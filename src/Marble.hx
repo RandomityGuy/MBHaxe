@@ -26,6 +26,7 @@ class Marble extends Object {
 
 	var velocity:Vector;
 	var omega:Vector;
+	var gravityDir:Vector = new Vector(0, 0, -1);
 
 	var _radius = 0.2;
 	var _maxRollVelocity = 15;
@@ -66,34 +67,30 @@ class Marble extends Object {
 	}
 
 	function getMarbleAxis() {
-		var gravitydir = new Vector(0, 0, -1);
 		var cammat = Matrix.I();
 		var xrot = new Matrix();
 		xrot.initRotationX(this.camera.phi);
 		var zrot = new Matrix();
 		zrot.initRotationZ(this.camera.theta);
 		cammat.multiply(xrot, zrot);
-		var updir = new Vector(0, 0, 1);
+		var updir = gravityDir.multiply(-1);
 		var motiondir = new Vector(cammat._21, cammat._22, cammat._23);
-		var sidedir = motiondir.clone().cross(updir);
+		var sidedir = motiondir.cross(updir);
 
 		sidedir.normalize();
-		motiondir = updir.clone().cross(sidedir);
+		motiondir = updir.cross(sidedir);
 		return [sidedir, motiondir, updir];
 	}
 
 	function getExternalForces(m:Move, dt:Float, contacts:Array<CollisionInfo>) {
-		var gWorkGravityDir = new Vector(0, 0, -1);
-		var A = gWorkGravityDir.clone().multiply(this._gravity);
+		var gWorkGravityDir = gravityDir;
+		var A = gWorkGravityDir.multiply(this._gravity);
 		if (contacts.length == 0) {
 			var axes = this.getMarbleAxis();
 			var sideDir = axes[0];
 			var motionDir = axes[1];
 			var upDir = axes[2];
-			A = A.add(sideDir.clone()
-				.multiply(m.d.x)
-				.add(motionDir.clone().multiply(m.d.y))
-				.multiply(this._airAccel));
+			A = A.add(sideDir.multiply(m.d.x).add(motionDir.multiply(m.d.y)).multiply(this._airAccel));
 		}
 		return A;
 	}
@@ -101,9 +98,9 @@ class Marble extends Object {
 	function computeMoveForces(m:Move) {
 		var aControl = new Vector();
 		var desiredOmega = new Vector();
-		var currentGravityDir = new Vector(0, 0, -1);
-		var R = currentGravityDir.clone().multiply(-this._radius);
-		var rollVelocity = this.omega.clone().cross(R);
+		var currentGravityDir = gravityDir;
+		var R = currentGravityDir.multiply(-this._radius);
+		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
 		var sideDir = axes[0];
 		var motionDir = axes[1];
@@ -112,7 +109,7 @@ class Marble extends Object {
 		var currentXVelocity = rollVelocity.dot(sideDir);
 		var mv = m.d;
 
-		mv = mv.multiply(1.53846157);
+		mv = mv.multiply(1.538461565971375);
 		var mvlen = mv.length();
 		if (mvlen > 1) {
 			mv = mv.multiply(1 / mvlen);
@@ -131,8 +128,8 @@ class Marble extends Object {
 				desiredXVelocity = currentXVelocity;
 			}
 			var rsq = R.lengthSq();
-			desiredOmega = R.clone().cross(motionDir.clone().multiply(desiredYVelocity).add(sideDir.clone().multiply(desiredXVelocity))).multiply(1 / rsq);
-			aControl = desiredOmega.clone().sub(this.omega);
+			desiredOmega = R.cross(motionDir.multiply(desiredYVelocity).add(sideDir.multiply(desiredXVelocity))).multiply(1 / rsq);
+			aControl = desiredOmega.sub(this.omega);
 			var aScalar = aControl.length();
 			if (aScalar > this._angularAcceleration) {
 				aControl = aControl.multiply(this._angularAcceleration / aScalar);
@@ -151,18 +148,18 @@ class Marble extends Object {
 			done = true;
 			itersIn++;
 			for (i in 0...contacts.length) {
-				var sVel = this.velocity.clone().sub(contacts[i].velocity);
+				var sVel = this.velocity.sub(contacts[i].velocity);
 				var surfaceDot = contacts[i].normal.dot(sVel);
 				if ((!looped && surfaceDot < 0) || surfaceDot < -SurfaceDotThreshold) {
 					var velLen = this.velocity.length();
-					var surfaceVel = contacts[i].normal.clone().multiply(surfaceDot);
+					var surfaceVel = contacts[i].normal.multiply(surfaceDot);
 					this.ReportBounce(contacts[i].point, contacts[i].normal, -surfaceDot);
 					if (noBounce) {
 						this.velocity = this.velocity.sub(surfaceVel);
 					} else if (contacts[i].collider != null) {
 						var info = contacts[i];
 						var bounce2 = 0.5;
-						var normV = info.normal.clone().multiply(this.velocity.dot(info.normal));
+						var normV = info.normal.multiply(this.velocity.dot(info.normal));
 						normV = normV.multiply(1 + bounce2);
 						this.velocity = this.velocity.sub(normV);
 					} else {
@@ -181,10 +178,10 @@ class Marble extends Object {
 						} else {
 							var restitution = this._bounceRestitution;
 							restitution *= contacts[i].restitution;
-							var velocityAdd = surfaceVel.clone().multiply(-(1 + restitution));
-							var vAtC = sVel.clone().add(this.omega.clone().cross(contacts[i].normal.clone().multiply(this._radius).multiply(-1)));
+							var velocityAdd = surfaceVel.multiply(-(1 + restitution));
+							var vAtC = sVel.add(this.omega.cross(contacts[i].normal.multiply(-this._radius)));
 							var normalVel = -contacts[i].normal.dot(sVel);
-							vAtC = vAtC.sub(contacts[i].normal.clone().multiply(contacts[i].normal.dot(sVel)));
+							vAtC = vAtC.sub(contacts[i].normal.multiply(contacts[i].normal.dot(sVel)));
 							var vAtCMag = vAtC.length();
 							if (vAtCMag != 0) {
 								var friction = this._bounceKineticFriction * contacts[i].friction;
@@ -192,13 +189,10 @@ class Marble extends Object {
 								if (angVMagnitude > vAtCMag / this._radius) {
 									angVMagnitude = vAtCMag / this._radius;
 								}
-								var vAtCDir = vAtC.clone().multiply(1 / vAtCMag);
-								var deltaOmega = contacts[i].normal.clone()
-									.multiply(-1)
-									.cross(vAtCDir.clone().multiply(-1))
-									.multiply(angVMagnitude);
+								var vAtCDir = vAtC.multiply(1 / vAtCMag);
+								var deltaOmega = contacts[i].normal.cross(vAtCDir).multiply(angVMagnitude);
 								this.omega = this.omega.add(deltaOmega);
-								this.velocity = this.velocity.sub(deltaOmega.clone().multiply(-1).cross(contacts[i].normal.clone().multiply(-this._radius)));
+								this.velocity = this.velocity.sub(deltaOmega.cross(contacts[i].normal.multiply(this._radius)));
 							}
 							this.velocity = this.velocity.add(velocityAdd);
 						}
@@ -211,37 +205,38 @@ class Marble extends Object {
 				done = true;
 			}
 		} while (!done);
-			// if (velocity.LengthSquared() < 625f)
-			// {
-		var gotOne = false;
-		var dir = new Vector(0, 0, 0);
-		for (j in 0...contacts.length) {
-			var dir2 = dir.clone().add(contacts[j].normal);
-			if (dir2.lengthSq() < 0.01) {
-				dir2 = dir2.add(contacts[j].normal);
+		if (this.velocity.lengthSq() < 625) {
+			var gotOne = false;
+			var dir = new Vector(0, 0, 0);
+			for (j in 0...contacts.length) {
+				var dir2 = dir.add(contacts[j].normal);
+				if (dir2.lengthSq() < 0.01) {
+					dir2 = dir2.add(contacts[j].normal);
+				}
+				dir = dir2;
+				gotOne = true;
 			}
-			dir = dir2;
-			gotOne = true;
-		}
-		if (gotOne) {
-			dir.normalize();
-			var soFar = 0.0;
-			for (k in 0...contacts.length) {
-				if (contacts[k].penetration < this._radius) {
-					var timeToSeparate = 0.1;
-					var dist = contacts[k].penetration;
-					var outVel = this.velocity.clone().add(dir.clone().multiply(soFar)).dot(contacts[k].normal);
+			if (gotOne) {
+				dir.normalize();
+				var soFar = 0.0;
+				for (k in 0...contacts.length) {
+					if (contacts[k].penetration < this._radius) {
+						var timeToSeparate = 0.1;
+						var dist = contacts[k].penetration;
+						var outVel = this.velocity.add(dir.multiply(soFar)).dot(contacts[k].normal);
 
-					if (timeToSeparate * outVel < dist) {
-						soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+						if (timeToSeparate * outVel < dist) {
+							soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+						}
 					}
 				}
+				if (soFar < -25)
+					soFar = -25;
+				if (soFar > 25)
+					soFar = 25;
+				this.velocity = this.velocity.add(dir.multiply(soFar));
 			}
-			// if (soFar < -25) soFar = -25;
-			// if (soFar > 25) soFar = 25;
-			this.velocity = this.velocity.add(dir.clone().multiply(soFar));
 		}
-		// }
 	}
 
 	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector, contacts:Array<CollisionInfo>) {

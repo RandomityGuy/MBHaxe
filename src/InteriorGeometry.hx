@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Matrix;
 import collision.CollisionEntity;
 import headbutt.threed.Headbutt;
 import headbutt.threed.shapes.Sphere;
@@ -16,5 +17,10 @@ class InteriorGeometry extends Object {
 
 	public function new() {
 		super();
+	}
+
+	public override function setTransform(transform:Matrix) {
+		super.setTransform(transform);
+		collider.setTransform(transform);
 	}
 }
