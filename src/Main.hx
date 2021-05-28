@@ -1,5 +1,6 @@
 package;
 
+import src.MarbleWorld;
 import collision.CollisionWorld;
 import src.Marble;
 import hxd.res.Loader;
@@ -16,9 +17,7 @@ class Main extends hxd.App {
 	var scene:Scene;
 	var fileSystem:FileSystem;
 
-	var marble:Marble;
-	var marble2:Marble;
-	var collisionWorld:CollisionWorld;
+	var world:MarbleWorld;
 
 	override function init() {
 		super.init();
@@ -27,28 +26,10 @@ class Main extends hxd.App {
 
 		var loader = new Loader(fileSystem);
 
-		var cube = new Cube();
-		cube.addUVs();
-		cube.addNormals();
-
-		this.collisionWorld = new CollisionWorld();
+		world = new MarbleWorld(s3d);
 
 		var db = DifBuilder.loadDif("interiors/beginner/beginner_finish.dif", loader);
-		collisionWorld.addEntity(db.collider);
-
-		var mat = Material.create();
-		var difbounds = new CustomObject(cube, mat, s3d);
-		var bound = db.collider.boundingBox;
-		var oct = collisionWorld.octree;
-		difbounds.setPosition(oct.root.min.x, oct.root.min.y, oct.root.min.z);
-
-		var difbounds2 = new CustomObject(cube, mat, s3d);
-		difbounds2.setPosition(oct.root.min.x + oct.root.size, oct.root.min.y + oct.root.size, oct.root.min.z + oct.root.size);
-
-		var difbounds3 = new CustomObject(cube, mat, s3d);
-		difbounds3.setPosition(bound.xMin, bound.yMin, bound.zMin);
-		var difbounds4 = new CustomObject(cube, mat, s3d);
-		difbounds4.setPosition(bound.xMax, bound.yMax, bound.zMax);
+		world.addInterior(db);
 
 		// for (surf in db.collider.surfaces) {
 		// 	var surfmin = new CustomObject(cube, mat, s3d);
@@ -72,25 +53,20 @@ class Main extends hxd.App {
 
 		// s3d.camera.
 
-		marble = new Marble();
-		marble.controllable = true;
-		s3d.addChild(marble);
-		marble.setPosition(0, 0, 5);
-
-		marble2 = new Marble();
-		s3d.addChild(marble2);
+		var marble2 = new Marble();
+		world.addMarble(marble2);
 		marble2.setPosition(0, 5, 5);
-		// marble.setPosition(-10, -5, 5);
-		s3d.addChild(marble.camera);
 
-		collisionWorld.addMovingEntity(marble.collider);
-		collisionWorld.addMovingEntity(marble2.collider);
+		var marble = new Marble();
+		marble.controllable = true;
+		world.addMarble(marble);
+		marble.setPosition(0, 0, 5);
+		// marble.setPosition(-10, -5, 5);
 	}
 
 	override function update(dt:Float) {
 		super.update(dt);
-		marble.update(dt, this.collisionWorld);
-		marble2.update(dt, this.collisionWorld);
+		world.update(dt);
 	}
 
 	static function main() {
