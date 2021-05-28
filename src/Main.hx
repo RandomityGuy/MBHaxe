@@ -17,6 +17,7 @@ class Main extends hxd.App {
 	var fileSystem:FileSystem;
 
 	var marble:Marble;
+	var marble2:Marble;
 	var collisionWorld:CollisionWorld;
 
 	override function init() {
@@ -72,15 +73,24 @@ class Main extends hxd.App {
 		// s3d.camera.
 
 		marble = new Marble();
+		marble.controllable = true;
 		s3d.addChild(marble);
 		marble.setPosition(0, 0, 5);
+
+		marble2 = new Marble();
+		s3d.addChild(marble2);
+		marble2.setPosition(0, 5, 5);
 		// marble.setPosition(-10, -5, 5);
 		s3d.addChild(marble.camera);
+
+		collisionWorld.addMovingEntity(marble.collider);
+		collisionWorld.addMovingEntity(marble2.collider);
 	}
 
 	override function update(dt:Float) {
 		super.update(dt);
 		marble.update(dt, this.collisionWorld);
+		marble2.update(dt, this.collisionWorld);
 	}
 
 	static function main() {

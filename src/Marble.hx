@@ -1,5 +1,6 @@
 package src;
 
+import collision.SphereCollisionEntity;
 import hxd.Key;
 import collision.CollisionInfo;
 import h3d.Matrix;
@@ -23,12 +24,17 @@ class Move {
 
 class Marble extends Object {
 	public var camera:CameraController;
+	public var controllable:Bool = false;
 
-	var velocity:Vector;
-	var omega:Vector;
+	public var collider:SphereCollisionEntity;
+
+	public var velocity:Vector;
+	public var omega:Vector;
+
 	var gravityDir:Vector = new Vector(0, 0, -1);
 
-	var _radius = 0.2;
+	public var _radius = 0.2;
+
 	var _maxRollVelocity = 15;
 	var _angularAcceleration = 75;
 	var _jumpImpulse = 7.5;
@@ -40,7 +46,9 @@ class Marble extends Object {
 	var _maxDotSlide = 0.5;
 	var _minBounceVel = 0.1;
 	var _bounceKineticFriction = 0.2;
-	var _bounceRestitution = 0.5;
+
+	public var _bounceRestitution = 0.5;
+
 	var _bounceYet:Bool;
 	var _bounceSpeed:Float;
 	var _bouncePos:Vector;
@@ -48,6 +56,11 @@ class Marble extends Object {
 	var _slipAmount:Float;
 	var _contactTime:Float;
 	var _totalTime:Float;
+
+	public var _mass:Float = 1;
+
+	var contacts:Array<CollisionInfo> = [];
+	var queuedContacts:Array<CollisionInfo> = [];
 
 	public function new() {
 		super();
@@ -59,11 +72,18 @@ class Marble extends Object {
 		this.velocity = new Vector();
 		this.omega = new Vector();
 		this.camera = new CameraController(20);
+
+		this.collider = new SphereCollisionEntity(cast this);
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld) {
-		var c = collisiomWorld.sphereIntersection(this.getAbsPos().getPosition(), this.velocity, _radius);
-		return c;
+		this.contacts = queuedContacts;
+		var c = collisiomWorld.sphereIntersection(this.collider);
+		contacts = contacts.concat(c);
+	}
+
+	public function queueCollision(collisionInfo:CollisionInfo) {
+		this.queuedContacts.push(collisionInfo);
 	}
 
 	function getMarbleAxis() {
@@ -82,7 +102,7 @@ class Marble extends Object {
 		return [sidedir, motiondir, updir];
 	}
 
-	function getExternalForces(m:Move, dt:Float, contacts:Array<CollisionInfo>) {
+	function getExternalForces(m:Move, dt:Float) {
 		var gWorkGravityDir = gravityDir;
 		var A = gWorkGravityDir.multiply(this._gravity);
 		if (contacts.length == 0) {
@@ -139,7 +159,7 @@ class Marble extends Object {
 		return {result: true, aControl: aControl, desiredOmega: desiredOmega};
 	}
 
-	function velocityCancel(surfaceSlide:Bool, noBounce:Bool, contacts:Array<CollisionInfo>) {
+	function velocityCancel(surfaceSlide:Bool, noBounce:Bool) {
 		var SurfaceDotThreshold = 0.001;
 		var looped = false;
 		var itersIn = 0;
@@ -157,11 +177,18 @@ class Marble extends Object {
 					if (noBounce) {
 						this.velocity = this.velocity.sub(surfaceVel);
 					} else if (contacts[i].collider != null) {
-						var info = contacts[i];
-						var bounce2 = 0.5;
-						var normV = info.normal.multiply(this.velocity.dot(info.normal));
-						normV = normV.multiply(1 + bounce2);
-						this.velocity = this.velocity.sub(normV);
+						var otherMarble = (cast(contacts[i].collider, SphereCollisionEntity).marble);
+						var ourMass = this._mass;
+						var theirMass = otherMarble._mass;
+
+						var bounce = Math.max(this._bounceRestitution, otherMarble._bounceRestitution);
+
+						var dp = this.velocity.multiply(ourMass).sub(otherMarble.velocity.multiply(theirMass));
+						var normP = contacts[i].normal.multiply(dp.dot(contacts[i].normal));
+						normP = normP.multiply(bounce + 1);
+
+						otherMarble.velocity = otherMarble.velocity.add(normP.multiply(1 / theirMass));
+						contacts[i].velocity = otherMarble.velocity;
 					} else {
 						var velocity2 = contacts[i].velocity;
 						if (velocity2.length() > 0.0001 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
@@ -239,7 +266,7 @@ class Marble extends Object {
 		}
 	}
 
-	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector, contacts:Array<CollisionInfo>) {
+	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector) {
 		var a = new Vector();
 		this._slipAmount = 0;
 		var gWorkGravityDir = new Vector(0, 0, -1);
@@ -340,42 +367,45 @@ class Marble extends Object {
 	}
 
 	function advancePhysics(m:Move, dt:Float, collisionWorld:CollisionWorld) {
-		var contacts = this.findContacts(collisionWorld);
+		this.findContacts(collisionWorld);
 		var cmf = this.computeMoveForces(m);
 		var isCentered:Bool = cmf.result;
 		var aControl = cmf.aControl;
 		var desiredOmega = cmf.desiredOmega;
-		this.velocityCancel(isCentered, false, contacts);
-		var A = this.getExternalForces(m, dt, contacts);
-		var retf = this.applyContactForces(dt, m, isCentered, aControl, desiredOmega, A, contacts);
+		this.velocityCancel(isCentered, false);
+		var A = this.getExternalForces(m, dt);
+		var retf = this.applyContactForces(dt, m, isCentered, aControl, desiredOmega, A);
 		A = retf[0];
 		var a = retf[1];
 		this.velocity = this.velocity.add(A.multiply(dt));
 		this.omega = this.omega.add(a.multiply(dt));
-		this.velocityCancel(isCentered, true, contacts);
+		this.velocityCancel(isCentered, true);
 		this._totalTime += dt;
 		if (contacts.length != 0) {
 			this._contactTime += dt;
 		}
+		this.queuedContacts = [];
 	}
 
 	public function update(dt:Float, collisionWorld:CollisionWorld) {
 		var move = new Move();
 		move.d = new Vector();
-		if (Key.isDown(Key.W)) {
-			move.d.x -= 1;
-		}
-		if (Key.isDown(Key.S)) {
-			move.d.x += 1;
-		}
-		if (Key.isDown(Key.A)) {
-			move.d.y += 1;
-		}
-		if (Key.isDown(Key.D)) {
-			move.d.y -= 1;
-		}
-		if (Key.isDown(Key.SPACE)) {
-			move.jump = true;
+		if (this.controllable) {
+			if (Key.isDown(Key.W)) {
+				move.d.x -= 1;
+			}
+			if (Key.isDown(Key.S)) {
+				move.d.x += 1;
+			}
+			if (Key.isDown(Key.A)) {
+				move.d.y += 1;
+			}
+			if (Key.isDown(Key.D)) {
+				move.d.y -= 1;
+			}
+			if (Key.isDown(Key.SPACE)) {
+				move.jump = true;
+			}
 		}
 
 		var timeRemaining = dt;
@@ -391,6 +421,10 @@ class Marble extends Object {
 			advancePhysics(move, timeStep, collisionWorld);
 			var newPos = this.getAbsPos().getPosition().add(this.velocity.multiply(timeStep));
 			this.setPosition(newPos.x, newPos.y, newPos.z);
+			var tform = this.collider.transform;
+			tform.setPosition(new Vector(newPos.x, newPos.y, newPos.z));
+			this.collider.setTransform(tform);
+			this.collider.velocity = this.velocity;
 
 			timeRemaining -= timeStep;
 			it++;

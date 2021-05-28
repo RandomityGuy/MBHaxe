@@ -3,3 +3,4 @@ interiors
 *.js
 *.js.map
 .vscode
+native
