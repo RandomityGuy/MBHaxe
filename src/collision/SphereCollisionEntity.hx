@@ -8,7 +8,6 @@ import h3d.col.Bounds;
 
 class SphereCollisionEntity extends CollisionEntity {
 	public var radius:Float;
-	public var velocity:Vector;
 	public var marble:Marble;
 
 	public function new(marble:Marble) {
@@ -31,7 +30,7 @@ class SphereCollisionEntity extends CollisionEntity {
 		return boundingBox.rayIntersection(Ray.fromValues(rayOrigin.x, rayOrigin.y, rayOrigin.z, rayDirection.x, rayDirection.y, rayDirection.z), true) != -1;
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity) {
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, dt:Float) {
 		var contacts = [];
 		var thispos = transform.getPosition();
 		var position = collisionEntity.transform.getPosition();

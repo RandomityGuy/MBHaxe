@@ -1,5 +1,8 @@
 package;
 
+import h3d.Quat;
+import src.PathedInteriorMarker;
+import src.PathedInterior;
 import src.MarbleWorld;
 import collision.CollisionWorld;
 import src.Marble;
@@ -31,6 +34,38 @@ class Main extends hxd.App {
 		var db = DifBuilder.loadDif("interiors/beginner/beginner_finish.dif", loader);
 		world.addInterior(db);
 
+		var pi = DifBuilder.loadDifAsPI("interiors/addon/smallplatform.dif", loader);
+		var pim = pi.getTransform();
+		pim.setPosition(new Vector(5, 0, 0));
+		pi.setTransform(pim);
+
+		var cube = new Cube();
+		cube.addUVs();
+		cube.addNormals();
+		var mat = Material.create();
+
+		var m1 = new PathedInteriorMarker();
+		m1.msToNext = 5;
+		m1.position = new Vector(5, 0, 0);
+		m1.smoothingType = "";
+		m1.rotation = new Quat();
+
+		var m2 = new PathedInteriorMarker();
+		m2.msToNext = 3;
+		m2.position = new Vector(5, 0, 5);
+		m2.smoothingType = "";
+		m2.rotation = new Quat();
+
+		var m3 = new PathedInteriorMarker();
+		m3.msToNext = 5;
+		m3.position = new Vector(5, 0, 0);
+		m3.smoothingType = "";
+		m3.rotation = new Quat();
+
+		pi.markerData = [m1, m2, m3];
+
+		world.addPathedInterior(pi);
+
 		// for (surf in db.collider.surfaces) {
 		// 	var surfmin = new CustomObject(cube, mat, s3d);
 		// 	var bound = surf.boundingBox;
@@ -39,8 +74,6 @@ class Main extends hxd.App {
 		// 	var surfmax = new CustomObject(cube, mat, s3d);
 		// 	surfmax.setPosition(bound.xMax, bound.yMax, bound.zMax);
 		// }
-
-		s3d.addChild(db);
 
 		// var mat = Material.create();
 		// var so = new CustomObject(cube, mat);
@@ -60,7 +93,7 @@ class Main extends hxd.App {
 		var marble = new Marble();
 		marble.controllable = true;
 		world.addMarble(marble);
-		marble.setPosition(0, 0, 5);
+		marble.setPosition(6, 0, 5);
 		// marble.setPosition(-10, -5, 5);
 	}
 

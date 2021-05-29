@@ -13,12 +13,13 @@ import h3d.col.Bounds;
 class CollisionEntity implements IOctreeObject {
 	public var boundingBox:Bounds;
 
-	var octree:Octree;
+	public var octree:Octree;
 
 	public var surfaces:Array<CollisionSurface>;
 
 	public var priority:Int;
 	public var position:Int;
+	public var velocity:Vector = new Vector();
 
 	public var transform:Matrix;
 
@@ -61,7 +62,7 @@ class CollisionEntity implements IOctreeObject {
 		this.priority = priority;
 	}
 
-	public function sphereIntersection(collisionEntity:SphereCollisionEntity) {
+	public function sphereIntersection(collisionEntity:SphereCollisionEntity, dt:Float) {
 		var position = collisionEntity.transform.getPosition();
 		var velocity = collisionEntity.velocity;
 		var radius = collisionEntity.radius;
@@ -72,6 +73,9 @@ class CollisionEntity implements IOctreeObject {
 		localpos.transform(invMatrix);
 		var surfaces = octree.radiusSearch(localpos, radius * 1.1);
 
+		var tform = transform.clone();
+		// tform.setPosition(tform.getPosition().add(velocity.multiply(dt)));
+
 		var contacts = [];
 
 		for (obj in surfaces) {
@@ -79,11 +83,11 @@ class CollisionEntity implements IOctreeObject {
 
 			var i = 0;
 			while (i < surface.indices.length) {
-				var v0 = surface.points[surface.indices[i]].transformed(transform);
-				var v = surface.points[surface.indices[i + 1]].transformed(transform);
-				var v2 = surface.points[surface.indices[i + 2]].transformed(transform);
+				var v0 = surface.points[surface.indices[i]].transformed(tform);
+				var v = surface.points[surface.indices[i + 1]].transformed(tform);
+				var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
 
-				var surfacenormal = surface.normals[surface.indices[i]].transformed(transform);
+				var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(transform);
 
 				var res = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
 				var closest = res.point;
@@ -99,7 +103,7 @@ class CollisionEntity implements IOctreeObject {
 							cinfo.normal = res.normal; // surface.normals[surface.indices[i]];
 							cinfo.point = closest;
 							// cinfo.collider = this;
-							cinfo.velocity = new Vector();
+							cinfo.velocity = this.velocity;
 							cinfo.penetration = radius - (position.sub(closest).dot(normal));
 							cinfo.restitution = 1;
 							cinfo.friction = 1;

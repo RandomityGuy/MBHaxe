@@ -1,5 +1,6 @@
 package src;
 
+import src.PathedInterior;
 import hxd.Key;
 import h3d.Vector;
 import src.InteriorGeometry;
@@ -12,7 +13,10 @@ class MarbleWorld {
 	var collisionWorld:CollisionWorld;
 
 	public var interiors:Array<InteriorGeometry> = [];
+	public var pathedInteriors:Array<PathedInterior> = [];
 	public var marbles:Array<Marble> = [];
+
+	public var currentTime:Float = 0;
 
 	var scene:Scene;
 
@@ -27,6 +31,13 @@ class MarbleWorld {
 		this.scene.addChild(obj);
 	}
 
+	public function addPathedInterior(obj:PathedInterior) {
+		this.pathedInteriors.push(obj);
+		this.collisionWorld.addMovingEntity(obj.collider);
+		this.scene.addChild(obj);
+		obj.init();
+	}
+
 	public function addMarble(marble:Marble) {
 		this.marbles.push(marble);
 		if (marble.controllable) {
@@ -38,7 +49,8 @@ class MarbleWorld {
 
 	public function update(dt:Float) {
 		for (marble in marbles) {
-			marble.update(dt, collisionWorld);
+			marble.update(currentTime, dt, collisionWorld, this.pathedInteriors);
 		}
+		currentTime += dt;
 	}
 }
