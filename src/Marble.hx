@@ -164,7 +164,7 @@ class Marble extends Object {
 		return {result: true, aControl: aControl, desiredOmega: desiredOmega};
 	}
 
-	function velocityCancel(surfaceSlide:Bool, noBounce:Bool) {
+	function velocityCancel(surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
 		var SurfaceDotThreshold = 0.001;
 		var looped = false;
 		var itersIn = 0;
@@ -235,8 +235,18 @@ class Marble extends Object {
 				}
 			}
 			looped = true;
-			if (itersIn > 6 && noBounce) {
-				done = true;
+			if (itersIn > 6 && !stoppedPaths) {
+				stoppedPaths = true;
+				if (noBounce)
+					done = true;
+
+				for (contact in contacts) {
+					contact.velocity = new Vector();
+				}
+
+				for (interior in pi) {
+					interior.setStopped();
+				}
 			}
 		} while (!done);
 		if (this.velocity.lengthSq() < 625) {
@@ -278,6 +288,8 @@ class Marble extends Object {
 				this.velocity = this.velocity.add(dir.multiply(soFar));
 			}
 		}
+
+		return stoppedPaths;
 	}
 
 	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector) {
@@ -445,6 +457,23 @@ class Marble extends Object {
 		var it = 0;
 
 		var piTime = currentTime;
+
+		// if (this.controllable) {
+		// 	for (interior in pathedInteriors) {
+		// 		// interior.pushTickState();
+		// 		interior.recomputeVelocity(piTime + 0.032, 0.032);
+		// 	}
+		// }
+
+		if (this.controllable) {
+			for (interior in pathedInteriors) {
+				// interior.popTickState();
+				interior.setStopped(false);
+				// interior.recomputeVelocity(piTime + 0.032, 0.032);
+				// interior.update(piTime, timeStep);
+			}
+		}
+
 		do {
 			if (timeRemaining <= 0)
 				break;
@@ -458,14 +487,15 @@ class Marble extends Object {
 			var isCentered:Bool = cmf.result;
 			var aControl = cmf.aControl;
 			var desiredOmega = cmf.desiredOmega;
-			this.velocityCancel(isCentered, false);
+			var stoppedPaths = false;
+			stoppedPaths = this.velocityCancel(isCentered, false, stoppedPaths, pathedInteriors);
 			var A = this.getExternalForces(m, timeStep);
 			var retf = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
 			A = retf[0];
 			var a = retf[1];
 			this.velocity = this.velocity.add(A.multiply(timeStep));
 			this.omega = this.omega.add(a.multiply(timeStep));
-			this.velocityCancel(isCentered, true);
+			stoppedPaths = this.velocityCancel(isCentered, true, stoppedPaths, pathedInteriors);
 			this._totalTime += timeStep;
 			if (contacts.length != 0) {
 				this._contactTime += timeStep;
@@ -483,6 +513,8 @@ class Marble extends Object {
 			piTime += timeStep;
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
+					// interior.popTickState();
+					// interior.setStopped(stoppedPaths);
 					interior.update(piTime, timeStep);
 				}
 			}
