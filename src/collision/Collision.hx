@@ -216,7 +216,7 @@ class Collision {
 		return res;
 	}
 
-	private static function PointInTriangle(point:Vector, v0:Vector, v1:Vector, v2:Vector):Bool {
+	public static function PointInTriangle(point:Vector, v0:Vector, v1:Vector, v2:Vector):Bool {
 		var u = v1.sub(v0);
 		var v = v2.sub(v0);
 		var w = point.sub(v0);
@@ -242,7 +242,7 @@ class Collision {
 		return (r + t) <= 1;
 	}
 
-	private static function PointInTriangle2(point:Vector, a:Vector, b:Vector, c:Vector):Bool {
+	public static function PointInTriangle2(point:Vector, a:Vector, b:Vector, c:Vector):Bool {
 		var a1 = a.sub(point);
 		var b1 = b.sub(point);
 		var c1 = c.sub(point);

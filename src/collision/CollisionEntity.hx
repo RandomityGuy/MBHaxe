@@ -74,7 +74,7 @@ class CollisionEntity implements IOctreeObject {
 		var surfaces = octree.radiusSearch(localpos, radius * 1.1);
 
 		var tform = transform.clone();
-		// tform.setPosition(tform.getPosition().add(velocity.multiply(dt)));
+		tform.setPosition(tform.getPosition().add(this.velocity.multiply(dt)));
 
 		var contacts = [];
 
@@ -104,8 +104,10 @@ class CollisionEntity implements IOctreeObject {
 							cinfo.point = closest;
 							// cinfo.collider = this;
 							cinfo.velocity = this.velocity;
-							cinfo.penetration = radius - (position.sub(closest).dot(normal));
+							cinfo.contactDistance = closest.distance(position);
+							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
 							cinfo.restitution = 1;
+							cinfo.force = 0;
 							cinfo.friction = 1;
 							contacts.push(cinfo);
 						}

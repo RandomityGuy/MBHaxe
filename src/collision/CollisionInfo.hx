@@ -8,8 +8,11 @@ class CollisionInfo {
 	public var velocity:Vector;
 	public var collider:CollisionEntity;
 	public var friction:Float;
+	public var vAtCMag:Float;
+	public var normalForce:Float;
 	public var restitution:Float;
-	public var penetration:Float;
+	public var contactDistance:Float;
+	public var force:Float;
 
 	public function new() {}
 }

@@ -6,18 +6,29 @@ import src.Util;
 import src.PathedInteriorMarker;
 import src.InteriorGeometry;
 
-class PathedInterior extends InteriorGeometry {
-	public var markerData:Array<PathedInteriorMarker> = [];
-
-	var duration:Float;
+typedef PIState = {
 	var currentTime:Float;
 	var targetTime:Float;
 	var changeTime:Float;
-
 	var prevPosition:Vector;
 	var currentPosition:Vector;
-
 	var velocity:Vector;
+}
+
+class PathedInterior extends InteriorGeometry {
+	public var markerData:Array<PathedInteriorMarker> = [];
+
+	public var duration:Float;
+	public var currentTime:Float;
+	public var targetTime:Float;
+	public var changeTime:Float;
+
+	public var prevPosition:Vector;
+	public var currentPosition:Vector;
+
+	public var velocity:Vector;
+
+	var previousState:PIState;
 
 	public function new() {
 		super();
@@ -29,6 +40,15 @@ class PathedInterior extends InteriorGeometry {
 	}
 
 	public function update(currentTime:Float, dt:Float) {
+		this.previousState = {
+			currentTime: currentTime,
+			targetTime: targetTime,
+			changeTime: changeTime,
+			prevPosition: prevPosition,
+			currentPosition: currentPosition,
+			velocity: velocity
+		};
+
 		var transform = this.getTransformAtTime(this.getInternalTime(currentTime));
 		this.updatePosition();
 
@@ -37,6 +57,16 @@ class PathedInterior extends InteriorGeometry {
 		this.currentPosition = position;
 
 		velocity = position.sub(this.prevPosition).multiply(1 / dt);
+	}
+
+	public function rollBack() {
+		this.currentTime = this.previousState.currentTime;
+		this.targetTime = this.previousState.targetTime;
+		this.changeTime = this.previousState.changeTime;
+		this.prevPosition = this.previousState.prevPosition;
+		this.currentPosition = this.previousState.currentPosition;
+		this.velocity = this.previousState.velocity;
+		this.updatePosition();
 	}
 
 	function computeDuration() {

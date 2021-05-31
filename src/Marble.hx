@@ -1,5 +1,6 @@
 package src;
 
+import collision.Collision;
 import dif.math.Point3F;
 import dif.math.PlaneF;
 import collision.CollisionSurface;
@@ -251,13 +252,20 @@ class Marble extends Object {
 				dir.normalize();
 				var soFar = 0.0;
 				for (k in 0...contacts.length) {
-					if (contacts[k].penetration < this._radius) {
+					if (contacts[k].contactDistance < this._radius) {
 						var timeToSeparate = 0.1;
-						var dist = contacts[k].penetration;
-						var outVel = this.velocity.add(dir.multiply(soFar)).dot(contacts[k].normal);
+						var dist = this._radius - contacts[k].contactDistance; // contacts[k].penetration;
+						var normal = contacts[k].normal;
+						var unk = normal.multiply(soFar);
+						var tickle = this.velocity.sub(contacts[k].velocity);
+						var plop = unk.add(tickle);
+						var outVel = plop.dot(normal);
+						var cancan = timeToSeparate * outVel;
 
-						if (timeToSeparate * outVel < dist) {
-							soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+						if (dist > cancan) {
+							var bla = contacts[k].normal;
+							var bFac = (dist - cancan) / timeToSeparate;
+							soFar += bFac / bla.dot(dir);
 						}
 					}
 				}
@@ -278,9 +286,9 @@ class Marble extends Object {
 		var bestNormalForce = 0.0;
 		for (i in 0...contacts.length) {
 			if (contacts[i].collider == null) {
-				var normalForce = -contacts[i].normal.dot(A);
-				if (normalForce > bestNormalForce) {
-					bestNormalForce = normalForce;
+				contacts[i].normalForce = -contacts[i].normal.dot(A);
+				if (contacts[i].normalForce > bestNormalForce) {
+					bestNormalForce = contacts[i].normalForce;
 					bestSurface = i;
 				}
 			}
@@ -373,7 +381,7 @@ class Marble extends Object {
 	function testMove(velocity:Vector, position:Vector, deltaT:Float, radius:Float, testPIs:Bool, collisionWorld:CollisionWorld) {
 		var velLen = velocity.length();
 		if (velLen < 0.001)
-			return false;
+			return deltaT;
 
 		var velocityDir = velocity.normalized();
 
@@ -411,7 +419,7 @@ class Marble extends Object {
 				var surfaces = obj.octree.radiusSearch(localpos, expandedcollider.radius);
 
 				for (surf in surfaces) {
-					var surface:CollisionSurface = cast obj;
+					var surface:CollisionSurface = cast surf;
 
 					var i = 0;
 					while (i < surface.indices.length) {
@@ -655,27 +663,131 @@ class Marble extends Object {
 			contacted = true;
 		}
 
-		return true;
+		return finalT;
 	}
 
-	function advancePhysics(m:Move, dt:Float, collisionWorld:CollisionWorld) {
-		this.findContacts(collisionWorld, dt);
-		var cmf = this.computeMoveForces(m);
-		var isCentered:Bool = cmf.result;
-		var aControl = cmf.aControl;
-		var desiredOmega = cmf.desiredOmega;
-		this.velocityCancel(isCentered, false);
-		var A = this.getExternalForces(m, dt);
-		var retf = this.applyContactForces(dt, m, isCentered, aControl, desiredOmega, A);
-		A = retf[0];
-		var a = retf[1];
-		this.velocity = this.velocity.add(A.multiply(dt));
-		this.omega = this.omega.add(a.multiply(dt));
-		this.velocityCancel(isCentered, true);
-		this._totalTime += dt;
-		if (contacts.length != 0) {
-			this._contactTime += dt;
+	function getIntersectionTime(dt:Float, velocity:Vector, pathedInteriors:Array<PathedInterior>, collisionWorld:CollisionWorld) {
+		var expandedcollider = new SphereCollisionEntity(cast this);
+		var position = this.getAbsPos().getPosition();
+		expandedcollider.transform = Matrix.T(position.x, position.y, position.z);
+		expandedcollider.radius = this.getAbsPos().getPosition().distance(position) + _radius;
+
+		var foundObjs = collisionWorld.radiusSearch(position, expandedcollider.radius);
+
+		function toDifPoint(vec:Vector) {
+			return new Point3F(vec.x, vec.y, vec.z);
 		}
+
+		var intersectT = 10e8;
+
+		for (obj in foundObjs) {
+			if (obj.velocity.length() > 0) {
+				var radius = _radius;
+
+				var invMatrix = obj.transform.clone();
+				invMatrix.invert();
+				var localpos = position.clone();
+				localpos.transform(invMatrix);
+				var surfaces = obj.octree.radiusSearch(localpos, radius * 1.1);
+
+				var tform = obj.transform.clone();
+				var velDir = obj.velocity.normalized();
+				// tform.setPosition(tform.getPosition().add(velDir.multiply(_radius)));
+				tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)).sub(velDir.multiply(_radius)));
+
+				var contacts = [];
+
+				for (surf in surfaces) {
+					var surface:CollisionSurface = cast surf;
+
+					var i = 0;
+					while (i < surface.indices.length) {
+						var v0 = surface.points[surface.indices[i]].transformed(tform);
+						var v = surface.points[surface.indices[i + 1]].transformed(tform);
+						var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
+
+						var polyPlane = PlaneF.ThreePoints(toDifPoint(v0), toDifPoint(v), toDifPoint(v2));
+
+						var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
+
+						var t = (-position.dot(surfacenormal) - polyPlane.d) / velocity.dot(surfacenormal);
+
+						var pt = position.add(velocity.multiply(t));
+
+						if (Collision.PointInTriangle(pt, v0, v, v2)) {
+							if (t > 0 && t < intersectT) {
+								intersectT = t;
+							}
+						}
+
+						i += 3;
+					}
+				}
+			}
+		}
+
+		return intersectT;
+	}
+
+	function advancePhysics(currentTime:Float, dt:Float, m:Move, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
+		var timeRemaining = dt;
+		var it = 0;
+
+		var piTime = currentTime;
+		do {
+			if (timeRemaining <= 0)
+				break;
+
+			var timeStep = 0.00800000037997961;
+			if (timeRemaining < 0.00800000037997961)
+				timeStep = timeRemaining;
+
+			this.findContacts(collisionWorld, timeStep);
+			var cmf = this.computeMoveForces(m);
+			var isCentered:Bool = cmf.result;
+			var aControl = cmf.aControl;
+			var desiredOmega = cmf.desiredOmega;
+			this.velocityCancel(isCentered, false);
+			var A = this.getExternalForces(m, timeStep);
+			var retf = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
+			A = retf[0];
+			var a = retf[1];
+			this.velocity = this.velocity.add(A.multiply(timeStep));
+			this.omega = this.omega.add(a.multiply(timeStep));
+			this.velocityCancel(isCentered, true);
+			this._totalTime += timeStep;
+			if (contacts.length != 0) {
+				this._contactTime += timeStep;
+			}
+
+			var intersectT = this.getIntersectionTime(timeStep, velocity, pathedInteriors, collisionWorld);
+
+			if (intersectT < timeStep) {
+				var diff = timeStep - intersectT;
+				this.velocity = this.velocity.sub(A.multiply(diff));
+				this.omega = this.omega.sub(a.multiply(diff));
+				timeStep = intersectT;
+			}
+
+			piTime += timeStep;
+			if (this.controllable) {
+				for (interior in pathedInteriors) {
+					interior.update(piTime, timeStep);
+				}
+			}
+
+			var pos = this.getAbsPos().getPosition();
+
+			var newPos = pos.add(this.velocity.multiply(timeStep));
+			this.setPosition(newPos.x, newPos.y, newPos.z);
+			var tform = this.collider.transform;
+			tform.setPosition(new Vector(newPos.x, newPos.y, newPos.z));
+			this.collider.setTransform(tform);
+			this.collider.velocity = this.velocity;
+
+			timeRemaining -= timeStep;
+			it++;
+		} while (it <= 10);
 		this.queuedContacts = [];
 	}
 
@@ -700,33 +812,62 @@ class Marble extends Object {
 			}
 		}
 
-		var timeRemaining = dt;
-		var it = 0;
-		do {
-			if (timeRemaining <= 0)
-				break;
+		advancePhysics(currentTime, dt, move, collisionWorld, pathedInteriors);
 
-			var timeStep = 0.00800000037997961;
-			if (timeRemaining < 0.00800000037997961)
-				timeStep = timeRemaining;
+		// var timeRemaining = dt;
+		// var it = 0;
 
-			advancePhysics(move, timeStep, collisionWorld);
-			var newPos = this.getAbsPos().getPosition().add(this.velocity.multiply(timeStep));
-			this.setPosition(newPos.x, newPos.y, newPos.z);
-			var tform = this.collider.transform;
-			tform.setPosition(new Vector(newPos.x, newPos.y, newPos.z));
-			this.collider.setTransform(tform);
-			this.collider.velocity = this.velocity;
+		// var piTime = currentTime;
 
-			timeRemaining -= timeStep;
-			it++;
-		} while (it <= 10);
+		// var pos = this.getAbsPos().getPosition();
+		// do {
+		// 	if (timeRemaining <= 0)
+		// 		break;
 
-		if (this.controllable) {
-			for (interior in pathedInteriors) {
-				interior.update(currentTime, dt);
-			}
-		}
+		// 	var timeStep = 0.00800000037997961;
+		// 	if (timeRemaining < 0.00800000037997961)
+		// 		timeStep = timeRemaining;
+
+		// 	var externalForces = getExternalForces(move, timeStep);
+
+		// 	advancePhysics(move, timeStep, collisionWorld);
+
+		// 	var intersectT = this.getIntersectionTime(timeStep, velocity, pathedInteriors, collisionWorld);
+
+		// 	if (intersectT < timeStep) {
+		// 		timeStep = intersectT;
+		// 	}
+
+		// 	piTime += timeStep;
+
+		// 	if (this.controllable) {
+		// 		for (interior in pathedInteriors) {
+		// 			// interior.rollBack();
+		// 			interior.update(piTime, timeStep);
+		// 		}
+		// 	}
+
+		// 	var pos = this.getAbsPos().getPosition();
+
+		// 	var newPos = pos.add(this.velocity.multiply(timeStep));
+		// 	this.setPosition(newPos.x, newPos.y, newPos.z);
+		// 	var tform = this.collider.transform;
+		// 	tform.setPosition(new Vector(newPos.x, newPos.y, newPos.z));
+		// 	this.collider.setTransform(tform);
+		// 	this.collider.velocity = this.velocity;
+
+		// 	// if (intersectT != timeStep && intersectT != 10e8) {
+		// 	// 	// this.velocity = this.velocity.sub(externalForces.multiply(timeStep - intersectT));
+		// 	// 	// this.omega
+		// 	// 	if (intersectT > timeStep) {
+		// 	// 		trace("Bruh");
+		// 	// 	}
+		// 	// 	timeStep = intersectT;
+		// 	// }
+
+		// 	timeRemaining -= timeStep;
+		// 	it++;
+		// } while (it <= 10);
 
 		this.camera.target.load(this.getAbsPos().getPosition().toPoint());
 	}

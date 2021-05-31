@@ -46,19 +46,19 @@ class Main extends hxd.App {
 
 		var m1 = new PathedInteriorMarker();
 		m1.msToNext = 5;
-		m1.position = new Vector(5, 0, 0);
+		m1.position = new Vector(0, 0, 0);
 		m1.smoothingType = "";
 		m1.rotation = new Quat();
 
 		var m2 = new PathedInteriorMarker();
 		m2.msToNext = 3;
-		m2.position = new Vector(5, 0, 5);
+		m2.position = new Vector(0, 0, 5);
 		m2.smoothingType = "";
 		m2.rotation = new Quat();
 
 		var m3 = new PathedInteriorMarker();
 		m3.msToNext = 5;
-		m3.position = new Vector(5, 0, 0);
+		m3.position = new Vector(0, 0, 0);
 		m3.smoothingType = "";
 		m3.rotation = new Quat();
 
@@ -86,14 +86,14 @@ class Main extends hxd.App {
 
 		// s3d.camera.
 
-		var marble2 = new Marble();
-		world.addMarble(marble2);
-		marble2.setPosition(0, 5, 5);
+		// var marble2 = new Marble();
+		// world.addMarble(marble2);
+		// marble2.setPosition(5, 0, 5);
 
 		var marble = new Marble();
 		marble.controllable = true;
 		world.addMarble(marble);
-		marble.setPosition(6, 0, 5);
+		marble.setPosition(0, 0, 2);
 		// marble.setPosition(-10, -5, 5);
 	}
 

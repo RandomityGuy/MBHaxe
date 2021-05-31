@@ -53,12 +53,12 @@ class CollisionWorld {
 		for (obj in intersections) {
 			var entity:CollisionEntity = cast obj;
 
-			contacts = contacts.concat(entity);
+			contacts.push(entity);
 		}
 
 		for (obj in dynamicEntities) {
 			if (obj.boundingBox.collide(box))
-				contacts = contacts.concat(obj);
+				contacts.push(obj);
 		}
 
 		return contacts;
