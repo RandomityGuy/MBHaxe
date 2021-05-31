@@ -86,14 +86,14 @@ class Main extends hxd.App {
 
 		// s3d.camera.
 
-		// var marble2 = new Marble();
-		// world.addMarble(marble2);
-		// marble2.setPosition(5, 0, 5);
-
 		var marble = new Marble();
 		marble.controllable = true;
 		world.addMarble(marble);
 		marble.setPosition(0, 0, 2);
+
+		var marble2 = new Marble();
+		world.addMarble(marble2);
+		marble2.setPosition(5, 0, 5);
 		// marble.setPosition(-10, -5, 5);
 	}
 

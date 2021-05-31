@@ -13,6 +13,7 @@ class CollisionInfo {
 	public var restitution:Float;
 	public var contactDistance:Float;
 	public var force:Float;
+	public var penetration:Float;
 
 	public function new() {}
 }

@@ -37,30 +37,34 @@ class SphereCollisionEntity extends CollisionEntity {
 		var velocity = collisionEntity.velocity;
 		var radius = collisionEntity.radius;
 
-		if (position.distanceSq(thispos) < (radius + this.radius) * (radius + this.radius)) {
+		var otherDist = thispos.sub(position);
+		var otherRadius = this.radius + radius;
+
+		if (otherRadius * otherRadius * 1.01 > otherDist.lengthSq()) {
+			var normDist = otherDist.normalized();
 			var contact = new CollisionInfo();
 			contact.collider = this;
 			contact.friction = 1;
 			contact.restitution = 1;
 			contact.velocity = this.velocity;
-			contact.point = position.add(thispos).multiply(0.5);
-			contact.normal = contact.point.sub(thispos).normalized();
+			contact.point = position.add(normDist);
+			contact.normal = normDist.multiply(-1);
 			contact.force = 0;
 			contact.contactDistance = contact.point.distance(position);
-			// contact.penetration = radius - (position.sub(contact.point).dot(contact.normal));
+			contact.penetration = radius - (position.sub(contact.point).dot(contact.normal));
 			contacts.push(contact);
 
-			var othercontact = new CollisionInfo();
-			othercontact.collider = collisionEntity;
-			othercontact.friction = 1;
-			othercontact.restitution = 1;
-			othercontact.velocity = this.velocity;
-			othercontact.point = thispos.add(position).multiply(0.5);
-			othercontact.normal = contact.point.sub(position).normalized();
-			othercontact.contactDistance = contact.point.distance(position);
-			othercontact.force = 0;
+			// var othercontact = new CollisionInfo();
+			// othercontact.collider = collisionEntity;
+			// othercontact.friction = 1;
+			// othercontact.restitution = 1;
+			// othercontact.velocity = this.velocity;
+			// othercontact.point = thispos.add(position).multiply(0.5);
+			// othercontact.normal = contact.point.sub(position).normalized();
+			// othercontact.contactDistance = contact.point.distance(position);
+			// othercontact.force = 0;
 			// othercontact.penetration = this.radius - (thispos.sub(othercontact.point).dot(othercontact.normal));
-			this.marble.queueCollision(othercontact);
+			// this.marble.queueCollision(othercontact);
 		}
 		return contacts;
 	}
