@@ -1,5 +1,6 @@
 package;
 
+import src.InteriorGeometry;
 import h3d.Quat;
 import src.PathedInteriorMarker;
 import src.PathedInterior;
@@ -31,10 +32,12 @@ class Main extends hxd.App {
 
 		world = new MarbleWorld(s3d);
 
-		var db = DifBuilder.loadDif("interiors/beginner/beginner_finish.dif", loader);
+		var db = new InteriorGeometry();
+		DifBuilder.loadDif("interiors/beginner/training_friction.dif", loader, db);
 		world.addInterior(db);
 
-		var pi = DifBuilder.loadDifAsPI("interiors/addon/smallplatform.dif", loader);
+		var pi = new PathedInterior();
+		DifBuilder.loadDif("interiors/addon/smallplatform.dif", loader, pi);
 		var pim = pi.getTransform();
 		pim.setPosition(new Vector(5, 0, 0));
 		pi.setTransform(pim);

@@ -106,9 +106,9 @@ class CollisionEntity implements IOctreeObject {
 							cinfo.velocity = this.velocity;
 							cinfo.contactDistance = closest.distance(position);
 							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
-							cinfo.restitution = 1;
-							cinfo.force = 0;
-							cinfo.friction = 1;
+							cinfo.restitution = surface.restitution;
+							cinfo.force = surface.force;
+							cinfo.friction = surface.friction;
 							contacts.push(cinfo);
 						}
 					}
