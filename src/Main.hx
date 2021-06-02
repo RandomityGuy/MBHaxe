@@ -34,7 +34,7 @@ class Main extends hxd.App {
 		var loader = new Loader(fileSystem);
 
 		dtsObj = new DtsObject();
-		dtsObj.dtsPath = "data/shapes/hazards/trapdoor.dts";
+		dtsObj.dtsPath = "data/shapes/hazards/tornado.dts";
 		dtsObj.isCollideable = false;
 		dtsObj.isTSStatic = false;
 		dtsObj.fs = loader;

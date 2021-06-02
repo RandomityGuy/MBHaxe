@@ -1,5 +1,11 @@
 package src;
 
+import hxd.FloatBuffer;
+import h3d.prim.DynamicPrimitive;
+import h3d.scene.Trail;
+import src.DynamicPolygon;
+import h3d.mat.Data.Blend;
+import h3d.prim.Cube;
 import dts.Sequence;
 import h3d.scene.Mesh;
 import h3d.scene.CustomObject;
@@ -56,21 +62,20 @@ class DtsObject extends Object {
 	var sequenceKeyframeOverride:Map<Sequence, Float> = new Map();
 	var lastSequenceKeyframes:Map<Sequence, Float> = new Map();
 
-	var graphNodes:Array<GraphNode> = [];
-	var rootGraphNodes:Array<GraphNode> = [];
-	var nodeTransforms:Array<Matrix> = [];
-
-	var dynamicGeometryLookup:Map<Object, Int> = new Map();
+	var graphNodes:Array<Object> = [];
 
 	var isTSStatic:Bool;
 	var isCollideable:Bool;
 	var showSequences:Bool = true;
 	var hasNonVisualSequences:Bool = true;
 
-	var geometries:Array<Object> = [];
+	var _regenNormals:Bool = false;
+
 	var skinMeshData:SkinMeshData;
 
 	var fs:Loader;
+
+	var rootObject:Object;
 
 	public function new() {
 		super();
@@ -80,43 +85,29 @@ class DtsObject extends Object {
 		this.dts = ResourceLoader.loadDts(this.dtsPath);
 		this.directoryPath = Path.directory(this.dtsPath);
 
-		for (i in 0...dts.nodes.length)
-			this.nodeTransforms.push(new Matrix());
-
 		this.computeMaterials();
 
 		var graphNodes = [];
-		for (i in 0...dts.nodes.length) {
-			var graphNode:GraphNode = {
-				index: i,
-				node: dts.nodes[i],
-				children: [],
-				parent: null
-			};
-			graphNodes.push(graphNode);
+		var rootNodesIdx = [];
+
+		for (i in 0...this.dts.nodes.length) {
+			graphNodes.push(new Object());
 		}
-		for (i in 0...dts.nodes.length) {
+
+		for (i in 0...this.dts.nodes.length) {
 			var node = this.dts.nodes[i];
 			if (node.parent != -1) {
-				graphNodes[i].parent = graphNodes[node.parent];
-				graphNodes[node.parent].children.push(graphNodes[i]);
+				graphNodes[node.parent].addChild(graphNodes[i]);
+			} else {
+				rootNodesIdx.push(i);
 			}
 		}
 
 		this.graphNodes = graphNodes;
-		this.rootGraphNodes = graphNodes.filter(node -> node.parent == null);
+		// this.rootGraphNodes = graphNodes.filter(node -> node.parent == null);
 		this.updateNodeTransforms();
 
 		var affectedBySequences = this.dts.sequences.length > 0 ? (this.dts.sequences[0].rotationMatters.length < 0 ? 0 : this.dts.sequences[0].rotationMatters[0]) | (this.dts.sequences[0].translationMatters.length > 0 ? this.dts.sequences[0].translationMatters[0] : 0) : 0;
-
-		var staticMaterialGeometries = [];
-		var dynamicMaterialGeometries = [];
-		var dynamicGeometriesMatrices = [];
-		var collisionMaterialGeometries = [];
-
-		var staticGeometries = [];
-		var dynamicGeometries = [];
-		var collisionGeometries = [];
 
 		for (i in 0...dts.nodes.length) {
 			var objects = dts.objects.filter(object -> object.node == i);
@@ -125,113 +116,80 @@ class DtsObject extends Object {
 			for (object in objects) {
 				var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
 
-				if (!isCollisionObject || this.isCollideable) {
-					var mat = this.nodeTransforms[i];
+				if (isCollisionObject)
+					continue;
 
-					for (i in object.firstMesh...(object.firstMesh + object.numMeshes)) {
-						if (i >= this.dts.meshes.length)
+				for (j in object.firstMesh...(object.firstMesh + object.numMeshes)) {
+					if (j >= this.dts.meshes.length)
+						continue;
+
+					var mesh = this.dts.meshes[j];
+					if (mesh == null)
+						continue;
+
+					var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
+					var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
+
+					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+					for (k in 0...geometry.length) {
+						if (geometry[k].vertices.length == 0)
 							continue;
 
-						var mesh = this.dts.meshes[i];
+						var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
+						poly.normals = geometry[k].normals.map(x -> x.toPoint());
+						poly.uvs = geometry[k].uvs;
 
-						var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
-						var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
-
-						if (!sequenceAffected)
-							for (vector in vertices) {
-								vector.transform(mat);
-							}
-						if (!sequenceAffected)
-							for (vector in vertexNormals) {
-								vector.transform3x3(mat);
-							}
-
-						var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
-						if (!sequenceAffected) {
-							staticMaterialGeometries.push(geometry);
-						} else {
-							dynamicMaterialGeometries.push(geometry);
-							dynamicGeometriesMatrices.push(mat);
-						}
-
-						if (isCollisionObject)
-							collisionMaterialGeometries.push(geometry);
+						var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
 					}
 				}
 			}
 		}
 
-		var skinnedMeshIndex:Int = -1;
-		for (i in 0...dts.meshes.length) {
-			var dtsMesh = this.dts.meshes[i];
-
-			if (dtsMesh == null || dtsMesh.type != 1)
+		for (i in 0...this.dts.meshes.length) {
+			var mesh = this.dts.meshes[i];
+			if (mesh == null)
 				continue;
 
-			var vertices = [];
-			for (i in 0...dtsMesh.vertices.length)
-				vertices.push(new Vector());
+			if (mesh.meshType == 1) {
+				var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
+				var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
 
-			var vertexNormals = [];
-			for (i in 0...dtsMesh.normals.length)
-				vertexNormals.push(new Vector());
+				var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+				var skinObj = new Object();
+				for (k in 0...geometry.length) {
+					if (geometry[k].vertices.length == 0)
+						continue;
 
-			var materialGeometry = this.generateMaterialGeometry(dtsMesh, vertices, vertexNormals);
-			staticMaterialGeometries.push(materialGeometry);
+					var poly = new DynamicPolygon(geometry[k].vertices.map(x -> x.toPoint()));
+					poly.normals = geometry[k].normals.map(x -> x.toPoint());
+					poly.uvs = geometry[k].uvs;
 
-			skinnedMeshIndex = i;
-			break; // Bruh
-		}
-
-		var staticNonCollision = staticMaterialGeometries.filter(x -> !collisionMaterialGeometries.contains(x));
-		var staticCollision = staticMaterialGeometries.filter(x -> collisionMaterialGeometries.contains(x));
-
-		if (staticNonCollision.length > 0) {
-			var merged = this.mergeMaterialGeometries(staticNonCollision);
-			var geometry = this.createGeometryFromMaterialGeometry(merged);
-			staticGeometries.push(geometry);
-			this.geometries.push(geometry);
-
-			if (skinnedMeshIndex != -1) {
-				this.skinMeshData = {
-					meshIndex: skinnedMeshIndex,
-					vertices: this.dts.meshes[skinnedMeshIndex].vertices.map(x -> new Vector()),
-					normals: this.dts.meshes[skinnedMeshIndex].normals.map(x -> new Vector()),
-					indices: [],
-					geometry: geometry
+					var obj = new Mesh(poly, materials[k], skinObj);
 				}
-				var idx = merged.map(x -> x.indices);
-				for (i in idx) {
-					this.skinMeshData.indices = this.skinMeshData.indices.concat(i);
+				skinMeshData = {
+					meshIndex: i,
+					vertices: vertices,
+					normals: vertexNormals,
+					indices: [],
+					geometry: skinObj
+				};
+				var idx = geometry.map(x -> x.indices);
+				for (indexes in idx) {
+					skinMeshData.indices = skinMeshData.indices.concat(indexes);
 				}
 			}
 		}
 
-		if (staticCollision.length > 0) {
-			var geometry = this.createGeometryFromMaterialGeometry(this.mergeMaterialGeometries(staticCollision));
-			staticGeometries.push(geometry);
-			collisionGeometries.push(geometry);
-			this.geometries.push(geometry);
+		rootObject = new Object(this);
+
+		for (i in rootNodesIdx) {
+			rootObject.addChild(this.graphNodes[i]);
+		}
+		if (this.skinMeshData != null) {
+			rootObject.addChild(this.skinMeshData.geometry);
 		}
 
-		for (materialGeom in dynamicMaterialGeometries) {
-			var geometry = this.createGeometryFromMaterialGeometry(materialGeom);
-			dynamicGeometries.push(geometry);
-			if (collisionMaterialGeometries.contains(materialGeom))
-				collisionGeometries.push(geometry);
-			this.geometries.push(geometry);
-		}
-
-		for (geometry in staticGeometries) {
-			this.addChild(geometry);
-		}
-
-		for (i in 0...dynamicGeometries.length) {
-			var geometry = dynamicGeometries[i];
-			dynamicGeometryLookup.set(geometry, this.nodeTransforms.indexOf(dynamicGeometriesMatrices[i]));
-			geometry.setTransform(dynamicGeometriesMatrices[i]);
-			this.addChild(geometry);
-		}
+		rootObject.scaleX = -1;
 	}
 
 	function computeMaterials() {
@@ -262,6 +220,10 @@ class DtsObject extends Object {
 				material.texture = texture;
 				// TODO TRANSLUENCY SHIT
 			}
+			if (flags & 4 > 0) {
+				material.blendMode = BlendMode.Alpha;
+				material.mainPass.culling = h3d.mat.Data.Face.Front;
+			}
 			// TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0)
 				material.blendMode = BlendMode.Add;
@@ -284,57 +246,16 @@ class DtsObject extends Object {
 	}
 
 	function updateNodeTransforms(quaternions:Array<Quat> = null, translations:Array<Vector> = null, bitField = 0xffffffff) {
-		if (quaternions == null) {
-			quaternions = [];
-			for (i in 0...this.dts.nodes.length) {
-				var rotation = this.dts.defaultRotations[i];
-				var quat = new Quat(rotation.x, rotation.y, rotation.z, rotation.w);
-				quat.normalize();
-				quat.conjugate();
-				quaternions.push(quat);
-			}
-		}
-
-		if (translations == null) {
-			translations = [];
-			for (i in 0...this.dts.nodes.length) {
-				var translation = this.dts.defaultTranslations[i];
-				translations.push(new Vector(translation.x, translation.y, translation.z));
-			}
-		}
-
-		var utiltyMatrix = new Matrix();
-
-		function traverse(node:GraphNode, needsUpdate:Bool) {
-			if (((1 << node.index) & bitField) != 0)
-				needsUpdate = true;
-
-			if (needsUpdate) {
-				// Recompute the matrix
-				var mat = this.nodeTransforms[node.index];
-
-				if (node.parent == null) {
-					mat = Matrix.I();
-				} else {
-					mat = this.nodeTransforms[node.parent.index].clone(); // mat.load(this.nodeTransforms[node.parent.index]);
-				}
-
-				var quat = quaternions[node.index];
-				var translation = translations[node.index];
-				quat.toMatrix(utiltyMatrix);
-				utiltyMatrix.scale(1 / utiltyMatrix.getDeterminant());
-				utiltyMatrix.setPosition(translation);
-				mat.multiply(mat, utiltyMatrix);
-				this.nodeTransforms[node.index] = mat;
-			}
-
-			for (i in 0...node.children.length)
-				traverse(node.children[i], needsUpdate);
-		}
-
-		for (i in 0...this.rootGraphNodes.length) {
-			var rootNode = this.rootGraphNodes[i];
-			traverse(rootNode, false);
+		for (i in 0...this.graphNodes.length) {
+			var translation = this.dts.defaultTranslations[i];
+			var rotation = this.dts.defaultRotations[i];
+			var mat = Matrix.I();
+			var quat = new Quat(rotation.x, rotation.y, rotation.z, rotation.w);
+			quat.normalize();
+			quat.conjugate();
+			quat.toMatrix(mat);
+			mat.setPosition(new Vector(translation.x, translation.y, translation.z));
+			this.graphNodes[i].setTransform(mat);
 		}
 	}
 
@@ -362,7 +283,7 @@ class DtsObject extends Object {
 					i3 = temp;
 				}
 
-				for (index in [i1, i2, i3]) {
+				for (index in [i3, i2, i1]) {
 					var vertex = vertices[index];
 					geometrydata.vertices.push(new Vector(vertex.x, vertex.y, vertex.z));
 
@@ -464,15 +385,17 @@ class DtsObject extends Object {
 						var quat = new Quat();
 						quat.slerp(q1, q2, t);
 						quat.normalize();
+
+						this.graphNodes[i].setRotationQuat(quat);
 						affectedCount++;
-						quaternions.push(quat);
+						// quaternions.push(quat);
 					} else {
 						var rotation = this.dts.defaultRotations[i];
 						var quat = new Quat(rotation.x, rotation.y, rotation.z, rotation.w);
 						quat.normalize();
 						quat.conjugate();
-
-						quaternions.push(quat);
+						this.graphNodes[i].setRotationQuat(quat);
+						// quaternions.push(quat);
 					}
 				}
 			}
@@ -490,23 +413,18 @@ class DtsObject extends Object {
 
 						var v1 = new Vector(trans1.x, trans1.y, trans1.z);
 						var v2 = new Vector(trans2.x, trans2.y, trans2.z);
+						var trans = Util.lerpThreeVectors(v1, v2, t);
+						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
 
-						translations.push(Util.lerpThreeVectors(v1, v2, t));
+						// translations.push(Util.lerpThreeVectors(v1, v2, t));
 					} else {
 						var translation = this.dts.defaultTranslations[i];
-						translations.push(new Vector(translation.x, translation.y, translation.z));
+						var trans = new Vector(translation.x, translation.y, translation.z);
+						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
+						// translations.push();
 					}
 				}
 			}
-
-			if (rot > 0 || trans > 0) {
-				this.updateNodeTransforms(quaternions, translations, rot | trans);
-			}
-		}
-
-		for (kvp in dynamicGeometryLookup.keyValueIterator()) {
-			var tform = this.nodeTransforms[kvp.value];
-			kvp.key.setTransform(tform);
 		}
 
 		if (this.skinMeshData != null) {
@@ -519,26 +437,23 @@ class DtsObject extends Object {
 			}
 
 			var boneTransformations = [];
-			var boneTransformationsTransposed = [];
 
 			for (i in 0...mesh.nodeIndices.length) {
 				var mat = mesh.initialTransforms[i].clone();
 				mat.transpose();
-				mat.multiply(this.nodeTransforms[mesh.nodeIndices[i]], mat);
+				var tform = this.graphNodes[mesh.nodeIndices[i]].getAbsPos().clone();
+				mat.multiply(mat, tform);
 
 				boneTransformations.push(mat);
-				var m = mat.clone();
-				m.transpose();
-				boneTransformationsTransposed.push(m);
 			}
-
-			var vec = new Vector();
-			var vec2 = new Vector();
 
 			for (i in 0...mesh.vertexIndices.length) {
 				var vIndex = mesh.vertexIndices[i];
 				var vertex = mesh.vertices[vIndex];
 				var normal = mesh.normals[vIndex];
+
+				var vec = new Vector();
+				var vec2 = new Vector();
 
 				vec.set(vertex.x, vertex.y, vertex.z);
 				vec2.set(normal.x, normal.y, normal.z);
@@ -563,26 +478,57 @@ class DtsObject extends Object {
 
 			var meshIndex = 0;
 			var mesh:Mesh = cast info.geometry.children[meshIndex];
-			var prim:Polygon = cast mesh.primitive;
+			var prim:DynamicPolygon = cast mesh.primitive;
+			var vbuffer:FloatBuffer = null;
+			if (prim.buffer != null) {
+				vbuffer = prim.getBuffer(prim.points.length);
+			}
 			var pos = 0;
 			for (i in info.indices) {
 				if (pos >= prim.points.length) {
 					meshIndex++;
-					if (prim.buffer != null)
-						prim.buffer.dispose();
+					if (prim.buffer != null) {
+						prim.addNormals();
+						prim.flush();
+						// prim.buffer.uploadBytes()
+						// prim.buffer.dispose();
+					}
 					mesh.primitive = prim;
 					mesh = cast info.geometry.children[meshIndex];
 					prim = cast mesh.primitive;
 					pos = 0;
+					if (prim.buffer != null) {
+						vbuffer = prim.getBuffer(prim.points.length);
+					}
 				}
+				// if (prim.buffer == null) {
 				var vertex = info.vertices[i];
 				var normal = info.normals[i];
 				prim.points[pos] = vertex.toPoint();
-				prim.normals[pos] = normal.toPoint();
+				if (prim.buffer != null) {
+					prim.dirtyFlags[pos] = true;
+				}
+				// } else {
+				// vbuffer[pos * 8] = info.vertices[i].x;
+				// vbuffer[(pos * 8) + 1] = info.vertices[i].y;
+				// vbuffer[(pos * 8) + 2] = info.vertices[i].z;
+				// var fb = new FloatBuffer();
+				// fb.push(info.vertices[i].x);
+				// fb.push(info.vertices[i].y);
+				// fb.push(info.vertices[i].z);
+				// prim.buffer.uploadVector(fb, pos * 8, 1);
+				// }
+				// prim.normals[pos] = normal.toPoint();
 				pos++;
 			}
-			if (prim.buffer != null)
-				prim.buffer.dispose();
+			if (prim.buffer != null) {
+				prim.addNormals();
+				prim.flush();
+				// prim.buffer.dispose();
+			}
+			if (_regenNormals) {
+				_regenNormals = false;
+			}
 		}
 	}
 
