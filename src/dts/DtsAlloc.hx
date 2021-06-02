@@ -53,7 +53,10 @@ class DtsAlloc {
 	}
 
 	public function readPoint3F():Point3F {
-		return new Point3F(this.readF32(), this.readF32(), this.readF32());
+		var x = this.readF32();
+		var y = this.readF32();
+		var z = this.readF32();
+		return new Point3F(x, y, z);
 	}
 
 	public function readBoxF():Box3F {
@@ -70,6 +73,8 @@ class DtsAlloc {
 	public function readS16() {
 		buf.seek(this.index16);
 		var val = this.buf.readInt16();
+		if (val > 32767)
+			val -= 65536;
 		this.index16 += 2;
 		return val;
 	}

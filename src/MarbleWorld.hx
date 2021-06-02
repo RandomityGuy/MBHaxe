@@ -1,5 +1,6 @@
 package src;
 
+import src.DtsObject;
 import src.PathedInterior;
 import hxd.Key;
 import h3d.Vector;
@@ -15,6 +16,7 @@ class MarbleWorld {
 	public var interiors:Array<InteriorGeometry> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
 	public var marbles:Array<Marble> = [];
+	public var dtsObjects:Array<DtsObject> = [];
 
 	public var currentTime:Float = 0;
 
@@ -38,6 +40,12 @@ class MarbleWorld {
 		obj.init();
 	}
 
+	public function addDtsObject(obj:DtsObject) {
+		this.dtsObjects.push(obj);
+		this.scene.addChild(obj);
+		obj.init();
+	}
+
 	public function addMarble(marble:Marble) {
 		this.marbles.push(marble);
 		if (marble.controllable) {
@@ -48,6 +56,9 @@ class MarbleWorld {
 	}
 
 	public function update(dt:Float) {
+		for (obj in dtsObjects) {
+			obj.update(currentTime, dt);
+		}
 		for (marble in marbles) {
 			marble.update(currentTime, dt, collisionWorld, this.pathedInteriors);
 		}

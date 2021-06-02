@@ -2,6 +2,7 @@ package dts;
 
 import dif.io.BytesReader;
 
+@:publicFields
 class Object {
 	var name:Int;
 	var numMeshes:Int;

@@ -1,5 +1,6 @@
 package;
 
+import dts.DtsFile;
 import src.InteriorGeometry;
 import h3d.Quat;
 import src.PathedInteriorMarker;
@@ -16,12 +17,14 @@ import h3d.scene.fwd.DirLight;
 import h3d.mat.Material;
 import h3d.prim.Cube;
 import h3d.scene.*;
+import src.DtsObject;
 
 class Main extends hxd.App {
 	var scene:Scene;
 	var fileSystem:FileSystem;
 
 	var world:MarbleWorld;
+	var dtsObj:DtsObject;
 
 	override function init() {
 		super.init();
@@ -30,14 +33,20 @@ class Main extends hxd.App {
 
 		var loader = new Loader(fileSystem);
 
+		dtsObj = new DtsObject();
+		dtsObj.dtsPath = "data/shapes/hazards/trapdoor.dts";
+		dtsObj.isCollideable = false;
+		dtsObj.isTSStatic = false;
+		dtsObj.fs = loader;
+
 		world = new MarbleWorld(s3d);
 
 		var db = new InteriorGeometry();
-		DifBuilder.loadDif("interiors/beginner/training_friction.dif", loader, db);
+		DifBuilder.loadDif("data/interiors/beginner/training_friction.dif", loader, db);
 		world.addInterior(db);
 
 		var pi = new PathedInterior();
-		DifBuilder.loadDif("interiors/addon/smallplatform.dif", loader, pi);
+		DifBuilder.loadDif("data/interiors/addon/smallplatform.dif", loader, pi);
 		var pim = pi.getTransform();
 		pim.setPosition(new Vector(5, 0, 0));
 		pi.setTransform(pim);
@@ -68,6 +77,8 @@ class Main extends hxd.App {
 		pi.markerData = [m1, m2, m3];
 
 		world.addPathedInterior(pi);
+
+		world.addDtsObject(dtsObj);
 
 		// for (surf in db.collider.surfaces) {
 		// 	var surfmin = new CustomObject(cube, mat, s3d);

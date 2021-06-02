@@ -1,10 +1,12 @@
 package dts;
 
+import hxsl.Types.Matrix;
 import haxe.Exception;
 import dif.math.Point2F;
 import dif.math.Point3F;
 import dif.math.Box3F;
 
+@:publicFields
 class Mesh {
 	var meshType:Int;
 	var numFrames:Int;
@@ -23,6 +25,11 @@ class Mesh {
 	var vertsPerFrame:Int;
 	var type:Int;
 	var shape:DtsFile;
+	var initialTransforms:Array<Matrix>;
+	var vertexIndices:Array<Int>;
+	var boneIndices:Array<Int>;
+	var weights:Array<Float>;
+	var nodeIndices:Array<Int>;
 
 	public function new() {}
 
@@ -56,10 +63,9 @@ class Mesh {
 			uv = shape.meshes[this.parent].uv;
 		}
 
-		var numNormals = reader.readU32();
 		normals = [];
 		if (this.parent < 0) {
-			for (i in 0...numNormals) {
+			for (i in 0...numVerts) {
 				normals.push(reader.readPoint3F());
 			}
 		} else {
@@ -100,40 +106,66 @@ class Mesh {
 	function readSkinned(reader:DtsAlloc) {
 		readStandard(reader);
 
-		var sz = reader.readS32();
-		for (i in 0...sz) {
-			reader.readPoint3F();
-		}
-		for (i in 0...sz) {
-			reader.readPoint3F();
-		}
-		for (i in 0...sz) {
-			reader.readU8();
-		}
-
-		sz = reader.readS32();
-		for (i in 0...sz) {
-			for (j in 0...16) {
-				reader.readF32();
+		var numVerts = reader.readS32();
+		if (parent < 0) {
+			vertices = [];
+			for (i in 0...numVerts) {
+				vertices.push(reader.readPoint3F());
 			}
-		}
+			normals = [];
+			for (i in 0...numVerts) {
+				normals.push(reader.readPoint3F());
+			}
+			if (parent < 0) {
+				for (i in 0...numVerts) {
+					reader.readU8();
+				}
+			}
+			var sz = reader.readS32();
+			initialTransforms = [];
+			for (i in 0...sz) {
+				initialTransforms.push(reader.readMatrixF());
+			}
 
-		sz = reader.readS32();
-		for (i in 0...sz) {
+			sz = reader.readS32();
+			vertexIndices = [];
+			for (i in 0...sz) {
+				vertexIndices.push(reader.readS32());
+			}
+			boneIndices = [];
+			for (i in 0...sz) {
+				boneIndices.push(reader.readS32());
+			}
+			weights = [];
+			for (i in 0...sz) {
+				weights.push(reader.readF32());
+			}
+			sz = reader.readS32();
+			nodeIndices = [];
+			for (i in 0...sz) {
+				nodeIndices.push(reader.readS32());
+			}
+		} else {
+			var other = this.shape.meshes[parent];
+			if (other == null) {
+				return;
+			}
+			vertices = other.vertices;
+			normals = other.normals;
+			if (parent < 0) {
+				for (i in 0...numVerts) {
+					reader.readU8();
+				}
+			}
 			reader.readS32();
-		}
-		for (i in 0...sz) {
+			initialTransforms = other.initialTransforms;
 			reader.readS32();
-		}
-		for (i in 0...sz) {
-			reader.readF32();
-		}
-
-		sz = reader.readS32();
-		for (i in 0...sz) {
+			vertexIndices = other.vertexIndices;
+			boneIndices = other.boneIndices;
+			weights = other.weights;
 			reader.readS32();
+			nodeIndices = other.nodeIndices;
 		}
-
 		reader.guard();
 	}
 

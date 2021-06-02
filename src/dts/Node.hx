@@ -2,6 +2,7 @@ package dts;
 
 import dif.io.BytesReader;
 
+@:publicFields
 class Node {
 	var name:Int;
 	var parent:Int;

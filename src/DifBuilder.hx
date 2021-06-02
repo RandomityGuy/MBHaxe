@@ -1,5 +1,6 @@
 package src;
 
+import src.ResourceLoader;
 import src.PathedInterior;
 import h3d.Vector;
 import collision.CollisionSurface;
@@ -70,7 +71,7 @@ class DifBuilder {
 	];
 
 	public static function loadDif(path:String, loader:Loader, itr:InteriorGeometry) {
-		var dif = Dif.Load(path);
+		var dif = ResourceLoader.loadInterior(path);
 
 		var geo = dif.interiors[0];
 

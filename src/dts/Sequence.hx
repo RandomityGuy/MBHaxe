@@ -3,6 +3,7 @@ package dts;
 import dif.io.BytesReader;
 import hl.I64;
 
+@:publicFields
 class Sequence {
 	var nameIndex:Int;
 	var numKeyFrames:Int;

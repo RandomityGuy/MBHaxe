@@ -321,9 +321,15 @@ class DtsFile {
 	}
 
 	function parseMaterialList(br:BytesReader, version:Int) {
-		var matStreamType = br.readInt32();
+		var matStreamType = br.readByte();
 		var numMaterials = br.readInt32();
 		matNames = [];
+		matFlags = [];
+		matReflectanceMaps = [];
+		matBumpMaps = [];
+		matDetailMaps = [];
+		matDetailScales = [];
+		matReflectionAmounts = [];
 		for (i in 0...numMaterials) {
 			matNames.push(br.readStr());
 		}
