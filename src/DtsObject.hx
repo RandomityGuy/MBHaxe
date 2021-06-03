@@ -91,6 +91,8 @@ class DtsObject extends Object {
 	var rootObject:Object;
 	var colliders:Array<CollisionEntity>;
 
+	var mountPointNodes:Array<Int>;
+
 	public function new() {
 		super();
 	}
@@ -104,6 +106,7 @@ class DtsObject extends Object {
 		var graphNodes = [];
 		var rootNodesIdx = [];
 		colliders = [];
+		this.mountPointNodes = [for (i in 0...32) -1];
 
 		for (i in 0...this.dts.nodes.length) {
 			graphNodes.push(new Object());
@@ -126,6 +129,12 @@ class DtsObject extends Object {
 		for (i in 0...dts.nodes.length) {
 			var objects = dts.objects.filter(object -> object.node == i);
 			var sequenceAffected = ((1 << i) & affectedBySequences) != 0;
+
+			if (dts.names[dts.nodes[i].name].substr(0, 5) == "mount") {
+				var mountindex = dts.names[dts.nodes[i].name].substr(5);
+				var mountNode = Std.parseInt(mountindex);
+				mountPointNodes[mountNode] = i;
+			}
 
 			for (object in objects) {
 				var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
@@ -629,7 +638,13 @@ class DtsObject extends Object {
 	}
 
 	public function getMountTransform(mountPoint:Int) {
-		// TODO FIX WHEN DTS SUPPORT
-		return Matrix.I();
+		if (mountPoint < 32) {
+			var ni = mountPointNodes[mountPoint];
+			if (ni != -1) {
+				var mtransform = this.graphNodes[ni].getAbsPos().clone();
+				return mtransform;
+			}
+		}
+		return this.getTransform().clone();
 	}
 }

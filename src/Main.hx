@@ -26,7 +26,7 @@ class Main extends hxd.App {
 		super.init();
 
 		dtsObj = new DtsObject();
-		dtsObj.dtsPath = "data/shapes/images/helicopter.dts";
+		dtsObj.dtsPath = "data/shapes/hazards/ductfan.dts";
 		dtsObj.isCollideable = false;
 		dtsObj.isTSStatic = false;
 		// dtsObj.setRotation(Math.PI / 2, 0, 0);
