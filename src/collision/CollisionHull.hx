@@ -7,6 +7,9 @@ import h3d.Vector;
 
 class CollisionHull extends CollisionEntity {
 	var hull:ConvexHull;
+	var friction = 1.0;
+	var restitution = 1.0;
+	var force = 0.0;
 
 	public function new() {
 		super();
@@ -39,9 +42,9 @@ class CollisionHull extends CollisionEntity {
 				cinfo.point = sph.position.sub(pt);
 				cinfo.velocity = velocity;
 				cinfo.contactDistance = sph.radius + pt.length();
-				cinfo.restitution = 1;
-				cinfo.friction = 1;
-				cinfo.force = 0;
+				cinfo.restitution = restitution;
+				cinfo.friction = friction;
+				cinfo.force = force;
 				return [cinfo];
 			}
 		}
@@ -53,5 +56,10 @@ class CollisionHull extends CollisionEntity {
 		if (hull == null)
 			hull = new ConvexHull([]);
 		hull.vertices = hull.vertices.concat(surface.points);
+		if (surface.points.length != 0) {
+			this.force = surface.force;
+			this.friction = surface.friction;
+			this.restitution = surface.restitution;
+		}
 	}
 }

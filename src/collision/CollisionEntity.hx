@@ -30,8 +30,10 @@ class CollisionEntity implements IOctreeObject {
 	}
 
 	public function addSurface(surface:CollisionSurface) {
-		this.octree.insert(surface);
-		this.surfaces.push(surface);
+		if (surface.points.length > 0) {
+			this.octree.insert(surface);
+			this.surfaces.push(surface);
+		}
 	}
 
 	public function setTransform(transform:Matrix) {

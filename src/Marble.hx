@@ -110,6 +110,32 @@ class Marble extends Object {
 	function getExternalForces(m:Move, dt:Float) {
 		var gWorkGravityDir = gravityDir;
 		var A = gWorkGravityDir.multiply(this._gravity);
+		if (contacts.length != 0) {
+			var contactForce = 0.0;
+			var contactNormal = new Vector();
+			var forceObjectCount = 0;
+
+			for (contact in contacts) {
+				if (contact.force != 0) {
+					forceObjectCount++;
+					contactNormal = contactNormal.add(contact.normal);
+					contactForce += contact.force;
+				}
+			}
+
+			if (forceObjectCount != 0) {
+				contactNormal.normalize();
+
+				var a = contactForce / this._mass;
+				var dot = this.velocity.dot(contactNormal);
+				if (a > dot) {
+					if (dot > 0)
+						a -= dot;
+
+					A = A.add(contactNormal.multiply(a / dt));
+				}
+			}
+		}
 		if (contacts.length == 0) {
 			var axes = this.getMarbleAxis();
 			var sideDir = axes[0];

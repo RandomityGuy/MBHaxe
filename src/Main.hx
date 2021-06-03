@@ -34,7 +34,7 @@ class Main extends hxd.App {
 		var loader = new Loader(fileSystem);
 
 		dtsObj = new DtsObject();
-		dtsObj.dtsPath = "data/shapes/items/timetravel.dts";
+		dtsObj.dtsPath = "data/shapes/bumpers/pball_tri.dts";
 		dtsObj.isCollideable = false;
 		dtsObj.isTSStatic = false;
 		dtsObj.fs = loader;
@@ -46,7 +46,7 @@ class Main extends hxd.App {
 		DifBuilder.loadDif("data/interiors/beginner/training_friction.dif", loader, db);
 		world.addInterior(db);
 		var tform = db.getTransform();
-		tform.setPosition(new Vector(0, 0, 7));
+		tform.setPosition(new Vector(0, 0, 7.5));
 		db.setTransform(tform);
 
 		// var pi = new PathedInterior();

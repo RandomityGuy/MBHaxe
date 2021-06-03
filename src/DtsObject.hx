@@ -31,6 +31,18 @@ import src.Util;
 
 var DROP_TEXTURE_FOR_ENV_MAP = ['shapes/items/superjump.dts', 'shapes/items/antigravity.dts'];
 
+var dtsMaterials = [
+	"oilslick" => {friction: 0.05, restitution: 0.5, force: 0.0},
+	"base.slick" => {friction: 0.05, restitution: 0.5, force: 0.0},
+	"ice.slick" => {friction: 0.05, restitution: 0.5, force: 0.0},
+	"bumper-rubber" => {friction: 0.5, restitution: 0.0, force: 15.0},
+	"triang-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
+	"triang-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
+	"pball-round-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
+	"pball-round-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
+	"pball-round-bottm" => {friction: 0.5, restitution: 0.0, force: 15.0}
+];
+
 typedef GraphNode = {
 	var index:Int;
 	var node:Node;
@@ -312,6 +324,13 @@ class DtsObject extends Object {
 		for (primitive in dtsMesh.primitives) {
 			var k = 0;
 			var geometrydata = surfaces[primitive.matIndex];
+			var material = this.dts.matNames[primitive.matIndex];
+			if (dtsMaterials.exists(material)) {
+				var data = dtsMaterials.get(material);
+				geometrydata.friction = data.friction;
+				geometrydata.force = data.force;
+				geometrydata.restitution = data.restitution;
+			}
 
 			for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
 				var i1 = dtsMesh.indices[i];
