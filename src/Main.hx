@@ -8,9 +8,6 @@ import src.PathedInterior;
 import src.MarbleWorld;
 import collision.CollisionWorld;
 import src.Marble;
-import hxd.res.Loader;
-import hxd.fs.LocalFileSystem;
-import hxd.fs.FileSystem;
 import src.DifBuilder;
 import h3d.Vector;
 import h3d.scene.fwd.DirLight;
@@ -21,7 +18,6 @@ import src.DtsObject;
 
 class Main extends hxd.App {
 	var scene:Scene;
-	var fileSystem:FileSystem;
 
 	var world:MarbleWorld;
 	var dtsObj:DtsObject;
@@ -29,21 +25,16 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		this.fileSystem = new LocalFileSystem(".", null);
-
-		var loader = new Loader(fileSystem);
-
 		dtsObj = new DtsObject();
-		dtsObj.dtsPath = "data/shapes/bumpers/pball_tri.dts";
+		dtsObj.dtsPath = "data/shapes/images/helicopter.dts";
 		dtsObj.isCollideable = false;
 		dtsObj.isTSStatic = false;
-		dtsObj.fs = loader;
 		// dtsObj.setRotation(Math.PI / 2, 0, 0);
 
 		world = new MarbleWorld(s3d);
 
 		var db = new InteriorGeometry();
-		DifBuilder.loadDif("data/interiors/beginner/training_friction.dif", loader, db);
+		DifBuilder.loadDif("data/interiors/beginner/training_friction.dif", db);
 		world.addInterior(db);
 		var tform = db.getTransform();
 		tform.setPosition(new Vector(0, 0, 7.5));

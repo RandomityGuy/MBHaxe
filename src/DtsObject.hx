@@ -88,8 +88,6 @@ class DtsObject extends Object {
 
 	var skinMeshData:SkinMeshData;
 
-	var fs:Loader;
-
 	var rootObject:Object;
 	var colliders:Array<CollisionEntity>;
 
@@ -143,8 +141,8 @@ class DtsObject extends Object {
 					if (mesh == null)
 						continue;
 
-					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
-					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
+					var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
+					var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
 
 					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
 					for (k in 0...geometry.length) {
@@ -240,7 +238,7 @@ class DtsObject extends Object {
 			rootObject.addChild(this.skinMeshData.geometry);
 		}
 
-		// rootObject.scaleX = -1;
+		rootObject.scaleX = -1;
 	}
 
 	function computeMaterials() {
@@ -266,7 +264,7 @@ class DtsObject extends Object {
 			} else if (Path.extension(fullName) == "ifl") {
 				// TODO IFL SHIT
 			} else {
-				var texture:Texture = this.fs.load(this.directoryPath + "/" + fullName).toImage().toTexture();
+				var texture:Texture = ResourceLoader.loader.load(fullName).toImage().toTexture();
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
 				// TODO TRANSLUENCY SHIT
@@ -346,10 +344,10 @@ class DtsObject extends Object {
 
 				for (index in [i1, i2, i3]) {
 					var vertex = vertices[index];
-					geometrydata.points.push(new Vector(-vertex.x, vertex.y, vertex.z));
+					geometrydata.points.push(new Vector(vertex.x, vertex.y, vertex.z));
 
 					var normal = vertexNormals[index];
-					geometrydata.normals.push(new Vector(-normal.x, normal.y, normal.z));
+					geometrydata.normals.push(new Vector(normal.x, normal.y, normal.z));
 				}
 
 				geometrydata.indices.push(geometrydata.indices.length);

@@ -1,5 +1,7 @@
 package src;
 
+import h3d.Quat;
+import src.ResourceLoader;
 import collision.Collision;
 import dif.math.Point3F;
 import dif.math.PlaneF;
@@ -71,7 +73,9 @@ class Marble extends Object {
 		super();
 		var geom = Sphere.defaultUnitSphere();
 		geom.addUVs();
-		var obj = new CustomObject(geom, Material.create(), this);
+		var marbleTexture = ResourceLoader.loader.load("data/shapes/balls/base.marble.png").toTexture();
+		var marbleMaterial = Material.create(marbleTexture);
+		var obj = new CustomObject(geom, marbleMaterial, this);
 		obj.scale(_radius);
 
 		this.velocity = new Vector();
@@ -548,7 +552,14 @@ class Marble extends Object {
 			var pos = this.getAbsPos().getPosition();
 
 			var newPos = pos.add(this.velocity.multiply(timeStep));
+			var rot = this.getRotationQuat();
+			var quat = new Quat();
+			quat.initRotation(omega.x * timeStep, omega.y * timeStep, omega.z * timeStep);
+			quat.multiply(quat, rot);
+			this.setRotationQuat(quat);
+
 			this.setPosition(newPos.x, newPos.y, newPos.z);
+
 			var tform = this.collider.transform;
 			tform.setPosition(new Vector(newPos.x, newPos.y, newPos.z));
 			this.collider.setTransform(tform);

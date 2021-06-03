@@ -71,7 +71,7 @@ class DifBuilder {
 		}
 	];
 
-	public static function loadDif(path:String, loader:Loader, itr:InteriorGeometry) {
+	public static function loadDif(path:String, itr:InteriorGeometry) {
 		var dif = ResourceLoader.loadInterior(path);
 
 		var geo = dif.interiors[0];
@@ -296,7 +296,7 @@ class DifBuilder {
 			var material:Material;
 			var texture:Texture;
 			if (canFindTex(grp)) {
-				texture = loader.load(tex(grp)).toImage().toTexture();
+				texture = ResourceLoader.loader.load(tex(grp)).toImage().toTexture();
 				texture.wrap = Wrap.Repeat;
 				material = h3d.mat.Material.create(texture);
 			} else {
