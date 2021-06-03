@@ -2,9 +2,6 @@ package src;
 
 import h3d.Matrix;
 import collision.CollisionEntity;
-import headbutt.threed.Headbutt;
-import headbutt.threed.shapes.Sphere;
-import glm.Vec3;
 import dif.math.Point3F;
 import h3d.scene.Mesh;
 import h3d.col.Bounds;

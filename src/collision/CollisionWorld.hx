@@ -44,9 +44,9 @@ class CollisionWorld {
 		box.xMin = center.x - radius;
 		box.yMin = center.y - radius;
 		box.zMin = center.z - radius;
-		box.xMax = center.x - radius;
-		box.yMax = center.y - radius;
-		box.zMax = center.z - radius;
+		box.xMax = center.x + radius;
+		box.yMax = center.y + radius;
+		box.zMax = center.z + radius;
 
 		var contacts:Array<CollisionEntity> = [];
 

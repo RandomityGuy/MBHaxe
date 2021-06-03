@@ -1,5 +1,4 @@
 -cp src
--lib headbutt
 -lib heaps
 -lib hlsdl
 -lib polygonal-ds

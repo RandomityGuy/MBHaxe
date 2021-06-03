@@ -76,6 +76,14 @@ class CollisionEntity implements IOctreeObject {
 		var tform = transform.clone();
 		tform.setPosition(tform.getPosition().add(this.velocity.multiply(dt)));
 
+		function toDifPoint(pt:Vector) {
+			return new Point3F(pt.x, pt.y, pt.z);
+		}
+
+		function fromDifPoint(pt:Point3F) {
+			return new Vector(pt.x, pt.y, pt.z);
+		}
+
 		var contacts = [];
 
 		for (obj in surfaces) {
@@ -91,8 +99,8 @@ class CollisionEntity implements IOctreeObject {
 
 				var res = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
 				var closest = res.point;
-				// Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surface.normals[surface.indices[i]]);
-				if (res.result) {
+				// closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surface.normals[surface.indices[i]]);
+				if (closest != null) {
 					if (position.sub(closest).lengthSq() < radius * radius) {
 						var normal = res.normal;
 
@@ -100,7 +108,7 @@ class CollisionEntity implements IOctreeObject {
 							normal.normalize();
 
 							var cinfo = new CollisionInfo();
-							cinfo.normal = res.normal; // surface.normals[surface.indices[i]];
+							cinfo.normal = normal; // surface.normals[surface.indices[i]];
 							cinfo.point = closest;
 							// cinfo.collider = this;
 							cinfo.velocity = this.velocity;

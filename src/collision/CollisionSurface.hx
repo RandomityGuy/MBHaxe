@@ -24,6 +24,21 @@ class CollisionSurface implements IOctreeObject {
 		return 2;
 	}
 
+	public function generateNormals() {
+		var i = 0;
+		normals = [for (n in points) null];
+		while (i < indices.length) {
+			var p1 = points[indices[i]];
+			var p2 = points[indices[i + 1]];
+			var p3 = points[indices[i + 2]];
+			var n = p2.sub(p1).cross(p3.sub(p1)).normalized().multiply(-1);
+			normals[indices[i]] = n;
+			normals[indices[i + 1]] = n;
+			normals[indices[i + 2]] = n;
+			i += 3;
+		}
+	}
+
 	public function generateBoundingBox() {
 		var boundingBox = new Bounds();
 		boundingBox.xMin = 10e8;

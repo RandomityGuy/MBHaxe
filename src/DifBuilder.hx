@@ -1,5 +1,6 @@
 package src;
 
+import h3d.mat.Material;
 import src.ResourceLoader;
 import src.PathedInterior;
 import h3d.Vector;
@@ -213,6 +214,9 @@ class DifBuilder {
 		itr.collider = collider;
 
 		function canFindTex(tex:String) {
+			if (["NULL"].contains(tex)) {
+				return false;
+			}
 			if (tex.indexOf('/') != -1) {
 				tex = tex.split('/')[1];
 			}
@@ -289,9 +293,15 @@ class DifBuilder {
 			prim.uvs = uvs;
 			prim.normals = normals;
 
-			var texture:Texture = loader.load(tex(grp)).toImage().toTexture();
-			texture.wrap = Wrap.Repeat;
-			var material = h3d.mat.Material.create(texture);
+			var material:Material;
+			var texture:Texture;
+			if (canFindTex(grp)) {
+				texture = loader.load(tex(grp)).toImage().toTexture();
+				texture.wrap = Wrap.Repeat;
+				material = h3d.mat.Material.create(texture);
+			} else {
+				material = Material.create();
+			}
 			// material.mainPass.wireframe = true;
 
 			var mesh = new Mesh(prim, material, itr);

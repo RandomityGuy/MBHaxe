@@ -44,6 +44,10 @@ class MarbleWorld {
 		this.dtsObjects.push(obj);
 		this.scene.addChild(obj);
 		obj.init();
+		for (collider in obj.colliders) {
+			if (collider != null)
+				this.collisionWorld.addEntity(collider);
+		}
 	}
 
 	public function addMarble(marble:Marble) {
