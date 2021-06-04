@@ -1,5 +1,7 @@
 package src;
 
+import src.Sky;
+import h3d.scene.Mesh;
 import src.InstanceManager;
 import h3d.scene.MeshBatch;
 import src.DtsObject;
@@ -22,13 +24,18 @@ class MarbleWorld {
 	public var dtsObjects:Array<DtsObject> = [];
 
 	public var currentTime:Float = 0;
+	public var sky:Sky;
 
-	var scene:Scene;
+	public var scene:Scene;
 
 	public function new(scene:Scene) {
 		this.collisionWorld = new CollisionWorld();
 		this.scene = scene;
 		this.instanceManager = new InstanceManager(scene);
+		this.sky = new Sky();
+		sky.dmlPath = "data/skies/sky_day.dml";
+		sky.init(cast this);
+		scene.addChild(sky);
 	}
 
 	public function addInterior(obj:InteriorObject) {
@@ -69,6 +76,8 @@ class MarbleWorld {
 		marble.level = cast this;
 		if (marble.controllable) {
 			this.scene.addChild(marble.camera);
+			// Ugly hack
+			sky.follow = marble;
 		}
 		this.collisionWorld.addMovingEntity(marble.collider);
 		this.scene.addChild(marble);

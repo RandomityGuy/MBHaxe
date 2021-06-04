@@ -1,5 +1,6 @@
 package src;
 
+import hxd.BitmapData;
 import h3d.Vector;
 
 class Util {
@@ -31,5 +32,14 @@ class Util {
 
 	public static function lerpThreeVectors(v1:Vector, v2:Vector, t:Float) {
 		return new Vector(lerp(v1.x, v2.x, t), lerp(v1.y, v2.y, t), lerp(v1.z, v2.z, t));
+	}
+
+	public static function rotateImage(bitmap:BitmapData, angle:Float) {
+		// var bmp = new Bitmap(Tile.fromBitmap(bitmap));
+		// bmp.rotate(angle);
+		// var output = new Texture(bitmap.width, bitmap.height, [TextureFlags.Target]);
+		// bmp.drawTo(output);
+		// var pixels = output.capturePixels();
+		// bitmap.setPixels(pixels);
 	}
 }
