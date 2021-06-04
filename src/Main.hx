@@ -1,5 +1,7 @@
 package;
 
+import shapes.Tornado;
+import shapes.DuctFan;
 import dts.DtsFile;
 import src.InteriorGeometry;
 import h3d.Quat;
@@ -25,11 +27,7 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		dtsObj = new DtsObject();
-		dtsObj.dtsPath = "data/shapes/hazards/ductfan.dts";
-		dtsObj.isCollideable = false;
-		dtsObj.isTSStatic = false;
-		// dtsObj.setRotation(Math.PI / 2, 0, 0);
+		dtsObj = new Tornado();
 
 		world = new MarbleWorld(s3d);
 

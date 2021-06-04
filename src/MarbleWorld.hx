@@ -52,6 +52,7 @@ class MarbleWorld {
 
 	public function addMarble(marble:Marble) {
 		this.marbles.push(marble);
+		marble.level = cast this;
 		if (marble.controllable) {
 			this.scene.addChild(marble.camera);
 		}

@@ -1,5 +1,6 @@
 package src;
 
+import src.DtsObject;
 import h3d.Vector;
 import h3d.scene.CustomObject;
 
@@ -10,15 +11,13 @@ enum ForceType {
 	ForceCone;
 }
 
-class ForceData {
-	public var forceType:ForceType;
-	public var forceNode:Int;
-	public var forceVector:Vector;
-	public var forceRadius:Float;
-	public var forceStrength:Float;
-	public var forceArc:Float;
-
-	public function new() {}
+typedef ForceData = {
+	var forceType:ForceType;
+	var forceNode:Int;
+	var forceVector:Vector;
+	var forceRadius:Float;
+	var forceStrength:Float;
+	var forceArc:Float;
 }
 
 class ForceObject extends DtsObject {
@@ -37,7 +36,7 @@ class ForceObject extends DtsObject {
 			var node = this.getMountTransform(forceData.forceNode);
 			var nodeVec:Vector;
 			if (forceData.forceVector.length() == 0) {
-				nodeVec = new Vector(node._12, node._22, node._32);
+				nodeVec = node.right();
 			} else {
 				nodeVec = forceData.forceVector;
 			}

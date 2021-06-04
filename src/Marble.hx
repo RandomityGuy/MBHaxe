@@ -1,5 +1,7 @@
 package src;
 
+import src.ForceObject;
+import src.MarbleWorld;
 import h3d.Quat;
 import src.ResourceLoader;
 import collision.Collision;
@@ -37,6 +39,8 @@ class Marble extends Object {
 
 	public var velocity:Vector;
 	public var omega:Vector;
+
+	public var level:MarbleWorld;
 
 	var gravityDir:Vector = new Vector(0, 0, -1);
 
@@ -114,6 +118,12 @@ class Marble extends Object {
 	function getExternalForces(m:Move, dt:Float) {
 		var gWorkGravityDir = gravityDir;
 		var A = gWorkGravityDir.multiply(this._gravity);
+		for (obj in level.dtsObjects) {
+			if (obj is ForceObject) {
+				var force = cast(obj, ForceObject).getForce(this.getAbsPos().getPosition());
+				A = A.add(force.multiply(1 / _mass));
+			}
+		}
 		if (contacts.length != 0) {
 			var contactForce = 0.0;
 			var contactNormal = new Vector();
