@@ -61,7 +61,7 @@ class InstanceManager {
 				var isMesh = obj is Mesh;
 				var minfo:MeshBatchInfo = {
 					instances: [obj],
-					meshbatch: isMesh ? new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material, scene) : null,
+					meshbatch: isMesh ? new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene) : null,
 					mesh: isMesh ? cast obj : null
 				}
 				minfos.push(minfo);

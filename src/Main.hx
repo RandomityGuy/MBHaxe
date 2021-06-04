@@ -1,5 +1,6 @@
 package;
 
+import shapes.SignFinish;
 import shapes.Trapdoor;
 import shapes.AntiGravity;
 import shapes.SuperJump;
@@ -33,13 +34,13 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		dtsObj = new Tornado();
-		dtsObj.x = 5;
+		dtsObj = new SignFinish();
+		dtsObj.z = 5;
 
 		world = new MarbleWorld(s3d);
 
 		var db = new InteriorObject();
-		DifBuilder.loadDif("data/interiors/beginner/training_friction.dif", db);
+		db.interiorFile = "data/interiors/beginner/training_friction.dif";
 		world.addInterior(db);
 		var tform = db.getTransform();
 		tform.setPosition(new Vector(0, 0, 7.5));
@@ -86,14 +87,14 @@ class Main extends hxd.App {
 
 		world.addDtsObject(dtsObj);
 
-		for (i in 0...10) {
-			for (j in 0...10) {
-				var trapdoor = new Tornado();
-				trapdoor.x = i * 2;
-				trapdoor.y = j * 2;
-				world.addDtsObject(trapdoor);
-			}
-		}
+		// for (i in 0...10) {
+		// 	for (j in 0...10) {
+		// 		var trapdoor = new Tornado();
+		// 		trapdoor.x = i * 2;
+		// 		trapdoor.y = j * 2;
+		// 		world.addDtsObject(trapdoor);
+		// 	}
+		// }
 
 		// for (surf in db.collider.surfaces) {
 		// 	var surfmin = new CustomObject(cube, mat, s3d);

@@ -21,6 +21,14 @@ class CollisionWorld {
 		var searchdist = (velocity.length() * dt) + radius;
 		var intersections = this.octree.radiusSearch(position, searchdist);
 
+		var box = new Bounds();
+		box.xMin = position.x - radius;
+		box.yMin = position.y - radius;
+		box.zMin = position.z - radius;
+		box.xMax = position.x + radius;
+		box.yMax = position.y + radius;
+		box.zMax = position.z + radius;
+
 		var contacts = [];
 
 		for (obj in intersections) {
@@ -31,7 +39,8 @@ class CollisionWorld {
 
 		for (obj in dynamicEntities) {
 			if (obj != spherecollision) {
-				contacts = contacts.concat(obj.sphereIntersection(spherecollision, dt));
+				if (obj.boundingBox.collide(box))
+					contacts = contacts.concat(obj.sphereIntersection(spherecollision, dt));
 			}
 		}
 		return contacts;

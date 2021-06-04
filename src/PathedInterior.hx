@@ -1,5 +1,6 @@
 package src;
 
+import src.MarbleWorld;
 import h3d.Matrix;
 import h3d.Vector;
 import src.Util;
@@ -37,7 +38,7 @@ class PathedInterior extends InteriorObject {
 		super();
 	}
 
-	public function init() {
+	public override function init(level:MarbleWorld) {
 		this.computeDuration();
 		this.reset();
 	}

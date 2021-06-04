@@ -33,15 +33,22 @@ class MarbleWorld {
 
 	public function addInterior(obj:InteriorObject) {
 		this.interiors.push(obj);
+		obj.init(cast this);
 		this.collisionWorld.addEntity(obj.collider);
-		this.scene.addChild(obj);
+		if (obj.useInstancing)
+			this.instanceManager.addObject(obj);
+		else
+			this.scene.addChild(obj);
 	}
 
 	public function addPathedInterior(obj:PathedInterior) {
 		this.pathedInteriors.push(obj);
+		obj.init(cast this);
 		this.collisionWorld.addMovingEntity(obj.collider);
-		this.scene.addChild(obj);
-		obj.init();
+		if (obj.useInstancing)
+			this.instanceManager.addObject(obj);
+		else
+			this.scene.addChild(obj);
 	}
 
 	public function addDtsObject(obj:DtsObject) {
@@ -51,7 +58,6 @@ class MarbleWorld {
 			this.instanceManager.addObject(obj);
 		} else
 			this.scene.addChild(obj);
-		// this.instanceManager.addObject(obj);
 		for (collider in obj.colliders) {
 			if (collider != null)
 				this.collisionWorld.addEntity(collider);

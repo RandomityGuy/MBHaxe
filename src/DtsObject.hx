@@ -1,5 +1,6 @@
 package src;
 
+import sys.io.File;
 import src.MarbleWorld;
 import src.GameObject;
 import collision.CollisionHull;
@@ -70,6 +71,7 @@ class DtsObject extends GameObject {
 	var level:MarbleWorld;
 
 	var materials:Array<Material> = [];
+	var materialInfos:Map<Material, Array<String>> = new Map();
 	var matNameOverride:Map<String, String> = new Map();
 
 	var sequenceKeyframeOverride:Map<Sequence, Float> = new Map();
@@ -312,9 +314,11 @@ class DtsObject extends GameObject {
 					// TODO USE PBR???
 				}
 			} else if (Path.extension(fullName) == "ifl") {
+				var keyframes = parseIfl(fullName);
+				this.materialInfos.set(material, keyframes);
 				// TODO IFL SHIT
 			} else {
-				var texture:Texture = ResourceLoader.loader.load(fullName).toImage().toTexture();
+				var texture:Texture = ResourceLoader.getTexture(fullName);
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
 				// TODO TRANSLUENCY SHIT
@@ -342,6 +346,27 @@ class DtsObject extends GameObject {
 			this.materials.push(mat);
 			// TODO THIS
 		}
+	}
+
+	function parseIfl(path:String) {
+		var text = File.getContent(path);
+		var lines = text.split('\n');
+		var keyframes = [];
+		for (line in lines) {
+			if (line.substr(0, 2) == "//")
+				continue;
+			if (line == "")
+				continue;
+
+			var parts = line.split(' ');
+			var count = parts.length > 1 ? Std.parseInt(parts[1]) : 1;
+
+			for (i in 0...count) {
+				keyframes.push(parts[0]);
+			}
+		}
+
+		return keyframes;
 	}
 
 	function updateNodeTransforms(quaternions:Array<Quat> = null, translations:Array<Vector> = null, bitField = 0xffffffff) {
@@ -668,6 +693,29 @@ class DtsObject extends GameObject {
 			}
 			if (_regenNormals) {
 				_regenNormals = false;
+			}
+		}
+
+		if (!this.isInstanced) {
+			for (i in 0...this.materials.length) {
+				var info = this.materialInfos.get(this.materials[i]);
+				if (info == null)
+					continue;
+
+				var iflSequence = this.dts.sequences.filter(seq -> seq.iflMatters.length > 0 ? seq.iflMatters[0] > 0 : false);
+				if (iflSequence.length == 0 || !this.showSequences)
+					continue;
+
+				var completion = (currentTime + dt) / (iflSequence[0].duration);
+				var keyframe = Math.floor(completion * info.length) % info.length;
+				var currentFile = info[keyframe];
+				var texture = ResourceLoader.getTexture(this.directoryPath + '/' + currentFile);
+
+				var flags = this.dts.matFlags[i];
+				if (flags & 1 > 0 || flags & 2 > 0)
+					texture.wrap = Wrap.Repeat;
+
+				this.materials[i].texture = texture;
 			}
 		}
 

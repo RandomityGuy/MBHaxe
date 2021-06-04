@@ -1,5 +1,6 @@
 package src;
 
+import h3d.mat.Texture;
 import h3d.scene.Object;
 import sys.FileSystem;
 import sys.io.File;
@@ -15,6 +16,7 @@ class ResourceLoader {
 	public static var loader = new Loader(fileSystem);
 	static var interiorResources:Map<String, Dif> = new Map();
 	static var dtsResources:Map<String, DtsFile> = new Map();
+	static var textureCache:Map<String, Texture> = new Map();
 
 	public static function loadInterior(path:String) {
 		if (interiorResources.exists(path))
@@ -35,6 +37,17 @@ class ResourceLoader {
 			dtsResources.set(path, dts);
 			return dts;
 		}
+	}
+
+	public static function getTexture(path:String) {
+		if (textureCache.exists(path))
+			return textureCache.get(path);
+		if (fileSystem.exists(path)) {
+			var tex = loader.load(path).toTexture();
+			textureCache.set(path, tex);
+			return tex;
+		}
+		return null;
 	}
 
 	public static function clearInteriorResources() {
