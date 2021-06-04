@@ -1,9 +1,15 @@
 package;
 
+import shapes.Trapdoor;
+import shapes.AntiGravity;
+import shapes.SuperJump;
+import h3d.prim.Polygon;
+import src.ResourceLoader;
+import src.GameObject;
 import shapes.Tornado;
 import shapes.DuctFan;
 import dts.DtsFile;
-import src.InteriorGeometry;
+import src.InteriorObject;
 import h3d.Quat;
 import src.PathedInteriorMarker;
 import src.PathedInterior;
@@ -28,10 +34,11 @@ class Main extends hxd.App {
 		super.init();
 
 		dtsObj = new Tornado();
+		dtsObj.x = 5;
 
 		world = new MarbleWorld(s3d);
 
-		var db = new InteriorGeometry();
+		var db = new InteriorObject();
 		DifBuilder.loadDif("data/interiors/beginner/training_friction.dif", db);
 		world.addInterior(db);
 		var tform = db.getTransform();
@@ -44,10 +51,16 @@ class Main extends hxd.App {
 		// pim.setPosition(new Vector(5, 0, 0));
 		// pi.setTransform(pim);
 
-		// var cube = new Cube();
-		// cube.addUVs();
+		// var cube = new Polygon([new h3d.col.Point(0, 0, 0), new h3d.col.Point(0, 0, 1), new h3d.col.Point(0, 1, 0)]);
 		// cube.addNormals();
-		// var mat = Material.create();
+		// cube.addUVs();
+		// var tex = ResourceLoader.loader.load("data/interiors/arrow_cool1.jpg").toTexture();
+		// var mat = Material.create(tex);
+		// var mesh = new Mesh(cube, mat);
+		// var go = new GameObject();
+		// go.identifier = "lol";
+		// go.addChild(mesh);
+		// world.instanceManager.addObject(go);
 
 		// var m1 = new PathedInteriorMarker();
 		// m1.msToNext = 5;
@@ -72,6 +85,15 @@ class Main extends hxd.App {
 		// world.addPathedInterior(pi);
 
 		world.addDtsObject(dtsObj);
+
+		for (i in 0...10) {
+			for (j in 0...10) {
+				var trapdoor = new Tornado();
+				trapdoor.x = i * 2;
+				trapdoor.y = j * 2;
+				world.addDtsObject(trapdoor);
+			}
+		}
 
 		// for (surf in db.collider.surfaces) {
 		// 	var surfmin = new CustomObject(cube, mat, s3d);
@@ -110,6 +132,7 @@ class Main extends hxd.App {
 	}
 
 	static function main() {
+		h3d.mat.PbrMaterialSetup.set();
 		new Main();
 	}
 }

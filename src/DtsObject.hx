@@ -1,17 +1,14 @@
 package src;
 
+import src.MarbleWorld;
+import src.GameObject;
 import collision.CollisionHull;
 import collision.CollisionSurface;
 import collision.CollisionEntity;
 import hxd.FloatBuffer;
-import h3d.prim.DynamicPrimitive;
-import h3d.scene.Trail;
 import src.DynamicPolygon;
-import h3d.mat.Data.Blend;
-import h3d.prim.Cube;
 import dts.Sequence;
 import h3d.scene.Mesh;
-import h3d.scene.CustomObject;
 import h3d.prim.Polygon;
 import h3d.prim.UV;
 import h3d.Vector;
@@ -20,7 +17,6 @@ import dts.Node;
 import h3d.mat.BlendMode;
 import h3d.mat.Data.Wrap;
 import h3d.mat.Texture;
-import hxd.res.Loader;
 import h3d.mat.Material;
 import h3d.scene.Object;
 import haxe.io.Path;
@@ -66,10 +62,12 @@ typedef SkinMeshData = {
 }
 
 @:publicFields
-class DtsObject extends Object {
+class DtsObject extends GameObject {
 	var dtsPath:String;
 	var directoryPath:String;
 	var dts:DtsFile;
+
+	var level:MarbleWorld;
 
 	var materials:Array<Material> = [];
 	var matNameOverride:Map<String, String> = new Map();
@@ -79,10 +77,12 @@ class DtsObject extends Object {
 
 	var graphNodes:Array<Object> = [];
 
+	var useInstancing:Bool = true;
 	var isTSStatic:Bool;
 	var isCollideable:Bool;
 	var showSequences:Bool = true;
 	var hasNonVisualSequences:Bool = true;
+	var isInstanced:Bool = false;
 
 	var _regenNormals:Bool = false;
 
@@ -97,11 +97,14 @@ class DtsObject extends Object {
 		super();
 	}
 
-	public function init() {
+	public function init(level:MarbleWorld) {
 		this.dts = ResourceLoader.loadDts(this.dtsPath);
 		this.directoryPath = Path.directory(this.dtsPath);
+		this.level = level;
 
-		this.computeMaterials();
+		isInstanced = this.level.instanceManager.isInstanced(this) && useInstancing;
+		if (!isInstanced)
+			this.computeMaterials();
 
 		var graphNodes = [];
 		var rootNodesIdx = [];
@@ -150,55 +153,71 @@ class DtsObject extends Object {
 					if (mesh == null)
 						continue;
 
-					var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
-					var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
+					if (!isInstanced) {
+						var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
+						var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
 
-					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
-					for (k in 0...geometry.length) {
-						if (geometry[k].vertices.length == 0)
-							continue;
+						var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+						for (k in 0...geometry.length) {
+							if (geometry[k].vertices.length == 0)
+								continue;
 
-						var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
-						poly.normals = geometry[k].normals.map(x -> x.toPoint());
-						poly.uvs = geometry[k].uvs;
+							var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
+							poly.normals = geometry[k].normals.map(x -> x.toPoint());
+							poly.uvs = geometry[k].uvs;
 
-						var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
+							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
+						}
+					} else {
+						var usedMats = [];
+
+						for (prim in mesh.primitives) {
+							if (!usedMats.contains(prim.matIndex)) {
+								usedMats.push(prim.matIndex);
+							}
+						}
+
+						for (k in usedMats) {
+							var obj = new Object(this.graphNodes[i]);
+						}
 					}
 				}
 			}
 		}
 
-		for (i in 0...dts.nodes.length) {
-			var objects = dts.objects.filter(object -> object.node == i);
-			var meshSurfaces = [];
-			var collider = new CollisionHull();
+		if (this.isCollideable) {
+			for (i in 0...dts.nodes.length) {
+				var objects = dts.objects.filter(object -> object.node == i);
+				var meshSurfaces = [];
+				var collider = new CollisionHull();
 
-			for (object in objects) {
-				var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
+				for (object in objects) {
+					var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
 
-				if (isCollisionObject) {
-					for (j in object.firstMesh...(object.firstMesh + object.numMeshes)) {
-						if (j >= this.dts.meshes.length)
-							continue;
+					if (isCollisionObject) {
+						for (j in object.firstMesh...(object.firstMesh + object.numMeshes)) {
+							if (j >= this.dts.meshes.length)
+								continue;
 
-						var mesh = this.dts.meshes[j];
-						if (mesh == null)
-							continue;
+							var mesh = this.dts.meshes[j];
+							if (mesh == null)
+								continue;
 
-						var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
-						var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
+							var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
+							var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
 
-						var surfaces = this.generateCollisionGeometry(mesh, vertices, vertexNormals);
-						for (surface in surfaces)
-							collider.addSurface(surface);
-						meshSurfaces = meshSurfaces.concat(surfaces);
+							var surfaces = this.generateCollisionGeometry(mesh, vertices, vertexNormals);
+							for (surface in surfaces)
+								collider.addSurface(surface);
+							meshSurfaces = meshSurfaces.concat(surfaces);
+						}
 					}
 				}
+				if (meshSurfaces.length != 0)
+					colliders.push(collider);
+				else
+					colliders.push(null);
 			}
-			if (meshSurfaces.length != 0)
-				colliders.push(collider);
-			else
-				colliders.push(null);
 		}
 
 		this.updateNodeTransforms();
@@ -209,31 +228,52 @@ class DtsObject extends Object {
 				continue;
 
 			if (mesh.meshType == 1) {
-				var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
-				var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
-
-				var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
 				var skinObj = new Object();
-				for (k in 0...geometry.length) {
-					if (geometry[k].vertices.length == 0)
-						continue;
 
-					var poly = new DynamicPolygon(geometry[k].vertices.map(x -> x.toPoint()));
-					poly.normals = geometry[k].normals.map(x -> x.toPoint());
-					poly.uvs = geometry[k].uvs;
+				if (!isInstanced) {
+					var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
+					var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
+					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+					for (k in 0...geometry.length) {
+						if (geometry[k].vertices.length == 0)
+							continue;
 
-					var obj = new Mesh(poly, materials[k], skinObj);
-				}
-				skinMeshData = {
-					meshIndex: i,
-					vertices: vertices,
-					normals: vertexNormals,
-					indices: [],
-					geometry: skinObj
-				};
-				var idx = geometry.map(x -> x.indices);
-				for (indexes in idx) {
-					skinMeshData.indices = skinMeshData.indices.concat(indexes);
+						var poly = new DynamicPolygon(geometry[k].vertices.map(x -> x.toPoint()));
+						poly.normals = geometry[k].normals.map(x -> x.toPoint());
+						poly.uvs = geometry[k].uvs;
+
+						var obj = new Mesh(poly, materials[k], skinObj);
+					}
+					skinMeshData = {
+						meshIndex: i,
+						vertices: vertices,
+						normals: vertexNormals,
+						indices: [],
+						geometry: skinObj
+					};
+					var idx = geometry.map(x -> x.indices);
+					for (indexes in idx) {
+						skinMeshData.indices = skinMeshData.indices.concat(indexes);
+					}
+				} else {
+					var usedMats = [];
+
+					for (prim in mesh.primitives) {
+						if (!usedMats.contains(prim.matIndex)) {
+							usedMats.push(prim.matIndex);
+						}
+					}
+
+					for (k in usedMats) {
+						var obj = new Object(skinObj);
+					}
+					skinMeshData = {
+						meshIndex: i,
+						vertices: [],
+						normals: [],
+						indices: [],
+						geometry: skinObj
+					};
 				}
 			}
 		}
@@ -243,6 +283,7 @@ class DtsObject extends Object {
 		for (i in rootNodesIdx) {
 			rootObject.addChild(this.graphNodes[i]);
 		}
+
 		if (this.skinMeshData != null) {
 			rootObject.addChild(this.skinMeshData.geometry);
 		}
@@ -288,9 +329,9 @@ class DtsObject extends Object {
 			if (flags & 16 > 0)
 				material.blendMode = BlendMode.Sub;
 
-			if (this.isTSStatic && !(flags & 64 > 0)) {
-				// TODO THIS SHIT
-			}
+			// if (this.isTSStatic && !(flags & 64 > 0)) {
+			// 	// TODO THIS SHIT
+			// }
 			// ((flags & 32) || environmentMaterial) ? new Materia
 
 			this.materials.push(material);
@@ -322,7 +363,7 @@ class DtsObject extends Object {
 	}
 
 	function generateCollisionGeometry(dtsMesh:dts.Mesh, vertices:Array<Vector>, vertexNormals:Array<Vector>) {
-		var surfaces = this.materials.map(x -> new CollisionSurface());
+		var surfaces = this.dts.matNames.map(x -> new CollisionSurface());
 		for (surface in surfaces) {
 			surface.points = [];
 			surface.normals = [];
@@ -374,7 +415,7 @@ class DtsObject extends Object {
 	}
 
 	function generateMaterialGeometry(dtsMesh:dts.Mesh, vertices:Array<Vector>, vertexNormals:Array<Vector>) {
-		var materialGeometry:Array<MaterialGeometry> = this.materials.map(x -> {
+		var materialGeometry:Array<MaterialGeometry> = this.dts.matNames.map(x -> {
 			vertices: [],
 			normals: [],
 			uvs: [],
@@ -541,7 +582,7 @@ class DtsObject extends Object {
 			}
 		}
 
-		if (this.skinMeshData != null) {
+		if (this.skinMeshData != null && !isInstanced) {
 			var info = this.skinMeshData;
 			var mesh = this.dts.meshes[info.meshIndex];
 
@@ -555,7 +596,7 @@ class DtsObject extends Object {
 			for (i in 0...mesh.nodeIndices.length) {
 				var mat = mesh.initialTransforms[i].clone();
 				mat.transpose();
-				var tform = this.graphNodes[mesh.nodeIndices[i]].getAbsPos().clone();
+				var tform = this.graphNodes[mesh.nodeIndices[i]].getRelPos(this).clone();
 				mat.multiply(mat, tform);
 
 				boneTransformations.push(mat);

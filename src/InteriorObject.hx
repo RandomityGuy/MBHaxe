@@ -2,14 +2,10 @@ package src;
 
 import h3d.Matrix;
 import collision.CollisionEntity;
-import dif.math.Point3F;
-import h3d.scene.Mesh;
-import h3d.col.Bounds;
-import h3d.scene.RenderContext;
-import h3d.prim.Polygon;
+import src.GameObject;
 import h3d.scene.Object;
 
-class InteriorGeometry extends Object {
+class InteriorObject extends GameObject {
 	public var collider:CollisionEntity;
 
 	public function new() {

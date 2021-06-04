@@ -9,6 +9,7 @@ class SmallDuctFan extends ForceObject {
 		this.dtsPath = "data/shapes/hazards/ductfan.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
+		this.identifier = "DuctFan";
 		this.forceDatas = [
 			{
 				forceType: ForceCone,

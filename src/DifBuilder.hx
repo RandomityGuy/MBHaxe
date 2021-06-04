@@ -22,7 +22,7 @@ import dif.math.Point3F;
 import h3d.prim.BigPrimitive;
 import dif.Interior;
 import dif.Dif;
-import src.InteriorGeometry;
+import src.InteriorObject;
 
 class DifBuilderTriangle {
 	public var texture:String;
@@ -71,7 +71,7 @@ class DifBuilder {
 		}
 	];
 
-	public static function loadDif(path:String, itr:InteriorGeometry) {
+	public static function loadDif(path:String, itr:InteriorObject) {
 		var dif = ResourceLoader.loadInterior(path);
 
 		var geo = dif.interiors[0];

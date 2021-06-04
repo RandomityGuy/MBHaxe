@@ -1,5 +1,6 @@
 package src;
 
+import h3d.scene.Object;
 import sys.FileSystem;
 import sys.io.File;
 import haxe.io.Path;

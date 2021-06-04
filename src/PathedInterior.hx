@@ -4,7 +4,7 @@ import h3d.Matrix;
 import h3d.Vector;
 import src.Util;
 import src.PathedInteriorMarker;
-import src.InteriorGeometry;
+import src.InteriorObject;
 
 typedef PIState = {
 	var currentTime:Float;
@@ -15,7 +15,7 @@ typedef PIState = {
 	var velocity:Vector;
 }
 
-class PathedInterior extends InteriorGeometry {
+class PathedInterior extends InteriorObject {
 	public var markerData:Array<PathedInteriorMarker> = [];
 
 	public var duration:Float;

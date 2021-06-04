@@ -1,19 +1,22 @@
 package src;
 
+import src.InstanceManager;
+import h3d.scene.MeshBatch;
 import src.DtsObject;
 import src.PathedInterior;
 import hxd.Key;
 import h3d.Vector;
-import src.InteriorGeometry;
+import src.InteriorObject;
 import h3d.scene.Scene;
 import h3d.scene.CustomObject;
 import collision.CollisionWorld;
 import src.Marble;
 
 class MarbleWorld {
-	var collisionWorld:CollisionWorld;
+	public var collisionWorld:CollisionWorld;
+	public var instanceManager:InstanceManager;
 
-	public var interiors:Array<InteriorGeometry> = [];
+	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
 	public var marbles:Array<Marble> = [];
 	public var dtsObjects:Array<DtsObject> = [];
@@ -25,9 +28,10 @@ class MarbleWorld {
 	public function new(scene:Scene) {
 		this.collisionWorld = new CollisionWorld();
 		this.scene = scene;
+		this.instanceManager = new InstanceManager(scene);
 	}
 
-	public function addInterior(obj:InteriorGeometry) {
+	public function addInterior(obj:InteriorObject) {
 		this.interiors.push(obj);
 		this.collisionWorld.addEntity(obj.collider);
 		this.scene.addChild(obj);
@@ -42,8 +46,12 @@ class MarbleWorld {
 
 	public function addDtsObject(obj:DtsObject) {
 		this.dtsObjects.push(obj);
-		this.scene.addChild(obj);
-		obj.init();
+		obj.init(cast this);
+		if (obj.useInstancing) {
+			this.instanceManager.addObject(obj);
+		} else
+			this.scene.addChild(obj);
+		// this.instanceManager.addObject(obj);
 		for (collider in obj.colliders) {
 			if (collider != null)
 				this.collisionWorld.addEntity(collider);
@@ -67,6 +75,7 @@ class MarbleWorld {
 		for (marble in marbles) {
 			marble.update(currentTime, dt, collisionWorld, this.pathedInteriors);
 		}
+		this.instanceManager.update(dt);
 		currentTime += dt;
 	}
 }
