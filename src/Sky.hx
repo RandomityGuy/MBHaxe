@@ -35,6 +35,8 @@ class Sky extends Object {
 			var lines = dmlFile.split('\n').map(x -> x.toLowerCase());
 			var skyboxImages = [];
 
+			// 5: bottom, to be rotated/flipped
+			// 0: front
 			var skyboxIndices = [3, 1, 2, 0, 4, 5];
 
 			for (i in 0...6) {
@@ -56,7 +58,16 @@ class Sky extends Object {
 					maxwidth = texture.width;
 			}
 
-			Util.rotateImage(skyboxImages[0], Math.PI / 2);
+			Util.flipImage(skyboxImages[0], true, false);
+			Util.flipImage(skyboxImages[4], true, false);
+			Util.rotateImage(skyboxImages[5], Math.PI);
+			Util.flipImage(skyboxImages[5], true, false);
+			Util.rotateImage(skyboxImages[1], -Math.PI / 2);
+			Util.flipImage(skyboxImages[1], true, false);
+			Util.rotateImage(skyboxImages[2], Math.PI);
+			Util.flipImage(skyboxImages[2], true, false);
+			Util.rotateImage(skyboxImages[3], Math.PI / 2);
+			Util.flipImage(skyboxImages[3], true, false);
 
 			var cubemaptexture = new Texture(maxheight, maxwidth, [Cube]);
 			for (i in 0...6) {
