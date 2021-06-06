@@ -1,8 +1,6 @@
 package src;
 
-import shaders.DtsMaterial;
 import shaders.DtsTexture;
-import shaders.DtsMaterialSetup;
 import h3d.shader.AlphaMult;
 import sys.io.File;
 import src.MarbleWorld;
@@ -99,6 +97,9 @@ class DtsObject extends GameObject {
 
 	var mountPointNodes:Array<Int>;
 	var alphaShader:AlphaMult;
+
+	var ambientRotate = false;
+	var ambientSpinFactor = -1 / 3 * Math.PI * 2;
 
 	public function new() {
 		super();
@@ -729,6 +730,16 @@ class DtsObject extends GameObject {
 
 				this.materials[i].texture = texture;
 			}
+		}
+
+		if (this.ambientRotate) {
+			var spinAnimation = new Quat();
+			spinAnimation.initRotateAxis(0, 0, -1, (currentTime + dt) * this.ambientSpinFactor);
+
+			var orientation = this.getRotationQuat();
+			// spinAnimation.multiply(orientation, spinAnimation);
+
+			this.rootObject.setRotationQuat(spinAnimation);
 		}
 
 		for (i in 0...this.colliders.length) {

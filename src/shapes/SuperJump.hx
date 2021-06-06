@@ -2,7 +2,7 @@ package shapes;
 
 import src.DtsObject;
 
-class SuperJump extends DtsObject {
+class SuperJump extends PowerUp {
 	public function new() {
 		super();
 		this.dtsPath = "data/shapes/items/superjump.dts";

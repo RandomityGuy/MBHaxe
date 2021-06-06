@@ -2,7 +2,7 @@ package shapes;
 
 import src.DtsObject;
 
-class SuperSpeed extends DtsObject {
+class SuperSpeed extends PowerUp {
 	public function new() {
 		super();
 		this.dtsPath = "data/shapes/items/superspeed.dts";
