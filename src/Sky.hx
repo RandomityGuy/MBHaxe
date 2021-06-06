@@ -1,5 +1,6 @@
 package src;
 
+import h3d.scene.pbr.Environment;
 import src.Util;
 import src.MarbleWorld;
 import hxd.BitmapData;
@@ -19,13 +20,19 @@ class Sky extends Object {
 
 	public function init(level:MarbleWorld) {
 		var texture = createSkyboxCubeTextured(this.dmlPath);
-		var sky = new h3d.prim.Sphere(300, 128, 128);
+		var sky = new h3d.prim.Sphere(1, 128, 128);
 		sky.addNormals();
+		sky.addUVs();
 		var skyMesh = new h3d.scene.Mesh(sky, this);
 		skyMesh.material.mainPass.culling = Front;
-		skyMesh.material.mainPass.addShader(new h3d.shader.CubeMap(texture));
+		skyMesh.material.mainPass.setPassName("overlay");
+		skyMesh.scale(200);
+		var env = new Environment(texture);
+		env.compute();
+		var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
+		// renderer.env = env;
+		skyMesh.material.mainPass.addShader(new h3d.shader.pbr.CubeLod(texture));
 		skyMesh.material.shadows = false;
-		skyMesh.culled = false;
 	}
 
 	function createSkyboxCubeTextured(dmlPath:String) {

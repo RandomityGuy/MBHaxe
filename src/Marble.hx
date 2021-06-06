@@ -17,11 +17,11 @@ import collision.CollisionWorld;
 import h3d.col.ObjectCollider;
 import h3d.col.Collider.GroupCollider;
 import h3d.Vector;
-import h3d.scene.CameraController;
 import h3d.mat.Material;
 import h3d.scene.CustomObject;
 import h3d.prim.Sphere;
 import h3d.scene.Object;
+import src.CameraController;
 
 class Move {
 	public var d:Vector;
@@ -33,6 +33,7 @@ class Move {
 
 class Marble extends Object {
 	public var camera:CameraController;
+	public var cameraObject:Object;
 	public var controllable:Bool = false;
 
 	public var collider:SphereCollisionEntity;
@@ -84,7 +85,7 @@ class Marble extends Object {
 
 		this.velocity = new Vector();
 		this.omega = new Vector();
-		this.camera = new CameraController(20);
+		this.camera = new CameraController(cast this);
 
 		this.collider = new SphereCollisionEntity(cast this);
 	}
@@ -102,9 +103,9 @@ class Marble extends Object {
 	function getMarbleAxis() {
 		var cammat = Matrix.I();
 		var xrot = new Matrix();
-		xrot.initRotationX(this.camera.phi);
+		xrot.initRotationX(this.camera.CameraPitch);
 		var zrot = new Matrix();
-		zrot.initRotationZ(this.camera.theta);
+		zrot.initRotationZ(this.camera.CameraYaw);
 		cammat.multiply(xrot, zrot);
 		var updir = gravityDir.multiply(-1);
 		var motiondir = new Vector(cammat._21, cammat._22, cammat._23);
@@ -604,6 +605,10 @@ class Marble extends Object {
 
 		advancePhysics(currentTime, dt, move, collisionWorld, pathedInteriors);
 
-		this.camera.target.load(this.getAbsPos().getPosition().toPoint());
+		if (this.controllable) {
+			this.camera.update(dt);
+		}
+
+		// this.camera.target.load(this.getAbsPos().getPosition().toPoint());
 	}
 }

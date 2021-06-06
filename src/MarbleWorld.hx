@@ -75,6 +75,7 @@ class MarbleWorld {
 		this.marbles.push(marble);
 		marble.level = cast this;
 		if (marble.controllable) {
+			marble.camera.init(cast this);
 			this.scene.addChild(marble.camera);
 			// Ugly hack
 			sky.follow = marble;
