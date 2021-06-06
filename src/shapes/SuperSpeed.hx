@@ -9,5 +9,6 @@ class SuperSpeed extends DtsObject {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperSpeed";
+		this.useInstancing = true;
 	}
 }

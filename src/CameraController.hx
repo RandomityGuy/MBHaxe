@@ -73,7 +73,6 @@ class CameraController extends Object {
 				Sdl.warpMouseGlobal(cast this.screenWidth / 2, cast this.screenHeight / 2);
 			default:
 		}
-		trace(e);
 	}
 
 	function orbit(mouseX:Float, mouseY:Float) {

@@ -1,5 +1,7 @@
 package src;
 
+import h3d.shader.pbr.PropsValues;
+import h3d.shader.AmbientLight;
 import h3d.scene.pbr.Environment;
 import src.Util;
 import src.MarbleWorld;
@@ -25,13 +27,15 @@ class Sky extends Object {
 		sky.addUVs();
 		var skyMesh = new h3d.scene.Mesh(sky, this);
 		skyMesh.material.mainPass.culling = Front;
-		skyMesh.material.mainPass.setPassName("overlay");
+		// This is such a hack
+		skyMesh.material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
+		skyMesh.material.blendMode = None;
 		skyMesh.scale(200);
 		var env = new Environment(texture);
 		env.compute();
 		var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
-		// renderer.env = env;
-		skyMesh.material.mainPass.addShader(new h3d.shader.pbr.CubeLod(texture));
+		var shad = new h3d.shader.pbr.CubeLod(texture);
+		skyMesh.material.mainPass.addShader(shad);
 		skyMesh.material.shadows = false;
 	}
 

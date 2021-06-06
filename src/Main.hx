@@ -1,5 +1,6 @@
 package;
 
+import shapes.SuperSpeed;
 import shapes.SignFinish;
 import shapes.Trapdoor;
 import shapes.AntiGravity;
@@ -34,8 +35,8 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		dtsObj = new SignFinish();
-		dtsObj.z = 5;
+		dtsObj = new SuperSpeed();
+		// dtsObj.z = 5;
 
 		world = new MarbleWorld(s3d);
 
@@ -86,6 +87,12 @@ class Main extends hxd.App {
 		// world.addPathedInterior(pi);
 
 		world.addDtsObject(dtsObj);
+		dtsObj.setOpacity(0.5);
+
+		var dto = new SuperSpeed();
+		world.addDtsObject(dto);
+		dto.setOpacity(1);
+		dto.z = 1;
 
 		// for (i in 0...10) {
 		// 	for (j in 0...10) {

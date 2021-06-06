@@ -1,5 +1,9 @@
 package src;
 
+import shaders.DtsMaterial;
+import shaders.DtsTexture;
+import shaders.DtsMaterialSetup;
+import h3d.shader.AlphaMult;
 import sys.io.File;
 import src.MarbleWorld;
 import src.GameObject;
@@ -94,6 +98,7 @@ class DtsObject extends GameObject {
 	var colliders:Array<CollisionEntity>;
 
 	var mountPointNodes:Array<Int>;
+	var alphaShader:AlphaMult;
 
 	public function new() {
 		super();
@@ -321,6 +326,11 @@ class DtsObject extends GameObject {
 				var texture:Texture = ResourceLoader.getTexture(fullName);
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
+				var dtsshader = new DtsTexture();
+				dtsshader.texture = texture;
+				dtsshader.currentOpacity = 1;
+				material.mainPass.removeShader(material.textureShader);
+				material.mainPass.addShader(dtsshader);
 				// TODO TRANSLUENCY SHIT
 			}
 			if (flags & 4 > 0) {
@@ -337,6 +347,8 @@ class DtsObject extends GameObject {
 			// 	// TODO THIS SHIT
 			// }
 			// ((flags & 32) || environmentMaterial) ? new Materia
+
+			material.mainPass.addShader(new AlphaMult());
 
 			this.materials.push(material);
 		}
@@ -735,5 +747,28 @@ class DtsObject extends GameObject {
 			}
 		}
 		return this.getTransform().clone();
+	}
+
+	public function setOpacity(opacity:Float) {
+		if (opacity == this.currentOpacity)
+			return;
+		this.currentOpacity = opacity;
+
+		for (material in this.materials) {
+			if (this.currentOpacity != 1) {
+				material.blendMode = BlendMode.Alpha;
+				if (this.alphaShader == null) {
+					this.alphaShader = new AlphaMult();
+				}
+				if (material.mainPass.getShader(AlphaMult) == null) {
+					material.mainPass.addShader(this.alphaShader);
+				}
+				this.alphaShader.alpha = this.currentOpacity;
+			} else {
+				if (alphaShader != null) {
+					alphaShader.alpha = this.currentOpacity;
+				}
+			}
+		}
 	}
 }
