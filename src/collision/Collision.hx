@@ -27,9 +27,13 @@ typedef ITSResult = {
 
 class Collision {
 	public static function IntersectLineSphere(start:Vector, end:Vector, center:Vector, radius:Float) {
-		var d = end.sub(start).normalized();
+		var d = end.sub(start);
 		var v = center.sub(start);
-		var t = v.dot(d);
+		var t = v.dot(d) / d.lengthSq();
+		if (t < 0)
+			t = 0;
+		if (t > 1)
+			t = 1;
 		var p = start.add(d.multiply(t));
 		var dist = center.distance(p);
 
