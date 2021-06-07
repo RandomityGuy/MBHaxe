@@ -38,8 +38,8 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		// dtsObj = new SuperSpeed();
-		// dtsObj.x = -3;
+		dtsObj = new SuperSpeed();
+		dtsObj.x = -3;
 
 		world = new MarbleWorld(s3d);
 
@@ -89,23 +89,28 @@ class Main extends hxd.App {
 
 		// world.addPathedInterior(pi);
 
-		// world.addDtsObject(dtsObj);
+		world.addDtsObject(dtsObj);
 
-		// var sj = new SuperJump();
-		// sj.x = 3;
-		// world.addDtsObject(sj);
+		var sj = new SuperJump();
+		sj.x = 3;
+		world.addDtsObject(sj);
 
-		// var sb = new SuperBounce();
-		// sb.y = 3;
-		// world.addDtsObject(sb);
+		var sj2 = new SuperJump();
+		sj2.x = 3;
+		sj2.z = 2;
+		world.addDtsObject(sj2);
+
+		var sb = new SuperBounce();
+		sb.y = 3;
+		world.addDtsObject(sb);
 
 		var sh = new ShockAbsorber();
 		sh.y = -3;
 		world.addDtsObject(sh);
 
-		// var he = new Helicopter();
-		// world.addDtsObject(he);
-		// sj.setTransform(sj.getTransform());
+		var he = new Helicopter();
+		world.addDtsObject(he);
+		sj.setTransform(sj.getTransform());
 
 		// for (i in 0...10) {
 		// 	for (j in 0...10) {

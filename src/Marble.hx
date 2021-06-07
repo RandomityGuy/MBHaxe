@@ -484,13 +484,13 @@ class Marble extends GameObject {
 		this._bounceNormal = normal;
 	}
 
-	function getIntersectionTime(dt:Float, velocity:Vector, pathedInteriors:Array<PathedInterior>, collisionWorld:CollisionWorld) {
+	function getIntersectionTime(dt:Float, velocity:Vector) {
 		var expandedcollider = new SphereCollisionEntity(cast this);
 		var position = this.getAbsPos().getPosition();
 		expandedcollider.transform = Matrix.T(position.x, position.y, position.z);
-		expandedcollider.radius = this.getAbsPos().getPosition().distance(position) + _radius;
+		expandedcollider.radius = velocity.multiply(dt).length() + _radius;
 
-		var foundObjs = collisionWorld.radiusSearch(position, expandedcollider.radius);
+		var foundObjs = this.level.collisionWorld.radiusSearch(position, expandedcollider.radius);
 
 		function toDifPoint(vec:Vector) {
 			return new Point3F(vec.x, vec.y, vec.z);
@@ -499,47 +499,45 @@ class Marble extends GameObject {
 		var intersectT = 10e8;
 
 		for (obj in foundObjs) {
-			if (obj.velocity.length() > 0) {
-				var radius = _radius;
+			var radius = expandedcollider.radius;
 
-				var invMatrix = obj.transform.clone();
-				invMatrix.invert();
-				var localpos = position.clone();
-				localpos.transform(invMatrix);
-				var surfaces = obj.octree.radiusSearch(localpos, radius * 1.1);
+			var invMatrix = obj.transform.clone();
+			invMatrix.invert();
+			var localpos = position.clone();
+			localpos.transform(invMatrix);
+			var surfaces = obj.octree.radiusSearch(localpos, radius * 1.1);
 
-				var tform = obj.transform.clone();
-				var velDir = obj.velocity.normalized();
-				// tform.setPosition(tform.getPosition().add(velDir.multiply(_radius)));
-				tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)).sub(velDir.multiply(_radius)));
+			var tform = obj.transform.clone();
+			var velDir = obj.velocity.normalized();
+			// tform.setPosition(tform.getPosition().add(velDir.multiply(_radius)));
+			tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)).sub(velDir.multiply(_radius)));
 
-				var contacts = [];
+			var contacts = [];
 
-				for (surf in surfaces) {
-					var surface:CollisionSurface = cast surf;
+			for (surf in surfaces) {
+				var surface:CollisionSurface = cast surf;
 
-					var i = 0;
-					while (i < surface.indices.length) {
-						var v0 = surface.points[surface.indices[i]].transformed(tform);
-						var v = surface.points[surface.indices[i + 1]].transformed(tform);
-						var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
+				var i = 0;
+				while (i < surface.indices.length) {
+					var v0 = surface.points[surface.indices[i]].transformed(tform);
+					var v = surface.points[surface.indices[i + 1]].transformed(tform);
+					var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
 
-						var polyPlane = PlaneF.ThreePoints(toDifPoint(v0), toDifPoint(v), toDifPoint(v2));
+					var polyPlane = PlaneF.ThreePoints(toDifPoint(v0), toDifPoint(v), toDifPoint(v2));
 
-						var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
+					var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
 
-						var t = (-position.dot(surfacenormal) - polyPlane.d) / velocity.dot(surfacenormal);
+					var t = (-position.dot(surfacenormal) - polyPlane.d) / velocity.dot(surfacenormal);
 
-						var pt = position.add(velocity.multiply(t));
+					var pt = position.add(velocity.multiply(t));
 
-						if (Collision.PointInTriangle(pt, v0, v, v2)) {
-							if (t > 0 && t < intersectT) {
-								intersectT = t;
-							}
+					if (Collision.PointInTriangle(pt, v0, v, v2)) {
+						if (t > 0 && t < intersectT) {
+							intersectT = t;
 						}
-
-						i += 3;
 					}
+
+					i += 3;
 				}
 			}
 		}
@@ -596,13 +594,16 @@ class Marble extends GameObject {
 				this._contactTime += timeStep;
 			}
 
-			var intersectT = this.getIntersectionTime(timeStep, velocity, pathedInteriors, collisionWorld);
+			var intersectT = this.getIntersectionTime(timeStep, velocity);
 
 			if (intersectT < timeStep) {
+				intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
+				// intersectT /= 2;
 				var diff = timeStep - intersectT;
 				this.velocity = this.velocity.sub(A.multiply(diff));
 				this.omega = this.omega.sub(a.multiply(diff));
 				timeStep = intersectT;
+				trace("CCD");
 			}
 
 			piTime += timeStep;
