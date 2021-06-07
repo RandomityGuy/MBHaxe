@@ -48,8 +48,6 @@ class Marble extends GameObject {
 
 	public var level:MarbleWorld;
 
-	public var gravityDir:Vector = new Vector(0, 0, -1);
-
 	public var _radius = 0.2;
 
 	var _maxRollVelocity = 15;
@@ -146,7 +144,8 @@ class Marble extends GameObject {
 		var zrot = new Matrix();
 		zrot.initRotationZ(this.camera.CameraYaw);
 		cammat.multiply(xrot, zrot);
-		var updir = gravityDir.multiply(-1);
+		cammat.multiply(cammat, this.level.newOrientationQuat.toMatrix());
+		var updir = this.level.currentUp;
 		var motiondir = new Vector(cammat._21, cammat._22, cammat._23);
 		var sidedir = motiondir.cross(updir);
 
@@ -156,7 +155,7 @@ class Marble extends GameObject {
 	}
 
 	function getExternalForces(currentTime:Float, m:Move, dt:Float) {
-		var gWorkGravityDir = gravityDir;
+		var gWorkGravityDir = this.level.currentUp.multiply(-1);
 		var A = gWorkGravityDir.multiply(this._gravity);
 		if (currentTime - this.helicopterEnableTime < 5) {
 			A = A.multiply(0.25);
@@ -210,7 +209,7 @@ class Marble extends GameObject {
 	function computeMoveForces(m:Move) {
 		var aControl = new Vector();
 		var desiredOmega = new Vector();
-		var currentGravityDir = gravityDir;
+		var currentGravityDir = this.level.currentUp.multiply(-1);
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
@@ -388,7 +387,7 @@ class Marble extends GameObject {
 	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector) {
 		var a = new Vector();
 		this._slipAmount = 0;
-		var gWorkGravityDir = new Vector(0, 0, -1);
+		var gWorkGravityDir = this.level.currentUp.multiply(-1);
 		var bestSurface = -1;
 		var bestNormalForce = 0.0;
 		for (i in 0...contacts.length) {
@@ -669,7 +668,7 @@ class Marble extends GameObject {
 		advancePhysics(currentTime, dt, move, collisionWorld, pathedInteriors);
 
 		if (this.controllable) {
-			this.camera.update(dt);
+			this.camera.update(currentTime, dt);
 		}
 
 		updatePowerupStates(currentTime, dt);

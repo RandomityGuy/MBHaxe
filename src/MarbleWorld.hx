@@ -1,5 +1,7 @@
 package src;
 
+import src.Util;
+import h3d.Quat;
 import shapes.PowerUp;
 import collision.SphereCollisionEntity;
 import src.Sky;
@@ -34,6 +36,14 @@ class MarbleWorld {
 	public var scene:Scene;
 
 	public var marble:Marble;
+	public var worldOrientation:Quat;
+	public var currentUp = new Vector(0, 0, 1);
+
+	var orientationChangeTime = -1e8;
+	var oldOrientationQuat = new Quat();
+
+	/** The new target camera orientation quat  */
+	public var newOrientationQuat = new Quat();
 
 	public function new(scene:Scene) {
 		this.collisionWorld = new CollisionWorld();
@@ -122,7 +132,7 @@ class MarbleWorld {
 				if (contact.go is DtsObject) {
 					var shape:DtsObject = cast contact.go;
 
-					var contacttest = shape.colliders.map(x -> x.sphereIntersection(contactsphere, 0));
+					var contacttest = shape.colliders.filter(x -> x != null).map(x -> x.sphereIntersection(contactsphere, 0));
 					var contactlist:Array<collision.CollisionInfo> = [];
 					for (l in contacttest) {
 						contactlist = contactlist.concat(l);
@@ -155,7 +165,7 @@ class MarbleWorld {
 	}
 
 	public function pickUpPowerUp(powerUp:PowerUp) {
-		if (this.marble.heldPowerup != null)
+		if (this.marble.heldPowerup == powerUp)
 			return false;
 		this.marble.heldPowerup = powerUp;
 		// 	for (let overlayShape
@@ -174,5 +184,59 @@ class MarbleWorld {
 		// 	if (!this.rewinding)
 		// 		AudioManager.play(powerUp.sounds[0]);
 		return true;
+	}
+
+	/** Get the current interpolated orientation quaternion. */
+	public function getOrientationQuat(time:Float) {
+		var completion = Util.clamp((time - this.orientationChangeTime) / 0.3, 0, 1);
+		var q = this.oldOrientationQuat.clone();
+		q.slerp(q, this.newOrientationQuat, completion);
+		return q;
+	}
+
+	public function setUp(vec:Vector, time:Float) {
+		this.currentUp = vec;
+		var currentQuat = this.getOrientationQuat(time);
+		var oldUp = new Vector(0, 0, 1);
+		oldUp.transform(currentQuat.toMatrix());
+
+		function getRotQuat(v1:Vector, v2:Vector) {
+			function orthogonal(v:Vector) {
+				var x = Math.abs(v.x);
+				var y = Math.abs(v.y);
+				var z = Math.abs(v.z);
+				var other = x < y ? (x < z ? new Vector(1, 0, 0) : new Vector(0, 0, 1)) : (y < z ? new Vector(0, 1, 0) : new Vector(0, 0, 1));
+				return v.cross(other);
+			}
+
+			var u = v1.normalized();
+			var v = v2.normalized();
+			if (u.multiply(-1).equals(v)) {
+				var q = new Quat();
+				var o = orthogonal(u).normalized();
+				q.x = o.x;
+				q.y = o.y;
+				q.z = o.z;
+				q.w = 0;
+				return q;
+			}
+			var half = u.add(v).normalized();
+			var q = new Quat();
+			q.w = u.dot(half);
+			var vr = u.cross(half);
+			q.x = vr.x;
+			q.y = vr.y;
+			q.z = vr.z;
+			return q;
+		}
+
+		var quatChange = getRotQuat(oldUp, vec);
+		// Instead of calculating the new quat from nothing, calculate it from the last one to guarantee the shortest possible rotation.
+		// quatChange.initMoveTo(oldUp, vec);
+		quatChange.multiply(quatChange, currentQuat);
+
+		this.newOrientationQuat = quatChange;
+		this.oldOrientationQuat = currentQuat;
+		this.orientationChangeTime = time;
 	}
 }

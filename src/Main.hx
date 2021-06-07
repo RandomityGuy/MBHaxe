@@ -44,10 +44,10 @@ class Main extends hxd.App {
 		world = new MarbleWorld(s3d);
 
 		var db = new InteriorObject();
-		db.interiorFile = "data/interiors/beginner/training_friction.dif";
+		db.interiorFile = "data/interiors/beginner/beginner_finish.dif";
 		world.addInterior(db);
 		var tform = db.getTransform();
-		tform.setPosition(new Vector(0, 0, 7.5));
+		tform.setPosition(new Vector(0, 0, 0));
 		db.setTransform(tform);
 
 		// var pi = new PathedInterior();
@@ -111,6 +111,10 @@ class Main extends hxd.App {
 		var he = new Helicopter();
 		world.addDtsObject(he);
 		sj.setTransform(sj.getTransform());
+
+		var ag = new AntiGravity();
+		ag.y = 6;
+		world.addDtsObject(ag);
 
 		// for (i in 0...10) {
 		// 	for (j in 0...10) {

@@ -29,7 +29,7 @@ class SuperSpeed extends PowerUp {
 
 		var quat2 = new Quat();
 		// Determine the necessary rotation to rotate the up vector to the contact normal.
-		quat2.initMoveTo(marble.gravityDir.multiply(-1), marble.lastContactNormal);
+		quat2.initMoveTo(this.level.currentUp, marble.lastContactNormal);
 		movementVector.transform(quat2.toMatrix());
 		marble.velocity = marble.velocity.add(movementVector.multiply(-24.7));
 

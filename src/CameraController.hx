@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Quat;
 import sdl.Cursor;
 import sdl.Sdl;
 import hxd.Window;
@@ -92,17 +93,61 @@ class CameraController extends Object {
 			CameraPitch = 0.001;
 	}
 
-	public function update(dt:Float) {
+	public function update(currentTime:Float, dt:Float) {
+		// camera.position.set(marblePosition.x, marblePosition.y, marblePosition.z).sub(directionVector.clone().multiplyScalar(2.5));
+		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
+		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
+
+		function getRotQuat(v1:Vector, v2:Vector) {
+			function orthogonal(v:Vector) {
+				var x = Math.abs(v.x);
+				var y = Math.abs(v.y);
+				var z = Math.abs(v.z);
+				var other = x < y ? (x < z ? new Vector(1, 0, 0) : new Vector(0, 0, 1)) : (y < z ? new Vector(0, 1, 0) : new Vector(0, 0, 1));
+				return v.cross(other);
+			}
+
+			var u = v1.normalized();
+			var v = v2.normalized();
+			if (u.multiply(-1).equals(v)) {
+				var q = new Quat();
+				var o = orthogonal(u).normalized();
+				q.x = o.x;
+				q.y = o.y;
+				q.z = o.z;
+				q.w = 0;
+				return q;
+			}
+			var half = u.add(v).normalized();
+			var q = new Quat();
+			q.w = u.dot(half);
+			var vr = u.cross(half);
+			q.x = vr.x;
+			q.y = vr.y;
+			q.z = vr.z;
+			return q;
+		}
+
+		var orientationQuat = level.getOrientationQuat(currentTime);
+
+		var up = new Vector(0, 0, 1);
+		up.transform(orientationQuat.toMatrix());
+		camera.up = up;
+		var upVec = new Vector(0, 0, 1);
+		var quat = getRotQuat(upVec, up);
 
 		var x = CameraDistance * Math.sin(CameraPitch) * Math.cos(CameraYaw);
 		var y = CameraDistance * Math.sin(CameraPitch) * Math.sin(CameraYaw);
 		var z = CameraDistance * Math.cos(CameraPitch);
 
+		var directionVec = new Vector(x, y, z);
+		directionVec.transform(orientationQuat.toMatrix());
+
 		var targetpos = this.marble.getAbsPos().getPosition();
-		this.x = targetpos.x + x;
-		this.y = targetpos.y + y;
-		this.z = targetpos.z + z;
-		camera.follow = {pos: this, target: this.marble};
+		this.x = targetpos.x + directionVec.x;
+		this.y = targetpos.y + directionVec.y;
+		this.z = targetpos.z + directionVec.z;
+		this.level.scene.camera.follow = {pos: this, target: this.marble};
 	}
 }
