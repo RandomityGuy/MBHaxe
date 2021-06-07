@@ -300,7 +300,8 @@ class DtsObject extends GameObject {
 
 		rootObject.scaleX = -1;
 
-		this.boundingCollider = new BoxCollisionEntity(this.getBounds().clone(), cast this);
+		this.boundingCollider = new BoxCollisionEntity(this.level.instanceManager.getObjectBounds(cast this), cast this);
+		this.boundingCollider.setTransform(this.getTransform());
 	}
 
 	function computeMaterials() {
@@ -331,16 +332,18 @@ class DtsObject extends GameObject {
 				var texture:Texture = ResourceLoader.getTexture(fullName);
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
+				// if (this.useInstancing) {
 				var dtsshader = new DtsTexture();
 				dtsshader.texture = texture;
 				dtsshader.currentOpacity = 1;
 				material.mainPass.removeShader(material.textureShader);
 				material.mainPass.addShader(dtsshader);
+				// }
 				// TODO TRANSLUENCY SHIT
 			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;
-				material.mainPass.culling = h3d.mat.Data.Face.Front;
+				// material.mainPass.culling = h3d.mat.Data.Face.Front;
 			}
 			// TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0)
@@ -540,6 +543,7 @@ class DtsObject extends GameObject {
 	public override function setTransform(mat:Matrix) {
 		super.setTransform(mat);
 		this.boundingCollider.setTransform(mat);
+		this.level.collisionWorld.updateTransform(this.boundingCollider);
 	}
 
 	public function update(currentTime:Float, dt:Float) {
@@ -774,19 +778,21 @@ class DtsObject extends GameObject {
 			return;
 		this.currentOpacity = opacity;
 
-		for (material in this.materials) {
-			if (this.currentOpacity != 1) {
-				material.blendMode = BlendMode.Alpha;
-				if (this.alphaShader == null) {
-					this.alphaShader = new AlphaMult();
-				}
-				if (material.mainPass.getShader(AlphaMult) == null) {
-					material.mainPass.addShader(this.alphaShader);
-				}
-				this.alphaShader.alpha = this.currentOpacity;
-			} else {
-				if (alphaShader != null) {
-					alphaShader.alpha = this.currentOpacity;
+		if (!this.useInstancing) {
+			for (material in this.materials) {
+				if (this.currentOpacity != 1) {
+					// material.blendMode = BlendMode.Alpha;
+					// 	if (this.alphaShader == null) {
+					// 		this.alphaShader = new AlphaMult();
+					// 	}
+					// 	if (material.mainPass.getShader(AlphaMult) == null) {
+					// 		material.mainPass.addShader(this.alphaShader);
+					// 	}
+					// 	this.alphaShader.alpha = this.currentOpacity;
+					// } else {
+					// 	if (alphaShader != null) {
+					// 		alphaShader.alpha = this.currentOpacity;
+					// 	}
 				}
 			}
 		}

@@ -111,7 +111,7 @@ class OctreeNode implements IOctreeElement {
 	}
 
 	public function merge() {
-		if (this.count > 8 || !(this.octants == null))
+		if (this.count > 8 || (this.octants == null))
 			return;
 		// Add all objects in the octants back to this node
 		for (i in 0...8) {

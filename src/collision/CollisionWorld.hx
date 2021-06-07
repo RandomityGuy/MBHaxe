@@ -81,4 +81,9 @@ class CollisionWorld {
 	public function addMovingEntity(entity:CollisionEntity) {
 		this.dynamicEntities.push(entity);
 	}
+
+	public function updateTransform(entity:CollisionEntity) {
+		this.octree.remove(entity);
+		this.octree.insert(entity);
+	}
 }

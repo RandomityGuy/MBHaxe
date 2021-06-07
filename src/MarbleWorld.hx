@@ -1,5 +1,6 @@
 package src;
 
+import shapes.PowerUp;
 import collision.SphereCollisionEntity;
 import src.Sky;
 import h3d.scene.Mesh;
@@ -32,7 +33,7 @@ class MarbleWorld {
 
 	public var scene:Scene;
 
-	var marble:Marble;
+	public var marble:Marble;
 
 	public function new(scene:Scene) {
 		this.collisionWorld = new CollisionWorld();
@@ -83,6 +84,7 @@ class MarbleWorld {
 		marble.level = cast this;
 		if (marble.controllable) {
 			marble.camera.init(cast this);
+			marble.init(cast this);
 			this.scene.addChild(marble.camera);
 			this.marble = marble;
 			// Ugly hack
@@ -150,5 +152,27 @@ class MarbleWorld {
 		}
 
 		this.shapeImmunity = newImmunity;
+	}
+
+	public function pickUpPowerUp(powerUp:PowerUp) {
+		if (this.marble.heldPowerup != null)
+			return false;
+		this.marble.heldPowerup = powerUp;
+		// 	for (let overlayShape
+		// 	of
+		// 	this.overlayShapes
+		// )
+		// 	{
+		// 		if (overlayShape.dtsPath.includes("gem"))
+		// 			continue;
+		// 		// Show the corresponding icon in the HUD
+		// 		if (overlayShape.dtsPath == = powerUp.dtsPath)
+		// 			this.overlayScene.add(overlayShape.group);
+		// 		else
+		// 			this.overlayScene.remove(overlayShape.group);
+		// 	}
+		// 	if (!this.rewinding)
+		// 		AudioManager.play(powerUp.sounds[0]);
+		return true;
 	}
 }

@@ -106,6 +106,21 @@ class InstanceManager {
 		}
 	}
 
+	public function getObjectBounds(object:GameObject) {
+		if (isInstanced(object)) {
+			var minfos = objects.get(object.identifier);
+			var invmat = minfos[0].instances[0].gameObject.getInvPos();
+			var b = minfos[0].instances[0].gameObject.getBounds().clone();
+			b.transform(invmat);
+			return b;
+		} else {
+			var invmat = object.getInvPos();
+			var b = object.getBounds().clone();
+			b.transform(invmat);
+			return b;
+		}
+	}
+
 	public function isInstanced(object:GameObject) {
 		if (objects.exists(object.identifier))
 			return true;
