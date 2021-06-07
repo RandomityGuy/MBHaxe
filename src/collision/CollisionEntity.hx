@@ -1,5 +1,6 @@
 package collision;
 
+import src.GameObject;
 import dif.math.Point3F;
 import dif.math.PlaneF;
 import h3d.col.Plane;
@@ -22,8 +23,10 @@ class CollisionEntity implements IOctreeObject {
 	public var velocity:Vector = new Vector();
 
 	public var transform:Matrix;
+	public var go:GameObject;
 
-	public function new() {
+	public function new(go:GameObject) {
+		this.go = go;
 		this.octree = new Octree();
 		this.surfaces = [];
 		this.transform = Matrix.I();

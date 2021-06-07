@@ -11,7 +11,7 @@ class SphereCollisionEntity extends CollisionEntity {
 	public var marble:Marble;
 
 	public function new(marble:Marble) {
-		super();
+		super(cast marble);
 		this.marble = marble;
 		this.velocity = marble.velocity;
 		this.radius = marble._radius;

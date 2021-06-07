@@ -1,5 +1,6 @@
 package collision;
 
+import src.GameObject;
 import h3d.col.Bounds;
 import collision.gjk.GJK;
 import collision.gjk.ConvexHull;
@@ -11,8 +12,8 @@ class CollisionHull extends CollisionEntity {
 	var restitution = 1.0;
 	var force = 0.0;
 
-	public function new() {
-		super();
+	public function new(go:GameObject) {
+		super(go);
 	}
 
 	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, dt:Float):Array<CollisionInfo> {
@@ -45,6 +46,7 @@ class CollisionHull extends CollisionEntity {
 				cinfo.restitution = restitution;
 				cinfo.friction = friction;
 				cinfo.force = force;
+				this.go.onMarbleContact(dt, cinfo);
 				return [cinfo];
 			}
 		}

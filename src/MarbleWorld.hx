@@ -1,5 +1,6 @@
 package src;
 
+import collision.SphereCollisionEntity;
 import src.Sky;
 import h3d.scene.Mesh;
 import src.InstanceManager;
@@ -23,10 +24,15 @@ class MarbleWorld {
 	public var marbles:Array<Marble> = [];
 	public var dtsObjects:Array<DtsObject> = [];
 
+	var shapeImmunity:Array<DtsObject> = [];
+	var shapeOrTriggerInside:Array<DtsObject> = [];
+
 	public var currentTime:Float = 0;
 	public var sky:Sky;
 
 	public var scene:Scene;
+
+	var marble:Marble;
 
 	public function new(scene:Scene) {
 		this.collisionWorld = new CollisionWorld();
@@ -69,6 +75,7 @@ class MarbleWorld {
 			if (collider != null)
 				this.collisionWorld.addEntity(collider);
 		}
+		this.collisionWorld.addEntity(obj.boundingCollider);
 	}
 
 	public function addMarble(marble:Marble) {
@@ -77,6 +84,7 @@ class MarbleWorld {
 		if (marble.controllable) {
 			marble.camera.init(cast this);
 			this.scene.addChild(marble.camera);
+			this.marble = marble;
 			// Ugly hack
 			sky.follow = marble;
 		}
@@ -93,5 +101,54 @@ class MarbleWorld {
 		}
 		this.instanceManager.update(dt);
 		currentTime += dt;
+		if (this.marble != null) {
+			callCollisionHandlers(marble);
+		}
+	}
+
+	function callCollisionHandlers(marble:Marble) {
+		var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
+		var newImmunity = [];
+		var calledShapes = [];
+		var inside = [];
+
+		var contactsphere = new SphereCollisionEntity(marble);
+		contactsphere.velocity = new Vector();
+
+		for (contact in contacts) {
+			if (contact.go != marble) {
+				if (contact.go is DtsObject) {
+					var shape:DtsObject = cast contact.go;
+
+					var contacttest = shape.colliders.map(x -> x.sphereIntersection(contactsphere, 0));
+					var contactlist:Array<collision.CollisionInfo> = [];
+					for (l in contacttest) {
+						contactlist = contactlist.concat(l);
+					}
+
+					if (!calledShapes.contains(shape) && !this.shapeImmunity.contains(shape) && contactlist.length != 0) {
+						calledShapes.push(shape);
+						newImmunity.push(shape);
+						shape.onMarbleContact(currentTime);
+					}
+
+					shape.onMarbleInside(currentTime);
+					if (!this.shapeOrTriggerInside.contains(shape)) {
+						this.shapeOrTriggerInside.push(shape);
+						shape.onMarbleEnter(currentTime);
+					}
+					inside.push(shape);
+				}
+			}
+		}
+
+		for (object in shapeOrTriggerInside) {
+			if (!inside.contains(object)) {
+				this.shapeOrTriggerInside.remove(object);
+				object.onMarbleLeave(currentTime);
+			}
+		}
+
+		this.shapeImmunity = newImmunity;
 	}
 }

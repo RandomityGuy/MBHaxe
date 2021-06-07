@@ -81,7 +81,7 @@ class DifBuilder {
 		var triangles = [];
 		var textures = [];
 
-		var collider = new CollisionEntity();
+		var collider = new CollisionEntity(itr);
 
 		function stripTexName(tex:String) {
 			var dotpos = tex.lastIndexOf(".");

@@ -1,5 +1,6 @@
 package src;
 
+import collision.BoxCollisionEntity;
 import shaders.DtsTexture;
 import h3d.shader.AlphaMult;
 import sys.io.File;
@@ -94,6 +95,7 @@ class DtsObject extends GameObject {
 
 	var rootObject:Object;
 	var colliders:Array<CollisionEntity>;
+	var boundingCollider:BoxCollisionEntity;
 
 	var mountPointNodes:Array<Int>;
 	var alphaShader:AlphaMult;
@@ -197,7 +199,7 @@ class DtsObject extends GameObject {
 			for (i in 0...dts.nodes.length) {
 				var objects = dts.objects.filter(object -> object.node == i);
 				var meshSurfaces = [];
-				var collider = new CollisionHull();
+				var collider = new CollisionHull(cast this);
 
 				for (object in objects) {
 					var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
@@ -297,6 +299,8 @@ class DtsObject extends GameObject {
 		}
 
 		rootObject.scaleX = -1;
+
+		this.boundingCollider = new BoxCollisionEntity(this.getBounds().clone(), cast this);
 	}
 
 	function computeMaterials() {
@@ -531,6 +535,11 @@ class DtsObject extends GameObject {
 			var obj = new Mesh(poly, materials[i], geo);
 		}
 		return geo;
+	}
+
+	public override function setTransform(mat:Matrix) {
+		super.setTransform(mat);
+		this.boundingCollider.setTransform(mat);
 	}
 
 	public function update(currentTime:Float, dt:Float) {

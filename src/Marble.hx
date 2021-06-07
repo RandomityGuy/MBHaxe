@@ -1,5 +1,6 @@
 package src;
 
+import src.GameObject;
 import src.ForceObject;
 import src.MarbleWorld;
 import h3d.Quat;
@@ -31,7 +32,7 @@ class Move {
 	public function new() {}
 }
 
-class Marble extends Object {
+class Marble extends GameObject {
 	public var camera:CameraController;
 	public var cameraObject:Object;
 	public var controllable:Bool = false;
