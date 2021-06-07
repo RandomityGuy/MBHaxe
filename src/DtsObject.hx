@@ -341,9 +341,20 @@ class DtsObject extends GameObject {
 				// }
 				// TODO TRANSLUENCY SHIT
 			}
+			if (material.texture == null) {
+				var dtsshader = new DtsTexture();
+				dtsshader.currentOpacity = 1;
+				// Make a 1x1 white texture
+				var bitmap = new hxd.BitmapData(1, 1);
+				bitmap.setPixel(0, 0, 0xFFFFFF);
+				var texture = new Texture(1, 1);
+				texture.uploadBitmap(bitmap);
+				dtsshader.texture = texture;
+				material.mainPass.addShader(dtsshader);
+			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;
-				// material.mainPass.culling = h3d.mat.Data.Face.Front;
+				material.mainPass.culling = h3d.mat.Data.Face.Front;
 			}
 			// TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0)

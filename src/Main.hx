@@ -95,13 +95,13 @@ class Main extends hxd.App {
 		// sj.x = 3;
 		// world.addDtsObject(sj);
 
-		var sb = new Helicopter();
-		sb.y = 3;
-		world.addDtsObject(sb);
+		// var sb = new SuperBounce();
+		// sb.y = 3;
+		// world.addDtsObject(sb);
 
-		// var sh = new ShockAbsorber();
-		// sh.y = -3;
-		// world.addDtsObject(sh);
+		var sh = new ShockAbsorber();
+		sh.y = -3;
+		world.addDtsObject(sh);
 
 		// var he = new Helicopter();
 		// world.addDtsObject(he);

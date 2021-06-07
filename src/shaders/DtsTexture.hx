@@ -27,7 +27,7 @@ class DtsTexture extends hxsl.Shader {
 				pixelColor *= c;
 			if (specularAlpha)
 				specColor *= c.aaa;
-			pixelColor.a *= currentOpacity;
+			pixelColor.a = c.a * currentOpacity;
 		}
 	}
 
