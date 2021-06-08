@@ -1,5 +1,6 @@
 package src;
 
+import src.ParticleSystem.ParticleManager;
 import src.Util;
 import h3d.Quat;
 import shapes.PowerUp;
@@ -21,6 +22,7 @@ import src.Marble;
 class MarbleWorld {
 	public var collisionWorld:CollisionWorld;
 	public var instanceManager:InstanceManager;
+	public var particleManager:ParticleManager;
 
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
@@ -49,6 +51,7 @@ class MarbleWorld {
 		this.collisionWorld = new CollisionWorld();
 		this.scene = scene;
 		this.instanceManager = new InstanceManager(scene);
+		this.particleManager = new ParticleManager(cast this);
 		this.sky = new Sky();
 		sky.dmlPath = "data/skies/sky_day.dml";
 		sky.init(cast this);
@@ -112,6 +115,7 @@ class MarbleWorld {
 			marble.update(currentTime, dt, collisionWorld, this.pathedInteriors);
 		}
 		this.instanceManager.update(dt);
+		this.particleManager.update(1000 * currentTime, dt);
 		currentTime += dt;
 		if (this.marble != null) {
 			callCollisionHandlers(marble);

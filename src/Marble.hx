@@ -1,5 +1,7 @@
 package src;
 
+import src.ParticleSystem.ParticleData;
+import src.ParticleSystem.ParticleEmitterOptions;
 import src.DtsObject;
 import sdl.Cursor;
 import hxd.Cursor;
@@ -35,6 +37,29 @@ class Move {
 
 	public function new() {}
 }
+
+final bounceParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1,
+	ambientVelocity: new Vector(0, 0, 0.0),
+	ejectionVelocity: 2.6,
+	velocityVariance: 0.25 * 0.5,
+	emitterLifetime: 4,
+	inheritedVelFactor: 0,
+	particleOptions: {
+		texture: 'particles/star.png',
+		blending: Alpha,
+		spinSpeed: 90,
+		spinRandomMin: -90,
+		spinRandomMax: 90,
+		lifetime: 500,
+		lifetimeVariance: 100,
+		dragCoefficient: 0.5,
+		acceleration: -2,
+		colors: [new Vector(0.9, 0, 0, 1), new Vector(0.9, 0.9, 0, 1), new Vector(0.9, 0.9, 0, 0)],
+		sizes: [0.25, 0.25, 0.25],
+		times: [0, 0.75, 1]
+	}
+};
 
 class Marble extends GameObject {
 	public var camera:CameraController;
@@ -86,6 +111,8 @@ class Marble extends GameObject {
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
 
+	var bounceEmitterData:ParticleData;
+
 	public function new() {
 		super();
 		var geom = Sphere.defaultUnitSphere();
@@ -100,6 +127,10 @@ class Marble extends GameObject {
 		this.camera = new CameraController(cast this);
 
 		this.collider = new SphereCollisionEntity(cast this);
+
+		this.bounceEmitterData = new ParticleData();
+		this.bounceEmitterData.identifier = "MarbleBounceParticle";
+		this.bounceEmitterData.texture = ResourceLoader.getTexture("data/particles/star.png");
 	}
 
 	public function init(level:MarbleWorld) {
@@ -307,6 +338,7 @@ class Marble extends GameObject {
 							var velocityAdd = surfaceVel.multiply(-(1 + restitution));
 							var vAtC = sVel.add(this.omega.cross(contacts[i].normal.multiply(-this._radius)));
 							var normalVel = -contacts[i].normal.dot(sVel);
+							bounceEmitter(sVel.length() * restitution, contacts[i].normal);
 							vAtC = vAtC.sub(contacts[i].normal.multiply(contacts[i].normal.dot(sVel)));
 							var vAtCMag = vAtC.length();
 							if (vAtCMag != 0) {
@@ -471,6 +503,10 @@ class Marble extends GameObject {
 		}
 		a = a.add(aControl);
 		return [A, a];
+	}
+
+	function bounceEmitter(speed:Float, normal:Vector) {
+		this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
 	}
 
 	function ReportBounce(pos:Vector, normal:Vector, speed:Float) {

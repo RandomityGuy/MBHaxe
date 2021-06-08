@@ -1,5 +1,6 @@
 package src;
 
+import shaders.Billboard;
 import collision.BoxCollisionEntity;
 import shaders.DtsTexture;
 import h3d.shader.AlphaMult;

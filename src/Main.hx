@@ -1,5 +1,12 @@
 package;
 
+import h3d.mat.Data.Blend;
+import src.ParticleSystem.ParticleEmitterOptions;
+import src.ParticleSystem.ParticleEmitter;
+import src.ParticleSystem.Particle;
+import src.ParticleSystem.ParticleManager;
+import src.ParticleSystem.ParticleData;
+import src.ParticleSystem.ParticleData;
 import shapes.Helicopter;
 import shapes.ShockAbsorber;
 import shapes.SuperBounce;
@@ -116,7 +123,45 @@ class Main extends hxd.App {
 		ag.y = 6;
 		world.addDtsObject(ag);
 
+		// var le:ParticleEmitterOptions = {
+		// 	ejectionPeriod: 0.01,
+		// 	ambientVelocity: new Vector(0, 0, 0),
+		// 	ejectionVelocity: 0.5,
+		// 	velocityVariance: 0.25,
+		// 	emitterLifetime: 1e8,
+		// 	inheritedVelFactor: 0.2,
+		// 	particleOptions: {
+		// 		texture: 'particles/smoke.png',
+		// 		blending: Add,
+		// 		spinSpeed: 40,
+		// 		spinRandomMin: -90,
+		// 		spinRandomMax: 90,
+		// 		lifetime: 1,
+		// 		lifetimeVariance: 0.15,
+		// 		dragCoefficient: 0.8,
+		// 		acceleration: 0,
+		// 		colors: [new Vector(0.56, 0.36, 0.26, 1), new Vector(0.56, 0.36, 0.26, 0)],
+		// 		sizes: [0.5, 1],
+		// 		times: [0, 1]
+		// 	}
+		// };
+
+		// var p1 = new ParticleData();
+		// p1.identifier = "testparticle";
+		// p1.texture = ResourceLoader.getTexture("data/particles/smoke.png");
+
+		// // var emitter = new ParticleEmitter(le, p1, world.particleManager); // var p = new Particle();
+		// world.particleManager.createEmitter(le, p1, new Vector());
+
+		// p.position = new Vector();
+		// p.color = new Vector(255, 255, 255);
+		// p.rotation = Math.PI;
+		// p.scale = 5;
+
+		// world.particleManager.addParticle(p1, p);
+
 		// for (i in 0...10) {
+
 		// 	for (j in 0...10) {
 		// 		var trapdoor = new Tornado();
 		// 		trapdoor.x = i * 2;

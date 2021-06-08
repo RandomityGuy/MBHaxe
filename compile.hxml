@@ -3,5 +3,6 @@
 -lib hlsdl
 -lib polygonal-ds
 -hl marblegame.hl
+-D windowSize=1280x720
 --main Main
 -debug

@@ -33,7 +33,7 @@ class Util {
 	}
 
 	public static function lerpThreeVectors(v1:Vector, v2:Vector, t:Float) {
-		return new Vector(lerp(v1.x, v2.x, t), lerp(v1.y, v2.y, t), lerp(v1.z, v2.z, t));
+		return new Vector(lerp(v1.x, v2.x, t), lerp(v1.y, v2.y, t), lerp(v1.z, v2.z, t), lerp(v1.w, v2.w, t));
 	}
 
 	public static function rotateImage(bitmap:BitmapData, angle:Float) {

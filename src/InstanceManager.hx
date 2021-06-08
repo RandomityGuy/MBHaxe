@@ -1,5 +1,6 @@
 package src;
 
+import shaders.Billboard;
 import shaders.DtsTexture;
 import h3d.mat.Pass;
 import h3d.shader.AlphaMult;

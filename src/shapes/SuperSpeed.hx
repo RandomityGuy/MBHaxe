@@ -1,10 +1,42 @@
 package shapes;
 
+import src.ResourceLoader;
+import src.ParticleSystem.ParticleData;
+import src.ParticleSystem.ParticleEmitterOptions;
 import h3d.Quat;
 import h3d.Vector;
 import src.DtsObject;
 
+final superSpeedParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 5,
+	ambientVelocity: new Vector(0, 0, 0.2),
+	ejectionVelocity: 1 * 0.5,
+	velocityVariance: 0.25 * 0.5,
+	emitterLifetime: 1100,
+	inheritedVelFactor: 0.25,
+	particleOptions: {
+		texture: 'particles/spark.png',
+		blending: Add,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
+		lifetime: 1500,
+		lifetimeVariance: 150,
+		dragCoefficient: 0.25,
+		acceleration: 0,
+		colors: [
+			new Vector(0.8, 0.8, 0, 0),
+			new Vector(0.8, 0.8, 0, 1),
+			new Vector(0.8, 0.8, 0, 0)
+		],
+		sizes: [0.25, 0.25, 1],
+		times: [0, 0.25, 1]
+	}
+};
+
 class SuperSpeed extends PowerUp {
+	var ssEmitterParticleData:ParticleData;
+
 	public function new() {
 		super();
 		this.dtsPath = "data/shapes/items/superspeed.dts";
@@ -12,6 +44,9 @@ class SuperSpeed extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "SuperSpeed";
 		this.useInstancing = true;
+		ssEmitterParticleData = new ParticleData();
+		ssEmitterParticleData.identifier = "superSpeedParticle";
+		ssEmitterParticleData.texture = ResourceLoader.getTexture("data/particles/spark.png");
 	}
 
 	public function pickUp():Bool {
@@ -37,7 +72,7 @@ class SuperSpeed extends PowerUp {
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
 		//	AudioManager.play(this.sounds[1]);
-		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
+		this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// this.level.deselectPowerUp();
 	}
 }
