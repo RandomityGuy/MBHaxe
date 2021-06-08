@@ -261,6 +261,18 @@ class Collision {
 		return !(u.dot(w) < 0);
 	}
 
+	public static function IntersectTriangleCapsule(start:Vector, end:Vector, radius:Float, p1:Vector, p2:Vector, p3:Vector, normal:Vector) {
+		var dir = end.sub(start);
+		var d = -(p1.dot(normal));
+		var t = -(start.dot(normal) - d) / dir.dot(normal);
+		if (t > 1)
+			t = 1;
+		if (t < 0)
+			t = 0;
+		var tracePoint = start.add(dir.multiply(t));
+		return IntersectTriangleSphere(p1, p2, p3, normal, tracePoint, radius);
+	}
+
 	private static function GetLowestRoot(a:Float, b:Float, c:Float, max:Float):Null<Float> {
 		// check if solution exists
 		var determinant:Float = b * b - 4.0 * a * c;

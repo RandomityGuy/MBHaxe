@@ -145,9 +145,40 @@ class CameraController extends Object {
 		directionVec.transform(orientationQuat.toMatrix());
 
 		var targetpos = this.marble.getAbsPos().getPosition();
-		this.x = targetpos.x + directionVec.x;
-		this.y = targetpos.y + directionVec.y;
-		this.z = targetpos.z + directionVec.z;
-		this.level.scene.camera.follow = {pos: this, target: this.marble};
+
+		var toPos = targetpos.add(directionVec);
+		camera.pos = toPos;
+		camera.target = targetpos;
+
+		var closeness = 0.1;
+		var rayCastOrigin = targetpos.add(up.multiply(marble._radius));
+		var rayCastDirection = camera.pos.sub(rayCastOrigin);
+		rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
+
+		var raycastresults = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection.normalized());
+		var firstHit = null;
+		var minT = 1e8;
+		for (result in raycastresults) {
+			var ca = result.point.sub(camera.pos);
+			var ba = rayCastOrigin.sub(camera.pos);
+			var t = (ba.x != 0 ? ca.x / ba.x : (ba.y != 0 ? ca.y / ba.y : (ba.z != 0 ? ca.z / ba.z : -1)));
+			if (t > 0 && t < 1 && t < minT) {
+				minT = t;
+				firstHit = result;
+			}
+		}
+		if (firstHit != null) {
+			if (firstHit.distance < CameraDistance) {
+				directionVec = directionVec.normalized().multiply(firstHit.distance);
+			}
+		}
+
+		var toPos = targetpos.add(directionVec);
+		camera.pos = toPos;
+
+		// this.x = targetpos.x + directionVec.x;
+		// this.y = targetpos.y + directionVec.y;
+		// this.z = targetpos.z + directionVec.z;
+		// this.level.scene.camera.follow = {pos: this, target: this.marble};
 	}
 }

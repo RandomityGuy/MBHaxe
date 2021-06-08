@@ -526,13 +526,17 @@ class Marble extends GameObject {
 
 					var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
 
-					var t = (-position.dot(surfacenormal) - polyPlane.d) / velocity.dot(surfacenormal);
+					var closest = Collision.IntersectTriangleCapsule(position, position.add(velocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
 
-					var pt = position.add(velocity.multiply(t));
+					if (closest != null) {
+						var t = (-position.dot(surfacenormal) - polyPlane.d) / velocity.dot(surfacenormal);
 
-					if (Collision.PointInTriangle(pt, v0, v, v2)) {
-						if (t > 0 && t < intersectT) {
-							intersectT = t;
+						var pt = position.add(velocity.multiply(t));
+
+						if (Collision.PointInTriangle(pt, v0, v, v2)) {
+							if (t > 0 && t < intersectT) {
+								intersectT = t;
+							}
 						}
 					}
 

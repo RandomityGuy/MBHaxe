@@ -76,7 +76,26 @@ class CollisionSurface implements IOctreeObject {
 	}
 
 	public function isIntersectedByRay(rayOrigin:Vector, rayDirection:Vector, intersectionPoint:Vector):Bool {
-		// TEMP cause bruh
-		return true;
+		var intersections = [];
+		var i = 0;
+		while (i < indices.length) {
+			var p1 = points[indices[i]];
+			var p2 = points[indices[i + 1]];
+			var p3 = points[indices[i + 2]];
+			var n = normals[indices[i]];
+			var d = -p1.dot(n);
+
+			var t = -(rayOrigin.dot(n) + d) / (rayDirection.dot(n));
+			var ip = rayOrigin.add(rayDirection.multiply(t));
+			if (Collision.PointInTriangle(ip, p1, p2, p3)) {
+				intersections.push(ip);
+			}
+			i += 3;
+		}
+		intersections.sort((a, b) -> cast(a.distance(rayOrigin) - b.distance(rayOrigin)));
+		if (intersections.length > 0) {
+			intersectionPoint.load(intersections[0]);
+		}
+		return intersections.length > 0;
 	}
 }

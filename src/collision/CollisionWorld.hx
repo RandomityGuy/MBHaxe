@@ -73,6 +73,10 @@ class CollisionWorld {
 		return contacts;
 	}
 
+	public function rayCast(rayStart:Vector, rayDirection:Vector) {
+		return this.octree.raycast(rayStart, rayDirection);
+	}
+
 	public function addEntity(entity:CollisionEntity) {
 		this.octree.insert(entity);
 		this.entities.push(entity);
