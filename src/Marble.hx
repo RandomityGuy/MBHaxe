@@ -1,5 +1,6 @@
 package src;
 
+import src.ParticleSystem.ParticleEmitter;
 import src.ParticleSystem.ParticleData;
 import src.ParticleSystem.ParticleEmitterOptions;
 import src.DtsObject;
@@ -61,6 +62,29 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
+final trailParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 5,
+	ejectionVelocity: 0.0,
+	velocityVariance: 0.25,
+	emitterLifetime: 1e8,
+	inheritedVelFactor: 1,
+	ambientVelocity: new Vector(),
+	particleOptions: {
+		texture: 'particles/smoke.png',
+		blending: Alpha,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
+		dragCoefficient: 1,
+		lifetime: 100,
+		lifetimeVariance: 10,
+		acceleration: 0,
+		colors: [new Vector(1, 1, 0, 0), new Vector(1, 1, 0, 1), new Vector(1, 1, 1, 0)],
+		sizes: [0.7, 0.4, 0.1],
+		times: [0, 0.15, 1]
+	}
+};
+
 class Marble extends GameObject {
 	public var camera:CameraController;
 	public var cameraObject:Object;
@@ -84,7 +108,8 @@ class Marble extends GameObject {
 	var _gravity = 20;
 	var _airAccel:Float = 5;
 	var _maxDotSlide = 0.5;
-	var _minBounceVel = 0.1;
+	var _minBounceVel = 3;
+	var _minTrailVel = 10;
 	var _bounceKineticFriction = 0.2;
 
 	public var _bounceRestitution = 0.5;
@@ -111,7 +136,11 @@ class Marble extends GameObject {
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
 
+	var bounceEmitDelay:Float = 0;
+
 	var bounceEmitterData:ParticleData;
+	var trailEmitterData:ParticleData;
+	var trailEmitterNode:ParticleEmitter;
 
 	public function new() {
 		super();
@@ -131,6 +160,10 @@ class Marble extends GameObject {
 		this.bounceEmitterData = new ParticleData();
 		this.bounceEmitterData.identifier = "MarbleBounceParticle";
 		this.bounceEmitterData.texture = ResourceLoader.getTexture("data/particles/star.png");
+
+		this.trailEmitterData = new ParticleData();
+		this.trailEmitterData.identifier = "MarbleTrailParticle";
+		this.trailEmitterData.texture = ResourceLoader.getTexture("data/particles/smoke.png");
 	}
 
 	public function init(level:MarbleWorld) {
@@ -506,7 +539,24 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
-		this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
+		if (this.bounceEmitDelay == 0 && this._minBounceVel <= speed) {
+			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
+			this.bounceEmitDelay = 0.3;
+		}
+	}
+
+	function trailEmitter() {
+		var speed = this.velocity.length();
+		if (this._minTrailVel > speed) {
+			if (this.trailEmitterNode != null) {
+				this.level.particleManager.removeEmitter(this.trailEmitterNode);
+				this.trailEmitterNode = null;
+			}
+			return;
+		}
+		if (this.trailEmitterNode == null)
+			this.trailEmitterNode = this.level.particleManager.createEmitter(trailParticleOptions, trailEmitterData, null,
+				() -> this.getAbsPos().getPosition());
 	}
 
 	function ReportBounce(pos:Vector, normal:Vector, speed:Float) {
@@ -712,6 +762,12 @@ class Marble extends GameObject {
 		}
 
 		updatePowerupStates(currentTime, dt);
+
+		this.trailEmitter();
+		if (bounceEmitDelay > 0)
+			bounceEmitDelay -= dt;
+		if (bounceEmitDelay < 0)
+			bounceEmitDelay = 0;
 
 		// this.camera.target.load(this.getAbsPos().getPosition().toPoint());
 	}

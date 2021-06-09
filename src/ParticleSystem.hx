@@ -255,12 +255,12 @@ class ParticleManager {
 	}
 
 	public function update(currentTime:Float, dt:Float) {
-		this.tick();
 		this.currentTime = currentTime;
 		for (obj => batch in particlebatches) {
 			for (instance in batch.instances)
 				instance.update(currentTime, dt);
 		}
+		this.tick();
 		for (obj => batch in particlebatches) {
 			batch.meshBatch.begin(batch.instances.length);
 			for (instance in batch.instances) {

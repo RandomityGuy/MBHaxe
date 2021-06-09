@@ -1,12 +1,6 @@
 package;
 
-import h3d.mat.Data.Blend;
-import src.ParticleSystem.ParticleEmitterOptions;
-import src.ParticleSystem.ParticleEmitter;
-import src.ParticleSystem.Particle;
-import src.ParticleSystem.ParticleManager;
-import src.ParticleSystem.ParticleData;
-import src.ParticleSystem.ParticleData;
+import gui.PlayGui;
 import shapes.Helicopter;
 import shapes.ShockAbsorber;
 import shapes.SuperBounce;
@@ -123,7 +117,10 @@ class Main extends hxd.App {
 		ag.y = 6;
 		world.addDtsObject(ag);
 
+		var pg = new PlayGui();
+		pg.init(s2d);
 		// var le:ParticleEmitterOptions = {
+
 		// 	ejectionPeriod: 0.01,
 		// 	ambientVelocity: new Vector(0, 0, 0),
 		// 	ejectionVelocity: 0.5,
