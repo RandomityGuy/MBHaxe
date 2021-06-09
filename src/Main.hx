@@ -42,7 +42,7 @@ class Main extends hxd.App {
 		dtsObj = new SuperSpeed();
 		dtsObj.x = -3;
 
-		world = new MarbleWorld(s3d);
+		world = new MarbleWorld(s3d, s2d);
 
 		var db = new InteriorObject();
 		db.interiorFile = "data/interiors/beginner/beginner_finish.dif";
@@ -117,8 +117,6 @@ class Main extends hxd.App {
 		ag.y = 6;
 		world.addDtsObject(ag);
 
-		var pg = new PlayGui();
-		pg.init(s2d);
 		// var le:ParticleEmitterOptions = {
 
 		// 	ejectionPeriod: 0.01,
@@ -201,6 +199,11 @@ class Main extends hxd.App {
 	override function update(dt:Float) {
 		super.update(dt);
 		world.update(dt);
+	}
+
+	override function render(e:h3d.Engine) {
+		this.world.render(e);
+		super.render(e);
 	}
 
 	static function main() {

@@ -87,10 +87,14 @@ class CameraController extends Object {
 		// CameraYaw = Math.PI / 2;
 		// CameraPitch = Math.PI / 4;
 
-		if (CameraPitch > Math.PI)
-			CameraPitch = 3.141;
-		if (CameraPitch < 0)
-			CameraPitch = 0.001;
+		if (CameraPitch > Math.PI / 2)
+			CameraPitch = Math.PI / 2 - 0.001;
+		if (CameraPitch < -Math.PI / 2)
+			CameraPitch = -Math.PI / 2 + 0.001;
+		// if (CameraPitch > Math.PI)
+		// 	CameraPitch = 3.141;
+		// if (CameraPitch < 0)
+		// 	CameraPitch = 0.001;
 	}
 
 	public function update(currentTime:Float, dt:Float) {
@@ -137,18 +141,34 @@ class CameraController extends Object {
 		var upVec = new Vector(0, 0, 1);
 		var quat = getRotQuat(upVec, up);
 
+		var q1 = new Quat();
+		q1.initRotateAxis(0, 1, 0, CameraPitch);
+		var q2 = new Quat();
+		q2.initRotateAxis(0, 0, 1, CameraYaw);
+
+		var dir = new Vector(1, 0, 0);
+		dir.transform(q1.toMatrix());
+		dir.transform(q2.toMatrix());
+		dir = dir.multiply(2.5);
+
 		var x = CameraDistance * Math.sin(CameraPitch) * Math.cos(CameraYaw);
 		var y = CameraDistance * Math.sin(CameraPitch) * Math.sin(CameraYaw);
 		var z = CameraDistance * Math.cos(CameraPitch);
 
-		var directionVec = new Vector(x, y, z);
+		var cameraVerticalTranslation = new Vector(0, 0, 0.3);
+		cameraVerticalTranslation.transform(q1.toMatrix());
+		cameraVerticalTranslation.transform(q2.toMatrix());
+		cameraVerticalTranslation.transform(orientationQuat.toMatrix());
+
+		var directionVec = dir; // new Vector(x, y, z);
 		directionVec.transform(orientationQuat.toMatrix());
+		// cameraVerticalTranslation.transform(orientationQuat.toMatrix());
 
 		var targetpos = this.marble.getAbsPos().getPosition();
 
-		var toPos = targetpos.add(directionVec);
+		var toPos = targetpos.add(directionVec).add(cameraVerticalTranslation);
 		camera.pos = toPos;
-		camera.target = targetpos;
+		camera.target = targetpos.add(cameraVerticalTranslation); // .add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
 		var rayCastOrigin = targetpos.add(up.multiply(marble._radius));
@@ -175,8 +195,10 @@ class CameraController extends Object {
 
 		var toPos = targetpos.add(directionVec);
 		camera.pos = toPos;
-
+		// camera.target = null;
+		// camera.target = targetpos.add(cameraVerticalTranslation);
 		// this.x = targetpos.x + directionVec.x;
+
 		// this.y = targetpos.y + directionVec.y;
 		// this.z = targetpos.z + directionVec.z;
 		// this.level.scene.camera.follow = {pos: this, target: this.marble};

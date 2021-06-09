@@ -1,5 +1,6 @@
 package src;
 
+import gui.PlayGui;
 import src.ParticleSystem.ParticleManager;
 import src.Util;
 import h3d.Quat;
@@ -19,10 +20,12 @@ import h3d.scene.CustomObject;
 import collision.CollisionWorld;
 import src.Marble;
 
-class MarbleWorld {
+class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
 	public var instanceManager:InstanceManager;
 	public var particleManager:ParticleManager;
+
+	var playGui:PlayGui;
 
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
@@ -33,6 +36,8 @@ class MarbleWorld {
 	var shapeOrTriggerInside:Array<DtsObject> = [];
 
 	public var currentTime:Float = 0;
+	public var elapsedTime:Float = 0;
+	public var bonusTime:Float = 0;
 	public var sky:Sky;
 
 	public var scene:Scene;
@@ -40,6 +45,7 @@ class MarbleWorld {
 	public var marble:Marble;
 	public var worldOrientation:Quat;
 	public var currentUp = new Vector(0, 0, 1);
+	public var outOfBounds:Bool = false;
 
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
@@ -47,15 +53,67 @@ class MarbleWorld {
 	/** The new target camera orientation quat  */
 	public var newOrientationQuat = new Quat();
 
-	public function new(scene:Scene) {
+	public function new(scene:Scene, scene2d:h2d.Scene) {
 		this.collisionWorld = new CollisionWorld();
 		this.scene = scene;
+		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
 		this.sky = new Sky();
 		sky.dmlPath = "data/skies/sky_day.dml";
 		sky.init(cast this);
+		playGui.init(scene2d);
 		scene.addChild(sky);
+	}
+
+	public function start() {
+		restart();
+		for (interior in this.interiors)
+			interior.onLevelStart();
+		for (shape in this.dtsObjects)
+			shape.onLevelStart();
+	}
+
+	public function restart() {
+		this.currentTime = 0;
+		this.elapsedTime = 0;
+		this.bonusTime = 0;
+		this.outOfBounds = false;
+		this.marble.camera.CameraPitch = 0.45;
+
+		for (shape in dtsObjects)
+			shape.reset();
+		for (interior in this.interiors)
+			interior.reset();
+
+		this.currentUp = new Vector(0, 0, 1);
+		this.orientationChangeTime = -1e8;
+		this.oldOrientationQuat = new Quat();
+		this.newOrientationQuat = new Quat();
+		this.deselectPowerUp();
+
+		this.clearSchedule();
+	}
+
+	public function updateGameState() {
+		if (this.currentTime < 0.5) {
+			this.playGui.setCenterText('none');
+		}
+		if (this.currentTime >= 0.5 && this.currentTime < 2) {
+			this.playGui.setCenterText('ready');
+		}
+		if (this.currentTime >= 2 && this.currentTime < 3.5) {
+			this.playGui.setCenterText('set');
+		}
+		if (this.currentTime >= 3.5 && this.currentTime < 5.5) {
+			this.playGui.setCenterText('go');
+		}
+		if (this.currentTime >= 5.5) {
+			this.playGui.setCenterText('none');
+		}
+		if (this.outOfBounds) {
+			this.playGui.setCenterText('outofbounds');
+		}
 	}
 
 	public function addInterior(obj:InteriorObject) {
@@ -108,6 +166,8 @@ class MarbleWorld {
 	}
 
 	public function update(dt:Float) {
+		this.tickSchedule(currentTime);
+		this.updateGameState();
 		for (obj in dtsObjects) {
 			obj.update(currentTime, dt);
 		}
@@ -116,10 +176,30 @@ class MarbleWorld {
 		}
 		this.instanceManager.update(dt);
 		this.particleManager.update(1000 * currentTime, dt);
-		currentTime += dt;
+		this.updateTimer(dt);
+		this.playGui.update(currentTime, dt);
+
 		if (this.marble != null) {
 			callCollisionHandlers(marble);
 		}
+	}
+
+	public function render(e:h3d.Engine) {
+		this.playGui.render(e);
+	}
+
+	public function updateTimer(dt:Float) {
+		currentTime += dt;
+		if (this.bonusTime != 0) {
+			this.bonusTime -= dt;
+			if (this.bonusTime < 0) {
+				this.elapsedTime -= this.bonusTime;
+				this.bonusTime = 0;
+			}
+		} else {
+			this.elapsedTime += dt;
+		}
+		playGui.formatTimer(this.elapsedTime);
 	}
 
 	function callCollisionHandlers(marble:Marble) {
@@ -172,22 +252,12 @@ class MarbleWorld {
 		if (this.marble.heldPowerup == powerUp)
 			return false;
 		this.marble.heldPowerup = powerUp;
-		// 	for (let overlayShape
-		// 	of
-		// 	this.overlayShapes
-		// )
-		// 	{
-		// 		if (overlayShape.dtsPath.includes("gem"))
-		// 			continue;
-		// 		// Show the corresponding icon in the HUD
-		// 		if (overlayShape.dtsPath == = powerUp.dtsPath)
-		// 			this.overlayScene.add(overlayShape.group);
-		// 		else
-		// 			this.overlayScene.remove(overlayShape.group);
-		// 	}
-		// 	if (!this.rewinding)
-		// 		AudioManager.play(powerUp.sounds[0]);
+		this.playGui.setPowerupImage(powerUp.identifier);
 		return true;
+	}
+
+	public function deselectPowerUp() {
+		this.playGui.setPowerupImage("");
 	}
 
 	/** Get the current interpolated orientation quaternion. */
@@ -242,5 +312,59 @@ class MarbleWorld {
 		this.newOrientationQuat = quatChange;
 		this.oldOrientationQuat = currentQuat;
 		this.orientationChangeTime = time;
+	}
+}
+
+typedef ScheduleInfo = {
+	var id:Float;
+	var stringId:String;
+	var time:Float;
+	var callBack:Void->Any;
+}
+
+abstract class Scheduler {
+	var scheduled:Array<ScheduleInfo> = [];
+
+	public function tickSchedule(time:Float) {
+		for (item in this.scheduled) {
+			if (time >= item.time) {
+				this.scheduled.remove(item);
+				item.callBack();
+			}
+		}
+	}
+
+	public function schedule(time:Float, callback:Void->Any, stringId:String = null) {
+		var id = Math.random();
+		this.scheduled.push({
+			id: id,
+			stringId: '${id}',
+			time: time,
+			callBack: callback
+		});
+		return id;
+	}
+
+	/** Cancels a schedule */
+	public function cancel(id:Float) {
+		var idx = this.scheduled.filter((val) -> {
+			return val.id == id;
+		});
+		if (idx.length == 0)
+			return;
+		this.scheduled.remove(idx[0]);
+	}
+
+	public function clearSchedule() {
+		this.scheduled = [];
+	}
+
+	public function clearScheduleId(id:String) {
+		var idx = this.scheduled.filter((val) -> {
+			return val.stringId == id;
+		});
+		if (idx.length == 0)
+			return;
+		this.scheduled.remove(idx[0]);
 	}
 }

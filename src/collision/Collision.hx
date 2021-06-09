@@ -80,27 +80,27 @@ class Collision {
 		}
 
 		// Check points
-		if (center.sub(v0).lengthSq() < radiusSq) {
-			res.result = true;
-			res.point = v0;
-			res.normal = center.sub(v0).normalized();
-			// center.sub(v0).normalized();
-			return res;
-		}
-		if (center.sub(v1).lengthSq() < radiusSq) {
-			res.result = true;
-			res.point = v1;
-			res.normal = center.sub(v1).normalized();
+		// if (center.sub(v0).lengthSq() < radiusSq) {
+		// 	res.result = true;
+		// 	res.point = v0;
+		// 	res.normal = center.sub(v0).normalized();
+		// 	// center.sub(v0).normalized();
+		// 	return res;
+		// }
+		// if (center.sub(v1).lengthSq() < radiusSq) {
+		// 	res.result = true;
+		// 	res.point = v1;
+		// 	res.normal = center.sub(v1).normalized();
 
-			return res;
-		}
-		if (center.sub(v2).lengthSq() < radiusSq) {
-			res.result = true;
-			res.point = v2;
-			res.normal = center.sub(v2).normalized();
+		// 	return res;
+		// }
+		// if (center.sub(v2).lengthSq() < radiusSq) {
+		// 	res.result = true;
+		// 	res.point = v2;
+		// 	res.normal = center.sub(v2).normalized();
 
-			return res;
-		}
+		// 	return res;
+		// }
 
 		// Check edges
 		var r1 = IntersectLineSphere(v0, v1, center, radius);

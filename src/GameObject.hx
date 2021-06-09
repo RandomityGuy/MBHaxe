@@ -14,4 +14,8 @@ class GameObject extends Object {
 	public function onMarbleEnter(time:Float) {}
 
 	public function onMarbleLeave(time:Float) {}
+
+	public function onLevelStart() {}
+
+	public function reset() {}
 }

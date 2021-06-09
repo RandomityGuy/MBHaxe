@@ -73,6 +73,6 @@ class SuperSpeed extends PowerUp {
 		// if (!this.level.rewinding)
 		//	AudioManager.play(this.sounds[1]);
 		this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
-		// this.level.deselectPowerUp();
+		this.level.deselectPowerUp();
 	}
 }

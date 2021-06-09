@@ -203,7 +203,7 @@ class PathedInterior extends InteriorObject {
 		return tform;
 	}
 
-	function reset() {
+	override function reset() {
 		this.currentTime = 0;
 		this.targetTime = -1;
 		this.changeTime = 0;

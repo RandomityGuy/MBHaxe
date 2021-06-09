@@ -23,6 +23,6 @@ class Helicopter extends PowerUp {
 		// if (!this.level.rewinding)
 		//	AudioManager.play(this.sounds[1]);
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
-		// this.level.deselectPowerUp();
+		this.level.deselectPowerUp();
 	}
 }

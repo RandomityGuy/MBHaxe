@@ -3,5 +3,6 @@ data
 *.hl
 *.js
 *.js.map
+*.tmp
 .vscode
 native

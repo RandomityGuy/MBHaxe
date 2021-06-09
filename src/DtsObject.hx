@@ -111,9 +111,12 @@ class DtsObject extends GameObject {
 	public function init(level:MarbleWorld) {
 		this.dts = ResourceLoader.loadDts(this.dtsPath);
 		this.directoryPath = Path.directory(this.dtsPath);
-		this.level = level;
+		if (level != null)
+			this.level = level;
 
-		isInstanced = this.level.instanceManager.isInstanced(this) && useInstancing;
+		var isInstanced = false;
+		if (this.level != null)
+			isInstanced = this.level.instanceManager.isInstanced(this) && useInstancing;
 		if (!isInstanced)
 			this.computeMaterials();
 
@@ -301,8 +304,10 @@ class DtsObject extends GameObject {
 
 		rootObject.scaleX = -1;
 
-		this.boundingCollider = new BoxCollisionEntity(this.level.instanceManager.getObjectBounds(cast this), cast this);
-		this.boundingCollider.setTransform(this.getTransform());
+		if (this.level != null) {
+			this.boundingCollider = new BoxCollisionEntity(this.level.instanceManager.getObjectBounds(cast this), cast this);
+			this.boundingCollider.setTransform(this.getTransform());
+		}
 	}
 
 	function computeMaterials() {

@@ -784,6 +784,7 @@ class Marble extends GameObject {
 		}
 		if (currentTime - this.helicopterEnableTime < 5) {
 			this.helicopter.setPosition(x, y, z);
+			this.helicopter.setRotationQuat(this.level.getOrientationQuat(currentTime));
 		} else {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
 		}
