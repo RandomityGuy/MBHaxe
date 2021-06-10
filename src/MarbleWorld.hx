@@ -47,6 +47,9 @@ class MarbleWorld extends Scheduler {
 	public var currentUp = new Vector(0, 0, 1);
 	public var outOfBounds:Bool = false;
 
+	var helpTextTimeState:Float = -1e8;
+	var alertTextTimeState:Float = -1e8;
+
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
 
@@ -182,6 +185,7 @@ class MarbleWorld extends Scheduler {
 		if (this.marble != null) {
 			callCollisionHandlers(marble);
 		}
+		this.updateTexts();
 	}
 
 	public function render(e:h3d.Engine) {
@@ -200,6 +204,20 @@ class MarbleWorld extends Scheduler {
 			this.elapsedTime += dt;
 		}
 		playGui.formatTimer(this.elapsedTime);
+	}
+
+	function updateTexts() {
+		var helpTextTime = this.helpTextTimeState;
+		var alertTextTime = this.alertTextTimeState;
+		var helpTextCompletion = Math.pow(Util.clamp((this.currentTime - helpTextTime - 3), 0, 1), 2);
+		var alertTextCompletion = Math.pow(Util.clamp((this.currentTime - alertTextTime - 3), 0, 1), 2);
+		this.playGui.setHelpTextOpacity(1 - helpTextCompletion);
+		this.playGui.setAlertTextOpacity(1 - alertTextCompletion);
+	}
+
+	public function displayAlert(text:String) {
+		this.playGui.setAlertText(text);
+		this.alertTextTimeState = this.currentTime;
 	}
 
 	function callCollisionHandlers(marble:Marble) {

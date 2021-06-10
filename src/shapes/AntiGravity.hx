@@ -10,6 +10,7 @@ class AntiGravity extends PowerUp {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "AntiGravity";
+		this.pickUpName = "Gravity Modifier";
 		this.autoUse = true;
 	}
 

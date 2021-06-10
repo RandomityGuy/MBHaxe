@@ -10,6 +10,7 @@ class Helicopter extends PowerUp {
 		this.isTSStatic = false;
 		this.showSequences = false;
 		this.identifier = "Helicopter";
+		this.pickUpName = "Gyrocopter PowerUp";
 	}
 
 	public function pickUp():Bool {

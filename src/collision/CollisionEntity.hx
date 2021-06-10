@@ -25,6 +25,8 @@ class CollisionEntity implements IOctreeObject {
 	public var transform:Matrix;
 	public var go:GameObject;
 
+	public var userData:Int;
+
 	public function new(go:GameObject) {
 		this.go = go;
 		this.octree = new Octree();
@@ -128,6 +130,7 @@ class CollisionEntity implements IOctreeObject {
 							// cinfo.collider = this;
 							cinfo.velocity = this.velocity;
 							cinfo.contactDistance = closest.distance(position);
+							cinfo.otherObject = this.go;
 							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
 							cinfo.restitution = surface.restitution;
 							cinfo.force = surface.force;

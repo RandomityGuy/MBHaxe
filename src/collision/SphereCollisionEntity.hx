@@ -48,6 +48,7 @@ class SphereCollisionEntity extends CollisionEntity {
 			contact.friction = 1;
 			contact.restitution = 1;
 			contact.velocity = this.velocity;
+			contact.otherObject = this.go;
 			contact.point = position.add(normDist);
 			contact.normal = normDist.multiply(-1);
 			contact.force = 0;

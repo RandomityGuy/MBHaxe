@@ -1,5 +1,9 @@
 package;
 
+import shapes.StartPad;
+import shapes.TriangleBumper;
+import shapes.RoundBumper;
+import shapes.Oilslick;
 import gui.PlayGui;
 import shapes.Helicopter;
 import shapes.ShockAbsorber;
@@ -116,6 +120,31 @@ class Main extends hxd.App {
 		var ag = new AntiGravity();
 		ag.y = 6;
 		world.addDtsObject(ag);
+
+		var os = new Oilslick();
+		os.x = 5;
+		os.z = 0.1;
+		world.addDtsObject(os);
+
+		var tdoor = new Trapdoor();
+		tdoor.x = -5;
+		tdoor.z = 1;
+		world.addDtsObject(tdoor);
+
+		var rb = new RoundBumper();
+		rb.x = -5;
+		rb.y = 2;
+		world.addDtsObject(rb);
+
+		var tb = new TriangleBumper();
+		tb.x = -5;
+		tb.y = 4;
+		world.addDtsObject(tb);
+
+		var spad = new StartPad();
+		tb.x = 5;
+		tb.y = 3;
+		world.addDtsObject(spad);
 
 		// var le:ParticleEmitterOptions = {
 

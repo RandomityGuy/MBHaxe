@@ -235,11 +235,14 @@ class Marble extends GameObject {
 			var contactNormal = new Vector();
 			var forceObjectCount = 0;
 
+			var forceObjects = [];
+
 			for (contact in contacts) {
-				if (contact.force != 0) {
+				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
 					forceObjectCount++;
 					contactNormal = contactNormal.add(contact.normal);
 					contactForce += contact.force;
+					forceObjects.push(contact.otherObject);
 				}
 			}
 

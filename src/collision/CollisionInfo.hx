@@ -1,5 +1,6 @@
 package collision;
 
+import src.GameObject;
 import h3d.Vector;
 
 class CollisionInfo {
@@ -7,6 +8,7 @@ class CollisionInfo {
 	public var normal:Vector;
 	public var velocity:Vector;
 	public var collider:CollisionEntity;
+	public var otherObject:GameObject;
 	public var friction:Float;
 	public var vAtCMag:Float;
 	public var normalForce:Float;

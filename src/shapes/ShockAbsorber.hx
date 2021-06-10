@@ -9,6 +9,7 @@ class ShockAbsorber extends PowerUp {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "ShockAbsorber";
+		this.pickUpName = "Shock Absorber PowerUp";
 	}
 
 	public function pickUp():Bool {

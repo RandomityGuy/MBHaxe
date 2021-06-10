@@ -27,6 +27,7 @@ abstract class PowerUp extends DtsObject {
 	public var cooldownDuration:Float = 7;
 	public var autoUse:Bool = false;
 	public var powerupParams:PowerupParams = new PowerupParams();
+	public var pickUpName:String;
 
 	public function new() {
 		super();
@@ -46,7 +47,7 @@ abstract class PowerUp extends DtsObject {
 			if (this.autoUse)
 				this.use(time);
 
-			// displayAlert(`You picked up a ${this.pickUpName}!`);
+			this.level.displayAlert('You picked up a ${this.pickUpName}!');
 			// if (this.element.showhelponpickup === "1" && !this.autoUse) displayHelp(`Press <func:bind mousefire> to use the ${this.pickUpName}!`);
 		}
 	}

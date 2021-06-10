@@ -74,7 +74,7 @@ class ResourceLoader {
 	public static function getFullNamesOf(path:String) {
 		var files = fileSystem.dir(Path.directory(path)); // FileSystem.readDirectory(Path.directory(path));
 		var names = [];
-		var fname = Path.withoutExtension(Path.withoutDirectory(path)).toLowerCase();
+		var fname = Path.withoutDirectory(path).toLowerCase();
 		for (file in files) {
 			var fname2 = file.name;
 			if (Path.withoutExtension(fname2).toLowerCase() == fname)

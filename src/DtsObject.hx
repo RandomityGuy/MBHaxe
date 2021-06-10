@@ -202,8 +202,7 @@ class DtsObject extends GameObject {
 		if (this.isCollideable) {
 			for (i in 0...dts.nodes.length) {
 				var objects = dts.objects.filter(object -> object.node == i);
-				var meshSurfaces = [];
-				var collider = new CollisionHull(cast this);
+				var localColliders:Array<CollisionEntity> = [];
 
 				for (object in objects) {
 					var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
@@ -220,17 +219,12 @@ class DtsObject extends GameObject {
 							var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
 							var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
 
-							var surfaces = this.generateCollisionGeometry(mesh, vertices, vertexNormals);
-							for (surface in surfaces)
-								collider.addSurface(surface);
-							meshSurfaces = meshSurfaces.concat(surfaces);
+							var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, i);
+							localColliders = localColliders.concat(hulls);
 						}
 					}
 				}
-				if (meshSurfaces.length != 0)
-					colliders.push(collider);
-				else
-					colliders.push(null);
+				colliders = colliders.concat(localColliders);
 			}
 		}
 
@@ -424,22 +418,24 @@ class DtsObject extends GameObject {
 		}
 	}
 
-	function generateCollisionGeometry(dtsMesh:dts.Mesh, vertices:Array<Vector>, vertexNormals:Array<Vector>) {
-		var surfaces = this.dts.matNames.map(x -> new CollisionSurface());
-		for (surface in surfaces) {
-			surface.points = [];
-			surface.normals = [];
-			surface.indices = [];
-		}
+	function generateCollisionGeometry(dtsMesh:dts.Mesh, vertices:Array<Vector>, vertexNormals:Array<Vector>, node:Int) {
+		var hulls:Array<CollisionEntity> = [];
 		for (primitive in dtsMesh.primitives) {
 			var k = 0;
-			var geometrydata = surfaces[primitive.matIndex];
+
+			var chull = new CollisionHull(cast this);
+			chull.userData = node;
+			var hs = new CollisionSurface();
+			hs.points = [];
+			hs.normals = [];
+			hs.indices = [];
+
 			var material = this.dts.matNames[primitive.matIndex];
 			if (dtsMaterials.exists(material)) {
 				var data = dtsMaterials.get(material);
-				geometrydata.friction = data.friction;
-				geometrydata.force = data.force;
-				geometrydata.restitution = data.restitution;
+				hs.friction = data.friction;
+				hs.force = data.force;
+				hs.restitution = data.restitution;
 			}
 
 			for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
@@ -456,24 +452,25 @@ class DtsObject extends GameObject {
 
 				for (index in [i1, i2, i3]) {
 					var vertex = vertices[index];
-					geometrydata.points.push(new Vector(vertex.x, vertex.y, vertex.z));
+					hs.points.push(new Vector(vertex.x, vertex.y, vertex.z));
 
 					var normal = vertexNormals[index];
-					geometrydata.normals.push(new Vector(normal.x, normal.y, normal.z));
+					hs.normals.push(new Vector(normal.x, normal.y, normal.z));
 				}
 
-				geometrydata.indices.push(geometrydata.indices.length);
-				geometrydata.indices.push(geometrydata.indices.length);
-				geometrydata.indices.push(geometrydata.indices.length);
+				hs.indices.push(hs.indices.length);
+				hs.indices.push(hs.indices.length);
+				hs.indices.push(hs.indices.length);
 
 				k++;
 			}
+
+			hs.generateBoundingBox();
+			chull.addSurface(hs);
+			chull.generateBoundingBox();
+			hulls.push(chull);
 		}
-		for (surface in surfaces) {
-			surface.generateBoundingBox();
-			// surface.generateNormals();
-		}
-		return surfaces;
+		return hulls;
 	}
 
 	function generateMaterialGeometry(dtsMesh:dts.Mesh, vertices:Array<Vector>, vertexNormals:Array<Vector>) {
@@ -773,7 +770,7 @@ class DtsObject extends GameObject {
 		}
 
 		for (i in 0...this.colliders.length) {
-			var absTform = this.graphNodes[i].getAbsPos().clone();
+			var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
 			if (this.colliders[i] != null)
 				this.colliders[i].setTransform(absTform);
 		}

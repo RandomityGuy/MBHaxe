@@ -151,7 +151,7 @@ class PlayGui {
 		gemImageObject.dtsPath = "data/shapes/items/gem.dts";
 		gemImageObject.ambientRotate = true;
 		gemImageObject.showSequences = false;
-		gemImageObject.matNameOverride.set("base.gem", "base.gem.png");
+		// gemImageObject.matNameOverride.set("base.gem", "base.gem.");
 		gemImageObject.ambientSpinFactor /= -2;
 		// ["base.gem"] = color + ".gem";
 		gemImageObject.init(null);
@@ -186,28 +186,47 @@ class PlayGui {
 		var bfont = new BitmapFont(fontdata.entry);
 		@:privateAccess bfont.loader = ResourceLoader.loader;
 		helpTextBackground = new Text(bfont.toFont(), scene2d);
-		helpTextBackground.text = "Hello Bruh";
+		helpTextBackground.text = "Bruh";
 		helpTextBackground.x = scene2d.width / 2 - helpTextBackground.textWidth / 2 + 1;
 		helpTextBackground.y = scene2d.height * 0.45 + 1;
 		helpTextBackground.textColor = 0x000000;
 
 		helpTextForeground = new Text(bfont.toFont(), scene2d);
-		helpTextForeground.text = "Hello Bruh";
+		helpTextForeground.text = "Bruh";
 		helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
 		helpTextForeground.y = scene2d.height * 0.45;
 		helpTextForeground.textColor = 0xFFFFFF;
 
 		alertTextBackground = new Text(bfont.toFont(), scene2d);
-		alertTextBackground.text = "Hello Bruh";
+		alertTextBackground.text = "Bruh";
 		alertTextBackground.x = scene2d.width / 2 - alertTextBackground.textWidth / 2 + 1;
 		alertTextBackground.y = scene2d.height - 102 + 1;
 		alertTextBackground.textColor = 0x000000;
 
 		alertTextForeground = new Text(bfont.toFont(), scene2d);
-		alertTextForeground.text = "Hello Bruh";
+		alertTextForeground.text = "Bruh";
 		alertTextForeground.x = scene2d.width / 2 - alertTextForeground.textWidth / 2;
 		alertTextForeground.y = scene2d.height - 102;
 		alertTextForeground.textColor = 0xFFE240;
+	}
+
+	public function setHelpTextOpacity(value:Float) {
+		helpTextForeground.color.a = value;
+		helpTextBackground.color.a = value;
+	}
+
+	public function setAlertTextOpacity(value:Float) {
+		alertTextForeground.color.a = value;
+		alertTextBackground.color.a = value;
+	}
+
+	public function setAlertText(text:String) {
+		this.alertTextForeground.text = text;
+		this.alertTextBackground.text = text;
+		alertTextForeground.x = scene2d.width / 2 - alertTextForeground.textWidth / 2;
+		alertTextForeground.y = scene2d.height - 102;
+		alertTextBackground.x = scene2d.width / 2 - alertTextBackground.textWidth / 2 + 1;
+		alertTextBackground.y = scene2d.height - 102 + 1;
 	}
 
 	public function setPowerupImage(powerupIdentifier:String) {

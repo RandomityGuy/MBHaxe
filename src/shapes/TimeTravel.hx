@@ -7,6 +7,7 @@ class TimeTravel extends PowerUp {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "TimeTravel";
+		this.pickUpName = '${this.timeBonus} second Time Travel bonus';
 		this.cooldownDuration = 1e8;
 		this.useInstancing = true;
 		this.autoUse = true;

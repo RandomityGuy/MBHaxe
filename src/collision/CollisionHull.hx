@@ -44,6 +44,7 @@ class CollisionHull extends CollisionEntity {
 				cinfo.velocity = velocity;
 				cinfo.contactDistance = sph.radius + pt.length();
 				cinfo.restitution = restitution;
+				cinfo.otherObject = this.go;
 				cinfo.friction = friction;
 				cinfo.force = force;
 				this.go.onMarbleContact(dt, cinfo);

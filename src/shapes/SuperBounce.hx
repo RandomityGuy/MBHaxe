@@ -9,6 +9,7 @@ class SuperBounce extends PowerUp {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperBounce";
+		this.pickUpName = "Super Bounce PowerUp";
 	}
 
 	public function pickUp():Bool {
