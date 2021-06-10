@@ -6,6 +6,7 @@ import h3d.scene.Object;
 class GameObject extends Object {
 	public var identifier:String;
 	public var currentOpacity:Float = 1;
+	public var isCollideable:Bool = false;
 
 	public function onMarbleContact(time:Float, ?contact:CollisionInfo) {}
 

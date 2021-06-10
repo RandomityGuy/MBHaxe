@@ -14,6 +14,7 @@ class InteriorObject extends GameObject {
 
 	public function new() {
 		super();
+		this.isCollideable = true;
 	}
 
 	public function init(level:MarbleWorld) {

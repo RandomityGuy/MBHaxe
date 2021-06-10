@@ -85,7 +85,6 @@ class DtsObject extends GameObject {
 
 	var useInstancing:Bool = true;
 	var isTSStatic:Bool;
-	var isCollideable:Bool;
 	var showSequences:Bool = true;
 	var hasNonVisualSequences:Bool = true;
 	var isInstanced:Bool = false;
@@ -810,5 +809,19 @@ class DtsObject extends GameObject {
 				}
 			}
 		}
+	}
+
+	public function setHide(hide:Bool) {
+		if (hide) {
+			this.setCollisionEnabled(false);
+			this.setOpacity(0);
+		} else {
+			this.setCollisionEnabled(true);
+			this.setOpacity(1);
+		}
+	}
+
+	public function setCollisionEnabled(flag:Bool) {
+		this.isCollideable = flag;
 	}
 }

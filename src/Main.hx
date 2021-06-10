@@ -1,5 +1,6 @@
 package;
 
+import shapes.LandMine;
 import shapes.StartPad;
 import shapes.TriangleBumper;
 import shapes.RoundBumper;
@@ -145,6 +146,10 @@ class Main extends hxd.App {
 		tb.x = 5;
 		tb.y = 3;
 		world.addDtsObject(spad);
+
+		var lm = new LandMine();
+		lm.x = 7;
+		world.addDtsObject(lm);
 
 		// var le:ParticleEmitterOptions = {
 

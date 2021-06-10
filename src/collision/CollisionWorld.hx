@@ -34,12 +34,14 @@ class CollisionWorld {
 		for (obj in intersections) {
 			var entity:CollisionEntity = cast obj;
 
-			contacts = contacts.concat(entity.sphereIntersection(spherecollision, dt));
+			if (entity.go.isCollideable) {
+				contacts = contacts.concat(entity.sphereIntersection(spherecollision, dt));
+			}
 		}
 
 		for (obj in dynamicEntities) {
 			if (obj != spherecollision) {
-				if (obj.boundingBox.collide(box))
+				if (obj.boundingBox.collide(box) && obj.go.isCollideable)
 					contacts = contacts.concat(obj.sphereIntersection(spherecollision, dt));
 			}
 		}

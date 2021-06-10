@@ -1,3 +1,5 @@
+package shapes;
+
 class TimeTravel extends PowerUp {
 	var timeBonus:Float = 5;
 
