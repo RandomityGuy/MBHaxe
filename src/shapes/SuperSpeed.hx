@@ -10,8 +10,8 @@ import src.DtsObject;
 final superSpeedParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
 	ambientVelocity: new Vector(0, 0, 0.2),
-	ejectionVelocity: 1 * 0.5,
-	velocityVariance: 0.25 * 0.5,
+	ejectionVelocity: 1,
+	velocityVariance: 0.25,
 	emitterLifetime: 1100,
 	inheritedVelFactor: 0.25,
 	particleOptions: {

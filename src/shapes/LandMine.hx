@@ -1,5 +1,6 @@
 package shapes;
 
+import collision.CollisionHull;
 import collision.CollisionInfo;
 import src.DtsObject;
 import src.Util;
@@ -9,9 +10,9 @@ import h3d.Vector;
 import src.ResourceLoader;
 
 final landMineParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 0.2,
+	ejectionPeriod: 2,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 2,
+	ejectionVelocity: 3,
 	velocityVariance: 1,
 	emitterLifetime: 50,
 	inheritedVelFactor: 0.2,
@@ -23,7 +24,7 @@ final landMineParticle:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 1000,
 		lifetimeVariance: 150,
-		dragCoefficient: 0.8,
+		dragCoefficient: 2,
 		acceleration: 0,
 		colors: [new Vector(0.56, 0.36, 0.26, 1), new Vector(0.56, 0.36, 0.26, 0)],
 		sizes: [0.5, 1],
@@ -32,11 +33,11 @@ final landMineParticle:ParticleEmitterOptions = {
 };
 
 final landMineSmokeParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 0.5,
+	ejectionPeriod: 2,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 0.8,
-	velocityVariance: 0.4,
-	emitterLifetime: 50,
+	ejectionVelocity: 4,
+	velocityVariance: 0.5,
+	emitterLifetime: 250,
 	inheritedVelFactor: 0.25,
 	particleOptions: {
 		texture: 'particles/smoke.png',
@@ -46,7 +47,7 @@ final landMineSmokeParticle:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 1200,
 		lifetimeVariance: 300,
-		dragCoefficient: 0.85,
+		dragCoefficient: 10,
 		acceleration: -8,
 		colors: [
 			new Vector(0.56, 0.36, 0.26, 1),
@@ -59,10 +60,10 @@ final landMineSmokeParticle:ParticleEmitterOptions = {
 };
 
 final landMineSparksParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 0.4,
+	ejectionPeriod: 3,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 13 / 4,
-	velocityVariance: 6.75 / 4,
+	ejectionVelocity: 13,
+	velocityVariance: 6.75,
 	emitterLifetime: 100,
 	inheritedVelFactor: 0.2,
 	particleOptions: {
@@ -73,8 +74,8 @@ final landMineSparksParticle:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 500,
 		lifetimeVariance: 350,
-		dragCoefficient: 0.75,
-		acceleration: -8,
+		dragCoefficient: 1,
+		acceleration: 0,
 		colors: [
 			new Vector(0.6, 0.4, 0.3, 1),
 			new Vector(0.6, 0.4, 0.3, 1),
@@ -111,6 +112,23 @@ class LandMine extends DtsObject {
 		landMineSparkParticleData.texture = ResourceLoader.getTexture("data/particles/spark.png");
 	}
 
+	override function onMarbleContact(time:Float, ?contact:CollisionInfo) {
+		if (this.isCollideable) {
+			// marble.velocity = marble.velocity.add(vec);
+			this.disappearTime = this.level.currentTime;
+			this.setCollisionEnabled(false);
+
+			// if (!this.level.rewinding)
+			// 	AudioManager.play(this.sounds[0]);
+			this.level.particleManager.createEmitter(landMineParticle, landMineParticleData, this.getAbsPos().getPosition());
+			this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
+			this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());
+		}
+		// Normally, we would add a light here, but that's too expensive for THREE, apparently.
+
+		// this.level.replay.recordMarbleContact(this);
+	}
+
 	function computeExplosionStrength(r:Float) {
 		// Figured out through testing by RandomityGuy
 		if (r >= 10.25)
@@ -125,35 +143,25 @@ class LandMine extends DtsObject {
 		return v;
 	}
 
-	override function onMarbleContact(time:Float, ?contact:CollisionInfo) {
-		var marble = this.level.marble;
-		var minePos = this.getAbsPos().getPosition();
-		var off = marble.getAbsPos().getPosition().sub(minePos);
-		var vec = off.normalized(); // Use the last pos so that it's a little less RNG
-
-		// Add velocity to the marble
-		var explosionStrength = this.computeExplosionStrength(off.length());
-		marble.velocity = marble.velocity.add(vec.multiply(explosionStrength));
-		this.disappearTime = level.currentTime;
-		this.isCollideable = false;
-		// this.setCollisionEnabled(false);
-
-		// if (!this.level.rewinding)
-		// 	AudioManager.play(this.sounds[0]);
-		this.level.particleManager.createEmitter(landMineParticle, landMineParticleData, this.getAbsPos().getPosition());
-		this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
-		this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());
-		// Normally, we would add a light here, but that's too expensive for THREE, apparently.
-
-		// this.level.replay.recordMarbleContact(this);
-	}
-
 	override function update(currentTime:Float, dt:Float) {
 		super.update(currentTime, dt);
 		if (currentTime >= this.disappearTime + 5 || currentTime < this.disappearTime) {
 			this.setHide(false);
 		} else {
 			this.setHide(true);
+		}
+
+		if (this.isCollideable) {
+			var marble = this.level.marble;
+			var minePos = this.getAbsPos().getPosition();
+			var off = marble.getAbsPos().getPosition().sub(minePos);
+
+			var strength = computeExplosionStrength(off.length());
+
+			for (collider in this.colliders) {
+				var hull:CollisionHull = cast collider;
+				hull.force = strength;
+			}
 		}
 
 		var opacity = Util.clamp((currentTime - (this.disappearTime + 5)), 0, 1);

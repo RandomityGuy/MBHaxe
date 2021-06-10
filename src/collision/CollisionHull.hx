@@ -8,9 +8,10 @@ import h3d.Vector;
 
 class CollisionHull extends CollisionEntity {
 	var hull:ConvexHull;
-	var friction = 1.0;
-	var restitution = 1.0;
-	var force = 0.0;
+
+	public var friction = 1.0;
+	public var restitution = 1.0;
+	public var force = 0.0;
 
 	public function new(go:GameObject) {
 		super(go);

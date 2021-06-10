@@ -40,11 +40,11 @@ class Move {
 }
 
 final bounceParticleOptions:ParticleEmitterOptions = {
-	ejectionPeriod: 1,
+	ejectionPeriod: 80,
 	ambientVelocity: new Vector(0, 0, 0.0),
-	ejectionVelocity: 2.6,
-	velocityVariance: 0.25 * 0.5,
-	emitterLifetime: 4,
+	ejectionVelocity: 3,
+	velocityVariance: 0.25,
+	emitterLifetime: 250,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/star.png',
@@ -54,7 +54,7 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 500,
 		lifetimeVariance: 100,
-		dragCoefficient: 0.5,
+		dragCoefficient: 1,
 		acceleration: -2,
 		colors: [new Vector(0.9, 0, 0, 1), new Vector(0.9, 0.9, 0, 1), new Vector(0.9, 0.9, 0, 0)],
 		sizes: [0.25, 0.25, 0.25],

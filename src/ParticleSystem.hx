@@ -78,38 +78,55 @@ class Particle {
 			return;
 		}
 
+		var t = this.currentAge / (this.lifeTime / 1000);
+
+		for (i in 1...4) {
+			if (this.o.times.length > i) {
+				if (this.o.times[i] >= t) {
+					var firstPart = t - this.o.times[i - 1];
+					var total = this.o.times[i] - this.o.times[i - 1];
+
+					firstPart /= total;
+
+					this.color = Util.lerpThreeVectors(this.o.colors[i - 1], this.o.colors[i], firstPart);
+					this.scale = Util.lerp(this.o.sizes[i - 1], this.o.sizes[i], firstPart);
+					break;
+				}
+			}
+		}
+
 		// var velElapsed = elapsed / 1000;
-		// velElapsed *= 0.001;
+		// // velElapsed *= 0.001;
 		// velElapsed = Math.pow(velElapsed, (1 - this.o.dragCoefficient)); // Somehow slow down velocity over time based on the drag coefficient
 
 		// // Compute the position
-		// var pos = this.position.add(this.vel.multiply(velElapsed + this.o.acceleration * (velElapsed * velElapsed) / 2));
-		// this.position = pos;
+		// // var pos = this.position.add(this.vel.multiply(velElapsed + this.o.acceleration * (velElapsed * velElapsed) / 2));
+		// // this.position = pos;
 
-		this.rotation = (this.initialSpin + this.o.spinSpeed * elapsed / 1000) * Math.PI / 180;
+		// this.rotation = (this.initialSpin + this.o.spinSpeed * elapsed / 1000) * Math.PI / 180;
 
-		// Check where we are in the times array
-		var indexLow = 0;
-		var indexHigh = 1;
-		for (i in 2...this.o.times.length) {
-			if (this.o.times[indexHigh] >= completion)
-				break;
+		// // Check where we are in the times array
+		// var indexLow = 0;
+		// var indexHigh = 1;
+		// for (i in 2...this.o.times.length) {
+		// 	if (this.o.times[indexHigh] >= completion)
+		// 		break;
 
-			indexLow = indexHigh;
-			indexHigh = i;
-		}
+		// 	indexLow = indexHigh;
+		// 	indexHigh = i;
+		// }
 
-		if (this.o.times.length == 1)
-			indexHigh = indexLow;
-		var t = (completion - this.o.times[indexLow]) / (this.o.times[indexHigh] - this.o.times[indexLow]);
+		// if (this.o.times.length == 1)
+		// 	indexHigh = indexLow;
+		// var t = (completion - this.o.times[indexLow]) / (this.o.times[indexHigh] - this.o.times[indexLow]);
 
-		// Adjust color
-		var color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
-		this.color = color;
-		// this.material.opacity = color.a * * 1.5; // Adjusted because additive mixing can be kind of extreme
+		// // Adjust color
+		// var color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
+		// this.color = color;
+		// // this.material.opacity = color.a * * 1.5; // Adjusted because additive mixing can be kind of extreme
 
-		// Adjust sizing
-		this.scale = Util.lerp(this.o.sizes[indexLow], this.o.sizes[indexHigh], t);
+		// // Adjust sizing
+		// this.scale = Util.lerp(this.o.sizes[indexLow], this.o.sizes[indexHigh], t);
 	}
 }
 
@@ -192,7 +209,7 @@ class ParticleEmitter {
 		this.emit(time);
 	}
 
-	public function tick(time:Float) {
+	public function tick(time:Float, dt:Float) {
 		// Cap the amount of particles emitted in such a case to prevent lag
 		if (time - this.lastEmitTime >= 1000)
 			this.lastEmitTime = time - 1000;
@@ -217,9 +234,12 @@ class ParticleEmitter {
 		// This isn't necessarily uniform but it's fine for the purpose.
 		var randomPointOnSphere = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalized();
 		// Compute the total velocity
-		var vel = this.vel.multiply(this.o.inheritedVelFactor)
-			.add(randomPointOnSphere.multiply(this.o.ejectionVelocity + this.o.velocityVariance * (Math.random() * 2 - 1)))
-			.add(this.o.ambientVelocity);
+		var initialVel = this.o.ejectionVelocity;
+		initialVel += (this.o.velocityVariance * 2 * Math.random()) - this.o.velocityVariance;
+		var vel = this.vel.multiply(this.o.inheritedVelFactor).add(randomPointOnSphere.multiply(initialVel)).add(this.o.ambientVelocity);
+		// var vel = this.vel.multiply(this.o.inheritedVelFactor)
+		// 	.add(randomPointOnSphere.multiply(this.o.ejectionVelocity + this.o.velocityVariance * (Math.random() * 2 - 1)))
+		// 	.add(this.o.ambientVelocity);
 		var particle = new Particle(this.o.particleOptions, this.manager, this.data, time, pos, vel);
 		this.manager.addParticle(data, particle);
 	}
@@ -260,7 +280,7 @@ class ParticleManager {
 			for (instance in batch.instances)
 				instance.update(currentTime, dt);
 		}
-		this.tick();
+		this.tick(dt);
 		for (obj => batch in particlebatches) {
 			batch.meshBatch.begin(batch.instances.length);
 			for (instance in batch.instances) {
@@ -348,12 +368,12 @@ class ParticleManager {
 			this.removeEmitter(emitter);
 	}
 
-	public function tick() {
+	public function tick(dt:Float) {
 		var time = this.getTime();
 		for (emitter in this.emitters) {
 			if (emitter.getPos != null)
 				emitter.setPos(emitter.getPos(), time);
-			emitter.tick(time);
+			emitter.tick(time, dt);
 			// Remove the artifact that was created in a different future cause we rewinded and now we shifted timelines
 			if (emitter.creationTime > time) {
 				this.removeEmitter(emitter);
