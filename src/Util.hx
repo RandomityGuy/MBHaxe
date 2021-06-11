@@ -77,4 +77,66 @@ class Util {
 			}
 		bitmap.unlock();
 	}
+
+	public static function splitIgnoreStringLiterals(str:String, splitter:String, strLiteralToken = '"') {
+		var indices = [];
+		var inString = false;
+		for (i in 0...str.length) {
+			var c = str.charAt(i);
+			if (inString) {
+				if (c == strLiteralToken && str.charAt(i - 1) != '\\')
+					inString = false;
+				continue;
+			}
+			if (c == strLiteralToken)
+				inString = true;
+			else if (c == splitter)
+				indices.push(i);
+		}
+		var parts = [];
+		var remaining = str;
+		for (i in 0...indices.length) {
+			var index = indices[i] - (str.length - remaining.length);
+			var part = remaining.substring(0, index);
+			remaining = remaining.substring(index + 1);
+			parts.push(part);
+		}
+		parts.push(remaining);
+		return parts;
+	}
+
+	public static function unescape(str:String) {
+		var specialCases = [
+			'\\t' => '\t',
+			'\\v' => '\x0B',
+			'\\0' => '\x00',
+			'\\f' => '\x0C',
+			'\\n' => '\n',
+			'\\r' => '\r'
+		];
+
+		for (obj => esc in specialCases) {
+			str = StringTools.replace(str, obj, esc);
+		}
+
+		return str;
+	}
+
+	/** Gets the index of a substring like String.prototype.indexOf, but only if that index lies outside of string literals. */
+	public static function indexOfIgnoreStringLiterals(str:String, searchString:String, position = 0, strLiteralToken = '"') {
+		var inString = false;
+		for (i in position...str.length) {
+			var c = str.charAt(i);
+			if (inString) {
+				if (c == strLiteralToken && str.charAt(i - 1) != '\\')
+					inString = false;
+				continue;
+			}
+			if (c == strLiteralToken)
+				inString = true;
+			else if (StringTools.startsWith(str.substr(i), searchString))
+				return i;
+		}
+		return -1;
+	}
 }
