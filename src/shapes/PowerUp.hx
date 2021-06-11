@@ -1,5 +1,6 @@
 package shapes;
 
+import src.TimeState;
 import src.Util;
 import h3d.Vector;
 import src.DtsObject;
@@ -35,29 +36,29 @@ abstract class PowerUp extends DtsObject {
 		this.ambientRotate = true;
 	}
 
-	public override function onMarbleInside(time:Float) {
-		var pickupable = this.lastPickUpTime == -1 || (time - this.lastPickUpTime) >= this.cooldownDuration;
+	public override function onMarbleInside(timeState:TimeState) {
+		var pickupable = this.lastPickUpTime == -1 || (timeState.currentAttemptTime - this.lastPickUpTime) >= this.cooldownDuration;
 		if (!pickupable)
 			return;
 
 		if (this.pickUp()) {
 			// this.level.replay.recordMarbleInside(this);
 
-			this.lastPickUpTime = time;
+			this.lastPickUpTime = timeState.currentAttemptTime;
 			if (this.autoUse)
-				this.use(time);
+				this.use(timeState);
 
 			this.level.displayAlert('You picked up a ${this.pickUpName}!');
 			// if (this.element.showhelponpickup === "1" && !this.autoUse) displayHelp(`Press <func:bind mousefire> to use the ${this.pickUpName}!`);
 		}
 	}
 
-	public override function update(currentTime:Float, dt:Float) {
-		super.update(currentTime, dt);
+	public override function update(timeState:TimeState) {
+		super.update(timeState);
 		var opacity = 1.0;
 		if (this.lastPickUpTime > 0 && this.cooldownDuration > 0) {
 			var availableTime = this.lastPickUpTime + this.cooldownDuration;
-			opacity = Util.clamp((currentTime - availableTime), 0, 1);
+			opacity = Util.clamp((timeState.currentAttemptTime - availableTime), 0, 1);
 		}
 
 		this.setOpacity(opacity);
@@ -65,5 +66,5 @@ abstract class PowerUp extends DtsObject {
 
 	public abstract function pickUp():Bool;
 
-	public abstract function use(time:Float):Void;
+	public abstract function use(timeState:TimeState):Void;
 }

@@ -1,5 +1,6 @@
 package shapes;
 
+import src.TimeState;
 import src.DtsObject;
 
 class SuperBounce extends PowerUp {
@@ -16,9 +17,9 @@ class SuperBounce extends PowerUp {
 		return this.level.pickUpPowerUp(this);
 	}
 
-	public function use(time:Float) {
+	public function use(timeState:TimeState) {
 		var marble = this.level.marble;
-		marble.enableSuperBounce(time);
+		marble.enableSuperBounce(timeState.currentAttemptTime);
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
 		//	AudioManager.play(this.sounds[1]);

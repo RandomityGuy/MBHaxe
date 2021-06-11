@@ -1,5 +1,6 @@
 package shapes;
 
+import src.TimeState;
 import collision.CollisionHull;
 import collision.CollisionInfo;
 import src.DtsObject;
@@ -112,10 +113,10 @@ class LandMine extends DtsObject {
 		landMineSparkParticleData.texture = ResourceLoader.getTexture("data/particles/spark.png");
 	}
 
-	override function onMarbleContact(time:Float, ?contact:CollisionInfo) {
+	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
 		if (this.isCollideable) {
 			// marble.velocity = marble.velocity.add(vec);
-			this.disappearTime = this.level.currentTime;
+			this.disappearTime = timeState.timeSinceLoad;
 			this.setCollisionEnabled(false);
 
 			// if (!this.level.rewinding)
@@ -143,9 +144,9 @@ class LandMine extends DtsObject {
 		return v;
 	}
 
-	override function update(currentTime:Float, dt:Float) {
-		super.update(currentTime, dt);
-		if (currentTime >= this.disappearTime + 5 || currentTime < this.disappearTime) {
+	override function update(timeState:TimeState) {
+		super.update(timeState);
+		if (timeState.timeSinceLoad >= this.disappearTime + 5 || timeState.timeSinceLoad < this.disappearTime) {
 			this.setHide(false);
 		} else {
 			this.setHide(true);
@@ -164,7 +165,7 @@ class LandMine extends DtsObject {
 			}
 		}
 
-		var opacity = Util.clamp((currentTime - (this.disappearTime + 5)), 0, 1);
+		var opacity = Util.clamp((timeState.timeSinceLoad - (this.disappearTime + 5)), 0, 1);
 		this.setOpacity(opacity);
 	}
 }

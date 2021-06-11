@@ -1,5 +1,6 @@
 package shapes;
 
+import src.TimeState;
 import src.ResourceLoader;
 import src.ParticleSystem.ParticleData;
 import src.ParticleSystem.ParticleEmitterOptions;
@@ -54,7 +55,7 @@ class SuperSpeed extends PowerUp {
 		return this.level.pickUpPowerUp(this);
 	}
 
-	public function use(time:Float) {
+	public function use(timeState:TimeState) {
 		var marble = this.level.marble;
 		var movementVector = marble.getMarbleAxis()[0];
 

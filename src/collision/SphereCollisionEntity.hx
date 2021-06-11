@@ -1,5 +1,6 @@
 package collision;
 
+import src.TimeState;
 import src.Marble;
 import h3d.col.Ray;
 import h3d.Vector;
@@ -31,7 +32,7 @@ class SphereCollisionEntity extends CollisionEntity {
 		return boundingBox.rayIntersection(Ray.fromValues(rayOrigin.x, rayOrigin.y, rayOrigin.z, rayDirection.x, rayDirection.y, rayDirection.z), true) != -1;
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, dt:Float) {
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
 		var contacts = [];
 		var thispos = transform.getPosition();
 		var position = collisionEntity.transform.getPosition();

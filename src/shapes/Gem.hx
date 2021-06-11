@@ -1,5 +1,6 @@
 package shapes;
 
+import src.TimeState;
 import src.DtsObject;
 
 class Gem extends DtsObject {
@@ -19,7 +20,7 @@ class Gem extends DtsObject {
 		this.matNameOverride.set('base.gem', color + ".gem");
 	}
 
-	public function setHide(hide:Bool) {
+	public override function setHide(hide:Bool) {
 		if (hide) {
 			this.pickedUp = true;
 			this.setOpacity(0);
@@ -29,8 +30,8 @@ class Gem extends DtsObject {
 		}
 	}
 
-	override function onMarbleInside(time:Float) {
-		super.onMarbleInside(time);
+	override function onMarbleInside(timeState:TimeState) {
+		super.onMarbleInside(timeState);
 		if (this.pickedUp)
 			return;
 		this.pickedUp = true;

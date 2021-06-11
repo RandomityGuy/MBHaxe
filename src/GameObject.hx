@@ -1,5 +1,6 @@
 package src;
 
+import src.TimeState;
 import collision.CollisionInfo;
 import h3d.scene.Object;
 
@@ -8,13 +9,13 @@ class GameObject extends Object {
 	public var currentOpacity:Float = 1;
 	public var isCollideable:Bool = false;
 
-	public function onMarbleContact(time:Float, ?contact:CollisionInfo) {}
+	public function onMarbleContact(time:TimeState, ?contact:CollisionInfo) {}
 
-	public function onMarbleInside(time:Float) {}
+	public function onMarbleInside(time:TimeState) {}
 
-	public function onMarbleEnter(time:Float) {}
+	public function onMarbleEnter(time:TimeState) {}
 
-	public function onMarbleLeave(time:Float) {}
+	public function onMarbleLeave(time:TimeState) {}
 
 	public function onLevelStart() {}
 

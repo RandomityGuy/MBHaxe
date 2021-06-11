@@ -1,5 +1,6 @@
 package src;
 
+import src.TimeState;
 import src.MarbleWorld;
 import h3d.Matrix;
 import h3d.Vector;
@@ -43,7 +44,7 @@ class PathedInterior extends InteriorObject {
 		this.reset();
 	}
 
-	public function update(currentTime:Float, dt:Float) {
+	public function update(timeState:TimeState) {
 		// this.previousState = {
 		// 	currentTime: currentTime,
 		// 	targetTime: targetTime,
@@ -71,7 +72,7 @@ class PathedInterior extends InteriorObject {
 		// if (!stopped)
 		// 	this.currentTime = currentTime;
 
-		velocity = position.sub(this.prevPosition).multiply(1 / dt);
+		velocity = position.sub(this.prevPosition).multiply(1 / timeState.dt);
 	}
 
 	public function setStopped(stopped:Bool = true) {

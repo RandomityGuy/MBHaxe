@@ -1,5 +1,6 @@
 package src;
 
+import src.TimeState;
 import h3d.prim.UV;
 import h3d.parts.Data.BlendMode;
 import src.MarbleWorld;
@@ -230,7 +231,7 @@ class ParticleEmitter {
 		this.currentWaitPeriod = this.o.ejectionPeriod;
 		var pos = this.getPosAtTime(time).clone();
 		if (this.o.spawnOffset != null)
-			pos.add(this.o.spawnOffset()); // Call the spawnOffset function if it's there
+			pos = pos.add(this.o.spawnOffset()); // Call the spawnOffset function if it's there
 		// This isn't necessarily uniform but it's fine for the purpose.
 		var randomPointOnSphere = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalized();
 		// Compute the total velocity

@@ -1,5 +1,6 @@
 package shapes;
 
+import src.TimeState;
 import src.ResourceLoader;
 import src.ParticleSystem.ParticleData;
 import h3d.Vector;
@@ -47,7 +48,7 @@ class SuperJump extends PowerUp {
 		return this.level.pickUpPowerUp(this);
 	}
 
-	public function use(time:Float) {
+	public function use(timeState:TimeState) {
 		var marble = this.level.marble;
 		marble.velocity = marble.velocity.add(this.level.currentUp.multiply(20));
 		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());

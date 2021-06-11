@@ -1,5 +1,6 @@
 package collision;
 
+import src.TimeState;
 import src.GameObject;
 import h3d.col.Bounds;
 import collision.gjk.GJK;
@@ -17,7 +18,7 @@ class CollisionHull extends CollisionEntity {
 		super(go);
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, dt:Float):Array<CollisionInfo> {
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState):Array<CollisionInfo> {
 		var bbox = this.boundingBox;
 		var box = new Bounds();
 		var pos = collisionEntity.transform.getPosition();
@@ -33,7 +34,7 @@ class CollisionHull extends CollisionEntity {
 			sph.position = pos;
 			sph.radius = collisionEntity.radius;
 			var newTform = this.transform.clone();
-			var newpos = this.transform.getPosition().add(this.velocity.multiply(dt));
+			var newpos = this.transform.getPosition().add(this.velocity.multiply(timeState.dt));
 			newTform.setPosition(newpos);
 			hull.setTransform(newTform);
 
@@ -48,7 +49,7 @@ class CollisionHull extends CollisionEntity {
 				cinfo.otherObject = this.go;
 				cinfo.friction = friction;
 				cinfo.force = force;
-				this.go.onMarbleContact(dt, cinfo);
+				this.go.onMarbleContact(timeState, cinfo);
 				return [cinfo];
 			}
 		}

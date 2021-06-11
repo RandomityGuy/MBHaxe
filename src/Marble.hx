@@ -1,5 +1,6 @@
 package src;
 
+import src.TimeState;
 import src.ParticleSystem.ParticleEmitter;
 import src.ParticleSystem.ParticleData;
 import src.ParticleSystem.ParticleEmitterOptions;
@@ -191,9 +192,9 @@ class Marble extends GameObject {
 		level.addDtsObject(this.helicopter);
 	}
 
-	function findContacts(collisiomWorld:CollisionWorld, dt:Float) {
+	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
 		this.contacts = queuedContacts;
-		var c = collisiomWorld.sphereIntersection(this.collider, dt);
+		var c = collisiomWorld.sphereIntersection(this.collider, timeState);
 		contacts = contacts.concat(c);
 	}
 
@@ -637,11 +638,11 @@ class Marble extends GameObject {
 		return intersectT;
 	}
 
-	function advancePhysics(currentTime:Float, dt:Float, m:Move, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
-		var timeRemaining = dt;
+	function advancePhysics(timeState:TimeState, m:Move, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
+		var timeRemaining = timeState.dt;
 		var it = 0;
 
-		var piTime = currentTime;
+		var piTime = timeState.currentAttemptTime;
 
 		// if (this.controllable) {
 		// 	for (interior in pathedInteriors) {
@@ -667,20 +668,23 @@ class Marble extends GameObject {
 			if (timeRemaining < 0.00800000037997961)
 				timeStep = timeRemaining;
 
-			this.findContacts(collisionWorld, timeStep);
+			var tempState = timeState.clone();
+			tempState.dt = timeStep;
+
+			this.findContacts(collisionWorld, tempState);
 			var cmf = this.computeMoveForces(m);
 			var isCentered:Bool = cmf.result;
 			var aControl = cmf.aControl;
 			var desiredOmega = cmf.desiredOmega;
 			var stoppedPaths = false;
-			stoppedPaths = this.velocityCancel(currentTime, dt, isCentered, false, stoppedPaths, pathedInteriors);
-			var A = this.getExternalForces(currentTime, m, timeStep);
+			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
+			var A = this.getExternalForces(timeState.currentAttemptTime, m, timeStep);
 			var retf = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
 			A = retf[0];
 			var a = retf[1];
 			this.velocity = this.velocity.add(A.multiply(timeStep));
 			this.omega = this.omega.add(a.multiply(timeStep));
-			stoppedPaths = this.velocityCancel(currentTime, dt, isCentered, true, stoppedPaths, pathedInteriors);
+			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, true, stoppedPaths, pathedInteriors);
 			this._totalTime += timeStep;
 			if (contacts.length != 0) {
 				this._contactTime += timeStep;
@@ -703,7 +707,10 @@ class Marble extends GameObject {
 				for (interior in pathedInteriors) {
 					// interior.popTickState();
 					// interior.setStopped(stoppedPaths);
-					interior.update(piTime, timeStep);
+					var piDT = timeState.clone();
+					piDT.currentAttemptTime = piTime;
+					piDT.dt = timeStep;
+					interior.update(piDT);
 				}
 			}
 
@@ -724,7 +731,10 @@ class Marble extends GameObject {
 			this.collider.velocity = this.velocity;
 
 			if (this.heldPowerup != null && m.powerup) {
-				this.heldPowerup.use(currentTime);
+				var pTime = timeState.clone();
+				pTime.dt = timeStep;
+				pTime.currentAttemptTime = piTime;
+				this.heldPowerup.use(pTime);
 				this.heldPowerup = null;
 			}
 
@@ -734,7 +744,7 @@ class Marble extends GameObject {
 		this.queuedContacts = [];
 	}
 
-	public function update(currentTime:Float, dt:Float, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
+	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var move = new Move();
 		move.d = new Vector();
 		if (this.controllable) {
@@ -758,17 +768,17 @@ class Marble extends GameObject {
 			}
 		}
 
-		advancePhysics(currentTime, dt, move, collisionWorld, pathedInteriors);
+		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
 
 		if (this.controllable) {
-			this.camera.update(currentTime, dt);
+			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
 
-		updatePowerupStates(currentTime, dt);
+		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
 
 		this.trailEmitter();
 		if (bounceEmitDelay > 0)
-			bounceEmitDelay -= dt;
+			bounceEmitDelay -= timeState.dt;
 		if (bounceEmitDelay < 0)
 			bounceEmitDelay = 0;
 

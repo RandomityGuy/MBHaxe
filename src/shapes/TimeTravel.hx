@@ -1,5 +1,7 @@
 package shapes;
 
+import src.TimeState;
+
 class TimeTravel extends PowerUp {
 	var timeBonus:Float = 5;
 
@@ -19,5 +21,5 @@ class TimeTravel extends PowerUp {
 		return true;
 	}
 
-	public function use(time:Float) {}
+	public function use(time:TimeState) {}
 }

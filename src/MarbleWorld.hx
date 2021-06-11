@@ -1,5 +1,6 @@
 package src;
 
+import src.TimeState;
 import gui.PlayGui;
 import src.ParticleSystem.ParticleManager;
 import src.Util;
@@ -35,8 +36,7 @@ class MarbleWorld extends Scheduler {
 	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<DtsObject> = [];
 
-	public var currentTime:Float = 0;
-	public var elapsedTime:Float = 0;
+	public var timeState:TimeState = new TimeState();
 	public var bonusTime:Float = 0;
 	public var sky:Sky;
 
@@ -78,8 +78,8 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function restart() {
-		this.currentTime = 0;
-		this.elapsedTime = 0;
+		this.timeState.currentAttemptTime = 0;
+		this.timeState.gameplayClock = 0;
 		this.bonusTime = 0;
 		this.outOfBounds = false;
 		this.marble.camera.CameraPitch = 0.45;
@@ -99,19 +99,19 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function updateGameState() {
-		if (this.currentTime < 0.5) {
+		if (this.timeState.currentAttemptTime < 0.5) {
 			this.playGui.setCenterText('none');
 		}
-		if (this.currentTime >= 0.5 && this.currentTime < 2) {
+		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 2)) {
 			this.playGui.setCenterText('ready');
 		}
-		if (this.currentTime >= 2 && this.currentTime < 3.5) {
+		if ((this.timeState.currentAttemptTime >= 2) && (this.timeState.currentAttemptTime < 3.5)) {
 			this.playGui.setCenterText('set');
 		}
-		if (this.currentTime >= 3.5 && this.currentTime < 5.5) {
+		if ((this.timeState.currentAttemptTime >= 3.5) && (this.timeState.currentAttemptTime < 5.5)) {
 			this.playGui.setCenterText('go');
 		}
-		if (this.currentTime >= 5.5) {
+		if (this.timeState.currentAttemptTime >= 5.5) {
 			this.playGui.setCenterText('none');
 		}
 		if (this.outOfBounds) {
@@ -169,18 +169,18 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function update(dt:Float) {
-		this.tickSchedule(currentTime);
+		this.updateTimer(dt);
+		this.tickSchedule(timeState.currentAttemptTime);
 		this.updateGameState();
 		for (obj in dtsObjects) {
-			obj.update(currentTime, dt);
+			obj.update(timeState);
 		}
 		for (marble in marbles) {
-			marble.update(currentTime, dt, collisionWorld, this.pathedInteriors);
+			marble.update(timeState, collisionWorld, this.pathedInteriors);
 		}
 		this.instanceManager.update(dt);
-		this.particleManager.update(1000 * currentTime, dt);
-		this.updateTimer(dt);
-		this.playGui.update(currentTime, dt);
+		this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
+		this.playGui.update(timeState);
 
 		if (this.marble != null) {
 			callCollisionHandlers(marble);
@@ -193,31 +193,33 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function updateTimer(dt:Float) {
-		currentTime += dt;
+		this.timeState.dt = dt;
+		this.timeState.currentAttemptTime += dt;
+		this.timeState.timeSinceLoad += dt;
 		if (this.bonusTime != 0) {
 			this.bonusTime -= dt;
 			if (this.bonusTime < 0) {
-				this.elapsedTime -= this.bonusTime;
+				this.timeState.gameplayClock -= this.bonusTime;
 				this.bonusTime = 0;
 			}
 		} else {
-			this.elapsedTime += dt;
+			this.timeState.gameplayClock += dt;
 		}
-		playGui.formatTimer(this.elapsedTime);
+		playGui.formatTimer(this.timeState.gameplayClock);
 	}
 
 	function updateTexts() {
 		var helpTextTime = this.helpTextTimeState;
 		var alertTextTime = this.alertTextTimeState;
-		var helpTextCompletion = Math.pow(Util.clamp((this.currentTime - helpTextTime - 3), 0, 1), 2);
-		var alertTextCompletion = Math.pow(Util.clamp((this.currentTime - alertTextTime - 3), 0, 1), 2);
+		var helpTextCompletion = Math.pow(Util.clamp((this.timeState.currentAttemptTime - helpTextTime - 3), 0, 1), 2);
+		var alertTextCompletion = Math.pow(Util.clamp((this.timeState.currentAttemptTime - alertTextTime - 3), 0, 1), 2);
 		this.playGui.setHelpTextOpacity(1 - helpTextCompletion);
 		this.playGui.setAlertTextOpacity(1 - alertTextCompletion);
 	}
 
 	public function displayAlert(text:String) {
 		this.playGui.setAlertText(text);
-		this.alertTextTimeState = this.currentTime;
+		this.alertTextTimeState = this.timeState.currentAttemptTime;
 	}
 
 	function callCollisionHandlers(marble:Marble) {
@@ -234,7 +236,7 @@ class MarbleWorld extends Scheduler {
 				if (contact.go is DtsObject) {
 					var shape:DtsObject = cast contact.go;
 
-					var contacttest = shape.colliders.filter(x -> x != null).map(x -> x.sphereIntersection(contactsphere, 0));
+					var contacttest = shape.colliders.filter(x -> x != null).map(x -> x.sphereIntersection(contactsphere, timeState));
 					var contactlist:Array<collision.CollisionInfo> = [];
 					for (l in contacttest) {
 						contactlist = contactlist.concat(l);
@@ -243,13 +245,13 @@ class MarbleWorld extends Scheduler {
 					if (!calledShapes.contains(shape) && !this.shapeImmunity.contains(shape) && contactlist.length != 0) {
 						calledShapes.push(shape);
 						newImmunity.push(shape);
-						shape.onMarbleContact(currentTime);
+						shape.onMarbleContact(timeState);
 					}
 
-					shape.onMarbleInside(currentTime);
+					shape.onMarbleInside(timeState);
 					if (!this.shapeOrTriggerInside.contains(shape)) {
 						this.shapeOrTriggerInside.push(shape);
-						shape.onMarbleEnter(currentTime);
+						shape.onMarbleEnter(timeState);
 					}
 					inside.push(shape);
 				}
@@ -259,7 +261,7 @@ class MarbleWorld extends Scheduler {
 		for (object in shapeOrTriggerInside) {
 			if (!inside.contains(object)) {
 				this.shapeOrTriggerInside.remove(object);
-				object.onMarbleLeave(currentTime);
+				object.onMarbleLeave(timeState);
 			}
 		}
 
@@ -286,9 +288,9 @@ class MarbleWorld extends Scheduler {
 		return q;
 	}
 
-	public function setUp(vec:Vector, time:Float) {
+	public function setUp(vec:Vector, timeState:TimeState) {
 		this.currentUp = vec;
-		var currentQuat = this.getOrientationQuat(time);
+		var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
 		var oldUp = new Vector(0, 0, 1);
 		oldUp.transform(currentQuat.toMatrix());
 
@@ -329,7 +331,7 @@ class MarbleWorld extends Scheduler {
 
 		this.newOrientationQuat = quatChange;
 		this.oldOrientationQuat = currentQuat;
-		this.orientationChangeTime = time;
+		this.orientationChangeTime = timeState.currentAttemptTime;
 	}
 }
 

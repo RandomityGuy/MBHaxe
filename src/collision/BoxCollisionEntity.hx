@@ -1,5 +1,6 @@
 package collision;
 
+import src.TimeState;
 import h3d.Matrix;
 import src.GameObject;
 import src.Marble;
@@ -27,7 +28,7 @@ class BoxCollisionEntity extends CollisionEntity {
 		return boundingBox.rayIntersection(Ray.fromValues(rayOrigin.x, rayOrigin.y, rayOrigin.z, rayDirection.x, rayDirection.y, rayDirection.z), true) != -1;
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, dt:Float) {
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
 		return [];
 	}
 }

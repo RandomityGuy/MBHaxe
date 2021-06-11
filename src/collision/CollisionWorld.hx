@@ -1,5 +1,6 @@
 package collision;
 
+import src.TimeState;
 import h3d.col.Bounds;
 import h3d.col.Sphere;
 import h3d.Vector;
@@ -14,11 +15,11 @@ class CollisionWorld {
 		this.octree = new Octree();
 	}
 
-	public function sphereIntersection(spherecollision:SphereCollisionEntity, dt:Float) {
+	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState) {
 		var position = spherecollision.transform.getPosition();
 		var radius = spherecollision.radius;
 		var velocity = spherecollision.velocity;
-		var searchdist = (velocity.length() * dt) + radius;
+		var searchdist = (velocity.length() * timeState.dt) + radius;
 		var intersections = this.octree.radiusSearch(position, searchdist);
 
 		var box = new Bounds();
@@ -35,14 +36,14 @@ class CollisionWorld {
 			var entity:CollisionEntity = cast obj;
 
 			if (entity.go.isCollideable) {
-				contacts = contacts.concat(entity.sphereIntersection(spherecollision, dt));
+				contacts = contacts.concat(entity.sphereIntersection(spherecollision, timeState));
 			}
 		}
 
 		for (obj in dynamicEntities) {
 			if (obj != spherecollision) {
 				if (obj.boundingBox.collide(box) && obj.go.isCollideable)
-					contacts = contacts.concat(obj.sphereIntersection(spherecollision, dt));
+					contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
 			}
 		}
 		return contacts;

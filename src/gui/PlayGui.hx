@@ -1,5 +1,6 @@
 package gui;
 
+import src.TimeState;
 import format.gif.Data.Block;
 import hxd.res.BitmapFont;
 import h2d.Text;
@@ -306,11 +307,11 @@ class PlayGui {
 		engine.popTarget();
 	}
 
-	public function update(currentTime:Float, dt:Float) {
-		this.gemImageObject.update(currentTime, dt);
-		this.gemImageScene.setElapsedTime(dt);
+	public function update(timeState:TimeState) {
+		this.gemImageObject.update(timeState);
+		this.gemImageScene.setElapsedTime(timeState.dt);
 		if (this.powerupImageObject != null)
-			this.powerupImageObject.update(currentTime, dt);
-		this.powerupImageScene.setElapsedTime(dt);
+			this.powerupImageObject.update(timeState);
+		this.powerupImageScene.setElapsedTime(timeState.dt);
 	}
 }

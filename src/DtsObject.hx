@@ -1,5 +1,6 @@
 package src;
 
+import src.TimeState;
 import shaders.Billboard;
 import collision.BoxCollisionEntity;
 import shaders.DtsTexture;
@@ -559,7 +560,7 @@ class DtsObject extends GameObject {
 		this.level.collisionWorld.updateTransform(this.boundingCollider);
 	}
 
-	public function update(currentTime:Float, dt:Float) {
+	public function update(timeState:TimeState) {
 		for (sequence in this.dts.sequences) {
 			if (!this.showSequences)
 				break;
@@ -569,7 +570,7 @@ class DtsObject extends GameObject {
 			var rot = sequence.rotationMatters.length > 0 ? sequence.rotationMatters[0] : 0;
 			var trans = sequence.translationMatters.length > 0 ? sequence.translationMatters[0] : 0;
 			var affectedCount = 0;
-			var completion = (currentTime + dt) / sequence.duration;
+			var completion = timeState.timeSinceLoad / sequence.duration;
 
 			var quaternions:Array<Quat> = null;
 			var translations:Array<Vector> = null;
@@ -745,7 +746,7 @@ class DtsObject extends GameObject {
 				if (iflSequence.length == 0 || !this.showSequences)
 					continue;
 
-				var completion = (currentTime + dt) / (iflSequence[0].duration);
+				var completion = timeState.timeSinceLoad / (iflSequence[0].duration);
 				var keyframe = Math.floor(completion * info.length) % info.length;
 				var currentFile = info[keyframe];
 				var texture = ResourceLoader.getTexture(this.directoryPath + '/' + currentFile);
@@ -760,7 +761,7 @@ class DtsObject extends GameObject {
 
 		if (this.ambientRotate) {
 			var spinAnimation = new Quat();
-			spinAnimation.initRotateAxis(0, 0, -1, (currentTime + dt) * this.ambientSpinFactor);
+			spinAnimation.initRotateAxis(0, 0, -1, timeState.timeSinceLoad * this.ambientSpinFactor);
 
 			var orientation = this.getRotationQuat();
 			// spinAnimation.multiply(orientation, spinAnimation);

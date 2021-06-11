@@ -1,5 +1,6 @@
 package collision;
 
+import src.TimeState;
 import src.GameObject;
 import dif.math.Point3F;
 import dif.math.PlaneF;
@@ -79,7 +80,7 @@ class CollisionEntity implements IOctreeObject {
 		this.priority = priority;
 	}
 
-	public function sphereIntersection(collisionEntity:SphereCollisionEntity, dt:Float) {
+	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
 		var position = collisionEntity.transform.getPosition();
 		var velocity = collisionEntity.velocity;
 		var radius = collisionEntity.radius;
@@ -91,7 +92,7 @@ class CollisionEntity implements IOctreeObject {
 		var surfaces = octree.radiusSearch(localpos, radius * 1.1);
 
 		var tform = transform.clone();
-		tform.setPosition(tform.getPosition().add(this.velocity.multiply(dt)));
+		tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));
 
 		function toDifPoint(pt:Vector) {
 			return new Point3F(pt.x, pt.y, pt.z);

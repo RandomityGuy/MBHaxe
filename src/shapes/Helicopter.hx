@@ -1,5 +1,6 @@
 package shapes;
 
+import src.TimeState;
 import src.DtsObject;
 
 class Helicopter extends PowerUp {
@@ -17,9 +18,9 @@ class Helicopter extends PowerUp {
 		return this.level.pickUpPowerUp(this);
 	}
 
-	public function use(time:Float) {
+	public function use(timeState:TimeState) {
 		var marble = this.level.marble;
-		marble.enableHelicopter(time);
+		marble.enableHelicopter(timeState.currentAttemptTime);
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
 		//	AudioManager.play(this.sounds[1]);
