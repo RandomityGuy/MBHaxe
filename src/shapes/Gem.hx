@@ -1,12 +1,13 @@
 package shapes;
 
+import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
 
 class Gem extends DtsObject {
 	public var pickedUp:Bool;
 
-	public function new() {
+	public function new(element:MissionElementItem) {
 		super();
 		dtsPath = "data/shapes/items/gem.dts";
 		ambientRotate = true;
@@ -15,7 +16,9 @@ class Gem extends DtsObject {
 		showSequences = false; // Gems actually have an animation for the little shiny thing, but the actual game ignores that. I get it, it was annoying as hell.
 
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
-		var color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
+		var color = element.datablock.substring("GemItem".length);
+		if (color.length == 0)
+			GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 		this.identifier = "Gem" + color;
 		this.matNameOverride.set('base.gem', color + ".gem");
 	}
