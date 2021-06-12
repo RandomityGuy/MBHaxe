@@ -75,7 +75,9 @@ class MissionElementSky extends MissionElementBase {
 	var position:String;
 	var rotation:String;
 	var scale:String;
-	var cloudheightper:Array<String>;
+	var cloudheightper0:String;
+	var cloudheightper1:String;
+	var cloudheightper2:String;
 	var cloudspeed1:String;
 	var cloudspeed2:String;
 	var cloudspeed3:String;

@@ -1,5 +1,7 @@
 package;
 
+import mis.MisParser;
+import sys.io.File;
 import shapes.EndPad;
 import shapes.LandMine;
 import shapes.StartPad;
@@ -56,6 +58,10 @@ class Main extends hxd.App {
 		var tform = db.getTransform();
 		tform.setPosition(new Vector(0, 0, 0));
 		db.setTransform(tform);
+
+		var ltr = File.getContent("data/missions/beginner/finale.mis");
+		var mfp = new MisParser(ltr);
+		var mis = mfp.parse();
 
 		// var pi = new PathedInterior();
 		// DifBuilder.loadDif("data/interiors/addon/smallplatform.dif", loader, pi);

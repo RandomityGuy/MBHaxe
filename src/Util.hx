@@ -139,4 +139,21 @@ class Util {
 		}
 		return -1;
 	}
+
+	public static function indexIsInStringLiteral(str:String, index:Int, strLiteralToken = '"') {
+		var inString = false;
+		for (i in 0...str.length) {
+			var c = str.charAt(i);
+			if (inString) {
+				if (i == index)
+					return true;
+				if (c == strLiteralToken && str.charAt(i - 1) != '\\')
+					inString = false;
+				continue;
+			}
+			if (c == strLiteralToken)
+				inString = true;
+		}
+		return false;
+	}
 }
