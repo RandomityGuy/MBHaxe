@@ -1,5 +1,8 @@
 package src;
 
+import src.GameObject;
+import triggers.Trigger;
+import src.Mission;
 import src.TimeState;
 import gui.PlayGui;
 import src.ParticleSystem.ParticleManager;
@@ -34,18 +37,21 @@ class MarbleWorld extends Scheduler {
 	public var dtsObjects:Array<DtsObject> = [];
 
 	var shapeImmunity:Array<DtsObject> = [];
-	var shapeOrTriggerInside:Array<DtsObject> = [];
+	var shapeOrTriggerInside:Array<GameObject> = [];
 
 	public var timeState:TimeState = new TimeState();
 	public var bonusTime:Float = 0;
 	public var sky:Sky;
 
 	public var scene:Scene;
+	public var mission:Mission;
 
 	public var marble:Marble;
 	public var worldOrientation:Quat;
 	public var currentUp = new Vector(0, 0, 1);
 	public var outOfBounds:Bool = false;
+	public var outOfBoundsTime:TimeState;
+	public var finishTime:TimeState;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -222,6 +228,13 @@ class MarbleWorld extends Scheduler {
 		this.alertTextTimeState = this.timeState.currentAttemptTime;
 	}
 
+	public function displayHelp(text:String) {
+		this.playGui.setHelpText(text);
+		this.helpTextTimeState = this.timeState.currentAttemptTime;
+
+		// TODO FIX
+	}
+
 	function callCollisionHandlers(marble:Marble) {
 		var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
 		var newImmunity = [];
@@ -249,11 +262,25 @@ class MarbleWorld extends Scheduler {
 					}
 
 					shape.onMarbleInside(timeState);
-					if (!this.shapeOrTriggerInside.contains(shape)) {
-						this.shapeOrTriggerInside.push(shape);
+					if (!this.shapeOrTriggerInside.contains(contact.go)) {
+						this.shapeOrTriggerInside.push(contact.go);
 						shape.onMarbleEnter(timeState);
 					}
-					inside.push(shape);
+					inside.push(contact.go);
+				}
+				if (contact.go is Trigger) {
+					var trigger:Trigger = cast contact.go;
+					var contacttest = trigger.collider.sphereIntersection(contactsphere, timeState);
+					if (contacttest.length != 0) {
+						trigger.onMarbleContact(timeState);
+					}
+
+					trigger.onMarbleInside(timeState);
+					if (!this.shapeOrTriggerInside.contains(contact.go)) {
+						this.shapeOrTriggerInside.push(contact.go);
+						trigger.onMarbleEnter(timeState);
+					}
+					inside.push(contact.go);
 				}
 			}
 		}
@@ -332,6 +359,19 @@ class MarbleWorld extends Scheduler {
 		this.newOrientationQuat = quatChange;
 		this.oldOrientationQuat = currentQuat;
 		this.orientationChangeTime = timeState.currentAttemptTime;
+	}
+
+	public function goOutOfBounds() {
+		if (this.outOfBounds || this.finishTime != null)
+			return;
+		// this.updateCamera(this.timeState); // Update the camera at the point of OOB-ing
+		this.outOfBounds = true;
+		this.outOfBoundsTime = this.timeState.clone();
+		// this.oobCameraPosition = camera.position.clone();
+		playGui.setCenterText('outofbounds');
+		// AudioManager.play('whoosh.wav');
+		// if (this.replay.mode != = 'playback')
+		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
 	}
 }
 

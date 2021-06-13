@@ -230,6 +230,15 @@ class PlayGui {
 		alertTextBackground.y = scene2d.height - 102 + 1;
 	}
 
+	public function setHelpText(text:String) {
+		this.helpTextForeground.text = text;
+		this.helpTextBackground.text = text;
+		helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
+		helpTextForeground.y = scene2d.height - 102;
+		helpTextBackground.x = scene2d.width / 2 - helpTextBackground.textWidth / 2 + 1;
+		helpTextBackground.y = scene2d.height - 102 + 1;
+	}
+
 	public function setPowerupImage(powerupIdentifier:String) {
 		this.powerupImageScene.removeChildren();
 		if (powerupIdentifier == "SuperJump") {

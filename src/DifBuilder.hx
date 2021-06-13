@@ -71,10 +71,10 @@ class DifBuilder {
 		}
 	];
 
-	public static function loadDif(path:String, itr:InteriorObject) {
+	public static function loadDif(path:String, itr:InteriorObject, ?so:Int = -1) {
 		var dif = ResourceLoader.loadInterior(path);
 
-		var geo = dif.interiors[0];
+		var geo = so == -1 ? dif.interiors[0] : dif.subObjects[so];
 
 		var hulls = geo.convexHulls;
 

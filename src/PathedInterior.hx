@@ -1,5 +1,13 @@
 package src;
 
+import src.DifBuilder;
+import mis.MisParser;
+import mis.MissionElement;
+import triggers.MustChangeTrigger;
+import mis.MissionElement.MissionElementPathedInterior;
+import mis.MissionElement.MissionElementSimGroup;
+import mis.MissionElement.MissionElementPath;
+import h3d.Quat;
 import src.TimeState;
 import src.MarbleWorld;
 import h3d.Matrix;
@@ -18,12 +26,21 @@ typedef PIState = {
 }
 
 class PathedInterior extends InteriorObject {
+	var path:MissionElementPath;
+	var simGroup:MissionElementSimGroup;
+	var element:MissionElementPathedInterior;
+	var triggers:Array<MustChangeTrigger> = [];
+
 	public var markerData:Array<PathedInteriorMarker> = [];
 
 	public var duration:Float;
 	public var currentTime:Float;
 	public var targetTime:Float;
 	public var changeTime:Float;
+
+	var basePosition:Vector;
+	var baseOrientation:Quat;
+	var baseScale:Vector;
 
 	public var prevPosition:Vector;
 	public var currentPosition:Vector;
@@ -33,14 +50,72 @@ class PathedInterior extends InteriorObject {
 	var stopped:Bool = false;
 	var stopTime:Float;
 
+	public var level:MarbleWorld;
+
 	var previousState:PIState;
+
+	public static function createFromSimGroup(simGroup:MissionElementSimGroup, level:MarbleWorld) {
+		var interiorElement:MissionElementPathedInterior = cast simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior)[0];
+		var difFile = level.mission.getDifPath(interiorElement.interiorresource);
+		if (difFile == null)
+			return null;
+		var pathedInterior = new PathedInterior();
+		pathedInterior.level = level;
+
+		DifBuilder.loadDif(difFile, pathedInterior, cast MisParser.parseNumber(interiorElement.interiorindex)); // (difFile, path, level, );
+
+		pathedInterior.simGroup = simGroup;
+		pathedInterior.element = interiorElement;
+		level.interiors.push(pathedInterior);
+		// await
+		// Util.wait(10); // See shapes for the meaning of this hack
+		// await
+		pathedInterior.init(level);
+		return pathedInterior;
+	}
 
 	public function new() {
 		super();
 	}
 
 	public override function init(level:MarbleWorld) {
+		this.basePosition = MisParser.parseVector3(this.element.baseposition);
+		this.baseOrientation = MisParser.parseRotation(this.element.baserotation);
+		this.baseScale = MisParser.parseVector3(this.element.basescale);
+		// this.hasCollision = this.baseScale.x != 0
+		// 	&& this.baseScale.y != = 0 && this.baseScale.z != = 0; // Don't want to add buggy geometry
+
+		// Fix zero-volume interiors so they receive correct lighting
+		if (this.baseScale.x == 0)
+			this.baseScale.x = 0.0001;
+		if (this.baseScale.y == 0)
+			this.baseScale.y = 0.0001;
+		if (this.baseScale.z == 0)
+			this.baseScale.z = 0.0001;
+
+		this.setRotationQuat(this.baseOrientation);
+
+		this.path = cast this.simGroup.elements.filter((element) -> element._type == MissionElementType.Path)[0];
+
+		this.markerData = this.path.markers.map(x -> {
+			var marker = new PathedInteriorMarker();
+			marker.msToNext = MisParser.parseNumber(x.mstonext) / 1000;
+			marker.smoothingType = x.smoothingtype;
+			marker.position = MisParser.parseVector3(x.position);
+			marker.rotation = MisParser.parseRotation(x.rotation);
+			return marker;
+		});
+
 		this.computeDuration();
+
+		var triggers = this.simGroup.elements.filter((element) -> element._type == MissionElementType.Trigger);
+		for (triggerElement in triggers) {
+			var te:MissionElementTrigger = cast triggerElement;
+			if (te.targettime == null)
+				continue; // Not a pathed interior trigger
+			var trigger = new MustChangeTrigger(te, cast this);
+			this.triggers.push(trigger);
+		}
 		this.reset();
 	}
 
@@ -147,7 +222,10 @@ class PathedInterior extends InteriorObject {
 		var m2:PathedInteriorMarker = this.markerData[1];
 		if (m1 == null) {
 			// Incase there are no markers at all
-			var mat = this.getTransform();
+			var mat = new Matrix();
+			this.baseOrientation.toMatrix(mat);
+			mat.setPosition(this.basePosition);
+			mat.scale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
 			return mat;
 		} else {
 			m1 = this.markerData[0];
@@ -197,17 +275,32 @@ class PathedInterior extends InteriorObject {
 		// Offset by the position of the first marker
 		var firstPosition = this.markerData[0].position;
 		position.sub(firstPosition);
-		var tform = this.getTransform().clone();
-		var basePosition = tform.getPosition();
 		position.add(basePosition); // Add the base position
-		tform.setPosition(position);
-		return tform;
+
+		var mat = new Matrix();
+		this.baseOrientation.toMatrix(mat);
+		mat.setPosition(position);
+		mat.scale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+
+		return mat;
 	}
 
 	override function reset() {
 		this.currentTime = 0;
 		this.targetTime = -1;
 		this.changeTime = 0;
+
+		if (this.element.initialposition != "") {
+			this.currentTime = MisParser.parseNumber(this.element.initialposition) / 1000;
+		}
+
+		if (this.element.initialtargetposition != "") {
+			this.targetTime = MisParser.parseNumber(this.element.initialtargetposition);
+			// Alright this is strange. In Torque, there are some FPS-dependent client/server desync issues that cause the interior to start at the end position whenever the initialTargetPosition is somewhere greater than 1 and, like, approximately below 50.
+			if (this.targetTime > 0 && this.targetTime < 50)
+				this.currentTime = this.duration;
+		}
+
 		this.stopTime = 0;
 		this.stopped = false;
 		// Reset the position
