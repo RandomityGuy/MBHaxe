@@ -107,6 +107,9 @@ class CollisionEntity implements IOctreeObject {
 		for (obj in surfaces) {
 			var surface:CollisionSurface = cast obj;
 
+			var surfaceBestContact:CollisionInfo = null;
+			var bestDot:Float = Math.NEGATIVE_INFINITY;
+
 			var i = 0;
 			while (i < surface.indices.length) {
 				var v0 = surface.points[surface.indices[i]].transformed(tform);
@@ -117,32 +120,41 @@ class CollisionEntity implements IOctreeObject {
 
 				var res = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
 				var closest = res.point;
-				// closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surface.normals[surface.indices[i]]);
+				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
 				if (closest != null) {
-					if (position.sub(closest).lengthSq() < radius * radius) {
+					if (position.sub(closest).lengthSq() <= radius * radius) {
 						var normal = res.normal;
 
 						if (position.sub(closest).dot(surfacenormal) > 0) {
 							normal.normalize();
 
-							var cinfo = new CollisionInfo();
-							cinfo.normal = normal; // surface.normals[surface.indices[i]];
-							cinfo.point = closest;
-							// cinfo.collider = this;
-							cinfo.velocity = this.velocity;
-							cinfo.contactDistance = closest.distance(position);
-							cinfo.otherObject = this.go;
-							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
-							cinfo.restitution = surface.restitution;
-							cinfo.force = surface.force;
-							cinfo.friction = surface.friction;
-							contacts.push(cinfo);
+							// We find the normal that is closest to the surface normal, sort of fixes weird edge cases of when colliding with
+							var testDot = normal.dot(surfacenormal);
+							if (testDot > bestDot) {
+								bestDot = testDot;
+
+								var cinfo = new CollisionInfo();
+								cinfo.normal = normal; // surface.normals[surface.indices[i]];
+								cinfo.point = closest;
+								// cinfo.collider = this;
+								cinfo.velocity = this.velocity;
+								cinfo.contactDistance = closest.distance(position);
+								cinfo.otherObject = this.go;
+								// cinfo.penetration = radius - (position.sub(closest).dot(normal));
+								cinfo.restitution = surface.restitution;
+								cinfo.force = surface.force;
+								cinfo.friction = surface.friction;
+								surfaceBestContact = cinfo;
+							}
 						}
 					}
 				}
 
 				i += 3;
 			}
+
+			if (surfaceBestContact != null)
+				contacts.push(surfaceBestContact);
 		}
 
 		return contacts;

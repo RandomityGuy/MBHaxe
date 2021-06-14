@@ -701,12 +701,13 @@ class Marble extends GameObject {
 			var intersectT = this.getIntersectionTime(timeStep, velocity);
 
 			if (intersectT < timeStep) {
-				// intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
+				intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
 				// intersectT /= 2;
 				var diff = timeStep - intersectT;
 				this.velocity = this.velocity.sub(A.multiply(diff));
 				this.omega = this.omega.sub(a.multiply(diff));
 				timeStep = intersectT;
+				trace('CCD at ${intersectT}');
 			}
 
 			piTime += timeStep;
