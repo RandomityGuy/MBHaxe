@@ -22,12 +22,12 @@ class DtsTexture extends hxsl.Shader {
 			if (killAlpha && c.a - killAlphaThreshold < 0)
 				discard;
 			if (additive)
-				pixelColor += c;
+				pixelColor = c;
 			else
 				pixelColor *= c;
 			if (specularAlpha)
 				specColor *= c.aaa;
-			pixelColor.a = c.a * currentOpacity;
+			pixelColor.a *= c.a * currentOpacity;
 		}
 	}
 

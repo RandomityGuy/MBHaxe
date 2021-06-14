@@ -28,12 +28,20 @@ class Sky extends Object {
 		var skyMesh = new h3d.scene.Mesh(sky, this);
 		skyMesh.material.mainPass.culling = Front;
 		// This is such a hack
-		skyMesh.material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
+		// skyMesh.material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
+		skyMesh.material.mainPass.enableLights = false;
+		skyMesh.material.receiveShadows = false;
 		skyMesh.material.blendMode = None;
+		var pbrprops = skyMesh.material.mainPass.getShader(PropsValues);
+		pbrprops.emissiveValue = 1;
+		pbrprops.roughnessValue = 0;
+		pbrprops.occlusionValue = 0;
+		pbrprops.metalnessValue = 1;
+
 		skyMesh.scale(200);
 		var env = new Environment(texture);
 		env.compute();
-		var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
+		// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
 		var shad = new h3d.shader.pbr.CubeLod(texture);
 		skyMesh.material.mainPass.addShader(shad);
 		skyMesh.material.shadows = false;

@@ -329,7 +329,6 @@ class Marble extends GameObject {
 			for (i in 0...contacts.length) {
 				var sVel = this.velocity.sub(contacts[i].velocity);
 				var surfaceDot = contacts[i].normal.dot(sVel);
-				trace(contacts[i].normal.length());
 
 				if ((!looped && surfaceDot < 0) || surfaceDot < -SurfaceDotThreshold) {
 					var velLen = this.velocity.length();

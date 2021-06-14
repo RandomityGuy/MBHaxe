@@ -15,6 +15,7 @@ class Gem extends DtsObject {
 		ambientRotate = true;
 		isCollideable = false;
 		pickedUp = false;
+		useInstancing = true;
 		showSequences = false; // Gems actually have an animation for the little shiny thing, but the actual game ignores that. I get it, it was annoying as hell.
 
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
@@ -29,7 +30,13 @@ class Gem extends DtsObject {
 		super.init(level);
 
 		for (material in this.materials) {
-			material.mainPass.addShader(new PropsValues(1, 0, 0, 1));
+			material.mainPass.enableLights = false;
+			var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
+			pbrprops.emissiveValue = 1;
+			pbrprops.roughnessValue = 0;
+			pbrprops.occlusionValue = 0;
+			pbrprops.metalnessValue = 1;
+			// material.mainPass.addShader(new PropsValues(1, 0, 0, 1));
 		}
 	}
 

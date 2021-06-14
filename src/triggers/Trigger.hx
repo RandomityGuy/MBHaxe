@@ -1,5 +1,8 @@
 package triggers;
 
+import h3d.scene.Mesh;
+import h3d.mat.Material;
+import h3d.prim.Cube;
 import h3d.col.Bounds;
 import h3d.Matrix;
 import h3d.Vector;
@@ -23,10 +26,10 @@ class Trigger extends GameObject {
 		this.level = level;
 		var coordinates = MisParser.parseNumberList(element.polyhedron);
 
-		var origin = new Vector(coordinates[0], coordinates[1], coordinates[2]);
-		var d1 = new Vector(coordinates[3], coordinates[4], coordinates[5]);
-		var d2 = new Vector(coordinates[6], coordinates[7], coordinates[8]);
-		var d3 = new Vector(coordinates[9], coordinates[10], coordinates[11]);
+		var origin = new Vector(-coordinates[0], coordinates[1], coordinates[2]);
+		var d1 = new Vector(-coordinates[3], coordinates[4], coordinates[5]);
+		var d2 = new Vector(-coordinates[6], coordinates[7], coordinates[8]);
+		var d3 = new Vector(-coordinates[9], coordinates[10], coordinates[11]);
 
 		// Create the 8 points of the parallelepiped
 		var p1 = origin.clone();
@@ -40,18 +43,34 @@ class Trigger extends GameObject {
 
 		var mat = new Matrix();
 		var quat = MisParser.parseRotation(element.rotation);
+		// quat.x = -quat.x;
+		// quat.w = -quat.w;
 		quat.toMatrix(mat);
 		var scale = MisParser.parseVector3(element.scale);
 		mat.scale(scale.x, scale.y, scale.z);
-		mat.setPosition(MisParser.parseVector3(element.position));
+		var pos = MisParser.parseVector3(element.position);
+		pos.x = -pos.x;
+		// mat.setPosition(pos);
 
 		var vertices = [p1, p2, p3, p4, p5, p6, p7, p8].map((vert) -> vert.transformed(mat));
 
 		var boundingbox = new Bounds();
 		for (vector in vertices) {
-			boundingbox.addPoint(vector.toPoint());
+			boundingbox.addPoint(vector.add(pos).toPoint());
 		}
 
 		collider = new BoxCollisionEntity(boundingbox, this);
+
+		// var cub = new Cube(boundingbox.xSize, boundingbox.ySize, boundingbox.zSize);
+		// cub.addUVs();
+		// cub.addNormals();
+		// var mat = Material.create();
+		// mat.mainPass.wireframe = true;
+		// var mesh = new Mesh(cub, mat, level.scene);
+		// // var m1 = new Mesh(cub, mat, level.scene);
+		// // m1.setPosition(boundingbox.xMin, boundingbox.yMin, boundingbox.zMin);
+		// // var m2 = new Mesh(cub, mat, level.scene);
+		// // m2.setPosition(boundingbox.xMax, boundingbox.yMax, boundingbox.zMax);
+		// mesh.setPosition(boundingbox.xMin, boundingbox.yMin, boundingbox.zMin);
 	}
 }

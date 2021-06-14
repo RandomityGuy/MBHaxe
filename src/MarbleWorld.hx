@@ -1,5 +1,7 @@
 package src;
 
+import h3d.scene.pbr.DirLight;
+import h3d.col.Bounds;
 import triggers.HelpTrigger;
 import triggers.InBoundsTrigger;
 import triggers.OutOfBoundsTrigger;
@@ -127,18 +129,47 @@ class MarbleWorld extends Scheduler {
 		};
 		scanMission(this.mission.root);
 
+		this.initScene();
+
+		this.addSimGroup(this.mission.root);
+		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+	}
+
+	public function initScene() {
 		this.collisionWorld = new CollisionWorld();
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
+
+		var renderer = cast(this.scene.renderer, h3d.scene.pbr.Renderer);
+
+		renderer.skyMode = Hide;
+
+		for (element in mission.root.elements) {
+			if (element._type != MissionElementType.Sun)
+				continue;
+
+			var sunElement:MissionElementSun = cast element;
+
+			var directionalColor = MisParser.parseVector4(sunElement.color);
+			var ambientColor = MisParser.parseVector4(sunElement.ambient);
+			var sunDirection = MisParser.parseVector3(sunElement.direction);
+			sunDirection.x = -sunDirection.x;
+
+			scene.lightSystem.ambientLight.load(ambientColor);
+
+			var sunlight = new DirLight(sunDirection, scene);
+			sunlight.color = directionalColor;
+		}
+
+		// var skyElement:MissionElementSky = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.Sky)[0];
+
 		this.sky = new Sky();
 		sky.dmlPath = "data/skies/sky_day.dml";
+
 		sky.init(cast this);
 		playGui.init(scene2d);
 		scene.addChild(sky);
-
-		this.addSimGroup(this.mission.root);
-		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 	}
 
 	public function start() {
@@ -427,8 +458,6 @@ class MarbleWorld extends Scheduler {
 	public function addTrigger(element:MissionElementTrigger) {
 		var trigger:Trigger = null;
 
-		return;
-
 		// Create a trigger based on type
 		if (element.datablock == "OutOfBoundsTrigger") {
 			trigger = new OutOfBoundsTrigger(element, cast this);
@@ -627,17 +656,26 @@ class MarbleWorld extends Scheduler {
 				}
 				if (contact.go is Trigger) {
 					var trigger:Trigger = cast contact.go;
-					var contacttest = trigger.collider.sphereIntersection(contactsphere, timeState);
-					if (contacttest.length != 0) {
-						trigger.onMarbleContact(timeState);
-					}
+					var triggeraabb = trigger.collider.boundingBox;
 
-					trigger.onMarbleInside(timeState);
-					if (!this.shapeOrTriggerInside.contains(contact.go)) {
-						this.shapeOrTriggerInside.push(contact.go);
-						trigger.onMarbleEnter(timeState);
+					var box = new Bounds();
+					var center = marble.collider.transform.getPosition();
+					var radius = marble._radius;
+					box.xMin = center.x - radius;
+					box.yMin = center.y - radius;
+					box.zMin = center.z - radius;
+					box.xMax = center.x + radius;
+					box.yMax = center.y + radius;
+					box.zMax = center.z + radius;
+
+					if (triggeraabb.collide(box)) {
+						trigger.onMarbleInside(timeState);
+						if (!this.shapeOrTriggerInside.contains(contact.go)) {
+							this.shapeOrTriggerInside.push(contact.go);
+							trigger.onMarbleEnter(timeState);
+						}
+						inside.push(contact.go);
 					}
-					inside.push(contact.go);
 				}
 			}
 		}

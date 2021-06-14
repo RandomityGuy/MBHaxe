@@ -333,11 +333,11 @@ class DtsObject extends GameObject {
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
 				// if (this.useInstancing) {
-				var dtsshader = new DtsTexture();
-				dtsshader.texture = texture;
-				dtsshader.currentOpacity = 1;
-				material.mainPass.removeShader(material.textureShader);
-				material.mainPass.addShader(dtsshader);
+				// var dtsshader = new DtsTexture();
+				// dtsshader.texture = texture;
+				// dtsshader.currentOpacity = 1;
+				// material.mainPass.removeShader(material.textureShader);
+				// material.mainPass.addShader(dtsshader);
 				// }
 				// TODO TRANSLUENCY SHIT
 			}
@@ -354,11 +354,15 @@ class DtsObject extends GameObject {
 			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;
-				material.mainPass.culling = h3d.mat.Data.Face.Front;
+				material.mainPass.depthWrite = false;
+				// material.mainPass.culling = h3d.mat.Data.Face.Front;
 			}
 			// TODO TRANSPARENCY SHIT
-			if (flags & 8 > 0)
+			if (flags & 8 > 0) {
 				material.blendMode = BlendMode.Add;
+				material.mainPass.setPassName("overlay");
+				// material.textureShader.additive = true;
+			}
 			if (flags & 16 > 0)
 				material.blendMode = BlendMode.Sub;
 
@@ -367,7 +371,7 @@ class DtsObject extends GameObject {
 			// }
 			// ((flags & 32) || environmentMaterial) ? new Materia
 
-			material.mainPass.addShader(new AlphaMult());
+			// material.mainPass.addShader(new AlphaMult());
 
 			this.materials.push(material);
 		}

@@ -1,5 +1,6 @@
 package src;
 
+import h3d.shader.pbr.PropsValues;
 import h3d.mat.Material;
 import src.ResourceLoader;
 import src.PathedInterior;
@@ -302,6 +303,7 @@ class DifBuilder {
 			} else {
 				material = Material.create();
 			}
+			// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 			// material.mainPass.wireframe = true;
 
 			var mesh = new Mesh(prim, material, itr);

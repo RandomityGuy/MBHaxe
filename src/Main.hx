@@ -61,10 +61,6 @@ class Main extends hxd.App {
 
 		world = new MarbleWorld(s3d, s2d, mission);
 
-		var dirlight = new DirLight(new Vector(0.5, 0.5, -0.5), s3d);
-		dirlight.enableSpecular = true;
-		s3d.lightSystem.ambientLight.set(0.3, 0.3, 0.3);
-
 		world.init();
 
 		// s3d.camera.
