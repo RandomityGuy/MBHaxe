@@ -41,9 +41,9 @@ class Trigger extends GameObject {
 		var mat = new Matrix();
 		var quat = MisParser.parseRotation(element.rotation);
 		quat.toMatrix(mat);
-		mat.setPosition(MisParser.parseVector3(element.position));
 		var scale = MisParser.parseVector3(element.scale);
 		mat.scale(scale.x, scale.y, scale.z);
+		mat.setPosition(MisParser.parseVector3(element.position));
 
 		var vertices = [p1, p2, p3, p4, p5, p6, p7, p8].map((vert) -> vert.transformed(mat));
 

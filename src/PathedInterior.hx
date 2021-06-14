@@ -29,7 +29,8 @@ class PathedInterior extends InteriorObject {
 	var path:MissionElementPath;
 	var simGroup:MissionElementSimGroup;
 	var element:MissionElementPathedInterior;
-	var triggers:Array<MustChangeTrigger> = [];
+
+	public var triggers:Array<MustChangeTrigger> = [];
 
 	public var markerData:Array<PathedInteriorMarker> = [];
 
@@ -64,6 +65,8 @@ class PathedInterior extends InteriorObject {
 
 		DifBuilder.loadDif(difFile, pathedInterior, cast MisParser.parseNumber(interiorElement.interiorindex)); // (difFile, path, level, );
 
+		pathedInterior.identifier = difFile + interiorElement.interiorindex;
+
 		pathedInterior.simGroup = simGroup;
 		pathedInterior.element = interiorElement;
 		level.interiors.push(pathedInterior);
@@ -80,7 +83,10 @@ class PathedInterior extends InteriorObject {
 
 	public override function init(level:MarbleWorld) {
 		this.basePosition = MisParser.parseVector3(this.element.baseposition);
+		this.basePosition.x = -this.basePosition.x;
 		this.baseOrientation = MisParser.parseRotation(this.element.baserotation);
+		this.baseOrientation.x = -this.baseOrientation.x;
+		this.baseOrientation.w = -this.baseOrientation.w;
 		this.baseScale = MisParser.parseVector3(this.element.basescale);
 		// this.hasCollision = this.baseScale.x != 0
 		// 	&& this.baseScale.y != = 0 && this.baseScale.z != = 0; // Don't want to add buggy geometry
@@ -133,9 +139,7 @@ class PathedInterior extends InteriorObject {
 			popTickState();
 		}
 
-		var transform = this.getTransformAtTime(this.getInternalTime(currentTime));
-
-		this.updatePosition();
+		var transform = this.getTransformAtTime(this.getInternalTime(timeState.currentAttemptTime));
 
 		var position = transform.getPosition();
 		this.prevPosition = this.currentPosition;
@@ -145,9 +149,11 @@ class PathedInterior extends InteriorObject {
 			pushTickState();
 		}
 		// if (!stopped)
-		// 	this.currentTime = currentTime;
+		// 	this.currentTime = timeState.currentAttemptTime;
 
 		velocity = position.sub(this.prevPosition).multiply(1 / timeState.dt);
+
+		this.updatePosition();
 	}
 
 	public function setStopped(stopped:Bool = true) {
@@ -191,11 +197,11 @@ class PathedInterior extends InteriorObject {
 		this.duration = total;
 	}
 
-	public function setTargetTime(now:Float, target:Float) {
-		var currentInternalTime = this.getInternalTime(now);
+	public function setTargetTime(now:TimeState, target:Float) {
+		var currentInternalTime = this.getInternalTime(now.currentAttemptTime);
 		this.currentTime = currentInternalTime; // Start where the interior currently is
 		this.targetTime = target;
-		this.changeTime = now;
+		this.changeTime = now.currentAttemptTime;
 	}
 
 	public function getInternalTime(externalTime:Float) {
@@ -224,8 +230,8 @@ class PathedInterior extends InteriorObject {
 			// Incase there are no markers at all
 			var mat = new Matrix();
 			this.baseOrientation.toMatrix(mat);
-			mat.setPosition(this.basePosition);
 			mat.scale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+			mat.setPosition(this.basePosition);
 			return mat;
 		} else {
 			m1 = this.markerData[0];
@@ -274,13 +280,14 @@ class PathedInterior extends InteriorObject {
 		}
 		// Offset by the position of the first marker
 		var firstPosition = this.markerData[0].position;
-		position.sub(firstPosition);
-		position.add(basePosition); // Add the base position
+		position = position.sub(firstPosition);
+		position = position.add(basePosition); // Add the base position
 
 		var mat = new Matrix();
 		this.baseOrientation.toMatrix(mat);
-		mat.setPosition(position);
+
 		mat.scale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+		mat.setPosition(position);
 
 		return mat;
 	}

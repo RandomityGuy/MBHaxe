@@ -599,7 +599,8 @@ class Marble extends GameObject {
 			var tform = obj.transform.clone();
 			var velDir = obj.velocity.normalized();
 			// tform.setPosition(tform.getPosition().add(velDir.multiply(_radius)));
-			tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)).sub(velDir.multiply(_radius)));
+			// tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)).sub(velDir.multiply(_radius)));
+			tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)));
 
 			var contacts = [];
 
@@ -693,20 +694,19 @@ class Marble extends GameObject {
 			var intersectT = this.getIntersectionTime(timeStep, velocity);
 
 			if (intersectT < timeStep) {
-				intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
+				// intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
 				// intersectT /= 2;
 				var diff = timeStep - intersectT;
 				this.velocity = this.velocity.sub(A.multiply(diff));
 				this.omega = this.omega.sub(a.multiply(diff));
 				timeStep = intersectT;
-				trace("CCD");
 			}
 
 			piTime += timeStep;
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
 					// interior.popTickState();
-					// interior.setStopped(stoppedPaths);
+					interior.setStopped(stoppedPaths);
 					var piDT = timeState.clone();
 					piDT.currentAttemptTime = piTime;
 					piDT.dt = timeStep;

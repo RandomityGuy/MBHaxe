@@ -277,6 +277,19 @@ class PlayGui {
 		}
 	}
 
+	public function formatGemCounter(collected:Int, total:Int) {
+		var totalTenths = Math.floor(total / 10);
+		var totalOnes = total % 10;
+
+		var collectedTenths = Math.floor(collected / 10);
+		var collectedOnes = collected % 10;
+
+		gemCountNumbers[0].currentFrame = collectedTenths;
+		gemCountNumbers[1].currentFrame = collectedOnes;
+		gemCountNumbers[2].currentFrame = totalTenths;
+		gemCountNumbers[3].currentFrame = totalOnes;
+	}
+
 	public function formatTimer(time:Float) {
 		var et = time * 1000;
 		var thousandth = et % 10;

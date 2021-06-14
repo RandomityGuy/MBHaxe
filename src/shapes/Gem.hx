@@ -1,5 +1,7 @@
 package shapes;
 
+import h3d.shader.pbr.PropsValues;
+import src.MarbleWorld;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
@@ -18,9 +20,17 @@ class Gem extends DtsObject {
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
 		var color = element.datablock.substring("GemItem".length);
 		if (color.length == 0)
-			GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
+			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 		this.identifier = "Gem" + color;
 		this.matNameOverride.set('base.gem', color + ".gem");
+	}
+
+	public override function init(level:MarbleWorld) {
+		super.init(level);
+
+		for (material in this.materials) {
+			material.mainPass.addShader(new PropsValues(1, 0, 0, 1));
+		}
 	}
 
 	public override function setHide(hide:Bool) {
@@ -39,7 +49,7 @@ class Gem extends DtsObject {
 			return;
 		this.pickedUp = true;
 		this.setOpacity(0); // Hide the gem
-		// this.level.pickUpGem(this);
+		this.level.pickUpGem(this);
 		// this.level.replay.recordMarbleInside(this);
 	}
 

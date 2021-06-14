@@ -181,9 +181,9 @@ class MisParser {
 	}
 
 	function hasNextElement() {
-		if (!elementHeadRegEx.match(this.text.substring(this.index)))
+		if (!elementHeadRegEx.matchSub(this.text, this.index))
 			return false;
-		if (Util.indexOfIgnoreStringLiterals(this.text.substring(this.index, this.index + elementHeadRegEx.matchedPos().pos), '}') != -1)
+		if (Util.indexOfIgnoreStringLiterals(this.text.substring(this.index, elementHeadRegEx.matchedPos().pos), '}') != -1)
 			return false;
 		return true;
 	}
@@ -197,6 +197,7 @@ class MisParser {
 				continue;
 			elements.push(element);
 		}
+
 		var endingBraceIndex = Util.indexOfIgnoreStringLiterals(this.text, '};', this.index);
 		if (endingBraceIndex == -1)
 			endingBraceIndex = this.text.length;
@@ -346,7 +347,6 @@ class MisParser {
 		obj._name = name;
 		obj.markers = sg.elements.map(x -> cast x);
 		obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
-		copyFields(obj);
 
 		return obj;
 	}
@@ -428,8 +428,8 @@ class MisParser {
 			if (StringTools.startsWith(x, '$ ') && this.variables[x] != null) {
 				// Replace the variable with its value
 				x = this.resolveExpression(this.variables[x]);
-			} else if (StringTools.startsWith(x, ' "') && StringTools.endsWith(x, '" ')) {
-				x = Util.unescape(x.substring(1, x.length - 2)); // It' s a string literal, so remove " "
+			} else if (StringTools.startsWith(x, '"') && StringTools.endsWith(x, '"')) {
+				x = Util.unescape(x.substring(1, x.length - 1)); // It' s a string literal, so remove " "
 			}
 			return x;
 		});

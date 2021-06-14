@@ -1,5 +1,6 @@
 package src;
 
+import h3d.shader.pbr.PropsValues;
 import shaders.Billboard;
 import shaders.DtsTexture;
 import h3d.mat.Pass;
@@ -100,6 +101,12 @@ class InstanceManager {
 					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
 					minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
 					minfo.transparencymeshbatch.material.mainPass.addShader(dtsshader);
+
+					var pbrshader = mat.mainPass.getShader(PropsValues);
+					if (pbrshader != null) {
+						minfo.meshbatch.material.mainPass.addShader(pbrshader);
+						minfo.transparencymeshbatch.material.mainPass.addShader(pbrshader);
+					}
 				}
 				minfos.push(minfo);
 			}

@@ -1,5 +1,33 @@
 package src;
 
+import triggers.HelpTrigger;
+import triggers.InBoundsTrigger;
+import triggers.OutOfBoundsTrigger;
+import shapes.Trapdoor;
+import shapes.Oilslick;
+import shapes.Tornado;
+import shapes.TimeTravel;
+import shapes.SuperSpeed;
+import shapes.ShockAbsorber;
+import shapes.LandMine;
+import shapes.AntiGravity;
+import shapes.SmallDuctFan;
+import shapes.DuctFan;
+import shapes.Helicopter;
+import shapes.TriangleBumper;
+import shapes.RoundBumper;
+import shapes.SuperBounce;
+import shapes.SignCaution;
+import shapes.SuperJump;
+import shapes.Gem;
+import shapes.SignPlain;
+import shapes.SignFinish;
+import shapes.EndPad;
+import shapes.StartPad;
+import h3d.Matrix;
+import mis.MisParser;
+import src.DifBuilder;
+import mis.MissionElement;
 import src.GameObject;
 import triggers.Trigger;
 import src.Mission;
@@ -35,6 +63,7 @@ class MarbleWorld extends Scheduler {
 	public var pathedInteriors:Array<PathedInterior> = [];
 	public var marbles:Array<Marble> = [];
 	public var dtsObjects:Array<DtsObject> = [];
+	public var triggers:Array<Trigger> = [];
 
 	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<GameObject> = [];
@@ -43,7 +72,10 @@ class MarbleWorld extends Scheduler {
 	public var bonusTime:Float = 0;
 	public var sky:Sky;
 
+	var endPadElement:MissionElementStaticShape;
+
 	public var scene:Scene;
+	public var scene2d:h2d.Scene;
 	public var mission:Mission;
 
 	public var marble:Marble;
@@ -52,6 +84,8 @@ class MarbleWorld extends Scheduler {
 	public var outOfBounds:Bool = false;
 	public var outOfBoundsTime:TimeState;
 	public var finishTime:TimeState;
+	public var totalGems:Int = 0;
+	public var gemCount:Int = 0;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -62,9 +96,38 @@ class MarbleWorld extends Scheduler {
 	/** The new target camera orientation quat  */
 	public var newOrientationQuat = new Quat();
 
-	public function new(scene:Scene, scene2d:h2d.Scene) {
-		this.collisionWorld = new CollisionWorld();
+	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission) {
 		this.scene = scene;
+		this.scene2d = scene2d;
+		this.mission = mission;
+	}
+
+	public function init() {
+		function scanMission(simGroup:MissionElementSimGroup) {
+			for (element in simGroup.elements) {
+				if ([
+					MissionElementType.InteriorInstance,
+					MissionElementType.Item,
+					MissionElementType.PathedInterior,
+					MissionElementType.StaticShape,
+					MissionElementType.TSStatic
+				].contains(element._type)) {
+					// this.loadingState.total++;
+
+					// Override the end pad element. We do this because only the last finish pad element will actually do anything.
+					if (element._type == MissionElementType.StaticShape) {
+						var so:MissionElementStaticShape = cast element;
+						if (so.datablock.toLowerCase() == 'endpad')
+							this.endPadElement = so;
+					}
+				} else if (element._type == MissionElementType.SimGroup) {
+					scanMission(cast element);
+				}
+			}
+		};
+		scanMission(this.mission.root);
+
+		this.collisionWorld = new CollisionWorld();
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
@@ -73,6 +136,9 @@ class MarbleWorld extends Scheduler {
 		sky.init(cast this);
 		playGui.init(scene2d);
 		scene.addChild(sky);
+
+		this.addSimGroup(this.mission.root);
+		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 	}
 
 	public function start() {
@@ -102,6 +168,8 @@ class MarbleWorld extends Scheduler {
 		this.deselectPowerUp();
 
 		this.clearSchedule();
+
+		return 0;
 	}
 
 	public function updateGameState() {
@@ -124,6 +192,261 @@ class MarbleWorld extends Scheduler {
 			this.playGui.setCenterText('outofbounds');
 		}
 	}
+
+	public function addSimGroup(simGroup:MissionElementSimGroup) {
+		if (simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior).length != 0) {
+			// Create the pathed interior
+			var pathedInterior = src.PathedInterior.createFromSimGroup(simGroup, cast this);
+			this.addPathedInterior(pathedInterior);
+			if (pathedInterior == null)
+				return;
+
+			// if (pathedInterior.hasCollision)
+			// 	this.physics.addInterior(pathedInterior);
+			for (trigger in pathedInterior.triggers)
+				this.triggers.push(trigger);
+
+			return;
+		}
+
+		for (element in simGroup.elements) {
+			switch (element._type) {
+				case MissionElementType.SimGroup:
+					this.addSimGroup(cast element);
+				case MissionElementType.InteriorInstance:
+					this.addInteriorFromMis(cast element);
+				case MissionElementType.StaticShape:
+					this.addStaticShape(cast element);
+				case MissionElementType.Item:
+					this.addItem(cast element);
+				case MissionElementType.Trigger:
+					this.addTrigger(cast element);
+				case MissionElementType.TSStatic:
+					this.addTSStatic(cast element);
+				case MissionElementType.ParticleEmitterNode:
+					this.addParticleEmitterNode(cast element);
+				default:
+			}
+		}
+	}
+
+	public function addInteriorFromMis(element:MissionElementInteriorInstance) {
+		var difPath = this.mission.getDifPath(element.interiorfile);
+		if (difPath == "")
+			return;
+
+		var interior = new InteriorObject();
+		interior.interiorFile = difPath;
+		// DifBuilder.loadDif(difPath, interior);
+		// this.interiors.push(interior);
+		this.addInterior(interior);
+
+		var interiorPosition = MisParser.parseVector3(element.position);
+		interiorPosition.x = -interiorPosition.x;
+		var interiorRotation = MisParser.parseRotation(element.rotation);
+		interiorRotation.x = -interiorRotation.x;
+		interiorRotation.w = -interiorRotation.w;
+		var interiorScale = MisParser.parseVector3(element.scale);
+		// var hasCollision = interiorScale.x != = 0 && interiorScale.y != = 0 && interiorScale.z != = 0; // Don't want to add buggy geometry
+
+		// Fix zero-volume interiors so they receive correct lighting
+		if (interiorScale.x == 0)
+			interiorScale.x = 0.0001;
+		if (interiorScale.y == 0)
+			interiorScale.y = 0.0001;
+		if (interiorScale.z == 0)
+			interiorScale.z = 0.0001;
+
+		var mat = new Matrix();
+		interiorRotation.toMatrix(mat);
+		mat.scale(interiorScale.x, interiorScale.y, interiorScale.z);
+		mat.setPosition(interiorPosition);
+
+		interior.setTransform(mat);
+
+		// interior.setTransform(interiorPosition, interiorRotation, interiorScale);
+
+		// this.scene.add(interior.group);
+		// if (hasCollision)
+		// 	this.physics.addInterior(interior);
+	}
+
+	public function addStaticShape(element:MissionElementStaticShape) {
+		var shape:DtsObject = null;
+
+		// Add the correct shape based on type
+		var dataBlockLowerCase = element.datablock.toLowerCase();
+		if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
+		else if (dataBlockLowerCase == "startpad")
+			shape = new StartPad();
+		else if (dataBlockLowerCase == "endpad")
+			shape = new EndPad();
+		else if (dataBlockLowerCase == "signfinish")
+			shape = new SignFinish();
+		else if (StringTools.startsWith(dataBlockLowerCase, "signplain"))
+			shape = new SignPlain(element);
+		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
+			shape = new Gem(cast element);
+			this.totalGems++;
+		} else if (dataBlockLowerCase == "superjumpitem")
+			shape = new SuperJump();
+		else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
+			shape = new SignCaution(element);
+		else if (dataBlockLowerCase == "superbounceitem")
+			shape = new SuperBounce();
+		else if (dataBlockLowerCase == "roundbumper")
+			shape = new RoundBumper();
+		else if (dataBlockLowerCase == "trianglebumper")
+			shape = new TriangleBumper();
+		else if (dataBlockLowerCase == "helicopteritem")
+			shape = new Helicopter();
+		else if (dataBlockLowerCase == "ductfan")
+			shape = new DuctFan();
+		else if (dataBlockLowerCase == "smallductfan")
+			shape = new SmallDuctFan();
+		else if (dataBlockLowerCase == "antigravityitem")
+			shape = new AntiGravity();
+		else if (dataBlockLowerCase == "landmine")
+			shape = new LandMine();
+		else if (dataBlockLowerCase == "shockabsorberitem")
+			shape = new ShockAbsorber();
+		else if (dataBlockLowerCase == "superspeeditem")
+			shape = new SuperSpeed();
+		else if (dataBlockLowerCase == "timetravelitem")
+			shape = new TimeTravel(cast element);
+		else if (dataBlockLowerCase == "tornado")
+			shape = new Tornado();
+		else if (dataBlockLowerCase == "trapdoor")
+			shape = new Trapdoor();
+		else if (dataBlockLowerCase == "oilslick")
+			shape = new Oilslick();
+		else {
+			return;
+		}
+
+		var shapePosition = MisParser.parseVector3(element.position);
+		shapePosition.x = -shapePosition.x;
+		var shapeRotation = MisParser.parseRotation(element.rotation);
+		shapeRotation.x = -shapeRotation.x;
+		shapeRotation.w = -shapeRotation.w;
+		var shapeScale = MisParser.parseVector3(element.scale);
+
+		// Apparently we still do collide with zero-volume shapes
+		if (shapeScale.x == 0)
+			shapeScale.x = 0.0001;
+		if (shapeScale.y == 0)
+			shapeScale.y = 0.0001;
+		if (shapeScale.z == 0)
+			shapeScale.z = 0.0001;
+
+		var mat = shapeRotation.toMatrix();
+		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
+		mat.setPosition(shapePosition);
+
+		this.addDtsObject(shape);
+
+		shape.setTransform(mat);
+
+		// else if (dataBlockLowerCase == "pushbutton")
+		// 	shape = new PushButton();
+	}
+
+	public function addItem(element:MissionElementItem) {
+		var shape:DtsObject = null;
+
+		// Add the correct shape based on type
+		var dataBlockLowerCase = element.datablock.toLowerCase();
+		if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
+		else if (dataBlockLowerCase == "startpad")
+			shape = new StartPad();
+		else if (dataBlockLowerCase == "endpad")
+			shape = new EndPad();
+		else if (dataBlockLowerCase == "signfinish")
+			shape = new SignFinish();
+		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
+			shape = new Gem(cast element);
+			this.totalGems++;
+		} else if (dataBlockLowerCase == "superjumpitem")
+			shape = new SuperJump();
+		else if (dataBlockLowerCase == "superbounceitem")
+			shape = new SuperBounce();
+		else if (dataBlockLowerCase == "roundbumper")
+			shape = new RoundBumper();
+		else if (dataBlockLowerCase == "trianglebumper")
+			shape = new TriangleBumper();
+		else if (dataBlockLowerCase == "helicopteritem")
+			shape = new Helicopter();
+		else if (dataBlockLowerCase == "ductfan")
+			shape = new DuctFan();
+		else if (dataBlockLowerCase == "smallductfan")
+			shape = new SmallDuctFan();
+		else if (dataBlockLowerCase == "antigravityitem")
+			shape = new AntiGravity();
+		else if (dataBlockLowerCase == "landmine")
+			shape = new LandMine();
+		else if (dataBlockLowerCase == "shockabsorberitem")
+			shape = new ShockAbsorber();
+		else if (dataBlockLowerCase == "superspeeditem")
+			shape = new SuperSpeed();
+		else if (dataBlockLowerCase == "timetravelitem")
+			shape = new TimeTravel(cast element);
+		else if (dataBlockLowerCase == "tornado")
+			shape = new Tornado();
+		else if (dataBlockLowerCase == "trapdoor")
+			shape = new Trapdoor();
+		else if (dataBlockLowerCase == "oilslick")
+			shape = new Oilslick();
+		else {
+			return;
+		}
+
+		var shapePosition = MisParser.parseVector3(element.position);
+		shapePosition.x = -shapePosition.x;
+		var shapeRotation = MisParser.parseRotation(element.rotation);
+		shapeRotation.x = -shapeRotation.x;
+		shapeRotation.w = -shapeRotation.w;
+		var shapeScale = MisParser.parseVector3(element.scale);
+
+		// Apparently we still do collide with zero-volume shapes
+		if (shapeScale.x == 0)
+			shapeScale.x = 0.0001;
+		if (shapeScale.y == 0)
+			shapeScale.y = 0.0001;
+		if (shapeScale.z == 0)
+			shapeScale.z = 0.0001;
+
+		var mat = shapeRotation.toMatrix();
+		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
+		mat.setPosition(shapePosition);
+
+		this.addDtsObject(shape);
+
+		shape.setTransform(mat);
+	}
+
+	public function addTrigger(element:MissionElementTrigger) {
+		var trigger:Trigger = null;
+
+		return;
+
+		// Create a trigger based on type
+		if (element.datablock == "OutOfBoundsTrigger") {
+			trigger = new OutOfBoundsTrigger(element, cast this);
+		} else if (element.datablock == "InBoundsTrigger") {
+			trigger = new InBoundsTrigger(element, cast this);
+		} else if (element.datablock == "HelpTrigger") {
+			trigger = new HelpTrigger(element, cast this);
+		} else {
+			return;
+		}
+
+		this.triggers.push(trigger);
+		this.collisionWorld.addEntity(trigger.collider);
+	}
+
+	public function addTSStatic(element:MissionElementTSStatic) {}
+
+	public function addParticleEmitterNode(element:MissionElementParticleEmitterNode) {}
 
 	public function addInterior(obj:InteriorObject) {
 		this.interiors.push(obj);
@@ -233,6 +556,40 @@ class MarbleWorld extends Scheduler {
 		this.helpTextTimeState = this.timeState.currentAttemptTime;
 
 		// TODO FIX
+	}
+
+	public function pickUpGem(gem:Gem) {
+		this.gemCount++;
+		var string:String;
+
+		// Show a notification (and play a sound) based on the gems remaining
+		if (this.gemCount == this.totalGems) {
+			string = "You have all the gems, head for the finish!";
+			// if (!this.rewinding)
+			//	AudioManager.play('gotallgems.wav');
+
+			// Some levels with this package end immediately upon collection of all gems
+			// if (this.mission.misFile.activatedPackages.includes('endWithTheGems')) {
+			// 	let
+			// 	completionOfImpact = this.physics.computeCompletionOfImpactWithBody(gem.bodies[0], 2); // Get the exact point of impact
+			// 	this.touchFinish(completionOfImpact);
+			// }
+		} else {
+			string = "You picked up a gem.  ";
+
+			var remaining = this.totalGems - this.gemCount;
+			if (remaining == 1) {
+				string += "Only one gem to go!";
+			} else {
+				string += '${remaining} gems to go!';
+			}
+
+			// if (!this.rewinding)
+			// 	AudioManager.play('gotgem.wav');
+		}
+
+		displayAlert(string);
+		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 	}
 
 	function callCollisionHandlers(marble:Marble) {

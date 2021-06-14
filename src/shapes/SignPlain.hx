@@ -18,9 +18,11 @@ class SignPlain extends DtsObject {
 			case "Left":
 				this.matNameOverride.set("base.plainsign", "left.plainsign");
 			case "Up":
-				this.matNameOverride.set("base.plainsign", "uo.plainsign");
+				this.matNameOverride.set("base.plainsign", "up.plainsign");
 			case "Down":
 				this.matNameOverride.set("base.plainsign", "down.plainsign");
 		}
+
+		this.identifier = "SignPlain" + direction;
 	}
 }

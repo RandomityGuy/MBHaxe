@@ -16,5 +16,6 @@ class SignCaution extends DtsObject {
 			case "Danger":
 				this.matNameOverride.set("base.cautionsign", "danger.cautionsign");
 		}
+		this.identifier = "CautionSign" + type;
 	}
 }
