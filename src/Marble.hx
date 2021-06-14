@@ -329,14 +329,17 @@ class Marble extends GameObject {
 			for (i in 0...contacts.length) {
 				var sVel = this.velocity.sub(contacts[i].velocity);
 				var surfaceDot = contacts[i].normal.dot(sVel);
+				trace(contacts[i].normal.length());
+
 				if ((!looped && surfaceDot < 0) || surfaceDot < -SurfaceDotThreshold) {
 					var velLen = this.velocity.length();
-					var surfaceVel = contacts[i].normal.multiply(surfaceDot);
-					this.ReportBounce(contacts[i].point, contacts[i].normal, -surfaceDot);
+					var surfaceVel = this.contacts[i].normal.multiply(surfaceDot);
+
 					if (noBounce) {
 						this.velocity = this.velocity.sub(surfaceVel);
 					} else if (contacts[i].collider != null) {
-						var otherMarble = (cast(contacts[i].collider, SphereCollisionEntity).marble);
+						var otherMarble:Marble = cast contacts[i].collider.go;
+
 						var ourMass = this._mass;
 						var theirMass = otherMarble._mass;
 
@@ -344,25 +347,19 @@ class Marble extends GameObject {
 
 						var dp = this.velocity.multiply(ourMass).sub(otherMarble.velocity.multiply(theirMass));
 						var normP = contacts[i].normal.multiply(dp.dot(contacts[i].normal));
-						normP = normP.multiply(bounce + 1);
 
-						this.velocity = this.velocity.sub(normP.multiply(1 / ourMass));
+						normP = normP.multiply(1 + bounce);
 
 						otherMarble.velocity = otherMarble.velocity.add(normP.multiply(1 / theirMass));
 						contacts[i].velocity = otherMarble.velocity;
 					} else {
-						var velocity2 = contacts[i].velocity;
-						if (velocity2.length() > 0.0001 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
-							var vel = this.velocity.clone();
-							vel = vel.sub(surfaceVel);
-							vel.normalize();
-							vel = vel.multiply(velLen);
-							this.velocity = vel;
+						if (contacts[i].velocity.length() == 0 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
+							this.velocity = this.velocity.sub(surfaceVel);
+							this.velocity.normalize();
+							this.velocity = this.velocity.multiply(velLen);
 							surfaceSlide = true;
-						} else if (surfaceDot > -this._minBounceVel) {
-							var vel = this.velocity.clone();
-							vel = vel.sub(surfaceVel);
-							this.velocity = vel;
+						} else if (surfaceDot >= -this._minBounceVel) {
+							this.velocity = this.velocity.sub(surfaceVel);
 						} else {
 							var restitution = this._bounceRestitution;
 							if (currentTime - this.superBounceEnableTime < 5) {
@@ -372,26 +369,34 @@ class Marble extends GameObject {
 								restitution = 0;
 							}
 							restitution *= contacts[i].restitution;
+
 							var velocityAdd = surfaceVel.multiply(-(1 + restitution));
 							var vAtC = sVel.add(this.omega.cross(contacts[i].normal.multiply(-this._radius)));
 							var normalVel = -contacts[i].normal.dot(sVel);
+
 							bounceEmitter(sVel.length() * restitution, contacts[i].normal);
+
 							vAtC = vAtC.sub(contacts[i].normal.multiply(contacts[i].normal.dot(sVel)));
+
 							var vAtCMag = vAtC.length();
 							if (vAtCMag != 0) {
 								var friction = this._bounceKineticFriction * contacts[i].friction;
-								var angVMagnitude = 5 * friction * normalVel / (2 * this._radius);
-								if (angVMagnitude > vAtCMag / this._radius) {
+
+								var angVMagnitude = friction * 5 * normalVel / (2 * this._radius);
+								if (vAtCMag / this._radius < angVMagnitude)
 									angVMagnitude = vAtCMag / this._radius;
-								}
+
 								var vAtCDir = vAtC.multiply(1 / vAtCMag);
+
 								var deltaOmega = contacts[i].normal.cross(vAtCDir).multiply(angVMagnitude);
 								this.omega = this.omega.add(deltaOmega);
-								this.velocity = this.velocity.sub(deltaOmega.cross(contacts[i].normal.multiply(this._radius)));
+
+								this.velocity = this.velocity.sub(deltaOmega.cross(contacts[i].normal.multiply(_radius)));
 							}
 							this.velocity = this.velocity.add(velocityAdd);
 						}
 					}
+
 					done = false;
 				}
 			}
@@ -576,6 +581,7 @@ class Marble extends GameObject {
 	function getIntersectionTime(dt:Float, velocity:Vector) {
 		var expandedcollider = new SphereCollisionEntity(cast this);
 		var position = this.getAbsPos().getPosition();
+
 		expandedcollider.transform = Matrix.T(position.x, position.y, position.z);
 		expandedcollider.radius = velocity.multiply(dt).length() + _radius;
 
@@ -597,10 +603,12 @@ class Marble extends GameObject {
 			var surfaces = obj.octree.radiusSearch(localpos, radius * 1.1);
 
 			var tform = obj.transform.clone();
-			var velDir = obj.velocity.normalized();
+
+			var relVelocity = velocity.sub(obj.velocity);
+
 			// tform.setPosition(tform.getPosition().add(velDir.multiply(_radius)));
 			// tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)).sub(velDir.multiply(_radius)));
-			tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)));
+			// tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)));
 
 			var contacts = [];
 
@@ -617,12 +625,12 @@ class Marble extends GameObject {
 
 					var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
 
-					var closest = Collision.IntersectTriangleCapsule(position, position.add(velocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
+					var closest = Collision.IntersectTriangleCapsule(position, position.add(relVelocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
 
 					if (closest != null) {
-						var t = (-position.dot(surfacenormal) - polyPlane.d) / velocity.dot(surfacenormal);
+						var t = (-position.dot(surfacenormal) - polyPlane.d) / relVelocity.dot(surfacenormal);
 
-						var pt = position.add(velocity.multiply(t));
+						var pt = position.add(relVelocity.multiply(t));
 
 						if (Collision.PointInTriangle(pt, v0, v, v2)) {
 							if (t > 0 && t < intersectT) {

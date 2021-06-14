@@ -1,5 +1,7 @@
 package;
 
+import hxd.res.DefaultFont;
+import h2d.Text;
 import src.Mission;
 import mis.MisParser;
 import sys.io.File;
@@ -45,6 +47,8 @@ class Main extends hxd.App {
 	var world:MarbleWorld;
 	var dtsObj:DtsObject;
 
+	var fpsCounter:Text;
+
 	override function init() {
 		super.init();
 
@@ -74,11 +78,16 @@ class Main extends hxd.App {
 		// world.addMarble(marble2);
 		// marble2.setPosition(5, 0, 5);
 		// marble.setPosition(-10, -5, 5);
+
+		fpsCounter = new Text(DefaultFont.get(), s2d);
+		fpsCounter.y = 40;
+		fpsCounter.color = new Vector(1, 1, 1, 1);
 	}
 
 	override function update(dt:Float) {
 		super.update(dt);
 		world.update(dt);
+		fpsCounter.text = 'FPS: ${this.engine.fps}';
 	}
 
 	override function render(e:h3d.Engine) {

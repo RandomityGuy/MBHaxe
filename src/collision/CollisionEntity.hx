@@ -92,7 +92,7 @@ class CollisionEntity implements IOctreeObject {
 		var surfaces = octree.radiusSearch(localpos, radius * 1.1);
 
 		var tform = transform.clone();
-		tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));
+		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));
 
 		function toDifPoint(pt:Vector) {
 			return new Point3F(pt.x, pt.y, pt.z);

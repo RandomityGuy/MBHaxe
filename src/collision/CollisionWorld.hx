@@ -42,8 +42,8 @@ class CollisionWorld {
 
 		for (obj in dynamicEntities) {
 			if (obj != spherecollision) {
-				if (obj.boundingBox.collide(box) && obj.go.isCollideable)
-					contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
+				// if (obj.boundingBox.collide(box) && obj.go.isCollideable)
+				contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
 			}
 		}
 		return contacts;
