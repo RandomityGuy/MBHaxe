@@ -593,9 +593,6 @@ class MarbleWorld extends Scheduler {
 		this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
 		this.playGui.update(timeState);
 
-		if (this.marble != null) {
-			callCollisionHandlers(marble);
-		}
 		this.updateTexts();
 	}
 
@@ -677,7 +674,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 	}
 
-	function callCollisionHandlers(marble:Marble) {
+	public function callCollisionHandlers(marble:Marble, timeState:TimeState) {
 		var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
 		var newImmunity = [];
 		var calledShapes = [];

@@ -691,8 +691,8 @@ class Marble extends GameObject {
 			if (timeRemaining <= 0)
 				break;
 
-			var timeStep = 0.00800000037997961;
-			if (timeRemaining < 0.00800000037997961)
+			var timeStep = 0.002;
+			if (timeRemaining < 0.002)
 				timeStep = timeRemaining;
 
 			var tempState = timeState.clone();
@@ -774,9 +774,15 @@ class Marble extends GameObject {
 				this.heldPowerup = null;
 			}
 
+			if (this.controllable) {
+				var tempTimeState = timeState.clone();
+				tempState.currentAttemptTime = piTime;
+				tempState.dt = timeStep;
+				this.level.callCollisionHandlers(cast this, tempTimeState);
+			}
+
 			timeRemaining -= timeStep;
-			it++;
-		} while (it <= 10);
+		} while (true);
 		this.queuedContacts = [];
 	}
 

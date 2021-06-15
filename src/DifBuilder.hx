@@ -103,6 +103,8 @@ class DifBuilder {
 			for (j in hull.surfaceStart...(hull.surfaceStart + hull.surfaceCount)) {
 				var surfaceindex = geo.hullSurfaceIndices[j];
 				var surface = geo.surfaces[surfaceindex];
+				if (surface == null)
+					continue;
 				var planeindex = surface.planeIndex;
 
 				var planeFlipped = (planeindex & 0x8000) == 0x8000;
