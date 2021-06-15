@@ -55,7 +55,7 @@ final landMineSmokeParticle:ParticleEmitterOptions = {
 			new Vector(0.2, 0.2, 0.2, 1),
 			new Vector(0, 0, 0, 0)
 		],
-		sizes: [1, 1.5, 2],
+		sizes: [1.5, 2, 3],
 		times: [0, 0.5, 1]
 	}
 };

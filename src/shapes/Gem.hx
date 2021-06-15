@@ -26,20 +26,6 @@ class Gem extends DtsObject {
 		this.matNameOverride.set('base.gem', color + ".gem");
 	}
 
-	public override function init(level:MarbleWorld) {
-		super.init(level);
-
-		for (material in this.materials) {
-			material.mainPass.enableLights = false;
-			var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
-			pbrprops.emissiveValue = 1;
-			pbrprops.roughnessValue = 0;
-			pbrprops.occlusionValue = 0;
-			pbrprops.metalnessValue = 1;
-			// material.mainPass.addShader(new PropsValues(1, 0, 0, 1));
-		}
-	}
-
 	public override function setHide(hide:Bool) {
 		if (hide) {
 			this.pickedUp = true;

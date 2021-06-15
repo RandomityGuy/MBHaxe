@@ -155,11 +155,12 @@ class MarbleWorld extends Scheduler {
 			var ambientColor = MisParser.parseVector4(sunElement.ambient);
 			var sunDirection = MisParser.parseVector3(sunElement.direction);
 			sunDirection.x = -sunDirection.x;
+			// sunDirection.z = -sunDirection.z;
 
 			scene.lightSystem.ambientLight.load(ambientColor);
 
 			var sunlight = new DirLight(sunDirection, scene);
-			sunlight.color = directionalColor;
+			sunlight.color = directionalColor.multiply(2);
 		}
 
 		// var skyElement:MissionElementSky = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.Sky)[0];

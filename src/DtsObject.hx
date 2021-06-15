@@ -366,6 +366,14 @@ class DtsObject extends GameObject {
 			if (flags & 16 > 0)
 				material.blendMode = BlendMode.Sub;
 
+			if (flags & 32 > 0) {
+				var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
+				pbrprops.emissiveValue = 1;
+				pbrprops.roughnessValue = 0;
+				pbrprops.occlusionValue = 0;
+				pbrprops.metalnessValue = 1;
+			}
+
 			// if (this.isTSStatic && !(flags & 64 > 0)) {
 			// 	// TODO THIS SHIT
 			// }
