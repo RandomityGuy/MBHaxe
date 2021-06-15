@@ -52,7 +52,7 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		var ltr = File.getContent("data/missions/beginner/finale.mis");
+		var ltr = File.getContent("data/missions/beginner/movement.mis");
 		var mfp = new MisParser(ltr);
 		var mis = mfp.parse();
 
@@ -62,13 +62,10 @@ class Main extends hxd.App {
 		world = new MarbleWorld(s3d, s2d, mission);
 
 		world.init();
+		world.start();
 
 		// s3d.camera.
-
-		var marble = new Marble();
-		marble.controllable = true;
-		world.addMarble(marble);
-		marble.setPosition(5, 0, 5);
+		// marble.setPosition(5, 0, 5);
 
 		// var marble2 = new Marble();
 		// world.addMarble(marble2);

@@ -75,6 +75,7 @@ class MarbleWorld extends Scheduler {
 	public var sky:Sky;
 
 	var endPadElement:MissionElementStaticShape;
+	var endPad:EndPad;
 
 	public var scene:Scene;
 	public var scene2d:h2d.Scene;
@@ -86,6 +87,8 @@ class MarbleWorld extends Scheduler {
 	public var outOfBounds:Bool = false;
 	public var outOfBoundsTime:TimeState;
 	public var finishTime:TimeState;
+	public var finishPitch:Float;
+	public var finishYaw:Float;
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
 
@@ -130,8 +133,10 @@ class MarbleWorld extends Scheduler {
 		scanMission(this.mission.root);
 
 		this.initScene();
+		this.initMarble();
 
 		this.addSimGroup(this.mission.root);
+		this.endPad.generateCollider();
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 	}
 
@@ -173,6 +178,12 @@ class MarbleWorld extends Scheduler {
 		scene.addChild(sky);
 	}
 
+	public function initMarble() {
+		var marble = new Marble();
+		marble.controllable = true;
+		this.addMarble(marble);
+	}
+
 	public function start() {
 		restart();
 		for (interior in this.interiors)
@@ -186,7 +197,26 @@ class MarbleWorld extends Scheduler {
 		this.timeState.gameplayClock = 0;
 		this.bonusTime = 0;
 		this.outOfBounds = false;
-		this.marble.camera.CameraPitch = 0.45;
+		this.finishTime = null;
+
+		var startquat = this.getStartPositionAndOrientation();
+
+		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 3);
+		this.marble.collider.transform.setPosition(startquat.position);
+		this.marble.reset();
+
+		var euler = startquat.quat.toEuler();
+		this.marble.camera.CameraYaw = euler.z - Math.PI / 2;
+		this.marble.camera.CameraPitch = -0.45;
+		this.marble.camera.oob = false;
+		this.marble.mode = Start;
+		this.marble.startPad = cast startquat.pad;
+		sky.follow = marble;
+
+		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
+			&& element._name == "MissionInfo")[0];
+		if (missionInfo.starthelptext != "")
+			displayHelp(missionInfo.starthelptext); // Show the start help text
 
 		for (shape in dtsObjects)
 			shape.reset();
@@ -216,6 +246,7 @@ class MarbleWorld extends Scheduler {
 		}
 		if ((this.timeState.currentAttemptTime >= 3.5) && (this.timeState.currentAttemptTime < 5.5)) {
 			this.playGui.setCenterText('go');
+			this.marble.mode = Play;
 		}
 		if (this.timeState.currentAttemptTime >= 5.5) {
 			this.playGui.setCenterText('none');
@@ -223,6 +254,25 @@ class MarbleWorld extends Scheduler {
 		if (this.outOfBounds) {
 			this.playGui.setCenterText('outofbounds');
 		}
+	}
+
+	function getStartPositionAndOrientation() {
+		// The player is spawned at the last start pad in the mission file.
+		var startPad = this.dtsObjects.filter(x -> x is StartPad).pop();
+		var position:Vector;
+		var quat:Quat = new Quat();
+		if (startPad != null) {
+			// If there's a start pad, start there
+			position = startPad.getAbsPos().getPosition();
+			quat = startPad.getRotationQuat().clone();
+		} else {
+			position = new Vector(0, 0, 300);
+		}
+		return {
+			position: position,
+			quat: quat,
+			pad: startPad
+		};
 	}
 
 	public function addSimGroup(simGroup:MissionElementSimGroup) {
@@ -311,9 +361,11 @@ class MarbleWorld extends Scheduler {
 		if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
 		else if (dataBlockLowerCase == "startpad")
 			shape = new StartPad();
-		else if (dataBlockLowerCase == "endpad")
+		else if (dataBlockLowerCase == "endpad") {
 			shape = new EndPad();
-		else if (dataBlockLowerCase == "signfinish")
+			if (element == endPadElement)
+				endPad = cast shape;
+		} else if (dataBlockLowerCase == "signfinish")
 			shape = new SignFinish();
 		else if (StringTools.startsWith(dataBlockLowerCase, "signplain"))
 			shape = new SignPlain(element);
@@ -555,15 +607,18 @@ class MarbleWorld extends Scheduler {
 		this.timeState.dt = dt;
 		this.timeState.currentAttemptTime += dt;
 		this.timeState.timeSinceLoad += dt;
-		if (this.bonusTime != 0) {
+		if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
 			this.bonusTime -= dt;
 			if (this.bonusTime < 0) {
 				this.timeState.gameplayClock -= this.bonusTime;
 				this.bonusTime = 0;
 			}
 		} else {
-			this.timeState.gameplayClock += dt;
+			if (this.timeState.currentAttemptTime >= 3.5)
+				this.timeState.gameplayClock += dt;
 		}
+		if (finishTime != null)
+			this.timeState.gameplayClock = finishTime.gameplayClock;
 		playGui.formatTimer(this.timeState.gameplayClock);
 	}
 
@@ -631,6 +686,20 @@ class MarbleWorld extends Scheduler {
 		var contactsphere = new SphereCollisionEntity(marble);
 		contactsphere.velocity = new Vector();
 
+		var spherebounds = new Bounds();
+		var center = marble.collider.transform.getPosition();
+		var radius = marble._radius;
+		spherebounds.xMin = center.x - radius;
+		spherebounds.yMin = center.y - radius;
+		spherebounds.zMin = center.z - radius;
+		spherebounds.xMax = center.x + radius;
+		spherebounds.yMax = center.y + radius;
+		spherebounds.zMax = center.z + radius;
+
+		var gjkSphere = new collision.gjk.Sphere();
+		gjkSphere.position = center;
+		gjkSphere.radius = radius;
+
 		for (contact in contacts) {
 			if (contact.go != marble) {
 				if (contact.go is DtsObject) {
@@ -659,17 +728,7 @@ class MarbleWorld extends Scheduler {
 					var trigger:Trigger = cast contact.go;
 					var triggeraabb = trigger.collider.boundingBox;
 
-					var box = new Bounds();
-					var center = marble.collider.transform.getPosition();
-					var radius = marble._radius;
-					box.xMin = center.x - radius;
-					box.yMin = center.y - radius;
-					box.zMin = center.z - radius;
-					box.xMax = center.x + radius;
-					box.yMax = center.y + radius;
-					box.zMax = center.z + radius;
-
-					if (triggeraabb.collide(box)) {
+					if (triggeraabb.collide(spherebounds)) {
 						trigger.onMarbleInside(timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
@@ -688,7 +747,30 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
+		if (spherebounds.collide(this.endPad.finishBounds)) {
+			if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider) != null) {
+				touchFinish();
+			}
+		}
 		this.shapeImmunity = newImmunity;
+	}
+
+	function touchFinish() {
+		if (this.finishTime != null
+			|| (this.outOfBounds && this.timeState.currentAttemptTime - this.outOfBoundsTime.currentAttemptTime >= 0.5))
+			return;
+
+		if (this.gemCount < this.totalGems) {
+			// AudioManager.play('missinggems.wav');
+			displayAlert("You can't finish without all the gems!!");
+		} else {
+			this.endPad.spawnFirework(this.timeState);
+			this.finishTime = this.timeState.clone();
+			this.marble.mode = Finish;
+			this.marble.camera.finish = true;
+			this.finishYaw = this.marble.camera.CameraYaw;
+			this.finishPitch = this.marble.camera.CameraPitch;
+		}
 	}
 
 	public function pickUpPowerUp(powerUp:PowerUp) {
@@ -763,6 +845,8 @@ class MarbleWorld extends Scheduler {
 		// this.updateCamera(this.timeState); // Update the camera at the point of OOB-ing
 		this.outOfBounds = true;
 		this.outOfBoundsTime = this.timeState.clone();
+		this.marble.camera.oob = true;
+		sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
 		// AudioManager.play('whoosh.wav');

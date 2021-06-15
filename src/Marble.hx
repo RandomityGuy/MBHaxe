@@ -1,5 +1,6 @@
 package src;
 
+import shapes.StartPad;
 import src.TimeState;
 import src.ParticleSystem.ParticleEmitter;
 import src.ParticleSystem.ParticleData;
@@ -38,6 +39,12 @@ class Move {
 	public var powerup:Bool;
 
 	public function new() {}
+}
+
+enum Mode {
+	Start;
+	Play;
+	Finish;
 }
 
 final bounceParticleOptions:ParticleEmitterOptions = {
@@ -143,6 +150,10 @@ class Marble extends GameObject {
 	var trailEmitterData:ParticleData;
 	var trailEmitterNode:ParticleEmitter;
 
+	public var mode:Mode = Play;
+
+	public var startPad:StartPad;
+
 	public function new() {
 		super();
 		var geom = Sphere.defaultUnitSphere();
@@ -221,7 +232,9 @@ class Marble extends GameObject {
 
 	function getExternalForces(currentTime:Float, m:Move, dt:Float) {
 		var gWorkGravityDir = this.level.currentUp.multiply(-1);
-		var A = gWorkGravityDir.multiply(this._gravity);
+		var A = new Vector();
+		if (this.mode != Finish)
+			A = gWorkGravityDir.multiply(this._gravity);
 		if (currentTime - this.helicopterEnableTime < 5) {
 			A = A.multiply(0.25);
 		}
@@ -231,7 +244,7 @@ class Marble extends GameObject {
 				A = A.add(force.multiply(1 / _mass));
 			}
 		}
-		if (contacts.length != 0) {
+		if (contacts.length != 0 && this.mode != Start) {
 			var contactForce = 0.0;
 			var contactNormal = new Vector();
 			var forceObjectCount = 0;
@@ -500,7 +513,9 @@ class Marble extends GameObject {
 			var AFriction = new Vector(0, 0, 0);
 			if (vAtCMag != 0) {
 				slipping = true;
-				var friction = this._kineticFriction * bestContact.friction;
+				var friction = 0.0;
+				if (this.mode != Start)
+					friction = this._kineticFriction * bestContact.friction;
 				var angAMagnitude = 5 * friction * bestNormalForce / (2 * this._radius);
 				var AMagnitude = bestNormalForce * friction;
 				var totalDeltaV = (angAMagnitude * this._radius + AMagnitude) * dt;
@@ -528,10 +543,14 @@ class Marble extends GameObject {
 				}
 				var Aadd = aControl.cross(bestContact.normal.multiply(this._radius));
 				var aAtCMag = aadd.cross(bestContact.normal.multiply(-this._radius)).add(Aadd).length();
-				var friction2 = this._staticFriction * bestContact.friction;
+				var friction2 = 0.0;
+				if (mode != Start)
+					friction2 = this._staticFriction * bestContact.friction;
 
 				if (aAtCMag > friction2 * bestNormalForce) {
-					friction2 = this._kineticFriction * bestContact.friction;
+					friction2 = 0;
+					if (mode != Start)
+						friction2 = this._kineticFriction * bestContact.friction;
 					Aadd = Aadd.multiply(friction2 * bestNormalForce / aAtCMag);
 				}
 				A = A.add(Aadd);
@@ -724,6 +743,15 @@ class Marble extends GameObject {
 
 			var pos = this.getAbsPos().getPosition();
 
+			if (mode == Start) {
+				var startPadNormal = this.startPad.getAbsPos().up();
+				this.velocity = startPadNormal.multiply(this.velocity.dot(startPadNormal));
+			}
+
+			if (mode == Finish) {
+				this.velocity = this.velocity.multiply(0.9);
+			}
+
 			var newPos = pos.add(this.velocity.multiply(timeStep));
 			var rot = this.getRotationQuat();
 			var quat = new Quat();
@@ -755,7 +783,7 @@ class Marble extends GameObject {
 	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var move = new Move();
 		move.d = new Vector();
-		if (this.controllable) {
+		if (this.controllable && this.mode != Finish) {
 			if (Key.isDown(Key.W)) {
 				move.d.x -= 1;
 			}
@@ -821,5 +849,15 @@ class Marble extends GameObject {
 
 	public function enableHelicopter(time:Float) {
 		this.helicopterEnableTime = time;
+	}
+
+	public override function reset() {
+		this.velocity = new Vector();
+		this.collider.velocity = new Vector();
+		this.omega = new Vector();
+		this.superBounceEnableTime = Math.NEGATIVE_INFINITY;
+		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
+		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
+		this.lastContactNormal = new Vector(0, 0, 1);
 	}
 }

@@ -1,5 +1,12 @@
 package shapes;
 
+import h3d.Quat;
+import h3d.mat.Material;
+import h3d.scene.Mesh;
+import h3d.prim.Polygon;
+import h3d.col.Bounds;
+import h2d.col.Matrix;
+import collision.gjk.ConvexHull;
 import src.TimeState;
 import collision.CollisionInfo;
 import src.Util;
@@ -14,7 +21,9 @@ import h3d.Vector;
 
 class EndPad extends DtsObject {
 	var fireworks:Array<Firework> = [];
-	var isEntered:Bool = false;
+
+	var finishCollider:ConvexHull;
+	var finishBounds:Bounds;
 
 	public function new() {
 		super();
@@ -24,17 +33,55 @@ class EndPad extends DtsObject {
 		this.identifier = "EndPad";
 	}
 
-	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
-		if (!isEntered) {
-			isEntered = true;
-			spawnFirework(timeState);
-		}
-	}
+	// override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
+	// 	if (!isEntered) {
+	// 		isEntered = true;
+	// 		spawnFirework(timeState);
+	// 	}
+	// }
 
 	function spawnFirework(time:TimeState) {
 		var firework = new Firework(this.getAbsPos().getPosition(), time.timeSinceLoad, this.level);
 		this.fireworks.push(firework);
 		// AudioManager.play(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
+	}
+
+	function generateCollider() {
+		var height = 4.8;
+		var radius = 1.7;
+		var vertices = [];
+
+		for (i in 0...2) {
+			for (j in 0...64) {
+				var angle = j / 64 * Math.PI * 2;
+				var x = Math.cos(angle);
+				var z = Math.sin(angle);
+
+				vertices.push(new Vector(x * radius * this.scaleX, (i != 0 ? 4.8 : 0) * 1, z * radius * this.scaleY));
+			}
+		}
+		finishCollider = new ConvexHull(vertices);
+
+		finishBounds = new Bounds();
+		for (vert in vertices)
+			finishBounds.addPoint(vert.toPoint());
+
+		var rotQuat = new Quat();
+		rotQuat.initRotation(0, Math.PI / 2, 0);
+		var rotMat = rotQuat.toMatrix();
+
+		var tform = this.getAbsPos().clone();
+		tform.prependRotation(Math.PI / 2, 0, 0);
+
+		finishCollider.transform = tform;
+
+		finishBounds.transform(tform);
+
+		// var polygon = new Polygon(vertices.map(x -> x.toPoint()));
+		// polygon.addNormals();
+		// polygon.addUVs();
+		// var collidermesh = new Mesh(polygon, Material.create(), this.level.scene);
+		// collidermesh.setTransform(tform);
 	}
 
 	override function update(timeState:TimeState) {

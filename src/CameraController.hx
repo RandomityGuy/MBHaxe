@@ -1,5 +1,6 @@
 package src;
 
+import src.Util;
 import h3d.Quat;
 import sdl.Cursor;
 import sdl.Sdl;
@@ -50,6 +51,11 @@ class CameraController extends Object {
 
 	var screenHeight:Int;
 	var screenWidth:Int;
+
+	var lastCamPos:Vector;
+
+	public var oob:Bool = false;
+	public var finish:Bool = false;
 
 	public function new(marble:Marble) {
 		super();
@@ -132,8 +138,14 @@ class CameraController extends Object {
 			q.z = vr.z;
 			return q;
 		}
-
 		var orientationQuat = level.getOrientationQuat(currentTime);
+
+		if (this.finish) {
+			// Make the camera spin around slowly
+			CameraPitch = Util.lerp(this.level.finishPitch, -0.45,
+				Util.clamp((this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / 0.3, 0, 1));
+			CameraYaw = this.level.finishYaw - (this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / -1 * 0.6;
+		}
 
 		var up = new Vector(0, 0, 1);
 		up.transform(orientationQuat.toMatrix());
@@ -195,6 +207,13 @@ class CameraController extends Object {
 
 		var toPos = targetpos.add(directionVec);
 		camera.pos = toPos;
+		if (oob) {
+			camera.pos = lastCamPos;
+			camera.target = targetpos.add(cameraVerticalTranslation);
+		}
+
+		if (!oob)
+			lastCamPos = camera.pos;
 		// camera.target = null;
 		// camera.target = targetpos.add(cameraVerticalTranslation);
 		// this.x = targetpos.x + directionVec.x;

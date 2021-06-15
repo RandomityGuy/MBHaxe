@@ -38,4 +38,11 @@ class Tornado extends ForceObject {
 			},
 		];
 	}
+
+	public override function init(level:src.MarbleWorld) {
+		super.init(level);
+		for (material in this.materials) {
+			// material.mainPass.setPassName("overlay");
+		}
+	}
 }
