@@ -38,11 +38,11 @@ class Sky extends Object {
 		pbrprops.occlusionValue = 0;
 		pbrprops.metalnessValue = 1;
 
-		skyMesh.scale(200);
+		skyMesh.scale(3000);
 		var env = new Environment(texture);
 		env.compute();
 		// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
-		var shad = new h3d.shader.pbr.CubeLod(texture);
+		var shad = new CubeMap(texture);
 		skyMesh.material.mainPass.addShader(shad);
 		skyMesh.material.shadows = false;
 	}
