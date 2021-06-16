@@ -32,6 +32,7 @@ class PlayGui {
 	var gemImageScene:h3d.scene.Scene;
 	var gemImageSceneTarget:Texture;
 	var gemImageObject:DtsObject;
+	var gemImageSceneTargetBitmap:Bitmap;
 
 	var powerupBox:Bitmap;
 	var powerupImageScene:h3d.scene.Scene;
@@ -144,7 +145,7 @@ class PlayGui {
 		gemImageSceneTarget = new Texture(60, 60, [Target]);
 		gemImageSceneTarget.depthBuffer = new DepthBuffer(60, 60);
 
-		var gemImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(gemImageSceneTarget), scene2d);
+		gemImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(gemImageSceneTarget), scene2d);
 		gemImageSceneTargetBitmap.x = -8;
 		gemImageSceneTargetBitmap.y = -8;
 
@@ -278,6 +279,20 @@ class PlayGui {
 	}
 
 	public function formatGemCounter(collected:Int, total:Int) {
+		if (total == 0) {
+			for (number in gemCountNumbers) {
+				number.visible = false;
+			}
+			gemCountSlash.visible = false;
+			gemImageSceneTargetBitmap.visible = false;
+		} else {
+			for (number in gemCountNumbers) {
+				number.visible = true;
+			}
+			gemCountSlash.visible = true;
+			gemImageSceneTargetBitmap.visible = true;
+		}
+
 		var totalTenths = Math.floor(total / 10);
 		var totalOnes = total % 10;
 

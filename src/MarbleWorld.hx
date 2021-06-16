@@ -198,6 +198,12 @@ class MarbleWorld extends Scheduler {
 		this.bonusTime = 0;
 		this.outOfBounds = false;
 		this.finishTime = null;
+		this.helpTextTimeState = Math.NEGATIVE_INFINITY;
+		this.alertTextTimeState = Math.NEGATIVE_INFINITY;
+		if (this.totalGems > 0) {
+			this.gemCount = 0;
+			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		}
 
 		var startquat = this.getStartPositionAndOrientation();
 
@@ -215,7 +221,7 @@ class MarbleWorld extends Scheduler {
 
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
 			&& element._name == "MissionInfo")[0];
-		if (missionInfo.starthelptext != "")
+		if (missionInfo.starthelptext != null)
 			displayHelp(missionInfo.starthelptext); // Show the start help text
 
 		for (shape in dtsObjects)
@@ -285,8 +291,10 @@ class MarbleWorld extends Scheduler {
 
 			// if (pathedInterior.hasCollision)
 			// 	this.physics.addInterior(pathedInterior);
-			for (trigger in pathedInterior.triggers)
+			for (trigger in pathedInterior.triggers) {
 				this.triggers.push(trigger);
+				this.collisionWorld.addEntity(trigger.collider);
+			}
 
 			return;
 		}

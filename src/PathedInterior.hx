@@ -108,7 +108,10 @@ class PathedInterior extends InteriorObject {
 			marker.msToNext = MisParser.parseNumber(x.mstonext) / 1000;
 			marker.smoothingType = x.smoothingtype;
 			marker.position = MisParser.parseVector3(x.position);
+			marker.position.x = -marker.position.x;
 			marker.rotation = MisParser.parseRotation(x.rotation);
+			marker.rotation.x = -marker.rotation.x;
+			marker.rotation.w = -marker.rotation.w;
 			return marker;
 		});
 

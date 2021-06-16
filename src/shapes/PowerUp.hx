@@ -67,4 +67,8 @@ abstract class PowerUp extends DtsObject {
 	public abstract function pickUp():Bool;
 
 	public abstract function use(timeState:TimeState):Void;
+
+	public override function reset() {
+		this.lastPickUpTime = Math.NEGATIVE_INFINITY;
+	}
 }
