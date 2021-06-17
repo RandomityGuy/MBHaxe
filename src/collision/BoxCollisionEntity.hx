@@ -25,6 +25,7 @@ class BoxCollisionEntity extends CollisionEntity {
 
 	public override function isIntersectedByRay(rayOrigin:Vector, rayDirection:Vector, intersectionPoint:Vector):Bool {
 		// TEMP cause bruh
+		return false;
 		return boundingBox.rayIntersection(Ray.fromValues(rayOrigin.x, rayOrigin.y, rayOrigin.z, rayDirection.x, rayDirection.y, rayDirection.z), true) != -1;
 	}
 
