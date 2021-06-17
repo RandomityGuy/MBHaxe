@@ -569,7 +569,8 @@ class MarbleWorld extends Scheduler {
 			if (collider != null)
 				this.collisionWorld.addEntity(collider);
 		}
-		this.collisionWorld.addEntity(obj.boundingCollider);
+		if (obj.isBoundingBoxCollideable)
+			this.collisionWorld.addEntity(obj.boundingCollider);
 	}
 
 	public function addMarble(marble:Marble) {
@@ -683,7 +684,8 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function callCollisionHandlers(marble:Marble, timeState:TimeState) {
-		var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
+		// var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
+		var contacts = marble.contactEntities;
 		var newImmunity = [];
 		var calledShapes = [];
 		var inside = [];

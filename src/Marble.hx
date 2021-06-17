@@ -1,5 +1,7 @@
 package src;
 
+import h3d.col.Bounds;
+import collision.CollisionEntity;
 import shapes.StartPad;
 import src.TimeState;
 import src.ParticleSystem.ParticleEmitter;
@@ -132,7 +134,9 @@ class Marble extends GameObject {
 
 	public var _mass:Float = 1;
 
-	var contacts:Array<CollisionInfo> = [];
+	public var contacts:Array<CollisionInfo> = [];
+	public var contactEntities:Array<CollisionEntity> = [];
+
 	var queuedContacts:Array<CollisionInfo> = [];
 
 	public var heldPowerup:PowerUp;
@@ -189,6 +193,7 @@ class Marble extends GameObject {
 		this.forcefield.x = 1e8;
 		this.forcefield.y = 1e8;
 		this.forcefield.z = 1e8;
+		this.forcefield.isBoundingBoxCollideable = false;
 		level.addDtsObject(this.forcefield);
 
 		this.helicopter = new DtsObject();
@@ -196,6 +201,7 @@ class Marble extends GameObject {
 		this.helicopter.useInstancing = true;
 		this.helicopter.identifier = "Helicopter";
 		this.helicopter.showSequences = true;
+		this.helicopter.isBoundingBoxCollideable = false;
 		// this.addChild(this.helicopter);
 		this.helicopter.x = 1e8;
 		this.helicopter.y = 1e8;
@@ -206,7 +212,8 @@ class Marble extends GameObject {
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
 		this.contacts = queuedContacts;
 		var c = collisiomWorld.sphereIntersection(this.collider, timeState);
-		contacts = contacts.concat(c);
+		this.contactEntities = c.foundEntities;
+		contacts = contacts.concat(c.contacts);
 	}
 
 	public function queueCollision(collisionInfo:CollisionInfo) {
@@ -597,13 +604,13 @@ class Marble extends GameObject {
 	}
 
 	function getIntersectionTime(dt:Float, velocity:Vector) {
-		var expandedcollider = new SphereCollisionEntity(cast this);
+		var searchbox = new Bounds();
+		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
+		searchbox.addSpherePos(this.x + velocity.x * dt, this.y + velocity.y * dt, this.z + velocity.z * dt, _radius);
+
 		var position = this.getAbsPos().getPosition();
 
-		expandedcollider.transform = Matrix.T(position.x, position.y, position.z);
-		expandedcollider.radius = velocity.multiply(dt).length() + _radius;
-
-		var foundObjs = this.level.collisionWorld.radiusSearch(position, expandedcollider.radius);
+		var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
 
 		function toDifPoint(vec:Vector) {
 			return new Point3F(vec.x, vec.y, vec.z);
@@ -612,7 +619,7 @@ class Marble extends GameObject {
 		var intersectT = 10e8;
 
 		for (obj in foundObjs) {
-			var radius = expandedcollider.radius;
+			var radius = _radius;
 
 			var invMatrix = obj.transform.clone();
 			invMatrix.invert();

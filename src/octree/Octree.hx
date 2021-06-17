@@ -131,6 +131,12 @@ class Octree {
 		return intersections;
 	}
 
+	public function boundingSearch(bounds:Bounds) {
+		var intersections = [];
+		this.root.boundingSearch(bounds, intersections);
+		return intersections;
+	}
+
 	public function radiusSearch(point:Vector, maximumDistance:Float) {
 		function getClosestPoint(box:Bounds, point:Vector) {
 			var closest = new Vector();

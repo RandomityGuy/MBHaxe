@@ -8,6 +8,7 @@ class GameObject extends Object {
 	public var identifier:String;
 	public var currentOpacity:Float = 1;
 	public var isCollideable:Bool = false;
+	public var isBoundingBoxCollideable:Bool = true;
 
 	public function onMarbleContact(time:TimeState, ?contact:CollisionInfo) {}
 

@@ -83,6 +83,7 @@ class DtsObject extends GameObject {
 	var lastSequenceKeyframes:Map<Sequence, Float> = new Map();
 
 	var graphNodes:Array<Object> = [];
+	var dirtyTransforms:Array<Bool> = [];
 
 	var useInstancing:Bool = true;
 	var isTSStatic:Bool;
@@ -301,6 +302,11 @@ class DtsObject extends GameObject {
 		if (this.level != null) {
 			this.boundingCollider = new BoxCollisionEntity(this.level.instanceManager.getObjectBounds(cast this), cast this);
 			this.boundingCollider.setTransform(this.getTransform());
+		}
+
+		this.dirtyTransforms = [];
+		for (i in 0...graphNodes.length) {
+			this.dirtyTransforms.push(true);
 		}
 	}
 
@@ -570,6 +576,9 @@ class DtsObject extends GameObject {
 		super.setTransform(mat);
 		this.boundingCollider.setTransform(mat);
 		this.level.collisionWorld.updateTransform(this.boundingCollider);
+		for (i in 0...this.dirtyTransforms.length) {
+			this.dirtyTransforms[i] = true;
+		}
 	}
 
 	public function update(timeState:TimeState) {
@@ -619,6 +628,7 @@ class DtsObject extends GameObject {
 						quat.normalize();
 
 						this.graphNodes[i].setRotationQuat(quat);
+						this.dirtyTransforms[i] = true;
 						affectedCount++;
 						// quaternions.push(quat);
 					} else {
@@ -647,6 +657,7 @@ class DtsObject extends GameObject {
 						var v2 = new Vector(trans2.x, trans2.y, trans2.z);
 						var trans = Util.lerpThreeVectors(v1, v2, t);
 						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
+						this.dirtyTransforms[i] = true;
 
 						// translations.push(Util.lerpThreeVectors(v1, v2, t));
 					} else {
@@ -782,9 +793,14 @@ class DtsObject extends GameObject {
 		}
 
 		for (i in 0...this.colliders.length) {
-			var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
-			if (this.colliders[i] != null)
-				this.colliders[i].setTransform(absTform);
+			if (this.dirtyTransforms[this.colliders[i].userData]) {
+				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
+				if (this.colliders[i] != null)
+					this.colliders[i].setTransform(absTform);
+			}
+		}
+		for (i in 0...this.dirtyTransforms.length) {
+			this.dirtyTransforms[i] = false;
 		}
 	}
 

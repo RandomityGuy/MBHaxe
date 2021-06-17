@@ -20,7 +20,7 @@ class CollisionWorld {
 		var radius = spherecollision.radius;
 		var velocity = spherecollision.velocity;
 		var searchdist = (velocity.length() * timeState.dt) + radius;
-		var intersections = this.octree.radiusSearch(position, searchdist);
+		// var intersections = this.octree.radiusSearch(position, searchdist);
 
 		var box = new Bounds();
 		box.xMin = position.x - radius;
@@ -29,12 +29,17 @@ class CollisionWorld {
 		box.xMax = position.x + radius;
 		box.yMax = position.y + radius;
 		box.zMax = position.z + radius;
+		var intersections = this.octree.boundingSearch(box);
+
+		// var intersections = this.rtree.search([box.xMin, box.yMax, box.zMin], [box.xSize, box.ySize, box.zSize]);
 
 		var contacts = [];
+		var foundEntities = [];
 
 		for (obj in intersections) {
 			var entity:CollisionEntity = cast obj;
 
+			foundEntities.push(entity);
 			if (entity.go.isCollideable) {
 				contacts = contacts.concat(entity.sphereIntersection(spherecollision, timeState));
 			}
@@ -46,7 +51,7 @@ class CollisionWorld {
 				contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
 			}
 		}
-		return contacts;
+		return {foundEntities: foundEntities, contacts: contacts};
 	}
 
 	public function radiusSearch(center:Vector, radius:Float) {
@@ -76,13 +81,26 @@ class CollisionWorld {
 		return contacts;
 	}
 
+	public function boundingSearch(bounds:Bounds) {
+		var contacts = this.octree.boundingSearch(bounds).map(x -> cast(x, CollisionEntity));
+		for (obj in dynamicEntities) {
+			if (obj.boundingBox.collide(bounds))
+				contacts.push(obj);
+		}
+		return contacts;
+	}
+
 	public function rayCast(rayStart:Vector, rayDirection:Vector) {
+		return [];
 		return this.octree.raycast(rayStart, rayDirection);
 	}
 
 	public function addEntity(entity:CollisionEntity) {
 		this.octree.insert(entity);
 		this.entities.push(entity);
+
+		// this.rtree.insert([entity.boundingBox.xMin, entity.boundingBox.yMin, entity.boundingBox.zMin],
+		// 	[entity.boundingBox.xSize, entity.boundingBox.ySize, entity.boundingBox.zSize], entity);
 	}
 
 	public function addMovingEntity(entity:CollisionEntity) {

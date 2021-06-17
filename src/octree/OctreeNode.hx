@@ -185,6 +185,22 @@ class OctreeNode implements IOctreeElement {
 			}
 	}
 
+	public function boundingSearch(bounds:Bounds, intersections:Array<IOctreeElement>) {
+		var thisBounds = new Bounds();
+		thisBounds.setMin(this.min.toPoint());
+		thisBounds.xSize = thisBounds.ySize = thisBounds.zSize = this.size;
+		if (thisBounds.collide(bounds)) {
+			for (obj in this.objects) {
+				if (obj.boundingBox.collide(bounds))
+					intersections.push(obj);
+			}
+			if (octants != null) {
+				for (octant in this.octants)
+					octant.boundingSearch(bounds, intersections);
+			}
+		}
+	}
+
 	public function getClosestPoint(point:Vector) {
 		var closest = new Vector();
 		if (this.min.x > point.x)

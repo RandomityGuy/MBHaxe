@@ -52,7 +52,7 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		var ltr = File.getContent("data/missions/advanced/survival.mis");
+		var ltr = File.getContent("data/missions/advanced/airwalk.mis");
 		var mfp = new MisParser(ltr);
 		var mis = mfp.parse();
 

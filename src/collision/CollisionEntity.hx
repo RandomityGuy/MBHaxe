@@ -43,6 +43,8 @@ class CollisionEntity implements IOctreeObject {
 	}
 
 	public function setTransform(transform:Matrix) {
+		if (this.transform == transform)
+			return;
 		this.transform = transform;
 		generateBoundingBox();
 	}
