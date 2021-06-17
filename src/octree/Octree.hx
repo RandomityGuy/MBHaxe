@@ -25,8 +25,6 @@ class Octree {
 			return; // Don't insert if already contained in the tree
 		while (!this.root.largerThan(object) || !this.root.containsCenter(object)) {
 			// The root node does not fit the object; we need to grow the tree.
-			var a = !this.root.largerThan(object);
-			var b = !this.root.containsCenter(object);
 			if (this.root.depth == -32) {
 				return;
 			}
@@ -64,11 +62,11 @@ class Octree {
 			vec.y = (i & 2) == 2 ? towards.boundingBox.yMin : towards.boundingBox.yMax;
 			vec.z = (i & 4) == 4 ? towards.boundingBox.zMin : towards.boundingBox.zMax;
 			if (!this.root.containsPoint(vec)) {
-				averagePoint.add(vec);
+				averagePoint = averagePoint.add(vec);
 				count++;
 			}
 		}
-		averagePoint.multiply(1 / count); // count should be greater than 0, because that's why we're growing in the first place.
+		averagePoint = averagePoint.multiply(1 / count); // count should be greater than 0, because that's why we're growing in the first place.
 		// Determine the direction from the root center to the determined point
 		var rootCenter = this.root.min.clone().add(new Vector(this.root.size / 2, this.root.size / 2, this.root.size / 2));
 		var direction = averagePoint.sub(rootCenter); // Determine the "direction of growth"

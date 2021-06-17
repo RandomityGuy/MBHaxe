@@ -245,11 +245,9 @@ class Marble extends GameObject {
 		if (currentTime - this.helicopterEnableTime < 5) {
 			A = A.multiply(0.25);
 		}
-		for (obj in level.dtsObjects) {
-			if (obj is ForceObject) {
-				var force = cast(obj, ForceObject).getForce(this.getAbsPos().getPosition());
-				A = A.add(force.multiply(1 / _mass));
-			}
+		for (obj in level.forceObjects) {
+			var force = cast(obj, ForceObject).getForce(this.getAbsPos().getPosition());
+			A = A.add(force.multiply(1 / _mass));
 		}
 		if (contacts.length != 0 && this.mode != Start) {
 			var contactForce = 0.0;
@@ -604,13 +602,14 @@ class Marble extends GameObject {
 	}
 
 	function getIntersectionTime(dt:Float, velocity:Vector) {
-		var searchbox = new Bounds();
-		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
-		searchbox.addSpherePos(this.x + velocity.x * dt, this.y + velocity.y * dt, this.z + velocity.z * dt, _radius);
+		// var searchbox = new Bounds();
+		// searchbox.addSpherePos(this.x, this.y, this.z, _radius);
+		// searchbox.addSpherePos(this.x + velocity.x * dt, this.y + velocity.y * dt, this.z + velocity.z * dt, _radius);
 
 		var position = this.getAbsPos().getPosition();
 
-		var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
+		// var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
+		var foundObjs = this.contactEntities;
 
 		function toDifPoint(vec:Vector) {
 			return new Point3F(vec.x, vec.y, vec.z);

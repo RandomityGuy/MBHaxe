@@ -16,7 +16,7 @@ class OctreeNode implements IOctreeElement {
 	public var min = new Vector();
 
 	/** The size of the bounding box on all three axes. This forces the bounding box to be a cube. */
-	public var size:Int;
+	public var size:Float;
 
 	public var octants:Array<OctreeNode> = null;
 
@@ -84,7 +84,7 @@ class OctreeNode implements IOctreeElement {
 		for (i in 0...8) {
 			var newNode = new OctreeNode(this.octree, this.depth + 1);
 			newNode.parent = this;
-			newNode.size = cast this.size / 2;
+			newNode.size = this.size / 2;
 			newNode.min.set(this.min.x
 				+ newNode.size * ((i & 1) >> 0), // The x coordinate changes every index
 				this.min.y

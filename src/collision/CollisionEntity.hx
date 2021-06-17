@@ -91,7 +91,9 @@ class CollisionEntity implements IOctreeObject {
 		invMatrix.invert();
 		var localpos = position.clone();
 		localpos.transform(invMatrix);
-		var surfaces = octree.radiusSearch(localpos, radius * 1.1);
+		var sphereBounds = new Bounds();
+		sphereBounds.addSpherePos(localpos.x, localpos.y, localpos.z, radius * 1.1);
+		var surfaces = octree.boundingSearch(sphereBounds);
 
 		var tform = transform.clone();
 		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));

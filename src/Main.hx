@@ -64,14 +64,6 @@ class Main extends hxd.App {
 		world.init();
 		world.start();
 
-		// s3d.camera.
-		// marble.setPosition(5, 0, 5);
-
-		// var marble2 = new Marble();
-		// world.addMarble(marble2);
-		// marble2.setPosition(5, 0, 5);
-		// marble.setPosition(-10, -5, 5);
-
 		fpsCounter = new Text(DefaultFont.get(), s2d);
 		fpsCounter.y = 40;
 		fpsCounter.color = new Vector(1, 1, 1, 1);

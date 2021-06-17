@@ -795,8 +795,10 @@ class DtsObject extends GameObject {
 		for (i in 0...this.colliders.length) {
 			if (this.dirtyTransforms[this.colliders[i].userData]) {
 				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
-				if (this.colliders[i] != null)
+				if (this.colliders[i] != null) {
 					this.colliders[i].setTransform(absTform);
+					this.level.collisionWorld.updateTransform(this.colliders[i]);
+				}
 			}
 		}
 		for (i in 0...this.dirtyTransforms.length) {

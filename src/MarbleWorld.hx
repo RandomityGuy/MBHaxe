@@ -1,5 +1,6 @@
 package src;
 
+import src.ForceObject;
 import h3d.scene.pbr.DirLight;
 import h3d.col.Bounds;
 import triggers.HelpTrigger;
@@ -65,6 +66,7 @@ class MarbleWorld extends Scheduler {
 	public var pathedInteriors:Array<PathedInterior> = [];
 	public var marbles:Array<Marble> = [];
 	public var dtsObjects:Array<DtsObject> = [];
+	public var forceObjects:Array<ForceObject> = [];
 	public var triggers:Array<Trigger> = [];
 
 	var shapeImmunity:Array<DtsObject> = [];
@@ -560,6 +562,9 @@ class MarbleWorld extends Scheduler {
 
 	public function addDtsObject(obj:DtsObject) {
 		this.dtsObjects.push(obj);
+		if (obj is ForceObject) {
+			this.forceObjects.push(cast obj);
+		}
 		obj.init(cast this);
 		if (obj.useInstancing) {
 			this.instanceManager.addObject(obj);
@@ -754,9 +759,11 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		if (spherebounds.collide(this.endPad.finishBounds)) {
-			if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider) != null) {
-				touchFinish();
+		if (this.finishTime == null) {
+			if (spherebounds.collide(this.endPad.finishBounds)) {
+				if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider) != null) {
+					touchFinish();
+				}
 			}
 		}
 		this.shapeImmunity = newImmunity;

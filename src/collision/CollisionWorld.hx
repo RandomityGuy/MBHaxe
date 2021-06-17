@@ -19,16 +19,11 @@ class CollisionWorld {
 		var position = spherecollision.transform.getPosition();
 		var radius = spherecollision.radius;
 		var velocity = spherecollision.velocity;
-		var searchdist = (velocity.length() * timeState.dt) + radius;
 		// var intersections = this.octree.radiusSearch(position, searchdist);
 
 		var box = new Bounds();
-		box.xMin = position.x - radius;
-		box.yMin = position.y - radius;
-		box.zMin = position.z - radius;
-		box.xMax = position.x + radius;
-		box.yMax = position.y + radius;
-		box.zMax = position.z + radius;
+		box.addSpherePos(position.x, position.y, position.z, radius);
+		box.addSpherePos(position.x + velocity.x * timeState.dt, position.y + velocity.y * timeState.dt, position.z + velocity.z * timeState.dt, radius);
 		var intersections = this.octree.boundingSearch(box);
 
 		// var intersections = this.rtree.search([box.xMin, box.yMax, box.zMin], [box.xSize, box.ySize, box.zSize]);
