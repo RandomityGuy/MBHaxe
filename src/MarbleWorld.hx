@@ -701,12 +701,7 @@ class MarbleWorld extends Scheduler {
 		var spherebounds = new Bounds();
 		var center = marble.collider.transform.getPosition();
 		var radius = marble._radius;
-		spherebounds.xMin = center.x - radius;
-		spherebounds.yMin = center.y - radius;
-		spherebounds.zMin = center.z - radius;
-		spherebounds.xMax = center.x + radius;
-		spherebounds.yMax = center.y + radius;
-		spherebounds.zMax = center.z + radius;
+		spherebounds.addSpherePos(center.x, center.y, center.z, radius);
 
 		var gjkSphere = new collision.gjk.Sphere();
 		gjkSphere.position = center;

@@ -1,5 +1,7 @@
 package gui;
 
+import hxd.snd.WavData;
+import gui.GuiControl.HorizSizing;
 import src.TimeState;
 import format.gif.Data.Block;
 import hxd.res.BitmapFont;
@@ -23,31 +25,39 @@ class PlayGui {
 
 	public function new() {}
 
-	var timerNumbers:Array<Anim> = [];
-	var timerPoint:Bitmap;
-	var timerColon:Bitmap;
+	var timerNumbers:Array<GuiAnim> = [];
+	var timerPoint:GuiImage;
+	var timerColon:GuiImage;
 
-	var gemCountNumbers:Array<Anim> = [];
-	var gemCountSlash:Bitmap;
+	var gemCountNumbers:Array<GuiAnim> = [];
+	var gemCountSlash:GuiImage;
 	var gemImageScene:h3d.scene.Scene;
 	var gemImageSceneTarget:Texture;
 	var gemImageObject:DtsObject;
 	var gemImageSceneTargetBitmap:Bitmap;
 
-	var powerupBox:Bitmap;
+	var powerupBox:GuiImage;
 	var powerupImageScene:h3d.scene.Scene;
 	var powerupImageSceneTarget:Texture;
 	var powerupImageObject:DtsObject;
 
 	var RSGOCenterText:Anim;
 
-	var helpTextForeground:Text;
-	var helpTextBackground:Text;
-	var alertTextForeground:Text;
-	var alertTextBackground:Text;
+	var helpTextForeground:GuiText;
+	var helpTextBackground:GuiText;
+	var alertTextForeground:GuiText;
+	var alertTextBackground:GuiText;
+
+	var playGuiCtrl:GuiControl;
 
 	public function init(scene2d:h2d.Scene) {
 		this.scene2d = scene2d;
+
+		playGuiCtrl = new GuiControl();
+		playGuiCtrl.position = new Vector();
+		playGuiCtrl.extent = new Vector(640, 480);
+		playGuiCtrl.horizSizing = Width;
+		playGuiCtrl.vertSizing = Height;
 
 		var numberTiles = [];
 		for (i in 0...10) {
@@ -56,11 +66,11 @@ class PlayGui {
 		}
 
 		for (i in 0...7) {
-			timerNumbers.push(new Anim(numberTiles, 0, scene2d));
+			timerNumbers.push(new GuiAnim(numberTiles));
 		}
 
 		for (i in 0...4) {
-			gemCountNumbers.push(new Anim(numberTiles, 0, scene2d));
+			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
 
 		var rsgo = [];
@@ -70,38 +80,62 @@ class PlayGui {
 		rsgo.push(ResourceLoader.getImage("data/ui/game/outofbounds.png").toTile());
 		RSGOCenterText = new Anim(rsgo, 0, scene2d);
 
-		timerPoint = new Bitmap(ResourceLoader.getImage('data/ui/game/numbers/point.png').toTile(), scene2d);
-		timerColon = new Bitmap(ResourceLoader.getImage('data/ui/game/numbers/colon.png').toTile(), scene2d);
-		gemCountSlash = new Bitmap(ResourceLoader.getImage('data/ui/game/numbers/slash.png').toTile(), scene2d);
-
-		powerupBox = new Bitmap(ResourceLoader.getImage('data/ui/game/powerup.png').toTile(), scene2d);
+		powerupBox = new GuiImage(ResourceLoader.getImage('data/ui/game/powerup.png').toTile());
 		initTimer();
 		initGemCounter();
 		initCenterText();
 		initPowerupBox();
 		initTexts();
+
+		playGuiCtrl.render(scene2d);
 	}
 
 	public function initTimer() {
-		var screenWidth = scene2d.width;
-		var screenHeight = scene2d.height;
+		var timerCtrl = new GuiControl();
+		timerCtrl.horizSizing = HorizSizing.Center;
+		timerCtrl.position = new Vector(215, 1);
+		timerCtrl.extent = new Vector(234, 58);
 
-		function toScreenSpaceX(x:Float) {
-			return screenWidth / 2 - (234 / 2) + x;
-		}
-		function toScreenSpaceY(y:Float) {
-			return (y / 480) * screenHeight;
-		}
+		timerNumbers[0].position = new Vector(23, 0);
+		timerNumbers[0].extent = new Vector(43, 55);
 
-		timerNumbers[0].x = toScreenSpaceX(23);
-		timerNumbers[1].x = toScreenSpaceX(47);
-		timerColon.x = toScreenSpaceX(67);
-		timerNumbers[2].x = toScreenSpaceX(83);
-		timerNumbers[3].x = toScreenSpaceX(107);
-		timerPoint.x = toScreenSpaceX(127);
-		timerNumbers[4].x = toScreenSpaceX(143);
-		timerNumbers[5].x = toScreenSpaceX(167);
-		timerNumbers[6].x = toScreenSpaceX(191);
+		timerNumbers[1].position = new Vector(47, 0);
+		timerNumbers[1].extent = new Vector(43, 55);
+
+		timerColon = new GuiImage(ResourceLoader.getImage('data/ui/game/numbers/colon.png').toTile());
+		timerColon.position = new Vector(67, 0);
+		timerColon.extent = new Vector(43, 55);
+
+		timerNumbers[2].position = new Vector(83, 0);
+		timerNumbers[2].extent = new Vector(43, 55);
+
+		timerNumbers[3].position = new Vector(107, 0);
+		timerNumbers[3].extent = new Vector(43, 55);
+
+		timerPoint = new GuiImage(ResourceLoader.getImage('data/ui/game/numbers/point.png').toTile());
+		timerPoint.position = new Vector(127, 0);
+		timerPoint.extent = new Vector(43, 55);
+
+		timerNumbers[4].position = new Vector(143, 0);
+		timerNumbers[4].extent = new Vector(43, 55);
+
+		timerNumbers[5].position = new Vector(167, 0);
+		timerNumbers[5].extent = new Vector(43, 55);
+
+		timerNumbers[6].position = new Vector(191, 0);
+		timerNumbers[6].extent = new Vector(43, 55);
+
+		timerCtrl.addChild(timerNumbers[0]);
+		timerCtrl.addChild(timerNumbers[1]);
+		timerCtrl.addChild(timerColon);
+		timerCtrl.addChild(timerNumbers[2]);
+		timerCtrl.addChild(timerNumbers[3]);
+		timerCtrl.addChild(timerPoint);
+		timerCtrl.addChild(timerNumbers[4]);
+		timerCtrl.addChild(timerNumbers[5]);
+		timerCtrl.addChild(timerNumbers[6]);
+
+		playGuiCtrl.addChild(timerCtrl);
 	}
 
 	public function initCenterText() {
@@ -132,11 +166,27 @@ class PlayGui {
 	}
 
 	public function initGemCounter() {
-		gemCountNumbers[0].x = 30;
-		gemCountNumbers[1].x = 54;
-		gemCountSlash.x = 75;
-		gemCountNumbers[2].x = 96;
-		gemCountNumbers[3].x = 120;
+		gemCountNumbers[0].position = new Vector(30, 0);
+		gemCountNumbers[0].extent = new Vector(43, 55);
+
+		gemCountNumbers[1].position = new Vector(54, 0);
+		gemCountNumbers[1].extent = new Vector(43, 55);
+
+		gemCountSlash = new GuiImage(ResourceLoader.getImage('data/ui/game/numbers/slash.png').toTile());
+		gemCountSlash.position = new Vector(75, 0);
+		gemCountSlash.extent = new Vector(43, 55);
+
+		gemCountNumbers[2].position = new Vector(96, 0);
+		gemCountNumbers[2].extent = new Vector(43, 55);
+
+		gemCountNumbers[3].position = new Vector(120, 0);
+		gemCountNumbers[3].extent = new Vector(43, 55);
+
+		playGuiCtrl.addChild(gemCountNumbers[0]);
+		playGuiCtrl.addChild(gemCountNumbers[1]);
+		playGuiCtrl.addChild(gemCountSlash);
+		playGuiCtrl.addChild(gemCountNumbers[2]);
+		playGuiCtrl.addChild(gemCountNumbers[3]);
 
 		this.gemImageScene = new h3d.scene.Scene();
 		var gemImageRenderer = cast(this.gemImageScene.renderer, h3d.scene.pbr.Renderer);
@@ -168,8 +218,11 @@ class PlayGui {
 	}
 
 	function initPowerupBox() {
-		powerupBox.x = scene2d.width - 102;
-		powerupBox.y = 6;
+		powerupBox.position = new Vector(538, 6);
+		powerupBox.extent = new Vector(97, 96);
+		powerupBox.horizSizing = Left;
+
+		playGuiCtrl.addChild(powerupBox);
 
 		this.powerupImageScene = new h3d.scene.Scene();
 		var powerupImageRenderer = cast(this.powerupImageScene.renderer, h3d.scene.pbr.Renderer);
@@ -187,57 +240,89 @@ class PlayGui {
 		var fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
 		var bfont = new BitmapFont(fontdata.entry);
 		@:privateAccess bfont.loader = ResourceLoader.loader;
-		helpTextBackground = new Text(bfont.toFont(), scene2d);
-		helpTextBackground.text = "Bruh";
-		helpTextBackground.x = scene2d.width / 2 - helpTextBackground.textWidth / 2 + 1;
-		helpTextBackground.y = scene2d.height * 0.45 + 1;
-		helpTextBackground.textColor = 0x000000;
 
-		helpTextForeground = new Text(bfont.toFont(), scene2d);
-		helpTextForeground.text = "Bruh";
-		helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
-		helpTextForeground.y = scene2d.height * 0.45;
-		helpTextForeground.textColor = 0xFFFFFF;
+		var helpTextCtrl = new GuiControl();
+		helpTextCtrl.position = new Vector(0, 210);
+		helpTextCtrl.extent = new Vector(640, 60);
+		helpTextCtrl.vertSizing = Center;
+		helpTextCtrl.horizSizing = Width;
 
-		alertTextBackground = new Text(bfont.toFont(), scene2d);
-		alertTextBackground.text = "Bruh";
-		alertTextBackground.x = scene2d.width / 2 - alertTextBackground.textWidth / 2 + 1;
-		alertTextBackground.y = scene2d.height - 102 + 1;
-		alertTextBackground.textColor = 0x000000;
+		helpTextBackground = new GuiText(bfont);
+		helpTextBackground.text.textColor = 0x000000;
+		helpTextBackground.position = new Vector(1, 1);
+		helpTextBackground.extent = new Vector(640, 14);
+		helpTextBackground.vertSizing = Height;
+		helpTextBackground.horizSizing = Width;
+		helpTextBackground.justify = Center;
 
-		alertTextForeground = new Text(bfont.toFont(), scene2d);
-		alertTextForeground.text = "Bruh";
-		alertTextForeground.x = scene2d.width / 2 - alertTextForeground.textWidth / 2;
-		alertTextForeground.y = scene2d.height - 102;
-		alertTextForeground.textColor = 0xFFE240;
+		helpTextForeground = new GuiText(bfont);
+		helpTextForeground.text.textColor = 0xFFFFFF;
+		helpTextForeground.position = new Vector(0, 0);
+		helpTextForeground.extent = new Vector(640, 16);
+		helpTextForeground.vertSizing = Height;
+		helpTextForeground.horizSizing = Width;
+		helpTextForeground.justify = Center;
+
+		helpTextCtrl.addChild(helpTextBackground);
+		helpTextCtrl.addChild(helpTextForeground);
+
+		var alertTextCtrl = new GuiControl();
+		alertTextCtrl.position = new Vector(0, 378);
+		alertTextCtrl.extent = new Vector(640, 98);
+		alertTextCtrl.vertSizing = Top;
+		alertTextCtrl.horizSizing = Width;
+
+		alertTextBackground = new GuiText(bfont);
+		alertTextBackground.text.textColor = 0x000000;
+		alertTextBackground.position = new Vector(1, 1);
+		alertTextBackground.extent = new Vector(640, 32);
+		alertTextBackground.vertSizing = Height;
+		alertTextBackground.horizSizing = Width;
+		alertTextBackground.justify = Center;
+
+		alertTextForeground = new GuiText(bfont);
+		alertTextForeground.text.textColor = 0xFFE240;
+		alertTextForeground.position = new Vector(0, 0);
+		alertTextForeground.extent = new Vector(640, 32);
+		alertTextForeground.vertSizing = Height;
+		alertTextForeground.horizSizing = Width;
+		alertTextForeground.justify = Center;
+
+		alertTextCtrl.addChild(alertTextBackground);
+		alertTextCtrl.addChild(alertTextForeground);
+
+		playGuiCtrl.addChild(helpTextCtrl);
+		playGuiCtrl.addChild(alertTextCtrl);
 	}
 
 	public function setHelpTextOpacity(value:Float) {
-		helpTextForeground.color.a = value;
-		helpTextBackground.color.a = value;
+		helpTextForeground.text.color.a = value;
+		helpTextBackground.text.color.a = value;
 	}
 
 	public function setAlertTextOpacity(value:Float) {
-		alertTextForeground.color.a = value;
-		alertTextBackground.color.a = value;
+		alertTextForeground.text.color.a = value;
+		alertTextBackground.text.color.a = value;
 	}
 
 	public function setAlertText(text:String) {
-		this.alertTextForeground.text = text;
-		this.alertTextBackground.text = text;
-		alertTextForeground.x = scene2d.width / 2 - alertTextForeground.textWidth / 2;
-		alertTextForeground.y = scene2d.height - 102;
-		alertTextBackground.x = scene2d.width / 2 - alertTextBackground.textWidth / 2 + 1;
-		alertTextBackground.y = scene2d.height - 102 + 1;
+		this.alertTextForeground.text.text = text;
+		this.alertTextBackground.text.text = text;
+		alertTextBackground.render(scene2d);
+		// alertTextForeground.x = scene2d.width / 2 - alertTextForeground.textWidth / 2;
+		// alertTextForeground.y = scene2d.height - 102;
+		// alertTextBackground.x = scene2d.width / 2 - alertTextBackground.textWidth / 2 + 1;
+		// alertTextBackground.y = scene2d.height - 102 + 1;
 	}
 
 	public function setHelpText(text:String) {
-		this.helpTextForeground.text = text;
-		this.helpTextBackground.text = text;
-		helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
-		helpTextForeground.y = scene2d.height * 0.45;
-		helpTextBackground.x = scene2d.width / 2 - helpTextBackground.textWidth / 2 + 1;
-		helpTextBackground.y = scene2d.height * 0.45 + 1;
+		this.helpTextForeground.text.text = text;
+		this.helpTextBackground.text.text = text;
+		helpTextBackground.render(scene2d);
+		// helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
+		// helpTextForeground.y = scene2d.height * 0.45;
+		// helpTextBackground.x = scene2d.width / 2 - helpTextBackground.textWidth / 2 + 1;
+		// helpTextBackground.y = scene2d.height * 0.45 + 1;
 	}
 
 	public function setPowerupImage(powerupIdentifier:String) {
@@ -281,15 +366,15 @@ class PlayGui {
 	public function formatGemCounter(collected:Int, total:Int) {
 		if (total == 0) {
 			for (number in gemCountNumbers) {
-				number.visible = false;
+				number.anim.visible = false;
 			}
-			gemCountSlash.visible = false;
+			gemCountSlash.bmp.visible = false;
 			gemImageSceneTargetBitmap.visible = false;
 		} else {
 			for (number in gemCountNumbers) {
-				number.visible = true;
+				number.anim.visible = true;
 			}
-			gemCountSlash.visible = true;
+			gemCountSlash.bmp.visible = true;
 			gemImageSceneTargetBitmap.visible = true;
 		}
 
@@ -299,10 +384,10 @@ class PlayGui {
 		var collectedTenths = Math.floor(collected / 10);
 		var collectedOnes = collected % 10;
 
-		gemCountNumbers[0].currentFrame = collectedTenths;
-		gemCountNumbers[1].currentFrame = collectedOnes;
-		gemCountNumbers[2].currentFrame = totalTenths;
-		gemCountNumbers[3].currentFrame = totalOnes;
+		gemCountNumbers[0].anim.currentFrame = collectedTenths;
+		gemCountNumbers[1].anim.currentFrame = collectedOnes;
+		gemCountNumbers[2].anim.currentFrame = totalTenths;
+		gemCountNumbers[3].anim.currentFrame = totalOnes;
 	}
 
 	public function formatTimer(time:Float) {
@@ -320,13 +405,13 @@ class PlayGui {
 		var hundredthOne = hundredth % 10;
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 
-		timerNumbers[0].currentFrame = minutesTen;
-		timerNumbers[1].currentFrame = minutesOne;
-		timerNumbers[2].currentFrame = secondsTen;
-		timerNumbers[3].currentFrame = secondsOne;
-		timerNumbers[4].currentFrame = hundredthTen;
-		timerNumbers[5].currentFrame = hundredthOne;
-		timerNumbers[6].currentFrame = thousandth;
+		timerNumbers[0].anim.currentFrame = minutesTen;
+		timerNumbers[1].anim.currentFrame = minutesOne;
+		timerNumbers[2].anim.currentFrame = secondsTen;
+		timerNumbers[3].anim.currentFrame = secondsOne;
+		timerNumbers[4].anim.currentFrame = hundredthTen;
+		timerNumbers[5].anim.currentFrame = hundredthOne;
+		timerNumbers[6].anim.currentFrame = thousandth;
 	}
 
 	public function render(engine:h3d.Engine) {
