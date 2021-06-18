@@ -1,5 +1,8 @@
 package;
 
+import gui.GuiControl.MouseState;
+import hxd.Window;
+import gui.Canvas;
 import gui.MainMenuGui;
 import hxd.res.DefaultFont;
 import h2d.Text;
@@ -48,7 +51,7 @@ class Main extends hxd.App {
 	var world:MarbleWorld;
 	var dtsObj:DtsObject;
 
-	var mmg:MainMenuGui;
+	var canvas:Canvas;
 
 	var fpsCounter:Text;
 
@@ -62,8 +65,9 @@ class Main extends hxd.App {
 		var mission = new Mission();
 		mission.root = mis.root;
 
-		mmg = new MainMenuGui();
-		mmg.init(s2d);
+		canvas = new Canvas(s2d);
+
+		canvas.setContent(new MainMenuGui());
 
 		// world = new MarbleWorld(s3d, s2d, mission);
 
@@ -77,7 +81,11 @@ class Main extends hxd.App {
 
 	override function update(dt:Float) {
 		super.update(dt);
-		mmg.update(dt);
+		var wnd = Window.getInstance();
+		var mouseState:MouseState = {
+			position: new Vector(wnd.mouseX, wnd.mouseY)
+		}
+		canvas.update(dt, mouseState);
 		// world.update(dt);
 		fpsCounter.text = 'FPS: ${this.engine.fps}';
 	}

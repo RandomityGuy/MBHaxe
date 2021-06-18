@@ -23,4 +23,9 @@ class GuiAnim extends GuiControl {
 			scene2d.addChild(anim);
 		super.render(scene2d);
 	}
+
+	public override function dispose() {
+		super.dispose();
+		this.anim.remove();
+	}
 }

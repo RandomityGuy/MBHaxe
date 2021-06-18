@@ -6,25 +6,17 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 
-class MainMenuGui {
-	var scene2d:h2d.Scene;
-
-	var mainCtrl:GuiControl;
-
-	public function new() {}
-
-	public function init(scene2d:h2d.Scene) {
-		this.scene2d = scene2d;
-
+class MainMenuGui extends GuiImage {
+	public function new() {
+		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
 		var fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
 		var bfont = new BitmapFont(fontdata.entry);
 		@:privateAccess bfont.loader = ResourceLoader.loader;
 
-		mainCtrl = new GuiImage(ResourceLoader.getImage("data/ui/background.jpg").toTile());
-		mainCtrl.horizSizing = Width;
-		mainCtrl.vertSizing = Height;
-		mainCtrl.position = new Vector();
-		mainCtrl.extent = new Vector(640, 480);
+		this.horizSizing = Width;
+		this.vertSizing = Height;
+		this.position = new Vector();
+		this.extent = new Vector(640, 480);
 
 		var versionText = new GuiText(bfont);
 		versionText.horizSizing = Center;
@@ -32,14 +24,14 @@ class MainMenuGui {
 		versionText.position = new Vector(289, 457);
 		versionText.extent = new Vector(62, 18);
 		versionText.text.text = "1.0.0";
-		mainCtrl.addChild(versionText);
+		this.addChild(versionText);
 
 		var homebase = new GuiImage(ResourceLoader.getImage("data/ui/home/homegui.png").toTile());
 		homebase.horizSizing = Center;
 		homebase.vertSizing = Center;
 		homebase.extent = new Vector(349, 477);
 		homebase.position = new Vector(145, 1);
-		mainCtrl.addChild(homebase);
+		this.addChild(homebase);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
@@ -67,15 +59,5 @@ class MainMenuGui {
 		exitButton.position = new Vector(82, 358);
 		exitButton.extent = new Vector(203, 88);
 		homebase.addChild(exitButton);
-
-		mainCtrl.render(scene2d);
-	}
-
-	public function update(dt:Float) {
-		var wnd = Window.getInstance();
-		var mouseState:MouseState = {
-			position: new Vector(wnd.mouseX, wnd.mouseY)
-		}
-		mainCtrl.update(dt, mouseState);
 	}
 }

@@ -108,4 +108,18 @@ class GuiControl {
 		this.children.push(ctrl);
 		ctrl.parent = this;
 	}
+
+	public function removeChildren() {
+		for (c in this.children) {
+			c.parent = null;
+		}
+		this.children = [];
+	}
+
+	public function dispose() {
+		for (c in this.children) {
+			c.dispose();
+		}
+		this.children = [];
+	}
 }

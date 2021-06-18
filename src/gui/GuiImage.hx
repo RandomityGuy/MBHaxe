@@ -22,4 +22,9 @@ class GuiImage extends GuiControl {
 			scene2d.addChild(bmp);
 		super.render(scene2d);
 	}
+
+	public override function dispose() {
+		super.dispose();
+		this.bmp.remove();
+	}
 }

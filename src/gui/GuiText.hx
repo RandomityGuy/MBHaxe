@@ -38,4 +38,9 @@ class GuiText extends GuiControl {
 			scene2d.addChild(text);
 		super.render(scene2d);
 	}
+
+	public override function dispose() {
+		super.dispose();
+		this.text.remove();
+	}
 }
