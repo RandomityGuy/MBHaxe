@@ -21,7 +21,6 @@ class GuiText extends GuiControl {
 	}
 
 	public override function render(scene2d:Scene) {
-		super.render(scene2d);
 		var renderRect = this.getRenderRectangle();
 		if (justify == Left) {
 			text.setPosition(renderRect.position.x, renderRect.position.y);
@@ -37,5 +36,6 @@ class GuiText extends GuiControl {
 		}
 		if (!scene2d.contains(text))
 			scene2d.addChild(text);
+		super.render(scene2d);
 	}
 }

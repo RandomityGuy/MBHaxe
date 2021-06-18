@@ -14,12 +14,12 @@ class GuiImage extends GuiControl {
 	}
 
 	public override function render(scene2d:Scene) {
-		super.render(scene2d);
 		var renderRect = this.getRenderRectangle();
 		bmp.setPosition(renderRect.position.x, renderRect.position.y);
 		bmp.scaleX = renderRect.extent.x / bmp.tile.width;
 		bmp.scaleY = renderRect.extent.y / bmp.tile.height;
 		if (!scene2d.contains(bmp))
 			scene2d.addChild(bmp);
+		super.render(scene2d);
 	}
 }

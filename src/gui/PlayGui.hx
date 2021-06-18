@@ -308,7 +308,7 @@ class PlayGui {
 	public function setAlertText(text:String) {
 		this.alertTextForeground.text.text = text;
 		this.alertTextBackground.text.text = text;
-		alertTextBackground.render(scene2d);
+		// alertTextBackground.render(scene2d);
 		// alertTextForeground.x = scene2d.width / 2 - alertTextForeground.textWidth / 2;
 		// alertTextForeground.y = scene2d.height - 102;
 		// alertTextBackground.x = scene2d.width / 2 - alertTextBackground.textWidth / 2 + 1;
@@ -318,7 +318,7 @@ class PlayGui {
 	public function setHelpText(text:String) {
 		this.helpTextForeground.text.text = text;
 		this.helpTextBackground.text.text = text;
-		helpTextBackground.render(scene2d);
+		// helpTextBackground.render(scene2d);
 		// helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
 		// helpTextForeground.y = scene2d.height * 0.45;
 		// helpTextBackground.x = scene2d.width / 2 - helpTextBackground.textWidth / 2 + 1;

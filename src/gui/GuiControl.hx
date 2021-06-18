@@ -21,6 +21,10 @@ enum VertSizing {
 	Relative;
 }
 
+typedef MouseState = {
+	var position:Vector;
+}
+
 @:publicFields
 class GuiControl {
 	var horizSizing:HorizSizing = Right;
@@ -38,6 +42,12 @@ class GuiControl {
 	public function render(scene2d:Scene) {
 		for (c in children) {
 			c.render(scene2d);
+		}
+	}
+
+	public function update(dt:Float, mouseState:MouseState) {
+		for (c in children) {
+			c.update(dt, mouseState);
 		}
 	}
 
