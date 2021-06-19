@@ -1,6 +1,5 @@
 package gui;
 
-import hxd.Window;
 import gui.GuiControl.MouseState;
 import hxd.res.BitmapFont;
 import h3d.Vector;
@@ -43,6 +42,9 @@ class MainMenuGui extends GuiImage {
 		var playButton = new GuiButton(loadButtonImages("data/ui/home/play"));
 		playButton.position = new Vector(50, 113);
 		playButton.extent = new Vector(270, 95);
+		playButton.pressedAction = (sender) -> {
+			cast(this.parent, Canvas).setContent(new PlayMissionGui());
+		}
 		homebase.addChild(playButton);
 
 		var helpButton = new GuiButton(loadButtonImages("data/ui/home/help"));
@@ -58,6 +60,9 @@ class MainMenuGui extends GuiImage {
 		var exitButton = new GuiButton(loadButtonImages("data/ui/home/exit"));
 		exitButton.position = new Vector(82, 358);
 		exitButton.extent = new Vector(203, 88);
+		exitButton.pressedAction = (sender) -> {
+			Sys.exit(0);
+		};
 		homebase.addChild(exitButton);
 	}
 }

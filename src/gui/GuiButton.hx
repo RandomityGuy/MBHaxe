@@ -10,6 +10,8 @@ class GuiButton extends GuiAnim {
 	// 1 is hover
 	// 2 is pressed
 	// 3 is disabled
+	public var pressedAction:GuiControl->Void = null;
+
 	public function new(anim:Array<Tile>) {
 		super(anim);
 	}
@@ -25,5 +27,12 @@ class GuiButton extends GuiAnim {
 		} else
 			this.anim.currentFrame = 0;
 		super.update(dt, mouseState);
+	}
+
+	public override function onMouseRelease(mouseState:MouseState) {
+		super.onMouseRelease(mouseState);
+		if (this.pressedAction != null) {
+			this.pressedAction(this);
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Key;
 import h2d.Scene;
 import h2d.col.Bounds;
 import hxd.Window;
@@ -23,6 +24,7 @@ enum VertSizing {
 
 typedef MouseState = {
 	var position:Vector;
+	var ?button:Int;
 }
 
 @:publicFields
@@ -46,6 +48,33 @@ class GuiControl {
 	}
 
 	public function update(dt:Float, mouseState:MouseState) {
+		var renderRect = getRenderRectangle();
+		if (renderRect.inRect(mouseState.position)) {
+			if (Key.isPressed(Key.MOUSE_LEFT)) {
+				mouseState.button = Key.MOUSE_LEFT;
+				this.onMousePress(mouseState);
+			}
+			if (Key.isPressed(Key.MOUSE_RIGHT)) {
+				mouseState.button = Key.MOUSE_RIGHT;
+				this.onMousePress(mouseState);
+			}
+			if (Key.isReleased(Key.MOUSE_LEFT)) {
+				mouseState.button = Key.MOUSE_LEFT;
+				this.onMouseRelease(mouseState);
+			}
+			if (Key.isReleased(Key.MOUSE_RIGHT)) {
+				mouseState.button = Key.MOUSE_RIGHT;
+				this.onMouseRelease(mouseState);
+			}
+			if (Key.isDown(Key.MOUSE_LEFT)) {
+				mouseState.button = Key.MOUSE_LEFT;
+				this.onMouseDown(mouseState);
+			}
+			if (Key.isDown(Key.MOUSE_RIGHT)) {
+				mouseState.button = Key.MOUSE_RIGHT;
+				this.onMouseDown(mouseState);
+			}
+		}
 		for (c in children) {
 			c.update(dt, mouseState);
 		}
@@ -122,4 +151,10 @@ class GuiControl {
 		}
 		this.children = [];
 	}
+
+	public function onMouseDown(mouseState:MouseState) {}
+
+	public function onMousePress(mouseState:MouseState) {}
+
+	public function onMouseRelease(mouseState:MouseState) {}
 }
