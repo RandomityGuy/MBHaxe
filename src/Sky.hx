@@ -1,5 +1,6 @@
 package src;
 
+import shaders.Skybox;
 import h3d.shader.pbr.PropsValues;
 import h3d.shader.AmbientLight;
 import h3d.scene.pbr.Environment;
@@ -38,13 +39,13 @@ class Sky extends Object {
 		pbrprops.occlusionValue = 0;
 		pbrprops.metalnessValue = 1;
 
-		skyMesh.scale(3000);
+		skyMesh.scale(3500);
 		var env = new Environment(texture);
 		env.compute();
 		// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
-		var shad = new CubeMap(texture);
+		var shad = new Skybox(texture);
 		skyMesh.material.mainPass.addShader(shad);
-		skyMesh.material.shadows = false;
+		// skyMesh.material.shadows = false;
 	}
 
 	function createSkyboxCubeTextured(dmlPath:String) {

@@ -65,14 +65,14 @@ class Main extends hxd.App {
 		var mission = new Mission();
 		mission.root = mis.root;
 
-		canvas = new Canvas(s2d);
+		// canvas = new Canvas(s2d);
 
-		canvas.setContent(new MainMenuGui());
+		// canvas.setContent(new MainMenuGui());
 
-		// world = new MarbleWorld(s3d, s2d, mission);
+		world = new MarbleWorld(s3d, s2d, mission);
 
-		// world.init();
-		// world.start();
+		world.init();
+		world.start();
 
 		fpsCounter = new Text(DefaultFont.get(), s2d);
 		fpsCounter.y = 40;
@@ -81,17 +81,17 @@ class Main extends hxd.App {
 
 	override function update(dt:Float) {
 		super.update(dt);
-		var wnd = Window.getInstance();
-		var mouseState:MouseState = {
-			position: new Vector(wnd.mouseX, wnd.mouseY)
-		}
-		canvas.update(dt, mouseState);
-		// world.update(dt);
+		// var wnd = Window.getInstance();
+		// var mouseState:MouseState = {
+		// 	position: new Vector(wnd.mouseX, wnd.mouseY)
+		// }
+		// canvas.update(dt, mouseState);
+		world.update(dt);
 		fpsCounter.text = 'FPS: ${this.engine.fps}';
 	}
 
 	override function render(e:h3d.Engine) {
-		// this.world.render(e);
+		this.world.render(e);
 		super.render(e);
 	}
 

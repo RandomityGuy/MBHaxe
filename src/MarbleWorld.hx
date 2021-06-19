@@ -219,7 +219,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.oob = false;
 		this.marble.mode = Start;
 		this.marble.startPad = cast startquat.pad;
-		// sky.follow = marble;
+		sky.follow = marble;
 
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
 			&& element._name == "MissionInfo")[0];
@@ -525,6 +525,7 @@ class MarbleWorld extends Scheduler {
 		if (element.datablock == "OutOfBoundsTrigger") {
 			trigger = new OutOfBoundsTrigger(element, cast this);
 		} else if (element.datablock == "InBoundsTrigger") {
+			return;
 			trigger = new InBoundsTrigger(element, cast this);
 		} else if (element.datablock == "HelpTrigger") {
 			trigger = new HelpTrigger(element, cast this);
@@ -587,7 +588,7 @@ class MarbleWorld extends Scheduler {
 			this.scene.addChild(marble.camera);
 			this.marble = marble;
 			// Ugly hack
-			// sky.follow = marble;
+			sky.follow = marble;
 		}
 		this.collisionWorld.addMovingEntity(marble.collider);
 		this.scene.addChild(marble);
