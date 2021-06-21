@@ -525,7 +525,6 @@ class MarbleWorld extends Scheduler {
 		if (element.datablock == "OutOfBoundsTrigger") {
 			trigger = new OutOfBoundsTrigger(element, cast this);
 		} else if (element.datablock == "InBoundsTrigger") {
-			return;
 			trigger = new InBoundsTrigger(element, cast this);
 		} else if (element.datablock == "HelpTrigger") {
 			trigger = new HelpTrigger(element, cast this);

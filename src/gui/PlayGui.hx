@@ -39,6 +39,7 @@ class PlayGui {
 	var powerupBox:GuiImage;
 	var powerupImageScene:h3d.scene.Scene;
 	var powerupImageSceneTarget:Texture;
+	var powerupImageSceneTargetBitmap:Bitmap;
 	var powerupImageObject:DtsObject;
 
 	var RSGOCenterText:Anim;
@@ -49,6 +50,17 @@ class PlayGui {
 	var alertTextBackground:GuiText;
 
 	var playGuiCtrl:GuiControl;
+
+	public function dispose() {
+		playGuiCtrl.dispose();
+		gemImageScene.dispose();
+		gemImageSceneTarget.dispose();
+		gemImageSceneTargetBitmap.remove();
+		powerupImageScene.dispose();
+		powerupImageSceneTarget.dispose();
+		powerupImageSceneTargetBitmap.remove();
+		RSGOCenterText.remove();
+	}
 
 	public function init(scene2d:h2d.Scene) {
 		this.scene2d = scene2d;
@@ -231,7 +243,7 @@ class PlayGui {
 		powerupImageSceneTarget = new Texture(68, 67, [Target]);
 		powerupImageSceneTarget.depthBuffer = new DepthBuffer(68, 67);
 
-		var powerupImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(powerupImageSceneTarget), scene2d);
+		powerupImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(powerupImageSceneTarget), scene2d);
 		powerupImageSceneTargetBitmap.x = scene2d.width - 88;
 		powerupImageSceneTargetBitmap.y = 18;
 	}

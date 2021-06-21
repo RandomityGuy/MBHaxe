@@ -11,6 +11,7 @@ class InteriorObject extends GameObject {
 	public var collider:CollisionEntity;
 	public var interiorFile:String;
 	public var useInstancing = true;
+	public var level:MarbleWorld;
 
 	public function new() {
 		super();
@@ -19,11 +20,13 @@ class InteriorObject extends GameObject {
 
 	public function init(level:MarbleWorld) {
 		this.identifier = this.interiorFile;
+		this.level = level;
 		DifBuilder.loadDif(this.interiorFile, cast this);
 	}
 
 	public override function setTransform(transform:Matrix) {
 		super.setTransform(transform);
 		collider.setTransform(transform);
+		this.level.collisionWorld.updateTransform(this.collider);
 	}
 }

@@ -51,8 +51,6 @@ class PathedInterior extends InteriorObject {
 	var stopped:Bool = false;
 	var stopTime:Float;
 
-	public var level:MarbleWorld;
-
 	var previousState:PIState;
 
 	public static function createFromSimGroup(simGroup:MissionElementSimGroup, level:MarbleWorld) {

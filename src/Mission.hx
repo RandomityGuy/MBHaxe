@@ -20,6 +20,12 @@ class Mission {
 
 	public function new() {}
 
+	public function load() {
+		var misParser = new MisParser(ResourceLoader.fileSystem.get(this.path).getText());
+		var contents = misParser.parse();
+		root = contents.root;
+	}
+
 	public static function fromMissionInfo(path:String, mInfo:MissionElementScriptObject) {
 		var mission = new Mission();
 		mission.path = path;

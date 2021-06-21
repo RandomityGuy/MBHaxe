@@ -138,6 +138,10 @@ class PlayMissionGui extends GuiImage {
 		var pmPlay = new GuiButton(loadButtonImages("data/ui/play/play"));
 		pmPlay.position = new Vector(391, 257);
 		pmPlay.extent = new Vector(121, 62);
+		pmPlay.pressedAction = (sender) -> {
+			// Wacky hacks
+			cast(this.parent, Canvas).marbleGame.playMission(currentList[currentSelection]);
+		}
 		pmBox.addChild(pmPlay);
 
 		var pmPrev = new GuiButton(loadButtonImages("data/ui/play/prev"));
@@ -199,7 +203,7 @@ class PlayMissionGui extends GuiImage {
 		var descText2 = '<br/><br/>' + '<font opacity="0">ÂTest Align</font>';
 		descText2 += '<br/><br/><br/>';
 		for (i in 0...3) {
-			descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">00:00.000</font>';
+			descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">99:59.999</font>';
 		}
 		pmDescriptionOther.text.text = descText2;
 		pmBox.addChild(pmDescriptionOther);
