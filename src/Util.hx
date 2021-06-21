@@ -112,7 +112,8 @@ class Util {
 			'\\0' => '\x00',
 			'\\f' => '\x0C',
 			'\\n' => '\n',
-			'\\r' => '\r'
+			'\\r' => '\r',
+			"\\'" => "'"
 		];
 
 		for (obj => esc in specialCases) {

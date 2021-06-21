@@ -12,7 +12,7 @@ class Canvas extends GuiControl {
 		this.scene2d = scene;
 
 		this.position = new Vector();
-		this.extent = new Vector(scene.width, scene.height);
+		this.extent = new Vector(640, 480);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 	}

@@ -1,23 +1,20 @@
 package gui;
 
+import gui.GuiText.Justification;
+import h2d.HtmlText;
 import h2d.Scene;
 import hxd.res.BitmapFont;
 import h2d.Text;
 
-enum Justification {
-	Left;
-	Right;
-	Center;
-}
-
 @:publicFields
-class GuiText extends GuiControl {
-	var text:Text;
+class GuiMLText extends GuiControl {
+	var text:HtmlText;
 	var justify:Justification = Left;
 
-	public function new(font:BitmapFont) {
+	public function new(font:BitmapFont, loadFontFunc:String->h2d.Font) {
 		super();
-		this.text = new Text(font.toFont());
+		this.text = new HtmlText(font.toFont());
+		this.text.loadFont = loadFontFunc;
 	}
 
 	public override function render(scene2d:Scene) {
@@ -37,6 +34,7 @@ class GuiText extends GuiControl {
 		if (scene2d.contains(text))
 			scene2d.removeChild(text);
 		scene2d.addChild(text);
+		text.maxWidth = renderRect.extent.x;
 		super.render(scene2d);
 	}
 

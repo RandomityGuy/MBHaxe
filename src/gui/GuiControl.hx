@@ -89,13 +89,13 @@ class GuiControl {
 		}
 		if (this.horizSizing == HorizSizing.Width) {
 			if (this.parent != null)
-				rect.extent.x = parentRect.extent.x;
+				rect.extent.x = parentRect.extent.x * (this.extent.x / parent.extent.x);
 			else
 				rect.extent.x = Window.getInstance().width;
 		}
 		if (this.vertSizing == VertSizing.Height) {
 			if (this.parent != null)
-				rect.extent.y = parentRect.extent.y;
+				rect.extent.y = parentRect.extent.y * (this.extent.y / parent.extent.y);
 			else
 				rect.extent.y = Window.getInstance().height;
 		}
@@ -136,6 +136,11 @@ class GuiControl {
 	public function addChild(ctrl:GuiControl) {
 		this.children.push(ctrl);
 		ctrl.parent = this;
+	}
+
+	public function removeChild(ctrl:GuiControl) {
+		this.children.remove(ctrl);
+		ctrl.parent = null;
 	}
 
 	public function removeChildren() {

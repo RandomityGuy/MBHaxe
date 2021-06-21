@@ -19,8 +19,10 @@ class GuiAnim extends GuiControl {
 		anim.setPosition(renderRect.position.x, renderRect.position.y);
 		anim.scaleX = renderRect.extent.x / anim.getFrame().width;
 		anim.scaleY = renderRect.extent.y / anim.getFrame().height;
-		if (!scene2d.contains(anim))
-			scene2d.addChild(anim);
+		if (scene2d.contains(anim)) {
+			scene2d.removeChild(anim); // Refresh "layer"
+		}
+		scene2d.addChild(anim);
 		super.render(scene2d);
 	}
 

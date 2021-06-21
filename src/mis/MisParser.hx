@@ -115,7 +115,6 @@ class MisParser {
 
 		if (elements.length != 1) {
 			// We expect there to be only one outer element; the MissionGroup SimGroup.
-			trace(elements);
 			throw new Exception("Mission file doesn't have exactly 1 outer element!");
 		}
 
@@ -124,6 +123,13 @@ class MisParser {
 		mf.marbleAttributes = marbleAttributes;
 		mf.activatedPackages = activatedPackages;
 		return mf;
+	}
+
+	public function parseMissionInfo() {
+		var missionInfoIndex = this.text.indexOf("new ScriptObject(MissionInfo) {");
+		this.index = missionInfoIndex;
+		var mInfo:MissionElementScriptObject = cast readElement();
+		return mInfo;
 	}
 
 	function readElement() {
