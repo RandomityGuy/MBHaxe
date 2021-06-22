@@ -1,5 +1,7 @@
 package src;
 
+import src.MarbleGame;
+import gui.EndGameGui;
 import sdl.Cursor;
 import src.ForceObject;
 import h3d.scene.pbr.DirLight;
@@ -782,7 +784,15 @@ class MarbleWorld extends Scheduler {
 			this.marble.camera.finish = true;
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
+			displayAlert("Congratulations! You've finished!");
+			this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 		}
+	}
+
+	function showFinishScreen() {
+		MarbleGame.canvas.pushDialog(new EndGameGui());
+		this.setCursorLock(false);
+		return 0;
 	}
 
 	public function pickUpPowerUp(powerUp:PowerUp) {

@@ -12,7 +12,8 @@ import gui.Canvas;
 
 @:publicFields
 class MarbleGame {
-	var canvas:Canvas;
+	static var canvas:Canvas;
+
 	var world:MarbleWorld;
 
 	var scene2d:h2d.Scene;
@@ -23,7 +24,7 @@ class MarbleGame {
 	var exitGameDlg:ExitGameDlg;
 
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
-		this.canvas = new Canvas(scene2d, cast this);
+		canvas = new Canvas(scene2d, cast this);
 		this.scene = scene;
 		this.scene2d = scene2d;
 	}
@@ -70,7 +71,7 @@ class MarbleGame {
 	}
 
 	public function playMission(mission:Mission) {
-		this.canvas.clearContent();
+		canvas.clearContent();
 		mission.load();
 		world = new MarbleWorld(scene, scene2d, mission);
 		world.init();

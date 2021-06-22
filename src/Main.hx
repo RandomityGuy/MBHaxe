@@ -15,7 +15,7 @@ class Main extends hxd.App {
 		super.init();
 
 		marbleGame = new MarbleGame(s2d, s3d);
-		marbleGame.canvas.setContent(new MainMenuGui());
+		MarbleGame.canvas.setContent(new MainMenuGui());
 		// world = new MarbleWorld(s3d, s2d, mission);
 
 		// world.init();

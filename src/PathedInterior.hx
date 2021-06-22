@@ -192,7 +192,8 @@ class PathedInterior extends InteriorObject {
 
 	function computeDuration() {
 		var total = 0.0;
-		for (marker in markerData) {
+		for (i in 0...(markerData.length - 1)) {
+			var marker = markerData[i];
 			total += marker.msToNext;
 		}
 		this.duration = total;
@@ -211,7 +212,8 @@ class PathedInterior extends InteriorObject {
 			return Util.adjustedMod(this.currentTime + (externalTime - this.changeTime) * direction, this.duration);
 		} else {
 			var dur = Math.abs(this.currentTime - this.targetTime);
-			var compvarion = Util.clamp(dur > 0 ? (externalTime - this.changeTime) / dur : 1, 0, 1);
+
+			var compvarion = Util.clamp(dur != 0 ? (externalTime - this.changeTime) / dur : 1, 0, 1);
 			return Util.clamp(Util.lerp(this.currentTime, this.targetTime, compvarion), 0, this.duration);
 		}
 	}
@@ -234,8 +236,6 @@ class PathedInterior extends InteriorObject {
 			mat.scale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
 			mat.setPosition(this.basePosition);
 			return mat;
-		} else {
-			m1 = this.markerData[0];
 		}
 		// Find the two markers in question
 		var currentEndTime = m1.msToNext;
@@ -253,7 +253,7 @@ class PathedInterior extends InteriorObject {
 		var m2Time = currentEndTime;
 		var duration = m2Time - m1Time;
 		var position:Vector = null;
-		var compvarion = Util.clamp(duration > 0 ? (time - m1Time) / duration : 1, 0, 1);
+		var compvarion = Util.clamp(duration != 0 ? (time - m1Time) / duration : 1, 0, 1);
 		if (m1.smoothingType == "Accelerate") {
 			// A simple easing function
 			compvarion = Math.sin(compvarion * Math.PI - (Math.PI / 2)) * 0.5 + 0.5;
