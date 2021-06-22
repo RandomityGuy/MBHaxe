@@ -62,6 +62,8 @@ class Mission {
 		var path = StringTools.replace(rawElementPath.substring(rawElementPath.indexOf('data/')), "\"", "");
 		if (StringTools.contains(path, 'interiors_mbg/'))
 			path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
-		return path;
+		if (ResourceLoader.fileSystem.exists(path))
+			return path;
+		return "";
 	}
 }

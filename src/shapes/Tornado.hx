@@ -7,10 +7,9 @@ class Tornado extends ForceObject {
 	public function new() {
 		super();
 		this.dtsPath = "data/shapes/hazards/tornado.dts";
-		this.isCollideable = true;
+		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "Tornado";
-		// this.useInstancing = false;
 		this.forceDatas = [
 			{
 				forceType: ForceSpherical,

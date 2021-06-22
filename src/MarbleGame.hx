@@ -1,5 +1,6 @@
 package src;
 
+import gui.PlayMissionGui;
 import gui.ExitGameDlg;
 import hxd.Key;
 import src.Mission;
@@ -35,10 +36,27 @@ class MarbleGame {
 			if (Key.isPressed(Key.ESCAPE)) {
 				paused = !paused;
 				if (paused) {
-					exitGameDlg = new ExitGameDlg();
+					world.setCursorLock(false);
+					exitGameDlg = new ExitGameDlg((sender) -> {
+						canvas.popDialog(exitGameDlg);
+						paused = !paused;
+						world.dispose();
+						world = null;
+						canvas.setContent(new PlayMissionGui());
+					}, (sender) -> {
+						canvas.popDialog(exitGameDlg);
+						paused = !paused;
+						world.setCursorLock(true);
+					}, (sender) -> {
+						canvas.popDialog(exitGameDlg);
+						world.restart();
+						world.setCursorLock(true);
+						paused = !paused;
+					});
 					canvas.pushDialog(exitGameDlg);
 				} else {
 					canvas.popDialog(exitGameDlg);
+					world.setCursorLock(true);
 				}
 			}
 		}

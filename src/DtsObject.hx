@@ -115,7 +115,7 @@ class DtsObject extends GameObject {
 		if (level != null)
 			this.level = level;
 
-		var isInstanced = false;
+		isInstanced = false;
 		if (this.level != null)
 			isInstanced = this.level.instanceManager.isInstanced(this) && useInstancing;
 		if (!isInstanced)
@@ -360,10 +360,10 @@ class DtsObject extends GameObject {
 			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;
-				material.mainPass.depthWrite = false;
-				// material.mainPass.culling = h3d.mat.Data.Face.Front;
+				// mmaterial.mainPass.depthWrite = false;
+				material.mainPass.culling = h3d.mat.Data.Face.Front;
 			}
-			// TODO TRANSPARENCY SHIT
+			// // TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0) {
 				material.blendMode = BlendMode.Add;
 				material.mainPass.setPassName("overlay");
@@ -373,11 +373,12 @@ class DtsObject extends GameObject {
 				material.blendMode = BlendMode.Sub;
 
 			if (flags & 32 > 0) {
-				var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
-				pbrprops.emissiveValue = 1;
-				pbrprops.roughnessValue = 0;
-				pbrprops.occlusionValue = 0;
-				pbrprops.metalnessValue = 1;
+				material.mainPass.setPassName("overlay");
+				// var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
+				// pbrprops.emissiveValue = 1;
+				// pbrprops.roughnessValue = 1;
+				// pbrprops.occlusionValue = 0;
+				// pbrprops.metalnessValue = 0;
 			}
 
 			// if (this.isTSStatic && !(flags & 64 > 0)) {

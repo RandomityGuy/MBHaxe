@@ -55,7 +55,7 @@ class Collision {
 		var p = PlaneF.PointNormal(new Point3F(v0.x, v0.y, v0.z), new Point3F(normal.x, normal.y, normal.z));
 		var pdist = p.distance(new Point3F(center.x, center.y, center.z));
 
-		if (pdist < 0) {
+		if (Math.abs(pdist) < 0.001) {
 			return res; // Dont collide internal edges
 		}
 
@@ -68,8 +68,11 @@ class Collision {
 		}
 
 		if (pdist < radius) {
-			var t = -toDifPoint(center).dot(p.getNormal()) / p.getNormal().lengthSq();
-			var pt = fromDifPoint(p.project(toDifPoint(center))); // center.add(fromDifPoint(p.getNormal().scalar(t)));
+			var n = normal.normalized();
+			var t = center.dot(n) - v0.dot(n);
+
+			var pt = center.sub(n.multiply(t));
+
 			if (PointInTriangle(pt, v0, v1, v2)) {
 				res.result = true;
 				res.point = pt;

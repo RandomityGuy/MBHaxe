@@ -14,12 +14,12 @@ class MustChangeTrigger extends Trigger {
 	}
 
 	public override function onMarbleEnter(time:TimeState) {
-		this.interior.setTargetTime(time, MisParser.parseNumber(this.element.targettime));
+		this.interior.setTargetTime(time, MisParser.parseNumber(this.element.targettime) / 1000);
 		if (this.element.instant == "1") {
 			if (this.element.icontinuetottime != null && this.element.icontinuetottime != "0") {
 				// Absolutely strange, and not sure if it's even a thing in MBG, but is implement nonetheless.
 				this.interior.currentTime = this.interior.targetTime;
-				this.interior.targetTime = MisParser.parseNumber(this.element.icontinuetottime);
+				this.interior.targetTime = MisParser.parseNumber(this.element.icontinuetottime) / 1000;
 			} else {
 				this.interior.changeTime = Math.NEGATIVE_INFINITY; // "If instant is 1, the MP will warp to targetTime instantly."
 			}

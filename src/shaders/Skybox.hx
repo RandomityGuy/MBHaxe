@@ -12,11 +12,12 @@ class Skybox extends hxsl.Shader {
 			var view:Mat4;
 			var proj:Mat4;
 		};
+		var projNorm:Vec3;
 		function vertex() {
-			transformedNormal = transformedPosition - camera.position;
+			projNorm = transformedPosition - camera.position;
 		}
 		function fragment() {
-			pixelColor.rgb = texture.get(normalize(transformedNormal)).rgb;
+			pixelColor.rgba = texture.get(normalize(projNorm)).rgba;
 		}
 	}
 

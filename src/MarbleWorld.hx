@@ -1,5 +1,6 @@
 package src;
 
+import sdl.Cursor;
 import src.ForceObject;
 import h3d.scene.pbr.DirLight;
 import h3d.col.Bounds;
@@ -93,6 +94,8 @@ class MarbleWorld extends Scheduler {
 	public var finishYaw:Float;
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
+
+	public var cursorLock:Bool = true;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -861,6 +864,21 @@ class MarbleWorld extends Scheduler {
 		// AudioManager.play('whoosh.wav');
 		// if (this.replay.mode != = 'playback')
 		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
+	}
+
+	public function setCursorLock(enabled:Bool) {
+		this.cursorLock = enabled;
+		if (enabled) {
+			this.marble.camera.lockCursor();
+			Cursor.show(false);
+		} else {
+			Cursor.show(true);
+		}
+	}
+
+	public function dispose() {
+		this.playGui.dispose();
+		scene.removeChildren();
 	}
 }
 

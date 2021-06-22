@@ -76,10 +76,16 @@ class CameraController extends Object {
 	function onEvent(e:Event) {
 		switch (e.kind) {
 			case EMove:
-				orbit(e.relX, e.relY);
-				Sdl.warpMouseGlobal(cast this.screenWidth / 2, cast this.screenHeight / 2);
+				if (this.level.cursorLock) {
+					orbit(e.relX, e.relY);
+					lockCursor();
+				}
 			default:
 		}
+	}
+
+	public function lockCursor() {
+		Sdl.warpMouseGlobal(cast this.screenWidth / 2, cast this.screenHeight / 2);
 	}
 
 	function orbit(mouseX:Float, mouseY:Float) {
