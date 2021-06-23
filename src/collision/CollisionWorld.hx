@@ -79,8 +79,8 @@ class CollisionWorld {
 	public function boundingSearch(bounds:Bounds) {
 		var contacts = this.octree.boundingSearch(bounds).map(x -> cast(x, CollisionEntity));
 		for (obj in dynamicEntities) {
-			if (obj.boundingBox.collide(bounds))
-				contacts.push(obj);
+			// if (obj.boundingBox.collide(bounds))
+			contacts.push(obj);
 		}
 		return contacts;
 	}

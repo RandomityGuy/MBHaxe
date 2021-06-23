@@ -443,6 +443,7 @@ class Marble extends GameObject {
 					dir2 = dir2.add(contacts[j].normal);
 				}
 				dir = dir2;
+				dir.normalize();
 				gotOne = true;
 			}
 			if (gotOne) {
@@ -450,20 +451,28 @@ class Marble extends GameObject {
 				var soFar = 0.0;
 				for (k in 0...contacts.length) {
 					if (contacts[k].contactDistance < this._radius) {
-						var timeToSeparate = 0.1;
-						var dist = this._radius - contacts[k].contactDistance; // contacts[k].penetration;
-						var normal = contacts[k].normal;
-						var unk = normal.multiply(soFar);
-						var tickle = this.velocity.sub(contacts[k].velocity);
-						var plop = unk.add(tickle);
-						var outVel = plop.dot(normal);
-						var cancan = timeToSeparate * outVel;
-
-						if (dist > cancan) {
-							var bla = contacts[k].normal;
-							var bFac = (dist - cancan) / timeToSeparate;
-							soFar += bFac / bla.dot(dir);
+						var timeToSeparate = 0.01666;
+						var dist = contacts[k].contactDistance; // contacts[k].penetration;
+						if (dist >= 0) {
+							var flag1 = this.velocity.sub(contacts[k].velocity).add(dir.multiply(soFar)).dot(contacts[k].normal) * timeToSeparate;
+							if (flag1 < dist) {
+								var flag2 = (dist - flag1) / timeToSeparate;
+								soFar += flag2 / contacts[k].normal.dot(dir);
+							}
 						}
+
+						// var normal = contacts[k].normal;
+						// var unk = normal.multiply(soFar);
+						// var tickle = this.velocity.sub(contacts[k].velocity);
+						// var plop = unk.add(tickle);
+						// var outVel = plop.dot(normal);
+						// var cancan = timeToSeparate * outVel;
+
+						// if (dist > cancan) {
+						// 	var bla = contacts[k].normal;
+						// 	var bFac = (dist - cancan) / timeToSeparate;
+						// 	soFar += bFac / bla.dot(dir);
+						// }
 					}
 				}
 				if (soFar < -25)
@@ -604,14 +613,14 @@ class Marble extends GameObject {
 	}
 
 	function getIntersectionTime(dt:Float, velocity:Vector) {
-		// var searchbox = new Bounds();
-		// searchbox.addSpherePos(this.x, this.y, this.z, _radius);
-		// searchbox.addSpherePos(this.x + velocity.x * dt, this.y + velocity.y * dt, this.z + velocity.z * dt, _radius);
+		var searchbox = new Bounds();
+		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
+		searchbox.addSpherePos(this.x + velocity.x * dt, this.y + velocity.y * dt, this.z + velocity.z * dt, _radius);
 
 		var position = this.getAbsPos().getPosition();
 
-		// var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
-		var foundObjs = this.contactEntities;
+		var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
+		// var foundObjs = this.contactEntities;
 
 		function toDifPoint(vec:Vector) {
 			return new Point3F(vec.x, vec.y, vec.z);
@@ -633,7 +642,6 @@ class Marble extends GameObject {
 			var relVelocity = velocity.sub(obj.velocity);
 
 			// tform.setPosition(tform.getPosition().add(velDir.multiply(_radius)));
-			// tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)).sub(velDir.multiply(_radius)));
 			// tform.setPosition(tform.getPosition().add(obj.velocity.multiply(dt)));
 
 			var contacts = [];
@@ -647,14 +655,13 @@ class Marble extends GameObject {
 					var v = surface.points[surface.indices[i + 1]].transformed(tform);
 					var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
 
-					var polyPlane = PlaneF.ThreePoints(toDifPoint(v0), toDifPoint(v), toDifPoint(v2));
-
 					var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
 
 					var closest = Collision.IntersectTriangleCapsule(position, position.add(relVelocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
+					// var closest = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
 
 					if (closest != null) {
-						var t = (-position.dot(surfacenormal) - polyPlane.d) / relVelocity.dot(surfacenormal);
+						var t = (-position.dot(surfacenormal) - v0.dot(surfacenormal)) / relVelocity.dot(surfacenormal);
 
 						var pt = position.add(relVelocity.multiply(t));
 
@@ -706,6 +713,13 @@ class Marble extends GameObject {
 			var tempState = timeState.clone();
 			tempState.dt = timeStep;
 
+			if (this.controllable) {
+				for (interior in pathedInteriors) {
+					interior.pushTickState();
+					interior.recomputeVelocity(piTime + 0.032, 0.032);
+				}
+			}
+
 			this.findContacts(collisionWorld, tempState);
 			var cmf = this.computeMoveForces(m);
 			var isCentered:Bool = cmf.result;
@@ -740,7 +754,7 @@ class Marble extends GameObject {
 			piTime += timeStep;
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
-					// interior.popTickState();
+					interior.popTickState();
 					interior.setStopped(stoppedPaths);
 					var piDT = timeState.clone();
 					piDT.currentAttemptTime = piTime;

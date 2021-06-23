@@ -142,7 +142,7 @@ class CollisionEntity implements IOctreeObject {
 								cinfo.point = closest;
 								// cinfo.collider = this;
 								cinfo.velocity = this.velocity;
-								cinfo.contactDistance = closest.distance(position);
+								cinfo.contactDistance = radius - closest.distance(position);
 								cinfo.otherObject = this.go;
 								// cinfo.penetration = radius - (position.sub(closest).dot(normal));
 								cinfo.restitution = surface.restitution;
