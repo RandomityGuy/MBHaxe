@@ -291,7 +291,8 @@ class ParticleManager {
 					particleShader.scale = instance.scale;
 					particleShader.rotation = instance.rotation;
 					batch.meshBatch.material.blendMode = instance.o.blending;
-					batch.meshBatch.material.mainPass.setPassName("overlay");
+					batch.meshBatch.material.mainPass.depthWrite = false;
+					// batch.meshBatch.material.mainPass.setPassName("overlay");
 					batch.meshBatch.material.color.load(instance.color);
 					batch.meshBatch.shadersChanged = true;
 					batch.meshBatch.setScale(instance.scale);
@@ -324,8 +325,9 @@ class ParticleManager {
 			var mat = Material.create(particleData.texture);
 			// matshader.texture = mat.texture;
 			mat.mainPass.enableLights = false;
-			mat.mainPass.setPassName("overlay");
+			// mat.mainPass.setPassName("overlay");
 			// mat.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
+			mat.shadows = false;
 			mat.texture.wrap = Wrap.Repeat;
 			var billboardShader = new Billboard();
 			mat.mainPass.addShader(billboardShader);

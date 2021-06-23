@@ -54,6 +54,17 @@ class EndGameGui extends GuiControl {
 		var expo32 = new BitmapFont(expo32fontdata.entry);
 		@:privateAccess expo32.loader = ResourceLoader.loader;
 
+		function mlFontLoader(text:String) {
+			switch (text) {
+				case "DomCasual32":
+					return domcasual32.toFont();
+				case "Arial14":
+					return arial14.toFont();
+				default:
+					return null;
+			}
+		}
+
 		var congrats = new GuiText(expo50);
 		congrats.text.textColor = 0xffff00;
 		congrats.text.text = "Final Time:";
@@ -71,9 +82,9 @@ class EndGameGui extends GuiControl {
 		finishMessage.extent = new Vector(200, 100);
 		pg.addChild(finishMessage);
 
-		var leftColumn = new GuiText(domcasual32);
+		var leftColumn = new GuiMLText(domcasual32, mlFontLoader);
 		leftColumn.text.textColor = 0x000000;
-		leftColumn.text.text = "Qualify Time:\nGold Time:\nElapsed Time:\nBonus Time:";
+		leftColumn.text.text = 'Qualify Time:<br/>Gold Time:<br/>Elapsed Time:<br/>Bonus Time:<br/><font face="Arial14"><br/></font>Best Times:<br/>1. Nardo Polo<br/>2. Nardo Polo<br/>3. Nardo Polo';
 		leftColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
 		leftColumn.position = new Vector(108, 103);
 		leftColumn.extent = new Vector(208, 50);

@@ -1,5 +1,6 @@
 package src;
 
+import h3d.scene.Mesh;
 import h3d.col.Bounds;
 import collision.CollisionEntity;
 import shapes.StartPad;
@@ -30,7 +31,6 @@ import h3d.col.ObjectCollider;
 import h3d.col.Collider.GroupCollider;
 import h3d.Vector;
 import h3d.mat.Material;
-import h3d.scene.CustomObject;
 import h3d.prim.Sphere;
 import h3d.scene.Object;
 import src.CameraController;
@@ -164,7 +164,8 @@ class Marble extends GameObject {
 		geom.addUVs();
 		var marbleTexture = ResourceLoader.loader.load("data/shapes/balls/base.marble.png").toTexture();
 		var marbleMaterial = Material.create(marbleTexture);
-		var obj = new CustomObject(geom, marbleMaterial, this);
+		marbleMaterial.shadows = false;
+		var obj = new Mesh(geom, marbleMaterial, this);
 		obj.scale(_radius);
 
 		this.velocity = new Vector();

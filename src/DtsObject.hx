@@ -366,14 +366,15 @@ class DtsObject extends GameObject {
 			// // TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0) {
 				material.blendMode = BlendMode.Add;
-				material.mainPass.setPassName("overlay");
+				// material.mainPass.setPassName("overlay");
 				// material.textureShader.additive = true;
 			}
 			if (flags & 16 > 0)
 				material.blendMode = BlendMode.Sub;
 
 			if (flags & 32 > 0) {
-				material.mainPass.setPassName("overlay");
+				material.mainPass.enableLights = false;
+				// material.mainPass.setPassName("overlay");
 				// var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
 				// pbrprops.emissiveValue = 1;
 				// pbrprops.roughnessValue = 1;
@@ -385,6 +386,8 @@ class DtsObject extends GameObject {
 			// 	// TODO THIS SHIT
 			// }
 			// ((flags & 32) || environmentMaterial) ? new Materia
+
+			material.shadows = false;
 
 			// material.mainPass.addShader(new AlphaMult());
 

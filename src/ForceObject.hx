@@ -2,7 +2,6 @@ package src;
 
 import src.DtsObject;
 import h3d.Vector;
-import h3d.scene.CustomObject;
 
 enum ForceType {
 	NoForce;

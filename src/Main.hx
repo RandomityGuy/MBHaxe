@@ -40,7 +40,7 @@ class Main extends hxd.App {
 	}
 
 	static function main() {
-		h3d.mat.PbrMaterialSetup.set();
+		// h3d.mat.PbrMaterialSetup.set();
 		new Main();
 	}
 }

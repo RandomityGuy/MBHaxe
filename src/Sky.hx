@@ -33,11 +33,11 @@ class Sky extends Object {
 		skyMesh.material.mainPass.enableLights = false;
 		skyMesh.material.receiveShadows = false;
 		skyMesh.material.blendMode = None;
-		var pbrprops = skyMesh.material.mainPass.getShader(PropsValues);
-		pbrprops.emissiveValue = 1;
-		pbrprops.roughnessValue = 0;
-		pbrprops.occlusionValue = 0;
-		pbrprops.metalnessValue = 1;
+		// var pbrprops = skyMesh.material.mainPass.getShader(PropsValues);
+		// pbrprops.emissiveValue = 1;
+		// pbrprops.roughnessValue = 0;
+		// pbrprops.occlusionValue = 0;
+		// pbrprops.metalnessValue = 1;
 
 		skyMesh.scale(3500);
 		var env = new Environment(texture);

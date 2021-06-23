@@ -1,12 +1,13 @@
 package gui;
 
+import h3d.shader.AlphaMult;
+import h3d.shader.ColorKey;
 import hxd.snd.WavData;
 import gui.GuiControl.HorizSizing;
 import src.TimeState;
 import format.gif.Data.Block;
 import hxd.res.BitmapFont;
 import h2d.Text;
-import h3d.shader.pbr.PropsValues;
 import h3d.Vector;
 import hxd.fmt.hmd.Data.AnimationEvent;
 import h2d.Tile;
@@ -201,8 +202,8 @@ class PlayGui {
 		playGuiCtrl.addChild(gemCountNumbers[3]);
 
 		this.gemImageScene = new h3d.scene.Scene();
-		var gemImageRenderer = cast(this.gemImageScene.renderer, h3d.scene.pbr.Renderer);
-		gemImageRenderer.skyMode = Hide;
+		// var gemImageRenderer = cast(this.gemImageScene.renderer, h3d.scene.Renderer);
+		// gemImageRenderer.skyMode = Hide;
 
 		gemImageSceneTarget = new Texture(60, 60, [Target]);
 		gemImageSceneTarget.depthBuffer = new DepthBuffer(60, 60);
@@ -210,6 +211,8 @@ class PlayGui {
 		gemImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(gemImageSceneTarget), scene2d);
 		gemImageSceneTargetBitmap.x = -8;
 		gemImageSceneTargetBitmap.y = -8;
+		// gemImageSceneTargetBitmap.blendMode = None;
+		// gemImageSceneTargetBitmap.addShader(new ColorKey());
 
 		gemImageObject = new DtsObject();
 		gemImageObject.dtsPath = "data/shapes/items/gem.dts";
@@ -220,7 +223,13 @@ class PlayGui {
 		// ["base.gem"] = color + ".gem";
 		gemImageObject.init(null);
 		for (mat in gemImageObject.materials) {
-			mat.mainPass.addShader(new PropsValues(1, 0, 0, 1));
+			mat.mainPass.enableLights = false;
+
+			// Huge hacks
+			if (mat.blendMode != Add) {
+				var alphaShader = new h3d.shader.AlphaChannel();
+				mat.mainPass.addShader(alphaShader);
+			}
 		}
 		gemImageScene.addChild(gemImageObject);
 		var gemImageCenter = gemImageObject.getBounds().getCenter();
@@ -237,8 +246,8 @@ class PlayGui {
 		playGuiCtrl.addChild(powerupBox);
 
 		this.powerupImageScene = new h3d.scene.Scene();
-		var powerupImageRenderer = cast(this.powerupImageScene.renderer, h3d.scene.pbr.Renderer);
-		powerupImageRenderer.skyMode = Hide;
+		// var powerupImageRenderer = cast(this.powerupImageScene.renderer, h3d.scene.pbr.Renderer);
+		// powerupImageRenderer.skyMode = Hide;
 
 		powerupImageSceneTarget = new Texture(68, 67, [Target]);
 		powerupImageSceneTarget.depthBuffer = new DepthBuffer(68, 67);
@@ -365,7 +374,7 @@ class PlayGui {
 			powerupImageObject.showSequences = false;
 			powerupImageObject.init(null);
 			for (mat in powerupImageObject.materials) {
-				mat.mainPass.addShader(new PropsValues(1, 0, 0, 1));
+				mat.mainPass.enableLights = false;
 			}
 			powerupImageScene.addChild(powerupImageObject);
 			var powerupImageCenter = powerupImageObject.getBounds().getCenter();

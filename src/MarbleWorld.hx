@@ -4,7 +4,7 @@ import src.MarbleGame;
 import gui.EndGameGui;
 import sdl.Cursor;
 import src.ForceObject;
-import h3d.scene.pbr.DirLight;
+import h3d.scene.fwd.DirLight;
 import h3d.col.Bounds;
 import triggers.HelpTrigger;
 import triggers.InBoundsTrigger;
@@ -54,7 +54,6 @@ import hxd.Key;
 import h3d.Vector;
 import src.InteriorObject;
 import h3d.scene.Scene;
-import h3d.scene.CustomObject;
 import collision.CollisionWorld;
 import src.Marble;
 
@@ -153,9 +152,9 @@ class MarbleWorld extends Scheduler {
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
 
-		var renderer = cast(this.scene.renderer, h3d.scene.pbr.Renderer);
+		// var renderer = cast(this.scene.renderer, h3d.scene.pbr.Renderer);
 
-		renderer.skyMode = Hide;
+		// renderer.skyMode = Hide;
 
 		for (element in mission.root.elements) {
 			if (element._type != MissionElementType.Sun)
@@ -172,7 +171,7 @@ class MarbleWorld extends Scheduler {
 			scene.lightSystem.ambientLight.load(ambientColor);
 
 			var sunlight = new DirLight(sunDirection, scene);
-			sunlight.color = directionalColor.multiply(2);
+			sunlight.color = directionalColor;
 		}
 
 		// var skyElement:MissionElementSky = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.Sky)[0];
