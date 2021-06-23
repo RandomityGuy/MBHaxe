@@ -6,7 +6,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 
 class EndGameGui extends GuiControl {
-	public function new() {
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -31,12 +31,14 @@ class EndGameGui extends GuiControl {
 		continueButton.vertSizing = Bottom;
 		continueButton.position = new Vector(333, 386);
 		continueButton.extent = new Vector(113, 47);
+		continueButton.pressedAction = continueFunc;
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/endgame/replay"));
 		restartButton.horizSizing = Right;
 		restartButton.vertSizing = Bottom;
 		restartButton.position = new Vector(51, 388);
 		restartButton.extent = new Vector(104, 48);
+		restartButton.pressedAction = restartFunc;
 
 		var arial14fontdata = ResourceLoader.loader.load("data/font/Arial14.fnt");
 		var arial14 = new BitmapFont(arial14fontdata.entry);
@@ -65,12 +67,12 @@ class EndGameGui extends GuiControl {
 			}
 		}
 
-		var congrats = new GuiText(expo50);
+		var congrats = new GuiMLText(expo50, mlFontLoader);
 		congrats.text.textColor = 0xffff00;
-		congrats.text.text = "Final Time:";
+		congrats.text.text = 'Final Time: <font color="#FFF090">99:59.999</font>';
 		congrats.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
 		congrats.position = new Vector(43, 17);
-		congrats.extent = new Vector(208, 50);
+		congrats.extent = new Vector(408, 50);
 		pg.addChild(congrats);
 
 		var finishMessage = new GuiText(expo32);
@@ -89,6 +91,14 @@ class EndGameGui extends GuiControl {
 		leftColumn.position = new Vector(108, 103);
 		leftColumn.extent = new Vector(208, 50);
 		pg.addChild(leftColumn);
+
+		var rightColumn = new GuiMLText(domcasual32, mlFontLoader);
+		rightColumn.text.textColor = 0x000000;
+		rightColumn.text.text = '99:59.999<br/>99:59.999<br/>99:59.999<br/>99:59.999<br/><font face="Arial14"><br/></font><br/>99:59.999<br/>99:59.999<br/>99:59.999';
+		rightColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
+		rightColumn.position = new Vector(274, 103);
+		rightColumn.extent = new Vector(208, 50);
+		pg.addChild(rightColumn);
 
 		pg.addChild(continueButton);
 		pg.addChild(restartButton);

@@ -31,7 +31,7 @@ class Sky extends Object {
 		// This is such a hack
 		// skyMesh.material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 		skyMesh.material.mainPass.enableLights = false;
-		skyMesh.material.receiveShadows = false;
+		skyMesh.material.shadows = false;
 		skyMesh.material.blendMode = None;
 		// var pbrprops = skyMesh.material.mainPass.getShader(PropsValues);
 		// pbrprops.emissiveValue = 1;

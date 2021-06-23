@@ -347,6 +347,7 @@ class DtsObject extends GameObject {
 				// }
 				// TODO TRANSLUENCY SHIT
 			}
+			material.shadows = false;
 			if (material.texture == null) {
 				var dtsshader = new DtsTexture();
 				dtsshader.currentOpacity = 1;
@@ -357,6 +358,7 @@ class DtsObject extends GameObject {
 				texture.uploadBitmap(bitmap);
 				dtsshader.texture = texture;
 				material.mainPass.addShader(dtsshader);
+				material.receiveShadows = true;
 			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;
@@ -369,11 +371,13 @@ class DtsObject extends GameObject {
 				// material.mainPass.setPassName("overlay");
 				// material.textureShader.additive = true;
 			}
-			if (flags & 16 > 0)
+			if (flags & 16 > 0) {
 				material.blendMode = BlendMode.Sub;
+			}
 
 			if (flags & 32 > 0) {
 				material.mainPass.enableLights = false;
+				// material.receiveShadows = false;
 				// material.mainPass.setPassName("overlay");
 				// var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
 				// pbrprops.emissiveValue = 1;
@@ -386,8 +390,6 @@ class DtsObject extends GameObject {
 			// 	// TODO THIS SHIT
 			// }
 			// ((flags & 32) || environmentMaterial) ? new Materia
-
-			material.shadows = false;
 
 			// material.mainPass.addShader(new AlphaMult());
 

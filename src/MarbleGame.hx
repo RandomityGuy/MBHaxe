@@ -31,10 +31,14 @@ class MarbleGame {
 
 	public function update(dt:Float) {
 		if (world != null) {
+			if (world._disposed) {
+				world = null;
+				return;
+			}
 			if (!paused) {
 				world.update(dt);
 			}
-			if (Key.isPressed(Key.ESCAPE)) {
+			if (Key.isPressed(Key.ESCAPE) && world.finishTime == null) {
 				paused = !paused;
 				if (paused) {
 					world.setCursorLock(false);
@@ -79,7 +83,7 @@ class MarbleGame {
 	}
 
 	public function render(e:h3d.Engine) {
-		if (world != null)
+		if (world != null && !world._disposed)
 			world.render(e);
 	}
 }

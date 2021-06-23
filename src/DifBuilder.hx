@@ -306,6 +306,7 @@ class DifBuilder {
 				material = Material.create();
 			}
 			material.shadows = false;
+			material.receiveShadows = true;
 			// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 			// material.mainPass.wireframe = true;
 

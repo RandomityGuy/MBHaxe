@@ -1,5 +1,6 @@
 package src;
 
+import gui.PlayMissionGui;
 import src.MarbleGame;
 import gui.EndGameGui;
 import sdl.Cursor;
@@ -107,6 +108,8 @@ class MarbleWorld extends Scheduler {
 	/** The new target camera orientation quat  */
 	public var newOrientationQuat = new Quat();
 
+	public var _disposed:Bool = false;
+
 	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission) {
 		this.scene = scene;
 		this.scene2d = scene2d;
@@ -170,6 +173,9 @@ class MarbleWorld extends Scheduler {
 
 			scene.lightSystem.ambientLight.load(ambientColor);
 
+			var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
+			shadow.power = 0.5;
+
 			var sunlight = new DirLight(sunDirection, scene);
 			sunlight.color = directionalColor;
 		}
@@ -221,6 +227,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.CameraYaw = euler.z - Math.PI / 2;
 		this.marble.camera.CameraPitch = -0.45;
 		this.marble.camera.oob = false;
+		this.marble.camera.finish = false;
 		this.marble.mode = Start;
 		this.marble.startPad = cast startquat.pad;
 		sky.follow = marble;
@@ -789,7 +796,16 @@ class MarbleWorld extends Scheduler {
 	}
 
 	function showFinishScreen() {
-		MarbleGame.canvas.pushDialog(new EndGameGui());
+		var egg:EndGameGui = null;
+		egg = new EndGameGui((sender) -> {
+			this.dispose();
+			MarbleGame.canvas.setContent(new PlayMissionGui());
+		}, (sender) -> {
+			MarbleGame.canvas.popDialog(egg);
+			this.setCursorLock(true);
+			this.restart();
+		});
+		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;
 	}
@@ -888,6 +904,7 @@ class MarbleWorld extends Scheduler {
 	public function dispose() {
 		this.playGui.dispose();
 		scene.removeChildren();
+		this._disposed = true;
 	}
 }
 

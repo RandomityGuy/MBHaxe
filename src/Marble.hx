@@ -165,6 +165,7 @@ class Marble extends GameObject {
 		var marbleTexture = ResourceLoader.loader.load("data/shapes/balls/base.marble.png").toTexture();
 		var marbleMaterial = Material.create(marbleTexture);
 		marbleMaterial.shadows = false;
+		marbleMaterial.castShadows = true;
 		var obj = new Mesh(geom, marbleMaterial, this);
 		obj.scale(_radius);
 
