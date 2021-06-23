@@ -4,7 +4,7 @@ import src.MarbleGame;
 import gui.EndGameGui;
 import sdl.Cursor;
 import src.ForceObject;
-import h3d.scene.fwd.DirLight;
+import shaders.DirLight;
 import h3d.col.Bounds;
 import triggers.HelpTrigger;
 import triggers.InBoundsTrigger;
