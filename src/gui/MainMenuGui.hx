@@ -55,6 +55,9 @@ class MainMenuGui extends GuiImage {
 		var optionsButton = new GuiButton(loadButtonImages("data/ui/home/options"));
 		optionsButton.position = new Vector(55, 279);
 		optionsButton.extent = new Vector(253, 83);
+		optionsButton.pressedAction = (sender) -> {
+			cast(this.parent, Canvas).setContent(new OptionsDlg());
+		}
 		homebase.addChild(optionsButton);
 
 		var exitButton = new GuiButton(loadButtonImages("data/ui/home/exit"));

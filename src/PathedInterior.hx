@@ -295,7 +295,7 @@ class PathedInterior extends InteriorObject {
 
 	override function reset() {
 		this.currentTime = 0;
-		this.targetTime = -1;
+		this.targetTime = 0;
 		this.changeTime = 0;
 
 		if (this.element.initialposition != "") {
@@ -304,8 +304,10 @@ class PathedInterior extends InteriorObject {
 
 		if (this.element.initialtargetposition != "") {
 			this.targetTime = MisParser.parseNumber(this.element.initialtargetposition);
+			if (this.targetTime > 0)
+				this.targetTime /= 1000;
 			// Alright this is strange. In Torque, there are some FPS-dependent client/server desync issues that cause the interior to start at the end position whenever the initialTargetPosition is somewhere greater than 1 and, like, approximately below 50.
-			if (this.targetTime > 0 && this.targetTime < 50)
+			if (this.targetTime > 0 && this.targetTime < 0.05)
 				this.currentTime = this.duration;
 		}
 

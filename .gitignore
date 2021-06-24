@@ -6,3 +6,5 @@ data
 *.tmp
 .vscode
 native
+*.exe
+*.obj
