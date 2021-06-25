@@ -1,5 +1,7 @@
 package gui;
 
+import src.Marble;
+import h2d.Tile;
 import hxd.res.BitmapFont;
 import src.MarbleGame;
 import h3d.Vector;
@@ -36,12 +38,10 @@ class OptionsDlg extends GuiImage {
 		var graphicsTab = new GuiImage(ResourceLoader.getImage("data/ui/options/graf_tab.png").toTile());
 		graphicsTab.position = new Vector(58, 44);
 		graphicsTab.extent = new Vector(149, 86);
-		graphicsTab.pressedAction = (sender) -> setTab("Graphics");
 
 		var controlsTab = new GuiImage(ResourceLoader.getImage("data/ui/options/cntr_tab.png").toTile());
 		controlsTab.position = new Vector(315, 15);
 		controlsTab.extent = new Vector(149, 65);
-		controlsTab.pressedAction = (sender) -> setTab("Controls");
 
 		var boxFrame = new GuiImage(ResourceLoader.getImage("data/ui/options/options_base.png").toTile());
 		boxFrame.position = new Vector(25, 14);
@@ -52,7 +52,6 @@ class OptionsDlg extends GuiImage {
 		var audioTab = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_tab.png").toTile());
 		audioTab.position = new Vector(204, 33);
 		audioTab.extent = new Vector(114, 75);
-		audioTab.pressedAction = (sender) -> setTab("Audio");
 
 		tabs.addChild(audioTab);
 		tabs.addChild(controlsTab);
@@ -272,6 +271,196 @@ Renderer: Software
 Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		audTxtWndo.addChild(audInfo);
 
+		// CONTROLS PANEL
+		var controlsPane = new GuiControl();
+		controlsPane.position = new Vector(44, 58);
+		controlsPane.extent = new Vector(459, 339);
+		// MARBLE PANEL
+		var marbleControlsPane = new GuiImage(ResourceLoader.getImage("data/ui/options/cntrl_marb_bse.png").toTile());
+		marbleControlsPane.position = new Vector(0, 5);
+		marbleControlsPane.extent = new Vector(438, 320);
+		controlsPane.addChild(marbleControlsPane);
+
+		var cameraControlsPane:GuiImage = null;
+		var mouseControlsPane:GuiImage = null;
+
+		var moveForward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_fw"), arial14);
+		moveForward.position = new Vector(82, 104);
+		moveForward.setExtent(new Vector(117, 51));
+		moveForward.txtCtrl.text.text = "W";
+		marbleControlsPane.addChild(moveForward);
+
+		var moveRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_rt"), arial14);
+		moveRight.position = new Vector(230, 167);
+		moveRight.setExtent(new Vector(112, 45));
+		moveRight.txtCtrl.text.text = "D";
+		marbleControlsPane.addChild(moveRight);
+
+		var mouseFire = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_pwr"), arial14);
+		mouseFire.position = new Vector(310, 84);
+		mouseFire.setExtent(new Vector(120, 51));
+		mouseFire.txtCtrl.text.text = "Left Mouse";
+		marbleControlsPane.addChild(mouseFire);
+
+		var moveBackward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_bak"), arial14);
+		moveBackward.position = new Vector(135, 235);
+		moveBackward.setExtent(new Vector(118, 48));
+		moveBackward.txtCtrl.text.text = "S";
+		marbleControlsPane.addChild(moveBackward);
+
+		var moveLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_lft"), arial14);
+		moveLeft.position = new Vector(19, 189);
+		moveLeft.setExtent(new Vector(108, 45));
+		moveLeft.txtCtrl.text.text = "A";
+		marbleControlsPane.addChild(moveLeft);
+
+		var moveJmp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_jmp"), arial14);
+		moveJmp.position = new Vector(299, 231);
+		moveJmp.setExtent(new Vector(120, 47));
+		moveJmp.txtCtrl.text.text = "Space Bar";
+		marbleControlsPane.addChild(moveJmp);
+
+		var transparentbmp = new hxd.BitmapData(1, 1);
+		transparentbmp.setPixel(0, 0, 0);
+		var transparentTile = Tile.fromBitmap(transparentbmp);
+
+		var marbleToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		marbleToCameraButton.position = new Vector(138, 26);
+		marbleToCameraButton.extent = new Vector(121, 40);
+		marbleToCameraButton.pressedAction = (sender) -> {
+			controlsPane.removeChild(marbleControlsPane);
+			controlsPane.addChild(cameraControlsPane);
+			this.render(cast(this.parent, Canvas).scene2d);
+		}
+		marbleControlsPane.addChild(marbleToCameraButton);
+
+		var marbleToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		marbleToMouseButton.position = new Vector(277, 0);
+		marbleToMouseButton.extent = new Vector(121, 43);
+		marbleToMouseButton.pressedAction = (sender) -> {
+			controlsPane.addChild(mouseControlsPane);
+			controlsPane.removeChild(marbleControlsPane);
+			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+		}
+		marbleControlsPane.addChild(marbleToMouseButton);
+
+		// CAMERA PANEL
+		cameraControlsPane = new GuiImage(ResourceLoader.getImage("data/ui/options/cntrl_cam_bse.png").toTile());
+		cameraControlsPane.position = new Vector(0, 5);
+		cameraControlsPane.extent = new Vector(438, 320);
+
+		var panUp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_up"), arial14);
+		panUp.position = new Vector(29, 133);
+		panUp.setExtent(new Vector(108, 42));
+		panUp.txtCtrl.text.text = "Up";
+		cameraControlsPane.addChild(panUp);
+
+		var turnRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_rt"), arial14);
+		turnRight.position = new Vector(312, 99);
+		turnRight.setExtent(new Vector(103, 36));
+		turnRight.txtCtrl.text.text = "Right";
+		cameraControlsPane.addChild(turnRight);
+
+		var panDown = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), arial14);
+		panDown.position = new Vector(42, 213);
+		panDown.setExtent(new Vector(109, 39));
+		panDown.txtCtrl.text.text = "Down";
+		cameraControlsPane.addChild(panDown);
+
+		var turnLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_lft"), arial14);
+		turnLeft.position = new Vector(319, 210);
+		turnLeft.setExtent(new Vector(99, 36));
+		turnLeft.txtCtrl.text.text = "Left";
+		cameraControlsPane.addChild(turnLeft);
+
+		var cameraToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		cameraToMarbleButton.position = new Vector(13, 45);
+		cameraToMarbleButton.extent = new Vector(121, 40);
+		cameraToMarbleButton.pressedAction = (sender) -> {
+			controlsPane.addChild(marbleControlsPane);
+			controlsPane.removeChild(cameraControlsPane);
+			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+		}
+		cameraControlsPane.addChild(cameraToMarbleButton);
+
+		var cameraToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		cameraToMouseButton.position = new Vector(276, 7);
+		cameraToMouseButton.extent = new Vector(121, 40);
+		cameraToMouseButton.pressedAction = (sender) -> {
+			controlsPane.addChild(mouseControlsPane);
+			controlsPane.removeChild(cameraControlsPane);
+			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+		}
+		cameraControlsPane.addChild(cameraToMouseButton);
+
+		// MOUSE CONTROLS
+
+		mouseControlsPane = new GuiImage(ResourceLoader.getImage("data/ui/options/cntrl_mous_base.png").toTile());
+		mouseControlsPane.position = new Vector(-17, -47);
+		mouseControlsPane.extent = new Vector(470, 425);
+
+		var freelook = new GuiButtonText(loadButtonImages("data/ui/options/cntrl_mous_bttn"), arial14);
+		freelook.position = new Vector(219, 225);
+		freelook.setExtent(new Vector(105, 45));
+		freelook.txtCtrl.text.text = "Right Mouse";
+		mouseControlsPane.addChild(freelook);
+
+		var mouseToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		mouseToMarbleButton.position = new Vector(26, 95);
+		mouseToMarbleButton.extent = new Vector(121, 40);
+		mouseToMarbleButton.pressedAction = (sender) -> {
+			controlsPane.addChild(marbleControlsPane);
+			controlsPane.removeChild(mouseControlsPane);
+			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+		}
+		mouseControlsPane.addChild(mouseToMarbleButton);
+
+		var mouseToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		mouseToCameraButton.position = new Vector(153, 71);
+		mouseToCameraButton.extent = new Vector(121, 40);
+		mouseToCameraButton.pressedAction = (sender) -> {
+			controlsPane.addChild(cameraControlsPane);
+			controlsPane.removeChild(mouseControlsPane);
+			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+		}
+		mouseControlsPane.addChild(mouseToCameraButton);
+
+		var invertAxis = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_invrt"));
+		invertAxis.position = new Vector(95, 249);
+		invertAxis.extent = new Vector(43, 53);
+		invertAxis.buttonType = Toggle;
+		mouseControlsPane.addChild(invertAxis);
+
+		var alwaysFreelook = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_freel"));
+		alwaysFreelook.position = new Vector(365, 269);
+		alwaysFreelook.extent = new Vector(43, 53);
+		alwaysFreelook.buttonType = Toggle;
+		mouseControlsPane.addChild(alwaysFreelook);
+
+		var mouseSensitivity = new GuiSlider(ResourceLoader.getImage("data/ui/options/cntrl_mous_knb.png").toTile());
+		mouseSensitivity.position = new Vector(147, 148);
+		mouseSensitivity.extent = new Vector(254, 34);
+		mouseControlsPane.addChild(mouseSensitivity);
+
+		// INVISIBLE BUTTON SHIT
+		var audioTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		audioTabBtn.position = new Vector(213, 39);
+		audioTabBtn.extent = new Vector(92, 42);
+		audioTabBtn.pressedAction = (sender) -> setTab("Audio");
+		mainPane.addChild(audioTabBtn);
+
+		var controlsTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		controlsTabBtn.position = new Vector(331, 24);
+		controlsTabBtn.extent = new Vector(117, 42);
+		controlsTabBtn.pressedAction = (sender) -> setTab("Controls");
+		mainPane.addChild(controlsTabBtn);
+
+		var graphicsTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		graphicsTabBtn.position = new Vector(70, 48);
+		graphicsTabBtn.extent = new Vector(117, 48);
+		graphicsTabBtn.pressedAction = (sender) -> setTab("Graphics");
+		mainPane.addChild(graphicsTabBtn);
+
 		setTab = function(tab:String) {
 			tabs.removeChild(audioTab);
 			tabs.removeChild(controlsTab);
@@ -279,6 +468,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			tabs.removeChild(graphicsTab);
 			mainPane.removeChild(graphicsPane);
 			mainPane.removeChild(audioPane);
+			mainPane.removeChild(controlsPane);
 			if (tab == "Graphics") {
 				tabs.addChild(audioTab);
 				tabs.addChild(controlsTab);
@@ -299,8 +489,9 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 				tabs.addChild(controlsTab);
 				tabs.addChild(boxFrame);
 				tabs.addChild(graphicsTab);
+				mainPane.addChild(controlsPane);
 			}
-			this.render(cast(this.parent, Canvas).scene2d);
+			this.render(MarbleGame.canvas.scene2d);
 		}
 	}
 }

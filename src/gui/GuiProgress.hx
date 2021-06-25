@@ -2,7 +2,7 @@ package gui;
 
 import h2d.Graphics;
 import h2d.Scene;
-import h3d.Vector;
+import src.MarbleGame;
 
 class GuiProgress extends GuiControl {
 	public var progress:Float = 0;
@@ -37,5 +37,12 @@ class GuiProgress extends GuiControl {
 		if (progressRect != null)
 			progressRect.remove();
 		super.dispose();
+	}
+
+	public override function onRemove() {
+		super.onRemove();
+		if (MarbleGame.canvas.scene2d.contains(progressRect)) {
+			MarbleGame.canvas.scene2d.removeChild(progressRect); // Refresh "layer"
+		}
 	}
 }

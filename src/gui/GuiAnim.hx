@@ -4,6 +4,7 @@ import h2d.Anim;
 import h2d.Scene;
 import h2d.Tile;
 import h2d.Bitmap;
+import src.MarbleGame;
 
 @:publicFields
 class GuiAnim extends GuiControl {
@@ -29,5 +30,12 @@ class GuiAnim extends GuiControl {
 	public override function dispose() {
 		super.dispose();
 		this.anim.remove();
+	}
+
+	public override function onRemove() {
+		super.onRemove();
+		if (MarbleGame.canvas.scene2d.contains(anim)) {
+			MarbleGame.canvas.scene2d.removeChild(anim); // Refresh "layer"
+		}
 	}
 }

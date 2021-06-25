@@ -141,11 +141,13 @@ class GuiControl {
 	public function removeChild(ctrl:GuiControl) {
 		this.children.remove(ctrl);
 		ctrl.parent = null;
+		ctrl.onRemove();
 	}
 
 	public function removeChildren() {
 		for (c in this.children) {
 			c.parent = null;
+			c.onRemove();
 		}
 		this.children = [];
 	}
@@ -162,4 +164,10 @@ class GuiControl {
 	public function onMousePress(mouseState:MouseState) {}
 
 	public function onMouseRelease(mouseState:MouseState) {}
+
+	public function onRemove() {
+		for (c in this.children) {
+			c.onRemove();
+		}
+	}
 }

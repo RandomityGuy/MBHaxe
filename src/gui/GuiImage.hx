@@ -4,6 +4,7 @@ import gui.GuiControl.MouseState;
 import h2d.Scene;
 import h2d.Tile;
 import h2d.Bitmap;
+import src.MarbleGame;
 
 @:publicFields
 class GuiImage extends GuiControl {
@@ -39,6 +40,13 @@ class GuiImage extends GuiControl {
 		super.onMouseRelease(mouseState);
 		if (this.pressedAction != null) {
 			this.pressedAction(this);
+		}
+	}
+
+	public override function onRemove() {
+		super.onRemove();
+		if (MarbleGame.canvas.scene2d.contains(bmp)) {
+			MarbleGame.canvas.scene2d.removeChild(bmp); // Refresh "layer"
 		}
 	}
 }

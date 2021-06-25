@@ -5,6 +5,7 @@ import h2d.HtmlText;
 import h2d.Scene;
 import hxd.res.BitmapFont;
 import h2d.Text;
+import src.MarbleGame;
 
 @:publicFields
 class GuiMLText extends GuiControl {
@@ -41,5 +42,12 @@ class GuiMLText extends GuiControl {
 	public override function dispose() {
 		super.dispose();
 		this.text.remove();
+	}
+
+	public override function onRemove() {
+		super.onRemove();
+		if (MarbleGame.canvas.scene2d.contains(text)) {
+			MarbleGame.canvas.scene2d.removeChild(text); // Refresh "layer"
+		}
 	}
 }
