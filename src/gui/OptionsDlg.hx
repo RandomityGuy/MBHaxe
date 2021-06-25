@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.res.BitmapFont;
 import src.MarbleGame;
 import h3d.Vector;
 import src.ResourceLoader;
@@ -11,6 +12,10 @@ class OptionsDlg extends GuiImage {
 		this.vertSizing = Height;
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
+
+		var arial14fontdata = ResourceLoader.loader.load("data/font/Arial14.fnt");
+		var arial14 = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14.loader = ResourceLoader.loader;
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
@@ -26,13 +31,17 @@ class OptionsDlg extends GuiImage {
 		tabs.extent = new Vector(520, 450);
 		this.addChild(tabs);
 
+		var setTab:String->Void = null;
+
 		var graphicsTab = new GuiImage(ResourceLoader.getImage("data/ui/options/graf_tab.png").toTile());
 		graphicsTab.position = new Vector(58, 44);
 		graphicsTab.extent = new Vector(149, 86);
+		graphicsTab.pressedAction = (sender) -> setTab("Graphics");
 
 		var controlsTab = new GuiImage(ResourceLoader.getImage("data/ui/options/cntr_tab.png").toTile());
 		controlsTab.position = new Vector(315, 15);
 		controlsTab.extent = new Vector(149, 65);
+		controlsTab.pressedAction = (sender) -> setTab("Controls");
 
 		var boxFrame = new GuiImage(ResourceLoader.getImage("data/ui/options/options_base.png").toTile());
 		boxFrame.position = new Vector(25, 14);
@@ -43,6 +52,7 @@ class OptionsDlg extends GuiImage {
 		var audioTab = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_tab.png").toTile());
 		audioTab.position = new Vector(204, 33);
 		audioTab.extent = new Vector(114, 75);
+		audioTab.pressedAction = (sender) -> setTab("Audio");
 
 		tabs.addChild(audioTab);
 		tabs.addChild(controlsTab);
@@ -56,6 +66,7 @@ class OptionsDlg extends GuiImage {
 		mainPane.vertSizing = Center;
 		this.addChild(mainPane);
 
+		// GRAPHICS PANEL
 		var graphicsPane = new GuiControl();
 		graphicsPane.position = new Vector(35, 110);
 		graphicsPane.extent = new Vector(438, 298);
@@ -218,5 +229,78 @@ class OptionsDlg extends GuiImage {
 		shadowsButton.extent = new Vector(46, 54);
 		shadowsButton.buttonType = Toggle;
 		graphicsPane.addChild(shadowsButton);
+
+		// AUDIO PANEL
+
+		var audioPane = new GuiControl();
+		audioPane.position = new Vector(41, 91);
+		audioPane.extent = new Vector(425, 281);
+		// mainPane.addChild(audioPane);
+
+		var audSndSlide = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_snd_slide.png").toTile());
+		audSndSlide.position = new Vector(14, 92);
+		audSndSlide.extent = new Vector(388, 34);
+		audioPane.addChild(audSndSlide);
+
+		var audMusSlide = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_mus_slide.png").toTile());
+		audMusSlide.position = new Vector(17, 32);
+		audMusSlide.extent = new Vector(381, 40);
+		audioPane.addChild(audMusSlide);
+
+		var audMusKnob = new GuiSlider(ResourceLoader.getImage("data/ui/options/aud_mus_knb.png").toTile());
+		audMusKnob.position = new Vector(137, 37);
+		audMusKnob.extent = new Vector(250, 34);
+		audioPane.addChild(audMusKnob);
+
+		var audSndKnob = new GuiSlider(ResourceLoader.getImage("data/ui/options/aud_snd_knb.png").toTile());
+		audSndKnob.position = new Vector(137, 95);
+		audSndKnob.extent = new Vector(254, 37);
+		audioPane.addChild(audSndKnob);
+
+		var audTxtWndo = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_txt_wndo.png").toTile());
+		audTxtWndo.position = new Vector(26, 130);
+		audTxtWndo.extent = new Vector(396, 132);
+		audioPane.addChild(audTxtWndo);
+
+		var audInfo = new GuiText(arial14);
+		audInfo.position = new Vector(24, 41);
+		audInfo.extent = new Vector(330, 56);
+		audInfo.text.textColor = 0x000000;
+		audInfo.text.text = "Vendor: Creative Labs Inc.
+Version: OpenAL 1.0
+Renderer: Software
+Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
+		audTxtWndo.addChild(audInfo);
+
+		setTab = function(tab:String) {
+			tabs.removeChild(audioTab);
+			tabs.removeChild(controlsTab);
+			tabs.removeChild(boxFrame);
+			tabs.removeChild(graphicsTab);
+			mainPane.removeChild(graphicsPane);
+			mainPane.removeChild(audioPane);
+			if (tab == "Graphics") {
+				tabs.addChild(audioTab);
+				tabs.addChild(controlsTab);
+				tabs.addChild(boxFrame);
+				tabs.addChild(graphicsTab);
+				mainPane.addChild(graphicsPane);
+			}
+			if (tab == "Audio") {
+				tabs.addChild(graphicsTab);
+				tabs.addChild(controlsTab);
+				tabs.addChild(boxFrame);
+				tabs.addChild(audioTab);
+				mainPane.addChild(audioPane);
+			}
+			if (tab == "Controls") {
+				// TODO
+				tabs.addChild(audioTab);
+				tabs.addChild(controlsTab);
+				tabs.addChild(boxFrame);
+				tabs.addChild(graphicsTab);
+			}
+			this.render(cast(this.parent, Canvas).scene2d);
+		}
 	}
 }
