@@ -628,8 +628,6 @@ class MarbleWorld extends Scheduler {
 
 	public function updateTimer(dt:Float) {
 		this.timeState.dt = dt;
-		this.timeState.currentAttemptTime += dt;
-		this.timeState.timeSinceLoad += dt;
 		if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
 			this.bonusTime -= dt;
 			if (this.bonusTime < 0) {
@@ -639,7 +637,12 @@ class MarbleWorld extends Scheduler {
 		} else {
 			if (this.timeState.currentAttemptTime >= 3.5)
 				this.timeState.gameplayClock += dt;
+			else if (this.timeState.currentAttemptTime + dt >= 3.5) {
+				this.timeState.gameplayClock += (this.timeState.currentAttemptTime + dt) - 3.5;
+			}
 		}
+		this.timeState.currentAttemptTime += dt;
+		this.timeState.timeSinceLoad += dt;
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
 		playGui.formatTimer(this.timeState.gameplayClock);
@@ -805,7 +808,7 @@ class MarbleWorld extends Scheduler {
 			MarbleGame.canvas.popDialog(egg);
 			this.setCursorLock(true);
 			this.restart();
-		});
+		}, mission, finishTime);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;

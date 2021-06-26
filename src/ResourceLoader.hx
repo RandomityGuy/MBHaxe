@@ -21,20 +21,21 @@ class ResourceLoader {
 	static var dtsResources:Map<String, DtsFile> = new Map();
 	static var textureCache:Map<String, Texture> = new Map();
 	static var imageCache:Map<String, Image> = new Map();
-	static var threadPool:FixedThreadPool = new FixedThreadPool(4);
+
+	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function loadInterior(path:String) {
 		if (interiorResources.exists(path))
 			return interiorResources.get(path);
 		else {
 			var itr:Dif;
-			var lock = new Lock();
-			threadPool.run(() -> {
-				itr = Dif.Load(path);
-				interiorResources.set(path, itr);
-				lock.release();
-			});
-			lock.wait();
+			// var lock = new Lock();
+			// threadPool.run(() -> {
+			itr = Dif.Load(path);
+			interiorResources.set(path, itr);
+			//	lock.release();
+			// });
+			// lock.wait();
 			return itr;
 		}
 	}
@@ -44,13 +45,13 @@ class ResourceLoader {
 			return dtsResources.get(path);
 		else {
 			var dts = new DtsFile();
-			var lock = new Lock();
-			threadPool.run(() -> {
-				dts.read(path);
-				dtsResources.set(path, dts);
-				lock.release();
-			});
-			lock.wait();
+			// var lock = new Lock();
+			// threadPool.run(() -> {
+			dts.read(path);
+			dtsResources.set(path, dts);
+			//	lock.release();
+			// });
+			// lock.wait();
 			return dts;
 		}
 	}

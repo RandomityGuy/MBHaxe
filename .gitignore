@@ -8,3 +8,4 @@ data
 native
 *.exe
 *.obj
+settings.json

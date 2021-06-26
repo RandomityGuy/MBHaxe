@@ -157,4 +157,22 @@ class Util {
 		}
 		return false;
 	}
+
+	public static function formatTime(time:Float) {
+		var et = time * 1000;
+		var thousandth = Math.floor(et % 10);
+		var hundredth = Math.floor((et % 1000) / 10);
+		var totalSeconds = Math.floor(et / 1000);
+		var seconds = totalSeconds % 60;
+		var minutes = (totalSeconds - seconds) / 60;
+
+		var secondsOne = seconds % 10;
+		var secondsTen = (seconds - secondsOne) / 10;
+		var minutesOne = minutes % 10;
+		var minutesTen = (minutes - minutesOne) / 10;
+		var hundredthOne = hundredth % 10;
+		var hundredthTen = (hundredth - hundredthOne) / 10;
+
+		return '${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
+	}
 }

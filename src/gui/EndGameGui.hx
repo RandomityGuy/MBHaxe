@@ -1,17 +1,28 @@
 package gui;
 
+import src.MarbleGame;
+import src.Settings.Score;
+import src.Settings.Settings;
+import src.Mission;
 import h2d.filter.DropShadow;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.TimeState;
+import src.Util;
 
 class EndGameGui extends GuiControl {
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void) {
+	var mission:Mission;
+
+	var scoreSubmitted:Bool = false;
+
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, mission:Mission, timeState:TimeState) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector(0, 0);
 		this.extent = new Vector(640, 480);
+		this.mission = mission;
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
@@ -69,7 +80,7 @@ class EndGameGui extends GuiControl {
 
 		var congrats = new GuiMLText(expo50, mlFontLoader);
 		congrats.text.textColor = 0xffff00;
-		congrats.text.text = 'Final Time: <font color="#FFF090">99:59.999</font>';
+		congrats.text.text = 'Final Time: <font color="#FFF090">${Util.formatTime(timeState.gameplayClock)}</font>';
 		congrats.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
 		congrats.position = new Vector(43, 17);
 		congrats.extent = new Vector(408, 50);
@@ -84,17 +95,31 @@ class EndGameGui extends GuiControl {
 		finishMessage.extent = new Vector(200, 100);
 		pg.addChild(finishMessage);
 
+		var scoreData:Array<Score> = Settings.getScores(mission.path);
+		while (scoreData.length < 3) {
+			scoreData.push({name: "Nardo Polo", time: 5999.999});
+		}
+
 		var leftColumn = new GuiMLText(domcasual32, mlFontLoader);
 		leftColumn.text.textColor = 0x000000;
-		leftColumn.text.text = 'Qualify Time:<br/>Gold Time:<br/>Elapsed Time:<br/>Bonus Time:<br/><font face="Arial14"><br/></font>Best Times:<br/>1. Nardo Polo<br/>2. Nardo Polo<br/>3. Nardo Polo';
+		leftColumn.text.text = 'Qualify Time:<br/>Gold Time:<br/>Elapsed Time:<br/>Bonus Time:<br/><font face="Arial14"><br/></font>Best Times:<br/>';
+		for (i in 0...3) {
+			leftColumn.text.text += '${i + 1}. ${scoreData[i].name}<br/>';
+		}
 		leftColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
 		leftColumn.position = new Vector(108, 103);
 		leftColumn.extent = new Vector(208, 50);
 		pg.addChild(leftColumn);
 
+		var elapsedTime = Math.max(timeState.currentAttemptTime - 5.5, 0);
+		var bonusTime = Math.max(0, elapsedTime - timeState.gameplayClock);
+
 		var rightColumn = new GuiMLText(domcasual32, mlFontLoader);
 		rightColumn.text.textColor = 0x000000;
-		rightColumn.text.text = '99:59.999<br/>99:59.999<br/>99:59.999<br/>99:59.999<br/><font face="Arial14"><br/></font><br/>99:59.999<br/>99:59.999<br/>99:59.999';
+		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/>${Util.formatTime(mission.goldTime)}<br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
+		for (i in 0...3) {
+			rightColumn.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
+		}
 		rightColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
 		rightColumn.position = new Vector(274, 103);
 		rightColumn.extent = new Vector(208, 50);
@@ -104,5 +129,36 @@ class EndGameGui extends GuiControl {
 		pg.addChild(restartButton);
 
 		this.addChild(pg);
+
+		var scoreTimes = scoreData.map(x -> x.time).concat([timeState.gameplayClock]);
+		scoreTimes.sort((a, b) -> a == b ? 0 : (a > b ? 1 : -1));
+
+		var idx = scoreTimes.indexOf(timeState.gameplayClock);
+
+		if (idx <= 2) {
+			var end = new EnterNameDlg(idx, (name) -> {
+				if (scoreSubmitted)
+					return;
+
+				var myScore = {name: name, time: timeState.gameplayClock};
+				scoreData.push(myScore);
+				scoreData.sort((a, b) -> a.time == b.time ? 0 : (a.time > b.time ? 1 : -1));
+
+				leftColumn.text.text = 'Qualify Time:<br/>Gold Time:<br/>Elapsed Time:<br/>Bonus Time:<br/><font face="Arial14"><br/></font>Best Times:<br/>';
+				for (i in 0...3) {
+					leftColumn.text.text += '${i + 1}. ${scoreData[i].name}<br/>';
+				}
+
+				rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/>${Util.formatTime(mission.goldTime)}<br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
+				for (i in 0...3) {
+					rightColumn.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
+				}
+
+				Settings.saveScore(mission.path, myScore);
+
+				scoreSubmitted = true;
+			});
+			this.addChild(end);
+		}
 	}
 }

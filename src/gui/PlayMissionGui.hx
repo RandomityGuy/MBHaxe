@@ -1,5 +1,7 @@
 package gui;
 
+import src.Settings.Score;
+import src.Settings.Settings;
 import haxe.io.Path;
 import h2d.Scene;
 import h2d.Text;
@@ -297,11 +299,17 @@ class PlayMissionGui extends GuiImage {
 				pmNext.disabled = false;
 
 			var currentMission = currentList[currentSelection];
+
+			var scoreData:Array<Score> = Settings.getScores(currentMission.path);
+			while (scoreData.length < 3) {
+				scoreData.push({name: "Nardo Polo", time: 5999.999});
+			}
+
 			var descText = '<font face="DomCasual24" color="#000000">${currentMission.title}</font><br/><br/>'
 				+ splitTextWithPadding(pmDescription.text, Util.unescape(currentMission.description));
 			descText += '<br/><br/><font face="DomCasual24">Best Times:</font><br/>';
 			for (i in 0...3) {
-				descText += '<br/>ÂÂ<font face="ArialBold14">${i + 1}. Nardo Polo</font>';
+				descText += '<br/>ÂÂ<font face="ArialBold14">${i + 1}. ${scoreData[i].name}</font>';
 			}
 			pmDescription.text.text = descText;
 
@@ -309,7 +317,7 @@ class PlayMissionGui extends GuiImage {
 				+ '<font opacity="0">${splitTextWithPadding(pmDescriptionOther.text, Util.unescape(currentMission.description))}</font>';
 			descText2 += '<br/><br/><br/>';
 			for (i in 0...3) {
-				descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">00:00.000</font>';
+				descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">${Util.formatTime(scoreData[i].time)}</font>';
 			}
 			pmDescriptionOther.text.text = descText2;
 
