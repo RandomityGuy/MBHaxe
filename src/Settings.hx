@@ -1,5 +1,7 @@
 package src;
 
+import src.MarbleGame;
+import hxd.Window;
 import haxe.DynamicAccess;
 import sys.io.File;
 import src.ResourceLoader;
@@ -10,8 +12,37 @@ typedef Score = {
 	var time:Float;
 }
 
+typedef OptionsSettings = {
+	var screenWidth:Int;
+	var screenHeight:Int;
+	var isFullScreen:Bool;
+	var videoDriver:Int;
+	var colorDepth:Int;
+	var shadows:Bool;
+	var musicVolume:Float;
+	var soundVolume:Float;
+}
+
 class Settings {
 	public static var highScores:Map<String, Array<Score>> = [];
+
+	public static var optionsSettings:OptionsSettings = {
+		screenWidth: 1280,
+		screenHeight: 720,
+		isFullScreen: false,
+		videoDriver: 0,
+		colorDepth: 1,
+		shadows: false,
+		musicVolume: 0,
+		soundVolume: 0
+	};
+
+	public static function applySettings() {
+		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
+		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+
+		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+	}
 
 	public static function saveScore(mapPath:String, score:Score) {
 		if (highScores.exists(mapPath)) {
@@ -48,5 +79,17 @@ class Settings {
 				highScores.set(key, value);
 			}
 		}
+	}
+
+	public static function init() {
+		load();
+		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
+		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		Window.getInstance().addResizeEvent(() -> {
+			var wnd = Window.getInstance();
+			Settings.optionsSettings.screenWidth = wnd.width;
+			Settings.optionsSettings.screenHeight = wnd.height;
+			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+		});
 	}
 }

@@ -1,5 +1,6 @@
 package gui;
 
+import src.Settings;
 import src.Marble;
 import h2d.Tile;
 import hxd.res.BitmapFont;
@@ -94,9 +95,11 @@ class OptionsDlg extends GuiImage {
 		gfxWindow.position = new Vector(174, 116);
 		gfxWindow.extent = new Vector(97, 55);
 		gfxWindow.buttonType = Toggle;
-		gfxWindow.pressed = true;
 		gfxWindow.pressedAction = (sender) -> {
 			updateWindowFunc(gfxWindow);
+		}
+		if (!Settings.optionsSettings.isFullScreen) {
+			gfxWindow.pressed = true;
 		}
 		graphicsPane.addChild(gfxWindow);
 		windowBoxes.push(gfxWindow);
@@ -107,6 +110,9 @@ class OptionsDlg extends GuiImage {
 		gfxFull.buttonType = Toggle;
 		gfxFull.pressedAction = (sender) -> {
 			updateWindowFunc(gfxFull);
+		}
+		if (Settings.optionsSettings.isFullScreen) {
+			gfxFull.pressed = true;
 		}
 		graphicsPane.addChild(gfxFull);
 		windowBoxes.push(gfxFull);
@@ -136,6 +142,8 @@ class OptionsDlg extends GuiImage {
 			updateResolutionFunc(gfx640480);
 		}
 		graphicsPane.addChild(gfx640480);
+		if (Settings.optionsSettings.screenWidth == 640)
+			gfx640480.pressed = true;
 
 		var gfx800600 = new GuiButton(loadButtonImages("data/ui/options/graf800"));
 		gfx800600.position = new Vector(237, 0);
@@ -146,16 +154,19 @@ class OptionsDlg extends GuiImage {
 			updateResolutionFunc(gfx800600);
 		}
 		graphicsPane.addChild(gfx800600);
+		if (Settings.optionsSettings.screenWidth == 800)
+			gfx800600.pressed = true;
 
 		var gfx1024768 = new GuiButton(loadButtonImages("data/ui/options/graf1024"));
 		gfx1024768.position = new Vector(320, -1);
 		gfx1024768.extent = new Vector(94, 51);
 		gfx1024768.buttonType = Toggle;
-		gfx1024768.pressed = true;
 		resolutionBoxes.push(gfx1024768);
 		gfx1024768.pressedAction = (sender) -> {
 			updateResolutionFunc(gfx1024768);
 		}
+		if (Settings.optionsSettings.screenWidth == 1024)
+			gfx1024768.pressed = true;
 		graphicsPane.addChild(gfx1024768);
 
 		var driverBoxes = [];
@@ -171,10 +182,12 @@ class OptionsDlg extends GuiImage {
 		gfxopengl.position = new Vector(165, 58);
 		gfxopengl.extent = new Vector(97, 54);
 		gfxopengl.buttonType = Toggle;
-		gfxopengl.pressed = true;
 		driverBoxes.push(gfxopengl);
 		gfxopengl.pressedAction = (sender) -> {
 			updateDriverFunc(gfxopengl);
+		}
+		if (Settings.optionsSettings.videoDriver == 0) {
+			gfxopengl.pressed = true;
 		}
 		graphicsPane.addChild(gfxopengl);
 
@@ -186,11 +199,17 @@ class OptionsDlg extends GuiImage {
 		gfxd3d.pressedAction = (sender) -> {
 			updateDriverFunc(gfxd3d);
 		}
+		if (Settings.optionsSettings.videoDriver == 1) {
+			gfxd3d.pressed = true;
+		}
 		graphicsPane.addChild(gfxd3d);
+
+		var applyFunc:Void->Void;
 
 		var applyButton = new GuiButton(loadButtonImages("data/ui/options/grafapply"));
 		applyButton.position = new Vector(188, 239);
 		applyButton.extent = new Vector(106, 60);
+		applyButton.pressedAction = (sender) -> applyFunc();
 		graphicsPane.addChild(applyButton);
 
 		var bitBoxes = [];
@@ -210,16 +229,21 @@ class OptionsDlg extends GuiImage {
 		gfx16.pressedAction = (sender) -> {
 			updateBitsFunc(gfx16);
 		}
+		if (Settings.optionsSettings.colorDepth == 0) {
+			gfx16.pressed = true;
+		}
 		graphicsPane.addChild(gfx16);
 
 		var gfx32 = new GuiButton(loadButtonImages("data/ui/options/graf32bt"));
 		gfx32.position = new Vector(272, 174);
 		gfx32.extent = new Vector(84, 51);
 		gfx32.buttonType = Toggle;
-		gfx32.pressed = true;
 		bitBoxes.push(gfx32);
 		gfx32.pressedAction = (sender) -> {
 			updateBitsFunc(gfx32);
+		}
+		if (Settings.optionsSettings.colorDepth == 1) {
+			gfx32.pressed = true;
 		}
 		graphicsPane.addChild(gfx32);
 
@@ -228,6 +252,39 @@ class OptionsDlg extends GuiImage {
 		shadowsButton.extent = new Vector(46, 54);
 		shadowsButton.buttonType = Toggle;
 		graphicsPane.addChild(shadowsButton);
+		if (Settings.optionsSettings.shadows) {
+			shadowsButton.pressed = true;
+		}
+
+		applyFunc = () -> {
+			if (gfx640480.pressed) {
+				Settings.optionsSettings.screenWidth = 640;
+				Settings.optionsSettings.screenHeight = 480;
+			}
+			if (gfx800600.pressed) {
+				Settings.optionsSettings.screenWidth = 800;
+				Settings.optionsSettings.screenHeight = 600;
+			}
+			if (gfx1024768.pressed) {
+				Settings.optionsSettings.screenWidth = 1024;
+				Settings.optionsSettings.screenHeight = 768;
+			}
+			if (gfxFull.pressed)
+				Settings.optionsSettings.isFullScreen = true;
+			else
+				Settings.optionsSettings.isFullScreen = false;
+			if (gfx16.pressed)
+				Settings.optionsSettings.colorDepth = 0;
+			else
+				Settings.optionsSettings.colorDepth = 1;
+			if (gfxopengl.pressed)
+				Settings.optionsSettings.videoDriver = 0;
+			else
+				Settings.optionsSettings.videoDriver = 1;
+			Settings.optionsSettings.shadows = shadowsButton.pressed;
+
+			Settings.applySettings();
+		}
 
 		// AUDIO PANEL
 
@@ -249,11 +306,19 @@ class OptionsDlg extends GuiImage {
 		var audMusKnob = new GuiSlider(ResourceLoader.getImage("data/ui/options/aud_mus_knb.png").toTile());
 		audMusKnob.position = new Vector(137, 37);
 		audMusKnob.extent = new Vector(250, 34);
+		audMusKnob.sliderValue = Settings.optionsSettings.musicVolume;
+		audMusKnob.pressedAction = (sender) -> {
+			Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
+		}
 		audioPane.addChild(audMusKnob);
 
 		var audSndKnob = new GuiSlider(ResourceLoader.getImage("data/ui/options/aud_snd_knb.png").toTile());
 		audSndKnob.position = new Vector(137, 95);
 		audSndKnob.extent = new Vector(254, 37);
+		audSndKnob.sliderValue = Settings.optionsSettings.soundVolume;
+		audSndKnob.pressedAction = (sender) -> {
+			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
+		}
 		audioPane.addChild(audSndKnob);
 
 		var audTxtWndo = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_txt_wndo.png").toTile());
