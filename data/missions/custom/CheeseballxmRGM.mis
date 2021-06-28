@@ -1,0 +1,341 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         type = "Custom";
+         time = "0";
+         name = "Cheeseballxm's RGM";
+         desc = "do nothing.";
+         startHelpText = "do nothing";
+         goldTime = "20000";
+         artist = "Cheeseballxm";
+         level = "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569861149077900047473967104.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160049016675429178998259712.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.488992 0.488992 -0.722339";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.300000 1.000000";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         locked = "true";
+         position = "0 0 0";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "0 0 469.2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+      new StaticShape(EndPoint) {
+         position = "-7.6 -14.2 372.4";
+         rotation = "1 0 0 0";
+         scale = "2 1 1";
+         dataBlock = "EndPad";
+      };
+   };
+   new StaticShape() {
+      position = "0.0117704 0.485512 470.206";
+      rotation = "-1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "0 0 469.4";
+      rotation = "1 0 0 0";
+      scale = "1 1 0.01";
+      interiorFile = "~/data/interiors/intermediate/shockdrop.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "3.77131 1.7896 499.223";
+      rotation = "0 0 1 77.9222";
+      scale = "1 1 1";
+      dataBlock = "SignPlainDown";
+   };
+   new StaticShape() {
+      position = "-3.69219 -2.38053 499.223";
+      rotation = "0 0 -1 110.581";
+      scale = "1 1 1";
+      dataBlock = "SignPlainDown";
+   };
+   new StaticShape() {
+      position = "0.0358018 -0.60514 368.454";
+      rotation = "0 0 1 65.8901";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new InteriorInstance() {
+      position = "2.05974 -14.1125 467.722";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/tube_space.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "2.00443 -26.994 465.689";
+      rotation = "1 0 0 130";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/tube_space.dif";
+      showTerrainInside = "0";
+   };
+   new ScriptObject() {
+         pad = "4464";
+         bonusTime = "0";
+         gemCount = "0";
+         time = "0";
+         penaltyTime = "0";
+         powerUp = "0";
+   };
+   new StaticShape() {
+      position = "-0.079323 -31.0868 455.217";
+      rotation = "1 0 0 150";
+      scale = "1 2 1.5";
+      dataBlock = "TriangleBumper";
+   };
+   new InteriorInstance() {
+      position = "-0.0826001 -61.7717 450.773";
+      rotation = "-1 0 0 105";
+      scale = "0.5 1 0.7";
+      interiorFile = "~/data/interiors/tubefriction.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "0.291167 -33.4517 455.788";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0.0494782 -55.5934 448.631";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "-2.41491 -67.7896 438.989";
+      rotation = "1 0 0 0";
+      scale = "1 2 1";
+      interiorFile = "~/data/interiors/tubefriction.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-4.56541 -66.9978 431.279";
+      rotation = "1 0 0 30";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/tube_grass.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-2.2001 -72.6896 435.949";
+      rotation = "1 0 0 0";
+      scale = "1 1 10";
+      interiorFile = "~/data/interiors/Tube_cution.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-4.27172 -62.5625 431.039";
+      rotation = "1 0 0 0";
+      scale = "0.5 2 1";
+      interiorFile = "~/data/interiors/tubefriction.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-19.0007 -34.2774 421.147";
+      rotation = "1 0 0 30";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/tube_lintersect.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-4.62949 -54.0981 426.576";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/tube_mud.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-9.45468 -27.8821 412.226";
+      rotation = "1 0 0 170";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "-6.26079 -24.1659 413.198";
+      rotation = "1 0 0 0";
+      scale = "10 10 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new ScriptObject() {
+         pad = "4613";
+         bonusTime = "0";
+         gemCount = "0";
+         time = "0";
+         penaltyTime = "0";
+         powerUp = "0";
+   };
+   new InteriorInstance() {
+      position = "-10.6268 -21.0938 378.418";
+      rotation = "1 0 0 15";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-10.6287 -16.777 375.26";
+      rotation = "1 0 0 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-7.33496 -28.4319 396.808";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/Straw_long.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-10.6246 -18.3342 378.56";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-10.605 -13.8747 372.132";
+      rotation = "1 0 0 30";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "-7.50898 -28.42 383.817";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "-10.6738 -24.1293 378.426";
+      rotation = "1 0 0 30";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-14.0677 -23.7199 412.463";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-9.35532 -21.6009 413.575";
+      rotation = "1 0 0 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-6.3417 -21.0716 402.69";
+      rotation = "1 0 0 0";
+      scale = "1 2 1";
+      interiorFile = "~/data/interiors/tubefriction.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-6.90984 -24.7902 412.74";
+      rotation = "1 0 0 9.99997";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-3.96275 -21.2029 422.163";
+      rotation = "1 0 0 0";
+      scale = "0.01 1 20";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-9.4353 -21.5572 422.113";
+      rotation = "1 0 0 0";
+      scale = "0.01 1 20";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "-10.2869 -31.919 413.104";
+      rotation = "1 0 0 0";
+      scale = "0.1 0.1 0.1";
+      dataBlock = "Tornado";
+   };
+   new InteriorInstance() {
+      position = "-4.9513 -16.7454 383.463";
+      rotation = "1 0 0 0";
+      scale = "0.1 2 15";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-11.2638 -16.5234 383.593";
+      rotation = "1 0 0 0";
+      scale = "0.1 2 15";
+      interiorFile = "~/data/interiors/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Shell.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

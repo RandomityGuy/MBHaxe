@@ -1,0 +1,170 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         time = "0";
+         type = "advanced";
+         desc = "Beware the slippery slopes!";
+         name = "Shimmy";
+         artist = "Alex Swanson";
+         startHelpText = "Stay in the air to avoid unsteady footing!";
+         level = "37";
+         goldTime = "20000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.512126 0.512126 -0.689532";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(StartPoint) {
+      position = "-0.118466 0.215802 0.375264";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new InteriorInstance() {
+      position = "-4.04578 9.69267 5.54496";
+      rotation = "0 0 1 29.2206";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new Trigger(Bounds) {
+      position = "-9.1479 32.3474 -4.30821";
+      rotation = "1 0 0 0";
+      scale = "41.0675 39.9535 21.6832";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new InteriorInstance() {
+      position = "0.836448 10.3545 -0.61816";
+      rotation = "0 0 -1 80.2141";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/shimmy.dif";
+      showTerrainInside = "0";
+   };
+   new ScriptObject() {
+         time = "0";
+         gemCount = "0";
+         powerUp = "0";
+         pad = "1808";
+         penaltyTime = "0";
+         bonusTime = "0";
+   };
+   new ScriptObject() {
+         time = "0";
+         gemCount = "0";
+         powerUp = "0";
+         pad = "1673";
+         penaltyTime = "0";
+         bonusTime = "0";
+   };
+   new InteriorInstance() {
+      position = "19.2367 8.96532 -1.73297";
+      rotation = "-0.019049 -0.108782 -0.993883 64.0709";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/shimmy.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "3.02342 21.2526 -0.258706";
+      rotation = "0 0 1 12.0321";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "13.5035 20.0702 -2.72689";
+      rotation = "-0.0932355 -0.899547 0.426758 13.2789";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/shimmy.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "24.492 19.2016 -3.05839";
+      rotation = "0 0 -1 2.29206";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "6.49747 4.79344 3.00852";
+      rotation = "0.30254 -0.577768 0.758059 37.5718";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/shimmy.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(EndPoint) {
+      position = "-4.12181 9.84722 5.91582";
+      rotation = "0 0 -1 65.3172";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new InteriorInstance() {
+      position = "15.1415 -0.841624 -0.431984";
+      rotation = "0 0 1 43.5445";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new ScriptObject() {
+         time = "0";
+         gemCount = "0";
+         powerUp = "0";
+         pad = "2154";
+         penaltyTime = "0";
+         bonusTime = "0";
+   };
+   new StaticShape() {
+      position = "-4.49598 9.72397 11.5381";
+      rotation = "0 0 1 128.915";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Shell.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

@@ -1,0 +1,646 @@
+//--- OBJECT WRITE BEGIN ---
+new GuiChunkedBitmapCtrl(playMissionGui) {
+   profile = "GuiContentProfile";
+   horizSizing = "width";
+   vertSizing = "height";
+   position = "0 0";
+   extent = "640 480";
+   minExtent = "8 8";
+   visible = "1";
+   helpTag = "0";
+   bitmap = "./background.jpg";
+   useVariable = "0";
+   tile = "0";
+
+   new GuiControl() {
+      profile = "GuiDefaultProfile";
+      horizSizing = "center";
+      vertSizing = "center";
+      position = "-1 44";
+      extent = "641 392";
+      minExtent = "8 8";
+      visible = "1";
+      helpTag = "0";
+
+      new GuiBitmapCtrl(PM_TabAdvanced) {
+         profile = "GuiDefaultProfile";
+         horizSizing = "right";
+         vertSizing = "bottom";
+         position = "410 21";
+         extent = "166 43";
+         minExtent = "8 8";
+         visible = "1";
+         command = "$MissionType=\"Advanced\";buildMissionList();";
+         helpTag = "0";
+         bitmap = "./play/tab_adv";
+         wrap = "1";
+            text = "Advanced";
+      };
+      new GuiBitmapCtrl(PM_TabIntermediate) {
+         profile = "GuiDefaultProfile";
+         horizSizing = "right";
+         vertSizing = "bottom";
+         position = "213 4";
+         extent = "205 58";
+         minExtent = "8 8";
+         visible = "1";
+         command = "$MissionType=\"Intermediate\";buildMissionList();";
+         helpTag = "0";
+         bitmap = "./play/tab_inter";
+         wrap = "1";
+            text = "Intermediate";
+      };
+      new GuiBitmapCtrl(PM_TabCustom) {
+         profile = "GuiDefaultProfile";
+         horizSizing = "right";
+         vertSizing = "bottom";
+         position = "589 91";
+         extent = "52 198";
+         minExtent = "8 8";
+         visible = "1";
+         command = "$MissionType=\"Custom\";buildMissionList();";
+         helpTag = "0";
+         bitmap = "./play/cust_tab";
+         wrap = "0";
+            text = "Advanced";
+      };
+      new GuiBitmapCtrl(PM_Box) {
+         profile = "GuiDefaultProfile";
+         horizSizing = "width";
+         vertSizing = "height";
+         position = "0 42";
+         extent = "610 351";
+         minExtent = "8 8";
+         visible = "1";
+         helpTag = "0";
+         bitmap = "./play/playGui.png";
+         wrap = "0";
+
+         new GuiBitmapCtrl() {
+            profile = "GuiDefaultProfile";
+            horizSizing = "width";
+            vertSizing = "height";
+            position = "31 29";
+            extent = "276 229";
+            minExtent = "8 8";
+            visible = "1";
+            helpTag = "0";
+            bitmap = "./play/text_window";
+            wrap = "0";
+         };
+         new GuiBitmapCtrl(PM_preview) {
+            profile = "GuiDefaultProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "312 42";
+            extent = "258 193";
+            minExtent = "8 8";
+            visible = "1";
+            helpTag = "0";
+            bitmap = "~/data/missions/beginner/superspeed";
+            wrap = "0";
+
+            new GuiControl(PM_NoQualOverlay) {
+               profile = "OverlayScreenProfile";
+               horizSizing = "right";
+               vertSizing = "bottom";
+               position = "2 3";
+               extent = "256 190";
+               minExtent = "8 8";
+               visible = "1";
+               helpTag = "0";
+            };
+            new GuiBitmapCtrl() {
+               profile = "GuiDefaultProfile";
+               horizSizing = "right";
+               vertSizing = "bottom";
+               position = "0 0";
+               extent = "258 194";
+               minExtent = "8 8";
+               visible = "1";
+               helpTag = "0";
+               bitmap = "./play/level_window.png";
+               wrap = "0";
+
+               new GuiMLTextCtrl(PM_level_bkgnd) {
+                  profile = "GuiMLTextProfile";
+                  horizSizing = "right";
+                  vertSizing = "bottom";
+                  position = "5 156";
+                  extent = "254 24";
+                  minExtent = "8 8";
+                  visible = "1";
+                  helpTag = "0";
+                  lineSpacing = "2";
+                  allowColorChars = "0";
+                  maxChars = "-1";
+               };
+               new GuiMLTextCtrl(PM_level_fgnd) {
+                  profile = "GuiMLTextProfile";
+                  horizSizing = "right";
+                  vertSizing = "bottom";
+                  position = "4 155";
+                  extent = "254 24";
+                  minExtent = "8 8";
+                  visible = "1";
+                  helpTag = "0";
+                  lineSpacing = "2";
+                  allowColorChars = "0";
+                  maxChars = "-1";
+               };
+               new GuiMLTextCtrl(PM_NoQualText) {
+                  profile = "GuiMLTextProfile";
+                  horizSizing = "right";
+                  vertSizing = "bottom";
+                  position = "0 84";
+                  extent = "254 32";
+                  minExtent = "8 8";
+                  visible = "1";
+                  helpTag = "0";
+                  lineSpacing = "2";
+                  allowColorChars = "0";
+                  maxChars = "-1";
+               };
+            };
+         };
+         new GuiBitmapButtonCtrl(PM_play) {
+            profile = "GuiButtonProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "391 257";
+            extent = "121 62";
+            minExtent = "8 8";
+            visible = "1";
+            command = "PM_StartMission();";
+            helpTag = "0";
+            text = "play";
+            groupNum = "-1";
+            buttonType = "PushButton";
+            bitmap = "./play/play";
+         };
+         new GuiBitmapButtonCtrl(PM_prev) {
+            profile = "GuiButtonProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "321 260";
+            extent = "77 58";
+            minExtent = "8 8";
+            visible = "1";
+            command = "PM_setSelected(4);";
+            helpTag = "0";
+            text = "Prev";
+            groupNum = "-1";
+            buttonType = "RepeaterButton";
+            repeatPeriod = 350;
+            repeatDecay = 0.9;
+            accelerator = "left";
+            bitmap = "./play/prev";
+         };
+         new GuiBitmapButtonCtrl(PM_next) {
+            profile = "GuiButtonProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "507 262";
+            extent = "75 60";
+            minExtent = "8 8";
+            visible = "1";
+            command = "PM_setSelected(6);";
+            helpTag = "0";
+            text = "Next";
+            groupNum = "-1";
+            buttonType = "RepeaterButton";
+            repeatPeriod = 350;
+            accelerator = "right";
+            repeatDecay = 0.9;
+            bitmap = "./play/next";
+         };
+         new GuiTextListCtrl(PM_missionList) {
+            profile = "GuiTextArrayProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "0 0";
+            extent = "80 384";
+            minExtent = "8 8";
+            visible = "0";
+            helpTag = "0";
+            enumerate = "0";
+            resizeCell = "1";
+            columns = "0";
+            fitParentWidth = "1";
+            clipColumnText = "0";
+               noDuplicates = "false";
+         };
+         new GuiBitmapButtonCtrl() {
+            profile = "GuiButtonProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "102 260";
+            extent = "79 61";
+            minExtent = "8 8";
+            visible = "1";
+            command = "disconnect(); Canvas.setContent(MainMenuGui);";
+            accelerator = "escape";
+            helpTag = "0";
+            text = "play";
+            groupNum = "-1";
+            buttonType = "PushButton";
+            bitmap = "./play/back";
+         };
+         new GuiMLTextCtrl(PM_description) {
+            profile = "GuiMLTextProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "61 43";
+            extent = "215 174";
+            minExtent = "8 8";
+            visible = "1";
+            helpTag = "0";
+            lineSpacing = "2";
+            allowColorChars = "0";
+            maxChars = "-1";
+         };
+      };
+      new GuiBitmapCtrl(PM_TabBeginner) {
+         profile = "GuiDefaultProfile";
+         horizSizing = "right";
+         vertSizing = "bottom";
+         position = "29 2";
+         extent = "184 55";
+         minExtent = "8 8";
+         visible = "1";
+         command = "$MissionType=\"Beginner\";buildMissionList();";
+         helpTag = "0";
+         bitmap = "./play/tab_begin";
+         wrap = "1";
+            text = "Beginner";
+      };
+      new GuiControl(PM_TabButtons) {
+         profile = "GuiDefaultProfile";
+         horizSizing = "right";
+         vertSizing = "bottom";
+         position = "-4 2";
+         extent = "631 61";
+         minExtent = "8 8";
+         visible = "1";
+         helpTag = "0";
+
+         new GuiButtonBaseCtrl() {
+            profile = "GuiDefaultProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "577 18";
+            extent = "43 40";
+            minExtent = "8 8";
+            visible = "1";
+            command = "$MissionType=\"\";buildMissionList();";
+            helpTag = "0";
+            text = "Button";
+            groupNum = "-1";
+            buttonType = "PushButton";
+         };
+         new GuiButtonBaseCtrl() {
+            profile = "GuiDefaultProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "428 22";
+            extent = "142 36";
+            minExtent = "8 8";
+            visible = "1";
+            command = "PMSetMissionTab(\"Advanced\");";
+            helpTag = "0";
+            text = "Button";
+            groupNum = "-1";
+            buttonType = "PushButton";
+         };
+         new GuiButtonBaseCtrl() {
+            profile = "GuiDefaultProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "236 6";
+            extent = "183 52";
+            minExtent = "8 8";
+            visible = "1";
+            command = "PMSetMissionTab(\"Intermediate\");";
+            helpTag = "0";
+            text = "Button";
+            groupNum = "-1";
+            buttonType = "PushButton";
+         };
+         new GuiButtonBaseCtrl() {
+            profile = "GuiDefaultProfile";
+            horizSizing = "right";
+            vertSizing = "bottom";
+            position = "62 7";
+            extent = "141 50";
+            minExtent = "8 8";
+            visible = "1";
+            command = "PMSetMissionTab(\"Beginner\");";
+            helpTag = "0";
+            text = "Button";
+            groupNum = "-1";
+            buttonType = "PushButton";
+         };
+      };
+      new GuiButtonBaseCtrl(PM_TabButtons2) {
+         profile = "GuiDefaultProfile";
+         horizSizing = "right";
+         vertSizing = "bottom";
+         position = "597 106";
+         extent = "42 171";
+         minExtent = "8 8";
+         visible = "1";
+         command = "PMSetMissionTab(\"Custom\");";
+         helpTag = "0";
+         text = "Button";
+         groupNum = "-1";
+         buttonType = "PushButton";
+      };
+   };
+   new GuiButtonBaseCtrl() {
+      profile = "GuiDefaultProfile";
+      horizSizing = "left";
+      vertSizing = "top";
+      position = "625 465";
+      extent = "18 19";
+      minExtent = "8 8";
+      visible = "1";
+      command = "PM_skipQualify();";
+      helpTag = "0";
+      text = "Button";
+      groupNum = "-1";
+      buttonType = "PushButton";
+   };
+};
+//--- OBJECT WRITE END ---
+
+
+//----------------------------------------
+function playMissionGui::onWake()
+{
+   if($MissionType $= "")
+      $MissionType = "Beginner";
+   PMSetMissionTab($MissionType);
+}
+
+function PMSetMissionTab(%tab)
+{
+   $MissionType = %tab;
+   %par = PM_Box.getGroup();
+   RootGroup.add(PM_Box);
+   RootGroup.add("PM_Tab" @ %tab);
+   RootGroup.add(PM_TabButtons);
+   RootGroup.add(PM_TabButtons2);
+   %par.add(PM_Box);
+   %par.add("PM_Tab" @ %tab);
+   %par.add(PM_TabButtons);
+   %par.add(PM_TabButtons2);
+   buildMissionList();
+}
+
+function sortByLevel(%grp)
+{
+   %ngrp = new SimGroup();
+   // take all the objects out of grp and put them in ngrp
+   while((%obj = %grp.getObject(0)) != -1)
+      %ngrp.add(%obj);
+
+   while(%ngrp.getCount() != 0)
+   {
+      %lowest = %ngrp.getObject(0).level;
+      %lowestIndex = 0;
+      for(%i = 1; %i < %ngrp.getCount(); %i++)
+      {
+         %level = %ngrp.getObject(%i).level;
+         if(%level < %lowest)
+         {
+            %lowest = %level;
+            %lowestIndex = %i;
+         }
+      }
+      %obj = %ngrp.getObject(%lowestIndex);
+      %grp.add(%obj);
+      %obj.level = %grp.getCount();
+   }
+   %ngrp.delete();
+}
+
+function buildMissionList()
+{
+   if (!isObject(PlayMissionGroup))
+   {
+      new SimGroup(PlayMissionGroup);
+      RootGroup.add(PlayMissionGroup);
+
+      for(%file = findFirstFile($Server::MissionFileSpec);
+            %file !$= ""; %file = findNextFile($Server::MissionFileSpec))
+      { 
+         if (strStr(%file, "CVS/") == -1 && strStr(%file, "common/") == -1)
+            getMissionObject(%file);
+      }
+      for(%i = 0;(%grp = PlayMissionGroup.getObject(%i)) != -1; %i++)
+         sortByLevel(%grp);
+   }
+   PM_missionList.clear();
+   %cnt = 0;
+   for(%i = 0;(%grp = PlayMissionGroup.getObject(%i)) != -1; %i++)
+   {
+      if($MissionType $= "" || %grp.getName() $= ("MTYPE_" @ $MissionType))
+      {
+         for(%j = 0; (%mission = %grp.getObject(%j)) != -1; %j++)
+         {
+            PM_missionList.addRow(%cnt++, %mission.level TAB %mission);
+         }
+      }
+   }
+   // Select mission level, or highest qualified
+   if(isObject(MissionInfo) && $LastMissionType $= $MissionType)
+   {
+      if($Game::Qualified)
+         %level = MissionInfo.level + 1;
+      else
+         %level = MissionInfo.level;
+   }
+   else
+      %level = $Pref::QualifiedLevel[$MissionType];
+   %selected = PM_missionList.rowCount() - 1;
+   for (%row = 0; %row < PM_missionList.rowCount(); %row++)
+   {
+      %mission = getField(PM_missionList.getRowText(%row), 1);
+      if (%mission.level + 0 == %level)
+      {
+         %selected = %row;
+         break;
+      }
+   }
+
+   PM_setSelected(%selected);
+} 
+
+function PM_skipQualify()
+{
+   %row = PM_MissionList.getRowNumById(PM_MissionList.getSelectedId());
+   if($MissionType !$= "" && %row == $pref::QualifiedLevel[$MissionType])
+   {
+      $pref::QualifiedLevel[$MissionType]++;
+      PM_setSelected(%row);
+   }
+}
+
+//----------------------------------------
+function PM_StartMission()
+{
+
+   %id = PM_missionList.getSelectedId();
+   %mission = getField(PM_missionList.getRowTextById(%id), 1);
+   $LastMissionType = %mission.type;
+
+   //
+   if ($pref::HostMultiPlayer)
+      %serverType = "MultiPlayer";
+   else
+      %serverType = "SinglePlayer";
+
+   // We need to start a server if one isn't already running
+   if ($Server::ServerType $= "") {
+      if($doRecordDemo)
+         recordDemo("~/client/demos/demo.rec", %mission.file);
+      createServer(%serverType, %mission.file);
+      %conn = new GameConnection(ServerConnection);
+      RootGroup.add(ServerConnection);
+      %conn.setConnectArgs($pref::Player::Name);
+      %conn.setJoinPassword($Client::Password);
+      %conn.connectLocal();
+   }
+   else
+      loadMission(%mission.file);
+   if(isObject(MissionInfo))
+      MissionInfo.level = %mission.level;
+}
+
+function onDemoPlay(%misFile)
+{
+   $playingDemo = true;
+   createServer("SinglePlayer", %misFile);
+   %conn = new GameConnection(ServerConnection);
+   RootGroup.add(ServerConnection);
+   %conn.setConnectArgs($pref::Player::Name);
+   %conn.setJoinPassword($Client::Password);
+   %conn.connectLocal();
+}
+
+function onDemoPlayDone(%forced)
+{
+   $playingDemo = false;
+   disconnect();
+   if(%forced)
+      Canvas.setContent(MainMenuGui);
+   else
+      runPresentation();
+}
+
+//----------------------------------------
+function PM_setSelected( %row )
+{
+   %playEnabled = (PM_missionList.rowCount() > 0) && ($testCheats || ($MissionType $= "") || (%row < $pref::QualifiedLevel[$MissionType]));
+   
+   PM_play.setActive(%playEnabled);
+   PM_NoQualOverlay.setVisible(!%playEnabled);
+   PM_NoQualText.setText(%playEnabled ? "" : "<color:CCCCCC><font:DomCasualD:32><just:center>Not Qualified!");
+   
+   PM_missionList.setSelectedRow(%row);
+   %id = PM_missionList.getSelectedId();
+   %mission = getField(PM_missionList.getRowTextById(%id), 1);
+   
+   // set the preview info
+   %levelText = "<font:DomCasualD:24><just:center>" @ upperFirst(%mission.type) @ " Level " @ (%mission.level+0);
+   PM_level_fgnd.setText("<color:FFFFFF>" @ %levelText);
+   PM_level_bkgnd.setText("<color:000000>" @ %levelText);
+   %descText = "<spush><font:DomCasualD:24>" @ %mission.name @ 
+               "<spop><lmargin:10>\n\n" @ 
+               %mission.desc;
+   if(%mission.time)
+      %descText = %descText @ "<spush><font:DomCasualD:24><lmargin:0>\nTime to Qualify: " @ formatTime(%mission.time) @ "<spop>";
+
+   %file = %mission.file;
+   getBestTimes(%file);
+   %descText = %descText @ "<lmargin:0>\n\n<spush><font:DomCasualD:24>Best Times:<spop><lmargin:10><tab:0,130,180><font:Arial Bold:14>\n\n";
+   for(%i = 0; %i < 3; %i++)
+   {
+      %time = getField($hs[%i], 0);
+      %descText = %descText @ "<shadow:1:1><color:000000><shadowcolor:ffffff4f>" @ (%i + 1) @ ". " @ getField($hs[%i], 1) TAB formatTime(%time) TAB ((%time < %mission.goldTime) ? "<bitmap:marble/client/ui/play/goldscore.png>\n" : "\n");
+   }
+
+   PM_description.setValue( %descText );
+   
+   PM_preview.setBitmap(filePath(%mission.file) @ "/" @fileBase(%mission.file));
+
+   %next = %row+1;
+   PM_next.setActive(%next < PM_missionList.rowCount());
+
+   if (%next >= PM_missionList.rowCount())
+      %next = PM_missionList.rowCount() - 1;
+   PM_next.command = "PM_setSelected(" @ %next @ ");";
+
+   %prev = %row-1;
+   PM_prev.setActive(%prev >= 0);
+   if (%prev < 0 )
+      %prev = 0;
+   PM_prev.command = "PM_setSelected(" @ %prev @ ");";
+}
+
+
+//----------------------------------------
+function getMissionObject( %missionFile ) 
+{
+   %file = new FileObject();
+   
+   %missionInfoObject = "";
+   
+   if ( %file.openForRead( %missionFile ) ) {
+		%inInfoBlock = false;
+		
+		while ( !%file.isEOF() ) {
+			%line = %file.readLine();
+			%line = trim( %line );
+			
+			if( %line $= "new ScriptObject(MissionInfo) {" ) {
+				%line = "new ScriptObject() {";
+				%inInfoBlock = true;
+			}
+			else if( %inInfoBlock && %line $= "};" ) {
+				%inInfoBlock = false;
+				%missionInfoObject = %missionInfoObject @ %line; 
+				break;
+			}
+			
+			if( %inInfoBlock )
+			   %missionInfoObject = %missionInfoObject @ %line @ " "; 	
+		}
+		
+		%file.close();
+	}
+	%missionInfoObject = "%missionInfoObject = " @ %missionInfoObject;
+	eval( %missionInfoObject );
+
+   // find the directory this file belongs in:
+
+   %path = filePath(%missionFile);
+   %misPath = filePath(%path);
+
+   if(%misPath !$= "marble/data/missions")
+      %groupTab = "custom";
+   else
+      %groupTab = fileBase(%path);
+
+   %grp = nameToId("MTYPE_" @ %groupTab);
+   if(%grp == -1)
+   {
+      %grp = new SimGroup("MTYPE_" @ %groupTab);
+      PlayMissionGroup.add(%grp);
+   }
+   %missionInfoObject.type = %groupTab;
+   %missionInfoObject.setName("");
+   %grp.add(%missionInfoObject);
+	%missionInfoObject.file = %missionFile;
+   %file.delete();
+}
