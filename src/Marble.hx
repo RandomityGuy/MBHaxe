@@ -9,7 +9,6 @@ import src.ParticleSystem.ParticleEmitter;
 import src.ParticleSystem.ParticleData;
 import src.ParticleSystem.ParticleEmitterOptions;
 import src.DtsObject;
-import sdl.Cursor;
 import hxd.Cursor;
 import shapes.PowerUp;
 import src.GameObject;

@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Key;
 import src.Settings;
 import src.Marble;
 import h2d.Tile;
@@ -204,7 +205,7 @@ class OptionsDlg extends GuiImage {
 		}
 		graphicsPane.addChild(gfxd3d);
 
-		var applyFunc:Void->Void;
+		var applyFunc:Void->Void = null;
 
 		var applyButton = new GuiButton(loadButtonImages("data/ui/options/grafapply"));
 		applyButton.position = new Vector(188, 239);
@@ -349,40 +350,106 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var cameraControlsPane:GuiImage = null;
 		var mouseControlsPane:GuiImage = null;
 
+		function getConflictingBinding(bindingName:String, key:Int) {
+			if (Settings.controlsSettings.forward == key && bindingName != "Move Forward")
+				return "Move Forward";
+			if (Settings.controlsSettings.backward == key && bindingName != "Move Backward")
+				return "Move Backward";
+			if (Settings.controlsSettings.left == key && bindingName != "Move Left")
+				return "Move Left";
+			if (Settings.controlsSettings.right == key && bindingName != "Move Right")
+				return "Move Right";
+			if (Settings.controlsSettings.camForward == key && bindingName != "Rotate Camera Up")
+				return "Rotate Camera Up";
+			if (Settings.controlsSettings.camBackward == key && bindingName != "Rotate Camera Down")
+				return "Rotate Camera Down";
+			if (Settings.controlsSettings.camLeft == key && bindingName != "Rotate Camera Left")
+				return "Rotate Camera Left";
+			if (Settings.controlsSettings.camRight == key && bindingName != "Rotate Camera Right")
+				return "Rotate Camera Right";
+			if (Settings.controlsSettings.jump == key && bindingName != "Jump")
+				return "Jump";
+			if (Settings.controlsSettings.powerup == key && bindingName != "Use PowerUp")
+				return "Use PowerUp";
+			if (Settings.controlsSettings.freelook == key && bindingName != "Free Look")
+				return "Free Look";
+
+			return null;
+		}
+
+		function remapFunc(bindingName:String, bindingFunc:Int->Void, ctrl:GuiButtonText) {
+			var remapDlg = new RemapDlg(bindingName);
+			MarbleGame.canvas.pushDialog(remapDlg);
+			remapDlg.remapCallback = (key) -> {
+				MarbleGame.canvas.popDialog(remapDlg);
+
+				var conflicting = getConflictingBinding(bindingName, key);
+				if (conflicting == null) {
+					ctrl.txtCtrl.text.text = Key.getKeyName(key);
+					bindingFunc(key);
+				} else {
+					var yesNoDlg = new MessageBoxYesNoDlg('<p align="center">"${Key.getKeyName(key)}" is already bound to "${conflicting}"!<br/>Do you want to undo this mapping?</p>',
+						() -> {
+						ctrl.txtCtrl.text.text = Key.getKeyName(key);
+						bindingFunc(key);
+					}, () -> {});
+					MarbleGame.canvas.pushDialog(yesNoDlg);
+				}
+			}
+		}
+
 		var moveForward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_fw"), arial14);
 		moveForward.position = new Vector(82, 104);
 		moveForward.setExtent(new Vector(117, 51));
-		moveForward.txtCtrl.text.text = "W";
+		moveForward.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.forward);
+		moveForward.pressedAction = (sender) -> {
+			remapFunc("Move Forward", (key) -> Settings.controlsSettings.forward = key, moveForward);
+		}
 		marbleControlsPane.addChild(moveForward);
 
 		var moveRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_rt"), arial14);
 		moveRight.position = new Vector(230, 167);
 		moveRight.setExtent(new Vector(112, 45));
-		moveRight.txtCtrl.text.text = "D";
+		moveRight.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.right);
+		moveRight.pressedAction = (sender) -> {
+			remapFunc("Move Right", (key) -> Settings.controlsSettings.right = key, moveRight);
+		}
 		marbleControlsPane.addChild(moveRight);
 
 		var mouseFire = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_pwr"), arial14);
 		mouseFire.position = new Vector(310, 84);
 		mouseFire.setExtent(new Vector(120, 51));
-		mouseFire.txtCtrl.text.text = "Left Mouse";
+		mouseFire.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.powerup);
+		mouseFire.pressedAction = (sender) -> {
+			remapFunc("Use PowerUp", (key) -> Settings.controlsSettings.powerup = key, mouseFire);
+		}
 		marbleControlsPane.addChild(mouseFire);
 
 		var moveBackward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_bak"), arial14);
 		moveBackward.position = new Vector(135, 235);
 		moveBackward.setExtent(new Vector(118, 48));
-		moveBackward.txtCtrl.text.text = "S";
+		moveBackward.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.backward);
+		moveBackward.pressedAction = (sender) -> {
+			remapFunc("Move Backward", (key) -> Settings.controlsSettings.backward = key, moveBackward);
+		}
 		marbleControlsPane.addChild(moveBackward);
 
 		var moveLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_lft"), arial14);
 		moveLeft.position = new Vector(19, 189);
 		moveLeft.setExtent(new Vector(108, 45));
-		moveLeft.txtCtrl.text.text = "A";
+		moveLeft.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.left);
+		moveLeft.pressedAction = (sender) -> {
+			remapFunc("Move Left", (key) -> Settings.controlsSettings.left = key, moveLeft);
+		}
 		marbleControlsPane.addChild(moveLeft);
 
 		var moveJmp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_jmp"), arial14);
 		moveJmp.position = new Vector(299, 231);
 		moveJmp.setExtent(new Vector(120, 47));
-		moveJmp.txtCtrl.text.text = "Space Bar";
+		moveJmp.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.jump);
+		moveJmp.pressedAction = (sender) -> {
+			remapFunc("Jump", (key) -> Settings.controlsSettings.jump = key, moveJmp);
+		}
 		marbleControlsPane.addChild(moveJmp);
 
 		var transparentbmp = new hxd.BitmapData(1, 1);
@@ -417,25 +484,37 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var panUp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_up"), arial14);
 		panUp.position = new Vector(29, 133);
 		panUp.setExtent(new Vector(108, 42));
-		panUp.txtCtrl.text.text = "Up";
+		panUp.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camForward);
+		panUp.pressedAction = (sender) -> {
+			remapFunc("Rotate Camera Up", (key) -> Settings.controlsSettings.camForward = key, panUp);
+		}
 		cameraControlsPane.addChild(panUp);
 
 		var turnRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_rt"), arial14);
 		turnRight.position = new Vector(312, 99);
 		turnRight.setExtent(new Vector(103, 36));
-		turnRight.txtCtrl.text.text = "Right";
+		turnRight.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camRight);
+		turnRight.pressedAction = (sender) -> {
+			remapFunc("Rotate Camera Right", (key) -> Settings.controlsSettings.camRight = key, turnRight);
+		}
 		cameraControlsPane.addChild(turnRight);
 
 		var panDown = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), arial14);
 		panDown.position = new Vector(42, 213);
 		panDown.setExtent(new Vector(109, 39));
-		panDown.txtCtrl.text.text = "Down";
+		panDown.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camBackward);
+		panDown.pressedAction = (sender) -> {
+			remapFunc("Rotate Camera Down", (key) -> Settings.controlsSettings.camBackward = key, panDown);
+		}
 		cameraControlsPane.addChild(panDown);
 
 		var turnLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_lft"), arial14);
 		turnLeft.position = new Vector(319, 210);
 		turnLeft.setExtent(new Vector(99, 36));
-		turnLeft.txtCtrl.text.text = "Left";
+		turnLeft.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camLeft);
+		turnLeft.pressedAction = (sender) -> {
+			remapFunc("Rotate Camera Left", (key) -> Settings.controlsSettings.camLeft = key, turnLeft);
+		}
 		cameraControlsPane.addChild(turnLeft);
 
 		var cameraToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
@@ -467,7 +546,11 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var freelook = new GuiButtonText(loadButtonImages("data/ui/options/cntrl_mous_bttn"), arial14);
 		freelook.position = new Vector(219, 225);
 		freelook.setExtent(new Vector(105, 45));
-		freelook.txtCtrl.text.text = "Right Mouse";
+		freelook.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.freelook);
+		freelook.pressedAction = (sender) -> {
+			remapFunc("Free Look", (key) -> Settings.controlsSettings.freelook = key, freelook);
+		}
+
 		mouseControlsPane.addChild(freelook);
 
 		var mouseToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);

@@ -44,6 +44,9 @@ class Canvas extends GuiControl {
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {
-		super.update(dt, mouseState);
+		// Update ONLY the last one
+		if (children.length > 0) {
+			children[children.length - 1].update(dt, mouseState);
+		}
 	}
 }

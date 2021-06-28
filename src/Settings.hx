@@ -1,5 +1,6 @@
 package src;
 
+import hxd.Key;
 import src.MarbleGame;
 import hxd.Window;
 import haxe.DynamicAccess;
@@ -23,6 +24,20 @@ typedef OptionsSettings = {
 	var soundVolume:Float;
 }
 
+typedef ControlsSettings = {
+	var forward:Int;
+	var backward:Int;
+	var left:Int;
+	var right:Int;
+	var camForward:Int;
+	var camBackward:Int;
+	var camLeft:Int;
+	var camRight:Int;
+	var jump:Int;
+	var powerup:Int;
+	var freelook:Int;
+}
+
 class Settings {
 	public static var highScores:Map<String, Array<Score>> = [];
 
@@ -35,6 +50,20 @@ class Settings {
 		shadows: false,
 		musicVolume: 0,
 		soundVolume: 0
+	};
+
+	public static var controlsSettings:ControlsSettings = {
+		forward: Key.W,
+		backward: Key.S,
+		left: Key.A,
+		right: Key.D,
+		camForward: Key.UP,
+		camBackward: Key.DOWN,
+		camLeft: Key.LEFT,
+		camRight: Key.RIGHT,
+		jump: Key.SPACE,
+		powerup: Key.MOUSE_LEFT,
+		freelook: Key.MOUSE_RIGHT
 	};
 
 	public static function applySettings() {

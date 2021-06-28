@@ -2,8 +2,10 @@ package src;
 
 import src.Util;
 import h3d.Quat;
+#if hl
 import sdl.Cursor;
 import sdl.Sdl;
+#end
 import hxd.Window;
 import hxd.Event;
 import src.MarbleWorld;
@@ -67,10 +69,14 @@ class CameraController extends Object {
 		Window.getInstance().addEventTarget(onEvent);
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
+		#if hl
 		this.screenHeight = Sdl.getScreenHeight();
 		this.screenWidth = Sdl.getScreenWidth();
+		#end
 		level.scene.camera.fovY = 60;
+		#if hl
 		Cursor.show(false);
+		#end
 	}
 
 	function onEvent(e:Event) {
@@ -85,7 +91,9 @@ class CameraController extends Object {
 	}
 
 	public function lockCursor() {
+		#if hl
 		Sdl.warpMouseGlobal(cast this.screenWidth / 2, cast this.screenHeight / 2);
+		#end
 	}
 
 	function orbit(mouseX:Float, mouseY:Float) {

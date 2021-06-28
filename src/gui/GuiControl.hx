@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.Graphics;
 import hxd.Key;
 import h2d.Scene;
 import h2d.col.Bounds;
@@ -48,8 +49,8 @@ class GuiControl {
 	}
 
 	public function update(dt:Float, mouseState:MouseState) {
-		var renderRect = getRenderRectangle();
-		if (renderRect.inRect(mouseState.position)) {
+		var hitTestRect = getHitTestRect();
+		if (hitTestRect.inRect(mouseState.position)) {
 			if (Key.isPressed(Key.MOUSE_LEFT)) {
 				mouseState.button = Key.MOUSE_LEFT;
 				this.onMousePress(mouseState);
@@ -131,6 +132,15 @@ class GuiControl {
 			}
 		}
 		return rect;
+	}
+
+	public function getHitTestRect() {
+		var thisRect = this.getRenderRectangle();
+		if (this.parent == null)
+			return thisRect;
+		else {
+			return thisRect.intersect(this.parent.getRenderRectangle());
+		}
 	}
 
 	public function addChild(ctrl:GuiControl) {

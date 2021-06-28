@@ -1,7 +1,5 @@
 package src;
 
-import sys.thread.Lock;
-import sys.thread.FixedThreadPool;
 import hxd.res.Image;
 import h3d.mat.Texture;
 import h3d.scene.Object;
