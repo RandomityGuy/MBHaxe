@@ -1,5 +1,6 @@
 package shapes;
 
+import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.Util;
 import h3d.Vector;
@@ -29,11 +30,13 @@ abstract class PowerUp extends DtsObject {
 	public var autoUse:Bool = false;
 	public var powerupParams:PowerupParams = new PowerupParams();
 	public var pickUpName:String;
+	public var element:MissionElementItem;
 
-	public function new() {
+	public function new(element:MissionElementItem) {
 		super();
 		this.isCollideable = false;
 		this.ambientRotate = true;
+		this.element = element;
 	}
 
 	public override function onMarbleInside(timeState:TimeState) {
@@ -49,7 +52,8 @@ abstract class PowerUp extends DtsObject {
 				this.use(timeState);
 
 			this.level.displayAlert('You picked up a ${this.pickUpName}!');
-			// if (this.element.showhelponpickup === "1" && !this.autoUse) displayHelp(`Press <func:bind mousefire> to use the ${this.pickUpName}!`);
+			if (this.element.showhelponpickup == "1" && !this.autoUse)
+				this.level.displayHelp('Press <func:bind mousefire> to use the ${this.pickUpName}!');
 		}
 	}
 

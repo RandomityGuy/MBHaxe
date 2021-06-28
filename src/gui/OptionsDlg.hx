@@ -73,11 +73,13 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.extent = new Vector(438, 298);
 
 		mainPane.addChild(graphicsPane);
+		var applyFunc:Void->Void = null;
 
 		var mainMenuButton = new GuiButton(loadButtonImages("data/ui/options/mainm"));
 		mainMenuButton.position = new Vector(330, 356);
 		mainMenuButton.extent = new Vector(121, 53);
 		mainMenuButton.pressedAction = (sender) -> {
+			applyFunc();
 			MarbleGame.canvas.setContent(new MainMenuGui());
 		}
 		mainPane.addChild(mainMenuButton);
@@ -204,8 +206,6 @@ class OptionsDlg extends GuiImage {
 			gfxd3d.pressed = true;
 		}
 		graphicsPane.addChild(gfxd3d);
-
-		var applyFunc:Void->Void = null;
 
 		var applyButton = new GuiButton(loadButtonImages("data/ui/options/grafapply"));
 		applyButton.position = new Vector(188, 239);
@@ -577,6 +577,10 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		invertAxis.position = new Vector(95, 249);
 		invertAxis.extent = new Vector(43, 53);
 		invertAxis.buttonType = Toggle;
+		invertAxis.pressed = Settings.controlsSettings.invertYAxis;
+		invertAxis.pressedAction = (sender) -> {
+			Settings.controlsSettings.invertYAxis = !Settings.controlsSettings.invertYAxis;
+		}
 		mouseControlsPane.addChild(invertAxis);
 
 		var alwaysFreelook = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_freel"));
@@ -592,6 +596,10 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var mouseSensitivity = new GuiSlider(ResourceLoader.getImage("data/ui/options/cntrl_mous_knb.png").toTile());
 		mouseSensitivity.position = new Vector(147, 148);
 		mouseSensitivity.extent = new Vector(254, 34);
+		mouseSensitivity.sliderValue = (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2);
+		mouseSensitivity.pressedAction = (sender) -> {
+			Settings.controlsSettings.cameraSensitivity = 0.2 + (3 - 0.2) * mouseSensitivity.sliderValue;
+		}
 		mouseControlsPane.addChild(mouseSensitivity);
 
 		// INVISIBLE BUTTON SHIT

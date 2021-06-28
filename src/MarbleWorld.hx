@@ -1,5 +1,6 @@
 package src;
 
+import src.Settings;
 import gui.LoadingGui;
 import gui.PlayMissionGui;
 import src.MarbleGame;
@@ -397,29 +398,29 @@ class MarbleWorld extends Scheduler {
 			shape = new Gem(cast element);
 			this.totalGems++;
 		} else if (dataBlockLowerCase == "superjumpitem")
-			shape = new SuperJump();
+			shape = new SuperJump(cast element);
 		else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
 			shape = new SignCaution(element);
 		else if (dataBlockLowerCase == "superbounceitem")
-			shape = new SuperBounce();
+			shape = new SuperBounce(cast element);
 		else if (dataBlockLowerCase == "roundbumper")
 			shape = new RoundBumper();
 		else if (dataBlockLowerCase == "trianglebumper")
 			shape = new TriangleBumper();
 		else if (dataBlockLowerCase == "helicopteritem")
-			shape = new Helicopter();
+			shape = new Helicopter(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
 			shape = new SmallDuctFan();
 		else if (dataBlockLowerCase == "antigravityitem")
-			shape = new AntiGravity();
+			shape = new AntiGravity(cast element);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
 		else if (dataBlockLowerCase == "shockabsorberitem")
-			shape = new ShockAbsorber();
+			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
-			shape = new SuperSpeed();
+			shape = new SuperSpeed(cast element);
 		else if (dataBlockLowerCase == "timetravelitem")
 			shape = new TimeTravel(cast element);
 		else if (dataBlockLowerCase == "tornado")
@@ -475,27 +476,27 @@ class MarbleWorld extends Scheduler {
 			shape = new Gem(cast element);
 			this.totalGems++;
 		} else if (dataBlockLowerCase == "superjumpitem")
-			shape = new SuperJump();
+			shape = new SuperJump(cast element);
 		else if (dataBlockLowerCase == "superbounceitem")
-			shape = new SuperBounce();
+			shape = new SuperBounce(cast element);
 		else if (dataBlockLowerCase == "roundbumper")
 			shape = new RoundBumper();
 		else if (dataBlockLowerCase == "trianglebumper")
 			shape = new TriangleBumper();
 		else if (dataBlockLowerCase == "helicopteritem")
-			shape = new Helicopter();
+			shape = new Helicopter(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
 			shape = new SmallDuctFan();
 		else if (dataBlockLowerCase == "antigravityitem")
-			shape = new AntiGravity();
+			shape = new AntiGravity(cast element);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
 		else if (dataBlockLowerCase == "shockabsorberitem")
-			shape = new ShockAbsorber();
+			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
-			shape = new SuperSpeed();
+			shape = new SuperSpeed(cast element);
 		else if (dataBlockLowerCase == "timetravelitem")
 			shape = new TimeTravel(cast element);
 		else if (dataBlockLowerCase == "tornado")
@@ -665,6 +666,45 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function displayHelp(text:String) {
+		var start = 0;
+		var pos = text.indexOf("<func:", start);
+		while (pos != -1) {
+			var end = text.indexOf(">", start + 5);
+			if (end == -1)
+				break;
+			var pre = text.substr(0, pos);
+			var post = text.substr(end + 1);
+			var func = text.substr(pos + 6, end - (pos + 6));
+			var funcdata = func.split(' ');
+			var val = "";
+			if (funcdata[0] == "bind") {
+				if (funcdata[1] == "moveforward")
+					val = Key.getKeyName(Settings.controlsSettings.forward);
+				if (funcdata[1] == "movebackward")
+					val = Key.getKeyName(Settings.controlsSettings.backward);
+				if (funcdata[1] == "moveleft")
+					val = Key.getKeyName(Settings.controlsSettings.left);
+				if (funcdata[1] == "moveright")
+					val = Key.getKeyName(Settings.controlsSettings.right);
+				if (funcdata[1] == "panup")
+					val = Key.getKeyName(Settings.controlsSettings.camForward);
+				if (funcdata[1] == "pandown")
+					val = Key.getKeyName(Settings.controlsSettings.camBackward);
+				if (funcdata[1] == "panleft")
+					val = Key.getKeyName(Settings.controlsSettings.camLeft);
+				if (funcdata[1] == "panright")
+					val = Key.getKeyName(Settings.controlsSettings.camRight);
+				if (funcdata[1] == "jump")
+					val = Key.getKeyName(Settings.controlsSettings.jump);
+				if (funcdata[1] == "mousefire")
+					val = Key.getKeyName(Settings.controlsSettings.powerup);
+				if (funcdata[1] == "freelook")
+					val = Key.getKeyName(Settings.controlsSettings.freelook);
+			}
+			start = val.length + pos;
+			text = pre + val + post;
+			pos = text.indexOf("<func:", start);
+		}
 		this.playGui.setHelpText(text);
 		this.helpTextTimeState = this.timeState.currentAttemptTime;
 

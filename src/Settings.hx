@@ -37,6 +37,8 @@ typedef ControlsSettings = {
 	var powerup:Int;
 	var freelook:Int;
 	var alwaysFreeLook:Bool;
+	var cameraSensitivity:Float;
+	var invertYAxis:Bool;
 }
 
 class Settings {
@@ -65,7 +67,9 @@ class Settings {
 		jump: Key.SPACE,
 		powerup: Key.MOUSE_LEFT,
 		freelook: Key.MOUSE_RIGHT,
-		alwaysFreeLook: true
+		alwaysFreeLook: true,
+		cameraSensitivity: 0.6,
+		invertYAxis: false
 	};
 
 	public static function applySettings() {
@@ -73,6 +77,7 @@ class Settings {
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
 
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+		save();
 	}
 
 	public static function saveScore(mapPath:String, score:Score) {
@@ -96,7 +101,9 @@ class Settings {
 
 	public static function save() {
 		var outputData = {
-			highScores: highScores
+			highScores: highScores,
+			options: optionsSettings,
+			controls: controlsSettings
 		};
 		var json = Json.stringify(outputData);
 		File.saveContent("settings.json", json);
@@ -109,6 +116,8 @@ class Settings {
 			for (key => value in highScoreData) {
 				highScores.set(key, value);
 			}
+			optionsSettings = json.options;
+			controlsSettings = json.controls;
 		}
 	}
 

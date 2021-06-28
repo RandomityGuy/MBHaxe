@@ -1,5 +1,6 @@
 package shapes;
 
+import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.ResourceLoader;
 import src.ParticleSystem.ParticleData;
@@ -38,8 +39,8 @@ final superSpeedParticleOptions:ParticleEmitterOptions = {
 class SuperSpeed extends PowerUp {
 	var ssEmitterParticleData:ParticleData;
 
-	public function new() {
-		super();
+	public function new(element:MissionElementItem) {
+		super(element);
 		this.dtsPath = "data/shapes/items/superspeed.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;

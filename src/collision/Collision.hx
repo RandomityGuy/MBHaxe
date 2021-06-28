@@ -55,16 +55,31 @@ class Collision {
 		var p = PlaneF.PointNormal(new Point3F(v0.x, v0.y, v0.z), new Point3F(normal.x, normal.y, normal.z));
 		var pdist = p.distance(new Point3F(center.x, center.y, center.z));
 
-		if (Math.abs(pdist) < 0.001) {
+		if (pdist < 0.001) {
 			return res; // Dont collide internal edges
 		}
 
-		function toDifPoint(pt:Vector) {
-			return new Point3F(pt.x, pt.y, pt.z);
+		// Check edges
+		var r1 = IntersectLineSphere(v0, v1, center, radius);
+		if (r1 != null) {
+			res.result = true;
+			res.point = r1;
+			res.normal = center.sub(r1).normalized();
+			return res;
 		}
-
-		function fromDifPoint(pt:Point3F) {
-			return new Vector(pt.x, pt.y, pt.z);
+		var r2 = IntersectLineSphere(v1, v2, center, radius);
+		if (r2 != null) {
+			res.result = true;
+			res.point = r2;
+			res.normal = center.sub(r2).normalized();
+			return res;
+		}
+		var r3 = IntersectLineSphere(v2, v0, center, radius);
+		if (r3 != null) {
+			res.result = true;
+			res.point = r3;
+			res.normal = center.sub(r3).normalized();
+			return res;
 		}
 
 		if (pdist < radius) {
@@ -104,29 +119,6 @@ class Collision {
 
 		// 	return res;
 		// }
-
-		// Check edges
-		var r1 = IntersectLineSphere(v0, v1, center, radius);
-		if (r1 != null) {
-			res.result = true;
-			res.point = r1;
-			res.normal = center.sub(r1).normalized();
-			return res;
-		}
-		var r2 = IntersectLineSphere(v1, v2, center, radius);
-		if (r2 != null) {
-			res.result = true;
-			res.point = r2;
-			res.normal = center.sub(r2).normalized();
-			return res;
-		}
-		var r3 = IntersectLineSphere(v2, v0, center, radius);
-		if (r3 != null) {
-			res.result = true;
-			res.point = r3;
-			res.normal = center.sub(r3).normalized();
-			return res;
-		}
 
 		// Check plane
 		// var p = PlaneF.ThreePoints(toDifPoint(v0), toDifPoint(v1), toDifPoint(v2));

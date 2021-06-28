@@ -1,5 +1,6 @@
 package shapes;
 
+import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.ResourceLoader;
 import src.ParticleSystem.ParticleData;
@@ -32,8 +33,8 @@ final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 class SuperJump extends PowerUp {
 	var sjEmitterParticleData:ParticleData;
 
-	public function new() {
-		super();
+	public function new(element:MissionElementItem) {
+		super(element);
 		this.dtsPath = "data/shapes/items/superjump.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;

@@ -101,12 +101,12 @@ class CameraController extends Object {
 	function orbit(mouseX:Float, mouseY:Float) {
 		var window = Window.getInstance();
 		var deltaposX = (window.width / 2) - mouseX;
-		var deltaposY = (window.height / 2) - mouseY;
+		var deltaposY = (window.height / 2) - mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1);
 		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
 			deltaposY = 0;
 		}
-		var rotX = deltaposX * 0.001 * CameraSensitivity * Math.PI * 2;
-		var rotY = deltaposY * 0.001 * CameraSensitivity * Math.PI * 2;
+		var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
+		var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		CameraYaw -= rotX;
 		CameraPitch += rotY;
 		// CameraYaw = Math.PI / 2;

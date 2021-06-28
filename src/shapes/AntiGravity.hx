@@ -1,12 +1,13 @@
 package shapes;
 
+import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import h3d.Vector;
 import src.DtsObject;
 
 class AntiGravity extends PowerUp {
-	public function new() {
-		super();
+	public function new(element:MissionElementItem) {
+		super(element);
 		this.dtsPath = "data/shapes/items/antigravity.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;

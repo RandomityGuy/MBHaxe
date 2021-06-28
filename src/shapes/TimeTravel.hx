@@ -8,7 +8,7 @@ class TimeTravel extends PowerUp {
 	var timeBonus:Float = 5;
 
 	public function new(element:MissionElementItem) {
-		super();
+		super(element);
 		this.dtsPath = "data/shapes/items/timetravel.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;

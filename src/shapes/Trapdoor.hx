@@ -9,7 +9,7 @@ import src.ForceObject;
 
 class Trapdoor extends DtsObject {
 	var lastContactTime = -1e8;
-	var timeout:Float = 0;
+	var timeout:Float = 0.2;
 	var lastDirection:Float;
 	var lastCompletion:Float = 0;
 

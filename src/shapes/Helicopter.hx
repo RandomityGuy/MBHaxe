@@ -1,11 +1,12 @@
 package shapes;
 
+import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
 
 class Helicopter extends PowerUp {
-	public function new() {
-		super();
+	public function new(element:MissionElementItem) {
+		super(element);
 		this.dtsPath = "data/shapes/images/helicopter.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
