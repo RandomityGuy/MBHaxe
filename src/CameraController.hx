@@ -1,5 +1,7 @@
 package src;
 
+import src.Settings;
+import hxd.Key;
 import src.Util;
 import h3d.Quat;
 #if hl
@@ -100,6 +102,9 @@ class CameraController extends Object {
 		var window = Window.getInstance();
 		var deltaposX = (window.width / 2) - mouseX;
 		var deltaposY = (window.height / 2) - mouseY;
+		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
+			deltaposY = 0;
+		}
 		var rotX = deltaposX * 0.001 * CameraSensitivity * Math.PI * 2;
 		var rotY = deltaposY * 0.001 * CameraSensitivity * Math.PI * 2;
 		CameraYaw -= rotX;
@@ -122,6 +127,21 @@ class CameraController extends Object {
 		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
 		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
+
+		if (Key.isDown(Settings.controlsSettings.camForward)) {
+			CameraPitch += 0.75 * 5 * dt;
+		}
+		if (Key.isDown(Settings.controlsSettings.camBackward)) {
+			CameraPitch -= 0.75 * 5 * dt;
+		}
+		if (Key.isDown(Settings.controlsSettings.camLeft)) {
+			CameraYaw -= 0.75 * 5 * dt;
+		}
+		if (Key.isDown(Settings.controlsSettings.camRight)) {
+			CameraYaw += 0.75 * 5 * dt;
+		}
+
+		CameraPitch = Util.clamp(CameraPitch, -Math.PI / 2, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {

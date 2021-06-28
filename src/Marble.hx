@@ -1,5 +1,6 @@
 package src;
 
+import src.Settings;
 import h3d.scene.Mesh;
 import h3d.col.Bounds;
 import collision.CollisionEntity;
@@ -811,22 +812,22 @@ class Marble extends GameObject {
 		var move = new Move();
 		move.d = new Vector();
 		if (this.controllable && this.mode != Finish) {
-			if (Key.isDown(Key.W)) {
+			if (Key.isDown(Settings.controlsSettings.forward)) {
 				move.d.x -= 1;
 			}
-			if (Key.isDown(Key.S)) {
+			if (Key.isDown(Settings.controlsSettings.backward)) {
 				move.d.x += 1;
 			}
-			if (Key.isDown(Key.A)) {
+			if (Key.isDown(Settings.controlsSettings.left)) {
 				move.d.y += 1;
 			}
-			if (Key.isDown(Key.D)) {
+			if (Key.isDown(Settings.controlsSettings.right)) {
 				move.d.y -= 1;
 			}
-			if (Key.isDown(Key.SPACE)) {
+			if (Key.isDown(Settings.controlsSettings.jump)) {
 				move.jump = true;
 			}
-			if (Key.isDown(Key.MOUSE_LEFT)) {
+			if (Key.isDown(Settings.controlsSettings.powerup)) {
 				move.powerup = true;
 			}
 		}

@@ -36,6 +36,7 @@ typedef ControlsSettings = {
 	var jump:Int;
 	var powerup:Int;
 	var freelook:Int;
+	var alwaysFreeLook:Bool;
 }
 
 class Settings {
@@ -49,7 +50,7 @@ class Settings {
 		colorDepth: 1,
 		shadows: false,
 		musicVolume: 0,
-		soundVolume: 0
+		soundVolume: 0,
 	};
 
 	public static var controlsSettings:ControlsSettings = {
@@ -63,7 +64,8 @@ class Settings {
 		camRight: Key.RIGHT,
 		jump: Key.SPACE,
 		powerup: Key.MOUSE_LEFT,
-		freelook: Key.MOUSE_RIGHT
+		freelook: Key.MOUSE_RIGHT,
+		alwaysFreeLook: true
 	};
 
 	public static function applySettings() {

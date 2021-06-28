@@ -583,6 +583,10 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		alwaysFreelook.position = new Vector(365, 269);
 		alwaysFreelook.extent = new Vector(43, 53);
 		alwaysFreelook.buttonType = Toggle;
+		alwaysFreelook.pressed = Settings.controlsSettings.alwaysFreeLook;
+		alwaysFreelook.pressedAction = (sender) -> {
+			Settings.controlsSettings.alwaysFreeLook = !Settings.controlsSettings.alwaysFreeLook;
+		}
 		mouseControlsPane.addChild(alwaysFreelook);
 
 		var mouseSensitivity = new GuiSlider(ResourceLoader.getImage("data/ui/options/cntrl_mous_knb.png").toTile());
