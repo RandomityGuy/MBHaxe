@@ -73,6 +73,8 @@ class EndGameGui extends GuiControl {
 					return domcasual32.toFont();
 				case "Arial14":
 					return arial14.toFont();
+				case "Expo32":
+					return expo32.toFont();
 				default:
 					return null;
 			}
@@ -86,13 +88,22 @@ class EndGameGui extends GuiControl {
 		congrats.extent = new Vector(408, 50);
 		pg.addChild(congrats);
 
-		var finishMessage = new GuiText(expo32);
+		var finishMessage = new GuiMLText(expo32, mlFontLoader);
 		finishMessage.text.textColor = 0x00ff00;
-		finishMessage.text.text = "You've qualified!";
+		var qualified = mission.qualifyTime > timeState.gameplayClock;
+		if (qualified)
+			finishMessage.text.text = timeState.gameplayClock < mission.goldTime ? 'You beat the <font color="#FFFF00">GOLD</font> time!' : "You've qualified!";
+		else
+			finishMessage.text.text = '<font color="#FF0000">You failed to qualify!</font>';
 		finishMessage.text.filter = new DropShadow(1, 0.785, 0, 1, 0, 0.4, 1, true);
-		finishMessage.justify = Center;
+		// finishMessage.justify = Center;
 		finishMessage.position = new Vector(155, 65);
-		finishMessage.extent = new Vector(200, 100);
+		if (timeState.gameplayClock < mission.goldTime) {
+			finishMessage.position.x = 110;
+		}
+		if (!qualified)
+			finishMessage.position.x = 125;
+		finishMessage.extent = new Vector(400, 100);
 		pg.addChild(finishMessage);
 
 		var scoreData:Array<Score> = Settings.getScores(mission.path);

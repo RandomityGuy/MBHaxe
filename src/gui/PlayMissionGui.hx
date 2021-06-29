@@ -223,8 +223,6 @@ class PlayMissionGui extends GuiImage {
 
 		currentList = MissionList.beginnerMissions;
 
-		// TODO actual tab buttons
-
 		setCategoryFunc = function(category:String) {
 			localContainer.removeChild(tabBeginner);
 			localContainer.removeChild(tabIntermediate);
@@ -279,6 +277,10 @@ class PlayMissionGui extends GuiImage {
 			return splits.join('\n');
 		}
 
+		var goldBadge = ResourceLoader.getImage("data/ui/play/goldscore.png").toTile();
+		goldBadge.dy = 2.5;
+		goldBadge.dx = 8;
+
 		setSelectedFunc = function setSelected(index:Int) {
 			if (index > currentList.length - 1) {
 				index = currentList.length - 1;
@@ -307,6 +309,9 @@ class PlayMissionGui extends GuiImage {
 
 			var descText = '<font face="DomCasual24" color="#000000">${currentMission.title}</font><br/><br/>'
 				+ splitTextWithPadding(pmDescription.text, Util.unescape(currentMission.description));
+			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
+				descText += '<font face="DomCasual24"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
+			}
 			descText += '<br/><br/><font face="DomCasual24">Best Times:</font><br/>';
 			for (i in 0...3) {
 				descText += '<br/>ÂÂ<font face="ArialBold14">${i + 1}. ${scoreData[i].name}</font>';
@@ -315,11 +320,19 @@ class PlayMissionGui extends GuiImage {
 
 			var descText2 = '<br/><br/>'
 				+ '<font opacity="0">${splitTextWithPadding(pmDescriptionOther.text, Util.unescape(currentMission.description))}</font>';
-			descText2 += '<br/><br/><br/>';
+			descText2 += '<br/><br/>';
+			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
+				descText2 += '<font face="DomCasual24" opacity="0"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
+			}
+			descText2 += '<br/>';
 			for (i in 0...3) {
 				descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">${Util.formatTime(scoreData[i].time)}</font>';
+				if (scoreData[i].time < currentMission.goldTime) {
+					descText2 += '<img src="goldBadge.png"></img>';
+				}
 			}
 			pmDescriptionOther.text.text = descText2;
+			pmDescriptionOther.text.loadImage = (name) -> goldBadge;
 
 			pmPreview.bmp.tile = currentMission.getPreviewImage();
 

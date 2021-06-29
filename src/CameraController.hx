@@ -65,8 +65,6 @@ class CameraController extends Object {
 	public var oob:Bool = false;
 	public var finish:Bool = false;
 
-	var originCube:Mesh;
-
 	public function new(marble:Marble) {
 		super();
 		this.marble = marble;
@@ -74,11 +72,6 @@ class CameraController extends Object {
 
 	public function init(level:MarbleWorld) {
 		this.level = level;
-		var cub = Cube.defaultUnitCube();
-		cub.addUVs();
-		cub.scale(0.2);
-		cub.addNormals();
-		originCube = new Mesh(cub, Material.create(), level.scene);
 		Window.getInstance().addEventTarget(onEvent);
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
