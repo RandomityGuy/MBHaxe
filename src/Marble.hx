@@ -223,15 +223,10 @@ class Marble extends GameObject {
 	}
 
 	public function getMarbleAxis() {
-		var cammat = Matrix.I();
-		var xrot = new Matrix();
-		xrot.initRotationX(this.camera.CameraPitch);
-		var zrot = new Matrix();
-		zrot.initRotationZ(this.camera.CameraYaw);
-		cammat.multiply(xrot, zrot);
-		cammat.multiply(cammat, this.level.newOrientationQuat.toMatrix());
+		var motiondir = new Vector(0, -1, 0);
+		motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
+		motiondir.transform(level.newOrientationQuat.toMatrix());
 		var updir = this.level.currentUp;
-		var motiondir = new Vector(cammat._21, cammat._22, cammat._23);
 		var sidedir = motiondir.cross(updir);
 
 		sidedir.normalize();

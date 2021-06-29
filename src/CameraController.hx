@@ -1,5 +1,9 @@
 package src;
 
+import h3d.col.Plane;
+import h3d.mat.Material;
+import h3d.prim.Cube;
+import h3d.scene.Mesh;
 import src.Settings;
 import hxd.Key;
 import src.Util;
@@ -61,6 +65,8 @@ class CameraController extends Object {
 	public var oob:Bool = false;
 	public var finish:Bool = false;
 
+	var originCube:Mesh;
+
 	public function new(marble:Marble) {
 		super();
 		this.marble = marble;
@@ -68,6 +74,11 @@ class CameraController extends Object {
 
 	public function init(level:MarbleWorld) {
 		this.level = level;
+		var cub = Cube.defaultUnitCube();
+		cub.addUVs();
+		cub.scale(0.2);
+		cub.addNormals();
+		originCube = new Mesh(cub, Material.create(), level.scene);
 		Window.getInstance().addEventTarget(onEvent);
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
@@ -108,7 +119,7 @@ class CameraController extends Object {
 		var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		CameraYaw -= rotX;
-		CameraPitch += rotY;
+		CameraPitch -= rotY;
 		// CameraYaw = Math.PI / 2;
 		// CameraPitch = Math.PI / 4;
 
@@ -141,7 +152,7 @@ class CameraController extends Object {
 			CameraYaw += 0.75 * 5 * dt;
 		}
 
-		CameraPitch = Util.clamp(CameraPitch, -Math.PI / 2, Math.PI / 2);
+		CameraPitch = Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {
@@ -176,74 +187,75 @@ class CameraController extends Object {
 
 		if (this.finish) {
 			// Make the camera spin around slowly
-			CameraPitch = Util.lerp(this.level.finishPitch, -0.45,
+			CameraPitch = Util.lerp(this.level.finishPitch, 0.45,
 				Util.clamp((this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / 0.3, 0, 1));
-			CameraYaw = this.level.finishYaw - (this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / -1 * 0.6;
+			CameraYaw = this.level.finishYaw - (this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / -1.2;
 		}
 
+		var marblePosition = level.marble.getAbsPos().getPosition();
 		var up = new Vector(0, 0, 1);
 		up.transform(orientationQuat.toMatrix());
-		camera.up = up;
-		var upVec = new Vector(0, 0, 1);
-		var quat = getRotQuat(upVec, up);
+		var directionVector = new Vector(1, 0, 0);
+		var cameraVerticalTranslation = new Vector(0, 0, 0.3);
 
 		var q1 = new Quat();
 		q1.initRotateAxis(0, 1, 0, CameraPitch);
-		var q2 = new Quat();
-		q2.initRotateAxis(0, 0, 1, CameraYaw);
-
-		var dir = new Vector(1, 0, 0);
-		dir.transform(q1.toMatrix());
-		dir.transform(q2.toMatrix());
-		dir = dir.multiply(2.5);
-
-		var x = CameraDistance * Math.sin(CameraPitch) * Math.cos(CameraYaw);
-		var y = CameraDistance * Math.sin(CameraPitch) * Math.sin(CameraYaw);
-		var z = CameraDistance * Math.cos(CameraPitch);
-
-		var cameraVerticalTranslation = new Vector(0, 0, 0.3);
+		directionVector.transform(q1.toMatrix());
 		cameraVerticalTranslation.transform(q1.toMatrix());
-		cameraVerticalTranslation.transform(q2.toMatrix());
+		q1.initRotateAxis(0, 0, 1, CameraYaw);
+		directionVector.transform(q1.toMatrix());
+		cameraVerticalTranslation.transform(q1.toMatrix());
+		directionVector.transform(orientationQuat.toMatrix());
 		cameraVerticalTranslation.transform(orientationQuat.toMatrix());
-
-		var directionVec = dir; // new Vector(x, y, z);
-		directionVec.transform(orientationQuat.toMatrix());
-		// cameraVerticalTranslation.transform(orientationQuat.toMatrix());
-
-		var targetpos = this.marble.getAbsPos().getPosition();
-
-		var toPos = targetpos.add(directionVec).add(cameraVerticalTranslation);
-		camera.pos = toPos;
-		camera.target = targetpos.add(cameraVerticalTranslation); // .add(cameraVerticalTranslation);
+		camera.up = up;
+		camera.pos = marblePosition.sub(directionVector.multiply(CameraDistance));
+		camera.target = marblePosition.add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
-		var rayCastOrigin = targetpos.add(up.multiply(marble._radius));
-		var rayCastDirection = camera.pos.sub(rayCastOrigin);
-		rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
+		var rayCastOrigin = marblePosition.add(level.currentUp.multiply(marble._radius));
+		var rayCastDirection = camera.pos.sub(rayCastOrigin).normalized();
+		var results = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection);
+		var rayCastEnd = rayCastOrigin.add(rayCastDirection.multiply(CameraDistance));
 
-		var raycastresults = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection.normalized());
 		var firstHit = null;
-		var minT = 1e8;
-		for (result in raycastresults) {
-			var ca = result.point.sub(camera.pos);
-			var ba = rayCastOrigin.sub(camera.pos);
-			var t = (ba.x != 0 ? ca.x / ba.x : (ba.y != 0 ? ca.y / ba.y : (ba.z != 0 ? ca.z / ba.z : -1)));
-			if (t > 0 && t < 1 && t < minT) {
-				minT = t;
-				firstHit = result;
+		var minD = 1e8;
+
+		for (result in results) {
+			if (result.distance < CameraDistance) {
+				var t1 = (result.point.x - rayCastOrigin.x) / (rayCastEnd.x - rayCastOrigin.x);
+				if (t1 < 0 || t1 > 1)
+					continue;
+				var t2 = (result.point.y - rayCastOrigin.y) / (rayCastEnd.y - rayCastOrigin.y);
+				if (t2 < 0 || t2 > 1)
+					continue;
+				var t3 = (result.point.z - rayCastOrigin.z) / (rayCastEnd.z - rayCastOrigin.z);
+				if (t3 < 0 || t3 > 1)
+					continue;
+				if (result.distance < minD) {
+					minD = result.distance;
+					firstHit = result;
+				}
 			}
 		}
+
 		if (firstHit != null) {
 			if (firstHit.distance < CameraDistance) {
-				directionVec = directionVec.normalized().multiply(firstHit.distance);
+				// camera.pos = marblePosition.sub(directionVector.multiply(firstHit.distance * 0.7));
+				var plane = new Plane(firstHit.normal.x, firstHit.normal.y, firstHit.normal.z, firstHit.point.dot(firstHit.normal));
+				var normal = firstHit.normal.multiply(-1);
+				// var position = firstHit.point;
+
+				var projected = plane.project(camera.pos.toPoint());
+				var dist = plane.distance(camera.pos.toPoint());
+				if (dist < closeness) {
+					camera.pos = projected.toVector().add(normal.multiply(-closeness));
+				}
 			}
 		}
 
-		var toPos = targetpos.add(directionVec);
-		camera.pos = toPos;
 		if (oob) {
 			camera.pos = lastCamPos;
-			camera.target = targetpos.add(cameraVerticalTranslation);
+			camera.target = marblePosition.add(cameraVerticalTranslation);
 		}
 
 		if (!oob)

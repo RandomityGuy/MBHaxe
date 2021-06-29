@@ -130,7 +130,7 @@ class Octree {
 	public function raycast(rayOrigin:Vector, rayDirection:Vector) {
 		var intersections:Array<OctreeIntersection> = [];
 		this.root.raycast(rayOrigin, rayDirection, intersections);
-		intersections.sort((a, b) -> cast(a.distance - b.distance));
+		intersections.sort((a, b) -> (a.distance == b.distance) ? 0 : (a.distance > b.distance ? 1 : -1));
 		return intersections;
 	}
 

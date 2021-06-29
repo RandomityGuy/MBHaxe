@@ -87,6 +87,8 @@ class CollisionWorld {
 
 	public function rayCast(rayStart:Vector, rayDirection:Vector) {
 		// 	return [];
+		rayStart.w = 1;
+		rayDirection.w = 1;
 		return this.octree.raycast(rayStart, rayDirection);
 	}
 

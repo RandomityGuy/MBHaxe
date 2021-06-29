@@ -228,8 +228,8 @@ class MarbleWorld extends Scheduler {
 		this.marble.reset();
 
 		var euler = startquat.quat.toEuler();
-		this.marble.camera.CameraYaw = euler.z - Math.PI / 2;
-		this.marble.camera.CameraPitch = -0.45;
+		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
+		this.marble.camera.CameraPitch = 0.45;
 		this.marble.camera.oob = false;
 		this.marble.camera.finish = false;
 		this.marble.mode = Start;

@@ -59,17 +59,20 @@ class CollisionEntity implements IOctreeObject {
 		this.boundingBox = boundingBox;
 	}
 
-	public function isIntersectedByRay(rayOrigin:Vector, rayDirection:Vector, intersectionPoint:Vector):Bool {
+	public function isIntersectedByRay(rayOrigin:Vector, rayDirection:Vector, intersectionPoint:Vector, intersectionNormal:Vector):Bool {
 		var invMatrix = transform.clone();
 		invMatrix.invert();
-		var rStart = rayOrigin.transformed(invMatrix);
-		var rDir = rayDirection.transformed(invMatrix);
+		var rStart = rayOrigin.clone();
+		rStart.transform(invMatrix);
+		var rDir = rayDirection.transformed3x3(invMatrix);
 		var intersections = octree.raycast(rStart, rDir);
 		for (i in intersections) {
 			i.point.transform(transform);
+			i.normal.transform3x3(transform);
 		}
 		if (intersections.length > 0) {
 			intersectionPoint.load(intersections[0].point);
+			intersectionNormal.load(intersections[0].normal);
 		}
 		return intersections.length > 0;
 	}
@@ -141,7 +144,7 @@ class CollisionEntity implements IOctreeObject {
 								cinfo.normal = normal; // surface.normals[surface.indices[i]];
 								cinfo.point = closest;
 								// cinfo.collider = this;
-								cinfo.velocity = this.velocity;
+								cinfo.velocity = this.velocity.clone();
 								cinfo.contactDistance = radius - closest.distance(position);
 								cinfo.otherObject = this.go;
 								// cinfo.penetration = radius - (position.sub(closest).dot(normal));
