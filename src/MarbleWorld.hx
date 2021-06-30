@@ -1,5 +1,7 @@
 package src;
 
+import hxd.snd.Channel;
+import hxd.res.Sound;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.Settings;
@@ -107,6 +109,8 @@ class MarbleWorld extends Scheduler {
 	public var gemCount:Int = 0;
 
 	public var cursorLock:Bool = true;
+
+	var timeTravelSound:Channel;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -643,6 +647,7 @@ class MarbleWorld extends Scheduler {
 		this.instanceManager.update(dt);
 		this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
 		this.playGui.update(timeState);
+		AudioManager.update(this.scene);
 
 		this.updateTexts();
 	}
@@ -659,7 +664,15 @@ class MarbleWorld extends Scheduler {
 				this.timeState.gameplayClock -= this.bonusTime;
 				this.bonusTime = 0;
 			}
+			if (timeTravelSound == null) {
+				var ttsnd = ResourceLoader.getAudio("data/sound/timetravelactive.wav");
+				timeTravelSound = AudioManager.playSound(ttsnd, null, true);
+			}
 		} else {
+			if (timeTravelSound != null) {
+				timeTravelSound.stop();
+				timeTravelSound = null;
+			}
 			if (this.timeState.currentAttemptTime >= 3.5)
 				this.timeState.gameplayClock += dt;
 			else if (this.timeState.currentAttemptTime + dt >= 3.5) {
@@ -982,6 +995,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui.dispose();
 		scene.removeChildren();
 		this._disposed = true;
+		AudioManager.stopAllSounds();
 	}
 }
 

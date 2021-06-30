@@ -1,5 +1,6 @@
 package shapes;
 
+import hxd.snd.effect.Spatialization;
 import src.TimeState;
 import collision.CollisionInfo;
 import src.Util;
@@ -39,7 +40,9 @@ class Trapdoor extends DtsObject {
 			direction = -1;
 		if (direction != 0 && direction != this.lastDirection) {
 			// If the direction has changed, play the sound
-			// AudioManager.playSound(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
+			var ch = AudioManager.playSound(ResourceLoader.getAudio("data/sound/trapdooropen.wav"), this.getAbsPos().getPosition());
+			var spat = ch.getEffect(Spatialization);
+			spat.referenceDistance = 5;
 		}
 
 		this.lastCompletion = currentCompletion;

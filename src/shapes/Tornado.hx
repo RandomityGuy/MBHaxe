@@ -1,9 +1,15 @@
 package shapes;
 
+import hxd.snd.effect.Spatialization;
+import hxd.snd.Channel;
 import h3d.Vector;
 import src.ForceObject;
+import src.ResourceLoader;
+import src.AudioManager;
 
 class Tornado extends ForceObject {
+	var soundChannel:Channel;
+
 	public function new() {
 		super();
 		this.dtsPath = "data/shapes/hazards/tornado.dts";
@@ -40,8 +46,17 @@ class Tornado extends ForceObject {
 
 	public override function init(level:src.MarbleWorld) {
 		super.init(level);
+		this.soundChannel = AudioManager.playSound(ResourceLoader.getAudio("data/sound/tornado.wav"), this.getAbsPos().getPosition(), true);
 		for (material in this.materials) {
 			// material.mainPass.setPassName("overlay");
 		}
+	}
+
+	public override function update(timeState:src.TimeState) {
+		super.update(timeState);
+
+		var seffect = this.soundChannel.getEffect(Spatialization);
+		seffect.position = this.getAbsPos().getPosition();
+		seffect.referenceDistance = 5;
 	}
 }

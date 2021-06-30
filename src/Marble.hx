@@ -1,5 +1,7 @@
 package src;
 
+import shapes.TriangleBumper;
+import shapes.RoundBumper;
 import src.Util;
 import src.AudioManager;
 import src.Settings;
@@ -260,6 +262,12 @@ class Marble extends GameObject {
 
 			for (contact in contacts) {
 				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
+					if (contact.otherObject is RoundBumper) {
+						AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumperding1.wav"));
+					}
+					if (contact.otherObject is TriangleBumper) {
+						AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumper1.wav"));
+					}
 					forceObjectCount++;
 					contactNormal = contactNormal.add(contact.normal);
 					contactForce += contact.force;

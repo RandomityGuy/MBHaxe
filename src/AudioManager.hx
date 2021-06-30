@@ -1,5 +1,6 @@
 package src;
 
+import h3d.scene.Scene;
 import hxd.snd.effect.Spatialization;
 import h3d.Vector;
 import hxd.res.Sound;
@@ -19,12 +20,22 @@ class AudioManager {
 		musicChannel.volume = Settings.optionsSettings.musicVolume;
 	}
 
-	public static function playSound(sound:Sound, ?position:Vector) {
-		AudioManager.manager.play(sound, soundChannel);
+	public static function update(scene3d:Scene) {
+		manager.listener.syncCamera(scene3d.camera);
+	}
+
+	public static function playSound(sound:Sound, ?position:Vector, ?loop:Bool = false) {
+		var ch = AudioManager.manager.play(sound, soundChannel);
+		ch.loop = loop;
 		if (position != null) {
 			var audioSrc = new Spatialization();
 			audioSrc.position = position;
-			soundChannel.addEffect(audioSrc);
+			ch.addEffect(audioSrc);
 		}
+		return ch;
+	}
+
+	public static function stopAllSounds() {
+		manager.stopByName("sound");
 	}
 }

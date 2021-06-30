@@ -45,7 +45,7 @@ class EndPad extends DtsObject {
 	function spawnFirework(time:TimeState) {
 		var firework = new Firework(this.getAbsPos().getPosition(), time.timeSinceLoad, this.level);
 		this.fireworks.push(firework);
-		// AudioManager.playSound(ResourceLoader.getAudio("data/sound/firewrks.wav"));
+		AudioManager.playSound(ResourceLoader.getAudio("data/sound/firewrks.wav"), this.getAbsPos().getPosition());
 		// AudioManager.play(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
 	}
 

@@ -1,5 +1,9 @@
 package src;
 
+import hxd.snd.effect.Spatialization;
+import src.ResourceLoader;
+import src.AudioManager;
+import hxd.snd.Channel;
 import src.DifBuilder;
 import mis.MisParser;
 import mis.MissionElement;
@@ -52,6 +56,8 @@ class PathedInterior extends InteriorObject {
 	var stopTime:Float;
 
 	var previousState:PIState;
+
+	var soundChannel:Channel;
 
 	public static function createFromSimGroup(simGroup:MissionElementSimGroup, level:MarbleWorld) {
 		var interiorElement:MissionElementPathedInterior = cast simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior)[0];
@@ -123,6 +129,11 @@ class PathedInterior extends InteriorObject {
 			var trigger = new MustChangeTrigger(te, cast this);
 			this.triggers.push(trigger);
 		}
+
+		if (this.element.datablock.toLowerCase() == "pathedmovingblock") {
+			this.soundChannel = AudioManager.playSound(ResourceLoader.getAudio("data/sound/movingblockloop.wav"), new Vector(), true);
+		}
+
 		this.reset();
 	}
 
@@ -224,6 +235,11 @@ class PathedInterior extends InteriorObject {
 		this.setTransform(tform);
 		this.collider.setTransform(tform);
 		this.collider.velocity = this.velocity;
+
+		if (this.soundChannel != null) {
+			var spat = this.soundChannel.getEffect(Spatialization);
+			spat.position = this.currentPosition;
+		}
 	}
 
 	function getTransformAtTime(time:Float) {
