@@ -1,5 +1,6 @@
 package shapes;
 
+import src.AudioManager;
 import src.TimeState;
 import collision.CollisionHull;
 import collision.CollisionInfo;
@@ -120,7 +121,7 @@ class LandMine extends DtsObject {
 			this.setCollisionEnabled(false);
 
 			// if (!this.level.rewinding)
-			// 	AudioManager.play(this.sounds[0]);
+			AudioManager.playSound(ResourceLoader.getAudio("data/sound/explode1.wav"));
 			this.level.particleManager.createEmitter(landMineParticle, landMineParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());

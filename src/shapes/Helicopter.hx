@@ -1,5 +1,6 @@
 package shapes;
 
+import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
@@ -13,6 +14,7 @@ class Helicopter extends PowerUp {
 		this.showSequences = false;
 		this.identifier = "Helicopter";
 		this.pickUpName = "Gyrocopter PowerUp";
+		this.pickupSound = ResourceLoader.getAudio("data/sound/pugyrocoptervoice.wav");
 	}
 
 	public function pickUp():Bool {

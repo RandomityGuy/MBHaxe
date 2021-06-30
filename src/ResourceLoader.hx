@@ -1,6 +1,7 @@
 package src;
 
 import hxd.res.Image;
+import hxd.res.Sound;
 import h3d.mat.Texture;
 import h3d.scene.Object;
 import sys.FileSystem;
@@ -19,6 +20,7 @@ class ResourceLoader {
 	static var dtsResources:Map<String, DtsFile> = new Map();
 	static var textureCache:Map<String, Texture> = new Map();
 	static var imageCache:Map<String, Image> = new Map();
+	static var audioCache:Map<String, Sound> = new Map();
 
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
@@ -73,6 +75,17 @@ class ResourceLoader {
 			var tex = loader.load(path).toImage();
 			imageCache.set(path, tex);
 			return tex;
+		}
+		return null;
+	}
+
+	public static function getAudio(path:String) {
+		if (audioCache.exists(path))
+			return audioCache.get(path);
+		if (fileSystem.exists(path)) {
+			var snd = loader.load(path).toSound();
+			audioCache.set(path, snd);
+			return snd;
 		}
 		return null;
 	}

@@ -1,5 +1,6 @@
 package shapes;
 
+import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import h3d.Vector;
@@ -14,6 +15,7 @@ class AntiGravity extends PowerUp {
 		this.identifier = "AntiGravity";
 		this.pickUpName = "Gravity Modifier";
 		this.autoUse = true;
+		this.pickupSound = ResourceLoader.getAudio("data/sound/gravitychange.wav");
 	}
 
 	public function pickUp():Bool {

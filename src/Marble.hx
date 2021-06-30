@@ -1,5 +1,7 @@
 package src;
 
+import src.Util;
+import src.AudioManager;
 import src.Settings;
 import h3d.scene.Mesh;
 import h3d.col.Bounds;
@@ -121,6 +123,9 @@ class Marble extends GameObject {
 	var _minBounceVel = 3;
 	var _minTrailVel = 10;
 	var _bounceKineticFriction = 0.2;
+	var minVelocityBounceSoft = 2.5;
+	var minVelocityBounceHard = 12.0;
+	var bounceMinGain = 0.2;
 
 	public var _bounceRestitution = 0.5;
 
@@ -349,6 +354,11 @@ class Marble extends GameObject {
 					var velLen = this.velocity.length();
 					var surfaceVel = this.contacts[i].normal.multiply(surfaceDot);
 
+					if (!_bounceYet) {
+						_bounceYet = true;
+						playBoundSound(-surfaceDot);
+					}
+
 					if (noBounce) {
 						this.velocity = this.velocity.sub(surfaceVel);
 					} else if (contacts[i].collider != null) {
@@ -506,6 +516,7 @@ class Marble extends GameObject {
 			}
 			if (sv < this._jumpImpulse) {
 				this.velocity = this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv)));
+				AudioManager.playSound(ResourceLoader.getAudio("data/sound/jump.wav"));
 			}
 		}
 		for (j in 0...contacts.length) {
@@ -607,6 +618,29 @@ class Marble extends GameObject {
 		this._bounceNormal = normal;
 	}
 
+	function playBoundSound(contactVel:Float) {
+		if (minVelocityBounceSoft <= contactVel) {
+			var hardBounceSpeed = minVelocityBounceHard;
+			var bounceSoundNum = Math.floor(Math.random() * 4);
+			var sndList = [
+				"data/sound/bouncehard1.wav",
+				"data/sound/bouncehard2.wav",
+				"data/sound/bouncehard3.wav",
+				"data/sound/bouncehard4.wav"
+			];
+			var snd = ResourceLoader.getAudio(sndList[bounceSoundNum]);
+			var gain = bounceMinGain;
+			gain = Util.clamp(Math.pow(contactVel / 12, 1.5), 0, 1);
+
+			// if (hardBounceSpeed <= contactVel)
+			// 	gain = 1.0;
+			// else
+			// 	gain = (contactVel - minVelocityBounceSoft) / (hardBounceSpeed - minVelocityBounceSoft) * (1.0 - gain) + gain;
+
+			snd.play(false, Settings.optionsSettings.soundVolume * gain);
+		}
+	}
+
 	function getIntersectionTime(dt:Float, velocity:Vector) {
 		var searchbox = new Bounds();
 		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
@@ -696,6 +730,8 @@ class Marble extends GameObject {
 				// interior.update(piTime, timeStep);
 			}
 		}
+
+		_bounceYet = false;
 
 		do {
 			if (timeRemaining <= 0)

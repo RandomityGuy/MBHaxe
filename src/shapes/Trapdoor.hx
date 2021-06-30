@@ -6,6 +6,8 @@ import src.Util;
 import src.DtsObject;
 import h3d.Vector;
 import src.ForceObject;
+import src.ResourceLoader;
+import src.AudioManager;
 
 class Trapdoor extends DtsObject {
 	var lastContactTime = -1e8;
@@ -37,7 +39,7 @@ class Trapdoor extends DtsObject {
 			direction = -1;
 		if (direction != 0 && direction != this.lastDirection) {
 			// If the direction has changed, play the sound
-			// AudioManager.play(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
+			// AudioManager.playSound(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
 		}
 
 		this.lastCompletion = currentCompletion;

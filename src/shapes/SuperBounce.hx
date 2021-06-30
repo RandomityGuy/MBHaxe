@@ -1,5 +1,6 @@
 package shapes;
 
+import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
@@ -12,6 +13,7 @@ class SuperBounce extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "SuperBounce";
 		this.pickUpName = "Super Bounce PowerUp";
+		this.pickupSound = ResourceLoader.getAudio("data/sound/pusuperbouncevoice.wav");
 	}
 
 	public function pickUp():Bool {

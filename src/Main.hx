@@ -1,5 +1,6 @@
 package;
 
+import src.AudioManager;
 import src.Settings;
 import src.MarbleGame;
 import gui.MainMenuGui;
@@ -16,6 +17,7 @@ class Main extends hxd.App {
 		super.init();
 
 		Settings.init();
+		AudioManager.init();
 		marbleGame = new MarbleGame(s2d, s3d);
 		MarbleGame.canvas.setContent(new MainMenuGui());
 		// world = new MarbleWorld(s3d, s2d, mission);

@@ -1,5 +1,7 @@
 package src;
 
+import src.ResourceLoader;
+import src.AudioManager;
 import src.Settings;
 import gui.LoadingGui;
 import gui.PlayMissionGui;
@@ -255,7 +257,24 @@ class MarbleWorld extends Scheduler {
 		this.newOrientationQuat = new Quat();
 		this.deselectPowerUp();
 
+		AudioManager.playSound(ResourceLoader.getAudio('data/sound/spawn.wav'));
+
 		this.clearSchedule();
+		this.schedule(0.5, () -> {
+			// setCenterText('ready');
+			AudioManager.playSound(ResourceLoader.getAudio('data/sound/ready.wav'));
+			return 0;
+		});
+		this.schedule(2, () -> {
+			// setCenterText('set');
+			AudioManager.playSound(ResourceLoader.getAudio('data/sound/set.wav'));
+			return 0;
+		});
+		this.schedule(3.5, () -> {
+			// setCenterText('go');
+			AudioManager.playSound(ResourceLoader.getAudio('data/sound/go.wav'));
+			return 0;
+		});
 
 		return 0;
 	}
@@ -722,7 +741,7 @@ class MarbleWorld extends Scheduler {
 		if (this.gemCount == this.totalGems) {
 			string = "You have all the gems, head for the finish!";
 			// if (!this.rewinding)
-			//	AudioManager.play('gotallgems.wav');
+			AudioManager.playSound(ResourceLoader.getAudio('data/sound/gotallgems.wav'));
 
 			// Some levels with this package end immediately upon collection of all gems
 			// if (this.mission.misFile.activatedPackages.includes('endWithTheGems')) {
@@ -741,7 +760,7 @@ class MarbleWorld extends Scheduler {
 			}
 
 			// if (!this.rewinding)
-			// 	AudioManager.play('gotgem.wav');
+			AudioManager.playSound(ResourceLoader.getAudio('data/sound/gotgem.wav'));
 		}
 
 		displayAlert(string);
@@ -817,7 +836,13 @@ class MarbleWorld extends Scheduler {
 		if (this.finishTime == null) {
 			if (spherebounds.collide(this.endPad.finishBounds)) {
 				if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider) != null) {
-					touchFinish();
+					if (!endPad.inFinish) {
+						touchFinish();
+						endPad.inFinish = true;
+					}
+				} else {
+					if (endPad.inFinish)
+						endPad.inFinish = false;
 				}
 			}
 		}
@@ -830,7 +855,7 @@ class MarbleWorld extends Scheduler {
 			return;
 
 		if (this.gemCount < this.totalGems) {
-			// AudioManager.play('missinggems.wav');
+			AudioManager.playSound(ResourceLoader.getAudio('data/sound/missinggems.wav'));
 			displayAlert("You can't finish without all the gems!!");
 		} else {
 			this.endPad.spawnFirework(this.timeState);
@@ -935,7 +960,7 @@ class MarbleWorld extends Scheduler {
 		sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
-		// AudioManager.play('whoosh.wav');
+		AudioManager.playSound(ResourceLoader.getAudio('data/sound/whoosh.wav'));
 		// if (this.replay.mode != = 'playback')
 		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
 	}

@@ -1,5 +1,6 @@
 package shapes;
 
+import src.AudioManager;
 import h3d.Quat;
 import h3d.mat.Material;
 import h3d.scene.Mesh;
@@ -24,6 +25,7 @@ class EndPad extends DtsObject {
 
 	var finishCollider:ConvexHull;
 	var finishBounds:Bounds;
+	var inFinish:Bool = false;
 
 	public function new() {
 		super();
@@ -43,6 +45,7 @@ class EndPad extends DtsObject {
 	function spawnFirework(time:TimeState) {
 		var firework = new Firework(this.getAbsPos().getPosition(), time.timeSinceLoad, this.level);
 		this.fireworks.push(firework);
+		// AudioManager.playSound(ResourceLoader.getAudio("data/sound/firewrks.wav"));
 		// AudioManager.play(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
 	}
 

@@ -1,5 +1,6 @@
 package shapes;
 
+import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import mis.MisParser;
@@ -22,6 +23,7 @@ class TimeTravel extends PowerUp {
 		this.cooldownDuration = 1e8;
 		this.useInstancing = true;
 		this.autoUse = true;
+		this.pickupSound = ResourceLoader.getAudio("data/sound/putimetravelvoice.wav");
 	}
 
 	public function pickUp():Bool {

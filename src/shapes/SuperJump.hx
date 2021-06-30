@@ -1,10 +1,12 @@
 package shapes;
 
+import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.ResourceLoader;
 import src.ParticleSystem.ParticleData;
 import h3d.Vector;
+import src.AudioManager;
 import src.DtsObject;
 
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
@@ -43,6 +45,7 @@ class SuperJump extends PowerUp {
 		sjEmitterParticleData = new ParticleData();
 		sjEmitterParticleData.identifier = "superJumpParticle";
 		sjEmitterParticleData.texture = ResourceLoader.getTexture("data/particles/twirl.png");
+		this.pickupSound = ResourceLoader.getAudio("data/sound/pusuperjumpvoice.wav");
 	}
 
 	public function pickUp():Bool {
@@ -55,7 +58,7 @@ class SuperJump extends PowerUp {
 		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		//	AudioManager.play(this.sounds[1]);
+		AudioManager.playSound(ResourceLoader.getAudio("data/sound/dosuperjump.wav"));
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp();
 	}

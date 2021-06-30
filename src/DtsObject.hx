@@ -349,16 +349,17 @@ class DtsObject extends GameObject {
 			}
 			material.shadows = false;
 			if (material.texture == null) {
-				var dtsshader = new DtsTexture();
-				dtsshader.currentOpacity = 1;
+				// var dtsshader = new DtsTexture();
+				// dtsshader.currentOpacity = 1;
 				// Make a 1x1 white texture
 				var bitmap = new hxd.BitmapData(1, 1);
 				bitmap.setPixel(0, 0, 0xFFFFFF);
 				var texture = new Texture(1, 1);
 				texture.uploadBitmap(bitmap);
-				dtsshader.texture = texture;
-				material.mainPass.addShader(dtsshader);
-				material.receiveShadows = true;
+				material.texture = texture;
+				// dtsshader.texture = texture;
+				// material.mainPass.addShader(dtsshader);
+				// material.shadows = false;
 			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;

@@ -1,5 +1,7 @@
 package shapes;
 
+import src.AudioManager;
+import hxd.res.Sound;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.Util;
@@ -31,6 +33,7 @@ abstract class PowerUp extends DtsObject {
 	public var powerupParams:PowerupParams = new PowerupParams();
 	public var pickUpName:String;
 	public var element:MissionElementItem;
+	public var pickupSound:Sound;
 
 	public function new(element:MissionElementItem) {
 		super();
@@ -54,6 +57,10 @@ abstract class PowerUp extends DtsObject {
 			this.level.displayAlert('You picked up a ${this.pickUpName}!');
 			if (this.element.showhelponpickup == "1" && !this.autoUse)
 				this.level.displayHelp('Press <func:bind mousefire> to use the ${this.pickUpName}!');
+
+			if (pickupSound != null) {
+				AudioManager.playSound(pickupSound);
+			}
 		}
 	}
 

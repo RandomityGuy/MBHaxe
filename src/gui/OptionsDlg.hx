@@ -257,36 +257,6 @@ class OptionsDlg extends GuiImage {
 			shadowsButton.pressed = true;
 		}
 
-		applyFunc = () -> {
-			if (gfx640480.pressed) {
-				Settings.optionsSettings.screenWidth = 640;
-				Settings.optionsSettings.screenHeight = 480;
-			}
-			if (gfx800600.pressed) {
-				Settings.optionsSettings.screenWidth = 800;
-				Settings.optionsSettings.screenHeight = 600;
-			}
-			if (gfx1024768.pressed) {
-				Settings.optionsSettings.screenWidth = 1024;
-				Settings.optionsSettings.screenHeight = 768;
-			}
-			if (gfxFull.pressed)
-				Settings.optionsSettings.isFullScreen = true;
-			else
-				Settings.optionsSettings.isFullScreen = false;
-			if (gfx16.pressed)
-				Settings.optionsSettings.colorDepth = 0;
-			else
-				Settings.optionsSettings.colorDepth = 1;
-			if (gfxopengl.pressed)
-				Settings.optionsSettings.videoDriver = 0;
-			else
-				Settings.optionsSettings.videoDriver = 1;
-			Settings.optionsSettings.shadows = shadowsButton.pressed;
-
-			Settings.applySettings();
-		}
-
 		// AUDIO PANEL
 
 		var audioPane = new GuiControl();
@@ -336,6 +306,39 @@ Version: OpenAL 1.0
 Renderer: Software
 Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		audTxtWndo.addChild(audInfo);
+
+		applyFunc = () -> {
+			if (gfx640480.pressed) {
+				Settings.optionsSettings.screenWidth = 640;
+				Settings.optionsSettings.screenHeight = 480;
+			}
+			if (gfx800600.pressed) {
+				Settings.optionsSettings.screenWidth = 800;
+				Settings.optionsSettings.screenHeight = 600;
+			}
+			if (gfx1024768.pressed) {
+				Settings.optionsSettings.screenWidth = 1024;
+				Settings.optionsSettings.screenHeight = 768;
+			}
+			if (gfxFull.pressed)
+				Settings.optionsSettings.isFullScreen = true;
+			else
+				Settings.optionsSettings.isFullScreen = false;
+			if (gfx16.pressed)
+				Settings.optionsSettings.colorDepth = 0;
+			else
+				Settings.optionsSettings.colorDepth = 1;
+			if (gfxopengl.pressed)
+				Settings.optionsSettings.videoDriver = 0;
+			else
+				Settings.optionsSettings.videoDriver = 1;
+			Settings.optionsSettings.shadows = shadowsButton.pressed;
+
+			Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
+			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
+
+			Settings.applySettings();
+		}
 
 		// CONTROLS PANEL
 		var controlsPane = new GuiControl();
