@@ -125,6 +125,7 @@ class Settings {
 		load();
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		// @:privateAccess Window.getInstance().window.center();
 		Window.getInstance().addResizeEvent(() -> {
 			var wnd = Window.getInstance();
 			Settings.optionsSettings.screenWidth = wnd.width;

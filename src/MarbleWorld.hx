@@ -5,8 +5,11 @@ import gui.LoadingGui;
 import gui.PlayMissionGui;
 import src.MarbleGame;
 import gui.EndGameGui;
-#if hl
+#if hlsdl
 import sdl.Cursor;
+#end
+#if hldx
+import dx.Cursor;
 #end
 import src.ForceObject;
 import shaders.DirLight;
@@ -942,11 +945,10 @@ class MarbleWorld extends Scheduler {
 		if (enabled) {
 			this.marble.camera.lockCursor();
 			#if hl
-			Cursor.show(false);
 			#end
 		} else {
 			#if hl
-			Cursor.show(true);
+			this.marble.camera.unlockCursor();
 			#end
 		}
 	}

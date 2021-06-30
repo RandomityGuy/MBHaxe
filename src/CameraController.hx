@@ -8,9 +8,13 @@ import src.Settings;
 import hxd.Key;
 import src.Util;
 import h3d.Quat;
-#if hl
+#if hlsdl
 import sdl.Cursor;
 import sdl.Sdl;
+#end
+#if hldx
+import dx.Cursor;
+import dx.Window;
 #end
 import hxd.Window;
 import hxd.Event;
@@ -57,9 +61,6 @@ class CameraController extends Object {
 	public var phi:Float;
 	public var theta:Float;
 
-	var screenHeight:Int;
-	var screenWidth:Int;
-
 	var lastCamPos:Vector;
 
 	public var oob:Bool = false;
@@ -72,54 +73,61 @@ class CameraController extends Object {
 
 	public function init(level:MarbleWorld) {
 		this.level = level;
-		Window.getInstance().addEventTarget(onEvent);
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
-		#if hl
-		this.screenHeight = Sdl.getScreenHeight();
-		this.screenWidth = Sdl.getScreenWidth();
-		#end
 		level.scene.camera.fovY = 60;
-		#if hl
+		#if hlsdl
+		lockCursor();
+		#end
+		#if hldx
 		Cursor.show(false);
 		#end
 	}
 
-	function onEvent(e:Event) {
-		switch (e.kind) {
-			case EMove:
+	function onEvent(e:sdl.Event) {
+		switch (e.type) {
+			case MouseMove:
 				if (this.level.cursorLock) {
-					orbit(e.relX, e.relY);
-					lockCursor();
+					orbit(e.mouseXRel, e.mouseYRel);
 				}
 			default:
 		}
+		return true;
 	}
 
 	public function lockCursor() {
-		#if hl
-		Sdl.warpMouseGlobal(cast this.screenWidth / 2, cast this.screenHeight / 2);
-		#end
+		Window.getInstance().lockPointer((x, y) -> orbit(x, y));
+		Cursor.show(false);
+	}
+
+	public function unlockCursor() {
+		Window.getInstance().unlockPointer();
+		Cursor.show(true);
 	}
 
 	function orbit(mouseX:Float, mouseY:Float) {
-		var window = Window.getInstance();
-		var deltaposX = (window.width / 2) - mouseX;
-		var deltaposY = (window.height / 2) - mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1);
+		var deltaposX = mouseX;
+		var deltaposY = mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1);
 		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
 			deltaposY = 0;
 		}
-		var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
-		var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
-		CameraYaw -= rotX;
-		CameraPitch -= rotY;
-		// CameraYaw = Math.PI / 2;
-		// CameraPitch = Math.PI / 4;
 
-		if (CameraPitch > Math.PI / 2)
-			CameraPitch = Math.PI / 2 - 0.001;
-		if (CameraPitch < -Math.PI / 2)
-			CameraPitch = -Math.PI / 2 + 0.001;
+		var factor = Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
+
+		CameraPitch += deltaposY * factor;
+		CameraYaw += deltaposX * factor;
+
+		// var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
+		// var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
+		// CameraYaw -= rotX;
+		// CameraPitch -= rotY;
+		// // CameraYaw = Math.PI / 2;
+		// // CameraPitch = Math.PI / 4;
+
+		// if (CameraPitch > Math.PI / 2)
+		// 	CameraPitch = Math.PI / 2 - 0.001;
+		// if (CameraPitch < -Math.PI / 2)
+		// 	CameraPitch = -Math.PI / 2 + 0.001;
 		// if (CameraPitch > Math.PI)
 		// 	CameraPitch = 3.141;
 		// if (CameraPitch < 0)
