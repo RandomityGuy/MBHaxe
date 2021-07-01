@@ -146,6 +146,11 @@ class EndGameGui extends GuiControl {
 
 		var idx = scoreTimes.indexOf(timeState.gameplayClock);
 
+		if (Settings.progression[mission.difficultyIndex] == mission.index) {
+			Settings.progression[mission.difficultyIndex]++;
+		}
+		Settings.save();
+
 		if (idx <= 2) {
 			var end = new EnterNameDlg(idx, (name) -> {
 				if (scoreSubmitted)

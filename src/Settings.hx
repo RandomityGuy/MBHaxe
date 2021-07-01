@@ -1,5 +1,6 @@
 package src;
 
+import src.AudioManager;
 import hxd.Key;
 import src.MarbleGame;
 import hxd.Window;
@@ -72,9 +73,12 @@ class Settings {
 		invertYAxis: false
 	};
 
+	public static var progression = [0, 0, 0];
+
 	public static function applySettings() {
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		AudioManager.updateVolumes();
 
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		save();
@@ -103,7 +107,8 @@ class Settings {
 		var outputData = {
 			highScores: highScores,
 			options: optionsSettings,
-			controls: controlsSettings
+			controls: controlsSettings,
+			progression: progression
 		};
 		var json = Json.stringify(outputData);
 		File.saveContent("settings.json", json);
@@ -118,6 +123,7 @@ class Settings {
 			}
 			optionsSettings = json.options;
 			controlsSettings = json.controls;
+			progression = json.progression;
 		}
 	}
 

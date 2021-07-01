@@ -18,6 +18,7 @@ class Mission {
 	public var path:String;
 	public var missionInfo:MissionElementScriptObject;
 	public var index:Int;
+	public var difficultyIndex:Int;
 
 	public function new() {}
 

@@ -1,5 +1,11 @@
 package gui;
 
+import h3d.Matrix;
+import h2d.filter.ColorMatrix;
+import h2d.Tile;
+import h3d.mat.Texture;
+import h2d.Bitmap;
+import hxd.BitmapData;
 import src.AudioManager;
 import src.Settings.Score;
 import src.Settings.Settings;
@@ -91,6 +97,8 @@ class PlayMissionGui extends GuiImage {
 		pmPreview.position = new Vector(312, 42);
 		pmPreview.extent = new Vector(258, 193);
 		pmBox.addChild(pmPreview);
+		var filt = new ColorMatrix(Matrix.I());
+		pmPreview.bmp.filter = filt;
 
 		var levelWnd = new GuiImage(ResourceLoader.getImage("data/ui/play/level_window.png").toTile());
 		levelWnd.position = new Vector();
@@ -101,7 +109,7 @@ class PlayMissionGui extends GuiImage {
 		var domcasual24 = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24.loader = ResourceLoader.loader;
 
-		var domcasual32fontdata = ResourceLoader.loader.load("data/font/DomCasual24px.fnt");
+		var domcasual32fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
 		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32.loader = ResourceLoader.loader;
 
@@ -112,8 +120,8 @@ class PlayMissionGui extends GuiImage {
 		var arialBold14fontdata = ResourceLoader.loader.load("data/font/ArialBold14px.fnt");
 		var arialBold14 = new BitmapFont(arialBold14fontdata.entry);
 		@:privateAccess arialBold14.loader = ResourceLoader.loader;
-
 		// TODO texts
+
 		var levelBkgnd = new GuiText(domcasual24);
 		levelBkgnd.position = new Vector(5, 156);
 		levelBkgnd.extent = new Vector(254, 24);
@@ -144,6 +152,7 @@ class PlayMissionGui extends GuiImage {
 		pmPlay.pressedAction = (sender) -> {
 			// Wacky hacks
 			currentList[currentSelection].index = currentSelection;
+			currentList[currentSelection].difficultyIndex = ["beginner", "intermediate", "advanced"].indexOf(currentCategory);
 			cast(this.parent, Canvas).marbleGame.playMission(currentList[currentSelection]);
 		}
 		pmBox.addChild(pmPlay);
@@ -175,7 +184,7 @@ class PlayMissionGui extends GuiImage {
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "DomCasual24":
-					return domcasual32.toFont();
+					return domcasual24.toFont();
 				case "Arial14":
 					return arial14.toFont();
 				case "ArialBold14":
@@ -303,6 +312,17 @@ class PlayMissionGui extends GuiImage {
 			} else
 				pmNext.disabled = false;
 
+			if (Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)] < currentSelection) {
+				noQualText.text.visible = true;
+				filt.matrix.identity();
+				filt.matrix.colorGain(0, 96 / 255);
+				pmPlay.disabled = true;
+			} else {
+				noQualText.text.visible = false;
+				filt.matrix.identity();
+				pmPlay.disabled = false;
+			}
+
 			var currentMission = currentList[currentSelection];
 
 			var scoreData:Array<Score> = Settings.getScores(currentMission.path);
@@ -341,8 +361,6 @@ class PlayMissionGui extends GuiImage {
 
 			levelBkgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
 			levelFgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
-
-			noQualText.text.visible = false;
 		}
 	}
 

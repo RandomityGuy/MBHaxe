@@ -22,6 +22,11 @@ class AudioManager {
 		musicGroup.volume = Settings.optionsSettings.musicVolume;
 	}
 
+	public static function updateVolumes() {
+		soundGroup.volume = Settings.optionsSettings.soundVolume;
+		musicGroup.volume = Settings.optionsSettings.musicVolume;
+	}
+
 	public static function update(scene3d:Scene) {
 		manager.listener.syncCamera(scene3d.camera);
 	}
