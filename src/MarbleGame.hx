@@ -1,5 +1,7 @@
 package src;
 
+import src.ResourceLoader;
+import src.AudioManager;
 import gui.PlayMissionGui;
 import gui.ExitGameDlg;
 import hxd.Key;
@@ -75,6 +77,12 @@ class MarbleGame {
 	}
 
 	public function playMission(mission:Mission) {
+		var musicFileName = [
+			'data/sound/groovepolice.ogg',
+			'data/sound/classic vibe.ogg',
+			'data/sound/beach party.ogg'
+		][(mission.index + 1) % 3];
+		AudioManager.playMusic(ResourceLoader.getAudio(musicFileName));
 		canvas.clearContent();
 		mission.load();
 		world = new MarbleWorld(scene, scene2d, mission);

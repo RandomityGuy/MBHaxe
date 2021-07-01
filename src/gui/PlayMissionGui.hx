@@ -1,5 +1,6 @@
 package gui;
 
+import src.AudioManager;
 import src.Settings.Score;
 import src.Settings.Settings;
 import haxe.io.Path;
@@ -142,6 +143,7 @@ class PlayMissionGui extends GuiImage {
 		pmPlay.extent = new Vector(121, 62);
 		pmPlay.pressedAction = (sender) -> {
 			// Wacky hacks
+			currentList[currentSelection].index = currentSelection;
 			cast(this.parent, Canvas).marbleGame.playMission(currentList[currentSelection]);
 		}
 		pmBox.addChild(pmPlay);
@@ -229,6 +231,7 @@ class PlayMissionGui extends GuiImage {
 			localContainer.removeChild(tabAdvanced);
 			localContainer.removeChild(tabCustom);
 			localContainer.removeChild(pmBox);
+			AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonpress.wav"));
 			if (category == "beginner") {
 				localContainer.addChild(tabIntermediate);
 				localContainer.addChild(tabAdvanced);

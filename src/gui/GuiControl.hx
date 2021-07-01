@@ -40,6 +40,8 @@ class GuiControl {
 
 	var parent:GuiControl;
 
+	var _entered:Bool = false;
+
 	public function new() {}
 
 	public function render(scene2d:Scene) {
@@ -74,6 +76,16 @@ class GuiControl {
 			if (Key.isDown(Key.MOUSE_RIGHT)) {
 				mouseState.button = Key.MOUSE_RIGHT;
 				this.onMouseDown(mouseState);
+			}
+
+			if (!_entered) {
+				_entered = true;
+				this.onMouseEnter(mouseState);
+			}
+		} else {
+			if (_entered) {
+				_entered = false;
+				this.onMouseLeave(mouseState);
 			}
 		}
 		for (c in children) {
@@ -174,6 +186,10 @@ class GuiControl {
 	public function onMousePress(mouseState:MouseState) {}
 
 	public function onMouseRelease(mouseState:MouseState) {}
+
+	public function onMouseEnter(mouseState:MouseState) {}
+
+	public function onMouseLeave(mouseState:MouseState) {}
 
 	public function onRemove() {
 		for (c in this.children) {

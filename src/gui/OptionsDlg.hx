@@ -1,5 +1,6 @@
 package gui;
 
+import src.AudioManager;
 import hxd.Key;
 import src.Settings;
 import src.Marble;
@@ -287,6 +288,9 @@ class OptionsDlg extends GuiImage {
 		audSndKnob.position = new Vector(137, 95);
 		audSndKnob.extent = new Vector(254, 37);
 		audSndKnob.sliderValue = Settings.optionsSettings.soundVolume;
+		var testingSnd = AudioManager.playSound(ResourceLoader.getAudio("data/sound/testing.wav"), null, true);
+		testingSnd.pause = true;
+		audSndKnob.slidingSound = testingSnd;
 		audSndKnob.pressedAction = (sender) -> {
 			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
 		}

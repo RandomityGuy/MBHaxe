@@ -17,6 +17,7 @@ class Mission {
 	public var type:String;
 	public var path:String;
 	public var missionInfo:MissionElementScriptObject;
+	public var index:Int;
 
 	public function new() {}
 

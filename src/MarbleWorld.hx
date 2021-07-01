@@ -996,6 +996,7 @@ class MarbleWorld extends Scheduler {
 		scene.removeChildren();
 		this._disposed = true;
 		AudioManager.stopAllSounds();
+		AudioManager.playShell();
 	}
 }
 

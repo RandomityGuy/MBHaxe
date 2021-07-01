@@ -1,5 +1,8 @@
 package src;
 
+import hxd.snd.effect.Pitch;
+import hxd.snd.effect.Spatialization;
+import hxd.snd.Channel;
 import shapes.TriangleBumper;
 import shapes.RoundBumper;
 import src.Util;
@@ -142,6 +145,7 @@ class Marble extends GameObject {
 	public var _mass:Float = 1;
 
 	public var contacts:Array<CollisionInfo> = [];
+	public var bestContact:CollisionInfo;
 	public var contactEntities:Array<CollisionEntity> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
@@ -160,6 +164,13 @@ class Marble extends GameObject {
 	var bounceEmitterData:ParticleData;
 	var trailEmitterData:ParticleData;
 	var trailEmitterNode:ParticleEmitter;
+
+	var rollSound:Channel;
+	var slipSound:Channel;
+
+	var superbounceSound:Channel;
+	var shockabsorberSound:Channel;
+	var helicopterSound:Channel;
 
 	public var mode:Mode = Play;
 
@@ -189,6 +200,12 @@ class Marble extends GameObject {
 		this.trailEmitterData = new ParticleData();
 		this.trailEmitterData.identifier = "MarbleTrailParticle";
 		this.trailEmitterData.texture = ResourceLoader.getTexture("data/particles/smoke.png");
+
+		this.rollSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/rolling_hard.wav"), this.getAbsPos().getPosition(), true);
+		this.slipSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/sliding.wav"), this.getAbsPos().getPosition(), true);
+		this.shockabsorberSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/superbounceactive.wav"), null, true);
+		this.superbounceSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/forcefield.wav"), null, true);
+		this.helicopterSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_gyrocopter.wav"), null, true);
 	}
 
 	public function init(level:MarbleWorld) {
@@ -514,7 +531,7 @@ class Marble extends GameObject {
 				}
 			}
 		}
-		var bestContact = (bestSurface != -1) ? contacts[bestSurface] : new CollisionInfo();
+		bestContact = (bestSurface != -1) ? contacts[bestSurface] : null;
 		var canJump = bestSurface != -1;
 		if (canJump && m.jump) {
 			var velDifference = this.velocity.sub(bestContact.velocity);
@@ -649,6 +666,48 @@ class Marble extends GameObject {
 		}
 	}
 
+	function updateRollSound(contactPct:Float, slipAmount:Float) {
+		var rSpat = rollSound.getEffect(Spatialization);
+		rSpat.position = this.getAbsPos().getPosition();
+		rSpat.referenceDistance = 5;
+
+		var sSpat = slipSound.getEffect(Spatialization);
+		sSpat.position = this.getAbsPos().getPosition();
+		sSpat.referenceDistance = 5;
+
+		var rollVel = bestContact != null ? this.velocity.sub(bestContact.velocity) : this.velocity;
+		var scale = rollVel.length();
+		scale /= this._maxRollVelocity;
+
+		var rollVolume = 2 * scale;
+		if (rollVolume > 1)
+			rollVolume = 1;
+		if (contactPct < 0.05)
+			rollVolume = 0;
+
+		var slipVolume = 0.0;
+		if (slipAmount > 0) {
+			slipVolume = slipAmount / 5;
+			if (slipVolume > 1)
+				slipVolume = 1;
+			rollVolume = (1 - slipVolume) * rollVolume;
+		}
+
+		rollSound.volume = rollVolume;
+		slipSound.volume = slipVolume;
+
+		if (rollSound.getEffect(Pitch) == null) {
+			rollSound.addEffect(new Pitch());
+		}
+
+		var pitch = scale;
+		if (scale > 1.0)
+			pitch = 1.0;
+
+		var rPitch = rollSound.getEffect(Pitch);
+		rPitch.value = pitch;
+	}
+
 	function getIntersectionTime(dt:Float, velocity:Vector) {
 		var searchbox = new Bounds();
 		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
@@ -740,6 +799,8 @@ class Marble extends GameObject {
 		}
 
 		_bounceYet = false;
+
+		var contactTime = 0.0;
 
 		do {
 			if (timeRemaining <= 0)
@@ -842,9 +903,14 @@ class Marble extends GameObject {
 				this.level.callCollisionHandlers(cast this, tempTimeState);
 			}
 
+			if (contacts.length != 0)
+				contactTime += timeStep;
+
 			timeRemaining -= timeStep;
 		} while (true);
 		this.queuedContacts = [];
+
+		this.updateRollSound(contactTime / timeState.dt, this._slipAmount);
 	}
 
 	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
@@ -890,6 +956,17 @@ class Marble extends GameObject {
 
 	public function updatePowerupStates(currentTime:Float, dt:Float) {
 		if (currentTime - this.shockAbsorberEnableTime < 5) {
+			this.shockabsorberSound.pause = false;
+		} else {
+			this.shockabsorberSound.pause = true;
+		}
+		if (currentTime - this.superBounceEnableTime < 5) {
+			this.superbounceSound.pause = false;
+		} else {
+			this.superbounceSound.pause = true;
+		}
+
+		if (currentTime - this.shockAbsorberEnableTime < 5) {
 			this.forcefield.setPosition(0, 0, 0);
 		} else if (currentTime - this.superBounceEnableTime < 5) {
 			this.forcefield.setPosition(0, 0, 0);
@@ -901,8 +978,10 @@ class Marble extends GameObject {
 		if (currentTime - this.helicopterEnableTime < 5) {
 			this.helicopter.setPosition(x, y, z);
 			this.helicopter.setRotationQuat(this.level.getOrientationQuat(currentTime));
+			this.helicopterSound.pause = false;
 		} else {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
+			this.helicopterSound.pause = true;
 		}
 	}
 

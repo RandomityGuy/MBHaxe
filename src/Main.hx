@@ -18,6 +18,7 @@ class Main extends hxd.App {
 
 		Settings.init();
 		AudioManager.init();
+		AudioManager.playShell();
 		marbleGame = new MarbleGame(s2d, s3d);
 		MarbleGame.canvas.setContent(new MainMenuGui());
 		// world = new MarbleWorld(s3d, s2d, mission);

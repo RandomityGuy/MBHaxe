@@ -1,9 +1,11 @@
 package gui;
 
+import src.AudioManager;
 import hxd.Key;
 import gui.GuiControl.MouseState;
 import hxd.Window;
 import h2d.Tile;
+import src.ResourceLoader;
 
 enum ButtonType {
 	Normal;
@@ -22,12 +24,19 @@ class GuiButton extends GuiAnim {
 	public var buttonType:ButtonType = Normal;
 	public var pressed:Bool = false;
 
+	public var buttonSounds:Bool = true;
+
 	public function new(anim:Array<Tile>) {
 		super(anim);
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {
 		var renderRect = getRenderRectangle();
+		if (renderRect.inRect(mouseState.position) && !disabled) {
+			if (buttonSounds && Key.isPressed(Key.MOUSE_LEFT)) {
+				AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonpress.wav"));
+			}
+		}
 		if (buttonType == Normal) {
 			if (renderRect.inRect(mouseState.position) && !disabled) {
 				if (Key.isDown(Key.MOUSE_LEFT)) {
@@ -67,6 +76,14 @@ class GuiButton extends GuiAnim {
 		}
 		if (buttonType == Toggle) {
 			pressed = !pressed;
+		}
+	}
+
+	public override function onMouseEnter(mouseState:MouseState) {
+		super.onMouseEnter(mouseState);
+
+		if (buttonSounds) {
+			AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonover.wav"));
 		}
 	}
 }
