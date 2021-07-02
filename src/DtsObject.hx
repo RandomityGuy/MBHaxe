@@ -409,6 +409,7 @@ class DtsObject extends GameObject {
 		var lines = text.split('\n');
 		var keyframes = [];
 		for (line in lines) {
+			line = StringTools.trim(line);
 			if (line.substr(0, 2) == "//")
 				continue;
 			if (line == "")

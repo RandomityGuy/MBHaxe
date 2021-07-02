@@ -60,7 +60,7 @@ class Sky extends Object {
 			var skyboxIndices = [3, 1, 2, 0, 4, 5];
 
 			for (i in 0...6) {
-				var line = lines[i];
+				var line = StringTools.trim(lines[i]);
 				var filenames = ResourceLoader.getFullNamesOf(dmlDirectory + '/' + line);
 				if (filenames.length == 0) {
 					skyboxImages.push(new BitmapData(128, 128));
