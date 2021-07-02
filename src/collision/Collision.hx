@@ -43,6 +43,18 @@ class Collision {
 			return p;
 	}
 
+	public static function ClosestPointLine(start:Vector, end:Vector, center:Vector) {
+		var d = end.sub(start);
+		var v = center.sub(start);
+		var t = v.dot(d) / d.lengthSq();
+		if (t < 0)
+			t = 0;
+		if (t > 1)
+			t = 1;
+		var p = start.add(d.multiply(t));
+		return p;
+	}
+
 	public static function IntersectTriangleSphere(v0:Vector, v1:Vector, v2:Vector, normal:Vector, center:Vector, radius:Float) {
 		var radiusSq = radius * radius;
 
@@ -52,34 +64,14 @@ class Collision {
 			normal: null
 		};
 
+		var pnorm = v1.sub(v0).cross(v2.sub(v0)).normalized();
+		var d = -v0.dot(normal);
+
 		var p = PlaneF.PointNormal(new Point3F(v0.x, v0.y, v0.z), new Point3F(normal.x, normal.y, normal.z));
 		var pdist = p.distance(new Point3F(center.x, center.y, center.z));
 
 		if (pdist < 0.001) {
 			return res; // Dont collide internal edges
-		}
-
-		// Check edges
-		var r1 = IntersectLineSphere(v0, v1, center, radius);
-		if (r1 != null) {
-			res.result = true;
-			res.point = r1;
-			res.normal = center.sub(r1).normalized();
-			return res;
-		}
-		var r2 = IntersectLineSphere(v1, v2, center, radius);
-		if (r2 != null) {
-			res.result = true;
-			res.point = r2;
-			res.normal = center.sub(r2).normalized();
-			return res;
-		}
-		var r3 = IntersectLineSphere(v2, v0, center, radius);
-		if (r3 != null) {
-			res.result = true;
-			res.point = r3;
-			res.normal = center.sub(r3).normalized();
-			return res;
 		}
 
 		if (pdist < radius) {
@@ -96,6 +88,50 @@ class Collision {
 			}
 			// return res;
 		}
+
+		// Check edges
+
+		var r1 = ClosestPointLine(v0, v1, center);
+		var r2 = ClosestPointLine(v1, v2, center);
+		var r3 = ClosestPointLine(v2, v0, center);
+
+		var chosenPt:Vector;
+		if (r1.distanceSq(center) < r2.distanceSq(center))
+			chosenPt = r1;
+		else
+			chosenPt = r2;
+		if (chosenPt.distanceSq(center) < r3.distanceSq(center))
+			res.point = chosenPt;
+		else
+			res.point = r3;
+
+		if (res.point.distanceSq(center) <= radiusSq) {
+			res.result = true;
+			res.normal = center.sub(res.point).normalized();
+			return res;
+		}
+
+		// var r1 = IntersectLineSphere(v0, v1, center, radius);
+		// if (r1 != null) {
+		// 	res.result = true;
+		// 	res.point = r1;
+		// 	res.normal = center.sub(r1).normalized();
+		// 	return res;
+		// }
+		// var r2 = IntersectLineSphere(v1, v2, center, radius);
+		// if (r2 != null) {
+		// 	res.result = true;
+		// 	res.point = r2;
+		// 	res.normal = center.sub(r2).normalized();
+		// 	return res;
+		// }
+		// var r3 = IntersectLineSphere(v2, v0, center, radius);
+		// if (r3 != null) {
+		// 	res.result = true;
+		// 	res.point = r3;
+		// 	res.normal = center.sub(r3).normalized();
+		// 	return res;
+		// }
 
 		// Check points
 		// if (center.sub(v0).lengthSq() < radiusSq) {

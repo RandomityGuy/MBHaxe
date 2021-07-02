@@ -204,8 +204,11 @@ class Marble extends GameObject {
 		this.rollSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/rolling_hard.wav"), this.getAbsPos().getPosition(), true);
 		this.slipSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/sliding.wav"), this.getAbsPos().getPosition(), true);
 		this.shockabsorberSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/superbounceactive.wav"), null, true);
+		this.shockabsorberSound.pause = true;
 		this.superbounceSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/forcefield.wav"), null, true);
+		this.superbounceSound.pause = true;
 		this.helicopterSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_gyrocopter.wav"), null, true);
+		this.helicopterSound.pause = true;
 	}
 
 	public function init(level:MarbleWorld) {
@@ -364,7 +367,7 @@ class Marble extends GameObject {
 	}
 
 	function velocityCancel(currentTime:Float, dt:Float, surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
-		var SurfaceDotThreshold = 0.001;
+		var SurfaceDotThreshold = 0.0001;
 		var looped = false;
 		var itersIn = 0;
 		var done:Bool;
@@ -480,29 +483,14 @@ class Marble extends GameObject {
 				dir.normalize();
 				var soFar = 0.0;
 				for (k in 0...contacts.length) {
-					if (contacts[k].contactDistance < this._radius) {
-						var timeToSeparate = 0.1;
-						var dist = contacts[k].contactDistance; // contacts[k].penetration;
-						if (dist >= 0) {
-							var flag1 = this.velocity.sub(contacts[k].velocity).add(dir.multiply(soFar)).dot(contacts[k].normal) * timeToSeparate;
-							if (flag1 < dist) {
-								var flag2 = (dist - flag1) / timeToSeparate;
-								soFar += flag2 / contacts[k].normal.dot(dir);
-							}
+					var dist = this._radius - contacts[k].contactDistance;
+					if (dist >= 0) {
+						var f1 = this.velocity.sub(contacts[k].velocity).add(dir.multiply(soFar)).dot(contacts[k].normal);
+						var f2 = 0.016 * f1;
+						if (f2 < dist) {
+							var f3 = (dist - f2) / 0.016;
+							soFar += f3 / contacts[k].normal.dot(dir);
 						}
-
-						// var normal = contacts[k].normal;
-						// var unk = normal.multiply(soFar);
-						// var tickle = this.velocity.sub(contacts[k].velocity);
-						// var plop = unk.add(tickle);
-						// var outVel = plop.dot(normal);
-						// var cancan = timeToSeparate * outVel;
-
-						// if (dist > cancan) {
-						// 	var bla = contacts[k].normal;
-						// 	var bFac = (dist - cancan) / timeToSeparate;
-						// 	soFar += bFac / bla.dot(dir);
-						// }
 					}
 				}
 				if (soFar < -25)
@@ -731,7 +719,15 @@ class Marble extends GameObject {
 			invMatrix.invert();
 			var localpos = position.clone();
 			localpos.transform(invMatrix);
-			var surfaces = obj.octree.radiusSearch(localpos, radius * 1.1);
+
+			var relLocalVel = velocity.sub(obj.velocity);
+			relLocalVel.transform3x3(invMatrix);
+
+			var boundThing = new Bounds();
+			boundThing.addSpherePos(localpos.x, localpos.y, localpos.z, radius * 1.1);
+			boundThing.addSpherePos(localpos.x + relLocalVel.x * dt, localpos.y + relLocalVel.y * dt, localpos.z + relLocalVel.z * dt, radius * 1.1);
+
+			var surfaces = obj.octree.boundingSearch(boundThing);
 
 			var tform = obj.transform.clone();
 
@@ -753,20 +749,22 @@ class Marble extends GameObject {
 
 					var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
 
-					var closest = Collision.IntersectTriangleCapsule(position, position.add(relVelocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
+					// var closest = Collision.IntersectTriangleCapsule(position, position.add(relVelocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
 					// var closest = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
 
-					if (closest != null) {
-						var t = (-position.dot(surfacenormal) - v0.dot(surfacenormal)) / relVelocity.dot(surfacenormal);
+					// if (closest != null) {
+					// This is some ballpark approximation, very bruh
+					var radiusDir = relVelocity.normalized().multiply(radius);
+					var t = (-position.add(radiusDir).dot(surfacenormal) + v0.dot(surfacenormal)) / relVelocity.dot(surfacenormal);
 
-						var pt = position.add(relVelocity.multiply(t));
+					var pt = position.add(radiusDir).add(relVelocity.multiply(t));
 
-						if (Collision.PointInTriangle(pt, v0, v, v2)) {
-							if (t > 0 && t < intersectT) {
-								intersectT = t;
-							}
+					if (Collision.PointInTriangle(pt, v0, v, v2)) {
+						if (t > 0 && t < intersectT) {
+							intersectT = t;
 						}
 					}
+					// }
 
 					i += 3;
 				}
@@ -792,6 +790,7 @@ class Marble extends GameObject {
 		if (this.controllable) {
 			for (interior in pathedInteriors) {
 				// interior.popTickState();
+				// interior.pushTickState();
 				interior.setStopped(false);
 				// interior.recomputeVelocity(piTime + 0.032, 0.032);
 				// interior.update(piTime, timeStep);
@@ -806,8 +805,8 @@ class Marble extends GameObject {
 			if (timeRemaining <= 0)
 				break;
 
-			var timeStep = 0.002;
-			if (timeRemaining < 0.002)
+			var timeStep = 0.008;
+			if (timeRemaining < 0.008)
 				timeStep = timeRemaining;
 
 			var tempState = timeState.clone();
@@ -816,7 +815,9 @@ class Marble extends GameObject {
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
 					interior.pushTickState();
-					interior.recomputeVelocity(piTime + 0.032, 0.032);
+					var l1 = interior.velocity.length();
+					interior.recomputeVelocity(piTime + timeStep * 2, timeStep * 2);
+					var l2 = interior.velocity.length();
 				}
 			}
 
