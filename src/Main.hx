@@ -1,5 +1,6 @@
 package;
 
+import hxd.Window;
 import src.AudioManager;
 import src.Settings;
 import src.MarbleGame;

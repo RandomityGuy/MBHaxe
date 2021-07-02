@@ -58,7 +58,7 @@ class PlayMissionGui extends GuiImage {
 		tabAdvanced.pressedAction = (sender) -> {
 			currentList = MissionList.advancedMissions;
 			currentCategory = "advanced";
-			setSelectedFunc(0);
+			setSelectedFunc(cast Math.min(Settings.progression[2], currentList.length - 1));
 			setCategoryFunc("advanced");
 		}
 		localContainer.addChild(tabAdvanced);
@@ -69,7 +69,7 @@ class PlayMissionGui extends GuiImage {
 		tabIntermediate.pressedAction = (sender) -> {
 			currentList = MissionList.intermediateMissions;
 			currentCategory = "intermediate";
-			setSelectedFunc(0);
+			setSelectedFunc(cast Math.min(Settings.progression[1], currentList.length - 1));
 			setCategoryFunc("intermediate");
 		}
 		localContainer.addChild(tabIntermediate);
@@ -227,7 +227,7 @@ class PlayMissionGui extends GuiImage {
 		tabBeginner.pressedAction = (sender) -> {
 			currentList = MissionList.beginnerMissions;
 			currentCategory = "beginner";
-			setSelectedFunc(0);
+			setSelectedFunc(cast Math.min(Settings.progression[0], currentList.length - 1));
 			setCategoryFunc("beginner");
 		}
 		localContainer.addChild(tabBeginner);
@@ -366,6 +366,7 @@ class PlayMissionGui extends GuiImage {
 
 	public override function render(scene2d:Scene) {
 		super.render(scene2d);
-		setSelectedFunc(0);
+		setSelectedFunc(cast Math.min(currentList.length - 1, Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
+		// setSelectedFunc(0);
 	}
 }

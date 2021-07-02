@@ -23,6 +23,7 @@ typedef OptionsSettings = {
 	var shadows:Bool;
 	var musicVolume:Float;
 	var soundVolume:Float;
+	var vsync:Bool;
 }
 
 typedef ControlsSettings = {
@@ -54,6 +55,7 @@ class Settings {
 		shadows: false,
 		musicVolume: 0,
 		soundVolume: 0,
+		vsync: true
 	};
 
 	public static var controlsSettings:ControlsSettings = {
@@ -125,6 +127,7 @@ class Settings {
 			controlsSettings = json.controls;
 			progression = json.progression;
 		}
+		Window.getInstance().vsync = optionsSettings.vsync;
 	}
 
 	public static function init() {
