@@ -811,17 +811,29 @@ class Marble extends GameObject {
 			if (timeRemaining < timeStep)
 				timeStep = timeRemaining;
 
-			var tempState = timeState.clone();
-			tempState.dt = timeStep;
-
-			it++;
-
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
 					interior.pushTickState();
 					interior.recomputeVelocity(piTime + timeStep * 2, timeStep * 2);
 				}
 			}
+
+			var intersectT = this.getIntersectionTime(timeStep, velocity);
+
+			if (intersectT < timeStep && intersectT > 0.000001) {
+				// intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
+				// intersectT /= 2;
+				var diff = timeStep - intersectT;
+				// this.velocity = this.velocity.sub(A.multiply(diff));
+				// this.omega = this.omega.sub(a.multiply(diff));
+				timeStep = intersectT;
+				trace('CCD at ${intersectT}');
+			}
+
+			var tempState = timeState.clone();
+			tempState.dt = timeStep;
+
+			it++;
 
 			this.findContacts(collisionWorld, tempState);
 			var cmf = this.computeMoveForces(m);
@@ -840,18 +852,6 @@ class Marble extends GameObject {
 			this._totalTime += timeStep;
 			if (contacts.length != 0) {
 				this._contactTime += timeStep;
-			}
-
-			var intersectT = this.getIntersectionTime(timeStep, velocity);
-
-			if (intersectT < timeStep && intersectT > 0.000001) {
-				// intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
-				// intersectT /= 2;
-				var diff = timeStep - intersectT;
-				this.velocity = this.velocity.sub(A.multiply(diff));
-				this.omega = this.omega.sub(a.multiply(diff));
-				timeStep = intersectT;
-				trace('CCD at ${intersectT}');
 			}
 
 			piTime += timeStep;
@@ -910,7 +910,7 @@ class Marble extends GameObject {
 				contactTime += timeStep;
 
 			timeRemaining -= timeStep;
-		} while (it <= 10);
+		} while (true);
 		this.queuedContacts = [];
 
 		this.updateRollSound(contactTime / timeState.dt, this._slipAmount);
