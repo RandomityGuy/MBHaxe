@@ -336,11 +336,11 @@ class Marble extends GameObject {
 		var currentXVelocity = rollVelocity.dot(sideDir);
 		var mv = m.d;
 
-		mv = mv.multiply(1.538461565971375);
-		var mvlen = mv.length();
-		if (mvlen > 1) {
-			mv = mv.multiply(1 / mvlen);
-		}
+		// mv = mv.multiply(1.538461565971375);
+		// var mvlen = mv.length();
+		// if (mvlen > 1) {
+		// 	mv = mv.multiply(1 / mvlen);
+		// }
 		var desiredYVelocity = this._maxRollVelocity * mv.y;
 		var desiredXVelocity = this._maxRollVelocity * mv.x;
 		if (desiredYVelocity != 0 || desiredXVelocity != 0) {
@@ -486,9 +486,9 @@ class Marble extends GameObject {
 					var dist = this._radius - contacts[k].contactDistance;
 					if (dist >= 0) {
 						var f1 = this.velocity.sub(contacts[k].velocity).add(dir.multiply(soFar)).dot(contacts[k].normal);
-						var f2 = 0.016 * f1;
+						var f2 = 0.1 * f1;
 						if (f2 < dist) {
-							var f3 = (dist - f2) / 0.016;
+							var f3 = (dist - f2) / 0.1;
 							soFar += f3 / contacts[k].normal.dot(dir);
 						}
 					}
@@ -561,7 +561,7 @@ class Marble extends GameObject {
 					slipping = false;
 				}
 				var vAtCDir = vAtC.multiply(1 / vAtCMag);
-				aFriction = bestContact.normal.cross(vAtCDir).multiply(angAMagnitude);
+				aFriction = bestContact.normal.multiply(-1).cross(vAtCDir.multiply(-1)).multiply(angAMagnitude);
 				AFriction = vAtCDir.multiply(-AMagnitude);
 				this._slipAmount = vAtCMag - totalDeltaV;
 			}
@@ -576,7 +576,7 @@ class Marble extends GameObject {
 						aControl = aControl.multiply(this._brakingAcceleration / aScalar);
 					}
 				}
-				var Aadd = aControl.cross(bestContact.normal.multiply(this._radius));
+				var Aadd = aControl.cross(bestContact.normal.multiply(-this._radius)).multiply(-1);
 				var aAtCMag = aadd.cross(bestContact.normal.multiply(-this._radius)).add(Aadd).length();
 				var friction2 = 0.0;
 				if (mode != Start)
