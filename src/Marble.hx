@@ -484,11 +484,12 @@ class Marble extends GameObject {
 				var soFar = 0.0;
 				for (k in 0...contacts.length) {
 					var dist = this._radius - contacts[k].contactDistance;
+					var timeToSeparate = 0.064;
 					if (dist >= 0) {
 						var f1 = this.velocity.sub(contacts[k].velocity).add(dir.multiply(soFar)).dot(contacts[k].normal);
-						var f2 = 0.1 * f1;
+						var f2 = timeToSeparate * f1;
 						if (f2 < dist) {
-							var f3 = (dist - f2) / 0.1;
+							var f3 = (dist - f2) / timeToSeparate;
 							soFar += f3 / contacts[k].normal.dot(dir);
 						}
 					}
@@ -800,24 +801,25 @@ class Marble extends GameObject {
 		_bounceYet = false;
 
 		var contactTime = 0.0;
+		var it = 0;
 
 		do {
 			if (timeRemaining <= 0)
 				break;
 
 			var timeStep = 0.008;
-			if (timeRemaining < 0.008)
+			if (timeRemaining < timeStep)
 				timeStep = timeRemaining;
 
 			var tempState = timeState.clone();
 			tempState.dt = timeStep;
 
+			it++;
+
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
 					interior.pushTickState();
-					var l1 = interior.velocity.length();
 					interior.recomputeVelocity(piTime + timeStep * 2, timeStep * 2);
-					var l2 = interior.velocity.length();
 				}
 			}
 
@@ -843,7 +845,7 @@ class Marble extends GameObject {
 			var intersectT = this.getIntersectionTime(timeStep, velocity);
 
 			if (intersectT < timeStep && intersectT > 0.000001) {
-				intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
+				// intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
 				// intersectT /= 2;
 				var diff = timeStep - intersectT;
 				this.velocity = this.velocity.sub(A.multiply(diff));
@@ -908,7 +910,7 @@ class Marble extends GameObject {
 				contactTime += timeStep;
 
 			timeRemaining -= timeStep;
-		} while (true);
+		} while (it <= 10);
 		this.queuedContacts = [];
 
 		this.updateRollSound(contactTime / timeState.dt, this._slipAmount);
