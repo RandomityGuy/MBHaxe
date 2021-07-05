@@ -1,5 +1,6 @@
 package gui;
 
+import src.MarbleGame;
 import gui.GuiControl.MouseState;
 import hxd.res.BitmapFont;
 import h3d.Vector;
@@ -50,6 +51,9 @@ class MainMenuGui extends GuiImage {
 		var helpButton = new GuiButton(loadButtonImages("data/ui/home/help"));
 		helpButton.position = new Vector(59, 200);
 		helpButton.extent = new Vector(242, 84);
+		helpButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.setContent(new HelpCreditsGui());
+		}
 		homebase.addChild(helpButton);
 
 		var optionsButton = new GuiButton(loadButtonImages("data/ui/home/options"));

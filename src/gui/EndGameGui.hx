@@ -146,7 +146,7 @@ class EndGameGui extends GuiControl {
 
 		var idx = scoreTimes.indexOf(timeState.gameplayClock);
 
-		if (Settings.progression[mission.difficultyIndex] == mission.index) {
+		if (Settings.progression[mission.difficultyIndex] == mission.index && qualified) {
 			Settings.progression[mission.difficultyIndex]++;
 		}
 		Settings.save();

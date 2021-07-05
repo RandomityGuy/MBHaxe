@@ -711,7 +711,7 @@ class MarbleWorld extends Scheduler {
 			var pre = text.substr(0, pos);
 			var post = text.substr(end + 1);
 			var func = text.substr(pos + 6, end - (pos + 6));
-			var funcdata = func.split(' ');
+			var funcdata = func.split(' ').map(x -> x.toLowerCase());
 			var val = "";
 			if (funcdata[0] == "bind") {
 				if (funcdata[1] == "moveforward")
@@ -726,9 +726,9 @@ class MarbleWorld extends Scheduler {
 					val = Key.getKeyName(Settings.controlsSettings.camForward);
 				if (funcdata[1] == "pandown")
 					val = Key.getKeyName(Settings.controlsSettings.camBackward);
-				if (funcdata[1] == "panleft")
+				if (funcdata[1] == "turnleft")
 					val = Key.getKeyName(Settings.controlsSettings.camLeft);
-				if (funcdata[1] == "panright")
+				if (funcdata[1] == "turnright")
 					val = Key.getKeyName(Settings.controlsSettings.camRight);
 				if (funcdata[1] == "jump")
 					val = Key.getKeyName(Settings.controlsSettings.jump);
