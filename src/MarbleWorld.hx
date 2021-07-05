@@ -243,7 +243,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.finish = false;
 		this.marble.mode = Start;
 		this.marble.startPad = cast startquat.pad;
-		sky.follow = marble;
+		sky.follow = marble.camera;
 
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
 			&& element._name == "MissionInfo")[0];
@@ -628,7 +628,8 @@ class MarbleWorld extends Scheduler {
 			this.scene.addChild(marble.camera);
 			this.marble = marble;
 			// Ugly hack
-			sky.follow = marble;
+			// sky.follow = marble;
+			sky.follow = marble.camera;
 		}
 		this.collisionWorld.addMovingEntity(marble.collider);
 		this.scene.addChild(marble);
@@ -970,7 +971,7 @@ class MarbleWorld extends Scheduler {
 		this.outOfBounds = true;
 		this.outOfBoundsTime = this.timeState.clone();
 		this.marble.camera.oob = true;
-		sky.follow = null;
+		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
 		AudioManager.playSound(ResourceLoader.getAudio('data/sound/whoosh.wav'));

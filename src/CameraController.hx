@@ -261,6 +261,8 @@ class CameraController extends Object {
 
 		if (!oob)
 			lastCamPos = camera.pos;
+
+		this.setPosition(camera.pos.x, camera.pos.y, camera.pos.z);
 		// camera.target = null;
 		// camera.target = targetpos.add(cameraVerticalTranslation);
 		// this.x = targetpos.x + directionVec.x;
