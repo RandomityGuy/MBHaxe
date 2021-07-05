@@ -140,7 +140,7 @@ class OptionsDlg extends GuiImage {
 		var gfx640480 = new GuiButton(loadButtonImages("data/ui/options/graf640"));
 		gfx640480.position = new Vector(157, -3);
 		gfx640480.extent = new Vector(84, 53);
-		gfx640480.buttonType = Toggle;
+		gfx640480.buttonType = Radio;
 		resolutionBoxes.push(gfx640480);
 		gfx640480.pressedAction = (sender) -> {
 			updateResolutionFunc(gfx640480);
@@ -152,7 +152,7 @@ class OptionsDlg extends GuiImage {
 		var gfx800600 = new GuiButton(loadButtonImages("data/ui/options/graf800"));
 		gfx800600.position = new Vector(237, 0);
 		gfx800600.extent = new Vector(86, 51);
-		gfx800600.buttonType = Toggle;
+		gfx800600.buttonType = Radio;
 		resolutionBoxes.push(gfx800600);
 		gfx800600.pressedAction = (sender) -> {
 			updateResolutionFunc(gfx800600);
@@ -164,7 +164,7 @@ class OptionsDlg extends GuiImage {
 		var gfx1024768 = new GuiButton(loadButtonImages("data/ui/options/graf1024"));
 		gfx1024768.position = new Vector(320, -1);
 		gfx1024768.extent = new Vector(94, 51);
-		gfx1024768.buttonType = Toggle;
+		gfx1024768.buttonType = Radio;
 		resolutionBoxes.push(gfx1024768);
 		gfx1024768.pressedAction = (sender) -> {
 			updateResolutionFunc(gfx1024768);
@@ -185,7 +185,7 @@ class OptionsDlg extends GuiImage {
 		var gfxopengl = new GuiButton(loadButtonImages("data/ui/options/grafopgl"));
 		gfxopengl.position = new Vector(165, 58);
 		gfxopengl.extent = new Vector(97, 54);
-		gfxopengl.buttonType = Toggle;
+		gfxopengl.buttonType = Radio;
 		driverBoxes.push(gfxopengl);
 		gfxopengl.pressedAction = (sender) -> {
 			updateDriverFunc(gfxopengl);
@@ -198,7 +198,7 @@ class OptionsDlg extends GuiImage {
 		var gfxd3d = new GuiButton(loadButtonImages("data/ui/options/grafdir3d"));
 		gfxd3d.position = new Vector(270, 59);
 		gfxd3d.extent = new Vector(104, 52);
-		gfxd3d.buttonType = Toggle;
+		gfxd3d.buttonType = Radio;
 		driverBoxes.push(gfxd3d);
 		gfxd3d.pressedAction = (sender) -> {
 			updateDriverFunc(gfxd3d);
@@ -226,7 +226,7 @@ class OptionsDlg extends GuiImage {
 		var gfx16 = new GuiButton(loadButtonImages("data/ui/options/graf16bt"));
 		gfx16.position = new Vector(179, 170);
 		gfx16.extent = new Vector(79, 54);
-		gfx16.buttonType = Toggle;
+		gfx16.buttonType = Radio;
 		bitBoxes.push(gfx16);
 		gfx16.pressedAction = (sender) -> {
 			updateBitsFunc(gfx16);
@@ -239,7 +239,7 @@ class OptionsDlg extends GuiImage {
 		var gfx32 = new GuiButton(loadButtonImages("data/ui/options/graf32bt"));
 		gfx32.position = new Vector(272, 174);
 		gfx32.extent = new Vector(84, 51);
-		gfx32.buttonType = Toggle;
+		gfx32.buttonType = Radio;
 		bitBoxes.push(gfx32);
 		gfx32.pressedAction = (sender) -> {
 			updateBitsFunc(gfx32);

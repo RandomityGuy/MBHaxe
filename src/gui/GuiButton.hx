@@ -10,6 +10,7 @@ import src.ResourceLoader;
 enum ButtonType {
 	Normal;
 	Toggle;
+	Radio;
 }
 
 class GuiButton extends GuiAnim {
@@ -51,7 +52,7 @@ class GuiButton extends GuiAnim {
 				pressed = false;
 			}
 		}
-		if (buttonType == Toggle) {
+		if (buttonType == Toggle || buttonType == Radio) {
 			if (this.pressed) {
 				this.anim.currentFrame = 2;
 			} else {
@@ -76,6 +77,9 @@ class GuiButton extends GuiAnim {
 		}
 		if (buttonType == Toggle) {
 			pressed = !pressed;
+		}
+		if (buttonType == Radio) {
+			pressed = true;
 		}
 	}
 

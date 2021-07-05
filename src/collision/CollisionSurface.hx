@@ -1,5 +1,6 @@
 package collision;
 
+import h3d.Matrix;
 import h3d.col.Bounds;
 import octree.IOctreeObject;
 import h3d.Vector;
@@ -100,5 +101,23 @@ class CollisionSurface implements IOctreeObject {
 			intersectionNormal.load(intersections[0].n);
 		}
 		return intersections.length > 0;
+	}
+
+	public function support(direction:Vector, transform:Matrix) {
+		var furthestDistance:Float = Math.NEGATIVE_INFINITY;
+		var furthestVertex:Vector = new Vector();
+
+		for (v in points) {
+			var v2 = v.transformed(transform);
+			var distance:Float = v2.dot(direction);
+			if (distance > furthestDistance) {
+				furthestDistance = distance;
+				furthestVertex.x = v2.x;
+				furthestVertex.y = v2.y;
+				furthestVertex.z = v2.z;
+			}
+		}
+
+		return furthestVertex;
 	}
 }

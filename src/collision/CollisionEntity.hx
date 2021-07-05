@@ -95,7 +95,7 @@ class CollisionEntity implements IOctreeObject {
 		var localpos = position.clone();
 		localpos.transform(invMatrix);
 		var sphereBounds = new Bounds();
-		sphereBounds.addSpherePos(localpos.x, localpos.y, localpos.z, radius * 1.1);
+		sphereBounds.addSpherePos(localpos.x, localpos.y, localpos.z, radius);
 		var surfaces = octree.boundingSearch(sphereBounds);
 
 		var tform = transform.clone();
@@ -134,6 +134,11 @@ class CollisionEntity implements IOctreeObject {
 
 						if (position.sub(closest).dot(surfacenormal) > 0) {
 							normal.normalize();
+
+							var supportVec = surface.support(normal, tform);
+							if (!(supportVec.equals(v0) || supportVec.equals(v) || supportVec.equals(v2))) {
+								normal = surfacenormal;
+							}
 
 							// We find the normal that is closest to the surface normal, sort of fixes weird edge cases of when colliding with
 							var testDot = normal.dot(surfacenormal);
