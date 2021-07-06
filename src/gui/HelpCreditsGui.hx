@@ -1,5 +1,7 @@
 package gui;
 
+import h3d.shader.AlphaChannel;
+import src.DtsObject;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
@@ -12,6 +14,24 @@ class HelpCreditsGui extends GuiImage {
 	var page = 0;
 	var hcText:GuiMLText;
 	var hcText2:GuiMLText;
+	var startPadCtrl:GuiObjectShow;
+	var endPadCtrl:GuiObjectShow;
+	var gem1Ctrl:GuiObjectShow;
+	var gem2Ctrl:GuiObjectShow;
+	var gem3Ctrl:GuiObjectShow;
+	var superSpeedCtrl:GuiObjectShow;
+	var superJumpCtrl:GuiObjectShow;
+	var shockAbsorberCtrl:GuiObjectShow;
+	var helicopterCtrl:GuiObjectShow;
+	var timeTravelCtrl:GuiObjectShow;
+	var antiGravityCtrl:GuiObjectShow;
+	var ductFanCtrl:GuiObjectShow;
+	var tornadoCtrl:GuiObjectShow;
+	var trapdoorCtrl:GuiObjectShow;
+	var oilSlickCtrl:GuiObjectShow;
+	var landMineCtrl:GuiObjectShow;
+	var bumperCtrl:GuiObjectShow;
+	var superBounceCtrl:GuiObjectShow;
 
 	public function new() {
 		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
@@ -102,6 +122,63 @@ class HelpCreditsGui extends GuiImage {
 		hcText2.text.textColor = 0;
 		helpWindow.addChild(hcText2);
 
+		startPadCtrl = buildObjectShow("data/shapes/pads/startarea.dts", new Vector(30, 82), new Vector(79, 66), 8, 0.5);
+		helpWindow.addChild(startPadCtrl);
+
+		endPadCtrl = buildObjectShow("data/shapes/pads/endarea.dts", new Vector(31, 146), new Vector(79, 66), 8, 0.5);
+		helpWindow.addChild(endPadCtrl);
+
+		gem1Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(17, 234), new Vector(79, 66), 2.5, 0.4);
+		helpWindow.addChild(gem1Ctrl);
+
+		gem2Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(43, 215), new Vector(79, 66), 2.5, 0.4, ["base.gem" => "purple.gem"]);
+		helpWindow.addChild(gem2Ctrl);
+
+		gem3Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(45, 250), new Vector(79, 66), 2.5, 0.4, ["base.gem" => "green.gem"]);
+		helpWindow.addChild(gem3Ctrl);
+
+		superSpeedCtrl = buildObjectShow("data/shapes/items/superspeed.dts", new Vector(30, 73), new Vector(79, 66), 3.5, 0.35);
+		helpWindow.addChild(superSpeedCtrl);
+
+		superJumpCtrl = buildObjectShow("data/shapes/items/superjump.dts", new Vector(31, 137), new Vector(79, 66), 3.5, 0.35);
+		helpWindow.addChild(superJumpCtrl);
+
+		shockAbsorberCtrl = buildObjectShow("data/shapes/items/shockabsorber.dts", new Vector(33, 204), new Vector(72, 61), 3.5, 0.35);
+		helpWindow.addChild(shockAbsorberCtrl);
+
+		superBounceCtrl = buildObjectShow("data/shapes/items/superbounce.dts", new Vector(35, 260), new Vector(72, 61), 3.5, 0.35);
+		helpWindow.addChild(superBounceCtrl);
+
+		helicopterCtrl = buildObjectShow("data/shapes/images/helicopter.dts", new Vector(30, 82), new Vector(79, 66), 2, 0.35);
+		helpWindow.addChild(helicopterCtrl);
+
+		timeTravelCtrl = buildObjectShow("data/shapes/items/timetravel.dts", new Vector(31, 146), new Vector(79, 66), 3.5, 0.35);
+		helpWindow.addChild(timeTravelCtrl);
+
+		antiGravityCtrl = buildObjectShow("data/shapes/items/antigravity.dts", new Vector(35, 217), new Vector(72, 61), 3.5, 0.35);
+		helpWindow.addChild(antiGravityCtrl);
+
+		ductFanCtrl = buildObjectShow("data/shapes/hazards/ductfan.dts", new Vector(30, 82), new Vector(79, 66), 4, 0.5);
+		helpWindow.addChild(ductFanCtrl);
+
+		tornadoCtrl = buildObjectShow("data/shapes/hazards/tornado.dts", new Vector(26, 155), new Vector(91, 66), 18, 0.35);
+		for (mat in tornadoCtrl.sceneObject.materials) {
+			mat.blendMode = None;
+		}
+		helpWindow.addChild(tornadoCtrl);
+
+		trapdoorCtrl = buildObjectShow("data/shapes/hazards/trapdoor.dts", new Vector(35, 217), new Vector(77, 76), 8, 0.35);
+		helpWindow.addChild(trapdoorCtrl);
+
+		oilSlickCtrl = buildObjectShow("data/shapes/hazards/oilslick.dts", new Vector(35, 217), new Vector(77, 76), 8, 0.35);
+		helpWindow.addChild(oilSlickCtrl);
+
+		landMineCtrl = buildObjectShow("data/shapes/hazards/landmine.dts", new Vector(26, 155), new Vector(91, 66), 1.5, 0.35);
+		helpWindow.addChild(landMineCtrl);
+
+		bumperCtrl = buildObjectShow("data/shapes/bumpers/pball_round.dts", new Vector(30, 82), new Vector(79, 66), 1.8, 0.5);
+		helpWindow.addChild(bumperCtrl);
+
 		redrawPage();
 	}
 
@@ -121,51 +198,159 @@ class HelpCreditsGui extends GuiImage {
 				formatText("The marble can be moved forward, back, left and right by pressing <func:bind moveforward>, <func:bind movebackward>, <func:bind moveleft> and <func:bind moveright>, respectively.  Pressing <func:bind jump> causes the marble to jump, and pressing <func:bind mouseFire> uses whatever powerup you currently have available.  All movement is relative to the view direction.");
 		}
 		if (page == 2) {
+			startPadCtrl.visible = false;
+			endPadCtrl.visible = false;
+			gem1Ctrl.visible = false;
+			gem2Ctrl.visible = false;
+			gem3Ctrl.visible = false;
 			hcText2.text.text = "";
 			hcText.text.text = '<font face="Expo50"><p align="center">Camera Controls</p></font><br/>'
 				+
 				formatText("The camera direction can be changed by moving the mouse or by pressing <func:bind panUp>, <func:bind panDown>, <func:bind turnLeft> or <func:bind turnRight>.  In order to look up and down freely with the mouse, hold down <func:bind freelook>.  You can turn free look on always from the Mouse pane of the Control Options screen.");
+			startPadCtrl.render(MarbleGame.canvas.scene2d);
+			endPadCtrl.render(MarbleGame.canvas.scene2d);
+			gem1Ctrl.render(MarbleGame.canvas.scene2d);
+			gem2Ctrl.render(MarbleGame.canvas.scene2d);
+			gem3Ctrl.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 3) {
+			startPadCtrl.visible = true;
+			endPadCtrl.visible = true;
+			gem1Ctrl.visible = true;
+			gem2Ctrl.visible = true;
+			gem3Ctrl.visible = true;
+			superJumpCtrl.visible = false;
+			superSpeedCtrl.visible = false;
+			shockAbsorberCtrl.visible = false;
+			superBounceCtrl.visible = false;
 			hcText.text.text = '<font face="Expo50"><p align="center">Goals</p></font><br/>';
 			hcText2.position = new Vector(110, 24);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Start Pad - this is where you start the level.<br/><br/>End Pad - roll your marble here to end the level.<br/><br/>Gems - if a level has gems, you must pick them all up before you can exit.";
+			startPadCtrl.render(MarbleGame.canvas.scene2d);
+			endPadCtrl.render(MarbleGame.canvas.scene2d);
+			gem1Ctrl.render(MarbleGame.canvas.scene2d);
+			gem2Ctrl.render(MarbleGame.canvas.scene2d);
+			gem3Ctrl.render(MarbleGame.canvas.scene2d);
 			hcText2.render(MarbleGame.canvas.scene2d);
+			superJumpCtrl.render(MarbleGame.canvas.scene2d);
+			superSpeedCtrl.render(MarbleGame.canvas.scene2d);
+			shockAbsorberCtrl.render(MarbleGame.canvas.scene2d);
+			superBounceCtrl.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 4) {
+			startPadCtrl.visible = false;
+			endPadCtrl.visible = false;
+			gem1Ctrl.visible = false;
+			gem2Ctrl.visible = false;
+			gem3Ctrl.visible = false;
+			superJumpCtrl.visible = true;
+			superSpeedCtrl.visible = true;
+			shockAbsorberCtrl.visible = true;
+			superBounceCtrl.visible = true;
+			helicopterCtrl.visible = false;
+			timeTravelCtrl.visible = false;
+			antiGravityCtrl.visible = false;
 			hcText.text.text = '<font face="Expo50"><p align="center">Bonus Items (1/2)</p></font><br/>';
 			hcText2.position = new Vector(110, 24);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Super Speed PowerUp - gives you a burst of speed.<br/><br/>Super Jump PowerUp - gives you a big jump up.<br/><br/>Shock Absorber PowerUp - absorbs bounce impacts.<br/><br/>Super Bounce PowerUp - makes you bounce higher.";
+			startPadCtrl.render(MarbleGame.canvas.scene2d);
+			endPadCtrl.render(MarbleGame.canvas.scene2d);
+			gem1Ctrl.render(MarbleGame.canvas.scene2d);
+			gem2Ctrl.render(MarbleGame.canvas.scene2d);
+			gem3Ctrl.render(MarbleGame.canvas.scene2d);
 			hcText2.render(MarbleGame.canvas.scene2d);
+			superJumpCtrl.render(MarbleGame.canvas.scene2d);
+			superSpeedCtrl.render(MarbleGame.canvas.scene2d);
+			shockAbsorberCtrl.render(MarbleGame.canvas.scene2d);
+			superBounceCtrl.render(MarbleGame.canvas.scene2d);
+			helicopterCtrl.render(MarbleGame.canvas.scene2d);
+			timeTravelCtrl.render(MarbleGame.canvas.scene2d);
+			antiGravityCtrl.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 5) {
+			superJumpCtrl.visible = false;
+			superSpeedCtrl.visible = false;
+			shockAbsorberCtrl.visible = false;
+			superBounceCtrl.visible = false;
+			helicopterCtrl.visible = true;
+			timeTravelCtrl.visible = true;
+			antiGravityCtrl.visible = true;
+			ductFanCtrl.visible = false;
+			tornadoCtrl.visible = false;
+			trapdoorCtrl.visible = false;
 			hcText.text.text = '<font face="Expo50"><p align="center">Bonus Items (2/2)</p></font><br/>';
 			hcText2.position = new Vector(110, 24);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Gyrocopter PowerUp - slows your fall in the air.<br/><br/>Time Travel - takes some time off the clock.<br/><br/>Gravity Modifier - Changes the direction of \"down\" - the new down is in the direction of the arrow.";
 			hcText2.render(MarbleGame.canvas.scene2d);
+			superJumpCtrl.render(MarbleGame.canvas.scene2d);
+			superSpeedCtrl.render(MarbleGame.canvas.scene2d);
+			shockAbsorberCtrl.render(MarbleGame.canvas.scene2d);
+			superBounceCtrl.render(MarbleGame.canvas.scene2d);
+			helicopterCtrl.render(MarbleGame.canvas.scene2d);
+			timeTravelCtrl.render(MarbleGame.canvas.scene2d);
+			antiGravityCtrl.render(MarbleGame.canvas.scene2d);
+			ductFanCtrl.render(MarbleGame.canvas.scene2d);
+			tornadoCtrl.render(MarbleGame.canvas.scene2d);
+			trapdoorCtrl.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 6) {
+			helicopterCtrl.visible = false;
+			timeTravelCtrl.visible = false;
+			antiGravityCtrl.visible = false;
+			ductFanCtrl.visible = true;
+			tornadoCtrl.visible = true;
+			trapdoorCtrl.visible = true;
+			bumperCtrl.visible = false;
+			landMineCtrl.visible = false;
+			oilSlickCtrl.visible = false;
 			hcText.text.text = '<font face="Expo50"><p align="center">Hazards (1/2)</p></font><br/>';
 			hcText2.position = new Vector(110, 24);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Duct Fan - be careful this doesn't blow you away!<br/><br/>Tornado - it'll pull you in and spit you out.<br/><br/>Trap Door - keep moving when you're rolling over one of these.";
 			hcText2.render(MarbleGame.canvas.scene2d);
+			helicopterCtrl.render(MarbleGame.canvas.scene2d);
+			timeTravelCtrl.render(MarbleGame.canvas.scene2d);
+			antiGravityCtrl.render(MarbleGame.canvas.scene2d);
+			ductFanCtrl.render(MarbleGame.canvas.scene2d);
+			tornadoCtrl.render(MarbleGame.canvas.scene2d);
+			trapdoorCtrl.render(MarbleGame.canvas.scene2d);
+			bumperCtrl.render(MarbleGame.canvas.scene2d);
+			landMineCtrl.render(MarbleGame.canvas.scene2d);
+			oilSlickCtrl.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 7) {
+			ductFanCtrl.visible = false;
+			tornadoCtrl.visible = false;
+			trapdoorCtrl.visible = false;
+			bumperCtrl.visible = true;
+			landMineCtrl.visible = true;
+			oilSlickCtrl.visible = true;
 			hcText.text.text = '<font face="Expo50"><p align="center">Hazards (2/2)</p></font><br/>';
 			hcText2.position = new Vector(110, 24);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Bumper - this'll bounce you if you touch it.<br/><br/>Land Mine - Warning!  Explodes on contact!<br/><br/>Oil Slick - you won't have much traction on these surfaces";
 			hcText2.render(MarbleGame.canvas.scene2d);
+			ductFanCtrl.render(MarbleGame.canvas.scene2d);
+			tornadoCtrl.render(MarbleGame.canvas.scene2d);
+			trapdoorCtrl.render(MarbleGame.canvas.scene2d);
+			bumperCtrl.render(MarbleGame.canvas.scene2d);
+			landMineCtrl.render(MarbleGame.canvas.scene2d);
+			oilSlickCtrl.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 8) {
+			bumperCtrl.visible = false;
+			landMineCtrl.visible = false;
+			oilSlickCtrl.visible = false;
 			hcText2.text.text = "";
 			hcText.text.text = '<font face="Expo50"><p align="center">About GarageGames</p></font><br/>'
 				+
 				"GarageGames is a unique Internet publishing label for independent games and gamemakers.  Our mission is to provide the independent developer with tools, knowledge, co-conspirators - whatever is needed to unleash the creative spirit and get great innovative independent games to market.";
+			bumperCtrl.render(MarbleGame.canvas.scene2d);
+			landMineCtrl.render(MarbleGame.canvas.scene2d);
+			oilSlickCtrl.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 9) {
 			hcText2.text.text = "";
@@ -242,5 +427,32 @@ class HelpCreditsGui extends GuiImage {
 			pos = text.indexOf("<func:", start);
 		}
 		return text;
+	}
+
+	function buildObjectShow(dtsPath:String, position:Vector, extent:Vector, dist:Float = 5, pitch:Float = 0, matnameOverride:Map<String, String> = null) {
+		var oShow = new GuiObjectShow();
+		var dtsObj = new DtsObject();
+		dtsObj.dtsPath = dtsPath;
+		dtsObj.ambientRotate = true;
+		dtsObj.ambientSpinFactor /= -2;
+		dtsObj.showSequences = false;
+		dtsObj.useInstancing = false;
+		if (matnameOverride != null) {
+			for (key => value in matnameOverride) {
+				dtsObj.matNameOverride.set(key, value);
+			}
+		}
+		dtsObj.init(null);
+		for (mat in dtsObj.materials) {
+			mat.mainPass.enableLights = false;
+			if (mat.blendMode != Alpha && mat.blendMode != Add)
+				mat.mainPass.addShader(new AlphaChannel());
+		}
+		oShow.sceneObject = dtsObj;
+		oShow.position = position;
+		oShow.extent = extent;
+		oShow.renderDistance = dist;
+		oShow.renderPitch = pitch;
+		return oShow;
 	}
 }

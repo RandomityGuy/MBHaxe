@@ -49,4 +49,10 @@ class Canvas extends GuiControl {
 			children[children.length - 1].update(dt, mouseState);
 		}
 	}
+
+	public override function renderEngine(e:h3d.Engine) {
+		if (children.length > 0) {
+			children[children.length - 1].renderEngine(e);
+		}
+	}
 }

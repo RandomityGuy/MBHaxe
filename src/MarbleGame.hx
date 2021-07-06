@@ -93,5 +93,6 @@ class MarbleGame {
 	public function render(e:h3d.Engine) {
 		if (world != null && !world._disposed)
 			world.render(e);
+		canvas.renderEngine(e);
 	}
 }

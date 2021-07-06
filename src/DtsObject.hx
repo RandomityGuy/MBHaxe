@@ -287,6 +287,29 @@ class DtsObject extends GameObject {
 			}
 		}
 
+		if (!this.isInstanced) {
+			for (i in 0...this.materials.length) {
+				var info = this.materialInfos.get(this.materials[i]);
+				if (info == null)
+					continue;
+
+				var iflSequence = this.dts.sequences.filter(seq -> seq.iflMatters.length > 0 ? seq.iflMatters[0] > 0 : false);
+				if (iflSequence.length == 0)
+					continue;
+
+				var completion = 0 / (iflSequence[0].duration);
+				var keyframe = Math.floor(completion * info.length) % info.length;
+				var currentFile = info[keyframe];
+				var texture = ResourceLoader.getTexture(this.directoryPath + '/' + currentFile);
+
+				var flags = this.dts.matFlags[i];
+				if (flags & 1 > 0 || flags & 2 > 0)
+					texture.wrap = Wrap.Repeat;
+
+				this.materials[i].texture = texture;
+			}
+		}
+
 		rootObject = new Object(this);
 
 		for (i in rootNodesIdx) {

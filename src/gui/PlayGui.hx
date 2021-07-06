@@ -375,6 +375,8 @@ class PlayGui {
 			powerupImageObject.init(null);
 			for (mat in powerupImageObject.materials) {
 				mat.mainPass.enableLights = false;
+				if (mat.blendMode != Alpha && mat.blendMode != Add)
+					mat.mainPass.addShader(new h3d.shader.AlphaChannel());
 			}
 			powerupImageScene.addChild(powerupImageObject);
 			var powerupImageCenter = powerupImageObject.getBounds().getCenter();

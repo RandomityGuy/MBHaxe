@@ -196,4 +196,10 @@ class GuiControl {
 			c.onRemove();
 		}
 	}
+
+	public function renderEngine(engine:h3d.Engine) {
+		for (c in this.children) {
+			c.renderEngine(engine);
+		}
+	}
 }
