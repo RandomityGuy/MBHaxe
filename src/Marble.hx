@@ -343,6 +343,7 @@ class Marble extends GameObject {
 		// }
 		var desiredYVelocity = this._maxRollVelocity * mv.y;
 		var desiredXVelocity = this._maxRollVelocity * mv.x;
+
 		if (desiredYVelocity != 0 || desiredXVelocity != 0) {
 			if (currentYVelocity > desiredYVelocity && desiredYVelocity > 0) {
 				desiredYVelocity = currentYVelocity;
@@ -869,12 +870,22 @@ class Marble extends GameObject {
 			var pos = this.getAbsPos().getPosition();
 
 			if (mode == Start) {
-				var startPadNormal = this.startPad.getAbsPos().up();
-				this.velocity = startPadNormal.multiply(this.velocity.dot(startPadNormal));
+				var upVec = this.level.currentUp;
+				var startpadNormal = startPad.getAbsPos().up();
+				this.velocity = upVec.multiply(this.velocity.dot(upVec));
+				// Apply contact forces in startPad up direction if upVec is not startpad up, fixes the weird startpad shit in pinball wizard
+				if (upVec.dot(startpadNormal) < 0.95) {
+					for (contact in contacts) {
+						var normF = contact.normal.multiply(contact.normalForce);
+						var startpadF = startpadNormal.multiply(normF.dot(startpadNormal));
+						var upF = upVec.multiply(normF.dot(upVec));
+						this.velocity = this.velocity.add(startpadF.multiply(timeStep / 4));
+					}
+				}
 			}
 
 			if (mode == Finish) {
-				this.velocity = this.velocity.multiply(0.9);
+				this.velocity = this.velocity.multiply(0.7);
 			}
 
 			var newPos = pos.add(this.velocity.multiply(timeStep));
