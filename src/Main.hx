@@ -35,7 +35,7 @@ class Main extends hxd.App {
 
 	override function update(dt:Float) {
 		super.update(dt);
-		marbleGame.update(hxd.Timer.dt);
+		marbleGame.update(dt);
 		// world.update(dt);
 		fpsCounter.text = 'FPS: ${this.engine.fps}';
 	}

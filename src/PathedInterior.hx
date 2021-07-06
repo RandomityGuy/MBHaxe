@@ -146,18 +146,21 @@ class PathedInterior extends InteriorObject {
 		// 	currentPosition: currentPosition,
 		// 	velocity: velocity
 		// };
+
+		var thisTime = timeState.currentAttemptTime;
+
 		if (stopped) {
-			currentTime = stopTime;
+			thisTime = stopTime;
 			popTickState();
 		}
 
-		var transform = this.getTransformAtTime(this.getInternalTime(timeState.currentAttemptTime));
+		var transform = this.getTransformAtTime(this.getInternalTime(thisTime));
 
 		var position = transform.getPosition();
 		this.prevPosition = this.currentPosition;
 		this.currentPosition = position;
 		if (!stopped) {
-			this.stopTime = currentTime;
+			this.stopTime = timeState.currentAttemptTime;
 			pushTickState();
 		}
 		// if (!stopped)
@@ -175,9 +178,12 @@ class PathedInterior extends InteriorObject {
 	}
 
 	public function recomputeVelocity(currentTime:Float, dt:Float) {
-		var transform = this.getTransformAtTime(this.getInternalTime(currentTime));
+		var thisTime = currentTime;
+
+		var transform = this.getTransformAtTime(this.getInternalTime(thisTime));
 		var position = transform.getPosition();
 		velocity = position.sub(this.currentPosition).multiply(1 / dt);
+		this.collider.velocity = velocity;
 	}
 
 	public function pushTickState() {
@@ -198,6 +204,7 @@ class PathedInterior extends InteriorObject {
 		this.prevPosition = this.previousState.prevPosition;
 		this.currentPosition = this.previousState.currentPosition;
 		this.velocity = this.previousState.velocity;
+		this.collider.velocity = this.velocity;
 		// this.updatePosition();
 	}
 
