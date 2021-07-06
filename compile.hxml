@@ -3,5 +3,6 @@
 -lib hlsdl
 -hl marblegame.hl
 -D windowSize=1280x720
+-D keep-inline-positions
 --main Main
 -debug

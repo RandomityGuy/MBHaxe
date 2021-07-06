@@ -76,6 +76,7 @@ class Settings {
 	};
 
 	public static var progression = [0, 0, 0];
+	public static var highscoreName = "";
 
 	public static function applySettings() {
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
@@ -110,7 +111,8 @@ class Settings {
 			highScores: highScores,
 			options: optionsSettings,
 			controls: controlsSettings,
-			progression: progression
+			progression: progression,
+			highscoreName: highscoreName
 		};
 		var json = Json.stringify(outputData);
 		File.saveContent("settings.json", json);
@@ -126,6 +128,7 @@ class Settings {
 			optionsSettings = json.options;
 			controlsSettings = json.controls;
 			progression = json.progression;
+			highscoreName = json.highscoreName;
 		}
 		Window.getInstance().vsync = optionsSettings.vsync;
 	}

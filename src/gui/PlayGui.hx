@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Window;
 import h3d.shader.AlphaMult;
 import h3d.shader.ColorKey;
 import hxd.snd.WavData;
@@ -20,6 +21,7 @@ import src.DtsObject;
 import h2d.Anim;
 import h2d.Bitmap;
 import src.ResourceLoader;
+import src.MarbleGame;
 
 class PlayGui {
 	var scene2d:h2d.Scene;
@@ -52,6 +54,8 @@ class PlayGui {
 
 	var playGuiCtrl:GuiControl;
 
+	var resizeEv:Void->Void;
+
 	public function dispose() {
 		playGuiCtrl.dispose();
 		gemImageScene.dispose();
@@ -61,6 +65,7 @@ class PlayGui {
 		powerupImageSceneTarget.dispose();
 		powerupImageSceneTargetBitmap.remove();
 		RSGOCenterText.remove();
+		Window.getInstance().removeResizeEvent(resizeEv);
 	}
 
 	public function init(scene2d:h2d.Scene) {
@@ -101,6 +106,13 @@ class PlayGui {
 		initTexts();
 
 		playGuiCtrl.render(scene2d);
+
+		resizeEv = () -> {
+			var wnd = Window.getInstance();
+			playGuiCtrl.render(MarbleGame.canvas.scene2d);
+		};
+
+		Window.getInstance().addResizeEvent(resizeEv);
 	}
 
 	public function initTimer() {

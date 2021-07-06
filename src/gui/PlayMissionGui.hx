@@ -77,6 +77,12 @@ class PlayMissionGui extends GuiImage {
 		var tabCustom = new GuiImage(ResourceLoader.getImage("data/ui/play/cust_tab.png").toTile());
 		tabCustom.position = new Vector(589, 91);
 		tabCustom.extent = new Vector(52, 198);
+		tabCustom.pressedAction = (sender) -> {
+			currentList = MissionList.customMissions;
+			currentCategory = "custom";
+			setSelectedFunc(currentList.length - 1);
+			setCategoryFunc("custom");
+		}
 		localContainer.addChild(tabCustom);
 
 		var pmBox = new GuiImage(ResourceLoader.getImage("data/ui/play/playgui.png").toTile());
@@ -262,6 +268,13 @@ class PlayMissionGui extends GuiImage {
 				localContainer.addChild(pmBox);
 				localContainer.addChild(tabAdvanced);
 			}
+			if (category == "custom") {
+				localContainer.addChild(tabBeginner);
+				localContainer.addChild(tabIntermediate);
+				localContainer.addChild(tabAdvanced);
+				localContainer.addChild(pmBox);
+				localContainer.addChild(tabCustom);
+			}
 			this.render(cast(this.parent, Canvas).scene2d);
 		}
 
@@ -303,16 +316,19 @@ class PlayMissionGui extends GuiImage {
 
 			currentSelection = index;
 
+			var currentMission = currentList[currentSelection];
+
 			if (index == 0) {
 				pmPrev.disabled = true;
 			} else
 				pmPrev.disabled = false;
-			if (index == currentList.length - 1) {
+			if (index == Math.max(currentList.length - 1, 0)) {
 				pmNext.disabled = true;
 			} else
 				pmNext.disabled = false;
 
-			if (Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)] < currentSelection) {
+			if (currentCategory != "custom"
+				&& Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)] < currentSelection) {
 				noQualText.text.visible = true;
 				filt.matrix.identity();
 				filt.matrix.colorGain(0, 96 / 255);
@@ -323,7 +339,19 @@ class PlayMissionGui extends GuiImage {
 				pmPlay.disabled = false;
 			}
 
-			var currentMission = currentList[currentSelection];
+			if (currentMission == null) {
+				noQualText.text.visible = true;
+				filt.matrix.identity();
+				filt.matrix.colorGain(0, 96 / 255);
+				pmPlay.disabled = true;
+			}
+
+			if (currentMission == null) {
+				currentMission = new Mission();
+				currentMission.title = "";
+				currentMission.description = "";
+				currentMission.path = "bruh";
+			}
 
 			var scoreData:Array<Score> = Settings.getScores(currentMission.path);
 			while (scoreData.length < 3) {

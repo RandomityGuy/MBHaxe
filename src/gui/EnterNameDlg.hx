@@ -1,5 +1,6 @@
 package gui;
 
+import src.Settings;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
@@ -59,12 +60,14 @@ class EnterNameDlg extends GuiControl {
 		var enterNameEdit = new GuiTextInput(domcasual32);
 		enterNameEdit.position = new Vector(87, 136);
 		enterNameEdit.extent = new Vector(255, 36);
+		enterNameEdit.text.text = Settings.highscoreName;
 
 		var okbutton = new GuiButton(loadButtonImages("data/ui/common/ok"));
 		okbutton.position = new Vector(163, 182);
 		okbutton.extent = new Vector(78, 59);
 		okbutton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
+			Settings.highscoreName = enterNameEdit.text.text;
 			okFunc(enterNameEdit.text.text);
 		}
 		dlg.addChild(okbutton);

@@ -7,6 +7,7 @@ class MissionList {
 	static var beginnerMissions:Array<Mission>;
 	static var intermediateMissions:Array<Mission>;
 	static var advancedMissions:Array<Mission>;
+	static var customMissions:Array<Mission>;
 
 	static var _build:Bool = false;
 
@@ -33,6 +34,7 @@ class MissionList {
 		beginnerMissions = parseDifficulty("beginner");
 		intermediateMissions = parseDifficulty("intermediate");
 		advancedMissions = parseDifficulty("advanced");
+		customMissions = parseDifficulty("custom");
 
 		_build = true;
 	}

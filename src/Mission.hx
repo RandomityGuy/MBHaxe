@@ -1,5 +1,7 @@
 package src;
 
+import h2d.Tile;
+import hxd.BitmapData;
 import mis.MisParser;
 import mis.MissionElement.MissionElementScriptObject;
 import mis.MissionElement.MissionElementType;
@@ -56,7 +58,9 @@ class Mission {
 		if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
 			return ResourceLoader.getImage(basename + ".jpg").toTile();
 		}
-		return null;
+		var img = new BitmapData(1, 1);
+		img.setPixel(0, 0, 0);
+		return Tile.fromBitmap(img);
 	}
 
 	public function getDifPath(rawElementPath:String) {
