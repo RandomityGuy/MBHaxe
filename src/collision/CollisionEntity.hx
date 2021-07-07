@@ -92,10 +92,9 @@ class CollisionEntity implements IOctreeObject {
 
 		var invMatrix = transform.clone();
 		invMatrix.invert();
-		var localpos = position.clone();
-		localpos.transform(invMatrix);
 		var sphereBounds = new Bounds();
-		sphereBounds.addSpherePos(localpos.x, localpos.y, localpos.z, radius);
+		sphereBounds.addSpherePos(position.x, position.y, position.z, radius * 1.1);
+		sphereBounds.transform(invMatrix);
 		var surfaces = octree.boundingSearch(sphereBounds);
 
 		var tform = transform.clone();
@@ -123,7 +122,7 @@ class CollisionEntity implements IOctreeObject {
 				var v = surface.points[surface.indices[i + 1]].transformed(tform);
 				var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
 
-				var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(transform);
+				var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
 
 				var res = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
 				var closest = res.point;

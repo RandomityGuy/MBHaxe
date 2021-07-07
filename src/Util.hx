@@ -1,5 +1,6 @@
 package src;
 
+import hxd.Key;
 import h2d.Tile;
 import h3d.mat.Texture;
 import hxd.BitmapData;
@@ -174,5 +175,31 @@ class Util {
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 
 		return '${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
+	}
+
+	public static function getKeyForButton(button:Int) {
+		var keyName = Key.getKeyName(button);
+		if (keyName == "MouseLeft")
+			keyName = "the Left Mouse Button";
+		if (keyName == "MouseRight")
+			keyName = "the Right Mouse Button";
+		if (keyName == "MouseMiddle")
+			keyName = "the Middle Mouse Button";
+		if (keyName == "Space")
+			keyName = "Space Bar";
+		return keyName;
+	}
+
+	public static function getKeyForButton2(button:Int) {
+		var keyName = Key.getKeyName(button);
+		if (keyName == "MouseLeft")
+			keyName = "Left Mouse";
+		if (keyName == "MouseRight")
+			keyName = "Right Mouse";
+		if (keyName == "MouseMiddle")
+			keyName = "Middle Mouse";
+		if (keyName == "Space")
+			keyName = "Space Bar";
+		return keyName;
 	}
 }

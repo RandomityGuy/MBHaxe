@@ -9,6 +9,7 @@ import hxd.res.BitmapFont;
 import src.MarbleGame;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.Util;
 
 class OptionsDlg extends GuiImage {
 	public function new() {
@@ -392,14 +393,14 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 
 				var conflicting = getConflictingBinding(bindingName, key);
 				if (conflicting == null) {
-					ctrl.txtCtrl.text.text = Key.getKeyName(key);
+					ctrl.txtCtrl.text.text = Util.getKeyForButton2(key);
 					bindingFunc(key);
 				} else {
-					var yesNoDlg = new MessageBoxYesNoDlg('<p align="center">"${Key.getKeyName(key)}" is already bound to "${conflicting}"!<br/>Do you want to undo this mapping?</p>',
+					var yesNoDlg = new MessageBoxYesNoDlg('<p align="center">"${Util.getKeyForButton2(key)}" is already bound to "${conflicting}"!<br/>Do you want to undo this mapping?</p>',
 						() -> {
-						ctrl.txtCtrl.text.text = Key.getKeyName(key);
-						bindingFunc(key);
-					}, () -> {});
+							ctrl.txtCtrl.text.text = Util.getKeyForButton2(key);
+							bindingFunc(key);
+						}, () -> {});
 					MarbleGame.canvas.pushDialog(yesNoDlg);
 				}
 			}
@@ -408,7 +409,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var moveForward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_fw"), arial14);
 		moveForward.position = new Vector(82, 104);
 		moveForward.setExtent(new Vector(117, 51));
-		moveForward.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.forward);
+		moveForward.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.forward);
 		moveForward.pressedAction = (sender) -> {
 			remapFunc("Move Forward", (key) -> Settings.controlsSettings.forward = key, moveForward);
 		}
@@ -417,7 +418,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var moveRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_rt"), arial14);
 		moveRight.position = new Vector(230, 167);
 		moveRight.setExtent(new Vector(112, 45));
-		moveRight.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.right);
+		moveRight.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.right);
 		moveRight.pressedAction = (sender) -> {
 			remapFunc("Move Right", (key) -> Settings.controlsSettings.right = key, moveRight);
 		}
@@ -426,7 +427,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var mouseFire = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_pwr"), arial14);
 		mouseFire.position = new Vector(310, 84);
 		mouseFire.setExtent(new Vector(120, 51));
-		mouseFire.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.powerup);
+		mouseFire.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.powerup);
 		mouseFire.pressedAction = (sender) -> {
 			remapFunc("Use PowerUp", (key) -> Settings.controlsSettings.powerup = key, mouseFire);
 		}
@@ -435,7 +436,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var moveBackward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_bak"), arial14);
 		moveBackward.position = new Vector(135, 235);
 		moveBackward.setExtent(new Vector(118, 48));
-		moveBackward.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.backward);
+		moveBackward.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.backward);
 		moveBackward.pressedAction = (sender) -> {
 			remapFunc("Move Backward", (key) -> Settings.controlsSettings.backward = key, moveBackward);
 		}
@@ -444,7 +445,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var moveLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_lft"), arial14);
 		moveLeft.position = new Vector(19, 189);
 		moveLeft.setExtent(new Vector(108, 45));
-		moveLeft.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.left);
+		moveLeft.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.left);
 		moveLeft.pressedAction = (sender) -> {
 			remapFunc("Move Left", (key) -> Settings.controlsSettings.left = key, moveLeft);
 		}
@@ -453,7 +454,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var moveJmp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_jmp"), arial14);
 		moveJmp.position = new Vector(299, 231);
 		moveJmp.setExtent(new Vector(120, 47));
-		moveJmp.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.jump);
+		moveJmp.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.jump);
 		moveJmp.pressedAction = (sender) -> {
 			remapFunc("Jump", (key) -> Settings.controlsSettings.jump = key, moveJmp);
 		}
@@ -491,7 +492,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var panUp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_up"), arial14);
 		panUp.position = new Vector(29, 133);
 		panUp.setExtent(new Vector(108, 42));
-		panUp.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camForward);
+		panUp.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camForward);
 		panUp.pressedAction = (sender) -> {
 			remapFunc("Rotate Camera Up", (key) -> Settings.controlsSettings.camForward = key, panUp);
 		}
@@ -500,7 +501,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var turnRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_rt"), arial14);
 		turnRight.position = new Vector(312, 99);
 		turnRight.setExtent(new Vector(103, 36));
-		turnRight.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camRight);
+		turnRight.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camRight);
 		turnRight.pressedAction = (sender) -> {
 			remapFunc("Rotate Camera Right", (key) -> Settings.controlsSettings.camRight = key, turnRight);
 		}
@@ -509,7 +510,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var panDown = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), arial14);
 		panDown.position = new Vector(42, 213);
 		panDown.setExtent(new Vector(109, 39));
-		panDown.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camBackward);
+		panDown.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camBackward);
 		panDown.pressedAction = (sender) -> {
 			remapFunc("Rotate Camera Down", (key) -> Settings.controlsSettings.camBackward = key, panDown);
 		}
@@ -518,7 +519,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var turnLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_lft"), arial14);
 		turnLeft.position = new Vector(319, 210);
 		turnLeft.setExtent(new Vector(99, 36));
-		turnLeft.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.camLeft);
+		turnLeft.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camLeft);
 		turnLeft.pressedAction = (sender) -> {
 			remapFunc("Rotate Camera Left", (key) -> Settings.controlsSettings.camLeft = key, turnLeft);
 		}
@@ -553,7 +554,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var freelook = new GuiButtonText(loadButtonImages("data/ui/options/cntrl_mous_bttn"), arial14);
 		freelook.position = new Vector(219, 225);
 		freelook.setExtent(new Vector(105, 45));
-		freelook.txtCtrl.text.text = Key.getKeyName(Settings.controlsSettings.freelook);
+		freelook.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.freelook);
 		freelook.pressedAction = (sender) -> {
 			remapFunc("Free Look", (key) -> Settings.controlsSettings.freelook = key, freelook);
 		}

@@ -386,8 +386,7 @@ class DtsObject extends GameObject {
 			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;
-				// mmaterial.mainPass.depthWrite = false;
-				material.mainPass.culling = h3d.mat.Data.Face.Front;
+				material.mainPass.culling = h3d.mat.Data.Face.None;
 			}
 			// // TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0) {
@@ -763,6 +762,8 @@ class DtsObject extends GameObject {
 					meshIndex++;
 					if (prim.buffer != null) {
 						prim.addNormals();
+						for (norm in prim.normals)
+							norm = norm.multiply(-1);
 						prim.flush();
 					}
 					mesh.primitive = prim;
@@ -783,6 +784,8 @@ class DtsObject extends GameObject {
 			}
 			if (prim.buffer != null) {
 				prim.addNormals();
+				for (norm in prim.normals)
+					norm = norm.multiply(-1);
 				prim.flush();
 			}
 			if (_regenNormals) {

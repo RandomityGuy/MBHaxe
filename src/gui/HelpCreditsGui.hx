@@ -400,27 +400,27 @@ class HelpCreditsGui extends GuiImage {
 			var val = "";
 			if (funcdata[0] == "bind") {
 				if (funcdata[1] == "moveforward")
-					val = Key.getKeyName(Settings.controlsSettings.forward);
+					val = Util.getKeyForButton(Settings.controlsSettings.forward);
 				if (funcdata[1] == "movebackward")
-					val = Key.getKeyName(Settings.controlsSettings.backward);
+					val = Util.getKeyForButton(Settings.controlsSettings.backward);
 				if (funcdata[1] == "moveleft")
-					val = Key.getKeyName(Settings.controlsSettings.left);
+					val = Util.getKeyForButton(Settings.controlsSettings.left);
 				if (funcdata[1] == "moveright")
-					val = Key.getKeyName(Settings.controlsSettings.right);
+					val = Util.getKeyForButton(Settings.controlsSettings.right);
 				if (funcdata[1] == "panup")
-					val = Key.getKeyName(Settings.controlsSettings.camForward);
+					val = Util.getKeyForButton(Settings.controlsSettings.camForward);
 				if (funcdata[1] == "pandown")
-					val = Key.getKeyName(Settings.controlsSettings.camBackward);
+					val = Util.getKeyForButton(Settings.controlsSettings.camBackward);
 				if (funcdata[1] == "turnleft")
-					val = Key.getKeyName(Settings.controlsSettings.camLeft);
+					val = Util.getKeyForButton(Settings.controlsSettings.camLeft);
 				if (funcdata[1] == "turnright")
-					val = Key.getKeyName(Settings.controlsSettings.camRight);
+					val = Util.getKeyForButton(Settings.controlsSettings.camRight);
 				if (funcdata[1] == "jump")
-					val = Key.getKeyName(Settings.controlsSettings.jump);
+					val = Util.getKeyForButton(Settings.controlsSettings.jump);
 				if (funcdata[1] == "mousefire")
-					val = Key.getKeyName(Settings.controlsSettings.powerup);
+					val = Util.getKeyForButton(Settings.controlsSettings.powerup);
 				if (funcdata[1] == "freelook")
-					val = Key.getKeyName(Settings.controlsSettings.freelook);
+					val = Util.getKeyForButton(Settings.controlsSettings.freelook);
 			}
 			start = val.length + pos;
 			text = pre + val + post;

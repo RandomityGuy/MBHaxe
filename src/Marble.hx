@@ -821,7 +821,7 @@ class Marble extends GameObject {
 
 			var intersectT = this.getIntersectionTime(timeStep, velocity);
 
-			if (intersectT < timeStep && intersectT > 0.000001) {
+			if (intersectT < timeStep && intersectT >= 0.001) {
 				// intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
 				// intersectT /= 2;
 				var diff = timeStep - intersectT;
@@ -885,7 +885,7 @@ class Marble extends GameObject {
 			}
 
 			if (mode == Finish) {
-				this.velocity = this.velocity.multiply(0.7);
+				this.velocity = this.velocity.multiply(0.925);
 			}
 
 			var newPos = pos.add(this.velocity.multiply(timeStep));

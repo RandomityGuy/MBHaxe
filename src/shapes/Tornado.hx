@@ -48,7 +48,7 @@ class Tornado extends ForceObject {
 		super.init(level);
 		this.soundChannel = AudioManager.playSound(ResourceLoader.getAudio("data/sound/tornado.wav"), this.getAbsPos().getPosition(), true);
 		for (material in this.materials) {
-			// material.mainPass.setPassName("overlay");
+			material.blendMode = Alpha;
 		}
 	}
 
