@@ -53,8 +53,8 @@ class Settings {
 		videoDriver: 0,
 		colorDepth: 1,
 		shadows: false,
-		musicVolume: 0,
-		soundVolume: 0,
+		musicVolume: 1,
+		soundVolume: 0.7,
 		vsync: true
 	};
 

@@ -18,6 +18,9 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
+		#if hl
+		hl.UI.closeConsole();
+		#end
 		Settings.init();
 		AudioManager.init();
 		AudioManager.playShell();

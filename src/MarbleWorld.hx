@@ -580,9 +580,44 @@ class MarbleWorld extends Scheduler {
 		this.collisionWorld.addEntity(trigger.collider);
 	}
 
-	public function addTSStatic(element:MissionElementTSStatic) {}
+	public function addTSStatic(element:MissionElementTSStatic) {
+		// !! WARNING - UNTESTED !!
+		var shapeName = element.shapename;
+		var index = shapeName.indexOf('data/');
+		if (index == -1)
+			return;
 
-	public function addParticleEmitterNode(element:MissionElementParticleEmitterNode) {}
+		var tsShape = new DtsObject();
+		tsShape.useInstancing = true;
+		tsShape.dtsPath = shapeName.substring(index + 'data/'.length);
+
+		var shapePosition = MisParser.parseVector3(element.position);
+		shapePosition.x = -shapePosition.x;
+		var shapeRotation = MisParser.parseRotation(element.rotation);
+		shapeRotation.x = -shapeRotation.x;
+		shapeRotation.w = -shapeRotation.w;
+		var shapeScale = MisParser.parseVector3(element.scale);
+
+		// Apparently we still do collide with zero-volume shapes
+		if (shapeScale.x == 0)
+			shapeScale.x = 0.0001;
+		if (shapeScale.y == 0)
+			shapeScale.y = 0.0001;
+		if (shapeScale.z == 0)
+			shapeScale.z = 0.0001;
+
+		var mat = shapeRotation.toMatrix();
+		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
+		mat.setPosition(shapePosition);
+
+		this.addDtsObject(tsShape);
+
+		tsShape.setTransform(mat);
+	}
+
+	public function addParticleEmitterNode(element:MissionElementParticleEmitterNode) {
+		// TODO THIS SHIT
+	}
 
 	public function addInterior(obj:InteriorObject) {
 		this.interiors.push(obj);
