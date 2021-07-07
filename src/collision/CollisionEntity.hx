@@ -136,7 +136,7 @@ class CollisionEntity implements IOctreeObject {
 
 							var supportVec = surface.support(normal, tform);
 							if (!(supportVec.equals(v0) || supportVec.equals(v) || supportVec.equals(v2))) {
-								normal = surfacenormal;
+								// normal = surfacenormal;
 							}
 
 							// We find the normal that is closest to the surface normal, sort of fixes weird edge cases of when colliding with

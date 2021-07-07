@@ -998,7 +998,8 @@ class MarbleWorld extends Scheduler {
 			return q;
 		}
 
-		var quatChange = getRotQuat(oldUp, vec);
+		var quatChange = new Quat();
+		quatChange.initMoveTo(oldUp, vec);
 		// Instead of calculating the new quat from nothing, calculate it from the last one to guarantee the shortest possible rotation.
 		// quatChange.initMoveTo(oldUp, vec);
 		quatChange.multiply(quatChange, currentQuat);
