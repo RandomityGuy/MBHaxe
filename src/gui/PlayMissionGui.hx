@@ -111,19 +111,19 @@ class PlayMissionGui extends GuiImage {
 		levelWnd.extent = new Vector(258, 194);
 		pmPreview.addChild(levelWnd);
 
-		var domcasual24fontdata = ResourceLoader.loader.load("data/font/DomCasual24px.fnt");
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasual24px.fnt");
 		var domcasual24 = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24.loader = ResourceLoader.loader;
 
-		var domcasual32fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
 		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32.loader = ResourceLoader.loader;
 
-		var arial14fontdata = ResourceLoader.loader.load("data/font/Arial14.fnt");
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial14.fnt");
 		var arial14 = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14.loader = ResourceLoader.loader;
 
-		var arialBold14fontdata = ResourceLoader.loader.load("data/font/ArialBold14px.fnt");
+		var arialBold14fontdata = ResourceLoader.getFileEntry("data/font/ArialBold14px.fnt");
 		var arialBold14 = new BitmapFont(arialBold14fontdata.entry);
 		@:privateAccess arialBold14.loader = ResourceLoader.loader;
 		// TODO texts

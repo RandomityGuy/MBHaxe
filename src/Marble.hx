@@ -181,7 +181,7 @@ class Marble extends GameObject {
 		super();
 		var geom = Sphere.defaultUnitSphere();
 		geom.addUVs();
-		var marbleTexture = ResourceLoader.loader.load("data/shapes/balls/base.marble.png").toTexture();
+		var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
 		var marbleMaterial = Material.create(marbleTexture);
 		marbleMaterial.shadows = false;
 		marbleMaterial.castShadows = true;

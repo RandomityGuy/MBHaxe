@@ -13,7 +13,7 @@ class MessageBoxYesNoDlg extends GuiControl {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var domcasual24fontdata = ResourceLoader.loader.load("data/font/DomCasual24px.fnt");
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasual24px.fnt");
 		var domcasual24 = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24.loader = ResourceLoader.loader;
 

@@ -26,7 +26,7 @@ class ExitGameDlg extends GuiControl {
 		dialogImg.position = new Vector(134, 148);
 		dialogImg.extent = new Vector(388, 186);
 
-		var domcasual32fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
 		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32.loader = ResourceLoader.loader;
 

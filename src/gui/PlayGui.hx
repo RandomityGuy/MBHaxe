@@ -270,7 +270,7 @@ class PlayGui {
 	}
 
 	function initTexts() {
-		var fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
+		var fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
 		var bfont = new BitmapFont(fontdata.entry);
 		@:privateAccess bfont.loader = ResourceLoader.loader;
 

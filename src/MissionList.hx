@@ -17,7 +17,12 @@ class MissionList {
 		if (_build)
 			return;
 		function parseDifficulty(difficulty:String) {
+			#if hl
 			var difficultyFiles = ResourceLoader.fileSystem.dir("data/missions/" + difficulty);
+			#end
+			#if js
+			var difficultyFiles = ResourceLoader.fileSystem.dir("missions/" + difficulty);
+			#end
 			var difficultyMissions = [];
 			for (file in difficultyFiles) {
 				if (file.extension == "mis") {

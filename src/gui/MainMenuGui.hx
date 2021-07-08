@@ -9,7 +9,7 @@ import src.ResourceLoader;
 class MainMenuGui extends GuiImage {
 	public function new() {
 		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
-		var fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
+		var fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
 		var bfont = new BitmapFont(fontdata.entry);
 		@:privateAccess bfont.loader = ResourceLoader.loader;
 

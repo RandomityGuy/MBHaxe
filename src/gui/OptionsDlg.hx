@@ -19,7 +19,7 @@ class OptionsDlg extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var arial14fontdata = ResourceLoader.loader.load("data/font/Arial14.fnt");
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial14.fnt");
 		var arial14 = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14.loader = ResourceLoader.loader;
 

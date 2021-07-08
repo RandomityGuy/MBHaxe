@@ -132,11 +132,11 @@ class ResourceLoader {
 		return null;
 	}
 
-	public static function getFile(path:String) {
+	public static function getFileEntry(path:String) {
 		#if js
 		path = StringTools.replace(path, "data/", "");
 		#end
-		var file = fileSystem.get(path);
+		var file = loader.load(path);
 		return file;
 	}
 
@@ -149,6 +149,9 @@ class ResourceLoader {
 	}
 
 	public static function getFullNamesOf(path:String) {
+		#if js
+		path = StringTools.replace(path, "data/", "");
+		#end
 		var files = fileSystem.dir(Path.directory(path)); // FileSystem.readDirectory(Path.directory(path));
 		var names = [];
 		var fname = Path.withoutDirectory(path).toLowerCase();

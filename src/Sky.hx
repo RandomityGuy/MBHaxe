@@ -43,11 +43,16 @@ class Sky extends Object {
 		env.compute();
 		// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
 		var shad = new Skybox(texture);
+		#if js
 		skyMesh.material.mainPass.addShader(shad);
+		#end
 		// skyMesh.material.shadows = false;
 	}
 
 	function createSkyboxCubeTextured(dmlPath:String) {
+		#if js
+		dmlPath = StringTools.replace(dmlPath, "data/", "");
+		#end
 		if (ResourceLoader.fileSystem.exists(dmlPath)) {
 			var dmlFile = ResourceLoader.fileSystem.get(dmlPath).getText();
 			var dmlDirectory = Path.directory(dmlPath);

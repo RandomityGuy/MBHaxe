@@ -224,6 +224,10 @@ class DifBuilder {
 				tex = tex.split('/')[1];
 			}
 
+			#if js
+			path = StringTools.replace(path, "data/", "");
+			#end
+
 			if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".jpg")) {
 				return true;
 			}
@@ -299,7 +303,7 @@ class DifBuilder {
 			var material:Material;
 			var texture:Texture;
 			if (canFindTex(grp)) {
-				texture = ResourceLoader.loader.load(tex(grp)).toImage().toTexture();
+				texture = ResourceLoader.getFileEntry(tex(grp)).toImage().toTexture();
 				texture.wrap = Wrap.Repeat;
 				material = h3d.mat.Material.create(texture);
 			} else {

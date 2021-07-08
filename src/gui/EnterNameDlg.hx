@@ -21,19 +21,19 @@ class EnterNameDlg extends GuiControl {
 			return [normal, hover, pressed];
 		}
 
-		var arial14fontdata = ResourceLoader.loader.load("data/font/Arial14.fnt");
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial14.fnt");
 		var arial14 = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14.loader = ResourceLoader.loader;
 
-		var domcasual32fontdata = ResourceLoader.loader.load("data/font/DomCasual32px.fnt");
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
 		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32.loader = ResourceLoader.loader;
 
-		var expo50fontdata = ResourceLoader.loader.load("data/font/Expo50.fnt");
+		var expo50fontdata = ResourceLoader.getFileEntry("data/font/Expo50.fnt");
 		var expo50 = new BitmapFont(expo50fontdata.entry);
 		@:privateAccess expo50.loader = ResourceLoader.loader;
 
-		var expo32fontdata = ResourceLoader.loader.load("data/font/Expo32.fnt");
+		var expo32fontdata = ResourceLoader.getFileEntry("data/font/Expo32.fnt");
 		var expo32 = new BitmapFont(expo32fontdata.entry);
 		@:privateAccess expo32.loader = ResourceLoader.loader;
 
