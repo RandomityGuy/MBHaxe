@@ -12,6 +12,7 @@ import dif.Dif;
 import hxd.fs.LocalFileSystem;
 import hxd.fs.FileSystem;
 import hxd.res.Loader;
+import fs.ManifestProgress;
 
 class ResourceLoader {
 	#if hl
@@ -34,17 +35,17 @@ class ResourceLoader {
 
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
-	public static function init(onLoadedFunc:Void->Void) {
+	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
 		#if js
 		var mfileSystem = ManifestBuilder.create("data");
 		var mloader = new ManifestLoader(mfileSystem);
 
-		mloader.onLoaded = () -> {
+		var preloader = new ManifestProgress(mloader, () -> {
 			loader = mloader;
 			fileSystem = mfileSystem;
 			onLoadedFunc();
-		};
-		mloader.loadManifestFiles();
+		}, scene2d);
+		preloader.start();
 		#end
 		#if hl
 		onLoadedFunc();

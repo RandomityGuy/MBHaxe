@@ -26,7 +26,7 @@ class Main extends hxd.App {
 		#if hl
 		hl.UI.closeConsole();
 		#end
-		ResourceLoader.init(() -> {
+		ResourceLoader.init(s2d, () -> {
 			Settings.init();
 			AudioManager.init();
 			AudioManager.playShell();

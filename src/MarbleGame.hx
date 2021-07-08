@@ -29,6 +29,24 @@ class MarbleGame {
 		canvas = new Canvas(scene2d, cast this);
 		this.scene = scene;
 		this.scene2d = scene2d;
+
+		#if js
+		js.Browser.document.addEventListener('pointerlockchange', () -> {
+			if (!paused && world != null) {
+				if (world.finishTime == null) {
+					if (js.Browser.document.pointerLockElement != @:privateAccess Window.getInstance().canvas) {
+						paused = true;
+						handlePauseGame();
+						// Focus the shit again
+						var jsCanvas = @:privateAccess Window.getInstance().canvas;
+						@:privateAccess Window.getInstance().lockCallback = null; // Fix cursorlock position shit
+						jsCanvas.focus();
+						// js.Browser.document.exitPointerLock();
+					}
+				}
+			}
+		});
+		#end
 	}
 
 	public function update(dt:Float) {
@@ -41,30 +59,15 @@ class MarbleGame {
 				world.update(dt);
 			}
 			if (Key.isPressed(Key.ESCAPE) && world.finishTime == null) {
+				#if hl
 				paused = !paused;
-				if (paused) {
-					world.setCursorLock(false);
-					exitGameDlg = new ExitGameDlg((sender) -> {
-						canvas.popDialog(exitGameDlg);
-						paused = !paused;
-						world.dispose();
-						world = null;
-						canvas.setContent(new PlayMissionGui());
-					}, (sender) -> {
-						canvas.popDialog(exitGameDlg);
-						paused = !paused;
-						world.setCursorLock(true);
-					}, (sender) -> {
-						canvas.popDialog(exitGameDlg);
-						world.restart();
-						world.setCursorLock(true);
-						paused = !paused;
-					});
-					canvas.pushDialog(exitGameDlg);
-				} else {
-					canvas.popDialog(exitGameDlg);
-					world.setCursorLock(true);
-				}
+				handlePauseGame();
+				#end
+				#if js
+				if (paused)
+					paused = false;
+				handlePauseGame();
+				#end
 			}
 		}
 		if (canvas != null) {
@@ -73,6 +76,32 @@ class MarbleGame {
 				position: new Vector(wnd.mouseX, wnd.mouseY)
 			}
 			canvas.update(dt, mouseState);
+		}
+	}
+
+	public function handlePauseGame() {
+		if (paused) {
+			world.setCursorLock(false);
+			exitGameDlg = new ExitGameDlg((sender) -> {
+				canvas.popDialog(exitGameDlg);
+				paused = !paused;
+				world.dispose();
+				world = null;
+				canvas.setContent(new PlayMissionGui());
+			}, (sender) -> {
+				canvas.popDialog(exitGameDlg);
+				paused = !paused;
+				world.setCursorLock(true);
+			}, (sender) -> {
+				canvas.popDialog(exitGameDlg);
+				world.restart();
+				world.setCursorLock(true);
+				paused = !paused;
+			});
+			canvas.pushDialog(exitGameDlg);
+		} else {
+			canvas.popDialog(exitGameDlg);
+			world.setCursorLock(true);
 		}
 	}
 

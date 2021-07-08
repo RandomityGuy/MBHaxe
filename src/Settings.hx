@@ -77,7 +77,7 @@ class Settings {
 		invertYAxis: false
 	};
 
-	public static var progression = [0, 0, 0];
+	public static var progression = [24, 24, 52];
 	public static var highscoreName = "";
 
 	public static function applySettings() {

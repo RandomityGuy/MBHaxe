@@ -348,6 +348,8 @@ class DtsObject extends GameObject {
 
 			var material = Material.create();
 
+			var iflMaterial = false;
+
 			if (fullName == null || (this.isTSStatic && ((flags & (1 << 31) > 0)))) {
 				if (this.isTSStatic) {
 					// TODO USE PBR???
@@ -355,6 +357,7 @@ class DtsObject extends GameObject {
 			} else if (Path.extension(fullName) == "ifl") {
 				var keyframes = parseIfl(fullName);
 				this.materialInfos.set(material, keyframes);
+				iflMaterial = true;
 				// TODO IFL SHIT
 			} else {
 				var texture:Texture = ResourceLoader.getTexture(fullName);
@@ -370,12 +373,13 @@ class DtsObject extends GameObject {
 				// TODO TRANSLUENCY SHIT
 			}
 			material.shadows = false;
-			if (material.texture == null) {
+			if (material.texture == null && !iflMaterial) {
 				// var dtsshader = new DtsTexture();
 				// dtsshader.currentOpacity = 1;
 				// Make a 1x1 white texture
 				var bitmap = new hxd.BitmapData(1, 1);
 				bitmap.setPixel(0, 0, 0xFFFFFF);
+				bitmap.setPixel(1, 1, 0xFFFFFF);
 				var texture = new Texture(1, 1);
 				texture.uploadBitmap(bitmap);
 				material.texture = texture;

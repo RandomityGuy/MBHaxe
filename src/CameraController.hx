@@ -1,6 +1,5 @@
 package src;
 
-import js.Browser;
 import h3d.col.Plane;
 import h3d.mat.Material;
 import h3d.prim.Cube;
@@ -81,6 +80,10 @@ class CameraController extends Object {
 	}
 
 	public function lockCursor() {
+		#if js
+		var jsCanvas = @:privateAccess Window.getInstance().canvas;
+		jsCanvas.focus();
+		#end
 		Window.getInstance().lockPointer((x, y) -> orbit(x, y));
 		#if hl
 		Cursor.show(false);
@@ -91,6 +94,10 @@ class CameraController extends Object {
 		Window.getInstance().unlockPointer();
 		#if hl
 		Cursor.show(true);
+		#end
+		#if js
+		var jsCanvas = @:privateAccess Window.getInstance().canvas;
+		@:privateAccess Window.getInstance().lockCallback = null; // Fix cursorlock position shit
 		#end
 	}
 
