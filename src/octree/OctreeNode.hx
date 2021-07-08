@@ -139,14 +139,13 @@ class OctreeNode implements IOctreeElement {
 			return;
 
 		for (obj in this.objects) {
-			var iSec = new Vector();
-			var iNorm = new Vector();
-			if (obj.isIntersectedByRay(rayOrigin, rayDirection, iSec, iNorm)) {
+			var iSecs = obj.rayCast(rayOrigin, rayDirection);
+			for (intersection in iSecs) {
 				var intersectionData = new OctreeIntersection();
-				intersectionData.distance = rayOrigin.distance(iSec);
+				intersectionData.distance = rayOrigin.distance(intersection.point);
 				intersectionData.object = obj;
-				intersectionData.point = iSec;
-				intersectionData.normal = iNorm;
+				intersectionData.point = intersection.point;
+				intersectionData.normal = intersection.normal;
 				intersections.push(intersectionData);
 			}
 		}

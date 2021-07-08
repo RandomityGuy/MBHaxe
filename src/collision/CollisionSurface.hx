@@ -76,7 +76,7 @@ class CollisionSurface implements IOctreeObject {
 		this.priority = priority;
 	}
 
-	public function isIntersectedByRay(rayOrigin:Vector, rayDirection:Vector, intersectionPoint:Vector, intersectionNormal:Vector):Bool {
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
 		var intersections = [];
 		var i = 0;
 		while (i < indices.length) {
@@ -89,18 +89,12 @@ class CollisionSurface implements IOctreeObject {
 			var t = -(rayOrigin.dot(n) + d) / (rayDirection.dot(n));
 			var ip = rayOrigin.add(rayDirection.multiply(t));
 			ip.w = 1;
-			if (Collision.PointInTriangle(ip, p1, p2, p3)) {
-				intersections.push({pt: ip, n: n});
+			if (t >= 0 && Collision.PointInTriangle(ip, p1, p2, p3)) {
+				intersections.push({point: ip, normal: n});
 			}
 			i += 3;
 		}
-		intersections.sort((a,
-				b) -> (a.pt.distance(rayOrigin) == b.pt.distance(rayOrigin)) ? 0 : (a.pt.distance(rayOrigin) > b.pt.distance(rayOrigin) ? 1 : -1));
-		if (intersections.length > 0) {
-			intersectionPoint.load(intersections[0].pt);
-			intersectionNormal.load(intersections[0].n);
-		}
-		return intersections.length > 0;
+		return intersections;
 	}
 
 	public function support(direction:Vector, transform:Matrix) {

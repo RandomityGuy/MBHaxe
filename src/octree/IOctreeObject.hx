@@ -3,7 +3,12 @@ package octree;
 import h3d.Vector;
 import h3d.col.Bounds;
 
+typedef RayIntersectionData = {
+	var point:Vector;
+	var normal:Vector;
+}
+
 interface IOctreeObject extends IOctreeElement {
 	var boundingBox:Bounds;
-	function isIntersectedByRay(rayOrigin:Vector, rayDirection:Vector, intersectionPoint:Vector, intersectionNormal:Vector):Bool;
+	function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData>;
 }

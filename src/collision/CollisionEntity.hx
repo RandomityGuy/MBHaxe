@@ -59,22 +59,21 @@ class CollisionEntity implements IOctreeObject {
 		this.boundingBox = boundingBox;
 	}
 
-	public function isIntersectedByRay(rayOrigin:Vector, rayDirection:Vector, intersectionPoint:Vector, intersectionNormal:Vector):Bool {
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
 		var invMatrix = transform.clone();
 		invMatrix.invert();
 		var rStart = rayOrigin.clone();
 		rStart.transform(invMatrix);
 		var rDir = rayDirection.transformed3x3(invMatrix);
 		var intersections = octree.raycast(rStart, rDir);
+		var iData:Array<RayIntersectionData> = [];
 		for (i in intersections) {
 			i.point.transform(transform);
 			i.normal.transform3x3(transform);
+			i.normal.normalize();
+			iData.push({point: i.point, normal: i.normal});
 		}
-		if (intersections.length > 0) {
-			intersectionPoint.load(intersections[0].point);
-			intersectionNormal.load(intersections[0].normal);
-		}
-		return intersections.length > 0;
+		return iData;
 	}
 
 	public function getElementType() {
