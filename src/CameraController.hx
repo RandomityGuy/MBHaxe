@@ -1,5 +1,6 @@
 package src;
 
+import js.Browser;
 import h3d.col.Plane;
 import h3d.mat.Material;
 import h3d.prim.Cube;
@@ -76,12 +77,7 @@ class CameraController extends Object {
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
 		level.scene.camera.fovY = 60;
-		#if hlsdl
 		lockCursor();
-		#end
-		#if hldx
-		Cursor.show(false);
-		#end
 	}
 
 	public function lockCursor() {

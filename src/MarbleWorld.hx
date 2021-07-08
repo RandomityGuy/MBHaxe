@@ -1029,12 +1029,8 @@ class MarbleWorld extends Scheduler {
 		this.cursorLock = enabled;
 		if (enabled) {
 			this.marble.camera.lockCursor();
-			#if hl
-			#end
 		} else {
-			#if hl
 			this.marble.camera.unlockCursor();
-			#end
 		}
 	}
 
