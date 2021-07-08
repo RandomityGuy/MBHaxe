@@ -171,6 +171,7 @@ class Marble extends GameObject {
 	var superbounceSound:Channel;
 	var shockabsorberSound:Channel;
 	var helicopterSound:Channel;
+	var playedSounds = [];
 
 	public var mode:Mode = Play;
 
@@ -283,10 +284,16 @@ class Marble extends GameObject {
 			for (contact in contacts) {
 				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
 					if (contact.otherObject is RoundBumper) {
-						AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumperding1.wav"));
+						if (!playedSounds.contains("data/sound/bumperding1.wav")) {
+							AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumperding1.wav"));
+							playedSounds.push("data/sound/bumperding1.wav");
+						}
 					}
 					if (contact.otherObject is TriangleBumper) {
-						AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumper1.wav"));
+						if (!playedSounds.contains("data/sound/bumper1.wav")) {
+							AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumper1.wav"));
+							playedSounds.push("data/sound/bumper1.wav");
+						}
 					}
 					forceObjectCount++;
 					contactNormal = contactNormal.add(contact.normal);
@@ -485,7 +492,7 @@ class Marble extends GameObject {
 				var soFar = 0.0;
 				for (k in 0...contacts.length) {
 					var dist = this._radius - contacts[k].contactDistance;
-					var timeToSeparate = 0.016;
+					var timeToSeparate = 0.1;
 					if (dist >= 0) {
 						var f1 = this.velocity.sub(contacts[k].velocity).add(dir.multiply(soFar)).dot(contacts[k].normal);
 						var f2 = timeToSeparate * f1;
@@ -531,7 +538,10 @@ class Marble extends GameObject {
 			}
 			if (sv < this._jumpImpulse) {
 				this.velocity = this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv)));
-				AudioManager.playSound(ResourceLoader.getAudio("data/sound/jump.wav"));
+				if (!playedSounds.contains("data/sound/jump.wav")) {
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/jump.wav"));
+					playedSounds.push("data/sound/jump.wav");
+				}
 			}
 		}
 		for (j in 0...contacts.length) {
@@ -951,6 +961,7 @@ class Marble extends GameObject {
 			}
 		}
 
+		playedSounds = [];
 		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
 
 		if (this.controllable) {

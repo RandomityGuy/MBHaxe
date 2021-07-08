@@ -41,6 +41,7 @@ class GuiControl {
 	var parent:GuiControl;
 
 	var _entered:Bool = false;
+	var _skipNextEvent:Bool = false;
 
 	public function new() {}
 
@@ -48,45 +49,50 @@ class GuiControl {
 		for (c in children) {
 			c.render(scene2d);
 		}
+		this._skipNextEvent = true;
 	}
 
 	public function update(dt:Float, mouseState:MouseState) {
-		var hitTestRect = getHitTestRect();
-		if (hitTestRect.inRect(mouseState.position)) {
-			if (Key.isPressed(Key.MOUSE_LEFT)) {
-				mouseState.button = Key.MOUSE_LEFT;
-				this.onMousePress(mouseState);
-			}
-			if (Key.isPressed(Key.MOUSE_RIGHT)) {
-				mouseState.button = Key.MOUSE_RIGHT;
-				this.onMousePress(mouseState);
-			}
-			if (Key.isReleased(Key.MOUSE_LEFT)) {
-				mouseState.button = Key.MOUSE_LEFT;
-				this.onMouseRelease(mouseState);
-			}
-			if (Key.isReleased(Key.MOUSE_RIGHT)) {
-				mouseState.button = Key.MOUSE_RIGHT;
-				this.onMouseRelease(mouseState);
-			}
-			if (Key.isDown(Key.MOUSE_LEFT)) {
-				mouseState.button = Key.MOUSE_LEFT;
-				this.onMouseDown(mouseState);
-			}
-			if (Key.isDown(Key.MOUSE_RIGHT)) {
-				mouseState.button = Key.MOUSE_RIGHT;
-				this.onMouseDown(mouseState);
-			}
+		if (!_skipNextEvent) {
+			var hitTestRect = getHitTestRect();
+			if (hitTestRect.inRect(mouseState.position)) {
+				if (Key.isPressed(Key.MOUSE_LEFT)) {
+					mouseState.button = Key.MOUSE_LEFT;
+					this.onMousePress(mouseState);
+				}
+				if (Key.isPressed(Key.MOUSE_RIGHT)) {
+					mouseState.button = Key.MOUSE_RIGHT;
+					this.onMousePress(mouseState);
+				}
+				if (Key.isReleased(Key.MOUSE_LEFT)) {
+					mouseState.button = Key.MOUSE_LEFT;
+					this.onMouseRelease(mouseState);
+				}
+				if (Key.isReleased(Key.MOUSE_RIGHT)) {
+					mouseState.button = Key.MOUSE_RIGHT;
+					this.onMouseRelease(mouseState);
+				}
+				if (Key.isDown(Key.MOUSE_LEFT)) {
+					mouseState.button = Key.MOUSE_LEFT;
+					this.onMouseDown(mouseState);
+				}
+				if (Key.isDown(Key.MOUSE_RIGHT)) {
+					mouseState.button = Key.MOUSE_RIGHT;
+					this.onMouseDown(mouseState);
+				}
 
-			if (!_entered) {
-				_entered = true;
-				this.onMouseEnter(mouseState);
+				if (!_entered) {
+					_entered = true;
+					this.onMouseEnter(mouseState);
+				}
+			} else {
+				if (_entered) {
+					_entered = false;
+					this.onMouseLeave(mouseState);
+				}
 			}
 		} else {
-			if (_entered) {
-				_entered = false;
-				this.onMouseLeave(mouseState);
-			}
+			_skipNextEvent = false;
 		}
 		for (c in children) {
 			c.update(dt, mouseState);

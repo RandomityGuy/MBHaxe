@@ -127,10 +127,10 @@ class EndGameGui extends GuiControl {
 
 		var rightColumn = new GuiMLText(domcasual32, mlFontLoader);
 		rightColumn.text.textColor = 0x000000;
-		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="#FFFF00">${Util.formatTime(mission.goldTime)}</font><br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
+		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
 		for (i in 0...3) {
 			if (scoreData[i].time < mission.goldTime)
-				rightColumn.text.text += '<font color="#FFFF00">${Util.formatTime(scoreData[i].time)}</font><br/>';
+				rightColumn.text.text += '<br/>';
 			else
 				rightColumn.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
 		}
@@ -138,6 +138,20 @@ class EndGameGui extends GuiControl {
 		rightColumn.position = new Vector(274, 103);
 		rightColumn.extent = new Vector(208, 50);
 		pg.addChild(rightColumn);
+
+		var rightColumnGold = new GuiMLText(domcasual32, mlFontLoader);
+		rightColumnGold.text.textColor = 0xFFFF00;
+		rightColumnGold.text.text = '<br/>${Util.formatTime(mission.goldTime)}<br/><br/><br/><font face="Arial14"><br/></font><br/>';
+		for (i in 0...3) {
+			if (scoreData[i].time < mission.goldTime)
+				rightColumnGold.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
+			else
+				rightColumnGold.text.text += '<br/>';
+		}
+		rightColumnGold.text.filter = new DropShadow(1.414, 0.785, 0x00000, 1, 0, 0.4, 1, true);
+		rightColumnGold.position = new Vector(274, 103);
+		rightColumnGold.extent = new Vector(208, 50);
+		pg.addChild(rightColumnGold);
 
 		pg.addChild(continueButton);
 		pg.addChild(restartButton);
@@ -168,12 +182,20 @@ class EndGameGui extends GuiControl {
 					leftColumn.text.text += '${i + 1}. ${scoreData[i].name}<br/>';
 				}
 
-				rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="#FFFF00">${Util.formatTime(mission.goldTime)}</font><br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
+				rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
 				for (i in 0...3) {
 					if (scoreData[i].time < mission.goldTime)
-						rightColumn.text.text += '<font color="#FFFF00">${Util.formatTime(scoreData[i].time)}</font><br/>';
+						rightColumn.text.text += '<br/>';
 					else
 						rightColumn.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
+				}
+
+				rightColumnGold.text.text = '<br/>${Util.formatTime(mission.goldTime)}<br/><br/><br/><font face="Arial14"><br/></font><br/>';
+				for (i in 0...3) {
+					if (scoreData[i].time < mission.goldTime)
+						rightColumnGold.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
+					else
+						rightColumnGold.text.text += '<br/>';
 				}
 
 				Settings.saveScore(mission.path, myScore);

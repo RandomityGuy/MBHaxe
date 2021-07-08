@@ -620,11 +620,13 @@ class DtsObject extends GameObject {
 
 			var rot = sequence.rotationMatters.length > 0 ? sequence.rotationMatters[0] : 0;
 			var trans = sequence.translationMatters.length > 0 ? sequence.translationMatters[0] : 0;
+			var scale = sequence.scaleMatters.length > 0 ? sequence.scaleMatters[0] : 0;
 			var affectedCount = 0;
 			var completion = timeState.timeSinceLoad / sequence.duration;
 
 			var quaternions:Array<Quat> = null;
 			var translations:Array<Vector> = null;
+			var scales:Array<Vector> = null;
 
 			var actualKeyframe = this.sequenceKeyframeOverride.exists(sequence) ? this.sequenceKeyframeOverride.get(sequence) : ((completion * sequence.numKeyFrames) % sequence.numKeyFrames);
 			if (this.lastSequenceKeyframes.get(sequence) == actualKeyframe)
@@ -695,6 +697,33 @@ class DtsObject extends GameObject {
 						var trans = new Vector(translation.x, translation.y, translation.z);
 						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
 						// translations.push();
+					}
+				}
+			}
+
+			if (scale > 0) {
+				scales = [];
+
+				for (i in 0...this.dts.nodes.length) {
+					var affected = ((1 << i) & scale) != 0;
+
+					if (affected) {
+						var scale1 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeLow];
+						var scale2 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeHigh];
+
+						var v1 = new Vector(scale1.x, scale1.y, scale1.z);
+						var v2 = new Vector(scale2.x, scale2.y, scale2.z);
+
+						var scaleVec = Util.lerpThreeVectors(v1, v2, t);
+						this.graphNodes[i].scaleX = scaleVec.x;
+						this.graphNodes[i].scaleY = scaleVec.y;
+						this.graphNodes[i].scaleZ = scaleVec.z;
+
+						this.dirtyTransforms[i] = true;
+					} else {
+						this.graphNodes[i].scaleX = 1;
+						this.graphNodes[i].scaleY = 1;
+						this.graphNodes[i].scaleZ = 1;
 					}
 				}
 			}

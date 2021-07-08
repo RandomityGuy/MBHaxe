@@ -943,14 +943,16 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function pickUpPowerUp(powerUp:PowerUp) {
-		if (this.marble.heldPowerup == powerUp)
-			return false;
+		if (this.marble.heldPowerup != null)
+			if (this.marble.heldPowerup.identifier == powerUp.identifier)
+				return false;
 		this.marble.heldPowerup = powerUp;
 		this.playGui.setPowerupImage(powerUp.identifier);
 		return true;
 	}
 
 	public function deselectPowerUp() {
+		this.marble.heldPowerup = null;
 		this.playGui.setPowerupImage("");
 	}
 
@@ -979,7 +981,7 @@ class MarbleWorld extends Scheduler {
 
 			var u = v1.normalized();
 			var v = v2.normalized();
-			if (u.multiply(-1).equals(v)) {
+			if (u.dot(v) == -1) {
 				var q = new Quat();
 				var o = orthogonal(u).normalized();
 				q.x = o.x;
@@ -998,8 +1000,7 @@ class MarbleWorld extends Scheduler {
 			return q;
 		}
 
-		var quatChange = new Quat();
-		quatChange.initMoveTo(oldUp, vec);
+		var quatChange = getRotQuat(oldUp, vec);
 		// Instead of calculating the new quat from nothing, calculate it from the last one to guarantee the shortest possible rotation.
 		// quatChange.initMoveTo(oldUp, vec);
 		quatChange.multiply(quatChange, currentQuat);
