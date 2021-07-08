@@ -1,11 +1,11 @@
 package dts;
 
 import haxe.Exception;
-import sys.io.File;
 import dif.io.BytesReader;
 import dif.math.QuatF;
 import dif.math.Box3F;
 import dif.math.Point3F;
+import src.ResourceLoader;
 
 @:publicFields
 class DtsFile {
@@ -61,8 +61,8 @@ class DtsFile {
 	public function new() {}
 
 	public function read(filepath:String) {
-		var f = File.read(filepath);
-		var bytes = f.readAll();
+		var f = ResourceLoader.fileSystem.get(filepath);
+		var bytes = f.getBytes();
 		var br = new BytesReader(bytes);
 
 		fileVersion = br.readInt16();

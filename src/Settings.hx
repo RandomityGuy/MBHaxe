@@ -5,7 +5,9 @@ import hxd.Key;
 import src.MarbleGame;
 import hxd.Window;
 import haxe.DynamicAccess;
+#if hl
 import sys.io.File;
+#end
 import src.ResourceLoader;
 import haxe.Json;
 
@@ -115,7 +117,9 @@ class Settings {
 			highscoreName: highscoreName
 		};
 		var json = Json.stringify(outputData);
+		#if hl
 		File.saveContent("settings.json", json);
+		#end
 	}
 
 	public static function load() {

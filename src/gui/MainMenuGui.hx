@@ -68,7 +68,9 @@ class MainMenuGui extends GuiImage {
 		exitButton.position = new Vector(82, 358);
 		exitButton.extent = new Vector(203, 88);
 		exitButton.pressedAction = (sender) -> {
+			#if hl
 			Sys.exit(0);
+			#end
 		};
 		homebase.addChild(exitButton);
 	}

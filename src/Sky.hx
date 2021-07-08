@@ -10,7 +10,6 @@ import hxd.BitmapData;
 import h3d.shader.CubeMap;
 import h3d.mat.Texture;
 import haxe.io.Path;
-import sys.io.File;
 import src.ResourceLoader;
 import h3d.scene.Object;
 
@@ -50,7 +49,7 @@ class Sky extends Object {
 
 	function createSkyboxCubeTextured(dmlPath:String) {
 		if (ResourceLoader.fileSystem.exists(dmlPath)) {
-			var dmlFile = File.getContent(dmlPath);
+			var dmlFile = ResourceLoader.fileSystem.get(dmlPath).getText();
 			var dmlDirectory = Path.directory(dmlPath);
 			var lines = dmlFile.split('\n').map(x -> x.toLowerCase());
 			var skyboxImages = [];

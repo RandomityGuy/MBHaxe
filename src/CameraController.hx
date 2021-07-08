@@ -84,25 +84,18 @@ class CameraController extends Object {
 		#end
 	}
 
-	function onEvent(e:sdl.Event) {
-		switch (e.type) {
-			case MouseMove:
-				if (this.level.cursorLock) {
-					orbit(e.mouseXRel, e.mouseYRel);
-				}
-			default:
-		}
-		return true;
-	}
-
 	public function lockCursor() {
 		Window.getInstance().lockPointer((x, y) -> orbit(x, y));
+		#if hl
 		Cursor.show(false);
+		#end
 	}
 
 	public function unlockCursor() {
 		Window.getInstance().unlockPointer();
+		#if hl
 		Cursor.show(true);
+		#end
 	}
 
 	function orbit(mouseX:Float, mouseY:Float) {

@@ -224,18 +224,18 @@ class DifBuilder {
 				tex = tex.split('/')[1];
 			}
 
-			if (File.exists(Path.directory(path) + "/" + tex + ".jpg")) {
+			if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".jpg")) {
 				return true;
 			}
-			if (File.exists(Path.directory(path) + "/" + tex + ".png")) {
+			if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".png")) {
 				return true;
 			}
 			var prevDir = Path.directory(Path.directory(path));
 
-			if (File.exists(prevDir + "/" + tex + ".jpg")) {
+			if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".jpg")) {
 				return true;
 			}
-			if (File.exists(prevDir + "/" + tex + ".png")) {
+			if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".png")) {
 				return true;
 			}
 
@@ -247,19 +247,19 @@ class DifBuilder {
 				tex = tex.split('/')[1];
 			}
 
-			if (File.exists(Path.directory(path) + "/" + tex + ".jpg")) {
+			if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".jpg")) {
 				return Path.directory(path) + "/" + tex + ".jpg";
 			}
-			if (File.exists(Path.directory(path) + "/" + tex + ".png")) {
+			if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".png")) {
 				return Path.directory(path) + "/" + tex + ".png";
 			}
 
 			var prevDir = Path.directory(Path.directory(path));
 
-			if (File.exists(prevDir + "/" + tex + ".jpg")) {
+			if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".jpg")) {
 				return prevDir + "/" + tex + ".jpg";
 			}
-			if (File.exists(prevDir + "/" + tex + ".png")) {
+			if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".png")) {
 				return prevDir + "/" + tex + ".png";
 			}
 

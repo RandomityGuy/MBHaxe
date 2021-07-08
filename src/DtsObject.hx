@@ -5,7 +5,6 @@ import shaders.Billboard;
 import collision.BoxCollisionEntity;
 import shaders.DtsTexture;
 import h3d.shader.AlphaMult;
-import sys.io.File;
 import src.MarbleWorld;
 import src.GameObject;
 import collision.CollisionHull;
@@ -427,7 +426,7 @@ class DtsObject extends GameObject {
 	}
 
 	function parseIfl(path:String) {
-		var text = File.getContent(path);
+		var text = ResourceLoader.fileSystem.get(path).getText();
 		var lines = text.split('\n');
 		var keyframes = [];
 		for (line in lines) {

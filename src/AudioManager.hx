@@ -43,14 +43,24 @@ class AudioManager {
 	}
 
 	public static function playShell() {
+		#if js
+		return;
+		#end
 		AudioManager.manager.stopByName("music");
 		var snd = ResourceLoader.getAudio("data/sound/shell.ogg");
+		if (snd == null)
+			return;
 		var ch = AudioManager.manager.play(snd, null, musicGroup);
 		ch.loop = true;
 	}
 
 	public static function playMusic(music:Sound) {
+		#if js
+		return;
+		#end
 		AudioManager.manager.stopByName("music");
+		if (music == null)
+			return;
 		var ch = AudioManager.manager.play(music, null, musicGroup);
 		ch.loop = true;
 	}
