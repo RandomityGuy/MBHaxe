@@ -37,15 +37,18 @@ class AudioManager {
 		if (position != null) {
 			var audioSrc = new Spatialization();
 			audioSrc.position = position;
+			#if hl
+			audioSrc.referenceDistance = 5;
+			#end
+			#if js
+			audioSrc.referenceDistance = 4.5;
+			#end
 			ch.addEffect(audioSrc);
 		}
 		return ch;
 	}
 
 	public static function playShell() {
-		#if js
-		return;
-		#end
 		AudioManager.manager.stopByName("music");
 		var snd = ResourceLoader.getAudio("data/sound/shell.ogg");
 		if (snd == null)
@@ -55,9 +58,6 @@ class AudioManager {
 	}
 
 	public static function playMusic(music:Sound) {
-		#if js
-		return;
-		#end
 		AudioManager.manager.stopByName("music");
 		if (music == null)
 			return;

@@ -31,6 +31,7 @@ class MarbleGame {
 		this.scene2d = scene2d;
 
 		#if js
+		// Pause shit
 		js.Browser.document.addEventListener('pointerlockchange', () -> {
 			if (!paused && world != null) {
 				if (world.finishTime == null) {
@@ -45,6 +46,12 @@ class MarbleGame {
 					}
 				}
 			}
+		});
+		// Resize shit
+		js.Browser.window.addEventListener('resize', () -> {
+			var canvasElement = js.Browser.document.getElementById("webgl");
+			canvasElement.style.width = "100%";
+			canvasElement.style.height = "100%";
 		});
 		#end
 	}

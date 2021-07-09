@@ -57,6 +57,5 @@ class Tornado extends ForceObject {
 
 		var seffect = this.soundChannel.getEffect(Spatialization);
 		seffect.position = this.getAbsPos().getPosition();
-		seffect.referenceDistance = 5;
 	}
 }

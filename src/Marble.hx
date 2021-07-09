@@ -669,11 +669,9 @@ class Marble extends GameObject {
 	function updateRollSound(contactPct:Float, slipAmount:Float) {
 		var rSpat = rollSound.getEffect(Spatialization);
 		rSpat.position = this.getAbsPos().getPosition();
-		rSpat.referenceDistance = 5;
 
 		var sSpat = slipSound.getEffect(Spatialization);
 		sSpat.position = this.getAbsPos().getPosition();
-		sSpat.referenceDistance = 5;
 
 		var rollVel = bestContact != null ? this.velocity.sub(bestContact.velocity) : this.velocity;
 		var scale = rollVel.length();
@@ -693,6 +691,11 @@ class Marble extends GameObject {
 			rollVolume = (1 - slipVolume) * rollVolume;
 		}
 
+		if (rollVolume < 0)
+			rollVolume = 0;
+		if (slipVolume < 0)
+			slipVolume = 0;
+
 		rollSound.volume = rollVolume;
 		slipSound.volume = slipVolume;
 
@@ -701,9 +704,11 @@ class Marble extends GameObject {
 		}
 
 		var pitch = scale;
-		if (scale > 1.0)
-			pitch = 1.0;
-
+		#if js
+		// Apparently audio crashes the whole thing if pitch is less than 0.2
+		if (pitch < 0.2)
+			pitch = 0.2;
+		#end
 		var rPitch = rollSound.getEffect(Pitch);
 		rPitch.value = pitch;
 	}

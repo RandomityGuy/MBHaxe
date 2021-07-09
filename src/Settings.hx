@@ -120,11 +120,33 @@ class Settings {
 		#if hl
 		File.saveContent("settings.json", json);
 		#end
+		#if js
+		var localStorage = js.Browser.getLocalStorage();
+		if (localStorage != null) {
+			localStorage.setItem("MBHaxeSettings", json);
+		}
+		#end
 	}
 
 	public static function load() {
-		if (ResourceLoader.fileSystem.exists("settings.json")) {
+		var settingsExists = false;
+		#if hl
+		settingsExists = ResourceLoader.fileSystem.exists("settings.json");
+		#end
+		#if js
+		var localStorage = js.Browser.getLocalStorage();
+		if (localStorage != null) {
+			settingsExists = localStorage.getItem("MBHaxeSettings") != null;
+		}
+		#end
+
+		if (settingsExists) {
+			#if hl
 			var json = Json.parse(ResourceLoader.fileSystem.get("settings.json").getText());
+			#end
+			#if js
+			var json = Json.parse(localStorage.getItem("MBHaxeSettings"));
+			#end
 			var highScoreData:DynamicAccess<Array<Score>> = json.highScores;
 			for (key => value in highScoreData) {
 				highScores.set(key, value);
@@ -139,8 +161,10 @@ class Settings {
 
 	public static function init() {
 		load();
+		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		#end
 		// @:privateAccess Window.getInstance().window.center();
 		Window.getInstance().addResizeEvent(() -> {
 			var wnd = Window.getInstance();

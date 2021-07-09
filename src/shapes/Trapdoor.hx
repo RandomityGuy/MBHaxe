@@ -41,8 +41,6 @@ class Trapdoor extends DtsObject {
 		if (direction != 0 && direction != this.lastDirection) {
 			// If the direction has changed, play the sound
 			var ch = AudioManager.playSound(ResourceLoader.getAudio("data/sound/trapdooropen.wav"), this.getAbsPos().getPosition());
-			var spat = ch.getEffect(Spatialization);
-			spat.referenceDistance = 5;
 		}
 
 		this.lastCompletion = currentCompletion;

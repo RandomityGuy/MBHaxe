@@ -358,7 +358,6 @@ class DtsObject extends GameObject {
 				var keyframes = parseIfl(fullName);
 				this.materialInfos.set(material, keyframes);
 				iflMaterial = true;
-				// TODO IFL SHIT
 			} else {
 				var texture:Texture = ResourceLoader.getTexture(fullName);
 				texture.wrap = Wrap.Repeat;
@@ -377,11 +376,20 @@ class DtsObject extends GameObject {
 				// var dtsshader = new DtsTexture();
 				// dtsshader.currentOpacity = 1;
 				// Make a 1x1 white texture
+				#if hl
 				var bitmap = new hxd.BitmapData(1, 1);
+				bitmap.lock();
 				bitmap.setPixel(0, 0, 0xFFFFFF);
-				bitmap.setPixel(1, 1, 0xFFFFFF);
+				bitmap.unlock();
 				var texture = new Texture(1, 1);
 				texture.uploadBitmap(bitmap);
+				texture.wrap = Wrap.Repeat;
+				#end
+				// Apparently creating these bitmap datas dont work so we'll just get the snag a white texture in the filesystem
+				#if js
+				var texture:Texture = ResourceLoader.getTexture("data/interiors/parts/white.jpg");
+				texture.wrap = Wrap.Repeat;
+				#end
 				material.texture = texture;
 				// dtsshader.texture = texture;
 				// material.mainPass.addShader(dtsshader);
