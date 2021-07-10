@@ -87,7 +87,7 @@ class MarbleGame {
 	}
 
 	public function handlePauseGame() {
-		if (paused) {
+		if (paused && world._ready) {
 			world.setCursorLock(false);
 			exitGameDlg = new ExitGameDlg((sender) -> {
 				canvas.popDialog(exitGameDlg);
@@ -120,10 +120,8 @@ class MarbleGame {
 		][(mission.index + 1) % 3];
 		AudioManager.playMusic(ResourceLoader.getAudio(musicFileName));
 		canvas.clearContent();
-		mission.load();
 		world = new MarbleWorld(scene, scene2d, mission);
 		world.init();
-		world.start();
 	}
 
 	public function render(e:h3d.Engine) {

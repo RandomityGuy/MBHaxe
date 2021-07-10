@@ -843,7 +843,6 @@ class Marble extends GameObject {
 				// this.velocity = this.velocity.sub(A.multiply(diff));
 				// this.omega = this.omega.sub(a.multiply(diff));
 				timeStep = intersectT;
-				trace('CCD at ${intersectT}');
 			}
 
 			var tempState = timeState.clone();

@@ -1,5 +1,6 @@
 package src;
 
+import gui.Canvas;
 import hxd.snd.Channel;
 import hxd.res.Sound;
 import src.ResourceLoader;
@@ -75,6 +76,7 @@ class MarbleWorld extends Scheduler {
 	public var particleManager:ParticleManager;
 
 	var playGui:PlayGui;
+	var loadingGui:LoadingGui;
 
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
@@ -118,10 +120,16 @@ class MarbleWorld extends Scheduler {
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
 
+	var resourceLoadFuncs:Array<Void->Void> = [];
+
 	/** The new target camera orientation quat  */
 	public var newOrientationQuat = new Quat();
 
 	public var _disposed:Bool = false;
+
+	public var _ready:Bool = false;
+
+	var _loadingLength:Int = 0;
 
 	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission) {
 		this.scene = scene;
@@ -130,6 +138,13 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function init() {
+		initLoading();
+	}
+
+	public function initLoading() {
+		this.loadingGui = new LoadingGui(this.mission.title);
+		MarbleGame.canvas.setContent(this.loadingGui);
+
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
 				if ([
@@ -152,14 +167,24 @@ class MarbleWorld extends Scheduler {
 				}
 			}
 		};
-		scanMission(this.mission.root);
 
-		this.initScene();
-		this.initMarble();
+		this.resourceLoadFuncs.push(() -> {
+			this.addSimGroup(this.mission.root);
+			this._loadingLength = resourceLoadFuncs.length;
+		});
+		this.resourceLoadFuncs.push(() -> this.initMarble());
+		this.resourceLoadFuncs.push(() -> this.initScene());
+		this.resourceLoadFuncs.push(() -> scanMission(this.mission.root));
+		this.resourceLoadFuncs.push(() -> this.mission.load());
+		this._loadingLength = resourceLoadFuncs.length;
+	}
 
-		this.addSimGroup(this.mission.root);
+	public function postInit() {
+		this._ready = true;
+		MarbleGame.canvas.clearContent();
 		this.endPad.generateCollider();
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		start();
 	}
 
 	public function initScene() {
@@ -330,17 +355,19 @@ class MarbleWorld extends Scheduler {
 	public function addSimGroup(simGroup:MissionElementSimGroup) {
 		if (simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior).length != 0) {
 			// Create the pathed interior
-			var pathedInterior = src.PathedInterior.createFromSimGroup(simGroup, cast this);
-			this.addPathedInterior(pathedInterior);
-			if (pathedInterior == null)
-				return;
+			resourceLoadFuncs.push(() -> {
+				var pathedInterior = src.PathedInterior.createFromSimGroup(simGroup, cast this);
+				this.addPathedInterior(pathedInterior);
+				if (pathedInterior == null)
+					return;
 
-			// if (pathedInterior.hasCollision)
-			// 	this.physics.addInterior(pathedInterior);
-			for (trigger in pathedInterior.triggers) {
-				this.triggers.push(trigger);
-				this.collisionWorld.addEntity(trigger.collider);
-			}
+				// if (pathedInterior.hasCollision)
+				// 	this.physics.addInterior(pathedInterior);
+				for (trigger in pathedInterior.triggers) {
+					this.triggers.push(trigger);
+					this.collisionWorld.addEntity(trigger.collider);
+				}
+			});
 
 			return;
 		}
@@ -350,17 +377,17 @@ class MarbleWorld extends Scheduler {
 				case MissionElementType.SimGroup:
 					this.addSimGroup(cast element);
 				case MissionElementType.InteriorInstance:
-					this.addInteriorFromMis(cast element);
+					resourceLoadFuncs.push(() -> this.addInteriorFromMis(cast element));
 				case MissionElementType.StaticShape:
-					this.addStaticShape(cast element);
+					resourceLoadFuncs.push(() -> this.addStaticShape(cast element));
 				case MissionElementType.Item:
-					this.addItem(cast element);
+					resourceLoadFuncs.push(() -> this.addItem(cast element));
 				case MissionElementType.Trigger:
-					this.addTrigger(cast element);
+					resourceLoadFuncs.push(() -> this.addTrigger(cast element));
 				case MissionElementType.TSStatic:
-					this.addTSStatic(cast element);
+					resourceLoadFuncs.push(() -> this.addTSStatic(cast element));
 				case MissionElementType.ParticleEmitterNode:
-					this.addParticleEmitterNode(cast element);
+					resourceLoadFuncs.push(() -> this.addParticleEmitterNode(cast element));
 				default:
 			}
 		}
@@ -674,6 +701,9 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function update(dt:Float) {
+		if (!_ready) {
+			return;
+		}
 		this.updateTimer(dt);
 		this.tickSchedule(timeState.currentAttemptTime);
 		this.updateGameState();
@@ -698,7 +728,22 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function render(e:h3d.Engine) {
-		this.playGui.render(e);
+		if (!_ready)
+			asyncLoadResources();
+		if (this.playGui != null)
+			this.playGui.render(e);
+	}
+
+	function asyncLoadResources() {
+		if (this.resourceLoadFuncs.length != 0) {
+			var func = this.resourceLoadFuncs.pop();
+			func();
+			this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+			MarbleGame.canvas.render(scene2d);
+		} else {
+			if (!_ready)
+				postInit();
+		}
 	}
 
 	public function updateTimer(dt:Float) {
@@ -1028,9 +1073,11 @@ class MarbleWorld extends Scheduler {
 	public function setCursorLock(enabled:Bool) {
 		this.cursorLock = enabled;
 		if (enabled) {
-			this.marble.camera.lockCursor();
+			if (this.marble != null)
+				this.marble.camera.lockCursor();
 		} else {
-			this.marble.camera.unlockCursor();
+			if (this.marble != null)
+				this.marble.camera.unlockCursor();
 		}
 	}
 

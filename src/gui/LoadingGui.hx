@@ -1,12 +1,13 @@
 package gui;
 
+import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 
 class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
 
-	public function new() {
+	public function new(missionName:String) {
 		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -26,7 +27,16 @@ class LoadingGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		// TODO mapname
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
+		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32.loader = ResourceLoader.loader;
+
+		var mapName = new GuiText(domcasual32);
+		mapName.position = new Vector(134, 78);
+		mapName.extent = new Vector(323, 32);
+		mapName.text.text = missionName;
+		mapName.text.textColor = 0;
+		mapName.justify = Center;
 
 		var progress = new GuiProgress();
 		progress.vertSizing = Bottom;
@@ -46,6 +56,7 @@ class LoadingGui extends GuiImage {
 		overlay.position = new Vector(151, 131);
 		overlay.extent = new Vector(278, 86);
 
+		loadingGui.addChild(mapName);
 		loadingGui.addChild(progress);
 		loadingGui.addChild(cancelButton);
 		loadingGui.addChild(overlay);

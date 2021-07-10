@@ -57,7 +57,10 @@ class Settings {
 		shadows: false,
 		musicVolume: 1,
 		soundVolume: 0.7,
-		vsync: true
+		vsync: #if js true #end
+		#if hl
+		false
+		#end
 	};
 
 	public static var controlsSettings:ControlsSettings = {
@@ -156,7 +159,9 @@ class Settings {
 			progression = json.progression;
 			highscoreName = json.highscoreName;
 		}
+		#if hl
 		Window.getInstance().vsync = optionsSettings.vsync;
+		#end
 	}
 
 	public static function init() {
