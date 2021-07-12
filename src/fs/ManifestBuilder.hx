@@ -107,21 +107,18 @@ class ManifestBuilder {
 	static function scan(t:hxd.res.FileTree, options:EmbedOptions, out:Array<ManifestFileInfo>) {
 		if (options == null)
 			options = {};
-		// var setTmp = options.tmpDir == null;
 		// if( options.compressAsMp3 == null ) options.compressAsMp3 = options.compressSounds && !(haxe.macro.Context.defined("stb_ogg_sound") || hxd.res.Config.platform == HL);
 		ManifestBuilder.options = options;
 
 		var tree = @:privateAccess t.scan();
 
 		for (path in @:privateAccess t.paths) {
-			// if( setTmp ) options.tmpDir = path + "/.tmp/";
-
 			var fs = new hxd.fs.LocalFileSystem(path, options.configuration);
 			// if( options.compressAsMp3 )
 			//   fs.addConvert(new hxd.fs.Convert.ConvertWAV2MP3());
 			// else if( options.compressSounds )
 			//   fs.addConvert(new hxd.fs.Convert.ConvertWAV2MP3());
-			// fs.tmpDir = options.tmpDir;
+			@:privateAccess fs.convert.tmpDir = "tmp/";
 			fs.convert.onConvert = function(f) Sys.println("Converting " + f.srcPath);
 			convertRec(tree, path, fs, out);
 		}

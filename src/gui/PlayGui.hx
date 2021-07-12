@@ -110,6 +110,7 @@ class PlayGui {
 		resizeEv = () -> {
 			var wnd = Window.getInstance();
 			playGuiCtrl.render(MarbleGame.canvas.scene2d);
+			powerupImageSceneTargetBitmap.x = wnd.width - 88;
 		};
 
 		Window.getInstance().addResizeEvent(resizeEv);

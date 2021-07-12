@@ -187,6 +187,27 @@ class PlayMissionGui extends GuiImage {
 		};
 		pmBox.addChild(pmBack);
 
+		var transparentbmp = new hxd.BitmapData(1, 1);
+		transparentbmp.setPixel(0, 0, 0);
+		var transparentTile = Tile.fromBitmap(transparentbmp);
+
+		var skipButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		skipButton.horizSizing = Left;
+		skipButton.vertSizing = Top;
+		skipButton.position = new Vector(625, 465);
+		skipButton.extent = new Vector(18, 19);
+		skipButton.pressedAction = (sender) -> {
+			var currentDifficulty = ["beginner", "intermediate", "advanced"].indexOf(currentCategory);
+			if (currentDifficulty == -1)
+				return;
+			var currentProgression = Settings.progression[currentDifficulty];
+			if (currentProgression + 1 == currentSelection) {
+				Settings.progression[currentDifficulty]++;
+			}
+			setSelectedFunc(currentSelection);
+		};
+		this.addChild(skipButton);
+
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "DomCasual24":

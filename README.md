@@ -1,6 +1,7 @@
 # MBHaxe
 A Haxe port of Marble Blast Gold, name subject to change.
 Its currently a WIP at the time of writing. The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/OpenMBU) along with my own collision detection code, game logic was partially from scratch and taken with permission from [Marble Blast Web Port](https://github.com/Vanilagy/MarbleBlast).
+The browser version of this port is hosted [here](https://mbhaxe.netlify.app/)
 
 # Build
 Requires Haxe 4.2.2  

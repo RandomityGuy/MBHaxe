@@ -24,7 +24,7 @@ class ManifestLoader extends hxd.res.Loader {
 	/**
 		Amount of concurrent file loadings. Defaults to 4 on JS and to 1 native (since there's no threaded loading implemented for native)
 	**/
-	public static var concurrentFiles:Int = #if js 4 #else 1 #end;
+	public static var concurrentFiles:Int = #if js 32 #else 1 #end;
 
 	public var mfs:ManifestFileSystem;
 
