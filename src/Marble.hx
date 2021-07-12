@@ -149,6 +149,7 @@ class Marble extends GameObject {
 	public var contactEntities:Array<CollisionEntity> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
+	var appliedImpulses:Array<Vector> = [];
 
 	public var heldPowerup:PowerUp;
 	public var lastContactNormal:Vector;
@@ -204,6 +205,8 @@ class Marble extends GameObject {
 
 		this.rollSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/rolling_hard.wav"), this.getAbsPos().getPosition(), true);
 		this.slipSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/sliding.wav"), this.getAbsPos().getPosition(), true);
+		this.rollSound.volume = 0;
+		this.slipSound.volume = 0;
 		this.shockabsorberSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/superbounceactive.wav"), null, true);
 		this.shockabsorberSound.pause = true;
 		this.superbounceSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/forcefield.wav"), null, true);
@@ -620,17 +623,18 @@ class Marble extends GameObject {
 	}
 
 	function trailEmitter() {
-		var speed = this.velocity.length();
-		if (this._minTrailVel > speed) {
-			if (this.trailEmitterNode != null) {
-				this.level.particleManager.removeEmitter(this.trailEmitterNode);
-				this.trailEmitterNode = null;
-			}
-			return;
-		}
-		if (this.trailEmitterNode == null)
-			this.trailEmitterNode = this.level.particleManager.createEmitter(trailParticleOptions, trailEmitterData, null,
-				() -> this.getAbsPos().getPosition());
+		// Trails are bugged
+		// var speed = this.velocity.length();
+		// if (this._minTrailVel > speed) {
+		// 	if (this.trailEmitterNode != null) {
+		// 		this.level.particleManager.removeEmitter(this.trailEmitterNode);
+		// 		this.trailEmitterNode = null;
+		// 	}
+		// 	return;
+		// }
+		// if (this.trailEmitterNode == null)
+		// 	this.trailEmitterNode = this.level.particleManager.createEmitter(trailParticleOptions, trailEmitterData, null,
+		// 		() -> this.getAbsPos().getPosition());
 	}
 
 	function ReportBounce(pos:Vector, normal:Vector, speed:Float) {
@@ -703,12 +707,13 @@ class Marble extends GameObject {
 			rollSound.addEffect(new Pitch());
 		}
 
-		var pitch = scale;
-		#if js
-		// Apparently audio crashes the whole thing if pitch is less than 0.2
-		if (pitch < 0.2)
-			pitch = 0.2;
-		#end
+		var pitch = Util.clamp(rollVel.length() / 15, 0, 1) * 0.75 + 0.75;
+
+		// #if js
+		// // Apparently audio crashes the whole thing if pitch is less than 0.2
+		// if (pitch < 0.2)
+		// 	pitch = 0.2;
+		// #end
 		var rPitch = rollSound.getEffect(Pitch);
 		rPitch.value = pitch;
 	}
@@ -869,6 +874,11 @@ class Marble extends GameObject {
 				this._contactTime += timeStep;
 			}
 
+			for (impulse in appliedImpulses) {
+				this.velocity = this.velocity.add(impulse);
+			}
+			appliedImpulses = [];
+
 			piTime += timeStep;
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
@@ -1012,6 +1022,10 @@ class Marble extends GameObject {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
 			this.helicopterSound.pause = true;
 		}
+	}
+
+	public function applyImpulse(impulse:Vector) {
+		this.appliedImpulses.push(impulse);
 	}
 
 	public function enableSuperBounce(time:Float) {

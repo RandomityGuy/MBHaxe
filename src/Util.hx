@@ -136,10 +136,26 @@ class Util {
 			}
 			if (c == strLiteralToken)
 				inString = true;
-			else if (StringTools.startsWith(str.substr(i), searchString))
+			#if hl
+			else if (Util.startsWithFromIndex(str, searchString, i))
 				return i;
+			#end
+			#if js
+			else if ((cast str).startsWith(searchString, i))
+				return i;
+			#end
 		}
 		return -1;
+	}
+
+	public static function startsWithFromIndex(str:String, searchString:String, index:Int) {
+		if (index + searchString.length > str.length)
+			return false;
+		for (i in 0...searchString.length) {
+			if (searchString.charAt(i) != str.charAt(index + i))
+				return false;
+		}
+		return true;
 	}
 
 	public static function indexIsInStringLiteral(str:String, index:Int, strLiteralToken = '"') {

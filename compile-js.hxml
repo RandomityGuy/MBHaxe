@@ -3,6 +3,7 @@
 -lib stb_ogg_sound
 --js marblegame.js
 -D windowSize=1280x720
+-D js-es=6
 -D keep-inline-positions
 --main Main
 -debug

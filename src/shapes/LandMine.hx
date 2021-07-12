@@ -125,6 +125,20 @@ class LandMine extends DtsObject {
 			this.level.particleManager.createEmitter(landMineParticle, landMineParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());
+
+			var marble = this.level.marble;
+			var minePos = this.getAbsPos().getPosition();
+			var off = marble.getAbsPos().getPosition().sub(minePos);
+
+			var strength = computeExplosionStrength(off.length());
+
+			var impulse = off.normalized().multiply(strength);
+			marble.applyImpulse(impulse);
+
+			// for (collider in this.colliders) {
+			// 	var hull:CollisionHull = cast collider;
+			// 	hull.force = strength;
+			// }
 		}
 		// Normally, we would add a light here, but that's too expensive for THREE, apparently.
 
@@ -151,19 +165,6 @@ class LandMine extends DtsObject {
 			this.setHide(false);
 		} else {
 			this.setHide(true);
-		}
-
-		if (this.isCollideable) {
-			var marble = this.level.marble;
-			var minePos = this.getAbsPos().getPosition();
-			var off = marble.getAbsPos().getPosition().sub(minePos);
-
-			var strength = computeExplosionStrength(off.length());
-
-			for (collider in this.colliders) {
-				var hull:CollisionHull = cast collider;
-				hull.force = strength;
-			}
 		}
 
 		var opacity = Util.clamp((timeState.timeSinceLoad - (this.disappearTime + 5)), 0, 1);
