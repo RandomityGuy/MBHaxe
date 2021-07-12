@@ -38,8 +38,8 @@ class Util {
 	}
 
 	public static function rotateImage(bitmap:BitmapData, angle:Float) {
-		var curpixels = bitmap.getPixels().clone();
 		bitmap.lock();
+		var curpixels = bitmap.getPixels().clone();
 		if (angle == Math.PI / 2)
 			for (x in 0...curpixels.width) {
 				for (y in 0...curpixels.height) {
@@ -62,8 +62,8 @@ class Util {
 	}
 
 	public static function flipImage(bitmap:BitmapData, hflip:Bool, vflip:Bool) {
-		var curpixels = bitmap.getPixels().clone();
 		bitmap.lock();
+		var curpixels = bitmap.getPixels().clone();
 		if (hflip)
 			for (x in 0...curpixels.width) {
 				for (y in 0...curpixels.height) {
