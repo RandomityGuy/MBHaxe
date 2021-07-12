@@ -107,7 +107,8 @@ class MarbleGame {
 			});
 			canvas.pushDialog(exitGameDlg);
 		} else {
-			canvas.popDialog(exitGameDlg);
+			if (exitGameDlg != null)
+				canvas.popDialog(exitGameDlg);
 			world.setCursorLock(true);
 		}
 	}

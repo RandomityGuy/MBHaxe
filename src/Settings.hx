@@ -112,13 +112,29 @@ class Settings {
 	}
 
 	public static function save() {
-		var outputData = {
-			highScores: highScores,
+		var outputData:Dynamic = {
 			options: optionsSettings,
 			controls: controlsSettings,
 			progression: progression,
 			highscoreName: highscoreName
 		};
+		var scoreCount = 0;
+		for (key => value in highScores) {
+			scoreCount++;
+		}
+		#if hl
+		if (scoreCount != 0)
+			outputData.highScores = highScores;
+		else
+			outputData.highScores = {};
+		#end
+		#if js
+		var kvps:Array<Dynamic> = [];
+		for (key => value in highScores)
+			kvps.push([key, value]);
+		var jobj = js.lib.Object.fromEntries(kvps);
+		outputData.highScores = jobj;
+		#end
 		var json = Json.stringify(outputData);
 		#if hl
 		File.saveContent("settings.json", json);
@@ -158,6 +174,8 @@ class Settings {
 			controlsSettings = json.controls;
 			progression = json.progression;
 			highscoreName = json.highscoreName;
+		} else {
+			save();
 		}
 		#if hl
 		Window.getInstance().vsync = optionsSettings.vsync;
