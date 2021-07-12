@@ -372,6 +372,8 @@ class DtsObject extends GameObject {
 				// TODO TRANSLUENCY SHIT
 			}
 			material.shadows = false;
+			if (this.isCollideable)
+				material.receiveShadows = true;
 			if (material.texture == null && !iflMaterial) {
 				// var dtsshader = new DtsTexture();
 				// dtsshader.currentOpacity = 1;
@@ -398,6 +400,7 @@ class DtsObject extends GameObject {
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;
 				material.mainPass.culling = h3d.mat.Data.Face.None;
+				material.receiveShadows = false;
 			}
 			// // TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0) {
@@ -411,7 +414,7 @@ class DtsObject extends GameObject {
 
 			if (flags & 32 > 0) {
 				material.mainPass.enableLights = false;
-				// material.receiveShadows = false;
+				material.receiveShadows = false;
 				// material.mainPass.setPassName("overlay");
 				// var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
 				// pbrprops.emissiveValue = 1;

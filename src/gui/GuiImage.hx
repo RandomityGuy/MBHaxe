@@ -19,7 +19,7 @@ class GuiImage extends GuiControl {
 
 	public override function render(scene2d:Scene) {
 		var renderRect = this.getRenderRectangle();
-		bmp.setPosition(Math.round(renderRect.position.x), Math.round(renderRect.position.y));
+		bmp.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 		// bmp.scaleX = renderRect.extent.x / bmp.tile.width;
 		// bmp.scaleY = renderRect.extent.y / bmp.tile.height;
 		bmp.width = renderRect.extent.x;

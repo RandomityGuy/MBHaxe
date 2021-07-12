@@ -1,5 +1,7 @@
 package gui;
 
+import hxd.Key;
+import gui.GuiControl.MouseState;
 import h3d.Matrix;
 import h2d.filter.ColorMatrix;
 import h2d.Tile;
@@ -64,7 +66,7 @@ class PlayMissionGui extends GuiImage {
 		localContainer.addChild(tabAdvanced);
 
 		var tabIntermediate = new GuiImage(ResourceLoader.getImage("data/ui/play/tab_inter.png").toTile());
-		tabIntermediate.position = new Vector(213, 4);
+		tabIntermediate.position = new Vector(213, 6);
 		tabIntermediate.extent = new Vector(205, 58);
 		tabIntermediate.pressedAction = (sender) -> {
 			currentList = MissionList.intermediateMissions;
@@ -149,7 +151,7 @@ class PlayMissionGui extends GuiImage {
 		noQualText.extent = new Vector(254, 32);
 		noQualText.text.textColor = 0xCCCCCC;
 		noQualText.justify = Center;
-		noQualText.text.text = "Not qualified!";
+		noQualText.text.text = "Not Qualified!";
 		levelWnd.addChild(noQualText);
 
 		var pmPlay = new GuiButton(loadButtonImages("data/ui/play/play"));
@@ -372,6 +374,7 @@ class PlayMissionGui extends GuiImage {
 				currentMission.title = "";
 				currentMission.description = "";
 				currentMission.path = "bruh";
+				currentSelection = -1;
 			}
 
 			var scoreData:Array<Score> = Settings.getScores(currentMission.path);
@@ -415,7 +418,19 @@ class PlayMissionGui extends GuiImage {
 
 	public override function render(scene2d:Scene) {
 		super.render(scene2d);
-		setSelectedFunc(cast Math.min(currentList.length - 1, Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
+		if (currentCategory != "custom")
+			setSelectedFunc(cast Math.min(currentList.length - 1, Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
+		else
+			setSelectedFunc(currentList.length - 1);
 		// setSelectedFunc(0);
+	}
+
+	public override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+
+		if (Key.isPressed(Key.LEFT))
+			setSelectedFunc(currentSelection - 1);
+		if (Key.isPressed(Key.RIGHT))
+			setSelectedFunc(currentSelection + 1);
 	}
 }

@@ -17,7 +17,7 @@ class GuiAnim extends GuiControl {
 
 	public override function render(scene2d:Scene) {
 		var renderRect = this.getRenderRectangle();
-		anim.setPosition(Math.round(renderRect.position.x), Math.round(renderRect.position.y));
+		anim.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 		anim.scaleX = renderRect.extent.x / anim.getFrame().width;
 		anim.scaleY = renderRect.extent.y / anim.getFrame().height;
 		if (scene2d.contains(anim)) {

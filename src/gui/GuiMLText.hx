@@ -22,15 +22,15 @@ class GuiMLText extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 		text.maxWidth = renderRect.extent.x;
 		if (justify == Left) {
-			text.setPosition(Math.round(renderRect.position.x), Math.round(renderRect.position.y));
+			text.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 			text.textAlign = Left;
 		}
 		if (justify == Right) {
-			text.setPosition(Math.round(renderRect.position.x + renderRect.extent.x), Math.round(renderRect.position.y));
+			text.setPosition(Math.floor(renderRect.position.x + renderRect.extent.x), Math.floor(renderRect.position.y));
 			text.textAlign = Right;
 		}
 		if (justify == Center) {
-			text.setPosition(Math.round(renderRect.position.x + renderRect.extent.x / 2), Math.round(renderRect.position.y));
+			text.setPosition(Math.floor(renderRect.position.x + renderRect.extent.x / 2), Math.floor(renderRect.position.y));
 			text.textAlign = Center;
 		}
 		if (scene2d.contains(text))

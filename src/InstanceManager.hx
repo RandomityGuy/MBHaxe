@@ -56,6 +56,7 @@ class InstanceManager {
 						// minfo.transparencymeshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						minfo.transparencymeshbatch.shadersChanged = true;
 						minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
+						minfo.transparencymeshbatch.material.receiveShadows = false;
 						// minfo.transparencymeshbatch.material.mainPass.depthWrite = false;
 						// if (dtsShader != null) {
 						// 	dtsShader.currentOpacity = instance.gameObject.currentOpacity;
