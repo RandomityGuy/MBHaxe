@@ -29,9 +29,9 @@ class CollisionSurface implements IOctreeObject {
 		var i = 0;
 		normals = [for (n in points) null];
 		while (i < indices.length) {
-			var p1 = points[indices[i]];
-			var p2 = points[indices[i + 1]];
-			var p3 = points[indices[i + 2]];
+			var p1 = points[indices[i]].clone();
+			var p2 = points[indices[i + 1]].clone();
+			var p3 = points[indices[i + 2]].clone();
 			var n = p2.sub(p1).cross(p3.sub(p1)).normalized().multiply(-1);
 			normals[indices[i]] = n;
 			normals[indices[i + 1]] = n;
@@ -80,10 +80,10 @@ class CollisionSurface implements IOctreeObject {
 		var intersections = [];
 		var i = 0;
 		while (i < indices.length) {
-			var p1 = points[indices[i]];
-			var p2 = points[indices[i + 1]];
-			var p3 = points[indices[i + 2]];
-			var n = normals[indices[i]];
+			var p1 = points[indices[i]].clone();
+			var p2 = points[indices[i + 1]].clone();
+			var p3 = points[indices[i + 2]].clone();
+			var n = normals[indices[i]].clone();
 			var d = -p1.dot(n);
 
 			var t = -(rayOrigin.dot(n) + d) / (rayDirection.dot(n));
