@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Matrix;
 import hxd.Key;
 import h2d.Tile;
 import h3d.mat.Texture;
@@ -217,5 +218,18 @@ class Util {
 		if (keyName == "Space")
 			keyName = "Space Bar";
 		return keyName;
+	}
+
+	public static function m_matF_x_vectorF(matrix:Matrix, v:Vector) {
+		var m = matrix.clone();
+		m.transpose();
+
+		var v0 = v.x, v1 = v.y, v2 = v.z;
+
+		var vresult_0 = m._11 * v0 + m._12 * v1 + m._13 * v2;
+		var vresult_1 = m._21 * v0 + m._22 * v1 + m._23 * v2;
+		var vresult_2 = m._31 * v0 + m._23 * v1 + m._33 * v2;
+
+		v.set(vresult_0, vresult_1, vresult_2);
 	}
 }

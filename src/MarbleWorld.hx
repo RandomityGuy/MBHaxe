@@ -169,6 +169,9 @@ class MarbleWorld extends Scheduler {
 		};
 
 		this.resourceLoadFuncs.push(() -> {
+			this.playGui.init(this.scene2d);
+		});
+		this.resourceLoadFuncs.push(() -> {
 			this.addSimGroup(this.mission.root);
 			this._loadingLength = resourceLoadFuncs.length;
 		});
@@ -222,7 +225,6 @@ class MarbleWorld extends Scheduler {
 		sky.dmlPath = "data/skies/sky_day.dml";
 
 		sky.init(cast this);
-		playGui.init(scene2d);
 		scene.addChild(sky);
 	}
 
@@ -728,7 +730,7 @@ class MarbleWorld extends Scheduler {
 	public function render(e:h3d.Engine) {
 		if (!_ready)
 			asyncLoadResources();
-		if (this.playGui != null)
+		if (this.playGui != null && _ready)
 			this.playGui.render(e);
 	}
 

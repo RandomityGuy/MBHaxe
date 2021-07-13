@@ -68,7 +68,7 @@ class MarbleGame {
 			if (!paused) {
 				world.update(dt);
 			}
-			if (Key.isPressed(Key.ESCAPE) && world.finishTime == null) {
+			if (Key.isPressed(Key.ESCAPE) && world.finishTime == null && world._ready) {
 				#if hl
 				paused = !paused;
 				handlePauseGame();
@@ -107,9 +107,11 @@ class MarbleGame {
 			});
 			canvas.pushDialog(exitGameDlg);
 		} else {
-			if (exitGameDlg != null)
-				canvas.popDialog(exitGameDlg);
-			world.setCursorLock(true);
+			if (world._ready) {
+				if (exitGameDlg != null)
+					canvas.popDialog(exitGameDlg);
+				world.setCursorLock(true);
+			}
 		}
 	}
 

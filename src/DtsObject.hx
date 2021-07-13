@@ -777,7 +777,8 @@ class DtsObject extends GameObject {
 
 				vec.transform(mat);
 				vec = vec.multiply(mesh.weights[i]);
-				vec2.transform3x3(mat);
+
+				Util.m_matF_x_vectorF(mat, vec2);
 				vec2 = vec2.multiply(mesh.weights[i]);
 
 				info.vertices[vIndex] = info.vertices[vIndex].add(vec);
@@ -786,7 +787,7 @@ class DtsObject extends GameObject {
 
 			for (i in 0...info.normals.length) {
 				var norm = info.normals[i];
-				var len2 = norm.lengthSq();
+				var len2 = norm.dot(norm);
 
 				if (len2 > 0.01)
 					norm.normalize();
@@ -820,15 +821,16 @@ class DtsObject extends GameObject {
 				var vertex = info.vertices[i];
 				var normal = info.normals[i];
 				prim.points[pos] = vertex.toPoint();
+				prim.normals[pos] = normal.toPoint().normalized();
 				if (prim.buffer != null) {
 					prim.dirtyFlags[pos] = true;
 				}
 				pos++;
 			}
 			if (prim.buffer != null) {
-				prim.addNormals();
-				for (norm in prim.normals)
-					norm = norm.multiply(-1);
+				// prim.addNormals();
+				// for (norm in prim.normals)
+				// 	norm = norm.multiply(-1);
 				prim.flush();
 			}
 			if (_regenNormals) {
