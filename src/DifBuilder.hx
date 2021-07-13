@@ -40,6 +40,12 @@ class DifBuilderTriangle {
 	public function new() {}
 }
 
+typedef VertexBucket = {
+	var referenceNormal:Point3F;
+	var triangleIndices:Array<Int>;
+	var normals:Array<Point3F>;
+}
+
 class DifBuilder {
 	static var materialDict = [
 		"friction_none" => {
@@ -95,6 +101,8 @@ class DifBuilder {
 			}
 			return tex.substring(slashpos, dotpos);
 		}
+
+		var vertexBuckets = new Map<Point3F, Array<VertexBucket>>();
 
 		for (i in 0...hulls.length) {
 			var hullTris = [];
@@ -196,10 +204,59 @@ class DifBuilder {
 					colliderSurface.indices.push(colliderSurface.indices.length);
 					colliderSurface.indices.push(colliderSurface.indices.length);
 					colliderSurface.indices.push(colliderSurface.indices.length);
+
+					for (v in [p1, p2, p3]) {
+						var buckets = vertexBuckets.get(v);
+						if (buckets == null) {
+							buckets = [];
+							vertexBuckets.set(v, buckets);
+						}
+
+						var bucket:VertexBucket = null;
+						for (j in 0...buckets.length) {
+							bucket = buckets[j];
+							if (normal.dot(bucket.referenceNormal) > Math.cos(Math.PI / 12))
+								break;
+							bucket = null;
+						}
+						if (bucket == null) {
+							bucket = {
+								referenceNormal: normal,
+								triangleIndices: [],
+								normals: []
+							};
+							buckets.push(bucket);
+						}
+
+						bucket.triangleIndices.push(triangles.length - 1);
+						bucket.normals.push(normal);
+					}
 				}
 
 				colliderSurface.generateBoundingBox();
 				collider.addSurface(colliderSurface);
+			}
+		}
+
+		for (vtex => buckets in vertexBuckets) {
+			for (i in 0...buckets.length) {
+				var bucket = buckets[i];
+				var avgNormal = new Point3F();
+
+				for (normal in bucket.normals)
+					avgNormal = avgNormal.add(normal);
+				avgNormal = avgNormal.scalarDiv(bucket.normals.length);
+
+				for (j in 0...bucket.triangleIndices.length) {
+					var index = bucket.triangleIndices[j];
+					var tri = triangles[index];
+					if (tri.p1 == vtex)
+						tri.normal1 = avgNormal;
+					if (tri.p2 == vtex)
+						tri.normal2 = avgNormal;
+					if (tri.p3 == vtex)
+						tri.normal3 = avgNormal;
+				}
 			}
 		}
 

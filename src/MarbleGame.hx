@@ -38,6 +38,8 @@ class MarbleGame {
 		js.Browser.document.addEventListener('pointerlockchange', () -> {
 			if (!paused && world != null) {
 				if (world.finishTime == null && world._ready) {
+					trace(js.Browser.document.pointerLockElement);
+					trace(@:privateAccess Window.getInstance().canvas);
 					if (js.Browser.document.pointerLockElement != @:privateAccess Window.getInstance().canvas) {
 						paused = true;
 						handlePauseGame();
@@ -102,7 +104,7 @@ class MarbleGame {
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
 				world.restart();
-				world.setCursorLock(true);
+				// world.setCursorLock(true);
 				paused = !paused;
 			});
 			canvas.pushDialog(exitGameDlg);
