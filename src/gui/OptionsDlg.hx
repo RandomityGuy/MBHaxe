@@ -1,5 +1,6 @@
 package gui;
 
+import gui.GuiControl.MouseState;
 import src.AudioManager;
 import hxd.Key;
 import src.Settings;
@@ -12,6 +13,8 @@ import src.ResourceLoader;
 import src.Util;
 
 class OptionsDlg extends GuiImage {
+	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
+
 	public function new() {
 		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
 		this.horizSizing = Width;
@@ -296,6 +299,21 @@ class OptionsDlg extends GuiImage {
 			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
 		}
 		audioPane.addChild(audSndKnob);
+
+		musicSliderFunc = (dt:Float, mouseState:MouseState) -> {
+			if (mouseState.button == Key.MOUSE_LEFT) {
+				var musRect = audMusKnob.getRenderRectangle();
+				if (musRect.inRect(mouseState.position)) {
+					Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
+					AudioManager.updateVolumes();
+				}
+				var sndRect = audSndKnob.getRenderRectangle();
+				if (sndRect.inRect(mouseState.position)) {
+					Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
+					AudioManager.updateVolumes();
+				}
+			}
+		}
 
 		var audTxtWndo = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_txt_wndo.png").toTile());
 		audTxtWndo.position = new Vector(26, 130);
@@ -661,5 +679,11 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			}
 			this.render(MarbleGame.canvas.scene2d);
 		}
+	}
+
+	public override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+		if (musicSliderFunc != null)
+			musicSliderFunc(dt, mouseState);
 	}
 }

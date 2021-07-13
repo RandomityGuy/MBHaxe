@@ -97,7 +97,13 @@ class ResourceLoader {
 		if (textureCache.exists(path))
 			return textureCache.get(path);
 		if (fileSystem.exists(path)) {
-			var tex = loader.load(path).toTexture();
+			var img = loader.load(path).toImage();
+			Image.setupTextureFlags = (texObj) -> {
+				texObj.flags.set(MipMapped);
+			}
+			var tex = img.toTexture();
+			tex.mipMap = Nearest;
+			// tex.filter = Nearest;
 			textureCache.set(path, tex);
 
 			return tex;

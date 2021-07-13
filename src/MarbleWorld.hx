@@ -193,9 +193,7 @@ class MarbleWorld extends Scheduler {
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
 
-		// var renderer = cast(this.scene.renderer, h3d.scene.pbr.Renderer);
-
-		// renderer.skyMode = Hide;
+		var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
 
 		for (element in mission.root.elements) {
 			if (element._type != MissionElementType.Sun)
@@ -975,7 +973,9 @@ class MarbleWorld extends Scheduler {
 		var egg:EndGameGui = null;
 		egg = new EndGameGui((sender) -> {
 			this.dispose();
-			MarbleGame.canvas.setContent(new PlayMissionGui());
+			var pmg = new PlayMissionGui();
+			PlayMissionGui.currentSelectionStatic = mission.index + 1;
+			MarbleGame.canvas.setContent(pmg);
 		}, (sender) -> {
 			MarbleGame.canvas.popDialog(egg);
 			this.setCursorLock(true);

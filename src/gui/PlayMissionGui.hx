@@ -21,25 +21,36 @@ import h3d.Vector;
 import src.Util;
 
 class PlayMissionGui extends GuiImage {
+	static var currentSelectionStatic:Int = -1;
+	static var currentCategoryStatic:String = "beginner";
+
 	var currentSelection:Int = 0;
 	var currentCategory:String = "beginner";
 	var currentList:Array<Mission>;
 
 	var setSelectedFunc:Int->Void;
+	var setCategoryFunc:(String, ?Bool) -> Void;
 	var buttonHoldFunc:(dt:Float, mouseState:MouseState) -> Void;
 
 	var buttonCooldown:Float = 0.5;
 	var maxButtonCooldown:Float = 0.5;
 
 	public function new() {
+		MissionList.buildMissionList();
+
+		if (currentSelectionStatic == -1)
+			currentSelectionStatic = cast Math.min(MissionList.beginnerMissions.length - 1,
+				Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]);
+
+		currentSelection = PlayMissionGui.currentSelectionStatic;
+		currentCategory = PlayMissionGui.currentCategoryStatic;
+
 		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.extent = new Vector(640, 480);
 		this.position = new Vector(0, 0);
-
-		MissionList.buildMissionList();
 
 		var localContainer = new GuiControl();
 		localContainer.horizSizing = Center;
@@ -56,15 +67,12 @@ class PlayMissionGui extends GuiImage {
 			return [normal, hover, pressed, disabled];
 		}
 
-		var setCategoryFunc:String->Void = null;
-
 		var tabAdvanced = new GuiImage(ResourceLoader.getImage("data/ui/play/tab_adv.png").toTile());
 		tabAdvanced.position = new Vector(410, 21);
 		tabAdvanced.extent = new Vector(166, 43);
 		tabAdvanced.pressedAction = (sender) -> {
 			currentList = MissionList.advancedMissions;
 			currentCategory = "advanced";
-			setSelectedFunc(cast Math.min(Settings.progression[2], currentList.length - 1));
 			setCategoryFunc("advanced");
 		}
 		localContainer.addChild(tabAdvanced);
@@ -75,7 +83,6 @@ class PlayMissionGui extends GuiImage {
 		tabIntermediate.pressedAction = (sender) -> {
 			currentList = MissionList.intermediateMissions;
 			currentCategory = "intermediate";
-			setSelectedFunc(cast Math.min(Settings.progression[1], currentList.length - 1));
 			setCategoryFunc("intermediate");
 		}
 		localContainer.addChild(tabIntermediate);
@@ -86,7 +93,6 @@ class PlayMissionGui extends GuiImage {
 		tabCustom.pressedAction = (sender) -> {
 			currentList = MissionList.customMissions;
 			currentCategory = "custom";
-			setSelectedFunc(currentList.length - 1);
 			setCategoryFunc("custom");
 		}
 		localContainer.addChild(tabCustom);
@@ -165,6 +171,8 @@ class PlayMissionGui extends GuiImage {
 			// Wacky hacks
 			currentList[currentSelection].index = currentSelection;
 			currentList[currentSelection].difficultyIndex = ["beginner", "intermediate", "advanced"].indexOf(currentCategory);
+			currentSelectionStatic = currentSelection;
+			currentCategoryStatic = currentCategory;
 			cast(this.parent, Canvas).marbleGame.playMission(currentList[currentSelection]);
 		}
 		pmBox.addChild(pmPlay);
@@ -296,19 +304,21 @@ class PlayMissionGui extends GuiImage {
 
 		currentList = MissionList.beginnerMissions;
 
-		setCategoryFunc = function(category:String) {
+		setCategoryFunc = function(category:String, ?doRender:Bool = true) {
 			localContainer.removeChild(tabBeginner);
 			localContainer.removeChild(tabIntermediate);
 			localContainer.removeChild(tabAdvanced);
 			localContainer.removeChild(tabCustom);
 			localContainer.removeChild(pmBox);
-			AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonpress.wav"));
+			if (doRender)
+				AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonpress.wav"));
 			if (category == "beginner") {
 				localContainer.addChild(tabIntermediate);
 				localContainer.addChild(tabAdvanced);
 				localContainer.addChild(tabCustom);
 				localContainer.addChild(pmBox);
 				localContainer.addChild(tabBeginner);
+				currentList = MissionList.beginnerMissions;
 			}
 			if (category == "intermediate") {
 				localContainer.addChild(tabBeginner);
@@ -316,6 +326,7 @@ class PlayMissionGui extends GuiImage {
 				localContainer.addChild(tabCustom);
 				localContainer.addChild(pmBox);
 				localContainer.addChild(tabIntermediate);
+				currentList = MissionList.intermediateMissions;
 			}
 			if (category == "advanced") {
 				localContainer.addChild(tabBeginner);
@@ -323,6 +334,7 @@ class PlayMissionGui extends GuiImage {
 				localContainer.addChild(tabCustom);
 				localContainer.addChild(pmBox);
 				localContainer.addChild(tabAdvanced);
+				currentList = MissionList.advancedMissions;
 			}
 			if (category == "custom") {
 				localContainer.addChild(tabBeginner);
@@ -330,8 +342,16 @@ class PlayMissionGui extends GuiImage {
 				localContainer.addChild(tabAdvanced);
 				localContainer.addChild(pmBox);
 				localContainer.addChild(tabCustom);
+				currentList = MissionList.customMissions;
 			}
-			this.render(cast(this.parent, Canvas).scene2d);
+			currentCategoryStatic = currentCategory;
+			if (currentCategory != "custom")
+				setSelectedFunc(cast Math.min(currentList.length - 1,
+					Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
+			else
+				setSelectedFunc(currentList.length - 1);
+			if (doRender)
+				this.render(cast(this.parent, Canvas).scene2d);
 		}
 
 		function splitTextWithPadding(textElement:Text, textStr:String) {
@@ -371,6 +391,7 @@ class PlayMissionGui extends GuiImage {
 			}
 
 			currentSelection = index;
+			currentSelectionStatic = currentSelection;
 
 			var currentMission = currentList[currentSelection];
 
@@ -447,15 +468,13 @@ class PlayMissionGui extends GuiImage {
 			levelBkgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
 			levelFgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
 		}
+
+		setCategoryFunc(currentCategoryStatic, false);
 	}
 
 	public override function render(scene2d:Scene) {
 		super.render(scene2d);
-		if (currentCategory != "custom")
-			setSelectedFunc(cast Math.min(currentList.length - 1, Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
-		else
-			setSelectedFunc(currentList.length - 1);
-		// setSelectedFunc(0);
+		setSelectedFunc(currentSelectionStatic);
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {

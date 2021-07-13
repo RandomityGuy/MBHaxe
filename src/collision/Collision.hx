@@ -64,11 +64,10 @@ class Collision {
 			normal: null
 		};
 
-		var pnorm = v1.sub(v0).cross(v2.sub(v0)).normalized();
-		var d = -v0.dot(normal);
+		var pnorm = normal.clone();
+		var d = -v0.dot(pnorm);
 
-		var p = PlaneF.PointNormal(new Point3F(v0.x, v0.y, v0.z), new Point3F(normal.x, normal.y, normal.z));
-		var pdist = p.distance(new Point3F(center.x, center.y, center.z));
+		var pdist = center.dot(pnorm) + d;
 
 		if (pdist < 0.001) {
 			return res; // Dont collide internal edges

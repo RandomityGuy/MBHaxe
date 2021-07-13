@@ -305,6 +305,7 @@ class DifBuilder {
 			if (canFindTex(grp)) {
 				texture = ResourceLoader.getFileEntry(tex(grp)).toImage().toTexture();
 				texture.wrap = Wrap.Repeat;
+				texture.mipMap = Nearest;
 				material = h3d.mat.Material.create(texture);
 			} else {
 				material = Material.create();

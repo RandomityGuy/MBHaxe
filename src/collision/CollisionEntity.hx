@@ -130,16 +130,12 @@ class CollisionEntity implements IOctreeObject {
 				var closest = res.point;
 				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
 				if (closest != null) {
-					if (position.sub(closest).lengthSq() <= radius * radius) {
+					var contactDist = closest.distanceSq(position);
+					if (contactDist <= radius * radius) {
 						var normal = res.normal;
 
 						if (position.sub(closest).dot(surfacenormal) > 0) {
 							normal.normalize();
-
-							var supportVec = surface.support(normal, tform);
-							if (!(supportVec.equals(v0) || supportVec.equals(v) || supportVec.equals(v2))) {
-								// normal = surfacenormal;
-							}
 
 							// We find the normal that is closest to the surface normal, sort of fixes weird edge cases of when colliding with
 							var testDot = normal.dot(surfacenormal);
@@ -151,7 +147,7 @@ class CollisionEntity implements IOctreeObject {
 								cinfo.point = closest;
 								// cinfo.collider = this;
 								cinfo.velocity = this.velocity.clone();
-								cinfo.contactDistance = closest.distance(position);
+								cinfo.contactDistance = Math.sqrt(contactDist);
 								cinfo.otherObject = this.go;
 								// cinfo.penetration = radius - (position.sub(closest).dot(normal));
 								cinfo.restitution = surface.restitution;

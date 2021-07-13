@@ -116,9 +116,11 @@ class MarbleGame {
 	public function quitMission() {
 		world.setCursorLock(false);
 		paused = false;
+		var pmg = new PlayMissionGui();
+		PlayMissionGui.currentSelectionStatic = world.mission.index;
 		world.dispose();
 		world = null;
-		canvas.setContent(new PlayMissionGui());
+		canvas.setContent(pmg);
 	}
 
 	public function playMission(mission:Mission) {

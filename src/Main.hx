@@ -63,11 +63,6 @@ class Main extends hxd.App {
 
 	static function main() {
 		// h3d.mat.PbrMaterialSetup.set();
-		#if hl
-		sdl.Sdl.setGLOptions(3, 2, 24, 8, 1, 2);
-		sdl.Sdl.setHint("SDL_HINT_RENDER_SCALE_QUALITY", "1");
-		#end
-		h3d.Engine.ANTIALIASING = 4;
 		new Main();
 	}
 }
