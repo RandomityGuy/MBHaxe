@@ -301,8 +301,8 @@ class PlayGui {
 		helpTextCtrl.addChild(helpTextForeground);
 
 		var alertTextCtrl = new GuiControl();
-		alertTextCtrl.position = new Vector(0, 378);
-		alertTextCtrl.extent = new Vector(640, 98);
+		alertTextCtrl.position = new Vector(0, 418);
+		alertTextCtrl.extent = new Vector(640, 58);
 		alertTextCtrl.vertSizing = Top;
 		alertTextCtrl.horizSizing = Width;
 
