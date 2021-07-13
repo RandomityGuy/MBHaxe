@@ -265,6 +265,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.reset();
 
 		var euler = startquat.quat.toEuler();
+		this.marble.camera.init(cast this);
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
 		this.marble.camera.CameraPitch = 0.45;
 		this.marble.camera.oob = false;
@@ -688,7 +689,6 @@ class MarbleWorld extends Scheduler {
 		this.marbles.push(marble);
 		marble.level = cast this;
 		if (marble.controllable) {
-			marble.camera.init(cast this);
 			marble.init(cast this);
 			this.scene.addChild(marble.camera);
 			this.marble = marble;
@@ -739,7 +739,6 @@ class MarbleWorld extends Scheduler {
 			var func = this.resourceLoadFuncs.pop();
 			func();
 			this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
-			MarbleGame.canvas.render(scene2d);
 		} else {
 			if (!_ready)
 				postInit();

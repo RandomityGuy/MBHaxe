@@ -26,6 +26,7 @@ typedef OptionsSettings = {
 	var musicVolume:Float;
 	var soundVolume:Float;
 	var vsync:Bool;
+	var fov:Int;
 }
 
 typedef ControlsSettings = {
@@ -57,6 +58,7 @@ class Settings {
 		shadows: false,
 		musicVolume: 1,
 		soundVolume: 0.7,
+		fov: 60,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -171,6 +173,8 @@ class Settings {
 				highScores.set(key, value);
 			}
 			optionsSettings = json.options;
+			if (optionsSettings.fov == 0 #if js || optionsSettings.fov == null #end)
+				optionsSettings.fov = 60;
 			controlsSettings = json.controls;
 			progression = json.progression;
 			highscoreName = json.highscoreName;

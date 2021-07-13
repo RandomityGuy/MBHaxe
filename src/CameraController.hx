@@ -75,7 +75,7 @@ class CameraController extends Object {
 		this.level = level;
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
-		level.scene.camera.fovY = 60;
+		level.scene.camera.fovY = Settings.optionsSettings.fov;
 		lockCursor();
 	}
 

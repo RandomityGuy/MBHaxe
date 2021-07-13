@@ -16,6 +16,8 @@ import gui.Canvas;
 class MarbleGame {
 	static var canvas:Canvas;
 
+	static var instance:MarbleGame;
+
 	var world:MarbleWorld;
 
 	var scene2d:h2d.Scene;
@@ -29,6 +31,7 @@ class MarbleGame {
 		canvas = new Canvas(scene2d, cast this);
 		this.scene = scene;
 		this.scene2d = scene2d;
+		MarbleGame.instance = this;
 
 		#if js
 		// Pause shit
@@ -91,10 +94,7 @@ class MarbleGame {
 			world.setCursorLock(false);
 			exitGameDlg = new ExitGameDlg((sender) -> {
 				canvas.popDialog(exitGameDlg);
-				paused = !paused;
-				world.dispose();
-				world = null;
-				canvas.setContent(new PlayMissionGui());
+				quitMission();
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
 				paused = !paused;
@@ -111,6 +111,14 @@ class MarbleGame {
 				canvas.popDialog(exitGameDlg);
 			world.setCursorLock(true);
 		}
+	}
+
+	public function quitMission() {
+		world.setCursorLock(false);
+		paused = false;
+		world.dispose();
+		world = null;
+		canvas.setContent(new PlayMissionGui());
 	}
 
 	public function playMission(mission:Mission) {

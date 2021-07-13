@@ -3,6 +3,7 @@ package gui;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.MarbleGame;
 
 class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
@@ -51,6 +52,9 @@ class LoadingGui extends GuiImage {
 		var cancelButton = new GuiButton(loadButtonImages("data/ui/loading/cancel"));
 		cancelButton.position = new Vector(320, 233);
 		cancelButton.extent = new Vector(88, 50);
+		cancelButton.pressedAction = (sender) -> {
+			MarbleGame.instance.quitMission();
+		}
 
 		var overlay = new GuiImage(ResourceLoader.getImage("data/ui/loading/overlay.png").toTile());
 		overlay.position = new Vector(151, 131);

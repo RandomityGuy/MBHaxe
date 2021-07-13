@@ -26,6 +26,10 @@ class PlayMissionGui extends GuiImage {
 	var currentList:Array<Mission>;
 
 	var setSelectedFunc:Int->Void;
+	var buttonHoldFunc:(dt:Float, mouseState:MouseState) -> Void;
+
+	var buttonCooldown:Float = 0.5;
+	var maxButtonCooldown:Float = 0.5;
 
 	public function new() {
 		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
@@ -180,6 +184,35 @@ class PlayMissionGui extends GuiImage {
 			setSelectedFunc(currentSelection + 1);
 		}
 		pmBox.addChild(pmNext);
+
+		buttonHoldFunc = (dt:Float, mouseState:MouseState) -> {
+			var prevBox = pmPrev.getRenderRectangle();
+			var nextBox = pmNext.getRenderRectangle();
+
+			if (prevBox.inRect(mouseState.position) && mouseState.button == Key.MOUSE_LEFT) {
+				if (buttonCooldown <= 0) {
+					pmPrev.pressedAction(pmPrev);
+					buttonCooldown = maxButtonCooldown;
+					maxButtonCooldown *= 0.75;
+				}
+			}
+
+			if (nextBox.inRect(mouseState.position) && mouseState.button == Key.MOUSE_LEFT) {
+				if (buttonCooldown <= 0) {
+					pmNext.pressedAction(pmNext);
+					buttonCooldown = maxButtonCooldown;
+					maxButtonCooldown *= 0.75;
+				}
+			}
+
+			if (buttonCooldown > 0 && mouseState.button == Key.MOUSE_LEFT)
+				buttonCooldown -= dt;
+
+			if (mouseState.button != Key.MOUSE_LEFT) {
+				maxButtonCooldown = 0.5;
+				buttonCooldown = maxButtonCooldown;
+			}
+		}
 
 		var pmBack = new GuiButton(loadButtonImages("data/ui/play/back"));
 		pmBack.position = new Vector(102, 260);
@@ -427,6 +460,8 @@ class PlayMissionGui extends GuiImage {
 
 	public override function update(dt:Float, mouseState:MouseState) {
 		super.update(dt, mouseState);
+
+		buttonHoldFunc(dt, mouseState);
 
 		if (Key.isPressed(Key.LEFT))
 			setSelectedFunc(currentSelection - 1);
