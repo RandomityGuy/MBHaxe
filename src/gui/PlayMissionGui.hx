@@ -437,7 +437,7 @@ class PlayMissionGui extends GuiImage {
 			}
 
 			var descText = '<font face="DomCasual24" color="#000000">${currentMission.title}</font><br/><br/>'
-				+ splitTextWithPadding(pmDescription.text, Util.unescape(currentMission.description));
+				+ splitTextWithPadding(pmDescription.text, StringTools.htmlEscape(Util.unescape(currentMission.description)));
 			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
 				descText += '<font face="DomCasual24"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
 			}
@@ -448,7 +448,8 @@ class PlayMissionGui extends GuiImage {
 			pmDescription.text.text = descText;
 
 			var descText2 = '<br/><br/>'
-				+ '<font opacity="0">${splitTextWithPadding(pmDescriptionOther.text, Util.unescape(currentMission.description))}</font>';
+				+
+				'<font opacity="0">${splitTextWithPadding(pmDescriptionOther.text, StringTools.htmlEscape(Util.unescape(currentMission.description)))}</font>';
 			descText2 += '<br/><br/>';
 			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
 				descText2 += '<font face="DomCasual24" opacity="0"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';

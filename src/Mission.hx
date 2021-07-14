@@ -1,5 +1,7 @@
 package src;
 
+import haxe.io.BytesBuffer;
+import haxe.Http;
 import h2d.Tile;
 import hxd.BitmapData;
 import mis.MisParser;
@@ -21,6 +23,8 @@ class Mission {
 	public var missionInfo:MissionElementScriptObject;
 	public var index:Int;
 	public var difficultyIndex:Int;
+	public var id:Int;
+	public var isClaMission:Bool;
 
 	public function new() {}
 
@@ -51,16 +55,28 @@ class Mission {
 	}
 
 	public function getPreviewImage() {
-		var basename = haxe.io.Path.withoutExtension(this.path);
-		if (ResourceLoader.fileSystem.exists(basename + ".png")) {
-			return ResourceLoader.getImage(basename + ".png").toTile();
+		if (!this.isClaMission) {
+			var basename = haxe.io.Path.withoutExtension(this.path);
+			if (ResourceLoader.fileSystem.exists(basename + ".png")) {
+				return ResourceLoader.getImage(basename + ".png").toTile();
+			}
+			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
+				return ResourceLoader.getImage(basename + ".jpg").toTile();
+			}
+			var img = new BitmapData(1, 1);
+			img.setPixel(0, 0, 0);
+			return Tile.fromBitmap(img);
+		} else {
+			var outputString = Http.requestUrl('https://marbleblast.vani.ga/api/custom/${this.id}.jpg');
+			#if hl
+			sys.FileSystem.createDirectory("data/previewcache");
+			sys.io.File.write('data/previewcache/${this.id}.jpg', true).writeString(outputString);
+			var imgData = ResourceLoader.getFileEntry('data/previewcache/${this.id}.jpg');
+			var img = new BitmapData(1, 1);
+			img.setPixel(0, 0, 0);
+			return Tile.fromBitmap(img);
+			#end
 		}
-		if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
-			return ResourceLoader.getImage(basename + ".jpg").toTile();
-		}
-		var img = new BitmapData(1, 1);
-		img.setPixel(0, 0, 0);
-		return Tile.fromBitmap(img);
 	}
 
 	public function getDifPath(rawElementPath:String) {
