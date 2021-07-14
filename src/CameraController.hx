@@ -215,8 +215,7 @@ class CameraController extends Object {
 		var results = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection);
 		var rayCastEnd = rayCastOrigin.add(rayCastDirection.multiply(CameraDistance));
 
-		var firstHit = null;
-		var minD = 1e8;
+		var successHits = [];
 
 		for (result in results) {
 			if (result.distance < CameraDistance) {
@@ -229,14 +228,13 @@ class CameraController extends Object {
 				var t3 = (result.point.z - rayCastOrigin.z) / (rayCastEnd.z - rayCastOrigin.z);
 				if (t3 < 0 || t3 > 1)
 					continue;
-				if (result.distance < minD) {
-					minD = result.distance;
-					firstHit = result;
-				}
+				successHits.push(result);
 			}
 		}
 
-		if (firstHit != null) {
+		successHits.sort((a, b) -> a.distance == b.distance ? 0 : a.distance > b.distance ? 1 : -1);
+
+		for (firstHit in successHits.slice(0, 1)) {
 			if (firstHit.distance < CameraDistance) {
 				// camera.pos = marblePosition.sub(directionVector.multiply(firstHit.distance * 0.7));
 				var plane = new Plane(firstHit.normal.x, firstHit.normal.y, firstHit.normal.z, firstHit.point.dot(firstHit.normal));
@@ -245,10 +243,22 @@ class CameraController extends Object {
 
 				var projected = plane.project(camera.pos.toPoint());
 				var dist = plane.distance(camera.pos.toPoint());
-				if (dist < closeness) {
-					camera.pos = projected.toVector().add(normal.multiply(-closeness));
-				}
+
+				if (dist >= closeness)
+					break;
+
+				camera.pos = projected.toVector().add(normal.multiply(-closeness));
+
+				var forwardVec = marblePosition.sub(camera.pos).normalized();
+				var rightVec = camera.up.cross(forwardVec);
+				var upVec = forwardVec.cross(rightVec);
+
+				camera.target = marblePosition.add(upVec.multiply(0.3));
+				camera.up = upVec;
+
+				continue;
 			}
+			break;
 		}
 
 		if (oob) {

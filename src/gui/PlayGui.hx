@@ -56,20 +56,25 @@ class PlayGui {
 
 	var resizeEv:Void->Void;
 
+	var _init:Bool;
+
 	public function dispose() {
-		playGuiCtrl.dispose();
-		gemImageScene.dispose();
-		gemImageSceneTarget.dispose();
-		gemImageSceneTargetBitmap.remove();
-		powerupImageScene.dispose();
-		powerupImageSceneTarget.dispose();
-		powerupImageSceneTargetBitmap.remove();
-		RSGOCenterText.remove();
-		Window.getInstance().removeResizeEvent(resizeEv);
+		if (_init) {
+			playGuiCtrl.dispose();
+			gemImageScene.dispose();
+			gemImageSceneTarget.dispose();
+			gemImageSceneTargetBitmap.remove();
+			powerupImageScene.dispose();
+			powerupImageSceneTarget.dispose();
+			powerupImageSceneTargetBitmap.remove();
+			RSGOCenterText.remove();
+			Window.getInstance().removeResizeEvent(resizeEv);
+		}
 	}
 
 	public function init(scene2d:h2d.Scene) {
 		this.scene2d = scene2d;
+		this._init = true;
 
 		playGuiCtrl = new GuiControl();
 		playGuiCtrl.position = new Vector();
