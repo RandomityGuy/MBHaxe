@@ -67,15 +67,9 @@ class Mission {
 			img.setPixel(0, 0, 0);
 			return Tile.fromBitmap(img);
 		} else {
-			var outputString = Http.requestUrl('https://marbleblast.vani.ga/api/custom/${this.id}.jpg');
-			#if hl
-			sys.FileSystem.createDirectory("data/previewcache");
-			sys.io.File.write('data/previewcache/${this.id}.jpg', true).writeString(outputString);
-			var imgData = ResourceLoader.getFileEntry('data/previewcache/${this.id}.jpg');
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
 			return Tile.fromBitmap(img);
-			#end
 		}
 	}
 
