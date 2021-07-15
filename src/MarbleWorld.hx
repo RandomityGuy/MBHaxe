@@ -724,7 +724,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui.update(timeState);
 		AudioManager.update(this.scene);
 
-		if (this.outOfBounds && this.finishTime == null && Key.isPressed(Settings.controlsSettings.powerup)) {
+		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {
 			this.clearSchedule();
 			this.restart();
 			return;
