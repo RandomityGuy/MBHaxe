@@ -870,6 +870,14 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function callCollisionHandlers(marble:Marble, timeState:TimeState) {
+		var gjkCapsule = new collision.gjk.Capsule();
+		gjkCapsule.p1 = marble.getAbsPos().getPosition();
+		gjkCapsule.p2 = marble.prevPos;
+		gjkCapsule.radius = marble._radius;
+
+		var spherebounds = new Bounds();
+		spherebounds.addSpherePos(gjkCapsule.p1.x, gjkCapsule.p1.y, gjkCapsule.p1.z, gjkCapsule.radius);
+		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
 		// var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
 		var contacts = marble.contactEntities;
 		var newImmunity = [];
@@ -878,15 +886,6 @@ class MarbleWorld extends Scheduler {
 
 		var contactsphere = new SphereCollisionEntity(marble);
 		contactsphere.velocity = new Vector();
-
-		var spherebounds = new Bounds();
-		var center = marble.collider.transform.getPosition();
-		var radius = marble._radius;
-		spherebounds.addSpherePos(center.x, center.y, center.z, radius);
-
-		var gjkSphere = new collision.gjk.Sphere();
-		gjkSphere.position = center;
-		gjkSphere.radius = radius;
 
 		for (contact in contacts) {
 			if (contact.go != marble) {
@@ -937,7 +936,7 @@ class MarbleWorld extends Scheduler {
 
 		if (this.finishTime == null) {
 			if (spherebounds.collide(this.endPad.finishBounds)) {
-				if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider) != null) {
+				if (collision.gjk.GJK.gjk(gjkCapsule, this.endPad.finishCollider) != null) {
 					if (!endPad.inFinish) {
 						touchFinish();
 						endPad.inFinish = true;

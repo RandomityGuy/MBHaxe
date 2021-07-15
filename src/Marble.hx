@@ -178,6 +178,8 @@ class Marble extends GameObject {
 
 	public var startPad:StartPad;
 
+	public var prevPos:Vector;
+
 	public function new() {
 		super();
 		var geom = Sphere.defaultUnitSphere();
@@ -892,6 +894,7 @@ class Marble extends GameObject {
 			}
 
 			var pos = this.getAbsPos().getPosition();
+			this.prevPos = pos.clone();
 
 			if (mode == Start) {
 				var upVec = this.level.currentUp;
@@ -934,7 +937,7 @@ class Marble extends GameObject {
 				this.heldPowerup = null;
 			}
 
-			if (this.controllable) {
+			if (this.controllable && this.prevPos != null) {
 				var tempTimeState = timeState.clone();
 				tempState.currentAttemptTime = piTime;
 				tempState.dt = timeStep;

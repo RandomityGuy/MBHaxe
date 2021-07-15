@@ -1,5 +1,6 @@
 package src;
 
+import h3d.col.Bounds;
 import src.TimeState;
 import shaders.Billboard;
 import collision.BoxCollisionEntity;
@@ -322,7 +323,10 @@ class DtsObject extends GameObject {
 		rootObject.scaleX = -1;
 
 		if (this.level != null) {
-			this.boundingCollider = new BoxCollisionEntity(this.level.instanceManager.getObjectBounds(cast this), cast this);
+			var boundthing = new Bounds();
+			boundthing.addPoint(new h3d.col.Point(this.dts.bounds.minX, this.dts.bounds.minY, this.dts.bounds.minZ));
+			boundthing.addPoint(new h3d.col.Point(this.dts.bounds.maxX, this.dts.bounds.maxY, this.dts.bounds.maxZ));
+			this.boundingCollider = new BoxCollisionEntity(boundthing, cast this);
 			this.boundingCollider.setTransform(this.getTransform());
 		}
 

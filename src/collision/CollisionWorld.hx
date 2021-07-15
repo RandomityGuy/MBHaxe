@@ -22,7 +22,10 @@ class CollisionWorld {
 		// var intersections = this.octree.radiusSearch(position, searchdist);
 
 		var box = new Bounds();
-		box.addSpherePos(position.x, position.y, position.z, radius);
+		box.addSpherePos(0, 0, 0, radius);
+		var rotQuat = spherecollision.marble.getRotationQuat();
+		box.transform(rotQuat.toMatrix());
+		box.offset(position.x, position.y, position.z);
 		box.addSpherePos(position.x + velocity.x * timeState.dt, position.y + velocity.y * timeState.dt, position.z + velocity.z * timeState.dt, radius);
 		var intersections = this.octree.boundingSearch(box);
 

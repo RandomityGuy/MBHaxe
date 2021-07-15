@@ -3,7 +3,7 @@ package collision.gjk;
 import h3d.Vector;
 
 @:publicFields
-class Sphere {
+class Sphere implements GJKShape {
 	var position:Vector;
 	var radius:Float;
 
@@ -15,5 +15,9 @@ class Sphere {
 		d = d.multiply(radius);
 		c = c.add(d);
 		return c;
+	}
+
+	public function getCenter() {
+		return position;
 	}
 }

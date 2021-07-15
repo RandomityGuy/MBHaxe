@@ -10,16 +10,16 @@ class GJK {
 	public static var maxEpaLooseEdges = 64;
 	public static var maxEpaIterations = 64;
 
-	public static function gjk(sphere:Sphere, hull:ConvexHull) {
-		var searchDir = sphere.position.sub(hull.centre);
+	public static function gjk(s1:GJKShape, s2:GJKShape) {
+		var searchDir = s1.getCenter().sub(s2.getCenter());
 		var a = new Vector();
 		var b = new Vector();
 		var c = new Vector();
 		var d = new Vector();
 
-		c = hull.support(searchDir).sub(sphere.support(searchDir.multiply(-1)));
+		c = s2.support(searchDir).sub(s1.support(searchDir.multiply(-1)));
 		searchDir = c.multiply(-1);
-		b = hull.support(searchDir).sub(sphere.support(searchDir.multiply(-1)));
+		b = s2.support(searchDir).sub(s1.support(searchDir.multiply(-1)));
 		if (b.dot(searchDir) < 0)
 			return null;
 
@@ -33,7 +33,7 @@ class GJK {
 		var simpDim = 2;
 
 		for (i in 0...maxIterations) {
-			a = hull.support(searchDir).sub(sphere.support(searchDir.multiply(-1)));
+			a = s2.support(searchDir).sub(s1.support(searchDir.multiply(-1)));
 			if (a.dot(searchDir) < 0) {
 				return null;
 			}
@@ -83,14 +83,14 @@ class GJK {
 					b = a;
 					searchDir = adb;
 				} else {
-					return epa(a, b, c, d, sphere, hull);
+					return epa(a, b, c, d, s1, s2);
 				}
 			}
 		}
 		return null;
 	}
 
-	public static function epa(a:Vector, b:Vector, c:Vector, d:Vector, sphere:Sphere, hull:ConvexHull) {
+	public static function epa(a:Vector, b:Vector, c:Vector, d:Vector, s1:GJKShape, s2:GJKShape) {
 		var faces = [];
 		for (i in 0...maxEpaFaces)
 			faces.push([new Vector(), new Vector(), new Vector(), new Vector()]);
@@ -129,7 +129,7 @@ class GJK {
 
 			// search normal to face that's closest to origin
 			var search_dir = faces[closestFace][3];
-			var p = hull.support(search_dir).sub(sphere.support(search_dir.multiply(-1)));
+			var p = s2.support(search_dir).sub(s1.support(search_dir.multiply(-1)));
 			if (p.dot(search_dir) - min_dist < epaTolerance) {
 				// Convergence (new point is not significantly further from origin)
 				return faces[closestFace][3].multiply(p.dot(search_dir)); // dot vertex with normal to resolve collision along normal!

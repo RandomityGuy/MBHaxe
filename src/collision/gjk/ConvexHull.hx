@@ -3,16 +3,14 @@ package collision.gjk;
 import h3d.Vector;
 import h3d.Matrix;
 
-class ConvexHull {
+class ConvexHull implements GJKShape {
 	public var vertices:Array<Vector>;
 
 	public var transform:Matrix;
 
-	public var centre(get, never):Vector;
-
 	var _centercache:Vector;
 
-	function get_centre():Vector {
+	public function getCenter():Vector {
 		if (_centercache != null)
 			return _centercache;
 		else {
