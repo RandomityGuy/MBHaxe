@@ -556,8 +556,6 @@ class Marble extends GameObject {
 			}
 		}
 		if (bestSurface != -1) {
-			// TODO: FIX
-			// bestContact.velocity - bestContact.normal * Vector3.Dot(bestContact.normal, bestContact.velocity);
 			var vAtC = this.velocity.add(this.omega.cross(bestContact.normal.multiply(-this._radius))).sub(bestContact.velocity);
 			var vAtCMag = vAtC.length();
 			var slipping = false;

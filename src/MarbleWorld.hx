@@ -170,6 +170,12 @@ class MarbleWorld extends Scheduler {
 
 		this.resourceLoadFuncs.push(() -> {
 			this.playGui.init(this.scene2d);
+			var musicFileName = [
+				'data/sound/groovepolice.ogg',
+				'data/sound/classic vibe.ogg',
+				'data/sound/beach party.ogg'
+			][(mission.index + 1) % 3];
+			AudioManager.playMusic(ResourceLoader.getAudio(musicFileName));
 		});
 		this.resourceLoadFuncs.push(() -> {
 			this.addSimGroup(this.mission.root);
@@ -831,8 +837,6 @@ class MarbleWorld extends Scheduler {
 		}
 		this.playGui.setHelpText(text);
 		this.helpTextTimeState = this.timeState.currentAttemptTime;
-
-		// TODO FIX
 	}
 
 	public function pickUpGem(gem:Gem) {

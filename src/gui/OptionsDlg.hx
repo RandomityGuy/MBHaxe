@@ -670,11 +670,10 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 				mainPane.addChild(audioPane);
 			}
 			if (tab == "Controls") {
-				// TODO
 				tabs.addChild(audioTab);
-				tabs.addChild(controlsTab);
-				tabs.addChild(boxFrame);
 				tabs.addChild(graphicsTab);
+				tabs.addChild(boxFrame);
+				tabs.addChild(controlsTab);
 				mainPane.addChild(controlsPane);
 			}
 			this.render(MarbleGame.canvas.scene2d);

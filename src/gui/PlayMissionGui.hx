@@ -138,7 +138,6 @@ class PlayMissionGui extends GuiImage {
 		var arialBold14fontdata = ResourceLoader.getFileEntry("data/font/ArialBold14px.fnt");
 		var arialBold14 = new BitmapFont(arialBold14fontdata.entry);
 		@:privateAccess arialBold14.loader = ResourceLoader.loader;
-		// TODO texts
 
 		var levelBkgnd = new GuiText(domcasual24);
 		levelBkgnd.position = new Vector(5, 156);
@@ -264,7 +263,6 @@ class PlayMissionGui extends GuiImage {
 			}
 		}
 
-		// TODO Pm description
 		var pmDescription = new GuiMLText(arial14, mlFontLoader);
 		pmDescription.position = new Vector(61, 52);
 		pmDescription.extent = new Vector(215, 174);
