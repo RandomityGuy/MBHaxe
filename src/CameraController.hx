@@ -107,8 +107,13 @@ class CameraController extends Object {
 	}
 
 	function orbit(mouseX:Float, mouseY:Float) {
-		var deltaposX = mouseX;
-		var deltaposY = mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1);
+		var scaleFactor = 1.0;
+		#if js
+		scaleFactor = 1 / js.Browser.window.devicePixelRatio;
+		#end
+
+		var deltaposX = mouseX * scaleFactor;
+		var deltaposY = mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1) * scaleFactor;
 		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
 			deltaposY = 0;
 		}

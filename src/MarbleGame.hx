@@ -81,6 +81,16 @@ class MarbleGame {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
 		});
+
+		js.Browser.window.addEventListener('contextmenu', (e) -> e.preventDefault()); // Disable right click context menu for good
+
+		js.Browser.window.addEventListener('beforeunload', (e) -> {
+			// Ask the user if they're sure about closing the tab if they're currently in game
+			if (world != null) {
+				e.preventDefault();
+				e.returnValue = '';
+			}
+		});
 		#end
 	}
 
