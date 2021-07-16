@@ -1,7 +1,6 @@
 package src;
 
 import haxe.io.BytesBuffer;
-import haxe.Http;
 import h2d.Tile;
 import hxd.BitmapData;
 import mis.MisParser;

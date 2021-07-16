@@ -62,6 +62,7 @@ class CameraController extends Object {
 	public var theta:Float;
 
 	var lastCamPos:Vector;
+	var lastVertTranslation:Vector;
 
 	public var oob:Bool = false;
 	public var finish:Bool = false;
@@ -83,6 +84,8 @@ class CameraController extends Object {
 		#if js
 		var jsCanvas = @:privateAccess Window.getInstance().canvas;
 		jsCanvas.focus();
+		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+		pointercontainer.hidden = true;
 		#end
 		Window.getInstance().lockPointer((x, y) -> orbit(x, y));
 		#if hl
@@ -98,6 +101,8 @@ class CameraController extends Object {
 		#if js
 		var jsCanvas = @:privateAccess Window.getInstance().canvas;
 		@:privateAccess Window.getInstance().lockCallback = null; // Fix cursorlock position shit
+		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+		pointercontainer.hidden = false;
 		#end
 	}
 
@@ -259,11 +264,13 @@ class CameraController extends Object {
 
 		if (oob) {
 			camera.pos = lastCamPos;
-			camera.target = marblePosition.add(cameraVerticalTranslation);
+			camera.target = marblePosition.add(lastVertTranslation);
 		}
 
-		if (!oob)
+		if (!oob) {
 			lastCamPos = camera.pos;
+			lastVertTranslation = cameraVerticalTranslation;
+		}
 
 		this.setPosition(camera.pos.x, camera.pos.y, camera.pos.z);
 		// camera.target = null;

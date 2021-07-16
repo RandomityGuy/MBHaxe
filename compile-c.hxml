@@ -3,4 +3,3 @@
 -lib hlsdl
 -hl native/marblegame.c
 --main Main
--debug

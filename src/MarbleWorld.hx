@@ -874,13 +874,12 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function callCollisionHandlers(marble:Marble, timeState:TimeState) {
-		var gjkCapsule = new collision.gjk.Capsule();
-		gjkCapsule.p1 = marble.getAbsPos().getPosition();
-		gjkCapsule.p2 = marble.prevPos;
-		gjkCapsule.radius = marble._radius;
+		var gjkSphere = new collision.gjk.Sphere();
+		gjkSphere.position = marble.getAbsPos().getPosition();
+		gjkSphere.radius = marble._radius;
 
 		var spherebounds = new Bounds();
-		spherebounds.addSpherePos(gjkCapsule.p1.x, gjkCapsule.p1.y, gjkCapsule.p1.z, gjkCapsule.radius);
+		spherebounds.addSpherePos(gjkSphere.position.x, gjkSphere.position.y, gjkSphere.position.z, gjkSphere.radius);
 		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
 		// var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
 		var contacts = marble.contactEntities;
@@ -940,7 +939,7 @@ class MarbleWorld extends Scheduler {
 
 		if (this.finishTime == null) {
 			if (spherebounds.collide(this.endPad.finishBounds)) {
-				if (collision.gjk.GJK.gjk(gjkCapsule, this.endPad.finishCollider) != null) {
+				if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider) != null) {
 					if (!endPad.inFinish) {
 						touchFinish();
 						endPad.inFinish = true;
@@ -976,11 +975,17 @@ class MarbleWorld extends Scheduler {
 
 	function showFinishScreen() {
 		var egg:EndGameGui = null;
+		#if js
+		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+		#end
 		egg = new EndGameGui((sender) -> {
 			this.dispose();
 			var pmg = new PlayMissionGui();
 			PlayMissionGui.currentSelectionStatic = mission.index + 1;
 			MarbleGame.canvas.setContent(pmg);
+			#if js
+			pointercontainer.hidden = false;
+			#end
 		}, (sender) -> {
 			MarbleGame.canvas.popDialog(egg);
 			this.setCursorLock(true);
@@ -988,6 +993,9 @@ class MarbleWorld extends Scheduler {
 		}, mission, finishTime);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
+		#if js
+		pointercontainer.hidden = true;
+		#end
 		return 0;
 	}
 

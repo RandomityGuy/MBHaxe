@@ -38,8 +38,6 @@ class MarbleGame {
 		js.Browser.document.addEventListener('pointerlockchange', () -> {
 			if (!paused && world != null) {
 				if (world.finishTime == null && world._ready) {
-					trace(js.Browser.document.pointerLockElement);
-					trace(@:privateAccess Window.getInstance().canvas);
 					if (js.Browser.document.pointerLockElement != @:privateAccess Window.getInstance().canvas) {
 						paused = true;
 						handlePauseGame();
@@ -57,6 +55,31 @@ class MarbleGame {
 			var canvasElement = js.Browser.document.getElementById("webgl");
 			canvasElement.style.width = "100%";
 			canvasElement.style.height = "100%";
+		});
+		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+		pointercontainer.addEventListener('mousedown', (e:js.html.MouseEvent) -> {
+			var buttonCode = switch (e.button) {
+				case 1: 2;
+				case 2: 1;
+				case x: x;
+			};
+			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+		});
+		pointercontainer.addEventListener('mouseup', (e:js.html.MouseEvent) -> {
+			var buttonCode = switch (e.button) {
+				case 1: 2;
+				case 2: 1;
+				case x: x;
+			};
+			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+		});
+		pointercontainer.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
+			var buttonCode = (e.keyCode);
+			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+		});
+		pointercontainer.addEventListener('keyup', (e:js.html.KeyboardEvent) -> {
+			var buttonCode = (e.keyCode);
+			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
 		});
 		#end
 	}

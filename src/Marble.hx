@@ -40,6 +40,7 @@ import h3d.Vector;
 import h3d.mat.Material;
 import h3d.prim.Sphere;
 import h3d.scene.Object;
+import src.MarbleGame;
 import src.CameraController;
 
 class Move {
@@ -916,7 +917,7 @@ class Marble extends GameObject {
 			this.collider.setTransform(tform);
 			this.collider.velocity = this.velocity;
 
-			if (this.heldPowerup != null && m.powerup) {
+			if (this.heldPowerup != null && m.powerup && !this.level.outOfBounds) {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = piTime;
@@ -944,7 +945,7 @@ class Marble extends GameObject {
 	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var move = new Move();
 		move.d = new Vector();
-		if (this.controllable && this.mode != Finish) {
+		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused) {
 			if (Key.isDown(Settings.controlsSettings.forward)) {
 				move.d.x -= 1;
 			}
