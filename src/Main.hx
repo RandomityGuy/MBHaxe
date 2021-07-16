@@ -26,6 +26,10 @@ class Main extends hxd.App {
 		#if hl
 		hl.UI.closeConsole();
 		#end
+		#if js
+		var zoomRatio = js.Browser.window.devicePixelRatio;
+		s2d.scaleMode = Zoom(zoomRatio);
+		#end
 		ResourceLoader.init(s2d, () -> {
 			Settings.init();
 			AudioManager.init();
