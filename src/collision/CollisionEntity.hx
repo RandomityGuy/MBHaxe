@@ -24,6 +24,9 @@ class CollisionEntity implements IOctreeObject {
 	public var velocity:Vector = new Vector();
 
 	public var transform:Matrix;
+
+	var invTransform:Matrix;
+
 	public var go:GameObject;
 
 	public var userData:Int;
@@ -33,6 +36,7 @@ class CollisionEntity implements IOctreeObject {
 		this.octree = new Octree();
 		this.surfaces = [];
 		this.transform = Matrix.I();
+		this.invTransform = Matrix.I();
 	}
 
 	public function addSurface(surface:CollisionSurface) {
@@ -46,6 +50,7 @@ class CollisionEntity implements IOctreeObject {
 		if (this.transform == transform)
 			return;
 		this.transform = transform;
+		this.invTransform = transform.getInverse();
 		generateBoundingBox();
 	}
 
@@ -60,8 +65,7 @@ class CollisionEntity implements IOctreeObject {
 	}
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
-		var invMatrix = transform.clone();
-		invMatrix.invert();
+		var invMatrix = invTransform;
 		var rStart = rayOrigin.clone();
 		rStart.transform(invMatrix);
 		var rDir = rayDirection.transformed3x3(invMatrix);
@@ -71,7 +75,7 @@ class CollisionEntity implements IOctreeObject {
 			i.point.transform(transform);
 			i.normal.transform3x3(transform);
 			i.normal.normalize();
-			iData.push({point: i.point, normal: i.normal});
+			iData.push({point: i.point, normal: i.normal, object: i.object});
 		}
 		return iData;
 	}
@@ -89,8 +93,9 @@ class CollisionEntity implements IOctreeObject {
 		var velocity = collisionEntity.velocity;
 		var radius = collisionEntity.radius;
 
-		var invMatrix = transform.clone();
-		invMatrix.invert();
+		var invMatrix = invTransform;
+		if (this.velocity.lengthSq() != 0)
+			invMatrix = transform.getInverse();
 		var sphereBounds = new Bounds();
 		var localPos = position.clone();
 		localPos.transform(invMatrix);

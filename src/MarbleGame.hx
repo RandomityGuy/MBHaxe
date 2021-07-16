@@ -83,9 +83,8 @@ class MarbleGame {
 			}
 		}
 		if (canvas != null) {
-			var wnd = Window.getInstance();
 			var mouseState:MouseState = {
-				position: new Vector(wnd.mouseX, wnd.mouseY)
+				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY)
 			}
 			canvas.update(dt, mouseState);
 		}

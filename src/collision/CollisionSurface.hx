@@ -90,7 +90,7 @@ class CollisionSurface implements IOctreeObject {
 			var ip = rayOrigin.add(rayDirection.multiply(t));
 			ip.w = 1;
 			if (t >= 0 && Collision.PointInTriangle(ip, p1, p2, p3)) {
-				intersections.push({point: ip, normal: n});
+				intersections.push({point: ip, normal: n, object: cast this});
 			}
 			i += 3;
 		}

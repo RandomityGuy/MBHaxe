@@ -6,6 +6,7 @@ import h3d.col.Bounds;
 typedef RayIntersectionData = {
 	var point:Vector;
 	var normal:Vector;
+	var object:IOctreeObject;
 }
 
 interface IOctreeObject extends IOctreeElement {

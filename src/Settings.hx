@@ -1,5 +1,6 @@
 package src;
 
+import gui.Canvas;
 import src.AudioManager;
 import hxd.Key;
 import src.MarbleGame;
@@ -195,8 +196,15 @@ class Settings {
 		// @:privateAccess Window.getInstance().window.center();
 		Window.getInstance().addResizeEvent(() -> {
 			var wnd = Window.getInstance();
-			Settings.optionsSettings.screenWidth = wnd.width;
-			Settings.optionsSettings.screenHeight = wnd.height;
+			var zoomRatio = 1.0;
+			#if js
+			zoomRatio = js.Browser.window.devicePixelRatio;
+			#end
+			Settings.optionsSettings.screenWidth = cast wnd.width / zoomRatio;
+			Settings.optionsSettings.screenHeight = cast wnd.height / zoomRatio;
+
+			MarbleGame.canvas.scene2d.scaleMode = Zoom(zoomRatio);
+
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		});
 	}

@@ -106,17 +106,23 @@ class GuiControl {
 			parentRect = this.parent.getRenderRectangle();
 			rect.position = parentRect.position.add(this.position);
 		}
+
+		var scaleFactor = 1.0;
+		#if js
+		scaleFactor = 1 / js.Browser.window.devicePixelRatio;
+		#end
+
 		if (this.horizSizing == HorizSizing.Width) {
 			if (this.parent != null)
 				rect.extent.x = parentRect.extent.x * (this.extent.x / parent.extent.x);
 			else
-				rect.extent.x = Window.getInstance().width;
+				rect.extent.x = Window.getInstance().width * scaleFactor;
 		}
 		if (this.vertSizing == VertSizing.Height) {
 			if (this.parent != null)
 				rect.extent.y = parentRect.extent.y * (this.extent.y / parent.extent.y);
 			else
-				rect.extent.y = Window.getInstance().height;
+				rect.extent.y = Window.getInstance().height * scaleFactor;
 		}
 
 		if (this.horizSizing == HorizSizing.Center) {

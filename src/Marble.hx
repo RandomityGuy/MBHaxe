@@ -737,8 +737,7 @@ class Marble extends GameObject {
 		for (obj in foundObjs) {
 			var radius = _radius;
 
-			var invMatrix = obj.transform.clone();
-			invMatrix.invert();
+			var invMatrix = @:privateAccess obj.invTransform;
 			var localpos = position.clone();
 			localpos.transform(invMatrix);
 
@@ -808,16 +807,6 @@ class Marble extends GameObject {
 		// 		interior.recomputeVelocity(piTime + 0.032, 0.032);
 		// 	}
 		// }
-
-		if (this.controllable) {
-			for (interior in pathedInteriors) {
-				// interior.popTickState();
-				// interior.pushTickState();
-				interior.setStopped(false);
-				// interior.recomputeVelocity(piTime + 0.032, 0.032);
-				// interior.update(piTime, timeStep);
-			}
-		}
 
 		_bounceYet = false;
 

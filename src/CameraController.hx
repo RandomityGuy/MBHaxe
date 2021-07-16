@@ -212,13 +212,20 @@ class CameraController extends Object {
 		var closeness = 0.1;
 		var rayCastOrigin = marblePosition.add(level.currentUp.multiply(marble._radius));
 
+		var processedShapes = [];
 		for (i in 0...3) {
 			var rayCastDirection = camera.pos.sub(rayCastOrigin);
 			rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
 
 			var results = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection);
 
-			var firstHit = results[0];
+			var firstHit:octree.OctreeIntersection = null;
+			for (result in results) {
+				if (!processedShapes.contains(result.object) && (firstHit == null || (result.distance < firstHit.distance))) {
+					firstHit = result;
+					processedShapes.push(result.object);
+				}
+			}
 
 			if (firstHit != null) {
 				if (firstHit.distance < CameraDistance) {
@@ -236,16 +243,18 @@ class CameraController extends Object {
 					camera.pos = projected.toVector().add(normal.multiply(-closeness));
 
 					var forwardVec = marblePosition.sub(camera.pos).normalized();
-					var rightVec = camera.up.cross(forwardVec);
+					var rightVec = camera.up.cross(forwardVec).normalized();
 					var upVec = forwardVec.cross(rightVec);
+
+					var cameraQuat = new Quat();
+					cameraQuat.initDirection(camera.target.sub(camera.pos).normalized());
 
 					camera.target = marblePosition.add(upVec.multiply(0.3));
 					camera.up = upVec;
-
 					continue;
 				}
-				break;
 			}
+			break;
 		}
 
 		if (oob) {
