@@ -16,8 +16,7 @@ import fs.ManifestBuilder;
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
 
-	var fpsCounter:Text;
-
+	// var fpsCounter:Text;
 	var loaded:Bool = false;
 
 	override function init() {
@@ -41,9 +40,9 @@ class Main extends hxd.App {
 			// world.init();
 			// world.start();
 
-			fpsCounter = new Text(DefaultFont.get(), s2d);
-			fpsCounter.y = 40;
-			fpsCounter.color = new Vector(1, 1, 1, 1);
+			// fpsCounter = new Text(DefaultFont.get(), s2d);
+			// fpsCounter.y = 40;
+			// fpsCounter.color = new Vector(1, 1, 1, 1);
 
 			loaded = true;
 		});
@@ -54,7 +53,7 @@ class Main extends hxd.App {
 		if (loaded) {
 			marbleGame.update(dt);
 			// world.update(dt);
-			fpsCounter.text = 'FPS: ${this.engine.fps}';
+			// fpsCounter.text = 'FPS: ${this.engine.fps}';
 		}
 	}
 
