@@ -20,3 +20,29 @@ To compile to C, do `haxe compile-c.hxml` and use the instructions in https://gi
 
 ## Javascript/Browser
 If the build dependencies are fullfilled, compile with `haxe compile-js.hxml` and run the game by running a web server in the same directory as the repo where index.html is located.
+
+# FAQ
+
+## Help I am able to reproduce a crash!
+If you are on browser, please send the browser console log to me
+If you are on native, please run marbleblast-debug.bat and reproduce the crash, send the resulting stacktrace that occurs during the crash to me.
+
+## Help it shows a black screen when playing a level!
+Your PC does not support the game, please upgrade it, there is nothing I can do about it to fix it.
+
+## How accurate are the marble physics?
+Very accurate with up to 1% deviation from the original physics. The deviations are due to traplaunches being slightly different and occassional internal edge collisions, and the lower delta t values for physics simulations.
+
+## How do I change my resolution?
+In browser, you can just resize your window. You can use the browser zoom feature (ctrl + scroll) to change the UI size.  
+In native version, you can just resize the window if windowed or use the resolution options in the menu or just directly modify settings.json  
+
+## How do I change my FOV?
+Edit settings.json for native version, edit the MBHaxeSettings key in LocalStorage in browser
+
+## How do I unlock/lock FPS?
+You cannot unlock fps in the browser, it is forever set to vsync.
+In the native version, edit settings.json
+
+## Hey can you please add this new feature?
+If this new feature of yours already exists in MBG but not in this port, then I will try to add it, if I get time to do so, otherwise chances are, I won't add it since I have other things to do and would rather not waste my time on this any further. You are free to do pull requests if you have already implemented said feature.

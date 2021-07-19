@@ -6,3 +6,4 @@ native
 *.exe
 *.obj
 settings.json
+release
