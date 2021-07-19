@@ -256,9 +256,6 @@ class CameraController extends Object {
 					var rightVec = camera.up.cross(forwardVec).normalized();
 					var upVec = forwardVec.cross(rightVec);
 
-					var cameraQuat = new Quat();
-					cameraQuat.initDirection(camera.target.sub(camera.pos).normalized());
-
 					camera.target = marblePosition.add(upVec.multiply(0.3));
 					camera.up = upVec;
 					continue;

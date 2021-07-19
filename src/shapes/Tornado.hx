@@ -46,7 +46,7 @@ class Tornado extends ForceObject {
 
 	public override function init(level:src.MarbleWorld) {
 		super.init(level);
-		this.soundChannel = AudioManager.playSound(ResourceLoader.getAudio("data/sound/tornado.wav"), this.getAbsPos().getPosition(), true);
+		this.soundChannel = AudioManager.playSound(ResourceLoader.getAudio("data/sound/tornado.wav"), new Vector(1e8, 1e8, 1e8), true);
 		for (material in this.materials) {
 			material.blendMode = Alpha;
 			material.mainPass.culling = h3d.mat.Data.Face.None;

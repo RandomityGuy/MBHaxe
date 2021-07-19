@@ -11,6 +11,7 @@ import h3d.Vector;
 import octree.IOctreeObject;
 import h3d.Matrix;
 import h3d.col.Bounds;
+import src.PathedInterior;
 
 class CollisionEntity implements IOctreeObject {
 	public var boundingBox:Bounds;
@@ -94,7 +95,7 @@ class CollisionEntity implements IOctreeObject {
 		var radius = collisionEntity.radius;
 
 		var invMatrix = invTransform;
-		if (this.velocity.lengthSq() != 0)
+		if (this.go is PathedInterior)
 			invMatrix = transform.getInverse();
 		var sphereBounds = new Bounds();
 		var localPos = position.clone();
