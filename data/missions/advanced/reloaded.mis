@@ -9,7 +9,7 @@ new SimGroup(MissionGroup) {
          type = "advanced";
          name = "Ramps Reloaded";
          artist = "Alex Swanson";
-         goldTime = "15000";
+         goldTime = "25000";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
