@@ -17,7 +17,7 @@ class Resource<T> {
 
 	public function acquire() {
 		this.referenceCount++;
-		trace('Acquiring Resource ${this.identifier}: ${this.referenceCount}');
+		// trace('Acquiring Resource ${this.identifier}: ${this.referenceCount}');
 	}
 
 	public function release() {
@@ -25,7 +25,7 @@ class Resource<T> {
 		if (this.referenceCount == 0) {
 			disposeFunc(this.resource);
 			this.resourceMap.remove(this.identifier);
-			trace('Releasing Resource ${this.identifier}');
+			// trace('Releasing Resource ${this.identifier}');
 		}
 	}
 }

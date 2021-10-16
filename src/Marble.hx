@@ -44,6 +44,7 @@ import src.MarbleGame;
 import src.CameraController;
 import src.Resource;
 import h3d.mat.Texture;
+import collision.CCDCollision.TraceInfo;
 
 class Move {
 	public var d:Vector;
@@ -729,7 +730,7 @@ class Marble extends GameObject {
 	function getIntersectionTime(dt:Float, velocity:Vector) {
 		var searchbox = new Bounds();
 		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
-		searchbox.addSpherePos(this.x + velocity.x * dt, this.y + velocity.y * dt, this.z + velocity.z * dt, _radius);
+		searchbox.addSpherePos(this.x + velocity.x * dt * 2, this.y + velocity.y * dt * 2, this.z + velocity.z * dt * 2, _radius);
 
 		var position = this.getAbsPos().getPosition();
 
@@ -741,6 +742,10 @@ class Marble extends GameObject {
 		}
 
 		var intersectT = 10e8;
+
+		var traceinfo = new TraceInfo();
+
+		traceinfo.resetTrace(position.clone(), position.add(velocity.multiply(dt)), this._radius);
 
 		for (obj in foundObjs) {
 			var radius = _radius;
@@ -754,7 +759,8 @@ class Marble extends GameObject {
 
 			var boundThing = new Bounds();
 			boundThing.addSpherePos(localpos.x, localpos.y, localpos.z, radius * 1.1);
-			boundThing.addSpherePos(localpos.x + relLocalVel.x * dt, localpos.y + relLocalVel.y * dt, localpos.z + relLocalVel.z * dt, radius * 1.1);
+			boundThing.addSpherePos(localpos.x + relLocalVel.x * dt * 2, localpos.y + relLocalVel.y * dt * 2, localpos.z + relLocalVel.z * dt * 2,
+				radius * 1.1);
 
 			var surfaces = obj.octree.boundingSearch(boundThing);
 
@@ -778,25 +784,35 @@ class Marble extends GameObject {
 
 					var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
 
+					traceinfo.traceSphereTriangle(v0, v, v2);
+
 					// var closest = Collision.IntersectTriangleCapsule(position, position.add(relVelocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
 					// var closest = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
 
 					// if (closest != null) {
 					// This is some ballpark approximation, very bruh
-					var radiusDir = relVelocity.normalized().multiply(radius);
-					var t = (-position.add(radiusDir).dot(surfacenormal) + v0.dot(surfacenormal)) / relVelocity.dot(surfacenormal);
+					// var radiusDir = relVelocity.normalized().multiply(radius);
+					// var t = (-position.add(radiusDir).dot(surfacenormal) + v0.dot(surfacenormal)) / relVelocity.dot(surfacenormal);
 
-					var pt = position.add(radiusDir).add(relVelocity.multiply(t));
+					// var pt = position.add(radiusDir).add(relVelocity.multiply(t));
 
-					if (Collision.PointInTriangle(pt, v0, v, v2)) {
-						if (t > 0 && t < intersectT) {
-							intersectT = t;
-						}
-					}
+					// if (Collision.PointInTriangle(pt, v0, v, v2)) {
+					// 	if (t > 0 && t < intersectT) {
+					// 		intersectT = t;
+					// 	}
+					// }
 					// }
 
 					i += 3;
 				}
+			}
+		}
+
+		if (traceinfo.collision) {
+			var traceDist = traceinfo.getTraceDistance();
+			var t = traceDist / velocity.length();
+			if (t < intersectT) {
+				intersectT = t;
 			}
 		}
 
@@ -838,7 +854,8 @@ class Marble extends GameObject {
 
 			var intersectT = this.getIntersectionTime(timeStep, velocity);
 
-			if (intersectT < timeStep && intersectT >= 0.001) {
+			if (intersectT < timeStep && intersectT >= 0.00001) {
+				trace('CCD AT t = ${intersectT}');
 				intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
 				// intersectT /= 2;
 				var diff = timeStep - intersectT;
