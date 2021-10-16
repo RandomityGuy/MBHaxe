@@ -16,7 +16,7 @@ class RemapDlg extends GuiControl {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var remapDlg = new GuiImage(ResourceLoader.getImage("data/ui/common/dialog.png").toTile());
+		var remapDlg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
 		remapDlg.horizSizing = Center;
 		remapDlg.vertSizing = Center;
 		remapDlg.position = new Vector(170, 159);

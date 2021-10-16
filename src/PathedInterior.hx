@@ -19,6 +19,7 @@ import h3d.Vector;
 import src.Util;
 import src.PathedInteriorMarker;
 import src.InteriorObject;
+import src.Resource;
 
 typedef PIState = {
 	var currentTime:Float;
@@ -131,7 +132,8 @@ class PathedInterior extends InteriorObject {
 		}
 
 		if (this.element.datablock.toLowerCase() == "pathedmovingblock") {
-			this.soundChannel = AudioManager.playSound(ResourceLoader.getAudio("data/sound/movingblockloop.wav"), new Vector(), true);
+			this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/movingblockloop.wav", ResourceLoader.getAudio,
+				this.soundResources), new Vector(), true);
 		}
 
 		this.reset();

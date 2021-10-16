@@ -15,7 +15,7 @@ class AntiGravity extends PowerUp {
 		this.identifier = "AntiGravity";
 		this.pickUpName = "Gravity Modifier";
 		this.autoUse = true;
-		this.pickupSound = ResourceLoader.getAudio("data/sound/gravitychange.wav");
+		this.pickupSound = ResourceLoader.getResource("data/sound/gravitychange.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {

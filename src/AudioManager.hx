@@ -8,11 +8,14 @@ import h3d.Vector;
 import hxd.res.Sound;
 import src.Settings;
 import hxd.snd.ChannelGroup;
+import src.Resource;
 
 class AudioManager {
 	static var manager:hxd.snd.Manager;
 	static var soundGroup:hxd.snd.SoundGroup;
 	static var musicGroup:hxd.snd.SoundGroup;
+
+	static var currentMusicResource:Resource<Sound>;
 
 	public static function init() {
 		AudioManager.manager = hxd.snd.Manager.get();
@@ -50,10 +53,14 @@ class AudioManager {
 
 	public static function playShell() {
 		AudioManager.manager.stopByName("music");
-		var snd = ResourceLoader.getAudio("data/sound/shell.ogg");
-		if (snd == null)
+		var sndres = ResourceLoader.getAudio("data/sound/shell.ogg");
+		if (sndres == null)
 			return;
-		var ch = AudioManager.manager.play(snd, null, musicGroup);
+		sndres.acquire();
+		if (currentMusicResource != null)
+			currentMusicResource.release();
+		currentMusicResource = sndres;
+		var ch = AudioManager.manager.play(sndres.resource, null, musicGroup);
 		ch.loop = true;
 	}
 

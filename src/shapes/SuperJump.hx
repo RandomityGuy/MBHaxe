@@ -44,8 +44,8 @@ class SuperJump extends PowerUp {
 		this.pickUpName = "Super Jump PowerUp";
 		sjEmitterParticleData = new ParticleData();
 		sjEmitterParticleData.identifier = "superJumpParticle";
-		sjEmitterParticleData.texture = ResourceLoader.getTexture("data/particles/twirl.png");
-		this.pickupSound = ResourceLoader.getAudio("data/sound/pusuperjumpvoice.wav");
+		sjEmitterParticleData.texture = ResourceLoader.getResource("data/particles/twirl.png", ResourceLoader.getTexture, this.textureResources);
+		this.pickupSound = ResourceLoader.getResource("data/sound/pusuperjumpvoice.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {
@@ -58,7 +58,7 @@ class SuperJump extends PowerUp {
 		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getAudio("data/sound/dosuperjump.wav"));
+		AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperjump.wav", ResourceLoader.getAudio, this.soundResources));
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp();
 	}

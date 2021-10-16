@@ -18,13 +18,13 @@ class MessageBoxYesNoDlg extends GuiControl {
 		@:privateAccess domcasual24.loader = ResourceLoader.loader;
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 
-		var yesNoFrame = new GuiImage(ResourceLoader.getImage("data/ui/common/dialog.png").toTile());
+		var yesNoFrame = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
 		yesNoFrame.horizSizing = Center;
 		yesNoFrame.vertSizing = Center;
 		yesNoFrame.position = new Vector(187, 156);

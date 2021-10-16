@@ -103,15 +103,15 @@ class LandMine extends DtsObject {
 
 		landMineParticleData = new ParticleData();
 		landMineParticleData.identifier = "landMineParticle";
-		landMineParticleData.texture = ResourceLoader.getTexture("data/particles/smoke.png");
+		landMineParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
 		landMineSmokeParticleData = new ParticleData();
 		landMineSmokeParticleData.identifier = "landMineSmokeParticle";
-		landMineSmokeParticleData.texture = ResourceLoader.getTexture("data/particles/smoke.png");
+		landMineSmokeParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
 		landMineSparkParticleData = new ParticleData();
 		landMineSparkParticleData.identifier = "landMineSparkParticle";
-		landMineSparkParticleData.texture = ResourceLoader.getTexture("data/particles/spark.png");
+		landMineSparkParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
 	}
 
 	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
@@ -121,7 +121,7 @@ class LandMine extends DtsObject {
 			this.setCollisionEnabled(false);
 
 			// if (!this.level.rewinding)
-			AudioManager.playSound(ResourceLoader.getAudio("data/sound/explode1.wav"));
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/explode1.wav", ResourceLoader.getAudio, this.soundResources));
 			this.level.particleManager.createEmitter(landMineParticle, landMineParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());

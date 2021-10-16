@@ -35,7 +35,7 @@ class GuiButton extends GuiAnim {
 		var renderRect = getRenderRectangle();
 		if (renderRect.inRect(mouseState.position) && !disabled) {
 			if (buttonSounds && Key.isPressed(Key.MOUSE_LEFT)) {
-				AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonpress.wav"));
+				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
 			}
 		}
 		if (buttonType == Normal) {
@@ -87,7 +87,7 @@ class GuiButton extends GuiAnim {
 		super.onMouseEnter(mouseState);
 
 		if (buttonSounds) {
-			AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonover.wav"));
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonover.wav", ResourceLoader.getAudio, this.soundResources));
 		}
 	}
 }

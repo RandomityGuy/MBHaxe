@@ -69,6 +69,7 @@ import src.InteriorObject;
 import h3d.scene.Scene;
 import collision.CollisionWorld;
 import src.Marble;
+import src.Resource;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -131,6 +132,9 @@ class MarbleWorld extends Scheduler {
 
 	var _loadingLength:Int = 0;
 
+	var textureResources:Array<Resource<h3d.mat.Texture>> = [];
+	var soundResources:Array<Resource<Sound>> = [];
+
 	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission) {
 		this.scene = scene;
 		this.scene2d = scene2d;
@@ -175,7 +179,7 @@ class MarbleWorld extends Scheduler {
 				'data/sound/classic vibe.ogg',
 				'data/sound/beach party.ogg'
 			][(mission.index + 1) % 3];
-			AudioManager.playMusic(ResourceLoader.getAudio(musicFileName));
+			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources));
 		});
 		this.resourceLoadFuncs.push(() -> {
 			this.addSimGroup(this.mission.root);
@@ -296,22 +300,22 @@ class MarbleWorld extends Scheduler {
 		this.newOrientationQuat = new Quat();
 		this.deselectPowerUp();
 
-		AudioManager.playSound(ResourceLoader.getAudio('data/sound/spawn.wav'));
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 
 		this.clearSchedule();
 		this.schedule(0.5, () -> {
 			// setCenterText('ready');
-			AudioManager.playSound(ResourceLoader.getAudio('data/sound/ready.wav'));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/ready.wav', ResourceLoader.getAudio, this.soundResources));
 			return 0;
 		});
 		this.schedule(2, () -> {
 			// setCenterText('set');
-			AudioManager.playSound(ResourceLoader.getAudio('data/sound/set.wav'));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/set.wav', ResourceLoader.getAudio, this.soundResources));
 			return 0;
 		});
 		this.schedule(3.5, () -> {
 			// setCenterText('go');
-			AudioManager.playSound(ResourceLoader.getAudio('data/sound/go.wav'));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/go.wav', ResourceLoader.getAudio, this.soundResources));
 			return 0;
 		});
 
@@ -760,7 +764,7 @@ class MarbleWorld extends Scheduler {
 				this.bonusTime = 0;
 			}
 			if (timeTravelSound == null) {
-				var ttsnd = ResourceLoader.getAudio("data/sound/timetravelactive.wav");
+				var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
 				timeTravelSound = AudioManager.playSound(ttsnd, null, true);
 			}
 		} else {
@@ -847,7 +851,7 @@ class MarbleWorld extends Scheduler {
 		if (this.gemCount == this.totalGems) {
 			string = "You have all the gems, head for the finish!";
 			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getAudio('data/sound/gotallgems.wav'));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotallgems.wav', ResourceLoader.getAudio, this.soundResources));
 
 			// Some levels with this package end immediately upon collection of all gems
 			// if (this.mission.misFile.activatedPackages.includes('endWithTheGems')) {
@@ -866,7 +870,7 @@ class MarbleWorld extends Scheduler {
 			}
 
 			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getAudio('data/sound/gotgem.wav'));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, this.soundResources));
 		}
 
 		displayAlert(string);
@@ -959,7 +963,7 @@ class MarbleWorld extends Scheduler {
 			return;
 
 		if (this.gemCount < this.totalGems) {
-			AudioManager.playSound(ResourceLoader.getAudio('data/sound/missinggems.wav'));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/missinggems.wav', ResourceLoader.getAudio, this.soundResources));
 			displayAlert("You can't finish without all the gems!!");
 		} else {
 			this.endPad.spawnFirework(this.timeState);
@@ -1077,7 +1081,7 @@ class MarbleWorld extends Scheduler {
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
-		AudioManager.playSound(ResourceLoader.getAudio('data/sound/whoosh.wav'));
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 		// if (this.replay.mode != = 'playback')
 		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
 	}
@@ -1096,6 +1100,31 @@ class MarbleWorld extends Scheduler {
 	public function dispose() {
 		this.playGui.dispose();
 		scene.removeChildren();
+
+		for (interior in this.interiors) {
+			interior.dispose();
+		}
+		for (pathedInteriors in this.pathedInteriors) {
+			pathedInteriors.dispose();
+		}
+		for (marble in this.marbles) {
+			marble.dispose();
+		}
+		for (dtsObject in this.dtsObjects) {
+			dtsObject.dispose();
+		}
+		for (trigger in this.triggers) {
+			trigger.dispose();
+		}
+		for (soundResource in this.soundResources) {
+			soundResource.release();
+		}
+		for (textureResource in this.textureResources) {
+			textureResource.release();
+		}
+
+		sky.dispose();
+
 		this._disposed = true;
 		AudioManager.stopAllSounds();
 		AudioManager.playShell();

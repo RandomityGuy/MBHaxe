@@ -14,13 +14,13 @@ class ExitGameDlg extends GuiControl {
 		this.extent = new Vector(640, 480);
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 
-		var dialogImg = new GuiImage(ResourceLoader.getImage("data/ui/common/dialog.png").toTile());
+		var dialogImg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
 		dialogImg.horizSizing = Center;
 		dialogImg.vertSizing = Center;
 		dialogImg.position = new Vector(134, 148);

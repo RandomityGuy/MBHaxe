@@ -15,7 +15,7 @@ class Helicopter extends PowerUp {
 		this.showSequences = false;
 		this.identifier = "Helicopter";
 		this.pickUpName = "Gyrocopter PowerUp";
-		this.pickupSound = ResourceLoader.getAudio("data/sound/pugyrocoptervoice.wav");
+		this.pickupSound = ResourceLoader.getResource("data/sound/pugyrocoptervoice.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {

@@ -9,22 +9,23 @@ class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
 
 	public function new(missionName:String) {
-		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
+		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.extent = new Vector(640, 480);
 		this.position = new Vector();
 
-		var loadingGui = new GuiImage(ResourceLoader.getImage("data/ui/loading/loadinggui.png").toTile());
+		var loadingGui = new GuiImage(ResourceLoader.getResource("data/ui/loading/loadinggui.png", ResourceLoader.getImage, this.imageResources).toTile());
 		loadingGui.horizSizing = Center;
 		loadingGui.vertSizing = Center;
 		loadingGui.position = new Vector(86, 77);
 		loadingGui.extent = new Vector(468, 325);
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 
@@ -56,7 +57,7 @@ class LoadingGui extends GuiImage {
 			MarbleGame.instance.quitMission();
 		}
 
-		var overlay = new GuiImage(ResourceLoader.getImage("data/ui/loading/overlay.png").toTile());
+		var overlay = new GuiImage(ResourceLoader.getResource("data/ui/loading/overlay.png", ResourceLoader.getImage, this.imageResources).toTile());
 		overlay.position = new Vector(151, 131);
 		overlay.extent = new Vector(278, 86);
 

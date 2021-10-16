@@ -25,13 +25,13 @@ class EndGameGui extends GuiControl {
 		this.mission = mission;
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 
-		var pg = new GuiImage(ResourceLoader.getImage("data/ui/play/playgui.png").toTile());
+		var pg = new GuiImage(ResourceLoader.getResource("data/ui/play/playgui.png", ResourceLoader.getImage, this.imageResources).toTile());
 		pg.horizSizing = Center;
 		pg.vertSizing = Center;
 		pg.position = new Vector(77, 9);

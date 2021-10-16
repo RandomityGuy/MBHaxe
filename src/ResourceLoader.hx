@@ -13,6 +13,7 @@ import hxd.fs.LocalFileSystem;
 import hxd.fs.FileSystem;
 import hxd.res.Loader;
 import fs.ManifestProgress;
+import src.Resource;
 
 class ResourceLoader {
 	#if hl
@@ -27,11 +28,11 @@ class ResourceLoader {
 	#if js
 	public static var loader:Loader = null;
 	#end
-	static var interiorResources:Map<String, Dif> = new Map();
-	static var dtsResources:Map<String, DtsFile> = new Map();
-	static var textureCache:Map<String, Texture> = new Map();
-	static var imageCache:Map<String, Image> = new Map();
-	static var audioCache:Map<String, Sound> = new Map();
+	static var interiorResources:Map<String, Resource<Dif>> = new Map();
+	static var dtsResources:Map<String, Resource<DtsFile>> = new Map();
+	static var textureCache:Map<String, Resource<Texture>> = new Map();
+	static var imageCache:Map<String, Resource<Image>> = new Map();
+	static var audioCache:Map<String, Resource<Sound>> = new Map();
 
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
@@ -63,11 +64,12 @@ class ResourceLoader {
 			// var lock = new Lock();
 			// threadPool.run(() -> {
 			itr = Dif.LoadFromBuffer(fileSystem.get(path).getBytes());
-			interiorResources.set(path, itr);
+			var itrresource = new Resource(itr, path, interiorResources, dif -> {});
+			interiorResources.set(path, itrresource);
 			//	lock.release();
 			// });
 			// lock.wait();
-			return itr;
+			return itrresource;
 		}
 	}
 
@@ -82,11 +84,12 @@ class ResourceLoader {
 			// var lock = new Lock();
 			// threadPool.run(() -> {
 			dts.read(path);
-			dtsResources.set(path, dts);
+			var dtsresource = new Resource(dts, path, dtsResources, dtsFile -> {});
+			dtsResources.set(path, dtsresource);
 			//	lock.release();
 			// });
 			// lock.wait();
-			return dts;
+			return dtsresource;
 		}
 	}
 
@@ -104,9 +107,10 @@ class ResourceLoader {
 			var tex = img.toTexture();
 			tex.mipMap = Nearest;
 			// tex.filter = Nearest;
-			textureCache.set(path, tex);
+			var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+			textureCache.set(path, textureresource);
 
-			return tex;
+			return textureresource;
 		}
 		return null;
 	}
@@ -119,8 +123,9 @@ class ResourceLoader {
 			return imageCache.get(path);
 		if (fileSystem.exists(path)) {
 			var tex = loader.load(path).toImage();
-			imageCache.set(path, tex);
-			return tex;
+			var imageresource = new Resource(tex, path, imageCache, img -> {});
+			imageCache.set(path, imageresource);
+			return imageresource;
 		}
 		return null;
 	}
@@ -133,8 +138,21 @@ class ResourceLoader {
 			return audioCache.get(path);
 		if (fileSystem.exists(path)) {
 			var snd = loader.load(path).toSound();
-			audioCache.set(path, snd);
-			return snd;
+			var audioresource = new Resource(snd, path, audioCache, snd -> snd.dispose());
+			audioCache.set(path, audioresource);
+			return audioresource;
+		}
+		return null;
+	}
+
+	public static function getResource<T>(path:String, resourceAcquirerer:String->Null<Resource<T>>, resourceCollector:Array<Resource<T>>) {
+		var res = resourceAcquirerer(path);
+		if (res != null) {
+			if (!resourceCollector.contains(res)) {
+				res.acquire();
+				resourceCollector.push(res);
+			}
+			return res.resource;
 		}
 		return null;
 	}

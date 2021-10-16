@@ -1,5 +1,6 @@
 package src;
 
+import hxd.res.Sound;
 import h3d.col.Bounds;
 import src.TimeState;
 import shaders.Billboard;
@@ -30,6 +31,7 @@ import src.ResourceLoader;
 import dts.DtsFile;
 import h3d.Matrix;
 import src.Util;
+import src.Resource;
 
 var DROP_TEXTURE_FOR_ENV_MAP = ['shapes/items/superjump.dts', 'shapes/items/antigravity.dts'];
 
@@ -72,6 +74,7 @@ class DtsObject extends GameObject {
 	var dtsPath:String;
 	var directoryPath:String;
 	var dts:DtsFile;
+	var dtsResource:Resource<DtsFile>;
 
 	var level:MarbleWorld;
 
@@ -110,7 +113,10 @@ class DtsObject extends GameObject {
 	}
 
 	public function init(level:MarbleWorld) {
-		this.dts = ResourceLoader.loadDts(this.dtsPath);
+		this.dtsResource = ResourceLoader.loadDts(this.dtsPath);
+		this.dtsResource.acquire();
+		this.dts = this.dtsResource.resource;
+
 		this.directoryPath = Path.directory(this.dtsPath);
 		if (level != null)
 			this.level = level;
@@ -300,7 +306,7 @@ class DtsObject extends GameObject {
 				var completion = 0 / (iflSequence[0].duration);
 				var keyframe = Math.floor(completion * info.length) % info.length;
 				var currentFile = info[keyframe];
-				var texture = ResourceLoader.getTexture(this.directoryPath + '/' + currentFile);
+				var texture = ResourceLoader.getResource(this.directoryPath + '/' + currentFile, ResourceLoader.getTexture, this.textureResources);
 
 				var flags = this.dts.matFlags[i];
 				if (flags & 1 > 0 || flags & 2 > 0)
@@ -363,7 +369,7 @@ class DtsObject extends GameObject {
 				this.materialInfos.set(material, keyframes);
 				iflMaterial = true;
 			} else {
-				var texture:Texture = ResourceLoader.getTexture(fullName);
+				var texture = ResourceLoader.getResource(fullName, ResourceLoader.getTexture, this.textureResources);
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
 				// if (this.useInstancing) {
@@ -393,7 +399,7 @@ class DtsObject extends GameObject {
 				#end
 				// Apparently creating these bitmap datas dont work so we'll just get the snag a white texture in the filesystem
 				#if js
-				var texture:Texture = ResourceLoader.getTexture("data/interiors/parts/white.jpg");
+				var texture:Texture = ResourceLoader.getResource("data/interiors/parts/white.jpg", ResourceLoader.getTexture, this.textureResources);
 				texture.wrap = Wrap.Repeat;
 				#end
 				material.texture = texture;
@@ -855,7 +861,7 @@ class DtsObject extends GameObject {
 				var completion = timeState.timeSinceLoad / (iflSequence[0].duration);
 				var keyframe = Math.floor(completion * info.length) % info.length;
 				var currentFile = info[keyframe];
-				var texture = ResourceLoader.getTexture(this.directoryPath + '/' + currentFile);
+				var texture = ResourceLoader.getResource(this.directoryPath + '/' + currentFile, ResourceLoader.getTexture, this.textureResources);
 
 				var flags = this.dts.matFlags[i];
 				if (flags & 1 > 0 || flags & 2 > 0)
@@ -937,5 +943,10 @@ class DtsObject extends GameObject {
 
 	public function setCollisionEnabled(flag:Bool) {
 		this.isCollideable = flag;
+	}
+
+	public override function dispose() {
+		super.dispose();
+		this.dtsResource.release();
 	}
 }

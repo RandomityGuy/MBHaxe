@@ -12,9 +12,13 @@ import h3d.mat.Texture;
 import haxe.io.Path;
 import src.ResourceLoader;
 import h3d.scene.Object;
+import src.Resource;
+import hxd.res.Image;
 
 class Sky extends Object {
 	public var dmlPath:String;
+
+	var imageResources:Array<Resource<Image>> = [];
 
 	public function new() {
 		super();
@@ -47,6 +51,12 @@ class Sky extends Object {
 		// skyMesh.material.shadows = false;
 	}
 
+	public function dispose() {
+		for (imageResource in imageResources) {
+			imageResource.release();
+		}
+	}
+
 	function createSkyboxCubeTextured(dmlPath:String) {
 		#if js
 		dmlPath = StringTools.replace(dmlPath, "data/", "");
@@ -67,7 +77,7 @@ class Sky extends Object {
 				if (filenames.length == 0) {
 					skyboxImages.push(new BitmapData(128, 128));
 				} else {
-					var image = ResourceLoader.getImage(filenames[0]).toBitmap();
+					var image = ResourceLoader.getResource(filenames[0], ResourceLoader.getImage, this.imageResources).toBitmap();
 					skyboxImages.push(image);
 				}
 			}

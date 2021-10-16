@@ -13,7 +13,7 @@ class SuperBounce extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "SuperBounce";
 		this.pickUpName = "Super Bounce PowerUp";
-		this.pickupSound = ResourceLoader.getAudio("data/sound/pusuperbouncevoice.wav");
+		this.pickupSound = ResourceLoader.getResource("data/sound/pusuperbouncevoice.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {

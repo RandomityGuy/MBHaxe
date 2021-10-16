@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.res.Image;
 import hxd.Window;
 import h3d.shader.AlphaMult;
 import h3d.shader.ColorKey;
@@ -22,6 +23,9 @@ import h2d.Anim;
 import h2d.Bitmap;
 import src.ResourceLoader;
 import src.MarbleGame;
+import src.Resource;
+import hxd.res.Sound;
+import h3d.mat.Texture;
 
 class PlayGui {
 	var scene2d:h2d.Scene;
@@ -52,6 +56,10 @@ class PlayGui {
 	var alertTextForeground:GuiText;
 	var alertTextBackground:GuiText;
 
+	var imageResources:Array<Resource<Image>> = [];
+	var textureResources:Array<Resource<Texture>> = [];
+	var soundResources:Array<Resource<Sound>> = [];
+
 	var playGuiCtrl:GuiControl;
 
 	var resizeEv:Void->Void;
@@ -68,6 +76,17 @@ class PlayGui {
 			powerupImageSceneTarget.dispose();
 			powerupImageSceneTargetBitmap.remove();
 			RSGOCenterText.remove();
+
+			for (textureResource in textureResources) {
+				textureResource.release();
+			}
+			for (imageResource in imageResources) {
+				imageResource.release();
+			}
+			for (audioResource in soundResources) {
+				audioResource.release();
+			}
+
 			Window.getInstance().removeResizeEvent(resizeEv);
 		}
 	}
@@ -84,7 +103,7 @@ class PlayGui {
 
 		var numberTiles = [];
 		for (i in 0...10) {
-			var tile = ResourceLoader.getImage('data/ui/game/numbers/${i}.png').toTile();
+			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}.png', ResourceLoader.getImage, this.imageResources).toTile();
 			numberTiles.push(tile);
 		}
 
@@ -97,13 +116,13 @@ class PlayGui {
 		}
 
 		var rsgo = [];
-		rsgo.push(ResourceLoader.getImage("data/ui/game/ready.png").toTile());
-		rsgo.push(ResourceLoader.getImage("data/ui/game/set.png").toTile());
-		rsgo.push(ResourceLoader.getImage("data/ui/game/go.png").toTile());
-		rsgo.push(ResourceLoader.getImage("data/ui/game/outofbounds.png").toTile());
+		rsgo.push(ResourceLoader.getResource("data/ui/game/ready.png", ResourceLoader.getImage, this.imageResources).toTile());
+		rsgo.push(ResourceLoader.getResource("data/ui/game/set.png", ResourceLoader.getImage, this.imageResources).toTile());
+		rsgo.push(ResourceLoader.getResource("data/ui/game/go.png", ResourceLoader.getImage, this.imageResources).toTile());
+		rsgo.push(ResourceLoader.getResource("data/ui/game/outofbounds.png", ResourceLoader.getImage, this.imageResources).toTile());
 		RSGOCenterText = new Anim(rsgo, 0, scene2d);
 
-		powerupBox = new GuiImage(ResourceLoader.getImage('data/ui/game/powerup.png').toTile());
+		powerupBox = new GuiImage(ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile());
 		initTimer();
 		initGemCounter();
 		initCenterText();
@@ -133,7 +152,7 @@ class PlayGui {
 		timerNumbers[1].position = new Vector(47, 0);
 		timerNumbers[1].extent = new Vector(43, 55);
 
-		timerColon = new GuiImage(ResourceLoader.getImage('data/ui/game/numbers/colon.png').toTile());
+		timerColon = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile());
 		timerColon.position = new Vector(67, 0);
 		timerColon.extent = new Vector(43, 55);
 
@@ -143,7 +162,7 @@ class PlayGui {
 		timerNumbers[3].position = new Vector(107, 0);
 		timerNumbers[3].extent = new Vector(43, 55);
 
-		timerPoint = new GuiImage(ResourceLoader.getImage('data/ui/game/numbers/point.png').toTile());
+		timerPoint = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile());
 		timerPoint.position = new Vector(127, 0);
 		timerPoint.extent = new Vector(43, 55);
 
@@ -203,7 +222,7 @@ class PlayGui {
 		gemCountNumbers[1].position = new Vector(54, 0);
 		gemCountNumbers[1].extent = new Vector(43, 55);
 
-		gemCountSlash = new GuiImage(ResourceLoader.getImage('data/ui/game/numbers/slash.png').toTile());
+		gemCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
 		gemCountSlash.position = new Vector(75, 0);
 		gemCountSlash.extent = new Vector(43, 55);
 

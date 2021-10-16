@@ -23,7 +23,7 @@ class TimeTravel extends PowerUp {
 		this.cooldownDuration = 1e8;
 		this.useInstancing = true;
 		this.autoUse = true;
-		this.pickupSound = ResourceLoader.getAudio("data/sound/putimetravelvoice.wav");
+		this.pickupSound = ResourceLoader.getResource("data/sound/putimetravelvoice.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {

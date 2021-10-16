@@ -16,7 +16,8 @@ class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
 
 	public function new() {
-		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
+		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
@@ -27,9 +28,9 @@ class OptionsDlg extends GuiImage {
 		@:privateAccess arial14.loader = ResourceLoader.loader;
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 
@@ -42,21 +43,21 @@ class OptionsDlg extends GuiImage {
 
 		var setTab:String->Void = null;
 
-		var graphicsTab = new GuiImage(ResourceLoader.getImage("data/ui/options/graf_tab.png").toTile());
+		var graphicsTab = new GuiImage(ResourceLoader.getResource("data/ui/options/graf_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		graphicsTab.position = new Vector(58, 44);
 		graphicsTab.extent = new Vector(149, 86);
 
-		var controlsTab = new GuiImage(ResourceLoader.getImage("data/ui/options/cntr_tab.png").toTile());
+		var controlsTab = new GuiImage(ResourceLoader.getResource("data/ui/options/cntr_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		controlsTab.position = new Vector(315, 15);
 		controlsTab.extent = new Vector(149, 65);
 
-		var boxFrame = new GuiImage(ResourceLoader.getImage("data/ui/options/options_base.png").toTile());
+		var boxFrame = new GuiImage(ResourceLoader.getResource("data/ui/options/options_base.png", ResourceLoader.getImage, this.imageResources).toTile());
 		boxFrame.position = new Vector(25, 14);
 		boxFrame.extent = new Vector(470, 422);
 		boxFrame.horizSizing = Center;
 		boxFrame.vertSizing = Center;
 
-		var audioTab = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_tab.png").toTile());
+		var audioTab = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audioTab.position = new Vector(204, 33);
 		audioTab.extent = new Vector(114, 75);
 
@@ -125,7 +126,7 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.addChild(gfxFull);
 		windowBoxes.push(gfxFull);
 
-		var gfxText = new GuiImage(ResourceLoader.getImage("data/ui/options/graf_txt.png").toTile());
+		var gfxText = new GuiImage(ResourceLoader.getResource("data/ui/options/graf_txt.png", ResourceLoader.getImage, this.imageResources).toTile());
 		gfxText.horizSizing = Right;
 		gfxText.vertSizing = Bottom;
 		gfxText.position = new Vector(12, 12);
@@ -269,17 +270,17 @@ class OptionsDlg extends GuiImage {
 		audioPane.extent = new Vector(425, 281);
 		// mainPane.addChild(audioPane);
 
-		var audSndSlide = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_snd_slide.png").toTile());
+		var audSndSlide = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_snd_slide.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audSndSlide.position = new Vector(14, 92);
 		audSndSlide.extent = new Vector(388, 34);
 		audioPane.addChild(audSndSlide);
 
-		var audMusSlide = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_mus_slide.png").toTile());
+		var audMusSlide = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_mus_slide.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audMusSlide.position = new Vector(17, 32);
 		audMusSlide.extent = new Vector(381, 40);
 		audioPane.addChild(audMusSlide);
 
-		var audMusKnob = new GuiSlider(ResourceLoader.getImage("data/ui/options/aud_mus_knb.png").toTile());
+		var audMusKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audMusKnob.position = new Vector(137, 37);
 		audMusKnob.extent = new Vector(250, 34);
 		audMusKnob.sliderValue = Settings.optionsSettings.musicVolume;
@@ -288,11 +289,12 @@ class OptionsDlg extends GuiImage {
 		}
 		audioPane.addChild(audMusKnob);
 
-		var audSndKnob = new GuiSlider(ResourceLoader.getImage("data/ui/options/aud_snd_knb.png").toTile());
+		var audSndKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_snd_knb.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audSndKnob.position = new Vector(137, 95);
 		audSndKnob.extent = new Vector(254, 37);
 		audSndKnob.sliderValue = Settings.optionsSettings.soundVolume;
-		var testingSnd = AudioManager.playSound(ResourceLoader.getAudio("data/sound/testing.wav"), null, true);
+		var testingSnd = AudioManager.playSound(ResourceLoader.getResource("data/sound/testing.wav", ResourceLoader.getAudio, this.soundResources), null,
+			true);
 		testingSnd.pause = true;
 		audSndKnob.slidingSound = testingSnd;
 		audSndKnob.pressedAction = (sender) -> {
@@ -315,7 +317,7 @@ class OptionsDlg extends GuiImage {
 			}
 		}
 
-		var audTxtWndo = new GuiImage(ResourceLoader.getImage("data/ui/options/aud_txt_wndo.png").toTile());
+		var audTxtWndo = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_txt_wndo.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audTxtWndo.position = new Vector(26, 130);
 		audTxtWndo.extent = new Vector(396, 132);
 		audioPane.addChild(audTxtWndo);
@@ -368,7 +370,8 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		controlsPane.position = new Vector(44, 58);
 		controlsPane.extent = new Vector(459, 339);
 		// MARBLE PANEL
-		var marbleControlsPane = new GuiImage(ResourceLoader.getImage("data/ui/options/cntrl_marb_bse.png").toTile());
+		var marbleControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_marb_bse.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
 		marbleControlsPane.position = new Vector(0, 5);
 		marbleControlsPane.extent = new Vector(438, 320);
 		controlsPane.addChild(marbleControlsPane);
@@ -503,7 +506,8 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		marbleControlsPane.addChild(marbleToMouseButton);
 
 		// CAMERA PANEL
-		cameraControlsPane = new GuiImage(ResourceLoader.getImage("data/ui/options/cntrl_cam_bse.png").toTile());
+		cameraControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_cam_bse.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
 		cameraControlsPane.position = new Vector(0, 5);
 		cameraControlsPane.extent = new Vector(438, 320);
 
@@ -565,7 +569,8 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 
 		// MOUSE CONTROLS
 
-		mouseControlsPane = new GuiImage(ResourceLoader.getImage("data/ui/options/cntrl_mous_base.png").toTile());
+		mouseControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_mous_base.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
 		mouseControlsPane.position = new Vector(-17, -47);
 		mouseControlsPane.extent = new Vector(470, 425);
 
@@ -619,7 +624,8 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		}
 		mouseControlsPane.addChild(alwaysFreelook);
 
-		var mouseSensitivity = new GuiSlider(ResourceLoader.getImage("data/ui/options/cntrl_mous_knb.png").toTile());
+		var mouseSensitivity = new GuiSlider(ResourceLoader.getResource("data/ui/options/cntrl_mous_knb.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
 		mouseSensitivity.position = new Vector(147, 148);
 		mouseSensitivity.extent = new Vector(254, 34);
 		mouseSensitivity.sliderValue = (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2);

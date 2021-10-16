@@ -15,9 +15,9 @@ class EnterNameDlg extends GuiControl {
 		this.vertSizing = Height;
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 
@@ -50,7 +50,7 @@ class EnterNameDlg extends GuiControl {
 			}
 		}
 
-		var dlg = new GuiImage(ResourceLoader.getImage("data/ui/common/dialog.png").toTile());
+		var dlg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
 		dlg.horizSizing = Center;
 		dlg.vertSizing = Center;
 		dlg.position = new Vector(112, 111);
@@ -72,7 +72,7 @@ class EnterNameDlg extends GuiControl {
 		}
 		dlg.addChild(okbutton);
 
-		var wnd = new GuiImage(ResourceLoader.getImage("data/ui/common/window.png").toTile());
+		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/common/window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		wnd.position = new Vector(58, 124);
 		wnd.extent = new Vector(295, 55);
 		dlg.addChild(wnd);

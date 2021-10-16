@@ -50,8 +50,8 @@ class SuperSpeed extends PowerUp {
 		this.useInstancing = true;
 		ssEmitterParticleData = new ParticleData();
 		ssEmitterParticleData.identifier = "superSpeedParticle";
-		ssEmitterParticleData.texture = ResourceLoader.getTexture("data/particles/spark.png");
-		this.pickupSound = ResourceLoader.getAudio("data/sound/pusuperspeedvoice.wav");
+		ssEmitterParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
+		this.pickupSound = ResourceLoader.getResource("data/sound/pusuperspeedvoice.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {
@@ -76,7 +76,7 @@ class SuperSpeed extends PowerUp {
 		// marble.body.addLinearVelocity(Util.vecThreeToOimo(movementVector).scale(24.7)); // Whirligig's determined value
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getAudio("data/sound/dosuperspeed.wav"));
+		AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperspeed.wav", ResourceLoader.getAudio, this.soundResources));
 		this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		this.level.deselectPowerUp();
 	}

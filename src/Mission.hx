@@ -9,6 +9,8 @@ import mis.MissionElement.MissionElementType;
 import mis.MisFile;
 import mis.MissionElement.MissionElementSimGroup;
 import src.ResourceLoader;
+import hxd.res.Image;
+import src.Resource;
 
 class Mission {
 	public var root:MissionElementSimGroup;
@@ -25,12 +27,20 @@ class Mission {
 	public var id:Int;
 	public var isClaMission:Bool;
 
+	var imageResources:Array<Resource<Image>> = [];
+
 	public function new() {}
 
 	public function load() {
 		var misParser = new MisParser(ResourceLoader.fileSystem.get(this.path).getText());
 		var contents = misParser.parse();
 		root = contents.root;
+	}
+
+	public function dispose() {
+		for (imageResource in imageResources) {
+			imageResource.release();
+		}
 	}
 
 	public static function fromMissionInfo(path:String, mInfo:MissionElementScriptObject) {
@@ -57,10 +67,10 @@ class Mission {
 		if (!this.isClaMission) {
 			var basename = haxe.io.Path.withoutExtension(this.path);
 			if (ResourceLoader.fileSystem.exists(basename + ".png")) {
-				return ResourceLoader.getImage(basename + ".png").toTile();
+				return ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
 			}
 			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
-				return ResourceLoader.getImage(basename + ".jpg").toTile();
+				return ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
 			}
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);

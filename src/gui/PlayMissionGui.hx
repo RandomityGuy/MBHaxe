@@ -45,7 +45,8 @@ class PlayMissionGui extends GuiImage {
 		currentSelection = PlayMissionGui.currentSelectionStatic;
 		currentCategory = PlayMissionGui.currentCategoryStatic;
 
-		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
+		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		super(img.resource.toTile());
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -60,14 +61,14 @@ class PlayMissionGui extends GuiImage {
 		this.addChild(localContainer);
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
-			var disabled = ResourceLoader.getImage('${path}_i.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed, disabled];
 		}
 
-		var tabAdvanced = new GuiImage(ResourceLoader.getImage("data/ui/play/tab_adv.png").toTile());
+		var tabAdvanced = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_adv.png", ResourceLoader.getImage, this.imageResources).toTile());
 		tabAdvanced.position = new Vector(410, 21);
 		tabAdvanced.extent = new Vector(166, 43);
 		tabAdvanced.pressedAction = (sender) -> {
@@ -77,7 +78,7 @@ class PlayMissionGui extends GuiImage {
 		}
 		localContainer.addChild(tabAdvanced);
 
-		var tabIntermediate = new GuiImage(ResourceLoader.getImage("data/ui/play/tab_inter.png").toTile());
+		var tabIntermediate = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_inter.png", ResourceLoader.getImage, this.imageResources).toTile());
 		tabIntermediate.position = new Vector(213, 6);
 		tabIntermediate.extent = new Vector(205, 58);
 		tabIntermediate.pressedAction = (sender) -> {
@@ -87,7 +88,7 @@ class PlayMissionGui extends GuiImage {
 		}
 		localContainer.addChild(tabIntermediate);
 
-		var tabCustom = new GuiImage(ResourceLoader.getImage("data/ui/play/cust_tab.png").toTile());
+		var tabCustom = new GuiImage(ResourceLoader.getResource("data/ui/play/cust_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		tabCustom.position = new Vector(589, 91);
 		tabCustom.extent = new Vector(52, 198);
 		tabCustom.pressedAction = (sender) -> {
@@ -97,28 +98,29 @@ class PlayMissionGui extends GuiImage {
 		}
 		localContainer.addChild(tabCustom);
 
-		var pmBox = new GuiImage(ResourceLoader.getImage("data/ui/play/playgui.png").toTile());
+		var pmBox = new GuiImage(ResourceLoader.getResource("data/ui/play/playgui.png", ResourceLoader.getImage, this.imageResources).toTile());
 		pmBox.position = new Vector(0, 42);
 		pmBox.extent = new Vector(610, 351);
 		pmBox.horizSizing = Width;
 		pmBox.vertSizing = Height;
 		localContainer.addChild(pmBox);
 
-		var textWnd = new GuiImage(ResourceLoader.getImage("data/ui/play/text_window.png").toTile());
+		var textWnd = new GuiImage(ResourceLoader.getResource("data/ui/play/text_window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		textWnd.horizSizing = Width;
 		textWnd.vertSizing = Height;
 		textWnd.position = new Vector(31, 29);
 		textWnd.extent = new Vector(276, 229);
 		pmBox.addChild(textWnd);
 
-		var pmPreview = new GuiImage(ResourceLoader.getImage("data/missions/beginner/superspeed.jpg").toTile());
+		var pmPreview = new GuiImage(ResourceLoader.getResource("data/missions/beginner/superspeed.jpg", ResourceLoader.getImage, this.imageResources)
+			.toTile());
 		pmPreview.position = new Vector(312, 42);
 		pmPreview.extent = new Vector(258, 193);
 		pmBox.addChild(pmPreview);
 		var filt = new ColorMatrix(Matrix.I());
 		pmPreview.bmp.filter = filt;
 
-		var levelWnd = new GuiImage(ResourceLoader.getImage("data/ui/play/level_window.png").toTile());
+		var levelWnd = new GuiImage(ResourceLoader.getResource("data/ui/play/level_window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		levelWnd.position = new Vector();
 		levelWnd.extent = new Vector(258, 194);
 		pmPreview.addChild(levelWnd);
@@ -289,7 +291,7 @@ class PlayMissionGui extends GuiImage {
 		pmDescriptionOther.text.text = descText2;
 		pmBox.addChild(pmDescriptionOther);
 
-		var tabBeginner = new GuiImage(ResourceLoader.getImage("data/ui/play/tab_begin.png").toTile());
+		var tabBeginner = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_begin.png", ResourceLoader.getImage, this.imageResources).toTile());
 		tabBeginner.position = new Vector(29, 2);
 		tabBeginner.extent = new Vector(184, 55);
 		tabBeginner.pressedAction = (sender) -> {
@@ -309,7 +311,7 @@ class PlayMissionGui extends GuiImage {
 			localContainer.removeChild(tabCustom);
 			localContainer.removeChild(pmBox);
 			if (doRender)
-				AudioManager.playSound(ResourceLoader.getAudio("data/sound/buttonpress.wav"));
+				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
 			if (category == "beginner") {
 				localContainer.addChild(tabIntermediate);
 				localContainer.addChild(tabAdvanced);
@@ -376,7 +378,7 @@ class PlayMissionGui extends GuiImage {
 			return splits.join('\n');
 		}
 
-		var goldBadge = ResourceLoader.getImage("data/ui/play/goldscore.png").toTile();
+		var goldBadge = ResourceLoader.getResource("data/ui/play/goldscore.png", ResourceLoader.getImage, this.imageResources).toTile();
 		goldBadge.dy = 2.5;
 		goldBadge.dx = 8;
 

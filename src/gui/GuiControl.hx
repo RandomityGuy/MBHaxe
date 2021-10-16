@@ -1,11 +1,15 @@
 package gui;
 
+import hxd.res.Image;
 import h2d.Graphics;
 import hxd.Key;
 import h2d.Scene;
 import h2d.col.Bounds;
 import hxd.Window;
 import h3d.Vector;
+import src.Resource;
+import hxd.res.Sound;
+import h3d.mat.Texture;
 
 enum HorizSizing {
 	Right;
@@ -42,6 +46,10 @@ class GuiControl {
 
 	var _entered:Bool = false;
 	var _skipNextEvent:Bool = false;
+
+	var imageResources:Array<Resource<Image>> = [];
+	var textureResources:Array<Resource<Texture>> = [];
+	var soundResources:Array<Resource<Sound>> = [];
 
 	public function new() {}
 
@@ -191,6 +199,16 @@ class GuiControl {
 			c.dispose();
 		}
 		this.children = [];
+
+		for (textureResource in textureResources) {
+			textureResource.release();
+		}
+		for (imageResource in imageResources) {
+			imageResource.release();
+		}
+		for (audioResource in soundResources) {
+			audioResource.release();
+		}
 	}
 
 	public function onMouseDown(mouseState:MouseState) {}

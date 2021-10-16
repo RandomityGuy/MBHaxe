@@ -42,6 +42,8 @@ import h3d.prim.Sphere;
 import h3d.scene.Object;
 import src.MarbleGame;
 import src.CameraController;
+import src.Resource;
+import h3d.mat.Texture;
 
 class Move {
 	public var d:Vector;
@@ -200,21 +202,26 @@ class Marble extends GameObject {
 
 		this.bounceEmitterData = new ParticleData();
 		this.bounceEmitterData.identifier = "MarbleBounceParticle";
-		this.bounceEmitterData.texture = ResourceLoader.getTexture("data/particles/star.png");
+		this.bounceEmitterData.texture = ResourceLoader.getResource("data/particles/star.png", ResourceLoader.getTexture, this.textureResources);
 
 		this.trailEmitterData = new ParticleData();
 		this.trailEmitterData.identifier = "MarbleTrailParticle";
-		this.trailEmitterData.texture = ResourceLoader.getTexture("data/particles/smoke.png");
+		this.trailEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
-		this.rollSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/rolling_hard.wav"), this.getAbsPos().getPosition(), true);
-		this.slipSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/sliding.wav"), this.getAbsPos().getPosition(), true);
+		this.rollSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/rolling_hard.wav", ResourceLoader.getAudio, this.soundResources),
+			this.getAbsPos().getPosition(), true);
+		this.slipSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/sliding.wav", ResourceLoader.getAudio, this.soundResources),
+			this.getAbsPos().getPosition(), true);
 		this.rollSound.volume = 0;
 		this.slipSound.volume = 0;
-		this.shockabsorberSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/superbounceactive.wav"), null, true);
+		this.shockabsorberSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/superbounceactive.wav", ResourceLoader.getAudio,
+			this.soundResources), null, true);
 		this.shockabsorberSound.pause = true;
-		this.superbounceSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/forcefield.wav"), null, true);
+		this.superbounceSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/forcefield.wav", ResourceLoader.getAudio, this.soundResources),
+			null, true);
 		this.superbounceSound.pause = true;
-		this.helicopterSound = AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_gyrocopter.wav"), null, true);
+		this.helicopterSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/use_gyrocopter.wav", ResourceLoader.getAudio,
+			this.soundResources), null, true);
 		this.helicopterSound.pause = true;
 	}
 
@@ -291,13 +298,13 @@ class Marble extends GameObject {
 				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
 					if (contact.otherObject is RoundBumper) {
 						if (!playedSounds.contains("data/sound/bumperding1.wav")) {
-							AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumperding1.wav"));
+							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
 							playedSounds.push("data/sound/bumperding1.wav");
 						}
 					}
 					if (contact.otherObject is TriangleBumper) {
 						if (!playedSounds.contains("data/sound/bumper1.wav")) {
-							AudioManager.playSound(ResourceLoader.getAudio("data/sound/bumper1.wav"));
+							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumper1.wav", ResourceLoader.getAudio, this.soundResources));
 							playedSounds.push("data/sound/bumper1.wav");
 						}
 					}
@@ -545,7 +552,7 @@ class Marble extends GameObject {
 			if (sv < this._jumpImpulse) {
 				this.velocity = this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv)));
 				if (!playedSounds.contains("data/sound/jump.wav")) {
-					AudioManager.playSound(ResourceLoader.getAudio("data/sound/jump.wav"));
+					AudioManager.playSound(ResourceLoader.getResource("data/sound/jump.wav", ResourceLoader.getAudio, this.soundResources));
 					playedSounds.push("data/sound/jump.wav");
 				}
 			}
@@ -658,7 +665,7 @@ class Marble extends GameObject {
 				"data/sound/bouncehard3.wav",
 				"data/sound/bouncehard4.wav"
 			];
-			var snd = ResourceLoader.getAudio(sndList[bounceSoundNum]);
+			var snd = ResourceLoader.getResource(sndList[bounceSoundNum], ResourceLoader.getAudio, this.soundResources);
 			var gain = bounceMinGain;
 			gain = Util.clamp(Math.pow(contactVel / 12, 1.5), 0, 1);
 

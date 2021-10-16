@@ -13,7 +13,7 @@ class ShockAbsorber extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "ShockAbsorber";
 		this.pickUpName = "Shock Absorber PowerUp";
-		this.pickupSound = ResourceLoader.getAudio("data/sound/pushockabsorbervoice.wav");
+		this.pickupSound = ResourceLoader.getResource("data/sound/pushockabsorbervoice.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {

@@ -34,13 +34,14 @@ class HelpCreditsGui extends GuiImage {
 	var superBounceCtrl:GuiObjectShow;
 
 	public function new() {
-		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
+		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		super(img.resource.toTile());
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 
-		var helpGui = new GuiImage(ResourceLoader.getImage("data/ui/help/help_gui.png").toTile());
+		var helpGui = new GuiImage(ResourceLoader.getResource("data/ui/help/help_gui.png", ResourceLoader.getImage, this.imageResources).toTile());
 		helpGui.horizSizing = Center;
 		helpGui.vertSizing = Center;
 		helpGui.position = new Vector(15, 10);
@@ -48,9 +49,9 @@ class HelpCreditsGui extends GuiImage {
 		this.addChild(helpGui);
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 
@@ -74,7 +75,7 @@ class HelpCreditsGui extends GuiImage {
 		}
 		helpGui.addChild(homeButton);
 
-		var helpWindow = new GuiImage(ResourceLoader.getImage("data/ui/help/help_window.png").toTile());
+		var helpWindow = new GuiImage(ResourceLoader.getResource("data/ui/help/help_window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		helpWindow.position = new Vector(30, 31);
 		helpWindow.extent = new Vector(549, 338);
 		helpGui.addChild(helpWindow);

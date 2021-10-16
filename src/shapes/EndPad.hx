@@ -19,6 +19,8 @@ import src.MarbleWorld.Scheduler;
 import src.ParticleSystem.ParticleEmitter;
 import src.ParticleSystem.ParticleEmitterOptions;
 import h3d.Vector;
+import src.Resource;
+import h3d.mat.Texture;
 
 class EndPad extends DtsObject {
 	var fireworks:Array<Firework> = [];
@@ -45,7 +47,8 @@ class EndPad extends DtsObject {
 	function spawnFirework(time:TimeState) {
 		var firework = new Firework(this.getAbsPos().getPosition(), time.timeSinceLoad, this.level);
 		this.fireworks.push(firework);
-		AudioManager.playSound(ResourceLoader.getAudio("data/sound/firewrks.wav"), this.getAbsPos().getPosition());
+		AudioManager.playSound(ResourceLoader.getResource("data/sound/firewrks.wav", ResourceLoader.getAudio, this.soundResources),
+			this.getAbsPos().getPosition());
 		// AudioManager.play(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
 	}
 
@@ -245,6 +248,8 @@ class Firework extends Scheduler {
 	var fireworkRedSparkData:ParticleData;
 	var fireworkBlueSparkData:ParticleData;
 
+	var textureResources:Array<Resource<Texture>> = [];
+
 	public function new(pos:Vector, spawnTime:Float, level:MarbleWorld) {
 		this.pos = pos;
 		this.spawnTime = spawnTime;
@@ -252,23 +257,43 @@ class Firework extends Scheduler {
 
 		fireworkSmokeData = new ParticleData();
 		fireworkSmokeData.identifier = "fireworkSmoke";
-		fireworkSmokeData.texture = ResourceLoader.getTexture("data/particles/saturn.png");
+		var res1 = ResourceLoader.getTexture("data/particles/saturn.png");
+		res1.acquire();
+		if (!this.textureResources.contains(res1))
+			this.textureResources.push(res1);
+		fireworkSmokeData.texture = res1.resource;
 
 		fireworkRedTrailData = new ParticleData();
 		fireworkRedTrailData.identifier = "fireworkRedTrail";
-		fireworkRedTrailData.texture = ResourceLoader.getTexture("data/particles/spark.png");
+		var res2 = ResourceLoader.getTexture("data/particles/spark.png");
+		res2.acquire();
+		if (!this.textureResources.contains(res2))
+			this.textureResources.push(res2);
+		fireworkRedTrailData.texture = res2.resource;
 
 		fireworkBlueTrailData = new ParticleData();
 		fireworkBlueTrailData.identifier = "fireworkBlueTrail";
-		fireworkBlueTrailData.texture = ResourceLoader.getTexture("data/particles/spark.png");
+		var res3 = ResourceLoader.getTexture("data/particles/spark.png");
+		res3.acquire();
+		if (!this.textureResources.contains(res3))
+			this.textureResources.push(res3);
+		fireworkBlueTrailData.texture = res3.resource;
 
 		fireworkRedSparkData = new ParticleData();
 		fireworkRedSparkData.identifier = "fireworkRedSpark";
-		fireworkRedSparkData.texture = ResourceLoader.getTexture("data/particles/star.png");
+		var res4 = ResourceLoader.getTexture("data/particles/star.png");
+		res4.acquire();
+		if (!this.textureResources.contains(res4))
+			this.textureResources.push(res4);
+		fireworkRedSparkData.texture = res4.resource;
 
 		fireworkBlueSparkData = new ParticleData();
 		fireworkBlueSparkData.identifier = "fireworkBlueSpark";
-		fireworkBlueSparkData.texture = ResourceLoader.getTexture("data/particles/bubble.png");
+		var res5 = ResourceLoader.getTexture("data/particles/bubble.png");
+		res5.acquire();
+		if (!this.textureResources.contains(res5))
+			this.textureResources.push(res5);
+		fireworkBlueSparkData.texture = res5.resource;
 
 		level.particleManager.createEmitter(fireworkSmoke, fireworkSmokeData, this.pos); // Start the smoke
 		this.doWave(this.spawnTime); // Start the first wave
@@ -334,5 +359,11 @@ class Firework extends Scheduler {
 			lifetime: lifetime
 		};
 		this.trails.push(trail);
+	}
+
+	function dispose() {
+		for (textureResource in this.textureResources) {
+			textureResource.release();
+		}
 	}
 }

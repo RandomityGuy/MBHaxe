@@ -8,7 +8,8 @@ import src.ResourceLoader;
 
 class MainMenuGui extends GuiImage {
 	public function new() {
-		super(ResourceLoader.getImage("data/ui/background.jpg").toTile());
+		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		super(img.resource.toTile());
 		var fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
 		var bfont = new BitmapFont(fontdata.entry);
 		@:privateAccess bfont.loader = ResourceLoader.loader;
@@ -26,7 +27,7 @@ class MainMenuGui extends GuiImage {
 		versionText.text.text = "1.0.0";
 		this.addChild(versionText);
 
-		var homebase = new GuiImage(ResourceLoader.getImage("data/ui/home/homegui.png").toTile());
+		var homebase = new GuiImage(ResourceLoader.getResource("data/ui/home/homegui.png", ResourceLoader.getImage, this.imageResources).toTile());
 		homebase.horizSizing = Center;
 		homebase.vertSizing = Center;
 		homebase.extent = new Vector(349, 477);
@@ -34,9 +35,9 @@ class MainMenuGui extends GuiImage {
 		this.addChild(homebase);
 
 		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getImage('${path}_n.png').toTile();
-			var hover = ResourceLoader.getImage('${path}_h.png').toTile();
-			var pressed = ResourceLoader.getImage('${path}_d.png').toTile();
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed];
 		}
 

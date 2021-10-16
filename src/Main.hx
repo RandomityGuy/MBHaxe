@@ -17,6 +17,7 @@ class Main extends hxd.App {
 	var marbleGame:MarbleGame;
 
 	// var fpsCounter:Text;
+	var debugProfiler:h3d.impl.Benchmark;
 	var loaded:Bool = false;
 
 	override function init() {
@@ -39,6 +40,8 @@ class Main extends hxd.App {
 
 			// world.init();
 			// world.start();
+			// debugProfiler = new h3d.impl.Benchmark(s2d);
+			// debugProfiler.y = 40;
 
 			// fpsCounter = new Text(DefaultFont.get(), s2d);
 			// fpsCounter.y = 40;
@@ -59,8 +62,12 @@ class Main extends hxd.App {
 
 	override function render(e:h3d.Engine) {
 		// this.world.render(e);
-		if (loaded)
+		if (loaded) {
+			// debugProfiler.begin();
+			// debugProfiler.measure("marbleGame");
 			marbleGame.render(e);
+			// debugProfiler.end();
+		}
 		super.render(e);
 	}
 

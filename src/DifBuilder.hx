@@ -79,7 +79,9 @@ class DifBuilder {
 	];
 
 	public static function loadDif(path:String, itr:InteriorObject, ?so:Int = -1) {
-		var dif = ResourceLoader.loadInterior(path);
+		var difresource = ResourceLoader.loadInterior(path);
+		difresource.acquire();
+		var dif = difresource.resource;
 
 		var geo = so == -1 ? dif.interiors[0] : dif.subObjects[so];
 
@@ -374,5 +376,7 @@ class DifBuilder {
 
 			var mesh = new Mesh(prim, material, itr);
 		}
+
+		difresource.release();
 	}
 }
