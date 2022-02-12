@@ -17,6 +17,7 @@
 // SOFTWARE.
 package fs;
 
+import hxd.fs.FileInput;
 import hxd.net.BinaryLoader;
 import hxd.impl.ArrayIterator;
 import hxd.fs.LoadedBitmap;
@@ -80,53 +81,17 @@ class ManifestEntry extends FileEntry {
 		#end
 	}
 
+	override function readBytes(out:haxe.io.Bytes, outPos:Int, pos:Int, len:Int):Int {
+		if (pos + len > bytes.length)
+			len = bytes.length - pos;
+		if (len < 0)
+			len = 0;
+		out.blit(outPos, bytes, pos, len);
+		return len;
+	}
+
 	override public function open() {
-		#if sys
-		if (fio == null)
-			fio = sys.io.File.read(file);
-		else
-			fio.seek(0, SeekBegin);
-		#else
-		readPos = 0;
-		#end
-	}
-
-	override public function skip(nbytes:Int) {
-		#if sys
-		fio.seek(nbytes, SeekCur);
-		#else
-		readPos += nbytes;
-		if (bytes.length < readPos)
-			readPos = bytes.length;
-		#end
-	}
-
-	override public function readByte():Int {
-		#if sys
-		return fio.readByte();
-		#else
-		return bytes.get(readPos++);
-		#end
-	}
-
-	override public function read(out:Bytes, pos:Int, size:Int) {
-		#if sys
-		fio.readFullBytes(out, pos, size);
-		#else
-		out.blit(pos, bytes, readPos, size);
-		readPos += size;
-		#end
-	}
-
-	override public function close() {
-		#if sys
-		if (fio != null) {
-			fio.close();
-			fio = null;
-		}
-		#else
-		readPos = 0;
-		#end
+		return @:privateAccess new FileInput(this);
 	}
 
 	public function fancyLoad(onReady:() -> Void, onProgress:(cur:Int, max:Int) -> Void) {

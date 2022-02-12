@@ -808,7 +808,7 @@ class DtsObject extends GameObject {
 			var prim:DynamicPolygon = cast mesh.primitive;
 			var vbuffer:FloatBuffer = null;
 			if (prim.buffer != null) {
-				vbuffer = prim.getBuffer(prim.points.length);
+				vbuffer = prim.getDrawBuffer(prim.points.length);
 			}
 			var pos = 0;
 			for (i in info.indices) {
@@ -825,7 +825,7 @@ class DtsObject extends GameObject {
 					prim = cast mesh.primitive;
 					pos = 0;
 					if (prim.buffer != null) {
-						vbuffer = prim.getBuffer(prim.points.length);
+						vbuffer = prim.getDrawBuffer(prim.points.length);
 					}
 				}
 				var vertex = info.vertices[i];

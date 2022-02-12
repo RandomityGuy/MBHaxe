@@ -1,6 +1,6 @@
 package shaders;
 
-import h3d.scene.Light;
+import h3d.scene.fwd.Light;
 
 class DirLight extends Light {
 	var dshader:DirLightShader;

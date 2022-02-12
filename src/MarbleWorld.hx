@@ -219,8 +219,9 @@ class MarbleWorld extends Scheduler {
 			var sunDirection = MisParser.parseVector3(sunElement.direction);
 			sunDirection.x = -sunDirection.x;
 			// sunDirection.z = -sunDirection.z;
+			var ls = cast(scene.lightSystem, h3d.scene.fwd.LightSystem);
 
-			scene.lightSystem.ambientLight.load(ambientColor);
+			ls.ambientLight.load(ambientColor);
 
 			var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
 			shadow.power = 0.5;

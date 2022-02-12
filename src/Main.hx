@@ -1,7 +1,10 @@
 package;
 
 import src.ResourceLoader;
+#if js
 import fs.ManifestFileSystem;
+import fs.ManifestBuilder;
+#end
 import hxd.Timer;
 import hxd.Window;
 import src.AudioManager;
@@ -11,7 +14,6 @@ import gui.MainMenuGui;
 import hxd.res.DefaultFont;
 import h2d.Text;
 import h3d.Vector;
-import fs.ManifestBuilder;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;

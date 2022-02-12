@@ -1,7 +1,10 @@
 package src;
 
+#if js
 import fs.ManifestLoader;
 import fs.ManifestBuilder;
+import fs.ManifestProgress;
+#end
 import hxd.res.Image;
 import hxd.res.Sound;
 import h3d.mat.Texture;
@@ -12,7 +15,6 @@ import dif.Dif;
 import hxd.fs.LocalFileSystem;
 import hxd.fs.FileSystem;
 import hxd.res.Loader;
-import fs.ManifestProgress;
 import src.Resource;
 
 class ResourceLoader {

@@ -56,6 +56,7 @@ class MarbleGame {
 			canvasElement.style.width = "100%";
 			canvasElement.style.height = "100%";
 		});
+		var canvas = js.Browser.document.getElementById("webgl");
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.addEventListener('mousedown', (e:js.html.MouseEvent) -> {
 			var buttonCode = switch (e.button) {
@@ -80,6 +81,31 @@ class MarbleGame {
 		pointercontainer.addEventListener('keyup', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+		});
+		js.Browser.window.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
+			var buttonCode = (e.keyCode);
+			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+		});
+		js.Browser.window.addEventListener('keyup', (e:js.html.KeyboardEvent) -> {
+			var buttonCode = (e.keyCode);
+			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+		});
+
+		pointercontainer.addEventListener('touchstart', (e:js.html.TouchEvent) -> {
+			@:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = Key.getFrame();
+			@:privateAccess scene2d.window.curMouseX = e.touches[0].clientX;
+			@:privateAccess scene2d.window.curMouseY = e.touches[0].clientY;
+		});
+
+		pointercontainer.addEventListener('touchend', (e:js.html.TouchEvent) -> {
+			@:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = -Key.getFrame();
+			@:privateAccess scene2d.window.curMouseX = e.touches[0].clientX;
+			@:privateAccess scene2d.window.curMouseY = e.touches[0].clientY;
+		});
+
+		pointercontainer.addEventListener('touchmove', (e:js.html.TouchEvent) -> {
+			@:privateAccess scene2d.window.curMouseX = e.touches[0].clientX;
+			@:privateAccess scene2d.window.curMouseY = e.touches[0].clientY;
 		});
 
 		js.Browser.window.addEventListener('contextmenu', (e) -> e.preventDefault()); // Disable right click context menu for good

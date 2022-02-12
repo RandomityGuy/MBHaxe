@@ -152,7 +152,7 @@ class DynamicPolygon extends MeshPrimitive {
 			indexes = h3d.Indexes.alloc(idx);
 	}
 
-	public function getBuffer(vertices:Int) {
+	public function getDrawBuffer(vertices:Int) {
 		if (vbuf == null)
 			vbuf = hxd.impl.Allocator.get().allocFloats(vertices * 8)
 		else
