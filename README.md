@@ -9,13 +9,13 @@ I chose Haxe because its a good language that can target other languages, meanin
 # Build
 Requires Haxe 4.2.2 or above
 You require the following Haxe libraries: 
-- heaps: 1.9.1 (not the git version) with https://github.com/HeapsIO/heaps/pull/573 applied
-- hlsdl (You will have to update it manually by replacing the files after doing the below steps) (Hashlink/C native target)
+- heaps: The specific version located [here](https://github.com/RandomityGuy/heaps)
+- hlsdl (Obtain the haxelib version of hlsdl, then patch it with these files [here](https://github.com/RandomityGuy/hashlink/tree/master/libs/sdl)) (Hashlink/C native target)
 - stb_ogg_sound (JS/Browser target)
 
 ## Hashlink/Native
-You have to compile your own version of Hashlink with https://github.com/HaxeFoundation/hashlink/pull/444 applied  
-After all that has been setup, compile to hashlink by doing `haxe compile.hxml` and then running the game by `hl marblegame.hl`
+The version of hashlink to be compiled is located [here](https://github.com/RandomityGuy/hashlink).  
+After all that has been setup, compile to hashlink by doing `haxe compile.hxml` and then running the game by `hl marblegame.hl`.  
 To compile to C, do `haxe compile-c.hxml` and use the instructions in https://gist.github.com/Yanrishatum/d69ed72e368e35b18cbfca726d81279a
 
 ## Javascript/Browser
