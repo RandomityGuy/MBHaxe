@@ -132,8 +132,12 @@ class MarbleWorld extends Scheduler {
 
 	var _loadingLength:Int = 0;
 
+	var _resourcesLoaded:Int = 0;
+
 	var textureResources:Array<Resource<h3d.mat.Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
+
+	var lock:Bool = false;
 
 	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission) {
 		this.scene = scene;
@@ -747,10 +751,28 @@ class MarbleWorld extends Scheduler {
 
 	function asyncLoadResources() {
 		if (this.resourceLoadFuncs.length != 0) {
+			// if (lock)
+			// 	return;
+
 			var func = this.resourceLoadFuncs.pop();
+			lock = true;
+			#if hl
 			func();
-			this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+			lock = false;
+			this._resourcesLoaded++;
+			#end
+			#if js
+			var prom = new js.lib.Promise((resolve, reject) -> {
+				func();
+				lock = false;
+				resolve(true);
+				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+				this._resourcesLoaded++;
+			});
+			#end
 		} else {
+			if (this._resourcesLoaded < _loadingLength)
+				return;
 			if (!_ready)
 				postInit();
 		}
