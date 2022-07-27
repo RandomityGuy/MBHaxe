@@ -1,6 +1,5 @@
 package src;
 
-import hxd.Pixels;
 import shaders.Skybox;
 import h3d.shader.pbr.PropsValues;
 import h3d.shader.AmbientLight;
@@ -39,7 +38,7 @@ class Sky extends Object {
 		skyMesh.material.blendMode = None;
 		// var pbrprops = skyMesh.material.mainPass.getShader(PropsValues);
 		// pbrprops.emissiveValue = 1;
-		// pbrprops.roughnessValue = 0;`
+		// pbrprops.roughnessValue = 0;
 		// pbrprops.occlusionValue = 0;
 		// pbrprops.metalnessValue = 1;
 
@@ -76,14 +75,10 @@ class Sky extends Object {
 				var line = StringTools.trim(lines[i]);
 				var filenames = ResourceLoader.getFullNamesOf(dmlDirectory + '/' + line);
 				if (filenames.length == 0) {
-					var pixels = Texture.fromColor(0).capturePixels(0, 0);
-					skyboxImages.push(pixels);
-					// var tex = new h3d.mat.Texture();
-					// skyboxImages.push(new BitmapData(128, 128));
+					skyboxImages.push(new BitmapData(128, 128));
 				} else {
-					var image = ResourceLoader.getResource(filenames[0], ResourceLoader.getImage, this.imageResources).toTexture();
-					var pixels = image.capturePixels(0, 0);
-					skyboxImages.push(pixels);
+					var image = ResourceLoader.getResource(filenames[0], ResourceLoader.getImage, this.imageResources).toBitmap();
+					skyboxImages.push(image);
 				}
 			}
 			var maxwidth = 0;
@@ -108,7 +103,7 @@ class Sky extends Object {
 
 			var cubemaptexture = new Texture(maxheight, maxwidth, [Cube]);
 			for (i in 0...6) {
-				cubemaptexture.uploadPixels(skyboxImages[skyboxIndices[i]], 0, i);
+				cubemaptexture.uploadBitmap(skyboxImages[skyboxIndices[i]], 0, i);
 			}
 			return cubemaptexture;
 		}
