@@ -229,6 +229,10 @@ class MarbleWorld extends Scheduler {
 
 			var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
 			shadow.power = 0.5;
+			shadow.mode = Dynamic;
+			shadow.minDist = 0.1;
+			shadow.maxDist = 200;
+			shadow.bias = 0;
 
 			var sunlight = new DirLight(sunDirection, scene);
 			sunlight.color = directionalColor;
@@ -760,6 +764,7 @@ class MarbleWorld extends Scheduler {
 			func();
 			lock = false;
 			this._resourcesLoaded++;
+			this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
 			#end
 			#if js
 			var prom = new js.lib.Promise((resolve, reject) -> {
