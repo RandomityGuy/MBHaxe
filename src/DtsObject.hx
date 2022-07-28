@@ -372,21 +372,21 @@ class DtsObject extends GameObject {
 				var texture = ResourceLoader.getResource(fullName, ResourceLoader.getTexture, this.textureResources);
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
-				// if (this.useInstancing) {
-				// var dtsshader = new DtsTexture();
-				// dtsshader.texture = texture;
-				// dtsshader.currentOpacity = 1;
-				// material.mainPass.removeShader(material.textureShader);
-				// material.mainPass.addShader(dtsshader);
-				// }
+				if (this.useInstancing) {
+					var dtsshader = new DtsTexture();
+					dtsshader.texture = texture;
+					dtsshader.currentOpacity = 1;
+					material.mainPass.removeShader(material.textureShader);
+					material.mainPass.addShader(dtsshader);
+				}
 				// TODO TRANSLUENCY SHIT
 			}
 			material.shadows = false;
 			if (this.isCollideable)
 				material.receiveShadows = true;
 			if (material.texture == null && !iflMaterial) {
-				// var dtsshader = new DtsTexture();
-				// dtsshader.currentOpacity = 1;
+				var dtsshader = new DtsTexture();
+				dtsshader.currentOpacity = 1;
 				// Make a 1x1 white texture
 				#if hl
 				var bitmap = new hxd.BitmapData(1, 1);
@@ -403,9 +403,9 @@ class DtsObject extends GameObject {
 				texture.wrap = Wrap.Repeat;
 				#end
 				material.texture = texture;
-				// dtsshader.texture = texture;
-				// material.mainPass.addShader(dtsshader);
-				// material.shadows = false;
+				dtsshader.texture = texture;
+				material.mainPass.addShader(dtsshader);
+				material.shadows = false;
 			}
 			if (flags & 4 > 0) {
 				material.blendMode = BlendMode.Alpha;

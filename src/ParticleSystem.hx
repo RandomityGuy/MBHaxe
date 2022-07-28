@@ -81,20 +81,26 @@ class Particle {
 
 		var t = this.currentAge / (this.lifeTime / 1000);
 
-		for (i in 1...4) {
-			if (this.o.times.length > i) {
-				if (this.o.times[i] >= t) {
-					var firstPart = t - this.o.times[i - 1];
-					var total = this.o.times[i] - this.o.times[i - 1];
+		// for (i in 1...4) {
+		// 	if (this.o.times.length > i) {
+		// 		if (this.o.times[i] >= t) {
+		// 			var firstPart = t - this.o.times[i - 1];
+		// 			var total = this.o.times[i] - this.o.times[i - 1];
 
-					firstPart /= total;
+		// 			firstPart /= total;
 
-					this.color = Util.lerpThreeVectors(this.o.colors[i - 1], this.o.colors[i], firstPart);
-					this.scale = Util.lerp(this.o.sizes[i - 1], this.o.sizes[i], firstPart);
-					break;
-				}
-			}
-		}
+		// 			// if (this.o.texture == 'particles/spark.png') {
+		// 			// 	if (this.o.colors[0].r == 1 && this.o.colors[0].g == 1) {
+		// 			// 		trace("HEREEEE");
+		// 			// 	}
+		// 			// }
+
+		// 			this.color = Util.lerpThreeVectors(this.o.colors[i - 1], this.o.colors[i], firstPart);
+		// 			this.scale = Util.lerp(this.o.sizes[i - 1], this.o.sizes[i], firstPart);
+		// 			break;
+		// 		}
+		// 	}
+		// }
 
 		// var velElapsed = elapsed / 1000;
 		// // velElapsed *= 0.001;
@@ -104,30 +110,30 @@ class Particle {
 		// // var pos = this.position.add(this.vel.multiply(velElapsed + this.o.acceleration * (velElapsed * velElapsed) / 2));
 		// // this.position = pos;
 
-		// this.rotation = (this.initialSpin + this.o.spinSpeed * elapsed / 1000) * Math.PI / 180;
+		this.rotation = (this.initialSpin + this.o.spinSpeed * elapsed / 1000) * Math.PI / 180;
 
-		// // Check where we are in the times array
-		// var indexLow = 0;
-		// var indexHigh = 1;
-		// for (i in 2...this.o.times.length) {
-		// 	if (this.o.times[indexHigh] >= completion)
-		// 		break;
+		// Check where we are in the times array
+		var indexLow = 0;
+		var indexHigh = 1;
+		for (i in 2...this.o.times.length) {
+			if (this.o.times[indexHigh] >= completion)
+				break;
 
-		// 	indexLow = indexHigh;
-		// 	indexHigh = i;
-		// }
+			indexLow = indexHigh;
+			indexHigh = i;
+		}
 
-		// if (this.o.times.length == 1)
-		// 	indexHigh = indexLow;
-		// var t = (completion - this.o.times[indexLow]) / (this.o.times[indexHigh] - this.o.times[indexLow]);
+		if (this.o.times.length == 1)
+			indexHigh = indexLow;
+		var t = (completion - this.o.times[indexLow]) / (this.o.times[indexHigh] - this.o.times[indexLow]);
 
-		// // Adjust color
-		// var color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
-		// this.color = color;
-		// // this.material.opacity = color.a * * 1.5; // Adjusted because additive mixing can be kind of extreme
+		// Adjust color
+		var color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
+		this.color = color;
+		// this.material.opacity = color.a * * 1.5; // Adjusted because additive mixing can be kind of extreme
 
-		// // Adjust sizing
-		// this.scale = Util.lerp(this.o.sizes[indexLow], this.o.sizes[indexHigh], t);
+		// Adjust sizing
+		this.scale = Util.lerp(this.o.sizes[indexLow], this.o.sizes[indexHigh], t);
 	}
 }
 
@@ -290,10 +296,11 @@ class ParticleManager {
 					var particleShader = batch.meshBatch.material.mainPass.getShader(Billboard);
 					particleShader.scale = instance.scale;
 					particleShader.rotation = instance.rotation;
+					particleShader.color = instance.color;
 					batch.meshBatch.material.blendMode = instance.o.blending;
 					batch.meshBatch.material.mainPass.depthWrite = false;
 					// batch.meshBatch.material.mainPass.setPassName("overlay");
-					batch.meshBatch.material.color.load(instance.color);
+					// batch.meshBatch.material.color.load(instance.color);
 					batch.meshBatch.shadersChanged = true;
 					batch.meshBatch.setScale(instance.scale);
 					batch.meshBatch.emitInstance();

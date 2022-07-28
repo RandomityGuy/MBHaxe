@@ -12,16 +12,21 @@ class Billboard extends hxsl.Shader {
 		@global var global:{
 			@perObject var modelView:Mat4;
 		};
-		@param var scale:Float;
-		@param var rotation:Float;
+		@perInstance @param var scale:Float;
+		@perInstance @param var rotation:Float;
+		@perInstance @param var color:Vec4;
 		var relativePosition:Vec3;
 		var projectedPosition:Vec4;
 		var calculatedUV:Vec2;
+		var pixelColor:Vec4;
 		function vertex() {
 			var mid = 0.5;
 			var uv = input.uv;
 			calculatedUV.x = cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid;
 			calculatedUV.y = cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid;
+		}
+		function fragment() {
+			pixelColor *= color;
 		}
 		function billboard(pos:Vec2, scale:Vec2):Vec4 {
 			return (vec4(0, 0, 0, 1) * (global.modelView * camera.view) + vec4(pos * scale, 0, 0));

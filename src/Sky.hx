@@ -48,6 +48,7 @@ class Sky extends Object {
 		// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
 		var shad = new Skybox(texture);
 		skyMesh.material.mainPass.addShader(shad);
+		skyMesh.material.mainPass.depthWrite = false;
 		// skyMesh.material.shadows = false;
 	}
 

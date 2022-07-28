@@ -10,7 +10,7 @@ class DtsTexture extends hxsl.Shader {
 		@const var specularAlpha:Bool;
 		@range(0, 1) @param var killAlphaThreshold:Float;
 		@param var texture:Sampler2D;
-		@param var currentOpacity:Float;
+		@perInstance @param var currentOpacity:Float;
 		var calculatedUV:Vec2;
 		var pixelColor:Vec4;
 		var specColor:Vec3;
