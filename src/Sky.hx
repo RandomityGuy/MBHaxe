@@ -82,8 +82,8 @@ class Sky extends Object {
 					// var tex = new h3d.mat.Texture();
 					// skyboxImages.push(new BitmapData(128, 128));
 				} else {
-					var image = ResourceLoader.getResource(filenames[0], ResourceLoader.getImage, this.imageResources).toTexture();
-					var pixels = image.capturePixels(0, 0);
+					var image = ResourceLoader.getResource(filenames[0], ResourceLoader.getImage, this.imageResources).toBitmap();
+					var pixels = image.getPixels();
 					skyboxImages.push(pixels);
 				}
 			}
