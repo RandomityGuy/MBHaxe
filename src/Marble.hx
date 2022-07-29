@@ -850,13 +850,13 @@ class Marble extends GameObject {
 				finalPos = finalPos.sub(pt);
 			}
 
-			var colpos = finalPos;
-			var msh = new h3d.prim.Sphere();
-			var prim = new h3d.scene.Mesh(msh);
-			msh.addNormals();
-			prim.setTransform(Matrix.T(colpos.x, colpos.y, colpos.z));
-			prim.setScale(this._radius);
-			this.level.scene.addChild(prim);
+			// var colpos = finalPos;
+			// var msh = new h3d.prim.Sphere();
+			// var prim = new h3d.scene.Mesh(msh);
+			// msh.addNormals();
+			// prim.setTransform(Matrix.T(colpos.x, colpos.y, colpos.z));
+			// prim.setScale(this._radius);
+			// this.level.scene.addChild(prim);
 
 			var intersectT = finalPos.sub(position).length() / velocity.length();
 			return intersectT;
