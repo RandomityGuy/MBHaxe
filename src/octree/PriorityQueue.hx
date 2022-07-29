@@ -1,45 +1,32 @@
 package octree;
 
 class PriorityQueue<T> {
-	var first:PriorityQueueNode<T>;
+	var queue:Array<PriorityQueueNode<T>>;
 
 	public var count:Int;
 
 	public function new() {
 		count = 0;
-		first = null;
+		queue = [];
 	}
 
 	public function enqueue(val:T, priority:Float) {
 		var node = new PriorityQueueNode<T>(val, priority);
-		if (this.first == null) {
-			this.first = node;
+		if (this.queue == null) {
+			this.queue = [node];
 		} else {
-			if (this.first.priority >= priority) {
-				node.next = this.first;
-				this.first.prev = node;
-				this.first = node;
+			if (this.queue[0].priority >= priority) {
+				this.queue.insert(0, node);
 			} else {
-				var n = this.first;
+				var insertIndex = 0;
 				var end = false;
-				while (n.priority < node.priority) {
-					if (n.next == null) {
-						end = true;
+				while (insertIndex < this.queue.length) {
+					if (this.queue[insertIndex].priority > node.priority) {
 						break;
 					}
-					n = n.next;
+					insertIndex++;
 				}
-				if (!end) {
-					if (n.prev != null) {
-						n.prev.next = node;
-						node.prev = n.prev;
-					}
-					n.prev = node;
-					node.next = n;
-				} else {
-					n.next = node;
-					node.prev = n;
-				}
+				this.queue.insert(insertIndex, node);
 			}
 		}
 
@@ -47,10 +34,8 @@ class PriorityQueue<T> {
 	}
 
 	public function dequeue() {
-		var ret = this.first;
-		this.first = this.first.next;
-		if (this.first != null)
-			this.first.prev = null;
+		var ret = this.queue[0];
+		this.queue.splice(0, 1);
 		count--;
 		return ret.value;
 	}

@@ -6,6 +6,10 @@ import h3d.col.Bounds;
 class Octree {
 	public var root:OctreeNode;
 
+	static var DEFAULT_ROOT_NODE_SIZE = 1;
+	static var MIN_DEPTH = -52; // Huge
+	static var MAX_DEPTH = 8;
+
 	/** A map of each object in the octree to the node that it's in. This accelerates removal drastically, as the lookup step can be skipped. */
 	public var objectToNode:Map<IOctreeObject, OctreeNode>;
 

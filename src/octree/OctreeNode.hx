@@ -34,11 +34,13 @@ class OctreeNode implements IOctreeElement {
 	public function insert(object:IOctreeObject) {
 		this.count++;
 		if (this.octants != null) {
-			for (i in 0...8) {
-				var octant = this.octants[i];
-				if (octant.largerThan(object) && octant.containsCenter(object)) {
-					octant.insert(object);
-					return;
+			if (this.octants[0].largerThan(object)) {
+				for (i in 0...8) {
+					var octant = this.octants[i];
+					if (octant.containsCenter(object)) {
+						octant.insert(object);
+						return;
+					}
 				}
 			}
 			this.objects.push(object);
@@ -55,13 +57,15 @@ class OctreeNode implements IOctreeElement {
 			return;
 		this.createOctants();
 		// Put the objects into the correct octants. Note that all objects that couldn't fit into any octant will remain in the set.
+
 		for (object in this.objects) {
-			for (j in 0...8) {
-				var octant = this.octants[j];
-				if (octant.largerThan(object) && octant.containsCenter(object)) {
-					octant.insert(object);
-					this.objects.remove(object);
-					break;
+			if (this.octants[0].largerThan(object)) {
+				for (i in 0...8) {
+					var octant = this.octants[i];
+					if (octant.containsCenter(object)) {
+						octant.insert(object);
+						this.objects.remove(object);
+					}
 				}
 			}
 		}
@@ -102,6 +106,25 @@ class OctreeNode implements IOctreeElement {
 			node.merge();
 			node = node.parent;
 		}
+	}
+
+	public function update(object:IOctreeObject) {
+		this.objects.remove(object);
+
+		var node = this;
+		while (node != null) {
+			node.count--;
+			node.merge();
+
+			if (node.largerThan(object) && node.containsCenter(object)) {
+				node.insert(object);
+				return true;
+			}
+
+			node = node.parent;
+		}
+
+		return false;
 	}
 
 	public function merge() {
