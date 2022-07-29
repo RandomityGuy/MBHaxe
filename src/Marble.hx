@@ -1,5 +1,7 @@
 package src;
 
+import collision.gjk.GJK;
+import collision.gjk.ConvexHull;
 import hxd.snd.effect.Pitch;
 import hxd.snd.effect.Spatialization;
 import hxd.snd.Channel;
@@ -741,11 +743,15 @@ class Marble extends GameObject {
 			return new Point3F(vec.x, vec.y, vec.z);
 		}
 
-		var intersectT = 10e8;
+		var maxIntersectDist = 0.0;
+		var contactNorm = new Vector();
+		var contactPt = null;
 
 		var traceinfo = new TraceInfo();
 
 		traceinfo.resetTrace(position.clone(), position.add(velocity.multiply(dt)), this._radius);
+
+		var foundTriangles = [];
 
 		for (obj in foundObjs) {
 			var radius = _radius;
@@ -784,7 +790,27 @@ class Marble extends GameObject {
 
 					var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform);
 
-					traceinfo.traceSphereTriangle(v0, v, v2);
+					foundTriangles.push(v0);
+					foundTriangles.push(v);
+					foundTriangles.push(v2);
+					// foundTriangles.push(surfacenormal);
+
+					traceinfo.resetTrace(position.clone(), position.add(velocity.multiply(dt)), this._radius);
+					traceinfo.traceSphereTriangle(v2, v, v0);
+
+					if (traceinfo.collision) {
+						var tcolpos = traceinfo.getTraceEndpoint();
+						var closest = Collision.ClosestPtPointTriangle(tcolpos, _radius, v2, v, v0, surfacenormal);
+						if (closest != null) {
+							var dist = tcolpos.sub(closest);
+							var distlen = dist.length();
+							if (maxIntersectDist < distlen && distlen < _radius) {
+								maxIntersectDist = distlen;
+								contactNorm = dist.normalized();
+								contactPt = closest;
+							}
+						}
+					}
 
 					// var closest = Collision.IntersectTriangleCapsule(position, position.add(relVelocity.multiply(dt)), _radius, v0, v, v2, surfacenormal);
 					// var closest = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
@@ -808,15 +834,35 @@ class Marble extends GameObject {
 			}
 		}
 
-		if (traceinfo.collision) {
-			var traceDist = traceinfo.getTraceDistance();
-			var t = traceDist / velocity.length();
-			if (t < intersectT) {
-				intersectT = t;
+		if (maxIntersectDist > 0) {
+			var finalPos = contactPt.add(contactNorm.multiply(_radius));
+
+			// Nudge the finalPos to the surface of the object
+
+			var chull = new ConvexHull(foundTriangles);
+			var sph = new collision.gjk.Sphere();
+			sph.position = finalPos;
+			sph.radius = _radius;
+
+			var pt = GJK.gjk(sph, chull);
+
+			if (pt != null) {
+				finalPos = finalPos.sub(pt);
 			}
+
+			var colpos = finalPos;
+			var msh = new h3d.prim.Sphere();
+			var prim = new h3d.scene.Mesh(msh);
+			msh.addNormals();
+			prim.setTransform(Matrix.T(colpos.x, colpos.y, colpos.z));
+			prim.setScale(this._radius);
+			this.level.scene.addChild(prim);
+
+			var intersectT = finalPos.sub(position).length() / velocity.length();
+			return intersectT;
 		}
 
-		return intersectT;
+		return 10e8;
 	}
 
 	function advancePhysics(timeState:TimeState, m:Move, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
@@ -855,7 +901,7 @@ class Marble extends GameObject {
 			var intersectT = this.getIntersectionTime(timeStep, velocity);
 
 			if (intersectT < timeStep && intersectT >= 0.00001) {
-				trace('CCD AT t = ${intersectT}');
+				// trace('CCD AT t = ${intersectT}');
 				intersectT *= 0.8; // We uh tick the shit to not actually at the contact time cause bruh
 				// intersectT /= 2;
 				var diff = timeStep - intersectT;
