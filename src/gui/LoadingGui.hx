@@ -4,6 +4,7 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleGame;
+import src.Settings;
 
 class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
@@ -32,7 +33,7 @@ class LoadingGui extends GuiImage {
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
+		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var mapName = new GuiText(domcasual32);
 		mapName.position = new Vector(134, 78);

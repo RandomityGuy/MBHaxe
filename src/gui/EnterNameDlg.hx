@@ -24,18 +24,18 @@ class EnterNameDlg extends GuiControl {
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(12, MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
 
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
+		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
 		var expo50b = new BitmapFont(expo50fontdata.entry);
 		@:privateAccess expo50b.loader = ResourceLoader.loader;
-		var expo50 = expo50b.toSdfFont(35, MultiChannel);
-		var expo32 = expo50b.toSdfFont(24, MultiChannel);
+		var expo50 = expo50b.toSdfFont(cast 35 * Settings.uiScale, MultiChannel);
+		var expo32 = expo50b.toSdfFont(cast 24 * Settings.uiScale, MultiChannel);
 
 		function mlFontLoader(text:String) {
 			switch (text) {

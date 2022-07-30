@@ -205,8 +205,14 @@ class Settings {
 			#if js
 			zoomRatio = js.Browser.window.devicePixelRatio;
 			#end
+			#if hl
 			Settings.optionsSettings.screenWidth = cast wnd.width / zoomRatio;
 			Settings.optionsSettings.screenHeight = cast wnd.height / zoomRatio;
+			#end
+			#if js
+			Settings.optionsSettings.screenWidth = cast js.Browser.window.innerWidth;
+			Settings.optionsSettings.screenHeight = cast js.Browser.window.innerHeight;
+			#end
 
 			MarbleGame.canvas.scene2d.scaleMode = Zoom(zoomRatio);
 

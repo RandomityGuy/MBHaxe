@@ -26,6 +26,7 @@ import src.MarbleGame;
 import src.Resource;
 import hxd.res.Sound;
 import h3d.mat.Texture;
+import src.Settings;
 
 class PlayGui {
 	var scene2d:h2d.Scene;
@@ -298,7 +299,7 @@ class PlayGui {
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var bfont = domcasual32b.toSdfFont(26, MultiChannel);
+		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var helpTextCtrl = new GuiControl();
 		helpTextCtrl.position = new Vector(0, 210);

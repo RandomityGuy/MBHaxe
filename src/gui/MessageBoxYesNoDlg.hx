@@ -4,6 +4,7 @@ import src.MarbleGame;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.Settings;
 
 class MessageBoxYesNoDlg extends GuiControl {
 	public function new(text:String, yesFunc:Void->Void, noFunc:Void->Void) {
@@ -16,7 +17,7 @@ class MessageBoxYesNoDlg extends GuiControl {
 		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
-		var domcasual24 = domcasual24b.toSdfFont(20, MultiChannel);
+		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();

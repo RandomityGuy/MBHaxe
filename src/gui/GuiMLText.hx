@@ -17,8 +17,6 @@ class GuiMLText extends GuiControl {
 		super();
 		this.text = new HtmlText(font);
 		this.text.loadFont = loadFontFunc;
-		var uiScaleFactor = Settings.uiScale;
-		this.text.scale(uiScaleFactor);
 	}
 
 	public override function render(scene2d:Scene) {

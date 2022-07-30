@@ -11,6 +11,7 @@ import src.MarbleGame;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Util;
+import src.Settings;
 
 class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
@@ -26,7 +27,7 @@ class OptionsDlg extends GuiImage {
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(12, MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();

@@ -128,19 +128,19 @@ class PlayMissionGui extends GuiImage {
 		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
-		var domcasual24 = domcasual24b.toSdfFont(20, MultiChannel);
+		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
-		var domcasual32 = domcasual24b.toSdfFont(26, MultiChannel);
+		var domcasual32 = domcasual24b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(12, MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
 
 		var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arialb14b = new BitmapFont(arialb14fontdata.entry);
 		@:privateAccess arialb14b.loader = ResourceLoader.loader;
-		var arialBold14 = arialb14b.toSdfFont(12, MultiChannel);
+		var arialBold14 = arialb14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
 
 		var levelBkgnd = new GuiText(domcasual24);
 		levelBkgnd.position = new Vector(5, 156);

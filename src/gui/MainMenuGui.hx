@@ -5,6 +5,7 @@ import gui.GuiControl.MouseState;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.Settings;
 
 class MainMenuGui extends GuiImage {
 	public function new() {
@@ -13,7 +14,7 @@ class MainMenuGui extends GuiImage {
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
+		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;

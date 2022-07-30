@@ -3,6 +3,7 @@ package gui;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.Settings;
 
 class ExitGameDlg extends GuiControl {
 	public function new(yesFunc:GuiControl->Void, noFunc:GuiControl->Void, restartFunc:GuiControl->Void) {
@@ -29,7 +30,7 @@ class ExitGameDlg extends GuiControl {
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
+		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var exitGameText = new GuiText(domcasual32);
 		exitGameText.text.textColor = 0x000000;

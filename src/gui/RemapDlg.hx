@@ -5,6 +5,7 @@ import gui.GuiControl.MouseState;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.Settings;
 
 class RemapDlg extends GuiControl {
 	var remapCallback:Int->Void;
@@ -27,7 +28,7 @@ class RemapDlg extends GuiControl {
 		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
 
-		var domcasual24 = domcasual24b.toSdfFont(20, MultiChannel);
+		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
 		var remapText = new GuiMLText(domcasual24, null);
 		remapText.horizSizing = Center;

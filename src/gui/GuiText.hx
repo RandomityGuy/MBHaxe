@@ -21,8 +21,6 @@ class GuiText extends GuiControl {
 	public function new(font:Font) {
 		super();
 		this.text = new Text(font);
-		var uiScaleFactor = Settings.uiScale;
-		this.text.scale(uiScaleFactor);
 	}
 
 	public override function render(scene2d:Scene) {
