@@ -295,9 +295,10 @@ class PlayGui {
 	}
 
 	function initTexts() {
-		var fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
-		var bfont = new BitmapFont(fontdata.entry);
-		@:privateAccess bfont.loader = ResourceLoader.loader;
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var bfont = domcasual32b.toSdfFont(26, MultiChannel);
 
 		var helpTextCtrl = new GuiControl();
 		helpTextCtrl.position = new Vector(0, 210);

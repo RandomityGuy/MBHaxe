@@ -86,6 +86,8 @@ class Settings {
 	public static var progression = [0, 0, 0];
 	public static var highscoreName = "";
 
+	public static var uiScale = 1.0;
+
 	public static function applySettings() {
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;

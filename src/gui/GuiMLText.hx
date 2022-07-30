@@ -6,16 +6,19 @@ import h2d.Scene;
 import hxd.res.BitmapFont;
 import h2d.Text;
 import src.MarbleGame;
+import src.Settings;
 
 @:publicFields
 class GuiMLText extends GuiControl {
 	var text:HtmlText;
 	var justify:Justification = Left;
 
-	public function new(font:BitmapFont, loadFontFunc:String->h2d.Font) {
+	public function new(font:h2d.Font, loadFontFunc:String->h2d.Font) {
 		super();
-		this.text = new HtmlText(font.toFont());
+		this.text = new HtmlText(font);
 		this.text.loadFont = loadFontFunc;
+		var uiScaleFactor = Settings.uiScale;
+		this.text.scale(uiScaleFactor);
 	}
 
 	public override function render(scene2d:Scene) {

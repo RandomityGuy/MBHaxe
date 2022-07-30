@@ -10,6 +10,7 @@ import h3d.Vector;
 import src.Resource;
 import hxd.res.Sound;
 import h3d.mat.Texture;
+import src.Settings;
 
 enum HorizSizing {
 	Right;
@@ -110,9 +111,12 @@ class GuiControl {
 	public function getRenderRectangle() {
 		var rect = new Rect(this.position, this.extent);
 		var parentRect:Rect = null;
+
+		var uiScaleFactor = Settings.uiScale;
+
 		if (this.parent != null) {
 			parentRect = this.parent.getRenderRectangle();
-			rect.position = parentRect.position.add(this.position);
+			rect.position = parentRect.position.add(this.position.multiply(uiScaleFactor));
 		}
 
 		var scaleFactor = 1.0;
@@ -135,32 +139,38 @@ class GuiControl {
 
 		if (this.horizSizing == HorizSizing.Center) {
 			if (this.parent != null) {
-				rect.position.x = parentRect.position.x + parentRect.extent.x / 2 - rect.extent.x / 2;
+				rect.position.x = parentRect.position.x + parentRect.extent.x / 2 - (rect.extent.x * uiScaleFactor) / 2;
+				rect.extent.x *= uiScaleFactor;
 			}
 		}
 		if (this.vertSizing == VertSizing.Center) {
 			if (this.parent != null) {
-				rect.position.y = parentRect.position.y + parentRect.extent.y / 2 - rect.extent.y / 2;
+				rect.position.y = parentRect.position.y + parentRect.extent.y / 2 - (rect.extent.y * uiScaleFactor) / 2;
+				rect.extent.y *= uiScaleFactor;
 			}
 		}
 		if (this.horizSizing == HorizSizing.Right) {
 			if (this.parent != null) {
-				rect.position.x = parentRect.position.x + this.position.x;
+				rect.position.x = parentRect.position.x + this.position.x * uiScaleFactor;
+				rect.extent.x *= uiScaleFactor;
 			}
 		}
 		if (this.vertSizing == VertSizing.Bottom) {
 			if (this.parent != null) {
-				rect.position.y = parentRect.position.y + this.position.y;
+				rect.position.y = parentRect.position.y + this.position.y * uiScaleFactor;
+				rect.extent.y *= uiScaleFactor;
 			}
 		}
 		if (this.horizSizing == HorizSizing.Left) {
 			if (this.parent != null) {
-				rect.position.x = parentRect.position.x + parentRect.extent.x - (parent.extent.x - this.position.x);
+				rect.position.x = parentRect.position.x + parentRect.extent.x - (parent.extent.x - this.position.x * uiScaleFactor);
+				rect.extent.x *= uiScaleFactor;
 			}
 		}
 		if (this.vertSizing == VertSizing.Top) {
 			if (this.parent != null) {
-				rect.position.y = parentRect.position.y + parentRect.extent.y - (parent.extent.y - this.position.y);
+				rect.position.y = parentRect.position.y + parentRect.extent.y - (parent.extent.y - this.position.y * uiScaleFactor);
+				rect.extent.y *= uiScaleFactor;
 			}
 		}
 		return rect;

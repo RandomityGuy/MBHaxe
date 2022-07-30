@@ -26,9 +26,10 @@ class ExitGameDlg extends GuiControl {
 		dialogImg.position = new Vector(134, 148);
 		dialogImg.extent = new Vector(388, 186);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
-		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32.loader = ResourceLoader.loader;
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
 
 		var exitGameText = new GuiText(domcasual32);
 		exitGameText.text.textColor = 0x000000;
@@ -42,21 +43,21 @@ class ExitGameDlg extends GuiControl {
 		var yesButton = new GuiButton(loadButtonImages("data/ui/common/yes"));
 		yesButton.position = new Vector(47, 107);
 		yesButton.extent = new Vector(88, 52);
-		yesButton.vertSizing = Top;
+		yesButton.vertSizing = Bottom;
 		yesButton.horizSizing = Right;
 		yesButton.pressedAction = yesFunc;
 
 		var noButton = new GuiButton(loadButtonImages("data/ui/common/no"));
 		noButton.position = new Vector(151, 107);
 		noButton.extent = new Vector(83, 55);
-		noButton.vertSizing = Top;
+		noButton.vertSizing = Bottom;
 		noButton.horizSizing = Right;
 		noButton.pressedAction = noFunc;
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/common/restart"));
 		restartButton.position = new Vector(249, 107);
 		restartButton.extent = new Vector(103, 56);
-		restartButton.vertSizing = Top;
+		restartButton.vertSizing = Bottom;
 		restartButton.horizSizing = Right;
 		restartButton.pressedAction = restartFunc;
 

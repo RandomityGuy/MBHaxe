@@ -13,9 +13,10 @@ class MessageBoxYesNoDlg extends GuiControl {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasual24px.fnt");
-		var domcasual24 = new BitmapFont(domcasual24fontdata.entry);
-		@:privateAccess domcasual24.loader = ResourceLoader.loader;
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
+		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
+		var domcasual24 = domcasual24b.toSdfFont(20, MultiChannel);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();

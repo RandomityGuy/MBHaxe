@@ -1,31 +1,118 @@
-
 <!DOCTYPE>
 <html>
-    <head>
-        <meta charset="utf-8"/>
-        <title>Marble Blast Gold Haxe Port</title>
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-                background-color: black;
+
+<head>
+    <meta charset="utf-8" />
+    <title>Marble Blast Gold Haxe Port</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+        }
+
+        canvas#webgl {
+            width: 100%;
+            height: 100%;
+        }
+
+        #pointercontainer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #fullscreen-enforcer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 69420;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Marker Felt';
+            font-size: 24px;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        #enter-fullscreen {
+            position: absolute;
+            display: block;
+            left: 0px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            width: 50px;
+            padding: 5px;
+            background: #00000031;
+            border-bottom-right-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+            pointer-events: none !important;
+        }
+    </style>
+    <canvas id="webgl"></canvas>
+</head>
+
+<body>
+    <div id="fullscreen-enforcer" class="hidden">
+        Tap to enter fullscreen<br><span style="opacity: 0.5; font-size: 18px;">(recommended for touch devices)</span>
+    </div>
+    <div id="enter-fullscreen" class="hidden"></div>
+    <div id="pointercontainer" tabindex="0"></div>
+    <script type="text/javascript" src="marblegame.js"></script>
+    <script>
+        let dislikesFullscreen = false;
+        const fullscreenEnforcer = document.querySelector('#fullscreen-enforcer');
+
+        fullscreenEnforcer.addEventListener('click', () => {
+            document.documentElement.requestFullscreen();
+        });
+
+        const enterFullscreenButton = document.querySelector('#enter-fullscreen');
+        enterFullscreenButton.addEventListener('click', () => {
+            document.documentElement.requestFullscreen();
+            dislikesFullscreen = false; // They changed their mind, yay
+        });
+
+        let fullscreenButtonVisibility = true;
+
+        const setEnterFullscreenButtonVisibility = (state) => {
+            fullscreenButtonVisibility = state;
+
+            let isInFullscreen = (/*window.innerWidth === screen.width && */window.innerHeight === screen.height || (screen.orientation?.type?.includes('portrait') && window.innerHeight === screen.width)) || !!document.fullscreenElement;
+            if (state && !isInFullscreen) enterFullscreenButton.classList.remove('hidden');
+            else enterFullscreenButton.classList.add('hidden');
+        };
+
+        // Periodically, check if the mobile user has left fullscreen and if so, remind them to re-enter it.
+        let lastImmunityTime = -Infinity;
+        setInterval(() => {
+            if (document.activeElement?.tagName === 'INPUT') lastImmunityTime = performance.now();
+
+            let isInFullscreen = (/*window.innerWidth === screen.width && */window.innerHeight === screen.height || (screen.orientation?.type?.includes('portrait') && window.innerHeight === screen.width)) || !!document.fullscreenElement;
+            if (isInFullscreen) {
+                // They're in fullscreen, hide the overlay
+                fullscreenEnforcer.classList.add('hidden');
+            } else if (!dislikesFullscreen && document.activeElement?.tagName !== 'INPUT' && performance.now() - lastImmunityTime > 666) {
+                // They're not in fullscreen, show the overlay
+                fullscreenEnforcer.classList.remove('hidden');
             }
-            canvas#webgl {
-                width: 100%;
-                height: 100%;
-            }
-            #pointercontainer {
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                left: 0;
-            }
-        </style>
-        <canvas id="webgl"></canvas>
-    </head>
-    <body>
-        <div id="pointercontainer" tabindex="0"></div>
-        <script type="text/javascript" src="marblegame.js"></script>
-    </body>
+
+            setEnterFullscreenButtonVisibility(fullscreenButtonVisibility);
+        }, 250);
+    </script>
+</body>
+
 </html>

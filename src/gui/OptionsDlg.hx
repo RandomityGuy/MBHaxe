@@ -23,9 +23,10 @@ class OptionsDlg extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial14.fnt");
-		var arial14 = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14.loader = ResourceLoader.loader;
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(12, MultiChannel);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();

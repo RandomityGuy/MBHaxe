@@ -6,7 +6,7 @@ import h2d.Tile;
 class GuiButtonText extends GuiButton {
 	var txtCtrl:GuiText;
 
-	public function new(images:Array<Tile>, font:hxd.res.BitmapFont) {
+	public function new(images:Array<Tile>, font:h2d.Font) {
 		super(images);
 		txtCtrl = new GuiText(font);
 		txtCtrl.position = new Vector();

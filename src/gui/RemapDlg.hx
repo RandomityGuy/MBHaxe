@@ -23,9 +23,11 @@ class RemapDlg extends GuiControl {
 		remapDlg.extent = new Vector(300, 161);
 		this.addChild(remapDlg);
 
-		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasual24px.fnt");
-		var domcasual24 = new BitmapFont(domcasual24fontdata.entry);
-		@:privateAccess domcasual24.loader = ResourceLoader.loader;
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
+		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
+
+		var domcasual24 = domcasual24b.toSdfFont(20, MultiChannel);
 
 		var remapText = new GuiMLText(domcasual24, null);
 		remapText.horizSizing = Center;

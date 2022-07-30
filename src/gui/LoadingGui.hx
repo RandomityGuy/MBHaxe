@@ -29,9 +29,10 @@ class LoadingGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
-		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32.loader = ResourceLoader.loader;
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
 
 		var mapName = new GuiText(domcasual32);
 		mapName.position = new Vector(134, 78);

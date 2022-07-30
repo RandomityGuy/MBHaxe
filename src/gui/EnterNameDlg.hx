@@ -21,30 +21,30 @@ class EnterNameDlg extends GuiControl {
 			return [normal, hover, pressed];
 		}
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial14.fnt");
-		var arial14 = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14.loader = ResourceLoader.loader;
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(12, MultiChannel);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
-		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32.loader = ResourceLoader.loader;
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
 
-		var expo50fontdata = ResourceLoader.getFileEntry("data/font/Expo50.fnt");
-		var expo50 = new BitmapFont(expo50fontdata.entry);
-		@:privateAccess expo50.loader = ResourceLoader.loader;
-
-		var expo32fontdata = ResourceLoader.getFileEntry("data/font/Expo32.fnt");
-		var expo32 = new BitmapFont(expo32fontdata.entry);
-		@:privateAccess expo32.loader = ResourceLoader.loader;
+		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
+		var expo50b = new BitmapFont(expo50fontdata.entry);
+		@:privateAccess expo50b.loader = ResourceLoader.loader;
+		var expo50 = expo50b.toSdfFont(35, MultiChannel);
+		var expo32 = expo50b.toSdfFont(24, MultiChannel);
 
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "DomCasual32":
-					return domcasual32.toFont();
+					return domcasual32;
 				case "Arial14":
-					return arial14.toFont();
+					return arial14;
 				case "Expo50":
-					return expo50.toFont();
+					return expo50;
 				default:
 					return null;
 			}
@@ -82,7 +82,7 @@ class EnterNameDlg extends GuiControl {
 		enterNameText.position = new Vector(41, 30);
 		enterNameText.extent = new Vector(345, 14);
 		// enterNameText.justify = Center;
-		enterNameText.text.text = '<p align="center"><font face="Expo50">Congratulations<br/></font>You got the${["", " 2nd", " 3rd"][place]} best time!</p>';
+		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="Expo50">Congratulations!<br/></font>You got the${["", " 2nd", " 3rd"][place]} best time!</p>';
 		dlg.addChild(enterNameText);
 
 		dlg.addChild(enterNameEdit);

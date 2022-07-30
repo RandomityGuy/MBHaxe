@@ -98,9 +98,7 @@ class MarbleGame {
 		});
 
 		pointercontainer.addEventListener('touchend', (e:js.html.TouchEvent) -> {
-			@:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = -Key.getFrame();
-			@:privateAccess scene2d.window.curMouseX = e.touches[0].clientX;
-			@:privateAccess scene2d.window.curMouseY = e.touches[0].clientY;
+			// @:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = -Key.getFrame();
 		});
 
 		pointercontainer.addEventListener('touchmove', (e:js.html.TouchEvent) -> {

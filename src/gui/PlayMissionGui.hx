@@ -125,21 +125,22 @@ class PlayMissionGui extends GuiImage {
 		levelWnd.extent = new Vector(258, 194);
 		pmPreview.addChild(levelWnd);
 
-		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasual24px.fnt");
-		var domcasual24 = new BitmapFont(domcasual24fontdata.entry);
-		@:privateAccess domcasual24.loader = ResourceLoader.loader;
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
+		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
+		var domcasual24 = domcasual24b.toSdfFont(20, MultiChannel);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
-		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual24b.toSdfFont(26, MultiChannel);
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial14.fnt");
-		var arial14 = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14.loader = ResourceLoader.loader;
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(12, MultiChannel);
 
-		var arialBold14fontdata = ResourceLoader.getFileEntry("data/font/ArialBold14px.fnt");
-		var arialBold14 = new BitmapFont(arialBold14fontdata.entry);
-		@:privateAccess arialBold14.loader = ResourceLoader.loader;
+		var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arialb14b = new BitmapFont(arialb14fontdata.entry);
+		@:privateAccess arialb14b.loader = ResourceLoader.loader;
+		var arialBold14 = arialb14b.toSdfFont(12, MultiChannel);
 
 		var levelBkgnd = new GuiText(domcasual24);
 		levelBkgnd.position = new Vector(5, 156);
@@ -255,11 +256,11 @@ class PlayMissionGui extends GuiImage {
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "DomCasual24":
-					return domcasual24.toFont();
+					return domcasual24;
 				case "Arial14":
-					return arial14.toFont();
+					return arial14;
 				case "ArialBold14":
-					return arialBold14.toFont();
+					return arialBold14;
 				default:
 					return null;
 			}

@@ -12,9 +12,9 @@ class GuiTextInput extends GuiControl {
 	var text:TextInput;
 	var justify:Justification = Left;
 
-	public function new(font:BitmapFont) {
+	public function new(font:h2d.Font) {
 		super();
-		this.text = new TextInput(font.toFont());
+		this.text = new TextInput(font);
 		this.text.textColor = 0;
 	}
 

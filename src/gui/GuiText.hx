@@ -1,5 +1,7 @@
 package gui;
 
+import h2d.Font;
+import src.Settings;
 import h2d.Scene;
 import hxd.res.BitmapFont;
 import h2d.Text;
@@ -16,9 +18,11 @@ class GuiText extends GuiControl {
 	var text:Text;
 	var justify:Justification = Left;
 
-	public function new(font:BitmapFont) {
+	public function new(font:Font) {
 		super();
-		this.text = new Text(font.toFont());
+		this.text = new Text(font);
+		var uiScaleFactor = Settings.uiScale;
+		this.text.scale(uiScaleFactor);
 	}
 
 	public override function render(scene2d:Scene) {

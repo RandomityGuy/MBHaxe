@@ -51,30 +51,30 @@ class EndGameGui extends GuiControl {
 		restartButton.extent = new Vector(104, 48);
 		restartButton.pressedAction = restartFunc;
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial14.fnt");
-		var arial14 = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14.loader = ResourceLoader.loader;
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(12, MultiChannel);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
-		var domcasual32 = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32.loader = ResourceLoader.loader;
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
 
-		var expo50fontdata = ResourceLoader.getFileEntry("data/font/Expo50.fnt");
-		var expo50 = new BitmapFont(expo50fontdata.entry);
-		@:privateAccess expo50.loader = ResourceLoader.loader;
-
-		var expo32fontdata = ResourceLoader.getFileEntry("data/font/Expo32.fnt");
-		var expo32 = new BitmapFont(expo32fontdata.entry);
-		@:privateAccess expo32.loader = ResourceLoader.loader;
+		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
+		var expo50b = new BitmapFont(expo50fontdata.entry);
+		@:privateAccess expo50b.loader = ResourceLoader.loader;
+		var expo50 = expo50b.toSdfFont(35, MultiChannel);
+		var expo32 = expo50b.toSdfFont(24, MultiChannel);
 
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "DomCasual32":
-					return domcasual32.toFont();
+					return domcasual32;
 				case "Arial14":
-					return arial14.toFont();
+					return arial14;
 				case "Expo32":
-					return expo32.toFont();
+					return expo32;
 				default:
 					return null;
 			}
@@ -84,7 +84,7 @@ class EndGameGui extends GuiControl {
 		congrats.text.textColor = 0xffff00;
 		congrats.text.text = 'Final Time: <font color="#FFF090">${Util.formatTime(timeState.gameplayClock)}</font>';
 		congrats.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
-		congrats.position = new Vector(43, 17);
+		congrats.position = new Vector(43, 24);
 		congrats.extent = new Vector(408, 50);
 		pg.addChild(congrats);
 
@@ -97,7 +97,7 @@ class EndGameGui extends GuiControl {
 			finishMessage.text.text = '<font color="#FF0000">You failed to qualify!</font>';
 		finishMessage.text.filter = new DropShadow(1, 0.785, 0, 1, 0, 0.4, 1, true);
 		// finishMessage.justify = Center;
-		finishMessage.position = new Vector(155, 65);
+		finishMessage.position = new Vector(155, 74);
 		if (timeState.gameplayClock < mission.goldTime) {
 			finishMessage.position.x = 110;
 		}
@@ -112,13 +112,14 @@ class EndGameGui extends GuiControl {
 		}
 
 		var leftColumn = new GuiMLText(domcasual32, mlFontLoader);
+		leftColumn.text.lineSpacing = 5;
 		leftColumn.text.textColor = 0x000000;
 		leftColumn.text.text = 'Qualify Time:<br/>Gold Time:<br/>Elapsed Time:<br/>Bonus Time:<br/><font face="Arial14"><br/></font>Best Times:<br/>';
 		for (i in 0...3) {
 			leftColumn.text.text += '${i + 1}. ${scoreData[i].name}<br/>';
 		}
 		leftColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
-		leftColumn.position = new Vector(108, 103);
+		leftColumn.position = new Vector(108, 113);
 		leftColumn.extent = new Vector(208, 50);
 		pg.addChild(leftColumn);
 
@@ -126,6 +127,7 @@ class EndGameGui extends GuiControl {
 		var bonusTime = Math.max(0, elapsedTime - timeState.gameplayClock);
 
 		var rightColumn = new GuiMLText(domcasual32, mlFontLoader);
+		rightColumn.text.lineSpacing = 5;
 		rightColumn.text.textColor = 0x000000;
 		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
 		for (i in 0...3) {
@@ -135,11 +137,12 @@ class EndGameGui extends GuiControl {
 				rightColumn.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
 		}
 		rightColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
-		rightColumn.position = new Vector(274, 103);
+		rightColumn.position = new Vector(274, 113);
 		rightColumn.extent = new Vector(208, 50);
 		pg.addChild(rightColumn);
 
 		var rightColumnGold = new GuiMLText(domcasual32, mlFontLoader);
+		rightColumnGold.text.lineSpacing = 5;
 		rightColumnGold.text.textColor = 0xFFFF00;
 		rightColumnGold.text.text = '<br/>${Util.formatTime(mission.goldTime)}<br/><br/><br/><font face="Arial14"><br/></font><br/>';
 		for (i in 0...3) {
@@ -149,7 +152,7 @@ class EndGameGui extends GuiControl {
 				rightColumnGold.text.text += '<br/>';
 		}
 		rightColumnGold.text.filter = new DropShadow(1.414, 0.785, 0x00000, 1, 0, 0.4, 1, true);
-		rightColumnGold.position = new Vector(274, 103);
+		rightColumnGold.position = new Vector(274, 113);
 		rightColumnGold.extent = new Vector(208, 50);
 		pg.addChild(rightColumnGold);
 

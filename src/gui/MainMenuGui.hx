@@ -10,16 +10,18 @@ class MainMenuGui extends GuiImage {
 	public function new() {
 		var img = ResourceLoader.getImage("data/ui/background.jpg");
 		super(img.resource.toTile());
-		var fontdata = ResourceLoader.getFileEntry("data/font/DomCasual32px.fnt");
-		var bfont = new BitmapFont(fontdata.entry);
-		@:privateAccess bfont.loader = ResourceLoader.loader;
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(26, MultiChannel);
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var versionText = new GuiText(bfont);
+		var versionText = new GuiText(domcasual32);
+
 		versionText.horizSizing = Center;
 		versionText.vertSizing = Top;
 		versionText.position = new Vector(289, 457);
