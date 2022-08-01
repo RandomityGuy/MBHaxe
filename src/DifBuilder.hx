@@ -1,5 +1,6 @@
 package src;
 
+import dif.Edge;
 import h3d.shader.pbr.PropsValues;
 import h3d.mat.Material;
 import src.ResourceLoader;
@@ -38,6 +39,24 @@ class DifBuilderTriangle {
 	public var uv3:Point2F;
 
 	public function new() {}
+}
+
+class TriangleEdge {
+	public var index1:Int;
+	public var index2:Int;
+
+	public var surfaceIndex:Int;
+
+	public function new(i1:Int, i2:Int, surfaceIndex:Int) {
+		if (i2 < i1) {
+			index1 = i2;
+			index2 = i1;
+		} else {
+			index1 = i1;
+			index2 = i2;
+		}
+		this.surfaceIndex = surfaceIndex;
+	}
 }
 
 typedef VertexBucket = {
@@ -106,6 +125,9 @@ class DifBuilder {
 
 		var vertexBuckets = new Map<Point3F, Array<VertexBucket>>();
 
+		var edges = [];
+		var colliderSurfaces = [];
+
 		for (i in 0...hulls.length) {
 			var hullTris = [];
 			var hull = hulls[i];
@@ -137,6 +159,10 @@ class DifBuilder {
 				colliderSurface.points = [];
 				colliderSurface.normals = [];
 				colliderSurface.indices = [];
+				colliderSurface.edgeData = [];
+				colliderSurface.edgeDots = [];
+				colliderSurface.originalIndices = [];
+				colliderSurface.originalSurfaceIndex = surfaceindex;
 
 				for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
 					var p1, p2, p3;
@@ -144,11 +170,25 @@ class DifBuilder {
 						p1 = points[geo.windings[k]];
 						p2 = points[geo.windings[k - 1]];
 						p3 = points[geo.windings[k - 2]];
+						colliderSurface.originalIndices.push(geo.windings[k]);
+						colliderSurface.originalIndices.push(geo.windings[k - 1]);
+						colliderSurface.originalIndices.push(geo.windings[k - 2]);
 					} else {
 						p1 = points[geo.windings[k - 2]];
 						p2 = points[geo.windings[k - 1]];
 						p3 = points[geo.windings[k]];
+						colliderSurface.originalIndices.push(geo.windings[k - 2]);
+						colliderSurface.originalIndices.push(geo.windings[k - 1]);
+						colliderSurface.originalIndices.push(geo.windings[k]);
 					}
+
+					var e1 = new TriangleEdge(geo.windings[k], geo.windings[k - 1], surfaceindex);
+					var e2 = new TriangleEdge(geo.windings[k - 1], geo.windings[k - 2], surfaceindex);
+					var e3 = new TriangleEdge(geo.windings[k], geo.windings[k - 2], surfaceindex);
+
+					edges.push(e1);
+					edges.push(e2);
+					edges.push(e3);
 
 					var texgen = geo.texGenEQs[surface.texGenIndex];
 
@@ -237,6 +277,157 @@ class DifBuilder {
 
 				colliderSurface.generateBoundingBox();
 				collider.addSurface(colliderSurface);
+				colliderSurfaces.push(colliderSurface);
+			}
+		}
+
+		var edgeMap:Map<Int, TriangleEdge> = new Map();
+		var internalEdges:Map<Int, Bool> = new Map();
+
+		var difEdges:Map<Int, Edge> = [];
+
+		for (edge in edges) {
+			var edgeHash = edge.index1 >= edge.index2 ? edge.index1 * edge.index1 + edge.index1 + edge.index2 : edge.index1 + edge.index2 * edge.index2;
+
+			if (internalEdges.exists(edgeHash))
+				continue;
+
+			if (edgeMap.exists(edgeHash)) {
+				if (edgeMap[edgeHash].surfaceIndex == edge.surfaceIndex) {
+					// Internal edge
+					internalEdges.set(edgeHash, true);
+					edgeMap.remove(edgeHash);
+					// trace('Removing internal edge: ${edge.index1} ${edge.index2}');
+				} else {
+					var difEdge = new Edge(edge.index1, edge.index2, edge.surfaceIndex, edgeMap[edgeHash].surfaceIndex);
+					difEdges.set(edgeHash, difEdge); // Literal edge
+				}
+			} else {
+				edgeMap.set(edgeHash, edge);
+			}
+		}
+
+		function hashEdge(i1:Int, i2:Int) {
+			return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
+		}
+
+		function getEdgeDot(edge:Edge) {
+			var edgeSurface0 = edge.surfaceIndex0;
+			var surface0 = geo.surfaces[edgeSurface0];
+
+			var planeindex = surface0.planeIndex;
+
+			var planeFlipped = (planeindex & 0x8000) == 0x8000;
+			if (planeFlipped)
+				planeindex &= ~0x8000;
+
+			var plane = geo.planes[planeindex];
+			var normal0 = geo.normals[plane.normalIndex];
+
+			if (planeFlipped)
+				normal0 = normal0.scalar(-1);
+
+			var edgeSurface1 = edge.surfaceIndex1;
+			var surface1 = geo.surfaces[edgeSurface1];
+
+			planeindex = surface1.planeIndex;
+
+			planeFlipped = (planeindex & 0x8000) == 0x8000;
+			if (planeFlipped)
+				planeindex &= ~0x8000;
+
+			plane = geo.planes[planeindex];
+			var normal1 = geo.normals[plane.normalIndex];
+
+			if (planeFlipped)
+				normal1 = normal1.scalar(-1);
+
+			var dot = normal0.dot(normal1);
+
+			return dot;
+		}
+
+		function getEdgeNormal(edge:Edge) {
+			var edgeSurface0 = edge.surfaceIndex0;
+			var surface0 = geo.surfaces[edgeSurface0];
+
+			var planeindex = surface0.planeIndex;
+
+			var planeFlipped = (planeindex & 0x8000) == 0x8000;
+			if (planeFlipped)
+				planeindex &= ~0x8000;
+
+			var plane = geo.planes[planeindex];
+			var normal0 = geo.normals[plane.normalIndex];
+
+			if (planeFlipped)
+				normal0 = normal0.scalar(-1);
+
+			var edgeSurface1 = edge.surfaceIndex1;
+			var surface1 = geo.surfaces[edgeSurface1];
+
+			planeindex = surface1.planeIndex;
+
+			planeFlipped = (planeindex & 0x8000) == 0x8000;
+			if (planeFlipped)
+				planeindex &= ~0x8000;
+
+			plane = geo.planes[planeindex];
+			var normal1 = geo.normals[plane.normalIndex];
+
+			if (planeFlipped)
+				normal1 = normal1.scalar(-1);
+
+			var norm = normal0.add(normal1).scalarDiv(2).normalized();
+
+			var vec = new Vector(norm.x, norm.y, norm.z);
+
+			return vec;
+		}
+
+		for (colliderSurface in colliderSurfaces) {
+			var i = 0;
+			while (i < colliderSurface.indices.length) {
+				var e1e2 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 1]);
+				var e2e3 = hashEdge(colliderSurface.originalIndices[i + 1], colliderSurface.originalIndices[i + 2]);
+				var e1e3 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 2]);
+
+				var edgeData = 0;
+				if (difEdges.exists(e1e2)) {
+					if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
+						edgeData |= 1;
+					}
+					colliderSurface.edgeDots.push(getEdgeDot(difEdges[e1e2]));
+					// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e2]));
+				} else {
+					colliderSurface.edgeDots.push(0);
+					// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
+				}
+				if (difEdges.exists(e2e3)) {
+					if (getEdgeDot(difEdges[e2e3]) < Math.cos(Math.PI / 12)) {
+						edgeData |= 2;
+					}
+					colliderSurface.edgeDots.push(getEdgeDot(difEdges[e2e3]));
+					// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e2e3]));
+					// colliderSurface.edgeDots.push(dot);
+				} else {
+					colliderSurface.edgeDots.push(0);
+					// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
+				}
+				if (difEdges.exists(e1e3)) {
+					if (getEdgeDot(difEdges[e1e3]) < Math.cos(Math.PI / 12)) {
+						edgeData |= 4;
+					}
+					colliderSurface.edgeDots.push(getEdgeDot(difEdges[e1e3]));
+					// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e3]));
+					// colliderSurface.edgeDots.push(dot);
+				} else {
+					colliderSurface.edgeDots.push(0);
+					// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
+				}
+
+				colliderSurface.edgeData.push(edgeData);
+				i += 3;
 			}
 		}
 
@@ -272,6 +463,7 @@ class DifBuilder {
 			}
 		}
 
+		collider.difEdgeMap = difEdges;
 		collider.generateBoundingBox();
 		itr.collider = collider;
 

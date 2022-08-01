@@ -32,6 +32,8 @@ class CollisionEntity implements IOctreeObject {
 
 	public var userData:Int;
 
+	public var difEdgeMap:Map<Int, dif.Edge>;
+
 	public function new(go:GameObject) {
 		this.go = go;
 		this.octree = new Octree();
@@ -116,6 +118,10 @@ class CollisionEntity implements IOctreeObject {
 			return new Vector(pt.x, pt.y, pt.z);
 		}
 
+		function hashEdge(i1:Int, i2:Int) {
+			return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
+		}
+
 		var contacts = [];
 
 		for (obj in surfaces) {
@@ -130,9 +136,28 @@ class CollisionEntity implements IOctreeObject {
 				var v = surface.points[surface.indices[i + 1]].transformed(tform);
 				var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
 
+				// var e1e2 = hashEdge(surface.originalIndices[i], surface.originalIndices[i + 1]);
+				// var e2e3 = hashEdge(surface.originalIndices[i + 1], surface.originalIndices[i + 2]);
+				// var e1e3 = hashEdge(surface.originalIndices[i], surface.originalIndices[i + 3]);
+
+				// var edgeData = 0;
+				// if (this.difEdgeMap.exists(e1e2)) {
+				// 	edgeData |= 1;
+				// }
+				// if (this.difEdgeMap.exists(e2e3)) {
+				// 	edgeData |= 2;
+				// }
+				// if (this.difEdgeMap.exists(e1e3)) {
+				// 	edgeData |= 4;
+				// }
+
+				var edgeData = surface.edgeData[Math.floor(i / 3)];
+
+				var edgeDots = surface.edgeDots.slice(Math.floor(i / 3), Math.floor(i / 3) + 3);
+
 				var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
 
-				var res = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius);
+				var res = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius, edgeData, edgeDots);
 				var closest = res.point;
 				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
 				if (closest != null) {
@@ -144,23 +169,24 @@ class CollisionEntity implements IOctreeObject {
 							normal.normalize();
 
 							// We find the normal that is closest to the surface normal, sort of fixes weird edge cases of when colliding with
-							var testDot = normal.dot(surfacenormal);
-							if (testDot > bestDot) {
-								bestDot = testDot;
+							// var testDot = normal.dot(surfacenormal);
+							// if (testDot > bestDot) {
+							// 	bestDot = testDot;
 
-								var cinfo = new CollisionInfo();
-								cinfo.normal = normal;
-								cinfo.point = closest;
-								// cinfo.collider = this;
-								cinfo.velocity = this.velocity.clone();
-								cinfo.contactDistance = Math.sqrt(contactDist);
-								cinfo.otherObject = this.go;
-								// cinfo.penetration = radius - (position.sub(closest).dot(normal));
-								cinfo.restitution = surface.restitution;
-								cinfo.force = surface.force;
-								cinfo.friction = surface.friction;
-								surfaceBestContact = cinfo;
-							}
+							var cinfo = new CollisionInfo();
+							cinfo.normal = normal;
+							cinfo.point = closest;
+							// cinfo.collider = this;
+							cinfo.velocity = this.velocity.clone();
+							cinfo.contactDistance = Math.sqrt(contactDist);
+							cinfo.otherObject = this.go;
+							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
+							cinfo.restitution = surface.restitution;
+							cinfo.force = surface.force;
+							cinfo.friction = surface.friction;
+							contacts.push(cinfo);
+							// surfaceBestContact = cinfo;
+							// }
 						}
 					}
 				}
@@ -168,8 +194,8 @@ class CollisionEntity implements IOctreeObject {
 				i += 3;
 			}
 
-			if (surfaceBestContact != null)
-				contacts.push(surfaceBestContact);
+			// if (surfaceBestContact != null)
+			// contacts.push(surfaceBestContact);
 		}
 
 		return contacts;

@@ -19,6 +19,13 @@ class CollisionSurface implements IOctreeObject {
 	public var restitution:Float = 1;
 	public var force:Float = 0;
 
+	public var edgeData:Array<Int>;
+
+	public var edgeDots:Array<Float>;
+	public var originalIndices:Array<Int>;
+
+	public var originalSurfaceIndex:Int;
+
 	public function new() {}
 
 	public function getElementType() {

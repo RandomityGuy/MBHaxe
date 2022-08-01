@@ -1,5 +1,6 @@
 package collision;
 
+import haxe.Exception;
 import dif.math.Point3F;
 import dif.math.PlaneF;
 import h3d.col.Plane;
@@ -55,7 +56,12 @@ class Collision {
 		return p;
 	}
 
-	public static function IntersectTriangleSphere(v0:Vector, v1:Vector, v2:Vector, normal:Vector, center:Vector, radius:Float) {
+	// EdgeData is bitfield
+	// 001b: v0v1 is edge
+	// 010b: v1v2 is edge
+	// 100b: v0v2 is edge
+	public static function IntersectTriangleSphere(v0:Vector, v1:Vector, v2:Vector, normal:Vector, center:Vector, radius:Float, edgeData:Int,
+			edgeDots:Array<Float>) {
 		var radiusSq = radius * radius;
 
 		var res:ITSResult = {
@@ -94,19 +100,49 @@ class Collision {
 		var r2 = ClosestPointLine(v1, v2, center);
 		var r3 = ClosestPointLine(v2, v0, center);
 
+		var chosenEdge = 0; // Bitfield
+
 		var chosenPt:Vector;
-		if (r1.distanceSq(center) < r2.distanceSq(center))
+		if (r1.distanceSq(center) < r2.distanceSq(center)) {
 			chosenPt = r1;
-		else
+			chosenEdge = 1;
+		} else {
 			chosenPt = r2;
+			chosenEdge = 2;
+		}
 		if (chosenPt.distanceSq(center) < r3.distanceSq(center))
 			res.point = chosenPt;
-		else
+		else {
+			chosenEdge = 4;
 			res.point = r3;
+		}
 
 		if (res.point.distanceSq(center) <= radiusSq) {
 			res.result = true;
-			res.normal = center.sub(res.point).normalized();
+
+			if (chosenEdge & edgeData > 0) {
+				res.normal = center.sub(res.point).normalized();
+			} else { // We hit an internal edge
+				chosenEdge -= 1;
+				if (chosenEdge > 2)
+					chosenEdge--;
+				// if (edgeNormals[chosenEdge].length() < 0.5) {
+				//	res.normal = center.sub(res.point).normalized();
+				// } else
+				var edgeDotAng = Math.acos(edgeDots[chosenEdge]);
+				if (edgeDotAng < Math.PI / 12) {
+					if (edgeDotAng == 0) {
+						res.normal = center.sub(res.point).normalized();
+					} else {
+						res.normal = normal; // edgeNormals[chosenEdge];
+					}
+				} else {
+					res.result = false;
+					res.normal = center.sub(res.point).normalized();
+				}
+				// trace("Internal Edge Collision");
+			}
+
 			return res;
 		}
 
@@ -131,7 +167,6 @@ class Collision {
 		// 	res.normal = center.sub(r3).normalized();
 		// 	return res;
 		// }
-
 		// Check points
 		// if (center.sub(v0).lengthSq() < radiusSq) {
 		// 	res.result = true;
@@ -144,17 +179,14 @@ class Collision {
 		// 	res.result = true;
 		// 	res.point = v1;
 		// 	res.normal = center.sub(v1).normalized();
-
 		// 	return res;
 		// }
 		// if (center.sub(v2).lengthSq() < radiusSq) {
 		// 	res.result = true;
 		// 	res.point = v2;
 		// 	res.normal = center.sub(v2).normalized();
-
 		// 	return res;
 		// }
-
 		// Check plane
 		// var p = PlaneF.ThreePoints(toDifPoint(v0), toDifPoint(v1), toDifPoint(v2));
 		return res;
@@ -291,7 +323,8 @@ class Collision {
 		return !(u.dot(w) < 0);
 	}
 
-	public static function IntersectTriangleCapsule(start:Vector, end:Vector, radius:Float, p1:Vector, p2:Vector, p3:Vector, normal:Vector) {
+	public static function IntersectTriangleCapsule(start:Vector, end:Vector, radius:Float, p1:Vector, p2:Vector, p3:Vector, normal:Vector, edgeData:Int,
+			edgeDots:Array<Float>) {
 		var dir = end.sub(start);
 		var d = -(p1.dot(normal));
 		var t = -(start.dot(normal) - d) / dir.dot(normal);
@@ -300,7 +333,7 @@ class Collision {
 		if (t < 0)
 			t = 0;
 		var tracePoint = start.add(dir.multiply(t));
-		return IntersectTriangleSphere(p1, p2, p3, normal, tracePoint, radius);
+		return IntersectTriangleSphere(p1, p2, p3, normal, tracePoint, radius, edgeData, edgeDots);
 	}
 
 	private static function GetLowestRoot(a:Float, b:Float, c:Float, max:Float):Null<Float> {
