@@ -29,7 +29,7 @@ class Main extends hxd.App {
 		hl.UI.closeConsole();
 		#end
 		#if js
-		var zoomRatio = js.Browser.window.devicePixelRatio;
+		var zoomRatio = js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768; // js.Browser.window.devicePixelRatio;
 		s2d.scaleMode = Zoom(zoomRatio);
 		#end
 		ResourceLoader.init(s2d, () -> {

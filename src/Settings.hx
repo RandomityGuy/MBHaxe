@@ -88,6 +88,8 @@ class Settings {
 
 	public static var uiScale = 1.0;
 
+	public static var zoomRatio = 1.0;
+
 	public static function applySettings() {
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
@@ -203,15 +205,17 @@ class Settings {
 			var wnd = Window.getInstance();
 			var zoomRatio = 1.0;
 			#if js
-			zoomRatio = js.Browser.window.devicePixelRatio;
+			zoomRatio = js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 600; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
+			trace("zoomRatio: " + zoomRatio);
+			Settings.zoomRatio = zoomRatio;
 			#end
 			#if hl
 			Settings.optionsSettings.screenWidth = cast wnd.width / zoomRatio;
 			Settings.optionsSettings.screenHeight = cast wnd.height / zoomRatio;
 			#end
 			#if js
-			Settings.optionsSettings.screenWidth = cast js.Browser.window.innerWidth;
-			Settings.optionsSettings.screenHeight = cast js.Browser.window.innerHeight;
+			Settings.optionsSettings.screenWidth = cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio; // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
+			Settings.optionsSettings.screenHeight = cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio; // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
 			#end
 
 			MarbleGame.canvas.scene2d.scaleMode = Zoom(zoomRatio);
