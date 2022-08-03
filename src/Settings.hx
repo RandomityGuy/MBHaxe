@@ -1,5 +1,6 @@
 package src;
 
+import haxe.ds.Option;
 import gui.Canvas;
 import src.AudioManager;
 import hxd.Key;
@@ -11,6 +12,7 @@ import sys.io.File;
 #end
 import src.ResourceLoader;
 import haxe.Json;
+import src.Util;
 
 typedef Score = {
 	var name:String;
@@ -89,6 +91,8 @@ class Settings {
 	public static var uiScale = 1.0;
 
 	public static var zoomRatio = 1.0;
+
+	public static var isTouch:Option<Bool> = Option.None;
 
 	public static function applySettings() {
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
@@ -205,8 +209,7 @@ class Settings {
 			var wnd = Window.getInstance();
 			var zoomRatio = 1.0;
 			#if js
-			zoomRatio = js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 600; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
-			trace("zoomRatio: " + zoomRatio);
+			var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 600 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
 			Settings.zoomRatio = zoomRatio;
 			#end
 			#if hl
@@ -214,8 +217,12 @@ class Settings {
 			Settings.optionsSettings.screenHeight = cast wnd.height / zoomRatio;
 			#end
 			#if js
-			Settings.optionsSettings.screenWidth = cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio; // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
-			Settings.optionsSettings.screenHeight = cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio; // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
+			Settings.optionsSettings.screenWidth = cast js.Browser.window.screen.width * js.Browser.window.devicePixelRatio; // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
+			Settings.optionsSettings.screenHeight = cast js.Browser.window.screen.height * js.Browser.window.devicePixelRatio; // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
+
+			var canvasElement = js.Browser.document.getElementById("webgl");
+			canvasElement.style.width = "100%";
+			canvasElement.style.height = "100%";
 			#end
 
 			MarbleGame.canvas.scene2d.scaleMode = Zoom(zoomRatio);

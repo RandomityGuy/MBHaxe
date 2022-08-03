@@ -106,7 +106,7 @@ class CameraController extends Object {
 		#end
 	}
 
-	function orbit(mouseX:Float, mouseY:Float) {
+	public function orbit(mouseX:Float, mouseY:Float) {
 		var scaleFactor = 1.0;
 		#if js
 		scaleFactor = 1 / js.Browser.window.devicePixelRatio;

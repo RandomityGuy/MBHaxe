@@ -1,5 +1,6 @@
 package src;
 
+import touch.TouchInput;
 import src.ResourceLoader;
 import src.AudioManager;
 import gui.PlayMissionGui;
@@ -10,7 +11,9 @@ import h3d.Vector;
 import gui.GuiControl.MouseState;
 import hxd.Window;
 import src.MarbleWorld;
+import src.JSPlatform;
 import gui.Canvas;
+import src.Util;
 
 @:publicFields
 class MarbleGame {
@@ -27,14 +30,20 @@ class MarbleGame {
 
 	var exitGameDlg:ExitGameDlg;
 
+	var touchInput:TouchInput;
+
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
 		canvas = new Canvas(scene2d, cast this);
 		this.scene = scene;
 		this.scene2d = scene2d;
 		MarbleGame.instance = this;
+		this.touchInput = new TouchInput();
 
 		#if js
 		// Pause shit
+		if (Util.isTouchDevice())
+			this.touchInput.registerTouchInput();
+
 		js.Browser.document.addEventListener('pointerlockchange', () -> {
 			if (!paused && world != null) {
 				if (world.finishTime == null && world._ready) {
@@ -115,6 +124,7 @@ class MarbleGame {
 				e.returnValue = '';
 			}
 		});
+		JSPlatform.initFullscreenEnforcer();
 		#end
 	}
 
@@ -124,6 +134,7 @@ class MarbleGame {
 				world = null;
 				return;
 			}
+			touchInput.update();
 			if (!paused) {
 				world.update(dt);
 			}

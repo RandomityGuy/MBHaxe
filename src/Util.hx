@@ -6,6 +6,7 @@ import h2d.Tile;
 import h3d.mat.Texture;
 import hxd.BitmapData;
 import h3d.Vector;
+import src.Settings;
 
 class Util {
 	public static function adjustedMod(a:Float, n:Float) {
@@ -315,5 +316,51 @@ class Util {
 		var vresult_2 = m._31 * v0 + m._23 * v1 + m._33 * v2;
 
 		v.set(vresult_0, vresult_1, vresult_2);
+	}
+
+	public static function isTouchDevice() {
+		#if js
+		switch (Settings.isTouch) {
+			case None:
+				Settings.isTouch = Some(js.lib.Object.keys(js.Browser.window).contains('ontouchstart'));
+				return js.lib.Object.keys(js.Browser.window).contains('ontouchstart');
+			case Some(val):
+				return val;
+		}
+		// Let's see if this suffices for now actually (this doesn't match my touchscreen laptop)
+		#end
+		#if hl
+		switch (Settings.isTouch) {
+			case None:
+				Settings.isTouch = Some(false);
+				return false;
+			case Some(val):
+				return val;
+		}
+		return false;
+		#end
+	}
+
+	public static function isSafari() {
+		#if js
+		var reg = ~/^((?!chrome|android).)*safari/;
+		return reg.match(js.Browser.navigator.userAgent);
+		#end
+		#if hl
+		return false;
+		#end
+	}
+
+	public static function isInFullscreen() {
+		#if js
+		return (js.Browser.window.innerHeight == js.Browser.window.screen.height
+			|| (js.Browser.window.screen.orientation.type == js.html.OrientationType.PORTRAIT_PRIMARY
+				|| js.Browser.window.screen.orientation.type == js.html.OrientationType.PORTRAIT_SECONDARY)
+			&& js.Browser.window.innerHeight == js.Browser.window.screen.width)
+			|| js.Browser.document.fullscreenElement != null;
+		#end
+		#if hl
+		return Settings.optionsSettings.isFullScreen;
+		#end
 	}
 }

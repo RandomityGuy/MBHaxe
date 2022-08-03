@@ -1,5 +1,6 @@
 package;
 
+import src.Util;
 import src.ResourceLoader;
 #if js
 import fs.ManifestFileSystem;
@@ -29,7 +30,7 @@ class Main extends hxd.App {
 		hl.UI.closeConsole();
 		#end
 		#if js
-		var zoomRatio = js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768; // js.Browser.window.devicePixelRatio;
+		var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 600 : js.Browser.window.devicePixelRatio; // js.Browser.window.devicePixelRatio;
 		s2d.scaleMode = Zoom(zoomRatio);
 		#end
 		ResourceLoader.init(s2d, () -> {
