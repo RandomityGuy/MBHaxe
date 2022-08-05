@@ -20,20 +20,25 @@ class CameraInput {
 					doing = true;
 				}
 			}
-		} else {
+		}
+		if (doing) {
 			// Get our identifier
 			for (touch in touchState.changedTouches) {
-				if (touch.identifier == this.identifier && touch.state == Release) {
-					doing = false;
-					return; // lol
-				}
-				if (touch.identifier == this.identifier && touch.state == Move) {
-					MarbleGame.instance.world.marble.camera.orbit(touch.deltaPosition.x, touch.deltaPosition.y);
-					return;
+				if (touch.identifier == this.identifier) {
+					switch (touch.state) {
+						case Release:
+							doing = false;
+							return;
+
+						case Move:
+							MarbleGame.instance.world.marble.camera.orbit(touch.deltaPosition.x, touch.deltaPosition.y);
+							return;
+
+						case _:
+							return;
+					}
 				}
 			}
-			// Could not find
-			doing = false;
 		}
 	}
 }

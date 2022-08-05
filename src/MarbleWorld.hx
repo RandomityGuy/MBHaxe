@@ -1037,12 +1037,14 @@ class MarbleWorld extends Scheduler {
 				return false;
 		this.marble.heldPowerup = powerUp;
 		this.playGui.setPowerupImage(powerUp.identifier);
+		MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
 		return true;
 	}
 
 	public function deselectPowerUp() {
 		this.marble.heldPowerup = null;
 		this.playGui.setPowerupImage("");
+		MarbleGame.instance.touchInput.powerupButton.setEnabled(false);
 	}
 
 	/** Get the current interpolated orientation quaternion. */

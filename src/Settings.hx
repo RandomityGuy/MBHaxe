@@ -217,8 +217,8 @@ class Settings {
 			Settings.optionsSettings.screenHeight = cast wnd.height / zoomRatio;
 			#end
 			#if js
-			Settings.optionsSettings.screenWidth = cast js.Browser.window.screen.width * js.Browser.window.devicePixelRatio; // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
-			Settings.optionsSettings.screenHeight = cast js.Browser.window.screen.height * js.Browser.window.devicePixelRatio; // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
+			Settings.optionsSettings.screenWidth = cast js.Browser.window.screen.width; // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
+			Settings.optionsSettings.screenHeight = cast js.Browser.window.screen.height; // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
 
 			var canvasElement = js.Browser.document.getElementById("webgl");
 			canvasElement.style.width = "100%";

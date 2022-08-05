@@ -1,7 +1,9 @@
 package touch;
 
+import gui.GuiControl;
 import src.MarbleWorld;
 import h3d.Vector;
+import src.Settings;
 
 enum TouchState {
 	Pressed;
@@ -32,14 +34,22 @@ class TouchEventState {
 }
 
 class TouchInput {
-	public var cameraInput:CameraInput;
+	var cameraInput:CameraInput;
+
+	public var jumpButton:JumpButton;
+
+	public var powerupButton:PowerupButton;
 
 	public var currentTouchState:TouchEventState;
 
 	public var previousTouchState:TouchEventState;
 
+	var touches:Map<Int, Touch> = [];
+
 	public function new() {
 		this.cameraInput = new CameraInput();
+		this.jumpButton = new JumpButton();
+		this.powerupButton = new PowerupButton();
 		this.currentTouchState = new TouchEventState();
 		this.previousTouchState = new TouchEventState();
 	}
@@ -47,28 +57,33 @@ class TouchInput {
 	// Registers the callbacks to the native stuff
 	public function registerTouchInput() {
 		#if js
-		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+		var pointercontainer = js.Browser.document.querySelector("#webgl");
 		pointercontainer.addEventListener('touchstart', (e:js.html.TouchEvent) -> {
 			for (touch in e.changedTouches) {
 				var t = new Touch(Pressed, new Vector(touch.clientX, touch.clientY), new Vector(0, 0), touch.identifier);
 				currentTouchState.changedTouches.push(t);
+				touches.set(touch.identifier, t);
+				// trace("Touch Start");
 			}
 		});
 		pointercontainer.addEventListener('touchmove', (e:js.html.TouchEvent) -> {
 			for (touch in e.changedTouches) {
-				var prevt = previousTouchState.changedTouches.filter(x -> x.identifier == touch.identifier);
+				var prevt = touches.get(touch.identifier); // previousTouchState.changedTouches.filter(x -> x.identifier == touch.identifier);
 				var prevDelta = new Vector(0, 0);
-				if (prevt.length != 0) {
-					prevDelta = new Vector(touch.clientX, touch.clientY).sub(prevt[0].position);
+				if (prevt != null) {
+					prevDelta = new Vector(touch.clientX, touch.clientY).sub(prevt.position);
 				}
 				var t = new Touch(Move, new Vector(touch.clientX, touch.clientY), prevDelta, touch.identifier);
 				currentTouchState.changedTouches.push(t);
+				// trace("Touch Move");
 			}
 		});
 		pointercontainer.addEventListener('touchend', (e:js.html.TouchEvent) -> {
 			for (touch in e.changedTouches) {
 				var t = new Touch(Release, new Vector(touch.clientX, touch.clientY), new Vector(0, 0), touch.identifier);
 				currentTouchState.changedTouches.push(t);
+				touches.remove(touch.identifier);
+				// trace("Touch End");
 			}
 		});
 		#end
@@ -78,5 +93,15 @@ class TouchInput {
 		this.cameraInput.update(currentTouchState);
 		previousTouchState = currentTouchState;
 		currentTouchState = new TouchEventState();
+	}
+
+	public function showControls(parentGui:GuiControl) {
+		jumpButton.add(parentGui);
+		powerupButton.add(parentGui);
+	}
+
+	public function hideControls(parentGui:GuiControl) {
+		jumpButton.remove(parentGui);
+		powerupButton.remove(parentGui);
 	}
 }

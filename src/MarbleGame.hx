@@ -144,8 +144,9 @@ class MarbleGame {
 				handlePauseGame();
 				#end
 				#if js
-				if (paused)
+				if (paused) {
 					paused = false;
+				}
 				handlePauseGame();
 				#end
 			}

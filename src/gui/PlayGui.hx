@@ -130,6 +130,8 @@ class PlayGui {
 		initPowerupBox();
 		initTexts();
 
+		MarbleGame.instance.touchInput.showControls(this.playGuiCtrl);
+
 		playGuiCtrl.render(scene2d);
 
 		resizeEv = () -> {

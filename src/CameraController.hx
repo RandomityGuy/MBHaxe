@@ -106,7 +106,7 @@ class CameraController extends Object {
 		#end
 	}
 
-	public function orbit(mouseX:Float, mouseY:Float) {
+	public function orbit(mouseX:Float, mouseY:Float, isTouch:Bool = false) {
 		var scaleFactor = 1.0;
 		#if js
 		scaleFactor = 1 / js.Browser.window.devicePixelRatio;
@@ -118,7 +118,8 @@ class CameraController extends Object {
 			deltaposY = 0;
 		}
 
-		var factor = Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
+		var factor = isTouch ? Util.lerp(1 / 1500, 1 / 50,
+			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
 		CameraPitch += deltaposY * factor;
 		CameraYaw += deltaposX * factor;

@@ -1344,10 +1344,10 @@ class Marble extends GameObject {
 			if (Key.isDown(Settings.controlsSettings.right)) {
 				move.d.y -= 1;
 			}
-			if (Key.isDown(Settings.controlsSettings.jump)) {
+			if (Key.isDown(Settings.controlsSettings.jump) || MarbleGame.instance.touchInput.jumpButton.pressed) {
 				move.jump = true;
 			}
-			if (Key.isDown(Settings.controlsSettings.powerup)) {
+			if (Key.isDown(Settings.controlsSettings.powerup) || MarbleGame.instance.touchInput.powerupButton.pressed) {
 				move.powerup = true;
 			}
 		}
