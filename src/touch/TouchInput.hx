@@ -36,6 +36,8 @@ class TouchEventState {
 class TouchInput {
 	var cameraInput:CameraInput;
 
+	public var movementInput:MovementInput;
+
 	public var jumpButton:JumpButton;
 
 	public var powerupButton:PowerupButton;
@@ -48,6 +50,7 @@ class TouchInput {
 
 	public function new() {
 		this.cameraInput = new CameraInput();
+		this.movementInput = new MovementInput();
 		this.jumpButton = new JumpButton();
 		this.powerupButton = new PowerupButton();
 		this.currentTouchState = new TouchEventState();
@@ -75,6 +78,7 @@ class TouchInput {
 				}
 				var t = new Touch(Move, new Vector(touch.clientX, touch.clientY), prevDelta, touch.identifier);
 				currentTouchState.changedTouches.push(t);
+				touches.set(touch.identifier, t);
 				// trace("Touch Move");
 			}
 		});
@@ -98,10 +102,12 @@ class TouchInput {
 	public function showControls(parentGui:GuiControl) {
 		jumpButton.add(parentGui);
 		powerupButton.add(parentGui);
+		movementInput.add(parentGui);
 	}
 
 	public function hideControls(parentGui:GuiControl) {
 		jumpButton.remove(parentGui);
 		powerupButton.remove(parentGui);
+		movementInput.remove(parentGui);
 	}
 }

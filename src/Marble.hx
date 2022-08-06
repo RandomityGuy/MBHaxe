@@ -1350,6 +1350,10 @@ class Marble extends GameObject {
 			if (Key.isDown(Settings.controlsSettings.powerup) || MarbleGame.instance.touchInput.powerupButton.pressed) {
 				move.powerup = true;
 			}
+			if (MarbleGame.instance.touchInput.movementInput.pressed) {
+				move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
+				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
+			}
 		}
 
 		playedSounds = [];

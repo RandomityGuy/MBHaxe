@@ -31,7 +31,11 @@ class CameraInput {
 							return;
 
 						case Move:
-							MarbleGame.instance.world.marble.camera.orbit(touch.deltaPosition.x, touch.deltaPosition.y);
+							var scaleFactor = 1.0;
+							#if js
+							scaleFactor = js.Browser.window.devicePixelRatio / Settings.zoomRatio;
+							#end
+							MarbleGame.instance.world.marble.camera.orbit(touch.deltaPosition.x / scaleFactor, touch.deltaPosition.y / scaleFactor, true);
 							return;
 
 						case _:
