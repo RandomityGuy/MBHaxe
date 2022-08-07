@@ -59,8 +59,13 @@ class TouchButton {
 			} else {
 				g.alpha = 0.5;
 			}
+			this.identifier = e.touchId;
 		}
 		this.collider.onRelease = (e) -> {
+			if (e.touchId != this.identifier)
+				return;
+
+			this.identifier = -1;
 			onRelease();
 
 			if (this.enabled) {
@@ -103,11 +108,19 @@ class TouchButton {
 		}
 	}
 
+	public function setVisible(enabled:Bool) {
+		this.guiElement.graphics.visible = enabled;
+	}
+
 	public dynamic function onClick() {
 		pressed = true;
 	}
 
 	public dynamic function onRelease() {
 		pressed = false;
+	}
+
+	public function dispose() {
+		this.guiElement.dispose();
 	}
 }

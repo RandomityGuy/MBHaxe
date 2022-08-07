@@ -56,34 +56,43 @@ class MovementInput {
 
 				this.touchId = e.touchId;
 
-				var xPos = Util.clamp(e.relX - this.area.graphics.x, 50, 250);
-				var yPos = Util.clamp(e.relY - this.area.graphics.x, 50, 250);
+				// var xPos = Util.clamp(e.relX - this.area.graphics.x, 50, 250);
+				// var yPos = Util.clamp(e.relY - this.area.graphics.x, 50, 250);
 
-				this.value.x = (xPos - 150) / 150;
-				this.value.y = (yPos - 150) / 150;
+				// this.value.x = (xPos - 150) / 100;
+				// this.value.y = (yPos - 150) / 100;
 
-				this.joystick.graphics.setPosition(this.area.graphics.x + xPos, this.area.graphics.y + yPos);
+				// this.joystick.graphics.setPosition(this.area.graphics.x + xPos, this.area.graphics.y + yPos);
+
+				var stopped = false;
 
 				collider.startCapture((emove) -> {
+					if (e.touchId != emove.touchId) {
+						emove.propagate = true;
+						return;
+					}
 					if (emove.kind == EMove) {
 						var xPos = Util.clamp(emove.relX, 50, 250);
 						var yPos = Util.clamp(emove.relY, 50, 250);
 
-						this.value.x = (xPos - 150) / 150;
-						this.value.y = (yPos - 150) / 150;
+						this.value.x = (xPos - 150) / 100;
+						this.value.y = (yPos - 150) / 100;
 
 						this.joystick.graphics.setPosition(this.area.graphics.x + xPos, this.area.graphics.y + yPos);
 					}
 					if (emove.kind == ERelease || emove.kind == EReleaseOutside) {
+						stopped = true;
 						collider.stopCapture();
 					}
 				}, () -> {
-					this.area.graphics.alpha = 0;
-					this.joystick.graphics.alpha = 0;
+					if (stopped) {
+						this.area.graphics.alpha = 0;
+						this.joystick.graphics.alpha = 0;
 
-					pressed = false;
+						pressed = false;
 
-					this.value = new Vector(0, 0);
+						this.value = new Vector(0, 0);
+					}
 				}, e.touchId);
 			}
 		}
@@ -100,5 +109,13 @@ class MovementInput {
 	public function remove(parentGui:GuiControl) {
 		parentGui.removeChild(this.area);
 		added = false;
+	}
+
+	public function setVisible(enabled:Bool) {
+		this.area.graphics.visible = enabled;
+	}
+
+	public function dispose() {
+		this.area.dispose();
 	}
 }

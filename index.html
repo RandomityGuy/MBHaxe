@@ -72,47 +72,6 @@
     <div id="enter-fullscreen" class="hidden"></div>
     <div id="pointercontainer" tabindex="0"></div>
     <script type="text/javascript" src="marblegame.js"></script>
-    <script>
-        let dislikesFullscreen = false;
-        const fullscreenEnforcer = document.querySelector('#fullscreen-enforcer');
-
-        fullscreenEnforcer.addEventListener('click', () => {
-            document.documentElement.requestFullscreen();
-        });
-
-        const enterFullscreenButton = document.querySelector('#enter-fullscreen');
-        enterFullscreenButton.addEventListener('click', () => {
-            document.documentElement.requestFullscreen();
-            dislikesFullscreen = false; // They changed their mind, yay
-        });
-
-        let fullscreenButtonVisibility = true;
-
-        const setEnterFullscreenButtonVisibility = (state) => {
-            fullscreenButtonVisibility = state;
-
-            let isInFullscreen = (/*window.innerWidth === screen.width && */window.innerHeight === screen.height || (screen.orientation?.type?.includes('portrait') && window.innerHeight === screen.width)) || !!document.fullscreenElement;
-            if (state && !isInFullscreen) enterFullscreenButton.classList.remove('hidden');
-            else enterFullscreenButton.classList.add('hidden');
-        };
-
-        // Periodically, check if the mobile user has left fullscreen and if so, remind them to re-enter it.
-        let lastImmunityTime = -Infinity;
-        setInterval(() => {
-            if (document.activeElement?.tagName === 'INPUT') lastImmunityTime = performance.now();
-
-            let isInFullscreen = (/*window.innerWidth === screen.width && */window.innerHeight === screen.height || (screen.orientation?.type?.includes('portrait') && window.innerHeight === screen.width)) || !!document.fullscreenElement;
-            if (isInFullscreen) {
-                // They're in fullscreen, hide the overlay
-                fullscreenEnforcer.classList.add('hidden');
-            } else if (!dislikesFullscreen && document.activeElement?.tagName !== 'INPUT' && performance.now() - lastImmunityTime > 666) {
-                // They're not in fullscreen, show the overlay
-                fullscreenEnforcer.classList.remove('hidden');
-            }
-
-            setEnterFullscreenButtonVisibility(fullscreenButtonVisibility);
-        }, 250);
-    </script>
 </body>
 
 </html>

@@ -42,6 +42,8 @@ class TouchInput {
 
 	public var powerupButton:PowerupButton;
 
+	public var pauseButton:PauseButton;
+
 	public var currentTouchState:TouchEventState;
 
 	public var previousTouchState:TouchEventState;
@@ -53,6 +55,7 @@ class TouchInput {
 		this.movementInput = new MovementInput();
 		this.jumpButton = new JumpButton();
 		this.powerupButton = new PowerupButton();
+		this.pauseButton = new PauseButton();
 		this.currentTouchState = new TouchEventState();
 		this.previousTouchState = new TouchEventState();
 	}
@@ -94,20 +97,43 @@ class TouchInput {
 	}
 
 	public function update() {
-		this.cameraInput.update(currentTouchState);
+		this.cameraInput.update(currentTouchState, jumpButton.pressed || powerupButton.pressed);
 		previousTouchState = currentTouchState;
 		currentTouchState = new TouchEventState();
 	}
 
 	public function showControls(parentGui:GuiControl) {
+		jumpButton.dispose();
+		powerupButton.dispose();
+		movementInput.dispose();
+		pauseButton.dispose();
+		this.cameraInput.enabled = true;
+		this.movementInput = new MovementInput();
+		this.jumpButton = new JumpButton();
+		this.powerupButton = new PowerupButton();
+		this.pauseButton = new PauseButton();
+		pauseButton.add(parentGui);
 		jumpButton.add(parentGui);
 		powerupButton.add(parentGui);
 		movementInput.add(parentGui);
+	}
+
+	public function setControlsEnabled(enabled:Bool) {
+		this.jumpButton.setVisible(enabled);
+		this.powerupButton.setVisible(enabled);
+		this.movementInput.setVisible(enabled);
+		this.pauseButton.setVisible(enabled);
 	}
 
 	public function hideControls(parentGui:GuiControl) {
 		jumpButton.remove(parentGui);
 		powerupButton.remove(parentGui);
 		movementInput.remove(parentGui);
+		pauseButton.remove(parentGui);
+		jumpButton.dispose();
+		powerupButton.dispose();
+		movementInput.dispose();
+		pauseButton.dispose();
+		this.cameraInput.enabled = false;
 	}
 }
