@@ -185,6 +185,11 @@ class GuiControl {
 		}
 	}
 
+	public function guiToScreen(point:Vector) {
+		var rect = this.getRenderRectangle();
+		return rect.position.add(point);
+	}
+
 	public function addChild(ctrl:GuiControl) {
 		this.children.push(ctrl);
 		ctrl.parent = this;

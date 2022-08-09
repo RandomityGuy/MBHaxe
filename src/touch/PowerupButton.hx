@@ -8,7 +8,7 @@ import src.Settings;
 
 class PowerupButton extends TouchButton {
 	public function new() {
-		super(ResourceLoader.getImage("data/ui/touch/energy.png").resource, new Vector(440, 180), 60);
+		super(ResourceLoader.getImage("data/ui/touch/energy.png").resource, Settings.touchSettings.powerupButtonPos, Settings.touchSettings.powerupButtonSize);
 		this.setEnabled(false);
 	}
 }

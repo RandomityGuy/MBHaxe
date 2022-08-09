@@ -70,7 +70,7 @@ class OptionsDlg extends GuiImage {
 
 		var mainPane = new GuiControl();
 		mainPane.position = new Vector(60, 15);
-		mainPane.extent = new Vector(520, 450);
+		mainPane.extent = new Vector(520, 480);
 		mainPane.horizSizing = Center;
 		mainPane.vertSizing = Center;
 		this.addChild(mainPane);
@@ -483,6 +483,11 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		}
 		marbleControlsPane.addChild(moveJmp);
 
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
+		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
+		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+
 		var transparentbmp = new hxd.BitmapData(1, 1);
 		transparentbmp.setPixel(0, 0, 0);
 		var transparentTile = Tile.fromBitmap(transparentbmp);
@@ -654,6 +659,24 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		graphicsTabBtn.extent = new Vector(117, 48);
 		graphicsTabBtn.pressedAction = (sender) -> setTab("Graphics");
 		mainPane.addChild(graphicsTabBtn);
+
+		// Touch Controls buttons???
+		var touchControlsTxt = new GuiText(domcasual24);
+		touchControlsTxt.text.text = "Touch Controls:";
+		touchControlsTxt.text.color = new Vector(0, 0, 0);
+		touchControlsTxt.position = new Vector(200, 465);
+		touchControlsTxt.extent = new Vector(200, 40);
+
+		var touchControlsEdit = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
+		touchControlsEdit.position = new Vector(300, 455);
+		touchControlsEdit.txtCtrl.text.text = "Edit";
+		touchControlsEdit.setExtent(new Vector(109, 39));
+		touchControlsEdit.pressedAction = (sender) -> {
+			MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+		}
+
+		mainPane.addChild(touchControlsTxt);
+		mainPane.addChild(touchControlsEdit);
 
 		setTab = function(tab:String) {
 			tabs.removeChild(audioTab);

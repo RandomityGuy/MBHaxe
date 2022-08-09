@@ -74,7 +74,7 @@ class CameraInput {
 				#end
 				var jumpcam = MarbleGame.instance.touchInput.jumpButton.pressed || MarbleGame.instance.touchInput.powerupButton.pressed;
 				if (jumpcam) {
-					scaleFactor /= 2.5;
+					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
 				MarbleGame.instance.world.marble.camera.orbit(delta.x / scaleFactor, delta.y / scaleFactor, true);
 				prevMouse.x = e.relX;

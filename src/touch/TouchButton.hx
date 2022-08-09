@@ -10,15 +10,9 @@ import hxd.res.Image;
 import src.MarbleGame;
 
 class TouchButton {
-	public var img:Image;
-
 	public var guiElement:GuiGraphics;
 
-	public var position:Vector;
-
 	public var radius:Float;
-
-	var doing = false;
 
 	var added = false;
 

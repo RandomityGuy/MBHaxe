@@ -24,26 +24,28 @@ class MovementInput {
 	var touchId = -1;
 
 	public function new() {
+		var size = Settings.touchSettings.joystickSize;
+
 		var g = new h2d.Graphics();
 		g.beginFill(0xffffff, 0.4);
-		g.drawRoundedRect(0, 0, 300, 300, 50);
+		g.drawRoundedRect(0, 0, size * 6, size * 6, size);
 		g.endFill();
 
 		this.area = new GuiGraphics(g);
-		this.area.position = new Vector(100, 40);
-		this.area.extent = new Vector(300, 300);
+		this.area.position = Settings.touchSettings.joystickPos;
+		this.area.extent = new Vector(size * 6, size * 6);
 		this.area.vertSizing = Top;
 
-		this.collider = new h2d.Interactive(300, 300, g, h2d.col.Bounds.fromValues(0, 0, 300, 300));
+		this.collider = new h2d.Interactive(size * 6, size * 6, g, h2d.col.Bounds.fromValues(0, 0, size * 6, size * 6));
 
 		var g2 = new h2d.Graphics();
 		g2.beginFill(0xffffff, 0.7);
-		g2.drawCircle(0, 0, 50);
+		g2.drawCircle(0, 0, size);
 		g2.endFill();
 
 		this.joystick = new GuiGraphics(g2);
-		this.joystick.position = new Vector(150, 150);
-		this.joystick.extent = new Vector(50, 50);
+		this.joystick.position = new Vector(size * 3, size * 3);
+		this.joystick.extent = new Vector(size, size);
 
 		this.area.addChild(this.joystick);
 
@@ -72,11 +74,11 @@ class MovementInput {
 						return;
 					}
 					if (emove.kind == EMove) {
-						var xPos = Util.clamp(emove.relX, 50, 250);
-						var yPos = Util.clamp(emove.relY, 50, 250);
+						var xPos = Util.clamp(emove.relX, size, size * 5);
+						var yPos = Util.clamp(emove.relY, size, size * 5);
 
-						this.value.x = (xPos - 150) / 100;
-						this.value.y = (yPos - 150) / 100;
+						this.value.x = (xPos - (size * 3)) / (size * 2);
+						this.value.y = (yPos - (size * 3)) / (size * 2);
 
 						this.joystick.graphics.setPosition(this.area.graphics.x + xPos, this.area.graphics.y + yPos);
 					}

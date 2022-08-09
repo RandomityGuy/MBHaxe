@@ -8,6 +8,6 @@ import src.Settings;
 
 class JumpButton extends TouchButton {
 	public function new() {
-		super(ResourceLoader.getImage("data/ui/touch/up-arrow.png").resource, new Vector(440, 320), 60);
+		super(ResourceLoader.getImage("data/ui/touch/up-arrow.png").resource, Settings.touchSettings.jumpButtonPos, Settings.touchSettings.jumpButtonSize);
 	}
 }

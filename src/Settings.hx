@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Vector;
 import haxe.ds.Option;
 import gui.Canvas;
 import src.AudioManager;
@@ -49,6 +50,16 @@ typedef ControlsSettings = {
 	var invertYAxis:Bool;
 }
 
+typedef TouchSettings = {
+	var joystickPos:Vector;
+	var joystickSize:Float;
+	var jumpButtonPos:Vector;
+	var jumpButtonSize:Float;
+	var powerupButtonPos:Vector;
+	var powerupButtonSize:Float;
+	var buttonJoystickMultiplier:Float;
+}
+
 class Settings {
 	public static var highScores:Map<String, Array<Score>> = [];
 
@@ -85,6 +96,15 @@ class Settings {
 		invertYAxis: false
 	};
 
+	public static var touchSettings:TouchSettings = {
+		joystickPos: new Vector(100, 40),
+		joystickSize: 50,
+		jumpButtonPos: new Vector(440, 320),
+		jumpButtonSize: 60,
+		powerupButtonPos: new Vector(440, 180),
+		powerupButtonSize: 60,
+		buttonJoystickMultiplier: 2.5
+	}
 	public static var progression = [0, 0, 0];
 	public static var highscoreName = "";
 
