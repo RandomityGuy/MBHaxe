@@ -136,7 +136,9 @@ class MarbleGame {
 				world = null;
 				return;
 			}
-			touchInput.update();
+			if (Util.isTouchDevice()) {
+				touchInput.update();
+			}
 			if (!paused) {
 				world.update(dt);
 			}

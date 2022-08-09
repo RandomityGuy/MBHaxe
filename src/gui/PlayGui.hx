@@ -27,6 +27,7 @@ import src.Resource;
 import hxd.res.Sound;
 import h3d.mat.Texture;
 import src.Settings;
+import src.Util;
 
 class PlayGui {
 	var scene2d:h2d.Scene;
@@ -130,7 +131,9 @@ class PlayGui {
 		initPowerupBox();
 		initTexts();
 
-		MarbleGame.instance.touchInput.showControls(this.playGuiCtrl);
+		if (Util.isTouchDevice()) {
+			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl);
+		}
 
 		playGuiCtrl.render(scene2d);
 

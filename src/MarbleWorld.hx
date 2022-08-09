@@ -1011,9 +1011,13 @@ class MarbleWorld extends Scheduler {
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.hidden = false;
 		#end
-		MarbleGame.instance.touchInput.setControlsEnabled(false);
+		if (Util.isTouchDevice()) {
+			MarbleGame.instance.touchInput.setControlsEnabled(false);
+		}
 		egg = new EndGameGui((sender) -> {
-			MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
+			if (Util.isTouchDevice()) {
+				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
+			}
 			this.dispose();
 			var pmg = new PlayMissionGui();
 			PlayMissionGui.currentSelectionStatic = mission.index + 1;
@@ -1028,7 +1032,9 @@ class MarbleWorld extends Scheduler {
 			#if js
 			pointercontainer.hidden = true;
 			#end
-			MarbleGame.instance.touchInput.setControlsEnabled(true);
+			if (Util.isTouchDevice()) {
+				MarbleGame.instance.touchInput.setControlsEnabled(true);
+			}
 			// @:privateAccess playGui.playGuiCtrl.render(scene2d);
 		}, mission, finishTime);
 		MarbleGame.canvas.pushDialog(egg);
