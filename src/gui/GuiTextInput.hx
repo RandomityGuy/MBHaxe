@@ -1,5 +1,8 @@
 package gui;
 
+import src.JSPlatform;
+import src.Util;
+import gui.GuiControl.MouseState;
 import h2d.TextInput;
 import h2d.Scene;
 import hxd.res.BitmapFont;
@@ -49,5 +52,16 @@ class GuiTextInput extends GuiControl {
 		if (MarbleGame.canvas.scene2d.contains(text)) {
 			MarbleGame.canvas.scene2d.removeChild(text); // Refresh "layer"
 		}
+	}
+
+	public override function onMousePress(mouseState:MouseState) {
+		super.onMousePress(mouseState);
+
+		#if js
+		if (Util.isTouchDevice()) {
+			text.text = js.Browser.window.prompt("Enter your name", text.text);
+			js.Browser.document.documentElement.requestFullscreen();
+		}
+		#end
 	}
 }
