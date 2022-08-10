@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.res.BitmapFont;
 import h3d.prim.Quads;
 import touch.TouchEditButton;
 import touch.MovementInputEdit;
@@ -24,6 +25,11 @@ class TouchCtrlsEditGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
 		var mainMenuButton = new GuiButton(loadButtonImages("data/ui/options/mainm"));
 		mainMenuButton.position = new Vector(500, 400);
 		mainMenuButton.extent = new Vector(121, 53);
@@ -32,6 +38,14 @@ class TouchCtrlsEditGui extends GuiImage {
 		mainMenuButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.setContent(new OptionsDlg());
 		}
+
+		var touchControlsTxt = new GuiText(domcasual32);
+		touchControlsTxt.position = new Vector(350, 415);
+		touchControlsTxt.extent = new Vector(121, 53);
+		touchControlsTxt.text.text = "Edit Touch Controls";
+		touchControlsTxt.horizSizing = Center;
+		touchControlsTxt.vertSizing = Top;
+		touchControlsTxt.text.textColor = 0;
 
 		var joystick = new MovementInputEdit();
 
@@ -44,14 +58,38 @@ class TouchCtrlsEditGui extends GuiImage {
 		jumpBtn.onClick = (sender, mousePos) -> {
 			sender.setSelected(true);
 			powerupBtn.setSelected(false);
+			joystick.setSelected(false);
+		}
+
+		jumpBtn.onChangeCb = (sender, value, rvalue) -> {
+			Settings.touchSettings.jumpButtonPos = value;
+			Settings.touchSettings.jumpButtonSize = rvalue;
 		}
 
 		powerupBtn.onClick = (sender, mousePos) -> {
 			sender.setSelected(true);
 			jumpBtn.setSelected(false);
+			joystick.setSelected(false);
+		}
+
+		powerupBtn.onChangeCb = (sender, value, rvalue) -> {
+			Settings.touchSettings.powerupButtonPos = value;
+			Settings.touchSettings.powerupButtonSize = rvalue;
+		}
+
+		joystick.onClick = (mousePos) -> {
+			joystick.setSelected(true);
+			jumpBtn.setSelected(false);
+			powerupBtn.setSelected(false);
+		}
+
+		joystick.onChangeCb = (value, rvalue) -> {
+			Settings.touchSettings.joystickPos = value;
+			Settings.touchSettings.joystickSize = rvalue;
 		}
 
 		this.addChild(mainMenuButton);
+		this.addChild(touchControlsTxt);
 		this.addChild(joystick);
 		this.addChild(jumpBtn);
 		this.addChild(powerupBtn);

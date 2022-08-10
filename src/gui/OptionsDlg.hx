@@ -661,22 +661,24 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		mainPane.addChild(graphicsTabBtn);
 
 		// Touch Controls buttons???
-		var touchControlsTxt = new GuiText(domcasual24);
-		touchControlsTxt.text.text = "Touch Controls:";
-		touchControlsTxt.text.color = new Vector(0, 0, 0);
-		touchControlsTxt.position = new Vector(200, 465);
-		touchControlsTxt.extent = new Vector(200, 40);
+		if (Util.isTouchDevice()) {
+			var touchControlsTxt = new GuiText(domcasual24);
+			touchControlsTxt.text.text = "Touch Controls:";
+			touchControlsTxt.text.color = new Vector(0, 0, 0);
+			touchControlsTxt.position = new Vector(200, 465);
+			touchControlsTxt.extent = new Vector(200, 40);
 
-		var touchControlsEdit = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
-		touchControlsEdit.position = new Vector(300, 455);
-		touchControlsEdit.txtCtrl.text.text = "Edit";
-		touchControlsEdit.setExtent(new Vector(109, 39));
-		touchControlsEdit.pressedAction = (sender) -> {
-			MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			var touchControlsEdit = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
+			touchControlsEdit.position = new Vector(300, 455);
+			touchControlsEdit.txtCtrl.text.text = "Edit";
+			touchControlsEdit.setExtent(new Vector(109, 39));
+			touchControlsEdit.pressedAction = (sender) -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			}
+
+			mainPane.addChild(touchControlsTxt);
+			mainPane.addChild(touchControlsEdit);
 		}
-
-		mainPane.addChild(touchControlsTxt);
-		mainPane.addChild(touchControlsEdit);
 
 		setTab = function(tab:String) {
 			tabs.removeChild(audioTab);

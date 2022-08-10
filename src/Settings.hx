@@ -146,6 +146,7 @@ class Settings {
 		var outputData:Dynamic = {
 			options: optionsSettings,
 			controls: controlsSettings,
+			touch: touchSettings,
 			progression: progression,
 			highscoreName: highscoreName
 		};
@@ -205,6 +206,8 @@ class Settings {
 			if (optionsSettings.fov == 0 #if js || optionsSettings.fov == null #end)
 				optionsSettings.fov = 60;
 			controlsSettings = json.controls;
+			if (json.touch != null)
+				touchSettings = json.touch;
 			progression = json.progression;
 			highscoreName = json.highscoreName;
 		} else {
