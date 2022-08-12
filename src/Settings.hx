@@ -168,7 +168,7 @@ class Settings {
 		outputData.highScores = jobj;
 		#end
 		var json = Json.stringify(outputData);
-		#if hl
+		#if (hl && !android)
 		File.saveContent("settings.json", json);
 		#end
 		#if js

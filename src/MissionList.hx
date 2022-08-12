@@ -18,10 +18,10 @@ class MissionList {
 		if (_build)
 			return;
 		function parseDifficulty(difficulty:String) {
-			#if hl
+			#if (hl && !android)
 			var difficultyFiles = ResourceLoader.fileSystem.dir("data/missions/" + difficulty);
 			#end
-			#if js
+			#if (js || android)
 			var difficultyFiles = ResourceLoader.fileSystem.dir("missions/" + difficulty);
 			#end
 			var difficultyMissions = [];

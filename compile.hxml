@@ -1,8 +1,10 @@
 -cp src
 -lib heaps
 -lib hlsdl
+-lib zyheaps
 -hl marblegame.hl
 -D windowSize=1280x720
 -D keep-inline-positions
+-D android
 --main Main
 -debug

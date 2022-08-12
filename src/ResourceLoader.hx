@@ -1,6 +1,6 @@
 package src;
 
-#if js
+#if (js || android)
 import fs.ManifestLoader;
 import fs.ManifestBuilder;
 import fs.ManifestProgress;
@@ -18,16 +18,16 @@ import hxd.res.Loader;
 import src.Resource;
 
 class ResourceLoader {
-	#if hl
+	#if (hl && !android)
 	public static var fileSystem:FileSystem = new LocalFileSystem(".", null);
 	#end
-	#if js
+	#if (js || android)
 	public static var fileSystem:FileSystem = null;
 	#end
-	#if hl
+	#if (hl && !android)
 	public static var loader = new Loader(fileSystem);
 	#end
-	#if js
+	#if (js || android)
 	public static var loader:Loader = null;
 	#end
 	static var interiorResources:Map<String, Resource<Dif>> = new Map();
@@ -39,7 +39,7 @@ class ResourceLoader {
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
-		#if js
+		#if (js || android)
 		var mfileSystem = ManifestBuilder.create("data");
 		var mloader = new ManifestLoader(mfileSystem);
 
@@ -50,13 +50,13 @@ class ResourceLoader {
 		}, scene2d);
 		preloader.start();
 		#end
-		#if hl
+		#if (hl && !android)
 		onLoadedFunc();
 		#end
 	}
 
 	public static function loadInterior(path:String) {
-		#if js
+		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
 		if (interiorResources.exists(path))
@@ -76,7 +76,7 @@ class ResourceLoader {
 	}
 
 	public static function loadDts(path:String) {
-		#if js
+		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
 		if (dtsResources.exists(path))
@@ -96,7 +96,7 @@ class ResourceLoader {
 	}
 
 	public static function getTexture(path:String) {
-		#if js
+		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
 		if (textureCache.exists(path))
@@ -118,7 +118,7 @@ class ResourceLoader {
 	}
 
 	public static function getImage(path:String) {
-		#if js
+		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
 		if (imageCache.exists(path))
@@ -133,7 +133,7 @@ class ResourceLoader {
 	}
 
 	public static function getAudio(path:String) {
-		#if js
+		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
 		if (audioCache.exists(path))
@@ -160,7 +160,7 @@ class ResourceLoader {
 	}
 
 	public static function getFileEntry(path:String) {
-		#if js
+		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
 		var file = loader.load(path);
@@ -176,7 +176,7 @@ class ResourceLoader {
 	}
 
 	public static function getFullNamesOf(path:String) {
-		#if js
+		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
 		var files = fileSystem.dir(Path.directory(path)); // FileSystem.readDirectory(Path.directory(path));

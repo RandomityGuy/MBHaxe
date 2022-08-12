@@ -475,7 +475,7 @@ class DifBuilder {
 				tex = tex.split('/')[1];
 			}
 
-			#if js
+			#if (js || android)
 			path = StringTools.replace(path, "data/", "");
 			#end
 

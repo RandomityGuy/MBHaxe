@@ -1,0 +1,16 @@
+<project>
+    <meta title="Marble Blast Gold" package="com.marble.blast" version="1.0.0" company="RandomityGuy" />
+    <!-- Main app -->
+    <app main="Main" path="Export" file="MBHaxe"/>
+    <!-- Assets -->
+    <assets path="data" rename="data" />
+    <!-- Haxelib -->
+    <haxelib name="zyheaps" />
+    <haxelib name="heaps" />
+    <!-- Sources -->
+    <source name="src" />
+    <!-- Android Config -->
+    <define name="NDK_DIR" value="E:/Android/ndk/18.1.5063045" />
+    <define name="ANDROID_SDK_DIR" value="E:/Android" />
+    <define name="NDK_VERSION" value="18.1.5063045" />
+</project>

@@ -28,6 +28,9 @@ import haxe.io.Encoding;
 import haxe.io.Path;
 import haxe.io.Bytes;
 
+#if android
+// import zygame.utils.hl.AssetsTools;
+#end
 @:allow(fs.ManifestFileSystem)
 class ManifestEntry extends FileEntry {
 	private var fs:ManifestFileSystem;
@@ -38,7 +41,7 @@ class ManifestEntry extends FileEntry {
 
 	private var file:String;
 	private var originalFile:String;
-	#if sys
+	#if (sys && !android)
 	private var fio:sys.io.FileInput;
 	#else
 	private var bytes:Bytes;
@@ -59,7 +62,7 @@ class ManifestEntry extends FileEntry {
 	}
 
 	override public function getSign():Int {
-		#if sys
+		#if (sys && !android)
 		var old = if (fio == null) -1 else fio.tell();
 		open();
 		var i = fio.readInt32();
@@ -74,14 +77,20 @@ class ManifestEntry extends FileEntry {
 	}
 
 	override public function getBytes():Bytes {
-		#if sys
+		#if (sys && !android)
 		return sys.io.File.getBytes(file);
+		#elseif android
+		bytes = sys.io.File.getBytes(file); // AssetsTools.getBytes(file);
+		return bytes;
 		#else
 		return bytes;
 		#end
 	}
 
 	override function readBytes(out:haxe.io.Bytes, outPos:Int, pos:Int, len:Int):Int {
+		if (this.bytes == null) {
+			this.bytes = getBytes();
+		}
 		if (pos + len > bytes.length)
 			len = bytes.length - pos;
 		if (len < 0)
@@ -132,7 +141,8 @@ class ManifestEntry extends FileEntry {
 		}
 		#else
 		if (onReady != null)
-			haxe.Timer.delay(onReady, 1);
+			onReady();
+		// haxe.Timer.delay(onReady, 1);
 		#end
 	}
 
@@ -198,8 +208,11 @@ class ManifestEntry extends FileEntry {
 	}
 
 	override private function get_size():Int {
-		#if sys
+		#if (sys && !android)
 		return sys.FileSystem.stat(file).size;
+		#elseif android
+		var fb = sys.io.File.getBytes(file); // AssetsTools.getBytes(file);
+		return fb != null ? fb.length : 0;
 		#else
 		return bytes != null ? bytes.length : 0;
 		#end
@@ -211,7 +224,7 @@ class ManifestEntry extends FileEntry {
 				c.dispose();
 			contents = null;
 		}
-		#if sys
+		#if (sys && !android)
 		close();
 		#else
 		bytes = null;

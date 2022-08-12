@@ -1,0 +1,68 @@
+{
+	"name": "Marble Blast Gold Haxe Port",
+	"short_name": "Marble Blast Gold",
+	"description": "A reimplementation of Marble Blast Gold in Haxe",
+	"dir": "ltr",
+	"start_url": "/index.html?app=true",
+	"scope": "/",
+	"display": "fullscreen",
+	"orientation": "landscape",
+	"background_color": "black",
+	"theme_color": "black",
+	"categories": [
+		"games"
+	],
+	"lang": "en-US",
+	"icons": [
+		{
+			"src": "/data/icons/icon-512.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		},
+		{
+			"src": "/data/icons/icon-256.png",
+			"type": "image/png",
+			"sizes": "256x256"
+		},
+		{
+			"src": "/data/icons/icon-192.png",
+			"type": "image/png",
+			"sizes": "192x192"
+		},
+		{
+			"src": "/data/icons/icon-180.png",
+			"type": "image/png",
+			"sizes": "180x180"
+		},
+		{
+			"src": "/data/icons/icon-144.png",
+			"type": "image/png",
+			"sizes": "144x144"
+		},
+		{
+			"src": "/data/icons/icon-128.png",
+			"type": "image/png",
+			"sizes": "128x128"
+		},
+		{
+			"src": "/data/icons/icon-96.png",
+			"type": "image/png",
+			"sizes": "96x96"
+		},
+		{
+			"src": "/data/icons/icon-64.png",
+			"type": "image/png",
+			"sizes": "64x64"
+		},
+		{
+			"src": "/data/icons/icon-48.png",
+			"type": "image/png",
+			"sizes": "48x48"
+		},
+		{
+			"src": "/data/icons/icon-32.png",
+			"type": "image/png",
+			"sizes": "32x32"
+		}
+	]
+}

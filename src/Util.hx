@@ -332,12 +332,21 @@ class Util {
 		#if hl
 		switch (Settings.isTouch) {
 			case None:
+				#if android
+				Settings.isTouch = Some(true);
+				return true;
+				#else
 				Settings.isTouch = Some(false);
 				return false;
+				#end
 			case Some(val):
 				return val;
 		}
+		#if android
+		return true;
+		#else
 		return false;
+		#end
 		#end
 	}
 
