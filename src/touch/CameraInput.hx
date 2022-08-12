@@ -1,5 +1,7 @@
 package touch;
 
+import hxd.res.DefaultFont;
+import h2d.Text;
 import gui.GuiGraphics;
 import h3d.Vector;
 import gui.GuiControl;
@@ -15,6 +17,8 @@ class CameraInput {
 	var added = false;
 
 	var collider:GuiGraphics;
+
+	var txt:Text;
 
 	public function new() {
 		var width = MarbleGame.canvas.scene2d.width;
@@ -36,6 +40,8 @@ class CameraInput {
 		var pressed = false;
 
 		var prevMouse = new Vector(0, 0);
+
+		txt = new Text(DefaultFont.get());
 
 		interactive.onPush = (e) -> {
 			e.propagate = true;
@@ -66,6 +72,8 @@ class CameraInput {
 				return;
 
 			if (pressed) {
+				txt.text = 'Camera Touch: ${e.relX} ${e.relY}';
+
 				var curPos = new Vector(e.relX, e.relY);
 				var delta = curPos.sub(prevMouse);
 				var scaleFactor = 1.0;
@@ -140,6 +148,7 @@ class CameraInput {
 
 	public function add(parentGui:GuiControl) {
 		parentGui.addChild(this.collider);
+		MarbleGame.canvas.scene2d.addChild(txt);
 		added = true;
 	}
 

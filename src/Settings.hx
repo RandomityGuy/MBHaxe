@@ -51,11 +51,11 @@ typedef ControlsSettings = {
 }
 
 typedef TouchSettings = {
-	var joystickPos:Vector;
+	var joystickPos:Array<Float>;
 	var joystickSize:Float;
-	var jumpButtonPos:Vector;
+	var jumpButtonPos:Array<Float>;
 	var jumpButtonSize:Float;
-	var powerupButtonPos:Vector;
+	var powerupButtonPos:Array<Float>;
 	var powerupButtonSize:Float;
 	var buttonJoystickMultiplier:Float;
 }
@@ -97,15 +97,15 @@ class Settings {
 	};
 
 	public static var touchSettings:TouchSettings = {
-		joystickPos: new Vector(100, 40),
+		joystickPos: [100, 40],
 		joystickSize: 50,
-		jumpButtonPos: new Vector(440, 320),
+		jumpButtonPos: [440, 320],
 		jumpButtonSize: 60,
-		powerupButtonPos: new Vector(440, 180),
+		powerupButtonPos: [440, 180],
 		powerupButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
-	public static var progression = [0, 0, 0];
+	public static var progression = [24, 24, 52];
 	public static var highscoreName = "";
 
 	public static var uiScale = 1.0;
@@ -206,8 +206,9 @@ class Settings {
 			if (optionsSettings.fov == 0 #if js || optionsSettings.fov == null #end)
 				optionsSettings.fov = 60;
 			controlsSettings = json.controls;
-			if (json.touch != null)
+			if (json.touch != null) {
 				touchSettings = json.touch;
+			}
 			progression = json.progression;
 			highscoreName = json.highscoreName;
 		} else {
@@ -233,6 +234,10 @@ class Settings {
 			var zoomRatio = 1.0;
 			#if js
 			var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 600 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
+			Settings.zoomRatio = zoomRatio;
+			#end
+			#if android
+			var zoomRatio = Window.getInstance().height / 600;
 			Settings.zoomRatio = zoomRatio;
 			#end
 			#if hl

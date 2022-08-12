@@ -32,7 +32,7 @@ class MovementInput {
 		g.endFill();
 
 		this.area = new GuiGraphics(g);
-		this.area.position = Settings.touchSettings.joystickPos;
+		this.area.position = new Vector(Settings.touchSettings.joystickPos[0], Settings.touchSettings.joystickPos[1]);
 		this.area.extent = new Vector(size * 6, size * 6);
 		this.area.vertSizing = Top;
 

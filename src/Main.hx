@@ -24,8 +24,6 @@ class Main extends hxd.App {
 	var debugProfiler:h3d.impl.Benchmark;
 	var loaded:Bool = false;
 
-	var keyCounter:Text;
-
 	override function init() {
 		super.init();
 
@@ -34,6 +32,10 @@ class Main extends hxd.App {
 		#end
 		#if js
 		var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 600 : js.Browser.window.devicePixelRatio; // js.Browser.window.devicePixelRatio;
+		s2d.scaleMode = Zoom(zoomRatio);
+		#end
+		#if android
+		var zoomRatio = Window.getInstance().height / 600;
 		s2d.scaleMode = Zoom(zoomRatio);
 		#end
 
@@ -61,9 +63,6 @@ class Main extends hxd.App {
 			AudioManager.playShell();
 			marbleGame = new MarbleGame(s2d, s3d);
 			MarbleGame.canvas.setContent(new MainMenuGui());
-
-			keyCounter = new Text(DefaultFont.get(), s2d);
-			keyCounter.color = new Vector(1, 1, 1, 1);
 
 			loaded = true;
 		});
@@ -93,7 +92,6 @@ class Main extends hxd.App {
 		super.update(dt);
 		if (loaded) {
 			marbleGame.update(dt);
-			keyCounter.text = 'Mouse: ${Window.getInstance().mouseX} ${Window.getInstance().mouseY}';
 			// world.update(dt);
 			// fpsCounter.text = 'FPS: ${this.engine.fps}';
 		}

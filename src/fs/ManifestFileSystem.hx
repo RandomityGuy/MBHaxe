@@ -27,10 +27,10 @@ import hxd.fs.FileSystem;
 import haxe.io.Encoding;
 import haxe.io.Path;
 import haxe.io.Bytes;
-
 #if android
-// import zygame.utils.hl.AssetsTools;
+import zygame.utils.hl.AssetsTools;
 #end
+
 @:allow(fs.ManifestFileSystem)
 class ManifestEntry extends FileEntry {
 	private var fs:ManifestFileSystem;
@@ -80,7 +80,7 @@ class ManifestEntry extends FileEntry {
 		#if (sys && !android)
 		return sys.io.File.getBytes(file);
 		#elseif android
-		bytes = sys.io.File.getBytes(file); // AssetsTools.getBytes(file);
+		bytes = AssetsTools.getBytes(file);
 		return bytes;
 		#else
 		return bytes;
@@ -211,7 +211,7 @@ class ManifestEntry extends FileEntry {
 		#if (sys && !android)
 		return sys.FileSystem.stat(file).size;
 		#elseif android
-		var fb = sys.io.File.getBytes(file); // AssetsTools.getBytes(file);
+		var fb = AssetsTools.getBytes(file);
 		return fb != null ? fb.length : 0;
 		#else
 		return bytes != null ? bytes.length : 0;

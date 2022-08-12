@@ -58,6 +58,9 @@ class CameraController extends Object {
 	public var CameraPitch:Float;
 	public var CameraYaw:Float;
 
+	public var nextCameraYaw:Float;
+	public var nextCameraPitch:Float;
+
 	public var phi:Float;
 	public var theta:Float;
 
@@ -121,8 +124,11 @@ class CameraController extends Object {
 		var factor = isTouch ? Util.lerp(1 / 250, 1 / 25,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
-		CameraPitch += deltaposY * factor;
-		CameraYaw += deltaposX * factor;
+		// CameraPitch += deltaposY * factor;
+		// CameraYaw += deltaposX * factor;
+
+		nextCameraPitch = CameraPitch + deltaposY * factor;
+		nextCameraYaw = CameraYaw + deltaposX * factor;
 
 		// var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		// var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
@@ -146,6 +152,11 @@ class CameraController extends Object {
 		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
 		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
+
+		var lerpt = hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+
+		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
+		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
 		if (Key.isDown(Settings.controlsSettings.camForward)) {
 			CameraPitch += 0.75 * 5 * dt;

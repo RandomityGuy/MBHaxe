@@ -120,7 +120,7 @@ class GuiControl {
 		}
 
 		var scaleFactor = 1.0;
-		#if js
+		#if (js || android)
 		scaleFactor = 1 / Settings.zoomRatio; // 768 / js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio; // 0.5; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
 		#end
 

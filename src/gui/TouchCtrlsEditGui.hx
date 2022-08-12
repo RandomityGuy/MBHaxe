@@ -49,11 +49,11 @@ class TouchCtrlsEditGui extends GuiImage {
 
 		var joystick = new MovementInputEdit();
 
-		var jumpBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/up-arrow.png").resource, Settings.touchSettings.jumpButtonPos,
-			Settings.touchSettings.jumpButtonSize);
+		var jumpBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/up-arrow.png").resource,
+			new Vector(Settings.touchSettings.jumpButtonPos[0], Settings.touchSettings.jumpButtonPos[1]), Settings.touchSettings.jumpButtonSize);
 
-		var powerupBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/energy.png").resource, Settings.touchSettings.powerupButtonPos,
-			Settings.touchSettings.powerupButtonSize);
+		var powerupBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/energy.png").resource,
+			new Vector(Settings.touchSettings.powerupButtonPos[0], Settings.touchSettings.powerupButtonPos[1]), Settings.touchSettings.powerupButtonSize);
 
 		jumpBtn.onClick = (sender, mousePos) -> {
 			sender.setSelected(true);
@@ -62,7 +62,7 @@ class TouchCtrlsEditGui extends GuiImage {
 		}
 
 		jumpBtn.onChangeCb = (sender, value, rvalue) -> {
-			Settings.touchSettings.jumpButtonPos = value;
+			Settings.touchSettings.jumpButtonPos = [value.x, value.y];
 			Settings.touchSettings.jumpButtonSize = rvalue;
 		}
 
@@ -73,7 +73,7 @@ class TouchCtrlsEditGui extends GuiImage {
 		}
 
 		powerupBtn.onChangeCb = (sender, value, rvalue) -> {
-			Settings.touchSettings.powerupButtonPos = value;
+			Settings.touchSettings.powerupButtonPos = [value.x, value.y];
 			Settings.touchSettings.powerupButtonSize = rvalue;
 		}
 
@@ -84,7 +84,7 @@ class TouchCtrlsEditGui extends GuiImage {
 		}
 
 		joystick.onChangeCb = (value, rvalue) -> {
-			Settings.touchSettings.joystickPos = value;
+			Settings.touchSettings.joystickPos = [value.x, value.y];
 			Settings.touchSettings.joystickSize = rvalue;
 		}
 

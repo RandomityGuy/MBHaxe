@@ -60,7 +60,7 @@ class Sky extends Object {
 	}
 
 	function createSkyboxCubeTextured(dmlPath:String) {
-		#if js
+		#if (js || android)
 		dmlPath = StringTools.replace(dmlPath, "data/", "");
 		#end
 		if (ResourceLoader.fileSystem.exists(dmlPath)) {

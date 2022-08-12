@@ -31,7 +31,7 @@ class MovementInputEdit extends GuiGraphics {
 
 		super(g);
 
-		this.position = Settings.touchSettings.joystickPos;
+		this.position = new Vector(Settings.touchSettings.joystickPos[0], Settings.touchSettings.joystickPos[1]);
 		this.extent = new Vector(size * 6, size * 6);
 		this.vertSizing = Top;
 
