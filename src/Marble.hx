@@ -780,7 +780,7 @@ class Marble extends GameObject {
 				+ relLocalVel.z * deltaT * 2,
 				radius * 1.1);
 
-			var surfaces = obj.octree.boundingSearch(boundThing);
+			var surfaces = obj.grid == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.grid.boundingSearch(boundThing);
 
 			for (surf in surfaces) {
 				var surface:CollisionSurface = cast surf;
@@ -1065,7 +1065,7 @@ class Marble extends GameObject {
 			boundThing.addSpherePos(localpos.x + relLocalVel.x * dt * 2, localpos.y + relLocalVel.y * dt * 2, localpos.z + relLocalVel.z * dt * 2,
 				radius * 1.1);
 
-			var surfaces = obj.octree.boundingSearch(boundThing);
+			var surfaces = obj.grid == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.grid.boundingSearch(boundThing);
 
 			var tform = obj.transform.clone();
 

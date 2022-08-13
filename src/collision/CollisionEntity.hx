@@ -18,6 +18,8 @@ class CollisionEntity implements IOctreeObject {
 
 	public var octree:Octree;
 
+	public var grid:Grid;
+
 	public var surfaces:Array<CollisionSurface>;
 
 	public var priority:Int;
@@ -49,6 +51,15 @@ class CollisionEntity implements IOctreeObject {
 		}
 	}
 
+	// Generates the grid
+	public function finalize() {
+		this.generateBoundingBox();
+		this.grid = new Grid(this.boundingBox);
+		for (surface in this.surfaces) {
+			this.grid.insert(surface);
+		}
+	}
+
 	public function setTransform(transform:Matrix) {
 		if (this.transform == transform)
 			return;
@@ -72,15 +83,26 @@ class CollisionEntity implements IOctreeObject {
 		var rStart = rayOrigin.clone();
 		rStart.transform(invMatrix);
 		var rDir = rayDirection.transformed3x3(invMatrix);
-		var intersections = octree.raycast(rStart, rDir);
-		var iData:Array<RayIntersectionData> = [];
-		for (i in intersections) {
-			i.point.transform(transform);
-			i.normal.transform3x3(transform);
-			i.normal.normalize();
-			iData.push({point: i.point, normal: i.normal, object: i.object});
+		if (grid == null) {
+			var intersections = octree.raycast(rStart, rDir);
+			var iData:Array<RayIntersectionData> = [];
+			for (i in intersections) {
+				i.point.transform(transform);
+				i.normal.transform3x3(transform);
+				i.normal.normalize();
+				iData.push({point: i.point, normal: i.normal, object: i.object});
+			}
+			return iData;
+		} else {
+			var intersections = this.grid.rayCast(rStart, rDir);
+			for (i in intersections) {
+				i.point.transform(transform);
+				i.normal.transform3x3(transform);
+				i.normal.normalize();
+			}
+
+			return intersections;
 		}
-		return iData;
 	}
 
 	public function getElementType() {
@@ -105,7 +127,7 @@ class CollisionEntity implements IOctreeObject {
 		sphereBounds.addSpherePos(position.x, position.y, position.z, radius * 1.1);
 		sphereBounds.transform(invMatrix);
 		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, radius * 1.1);
-		var surfaces = octree.boundingSearch(sphereBounds);
+		var surfaces = grid == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : grid.boundingSearch(sphereBounds);
 
 		var tform = transform.clone();
 		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));

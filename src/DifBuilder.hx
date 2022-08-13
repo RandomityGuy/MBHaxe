@@ -464,7 +464,7 @@ class DifBuilder {
 		}
 
 		collider.difEdgeMap = difEdges;
-		collider.generateBoundingBox();
+		collider.finalize();
 		itr.collider = collider;
 
 		function canFindTex(tex:String) {

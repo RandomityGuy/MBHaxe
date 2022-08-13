@@ -15,27 +15,27 @@ class ProfilerUI {
 			return;
 
 		instance = this;
-		// debugProfiler = new h3d.impl.Benchmark(s2d);
-		// debugProfiler.y = 40;
+		debugProfiler = new h3d.impl.Benchmark(s2d);
+		debugProfiler.y = 40;
 
-		// fpsCounter = new Text(DefaultFont.get(), s2d);
-		// fpsCounter.y = 80;
-		// fpsCounter.color = new Vector(1, 1, 1, 1);
+		fpsCounter = new Text(DefaultFont.get(), s2d);
+		fpsCounter.y = 80;
+		fpsCounter.color = new Vector(1, 1, 1, 1);
 	}
 
 	public static function begin() {
-		// instance.debugProfiler.begin();
+		instance.debugProfiler.begin();
 	}
 
 	public static function measure(name:String) {
-		// instance.debugProfiler.measure(name);
+		instance.debugProfiler.measure(name);
 	}
 
 	public static function end() {
-		// instance.debugProfiler.end();
+		instance.debugProfiler.end();
 	}
 
 	public static function update(fps:Float) {
-		// instance.fpsCounter.text = "FPS: " + fps;
+		instance.fpsCounter.text = "FPS: " + fps;
 	}
 }

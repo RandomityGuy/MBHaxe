@@ -26,6 +26,8 @@ class CollisionSurface implements IOctreeObject {
 
 	public var originalSurfaceIndex:Int;
 
+	public var key:Bool = false;
+
 	public function new() {}
 
 	public function getElementType() {
