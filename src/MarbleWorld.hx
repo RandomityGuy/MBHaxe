@@ -70,6 +70,7 @@ import h3d.scene.Scene;
 import collision.CollisionWorld;
 import src.Marble;
 import src.Resource;
+import src.ProfilerUI;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -723,18 +724,25 @@ class MarbleWorld extends Scheduler {
 		if (!_ready) {
 			return;
 		}
+		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 		this.tickSchedule(timeState.currentAttemptTime);
 		this.updateGameState();
+		ProfilerUI.measure("updateDTS");
 		for (obj in dtsObjects) {
 			obj.update(timeState);
 		}
+		ProfilerUI.measure("updateMarbles");
 		for (marble in marbles) {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
 		}
+		ProfilerUI.measure("updateInstances");
 		this.instanceManager.update(dt);
+		ProfilerUI.measure("updateParticles");
 		this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
+		ProfilerUI.measure("updatePlayGui");
 		this.playGui.update(timeState);
+		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
 		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {

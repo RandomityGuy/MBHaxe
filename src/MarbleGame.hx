@@ -14,6 +14,7 @@ import src.MarbleWorld;
 import src.JSPlatform;
 import gui.Canvas;
 import src.Util;
+import src.ProfilerUI;
 
 @:publicFields
 class MarbleGame {
@@ -159,6 +160,7 @@ class MarbleGame {
 			var mouseState:MouseState = {
 				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY)
 			}
+			ProfilerUI.measure("canvasUpdate");
 			canvas.update(dt, mouseState);
 		}
 	}

@@ -16,12 +16,11 @@ import gui.MainMenuGui;
 import hxd.res.DefaultFont;
 import h2d.Text;
 import h3d.Vector;
+import src.ProfilerUI;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
 
-	// var fpsCounter:Text;
-	var debugProfiler:h3d.impl.Benchmark;
 	var loaded:Bool = false;
 
 	override function init() {
@@ -64,6 +63,8 @@ class Main extends hxd.App {
 			marbleGame = new MarbleGame(s2d, s3d);
 			MarbleGame.canvas.setContent(new MainMenuGui());
 
+			new ProfilerUI(s2d);
+
 			loaded = true;
 		});
 
@@ -91,19 +92,20 @@ class Main extends hxd.App {
 	override function update(dt:Float) {
 		super.update(dt);
 		if (loaded) {
+			ProfilerUI.begin();
+			ProfilerUI.measure("updateBegin");
 			marbleGame.update(dt);
 			// world.update(dt);
-			// fpsCounter.text = 'FPS: ${this.engine.fps}';
+			ProfilerUI.update(this.engine.fps);
 		}
 	}
 
 	override function render(e:h3d.Engine) {
 		// this.world.render(e);
 		if (loaded) {
-			// debugProfiler.begin();
-			// debugProfiler.measure("marbleGame");
+			ProfilerUI.measure("renderBegin");
 			marbleGame.render(e);
-			// debugProfiler.end();
+			ProfilerUI.end();
 		}
 		super.render(e);
 	}
