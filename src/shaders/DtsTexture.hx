@@ -4,6 +4,10 @@ class DtsTexture extends hxsl.Shader {
 	static var SRC = {
 		@input var input:{
 			var uv:Vec2;
+			var normal:Vec3;
+		};
+		@global var global:{
+			@perObject var modelView:Mat4;
 		};
 		@const var additive:Bool;
 		@const var killAlpha:Bool;
@@ -14,8 +18,10 @@ class DtsTexture extends hxsl.Shader {
 		var calculatedUV:Vec2;
 		var pixelColor:Vec4;
 		var specColor:Vec3;
+		var transformedNormal:Vec3;
 		function vertex() {
 			calculatedUV = input.uv;
+			transformedNormal = (input.normal * global.modelView.mat3());
 		}
 		function fragment() {
 			var c = texture.get(calculatedUV);

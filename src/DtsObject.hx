@@ -815,9 +815,9 @@ class DtsObject extends GameObject {
 				if (pos >= prim.points.length) {
 					meshIndex++;
 					if (prim.buffer != null) {
-						prim.addNormals();
-						for (norm in prim.normals)
-							norm = norm.multiply(-1);
+						// prim.addNormals();
+						// for (norm in prim.normals)
+						// 	norm = norm.multiply(-1);
 						prim.flush();
 					}
 					mesh.primitive = prim;
@@ -831,7 +831,7 @@ class DtsObject extends GameObject {
 				var vertex = info.vertices[i];
 				var normal = info.normals[i];
 				prim.points[pos] = vertex.toPoint();
-				prim.normals[pos] = normal.toPoint().normalized();
+				prim.normals[pos] = normal.toPoint(); // .normalized();
 				if (prim.buffer != null) {
 					prim.dirtyFlags[pos] = true;
 				}

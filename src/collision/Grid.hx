@@ -9,7 +9,7 @@ class Grid {
 
 	public var cellSize:Vector; // The dimensions of one cell
 
-	public static var CELL_DIV = new Vector(16, 16, 16); // split the bounds into cells of dimensions 1/16th of the corresponding dimensions of the bounds
+	public static var CELL_DIV = new Vector(12, 12, 12); // split the bounds into cells of dimensions 1/16th of the corresponding dimensions of the bounds
 
 	var map:Map<Int, Array<Int>> = new Map();
 

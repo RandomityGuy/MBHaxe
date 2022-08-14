@@ -49,8 +49,8 @@ class Tornado extends ForceObject {
 		this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/tornado.wav", ResourceLoader.getAudio, this.soundResources),
 			new Vector(1e8, 1e8, 1e8), true);
 		for (material in this.materials) {
-			// material.blendMode = Alpha;
-			material.mainPass.culling = h3d.mat.Data.Face.None;
+			material.blendMode = Alpha;
+			// material.mainPass.culling = h3d.mat.Data.Face.None;
 		}
 	}
 
