@@ -269,7 +269,8 @@ class ParticleEmitter {
 }
 
 class ParticleManager {
-	var particlebatches:Map<String, ParticleBatch> = new Map();
+	var particlebatches:Array<ParticleBatch> = [];
+	var particlebatchMap:Map<String, Int> = [];
 	var level:MarbleWorld;
 	var scene:Scene;
 	var currentTime:Float;
@@ -283,12 +284,12 @@ class ParticleManager {
 
 	public function update(currentTime:Float, dt:Float) {
 		this.currentTime = currentTime;
-		for (obj => batch in particlebatches) {
+		for (batch in particlebatches) {
 			for (instance in batch.instances)
 				instance.update(currentTime, dt);
 		}
 		this.tick(dt);
-		for (obj => batch in particlebatches) {
+		for (batch in particlebatches) {
 			batch.meshBatch.begin(batch.instances.length);
 			for (instance in batch.instances) {
 				if (instance.currentAge != 0) {
@@ -310,8 +311,8 @@ class ParticleManager {
 	}
 
 	public function addParticle(particleData:ParticleData, particle:Particle) {
-		if (particlebatches.exists(particleData.identifier)) {
-			particlebatches.get(particleData.identifier).instances.push(particle);
+		if (particlebatchMap.exists(particleData.identifier)) {
+			particlebatches[particlebatchMap.get(particleData.identifier)].instances.push(particle);
 		} else {
 			var pts = [
 				new Point(-0.5, -0.5, 0),
@@ -343,13 +344,15 @@ class ParticleManager {
 				instances: [particle],
 				meshBatch: mb
 			};
-			particlebatches.set(particleData.identifier, batch);
+			var curidx = particlebatches.length;
+			particlebatches.push(batch);
+			particlebatchMap.set(particleData.identifier, curidx);
 		}
 	}
 
 	public function removeParticle(particleData:ParticleData, particle:Particle) {
-		if (particlebatches.exists(particleData.identifier)) {
-			particlebatches.get(particleData.identifier).instances.remove(particle);
+		if (particlebatchMap.exists(particleData.identifier)) {
+			particlebatches[particlebatchMap.get(particleData.identifier)].instances.remove(particle);
 		}
 	}
 

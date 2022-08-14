@@ -1,5 +1,6 @@
 package src;
 
+import h3d.col.Bounds;
 import h3d.col.Plane;
 import h3d.mat.Material;
 import h3d.prim.Cube;
@@ -239,18 +240,23 @@ class CameraController extends Object {
 			var rayCastDirection = camera.pos.sub(rayCastOrigin);
 			rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
 
-			var results = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection);
+			var rayCastLen = rayCastDirection.length();
 
-			var firstHit:octree.OctreeIntersection = null;
+			var results = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection.normalized(), rayCastLen);
+
+			var firstHit:octree.IOctreeObject.RayIntersectionData = null;
+			var firstHitDistance = 1e8;
 			for (result in results) {
-				if (!processedShapes.contains(result.object) && (firstHit == null || (result.distance < firstHit.distance))) {
+				if (!processedShapes.contains(result.object)
+					&& (firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
 					firstHit = result;
+					firstHitDistance = rayCastOrigin.distance(result.point);
 					processedShapes.push(result.object);
 				}
 			}
 
 			if (firstHit != null) {
-				if (firstHit.distance < CameraDistance) {
+				if (firstHitDistance < CameraDistance) {
 					// camera.pos = marblePosition.sub(directionVector.multiply(firstHit.distance * 0.7));
 					var plane = new Plane(firstHit.normal.x, firstHit.normal.y, firstHit.normal.z, firstHit.point.dot(firstHit.normal));
 					var normal = firstHit.normal.multiply(-1);

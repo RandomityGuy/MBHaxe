@@ -39,6 +39,9 @@ class ResourceLoader {
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
+		// hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
+		@:privateAccess hxd.res.Image.ENABLE_AUTO_WATCH = false;
+		// @:privateAccess hxd.res.Sound.ENABLE_AUTO_WATCH = false;
 		#if (js || android)
 		var mfileSystem = ManifestBuilder.create("data");
 		var mloader = new ManifestLoader(mfileSystem);
@@ -140,6 +143,7 @@ class ResourceLoader {
 			return audioCache.get(path);
 		if (fileSystem.exists(path)) {
 			var snd = loader.load(path).toSound();
+			// @:privateAccess snd.watchCallb();
 			var audioresource = new Resource(snd, path, audioCache, snd -> snd.dispose());
 			audioCache.set(path, audioresource);
 			return audioresource;

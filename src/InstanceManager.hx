@@ -25,7 +25,9 @@ typedef MeshInstance = {
 }
 
 class InstanceManager {
-	var objects:Map<String, Array<MeshBatchInfo>> = new Map();
+	var objects:Array<Array<MeshBatchInfo>> = [];
+
+	var objectMap:Map<String, Int> = [];
 	var scene:Scene;
 
 	public function new(scene:Scene) {
@@ -33,7 +35,7 @@ class InstanceManager {
 	}
 
 	public function update(dt:Float) {
-		for (obj => meshes in objects) {
+		for (meshes in objects) {
 			for (minfo in meshes) {
 				if (minfo.meshbatch != null) {
 					var opaqueinstances = minfo.instances.filter(x -> x.gameObject.currentOpacity == 1);
@@ -43,7 +45,7 @@ class InstanceManager {
 						if (dtsShader != null) {
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
-						var transform = instance.emptyObj.getAbsPos().clone();
+						var transform = instance.emptyObj.getAbsPos();
 						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						minfo.meshbatch.setTransform(transform);
@@ -68,7 +70,7 @@ class InstanceManager {
 						// 	dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						// 	minfo.transparencymeshbatch.shadersChanged = true;
 						// }
-						var transform = instance.emptyObj.getAbsPos().clone();
+						var transform = instance.emptyObj.getAbsPos();
 						minfo.transparencymeshbatch.setTransform(transform);
 						minfo.transparencymeshbatch.emitInstance();
 					}
@@ -89,7 +91,7 @@ class InstanceManager {
 		if (isInstanced(object)) {
 			// Add existing instance
 			var objs = getAllChildren(object);
-			var minfos = objects.get(object.identifier);
+			var minfos = objects[objectMap.get(object.identifier)]; // objects.get(object.identifier);
 			for (i in 0...objs.length) {
 				minfos[i].instances.push({emptyObj: objs[i], gameObject: object});
 			}
@@ -129,13 +131,15 @@ class InstanceManager {
 				}
 				minfos.push(minfo);
 			}
-			objects.set(object.identifier, minfos);
+			var curidx = objects.length;
+			objects.push(minfos);
+			objectMap.set(object.identifier, curidx);
 		}
 	}
 
 	public function getObjectBounds(object:GameObject) {
 		if (isInstanced(object)) {
-			var minfos = objects.get(object.identifier);
+			var minfos = objects[objectMap.get(object.identifier)];
 			var invmat = minfos[0].instances[0].gameObject.getInvPos();
 			var b = minfos[0].instances[0].gameObject.getBounds().clone();
 			b.transform(invmat);
@@ -149,7 +153,7 @@ class InstanceManager {
 	}
 
 	public function isInstanced(object:GameObject) {
-		if (objects.exists(object.identifier))
+		if (objectMap.exists(object.identifier))
 			return true;
 		return false;
 	}

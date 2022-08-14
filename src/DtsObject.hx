@@ -814,12 +814,6 @@ class DtsObject extends GameObject {
 			for (i in info.indices) {
 				if (pos >= prim.points.length) {
 					meshIndex++;
-					if (prim.buffer != null) {
-						// prim.addNormals();
-						// for (norm in prim.normals)
-						// 	norm = norm.multiply(-1);
-						prim.flush();
-					}
 					mesh.primitive = prim;
 					mesh = cast info.geometry.children[meshIndex];
 					prim = cast mesh.primitive;

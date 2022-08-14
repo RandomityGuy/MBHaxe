@@ -88,11 +88,22 @@ class CollisionWorld {
 		return contacts;
 	}
 
-	public function rayCast(rayStart:Vector, rayDirection:Vector) {
+	public function rayCast(rayStart:Vector, rayDirection:Vector, rayLength:Float) {
 		// 	return [];
 		rayStart.w = 1;
 		rayDirection.w = 1;
-		return this.octree.raycast(rayStart, rayDirection);
+		var bounds = new Bounds();
+		bounds.addPos(rayStart.x, rayStart.y, rayStart.z);
+		bounds.addPos(rayStart.x
+			+ rayDirection.x * rayLength, rayStart.y
+			+ rayDirection.y * rayLength, rayStart.z
+			+ rayDirection.z * rayLength);
+		var objs = this.octree.boundingSearch(bounds).map(x -> cast(x, CollisionEntity));
+		var results = [];
+		for (obj in objs) {
+			results = results.concat(obj.rayCast(rayStart, rayDirection));
+		}
+		return results;
 	}
 
 	public function addEntity(entity:CollisionEntity) {
