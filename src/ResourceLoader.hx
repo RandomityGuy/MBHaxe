@@ -39,9 +39,10 @@ class ResourceLoader {
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
-		// hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
+		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
 		@:privateAccess hxd.res.Image.ENABLE_AUTO_WATCH = false;
-		// @:privateAccess hxd.res.Sound.ENABLE_AUTO_WATCH = false;
+		@:privateAccess hxd.res.Sound.ENABLE_AUTO_WATCH = false;
+		haxe.MainLoop.add(() -> {});
 		#if (js || android)
 		var mfileSystem = ManifestBuilder.create("data");
 		var mloader = new ManifestLoader(mfileSystem);
