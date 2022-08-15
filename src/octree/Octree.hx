@@ -13,7 +13,8 @@ class Octree {
 	/** A map of each object in the octree to the node that it's in. This accelerates removal drastically, as the lookup step can be skipped. */
 	public var objectToNode:Map<IOctreeObject, OctreeNode>;
 
-	public var tempBox = new Bounds();
+	var prevBoundSearch:Bounds;
+	var boundSearchCache:Array<IOctreeElement>;
 
 	public function new() {
 		this.root = new OctreeNode(this, 0);
@@ -140,7 +141,14 @@ class Octree {
 
 	public function boundingSearch(bounds:Bounds) {
 		var intersections = [];
+		if (this.prevBoundSearch != null) {
+			if (this.prevBoundSearch.containsBounds(bounds)) {
+				return boundSearchCache;
+			}
+		}
 		this.root.boundingSearch(bounds, intersections);
+		prevBoundSearch = bounds;
+		boundSearchCache = intersections;
 		return intersections;
 	}
 

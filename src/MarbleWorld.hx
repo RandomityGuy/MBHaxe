@@ -288,6 +288,8 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.init(cast this);
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
 		this.marble.camera.CameraPitch = 0.45;
+		this.marble.camera.nextCameraPitch = 0.45;
+		this.marble.camera.nextCameraYaw = euler.z + Math.PI / 2;
 		this.marble.camera.oob = false;
 		this.marble.camera.finish = false;
 		this.marble.mode = Start;
@@ -693,6 +695,7 @@ class MarbleWorld extends Scheduler {
 			this.forceObjects.push(cast obj);
 		}
 		obj.init(cast this);
+		obj.update(this.timeState);
 		if (obj.useInstancing) {
 			this.instanceManager.addObject(obj);
 		} else

@@ -893,11 +893,11 @@ class DtsObject extends GameObject {
 		if (mountPoint < 32) {
 			var ni = mountPointNodes[mountPoint];
 			if (ni != -1) {
-				var mtransform = this.graphNodes[ni].getAbsPos().clone();
+				var mtransform = this.graphNodes[ni].getAbsPos();
 				return mtransform;
 			}
 		}
-		return this.getTransform().clone();
+		return this.getTransform();
 	}
 
 	public function setOpacity(opacity:Float) {
