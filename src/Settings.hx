@@ -115,8 +115,10 @@ class Settings {
 	public static var isTouch:Option<Bool> = Option.None;
 
 	public static function applySettings() {
+		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		#end
 		AudioManager.updateVolumes();
 
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
