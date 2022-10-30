@@ -9,6 +9,7 @@ import hxd.res.Sound;
 import src.Settings;
 import hxd.snd.ChannelGroup;
 import src.Resource;
+import src.ResourceLoaderWorker;
 
 class AudioManager {
 	static var manager:hxd.snd.Manager;

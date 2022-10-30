@@ -399,7 +399,7 @@ class DtsObject extends GameObject {
 				#end
 				// Apparently creating these bitmap datas dont work so we'll just get the snag a white texture in the filesystem
 				#if js
-				var texture:Texture = ResourceLoader.getResource("data/interiors/parts/white.jpg", ResourceLoader.getTexture, this.textureResources);
+				var texture:Texture = ResourceLoader.getResource("data/shapes/pads/white.jpg", ResourceLoader.getTexture, this.textureResources);
 				texture.wrap = Wrap.Repeat;
 				#end
 				material.texture = texture;

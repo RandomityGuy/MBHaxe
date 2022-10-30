@@ -16,6 +16,7 @@ import hxd.fs.LocalFileSystem;
 import hxd.fs.FileSystem;
 import hxd.res.Loader;
 import src.Resource;
+import src.ResourceLoaderWorker;
 
 class ResourceLoader {
 	#if (hl && !android)
@@ -45,18 +46,129 @@ class ResourceLoader {
 		haxe.MainLoop.add(() -> {});
 		#if (js || android)
 		var mfileSystem = ManifestBuilder.create("data");
-		var mloader = new ManifestLoader(mfileSystem);
+		var mloader:ManifestLoader = new ManifestLoader(mfileSystem);
 
 		var preloader = new ManifestProgress(mloader, () -> {
 			loader = mloader;
 			fileSystem = mfileSystem;
 			onLoadedFunc();
 		}, scene2d);
-		preloader.start();
+		loader = mloader;
+		fileSystem = mfileSystem;
+		var worker = new ResourceLoaderWorker(onLoadedFunc);
+		worker.addTask(fwd -> preloadUI(fwd));
+		worker.addTask(fwd -> preloadMisFiles(fwd));
+		worker.addTask(fwd -> preloadMusic(fwd));
+		worker.addTask(fwd -> preloadUISounds(fwd));
+		worker.addTask(fwd -> preloadShapes(fwd));
+		worker.run();
+		// preloader.start();
 		#end
 		#if (hl && !android)
 		onLoadedFunc();
 		#end
+	}
+
+	static function preloadUI(onFinish:Void->Void) {
+		var toloadfiles = [];
+		var toloaddirs = [];
+		var filestats = fileSystem.dir("font").concat(fileSystem.dir("ui"));
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
+		while (toloaddirs.length > 0) {
+			var nextdir = toloaddirs.pop();
+			for (file in fileSystem.dir(nextdir.path.substring(2))) {
+				if (file.isDirectory) {
+					toloaddirs.push(file);
+				} else {
+					toloadfiles.push(file);
+				}
+			}
+		}
+		var worker = new ResourceLoaderWorker(onFinish);
+		for (file in toloadfiles) {
+			worker.addTask((fwd) -> file.load(fwd));
+		}
+		worker.run();
+	}
+
+	static function preloadMisFiles(onFinish:Void->Void) {
+		var toloadfiles = [];
+		var toloaddirs = [];
+		var filestats = fileSystem.dir("missions");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
+		while (toloaddirs.length > 0) {
+			var nextdir = toloaddirs.pop();
+			for (file in fileSystem.dir(nextdir.path.substring(2))) {
+				if (file.isDirectory) {
+					toloaddirs.push(file);
+				} else {
+					if (file.extension == "mis")
+						toloadfiles.push(file);
+				}
+			}
+		}
+		var worker = new ResourceLoaderWorker(onFinish);
+		for (file in toloadfiles) {
+			worker.addTask((fwd) -> file.load(fwd));
+		}
+		worker.run();
+	}
+
+	static function preloadMusic(onFinish:Void->Void) {
+		var worker = new ResourceLoaderWorker(onFinish);
+		worker.loadFile("sound/shell.ogg");
+		worker.loadFile("sound/groovepolice.ogg");
+		worker.loadFile("sound/classic vibe.ogg");
+		worker.loadFile("sound/beach party.ogg");
+		worker.run();
+	}
+
+	static function preloadUISounds(onFinish:Void->Void) {
+		var worker = new ResourceLoaderWorker(onFinish);
+		worker.loadFile("sound/testing.wav");
+		worker.loadFile("sound/buttonover.wav");
+		worker.loadFile("sound/buttonpress.wav");
+		worker.run();
+	}
+
+	static function preloadShapes(onFinish:Void->Void) {
+		var toloadfiles = [];
+		var toloaddirs = [];
+		var filestats = fileSystem.dir("shapes");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
+		while (toloaddirs.length > 0) {
+			var nextdir = toloaddirs.pop();
+			for (file in fileSystem.dir(nextdir.path.substring(2))) {
+				if (file.isDirectory) {
+					toloaddirs.push(file);
+				} else {
+					toloadfiles.push(file);
+				}
+			}
+		}
+		var worker = new ResourceLoaderWorker(onFinish);
+		for (file in toloadfiles) {
+			worker.addTask((fwd) -> file.load(fwd));
+		}
+		worker.run();
 	}
 
 	public static function loadInterior(path:String) {
