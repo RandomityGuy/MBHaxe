@@ -30,7 +30,7 @@ class SmallDuctFan extends ForceObject {
 
 	public override function init(level:src.MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.loader.load("sound/fan_loop.wav").entry.load(() -> {
+			ResourceLoader.load("sound/fan_loop.wav").entry.load(() -> {
 				this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/fan_loop.wav", ResourceLoader.getAudio,
 					this.soundResources), new Vector(1e8, 1e8, 1e8), true);
 				onFinish();

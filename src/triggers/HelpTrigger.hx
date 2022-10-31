@@ -12,6 +12,6 @@ class HelpTrigger extends Trigger {
 	}
 
 	public override function init(onFinish:Void->Void) {
-		ResourceLoader.loader.load("sound/infotutorial.wav").entry.load(onFinish);
+		ResourceLoader.load("sound/infotutorial.wav").entry.load(onFinish);
 	}
 }

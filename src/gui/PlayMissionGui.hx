@@ -491,6 +491,11 @@ class PlayMissionGui extends GuiImage {
 					}, 75));
 			}
 			#end
+			#if hl
+			currentMission.getPreviewImage(prevImg -> {
+				pmPreview.bmp.tile = prevImg;
+			}); // Shit be sync
+			#end
 
 			levelBkgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
 

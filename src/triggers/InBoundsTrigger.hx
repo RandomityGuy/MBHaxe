@@ -10,6 +10,6 @@ class InBoundsTrigger extends Trigger {
 	}
 
 	public override function init(onFinish:Void->Void) {
-		ResourceLoader.loader.load("sound/whoosh.wav").entry.load(onFinish);
+		ResourceLoader.load("sound/whoosh.wav").entry.load(onFinish);
 	}
 }

@@ -117,7 +117,7 @@ class LandMine extends DtsObject {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.loader.load("sound/explode1.wav").entry.load(onFinish);
+			ResourceLoader.load("sound/explode1.wav").entry.load(onFinish);
 		});
 	}
 

@@ -102,7 +102,7 @@ class DifBuilder {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
-		ResourceLoader.loader.load(path).entry.load(() -> {
+		ResourceLoader.load(path).entry.load(() -> {
 			var difresource = ResourceLoader.loadInterior(path);
 			difresource.acquire();
 			var dif = difresource.resource;
@@ -169,7 +169,7 @@ class DifBuilder {
 					colliderSurface.originalIndices = [];
 					colliderSurface.originalSurfaceIndex = surfaceindex;
 
-					for (k in(surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
+					for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
 						var p1, p2, p3;
 						if ((k - (surface.windingStart + 2)) % 2 == 0) {
 							p1 = points[geo.windings[k]];

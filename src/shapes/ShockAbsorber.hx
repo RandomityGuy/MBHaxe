@@ -18,7 +18,7 @@ class ShockAbsorber extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.loader.load("sound/pushockabsorbervoice.wav").entry.load(() -> {
+			ResourceLoader.load("sound/pushockabsorbervoice.wav").entry.load(() -> {
 				this.pickupSound = ResourceLoader.getResource("data/sound/pushockabsorbervoice.wav", ResourceLoader.getAudio, this.soundResources);
 				onFinish();
 			});

@@ -133,7 +133,7 @@ class PathedInterior extends InteriorObject {
 		}
 
 		if (this.element.datablock.toLowerCase() == "pathedmovingblock") {
-			ResourceLoader.loader.load("sound/movingblockloop.wav").entry.load(() -> {
+			ResourceLoader.load("sound/movingblockloop.wav").entry.load(() -> {
 				this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/movingblockloop.wav", ResourceLoader.getAudio,
 					this.soundResources), new Vector(), true);
 			});

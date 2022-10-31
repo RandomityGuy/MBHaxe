@@ -203,6 +203,14 @@ class ResourceLoader {
 		worker.run();
 	}
 
+	public static function load(path:String) {
+		#if hl
+		if (!StringTools.startsWith(path, "data/"))
+			path = "data/" + path;
+		#end
+		return ResourceLoader.loader.load(path);
+	}
+
 	public static function loadInterior(path:String) {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");

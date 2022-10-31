@@ -39,7 +39,7 @@ class EndPad extends DtsObject {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.loader.load("sound/firewrks.wav").entry.load(onFinish);
+			ResourceLoader.load("sound/firewrks.wav").entry.load(onFinish);
 		});
 	}
 

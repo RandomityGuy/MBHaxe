@@ -22,7 +22,7 @@ class SuperBounce extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.loader.load("sound/pusuperbouncevoice.wav").entry.load(() -> {
+			ResourceLoader.load("sound/pusuperbouncevoice.wav").entry.load(() -> {
 				this.pickupSound = ResourceLoader.getResource("data/sound/pusuperbouncevoice.wav", ResourceLoader.getAudio, this.soundResources);
 				onFinish();
 			});

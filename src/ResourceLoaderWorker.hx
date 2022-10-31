@@ -27,6 +27,6 @@ class ResourceLoaderWorker {
 	}
 
 	public function loadFile(path:String) {
-		addTask(fwd -> ResourceLoader.loader.load(path).entry.load(fwd));
+		addTask(fwd -> ResourceLoader.load(path).entry.load(fwd));
 	}
 }

@@ -56,9 +56,9 @@ class SuperSpeed extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.loader.load("sound/pusuperspeedvoice.wav").entry.load(() -> {
+			ResourceLoader.load("sound/pusuperspeedvoice.wav").entry.load(() -> {
 				this.pickupSound = ResourceLoader.getResource("data/sound/pusuperspeedvoice.wav", ResourceLoader.getAudio, this.soundResources);
-				ResourceLoader.loader.load("sound/dosuperspeed.wav").entry.load(onFinish);
+				ResourceLoader.load("sound/dosuperspeed.wav").entry.load(onFinish);
 			});
 		});
 	}
