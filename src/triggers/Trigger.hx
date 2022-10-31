@@ -73,4 +73,8 @@ class Trigger extends GameObject {
 		// // m2.setPosition(boundingbox.xMax, boundingbox.yMax, boundingbox.zMax);
 		// mesh.setPosition(boundingbox.xMin, boundingbox.yMin, boundingbox.zMin);
 	}
+
+	public function init(onFinish:Void->Void) {
+		onFinish();
+	}
 }

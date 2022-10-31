@@ -8,6 +8,7 @@ import src.ParticleSystem.ParticleData;
 import h3d.Vector;
 import src.AudioManager;
 import src.DtsObject;
+import src.MarbleWorld;
 
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ejectionPeriod: 10,
@@ -45,7 +46,15 @@ class SuperJump extends PowerUp {
 		sjEmitterParticleData = new ParticleData();
 		sjEmitterParticleData.identifier = "superJumpParticle";
 		sjEmitterParticleData.texture = ResourceLoader.getResource("data/particles/twirl.png", ResourceLoader.getTexture, this.textureResources);
-		this.pickupSound = ResourceLoader.getResource("data/sound/pusuperjumpvoice.wav", ResourceLoader.getAudio, this.soundResources);
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/pusuperjumpvoice.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("sound/pusuperjumpvoice.wav", ResourceLoader.getAudio, this.soundResources);
+				ResourceLoader.loader.load("sound/dosuperjump.wav").entry.load(onFinish);
+			});
+		});
 	}
 
 	public function pickUp():Bool {

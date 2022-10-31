@@ -1,5 +1,6 @@
 package gui;
 
+import haxe.ds.Option;
 import hxd.Key;
 import gui.GuiControl.MouseState;
 import h3d.Matrix;
@@ -34,6 +35,10 @@ class PlayMissionGui extends GuiImage {
 
 	var buttonCooldown:Float = 0.5;
 	var maxButtonCooldown:Float = 0.5;
+
+	#if js
+	var previewTimeoutHandle:Option<Int> = None;
+	#end
 
 	public function new() {
 		MissionList.buildMissionList();
@@ -112,8 +117,11 @@ class PlayMissionGui extends GuiImage {
 		textWnd.extent = new Vector(276, 229);
 		pmBox.addChild(textWnd);
 
-		var pmPreview = new GuiImage(ResourceLoader.getResource("data/missions/beginner/superspeed.jpg", ResourceLoader.getImage, this.imageResources)
-			.toTile());
+		var temprev = new BitmapData(1, 1);
+		temprev.setPixel(0, 0, 0);
+		var tmpprevtile = Tile.fromBitmap(temprev);
+
+		var pmPreview = new GuiImage(tmpprevtile);
 		pmPreview.position = new Vector(312, 42);
 		pmPreview.extent = new Vector(258, 193);
 		pmBox.addChild(pmPreview);
@@ -465,9 +473,27 @@ class PlayMissionGui extends GuiImage {
 			pmDescriptionOther.text.text = descText2;
 			pmDescriptionOther.text.loadImage = (name) -> goldBadge;
 
-			pmPreview.bmp.tile = currentMission.getPreviewImage();
+			pmPreview.bmp.tile = tmpprevtile;
+			#if js
+			switch (previewTimeoutHandle) {
+				case None:
+					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
+						currentMission.getPreviewImage(prevImg -> {
+							pmPreview.bmp.tile = prevImg;
+						});
+					}, 75));
+				case Some(previewTimeoutHandle_id):
+					js.Browser.window.clearTimeout(previewTimeoutHandle_id);
+					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
+						currentMission.getPreviewImage(prevImg -> {
+							pmPreview.bmp.tile = prevImg;
+						});
+					}, 75));
+			}
+			#end
 
 			levelBkgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
+
 			levelFgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
 		}
 

@@ -4,6 +4,7 @@ import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
+import src.MarbleWorld;
 
 class SuperBounce extends PowerUp {
 	public function new(element:MissionElementItem) {
@@ -13,11 +14,19 @@ class SuperBounce extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "SuperBounce";
 		this.pickUpName = "Super Bounce PowerUp";
-		this.pickupSound = ResourceLoader.getResource("data/sound/pusuperbouncevoice.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {
 		return this.level.pickUpPowerUp(this);
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/pusuperbouncevoice.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/pusuperbouncevoice.wav", ResourceLoader.getAudio, this.soundResources);
+				onFinish();
+			});
+		});
 	}
 
 	public function use(timeState:TimeState) {

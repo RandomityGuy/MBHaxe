@@ -9,6 +9,7 @@ import h3d.Quat;
 import h3d.Vector;
 import src.DtsObject;
 import src.AudioManager;
+import src.MarbleWorld;
 
 final superSpeedParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
@@ -51,7 +52,15 @@ class SuperSpeed extends PowerUp {
 		ssEmitterParticleData = new ParticleData();
 		ssEmitterParticleData.identifier = "superSpeedParticle";
 		ssEmitterParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
-		this.pickupSound = ResourceLoader.getResource("data/sound/pusuperspeedvoice.wav", ResourceLoader.getAudio, this.soundResources);
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/pusuperspeedvoice.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/pusuperspeedvoice.wav", ResourceLoader.getAudio, this.soundResources);
+				ResourceLoader.loader.load("sound/dosuperspeed.wav").entry.load(onFinish);
+			});
+		});
 	}
 
 	public function pickUp():Bool {

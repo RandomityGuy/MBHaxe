@@ -112,7 +112,7 @@ class DtsObject extends GameObject {
 		super();
 	}
 
-	public function init(level:MarbleWorld) {
+	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.dtsResource = ResourceLoader.loadDts(this.dtsPath);
 		this.dtsResource.acquire();
 		this.dts = this.dtsResource.resource;
@@ -340,6 +340,8 @@ class DtsObject extends GameObject {
 		for (i in 0...graphNodes.length) {
 			this.dirtyTransforms.push(true);
 		}
+
+		onFinish();
 	}
 
 	function computeMaterials() {

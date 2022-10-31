@@ -84,6 +84,22 @@ class MarbleGame {
 			};
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
 		});
+		canvas.addEventListener('mousedown', (e:js.html.MouseEvent) -> {
+			var buttonCode = switch (e.button) {
+				case 1: 2;
+				case 2: 1;
+				case x: x;
+			};
+			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+		});
+		canvas.addEventListener('mouseup', (e:js.html.MouseEvent) -> {
+			var buttonCode = switch (e.button) {
+				case 1: 2;
+				case 2: 1;
+				case x: x;
+			};
+			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+		});
 		pointercontainer.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();

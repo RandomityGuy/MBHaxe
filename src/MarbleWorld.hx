@@ -1,5 +1,6 @@
 package src;
 
+import hxd.impl.Air3File.FileSeek;
 import gui.Canvas;
 import hxd.snd.Channel;
 import hxd.res.Sound;
@@ -71,6 +72,7 @@ import collision.CollisionWorld;
 import src.Marble;
 import src.Resource;
 import src.ProfilerUI;
+import src.ResourceLoaderWorker;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -122,7 +124,7 @@ class MarbleWorld extends Scheduler {
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
 
-	var resourceLoadFuncs:Array<Void->Void> = [];
+	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
 
 	/** The new target camera orientation quat  */
 	public var newOrientationQuat = new Quat();
@@ -176,8 +178,16 @@ class MarbleWorld extends Scheduler {
 				}
 			}
 		};
-
-		this.resourceLoadFuncs.push(() -> {
+		this.mission.load();
+		scanMission(this.mission.root);
+		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
+		this.resourceLoadFuncs.push(fwd -> this.initMarble(fwd));
+		this.resourceLoadFuncs.push(fwd -> {
+			this.addSimGroup(this.mission.root);
+			this._loadingLength = resourceLoadFuncs.length;
+			fwd();
+		});
+		this.resourceLoadFuncs.push(fwd -> {
 			this.playGui.init(this.scene2d);
 			var musicFileName = [
 				'data/sound/groovepolice.ogg',
@@ -185,15 +195,8 @@ class MarbleWorld extends Scheduler {
 				'data/sound/beach party.ogg'
 			][(mission.index + 1) % 3];
 			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources));
+			fwd();
 		});
-		this.resourceLoadFuncs.push(() -> {
-			this.addSimGroup(this.mission.root);
-			this._loadingLength = resourceLoadFuncs.length;
-		});
-		this.resourceLoadFuncs.push(() -> this.initMarble());
-		this.resourceLoadFuncs.push(() -> this.initScene());
-		this.resourceLoadFuncs.push(() -> scanMission(this.mission.root));
-		this.resourceLoadFuncs.push(() -> this.mission.load());
 		this._loadingLength = resourceLoadFuncs.length;
 	}
 
@@ -205,53 +208,103 @@ class MarbleWorld extends Scheduler {
 		start();
 	}
 
-	public function initScene() {
+	public function initScene(onFinish:Void->Void) {
 		this.collisionWorld = new CollisionWorld();
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
 
-		var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
-
-		for (element in mission.root.elements) {
-			if (element._type != MissionElementType.Sun)
-				continue;
-
-			var sunElement:MissionElementSun = cast element;
-
-			var directionalColor = MisParser.parseVector4(sunElement.color);
-			var ambientColor = MisParser.parseVector4(sunElement.ambient);
-			var sunDirection = MisParser.parseVector3(sunElement.direction);
-			sunDirection.x = -sunDirection.x;
-			// sunDirection.z = -sunDirection.z;
-			var ls = cast(scene.lightSystem, h3d.scene.fwd.LightSystem);
-
-			ls.ambientLight.load(ambientColor);
-
-			var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
-			shadow.power = 0.5;
-			shadow.mode = Dynamic;
-			shadow.minDist = 0.1;
-			shadow.maxDist = 200;
-			shadow.bias = 0;
-
-			var sunlight = new DirLight(sunDirection, scene);
-			sunlight.color = directionalColor;
-		}
-
 		// var skyElement:MissionElementSky = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.Sky)[0];
 
+		var worker = new ResourceLoaderWorker(() -> {
+			var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
+
+			for (element in mission.root.elements) {
+				if (element._type != MissionElementType.Sun)
+					continue;
+
+				var sunElement:MissionElementSun = cast element;
+
+				var directionalColor = MisParser.parseVector4(sunElement.color);
+				var ambientColor = MisParser.parseVector4(sunElement.ambient);
+				var sunDirection = MisParser.parseVector3(sunElement.direction);
+				sunDirection.x = -sunDirection.x;
+				// sunDirection.z = -sunDirection.z;
+				var ls = cast(scene.lightSystem, h3d.scene.fwd.LightSystem);
+
+				ls.ambientLight.load(ambientColor);
+
+				var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
+				shadow.power = 0.5;
+				shadow.mode = Dynamic;
+				shadow.minDist = 0.1;
+				shadow.maxDist = 200;
+				shadow.bias = 0;
+
+				var sunlight = new DirLight(sunDirection, scene);
+				sunlight.color = directionalColor;
+			}
+
+			onFinish();
+		});
+		var filestoload = [
+			"particles/bubble.png",
+			"particles/saturn.png",
+			"particles/smoke.png",
+			"particles/spark.png",
+			"particles/star.png",
+			"particles/twirl.png",
+			"skies/sky_day.dml"
+		];
+
+		for (file in filestoload) {
+			worker.loadFile(file);
+		}
+
 		this.sky = new Sky();
+
 		sky.dmlPath = "data/skies/sky_day.dml";
 
-		sky.init(cast this);
-		scene.addChild(sky);
+		worker.addTask(fwd -> sky.init(cast this, fwd));
+		worker.addTask(fwd -> {
+			scene.addChild(sky);
+			return fwd();
+		});
+
+		worker.run();
 	}
 
-	public function initMarble() {
-		var marble = new Marble();
-		marble.controllable = true;
-		this.addMarble(marble);
+	public function initMarble(onFinish:Void->Void) {
+		var worker = new ResourceLoaderWorker(onFinish);
+		var marblefiles = [
+			"particles/star.png",
+			"particles/smoke.png",
+			"sound/rolling_hard.wav",
+			"sound/sliding.wav",
+			"sound/superbounceactive.wav",
+			"sound/forcefield.wav",
+			"sound/use_gyrocopter.wav",
+			"sound/bumperding1.wav",
+			"sound/bumper1.wav",
+			"sound/jump.wav",
+			"sound/bouncehard1.wav",
+			"sound/bouncehard2.wav",
+			"sound/bouncehard3.wav",
+			"sound/bouncehard4.wav",
+			"sound/spawn.wav",
+			"sound/ready.wav",
+			"sound/set.wav",
+			"sound/go.wav"
+		];
+		for (file in marblefiles) {
+			worker.loadFile(file);
+		}
+		worker.addTask(fwd -> {
+			var marble = new Marble();
+			marble.controllable = true;
+			this.addMarble(marble, fwd);
+		});
+		worker.run();
 	}
 
 	public function start() {
@@ -378,18 +431,23 @@ class MarbleWorld extends Scheduler {
 	public function addSimGroup(simGroup:MissionElementSimGroup) {
 		if (simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior).length != 0) {
 			// Create the pathed interior
-			resourceLoadFuncs.push(() -> {
-				var pathedInterior = src.PathedInterior.createFromSimGroup(simGroup, cast this);
-				this.addPathedInterior(pathedInterior);
-				if (pathedInterior == null)
-					return;
+			resourceLoadFuncs.push(fwd -> {
+				src.PathedInterior.createFromSimGroup(simGroup, cast this, pathedInterior -> {
+					this.addPathedInterior(pathedInterior, () -> {
+						if (pathedInterior == null) {
+							fwd();
+							return;
+						}
 
-				// if (pathedInterior.hasCollision)
-				// 	this.physics.addInterior(pathedInterior);
-				for (trigger in pathedInterior.triggers) {
-					this.triggers.push(trigger);
-					this.collisionWorld.addEntity(trigger.collider);
-				}
+						// if (pathedInterior.hasCollision)
+						// 	this.physics.addInterior(pathedInterior);
+						for (trigger in pathedInterior.triggers) {
+							this.triggers.push(trigger);
+							this.collisionWorld.addEntity(trigger.collider);
+						}
+						fwd();
+					});
+				});
 			});
 
 			return;
@@ -400,55 +458,61 @@ class MarbleWorld extends Scheduler {
 				case MissionElementType.SimGroup:
 					this.addSimGroup(cast element);
 				case MissionElementType.InteriorInstance:
-					resourceLoadFuncs.push(() -> this.addInteriorFromMis(cast element));
+					resourceLoadFuncs.push(fwd -> this.addInteriorFromMis(cast element, fwd));
 				case MissionElementType.StaticShape:
-					resourceLoadFuncs.push(() -> this.addStaticShape(cast element));
+					resourceLoadFuncs.push(fwd -> this.addStaticShape(cast element, fwd));
 				case MissionElementType.Item:
-					resourceLoadFuncs.push(() -> this.addItem(cast element));
+					resourceLoadFuncs.push(fwd -> this.addItem(cast element, fwd));
 				case MissionElementType.Trigger:
-					resourceLoadFuncs.push(() -> this.addTrigger(cast element));
+					resourceLoadFuncs.push(fwd -> this.addTrigger(cast element, fwd));
 				case MissionElementType.TSStatic:
-					resourceLoadFuncs.push(() -> this.addTSStatic(cast element));
+					resourceLoadFuncs.push(fwd -> this.addTSStatic(cast element, fwd));
 				case MissionElementType.ParticleEmitterNode:
-					resourceLoadFuncs.push(() -> this.addParticleEmitterNode(cast element));
+					resourceLoadFuncs.push(fwd -> {
+						this.addParticleEmitterNode(cast element);
+						fwd();
+					});
 				default:
 			}
 		}
 	}
 
-	public function addInteriorFromMis(element:MissionElementInteriorInstance) {
+	public function addInteriorFromMis(element:MissionElementInteriorInstance, onFinish:Void->Void) {
 		var difPath = this.mission.getDifPath(element.interiorfile);
-		if (difPath == "")
+		if (difPath == "") {
+			onFinish();
 			return;
+		}
 
 		var interior = new InteriorObject();
 		interior.interiorFile = difPath;
 		// DifBuilder.loadDif(difPath, interior);
 		// this.interiors.push(interior);
-		this.addInterior(interior);
+		this.addInterior(interior, () -> {
+			var interiorPosition = MisParser.parseVector3(element.position);
+			interiorPosition.x = -interiorPosition.x;
+			var interiorRotation = MisParser.parseRotation(element.rotation);
+			interiorRotation.x = -interiorRotation.x;
+			interiorRotation.w = -interiorRotation.w;
+			var interiorScale = MisParser.parseVector3(element.scale);
+			// var hasCollision = interiorScale.x != = 0 && interiorScale.y != = 0 && interiorScale.z != = 0; // Don't want to add buggy geometry
 
-		var interiorPosition = MisParser.parseVector3(element.position);
-		interiorPosition.x = -interiorPosition.x;
-		var interiorRotation = MisParser.parseRotation(element.rotation);
-		interiorRotation.x = -interiorRotation.x;
-		interiorRotation.w = -interiorRotation.w;
-		var interiorScale = MisParser.parseVector3(element.scale);
-		// var hasCollision = interiorScale.x != = 0 && interiorScale.y != = 0 && interiorScale.z != = 0; // Don't want to add buggy geometry
+			// Fix zero-volume interiors so they receive correct lighting
+			if (interiorScale.x == 0)
+				interiorScale.x = 0.0001;
+			if (interiorScale.y == 0)
+				interiorScale.y = 0.0001;
+			if (interiorScale.z == 0)
+				interiorScale.z = 0.0001;
 
-		// Fix zero-volume interiors so they receive correct lighting
-		if (interiorScale.x == 0)
-			interiorScale.x = 0.0001;
-		if (interiorScale.y == 0)
-			interiorScale.y = 0.0001;
-		if (interiorScale.z == 0)
-			interiorScale.z = 0.0001;
+			var mat = new Matrix();
+			interiorRotation.toMatrix(mat);
+			mat.scale(interiorScale.x, interiorScale.y, interiorScale.z);
+			mat.setPosition(interiorPosition);
 
-		var mat = new Matrix();
-		interiorRotation.toMatrix(mat);
-		mat.scale(interiorScale.x, interiorScale.y, interiorScale.z);
-		mat.setPosition(interiorPosition);
-
-		interior.setTransform(mat);
+			interior.setTransform(mat);
+			onFinish();
+		});
 
 		// interior.setTransform(interiorPosition, interiorRotation, interiorScale);
 
@@ -457,7 +521,7 @@ class MarbleWorld extends Scheduler {
 		// 	this.physics.addInterior(interior);
 	}
 
-	public function addStaticShape(element:MissionElementStaticShape) {
+	public function addStaticShape(element:MissionElementStaticShape, onFinish:Void->Void) {
 		var shape:DtsObject = null;
 
 		// Add the correct shape based on type
@@ -509,6 +573,7 @@ class MarbleWorld extends Scheduler {
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
 		else {
+			onFinish();
 			return;
 		}
 
@@ -531,15 +596,16 @@ class MarbleWorld extends Scheduler {
 		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
 		mat.setPosition(shapePosition);
 
-		this.addDtsObject(shape);
-
-		shape.setTransform(mat);
+		this.addDtsObject(shape, () -> {
+			shape.setTransform(mat);
+			onFinish();
+		});
 
 		// else if (dataBlockLowerCase == "pushbutton")
 		// 	shape = new PushButton();
 	}
 
-	public function addItem(element:MissionElementItem) {
+	public function addItem(element:MissionElementItem, onFinish:Void->Void) {
 		var shape:DtsObject = null;
 
 		// Add the correct shape based on type
@@ -585,6 +651,7 @@ class MarbleWorld extends Scheduler {
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
 		else {
+			onFinish();
 			return;
 		}
 
@@ -607,12 +674,13 @@ class MarbleWorld extends Scheduler {
 		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
 		mat.setPosition(shapePosition);
 
-		this.addDtsObject(shape);
-
-		shape.setTransform(mat);
+		this.addDtsObject(shape, () -> {
+			shape.setTransform(mat);
+			onFinish();
+		});
 	}
 
-	public function addTrigger(element:MissionElementTrigger) {
+	public function addTrigger(element:MissionElementTrigger, onFinish:Void->Void) {
 		var trigger:Trigger = null;
 
 		// Create a trigger based on type
@@ -625,12 +693,14 @@ class MarbleWorld extends Scheduler {
 		} else {
 			return;
 		}
-
-		this.triggers.push(trigger);
-		this.collisionWorld.addEntity(trigger.collider);
+		trigger.init(() -> {
+			this.triggers.push(trigger);
+			this.collisionWorld.addEntity(trigger.collider);
+			onFinish();
+		});
 	}
 
-	public function addTSStatic(element:MissionElementTSStatic) {
+	public function addTSStatic(element:MissionElementTSStatic, onFinish:Void->Void) {
 		// !! WARNING - UNTESTED !!
 		var shapeName = element.shapename;
 		var index = shapeName.indexOf('data/');
@@ -660,67 +730,80 @@ class MarbleWorld extends Scheduler {
 		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
 		mat.setPosition(shapePosition);
 
-		this.addDtsObject(tsShape);
-
-		tsShape.setTransform(mat);
+		this.addDtsObject(tsShape, () -> {
+			tsShape.setTransform(mat);
+			onFinish();
+		});
 	}
 
 	public function addParticleEmitterNode(element:MissionElementParticleEmitterNode) {
 		// TODO THIS SHIT
 	}
 
-	public function addInterior(obj:InteriorObject) {
+	public function addInterior(obj:InteriorObject, onFinish:Void->Void) {
 		this.interiors.push(obj);
-		obj.init(cast this);
-		this.collisionWorld.addEntity(obj.collider);
-		if (obj.useInstancing)
-			this.instanceManager.addObject(obj);
-		else
-			this.scene.addChild(obj);
+		obj.init(cast this, () -> {
+			this.collisionWorld.addEntity(obj.collider);
+			if (obj.useInstancing)
+				this.instanceManager.addObject(obj);
+			else
+				this.scene.addChild(obj);
+			onFinish();
+		});
 	}
 
-	public function addPathedInterior(obj:PathedInterior) {
+	public function addPathedInterior(obj:PathedInterior, onFinish:Void->Void) {
 		this.pathedInteriors.push(obj);
-		obj.init(cast this);
-		this.collisionWorld.addMovingEntity(obj.collider);
-		if (obj.useInstancing)
-			this.instanceManager.addObject(obj);
-		else
-			this.scene.addChild(obj);
+		obj.init(cast this, () -> {
+			this.collisionWorld.addMovingEntity(obj.collider);
+			if (obj.useInstancing)
+				this.instanceManager.addObject(obj);
+			else
+				this.scene.addChild(obj);
+			onFinish();
+		});
 	}
 
-	public function addDtsObject(obj:DtsObject) {
+	public function addDtsObject(obj:DtsObject, onFinish:Void->Void) {
 		this.dtsObjects.push(obj);
 		if (obj is ForceObject) {
 			this.forceObjects.push(cast obj);
 		}
-		obj.init(cast this);
-		obj.update(this.timeState);
-		if (obj.useInstancing) {
-			this.instanceManager.addObject(obj);
-		} else
-			this.scene.addChild(obj);
-		for (collider in obj.colliders) {
-			if (collider != null)
-				this.collisionWorld.addEntity(collider);
-		}
-		if (obj.isBoundingBoxCollideable)
-			this.collisionWorld.addEntity(obj.boundingCollider);
+		obj.init(cast this, () -> {
+			obj.update(this.timeState);
+			if (obj.useInstancing) {
+				this.instanceManager.addObject(obj);
+			} else
+				this.scene.addChild(obj);
+			for (collider in obj.colliders) {
+				if (collider != null)
+					this.collisionWorld.addEntity(collider);
+			}
+			if (obj.isBoundingBoxCollideable)
+				this.collisionWorld.addEntity(obj.boundingCollider);
+
+			onFinish();
+		});
 	}
 
-	public function addMarble(marble:Marble) {
+	public function addMarble(marble:Marble, onFinish:Void->Void) {
 		this.marbles.push(marble);
 		marble.level = cast this;
 		if (marble.controllable) {
-			marble.init(cast this);
-			this.scene.addChild(marble.camera);
-			this.marble = marble;
-			// Ugly hack
-			// sky.follow = marble;
-			sky.follow = marble.camera;
+			marble.init(cast this, () -> {
+				this.scene.addChild(marble.camera);
+				this.marble = marble;
+				// Ugly hack
+				// sky.follow = marble;
+				sky.follow = marble.camera;
+				this.collisionWorld.addMovingEntity(marble.collider);
+				this.scene.addChild(marble);
+				onFinish();
+			});
+		} else {
+			this.collisionWorld.addMovingEntity(marble.collider);
+			this.scene.addChild(marble);
 		}
-		this.collisionWorld.addMovingEntity(marble.collider);
-		this.scene.addChild(marble);
 	}
 
 	public function update(dt:Float) {
@@ -766,10 +849,10 @@ class MarbleWorld extends Scheduler {
 
 	function asyncLoadResources() {
 		if (this.resourceLoadFuncs.length != 0) {
-			// if (lock)
-			// 	return;
+			if (lock)
+				return;
 
-			var func = this.resourceLoadFuncs.pop();
+			var func = this.resourceLoadFuncs.shift();
 			lock = true;
 			#if hl
 			func();
@@ -778,12 +861,11 @@ class MarbleWorld extends Scheduler {
 			this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
 			#end
 			#if js
-			var prom = new js.lib.Promise((resolve, reject) -> {
-				func();
+			func(() -> {
 				lock = false;
-				resolve(true);
 				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
 				this._resourcesLoaded++;
+				js.Browser.console.log('${func} is done');
 			});
 			#end
 		} else {

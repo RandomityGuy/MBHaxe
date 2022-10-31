@@ -60,33 +60,34 @@ class PathedInterior extends InteriorObject {
 
 	var soundChannel:Channel;
 
-	public static function createFromSimGroup(simGroup:MissionElementSimGroup, level:MarbleWorld) {
+	public static function createFromSimGroup(simGroup:MissionElementSimGroup, level:MarbleWorld, onFinish:PathedInterior->Void) {
 		var interiorElement:MissionElementPathedInterior = cast simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior)[0];
 		var difFile = level.mission.getDifPath(interiorElement.interiorresource);
 		if (difFile == null)
-			return null;
+			onFinish(null);
 		var pathedInterior = new PathedInterior();
 		pathedInterior.level = level;
 
-		DifBuilder.loadDif(difFile, pathedInterior, cast MisParser.parseNumber(interiorElement.interiorindex)); // (difFile, path, level, );
+		DifBuilder.loadDif(difFile, pathedInterior, () -> {
+			pathedInterior.identifier = difFile + interiorElement.interiorindex;
 
-		pathedInterior.identifier = difFile + interiorElement.interiorindex;
-
-		pathedInterior.simGroup = simGroup;
-		pathedInterior.element = interiorElement;
-		level.interiors.push(pathedInterior);
-		// await
-		// Util.wait(10); // See shapes for the meaning of this hack
-		// await
-		pathedInterior.init(level);
-		return pathedInterior;
+			pathedInterior.simGroup = simGroup;
+			pathedInterior.element = interiorElement;
+			level.interiors.push(pathedInterior);
+			// await
+			// Util.wait(10); // See shapes for the meaning of this hack
+			// await
+			pathedInterior.init(level, () -> {
+				onFinish(pathedInterior);
+			});
+		}, cast MisParser.parseNumber(interiorElement.interiorindex));
 	}
 
 	public function new() {
 		super();
 	}
 
-	public override function init(level:MarbleWorld) {
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.basePosition = MisParser.parseVector3(this.element.baseposition);
 		this.basePosition.x = -this.basePosition.x;
 		this.baseOrientation = MisParser.parseRotation(this.element.baserotation);
@@ -132,11 +133,14 @@ class PathedInterior extends InteriorObject {
 		}
 
 		if (this.element.datablock.toLowerCase() == "pathedmovingblock") {
-			this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/movingblockloop.wav", ResourceLoader.getAudio,
-				this.soundResources), new Vector(), true);
+			ResourceLoader.loader.load("sound/movingblockloop.wav").entry.load(() -> {
+				this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/movingblockloop.wav", ResourceLoader.getAudio,
+					this.soundResources), new Vector(), true);
+			});
 		}
 
 		this.reset();
+		onFinish();
 	}
 
 	public function update(timeState:TimeState) {

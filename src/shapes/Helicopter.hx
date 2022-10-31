@@ -5,6 +5,7 @@ import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
 import src.AudioManager;
+import src.MarbleWorld;
 
 class Helicopter extends PowerUp {
 	public function new(element:MissionElementItem) {
@@ -15,7 +16,15 @@ class Helicopter extends PowerUp {
 		this.showSequences = false;
 		this.identifier = "Helicopter";
 		this.pickUpName = "Gyrocopter PowerUp";
-		this.pickupSound = ResourceLoader.getResource("data/sound/pugyrocoptervoice.wav", ResourceLoader.getAudio, this.soundResources);
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/pugyrocoptervoice.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/pugyrocoptervoice.wav", ResourceLoader.getAudio, this.soundResources);
+				onFinish();
+			});
+		});
 	}
 
 	public function pickUp():Bool {

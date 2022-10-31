@@ -10,6 +10,7 @@ import src.ParticleSystem.ParticleEmitterOptions;
 import src.ParticleSystem.ParticleData;
 import h3d.Vector;
 import src.ResourceLoader;
+import src.MarbleWorld;
 
 final landMineParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 2,
@@ -112,6 +113,12 @@ class LandMine extends DtsObject {
 		landMineSparkParticleData = new ParticleData();
 		landMineSparkParticleData.identifier = "landMineSparkParticle";
 		landMineSparkParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/explode1.wav").entry.load(onFinish);
+		});
 	}
 
 	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {

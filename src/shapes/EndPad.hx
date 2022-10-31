@@ -37,6 +37,12 @@ class EndPad extends DtsObject {
 		this.identifier = "EndPad";
 	}
 
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/firewrks.wav").entry.load(onFinish);
+		});
+	}
+
 	// override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
 	// 	if (!isEntered) {
 	// 		isEntered = true;

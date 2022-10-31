@@ -5,6 +5,7 @@ import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import h3d.Vector;
 import src.DtsObject;
+import src.MarbleWorld;
 
 class AntiGravity extends PowerUp {
 	public function new(element:MissionElementItem) {
@@ -15,7 +16,6 @@ class AntiGravity extends PowerUp {
 		this.identifier = "AntiGravity";
 		this.pickUpName = "Gravity Modifier";
 		this.autoUse = true;
-		this.pickupSound = ResourceLoader.getResource("data/sound/gravitychange.wav", ResourceLoader.getAudio, this.soundResources);
 	}
 
 	public function pickUp():Bool {
@@ -33,5 +33,14 @@ class AntiGravity extends PowerUp {
 		//	AudioManager.play(this.sounds[1]);
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		// this.level.deselectPowerUp();
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/gravitychange.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/gravitychange.wav", ResourceLoader.getAudio, this.soundResources);
+				onFinish();
+			});
+		});
 	}
 }

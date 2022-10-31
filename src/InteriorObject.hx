@@ -18,10 +18,10 @@ class InteriorObject extends GameObject {
 		this.isCollideable = true;
 	}
 
-	public function init(level:MarbleWorld) {
+	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.identifier = this.interiorFile;
 		this.level = level;
-		DifBuilder.loadDif(this.interiorFile, cast this);
+		DifBuilder.loadDif(this.interiorFile, cast this, onFinish);
 	}
 
 	public override function setTransform(transform:Matrix) {

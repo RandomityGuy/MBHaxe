@@ -5,6 +5,7 @@ import src.MarbleWorld;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
+import src.ResourceLoaderWorker;
 
 class Gem extends DtsObject {
 	public var pickedUp:Bool;
@@ -24,6 +25,15 @@ class Gem extends DtsObject {
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 		this.identifier = "Gem" + color;
 		this.matNameOverride.set('base.gem', color + ".gem");
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			var worker = new ResourceLoaderWorker(onFinish);
+			worker.loadFile('sound/gotgem.wav');
+			worker.loadFile('sound/gotallgems.wav');
+			worker.run();
+		});
 	}
 
 	public override function setHide(hide:Bool) {

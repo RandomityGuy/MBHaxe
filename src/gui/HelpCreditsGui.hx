@@ -445,7 +445,7 @@ class HelpCreditsGui extends GuiImage {
 				dtsObj.matNameOverride.set(key, value);
 			}
 		}
-		dtsObj.init(null);
+		dtsObj.init(null, () -> {}); // The lambda is not gonna run async anyway
 		for (mat in dtsObj.materials) {
 			mat.mainPass.enableLights = false;
 			if (mat.blendMode != Alpha && mat.blendMode != Add)

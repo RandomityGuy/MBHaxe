@@ -4,6 +4,7 @@ import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import mis.MisParser;
+import src.MarbleWorld;
 
 class TimeTravel extends PowerUp {
 	var timeBonus:Float = 5;
@@ -23,7 +24,15 @@ class TimeTravel extends PowerUp {
 		this.cooldownDuration = 1e8;
 		this.useInstancing = true;
 		this.autoUse = true;
-		this.pickupSound = ResourceLoader.getResource("data/sound/putimetravelvoice.wav", ResourceLoader.getAudio, this.soundResources);
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/putimetravelvoice.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/putimetravelvoice.wav", ResourceLoader.getAudio, this.soundResources);
+				ResourceLoader.loader.load("sound/timetravelactive.wav").entry.load(onFinish);
+			});
+		});
 	}
 
 	public function pickUp():Bool {

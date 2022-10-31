@@ -47,6 +47,7 @@ import src.CameraController;
 import src.Resource;
 import h3d.mat.Texture;
 import collision.CCDCollision.TraceInfo;
+import src.ResourceLoaderWorker;
 
 class Move {
 	public var d:Vector;
@@ -228,7 +229,7 @@ class Marble extends GameObject {
 		this.helicopterSound.pause = true;
 	}
 
-	public function init(level:MarbleWorld) {
+	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.level = level;
 		this.forcefield = new DtsObject();
 		this.forcefield.dtsPath = "data/shapes/images/glow_bounce.dts";
@@ -240,7 +241,6 @@ class Marble extends GameObject {
 		this.forcefield.y = 1e8;
 		this.forcefield.z = 1e8;
 		this.forcefield.isBoundingBoxCollideable = false;
-		level.addDtsObject(this.forcefield);
 
 		this.helicopter = new DtsObject();
 		this.helicopter.dtsPath = "data/shapes/images/helicopter.dts";
@@ -252,7 +252,11 @@ class Marble extends GameObject {
 		this.helicopter.x = 1e8;
 		this.helicopter.y = 1e8;
 		this.helicopter.z = 1e8;
-		level.addDtsObject(this.helicopter);
+
+		var worker = new ResourceLoaderWorker(onFinish);
+		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
+		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
+		worker.run();
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {

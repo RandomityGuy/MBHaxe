@@ -264,21 +264,22 @@ class PlayGui {
 		// gemImageObject.matNameOverride.set("base.gem", "base.gem.");
 		gemImageObject.ambientSpinFactor /= -2;
 		// ["base.gem"] = color + ".gem";
-		gemImageObject.init(null);
-		for (mat in gemImageObject.materials) {
-			mat.mainPass.enableLights = false;
+		gemImageObject.init(null, () -> {
+			for (mat in gemImageObject.materials) {
+				mat.mainPass.enableLights = false;
 
-			// Huge hacks
-			if (mat.blendMode != Add) {
-				var alphaShader = new h3d.shader.AlphaChannel();
-				mat.mainPass.addShader(alphaShader);
+				// Huge hacks
+				if (mat.blendMode != Add) {
+					var alphaShader = new h3d.shader.AlphaChannel();
+					mat.mainPass.addShader(alphaShader);
+				}
 			}
-		}
-		gemImageScene.addChild(gemImageObject);
-		var gemImageCenter = gemImageObject.getBounds().getCenter();
+			gemImageScene.addChild(gemImageObject);
+			var gemImageCenter = gemImageObject.getBounds().getCenter();
 
-		gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
-		gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
+			gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
+			gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
+		});
 	}
 
 	function initPowerupBox() {
@@ -416,17 +417,18 @@ class PlayGui {
 			powerupImageObject.ambientRotate = true;
 			powerupImageObject.ambientSpinFactor /= 2;
 			powerupImageObject.showSequences = false;
-			powerupImageObject.init(null);
-			for (mat in powerupImageObject.materials) {
-				mat.mainPass.enableLights = false;
-				if (mat.blendMode != Alpha && mat.blendMode != Add)
-					mat.mainPass.addShader(new h3d.shader.AlphaChannel());
-			}
-			powerupImageScene.addChild(powerupImageObject);
-			var powerupImageCenter = powerupImageObject.getBounds().getCenter();
+			powerupImageObject.init(null, () -> {
+				for (mat in powerupImageObject.materials) {
+					mat.mainPass.enableLights = false;
+					if (mat.blendMode != Alpha && mat.blendMode != Add)
+						mat.mainPass.addShader(new h3d.shader.AlphaChannel());
+				}
+				powerupImageScene.addChild(powerupImageObject);
+				var powerupImageCenter = powerupImageObject.getBounds().getCenter();
 
-			powerupImageScene.camera.pos = new Vector(0, 4, powerupImageCenter.z);
-			powerupImageScene.camera.target = new Vector(powerupImageCenter.x, powerupImageCenter.y, powerupImageCenter.z);
+				powerupImageScene.camera.pos = new Vector(0, 4, powerupImageCenter.z);
+				powerupImageScene.camera.target = new Vector(powerupImageCenter.x, powerupImageCenter.y, powerupImageCenter.z);
+			});
 		}
 	}
 

@@ -29,6 +29,10 @@ class Mission {
 
 	var imageResources:Array<Resource<Image>> = [];
 
+	var imgFileEntry:hxd.fs.FileEntry;
+
+	static var doingLoadPreviewTimeout = false;
+
 	public function new() {}
 
 	public function load() {
@@ -63,22 +67,30 @@ class Mission {
 		return mission;
 	}
 
-	public function getPreviewImage() {
+	public function getPreviewImage(onLoaded:h2d.Tile->Void) {
 		if (!this.isClaMission) {
 			var basename = haxe.io.Path.withoutExtension(this.path);
 			if (ResourceLoader.fileSystem.exists(basename + ".png")) {
-				return ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
+				imgFileEntry = ResourceLoader.fileSystem.get(basename + ".png");
+				imgFileEntry.load(() -> {
+					var ret = ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
+					onLoaded(ret);
+				});
 			}
 			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
-				return ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
+				imgFileEntry = ResourceLoader.fileSystem.get(basename + ".jpg");
+				imgFileEntry.load(() -> {
+					var ret = ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
+					onLoaded(ret);
+				});
 			}
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
-			return Tile.fromBitmap(img);
+			onLoaded(Tile.fromBitmap(img));
 		} else {
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
-			return Tile.fromBitmap(img);
+			onLoaded(Tile.fromBitmap(img));
 		}
 	}
 

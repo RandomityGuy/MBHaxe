@@ -9,6 +9,7 @@ import h3d.Vector;
 import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
+import src.MarbleWorld;
 
 class Trapdoor extends DtsObject {
 	var lastContactTime = -1e8;
@@ -23,6 +24,12 @@ class Trapdoor extends DtsObject {
 		this.isTSStatic = false;
 		this.identifier = "Trapdoor";
 		this.hasNonVisualSequences = true;
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/trapdooropen.wav").entry.load(onFinish);
+		});
 	}
 
 	public override function update(timeState:TimeState) {

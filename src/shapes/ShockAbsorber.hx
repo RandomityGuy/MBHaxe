@@ -4,6 +4,7 @@ import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
+import src.MarbleWorld;
 
 class ShockAbsorber extends PowerUp {
 	public function new(element:MissionElementItem) {
@@ -13,7 +14,15 @@ class ShockAbsorber extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "ShockAbsorber";
 		this.pickUpName = "Shock Absorber PowerUp";
-		this.pickupSound = ResourceLoader.getResource("data/sound/pushockabsorbervoice.wav", ResourceLoader.getAudio, this.soundResources);
+	}
+
+	public override function init(level:MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/pushockabsorbervoice.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/pushockabsorbervoice.wav", ResourceLoader.getAudio, this.soundResources);
+				onFinish();
+			});
+		});
 	}
 
 	public function pickUp():Bool {

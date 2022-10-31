@@ -6,6 +6,7 @@ import h3d.Vector;
 import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
+import src.MarbleWorld;
 
 class Tornado extends ForceObject {
 	var soundChannel:Channel;
@@ -44,14 +45,18 @@ class Tornado extends ForceObject {
 		];
 	}
 
-	public override function init(level:src.MarbleWorld) {
-		super.init(level);
-		this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/tornado.wav", ResourceLoader.getAudio, this.soundResources),
-			new Vector(1e8, 1e8, 1e8), true);
-		for (material in this.materials) {
-			material.blendMode = Alpha;
-			// material.mainPass.culling = h3d.mat.Data.Face.None;
-		}
+	public override function init(level:src.MarbleWorld, onFinish:Void->Void) {
+		super.init(level, () -> {
+			ResourceLoader.loader.load("sound/tornado.wav").entry.load(() -> {
+				this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/tornado.wav", ResourceLoader.getAudio, this.soundResources),
+					new Vector(1e8, 1e8, 1e8), true);
+				for (material in this.materials) {
+					material.blendMode = Alpha;
+					// material.mainPass.culling = h3d.mat.Data.Face.None;
+				}
+				onFinish();
+			});
+		});
 	}
 
 	public override function update(timeState:src.TimeState) {
