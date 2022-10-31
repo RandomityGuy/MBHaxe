@@ -55,12 +55,44 @@ class ResourceLoader {
 		}, scene2d);
 		loader = mloader;
 		fileSystem = mfileSystem;
+		var loadg = new h2d.Text(hxd.res.DefaultFont.get());
+		loadg.textAlign = Center;
+		loadg.textColor = 0xffffff;
+		loadg.y = scene2d.height / 2;
+		loadg.x = scene2d.width / 2;
+		loadg.scale(2.5);
+		scene2d.addChild(loadg);
+
 		var worker = new ResourceLoaderWorker(onLoadedFunc);
+		worker.addTask(fwd -> {
+			loadg.text = "Loading UI..";
+			fwd();
+		});
 		worker.addTask(fwd -> preloadUI(fwd));
+		worker.addTask(fwd -> {
+			loadg.text = "Loading Missions..";
+			fwd();
+		});
 		worker.addTask(fwd -> preloadMisFiles(fwd));
+		worker.addTask(fwd -> {
+			loadg.text = "Loading Music..";
+			fwd();
+		});
 		worker.addTask(fwd -> preloadMusic(fwd));
+		worker.addTask(fwd -> {
+			loadg.text = "Loading Sounds..";
+			fwd();
+		});
 		worker.addTask(fwd -> preloadUISounds(fwd));
+		worker.addTask(fwd -> {
+			loadg.text = "Loading Shapes..";
+			fwd();
+		});
 		worker.addTask(fwd -> preloadShapes(fwd));
+		worker.addTask(fwd -> {
+			scene2d.removeChild(loadg);
+			fwd();
+		});
 		worker.run();
 		// preloader.start();
 		#end

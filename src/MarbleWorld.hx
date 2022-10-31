@@ -187,21 +187,18 @@ class MarbleWorld extends Scheduler {
 			this._loadingLength = resourceLoadFuncs.length;
 			fwd();
 		});
-		this.resourceLoadFuncs.push(fwd -> {
-			this.playGui.init(this.scene2d);
-			var musicFileName = [
-				'data/sound/groovepolice.ogg',
-				'data/sound/classic vibe.ogg',
-				'data/sound/beach party.ogg'
-			][(mission.index + 1) % 3];
-			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources));
-			fwd();
-		});
 		this._loadingLength = resourceLoadFuncs.length;
 	}
 
 	public function postInit() {
 		this._ready = true;
+		this.playGui.init(this.scene2d);
+		var musicFileName = [
+			'data/sound/groovepolice.ogg',
+			'data/sound/classic vibe.ogg',
+			'data/sound/beach party.ogg'
+		][(mission.index + 1) % 3];
+		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources));
 		MarbleGame.canvas.clearContent();
 		this.endPad.generateCollider();
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
