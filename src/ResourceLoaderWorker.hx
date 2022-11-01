@@ -19,6 +19,10 @@ class ResourceLoaderWorker {
 		tasks.push(task);
 	}
 
+	public function addTaskParallel(task:(() -> Void)->Void) {
+		paralleltasks.push(task);
+	}
+
 	public function run() {
 		if (!parallelstarted && paralleltasks.length > 0) {
 			parallelstarted = true;

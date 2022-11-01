@@ -124,7 +124,7 @@ class ResourceLoader {
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.addTask((fwd) -> file.load(fwd));
+			worker.addTaskParallel((fwd) -> file.load(fwd));
 		}
 		worker.run();
 	}
@@ -153,7 +153,7 @@ class ResourceLoader {
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.addTask((fwd) -> file.load(fwd));
+			worker.addTaskParallel((fwd) -> file.load(fwd));
 		}
 		worker.run();
 	}
@@ -198,7 +198,7 @@ class ResourceLoader {
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.addTask((fwd) -> file.load(fwd));
+			worker.addTaskParallel((fwd) -> file.load(fwd));
 		}
 		worker.run();
 	}
