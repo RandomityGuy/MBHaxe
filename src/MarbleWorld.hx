@@ -1,5 +1,6 @@
 package src;
 
+import src.Replay;
 import hxd.impl.Air3File.FileSeek;
 import gui.Canvas;
 import hxd.snd.Channel;
@@ -121,13 +122,18 @@ class MarbleWorld extends Scheduler {
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
 
+	// Orientation
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
 
-	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
-
-	/** The new target camera orientation quat  */
 	public var newOrientationQuat = new Quat();
+
+	// Replay
+	public var replay:Replay;
+	public var isWatching:Bool = false;
+
+	// Loading
+	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
 
 	public var _disposed:Bool = false;
 
@@ -146,6 +152,7 @@ class MarbleWorld extends Scheduler {
 		this.scene = scene;
 		this.scene2d = scene2d;
 		this.mission = mission;
+		this.replay = new Replay(mission.path);
 	}
 
 	public function init() {
@@ -313,6 +320,10 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function restart() {
+		if (!this.isWatching)
+			this.replay.clear();
+		else
+			this.replay.rewind();
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = 0;
 		this.bonusTime = 0;
@@ -762,6 +773,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function addDtsObject(obj:DtsObject, onFinish:Void->Void) {
+		obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
 		this.dtsObjects.push(obj);
 		if (obj is ForceObject) {
 			this.forceObjects.push(cast obj);
@@ -807,8 +819,27 @@ class MarbleWorld extends Scheduler {
 		if (!_ready) {
 			return;
 		}
+		if (!this.isWatching)
+			this.replay.startFrame();
+		else {
+			if (!this.replay.advance(dt)) {
+				if (Util.isTouchDevice()) {
+					MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
+				}
+				this.setCursorLock(false);
+				this.dispose();
+				var pmg = new PlayMissionGui();
+				PlayMissionGui.currentSelectionStatic = mission.index + 1;
+				MarbleGame.canvas.setContent(pmg);
+				#if js
+				pointercontainer.hidden = false;
+				#end
+			}
+		}
+
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
+
 		this.tickSchedule(timeState.currentAttemptTime);
 		this.updateGameState();
 		ProfilerUI.measure("updateDTS");
@@ -828,10 +859,18 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
+		if (!this.isWatching)
+			this.replay.endFrame();
+
 		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {
 			this.clearSchedule();
 			this.restart();
 			return;
+		}
+
+		if (Key.isDown(Key.H)) {
+			this.isWatching = true;
+			this.restart();
 		}
 
 		this.updateTexts();
@@ -875,32 +914,52 @@ class MarbleWorld extends Scheduler {
 
 	public function updateTimer(dt:Float) {
 		this.timeState.dt = dt;
-		if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
-			this.bonusTime -= dt;
-			if (this.bonusTime < 0) {
-				this.timeState.gameplayClock -= this.bonusTime;
-				this.bonusTime = 0;
+		if (!this.isWatching) {
+			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
+				this.bonusTime -= dt;
+				if (this.bonusTime < 0) {
+					this.timeState.gameplayClock -= this.bonusTime;
+					this.bonusTime = 0;
+				}
+				if (timeTravelSound == null) {
+					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
+					timeTravelSound = AudioManager.playSound(ttsnd, null, true);
+				}
+			} else {
+				if (timeTravelSound != null) {
+					timeTravelSound.stop();
+					timeTravelSound = null;
+				}
+				if (this.timeState.currentAttemptTime >= 3.5)
+					this.timeState.gameplayClock += dt;
+				else if (this.timeState.currentAttemptTime + dt >= 3.5) {
+					this.timeState.gameplayClock += (this.timeState.currentAttemptTime + dt) - 3.5;
+				}
 			}
-			if (timeTravelSound == null) {
-				var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
-				timeTravelSound = AudioManager.playSound(ttsnd, null, true);
-			}
+			this.timeState.currentAttemptTime += dt;
 		} else {
-			if (timeTravelSound != null) {
-				timeTravelSound.stop();
-				timeTravelSound = null;
-			}
-			if (this.timeState.currentAttemptTime >= 3.5)
-				this.timeState.gameplayClock += dt;
-			else if (this.timeState.currentAttemptTime + dt >= 3.5) {
-				this.timeState.gameplayClock += (this.timeState.currentAttemptTime + dt) - 3.5;
+			this.timeState.currentAttemptTime = this.replay.currentPlaybackFrame.time;
+			this.timeState.gameplayClock = this.replay.currentPlaybackFrame.clockTime;
+			this.bonusTime = this.replay.currentPlaybackFrame.bonusTime;
+			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
+				if (timeTravelSound == null) {
+					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
+					timeTravelSound = AudioManager.playSound(ttsnd, null, true);
+				}
+			} else {
+				if (timeTravelSound != null) {
+					timeTravelSound.stop();
+					timeTravelSound = null;
+				}
 			}
 		}
-		this.timeState.currentAttemptTime += dt;
 		this.timeState.timeSinceLoad += dt;
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
 		playGui.formatTimer(this.timeState.gameplayClock);
+
+		if (!this.isWatching)
+			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);
 	}
 
 	function updateTexts() {

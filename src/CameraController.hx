@@ -213,6 +213,13 @@ class CameraController extends Object {
 			CameraYaw = this.level.finishYaw - (this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / -1.2;
 		}
 
+		if (!this.level.isWatching) {
+			this.level.replay.recordCameraState(CameraPitch, CameraYaw);
+		} else {
+			CameraPitch = this.level.replay.currentPlaybackFrame.cameraPitch;
+			CameraYaw = this.level.replay.currentPlaybackFrame.cameraYaw;
+		}
+
 		var marblePosition = level.marble.getAbsPos().getPosition();
 		var up = new Vector(0, 0, 1);
 		up.transform(orientationQuat.toMatrix());

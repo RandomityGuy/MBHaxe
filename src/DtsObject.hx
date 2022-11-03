@@ -108,6 +108,8 @@ class DtsObject extends GameObject {
 	var ambientRotate = false;
 	var ambientSpinFactor = -1 / 3 * Math.PI * 2;
 
+	public var idInLevel:Int = -1;
+
 	public function new() {
 		super();
 	}
