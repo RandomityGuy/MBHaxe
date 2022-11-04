@@ -1,5 +1,6 @@
 package src;
 
+import src.Replay;
 import touch.TouchInput;
 import src.ResourceLoader;
 import src.AudioManager;
@@ -28,6 +29,7 @@ class MarbleGame {
 	var scene:h3d.scene.Scene;
 
 	var paused:Bool;
+	var toRecord:Bool = false;
 
 	var exitGameDlg:ExitGameDlg;
 
@@ -212,6 +214,9 @@ class MarbleGame {
 		paused = false;
 		var pmg = new PlayMissionGui();
 		PlayMissionGui.currentSelectionStatic = world.mission.index;
+		if (world.isRecording) {
+			world.saveReplay();
+		}
 		world.dispose();
 		world = null;
 		canvas.setContent(pmg);
@@ -219,7 +224,16 @@ class MarbleGame {
 
 	public function playMission(mission:Mission) {
 		canvas.clearContent();
+		world = new MarbleWorld(scene, scene2d, mission, toRecord);
+		toRecord = false;
+		world.init();
+	}
+
+	public function watchMissionReplay(mission:Mission, replay:Replay) {
+		canvas.clearContent();
 		world = new MarbleWorld(scene, scene2d, mission);
+		world.replay = replay;
+		world.isWatching = true;
 		world.init();
 	}
 

@@ -1335,11 +1335,7 @@ class Marble extends GameObject {
 	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var move = new Move();
 		move.d = new Vector();
-		if (this.controllable
-			&& this.mode != Finish
-			&& !MarbleGame.instance.paused
-			&& !this.level.isWatching
-			&& this.level.isRecording) {
+		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching) {
 			if (Key.isDown(Settings.controlsSettings.forward)) {
 				move.d.x -= 1;
 			}

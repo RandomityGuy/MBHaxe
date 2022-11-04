@@ -19,15 +19,15 @@ class BytesWriter {
 	public function writeUInt16(int:Int) {
 		var h = int >> 8;
 		var l = int & 0xFF;
-		this.bytes.addByte(h);
 		this.bytes.addByte(l);
+		this.bytes.addByte(h);
 	}
 
 	public function writeInt16(int:Int) {
 		var h = int >> 8;
 		var l = int & 0xFF;
-		this.bytes.addByte(h);
 		this.bytes.addByte(l);
+		this.bytes.addByte(h);
 	}
 
 	public function writeByte(int:Int) {

@@ -10,6 +10,8 @@ class MissionList {
 	static var advancedMissions:Array<Mission>;
 	static var customMissions:Array<Mission>;
 
+	static var missions:Map<String, Mission>;
+
 	static var _build:Bool = false;
 
 	public function new() {}
@@ -17,6 +19,9 @@ class MissionList {
 	public static function buildMissionList() {
 		if (_build)
 			return;
+
+		missions = new Map<String, Mission>();
+
 		function parseDifficulty(difficulty:String) {
 			#if (hl && !android)
 			var difficultyFiles = ResourceLoader.fileSystem.dir("data/missions/" + difficulty);
@@ -30,6 +35,7 @@ class MissionList {
 					var misParser = new MisParser(file.getText());
 					var mInfo = misParser.parseMissionInfo();
 					var mission = Mission.fromMissionInfo(file.path, mInfo);
+					missions.set(file.path, mission);
 					difficultyMissions.push(mission);
 				}
 			}

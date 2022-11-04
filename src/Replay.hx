@@ -1,5 +1,7 @@
 package src;
 
+import haxe.io.BytesInput;
+import haxe.zip.Huffman;
 import haxe.io.Bytes;
 import haxe.io.BytesBuffer;
 import dif.io.BytesReader;
@@ -195,6 +197,8 @@ class Replay {
 	var currentPlaybackFrameIdx:Int;
 	var currentPlaybackTime:Float;
 
+	var version:Int = 1;
+
 	public function new(mission:String) {
 		this.mission = mission;
 		this.initialState = new ReplayInitialState();
@@ -311,20 +315,37 @@ class Replay {
 
 		var buf = bw.getBuffer();
 		var bufsize = buf.length;
-		var compressed = haxe.zip.Compress.run(bw.getBuffer(), 7);
+		#if hl
+		var compressed = haxe.zip.Compress.run(bw.getBuffer(), 9);
+		#end
+		#if js
+		var stream = zip.DeflateStream.create(zip.DeflateStream.CompressionLevel.GOOD, false);
+		stream.write(new BytesInput(bw.getBuffer()));
+		var compressed = stream.finalize();
+		#end
 
 		var finalB = new BytesBuffer();
+		finalB.addByte(version);
 		finalB.addInt32(bufsize);
-		finalB.addBytes(compressed, 4, compressed.length);
+		finalB.addBytes(compressed, 0, compressed.length);
 
 		return finalB.getBytes();
 	}
 
 	public function read(data:Bytes) {
-		var uncompressedLength = data.getInt32(0);
-		var compressedData = data.sub(4, data.length - 4);
+		var replayVersion = data.get(0);
+		if (replayVersion > version) {
+			return false;
+		}
+		var uncompressedLength = data.getInt32(1);
+		var compressedData = data.sub(5, data.length - 5);
 
+		#if hl
 		var uncompressed = haxe.zip.Uncompress.run(compressedData, uncompressedLength);
+		#end
+		#if js
+		var uncompressed = haxe.zip.InflateImpl.run(new BytesInput(compressedData), uncompressedLength);
+		#end
 		var br = new BytesReader(uncompressed);
 		this.mission = br.readStr();
 		this.initialState.read(br);
@@ -335,5 +356,6 @@ class Replay {
 			frame.read(br);
 			this.frames.push(frame);
 		}
+		return true;
 	}
 }

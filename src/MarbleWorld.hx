@@ -131,7 +131,7 @@ class MarbleWorld extends Scheduler {
 	// Replay
 	public var replay:Replay;
 	public var isWatching:Bool = false;
-	public var isRecording:Bool = true;
+	public var isRecording:Bool = false;
 
 	// Loading
 	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
@@ -149,11 +149,12 @@ class MarbleWorld extends Scheduler {
 
 	var lock:Bool = false;
 
-	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission) {
+	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission, record:Bool = false) {
 		this.scene = scene;
 		this.scene2d = scene2d;
 		this.mission = mission;
 		this.replay = new Replay(mission.path);
+		this.isRecording = record;
 	}
 
 	public function init() {
@@ -323,7 +324,6 @@ class MarbleWorld extends Scheduler {
 	public function restart() {
 		if (!this.isWatching) {
 			this.replay.clear();
-			this.isRecording = true;
 		} else
 			this.replay.rewind();
 		this.timeState.currentAttemptTime = 0;
@@ -863,6 +863,7 @@ class MarbleWorld extends Scheduler {
 				PlayMissionGui.currentSelectionStatic = mission.index + 1;
 				MarbleGame.canvas.setContent(pmg);
 				#if js
+				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 				pointercontainer.hidden = false;
 				#end
 				return;
@@ -1195,7 +1196,10 @@ class MarbleWorld extends Scheduler {
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.hidden = false;
 		#end
-		this.isRecording = false; // Stop recording here
+		if (this.isRecording) {
+			this.isRecording = false; // Stop recording here
+			this.saveReplay();
+		}
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.setControlsEnabled(false);
 		}
@@ -1321,6 +1325,20 @@ class MarbleWorld extends Scheduler {
 			if (this.marble != null)
 				this.marble.camera.unlockCursor();
 		}
+	}
+
+	public function saveReplay() {
+		var replayBytes = this.replay.write();
+		hxd.File.saveAs(replayBytes, {
+			title: 'Save Replay',
+			fileTypes: [
+				{
+					name: "Replay (*.mbr)",
+					extensions: ["mbr"]
+				}
+			],
+			defaultPath: '${this.mission.title}${this.timeState.gameplayClock}.mbr'
+		});
 	}
 
 	public function dispose() {

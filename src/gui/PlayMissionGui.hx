@@ -1,5 +1,6 @@
 package gui;
 
+import src.Replay;
 import haxe.ds.Option;
 import hxd.Key;
 import gui.GuiControl.MouseState;
@@ -127,6 +128,50 @@ class PlayMissionGui extends GuiImage {
 		pmBox.addChild(pmPreview);
 		var filt = new ColorMatrix(Matrix.I());
 		pmPreview.bmp.filter = filt;
+
+		var replayPlayButton = new GuiImage(ResourceLoader.getResource("data/ui/play/playback.png", ResourceLoader.getImage, this.imageResources).toTile());
+		replayPlayButton.position = new Vector(38, 315);
+		replayPlayButton.extent = new Vector(18, 18);
+		replayPlayButton.pressedAction = (sender) -> {
+			hxd.File.browse((replayToLoad) -> {
+				replayToLoad.load((replayData) -> {
+					var replay = new Replay("");
+					if (!replay.read(replayData)) {
+						cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+						// Idk do something to notify the user here
+					} else {
+						var repmis = replay.mission;
+						#if js
+						repmis = StringTools.replace(repmis, "data/", "");
+						#end
+						var playMis = MissionList.missions.get(repmis);
+						if (playMis != null) {
+							cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);
+						} else {
+							cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+						}
+					}
+				});
+			}, {
+				title: "Select replay file",
+				fileTypes: [
+					{
+						name: "Replay (*.mbr)",
+						extensions: ["mbr"]
+					}
+				],
+			});
+		};
+		pmBox.addChild(replayPlayButton);
+
+		var replayRecordButton = new GuiImage(ResourceLoader.getResource("data/ui/play/record.png", ResourceLoader.getImage, this.imageResources).toTile());
+		replayRecordButton.position = new Vector(56, 315);
+		replayRecordButton.extent = new Vector(18, 18);
+		replayRecordButton.pressedAction = (sender) -> {
+			cast(this.parent, Canvas).marbleGame.toRecord = true;
+			cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
+		};
+		pmBox.addChild(replayRecordButton);
 
 		var levelWnd = new GuiImage(ResourceLoader.getResource("data/ui/play/level_window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		levelWnd.position = new Vector();
