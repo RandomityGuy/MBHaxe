@@ -214,7 +214,9 @@ class CameraController extends Object {
 		}
 
 		if (!this.level.isWatching) {
-			this.level.replay.recordCameraState(CameraPitch, CameraYaw);
+			if (this.level.isRecording) {
+				this.level.replay.recordCameraState(CameraPitch, CameraYaw);
+			}
 		} else {
 			CameraPitch = this.level.replay.currentPlaybackFrame.cameraPitch;
 			CameraYaw = this.level.replay.currentPlaybackFrame.cameraYaw;

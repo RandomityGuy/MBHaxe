@@ -131,6 +131,7 @@ class MarbleWorld extends Scheduler {
 	// Replay
 	public var replay:Replay;
 	public var isWatching:Bool = false;
+	public var isRecording:Bool = true;
 
 	// Loading
 	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
@@ -320,9 +321,10 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function restart() {
-		if (!this.isWatching)
+		if (!this.isWatching) {
 			this.replay.clear();
-		else
+			this.isRecording = true;
+		} else
 			this.replay.rewind();
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = 0;
@@ -337,6 +339,33 @@ class MarbleWorld extends Scheduler {
 		if (this.totalGems > 0) {
 			this.gemCount = 0;
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		}
+
+		// Record/Playback trapdoor and landmine states
+		var tidx = 0;
+		var lidx = 0;
+		for (dtss in this.dtsObjects) {
+			if (dtss is Trapdoor) {
+				var trapdoor:Trapdoor = cast dtss;
+				if (!this.isWatching) {
+					this.replay.recordTrapdoorState(trapdoor.lastContactTime - this.timeState.timeSinceLoad, trapdoor.lastDirection, trapdoor.lastCompletion);
+				} else {
+					var state = this.replay.getTrapdoorState(tidx);
+					trapdoor.lastContactTime = state.lastContactTime + this.timeState.timeSinceLoad;
+					trapdoor.lastDirection = state.lastDirection;
+					trapdoor.lastCompletion = state.lastCompletion;
+				}
+				tidx++;
+			}
+			if (dtss is LandMine) {
+				var landmine:LandMine = cast dtss;
+				if (!this.isWatching) {
+					this.replay.recordLandMineState(landmine.disappearTime - this.timeState.timeSinceLoad);
+				} else {
+					landmine.disappearTime = this.replay.getLandMineState(lidx) + this.timeState.timeSinceLoad;
+				}
+				lidx++;
+			}
 		}
 
 		var startquat = this.getStartPositionAndOrientation();
@@ -819,9 +848,11 @@ class MarbleWorld extends Scheduler {
 		if (!_ready) {
 			return;
 		}
-		if (!this.isWatching)
-			this.replay.startFrame();
-		else {
+		if (!this.isWatching) {
+			if (this.isRecording) {
+				this.replay.startFrame();
+			}
+		} else {
 			if (!this.replay.advance(dt)) {
 				if (Util.isTouchDevice()) {
 					MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
@@ -834,6 +865,7 @@ class MarbleWorld extends Scheduler {
 				#if js
 				pointercontainer.hidden = false;
 				#end
+				return;
 			}
 		}
 
@@ -859,8 +891,11 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
-		if (!this.isWatching)
-			this.replay.endFrame();
+		if (!this.isWatching) {
+			if (this.isRecording) {
+				this.replay.endFrame();
+			}
+		}
 
 		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {
 			this.clearSchedule();
@@ -958,7 +993,7 @@ class MarbleWorld extends Scheduler {
 			this.timeState.gameplayClock = finishTime.gameplayClock;
 		playGui.formatTimer(this.timeState.gameplayClock);
 
-		if (!this.isWatching)
+		if (!this.isWatching && this.isRecording)
 			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);
 	}
 
@@ -1160,6 +1195,7 @@ class MarbleWorld extends Scheduler {
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.hidden = false;
 		#end
+		this.isRecording = false; // Stop recording here
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.setControlsEnabled(false);
 		}

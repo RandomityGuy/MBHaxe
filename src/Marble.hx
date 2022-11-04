@@ -1335,7 +1335,11 @@ class Marble extends GameObject {
 	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var move = new Move();
 		move.d = new Vector();
-		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching) {
+		if (this.controllable
+			&& this.mode != Finish
+			&& !MarbleGame.instance.paused
+			&& !this.level.isWatching
+			&& this.level.isRecording) {
 			if (Key.isDown(Settings.controlsSettings.forward)) {
 				move.d.x -= 1;
 			}
@@ -1367,16 +1371,20 @@ class Marble extends GameObject {
 				move.powerup = true;
 			move.d = new Vector(this.level.replay.currentPlaybackFrame.marbleX, this.level.replay.currentPlaybackFrame.marbleY, 0);
 		} else {
-			this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false);
-			this.level.replay.recordMarbleInput(move.d.x, move.d.y);
+			if (this.level.isRecording) {
+				this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false);
+				this.level.replay.recordMarbleInput(move.d.x, move.d.y);
+			}
 		}
 
 		playedSounds = [];
 		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
 
-		if (!this.level.isWatching)
-			this.level.replay.recordMarbleState(this.getAbsPos().getPosition(), this.velocity, this.getRotationQuat(), this.omega);
-		else {
+		if (!this.level.isWatching) {
+			if (this.level.isRecording) {
+				this.level.replay.recordMarbleState(this.getAbsPos().getPosition(), this.velocity, this.getRotationQuat(), this.omega);
+			}
+		} else {
 			var expectedPos = this.level.replay.currentPlaybackFrame.marblePosition.clone();
 			var expectedVel = this.level.replay.currentPlaybackFrame.marbleVelocity.clone();
 			var expectedOmega = this.level.replay.currentPlaybackFrame.marbleAngularVelocity.clone();
