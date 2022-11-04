@@ -12,6 +12,7 @@ You require the following Haxe libraries:
 - heaps: The specific version located [here](https://github.com/RandomityGuy/heaps)
 - hlsdl (Obtain the haxelib version of hlsdl, then patch it with these files [here](https://github.com/RandomityGuy/hashlink/tree/master/libs/sdl)) (Hashlink/C native target)
 - stb_ogg_sound (JS/Browser target)
+- zip 1.1.0 (JS/Browser target)
 
 ## Hashlink/Native
 The version of hashlink to be compiled is located [here](https://github.com/RandomityGuy/hashlink).  
