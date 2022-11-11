@@ -1,0 +1,191 @@
+// UT Tip: Go in speed and time your jumps to pass flawlessly to the end.
+// Otherwise, you can simply edge hit from start to finish, but that's hard.
+// Rep. by Phil and Matan
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         level = "16";
+         name = "Magnet Training";
+         artist = "Andrew";
+         type = "beginner";
+         startHelpText = "Magnets can be both a help and a hindrance to the marble.";
+         desc = "Learn about magnets!";
+         music = "Grudge.ogg";
+         goldTime = "14500";
+         UltimateTime = "10000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/Beginner/Beginner_Sky.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.481726 0.481726 -0.732038";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         scale = "1 1 1";
+         locked = "true";
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+   };
+   new Trigger(Bounds) {
+      position = "14.8171 8.0954 483.488";
+      rotation = "1 0 0 0";
+      scale = "60 70 120";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger(Magnet2) {
+      position = "28.1723 0.35053 488.638";
+      rotation = "1 0 0 0";
+      scale = "2 7 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Don\'t let these magnets force you Out of Bounds!";
+   };
+   new StaticShape() {
+      position = "63.7845 -19.0044 495.178";
+      rotation = "1 0 0 90";
+      scale = "7 7 7";
+      dataBlock = "Magnet";
+   };
+   new StaticShape() {
+      position = "19.9435 -49.7002 488.77";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape(StartPoint) {
+      position = "39.6261 -49.0952 488.74";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new StaticShape() {
+      position = "63.5835 -26.0648 488.77";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignUp";
+   };
+   new StaticShape() {
+      position = "64.2776 -31.147 502.79";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+         locked = "false";
+   };
+   new Trigger(Magnet1) {
+      position = "20.4294 -43.0366 488.638";
+      rotation = "1 0 0 0";
+      scale = "7 2 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Use the magnet above you to propel yourself across the gap!";
+   };
+   new StaticShape() {
+      position = "23.7431 -37.3483 493.641";
+      rotation = "1 0 0 90";
+      scale = "6 6 6";
+      dataBlock = "Magnet";
+   };
+   new InteriorInstance() {
+      position = "25.6067 -45.0961 488.521";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/MagnetTraining.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "22.8023 0.45512 488.77";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape(EndPoint) {
+      position = "63.5651 -31.145 498.27";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+         locked = "false";
+   };
+   new StaticShape() {
+      position = "40.7012 -11.6123 487.416";
+      rotation = "1 0 0 0";
+      scale = "6 6 6";
+      dataBlock = "Magnet";
+   };
+   new Trigger(Magnet3) {
+      position = "59.9699 -7.36043 488.638";
+      rotation = "1 0 0 0";
+      scale = "7 2 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Use the magnet to throw yourself up to the finish!";
+   };
+   new StaticShape() {
+      position = "66.9271 -3.24002 488.77";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape() {
+      position = "54.0379 4.85827 487.116";
+      rotation = "0 0 1 180";
+      scale = "6 6 6";
+      dataBlock = "Magnet";
+   };
+   new StaticShape() {
+      position = "63.5835 -26.0648 493.17";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignUp";
+   };
+   new StaticShape() {
+      position = "31.9952 -48.4472 504.633";
+      rotation = "0.984812 -0.128752 0.11648 96.6014";
+      scale = "1 1 1";
+      dataBlock = "Magnet";
+   };
+   new StaticShape() {
+      position = "32.0671 -48.1771 507.419";
+      rotation = "0.984812 -0.128752 0.11648 96.6014";
+      scale = "1 1 1";
+      dataBlock = "Magnet";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

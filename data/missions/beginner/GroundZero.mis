@@ -1,0 +1,344 @@
+// UT Tip: Test the three nukes at the start. Hit them correctly!
+// Rep. by Matan
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         desc = "Watch out for nukes!";
+         name = "Ground Zero";
+         level = "17";
+         artist = "Ian";
+         type = "beginner";
+         music = "Rising Temper.ogg";
+         startHelpText = "Avoid the nukes unless you want to get blown to bits!";
+         goldTime = "7500";
+         UltimateTime = "2750";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/Beginner/Beginner_Sky.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.481726 0.481726 -0.732038";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         scale = "1 1 1";
+         position = "0 0 0";
+         locked = "true";
+         rotation = "1 0 0 0";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "-0.28569 0.0961937 498.021";
+         rotation = "0 0 1 89.4374";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+   };
+   new InteriorInstance() {
+      position = "-5.3 -0.9 497.77";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/GroundZero.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "19.6432 0.710608 499.275";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "5.64548 0.0632498 498.02";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new Trigger(Bounds) {
+      position = "-10.2885 9.83369 492.746";
+      rotation = "1 0 0 0";
+      scale = "50 20 100";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "5.13738 -0.523508 498.02";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "6.18994 0.717398 498.02";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "7.63929 0.0654428 498.27";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "17.2118 0.087727 499.275";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "16.7893 -0.535918 499.275";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "9.63134 0.0590798 498.52";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "9.12324 -0.527678 498.52";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "19.9008 0.0502847 499.275";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new Item() {
+      position = "17.5 0.1 504.3";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.2";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "11.6258 0.0581319 498.77";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "13.6196 0.0603249 499.02";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "31.3506 -0.461741 510.101";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape() {
+      position = "14.1641 0.714473 499.02";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "13.1115 -0.526433 499.02";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "17.7563 0.741875 499.275";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "12.1702 0.71228 498.77";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape(EndPoint) {
+      position = "29.8 0.2 505.27";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new StaticShape() {
+      position = "23.7 0.05 499.27";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "15.6895 0.0150811 499.275";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "16.234 0.66923 499.275";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "25.7 2 499.27";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignUp";
+   };
+   new Trigger(hitcentre) {
+      position = "22.7 1.08 499.27";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Either go up the stairs or jump on the centre of this nuke in order to be blown up high and fall down to the finish!";
+   };
+   new Trigger(recharge) {
+      position = "4.7 1.08 498.03";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "A nuke, once exploded, will spawn after 15 seconds.";
+   };
+   new Trigger(checkpoint1) {
+      position = "8.7 1.1 498.5";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Further ahead is the checkpoint. If you fall off, it will restore you to its position with the last saved data but doesn\'t restore time back. With it, you won\'t have to restart and do the whole level again.";
+   };
+   new Trigger(checkpoint2) {
+      position = "12.7 1.1 499";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Further ahead is the checkpoint. If you fall off, it will restore you to its position with the last saved data but doesn\'t restore time back. With it, you won\'t have to restart and do the whole level again.";
+   };
+   new Trigger(checkpoint3) {
+      position = "16.7 1.1 499";
+      rotation = "1 0 0 0";
+      scale = "2 2 6";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Further ahead is the checkpoint. If you fall off, it will restore you to its position with the last saved data but doesn\'t restore time back. With it, you won\'t have to restart and do the whole level again.";
+   };
+   new StaticShape() {
+      position = "25.0521 1.55453 503.77";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "25.7967 -2.24088 499.77";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "25.1548 -1.59904 499.77";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "25.0187 0.483494 500.895";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "26.2606 0.441654 500.895";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "25.5264 2.57264 501.895";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "26.0108 -1.25207 502.77";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "23.7 2.1 499.27";
+      rotation = "0 0 1 180";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "checkPoint";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

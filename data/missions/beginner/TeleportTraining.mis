@@ -1,0 +1,189 @@
+// UT Tip: Take a leap of faith!
+// Rep. by Matan
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         desc = "Learn to use the teleport!";
+         name = "Teleport Training";
+         level = "8";
+         music = "Astrolabe.ogg";
+         type = "Beginner";
+         startHelpText = "The teleport is used to transport you to different locations in a level.";
+         artist = "Andrew";
+         goldTime = "20000";
+         UltimateTime = "14000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.900000 0.900000 0.900000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/Beginner/Beginner_Sky.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.544508 0.439467 -0.714409";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         scale = "1 1 1";
+         locked = "true";
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+   };
+   new Trigger(Bounds) {
+      position = "-50.0267 96.215 473.902";
+      rotation = "1 0 0 0";
+      scale = "130 120 200";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape(StartPoint) {
+      position = "9.1824 -11.6243 481.32";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new StaticShape() {
+      position = "8.24118 42.5204 543.754";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape(EndPoint) {
+      position = "8.09861 41.8579 538.32";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Item() {
+      position = "-29.9645 78.3751 587.792";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.2";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(OOB) {
+      position = "-31.5084 77.9638 569.333";
+      rotation = "1 0 0 0";
+      scale = "70 70 1";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger(congrats) {
+      position = "-18.5231 82.7078 588.459";
+      rotation = "1 0 0 0";
+      scale = "4 9 6";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Congratulations! You just made your first teleport!";
+   };
+   new Trigger(teleport1) {
+      position = "5.65943 26.9479 485.86";
+      rotation = "1 0 0 0";
+      scale = "7 2 6";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "This is a teleport pad. Roll onto it to be transported to a different location in this level!";
+   };
+   new TSStatic() {
+      position = "9.32892 41.9561 485.76";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      shapeName = "~/data/interiors_MBP/teleportpad.dts";
+         destination = "dest1";
+   };
+   new Trigger(teleport2) {
+      position = "3.39432 69.3957 588.466";
+      rotation = "1 0 0 0";
+      scale = "7 2 6";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "However, you won\'t necessarily use a teleport pad to teleport.";
+   };
+   new Trigger(teleport3) {
+      position = "3.24745 51.4062 588.466";
+      rotation = "1 0 0 0";
+      scale = "7 2 6";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Jump on the small brown platform!";
+   };
+   new TSStatic() {
+      position = "-24.1856 78.5 588.57";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      shapeName = "~/data/interiors_MBP/teleportpad.dts";
+   };
+   new InteriorInstance() {
+      position = "6.23549 71.2358 539.764";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/TeleportTraining.dif";
+      showTerrainInside = "0";
+   };
+   new Trigger() {
+      position = "5.29696 45.0694 485.932";
+      rotation = "1 0 0 0";
+      scale = "8 8 4";
+      dataBlock = "TeleportTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         destination = "SecondFloor";
+   };
+   new Trigger(SecondFloor) {
+      position = "-24.75 80 589";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "DestinationTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger() {
+      position = "6.1 41.325 588.7";
+      rotation = "1 0 0 0";
+      scale = "1.8 1.8 2";
+      dataBlock = "TeleportTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         destination = "FinalFloor";
+   };
+   new Trigger(FinalFloor) {
+      position = "57.63 41.68 531.7";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "DestinationTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---
