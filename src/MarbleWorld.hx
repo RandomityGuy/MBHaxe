@@ -100,6 +100,8 @@ class MarbleWorld extends Scheduler {
 	var endPadElement:MissionElementStaticShape;
 	var endPad:EndPad;
 
+	var skyElement:MissionElementSky;
+
 	public var scene:Scene;
 	public var scene2d:h2d.Scene;
 	public var mission:Mission;
@@ -172,7 +174,8 @@ class MarbleWorld extends Scheduler {
 					MissionElementType.Item,
 					MissionElementType.PathedInterior,
 					MissionElementType.StaticShape,
-					MissionElementType.TSStatic
+					MissionElementType.TSStatic,
+					MissionElementType.Sky
 				].contains(element._type)) {
 					// this.loadingState.total++;
 
@@ -181,6 +184,10 @@ class MarbleWorld extends Scheduler {
 						var so:MissionElementStaticShape = cast element;
 						if (so.datablock.toLowerCase() == 'endpad')
 							this.endPadElement = so;
+					}
+
+					if (element._type == Sky) {
+						this.skyElement = cast element;
 					}
 				} else if (element._type == MissionElementType.SimGroup) {
 					scanMission(cast element);
@@ -219,8 +226,6 @@ class MarbleWorld extends Scheduler {
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
-
-		// var skyElement:MissionElementSky = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.Sky)[0];
 
 		var worker = new ResourceLoaderWorker(() -> {
 			var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
@@ -269,7 +274,7 @@ class MarbleWorld extends Scheduler {
 
 		this.sky = new Sky();
 
-		sky.dmlPath = "data/skies/sky_day.dml";
+		sky.dmlPath = ResourceLoader.getProperFilepath(skyElement.materiallist);
 
 		worker.addTask(fwd -> sky.init(cast this, fwd));
 		worker.addTask(fwd -> {
@@ -728,6 +733,7 @@ class MarbleWorld extends Scheduler {
 		} else if (element.datablock == "HelpTrigger") {
 			trigger = new HelpTrigger(element, cast this);
 		} else {
+			onFinish();
 			return;
 		}
 		trigger.init(() -> {
@@ -746,7 +752,8 @@ class MarbleWorld extends Scheduler {
 
 		var tsShape = new DtsObject();
 		tsShape.useInstancing = true;
-		tsShape.dtsPath = shapeName.substring(index + 'data/'.length);
+		tsShape.dtsPath = 'data/' + shapeName.substring(index + 'data/'.length);
+		tsShape.identifier = shapeName;
 
 		var shapePosition = MisParser.parseVector3(element.position);
 		shapePosition.x = -shapePosition.x;

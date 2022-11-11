@@ -17,10 +17,11 @@ import hxd.fs.FileSystem;
 import hxd.res.Loader;
 import src.Resource;
 import src.ResourceLoaderWorker;
+import fs.TorqueFileSystem;
 
 class ResourceLoader {
 	#if (hl && !android)
-	public static var fileSystem:FileSystem = new LocalFileSystem(".", null);
+	public static var fileSystem:FileSystem = new TorqueFileSystem(".", null);
 	#end
 	#if (js || android)
 	public static var fileSystem:FileSystem = null;
@@ -203,6 +204,23 @@ class ResourceLoader {
 		worker.run();
 	}
 
+	public static function getProperFilepath(rawElementPath:String) {
+		var fname = rawElementPath.substring(rawElementPath.lastIndexOf('/') + 1);
+		rawElementPath = rawElementPath.toLowerCase();
+		var path = StringTools.replace(rawElementPath.substring(rawElementPath.indexOf('data/')), "\"", "");
+		if (StringTools.contains(path, 'interiors_mbg/'))
+			path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
+		var dirpath = path.substring(0, path.lastIndexOf('/') + 1);
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
+		#end
+		if (ResourceLoader.fileSystem.exists(path))
+			return path;
+		if (ResourceLoader.fileSystem.exists(dirpath + fname))
+			return dirpath + fname;
+		return "";
+	}
+
 	public static function load(path:String) {
 		#if hl
 		if (!StringTools.startsWith(path, "data/"))
@@ -232,9 +250,7 @@ class ResourceLoader {
 	}
 
 	public static function loadDts(path:String) {
-		#if (js || android)
-		path = StringTools.replace(path, "data/", "");
-		#end
+		path = getProperFilepath(path);
 		if (dtsResources.exists(path))
 			return dtsResources.get(path);
 		else {
