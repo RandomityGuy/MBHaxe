@@ -347,7 +347,7 @@ class PlayGui {
 		alertTextBackground.justify = Center;
 
 		alertTextForeground = new GuiText(bfont);
-		alertTextForeground.text.textColor = 0xFFE240;
+		alertTextForeground.text.textColor = 0xFFFF00;
 		alertTextForeground.position = new Vector(0, 0);
 		alertTextForeground.extent = new Vector(640, 32);
 		alertTextForeground.vertSizing = Height;
