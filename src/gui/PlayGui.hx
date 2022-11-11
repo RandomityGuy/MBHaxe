@@ -152,6 +152,12 @@ class PlayGui {
 		timerCtrl.position = new Vector(215, 1);
 		timerCtrl.extent = new Vector(234, 58);
 
+		var timerTransparency = new GuiImage(ResourceLoader.getResource('data/ui/game/transparency.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		timerTransparency.position = new Vector(14, -7);
+		timerTransparency.extent = new Vector(228, 71);
+		timerCtrl.addChild(timerTransparency);
+
 		timerNumbers[0].position = new Vector(23, 0);
 		timerNumbers[0].extent = new Vector(43, 55);
 
@@ -314,7 +320,7 @@ class PlayGui {
 		helpTextCtrl.horizSizing = Width;
 
 		helpTextBackground = new GuiText(bfont);
-		helpTextBackground.text.textColor = 0x000000;
+		helpTextBackground.text.textColor = 0x777777;
 		helpTextBackground.position = new Vector(1, 1);
 		helpTextBackground.extent = new Vector(640, 14);
 		helpTextBackground.vertSizing = Height;
@@ -333,13 +339,13 @@ class PlayGui {
 		helpTextCtrl.addChild(helpTextForeground);
 
 		var alertTextCtrl = new GuiControl();
-		alertTextCtrl.position = new Vector(0, 418);
-		alertTextCtrl.extent = new Vector(640, 58);
+		alertTextCtrl.position = new Vector(0, 371);
+		alertTextCtrl.extent = new Vector(640, 105);
 		alertTextCtrl.vertSizing = Top;
 		alertTextCtrl.horizSizing = Width;
 
 		alertTextBackground = new GuiText(bfont);
-		alertTextBackground.text.textColor = 0x000000;
+		alertTextBackground.text.textColor = 0x776622;
 		alertTextBackground.position = new Vector(1, 1);
 		alertTextBackground.extent = new Vector(640, 32);
 		alertTextBackground.vertSizing = Height;
@@ -347,7 +353,7 @@ class PlayGui {
 		alertTextBackground.justify = Center;
 
 		alertTextForeground = new GuiText(bfont);
-		alertTextForeground.text.textColor = 0xFFFF00;
+		alertTextForeground.text.textColor = 0xffEE99;
 		alertTextForeground.position = new Vector(0, 0);
 		alertTextForeground.extent = new Vector(640, 32);
 		alertTextForeground.vertSizing = Height;

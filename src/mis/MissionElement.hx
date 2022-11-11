@@ -52,6 +52,7 @@ class MissionElementScriptObject extends MissionElementBase {
 	var level:String;
 	var artist:String;
 	var goldtime:String;
+	var music:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;
