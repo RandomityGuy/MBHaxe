@@ -540,7 +540,7 @@ class MarbleWorld extends Scheduler {
 			interiorRotation.x = -interiorRotation.x;
 			interiorRotation.w = -interiorRotation.w;
 			var interiorScale = MisParser.parseVector3(element.scale);
-			// var hasCollision = interiorScale.x != = 0 && interiorScale.y != = 0 && interiorScale.z != = 0; // Don't want to add buggy geometry
+			var hasCollision = interiorScale.x * interiorScale.y * interiorScale.z != 0; // Don't want to add buggy geometry
 
 			// Fix zero-volume interiors so they receive correct lighting
 			if (interiorScale.x == 0)
@@ -556,6 +556,7 @@ class MarbleWorld extends Scheduler {
 			mat.setPosition(interiorPosition);
 
 			interior.setTransform(mat);
+			interior.isCollideable = hasCollision;
 			onFinish();
 		});
 
@@ -758,12 +759,20 @@ class MarbleWorld extends Scheduler {
 		// !! WARNING - UNTESTED !!
 		var shapeName = element.shapename;
 		var index = shapeName.indexOf('data/');
-		if (index == -1)
+		if (index == -1) {
+			onFinish();
 			return;
+		}
+
+		var dtsPath = 'data/' + shapeName.substring(index + 'data/'.length);
+		if (ResourceLoader.getProperFilepath(dtsPath) == "") {
+			onFinish();
+			return;
+		}
 
 		var tsShape = new DtsObject();
 		tsShape.useInstancing = true;
-		tsShape.dtsPath = 'data/' + shapeName.substring(index + 'data/'.length);
+		tsShape.dtsPath = dtsPath;
 		tsShape.identifier = shapeName;
 
 		var shapePosition = MisParser.parseVector3(element.position);

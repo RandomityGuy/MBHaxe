@@ -11,6 +11,7 @@ import mis.MissionElement.MissionElementSimGroup;
 import src.ResourceLoader;
 import hxd.res.Image;
 import src.Resource;
+import src.Util;
 
 class Mission {
 	public var root:MissionElementSimGroup;
