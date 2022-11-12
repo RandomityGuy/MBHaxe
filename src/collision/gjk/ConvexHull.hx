@@ -31,7 +31,7 @@ class ConvexHull implements GJKShape {
 
 	public function setTransform(matrix:Matrix):Void {
 		if (this.transform != matrix) {
-			this.transform = matrix;
+			this.transform.load(matrix);
 			this._centercache = null;
 		}
 	}
