@@ -35,8 +35,8 @@ class PlayGui {
 	public function new() {}
 
 	var timerNumbers:Array<GuiAnim> = [];
-	var timerPoint:GuiImage;
-	var timerColon:GuiImage;
+	var timerPoint:GuiAnim;
+	var timerColon:GuiAnim;
 
 	var gemCountNumbers:Array<GuiAnim> = [];
 	var gemCountSlash:GuiImage;
@@ -108,6 +108,14 @@ class PlayGui {
 			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}.png', ResourceLoader.getImage, this.imageResources).toTile();
 			numberTiles.push(tile);
 		}
+		for (i in 0...10) {
+			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_green.png', ResourceLoader.getImage, this.imageResources).toTile();
+			numberTiles.push(tile);
+		}
+		for (i in 0...10) {
+			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_red.png', ResourceLoader.getImage, this.imageResources).toTile();
+			numberTiles.push(tile);
+		}
 
 		for (i in 0...7) {
 			timerNumbers.push(new GuiAnim(numberTiles));
@@ -164,7 +172,13 @@ class PlayGui {
 		timerNumbers[1].position = new Vector(47, 0);
 		timerNumbers[1].extent = new Vector(43, 55);
 
-		timerColon = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var colonCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/colon_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/colon_red.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+
+		timerColon = new GuiAnim(colonCols);
 		timerColon.position = new Vector(67, 0);
 		timerColon.extent = new Vector(43, 55);
 
@@ -174,7 +188,13 @@ class PlayGui {
 		timerNumbers[3].position = new Vector(107, 0);
 		timerNumbers[3].extent = new Vector(43, 55);
 
-		timerPoint = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var pointCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_red.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+
+		timerPoint = new GuiAnim(pointCols);
 		timerPoint.position = new Vector(127, 0);
 		timerPoint.extent = new Vector(43, 55);
 
@@ -465,7 +485,10 @@ class PlayGui {
 		gemCountNumbers[3].anim.currentFrame = totalOnes;
 	}
 
-	public function formatTimer(time:Float) {
+	// 0: default
+	// 1: green
+	// 2: red
+	public function formatTimer(time:Float, color:Int = 0) {
 		var et = time * 1000;
 		var thousandth = et % 10;
 		var hundredth = Math.floor((et % 1000) / 10);
@@ -480,13 +503,16 @@ class PlayGui {
 		var hundredthOne = hundredth % 10;
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 
-		timerNumbers[0].anim.currentFrame = minutesTen;
-		timerNumbers[1].anim.currentFrame = minutesOne;
-		timerNumbers[2].anim.currentFrame = secondsTen;
-		timerNumbers[3].anim.currentFrame = secondsOne;
-		timerNumbers[4].anim.currentFrame = hundredthTen;
-		timerNumbers[5].anim.currentFrame = hundredthOne;
-		timerNumbers[6].anim.currentFrame = thousandth;
+		timerNumbers[0].anim.currentFrame = minutesTen + color * 10;
+		timerNumbers[1].anim.currentFrame = minutesOne + color * 10;
+		timerNumbers[2].anim.currentFrame = secondsTen + color * 10;
+		timerNumbers[3].anim.currentFrame = secondsOne + color * 10;
+		timerNumbers[4].anim.currentFrame = hundredthTen + color * 10;
+		timerNumbers[5].anim.currentFrame = hundredthOne + color * 10;
+		timerNumbers[6].anim.currentFrame = thousandth + color * 10;
+
+		timerPoint.anim.currentFrame = color;
+		timerColon.anim.currentFrame = color;
 	}
 
 	public function render(engine:h3d.Engine) {

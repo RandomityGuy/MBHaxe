@@ -67,7 +67,11 @@ typedef VertexBucket = {
 }
 
 class DifBuilder {
-	static var materialDict = [
+	static var materialDict:Map<String, {
+		friction:Float,
+		restitution:Float,
+		?force:Float
+	}> = [
 		"friction_none" => {
 			friction: 0.01,
 			restitution: 0.5
@@ -95,8 +99,73 @@ class DifBuilder {
 		"ice.slick" => {
 			friction: 0.05,
 			restitution: 0.5
+		},
+		"grass" => {
+			friction: 1.5,
+			restitution: 0.35
+		},
+		"ice1" => {
+			friction: 0.03,
+			restitution: 0.95
+		},
+		"rug" => {
+			friction: 6.0,
+			restitution: 0.5,
+		},
+		"tarmac" => {
+			friction: 0.35,
+			restitution: 0.7
+		},
+		"carpet" => {
+			friction: 6.0,
+			restitution: 0.5
+		},
+		"sand" => {
+			friction: 4.0,
+			restitution: 0.1
+		},
+		"water" => {
+			friction: 6.0,
+			restitution: 0.0,
+		},
+		"floor_bounce" => {
+			friction: 0.2,
+			restitution: 0.0,
+			force: 15
+		},
+		"mbp_chevron_friction" => {
+			friction: -1.0,
+			restitution: 1.0
+		},
+		"mbp_chevron_friction2" => {
+			friction: -1.0,
+			restitution: 1.0
+		},
+		"mbp_chevron_friction3" => {
+			friction: -1.0,
+			restitution: 1.0
+		},
+		"mmg_grass" => {
+			friction: 0.9,
+			restitution: 0.5
+		},
+		"mmg_sand" => {
+			friction: 6.0,
+			restitution: 0.1
+		},
+		"mmg_water" => {
+			friction: 6.0,
+			restitution: 0.0
+		},
+		"mmg_ice" => {
+			friction: 0.03,
+			restitution: 0.95
+		},
+		"mmg_ice_shadow" => {
+			friction: 0.03,
+			restitution: 0.95
 		}
-	];
+		];
 
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
 		#if (js || android)
@@ -106,16 +175,11 @@ class DifBuilder {
 			var difresource = ResourceLoader.loadInterior(path);
 			difresource.acquire();
 			var dif = difresource.resource;
-
 			var geo = so == -1 ? dif.interiors[0] : dif.subObjects[so];
-
 			var hulls = geo.convexHulls;
-
 			var triangles = [];
 			var textures = [];
-
 			var collider = new CollisionEntity(itr);
-
 			function stripTexName(tex:String) {
 				var dotpos = tex.lastIndexOf(".");
 				var slashpos = tex.lastIndexOf("/") + 1;
@@ -127,39 +191,29 @@ class DifBuilder {
 				}
 				return tex.substring(slashpos, dotpos);
 			}
-
 			var vertexBuckets = new Map<Point3F, Array<VertexBucket>>();
-
 			var edges = [];
 			var colliderSurfaces = [];
-
 			for (i in 0...hulls.length) {
 				var hullTris = [];
 				var hull = hulls[i];
-
 				for (j in hull.surfaceStart...(hull.surfaceStart + hull.surfaceCount)) {
 					var surfaceindex = geo.hullSurfaceIndices[j];
 					var surface = geo.surfaces[surfaceindex];
 					if (surface == null)
 						continue;
 					var planeindex = surface.planeIndex;
-
 					var planeFlipped = (planeindex & 0x8000) == 0x8000;
 					if (planeFlipped)
 						planeindex &= ~0x8000;
-
 					var plane = geo.planes[planeindex];
 					var normal = geo.normals[plane.normalIndex];
-
 					if (planeFlipped)
 						normal = normal.scalar(-1);
-
 					var texture = geo.materialList[surface.textureIndex];
 					if (!textures.contains(texture))
 						textures.push(texture);
-
 					var points = geo.points;
-
 					var colliderSurface = new CollisionSurface();
 					colliderSurface.points = [];
 					colliderSurface.normals = [];
@@ -168,7 +222,6 @@ class DifBuilder {
 					colliderSurface.edgeDots = [];
 					colliderSurface.originalIndices = [];
 					colliderSurface.originalSurfaceIndex = surfaceindex;
-
 					for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
 						var p1, p2, p3;
 						if ((k - (surface.windingStart + 2)) % 2 == 0) {
@@ -186,17 +239,13 @@ class DifBuilder {
 							colliderSurface.originalIndices.push(geo.windings[k - 1]);
 							colliderSurface.originalIndices.push(geo.windings[k]);
 						}
-
 						var e1 = new TriangleEdge(geo.windings[k], geo.windings[k - 1], surfaceindex);
 						var e2 = new TriangleEdge(geo.windings[k - 1], geo.windings[k - 2], surfaceindex);
 						var e3 = new TriangleEdge(geo.windings[k], geo.windings[k - 2], surfaceindex);
-
 						edges.push(e1);
 						edges.push(e2);
 						edges.push(e3);
-
 						var texgen = geo.texGenEQs[surface.texGenIndex];
-
 						var uv1 = new Point2F(p1.x * texgen.planeX.x
 							+ p1.y * texgen.planeX.y
 							+ p1.z * texgen.planeX.z
@@ -221,7 +270,6 @@ class DifBuilder {
 							+ p3.y * texgen.planeY.y
 							+ p3.z * texgen.planeY.z
 							+ texgen.planeY.d);
-
 						var tri = new DifBuilderTriangle();
 						tri.texture = texture;
 						tri.normal1 = normal;
@@ -241,6 +289,7 @@ class DifBuilder {
 							var minfo = materialDict.get(materialName);
 							colliderSurface.friction = minfo.friction;
 							colliderSurface.restitution = minfo.restitution;
+							colliderSurface.force = minfo.force != null ? minfo.force : 0;
 						}
 						colliderSurface.points.push(new Vector(-p1.x, p1.y, p1.z));
 						colliderSurface.points.push(new Vector(-p2.x, p2.y, p2.z));
@@ -251,14 +300,12 @@ class DifBuilder {
 						colliderSurface.indices.push(colliderSurface.indices.length);
 						colliderSurface.indices.push(colliderSurface.indices.length);
 						colliderSurface.indices.push(colliderSurface.indices.length);
-
 						for (v in [p1, p2, p3]) {
 							var buckets = vertexBuckets.get(v);
 							if (buckets == null) {
 								buckets = [];
 								vertexBuckets.set(v, buckets);
 							}
-
 							var bucket:VertexBucket = null;
 							for (j in 0...buckets.length) {
 								bucket = buckets[j];
@@ -274,29 +321,22 @@ class DifBuilder {
 								};
 								buckets.push(bucket);
 							}
-
 							bucket.triangleIndices.push(triangles.length - 1);
 							bucket.normals.push(normal);
 						}
 					}
-
 					colliderSurface.generateBoundingBox();
 					collider.addSurface(colliderSurface);
 					colliderSurfaces.push(colliderSurface);
 				}
 			}
-
 			var edgeMap:Map<Int, TriangleEdge> = new Map();
 			var internalEdges:Map<Int, Bool> = new Map();
-
 			var difEdges:Map<Int, Edge> = [];
-
 			for (edge in edges) {
 				var edgeHash = edge.index1 >= edge.index2 ? edge.index1 * edge.index1 + edge.index1 + edge.index2 : edge.index1 + edge.index2 * edge.index2;
-
 				if (internalEdges.exists(edgeHash))
 					continue;
-
 				if (edgeMap.exists(edgeHash)) {
 					if (edgeMap[edgeHash].surfaceIndex == edge.surfaceIndex) {
 						// Internal edge
@@ -311,11 +351,9 @@ class DifBuilder {
 					edgeMap.set(edgeHash, edge);
 				}
 			}
-
 			function hashEdge(i1:Int, i2:Int) {
 				return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
 			}
-
 			function getEdgeDot(edge:Edge) {
 				var edgeSurface0 = edge.surfaceIndex0;
 				var surface0 = geo.surfaces[edgeSurface0];
@@ -351,7 +389,6 @@ class DifBuilder {
 
 				return dot;
 			}
-
 			function getEdgeNormal(edge:Edge) {
 				var edgeSurface0 = edge.surfaceIndex0;
 				var surface0 = geo.surfaces[edgeSurface0];
@@ -389,14 +426,12 @@ class DifBuilder {
 
 				return vec;
 			}
-
 			for (colliderSurface in colliderSurfaces) {
 				var i = 0;
 				while (i < colliderSurface.indices.length) {
 					var e1e2 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 1]);
 					var e2e3 = hashEdge(colliderSurface.originalIndices[i + 1], colliderSurface.originalIndices[i + 2]);
 					var e1e3 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 2]);
-
 					var edgeData = 0;
 					if (difEdges.exists(e1e2)) {
 						if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
@@ -430,21 +465,17 @@ class DifBuilder {
 						colliderSurface.edgeDots.push(0);
 						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
 					}
-
 					colliderSurface.edgeData.push(edgeData);
 					i += 3;
 				}
 			}
-
 			for (vtex => buckets in vertexBuckets) {
 				for (i in 0...buckets.length) {
 					var bucket = buckets[i];
 					var avgNormal = new Point3F();
-
 					for (normal in bucket.normals)
 						avgNormal = avgNormal.add(normal);
 					avgNormal = avgNormal.scalarDiv(bucket.normals.length);
-
 					for (j in 0...bucket.triangleIndices.length) {
 						var index = bucket.triangleIndices[j];
 						var tri = triangles[index];
@@ -457,9 +488,7 @@ class DifBuilder {
 					}
 				}
 			}
-
 			var mats = new Map<String, Array<DifBuilderTriangle>>();
-
 			for (index => value in triangles) {
 				if (mats.exists(value.texture)) {
 					mats[value.texture].push(value);
@@ -467,11 +496,9 @@ class DifBuilder {
 					mats.set(value.texture, [value]);
 				}
 			}
-
 			collider.difEdgeMap = difEdges;
 			collider.finalize();
 			itr.collider = collider;
-
 			function canFindTex(tex:String) {
 				if (["NULL"].contains(tex)) {
 					return false;
@@ -501,7 +528,6 @@ class DifBuilder {
 
 				return false;
 			}
-
 			function tex(tex:String):String {
 				if (tex.indexOf('/') != -1) {
 					tex = tex.split('/')[1];
@@ -525,20 +551,17 @@ class DifBuilder {
 
 				return null;
 			}
-
 			var loadtexs = [];
 			for (grp => tris in mats) {
 				if (canFindTex(grp)) {
 					loadtexs.push(tex(grp));
 				}
 			}
-
 			var worker = new ResourceLoaderWorker(() -> {
 				for (grp => tris in mats) {
 					var points = [];
 					var normals = [];
 					var uvs = [];
-
 					for (tri in tris) {
 						var p1 = new Point(-tri.p1.x, tri.p1.y, tri.p1.z);
 						var p2 = new Point(-tri.p2.x, tri.p2.y, tri.p2.z);
@@ -559,11 +582,9 @@ class DifBuilder {
 						uvs.push(uv2);
 						uvs.push(uv1);
 					}
-
 					var prim = new Polygon(points);
 					prim.uvs = uvs;
 					prim.normals = normals;
-
 					var material:Material;
 					var texture:Texture;
 					if (canFindTex(grp)) {
@@ -578,10 +599,8 @@ class DifBuilder {
 					material.receiveShadows = true;
 					// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 					// material.mainPass.wireframe = true;
-
 					var mesh = new Mesh(prim, material, itr);
 				}
-
 				difresource.release();
 				onFinish();
 			});

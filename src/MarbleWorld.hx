@@ -953,12 +953,14 @@ class MarbleWorld extends Scheduler {
 
 	public function updateTimer(dt:Float) {
 		this.timeState.dt = dt;
+		var timerColor = 1;
 		if (!this.isWatching) {
 			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
 				this.bonusTime -= dt;
 				if (this.bonusTime < 0) {
 					this.timeState.gameplayClock -= this.bonusTime;
 					this.bonusTime = 0;
+					timerColor = 0;
 				}
 				if (timeTravelSound == null) {
 					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
@@ -969,10 +971,12 @@ class MarbleWorld extends Scheduler {
 					timeTravelSound.stop();
 					timeTravelSound = null;
 				}
-				if (this.timeState.currentAttemptTime >= 3.5)
+				if (this.timeState.currentAttemptTime >= 3.5) {
 					this.timeState.gameplayClock += dt;
-				else if (this.timeState.currentAttemptTime + dt >= 3.5) {
+					timerColor = 0;
+				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
 					this.timeState.gameplayClock += (this.timeState.currentAttemptTime + dt) - 3.5;
+					timerColor = 0;
 				}
 			}
 			this.timeState.currentAttemptTime += dt;
@@ -995,7 +999,7 @@ class MarbleWorld extends Scheduler {
 		this.timeState.timeSinceLoad += dt;
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
-		playGui.formatTimer(this.timeState.gameplayClock);
+		playGui.formatTimer(this.timeState.gameplayClock, timerColor);
 
 		if (!this.isWatching && this.isRecording)
 			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);
