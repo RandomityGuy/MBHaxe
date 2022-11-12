@@ -243,7 +243,7 @@ class PathedInterior extends InteriorObject {
 	}
 
 	function updatePosition() {
-		var tform = this.collider.transform;
+		var tform = this.collider.transform.clone();
 		tform.setPosition(this.currentPosition);
 		this.setTransform(tform);
 		this.collider.setTransform(tform);

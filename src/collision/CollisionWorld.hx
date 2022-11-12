@@ -1,5 +1,6 @@
 package collision;
 
+import src.MarbleGame;
 import src.TimeState;
 import h3d.col.Bounds;
 import h3d.col.Sphere;
@@ -45,8 +46,8 @@ class CollisionWorld {
 
 		for (obj in dynamicEntities) {
 			if (obj != spherecollision) {
-				// if (obj.boundingBox.collide(box) && obj.go.isCollideable)
-				contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
+				if (obj.boundingBox.collide(box) && obj.go.isCollideable)
+					contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
 			}
 		}
 		return {foundEntities: foundEntities, contacts: contacts};
@@ -82,8 +83,8 @@ class CollisionWorld {
 	public function boundingSearch(bounds:Bounds) {
 		var contacts = this.octree.boundingSearch(bounds).map(x -> cast(x, CollisionEntity));
 		for (obj in dynamicEntities) {
-			// if (obj.boundingBox.collide(bounds))
-			contacts.push(obj);
+			if (obj.boundingBox.collide(bounds))
+				contacts.push(obj);
 		}
 		return contacts;
 	}
