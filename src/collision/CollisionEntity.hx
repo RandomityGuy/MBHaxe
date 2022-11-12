@@ -61,7 +61,7 @@ class CollisionEntity implements IOctreeObject {
 	}
 
 	public function setTransform(transform:Matrix) {
-		if (this.transform == transform)
+		if (this.transform.equal(transform))
 			return;
 		this.transform.load(transform);
 		this.invTransform = transform.getInverse();

@@ -95,6 +95,14 @@ class Mission {
 	}
 
 	public function getDifPath(rawElementPath:String) {
+		if (StringTools.contains(rawElementPath, "$usermods")) {
+			rawElementPath = rawElementPath.split("@").slice(1).map(x -> {
+				var a = StringTools.trim(x);
+				a = Util.unescape(a.substr(1, a.length - 2));
+				return a;
+			}).join('');
+		}
+		var fname = rawElementPath.substring(rawElementPath.lastIndexOf('/') + 1);
 		rawElementPath = rawElementPath.toLowerCase();
 		var path = StringTools.replace(rawElementPath.substring(rawElementPath.indexOf('data/')), "\"", "");
 		if (StringTools.contains(path, 'interiors_mbg/'))
