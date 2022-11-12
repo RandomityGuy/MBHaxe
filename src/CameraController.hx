@@ -36,9 +36,6 @@ class CameraController extends Object {
 	var marble:Marble;
 	var level:MarbleWorld;
 
-	var view:Matrix;
-	var projection:Matrix;
-
 	public var Position:Vector;
 	public var Direction:Vector;
 	public var Up:Vector;

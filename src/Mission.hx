@@ -98,7 +98,7 @@ class Mission {
 		if (StringTools.contains(rawElementPath, "$usermods")) {
 			rawElementPath = rawElementPath.split("@").slice(1).map(x -> {
 				var a = StringTools.trim(x);
-				a = a.substr(1, a.length - 2);
+				a = Util.unescape(a.substr(1, a.length - 2));
 				return a;
 			}).join('');
 		}
