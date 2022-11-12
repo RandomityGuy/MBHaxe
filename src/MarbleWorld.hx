@@ -1,5 +1,7 @@
 package src;
 
+import shapes.Nuke;
+import shapes.Magnet;
 import src.Replay;
 import hxd.impl.Air3File.FileSeek;
 import gui.Canvas;
@@ -594,10 +596,14 @@ class MarbleWorld extends Scheduler {
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
 			shape = new SmallDuctFan();
+		else if (dataBlockLowerCase == "magnet")
+			shape = new Magnet();
 		else if (dataBlockLowerCase == "antigravityitem")
 			shape = new AntiGravity(cast element);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
+		else if (dataBlockLowerCase == "nuke")
+			shape = new Nuke();
 		else if (dataBlockLowerCase == "shockabsorberitem")
 			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
@@ -672,10 +678,14 @@ class MarbleWorld extends Scheduler {
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
 			shape = new SmallDuctFan();
+		else if (dataBlockLowerCase == "magnet")
+			shape = new Magnet();
 		else if (dataBlockLowerCase == "antigravityitem")
 			shape = new AntiGravity(cast element);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
+		else if (dataBlockLowerCase == "nuke")
+			shape = new Nuke();
 		else if (dataBlockLowerCase == "shockabsorberitem")
 			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
