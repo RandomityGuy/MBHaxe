@@ -3,6 +3,7 @@ package fs;
 import hxd.fs.LocalFileSystem;
 
 class TorqueFileSystem extends LocalFileSystem {
+	#if hl
 	override function checkPath(path:String) {
 		// make sure the file is loaded with correct case !
 		var baseDir = new haxe.io.Path(path).dir;
@@ -44,4 +45,5 @@ class TorqueFileSystem extends LocalFileSystem {
 		fileCache.set(path.toLowerCase(), {r: e});
 		return e;
 	}
+	#end
 }

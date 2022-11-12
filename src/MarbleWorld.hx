@@ -205,7 +205,13 @@ class MarbleWorld extends Scheduler {
 			this._loadingLength = resourceLoadFuncs.length;
 			fwd();
 		});
+		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
+	}
+
+	public function loadMusic(onFinish:Void->Void) {
+		var musicFileName = 'sound/' + this.mission.missionInfo.music;
+		ResourceLoader.load(musicFileName).entry.load(onFinish);
 	}
 
 	public function postInit() {
@@ -262,8 +268,7 @@ class MarbleWorld extends Scheduler {
 			"particles/smoke.png",
 			"particles/spark.png",
 			"particles/star.png",
-			"particles/twirl.png",
-			"skies/sky_day.dml"
+			"particles/twirl.png"
 		];
 
 		for (file in filestoload) {

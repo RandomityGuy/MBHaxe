@@ -162,9 +162,7 @@ class ResourceLoader {
 	static function preloadMusic(onFinish:Void->Void) {
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.loadFile("sound/shell.ogg");
-		worker.loadFile("sound/groovepolice.ogg");
-		worker.loadFile("sound/classic vibe.ogg");
-		worker.loadFile("sound/beach party.ogg");
+		worker.loadFile("sound/pianoforte.ogg");
 		worker.run();
 	}
 
