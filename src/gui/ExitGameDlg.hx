@@ -24,45 +24,38 @@ class ExitGameDlg extends GuiControl {
 		var dialogImg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
 		dialogImg.horizSizing = Center;
 		dialogImg.vertSizing = Center;
-		dialogImg.position = new Vector(134, 148);
-		dialogImg.extent = new Vector(388, 186);
+		dialogImg.position = new Vector(162, 160);
+		dialogImg.extent = new Vector(315, 160);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-
-		var exitGameText = new GuiText(domcasual32);
-		exitGameText.text.textColor = 0x000000;
-		exitGameText.text.text = "Exit from this Level?";
-		exitGameText.justify = Center;
-		exitGameText.position = new Vector(95, 46);
-		exitGameText.extent = new Vector(198, 23);
-		exitGameText.horizSizing = Center;
-		exitGameText.vertSizing = Bottom;
+		var overlay = new GuiImage(ResourceLoader.getResource("data/ui/common/quitfromthislvl_overlay.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		overlay.horizSizing = Right;
+		overlay.vertSizing = Bottom;
+		overlay.position = new Vector(36, 22);
+		overlay.extent = new Vector(235, 42);
 
 		var yesButton = new GuiButton(loadButtonImages("data/ui/common/yes"));
-		yesButton.position = new Vector(47, 107);
-		yesButton.extent = new Vector(88, 52);
-		yesButton.vertSizing = Bottom;
+		yesButton.position = new Vector(19, 103);
+		yesButton.extent = new Vector(86, 40);
+		yesButton.vertSizing = Top;
 		yesButton.horizSizing = Right;
 		yesButton.pressedAction = yesFunc;
 
 		var noButton = new GuiButton(loadButtonImages("data/ui/common/no"));
-		noButton.position = new Vector(151, 107);
-		noButton.extent = new Vector(83, 55);
-		noButton.vertSizing = Bottom;
+		noButton.position = new Vector(105, 102);
+		noButton.extent = new Vector(86, 40);
+		noButton.vertSizing = Top;
 		noButton.horizSizing = Right;
 		noButton.pressedAction = noFunc;
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/common/restart"));
-		restartButton.position = new Vector(249, 107);
-		restartButton.extent = new Vector(103, 56);
-		restartButton.vertSizing = Bottom;
+		restartButton.position = new Vector(214, 104);
+		restartButton.extent = new Vector(86, 40);
+		restartButton.vertSizing = Top;
 		restartButton.horizSizing = Right;
 		restartButton.pressedAction = restartFunc;
 
-		dialogImg.addChild(exitGameText);
+		dialogImg.addChild(overlay);
 		dialogImg.addChild(yesButton);
 		dialogImg.addChild(noButton);
 		dialogImg.addChild(restartButton);

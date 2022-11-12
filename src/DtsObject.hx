@@ -176,6 +176,12 @@ class DtsObject extends GameObject {
 					if (mesh == null)
 						continue;
 
+					if (mesh.parent >= 0)
+						continue; // Fix teleporter being broken
+
+					if (mesh.vertices.length == 0)
+						continue;
+
 					if (!isInstanced) {
 						var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
 						var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));

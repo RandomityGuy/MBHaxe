@@ -774,6 +774,7 @@ class MarbleWorld extends Scheduler {
 		tsShape.useInstancing = true;
 		tsShape.dtsPath = dtsPath;
 		tsShape.identifier = shapeName;
+		tsShape.isCollideable = true;
 
 		var shapePosition = MisParser.parseVector3(element.position);
 		shapePosition.x = -shapePosition.x;

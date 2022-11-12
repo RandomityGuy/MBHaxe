@@ -36,16 +36,16 @@ class LoadingGui extends GuiImage {
 		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var mapName = new GuiText(domcasual32);
-		mapName.position = new Vector(134, 78);
-		mapName.extent = new Vector(323, 32);
+		mapName.position = new Vector(6, 33);
+		mapName.extent = new Vector(456, 14);
 		mapName.text.text = missionName;
 		mapName.text.textColor = 0;
 		mapName.justify = Center;
 
 		var progress = new GuiProgress();
-		progress.vertSizing = Bottom;
-		progress.position = new Vector(153, 133);
-		progress.extent = new Vector(269, 78);
+		progress.vertSizing = Top;
+		progress.position = new Vector(194, 145);
+		progress.extent = new Vector(225, 56);
 		progress.progress = 0.5;
 
 		setProgress = (progressPz) -> {
@@ -53,15 +53,15 @@ class LoadingGui extends GuiImage {
 		}
 
 		var cancelButton = new GuiButton(loadButtonImages("data/ui/loading/cancel"));
-		cancelButton.position = new Vector(320, 233);
-		cancelButton.extent = new Vector(88, 50);
+		cancelButton.position = new Vector(333, 243);
+		cancelButton.extent = new Vector(112, 59);
 		cancelButton.pressedAction = (sender) -> {
 			MarbleGame.instance.quitMission();
 		}
 
 		var overlay = new GuiImage(ResourceLoader.getResource("data/ui/loading/overlay.png", ResourceLoader.getImage, this.imageResources).toTile());
-		overlay.position = new Vector(151, 131);
-		overlay.extent = new Vector(278, 86);
+		overlay.position = new Vector(188, 139);
+		overlay.extent = new Vector(242, 75);
 
 		loadingGui.addChild(mapName);
 		loadingGui.addChild(progress);

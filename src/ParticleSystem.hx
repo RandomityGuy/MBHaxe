@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Matrix;
 import src.TimeState;
 import h3d.prim.UV;
 import h3d.parts.Data.BlendMode;
@@ -290,10 +291,11 @@ class ParticleManager {
 		}
 		this.tick(dt);
 		for (batch in particlebatches) {
-			batch.meshBatch.begin(batch.instances.length);
-			for (instance in batch.instances) {
+			var visibleinstances = batch.instances.filter(x -> scene.camera.frustum.hasPoint(x.position.toPoint()));
+			batch.meshBatch.begin(visibleinstances.length);
+			for (instance in visibleinstances) {
 				if (instance.currentAge != 0) {
-					batch.meshBatch.setPosition(instance.position.x, instance.position.y, instance.position.z);
+					batch.meshBatch.worldPosition = Matrix.T(instance.position.x, instance.position.y, instance.position.z);
 					var particleShader = batch.meshBatch.material.mainPass.getShader(Billboard);
 					particleShader.scale = instance.scale;
 					particleShader.rotation = instance.rotation;
@@ -303,7 +305,6 @@ class ParticleManager {
 					// batch.meshBatch.material.mainPass.setPassName("overlay");
 					// batch.meshBatch.material.color.load(instance.color);
 					batch.meshBatch.shadersChanged = true;
-					batch.meshBatch.setScale(instance.scale);
 					batch.meshBatch.emitInstance();
 				}
 			}
