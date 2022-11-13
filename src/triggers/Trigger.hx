@@ -1,5 +1,6 @@
 package triggers;
 
+import src.TimeState;
 import h3d.scene.Mesh;
 import h3d.mat.Material;
 import h3d.prim.Cube;
@@ -16,6 +17,8 @@ class Trigger extends GameObject {
 	var id:Float;
 	var level:MarbleWorld;
 	var element:MissionElementTrigger;
+
+	var vertices:Array<Vector>;
 
 	public var collider:BoxCollisionEntity;
 
@@ -43,7 +46,7 @@ class Trigger extends GameObject {
 
 		var mat = new Matrix();
 		var quat = MisParser.parseRotation(element.rotation);
-		// quat.x = -quat.x;
+		quat.x = -quat.x;
 		// quat.w = -quat.w;
 		quat.toMatrix(mat);
 		var scale = MisParser.parseVector3(element.scale);
@@ -52,7 +55,7 @@ class Trigger extends GameObject {
 		pos.x = -pos.x;
 		// mat.setPosition(pos);
 
-		var vertices = [p1, p2, p3, p4, p5, p6, p7, p8].map((vert) -> vert.transformed(mat));
+		vertices = [p1, p2, p3, p4, p5, p6, p7, p8].map((vert) -> vert.transformed(mat));
 
 		var boundingbox = new Bounds();
 		for (vector in vertices) {
@@ -73,6 +76,8 @@ class Trigger extends GameObject {
 		// // m2.setPosition(boundingbox.xMax, boundingbox.yMax, boundingbox.zMax);
 		// mesh.setPosition(boundingbox.xMin, boundingbox.yMin, boundingbox.zMin);
 	}
+
+	public function update(timeState:TimeState) {}
 
 	public function init(onFinish:Void->Void) {
 		onFinish();

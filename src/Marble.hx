@@ -1,5 +1,7 @@
 package src;
 
+import h3d.shader.AlphaMult;
+import shaders.DtsTexture;
 import collision.gjk.GJK;
 import collision.gjk.ConvexHull;
 import hxd.snd.effect.Pitch;
@@ -167,6 +169,8 @@ class Marble extends GameObject {
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
 
+	var teleportEnableTime:Null<Float> = null;
+	var teleportDisableTime:Null<Float> = null;
 	var bounceEmitDelay:Float = 0;
 
 	var bounceEmitterData:ParticleData;
@@ -187,6 +191,10 @@ class Marble extends GameObject {
 
 	public var prevPos:Vector;
 
+	var cloak:Bool = false;
+
+	var teleporting:Bool = false;
+
 	public function new() {
 		super();
 		var geom = Sphere.defaultUnitSphere();
@@ -195,6 +203,11 @@ class Marble extends GameObject {
 		var marbleMaterial = Material.create(marbleTexture);
 		marbleMaterial.shadows = false;
 		marbleMaterial.castShadows = true;
+		// marbleMaterial.mainPass.removeShader(marbleMaterial.textureShader);
+		// var dtsShader = new DtsTexture();
+		// dtsShader.texture = marbleTexture;
+		// dtsShader.currentOpacity = 1;
+		// marbleMaterial.mainPass.addShader(dtsShader);
 		var obj = new Mesh(geom, marbleMaterial, this);
 		obj.scale(_radius);
 
@@ -1396,6 +1409,7 @@ class Marble extends GameObject {
 		}
 
 		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+		this.updateTeleporterState(timeState);
 
 		this.trailEmitter();
 		if (bounceEmitDelay > 0)
@@ -1453,6 +1467,47 @@ class Marble extends GameObject {
 		this.helicopterEnableTime = time;
 	}
 
+	function updateTeleporterState(time:TimeState) {
+		var teleportFadeCompletion:Float = 0;
+
+		if (this.teleportEnableTime != null)
+			teleportFadeCompletion = Util.clamp((time.currentAttemptTime - this.teleportEnableTime) / 0.5, 0, 1);
+		if (this.teleportDisableTime != null)
+			teleportFadeCompletion = Util.clamp(1 - (time.currentAttemptTime - this.teleportDisableTime) / 0.5, 0, 1);
+
+		if (teleportFadeCompletion > 0) {
+			var mesh:Mesh = cast this.children[0];
+			var shad:AlphaMult = mesh.material.mainPass.getShader(AlphaMult);
+			if (shad == null) {
+				shad = new AlphaMult();
+				mesh.material.mainPass.addShader(shad);
+				mesh.material.blendMode = Alpha;
+				this.teleporting = true;
+			}
+			shad.alpha = Util.lerp(1, 0.25, teleportFadeCompletion);
+		} else {
+			if (this.teleporting) {
+				var mesh:Mesh = cast this.children[0];
+				mesh.material.mainPass.removeShader(mesh.material.mainPass.getShader(AlphaMult));
+				mesh.material.blendMode = None;
+				this.teleporting = false;
+			}
+		}
+	}
+
+	public function setCloaking(active:Bool, time:TimeState) {
+		this.cloak = active;
+		if (this.cloak) {
+			var completion = (this.teleportDisableTime != null) ? Util.clamp((time.currentAttemptTime - this.teleportDisableTime) / 0.5, 0, 1) : 1;
+			this.teleportEnableTime = time.currentAttemptTime - 0.5 * (1 - completion);
+			this.teleportDisableTime = null;
+		} else {
+			var completion = Util.clamp((time.currentAttemptTime - this.teleportEnableTime) / 0.5, 0, 1);
+			this.teleportDisableTime = time.currentAttemptTime - 0.5 * (1 - completion);
+			this.teleportEnableTime = null;
+		}
+	}
+
 	public override function reset() {
 		this.velocity = new Vector();
 		this.collider.velocity = new Vector();
@@ -1461,5 +1516,14 @@ class Marble extends GameObject {
 		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
 		this.lastContactNormal = new Vector(0, 0, 1);
+		this.cloak = false;
+		if (this.teleporting) {
+			var mesh:Mesh = cast this.children[0];
+			mesh.material.mainPass.removeShader(mesh.material.mainPass.getShader(AlphaMult));
+			mesh.material.blendMode = None;
+		}
+		this.teleporting = false;
+		this.teleportDisableTime = null;
+		this.teleportEnableTime = null;
 	}
 }

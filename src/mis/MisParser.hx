@@ -519,4 +519,15 @@ class MisParser {
 		}
 		return result;
 	}
+
+	/** Parses a boolean value. */
+	public static function parseBoolean(string:String) {
+		if (string == null)
+			return false;
+		if (string == "")
+			return false;
+		if (string == "0")
+			return false;
+		return true;
+	}
 }

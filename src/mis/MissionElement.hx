@@ -227,6 +227,22 @@ class MissionElementTrigger extends MissionElementBase {
 	var instant:Null<String>;
 	var icontinuetottime:Null<String>;
 
+	// checkpoint stuff:
+	var respawnpoint:Null<String>;
+	var add:Null<String>;
+	var sub:Null<String>;
+	var gravity:Null<String>;
+	var disableOob:Null<String>;
+	// teleport/destination trigger stuff:
+	var destination:Null<String>;
+	var delay:Null<String>;
+	var centerdestpoint:Null<String>;
+	var keepvelocity:Null<String>;
+	var inversevelocity:Null<String>;
+	var keepangular:Null<String>;
+	var keepcamera:Null<String>;
+	var camerayaw:Null<String>;
+
 	public function new() {
 		_type = MissionElementType.Trigger;
 	}

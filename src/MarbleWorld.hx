@@ -1,5 +1,7 @@
 package src;
 
+import triggers.TeleportTrigger;
+import triggers.DestinationTrigger;
 import shapes.Nuke;
 import shapes.Magnet;
 import src.Replay;
@@ -744,6 +746,10 @@ class MarbleWorld extends Scheduler {
 			trigger = new InBoundsTrigger(element, cast this);
 		} else if (element.datablock == "HelpTrigger") {
 			trigger = new HelpTrigger(element, cast this);
+		} else if (element.datablock == "TeleportTrigger") {
+			trigger = new TeleportTrigger(element, cast this);
+		} else if (element.datablock == "DestinationTrigger") {
+			trigger = new DestinationTrigger(element, cast this);
 		} else {
 			onFinish();
 			return;
@@ -905,6 +911,9 @@ class MarbleWorld extends Scheduler {
 		this.updateGameState();
 		ProfilerUI.measure("updateDTS");
 		for (obj in dtsObjects) {
+			obj.update(timeState);
+		}
+		for (obj in triggers) {
 			obj.update(timeState);
 		}
 		ProfilerUI.measure("updateMarbles");
