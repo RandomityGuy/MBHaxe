@@ -9,17 +9,18 @@ class SignPlain extends DtsObject {
 
 		this.dtsPath = "data/shapes/signs/plainsign.dts";
 		this.isCollideable = true;
+		this.useInstancing = true;
 
 		// Determine the direction to show
-		var direction = element.datablock.substring("SignPlain".length);
+		var direction = element.datablock.substring("SignPlain".length).toLowerCase();
 		switch (direction) {
-			case "Right":
+			case "right":
 				this.matNameOverride.set("base.plainsign", "right.plainsign");
-			case "Left":
+			case "left":
 				this.matNameOverride.set("base.plainsign", "left.plainsign");
-			case "Up":
+			case "up":
 				this.matNameOverride.set("base.plainsign", "up.plainsign");
-			case "Down":
+			case "down":
 				this.matNameOverride.set("base.plainsign", "down.plainsign");
 		}
 

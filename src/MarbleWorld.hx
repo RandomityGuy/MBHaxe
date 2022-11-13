@@ -1,5 +1,7 @@
 package src;
 
+import shapes.EasterEgg;
+import shapes.Sign;
 import triggers.TeleportTrigger;
 import triggers.DestinationTrigger;
 import shapes.Nuke;
@@ -600,6 +602,8 @@ class MarbleWorld extends Scheduler {
 			shape = new TriangleBumper();
 		else if (dataBlockLowerCase == "helicopteritem")
 			shape = new Helicopter(cast element);
+		else if (dataBlockLowerCase == "easteregg")
+			shape = new EasterEgg(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
@@ -616,7 +620,7 @@ class MarbleWorld extends Scheduler {
 			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
 			shape = new SuperSpeed(cast element);
-		else if (dataBlockLowerCase == "timetravelitem")
+		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
 			shape = new TimeTravel(cast element);
 		else if (dataBlockLowerCase == "tornado")
 			shape = new Tornado();
@@ -624,6 +628,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Trapdoor();
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
+		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
+			shape = new Sign(cast element);
 		else {
 			onFinish();
 			return;
@@ -682,6 +688,8 @@ class MarbleWorld extends Scheduler {
 			shape = new TriangleBumper();
 		else if (dataBlockLowerCase == "helicopteritem")
 			shape = new Helicopter(cast element);
+		else if (dataBlockLowerCase == "easteregg")
+			shape = new EasterEgg(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
@@ -698,7 +706,7 @@ class MarbleWorld extends Scheduler {
 			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
 			shape = new SuperSpeed(cast element);
-		else if (dataBlockLowerCase == "timetravelitem")
+		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
 			shape = new TimeTravel(cast element);
 		else if (dataBlockLowerCase == "tornado")
 			shape = new Tornado();
@@ -706,6 +714,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Trapdoor();
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
+		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
+			shape = new Sign(cast element);
 		else {
 			onFinish();
 			return;

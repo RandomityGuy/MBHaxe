@@ -8,12 +8,13 @@ class SignCaution extends DtsObject {
 		super();
 		this.dtsPath = "data/shapes/signs/cautionsign.dts";
 		this.isCollideable = true;
+		this.useInstancing = true;
 
-		var type = element.datablock.substring("SignCaution".length);
+		var type = element.datablock.substring("SignCaution".length).toLowerCase();
 		switch (type) {
-			case "Caution":
+			case "caution":
 				this.matNameOverride.set("base.cautionsign", "caution.cautionsign");
-			case "Danger":
+			case "danger":
 				this.matNameOverride.set("base.cautionsign", "danger.cautionsign");
 		}
 		this.identifier = "CautionSign" + type;

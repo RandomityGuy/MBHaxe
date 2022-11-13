@@ -16,6 +16,7 @@ class Magnet extends ForceObject {
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		this.identifier = "Magnet";
+		this.useInstancing = true;
 		this.forceDatas = [
 			{
 				forceType: ForceCone,

@@ -266,9 +266,7 @@ class ResourceLoader {
 	}
 
 	public static function getTexture(path:String) {
-		#if (js || android)
-		path = StringTools.replace(path, "data/", "");
-		#end
+		path = getProperFilepath(path);
 		if (textureCache.exists(path))
 			return textureCache.get(path);
 		if (fileSystem.exists(path)) {
@@ -355,7 +353,7 @@ class ResourceLoader {
 		var fname = Path.withoutDirectory(path).toLowerCase();
 		for (file in files) {
 			var fname2 = file.name;
-			if (Path.withoutExtension(fname2).toLowerCase() == fname)
+			if (Path.withoutExtension(fname2).toLowerCase() == fname || fname2.toLowerCase() == fname)
 				names.push(file.path);
 		}
 		return names;

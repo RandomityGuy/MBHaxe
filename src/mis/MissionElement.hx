@@ -157,6 +157,7 @@ class MissionElementItem extends MissionElementBase {
 	var rotate:String;
 	var showhelponpickup:String;
 	var timebonus:Null<String>;
+	var timepenalty:Null<String>;
 
 	public function new() {
 		_type = MissionElementType.Item;

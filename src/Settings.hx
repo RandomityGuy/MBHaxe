@@ -63,6 +63,8 @@ typedef TouchSettings = {
 class Settings {
 	public static var highScores:Map<String, Array<Score>> = [];
 
+	public static var easterEggs:Map<String, Float> = [];
+
 	public static var optionsSettings:OptionsSettings = {
 		screenWidth: 1280,
 		screenHeight: 720,
@@ -153,14 +155,23 @@ class Settings {
 			highscoreName: highscoreName
 		};
 		var scoreCount = 0;
+		var eggCount = 0;
 		for (key => value in highScores) {
 			scoreCount++;
+		}
+		for (key => value in easterEggs) {
+			eggCount++;
 		}
 		#if hl
 		if (scoreCount != 0)
 			outputData.highScores = highScores;
 		else
 			outputData.highScores = {};
+		if (eggCount != 0) {
+			outputData.easterEggs = easterEggs;
+		} else {
+			outputData.easterEggs = {};
+		}
 		#end
 		#if js
 		var kvps:Array<Dynamic> = [];
@@ -168,6 +179,11 @@ class Settings {
 			kvps.push([key, value]);
 		var jobj = js.lib.Object.fromEntries(kvps);
 		outputData.highScores = jobj;
+		kvps = [];
+		for (key => value in easterEggs)
+			kvps.push([key, value]);
+		jobj = js.lib.Object.fromEntries(kvps);
+		outputData.easterEggs = jobj;
 		#end
 		var json = Json.stringify(outputData);
 		#if (hl && !android)
@@ -203,6 +219,12 @@ class Settings {
 			var highScoreData:DynamicAccess<Array<Score>> = json.highScores;
 			for (key => value in highScoreData) {
 				highScores.set(key, value);
+			}
+			var easterEggData:DynamicAccess<Float> = json.easterEggs;
+			if (easterEggData != null) {
+				for (key => value in easterEggData) {
+					easterEggs.set(key, value);
+				}
 			}
 			optionsSettings = json.options;
 			if (optionsSettings.fov == 0 #if js || optionsSettings.fov == null #end)
