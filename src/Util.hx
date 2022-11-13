@@ -9,6 +9,11 @@ import h3d.Vector;
 import src.Settings;
 
 class Util {
+	public static function mat3x3equal(a:Matrix, b:Matrix) {
+		return a._11 == b._11 && a._12 == b._12 && a._13 == b._13 && a._21 == b._21 && a._22 == b._22 && a._23 == b._23 && a._31 == b._31 && a._32 == b._32
+			&& a._33 == b._33;
+	}
+
 	public static function adjustedMod(a:Float, n:Float) {
 		var r1 = a % n;
 		var r2 = (r1 + n) % n;

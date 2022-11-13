@@ -12,6 +12,7 @@ import octree.IOctreeObject;
 import h3d.Matrix;
 import h3d.col.Bounds;
 import src.PathedInterior;
+import src.Util;
 
 class CollisionEntity implements IOctreeObject {
 	public var boundingBox:Bounds;
@@ -63,9 +64,27 @@ class CollisionEntity implements IOctreeObject {
 	public function setTransform(transform:Matrix) {
 		if (this.transform.equal(transform))
 			return;
-		this.transform.load(transform);
-		this.invTransform = transform.getInverse();
-		generateBoundingBox();
+		// Speedup
+		if (Util.mat3x3equal(this.transform, transform)) {
+			var oldPos = this.transform.getPosition();
+			var newPos = transform.getPosition();
+			this.transform.setPosition(newPos);
+			this.invTransform.setPosition(newPos.multiply(-1));
+			if (this.boundingBox == null)
+				generateBoundingBox();
+			else {
+				this.boundingBox.xMin += newPos.x - oldPos.x;
+				this.boundingBox.xMax += newPos.x - oldPos.x;
+				this.boundingBox.yMin += newPos.y - oldPos.y;
+				this.boundingBox.yMax += newPos.y - oldPos.y;
+				this.boundingBox.zMin += newPos.z - oldPos.z;
+				this.boundingBox.zMax += newPos.z - oldPos.z;
+			}
+		} else {
+			this.transform.load(transform);
+			this.invTransform = transform.getInverse();
+			generateBoundingBox();
+		}
 	}
 
 	public function generateBoundingBox() {
