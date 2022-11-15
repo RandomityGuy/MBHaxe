@@ -195,7 +195,7 @@ class MarbleGame {
 				world.setCursorLock(true);
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
-				world.restart();
+				world.restart(true);
 				// world.setCursorLock(true);
 				paused = !paused;
 			});

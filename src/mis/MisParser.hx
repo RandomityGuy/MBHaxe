@@ -1,5 +1,6 @@
 package mis;
 
+import Macros.MisParserMacros;
 import haxe.Exception;
 import mis.MissionElement.MissionElementPathedInterior;
 import mis.MissionElement.MissionElementPath;
@@ -144,35 +145,35 @@ class MisParser {
 			case "SimGroup":
 				element = this.readSimGroup(name);
 			case "ScriptObject":
-				element = this.readScriptObject(name);
+				MisParserMacros.parseObject(name, MissionElementScriptObject, MissionElementType.ScriptObject);
 			case "MissionArea":
-				element = this.readMissionArea(name);
+				MisParserMacros.parseObject(name, MissionElementMissionArea, MissionElementType.MissionArea);
 			case "Sky":
-				element = this.readSky(name);
+				MisParserMacros.parseObject(name, MissionElementSky, MissionElementType.Sky);
 			case "Sun":
-				element = this.readSun(name);
+				MisParserMacros.parseObject(name, MissionElementSun, MissionElementType.Sun);
 			case "InteriorInstance":
-				element = this.readInteriorInstance(name);
+				MisParserMacros.parseObject(name, MissionElementInteriorInstance, MissionElementType.InteriorInstance);
 			case "StaticShape":
-				element = this.readStaticShape(name);
+				MisParserMacros.parseObject(name, MissionElementStaticShape, MissionElementType.StaticShape);
 			case "Item":
-				element = this.readItem(name);
+				MisParserMacros.parseObject(name, MissionElementItem, MissionElementType.Item);
 			case "Path":
 				element = this.readPath(name);
 			case "Marker":
-				element = this.readMarker(name);
+				MisParserMacros.parseObject(name, MissionElementMarker, MissionElementType.Marker);
 			case "PathedInterior":
-				element = this.readPathedInterior(name);
+				MisParserMacros.parseObject(name, MissionElementPathedInterior, MissionElementType.PathedInterior);
 			case "Trigger":
-				element = this.readTrigger(name);
+				MisParserMacros.parseObject(name, MissionElementTrigger, MissionElementType.Trigger);
 			case "AudioProfile":
-				element = this.readAudioProfile(name);
+				MisParserMacros.parseObject(name, MissionElementAudioProfile, MissionElementType.AudioProfile);
 			case "MessageVector":
-				element = this.readMessageVector(name);
+				MisParserMacros.parseObject(name, MissionElementMessageVector, MissionElementType.MessageVector);
 			case "TSStatic":
-				element = this.readTSStatic(name);
+				MisParserMacros.parseObject(name, MissionElementTSStatic, MissionElementType.TSStatic);
 			case "ParticleEmitterNode":
-				element = this.readParticleEmitterNode(name);
+				MisParserMacros.parseObject(name, MissionElementParticleEmitterNode, MissionElementType.ParticleEmitterNode);
 			default:
 				trace("Unknown element type! " + type);
 				// Still advance the index
@@ -274,76 +275,8 @@ class MisParser {
 					Reflect.setField(obj, key, value[0]);
 			}
 		}
-	}
 
-	function readScriptObject(name:String) {
-		var obj = new MissionElementScriptObject();
-		obj._type = MissionElementType.ScriptObject;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readMissionArea(name:String) {
-		var obj = new MissionElementMissionArea();
-		obj._type = MissionElementType.MissionArea;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readSky(name:String) {
-		var obj = new MissionElementSky();
-		obj._type = MissionElementType.Sky;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readSun(name:String) {
-		var obj = new MissionElementSun();
-		obj._type = MissionElementType.Sun;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readInteriorInstance(name:String) {
-		var obj = new MissionElementInteriorInstance();
-		obj._type = MissionElementType.InteriorInstance;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readStaticShape(name:String) {
-		var obj = new MissionElementStaticShape();
-		obj._type = MissionElementType.StaticShape;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readItem(name:String) {
-		var obj = new MissionElementItem();
-		obj._type = MissionElementType.Item;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
+		Reflect.setField(obj, "fields", values);
 	}
 
 	function readPath(name:String) {
@@ -353,76 +286,6 @@ class MisParser {
 		obj._name = name;
 		obj.markers = sg.elements.map(x -> cast x);
 		obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
-
-		return obj;
-	}
-
-	function readMarker(name:String) {
-		var obj = new MissionElementMarker();
-		obj._type = MissionElementType.Marker;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readPathedInterior(name:String) {
-		var obj = new MissionElementPathedInterior();
-		obj._type = MissionElementType.PathedInterior;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readTrigger(name:String) {
-		var obj = new MissionElementTrigger();
-		obj._type = MissionElementType.Trigger;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readAudioProfile(name:String) {
-		var obj = new MissionElementAudioProfile();
-		obj._type = MissionElementType.AudioProfile;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readMessageVector(name:String) {
-		var obj = new MissionElementMessageVector();
-		obj._type = MissionElementType.MessageVector;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readTSStatic(name:String) {
-		var obj = new MissionElementTSStatic();
-		obj._type = MissionElementType.TSStatic;
-		obj._name = name;
-
-		copyFields(obj);
-
-		return obj;
-	}
-
-	function readParticleEmitterNode(name:String) {
-		var obj = new MissionElementParticleEmitterNode();
-		obj._type = MissionElementType.ParticleEmitterNode;
-		obj._name = name;
-
-		copyFields(obj);
 
 		return obj;
 	}

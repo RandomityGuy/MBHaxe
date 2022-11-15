@@ -1,5 +1,7 @@
 package src;
 
+import shapes.Checkpoint;
+import triggers.CheckpointTrigger;
 import shapes.EasterEgg;
 import shapes.Sign;
 import triggers.TeleportTrigger;
@@ -95,6 +97,8 @@ class MarbleWorld extends Scheduler {
 	public var dtsObjects:Array<DtsObject> = [];
 	public var forceObjects:Array<ForceObject> = [];
 	public var triggers:Array<Trigger> = [];
+	public var gems:Array<Gem> = [];
+	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
 
 	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<GameObject> = [];
@@ -135,6 +139,13 @@ class MarbleWorld extends Scheduler {
 	var oldOrientationQuat = new Quat();
 
 	public var newOrientationQuat = new Quat();
+
+	// Checkpoint
+	var currentCheckpoint:{obj:DtsObject, elem:MissionElementBase} = null;
+	var currentCheckpointTrigger:CheckpointTrigger = null;
+	var checkpointCollectedGems:Map<Gem, Bool> = [];
+	var checkpointHeldPowerup:PowerUp = null;
+	var checkpointUp:Vector = null;
 
 	// Replay
 	public var replay:Replay;
@@ -326,18 +337,24 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function start() {
-		restart();
+		restart(true);
 		for (interior in this.interiors)
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
 			shape.onLevelStart();
 	}
 
-	public function restart() {
+	public function restart(full:Bool = false) {
 		if (!this.isWatching) {
 			this.replay.clear();
 		} else
 			this.replay.rewind();
+
+		if (!full && this.currentCheckpoint != null) {
+			this.loadCheckpointState();
+			return 0; // Load checkpoint
+		}
+
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = 0;
 		this.bonusTime = 0;
@@ -346,6 +363,13 @@ class MarbleWorld extends Scheduler {
 		this.finishTime = null;
 		this.helpTextTimeState = Math.NEGATIVE_INFINITY;
 		this.alertTextTimeState = Math.NEGATIVE_INFINITY;
+
+		this.currentCheckpoint = null;
+		this.currentCheckpointTrigger = null;
+		this.checkpointCollectedGems.clear();
+		this.checkpointHeldPowerup = null;
+		this.checkpointUp = null;
+
 		if (this.endPad != null)
 			this.endPad.inFinish = false;
 		if (this.totalGems > 0) {
@@ -590,6 +614,7 @@ class MarbleWorld extends Scheduler {
 		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
 			shape = new Gem(cast element);
 			this.totalGems++;
+			this.gems.push(cast shape);
 		} else if (dataBlockLowerCase == "superjumpitem")
 			shape = new SuperJump(cast element);
 		else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
@@ -604,6 +629,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Helicopter(cast element);
 		else if (dataBlockLowerCase == "easteregg")
 			shape = new EasterEgg(cast element);
+		else if (dataBlockLowerCase == "checkpoint")
+			shape = new Checkpoint(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
@@ -633,6 +660,13 @@ class MarbleWorld extends Scheduler {
 		else {
 			onFinish();
 			return;
+		}
+
+		if (element._name != null && element._name != "") {
+			this.namedObjects.set(element._name, {
+				obj: shape,
+				elem: element
+			});
 		}
 
 		var shapePosition = MisParser.parseVector3(element.position);
@@ -678,6 +712,7 @@ class MarbleWorld extends Scheduler {
 		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
 			shape = new Gem(cast element);
 			this.totalGems++;
+			this.gems.push(cast shape);
 		} else if (dataBlockLowerCase == "superjumpitem")
 			shape = new SuperJump(cast element);
 		else if (dataBlockLowerCase == "superbounceitem")
@@ -690,6 +725,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Helicopter(cast element);
 		else if (dataBlockLowerCase == "easteregg")
 			shape = new EasterEgg(cast element);
+		else if (dataBlockLowerCase == "checkpoint")
+			shape = new Checkpoint(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
@@ -721,6 +758,13 @@ class MarbleWorld extends Scheduler {
 			return;
 		}
 
+		if (element._name != null && element._name != "") {
+			this.namedObjects.set(element._name, {
+				obj: shape,
+				elem: element
+			});
+		}
+
 		var shapePosition = MisParser.parseVector3(element.position);
 		shapePosition.x = -shapePosition.x;
 		var shapeRotation = MisParser.parseRotation(element.rotation);
@@ -749,21 +793,26 @@ class MarbleWorld extends Scheduler {
 	public function addTrigger(element:MissionElementTrigger, onFinish:Void->Void) {
 		var trigger:Trigger = null;
 
+		var datablockLowercase = element.datablock.toLowerCase();
+
 		// Create a trigger based on type
-		if (element.datablock == "OutOfBoundsTrigger") {
+		if (datablockLowercase == "outofboundstrigger") {
 			trigger = new OutOfBoundsTrigger(element, cast this);
-		} else if (element.datablock == "InBoundsTrigger") {
+		} else if (datablockLowercase == "inboundstrigger") {
 			trigger = new InBoundsTrigger(element, cast this);
-		} else if (element.datablock == "HelpTrigger") {
+		} else if (datablockLowercase == "helptrigger") {
 			trigger = new HelpTrigger(element, cast this);
-		} else if (element.datablock == "TeleportTrigger") {
+		} else if (datablockLowercase == "teleporttrigger") {
 			trigger = new TeleportTrigger(element, cast this);
-		} else if (element.datablock == "DestinationTrigger") {
+		} else if (datablockLowercase == "destinationtrigger") {
 			trigger = new DestinationTrigger(element, cast this);
+		} else if (datablockLowercase == "checkpointtrigger") {
+			trigger = new CheckpointTrigger(element, cast this);
 		} else {
 			onFinish();
 			return;
 		}
+
 		trigger.init(() -> {
 			this.triggers.push(trigger);
 			this.collisionWorld.addEntity(trigger.collider);
@@ -791,6 +840,13 @@ class MarbleWorld extends Scheduler {
 		tsShape.dtsPath = dtsPath;
 		tsShape.identifier = shapeName;
 		tsShape.isCollideable = true;
+
+		if (element._name != null && element._name != "") {
+			this.namedObjects.set(element._name, {
+				obj: tsShape,
+				elem: element
+			});
+		}
 
 		var shapePosition = MisParser.parseVector3(element.position);
 		shapePosition.x = -shapePosition.x;
@@ -946,14 +1002,8 @@ class MarbleWorld extends Scheduler {
 		}
 
 		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {
-			this.clearSchedule();
 			this.restart();
 			return;
-		}
-
-		if (Key.isDown(Key.H)) {
-			this.isWatching = true;
-			this.restart();
 		}
 
 		this.updateTexts();
@@ -1268,7 +1318,7 @@ class MarbleWorld extends Scheduler {
 		}, (sender) -> {
 			MarbleGame.canvas.popDialog(egg);
 			this.setCursorLock(true);
-			this.restart();
+			this.restart(true);
 			#if js
 			pointercontainer.hidden = true;
 			#end
@@ -1283,6 +1333,8 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function pickUpPowerUp(powerUp:PowerUp) {
+		if (powerUp == null)
+			return false;
 		if (this.marble.heldPowerup != null)
 			if (this.marble.heldPowerup.identifier == powerUp.identifier)
 				return false;
@@ -1306,7 +1358,7 @@ class MarbleWorld extends Scheduler {
 		return q;
 	}
 
-	public function setUp(vec:Vector, timeState:TimeState) {
+	public function setUp(vec:Vector, timeState:TimeState, instant:Bool = false) {
 		this.currentUp = vec;
 		var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
 		var oldUp = new Vector(0, 0, 1);
@@ -1349,7 +1401,7 @@ class MarbleWorld extends Scheduler {
 
 		this.newOrientationQuat = quatChange;
 		this.oldOrientationQuat = currentQuat;
-		this.orientationChangeTime = timeState.currentAttemptTime;
+		this.orientationChangeTime = instant ? -1e8 : timeState.currentAttemptTime;
 	}
 
 	public function goOutOfBounds() {
@@ -1365,6 +1417,98 @@ class MarbleWorld extends Scheduler {
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 		// if (this.replay.mode != = 'playback')
 		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
+	}
+
+	/** Sets a new active checkpoint. */
+	public function saveCheckpointState(shape:{obj:DtsObject, elem:MissionElementBase}, trigger:CheckpointTrigger = null) {
+		if (this.currentCheckpoint != null)
+			if (this.currentCheckpoint.obj == shape.obj)
+				return;
+		var disableOob = false;
+		if (shape != null) {
+			if (shape.elem.fields.exists('disableOob')) {
+				disableOob = MisParser.parseBoolean(shape.elem.fields.get('disableOob'));
+			}
+		}
+		if (trigger != null) {
+			disableOob = trigger.disableOOB;
+		}
+		// (shape.srcElement as any) ?.disableOob || trigger?.element.disableOob;
+		if (disableOob && this.outOfBounds)
+			return; // The checkpoint is configured to not work when the player is already OOB
+		this.currentCheckpoint = shape;
+		this.currentCheckpointTrigger = trigger;
+		this.checkpointCollectedGems.clear();
+		this.checkpointUp = this.currentUp.clone();
+		// Remember all gems that were collected up to this point
+		for (gem in this.gems) {
+			if (gem.pickedUp)
+				this.checkpointCollectedGems.set(gem, true);
+		}
+		this.checkpointHeldPowerup = this.marble.heldPowerup;
+		this.displayAlert("Checkpoint reached!");
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
+	}
+
+	/** Resets to the last stored checkpoint state. */
+	public function loadCheckpointState() {
+		var marble = this.marble;
+		// Determine where to spawn the marble
+		var offset = new Vector(0, 0, 3);
+		var add = ""; // (this.currentCheckpoint.srcElement as any)?.add || this.currentCheckpointTrigger?.element.add;
+		if (this.currentCheckpoint.elem.fields.exists('add')) {
+			add = this.currentCheckpoint.elem.fields.get('add');
+		}
+		if (this.currentCheckpointTrigger != null) {
+			offset = this.currentCheckpointTrigger.add;
+		}
+		if (add != "")
+			offset = MisParser.parseVector3(add);
+		var mpos = this.currentCheckpoint.obj.getAbsPos().getPosition().add(offset);
+		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
+		marble.velocity.load(new Vector(0, 0, 0));
+		marble.omega.load(new Vector(0, 0, 0));
+		// Set camera orienation
+		var euler = this.currentCheckpoint.obj.getRotationQuat().toEuler();
+		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
+		this.marble.camera.CameraPitch = 0.45;
+		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
+		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
+		this.marble.camera.oob = false;
+		var gravityField = ""; // (this.currentCheckpoint.srcElement as any) ?.gravity || this.currentCheckpointTrigger?.element.gravity;
+		if (this.currentCheckpoint.elem.fields.exists('gravity')) {
+			gravityField = this.currentCheckpoint.elem.fields.get('gravity');
+		}
+		if (this.currentCheckpointTrigger != null) {
+			if (@:privateAccess this.currentCheckpointTrigger.element.fields.exists('gravity')) {
+				gravityField = @:privateAccess this.currentCheckpointTrigger.element.fields.get('gravity');
+			}
+		}
+		if (MisParser.parseBoolean(gravityField)) {
+			// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
+			var up = new Vector(0, 0, 1);
+			up.transform(this.currentCheckpoint.obj.getRotationQuat().toMatrix());
+			this.setUp(up, this.timeState, true);
+		} else {
+			// Otherwise, we restore gravity to what was stored.
+			this.setUp(this.checkpointUp, this.timeState, true);
+		}
+		// Restore gem states
+		for (gem in this.gems) {
+			if (gem.pickedUp && !this.checkpointCollectedGems.exists(gem)) {
+				gem.reset();
+				this.gemCount--;
+			}
+		}
+		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		this.playGui.setCenterText('none');
+		this.clearSchedule();
+		this.outOfBounds = false;
+		this.deselectPowerUp(); // Always deselect first
+		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
+		if (this.marble.heldPowerup != null)
+			this.schedule(this.timeState.currentAttemptTime + 500, () -> this.pickUpPowerUp(this.marble.heldPowerup));
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	public function setCursorLock(enabled:Bool) {

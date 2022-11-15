@@ -30,6 +30,8 @@ class MissionElementBase {
 
 	/** Is unique for every element in the mission file. */
 	var _id:Int;
+
+	var fields:Map<String, String>;
 }
 
 @:publicFields
