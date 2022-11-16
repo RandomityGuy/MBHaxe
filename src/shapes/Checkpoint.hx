@@ -19,7 +19,7 @@ class Checkpoint extends DtsObject {
 		this.identifier = "Checkpoint";
 		this.element = element;
 
-		this.disableOOB = element.fields.exists('disableOob') ? MisParser.parseBoolean(element.fields['disableOob']) : false;
+		this.disableOOB = element.fields.exists('disableOob') ? MisParser.parseBoolean(element.fields['disableOob'][0]) : false;
 	}
 
 	public override function init(level:src.MarbleWorld, onFinish:() -> Void) {

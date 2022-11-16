@@ -13,8 +13,8 @@ class CheckpointTrigger extends Trigger {
 	override public function new(element:MissionElementTrigger, level:MarbleWorld) {
 		super(element, level);
 
-		this.disableOOB = element.fields.exists('disableOob') ? MisParser.parseBoolean(element.fields['disableOob']) : false;
-		this.add = element.fields.exists('add') ? MisParser.parseVector3(element.fields['add']) : null;
+		this.disableOOB = element.fields.exists('disableOob') ? MisParser.parseBoolean(element.fields['disableOob'][0]) : false;
+		this.add = element.fields.exists('add') ? MisParser.parseVector3(element.fields['add'][0]) : null;
 	}
 
 	public override function init(onFinish:() -> Void) {

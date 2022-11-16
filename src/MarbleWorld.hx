@@ -1427,7 +1427,7 @@ class MarbleWorld extends Scheduler {
 		var disableOob = false;
 		if (shape != null) {
 			if (shape.elem.fields.exists('disableOob')) {
-				disableOob = MisParser.parseBoolean(shape.elem.fields.get('disableOob'));
+				disableOob = MisParser.parseBoolean(shape.elem.fields.get('disableOob')[0]);
 			}
 		}
 		if (trigger != null) {
@@ -1457,7 +1457,7 @@ class MarbleWorld extends Scheduler {
 		var offset = new Vector(0, 0, 3);
 		var add = ""; // (this.currentCheckpoint.srcElement as any)?.add || this.currentCheckpointTrigger?.element.add;
 		if (this.currentCheckpoint.elem.fields.exists('add')) {
-			add = this.currentCheckpoint.elem.fields.get('add');
+			add = this.currentCheckpoint.elem.fields.get('add')[0];
 		}
 		if (this.currentCheckpointTrigger != null) {
 			offset = this.currentCheckpointTrigger.add;
@@ -1477,11 +1477,11 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.oob = false;
 		var gravityField = ""; // (this.currentCheckpoint.srcElement as any) ?.gravity || this.currentCheckpointTrigger?.element.gravity;
 		if (this.currentCheckpoint.elem.fields.exists('gravity')) {
-			gravityField = this.currentCheckpoint.elem.fields.get('gravity');
+			gravityField = this.currentCheckpoint.elem.fields.get('gravity')[0];
 		}
 		if (this.currentCheckpointTrigger != null) {
 			if (@:privateAccess this.currentCheckpointTrigger.element.fields.exists('gravity')) {
-				gravityField = @:privateAccess this.currentCheckpointTrigger.element.fields.get('gravity');
+				gravityField = @:privateAccess this.currentCheckpointTrigger.element.fields.get('gravity')[0];
 			}
 		}
 		if (MisParser.parseBoolean(gravityField)) {
@@ -1506,8 +1506,8 @@ class MarbleWorld extends Scheduler {
 		this.outOfBounds = false;
 		this.deselectPowerUp(); // Always deselect first
 		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
-		if (this.marble.heldPowerup != null)
-			this.schedule(this.timeState.currentAttemptTime + 500, () -> this.pickUpPowerUp(this.marble.heldPowerup));
+		if (this.checkpointHeldPowerup != null)
+			this.schedule(this.timeState.currentAttemptTime + 0.5, () -> this.pickUpPowerUp(this.checkpointHeldPowerup));
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
