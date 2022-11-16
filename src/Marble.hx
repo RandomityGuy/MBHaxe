@@ -1,5 +1,7 @@
 package src;
 
+import shaders.MarbleReflection;
+import shaders.CubemapRenderer;
 import h3d.shader.AlphaMult;
 import shaders.DtsTexture;
 import collision.gjk.GJK;
@@ -195,21 +197,10 @@ class Marble extends GameObject {
 
 	var teleporting:Bool = false;
 
+	public var cubemapRenderer:CubemapRenderer;
+
 	public function new() {
 		super();
-		var geom = Sphere.defaultUnitSphere();
-		geom.addUVs();
-		var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
-		var marbleMaterial = Material.create(marbleTexture);
-		marbleMaterial.shadows = false;
-		marbleMaterial.castShadows = true;
-		// marbleMaterial.mainPass.removeShader(marbleMaterial.textureShader);
-		// var dtsShader = new DtsTexture();
-		// dtsShader.texture = marbleTexture;
-		// dtsShader.currentOpacity = 1;
-		// marbleMaterial.mainPass.addShader(dtsShader);
-		var obj = new Mesh(geom, marbleMaterial, this);
-		obj.scale(_radius);
 
 		this.velocity = new Vector();
 		this.omega = new Vector();
@@ -244,6 +235,23 @@ class Marble extends GameObject {
 
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.level = level;
+
+		var geom = Sphere.defaultUnitSphere();
+		geom.addUVs();
+		var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
+		var marbleMaterial = Material.create(marbleTexture);
+		marbleMaterial.shadows = false;
+		marbleMaterial.castShadows = true;
+		// marbleMaterial.mainPass.removeShader(marbleMaterial.textureShader);
+		// var dtsShader = new DtsTexture();
+		// dtsShader.texture = marbleTexture;
+		// dtsShader.currentOpacity = 1;
+		// marbleMaterial.mainPass.addShader(dtsShader);
+		var obj = new Mesh(geom, marbleMaterial, this);
+		obj.scale(_radius);
+		this.cubemapRenderer = new CubemapRenderer(level.scene);
+		marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+
 		this.forcefield = new DtsObject();
 		this.forcefield.dtsPath = "data/shapes/images/glow_bounce.dts";
 		this.forcefield.useInstancing = true;

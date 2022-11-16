@@ -9,7 +9,6 @@ import triggers.DestinationTrigger;
 import shapes.Nuke;
 import shapes.Magnet;
 import src.Replay;
-import hxd.impl.Air3File.FileSeek;
 import gui.Canvas;
 import hxd.snd.Channel;
 import hxd.res.Sound;
@@ -230,6 +229,9 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function postInit() {
+		// Add the sky at the last so that cubemap reflections work
+		this.scene.addChild(this.sky);
+
 		this._ready = true;
 		this.playGui.init(this.scene2d);
 		var musicFileName = 'data/sound/' + this.mission.missionInfo.music;
@@ -295,10 +297,10 @@ class MarbleWorld extends Scheduler {
 		sky.dmlPath = ResourceLoader.getProperFilepath(skyElement.materiallist);
 
 		worker.addTask(fwd -> sky.init(cast this, fwd));
-		worker.addTask(fwd -> {
-			scene.addChild(sky);
-			return fwd();
-		});
+		// worker.addTask(fwd -> {
+		// 	scene.addChild(sky);
+		// 	return fwd();
+		// });
 
 		worker.run();
 	}
@@ -1014,6 +1016,10 @@ class MarbleWorld extends Scheduler {
 			asyncLoadResources();
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
+		if (this.marble != null && this.marble.cubemapRenderer != null) {
+			this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
+			this.marble.cubemapRenderer.render(e, 0.002);
+		}
 	}
 
 	function asyncLoadResources() {

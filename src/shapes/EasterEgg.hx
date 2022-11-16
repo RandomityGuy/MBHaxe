@@ -35,7 +35,7 @@ class EasterEgg extends PowerUp {
 	public override function init(level:src.MarbleWorld, onFinish:() -> Void) {
 		super.init(level, () -> {
 			ResourceLoader.load("sound/easter.wav").entry.load(() -> {
-				ResourceLoader.load("data/sound/easterfound.wav").entry.load(onFinish);
+				ResourceLoader.load("sound/easterfound.wav").entry.load(onFinish);
 			});
 		});
 	}
