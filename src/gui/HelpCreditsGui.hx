@@ -34,19 +34,19 @@ class HelpCreditsGui extends GuiImage {
 	var superBounceCtrl:GuiObjectShow;
 
 	public function new() {
-		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		var img = ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
-		this.position = new Vector();
+		this.position = new Vector(0, 0);
 		this.extent = new Vector(640, 480);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 
-		var helpGui = new GuiImage(ResourceLoader.getResource("data/ui/help/help_gui.png", ResourceLoader.getImage, this.imageResources).toTile());
-		helpGui.horizSizing = Center;
-		helpGui.vertSizing = Center;
-		helpGui.position = new Vector(15, 10);
-		helpGui.extent = new Vector(609, 460);
-		this.addChild(helpGui);
+		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/manual/window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		wnd.position = new Vector(0, 0);
+		wnd.extent = new Vector(640, 480);
+		wnd.horizSizing = Center;
+		wnd.vertSizing = Center;
+		this.addChild(wnd);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -55,134 +55,141 @@ class HelpCreditsGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var nextButton = new GuiButton(loadButtonImages("data/ui/play/next"));
-		nextButton.position = new Vector(482, 376);
-		nextButton.extent = new Vector(75, 60);
-		nextButton.pressedAction = (sender) -> nextPage();
-		helpGui.addChild(nextButton);
-
-		var prevButton = new GuiButton(loadButtonImages("data/ui/play/prev"));
-		prevButton.position = new Vector(58, 383);
-		prevButton.extent = new Vector(77, 58);
-		prevButton.pressedAction = (sender) -> previousPage();
-		helpGui.addChild(prevButton);
-
-		var homeButton = new GuiButton(loadButtonImages("data/ui/play/back"));
-		homeButton.position = new Vector(278, 378);
-		homeButton.extent = new Vector(79, 61);
+		var homeButton = new GuiButton(loadButtonImages("data/ui/manual/home"));
+		homeButton.position = new Vector(274, 385);
+		homeButton.extent = new Vector(94, 46);
 		homeButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.setContent(new MainMenuGui());
 		}
-		helpGui.addChild(homeButton);
+		wnd.addChild(homeButton);
 
-		var helpWindow = new GuiImage(ResourceLoader.getResource("data/ui/help/help_window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		helpWindow.position = new Vector(30, 31);
-		helpWindow.extent = new Vector(549, 338);
-		helpGui.addChild(helpWindow);
+		// var helpGui = new GuiImage(ResourceLoader.getResource("data/ui/help/help_gui.png", ResourceLoader.getImage, this.imageResources).toTile());
+		// helpGui.horizSizing = Center;
+		// helpGui.vertSizing = Center;
+		// helpGui.position = new Vector(15, 10);
+		// helpGui.extent = new Vector(609, 460);
+		// this.addChild(helpGui);
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
-		var arial14b = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+		// var nextButton = new GuiButton(loadButtonImages("data/ui/play/next"));
+		// nextButton.position = new Vector(482, 376);
+		// nextButton.extent = new Vector(75, 60);
+		// nextButton.pressedAction = (sender) -> nextPage();
+		// helpGui.addChild(nextButton);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		// var prevButton = new GuiButton(loadButtonImages("data/ui/play/prev"));
+		// prevButton.position = new Vector(58, 383);
+		// prevButton.extent = new Vector(77, 58);
+		// prevButton.pressedAction = (sender) -> previousPage();
+		// helpGui.addChild(prevButton);
 
-		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
-		var expo50b = new BitmapFont(expo50fontdata.entry);
-		@:privateAccess expo50b.loader = ResourceLoader.loader;
-		var expo50 = expo50b.toSdfFont(cast 35 * Settings.uiScale, MultiChannel);
-		var expo32 = expo50b.toSdfFont(cast 24 * Settings.uiScale, MultiChannel);
+		// var helpWindow = new GuiImage(ResourceLoader.getResource("data/ui/help/help_window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		// helpWindow.position = new Vector(30, 31);
+		// helpWindow.extent = new Vector(549, 338);
+		// helpGui.addChild(helpWindow);
 
-		function mlFontLoader(text:String) {
-			switch (text) {
-				case "DomCasual32":
-					return domcasual32;
-				case "Arial14":
-					return arial14;
-				case "Expo32":
-					return expo32;
-				case "Expo50":
-					return expo50;
-				default:
-					return null;
-			}
-		}
+		// var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		// var arial14b = new BitmapFont(arial14fontdata.entry);
+		// @:privateAccess arial14b.loader = ResourceLoader.loader;
+		// var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
 
-		hcText = new GuiMLText(domcasual32, mlFontLoader);
-		hcText.position = new Vector(40, 24);
-		hcText.extent = new Vector(488, 274);
-		hcText.text.textColor = 0;
-		hcText.text.lineSpacing = 5;
-		helpWindow.addChild(hcText);
+		// var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		// var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		// @:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		// var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
-		hcText2 = new GuiMLText(domcasual32, mlFontLoader);
-		hcText2.position = new Vector(40, 24);
-		hcText2.extent = new Vector(488, 274);
-		hcText2.text.textColor = 0;
-		hcText2.text.lineSpacing = 5;
-		helpWindow.addChild(hcText2);
+		// var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
+		// var expo50b = new BitmapFont(expo50fontdata.entry);
+		// @:privateAccess expo50b.loader = ResourceLoader.loader;
+		// var expo50 = expo50b.toSdfFont(cast 35 * Settings.uiScale, MultiChannel);
+		// var expo32 = expo50b.toSdfFont(cast 24 * Settings.uiScale, MultiChannel);
 
-		startPadCtrl = buildObjectShow("data/shapes/pads/startarea.dts", new Vector(30, 82), new Vector(79, 66), 8, 0.5);
-		helpWindow.addChild(startPadCtrl);
+		// function mlFontLoader(text:String) {
+		// 	switch (text) {
+		// 		case "DomCasual32":
+		// 			return domcasual32;
+		// 		case "Arial14":
+		// 			return arial14;
+		// 		case "Expo32":
+		// 			return expo32;
+		// 		case "Expo50":
+		// 			return expo50;
+		// 		default:
+		// 			return null;
+		// 	}
+		// }
 
-		endPadCtrl = buildObjectShow("data/shapes/pads/endarea.dts", new Vector(31, 146), new Vector(79, 66), 8, 0.5);
-		helpWindow.addChild(endPadCtrl);
+		// hcText = new GuiMLText(domcasual32, mlFontLoader);
+		// hcText.position = new Vector(40, 24);
+		// hcText.extent = new Vector(488, 274);
+		// hcText.text.textColor = 0;
+		// hcText.text.lineSpacing = 5;
+		// helpWindow.addChild(hcText);
 
-		gem1Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(17, 234), new Vector(79, 66), 2.5, 0.4);
-		helpWindow.addChild(gem1Ctrl);
+		// hcText2 = new GuiMLText(domcasual32, mlFontLoader);
+		// hcText2.position = new Vector(40, 24);
+		// hcText2.extent = new Vector(488, 274);
+		// hcText2.text.textColor = 0;
+		// hcText2.text.lineSpacing = 5;
+		// helpWindow.addChild(hcText2);
 
-		gem2Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(43, 215), new Vector(79, 66), 2.5, 0.4, ["base.gem" => "purple.gem"]);
-		helpWindow.addChild(gem2Ctrl);
+		// startPadCtrl = buildObjectShow("data/shapes/pads/startarea.dts", new Vector(30, 82), new Vector(79, 66), 8, 0.5);
+		// helpWindow.addChild(startPadCtrl);
 
-		gem3Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(45, 250), new Vector(79, 66), 2.5, 0.4, ["base.gem" => "green.gem"]);
-		helpWindow.addChild(gem3Ctrl);
+		// endPadCtrl = buildObjectShow("data/shapes/pads/endarea.dts", new Vector(31, 146), new Vector(79, 66), 8, 0.5);
+		// helpWindow.addChild(endPadCtrl);
 
-		superSpeedCtrl = buildObjectShow("data/shapes/items/superspeed.dts", new Vector(30, 73), new Vector(79, 66), 3.5, 0.35);
-		helpWindow.addChild(superSpeedCtrl);
+		// gem1Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(17, 234), new Vector(79, 66), 2.5, 0.4);
+		// helpWindow.addChild(gem1Ctrl);
 
-		superJumpCtrl = buildObjectShow("data/shapes/items/superjump.dts", new Vector(31, 137), new Vector(79, 66), 3.5, 0.35);
-		helpWindow.addChild(superJumpCtrl);
+		// gem2Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(43, 215), new Vector(79, 66), 2.5, 0.4, ["base.gem" => "purple.gem"]);
+		// helpWindow.addChild(gem2Ctrl);
 
-		shockAbsorberCtrl = buildObjectShow("data/shapes/items/shockabsorber.dts", new Vector(33, 204), new Vector(72, 61), 3.5, 0.35);
-		helpWindow.addChild(shockAbsorberCtrl);
+		// gem3Ctrl = buildObjectShow("data/shapes/items/gem.dts", new Vector(45, 250), new Vector(79, 66), 2.5, 0.4, ["base.gem" => "green.gem"]);
+		// helpWindow.addChild(gem3Ctrl);
 
-		superBounceCtrl = buildObjectShow("data/shapes/items/superbounce.dts", new Vector(35, 260), new Vector(72, 61), 3.5, 0.35);
-		helpWindow.addChild(superBounceCtrl);
+		// superSpeedCtrl = buildObjectShow("data/shapes/items/superspeed.dts", new Vector(30, 73), new Vector(79, 66), 3.5, 0.35);
+		// helpWindow.addChild(superSpeedCtrl);
 
-		helicopterCtrl = buildObjectShow("data/shapes/images/helicopter.dts", new Vector(30, 82), new Vector(79, 66), 2, 0.35);
-		helpWindow.addChild(helicopterCtrl);
+		// superJumpCtrl = buildObjectShow("data/shapes/items/superjump.dts", new Vector(31, 137), new Vector(79, 66), 3.5, 0.35);
+		// helpWindow.addChild(superJumpCtrl);
 
-		timeTravelCtrl = buildObjectShow("data/shapes/items/timetravel.dts", new Vector(31, 146), new Vector(79, 66), 3.5, 0.35);
-		helpWindow.addChild(timeTravelCtrl);
+		// shockAbsorberCtrl = buildObjectShow("data/shapes/items/shockabsorber.dts", new Vector(33, 204), new Vector(72, 61), 3.5, 0.35);
+		// helpWindow.addChild(shockAbsorberCtrl);
 
-		antiGravityCtrl = buildObjectShow("data/shapes/items/antigravity.dts", new Vector(35, 217), new Vector(72, 61), 3.5, 0.35);
-		helpWindow.addChild(antiGravityCtrl);
+		// superBounceCtrl = buildObjectShow("data/shapes/items/superbounce.dts", new Vector(35, 260), new Vector(72, 61), 3.5, 0.35);
+		// helpWindow.addChild(superBounceCtrl);
 
-		ductFanCtrl = buildObjectShow("data/shapes/hazards/ductfan.dts", new Vector(30, 82), new Vector(79, 66), 4, 0.5);
-		helpWindow.addChild(ductFanCtrl);
+		// helicopterCtrl = buildObjectShow("data/shapes/images/helicopter.dts", new Vector(30, 82), new Vector(79, 66), 2, 0.35);
+		// helpWindow.addChild(helicopterCtrl);
 
-		tornadoCtrl = buildObjectShow("data/shapes/hazards/tornado.dts", new Vector(26, 155), new Vector(91, 66), 18, 0.35);
-		for (mat in tornadoCtrl.sceneObject.materials) {
-			mat.blendMode = None;
-		}
-		helpWindow.addChild(tornadoCtrl);
+		// timeTravelCtrl = buildObjectShow("data/shapes/items/timetravel.dts", new Vector(31, 146), new Vector(79, 66), 3.5, 0.35);
+		// helpWindow.addChild(timeTravelCtrl);
 
-		trapdoorCtrl = buildObjectShow("data/shapes/hazards/trapdoor.dts", new Vector(35, 217), new Vector(77, 76), 8, 0.35);
-		helpWindow.addChild(trapdoorCtrl);
+		// antiGravityCtrl = buildObjectShow("data/shapes/items/antigravity.dts", new Vector(35, 217), new Vector(72, 61), 3.5, 0.35);
+		// helpWindow.addChild(antiGravityCtrl);
 
-		oilSlickCtrl = buildObjectShow("data/shapes/hazards/oilslick.dts", new Vector(35, 217), new Vector(77, 76), 8, 0.35);
-		helpWindow.addChild(oilSlickCtrl);
+		// ductFanCtrl = buildObjectShow("data/shapes/hazards/ductfan.dts", new Vector(30, 82), new Vector(79, 66), 4, 0.5);
+		// helpWindow.addChild(ductFanCtrl);
 
-		landMineCtrl = buildObjectShow("data/shapes/hazards/landmine.dts", new Vector(26, 155), new Vector(91, 66), 1.5, 0.35);
-		helpWindow.addChild(landMineCtrl);
+		// tornadoCtrl = buildObjectShow("data/shapes/hazards/tornado.dts", new Vector(26, 155), new Vector(91, 66), 18, 0.35);
+		// for (mat in tornadoCtrl.sceneObject.materials) {
+		// 	mat.blendMode = None;
+		// }
+		// helpWindow.addChild(tornadoCtrl);
 
-		bumperCtrl = buildObjectShow("data/shapes/bumpers/pball_round.dts", new Vector(30, 82), new Vector(79, 66), 1.8, 0.5);
-		helpWindow.addChild(bumperCtrl);
+		// trapdoorCtrl = buildObjectShow("data/shapes/hazards/trapdoor.dts", new Vector(35, 217), new Vector(77, 76), 8, 0.35);
+		// helpWindow.addChild(trapdoorCtrl);
 
-		redrawPage();
+		// oilSlickCtrl = buildObjectShow("data/shapes/hazards/oilslick.dts", new Vector(35, 217), new Vector(77, 76), 8, 0.35);
+		// helpWindow.addChild(oilSlickCtrl);
+
+		// landMineCtrl = buildObjectShow("data/shapes/hazards/landmine.dts", new Vector(26, 155), new Vector(91, 66), 1.5, 0.35);
+		// helpWindow.addChild(landMineCtrl);
+
+		// bumperCtrl = buildObjectShow("data/shapes/bumpers/pball_round.dts", new Vector(30, 82), new Vector(79, 66), 1.8, 0.5);
+		// helpWindow.addChild(bumperCtrl);
+
+		// redrawPage();
 	}
 
 	function redrawPage() {
