@@ -31,25 +31,49 @@ class EndGameGui extends GuiControl {
 			return [normal, hover, pressed];
 		}
 
-		var pg = new GuiImage(ResourceLoader.getResource("data/ui/play/playgui.png", ResourceLoader.getImage, this.imageResources).toTile());
+		var pg = new GuiImage(ResourceLoader.getResource("data/ui/endgame/base.png", ResourceLoader.getImage, this.imageResources).toTile());
 		pg.horizSizing = Center;
 		pg.vertSizing = Center;
-		pg.position = new Vector(77, 9);
-		pg.extent = new Vector(485, 461);
+		pg.position = new Vector(28, 20);
+		pg.extent = new Vector(584, 440);
 
 		var continueButton = new GuiButton(loadButtonImages("data/ui/endgame/continue"));
 		continueButton.horizSizing = Right;
 		continueButton.vertSizing = Bottom;
-		continueButton.position = new Vector(333, 386);
-		continueButton.extent = new Vector(113, 47);
+		continueButton.position = new Vector(460, 307);
+		continueButton.extent = new Vector(104, 54);
 		continueButton.pressedAction = continueFunc;
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/endgame/replay"));
 		restartButton.horizSizing = Right;
 		restartButton.vertSizing = Bottom;
-		restartButton.position = new Vector(51, 388);
-		restartButton.extent = new Vector(104, 48);
+		restartButton.position = new Vector(460, 363);
+		restartButton.extent = new Vector(104, 54);
 		restartButton.pressedAction = restartFunc;
+
+		var nextLevel = new GuiControl();
+		nextLevel.position = new Vector(326, 307);
+		nextLevel.extent = new Vector(130, 110);
+
+		var nextLevelPreview = new GuiImage(ResourceLoader.getResource('data/missions/beginner/LearnTheWall-Hit.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		nextLevelPreview.position = new Vector(-15, 0);
+		nextLevelPreview.extent = new Vector(160, 110);
+		nextLevel.addChild(nextLevelPreview);
+
+		var nextLevelBtn = new GuiButton(loadButtonImages('data/ui/endgame/level_window'));
+		nextLevelBtn.horizSizing = Width;
+		nextLevelBtn.vertSizing = Height;
+		nextLevelBtn.position = new Vector(0, 0);
+		nextLevelBtn.extent = new Vector(130, 110);
+		nextLevelBtn.pressedAction = function(self:GuiControl) {
+			// var nextMission = Mission.getNextMission(mission);
+			// if (nextMission != null) {
+			// 	continueFunc(self);
+			// }
+		};
+		nextLevel.addChild(nextLevelBtn);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
@@ -59,7 +83,9 @@ class EndGameGui extends GuiControl {
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var domcasual32 = domcasual32b.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
+		var domcasual64 = domcasual32b.toSdfFont(cast 58 * Settings.uiScale, MultiChannel);
+		var domcasual24 = domcasual32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
 		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
 		var expo50b = new BitmapFont(expo50fontdata.entry);
@@ -69,8 +95,12 @@ class EndGameGui extends GuiControl {
 
 		function mlFontLoader(text:String) {
 			switch (text) {
+				case "DomCasual24":
+					return domcasual24;
 				case "DomCasual32":
 					return domcasual32;
+				case "DomCasual64":
+					return domcasual64;
 				case "Arial14":
 					return arial14;
 				case "Expo32":
@@ -80,84 +110,140 @@ class EndGameGui extends GuiControl {
 			}
 		}
 
-		var congrats = new GuiMLText(expo50, mlFontLoader);
-		congrats.text.textColor = 0xffff00;
-		congrats.text.text = 'Final Time: <font color="#FFF090">${Util.formatTime(timeState.gameplayClock)}</font>';
-		congrats.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
-		congrats.position = new Vector(43, 24);
-		congrats.extent = new Vector(408, 50);
-		pg.addChild(congrats);
+		var egResult = new GuiMLText(domcasual32, mlFontLoader);
+		egResult.position = new Vector(313, 54);
+		egResult.extent = new Vector(244, 69);
+		egResult.text.text = '<font face="DomCasual64" color="#FFFFFF"><p align="right">${Util.formatTime(timeState.gameplayClock)}</p></font>';
+		egResult.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		pg.addChild(egResult);
+
+		var egFirstLine = new GuiMLText(domcasual24, mlFontLoader);
+		egFirstLine.position = new Vector(340, 150);
+		egFirstLine.extent = new Vector(210, 25);
+		egFirstLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egFirstLine);
+
+		var egSecondLine = new GuiMLText(domcasual24, mlFontLoader);
+		egSecondLine.position = new Vector(341, 178);
+		egSecondLine.extent = new Vector(209, 25);
+		egSecondLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egSecondLine);
+
+		var egThirdLine = new GuiMLText(domcasual24, mlFontLoader);
+		egThirdLine.position = new Vector(341, 206);
+		egThirdLine.extent = new Vector(209, 25);
+		egThirdLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egThirdLine);
+
+		var egFourthLine = new GuiMLText(domcasual24, mlFontLoader);
+		egFourthLine.position = new Vector(341, 234);
+		egFourthLine.extent = new Vector(209, 25);
+		egFourthLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egFourthLine);
+
+		var egFifthLine = new GuiMLText(domcasual24, mlFontLoader);
+		egFifthLine.position = new Vector(341, 262);
+		egFifthLine.extent = new Vector(209, 25);
+		egFifthLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egFifthLine);
+
+		var egTitleText = new GuiMLText(expo50, mlFontLoader);
+		egTitleText.text.textColor = 0xffff00;
+		egTitleText.text.text = '<font color="#FFFFFF" face="DomCasual64">Your Time:</font>';
+		egTitleText.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		egTitleText.position = new Vector(34, 54);
+		egTitleText.extent = new Vector(247, 69);
+		pg.addChild(egTitleText);
+
+		var egTopThreeText = new GuiMLText(domcasual32, mlFontLoader);
+		egTopThreeText.position = new Vector(341, 114);
+		egTopThreeText.extent = new Vector(209, 34);
+		egTopThreeText.text.text = '<font face="DomCasual32" color="#FFFFFF">Top 5 Times:</font>'; // Make toggleable 3-5
+		egTopThreeText.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		pg.addChild(egTopThreeText);
+
+		var text = '<font color="#FFFFFF" face="DomCasual32"><p align="center">';
+		// Check for ultimate time TODO
+		if (mission.ultimateTime > 0 && timeState.gameplayClock < mission.ultimateTime) {
+			text += 'You beat the <font color="#FFDD22">Ultimate</font> Time!';
+		} else {
+			if (mission.goldTime > 0 && timeState.gameplayClock < mission.goldTime) {
+				text += 'You beat the <font color="#CCCCCC">Platinum</font> Time!';
+			} else {
+				if (mission.qualifyTime > timeState.gameplayClock) {
+					text += "You beat the Par Time!";
+				} else {
+					text += '<font color="#F55555">You didn\'nt pass the Par Time!</font>';
+				}
+			}
+		}
+		text += '</p></font>';
 
 		var finishMessage = new GuiMLText(expo32, mlFontLoader);
 		finishMessage.text.textColor = 0x00ff00;
-		var qualified = mission.qualifyTime > timeState.gameplayClock;
-		if (qualified)
-			finishMessage.text.text = timeState.gameplayClock < mission.goldTime ? 'You beat the <font color="#FFFF00">GOLD</font> time!' : "You've qualified!";
-		else
-			finishMessage.text.text = '<font color="#FF0000">You failed to qualify!</font>';
+		finishMessage.text.text = text;
 		finishMessage.text.filter = new DropShadow(1, 0.785, 0, 1, 0, 0.4, 1, true);
 		// finishMessage.justify = Center;
-		finishMessage.position = new Vector(155, 74);
-		if (timeState.gameplayClock < mission.goldTime) {
-			finishMessage.position.x = 110;
-		}
-		if (!qualified)
-			finishMessage.position.x = 125;
-		finishMessage.extent = new Vector(400, 100);
+		finishMessage.position = new Vector(25, 120);
+		finishMessage.extent = new Vector(293, 211);
 		pg.addChild(finishMessage);
 
+		var qualified = mission.qualifyTime > timeState.gameplayClock;
+
 		var scoreData:Array<Score> = Settings.getScores(mission.path);
-		while (scoreData.length < 3) {
-			scoreData.push({name: "Nardo Polo", time: 5999.999});
+		while (scoreData.length < 5) {
+			scoreData.push({name: "Matan W.", time: 5999.999});
 		}
 
-		var leftColumn = new GuiMLText(domcasual32, mlFontLoader);
-		leftColumn.text.lineSpacing = 5;
-		leftColumn.text.textColor = 0x000000;
-		leftColumn.text.text = 'Qualify Time:<br/>Gold Time:<br/>Elapsed Time:<br/>Bonus Time:<br/><font face="Arial14"><br/></font>Best Times:<br/>';
-		for (i in 0...3) {
-			leftColumn.text.text += '${i + 1}. ${scoreData[i].name}<br/>';
+		egFirstLine.text.text = '<p align="left"><font color="#EEC884">1. </font>${scoreData[0].name}</p>';
+		egSecondLine.text.text = '<p align="left"><font color="#CDCDCD">2. </font>${scoreData[1].name}</p>';
+		egThirdLine.text.text = '<p align="left"><font color="#C9AFA0">3. </font>${scoreData[2].name}</p>';
+		egFourthLine.text.text = '<p align="left"><font color="#A4A4A4">4. </font>${scoreData[3].name}</p>';
+		egFifthLine.text.text = '<p align="left"><font color="#949494">5. </font>${scoreData[4].name}</p>';
+
+		var lineelems = [egFirstLine, egSecondLine, egThirdLine, egFourthLine, egFifthLine];
+
+		for (i in 0...5) {
+			if (scoreData[i].time < mission.ultimateTime) {
+				lineelems[i].text.text += '<p align="right"><font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font></p>';
+			} else {
+				if (scoreData[i].time < mission.goldTime) {
+					lineelems[i].text.text += '<p align="right"><font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font></p>';
+				} else {
+					lineelems[i].text.text += '<p align="right">${Util.formatTime(scoreData[i].time)}</p>';
+				}
+			}
 		}
-		leftColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
-		leftColumn.position = new Vector(108, 113);
-		leftColumn.extent = new Vector(208, 50);
+
+		var leftColumn = new GuiMLText(domcasual24, mlFontLoader);
+		leftColumn.text.lineSpacing = 5;
+		leftColumn.text.textColor = 0xFFFFFF;
+		leftColumn.text.text = 'Par Time:<br/><font color="#CCCCCC">Platinum Time:</font><br/><font color="#FFDD22">Ultimate Time:</font><br/><font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">Time Passed:<br/>Clock Bonuses:</font>';
+		leftColumn.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		leftColumn.position = new Vector(25, 165);
+		leftColumn.extent = new Vector(293, 211);
 		pg.addChild(leftColumn);
 
 		var elapsedTime = Math.max(timeState.currentAttemptTime - 3.5, 0);
 		var bonusTime = Math.max(0, elapsedTime - timeState.gameplayClock);
 
-		var rightColumn = new GuiMLText(domcasual32, mlFontLoader);
+		var rightColumn = new GuiMLText(domcasual24, mlFontLoader);
 		rightColumn.text.lineSpacing = 5;
-		rightColumn.text.textColor = 0x000000;
-		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
-		for (i in 0...3) {
-			if (scoreData[i].time < mission.goldTime)
-				rightColumn.text.text += '<br/>';
-			else
-				rightColumn.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
-		}
+		rightColumn.text.textColor = 0xFFFFFF;
+		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="#CCCCCC">${Util.formatTime(mission.goldTime)}</font><br/><font color="#FFDD22">${Util.formatTime(mission.ultimateTime)}</font><br/><font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}</font>';
 		rightColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
-		rightColumn.position = new Vector(274, 113);
-		rightColumn.extent = new Vector(208, 50);
+		rightColumn.position = new Vector(235, 165);
+		rightColumn.extent = new Vector(293, 211);
 		pg.addChild(rightColumn);
-
-		var rightColumnGold = new GuiMLText(domcasual32, mlFontLoader);
-		rightColumnGold.text.lineSpacing = 5;
-		rightColumnGold.text.textColor = 0xFFFF00;
-		rightColumnGold.text.text = '<br/>${Util.formatTime(mission.goldTime)}<br/><br/><br/><font face="Arial14"><br/></font><br/>';
-		for (i in 0...3) {
-			if (scoreData[i].time < mission.goldTime)
-				rightColumnGold.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
-			else
-				rightColumnGold.text.text += '<br/>';
-		}
-		rightColumnGold.text.filter = new DropShadow(1.414, 0.785, 0x00000, 1, 0, 0.4, 1, true);
-		rightColumnGold.position = new Vector(274, 113);
-		rightColumnGold.extent = new Vector(208, 50);
-		pg.addChild(rightColumnGold);
 
 		pg.addChild(continueButton);
 		pg.addChild(restartButton);
+		pg.addChild(nextLevel);
+		pg.addChild(egFirstLine);
+		pg.addChild(egSecondLine);
+		pg.addChild(egThirdLine);
+		pg.addChild(egFourthLine);
+		pg.addChild(egFifthLine);
 
 		this.addChild(pg);
 
@@ -179,27 +265,6 @@ class EndGameGui extends GuiControl {
 				var myScore = {name: name, time: timeState.gameplayClock};
 				scoreData.push(myScore);
 				scoreData.sort((a, b) -> a.time == b.time ? 0 : (a.time > b.time ? 1 : -1));
-
-				leftColumn.text.text = 'Qualify Time:<br/>Gold Time:<br/>Elapsed Time:<br/>Bonus Time:<br/><font face="Arial14"><br/></font>Best Times:<br/>';
-				for (i in 0...3) {
-					leftColumn.text.text += '${i + 1}. ${scoreData[i].name}<br/>';
-				}
-
-				rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><br/>${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}<br/><font face="Arial14"><br/></font><br/>';
-				for (i in 0...3) {
-					if (scoreData[i].time < mission.goldTime)
-						rightColumn.text.text += '<br/>';
-					else
-						rightColumn.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
-				}
-
-				rightColumnGold.text.text = '<br/>${Util.formatTime(mission.goldTime)}<br/><br/><br/><font face="Arial14"><br/></font><br/>';
-				for (i in 0...3) {
-					if (scoreData[i].time < mission.goldTime)
-						rightColumnGold.text.text += '${Util.formatTime(scoreData[i].time)}<br/>';
-					else
-						rightColumnGold.text.text += '<br/>';
-				}
 
 				Settings.saveScore(mission.path, myScore);
 

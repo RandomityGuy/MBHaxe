@@ -54,6 +54,7 @@ class MissionElementScriptObject extends MissionElementBase {
 	var level:String;
 	var artist:String;
 	var goldtime:String;
+	var ultimatetime:String;
 	var music:String;
 
 	public function new() {

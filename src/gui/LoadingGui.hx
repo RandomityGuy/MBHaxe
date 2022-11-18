@@ -5,12 +5,13 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleGame;
 import src.Settings;
+import src.Util;
 
 class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
 
 	public function new(missionName:String) {
-		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		var img = ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;

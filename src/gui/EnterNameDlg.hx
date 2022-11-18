@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.filter.DropShadow;
 import src.Settings;
 import hxd.res.BitmapFont;
 import h3d.Vector;
@@ -30,6 +31,7 @@ class EnterNameDlg extends GuiControl {
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
 		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var domcasual48 = domcasual32b.toSdfFont(cast 42 * Settings.uiScale, MultiChannel);
 
 		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
 		var expo50b = new BitmapFont(expo50fontdata.entry);
@@ -41,6 +43,8 @@ class EnterNameDlg extends GuiControl {
 			switch (text) {
 				case "DomCasual32":
 					return domcasual32;
+				case "DomCasual48":
+					return domcasual48;
 				case "Arial14":
 					return arial14;
 				case "Expo50":
@@ -50,21 +54,21 @@ class EnterNameDlg extends GuiControl {
 			}
 		}
 
-		var dlg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
+		var dlg = new GuiImage(ResourceLoader.getResource("data/ui/endgame/enternamebox.png", ResourceLoader.getImage, this.imageResources).toTile());
 		dlg.horizSizing = Center;
 		dlg.vertSizing = Center;
-		dlg.position = new Vector(112, 111);
-		dlg.extent = new Vector(416, 257);
+		dlg.position = new Vector(110, 112);
+		dlg.extent = new Vector(420, 256);
 		this.addChild(dlg);
 
 		var enterNameEdit = new GuiTextInput(domcasual32);
-		enterNameEdit.position = new Vector(87, 136);
-		enterNameEdit.extent = new Vector(255, 36);
+		enterNameEdit.position = new Vector(28, 130);
+		enterNameEdit.extent = new Vector(363, 38);
 		enterNameEdit.text.text = Settings.highscoreName;
 
-		var okbutton = new GuiButton(loadButtonImages("data/ui/common/ok"));
-		okbutton.position = new Vector(163, 182);
-		okbutton.extent = new Vector(78, 59);
+		var okbutton = new GuiButton(loadButtonImages("data/ui/endgame/ok"));
+		okbutton.position = new Vector(151, 184);
+		okbutton.extent = new Vector(110, 55);
 		okbutton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			Settings.highscoreName = enterNameEdit.text.text;
@@ -72,17 +76,20 @@ class EnterNameDlg extends GuiControl {
 		}
 		dlg.addChild(okbutton);
 
-		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/common/window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		wnd.position = new Vector(58, 124);
-		wnd.extent = new Vector(295, 55);
+		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/endgame/window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		wnd.horizSizing = Width;
+		wnd.vertSizing = Height;
+		wnd.position = new Vector(16, 119);
+		wnd.extent = new Vector(388, 56);
 		dlg.addChild(wnd);
 
 		var enterNameText = new GuiMLText(domcasual32, mlFontLoader);
-		enterNameText.text.textColor = 0;
-		enterNameText.position = new Vector(41, 30);
-		enterNameText.extent = new Vector(345, 14);
+		enterNameText.text.textColor = 0xFFFFFF;
+		enterNameText.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		enterNameText.position = new Vector(37, 23);
+		enterNameText.extent = new Vector(345, 85);
 		// enterNameText.justify = Center;
-		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="Expo50">Congratulations!<br/></font>You got the${["", " 2nd", " 3rd"][place]} best time!</p>';
+		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="DomCasual48">Well Done!<br/></font><font face="DomCasual32">You have the${["", " second", " third", " fourth", "fifth"][place]} top time!</font></p>';
 		dlg.addChild(enterNameText);
 
 		dlg.addChild(enterNameEdit);

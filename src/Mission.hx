@@ -20,6 +20,7 @@ class Mission {
 	public var description:String;
 	public var qualifyTime = Math.POSITIVE_INFINITY;
 	public var goldTime:Float = 0;
+	public var ultimateTime:Float = 0;
 	public var type:String;
 	public var path:String;
 	public var missionInfo:MissionElementScriptObject;
@@ -62,6 +63,9 @@ class Mission {
 			mission.qualifyTime = MisParser.parseNumber(missionInfo.time) / 1000;
 		if (missionInfo.goldtime != null) {
 			mission.goldTime = MisParser.parseNumber(missionInfo.goldtime) / 1000;
+		}
+		if (missionInfo.ultimatetime != null) {
+			mission.ultimateTime = MisParser.parseNumber(missionInfo.ultimatetime) / 1000;
 		}
 		mission.type = missionInfo.type.toLowerCase();
 		mission.missionInfo = missionInfo;
