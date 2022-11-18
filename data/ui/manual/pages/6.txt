@@ -1,0 +1,15 @@
+Replay Center / Demo Recording
+
+The Replay Center is the hub of saved demo recording in Marble Blast Platinum. When recording a demo anywhere in MBP, you are asked for a filename for the demo, and on completion of the demo (exiting the level counts as such) you can give a short description, the demo's actual name and your name as the author.
+
+When first choosing the demo recording option, it also asks you about an OOB count. This is the amount of times a player can go Out of Bounds and restart the level before the recording will automatically reload the level. Hitting a checkpoint and going Out of Bounds does not affect this.
+
+Every demo displayed in the Replay Center goes by the name you've given it at the end of your demo recording session. Click on any of the names to show the demo's level played, author and description.
+You can then press Play to playback the demo file. Press Home to return to the Main Menu.
+
+You can find demo recording files (file type extensions .rec and .inf) in platinum/client/demos. .inf files contain info that is seen in the Replay Center. It is recommended not to edit this file as it can cause desyncs.
+
+Remember:
+You cannot view .rec files using any other programs except Marble Blast.
+
+You can read more about the problems with Demo Recording in Marble Blast Platinum in its appropriate page later in this Help section.

@@ -6,10 +6,12 @@ import h3d.Vector;
 class Rect {
 	var position:Vector;
 	var extent:Vector;
+	var scroll:Vector;
 
 	public function new(position:Vector, extent:Vector) {
 		this.position = position.clone();
 		this.extent = extent.clone();
+		this.scroll = new Vector();
 	}
 
 	public function inRect(point:Vector) {

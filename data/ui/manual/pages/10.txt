@@ -1,0 +1,11 @@
+Online: Login Interface
+
+Assuming you have not set Auto-Login in the Options, this screen is the first you'll meet when you enter the leaderboards.
+This screen shows you the amount of players currently online on the top left, and asks for a Username and Password. You can tick a checkbox to remember your password. Pressing the Login button then logs you in to Marble Blast Platinum Online.
+You can also log in as a Guest by pressing the Guest button. Guests cannot write to other users anywhere, have no statistics tracked, and their times, scores and achievements are not recorded.
+Press the Home button to go back to the Main Menu.
+
+The Create Account button allows you to create an account for both the website and Marble Blast Platinum Online. It asks for a Username and Password of your choice, as well as an e-mail. You MUST provide a working e-mail, as you will be sent an activation key that, without it, you won't be able to login.
+Please read the Terms of Service, and tick the checkbox on the bottom.
+
+If your version is lower than the one on the server, you will be asked to download the latest version.

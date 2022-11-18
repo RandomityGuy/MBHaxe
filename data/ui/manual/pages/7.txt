@@ -1,0 +1,34 @@
+Single-Player Level Select
+
+The Level Select screen is where you can choose which levels you want to play, and the game or category to play. Available to play are Marble Blast Gold levels, Platinum levels and Custom levels.
+
+Marble Blast Platinum 1.50 changed the way the interface works.
+To access Gold, Platinum, and Custom levels, you will have to press on the difficulty dropdown menu on the top. This will also list the available difficulties playable: Beginner, Intermediate, Advanced, and if Platinum is selected, then Expert as well. Custom levels are accessible if Gold levels are chosen.
+
+Right below the difficulty tab you will see the level's name, description, author, and whether you need to beat a Qualify Time (if Gold) or Par Time (if Platinum). These times are a challenge, with the goal being to beat the level under a time pressure. If an Easter Egg is present in the level, then a small grey and white image of an Easter Egg will appear on the bottom right of the level picture. When you collect the egg, this small image will turn blue and white to match the egg's colors.
+
+Hover above 'Best Time' below the picture to see the text switch to 'Show 5 Top Times'. Pressing it will change the description display to your top times display. If you're playing Gold, the level's Qualify and Gold Times will appear on the bottom to show you what your goal is. If you are playing Platinum, it will instead show the level's Platinum and Ultimate Times. Hovering above the 'Best Time' again will change to 'Hide 5 Top Times,' and pressing it goes back to the level description text.
+
+The three buttons that appear on the bottom left of Level Select screen are:
+Menu: Go back to the Main Menu
+More...: Press it to reveal additional options
+Magnifier icon: Press to open the Search window to search levels.
+
+Using the search:
+When searching for levels, the search window will list all the levels in the current game: Gold levels in Gold, Platinum levels in Platinum, and Custom levels in Custom.
+You can search using the level's name (Title) or press Options to search by the Artist or file name (e.g. Custom/MyLevelRules.mis). You can press the dice button to automatically load a random level; an excellent choice if you don't know which one to play.
+
+The More... tab lists the following buttons (Left to Right order):
+
+Marble Select: Choose between 40 default marbles with different skins and sizes. When pressing the 'Cat' (Category) buttons, you can switch to custom marbles like unique CyberFox marbles and the Marble Blast Ultra marbles.
+
+Statistics: Whether you are playing Platinum or Gold, you can see up-to-date statistics about your game, as well as some other tracked data. The 'Grand Total' is all your best times on all completed levels combined, and the 'Total Wasted Time' is how long you have played Platinum overall. It starts counting from the application's launch until you exit it, and updates every time you launch the statistics.
+Statistics are disabled when Custom is selected.
+
+Achievements: 8 achievements are available when playing the Platinum levels. Can you beat them all?
+Achievements are disabled when Gold or Custom are selected.
+
+Level Editor: Press to enable the Level Editor. When you first launch it, a help window will explain how to activate it and where. You can uncheck the 'Show that reminder again!' if you don't want this window to appear again when activating the Level Editor.
+In case you forget, F11 activates the level editor.
+
+Demo Recording: Press to activate Demo Recording. Fill in the file name of the demo (e.g. AwesomeDemo) and move the slider to choose the amount of times you can go Out of Bounds before the recording will automatically reload the level. Hitting a checkpoint and going Out of Bounds does not affect this.

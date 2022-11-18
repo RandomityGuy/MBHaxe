@@ -1,0 +1,10 @@
+Main Menu Interface
+
+The Main Menu is composed of seven buttons:
+-	The Play button allows you to play Marble Blast Gold and Platinum offline, as well as custom levels which you can download at MarbleBlast.com
+-	The Online button allows you to play competitively against users of the Marble Blast Community
+-	The Options button allows you to configure many basic options in Marble Blast Platinum to suit your liking
+-	The Quit button to quit the game. Don't press it :)
+-	The Tip of the Day button, which provides news and updates or just tips. Disclaimer: does not actually provide a tip on a daily basis.
+-	The Replay Center button allows you an easy access to all recordings you or other users have done in Marble Blast.
+-	The Help button, which leads you here. Not to this page, no, but the first one.

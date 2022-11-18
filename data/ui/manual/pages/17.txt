@@ -1,0 +1,24 @@
+Adding custom missions
+
+You can add directories under platinum/data/missions/custom such as custom/mylevels or custom/Jayer, add missions there, and then select the custom subdirectory you have created. This way you can organize levels however you would prefer.
+
+To add custom missions to the game, follow these guidelines:
+Important: If you are using Windows, it is better if you go to Tools -> Folder Options -> View and untick  'Hide extensions for known file types'. This will make all extensions visible, which is very helpful when moving files within Marble Blast, and also when you want to know what is prefs.cs.
+
+A mission file (file type extension .mis) usually has another image file (file type extensions .jpg or .png) that has the same name as the mission file. For example: MyLevel.mis and MyLevel.jpg . These two files go to your custom directory or a subdirectory within custom.
+
+As most custom levels were created in QuArK or Constructor, they have their own custom interiors and sometimes textures. Any interior (file type extension .dif) and associated textures (.jpg and .png) go to platinum/data/interiors *. For convenience, MBP comes pre-installed with over 500 textures, which are all located in a .zip file so you don't have to copy textures again.
+
+Some custom levels also come with shape files (file type extension .dts) and associated textures (.jpg and .png). These are often put in platinum/data/shapes **.
+Likewise, skyboxes are directories with 6-8 images and a .dml file extension file, which lists how to organize the skybox in-game. Every mission (.mis), when opened, has a Sky object that contains a materialList line. This line tells the game which skybox to use, and the path to it. For example:
+materialList = "~/data/skies/Beginner/Beginner_Sky.dml";
+This tells us the directory is called Beginner, and in it we will have a number of image files and a .dml file called Beginner_Sky.dml .
+Custom skyboxes such as Atoll will be listed as:
+materialList = "~/data/skies/Atoll/Atoll.dml";
+That means you need to place the Atoll directory inside the skies directory. Atoll.dml is inside the Atoll directory.
+
+* - Some custom missions will put their interiors and textures in a subdirectory, e.g. platinum/data/interiors/RandomName . Custom Multiplayer levels normally use platinum/data/multiplayer/interiors/custom where interiors are located.
+
+** - Some shapes such as marbles, PowerUps or hazards go to specific subdirectories, such as /balls, /items and so on. You can check with the level designer's level info on where these are put.
+
+Also note that you can open the mission file (.mis) using any text editing program, such as Notepad, Wordpad and TextEdit. You can then scroll through the mission and check where interiors, shapes, and skybox are all located.

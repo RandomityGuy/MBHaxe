@@ -1,0 +1,94 @@
+Options Menu
+
+You can access many configurable items in the Options menu. This page is dedicated to explain most of the options (as some are rather obvious), and it gives out a few recommendations and tips.
+Please note that both General and Hotkeys tabs have a scrollbar on the right, so you can scroll down for more options.
+
+General Tab:
+
+Screen Resolution: Choose how big you want your Marble Blast window to be. If you choose Windowed mode in Screen Style, it will let you choose a maximum size that doesn't fill the whole window. We recommend 1280x720 and above for HD monitors, and 1024x768 or greater for SD monitors.
+
+Screen Style: Choose whether to play full-screen, or in a windowed mode so you can see other programs.
+
+Color Depth: 16-bit or 32-bit. Default to 32-bit, you should rarely change to 16-bit unless bad quality is something you like, or have a bad graphics card.
+
+Video Driver: Defaulted to OpenGL. Select OpenGL rendering or Direct3D, depending on your graphics card model and CPU. Note that some may get lag on OpenGL that doesn't exist in Direct3D, and vice versa. OpenGL is preferred.
+Note: Mac users cannot choose Direct3D as it's a Microsoft product, and is not supported for Mac. The only option is OpenGL hence it is greyed out.
+
+Shadows: Defaulted to Disabled. Allows you to add shadows depending on sun position to the level. In some levels it looks great, but broken faces and polys can make it look bad. It can make dark levels be really dark.
+Note: The Mac engine does not support shadows, so this option is greyed out.
+
+Frame Rate: Defaulted to Visible. Allows you to see your current framerate in-game. Windows users will find 64fps as maximum, while Mac users can go into the hundreds unless VSync is enabled, where it will then drop to 64fps as well.
+
+Out of Bounds (OoB) Insults: Defaulted to Disabled. If enabled, this will add a randomized insult every 200 OoBs. Some people like it.
+
+Free-Look: Defaulted to Enabled. Allows the camera to move in all directions just by moving the mouse/trackpad. Makes gameplay easier.
+
+Live Replays: Defaulted to Disabled. When enabled, it activates when you beat a level and then replay that level. It will show you your best-time live-replay recording so you can race against yourself and beat it ad infinitum.
+
+Invert Mouse: Defaulted to None. You can select between X axis, Y axis or both X and Y axes With an inverted X axis, moving the mouse right will move the camera left, and inverting the Y axis and moving the mouse up will move the camera down.
+
+Thousandths: Defaulted to Disabled. When Enabled, all in-game timers including displayed times will show time to the thousandths of a second. Makes you feel horrible to be beaten by one thousandth of a second.
+
+Music Volume: Move the slider to change the music volume.
+
+Sound Volume: Move the slider to change the sound volume.
+
+Mouse Speed: Move the slider to change the speed the camera will move when the mouse is moved. Put at the highest for super-crazy not-fun times!
+
+Keyboard Speed: Move the slider to change the speed the camera will move when the keyboard keys are pressed. Put at the highest for super-crazy not-fun times!
+
+Field of View: Defaulted to 90. Increase to see more of the level around you, and decrease to have the camera really close to the marble. Since the extremes are pretty unplayable, we kept it at levels that people often like playing, which are 60 to 140.
+
+
+Hotkeys tab:
+
+This section is split into three main parts: Basic Controls, Online Controls, and Multiplayer Taunts.
+
+Basic Controls:
+
+Movement keys are self-explanatory: select the buttons on your keyboard and mouse which you want to use when moving your marble, your keyboard camera, jumping, and usage of powerups.
+
+Free Look: This only works when always free-look is disabled. This allows you to press a key before you can move your mouse to look anywhere freely.
+
+Respawn: Select a button which, when pressed, will respawn your marble. In Singleplayer games it will restart the level for you. If a checkpoint was hit, it will respawn you at the last checkpoint. A long press (1 second) will restart the level fully. Respawning in Multiplayer games will respawn your marble somewhere random on the map. To stop abuse of this ability in Multiplayer games, you can only respawn once every 25 seconds. If you are the host, holding the respawn button for 3 seconds will completely restart the match. You can respawn as many times as you want in Singleplayer; there is no limit.
+
+Screenshot mode: Hides the interface (time, chat, etc) so you can take awesome screenshots. Press once to hide the interface, and once more to show it again.
+
+
+Online Controls:
+
+Use Blast: Defaulted to 'E'. Select a key which will allow you to use the blast in Ultra and Multiplayer levels/games.
+
+Toggle Radar: Defaulted to 'Tab'. Select a key which will allow you to toggle between the three radar modes (or disable radar). The purpose of the radar is to indicate where gems are and their type: red, yellow, blue or platinum colored.
+The first radar mode shows you a small radar on the top right. The second radar mode has the radar take up the whole screen. The third radar mode will lock into the gems when they are in sight (small gem icons on-screen). When they are not on camera, gem arrows will point in their direction.
+
+Spectate Mode: Defaulted to 'C'. When spectating, this changes between being able to see the entire field and move the camera around (free-fly mode) or follow a player's marble.
+Pressing Ctrl+C allows you to enter or leave Spectate Mode. This cannot be rebound.
+
+Score List: Defaulted to 'O'. Allows you to see detailed scores of all players in the match – including the number of red, yellow, and blue gems that every player caught.
+
+Global Chat: Defaulted to 'T'. Allows you to talk to other users online while playing in Singleplayer and Multiplayer matches, as well as during Challenges and Super Challenges.
+
+Server Chat: Defaulted to 'P'. Allows you to talk to users within the current server. Multiplayer only.
+
+Team Chat: Defaulted to 'M'. Allows you to talk to your team-mates without anyone else interfering. Multiplayer in-game only when Team mode is enabled.
+
+Multiplayer Taunts: Select keys to shout a taunt during those exciting Multiplayer matches. Available in Multiplayer only.
+Alternatively you can write down ' /v1 ' to ' /v17 ' in server chat to shout taunts. As you may have noticed not all taunts have keys and that is intentional.
+
+
+Online Tab:
+
+Score Predictor: Defaulted to Disabled. When enabled, the game will attempt to predict your end-game score as the game progresses based on the amount of points you have collected. It becomes pretty accurate as the game passes the half-way mark. Multiplayer only.
+
+Radar Z-Axis: Defaulted to Enabled. Makes gems appear smaller or larger on the radar depending on their height (Z-Axis) when compared to your marble.
+
+Server Port: Defaulted to 28000. Select a port number that you want to have Marble Blast Platinum be port-forwarded from. 28000 is a legacy number from when Marble Blast Gold was created. You can choose any other port number, such as 44431. Range of ports allowed: 1-65535.
+When port forwarded, others may join your Multiplayer matches when you host.
+To join matches, you do not need to port forward.
+
+Server: Defaulted to leaderboards.marbleblast.com. Cannot be changed as this is the server currently in-use when connecting online to the Marble Blast Platinum leaderboards.
+
+Overview Speed: Defaulted to 120. Click on the button and move it along the slider to change the speed in which the camera will rotate around levels in the preview screen. Multiplayer only.
+
+Auto-Login As: Defaulted to None. This enables you to automatically log in as a guest or a user to the Online section, bypassing the log in screen. If you select User, you need to enter your Online Username and Password to their respective fields.

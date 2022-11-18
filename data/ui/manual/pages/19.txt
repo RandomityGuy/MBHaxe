@@ -1,0 +1,48 @@
+Demo Recording Problems
+
+Demo recording in Marble Blast Platinum is very interesting. It normally works fine, but there are a few things to watch out for.
+Note: the term Desync is often used. It means the marble goes off-route and Out of Bounds, thus the recording never finishes properly.
+
+Source for the following was taken from: http://marbleblast.com/index.php/forum/general-mb-discussion/240-recording-demos-replays-using-marble-blast
+The topic above is a must read for Marble Blast Gold demo recording, as it's different than that in Platinum. Please also note the topic refers to recording in Platinum in ways that no longer exist in 1.50. Don't worry about them.
+
+Due to 1.50+ changes, some of the problems listed in the topic are no longer an issue. These are noted below.
+
+Marble Blast Ultra Levels
+Marble Blast does not know how to handle the addition of the Blast, as it is was never included in the original game. Recordings using the Blast will not work. To make things easier, demo recording in Marble Blast Ultra has been disabled.
+
+Cross Platform
+A Windows user can only see recordings from a Windows user. If he's given Mac/Linux user recordings, there will likely be a desync at some point.
+Likewise, Mac users can only watch other Mac users' recordings, and Linux to Linux. In some cases the recording will simply not start.
+Note - There may be rare occurrences where recordings will actually function correctly. It could be due to a very short replay file.
+
+Version Number
+A recording created in different versions of Marble Blast, even if the same level is recorded, will fail when attempted to replay. For example, a recording created in Marble Blast Platinum 1.14 will not work in 1.50.
+One of the main reasons is that even a single script change seems to modify some values within the recording system, making it desync when replaying in different versions or the game.
+
+Out of Bounds & Restarting
+This is no longer an issue in Marble Blast Platinum 1.50 and above.
+
+Replay and Continue Options at the End Level Screen
+This is no longer an issue in Marble Blast Platinum 1.50 and above.
+
+Desyncing
+Although you may be doing a successful run of a certain level, the game sometimes messes up the movement at a certain point or not jumping or activating a PowerUp. This often causes the marble to go out of bounds.
+
+Known causes of such desyncs are:
+Fans, Gravity Modifiers, Tornados, and long levels (usually several minutes length). It can also be caused by lag during the recording of the demo.
+
+Even if a replay fails, you should replay it a couple of times, maybe even restart Marble Blast and try again. There have been known cases where a replay fails, but several attempts later the playback fully works again. Sometimes it works only once.
+
+Usage of screen recorders causes lag, which when combined with the aforementioned factors, may stop a playback from working properly.
+
+Custom levels do not work properly
+During playback it is recommended to have all interiors required by the mission file for successful playback and hope that the recorder himself was not missing any interiors.
+
+Path of mission file & mission name
+This is no longer an issue in any version of Marble Blast Platinum.
+
+A certain recording ALWAYS starts first
+This problem is exclusive to Marble Blast Gold and is here for documentation purposes.
+Sometimes you may have (by accident) put a .rec file in the client folder (marble -> client). The game usually reads the client folder before the demos folder in search of .rec files.
+Alternatively, if several demo files are listed as say, Demo1, Demo2, Demo 3, Demo15, Demo21, then Marble Blast will launch them in this order: Demo3, Demo21, Demo2, Demo15, Demo1

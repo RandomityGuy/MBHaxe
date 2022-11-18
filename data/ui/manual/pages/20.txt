@@ -1,0 +1,21 @@
+Hidden Preferences
+
+If you would like to further customize MBP, here are some options which aren't shown in-game. Modify them in either MBPPrefs.cs in your platinum/client directory or prefs.cs in platinum/leaderboards/multiplayer directory.
+Multiplayer related preferences usually begin with MPPref.
+
+
+$MPPref::AllowServerChat - Defaulted to true. Change to false to get some peace and quiet.
+
+$MPPref::AllowQuickRespawn - Defaulted to true. Allow players to use quick respawn, change to false if you don't want them or yourself to be able to hit the respawn button in a desperate time of need. Multiplayer only.
+
+$MPPref::OverviewFinishSpeed - Defaulted to 0. A zoom-in animation of the camera towards the marble when starting a Multiplayer game. Value is in milliseconds of animation or 0 to disable.
+
+$MPPref::BackupClients - Defaulted to true. Save peoples' score progress when they leave and rejoin. Value is true/false. Multiplayer only.
+
+$MPPref::DisplayWinners - Defaulted to disable. Show winners' names in server chat when they win. Value is true/false. Multiplayer only.
+
+$pref::OpenGL::gammaCorrection - Defaulted to 0.5. We put this here as an option you can change even though you absolutely mustn't. If you want to play a prank on somebody, put it as 0 and launch Marble Blast. Values are 0.0 - 1.0.
+
+$pref::Music::Songs["LB"], $pref::Music::Songs["Menu"], $pref::Music::Songs["Game"] - Defaulted to "LB" => "Comforting Mystery.ogg", "Menu" => "Pianoforte.ogg", "Game" => "*" . Change which songs are played in which places, use "*" for wildcard (any song), value is a list of song file names with names separated by \t .
+
+$pref::UseLowResGlass - Defaulted to disable. Use the same looking glass shape in MBU/Multiplayer levels without collision on the borders. value is true/false.

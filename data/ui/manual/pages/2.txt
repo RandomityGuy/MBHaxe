@@ -1,0 +1,100 @@
+Credits
+
+In some games and mods, credits come last. Not here. The following people have helped develop Marble Blast Platinum over the last years both directly and indirectly. Their contribution has made this mod what it is today, and we cannot thank them enough. Whether you want to praise them, or just say a Thank You next time you see them, make sure they feel good about their hard work.
+
+The developers of Marble Blast Gold (the game that this mod is based on):
+Alex Swanson, Mark Frohnmayer, Jeff Tunnell, Brian Hahn, Liam Ryan, Tim Gift, Rick Overman, Kevin Ryan, Timothy Clarke, Jay Moore, Pat Wilson and John Quigley. Special thanks to Kurtis Seebaldt for integrating Ogg/Vorbis streaming into the Torque engine, and to the Ogg/Vorbis team. Special thanks also go to Markus F.X.J. Oberhumer, Laszlo Molnar and the UPX team for the UPX executable packer.
+
+<p align="center"><font face="MarkerFelt24">The Marble Blast Platinum team</font>
+
+<font face="MarkerFelt24">Project Founders</font>
+Phil
+Matan
+Jase
+
+<font face="MarkerFelt24">Marble Blast Platinum 1.50+ Project Leaders</font>
+Matan
+HiGuy
+Jeff
+
+<font face="MarkerFelt24">Core Programming</font>
+<font face="MarkerFelt18">Engine Modifications</font>
+amd42
+HiGuy
+Jeff
+
+<font face="MarkerFelt18">Gameplay and Features</font>
+HiGuy
+Jeff
+Seizure22
+Whirligig
+Spy47
+ShadowMarble
+
+<font face="MarkerFelt24">Online & Leaderboards</font>
+<font face="MarkerFelt18">Programming and Protocol Design</font>
+HiGuy
+Jeff
+Aayrl
+Spy47
+
+<font face="MarkerFelt18">Multiplayer & Challenges</font>
+Matan
+HiGuy
+Jeff
+
+<font face="MarkerFelt24">Graphics & User Interface</font>
+HiGuy
+Phil
+Jase
+Spy47
+MadMarioSkills
+
+<font face="MarkerFelt24">Level Design</font>
+Matan
+Phil
+Pablo
+Ian
+Technostick
+Andrew Sears
+Perishingflames
+Lonestar
+Oaky
+Jase
+Moshe
+
+<font face="MarkerFelt18">Additional Level Design</font>
+Xelna
+Darkness Shadow
+
+<font face="MarkerFelt24">Texture Design</font>
+Phil
+Jase
+Ian
+Mkbul
+Lonestar
+
+<font face="MarkerFelt24">3D Modeling</font>
+CyberFox
+Phil
+RDs.Empire
+
+<font face="MarkerFelt24">Music and Effects</font>
+Beau
+Phil
+Matan
+Buzzmusic
+
+<font face="MarkerFelt24">Community Hype-ist</font>
+Aayrl
+
+<font face="MarkerFelt24">Special thanks to:</font>
+
+GarageGames
+Alex Swanson
+Ben
+Our parents and friends
+Tsuf
+Thistle
+The Marble Blast community
+</p>

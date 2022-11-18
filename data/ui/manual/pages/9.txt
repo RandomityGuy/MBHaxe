@@ -1,0 +1,12 @@
+The End Game Screen
+
+The End Game screen is mostly self-explanatory. The only part to note is that the level picture on the bottom right of the screen can be clicked on to go immediately to the next level, whereas with 'Continue' you will be sent back to the Level Select screen. You can press Replay to play the level again.
+
+In Multiplayer, the End Game screen lists player names, teams names (if Team Mode is enabled), total score, a breakdown of gems collected, and marble skin used. Ratings are displayed if ratings are being calculated (otherwise it shows N/A), and how much a player won or lost.
+On the right side of the screen, from top to bottom, the host of the match can:
+Replay the level
+Quit to Level Select
+Quit to the Leaderboards chat
+Save Spawns: Save the match's spawns as they appeared in the match.
+
+Note: When playing Singleplayer levels online, you will be shown the rank for that particular level on the leaderboards based on time you reach.

@@ -1,0 +1,5 @@
+An Important Note
+
+Please be aware that during all Online plays, be it Singleplayer, Multiplayer, Challenges or Super Challenges, pressing the ESC button will NOT pause the game. The timer and all in-game events will continue normally. That is because pausing online doesn't actually pause the game.
+
+The reason behind that is that pausing the game causes the game to stop ALL events and not just game-related events. Some of these stopped events include incoming and outgoing connections. This causes loss of connection to Platinum Online.
