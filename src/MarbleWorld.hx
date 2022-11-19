@@ -133,6 +133,8 @@ class MarbleWorld extends Scheduler {
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
 
+	var respawnPressedTime:Float = -1e8;
+
 	// Orientation
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
@@ -974,6 +976,20 @@ class MarbleWorld extends Scheduler {
 
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
+
+		if (Key.isPressed(Settings.controlsSettings.respawn)) {
+			this.respawnPressedTime = timeState.timeSinceLoad;
+			this.restart();
+			return;
+		}
+
+		if (Key.isDown(Settings.controlsSettings.respawn)) {
+			if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
+				this.restart(true);
+				this.respawnPressedTime = Math.POSITIVE_INFINITY;
+				return;
+			}
+		}
 
 		this.tickSchedule(timeState.currentAttemptTime);
 		this.updateGameState();
