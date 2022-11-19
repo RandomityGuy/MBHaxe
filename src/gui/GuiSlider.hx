@@ -24,9 +24,9 @@ class GuiSlider extends GuiImage {
 			}
 		} else if (slidingSound != null)
 			slidingSound.pause = true;
-		super.update(dt, mouseState);
 		this.bmp.x = renderRect.position.x + renderRect.extent.x * sliderValue;
 		this.bmp.x = Util.clamp(this.bmp.x, renderRect.position.x, renderRect.position.x + renderRect.extent.x - bmp.width / 2);
 		this.bmp.width = this.bmp.tile.width;
+		super.update(dt, mouseState);
 	}
 }
