@@ -249,8 +249,10 @@ class Marble extends GameObject {
 		// marbleMaterial.mainPass.addShader(dtsShader);
 		var obj = new Mesh(geom, marbleMaterial, this);
 		obj.scale(_radius);
-		this.cubemapRenderer = new CubemapRenderer(level.scene);
-		marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+		if (Settings.optionsSettings.reflectiveMarble) {
+			this.cubemapRenderer = new CubemapRenderer(level.scene);
+			marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+		}
 
 		this.forcefield = new DtsObject();
 		this.forcefield.dtsPath = "data/shapes/images/glow_bounce.dts";
