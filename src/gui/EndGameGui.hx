@@ -1,5 +1,7 @@
 package gui;
 
+import hxd.BitmapData;
+import h2d.Tile;
 import src.MarbleGame;
 import src.Settings.Score;
 import src.Settings.Settings;
@@ -55,12 +57,18 @@ class EndGameGui extends GuiControl {
 		nextLevel.position = new Vector(326, 307);
 		nextLevel.extent = new Vector(130, 110);
 
-		var nextLevelPreview = new GuiImage(ResourceLoader.getResource('data/missions/beginner/LearnTheWall-Hit.png', ResourceLoader.getImage,
-			this.imageResources)
-			.toTile());
+		var temprev = new BitmapData(1, 1);
+		temprev.setPixel(0, 0, 0);
+		var tmpprevtile = Tile.fromBitmap(temprev);
+
+		var nextLevelPreview = new GuiImage(tmpprevtile);
 		nextLevelPreview.position = new Vector(-15, 0);
 		nextLevelPreview.extent = new Vector(160, 110);
 		nextLevel.addChild(nextLevelPreview);
+
+		mission.getNextMission().getPreviewImage(t -> {
+			nextLevelPreview.bmp.tile = t;
+		});
 
 		var nextLevelBtn = new GuiButton(loadButtonImages('data/ui/endgame/level_window'));
 		nextLevelBtn.horizSizing = Width;
@@ -68,10 +76,10 @@ class EndGameGui extends GuiControl {
 		nextLevelBtn.position = new Vector(0, 0);
 		nextLevelBtn.extent = new Vector(130, 110);
 		nextLevelBtn.pressedAction = function(self:GuiControl) {
-			// var nextMission = Mission.getNextMission(mission);
-			// if (nextMission != null) {
-			// 	continueFunc(self);
-			// }
+			var nextMission = mission.getNextMission();
+			if (nextMission != null) {
+				cast(this.parent, Canvas).marbleGame.playMission(nextMission);
+			}
 		};
 		nextLevel.addChild(nextLevelBtn);
 
@@ -147,6 +155,36 @@ class EndGameGui extends GuiControl {
 		egFifthLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
 		pg.addChild(egFifthLine);
 
+		var egFirstLineScore = new GuiMLText(domcasual24, mlFontLoader);
+		egFirstLineScore.position = new Vector(475, 150);
+		egFirstLineScore.extent = new Vector(210, 25);
+		egFirstLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egFirstLineScore);
+
+		var egSecondLineScore = new GuiMLText(domcasual24, mlFontLoader);
+		egSecondLineScore.position = new Vector(476, 178);
+		egSecondLineScore.extent = new Vector(209, 25);
+		egSecondLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egSecondLineScore);
+
+		var egThirdLineScore = new GuiMLText(domcasual24, mlFontLoader);
+		egThirdLineScore.position = new Vector(476, 206);
+		egThirdLineScore.extent = new Vector(209, 25);
+		egThirdLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egThirdLineScore);
+
+		var egFourthLineScore = new GuiMLText(domcasual24, mlFontLoader);
+		egFourthLineScore.position = new Vector(476, 234);
+		egFourthLineScore.extent = new Vector(209, 25);
+		egFourthLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egFourthLineScore);
+
+		var egFifthLineScore = new GuiMLText(domcasual24, mlFontLoader);
+		egFifthLineScore.position = new Vector(476, 262);
+		egFifthLineScore.extent = new Vector(209, 25);
+		egFifthLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		pg.addChild(egFifthLineScore);
+
 		var egTitleText = new GuiMLText(expo50, mlFontLoader);
 		egTitleText.text.textColor = 0xffff00;
 		egTitleText.text.text = '<font color="#FFFFFF" face="DomCasual64">Your Time:</font>';
@@ -201,16 +239,22 @@ class EndGameGui extends GuiControl {
 		egFourthLine.text.text = '<p align="left"><font color="#A4A4A4">4. </font>${scoreData[3].name}</p>';
 		egFifthLine.text.text = '<p align="left"><font color="#949494">5. </font>${scoreData[4].name}</p>';
 
-		var lineelems = [egFirstLine, egSecondLine, egThirdLine, egFourthLine, egFifthLine];
+		var lineelems = [
+			egFirstLineScore,
+			egSecondLineScore,
+			egThirdLineScore,
+			egFourthLineScore,
+			egFifthLineScore
+		];
 
 		for (i in 0...5) {
 			if (scoreData[i].time < mission.ultimateTime) {
-				lineelems[i].text.text += '<p align="right"><font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font></p>';
+				lineelems[i].text.text = '<font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font>';
 			} else {
 				if (scoreData[i].time < mission.goldTime) {
-					lineelems[i].text.text += '<p align="right"><font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font></p>';
+					lineelems[i].text.text = '<font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font>';
 				} else {
-					lineelems[i].text.text += '<p align="right">${Util.formatTime(scoreData[i].time)}</p>';
+					lineelems[i].text.text = '${Util.formatTime(scoreData[i].time)}';
 				}
 			}
 		}
@@ -257,7 +301,7 @@ class EndGameGui extends GuiControl {
 		}
 		Settings.save();
 
-		if (idx <= 2) {
+		if (idx <= 4) {
 			var end = new EnterNameDlg(idx, (name) -> {
 				if (scoreSubmitted)
 					return;
@@ -265,6 +309,24 @@ class EndGameGui extends GuiControl {
 				var myScore = {name: name, time: timeState.gameplayClock};
 				scoreData.push(myScore);
 				scoreData.sort((a, b) -> a.time == b.time ? 0 : (a.time > b.time ? 1 : -1));
+
+				egFirstLine.text.text = '<p align="left"><font color="#EEC884">1. </font>${scoreData[0].name}</p>';
+				egSecondLine.text.text = '<p align="left"><font color="#CDCDCD">2. </font>${scoreData[1].name}</p>';
+				egThirdLine.text.text = '<p align="left"><font color="#C9AFA0">3. </font>${scoreData[2].name}</p>';
+				egFourthLine.text.text = '<p align="left"><font color="#A4A4A4">4. </font>${scoreData[3].name}</p>';
+				egFifthLine.text.text = '<p align="left"><font color="#949494">5. </font>${scoreData[4].name}</p>';
+
+				for (i in 0...5) {
+					if (scoreData[i].time < mission.ultimateTime) {
+						lineelems[i].text.text = '<font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font>';
+					} else {
+						if (scoreData[i].time < mission.goldTime) {
+							lineelems[i].text.text = '<font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font>';
+						} else {
+							lineelems[i].text.text = '${Util.formatTime(scoreData[i].time)}';
+						}
+					}
+				}
 
 				Settings.saveScore(mission.path, myScore);
 

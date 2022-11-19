@@ -29,6 +29,8 @@ class Mission {
 	public var id:Int;
 	public var isClaMission:Bool;
 
+	var next:Mission;
+
 	var imageResources:Array<Resource<Image>> = [];
 
 	var imgFileEntry:hxd.fs.FileEntry;
@@ -70,6 +72,10 @@ class Mission {
 		mission.type = missionInfo.type.toLowerCase();
 		mission.missionInfo = missionInfo;
 		return mission;
+	}
+
+	public function getNextMission() {
+		return this.next;
 	}
 
 	public function getPreviewImage(onLoaded:h2d.Tile->Void) {

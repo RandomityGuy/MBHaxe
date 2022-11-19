@@ -8,6 +8,7 @@ class MissionList {
 	static var beginnerMissions:Array<Mission>;
 	static var intermediateMissions:Array<Mission>;
 	static var advancedMissions:Array<Mission>;
+	static var expertMissions:Array<Mission>;
 	static var customMissions:Array<Mission>;
 
 	static var missions:Map<String, Mission>;
@@ -40,13 +41,23 @@ class MissionList {
 				}
 			}
 			difficultyMissions.sort((a, b) -> Std.parseInt(a.missionInfo.level) - Std.parseInt(b.missionInfo.level));
+
+			for (i in 0...difficultyMissions.length - 1) {
+				@:privateAccess difficultyMissions[i].next = difficultyMissions[i + 1];
+			}
 			return difficultyMissions;
 		}
 
 		beginnerMissions = parseDifficulty("beginner");
 		intermediateMissions = parseDifficulty("intermediate");
 		advancedMissions = parseDifficulty("advanced");
+		expertMissions = parseDifficulty("expert");
 		customMissions = parseDifficulty("expert");
+
+		@:privateAccess beginnerMissions[beginnerMissions.length - 1].next = intermediateMissions[0];
+		@:privateAccess intermediateMissions[intermediateMissions.length - 1].next = advancedMissions[0];
+		@:privateAccess advancedMissions[advancedMissions.length - 1].next = expertMissions[0];
+		@:privateAccess expertMissions[expertMissions.length - 1].next = beginnerMissions[0];
 
 		// parseCLAList();
 

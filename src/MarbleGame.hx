@@ -224,6 +224,9 @@ class MarbleGame {
 
 	public function playMission(mission:Mission) {
 		canvas.clearContent();
+		if (world != null) {
+			world.dispose();
+		}
 		world = new MarbleWorld(scene, scene2d, mission, toRecord);
 		toRecord = false;
 		world.init();

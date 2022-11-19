@@ -1,5 +1,7 @@
 package gui;
 
+import shaders.GuiClipFilter;
+import h2d.filter.Mask;
 import gui.GuiControl.MouseState;
 import h2d.Scene;
 import h2d.Tile;
@@ -12,6 +14,8 @@ class GuiImage extends GuiControl {
 
 	public var pressedAction:GuiControl->Void = null;
 
+	public var doClipping:Bool = true;
+
 	public function new(texture:Tile) {
 		super();
 		this.bmp = new Bitmap(texture);
@@ -19,6 +23,16 @@ class GuiImage extends GuiControl {
 
 	public override function render(scene2d:Scene) {
 		var renderRect = this.getRenderRectangle();
+		var hittestRect = this.getHitTestRect();
+		if (doClipping
+			&& (hittestRect.position.x > renderRect.position.x
+				|| hittestRect.position.y > renderRect.position.y
+				|| hittestRect.extent.x < renderRect.extent.x
+				|| hittestRect.extent.y < renderRect.extent.y)) {
+			if (bmp.filter == null) {
+				bmp.filter = new GuiClipFilter(hittestRect);
+			}
+		}
 		bmp.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 		// bmp.scaleX = renderRect.extent.x / bmp.tile.width;
 		// bmp.scaleY = renderRect.extent.y / bmp.tile.height;
