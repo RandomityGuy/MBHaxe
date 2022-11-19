@@ -44,14 +44,14 @@ class EndGameGui extends GuiControl {
 		continueButton.vertSizing = Bottom;
 		continueButton.position = new Vector(460, 307);
 		continueButton.extent = new Vector(104, 54);
-		continueButton.pressedAction = continueFunc;
+		continueButton.pressedAction = (e) -> continueFunc(continueButton);
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/endgame/replay"));
 		restartButton.horizSizing = Right;
 		restartButton.vertSizing = Bottom;
 		restartButton.position = new Vector(460, 363);
 		restartButton.extent = new Vector(104, 54);
-		restartButton.pressedAction = restartFunc;
+		restartButton.pressedAction = (e) -> restartFunc(restartButton);
 
 		var nextLevel = new GuiControl();
 		nextLevel.position = new Vector(326, 307);
@@ -75,7 +75,7 @@ class EndGameGui extends GuiControl {
 		nextLevelBtn.vertSizing = Height;
 		nextLevelBtn.position = new Vector(0, 0);
 		nextLevelBtn.extent = new Vector(130, 110);
-		nextLevelBtn.pressedAction = function(self:GuiControl) {
+		nextLevelBtn.pressedAction = (e) -> {
 			var nextMission = mission.getNextMission();
 			if (nextMission != null) {
 				cast(this.parent, Canvas).marbleGame.playMission(nextMission);

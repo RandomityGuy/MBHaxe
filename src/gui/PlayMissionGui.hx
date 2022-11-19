@@ -254,7 +254,7 @@ class PlayMissionGui extends GuiImage {
 
 			if (prevBox.inRect(mouseState.position) && mouseState.button == Key.MOUSE_LEFT) {
 				if (buttonCooldown <= 0) {
-					pmPrev.pressedAction(pmPrev);
+					pmPrev.pressedAction(new GuiEvent(pmPrev));
 					buttonCooldown = maxButtonCooldown;
 					maxButtonCooldown *= 0.75;
 				}
@@ -262,7 +262,7 @@ class PlayMissionGui extends GuiImage {
 
 			if (nextBox.inRect(mouseState.position) && mouseState.button == Key.MOUSE_LEFT) {
 				if (buttonCooldown <= 0) {
-					pmNext.pressedAction(pmNext);
+					pmNext.pressedAction(new GuiEvent(pmNext));
 					buttonCooldown = maxButtonCooldown;
 					maxButtonCooldown *= 0.75;
 				}

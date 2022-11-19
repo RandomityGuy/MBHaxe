@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.Scene;
 import hxd.snd.Channel;
 import hxd.res.Sound;
 import hxd.Key;

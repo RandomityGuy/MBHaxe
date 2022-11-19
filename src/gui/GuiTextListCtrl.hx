@@ -17,6 +17,8 @@ class GuiTextListCtrl extends GuiControl {
 	var g:Graphics;
 	var _prevSelected:Int = -1;
 
+	public var textYOffset:Int = 0;
+
 	public function new(font:Font, texts:Array<String>) {
 		super();
 		this.font = font;
@@ -41,10 +43,23 @@ class GuiTextListCtrl extends GuiControl {
 
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
-			text.setPosition(Math.floor(renderRect.position.x + 5), Math.floor(renderRect.position.y + (i * (text.font.size + 4) + 5)));
+			text.setPosition(Math.floor(renderRect.position.x + 5), Math.floor(renderRect.position.y + (i * (text.font.size + 4) + 5 + textYOffset)));
 			if (scene2d.contains(text))
 				scene2d.removeChild(text);
 			scene2d.addChild(text);
+
+			if (_prevSelected == i) {
+				text.textColor = 0x206464;
+			}
+		}
+
+		if (_prevSelected != -1) {
+			g.clear();
+			g.beginFill(0xC8C8C8);
+			g.drawRect(0, 5 + (_prevSelected * (font.size + 4)) - 3, renderRect.extent.x, font.size + 4);
+			g.endFill();
+		} else {
+			g.clear();
 		}
 
 		super.render(scene2d);
@@ -91,6 +106,8 @@ class GuiTextListCtrl extends GuiControl {
 
 	public override function onMouseLeave(mouseState:MouseState) {
 		for (i in 0...textObjs.length) {
+			if (i == this._prevSelected)
+				continue;
 			var text = textObjs[i];
 			text.textColor = 0;
 			// fill color = 0xC8C8C8

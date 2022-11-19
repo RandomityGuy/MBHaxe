@@ -12,7 +12,7 @@ import src.MarbleGame;
 class GuiImage extends GuiControl {
 	var bmp:Bitmap;
 
-	public var pressedAction:GuiControl->Void = null;
+	public var pressedAction:GuiEvent->Void = null;
 
 	public var doClipping:Bool = true;
 
@@ -53,7 +53,7 @@ class GuiImage extends GuiControl {
 	public override function onMouseRelease(mouseState:MouseState) {
 		super.onMouseRelease(mouseState);
 		if (this.pressedAction != null) {
-			this.pressedAction(this);
+			this.pressedAction(new GuiEvent(this));
 		}
 	}
 

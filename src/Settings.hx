@@ -31,6 +31,9 @@ typedef OptionsSettings = {
 	var soundVolume:Float;
 	var vsync:Bool;
 	var fov:Int;
+	var frameRateVis:Bool;
+	var oobInsults:Bool;
+	var reflectiveMarble:Bool;
 }
 
 typedef ControlsSettings = {
@@ -75,6 +78,9 @@ class Settings {
 		musicVolume: 1,
 		soundVolume: 0.7,
 		fov: 60,
+		frameRateVis: true,
+		oobInsults: true,
+		reflectiveMarble: true,
 		vsync: #if js true #end
 		#if hl
 		false

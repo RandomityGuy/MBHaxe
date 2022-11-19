@@ -39,21 +39,21 @@ class ExitGameDlg extends GuiControl {
 		yesButton.extent = new Vector(86, 40);
 		yesButton.vertSizing = Top;
 		yesButton.horizSizing = Right;
-		yesButton.pressedAction = yesFunc;
+		yesButton.pressedAction = (sender) -> yesFunc(yesButton);
 
 		var noButton = new GuiButton(loadButtonImages("data/ui/common/no"));
 		noButton.position = new Vector(105, 102);
 		noButton.extent = new Vector(86, 40);
 		noButton.vertSizing = Top;
 		noButton.horizSizing = Right;
-		noButton.pressedAction = noFunc;
+		noButton.pressedAction = (sender) -> noFunc(noButton);
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/common/restart"));
 		restartButton.position = new Vector(214, 104);
 		restartButton.extent = new Vector(86, 40);
 		restartButton.vertSizing = Top;
 		restartButton.horizSizing = Right;
-		restartButton.pressedAction = restartFunc;
+		restartButton.pressedAction = (sender) -> restartFunc(restartButton);
 
 		dialogImg.addChild(overlay);
 		dialogImg.addChild(yesButton);

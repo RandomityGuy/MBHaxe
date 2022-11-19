@@ -60,7 +60,9 @@ class OptionsDlg extends GuiImage {
 		onlineBtn.extent = new Vector(134, 65);
 		window.addChild(onlineBtn);
 
-		var applyFunc:Void->Void = () -> {};
+		var applyFunc:Void->Void = () -> {
+			Settings.applySettings();
+		};
 
 		var homeBtn = new GuiButton(loadButtonImages('data/ui/options/home'));
 		homeBtn.position = new Vector(292, 482);
@@ -98,7 +100,38 @@ class OptionsDlg extends GuiImage {
 		var optBtns = [];
 		var optSliders = [];
 
-		function makeOption(text:String, value:String, yPos:Float, parent:GuiControl, right:Bool = false) {
+		var transparentbmp = new hxd.BitmapData(1, 1);
+		transparentbmp.setPixel(0, 0, 0);
+		var transparentTile = Tile.fromBitmap(transparentbmp);
+
+		var currentDropDown:GuiImage = null;
+
+		function disableAllBtnsExcept(btn:GuiButton) {
+			for (b in optBtns) {
+				if (b != btn) {
+					b.disabled = true;
+				}
+			}
+		}
+
+		function enableAllBtns() {
+			for (b in optBtns) {
+				b.disabled = false;
+			}
+		}
+
+		window.pressedAction = (sender) -> {
+			if (currentDropDown != null) {
+				var dropdownparent = currentDropDown.parent;
+				currentDropDown.parent.removeChild(currentDropDown);
+				dropdownparent.parent.render(MarbleGame.canvas.scene2d);
+				currentDropDown = null;
+				enableAllBtns();
+			}
+		}
+
+		function makeOption(text:String, valueFunc:Void->String, yPos:Float, parent:GuiControl, size:String, options:Array<String>, onSelect:Int->Void,
+				right:Bool = false) {
 			var textObj = new GuiText(markerFelt32);
 			textObj.position = new Vector(right ? 388 : 7, yPos);
 			textObj.extent = new Vector(212, 14);
@@ -107,12 +140,56 @@ class OptionsDlg extends GuiImage {
 			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
 			parent.addChild(textObj);
 
+			var optDropdownImg = new GuiImage(ResourceLoader.getResource('data/ui/options/dropdown-${size}.png', ResourceLoader.getImage, this.imageResources)
+				.toTile());
+
+			optDropdownImg.position = new Vector(right ? 552 : 222, yPos + 39);
+			optDropdownImg.extent = new Vector(163, 79 + switch (size) {
+				case 'small': 0;
+				case 'medium': 20;
+				case 'large': 42;
+				case 'xlarge': 97;
+				default: 0;
+			});
+
 			var optDropdown = new GuiButtonText(loadButtonImages('data/ui/options/dropdown'), markerFelt24);
 			optDropdown.position = new Vector(right ? 552 : 222, yPos - 12);
 			optDropdown.setExtent(new Vector(163, 56));
-			optDropdown.txtCtrl.text.text = value;
+			optDropdown.txtCtrl.text.text = valueFunc();
 			optDropdown.txtCtrl.text.textColor = 0;
+			optDropdown.pressedAction = (sender) -> {
+				if (currentDropDown == null) {
+					parent.addChild(optDropdownImg);
+					optDropdownImg.render(MarbleGame.canvas.scene2d);
+					currentDropDown = optDropdownImg;
+					disableAllBtnsExcept(optDropdown);
+					return;
+				}
+				if (currentDropDown == optDropdownImg) {
+					parent.removeChild(optDropdownImg);
+					parent.render(MarbleGame.canvas.scene2d);
+					currentDropDown = null;
+					enableAllBtns();
+					return;
+				}
+			}
 			parent.addChild(optDropdown);
+
+			var optDropdownList = new GuiTextListCtrl(markerFelt24, options);
+			optDropdownList.position = new Vector(11, 15);
+			optDropdownList.extent = new Vector(135, 47 + switch (size) {
+				case 'small': 0;
+				case 'medium': 20;
+				case 'large': 42;
+				case 'xlarge': 97;
+				default: 0;
+			});
+			optDropdownList.textYOffset = -5;
+			optDropdownList.onSelectedFunc = (idx) -> {
+				onSelect(idx);
+				optDropdown.txtCtrl.text.text = valueFunc();
+			};
+			optDropdownImg.addChild(optDropdownList);
 
 			optBtns.push(optDropdown);
 		}
@@ -143,14 +220,63 @@ class OptionsDlg extends GuiImage {
 			optSliders.push(optSlider);
 		}
 
-		makeOption("Screen Resolution:", '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', 18, generalPanel);
-		makeOption("Screen Style:", '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', 18, generalPanel, true);
-		makeOption("Frame Rate:", 'Visible', 74, generalPanel);
-		makeOption("OoB Insults:", 'Disabled', 74, generalPanel, true);
-		makeOption("Free-Look:", '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', 130, generalPanel);
-		makeOption("Invert Y:", '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', 130, generalPanel, true);
-		makeOption("Reflective Marble:", "Enabled", 186, generalPanel);
-		makeOption("Vertical Sync:", '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', 186, generalPanel, true);
+		makeOption("Screen Resolution:", () -> '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', 18, generalPanel,
+			"xlarge", [
+				"1024 x 800",
+				"1280 x 720",
+				"1366 x 768",
+				"1440 x 900",
+				"1600 x 900",
+				"1920 x 1080"
+			], (idx) -> {
+				switch (idx) {
+					case 0:
+						Settings.optionsSettings.screenWidth = 1024;
+						Settings.optionsSettings.screenHeight = 800;
+					case 1:
+						Settings.optionsSettings.screenWidth = 1280;
+						Settings.optionsSettings.screenHeight = 720;
+					case 2:
+						Settings.optionsSettings.screenWidth = 1366;
+						Settings.optionsSettings.screenHeight = 768;
+					case 3:
+						Settings.optionsSettings.screenWidth = 1440;
+						Settings.optionsSettings.screenHeight = 900;
+					case 4:
+						Settings.optionsSettings.screenWidth = 1600;
+						Settings.optionsSettings.screenHeight = 900;
+					case 5:
+						Settings.optionsSettings.screenWidth = 1920;
+						Settings.optionsSettings.screenHeight = 1080;
+				}
+			});
+		makeOption("Screen Style:", () -> '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', 18, generalPanel, "small",
+			["Windowed", "Full Screen"], (idx) -> {
+				Settings.optionsSettings.isFullScreen = idx == 1;
+			}, true);
+		makeOption("Frame Rate:", () -> '${Settings.optionsSettings.frameRateVis ? "Visible" : "Hidden"}', 74, generalPanel, "small", ["Visible", "Hidden"],
+			(idx) -> {
+				Settings.optionsSettings.frameRateVis = idx == 0;
+			});
+		makeOption("OoB Insults:", () -> '${Settings.optionsSettings.oobInsults ? "Enabled" : "Disabled"}', 74, generalPanel, "small",
+			["Disabled", "Enabled"], (idx) -> {
+				Settings.optionsSettings.oobInsults = idx == 1;
+			}, true);
+		makeOption("Free-Look:", () -> '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', 130, generalPanel, "small",
+			["Disabled", "Enabled"], (idx) -> {
+				Settings.controlsSettings.alwaysFreeLook = idx == 1;
+			});
+		makeOption("Invert Y:", () -> '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', 130, generalPanel, "small", ["No", "Yes"], (idx) -> {
+			Settings.controlsSettings.invertYAxis = idx == 1;
+		}, true);
+		makeOption("Reflective Marble:", () -> '${Settings.optionsSettings.reflectiveMarble ? "Enabled" : "Disabled"}', 186, generalPanel, "small",
+			["Disabled", "Enabled"], (idx) -> {
+				Settings.optionsSettings.reflectiveMarble = idx == 1;
+			});
+		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', 186, generalPanel, "small", ["Disabled", "Enabled"],
+			(idx) -> {
+				Settings.optionsSettings.vsync = idx == 1;
+			}, true);
 		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, 242, generalPanel, (val) -> {
 			Settings.optionsSettings.musicVolume = val;
 			AudioManager.updateVolumes();
@@ -165,38 +291,30 @@ class OptionsDlg extends GuiImage {
 		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), 298, generalPanel, (val) -> {
 			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
 		}, true);
-
 		var tabs = new GuiControl();
 		tabs.horizSizing = Center;
 		tabs.vertSizing = Center;
 		tabs.position = new Vector(60, 15);
 		tabs.extent = new Vector(520, 450);
-
 		var setTab:String->Void = null;
-
 		var graphicsTab = new GuiImage(ResourceLoader.getResource("data/ui/options/graf_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		graphicsTab.position = new Vector(58, 44);
 		graphicsTab.extent = new Vector(149, 86);
-
 		var controlsTab = new GuiImage(ResourceLoader.getResource("data/ui/options/cntr_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		controlsTab.position = new Vector(315, 15);
 		controlsTab.extent = new Vector(149, 65);
-
 		var boxFrame = new GuiImage(ResourceLoader.getResource("data/ui/options/options_base.png", ResourceLoader.getImage, this.imageResources).toTile());
 		boxFrame.position = new Vector(25, 14);
 		boxFrame.extent = new Vector(470, 422);
 		boxFrame.horizSizing = Center;
 		boxFrame.vertSizing = Center;
-
 		var audioTab = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audioTab.position = new Vector(204, 33);
 		audioTab.extent = new Vector(114, 75);
-
 		tabs.addChild(audioTab);
 		tabs.addChild(controlsTab);
 		tabs.addChild(boxFrame);
 		tabs.addChild(graphicsTab);
-
 		var mainPane = new GuiControl();
 		mainPane.position = new Vector(60, 15);
 		mainPane.extent = new Vector(520, 480);
@@ -206,10 +324,8 @@ class OptionsDlg extends GuiImage {
 		var graphicsPane = new GuiControl();
 		graphicsPane.position = new Vector(35, 110);
 		graphicsPane.extent = new Vector(438, 298);
-
 		mainPane.addChild(graphicsPane);
 		var applyFunc:Void->Void = null;
-
 		var mainMenuButton = new GuiButton(loadButtonImages("data/ui/options/mainm"));
 		mainMenuButton.position = new Vector(330, 356);
 		mainMenuButton.extent = new Vector(121, 53);
@@ -218,7 +334,6 @@ class OptionsDlg extends GuiImage {
 			MarbleGame.canvas.setContent(new MainMenuGui());
 		}
 		mainPane.addChild(mainMenuButton);
-
 		// Hacky radio box logic
 		var windowBoxes = [];
 
@@ -241,7 +356,6 @@ class OptionsDlg extends GuiImage {
 		}
 		graphicsPane.addChild(gfxWindow);
 		windowBoxes.push(gfxWindow);
-
 		var gfxFull = new GuiButton(loadButtonImages("data/ui/options/grafful"));
 		gfxFull.position = new Vector(288, 118);
 		gfxFull.extent = new Vector(61, 55);
@@ -254,14 +368,12 @@ class OptionsDlg extends GuiImage {
 		}
 		graphicsPane.addChild(gfxFull);
 		windowBoxes.push(gfxFull);
-
 		var gfxText = new GuiImage(ResourceLoader.getResource("data/ui/options/graf_txt.png", ResourceLoader.getImage, this.imageResources).toTile());
 		gfxText.horizSizing = Right;
 		gfxText.vertSizing = Bottom;
 		gfxText.position = new Vector(12, 12);
 		gfxText.extent = new Vector(146, 261);
 		graphicsPane.addChild(gfxText);
-
 		var resolutionBoxes = [];
 
 		function updateResolutionFunc(sender:GuiButton) {
@@ -282,7 +394,6 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.addChild(gfx640480);
 		if (Settings.optionsSettings.screenWidth == 640)
 			gfx640480.pressed = true;
-
 		var gfx800600 = new GuiButton(loadButtonImages("data/ui/options/graf800"));
 		gfx800600.position = new Vector(237, 0);
 		gfx800600.extent = new Vector(86, 51);
@@ -294,7 +405,6 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.addChild(gfx800600);
 		if (Settings.optionsSettings.screenWidth == 800)
 			gfx800600.pressed = true;
-
 		var gfx1024768 = new GuiButton(loadButtonImages("data/ui/options/graf1024"));
 		gfx1024768.position = new Vector(320, -1);
 		gfx1024768.extent = new Vector(94, 51);
@@ -306,7 +416,6 @@ class OptionsDlg extends GuiImage {
 		if (Settings.optionsSettings.screenWidth == 1024)
 			gfx1024768.pressed = true;
 		graphicsPane.addChild(gfx1024768);
-
 		var driverBoxes = [];
 
 		function updateDriverFunc(sender:GuiButton) {
@@ -328,7 +437,6 @@ class OptionsDlg extends GuiImage {
 			gfxopengl.pressed = true;
 		}
 		graphicsPane.addChild(gfxopengl);
-
 		var gfxd3d = new GuiButton(loadButtonImages("data/ui/options/grafdir3d"));
 		gfxd3d.position = new Vector(270, 59);
 		gfxd3d.extent = new Vector(104, 52);
@@ -341,13 +449,11 @@ class OptionsDlg extends GuiImage {
 			gfxd3d.pressed = true;
 		}
 		graphicsPane.addChild(gfxd3d);
-
 		var applyButton = new GuiButton(loadButtonImages("data/ui/options/grafapply"));
 		applyButton.position = new Vector(188, 239);
 		applyButton.extent = new Vector(106, 60);
 		applyButton.pressedAction = (sender) -> applyFunc();
 		graphicsPane.addChild(applyButton);
-
 		var bitBoxes = [];
 
 		function updateBitsFunc(sender:GuiButton) {
@@ -369,7 +475,6 @@ class OptionsDlg extends GuiImage {
 			gfx16.pressed = true;
 		}
 		graphicsPane.addChild(gfx16);
-
 		var gfx32 = new GuiButton(loadButtonImages("data/ui/options/graf32bt"));
 		gfx32.position = new Vector(272, 174);
 		gfx32.extent = new Vector(84, 51);
@@ -382,7 +487,6 @@ class OptionsDlg extends GuiImage {
 			gfx32.pressed = true;
 		}
 		graphicsPane.addChild(gfx32);
-
 		var shadowsButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
 		shadowsButton.position = new Vector(141, 233);
 		shadowsButton.extent = new Vector(46, 54);
@@ -391,24 +495,19 @@ class OptionsDlg extends GuiImage {
 		if (Settings.optionsSettings.shadows) {
 			shadowsButton.pressed = true;
 		}
-
 		// AUDIO PANEL
-
 		var audioPane = new GuiControl();
 		audioPane.position = new Vector(41, 91);
 		audioPane.extent = new Vector(425, 281);
 		// mainPane.addChild(audioPane);
-
 		var audSndSlide = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_snd_slide.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audSndSlide.position = new Vector(14, 92);
 		audSndSlide.extent = new Vector(388, 34);
 		audioPane.addChild(audSndSlide);
-
 		var audMusSlide = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_mus_slide.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audMusSlide.position = new Vector(17, 32);
 		audMusSlide.extent = new Vector(381, 40);
 		audioPane.addChild(audMusSlide);
-
 		var audMusKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audMusKnob.position = new Vector(137, 37);
 		audMusKnob.extent = new Vector(250, 34);
@@ -417,7 +516,6 @@ class OptionsDlg extends GuiImage {
 			Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
 		}
 		audioPane.addChild(audMusKnob);
-
 		var audSndKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_snd_knb.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audSndKnob.position = new Vector(137, 95);
 		audSndKnob.extent = new Vector(254, 37);
@@ -430,7 +528,6 @@ class OptionsDlg extends GuiImage {
 			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
 		}
 		audioPane.addChild(audSndKnob);
-
 		musicSliderFunc = (dt:Float, mouseState:MouseState) -> {
 			if (mouseState.button == Key.MOUSE_LEFT) {
 				var musRect = audMusKnob.getRenderRectangle();
@@ -445,12 +542,10 @@ class OptionsDlg extends GuiImage {
 				}
 			}
 		}
-
 		var audTxtWndo = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_txt_wndo.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audTxtWndo.position = new Vector(26, 130);
 		audTxtWndo.extent = new Vector(396, 132);
 		audioPane.addChild(audTxtWndo);
-
 		var audInfo = new GuiText(arial14);
 		audInfo.position = new Vector(24, 41);
 		audInfo.extent = new Vector(330, 56);
@@ -460,7 +555,6 @@ Version: OpenAL 1.0
 Renderer: Software
 Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		audTxtWndo.addChild(audInfo);
-
 		applyFunc = () -> {
 			if (gfx640480.pressed) {
 				Settings.optionsSettings.screenWidth = 640;
@@ -487,13 +581,10 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			else
 				Settings.optionsSettings.videoDriver = 1;
 			Settings.optionsSettings.shadows = shadowsButton.pressed;
-
 			Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
 			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
-
 			Settings.applySettings();
 		}
-
 		// CONTROLS PANEL
 		var controlsPane = new GuiControl();
 		controlsPane.position = new Vector(44, 58);
@@ -504,7 +595,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		marbleControlsPane.position = new Vector(0, 5);
 		marbleControlsPane.extent = new Vector(438, 320);
 		controlsPane.addChild(marbleControlsPane);
-
 		var cameraControlsPane:GuiImage = null;
 		var mouseControlsPane:GuiImage = null;
 
@@ -564,7 +654,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Move Forward", (key) -> Settings.controlsSettings.forward = key, moveForward);
 		}
 		marbleControlsPane.addChild(moveForward);
-
 		var moveRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_rt"), arial14);
 		moveRight.position = new Vector(230, 167);
 		moveRight.setExtent(new Vector(112, 45));
@@ -573,7 +662,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Move Right", (key) -> Settings.controlsSettings.right = key, moveRight);
 		}
 		marbleControlsPane.addChild(moveRight);
-
 		var mouseFire = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_pwr"), arial14);
 		mouseFire.position = new Vector(310, 84);
 		mouseFire.setExtent(new Vector(120, 51));
@@ -582,7 +670,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Use PowerUp", (key) -> Settings.controlsSettings.powerup = key, mouseFire);
 		}
 		marbleControlsPane.addChild(mouseFire);
-
 		var moveBackward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_bak"), arial14);
 		moveBackward.position = new Vector(135, 235);
 		moveBackward.setExtent(new Vector(118, 48));
@@ -591,7 +678,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Move Backward", (key) -> Settings.controlsSettings.backward = key, moveBackward);
 		}
 		marbleControlsPane.addChild(moveBackward);
-
 		var moveLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_lft"), arial14);
 		moveLeft.position = new Vector(19, 189);
 		moveLeft.setExtent(new Vector(108, 45));
@@ -600,7 +686,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Move Left", (key) -> Settings.controlsSettings.left = key, moveLeft);
 		}
 		marbleControlsPane.addChild(moveLeft);
-
 		var moveJmp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_jmp"), arial14);
 		moveJmp.position = new Vector(299, 231);
 		moveJmp.setExtent(new Vector(120, 47));
@@ -609,16 +694,13 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Jump", (key) -> Settings.controlsSettings.jump = key, moveJmp);
 		}
 		marbleControlsPane.addChild(moveJmp);
-
 		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
 		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
-
 		var transparentbmp = new hxd.BitmapData(1, 1);
 		transparentbmp.setPixel(0, 0, 0);
 		var transparentTile = Tile.fromBitmap(transparentbmp);
-
 		var marbleToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		marbleToCameraButton.position = new Vector(138, 26);
 		marbleToCameraButton.extent = new Vector(121, 40);
@@ -628,7 +710,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			this.render(cast(this.parent, Canvas).scene2d);
 		}
 		marbleControlsPane.addChild(marbleToCameraButton);
-
 		var marbleToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		marbleToMouseButton.position = new Vector(277, 0);
 		marbleToMouseButton.extent = new Vector(121, 43);
@@ -638,13 +719,11 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		}
 		marbleControlsPane.addChild(marbleToMouseButton);
-
 		// CAMERA PANEL
 		cameraControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_cam_bse.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		cameraControlsPane.position = new Vector(0, 5);
 		cameraControlsPane.extent = new Vector(438, 320);
-
 		var panUp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_up"), arial14);
 		panUp.position = new Vector(29, 133);
 		panUp.setExtent(new Vector(108, 42));
@@ -653,7 +732,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Rotate Camera Up", (key) -> Settings.controlsSettings.camForward = key, panUp);
 		}
 		cameraControlsPane.addChild(panUp);
-
 		var turnRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_rt"), arial14);
 		turnRight.position = new Vector(312, 99);
 		turnRight.setExtent(new Vector(103, 36));
@@ -662,7 +740,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Rotate Camera Right", (key) -> Settings.controlsSettings.camRight = key, turnRight);
 		}
 		cameraControlsPane.addChild(turnRight);
-
 		var panDown = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), arial14);
 		panDown.position = new Vector(42, 213);
 		panDown.setExtent(new Vector(109, 39));
@@ -671,7 +748,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Rotate Camera Down", (key) -> Settings.controlsSettings.camBackward = key, panDown);
 		}
 		cameraControlsPane.addChild(panDown);
-
 		var turnLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_lft"), arial14);
 		turnLeft.position = new Vector(319, 210);
 		turnLeft.setExtent(new Vector(99, 36));
@@ -680,7 +756,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapFunc("Rotate Camera Left", (key) -> Settings.controlsSettings.camLeft = key, turnLeft);
 		}
 		cameraControlsPane.addChild(turnLeft);
-
 		var cameraToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		cameraToMarbleButton.position = new Vector(13, 45);
 		cameraToMarbleButton.extent = new Vector(121, 40);
@@ -690,7 +765,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		}
 		cameraControlsPane.addChild(cameraToMarbleButton);
-
 		var cameraToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		cameraToMouseButton.position = new Vector(276, 7);
 		cameraToMouseButton.extent = new Vector(121, 40);
@@ -700,14 +774,11 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		}
 		cameraControlsPane.addChild(cameraToMouseButton);
-
 		// MOUSE CONTROLS
-
 		mouseControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_mous_base.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		mouseControlsPane.position = new Vector(-17, -47);
 		mouseControlsPane.extent = new Vector(470, 425);
-
 		var freelook = new GuiButtonText(loadButtonImages("data/ui/options/cntrl_mous_bttn"), arial14);
 		freelook.position = new Vector(219, 225);
 		freelook.setExtent(new Vector(105, 45));
@@ -715,9 +786,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		freelook.pressedAction = (sender) -> {
 			remapFunc("Free Look", (key) -> Settings.controlsSettings.freelook = key, freelook);
 		}
-
 		mouseControlsPane.addChild(freelook);
-
 		var mouseToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		mouseToMarbleButton.position = new Vector(26, 95);
 		mouseToMarbleButton.extent = new Vector(121, 40);
@@ -727,7 +796,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		}
 		mouseControlsPane.addChild(mouseToMarbleButton);
-
 		var mouseToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		mouseToCameraButton.position = new Vector(153, 71);
 		mouseToCameraButton.extent = new Vector(121, 40);
@@ -737,7 +805,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		}
 		mouseControlsPane.addChild(mouseToCameraButton);
-
 		var invertAxis = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_invrt"));
 		invertAxis.position = new Vector(95, 249);
 		invertAxis.extent = new Vector(43, 53);
@@ -747,7 +814,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			Settings.controlsSettings.invertYAxis = !Settings.controlsSettings.invertYAxis;
 		}
 		mouseControlsPane.addChild(invertAxis);
-
 		var alwaysFreelook = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_freel"));
 		alwaysFreelook.position = new Vector(365, 269);
 		alwaysFreelook.extent = new Vector(43, 53);
@@ -757,7 +823,6 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			Settings.controlsSettings.alwaysFreeLook = !Settings.controlsSettings.alwaysFreeLook;
 		}
 		mouseControlsPane.addChild(alwaysFreelook);
-
 		var mouseSensitivity = new GuiSlider(ResourceLoader.getResource("data/ui/options/cntrl_mous_knb.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		mouseSensitivity.position = new Vector(147, 148);
@@ -767,26 +832,22 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			Settings.controlsSettings.cameraSensitivity = 0.2 + (3 - 0.2) * mouseSensitivity.sliderValue;
 		}
 		mouseControlsPane.addChild(mouseSensitivity);
-
 		// INVISIBLE BUTTON SHIT
 		var audioTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		audioTabBtn.position = new Vector(213, 39);
 		audioTabBtn.extent = new Vector(92, 42);
 		audioTabBtn.pressedAction = (sender) -> setTab("Audio");
 		mainPane.addChild(audioTabBtn);
-
 		var controlsTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		controlsTabBtn.position = new Vector(331, 24);
 		controlsTabBtn.extent = new Vector(117, 42);
 		controlsTabBtn.pressedAction = (sender) -> setTab("Controls");
 		mainPane.addChild(controlsTabBtn);
-
 		var graphicsTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
 		graphicsTabBtn.position = new Vector(70, 48);
 		graphicsTabBtn.extent = new Vector(117, 48);
 		graphicsTabBtn.pressedAction = (sender) -> setTab("Graphics");
 		mainPane.addChild(graphicsTabBtn);
-
 		// Touch Controls buttons???
 		if (Util.isTouchDevice()) {
 			var touchControlsTxt = new GuiText(domcasual24);
@@ -794,19 +855,17 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			touchControlsTxt.text.color = new Vector(0, 0, 0);
 			touchControlsTxt.position = new Vector(200, 465);
 			touchControlsTxt.extent = new Vector(200, 40);
-
 			var touchControlsEdit = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
+
 			touchControlsEdit.position = new Vector(300, 455);
 			touchControlsEdit.txtCtrl.text.text = "Edit";
 			touchControlsEdit.setExtent(new Vector(109, 39));
 			touchControlsEdit.pressedAction = (sender) -> {
 				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
 			}
-
 			mainPane.addChild(touchControlsTxt);
 			mainPane.addChild(touchControlsEdit);
 		}
-
 		setTab = function(tab:String) {
 			tabs.removeChild(audioTab);
 			tabs.removeChild(controlsTab);
