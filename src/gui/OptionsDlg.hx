@@ -1,5 +1,7 @@
 package gui;
 
+import h2d.filter.DropShadow;
+import h2d.Text;
 import gui.GuiControl.MouseState;
 import src.AudioManager;
 import hxd.Key;
@@ -17,7 +19,7 @@ class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
 
 	public function new() {
-		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		var img = ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -36,12 +38,139 @@ class OptionsDlg extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
+		var window = new GuiImage(ResourceLoader.getResource("data/ui/options/window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		window.horizSizing = Center;
+		window.vertSizing = Center;
+		window.position = new Vector(-72, -47);
+		window.extent = new Vector(784, 573);
+		this.addChild(window);
+
+		var generalBtn = new GuiButton(loadButtonImages('data/ui/options/general'));
+		generalBtn.position = new Vector(102, 19);
+		generalBtn.extent = new Vector(134, 65);
+		window.addChild(generalBtn);
+
+		var hotkeysBtn = new GuiButton(loadButtonImages('data/ui/options/hotkeys'));
+		hotkeysBtn.position = new Vector(325, 19);
+		hotkeysBtn.extent = new Vector(134, 65);
+		window.addChild(hotkeysBtn);
+
+		var onlineBtn = new GuiImage(ResourceLoader.getResource("data/ui/options/online_i.png", ResourceLoader.getImage, this.imageResources).toTile());
+		onlineBtn.position = new Vector(548, 19);
+		onlineBtn.extent = new Vector(134, 65);
+		window.addChild(onlineBtn);
+
+		var applyFunc:Void->Void = () -> {};
+
+		var homeBtn = new GuiButton(loadButtonImages('data/ui/options/home'));
+		homeBtn.position = new Vector(292, 482);
+		homeBtn.extent = new Vector(94, 46);
+		homeBtn.pressedAction = (sender) -> {
+			applyFunc();
+			MarbleGame.canvas.setContent(new MainMenuGui());
+		}
+		window.addChild(homeBtn);
+
+		var applyBtn = new GuiButton(loadButtonImages('data/ui/options/apply'));
+		applyBtn.position = new Vector(398, 482);
+		applyBtn.extent = new Vector(94, 46);
+		applyBtn.pressedAction = (sender) -> {
+			applyFunc();
+		}
+		window.addChild(applyBtn);
+
+		var generalPanel = new GuiControl();
+		generalPanel.position = new Vector(30, 88);
+		generalPanel.extent = new Vector(726, 394);
+		window.addChild(generalPanel);
+
+		var hotkeysPanel = new GuiControl();
+		hotkeysPanel.position = new Vector(30, 88);
+		hotkeysPanel.extent = new Vector(726, 394);
+
+		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
+		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
+		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
+		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
+		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+
+		var optBtns = [];
+		var optSliders = [];
+
+		function makeOption(text:String, value:String, yPos:Float, parent:GuiControl, right:Bool = false) {
+			var textObj = new GuiText(markerFelt32);
+			textObj.position = new Vector(right ? 388 : 7, yPos);
+			textObj.extent = new Vector(212, 14);
+			textObj.text.text = text;
+			textObj.text.textColor = 0xFFFFFF;
+			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			parent.addChild(textObj);
+
+			var optDropdown = new GuiButtonText(loadButtonImages('data/ui/options/dropdown'), markerFelt24);
+			optDropdown.position = new Vector(right ? 552 : 222, yPos - 12);
+			optDropdown.setExtent(new Vector(163, 56));
+			optDropdown.txtCtrl.text.text = value;
+			optDropdown.txtCtrl.text.textColor = 0;
+			parent.addChild(optDropdown);
+
+			optBtns.push(optDropdown);
+		}
+
+		function makeSlider(text:String, value:Float, yPos:Float, parent:GuiControl, onChange:Float->Void, right:Bool = false) {
+			var textObj = new GuiText(markerFelt32);
+			textObj.position = new Vector(right ? 388 : 7, yPos);
+			textObj.extent = new Vector(212, 14);
+			textObj.text.text = text;
+			textObj.text.textColor = 0xFFFFFF;
+			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			parent.addChild(textObj);
+
+			var sliderBar = new GuiImage(ResourceLoader.getResource("data/ui/options/bar.png", ResourceLoader.getImage, this.imageResources).toTile());
+			sliderBar.position = new Vector(right ? 552 : 226, yPos + 3 + 5);
+			sliderBar.extent = new Vector(154, 19);
+			parent.addChild(sliderBar);
+
+			var optSlider = new GuiSlider(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources).toTile());
+			optSlider.position = new Vector(right ? 550 : 220, yPos - 8 + 5);
+			optSlider.extent = new Vector(150, 41);
+			optSlider.sliderValue = value;
+			optSlider.pressedAction = (sender) -> {
+				onChange(optSlider.sliderValue);
+			}
+			parent.addChild(optSlider);
+
+			optSliders.push(optSlider);
+		}
+
+		makeOption("Screen Resolution:", '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', 18, generalPanel);
+		makeOption("Screen Style:", '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', 18, generalPanel, true);
+		makeOption("Frame Rate:", 'Visible', 74, generalPanel);
+		makeOption("OoB Insults:", 'Disabled', 74, generalPanel, true);
+		makeOption("Free-Look:", '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', 130, generalPanel);
+		makeOption("Invert Y:", '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', 130, generalPanel, true);
+		makeOption("Reflective Marble:", "Enabled", 186, generalPanel);
+		makeOption("Vertical Sync:", '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', 186, generalPanel, true);
+		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, 242, generalPanel, (val) -> {
+			Settings.optionsSettings.musicVolume = val;
+			AudioManager.updateVolumes();
+		});
+		makeSlider("Sound Volume:", Settings.optionsSettings.soundVolume, 242, generalPanel, (val) -> {
+			Settings.optionsSettings.soundVolume = val;
+			AudioManager.updateVolumes();
+		}, true);
+		makeSlider("Field of View:", (Settings.optionsSettings.fov - 60) / (140 - 60), 298, generalPanel, (val) -> {
+			Settings.optionsSettings.fov = cast(60 + val * (140 - 60));
+		});
+		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), 298, generalPanel, (val) -> {
+			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
+		}, true);
+
 		var tabs = new GuiControl();
 		tabs.horizSizing = Center;
 		tabs.vertSizing = Center;
 		tabs.position = new Vector(60, 15);
 		tabs.extent = new Vector(520, 450);
-		this.addChild(tabs);
 
 		var setTab:String->Void = null;
 
@@ -73,8 +202,6 @@ class OptionsDlg extends GuiImage {
 		mainPane.extent = new Vector(520, 480);
 		mainPane.horizSizing = Center;
 		mainPane.vertSizing = Center;
-		this.addChild(mainPane);
-
 		// GRAPHICS PANEL
 		var graphicsPane = new GuiControl();
 		graphicsPane.position = new Vector(35, 110);

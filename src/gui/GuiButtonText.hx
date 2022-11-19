@@ -19,6 +19,6 @@ class GuiButtonText extends GuiButton {
 	public function setExtent(extent:Vector) {
 		this.extent = extent;
 		txtCtrl.extent = extent;
-		txtCtrl.position.y = 5 * extent.y / 16; // Weird ratio shit that makes it as centered as possible
+		txtCtrl.position.y = 4 * extent.y / 16; // Weird ratio shit that makes it as centered as possible
 	}
 }
