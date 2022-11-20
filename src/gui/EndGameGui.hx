@@ -206,7 +206,10 @@ class EndGameGui extends GuiControl {
 			text += 'You beat the <font color="#FFDD22">Ultimate</font> Time!';
 		} else {
 			if (mission.goldTime > 0 && timeState.gameplayClock < mission.goldTime) {
-				text += 'You beat the <font color="#CCCCCC">Platinum</font> Time!';
+				if (mission.game == "gold")
+					text += 'You beat the <font color="#FFCC00">Gold</font> Time!';
+				else
+					text += 'You beat the <font color="#CCCCCC">Platinum</font> Time!';
 			} else {
 				if (mission.qualifyTime > timeState.gameplayClock) {
 					text += "You beat the Par Time!";
@@ -252,7 +255,10 @@ class EndGameGui extends GuiControl {
 				lineelems[i].text.text = '<font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font>';
 			} else {
 				if (scoreData[i].time < mission.goldTime) {
-					lineelems[i].text.text = '<font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font>';
+					if (mission.game == "gold")
+						lineelems[i].text.text = '<font color="#FFCC00">${Util.formatTime(scoreData[i].time)}</font>';
+					else
+						lineelems[i].text.text = '<font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font>';
 				} else {
 					lineelems[i].text.text = '${Util.formatTime(scoreData[i].time)}';
 				}
@@ -262,7 +268,7 @@ class EndGameGui extends GuiControl {
 		var leftColumn = new GuiMLText(domcasual24, mlFontLoader);
 		leftColumn.text.lineSpacing = 5;
 		leftColumn.text.textColor = 0xFFFFFF;
-		leftColumn.text.text = 'Par Time:<br/><font color="#CCCCCC">Platinum Time:</font><br/><font color="#FFDD22">Ultimate Time:</font><br/><font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">Time Passed:<br/>Clock Bonuses:</font>';
+		leftColumn.text.text = 'Par Time:<br/>${mission.game == "gold" ? '<font color="#FFCC00">Gold Time:</font>' : '<font color="#CCCCCC">Platinum Time:</font>'}<br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">Ultimate Time:</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">Time Passed:<br/>Clock Bonuses:</font>';
 		leftColumn.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
 		leftColumn.position = new Vector(25, 165);
 		leftColumn.extent = new Vector(293, 211);
@@ -274,7 +280,7 @@ class EndGameGui extends GuiControl {
 		var rightColumn = new GuiMLText(domcasual24, mlFontLoader);
 		rightColumn.text.lineSpacing = 5;
 		rightColumn.text.textColor = 0xFFFFFF;
-		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="#CCCCCC">${Util.formatTime(mission.goldTime)}</font><br/><font color="#FFDD22">${Util.formatTime(mission.ultimateTime)}</font><br/><font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}</font>';
+		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="${mission.game == "gold" ? '#FFCC00' : '#CCCCCC'}">${Util.formatTime(mission.goldTime)}</font><br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">${Util.formatTime(mission.ultimateTime)}</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}</font>';
 		rightColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
 		rightColumn.position = new Vector(235, 165);
 		rightColumn.extent = new Vector(293, 211);
@@ -296,9 +302,9 @@ class EndGameGui extends GuiControl {
 
 		var idx = scoreTimes.indexOf(timeState.gameplayClock);
 
-		if (Settings.progression[mission.difficultyIndex] == mission.index && qualified) {
-			Settings.progression[mission.difficultyIndex]++;
-		}
+		// if (Settings.progression[mission.difficultyIndex] == mission.index && qualified) {
+		// 	Settings.progression[mission.difficultyIndex]++;
+		// }
 		Settings.save();
 
 		if (idx <= 4) {
@@ -321,7 +327,7 @@ class EndGameGui extends GuiControl {
 						lineelems[i].text.text = '<font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font>';
 					} else {
 						if (scoreData[i].time < mission.goldTime) {
-							lineelems[i].text.text = '<font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font>';
+							lineelems[i].text.text = '<font color="${mission.game == "gold" ? '#FFCC00' : '#CCCCCC'}">${Util.formatTime(scoreData[i].time)}</font>';
 						} else {
 							lineelems[i].text.text = '${Util.formatTime(scoreData[i].time)}';
 						}

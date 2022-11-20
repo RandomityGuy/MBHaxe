@@ -115,7 +115,6 @@ class Settings {
 		powerupButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
-	public static var progression = [24, 24, 52];
 	public static var highscoreName = "";
 
 	public static var uiScale = 1.0;
@@ -160,7 +159,6 @@ class Settings {
 			options: optionsSettings,
 			controls: controlsSettings,
 			touch: touchSettings,
-			progression: progression,
 			highscoreName: highscoreName
 		};
 		var scoreCount = 0;
@@ -242,7 +240,6 @@ class Settings {
 			if (json.touch != null) {
 				touchSettings = json.touch;
 			}
-			progression = json.progression;
 			highscoreName = json.highscoreName;
 		} else {
 			save();

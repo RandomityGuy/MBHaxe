@@ -28,13 +28,14 @@ class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
 	static var currentCategoryStatic:String = "beginner";
 
+	var currentGame:String = "platinum";
 	var currentSelection:Int = 0;
 	var currentCategory:String = "beginner";
 	var currentList:Array<Mission>;
 
 	var setSelectedFunc:Int->Void;
 	var setScoreHover:Bool->Void;
-	var setCategoryFunc:(String, ?Bool) -> Void;
+	var setCategoryFunc:(String, String, ?Bool) -> Void;
 	var buttonHoldFunc:(dt:Float, mouseState:MouseState) -> Void;
 
 	var pmScoreButton:GuiButton;
@@ -52,9 +53,12 @@ class PlayMissionGui extends GuiImage {
 	public function new() {
 		MissionList.buildMissionList();
 
-		if (currentSelectionStatic == -1)
-			currentSelectionStatic = cast Math.min(MissionList.beginnerMissions.length - 1,
-				Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)]);
+		// if (currentSelectionStatic == -1)
+		// 	currentSelectionStatic = cast Math.min(MissionList.missionList["platinum"]["beginner"].length - 1,
+		// 		Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)]);
+		if (currentSelectionStatic == -1) {
+			currentSelectionStatic = MissionList.missionList["platinum"]["beginner"].length - 1;
+		}
 
 		currentSelection = PlayMissionGui.currentSelectionStatic;
 		currentCategory = PlayMissionGui.currentCategoryStatic;
@@ -428,7 +432,11 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyGoldAdvanced.ratio = -1 / 16;
 		pmDifficultyGoldAdvanced.setExtent(new Vector(120, 31));
 		pmDifficultyGoldAdvanced.txtCtrl.text.text = " Advanced";
-		pmDifficultyGoldAdvanced.disabled = true;
+		pmDifficultyGoldAdvanced.pressedAction = (e) -> {
+			currentList = MissionList.missionList["gold"]["advanced"];
+			currentCategory = "advanced";
+			setCategoryFunc("gold", "advanced");
+		}
 		pmDifficultyCtrl.addChild(pmDifficultyGoldAdvanced);
 
 		var pmDifficultyGoldBeginner = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
@@ -436,7 +444,11 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyGoldBeginner.ratio = -1 / 16;
 		pmDifficultyGoldBeginner.setExtent(new Vector(120, 31));
 		pmDifficultyGoldBeginner.txtCtrl.text.text = " Beginner";
-		pmDifficultyGoldBeginner.disabled = true;
+		pmDifficultyGoldBeginner.pressedAction = (e) -> {
+			currentList = MissionList.missionList["gold"]["beginner"];
+			currentCategory = "beginner";
+			setCategoryFunc("gold", "beginner");
+		}
 		pmDifficultyCtrl.addChild(pmDifficultyGoldBeginner);
 
 		var pmDifficultyGoldIntermediate = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
@@ -444,7 +456,11 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyGoldIntermediate.ratio = -1 / 16;
 		pmDifficultyGoldIntermediate.setExtent(new Vector(120, 31));
 		pmDifficultyGoldIntermediate.txtCtrl.text.text = " Intermediate";
-		pmDifficultyGoldIntermediate.disabled = true;
+		pmDifficultyGoldIntermediate.pressedAction = (e) -> {
+			currentList = MissionList.missionList["gold"]["intermediate"];
+			currentCategory = "intermediate";
+			setCategoryFunc("gold", "intermediate");
+		}
 		pmDifficultyCtrl.addChild(pmDifficultyGoldIntermediate);
 
 		var pmDifficultyPlatinumAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
@@ -453,9 +469,9 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyPlatinumAdvanced.setExtent(new Vector(120, 31));
 		pmDifficultyPlatinumAdvanced.txtCtrl.text.text = " Advanced";
 		pmDifficultyPlatinumAdvanced.pressedAction = (e) -> {
-			currentList = MissionList.advancedMissions;
+			currentList = MissionList.missionList["platinum"]["advanced"];
 			currentCategory = "advanced";
-			setCategoryFunc("advanced");
+			setCategoryFunc("platinum", "advanced");
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyPlatinumAdvanced);
 
@@ -465,9 +481,9 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyPlatinumBeginner.setExtent(new Vector(120, 31));
 		pmDifficultyPlatinumBeginner.txtCtrl.text.text = " Beginner";
 		pmDifficultyPlatinumBeginner.pressedAction = (e) -> {
-			currentList = MissionList.beginnerMissions;
+			currentList = MissionList.missionList["platinum"]["beginner"];
 			currentCategory = "beginner";
-			setCategoryFunc("beginner");
+			setCategoryFunc("platinum", "beginner");
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyPlatinumBeginner);
 
@@ -477,9 +493,9 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyPlatinumIntermediate.setExtent(new Vector(120, 31));
 		pmDifficultyPlatinumIntermediate.txtCtrl.text.text = " Intermediate";
 		pmDifficultyPlatinumIntermediate.pressedAction = (e) -> {
-			currentList = MissionList.intermediateMissions;
+			currentList = MissionList.missionList["platinum"]["intermediate"];
 			currentCategory = "intermediate";
-			setCategoryFunc("intermediate");
+			setCategoryFunc("platinum", "intermediate");
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyPlatinumIntermediate);
 
@@ -489,9 +505,9 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyPlatinumExpert.setExtent(new Vector(120, 31));
 		pmDifficultyPlatinumExpert.txtCtrl.text.text = " Expert";
 		pmDifficultyPlatinumExpert.pressedAction = (e) -> {
-			currentList = MissionList.expertMissions;
+			currentList = MissionList.missionList["platinum"]["expert"];
 			currentCategory = "expert";
-			setCategoryFunc("expert");
+			setCategoryFunc("platinum", "expert");
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyPlatinumExpert);
 
@@ -683,37 +699,17 @@ class PlayMissionGui extends GuiImage {
 			}
 		}
 
-		currentList = MissionList.beginnerMissions;
+		currentList = MissionList.missionList["platinum"]["beginner"];
 
-		setCategoryFunc = function(category:String, ?doRender:Bool = true) {
+		setCategoryFunc = function(game:String, category:String, ?doRender:Bool = true) {
 			if (doRender)
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
-			if (category == "beginner") {
-				currentList = MissionList.beginnerMissions;
-				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_beginner");
-			}
-			if (category == "intermediate") {
-				currentList = MissionList.intermediateMissions;
-				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_intermediate");
-			}
-			if (category == "advanced") {
-				currentList = MissionList.advancedMissions;
-				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_advanced");
-			}
-			if (category == "expert") {
-				currentList = MissionList.expertMissions;
-				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_expert");
-			}
-			if (category == "custom") {
-				currentList = MissionList.customMissions;
-				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_custom");
-			}
+
+			currentList = "category" == "custom" ? MissionList.customMissions : MissionList.missionList[game][category];
+			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
 			currentCategoryStatic = currentCategory;
-			if (currentCategory != "custom")
-				setSelectedFunc(cast Math.min(currentList.length - 1,
-					Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)]));
-			else
-				setSelectedFunc(currentList.length - 1);
+			currentGame = game;
+			setSelectedFunc(currentList.length - 1);
 			if (doRender)
 				this.render(cast(this.parent, Canvas).scene2d);
 		}
@@ -733,7 +729,10 @@ class PlayMissionGui extends GuiImage {
 				if (topScore.time < currentMission.ultimateTime) {
 					scoreColor = "#FFCC33";
 				} else if (topScore.time < currentMission.goldTime) {
-					scoreColor = "#CCCCCC";
+					if (currentMission.game == "gold")
+						scoreColor = "#FFFF00"
+					else
+						scoreColor = "#CCCCCC";
 				}
 
 				scoreTextTime = '<font color="${scoreColor}">${Util.formatTime(topScore.time)}</font>';
@@ -768,17 +767,17 @@ class PlayMissionGui extends GuiImage {
 			} else
 				pmNext.disabled = false;
 
-			if (currentCategory != "custom"
-				&& Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)] < currentSelection) {
-				noQualText.text.visible = true;
-				filt.matrix.identity();
-				filt.matrix.colorGain(0, 96 / 255);
-				pmPlay.disabled = true;
-			} else {
-				noQualText.text.visible = false;
-				filt.matrix.identity();
-				pmPlay.disabled = false;
-			}
+			// if (currentCategory != "custom"
+			// 	&& Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)] < currentSelection) {
+			// 	noQualText.text.visible = true;
+			// 	filt.matrix.identity();
+			// 	filt.matrix.colorGain(0, 96 / 255);
+			// 	pmPlay.disabled = true;
+			// } else {
+			noQualText.text.visible = false;
+			filt.matrix.identity();
+			pmPlay.disabled = false;
+			// }
 
 			if (currentMission == null) {
 				noQualText.text.visible = true;
@@ -818,7 +817,10 @@ class PlayMissionGui extends GuiImage {
 					if (score.time < currentMission.ultimateTime) {
 						scoreColor = "#FFCC33";
 					} else if (score.time < currentMission.goldTime) {
-						scoreColor = "#CCCCCC";
+						if (currentMission.game == "gold")
+							scoreColor = "#FFFF00";
+						else
+							scoreColor = "#CCCCCC";
 					}
 
 					var scoreTextTime = '<p align="right"><font color="${scoreColor}" face="MarkerFelt18">${Util.formatTime(score.time)}</font></p>';
@@ -838,10 +840,16 @@ class PlayMissionGui extends GuiImage {
 			pmParText.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
 			pmParTextRight.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
 			if (this.scoreShowing) {
-				pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Platinum: <font color="#CCCCCC">${Util.formatTime(currentMission.goldTime)}</font></font>';
-				pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
+				if (currentMission.game == "platinum") {
+					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Platinum: <font color="#CCCCCC">${Util.formatTime(currentMission.goldTime)}</font></font>';
+					pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
+				}
+				if (currentMission.game == "gold") {
+					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Qualify: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></font>';
+					pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Gold: <font color="#FFFF00">${Util.formatTime(currentMission.goldTime)}</font></font></p>';
+				}
 			} else {
-				pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">Par Time: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></p></font>';
+				pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">${currentMission.game == "gold" ? "Qualify" : "Par"} Time: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></p></font>';
 				pmParTextRight.text.text = '';
 			}
 
@@ -872,7 +880,7 @@ class PlayMissionGui extends GuiImage {
 			#end
 		}
 
-		setCategoryFunc(currentCategoryStatic, false);
+		setCategoryFunc(currentGame, currentCategoryStatic, false);
 	}
 
 	public override function render(scene2d:Scene) {

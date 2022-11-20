@@ -141,6 +141,22 @@ class ResourceLoader {
 				toloadfiles.push(file);
 			}
 		}
+		filestats = fileSystem.dir("missions_mbg");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
+		filestats = fileSystem.dir("missions_mbp");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
 		while (toloaddirs.length > 0) {
 			var nextdir = toloaddirs.pop();
 			for (file in fileSystem.dir(nextdir.path.substring(2))) {

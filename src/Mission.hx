@@ -29,6 +29,8 @@ class Mission {
 	public var id:Int;
 	public var isClaMission:Bool;
 
+	public var game:String;
+
 	var next:Mission;
 
 	var imageResources:Array<Resource<Image>> = [];
@@ -116,12 +118,14 @@ class Mission {
 		var fname = rawElementPath.substring(rawElementPath.lastIndexOf('/') + 1);
 		rawElementPath = rawElementPath.toLowerCase();
 		var path = StringTools.replace(rawElementPath.substring(rawElementPath.indexOf('data/')), "\"", "");
-		if (StringTools.contains(path, 'interiors_mbg/'))
-			path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
-		var dirpath = path.substring(0, path.lastIndexOf('/') + 1);
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		if (ResourceLoader.fileSystem.exists(path))
+			return path;
+		if (StringTools.contains(path, 'interiors_mbg/'))
+			path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
+		var dirpath = path.substring(0, path.lastIndexOf('/') + 1);
 		if (ResourceLoader.fileSystem.exists(path))
 			return path;
 		if (ResourceLoader.fileSystem.exists(dirpath + fname))
