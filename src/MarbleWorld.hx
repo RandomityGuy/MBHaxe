@@ -1481,11 +1481,21 @@ class MarbleWorld extends Scheduler {
 		if (this.currentCheckpoint.elem.fields.exists('add')) {
 			add = this.currentCheckpoint.elem.fields.get('add')[0];
 		}
+		var sub = "";
+		if (this.currentCheckpoint.elem.fields.exists('sub')) {
+			sub = this.currentCheckpoint.elem.fields.get('sub')[0];
+		}
 		if (this.currentCheckpointTrigger != null) {
 			offset = this.currentCheckpointTrigger.add;
 		}
-		if (add != "")
+		if (add != "") {
 			offset = MisParser.parseVector3(add);
+			offset.x = -offset.x;
+		}
+		if (sub != "") {
+			offset = MisParser.parseVector3(sub).multiply(-1);
+			offset.x = -offset.x;
+		}
 		var mpos = this.currentCheckpoint.obj.getAbsPos().getPosition().add(offset);
 		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
 		marble.velocity.load(new Vector(0, 0, 0));
