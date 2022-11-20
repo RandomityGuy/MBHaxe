@@ -1,5 +1,7 @@
 package gui;
 
+import src.ProfilerUI;
+import hxd.App;
 import hxd.res.Image;
 import hxd.Window;
 import h3d.shader.AlphaMult;
@@ -67,6 +69,8 @@ class PlayGui {
 	var resizeEv:Void->Void;
 
 	var _init:Bool;
+
+	var fpsMeter:GuiText;
 
 	public function dispose() {
 		if (_init) {
@@ -138,6 +142,8 @@ class PlayGui {
 		initCenterText();
 		initPowerupBox();
 		initTexts();
+		if (Settings.optionsSettings.frameRateVis)
+			initFPSMeter();
 
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl);
@@ -388,6 +394,30 @@ class PlayGui {
 		playGuiCtrl.addChild(alertTextCtrl);
 	}
 
+	function initFPSMeter() {
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
+		var fpsMeterCtrl = new GuiImage(ResourceLoader.getResource("data/ui/game/transparency-fps.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		fpsMeterCtrl.position = new Vector(544, 448);
+		fpsMeterCtrl.horizSizing = Left;
+		fpsMeterCtrl.vertSizing = Top;
+		fpsMeterCtrl.extent = new Vector(96, 32);
+
+		fpsMeter = new GuiText(bfont);
+		fpsMeter.horizSizing = Width;
+		fpsMeter.vertSizing = Height;
+		fpsMeter.position = new Vector(10, 3);
+		fpsMeter.text.textColor = 0;
+		fpsMeter.extent = new Vector(96, 32);
+		fpsMeterCtrl.addChild(fpsMeter);
+
+		playGuiCtrl.addChild(fpsMeterCtrl);
+	}
+
 	public function setHelpTextOpacity(value:Float) {
 		helpTextForeground.text.color.a = value;
 		helpTextBackground.text.color.a = value;
@@ -537,5 +567,9 @@ class PlayGui {
 		if (this.powerupImageObject != null)
 			this.powerupImageObject.update(timeState);
 		this.powerupImageScene.setElapsedTime(timeState.dt);
+
+		if (this.fpsMeter != null) {
+			this.fpsMeter.text.text = '${cast (ProfilerUI.instance.fps, Int)} fps';
+		}
 	}
 }
