@@ -290,10 +290,14 @@ class PlayGui {
 		// gemImageSceneTargetBitmap.blendMode = None;
 		// gemImageSceneTargetBitmap.addShader(new ColorKey());
 
+		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
+		var gemColor = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
+
 		gemImageObject = new DtsObject();
 		gemImageObject.dtsPath = "data/shapes/items/gem.dts";
 		gemImageObject.ambientRotate = true;
 		gemImageObject.showSequences = false;
+		gemImageObject.matNameOverride.set('base.gem', gemColor + ".gem");
 		// gemImageObject.matNameOverride.set("base.gem", "base.gem.");
 		gemImageObject.ambientSpinFactor /= -2;
 		// ["base.gem"] = color + ".gem";

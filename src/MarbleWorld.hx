@@ -129,6 +129,7 @@ class MarbleWorld extends Scheduler {
 	public var cursorLock:Bool = true;
 
 	var timeTravelSound:Channel;
+	var alarmSound:Channel;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -327,7 +328,9 @@ class MarbleWorld extends Scheduler {
 			"sound/spawn.wav",
 			"sound/ready.wav",
 			"sound/set.wav",
-			"sound/go.wav"
+			"sound/go.wav",
+			"sound/alarm.wav",
+			"sound/alarm_timeout.wav"
 		];
 		for (file in marblefiles) {
 			worker.loadFile(file);
@@ -367,6 +370,10 @@ class MarbleWorld extends Scheduler {
 		this.finishTime = null;
 		this.helpTextTimeState = Math.NEGATIVE_INFINITY;
 		this.alertTextTimeState = Math.NEGATIVE_INFINITY;
+		if (this.alarmSound != null) {
+			this.alarmSound.stop();
+			this.alarmSound = null;
+		}
 
 		this.currentCheckpoint = null;
 		this.currentCheckpointTrigger = null;
@@ -1067,16 +1074,36 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	function determineClockColor(timeToDisplay:Float) {
+		if (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0)
+			return 1;
+		if (timeToDisplay >= this.mission.qualifyTime)
+			return 2;
+
+		if (this.timeState.currentAttemptTime >= 3.5) {
+			// Create the flashing effect
+			var alarmStart = this.mission.computeAlarmStartTime();
+			var elapsed = timeToDisplay - alarmStart;
+			if (elapsed < 0)
+				return 0;
+			if (Math.floor(elapsed) % 2 == 0)
+				return 2;
+		}
+
+		return 0; // Default yellow
+	}
+
 	public function updateTimer(dt:Float) {
 		this.timeState.dt = dt;
-		var timerColor = 1;
+
+		var prevGameplayClock = this.timeState.gameplayClock;
+
 		if (!this.isWatching) {
 			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
 				this.bonusTime -= dt;
 				if (this.bonusTime < 0) {
 					this.timeState.gameplayClock -= this.bonusTime;
 					this.bonusTime = 0;
-					timerColor = 0;
 				}
 				if (timeTravelSound == null) {
 					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
@@ -1089,10 +1116,8 @@ class MarbleWorld extends Scheduler {
 				}
 				if (this.timeState.currentAttemptTime >= 3.5) {
 					this.timeState.gameplayClock += dt;
-					timerColor = 0;
 				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
 					this.timeState.gameplayClock += (this.timeState.currentAttemptTime + dt) - 3.5;
-					timerColor = 0;
 				}
 			}
 			this.timeState.currentAttemptTime += dt;
@@ -1113,9 +1138,31 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 		this.timeState.timeSinceLoad += dt;
+
+		// Handle alarm warnings (that the user is about to exceed the par time)
+		if (this.timeState.currentAttemptTime >= 3.5) {
+			var alarmStart = this.mission.computeAlarmStartTime();
+
+			if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
+				// Start the alarm
+				this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
+					null, true); // AudioManager.createAudioSource('alarm.wav');
+				this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.');
+			}
+			if (prevGameplayClock < this.mission.qualifyTime && this.timeState.gameplayClock >= this.mission.qualifyTime) {
+				// Stop the alarm
+				if (this.alarmSound != null) {
+					this.alarmSound.stop();
+					this.alarmSound = null;
+				}
+				this.displayHelp("The clock has passed the Par Time.");
+				AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
+			}
+		}
+
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
-		playGui.formatTimer(this.timeState.gameplayClock, timerColor);
+		playGui.formatTimer(this.timeState.gameplayClock, determineClockColor(this.timeState.gameplayClock));
 
 		if (!this.isWatching && this.isRecording)
 			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);

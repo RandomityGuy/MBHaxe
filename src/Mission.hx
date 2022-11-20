@@ -128,4 +128,17 @@ class Mission {
 			return dirpath + fname;
 		return "";
 	}
+
+	/** Computes the clock time in MBP when the user should be warned that they're about to exceed the par time. */
+	public function computeAlarmStartTime() {
+		var alarmStart = this.qualifyTime;
+		if (this.missionInfo.alarmstarttime != null)
+			alarmStart -= MisParser.parseNumber(this.missionInfo.alarmstarttime);
+		else {
+			alarmStart -= 15;
+		}
+		alarmStart = Math.max(0, alarmStart);
+
+		return alarmStart;
+	}
 }
