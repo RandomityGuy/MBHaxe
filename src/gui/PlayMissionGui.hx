@@ -619,11 +619,15 @@ class PlayMissionGui extends GuiImage {
 		var pmAchievements = new GuiButton(loadButtonImages("data/ui/play/achiev"));
 		pmAchievements.position = new Vector(150, 46);
 		pmAchievements.extent = new Vector(43, 43);
+		pmAchievements.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new AchievementsGui());
+		}
 		pmMorePopDlg.addChild(pmAchievements);
 
 		var pmEditorToggle = new GuiButton(loadButtonImages("data/ui/play/editor"));
 		pmEditorToggle.position = new Vector(198, 46);
 		pmEditorToggle.extent = new Vector(43, 43);
+		pmEditorToggle.disabled = true;
 		pmMorePopDlg.addChild(pmEditorToggle);
 
 		var pmRecord = new GuiButton(loadButtonImages("data/ui/play/replay"));
@@ -707,6 +711,14 @@ class PlayMissionGui extends GuiImage {
 
 			currentList = "category" == "custom" ? MissionList.customMissions : MissionList.missionList[game][category];
 			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
+			pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources).toTile();
+
+			if (game == "platinum") {
+				pmAchievements.disabled = false;
+			} else {
+				pmAchievements.disabled = true;
+			}
+
 			currentCategoryStatic = currentCategory;
 			currentGame = game;
 			setSelectedFunc(currentList.length - 1);
