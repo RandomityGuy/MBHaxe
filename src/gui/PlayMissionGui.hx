@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.filter.DropShadow;
 import src.Replay;
 import haxe.ds.Option;
 import hxd.Key;
@@ -21,6 +22,7 @@ import hxd.res.BitmapFont;
 import src.ResourceLoader;
 import h3d.Vector;
 import src.Util;
+import src.MarbleGame;
 
 class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
@@ -31,8 +33,14 @@ class PlayMissionGui extends GuiImage {
 	var currentList:Array<Mission>;
 
 	var setSelectedFunc:Int->Void;
+	var setScoreHover:Bool->Void;
 	var setCategoryFunc:(String, ?Bool) -> Void;
 	var buttonHoldFunc:(dt:Float, mouseState:MouseState) -> Void;
+
+	var pmScoreButton:GuiButton;
+	var scoreButtonHover:Bool = false;
+	var scoreButtonDirty:Bool = true;
+	var scoreShowing:Bool = false;
 
 	var buttonCooldown:Float = 0.5;
 	var maxButtonCooldown:Float = 0.5;
@@ -46,12 +54,12 @@ class PlayMissionGui extends GuiImage {
 
 		if (currentSelectionStatic == -1)
 			currentSelectionStatic = cast Math.min(MissionList.beginnerMissions.length - 1,
-				Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]);
+				Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)]);
 
 		currentSelection = PlayMissionGui.currentSelectionStatic;
 		currentCategory = PlayMissionGui.currentCategoryStatic;
 
-		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		var img = ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
 
 		this.horizSizing = Width;
@@ -59,12 +67,12 @@ class PlayMissionGui extends GuiImage {
 		this.extent = new Vector(640, 480);
 		this.position = new Vector(0, 0);
 
-		var localContainer = new GuiControl();
-		localContainer.horizSizing = Center;
-		localContainer.vertSizing = Center;
-		localContainer.position = new Vector(-1, 44);
-		localContainer.extent = new Vector(651, 392);
-		this.addChild(localContainer);
+		var container = new GuiControl();
+		container.horizSizing = Width;
+		container.vertSizing = Height;
+		container.extent = new Vector(640, 480);
+		container.position = new Vector(0, 0);
+		this.addChild(container);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -73,110 +81,6 @@ class PlayMissionGui extends GuiImage {
 			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed, disabled];
 		}
-
-		var tabAdvanced = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_adv.png", ResourceLoader.getImage, this.imageResources).toTile());
-		tabAdvanced.position = new Vector(410, 21);
-		tabAdvanced.extent = new Vector(166, 43);
-		tabAdvanced.pressedAction = (sender) -> {
-			currentList = MissionList.advancedMissions;
-			currentCategory = "advanced";
-			setCategoryFunc("advanced");
-		}
-		localContainer.addChild(tabAdvanced);
-
-		var tabIntermediate = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_inter.png", ResourceLoader.getImage, this.imageResources).toTile());
-		tabIntermediate.position = new Vector(213, 6);
-		tabIntermediate.extent = new Vector(205, 58);
-		tabIntermediate.pressedAction = (sender) -> {
-			currentList = MissionList.intermediateMissions;
-			currentCategory = "intermediate";
-			setCategoryFunc("intermediate");
-		}
-		localContainer.addChild(tabIntermediate);
-
-		var tabCustom = new GuiImage(ResourceLoader.getResource("data/ui/play/cust_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
-		tabCustom.position = new Vector(589, 91);
-		tabCustom.extent = new Vector(52, 198);
-		tabCustom.pressedAction = (sender) -> {
-			currentList = MissionList.customMissions;
-			currentCategory = "custom";
-			setCategoryFunc("custom");
-		}
-		localContainer.addChild(tabCustom);
-
-		var pmBox = new GuiImage(ResourceLoader.getResource("data/ui/play/playgui.png", ResourceLoader.getImage, this.imageResources).toTile());
-		pmBox.position = new Vector(0, 42);
-		pmBox.extent = new Vector(610, 351);
-		pmBox.horizSizing = Width;
-		pmBox.vertSizing = Height;
-		localContainer.addChild(pmBox);
-
-		var textWnd = new GuiImage(ResourceLoader.getResource("data/ui/play/text_window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		textWnd.horizSizing = Width;
-		textWnd.vertSizing = Height;
-		textWnd.position = new Vector(31, 29);
-		textWnd.extent = new Vector(276, 229);
-		pmBox.addChild(textWnd);
-
-		var temprev = new BitmapData(1, 1);
-		temprev.setPixel(0, 0, 0);
-		var tmpprevtile = Tile.fromBitmap(temprev);
-
-		var pmPreview = new GuiImage(tmpprevtile);
-		pmPreview.position = new Vector(312, 42);
-		pmPreview.extent = new Vector(258, 193);
-		pmBox.addChild(pmPreview);
-		var filt = new ColorMatrix(Matrix.I());
-		pmPreview.bmp.filter = filt;
-
-		var replayPlayButton = new GuiImage(ResourceLoader.getResource("data/ui/play/playback.png", ResourceLoader.getImage, this.imageResources).toTile());
-		replayPlayButton.position = new Vector(38, 315);
-		replayPlayButton.extent = new Vector(18, 18);
-		replayPlayButton.pressedAction = (sender) -> {
-			hxd.File.browse((replayToLoad) -> {
-				replayToLoad.load((replayData) -> {
-					var replay = new Replay("");
-					if (!replay.read(replayData)) {
-						cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
-						// Idk do something to notify the user here
-					} else {
-						var repmis = replay.mission;
-						#if js
-						repmis = StringTools.replace(repmis, "data/", "");
-						#end
-						var playMis = MissionList.missions.get(repmis);
-						if (playMis != null) {
-							cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);
-						} else {
-							cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
-						}
-					}
-				});
-			}, {
-				title: "Select replay file",
-				fileTypes: [
-					{
-						name: "Replay (*.mbr)",
-						extensions: ["mbr"]
-					}
-				],
-			});
-		};
-		pmBox.addChild(replayPlayButton);
-
-		var replayRecordButton = new GuiImage(ResourceLoader.getResource("data/ui/play/record.png", ResourceLoader.getImage, this.imageResources).toTile());
-		replayRecordButton.position = new Vector(56, 315);
-		replayRecordButton.extent = new Vector(18, 18);
-		replayRecordButton.pressedAction = (sender) -> {
-			cast(this.parent, Canvas).marbleGame.toRecord = true;
-			cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
-		};
-		pmBox.addChild(replayRecordButton);
-
-		var levelWnd = new GuiImage(ResourceLoader.getResource("data/ui/play/level_window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		levelWnd.position = new Vector();
-		levelWnd.extent = new Vector(258, 194);
-		pmPreview.addChild(levelWnd);
 
 		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
@@ -195,58 +99,560 @@ class PlayMissionGui extends GuiImage {
 		@:privateAccess arialb14b.loader = ResourceLoader.loader;
 		var arialBold14 = arialb14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
 
-		var levelBkgnd = new GuiText(domcasual24);
-		levelBkgnd.position = new Vector(5, 156);
-		levelBkgnd.extent = new Vector(254, 24);
-		levelBkgnd.text.textColor = 0x000000;
-		levelBkgnd.justify = Center;
-		levelBkgnd.text.text = "Beginner Level 3";
-		levelWnd.addChild(levelBkgnd);
+		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
+		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
+		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
+		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var markerFelt24 = markerFelt32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		var markerFelt20 = markerFelt32b.toSdfFont(cast 18.5 * Settings.uiScale, MultiChannel);
+		var markerFelt18 = markerFelt32b.toSdfFont(cast 17 * Settings.uiScale, MultiChannel);
+		var markerFelt26 = markerFelt32b.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
 
-		var levelFgnd = new GuiText(domcasual24);
-		levelFgnd.position = new Vector(4, 155);
-		levelFgnd.extent = new Vector(254, 24);
-		levelFgnd.text.textColor = 0xFFFFFF;
-		levelFgnd.justify = Center;
-		levelFgnd.text.text = "Beginner Level 3";
-		levelWnd.addChild(levelFgnd);
+		function mlFontLoader(text:String) {
+			switch (text) {
+				case "DomCasual24":
+					return domcasual24;
+				case "Arial14":
+					return arial14;
+				case "ArialBold14":
+					return arialBold14;
+				case "MarkerFelt32":
+					return markerFelt32;
+				case "MarkerFelt24":
+					return markerFelt24;
+				case "MarkerFelt18":
+					return markerFelt18;
+				case "MarkerFelt20":
+					return markerFelt20;
+				case "MarkerFelt26":
+					return markerFelt26;
+				default:
+					return null;
+			}
+		}
 
-		var noQualText = new GuiText(domcasual32);
-		noQualText.position = new Vector(0, 84);
-		noQualText.extent = new Vector(254, 32);
-		noQualText.text.textColor = 0xCCCCCC;
-		noQualText.justify = Center;
-		noQualText.text.text = "Not Qualified!";
-		levelWnd.addChild(noQualText);
+		var pmBox = new GuiImage(ResourceLoader.getResource('data/ui/play/window.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmBox.horizSizing = Center;
+		pmBox.vertSizing = Center;
+		pmBox.position = new Vector(-80. - 10);
+		pmBox.extent = new Vector(800, 500);
+		container.addChild(pmBox);
+
+		var pmDifficultyPopup:GuiControl = null;
+
+		var pmDifficulty = new GuiButton(loadButtonImages("data/ui/play/difficulty_beginner"));
+		pmDifficulty.position = new Vector(168, 98);
+		pmDifficulty.extent = new Vector(203, 43);
+		pmDifficulty.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(pmDifficultyPopup);
+		};
+		pmBox.addChild(pmDifficulty);
+
+		var pmDifficultyMarble = new GuiImage(ResourceLoader.getResource('data/ui/play/marble_platinum.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmDifficultyMarble.position = new Vector(151, 11);
+		pmDifficultyMarble.extent = new Vector(21, 22);
+		pmDifficulty.addChild(pmDifficultyMarble);
+
+		var pmMenuButton = new GuiButton(loadButtonImages("data/ui/play/menu"));
+		pmMenuButton.position = new Vector(119, 325);
+		pmMenuButton.extent = new Vector(92, 43);
+		pmMenuButton.pressedAction = (sender) -> {
+			cast(this.parent, Canvas).setContent(new MainMenuGui());
+		};
+		pmBox.addChild(pmMenuButton);
+
+		var pmMorePop:GuiControl = null;
+
+		var pmMore = new GuiButton(loadButtonImages("data/ui/play/more"));
+		pmMore.position = new Vector(217, 325);
+		pmMore.extent = new Vector(92, 43);
+		pmMore.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(pmMorePop);
+		};
+		pmBox.addChild(pmMore);
+
+		var pmSearch = new GuiButton(loadButtonImages("data/ui/play/search"));
+		pmSearch.position = new Vector(315, 325);
+		pmSearch.extent = new Vector(43, 43);
+		// todo search button functionality
+		pmBox.addChild(pmSearch);
+
+		var pmPrev = new GuiButton(loadButtonImages("data/ui/play/prev"));
+		pmPrev.position = new Vector(436, 325);
+		pmPrev.extent = new Vector(72, 43);
+		pmPrev.pressedAction = (sender) -> {
+			setSelectedFunc(currentSelection - 1);
+		}
+		pmBox.addChild(pmPrev);
 
 		var pmPlay = new GuiButton(loadButtonImages("data/ui/play/play"));
-		pmPlay.position = new Vector(391, 257);
-		pmPlay.extent = new Vector(121, 62);
+		pmPlay.position = new Vector(510, 325);
+		pmPlay.extent = new Vector(92, 43);
 		pmPlay.pressedAction = (sender) -> {
 			// Wacky hacks
 			currentList[currentSelection].index = currentSelection;
-			currentList[currentSelection].difficultyIndex = ["beginner", "intermediate", "advanced"].indexOf(currentCategory);
+			currentList[currentSelection].difficultyIndex = ["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory);
 			currentSelectionStatic = currentSelection;
 			currentCategoryStatic = currentCategory;
 			cast(this.parent, Canvas).marbleGame.playMission(currentList[currentSelection]);
 		}
 		pmBox.addChild(pmPlay);
 
-		var pmPrev = new GuiButton(loadButtonImages("data/ui/play/prev"));
-		pmPrev.position = new Vector(321, 260);
-		pmPrev.extent = new Vector(77, 58);
-		pmPrev.pressedAction = (sender) -> {
-			setSelectedFunc(currentSelection - 1);
-		}
-		pmBox.addChild(pmPrev);
-
 		var pmNext = new GuiButton(loadButtonImages("data/ui/play/next"));
-		pmNext.position = new Vector(507, 262);
-		pmNext.extent = new Vector(75, 60);
+		pmNext.position = new Vector(604, 325);
+		pmNext.extent = new Vector(72, 43);
 		pmNext.pressedAction = (sender) -> {
 			setSelectedFunc(currentSelection + 1);
 		}
 		pmBox.addChild(pmNext);
+
+		var temprev = new BitmapData(1, 1);
+		temprev.setPixel(0, 0, 0);
+		var tmpprevtile = Tile.fromBitmap(temprev);
+
+		var pmPreview = new GuiImage(tmpprevtile);
+		pmPreview.position = new Vector(429, 96);
+		pmPreview.extent = new Vector(256, 194);
+		var filt = new ColorMatrix(Matrix.I());
+		pmPreview.bmp.filter = filt;
+		pmBox.addChild(pmPreview);
+
+		var pmPreviewFrame = new GuiImage(ResourceLoader.getResource('data/ui/play/levelframe.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmPreviewFrame.position = new Vector(0, 0);
+		pmPreviewFrame.extent = new Vector(256, 194);
+		pmPreview.addChild(pmPreviewFrame);
+
+		var noQualText = new GuiText(markerFelt32);
+		noQualText.position = new Vector(0, 78);
+		noQualText.extent = new Vector(256, 14);
+		noQualText.text.textColor = 0xCCCCCC;
+		noQualText.justify = Center;
+		noQualText.text.text = "Not Qualified!";
+		pmPreview.addChild(noQualText);
+
+		var pmEgg = new GuiImage(ResourceLoader.getResource('data/ui/play/eggfound.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmEgg.position = new Vector(228, 157);
+		pmEgg.extent = new Vector(14, 21);
+		pmPreview.addChild(pmEgg);
+
+		var pmDescription = new GuiMLText(markerFelt18, mlFontLoader);
+		pmDescription.position = new Vector(110, 145);
+		pmDescription.extent = new Vector(320, 146);
+		pmBox.addChild(pmDescription);
+
+		var pmDescriptionRight = new GuiMLText(markerFelt18, mlFontLoader);
+		pmDescriptionRight.position = new Vector(110, 145);
+		pmDescriptionRight.extent = new Vector(320, 146);
+		pmBox.addChild(pmDescriptionRight);
+
+		var pmParText = new GuiMLText(markerFelt18, mlFontLoader);
+		pmParText.position = new Vector(110, 292);
+		pmParText.extent = new Vector(320, 14);
+		pmBox.addChild(pmParText);
+
+		var pmParTextRight = new GuiMLText(markerFelt18, mlFontLoader);
+		pmParTextRight.position = new Vector(110, 292);
+		pmParTextRight.extent = new Vector(320, 14);
+		pmBox.addChild(pmParTextRight);
+
+		var pmScoreText = new GuiMLText(markerFelt18, mlFontLoader);
+		pmScoreText.position = new Vector(441, 292);
+		pmScoreText.extent = new Vector(235, 14);
+		pmBox.addChild(pmScoreText);
+
+		pmScoreButton = new GuiButton([tmpprevtile, tmpprevtile, tmpprevtile]);
+		pmScoreButton.position = new Vector(438, 282);
+		pmScoreButton.extent = new Vector(240, 39);
+		pmScoreButton.pressedAction = (e) -> {
+			scoreShowing = !scoreShowing;
+			setSelectedFunc(currentSelection);
+		};
+		pmBox.addChild(pmScoreButton);
+
+		// Difficulty popup
+		pmDifficultyPopup = new GuiControl();
+		pmDifficultyPopup.horizSizing = Width;
+		pmDifficultyPopup.vertSizing = Height;
+		pmDifficultyPopup.position = new Vector(0, 0);
+		pmDifficultyPopup.extent = new Vector(640, 480);
+
+		var pmDifficultyPopupInner = new GuiImage(tmpprevtile);
+		pmDifficultyPopupInner.position = new Vector(-80, -10);
+		pmDifficultyPopupInner.extent = new Vector(800, 500);
+		pmDifficultyPopupInner.horizSizing = Center;
+		pmDifficultyPopupInner.vertSizing = Center;
+		pmDifficultyPopup.addChild(pmDifficultyPopupInner);
+		pmDifficultyPopupInner.pressedAction = (e) -> {
+			MarbleGame.canvas.popDialog(pmDifficultyPopup, false);
+		}
+
+		var pmDifficultyCtrl = new GuiImage(tmpprevtile);
+		pmDifficultyCtrl.position = new Vector(-19, 116);
+		pmDifficultyCtrl.extent = new Vector(583, 252);
+		pmDifficultyPopupInner.addChild(pmDifficultyCtrl);
+
+		var pmDifficultyBgCtrl = new GuiControl();
+		pmDifficultyBgCtrl.position = new Vector(0, 0);
+		pmDifficultyBgCtrl.extent = new Vector(583, 252);
+		pmDifficultyBgCtrl.horizSizing = Width;
+		pmDifficultyBgCtrl.vertSizing = Height;
+		pmDifficultyCtrl.addChild(pmDifficultyBgCtrl);
+
+		var pmDifficultyBgTL = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/tl.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgTL.position = new Vector(0, 0);
+		pmDifficultyBgTL.extent = new Vector(49, 45);
+		pmDifficultyBgTL.horizSizing = Right;
+		pmDifficultyBgTL.vertSizing = Bottom;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgTL);
+
+		var pmDifficultyBgTR = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/tr.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgTR.position = new Vector(534, 0);
+		pmDifficultyBgTR.extent = new Vector(49, 45);
+		pmDifficultyBgTR.horizSizing = Left;
+		pmDifficultyBgTR.vertSizing = Bottom;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgTR);
+
+		var pmDifficultyBgBL = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/bl.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgBL.position = new Vector(0, 190);
+		pmDifficultyBgBL.extent = new Vector(49, 62);
+		pmDifficultyBgBL.horizSizing = Right;
+		pmDifficultyBgBL.vertSizing = Top;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgBL);
+
+		var pmDifficultyBgBR = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/br.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgBR.position = new Vector(534, 190);
+		pmDifficultyBgBR.extent = new Vector(49, 62);
+		pmDifficultyBgBR.horizSizing = Left;
+		pmDifficultyBgBR.vertSizing = Top;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgBR);
+
+		var pmDifficultyBgL = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/l.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgL.position = new Vector(0, 45);
+		pmDifficultyBgL.extent = new Vector(49, 145);
+		pmDifficultyBgL.horizSizing = Right;
+		pmDifficultyBgL.vertSizing = Height;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgL);
+
+		var pmDifficultyBgR = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/r.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgR.position = new Vector(534, 45);
+		pmDifficultyBgR.extent = new Vector(49, 145);
+		pmDifficultyBgR.horizSizing = Left;
+		pmDifficultyBgR.vertSizing = Height;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgR);
+
+		var pmDifficultyBgB = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/b.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgB.position = new Vector(49, 190);
+		pmDifficultyBgB.extent = new Vector(485, 62);
+		pmDifficultyBgB.horizSizing = Width;
+		pmDifficultyBgB.vertSizing = Top;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgB);
+
+		var pmDifficultyBgC = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/c.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyBgC.position = new Vector(49, 45);
+		pmDifficultyBgC.extent = new Vector(485, 145);
+		pmDifficultyBgC.horizSizing = Width;
+		pmDifficultyBgC.vertSizing = Height;
+		pmDifficultyBgCtrl.addChild(pmDifficultyBgC);
+
+		var pmDifficultyTopC = new GuiControl();
+		pmDifficultyTopC.horizSizing = Width;
+		pmDifficultyTopC.vertSizing = Bottom;
+		pmDifficultyTopC.position = new Vector(49, 0);
+		pmDifficultyTopC.extent = new Vector(485, 45);
+		pmDifficultyBgCtrl.addChild(pmDifficultyTopC);
+
+		var pmDifficultyTopCT = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/t.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyTopCT.position = new Vector(0, 0);
+		pmDifficultyTopCT.extent = new Vector(231, 45);
+		pmDifficultyTopCT.horizSizing = Width;
+		pmDifficultyTopCT.vertSizing = Bottom;
+		pmDifficultyTopC.addChild(pmDifficultyTopCT);
+
+		var pmDifficultyTopCTab = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/tabt.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmDifficultyTopCTab.position = new Vector(231, 0);
+		pmDifficultyTopCTab.extent = new Vector(25, 45);
+		pmDifficultyTopCTab.horizSizing = Left;
+		pmDifficultyTopCTab.vertSizing = Bottom;
+		pmDifficultyTopC.addChild(pmDifficultyTopCTab);
+
+		var pmDifficultyTopC2 = new GuiControl();
+		pmDifficultyTopC2.horizSizing = Relative;
+		pmDifficultyTopC2.vertSizing = Bottom;
+		pmDifficultyTopC2.position = new Vector(293, 0);
+		pmDifficultyTopC2.extent = new Vector(243, 45);
+		pmDifficultyBgCtrl.addChild(pmDifficultyTopC2);
+
+		var pmDifficultyTopCT2 = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/t.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmDifficultyTopCT2.position = new Vector(13, 0);
+		pmDifficultyTopCT2.extent = new Vector(230, 45);
+		pmDifficultyTopCT2.horizSizing = Width;
+		pmDifficultyTopCT2.vertSizing = Bottom;
+		pmDifficultyTopC2.addChild(pmDifficultyTopCT2);
+
+		var pmDifficultyTopCTab2 = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/tabt.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmDifficultyTopCTab2.position = new Vector(-12, 0);
+		pmDifficultyTopCTab2.extent = new Vector(25, 45);
+		pmDifficultyTopCTab2.horizSizing = Right;
+		pmDifficultyTopCTab2.vertSizing = Bottom;
+		pmDifficultyTopC2.addChild(pmDifficultyTopCTab2);
+
+		var pmDifficultyUltraAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyUltraAdvanced.position = new Vector(277, 134);
+		pmDifficultyUltraAdvanced.ratio = -1 / 16;
+		pmDifficultyUltraAdvanced.setExtent(new Vector(120, 31));
+		pmDifficultyUltraAdvanced.txtCtrl.text.text = " Advanced";
+		pmDifficultyUltraAdvanced.disabled = true;
+		pmDifficultyCtrl.addChild(pmDifficultyUltraAdvanced);
+
+		var pmDifficultyUltraBeginner = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyUltraBeginner.position = new Vector(277, 75);
+		pmDifficultyUltraBeginner.ratio = -1 / 16;
+		pmDifficultyUltraBeginner.setExtent(new Vector(120, 31));
+		pmDifficultyUltraBeginner.txtCtrl.text.text = " Beginner";
+		pmDifficultyUltraBeginner.disabled = true;
+		pmDifficultyCtrl.addChild(pmDifficultyUltraBeginner);
+
+		var pmDifficultyUltraIntermediate = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyUltraIntermediate.position = new Vector(277, 104);
+		pmDifficultyUltraIntermediate.ratio = -1 / 16;
+		pmDifficultyUltraIntermediate.setExtent(new Vector(120, 31));
+		pmDifficultyUltraIntermediate.txtCtrl.text.text = " Intermediate";
+		pmDifficultyUltraIntermediate.disabled = true;
+		pmDifficultyCtrl.addChild(pmDifficultyUltraIntermediate);
+
+		var pmDifficultyGoldAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyGoldAdvanced.position = new Vector(37, 134);
+		pmDifficultyGoldAdvanced.ratio = -1 / 16;
+		pmDifficultyGoldAdvanced.setExtent(new Vector(120, 31));
+		pmDifficultyGoldAdvanced.txtCtrl.text.text = " Advanced";
+		pmDifficultyGoldAdvanced.disabled = true;
+		pmDifficultyCtrl.addChild(pmDifficultyGoldAdvanced);
+
+		var pmDifficultyGoldBeginner = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyGoldBeginner.position = new Vector(37, 75);
+		pmDifficultyGoldBeginner.ratio = -1 / 16;
+		pmDifficultyGoldBeginner.setExtent(new Vector(120, 31));
+		pmDifficultyGoldBeginner.txtCtrl.text.text = " Beginner";
+		pmDifficultyGoldBeginner.disabled = true;
+		pmDifficultyCtrl.addChild(pmDifficultyGoldBeginner);
+
+		var pmDifficultyGoldIntermediate = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyGoldIntermediate.position = new Vector(37, 104);
+		pmDifficultyGoldIntermediate.ratio = -1 / 16;
+		pmDifficultyGoldIntermediate.setExtent(new Vector(120, 31));
+		pmDifficultyGoldIntermediate.txtCtrl.text.text = " Intermediate";
+		pmDifficultyGoldIntermediate.disabled = true;
+		pmDifficultyCtrl.addChild(pmDifficultyGoldIntermediate);
+
+		var pmDifficultyPlatinumAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyPlatinumAdvanced.position = new Vector(157, 134);
+		pmDifficultyPlatinumAdvanced.ratio = -1 / 16;
+		pmDifficultyPlatinumAdvanced.setExtent(new Vector(120, 31));
+		pmDifficultyPlatinumAdvanced.txtCtrl.text.text = " Advanced";
+		pmDifficultyPlatinumAdvanced.pressedAction = (e) -> {
+			currentList = MissionList.advancedMissions;
+			currentCategory = "advanced";
+			setCategoryFunc("advanced");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyPlatinumAdvanced);
+
+		var pmDifficultyPlatinumBeginner = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyPlatinumBeginner.position = new Vector(157, 75);
+		pmDifficultyPlatinumBeginner.ratio = -1 / 16;
+		pmDifficultyPlatinumBeginner.setExtent(new Vector(120, 31));
+		pmDifficultyPlatinumBeginner.txtCtrl.text.text = " Beginner";
+		pmDifficultyPlatinumBeginner.pressedAction = (e) -> {
+			currentList = MissionList.beginnerMissions;
+			currentCategory = "beginner";
+			setCategoryFunc("beginner");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyPlatinumBeginner);
+
+		var pmDifficultyPlatinumIntermediate = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyPlatinumIntermediate.position = new Vector(157, 104);
+		pmDifficultyPlatinumIntermediate.ratio = -1 / 16;
+		pmDifficultyPlatinumIntermediate.setExtent(new Vector(120, 31));
+		pmDifficultyPlatinumIntermediate.txtCtrl.text.text = " Intermediate";
+		pmDifficultyPlatinumIntermediate.pressedAction = (e) -> {
+			currentList = MissionList.intermediateMissions;
+			currentCategory = "intermediate";
+			setCategoryFunc("intermediate");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyPlatinumIntermediate);
+
+		var pmDifficultyPlatinumExpert = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyPlatinumExpert.position = new Vector(157, 164);
+		pmDifficultyPlatinumExpert.ratio = -1 / 16;
+		pmDifficultyPlatinumExpert.setExtent(new Vector(120, 31));
+		pmDifficultyPlatinumExpert.txtCtrl.text.text = " Expert";
+		pmDifficultyPlatinumExpert.pressedAction = (e) -> {
+			currentList = MissionList.expertMissions;
+			currentCategory = "expert";
+			setCategoryFunc("expert");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyPlatinumExpert);
+
+		var pmGameUltra = new GuiText(markerFelt24);
+		pmGameUltra.text.text = " Ultra";
+		pmGameUltra.text.textColor = 0;
+		pmGameUltra.position = new Vector(277, 33);
+		pmGameUltra.extent = new Vector(120, 31);
+		pmDifficultyCtrl.addChild(pmGameUltra);
+
+		var pmGameUltraMarble = new GuiImage(ResourceLoader.getResource('data/ui/play/marble_ultra.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmGameUltraMarble.position = new Vector(95, 5);
+		pmGameUltraMarble.extent = new Vector(21, 22);
+		pmGameUltra.addChild(pmGameUltraMarble);
+
+		var pmGameGold = new GuiText(markerFelt24);
+		pmGameGold.text.text = " Gold Levels";
+		pmGameGold.text.textColor = 0;
+		pmGameGold.position = new Vector(37, 33);
+		pmGameGold.extent = new Vector(120, 31);
+		pmDifficultyCtrl.addChild(pmGameGold);
+
+		var pmGameGoldMarble = new GuiImage(ResourceLoader.getResource('data/ui/play/marble_gold.png', ResourceLoader.getImage, this.imageResources).toTile());
+		pmGameGoldMarble.position = new Vector(95, 5);
+		pmGameGoldMarble.extent = new Vector(21, 22);
+		pmGameGold.addChild(pmGameGoldMarble);
+
+		var pmGamePlatinum = new GuiText(markerFelt24);
+		pmGamePlatinum.text.text = " Platinum";
+		pmGamePlatinum.text.textColor = 0;
+		pmGamePlatinum.position = new Vector(157, 33);
+		pmGamePlatinum.extent = new Vector(120, 31);
+		pmDifficultyCtrl.addChild(pmGamePlatinum);
+
+		var pmGamePlatinumMarble = new GuiImage(ResourceLoader.getResource('data/ui/play/marble_platinum.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmGamePlatinumMarble.position = new Vector(95, 5);
+		pmGamePlatinumMarble.extent = new Vector(21, 22);
+		pmGamePlatinum.addChild(pmGamePlatinumMarble);
+
+		var pmGameCustom = new GuiText(markerFelt24);
+		pmGameCustom.horizSizing = Left;
+		pmGameCustom.text.text = " Custom Levels";
+		pmGameCustom.text.textColor = 0;
+		pmGameCustom.position = new Vector(395, 33);
+		pmGameCustom.extent = new Vector(120, 31);
+		pmDifficultyCtrl.addChild(pmGameCustom);
+
+		var pmDividerR = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/divider-orange-r.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmDividerR.horizSizing = Left;
+		pmDividerR.position = new Vector(530, 62);
+		pmDividerR.extent = new Vector(12, 12);
+		pmDifficultyCtrl.addChild(pmDividerR);
+
+		var pmDividerL = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/divider-orange-l.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmDividerL.horizSizing = Right;
+		pmDividerL.position = new Vector(39, 62);
+		pmDividerL.extent = new Vector(12, 12);
+		pmDifficultyCtrl.addChild(pmDividerL);
+
+		var pmDividerC = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/divider-orange-c.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		pmDividerC.horizSizing = Width;
+		pmDividerC.position = new Vector(51, 62);
+		pmDividerC.extent = new Vector(479, 12);
+		pmDifficultyCtrl.addChild(pmDividerC);
+
+		pmMorePop = new GuiControl();
+		pmMorePop.horizSizing = Width;
+		pmMorePop.vertSizing = Height;
+		pmMorePop.position = new Vector(0, 0);
+		pmMorePop.extent = new Vector(640, 480);
+
+		var pmMorePopInner = new GuiImage(tmpprevtile);
+		pmMorePopInner.position = new Vector(0, 0);
+		pmMorePopInner.extent = new Vector(640, 480);
+		pmMorePopInner.horizSizing = Center;
+		pmMorePopInner.vertSizing = Center;
+		pmMorePop.addChild(pmMorePopInner);
+		pmMorePopInner.pressedAction = (e) -> {
+			MarbleGame.canvas.popDialog(pmMorePop, false);
+		}
+
+		var pmMorePopCtrl = new GuiControl();
+		pmMorePopCtrl.horizSizing = Center;
+		pmMorePopCtrl.vertSizing = Center;
+		pmMorePopCtrl.position = new Vector(-80, -10);
+		pmMorePopCtrl.extent = new Vector(800, 500);
+		pmMorePop.addChild(pmMorePopCtrl);
+
+		var pmMorePopDlg = new GuiButton(loadButtonImages("data/ui/play/moremenu"));
+		pmMorePopDlg.position = new Vector(92, 204);
+		pmMorePopDlg.extent = new Vector(338, 146);
+		pmMorePopCtrl.addChild(pmMorePopDlg);
+
+		var pmMarbleSelect = new GuiButton(loadButtonImages("data/ui/play/marble"));
+		pmMarbleSelect.position = new Vector(50, 46);
+		pmMarbleSelect.extent = new Vector(43, 43);
+		pmMorePopDlg.addChild(pmMarbleSelect);
+
+		var pmStats = new GuiButton(loadButtonImages("data/ui/play/statistics"));
+		pmStats.position = new Vector(101, 46);
+		pmStats.extent = new Vector(43, 43);
+		pmMorePopDlg.addChild(pmStats);
+
+		var pmAchievements = new GuiButton(loadButtonImages("data/ui/play/achiev"));
+		pmAchievements.position = new Vector(150, 46);
+		pmAchievements.extent = new Vector(43, 43);
+		pmMorePopDlg.addChild(pmAchievements);
+
+		var pmEditorToggle = new GuiButton(loadButtonImages("data/ui/play/editor"));
+		pmEditorToggle.position = new Vector(198, 46);
+		pmEditorToggle.extent = new Vector(43, 43);
+		pmMorePopDlg.addChild(pmEditorToggle);
+
+		var pmRecord = new GuiButton(loadButtonImages("data/ui/play/replay"));
+		pmRecord.position = new Vector(247, 46);
+		pmRecord.extent = new Vector(43, 43);
+		pmRecord.pressedAction = (sender) -> {
+			cast(this.parent, Canvas).marbleGame.toRecord = true;
+			cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
+		};
+		pmMorePopDlg.addChild(pmRecord);
+
+		// var replayPlayButton = new GuiImage(ResourceLoader.getResource("data/ui/play/playback.png", ResourceLoader.getImage, this.imageResources).toTile());
+		// replayPlayButton.position = new Vector(38, 315);
+		// replayPlayButton.extent = new Vector(18, 18);
+		// replayPlayButton.pressedAction = (sender) -> {
+		// 	hxd.File.browse((replayToLoad) -> {
+		// 		replayToLoad.load((replayData) -> {
+		// 			var replay = new Replay("");
+		// 			if (!replay.read(replayData)) {
+		// 				cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+		// 				// Idk do something to notify the user here
+		// 			} else {
+		// 				var repmis = replay.mission;
+		// 				#if js
+		// 				repmis = StringTools.replace(repmis, "data/", "");
+		// 				#end
+		// 				var playMis = MissionList.missions.get(repmis);
+		// 				if (playMis != null) {
+		// 					cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);
+		// 				} else {
+		// 					cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+		// 				}
+		// 			}
+		// 		});
+		// 	}, {
+		// 		title: "Select replay file",
+		// 		fileTypes: [
+		// 			{
+		// 				name: "Replay (*.mbr)",
+		// 				extensions: ["mbr"]
+		// 			}
+		// 		],
+		// 	});
+		// };
+		// pmBox.addChild(replayPlayButton);
 
 		buttonHoldFunc = (dt:Float, mouseState:MouseState) -> {
 			var prevBox = pmPrev.getRenderRectangle();
@@ -277,164 +683,68 @@ class PlayMissionGui extends GuiImage {
 			}
 		}
 
-		var pmBack = new GuiButton(loadButtonImages("data/ui/play/back"));
-		pmBack.position = new Vector(102, 260);
-		pmBack.extent = new Vector(79, 61);
-		pmBack.pressedAction = (sender) -> {
-			cast(this.parent, Canvas).setContent(new MainMenuGui());
-		};
-		pmBox.addChild(pmBack);
-
-		var transparentbmp = new hxd.BitmapData(1, 1);
-		transparentbmp.setPixel(0, 0, 0);
-		var transparentTile = Tile.fromBitmap(transparentbmp);
-
-		var skipButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
-		skipButton.horizSizing = Left;
-		skipButton.vertSizing = Top;
-		skipButton.position = new Vector(625, 465);
-		skipButton.extent = new Vector(18, 19);
-		skipButton.pressedAction = (sender) -> {
-			var currentDifficulty = ["beginner", "intermediate", "advanced"].indexOf(currentCategory);
-			if (currentDifficulty == -1)
-				return;
-			var currentProgression = Settings.progression[currentDifficulty];
-			if (currentProgression + 1 == currentSelection) {
-				Settings.progression[currentDifficulty]++;
-			}
-			setSelectedFunc(currentSelection);
-		};
-		this.addChild(skipButton);
-
-		function mlFontLoader(text:String) {
-			switch (text) {
-				case "DomCasual24":
-					return domcasual24;
-				case "Arial14":
-					return arial14;
-				case "ArialBold14":
-					return arialBold14;
-				default:
-					return null;
-			}
-		}
-
-		var pmDescription = new GuiMLText(arial14, mlFontLoader);
-		pmDescription.position = new Vector(61, 52);
-		pmDescription.extent = new Vector(215, 174);
-		pmDescription.text.textColor = 0x000000;
-		// We're gonna use Â to align shit lmao, its too hacky i know
-		var descText = '<font face="DomCasual24" color="#000000">Learn The Super Speed </font><br/><br/>' + 'ÂTest Align';
-		descText += '<br/><br/><font face="DomCasual24">Best Times:</font><br/>';
-		for (i in 0...3) {
-			descText += '<br/>ÂÂ<font face="ArialBold14">${i + 1}. Nardo Polo</font>';
-		}
-		pmDescription.text.text = descText;
-		pmBox.addChild(pmDescription);
-
-		// Oh god this is yet another hack cause I cant do that tab thing torque does so thats bruh
-		var pmDescriptionOther = new GuiMLText(arial14, mlFontLoader);
-		pmDescriptionOther.position = new Vector(61, 52);
-		pmDescriptionOther.extent = new Vector(215, 174);
-		pmDescriptionOther.text.textColor = 0x000000;
-		var descText2 = '<br/><br/>' + '<font opacity="0">ÂTest Align</font>';
-		descText2 += '<br/><br/><br/>';
-		for (i in 0...3) {
-			descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">99:59.999</font>';
-		}
-		pmDescriptionOther.text.text = descText2;
-		pmBox.addChild(pmDescriptionOther);
-
-		var tabBeginner = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_begin.png", ResourceLoader.getImage, this.imageResources).toTile());
-		tabBeginner.position = new Vector(29, 2);
-		tabBeginner.extent = new Vector(184, 55);
-		tabBeginner.pressedAction = (sender) -> {
-			currentList = MissionList.beginnerMissions;
-			currentCategory = "beginner";
-			setSelectedFunc(cast Math.min(Settings.progression[0], currentList.length - 1));
-			setCategoryFunc("beginner");
-		}
-		localContainer.addChild(tabBeginner);
-
 		currentList = MissionList.beginnerMissions;
 
 		setCategoryFunc = function(category:String, ?doRender:Bool = true) {
-			localContainer.removeChild(tabBeginner);
-			localContainer.removeChild(tabIntermediate);
-			localContainer.removeChild(tabAdvanced);
-			localContainer.removeChild(tabCustom);
-			localContainer.removeChild(pmBox);
 			if (doRender)
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
 			if (category == "beginner") {
-				localContainer.addChild(tabIntermediate);
-				localContainer.addChild(tabAdvanced);
-				localContainer.addChild(tabCustom);
-				localContainer.addChild(pmBox);
-				localContainer.addChild(tabBeginner);
 				currentList = MissionList.beginnerMissions;
+				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_beginner");
 			}
 			if (category == "intermediate") {
-				localContainer.addChild(tabBeginner);
-				localContainer.addChild(tabAdvanced);
-				localContainer.addChild(tabCustom);
-				localContainer.addChild(pmBox);
-				localContainer.addChild(tabIntermediate);
 				currentList = MissionList.intermediateMissions;
+				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_intermediate");
 			}
 			if (category == "advanced") {
-				localContainer.addChild(tabBeginner);
-				localContainer.addChild(tabIntermediate);
-				localContainer.addChild(tabCustom);
-				localContainer.addChild(pmBox);
-				localContainer.addChild(tabAdvanced);
 				currentList = MissionList.advancedMissions;
+				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_advanced");
+			}
+			if (category == "expert") {
+				currentList = MissionList.expertMissions;
+				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_expert");
 			}
 			if (category == "custom") {
-				localContainer.addChild(tabBeginner);
-				localContainer.addChild(tabIntermediate);
-				localContainer.addChild(tabAdvanced);
-				localContainer.addChild(pmBox);
-				localContainer.addChild(tabCustom);
 				currentList = MissionList.customMissions;
+				@:privateAccess pmDifficulty.anim.frames = loadButtonImages("data/ui/play/difficulty_custom");
 			}
 			currentCategoryStatic = currentCategory;
 			if (currentCategory != "custom")
 				setSelectedFunc(cast Math.min(currentList.length - 1,
-					Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
+					Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)]));
 			else
 				setSelectedFunc(currentList.length - 1);
 			if (doRender)
 				this.render(cast(this.parent, Canvas).scene2d);
 		}
 
-		function splitTextWithPadding(textElement:Text, textStr:String) {
-			var maxWidth = textElement.maxWidth;
-			textElement.maxWidth = null;
-			var splits = [];
-			var currentText = "Â";
-			var textSplit = textStr.split(" ");
-			for (i in 0...textSplit.length) {
-				var prevText = currentText;
-				currentText += textSplit[i];
-				if (i != textSplit.length - 1)
-					currentText += " ";
-				textElement.text = currentText;
-				if (textElement.textWidth > maxWidth) {
-					splits.push(StringTools.trim(prevText));
-					currentText = "Â" + textSplit[i];
-					if (i != textSplit.length - 1)
-						currentText += " ";
-				}
-			}
-			textElement.maxWidth = maxWidth;
-			splits.push(currentText);
-			return splits.join('\n');
-		}
+		setScoreHover = (isHover) -> {
+			var currentMission = currentList[currentSelection];
 
-		var goldBadge = ResourceLoader.getResource("data/ui/play/goldscore.png", ResourceLoader.getImage, this.imageResources).toTile();
-		goldBadge.dy = 2.5;
-		goldBadge.dx = 8;
+			pmScoreText.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+
+			var scoreTextTime = "";
+			var scoreData = Settings.getScores(currentMission.path);
+			if (scoreData.length == 0) {
+				scoreTextTime = '<font color="#FFFFFF">99:59.999</font>';
+			} else {
+				var topScore = scoreData[0];
+				var scoreColor = "#FFFFFF";
+				if (topScore.time < currentMission.ultimateTime) {
+					scoreColor = "#FFCC33";
+				} else if (topScore.time < currentMission.goldTime) {
+					scoreColor = "#CCCCCC";
+				}
+
+				scoreTextTime = '<font color="${scoreColor}">${Util.formatTime(topScore.time)}</font>';
+			}
+
+			if (isHover) {
+				pmScoreText.text.text = '<font color="#DDC1C1" face="MarkerFelt24"><p align="center">${this.scoreShowing ? "Hide" : "Show"} 5 Top Times</p></font>';
+			} else {
+				pmScoreText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">Best Time: ${scoreTextTime}</p></font>';
+			}
+		}
 
 		setSelectedFunc = function setSelected(index:Int) {
 			if (index > currentList.length - 1) {
@@ -459,7 +769,7 @@ class PlayMissionGui extends GuiImage {
 				pmNext.disabled = false;
 
 			if (currentCategory != "custom"
-				&& Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)] < currentSelection) {
+				&& Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)] < currentSelection) {
 				noQualText.text.visible = true;
 				filt.matrix.identity();
 				filt.matrix.colorGain(0, 96 / 255);
@@ -485,38 +795,57 @@ class PlayMissionGui extends GuiImage {
 				currentSelection = -1;
 			}
 
-			var scoreData:Array<Score> = Settings.getScores(currentMission.path);
-			while (scoreData.length < 3) {
-				scoreData.push({name: "Nardo Polo", time: 5999.999});
-			}
+			pmDescription.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			pmDescription.text.lineSpacing = -1;
 
-			var descText = '<font face="DomCasual24" color="#000000">${currentMission.title}</font><br/><br/>'
-				+ splitTextWithPadding(pmDescription.text, StringTools.htmlEscape(Util.unescape(currentMission.description)));
-			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
-				descText += '<font face="DomCasual24"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
-			}
-			descText += '<br/><br/><font face="DomCasual24">Best Times:</font><br/>';
-			for (i in 0...3) {
-				descText += '<br/>ÂÂ<font face="ArialBold14">${i + 1}. ${scoreData[i].name}</font>';
+			pmDescriptionRight.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			pmDescriptionRight.text.lineSpacing = -1;
+
+			var descText = '<font color="#FDFEFE" face="MarkerFelt26"><p align="center">#${currentList.indexOf(currentMission) + 1}: ${currentMission.title}</p></font>';
+
+			if (this.scoreShowing) {
+				var scoreData:Array<Score> = Settings.getScores(currentMission.path);
+				while (scoreData.length < 5) {
+					scoreData.push({name: "Matan W.", time: 5999.999});
+				}
+
+				var rightText = '<font color="#FDFEFE" face="MarkerFelt26"><br/></font><font color="#F4EFE3" face="MarkerFelt18"></font>';
+
+				for (i in 0...5) {
+					var score = scoreData[i];
+
+					var scoreColor = "#FFFFFF";
+					if (score.time < currentMission.ultimateTime) {
+						scoreColor = "#FFCC33";
+					} else if (score.time < currentMission.goldTime) {
+						scoreColor = "#CCCCCC";
+					}
+
+					var scoreTextTime = '<p align="right"><font color="${scoreColor}" face="MarkerFelt18">${Util.formatTime(score.time)}</font></p>';
+					rightText += scoreTextTime;
+
+					descText += '<font color="#F4E4CE" face="MarkerFelt18">${i + 1}. <font color="#FFFFFF">${score.name}</font></font><br/>';
+				}
+
+				pmDescriptionRight.text.text = rightText;
+			} else {
+				descText += '<font color="#F4EFE3" face="MarkerFelt18"><p align="center">Author: ${currentMission.artist}</p></font>';
+				descText += '<font color="#F4E4CE" face="MarkerFelt18">${currentMission.description}</font>';
+				pmDescriptionRight.text.text = '';
 			}
 			pmDescription.text.text = descText;
 
-			var descText2 = '<br/><br/>'
-				+
-				'<font opacity="0">${splitTextWithPadding(pmDescriptionOther.text, StringTools.htmlEscape(Util.unescape(currentMission.description)))}</font>';
-			descText2 += '<br/><br/>';
-			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
-				descText2 += '<font face="DomCasual24" opacity="0"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
+			pmParText.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			pmParTextRight.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			if (this.scoreShowing) {
+				pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Platinum: <font color="#CCCCCC">${Util.formatTime(currentMission.goldTime)}</font></font>';
+				pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
+			} else {
+				pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">Par Time: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></p></font>';
+				pmParTextRight.text.text = '';
 			}
-			descText2 += '<br/>';
-			for (i in 0...3) {
-				descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">${Util.formatTime(scoreData[i].time)}</font>';
-				if (scoreData[i].time < currentMission.goldTime) {
-					descText2 += '<img src="goldBadge.png"></img>';
-				}
-			}
-			pmDescriptionOther.text.text = descText2;
-			pmDescriptionOther.text.loadImage = (name) -> goldBadge;
+
+			setScoreHover(scoreButtonHover);
 
 			pmPreview.bmp.tile = tmpprevtile;
 			#if js
@@ -541,10 +870,6 @@ class PlayMissionGui extends GuiImage {
 				pmPreview.bmp.tile = prevImg;
 			}); // Shit be sync
 			#end
-
-			levelBkgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
-
-			levelFgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
 		}
 
 		setCategoryFunc(currentCategoryStatic, false);
@@ -564,5 +889,22 @@ class PlayMissionGui extends GuiImage {
 			setSelectedFunc(currentSelection - 1);
 		if (Key.isPressed(Key.RIGHT))
 			setSelectedFunc(currentSelection + 1);
+
+		if (scoreButtonDirty) {
+			setScoreHover(scoreButtonHover);
+			scoreButtonDirty = false;
+		}
+
+		if (pmScoreButton.getHitTestRect().inRect(mouseState.position)) {
+			if (!scoreButtonHover) {
+				scoreButtonDirty = true;
+			}
+			scoreButtonHover = true;
+		} else {
+			if (scoreButtonHover) {
+				scoreButtonDirty = true;
+			}
+			scoreButtonHover = false;
+		}
 	}
 }

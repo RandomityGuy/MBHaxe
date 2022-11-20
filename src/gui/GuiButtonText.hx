@@ -6,6 +6,8 @@ import h2d.Tile;
 class GuiButtonText extends GuiButton {
 	var txtCtrl:GuiText;
 
+	public var ratio = 0.25;
+
 	public function new(images:Array<Tile>, font:h2d.Font) {
 		super(images);
 		txtCtrl = new GuiText(font);
@@ -19,6 +21,6 @@ class GuiButtonText extends GuiButton {
 	public function setExtent(extent:Vector) {
 		this.extent = extent;
 		txtCtrl.extent = extent;
-		txtCtrl.position.y = 4 * extent.y / 16; // Weird ratio shit that makes it as centered as possible
+		txtCtrl.position.y = extent.y * ratio; // Weird ratio shit that makes it as centered as possible
 	}
 }

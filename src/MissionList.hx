@@ -52,7 +52,7 @@ class MissionList {
 		intermediateMissions = parseDifficulty("intermediate");
 		advancedMissions = parseDifficulty("advanced");
 		expertMissions = parseDifficulty("expert");
-		customMissions = parseDifficulty("expert");
+		customMissions = parseDifficulty("custom");
 
 		@:privateAccess beginnerMissions[beginnerMissions.length - 1].next = intermediateMissions[0];
 		@:privateAccess intermediateMissions[intermediateMissions.length - 1].next = advancedMissions[0];
