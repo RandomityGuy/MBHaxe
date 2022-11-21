@@ -1,5 +1,7 @@
 package src;
 
+import haxe.Json;
+import mis.MissionElement.MissionElementItem;
 import haxe.io.BytesBuffer;
 import h2d.Tile;
 import hxd.BitmapData;
@@ -28,8 +30,8 @@ class Mission {
 	public var difficultyIndex:Int;
 	public var id:Int;
 	public var isClaMission:Bool;
-
 	public var game:String;
+	public var hasEgg:Bool;
 
 	var next:Mission;
 
@@ -45,6 +47,24 @@ class Mission {
 		var misParser = new MisParser(ResourceLoader.fileSystem.get(this.path).getText());
 		var contents = misParser.parse();
 		root = contents.root;
+
+		function scanMission(simGroup:MissionElementSimGroup) {
+			for (element in simGroup.elements) {
+				if (this.hasEgg)
+					break;
+				if ([MissionElementType.Item].contains(element._type)) {
+					if (element._type == MissionElementType.Item) {
+						var so:MissionElementItem = cast element;
+						if (so.datablock.toLowerCase() == 'easteregg')
+							this.hasEgg = true;
+					}
+				} else if (element._type == MissionElementType.SimGroup && !this.hasEgg) {
+					scanMission(cast element);
+				}
+			}
+		};
+
+		scanMission(root); // Scan for egg
 	}
 
 	public function dispose() {
@@ -73,6 +93,35 @@ class Mission {
 		}
 		mission.type = missionInfo.type.toLowerCase();
 		mission.missionInfo = missionInfo;
+		return mission;
+	}
+
+	public function toJSON() {
+		return Json.stringify({
+			artist: this.artist,
+			description: this.description,
+			goldTime: this.goldTime,
+			ultimateTime: this.ultimateTime,
+			qualifyTime: this.qualifyTime,
+			hasEgg: this.hasEgg,
+			title: this.title,
+			type: this.type,
+			path: this.path,
+		});
+	}
+
+	public static function fromJSON(jsonData:String) {
+		var jdata = Json.parse(jsonData);
+		var mission = new Mission();
+		mission.artist = jdata.artist;
+		mission.description = jdata.description;
+		mission.goldTime = jdata.goldTime;
+		mission.ultimateTime = jdata.ultimateTime;
+		mission.qualifyTime = jdata.qualifyTime;
+		mission.hasEgg = jdata.hasEgg;
+		mission.title = jdata.title;
+		mission.type = jdata.type;
+		mission.path = jdata.path;
 		return mission;
 	}
 

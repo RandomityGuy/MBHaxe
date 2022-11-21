@@ -35,6 +35,10 @@ class MissionList {
 					var mInfo = misParser.parseMissionInfo();
 					var mission = Mission.fromMissionInfo(file.path, mInfo);
 					mission.game = game;
+					// do egg thing
+					if (StringTools.contains(file.getText().toLowerCase(), 'datablock = "easteregg"')) { // Ew
+						mission.hasEgg = true;
+					}
 					missions.set(file.path, mission);
 					difficultyMissions.push(mission);
 				}

@@ -126,6 +126,7 @@ class AchievementsGui extends GuiImage {
 
 		var totalPlatinums = 0;
 		var totalUltimates = 0;
+		var totalEggs = 0;
 
 		for (difficulty => missions in MissionList.missionList["platinum"]) {
 			completions.set(difficulty, missions.map(mis -> {
@@ -144,6 +145,13 @@ class AchievementsGui extends GuiImage {
 				var beatPlatinum = bestTime.time < mis.goldTime;
 				var beatUltimate = bestTime.time < mis.ultimateTime;
 				var beaten = beatPar || beatPlatinum || beatUltimate;
+
+				if (beatPlatinum)
+					totalPlatinums++;
+				if (beatUltimate)
+					totalUltimates++;
+				if (Settings.easterEggs.exists(mis.path))
+					totalEggs++;
 				return {
 					mission: mis,
 					beatPar: beatPar,
@@ -160,6 +168,8 @@ class AchievementsGui extends GuiImage {
 		var expertFinishAchiev = completions["expert"].filter(x -> !x.beatPar).length == 0;
 		var beatPlatinumAchiev = totalPlatinums == 120;
 		var beatUltimateAchiev = totalUltimates == 120;
+		var easterEggAny = totalEggs != 0;
+		var easterEggAll = totalEggs == 96;
 
 		if (beginnerFinishAchiev)
 			bmp1.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n1.png", ResourceLoader.getImage, this.imageResources).toTile();
@@ -173,5 +183,9 @@ class AchievementsGui extends GuiImage {
 			bmp5.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n6.png", ResourceLoader.getImage, this.imageResources).toTile();
 		if (beatUltimateAchiev)
 			bmp6.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n5.png", ResourceLoader.getImage, this.imageResources).toTile();
+		if (easterEggAny)
+			bmp7.bmp.tile = ResourceLoader.getResource("data/ui/achiev/1.png", ResourceLoader.getImage, this.imageResources).toTile();
+		if (easterEggAll)
+			bmp8.bmp.tile = ResourceLoader.getResource("data/ui/achiev/2.png", ResourceLoader.getImage, this.imageResources).toTile();
 	}
 }

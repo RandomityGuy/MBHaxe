@@ -779,6 +779,19 @@ class PlayMissionGui extends GuiImage {
 			} else
 				pmNext.disabled = false;
 
+			if (pmPreview.children.contains(pmEgg))
+				pmPreview.removeChild(pmEgg);
+			if (currentMission.hasEgg) {
+				if (Settings.easterEggs.exists(currentMission.path)) {
+					pmEgg.bmp.tile = ResourceLoader.getResource('data/ui/play/eggfound.png', ResourceLoader.getImage, this.imageResources).toTile();
+				} else {
+					pmEgg.bmp.tile = ResourceLoader.getResource('data/ui/play/eggnotfound.png', ResourceLoader.getImage, this.imageResources).toTile();
+				}
+
+				pmPreview.addChild(pmEgg);
+				pmEgg.render(MarbleGame.canvas.scene2d);
+			}
+
 			// if (currentCategory != "custom"
 			// 	&& Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)] < currentSelection) {
 			// 	noQualText.text.visible = true;

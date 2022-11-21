@@ -573,7 +573,7 @@ class PlayGui {
 		this.powerupImageScene.setElapsedTime(timeState.dt);
 
 		if (this.fpsMeter != null) {
-			this.fpsMeter.text.text = '${cast (ProfilerUI.instance.fps, Int)} fps';
+			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} fps';
 		}
 	}
 }
