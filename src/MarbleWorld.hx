@@ -183,7 +183,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function initLoading() {
-		this.loadingGui = new LoadingGui(this.mission.title);
+		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game);
 		MarbleGame.canvas.setContent(this.loadingGui);
 
 		function scanMission(simGroup:MissionElementSimGroup) {

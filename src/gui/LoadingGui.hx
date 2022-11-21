@@ -10,8 +10,8 @@ import src.Util;
 class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
 
-	public function new(missionName:String) {
-		var img = ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
+	public function new(missionName:String, game:String) {
+		var img = game == "platinum" ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;

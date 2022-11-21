@@ -27,6 +27,7 @@ import src.MarbleGame;
 class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
 	static var currentCategoryStatic:String = "beginner";
+	static var currentGameStatic:String = "platinum";
 
 	var currentGame:String = "platinum";
 	var currentSelection:Int = 0;
@@ -62,8 +63,9 @@ class PlayMissionGui extends GuiImage {
 
 		currentSelection = PlayMissionGui.currentSelectionStatic;
 		currentCategory = PlayMissionGui.currentCategoryStatic;
+		currentGame = PlayMissionGui.currentGameStatic;
 
-		var img = ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
+		var img = currentGame == "platinum" ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
 
 		this.horizSizing = Width;
@@ -723,6 +725,13 @@ class PlayMissionGui extends GuiImage {
 			}
 
 			currentCategoryStatic = currentCategory;
+
+			if (currentGame != game) {
+				this.bmp.tile = (game == "platinum" ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg'))
+					.resource.toTile();
+			}
+
+			currentGameStatic = game;
 			currentGame = game;
 			setSelectedFunc(currentList.length - 1);
 			if (doRender)
