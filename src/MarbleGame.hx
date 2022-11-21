@@ -16,6 +16,7 @@ import src.JSPlatform;
 import gui.Canvas;
 import src.Util;
 import src.ProfilerUI;
+import src.Settings;
 
 @:publicFields
 class MarbleGame {
@@ -220,6 +221,8 @@ class MarbleGame {
 		world.dispose();
 		world = null;
 		canvas.setContent(pmg);
+
+		Settings.save();
 	}
 
 	public function playMission(mission:Mission) {

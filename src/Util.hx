@@ -284,6 +284,28 @@ class Util {
 		return '${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
 	}
 
+	public static function formatTimeHours(time:Float) {
+		var et = time * 1000;
+
+		var hours = Math.floor(Math.floor(et / 1000) / 3600);
+		var minutes = Math.floor(Math.floor(et / 1000) / 60) - (hours * 60);
+		var seconds = Math.floor(et / 1000) - (minutes * 60) - (hours * 3600);
+		var hundredth = Math.floor((et % 1000) / 10);
+
+		var secondsOne = seconds % 10;
+		var secondsTen = Math.floor(seconds / 10);
+		var minutesOne = minutes % 10;
+		var minutesTen = Math.floor(minutes / 10);
+		var hoursOne = hours % 10;
+		var hoursTen = Math.floor(hours / 10);
+		var hundredthOne = hundredth % 10;
+		var hundredthTen = (hundredth - hundredthOne) / 10;
+		var thousandth = Math.floor(et % 10);
+
+		return
+			'${(hours > 0 ? (hoursTen > 0 ? '${hoursTen}' : '') +'${hoursOne}' + ':' : '')}${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
+	}
+
 	public static function getKeyForButton(button:Int) {
 		var keyName = Key.getKeyName(button);
 		if (keyName == "MouseLeft")

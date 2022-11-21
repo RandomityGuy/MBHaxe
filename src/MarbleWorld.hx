@@ -987,6 +987,16 @@ class MarbleWorld extends Scheduler {
 		if (Key.isPressed(Settings.controlsSettings.respawn)) {
 			this.respawnPressedTime = timeState.timeSinceLoad;
 			this.restart();
+			Settings.playStatistics.respawns++;
+			if (!Settings.levelStatistics.exists(mission.path)) {
+				Settings.levelStatistics.set(mission.path, {
+					oobs: 0,
+					respawns: 1,
+					totalTime: 0,
+				});
+			} else {
+				Settings.levelStatistics[mission.path].respawns++;
+			}
 			return;
 		}
 
@@ -1480,6 +1490,16 @@ class MarbleWorld extends Scheduler {
 		this.outOfBounds = true;
 		this.outOfBoundsTime = this.timeState.clone();
 		this.marble.camera.oob = true;
+		Settings.playStatistics.oobs++;
+		if (!Settings.levelStatistics.exists(mission.path)) {
+			Settings.levelStatistics.set(mission.path, {
+				oobs: 1,
+				respawns: 0,
+				totalTime: 0,
+			});
+		} else {
+			Settings.levelStatistics[mission.path].oobs++;
+		}
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
@@ -1636,6 +1656,18 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function dispose() {
+		// Gotta add the timesinceload to our stats
+		Settings.playStatistics.totalTime += this.timeState.timeSinceLoad;
+		if (!Settings.levelStatistics.exists(mission.path)) {
+			Settings.levelStatistics.set(mission.path, {
+				oobs: 0,
+				respawns: 0,
+				totalTime: this.timeState.timeSinceLoad,
+			});
+		} else {
+			Settings.levelStatistics[mission.path].totalTime += this.timeState.timeSinceLoad;
+		}
+
 		this.playGui.dispose();
 		scene.removeChildren();
 

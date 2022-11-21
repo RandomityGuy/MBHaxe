@@ -64,6 +64,12 @@ typedef TouchSettings = {
 	var buttonJoystickMultiplier:Float;
 }
 
+typedef PlayStatistics = {
+	var oobs:Int;
+	var respawns:Int;
+	var totalTime:Float;
+}
+
 class Settings {
 	public static var highScores:Map<String, Array<Score>> = [];
 
@@ -115,6 +121,15 @@ class Settings {
 		powerupButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
+
+	public static var playStatistics:PlayStatistics = {
+		oobs: 0,
+		respawns: 0,
+		totalTime: 0,
+	}
+
+	public static var levelStatistics:Map<String, PlayStatistics> = [];
+
 	public static var highscoreName = "";
 
 	public static var uiScale = 1.0;
@@ -159,15 +174,20 @@ class Settings {
 			options: optionsSettings,
 			controls: controlsSettings,
 			touch: touchSettings,
+			stats: playStatistics,
 			highscoreName: highscoreName
 		};
 		var scoreCount = 0;
 		var eggCount = 0;
+		var statCount = 0;
 		for (key => value in highScores) {
 			scoreCount++;
 		}
 		for (key => value in easterEggs) {
 			eggCount++;
+		}
+		for (key => value in levelStatistics) {
+			statCount++;
 		}
 		#if hl
 		if (scoreCount != 0)
@@ -178,6 +198,11 @@ class Settings {
 			outputData.easterEggs = easterEggs;
 		} else {
 			outputData.easterEggs = {};
+		}
+		if (statCount != 0) {
+			outputData.levelStatistics = levelStatistics;
+		} else {
+			outputData.levelStatistics = {};
 		}
 		#end
 		#if js
@@ -191,6 +216,11 @@ class Settings {
 			kvps.push([key, value]);
 		jobj = js.lib.Object.fromEntries(kvps);
 		outputData.easterEggs = jobj;
+		kvps = [];
+		for (key => value in levelStatistics)
+			kvps.push([key, value]);
+		jobj = js.lib.Object.fromEntries(kvps);
+		outputData.levelStatistics = jobj;
 		#end
 		var json = Json.stringify(outputData);
 		#if (hl && !android)
@@ -239,6 +269,15 @@ class Settings {
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
+			}
+			if (json.stats != null) {
+				playStatistics = json.stats;
+			}
+			if (json.levelStatistics != null) {
+				var levelStatData:DynamicAccess<PlayStatistics> = json.levelStatistics;
+				for (key => value in levelStatData) {
+					levelStatistics.set(key, value);
+				}
 			}
 			highscoreName = json.highscoreName;
 		} else {

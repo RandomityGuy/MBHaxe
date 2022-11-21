@@ -52,12 +52,10 @@ class Mission {
 			for (element in simGroup.elements) {
 				if (this.hasEgg)
 					break;
-				if ([MissionElementType.Item].contains(element._type)) {
-					if (element._type == MissionElementType.Item) {
-						var so:MissionElementItem = cast element;
-						if (so.datablock.toLowerCase() == 'easteregg')
-							this.hasEgg = true;
-					}
+				if (element._type == MissionElementType.Item) {
+					var so:MissionElementItem = cast element;
+					if (so.datablock.toLowerCase() == 'easteregg')
+						this.hasEgg = true;
 				} else if (element._type == MissionElementType.SimGroup && !this.hasEgg) {
 					scanMission(cast element);
 				}

@@ -3,11 +3,11 @@
 new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
-         name = "N\x91onTech";
+         name = "NeonTech";
          artist = "Phil and Matan";
          startHelpText = "A small course to test your skills.";
          type = "Advanced";
-         desc = "Progress along the \xFCber-styled, technical floors!";
+         desc = "Progress along the Uber-styled, technical floors!";
          level = "15";
          music = "Seaside Revisited.ogg";
          time = "60000";
