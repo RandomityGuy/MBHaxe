@@ -1,5 +1,6 @@
 package src;
 
+import gui.OOBInsultGui;
 import shapes.Checkpoint;
 import triggers.CheckpointTrigger;
 import shapes.EasterEgg;
@@ -1500,6 +1501,8 @@ class MarbleWorld extends Scheduler {
 		} else {
 			Settings.levelStatistics[mission.path].oobs++;
 		}
+		if (Settings.optionsSettings.oobInsults)
+			OOBInsultGui.OOBCheck();
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
