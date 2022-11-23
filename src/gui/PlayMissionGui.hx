@@ -61,7 +61,7 @@ class PlayMissionGui extends GuiImage {
 			currentSelectionStatic = MissionList.missionList["platinum"]["beginner"].length - 1;
 		}
 
-		currentSelection = PlayMissionGui.currentSelectionStatic;
+		// currentSelection = PlayMissionGui.currentSelectionStatic;
 		currentCategory = PlayMissionGui.currentCategoryStatic;
 		currentGame = PlayMissionGui.currentGameStatic;
 
@@ -181,7 +181,9 @@ class PlayMissionGui extends GuiImage {
 		var pmSearch = new GuiButton(loadButtonImages("data/ui/play/search"));
 		pmSearch.position = new Vector(315, 325);
 		pmSearch.extent = new Vector(43, 43);
-		// todo search button functionality
+		pmSearch.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new SearchGui(currentGame));
+		}
 		pmBox.addChild(pmSearch);
 
 		var pmPrev = new GuiButton(loadButtonImages("data/ui/play/prev"));
@@ -777,6 +779,8 @@ class PlayMissionGui extends GuiImage {
 				index = 0;
 			}
 
+			var selectionChanged = currentSelection != index;
+
 			currentSelection = index;
 			currentSelectionStatic = currentSelection;
 
@@ -892,29 +896,31 @@ class PlayMissionGui extends GuiImage {
 
 			setScoreHover(scoreButtonHover);
 
-			pmPreview.bmp.tile = tmpprevtile;
-			#if js
-			switch (previewTimeoutHandle) {
-				case None:
-					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
-						currentMission.getPreviewImage(prevImg -> {
-							pmPreview.bmp.tile = prevImg;
-						});
-					}, 75));
-				case Some(previewTimeoutHandle_id):
-					js.Browser.window.clearTimeout(previewTimeoutHandle_id);
-					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
-						currentMission.getPreviewImage(prevImg -> {
-							pmPreview.bmp.tile = prevImg;
-						});
-					}, 75));
+			if (selectionChanged) {
+				pmPreview.bmp.tile = tmpprevtile;
+				#if js
+				switch (previewTimeoutHandle) {
+					case None:
+						previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
+							currentMission.getPreviewImage(prevImg -> {
+								pmPreview.bmp.tile = prevImg;
+							});
+						}, 75));
+					case Some(previewTimeoutHandle_id):
+						js.Browser.window.clearTimeout(previewTimeoutHandle_id);
+						previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
+							currentMission.getPreviewImage(prevImg -> {
+								pmPreview.bmp.tile = prevImg;
+							});
+						}, 75));
+				}
+				#end
+				#if hl
+				currentMission.getPreviewImage(prevImg -> {
+					pmPreview.bmp.tile = prevImg;
+				}); // Shit be sync
+				#end
 			}
-			#end
-			#if hl
-			currentMission.getPreviewImage(prevImg -> {
-				pmPreview.bmp.tile = prevImg;
-			}); // Shit be sync
-			#end
 		}
 
 		setCategoryFunc(currentGame, currentCategoryStatic, false);

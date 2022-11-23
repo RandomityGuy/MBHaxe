@@ -80,6 +80,15 @@ class GuiButton extends GuiAnim {
 		}
 		if (buttonType == Radio) {
 			pressed = true;
+			// Unpress all the other radios
+			for (c in this.parent.children) {
+				if (c != this && c is GuiButton) {
+					var cb:GuiButton = cast c;
+					if (cb.buttonType == Radio) {
+						cb.pressed = false;
+					}
+				}
+			}
 		}
 	}
 

@@ -132,7 +132,7 @@ class OOBInsultGui extends GuiImage {
 			"Wow, you truly are bad, probably one of the worst Marble Blast players to ever live on this planet. Or you just keep failing to good runs. Are you sure you aren\'t playing an easy level while this message pops up? Whatever, those messages will now repeat themselves (with a few exceptions), but for now, please remember this:\n\n\nYOU suck!",
 			"SING WITH ME:\n\nForty nine thousand nine hundred and ninety nine times Out of Bounds, forty nine thousand nine hundred and ninety nine times Out of Bounds, knock a marble off the level, fifty thousand times Out of Bounds!",
 			"What\'s that in the sky? Is it a plane? Is it a bird? No! It\'s the marble! And it\'s way off the level!!! Congratulations on hitting 300,000 Out of Bounds mark. You may now suck more.",
-			"1,000,000 times Out of Bounds?!?! You seriously love this game, don\'t you? Well then, thanks for playing PlatinumQuest! Please keep this bad playing up and continue to go Out of Bounds. We\'ll just laugh at how bad you are. Also, this is the final message as from now on they\'re all repeats. Thank you for sucking at PlatinumQuest!",
+			"1,000,000 times Out of Bounds?!?! You seriously love this game, don\'t you? Well then, thanks for playing Marble Blast Platinum! Please keep this bad playing up and continue to go Out of Bounds. We\'ll just laugh at how bad you are. Also, this is the final message as from now on they\'re all repeats. Thank you for sucking at Marble Blast Platinum!",
 			"You have no life. This is official."
 		];
 

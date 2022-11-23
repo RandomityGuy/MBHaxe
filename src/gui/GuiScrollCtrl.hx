@@ -84,7 +84,7 @@ class GuiScrollCtrl extends GuiControl {
 	}
 
 	public override function render(scene2d:Scene) {
-		updateScrollVisual();
+		this.dirty = true;
 
 		if (scene2d.contains(scrollBarY))
 			scene2d.removeChild(scrollBarY);
@@ -95,11 +95,18 @@ class GuiScrollCtrl extends GuiControl {
 		scene2d.addChild(scrollBarY);
 		scene2d.addChild(clickInteractive);
 
+		updateScrollVisual();
+
 		super.render(scene2d);
 	}
 
 	public function updateScrollVisual() {
 		var renderRect = this.getRenderRectangle();
+
+		if (maxScrollY < renderRect.extent.y) {
+			scrollBarY.clear();
+			return;
+		}
 
 		var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / maxScrollY;
 

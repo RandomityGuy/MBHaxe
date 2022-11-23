@@ -15,10 +15,17 @@ class GuiTextInput extends GuiControl {
 	var text:TextInput;
 	var justify:Justification = Left;
 
+	var onTextChange:String->Void;
+
 	public function new(font:h2d.Font) {
 		super();
 		this.text = new TextInput(font);
 		this.text.textColor = 0;
+		this.text.onChange = () -> {
+			if (onTextChange != null) {
+				onTextChange(this.text.text);
+			}
+		};
 	}
 
 	public override function render(scene2d:Scene) {
