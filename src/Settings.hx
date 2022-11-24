@@ -34,6 +34,9 @@ typedef OptionsSettings = {
 	var frameRateVis:Bool;
 	var oobInsults:Bool;
 	var reflectiveMarble:Bool;
+	var marbleIndex:Int;
+	var marbleSkin:String;
+	var marbleModel:String;
 }
 
 typedef ControlsSettings = {
@@ -88,6 +91,9 @@ class Settings {
 		frameRateVis: true,
 		oobInsults: true,
 		reflectiveMarble: true,
+		marbleIndex: 0,
+		marbleSkin: "base",
+		marbleModel: "data/shapes/balls/ball-superball.dts",
 		vsync: #if js true #end
 		#if hl
 		false
@@ -175,7 +181,10 @@ class Settings {
 			controls: controlsSettings,
 			touch: touchSettings,
 			stats: playStatistics,
-			highscoreName: highscoreName
+			highscoreName: highscoreName,
+			marbleIndex: optionsSettings.marbleIndex,
+			marbleSkin: optionsSettings.marbleSkin,
+			marbleModel: optionsSettings.marbleModel,
 		};
 		var scoreCount = 0;
 		var eggCount = 0;

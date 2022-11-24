@@ -1,5 +1,6 @@
 package src;
 
+import dts.TSDrawPrimitive;
 import hxd.res.Sound;
 import h3d.col.Bounds;
 import src.TimeState;
@@ -563,38 +564,87 @@ class DtsObject extends GameObject {
 			indices: []
 		});
 
-		for (primitive in dtsMesh.primitives) {
-			var k = 0;
-			var geometrydata = materialGeometry[primitive.matIndex];
-
-			for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
-				var i1 = dtsMesh.indices[i];
-				var i2 = dtsMesh.indices[i + 1];
-				var i3 = dtsMesh.indices[i + 2];
-
-				if (k % 2 == 0) {
-					// Swap the first and last index to mainting correct winding order
+		var ab = new Vector();
+		var ac = new Vector();
+		function addTriangleFromIndices(i1:Int, i2:Int, i3:Int, materialIndex:Int) {
+			ab.set(vertices[i2].x - vertices[i1].x, vertices[i2].y - vertices[i1].y, vertices[i2].z - vertices[i1].z);
+			ac.set(vertices[i3].x - vertices[i1].x, vertices[i3].y - vertices[i1].y, vertices[i3].z - vertices[i1].z);
+			var normal = ab.cross(ac);
+			normal.normalize();
+			var dot1 = normal.dot(vertexNormals[i1]);
+			var dot2 = normal.dot(vertexNormals[i2]);
+			var dot3 = normal.dot(vertexNormals[i3]);
+			if (!StringTools.contains(this.dtsPath, 'helicopter.dts') && !StringTools.contains(this.dtsPath, 'tornado.dts'))
+				if (dot1 < 0 && dot2 < 0 && dot3 < 0) {
 					var temp = i1;
 					i1 = i3;
 					i3 = temp;
 				}
+			// ^ temp hardcoded fix
 
-				for (index in [i3, i2, i1]) {
-					var vertex = vertices[index];
-					geometrydata.vertices.push(new Vector(vertex.x, vertex.y, vertex.z));
+			var geometrydata = materialGeometry[materialIndex];
 
-					var uv = dtsMesh.uv[index];
-					geometrydata.uvs.push(new UV(uv.x, uv.y));
+			for (index in [i3, i2, i1]) {
+				var vertex = vertices[index];
+				geometrydata.vertices.push(new Vector(vertex.x, vertex.y, vertex.z));
 
-					var normal = vertexNormals[index];
-					geometrydata.normals.push(new Vector(normal.x, normal.y, normal.z));
+				var uv = dtsMesh.uv[index];
+				geometrydata.uvs.push(new UV(uv.x, uv.y));
+
+				var normal = vertexNormals[index];
+				geometrydata.normals.push(new Vector(normal.x, normal.y, normal.z));
+			}
+
+			geometrydata.indices.push(i1);
+			geometrydata.indices.push(i2);
+			geometrydata.indices.push(i3);
+		}
+
+		for (primitive in dtsMesh.primitives) {
+			var materialIndex = primitive.matIndex & TSDrawPrimitive.MaterialMask;
+			var drawType = primitive.matIndex & TSDrawPrimitive.TypeMask;
+			var geometrydata = materialGeometry[materialIndex];
+
+			if (drawType == TSDrawPrimitive.Triangles) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
+
+					addTriangleFromIndices(i1, i2, i3, materialIndex);
+
+					i += 3;
 				}
+			} else if (drawType == TSDrawPrimitive.Strip) {
+				var k = 0;
+				for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				geometrydata.indices.push(i1);
-				geometrydata.indices.push(i2);
-				geometrydata.indices.push(i3);
+					if (k % 2 == 0) {
+						// Swap the first and last index to mainting correct winding order
+						var temp = i1;
+						i1 = i3;
+						i3 = temp;
+					}
 
-				k++;
+					addTriangleFromIndices(i1, i2, i3, materialIndex);
+
+					k++;
+				}
+			} else if (drawType == TSDrawPrimitive.Fan) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements - 2) {
+					var i1 = dtsMesh.indices[primitive.firstElement];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
+
+					addTriangleFromIndices(i1, i2, i3, materialIndex);
+
+					i++;
+				}
 			}
 		}
 
@@ -918,18 +968,20 @@ class DtsObject extends GameObject {
 		if (!this.useInstancing) {
 			for (material in this.materials) {
 				if (this.currentOpacity != 1) {
-					// material.blendMode = BlendMode.Alpha;
-					// 	if (this.alphaShader == null) {
-					// 		this.alphaShader = new AlphaMult();
-					// 	}
-					// 	if (material.mainPass.getShader(AlphaMult) == null) {
-					// 		material.mainPass.addShader(this.alphaShader);
-					// 	}
-					// 	this.alphaShader.alpha = this.currentOpacity;
-					// } else {
-					// 	if (alphaShader != null) {
-					// 		alphaShader.alpha = this.currentOpacity;
-					// 	}
+					material.blendMode = BlendMode.Alpha;
+					if (this.alphaShader == null) {
+						this.alphaShader = new AlphaMult();
+					}
+					if (material.mainPass.getShader(AlphaMult) == null) {
+						material.mainPass.addShader(this.alphaShader);
+					}
+					this.alphaShader.alpha = this.currentOpacity;
+				} else {
+					if (alphaShader != null) {
+						material.blendMode = BlendMode.None;
+						alphaShader.alpha = this.currentOpacity;
+						material.mainPass.removeShader(alphaShader);
+					}
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package src;
 
+import h3d.mat.MaterialDatabase;
 import shaders.MarbleReflection;
 import shaders.CubemapRenderer;
 import h3d.shader.AlphaMult;
@@ -206,8 +207,6 @@ class Marble extends GameObject {
 		this.omega = new Vector();
 		this.camera = new CameraController(cast this);
 
-		this.collider = new SphereCollisionEntity(cast this);
-
 		this.bounceEmitterData = new ParticleData();
 		this.bounceEmitterData.identifier = "MarbleBounceParticle";
 		this.bounceEmitterData.texture = ResourceLoader.getResource("data/particles/star.png", ResourceLoader.getTexture, this.textureResources);
@@ -236,23 +235,50 @@ class Marble extends GameObject {
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.level = level;
 
-		var geom = Sphere.defaultUnitSphere();
-		geom.addUVs();
-		var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
-		var marbleMaterial = Material.create(marbleTexture);
-		marbleMaterial.shadows = false;
-		marbleMaterial.castShadows = true;
+		var marbleDts = new DtsObject();
+		marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
+		marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
+		marbleDts.showSequences = false;
+		marbleDts.useInstancing = false;
+		marbleDts.init(null, () -> {}); // SYNC
+		for (mat in marbleDts.materials) {
+			mat.castShadows = true;
+			mat.shadows = true;
+			mat.receiveShadows = false;
+			// mat.mainPass.culling = None;
+
+			if (Settings.optionsSettings.reflectiveMarble) {
+				this.cubemapRenderer = new CubemapRenderer(level.scene);
+				mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+			}
+		}
+
+		// Calculate radius according to marble model (egh)
+		var b = marbleDts.getBounds();
+		var avgRadius = (b.xSize + b.ySize + b.zSize) / 6;
+		this._radius = avgRadius;
+
+		this.collider = new SphereCollisionEntity(cast this);
+
+		this.addChild(marbleDts);
+
+		// var geom = Sphere.defaultUnitSphere();
+		// geom.addUVs();
+		// var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
+		// var marbleMaterial = Material.create(marbleTexture);
+		// marbleMaterial.shadows = false;
+		// marbleMaterial.castShadows = true;
 		// marbleMaterial.mainPass.removeShader(marbleMaterial.textureShader);
 		// var dtsShader = new DtsTexture();
 		// dtsShader.texture = marbleTexture;
 		// dtsShader.currentOpacity = 1;
 		// marbleMaterial.mainPass.addShader(dtsShader);
-		var obj = new Mesh(geom, marbleMaterial, this);
-		obj.scale(_radius);
-		if (Settings.optionsSettings.reflectiveMarble) {
-			this.cubemapRenderer = new CubemapRenderer(level.scene);
-			marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
-		}
+		// var obj = new Mesh(geom, marbleMaterial, this);
+		// obj.scale(_radius * 0.1);
+		// if (Settings.optionsSettings.reflectiveMarble) {
+		// 	this.cubemapRenderer = new CubemapRenderer(level.scene);
+		// 	marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+		// }
 
 		this.forcefield = new DtsObject();
 		this.forcefield.dtsPath = "data/shapes/images/glow_bounce.dts";
@@ -1486,20 +1512,13 @@ class Marble extends GameObject {
 			teleportFadeCompletion = Util.clamp(1 - (time.currentAttemptTime - this.teleportDisableTime) / 0.5, 0, 1);
 
 		if (teleportFadeCompletion > 0) {
-			var mesh:Mesh = cast this.children[0];
-			var shad:AlphaMult = mesh.material.mainPass.getShader(AlphaMult);
-			if (shad == null) {
-				shad = new AlphaMult();
-				mesh.material.mainPass.addShader(shad);
-				mesh.material.blendMode = Alpha;
-				this.teleporting = true;
-			}
-			shad.alpha = Util.lerp(1, 0.25, teleportFadeCompletion);
+			var ourDts:DtsObject = cast this.children[0];
+			ourDts.setOpacity(Util.lerp(1, 0.25, teleportFadeCompletion));
+			this.teleporting = true;
 		} else {
 			if (this.teleporting) {
-				var mesh:Mesh = cast this.children[0];
-				mesh.material.mainPass.removeShader(mesh.material.mainPass.getShader(AlphaMult));
-				mesh.material.blendMode = None;
+				var ourDts:DtsObject = cast this.children[0];
+				ourDts.setOpacity(1);
 				this.teleporting = false;
 			}
 		}

@@ -613,6 +613,9 @@ class PlayMissionGui extends GuiImage {
 		var pmMarbleSelect = new GuiButton(loadButtonImages("data/ui/play/marble"));
 		pmMarbleSelect.position = new Vector(50, 46);
 		pmMarbleSelect.extent = new Vector(43, 43);
+		pmMarbleSelect.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MarbleSelectGui());
+		}
 		pmMorePopDlg.addChild(pmMarbleSelect);
 
 		var pmStats = new GuiButton(loadButtonImages("data/ui/play/statistics"));

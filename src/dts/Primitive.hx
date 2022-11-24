@@ -14,7 +14,7 @@ class Primitive {
 		var p = new Primitive();
 		p.firstElement = reader.readU16();
 		p.numElements = reader.readU16();
-		p.matIndex = (reader.readU32() & 0x00ffffff);
+		p.matIndex = reader.readU32();
 		return p;
 	}
 }
