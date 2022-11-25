@@ -211,6 +211,10 @@ class ResourceLoader {
 				}
 			}
 		}
+		var teleportPad = fileSystem.get("interiors_mbp/teleportpad.dts");
+		var teleportTexture = fileSystem.get("interiors_mbp/repairbay.jpg");
+		toloadfiles.push(teleportPad); // Because its not in the shapes folder like wtf
+		toloadfiles.push(teleportTexture);
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
 			worker.addTaskParallel((fwd) -> file.load(fwd));

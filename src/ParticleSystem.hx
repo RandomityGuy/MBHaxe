@@ -1,5 +1,7 @@
 package src;
 
+import shaders.DtsTexture;
+import h3d.parts.Particles;
 import h3d.Matrix;
 import src.TimeState;
 import h3d.prim.UV;
@@ -18,6 +20,7 @@ import h3d.mat.Material;
 import h3d.Vector;
 import h3d.scene.MeshBatch;
 import h3d.scene.Mesh;
+import src.ResourceLoader;
 
 @:publicFields
 class ParticleData {
@@ -29,6 +32,8 @@ class ParticleData {
 
 @:publicFields
 class Particle {
+	public var part:h3d.parts.Particle;
+
 	var data:ParticleData;
 	var manager:ParticleManager;
 	var o:ParticleOptions;
@@ -54,6 +59,8 @@ class Particle {
 
 		this.lifeTime = this.o.lifetime + this.o.lifetimeVariance * (Math.random() * 2 - 1);
 		this.initialSpin = Util.lerp(this.o.spinRandomMin, this.o.spinRandomMax, Math.random());
+
+		this.part = new h3d.parts.Particle();
 	}
 
 	public function update(time:Float, dt:Float) {
@@ -135,6 +142,15 @@ class Particle {
 
 		// Adjust sizing
 		this.scale = Util.lerp(this.o.sizes[indexLow], this.o.sizes[indexHigh], t);
+
+		this.part.x = this.position.x;
+		this.part.y = this.position.y;
+		this.part.z = this.position.z;
+		this.part.r = this.color.r;
+		this.part.g = this.color.g;
+		this.part.b = this.color.b;
+		this.part.ratio = 1;
+		this.part.size = this.scale;
 	}
 }
 
@@ -270,11 +286,14 @@ class ParticleEmitter {
 }
 
 class ParticleManager {
-	var particlebatches:Array<ParticleBatch> = [];
-	var particlebatchMap:Map<String, Int> = [];
+	// var particlebatches:Array<ParticleBatch> = [];
+	// var particlebatchMap:Map<String, Int> = [];
 	var level:MarbleWorld;
 	var scene:Scene;
 	var currentTime:Float;
+
+	var particleGroups:Map<String, Particles> = [];
+	var particles:Array<Particle> = [];
 
 	var emitters:Array<ParticleEmitter> = [];
 
@@ -285,76 +304,36 @@ class ParticleManager {
 
 	public function update(currentTime:Float, dt:Float) {
 		this.currentTime = currentTime;
-		for (batch in particlebatches) {
-			for (instance in batch.instances)
-				instance.update(currentTime, dt);
+		for (particle in this.particles) {
+			particle.update(currentTime, dt);
 		}
 		this.tick(dt);
-		for (batch in particlebatches) {
-			var visibleinstances = batch.instances.filter(x -> scene.camera.frustum.hasPoint(x.position.toPoint()));
-			batch.meshBatch.begin(visibleinstances.length);
-			for (instance in visibleinstances) {
-				if (instance.currentAge != 0) {
-					batch.meshBatch.worldPosition = Matrix.T(instance.position.x, instance.position.y, instance.position.z);
-					var particleShader = batch.meshBatch.material.mainPass.getShader(Billboard);
-					particleShader.scale = instance.scale;
-					particleShader.rotation = instance.rotation;
-					particleShader.color = instance.color;
-					batch.meshBatch.material.blendMode = instance.o.blending;
-					batch.meshBatch.material.mainPass.depthWrite = false;
-					// batch.meshBatch.material.mainPass.setPassName("overlay");
-					// batch.meshBatch.material.color.load(instance.color);
-					batch.meshBatch.shadersChanged = true;
-					batch.meshBatch.emitInstance();
-				}
-			}
-		}
 	}
 
 	public function addParticle(particleData:ParticleData, particle:Particle) {
-		if (particlebatchMap.exists(particleData.identifier)) {
-			particlebatches[particlebatchMap.get(particleData.identifier)].instances.push(particle);
+		if (particleGroups.exists(particleData.identifier)) {
+			particleGroups[particleData.identifier].add(particle.part);
 		} else {
-			var pts = [
-				new Point(-0.5, -0.5, 0),
-				new Point(-0.5, 0.5, 0),
-				new Point(0.5, -0.5, 0),
-				new Point(0.5, 0.5)
-			];
-			var prim = new Polygon(pts);
-			prim.idx = new IndexBuffer();
-			prim.idx.push(0);
-			prim.idx.push(1);
-			prim.idx.push(2);
-			prim.idx.push(1);
-			prim.idx.push(3);
-			prim.idx.push(2);
-			prim.uvs = [new UV(0, 0), new UV(0, 1), new UV(1, 0), new UV(1, 1)];
-			prim.addNormals();
-			var mat = Material.create(particleData.texture);
-			// matshader.texture = mat.texture;
-			mat.mainPass.enableLights = false;
-			// mat.mainPass.setPassName("overlay");
-			// mat.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
-			mat.shadows = false;
-			mat.texture.wrap = Wrap.Repeat;
-			var billboardShader = new Billboard();
-			mat.mainPass.addShader(billboardShader);
-			var mb = new MeshBatch(prim, mat, this.scene);
-			var batch:ParticleBatch = {
-				instances: [particle],
-				meshBatch: mb
-			};
-			var curidx = particlebatches.length;
-			particlebatches.push(batch);
-			particlebatchMap.set(particleData.identifier, curidx);
+			var pGroup = new Particles(particle.data.texture, this.scene);
+			pGroup.hasColor = true;
+			pGroup.material.setDefaultProps("ui");
+			// var pdts = new DtsTexture(pGroup.material.texture);
+			// pdts.currentOpacity = 1;
+			pGroup.material.blendMode = particle.o.blending;
+			pGroup.material.mainPass.depthWrite = false;
+			// pGroup.material.mainPass.removeShader(pGroup.material.textureShader);
+			// pGroup.material.mainPass.addShader(pdts);
+			pGroup.add(particle.part);
+			particleGroups.set(particleData.identifier, pGroup);
 		}
+		this.particles.push(particle);
 	}
 
 	public function removeParticle(particleData:ParticleData, particle:Particle) {
-		if (particlebatchMap.exists(particleData.identifier)) {
-			particlebatches[particlebatchMap.get(particleData.identifier)].instances.remove(particle);
+		if (particleGroups.exists(particleData.identifier)) {
+			@:privateAccess particleGroups[particleData.identifier].kill(particle.part);
 		}
+		this.particles.remove(particle);
 	}
 
 	public function getTime() {
@@ -378,9 +357,10 @@ class ParticleManager {
 	}
 
 	public function removeEverything() {
-		for (particle in this.particlebatches) {
-			particle.instances = [];
+		for (ident => particles in this.particleGroups) {
+			particles.remove();
 		}
+		this.particleGroups = [];
 		for (emitter in this.emitters)
 			this.removeEmitter(emitter);
 	}

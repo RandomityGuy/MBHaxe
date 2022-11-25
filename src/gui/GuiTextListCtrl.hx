@@ -268,12 +268,17 @@ class GuiTextListCtrl extends GuiControl {
 
 	function redrawText() {
 		if (this.scrollable) {
+			#if hl
 			if (this._dirty) {
+			#end
 				textTexture.clear(0, 0);
-				for (txt in this.textObjs)
+				for (txt in this.textObjs) {
 					txt.drawTo(textTexture);
-				this._dirty = false;
+				}
+			#if hl
+			this._dirty = false;
 			}
+			#end
 		}
 	}
 

@@ -104,12 +104,16 @@ class GuiMLText extends GuiControl {
 
 	public override function renderEngine(engine:Engine) {
 		if (this.scrollable) {
+			#if hl
 			if (this._textContents != this.text.text || this._dirty) {
+			#end
 				textTexture.clear(0, 0);
 				text.drawTo(textTexture);
 				this._textContents = this.text.text;
-				this._dirty = false;
+			#if hl
+			this._dirty = false;
 			}
+			#end
 
 			super.renderEngine(engine);
 		}
