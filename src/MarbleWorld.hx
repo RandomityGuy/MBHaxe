@@ -239,7 +239,7 @@ class MarbleWorld extends Scheduler {
 		this._ready = true;
 		this.playGui.init(this.scene2d);
 		var musicFileName = 'data/sound/' + this.mission.missionInfo.music;
-		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources));
+		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
 		MarbleGame.canvas.clearContent();
 		this.endPad.generateCollider();
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);

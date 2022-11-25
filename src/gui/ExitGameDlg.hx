@@ -1,5 +1,6 @@
 package gui;
 
+import src.MarbleGame;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
@@ -61,5 +62,16 @@ class ExitGameDlg extends GuiControl {
 		dialogImg.addChild(restartButton);
 
 		this.addChild(dialogImg);
+
+		var jukeboxButton = new GuiButton(loadButtonImages("data/ui/jukebox/jb_pausemenu"));
+		jukeboxButton.vertSizing = Top;
+		jukeboxButton.horizSizing = Left;
+		jukeboxButton.position = new Vector(439, 403);
+		jukeboxButton.extent = new Vector(187, 65);
+		jukeboxButton.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new JukeboxDlg());
+		}
+
+		this.addChild(jukeboxButton);
 	}
 }
