@@ -376,6 +376,25 @@ class OptionsDlg extends GuiImage {
 		makeRemapOption("Respawn:", 278, Util.getKeyForButton2(Settings.controlsSettings.respawn), (key) -> Settings.controlsSettings.respawn = key,
 			hotkeysPanel, true);
 
+		if (Util.isTouchDevice()) {
+			var textObj = new GuiText(markerFelt32);
+			textObj.position = new Vector(5, 326);
+			textObj.extent = new Vector(212, 14);
+			textObj.text.text = "Touch Controls";
+			textObj.text.textColor = 0xFFFFFF;
+			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			hotkeysPanel.addChild(textObj);
+
+			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
+			remapBtn.position = new Vector(203, 323);
+			remapBtn.txtCtrl.text.text = "Edit";
+			remapBtn.setExtent(new Vector(152, 49));
+			remapBtn.pressedAction = (sender) -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			}
+			hotkeysPanel.addChild(remapBtn);
+		}
+
 		generalBtn.pressedAction = (e) -> {
 			if (currentTab != "general") {
 				currentTab = "general";

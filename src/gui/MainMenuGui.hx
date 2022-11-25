@@ -7,6 +7,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 import src.Util;
+import src.Replay;
 
 class MainMenuGui extends GuiImage {
 	public function new() {
@@ -86,7 +87,36 @@ class MainMenuGui extends GuiImage {
 		replButton.vertSizing = Top;
 		replButton.position = new Vector(552, 536);
 		replButton.extent = new Vector(191, 141);
-		replButton.pressedAction = (sender) -> {};
+		replButton.pressedAction = (sender) -> {
+			hxd.File.browse((replayToLoad) -> {
+				replayToLoad.load((replayData) -> {
+					var replay = new Replay("");
+					if (!replay.read(replayData)) {
+						cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+						// Idk do something to notify the user here
+					} else {
+						var repmis = replay.mission;
+						#if js
+						repmis = StringTools.replace(repmis, "data/", "");
+						#end
+						var playMis = MissionList.missions.get(repmis);
+						if (playMis != null) {
+							cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);
+						} else {
+							cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+						}
+					}
+				});
+			}, {
+				title: "Select replay file",
+				fileTypes: [
+					{
+						name: "Replay (*.mbr)",
+						extensions: ["mbr"]
+					}
+				],
+			});
+		};
 		mainMenuContent.addChild(replButton);
 
 		var helpButton = new GuiButton(loadButtonImages("data/ui/menu/help"));

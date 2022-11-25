@@ -1,5 +1,7 @@
 package gui;
 
+import h3d.Vector;
+import src.Settings;
 import gui.GuiControl.MouseState;
 import h2d.Interactive;
 import h2d.Scene;
@@ -27,6 +29,7 @@ class GuiScrollCtrl extends GuiControl {
 
 	var pressed:Bool = false;
 	var dirty:Bool = true;
+	var prevMousePos:Vector;
 
 	public function new(scrollBar:Tile) {
 		super();
@@ -155,6 +158,35 @@ class GuiScrollCtrl extends GuiControl {
 		}
 		if (MarbleGame.canvas.scene2d.contains(clickInteractive)) {
 			MarbleGame.canvas.scene2d.removeChild(clickInteractive); // Refresh "layer"
+		}
+	}
+
+	public override function onMousePress(mouseState:MouseState) {
+		if (Util.isTouchDevice()) {
+			this.pressed = true;
+			this.dirty = true;
+			this.updateScrollVisual();
+			this.prevMousePos = mouseState.position;
+		}
+	}
+
+	public override function onMouseRelease(mouseState:MouseState) {
+		if (Util.isTouchDevice()) {
+			this.pressed = false;
+			this.dirty = true;
+			this.updateScrollVisual();
+		}
+	}
+
+	public override function onMouseMove(mouseState:MouseState) {
+		if (Util.isTouchDevice()) {
+			super.onMouseMove(mouseState);
+			if (this.pressed) {
+				var dy = mouseState.position.y - this.prevMousePos.y;
+				this.scrollY -= dy;
+				this.prevMousePos = mouseState.position;
+				this.updateScrollVisual();
+			}
 		}
 	}
 

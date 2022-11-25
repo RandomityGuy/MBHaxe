@@ -222,6 +222,7 @@ class MarbleGame {
 		paused = false;
 		var pmg = new PlayMissionGui();
 		PlayMissionGui.currentSelectionStatic = world.mission.index;
+		PlayMissionGui.currentGameStatic = world.mission.game;
 		if (world.isRecording) {
 			world.saveReplay();
 		}

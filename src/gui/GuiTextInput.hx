@@ -66,7 +66,8 @@ class GuiTextInput extends GuiControl {
 
 		#if js
 		if (Util.isTouchDevice()) {
-			text.text = js.Browser.window.prompt("Enter your name", text.text);
+			text.text = js.Browser.window.prompt("Enter your input", text.text);
+			onTextChange(this.text.text);
 			var canvas = js.Browser.document.querySelector("#webgl");
 			// canvas.focus();
 			// js.Browser.document.documentElement.requestFullscreen();
