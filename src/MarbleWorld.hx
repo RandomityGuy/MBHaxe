@@ -1556,7 +1556,8 @@ class MarbleWorld extends Scheduler {
 			sub = this.currentCheckpoint.elem.fields.get('sub')[0];
 		}
 		if (this.currentCheckpointTrigger != null) {
-			offset = this.currentCheckpointTrigger.add;
+			if (this.currentCheckpointTrigger.add != null)
+				offset = this.currentCheckpointTrigger.add;
 		}
 		if (add != "") {
 			offset = MisParser.parseVector3(add);

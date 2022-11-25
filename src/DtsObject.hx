@@ -513,7 +513,7 @@ class DtsObject extends GameObject {
 			hs.normals = [];
 			hs.indices = [];
 
-			var material = this.dts.matNames[primitive.matIndex];
+			var material = this.dts.matNames[primitive.matIndex & TSDrawPrimitive.MaterialMask];
 			if (dtsMaterials.exists(material)) {
 				var data = dtsMaterials.get(material);
 				hs.friction = data.friction;

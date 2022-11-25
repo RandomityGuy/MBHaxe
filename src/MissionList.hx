@@ -45,6 +45,10 @@ class MissionList {
 			}
 			difficultyMissions.sort((a, b) -> Std.parseInt(a.missionInfo.level) - Std.parseInt(b.missionInfo.level));
 
+			for (i in 0...difficultyMissions.length) {
+				difficultyMissions[i].index = i;
+			}
+
 			for (i in 0...difficultyMissions.length - 1) {
 				@:privateAccess difficultyMissions[i].next = difficultyMissions[i + 1];
 			}
