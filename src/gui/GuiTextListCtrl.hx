@@ -88,6 +88,7 @@ class GuiTextListCtrl extends GuiControl {
 
 	public override function render(scene2d:Scene) {
 		var renderRect = this.getRenderRectangle();
+		var htr = this.getHitTestRect();
 
 		if (scene2d.contains(g))
 			scene2d.removeChild(g);
@@ -96,8 +97,6 @@ class GuiTextListCtrl extends GuiControl {
 
 		if (scrollable) {
 			this.flow = new Flow();
-
-			var htr = this.getHitTestRect();
 
 			this.flow.maxWidth = cast htr.extent.x;
 			this.flow.maxHeight = cast htr.extent.y;
@@ -134,7 +133,7 @@ class GuiTextListCtrl extends GuiControl {
 			}
 		}
 
-		redrawSelectionRect(renderRect);
+		redrawSelectionRect(htr);
 		super.render(scene2d);
 	}
 

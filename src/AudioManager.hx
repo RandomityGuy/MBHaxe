@@ -58,7 +58,7 @@ class AudioManager {
 
 	public static function playShell() {
 		AudioManager.manager.stopByName("music");
-		var sndres = ResourceLoader.getAudio("data/sound/pianoforte.ogg");
+		var sndres = ResourceLoader.getAudio("data/sound/music/Pianoforte.ogg");
 		if (sndres == null)
 			return;
 		sndres.acquire();

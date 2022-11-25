@@ -228,7 +228,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function loadMusic(onFinish:Void->Void) {
-		var musicFileName = 'sound/' + this.mission.missionInfo.music;
+		var musicFileName = 'sound/music/' + this.mission.missionInfo.music;
 		ResourceLoader.load(musicFileName).entry.load(onFinish);
 	}
 
@@ -238,7 +238,7 @@ class MarbleWorld extends Scheduler {
 
 		this._ready = true;
 		this.playGui.init(this.scene2d);
-		var musicFileName = 'data/sound/' + this.mission.missionInfo.music;
+		var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
 		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
 		MarbleGame.canvas.clearContent();
 		this.endPad.generateCollider();

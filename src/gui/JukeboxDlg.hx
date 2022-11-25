@@ -32,12 +32,10 @@ class JukeboxDlg extends GuiImage {
 		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
 		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
 
-		var songList = [
-			"Astrolabe", "Beach Party", "Challenge", "Classic Vibe", "Comforting Mystery", "Endurance", "Flanked", "Groove Police", "Grudge", "MBP Old Shell",
-			"Metropolis", "Pianoforte", "Quiet Lab", "Rising Temper", "Seaside Revisited", "Shell", "The Race", "Tim Trance", "Xmas Trance"
-		];
+		var songFiles = ResourceLoader.fileSystem.dir("data/sound/music");
+		var songList = songFiles.map(x -> StringTools.replace(x.name, ".ogg", ""));
 
-		var playing:Bool = AudioManager.currentMusicPaused;
+		var playing:Bool = !AudioManager.currentMusicPaused;
 		var selectedIdx:Int = 0;
 
 		var currentPlayingSong = StringTools.replace(AudioManager.currentMusicName, ".ogg", "");
@@ -71,12 +69,26 @@ class JukeboxDlg extends GuiImage {
 		songCtrl.textYOffset = -6;
 		songCtrl.selectedColor = 0;
 		songCtrl._prevSelected = selectedIdx;
-		songCtrl.onSelectedFunc = (idx) -> {
-			selectedIdx = idx;
-			songTitle.text.text = '<p align="center">Title: ${songList[idx]}</p>';
-		};
 		scroll.addChild(songCtrl);
 		scroll.setScrollMax(songCtrl.calculateFullHeight());
+
+		function setCurrentSong(idx:Int) {
+			selectedIdx = idx;
+			songCtrl._prevSelected = idx;
+			songTitle.text.text = '<p align="center">Title: ${songList[idx]}</p>';
+			songCtrl.redrawSelectionRect(songCtrl.getHitTestRect());
+
+			if (playing) {
+				songFiles[idx].load(() -> {
+					var audiores = ResourceLoader.getAudio(songFiles[idx].path).resource;
+					AudioManager.playMusic(audiores, songList[idx]);
+				});
+			}
+		}
+
+		songCtrl.onSelectedFunc = (idx) -> {
+			setCurrentSong(idx);
+		};
 
 		var stopBtn = new GuiButton(loadButtonImages("data/ui/jukebox/stop"));
 		stopBtn.position = new Vector(219, 306);
@@ -93,6 +105,7 @@ class JukeboxDlg extends GuiImage {
 			playBtn.render(MarbleGame.canvas.scene2d);
 			playing = false;
 			songStatus.text.text = '<p align="center">${playing ? "Playing" : "Stopped"}</p>';
+			AudioManager.pauseMusic(true);
 		};
 
 		playBtn.pressedAction = (e) -> {
@@ -101,14 +114,25 @@ class JukeboxDlg extends GuiImage {
 			stopBtn.render(MarbleGame.canvas.scene2d);
 			playing = true;
 			songStatus.text.text = '<p align="center">${playing ? "Playing" : "Stopped"}</p>';
+			if (AudioManager.currentMusicName != songList[selectedIdx]) {
+				songFiles[selectedIdx].load(() -> {
+					var audiores = ResourceLoader.getAudio(songFiles[selectedIdx].path).resource;
+					AudioManager.playMusic(audiores, songList[selectedIdx]);
+				});
+			} else {
+				AudioManager.pauseMusic(false);
+			}
 		};
 
 		var prevBtn = new GuiButton(loadButtonImages("data/ui/play/prev"));
 		prevBtn.position = new Vector(145, 307);
 		prevBtn.extent = new Vector(72, 43);
 		prevBtn.pressedAction = (e) -> {
-			if (selectedIdx > 1)
-				songCtrl.onSelectedFunc(selectedIdx - 1);
+			if (selectedIdx >= 1) {
+				setCurrentSong(selectedIdx - 1);
+			} else {
+				setCurrentSong(songList.length - 1);
+			}
 		}
 		this.addChild(prevBtn);
 
@@ -116,8 +140,11 @@ class JukeboxDlg extends GuiImage {
 		nextBtn.position = new Vector(317, 307);
 		nextBtn.extent = new Vector(72, 43);
 		nextBtn.pressedAction = (e) -> {
-			if (selectedIdx < songList.length)
-				songCtrl.onSelectedFunc(selectedIdx + 1);
+			if (selectedIdx < songList.length - 1) {
+				setCurrentSong(selectedIdx + 1);
+			} else {
+				setCurrentSong(0);
+			}
 		}
 		this.addChild(nextBtn);
 
