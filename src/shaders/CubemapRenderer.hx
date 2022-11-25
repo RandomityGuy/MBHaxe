@@ -20,7 +20,7 @@ class CubemapRenderer {
 	public function new(scene:Scene) {
 		this.scene = scene;
 		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target]);
-		this.camera = new Camera(90, 1, 1);
+		this.camera = new Camera(90, 1, 1, 0.02, 100);
 		this.position = new Vector();
 		this.nextFaceToRender = 0;
 	}

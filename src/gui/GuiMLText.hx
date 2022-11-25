@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.Flow;
 import h3d.mat.Texture;
 import h2d.Tile;
 import h2d.Bitmap;
@@ -18,10 +19,7 @@ import src.Settings;
 class GuiMLText extends GuiControl {
 	var text:HtmlText;
 	var justify:Justification = Left;
-	var bmp:Bitmap;
-	var textTexture:Texture;
-	var _textContents = "";
-	var _dirty = true;
+	var flow:Flow;
 
 	public var scrollable:Bool = false;
 
@@ -29,7 +27,6 @@ class GuiMLText extends GuiControl {
 		super();
 		this.text = new HtmlText(font);
 		this.text.loadFont = loadFontFunc;
-		this._textContents = text.text;
 	}
 
 	public override function render(scene2d:Scene) {
@@ -37,19 +34,16 @@ class GuiMLText extends GuiControl {
 		text.maxWidth = renderRect.extent.x;
 
 		if (this.scrollable) {
-			if (textTexture != null)
-				textTexture.dispose();
+			this.flow = new Flow();
+			this.flow.addChild(this.text);
 
-			textTexture = new Texture(cast text.maxWidth, cast renderRect.extent.y, [Target]);
-
-			if (bmp != null) {
-				bmp.tile = Tile.fromTexture(textTexture);
-			} else {
-				bmp = new Bitmap(Tile.fromTexture(textTexture));
-			}
+			this.flow.maxWidth = cast renderRect.extent.x;
+			this.flow.maxHeight = cast renderRect.extent.y;
+			this.flow.multiline = true;
+			this.flow.overflow = FlowOverflow.Hidden;
 		}
 
-		var obj:h2d.Object = this.scrollable ? bmp : text;
+		var obj:h2d.Object = this.scrollable ? flow : text;
 
 		if (justify == Left) {
 			obj.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
@@ -69,10 +63,6 @@ class GuiMLText extends GuiControl {
 
 		scene2d.addChild(obj);
 
-		// if (text.filter == null) {
-		// 	text.filter = new GuiRender(renderRect);
-		// }
-
 		scene2d.addChild(obj);
 		super.render(scene2d);
 	}
@@ -82,15 +72,14 @@ class GuiMLText extends GuiControl {
 		if (!this.scrollable) {
 			this.text.remove();
 		} else {
-			this.bmp.remove();
-			this.textTexture.dispose();
+			this.flow.remove();
 		}
 	}
 
 	public override function onRemove() {
 		super.onRemove();
-		if (MarbleGame.canvas.scene2d.contains(bmp)) {
-			MarbleGame.canvas.scene2d.removeChild(bmp); // Refresh "layer"
+		if (MarbleGame.canvas.scene2d.contains(flow)) {
+			MarbleGame.canvas.scene2d.removeChild(flow); // Refresh "layer"
 		}
 		if (MarbleGame.canvas.scene2d.contains(text)) {
 			MarbleGame.canvas.scene2d.removeChild(text); // Refresh "layer"
@@ -99,23 +88,5 @@ class GuiMLText extends GuiControl {
 
 	public override function onScroll(scrollX:Float, scrollY:Float) {
 		text.setPosition(0, -scrollY);
-		this._dirty = true;
-	}
-
-	public override function renderEngine(engine:Engine) {
-		if (this.scrollable) {
-			#if hl
-			if (this._textContents != this.text.text || this._dirty) {
-			#end
-				textTexture.clear(0, 0);
-				text.drawTo(textTexture);
-				this._textContents = this.text.text;
-			#if hl
-			this._dirty = false;
-			}
-			#end
-
-			super.renderEngine(engine);
-		}
 	}
 }

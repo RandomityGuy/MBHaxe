@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.Flow;
 import h3d.Engine;
 import h2d.Tile;
 import h2d.Bitmap;
@@ -21,10 +22,6 @@ class GuiTextListCtrl extends GuiControl {
 	var g:Graphics;
 	var _prevSelected:Int = -1;
 
-	var bmp:Bitmap;
-	var textTexture:Texture;
-	var _dirty = true;
-
 	public var selectedColor:Int = 0x206464;
 	public var selectedFillColor:Int = 0xC8C8C8;
 
@@ -33,6 +30,8 @@ class GuiTextListCtrl extends GuiControl {
 	public var scroll:Float = 0;
 
 	public var scrollable:Bool = false;
+
+	var flow:Flow;
 
 	public function new(font:Font, texts:Array<String>) {
 		super();
@@ -59,12 +58,20 @@ class GuiTextListCtrl extends GuiControl {
 			tobj.text = text;
 			tobj.textColor = 0;
 			textObjs.push(tobj);
+
+			if (this.scrollable) {
+				if (this.flow.contains(tobj))
+					this.flow.removeChild(tobj);
+
+				this.flow.addChild(tobj);
+
+				this.flow.getProperties(tobj).isAbsolute = true;
+			}
 		}
 		this.texts = texts;
 		this._prevSelected = -1;
 		if (this.onSelectedFunc != null)
 			this.onSelectedFunc(-1);
-		this._dirty = true;
 
 		redrawSelectionRect(renderRect);
 
@@ -88,35 +95,39 @@ class GuiTextListCtrl extends GuiControl {
 		g.setPosition(renderRect.position.x, renderRect.position.y - this.scroll);
 
 		if (scrollable) {
-			if (textTexture != null)
-				textTexture.dispose();
+			this.flow = new Flow();
 
 			var htr = this.getHitTestRect();
 
-			textTexture = new Texture(cast htr.extent.x, cast htr.extent.y, [Target]);
-			if (bmp != null) {
-				bmp.tile = Tile.fromTexture(textTexture);
-			} else {
-				bmp = new Bitmap(Tile.fromTexture(textTexture));
-			}
+			this.flow.maxWidth = cast htr.extent.x;
+			this.flow.maxHeight = cast htr.extent.y;
+			this.flow.multiline = true;
+			this.flow.layout = Stack;
+			this.flow.overflow = FlowOverflow.Hidden;
+			if (scene2d.contains(this.flow))
+				scene2d.removeChild(this.flow);
 
-			if (scene2d.contains(bmp))
-				scene2d.removeChild(bmp);
+			scene2d.addChild(this.flow);
 
-			scene2d.addChild(bmp);
-
-			bmp.setPosition(htr.position.x, htr.position.y);
+			this.flow.setPosition(htr.position.x, htr.position.y);
 		}
 
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
-			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset - this.scroll)));
 			if (!scrollable) {
 				if (scene2d.contains(text))
 					scene2d.removeChild(text);
 				scene2d.addChild(text);
+			} else {
+				if (this.flow.contains(text))
+					this.flow.removeChild(text);
+				this.flow.addChild(text);
+
+				this.flow.getProperties(text).isAbsolute = true;
 			}
+
+			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
+				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset - this.scroll)));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;
@@ -124,8 +135,6 @@ class GuiTextListCtrl extends GuiControl {
 		}
 
 		redrawSelectionRect(renderRect);
-		redrawText();
-
 		super.render(scene2d);
 	}
 
@@ -140,8 +149,7 @@ class GuiTextListCtrl extends GuiControl {
 		}
 		this.g.remove();
 		if (this.scrollable) {
-			this.textTexture.dispose();
-			this.bmp.remove();
+			this.flow.remove();
 		}
 	}
 
@@ -173,7 +181,6 @@ class GuiTextListCtrl extends GuiControl {
 			text.textColor = selected ? selectedColor : 0;
 			// fill color = 0xC8C8C8
 		}
-		this._dirty = true;
 		// obviously in renderRect
 	}
 
@@ -185,7 +192,6 @@ class GuiTextListCtrl extends GuiControl {
 			text.textColor = 0;
 			// fill color = 0xC8C8C8
 		}
-		this._dirty = true;
 	}
 
 	public override function onMousePress(mouseState:MouseState) {
@@ -200,7 +206,6 @@ class GuiTextListCtrl extends GuiControl {
 			selectedIndex = -1;
 		}
 		if (_prevSelected != selectedIndex) {
-			this._dirty = true;
 			_prevSelected = selectedIndex;
 
 			redrawSelectionRect(renderRect);
@@ -255,35 +260,7 @@ class GuiTextListCtrl extends GuiControl {
 			var text = textObjs[i];
 			text.y = Math.floor((i * (text.font.size + 4) + 5 + textYOffset - scrollY));
 			g.y = renderRect.position.y - scrollY;
-
-			// if (text.y < hittestrect.position.y - text.textHeight || text.y > hittestrect.position.y + hittestrect.extent.y)
-			// 	text.visible = false;
-			// else {
-			// 	text.visible = true;
-			// }
 		}
 		redrawSelectionRect(hittestrect);
-		this._dirty = true;
-	}
-
-	function redrawText() {
-		if (this.scrollable) {
-			#if hl
-			if (this._dirty) {
-			#end
-				textTexture.clear(0, 0);
-				for (txt in this.textObjs) {
-					txt.drawTo(textTexture);
-				}
-			#if hl
-			this._dirty = false;
-			}
-			#end
-		}
-	}
-
-	public override function renderEngine(engine:Engine) {
-		redrawText();
-		super.renderEngine(engine);
 	}
 }
