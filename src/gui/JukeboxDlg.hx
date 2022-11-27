@@ -32,7 +32,13 @@ class JukeboxDlg extends GuiImage {
 		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
 		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
 
-		var songFiles = ResourceLoader.fileSystem.dir("data/sound/music");
+		#if hl
+		var songPath = "data/sound/music";
+		#end
+		#if js
+		var songPath = "sound/music";
+		#end
+		var songFiles = ResourceLoader.fileSystem.dir(songPath);
 		var songList = songFiles.map(x -> StringTools.replace(x.name, ".ogg", ""));
 
 		var playing:Bool = !AudioManager.currentMusicPaused;
