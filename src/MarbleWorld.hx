@@ -353,15 +353,15 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function restart(full:Bool = false) {
-		if (!this.isWatching) {
-			this.replay.clear();
-		} else
-			this.replay.rewind();
-
 		if (!full && this.currentCheckpoint != null) {
 			this.loadCheckpointState();
 			return 0; // Load checkpoint
 		}
+
+		if (!this.isWatching) {
+			this.replay.clear();
+		} else
+			this.replay.rewind();
 
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = 0;
@@ -390,29 +390,32 @@ class MarbleWorld extends Scheduler {
 		}
 
 		// Record/Playback trapdoor and landmine states
-		var tidx = 0;
-		var lidx = 0;
-		for (dtss in this.dtsObjects) {
-			if (dtss is Trapdoor) {
-				var trapdoor:Trapdoor = cast dtss;
-				if (!this.isWatching) {
-					this.replay.recordTrapdoorState(trapdoor.lastContactTime - this.timeState.timeSinceLoad, trapdoor.lastDirection, trapdoor.lastCompletion);
-				} else {
-					var state = this.replay.getTrapdoorState(tidx);
-					trapdoor.lastContactTime = state.lastContactTime + this.timeState.timeSinceLoad;
-					trapdoor.lastDirection = state.lastDirection;
-					trapdoor.lastCompletion = state.lastCompletion;
+		if (full) {
+			var tidx = 0;
+			var lidx = 0;
+			for (dtss in this.dtsObjects) {
+				if (dtss is Trapdoor) {
+					var trapdoor:Trapdoor = cast dtss;
+					if (!this.isWatching) {
+						this.replay.recordTrapdoorState(trapdoor.lastContactTime - this.timeState.timeSinceLoad, trapdoor.lastDirection,
+							trapdoor.lastCompletion);
+					} else {
+						var state = this.replay.getTrapdoorState(tidx);
+						trapdoor.lastContactTime = state.lastContactTime + this.timeState.timeSinceLoad;
+						trapdoor.lastDirection = state.lastDirection;
+						trapdoor.lastCompletion = state.lastCompletion;
+					}
+					tidx++;
 				}
-				tidx++;
-			}
-			if (dtss is LandMine) {
-				var landmine:LandMine = cast dtss;
-				if (!this.isWatching) {
-					this.replay.recordLandMineState(landmine.disappearTime - this.timeState.timeSinceLoad);
-				} else {
-					landmine.disappearTime = this.replay.getLandMineState(lidx) + this.timeState.timeSinceLoad;
+				if (dtss is LandMine) {
+					var landmine:LandMine = cast dtss;
+					if (!this.isWatching) {
+						this.replay.recordLandMineState(landmine.disappearTime - this.timeState.timeSinceLoad);
+					} else {
+						landmine.disappearTime = this.replay.getLandMineState(lidx) + this.timeState.timeSinceLoad;
+					}
+					lidx++;
 				}
-				lidx++;
 			}
 		}
 
@@ -988,20 +991,27 @@ class MarbleWorld extends Scheduler {
 		if (Key.isPressed(Settings.controlsSettings.respawn)) {
 			this.respawnPressedTime = timeState.timeSinceLoad;
 			this.restart();
-			Settings.playStatistics.respawns++;
-			if (!Settings.levelStatistics.exists(mission.path)) {
-				Settings.levelStatistics.set(mission.path, {
-					oobs: 0,
-					respawns: 1,
-					totalTime: 0,
-				});
-			} else {
-				Settings.levelStatistics[mission.path].respawns++;
+			if (!this.isWatching) {
+				Settings.playStatistics.respawns++;
+
+				if (!Settings.levelStatistics.exists(mission.path)) {
+					Settings.levelStatistics.set(mission.path, {
+						oobs: 0,
+						respawns: 1,
+						totalTime: 0,
+					});
+				} else {
+					Settings.levelStatistics[mission.path].respawns++;
+				}
+
+				if (this.isRecording) {
+					this.replay.endFrame();
+				}
 			}
 			return;
 		}
 
-		if (Key.isDown(Settings.controlsSettings.respawn)) {
+		if (Key.isDown(Settings.controlsSettings.respawn) && !this.isWatching) {
 			if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
 				this.restart(true);
 				this.respawnPressedTime = Math.POSITIVE_INFINITY;
@@ -1010,6 +1020,17 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.tickSchedule(timeState.currentAttemptTime);
+
+		// Replay gravity
+		if (this.isWatching) {
+			if (this.replay.currentPlaybackFrame.gravityChange) {
+				this.setUp(this.replay.currentPlaybackFrame.gravity, timeState, this.replay.currentPlaybackFrame.gravityInstant);
+			}
+			if (this.replay.currentPlaybackFrame.powerupPickup != null) {
+				this.pickUpPowerUpReplay(this.replay.currentPlaybackFrame.powerupPickup);
+			}
+		}
+
 		this.updateGameState();
 		ProfilerUI.measure("updateDTS");
 		for (obj in dtsObjects) {
@@ -1031,15 +1052,15 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
+		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup) && !this.isWatching) {
+			this.restart();
+			return;
+		}
+
 		if (!this.isWatching) {
 			if (this.isRecording) {
 				this.replay.endFrame();
 			}
-		}
-
-		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {
-			this.restart();
-			return;
 		}
 
 		this.updateTexts();
@@ -1412,6 +1433,18 @@ class MarbleWorld extends Scheduler {
 		return 0;
 	}
 
+	public function pickUpPowerUpReplay(powerupIdent:String) {
+		if (powerupIdent == null)
+			return false;
+		if (this.marble.heldPowerup != null)
+			if (this.marble.heldPowerup.identifier == powerupIdent)
+				return false;
+
+		this.playGui.setPowerupImage(powerupIdent);
+
+		return true;
+	}
+
 	public function pickUpPowerUp(powerUp:PowerUp) {
 		if (powerUp == null)
 			return false;
@@ -1421,6 +1454,9 @@ class MarbleWorld extends Scheduler {
 		this.marble.heldPowerup = powerUp;
 		this.playGui.setPowerupImage(powerUp.identifier);
 		MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
+		if (this.isRecording) {
+			this.replay.recordPowerupPickup(powerUp);
+		}
 		return true;
 	}
 
@@ -1479,6 +1515,10 @@ class MarbleWorld extends Scheduler {
 		// quatChange.initMoveTo(oldUp, vec);
 		quatChange.multiply(quatChange, currentQuat);
 
+		if (this.isRecording) {
+			this.replay.recordGravity(vec, instant);
+		}
+
 		this.newOrientationQuat = quatChange;
 		this.oldOrientationQuat = currentQuat;
 		this.orientationChangeTime = instant ? -1e8 : timeState.currentAttemptTime;
@@ -1491,18 +1531,20 @@ class MarbleWorld extends Scheduler {
 		this.outOfBounds = true;
 		this.outOfBoundsTime = this.timeState.clone();
 		this.marble.camera.oob = true;
-		Settings.playStatistics.oobs++;
-		if (!Settings.levelStatistics.exists(mission.path)) {
-			Settings.levelStatistics.set(mission.path, {
-				oobs: 1,
-				respawns: 0,
-				totalTime: 0,
-			});
-		} else {
-			Settings.levelStatistics[mission.path].oobs++;
+		if (!this.isWatching) {
+			Settings.playStatistics.oobs++;
+			if (!Settings.levelStatistics.exists(mission.path)) {
+				Settings.levelStatistics.set(mission.path, {
+					oobs: 1,
+					respawns: 0,
+					totalTime: 0,
+				});
+			} else {
+				Settings.levelStatistics[mission.path].oobs++;
+			}
+			if (Settings.optionsSettings.oobInsults)
+				OOBInsultGui.OOBCheck();
 		}
-		if (Settings.optionsSettings.oobInsults)
-			OOBInsultGui.OOBCheck();
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
@@ -1571,13 +1613,19 @@ class MarbleWorld extends Scheduler {
 		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
 		marble.velocity.load(new Vector(0, 0, 0));
 		marble.omega.load(new Vector(0, 0, 0));
-		// Set camera orienation
+		// Set camera orientation
 		var euler = this.currentCheckpoint.obj.getRotationQuat().toEuler();
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
 		this.marble.camera.CameraPitch = 0.45;
 		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
 		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
 		this.marble.camera.oob = false;
+		if (this.isRecording) {
+			this.replay.recordCameraState(this.marble.camera.CameraYaw, this.marble.camera.CameraPitch);
+			this.replay.recordMarbleInput(0, 0);
+			this.replay.recordMarbleState(mpos, marble.velocity, marble.getRotationQuat(), marble.omega);
+			this.replay.recordMarbleStateFlags(false, false, true);
+		}
 		var gravityField = ""; // (this.currentCheckpoint.srcElement as any) ?.gravity || this.currentCheckpointTrigger?.element.gravity;
 		if (this.currentCheckpoint.elem.fields.exists('gravity')) {
 			gravityField = this.currentCheckpoint.elem.fields.get('gravity')[0];
@@ -1661,15 +1709,18 @@ class MarbleWorld extends Scheduler {
 
 	public function dispose() {
 		// Gotta add the timesinceload to our stats
-		Settings.playStatistics.totalTime += this.timeState.timeSinceLoad;
-		if (!Settings.levelStatistics.exists(mission.path)) {
-			Settings.levelStatistics.set(mission.path, {
-				oobs: 0,
-				respawns: 0,
-				totalTime: this.timeState.timeSinceLoad,
-			});
-		} else {
-			Settings.levelStatistics[mission.path].totalTime += this.timeState.timeSinceLoad;
+		if (!this.isWatching) {
+			Settings.playStatistics.totalTime += this.timeState.timeSinceLoad;
+
+			if (!Settings.levelStatistics.exists(mission.path)) {
+				Settings.levelStatistics.set(mission.path, {
+					oobs: 0,
+					respawns: 0,
+					totalTime: this.timeState.timeSinceLoad,
+				});
+			} else {
+				Settings.levelStatistics[mission.path].totalTime += this.timeState.timeSinceLoad;
+			}
 		}
 
 		this.playGui.dispose();

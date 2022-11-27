@@ -1265,6 +1265,9 @@ class Marble extends GameObject {
 				}
 			}
 
+			var stoppedPaths = false;
+			var tempState = timeState.clone();
+
 			var intersectData = testMove(velocity, this.getAbsPos().getPosition(), timeStep, _radius, true); // this.getIntersectionTime(timeStep, velocity);
 			var intersectT = intersectData.t;
 
@@ -1279,7 +1282,6 @@ class Marble extends GameObject {
 				// this.setPosition(intersectData.position.x, intersectData.position.y, intersectData.position.z);
 			}
 
-			var tempState = timeState.clone();
 			tempState.dt = timeStep;
 
 			it++;
@@ -1289,7 +1291,7 @@ class Marble extends GameObject {
 			var isCentered:Bool = cmf.result;
 			var aControl = cmf.aControl;
 			var desiredOmega = cmf.desiredOmega;
-			var stoppedPaths = false;
+
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
 			var A = this.getExternalForces(timeState.currentAttemptTime, m, timeStep);
 			var retf = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
@@ -1362,6 +1364,9 @@ class Marble extends GameObject {
 				pTime.currentAttemptTime = piTime;
 				this.heldPowerup.use(pTime);
 				this.heldPowerup = null;
+				if (this.level.isRecording) {
+					this.level.replay.recordPowerupPickup(null);
+				}
 			}
 
 			if (this.controllable && this.prevPos != null) {
@@ -1434,7 +1439,10 @@ class Marble extends GameObject {
 			var expectedVel = this.level.replay.currentPlaybackFrame.marbleVelocity.clone();
 			var expectedOmega = this.level.replay.currentPlaybackFrame.marbleAngularVelocity.clone();
 
-			this.getAbsPos().setPosition(expectedPos);
+			this.setPosition(expectedPos.x, expectedPos.y, expectedPos.z);
+			var tform = this.collider.transform;
+			tform.setPosition(new Vector(expectedPos.x, expectedPos.y, expectedPos.z));
+			this.collider.setTransform(tform);
 			this.velocity = expectedVel;
 			this.setRotationQuat(this.level.replay.currentPlaybackFrame.marbleOrientation.clone());
 			this.omega = expectedOmega;

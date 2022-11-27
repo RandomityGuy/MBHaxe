@@ -782,8 +782,6 @@ class PlayMissionGui extends GuiImage {
 				index = 0;
 			}
 
-			var selectionChanged = currentSelection != index;
-
 			currentSelection = index;
 			currentSelectionStatic = currentSelection;
 
@@ -899,31 +897,38 @@ class PlayMissionGui extends GuiImage {
 
 			setScoreHover(scoreButtonHover);
 
-			if (selectionChanged) {
-				pmPreview.bmp.tile = tmpprevtile;
-				#if js
-				switch (previewTimeoutHandle) {
-					case None:
-						previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
-							currentMission.getPreviewImage(prevImg -> {
-								pmPreview.bmp.tile = prevImg;
-							});
-						}, 75));
-					case Some(previewTimeoutHandle_id):
-						js.Browser.window.clearTimeout(previewTimeoutHandle_id);
-						previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
-							currentMission.getPreviewImage(prevImg -> {
-								pmPreview.bmp.tile = prevImg;
-							});
-						}, 75));
-				}
-				#end
-				#if hl
-				currentMission.getPreviewImage(prevImg -> {
-					pmPreview.bmp.tile = prevImg;
-				}); // Shit be sync
-				#end
+			// pmPreview.bmp.tile = tmpprevtile;
+			#if js
+			switch (previewTimeoutHandle) {
+				case None:
+					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
+						var prevpath = currentMission.getPreviewImage(prevImg -> {
+							pmPreview.bmp.tile = prevImg;
+						});
+						if (prevpath != pmPreview.bmp.tile.getTexture().name) {
+							pmPreview.bmp.tile = tmpprevtile;
+						}
+					}, 75));
+				case Some(previewTimeoutHandle_id):
+					js.Browser.window.clearTimeout(previewTimeoutHandle_id);
+					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
+						var prevpath = currentMission.getPreviewImage(prevImg -> {
+							pmPreview.bmp.tile = prevImg;
+						});
+						if (prevpath != pmPreview.bmp.tile.getTexture().name) {
+							pmPreview.bmp.tile = tmpprevtile;
+						}
+					}, 75));
 			}
+			#end
+			#if hl
+			var prevpath = currentMission.getPreviewImage(prevImg -> {
+				pmPreview.bmp.tile = prevImg;
+			}); // Shit be sync
+			if (prevpath != pmPreview.bmp.tile.getTexture().name) {
+				pmPreview.bmp.tile = tmpprevtile;
+			}
+			#end
 		}
 
 		setCategoryFunc(currentGame, currentCategoryStatic, false);

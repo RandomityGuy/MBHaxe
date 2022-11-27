@@ -99,6 +99,8 @@ class MainMenuGui extends GuiImage {
 						#if js
 						repmis = StringTools.replace(repmis, "data/", "");
 						#end
+						if (MissionList.missions == null)
+							MissionList.buildMissionList();
 						var playMis = MissionList.missions.get(repmis);
 						if (playMis != null) {
 							cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);

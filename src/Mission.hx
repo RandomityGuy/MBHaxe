@@ -136,6 +136,7 @@ class Mission {
 					var ret = ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
 					onLoaded(ret);
 				});
+				return imgFileEntry.path;
 			}
 			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
 				imgFileEntry = ResourceLoader.fileSystem.get(basename + ".jpg");
@@ -143,14 +144,17 @@ class Mission {
 					var ret = ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
 					onLoaded(ret);
 				});
+				return imgFileEntry.path;
 			}
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
 			onLoaded(Tile.fromBitmap(img));
+			return null;
 		} else {
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
 			onLoaded(Tile.fromBitmap(img));
+			return null;
 		}
 	}
 
