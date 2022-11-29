@@ -33,6 +33,7 @@ class DuctFan extends ForceObject {
 			ResourceLoader.load("sound/fan_loop.wav").entry.load(() -> {
 				this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/fan_loop.wav", ResourceLoader.getAudio,
 					this.soundResources), new Vector(1e8, 1e8, 1e8), true);
+				this.soundChannel.pause = true;
 				onFinish();
 			});
 		});
@@ -43,5 +44,8 @@ class DuctFan extends ForceObject {
 
 		var seffect = this.soundChannel.getEffect(Spatialization);
 		seffect.position = this.getAbsPos().getPosition();
+
+		if (this.soundChannel.pause)
+			this.soundChannel.pause = false;
 	}
 }

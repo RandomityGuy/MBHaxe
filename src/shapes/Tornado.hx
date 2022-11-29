@@ -50,6 +50,7 @@ class Tornado extends ForceObject {
 			ResourceLoader.load("sound/tornado.wav").entry.load(() -> {
 				this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/tornado.wav", ResourceLoader.getAudio, this.soundResources),
 					new Vector(1e8, 1e8, 1e8), true);
+				this.soundChannel.pause = true;
 				for (material in this.materials) {
 					material.blendMode = Alpha;
 					// material.mainPass.culling = h3d.mat.Data.Face.None;
@@ -64,5 +65,8 @@ class Tornado extends ForceObject {
 
 		var seffect = this.soundChannel.getEffect(Spatialization);
 		seffect.position = this.getAbsPos().getPosition();
+
+		if (this.soundChannel.pause)
+			this.soundChannel.pause = false;
 	}
 }
