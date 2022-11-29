@@ -56,8 +56,8 @@ class Main extends hxd.App {
 		});
 		#end
 
+		Settings.init();
 		ResourceLoader.init(s2d, () -> {
-			Settings.init();
 			AudioManager.init();
 			AudioManager.playShell();
 			marbleGame = new MarbleGame(s2d, s3d);

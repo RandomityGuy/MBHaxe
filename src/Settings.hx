@@ -288,11 +288,13 @@ class Settings {
 					levelStatistics.set(key, value);
 				}
 			}
+			#if js
 			if (optionsSettings.marbleIndex == null) {
 				optionsSettings.marbleIndex = 0;
 				optionsSettings.marbleSkin = "base";
 				optionsSettings.marbleModel = "data/shapes/balls/ball-superball.dts";
 			}
+			#end
 			highscoreName = json.highscoreName;
 		} else {
 			save();

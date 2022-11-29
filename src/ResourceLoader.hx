@@ -18,6 +18,7 @@ import hxd.res.Loader;
 import src.Resource;
 import src.ResourceLoaderWorker;
 import fs.TorqueFileSystem;
+import src.Settings;
 
 class ResourceLoader {
 	#if (hl && !android)
@@ -191,33 +192,36 @@ class ResourceLoader {
 	}
 
 	static function preloadShapes(onFinish:Void->Void) {
-		var toloadfiles = [];
-		var toloaddirs = [];
-		var filestats = fileSystem.dir("shapes");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		while (toloaddirs.length > 0) {
-			var nextdir = toloaddirs.pop();
-			for (file in fileSystem.dir(nextdir.path.substring(2))) {
-				if (file.isDirectory) {
-					toloaddirs.push(file);
-				} else {
-					toloadfiles.push(file);
-				}
-			}
-		}
-		var teleportPad = fileSystem.get("interiors_mbp/teleportpad.dts");
-		var teleportTexture = fileSystem.get("interiors_mbp/repairbay.jpg");
-		toloadfiles.push(teleportPad); // Because its not in the shapes folder like wtf
-		toloadfiles.push(teleportTexture);
+		var toloadfiles = [
+			StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""),
+			"shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png"
+		];
+		// var toloaddirs = [];
+		// var filestats = fileSystem.dir("shapes");
+		// for (file in filestats) {
+		// 	if (file.isDirectory) {
+		// 		toloaddirs.push(file);
+		// 	} else {
+		// 		toloadfiles.push(file);
+		// 	}
+		// }
+		// while (toloaddirs.length > 0) {
+		// 	var nextdir = toloaddirs.pop();
+		// 	for (file in fileSystem.dir(nextdir.path.substring(2))) {
+		// 		if (file.isDirectory) {
+		// 			toloaddirs.push(file);
+		// 		} else {
+		// 			toloadfiles.push(file);
+		// 		}
+		// 	}
+		// }
+		// var teleportPad = fileSystem.get("interiors_mbp/teleportpad.dts");
+		// var teleportTexture = fileSystem.get("interiors_mbp/repairbay.jpg");
+		// toloadfiles.push(teleportPad); // Because its not in the shapes folder like wtf
+		// toloadfiles.push(teleportTexture);
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.addTaskParallel((fwd) -> file.load(fwd));
+			worker.loadFile(file);
 		}
 		worker.run();
 	}
@@ -243,6 +247,9 @@ class ResourceLoader {
 		#if hl
 		if (!StringTools.startsWith(path, "data/"))
 			path = "data/" + path;
+		#end
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
 		#end
 		return ResourceLoader.loader.load(path);
 	}

@@ -10,6 +10,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.DtsObject;
 import src.Settings;
+import src.ResourceLoaderWorker;
 
 class MarbleSelectGui extends GuiImage {
 	public function new() {
@@ -94,7 +95,8 @@ class MarbleSelectGui extends GuiImage {
 		}
 		this.addChild(selectBtn);
 
-		var marbleShow = buildObjectShow(marbleData[curSelection].dts, new Vector(171, 97), new Vector(150, 150), 2.6, 0);
+		var marbleShow = buildObjectShow(marbleData[curSelection].dts, new Vector(171, 97), new Vector(150, 150), 2.6, 0,
+			["base.marble" => marbleData[curSelection].skin + ".marble"]);
 		marbleShow.horizSizing = Center;
 		marbleShow.vertSizing = Bottom;
 		marbleShow.visible = true;
@@ -144,14 +146,36 @@ class MarbleSelectGui extends GuiImage {
 			dtsObj.showSequences = false;
 			dtsObj.useInstancing = false;
 			dtsObj.matNameOverride.set("base.marble", marble.skin + ".marble");
-			dtsObj.init(null, () -> {}); // The lambda is not gonna run async anyway
-			for (mat in dtsObj.materials) {
-				mat.mainPass.enableLights = false;
-				mat.mainPass.culling = None;
-				if (mat.blendMode != Alpha && mat.blendMode != Add)
-					mat.mainPass.addShader(new AlphaChannel());
-			}
-			marbleShow.changeObject(dtsObj);
+
+			ResourceLoader.load(dtsObj.dtsPath).entry.load(() -> {
+				var dtsFile = ResourceLoader.loadDts(dtsObj.dtsPath);
+				var directoryPath = haxe.io.Path.directory(dtsObj.dtsPath);
+				var texToLoad = [];
+				for (i in 0...dtsFile.resource.matNames.length) {
+					var matName = dtsObj.matNameOverride.exists(dtsFile.resource.matNames[i]) ? dtsObj.matNameOverride.get(dtsFile.resource.matNames[i]) : dtsFile.resource.matNames[i];
+					var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
+					var fullName = fullNames.length > 0 ? fullNames[0] : null;
+					if (fullName != null) {
+						texToLoad.push(fullName);
+					}
+				}
+
+				var worker = new ResourceLoaderWorker(() -> {
+					dtsObj.init(null, () -> {}); // The lambda is not gonna run async anyway
+					for (mat in dtsObj.materials) {
+						mat.mainPass.enableLights = false;
+						mat.mainPass.culling = None;
+						if (mat.blendMode != Alpha && mat.blendMode != Add)
+							mat.mainPass.addShader(new AlphaChannel());
+					}
+					marbleShow.changeObject(dtsObj);
+				});
+
+				for (texPath in texToLoad) {
+					worker.loadFile(texPath);
+				}
+				worker.run();
+			});
 		}
 
 		var nextBtn = new GuiButton(loadButtonImages("data/ui/marbleSelect/next"));

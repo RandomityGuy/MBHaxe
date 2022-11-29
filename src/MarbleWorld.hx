@@ -82,6 +82,7 @@ import src.Marble;
 import src.Resource;
 import src.ProfilerUI;
 import src.ResourceLoaderWorker;
+import haxe.io.Path;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -234,16 +235,16 @@ class MarbleWorld extends Scheduler {
 
 	public function postInit() {
 		// Add the sky at the last so that cubemap reflections work
-		this.scene.addChild(this.sky);
-
-		this._ready = true;
-		this.playGui.init(this.scene2d);
-		var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
-		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
-		MarbleGame.canvas.clearContent();
-		this.endPad.generateCollider();
-		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
-		start();
+		this.playGui.init(this.scene2d, () -> {
+			this.scene.addChild(this.sky);
+			this._ready = true;
+			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
+			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
+			MarbleGame.canvas.clearContent();
+			this.endPad.generateCollider();
+			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+			start();
+		});
 	}
 
 	public function initScene(onFinish:Void->Void) {
@@ -331,8 +332,14 @@ class MarbleWorld extends Scheduler {
 			"sound/set.wav",
 			"sound/go.wav",
 			"sound/alarm.wav",
-			"sound/alarm_timeout.wav"
+			"sound/alarm_timeout.wav",
+			"shapes/images/glow_bounce.dts",
+			"shapes/images/glow_bounce.png",
+			"shapes/images/helicopter.dts",
+			"shapes/images/helicopter.jpg"
 		];
+		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
+		marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		for (file in marblefiles) {
 			worker.loadFile(file);
 		}
@@ -917,25 +924,89 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function addDtsObject(obj:DtsObject, onFinish:Void->Void) {
-		obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
-		this.dtsObjects.push(obj);
-		if (obj is ForceObject) {
-			this.forceObjects.push(cast obj);
-		}
-		obj.init(cast this, () -> {
-			obj.update(this.timeState);
-			if (obj.useInstancing) {
-				this.instanceManager.addObject(obj);
-			} else
-				this.scene.addChild(obj);
-			for (collider in obj.colliders) {
-				if (collider != null)
-					this.collisionWorld.addEntity(collider);
-			}
-			if (obj.isBoundingBoxCollideable)
-				this.collisionWorld.addEntity(obj.boundingCollider);
+		function parseIfl(path:String, onFinish:Array<String>->Void) {
+			ResourceLoader.load(path).entry.load(() -> {
+				var text = ResourceLoader.fileSystem.get(path).getText();
+				var lines = text.split('\n');
+				var keyframes = [];
+				for (line in lines) {
+					line = StringTools.trim(line);
+					if (line.substr(0, 2) == "//")
+						continue;
+					if (line == "")
+						continue;
 
-			onFinish();
+					var parts = line.split(' ');
+					var count = parts.length > 1 ? Std.parseInt(parts[1]) : 1;
+
+					for (i in 0...count) {
+						keyframes.push(parts[0]);
+					}
+				}
+
+				onFinish(keyframes);
+			});
+		}
+
+		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
+			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
+			var directoryPath = haxe.io.Path.directory(obj.dtsPath);
+			var texToLoad = [];
+			for (i in 0...dtsFile.resource.matNames.length) {
+				var matName = obj.matNameOverride.exists(dtsFile.resource.matNames[i]) ? obj.matNameOverride.get(dtsFile.resource.matNames[i]) : dtsFile.resource.matNames[i];
+				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
+				var fullName = fullNames.length > 0 ? fullNames[0] : null;
+				if (fullName != null) {
+					texToLoad.push(fullName);
+				}
+			}
+
+			var worker = new ResourceLoaderWorker(() -> {
+				obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
+				this.dtsObjects.push(obj);
+				if (obj is ForceObject) {
+					this.forceObjects.push(cast obj);
+				}
+				obj.init(cast this, () -> {
+					obj.update(this.timeState);
+					if (obj.useInstancing) {
+						this.instanceManager.addObject(obj);
+					} else
+						this.scene.addChild(obj);
+					for (collider in obj.colliders) {
+						if (collider != null)
+							this.collisionWorld.addEntity(collider);
+					}
+					if (obj.isBoundingBoxCollideable)
+						this.collisionWorld.addEntity(obj.boundingCollider);
+
+					onFinish();
+				});
+			});
+
+			for (texPath in texToLoad) {
+				if (haxe.io.Path.extension(texPath) == "ifl") {
+					worker.addTask(fwd -> {
+						parseIfl(texPath, keyframes -> {
+							var innerWorker = new ResourceLoaderWorker(() -> {
+								fwd();
+							});
+							var loadedkf = [];
+							for (kf in keyframes) {
+								if (!loadedkf.contains(kf)) {
+									innerWorker.loadFile(directoryPath + '/' + kf);
+									loadedkf.push(kf);
+								}
+							}
+							innerWorker.run();
+						});
+					});
+				} else {
+					worker.loadFile(texPath);
+				}
+			}
+
+			worker.run();
 		});
 	}
 
@@ -1077,6 +1148,8 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	var postInited = false;
+
 	function asyncLoadResources() {
 		if (this.resourceLoadFuncs.length != 0) {
 			if (lock)
@@ -1101,8 +1174,10 @@ class MarbleWorld extends Scheduler {
 		} else {
 			if (this._resourcesLoaded < _loadingLength)
 				return;
-			if (!_ready)
+			if (!_ready && !postInited) {
+				postInited = true;
 				postInit();
+			}
 		}
 	}
 
