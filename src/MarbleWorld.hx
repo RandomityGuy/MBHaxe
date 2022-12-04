@@ -333,10 +333,15 @@ class MarbleWorld extends Scheduler {
 			"sound/go.wav",
 			"sound/alarm.wav",
 			"sound/alarm_timeout.wav",
+			"sound/missinggems.wav",
 			"shapes/images/glow_bounce.dts",
 			"shapes/images/glow_bounce.png",
 			"shapes/images/helicopter.dts",
-			"shapes/images/helicopter.jpg"
+			"shapes/images/helicopter.jpg",
+			"shapes/pads/white.jpg", // These irk us a lot because ifl shit
+			"shapes/pads/red.jpg",
+			"shapes/pads/blue.jpg",
+			"shapes/pads/green.jpg",
 		];
 		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
 		marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
