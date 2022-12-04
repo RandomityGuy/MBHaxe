@@ -19,7 +19,11 @@ I chose Haxe because its a good language that can target other languages, meanin
 <img src="https://imgur.com/iryo0AL.png" width="640">
 <img src="https://imgur.com/vsuNqUi.png" width="640">
 <img src="https://imgur.com/SFPdC7g.png" width="640">
+<img src="https://imgur.com/T5ayduK.png" width="640">
 <img src="https://imgur.com/I3Gaze9.png" width="640">
+<img src="https://imgur.com/qn9aThu.png" width="640">
+<img src="https://imgur.com/eEfU2we.png" width="640">
+<img src="https://imgur.com/7OSISYJ.png" width="640">
 
 # Build
 The `master` branch is currently for Marble Blast Platinum. 
