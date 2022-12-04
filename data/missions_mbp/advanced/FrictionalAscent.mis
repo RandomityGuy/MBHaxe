@@ -1,0 +1,360 @@
+// UT Tip: Amazingly there is a shortcut, just find a method to save that Jump Boost.
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         startHelpText = "Collect the diamonds, but don\'t rush!";
+         name = "Frictional Ascent";
+         desc = "Ascend to the top while traversing the hazardous friction and collecting the diamonds, but don\'t rush!";
+         artist = "Perishingflames";
+         level = "23";
+         music = "Rising Temper.ogg";
+         type = "Advanced";
+         goldTime = "90000";
+         UltimateTime = "60000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/Advanced/Advanced_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.638261 0.459006 -0.61801";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/FrictionalAscent.dif";
+      showTerrainInside = "0";
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "-100.5 -38 37";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "25";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-100.5 -38 37.4625";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "50";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-100.5 -38 37.4625";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-100.5 -38 37";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "500";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = $usermods @ "/data/interiors_MBP/FrictionalAscent.dif";
+         interiorIndex = "0";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "-93.5 11.9909 72.25";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "400";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-93.5 11.9909 72.25";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "13000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-21.75 11.9909 72.25";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-21.75 11.9909 72.25";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "3000";
+            smoothingType = "Linear";
+         };
+      };
+      new Trigger(MustChange) {
+         position = "-93.5 12 73";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TriggerGotoTarget";
+         polyhedron = "-2.0000000 -2.0000000 1.0000000 0.0000000 0.0000000 -2.0000000 0.0000000 4.0000000 0.0000000 4.0000000 0.0000000 0.0000000";
+            targetTime = "17400";
+	  };
+      new Trigger(MustChange) {
+         position = "-97.5 12 73";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TriggerGotoTarget";
+         polyhedron = "-2.0000000 -2.0000000 1.0000000 0.0000000 0.0000000 -2.0000000 0.0000000 4.0000000 0.0000000 4.0000000 0.0000000 0.0000000";
+			instant = "1";
+			IContinueToTTime = "17400";		
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = $usermods @ "/data/interiors_MBP/FrictionalAscent.dif";
+         interiorIndex = "1";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "0";
+      };
+   };
+   new StaticShape(StartPoint) {
+      position = "7.05 1.99 7.00999";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new StaticShape(EndPoint) {
+      position = "-35.5 12 52";
+      rotation = "0 0 1 90";
+      scale = "0.75 0.75 1";
+      dataBlock = "EndPad";
+   };
+   new Trigger(Bounds) {
+      position = "-132 70 5";
+      rotation = "1 0 0 0";
+      scale = "175 150 175";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "-94.5452 -5.82152 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new Item() {
+      position = "-50.1646 18.5121 12.4436";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-65.5121 16.5477 12.4744";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-85.3704 3.10166 17.012";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-97.5177 -41.9841 26.026";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-93.4953 -34.5183 34.1626";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-85.7555 -38.0029 38.5393";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new StaticShape() {
+      position = "-97.3799 5.96803 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "-92.684 -3.93801 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "-97.8372 -7.46838 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "-96.3174 -2.5227 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "-98.776 -0.146681 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "-94.9752 2.00634 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "-92.1531 3.51289 48";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "Nuke";
+         resetTime = "Default";
+   };
+   new Item() {
+      position = "-97.4446 -0.667764 70.143";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-93.4383 48.0023 59.5012";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-63.5123 16.5018 66.7519";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-89.516 -1.96516 41.01";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.25";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "-36.1762 10.3381 75.6677";
+      rotation = "0 0 1 95.684";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

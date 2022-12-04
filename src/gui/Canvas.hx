@@ -32,8 +32,9 @@ class Canvas extends GuiControl {
 		this.render(scene2d);
 	}
 
-	public function popDialog(content:GuiControl) {
-		content.dispose();
+	public function popDialog(content:GuiControl, dispose:Bool = true) {
+		if (dispose)
+			content.dispose();
 		this.removeChild(content);
 		this.render(scene2d);
 	}

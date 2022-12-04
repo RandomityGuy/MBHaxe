@@ -31,6 +31,12 @@ typedef OptionsSettings = {
 	var soundVolume:Float;
 	var vsync:Bool;
 	var fov:Int;
+	var frameRateVis:Bool;
+	var oobInsults:Bool;
+	var reflectiveMarble:Bool;
+	var marbleIndex:Int;
+	var marbleSkin:String;
+	var marbleModel:String;
 }
 
 typedef ControlsSettings = {
@@ -48,6 +54,7 @@ typedef ControlsSettings = {
 	var alwaysFreeLook:Bool;
 	var cameraSensitivity:Float;
 	var invertYAxis:Bool;
+	var respawn:Int;
 }
 
 typedef TouchSettings = {
@@ -60,8 +67,16 @@ typedef TouchSettings = {
 	var buttonJoystickMultiplier:Float;
 }
 
+typedef PlayStatistics = {
+	var oobs:Int;
+	var respawns:Int;
+	var totalTime:Float;
+}
+
 class Settings {
 	public static var highScores:Map<String, Array<Score>> = [];
+
+	public static var easterEggs:Map<String, Float> = [];
 
 	public static var optionsSettings:OptionsSettings = {
 		screenWidth: 1280,
@@ -73,6 +88,12 @@ class Settings {
 		musicVolume: 1,
 		soundVolume: 0.7,
 		fov: 60,
+		frameRateVis: true,
+		oobInsults: true,
+		reflectiveMarble: true,
+		marbleIndex: 0,
+		marbleSkin: "base",
+		marbleModel: "data/shapes/balls/ball-superball.dts",
 		vsync: #if js true #end
 		#if hl
 		false
@@ -93,7 +114,8 @@ class Settings {
 		freelook: Key.MOUSE_RIGHT,
 		alwaysFreeLook: true,
 		cameraSensitivity: 0.6,
-		invertYAxis: false
+		invertYAxis: false,
+		respawn: Key.BACKSPACE
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -105,7 +127,15 @@ class Settings {
 		powerupButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
-	public static var progression = [24, 24, 52];
+
+	public static var playStatistics:PlayStatistics = {
+		oobs: 0,
+		respawns: 0,
+		totalTime: 0,
+	}
+
+	public static var levelStatistics:Map<String, PlayStatistics> = [];
+
 	public static var highscoreName = "";
 
 	public static var uiScale = 1.0;
@@ -120,6 +150,7 @@ class Settings {
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
 		#end
 		AudioManager.updateVolumes();
+		Window.getInstance().vsync = optionsSettings.vsync;
 
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		save();
@@ -149,18 +180,39 @@ class Settings {
 			options: optionsSettings,
 			controls: controlsSettings,
 			touch: touchSettings,
-			progression: progression,
-			highscoreName: highscoreName
+			stats: playStatistics,
+			highscoreName: highscoreName,
+			marbleIndex: optionsSettings.marbleIndex,
+			marbleSkin: optionsSettings.marbleSkin,
+			marbleModel: optionsSettings.marbleModel,
 		};
 		var scoreCount = 0;
+		var eggCount = 0;
+		var statCount = 0;
 		for (key => value in highScores) {
 			scoreCount++;
+		}
+		for (key => value in easterEggs) {
+			eggCount++;
+		}
+		for (key => value in levelStatistics) {
+			statCount++;
 		}
 		#if hl
 		if (scoreCount != 0)
 			outputData.highScores = highScores;
 		else
 			outputData.highScores = {};
+		if (eggCount != 0) {
+			outputData.easterEggs = easterEggs;
+		} else {
+			outputData.easterEggs = {};
+		}
+		if (statCount != 0) {
+			outputData.levelStatistics = levelStatistics;
+		} else {
+			outputData.levelStatistics = {};
+		}
 		#end
 		#if js
 		var kvps:Array<Dynamic> = [];
@@ -168,6 +220,16 @@ class Settings {
 			kvps.push([key, value]);
 		var jobj = js.lib.Object.fromEntries(kvps);
 		outputData.highScores = jobj;
+		kvps = [];
+		for (key => value in easterEggs)
+			kvps.push([key, value]);
+		jobj = js.lib.Object.fromEntries(kvps);
+		outputData.easterEggs = jobj;
+		kvps = [];
+		for (key => value in levelStatistics)
+			kvps.push([key, value]);
+		jobj = js.lib.Object.fromEntries(kvps);
+		outputData.levelStatistics = jobj;
 		#end
 		var json = Json.stringify(outputData);
 		#if (hl && !android)
@@ -204,6 +266,12 @@ class Settings {
 			for (key => value in highScoreData) {
 				highScores.set(key, value);
 			}
+			var easterEggData:DynamicAccess<Float> = json.easterEggs;
+			if (easterEggData != null) {
+				for (key => value in easterEggData) {
+					easterEggs.set(key, value);
+				}
+			}
 			optionsSettings = json.options;
 			if (optionsSettings.fov == 0 #if js || optionsSettings.fov == null #end)
 				optionsSettings.fov = 60;
@@ -211,7 +279,22 @@ class Settings {
 			if (json.touch != null) {
 				touchSettings = json.touch;
 			}
-			progression = json.progression;
+			if (json.stats != null) {
+				playStatistics = json.stats;
+			}
+			if (json.levelStatistics != null) {
+				var levelStatData:DynamicAccess<PlayStatistics> = json.levelStatistics;
+				for (key => value in levelStatData) {
+					levelStatistics.set(key, value);
+				}
+			}
+			#if js
+			if (optionsSettings.marbleIndex == null) {
+				optionsSettings.marbleIndex = 0;
+				optionsSettings.marbleSkin = "base";
+				optionsSettings.marbleModel = "data/shapes/balls/ball-superball.dts";
+			}
+			#end
 			highscoreName = json.highscoreName;
 		} else {
 			save();

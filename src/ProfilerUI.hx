@@ -8,6 +8,8 @@ class ProfilerUI {
 	var fpsCounter:Text;
 	var debugProfiler:h3d.impl.Benchmark;
 
+	public var fps:Float;
+
 	public static var instance:ProfilerUI;
 
 	public function new(s2d:h2d.Scene) {
@@ -36,6 +38,7 @@ class ProfilerUI {
 	}
 
 	public static function update(fps:Float) {
+		instance.fps = fps;
 		// instance.fpsCounter.text = "FPS: " + fps;
 	}
 }

@@ -6,9 +6,12 @@ import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.DtsObject;
 import src.ResourceLoaderWorker;
+import src.ResourceLoader;
 
 class Gem extends DtsObject {
 	public var pickedUp:Bool;
+
+	var gemColor:String;
 
 	public function new(element:MissionElementItem) {
 		super();
@@ -25,6 +28,7 @@ class Gem extends DtsObject {
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 		this.identifier = "Gem" + color;
 		this.matNameOverride.set('base.gem', color + ".gem");
+		gemColor = color + ".gem";
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

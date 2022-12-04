@@ -1,5 +1,6 @@
 package src;
 
+import shapes.PowerUp;
 import haxe.io.BytesInput;
 import haxe.zip.Huffman;
 import haxe.io.Bytes;
@@ -29,12 +30,17 @@ class ReplayFrame {
 	var marbleOrientation:Quat;
 	var marbleAngularVelocity:Vector;
 	var marbleStateFlags:EnumFlags<ReplayMarbleState>;
+	var powerupPickup:String;
 	// Camera
 	var cameraPitch:Float;
 	var cameraYaw:Float;
 	// Input
 	var marbleX:Float;
 	var marbleY:Float;
+	// Gravity
+	var gravity:Vector;
+	var gravityInstant:Bool;
+	var gravityChange:Bool;
 
 	public function new() {}
 
@@ -98,6 +104,22 @@ class ReplayFrame {
 		interpFrame.marbleX = this.marbleX;
 		interpFrame.marbleY = this.marbleY;
 
+		// Gravity
+		if (this.gravityChange) {
+			interpFrame.gravity = this.gravity.clone();
+			interpFrame.gravityInstant = this.gravityInstant;
+			interpFrame.gravityChange = true;
+		}
+		if (next.gravityChange) {
+			interpFrame.gravity = next.gravity.clone();
+			interpFrame.gravityInstant = next.gravityInstant;
+			interpFrame.gravityChange = true;
+		}
+
+		if (this.powerupPickup != null) {
+			interpFrame.powerupPickup = this.powerupPickup;
+		}
+
 		return interpFrame;
 	}
 
@@ -123,6 +145,21 @@ class ReplayFrame {
 		bw.writeFloat(this.cameraYaw);
 		bw.writeFloat(this.marbleX);
 		bw.writeFloat(this.marbleY);
+		if (this.gravityChange) {
+			bw.writeByte(1);
+			bw.writeFloat(this.gravity.x);
+			bw.writeFloat(this.gravity.y);
+			bw.writeFloat(this.gravity.z);
+			bw.writeByte(this.gravityInstant ? 1 : 0);
+		} else {
+			bw.writeByte(0);
+		}
+		if (this.powerupPickup != null) {
+			bw.writeByte(1);
+			bw.writeStr(this.powerupPickup);
+		} else {
+			bw.writeByte(0);
+		}
 	}
 
 	public function read(br:BytesReader) {
@@ -138,6 +175,18 @@ class ReplayFrame {
 		this.cameraYaw = br.readFloat();
 		this.marbleX = br.readFloat();
 		this.marbleY = br.readFloat();
+		if (br.readByte() == 1) {
+			this.gravity = new Vector(br.readFloat(), br.readFloat(), br.readFloat());
+			this.gravityInstant = br.readByte() == 1;
+			this.gravityChange = true;
+		} else {
+			this.gravityChange = false;
+		}
+		if (br.readByte() == 1) {
+			this.powerupPickup = br.readStr();
+		} else {
+			this.powerupPickup = null;
+		}
 	}
 }
 
@@ -197,7 +246,7 @@ class Replay {
 	var currentPlaybackFrameIdx:Int;
 	var currentPlaybackTime:Float;
 
-	var version:Int = 1;
+	var version:Int = 3;
 
 	public function new(mission:String) {
 		this.mission = mission;
@@ -235,6 +284,13 @@ class Replay {
 			currentRecordFrame.marbleStateFlags.set(InstantTeleport);
 	}
 
+	public function recordPowerupPickup(powerup:PowerUp) {
+		if (powerup == null)
+			currentRecordFrame.powerupPickup = ""; // Use powerup
+		else
+			currentRecordFrame.powerupPickup = powerup.identifier;
+	}
+
 	public function recordMarbleInput(x:Float, y:Float) {
 		currentRecordFrame.marbleX = x;
 		currentRecordFrame.marbleY = y;
@@ -243,6 +299,13 @@ class Replay {
 	public function recordCameraState(pitch:Float, yaw:Float) {
 		currentRecordFrame.cameraPitch = pitch;
 		currentRecordFrame.cameraYaw = yaw;
+	}
+
+	public function recordGravity(gravity:Vector, instant:Bool) {
+		currentRecordFrame.gravityChange = true;
+		currentRecordFrame.gravity = gravity.clone();
+		if (instant)
+			currentRecordFrame.gravityInstant = instant;
 	}
 
 	public function recordTrapdoorState(lastContactTime:Float, lastDirection:Int, lastCompletion:Float) {
@@ -283,14 +346,41 @@ class Replay {
 			return false;
 		}
 		var nextFrame = this.frames[this.currentPlaybackFrameIdx + 1];
+		var stateFlags = 0;
+		var nextGravityChange:Bool = false;
+		var nextGravityState:{
+			instant:Bool,
+			gravity:Vector
+		} = null;
+		var powerup:String = null;
 		while (nextFrame.time <= nextT) {
 			this.currentPlaybackFrameIdx++;
 			if (this.currentPlaybackFrameIdx + 1 >= this.frames.length) {
 				return false;
 			}
 			var testNextFrame = this.frames[this.currentPlaybackFrameIdx + 1];
+			stateFlags |= testNextFrame.marbleStateFlags.toInt();
+			if (testNextFrame.gravityChange) {
+				nextGravityChange = true;
+				nextGravityState = {
+					instant: testNextFrame.gravityInstant,
+					gravity: testNextFrame.gravity.clone()
+				};
+			}
+			if (testNextFrame.powerupPickup != null) {
+				powerup = testNextFrame.powerupPickup;
+			}
 			startFrame = nextFrame;
 			nextFrame = testNextFrame;
+		}
+		nextFrame.marbleStateFlags = EnumFlags.ofInt(stateFlags);
+		if (nextGravityChange) {
+			nextFrame.gravityChange = true;
+			nextFrame.gravityInstant = nextGravityState.instant;
+			nextFrame.gravity = nextGravityState.gravity.clone();
+		}
+		if (powerup != null) {
+			nextFrame.powerupPickup = powerup;
 		}
 		this.currentPlaybackFrame = startFrame.interpolate(nextFrame, nextT);
 		this.currentPlaybackTime += dt;

@@ -35,6 +35,8 @@ abstract class PowerUp extends DtsObject {
 	public var element:MissionElementItem;
 	public var pickupSound:Sound;
 
+	var customPickupMessage:String = null;
+
 	public function new(element:MissionElementItem) {
 		super();
 		this.isCollideable = false;
@@ -54,7 +56,10 @@ abstract class PowerUp extends DtsObject {
 			if (this.autoUse)
 				this.use(timeState);
 
-			this.level.displayAlert('You picked up a ${this.pickUpName}!');
+			if (customPickupMessage != null)
+				this.level.displayAlert(customPickupMessage);
+			else
+				this.level.displayAlert('You picked up a ${this.pickUpName}!');
 			if (this.element.showhelponpickup == "1" && !this.autoUse)
 				this.level.displayHelp('Press <func:bind mousefire> to use the ${this.pickUpName}!');
 

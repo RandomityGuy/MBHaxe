@@ -1,5 +1,10 @@
 package src;
 
+import h3d.mat.MaterialDatabase;
+import shaders.MarbleReflection;
+import shaders.CubemapRenderer;
+import h3d.shader.AlphaMult;
+import shaders.DtsTexture;
 import collision.gjk.GJK;
 import collision.gjk.ConvexHull;
 import hxd.snd.effect.Pitch;
@@ -167,6 +172,8 @@ class Marble extends GameObject {
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
 
+	var teleportEnableTime:Null<Float> = null;
+	var teleportDisableTime:Null<Float> = null;
 	var bounceEmitDelay:Float = 0;
 
 	var bounceEmitterData:ParticleData;
@@ -187,22 +194,18 @@ class Marble extends GameObject {
 
 	public var prevPos:Vector;
 
+	var cloak:Bool = false;
+
+	var teleporting:Bool = false;
+
+	public var cubemapRenderer:CubemapRenderer;
+
 	public function new() {
 		super();
-		var geom = Sphere.defaultUnitSphere();
-		geom.addUVs();
-		var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
-		var marbleMaterial = Material.create(marbleTexture);
-		marbleMaterial.shadows = false;
-		marbleMaterial.castShadows = true;
-		var obj = new Mesh(geom, marbleMaterial, this);
-		obj.scale(_radius);
 
 		this.velocity = new Vector();
 		this.omega = new Vector();
 		this.camera = new CameraController(cast this);
-
-		this.collider = new SphereCollisionEntity(cast this);
 
 		this.bounceEmitterData = new ParticleData();
 		this.bounceEmitterData.identifier = "MarbleBounceParticle";
@@ -231,6 +234,52 @@ class Marble extends GameObject {
 
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.level = level;
+
+		var marbleDts = new DtsObject();
+		marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
+		marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
+		marbleDts.showSequences = false;
+		marbleDts.useInstancing = false;
+		marbleDts.init(null, () -> {}); // SYNC
+		for (mat in marbleDts.materials) {
+			mat.castShadows = true;
+			mat.shadows = true;
+			mat.receiveShadows = false;
+			// mat.mainPass.culling = None;
+
+			if (Settings.optionsSettings.reflectiveMarble) {
+				this.cubemapRenderer = new CubemapRenderer(level.scene, level.sky);
+				mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+			}
+		}
+
+		// Calculate radius according to marble model (egh)
+		var b = marbleDts.getBounds();
+		var avgRadius = (b.xSize + b.ySize + b.zSize) / 6;
+		this._radius = avgRadius;
+
+		this.collider = new SphereCollisionEntity(cast this);
+
+		this.addChild(marbleDts);
+
+		// var geom = Sphere.defaultUnitSphere();
+		// geom.addUVs();
+		// var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
+		// var marbleMaterial = Material.create(marbleTexture);
+		// marbleMaterial.shadows = false;
+		// marbleMaterial.castShadows = true;
+		// marbleMaterial.mainPass.removeShader(marbleMaterial.textureShader);
+		// var dtsShader = new DtsTexture();
+		// dtsShader.texture = marbleTexture;
+		// dtsShader.currentOpacity = 1;
+		// marbleMaterial.mainPass.addShader(dtsShader);
+		// var obj = new Mesh(geom, marbleMaterial, this);
+		// obj.scale(_radius * 0.1);
+		// if (Settings.optionsSettings.reflectiveMarble) {
+		// 	this.cubemapRenderer = new CubemapRenderer(level.scene);
+		// 	marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+		// }
+
 		this.forcefield = new DtsObject();
 		this.forcefield.dtsPath = "data/shapes/images/glow_bounce.dts";
 		this.forcefield.useInstancing = true;
@@ -784,7 +833,7 @@ class Marble extends GameObject {
 				+ relLocalVel.z * deltaT * 2,
 				radius * 1.1);
 
-			var surfaces = obj.grid == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.grid.boundingSearch(boundThing);
+			var surfaces = obj.bvh == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.bvh.boundingSearch(boundThing);
 
 			for (surf in surfaces) {
 				var surface:CollisionSurface = cast surf;
@@ -1069,7 +1118,7 @@ class Marble extends GameObject {
 			boundThing.addSpherePos(localpos.x + relLocalVel.x * dt * 2, localpos.y + relLocalVel.y * dt * 2, localpos.z + relLocalVel.z * dt * 2,
 				radius * 1.1);
 
-			var surfaces = obj.grid == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.grid.boundingSearch(boundThing);
+			var surfaces = obj.bvh == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.bvh.boundingSearch(boundThing);
 
 			var tform = obj.transform.clone();
 
@@ -1216,6 +1265,9 @@ class Marble extends GameObject {
 				}
 			}
 
+			var stoppedPaths = false;
+			var tempState = timeState.clone();
+
 			var intersectData = testMove(velocity, this.getAbsPos().getPosition(), timeStep, _radius, true); // this.getIntersectionTime(timeStep, velocity);
 			var intersectT = intersectData.t;
 
@@ -1230,7 +1282,6 @@ class Marble extends GameObject {
 				// this.setPosition(intersectData.position.x, intersectData.position.y, intersectData.position.z);
 			}
 
-			var tempState = timeState.clone();
 			tempState.dt = timeStep;
 
 			it++;
@@ -1240,7 +1291,7 @@ class Marble extends GameObject {
 			var isCentered:Bool = cmf.result;
 			var aControl = cmf.aControl;
 			var desiredOmega = cmf.desiredOmega;
-			var stoppedPaths = false;
+
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
 			var A = this.getExternalForces(timeState.currentAttemptTime, m, timeStep);
 			var retf = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
@@ -1313,6 +1364,9 @@ class Marble extends GameObject {
 				pTime.currentAttemptTime = piTime;
 				this.heldPowerup.use(pTime);
 				this.heldPowerup = null;
+				if (this.level.isRecording) {
+					this.level.replay.recordPowerupPickup(null);
+				}
 			}
 
 			if (this.controllable && this.prevPos != null) {
@@ -1385,7 +1439,10 @@ class Marble extends GameObject {
 			var expectedVel = this.level.replay.currentPlaybackFrame.marbleVelocity.clone();
 			var expectedOmega = this.level.replay.currentPlaybackFrame.marbleAngularVelocity.clone();
 
-			this.getAbsPos().setPosition(expectedPos);
+			this.setPosition(expectedPos.x, expectedPos.y, expectedPos.z);
+			var tform = this.collider.transform;
+			tform.setPosition(new Vector(expectedPos.x, expectedPos.y, expectedPos.z));
+			this.collider.setTransform(tform);
 			this.velocity = expectedVel;
 			this.setRotationQuat(this.level.replay.currentPlaybackFrame.marbleOrientation.clone());
 			this.omega = expectedOmega;
@@ -1396,6 +1453,7 @@ class Marble extends GameObject {
 		}
 
 		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+		this.updateTeleporterState(timeState);
 
 		this.trailEmitter();
 		if (bounceEmitDelay > 0)
@@ -1453,6 +1511,40 @@ class Marble extends GameObject {
 		this.helicopterEnableTime = time;
 	}
 
+	function updateTeleporterState(time:TimeState) {
+		var teleportFadeCompletion:Float = 0;
+
+		if (this.teleportEnableTime != null)
+			teleportFadeCompletion = Util.clamp((time.currentAttemptTime - this.teleportEnableTime) / 0.5, 0, 1);
+		if (this.teleportDisableTime != null)
+			teleportFadeCompletion = Util.clamp(1 - (time.currentAttemptTime - this.teleportDisableTime) / 0.5, 0, 1);
+
+		if (teleportFadeCompletion > 0) {
+			var ourDts:DtsObject = cast this.children[0];
+			ourDts.setOpacity(Util.lerp(1, 0.25, teleportFadeCompletion));
+			this.teleporting = true;
+		} else {
+			if (this.teleporting) {
+				var ourDts:DtsObject = cast this.children[0];
+				ourDts.setOpacity(1);
+				this.teleporting = false;
+			}
+		}
+	}
+
+	public function setCloaking(active:Bool, time:TimeState) {
+		this.cloak = active;
+		if (this.cloak) {
+			var completion = (this.teleportDisableTime != null) ? Util.clamp((time.currentAttemptTime - this.teleportDisableTime) / 0.5, 0, 1) : 1;
+			this.teleportEnableTime = time.currentAttemptTime - 0.5 * (1 - completion);
+			this.teleportDisableTime = null;
+		} else {
+			var completion = Util.clamp((time.currentAttemptTime - this.teleportEnableTime) / 0.5, 0, 1);
+			this.teleportDisableTime = time.currentAttemptTime - 0.5 * (1 - completion);
+			this.teleportEnableTime = null;
+		}
+	}
+
 	public override function reset() {
 		this.velocity = new Vector();
 		this.collider.velocity = new Vector();
@@ -1461,5 +1553,14 @@ class Marble extends GameObject {
 		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
 		this.lastContactNormal = new Vector(0, 0, 1);
+		this.cloak = false;
+		if (this.teleporting) {
+			var mesh:Mesh = cast this.children[0];
+			mesh.material.mainPass.removeShader(mesh.material.mainPass.getShader(AlphaMult));
+			mesh.material.blendMode = None;
+		}
+		this.teleporting = false;
+		this.teleportDisableTime = null;
+		this.teleportEnableTime = null;
 	}
 }

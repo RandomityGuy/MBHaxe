@@ -1,0 +1,259 @@
+// UT Tip: Try not to use any powerups along your way... except for the last one.
+// Rep. by Phil
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         level = "18";
+         name = "Recoil Training";
+         music = "Rising Temper.ogg";
+         artist = "Ian";
+         type = "beginner";
+         startHelpText = "Control your bounce as you hit the floor!";
+         desc = "Practice your skills on bouncing!";
+         goldTime = "22000";
+         UltimateTime = "17000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/Beginner/Beginner_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.638261 0.459006 -0.61801";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/RecoilTraining.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(EndPoint) {
+      position = "-4 -10 -120";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Item() {
+      position = "-3.5 14.5 -8";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2 20 -12";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11 23 -48";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "39 23 -49.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "35 9 -64";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "30 -4 -75.8";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "17 23 -47.6";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11 -10 -112";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 -10 -111.8";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape(StartPoint) {
+      position = "-3 3 0.5";
+      rotation = "0 0 -1 45";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new Trigger() {
+      position = "16.4953 26.0001 -48";
+      rotation = "1 0 0 0";
+      scale = "1 6 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Use the Marble Recoil powerup to help your marble bounce higher!";
+   };
+   new Trigger() {
+      position = "28 -2 -76";
+      rotation = "1 0 0 0";
+      scale = "4 4 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "The Anti-Recoil Powerup stops the marble from rebounding.";
+   };
+   new Trigger(Bounds) {
+      position = "-15 35 -126.8";
+      rotation = "1 0 0 0";
+      scale = "60 54 166.5";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "-4 -11 -115";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape() {
+      position = "-5.7 3.7 0.5";
+      rotation = "0 0 -1 20";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new StaticShape() {
+      position = "28.5 -3 -76";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new StaticShape() {
+      position = "-8 11.6 -4";
+      rotation = "0 0 1 135";
+      scale = "1 1 1";
+      dataBlock = "SignDown";
+   };
+   new StaticShape() {
+      position = "-3.3 17.7 -8";
+      rotation = "0 0 1 135";
+      scale = "1 1 1";
+      dataBlock = "SignDown";
+   };
+   new StaticShape() {
+      position = "4 22 -12";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      dataBlock = "SignDown";
+   };
+   new StaticShape() {
+      position = "41 20.8 -49.5";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new StaticShape() {
+      position = "37.2 6.2 -64";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new Item() {
+      position = "4 -6 -43";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "4 -14 -48.3";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "14 28.8 16.4";
+      rotation = "1 0 0 50";
+      scale = "1 1 1.3";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

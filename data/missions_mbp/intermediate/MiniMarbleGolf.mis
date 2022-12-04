@@ -1,0 +1,285 @@
+// UT Tip: Slow down as you jump onto the flower, you'll find it much easier.
+// Rep. by Pablo
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         level = "6";
+         music = "Pianoforte.ogg";
+         name = "Mini Marble Golf";
+         startHelpText = "Beat the Par, the Birdie and the Eagle!";
+         type = "intermediate";
+         artist = "Matan";
+         desc = "Roll along this small, garden-style course.";
+         time = "30000";
+         goldTime = "10000";
+         UltimateTime = "5000";
+         AlarmStartTime = "5";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.900000 0.900000 0.900000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/Intermediate/Intermediate_Sky.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.544508 0.439467 -0.714409";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         scale = "1 1 1";
+         locked = "true";
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "0 0 -1.87";
+         rotation = "1 0 0 0";
+         scale = "0 0 0";
+         dataBlock = "StartPad";
+      };
+   };
+   new StaticShape(EndPoint) {
+      position = "28.2604 341.578 -7.1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "0 0 0";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "1000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "0 0 0";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "2200";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "0 -7 4";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "300";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "0 -1 0";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "700";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "0 6 5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "5000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "0 7 4";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "1000";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "-0.676164 25.5908 -3.61061";
+         rotation = "1 0 0 9.99997";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = $usermods @ "/data/interiors_MBP/MMG.dif";
+         interiorIndex = "0";
+         basePosition = "-0.676164 25.5908 -3.61061";
+         baseRotation = "1 0 0 9.99997";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new Trigger(Bounds) {
+      position = "-23.2612 368.373 -9.8225";
+      rotation = "1 0 0 0";
+      scale = "70 450 100";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "27.9919 237.298 -0.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0.201048 -31.672 4";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Item() {
+      position = "28.2014 148.259 0.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "0.7051 -27.7399 1.44";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/MMG.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "23.6791 112.861 5.66";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "3500";
+   };
+   new Item() {
+      position = "30.6791 95.0612 5.33";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "3000";
+   };
+   new StaticShape() {
+      position = "30.2416 341.704 5.72416";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new Item() {
+      position = "26.8553 172.855 0.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "27.0791 128.061 6";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "5000";
+   };
+   new Item() {
+      position = "27.0791 79.4612 5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "2500";
+   };
+   new Item() {
+      position = "28.1569 193.439 0.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(water_oob) {
+      position = "19.492 179.502 -0.426259";
+      rotation = "1 0 0 0";
+      scale = "20 23.5 1";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger(water_oob) {
+      position = "17.478 227.022 1.74779";
+      rotation = "1 0 0 0";
+      scale = "20 23.5 1";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger(water_oob) {
+      position = "19.2584 281.882 1.67218";
+      rotation = "1 0 0 0";
+      scale = "20 31 1";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "0.2 -31.8 19";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.2";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Rising Temper.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

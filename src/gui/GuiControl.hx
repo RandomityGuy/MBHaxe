@@ -47,6 +47,7 @@ class GuiControl {
 
 	var _entered:Bool = false;
 	var _skipNextEvent:Bool = false;
+	var _mousePos:Vector = null;
 
 	var imageResources:Array<Resource<Image>> = [];
 	var textureResources:Array<Resource<Texture>> = [];
@@ -93,6 +94,17 @@ class GuiControl {
 				if (!_entered) {
 					_entered = true;
 					this.onMouseEnter(mouseState);
+				}
+				if (_entered) {
+					if (this._mousePos != null) {
+						if (!this._mousePos.equals(mouseState.position)) {
+							this.onMouseMove(mouseState);
+							this._mousePos = mouseState.position.clone();
+						}
+					} else {
+						this._mousePos = mouseState.position.clone();
+						this.onMouseMove(mouseState);
+					}
 				}
 			} else {
 				if (_entered) {
@@ -173,6 +185,10 @@ class GuiControl {
 				rect.extent.y *= uiScaleFactor;
 			}
 		}
+		if (this.parent != null) {
+			rect.scroll.x = parentRect.scroll.x;
+			rect.scroll.y = parentRect.scroll.y;
+		}
 		return rect;
 	}
 
@@ -235,6 +251,10 @@ class GuiControl {
 	public function onMouseEnter(mouseState:MouseState) {}
 
 	public function onMouseLeave(mouseState:MouseState) {}
+
+	public function onMouseMove(mouseState:MouseState) {}
+
+	public function onScroll(scrollX:Float, scrollY:Float) {}
 
 	public function onRemove() {
 		for (c in this.children) {

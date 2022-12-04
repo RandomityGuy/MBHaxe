@@ -15,7 +15,7 @@ class Helicopter extends PowerUp {
 		this.isTSStatic = false;
 		this.showSequences = false;
 		this.identifier = "Helicopter";
-		this.pickUpName = "Gyrocopter PowerUp";
+		this.pickUpName = "Helicopter PowerUp";
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

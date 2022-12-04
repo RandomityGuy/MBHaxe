@@ -1,0 +1,279 @@
+// UT Tip: Get a good path and go fast!
+// Rep. by Phil
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         artist = "Andrew";
+         desc = "Use the available powerups and your best marbling skills to get all the diamonds.";
+         name = "Slope Madness";
+         level = "12";
+         startHelpText = "Slopes have never been so much fun!";
+         music = "Grudge.ogg";
+         type = "Advanced";
+         goldTime = "44000";
+         UltimateTime = "22000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.900000 0.900000 0.900000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/Advanced/Advanced_Sky.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.544508 0.439467 -0.714409";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         scale = "1 1 1";
+         locked = "true";
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+   };
+   new Trigger(Bounds) {
+      position = "-17.2267 50.0154 478.302";
+      rotation = "1 0 0 0";
+      scale = "90 90 100";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape(StartPoint) {
+      position = "27.8801 -29.1655 484.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new StaticShape(EndPoint) {
+      position = "27.9412 26.7743 484.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new StaticShape() {
+      position = "28.736 27.066 491.162";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new Item() {
+      position = "27.7244 -31.6534 483.26";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Item() {
+      position = "16.2895 -7.28657 482.931";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "39.8025 -11.1669 482.949";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "33.8651 10.0661 482.62";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "49.8104 9.4858 483.346";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11.6069 -20.2486 486.749";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "33.2072 -3.43607 485.749";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "23.2679 -15.2066 485.749";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "29.5705 4.12127 488.149";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "33.9343 -23.2657 484.949";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "3.98259 6.0678 495.949";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.75204 0.760284 486.949";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15.2509 6.9165 486.3";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "52.5841 -15.1226 484.349";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "49.8148 2.89412 488.949";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "41.7678 10.9193 485.633";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "41.7255 23.1601 493.749";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "20.3707 12.9257 486.949";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12.0324 14.2785 486.149";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "27.8874 -1.1846 482.716";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/SlopeMadness.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "27.89 -1.175 509.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.25";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Rising Temper.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

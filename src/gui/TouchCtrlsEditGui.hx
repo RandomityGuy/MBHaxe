@@ -8,10 +8,11 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleGame;
 import src.Settings;
+import src.Util;
 
 class TouchCtrlsEditGui extends GuiImage {
 	public function new() {
-		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		var img = Math.random() >= 0.7 ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -30,11 +31,11 @@ class TouchCtrlsEditGui extends GuiImage {
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
 		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
-		var mainMenuButton = new GuiButton(loadButtonImages("data/ui/options/mainm"));
-		mainMenuButton.position = new Vector(500, 400);
-		mainMenuButton.extent = new Vector(121, 53);
+		var mainMenuButton = new GuiButton(loadButtonImages("data/ui/menu/options"));
+		mainMenuButton.position = new Vector(380, 15);
+		mainMenuButton.extent = new Vector(247, 164);
 		mainMenuButton.horizSizing = Left;
-		mainMenuButton.vertSizing = Top;
+		mainMenuButton.vertSizing = Bottom;
 		mainMenuButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.setContent(new OptionsDlg());
 		}

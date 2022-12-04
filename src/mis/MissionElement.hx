@@ -30,6 +30,8 @@ class MissionElementBase {
 
 	/** Is unique for every element in the mission file. */
 	var _id:Int;
+
+	var fields:Map<String, Array<String>>;
 }
 
 @:publicFields
@@ -52,6 +54,9 @@ class MissionElementScriptObject extends MissionElementBase {
 	var level:String;
 	var artist:String;
 	var goldtime:String;
+	var ultimatetime:String;
+	var music:String;
+	var alarmstarttime:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;
@@ -156,6 +161,7 @@ class MissionElementItem extends MissionElementBase {
 	var rotate:String;
 	var showhelponpickup:String;
 	var timebonus:Null<String>;
+	var timepenalty:Null<String>;
 
 	public function new() {
 		_type = MissionElementType.Item;
@@ -225,6 +231,22 @@ class MissionElementTrigger extends MissionElementBase {
 	var targettime:Null<String>;
 	var instant:Null<String>;
 	var icontinuetottime:Null<String>;
+
+	// checkpoint stuff:
+	var respawnpoint:Null<String>;
+	var add:Null<String>;
+	var sub:Null<String>;
+	var gravity:Null<String>;
+	var disableOob:Null<String>;
+	// teleport/destination trigger stuff:
+	var destination:Null<String>;
+	var delay:Null<String>;
+	var centerdestpoint:Null<String>;
+	var keepvelocity:Null<String>;
+	var inversevelocity:Null<String>;
+	var keepangular:Null<String>;
+	var keepcamera:Null<String>;
+	var camerayaw:Null<String>;
 
 	public function new() {
 		_type = MissionElementType.Trigger;

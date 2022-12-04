@@ -1,0 +1,28 @@
+Online: The Main Screen
+
+Welcome to Marble Blast Platinum Online! This is the main hub where you can access everything that deals with Platinum Online.
+
+The main window is dedicated to the server chat, and a list of who is online. Every user has in brackets his current status, such as Hosting, Playing, Super Challenge, Away and more.
+
+The buttons that exist are:
+Single Player: Play Singleplayer levels of: Gold, Platinum, Ultra and Customs. Please note you cannot add your own custom levels, and therefore are limited to the ones provided for you. There are more than 500 levels to play, so there is definitely no shortage. You can also play Challenges and Super Challenges from there. More on these later.
+
+Multiplayer: Play Multiplayer levels; you can either play the official levels (which have ratings enabled) or custom levels (ratings disabled). You can add your own custom levels and share with the community, but more on that later.
+
+Leaderboards: Check out the current Leaderboards ranking on 7 different areas: General ratings, Platinum levels, Gold levels, Ultra levels, Custom levels, Challenge points, and Multiplayer ratings. General ratings are cumulative of Platinum, Gold, Ultra, Custom and achievement points won from these games. Challenge and Multiplayer are affected by their respective achievements as well, and do not contribute to General ratings. You can press the right and left arrows to scroll between the rankings.
+
+My Profile: You can loads your profile information and statistics from here, and also see who are your friends. The buttons on the bottom are:
+Close: Close your profile and return to the main hub
+Achievements: Load the achievements window. It will load all the achievements that can be completed Online in this sequence: Gold/Platinum, Ultra, Challenges and Multiplayer.
+Statistics: Loads all your statistics for the various games, and gives you a thorough breakdown.
+
+Options: Go to the Options Menu
+
+Log Out: Quit Platinum Online and go back to the Main Menu. Don't press it :)
+
+You can press on anyone's username on the right side to load their profile. You can then see their user information, and also check out their achievements and statistics.
+Most users are in black color. Users in blue color are Moderators, and those in red color are Administrators.
+
+Helpful commands to write in chat:
+/help format : Tells you how to use basic formatting styles in chat, such as bold and italics, as well as using colors.
+/help cmdlist : Tells you a number of commands that you can type in chat, such as /me and /slap among others.

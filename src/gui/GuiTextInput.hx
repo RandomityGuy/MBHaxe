@@ -15,10 +15,17 @@ class GuiTextInput extends GuiControl {
 	var text:TextInput;
 	var justify:Justification = Left;
 
+	var onTextChange:String->Void;
+
 	public function new(font:h2d.Font) {
 		super();
 		this.text = new TextInput(font);
 		this.text.textColor = 0;
+		this.text.onChange = () -> {
+			if (onTextChange != null) {
+				onTextChange(this.text.text);
+			}
+		};
 	}
 
 	public override function render(scene2d:Scene) {
@@ -59,7 +66,8 @@ class GuiTextInput extends GuiControl {
 
 		#if js
 		if (Util.isTouchDevice()) {
-			text.text = js.Browser.window.prompt("Enter your name", text.text);
+			text.text = js.Browser.window.prompt("Enter your input", text.text);
+			onTextChange(this.text.text);
 			var canvas = js.Browser.document.querySelector("#webgl");
 			// canvas.focus();
 			// js.Browser.document.documentElement.requestFullscreen();

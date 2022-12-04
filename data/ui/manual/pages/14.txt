@@ -1,0 +1,69 @@
+Online: Challenges
+
+
+Challenges and Super Challenges are two new game modes, introduced in 1.50. Challenges allows you to play a 1v1 against a person online on a certain level, and the person who has either the lowest time or finishes a level first, wins. Super Challenges take place on several levels in a row, and can have up to 4 players competing against each other.
+
+Note: you can only challenge players who are idling in chat. Those currently playing in Singleplayer, Challenges, Super Challenges, or Multiplayer, cannot be invited. For obvious reasons, you cannot Challenge or Super Challenge players who are in the Webchat or in other mods, such as Fubar or PlatinumQuest.
+
+
+
+When pressing Challenge, the level you are currently on in the Level Select screen is the level that will be played.
+
+Challenges window shows you the available players to challenge as well as the following:
+
+
+
+Race: If selected, two players race to the finish. First to beat a level, wins.
+
+
+
+Attempts: If selected, two players will replay the same level a number of times, and the person with the lowest Final Time at the end of their attempts will win. Final Time is the time displayed in-game.
+
+
+
+Timeout: When a player finishes a Race or their Attempts, a Timeout countdown timer will appear on the bottom right of the screen, above the chat, for the opposing player. That player has the amount of time pre-selected to finish the level (or Attempts) or risk an automatic loss. The Timeout timer is in minutes, and goes from 1 to 20 minutes.
+
+
+
+Attempts: Appears when Attempts mode is selected. Move the slider to choose how many attempts every player can have for the chosen level. An Attempt counts as: a player finishes the level, the player goes Out of Bounds (no checkpoints hit), the player resets the level. If you finished the level, you wlll be forced to replay the level again to try and get a better time.
+
+
+
+
+
+Super Challenges work slightly different to Challenges. Super Challenges contain several levels which are played in a row, and the objective is to be the first to finish all of them. You can see what levels each Super Challenge contains on the level slideshow on the bottom right, as well as the amount of levels in the Super Challenge. In addition the cumulative total of Gold/Platinum and Ultimate Times display, as well as your own progress of the Super Challenge, and if completed, it will display your best score and percentage. The percentage is based on the amount of levels completed and how many times you have had to restart either manually or because you fell Out of Bounds without hitting checkpoints.
+
+
+
+Super Challenges can be played with up to 4 players (selecting three other players from the list), or played by yourself in practice mode (select practice mode on the list). You can also see which achievements are available (these are for both Challenges and Super Challenges), and select the following options:
+
+
+
+Timeout: When a player finishes a Super Challenge, the other opponent(s) receive a Timeout countdown timer on their bottom right of the screen, above the chat. That player has the amount of time pre-selected to finish the level (or Attempts) or risk an automatic loss. The Timeout timer is in minutes, and is usually either 1 or 2 minutes. Most Super Challenges contain a pre-defined Countdown timer that lasts from 5 minutes and up to 1 hour, depending on the length of the Super Challenge.
+
+
+
+Show Progress: Show your progress on the bottom left of the screen (in-game).
+
+
+
+Show Percents: Show your percentage as you progress in the Super Challenge (in-game). The more times you restart a level, either manually or by going Out of Bounds if no checkpoints are hit, then the lower the percentage is.
+
+
+
+Real-Time Attack (Practice): Changes the way practice mode works by comparing your best time to your current run, and then reports to you the time difference (whether you're behind or ahead) on every level. It also gives you your best time ever, your Personal Best (PB), the total time you've currently played, your current time, and the Sum of Best Segments (sum of your best times on every level in Super Challenge RTA mode). This is an alternative to LiveSplit and other timer programs, and is used for speedrunners who want to stream.
+
+
+
+Winning Challenges and Super Challenges rewards you with Challenge points. Super Challenges are worth more points, and the more players playing in a Super Challenge, the more points you gain for winning that particular Super Challenge. Players who have the best lowest overall time, gain an additional bonus of several points. This is a good incentive to get the lowest overall time even if you have lost the Super Challenge.
+
+Note: Even if you lost a Challenge or a Super Challenge, you still gain at least one point for completion.
+
+
+
+Achieving either Platinum or Ultimate on your percentage nets you an additional amount of points per Super Challenge. This is awarded every time you finish a Super Challenge in Platinum or Ultimate percentages.
+
+
+
+It is also possible to forfeit from Challenges or Super Challenges. However doing so loses points, and this point loss is greater as there are more players in the Super Challenge and as the Super Challenge is more difficult or long.
+

@@ -173,7 +173,7 @@ class ManifestEntry extends FileEntry {
 	private function _exists(name:String):Bool {
 		if (isDir) {
 			for (c in contents)
-				if (c.name == name)
+				if (c.name.toLowerCase() == name.toLowerCase())
 					return true;
 		}
 		return false;
@@ -182,7 +182,7 @@ class ManifestEntry extends FileEntry {
 	private function _get(name:String):ManifestEntry {
 		if (isDir) {
 			for (c in contents)
-				if (c.name == name)
+				if (c.name.toLowerCase() == name.toLowerCase())
 					return c;
 		}
 		return null;
@@ -268,7 +268,7 @@ class ManifestFileSystem implements FileSystem {
 			}
 			var entry:ManifestEntry = new ManifestEntry(this, Path.withoutDirectory(original), original, file, original);
 			r.contents.push(entry);
-			manifest.set(path, entry);
+			manifest.set(path.toLowerCase(), entry);
 		}
 
 		switch (_manifest.get(0)) {
@@ -299,7 +299,7 @@ class ManifestFileSystem implements FileSystem {
 				// JSON
 				var json:Array<{path:String, original:String}> = haxe.Json.parse(_manifest.toString());
 				for (entry in json) {
-					insert(entry.path, baseDir + entry.path, entry.original);
+					insert(entry.path.toLowerCase(), baseDir + entry.path, entry.original);
 				}
 		}
 	}
@@ -314,8 +314,8 @@ class ManifestFileSystem implements FileSystem {
 
 	private function find(path:String):ManifestEntry {
 		var r = root;
-		for (p in splitPath(path)) {
-			r = r._get(p);
+		for (p in splitPath(path.toLowerCase())) {
+			r = r._get(p.toLowerCase());
 			if (r == null)
 				return null;
 		}
@@ -323,11 +323,11 @@ class ManifestFileSystem implements FileSystem {
 	}
 
 	public function exists(path:String) {
-		return find(path) != null;
+		return find(path.toLowerCase()) != null;
 	}
 
 	public function get(path:String) {
-		var entry:ManifestEntry = find(path);
+		var entry:ManifestEntry = find(path.toLowerCase());
 		if (entry == null)
 			throw new NotFound(path);
 		return entry;
@@ -339,7 +339,7 @@ class ManifestFileSystem implements FileSystem {
 	}
 
 	public function dir(path:String):Array<FileEntry> {
-		var entry:ManifestEntry = find(path);
+		var entry:ManifestEntry = find(path.toLowerCase());
 		if (entry == null)
 			throw new NotFound(path);
 		return cast entry.contents.copy();

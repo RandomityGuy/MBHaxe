@@ -1,0 +1,193 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         startHelpText = "Collect the gems as fast as you can!";
+         name = "Stepping Stones";
+         artist = "Kevin Ryan";
+         desc = "You\'ve got 50 seconds to collect the gems and get to the finish area.\nHint: Stay off the red area.";
+         type = "Advanced";
+         music = "Beach Party.ogg";
+         level = "6";
+         time = "50000";
+         goldTime = "24000";
+         AlarmStartTime = "15";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.57735 0.57735 -0.57735";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         rotation = "1 0 0 0";
+         locked = "true";
+         scale = "1 1 1";
+         position = "0 0 0";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "0 -2.4 494";
+         rotation = "0 0 1 64.7442";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+      new StaticShape(EndPoint) {
+         position = "22.2 9.4 480";
+         rotation = "0 0 1 40";
+         scale = "1 1 1";
+         dataBlock = "EndPad";
+      };
+   };
+   new SimGroup(Triggers) {
+
+      new Trigger(Bounds) {
+         position = "-168.473 147.617 439.2";
+         rotation = "1 0 0 0";
+         scale = "327.77 304.932 150";
+         dataBlock = "InBoundsTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+      };
+   };
+   new InteriorInstance() {
+      position = "0.0479157 -2.41775 490";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_mbg/intermediate/intsteppingstones.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "16.949 -11.2694 459.529";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "22 3.6 475.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.5087 6.48768 470.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11 3.8 465.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.63602 -11.4138 458.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.79273 0.739463 490.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11.0067 -2.63766 468.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-0.0524565 -14.146 462.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "16.5949 0.592021 465.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.62459 -5.44893 470.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "22.8077 9.28786 485.513";
+      rotation = "0 0 1 48.7014";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Classic Vibe.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

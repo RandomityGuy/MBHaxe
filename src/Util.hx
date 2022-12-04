@@ -9,6 +9,11 @@ import h3d.Vector;
 import src.Settings;
 
 class Util {
+	public static function mat3x3equal(a:Matrix, b:Matrix) {
+		return a._11 == b._11 && a._12 == b._12 && a._13 == b._13 && a._21 == b._21 && a._22 == b._22 && a._23 == b._23 && a._31 == b._31 && a._32 == b._32
+			&& a._33 == b._33;
+	}
+
 	public static function adjustedMod(a:Float, n:Float) {
 		var r1 = a % n;
 		var r2 = (r1 + n) % n;
@@ -200,7 +205,8 @@ class Util {
 			'\\f' => '\x0C',
 			'\\n' => '\n',
 			'\\r' => '\r',
-			"\\'" => "'"
+			"\\'" => "'",
+			"\\\"" => "\"",
 		];
 
 		for (obj => esc in specialCases) {
@@ -277,6 +283,28 @@ class Util {
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 
 		return '${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
+	}
+
+	public static function formatTimeHours(time:Float) {
+		var et = time * 1000;
+
+		var hours = Math.floor(Math.floor(et / 1000) / 3600);
+		var minutes = Math.floor(Math.floor(et / 1000) / 60) - (hours * 60);
+		var seconds = Math.floor(et / 1000) - (minutes * 60) - (hours * 3600);
+		var hundredth = Math.floor((et % 1000) / 10);
+
+		var secondsOne = seconds % 10;
+		var secondsTen = Math.floor(seconds / 10);
+		var minutesOne = minutes % 10;
+		var minutesTen = Math.floor(minutes / 10);
+		var hoursOne = hours % 10;
+		var hoursTen = Math.floor(hours / 10);
+		var hundredthOne = hundredth % 10;
+		var hundredthTen = (hundredth - hundredthOne) / 10;
+		var thousandth = Math.floor(et % 10);
+
+		return
+			'${(hours > 0 ? (hoursTen > 0 ? '${hoursTen}' : '') +'${hoursOne}' + ':' : '')}${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
 	}
 
 	public static function getKeyForButton(button:Int) {

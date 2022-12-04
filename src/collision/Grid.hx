@@ -16,7 +16,7 @@ class Grid {
 	var surfaces:Array<CollisionSurface> = [];
 
 	public function new(bounds:Bounds) {
-		this.bounds = bounds;
+		this.bounds = bounds.clone();
 
 		this.cellSize = new Vector(bounds.xSize / CELL_DIV.x, bounds.ySize / CELL_DIV.y, bounds.zSize / CELL_DIV.z);
 	}

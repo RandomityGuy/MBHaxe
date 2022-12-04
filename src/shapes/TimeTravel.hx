@@ -19,8 +19,11 @@ class TimeTravel extends PowerUp {
 		if (element.timebonus != null) {
 			this.timeBonus = MisParser.parseNumber(element.timebonus) / 1000;
 		}
+		if (element.timepenalty != null) {
+			this.timeBonus = -MisParser.parseNumber(element.timepenalty) / 1000;
+		}
 
-		this.pickUpName = '${this.timeBonus} second Time Travel bonus';
+		this.pickUpName = '${this.timeBonus} second Time ${this.timeBonus >= 0 ? 'Modifier' : 'Penalty'}';
 		this.cooldownDuration = 1e8;
 		this.useInstancing = true;
 		this.autoUse = true;

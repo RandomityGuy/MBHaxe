@@ -1,0 +1,11 @@
+Jukebox
+
+The Jukebox can be entered anywhere from the game by pressing Ctrl+F5. In the window that opens, there will be a list of all available soundtracks and the one currently being played.
+Ctrl+F6 plays the previous soundtrack.
+Ctrl+F7 stops the resumes the current soundtrack.
+Ctrl+F8 plays the next soundtrack.
+
+You can add your own soundtracks in platinum/data/sounds/music. These must be in .ogg (Ogg/Vorbis) format.
+You can convert soundtracks from .wav and .mp3 to .ogg format using Audacity, which is available for Windows and Mac free of charge.
+
+The Jukebox also appears on the bottom right of the pause menu screen, so you can access it from there as well.

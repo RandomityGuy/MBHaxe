@@ -1,0 +1,15 @@
+Online: Single Player Level Select
+
+The Level Select screen is quite similar at the top half to that of its offline counterpart. You no longer need to hover anywhere to see your times to see what are the Qualify/Par, Gold/Platinum, and Ultimate Times to beat.
+
+Instead the level select shows you your top 10 times, as well as the ratings each one gave. Only your top time and rating goes to your total rating score. The 'Global Best Times' shows you all the times from all users* for a particular level, and you can click on the arrows next to it to go to the next ranks. If you beat a level but did not beat its Qualify/Par time, your score and ratings will still be calculated.
+
+The top category dropdown now lists Marble Blast Ultra levels, and Custom levels. Pressing Custom will give its own list; Director's Cut are additional Platinum levels that didn't make it to the official levels, and Level Packs are packs of 50 levels (except level packs 1-9, which is 43) that can be played. The level packs were done based on numerous themes:
+Level packs 1-9 are made from Level of the Month/Year winners (2007-2008)
+Level packs 10-19 are made from old MBG custom levels (2003-2005) that were downloadable via GarageGames
+Level Packs 20-29 are made up from several themes: LotM/Y winners (2009-2010), old MBG custom levels (2003-2005), levels from Bobby, Phil's Old Levels, and several of Matan's levels
+Level packs 30-39 are made up from a selection of levels from Custom Levels Archive, 15 of Buzzmusic's favourite levels, and levels there were released on MarbleBlast.com. These levels range from 2006-2014.
+
+The buttons on the bottom of the Level Select are identical in function to their offline counterparts. Nonetheless the options in 'More...' do not have the Level Editor button (as it's disabled Online), and instead lists the following (left to right order): Marble Select, Statistics (Online), Achievements, Demo Recording, Challenges and Super Challenges.
+
+* Note: users with an asterisk (*) next to their rating are those who haven't imported their scores on MarbleBlast.com, but those would be their ratings they'd get if they were to. That is because in 1.50+ the rating formulas and score calculations slightly changed for every level, hence the original PhilsEmpire ratings are now different to the current ratings.

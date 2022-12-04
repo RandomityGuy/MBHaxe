@@ -1,0 +1,153 @@
+// UT Tip: You can loop exit straight to the finish!
+// Rep. by Phil and Pablo
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         type = "Intermediate";
+         artist = "Andrew";
+         startHelpText = "Use the Speed Boosters ahead to your advantage!";
+         desc = "Loops have never been so much fun! ";
+         name = "Loop Exits";
+         level = "17";
+         music = "Endurance.ogg";
+         goldTime = "11000";
+         UltimateTime = "7500";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/Intermediate/Intermediate_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.638261 0.459006 -0.61801";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/LoopExits.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(StartPoint) {
+      position = "-3 3 0.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new Item() {
+      position = "-3 24 0.75";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-3 28 0.75";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-3 260 4.75";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape(EndPoint) {
+      position = "-3 291.03 52.59";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Trigger(Bounds) {
+      position = "-31 327 -5";
+      rotation = "1 0 0 0";
+      scale = "54 346 116";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "-2.7 58.93 47.09";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.25";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "-3 291.03 61.49";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new Trigger(loop1) {
+      position = "-6.45364 12.8631 0.425557";
+      rotation = "1 0 0 0";
+      scale = "7 2 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "After activating the Speed Boosters, exit the loop on either side to send you high, far, and fast!";
+   };
+   new Trigger(loop2) {
+      position = "-6.40849 32.132 0.40719";
+      rotation = "1 0 0 0";
+      scale = "7 2 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Do a loop exit to make it to the next loop ahead.";
+   };
+   new Trigger(loop3) {
+      position = "-17.274 240.955 4.16493";
+      rotation = "1 0 0 0";
+      scale = "30 2 50";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Do a loop exit to make it to the finish on top of the loop.";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

@@ -1,5 +1,7 @@
 package gui;
 
+import src.ProfilerUI;
+import hxd.App;
 import hxd.res.Image;
 import hxd.Window;
 import h3d.shader.AlphaMult;
@@ -35,8 +37,8 @@ class PlayGui {
 	public function new() {}
 
 	var timerNumbers:Array<GuiAnim> = [];
-	var timerPoint:GuiImage;
-	var timerColon:GuiImage;
+	var timerPoint:GuiAnim;
+	var timerColon:GuiAnim;
 
 	var gemCountNumbers:Array<GuiAnim> = [];
 	var gemCountSlash:GuiImage;
@@ -68,6 +70,8 @@ class PlayGui {
 
 	var _init:Bool;
 
+	var fpsMeter:GuiText;
+
 	public function dispose() {
 		if (_init) {
 			playGuiCtrl.dispose();
@@ -93,7 +97,7 @@ class PlayGui {
 		}
 	}
 
-	public function init(scene2d:h2d.Scene) {
+	public function init(scene2d:h2d.Scene, onFinish:Void->Void) {
 		this.scene2d = scene2d;
 		this._init = true;
 
@@ -106,6 +110,14 @@ class PlayGui {
 		var numberTiles = [];
 		for (i in 0...10) {
 			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			numberTiles.push(tile);
+		}
+		for (i in 0...10) {
+			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_green.png', ResourceLoader.getImage, this.imageResources).toTile();
+			numberTiles.push(tile);
+		}
+		for (i in 0...10) {
+			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_red.png', ResourceLoader.getImage, this.imageResources).toTile();
 			numberTiles.push(tile);
 		}
 
@@ -126,10 +138,14 @@ class PlayGui {
 
 		powerupBox = new GuiImage(ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile());
 		initTimer();
-		initGemCounter();
+		initGemCounter(() -> {
+			onFinish();
+		});
 		initCenterText();
 		initPowerupBox();
 		initTexts();
+		if (Settings.optionsSettings.frameRateVis)
+			initFPSMeter();
 
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl);
@@ -152,13 +168,26 @@ class PlayGui {
 		timerCtrl.position = new Vector(215, 1);
 		timerCtrl.extent = new Vector(234, 58);
 
+		var timerTransparency = new GuiImage(ResourceLoader.getResource('data/ui/game/transparency.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		timerTransparency.position = new Vector(14, -7);
+		timerTransparency.extent = new Vector(228, 71);
+		timerTransparency.doClipping = false;
+		timerCtrl.addChild(timerTransparency);
+
 		timerNumbers[0].position = new Vector(23, 0);
 		timerNumbers[0].extent = new Vector(43, 55);
 
 		timerNumbers[1].position = new Vector(47, 0);
 		timerNumbers[1].extent = new Vector(43, 55);
 
-		timerColon = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var colonCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/colon_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/colon_red.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+
+		timerColon = new GuiAnim(colonCols);
 		timerColon.position = new Vector(67, 0);
 		timerColon.extent = new Vector(43, 55);
 
@@ -168,7 +197,13 @@ class PlayGui {
 		timerNumbers[3].position = new Vector(107, 0);
 		timerNumbers[3].extent = new Vector(43, 55);
 
-		timerPoint = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var pointCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_red.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+
+		timerPoint = new GuiAnim(pointCols);
 		timerPoint.position = new Vector(127, 0);
 		timerPoint.extent = new Vector(43, 55);
 
@@ -221,7 +256,7 @@ class PlayGui {
 		}
 	}
 
-	public function initGemCounter() {
+	public function initGemCounter(onFinish:Void->Void) {
 		gemCountNumbers[0].position = new Vector(30, 0);
 		gemCountNumbers[0].extent = new Vector(43, 55);
 
@@ -257,28 +292,35 @@ class PlayGui {
 		// gemImageSceneTargetBitmap.blendMode = None;
 		// gemImageSceneTargetBitmap.addShader(new ColorKey());
 
+		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
+		var gemColor = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
+
 		gemImageObject = new DtsObject();
 		gemImageObject.dtsPath = "data/shapes/items/gem.dts";
 		gemImageObject.ambientRotate = true;
 		gemImageObject.showSequences = false;
+		gemImageObject.matNameOverride.set('base.gem', gemColor + ".gem");
 		// gemImageObject.matNameOverride.set("base.gem", "base.gem.");
 		gemImageObject.ambientSpinFactor /= -2;
 		// ["base.gem"] = color + ".gem";
-		gemImageObject.init(null, () -> {
-			for (mat in gemImageObject.materials) {
-				mat.mainPass.enableLights = false;
+		ResourceLoader.load("shapes/items/" + gemColor + ".gem.png").entry.load(() -> {
+			gemImageObject.init(null, () -> {
+				for (mat in gemImageObject.materials) {
+					mat.mainPass.enableLights = false;
 
-				// Huge hacks
-				if (mat.blendMode != Add) {
-					var alphaShader = new h3d.shader.AlphaChannel();
-					mat.mainPass.addShader(alphaShader);
+					// Huge hacks
+					if (mat.blendMode != Add) {
+						var alphaShader = new h3d.shader.AlphaChannel();
+						mat.mainPass.addShader(alphaShader);
+					}
 				}
-			}
-			gemImageScene.addChild(gemImageObject);
-			var gemImageCenter = gemImageObject.getBounds().getCenter();
+				gemImageScene.addChild(gemImageObject);
+				var gemImageCenter = gemImageObject.getBounds().getCenter();
 
-			gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
-			gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
+				gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
+				gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
+				onFinish();
+			});
 		});
 	}
 
@@ -314,7 +356,7 @@ class PlayGui {
 		helpTextCtrl.horizSizing = Width;
 
 		helpTextBackground = new GuiText(bfont);
-		helpTextBackground.text.textColor = 0x000000;
+		helpTextBackground.text.textColor = 0x777777;
 		helpTextBackground.position = new Vector(1, 1);
 		helpTextBackground.extent = new Vector(640, 14);
 		helpTextBackground.vertSizing = Height;
@@ -333,13 +375,13 @@ class PlayGui {
 		helpTextCtrl.addChild(helpTextForeground);
 
 		var alertTextCtrl = new GuiControl();
-		alertTextCtrl.position = new Vector(0, 418);
-		alertTextCtrl.extent = new Vector(640, 58);
+		alertTextCtrl.position = new Vector(0, 371);
+		alertTextCtrl.extent = new Vector(640, 105);
 		alertTextCtrl.vertSizing = Top;
 		alertTextCtrl.horizSizing = Width;
 
 		alertTextBackground = new GuiText(bfont);
-		alertTextBackground.text.textColor = 0x000000;
+		alertTextBackground.text.textColor = 0x776622;
 		alertTextBackground.position = new Vector(1, 1);
 		alertTextBackground.extent = new Vector(640, 32);
 		alertTextBackground.vertSizing = Height;
@@ -347,7 +389,7 @@ class PlayGui {
 		alertTextBackground.justify = Center;
 
 		alertTextForeground = new GuiText(bfont);
-		alertTextForeground.text.textColor = 0xFFFF00;
+		alertTextForeground.text.textColor = 0xffEE99;
 		alertTextForeground.position = new Vector(0, 0);
 		alertTextForeground.extent = new Vector(640, 32);
 		alertTextForeground.vertSizing = Height;
@@ -359,6 +401,30 @@ class PlayGui {
 
 		playGuiCtrl.addChild(helpTextCtrl);
 		playGuiCtrl.addChild(alertTextCtrl);
+	}
+
+	function initFPSMeter() {
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
+		var fpsMeterCtrl = new GuiImage(ResourceLoader.getResource("data/ui/game/transparency-fps.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		fpsMeterCtrl.position = new Vector(544, 448);
+		fpsMeterCtrl.horizSizing = Left;
+		fpsMeterCtrl.vertSizing = Top;
+		fpsMeterCtrl.extent = new Vector(96, 32);
+
+		fpsMeter = new GuiText(bfont);
+		fpsMeter.horizSizing = Width;
+		fpsMeter.vertSizing = Height;
+		fpsMeter.position = new Vector(10, 3);
+		fpsMeter.text.textColor = 0;
+		fpsMeter.extent = new Vector(96, 32);
+		fpsMeterCtrl.addChild(fpsMeter);
+
+		playGuiCtrl.addChild(fpsMeterCtrl);
 	}
 
 	public function setHelpTextOpacity(value:Float) {
@@ -459,7 +525,10 @@ class PlayGui {
 		gemCountNumbers[3].anim.currentFrame = totalOnes;
 	}
 
-	public function formatTimer(time:Float) {
+	// 0: default
+	// 1: green
+	// 2: red
+	public function formatTimer(time:Float, color:Int = 0) {
 		var et = time * 1000;
 		var thousandth = et % 10;
 		var hundredth = Math.floor((et % 1000) / 10);
@@ -474,13 +543,16 @@ class PlayGui {
 		var hundredthOne = hundredth % 10;
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 
-		timerNumbers[0].anim.currentFrame = minutesTen;
-		timerNumbers[1].anim.currentFrame = minutesOne;
-		timerNumbers[2].anim.currentFrame = secondsTen;
-		timerNumbers[3].anim.currentFrame = secondsOne;
-		timerNumbers[4].anim.currentFrame = hundredthTen;
-		timerNumbers[5].anim.currentFrame = hundredthOne;
-		timerNumbers[6].anim.currentFrame = thousandth;
+		timerNumbers[0].anim.currentFrame = minutesTen + color * 10;
+		timerNumbers[1].anim.currentFrame = minutesOne + color * 10;
+		timerNumbers[2].anim.currentFrame = secondsTen + color * 10;
+		timerNumbers[3].anim.currentFrame = secondsOne + color * 10;
+		timerNumbers[4].anim.currentFrame = hundredthTen + color * 10;
+		timerNumbers[5].anim.currentFrame = hundredthOne + color * 10;
+		timerNumbers[6].anim.currentFrame = thousandth + color * 10;
+
+		timerPoint.anim.currentFrame = color;
+		timerColon.anim.currentFrame = color;
 	}
 
 	public function render(engine:h3d.Engine) {
@@ -504,5 +576,9 @@ class PlayGui {
 		if (this.powerupImageObject != null)
 			this.powerupImageObject.update(timeState);
 		this.powerupImageScene.setElapsedTime(timeState.dt);
+
+		if (this.fpsMeter != null) {
+			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} fps';
+		}
 	}
 }

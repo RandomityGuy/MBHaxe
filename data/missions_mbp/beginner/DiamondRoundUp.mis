@@ -1,0 +1,174 @@
+// UT Tip: There're two ways to collect the gems and both ways beat the UT.
+// Which way will you go?
+// Rep. by Pablo
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         name = "Diamond Round-Up";
+         artist = "Ian";
+         startHelpText = "Find all the diamonds, then roll for the finish pad!";
+         type = "beginner";
+         music = "Pianoforte.ogg";
+         level = "3";
+         desc = "If a level has diamonds, you must pick them all up before you can finish.";
+         goldTime = "21000";
+         UltimateTime = "16500";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/Beginner/Beginner_Sky.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "-0.473121 -0.225982 -0.851521";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         scale = "1 1 1";
+         locked = "true";
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "30 7 500.25";
+         rotation = "0 0 1 90";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+      new StaticShape(EndPoint) {
+         position = "48 17 500.25";
+         rotation = "0 0 1 90";
+         scale = "1 1 1";
+         dataBlock = "EndPad";
+      };
+   };
+   new Item() {
+      position = "31 14.2 510.25";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "32 18 500";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/DiamondRoundUp.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "47 7 500.25";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "31 10.4 495.25";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(Bounds) {
+      position = "21 40 492";
+      rotation = "1 0 0 0";
+      scale = "50 50 30";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "48.1983 15.6909 505.319";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape() {
+      position = "60.7726 -1.14667 500.25";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignUpSide";
+   };
+   new StaticShape() {
+      position = "61.1105 27.7926 510.218";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape() {
+      position = "62.2184 14.9995 500.25";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new StaticShape() {
+      position = "61.8315 0.233737 495.25";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignUpSide";
+   };
+   new StaticShape() {
+      position = "60.6315 -0.566262 495.25";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape() {
+      position = "35.6334 12.3055 510.125";
+      rotation = "-0.10674 0.151496 0.982678 67.3723";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new Item() {
+      position = "66.4 15 500.75";
+      rotation = "0.577504 -0.577503 -0.577044 240";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

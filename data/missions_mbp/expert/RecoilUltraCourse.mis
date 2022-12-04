@@ -1,0 +1,910 @@
+// UT Tip: Go fast and collect all TMs. Try not to fail anything.
+// Rep. by Pablo
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         artist = "Ian, Matan and Andrew";
+         name = "Recoil Ultra Course";
+         music = "Endurance.ogg";
+         goldTime = "120000";
+         desc = "Put all your recoiling skills to the ultimate test!";
+         startHelpText = "Welcome to the Recoil Ultra Course!\nGet the diamonds on each challenge. Get each time modifier to get the best time!";
+         UltimateTime = "60000";
+         level = "8";
+         type = "Expert";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/Expert/Expert_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.638261 0.459006 -0.61801";
+      color = "0.700000 0.700000 0.700000 1.000000";
+      ambient = "0.100000 0.100000 0.200000 1.000000";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "-1.25798 -1.86819 497.77";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+   };
+   new InteriorInstance() {
+      position = "-2.26451 0.119637 497.271";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/RecoilUltraCourse.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "27.7466 40.0076 497.195";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Item() {
+      position = "-103.191 -0.764701 524.765";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-148.243 59.436 521.475";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-102.325 232.1 451.409";
+      rotation = "1 0 0 0";
+      scale = "1.5 1.5 1.5";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-101.129 -4.98599 524.765";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-28.2729 89.1007 414.187";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 9: Flight of the Bouncy";
+   };
+   new Item() {
+      position = "-99.0728 -1.06873 524.963";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "23.7956 53.2989 500.797";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "4.82183 39.0435 498.28";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "4.80407 59.118 495.82";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-26.1258 49.688 453.234";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Item() {
+      position = "23.756 79.5069 495.589";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9.7279 118.393 499.572";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "30.0163 41.3538 494";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "RoundBumper";
+   };
+   new StaticShape() {
+      position = "-101.574 296.428 393.533";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new Item() {
+      position = "34.0102 19.7783 458.008";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Item() {
+      position = "-12.1319 19.91 428.614";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.2262 88.0293 414.058";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.0389 112.262 417.812";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-28.2734 113.389 417.401";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 8: Shock Wall";
+   };
+   new Trigger(challenge1) {
+      position = "-31.373 37.0593 424.19";
+      rotation = "1 0 0 0";
+      scale = "8 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 10: Wall Ricochet";
+   };
+   new Item() {
+      position = "-148.244 47.9184 521.537";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "33.6753 23.7526 457.748";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-29.5753 105.482 418.817";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "10000";
+   };
+   new Item() {
+      position = "-27.1971 104.874 417.197";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-17.5877 19.7962 429.029";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "20.6683 19.6883 450.232";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Tornado";
+   };
+   new Item() {
+      position = "24.43 46.5761 501.16";
+      rotation = "1 0 0 180";
+      scale = "0.75 0.75 0.75";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "14.1351 36.848 450.2";
+      rotation = "1 0 0 0";
+      scale = "8 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 14: Waterfalls";
+   };
+   new Trigger(challenge1) {
+      position = "-108.742 1.61064 524.266";
+      rotation = "1 0 0 0";
+      scale = "2 10 5";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 20: Bounce to Freedom";
+   };
+   new Item() {
+      position = "-23.3056 26.6035 428.719";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-23.8326 18.0425 428.357";
+      rotation = "1 0 0 0";
+      scale = "13 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 12: Bounce High";
+   };
+   new Item() {
+      position = "23.8113 127.846 496.127";
+      rotation = "1 0 0 0";
+      scale = "5 5 5";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "20.8742 53.0556 500.372";
+      rotation = "1 0 0 0";
+      scale = "5.7 1 5";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 16: Speed Trampoline";
+   };
+   new Item() {
+      position = "-27.2042 123.946 429.67";
+      rotation = "-1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.2323 117.341 422.604";
+      rotation = "-1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-5.76485 19.8658 406.682";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-31.8935 14.9915 428.387";
+      rotation = "1 0 0 0";
+      scale = "8 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 11: Wall Ricochet Part II";
+   };
+   new Item() {
+      position = "-33.843 123.944 491.655";
+      rotation = "-1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-28.2254 124.252 428.717";
+      rotation = "1 0 0 0";
+      scale = "2 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 7: Speed Bounce";
+   };
+   new Trigger(challenge1) {
+      position = "-34.9132 116.169 445.723";
+      rotation = "1 0 0 0";
+      scale = "15 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 5: Head Bump";
+   };
+   new Item() {
+      position = "-27.2276 34.0651 426.384";
+      rotation = "1 0 0 45";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-27.2516 123.184 502.396";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "10000";
+   };
+   new Item() {
+      position = "-20.7281 123.887 491.285";
+      rotation = "-1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new ScriptObject() {
+         bonusTime = "0";
+         gemCount = "0";
+         time = "0";
+         penaltyTime = "0";
+         Pad = "1888";
+         powerUp = "0";
+   };
+   new Item() {
+      position = "-137.978 107.042 507.837";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.3176 7.83831 428.752";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.1643 14.8046 440.148";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "8.18307 23.9711 448.936";
+      rotation = "1 0 0 0";
+      scale = "8 8 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 13: Cyclone Aim";
+   };
+   new Item() {
+      position = "-27.2456 -13.0237 431.431";
+      rotation = "1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.1608 116.154 418.408";
+      rotation = "1 0 0 180";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-32.1003 36.0973 498.013";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-147.32 124.368 506.827";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Item() {
+      position = "7.5261 118.729 499.772";
+      rotation = "1 0 0 0";
+      scale = "0 0 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(SecondHalf) {
+      position = "-147.516 118.026 506.412";
+      rotation = "1 0 0 0";
+      scale = "5 5 5";
+      dataBlock = "DestinationTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "6.69985 40.8603 490.456";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-12.0004 35.933 489.804";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Trigger() {
+      position = "26.4677 170.298 499.072";
+      rotation = "1 0 0 0";
+      scale = "5 5 5";
+      dataBlock = "TeleportTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         destination = "SecondHalf";
+   };
+   new Trigger(challenge1) {
+      position = "0.96105 35.1756 497.373";
+      rotation = "1 0 0 0";
+      scale = "7 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 1: Marble Recoil Basics";
+   };
+   new Trigger(challenge1) {
+      position = "-15.4816 38.1199 497.673";
+      rotation = "1 0 0 0";
+      scale = "1 4 3.5";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 2: Anti-Recoil Basics";
+   };
+   new Item() {
+      position = "-35.1192 36.2082 491.387";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-34.1998 35.8653 483.974";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-30.2683 124.602 497.835";
+      rotation = "1 0 0 0";
+      scale = "6 7 1";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 6: Bounce Gutter";
+   };
+   new Item() {
+      position = "-17.7266 36.1244 485.364";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new TSStatic() {
+      position = "-147.214 118.878 506.262";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      shapeName = "~/data/interiors_mbp/teleportpad.dts";
+   };
+   new StaticShape(EndPoint) {
+      position = "-101.902 293.616 376.52";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Item() {
+      position = "5.75998 117.148 499.272";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-101.08 -3.10925 524.566";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "33.9135 41.389 490";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "RoundBumper";
+   };
+   new Trigger(challenge1) {
+      position = "-152.188 105.114 512.137";
+      rotation = "1 0 0 0";
+      scale = "8 1 5";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 19: Double Ricochet";
+   };
+   new Item() {
+      position = "35.0461 168.106 499.787";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new StaticShape() {
+      position = "-140.23 -3.1098 521.455";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "Tornado";
+   };
+   new Item() {
+      position = "-39.2528 63.6241 474.795";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.3282 97.4994 453.347";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-32.0647 43.1424 487.932";
+      rotation = "1 0 0 0";
+      scale = "8 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 4: Momentum Segments";
+   };
+   new Item() {
+      position = "17.3779 41.4194 290.382";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.2857 116.834 446.905";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "7.73302 129.38 499.172";
+      rotation = "1 0 0 0";
+      scale = "8 1 8";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 17: Trampoline Trap";
+   };
+   new Trigger(challenge1) {
+      position = "26.4882 44.3789 489.922";
+      rotation = "1 0 0 0";
+      scale = "0.3 6 5.5";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 15: Bumper Bounce";
+   };
+   new Item() {
+      position = "-27.3132 20.8043 428.256";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new TSStatic() {
+      position = "29.6836 168.002 499.122";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      shapeName = "~/data/interiors_mbp/teleportpad.dts";
+   };
+   new Item() {
+      position = "-27.2568 123.146 499.714";
+      rotation = "1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.1896 124.033 428.164";
+      rotation = "1 0 0 0";
+      scale = "0.3 0.3 0.3";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "5000";
+   };
+   new Item() {
+      position = "-27.2374 121.057 455.273";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "15000";
+   };
+   new Item() {
+      position = "27.7554 39.893 499.522";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.1892 13.5101 434.098";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "10000";
+   };
+   new Item() {
+      position = "-27.1801 23.0362 440.1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.2713 123.743 452.873";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "-27.203 135.852 429.185";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "13.7561 41.4339 392.138";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "3000";
+   };
+   new Trigger(challenge1) {
+      position = "-147.733 111.797 506.2";
+      rotation = "1 0 0 0";
+      scale = "8 1 5";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 18: Ricochets At 45";
+   };
+   new Item() {
+      position = "23.6394 41.3872 291.578";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(challenge1) {
+      position = "-25.3943 38.5341 485.081";
+      rotation = "1 0 0 0";
+      scale = "1 5 3";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Challenge 3: Running Recoil";
+   };
+   new Trigger(IBT) {
+      position = "-187.006 313.756 287.121";
+      rotation = "1 0 0 0";
+      scale = "250 350 300";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "-27.203 132.652 428.771";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "checkPoint";
+   };
+   new Item() {
+      position = "-148.647 47.2205 519.255";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.2";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "28.7 41.3 490.02";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "checkPoint";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Pianoforte.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

@@ -16,6 +16,7 @@ import src.JSPlatform;
 import gui.Canvas;
 import src.Util;
 import src.ProfilerUI;
+import src.Settings;
 
 @:publicFields
 class MarbleGame {
@@ -77,6 +78,7 @@ class MarbleGame {
 				case x: x;
 			};
 			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+			@:privateAccess Window.getInstance().onMouseDown(e);
 		});
 		pointercontainer.addEventListener('mouseup', (e:js.html.MouseEvent) -> {
 			var buttonCode = switch (e.button) {
@@ -85,6 +87,7 @@ class MarbleGame {
 				case x: x;
 			};
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+			@:privateAccess Window.getInstance().onMouseUp(e);
 		});
 		canvas.addEventListener('mousedown', (e:js.html.MouseEvent) -> {
 			var buttonCode = switch (e.button) {
@@ -102,13 +105,18 @@ class MarbleGame {
 			};
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
 		});
+		pointercontainer.addEventListener('keypress', (e:js.html.KeyboardEvent) -> {
+			@:privateAccess Window.getInstance().onKeyPress(e);
+		});
 		pointercontainer.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+			@:privateAccess Window.getInstance().onKeyDown(e);
 		});
 		pointercontainer.addEventListener('keyup', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+			@:privateAccess Window.getInstance().onKeyUp(e);
 		});
 		js.Browser.window.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
@@ -195,7 +203,7 @@ class MarbleGame {
 				world.setCursorLock(true);
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
-				world.restart();
+				world.restart(true);
 				// world.setCursorLock(true);
 				paused = !paused;
 			});
@@ -214,16 +222,22 @@ class MarbleGame {
 		paused = false;
 		var pmg = new PlayMissionGui();
 		PlayMissionGui.currentSelectionStatic = world.mission.index;
+		PlayMissionGui.currentGameStatic = world.mission.game;
 		if (world.isRecording) {
 			world.saveReplay();
 		}
 		world.dispose();
 		world = null;
 		canvas.setContent(pmg);
+
+		Settings.save();
 	}
 
 	public function playMission(mission:Mission) {
 		canvas.clearContent();
+		if (world != null) {
+			world.dispose();
+		}
 		world = new MarbleWorld(scene, scene2d, mission, toRecord);
 		toRecord = false;
 		world.init();

@@ -16,6 +16,10 @@ class AudioManager {
 	static var soundGroup:hxd.snd.SoundGroup;
 	static var musicGroup:hxd.snd.SoundGroup;
 
+	static var currentMusic:hxd.snd.Channel;
+	public static var currentMusicName:String;
+	public static var currentMusicPaused:Bool = true;
+
 	static var currentMusicResource:Resource<Sound>;
 
 	public static function init() {
@@ -54,23 +58,32 @@ class AudioManager {
 
 	public static function playShell() {
 		AudioManager.manager.stopByName("music");
-		var sndres = ResourceLoader.getAudio("data/sound/shell.ogg");
+		var sndres = ResourceLoader.getAudio("data/sound/music/Pianoforte.ogg");
 		if (sndres == null)
 			return;
 		sndres.acquire();
 		if (currentMusicResource != null)
 			currentMusicResource.release();
 		currentMusicResource = sndres;
-		var ch = AudioManager.manager.play(sndres.resource, null, musicGroup);
-		ch.loop = true;
+		currentMusic = AudioManager.manager.play(sndres.resource, null, musicGroup);
+		currentMusic.loop = true;
 	}
 
-	public static function playMusic(music:Sound) {
+	public static function playMusic(music:Sound, musicName:String) {
 		AudioManager.manager.stopByName("music");
 		if (music == null)
 			return;
-		var ch = AudioManager.manager.play(music, null, musicGroup);
-		ch.loop = true;
+		AudioManager.currentMusicName = musicName;
+		currentMusic = AudioManager.manager.play(music, null, musicGroup);
+		currentMusicPaused = false;
+		currentMusic.loop = true;
+	}
+
+	public static function pauseMusic(paused:Bool) {
+		if (currentMusic != null) {
+			currentMusic.pause = paused;
+			currentMusicPaused = paused;
+		}
 	}
 
 	public static function stopAllSounds() {

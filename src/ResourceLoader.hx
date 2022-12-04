@@ -17,10 +17,12 @@ import hxd.fs.FileSystem;
 import hxd.res.Loader;
 import src.Resource;
 import src.ResourceLoaderWorker;
+import fs.TorqueFileSystem;
+import src.Settings;
 
 class ResourceLoader {
 	#if (hl && !android)
-	public static var fileSystem:FileSystem = new LocalFileSystem(".", null);
+	public static var fileSystem:FileSystem = new TorqueFileSystem(".", null);
 	#end
 	#if (js || android)
 	public static var fileSystem:FileSystem = null;
@@ -140,6 +142,22 @@ class ResourceLoader {
 				toloadfiles.push(file);
 			}
 		}
+		filestats = fileSystem.dir("missions_mbg");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
+		filestats = fileSystem.dir("missions_mbp");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
 		while (toloaddirs.length > 0) {
 			var nextdir = toloaddirs.pop();
 			for (file in fileSystem.dir(nextdir.path.substring(2))) {
@@ -160,10 +178,8 @@ class ResourceLoader {
 
 	static function preloadMusic(onFinish:Void->Void) {
 		var worker = new ResourceLoaderWorker(onFinish);
-		worker.loadFile("sound/shell.ogg");
-		worker.loadFile("sound/groovepolice.ogg");
-		worker.loadFile("sound/classic vibe.ogg");
-		worker.loadFile("sound/beach party.ogg");
+		worker.loadFile("sound/music/shell.ogg");
+		worker.loadFile("sound/music/pianoforte.ogg");
 		worker.run();
 	}
 
@@ -176,37 +192,64 @@ class ResourceLoader {
 	}
 
 	static function preloadShapes(onFinish:Void->Void) {
-		var toloadfiles = [];
-		var toloaddirs = [];
-		var filestats = fileSystem.dir("shapes");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		while (toloaddirs.length > 0) {
-			var nextdir = toloaddirs.pop();
-			for (file in fileSystem.dir(nextdir.path.substring(2))) {
-				if (file.isDirectory) {
-					toloaddirs.push(file);
-				} else {
-					toloadfiles.push(file);
-				}
-			}
-		}
+		var toloadfiles = [
+			StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""),
+			"shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png"
+		];
+		// var toloaddirs = [];
+		// var filestats = fileSystem.dir("shapes");
+		// for (file in filestats) {
+		// 	if (file.isDirectory) {
+		// 		toloaddirs.push(file);
+		// 	} else {
+		// 		toloadfiles.push(file);
+		// 	}
+		// }
+		// while (toloaddirs.length > 0) {
+		// 	var nextdir = toloaddirs.pop();
+		// 	for (file in fileSystem.dir(nextdir.path.substring(2))) {
+		// 		if (file.isDirectory) {
+		// 			toloaddirs.push(file);
+		// 		} else {
+		// 			toloadfiles.push(file);
+		// 		}
+		// 	}
+		// }
+		// var teleportPad = fileSystem.get("interiors_mbp/teleportpad.dts");
+		// var teleportTexture = fileSystem.get("interiors_mbp/repairbay.jpg");
+		// toloadfiles.push(teleportPad); // Because its not in the shapes folder like wtf
+		// toloadfiles.push(teleportTexture);
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.addTaskParallel((fwd) -> file.load(fwd));
+			worker.loadFile(file);
 		}
 		worker.run();
+	}
+
+	public static function getProperFilepath(rawElementPath:String) {
+		var fname = rawElementPath.substring(rawElementPath.lastIndexOf('/') + 1);
+		rawElementPath = rawElementPath.toLowerCase();
+		var path = StringTools.replace(rawElementPath.substring(rawElementPath.indexOf('data/')), "\"", "");
+		if (StringTools.contains(path, 'interiors_mbg/'))
+			path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
+		var dirpath = path.substring(0, path.lastIndexOf('/') + 1);
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
+		#end
+		if (ResourceLoader.fileSystem.exists(path))
+			return path;
+		if (ResourceLoader.fileSystem.exists(dirpath + fname))
+			return dirpath + fname;
+		return "";
 	}
 
 	public static function load(path:String) {
 		#if hl
 		if (!StringTools.startsWith(path, "data/"))
 			path = "data/" + path;
+		#end
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
 		#end
 		return ResourceLoader.loader.load(path);
 	}
@@ -232,9 +275,7 @@ class ResourceLoader {
 	}
 
 	public static function loadDts(path:String) {
-		#if (js || android)
-		path = StringTools.replace(path, "data/", "");
-		#end
+		path = getProperFilepath(path);
 		if (dtsResources.exists(path))
 			return dtsResources.get(path);
 		else {
@@ -252,9 +293,7 @@ class ResourceLoader {
 	}
 
 	public static function getTexture(path:String) {
-		#if (js || android)
-		path = StringTools.replace(path, "data/", "");
-		#end
+		path = getProperFilepath(path);
 		if (textureCache.exists(path))
 			return textureCache.get(path);
 		if (fileSystem.exists(path)) {
@@ -341,7 +380,7 @@ class ResourceLoader {
 		var fname = Path.withoutDirectory(path).toLowerCase();
 		for (file in files) {
 			var fname2 = file.name;
-			if (Path.withoutExtension(fname2).toLowerCase() == fname)
+			if (Path.withoutExtension(fname2).toLowerCase() == fname || fname2.toLowerCase() == fname)
 				names.push(file.path);
 		}
 		return names;

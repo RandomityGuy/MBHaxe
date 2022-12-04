@@ -1,0 +1,249 @@
+// UT Tip: You did train in loop exits, right?
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         name = "Byzantine Helix";
+         desc = "A level meant for shortcuts, but you can beat it the long way too.";
+         level = "20";
+         music = "Astrolabe.ogg";
+         type = "intermediate";
+         artist = "Pablo Vasquez";
+         goldTime = "25000";
+         UltimateTime = "9500";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/Intermediate/Intermediate_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "-0.57735 -0.57735 -0.57735";
+      color = "1.000000 1.000000 1.000000 1.000000";
+      ambient = "0.700000 0.700000 0.700000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/ByzantineHelix.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(StartPoint) {
+      position = "0 0 0.5";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new Item() {
+      position = "28 0 0.69";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "34.55 0 20.44";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "67 0.07 39.9";
+      rotation = "0 1 0 90";
+      scale = "1.4 1.4 1.4";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "87 0.07 39.91";
+      rotation = "0 1 0 90";
+      scale = "1.4 1.4 1.4";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "76 -1.48617e-008 39.83";
+      rotation = "1 0 0 180";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "96 -1.57361e-008 39.82";
+      rotation = "1 0 0 180";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "106.473 0.137568 39.3477";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "130.38 -7.00061 13.5156";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "152.232 4.93866 21.1195";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "174.605 -19.0513 -2.79188";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape(EndPoint) {
+      position = "209.557 -47 13.7917";
+      rotation = "0.0040987 0.707101 -0.707101 180.47";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Trigger(Bounds) {
+      position = "-16.179 20.0544 -9.4798";
+      rotation = "1 0 0 0";
+      scale = "250 100 180";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "4.55327 -0.0306787 -1.82";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.3";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "209.544 -20.0377 18.0321";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "-5663";
+   };
+   new Item() {
+      position = "204.57 -19.9524 18.1083";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         timeBonus = "-556";
+   };
+   new Item() {
+      position = "214.417 -19.9292 18.0775";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "201.011 -3.93607 17.2538";
+      rotation = "-0.569959 0.581011 -0.581011 239.363";
+      scale = "2 2 2";
+      dataBlock = "Magnet";
+   };
+   new StaticShape() {
+      position = "210.369 -50.9305 18.6694";
+      rotation = "-0.879323 0.158339 -0.449132 18.7119";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape() {
+      position = "214.515 -7.085 20.9171";
+      rotation = "0.917256 -0.373394 0.138632 100.442";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new StaticShape() {
+      position = "204.512 -7.09965 21.0271";
+      rotation = "0.917256 -0.373394 0.138632 100.442";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new StaticShape() {
+      position = "209.323 -7.06641 21.0298";
+      rotation = "0.917256 -0.373394 0.138632 100.442";
+      scale = "1 1 1";
+      dataBlock = "SignDownSide";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Rising Temper.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+   new StaticShape() {
+      position = "101.5 0 39";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "checkPoint";
+   };
+};
+//--- OBJECT WRITE END ---

@@ -1,0 +1,236 @@
+// UT Tip: I found it faster to make a sign hit, but its harder.
+// Rep. by Perishingflames
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         name = "Wall Master";
+         desc = "Master your wall-hitting skills!";
+         level = "18";
+         music = "Rising Temper.ogg";
+         startHelpText = "Collect the diamonds in the building by bouncing off the walls!";
+         artist = "Andrew";
+         type = "Intermediate";
+         goldTime = "75000";
+         UltimateTime = "40000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/Intermediate/Intermediate_Sky.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.481726 0.481726 -0.732038";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         scale = "1 1 1";
+         position = "0 0 0";
+         locked = "true";
+         rotation = "1 0 0 0";
+   };
+   new Trigger() {
+      position = "-44.698 108.975 496.293";
+      rotation = "1 0 0 0";
+      scale = "120 100 60";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new InteriorInstance() {
+      position = "41.1411 41.468 444.816";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/WallMaster.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(StartPoint) {
+      position = "15.5129 20.8633 500.94";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new Item() {
+      position = "20.4641 93.8425 512.941";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "32.4763 93.8423 506.973";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new Item() {
+      position = "51.4978 68.8718 508.965";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2.47356 66.8345 507.944";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-11.4933 49.8421 505.44";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0.518507 49.8446 505.44";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "40.1971 80.8773 512.96";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         
+   };
+   new StaticShape() {
+      position = "15.578 64.9285 513.303";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape(EndPoint) {
+      position = "15.4441 64.8914 500.93";
+      rotation = "0 0 1 225";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Item() {
+      position = "15.5525 44.8696 506.936";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.4943 39.8448 504.94";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "34.4509 95.8877 514.827";
+      rotation = "-1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "SignUp";
+   };
+   new StaticShape() {
+      position = "-23.0109 36.2168 500.9";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignUpSide";
+   };
+   new StaticShape() {
+      position = "42.5246 83.0735 512.92";
+      rotation = "0 0 1 130";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape() {
+      position = "37.3037 82.9438 500.9";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignUpSide";
+   };
+   new StaticShape() {
+      position = "42.9251 82.0167 512.92";
+      rotation = "0 0 -1 25";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape() {
+      position = "31.319 66.1527 500.9";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignUpSide";
+   };
+   new StaticShape() {
+      position = "12.6408 91.6423 500.9";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignUpSide";
+   };
+   new StaticShape() {
+      position = "38.3181 92.5408 506.95";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "SignSide";
+   };
+   new StaticShape() {
+      position = "17.7241 61.1291 500.92";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "SignUp";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

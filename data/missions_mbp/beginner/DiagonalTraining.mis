@@ -1,0 +1,225 @@
+// UT Tip: Diagonal movement, as learnt, makes you go faster. So go fast to finish this level.
+// However, at some point, you do need to slow down so you end up hitting a lower time. Find out where!
+// Rep. by Pablo
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         music = "Astrolabe.ogg";
+         type = "beginner";
+         name = "Diagonal Training";
+         startHelpText = "Learn how to use diagonal movement!";
+         level = "21";
+         ultimateTime = "22000";
+         desc = "Learn how to use diagonal movement to make your marble go faster.";
+         goldTime = "30000";
+         artist = "Andrew";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 -2.19536e+038 -2.19536e+038";
+      fogVolume2 = "-1 -2.2087e+038 -2.19536e+038";
+      fogVolume3 = "-1 -2.18196e+038 -2.16867e+038";
+      materialList = "~/data/skies/Beginner/Beginner_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222204871403647640000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 -219535990253541530000000000000000000000.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -214193076221289990000000000000000000000.000000";
+   };
+   new Sun() {
+      direction = "0.4817261 0.4817261 -0.7320382";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new Trigger(stayhere) {
+      position = "-150 120 -10";
+      rotation = "1 0 0 0";
+      scale = "300 200 160";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "-112.1 22.7 29.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape(StartPoint) {
+      position = "124.8 0 0.25";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new Item() {
+      position = "48 0 8.8";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/DiagonalTraining.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "-110 94 29.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape(EndPoint) {
+      position = "-112 93.8 24";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Trigger(Diag1) {
+      position = "106.535 5.29365 0.320804";
+      rotation = "1 0 0 0";
+      scale = "2 11 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "To use diagonal movement, turn the camera 45 degrees to the left or right,\nand move the marble with both the <func:bind moveforward> and <func:bind moveright> keys\nor the <func:bind moveforward> and <func:bind moveleft> keys.";
+   };
+   new Trigger(Diag5) {
+      position = "26.852 -48.2234 23.4";
+      rotation = "1 0 0 0";
+      scale = "2 11 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Catch the Time Modifier in mid-air!";
+   };
+   new Trigger(Diag2) {
+      position = "79.0871 5.47226 0.320804";
+      rotation = "1 0 0 0";
+      scale = "2 11 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Diagonal movement can be used to help you get up steep slopes.";
+   };
+   new Item() {
+      position = "2 -54 33";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-96 -53.5 33.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(DIag3) {
+      position = "42.0788 -41.5624 23.4";
+      rotation = "1 0 0 0";
+      scale = "11 2 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Diagonal movement can be used to gain height using slopes.";
+   };
+   new Item() {
+      position = "48 -18.9 14.35";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(Diag4) {
+      position = "40.0786 -48.2984 23.4";
+      rotation = "1 0 0 0";
+      scale = "2 11 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "To gain height, get a head start using diagonal movement and jump on the slope.";
+   };
+   new Trigger(Diag7) {
+      position = "-39.649 -48.3179 23.6";
+      rotation = "1 0 0 0";
+      scale = "2 11 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Jump off the slope to reach the platform above!";
+   };
+   new Trigger(Diag8) {
+      position = "-105.134 -47.9095 33.477";
+      rotation = "1 0 0 0";
+      scale = "2 11 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Diagonal movement can also be used to cross large gaps.";
+   };
+   new Item() {
+      position = "-123.4 -53.65 41.9";
+      rotation = "0 -1 0 57";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-123.5 105.75 37.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.25";
+      dataBlock = "easterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "48 -53.5 23.5";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "checkPoint";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/music/Pianoforte.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+   new StaticShape() {
+      position = "-112 -53.5 33.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "checkPoint";
+   };
+};
+//--- OBJECT WRITE END ---

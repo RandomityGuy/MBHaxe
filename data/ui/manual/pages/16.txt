@@ -1,0 +1,70 @@
+Online: Multiplayer - Level Select
+
+The Multiplayer Level Select screen is where you will be able to select and play with other users Multiplayer matches, as well as change many server settings.
+
+At the top there is dropdown difficulty menu for the official levels: Beginner, Intermediate and Advanced. Custom can be chosen if you want to play Custom levels with others, or share your own Custom levels with players currently in your server. Custom levels NEVER give ratings even if Calculate Ratings is enabled.
+
+Every level has a Duration. This is the amount of time the level will be played (time counts down rather than up) before the match ends.
+Official levels also have a Par, Platinum Ultimate Scores. Those are fun challenges that you may attempt to beat. If other players join your match, these scores change to lower amounts so you can try and beat those while playing against others. They do not affect ratings, but can contribute to Achievements.
+You will also see in the level description the author of the level as well as the current game mode, Free For All or Teams.
+
+Below the level picture, you will be able to see the following (left to right order):
+Download Options: Offer other users in your server to download your level. You can check Enable Download to allow players to download the level. Checking Allow All gives everyone access to download the level. If you don't want to allow everyone, you can individually select players who can download by checking the checkbox next to their name.
+
+Best: Your best score on the level and whether it is Par, Platinum or Ultimate. This changes between solo player and versus.
+
+Top Scores/Level Information: Toggle the description between Multiplayer scores leaderboards and the Level Information. When Top Scores is toggle, you can see your top 5 scores, the scores of everyone in the current server, and the All-Time scores. You can press the right and left arrows to see everyone's score and rank on the level. When Top Scores is viewed, you will also be able to toggle between Solo and Versus (Vs.) scores. Solo is when playing by yourself, whereas Versus is against other players.
+When Top Scores is toggled on, you will notice below that every user in the server has information:
+Rating: User's current rating and last change. +0 if this is the player's first match in the server, else it will show + or - if the player had won or lost the previous match.
+Last: Last score of the last game the player has played, regardless of current map chosen in the Level Select screen.
+Best: The player's best score in Versus mode in the current map that is chosen.
+
+The bottom half of the screen is mainly dedicated to Server/Global chat, and the userlist of who is currently in the server or online. You can talk to players in the server privately in this manner without annoying everyone else in the global chat.
+
+On the bottom, the buttons that are available (left to right order) are:
+
+Leave: Go back to the main hub of the Leaderboards
+
+More...: Press it to reveal additional options
+
+Magnifier icon: Press to open the Search window to search levels. This acts in exactly the same way as Singleplayer search, except it includes Custom levels as well.
+
+Kick/Ban Players: Press to be able to kick or ban players from your server. Select the player and press Kick or Ban to kick or ban them from your server. Banned players cannot join back. Press on a banned user and press Unban to allow them entry to your server again.
+
+Show Server/Global Chat: Toggle between Server and Global chats (and userlists). If the button highlights in green, someone has mentioned you in the chat. Feeling special?
+
+Preload/Play: Preload the level, and then press Play to start. When a level is preloaded, you cannot change the level, use Spawn Saves, use the search button, change difficulty, and use the Download Options buttons. To cancel preload, click the left or right buttons and a message window will appear asking you if you want to cancel it. If Preload Missions is not checked in Server Settings, then the button will automatically show up as Play.
+
+Spawn Saves: Press it to load a Spawn Save, which was saved from a match that has been played. It will load the spawns in the same way that the match had, so that you can see how far some matches could have been played, or to show to others how much bad luck you got. All Spawn Saves matches are unrated. To select a Spawn Save, simply click on the name of the Spawn Save you have given it and press Preload/Play (the Spawn Save button will turn green when one is selected). Click the Spawn Save again to not play the Spawn Save (Spawn Save button turns back to purple).
+
+
+The More... button lists the following buttons (Left to Right order):
+Marble Select: Choose between all available skins for your marble. You can unlock additional skins if you complete enough Multiplayer Achievements.
+Server Settings: Change current Server Settings
+Achievements: Take on 30 challenging achievements.
+Teams Mode: Toggle Teams Mode on or off. If toggled on a new button, Team Information, will appear between the Kick/Ban Players and the Show Global/Server Chat buttons. In addition, the Free For All text changes to 'Team Name:' and your team's name. On the bottom right of the screen, the team name of every player is listed next to their names.
+Handicaps: Press it to show all possible Gameplay Settings.
+
+Handicaps/Gameplay Settings: In this window you can disable certain gameplay elements from being playable, or select one of three additional game modes:
+Matan Mode: Named after the titular player, in this game mode the gems will respawn automatically every 10 seconds, regardless of whether all the gems in the previous gem spawn were collected.
+Glass Mode: For two or more players only. Adds a glass in the middle of the map, and players scramble to see who gets the luckiest in terms of gem spawns.
+Balanced Mode: The game looks at how many points you have and compares it to the Ultimate Score and the time remaining on the match. The closer your score is to the Ultimate Score, the less chance blue and yellow gems will appear, and the further away the gems will spawn from you. In Versus mode, only the top player's score is checked. The time remaining is used to estimate your final score.
+Note: all of these three modes will disable ratings.
+
+Team Information: Opens the Team Info and Team Chat window. Here you can see your Team name and description, as well as your current role in the team and the players that are in it.
+Pressing the 'Join' button will open the 'Join Team' window, where you can select which team to join. Simply click on the team and press Join.
+
+If you want to make your own team, press the 'Create' button in the Join Team window. The newly opened Create Team window will allow you to give a Team Name/Description, as well as choose a Team Color. You can also choose whether to make the team a Private team, meaning that the team is invite-only. Once set as Private, only the Team Leader and can assign players to that team. However the Server Host can join any team he wants even if it's set as Private.
+
+Once you've pressed the 'Create' button, you will be able to either close and go back to the Level Select screen, or press the new 'Options' button which gives you Team Options. These options include changing the Team Name/Description, Team Color and whether the team is private or not.
+In addition to those, you will see which players are on the team, and a button appears on whether you want to leave the team or not.
+The Team Leader also sees the following buttons:
+Promote: Promote a selected player to become the new Team Leader.
+Kick: Kick someone from your team. They probably deserved it.
+Invite: Invite a player to your team. You want those players on your side!
+Delete: Delete the team. The next one will be better anyway.
+Leave: Any player (not just the Team Leader) can leave the team, but if the Team Leader leaves, then someone random on the team becomes the new Team Leader.
+
+
+In addition on making your own servers, you can also join either Tsuf Mk 1 or Thistle. If you're the first to join them, you become the Host. While the Dedicated Servers' Level Select screen is identical to that if you were to make your own server, the only real difference is with the Dedicated Server Settings (under 'More...' button, where the Server Settings button is). The Dedicated Server Settings allow you to change the following options: Calculate Ratings, Force Spectators, Max Players.
+When you leave the Dedicated Server, the settings will go back to their defaults even if someone else becomes the host.

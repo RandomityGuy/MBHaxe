@@ -1,0 +1,227 @@
+// UT Tip: Either start with the loops, or go down, it is your choice.
+// Rep. by Pablo
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         level = "15";
+         artist = "Lonestar";
+         name = "Double LoopLoop";
+         type = "intermediate";
+         music = "Seaside Revisited.ogg";
+         desc = "Roll around the inside of the rings to collect the diamonds.";
+         goldTime = "40000";
+         UltimateTime = "27500";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/Intermediate/Intermediate_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.638261 0.459006 -0.61801";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new StaticShape() {
+      position = "7.15088 -36.065 13.6623";
+      rotation = "0 0 -1 15";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new StaticShape(EndPoint) {
+      position = "5.7237 -36.3959 8.05";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new StaticShape(StartPoint) {
+      position = "5.7788 -31.3532 8.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new Item() {
+      position = "-9.30649 12.6024 12.6329";
+      rotation = "0 1 0 180";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-26.2082 12.3485 42.4012";
+      rotation = "0 -1 0 90";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.81786 28.3332 13.3324";
+      rotation = "1 0 0 150";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-21.2045 12.7082 57.9835";
+      rotation = "0 1 0 240";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.94094 38.596 57.7883";
+      rotation = "1 0 0 60";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.64167 12.5979 72.4104";
+      rotation = "1 0 0 180";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-22.9195 12.6618 25.7524";
+      rotation = "0 -1 0 60";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.82908 40.2659 25.7251";
+      rotation = "1 0 0 120";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.73745 18.5478 5.1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "4.74807 -34.4436 7.55";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/DoubleLoopLoop.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "5.77529 12.5435 3.45";
+      rotation = "1 0 0 180";
+      scale = "1 1 1.2";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.92057 26.6933 68.3209";
+      rotation = "1 0 0 30";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "3.35477 12.3953 71.981";
+      rotation = "0 1 0 90";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "37.8593 12.6122 42.4058";
+      rotation = "0 1 0 90";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.86048 43.927 42.2962";
+      rotation = "1 0 0 90";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5.85834 13.7454 71.803";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "AntiGravityItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(Bounds) {
+      position = "-40 70 -150";
+      rotation = "1 0 0 0";
+      scale = "90 120 300";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Rising Temper.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

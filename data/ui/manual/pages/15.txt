@@ -1,0 +1,49 @@
+Online: Multiplayer - Join Server
+
+The Join Server screen is where you can join and host Multiplayer matches, as well as find information about the different servers that are being hosted. Every server shows the following information (left to right):
+Lock icon: If appears, server requires a password to be able to join
+Scores icon: If appears, server has ratings enabled
+Server Name: [Status] and Server Name. The two statuses possible are: Lobby, which means players are in the main Level Select screen, and Playing which means a match is in progress.
+Players: Displayed as: Amount of players in the server / Maximum players that the server supports
+Mode: FFA or Teams. FFA is Free For All, where everyone plays against each other. Teams mode pits players one team against players in other teams.
+Ping: Displayed number is your current ping to the server. The lower the number, the better. Higher numbers mean more lag, which affects gameplay badly.
+Min Rating: By default it's N/A (Not Applicable), but if the host sets it, it will show the minimum rating that any player can have in order to be able to join.
+
+When you click on a server, the right side will fill in with the server info, such as the Server Name, Server Description and a list of Handicaps (if any are set).
+
+On the bottom of the Join screen you will find the following buttons (left to right order):
+Leave: Go back to the main hub
+Direct Connect: If you can't directly connect to a user, you can input their IP address and join from there.
+Refresh: Refresh the list, and check for available servers.
+Server Settings: Press it to open up your Server Settings
+Host/Join: Self-explanatory. Either press Host to host a Multiplayer match, or click on a server and press Join to join that server.
+
+By default there should be three dedicated servers running: Thistle, Tsuf Mk 1 and Tsuf Mk 3. Tsuf Mk 3 is a development server only, and is accessible only to Administrators.
+
+Server Settings:  In here you can control most of the settings your server will use when you host a Multiplayer match. This is what everything does:
+
+Server Name: Give a name to your server. Otherwise it uses your username as the Server Name.
+Password: Putting a password means that only users who know the password can join, which happens if you tell them. Leave empty to let everyone in.
+
+Display on Server List: Checked by default. Allows everyone to see your server on the Join Server window. If you uncheck it, other users can only join if you give them your Server Address (on the bottom of the screen) by inputting it via Direct Connect window. This will take up to 2 minutes before taking effect.
+
+Preload Missions: Checked by default. When pressing Preload button on the Level Select screen, the missions will load on that screen rather than throw users to the in-game Loading screen. If you really want the old loading screen when you load levels, uncheck this.
+
+Fast PowerUps: Unchecked by default. Normally when playing Multiplayers matches, those who join your server take a certain amount of time before a PowerUp they collect is registered as picked up. This amount of time depends on lag, and the worse their lag (higher ping), the longer this takes. Fast PowerUps solves this problem by giving the players the PowerUp immediately, regardless of lag. The downside is that sometimes picked up powerups aren't registered as picked up by the player. While it is unchecked by default, it is encouraged to have it on, and ask those in your server if they want it on or not.
+
+Calculate Ratings: Checked by default. When a match is being played, all players (except Spectators) receive points when the match ends. Whether they win points or lose depends on how their ranking at the end of the match. Maximum gain/loss is 32 points.
+New players to Multiplayer have their rating and ranking invisible, and written as Provisional instead. These players will maintain their Provisional status for 20 rated games, whereupon then they are listed as Established players and will have their rating and rank show up. Provisional players win/lose less points than Established players.
+After 50 games, a player can reset his rating back to 1500 points and wipe out Multiplayer scores, and as such becoming Provisional again. You can reset your rating by going on the MarbleBlast.com website, and viewing your profile where one of the options allows you to reset your rating.
+If Handicaps are enabled, then depending on the level the winner and loser will get further adjustment to their ratings based on the handicaps enabled. That makes the maximum rating gain/loss higher than 32 points.
+
+Force Spectators: Unchecked by default. When players join a match, they will automatically be asked whether they want to Spectate the match (meaning become an Observer) or join the match and play while it is in progress. By enabling Force Spectators, all players joining a match in progress will automatically become Spectators until the match ends.
+
+Max Players: 8 by default. Select how many players can play in your server. Use the + and - boxes to increase or decrease the value. Minimum is 2, maximum is 64.
+
+Min Rating: N/A (Not Applicable) by default. If you press the + (increase) button, you will limit the players who can join your server to those with the minimum rating listed and above. Pressing - (decrease) will decrease it back down to 0 (N/A). The increase and decrease is in multiples of 50, and the maximum rating limit is -500 points.
+
+Port Mapping: If you have not managed to port forward (see Options for the Server Port to see what port number you should forward), then a LAN Only message will be displayed. If the message shows Loading, it means the game hasn't found out yet if you managed to port forward. If you managed to port forward, the message will be Successful.
+
+Server Address: Your IP address. Give it out only if players need to use Direct Connect to enter your server.
+
+Server Info: Enter a description for your server. Can be left blank.

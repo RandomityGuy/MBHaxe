@@ -105,7 +105,8 @@ class PathedInterior extends InteriorObject {
 		if (this.baseScale.z == 0)
 			this.baseScale.z = 0.0001;
 
-		this.setRotationQuat(this.baseOrientation);
+		this.setRotationQuat(this.baseOrientation.clone());
+		this.collider.setTransform(this.getTransform());
 
 		this.path = cast this.simGroup.elements.filter((element) -> element._type == MissionElementType.Path)[0];
 
@@ -161,6 +162,7 @@ class PathedInterior extends InteriorObject {
 		}
 
 		var transform = this.getTransformAtTime(this.getInternalTime(thisTime));
+		this.setTransform(transform);
 
 		var position = transform.getPosition();
 		this.prevPosition = this.currentPosition;
@@ -243,10 +245,8 @@ class PathedInterior extends InteriorObject {
 	}
 
 	function updatePosition() {
-		var tform = this.collider.transform;
-		tform.setPosition(this.currentPosition);
-		this.setTransform(tform);
-		this.collider.setTransform(tform);
+		this.setPosition(this.currentPosition.x, this.currentPosition.y, this.currentPosition.z);
+		this.collider.setTransform(this.getTransform());
 		this.collider.velocity = this.velocity;
 
 		if (this.soundChannel != null) {

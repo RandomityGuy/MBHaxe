@@ -18,7 +18,7 @@ class GuiButton extends GuiAnim {
 	// 1 is hover
 	// 2 is pressed
 	// 3 is disabled
-	public var pressedAction:GuiControl->Void = null;
+	public var pressedAction:GuiEvent->Void = null;
 
 	public var disabled:Bool = false;
 
@@ -73,13 +73,22 @@ class GuiButton extends GuiAnim {
 	public override function onMouseRelease(mouseState:MouseState) {
 		super.onMouseRelease(mouseState);
 		if (this.pressedAction != null && !disabled) {
-			this.pressedAction(this);
+			this.pressedAction(new GuiEvent(this));
 		}
 		if (buttonType == Toggle) {
 			pressed = !pressed;
 		}
 		if (buttonType == Radio) {
 			pressed = true;
+			// Unpress all the other radios
+			for (c in this.parent.children) {
+				if (c != this && c is GuiButton) {
+					var cb:GuiButton = cast c;
+					if (cb.buttonType == Radio) {
+						cb.pressed = false;
+					}
+				}
+			}
 		}
 	}
 

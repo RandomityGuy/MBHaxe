@@ -1,0 +1,26 @@
+Additions to the Level Editor
+
+The level editor included in Marble Blast Gold is the same as Platinum, but Platinum does change a few things. You can see a good guide about using the Level Editor in MBG here: https://www.youtube.com/watch?v=YPmR7spHITI
+Please note that the guide is old and some information in there is now known to be incorrect, but it does cover more than enough about the basics.
+In addition to that guide, also use this: http://marbleblast.com/index.php/forum/mb-level-building
+It has a lot of useful topics lying about, including a sticked topic about using the level editor, QuArK and Constructor. It is extremely recommended to browse through this board.
+
+This section of the help page only looks at the new additions and changes to the editor in Platinum and explains them in detail:
+
+Create tab: Allows you to add instantly any number of items that are used in Multiplayer. Spawn Triggers, Mega Marbles and Ultra Blasts have no effect in Singleplayer. You can also add an autosized Bounds Trigger where, if the marble leaves it, it goes Out of Bounds.
+You can select multiple gems at once and place them in a gem group, so that if the group is selected, all gems (or number of) in the group are spawned. Multiplayer only.
+
+Special tab:
+Make Gem Group: Like the Gem Group open in Create tab, this creates a gem group. Select gems first before choosing this option.
+Destroy GemGroups: Remove all Gem Groups. Does not remove gems.
+Generate Bounds: Same as the Bounds Trigger in the Create tab, this created an In-Bounds Trigger.
+Drop at Ground: Drops any item to the ground (interior) and aligns it perfectly.
+Round Coordinates: rounds any item's coordinates to the closest number based on your world editor movement scale. Example: 0.1813 becomes 0.2.
+Magic Button: Adds all instances as listed in the interior data (items, gems, pads, moving platforms) to the level editor, making life so much easier.
+Anti-OCD Button: Select one or more items, triggers, interiors etc. and press this button. Everything selected will become misaligned. Rated A++: would recommend.
+
+Window tab: Allows you to switch on the go between the World Editor, Inspector and Creator.
+
+In the World Editor Inspector, pressing on the MissionInfo – ScriptObject at the top will open a window that lists all the Mission Info fields that currently exist in the mission. You can either modify them or press Add Field and add new values. Press close to save the MissionInfo.
+
+To make things easier, pressing on any Marker object (of Moving Platforms) will draw a line from one marker to the next, effectively showing you the entire path the Moving Platform takes. When several markers are used in a path, every line will be colored based on its relative duration.

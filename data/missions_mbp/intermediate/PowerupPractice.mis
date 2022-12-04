@@ -1,0 +1,246 @@
+// UT Tip: Use each powerup smartly.
+// Rep. by Pablo
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         desc = "Practice your powerup skills!";
+         name = "Powerup Practice";
+         artist = "Andrew";
+         level = "16";
+         music = "Endurance.ogg";
+         startHelpText = "Don\'t forget to collect the diamonds!";
+         type = "Intermediate";
+         goldTime = "70000";
+         UltimateTime = "52000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/Intermediate/Intermediate_Sky.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.638261 0.459006 -0.61801";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new StaticShape(StartPoint) {
+      position = "7.35264 -10.0428 0.62";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new InteriorInstance() {
+      position = "6.3008 -9.96181 1.1376";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_MBP/PowerupPractice.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "-24.0534 -32.305 21.154";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Seaside Revisited.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+   new Item() {
+      position = "-45.2009 44.2906 66.35";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "7.40303 84.2212 22.38";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "29.3994 58.8404 34.9598";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "30.0422 80.4149 43.2323";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new Item() {
+      position = "29.4217 52.3172 58.63";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "ShockAbsorberItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape(EndPoint) {
+      position = "29.5308 80.1207 34.96";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Item() {
+      position = "7.45294 54.4129 8.99681";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-10.7468 83.6451 22.1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-68.0257 83.7106 10.025";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12.9761 -28.2314 39.15";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-63.2426 55.7579 20.36";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "7.5462 44.279 58.4826";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-6.02315 -32.2458 39.4788";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperBounceItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-3.07348 55.8306 39.35";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-61.3052 38.3576 42.4309";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-61.2518 44.385 66.2";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemPlatinum";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "13.0771 30.9912 39.3318";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger(Bounds) {
+      position = "-105.297 100.409 -6.4547";
+      rotation = "1 0 0 0";
+      scale = "150 150 150";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "-23.15 19.5 80.232";
+      rotation = "1 0 0 0";
+      scale = "0.7 0.7 1";
+      dataBlock = "EasterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+};
+//--- OBJECT WRITE END ---

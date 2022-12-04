@@ -71,6 +71,19 @@ class GuiObjectShow extends GuiControl {
 		}
 	}
 
+	public function changeObject(dts:DtsObject) {
+		if (_initialized) {
+			sceneObject.remove();
+			sceneObject.dispose();
+			sceneObject = dts;
+
+			scene.addChild(sceneObject);
+			var objCenter = sceneObject.getBounds().getCenter();
+			scene.camera.pos = new Vector(0, renderDistance * Math.cos(renderPitch), objCenter.z + renderDistance * Math.sin(renderPitch));
+			scene.camera.target = new Vector(objCenter.x, objCenter.y, objCenter.z);
+		}
+	}
+
 	public override function renderEngine(engine:h3d.Engine) {
 		if (_initialized) {
 			engine.pushTarget(this.sceneTarget);

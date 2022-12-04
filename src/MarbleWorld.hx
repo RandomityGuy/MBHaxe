@@ -1,7 +1,15 @@
 package src;
 
+import gui.OOBInsultGui;
+import shapes.Checkpoint;
+import triggers.CheckpointTrigger;
+import shapes.EasterEgg;
+import shapes.Sign;
+import triggers.TeleportTrigger;
+import triggers.DestinationTrigger;
+import shapes.Nuke;
+import shapes.Magnet;
 import src.Replay;
-import hxd.impl.Air3File.FileSeek;
 import gui.Canvas;
 import hxd.snd.Channel;
 import hxd.res.Sound;
@@ -74,6 +82,7 @@ import src.Marble;
 import src.Resource;
 import src.ProfilerUI;
 import src.ResourceLoaderWorker;
+import haxe.io.Path;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -89,6 +98,8 @@ class MarbleWorld extends Scheduler {
 	public var dtsObjects:Array<DtsObject> = [];
 	public var forceObjects:Array<ForceObject> = [];
 	public var triggers:Array<Trigger> = [];
+	public var gems:Array<Gem> = [];
+	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
 
 	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<GameObject> = [];
@@ -99,6 +110,8 @@ class MarbleWorld extends Scheduler {
 
 	var endPadElement:MissionElementStaticShape;
 	var endPad:EndPad;
+
+	var skyElement:MissionElementSky;
 
 	public var scene:Scene;
 	public var scene2d:h2d.Scene;
@@ -118,15 +131,25 @@ class MarbleWorld extends Scheduler {
 	public var cursorLock:Bool = true;
 
 	var timeTravelSound:Channel;
+	var alarmSound:Channel;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
+
+	var respawnPressedTime:Float = -1e8;
 
 	// Orientation
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
 
 	public var newOrientationQuat = new Quat();
+
+	// Checkpoint
+	var currentCheckpoint:{obj:DtsObject, elem:MissionElementBase} = null;
+	var currentCheckpointTrigger:CheckpointTrigger = null;
+	var checkpointCollectedGems:Map<Gem, Bool> = [];
+	var checkpointHeldPowerup:PowerUp = null;
+	var checkpointUp:Vector = null;
 
 	// Replay
 	public var replay:Replay;
@@ -162,7 +185,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function initLoading() {
-		this.loadingGui = new LoadingGui(this.mission.title);
+		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game);
 		MarbleGame.canvas.setContent(this.loadingGui);
 
 		function scanMission(simGroup:MissionElementSimGroup) {
@@ -172,7 +195,8 @@ class MarbleWorld extends Scheduler {
 					MissionElementType.Item,
 					MissionElementType.PathedInterior,
 					MissionElementType.StaticShape,
-					MissionElementType.TSStatic
+					MissionElementType.TSStatic,
+					MissionElementType.Sky
 				].contains(element._type)) {
 					// this.loadingState.total++;
 
@@ -181,6 +205,10 @@ class MarbleWorld extends Scheduler {
 						var so:MissionElementStaticShape = cast element;
 						if (so.datablock.toLowerCase() == 'endpad')
 							this.endPadElement = so;
+					}
+
+					if (element._type == Sky) {
+						this.skyElement = cast element;
 					}
 				} else if (element._type == MissionElementType.SimGroup) {
 					scanMission(cast element);
@@ -196,22 +224,27 @@ class MarbleWorld extends Scheduler {
 			this._loadingLength = resourceLoadFuncs.length;
 			fwd();
 		});
+		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
 	}
 
+	public function loadMusic(onFinish:Void->Void) {
+		var musicFileName = 'sound/music/' + this.mission.missionInfo.music;
+		ResourceLoader.load(musicFileName).entry.load(onFinish);
+	}
+
 	public function postInit() {
-		this._ready = true;
-		this.playGui.init(this.scene2d);
-		var musicFileName = [
-			'data/sound/groovepolice.ogg',
-			'data/sound/classic vibe.ogg',
-			'data/sound/beach party.ogg'
-		][(mission.index + 1) % 3];
-		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources));
-		MarbleGame.canvas.clearContent();
-		this.endPad.generateCollider();
-		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
-		start();
+		// Add the sky at the last so that cubemap reflections work
+		this.playGui.init(this.scene2d, () -> {
+			this.scene.addChild(this.sky);
+			this._ready = true;
+			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
+			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
+			MarbleGame.canvas.clearContent();
+			this.endPad.generateCollider();
+			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+			start();
+		});
 	}
 
 	public function initScene(onFinish:Void->Void) {
@@ -219,8 +252,6 @@ class MarbleWorld extends Scheduler {
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
-
-		// var skyElement:MissionElementSky = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.Sky)[0];
 
 		var worker = new ResourceLoaderWorker(() -> {
 			var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
@@ -259,8 +290,7 @@ class MarbleWorld extends Scheduler {
 			"particles/smoke.png",
 			"particles/spark.png",
 			"particles/star.png",
-			"particles/twirl.png",
-			"skies/sky_day.dml"
+			"particles/twirl.png"
 		];
 
 		for (file in filestoload) {
@@ -269,13 +299,13 @@ class MarbleWorld extends Scheduler {
 
 		this.sky = new Sky();
 
-		sky.dmlPath = "data/skies/sky_day.dml";
+		sky.dmlPath = ResourceLoader.getProperFilepath(skyElement.materiallist);
 
 		worker.addTask(fwd -> sky.init(cast this, fwd));
-		worker.addTask(fwd -> {
-			scene.addChild(sky);
-			return fwd();
-		});
+		// worker.addTask(fwd -> {
+		// 	scene.addChild(sky);
+		// 	return fwd();
+		// });
 
 		worker.run();
 	}
@@ -300,8 +330,21 @@ class MarbleWorld extends Scheduler {
 			"sound/spawn.wav",
 			"sound/ready.wav",
 			"sound/set.wav",
-			"sound/go.wav"
+			"sound/go.wav",
+			"sound/alarm.wav",
+			"sound/alarm_timeout.wav",
+			"sound/missinggems.wav",
+			"shapes/images/glow_bounce.dts",
+			"shapes/images/glow_bounce.png",
+			"shapes/images/helicopter.dts",
+			"shapes/images/helicopter.jpg",
+			"shapes/pads/white.jpg", // These irk us a lot because ifl shit
+			"shapes/pads/red.jpg",
+			"shapes/pads/blue.jpg",
+			"shapes/pads/green.jpg",
 		];
+		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
+		marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		for (file in marblefiles) {
 			worker.loadFile(file);
 		}
@@ -314,18 +357,24 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function start() {
-		restart();
+		restart(true);
 		for (interior in this.interiors)
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
 			shape.onLevelStart();
 	}
 
-	public function restart() {
+	public function restart(full:Bool = false) {
+		if (!full && this.currentCheckpoint != null) {
+			this.loadCheckpointState();
+			return 0; // Load checkpoint
+		}
+
 		if (!this.isWatching) {
 			this.replay.clear();
 		} else
 			this.replay.rewind();
+
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = 0;
 		this.bonusTime = 0;
@@ -334,6 +383,17 @@ class MarbleWorld extends Scheduler {
 		this.finishTime = null;
 		this.helpTextTimeState = Math.NEGATIVE_INFINITY;
 		this.alertTextTimeState = Math.NEGATIVE_INFINITY;
+		if (this.alarmSound != null) {
+			this.alarmSound.stop();
+			this.alarmSound = null;
+		}
+
+		this.currentCheckpoint = null;
+		this.currentCheckpointTrigger = null;
+		this.checkpointCollectedGems.clear();
+		this.checkpointHeldPowerup = null;
+		this.checkpointUp = null;
+
 		if (this.endPad != null)
 			this.endPad.inFinish = false;
 		if (this.totalGems > 0) {
@@ -342,29 +402,32 @@ class MarbleWorld extends Scheduler {
 		}
 
 		// Record/Playback trapdoor and landmine states
-		var tidx = 0;
-		var lidx = 0;
-		for (dtss in this.dtsObjects) {
-			if (dtss is Trapdoor) {
-				var trapdoor:Trapdoor = cast dtss;
-				if (!this.isWatching) {
-					this.replay.recordTrapdoorState(trapdoor.lastContactTime - this.timeState.timeSinceLoad, trapdoor.lastDirection, trapdoor.lastCompletion);
-				} else {
-					var state = this.replay.getTrapdoorState(tidx);
-					trapdoor.lastContactTime = state.lastContactTime + this.timeState.timeSinceLoad;
-					trapdoor.lastDirection = state.lastDirection;
-					trapdoor.lastCompletion = state.lastCompletion;
+		if (full) {
+			var tidx = 0;
+			var lidx = 0;
+			for (dtss in this.dtsObjects) {
+				if (dtss is Trapdoor) {
+					var trapdoor:Trapdoor = cast dtss;
+					if (!this.isWatching) {
+						this.replay.recordTrapdoorState(trapdoor.lastContactTime - this.timeState.timeSinceLoad, trapdoor.lastDirection,
+							trapdoor.lastCompletion);
+					} else {
+						var state = this.replay.getTrapdoorState(tidx);
+						trapdoor.lastContactTime = state.lastContactTime + this.timeState.timeSinceLoad;
+						trapdoor.lastDirection = state.lastDirection;
+						trapdoor.lastCompletion = state.lastCompletion;
+					}
+					tidx++;
 				}
-				tidx++;
-			}
-			if (dtss is LandMine) {
-				var landmine:LandMine = cast dtss;
-				if (!this.isWatching) {
-					this.replay.recordLandMineState(landmine.disappearTime - this.timeState.timeSinceLoad);
-				} else {
-					landmine.disappearTime = this.replay.getLandMineState(lidx) + this.timeState.timeSinceLoad;
+				if (dtss is LandMine) {
+					var landmine:LandMine = cast dtss;
+					if (!this.isWatching) {
+						this.replay.recordLandMineState(landmine.disappearTime - this.timeState.timeSinceLoad);
+					} else {
+						landmine.disappearTime = this.replay.getLandMineState(lidx) + this.timeState.timeSinceLoad;
+					}
+					lidx++;
 				}
-				lidx++;
 			}
 		}
 
@@ -532,7 +595,7 @@ class MarbleWorld extends Scheduler {
 			interiorRotation.x = -interiorRotation.x;
 			interiorRotation.w = -interiorRotation.w;
 			var interiorScale = MisParser.parseVector3(element.scale);
-			// var hasCollision = interiorScale.x != = 0 && interiorScale.y != = 0 && interiorScale.z != = 0; // Don't want to add buggy geometry
+			var hasCollision = interiorScale.x * interiorScale.y * interiorScale.z != 0; // Don't want to add buggy geometry
 
 			// Fix zero-volume interiors so they receive correct lighting
 			if (interiorScale.x == 0)
@@ -548,6 +611,7 @@ class MarbleWorld extends Scheduler {
 			mat.setPosition(interiorPosition);
 
 			interior.setTransform(mat);
+			interior.isCollideable = hasCollision;
 			onFinish();
 		});
 
@@ -577,6 +641,7 @@ class MarbleWorld extends Scheduler {
 		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
 			shape = new Gem(cast element);
 			this.totalGems++;
+			this.gems.push(cast shape);
 		} else if (dataBlockLowerCase == "superjumpitem")
 			shape = new SuperJump(cast element);
 		else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
@@ -589,19 +654,27 @@ class MarbleWorld extends Scheduler {
 			shape = new TriangleBumper();
 		else if (dataBlockLowerCase == "helicopteritem")
 			shape = new Helicopter(cast element);
+		else if (dataBlockLowerCase == "easteregg")
+			shape = new EasterEgg(cast element);
+		else if (dataBlockLowerCase == "checkpoint")
+			shape = new Checkpoint(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
 			shape = new SmallDuctFan();
+		else if (dataBlockLowerCase == "magnet")
+			shape = new Magnet();
 		else if (dataBlockLowerCase == "antigravityitem")
 			shape = new AntiGravity(cast element);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
+		else if (dataBlockLowerCase == "nuke")
+			shape = new Nuke();
 		else if (dataBlockLowerCase == "shockabsorberitem")
 			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
 			shape = new SuperSpeed(cast element);
-		else if (dataBlockLowerCase == "timetravelitem")
+		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
 			shape = new TimeTravel(cast element);
 		else if (dataBlockLowerCase == "tornado")
 			shape = new Tornado();
@@ -609,9 +682,18 @@ class MarbleWorld extends Scheduler {
 			shape = new Trapdoor();
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
+		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
+			shape = new Sign(cast element);
 		else {
 			onFinish();
 			return;
+		}
+
+		if (element._name != null && element._name != "") {
+			this.namedObjects.set(element._name, {
+				obj: shape,
+				elem: element
+			});
 		}
 
 		var shapePosition = MisParser.parseVector3(element.position);
@@ -657,6 +739,7 @@ class MarbleWorld extends Scheduler {
 		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
 			shape = new Gem(cast element);
 			this.totalGems++;
+			this.gems.push(cast shape);
 		} else if (dataBlockLowerCase == "superjumpitem")
 			shape = new SuperJump(cast element);
 		else if (dataBlockLowerCase == "superbounceitem")
@@ -667,19 +750,27 @@ class MarbleWorld extends Scheduler {
 			shape = new TriangleBumper();
 		else if (dataBlockLowerCase == "helicopteritem")
 			shape = new Helicopter(cast element);
+		else if (dataBlockLowerCase == "easteregg")
+			shape = new EasterEgg(cast element);
+		else if (dataBlockLowerCase == "checkpoint")
+			shape = new Checkpoint(cast element);
 		else if (dataBlockLowerCase == "ductfan")
 			shape = new DuctFan();
 		else if (dataBlockLowerCase == "smallductfan")
 			shape = new SmallDuctFan();
+		else if (dataBlockLowerCase == "magnet")
+			shape = new Magnet();
 		else if (dataBlockLowerCase == "antigravityitem")
 			shape = new AntiGravity(cast element);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
+		else if (dataBlockLowerCase == "nuke")
+			shape = new Nuke();
 		else if (dataBlockLowerCase == "shockabsorberitem")
 			shape = new ShockAbsorber(cast element);
 		else if (dataBlockLowerCase == "superspeeditem")
 			shape = new SuperSpeed(cast element);
-		else if (dataBlockLowerCase == "timetravelitem")
+		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
 			shape = new TimeTravel(cast element);
 		else if (dataBlockLowerCase == "tornado")
 			shape = new Tornado();
@@ -687,9 +778,18 @@ class MarbleWorld extends Scheduler {
 			shape = new Trapdoor();
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
+		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
+			shape = new Sign(cast element);
 		else {
 			onFinish();
 			return;
+		}
+
+		if (element._name != null && element._name != "") {
+			this.namedObjects.set(element._name, {
+				obj: shape,
+				elem: element
+			});
 		}
 
 		var shapePosition = MisParser.parseVector3(element.position);
@@ -720,16 +820,26 @@ class MarbleWorld extends Scheduler {
 	public function addTrigger(element:MissionElementTrigger, onFinish:Void->Void) {
 		var trigger:Trigger = null;
 
+		var datablockLowercase = element.datablock.toLowerCase();
+
 		// Create a trigger based on type
-		if (element.datablock == "OutOfBoundsTrigger") {
+		if (datablockLowercase == "outofboundstrigger") {
 			trigger = new OutOfBoundsTrigger(element, cast this);
-		} else if (element.datablock == "InBoundsTrigger") {
+		} else if (datablockLowercase == "inboundstrigger") {
 			trigger = new InBoundsTrigger(element, cast this);
-		} else if (element.datablock == "HelpTrigger") {
+		} else if (datablockLowercase == "helptrigger") {
 			trigger = new HelpTrigger(element, cast this);
+		} else if (datablockLowercase == "teleporttrigger") {
+			trigger = new TeleportTrigger(element, cast this);
+		} else if (datablockLowercase == "destinationtrigger") {
+			trigger = new DestinationTrigger(element, cast this);
+		} else if (datablockLowercase == "checkpointtrigger") {
+			trigger = new CheckpointTrigger(element, cast this);
 		} else {
+			onFinish();
 			return;
 		}
+
 		trigger.init(() -> {
 			this.triggers.push(trigger);
 			this.collisionWorld.addEntity(trigger.collider);
@@ -741,12 +851,29 @@ class MarbleWorld extends Scheduler {
 		// !! WARNING - UNTESTED !!
 		var shapeName = element.shapename;
 		var index = shapeName.indexOf('data/');
-		if (index == -1)
+		if (index == -1) {
+			onFinish();
 			return;
+		}
+
+		var dtsPath = 'data/' + shapeName.substring(index + 'data/'.length);
+		if (ResourceLoader.getProperFilepath(dtsPath) == "") {
+			onFinish();
+			return;
+		}
 
 		var tsShape = new DtsObject();
 		tsShape.useInstancing = true;
-		tsShape.dtsPath = shapeName.substring(index + 'data/'.length);
+		tsShape.dtsPath = dtsPath;
+		tsShape.identifier = shapeName;
+		tsShape.isCollideable = true;
+
+		if (element._name != null && element._name != "") {
+			this.namedObjects.set(element._name, {
+				obj: tsShape,
+				elem: element
+			});
+		}
 
 		var shapePosition = MisParser.parseVector3(element.position);
 		shapePosition.x = -shapePosition.x;
@@ -802,25 +929,89 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function addDtsObject(obj:DtsObject, onFinish:Void->Void) {
-		obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
-		this.dtsObjects.push(obj);
-		if (obj is ForceObject) {
-			this.forceObjects.push(cast obj);
-		}
-		obj.init(cast this, () -> {
-			obj.update(this.timeState);
-			if (obj.useInstancing) {
-				this.instanceManager.addObject(obj);
-			} else
-				this.scene.addChild(obj);
-			for (collider in obj.colliders) {
-				if (collider != null)
-					this.collisionWorld.addEntity(collider);
-			}
-			if (obj.isBoundingBoxCollideable)
-				this.collisionWorld.addEntity(obj.boundingCollider);
+		function parseIfl(path:String, onFinish:Array<String>->Void) {
+			ResourceLoader.load(path).entry.load(() -> {
+				var text = ResourceLoader.fileSystem.get(path).getText();
+				var lines = text.split('\n');
+				var keyframes = [];
+				for (line in lines) {
+					line = StringTools.trim(line);
+					if (line.substr(0, 2) == "//")
+						continue;
+					if (line == "")
+						continue;
 
-			onFinish();
+					var parts = line.split(' ');
+					var count = parts.length > 1 ? Std.parseInt(parts[1]) : 1;
+
+					for (i in 0...count) {
+						keyframes.push(parts[0]);
+					}
+				}
+
+				onFinish(keyframes);
+			});
+		}
+
+		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
+			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
+			var directoryPath = haxe.io.Path.directory(obj.dtsPath);
+			var texToLoad = [];
+			for (i in 0...dtsFile.resource.matNames.length) {
+				var matName = obj.matNameOverride.exists(dtsFile.resource.matNames[i]) ? obj.matNameOverride.get(dtsFile.resource.matNames[i]) : dtsFile.resource.matNames[i];
+				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
+				var fullName = fullNames.length > 0 ? fullNames[0] : null;
+				if (fullName != null) {
+					texToLoad.push(fullName);
+				}
+			}
+
+			var worker = new ResourceLoaderWorker(() -> {
+				obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
+				this.dtsObjects.push(obj);
+				if (obj is ForceObject) {
+					this.forceObjects.push(cast obj);
+				}
+				obj.init(cast this, () -> {
+					obj.update(this.timeState);
+					if (obj.useInstancing) {
+						this.instanceManager.addObject(obj);
+					} else
+						this.scene.addChild(obj);
+					for (collider in obj.colliders) {
+						if (collider != null)
+							this.collisionWorld.addEntity(collider);
+					}
+					if (obj.isBoundingBoxCollideable)
+						this.collisionWorld.addEntity(obj.boundingCollider);
+
+					onFinish();
+				});
+			});
+
+			for (texPath in texToLoad) {
+				if (haxe.io.Path.extension(texPath) == "ifl") {
+					worker.addTask(fwd -> {
+						parseIfl(texPath, keyframes -> {
+							var innerWorker = new ResourceLoaderWorker(() -> {
+								fwd();
+							});
+							var loadedkf = [];
+							for (kf in keyframes) {
+								if (!loadedkf.contains(kf)) {
+									innerWorker.loadFile(directoryPath + '/' + kf);
+									loadedkf.push(kf);
+								}
+							}
+							innerWorker.run();
+						});
+					});
+				} else {
+					worker.loadFile(texPath);
+				}
+			}
+
+			worker.run();
 		});
 	}
 
@@ -873,10 +1064,55 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
+		if (Key.isPressed(Settings.controlsSettings.respawn)) {
+			this.respawnPressedTime = timeState.timeSinceLoad;
+			this.restart();
+			if (!this.isWatching) {
+				Settings.playStatistics.respawns++;
+
+				if (!Settings.levelStatistics.exists(mission.path)) {
+					Settings.levelStatistics.set(mission.path, {
+						oobs: 0,
+						respawns: 1,
+						totalTime: 0,
+					});
+				} else {
+					Settings.levelStatistics[mission.path].respawns++;
+				}
+
+				if (this.isRecording) {
+					this.replay.endFrame();
+				}
+			}
+			return;
+		}
+
+		if (Key.isDown(Settings.controlsSettings.respawn) && !this.isWatching) {
+			if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
+				this.restart(true);
+				this.respawnPressedTime = Math.POSITIVE_INFINITY;
+				return;
+			}
+		}
+
 		this.tickSchedule(timeState.currentAttemptTime);
+
+		// Replay gravity
+		if (this.isWatching) {
+			if (this.replay.currentPlaybackFrame.gravityChange) {
+				this.setUp(this.replay.currentPlaybackFrame.gravity, timeState, this.replay.currentPlaybackFrame.gravityInstant);
+			}
+			if (this.replay.currentPlaybackFrame.powerupPickup != null) {
+				this.pickUpPowerUpReplay(this.replay.currentPlaybackFrame.powerupPickup);
+			}
+		}
+
 		this.updateGameState();
 		ProfilerUI.measure("updateDTS");
 		for (obj in dtsObjects) {
+			obj.update(timeState);
+		}
+		for (obj in triggers) {
 			obj.update(timeState);
 		}
 		ProfilerUI.measure("updateMarbles");
@@ -892,21 +1128,15 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
-		if (!this.isWatching) {
-			if (this.isRecording) {
-				this.replay.endFrame();
-			}
-		}
-
-		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {
-			this.clearSchedule();
+		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup) && !this.isWatching) {
 			this.restart();
 			return;
 		}
 
-		if (Key.isDown(Key.H)) {
-			this.isWatching = true;
-			this.restart();
+		if (!this.isWatching) {
+			if (this.isRecording) {
+				this.replay.endFrame();
+			}
 		}
 
 		this.updateTexts();
@@ -917,7 +1147,13 @@ class MarbleWorld extends Scheduler {
 			asyncLoadResources();
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
+		if (this.marble != null && this.marble.cubemapRenderer != null) {
+			this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
+			this.marble.cubemapRenderer.render(e, 0.002);
+		}
 	}
+
+	var postInited = false;
 
 	function asyncLoadResources() {
 		if (this.resourceLoadFuncs.length != 0) {
@@ -943,13 +1179,37 @@ class MarbleWorld extends Scheduler {
 		} else {
 			if (this._resourcesLoaded < _loadingLength)
 				return;
-			if (!_ready)
+			if (!_ready && !postInited) {
+				postInited = true;
 				postInit();
+			}
 		}
+	}
+
+	function determineClockColor(timeToDisplay:Float) {
+		if (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0)
+			return 1;
+		if (timeToDisplay >= this.mission.qualifyTime)
+			return 2;
+
+		if (this.timeState.currentAttemptTime >= 3.5) {
+			// Create the flashing effect
+			var alarmStart = this.mission.computeAlarmStartTime();
+			var elapsed = timeToDisplay - alarmStart;
+			if (elapsed < 0)
+				return 0;
+			if (Math.floor(elapsed) % 2 == 0)
+				return 2;
+		}
+
+		return 0; // Default yellow
 	}
 
 	public function updateTimer(dt:Float) {
 		this.timeState.dt = dt;
+
+		var prevGameplayClock = this.timeState.gameplayClock;
+
 		if (!this.isWatching) {
 			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
 				this.bonusTime -= dt;
@@ -966,9 +1226,9 @@ class MarbleWorld extends Scheduler {
 					timeTravelSound.stop();
 					timeTravelSound = null;
 				}
-				if (this.timeState.currentAttemptTime >= 3.5)
+				if (this.timeState.currentAttemptTime >= 3.5) {
 					this.timeState.gameplayClock += dt;
-				else if (this.timeState.currentAttemptTime + dt >= 3.5) {
+				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
 					this.timeState.gameplayClock += (this.timeState.currentAttemptTime + dt) - 3.5;
 				}
 			}
@@ -990,9 +1250,31 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 		this.timeState.timeSinceLoad += dt;
+
+		// Handle alarm warnings (that the user is about to exceed the par time)
+		if (this.timeState.currentAttemptTime >= 3.5) {
+			var alarmStart = this.mission.computeAlarmStartTime();
+
+			if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
+				// Start the alarm
+				this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
+					null, true); // AudioManager.createAudioSource('alarm.wav');
+				this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.');
+			}
+			if (prevGameplayClock < this.mission.qualifyTime && this.timeState.gameplayClock >= this.mission.qualifyTime) {
+				// Stop the alarm
+				if (this.alarmSound != null) {
+					this.alarmSound.stop();
+					this.alarmSound = null;
+				}
+				this.displayHelp("The clock has passed the Par Time.");
+				AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
+			}
+		}
+
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
-		playGui.formatTimer(this.timeState.gameplayClock);
+		playGui.formatTimer(this.timeState.gameplayClock, determineClockColor(this.timeState.gameplayClock));
 
 		if (!this.isWatching && this.isRecording)
 			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);
@@ -1217,7 +1499,7 @@ class MarbleWorld extends Scheduler {
 		}, (sender) -> {
 			MarbleGame.canvas.popDialog(egg);
 			this.setCursorLock(true);
-			this.restart();
+			this.restart(true);
 			#if js
 			pointercontainer.hidden = true;
 			#end
@@ -1231,13 +1513,30 @@ class MarbleWorld extends Scheduler {
 		return 0;
 	}
 
+	public function pickUpPowerUpReplay(powerupIdent:String) {
+		if (powerupIdent == null)
+			return false;
+		if (this.marble.heldPowerup != null)
+			if (this.marble.heldPowerup.identifier == powerupIdent)
+				return false;
+
+		this.playGui.setPowerupImage(powerupIdent);
+
+		return true;
+	}
+
 	public function pickUpPowerUp(powerUp:PowerUp) {
+		if (powerUp == null)
+			return false;
 		if (this.marble.heldPowerup != null)
 			if (this.marble.heldPowerup.identifier == powerUp.identifier)
 				return false;
 		this.marble.heldPowerup = powerUp;
 		this.playGui.setPowerupImage(powerUp.identifier);
 		MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
+		if (this.isRecording) {
+			this.replay.recordPowerupPickup(powerUp);
+		}
 		return true;
 	}
 
@@ -1255,7 +1554,7 @@ class MarbleWorld extends Scheduler {
 		return q;
 	}
 
-	public function setUp(vec:Vector, timeState:TimeState) {
+	public function setUp(vec:Vector, timeState:TimeState, instant:Bool = false) {
 		this.currentUp = vec;
 		var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
 		var oldUp = new Vector(0, 0, 1);
@@ -1296,9 +1595,13 @@ class MarbleWorld extends Scheduler {
 		// quatChange.initMoveTo(oldUp, vec);
 		quatChange.multiply(quatChange, currentQuat);
 
+		if (this.isRecording) {
+			this.replay.recordGravity(vec, instant);
+		}
+
 		this.newOrientationQuat = quatChange;
 		this.oldOrientationQuat = currentQuat;
-		this.orientationChangeTime = timeState.currentAttemptTime;
+		this.orientationChangeTime = instant ? -1e8 : timeState.currentAttemptTime;
 	}
 
 	public function goOutOfBounds() {
@@ -1308,12 +1611,135 @@ class MarbleWorld extends Scheduler {
 		this.outOfBounds = true;
 		this.outOfBoundsTime = this.timeState.clone();
 		this.marble.camera.oob = true;
+		if (!this.isWatching) {
+			Settings.playStatistics.oobs++;
+			if (!Settings.levelStatistics.exists(mission.path)) {
+				Settings.levelStatistics.set(mission.path, {
+					oobs: 1,
+					respawns: 0,
+					totalTime: 0,
+				});
+			} else {
+				Settings.levelStatistics[mission.path].oobs++;
+			}
+			if (Settings.optionsSettings.oobInsults)
+				OOBInsultGui.OOBCheck();
+		}
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 		// if (this.replay.mode != = 'playback')
 		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
+	}
+
+	/** Sets a new active checkpoint. */
+	public function saveCheckpointState(shape:{obj:DtsObject, elem:MissionElementBase}, trigger:CheckpointTrigger = null) {
+		if (this.currentCheckpoint != null)
+			if (this.currentCheckpoint.obj == shape.obj)
+				return;
+		var disableOob = false;
+		if (shape != null) {
+			if (shape.elem.fields.exists('disableOob')) {
+				disableOob = MisParser.parseBoolean(shape.elem.fields.get('disableOob')[0]);
+			}
+		}
+		if (trigger != null) {
+			disableOob = trigger.disableOOB;
+		}
+		// (shape.srcElement as any) ?.disableOob || trigger?.element.disableOob;
+		if (disableOob && this.outOfBounds)
+			return; // The checkpoint is configured to not work when the player is already OOB
+		this.currentCheckpoint = shape;
+		this.currentCheckpointTrigger = trigger;
+		this.checkpointCollectedGems.clear();
+		this.checkpointUp = this.currentUp.clone();
+		// Remember all gems that were collected up to this point
+		for (gem in this.gems) {
+			if (gem.pickedUp)
+				this.checkpointCollectedGems.set(gem, true);
+		}
+		this.checkpointHeldPowerup = this.marble.heldPowerup;
+		this.displayAlert("Checkpoint reached!");
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
+	}
+
+	/** Resets to the last stored checkpoint state. */
+	public function loadCheckpointState() {
+		var marble = this.marble;
+		// Determine where to spawn the marble
+		var offset = new Vector(0, 0, 3);
+		var add = ""; // (this.currentCheckpoint.srcElement as any)?.add || this.currentCheckpointTrigger?.element.add;
+		if (this.currentCheckpoint.elem.fields.exists('add')) {
+			add = this.currentCheckpoint.elem.fields.get('add')[0];
+		}
+		var sub = "";
+		if (this.currentCheckpoint.elem.fields.exists('sub')) {
+			sub = this.currentCheckpoint.elem.fields.get('sub')[0];
+		}
+		if (this.currentCheckpointTrigger != null) {
+			if (this.currentCheckpointTrigger.add != null)
+				offset = this.currentCheckpointTrigger.add;
+		}
+		if (add != "") {
+			offset = MisParser.parseVector3(add);
+			offset.x = -offset.x;
+		}
+		if (sub != "") {
+			offset = MisParser.parseVector3(sub).multiply(-1);
+			offset.x = -offset.x;
+		}
+		var mpos = this.currentCheckpoint.obj.getAbsPos().getPosition().add(offset);
+		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
+		marble.velocity.load(new Vector(0, 0, 0));
+		marble.omega.load(new Vector(0, 0, 0));
+		// Set camera orientation
+		var euler = this.currentCheckpoint.obj.getRotationQuat().toEuler();
+		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
+		this.marble.camera.CameraPitch = 0.45;
+		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
+		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
+		this.marble.camera.oob = false;
+		if (this.isRecording) {
+			this.replay.recordCameraState(this.marble.camera.CameraYaw, this.marble.camera.CameraPitch);
+			this.replay.recordMarbleInput(0, 0);
+			this.replay.recordMarbleState(mpos, marble.velocity, marble.getRotationQuat(), marble.omega);
+			this.replay.recordMarbleStateFlags(false, false, true);
+		}
+		var gravityField = ""; // (this.currentCheckpoint.srcElement as any) ?.gravity || this.currentCheckpointTrigger?.element.gravity;
+		if (this.currentCheckpoint.elem.fields.exists('gravity')) {
+			gravityField = this.currentCheckpoint.elem.fields.get('gravity')[0];
+		}
+		if (this.currentCheckpointTrigger != null) {
+			if (@:privateAccess this.currentCheckpointTrigger.element.fields.exists('gravity')) {
+				gravityField = @:privateAccess this.currentCheckpointTrigger.element.fields.get('gravity')[0];
+			}
+		}
+		if (MisParser.parseBoolean(gravityField)) {
+			// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
+			var up = new Vector(0, 0, 1);
+			up.transform(this.currentCheckpoint.obj.getRotationQuat().toMatrix());
+			this.setUp(up, this.timeState, true);
+		} else {
+			// Otherwise, we restore gravity to what was stored.
+			this.setUp(this.checkpointUp, this.timeState, true);
+		}
+		// Restore gem states
+		for (gem in this.gems) {
+			if (gem.pickedUp && !this.checkpointCollectedGems.exists(gem)) {
+				gem.reset();
+				this.gemCount--;
+			}
+		}
+		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		this.playGui.setCenterText('none');
+		this.clearSchedule();
+		this.outOfBounds = false;
+		this.deselectPowerUp(); // Always deselect first
+		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
+		if (this.checkpointHeldPowerup != null)
+			this.schedule(this.timeState.currentAttemptTime + 0.5, () -> this.pickUpPowerUp(this.checkpointHeldPowerup));
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	public function setCursorLock(enabled:Bool) {
@@ -1362,6 +1788,21 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function dispose() {
+		// Gotta add the timesinceload to our stats
+		if (!this.isWatching) {
+			Settings.playStatistics.totalTime += this.timeState.timeSinceLoad;
+
+			if (!Settings.levelStatistics.exists(mission.path)) {
+				Settings.levelStatistics.set(mission.path, {
+					oobs: 0,
+					respawns: 0,
+					totalTime: this.timeState.timeSinceLoad,
+				});
+			} else {
+				Settings.levelStatistics[mission.path].totalTime += this.timeState.timeSinceLoad;
+			}
+		}
+
 		this.playGui.dispose();
 		scene.removeChildren();
 

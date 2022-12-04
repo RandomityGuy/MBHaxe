@@ -130,12 +130,13 @@ class ManifestBuilder {
 			// try later with another fs
 			if (!StringTools.startsWith(file.fullPath, basePath))
 				continue;
-			var info = {path: file.relPath, original: file.relPath};
+			var info = {path: file.relPath.toLowerCase(), original: file.relPath};
 			out.push(info);
 			var f = fs.get(file.relPath); // convert
 			if (f.originalFile != null && f.originalFile != f.file) {
 				info.original = f.relPath;
 				info.path = StringTools.startsWith(f.file, fs.baseDir) ? f.file.substr(fs.baseDir.length) : f.file;
+				info.path = info.path.toLowerCase();
 			}
 		}
 

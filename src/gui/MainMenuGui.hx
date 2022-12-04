@@ -6,10 +6,12 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
+import src.Util;
+import src.Replay;
 
 class MainMenuGui extends GuiImage {
 	public function new() {
-		var img = ResourceLoader.getImage("data/ui/background.jpg");
+		var img = Math.random() >= 0.7 ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
 		super(img.resource.toTile());
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
@@ -21,21 +23,11 @@ class MainMenuGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var versionText = new GuiText(domcasual32);
-
-		versionText.horizSizing = Center;
-		versionText.vertSizing = Top;
-		versionText.position = new Vector(289, 457);
-		versionText.extent = new Vector(62, 18);
-		versionText.text.text = "1.1.2";
-		this.addChild(versionText);
-
-		var homebase = new GuiImage(ResourceLoader.getResource("data/ui/home/homegui.png", ResourceLoader.getImage, this.imageResources).toTile());
-		homebase.horizSizing = Center;
-		homebase.vertSizing = Center;
-		homebase.extent = new Vector(349, 477);
-		homebase.position = new Vector(145, 1);
-		this.addChild(homebase);
+		var mainMenuContent = new GuiControl();
+		mainMenuContent.horizSizing = Center;
+		mainMenuContent.vertSizing = Center;
+		mainMenuContent.position = new Vector(-130, -110);
+		mainMenuContent.extent = new Vector(900, 700);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -44,38 +36,117 @@ class MainMenuGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var playButton = new GuiButton(loadButtonImages("data/ui/home/play"));
-		playButton.position = new Vector(50, 113);
-		playButton.extent = new Vector(270, 95);
+		var siteButton = new GuiButton(loadButtonImages('data/ui/menu/site'));
+		siteButton.horizSizing = Right;
+		siteButton.vertSizing = Top;
+		siteButton.position = new Vector(363, 664);
+		siteButton.extent = new Vector(400, 30);
+		siteButton.pressedAction = (sender) -> {}
+		mainMenuContent.addChild(siteButton);
+
+		var motdButton = new GuiImage(ResourceLoader.getResource('data/ui/menu/totd_i.png', ResourceLoader.getImage, this.imageResources).toTile());
+		motdButton.horizSizing = Left;
+		motdButton.vertSizing = Top;
+		motdButton.position = new Vector(706, 536);
+		motdButton.extent = new Vector(191, 141);
+		mainMenuContent.addChild(motdButton);
+
+		var playButton = new GuiButton(loadButtonImages("data/ui/menu/play"));
+		playButton.position = new Vector(-5, -2);
+		playButton.extent = new Vector(247, 164);
 		playButton.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new PlayMissionGui());
 		}
-		homebase.addChild(playButton);
+		mainMenuContent.addChild(playButton);
 
-		var helpButton = new GuiButton(loadButtonImages("data/ui/home/help"));
-		helpButton.position = new Vector(59, 200);
-		helpButton.extent = new Vector(242, 84);
-		helpButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.setContent(new HelpCreditsGui());
-		}
-		homebase.addChild(helpButton);
+		var lbButton = new GuiImage(ResourceLoader.getResource('data/ui/menu/online_i.png', ResourceLoader.getImage, this.imageResources).toTile());
+		lbButton.position = new Vector(-5, 128);
+		lbButton.extent = new Vector(247, 164);
+		mainMenuContent.addChild(lbButton);
 
-		var optionsButton = new GuiButton(loadButtonImages("data/ui/home/options"));
-		optionsButton.position = new Vector(55, 279);
-		optionsButton.extent = new Vector(253, 83);
+		var optionsButton = new GuiButton(loadButtonImages("data/ui/menu/options"));
+		optionsButton.position = new Vector(-5, 258);
+		optionsButton.extent = new Vector(247, 164);
 		optionsButton.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new OptionsDlg());
 		}
-		homebase.addChild(optionsButton);
+		mainMenuContent.addChild(optionsButton);
 
-		var exitButton = new GuiButton(loadButtonImages("data/ui/home/exit"));
-		exitButton.position = new Vector(82, 358);
-		exitButton.extent = new Vector(203, 88);
+		var exitButton = new GuiButton(loadButtonImages("data/ui/menu/quit"));
+		exitButton.position = new Vector(-5, 388);
+		exitButton.extent = new Vector(247, 164);
 		exitButton.pressedAction = (sender) -> {
 			#if hl
 			Sys.exit(0);
 			#end
 		};
-		homebase.addChild(exitButton);
+		mainMenuContent.addChild(exitButton);
+
+		var replButton = new GuiButton(loadButtonImages("data/ui/menu/replay"));
+		replButton.horizSizing = Left;
+		replButton.vertSizing = Top;
+		replButton.position = new Vector(552, 536);
+		replButton.extent = new Vector(191, 141);
+		replButton.pressedAction = (sender) -> {
+			hxd.File.browse((replayToLoad) -> {
+				replayToLoad.load((replayData) -> {
+					var replay = new Replay("");
+					if (!replay.read(replayData)) {
+						cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+						// Idk do something to notify the user here
+					} else {
+						var repmis = replay.mission;
+						#if js
+						repmis = StringTools.replace(repmis, "data/", "");
+						#end
+						if (MissionList.missions == null)
+							MissionList.buildMissionList();
+						var playMis = MissionList.missions.get(repmis);
+						if (playMis != null) {
+							cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);
+						} else {
+							cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+						}
+					}
+				});
+			}, {
+				title: "Select replay file",
+				fileTypes: [
+					{
+						name: "Replay (*.mbr)",
+						extensions: ["mbr"]
+					}
+				],
+			});
+		};
+		mainMenuContent.addChild(replButton);
+
+		var helpButton = new GuiButton(loadButtonImages("data/ui/menu/help"));
+		helpButton.horizSizing = Left;
+		helpButton.vertSizing = Top;
+		helpButton.position = new Vector(398, 536);
+		helpButton.extent = new Vector(191, 141);
+		helpButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.setContent(new HelpCreditsGui());
+		}
+		mainMenuContent.addChild(helpButton);
+
+		this.addChild(mainMenuContent);
+
+		var mbp = new GuiImage(ResourceLoader.getResource("data/ui/menu/mbp.png", ResourceLoader.getImage, this.imageResources).toTile());
+		mbp.horizSizing = Left;
+		mbp.vertSizing = Bottom;
+		mbp.position = new Vector(476, 12);
+		mbp.extent = new Vector(153, 150);
+		this.addChild(mbp);
+
+		var versionText = new GuiMLText(domcasual32, null);
+
+		versionText.horizSizing = Left;
+		versionText.vertSizing = Bottom;
+		versionText.position = new Vector(502, 66);
+		versionText.extent = new Vector(97, 72);
+		versionText.text.text = "<p align=\"center\">1.2.0</p>";
+		this.addChild(versionText);
 	}
 }
