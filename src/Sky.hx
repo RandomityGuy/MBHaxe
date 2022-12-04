@@ -20,6 +20,8 @@ import src.ResourceLoaderWorker;
 class Sky extends Object {
 	public var dmlPath:String;
 
+	public var cubemap:Texture;
+
 	var imageResources:Array<Resource<Image>> = [];
 
 	public function new() {
@@ -51,6 +53,7 @@ class Sky extends Object {
 			var shad = new Skybox(texture);
 			skyMesh.material.mainPass.addShader(shad);
 			skyMesh.material.mainPass.depthWrite = false;
+			cubemap = texture;
 			onFinish();
 		});
 		// skyMesh.material.shadows = false;
