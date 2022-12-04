@@ -1,12 +1,31 @@
 # MBHaxe
-A Haxe port of Marble Blast Gold, name subject to change.
+A Haxe port of Marble Blast Gold and Platinum, name subject to change.
 The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/OpenMBU) along with my own collision detection code, game logic was partially from scratch and taken with permission from [Marble Blast Web Port](https://github.com/Vanilagy/MarbleBlast).
-The browser version of this port is hosted [here](https://mbhaxe.netlify.app/)
+
+# Play
+## Web Browser
+The browser port supports touch controls, meaning it can be played on mobile devices.
+### Marble Blast Gold: [Play](https://mbhaxe.netlify.app/)
+### Marble Blast Platinum: [Play](https://mbphaxe.netlify.app/)
+## Windows
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.2)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.0)
 
 # Why Haxe?
 I chose Haxe because its a good language that can target other languages, meaning any Haxe code can be converted and used in Python, C++, Java very easily so that nobody has to take effort in porting the code to different languages, atleast thats what my mindset was when I started it, but unfortunately because of the 3d engine I used, it only compiles to C and Javascript. You will have to isolate the engine specific features yourself if you want to use this for other programming languages.
 
+# Screenshots
+<img src="https://imgur.com/CS693zi.png" width="640">
+<img src="https://imgur.com/iryo0AL.png" width="640">
+<img src="https://imgur.com/vsuNqUi.png" width="640">
+<img src="https://imgur.com/SFPdC7g.png" width="640">
+<img src="https://imgur.com/I3Gaze9.png" width="640">
+<img src="https://imgur.com/iryo0AL.png" width="640">
+
 # Build
+The `master` branch is currently for Marble Blast Platinum. 
+If you want to build Marble Blast Gold, look for version [1.1.2 tag](https://github.com/RandomityGuy/MBHaxe/commits/1.1.2)
+
 Requires Haxe 4.2.2 or above
 You require the following Haxe libraries: 
 - heaps: The specific version located [here](https://github.com/RandomityGuy/heaps)
