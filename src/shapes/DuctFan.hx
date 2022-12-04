@@ -39,8 +39,8 @@ class DuctFan extends ForceObject {
 		});
 	}
 
-	public override function update(timeState:src.TimeState) {
-		super.update(timeState);
+	public override function reset() {
+		super.reset();
 
 		var seffect = this.soundChannel.getEffect(Spatialization);
 		seffect.position = this.getAbsPos().getPosition();
