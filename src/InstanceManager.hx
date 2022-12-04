@@ -1,5 +1,6 @@
 package src;
 
+import h3d.prim.Instanced;
 import h3d.shader.pbr.PropsValues;
 import shaders.Billboard;
 import shaders.DtsTexture;
@@ -37,8 +38,21 @@ class InstanceManager {
 	public function update(dt:Float) {
 		for (meshes in objects) {
 			for (minfo in meshes) {
+				var visibleinstances = [];
+				// Culling
+				if (minfo.meshbatch != null || minfo.transparencymeshbatch != null) {
+					for (inst in minfo.instances) {
+						var objBounds = @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds.clone();
+						objBounds.transform(inst.emptyObj.getAbsPos());
+						if (scene.camera.frustum.hasBounds(objBounds)) {
+							visibleinstances.push(inst);
+						}
+					}
+				}
+
+				// Emit non culled primitives
 				if (minfo.meshbatch != null) {
-					var opaqueinstances = minfo.instances.filter(x -> x.gameObject.currentOpacity == 1);
+					var opaqueinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity == 1);
 					minfo.meshbatch.begin(opaqueinstances.length);
 					for (instance in opaqueinstances) { // Draw the opaque shit first
 						var dtsShader = minfo.meshbatch.material.mainPass.getShader(DtsTexture);
@@ -53,7 +67,7 @@ class InstanceManager {
 					}
 				}
 				if (minfo.transparencymeshbatch != null) {
-					var transparentinstances = minfo.instances.filter(x -> x.gameObject.currentOpacity != 1);
+					var transparentinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity != 1);
 					minfo.transparencymeshbatch.begin(transparentinstances.length);
 					for (instance in transparentinstances) { // Non opaque shit
 						var dtsShader = minfo.transparencymeshbatch.material.mainPass.getShader(DtsTexture);

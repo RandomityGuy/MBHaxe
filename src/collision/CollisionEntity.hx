@@ -19,7 +19,7 @@ class CollisionEntity implements IOctreeObject {
 
 	public var octree:Octree;
 
-	public var grid:Grid;
+	public var bvh:BVHTree;
 
 	public var surfaces:Array<CollisionSurface>;
 
@@ -52,13 +52,14 @@ class CollisionEntity implements IOctreeObject {
 		}
 	}
 
-	// Generates the grid
+	// Generates the bvh
 	public function finalize() {
 		this.generateBoundingBox();
-		this.grid = new Grid(this.boundingBox);
+		this.bvh = new BVHTree(this.boundingBox);
 		for (surface in this.surfaces) {
-			this.grid.insert(surface);
+			this.bvh.insert(surface);
 		}
+		this.bvh.build();
 	}
 
 	public function setTransform(transform:Matrix) {
@@ -102,7 +103,7 @@ class CollisionEntity implements IOctreeObject {
 		var rStart = rayOrigin.clone();
 		rStart.transform(invMatrix);
 		var rDir = rayDirection.transformed3x3(invMatrix);
-		if (grid == null) {
+		if (bvh == null) {
 			var intersections = octree.raycast(rStart, rDir);
 			var iData:Array<RayIntersectionData> = [];
 			for (i in intersections) {
@@ -113,7 +114,7 @@ class CollisionEntity implements IOctreeObject {
 			}
 			return iData;
 		} else {
-			var intersections = this.grid.rayCast(rStart, rDir);
+			var intersections = this.bvh.rayCast(rStart, rDir);
 			for (i in intersections) {
 				i.point.transform(transform);
 				i.normal.transform3x3(transform);
@@ -146,7 +147,7 @@ class CollisionEntity implements IOctreeObject {
 		sphereBounds.addSpherePos(position.x, position.y, position.z, radius * 1.1);
 		sphereBounds.transform(invMatrix);
 		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, radius * 1.1);
-		var surfaces = grid == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : grid.boundingSearch(sphereBounds);
+		var surfaces = bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
 
 		var tform = transform.clone();
 		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));

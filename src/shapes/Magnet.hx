@@ -43,10 +43,14 @@ class Magnet extends ForceObject {
 	public override function update(timeState:src.TimeState) {
 		super.update(timeState);
 
-		var seffect = this.soundChannel.getEffect(Spatialization);
-		seffect.position = this.getAbsPos().getPosition();
+		if (this.soundChannel != null) {
+			var seffect = this.soundChannel.getEffect(Spatialization);
+			seffect.position = this.getAbsPos().getPosition();
+			seffect.fadeDistance = 15;
+			// seffect.maxDistance = 5;
 
-		if (this.soundChannel.pause)
-			this.soundChannel.pause = false;
+			if (this.soundChannel.pause)
+				this.soundChannel.pause = false;
+		}
 	}
 }

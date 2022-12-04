@@ -1,5 +1,6 @@
 package shaders;
 
+import src.Sky;
 import h3d.Vector;
 import h3d.scene.Scene;
 import h3d.Engine;
@@ -8,18 +9,17 @@ import h3d.mat.Texture;
 
 class CubemapRenderer {
 	public var cubemap:Texture;
-
+	public var sky:Sky;
 	public var position:Vector;
 
 	var camera:Camera;
-
 	var scene:Scene;
-
 	var nextFaceToRender:Int;
 
-	public function new(scene:Scene) {
+	public function new(scene:Scene, sky:Sky) {
 		this.scene = scene;
-		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target]);
+		this.sky = sky;
+		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGB8);
 		this.camera = new Camera(90, 1, 1, 0.02);
 		this.position = new Vector();
 		this.nextFaceToRender = 0;
