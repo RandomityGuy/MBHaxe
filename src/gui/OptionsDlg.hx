@@ -19,7 +19,15 @@ class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
 
 	public function new() {
-		var img = Math.random() >= 0.7 ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
+		function chooseBg() {
+			var rand = Math.random();
+			if (rand >= 0 && rand <= 0.244)
+				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
+			if (rand > 0.244 && rand <= 0.816)
+				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
+			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
+		}
+		var img = chooseBg();
 		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;

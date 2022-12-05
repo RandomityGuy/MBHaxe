@@ -65,7 +65,17 @@ class PlayMissionGui extends GuiImage {
 		currentCategory = PlayMissionGui.currentCategoryStatic;
 		currentGame = PlayMissionGui.currentGameStatic;
 
-		var img = currentGame == "platinum" ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
+		function chooseBg() {
+			if (currentGame == "gold")
+				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
+			if (currentGame == "platinum")
+				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
+			if (currentGame == "ultra")
+				return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
+			return null;
+		}
+
+		var img = chooseBg();
 		super(img.resource.toTile());
 
 		this.horizSizing = Width;
@@ -735,7 +745,7 @@ class PlayMissionGui extends GuiImage {
 			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
 			pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources).toTile();
 
-			if (game == "platinum") {
+			if (game == "platinum" || game == "ultra") {
 				pmAchievements.disabled = false;
 			} else {
 				pmAchievements.disabled = true;
@@ -744,12 +754,11 @@ class PlayMissionGui extends GuiImage {
 			currentCategoryStatic = currentCategory;
 
 			if (currentGame != game) {
-				this.bmp.tile = (game == "platinum" ? ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg') : ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg'))
-					.resource.toTile();
+				currentGameStatic = game;
+				currentGame = game;
+				this.bmp.tile = chooseBg().resource.toTile();
 			}
 
-			currentGameStatic = game;
-			currentGame = game;
 			setSelectedFunc(currentList.length - 1);
 			if (doRender)
 				this.render(cast(this.parent, Canvas).scene2d);
@@ -770,7 +779,7 @@ class PlayMissionGui extends GuiImage {
 				if (topScore.time < currentMission.ultimateTime) {
 					scoreColor = "#FFCC33";
 				} else if (topScore.time < currentMission.goldTime) {
-					if (currentMission.game == "gold")
+					if (currentMission.game == "gold" || currentMission.game == "Ultra")
 						scoreColor = "#FFFF00"
 					else
 						scoreColor = "#CCCCCC";
@@ -871,7 +880,7 @@ class PlayMissionGui extends GuiImage {
 					if (score.time < currentMission.ultimateTime) {
 						scoreColor = "#FFCC33";
 					} else if (score.time < currentMission.goldTime) {
-						if (currentMission.game == "gold")
+						if (currentMission.game == "gold" || currentMission.game.toLowerCase() == "ultra")
 							scoreColor = "#FFFF00";
 						else
 							scoreColor = "#CCCCCC";
@@ -901,6 +910,10 @@ class PlayMissionGui extends GuiImage {
 				if (currentMission.game == "gold") {
 					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Qualify: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></font>';
 					pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Gold: <font color="#FFFF00">${Util.formatTime(currentMission.goldTime)}</font></font></p>';
+				}
+				if (currentMission.game.toLowerCase() == "ultra") {
+					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Gold: <font color="#FFFF00">${Util.formatTime(currentMission.goldTime)}</font></font>';
+					pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
 				}
 			} else {
 				pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">${currentMission.game == "gold" ? "Qualify" : "Par"} Time: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></p></font>';

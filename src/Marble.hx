@@ -235,6 +235,8 @@ class Marble extends GameObject {
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.level = level;
 
+		var isUltra = level.mission.game.toLowerCase() == "ultra";
+
 		var marbleDts = new DtsObject();
 		marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
 		marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
@@ -256,7 +258,11 @@ class Marble extends GameObject {
 		// Calculate radius according to marble model (egh)
 		var b = marbleDts.getBounds();
 		var avgRadius = (b.xSize + b.ySize + b.zSize) / 6;
-		this._radius = avgRadius;
+		if (isUltra) {
+			this._radius = 0.3;
+			marbleDts.scale(0.3 / avgRadius);
+		} else
+			this._radius = avgRadius;
 
 		this.collider = new SphereCollisionEntity(cast this);
 
