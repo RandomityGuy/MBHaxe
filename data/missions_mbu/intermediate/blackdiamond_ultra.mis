@@ -1,0 +1,262 @@
+exec("./blackdiamond.cs");
+
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         Difficulty = "6";
+         artist = "Alex Swanson";
+         name = "Black Diamond";
+         time = "75000";
+         level = "15";
+         game = "Ultra";
+         type = "Intermediate";
+	 music = "Tim Trance.ogg";
+	 goldTime = "30000";
+         ultimateTime = "15000";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "10000";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "2500";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 1.84699e+025 3670.77";
+      fogVolume2 = "-1 7.22507e+028 5.10655e+028";
+      fogVolume3 = "-1 1.01124e+012 1.69273e+022";
+      materialList = "~/data/skies/Cloudy/cloudy.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 274952335980479310000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 11918.598633";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 1109264997360148200000000000.000000";
+   };
+   new StaticShape() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1300 1300 1300";
+      dataBlock = "Dusk";
+   };
+   new Sun() {
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
+         shadowColor = "0.000000 0.000000 0.150000 0.350000";
+   };
+   new SimGroup(SpawnPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "632 196 149.5";
+         rotation = "0 0 1 220.198";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+   };
+   new StaticShape(EndPoint) {
+      position = "-944.2 -84 -126.5";
+      rotation = "0 0 -1 90";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Trigger(Bounds) {
+      position = "-1093.13 287.521 -136.712";
+      rotation = "1 0 0 0";
+      scale = "1777.39 768.496 5000";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger() {
+      position = "304.198 289.795 6.6716";
+      rotation = "1 0 0 0";
+      scale = "438.713 680.545 14.2295";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger() {
+      position = "0 155 -12.6";
+      rotation = "1 0 0 0";
+      scale = "438.713 697.437 14.2295";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger() {
+      position = "-345.072 365.907 -90.2515";
+      rotation = "0 0 1 8.59438";
+      scale = "438.713 707.894 14.2295";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "591.527 108.265 130.401";
+      rotation = "0 0 -1 45.8366";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-283.907 -39.7275 -27.7239";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "272.564 -100.055 86.3087";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "491.986 55.283 105.295";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "544.069 155.781 130.442";
+      rotation = "0 0 -1 50.9932";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-167.299 -84.8322 -25.4698";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-248.284 -95.8942 -27.9224";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TimeTravelItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new InteriorInstance() {
+      position = "0.022583 0.00195313 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_mbu/intermediate/blackdiamond.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "-170.261 -84.1101 18.7154";
+      rotation = "1 0 0 0";
+      scale = "1 1 1.2";
+      dataBlock = "easterEgg";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new SimGroup() {
+
+      new Trigger() {
+         position = "460.417 -60.8309 90.883";
+         rotation = "0 0 1 234.522";
+         scale = "150 10 80";
+         dataBlock = "CheckpointTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            respawnPoint = "check1";
+      };
+      new TSStatic(check1) {
+         position = "437.03 9.02114 101.51";
+         rotation = "0 0 1 227.074";
+         scale = "0.5 0.5 0.5";
+         shapeName = "~/data/shapes/buttons/checkPoint.dts";
+      };
+   };
+   new SimGroup() {
+
+      new Trigger() {
+         position = "140.075 -176.435 19.888";
+         rotation = "0 0 -1 94.5383";
+         scale = "150 10 80";
+         dataBlock = "CheckpointTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            respawnPoint = "check2";
+      };
+      new TSStatic(check2) {
+         position = "135 -80.9831 29.5123";
+         rotation = "0 0 -1 89.3814";
+         scale = "0.5 0.5 0.5";
+         shapeName = "~/data/shapes/buttons/checkPoint.dts";
+      };
+   };
+   new SimGroup() {
+
+      new Trigger() {
+         position = "-16.2494 -166.235 -12.3749";
+         rotation = "0 0 -1 89.3817";
+         scale = "150 10 80";
+         dataBlock = "CheckpointTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            respawnPoint = "check3";
+      };
+      new TSStatic(check3) {
+         position = "-33.0065 -82.9637 5.51438";
+         rotation = "0 0 -1 89.9544";
+         scale = "0.5 0.5 0.5";
+         shapeName = "~/data/shapes/buttons/checkPoint.dts";
+      };
+   };
+   new SimGroup() {
+
+      new Trigger() {
+         position = "-427.443 -157.707 -130.47";
+         rotation = "0 0 -1 89.3817";
+         scale = "150 10 180";
+         dataBlock = "CheckpointTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            respawnPoint = "check4";
+      };
+      new TSStatic(check4) {
+         position = "-418.984 -83.0064 -42.4828";
+         rotation = "0 0 -1 89.3814";
+         scale = "0.5 0.5 0.5";
+         shapeName = "~/data/shapes/buttons/checkPoint.dts";
+      };
+   };
+   new Trigger(DoubleDiamondOne) {
+      position = "-960 -76 -126.5";
+      rotation = "1 0 0 0";
+      scale = "2 16 20";
+      dataBlock = "DoubleDiamondTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger(DoubleDiamondTwo) {
+      position = "646 212 149.5";
+      rotation = "1 0 0 0";
+      scale = "2 2 10";
+      dataBlock = "DoubleDiamondTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+};
+//--- OBJECT WRITE END ---

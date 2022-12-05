@@ -1,0 +1,192 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+   new ScriptObject(MissionInfo) {
+      difficulty = "1";
+      time = "45000";
+      type = "beginner";
+      level = "4";
+      name = "Frictional Concerns";
+      game = "Ultra";
+	  artist = "Alex Swanson";
+	  music = "Tim Trance.ogg";
+	  goldTime = "25000";
+      ultimateTime = "3150";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      materialList = "~/data/skies/Cloudy/cloudy.dml";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "10000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 0.0825316 -0.404919";
+      fogVolume2 = "-1 0.911907 0.0668267";
+      fogVolume3 = "-1 0.92537 0.268465";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      noRenderBans = "1";
+   };
+   new Sun() {
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
+      shadowColor = "0.000000 0.000000 0.150000 0.350000";
+   };
+   new StaticShape() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "5000 5000 5000";
+      dataBlock = "clear";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_mbu/beginner/friction.dif";
+      showTerrainInside = "0";
+   };
+   new SimGroup(SpawnPoints) {
+      new StaticShape(StartPoint) {
+         position = "4 -6 0";
+         rotation = "0 0 -1 90";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+   };
+   new Trigger() {
+      position = "2.5 -4.5 0";
+      rotation = "1 0 0 0";
+      scale = "3 3 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0 0.0 0.0 0.0 1.0";
+      text = "Not all surfaces are the same!";
+   };
+   new StaticShape(EndPoint) {
+      position = "16 -6 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new StaticShape() {
+      position = "-50 -30.5 0";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_3shape";
+   };
+   new StaticShape() {
+      position = "4 -30.5 0";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new StaticShape() {
+      position = "-44 18 -6";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new StaticShape() {
+      position = "-20 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new StaticShape() {
+      position = "-8 -0.25 0";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new StaticShape() {
+      position = "10.5 0 0";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new StaticShape() {
+      position = "-20 11.75 0";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new Trigger() {
+      position = "-2.06856 -0.572938 -0.0263936";
+      rotation = "1 0 0 0";
+      scale = "1 11.3919 3.53311";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+      text = "Ice is slippery!\nApproach it with caution.";
+   };
+   new StaticShape() {
+      position = "10.5 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new StaticShape() {
+      position = "-2 -12.5 0";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new StaticShape() {
+      position = "-50 -30 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_18shape";
+   };
+   new StaticShape() {
+      position = "22.5 -30 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_15shape";
+   };
+   new StaticShape() {
+      position = "10.5 -12 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new Trigger(Bounds) {
+      position = "-58.5 45 -9.5";
+      rotation = "1 0 0 0";
+      scale = "84 90 5000";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "-44 36 -6";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_12shape";
+   };
+   new StaticShape() {
+      position = "-43.4588 18.8323 -5.10799";
+      rotation = "0.196116 -0.387357 -0.900829 109.514";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "-37.4105 1.06635 6.16776";
+      rotation = "0 0 1 239.106";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "-28.0405 -28.7215 11.1614";
+      rotation = "0 0 1 179.336";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+};
+//--- OBJECT WRITE END ---

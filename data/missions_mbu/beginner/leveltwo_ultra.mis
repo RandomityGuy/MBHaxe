@@ -1,0 +1,273 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+   new ScriptObject(MissionInfo) {
+      artist = "Alex Swanson";
+      difficulty = "1";
+      time = "45000";
+      type = "beginner";
+      level = "2";
+      name = "Moving Up";
+      game = "Ultra";
+	  music = "Tim Trance.ogg";
+	  goldTime = "20000";
+      ultimateTime = "3000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+      locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      materialList = "~/data/skies/Cloudy/cloudy.dml";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "10000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 -0.930435 -0.365184";
+      fogVolume2 = "-1 0.0780969 -0.701916";
+      fogVolume3 = "-1 0.998288 0.0494325";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      noRenderBans = "1";
+   };
+   new StaticShape() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "5000 5000 5000";
+      dataBlock = "clear";
+   };
+   new Sun() {
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
+      shadowColor = "0.000000 0.000000 0.150000 0.350000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors_mbu/beginner/level_two.dif";
+      showTerrainInside = "0";
+   };
+   new SimGroup(SpawnPoints) {
+      new StaticShape(StartPoint) {
+         position = "16 -1.8 0.5";
+         rotation = "0 0 -1 90.0456";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+   };
+   new Trigger() {
+      position = "14.5 -0.3 0.5";
+      rotation = "1 0 0 0";
+      scale = "3 3 2";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0 0.0 0.0 1.0 0.0 0.0 0.0 -1.0 0.0 0.0 0.0 1.0";
+      text = "The Super Jump powerup can be used to vault taller barriers.";
+   };
+   new Item() {
+      position = "10.122 -2.02413 0.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-34 -17 4.687";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape(EndPoint) {
+      position = "-34.75 -6.5 15.5";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Trigger() {
+      position = "-27.8156 36.2089 8.72421";
+      rotation = "1 0 0 0";
+      scale = "4.90169 12.178 3.04995";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+      text = "Ride the elevator to reach the uppermost platform.";
+   };
+   new StaticShape() {
+      position = "-10.25 6 2.5";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_15shape";
+   };
+   new StaticShape() {
+      position = "-3.0496 -10.8857 1.59609";
+      rotation = "-0.054948 0.029719 0.998047 236.72";
+      scale = "1 1 1";
+      dataBlock = "SignPlainUp";
+   };
+   new StaticShape() {
+      position = "-3.09004 5.14841 1.61775";
+      rotation = "-0.0888849 0.148284 -0.984942 62.6484";
+      scale = "1 1 1";
+      dataBlock = "SignPlainUp";
+   };
+   new SimGroup(MustChange_g) {
+      new Path() {
+         isLooping = "1";
+         new Marker() {
+            position = "-22.5 16 9";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-22.5 16 9";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "2000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-22.5 16 15.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-22.5 16 15.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "2000";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = $usermods @ "/data/interiors_mbu/beginner/level_two.dif";
+         interiorIndex = "0";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+         initialTargetPosition = "-1";
+      };
+   };
+   new StaticShape() {
+      position = "-4.25 -12.5 2.5";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_12shape";
+   };
+   new StaticShape() {
+      position = "-4 -24.25 2.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new StaticShape() {
+      position = "-22.25 5.5 15.5";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new StaticShape() {
+      position = "-40.5 -24.25 2.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new StaticShape() {
+      position = "20.5 -12 2.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new StaticShape() {
+      position = "-40.5 -12.25 15.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_18shape";
+   };
+   new StaticShape() {
+      position = "-40.5 23.75 15.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_3shape";
+   };
+   new Trigger() {
+      position = "-27.8187 -12.1813 2.07091";
+      rotation = "1 0 0 0";
+      scale = "4.90169 12.178 3.04995";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+      text = "Use the Super Speed powerup to move quickly, especially up steep slopes!";
+   };
+   new Trigger(Bounds) {
+      position = "-44 39.5 -4";
+      rotation = "1 0 0 0";
+      scale = "67.75 67 5000";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "-40.75 -12.5 15.5";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new StaticShape() {
+      position = "-40.5 -24.5 2.5";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_18shape";
+   };
+   new StaticShape() {
+      position = "-10 5.75 15.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+   new StaticShape() {
+      position = "-40.5 36 9";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      dataBlock = "glass_15shape";
+   };
+   new StaticShape() {
+      position = "-40.5 24.25 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_6shape";
+   };
+   new StaticShape() {
+      position = "-10 18.25 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "glass_9shape";
+   };
+};
+//--- OBJECT WRITE END ---
