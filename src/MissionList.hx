@@ -57,6 +57,7 @@ class MissionList {
 
 		var goldMissions:Map<String, Array<Mission>> = [];
 		var platinumMissions:Map<String, Array<Mission>> = [];
+		var ultraMissions:Map<String, Array<Mission>> = [];
 
 		goldMissions.set("beginner", parseDifficulty("gold", "missions_mbg", "beginner"));
 		goldMissions.set("intermediate", parseDifficulty("gold", "missions_mbg", "intermediate"));
@@ -67,6 +68,10 @@ class MissionList {
 		platinumMissions.set("advanced", parseDifficulty("platinum", "missions_mbp", "advanced"));
 		platinumMissions.set("expert", parseDifficulty("platinum", "missions_mbp", "expert"));
 
+		ultraMissions.set("beginner", parseDifficulty("ultra", "missions_mbu", "beginner"));
+		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions_mbu", "intermediate"));
+		ultraMissions.set("advanced", parseDifficulty("ultra", "missions_mbu", "advanced"));
+
 		customMissions = parseDifficulty("custom", "missions", "custom");
 
 		@:privateAccess goldMissions["beginner"][goldMissions["beginner"].length - 1].next = goldMissions["intermediate"][0];
@@ -76,9 +81,13 @@ class MissionList {
 		@:privateAccess platinumMissions["intermediate"][platinumMissions["intermediate"].length - 1].next = platinumMissions["advanced"][0];
 		@:privateAccess platinumMissions["advanced"][platinumMissions["advanced"].length - 1].next = platinumMissions["expert"][0];
 		@:privateAccess platinumMissions["expert"][platinumMissions["expert"].length - 1].next = platinumMissions["beginner"][0];
+		@:privateAccess ultraMissions["beginner"][ultraMissions["beginner"].length - 1].next = ultraMissions["intermediate"][0];
+		@:privateAccess ultraMissions["intermediate"][ultraMissions["intermediate"].length - 1].next = ultraMissions["advanced"][0];
+		@:privateAccess ultraMissions["advanced"][ultraMissions["advanced"].length - 1].next = ultraMissions["beginner"][0];
 
 		missionList.set("gold", goldMissions);
 		missionList.set("platinum", platinumMissions);
+		missionList.set("ultra", ultraMissions);
 
 		// parseCLAList();
 

@@ -1,5 +1,8 @@
 package src;
 
+import shapes.MegaMarble;
+import shapes.Blast;
+import shapes.Glass;
 import gui.OOBInsultGui;
 import shapes.Checkpoint;
 import triggers.CheckpointTrigger;
@@ -296,6 +299,8 @@ class MarbleWorld extends Scheduler {
 		for (file in filestoload) {
 			worker.loadFile(file);
 		}
+
+		this.scene.camera.zFar = Math.max(2000, Std.parseFloat(this.skyElement.visibledistance));
 
 		this.sky = new Sky();
 
@@ -666,6 +671,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Magnet();
 		else if (dataBlockLowerCase == "antigravityitem")
 			shape = new AntiGravity(cast element);
+		else if (dataBlockLowerCase == "norespawnantigravityitem")
+			shape = new AntiGravity(cast element, true);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
 		else if (dataBlockLowerCase == "nuke")
@@ -676,6 +683,10 @@ class MarbleWorld extends Scheduler {
 			shape = new SuperSpeed(cast element);
 		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
 			shape = new TimeTravel(cast element);
+		else if (dataBlockLowerCase == "blast")
+			shape = new Blast(cast element);
+		else if (dataBlockLowerCase == "megamarble")
+			shape = new MegaMarble(cast element);
 		else if (dataBlockLowerCase == "tornado")
 			shape = new Tornado();
 		else if (dataBlockLowerCase == "trapdoor")
@@ -684,6 +695,17 @@ class MarbleWorld extends Scheduler {
 			shape = new Oilslick();
 		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
 			shape = new Sign(cast element);
+		else if ([
+			"glass_3shape",
+			"glass_6shape",
+			"glass_9shape",
+			"glass_12shape",
+			"glass_15shape",
+			"glass_18shape"
+		].contains(dataBlockLowerCase))
+			shape = new Glass(cast element);
+		else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
+			shape = new shapes.Sky(dataBlockLowerCase);
 		else {
 			onFinish();
 			return;
@@ -762,6 +784,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Magnet();
 		else if (dataBlockLowerCase == "antigravityitem")
 			shape = new AntiGravity(cast element);
+		else if (dataBlockLowerCase == "norespawnantigravityitem")
+			shape = new AntiGravity(cast element, true);
 		else if (dataBlockLowerCase == "landmine")
 			shape = new LandMine();
 		else if (dataBlockLowerCase == "nuke")
@@ -772,6 +796,10 @@ class MarbleWorld extends Scheduler {
 			shape = new SuperSpeed(cast element);
 		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
 			shape = new TimeTravel(cast element);
+		else if (dataBlockLowerCase == "blastitem")
+			shape = new Blast(cast element);
+		else if (dataBlockLowerCase == "megamarbleitem")
+			shape = new MegaMarble(cast element);
 		else if (dataBlockLowerCase == "tornado")
 			shape = new Tornado();
 		else if (dataBlockLowerCase == "trapdoor")
@@ -780,6 +808,17 @@ class MarbleWorld extends Scheduler {
 			shape = new Oilslick();
 		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
 			shape = new Sign(cast element);
+		else if ([
+			"glass_3shape",
+			"glass_6shape",
+			"glass_9shape",
+			"glass_12shape",
+			"glass_15shape",
+			"glass_18shape"
+		].contains(dataBlockLowerCase))
+			shape = new Glass(cast element);
+		else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
+			shape = new shapes.Sky(dataBlockLowerCase);
 		else {
 			onFinish();
 			return;

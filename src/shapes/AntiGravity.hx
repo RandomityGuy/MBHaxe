@@ -8,7 +8,7 @@ import src.DtsObject;
 import src.MarbleWorld;
 
 class AntiGravity extends PowerUp {
-	public function new(element:MissionElementItem) {
+	public function new(element:MissionElementItem, norespawn:Bool = false) {
 		super(element);
 		this.dtsPath = "data/shapes/items/antigravity.dts";
 		this.isCollideable = false;
@@ -16,6 +16,8 @@ class AntiGravity extends PowerUp {
 		this.identifier = "AntiGravity";
 		this.pickUpName = "Gravity Defier";
 		this.autoUse = true;
+		if (norespawn)
+			this.cooldownDuration = Math.NEGATIVE_INFINITY;
 	}
 
 	public function pickUp():Bool {

@@ -412,7 +412,11 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyUltraAdvanced.ratio = -1 / 16;
 		pmDifficultyUltraAdvanced.setExtent(new Vector(120, 31));
 		pmDifficultyUltraAdvanced.txtCtrl.text.text = " Advanced";
-		pmDifficultyUltraAdvanced.disabled = true;
+		pmDifficultyUltraAdvanced.pressedAction = (e) -> {
+			currentList = MissionList.missionList["ultra"]["advanced"];
+			currentCategory = "advanced";
+			setCategoryFunc("ultra", "advanced");
+		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraAdvanced);
 
 		var pmDifficultyUltraBeginner = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
@@ -420,7 +424,11 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyUltraBeginner.ratio = -1 / 16;
 		pmDifficultyUltraBeginner.setExtent(new Vector(120, 31));
 		pmDifficultyUltraBeginner.txtCtrl.text.text = " Beginner";
-		pmDifficultyUltraBeginner.disabled = true;
+		pmDifficultyUltraBeginner.pressedAction = (e) -> {
+			currentList = MissionList.missionList["ultra"]["beginner"];
+			currentCategory = "beginner";
+			setCategoryFunc("ultra", "beginner");
+		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraBeginner);
 
 		var pmDifficultyUltraIntermediate = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
@@ -428,7 +436,11 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyUltraIntermediate.ratio = -1 / 16;
 		pmDifficultyUltraIntermediate.setExtent(new Vector(120, 31));
 		pmDifficultyUltraIntermediate.txtCtrl.text.text = " Intermediate";
-		pmDifficultyUltraIntermediate.disabled = true;
+		pmDifficultyUltraIntermediate.pressedAction = (e) -> {
+			currentList = MissionList.missionList["ultra"]["intermediate"];
+			currentCategory = "intermediate";
+			setCategoryFunc("ultra", "intermediate");
+		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraIntermediate);
 
 		var pmDifficultyGoldAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
