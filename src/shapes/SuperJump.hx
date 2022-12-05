@@ -51,7 +51,7 @@ class SuperJump extends PowerUp {
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
 			ResourceLoader.load("sound/pusuperjumpvoice.wav").entry.load(() -> {
-				this.pickupSound = ResourceLoader.getResource("sound/pusuperjumpvoice.wav", ResourceLoader.getAudio, this.soundResources);
+				this.pickupSound = ResourceLoader.getResource("data/sound/pusuperjumpvoice.wav", ResourceLoader.getAudio, this.soundResources);
 				ResourceLoader.load("sound/dosuperjump.wav").entry.load(onFinish);
 			});
 		});
