@@ -78,6 +78,11 @@ class StatisticsGui extends GuiImage {
 				+ "Out of Bounds:<br/>" + "Respawns:<br/>" + "Hardest Level:<br/>" + "<br/>" + "Grand Total (hours:minutes:seconds):<br/>"
 				+ "Total Wasted Time (hours:minutes:seconds):";
 		}
+		if (game == "ultra") {
+			statLabel.text.text = "Beginner:<br/>" + "Intermediate:<br/>" + "Advanced:<br/>" + "Total:<br/>" + "<br/>" + "Gold times:<br/>"
+				+ "Ultimate times:<br/>" + "Easter Eggs:<br/>" + "Out of Bounds:<br/>" + "Respawns:<br/>" + "Hardest Level:<br/>" + "<br/>"
+				+ "Grand Total (hours:minutes:seconds):<br/>" + "Total Wasted Time (hours:minutes:seconds):<br/>";
+		}
 
 		this.addChild(statText);
 
@@ -199,6 +204,30 @@ class StatisticsGui extends GuiImage {
 				+ '<p align="right">${Math.floor(totalCompletion * 100)}%</p>'
 				+ '<br/>'
 				+ '<p align="right">${totalPlatinums}/100		${Math.floor(totalPlatinums / 100.0 * 100)}%</p>'
+				+ '<p align="right">${Settings.playStatistics.oobs}</p>'
+				+ '<p align="right">${Settings.playStatistics.respawns}</p>'
+				+ '<p align="right">${hardestLevel != null ? hardestLevel.title : ""}</p>'
+				+
+				'<p align="right">${hardestLevel != null ? 'With ${hardestStats.oobs} OOBs, ${hardestStats.respawns} Respawns, and ${Util.formatTimeHours(hardestStats.totalTime)} Played': ""}</p>'
+				+ '<p align="right">${Util.formatTimeHours(totalBestTime)}</p>'
+				+ '<p align="right">${Util.formatTimeHours(Settings.playStatistics.totalTime)}</p>';
+		}
+		if (game == "ultra") {
+			var beginnerCompletion = completions["beginner"].filter(x -> x.beatPar).length / completions["beginner"].length;
+			var intermediateCompletion = completions["intermediate"].filter(x -> x.beatPar).length / completions["intermediate"].length;
+			var advancedCompletion = completions["advanced"].filter(x -> x.beatPar).length / completions["advanced"].length;
+			var totalCompletion:Float = completions["beginner"].filter(x -> x.beatPar).length
+				+ completions["intermediate"].filter(x -> x.beatPar).length + completions["advanced"].filter(x -> x.beatPar).length;
+			totalCompletion /= completions["beginner"].length + completions["intermediate"].length + completions["advanced"].length;
+
+			statText.text.text = '<p align="right">${Math.floor(beginnerCompletion * 100)}%</p>'
+				+ '<p align="right">${Math.floor(intermediateCompletion * 100)}%</p>'
+				+ '<p align="right">${Math.floor(advancedCompletion * 100)}%</p>'
+				+ '<p align="right">${Math.floor(totalCompletion * 100)}%</p>'
+				+ '<br/>'
+				+ '<p align="right">${totalPlatinums}/61		${Math.floor(totalPlatinums / 61.0 * 100)}%</p>'
+				+ '<p align="right">${totalUltimates}/61		${Math.floor(totalUltimates / 61.0 * 100)}%</p>'
+				+ '<p align="right">${totalEggs}/20		${Math.floor(totalEggs / 20 * 100)}%</p>'
 				+ '<p align="right">${Settings.playStatistics.oobs}</p>'
 				+ '<p align="right">${Settings.playStatistics.respawns}</p>'
 				+ '<p align="right">${hardestLevel != null ? hardestLevel.title : ""}</p>'
