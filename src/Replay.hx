@@ -258,7 +258,8 @@ class Replay {
 	}
 
 	public function endFrame() {
-		frames.push(currentRecordFrame);
+		if (currentRecordFrame != null)
+			frames.push(currentRecordFrame);
 		currentRecordFrame = null;
 	}
 

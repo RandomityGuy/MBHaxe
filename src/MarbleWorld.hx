@@ -1103,7 +1103,7 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
-		if (Key.isPressed(Settings.controlsSettings.respawn)) {
+		if (Key.isPressed(Settings.controlsSettings.respawn) && this.finishTime == null) {
 			this.respawnPressedTime = timeState.timeSinceLoad;
 			this.restart();
 			if (!this.isWatching) {
@@ -1118,15 +1118,11 @@ class MarbleWorld extends Scheduler {
 				} else {
 					Settings.levelStatistics[mission.path].respawns++;
 				}
-
-				if (this.isRecording) {
-					this.replay.endFrame();
-				}
 			}
 			return;
 		}
 
-		if (Key.isDown(Settings.controlsSettings.respawn) && !this.isWatching) {
+		if (Key.isDown(Settings.controlsSettings.respawn) && !this.isWatching && this.finishTime == null) {
 			if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
 				this.restart(true);
 				this.respawnPressedTime = Math.POSITIVE_INFINITY;

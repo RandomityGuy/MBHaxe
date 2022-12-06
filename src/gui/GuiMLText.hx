@@ -6,7 +6,6 @@ import h2d.Tile;
 import h2d.Bitmap;
 import h3d.Engine;
 import h3d.Vector;
-import shaders.GuiRender;
 import gui.GuiText.Justification;
 import h2d.HtmlText;
 import h2d.Scene;
