@@ -220,12 +220,14 @@ class ParticleEmitter {
 	var creationTime:Float;
 	var vel = new Vector();
 	var getPos:Void->Vector;
+	var spawnSphereSquish:Vector;
 
-	public function new(options:ParticleEmitterOptions, data:ParticleData, manager:ParticleManager, ?getPos:Void->Vector) {
+	public function new(options:ParticleEmitterOptions, data:ParticleData, manager:ParticleManager, ?getPos:Void->Vector, ?spawnSphereSquish:Vector) {
 		this.o = options;
 		this.manager = manager;
 		this.getPos = getPos;
 		this.data = data;
+		this.spawnSphereSquish = spawnSphereSquish != null ? spawnSphereSquish : new Vector(1, 1, 1);
 	}
 
 	public function spawn(time:Float) {
@@ -257,6 +259,9 @@ class ParticleEmitter {
 			pos = pos.add(this.o.spawnOffset()); // Call the spawnOffset function if it's there
 		// This isn't necessarily uniform but it's fine for the purpose.
 		var randomPointOnSphere = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalized();
+		randomPointOnSphere.x *= this.spawnSphereSquish.x;
+		randomPointOnSphere.y *= this.spawnSphereSquish.y;
+		randomPointOnSphere.z *= this.spawnSphereSquish.z;
 		// Compute the total velocity
 		var initialVel = this.o.ejectionVelocity;
 		initialVel += (this.o.velocityVariance * 2 * Math.random()) - this.o.velocityVariance;
@@ -340,8 +345,8 @@ class ParticleManager {
 		return this.currentTime;
 	}
 
-	public function createEmitter(options:ParticleEmitterOptions, data:ParticleData, initialPos:Vector, ?getPos:Void->Vector) {
-		var emitter = new ParticleEmitter(options, data, cast this, getPos);
+	public function createEmitter(options:ParticleEmitterOptions, data:ParticleData, initialPos:Vector, ?getPos:Void->Vector, ?spawnSphereSquish:Vector) {
+		var emitter = new ParticleEmitter(options, data, cast this, getPos, spawnSphereSquish);
 		emitter.currPos = (getPos != null) ? getPos() : initialPos.clone();
 		if (emitter.currPos == null)
 			emitter.currPos = initialPos.clone();

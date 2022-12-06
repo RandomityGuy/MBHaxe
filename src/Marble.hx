@@ -114,6 +114,56 @@ final trailParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
+final blastParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1,
+	ambientVelocity: new Vector(0, 0, -0.3),
+	ejectionVelocity: 4,
+	velocityVariance: 0,
+	emitterLifetime: 300,
+	inheritedVelFactor: 0,
+	particleOptions: {
+		texture: 'particles/smoke.png',
+		blending: Alpha,
+		spinSpeed: 20,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
+		lifetime: 500,
+		lifetimeVariance: 100,
+		dragCoefficient: 1,
+		acceleration: 0,
+		colors: [new Vector(0, 1, 1, 0.1), new Vector(0, 1, 1, 0.5), new Vector(0, 1, 1, 0.9)],
+		sizes: [0.125, 0.125, 0.125],
+		times: [0, 0.4, 1]
+	}
+}
+
+final blastMaxParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1,
+	ambientVelocity: new Vector(0, 0, -0.3),
+	ejectionVelocity: 4,
+	velocityVariance: 0,
+	emitterLifetime: 300,
+	inheritedVelFactor: 0,
+	particleOptions: {
+		texture: 'particles/smoke.png',
+		blending: Alpha,
+		spinSpeed: 20,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
+		lifetime: 500,
+		lifetimeVariance: 100,
+		dragCoefficient: 1,
+		acceleration: 0,
+		colors: [
+			new Vector(1, 0.7, 0, 0.1),
+			new Vector(1, 0.7, 0, 0.5),
+			new Vector(1, 0.7, 0, 0.9)
+		],
+		sizes: [0.125, 0.125, 0.125],
+		times: [0, 0.4, 1]
+	}
+}
+
 class Marble extends GameObject {
 	public var camera:CameraController;
 	public var cameraObject:Object;
@@ -178,6 +228,8 @@ class Marble extends GameObject {
 
 	var bounceEmitterData:ParticleData;
 	var trailEmitterData:ParticleData;
+	var blastEmitterData:ParticleData;
+	var blastMaxEmitterData:ParticleData;
 	var trailEmitterNode:ParticleEmitter;
 
 	var rollSound:Channel;
@@ -214,6 +266,14 @@ class Marble extends GameObject {
 		this.trailEmitterData = new ParticleData();
 		this.trailEmitterData.identifier = "MarbleTrailParticle";
 		this.trailEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.blastEmitterData = new ParticleData();
+		this.blastEmitterData.identifier = "MarbleBlastParticle";
+		this.blastEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.blastMaxEmitterData = new ParticleData();
+		this.blastMaxEmitterData.identifier = "MarbleBlastMaxParticle";
+		this.blastMaxEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
 		this.rollSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/rolling_hard.wav", ResourceLoader.getAudio, this.soundResources),
 			this.getAbsPos().getPosition(), true);
@@ -1499,6 +1559,21 @@ class Marble extends GameObject {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
 			this.helicopterSound.pause = true;
 		}
+	}
+
+	public function useBlast() {
+		if (this.level.blastAmount < 0.2 || this.level.game != "ultra")
+			return;
+		var impulse = this.level.currentUp.multiply(Math.max(Math.sqrt(this.level.blastAmount), this.level.blastAmount) * 10);
+		this.applyImpulse(impulse);
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
+		this.level.particleManager.createEmitter(this.level.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
+			this.level.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
+				this.getAbsPos().getPosition().add(this.level.currentUp.multiply(-this._radius * 0.4));
+			},
+			new Vector(1, 1,
+				1).add(new Vector(Math.abs(this.level.currentUp.x), Math.abs(this.level.currentUp.y), Math.abs(this.level.currentUp.z)).multiply(-0.8)));
+		this.level.blastAmount = 0;
 	}
 
 	public function applyImpulse(impulse:Vector) {

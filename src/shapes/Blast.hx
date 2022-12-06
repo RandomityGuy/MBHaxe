@@ -31,7 +31,6 @@ class Blast extends PowerUp {
 	}
 
 	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
-		this.level.deselectPowerUp();
+		this.level.blastAmount = 1.03;
 	}
 }

@@ -383,10 +383,11 @@ class OptionsDlg extends GuiImage {
 			hotkeysPanel);
 		makeRemapOption("Respawn:", 278, Util.getKeyForButton2(Settings.controlsSettings.respawn), (key) -> Settings.controlsSettings.respawn = key,
 			hotkeysPanel, true);
+		makeRemapOption("Blast:", 326, Util.getKeyForButton2(Settings.controlsSettings.blast), (key) -> Settings.controlsSettings.blast = key, hotkeysPanel);
 
 		if (Util.isTouchDevice()) {
 			var textObj = new GuiText(markerFelt32);
-			textObj.position = new Vector(5, 326);
+			textObj.position = new Vector(368, 326);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = "Touch Controls";
 			textObj.text.textColor = 0xFFFFFF;
@@ -394,7 +395,7 @@ class OptionsDlg extends GuiImage {
 			hotkeysPanel.addChild(textObj);
 
 			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			remapBtn.position = new Vector(203, 323);
+			remapBtn.position = new Vector(363 + 203, 323);
 			remapBtn.txtCtrl.text.text = "Edit";
 			remapBtn.setExtent(new Vector(152, 49));
 			remapBtn.pressedAction = (sender) -> {

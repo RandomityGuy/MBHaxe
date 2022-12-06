@@ -55,6 +55,7 @@ typedef ControlsSettings = {
 	var cameraSensitivity:Float;
 	var invertYAxis:Bool;
 	var respawn:Int;
+	var blast:Int;
 }
 
 typedef TouchSettings = {
@@ -115,7 +116,8 @@ class Settings {
 		alwaysFreeLook: true,
 		cameraSensitivity: 0.6,
 		invertYAxis: false,
-		respawn: Key.BACKSPACE
+		respawn: Key.BACKSPACE,
+		blast: Key.E
 	};
 
 	public static var touchSettings:TouchSettings = {

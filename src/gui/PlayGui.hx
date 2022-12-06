@@ -60,6 +60,10 @@ class PlayGui {
 	var alertTextForeground:GuiText;
 	var alertTextBackground:GuiText;
 
+	var blastBar:GuiControl;
+	var blastFill:GuiImage;
+	var blastFrame:GuiImage;
+
 	var imageResources:Array<Resource<Image>> = [];
 	var textureResources:Array<Resource<Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
@@ -97,7 +101,7 @@ class PlayGui {
 		}
 	}
 
-	public function init(scene2d:h2d.Scene, onFinish:Void->Void) {
+	public function init(scene2d:h2d.Scene, game:String, onFinish:Void->Void) {
 		this.scene2d = scene2d;
 		this._init = true;
 
@@ -143,6 +147,8 @@ class PlayGui {
 		});
 		initCenterText();
 		initPowerupBox();
+		if (game == 'ultra')
+			initBlastBar();
 		initTexts();
 		if (Settings.optionsSettings.frameRateVis)
 			initFPSMeter();
@@ -425,6 +431,45 @@ class PlayGui {
 		fpsMeterCtrl.addChild(fpsMeter);
 
 		playGuiCtrl.addChild(fpsMeterCtrl);
+	}
+
+	function initBlastBar() {
+		blastBar = new GuiControl();
+		blastBar.position = new Vector(6, 445);
+		blastBar.extent = new Vector(120, 28);
+		blastBar.vertSizing = Top;
+		this.playGuiCtrl.addChild(blastBar);
+
+		blastFill = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFill.position = new Vector(5, 5);
+		blastFill.extent = new Vector(58, 17);
+		blastFill.doClipping = false;
+		blastBar.addChild(blastFill);
+
+		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFrame.position = new Vector(0, 0);
+		blastFrame.extent = new Vector(120, 28);
+		blastBar.addChild(blastFrame);
+	}
+
+	public function setBlastValue(value:Float) {
+		if (value <= 1) {
+			if (blastFill.extent.y == 16) { // Was previously charged
+				blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile();
+			}
+			var oldVal = blastFill.extent.x;
+			blastFill.extent = new Vector(Util.lerp(0, 110, value), 17);
+			if (oldVal < 22 && blastFill.extent.x >= 22) {
+				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile();
+			}
+			if (oldVal >= 22 && blastFill.extent.x < 22) {
+				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargray.png", ResourceLoader.getImage, this.imageResources).toTile();
+			}
+		} else {
+			blastFill.extent = new Vector(0, 16); // WE will just use this extra number to store whether it was previously charged or not
+			blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_charged.png", ResourceLoader.getImage, this.imageResources).toTile();
+		}
+		this.blastBar.render(scene2d);
 	}
 
 	public function setHelpTextOpacity(value:Float) {

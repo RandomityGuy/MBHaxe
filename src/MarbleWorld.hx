@@ -119,6 +119,7 @@ class MarbleWorld extends Scheduler {
 	public var scene:Scene;
 	public var scene2d:h2d.Scene;
 	public var mission:Mission;
+	public var game:String;
 
 	public var marble:Marble;
 	public var worldOrientation:Quat;
@@ -130,6 +131,7 @@ class MarbleWorld extends Scheduler {
 	public var finishYaw:Float;
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
+	public var blastAmount:Float = 0;
 
 	public var cursorLock:Bool = true;
 
@@ -153,6 +155,7 @@ class MarbleWorld extends Scheduler {
 	var checkpointCollectedGems:Map<Gem, Bool> = [];
 	var checkpointHeldPowerup:PowerUp = null;
 	var checkpointUp:Vector = null;
+	var cheeckpointBlast:Float = 0;
 
 	// Replay
 	public var replay:Replay;
@@ -179,6 +182,7 @@ class MarbleWorld extends Scheduler {
 		this.scene = scene;
 		this.scene2d = scene2d;
 		this.mission = mission;
+		this.game = mission.game.toLowerCase();
 		this.replay = new Replay(mission.path);
 		this.isRecording = record;
 	}
@@ -238,7 +242,7 @@ class MarbleWorld extends Scheduler {
 
 	public function postInit() {
 		// Add the sky at the last so that cubemap reflections work
-		this.playGui.init(this.scene2d, () -> {
+		this.playGui.init(this.scene2d, this.mission.game.toLowerCase(), () -> {
 			this.scene.addChild(this.sky);
 			this._ready = true;
 			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
@@ -300,7 +304,7 @@ class MarbleWorld extends Scheduler {
 			worker.loadFile(file);
 		}
 
-		this.scene.camera.zFar = Math.max(2000, Std.parseFloat(this.skyElement.visibledistance));
+		this.scene.camera.zFar = Math.max(4000, Std.parseFloat(this.skyElement.visibledistance));
 
 		this.sky = new Sky();
 
@@ -384,6 +388,7 @@ class MarbleWorld extends Scheduler {
 		this.timeState.gameplayClock = 0;
 		this.bonusTime = 0;
 		this.outOfBounds = false;
+		this.blastAmount = 0;
 		this.outOfBoundsTime = null;
 		this.finishTime = null;
 		this.helpTextTimeState = Math.NEGATIVE_INFINITY;
@@ -398,6 +403,7 @@ class MarbleWorld extends Scheduler {
 		this.checkpointCollectedGems.clear();
 		this.checkpointHeldPowerup = null;
 		this.checkpointUp = null;
+		this.cheeckpointBlast = 0;
 
 		if (this.endPad != null)
 			this.endPad.inFinish = false;
@@ -1132,6 +1138,10 @@ class MarbleWorld extends Scheduler {
 
 		this.tickSchedule(timeState.currentAttemptTime);
 
+		if (Key.isPressed(Settings.controlsSettings.blast) && !this.isWatching && this.game == "ultra") {
+			this.marble.useBlast();
+		}
+
 		// Replay gravity
 		if (this.isWatching) {
 			if (this.replay.currentPlaybackFrame.gravityChange) {
@@ -1143,6 +1153,7 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.updateGameState();
+		this.updateBlast(timeState);
 		ProfilerUI.measure("updateDTS");
 		for (obj in dtsObjects) {
 			obj.update(timeState);
@@ -1313,6 +1324,15 @@ class MarbleWorld extends Scheduler {
 
 		if (!this.isWatching && this.isRecording)
 			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);
+	}
+
+	function updateBlast(timestate:TimeState) {
+		if (this.game == "ultra") {
+			if (this.blastAmount < 1) {
+				this.blastAmount = Util.clamp(this.blastAmount + (timeState.dt / 25), 0, 1);
+			}
+			this.playGui.setBlastValue(this.blastAmount);
+		}
 	}
 
 	function updateTexts() {
@@ -1689,6 +1709,7 @@ class MarbleWorld extends Scheduler {
 		this.currentCheckpointTrigger = trigger;
 		this.checkpointCollectedGems.clear();
 		this.checkpointUp = this.currentUp.clone();
+		this.cheeckpointBlast = this.blastAmount;
 		// Remember all gems that were collected up to this point
 		for (gem in this.gems) {
 			if (gem.pickedUp)
@@ -1735,6 +1756,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
 		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
 		this.marble.camera.oob = false;
+		this.blastAmount = this.cheeckpointBlast;
 		if (this.isRecording) {
 			this.replay.recordCameraState(this.marble.camera.CameraYaw, this.marble.camera.CameraPitch);
 			this.replay.recordMarbleInput(0, 0);

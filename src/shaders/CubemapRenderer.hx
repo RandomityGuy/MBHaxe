@@ -20,7 +20,7 @@ class CubemapRenderer {
 		this.scene = scene;
 		this.sky = sky;
 		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGB8);
-		this.camera = new Camera(90, 1, 1, 0.02);
+		this.camera = new Camera(90, 1, 1, 0.02, scene.camera.zFar);
 		this.position = new Vector();
 		this.nextFaceToRender = 0;
 	}
