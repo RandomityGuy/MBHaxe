@@ -178,6 +178,8 @@ class Marble extends GameObject {
 
 	public var _radius = 0.2;
 
+	var _prevRadius:Float;
+
 	var _maxRollVelocity = 15;
 	var _angularAcceleration = 75;
 	var _jumpImpulse = 7.5;
@@ -221,6 +223,7 @@ class Marble extends GameObject {
 	var superBounceEnableTime:Float = -1e8;
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
+	var megaMarbleEnableTime:Float = -1e8;
 
 	var teleportEnableTime:Null<Float> = null;
 	var teleportDisableTime:Null<Float> = null;
@@ -233,6 +236,7 @@ class Marble extends GameObject {
 	var trailEmitterNode:ParticleEmitter;
 
 	var rollSound:Channel;
+	var rollMegaSound:Channel;
 	var slipSound:Channel;
 
 	var superbounceSound:Channel;
@@ -247,8 +251,8 @@ class Marble extends GameObject {
 	public var prevPos:Vector;
 
 	var cloak:Bool = false;
-
 	var teleporting:Bool = false;
+	var isUltra:Bool = false;
 
 	public var cubemapRenderer:CubemapRenderer;
 
@@ -323,6 +327,16 @@ class Marble extends GameObject {
 			marbleDts.scale(0.3 / avgRadius);
 		} else
 			this._radius = avgRadius;
+
+		this._prevRadius = this._radius;
+
+		if (isUltra) {
+			this.rollMegaSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/mega_roll.wav", ResourceLoader.getAudio, this.soundResources),
+				this.getAbsPos().getPosition(), true);
+			this.rollMegaSound.volume = 0;
+		}
+
+		this.isUltra = isUltra;
 
 		this.collider = new SphereCollisionEntity(cast this);
 
@@ -527,7 +541,7 @@ class Marble extends GameObject {
 
 					if (!_bounceYet) {
 						_bounceYet = true;
-						playBoundSound(-surfaceDot);
+						playBoundSound(currentTime, -surfaceDot);
 					}
 
 					if (noBounce) {
@@ -777,16 +791,22 @@ class Marble extends GameObject {
 		this._bounceNormal = normal;
 	}
 
-	function playBoundSound(contactVel:Float) {
+	function playBoundSound(time:Float, contactVel:Float) {
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
 			var bounceSoundNum = Math.floor(Math.random() * 4);
-			var sndList = [
+			var sndList = (time - this.megaMarbleEnableTime < 10) ? [
+				"data/sound/mega_bouncehard1.wav",
+				"data/sound/mega_bouncehard2.wav",
+				"data/sound/mega_bouncehard3.wav",
+				"data/sound/mega_bouncehard4.wav"
+			] : [
 				"data/sound/bouncehard1.wav",
 				"data/sound/bouncehard2.wav",
 				"data/sound/bouncehard3.wav",
 				"data/sound/bouncehard4.wav"
 			];
+
 			var snd = ResourceLoader.getResource(sndList[bounceSoundNum], ResourceLoader.getAudio, this.soundResources);
 			var gain = bounceMinGain;
 			gain = Util.clamp(Math.pow(contactVel / 12, 1.5), 0, 1);
@@ -800,9 +820,14 @@ class Marble extends GameObject {
 		}
 	}
 
-	function updateRollSound(contactPct:Float, slipAmount:Float) {
+	function updateRollSound(time:TimeState, contactPct:Float, slipAmount:Float) {
 		var rSpat = rollSound.getEffect(Spatialization);
 		rSpat.position = this.getAbsPos().getPosition();
+
+		if (this.rollMegaSound != null) {
+			var rmspat = this.rollMegaSound.getEffect(Spatialization);
+			rmspat.position = this.getAbsPos().getPosition();
+		}
 
 		var sSpat = slipSound.getEffect(Spatialization);
 		sSpat.position = this.getAbsPos().getPosition();
@@ -830,11 +855,23 @@ class Marble extends GameObject {
 		if (slipVolume < 0)
 			slipVolume = 0;
 
-		rollSound.volume = rollVolume;
+		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+			rollMegaSound.volume = rollVolume;
+			rollSound.volume = 0;
+		} else {
+			rollSound.volume = rollVolume;
+			rollMegaSound.volume = 0;
+		}
 		slipSound.volume = slipVolume;
 
 		if (rollSound.getEffect(Pitch) == null) {
 			rollSound.addEffect(new Pitch());
+		}
+
+		if (rollMegaSound != null) {
+			if (rollMegaSound.getEffect(Pitch) == null) {
+				rollMegaSound.addEffect(new Pitch());
+			}
 		}
 
 		var pitch = Util.clamp(rollVel.length() / 15, 0, 1) * 0.75 + 0.75;
@@ -846,6 +883,11 @@ class Marble extends GameObject {
 		// #end
 		var rPitch = rollSound.getEffect(Pitch);
 		rPitch.value = pitch;
+
+		if (rollMegaSound != null) {
+			var rPitch = rollMegaSound.getEffect(Pitch);
+			rPitch.value = pitch;
+		}
 	}
 
 	function testMove(velocity:Vector, position:Vector, deltaT:Float, radius:Float, testPIs:Bool):{position:Vector, t:Float} {
@@ -1449,7 +1491,7 @@ class Marble extends GameObject {
 		} while (true);
 		this.queuedContacts = [];
 
-		this.updateRollSound(contactTime / timeState.dt, this._slipAmount);
+		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 	}
 
 	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
@@ -1519,6 +1561,22 @@ class Marble extends GameObject {
 		}
 
 		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+
+		if (this._radius != 0.6666 && timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+			this._prevRadius = this._radius;
+			this._radius = 0.6666;
+			this.collider.radius = 0.6666;
+			var marbledts = cast(this.getChildAt(0), DtsObject);
+			marbledts.scale(this._radius / this._prevRadius);
+		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > 10) {
+			if (this._radius != this._prevRadius) {
+				this._radius = this._prevRadius;
+				this.collider.radius = this._radius;
+				var marbledts = cast(this.getChildAt(0), DtsObject);
+				marbledts.scale(this._prevRadius / 0.6666);
+			}
+		}
+
 		this.updateTeleporterState(timeState);
 
 		this.trailEmitter();
@@ -1592,6 +1650,10 @@ class Marble extends GameObject {
 		this.helicopterEnableTime = time;
 	}
 
+	public function enableMegaMarble(time:Float) {
+		this.megaMarbleEnableTime = time;
+	}
+
 	function updateTeleporterState(time:TimeState) {
 		var teleportFadeCompletion:Float = 0;
 
@@ -1633,6 +1695,7 @@ class Marble extends GameObject {
 		this.superBounceEnableTime = Math.NEGATIVE_INFINITY;
 		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
+		this.megaMarbleEnableTime = Math.NEGATIVE_INFINITY;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.cloak = false;
 		if (this.teleporting) {
@@ -1643,5 +1706,11 @@ class Marble extends GameObject {
 		this.teleporting = false;
 		this.teleportDisableTime = null;
 		this.teleportEnableTime = null;
+		if (this._radius != this._prevRadius) {
+			this._radius = this._prevRadius;
+			this.collider.radius = this._radius;
+			var marbledts = cast(this.getChildAt(0), DtsObject);
+			marbledts.scale(this._prevRadius / 0.6666);
+		}
 	}
 }
