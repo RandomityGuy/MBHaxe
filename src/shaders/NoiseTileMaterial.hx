@@ -87,14 +87,10 @@ class NoiseTileMaterial extends hxsl.Shader {
 			var addedLight = dirLight * lambert(transformedNormal, -dirLightDir);
 			incomingLight += addedLight;
 
-			var viewDir = normalize(camera.position - transformedPosition.xyz);
-			var halfwayDir = normalize(-dirLightDir + camera.dir); // Blinn-Phong
-
-			var spec = pow(max(dot(transformedNormal, halfwayDir), 0.0), shininess);
-
-			spec *= specularMap.get(secondaryMapUvFactor * calculatedUV).r;
-
-			specularLight += vec3(specularIntensity * spec);
+			var r = reflect(dirLightDir, transformedNormal).normalize();
+			var specColor = specularMap.get(secondaryMapUvFactor * calculatedUV).r;
+			var specValue = r.dot((camera.position - transformedPosition).normalize()).max(0.);
+			specularLight += specColor * pow(specValue, shininess) * specularIntensity;
 
 			var shaded = diffuse * vec4(incomingLight, 1);
 			shaded.rgb += specularLight;

@@ -54,7 +54,13 @@ class NormalMaterial extends hxsl.Shader {
 			var addedLight = dirLight * lambert(transformedNormal, -dirLightDir);
 			incomingLight += addedLight;
 
+			var r = reflect(dirLightDir, transformedNormal).normalize();
+			var specColor = vec3(1, 1, 1);
+			var specValue = r.dot((camera.position - transformedPosition).normalize()).max(0.);
+			specularLight += specColor * pow(specValue, 12) * 0.8;
+
 			var shaded = diffuse * vec4(incomingLight, 1);
+			shaded.rgb += specularLight;
 
 			pixelColor = shaded;
 		}

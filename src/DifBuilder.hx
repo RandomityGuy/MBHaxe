@@ -190,7 +190,7 @@ class DifBuilder {
 		worker.run();
 	}
 
-	static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String) {
+	static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String, shininess:Float, specularIntensity:Float) {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
 			var specularTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.spec.jpg').resource;
@@ -198,7 +198,7 @@ class DifBuilder {
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.normal.png').resource;
 			normalTex.wrap = Repeat;
 			var noiseTex = ResourceLoader.getTexture('data/shaders/tex/noise${noiseSuffix}.jpg').resource;
-			var shader = new NoiseTileMaterial(diffuseTex, specularTex, normalTex, noiseTex, 40, 0.7, MarbleGame.instance.world.ambient,
+			var shader = new NoiseTileMaterial(diffuseTex, specularTex, normalTex, noiseTex, shininess, specularIntensity, MarbleGame.instance.world.ambient,
 				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, 1);
 			onFinish(shader);
 		});
@@ -224,42 +224,43 @@ class DifBuilder {
 	}
 
 	static var shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void> = [
-		'interiors_mbu/plate_1.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'plate_1.jpg', 'plate_mbu.spec.jpg', 'plate_mbu.normal.png', 30, 0.5),
-		'interiors_mbu/tile_beginner.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', ''),
-		'interiors_mbu/tile_beginner_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_shadow.png', ''),
-		'interiors_mbu/tile_beginner_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_red.jpg', ''),
-		'interiors_mbu/tile_beginner_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_red_shadow.png', ''),
-		'interiors_mbu/tile_beginner_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_blue.jpg', ''),
-		'interiors_mbu/tile_beginner_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_blue_shadow.png', ''),
-		'interiors_mbu/tile_intermediate.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', ''),
-		'interiors_mbu/tile_intermediate_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_shadow.png', ''),
-		'interiors_mbu/tile_intermediate_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_red.jpg', ''),
-		'interiors_mbu/tile_intermediate_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_red_shadow.png', ''),
-		'interiors_mbu/tile_intermediate_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_green.jpg', ''),
-		'interiors_mbu/tile_intermediate_green_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_green_shadow.png', ''),
-		'interiors_mbu/tile_advanced.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', ''),
-		'interiors_mbu/tile_advanced_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_shadow.png', ''),
-		'interiors_mbu/tile_advanced_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_blue.jpg', ''),
-		'interiors_mbu/tile_advanced_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_blue_shadow.png', ''),
-		'interiors_mbu/tile_advanced_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_green.jpg', ''),
-		'interiors_mbu/tile_advanced_green_shadow.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_green_shadow.png', ''),
-		'interiors_mbu/tile_underside.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.jpg', ''),
-		'interiors_mbu/wall_beginner.png' => (onFinish) -> createPhongMaterial(onFinish, 'wall_beginner.png', 'wall_mbu.spec.png', 'wall_mbu.normal.png', 30,
-			0.5),
+		'interiors_mbu/plate_1.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'plate_1.jpg', 'plate_mbu.spec.jpg', 'plate_mbu.normal.png', 8, 1),
+		'interiors_mbu/tile_beginner.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, 1),
+		'interiors_mbu/tile_beginner_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_beginner_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_red.jpg', '', 40, 1),
+		'interiors_mbu/tile_beginner_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_red_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_beginner_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_blue.jpg', '', 40, 1),
+		'interiors_mbu/tile_beginner_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_blue_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_intermediate.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '', 40, 1),
+		'interiors_mbu/tile_intermediate_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_intermediate_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_red.jpg', '', 40, 1),
+		'interiors_mbu/tile_intermediate_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_red_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_intermediate_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_green.jpg', '', 40, 1),
+		'interiors_mbu/tile_intermediate_green_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_green_shadow.png', '', 40,
+			0.2),
+		'interiors_mbu/tile_advanced.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '', 40, 1),
+		'interiors_mbu/tile_advanced_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_advanced_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_blue.jpg', '', 40, 1),
+		'interiors_mbu/tile_advanced_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_blue_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_advanced_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_green.jpg', '', 40, 1),
+		'interiors_mbu/tile_advanced_green_shadow.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_green_shadow.png', '', 40, 0.2),
+		'interiors_mbu/tile_underside.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.jpg', '', 40, 1),
+		'interiors_mbu/wall_beginner.png' => (onFinish) -> createPhongMaterial(onFinish, 'wall_beginner.png', 'wall_mbu.spec.png', 'wall_mbu.normal.png', 12,
+			0.8),
 		'interiors_mbu/edge_white.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white.jpg', 'edge_white_mbu.spec.jpg',
-			'edge_white_mbu.normal.jpg', 50, 4),
+			'edge_white_mbu.normal.jpg', 50, 0.8),
 		'interiors_mbu/edge_white_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white_shadow.png', 'edge_white_mbu.spec.jpg',
-			'edge_white_mbu.normal.jpg', 50, 4),
+			'edge_white_mbu.normal.jpg', 50, 0.2),
 		'interiors_mbu/beam.png' => (onFinish) -> createNormalMapMaterial(onFinish, 'beam.png', 'beam_side_mbu.normal.png'),
 		'interiors_mbu/beam_side.png' => (onFinish) -> createNormalMapMaterial(onFinish, 'beam_side.png', 'beam_side_mbu.normal.png'),
 		'interiors_mbu/friction_low.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.jpg', 'friction_low_mbu.spec.png',
-			'friction_low_mbu.normal.png', 100, 3),
+			'friction_low_mbu.normal.png', 128, 1),
 		'interiors_mbu/friction_low_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low_shadow.png', 'friction_low_mbu.spec.png',
-			'friction_low_mbu.normal.png', 100, 3),
+			'friction_low_mbu.normal.png', 128, 0.3),
 		'interiors_mbu/friction_high.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high.png', 'friction_high_mbu.spec.png',
-			'friction_high_mbu.normal.png', 30, 0.8, 2),
+			'friction_high_mbu.normal.png', 10, 0.3, 2),
 		'interiors_mbu/friction_high_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high_shadow.png', 'friction_high_mbu.spec.png',
-			'friction_high_mbu.normal.png', 30, 0.8, 2)
+			'friction_high_mbu.normal.png', 10, 0.15, 2)
 	];
 
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
