@@ -745,7 +745,7 @@ class PlayMissionGui extends GuiImage {
 			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
 			pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources).toTile();
 
-			if (game == "platinum" || game == "ultra") {
+			if (game == "platinum") {
 				pmAchievements.disabled = false;
 			} else {
 				pmAchievements.disabled = true;

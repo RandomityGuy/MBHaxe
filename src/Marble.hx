@@ -856,11 +856,15 @@ class Marble extends GameObject {
 			slipVolume = 0;
 
 		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10) {
-			rollMegaSound.volume = rollVolume;
-			rollSound.volume = 0;
+			if (this.rollMegaSound != null) {
+				rollMegaSound.volume = rollVolume;
+				rollSound.volume = 0;
+			}
 		} else {
 			rollSound.volume = rollVolume;
-			rollMegaSound.volume = 0;
+			if (this.rollMegaSound != null) {
+				rollMegaSound.volume = 0;
+			}
 		}
 		slipSound.volume = slipVolume;
 

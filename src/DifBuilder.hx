@@ -1,5 +1,9 @@
 package src;
 
+import shaders.NormalMaterial;
+import shaders.NoiseTileMaterial;
+import shaders.DirLight;
+import shaders.PhongMaterial;
 import dif.Edge;
 import h3d.shader.pbr.PropsValues;
 import h3d.mat.Material;
@@ -25,6 +29,7 @@ import h3d.prim.BigPrimitive;
 import dif.Interior;
 import dif.Dif;
 import src.InteriorObject;
+import src.MarbleGame;
 import src.ResourceLoaderWorker;
 
 class DifBuilderTriangle {
@@ -166,6 +171,96 @@ class DifBuilder {
 			restitution: 0.95
 		}
 		];
+
+	static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, specTexture:String, normalTexture:String, shininess:Float,
+			specularIntensity:Float, secMapUVFactor:Float = 1) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var specularTex = ResourceLoader.getTexture('data/shaders/tex/${specTexture}').resource;
+			specularTex.wrap = Repeat;
+			var normalTex = ResourceLoader.getTexture('data/shaders/tex/${normalTexture}').resource;
+			normalTex.wrap = Repeat;
+			var shader = new PhongMaterial(diffuseTex, specularTex, normalTex, shininess, specularIntensity, MarbleGame.instance.world.ambient,
+				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, secMapUVFactor);
+			onFinish(shader);
+		});
+		worker.loadFile('interiors_mbu/${baseTexture}');
+		worker.loadFile('shaders/tex/${specTexture}');
+		worker.loadFile('shaders/tex/${normalTexture}');
+		worker.run();
+	}
+
+	static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var specularTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.spec.jpg').resource;
+			specularTex.wrap = Repeat;
+			var normalTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.normal.png').resource;
+			normalTex.wrap = Repeat;
+			var noiseTex = ResourceLoader.getTexture('data/shaders/tex/noise${noiseSuffix}.jpg').resource;
+			var shader = new NoiseTileMaterial(diffuseTex, specularTex, normalTex, noiseTex, 40, 0.7, MarbleGame.instance.world.ambient,
+				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, 1);
+			onFinish(shader);
+		});
+		worker.loadFile('interiors_mbu/${baseTexture}');
+		worker.loadFile('shaders/tex/noise${noiseSuffix}.jpg');
+		worker.loadFile('shaders/tex/tile_mbu.spec.jpg');
+		worker.loadFile('shaders/tex/tile_mbu.normal.png');
+		worker.run();
+	}
+
+	static function createNormalMapMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var normalTex = ResourceLoader.getTexture('data/shaders/tex/${normalTexture}').resource;
+			normalTex.wrap = Repeat;
+			var shader = new NormalMaterial(diffuseTex, normalTex, MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight,
+				MarbleGame.instance.world.dirLightDir);
+			onFinish(shader);
+		});
+		worker.loadFile('interiors_mbu/${baseTexture}');
+		worker.loadFile('shaders/tex/${normalTexture}');
+		worker.run();
+	}
+
+	static var shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void> = [
+		'interiors_mbu/plate_1.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'plate_1.jpg', 'plate_mbu.spec.jpg', 'plate_mbu.normal.png', 30, 0.5),
+		'interiors_mbu/tile_beginner.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', ''),
+		'interiors_mbu/tile_beginner_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_shadow.png', ''),
+		'interiors_mbu/tile_beginner_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_red.jpg', ''),
+		'interiors_mbu/tile_beginner_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_red_shadow.png', ''),
+		'interiors_mbu/tile_beginner_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_blue.jpg', ''),
+		'interiors_mbu/tile_beginner_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner_blue_shadow.png', ''),
+		'interiors_mbu/tile_intermediate.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', ''),
+		'interiors_mbu/tile_intermediate_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_shadow.png', ''),
+		'interiors_mbu/tile_intermediate_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_red.jpg', ''),
+		'interiors_mbu/tile_intermediate_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_red_shadow.png', ''),
+		'interiors_mbu/tile_intermediate_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_green.jpg', ''),
+		'interiors_mbu/tile_intermediate_green_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate_green_shadow.png', ''),
+		'interiors_mbu/tile_advanced.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', ''),
+		'interiors_mbu/tile_advanced_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_shadow.png', ''),
+		'interiors_mbu/tile_advanced_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_blue.jpg', ''),
+		'interiors_mbu/tile_advanced_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_blue_shadow.png', ''),
+		'interiors_mbu/tile_advanced_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_green.jpg', ''),
+		'interiors_mbu/tile_advanced_green_shadow.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced_green_shadow.png', ''),
+		'interiors_mbu/tile_underside.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.jpg', ''),
+		'interiors_mbu/wall_beginner.png' => (onFinish) -> createPhongMaterial(onFinish, 'wall_beginner.png', 'wall_mbu.spec.png', 'wall_mbu.normal.png', 30,
+			0.5),
+		'interiors_mbu/edge_white.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white.jpg', 'edge_white_mbu.spec.jpg',
+			'edge_white_mbu.normal.jpg', 50, 4),
+		'interiors_mbu/edge_white_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white_shadow.png', 'edge_white_mbu.spec.jpg',
+			'edge_white_mbu.normal.jpg', 50, 4),
+		'interiors_mbu/beam.png' => (onFinish) -> createNormalMapMaterial(onFinish, 'beam.png', 'beam_side_mbu.normal.png'),
+		'interiors_mbu/beam_side.png' => (onFinish) -> createNormalMapMaterial(onFinish, 'beam_side.png', 'beam_side_mbu.normal.png'),
+		'interiors_mbu/friction_low.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.jpg', 'friction_low_mbu.spec.png',
+			'friction_low_mbu.normal.png', 100, 3),
+		'interiors_mbu/friction_low_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low_shadow.png', 'friction_low_mbu.spec.png',
+			'friction_low_mbu.normal.png', 100, 3),
+		'interiors_mbu/friction_high.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high.png', 'friction_high_mbu.spec.png',
+			'friction_high_mbu.normal.png', 30, 0.8, 2),
+		'interiors_mbu/friction_high_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high_shadow.png', 'friction_high_mbu.spec.png',
+			'friction_high_mbu.normal.png', 30, 0.8, 2)
+	];
 
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
 		#if (js || android)
@@ -558,6 +653,11 @@ class DifBuilder {
 				}
 			}
 			var worker = new ResourceLoaderWorker(() -> {
+				var shaderWorker = new ResourceLoaderWorker(() -> {
+					difresource.release();
+					onFinish();
+				});
+
 				for (grp => tris in mats) {
 					var points = [];
 					var normals = [];
@@ -591,18 +691,38 @@ class DifBuilder {
 						texture = ResourceLoader.getFileEntry(tex(grp)).toImage().toTexture();
 						texture.wrap = Wrap.Repeat;
 						texture.mipMap = Nearest;
+						var exactName = StringTools.replace(texture.name, "data/", "");
 						material = h3d.mat.Material.create(texture);
+						if (shaderMaterialDict.exists(exactName)) {
+							var retrievefunc = shaderMaterialDict[exactName];
+							shaderWorker.addTask(fwd -> {
+								retrievefunc(shad -> {
+									material.mainPass.removeShader(material.textureShader);
+									material.mainPass.addShader(shad);
+									material.receiveShadows = true;
+									var thisprops:Dynamic = material.getDefaultProps();
+									thisprops.light = false; // We will calculate our own lighting
+									material.props = thisprops;
+									material.shadows = false;
+									fwd();
+								});
+							});
+							prim.addTangents();
+						} else {
+							material.shadows = false;
+							material.receiveShadows = true;
+						}
 					} else {
 						material = Material.create();
+						material.shadows = false;
+						material.receiveShadows = true;
 					}
-					material.shadows = false;
-					material.receiveShadows = true;
 					// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 					// material.mainPass.wireframe = true;
 					var mesh = new Mesh(prim, material, itr);
 				}
-				difresource.release();
-				onFinish();
+
+				shaderWorker.run();
 			});
 			for (f in loadtexs) {
 				worker.loadFile(f);

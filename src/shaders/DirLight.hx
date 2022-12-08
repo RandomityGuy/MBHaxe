@@ -5,10 +5,13 @@ import h3d.scene.fwd.Light;
 class DirLight extends Light {
 	var dshader:DirLightShader;
 
+	public var direction:h3d.Vector;
+
 	public function new(?dir:h3d.Vector, ?parent) {
 		dshader = new DirLightShader();
 		super(dshader, parent);
 		priority = 100;
+		direction = dir;
 		if (dir != null)
 			setDirection(dir);
 	}

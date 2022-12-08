@@ -113,8 +113,12 @@ class MarbleWorld extends Scheduler {
 
 	var endPadElement:MissionElementStaticShape;
 	var endPad:EndPad;
-
 	var skyElement:MissionElementSky;
+
+	// Lighting
+	public var ambient:Vector;
+	public var dirLight:Vector;
+	public var dirLightDir:Vector;
 
 	public var scene:Scene;
 	public var scene2d:h2d.Scene;
@@ -277,6 +281,8 @@ class MarbleWorld extends Scheduler {
 				var ls = cast(scene.lightSystem, h3d.scene.fwd.LightSystem);
 
 				ls.ambientLight.load(ambientColor);
+				this.ambient = ambientColor;
+				// ls.perPixelLighting = false;
 
 				var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
 				shadow.power = 0.5;
@@ -287,6 +293,9 @@ class MarbleWorld extends Scheduler {
 
 				var sunlight = new DirLight(sunDirection, scene);
 				sunlight.color = directionalColor;
+
+				this.dirLight = directionalColor;
+				this.dirLightDir = sunDirection;
 			}
 
 			onFinish();
@@ -332,6 +341,7 @@ class MarbleWorld extends Scheduler {
 			"sound/bumperding1.wav",
 			"sound/bumper1.wav",
 			"sound/jump.wav",
+			"sound/mega_roll.wav",
 			"sound/bouncehard1.wav",
 			"sound/bouncehard2.wav",
 			"sound/bouncehard3.wav",

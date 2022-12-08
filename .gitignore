@@ -8,3 +8,7 @@ native
 settings.json
 release
 Export
+node_modules
+fonts
+package.json
+package-lock.json

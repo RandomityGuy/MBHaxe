@@ -1,5 +1,8 @@
 package src;
 
+import shaders.NormalMaterial;
+import shaders.NoiseTileMaterial;
+import shaders.PhongMaterial;
 import h3d.prim.Instanced;
 import h3d.shader.pbr.PropsValues;
 import shaders.Billboard;
@@ -127,6 +130,24 @@ class InstanceManager {
 					if (dtsshader != null) {
 						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
 						minfo.meshbatch.material.mainPass.addShader(dtsshader);
+						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					}
+					var phongshader = mat.mainPass.getShader(PhongMaterial);
+					if (phongshader != null) {
+						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+						minfo.meshbatch.material.mainPass.addShader(phongshader);
+						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					}
+					var noiseshder = mat.mainPass.getShader(NoiseTileMaterial);
+					if (noiseshder != null) {
+						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+						minfo.meshbatch.material.mainPass.addShader(noiseshder);
+						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					}
+					var nmapshdr = mat.mainPass.getShader(NormalMaterial);
+					if (nmapshdr != null) {
+						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+						minfo.meshbatch.material.mainPass.addShader(nmapshdr);
 						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
 					}
 					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
