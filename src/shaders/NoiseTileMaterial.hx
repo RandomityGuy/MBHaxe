@@ -3,11 +3,10 @@ package shaders;
 class NoiseTileMaterial extends hxsl.Shader {
 	static var SRC = {
 		@param var diffuseMap:Sampler2D;
-		@param var specularMap:Sampler2D;
+		@param var specularColor:Vec4;
 		@param var normalMap:Sampler2D;
 		@param var noiseMap:Sampler2D;
 		@param var shininess:Float;
-		@param var specularIntensity:Float;
 		@param var ambientLight:Vec3;
 		@param var dirLight:Vec3;
 		@param var dirLightDir:Vec3;
@@ -37,7 +36,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 		}
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
 			var result = dot(normal, lightPosition);
-			return max(result, 0.0);
+			return saturate(result);
 		}
 		function vertex() {
 			calculatedUV = input.uv;
@@ -45,7 +44,6 @@ class NoiseTileMaterial extends hxsl.Shader {
 		function fragment() {
 			// Diffuse part
 			var diffuse = diffuseMap.get(calculatedUV);
-
 			// noise
 
 			var noiseIndex:Vec2;
@@ -72,41 +70,36 @@ class NoiseTileMaterial extends hxsl.Shader {
 			noiseColor4 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
 
 			var finalNoiseCol = (noiseColor1 + noiseColor2 + noiseColor3 + noiseColor4) / 4.0;
-			diffuse.rgb *= 1.0 + finalNoiseCol.r; // This isn't how MBU does it afaik but it looks good :o
+			var noiseAdd = finalNoiseCol * diffuse.a;
 
-			var incomingLight = vec3(0.0);
-			var specularLight = vec3(0.0);
+			var outCol = diffuse + noiseAdd;
 
-			incomingLight += ambientLight;
 			var n = transformedNormal;
 			var nf = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
 			var tanX = transformedTangent.xyz.normalize();
 			var tanY = n.cross(tanX) * -transformedTangent.w;
 			transformedNormal = (nf.x * tanX + nf.y * tanY + nf.z * n).normalize();
 
-			var addedLight = dirLight * lambert(transformedNormal, -dirLightDir);
-			incomingLight += addedLight;
+			var bumpDot = dirLight * lambert(transformedNormal, -dirLightDir);
+
+			outCol.xyz *= bumpDot * 0.8 + ambientLight;
 
 			var r = reflect(dirLightDir, transformedNormal).normalize();
-			var specColor = specularMap.get(secondaryMapUvFactor * calculatedUV).r;
-			var specValue = r.dot((camera.position - transformedPosition).normalize()).max(0.);
-			specularLight += specColor * pow(specValue, shininess) * specularIntensity;
+			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize()));
+			var specular = specularColor * pow(specValue, shininess);
 
-			var shaded = diffuse * vec4(incomingLight, 1);
-			shaded.rgb += specularLight;
-
-			pixelColor = shaded;
+			outCol += specular * diffuse.a;
+			pixelColor = outCol;
 		}
 	}
 
-	public function new(diffuse, specular, normal, noise, shininess, specularIntensity, ambientLight, dirLight, dirLightDir, secondaryMapUvFactor) {
+	public function new(diffuse, normal, noise, shininess, specularColor, ambientLight, dirLight, dirLightDir, secondaryMapUvFactor) {
 		super();
 		this.diffuseMap = diffuse;
-		this.specularMap = specular;
 		this.normalMap = normal;
 		this.noiseMap = noise;
 		this.shininess = shininess;
-		this.specularIntensity = specularIntensity;
+		this.specularColor = specularColor;
 		this.ambientLight = ambientLight.clone();
 		this.dirLight = dirLight.clone();
 		this.dirLightDir = dirLightDir.clone();
