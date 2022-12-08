@@ -198,6 +198,7 @@ class DifBuilder {
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.normal.png').resource;
 			normalTex.wrap = Repeat;
 			var noiseTex = ResourceLoader.getTexture('data/shaders/tex/noise${noiseSuffix}.jpg').resource;
+			noiseTex.wrap = Repeat;
 			var shader = new NoiseTileMaterial(diffuseTex, specularTex, normalTex, noiseTex, shininess, specularIntensity, MarbleGame.instance.world.ambient,
 				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, 1);
 			onFinish(shader);
@@ -700,11 +701,11 @@ class DifBuilder {
 								retrievefunc(shad -> {
 									material.mainPass.removeShader(material.textureShader);
 									material.mainPass.addShader(shad);
-									material.receiveShadows = true;
 									var thisprops:Dynamic = material.getDefaultProps();
 									thisprops.light = false; // We will calculate our own lighting
 									material.props = thisprops;
 									material.shadows = false;
+									material.receiveShadows = true;
 									fwd();
 								});
 							});

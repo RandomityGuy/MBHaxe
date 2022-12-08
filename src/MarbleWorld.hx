@@ -361,6 +361,8 @@ class MarbleWorld extends Scheduler {
 			"shapes/pads/red.jpg",
 			"shapes/pads/blue.jpg",
 			"shapes/pads/green.jpg",
+			"shapes/items/gem.dts", // Ew ew
+			"shapes/items/gemshine.png"
 		];
 		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
 		marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
