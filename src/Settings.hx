@@ -35,6 +35,7 @@ typedef OptionsSettings = {
 	var oobInsults:Bool;
 	var reflectiveMarble:Bool;
 	var marbleIndex:Int;
+	var marbleCategoryIndex:Int;
 	var marbleSkin:String;
 	var marbleModel:String;
 }
@@ -93,6 +94,7 @@ class Settings {
 		oobInsults: true,
 		reflectiveMarble: true,
 		marbleIndex: 0,
+		marbleCategoryIndex: 0,
 		marbleSkin: "base",
 		marbleModel: "data/shapes/balls/ball-superball.dts",
 		vsync: #if js true #end
@@ -187,6 +189,7 @@ class Settings {
 			marbleIndex: optionsSettings.marbleIndex,
 			marbleSkin: optionsSettings.marbleSkin,
 			marbleModel: optionsSettings.marbleModel,
+			marbleCategoryIndex: optionsSettings.marbleCategoryIndex,
 		};
 		var scoreCount = 0;
 		var eggCount = 0;
@@ -295,6 +298,9 @@ class Settings {
 				optionsSettings.marbleIndex = 0;
 				optionsSettings.marbleSkin = "base";
 				optionsSettings.marbleModel = "data/shapes/balls/ball-superball.dts";
+			}
+			if (optionsSettings.marbleCategoryIndex == null) {
+				optionsSettings.marbleCategoryIndex = 0;
 			}
 			#end
 			highscoreName = json.highscoreName;

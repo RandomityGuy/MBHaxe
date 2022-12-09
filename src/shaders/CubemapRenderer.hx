@@ -5,6 +5,7 @@ import h3d.Vector;
 import h3d.scene.Scene;
 import h3d.Engine;
 import h3d.Camera;
+import src.MarbleGame;
 import h3d.mat.Texture;
 
 class CubemapRenderer {
@@ -20,6 +21,7 @@ class CubemapRenderer {
 		this.scene = scene;
 		this.sky = sky;
 		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGB8);
+		this.cubemap.depthBuffer = new h3d.mat.DepthBuffer(128, 128, h3d.mat.DepthBuffer.DepthFormat.Depth24);
 		this.camera = new Camera(90, 1, 1, 0.02, scene.camera.zFar);
 		this.position = new Vector();
 		this.nextFaceToRender = 0;
@@ -53,5 +55,15 @@ class CubemapRenderer {
 
 		this.nextFaceToRender += renderedFaces;
 		this.nextFaceToRender %= 6;
+	}
+
+	public function getCameraFrustums() {
+		var frustums = [];
+		for (i in 0...6) {
+			this.camera.setCubeMap(i, position);
+			this.camera.update();
+			frustums.push(camera.frustum.clone());
+		}
+		return frustums;
 	}
 }

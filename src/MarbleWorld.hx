@@ -364,8 +364,12 @@ class MarbleWorld extends Scheduler {
 			"shapes/items/gem.dts", // Ew ew
 			"shapes/items/gemshine.png"
 		];
+		// Hacky
 		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
-		marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+		if (Settings.optionsSettings.marbleCategoryIndex == 0)
+			marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+		else
+			marblefiles.push("shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		for (file in marblefiles) {
 			worker.loadFile(file);
 		}
@@ -1178,7 +1182,7 @@ class MarbleWorld extends Scheduler {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
 		}
 		ProfilerUI.measure("updateInstances");
-		this.instanceManager.update(dt);
+		this.instanceManager.render();
 		ProfilerUI.measure("updateParticles");
 		this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
 		ProfilerUI.measure("updatePlayGui");

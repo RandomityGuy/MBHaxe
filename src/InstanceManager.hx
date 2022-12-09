@@ -15,6 +15,7 @@ import h3d.scene.Scene;
 import h3d.scene.Object;
 import h3d.scene.Mesh;
 import h3d.scene.MeshBatch;
+import src.MarbleGame;
 
 typedef MeshBatchInfo = {
 	var instances:Array<MeshInstance>;
@@ -38,7 +39,12 @@ class InstanceManager {
 		this.scene = scene;
 	}
 
-	public function update(dt:Float) {
+	public function render() {
+		var renderFrustums = [scene.camera.frustum];
+		// This sucks holy shit
+		if (MarbleGame.instance.world.marble != null && MarbleGame.instance.world.marble.cubemapRenderer != null)
+			renderFrustums = renderFrustums.concat(MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums());
+
 		for (meshes in objects) {
 			for (minfo in meshes) {
 				var visibleinstances = [];
@@ -47,8 +53,11 @@ class InstanceManager {
 					for (inst in minfo.instances) {
 						var objBounds = @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds.clone();
 						objBounds.transform(inst.emptyObj.getAbsPos());
-						if (scene.camera.frustum.hasBounds(objBounds)) {
-							visibleinstances.push(inst);
+						for (frustum in renderFrustums) {
+							if (frustum.hasBounds(objBounds)) {
+								visibleinstances.push(inst);
+								break;
+							}
 						}
 					}
 				}

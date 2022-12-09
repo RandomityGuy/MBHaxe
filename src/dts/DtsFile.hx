@@ -331,7 +331,9 @@ class DtsFile {
 		matDetailScales = [];
 		matReflectionAmounts = [];
 		for (i in 0...numMaterials) {
-			matNames.push(br.readStr());
+			var mname = br.readStr();
+			mname = StringTools.replace(mname, '\x00', '');
+			matNames.push(mname);
 		}
 		for (i in 0...numMaterials) {
 			matFlags.push(br.readInt32());

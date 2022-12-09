@@ -202,7 +202,9 @@ class ResourceLoader {
 	static function preloadShapes(onFinish:Void->Void) {
 		var toloadfiles = [
 			StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""),
-			"shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png"
+			(Settings.optionsSettings.marbleCategoryIndex == 0)
+			? "shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png" : "shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin +
+			".marble.png"
 		];
 		// var toloaddirs = [];
 		// var filestats = fileSystem.dir("shapes");

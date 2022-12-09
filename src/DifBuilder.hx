@@ -177,8 +177,10 @@ class DifBuilder {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
 			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/${normalTexture}').resource;
 			normalTex.wrap = Repeat;
+			normalTex.mipMap = Nearest;
 			var shader = new PhongMaterial(diffuseTex, normalTex, shininess, specularColor, MarbleGame.instance.world.ambient,
 				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, uvScaleFactor);
 			onFinish(shader);
@@ -192,10 +194,13 @@ class DifBuilder {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
 			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.normal.png').resource;
 			normalTex.wrap = Repeat;
+			normalTex.mipMap = Nearest;
 			var noiseTex = ResourceLoader.getTexture('data/shaders/tex/noise${noiseSuffix}.jpg').resource;
 			noiseTex.wrap = Repeat;
+			noiseTex.mipMap = Nearest;
 			var shader = new NoiseTileMaterial(diffuseTex, normalTex, noiseTex, shininess, specular, MarbleGame.instance.world.ambient,
 				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, 1);
 			onFinish(shader);
