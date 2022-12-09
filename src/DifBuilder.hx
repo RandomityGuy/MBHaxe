@@ -269,7 +269,9 @@ class DifBuilder {
 		'interiors_mbu/friction_high.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high.png', 'friction_high.normal.png', 10,
 			new Vector(0.3, 0.3, 0.35, 1)),
 		'interiors_mbu/friction_high_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high_shadow.png', 'friction_high.normal.png', 10,
-			new Vector(0.15, 0.15, 0.16, 1.0))
+			new Vector(0.15, 0.15, 0.16, 1.0)),
+		'interiors_mbu/stripe_caution.png' => (onFinish) -> createPhongMaterial(onFinish, 'stripe_caution.png', 'DefaultNormal.png', 12,
+			new Vector(0.8, 0.8, 0.6, 1)),
 	];
 
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
