@@ -1,5 +1,10 @@
 package src;
 
+import shaders.marble.ClassicGlass;
+import shaders.marble.ClassicMetal;
+import shaders.marble.ClassicMarb3;
+import shaders.marble.ClassicMarb2;
+import shaders.marble.ClassicGlassPureSphere;
 import h3d.mat.MaterialDatabase;
 import shaders.MarbleReflection;
 import shaders.CubemapRenderer;
@@ -315,7 +320,73 @@ class Marble extends GameObject {
 
 			if (Settings.optionsSettings.reflectiveMarble) {
 				this.cubemapRenderer = new CubemapRenderer(level.scene, level.sky);
-				mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+
+				if (Settings.optionsSettings.marbleShader == null
+					|| Settings.optionsSettings.marbleShader == "Default"
+					|| Settings.optionsSettings.marbleShader == "") {
+					mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+				} else {
+					// Generate tangents for next shaders
+					for (node in marbleDts.graphNodes) {
+						for (ch in node.children) {
+							var chmesh = cast(ch, Mesh);
+							var chpoly = cast(chmesh.primitive, h3d.prim.Polygon);
+							chpoly.addTangents();
+						}
+					}
+
+					mat.mainPass.removeShader(mat.textureShader);
+
+					if (Settings.optionsSettings.marbleShader == "ClassicGlassPureSphere") {
+						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/pack1/marble01.normal.png").resource;
+						var classicGlassShader = new ClassicGlassPureSphere(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
+							new Vector(0.6, 0.6, 0.6, 0.6), this.level.ambient, this.level.dirLight, this.level.dirLightDir, 1);
+						mat.mainPass.addShader(classicGlassShader);
+					}
+
+					if (Settings.optionsSettings.marbleShader == "ClassicMarb2") {
+						var classicMarb2 = new ClassicMarb2(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), this.level.ambient,
+							this.level.dirLight, this.level.dirLightDir, 1);
+						mat.mainPass.addShader(classicMarb2);
+					}
+
+					if (Settings.optionsSettings.marbleShader == "ClassicMarb3") {
+						var classicMarb3 = new ClassicMarb3(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), this.level.ambient,
+							this.level.dirLight, this.level.dirLightDir, 1);
+						mat.mainPass.addShader(classicMarb3);
+					}
+
+					if (Settings.optionsSettings.marbleShader == "ClassicMetal") {
+						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/pack1/marble18.normal.png").resource;
+						marbleNormal.wrap = Repeat;
+						var classicMetalShader = new ClassicMetal(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6),
+							this.level.ambient, this.level.dirLight, this.level.dirLightDir, 1);
+						mat.mainPass.addShader(classicMetalShader);
+					}
+
+					if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass20") {
+						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/pack1/marble20.normal.png").resource;
+						marbleNormal.wrap = Repeat;
+						var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6),
+							this.level.ambient, this.level.dirLight, this.level.dirLightDir, 1);
+						mat.mainPass.addShader(classicGlassShader);
+					}
+
+					if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass18") {
+						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/pack1/marble18.normal.png").resource;
+						marbleNormal.wrap = Repeat;
+						var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6),
+							this.level.ambient, this.level.dirLight, this.level.dirLightDir, 1);
+						mat.mainPass.addShader(classicGlassShader);
+					}
+
+					var thisprops:Dynamic = mat.getDefaultProps();
+					thisprops.light = false; // We will calculate our own lighting
+					mat.props = thisprops;
+					mat.castShadows = true;
+					mat.shadows = true;
+					mat.receiveShadows = false;
+				}
 			}
 		}
 

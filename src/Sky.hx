@@ -46,7 +46,7 @@ class Sky extends Object {
 			// pbrprops.occlusionValue = 0;
 			// pbrprops.metalnessValue = 1;
 
-			skyMesh.scale(3500);
+			// skyMesh.scale(3500);
 			// var env = new Environment(texture);
 			// env.compute();
 			// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);

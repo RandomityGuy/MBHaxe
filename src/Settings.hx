@@ -38,6 +38,7 @@ typedef OptionsSettings = {
 	var marbleCategoryIndex:Int;
 	var marbleSkin:String;
 	var marbleModel:String;
+	var marbleShader:String;
 }
 
 typedef ControlsSettings = {
@@ -97,6 +98,7 @@ class Settings {
 		marbleCategoryIndex: 0,
 		marbleSkin: "base",
 		marbleModel: "data/shapes/balls/ball-superball.dts",
+		marbleShader: "Default",
 		vsync: #if js true #end
 		#if hl
 		false
@@ -190,6 +192,7 @@ class Settings {
 			marbleSkin: optionsSettings.marbleSkin,
 			marbleModel: optionsSettings.marbleModel,
 			marbleCategoryIndex: optionsSettings.marbleCategoryIndex,
+			marbleShader: optionsSettings.marbleShader,
 		};
 		var scoreCount = 0;
 		var eggCount = 0;
@@ -301,6 +304,9 @@ class Settings {
 			}
 			if (optionsSettings.marbleCategoryIndex == null) {
 				optionsSettings.marbleCategoryIndex = 0;
+			}
+			if (optionsSettings.marbleShader == null) {
+				optionsSettings.marbleShader = "Default";
 			}
 			#end
 			highscoreName = json.highscoreName;

@@ -31,6 +31,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 		var transformedPosition:Vec3;
 		var transformedNormal:Vec3;
 		@var var transformedTangent:Vec4;
+		@var var fragLightW:Float;
 		function __init__vertex() {
 			transformedTangent = vec4(input.tangent * global.modelView.mat3(), input.tangent.dot(input.tangent) > 0.5 ? 1. : -1.);
 		}
@@ -40,6 +41,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 		}
 		function vertex() {
 			calculatedUV = input.uv;
+			fragLightW = step(0, dot(dirLight, input.normal));
 		}
 		function fragment() {
 			// Diffuse part
@@ -85,7 +87,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 			outCol.xyz *= bumpDot + ambientLight;
 
 			var r = reflect(dirLightDir, transformedNormal).normalize();
-			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize()));
+			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize())) * fragLightW;
 			var specular = specularColor * pow(specValue, shininess);
 
 			outCol += specular * diffuse.a;

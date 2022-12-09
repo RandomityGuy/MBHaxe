@@ -59,11 +59,14 @@ class CubemapRenderer {
 
 	public function getCameraFrustums() {
 		var frustums = [];
+		var prevFar = this.camera.zFar;
+		this.camera.zFar = 300; // Max draw distance
 		for (i in 0...6) {
 			this.camera.setCubeMap(i, position);
 			this.camera.update();
 			frustums.push(camera.frustum.clone());
 		}
+		this.camera.zFar = prevFar;
 		return frustums;
 	}
 }
