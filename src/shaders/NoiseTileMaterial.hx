@@ -77,12 +77,12 @@ class NoiseTileMaterial extends hxsl.Shader {
 			var n = transformedNormal;
 			var nf = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
 			var tanX = transformedTangent.xyz.normalize();
-			var tanY = n.cross(tanX) * -transformedTangent.w;
+			var tanY = n.cross(tanX) * transformedTangent.w;
 			transformedNormal = (nf.x * tanX + nf.y * tanY + nf.z * n).normalize();
 
 			var bumpDot = dirLight * lambert(transformedNormal, -dirLightDir);
 
-			outCol.xyz *= bumpDot * 0.8 + ambientLight;
+			outCol.xyz *= bumpDot + ambientLight;
 
 			var r = reflect(dirLightDir, transformedNormal).normalize();
 			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize()));

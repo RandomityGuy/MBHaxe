@@ -43,8 +43,8 @@ new SimGroup(MissionGroup) {
       windEffectPrecipitation = "0";
    };
    new Sun() {
-      color = "1 1 0.9 1";
-      ambient = "0.4 0.4 0.5 1";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
       direction = "0.573201 0.275357 -0.771764";
       shadowColor = "0.000000 0.000000 0.150000 0.350000";
    };

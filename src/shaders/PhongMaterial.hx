@@ -3,14 +3,13 @@ package shaders;
 class PhongMaterial extends hxsl.Shader {
 	static var SRC = {
 		@param var diffuseMap:Sampler2D;
-		@param var specularMap:Sampler2D;
 		@param var normalMap:Sampler2D;
 		@param var shininess:Float;
-		@param var specularIntensity:Float;
+		@param var specularColor:Vec4;
 		@param var ambientLight:Vec3;
 		@param var dirLight:Vec3;
 		@param var dirLightDir:Vec3;
-		@param var secondaryMapUvFactor:Float;
+		@param var uvScaleFactor:Float;
 		@global var camera:{
 			var position:Vec3;
 			@var var dir:Vec3;
@@ -36,50 +35,44 @@ class PhongMaterial extends hxsl.Shader {
 		}
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
 			var result = dot(normal, lightPosition);
-			return max(result, 0.0);
+			return saturate(result);
 		}
 		function vertex() {
-			calculatedUV = input.uv;
+			calculatedUV = input.uv * uvScaleFactor;
 		}
 		function fragment() {
 			// Diffuse part
 			var diffuse = diffuseMap.get(calculatedUV);
+			var outCol = diffuse;
 
-			var incomingLight = vec3(0.0);
-			var specularLight = vec3(0.0);
-
-			incomingLight += ambientLight;
 			var n = transformedNormal;
-			var nf = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
+			var nf = unpackNormal(normalMap.get(calculatedUV));
 			var tanX = transformedTangent.xyz.normalize();
-			var tanY = n.cross(tanX) * -transformedTangent.w;
+			var tanY = n.cross(tanX) * transformedTangent.w;
 			transformedNormal = (nf.x * tanX + nf.y * tanY + nf.z * n).normalize();
 
-			var addedLight = dirLight * lambert(transformedNormal, -dirLightDir);
-			incomingLight += addedLight;
+			var bumpDot = dirLight * lambert(transformedNormal, -dirLightDir);
+			outCol.xyz *= bumpDot + ambientLight;
 
 			var r = reflect(dirLightDir, transformedNormal).normalize();
-			var specColor = specularMap.get(secondaryMapUvFactor * calculatedUV).r;
-			var specValue = r.dot((camera.position - transformedPosition).normalize()).max(0.);
-			specularLight += specColor * pow(specValue, shininess) * specularIntensity;
+			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize()));
+			var specular = specularColor * pow(specValue, shininess);
 
-			var shaded = diffuse * vec4(incomingLight, 1);
-			shaded.rgb += specularLight;
+			outCol += specular * diffuse.a;
 
-			pixelColor = shaded;
+			pixelColor = outCol;
 		}
 	}
 
-	public function new(diffuse, specular, normal, shininess, specularIntensity, ambientLight, dirLight, dirLightDir, secondaryMapUvFactor) {
+	public function new(diffuse, normal, shininess, specularVal, ambientLight, dirLight, dirLightDir, uvScaleFactor) {
 		super();
 		this.diffuseMap = diffuse;
-		this.specularMap = specular;
 		this.normalMap = normal;
 		this.shininess = shininess;
-		this.specularIntensity = specularIntensity;
+		this.specularColor = specularVal;
 		this.ambientLight = ambientLight.clone();
 		this.dirLight = dirLight.clone();
 		this.dirLightDir = dirLightDir.clone();
-		this.secondaryMapUvFactor = secondaryMapUvFactor;
+		this.uvScaleFactor = uvScaleFactor;
 	}
 }
