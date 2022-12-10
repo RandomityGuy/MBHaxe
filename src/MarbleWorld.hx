@@ -313,7 +313,7 @@ class MarbleWorld extends Scheduler {
 			worker.loadFile(file);
 		}
 
-		this.scene.camera.zFar = Std.parseFloat(this.skyElement.visibledistance);
+		this.scene.camera.zFar = Math.max(4000, Std.parseFloat(this.skyElement.visibledistance));
 
 		this.sky = new Sky();
 
@@ -362,8 +362,14 @@ class MarbleWorld extends Scheduler {
 			"shapes/pads/blue.jpg",
 			"shapes/pads/green.jpg",
 			"shapes/items/gem.dts", // Ew ew
-			"shapes/items/gemshine.png"
+			"shapes/items/gemshine.png",
 		];
+		if (this.game == "ultra") {
+			marblefiles.push("shapes/balls/pack1/marble20.normal.png");
+			marblefiles.push("shapes/balls/pack1/marble18.normal.png");
+			marblefiles.push("shapes/balls/pack1/marble01.normal.png");
+			marblefiles.push("sound/blast.wav");
+		}
 		// Hacky
 		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
 		if (Settings.optionsSettings.marbleCategoryIndex == 0)

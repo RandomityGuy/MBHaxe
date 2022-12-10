@@ -46,13 +46,15 @@ class Sky extends Object {
 			// pbrprops.occlusionValue = 0;
 			// pbrprops.metalnessValue = 1;
 
-			// skyMesh.scale(3500);
+			skyMesh.scale(3500);
 			// var env = new Environment(texture);
 			// env.compute();
 			// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
 			var shad = new Skybox(texture);
+			skyMesh.material.mainPass.removeShader(skyMesh.material.textureShader);
 			skyMesh.material.mainPass.addShader(shad);
 			skyMesh.material.mainPass.depthWrite = false;
+			skyMesh.material.mainPass.depth(false, h3d.mat.Data.Compare.LessEqual);
 			cubemap = texture;
 			onFinish();
 		});

@@ -323,10 +323,11 @@ class Marble extends GameObject {
 
 				if (Settings.optionsSettings.marbleShader == null
 					|| Settings.optionsSettings.marbleShader == "Default"
-					|| Settings.optionsSettings.marbleShader == "") {
+					|| Settings.optionsSettings.marbleShader == ""
+					|| !isUltra) { // Use this shit everywhere except ultra
 					mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
 				} else {
-					// Generate tangents for next shaders
+					// Generate tangents for next shaders, only for Ultra
 					for (node in marbleDts.graphNodes) {
 						for (ch in node.children) {
 							var chmesh = cast(ch, Mesh);
