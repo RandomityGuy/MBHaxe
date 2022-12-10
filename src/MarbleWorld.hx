@@ -267,6 +267,8 @@ class MarbleWorld extends Scheduler {
 			worker.loadFile(file);
 		}
 
+		this.scene.camera.zFar = Math.max(4000, Std.parseFloat(this.skyElement.visibledistance));
+
 		this.sky = new Sky();
 
 		sky.dmlPath = "data/skies/sky_day.dml";
@@ -312,6 +314,8 @@ class MarbleWorld extends Scheduler {
 			"shapes/pads/red.jpg",
 			"shapes/pads/blue.jpg",
 			"shapes/pads/green.jpg",
+			"shapes/items/gem.dts", // Ew ew
+			"shapes/items/gemshine.png",
 		];
 		for (file in marblefiles) {
 			worker.loadFile(file);

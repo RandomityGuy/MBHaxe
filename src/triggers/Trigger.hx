@@ -43,8 +43,8 @@ class Trigger extends GameObject {
 
 		var mat = new Matrix();
 		var quat = MisParser.parseRotation(element.rotation);
-		// quat.x = -quat.x;
-		// quat.w = -quat.w;
+		quat.x = -quat.x;
+		quat.w = -quat.w;
 		quat.toMatrix(mat);
 		var scale = MisParser.parseVector3(element.scale);
 		mat.scale(scale.x, scale.y, scale.z);

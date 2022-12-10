@@ -60,6 +60,7 @@ class InstanceManager {
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
 						var transform = instance.emptyObj.getAbsPos();
+						minfo.meshbatch.shadersChanged = true;
 						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						minfo.meshbatch.setTransform(transform);
@@ -67,7 +68,7 @@ class InstanceManager {
 					}
 				}
 				if (minfo.transparencymeshbatch != null) {
-					var transparentinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity != 1);
+					var transparentinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity != 1 && x.gameObject.currentOpacity != 0); // Filter out all zero opacity things too
 					minfo.transparencymeshbatch.begin(transparentinstances.length);
 					for (instance in transparentinstances) { // Non opaque shit
 						var dtsShader = minfo.transparencymeshbatch.material.mainPass.getShader(DtsTexture);
