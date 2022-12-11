@@ -30,6 +30,7 @@ class PhongMaterial extends hxsl.Shader {
 		var transformedPosition:Vec3;
 		var transformedNormal:Vec3;
 		@var var transformedTangent:Vec4;
+		@var var fragLightW:Float;
 		function __init__vertex() {
 			transformedTangent = vec4(input.tangent * global.modelView.mat3(), input.tangent.dot(input.tangent) > 0.5 ? 1. : -1.);
 		}
@@ -39,6 +40,7 @@ class PhongMaterial extends hxsl.Shader {
 		}
 		function vertex() {
 			calculatedUV = input.uv * uvScaleFactor;
+			fragLightW = step(0, dot(dirLight, input.normal));
 		}
 		function fragment() {
 			// Diffuse part
@@ -54,8 +56,9 @@ class PhongMaterial extends hxsl.Shader {
 			var bumpDot = dirLight * lambert(transformedNormal, -dirLightDir);
 			outCol.xyz *= bumpDot + ambientLight;
 
-			var r = reflect(dirLightDir, transformedNormal).normalize();
-			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize()));
+			var eyeVec = (camera.position - transformedPosition).normalize();
+			var halfAng = (eyeVec - dirLightDir).normalize();
+			var specValue = saturate(transformedNormal.dot(halfAng)) * fragLightW;
 			var specular = specularColor * pow(specValue, shininess);
 
 			outCol += specular * diffuse.a;

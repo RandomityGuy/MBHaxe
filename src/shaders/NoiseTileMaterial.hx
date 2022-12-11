@@ -86,8 +86,9 @@ class NoiseTileMaterial extends hxsl.Shader {
 
 			outCol.xyz *= bumpDot + ambientLight;
 
-			var r = reflect(dirLightDir, transformedNormal).normalize();
-			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize())) * fragLightW;
+			var eyeVec = (camera.position - transformedPosition).normalize();
+			var halfAng = (eyeVec - dirLightDir).normalize();
+			var specValue = saturate(transformedNormal.dot(halfAng)) * fragLightW;
 			var specular = specularColor * pow(specValue, shininess);
 
 			outCol += specular * diffuse.a;

@@ -93,12 +93,6 @@ class HelpCreditsGui extends GuiImage {
 		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
 		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
 
-		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
-		var expo50b = new BitmapFont(expo50fontdata.entry);
-		@:privateAccess expo50b.loader = ResourceLoader.loader;
-		var expo50 = expo50b.toSdfFont(cast 35 * Settings.uiScale, MultiChannel);
-		var expo32 = expo50b.toSdfFont(cast 24 * Settings.uiScale, MultiChannel);
-
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "MarkerFelt32":
@@ -109,10 +103,6 @@ class HelpCreditsGui extends GuiImage {
 					return markerFelt18;
 				case "Arial16":
 					return arial14;
-				case "Expo32":
-					return expo32;
-				case "Expo50":
-					return expo50;
 				default:
 					return null;
 			}

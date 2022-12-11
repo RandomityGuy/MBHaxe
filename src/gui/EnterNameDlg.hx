@@ -33,12 +33,6 @@ class EnterNameDlg extends GuiControl {
 		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 		var domcasual48 = domcasual32b.toSdfFont(cast 42 * Settings.uiScale, MultiChannel);
 
-		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
-		var expo50b = new BitmapFont(expo50fontdata.entry);
-		@:privateAccess expo50b.loader = ResourceLoader.loader;
-		var expo50 = expo50b.toSdfFont(cast 35 * Settings.uiScale, MultiChannel);
-		var expo32 = expo50b.toSdfFont(cast 24 * Settings.uiScale, MultiChannel);
-
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "DomCasual32":
@@ -47,8 +41,6 @@ class EnterNameDlg extends GuiControl {
 					return domcasual48;
 				case "Arial14":
 					return arial14;
-				case "Expo50":
-					return expo50;
 				default:
 					return null;
 			}
