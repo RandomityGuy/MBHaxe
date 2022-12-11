@@ -131,11 +131,14 @@ class Collision {
 				// } else
 				var edgeDotAng = Math.acos(edgeDots[chosenEdge]);
 				if (edgeDotAng < Math.PI / 12) {
-					if (edgeDotAng == 0) {
-						res.normal = center.sub(res.point).normalized();
-					} else {
-						res.normal = normal; // edgeNormals[chosenEdge];
-					}
+					// if (edgeDotAng == 0) {
+					// 	res.normal = center.sub(res.point).normalized();
+					// } else {
+					// 	res.normal = normal; // edgeNormals[chosenEdge];
+					// }
+					res.point = null;
+					res.normal = null;
+					res.result = false;
 				} else {
 					res.result = false;
 					res.normal = center.sub(res.point).normalized();

@@ -1046,21 +1046,19 @@ class Marble extends GameObject {
 
 							var isOnEdge:Bool = false;
 
-							for (i in 0...surface.indices.length) {
-								{
-									var thisVert = surface.points[surface.indices[i]];
-									if (thisVert != lastVert) {
-										var edgePlane = PlaneF.ThreePoints(toDifPoint(thisVert).add(polyPlane.getNormal()), toDifPoint(thisVert),
-											toDifPoint(lastVert));
-										lastVert = thisVert;
+							for (j in 0...surface.indices.length) {
+								var thisVert = surface.points[surface.indices[j]];
+								if (thisVert != lastVert) {
+									var edgePlane = PlaneF.ThreePoints(toDifPoint(thisVert).add(polyPlane.getNormal()), toDifPoint(thisVert),
+										toDifPoint(lastVert));
+									lastVert = thisVert;
 
-										// if we are on the far side of the edge
-										if (edgePlane.getNormal().dot(toDifPoint(collisionPos)) + edgePlane.d < 0.0)
-											break;
-									}
+									// if we are on the far side of the edge
+									if (edgePlane.getNormal().dot(toDifPoint(collisionPos)) + edgePlane.d < 0.0)
+										break;
 								}
 
-								isOnEdge = i != surface.indices.length;
+								isOnEdge = j != surface.indices.length;
 							}
 
 							// If we're inside the poly, just get the position
@@ -1084,7 +1082,7 @@ class Marble extends GameObject {
 						}
 						var radSq = radius * radius;
 						for (iter in 0...surface.indices.length) {
-							var thisVert = surface.points[surface.indices[i]];
+							var thisVert = surface.points[surface.indices[iter]];
 
 							var vertDiff = lastVert.sub(thisVert);
 							var posDiff = position.sub(thisVert);
