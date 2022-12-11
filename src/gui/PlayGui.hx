@@ -154,7 +154,7 @@ class PlayGui {
 			initFPSMeter();
 
 		if (Util.isTouchDevice()) {
-			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl);
+			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
 		}
 
 		playGuiCtrl.render(scene2d);
@@ -461,13 +461,16 @@ class PlayGui {
 			blastFill.extent = new Vector(Util.lerp(0, 110, value), 17);
 			if (oldVal < 22 && blastFill.extent.x >= 22) {
 				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile();
+				MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 			}
 			if (oldVal >= 22 && blastFill.extent.x < 22) {
 				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargray.png", ResourceLoader.getImage, this.imageResources).toTile();
+				MarbleGame.instance.touchInput.blastbutton.setEnabled(false);
 			}
 		} else {
 			blastFill.extent = new Vector(0, 16); // WE will just use this extra number to store whether it was previously charged or not
 			blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_charged.png", ResourceLoader.getImage, this.imageResources).toTile();
+			MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 		}
 		this.blastBar.render(scene2d);
 	}

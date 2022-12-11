@@ -64,10 +64,14 @@ class TouchCtrlsEditGui extends GuiImage {
 		var powerupBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/energy.png").resource,
 			new Vector(Settings.touchSettings.powerupButtonPos[0], Settings.touchSettings.powerupButtonPos[1]), Settings.touchSettings.powerupButtonSize);
 
+		var blastBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/explosion.png").resource,
+			new Vector(Settings.touchSettings.blastButtonPos[0], Settings.touchSettings.blastButtonPos[1]), Settings.touchSettings.blastButtonSize);
+
 		jumpBtn.onClick = (sender, mousePos) -> {
 			sender.setSelected(true);
 			powerupBtn.setSelected(false);
 			joystick.setSelected(false);
+			blastBtn.setSelected(false);
 		}
 
 		jumpBtn.onChangeCb = (sender, value, rvalue) -> {
@@ -79,6 +83,7 @@ class TouchCtrlsEditGui extends GuiImage {
 			sender.setSelected(true);
 			jumpBtn.setSelected(false);
 			joystick.setSelected(false);
+			blastBtn.setSelected(false);
 		}
 
 		powerupBtn.onChangeCb = (sender, value, rvalue) -> {
@@ -86,10 +91,23 @@ class TouchCtrlsEditGui extends GuiImage {
 			Settings.touchSettings.powerupButtonSize = rvalue;
 		}
 
+		blastBtn.onClick = (sender, mousePos) -> {
+			sender.setSelected(true);
+			jumpBtn.setSelected(false);
+			powerupBtn.setSelected(false);
+			joystick.setSelected(false);
+		}
+
+		blastBtn.onChangeCb = (sender, value, rvalue) -> {
+			Settings.touchSettings.blastButtonPos = [value.x, value.y];
+			Settings.touchSettings.blastButtonSize = rvalue;
+		}
+
 		joystick.onClick = (mousePos) -> {
 			joystick.setSelected(true);
 			jumpBtn.setSelected(false);
 			powerupBtn.setSelected(false);
+			blastBtn.setSelected(false);
 		}
 
 		joystick.onChangeCb = (value, rvalue) -> {
@@ -102,5 +120,6 @@ class TouchCtrlsEditGui extends GuiImage {
 		this.addChild(joystick);
 		this.addChild(jumpBtn);
 		this.addChild(powerupBtn);
+		this.addChild(blastBtn);
 	}
 }

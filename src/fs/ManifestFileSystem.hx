@@ -47,7 +47,6 @@ class ManifestEntry extends FileEntry {
 	private var bytes:Bytes;
 	private var readPos:Int;
 	private var loaded:Bool;
-	private var loadPromise:js.lib.Promise<Void>;
 	#end
 
 	public function new(fs:ManifestFileSystem, name:String, relPath:String, file:String, ?originalFile:String) {
@@ -131,7 +130,7 @@ class ManifestEntry extends FileEntry {
 			if (onReady != null)
 				haxe.Timer.delay(onReady, 1);
 		} else {
-			this.loadPromise = js.Browser.window.fetch(file).then((res:js.html.Response) -> {
+			js.Browser.window.fetch(file).then((res:js.html.Response) -> {
 				return res.arrayBuffer();
 			}).then((buf:js.lib.ArrayBuffer) -> {
 				loaded = true;

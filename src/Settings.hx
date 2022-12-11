@@ -67,6 +67,8 @@ typedef TouchSettings = {
 	var jumpButtonSize:Float;
 	var powerupButtonPos:Array<Float>;
 	var powerupButtonSize:Float;
+	var blastButtonPos:Array<Float>;
+	var blastButtonSize:Float;
 	var buttonJoystickMultiplier:Float;
 }
 
@@ -131,6 +133,8 @@ class Settings {
 		jumpButtonSize: 60,
 		powerupButtonPos: [440, 180],
 		powerupButtonSize: 60,
+		blastButtonPos: [300, 240],
+		blastButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
 
@@ -286,6 +290,10 @@ class Settings {
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
+			}
+			if (touchSettings.blastButtonPos == null) {
+				touchSettings.blastButtonPos = [300, 240];
+				touchSettings.blastButtonSize = 60;
 			}
 			if (json.stats != null) {
 				playStatistics = json.stats;

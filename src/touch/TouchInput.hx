@@ -39,9 +39,8 @@ class TouchInput {
 	public var movementInput:MovementInput;
 
 	public var jumpButton:JumpButton;
-
 	public var powerupButton:PowerupButton;
-
+	public var blastbutton:BlastButton;
 	public var pauseButton:PauseButton;
 
 	public var currentTouchState:TouchEventState;
@@ -55,6 +54,7 @@ class TouchInput {
 		this.movementInput = new MovementInput();
 		this.jumpButton = new JumpButton();
 		this.powerupButton = new PowerupButton();
+		this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
 		this.currentTouchState = new TouchEventState();
 		this.previousTouchState = new TouchEventState();
@@ -101,9 +101,11 @@ class TouchInput {
 		currentTouchState = new TouchEventState();
 	}
 
-	public function showControls(parentGui:GuiControl) {
+	public function showControls(parentGui:GuiControl, ultra:Bool) {
 		jumpButton.dispose();
 		powerupButton.dispose();
+		if (ultra)
+			blastbutton.dispose();
 		movementInput.dispose();
 		pauseButton.dispose();
 		cameraInput.dispose();
@@ -111,10 +113,14 @@ class TouchInput {
 		this.movementInput = new MovementInput();
 		this.jumpButton = new JumpButton();
 		this.powerupButton = new PowerupButton();
+		if (ultra)
+			this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
 		pauseButton.add(parentGui);
 		jumpButton.add(parentGui);
 		powerupButton.add(parentGui);
+		if (ultra)
+			blastbutton.add(parentGui);
 		movementInput.add(parentGui);
 		cameraInput.add(parentGui);
 		cameraInput.enabled = true;
@@ -123,6 +129,8 @@ class TouchInput {
 	public function setControlsEnabled(enabled:Bool) {
 		this.jumpButton.setVisible(enabled);
 		this.powerupButton.setVisible(enabled);
+		if (this.blastbutton != null)
+			this.blastbutton.setVisible(enabled);
 		this.movementInput.setVisible(enabled);
 		this.pauseButton.setVisible(enabled);
 		this.cameraInput.enabled = enabled;
@@ -131,6 +139,8 @@ class TouchInput {
 	public function hideControls(parentGui:GuiControl) {
 		jumpButton.remove(parentGui);
 		powerupButton.remove(parentGui);
+		if (this.blastbutton != null)
+			blastbutton.remove(parentGui);
 		movementInput.remove(parentGui);
 		pauseButton.remove(parentGui);
 		cameraInput.remove(parentGui);
