@@ -45,10 +45,11 @@ class DifBuilderTriangle {
 class TriangleEdge {
 	public var index1:Int;
 	public var index2:Int;
+	public var farPoint:Int;
 
 	public var surfaceIndex:Int;
 
-	public function new(i1:Int, i2:Int, surfaceIndex:Int) {
+	public function new(i1:Int, i2:Int, farPoint:Int, surfaceIndex:Int) {
 		if (i2 < i1) {
 			index1 = i2;
 			index2 = i1;
@@ -56,6 +57,7 @@ class TriangleEdge {
 			index1 = i1;
 			index2 = i2;
 		}
+		this.farPoint = farPoint;
 		this.surfaceIndex = surfaceIndex;
 	}
 }
@@ -165,7 +167,7 @@ class DifBuilder {
 					colliderSurface.normals = [];
 					colliderSurface.indices = [];
 					colliderSurface.edgeData = [];
-					colliderSurface.edgeDots = [];
+					colliderSurface.edgeConcavities = [];
 					colliderSurface.originalIndices = [];
 					colliderSurface.originalSurfaceIndex = surfaceindex;
 
@@ -186,11 +188,9 @@ class DifBuilder {
 							colliderSurface.originalIndices.push(geo.windings[k - 1]);
 							colliderSurface.originalIndices.push(geo.windings[k]);
 						}
-
-						var e1 = new TriangleEdge(geo.windings[k], geo.windings[k - 1], surfaceindex);
-						var e2 = new TriangleEdge(geo.windings[k - 1], geo.windings[k - 2], surfaceindex);
-						var e3 = new TriangleEdge(geo.windings[k], geo.windings[k - 2], surfaceindex);
-
+						var e1 = new TriangleEdge(geo.windings[k], geo.windings[k - 1], geo.windings[k - 2], surfaceindex);
+						var e2 = new TriangleEdge(geo.windings[k - 1], geo.windings[k - 2], geo.windings[k], surfaceindex);
+						var e3 = new TriangleEdge(geo.windings[k], geo.windings[k - 2], geo.windings[k - 1], surfaceindex);
 						edges.push(e1);
 						edges.push(e2);
 						edges.push(e3);
@@ -305,6 +305,8 @@ class DifBuilder {
 						// trace('Removing internal edge: ${edge.index1} ${edge.index2}');
 					} else {
 						var difEdge = new Edge(edge.index1, edge.index2, edge.surfaceIndex, edgeMap[edgeHash].surfaceIndex);
+						difEdge.farPoint0 = edge.farPoint;
+						difEdge.farPoint1 = edgeMap[edgeHash].farPoint;
 						difEdges.set(edgeHash, difEdge); // Literal edge
 					}
 				} else {
@@ -315,8 +317,7 @@ class DifBuilder {
 			function hashEdge(i1:Int, i2:Int) {
 				return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
 			}
-
-			function getEdgeDot(edge:Edge) {
+			function getEdgeConcavity(edge:Edge) {
 				var edgeSurface0 = edge.surfaceIndex0;
 				var surface0 = geo.surfaces[edgeSurface0];
 
@@ -349,9 +350,20 @@ class DifBuilder {
 
 				var dot = normal0.dot(normal1);
 
-				return dot;
-			}
+				if (Math.abs(dot) < 0.1)
+					return false;
 
+				var farP0 = geo.points[edge.farPoint0];
+				var farP1 = geo.points[edge.farPoint1];
+
+				var diff = farP1.sub(farP0);
+				var cdot0 = normal0.dot(diff);
+				if (cdot0 > -0.1) {
+					return true;
+				}
+
+				return false;
+			}
 			function getEdgeNormal(edge:Edge) {
 				var edgeSurface0 = edge.surfaceIndex0;
 				var surface0 = geo.surfaces[edgeSurface0];
@@ -399,35 +411,35 @@ class DifBuilder {
 
 					var edgeData = 0;
 					if (difEdges.exists(e1e2)) {
-						if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
-							edgeData |= 1;
-						}
-						colliderSurface.edgeDots.push(getEdgeDot(difEdges[e1e2]));
+						// if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
+						edgeData |= 1;
+						// }
+						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e2]));
 						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e2]));
 					} else {
-						colliderSurface.edgeDots.push(0);
+						colliderSurface.edgeConcavities.push(false);
 						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
 					}
 					if (difEdges.exists(e2e3)) {
-						if (getEdgeDot(difEdges[e2e3]) < Math.cos(Math.PI / 12)) {
-							edgeData |= 2;
-						}
-						colliderSurface.edgeDots.push(getEdgeDot(difEdges[e2e3]));
+						// if (getEdgeDot(difEdges[e2e3]) < Math.cos(Math.PI / 12)) {
+						edgeData |= 2;
+						// }
+						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e2e3]));
 						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e2e3]));
 						// colliderSurface.edgeDots.push(dot);
 					} else {
-						colliderSurface.edgeDots.push(0);
+						colliderSurface.edgeConcavities.push(false);
 						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
 					}
 					if (difEdges.exists(e1e3)) {
-						if (getEdgeDot(difEdges[e1e3]) < Math.cos(Math.PI / 12)) {
-							edgeData |= 4;
-						}
-						colliderSurface.edgeDots.push(getEdgeDot(difEdges[e1e3]));
+						// if (getEdgeDot(difEdges[e1e3]) < Math.cos(Math.PI / 12)) {
+						edgeData |= 4;
+						// }
+						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e3]));
 						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e3]));
 						// colliderSurface.edgeDots.push(dot);
 					} else {
-						colliderSurface.edgeDots.push(0);
+						colliderSurface.edgeConcavities.push(false);
 						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
 					}
 

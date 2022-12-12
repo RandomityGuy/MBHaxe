@@ -21,7 +21,7 @@ class CollisionSurface implements IOctreeObject {
 
 	public var edgeData:Array<Int>;
 
-	public var edgeDots:Array<Float>;
+	public var edgeConcavities:Array<Bool>;
 	public var originalIndices:Array<Int>;
 
 	public var originalSurfaceIndex:Int;
