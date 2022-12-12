@@ -59,8 +59,9 @@ class ClassicGlass extends hxsl.Shader {
 			var diffuse = dirLight * (dot(transformedNormal, -dirLightDir) + 1.3) * 0.5;
 
 			// Specular
-			var r = reflect(dirLightDir, transformedNormal).normalize();
-			var specValue = saturate(r.dot((camera.position - transformedPosition).normalize())) * fragLightW;
+			var eyeVec = (camera.position - transformedPosition).normalize();
+			var halfAng = (eyeVec - dirLightDir).normalize();
+			var specValue = saturate(transformedNormal.dot(halfAng)) * fragLightW;
 			var specular = specularColor * pow(specValue, shininess);
 
 			var viewDir = normalize(camera.position - pixelTransformedPosition);

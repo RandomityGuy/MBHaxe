@@ -10,6 +10,8 @@ class Edge {
 	public var pointIndex1:Int32;
 	public var surfaceIndex0:Int32;
 	public var surfaceIndex1:Int32;
+	public var farPoint0:Int32;
+	public var farPoint1:Int32;
 
 	public function new(pointIndex0, pointIndex1, surfaceIndex0, surfaceIndex1) {
 		this.pointIndex0 = pointIndex0;

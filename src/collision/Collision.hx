@@ -61,7 +61,7 @@ class Collision {
 	// 010b: v1v2 is edge
 	// 100b: v0v2 is edge
 	public static function IntersectTriangleSphere(v0:Vector, v1:Vector, v2:Vector, normal:Vector, center:Vector, radius:Float, edgeData:Int,
-			edgeDots:Array<Float>) {
+			edgeConcavities:Array<Bool>) {
 		var radiusSq = radius * radius;
 
 		var res:ITSResult = {
@@ -88,7 +88,7 @@ class Collision {
 			if (PointInTriangle(pt, v0, v1, v2)) {
 				res.result = true;
 				res.point = pt;
-				res.normal = center.sub(pt).normalized();
+				res.normal = pnorm;
 				return res;
 			}
 			// return res;
@@ -120,30 +120,21 @@ class Collision {
 		if (res.point.distanceSq(center) <= radiusSq) {
 			res.result = true;
 
-			if (chosenEdge & edgeData > 0) {
-				res.normal = center.sub(res.point).normalized();
-			} else { // We hit an internal edge
-				chosenEdge -= 1;
-				if (chosenEdge > 2)
-					chosenEdge--;
-				// if (edgeNormals[chosenEdge].length() < 0.5) {
-				//	res.normal = center.sub(res.point).normalized();
-				// } else
-				var edgeDotAng = Math.acos(edgeDots[chosenEdge]);
-				if (edgeDotAng < Math.PI / 12) {
-					// if (edgeDotAng == 0) {
-					// 	res.normal = center.sub(res.point).normalized();
-					// } else {
-					// 	res.normal = normal; // edgeNormals[chosenEdge];
-					// }
-					res.point = null;
-					res.normal = null;
-					res.result = false;
-				} else {
-					res.result = false;
-					res.normal = center.sub(res.point).normalized();
+			res.normal = center.sub(res.point).normalized();
+
+			if (res.normal.dot(normal) > 0.8) {
+				// Internal edge
+				if (chosenEdge & edgeData > 0) {
+					chosenEdge -= 1;
+					if (chosenEdge > 2)
+						chosenEdge--;
+					// if (edgeNormals[chosenEdge].length() < 0.5) {
+					//	res.normal = center.sub(res.point).normalized();
+					// } else
+					if (edgeConcavities[chosenEdge]) { // Our edge is concave
+						res.normal = pnorm;
+					}
 				}
-				// trace("Internal Edge Collision");
 			}
 
 			return res;
@@ -327,7 +318,7 @@ class Collision {
 	}
 
 	public static function IntersectTriangleCapsule(start:Vector, end:Vector, radius:Float, p1:Vector, p2:Vector, p3:Vector, normal:Vector, edgeData:Int,
-			edgeDots:Array<Float>) {
+			edgeConcavities:Array<Bool>) {
 		var dir = end.sub(start);
 		var d = -(p1.dot(normal));
 		var t = -(start.dot(normal) - d) / dir.dot(normal);
@@ -336,7 +327,7 @@ class Collision {
 		if (t < 0)
 			t = 0;
 		var tracePoint = start.add(dir.multiply(t));
-		return IntersectTriangleSphere(p1, p2, p3, normal, tracePoint, radius, edgeData, edgeDots);
+		return IntersectTriangleSphere(p1, p2, p3, normal, tracePoint, radius, edgeData, edgeConcavities);
 	}
 
 	private static function GetLowestRoot(a:Float, b:Float, c:Float, max:Float):Null<Float> {
