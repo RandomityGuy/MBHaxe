@@ -24,6 +24,7 @@ class Trapdoor extends DtsObject {
 		this.isTSStatic = false;
 		this.identifier = "Trapdoor";
 		this.hasNonVisualSequences = true;
+		this.enableCollideCallbacks = true;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

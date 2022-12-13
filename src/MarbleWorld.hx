@@ -1115,8 +1115,6 @@ class MarbleWorld extends Scheduler {
 		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
 		// var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
 		var contacts = marble.contactEntities;
-		var newImmunity = [];
-		var calledShapes = [];
 		var inside = [];
 
 		var contactsphere = new SphereCollisionEntity(marble);
@@ -1126,18 +1124,6 @@ class MarbleWorld extends Scheduler {
 			if (contact.go != marble) {
 				if (contact.go is DtsObject) {
 					var shape:DtsObject = cast contact.go;
-
-					var contacttest = shape.colliders.filter(x -> x != null).map(x -> x.sphereIntersection(contactsphere, timeState));
-					var contactlist:Array<collision.CollisionInfo> = [];
-					for (l in contacttest) {
-						contactlist = contactlist.concat(l);
-					}
-
-					if (!calledShapes.contains(shape) && !this.shapeImmunity.contains(shape) && contactlist.length != 0) {
-						calledShapes.push(shape);
-						newImmunity.push(shape);
-						shape.onMarbleContact(timeState);
-					}
 
 					shape.onMarbleInside(timeState);
 					if (!this.shapeOrTriggerInside.contains(contact.go)) {
@@ -1182,7 +1168,6 @@ class MarbleWorld extends Scheduler {
 				}
 			}
 		}
-		this.shapeImmunity = newImmunity;
 	}
 
 	function touchFinish() {

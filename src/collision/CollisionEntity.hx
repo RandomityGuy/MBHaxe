@@ -199,7 +199,7 @@ class CollisionEntity implements IOctreeObject {
 
 				var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
 
-				var res = Collision.IntersectTriangleSphere(v0, v, v2, surfacenormal, position, radius, edgeData, edgeConcavities);
+				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius, edgeData, edgeConcavities);
 				var closest = res.point;
 				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
 				if (closest != null) {

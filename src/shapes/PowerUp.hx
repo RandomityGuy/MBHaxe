@@ -37,6 +37,7 @@ abstract class PowerUp extends DtsObject {
 
 	public function new(element:MissionElementItem) {
 		super();
+		this.isBoundingBoxCollideable = true;
 		this.isCollideable = false;
 		this.ambientRotate = true;
 		this.element = element;

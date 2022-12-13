@@ -139,50 +139,124 @@ class Collision {
 
 			return res;
 		}
+		return res;
+	}
 
-		// var r1 = IntersectLineSphere(v0, v1, center, radius);
-		// if (r1 != null) {
-		// 	res.result = true;
-		// 	res.point = r1;
-		// 	res.normal = center.sub(r1).normalized();
-		// 	return res;
-		// }
-		// var r2 = IntersectLineSphere(v1, v2, center, radius);
-		// if (r2 != null) {
-		// 	res.result = true;
-		// 	res.point = r2;
-		// 	res.normal = center.sub(r2).normalized();
-		// 	return res;
-		// }
-		// var r3 = IntersectLineSphere(v2, v0, center, radius);
-		// if (r3 != null) {
-		// 	res.result = true;
-		// 	res.point = r3;
-		// 	res.normal = center.sub(r3).normalized();
-		// 	return res;
-		// }
-		// Check points
-		// if (center.sub(v0).lengthSq() < radiusSq) {
-		// 	res.result = true;
-		// 	res.point = v0;
-		// 	res.normal = center.sub(v0).normalized();
-		// 	// center.sub(v0).normalized();
-		// 	return res;
-		// }
-		// if (center.sub(v1).lengthSq() < radiusSq) {
-		// 	res.result = true;
-		// 	res.point = v1;
-		// 	res.normal = center.sub(v1).normalized();
-		// 	return res;
-		// }
-		// if (center.sub(v2).lengthSq() < radiusSq) {
-		// 	res.result = true;
-		// 	res.point = v2;
-		// 	res.normal = center.sub(v2).normalized();
-		// 	return res;
-		// }
-		// Check plane
-		// var p = PlaneF.ThreePoints(toDifPoint(v0), toDifPoint(v1), toDifPoint(v2));
+	public static function TriangleSphereIntersection(A:Vector, B:Vector, C:Vector, N:Vector, P:Vector, r:Float, edgeData:Int, edgeConcavities:Array<Bool>) {
+		var res:ITSResult = {
+			result: false,
+			point: null,
+			normal: null
+		};
+
+		var v0 = A;
+		var v1 = B;
+		var v2 = C;
+		A = A.sub(P);
+		B = B.sub(P);
+		C = C.sub(P);
+		var ca = C.sub(A);
+		var ba = B.sub(A);
+		var radiusSq = r * r;
+		var cp = ba.cross(ca);
+		var aDotCp = A.dot(cp);
+		var cpLenSq = cp.lengthSq();
+		if (aDotCp * aDotCp > radiusSq * cpLenSq) {
+			return res;
+		}
+
+		var aSq = A.dot(A);
+		var aDotB = A.dot(B);
+		var aDotC = A.dot(C);
+		var bSq = B.dot(B);
+		var bDotC = B.dot(C);
+		var cSq = C.dot(C);
+
+		if (aSq > radiusSq && aDotB > aSq && aDotC > aSq) {
+			return res;
+		}
+		if (bSq > radiusSq && aDotB > bSq && bDotC > bSq) {
+			return res;
+		}
+		if (cSq > radiusSq && aDotC > cSq && bDotC > cSq) {
+			return res;
+		}
+
+		var cSubB = C.sub(B);
+		var aSubC = A.sub(C);
+		var baSq = ba.lengthSq();
+		var cSubBSq = cSubB.lengthSq();
+		var aSubCSq = aSubC.lengthSq();
+		var aTest = A.multiply(baSq).sub(ba.multiply(aDotB - aSq));
+		var bTest = B.multiply(cSubBSq).sub(cSubB.multiply(bDotC - bSq));
+		var cTest = C.multiply(aSubCSq).sub(aSubC.multiply(aDotC - cSq));
+		var rhs = C.multiply(baSq).sub(aTest);
+		var rhs2 = A.multiply(cSubBSq).sub(bTest);
+		var rhs3 = B.multiply(aSubCSq).sub(cTest);
+
+		if (aTest.dot(aTest) > radiusSq * baSq * baSq && aTest.dot(rhs) > 0) {
+			return res;
+		}
+		if (bTest.dot(bTest) > radiusSq * cSubBSq * cSubBSq && bTest.dot(rhs2) > 0) {
+			return res;
+		}
+		if (cTest.dot(cTest) > radiusSq * aSubCSq * aSubCSq && cTest.dot(rhs3) > 0) {
+			return res;
+		}
+
+		var lhs = P.sub(v0);
+		var baca = ba.dot(ca);
+		var caSq = ca.lengthSq();
+		var lhsBa = lhs.dot(ba);
+		var lhsCa = lhs.dot(ca);
+		var len = baSq * caSq - baca * baca;
+		var d1 = (caSq * lhsBa - baca * lhsCa) / len;
+		var d2 = (baSq * lhsCa - baca * lhsBa) / len;
+
+		if (1 - d1 - d2 >= 0 && d1 >= 0 && d2 >= 0) {
+			res.result = true;
+			res.normal = N.clone();
+			res.point = P.sub(N.multiply(P.sub(v0).dot(N)));
+		} else {
+			var closestPt = P.sub(N.multiply(P.sub(v0).dot(N)));
+			var r1 = ClosestPointLine(v0, v1, closestPt);
+			var r2 = ClosestPointLine(v1, v2, closestPt);
+			var r3 = ClosestPointLine(v2, v0, closestPt);
+
+			var chosenEdge = 0; // Bitfield
+
+			var chosenPt:Vector;
+			if (r1.distanceSq(P) < r2.distanceSq(P)) {
+				chosenPt = r1;
+				chosenEdge = 1;
+			} else {
+				chosenPt = r2;
+				chosenEdge = 2;
+			}
+			if (chosenPt.distanceSq(P) < r3.distanceSq(P))
+				res.point = chosenPt;
+			else {
+				chosenEdge = 4;
+				res.point = r3;
+			}
+			res.normal = P.sub(res.point).normalized();
+			res.result = true;
+
+			if (res.normal.dot(N) > 0.8) {
+				// Internal edge
+				if (chosenEdge & edgeData > 0) {
+					chosenEdge -= 1;
+					if (chosenEdge > 2)
+						chosenEdge--;
+					// if (edgeNormals[chosenEdge].length() < 0.5) {
+					//	res.normal = center.sub(res.point).normalized();
+					// } else
+					if (edgeConcavities[chosenEdge]) { // Our edge is concave
+						res.normal = N.clone();
+					}
+				}
+			}
+		}
 		return res;
 	}
 

@@ -330,7 +330,7 @@ class DtsObject extends GameObject {
 
 		rootObject.scaleX = -1;
 
-		if (this.level != null) {
+		if (this.level != null && this.isBoundingBoxCollideable) {
 			var boundthing = new Bounds();
 			boundthing.addPoint(new h3d.col.Point(this.dts.bounds.minX, this.dts.bounds.minY, this.dts.bounds.minZ));
 			boundthing.addPoint(new h3d.col.Point(this.dts.bounds.maxX, this.dts.bounds.maxY, this.dts.bounds.maxZ));
@@ -632,8 +632,10 @@ class DtsObject extends GameObject {
 
 	public override function setTransform(mat:Matrix) {
 		super.setTransform(mat);
-		this.boundingCollider.setTransform(mat);
-		this.level.collisionWorld.updateTransform(this.boundingCollider);
+		if (this.isBoundingBoxCollideable) {
+			this.boundingCollider.setTransform(mat);
+			this.level.collisionWorld.updateTransform(this.boundingCollider);
+		}
 		for (i in 0...this.dirtyTransforms.length) {
 			this.dirtyTransforms[i] = true;
 		}
