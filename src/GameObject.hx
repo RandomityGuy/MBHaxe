@@ -11,7 +11,8 @@ class GameObject extends Object {
 	public var identifier:String;
 	public var currentOpacity:Float = 1;
 	public var isCollideable:Bool = false;
-	public var isBoundingBoxCollideable:Bool = true;
+	public var isBoundingBoxCollideable:Bool = false;
+	public var enableCollideCallbacks:Bool = false;
 
 	var textureResources:Array<Resource<Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];

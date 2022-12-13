@@ -8,6 +8,11 @@ import src.Util;
 class AbstractBumper extends DtsObject {
 	var lastContactTime = Math.NEGATIVE_INFINITY;
 
+	public function new() {
+		super();
+		this.enableCollideCallbacks = true;
+	}
+
 	override function update(timeState:src.TimeState) {
 		// Override the keyframe
 		var currentCompletion = getCurrentCompletion(timeState);

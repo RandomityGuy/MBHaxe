@@ -18,6 +18,7 @@ class Gem extends DtsObject {
 		dtsPath = "data/shapes/items/gem.dts";
 		ambientRotate = true;
 		isCollideable = false;
+		this.isBoundingBoxCollideable = true;
 		pickedUp = false;
 		useInstancing = true;
 		showSequences = false; // Gems actually have an animation for the little shiny thing, but the actual game ignores that. I get it, it was annoying as hell.
