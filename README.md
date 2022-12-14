@@ -9,7 +9,7 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Platinum: [Play](https://mbphaxe.netlify.app/)
 ## Windows
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.2)
-### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.0)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.0)
 
 # Why Haxe?
 I chose Haxe because its a good language that can target other languages, meaning any Haxe code can be converted and used in Python, C++, Java very easily so that nobody has to take effort in porting the code to different languages, atleast thats what my mindset was when I started it, but unfortunately because of the 3d engine I used, it only compiles to C and Javascript. You will have to isolate the engine specific features yourself if you want to use this for other programming languages.

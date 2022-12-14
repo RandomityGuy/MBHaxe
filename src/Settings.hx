@@ -316,6 +316,9 @@ class Settings {
 			if (optionsSettings.marbleShader == null) {
 				optionsSettings.marbleShader = "Default";
 			}
+			if (controlsSettings.blast == null) {
+				controlsSettings.blast = Key.E;
+			}
 			#end
 			highscoreName = json.highscoreName;
 		} else {
