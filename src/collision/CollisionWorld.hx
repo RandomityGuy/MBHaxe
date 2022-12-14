@@ -19,7 +19,7 @@ class CollisionWorld {
 	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState) {
 		var position = spherecollision.transform.getPosition();
 		var radius = spherecollision.radius;
-		var velocity = spherecollision.velocity;
+		// var velocity = spherecollision.velocity;
 		// var intersections = this.octree.radiusSearch(position, searchdist);
 
 		var box = new Bounds();
@@ -27,7 +27,7 @@ class CollisionWorld {
 		var rotQuat = spherecollision.marble.getRotationQuat();
 		box.transform(rotQuat.toMatrix());
 		box.offset(position.x, position.y, position.z);
-		box.addSpherePos(position.x + velocity.x * timeState.dt, position.y + velocity.y * timeState.dt, position.z + velocity.z * timeState.dt, radius);
+		// box.addSpherePos(position.x + velocity.x * timeState.dt, position.y + velocity.y * timeState.dt, position.z + velocity.z * timeState.dt, radius);
 		var intersections = this.octree.boundingSearch(box);
 
 		// var intersections = this.rtree.search([box.xMin, box.yMax, box.zMin], [box.xSize, box.ySize, box.zSize]);

@@ -135,7 +135,6 @@ class CollisionEntity implements IOctreeObject {
 
 	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
 		var position = collisionEntity.transform.getPosition();
-		var velocity = collisionEntity.velocity;
 		var radius = collisionEntity.radius;
 
 		var invMatrix = invTransform;
