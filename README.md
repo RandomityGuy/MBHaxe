@@ -8,7 +8,7 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Gold: [Play](https://mbhaxe.netlify.app/)
 ### Marble Blast Platinum: [Play](https://mbphaxe.netlify.app/)
 ## Windows
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.2)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.3)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.0)
 
 # Why Haxe?
@@ -29,7 +29,7 @@ I chose Haxe because its a good language that can target other languages, meanin
 
 # Build
 The `master` branch is currently for Marble Blast Platinum. 
-If you want to build Marble Blast Gold, look for version [1.1.2 tag](https://github.com/RandomityGuy/MBHaxe/commits/1.1.2)
+If you want to build Marble Blast Gold, go to the [mbg](https://github.com/RandomityGuy/MBHaxe/tree/mbg) tag
 
 Requires Haxe 4.2.2 or above
 You require the following Haxe libraries: 
