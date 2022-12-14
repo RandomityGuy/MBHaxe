@@ -1131,7 +1131,8 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
-		if (Key.isPressed(Settings.controlsSettings.respawn) && this.finishTime == null) {
+		if ((Key.isPressed(Settings.controlsSettings.respawn) || MarbleGame.instance.touchInput.restartButton.pressed)
+			&& this.finishTime == null) {
 			this.respawnPressedTime = timeState.timeSinceLoad;
 			this.restart();
 			if (!this.isWatching) {
@@ -1150,7 +1151,9 @@ class MarbleWorld extends Scheduler {
 			return;
 		}
 
-		if (Key.isDown(Settings.controlsSettings.respawn) && !this.isWatching && this.finishTime == null) {
+		if ((Key.isDown(Settings.controlsSettings.respawn) || MarbleGame.instance.touchInput.restartButton.pressed)
+			&& !this.isWatching
+			&& this.finishTime == null) {
 			if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
 				this.restart(true);
 				this.respawnPressedTime = Math.POSITIVE_INFINITY;

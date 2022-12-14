@@ -120,6 +120,9 @@ class OptionsDlg extends GuiImage {
 			for (b in optBtns) {
 				b.disabled = !enabled;
 			}
+			for (s in optSliders) {
+				s.enabled = enabled;
+			}
 		}
 
 		window.pressedAction = (sender) -> {

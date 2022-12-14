@@ -42,6 +42,7 @@ class TouchInput {
 	public var powerupButton:PowerupButton;
 	public var blastbutton:BlastButton;
 	public var pauseButton:PauseButton;
+	public var restartButton:RestartButton;
 
 	public var currentTouchState:TouchEventState;
 
@@ -56,6 +57,7 @@ class TouchInput {
 		this.powerupButton = new PowerupButton();
 		this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
+		this.restartButton = new RestartButton();
 		this.currentTouchState = new TouchEventState();
 		this.previousTouchState = new TouchEventState();
 	}
@@ -108,6 +110,7 @@ class TouchInput {
 			blastbutton.dispose();
 		movementInput.dispose();
 		pauseButton.dispose();
+		restartButton.dispose();
 		cameraInput.dispose();
 		this.cameraInput = new CameraInput();
 		this.movementInput = new MovementInput();
@@ -116,7 +119,9 @@ class TouchInput {
 		if (ultra)
 			this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
+		this.restartButton = new RestartButton();
 		pauseButton.add(parentGui);
+		restartButton.add(parentGui);
 		jumpButton.add(parentGui);
 		powerupButton.add(parentGui);
 		if (ultra)
@@ -133,6 +138,7 @@ class TouchInput {
 			this.blastbutton.setVisible(enabled);
 		this.movementInput.setVisible(enabled);
 		this.pauseButton.setVisible(enabled);
+		this.restartButton.setVisible(enabled);
 		this.cameraInput.enabled = enabled;
 	}
 
@@ -143,11 +149,13 @@ class TouchInput {
 			blastbutton.remove(parentGui);
 		movementInput.remove(parentGui);
 		pauseButton.remove(parentGui);
+		restartButton.remove(parentGui);
 		cameraInput.remove(parentGui);
 		jumpButton.dispose();
 		powerupButton.dispose();
 		movementInput.dispose();
 		pauseButton.dispose();
+		restartButton.dispose();
 		cameraInput.dispose();
 	}
 }
