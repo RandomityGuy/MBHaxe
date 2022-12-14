@@ -259,6 +259,7 @@ class Marble extends GameObject {
 	var cloak:Bool = false;
 	var teleporting:Bool = false;
 	var isUltra:Bool = false;
+	var _firstTick = true;
 
 	public var cubemapRenderer:CubemapRenderer;
 
@@ -1427,7 +1428,10 @@ class Marble extends GameObject {
 
 			it++;
 
-			this.findContacts(collisionWorld, tempState);
+			if (!this._firstTick)
+				this.findContacts(collisionWorld, tempState);
+			else
+				this._firstTick = false;
 			var cmf = this.computeMoveForces(m);
 			var isCentered:Bool = cmf.result;
 			var aControl = cmf.aControl;
@@ -1747,6 +1751,7 @@ class Marble extends GameObject {
 		this.megaMarbleEnableTime = Math.NEGATIVE_INFINITY;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.cloak = false;
+		this._firstTick = true;
 		if (this.teleporting) {
 			var mesh:Mesh = cast this.children[0];
 			mesh.material.mainPass.removeShader(mesh.material.mainPass.getShader(AlphaMult));
