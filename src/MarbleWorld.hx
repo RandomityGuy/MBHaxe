@@ -267,8 +267,6 @@ class MarbleWorld extends Scheduler {
 			worker.loadFile(file);
 		}
 
-		this.scene.camera.zFar = Math.max(4000, Std.parseFloat(this.skyElement.visibledistance));
-
 		this.sky = new Sky();
 
 		sky.dmlPath = "data/skies/sky_day.dml";

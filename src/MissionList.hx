@@ -46,7 +46,7 @@ class MissionList {
 		beginnerMissions = parseDifficulty("beginner");
 		intermediateMissions = parseDifficulty("intermediate");
 		advancedMissions = parseDifficulty("advanced");
-		customMissions = parseDifficulty("expert");
+		customMissions = parseDifficulty("custom");
 
 		// parseCLAList();
 
