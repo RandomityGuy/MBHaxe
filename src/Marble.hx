@@ -715,13 +715,10 @@ class Marble extends GameObject {
 				for (k in 0...contacts.length) {
 					var dist = this._radius - contacts[k].contactDistance;
 					var timeToSeparate = 0.1;
-					if (dist >= 0) {
-						var f1 = this.velocity.sub(contacts[k].velocity).add(dir.multiply(soFar)).dot(contacts[k].normal);
-						var f2 = timeToSeparate * f1;
-						if (f2 < dist) {
-							var f3 = (dist - f2) / timeToSeparate;
-							soFar += f3 / contacts[k].normal.dot(dir);
-						}
+					var vel = this.velocity.sub(contacts[k].velocity);
+					var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
+					if (dist > timeToSeparate * outVel) {
+						soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
 					}
 				}
 				if (soFar < -25)
@@ -970,7 +967,7 @@ class Marble extends GameObject {
 	function testMove(velocity:Vector, position:Vector, deltaT:Float, radius:Float, testPIs:Bool):{position:Vector, t:Float, found:Bool} {
 		var searchbox = new Bounds();
 		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
-		searchbox.addSpherePos(this.x + velocity.x * deltaT * 2, this.y + velocity.y * deltaT * 2, this.z + velocity.z * deltaT * 2, _radius);
+		searchbox.addSpherePos(this.x + velocity.x * deltaT, this.y + velocity.y * deltaT, this.z + velocity.z * deltaT, _radius);
 
 		var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
 
@@ -1000,10 +997,7 @@ class Marble extends GameObject {
 
 			var boundThing = new Bounds();
 			boundThing.addSpherePos(localpos.x, localpos.y, localpos.z, radius * 1.1);
-			boundThing.addSpherePos(localpos.x
-				+ relLocalVel.x * deltaT * 2, localpos.y
-				+ relLocalVel.y * deltaT * 2, localpos.z
-				+ relLocalVel.z * deltaT * 2,
+			boundThing.addSpherePos(localpos.x + relLocalVel.x * deltaT, localpos.y + relLocalVel.y * deltaT, localpos.z + relLocalVel.z * deltaT,
 				radius * 1.1);
 
 			var surfaces = obj.bvh == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.bvh.boundingSearch(boundThing);
@@ -1377,6 +1371,29 @@ class Marble extends GameObject {
 		return 10e8;
 	}
 
+	function nudgeToContacts(position:Vector, radius:Float) {
+		var it = 0;
+		var concernedContacts = this.contacts.filter(x ->
+			(x.otherObject is src.InteriorObject && !(x.otherObject is src.PathedInterior))); // PathedInteriors have their own nudge logic
+		var prevResolved = 0;
+		do {
+			var resolved = 0;
+			for (contact in concernedContacts) {
+				var distToContactPlane = position.dot(contact.normal) - contact.point.dot(contact.normal);
+				if (distToContactPlane < radius - 0.001) {
+					// Nudge to the surface of the contact plane
+					position = position.add(contact.normal.multiply(radius - distToContactPlane - 0.001));
+					resolved++;
+				}
+			}
+			if (resolved == 0 && prevResolved == 0)
+				break;
+			prevResolved = resolved;
+			it++;
+		} while (it < 8);
+		return position;
+	}
+
 	function advancePhysics(timeState:TimeState, m:Move, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var timeRemaining = timeState.dt;
 		var it = 0;
@@ -1484,6 +1501,7 @@ class Marble extends GameObject {
 			}
 
 			var newPos = pos.add(this.velocity.multiply(timeStep));
+			newPos = nudgeToContacts(newPos, _radius);
 			var rot = this.getRotationQuat();
 			var quat = new Quat();
 			quat.initRotation(omega.x * timeStep, omega.y * timeStep, omega.z * timeStep);
