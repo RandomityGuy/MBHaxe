@@ -301,8 +301,6 @@ class MarbleWorld extends Scheduler {
 			"sound/ready.wav",
 			"sound/set.wav",
 			"sound/go.wav",
-			"sound/alarm.wav",
-			"sound/alarm_timeout.wav",
 			"sound/missinggems.wav",
 			"shapes/images/glow_bounce.dts",
 			"shapes/images/glow_bounce.png",
