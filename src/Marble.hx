@@ -189,6 +189,8 @@ class Marble extends GameObject {
 
 	public var prevPos:Vector;
 
+	var _firstTick = true;
+
 	public function new() {
 		super();
 		var geom = Sphere.defaultUnitSphere();
@@ -1195,7 +1197,10 @@ class Marble extends GameObject {
 
 			it++;
 
-			this.findContacts(collisionWorld, tempState);
+			if (!this._firstTick)
+				this.findContacts(collisionWorld, tempState);
+			else
+				this._firstTick = false;
 			var cmf = this.computeMoveForces(m);
 			var isCentered:Bool = cmf.result;
 			var aControl = cmf.aControl;
@@ -1437,5 +1442,6 @@ class Marble extends GameObject {
 		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
 		this.lastContactNormal = new Vector(0, 0, 1);
+		this._firstTick = true;
 	}
 }
