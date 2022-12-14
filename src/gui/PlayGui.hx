@@ -309,23 +309,25 @@ class PlayGui {
 		// gemImageObject.matNameOverride.set("base.gem", "base.gem.");
 		gemImageObject.ambientSpinFactor /= -2;
 		// ["base.gem"] = color + ".gem";
-		ResourceLoader.load("shapes/items/" + gemColor + ".gem.png").entry.load(() -> {
-			gemImageObject.init(null, () -> {
-				for (mat in gemImageObject.materials) {
-					mat.mainPass.enableLights = false;
+		ResourceLoader.load("shapes/items/gem.dts").entry.load(() -> {
+			ResourceLoader.load("shapes/items/" + gemColor + ".gem.png").entry.load(() -> {
+				gemImageObject.init(null, () -> {
+					for (mat in gemImageObject.materials) {
+						mat.mainPass.enableLights = false;
 
-					// Huge hacks
-					if (mat.blendMode != Add) {
-						var alphaShader = new h3d.shader.AlphaChannel();
-						mat.mainPass.addShader(alphaShader);
+						// Huge hacks
+						if (mat.blendMode != Add) {
+							var alphaShader = new h3d.shader.AlphaChannel();
+							mat.mainPass.addShader(alphaShader);
+						}
 					}
-				}
-				gemImageScene.addChild(gemImageObject);
-				var gemImageCenter = gemImageObject.getBounds().getCenter();
+					gemImageScene.addChild(gemImageObject);
+					var gemImageCenter = gemImageObject.getBounds().getCenter();
 
-				gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
-				gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
-				onFinish();
+					gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
+					gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
+					onFinish();
+				});
 			});
 		});
 	}

@@ -10,5 +10,9 @@ class RestartButton extends TouchButton {
 		super(ResourceLoader.getImage("data/ui/touch/refresh.png").resource, new Vector(135, 55 + offset), 35);
 		this.guiElement.horizSizing = Right;
 		this.guiElement.vertSizing = Bottom;
+		this.onClick = () -> {
+			if (MarbleGame.instance.world.finishTime == null)
+				MarbleGame.instance.world.performRestart();
+		}
 	}
 }

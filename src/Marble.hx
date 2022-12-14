@@ -1579,7 +1579,7 @@ class Marble extends GameObject {
 			move.d = new Vector(this.level.replay.currentPlaybackFrame.marbleX, this.level.replay.currentPlaybackFrame.marbleY, 0);
 		} else {
 			if (this.level.isRecording) {
-				this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false);
+				this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false, false);
 				this.level.replay.recordMarbleInput(move.d.x, move.d.y);
 			}
 		}

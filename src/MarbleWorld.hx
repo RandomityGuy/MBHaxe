@@ -363,6 +363,7 @@ class MarbleWorld extends Scheduler {
 			"shapes/pads/green.jpg",
 			"shapes/items/gem.dts", // Ew ew
 			"shapes/items/gemshine.png",
+			"shapes/items/enviro1.jpg",
 		];
 		if (this.game == "ultra") {
 			marblefiles.push("shapes/balls/pack1/marble20.normal.png");
@@ -1102,6 +1103,24 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	public function performRestart() {
+		this.respawnPressedTime = timeState.timeSinceLoad;
+		this.restart();
+		if (!this.isWatching) {
+			Settings.playStatistics.respawns++;
+
+			if (!Settings.levelStatistics.exists(mission.path)) {
+				Settings.levelStatistics.set(mission.path, {
+					oobs: 0,
+					respawns: 1,
+					totalTime: 0,
+				});
+			} else {
+				Settings.levelStatistics[mission.path].respawns++;
+			}
+		}
+	}
+
 	public function update(dt:Float) {
 		if (!_ready) {
 			return;
@@ -1131,23 +1150,8 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
-		if ((Key.isPressed(Settings.controlsSettings.respawn) || MarbleGame.instance.touchInput.restartButton.pressed)
-			&& this.finishTime == null) {
-			this.respawnPressedTime = timeState.timeSinceLoad;
-			this.restart();
-			if (!this.isWatching) {
-				Settings.playStatistics.respawns++;
-
-				if (!Settings.levelStatistics.exists(mission.path)) {
-					Settings.levelStatistics.set(mission.path, {
-						oobs: 0,
-						respawns: 1,
-						totalTime: 0,
-					});
-				} else {
-					Settings.levelStatistics[mission.path].respawns++;
-				}
-			}
+		if ((Key.isPressed(Settings.controlsSettings.respawn)) && this.finishTime == null) {
+			performRestart();
 			return;
 		}
 
@@ -1168,7 +1172,13 @@ class MarbleWorld extends Scheduler {
 			&& !this.isWatching
 			&& this.game == "ultra") {
 			this.marble.useBlast();
+			if (this.isRecording) {
+				this.replay.recordMarbleStateFlags(false, false, false, true);
+			}
 		}
+
+		if (this.isWatching && this.replay.currentPlaybackFrame.marbleStateFlags.has(UsedBlast))
+			this.marble.useBlast();
 
 		// Replay gravity
 		if (this.isWatching) {
@@ -1769,12 +1779,16 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
 		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
 		this.marble.camera.oob = false;
+		@:privateAccess this.marble.superBounceEnableTime = -1e8;
+		@:privateAccess this.marble.shockAbsorberEnableTime = -1e8;
+		@:privateAccess this.marble.helicopterEnableTime = -1e8;
+		@:privateAccess this.marble.megaMarbleEnableTime = -1e8;
 		this.blastAmount = this.cheeckpointBlast;
 		if (this.isRecording) {
 			this.replay.recordCameraState(this.marble.camera.CameraYaw, this.marble.camera.CameraPitch);
 			this.replay.recordMarbleInput(0, 0);
 			this.replay.recordMarbleState(mpos, marble.velocity, marble.getRotationQuat(), marble.omega);
-			this.replay.recordMarbleStateFlags(false, false, true);
+			this.replay.recordMarbleStateFlags(false, false, true, false);
 		}
 		var gravityField = ""; // (this.currentCheckpoint.srcElement as any) ?.gravity || this.currentCheckpointTrigger?.element.gravity;
 		if (this.currentCheckpoint.elem.fields.exists('gravity')) {

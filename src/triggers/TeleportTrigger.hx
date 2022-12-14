@@ -89,7 +89,7 @@ class TeleportTrigger extends Trigger {
 		this.level.marble.prevPos.load(position);
 		this.level.marble.setPosition(position.x, position.y, position.z);
 		if (this.level.isRecording) {
-			this.level.replay.recordMarbleStateFlags(false, false, true);
+			this.level.replay.recordMarbleStateFlags(false, false, true, false);
 		}
 
 		if (!MisParser.parseBoolean(chooseNonNull(this.element.keepvelocity, destination.element.keepvelocity)))

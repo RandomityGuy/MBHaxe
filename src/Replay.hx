@@ -16,6 +16,7 @@ enum ReplayMarbleState {
 	UsedPowerup;
 	Jumped;
 	InstantTeleport;
+	UsedBlast;
 }
 
 @:publicFields
@@ -99,6 +100,8 @@ class ReplayFrame {
 			interpFrame.marbleStateFlags.set(UsedPowerup);
 		if (this.marbleStateFlags.has(Jumped))
 			interpFrame.marbleStateFlags.set(Jumped);
+		if (this.marbleStateFlags.has(UsedBlast))
+			interpFrame.marbleStateFlags.set(UsedBlast);
 
 		// Input
 		interpFrame.marbleX = this.marbleX;
@@ -246,7 +249,7 @@ class Replay {
 	var currentPlaybackFrameIdx:Int;
 	var currentPlaybackTime:Float;
 
-	var version:Int = 3;
+	var version:Int = 4;
 
 	public function new(mission:String) {
 		this.mission = mission;
@@ -276,13 +279,15 @@ class Replay {
 		currentRecordFrame.marbleAngularVelocity = angularVelocity.clone();
 	}
 
-	public function recordMarbleStateFlags(jumped:Bool, usedPowerup:Bool, instantTeleport:Bool) {
+	public function recordMarbleStateFlags(jumped:Bool, usedPowerup:Bool, instantTeleport:Bool, usedBlast:Bool) {
 		if (jumped)
 			currentRecordFrame.marbleStateFlags.set(Jumped);
 		if (usedPowerup)
 			currentRecordFrame.marbleStateFlags.set(UsedPowerup);
 		if (instantTeleport)
 			currentRecordFrame.marbleStateFlags.set(InstantTeleport);
+		if (usedBlast)
+			currentRecordFrame.marbleStateFlags.set(UsedBlast);
 	}
 
 	public function recordPowerupPickup(powerup:PowerUp) {
