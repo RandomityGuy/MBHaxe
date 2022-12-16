@@ -31,11 +31,12 @@ jobs:
           haxelib install hlsdl
           haxelib git heaps https://github.com/RandomityGuy/heaps
           git clone https://github.com/RandomityGuy/hashlink
-          curl -fsSL --retry 3 --retry-delay 5 https://github.com/RandomityGuy/hashlink/releases/download/latest/hashlink-69bf6d7-darwin.tar.gz
+          curl -LJO https://github.com/RandomityGuy/hashlink/releases/download/latest/hashlink-69bf6d7-darwin.tar.gz
           tar -xvzf hashlink-69bf6d7-darwin.tar.gz
           cp -rf hashlink/libs/sdl/* ~/haxelib/hlsdl/1,10,0
           haxe compile-c.hxml
           cp -r hashlink-69bf6d7-darwin/* native
+          gcc -O0 -o marblegame native/marblegame.c -lhl -Ihashlink-69bf6d7-darwin/include -Inative -Lnative fmt.hdll mysql.hdll sdl.hdll openal.hdll ssl.hdll ui.hdll uv.hdll
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
