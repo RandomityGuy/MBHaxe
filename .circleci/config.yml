@@ -14,10 +14,10 @@ jobs:
       
       - run: |
           set -eux
-          download_url="https://build.haxe.org/builds/haxe/mac/haxe_latest.tar.gz"
+          download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-osx.tar.gz"
           echo "Downloading [$download_url]..."
           mkdir /tmp/haxe
-          curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
+          curl -LJO "$download_url" -o /tmp/haxe.tar.gz
           tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
           export PATH=/tmp/haxe/:"$PATH"
           export HAXE_STD_PATH=/tmp/haxe/std
@@ -27,13 +27,15 @@ jobs:
           brew install neko
           haxelib setup ~/haxelib
           haxelib list
-          git clone https://github.com/RandomityGuy/MBHaxe
           haxelib install hashlink
           haxelib install hlsdl
           haxelib git heaps https://github.com/RandomityGuy/heaps
           git clone https://github.com/RandomityGuy/hashlink
           curl -LJO https://github.com/RandomityGuy/hashlink/releases/download/latest/hashlink-69bf6d7-darwin.tar.gz
           tar -xvzf hashlink-69bf6d7-darwin.tar.gz
+          cp -rf hashlink/libs/sdl/* ~/haxelib/hlsdl/1,10,0
+          haxe compile-c.hxml
+          cp -r hashlink-69bf6d7-darwin/* native
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
