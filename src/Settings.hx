@@ -10,6 +10,8 @@ import hxd.Window;
 import haxe.DynamicAccess;
 #if hl
 import sys.io.File;
+import sys.FileSystem;
+import haxe.io.Path;
 #end
 import src.ResourceLoader;
 import haxe.Json;
@@ -154,6 +156,9 @@ class Settings {
 
 	public static var isTouch:Option<Bool> = Option.None;
 
+	public static var settingsDir = Path.join([Sys.getEnv("HOME"),
+	"Library", "Application Support", "MBHaxe-MBP"]);
+
 	public static function applySettings() {
 		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
@@ -245,7 +250,10 @@ class Settings {
 		#end
 		var json = Json.stringify(outputData);
 		#if (hl && !android)
-		File.saveContent("settings.json", json);
+		if (!FileSystem.exists(settingsDir)) {
+			FileSystem.createDirectory(settingsDir);
+		}
+		File.saveContent(Path.join([settingsDir, "settings.json"]), json);
 		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();
@@ -258,7 +266,7 @@ class Settings {
 	public static function load() {
 		var settingsExists = false;
 		#if hl
-		settingsExists = ResourceLoader.fileSystem.exists("settings.json");
+		settingsExists = FileSystem.exists(Path.join([settingsDir, "settings.json"]));
 		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();
@@ -269,7 +277,8 @@ class Settings {
 
 		if (settingsExists) {
 			#if hl
-			var json = Json.parse(ResourceLoader.fileSystem.get("settings.json").getText());
+			var json =
+			Json.parse(File.getContent(Path.join([settingsDir, "settings.json"])));
 			#end
 			#if js
 			var json = Json.parse(localStorage.getItem("MBHaxeSettings"));
