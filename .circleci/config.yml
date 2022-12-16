@@ -19,19 +19,21 @@ jobs:
           mkdir /tmp/haxe
           curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
           tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
-          echo 'export PATH=/tmp/haxe/:"$PATH"' >> "$BASH_ENV"
-          echo "export HAXE_STD_PATH=/tmp/haxe/std" >> "$BASH_ENV"
-          source "$BASH_ENV"
+          export PATH=/tmp/haxe/:"$PATH"
+          export HAXE_STD_PATH=/tmp/haxe/std"
           /tmp/haxe/haxe --version
-
-      - run: |
-            brew install cmake
-            brew install libpthread-stubs
-
-      - run: |
-          set -eux
+          brew install cmake
+          brew install libpthread-stubs
+          brew install neko
           haxelib setup ~/haxelib
           haxelib list
+          git clone https://github.com/RandomityGuy/MBHaxe
+          haxelib install hashlink
+          haxelib install hlsdl
+          haxelib git heaps https://github.com/RandomityGuy/heaps
+          git clone https://github.com/RandomityGuy/hashlink
+          curl -LJO https://github.com/RandomityGuy/hashlink/releases/download/latest/hashlink-69bf6d7-darwin.tar.gz
+          tar -xvzf hashlink-69bf6d7-darwin.tar.gz
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
