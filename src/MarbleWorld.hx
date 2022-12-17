@@ -1625,6 +1625,17 @@ class MarbleWorld extends Scheduler {
 		MarbleGame.instance.touchInput.powerupButton.setEnabled(false);
 	}
 
+	public function addBonusTime(t:Float) {
+		this.bonusTime += t;
+		if (t > 0) {
+			this.playGui.addMiddleMessage('+${t}s', 0x99ff99);
+		} else if (t < 0) {
+			this.playGui.addMiddleMessage('${t}s', 0xff9999);
+		} else {
+			this.playGui.addMiddleMessage('+0s', 0xcccccc);
+		}
+	}
+
 	/** Get the current interpolated orientation quaternion. */
 	public function getOrientationQuat(time:Float) {
 		var completion = Util.clamp((time - this.orientationChangeTime) / 0.3, 0, 1);

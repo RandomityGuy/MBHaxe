@@ -43,6 +43,6 @@ class TimeTravel extends PowerUp {
 	}
 
 	public function use(time:TimeState) {
-		level.bonusTime += this.timeBonus;
+		level.addBonusTime(this.timeBonus);
 	}
 }

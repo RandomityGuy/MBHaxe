@@ -31,6 +31,11 @@ import h3d.mat.Texture;
 import src.Settings;
 import src.Util;
 
+typedef MiddleMessage = {
+	ctrl:GuiText,
+	age:Float,
+}
+
 class PlayGui {
 	var scene2d:h2d.Scene;
 
@@ -75,6 +80,8 @@ class PlayGui {
 	var _init:Bool;
 
 	var fpsMeter:GuiText;
+
+	var middleMessages:Array<MiddleMessage> = [];
 
 	public function dispose() {
 		if (_init) {
@@ -630,5 +637,45 @@ class PlayGui {
 		if (this.fpsMeter != null) {
 			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} fps';
 		}
+		this.updateMiddleMessages(timeState.dt);
+	}
+
+	function updateMiddleMessages(dt:Float) {
+		var itermessages = this.middleMessages.copy();
+		if (itermessages.length > 0) {
+			var thismsg = itermessages.shift();
+			thismsg.age += dt;
+			if (thismsg.age > 0.6) {
+				this.middleMessages.remove(thismsg);
+				thismsg.ctrl.parent.removeChild(thismsg.ctrl); // Delete it
+			} else {
+				if (thismsg.age >= 0.3) {
+					thismsg.ctrl.text.alpha = 1 - (thismsg.age - 0.3) / 0.3;
+				}
+				thismsg.ctrl.text.y -= (0.1 / playGuiCtrl.extent.y) * scene2d.height;
+			}
+		}
+	}
+
+	public function addMiddleMessage(text:String, color:Int) {
+		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
+		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
+		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
+		var markerFelt32 = markerFelt32b.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+
+		var middleMsg = new GuiText(markerFelt32);
+		middleMsg.position = new Vector(200, 50);
+		middleMsg.extent = new Vector(400, 100);
+		middleMsg.horizSizing = Center;
+		middleMsg.vertSizing = Center;
+		middleMsg.text.text = text;
+		middleMsg.justify = Center;
+		middleMsg.text.textColor = color;
+		middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
+		this.playGuiCtrl.addChild(middleMsg);
+		middleMsg.render(scene2d);
+		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
+
+		this.middleMessages.push({ctrl: middleMsg, age: 0});
 	}
 }
