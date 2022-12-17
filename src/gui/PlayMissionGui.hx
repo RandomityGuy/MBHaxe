@@ -173,6 +173,7 @@ class PlayMissionGui extends GuiImage {
 		var pmMenuButton = new GuiButton(loadButtonImages("data/ui/play/menu"));
 		pmMenuButton.position = new Vector(119, 325);
 		pmMenuButton.extent = new Vector(92, 43);
+		pmMenuButton.accelerator = hxd.Key.ESCAPE;
 		pmMenuButton.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new MainMenuGui());
 		};
@@ -199,6 +200,7 @@ class PlayMissionGui extends GuiImage {
 		var pmPrev = new GuiButton(loadButtonImages("data/ui/play/prev"));
 		pmPrev.position = new Vector(436, 325);
 		pmPrev.extent = new Vector(72, 43);
+		pmPrev.accelerator = hxd.Key.LEFT;
 		pmPrev.pressedAction = (sender) -> {
 			setSelectedFunc(currentSelection - 1);
 		}
@@ -220,6 +222,7 @@ class PlayMissionGui extends GuiImage {
 		var pmNext = new GuiButton(loadButtonImages("data/ui/play/next"));
 		pmNext.position = new Vector(604, 325);
 		pmNext.extent = new Vector(72, 43);
+		pmNext.accelerator = hxd.Key.RIGHT;
 		pmNext.pressedAction = (sender) -> {
 			setSelectedFunc(currentSelection + 1);
 		}

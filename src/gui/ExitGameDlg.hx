@@ -40,6 +40,7 @@ class ExitGameDlg extends GuiControl {
 		yesButton.extent = new Vector(86, 40);
 		yesButton.vertSizing = Top;
 		yesButton.horizSizing = Right;
+		yesButton.accelerator = hxd.Key.ENTER;
 		yesButton.pressedAction = (sender) -> yesFunc(yesButton);
 
 		var noButton = new GuiButton(loadButtonImages("data/ui/common/no"));
@@ -47,6 +48,7 @@ class ExitGameDlg extends GuiControl {
 		noButton.extent = new Vector(86, 40);
 		noButton.vertSizing = Top;
 		noButton.horizSizing = Right;
+		noButton.accelerator = hxd.Key.ESCAPE;
 		noButton.pressedAction = (sender) -> noFunc(noButton);
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/common/restart"));

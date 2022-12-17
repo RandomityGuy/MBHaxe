@@ -44,6 +44,7 @@ class EndGameGui extends GuiControl {
 		continueButton.vertSizing = Bottom;
 		continueButton.position = new Vector(460, 307);
 		continueButton.extent = new Vector(104, 54);
+		continueButton.accelerator = hxd.Key.ENTER;
 		continueButton.pressedAction = (e) -> continueFunc(continueButton);
 
 		var restartButton = new GuiButton(loadButtonImages("data/ui/endgame/replay"));
