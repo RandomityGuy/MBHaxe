@@ -1,5 +1,7 @@
 package gui;
 
+import h2d.Tile;
+import hxd.BitmapData;
 import h2d.filter.DropShadow;
 import src.Settings;
 import hxd.res.BitmapFont;
@@ -57,6 +59,9 @@ class EnterNameDlg extends GuiControl {
 		enterNameEdit.position = new Vector(28, 130);
 		enterNameEdit.extent = new Vector(363, 38);
 		enterNameEdit.text.text = Settings.highscoreName;
+		haxe.Timer.delay(() -> {
+			enterNameEdit.text.focus();
+		}, 5);
 
 		var okbutton = new GuiButton(loadButtonImages("data/ui/endgame/ok"));
 		okbutton.position = new Vector(151, 184);

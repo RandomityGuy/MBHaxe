@@ -84,6 +84,12 @@ class EndGameGui extends GuiControl {
 		};
 		nextLevel.addChild(nextLevelBtn);
 
+		function setButtonStates(enabled:Bool) {
+			nextLevelBtn.disabled = !enabled;
+			continueButton.disabled = !enabled;
+			restartButton.disabled = !enabled;
+		}
+
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
@@ -309,7 +315,9 @@ class EndGameGui extends GuiControl {
 		Settings.save();
 
 		if (idx <= 4) {
+			setButtonStates(false);
 			var end = new EnterNameDlg(idx, (name) -> {
+				setButtonStates(true);
 				if (scoreSubmitted)
 					return;
 
