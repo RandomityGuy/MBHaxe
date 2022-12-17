@@ -52,6 +52,12 @@ class EndGameGui extends GuiControl {
 		restartButton.extent = new Vector(104, 48);
 		restartButton.pressedAction = restartFunc;
 
+		function setButtonStates(enabled:Bool) {
+			nextLevelBtn.disabled = !enabled;
+			continueButton.disabled = !enabled;
+			restartButton.disabled = !enabled;
+		}
+
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
@@ -173,7 +179,9 @@ class EndGameGui extends GuiControl {
 		Settings.save();
 
 		if (idx <= 2) {
+			setButtonStates(false);
 			var end = new EnterNameDlg(idx, (name) -> {
+				setButtonStates(true);
 				if (scoreSubmitted)
 					return;
 

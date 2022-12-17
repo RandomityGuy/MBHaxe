@@ -61,6 +61,9 @@ class EnterNameDlg extends GuiControl {
 		enterNameEdit.position = new Vector(87, 136);
 		enterNameEdit.extent = new Vector(255, 36);
 		enterNameEdit.text.text = Settings.highscoreName;
+		haxe.Timer.delay(() -> {
+			enterNameEdit.text.focus();
+		}, 5);
 
 		var okbutton = new GuiButton(loadButtonImages("data/ui/common/ok"));
 		okbutton.position = new Vector(163, 182);
