@@ -468,7 +468,9 @@ class MarbleWorld extends Scheduler {
 		var startquat = this.getStartPositionAndOrientation();
 
 		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 3);
-		this.marble.collider.transform.setPosition(startquat.position);
+		var oldtransform = this.marble.collider.transform.clone();
+		oldtransform.setPosition(startquat.position);
+		this.marble.collider.setTransform(oldtransform);
 		this.marble.reset();
 
 		var euler = startquat.quat.toEuler();
