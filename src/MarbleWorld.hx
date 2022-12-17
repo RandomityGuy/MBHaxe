@@ -1481,9 +1481,6 @@ class MarbleWorld extends Scheduler {
 		var contacts = marble.contactEntities;
 		var inside = [];
 
-		var contactsphere = new SphereCollisionEntity(marble);
-		contactsphere.velocity = new Vector();
-
 		for (contact in contacts) {
 			if (contact.go != marble) {
 				if (contact.go is DtsObject) {

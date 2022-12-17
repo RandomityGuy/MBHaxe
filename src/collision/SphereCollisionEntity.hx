@@ -1,15 +1,19 @@
 package collision;
 
+import h3d.Matrix;
 import src.TimeState;
 import src.Marble;
 import h3d.col.Ray;
 import h3d.Vector;
 import h3d.col.Sphere;
 import h3d.col.Bounds;
+import src.MarbleGame;
 
 class SphereCollisionEntity extends CollisionEntity {
 	public var radius:Float;
 	public var marble:Marble;
+
+	var _dbgEntity:h3d.scene.Mesh;
 
 	public function new(marble:Marble) {
 		super(cast marble);
@@ -24,6 +28,25 @@ class SphereCollisionEntity extends CollisionEntity {
 		var pos = transform.getPosition();
 		boundingBox.addSpherePos(pos.x, pos.y, pos.z, radius);
 		this.boundingBox = boundingBox;
+
+		// if (_dbgEntity == null) {
+		// 	var cube = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
+		// 	cube.addNormals();
+		// 	cube.addUVs();
+		// 	_dbgEntity = new h3d.scene.Mesh(cube);
+		// 	_dbgEntity.material.mainPass.wireframe = true;
+		// 	_dbgEntity.setTransform(transform);
+		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
+		// } else {
+		// 	_dbgEntity.setTransform(transform);
+		// }
+	}
+
+	public override function setTransform(transform:Matrix) {
+		super.setTransform(transform);
+		// if (_dbgEntity != null) {
+		// 	_dbgEntity.setTransform(transform);
+		// }
 	}
 
 	public override function rayCast(rayOrigin:Vector, rayDirection:Vector) {

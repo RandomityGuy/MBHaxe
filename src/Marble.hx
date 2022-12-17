@@ -1517,11 +1517,12 @@ class Marble extends GameObject {
 			quat.multiply(quat, rot);
 			this.setRotationQuat(quat);
 
+			var totMatrix = quat.toMatrix();
+			totMatrix.setPosition(newPos);
+
 			this.setPosition(newPos.x, newPos.y, newPos.z);
 
-			var tform = this.collider.transform;
-			tform.setPosition(new Vector(newPos.x, newPos.y, newPos.z));
-			this.collider.setTransform(tform);
+			this.collider.setTransform(totMatrix);
 			this.collider.velocity = this.velocity;
 
 			if (this.heldPowerup != null && m.powerup && !this.level.outOfBounds) {
@@ -1606,7 +1607,8 @@ class Marble extends GameObject {
 			var expectedOmega = this.level.replay.currentPlaybackFrame.marbleAngularVelocity.clone();
 
 			this.setPosition(expectedPos.x, expectedPos.y, expectedPos.z);
-			var tform = this.collider.transform;
+			var tform = this.level.replay.currentPlaybackFrame.marbleOrientation.toMatrix();
+
 			tform.setPosition(new Vector(expectedPos.x, expectedPos.y, expectedPos.z));
 			this.collider.setTransform(tform);
 			this.velocity = expectedVel;
