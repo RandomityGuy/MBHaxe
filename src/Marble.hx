@@ -115,7 +115,7 @@ final trailParticleOptions:ParticleEmitterOptions = {
 		lifetimeVariance: 10,
 		acceleration: 0,
 		colors: [new Vector(1, 1, 0, 0), new Vector(1, 1, 0, 1), new Vector(1, 1, 1, 0)],
-		sizes: [0.4, 0.4, 0.1],
+		sizes: [0.7, 0.4, 0.1],
 		times: [0, 0.15, 1]
 	}
 };

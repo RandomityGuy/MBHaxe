@@ -1273,6 +1273,8 @@ class MarbleWorld extends Scheduler {
 	}
 
 	function determineClockColor(timeToDisplay:Float) {
+		if (this.finishTime != null)
+			return 1;
 		if (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0)
 			return 1;
 		if (timeToDisplay >= this.mission.qualifyTime)
