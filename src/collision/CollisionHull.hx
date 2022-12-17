@@ -38,7 +38,7 @@ class CollisionHull extends CollisionEntity {
 			newTform.setPosition(newpos);
 			hull.setTransform(newTform);
 
-			var pt = GJK.gjk(sph, this.hull);
+			var pt = GJK.gjk(sph, this.hull).epa;
 			if (pt != null) {
 				var cinfo = new CollisionInfo();
 				cinfo.normal = pt.normalized();

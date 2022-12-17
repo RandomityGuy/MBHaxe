@@ -10,7 +10,10 @@ class GJK {
 	public static var maxEpaLooseEdges = 64;
 	public static var maxEpaIterations = 64;
 
-	public static function gjk(s1:GJKShape, s2:GJKShape) {
+	static var epaFaces:Array<Array<Vector>>;
+	static var loose_edges:Array<Array<Vector>>;
+
+	public static function gjk(s1:GJKShape, s2:GJKShape, doEpa:Bool = true) {
 		var searchDir = s1.getCenter().sub(s2.getCenter());
 		var a = new Vector();
 		var b = new Vector();
@@ -21,7 +24,10 @@ class GJK {
 		searchDir = c.multiply(-1);
 		b = s2.support(searchDir).sub(s1.support(searchDir.multiply(-1)));
 		if (b.dot(searchDir) < 0)
-			return null;
+			return {
+				result: false,
+				epa: null
+			};
 
 		searchDir = c.sub(b).cross(b.multiply(-1)).cross(c.sub(b));
 		if (searchDir.length() == 0) {
@@ -35,7 +41,10 @@ class GJK {
 		for (i in 0...maxIterations) {
 			a = s2.support(searchDir).sub(s1.support(searchDir.multiply(-1)));
 			if (a.dot(searchDir) < 0) {
-				return null;
+				return {
+					result: false,
+					epa: null
+				};
 			}
 
 			simpDim++;
@@ -83,44 +92,57 @@ class GJK {
 					b = a;
 					searchDir = adb;
 				} else {
-					return epa(a, b, c, d, s1, s2);
+					if (doEpa)
+						return {
+							result: true,
+							epa: epa(a, b, c, d, s1, s2)
+						};
+					return {
+						result: true,
+						epa: null
+					};
 				}
 			}
 		}
-		return null;
+		return {
+			result: false,
+			epa: null
+		};
 	}
 
 	public static function epa(a:Vector, b:Vector, c:Vector, d:Vector, s1:GJKShape, s2:GJKShape) {
-		var faces = [];
-		for (i in 0...maxEpaFaces)
-			faces.push([new Vector(), new Vector(), new Vector(), new Vector()]);
+		if (epaFaces == null) {
+			epaFaces = [];
+			for (i in 0...maxEpaFaces)
+				epaFaces.push([new Vector(), new Vector(), new Vector(), new Vector()]);
+		}
 
-		faces[0][0] = a;
-		faces[0][1] = b;
-		faces[0][2] = c;
-		faces[0][3] = b.sub(a).cross(c.sub(a)).normalized(); // ABC
-		faces[1][0] = a;
-		faces[1][1] = c;
-		faces[1][2] = d;
-		faces[1][3] = c.sub(a).cross(d.sub(a)).normalized();
-		faces[2][0] = a;
-		faces[2][1] = d;
-		faces[2][2] = b;
-		faces[2][3] = d.sub(a).cross(b.sub(a)).normalized();
-		faces[3][0] = b;
-		faces[3][1] = d;
-		faces[3][2] = c;
-		faces[3][3] = d.sub(b).cross(c.sub(b)).normalized();
+		epaFaces[0][0] = a;
+		epaFaces[0][1] = b;
+		epaFaces[0][2] = c;
+		epaFaces[0][3] = b.sub(a).cross(c.sub(a)).normalized(); // ABC
+		epaFaces[1][0] = a;
+		epaFaces[1][1] = c;
+		epaFaces[1][2] = d;
+		epaFaces[1][3] = c.sub(a).cross(d.sub(a)).normalized();
+		epaFaces[2][0] = a;
+		epaFaces[2][1] = d;
+		epaFaces[2][2] = b;
+		epaFaces[2][3] = d.sub(a).cross(b.sub(a)).normalized();
+		epaFaces[3][0] = b;
+		epaFaces[3][1] = d;
+		epaFaces[3][2] = c;
+		epaFaces[3][3] = d.sub(b).cross(c.sub(b)).normalized();
 
 		var numFaces = 4;
 		var closestFace = 0;
 
 		for (iteration in 0...maxEpaIterations) {
 			// Find face that's closest to origin
-			var min_dist = faces[0][0].dot(faces[0][3]);
+			var min_dist = epaFaces[0][0].dot(epaFaces[0][3]);
 			closestFace = 0;
 			for (i in 1...numFaces) {
-				var dist = faces[i][0].dot(faces[i][3]);
+				var dist = epaFaces[i][0].dot(epaFaces[i][3]);
 				if (dist < min_dist) {
 					min_dist = dist;
 					closestFace = i;
@@ -128,28 +150,30 @@ class GJK {
 			}
 
 			// search normal to face that's closest to origin
-			var search_dir = faces[closestFace][3];
+			var search_dir = epaFaces[closestFace][3];
 			var p = s2.support(search_dir).sub(s1.support(search_dir.multiply(-1)));
 			if (p.dot(search_dir) - min_dist < epaTolerance) {
 				// Convergence (new point is not significantly further from origin)
-				return faces[closestFace][3].multiply(p.dot(search_dir)); // dot vertex with normal to resolve collision along normal!
+				return epaFaces[closestFace][3].multiply(p.dot(search_dir)); // dot vertex with normal to resolve collision along normal!
 			}
-			var loose_edges = [];
-			for (i in 0...maxEpaLooseEdges)
-				loose_edges.push([new Vector(), new Vector()]);
+			if (loose_edges == null) {
+				loose_edges = [];
+				for (i in 0...maxEpaLooseEdges)
+					loose_edges.push([new Vector(), new Vector()]);
+			}
 
 			var num_loose_edges = 0;
 
 			// Find all triangles that are facing p
 			var i = 0;
 			while (i < numFaces) {
-				if (faces[i][3].dot(p.sub(faces[i][0])) > 0) // triangle i faces p, remove it
+				if (epaFaces[i][3].dot(p.sub(epaFaces[i][0])) > 0) // triangle i faces p, remove it
 				{
 					// Add removed triangle's edges to loose edge list.
 					// If it's already there, remove it (both triangles it belonged to are gone)
 					for (j in 0...3) // Three edges per face
 					{
-						var current_edge = [faces[i][j], faces[i][(j + 1) % 3]];
+						var current_edge = [epaFaces[i][j], epaFaces[i][(j + 1) % 3]];
 						var found_edge = false;
 						for (k in 0...num_loose_edges) // Check if current edge is already in list
 						{
@@ -178,10 +202,10 @@ class GJK {
 					}
 
 					// Remove triangle i from list
-					faces[i][0] = faces[numFaces - 1][0];
-					faces[i][1] = faces[numFaces - 1][1];
-					faces[i][2] = faces[numFaces - 1][2];
-					faces[i][3] = faces[numFaces - 1][3];
+					epaFaces[i][0] = epaFaces[numFaces - 1][0];
+					epaFaces[i][1] = epaFaces[numFaces - 1][1];
+					epaFaces[i][2] = epaFaces[numFaces - 1][2];
+					epaFaces[i][3] = epaFaces[numFaces - 1][3];
 					numFaces--;
 					i--;
 				} // endif p can see triangle i
@@ -194,22 +218,22 @@ class GJK {
 				// assert(num_faces<EPA_MAX_NUM_FACES);
 				if (numFaces >= maxEpaFaces)
 					break;
-				faces[numFaces][0] = loose_edges[i][0];
-				faces[numFaces][1] = loose_edges[i][1];
-				faces[numFaces][2] = p;
-				faces[numFaces][3] = loose_edges[i][0].sub(loose_edges[i][1]).cross(loose_edges[i][0].sub(p)).normalized();
+				epaFaces[numFaces][0] = loose_edges[i][0];
+				epaFaces[numFaces][1] = loose_edges[i][1];
+				epaFaces[numFaces][2] = p;
+				epaFaces[numFaces][3] = loose_edges[i][0].sub(loose_edges[i][1]).cross(loose_edges[i][0].sub(p)).normalized();
 
 				// Check for wrong normal to maintain CCW winding
 				var bias = 0.000001; // in case dot result is only slightly < 0 (because origin is on face)
-				if (faces[numFaces][0].dot(faces[numFaces][3]) + bias < 0) {
-					var temp = faces[numFaces][0];
-					faces[numFaces][0] = faces[numFaces][1];
-					faces[numFaces][1] = temp;
-					faces[numFaces][3] = faces[numFaces][3].multiply(-1);
+				if (epaFaces[numFaces][0].dot(epaFaces[numFaces][3]) + bias < 0) {
+					var temp = epaFaces[numFaces][0];
+					epaFaces[numFaces][0] = epaFaces[numFaces][1];
+					epaFaces[numFaces][1] = temp;
+					epaFaces[numFaces][3] = epaFaces[numFaces][3].multiply(-1);
 				}
 				numFaces++;
 			}
 		}
-		return faces[closestFace][3].multiply(faces[closestFace][0].dot(faces[closestFace][3]));
+		return epaFaces[closestFace][3].multiply(epaFaces[closestFace][0].dot(epaFaces[closestFace][3]));
 	}
 }

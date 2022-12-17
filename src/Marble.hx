@@ -706,7 +706,7 @@ class Marble extends GameObject {
 			rollVolume = 0;
 
 		var slipVolume = 0.0;
-		if (slipAmount > 0) {
+		if (slipAmount > 1e-4) {
 			slipVolume = slipAmount / 5;
 			if (slipVolume > 1)
 				slipVolume = 1;
@@ -1106,7 +1106,7 @@ class Marble extends GameObject {
 			sph.position = finalPos;
 			sph.radius = _radius;
 
-			var pt = GJK.gjk(sph, chull);
+			var pt = GJK.gjk(sph, chull).epa;
 
 			while (pt != null) {
 				if (pt.lengthSq() < 0.0001) {
@@ -1115,7 +1115,7 @@ class Marble extends GameObject {
 				trace('Separating Vector Len: ${pt.length()}');
 				finalPos = finalPos.sub(pt);
 				sph.position = finalPos;
-				pt = GJK.gjk(sph, chull);
+				pt = GJK.gjk(sph, chull).epa;
 			}
 
 			// if (pt != null) {
