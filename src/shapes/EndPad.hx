@@ -1,5 +1,7 @@
 package shapes;
 
+import src.MarbleGame;
+import collision.gjk.Cylinder;
 import src.AudioManager;
 import h3d.Quat;
 import h3d.mat.Material;
@@ -25,7 +27,7 @@ import h3d.mat.Texture;
 class EndPad extends DtsObject {
 	var fireworks:Array<Firework> = [];
 
-	var finishCollider:ConvexHull;
+	var finishCollider:Cylinder;
 	var finishBounds:Bounds;
 	var inFinish:Bool = false;
 
@@ -72,7 +74,12 @@ class EndPad extends DtsObject {
 				vertices.push(new Vector(x * radius * this.scaleX, (i != 0 ? 4.8 : 0) * 1, z * radius * this.scaleY));
 			}
 		}
-		finishCollider = new ConvexHull(vertices);
+		finishCollider = new Cylinder();
+		finishCollider.p1 = this.getAbsPos().getPosition();
+		finishCollider.p2 = finishCollider.p1.clone();
+		var vertDir = this.getAbsPos().up();
+		finishCollider.p2 = finishCollider.p2.add(vertDir.multiply(height));
+		finishCollider.radius = radius * this.scaleY;
 
 		finishBounds = new Bounds();
 		for (vert in vertices)
@@ -85,7 +92,7 @@ class EndPad extends DtsObject {
 		var tform = this.getAbsPos().clone();
 		tform.prependRotation(Math.PI / 2, 0, 0);
 
-		finishCollider.transform = tform;
+		// finishCollider.transform = tform;
 
 		finishBounds.transform(tform);
 

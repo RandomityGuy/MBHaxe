@@ -82,7 +82,7 @@ class EnterNameDlg extends GuiControl {
 		enterNameText.position = new Vector(37, 23);
 		enterNameText.extent = new Vector(345, 85);
 		// enterNameText.justify = Center;
-		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="DomCasual48">Well Done!<br/></font><font face="DomCasual32">You have the${["", " second", " third", " fourth", "fifth"][place]} top time!</font></p>';
+		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="DomCasual48">Well Done!<br/></font><font face="DomCasual32">You have the${["", " second", " third", " fourth", " fifth"][place]} top time!</font></p>';
 		dlg.addChild(enterNameText);
 
 		dlg.addChild(enterNameEdit);

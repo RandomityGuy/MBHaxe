@@ -1518,7 +1518,7 @@ class MarbleWorld extends Scheduler {
 
 		if (this.finishTime == null) {
 			if (spherebounds.collide(this.endPad.finishBounds)) {
-				if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider) != null) {
+				if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider, false) != null) {
 					if (!endPad.inFinish) {
 						touchFinish();
 						endPad.inFinish = true;
@@ -1527,6 +1527,9 @@ class MarbleWorld extends Scheduler {
 					if (endPad.inFinish)
 						endPad.inFinish = false;
 				}
+			} else {
+				if (endPad.inFinish)
+					endPad.inFinish = false;
 			}
 		}
 	}
