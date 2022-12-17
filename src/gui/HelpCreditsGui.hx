@@ -70,6 +70,7 @@ class HelpCreditsGui extends GuiImage {
 		var homeButton = new GuiButton(loadButtonImages("data/ui/play/back"));
 		homeButton.position = new Vector(278, 378);
 		homeButton.extent = new Vector(79, 61);
+		homeButton.accelerator = hxd.Key.ESCAPE;
 		homeButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.setContent(new MainMenuGui());
 		}

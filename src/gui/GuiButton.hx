@@ -27,6 +27,8 @@ class GuiButton extends GuiAnim {
 
 	public var buttonSounds:Bool = true;
 
+	public var accelerator:Int = 0;
+
 	public function new(anim:Array<Tile>) {
 		super(anim);
 	}
@@ -65,6 +67,11 @@ class GuiButton extends GuiAnim {
 				} else {
 					this.anim.currentFrame = disabled ? 3 : 0;
 				}
+			}
+		}
+		if (!disabled && accelerator != 0 && hxd.Key.isReleased(accelerator)) {
+			if (this.pressedAction != null) {
+				this.pressedAction(new GuiEvent(this));
 			}
 		}
 		super.update(dt, mouseState);
