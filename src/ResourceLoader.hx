@@ -312,7 +312,8 @@ class ResourceLoader {
 				texObj.flags.set(MipMapped);
 			}
 			var tex = img.toTexture();
-			tex.mipMap = Nearest;
+			tex.mipMap = Linear;
+			tex.filter = Linear;
 			// tex.filter = Nearest;
 			var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
 			textureCache.set(path, textureresource);
