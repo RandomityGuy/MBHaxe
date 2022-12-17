@@ -154,7 +154,7 @@ class MainMenuGui extends GuiImage {
 		versionText.vertSizing = Bottom;
 		versionText.position = new Vector(502, 66);
 		versionText.extent = new Vector(97, 72);
-		versionText.text.text = "<p align=\"center\">1.3.0</p>";
+		versionText.text.text = "<p align=\"center\">1.3.1</p>";
 		this.addChild(versionText);
 	}
 }
