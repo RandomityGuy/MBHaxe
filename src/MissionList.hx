@@ -85,6 +85,9 @@ class MissionList {
 		@:privateAccess ultraMissions["intermediate"][ultraMissions["intermediate"].length - 1].next = ultraMissions["advanced"][0];
 		@:privateAccess ultraMissions["advanced"][ultraMissions["advanced"].length - 1].next = ultraMissions["beginner"][0];
 
+		// Hypercube uses MBG logic
+		ultraMissions["advanced"][ultraMissions["advanced"].length - 1].game = "gold";
+
 		missionList.set("gold", goldMissions);
 		missionList.set("platinum", platinumMissions);
 		missionList.set("ultra", ultraMissions);
