@@ -8,5 +8,6 @@ class StartPad extends DtsObject {
 		dtsPath = "data/shapes/pads/startarea.dts";
 		isCollideable = true;
 		identifier = "StartPad";
+		useInstancing = false;
 	}
 }
