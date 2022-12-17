@@ -68,6 +68,8 @@ class CameraController extends Object {
 	public var oob:Bool = false;
 	public var finish:Bool = false;
 
+	var _ignoreCursor:Bool = false;
+
 	public function new(marble:Marble) {
 		super();
 		this.marble = marble;
@@ -88,6 +90,7 @@ class CameraController extends Object {
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.hidden = true;
 		#end
+		_ignoreCursor = true;
 		Window.getInstance().lockPointer((x, y) -> orbit(x, y));
 		#if hl
 		Cursor.show(false);
@@ -108,6 +111,10 @@ class CameraController extends Object {
 	}
 
 	public function orbit(mouseX:Float, mouseY:Float, isTouch:Bool = false) {
+		if (_ignoreCursor) {
+			_ignoreCursor = false;
+			return;
+		}
 		var scaleFactor = 1.0;
 		#if js
 		scaleFactor = 1 / js.Browser.window.devicePixelRatio;
