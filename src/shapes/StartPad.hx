@@ -9,5 +9,6 @@ class StartPad extends DtsObject {
 		useInstancing = false;
 		isCollideable = true;
 		identifier = "StartPad";
+		useInstancing = false;
 	}
 }

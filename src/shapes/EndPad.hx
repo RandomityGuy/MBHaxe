@@ -35,6 +35,7 @@ class EndPad extends DtsObject {
 		this.useInstancing = false;
 		this.isCollideable = true;
 		this.identifier = "EndPad";
+		this.useInstancing = false;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
