@@ -1428,10 +1428,13 @@ class Marble extends GameObject {
 
 			it++;
 
-			if (!this._firstTick)
-				this.findContacts(collisionWorld, tempState);
-			else
+			this.findContacts(collisionWorld, tempState);
+
+			if (this._firstTick) {
+				contacts = [];
 				this._firstTick = false;
+			}
+
 			var cmf = this.computeMoveForces(m);
 			var isCentered:Bool = cmf.result;
 			var aControl = cmf.aControl;
@@ -1750,6 +1753,7 @@ class Marble extends GameObject {
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
 		this.megaMarbleEnableTime = Math.NEGATIVE_INFINITY;
 		this.lastContactNormal = new Vector(0, 0, 1);
+		this.contactEntities = [];
 		this.cloak = false;
 		this._firstTick = true;
 		if (this.teleporting) {
