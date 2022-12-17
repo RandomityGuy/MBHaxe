@@ -153,21 +153,23 @@ class CameraController extends Object {
 
 		var lerpt = hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
-		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
-		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
-
 		if (Key.isDown(Settings.controlsSettings.camForward)) {
-			CameraPitch += 0.75 * 5 * dt;
+			nextCameraPitch += 0.75 * 5 * dt;
 		}
 		if (Key.isDown(Settings.controlsSettings.camBackward)) {
-			CameraPitch -= 0.75 * 5 * dt;
+			nextCameraPitch -= 0.75 * 5 * dt;
 		}
 		if (Key.isDown(Settings.controlsSettings.camLeft)) {
-			CameraYaw -= 0.75 * 5 * dt;
+			nextCameraYaw -= 0.75 * 5 * dt;
 		}
 		if (Key.isDown(Settings.controlsSettings.camRight)) {
-			CameraYaw += 0.75 * 5 * dt;
+			nextCameraYaw += 0.75 * 5 * dt;
 		}
+
+		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
+
+		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
+		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
 		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4,
 			Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
