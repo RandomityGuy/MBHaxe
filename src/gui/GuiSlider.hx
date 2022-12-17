@@ -18,6 +18,9 @@ class GuiSlider extends GuiImage {
 				sliderValue = (mouseState.position.x - renderRect.position.x - bmp.width / 2) / renderRect.extent.x;
 				sliderValue = Util.clamp(sliderValue, 0, 1);
 
+				if (this.pressedAction != null)
+					this.pressedAction(new GuiEvent(this));
+
 				if (slidingSound != null)
 					slidingSound.pause = false;
 			}
