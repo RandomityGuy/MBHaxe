@@ -739,9 +739,6 @@ class PlayMissionGui extends GuiImage {
 		currentList = MissionList.missionList["platinum"]["beginner"];
 
 		setCategoryFunc = function(game:String, category:String, ?doRender:Bool = true) {
-			if (doRender)
-				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
-
 			currentList = "category" == "custom" ? MissionList.customMissions : MissionList.missionList[game][category];
 			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
 			pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources).toTile();
