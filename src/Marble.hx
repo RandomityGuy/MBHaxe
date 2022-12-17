@@ -291,6 +291,8 @@ class Marble extends GameObject {
 		var A = new Vector();
 		if (this.mode != Finish)
 			A = gWorkGravityDir.multiply(this._gravity);
+		if (this.mode == Finish)
+			A = this.velocity.multiply(-16);
 		if (currentTime - this.helicopterEnableTime < 5) {
 			A = A.multiply(0.25);
 		}
@@ -1272,9 +1274,9 @@ class Marble extends GameObject {
 				}
 			}
 
-			if (mode == Finish) {
-				this.velocity = this.velocity.multiply(0.925);
-			}
+			// if (mode == Finish) {
+			// 	this.velocity = this.velocity.multiply(0.925);
+			// }
 
 			var newPos = pos.add(this.velocity.multiply(timeStep));
 			newPos = nudgeToContacts(newPos, _radius);
