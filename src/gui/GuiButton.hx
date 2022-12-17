@@ -71,7 +71,7 @@ class GuiButton extends GuiAnim {
 		}
 		if (!disabled && accelerator != 0 && hxd.Key.isReleased(accelerator)) {
 			if (this.pressedAction != null) {
-				this.pressedAction(new GuiEvent(this));
+				this.pressedAction(this);
 			}
 		}
 		super.update(dt, mouseState);

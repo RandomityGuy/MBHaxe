@@ -53,7 +53,6 @@ class EndGameGui extends GuiControl {
 		restartButton.pressedAction = restartFunc;
 
 		function setButtonStates(enabled:Bool) {
-			nextLevelBtn.disabled = !enabled;
 			continueButton.disabled = !enabled;
 			restartButton.disabled = !enabled;
 		}

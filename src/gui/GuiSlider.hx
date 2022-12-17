@@ -19,7 +19,7 @@ class GuiSlider extends GuiImage {
 				sliderValue = Util.clamp(sliderValue, 0, 1);
 
 				if (this.pressedAction != null)
-					this.pressedAction(new GuiEvent(this));
+					this.pressedAction(this);
 
 				if (slidingSound != null)
 					slidingSound.pause = false;
