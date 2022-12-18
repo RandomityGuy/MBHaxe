@@ -1383,9 +1383,9 @@ class Marble extends GameObject {
 			var resolved = 0;
 			for (contact in concernedContacts) {
 				var distToContactPlane = position.dot(contact.normal) - contact.point.dot(contact.normal);
-				if (distToContactPlane < radius - 0.001) {
+				if (distToContactPlane < radius - 0.005) {
 					// Nudge to the surface of the contact plane
-					position = position.add(contact.normal.multiply(radius - distToContactPlane - 0.001));
+					position = position.add(contact.normal.multiply(radius - distToContactPlane - 0.005));
 					resolved++;
 				}
 			}
@@ -1475,6 +1475,27 @@ class Marble extends GameObject {
 				timeStep = intersectT;
 			}
 
+			var pos = this.getAbsPos().getPosition();
+			this.prevPos = pos.clone();
+
+			var posAdd = this.velocity.multiply(timeStep);
+			var expectedPos = pos.add(posAdd);
+			var newPos = nudgeToContacts(expectedPos, _radius);
+			if (this.velocity.lengthSq() > 1e-8) {
+				var posDiff = newPos.sub(expectedPos);
+				if (posDiff.lengthSq() > 1e-8) {
+					var velDiffProj = this.velocity.multiply(posDiff.dot(this.velocity) / (this.velocity.lengthSq()));
+					var expectedProjPos = expectedPos.add(velDiffProj);
+					var updatedTimestep = expectedProjPos.sub(pos).length() / velocity.length();
+
+					var tDiff = updatedTimestep - timeStep;
+					this.velocity = this.velocity.sub(A.multiply(tDiff));
+					this.omega = this.omega.sub(a.multiply(tDiff));
+
+					timeStep = updatedTimestep;
+				}
+			}
+
 			piTime += timeStep;
 			if (this.controllable) {
 				for (interior in pathedInteriors) {
@@ -1486,9 +1507,6 @@ class Marble extends GameObject {
 					interior.update(piDT);
 				}
 			}
-
-			var pos = this.getAbsPos().getPosition();
-			this.prevPos = pos.clone();
 
 			if (mode == Start) {
 				var upVec = this.level.currentUp;
@@ -1509,8 +1527,6 @@ class Marble extends GameObject {
 			// 	this.velocity = this.velocity.multiply(0.925);
 			// }
 
-			var newPos = pos.add(this.velocity.multiply(timeStep));
-			newPos = nudgeToContacts(newPos, _radius);
 			var rot = this.getRotationQuat();
 			var quat = new Quat();
 			quat.initRotation(omega.x * timeStep, omega.y * timeStep, omega.z * timeStep);
