@@ -20,7 +20,11 @@ class ResourceLoaderWorker {
 	}
 
 	public function addTaskParallel(task:(() -> Void)->Void) {
+		#if (!android)
 		paralleltasks.push(task);
+		#else
+		tasks.push(task);
+		#end
 	}
 
 	public function run() {
@@ -54,6 +58,10 @@ class ResourceLoaderWorker {
 	}
 
 	public function loadFile(path:String) {
+		#if (!android)
 		paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
+		#else
+		tasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
+		#end
 	}
 }

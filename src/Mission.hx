@@ -71,18 +71,26 @@ class Mission {
 		if (!this.isClaMission) {
 			var basename = haxe.io.Path.withoutExtension(this.path);
 			if (ResourceLoader.fileSystem.exists(basename + ".png")) {
+				#if (!android)
 				imgFileEntry = ResourceLoader.fileSystem.get(basename + ".png");
 				imgFileEntry.load(() -> {
+				#end
 					var ret = ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
 					onLoaded(ret);
+				#if (!android)
 				});
+				#end
 			}
 			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
+				#if (!android)
 				imgFileEntry = ResourceLoader.fileSystem.get(basename + ".jpg");
 				imgFileEntry.load(() -> {
+				#end
 					var ret = ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
 					onLoaded(ret);
+				#if (!android)
 				});
+				#end
 			}
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
@@ -91,6 +99,27 @@ class Mission {
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
 			onLoaded(Tile.fromBitmap(img));
+		}
+	}
+
+	public function getPreviewImageSync() {
+		if (!this.isClaMission) {
+			var basename = haxe.io.Path.withoutExtension(this.path);
+			if (ResourceLoader.fileSystem.exists(basename + ".png")) {
+				var ret = ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
+				return ret; 
+			}
+			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
+				var ret = ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
+				return ret;
+			}
+			var img = new BitmapData(1, 1);
+			img.setPixel(0, 0, 0);
+			return Tile.fromBitmap(img);
+		} else {
+			var img = new BitmapData(1, 1);
+			img.setPixel(0, 0, 0);
+			return Tile.fromBitmap(img);
 		}
 	}
 

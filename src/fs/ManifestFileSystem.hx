@@ -47,7 +47,6 @@ class ManifestEntry extends FileEntry {
 	private var bytes:Bytes;
 	private var readPos:Int;
 	private var loaded:Bool;
-	private var loadPromise:js.lib.Promise<Void>;
 	#end
 
 	public function new(fs:ManifestFileSystem, name:String, relPath:String, file:String, ?originalFile:String) {

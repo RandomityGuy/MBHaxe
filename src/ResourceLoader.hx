@@ -53,6 +53,7 @@ class ResourceLoader {
 			fileSystem = mfileSystem;
 			onLoadedFunc();
 		}, scene2d);
+		#if js
 		loader = mloader;
 		fileSystem = mfileSystem;
 		var loadg = new h2d.Text(hxd.res.DefaultFont.get());
@@ -94,7 +95,10 @@ class ResourceLoader {
 			fwd();
 		});
 		worker.run();
-		// preloader.start();
+		#end
+		#if android
+		preloader.start();
+		#end
 		#end
 		#if (hl && !android)
 		onLoadedFunc();
@@ -204,7 +208,7 @@ class ResourceLoader {
 	}
 
 	public static function load(path:String) {
-		#if hl
+		#if (hl && !android)
 		if (!StringTools.startsWith(path, "data/"))
 			path = "data/" + path;
 		#end

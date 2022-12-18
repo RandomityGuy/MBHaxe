@@ -518,7 +518,11 @@ class PlayMissionGui extends GuiImage {
 			pmDescriptionOther.text.text = descText2;
 			pmDescriptionOther.text.loadImage = (name) -> goldBadge;
 
+			#if android
+			pmPreview.bmp.tile = currentMission.getPreviewImageSync();
+			#else
 			pmPreview.bmp.tile = tmpprevtile;
+			#end
 			#if js
 			switch (previewTimeoutHandle) {
 				case None:
@@ -536,7 +540,7 @@ class PlayMissionGui extends GuiImage {
 					}, 75));
 			}
 			#end
-			#if hl
+			#if (hl && !android)
 			currentMission.getPreviewImage(prevImg -> {
 				pmPreview.bmp.tile = prevImg;
 			}); // Shit be sync
