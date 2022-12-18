@@ -156,8 +156,13 @@ class Settings {
 
 	public static var isTouch:Option<Bool> = Option.None;
 
-	public static var settingsDir = Path.join([Sys.getEnv("HOME"),
-	"Library", "Application Support", "MBHaxe-MBP"]);
+	#if hl
+		#if MACOS_BUNDLE
+	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBP"]);
+		#else
+	public static var settingsDir = ".";
+		#end
+	#end
 
 	public static function applySettings() {
 		#if hl
@@ -277,8 +282,7 @@ class Settings {
 
 		if (settingsExists) {
 			#if hl
-			var json =
-			Json.parse(File.getContent(Path.join([settingsDir, "settings.json"])));
+			var json = Json.parse(File.getContent(Path.join([settingsDir, "settings.json"])));
 			#end
 			#if js
 			var json = Json.parse(localStorage.getItem("MBHaxeSettings"));
