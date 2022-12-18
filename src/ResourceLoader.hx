@@ -20,7 +20,11 @@ import src.ResourceLoaderWorker;
 
 class ResourceLoader {
 	#if (hl && !android)
-	public static var fileSystem:FileSystem = new LocalFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "..", ".."])), null);
+		#if MACOS_BUNDLE
+	public static var fileSystem:FileSystem = new TorqueFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "..", ".."])), null);
+		#else
+	public static var fileSystem:FileSystem = new TorqueFileSystem(".", null);
+		#end
 	#end
 	#if (js || android)
 	public static var fileSystem:FileSystem = null;

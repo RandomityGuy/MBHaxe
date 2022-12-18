@@ -116,7 +116,13 @@ class Settings {
 
 	public static var isTouch:Option<Bool> = Option.None;
 
+	#if hl
+		#if MACOS_BUNDLE
 	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBG"]);
+		#else
+	public static var settingsDir = ".";
+		#end
+	#end
 
 	public static function applySettings() {
 		#if hl
