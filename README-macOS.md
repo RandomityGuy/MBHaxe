@@ -46,3 +46,33 @@ clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L 
 ```
 This assumes you built all the libraries and installed them to
 /usr/local/lib. 
+
+## Packaging for macOS .app format
+After compiling native/marblegame.c successfully, use the script
+`./package-macos.sh` to create the skeleton app bundle under macos-dist.
+
+Finally, you need to use `otool` and `install_name_tool` to redirect the
+library paths to @rpath/lib.dylib.
+
+marblegame should already have the rpath set. You just need to make sure
+it's correct and copy the libs:
+- fmt.hdll
+- libSDL2-2.0.0.dylib
+- libhl.dylib
+- libogg.dylib
+- libopenal.dylib
+- libpng16.dylib
+- libturbojpeg.dylib
+- libvorbis.dylib
+- libvorbisfile.dylib
+- libz.dylib
+- openal.dylib
+- sdl.hdll
+- ui.hdll
+
+Ensure that they all depend on eachother with @rpath, as that will be
+set to the correct directory when running marblegame. `otool -L` is
+useful to check.
+
+Sign the .app with `codesign` and it should be ready to go.
+
