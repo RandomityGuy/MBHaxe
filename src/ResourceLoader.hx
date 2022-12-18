@@ -20,7 +20,7 @@ import src.ResourceLoaderWorker;
 
 class ResourceLoader {
 	#if (hl && !android)
-	public static var fileSystem:FileSystem = new LocalFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "Resources"])), null);
+	public static var fileSystem:FileSystem = new LocalFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "..", ".."])), null);
 	#end
 	#if (js || android)
 	public static var fileSystem:FileSystem = null;

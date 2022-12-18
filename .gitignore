@@ -8,3 +8,9 @@ native
 settings.json
 release
 Export
+
+macos-dist/MarbleBlast Gold.app/
+macos-dist/data/
+
+.DS_Store
+**/.DS_Store
