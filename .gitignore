@@ -12,3 +12,9 @@ node_modules
 fonts
 package.json
 package-lock.json
+
+macos-dist/MarbleBlast Platinum.app/
+
+.DS_Store
+**/.DS_Store
+
