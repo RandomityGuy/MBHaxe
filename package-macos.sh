@@ -16,6 +16,9 @@ sed -i "" -e "s/@VERSION@/$1/" "macos-dist/MarbleBlast Platinum.app/Contents/Inf
 
 # Copy binary
 cp native/marblegame "macos-dist/MarbleBlast Platinum.app/Contents/MacOS/marblegame" || exit $?
+# Copy data
+cp -r data "macos-dist/MarbleBlast Platinum.app/Contents/Resources/" || exit $?
+
 cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS/"
 install_name_tool -change ui.hdll @rpath/ui.hdll \
 	-change openal.hdll @rpath/openal.hdll \
