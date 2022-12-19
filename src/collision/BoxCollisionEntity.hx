@@ -13,7 +13,7 @@ import h3d.col.Bounds;
 class BoxCollisionEntity extends CollisionEntity {
 	var bounds:Bounds;
 
-	var _dbgEntity:h3d.scene.Mesh;
+	var _dbgEntity:h3d.scene.Object;
 
 	public function new(bounds:Bounds, go:GameObject) {
 		super(go);
@@ -25,22 +25,22 @@ class BoxCollisionEntity extends CollisionEntity {
 		this.boundingBox = bounds.clone();
 		this.boundingBox.transform(this.transform);
 		// if (_dbgEntity == null) {
-		// 	var cube = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
-		// 	cube.addNormals();
-		// 	cube.addUVs();
-		// 	_dbgEntity = new h3d.scene.Mesh(cube);
-		// 	_dbgEntity.material.mainPass.wireframe = true;
-		// 	_dbgEntity.setTransform(transform);
+		// 	_dbgEntity = this.boundingBox.makeDebugObj();
+		// 	_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
 		// } else {
-		// 	_dbgEntity.setTransform(transform);
+		// 	_dbgEntity = this.boundingBox.makeDebugObj();
+		// 	_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
 		// }
 	}
 
 	public override function setTransform(transform:Matrix) {
 		super.setTransform(transform);
 		// if (_dbgEntity != null) {
-		// 	_dbgEntity.setTransform(transform);
+		// 	_dbgEntity = this.boundingBox.makeDebugObj();
+		// 	_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
 		// }
 	}
 

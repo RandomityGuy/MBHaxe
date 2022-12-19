@@ -14,6 +14,7 @@ class SphereCollisionEntity extends CollisionEntity {
 	public var marble:Marble;
 
 	var _dbgEntity:h3d.scene.Mesh;
+	var _dbgEntity2:h3d.scene.Mesh;
 
 	public function new(marble:Marble) {
 		super(cast marble);
@@ -27,6 +28,7 @@ class SphereCollisionEntity extends CollisionEntity {
 		var boundingBox = new Bounds();
 		var pos = transform.getPosition();
 		boundingBox.addSpherePos(pos.x, pos.y, pos.z, radius);
+		boundingBox.transform3x3(transform);
 		this.boundingBox = boundingBox;
 
 		// if (_dbgEntity == null) {
@@ -37,8 +39,21 @@ class SphereCollisionEntity extends CollisionEntity {
 		// 	_dbgEntity.material.mainPass.wireframe = true;
 		// 	_dbgEntity.setTransform(transform);
 		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
+
+		// 	var cube2 = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
+		// 	cube2.addNormals();
+		// 	cube2.addUVs();
+		// 	_dbgEntity2 = new h3d.scene.Mesh(cube2);
+		// 	_dbgEntity2.material.mainPass.wireframe = true;
+		// 	_dbgEntity2.setTransform(transform);
+		// 	MarbleGame.instance.scene.addChild(_dbgEntity2);
 		// } else {
 		// 	_dbgEntity.setTransform(transform);
+		// 	var cube2 = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
+		// 	cube2.addNormals();
+		// 	cube2.addUVs();
+		// 	_dbgEntity2.primitive = cube2;
+		// 	_dbgEntity2.setPosition(pos.x, pos.y, pos.z);
 		// }
 	}
 
