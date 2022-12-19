@@ -524,6 +524,8 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function updateGameState() {
+		if (this.outOfBounds)
+			return; // We will update state manually
 		if (this.timeState.currentAttemptTime < 0.5) {
 			this.playGui.setCenterText('none');
 		}
@@ -539,9 +541,6 @@ class MarbleWorld extends Scheduler {
 		}
 		if (this.timeState.currentAttemptTime >= 5.5) {
 			this.playGui.setCenterText('none');
-		}
-		if (this.outOfBounds) {
-			this.playGui.setCenterText('outofbounds');
 		}
 	}
 
@@ -1736,7 +1735,10 @@ class MarbleWorld extends Scheduler {
 			playGui.setCenterText('none');
 			return null;
 		});
-		this.schedule(this.timeState.currentAttemptTime + 2.5, () -> this.restart());
+		this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
+			this.restart();
+			return null;
+		});
 	}
 
 	/** Sets a new active checkpoint. */
