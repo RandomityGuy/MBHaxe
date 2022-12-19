@@ -1551,6 +1551,15 @@ class MarbleWorld extends Scheduler {
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
 			this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
+			// Stop the ongoing sounds
+			if (timeTravelSound != null) {
+				timeTravelSound.stop();
+				timeTravelSound = null;
+			}
+			if (alarmSound != null) {
+				alarmSound.stop();
+				alarmSound = null;
+			}
 		}
 	}
 
