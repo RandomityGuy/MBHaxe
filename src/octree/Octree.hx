@@ -139,16 +139,20 @@ class Octree {
 		return intersections;
 	}
 
-	public function boundingSearch(bounds:Bounds) {
+	public function boundingSearch(bounds:Bounds, useCache:Bool = true) {
 		var intersections = [];
-		if (this.prevBoundSearch != null) {
-			if (this.prevBoundSearch.containsBounds(bounds)) {
-				return boundSearchCache;
+		if (useCache) {
+			if (this.prevBoundSearch != null) {
+				if (this.prevBoundSearch.containsBounds(bounds)) {
+					return boundSearchCache;
+				}
 			}
 		}
 		this.root.boundingSearch(bounds, intersections);
-		prevBoundSearch = bounds;
-		boundSearchCache = intersections;
+		if (useCache) {
+			prevBoundSearch = bounds;
+			boundSearchCache = intersections;
+		}
 		return intersections;
 	}
 
