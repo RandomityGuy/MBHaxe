@@ -27,7 +27,7 @@ import h3d.mat.Texture;
 class EndPad extends DtsObject {
 	var fireworks:Array<Firework> = [];
 
-	var finishCollider:Cylinder;
+	var finishCollider:ConvexHull;
 	var finishBounds:Bounds;
 	var inFinish:Bool = false;
 
@@ -75,12 +75,19 @@ class EndPad extends DtsObject {
 				vertices.push(new Vector(x * radius * this.scaleX, (i != 0 ? 4.8 : 0) * 1, z * radius * this.scaleY));
 			}
 		}
-		finishCollider = new Cylinder();
-		finishCollider.p1 = this.getAbsPos().getPosition();
-		finishCollider.p2 = finishCollider.p1.clone();
-		var vertDir = this.getAbsPos().up();
-		finishCollider.p2 = finishCollider.p2.add(vertDir.multiply(height));
-		finishCollider.radius = radius * this.scaleY;
+		// var m = new h3d.prim.Cylinder(64, radius, height);
+		// m.addNormals();
+		// m.addUVs();
+		// var cmesh = new h3d.scene.Mesh(m);
+		// cmesh.setTransform(this.getAbsPos());
+		// MarbleGame.instance.scene.addChild(cmesh);
+		finishCollider = new ConvexHull(vertices);
+		// finishCollider = new Cylinder();
+		// finishCollider.p1 = this.getAbsPos().getPosition();
+		// finishCollider.p2 = finishCollider.p1.clone();
+		// var vertDir = this.getAbsPos().up();
+		// finishCollider.p2 = finishCollider.p2.add(vertDir.multiply(height));
+		// finishCollider.radius = radius;
 
 		finishBounds = new Bounds();
 		for (vert in vertices)
@@ -93,7 +100,7 @@ class EndPad extends DtsObject {
 		var tform = this.getAbsPos().clone();
 		tform.prependRotation(Math.PI / 2, 0, 0);
 
-		// finishCollider.transform = tform;
+		finishCollider.transform = tform;
 
 		finishBounds.transform(tform);
 

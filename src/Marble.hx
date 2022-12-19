@@ -1287,6 +1287,7 @@ class Marble extends GameObject {
 			this.setRotationQuat(quat);
 
 			var totMatrix = quat.toMatrix();
+			newPos.w = 1; // Fix shit blowing up
 			totMatrix.setPosition(newPos);
 
 			this.setPosition(newPos.x, newPos.y, newPos.z);

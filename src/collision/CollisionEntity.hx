@@ -143,8 +143,8 @@ class CollisionEntity implements IOctreeObject {
 		var sphereBounds = new Bounds();
 		var localPos = position.clone();
 		localPos.transform(invMatrix);
-		sphereBounds.addSpherePos(position.x, position.y, position.z, radius * 1.1);
-		sphereBounds.transform(invMatrix);
+		// sphereBounds.addSpherePos(position.x, position.y, position.z, radius * 1.1);
+		// sphereBounds.transform(invMatrix);
 		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, radius * 1.1);
 		var surfaces = bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
 

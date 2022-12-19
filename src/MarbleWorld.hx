@@ -1311,7 +1311,11 @@ class MarbleWorld extends Scheduler {
 		playGui.setCenterText('outofbounds');
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 		// if (this.replay.mode != = 'playback')
-		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
+		this.schedule(this.timeState.currentAttemptTime + 2, () -> {
+			playGui.setCenterText('none');
+			return null;
+		});
+		this.schedule(this.timeState.currentAttemptTime + 2.5, () -> this.restart());
 	}
 
 	public function setCursorLock(enabled:Bool) {

@@ -73,13 +73,12 @@ class Grid {
 					var hash = hashVector(i, j, k);
 					if (this.map.exists(hash)) {
 						var surfs = this.map.get(hash);
-						var actualsurfs = surfs.map(x -> this.surfaces[x]);
-						for (surf in actualsurfs) {
-							if (surf.key)
+						for (surf in surfs) {
+							if (surfaces[surf].key)
 								continue;
-							if (searchbox.containsBounds(surf.boundingBox) || searchbox.collide(surf.boundingBox)) {
-								foundSurfaces.push(surf);
-								surf.key = true;
+							if (searchbox.containsBounds(surfaces[surf].boundingBox) || searchbox.collide(surfaces[surf].boundingBox)) {
+								foundSurfaces.push(surfaces[surf]);
+								surfaces[surf].key = true;
 							}
 						}
 					}
