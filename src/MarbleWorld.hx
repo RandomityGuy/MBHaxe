@@ -1,5 +1,6 @@
 package src;
 
+import collision.Collision;
 import src.Replay;
 import hxd.impl.Air3File.FileSeek;
 import gui.Canvas;
@@ -1151,7 +1152,54 @@ class MarbleWorld extends Scheduler {
 
 		if (this.finishTime == null) {
 			if (spherebounds.collide(this.endPad.finishBounds)) {
-				if (collision.gjk.GJK.gjk(gjkSphere, this.endPad.finishCollider, false) != null) {
+				var padUp = this.endPad.getAbsPos().up();
+				padUp = padUp.multiply(10);
+
+				var checkBounds = spherebounds.clone();
+				checkBounds.zMin -= 10;
+				checkBounds.zMax += 10;
+				var checkBoundsCenter = checkBounds.getCenter();
+				var checkSphereRadius = checkBounds.getMax().sub(checkBoundsCenter).length();
+				var checkSphere = new Bounds();
+				checkSphere.addSpherePos(checkBoundsCenter.x, checkBoundsCenter.y, checkBoundsCenter.z, checkSphereRadius);
+				var endpadBB = this.collisionWorld.boundingSearch(checkSphere, false);
+				var found = false;
+				for (collider in endpadBB) {
+					if (collider.go == this.endPad) {
+						var chull = cast(collider, collision.CollisionHull);
+						for (surface in chull.surfaces) {
+							var i = 0;
+							while (i < surface.indices.length) {
+								var surfaceN = surface.normals[surface.indices[i]].transformed3x3(chull.transform);
+								var v1 = surface.points[surface.indices[i]].transformed(chull.transform);
+								var surfaceD = -surfaceN.dot(v1);
+
+								if (surfaceN.dot(padUp.multiply(-10)) < 0) {
+									var dist = surfaceN.dot(checkBoundsCenter.toVector()) + surfaceD;
+									if (dist >= 0 && dist < 5) {
+										var intersectT = -(checkBoundsCenter.dot(surfaceN.toPoint()) + surfaceD) / (padUp.dot(surfaceN));
+										var intersectP = checkBoundsCenter.add(padUp.multiply(intersectT).toPoint()).toVector();
+										if (Collision.PointInTriangle(intersectP, v1, surface.points[surface.indices[i + 1]].transformed(chull.transform),
+											surface.points[surface.indices[i + 2]].transformed(chull.transform))) {
+											found = true;
+											break;
+										}
+									}
+								}
+
+								i += 3;
+							}
+
+							if (found) {
+								break;
+							}
+						}
+						if (found) {
+							break;
+						}
+					}
+				}
+				if (found) {
 					if (!endPad.inFinish) {
 						touchFinish();
 						endPad.inFinish = true;
