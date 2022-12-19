@@ -93,7 +93,7 @@ class GuiButton extends GuiAnim {
 	public override function onMouseEnter(mouseState:MouseState) {
 		super.onMouseEnter(mouseState);
 
-		if (buttonSounds) {
+		if (buttonSounds && !disabled) {
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonover.wav", ResourceLoader.getAudio, this.soundResources));
 		}
 	}
