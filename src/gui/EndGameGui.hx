@@ -221,7 +221,7 @@ class EndGameGui extends GuiControl {
 				if (mission.qualifyTime > timeState.gameplayClock) {
 					text += "You beat the Par Time!";
 				} else {
-					text += '<font color="#F55555">You didn\'nt pass the Par Time!</font>';
+					text += '<font color="#F55555">You didn\'t pass the Par Time!</font>';
 				}
 			}
 		}

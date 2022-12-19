@@ -1631,9 +1631,9 @@ class MarbleWorld extends Scheduler {
 	public function addBonusTime(t:Float) {
 		this.bonusTime += t;
 		if (t > 0) {
-			this.playGui.addMiddleMessage('+${t}s', 0x99ff99);
+			this.playGui.addMiddleMessage('-${t}s', 0x99ff99);
 		} else if (t < 0) {
-			this.playGui.addMiddleMessage('${t}s', 0xff9999);
+			this.playGui.addMiddleMessage('+${- t}s', 0xff9999);
 		} else {
 			this.playGui.addMiddleMessage('+0s', 0xcccccc);
 		}
@@ -1723,7 +1723,8 @@ class MarbleWorld extends Scheduler {
 		playGui.setCenterText('outofbounds');
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 		// if (this.replay.mode != = 'playback')
-		this.schedule(this.timeState.currentAttemptTime + 2, () -> this.restart());
+		this.schedule(this.timeState.currentAttemptTime + 2, () -> playGui.setCenterText('none'));
+		this.schedule(this.timeState.currentAttemptTime + 2.5, () -> this.restart());
 	}
 
 	/** Sets a new active checkpoint. */

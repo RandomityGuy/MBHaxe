@@ -184,9 +184,11 @@ jobs:
 
       - run:
           name: Package app bundle
+          environment:
+            COMMIT_TAG: pipeline.git.tag
           command: |
             cd ~/MBHaxe
-            ./package-macos.sh v1.3.1
+            ./package-macos.sh v$COMMIT_TAG
             cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
@@ -221,6 +223,9 @@ jobs:
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  build-mac:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /^\d+.\d+.\d+$/
