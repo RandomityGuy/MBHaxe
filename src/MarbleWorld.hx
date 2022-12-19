@@ -1237,10 +1237,6 @@ class MarbleWorld extends Scheduler {
 				timeTravelSound.stop();
 				timeTravelSound = null;
 			}
-			if (alarmSound != null) {
-				alarmSound.stop();
-				alarmSound = null;
-			}
 		}
 	}
 
