@@ -268,9 +268,9 @@ class Util {
 
 	public static function formatTime(time:Float) {
 		var et = time * 1000;
-		var thousandth = Math.floor(et % 10);
-		var hundredth = Math.floor((et % 1000) / 10);
-		var totalSeconds = Math.floor(et / 1000);
+		var thousandth = Std.int(et % 10);
+		var hundredth = Std.int((et % 1000) / 10);
+		var totalSeconds = Std.int(et / 1000);
 		var seconds = totalSeconds % 60;
 		var minutes = (totalSeconds - seconds) / 60;
 

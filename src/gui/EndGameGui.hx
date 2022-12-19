@@ -130,7 +130,7 @@ class EndGameGui extends GuiControl {
 		pg.addChild(leftColumn);
 
 		var elapsedTime = Math.max(timeState.currentAttemptTime - 3.5, 0);
-		var bonusTime = Math.max(0, elapsedTime - timeState.gameplayClock);
+		var bonusTime = Math.max(0, Std.int((elapsedTime - timeState.gameplayClock) * 1000) / 1000);
 
 		var rightColumn = new GuiMLText(domcasual32, mlFontLoader);
 		rightColumn.text.lineSpacing = 5;

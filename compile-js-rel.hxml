@@ -1,0 +1,10 @@
+-cp src
+-lib heaps
+-lib stb_ogg_sound
+-lib zip
+-lib uglifyjs
+--js marblegame.js
+-D windowSize=1280x720
+-D js-es=6
+--dce full
+--main Main
