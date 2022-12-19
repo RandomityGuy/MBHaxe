@@ -17,7 +17,7 @@ class Cylinder implements GJKShape {
 	public function support(dir:Vector) {
 		var axis = p2.sub(p1);
 		var v = axis.dot(dir) > 0 ? p2 : p1;
-		var rejection = dir.sub(axis.multiply(dir.dot(axis) / (axis.dot(axis) * dir.dot(dir)))).normalized().multiply(radius);
+		var rejection = dir.sub(axis.multiply(dir.dot(axis) / (axis.dot(axis)))).normalized().multiply(radius);
 		return v.add(rejection);
 	}
 }
