@@ -1,0 +1,226 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  build:
+    macos:
+      xcode: 14.1.0 # Specify the Xcode version to use
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      NPROC: 4
+    steps:
+      - checkout:
+          path: ~/MBHaxe
+
+      - run:
+          name: Install brew dependencies
+          command: |
+            brew install cmake
+            brew install pkg-config
+            brew install libpthread-stubs
+            brew install neko
+            brew install nasm
+
+      - run:
+          name: Install Haxe
+          command: |
+            set -eux
+            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-osx.tar.gz"
+            echo "Downloading [$download_url]..."
+            mkdir /tmp/haxe
+            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
+            tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
+            export PATH=/tmp/haxe/:"$PATH"
+            export HAXE_STD_PATH=/tmp/haxe/std
+            haxelib setup ~/haxelib
+            haxelib list
+            haxelib install hashlink
+
+      - run:
+          name: Compile zlib
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl https://www.zlib.net/zlib-1.2.13.tar.xz | tar xz
+            cd zlib-1.2.13
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
+          name: Compile alsoft
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2 | tar xz
+            cd openal-soft-1.22.2
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DALSOFT_BACKEND_SNDIO=NO -DALSOFT_BACKEND_PORTAUDIO=NO -DALSOFT_BACKEND_WAVE=NO -DALSOFT_UTILS=NO -DALSOFT_EXAMPLES=NO -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+      - run:
+          name: Compile jpeg-turbo (x86)
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl -L https://downloads.sourceforge.net/project/libjpeg-turbo/2.1.4/libjpeg-turbo-2.1.4.tar.gz | tar xz
+            cd libjpeg-turbo-2.1.4
+            cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
+            cmake --build build-x86 --config release -j$NPROC
+
+      - run:
+          name: Compile jpeg-turbo (ARM64)
+          command: |
+            cd ~/deps/libjpeg-turbo-2.1.4
+            cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
+            cmake --build build-arm64 --config release -j$NPROC
+
+      - run:
+          name: Install jpeg-turbo (Universal)
+          command: |
+            cd ~/deps/libjpeg-turbo-2.1.4/build-arm64
+            for i in libjpeg.62.3.0.dylib cjpeg cjpeg-static djpeg djpeg-static jcstest jpegtran jpegtran-static libjpeg.a libturbojpeg.a libturbojpeg.0.2.0.dylib rdjpgcom strtest tjbench tjbench-static tjexample tjunittest tjunittest-static wrjpgcom
+            do
+            lipo -create -output $i ../build-x86/$i $i
+            done
+            sudo cmake --install .
+
+      - run:
+          name: Compile libogg
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl -L https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz | tar xz
+            cd libogg-1.3.5
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
+          name: Compile libvorbis
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl -L https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz | tar xz
+            cd libvorbis-1.3.7
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
+          name: Compile libpng (x86)
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl -L https://download.sourceforge.net/libpng/libpng-1.6.39.tar.xz | tar xz
+            cd libpng-1.6.39
+            cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build-x86 --config release -j$NPROC
+
+      - run:
+          name: Compile libpng (arm64)
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            cd libpng-1.6.39
+            cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build-arm64 --config release -j$NPROC
+
+      - run:
+          name: Install libpng (Universal)
+          command: |
+            cd ~/deps/libpng-1.6.39/build-arm64
+            for i in libpng16.16.39.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
+            do
+            lipo -create -output $i ../build-x86/$i $i
+            done
+            sudo cmake --install .
+
+      - run:
+          name: Compile SDL2
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.26.1/SDL2-2.26.1.tar.gz | tar xz
+            cd SDL2-2.26.1
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
+          name: Install hashlink
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            git clone --depth=1 https://github.com/RandomityGuy/hashlink
+            cd hashlink
+            # Fix OpenAL
+            curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DWITH_SSL=OFF -DWITH_UV=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
+          name: Install haxe dependencies
+          command: |
+            export PATH=/tmp/haxe/:"$PATH"
+            export HAXE_STD_PATH=/tmp/haxe/std
+            haxelib git heaps https://github.com/RandomityGuy/heaps
+            haxelib dev hlopenal ~/deps/hashlink/libs/openal
+            haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+
+      - run:
+          name: Compile MBHaxe
+          command: |
+            export PATH=/tmp/haxe/:"$PATH"
+            export HAXE_STD_PATH=/tmp/haxe/std
+            cd ~/MBHaxe
+            haxe compile-macos.hxml
+            cd native
+            cp ~/deps/hashlink/src/hlc_main.c .
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll} -lsdl2 -lhl
+
+      - run:
+          name: Package app bundle
+          command: |
+            cd ~/MBHaxe
+            ./package-macos.sh v1.3.1
+            cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS"
+            otool -L marblegame
+            cd ../Frameworks
+            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib} .
+            cp /usr/local/lib/libhl.1.13.0.dylib libhl.1.dylib
+            cp /usr/local/lib/libogg.0.8.5.dylib libogg.0.dylib
+            cp /usr/local/lib/libopenal.1.22.2.dylib libopenal.1.dylib
+            cp /usr/local/lib/libpng16.16.dylib libpng16.16.dylib
+            cp /usr/local/lib/libturbojpeg.0.2.0.dylib libturbojpeg.0.dylib
+            cp /usr/local/lib/libvorbis.0.4.9.dylib libvorbis.0.4.9.dylib
+            cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
+            cp /usr/local/lib/libvorbisenc.2.0.12.dylib libvorbisenc.2.0.12.dylib
+            cp /usr/local/lib/libz.1.2.13.dylib libz.1.dylib
+            # These libraries have dangling RPATHs
+            install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib
+            for i in fmt.hdll libpng16.16.dylib
+            do
+            install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.1.dylib $i
+            done
+
+      - run:
+          name: ZIP Bundle
+          command: |
+            cd ~/MBHaxe
+            rm -rf "macos-dist/MarbleBlast Platinum.app.in"
+            zip -r MBHaxe-Platinum.zip macos-dist/
+
+      - store_artifacts:
+          path: ~/MBHaxe/MBHaxe-Platinum.zip
+
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  say-hello-workflow:
+    jobs:
+      - build
