@@ -22,11 +22,11 @@ import src.Settings;
 
 class ResourceLoader {
 	#if (hl && !android)
-		#if MACOS_BUNDLE
+	#if MACOS_BUNDLE
 	public static var fileSystem:FileSystem = new TorqueFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "..", ".."])), null);
-		#else
+	#else
 	public static var fileSystem:FileSystem = new TorqueFileSystem(".", null);
-		#end
+	#end
 	#end
 	#if (js || android)
 	public static var fileSystem:FileSystem = null;
@@ -316,8 +316,7 @@ class ResourceLoader {
 				texObj.flags.set(MipMapped);
 			}
 			var tex = img.toTexture();
-			tex.mipMap = Linear;
-			tex.filter = Linear;
+			tex.mipMap = Nearest;
 			// tex.filter = Nearest;
 			var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
 			textureCache.set(path, textureresource);

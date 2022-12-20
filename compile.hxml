@@ -4,5 +4,6 @@
 -hl marblegame.hl
 -D windowSize=1280x720
 -D keep-inline-positions
+-D highDPI
 --main Main
 -debug
