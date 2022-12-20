@@ -6,5 +6,6 @@
 -D windowSize=1280x720
 -D js-es=6
 -D keep-inline-positions
+-D highDPI
 --main Main
 -debug

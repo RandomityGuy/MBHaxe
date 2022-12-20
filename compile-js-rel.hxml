@@ -6,5 +6,6 @@
 --js marblegame.js
 -D windowSize=1280x720
 -D js-es=6
+-D highDPI
 --dce full
 --main Main

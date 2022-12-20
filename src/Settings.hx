@@ -117,13 +117,12 @@ class Settings {
 	public static var isTouch:Option<Bool> = Option.None;
 
 	#if hl
-		#if MACOS_BUNDLE
+	#if MACOS_BUNDLE
 	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBG"]);
-		#else
+	#else
 	public static var settingsDir = ".";
-		#end
 	#end
-
+	#end
 	public static function applySettings() {
 		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
@@ -208,8 +207,7 @@ class Settings {
 
 		if (settingsExists) {
 			#if hl
-			var json =
-			Json.parse(File.getContent(Path.join([settingsDir, "settings.json"])));
+			var json = Json.parse(File.getContent(Path.join([settingsDir, "settings.json"])));
 			#end
 			#if js
 			var json = Json.parse(localStorage.getItem("MBHaxeSettings"));
@@ -247,7 +245,7 @@ class Settings {
 		// @:privateAccess Window.getInstance().window.center();
 		Window.getInstance().addResizeEvent(() -> {
 			var wnd = Window.getInstance();
-			var zoomRatio = 1.0;
+			var zoomRatio = Window.getInstance().windowToPixelRatio;
 			#if js
 			var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 600 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
 			Settings.zoomRatio = zoomRatio;

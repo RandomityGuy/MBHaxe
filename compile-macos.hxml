@@ -1,6 +1,7 @@
 -cp src
 -lib heaps
 -lib hlsdl
+-D highDPI
 -hl native/marblegame.c
 -D MACOS_BUNDLE
 --main Main

@@ -115,7 +115,7 @@ class CameraController extends Object {
 			_ignoreCursor = false;
 			return;
 		}
-		var scaleFactor = 1.0;
+		var scaleFactor = 1.0 / Window.getInstance().windowToPixelRatio;
 		#if js
 		scaleFactor = 1 / js.Browser.window.devicePixelRatio;
 		#end
