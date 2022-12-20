@@ -267,7 +267,7 @@ class ManifestFileSystem implements FileSystem {
 			}
 			var entry:ManifestEntry = new ManifestEntry(this, Path.withoutDirectory(original), original, file, original);
 			r.contents.push(entry);
-			manifest.set(path.toLowerCase(), entry);
+			manifest.set(path, entry);
 		}
 
 		switch (_manifest.get(0)) {
@@ -298,7 +298,7 @@ class ManifestFileSystem implements FileSystem {
 				// JSON
 				var json:Array<{path:String, original:String}> = haxe.Json.parse(_manifest.toString());
 				for (entry in json) {
-					insert(entry.path.toLowerCase(), baseDir + entry.path, entry.original);
+					insert(entry.path, baseDir + entry.path, entry.original);
 				}
 		}
 	}
@@ -322,11 +322,11 @@ class ManifestFileSystem implements FileSystem {
 	}
 
 	public function exists(path:String) {
-		return find(path.toLowerCase()) != null;
+		return find(path) != null;
 	}
 
 	public function get(path:String) {
-		var entry:ManifestEntry = find(path.toLowerCase());
+		var entry:ManifestEntry = find(path);
 		if (entry == null)
 			throw new NotFound(path);
 		return entry;

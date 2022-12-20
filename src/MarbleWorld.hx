@@ -8,6 +8,7 @@ import gui.MainMenuGui;
 import gui.ReplayCenterGui;
 #end
 import gui.ReplayNameDlg;
+import gui.MessageBoxOkDlg;
 import collision.Collision;
 import shapes.MegaMarble;
 import shapes.Blast;
@@ -254,11 +255,11 @@ class MarbleWorld extends Scheduler {
 		scanMission(this.mission.root);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		this.resourceLoadFuncs.push(fwd -> this.initMarble(fwd));
-		this.resourceLoadFuncs.push(fwd -> {
-			this.addSimGroup(this.mission.root);
-			this._loadingLength = resourceLoadFuncs.length;
-			fwd();
-		});
+		// this.resourceLoadFuncs.push(fwd -> {
+		// 	this.addSimGroup(this.mission.root);
+		// 	this._loadingLength = resourceLoadFuncs.length;
+		// 	fwd();
+		// });
 		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
 	}
@@ -280,7 +281,8 @@ class MarbleWorld extends Scheduler {
 			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
 			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
 			MarbleGame.canvas.clearContent();
-			this.endPad.generateCollider();
+			if (this.endPad != null)
+				this.endPad.generateCollider();
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 			Console.log("MISSION LOADED");
 			start();
@@ -1103,11 +1105,21 @@ class MarbleWorld extends Scheduler {
 			var func = this.resourceLoadFuncs.shift();
 			lock = true;
 			#if hl
-			func(() -> {
+			try {
+				func(() -> {
+					lock = false;
+					this._resourcesLoaded++;
+					this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+				});
+			} catch (e) {
 				lock = false;
 				this._resourcesLoaded++;
-				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
-			});
+				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
+				errorTxt.setPosition(20, 20);
+				errorTxt.text = e.toString();
+				errorTxt.textColor = 0xFFFFFF;
+				MarbleGame.canvas.scene2d.addChild(errorTxt);
+			}
 			#end
 			#if js
 			func(() -> {

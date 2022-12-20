@@ -1,6 +1,8 @@
 package src;
 
+import gui.MessageBoxOkDlg;
 import src.ResourceLoader;
+import src.MarbleGame;
 
 class ResourceLoaderWorker {
 	var tasks:Array<(() -> Void)->Void> = [];
@@ -20,7 +22,11 @@ class ResourceLoaderWorker {
 	}
 
 	public function addTaskParallel(task:(() -> Void)->Void) {
+		#if (!android)
 		paralleltasks.push(task);
+		#else
+		tasks.push(task);
+		#end
 	}
 
 	public function run() {
@@ -41,19 +47,59 @@ class ResourceLoaderWorker {
 
 		if (tasks.length > 0) {
 			var task = tasks.shift();
-			task(() -> {
-				if (tasks.length > 0) {
-					run();
-				} else {
-					onFinish();
-				}
-			});
+			try {
+				task(() -> {
+					if (tasks.length > 0) {
+						run();
+					} else {
+						onFinish();
+					}
+				});
+			} catch (e) {
+				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
+				errorTxt.setPosition(20, 20);
+				errorTxt.text = e.toString();
+				errorTxt.textColor = 0xFFFFFF;
+				MarbleGame.canvas.scene2d.addChild(errorTxt);
+			}
 		} else {
-			onFinish();
+			try {
+				onFinish();
+			} catch (e) {
+				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
+				errorTxt.setPosition(20, 20);
+				errorTxt.text = e.toString();
+				errorTxt.textColor = 0xFFFFFF;
+				MarbleGame.canvas.scene2d.addChild(errorTxt);
+			}
 		}
 	}
 
 	public function loadFile(path:String) {
-		paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
+		#if (!android)
+		paralleltasks.push(fwd -> {
+			try {
+				ResourceLoader.load(path).entry.load(fwd);
+			} catch (e) {
+				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
+				errorTxt.setPosition(20, 20);
+				errorTxt.text = e.toString();
+				errorTxt.textColor = 0xFFFFFF;
+				MarbleGame.canvas.scene2d.addChild(errorTxt);
+			}
+		});
+		#else
+		tasks.push(fwd -> {
+			try {
+				ResourceLoader.load(path).entry.load(fwd);
+			} catch (e) {
+				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
+				errorTxt.setPosition(20, 20);
+				errorTxt.text = e.toString();
+				errorTxt.textColor = 0xFFFFFF;
+				MarbleGame.canvas.scene2d.addChild(errorTxt);
+			}
+		});
+		#end
 	}
 }
