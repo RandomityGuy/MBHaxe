@@ -248,17 +248,16 @@ class MarbleWorld extends Scheduler {
 
 	public function postInit() {
 		// Add the sky at the last so that cubemap reflections work
-		this.playGui.init(this.scene2d, this.mission.game.toLowerCase(), () -> {
-			// this.scene.addChild(this.sky); TODO FIX ANDROID
-			this._ready = true;
-			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
-			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
-			MarbleGame.canvas.clearContent();
-			if (this.endPad != null)
-				this.endPad.generateCollider();
-			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
-			start();
-		});
+		this.playGui.init(this.scene2d, this.mission.game.toLowerCase());
+		this.scene.addChild(this.sky);
+		this._ready = true;
+		var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
+		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
+		MarbleGame.canvas.clearContent();
+		if (this.endPad != null)
+			this.endPad.generateCollider();
+		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		start();
 	}
 
 	public function initScene(onFinish:Void->Void) {
@@ -1235,7 +1234,7 @@ class MarbleWorld extends Scheduler {
 			asyncLoadResources();
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
-		if (this.marble != null && this.marble.cubemapRenderer != null) {
+		if (this.marble != null && this.marble.cubemapRenderer != null && _ready) {
 			this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
 			this.marble.cubemapRenderer.render(e, 0.002);
 		}
