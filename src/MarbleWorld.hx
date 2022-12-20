@@ -1089,7 +1089,7 @@ class MarbleWorld extends Scheduler {
 			asyncLoadResources();
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
-		if (this.marble != null && this.marble.cubemapRenderer != null) {
+		if (this.marble != null && this.marble.cubemapRenderer != null && _ready) {
 			this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
 			this.marble.cubemapRenderer.render(e, 0.002);
 		}

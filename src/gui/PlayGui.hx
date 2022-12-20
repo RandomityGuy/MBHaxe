@@ -108,7 +108,7 @@ class PlayGui {
 		}
 	}
 
-	public function init(scene2d:h2d.Scene, game:String, onFinish:Void->Void) {
+	public function init(scene2d:h2d.Scene, game:String) {
 		this.scene2d = scene2d;
 		this._init = true;
 
@@ -149,9 +149,7 @@ class PlayGui {
 
 		powerupBox = new GuiImage(ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile());
 		initTimer();
-		initGemCounter(() -> {
-			onFinish();
-		});
+		initGemCounter();
 		initCenterText();
 		initPowerupBox();
 		if (game == 'ultra')
@@ -270,7 +268,7 @@ class PlayGui {
 		}
 	}
 
-	public function initGemCounter(onFinish:Void->Void) {
+	public function initGemCounter() {
 		gemCountNumbers[0].position = new Vector(30, 0);
 		gemCountNumbers[0].extent = new Vector(43, 55);
 
@@ -326,27 +324,22 @@ class PlayGui {
 		// gemImageObject.matNameOverride.set("base.gem", "base.gem.");
 		gemImageObject.ambientSpinFactor /= -2;
 		// ["base.gem"] = color + ".gem";
-		ResourceLoader.load("shapes/items/gem.dts").entry.load(() -> {
-			ResourceLoader.load("shapes/items/" + gemColor + ".gem.png").entry.load(() -> {
-				gemImageObject.init(null, () -> {
-					for (mat in gemImageObject.materials) {
-						mat.mainPass.enableLights = false;
+		gemImageObject.init(null, () -> {});
 
-						// Huge hacks
-						if (mat.blendMode != Add) {
-							var alphaShader = new h3d.shader.AlphaChannel();
-							mat.mainPass.addShader(alphaShader);
-						}
-					}
-					gemImageScene.addChild(gemImageObject);
-					var gemImageCenter = gemImageObject.getBounds().getCenter();
+		for (mat in gemImageObject.materials) {
+			mat.mainPass.enableLights = false;
 
-					gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
-					gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
-					onFinish();
-				});
-			});
-		});
+			// Huge hacks
+			if (mat.blendMode != Add) {
+				var alphaShader = new h3d.shader.AlphaChannel();
+				mat.mainPass.addShader(alphaShader);
+			}
+		}
+		gemImageScene.addChild(gemImageObject);
+		var gemImageCenter = gemImageObject.getBounds().getCenter();
+
+		gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
+		gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
 	}
 
 	function initPowerupBox() {
