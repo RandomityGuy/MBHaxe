@@ -1,5 +1,6 @@
 package src;
 
+import gui.MessageBoxOkDlg;
 import collision.Collision;
 import shapes.MegaMarble;
 import shapes.Blast;
@@ -198,7 +199,7 @@ class MarbleWorld extends Scheduler {
 
 	public function initLoading() {
 		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game);
-		MarbleGame.canvas.setContent(this.loadingGui);
+		// MarbleGame.canvas.setContent(this.loadingGui);
 
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
@@ -231,11 +232,11 @@ class MarbleWorld extends Scheduler {
 		scanMission(this.mission.root);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		this.resourceLoadFuncs.push(fwd -> this.initMarble(fwd));
-		this.resourceLoadFuncs.push(fwd -> {
-			this.addSimGroup(this.mission.root);
-			this._loadingLength = resourceLoadFuncs.length;
-			fwd();
-		});
+		// this.resourceLoadFuncs.push(fwd -> {
+		// 	this.addSimGroup(this.mission.root);
+		// 	this._loadingLength = resourceLoadFuncs.length;
+		// 	fwd();
+		// });
 		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
 	}
@@ -253,7 +254,8 @@ class MarbleWorld extends Scheduler {
 			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
 			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
 			MarbleGame.canvas.clearContent();
-			this.endPad.generateCollider();
+			if (this.endPad != null)
+				this.endPad.generateCollider();
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 			start();
 		});
@@ -1249,11 +1251,21 @@ class MarbleWorld extends Scheduler {
 			var func = this.resourceLoadFuncs.shift();
 			lock = true;
 			#if hl
-			func(() -> {
+			try {
+				func(() -> {
+					lock = false;
+					this._resourcesLoaded++;
+					this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+				});
+			} catch (e) {
 				lock = false;
 				this._resourcesLoaded++;
-				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
-			});
+				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
+				errorTxt.setPosition(20, 20);
+				errorTxt.text = e.toString();
+				errorTxt.textColor = 0xFFFFFF;
+				MarbleGame.canvas.scene2d.addChild(errorTxt);
+			}
 			#end
 			#if js
 			func(() -> {
@@ -1516,7 +1528,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		if (this.finishTime == null) {
+		if (this.finishTime == null && this.endPad != null) {
 			if (spherebounds.collide(this.endPad.finishBounds)) {
 				var padUp = this.endPad.getAbsPos().up();
 				padUp = padUp.multiply(10);

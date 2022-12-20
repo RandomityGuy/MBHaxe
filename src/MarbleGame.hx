@@ -1,5 +1,6 @@
 package src;
 
+import gui.MessageBoxOkDlg;
 import src.Replay;
 import touch.TouchInput;
 import src.ResourceLoader;

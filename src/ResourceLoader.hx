@@ -22,11 +22,11 @@ import src.Settings;
 
 class ResourceLoader {
 	#if (hl && !android)
-		#if MACOS_BUNDLE
+	#if MACOS_BUNDLE
 	public static var fileSystem:FileSystem = new TorqueFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "..", ".."])), null);
-		#else
+	#else
 	public static var fileSystem:FileSystem = new TorqueFileSystem(".", null);
-		#end
+	#end
 	#end
 	#if (js || android)
 	public static var fileSystem:FileSystem = null;
@@ -53,12 +53,12 @@ class ResourceLoader {
 		#if (js || android)
 		var mfileSystem = ManifestBuilder.create("data");
 		var mloader:ManifestLoader = new ManifestLoader(mfileSystem);
-
 		var preloader = new ManifestProgress(mloader, () -> {
 			loader = mloader;
 			fileSystem = mfileSystem;
 			onLoadedFunc();
 		}, scene2d);
+		#if js
 		loader = mloader;
 		fileSystem = mfileSystem;
 		var loadg = new h2d.Text(hxd.res.DefaultFont.get());
@@ -100,7 +100,10 @@ class ResourceLoader {
 			fwd();
 		});
 		worker.run();
-		// preloader.start();
+		#end
+		#if android
+		preloader.start();
+		#end
 		#end
 		#if (hl && !android)
 		onLoadedFunc();
