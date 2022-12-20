@@ -7,7 +7,6 @@ native
 *.obj
 settings.json
 release
-Export
 node_modules
 fonts
 package.json
@@ -19,3 +18,10 @@ macos-dist/data/
 .DS_Store
 **/.DS_Store
 
+Export/html5
+Export/.hxml
+Export/android/local.properties
+Export/android/app/src/main/assets
+Export/android/app/src/main/cpp
+Export/android/app/src/main/java
+Export/android/app/src/main/build.hxml
