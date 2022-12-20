@@ -47,58 +47,26 @@ class ResourceLoaderWorker {
 
 		if (tasks.length > 0) {
 			var task = tasks.shift();
-			try {
-				task(() -> {
-					if (tasks.length > 0) {
-						run();
-					} else {
-						onFinish();
-					}
-				});
-			} catch (e) {
-				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
-				errorTxt.setPosition(20, 20);
-				errorTxt.text = e.toString();
-				errorTxt.textColor = 0xFFFFFF;
-				MarbleGame.canvas.scene2d.addChild(errorTxt);
-			}
+			task(() -> {
+				if (tasks.length > 0) {
+					run();
+				} else {
+					onFinish();
+				}
+			});
 		} else {
-			try {
-				onFinish();
-			} catch (e) {
-				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
-				errorTxt.setPosition(20, 20);
-				errorTxt.text = e.toString();
-				errorTxt.textColor = 0xFFFFFF;
-				MarbleGame.canvas.scene2d.addChild(errorTxt);
-			}
+			onFinish();
 		}
 	}
 
 	public function loadFile(path:String) {
 		#if (!android)
 		paralleltasks.push(fwd -> {
-			try {
-				ResourceLoader.load(path).entry.load(fwd);
-			} catch (e) {
-				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
-				errorTxt.setPosition(20, 20);
-				errorTxt.text = e.toString();
-				errorTxt.textColor = 0xFFFFFF;
-				MarbleGame.canvas.scene2d.addChild(errorTxt);
-			}
+			ResourceLoader.load(path).entry.load(fwd);
 		});
 		#else
 		tasks.push(fwd -> {
-			try {
-				ResourceLoader.load(path).entry.load(fwd);
-			} catch (e) {
-				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
-				errorTxt.setPosition(20, 20);
-				errorTxt.text = e.toString();
-				errorTxt.textColor = 0xFFFFFF;
-				MarbleGame.canvas.scene2d.addChild(errorTxt);
-			}
+			ResourceLoader.load(path).entry.load(fwd);
 		});
 		#end
 	}

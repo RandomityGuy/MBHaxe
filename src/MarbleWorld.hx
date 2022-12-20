@@ -255,11 +255,11 @@ class MarbleWorld extends Scheduler {
 		scanMission(this.mission.root);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		this.resourceLoadFuncs.push(fwd -> this.initMarble(fwd));
-		// this.resourceLoadFuncs.push(fwd -> {
-		// 	this.addSimGroup(this.mission.root);
-		// 	this._loadingLength = resourceLoadFuncs.length;
-		// 	fwd();
-		// });
+		this.resourceLoadFuncs.push(fwd -> {
+			this.addSimGroup(this.mission.root);
+			this._loadingLength = resourceLoadFuncs.length;
+			fwd();
+		});
 		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
 	}
@@ -276,7 +276,7 @@ class MarbleWorld extends Scheduler {
 	public function postInit() {
 		// Add the sky at the last so that cubemap reflections work
 		this.playGui.init(this.scene2d, this.mission.game.toLowerCase(), () -> {
-			this.scene.addChild(this.sky);
+			// this.scene.addChild(this.sky); TODO FIX ANDROID
 			this._ready = true;
 			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
 			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
@@ -1105,21 +1105,11 @@ class MarbleWorld extends Scheduler {
 			var func = this.resourceLoadFuncs.shift();
 			lock = true;
 			#if hl
-			try {
-				func(() -> {
-					lock = false;
-					this._resourcesLoaded++;
-					this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
-				});
-			} catch (e) {
+			func(() -> {
 				lock = false;
 				this._resourcesLoaded++;
-				var errorTxt = new h2d.Text(hxd.res.DefaultFont.get());
-				errorTxt.setPosition(20, 20);
-				errorTxt.text = e.toString();
-				errorTxt.textColor = 0xFFFFFF;
-				MarbleGame.canvas.scene2d.addChild(errorTxt);
-			}
+				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+			});
 			#end
 			#if js
 			func(() -> {
