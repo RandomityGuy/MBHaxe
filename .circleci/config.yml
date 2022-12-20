@@ -11,6 +11,7 @@ jobs:
     environment:
       HOMEBREW_NO_AUTO_UPDATE: 1
       NPROC: 4
+      COMMIT_TAG: pipeline.git.tag
     steps:
       - checkout:
           path: ~/MBHaxe
@@ -157,7 +158,7 @@ jobs:
             git clone --depth=1 https://github.com/RandomityGuy/hashlink
             cd hashlink
             # Fix OpenAL
-            curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
+            £ curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
             cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DWITH_SSL=OFF -DWITH_UV=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
@@ -184,8 +185,6 @@ jobs:
 
       - run:
           name: Package app bundle
-          environment:
-            COMMIT_TAG: pipeline.git.tag
           command: |
             cd ~/MBHaxe
             ./package-macos.sh v$COMMIT_TAG
