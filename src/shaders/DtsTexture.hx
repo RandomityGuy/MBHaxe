@@ -8,6 +8,7 @@ class DtsTexture extends hxsl.Shader {
 		};
 		@global var global:{
 			@perObject var modelView:Mat4;
+			@perObject var modelViewInverse:Mat4;
 		};
 		@const var additive:Bool;
 		@const var killAlpha:Bool;
@@ -22,6 +23,9 @@ class DtsTexture extends hxsl.Shader {
 		function vertex() {
 			calculatedUV = input.uv;
 			transformedNormal = (input.normal * global.modelView.mat3());
+			var normalizednorm = transformedNormal.normalize();
+			transformedNormal = transformedNormal / (transformedNormal.x * transformedNormal.x + transformedNormal.y * transformedNormal.y
+				+ transformedNormal.z * transformedNormal.z);
 		}
 		function fragment() {
 			var c = texture.get(calculatedUV);
