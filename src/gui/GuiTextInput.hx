@@ -20,7 +20,7 @@ class GuiTextInput extends GuiControl {
 	public function new(font:h2d.Font) {
 		super();
 		this.text = new TextInput(font);
-		this.text.textColor = 0;
+		// this.text.textColor = 0;
 		this.text.onChange = () -> {
 			if (onTextChange != null) {
 				onTextChange(this.text.text);

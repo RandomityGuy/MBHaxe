@@ -129,6 +129,9 @@ class SearchGui extends GuiImage {
 		this.addChild(searchTitle);
 
 		var searchEdit = new GuiTextInput(domcasual24);
+		searchEdit.text.textColor = 0;
+		searchEdit.text.selectionColor.setColor(0xFFFFFFFF);
+		searchEdit.text.selectionTile = h2d.Tile.fromColor(0x808080, 0, hxd.Math.ceil(searchEdit.text.font.lineHeight));
 		searchEdit.position = new Vector(91, 19);
 		searchEdit.extent = new Vector(373, 29);
 		searchEdit.onTextChange = (txt) -> {
