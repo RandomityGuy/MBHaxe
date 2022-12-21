@@ -492,7 +492,7 @@ class Marble extends GameObject {
 			A = gWorkGravityDir.multiply(this._gravity);
 		if (this.mode == Finish)
 			A = this.velocity.multiply(-16);
-		if (currentTime - this.helicopterEnableTime < 5) {
+		if (currentTime - this.helicopterEnableTime < 5 && this.mode != Finish) {
 			A = A.multiply(0.25);
 		}
 		for (obj in level.forceObjects) {
