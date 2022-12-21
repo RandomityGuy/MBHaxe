@@ -58,6 +58,9 @@ class EnterNameDlg extends GuiControl {
 		this.addChild(dlg);
 
 		var enterNameEdit = new GuiTextInput(domcasual32);
+		enterNameEdit.text.textColor = 0;
+		enterNameEdit.text.selectionColor.setColor(0xFFFFFFFF);
+		enterNameEdit.text.selectionTile = h2d.Tile.fromColor(0x808080, 0, hxd.Math.ceil(enterNameEdit.text.font.lineHeight));
 		enterNameEdit.position = new Vector(87, 136);
 		enterNameEdit.extent = new Vector(255, 36);
 		enterNameEdit.text.text = Settings.highscoreName;
