@@ -16,7 +16,7 @@ class GuiImage extends GuiControl {
 
 	public var pressedAction:GuiEvent->Void = null;
 
-	public var doClipping:Bool = true;
+	public var doClipping:Bool = false;
 
 	public function new(texture:Tile) {
 		super();
