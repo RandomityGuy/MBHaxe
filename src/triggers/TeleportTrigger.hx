@@ -86,8 +86,12 @@ class TeleportTrigger extends Trigger {
 		} else {
 			position = destination.vertices[0].add(new Vector(0, 0, 3)).add(pos); // destination.vertices[0].clone().add(new Vector(0, 0, 3));
 		}
+		position.w = 1;
 		this.level.marble.prevPos.load(position);
 		this.level.marble.setPosition(position.x, position.y, position.z);
+		var ct = this.level.marble.collider.transform.clone();
+		ct.setPosition(position);
+		this.level.marble.collider.setTransform(ct);
 		if (this.level.isRecording) {
 			this.level.replay.recordMarbleStateFlags(false, false, true, false);
 		}
