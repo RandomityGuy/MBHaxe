@@ -15,8 +15,7 @@ class Rect {
 	}
 
 	public function inRect(point:Vector) {
-		return (position.x <= point.x && (position.x + extent.x) >= point.x)
-			&& (position.y <= point.y && (position.y + extent.y) >= point.y);
+		return (position.x < point.x && (position.x + extent.x) > point.x) && (position.y < point.y && (position.y + extent.y) > point.y);
 	}
 
 	public function intersect(other:Rect) {
