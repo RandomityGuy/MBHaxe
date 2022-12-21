@@ -119,7 +119,7 @@ class GuiControl {
 			rect.position = parentRect.position.add(this.position.multiply(uiScaleFactor));
 		}
 
-		var scaleFactor = 1.0 / Window.getInstance().windowToPixelRatio;
+		var scaleFactor = 1.0;
 		#if (js || android)
 		scaleFactor = 1 / Settings.zoomRatio; // 768 / js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio; // 0.5; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
 		#end

@@ -9,6 +9,7 @@ import src.MarbleGame;
 @:publicFields
 class GuiImage extends GuiControl {
 	var bmp:Bitmap;
+	var bmpFlow:Flow;
 
 	public var pressedAction:GuiControl->Void = null;
 
@@ -24,16 +25,23 @@ class GuiImage extends GuiControl {
 		// bmp.scaleY = renderRect.extent.y / bmp.tile.height;
 		bmp.width = renderRect.extent.x;
 		bmp.height = renderRect.extent.y;
-		if (scene2d.contains(bmp)) {
-			scene2d.removeChild(bmp); // Refresh "layer"
+		if (doClipping) {
+			bmpFlow.maxWidth = Std.int(hittestRect.extent.x);
+			bmpFlow.maxHeight = Std.int(hittestRect.extent.y);
 		}
-		scene2d.addChild(bmp);
+		if (scene2d.contains(obj)) {
+			scene2d.removeChild(obj); // Refresh "layer"
+		}
+		scene2d.addChild(obj);
 		super.render(scene2d);
 	}
 
 	public override function dispose() {
 		super.dispose();
-		this.bmp.remove();
+		if (this.doClipping) {
+			bmpFlow.remove();
+		} else
+			this.bmp.remove();
 	}
 
 	public override function onMouseRelease(mouseState:MouseState) {
@@ -45,6 +53,9 @@ class GuiImage extends GuiControl {
 
 	public override function onRemove() {
 		super.onRemove();
+		if (MarbleGame.canvas.scene2d.contains(bmpFlow)) {
+			MarbleGame.canvas.scene2d.removeChild(bmpFlow); // Refresh "layer"
+		}
 		if (MarbleGame.canvas.scene2d.contains(bmp)) {
 			MarbleGame.canvas.scene2d.removeChild(bmp); // Refresh "layer"
 		}
