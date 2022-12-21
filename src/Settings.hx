@@ -364,8 +364,8 @@ class Settings {
 			Settings.zoomRatio = zoomRatio;
 			#end
 			#if hl
-			Settings.optionsSettings.screenWidth = cast wnd.width / zoomRatio;
-			Settings.optionsSettings.screenHeight = cast wnd.height / zoomRatio;
+			Settings.optionsSettings.screenWidth = cast wnd.width;
+			Settings.optionsSettings.screenHeight = cast wnd.height;
 			#end
 			#if js
 			Settings.optionsSettings.screenWidth = cast js.Browser.window.screen.width; // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
