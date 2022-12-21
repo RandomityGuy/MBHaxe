@@ -65,6 +65,7 @@ class EndGameGui extends GuiControl {
 		var nextLevelPreview = new GuiImage(tmpprevtile);
 		nextLevelPreview.position = new Vector(-15, 0);
 		nextLevelPreview.extent = new Vector(160, 110);
+		nextLevelPreview.doClipping = true;
 		nextLevel.addChild(nextLevelPreview);
 
 		mission.getNextMission().getPreviewImage(t -> {
