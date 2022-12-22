@@ -362,13 +362,13 @@ class PlayGui {
 	}
 
 	public function setHelpTextOpacity(value:Float) {
-		helpTextForeground.text.color.a = value;
-		helpTextBackground.text.color.a = value;
+		@:privateAccess helpTextForeground.text._textColorVec.a = value;
+		@:privateAccess helpTextBackground.text._textColorVec.a = value;
 	}
 
 	public function setAlertTextOpacity(value:Float) {
-		alertTextForeground.text.color.a = value;
-		alertTextBackground.text.color.a = value;
+		@:privateAccess alertTextForeground.text._textColorVec.a = value;
+		@:privateAccess alertTextBackground.text._textColorVec.a = value;
 	}
 
 	public function setAlertText(text:String) {
