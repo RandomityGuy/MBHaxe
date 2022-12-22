@@ -157,11 +157,23 @@ class Settings {
 	public static var isTouch:Option<Bool> = Option.None;
 
 	#if hl
-		#if MACOS_BUNDLE
+	#if MACOS_BUNDLE
 	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBP"]);
-		#else
+	#else
 	public static var settingsDir = ".";
-		#end
+	#end
+	#end
+	#if android
+	@:hlNative("Java_io_heaps_android_HeapsActivity")
+	static function saveAndroid(name:String, data:String) {}
+	#end
+
+	#if android
+	@:hlNative("Java_io_heaps_android_HeapsActivity")
+	static function loadAndroid(name:String):hl.Bytes {
+		var i = 4;
+		return hl.Bytes.fromValue("null", i);
+	}
 	#end
 
 	public static function applySettings() {
@@ -260,6 +272,9 @@ class Settings {
 		}
 		File.saveContent(Path.join([settingsDir, "settings.json"]), json);
 		#end
+		#if android
+		saveAndroid('settings', json);
+		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();
 		if (localStorage != null) {
@@ -279,10 +294,19 @@ class Settings {
 			settingsExists = localStorage.getItem("MBHaxeSettings") != null;
 		}
 		#end
+		#if android
+		settingsExists = true;
+		var rawJson = @:privateAccess String.fromUTF8(loadAndroid('settings'));
+		if (rawJson == null || rawJson == "")
+			settingsExists = false;
+		#end
 
 		if (settingsExists) {
-			#if hl
+			#if (hl && !android)
 			var json = Json.parse(File.getContent(Path.join([settingsDir, "settings.json"])));
+			#end
+			#if android
+			var json = Json.parse(rawJson);
 			#end
 			#if js
 			var json = Json.parse(localStorage.getItem("MBHaxeSettings"));
