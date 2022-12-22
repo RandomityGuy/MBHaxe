@@ -195,12 +195,12 @@ class Settings {
 	#end
 	#end
 	#if android
-	@:hlNative("Java_io_heaps_android_HeapsActivity")
+	@:hlNative("Java_org_haxe_HashLinkActivity")
 	static function saveAndroid(name:String, data:String) {}
 	#end
 
 	#if android
-	@:hlNative("Java_io_heaps_android_HeapsActivity")
+	@:hlNative("Java_org_haxe_HashLinkActivity")
 	static function loadAndroid(name:String):hl.Bytes {
 		var i = 4;
 		return hl.Bytes.fromValue("null", i);
