@@ -195,8 +195,9 @@ class PlayGui {
 	}
 
 	public function initCenterText() {
-		RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[0].width / 2;
+		RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[0].width * Settings.uiScale / 2;
 		RSGOCenterText.y = scene2d.height * 0.3; // - RSGOCenterText.frames[0].height / 2;
+		RSGOCenterText.setScale(Settings.uiScale);
 	}
 
 	public function setCenterText(identifier:String) {
@@ -205,19 +206,19 @@ class PlayGui {
 		} else if (identifier == 'ready') {
 			this.RSGOCenterText.visible = true;
 			this.RSGOCenterText.currentFrame = 0;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[0].width / 2;
+			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[0].width * Settings.uiScale / 2;
 		} else if (identifier == 'set') {
 			this.RSGOCenterText.visible = true;
 			this.RSGOCenterText.currentFrame = 1;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[1].width / 2;
+			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[1].width * Settings.uiScale / 2;
 		} else if (identifier == 'go') {
 			this.RSGOCenterText.visible = true;
 			this.RSGOCenterText.currentFrame = 2;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[2].width / 2;
+			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[2].width * Settings.uiScale / 2;
 		} else if (identifier == 'outofbounds') {
 			this.RSGOCenterText.visible = true;
 			this.RSGOCenterText.currentFrame = 3;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[3].width / 2;
+			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[3].width * Settings.uiScale / 2;
 		}
 	}
 
@@ -252,8 +253,9 @@ class PlayGui {
 		gemImageSceneTarget.depthBuffer = new DepthBuffer(60, 60);
 
 		gemImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(gemImageSceneTarget), scene2d);
-		gemImageSceneTargetBitmap.x = -8;
-		gemImageSceneTargetBitmap.y = -8;
+		gemImageSceneTargetBitmap.x = -8 * Settings.uiScale;
+		gemImageSceneTargetBitmap.y = -8 * Settings.uiScale;
+		gemImageSceneTargetBitmap.setScale(Settings.uiScale);
 		// gemImageSceneTargetBitmap.blendMode = None;
 		// gemImageSceneTargetBitmap.addShader(new ColorKey());
 
@@ -297,8 +299,9 @@ class PlayGui {
 		powerupImageSceneTarget.depthBuffer = new DepthBuffer(68, 67);
 
 		powerupImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(powerupImageSceneTarget), scene2d);
-		powerupImageSceneTargetBitmap.x = scene2d.width - 88;
-		powerupImageSceneTargetBitmap.y = 18;
+		powerupImageSceneTargetBitmap.x = scene2d.width - 88 * Settings.uiScale;
+		powerupImageSceneTargetBitmap.y = 18 * Settings.uiScale;
+		powerupImageSceneTargetBitmap.setScale(Settings.uiScale);
 	}
 
 	function initTexts() {

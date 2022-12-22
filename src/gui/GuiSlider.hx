@@ -5,6 +5,7 @@ import hxd.res.Sound;
 import hxd.Key;
 import gui.GuiControl.MouseState;
 import src.Util;
+import src.Settings;
 
 class GuiSlider extends GuiImage {
 	public var sliderValue:Float = 0;
@@ -29,6 +30,7 @@ class GuiSlider extends GuiImage {
 		super.update(dt, mouseState);
 		this.bmp.x = renderRect.position.x + renderRect.extent.x * sliderValue;
 		this.bmp.x = Util.clamp(this.bmp.x, renderRect.position.x, renderRect.position.x + renderRect.extent.x - bmp.width / 2);
-		this.bmp.width = this.bmp.tile.width;
+		this.bmp.width = this.bmp.tile.width * Settings.uiScale;
+		super.update(dt, mouseState);
 	}
 }
