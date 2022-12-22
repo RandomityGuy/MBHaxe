@@ -175,13 +175,13 @@ class GuiControl {
 		}
 		if (this.horizSizing == HorizSizing.Left) {
 			if (this.parent != null) {
-				rect.position.x = parentRect.position.x + parentRect.extent.x - (parent.extent.x - this.position.x * uiScaleFactor);
+				rect.position.x = parentRect.position.x + parentRect.extent.x - (parent.extent.x - this.position.x) * uiScaleFactor;
 				rect.extent.x *= uiScaleFactor;
 			}
 		}
 		if (this.vertSizing == VertSizing.Top) {
 			if (this.parent != null) {
-				rect.position.y = parentRect.position.y + parentRect.extent.y - (parent.extent.y - this.position.y * uiScaleFactor);
+				rect.position.y = parentRect.position.y + parentRect.extent.y - (parent.extent.y - this.position.y) * uiScaleFactor;
 				rect.extent.y *= uiScaleFactor;
 			}
 		}
