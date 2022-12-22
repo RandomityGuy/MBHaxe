@@ -397,7 +397,7 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyTopC.addChild(pmDifficultyTopCTab);
 
 		var pmDifficultyTopC2 = new GuiControl();
-		pmDifficultyTopC2.horizSizing = Relative;
+		pmDifficultyTopC2.horizSizing = Left;
 		pmDifficultyTopC2.vertSizing = Bottom;
 		pmDifficultyTopC2.position = new Vector(293, 0);
 		pmDifficultyTopC2.extent = new Vector(243, 45);
