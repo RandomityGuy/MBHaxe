@@ -238,7 +238,7 @@ class Settings {
 		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
-		uiScale = Window.getInstance().windowToPixelRatio;
+		uiScale = 1 / Window.getInstance().windowToPixelRatio;
 		#end
 		#if js
 		Window.getInstance().propagateKeyEvents = true;

@@ -973,11 +973,16 @@ class MarbleWorld extends Scheduler {
 				if (timeTravelSound == null) {
 					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
 					timeTravelSound = AudioManager.playSound(ttsnd, null, true);
+
+					if (alarmSound != null)
+						alarmSound.pause = true;
 				}
 			} else {
 				if (timeTravelSound != null) {
 					timeTravelSound.stop();
 					timeTravelSound = null;
+					if (alarmSound != null)
+						alarmSound.pause = false;
 				}
 				if (this.timeState.currentAttemptTime >= 3.5)
 					this.timeState.gameplayClock += dt;
