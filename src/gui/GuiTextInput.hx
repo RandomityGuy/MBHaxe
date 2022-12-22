@@ -73,5 +73,8 @@ class GuiTextInput extends GuiControl {
 			// js.Browser.document.documentElement.requestFullscreen();
 		}
 		#end
+		#if android
+		text.focus();
+		#end
 	}
 }
