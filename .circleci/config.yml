@@ -40,6 +40,11 @@ jobs:
             haxelib list
             haxelib install hashlink
 
+      - restore_cache:
+          keys:
+            - mbhaxe-deps-v1
+          
+
       - run:
           name: Compile zlib
           command: |
@@ -47,9 +52,11 @@ jobs:
             cd ~/deps
             curl https://www.zlib.net/zlib-1.2.13.tar.xz | tar xz
             cd zlib-1.2.13
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build --config Release -j$NPROC
-            sudo cmake --install build
+            if [ ! -f /usr/local/lib/libz.1.2.13.dylib ]; then
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+              cmake --build build --config Release -j$NPROC
+              sudo cmake --install build
+            fi
 
       - run:
           name: Compile alsoft
@@ -58,9 +65,11 @@ jobs:
             cd ~/deps
             curl https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2 | tar xz
             cd openal-soft-1.22.2
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DALSOFT_BACKEND_SNDIO=NO -DALSOFT_BACKEND_PORTAUDIO=NO -DALSOFT_BACKEND_WAVE=NO -DALSOFT_UTILS=NO -DALSOFT_EXAMPLES=NO -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build --config Release -j$NPROC
-            sudo cmake --install build
+            if [ ! -f /usr/local/lib/libopenal.1.22.2.dylib ]; then
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DALSOFT_BACKEND_SNDIO=NO -DALSOFT_BACKEND_PORTAUDIO=NO -DALSOFT_BACKEND_WAVE=NO -DALSOFT_UTILS=NO -DALSOFT_EXAMPLES=NO -DCMAKE_MACOSX_RPATH=TRUE
+              cmake --build build --config Release -j$NPROC
+              sudo cmake --install build
+            fi
       - run:
           name: Compile jpeg-turbo (x86)
           command: |
@@ -68,25 +77,31 @@ jobs:
             cd ~/deps
             curl -L https://downloads.sourceforge.net/project/libjpeg-turbo/2.1.4/libjpeg-turbo-2.1.4.tar.gz | tar xz
             cd libjpeg-turbo-2.1.4
-            cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
-            cmake --build build-x86 --config release -j$NPROC
+            if [ ! -f /usr/local/lib/libturbojpeg.0.2.0.dylib ]; then
+              cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
+              cmake --build build-x86 --config release -j$NPROC
+            fi
 
       - run:
           name: Compile jpeg-turbo (ARM64)
           command: |
             cd ~/deps/libjpeg-turbo-2.1.4
-            cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
-            cmake --build build-arm64 --config release -j$NPROC
+            if [ ! -f /usr/local/lib/libturbojpeg.0.2.0.dylib ]; then
+              cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
+              cmake --build build-arm64 --config release -j$NPROC
+            fi
 
       - run:
           name: Install jpeg-turbo (Universal)
           command: |
             cd ~/deps/libjpeg-turbo-2.1.4/build-arm64
-            for i in libjpeg.62.3.0.dylib cjpeg cjpeg-static djpeg djpeg-static jcstest jpegtran jpegtran-static libjpeg.a libturbojpeg.a libturbojpeg.0.2.0.dylib rdjpgcom strtest tjbench tjbench-static tjexample tjunittest tjunittest-static wrjpgcom
-            do
-            lipo -create -output $i ../build-x86/$i $i
-            done
-            sudo cmake --install .
+            if [ ! -f /usr/local/lib/libturbojpeg.0.2.0.dylib ]; then
+              for i in libjpeg.62.3.0.dylib cjpeg cjpeg-static djpeg djpeg-static jcstest jpegtran jpegtran-static libjpeg.a libturbojpeg.a libturbojpeg.0.2.0.dylib rdjpgcom strtest tjbench tjbench-static tjexample tjunittest tjunittest-static wrjpgcom
+              do
+              lipo -create -output $i ../build-x86/$i $i
+              done
+              sudo cmake --install .
+            fi
 
       - run:
           name: Compile libogg
@@ -95,9 +110,11 @@ jobs:
             cd ~/deps
             curl -L https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz | tar xz
             cd libogg-1.3.5
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build --config Release -j$NPROC
-            sudo cmake --install build
+            if [ ! -f /usr/local/lib/libogg.0.8.5.dylib ]; then
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+              cmake --build build --config Release -j$NPROC
+              sudo cmake --install build
+            fi
 
       - run:
           name: Compile libvorbis
@@ -106,9 +123,11 @@ jobs:
             cd ~/deps
             curl -L https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz | tar xz
             cd libvorbis-1.3.7
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build --config Release -j$NPROC
-            sudo cmake --install build
+            if [ ! -f /usr/local/lib/libvorbis.0.4.9.dylib ]; then
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+              cmake --build build --config Release -j$NPROC
+              sudo cmake --install build
+            fi
 
       - run:
           name: Compile libpng (x86)
@@ -117,8 +136,10 @@ jobs:
             cd ~/deps
             curl -L https://download.sourceforge.net/libpng/libpng-1.6.39.tar.xz | tar xz
             cd libpng-1.6.39
-            cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build-x86 --config release -j$NPROC
+            if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
+              cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+              cmake --build build-x86 --config release -j$NPROC
+            fi
 
       - run:
           name: Compile libpng (arm64)
@@ -126,18 +147,22 @@ jobs:
             mkdir -p ~/deps
             cd ~/deps
             cd libpng-1.6.39
-            cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build-arm64 --config release -j$NPROC
+            if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
+              cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+              cmake --build build-arm64 --config release -j$NPROC
+            fi
 
       - run:
           name: Install libpng (Universal)
           command: |
             cd ~/deps/libpng-1.6.39/build-arm64
-            for i in libpng16.16.39.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
-            do
-            lipo -create -output $i ../build-x86/$i $i
-            done
-            sudo cmake --install .
+            if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
+              for i in libpng16.16.39.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
+              do
+              lipo -create -output $i ../build-x86/$i $i
+              done
+              sudo cmake --install .
+            fi
 
       - run:
           name: Compile SDL2
@@ -146,9 +171,11 @@ jobs:
             cd ~/deps
             curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.26.1/SDL2-2.26.1.tar.gz | tar xz
             cd SDL2-2.26.1
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build --config Release -j$NPROC
-            sudo cmake --install build
+            if [ ! -f /usr/local/lib/libSDL2-2.0.0.dylib ]; then
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+              cmake --build build --config Release -j$NPROC
+              sudo cmake --install build
+            fi
 
       - run:
           name: Install hashlink
@@ -171,6 +198,25 @@ jobs:
             haxelib git heaps https://github.com/RandomityGuy/heaps
             haxelib dev hlopenal ~/deps/hashlink/libs/openal
             haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+
+      - save_cache:
+          key: mbhaxe-deps-v1
+          paths:
+            - /usr/local/lib/ui.hdll
+            - /usr/local/lib/openal.hdll
+            - /usr/local/lib/fmt.hdll
+            - /usr/local/lib/sdl.hdll
+            - /usr/local/lib/libSDL2-2.0.0.dylib
+            - /usr/local/lib/libhl.1.13.0.dylib
+            - /usr/local/lib/libogg.0.8.5.dylib
+            - /usr/local/lib/libopenal.1.22.2.dylib
+            - /usr/local/lib/libpng16.16.dylib
+            - /usr/local/lib/libturbojpeg.0.2.0.dylib
+            - /usr/local/lib/libvorbis.0.4.9.dylib
+            - /usr/local/lib/libvorbisfile.3.3.8.dylib
+            - /usr/local/lib/libvorbisenc.2.0.12.dylib
+            - /usr/local/lib/libz.1.2.13.dylib
+
 
       - run:
           name: Compile MBHaxe
