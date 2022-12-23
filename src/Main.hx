@@ -34,7 +34,7 @@ class Main extends hxd.App {
 		s2d.scaleMode = Zoom(zoomRatio);
 		#end
 		#if android
-		var zoomRatio = Window.getInstance().height / 768;
+		var zoomRatio = Window.getInstance().height / 700;
 		s2d.scaleMode = Zoom(zoomRatio);
 		#end
 

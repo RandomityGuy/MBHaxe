@@ -369,7 +369,8 @@ class Settings {
 	public static function init() {
 		load();
 		#if hl
-		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
+		Window.getInstance().resize(Window.getInstance().width, Window.getInstance().height);
+		// Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
 		#end
 		#if js
@@ -384,7 +385,7 @@ class Settings {
 			Settings.zoomRatio = zoomRatio;
 			#end
 			#if android
-			var zoomRatio = Window.getInstance().height / 768;
+			var zoomRatio = Window.getInstance().height / 700;
 			Settings.zoomRatio = zoomRatio;
 			#end
 			#if hl
