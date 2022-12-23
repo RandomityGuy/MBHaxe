@@ -371,6 +371,7 @@ class Settings {
 		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		uiScale = 1 / Window.getInstance().windowToPixelRatio;
 		#end
 		#if js
 		Window.getInstance().propagateKeyEvents = true;
@@ -380,13 +381,13 @@ class Settings {
 			var wnd = Window.getInstance();
 			var zoomRatio = 1.0;
 			#if js
-			var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 600 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
+			var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
 			Settings.zoomRatio = zoomRatio;
 			#end
-			#if android
-			var zoomRatio = Window.getInstance().height / 600;
-			Settings.zoomRatio = zoomRatio;
-			#end
+			// #if android
+			// var zoomRatio = Window.getInstance().height / 768;
+			// Settings.zoomRatio = zoomRatio;
+			// #end
 			#if hl
 			Settings.optionsSettings.screenWidth = cast wnd.width;
 			Settings.optionsSettings.screenHeight = cast wnd.height;
