@@ -39,10 +39,6 @@ jobs:
             haxelib setup ~/haxelib
             haxelib list
             haxelib install hashlink
-
-      - restore_cache:
-          keys:
-            - mbhaxe-deps-v1
           
 
       - run:
