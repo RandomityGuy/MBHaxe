@@ -103,7 +103,7 @@ class GuiTextListCtrl extends GuiControl {
 			this.flow.maxHeight = cast htr.extent.y;
 			this.flow.multiline = true;
 			this.flow.layout = Stack;
-			this.flow.overflow = FlowOverflow.Hidden;
+			this.flow.overflow = FlowOverflow.Limit;
 			if (scene2d.contains(this.flow))
 				scene2d.removeChild(this.flow);
 
