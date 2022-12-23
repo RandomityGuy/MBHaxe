@@ -344,8 +344,6 @@ class MarbleWorld extends Scheduler {
 		this.outOfBounds = false;
 		this.outOfBoundsTime = null;
 		this.finishTime = null;
-		this.helpTextTimeState = Math.NEGATIVE_INFINITY;
-		this.alertTextTimeState = Math.NEGATIVE_INFINITY;
 		if (this.endPad != null)
 			this.endPad.inFinish = false;
 		if (this.totalGems > 0) {
@@ -1019,15 +1017,15 @@ class MarbleWorld extends Scheduler {
 	function updateTexts() {
 		var helpTextTime = this.helpTextTimeState;
 		var alertTextTime = this.alertTextTimeState;
-		var helpTextCompletion = Math.pow(Util.clamp((this.timeState.currentAttemptTime - helpTextTime - 3), 0, 1), 2);
-		var alertTextCompletion = Math.pow(Util.clamp((this.timeState.currentAttemptTime - alertTextTime - 3), 0, 1), 2);
+		var helpTextCompletion = Math.pow(Util.clamp((this.timeState.timeSinceLoad - helpTextTime - 3), 0, 1), 2);
+		var alertTextCompletion = Math.pow(Util.clamp((this.timeState.timeSinceLoad - alertTextTime - 3), 0, 1), 2);
 		this.playGui.setHelpTextOpacity(1 - helpTextCompletion);
 		this.playGui.setAlertTextOpacity(1 - alertTextCompletion);
 	}
 
 	public function displayAlert(text:String) {
 		this.playGui.setAlertText(text);
-		this.alertTextTimeState = this.timeState.currentAttemptTime;
+		this.alertTextTimeState = this.timeState.timeSinceLoad;
 	}
 
 	public function displayHelp(text:String) {
@@ -1071,7 +1069,7 @@ class MarbleWorld extends Scheduler {
 			pos = text.indexOf("<func:", start);
 		}
 		this.playGui.setHelpText(text);
-		this.helpTextTimeState = this.timeState.currentAttemptTime;
+		this.helpTextTimeState = this.timeState.timeSinceLoad;
 	}
 
 	public function pickUpGem(gem:Gem) {
