@@ -65,6 +65,16 @@ class EnterNameDlg extends GuiControl {
 		haxe.Timer.delay(() -> {
 			enterNameEdit.text.focus();
 		}, 5);
+		enterNameEdit.text.onFocus = (e) -> {
+			dlg.vertSizing = Bottom;
+			dlg.position = new Vector(110, 56);
+			dlg.render(MarbleGame.canvas.scene2d);
+		}
+		enterNameEdit.text.onFocusLost = (e) -> {
+			dlg.vertSizing = Center;
+			dlg.position = new Vector(110, 112);
+			dlg.render(MarbleGame.canvas.scene2d);
+		}
 
 		var okbutton = new GuiButton(loadButtonImages("data/ui/endgame/ok"));
 		okbutton.position = new Vector(151, 184);
