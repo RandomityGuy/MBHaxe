@@ -40,7 +40,8 @@ class GuiScrollCtrl extends GuiControl {
 		this.scrollBottomPressedTile = scrollBar.sub(11, 13, 10, 6);
 		this.scrollFillPressedTile = scrollBar.sub(11, 11, 10, 1);
 		this.scrollBarY = new Graphics();
-		this.clickInteractive = new Interactive(10, 1);
+		this.scrollBarY.scale(Settings.uiScale);
+		this.clickInteractive = new Interactive(10 * Settings.uiScale, 1);
 		this.clickInteractive.onPush = (e) -> {
 			if (!this.pressed) {
 				this.pressed = true;
@@ -57,7 +58,7 @@ class GuiScrollCtrl extends GuiControl {
 						if (prevEY == null) {
 							prevEY = e2.relY;
 						} else {
-							this.scrollY += e2.relY - prevEY;
+							this.scrollY += (e2.relY - prevEY);
 							prevEY = e2.relY;
 							this.updateScrollVisual();
 						}
@@ -111,13 +112,13 @@ class GuiScrollCtrl extends GuiControl {
 			return;
 		}
 
-		var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / maxScrollY;
+		var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
 
-		this.scrollY = Util.clamp(scrollY, 0, renderRect.extent.y - scrollBarYSize);
+		this.scrollY = Util.clamp(scrollY, 0, renderRect.extent.y - scrollBarYSize * Settings.uiScale);
 
-		this.scrollBarY.setPosition(renderRect.position.x + renderRect.extent.x - 10, renderRect.position.y + scrollY);
+		this.scrollBarY.setPosition(renderRect.position.x + renderRect.extent.x - 10 * Settings.uiScale, renderRect.position.y + scrollY);
 
-		this.clickInteractive.setPosition(renderRect.position.x + renderRect.extent.x - 10, renderRect.position.y);
+		this.clickInteractive.setPosition(renderRect.position.x + renderRect.extent.x - 10 * Settings.uiScale, renderRect.position.y);
 
 		this.clickInteractive.height = renderRect.extent.y;
 

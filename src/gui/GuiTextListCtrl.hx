@@ -12,6 +12,7 @@ import h2d.Scene;
 import h2d.Text;
 import h2d.Font;
 import src.MarbleGame;
+import src.Settings;
 
 class GuiTextListCtrl extends GuiControl {
 	public var texts:Array<String>;
@@ -78,7 +79,7 @@ class GuiTextListCtrl extends GuiControl {
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
 			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset - this.scroll)));
+				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - this.scroll)));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;
@@ -126,7 +127,7 @@ class GuiTextListCtrl extends GuiControl {
 			}
 
 			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset - this.scroll)));
+				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - this.scroll)));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;
@@ -257,7 +258,7 @@ class GuiTextListCtrl extends GuiControl {
 		var hittestrect = this.getHitTestRect();
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
-			text.y = Math.floor((i * (text.font.size + 4) + 5 + textYOffset - scrollY));
+			text.y = Math.floor((i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - scrollY));
 			g.y = renderRect.position.y - scrollY;
 		}
 		redrawSelectionRect(hittestrect);
