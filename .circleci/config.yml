@@ -94,8 +94,8 @@ jobs:
       - run:
           name: Install jpeg-turbo (Universal)
           command: |
-            cd ~/deps/libjpeg-turbo-2.1.4/build-arm64
             if [ ! -f /usr/local/lib/libturbojpeg.0.2.0.dylib ]; then
+              cd ~/deps/libjpeg-turbo-2.1.4/build-arm64
               for i in libjpeg.62.3.0.dylib cjpeg cjpeg-static djpeg djpeg-static jcstest jpegtran jpegtran-static libjpeg.a libturbojpeg.a libturbojpeg.0.2.0.dylib rdjpgcom strtest tjbench tjbench-static tjexample tjunittest tjunittest-static wrjpgcom
               do
               lipo -create -output $i ../build-x86/$i $i
@@ -155,8 +155,8 @@ jobs:
       - run:
           name: Install libpng (Universal)
           command: |
-            cd ~/deps/libpng-1.6.39/build-arm64
             if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
+              cd ~/deps/libpng-1.6.39/build-arm64
               for i in libpng16.16.39.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
               do
               lipo -create -output $i ../build-x86/$i $i
