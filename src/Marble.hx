@@ -717,7 +717,7 @@ class Marble extends GameObject {
 			var soFar = 0.0;
 			for (k in 0...contacts.length) {
 				var dist = this._radius - contacts[k].contactDistance;
-				var timeToSeparate = 0.016;
+				var timeToSeparate = 0.1;
 				var vel = this.velocity.sub(contacts[k].velocity);
 				var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
 				if (dist > timeToSeparate * outVel) {
