@@ -4,28 +4,22 @@ import h3d.Matrix;
 import h3d.col.Bounds;
 import octree.IOctreeObject;
 import h3d.Vector;
+import collision.BVHTree.IBVHObject;
 
-class CollisionSurface implements IOctreeObject {
+class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public var priority:Int;
 	public var position:Int;
-
 	public var boundingBox:Bounds;
-
 	public var points:Array<Vector>;
 	public var normals:Array<Vector>;
 	public var indices:Array<Int>;
-
 	public var friction:Float = 1;
 	public var restitution:Float = 1;
 	public var force:Float = 0;
-
 	public var edgeData:Array<Int>;
-
 	public var edgeConcavities:Array<Bool>;
 	public var originalIndices:Array<Int>;
-
 	public var originalSurfaceIndex:Int;
-
 	public var key:Bool = false;
 
 	public function new() {}
