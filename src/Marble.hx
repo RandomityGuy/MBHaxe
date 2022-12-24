@@ -501,37 +501,37 @@ class Marble extends GameObject {
 				}
 			}
 		} while (!done);
-		if (this.velocity.lengthSq() < 625) {
-			var gotOne = false;
-			var dir = new Vector(0, 0, 0);
-			for (j in 0...contacts.length) {
-				var dir2 = dir.add(contacts[j].normal);
-				if (dir2.lengthSq() < 0.01) {
-					dir2 = dir2.add(contacts[j].normal);
-				}
-				dir = dir2;
-				dir.normalize();
-				gotOne = true;
+			// if (this.velocity.lengthSq() < 625) {
+		var gotOne = false;
+		var dir = new Vector(0, 0, 0);
+		for (j in 0...contacts.length) {
+			var dir2 = dir.add(contacts[j].normal);
+			if (dir2.lengthSq() < 0.01) {
+				dir2 = dir2.add(contacts[j].normal);
 			}
-			if (gotOne) {
-				dir.normalize();
-				var soFar = 0.0;
-				for (k in 0...contacts.length) {
-					var dist = this._radius - contacts[k].contactDistance;
-					var timeToSeparate = 0.1;
-					var vel = this.velocity.sub(contacts[k].velocity);
-					var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
-					if (dist > timeToSeparate * outVel) {
-						soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
-					}
-				}
-				if (soFar < -25)
-					soFar = -25;
-				if (soFar > 25)
-					soFar = 25;
-				this.velocity = this.velocity.add(dir.multiply(soFar));
-			}
+			dir = dir2;
+			dir.normalize();
+			gotOne = true;
 		}
+		if (gotOne) {
+			dir.normalize();
+			var soFar = 0.0;
+			for (k in 0...contacts.length) {
+				var dist = this._radius - contacts[k].contactDistance;
+				var timeToSeparate = 0.016;
+				var vel = this.velocity.sub(contacts[k].velocity);
+				var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
+				if (dist > timeToSeparate * outVel) {
+					soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+				}
+			}
+			// if (soFar < -25)
+			// 	soFar = -25;
+			// if (soFar > 25)
+			// 	soFar = 25;
+			this.velocity = this.velocity.add(dir.multiply(soFar));
+		}
+		// }
 
 		return stoppedPaths;
 	}
