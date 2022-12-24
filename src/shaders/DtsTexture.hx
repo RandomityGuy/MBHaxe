@@ -14,6 +14,7 @@ class DtsTexture extends hxsl.Shader {
 		@const var specularAlpha:Bool;
 		@range(0, 1) @param var killAlphaThreshold:Float;
 		@param var texture:Sampler2D;
+		@const var normalizeNormals:Bool;
 		@perInstance @param var currentOpacity:Float;
 		var calculatedUV:Vec2;
 		var pixelColor:Vec4;
@@ -22,6 +23,11 @@ class DtsTexture extends hxsl.Shader {
 		function vertex() {
 			calculatedUV = input.uv;
 			transformedNormal = (input.normal * global.modelView.mat3());
+			if (normalizeNormals) {
+				var normalizednorm = transformedNormal.normalize();
+				transformedNormal = transformedNormal / (transformedNormal.x * transformedNormal.x + transformedNormal.y * transformedNormal.y
+					+ transformedNormal.z * transformedNormal.z);
+			}
 		}
 		function fragment() {
 			var c = texture.get(calculatedUV);
@@ -41,5 +47,6 @@ class DtsTexture extends hxsl.Shader {
 		super();
 		this.texture = tex;
 		killAlphaThreshold = h3d.mat.Defaults.defaultKillAlphaThreshold;
+		normalizeNormals = true;
 	}
 }
