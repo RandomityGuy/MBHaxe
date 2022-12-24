@@ -139,7 +139,7 @@ class Octree {
 		return intersections;
 	}
 
-	public function boundingSearch(bounds:Bounds, useCache:Bool = true) {
+	public function boundingSearch(bounds:Bounds, useCache:Bool = false) {
 		var intersections = [];
 		if (useCache) {
 			if (this.prevBoundSearch != null) {

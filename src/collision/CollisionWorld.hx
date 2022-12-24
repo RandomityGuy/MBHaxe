@@ -11,9 +11,11 @@ class CollisionWorld {
 	public var octree:Octree;
 	public var entities:Array<CollisionEntity> = [];
 	public var dynamicEntities:Array<CollisionEntity> = [];
+	public var dynamicBVH:BVHTree<CollisionEntity>;
 
 	public function new() {
 		this.octree = new Octree();
+		this.dynamicBVH = new BVHTree();
 	}
 
 	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState) {
@@ -44,7 +46,8 @@ class CollisionWorld {
 			}
 		}
 
-		for (obj in dynamicEntities) {
+		var dynSearch = dynamicBVH.boundingSearch(box);
+		for (obj in dynSearch) {
 			if (obj != spherecollision) {
 				if (obj.boundingBox.collide(box) && obj.go.isCollideable)
 					contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
@@ -72,20 +75,14 @@ class CollisionWorld {
 			contacts.push(entity);
 		}
 
-		for (obj in dynamicEntities) {
-			if (obj.boundingBox.collide(box))
-				contacts.push(obj);
-		}
+		contacts = contacts.concat(dynamicBVH.boundingSearch(box));
 
 		return contacts;
 	}
 
 	public function boundingSearch(bounds:Bounds, useCache:Bool = true) {
 		var contacts = this.octree.boundingSearch(bounds, useCache).map(x -> cast(x, CollisionEntity));
-		for (obj in dynamicEntities) {
-			if (obj.boundingBox.collide(bounds))
-				contacts.push(obj);
-		}
+		contacts = contacts.concat(dynamicBVH.boundingSearch(bounds));
 		return contacts;
 	}
 
@@ -117,6 +114,7 @@ class CollisionWorld {
 
 	public function addMovingEntity(entity:CollisionEntity) {
 		this.dynamicEntities.push(entity);
+		this.dynamicBVH.add(entity);
 	}
 
 	public function updateTransform(entity:CollisionEntity) {

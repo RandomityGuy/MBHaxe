@@ -1,5 +1,6 @@
 package collision;
 
+import collision.BVHTree.IBVHObject;
 import src.TimeState;
 import src.GameObject;
 import dif.math.Point3F;
@@ -14,12 +15,12 @@ import h3d.col.Bounds;
 import src.PathedInterior;
 import src.Util;
 
-class CollisionEntity implements IOctreeObject {
+class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var boundingBox:Bounds;
 
 	public var octree:Octree;
 
-	public var bvh:BVHTree;
+	public var bvh:BVHTree<CollisionSurface>;
 
 	public var surfaces:Array<CollisionSurface>;
 

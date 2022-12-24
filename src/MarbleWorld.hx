@@ -1430,6 +1430,8 @@ class MarbleWorld extends Scheduler {
 					val = Util.getKeyForButton(Settings.controlsSettings.powerup);
 				if (funcdata[1] == "freelook")
 					val = Util.getKeyForButton(Settings.controlsSettings.freelook);
+				if (funcdata[1] == "useblast")
+					val = Util.getKeyForButton(Settings.controlsSettings.blast);
 			}
 			start = val.length + pos;
 			text = pre + val + post;
@@ -1473,13 +1475,18 @@ class MarbleWorld extends Scheduler {
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 	}
 
-	public function callCollisionHandlers(marble:Marble, timeState:TimeState) {
-		var gjkSphere = new collision.gjk.Sphere();
-		gjkSphere.position = marble.getAbsPos().getPosition();
-		gjkSphere.radius = marble._radius;
+	public function callCollisionHandlers(marble:Marble, timeState:TimeState, start:Vector, end:Vector, startQuat:Quat, endQuat:Quat) {
+		var expansion = marble._radius + 0.2;
+		var minP = new Vector(Math.min(start.x, end.x) - expansion, Math.min(start.y, end.y) - expansion, Math.min(start.z, end.z) - expansion);
+		var maxP = new Vector(Math.max(start.x, end.x) + expansion, Math.max(start.y, end.y) + expansion, Math.max(start.z, end.z) + expansion);
+		var box = Bounds.fromPoints(minP.toPoint(), maxP.toPoint());
 
-		var spherebounds = new Bounds();
-		spherebounds.addSpherePos(gjkSphere.position.x, gjkSphere.position.y, gjkSphere.position.z, gjkSphere.radius);
+		var marbleHitbox = new Bounds();
+		marbleHitbox.addSpherePos(0, 0, 0, marble._radius);
+		marbleHitbox.transform(startQuat.toMatrix());
+		marbleHitbox.transform(endQuat.toMatrix());
+		marbleHitbox.offset(end.x, end.y, end.z);
+
 		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
 		// var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
 		var contacts = marble.contactEntities;
@@ -1490,18 +1497,20 @@ class MarbleWorld extends Scheduler {
 				if (contact.go is DtsObject) {
 					var shape:DtsObject = cast contact.go;
 
-					shape.onMarbleInside(timeState);
-					if (!this.shapeOrTriggerInside.contains(contact.go)) {
-						this.shapeOrTriggerInside.push(contact.go);
-						shape.onMarbleEnter(timeState);
+					if (contact.boundingBox.collide(marbleHitbox)) {
+						shape.onMarbleInside(timeState);
+						if (!this.shapeOrTriggerInside.contains(contact.go)) {
+							this.shapeOrTriggerInside.push(contact.go);
+							shape.onMarbleEnter(timeState);
+						}
+						inside.push(contact.go);
 					}
-					inside.push(contact.go);
 				}
 				if (contact.go is Trigger) {
 					var trigger:Trigger = cast contact.go;
 					var triggeraabb = trigger.collider.boundingBox;
 
-					if (triggeraabb.collide(spherebounds)) {
+					if (triggeraabb.collide(marbleHitbox)) {
 						trigger.onMarbleInside(timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
@@ -1521,11 +1530,11 @@ class MarbleWorld extends Scheduler {
 		}
 
 		if (this.finishTime == null && this.endPad != null) {
-			if (spherebounds.collide(this.endPad.finishBounds)) {
+			if (marbleHitbox.collide(this.endPad.finishBounds)) {
 				var padUp = this.endPad.getAbsPos().up();
 				padUp = padUp.multiply(10);
 
-				var checkBounds = spherebounds.clone();
+				var checkBounds = box.clone();
 				checkBounds.zMin -= 10;
 				checkBounds.zMax += 10;
 				var checkBoundsCenter = checkBounds.getCenter();

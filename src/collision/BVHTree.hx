@@ -3,22 +3,27 @@ package collision;
 import h3d.Vector;
 import h3d.col.Bounds;
 
+interface IBVHObject {
+	var boundingBox:Bounds;
+	function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<octree.IOctreeObject.RayIntersectionData>;
+}
+
 @:publicFields
-class BVHNode {
+class BVHNode<T:IBVHObject> {
 	var id:Int;
-	var parent:BVHNode;
-	var child1:BVHNode;
-	var child2:BVHNode;
+	var parent:BVHNode<T>;
+	var child1:BVHNode<T>;
+	var child2:BVHNode<T>;
 	var isLeaf:Bool;
 	var bounds:Bounds;
-	var surface:CollisionSurface;
+	var object:T;
 
 	public function new() {}
 }
 
-class BVHTree {
+class BVHTree<T:IBVHObject> {
 	var nodeId:Int = 0;
-	var root:BVHNode;
+	var root:BVHNode<T>;
 
 	public function new() {}
 
@@ -26,7 +31,7 @@ class BVHTree {
 		var invalidNodes = [];
 		this.traverse(node -> {
 			if (node.isLeaf) {
-				var entity = node.surface;
+				var entity = node.object;
 				var tightAABB = entity.boundingBox;
 
 				if (node.bounds.containsBounds(tightAABB)) {
@@ -38,18 +43,18 @@ class BVHTree {
 		});
 		for (node in invalidNodes) {
 			this.remove(node);
-			this.add(node.surface);
+			this.add(node.object);
 		}
 	}
 
-	public function add(entity:CollisionSurface) {
+	public function add(entity:T) {
 		// Enlarged AABB
 		var aabb = entity.boundingBox;
 
 		var newNode = new BVHNode();
 		newNode.id = this.nodeId++;
 		newNode.bounds = aabb;
-		newNode.surface = entity;
+		newNode.object = entity;
 		newNode.isLeaf = true;
 
 		if (this.root == null) {
@@ -149,7 +154,7 @@ class BVHTree {
 	}
 
 	// BFS tree traversal
-	function traverse(callback:(node:BVHNode) -> Void) {
+	function traverse(callback:(node:BVHNode<T>) -> Void) {
 		var q = [this.root];
 
 		while (q.length != 0) {
@@ -169,7 +174,7 @@ class BVHTree {
 		}
 	}
 
-	public function remove(node:BVHNode) {
+	public function remove(node:BVHNode<T>) {
 		var parent = node.parent;
 
 		if (parent != null) {
@@ -203,7 +208,7 @@ class BVHTree {
 		}
 	}
 
-	function rotate(node:BVHNode) {
+	function rotate(node:BVHNode<T>) {
 		if (node.parent == null) {
 			return;
 		}
@@ -322,7 +327,7 @@ class BVHTree {
 
 			if (current.bounds.containsBounds(searchbox) || current.bounds.collide(searchbox)) {
 				if (current.isLeaf) {
-					res.push(current.surface);
+					res.push(current.object);
 				} else {
 					if (current.child1 != null)
 						q.push(current.child1);
@@ -346,7 +351,7 @@ class BVHTree {
 			var current = q.shift();
 			if (ray.collide(current.bounds)) {
 				if (current.isLeaf) {
-					res = res.concat(current.surface.rayCast(origin, direction));
+					res = res.concat(current.object.rayCast(origin, direction));
 				} else {
 					if (current.child1 != null)
 						q.push(current.child1);
