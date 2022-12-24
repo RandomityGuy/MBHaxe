@@ -1,183 +1,233 @@
 package collision;
 
 import h3d.col.Bounds;
-import h3d.Vector;
 
-// https://github.com/Sopiro/DynamicBVH/blob/master/src/aabbtree.ts
+interface IBVHObject {
+	var boundingBox:Bounds;
+	function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<octree.IOctreeObject.RayIntersectionData>;
+}
 
 @:publicFields
-class BVHNode {
+class BVHNode<T:IBVHObject> {
+	var id:Int;
+	var parent:BVHNode<T>;
+	var child1:BVHNode<T>;
+	var child2:BVHNode<T>;
+	var isLeaf:Bool;
 	var bounds:Bounds;
-	var objects:Array<CollisionSurface>;
-	var objectBounds:Bounds; // total bounds for objects stored in THIS node
-	var left:BVHNode;
-	var right:BVHNode;
-	var surfaceArea:Float;
+	var object:T;
 
 	public function new(bounds:Bounds) {
 		this.bounds = bounds.clone();
 		surfaceArea = this.bounds.xSize * this.bounds.ySize + this.bounds.xSize * this.bounds.zSize + this.bounds.ySize * this.bounds.zSize;
 	}
 
-	function getSplitCost(objs:Array<{obj:CollisionSurface, centroid:h3d.col.Point}>, axis:Int) {
-		// Pick best axis to split
-		switch (axis) {
-			case 0:
-				objs.sort((x, y) -> x.centroid.x > y.centroid.x ? 1 : -1);
-			case 1:
-				objs.sort((x, y) -> x.centroid.y > y.centroid.y ? 1 : -1);
-			case 2:
-				objs.sort((x, y) -> x.centroid.z > y.centroid.z ? 1 : -1);
-		};
+	class BVHTree<T:IBVHObject> {
+		var nodeId:Int = 0;
+		var root:BVHNode<T>;
 
-		var leftObjects = objs.slice(0, Math.ceil(objs.length / 2));
-		var rightObjects = objs.slice(Math.ceil(objs.length / 2));
-		var leftAABB = new Bounds();
-		var rightAABB = new Bounds();
-		for (o in leftObjects)
-			leftAABB.add(o.obj.boundingBox);
-		for (o in rightObjects)
-			rightAABB.add(o.obj.boundingBox);
-		var leftSA = leftAABB.xSize * leftAABB.ySize + leftAABB.xSize * leftAABB.zSize + leftAABB.ySize * leftAABB.zSize;
-		var rightSA = rightAABB.xSize * rightAABB.ySize + rightAABB.xSize * rightAABB.zSize + rightAABB.ySize * rightAABB.zSize;
-		var splitCost = leftSA + rightSA;
-		var bestSplit = {
-			cost: splitCost,
-			left: leftObjects,
-			right: rightObjects,
-			leftBounds: leftAABB,
-			rightBounds: rightAABB,
-			axis: axis
-		};
-		return bestSplit;
-	}
+		public function new() {}
 
-	public function split() {
-		// Splitting first time
-		// Calculate the centroids of all objects
-		var objs = objects.map(x -> {
-			x.generateBoundingBox();
-			return {obj: x, centroid: x.boundingBox.getCenter()};
-		});
+		function update() {
+			var invalidNodes = [];
+			this.traverse(node -> {
+				if (node.isLeaf) {
+					var entity = node.object;
+					var tightAABB = entity.boundingBox;
 
-		// Find the best split cost
-		var costs = [getSplitCost(objs, 0), getSplitCost(objs, 1), getSplitCost(objs, 2)];
-		costs.sort((x, y) -> x.cost > y.cost ? 1 : -1);
-		var bestSplit = costs[0];
+					if (node.bounds.containsBounds(tightAABB)) {
+						return;
+					}
 
-		// Sort the objects according to where they should go
-		var leftObjs = [];
-		var rightObjs = [];
-		var intersectObjs = [];
-		for (o in bestSplit.left.concat(bestSplit.right)) {
-			var inleft = bestSplit.leftBounds.containsBounds(o.obj.boundingBox);
-			var inright = bestSplit.rightBounds.containsBounds(o.obj.boundingBox);
-			if (inleft && inright) {
-				intersectObjs.push(o.obj);
-			} else if (inleft) {
-				leftObjs.push(o.obj);
-			} else if (inright) {
-				rightObjs.push(o.obj);
-			}
-		}
+					public function split() {
+						// Splitting first time
+						// Calculate the centroids of all objects
+						var objs = objects.map(x -> {
+							x.generateBoundingBox();
+							return {obj: x, centroid: x.boundingBox.getCenter()};
+						});
+						for (node in invalidNodes) {
+							this.remove(node);
+							this.add(node.object);
+						}
 
-		// Only one side has objects, egh
-		if (leftObjs.length == 0 || rightObjs.length == 0) {
-			var thisobjs = leftObjs.concat(rightObjs).concat(intersectObjs);
-			this.objects = thisobjs;
-			this.objectBounds = new Bounds();
-			for (o in thisobjs)
-				this.objectBounds.add(o.boundingBox);
-			return;
-		}
+						public function add(entity:T) {
+							// Enlarged AABB
+							var aabb = entity.boundingBox;
 
-		// Make the child nodes
-		var leftBounds = new Bounds();
-		var rightBounds = new Bounds();
-		for (o in leftObjs)
-			leftBounds.add(o.boundingBox);
-		for (o in rightObjs)
-			rightBounds.add(o.boundingBox);
-		left = new BVHNode(leftBounds);
-		right = new BVHNode(rightBounds);
-		left.objects = leftObjs;
-		right.objects = rightObjs;
-		this.objects = intersectObjs;
-		this.objectBounds = new Bounds();
-		for (o in intersectObjs)
-			this.objectBounds.add(o.boundingBox);
+							var newNode = new BVHNode();
+							newNode.id = this.nodeId++;
+							newNode.bounds = aabb;
+							newNode.object = entity;
+							newNode.isLeaf = true;
 
-		left.split();
-		right.split();
-	}
+							if (this.root == null) {
+								this.root = newNode;
+								return newNode;
+							}
 
-	public function boundingSearch(searchbox:Bounds) {
-		if (this.bounds.containsBounds(searchbox) || this.bounds.collide(searchbox)) {
-			var intersects = [];
-			if (this.left != null && this.right != null) {
-				intersects = intersects.concat(this.left.boundingSearch(searchbox));
-				intersects = intersects.concat(this.right.boundingSearch(searchbox));
-			}
-			if (this.objectBounds.collide(searchbox) || this.objectBounds.containsBounds(searchbox)) {
-				for (o in this.objects) {
-					if (o.boundingBox.containsBounds(searchbox) || o.boundingBox.collide(searchbox))
-						intersects.push(o);
-				}
-			}
-			return intersects;
-		} else {
-			return [];
-		}
-	}
+							// Make the child nodes
+							var leftBounds = new Bounds();
+							var rightBounds = new Bounds();
+							for (o in leftObjs)
+								leftBounds.add(o.boundingBox);
+							for (o in rightObjs)
+								rightBounds.add(o.boundingBox);
+							left = new BVHNode(leftBounds);
+							right = new BVHNode(rightBounds);
+							left.objects = leftObjs;
+							right.objects = rightObjs;
+							this.objects = intersectObjs;
+							this.objectBounds = new Bounds();
+							for (o in intersectObjs)
+								this.objectBounds.add(o.boundingBox);
 
-	public function rayCast(origin:Vector, direction:Vector) {
-		var ray = h3d.col.Ray.fromValues(origin.x, origin.y, origin.z, direction.x, direction.y, direction.z);
-		if (ray.collide(this.bounds)) {
-			var intersects = [];
-			if (this.left != null && this.right != null) {
-				intersects = intersects.concat(this.left.rayCast(origin, direction));
-				intersects = intersects.concat(this.right.rayCast(origin, direction));
-			}
-			if (ray.collide(this.objectBounds)) {
-				for (o in this.objects) {
-					if (ray.collide(o.boundingBox))
-						intersects = intersects.concat(o.rayCast(origin, direction));
-				}
-			}
-			return intersects;
-		} else {
-			return [];
-		}
-	}
-}
+							left.split();
+							right.split();
+						}
 
-class BVHTree {
-	public var bounds:Bounds;
+						public function boundingSearch(searchbox:Bounds) {
+							if (this.bounds.containsBounds(searchbox) || this.bounds.collide(searchbox)) {
+								var intersects = [];
+								if (this.left != null && this.right != null) {
+									intersects = intersects.concat(this.left.boundingSearch(searchbox));
+									intersects = intersects.concat(this.right.boundingSearch(searchbox));
+								}
+								if (this.objectBounds.collide(searchbox) || this.objectBounds.containsBounds(searchbox)) {
+									for (o in this.objects) {
+										if (o.boundingBox.containsBounds(searchbox) || o.boundingBox.collide(searchbox))
+											intersects.push(o);
+									}
+								}
+								return intersects;
+							} else {
+								return [];
+							}
+						}
 
-	var surfaces:Array<CollisionSurface> = [];
+						function reset() {
+							this.nodeId = 0;
+							this.root = null;
+						}
 
-	var root:BVHNode;
+						// BFS tree traversal
+						function traverse(callback:(node:BVHNode<T>) -> Void) {
+							var q = [this.root];
 
-	public function new(bounds:Bounds) {
-		this.bounds = bounds.clone();
-	}
+							while (q.length != 0) {
+								var current = q.shift();
+								if (current == null) {
+									break;
+								}
 
-	public function insert(surf:CollisionSurface) {
-		surfaces.push(surf);
-	}
+								callback(current);
 
-	public function build() {
-		root = new BVHNode(bounds);
-		// Add all children
-		root.objects = this.surfaces;
-		root.split();
-	}
+								if (!current.isLeaf) {
+									if (current.child1 != null)
+										q.push(current.child1);
+									if (current.child2 != null)
+										q.push(current.child2);
+								}
+							}
+						}
 
-	public function boundingSearch(searchbox:Bounds) {
-		return this.root.boundingSearch(searchbox);
-	}
+						public function remove(node:BVHNode<T>) {
+							var parent = node.parent;
 
-	public function rayCast(origin:Vector, direction:Vector) {
-		return this.root.rayCast(origin, direction);
-	}
-}
+							if (parent != null) {
+								var sibling = parent.child1 == node ? parent.child2 : parent.child1;
+
+								if (parent.parent != null) {
+									sibling.parent = parent.parent;
+									if (parent.parent.child1 == parent) {
+										parent.parent.child1 = sibling;
+									} else {
+										parent.parent.child2 = sibling;
+									}
+								}
+								return intersects;
+							} else {
+								return [];
+							}
+						}
+
+						function rotate(node:BVHNode<T>) {
+							if (node.parent == null) {
+								return;
+							}
+							var parent = node.parent;
+							var sibling = parent.child1 == node ? parent.child2 : parent.child1;
+							var costDiffs = [];
+							var nodeArea = node.bounds.xSize * node.bounds.ySize + node.bounds.zSize * node.bounds.ySize
+								+ node.bounds.xSize * node.bounds.zSize;
+
+							class BVHTree {
+								public var bounds:Bounds;
+
+								var surfaces:Array<CollisionSurface> = [];
+
+								var root:BVHNode;
+
+								public function new(bounds:Bounds) {
+									this.bounds = bounds.clone();
+								}
+
+								public function insert(surf:CollisionSurface) {
+									surfaces.push(surf);
+								}
+
+								public function build() {
+									root = new BVHNode(bounds);
+									// Add all children
+									root.objects = this.surfaces;
+									root.split();
+								}
+
+								public function boundingSearch(searchbox:Bounds) {
+									var res = [];
+									if (this.root == null)
+										return res;
+
+									var q = [this.root];
+
+									while (q.length != 0) {
+										var current = q.shift();
+
+										if (current.bounds.containsBounds(searchbox) || current.bounds.collide(searchbox)) {
+											if (current.isLeaf) {
+												res.push(current.object);
+											} else {
+												if (current.child1 != null)
+													q.push(current.child1);
+												if (current.child2 != null)
+													q.push(current.child2);
+											}
+										}
+									}
+
+									return res;
+								}
+
+								public function rayCast(origin:Vector, direction:Vector) {
+									var res = [];
+									if (this.root == null)
+										return res;
+
+									var ray = h3d.col.Ray.fromValues(origin.x, origin.y, origin.z, direction.x, direction.y, direction.z);
+									var q = [this.root];
+									while (q.length != 0) {
+										var current = q.shift();
+										if (ray.collide(current.bounds)) {
+											if (current.isLeaf) {
+												res = res.concat(current.object.rayCast(origin, direction));
+											} else {
+												if (current.child1 != null)
+													q.push(current.child1);
+												if (current.child2 != null)
+													q.push(current.child2);
+											}
+										}
+									}
+									return res;
+								}
+							}

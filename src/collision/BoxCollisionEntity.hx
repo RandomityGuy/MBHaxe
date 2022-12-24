@@ -1,5 +1,6 @@
 package collision;
 
+import collision.BVHTree.IBVHObject;
 import src.MarbleGame;
 import src.TimeState;
 import h3d.Matrix;
@@ -10,7 +11,7 @@ import h3d.Vector;
 import h3d.col.Sphere;
 import h3d.col.Bounds;
 
-class BoxCollisionEntity extends CollisionEntity {
+class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 	var bounds:Bounds;
 
 	var _dbgEntity:h3d.scene.Object;

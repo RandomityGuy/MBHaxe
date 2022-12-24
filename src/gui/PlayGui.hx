@@ -411,6 +411,9 @@ class PlayGui {
 		} else if (powerupIdentifier == "Helicopter") {
 			powerupImageObject = new DtsObject();
 			powerupImageObject.dtsPath = "data/shapes/images/helicopter.dts";
+		} else if (powerupIdentifier == "MegaMarble") {
+			powerupImageObject = new DtsObject();
+			powerupImageObject.dtsPath = "data/shapes/items/megamarble.dts";
 		} else {
 			powerupIdentifier = "";
 			this.powerupImageObject = null;

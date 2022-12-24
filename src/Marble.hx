@@ -1307,7 +1307,7 @@ class Marble extends GameObject {
 				var tempTimeState = timeState.clone();
 				tempState.currentAttemptTime = piTime;
 				tempState.dt = timeStep;
-				this.level.callCollisionHandlers(cast this, tempTimeState);
+				this.level.callCollisionHandlers(cast this, tempTimeState, pos, newPos, rot, quat);
 			}
 
 			if (contacts.length != 0)
