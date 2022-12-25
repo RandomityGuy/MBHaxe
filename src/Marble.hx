@@ -59,6 +59,7 @@ import src.Resource;
 import h3d.mat.Texture;
 import collision.CCDCollision.TraceInfo;
 import src.ResourceLoaderWorker;
+import src.InteriorObject;
 
 class Move {
 	public var d:Vector;
@@ -700,7 +701,7 @@ class Marble extends GameObject {
 				}
 			}
 		} while (!done);
-			// if (this.velocity.lengthSq() < 625) {
+			//	if (this.velocity.lengthSq() < 625) {
 		var gotOne = false;
 		var dir = new Vector(0, 0, 0);
 		for (j in 0...contacts.length) {
@@ -730,7 +731,7 @@ class Marble extends GameObject {
 			// 	soFar = 25;
 			this.velocity = this.velocity.add(dir.multiply(soFar));
 		}
-		// }
+		//	}
 
 		return stoppedPaths;
 	}
@@ -969,8 +970,8 @@ class Marble extends GameObject {
 
 	function testMove(velocity:Vector, position:Vector, deltaT:Float, radius:Float, testPIs:Bool):{position:Vector, t:Float, found:Bool} {
 		var searchbox = new Bounds();
-		searchbox.addSpherePos(this.x, this.y, this.z, _radius);
-		searchbox.addSpherePos(this.x + velocity.x * deltaT, this.y + velocity.y * deltaT, this.z + velocity.z * deltaT, _radius);
+		searchbox.addSpherePos(position.x, position.y, position.z, _radius);
+		searchbox.addSpherePos(position.x + velocity.x * deltaT, position.y + velocity.y * deltaT, position.z + velocity.z * deltaT, _radius);
 
 		var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
 
@@ -979,14 +980,7 @@ class Marble extends GameObject {
 
 		var lastContactPos = new Vector();
 
-		function toDifPoint(vec:Vector) {
-			return new Point3F(vec.x, vec.y, vec.z);
-		}
-		function fromDifPoint(vec:Point3F) {
-			return new Vector(vec.x, vec.y, vec.z);
-		}
-
-		for (obj in foundObjs) {
+		for (obj in foundObjs.filter(x -> x.go is InteriorObject && !(x.go is PathedInterior))) {
 			// Its an MP so bruh
 
 			var invMatrix = @:privateAccess obj.invTransform;
@@ -1102,7 +1096,7 @@ class Marble extends GameObject {
 						}
 
 						// Check if the collision hasn't already happened
-						if (edgeCollisionTime >= 0.0) {
+						if (edgeCollisionTime >= 0.00001) {
 							var edgeLen = vertDiff.length();
 
 							var relativeCollisionPos = localpos.add(relLocalVel.multiply(edgeCollisionTime)).sub(thisVert);
@@ -1460,41 +1454,52 @@ class Marble extends GameObject {
 			}
 			appliedImpulses = [];
 
-			var intersectData = testMove(velocity, this.getAbsPos().getPosition(), timeStep, _radius, true); // this.getIntersectionTime(timeStep, velocity);
-			var intersectT = intersectData.t;
-			if (intersectData.found && intersectT > 0.001) {
-				var diff = timeStep - intersectT;
-				this.velocity = this.velocity.sub(A.multiply(diff));
-				this.omega = this.omega.sub(a.multiply(diff));
-				// var mo = new h3d.prim.Sphere();
-				// mo.addNormals();
-				// mo.scale(_radius);
-				// var mCol = new h3d.scene.Mesh(mo);
-				// mCol.setPosition(intersectData.position.x, intersectData.position.y, intersectData.position.z);
-				// this.level.scene.addChild(mCol);
-				timeStep = intersectT;
-			}
+			velocity.w = 0;
 
 			var pos = this.getAbsPos().getPosition();
 			this.prevPos = pos.clone();
 
-			var posAdd = this.velocity.multiply(timeStep);
-			var expectedPos = pos.add(posAdd);
-			var newPos = nudgeToContacts(expectedPos, _radius);
-			if (this.velocity.lengthSq() > 1e-8) {
-				var posDiff = newPos.sub(expectedPos);
-				if (posDiff.lengthSq() > 1e-8) {
-					var velDiffProj = this.velocity.multiply(posDiff.dot(this.velocity) / (this.velocity.lengthSq()));
-					var expectedProjPos = expectedPos.add(velDiffProj);
-					var updatedTimestep = expectedProjPos.sub(pos).length() / velocity.length();
-
-					var tDiff = updatedTimestep - timeStep;
-					this.velocity = this.velocity.sub(A.multiply(tDiff));
-					this.omega = this.omega.sub(a.multiply(tDiff));
-
-					timeStep = updatedTimestep;
-				}
+			var finalPosData = testMove(velocity, pos, timeStep, _radius, true); // this.getIntersectionTime(timeStep, velocity);
+			if (finalPosData.found) {
+				var diff = timeStep - finalPosData.t;
+				this.velocity = this.velocity.sub(A.multiply(diff));
+				this.omega = this.omega.sub(a.multiply(diff));
+				timeStep = finalPosData.t;
 			}
+			var expectedPos = finalPosData.position;
+			var newPos = nudgeToContacts(expectedPos, _radius);
+
+			// var intersectT = intersectData.t;
+			// if (intersectData.found && intersectT > 0.001) {
+			// 	var diff = timeStep - intersectT;
+			// 	this.velocity = this.velocity.sub(A.multiply(diff));
+			// 	this.omega = this.omega.sub(a.multiply(diff));
+			// 	// var mo = new h3d.prim.Sphere();
+			// 	// mo.addNormals();
+			// 	// mo.scale(_radius);
+			// 	// var mCol = new h3d.scene.Mesh(mo);
+			// 	// mCol.setPosition(intersectData.position.x, intersectData.position.y, intersectData.position.z);
+			// 	// this.level.scene.addChild(mCol);
+			// 	timeStep = intersectT;
+			// }
+
+			// var posAdd = this.velocity.multiply(timeStep);
+			// var expectedPos = pos.add(posAdd);
+			// var newPos = nudgeToContacts(expectedPos, _radius);
+			// if (this.velocity.lengthSq() > 1e-8) {
+			// 	var posDiff = newPos.sub(expectedPos);
+			// 	if (posDiff.lengthSq() > 1e-8) {
+			// 		var velDiffProj = this.velocity.multiply(posDiff.dot(this.velocity) / (this.velocity.lengthSq()));
+			// 		var expectedProjPos = expectedPos.add(velDiffProj);
+			// 		var updatedTimestep = expectedProjPos.sub(pos).length() / velocity.length();
+
+			// 		var tDiff = updatedTimestep - timeStep;
+			// 		this.velocity = this.velocity.sub(A.multiply(tDiff));
+			// 		this.omega = this.omega.sub(a.multiply(tDiff));
+
+			// 		timeStep = updatedTimestep;
+			// 	}
+			// }
 
 			piTime += timeStep;
 			if (this.controllable) {
