@@ -220,56 +220,55 @@ jobs:
             - store_artifacts:
                   path: ~/MBHaxe/MBHaxe-Gold.zip
 
-    build-win:
-        executor:
-            name: win/server-2022
-            shell: cmd.exe # executor type
-        # Checkout the code as the first step. This is a dedicated CircleCI step.
-        # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-        # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-        # Then run your tests!
-        # CircleCI will report the results back to your VCS provider.
-        steps:
-            - add_ssh_keys:
-                  fingerprints:
-                      - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
-            - checkout
-            - run:
-                  name: Install dependencies
-                  command: |
-                      curl -fsSL --retry 3 --retry-delay 5 -o /tmp/sdl.zip https://www.libsdl.org/release/SDL2-devel-2.0.5-VC.zip
-                      curl -fsSL --retry 3 --retry-delay 5 -o /tmp/openal.zip https://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip
-                      curl -fsSL --retry 3 --retry-delay 5 -o /tmp/ffmpeg.zip https://github.com/HaxeFoundation/hashlink/files/5648056/ffmpeg-3.4.2-win64-dev.zip
-                      7z x /tmp/sdl.zip    -oinclude; mv include/SDL2*   include/sdl
-                      7z x /tmp/openal.zip -oinclude; mv include/openal* include/openal
-                      7z x /tmp/ffmpeg.zip -oinclude; mv include/ffmpeg* include/ffmpeg
-            - run:
-                  name: Install Neko
-                  command: |
-                      choco install --no-progress neko -y
-                      nekopath=$(find C:/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
-                      set NEKOPATH=$nekopath
-            - run:
-                  name: Install Haxe
-                  command: |
-                      set -eux
-                      download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-win64.zip"
-                      echo "Downloading [$download_url]..."
-                      mkdir /tmp/haxe
-                      curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.zip
-                      7z x /tmp/haxe.zip -o/tmp
-                      mv -v /tmp/haxe_* /tmp/haxe
-                      set PATH=%PATH%;/tmp/haxe/
-                      set HAXE_STD_PATH=/tmp/haxe/std
-                      haxelib setup ~/haxelib
-                      haxelib list
-                      haxelib install hashlink
-            - run:
-                  name: Build Hashlink
-                  command: |
-                      MSBuild.exe hl.sln //nologo //m //clp:ErrorsOnly \ 
-                        //p:Configuration=Release \
-                        //p:Platform=x64
+  build-win:
+    executor: 
+        name: win/server-2022
+        shell: cmd.exe # executor type
+    # Checkout the code as the first step. This is a dedicated CircleCI step.
+    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
+    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
+    # Then run your tests!
+    # CircleCI will report the results back to your VCS provider.
+    steps:
+        - add_ssh_keys:
+              fingerprints:
+                  - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
+        - checkout
+        - run:
+            name: Install dependencies
+            command: |
+              curl -fsSL --retry 3 --retry-delay 5 -o /tmp/sdl.zip https://www.libsdl.org/release/SDL2-devel-2.0.5-VC.zip
+              curl -fsSL --retry 3 --retry-delay 5 -o /tmp/openal.zip https://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip
+              curl -fsSL --retry 3 --retry-delay 5 -o /tmp/ffmpeg.zip https://github.com/HaxeFoundation/hashlink/files/5648056/ffmpeg-3.4.2-win64-dev.zip
+              7z x /tmp/sdl.zip    -oinclude; mv include/SDL2*   include/sdl
+              7z x /tmp/openal.zip -oinclude; mv include/openal* include/openal
+              7z x /tmp/ffmpeg.zip -oinclude; mv include/ffmpeg* include/ffmpeg
+        - run:
+            name: Install Neko
+            command: |
+              choco install --no-progress neko -y
+              nekopath=$(find C:/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+        - run:
+            name: Install Haxe
+            command: |
+              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-win64.zip"
+              echo "Downloading [$download_url]..."
+              mkdir /tmp/haxe
+              curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.zip
+              7z x /tmp/haxe.zip -o/tmp
+              mv -v /tmp/haxe_* /tmp/haxe
+              set PATH=%PATH%;/tmp/haxe/
+              set HAXE_STD_PATH=/tmp/haxe/std
+              haxelib setup ~/haxelib
+              haxelib list
+              haxelib install hashlink
+        - run: 
+            name: Build Hashlink
+            command: |
+              MSBuild.exe hl.sln //nologo //m //clp:ErrorsOnly \ 
+                //p:Configuration=Release \
+                //p:Platform=x64
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
