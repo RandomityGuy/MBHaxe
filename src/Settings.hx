@@ -16,6 +16,7 @@ import haxe.io.Path;
 import src.ResourceLoader;
 import haxe.Json;
 import src.Util;
+import src.Console;
 
 typedef Score = {
 	var name:String;
@@ -284,6 +285,7 @@ class Settings {
 	}
 
 	public static function load() {
+		Console.log("Loading settings");
 		var settingsExists = false;
 		#if hl
 		settingsExists = FileSystem.exists(Path.join([settingsDir, "settings.json"]));
@@ -359,6 +361,7 @@ class Settings {
 			#end
 			highscoreName = json.highscoreName;
 		} else {
+			Console.warn("Settings file does not exist");
 			save();
 		}
 		#if hl
@@ -400,6 +403,9 @@ class Settings {
 			canvasElement.style.width = "100%";
 			canvasElement.style.height = "100%";
 			#end
+
+			Console.log("Window resized to " + Settings.optionsSettings.screenWidth + "x" + Settings.optionsSettings.screenHeight + " (Zoom " + zoomRatio +
+				")");
 
 			MarbleGame.canvas.scene2d.scaleMode = Zoom(zoomRatio);
 

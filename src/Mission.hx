@@ -14,6 +14,7 @@ import src.ResourceLoader;
 import hxd.res.Image;
 import src.Resource;
 import src.Util;
+import src.Console;
 
 class Mission {
 	public var root:MissionElementSimGroup;
@@ -146,11 +147,13 @@ class Mission {
 				});
 				return imgFileEntry.path;
 			}
+			Console.error("Preview image not found for " + this.path);
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
 			onLoaded(Tile.fromBitmap(img));
 			return null;
 		} else {
+			Console.error("Preview image not found for " + this.path);
 			var img = new BitmapData(1, 1);
 			img.setPixel(0, 0, 0);
 			onLoaded(Tile.fromBitmap(img));
@@ -181,6 +184,7 @@ class Mission {
 			return path;
 		if (ResourceLoader.fileSystem.exists(dirpath + fname))
 			return dirpath + fname;
+		Console.error("Interior resource not found: " + rawElementPath);
 		return "";
 	}
 
