@@ -1,5 +1,6 @@
 package;
 
+import src.Console;
 import hxd.Key;
 import src.Util;
 import src.ResourceLoader;
@@ -22,6 +23,8 @@ class Main extends hxd.App {
 	var marbleGame:MarbleGame;
 
 	var loaded:Bool = false;
+
+	var frameByFrame:Bool = false;
 
 	override function init() {
 		super.init();
@@ -54,6 +57,12 @@ class Main extends hxd.App {
 				@:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = -Key.getFrame();
 			}
 		});
+		#end
+
+		new Console(); // Singleton
+		Console.log("Initializing MBHaxe");
+		#if hl
+		Console.log("System: " + Sys.systemName());
 		#end
 
 		Settings.init();

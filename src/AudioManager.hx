@@ -10,6 +10,7 @@ import src.Settings;
 import hxd.snd.ChannelGroup;
 import src.Resource;
 import src.ResourceLoaderWorker;
+import src.Console;
 
 class AudioManager {
 	static var manager:hxd.snd.Manager;
@@ -23,6 +24,7 @@ class AudioManager {
 	static var currentMusicResource:Resource<Sound>;
 
 	public static function init() {
+		Console.log("Initializing Audio System");
 		AudioManager.manager = hxd.snd.Manager.get();
 		AudioManager.soundGroup = new SoundGroup("sound");
 		soundGroup.volume = Settings.optionsSettings.soundVolume;

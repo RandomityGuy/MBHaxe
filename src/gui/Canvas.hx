@@ -1,5 +1,6 @@
 package gui;
 
+import src.Console;
 import src.MarbleGame;
 import h3d.Vector;
 import h2d.Scene;
@@ -12,6 +13,7 @@ class Canvas extends GuiControl {
 
 	public function new(scene, marbleGame:MarbleGame) {
 		super();
+		Console.log("Creating canvas");
 		this.scene2d = scene;
 		this.marbleGame = marbleGame;
 

@@ -1,5 +1,6 @@
 package src;
 
+import gui.ConsoleDlg;
 import src.Replay;
 import touch.TouchInput;
 import src.ResourceLoader;
@@ -17,6 +18,7 @@ import gui.Canvas;
 import src.Util;
 import src.ProfilerUI;
 import src.Settings;
+import src.Console;
 
 @:publicFields
 class MarbleGame {
@@ -36,7 +38,11 @@ class MarbleGame {
 
 	var touchInput:TouchInput;
 
+	var consoleShown:Bool = false;
+	var console:ConsoleDlg;
+
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
+		Console.log("Initializing the game...");
 		canvas = new Canvas(scene2d, cast this);
 		this.scene = scene;
 		this.scene2d = scene2d;
@@ -183,6 +189,19 @@ class MarbleGame {
 			}
 		}
 		if (canvas != null) {
+			if (Key.isPressed(Key.QWERTY_TILDE)) {
+				consoleShown = !consoleShown;
+				if (consoleShown) {
+					if (console == null)
+						console = new ConsoleDlg();
+					@:privateAccess console.isShowing = true;
+					canvas.pushDialog(console);
+				} else {
+					@:privateAccess console.isShowing = false;
+					canvas.popDialog(console, false);
+				}
+			}
+
 			var mouseState:MouseState = {
 				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY)
 			}
@@ -193,6 +212,7 @@ class MarbleGame {
 
 	public function handlePauseGame() {
 		if (paused && world._ready) {
+			Console.log("Game paused");
 			world.setCursorLock(false);
 			exitGameDlg = new ExitGameDlg((sender) -> {
 				canvas.popDialog(exitGameDlg);
@@ -210,6 +230,7 @@ class MarbleGame {
 			canvas.pushDialog(exitGameDlg);
 		} else {
 			if (world._ready) {
+				Console.log("Game unpaused");
 				if (exitGameDlg != null)
 					canvas.popDialog(exitGameDlg);
 				world.setCursorLock(true);
@@ -218,6 +239,7 @@ class MarbleGame {
 	}
 
 	public function quitMission() {
+		Console.log("Quitting mission");
 		world.setCursorLock(false);
 		paused = false;
 		var pmg = new PlayMissionGui();

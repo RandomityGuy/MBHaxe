@@ -87,6 +87,7 @@ import src.Resource;
 import src.ProfilerUI;
 import src.ResourceLoaderWorker;
 import haxe.io.Path;
+import src.Console;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -197,6 +198,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function initLoading() {
+		Console.log("*** LOADING MISSION: " + mission.path);
 		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game);
 		MarbleGame.canvas.setContent(this.loadingGui);
 
@@ -260,6 +262,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function initScene(onFinish:Void->Void) {
+		Console.log("Starting scene");
 		this.collisionWorld = new CollisionWorld();
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
@@ -330,6 +333,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function initMarble(onFinish:Void->Void) {
+		Console.log("Initializing marble");
 		var worker = new ResourceLoaderWorker(onFinish);
 		var marblefiles = [
 			"particles/star.png",
@@ -390,6 +394,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function start() {
+		Console.log("LEVEL START");
 		restart(true);
 		for (interior in this.interiors)
 			interior.onLevelStart();
@@ -502,20 +507,25 @@ class MarbleWorld extends Scheduler {
 
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 
+		Console.log("State Start");
 		this.clearSchedule();
 		this.schedule(0.5, () -> {
 			// setCenterText('ready');
+			Console.log("State Ready");
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/ready.wav', ResourceLoader.getAudio, this.soundResources));
 			return 0;
 		});
 		this.schedule(2, () -> {
 			// setCenterText('set');
+			Console.log("State Set");
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/set.wav', ResourceLoader.getAudio, this.soundResources));
 			return 0;
 		});
 		this.schedule(3.5, () -> {
 			// setCenterText('go');
+			Console.log("State Go");
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/go.wav', ResourceLoader.getAudio, this.soundResources));
+			Console.log("State Play");
 			return 0;
 		});
 
@@ -570,6 +580,7 @@ class MarbleWorld extends Scheduler {
 					this.addPathedInterior(pathedInterior, () -> {
 						if (pathedInterior == null) {
 							fwd();
+							Console.error("Unable to load pathed interior");
 							return;
 						}
 
@@ -736,6 +747,7 @@ class MarbleWorld extends Scheduler {
 		else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
 			shape = new shapes.Sky(dataBlockLowerCase);
 		else {
+			Console.error("Unable to create static shape with data block '" + element.datablock + "'");
 			onFinish();
 			return;
 		}
@@ -849,6 +861,7 @@ class MarbleWorld extends Scheduler {
 		else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
 			shape = new shapes.Sky(dataBlockLowerCase);
 		else {
+			Console.error("Unknown item: " + element.datablock);
 			onFinish();
 			return;
 		}
@@ -920,12 +933,14 @@ class MarbleWorld extends Scheduler {
 		var shapeName = element.shapename;
 		var index = shapeName.indexOf('data/');
 		if (index == -1) {
+			Console.error("Unable to parse shape path: " + shapeName);
 			onFinish();
 			return;
 		}
 
 		var dtsPath = 'data/' + shapeName.substring(index + 'data/'.length);
 		if (ResourceLoader.getProperFilepath(dtsPath) == "") {
+			Console.error("DTS path does not exist: " + dtsPath);
 			onFinish();
 			return;
 		}
@@ -969,6 +984,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function addParticleEmitterNode(element:MissionElementParticleEmitterNode) {
+		Console.warn("Unimplemented method addParticleEmitterNode");
 		// TODO THIS SHIT
 	}
 
@@ -1265,6 +1281,7 @@ class MarbleWorld extends Scheduler {
 				return;
 			if (!_ready && !postInited) {
 				postInited = true;
+				Console.log("Finished loading, starting mission");
 				postInit();
 			}
 		}
@@ -1623,6 +1640,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	function showFinishScreen() {
+		Console.log("State End");
 		var egg:EndGameGui = null;
 		#if js
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");

@@ -19,6 +19,7 @@ import src.Resource;
 import src.ResourceLoaderWorker;
 import fs.TorqueFileSystem;
 import src.Settings;
+import src.Console;
 
 class ResourceLoader {
 	#if (hl && !android)
@@ -46,6 +47,10 @@ class ResourceLoader {
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
+		Console.log("Initializing filesystem");
+		#if hl
+		Console.log("Filesystem Path: " + @:privateAccess cast(fileSystem, TorqueFileSystem).baseDir);
+		#end
 		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
 		@:privateAccess hxd.res.Image.ENABLE_AUTO_WATCH = false;
 		@:privateAccess hxd.res.Sound.ENABLE_AUTO_WATCH = false;
@@ -275,6 +280,7 @@ class ResourceLoader {
 		if (interiorResources.exists(path))
 			return interiorResources.get(path);
 		else {
+			Console.log("Load Interior: " + path);
 			var itr:Dif;
 			// var lock = new Lock();
 			// threadPool.run(() -> {
@@ -293,6 +299,7 @@ class ResourceLoader {
 		if (dtsResources.exists(path))
 			return dtsResources.get(path);
 		else {
+			Console.log("Load DTS: " + path);
 			var dts = new DtsFile();
 			// var lock = new Lock();
 			// threadPool.run(() -> {
@@ -311,6 +318,7 @@ class ResourceLoader {
 		if (textureCache.exists(path))
 			return textureCache.get(path);
 		if (fileSystem.exists(path)) {
+			Console.log("Load Texture: " + path);
 			var img = loader.load(path).toImage();
 			Image.setupTextureFlags = (texObj) -> {
 				texObj.flags.set(MipMapped);
@@ -333,6 +341,7 @@ class ResourceLoader {
 		if (imageCache.exists(path))
 			return imageCache.get(path);
 		if (fileSystem.exists(path)) {
+			Console.log("Load Image: " + path);
 			var tex = loader.load(path).toImage();
 			var imageresource = new Resource(tex, path, imageCache, img -> {});
 			imageCache.set(path, imageresource);
@@ -348,6 +357,7 @@ class ResourceLoader {
 		if (audioCache.exists(path))
 			return audioCache.get(path);
 		if (fileSystem.exists(path)) {
+			Console.log("Load Audio: " + path);
 			var snd = loader.load(path).toSound();
 			// @:privateAccess snd.watchCallb();
 			var audioresource = new Resource(snd, path, audioCache, snd -> snd.dispose());

@@ -1,5 +1,7 @@
 package src;
 
+import src.Console;
+
 class Resource<T> {
 	public var resource:T;
 	public var identifier:String;
@@ -23,6 +25,7 @@ class Resource<T> {
 	public function release() {
 		this.referenceCount--;
 		if (this.referenceCount == 0) {
+			Console.log("Freeing: " + identifier);
 			disposeFunc(this.resource);
 			this.resourceMap.remove(this.identifier);
 			// trace('Releasing Resource ${this.identifier}');

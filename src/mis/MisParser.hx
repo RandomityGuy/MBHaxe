@@ -23,6 +23,7 @@ import mis.MissionElement.MissionElementScriptObject;
 import src.Util;
 import h3d.Vector;
 import h3d.Quat;
+import src.Console;
 
 final elementHeadRegEx = ~/new (\w+)\((\w*)\) *{/g;
 final blockCommentRegEx = ~/\/\*(.|\n)*?\*\//g;
@@ -175,7 +176,7 @@ class MisParser {
 			case "ParticleEmitterNode":
 				MisParserMacros.parseObject(name, MissionElementParticleEmitterNode, MissionElementType.ParticleEmitterNode);
 			default:
-				trace("Unknown element type! " + type);
+				Console.warn("Unknown element type! " + type);
 				// Still advance the index
 				var endingBraceIndex = Util.indexOfIgnoreStringLiterals(this.text, '};', this.index);
 				if (endingBraceIndex == -1)
