@@ -1,5 +1,7 @@
 package src;
 
+import src.Settings;
+
 @:publicFields
 class ConsoleEntry {
 	var time:Float;
@@ -21,6 +23,10 @@ class Console {
 	var consumers:Array<ConsoleEntry->Void>;
 	var timeSinceStart:Float;
 
+	#if hl
+	var consoleFileHandle:sys.io.FileOutput;
+	#end
+
 	public function new() {
 		if (instance == null) {
 			instance = this;
@@ -28,6 +34,9 @@ class Console {
 		entries = [];
 		consumers = [];
 		timeSinceStart = haxe.Timer.stamp();
+		#if hl
+		consoleFileHandle = sys.io.File.write(haxe.io.Path.join([Settings.settingsDir, "console.log"]), false);
+		#end
 	}
 
 	public function clear() {
@@ -41,6 +50,9 @@ class Console {
 	function addEntry(type:String, msg:String) {
 		var e = new ConsoleEntry(getTime(), type, msg);
 		entries.push(e);
+		#if hl
+		consoleFileHandle.writeString('[${e.time}] ${e.text}\n');
+		#end
 		for (c in consumers) {
 			c(e);
 		}

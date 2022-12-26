@@ -53,6 +53,8 @@ class GuiControl {
 	var textureResources:Array<Resource<Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
 
+	var _disposed = false;
+
 	public function new() {}
 
 	public function render(scene2d:Scene) {
@@ -240,6 +242,8 @@ class GuiControl {
 		for (audioResource in soundResources) {
 			audioResource.release();
 		}
+
+		_disposed = true;
 	}
 
 	public function onMouseDown(mouseState:MouseState) {}

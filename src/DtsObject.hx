@@ -33,6 +33,7 @@ import dts.DtsFile;
 import h3d.Matrix;
 import src.Util;
 import src.Resource;
+import src.Console;
 
 var DROP_TEXTURE_FOR_ENV_MAP = ['shapes/items/superjump.dts', 'shapes/items/antigravity.dts'];
 
@@ -373,6 +374,7 @@ class DtsObject extends GameObject {
 
 			if (fullName == null || (this.isTSStatic && ((flags & (1 << 31) > 0)))) {
 				if (this.isTSStatic) {
+					Console.warn('Unsupported material type for ${fullName}, dts: ${this.dtsPath}');
 					// TODO USE PBR???
 				}
 			} else if (Path.extension(fullName) == "ifl") {
@@ -417,6 +419,7 @@ class DtsObject extends GameObject {
 				var texture:Texture = ResourceLoader.getResource("data/shapes/pads/white.jpg", ResourceLoader.getTexture, this.textureResources);
 				texture.wrap = Wrap.Repeat;
 				#end
+				Console.warn('Unable to load ${matName}');
 				material.texture = texture;
 				dtsshader.texture = texture;
 				material.mainPass.addShader(dtsshader);
@@ -461,6 +464,7 @@ class DtsObject extends GameObject {
 		if (this.materials.length == 0) {
 			var mat = Material.create();
 			this.materials.push(mat);
+			Console.warn('No materials found for ${this.dtsPath}}');
 			// TODO THIS
 		}
 	}
@@ -653,41 +657,6 @@ class DtsObject extends GameObject {
 		}
 
 		return materialGeometry;
-	}
-
-	function mergeMaterialGeometries(materialGeometries:Array<Array<MaterialGeometry>>) {
-		var merged = materialGeometries[0].map(x -> {
-			vertices: [],
-			normals: [],
-			uvs: [],
-			indices: []
-		});
-
-		for (matGeom in materialGeometries) {
-			for (i in 0...matGeom.length) {
-				merged[i].vertices = merged[i].vertices.concat(matGeom[i].vertices);
-				merged[i].normals = merged[i].normals.concat(matGeom[i].normals);
-				merged[i].uvs = merged[i].uvs.concat(matGeom[i].uvs);
-				merged[i].indices = merged[i].indices.concat(matGeom[i].indices);
-			}
-		}
-
-		return merged;
-	}
-
-	function createGeometryFromMaterialGeometry(materialGeometry:Array<MaterialGeometry>) {
-		var geo = new Object();
-		for (i in 0...materialGeometry.length) {
-			if (materialGeometry[i].vertices.length == 0)
-				continue;
-
-			var poly = new Polygon(materialGeometry[i].vertices.map(x -> x.toPoint()));
-			poly.normals = materialGeometry[i].normals.map(x -> x.toPoint());
-			poly.uvs = materialGeometry[i].uvs;
-
-			var obj = new Mesh(poly, materials[i], geo);
-		}
-		return geo;
 	}
 
 	public override function setTransform(mat:Matrix) {

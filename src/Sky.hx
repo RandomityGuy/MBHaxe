@@ -16,6 +16,7 @@ import h3d.scene.Object;
 import src.Resource;
 import hxd.res.Image;
 import src.ResourceLoaderWorker;
+import src.Console;
 
 class Sky extends Object {
 	public var dmlPath:String;
@@ -101,6 +102,7 @@ class Sky extends Object {
 							skyboxImages.push(pixels);
 							// var tex = new h3d.mat.Texture();
 							// skyboxImages.push(new BitmapData(128, 128));
+							Console.error("Skybox image " + filenames[0] + " does not exist");
 						} else {
 							var image = ResourceLoader.getResource(filenames[0], ResourceLoader.getImage, this.imageResources).toBitmap();
 							var pixels = image.getPixels();

@@ -65,17 +65,23 @@ class Main extends hxd.App {
 		Console.log("System: " + Sys.systemName());
 		#end
 
-		Settings.init();
-		ResourceLoader.init(s2d, () -> {
-			AudioManager.init();
-			AudioManager.playShell();
-			marbleGame = new MarbleGame(s2d, s3d);
-			MarbleGame.canvas.setContent(new MainMenuGui());
+		try {
+			Settings.init();
+			ResourceLoader.init(s2d, () -> {
+				AudioManager.init();
+				AudioManager.playShell();
+				marbleGame = new MarbleGame(s2d, s3d);
+				MarbleGame.canvas.setContent(new MainMenuGui());
 
-			new ProfilerUI(s2d);
+				new ProfilerUI(s2d);
 
-			loaded = true;
-		});
+				loaded = true;
+			});
+		} catch (e) {
+			Console.error(e.message);
+			Console.error(e.stack.toString());
+			throw e;
+		}
 
 		// ResourceLoader.init(s2d, () -> {
 		// 	Settings.init();
@@ -103,7 +109,13 @@ class Main extends hxd.App {
 		if (loaded) {
 			ProfilerUI.begin();
 			ProfilerUI.measure("updateBegin");
-			marbleGame.update(dt);
+			try {
+				marbleGame.update(dt);
+			} catch (e) {
+				Console.error(e.message);
+				Console.error(e.stack.toString());
+				throw e;
+			}
 			// world.update(dt);
 			ProfilerUI.update(this.engine.fps);
 		}
