@@ -31,6 +31,7 @@ import dif.Dif;
 import src.InteriorObject;
 import src.MarbleGame;
 import src.ResourceLoaderWorker;
+import src.Console;
 
 class DifBuilderTriangle {
 	public var texture:String;
@@ -746,6 +747,7 @@ class DifBuilder {
 							material.receiveShadows = true;
 						}
 					} else {
+						Console.warn('Unable to load ${grp} texture for dif ${path}');
 						material = Material.create();
 						material.shadows = false;
 						material.receiveShadows = true;

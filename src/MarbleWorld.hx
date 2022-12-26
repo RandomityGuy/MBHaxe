@@ -257,6 +257,7 @@ class MarbleWorld extends Scheduler {
 			MarbleGame.canvas.clearContent();
 			this.endPad.generateCollider();
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+			Console.log("MISSION LOADED");
 			start();
 		});
 	}
@@ -403,6 +404,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function restart(full:Bool = false) {
+		Console.log("LEVEL RESTART");
 		if (!full && this.currentCheckpoint != null) {
 			this.loadCheckpointState();
 			return 0; // Load checkpoint
@@ -917,6 +919,7 @@ class MarbleWorld extends Scheduler {
 		} else if (datablockLowercase == "checkpointtrigger") {
 			trigger = new CheckpointTrigger(element, cast this);
 		} else {
+			Console.error("Unknown trigger: " + element.datablock);
 			onFinish();
 			return;
 		}
@@ -1699,6 +1702,7 @@ class MarbleWorld extends Scheduler {
 		if (this.marble.heldPowerup != null)
 			if (this.marble.heldPowerup.identifier == powerUp.identifier)
 				return false;
+		Console.log("PowerUp pickup: " + powerUp.identifier);
 		this.marble.heldPowerup = powerUp;
 		this.playGui.setPowerupImage(powerUp.identifier);
 		MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
@@ -1880,6 +1884,10 @@ class MarbleWorld extends Scheduler {
 		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
 		marble.velocity.load(new Vector(0, 0, 0));
 		marble.omega.load(new Vector(0, 0, 0));
+		Console.log('Respawn:');
+		Console.log('Marble Position: ${mpos.x} ${mpos.y} ${mpos.z}');
+		Console.log('Marble Velocity: ${marble.velocity.x} ${marble.velocity.y} ${marble.velocity.z}');
+		Console.log('Marble Angular: ${marble.omega.x} ${marble.omega.y} ${marble.omega.z}');
 		// Set camera orientation
 		var euler = this.currentCheckpoint.obj.getRotationQuat().toEuler();
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;

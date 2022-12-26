@@ -259,6 +259,7 @@ class Settings {
 			FileSystem.createDirectory(settingsDir);
 		}
 		File.saveContent(Path.join([settingsDir, "settings.json"]), json);
+		Console.log("Saved settings to " + Path.join([settingsDir, "settings.json"]));
 		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();

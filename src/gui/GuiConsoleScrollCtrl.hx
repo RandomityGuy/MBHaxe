@@ -76,7 +76,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 		this.scrollBarY = new Graphics();
 		this.scrollBarY.scale(Settings.uiScale);
-		this.clickInteractive = new Interactive(10 * Settings.uiScale, 1);
+		this.clickInteractive = new Interactive(18 * Settings.uiScale, 1);
 		this.clickInteractive.onPush = (e) -> {
 			if (!this.pressed) {
 				this.pressed = true;
@@ -111,7 +111,10 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	}
 
 	public function setScrollMax(max:Float) {
-		this.scrollY = 0;
+		var renderRect = this.getRenderRectangle();
+		var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
+		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
+		this.scrollY = scrollExtentY - scrollBarYSize * Settings.uiScale;
 		this.maxScrollY = max;
 		this.dirty = true;
 		this.updateScrollVisual();

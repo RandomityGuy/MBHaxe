@@ -2,6 +2,7 @@ import haxe.Json;
 import mis.MisParser;
 import src.ResourceLoader;
 import src.Mission;
+import src.Console;
 
 @:publicFields
 class MissionList {
@@ -91,6 +92,19 @@ class MissionList {
 		missionList.set("gold", goldMissions);
 		missionList.set("platinum", platinumMissions);
 		missionList.set("ultra", ultraMissions);
+
+		Console.log("Loaded MissionList");
+		Console.log("Gold Beginner: " + goldMissions["beginner"].length);
+		Console.log("Gold Intermediate: " + goldMissions["intermediate"].length);
+		Console.log("Gold Advanced: " + goldMissions["advanced"].length);
+		Console.log("Platinum Beginner: " + platinumMissions["beginner"].length);
+		Console.log("Platinum Intermediate: " + platinumMissions["intermediate"].length);
+		Console.log("Platinum Advanced: " + platinumMissions["advanced"].length);
+		Console.log("Platinum Expert: " + platinumMissions["expert"].length);
+		Console.log("Ultra Beginner: " + ultraMissions["beginner"].length);
+		Console.log("Ultra Intermediate: " + ultraMissions["intermediate"].length);
+		Console.log("Ultra Advanced: " + ultraMissions["advanced"].length);
+		Console.log("Custom: " + customMissions.length);
 
 		// parseCLAList();
 

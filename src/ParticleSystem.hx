@@ -21,6 +21,7 @@ import h3d.Vector;
 import h3d.scene.MeshBatch;
 import h3d.scene.Mesh;
 import src.ResourceLoader;
+import src.Console;
 
 @:publicFields
 class ParticleData {
@@ -303,6 +304,7 @@ class ParticleManager {
 	var emitters:Array<ParticleEmitter> = [];
 
 	public function new(level:MarbleWorld) {
+		Console.log("Initializing Particle Manager");
 		this.level = level;
 		this.scene = level.scene;
 	}

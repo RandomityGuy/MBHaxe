@@ -192,7 +192,7 @@ class MarbleGame {
 			if (Key.isPressed(Key.QWERTY_TILDE)) {
 				consoleShown = !consoleShown;
 				if (consoleShown) {
-					if (console == null)
+					if (console == null || @:privateAccess console._disposed)
 						console = new ConsoleDlg();
 					@:privateAccess console.isShowing = true;
 					canvas.pushDialog(console);

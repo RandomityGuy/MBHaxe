@@ -11,6 +11,7 @@ import haxe.EnumFlags;
 import h3d.Quat;
 import h3d.Vector;
 import src.Util;
+import src.Console;
 
 enum ReplayMarbleState {
 	UsedPowerup;
@@ -429,8 +430,10 @@ class Replay {
 	}
 
 	public function read(data:Bytes) {
+		Console.log("Loading replay");
 		var replayVersion = data.get(0);
 		if (replayVersion > version) {
+			Console.log("Replay loading failed: unknown version");
 			return false;
 		}
 		var uncompressedLength = data.getInt32(1);

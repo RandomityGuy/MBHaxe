@@ -94,7 +94,6 @@ class ConsoleDlg extends GuiControl {
 			consoleContent.text.text += txt;
 			if (isShowing) {
 				scroll.setScrollMax(consoleContent.text.textHeight);
-				haxe.Timer.delay(() -> scroll.setScrollPercentage(1), 1);
 			}
 		};
 

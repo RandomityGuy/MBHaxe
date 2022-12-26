@@ -75,7 +75,7 @@ class InstanceManager {
 						minfo.meshbatch.shadersChanged = true;
 						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
-						minfo.meshbatch.setTransform(transform);
+						minfo.meshbatch.worldPosition = transform;
 						minfo.meshbatch.emitInstance();
 					}
 				}
@@ -98,7 +98,7 @@ class InstanceManager {
 						// 	minfo.transparencymeshbatch.shadersChanged = true;
 						// }
 						var transform = instance.emptyObj.getAbsPos();
-						minfo.transparencymeshbatch.setTransform(transform);
+						minfo.transparencymeshbatch.worldPosition = transform;
 						minfo.transparencymeshbatch.emitInstance();
 					}
 				}

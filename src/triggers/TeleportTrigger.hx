@@ -6,6 +6,7 @@ import src.AudioManager;
 import mis.MisParser;
 import src.MarbleWorld;
 import mis.MissionElement.MissionElementTrigger;
+import src.Console;
 
 class TeleportTrigger extends Trigger {
 	var delay:Float = 2;
@@ -102,6 +103,11 @@ class TeleportTrigger extends Trigger {
 			this.level.marble.velocity.scale(-1);
 		if (!MisParser.parseBoolean(chooseNonNull(this.element.keepangular, destination.element.keepangular)))
 			this.level.marble.omega.set(0, 0, 0);
+
+		Console.log('Teleport:');
+		Console.log('Marble Position: ${position.x} ${position.y} ${position.z}');
+		Console.log('Marble Velocity: ${this.level.marble.velocity.x} ${this.level.marble.velocity.y} ${this.level.marble.velocity.z}');
+		Console.log('Marble Angular: ${this.level.marble.omega.x} ${this.level.marble.omega.y} ${this.level.marble.omega.z}');
 
 		// Determine camera orientation
 		if (!MisParser.parseBoolean(chooseNonNull(this.element.keepcamera, destination.element.keepcamera))) {

@@ -74,9 +74,6 @@ class PathedInterior extends InteriorObject {
 			pathedInterior.simGroup = simGroup;
 			pathedInterior.element = interiorElement;
 			level.interiors.push(pathedInterior);
-			// await
-			// Util.wait(10); // See shapes for the meaning of this hack
-			// await
 			pathedInterior.init(level, () -> {
 				onFinish(pathedInterior);
 			});

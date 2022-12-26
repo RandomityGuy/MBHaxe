@@ -152,18 +152,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var tform = transform.clone();
 		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));
 
-		function toDifPoint(pt:Vector) {
-			return new Point3F(pt.x, pt.y, pt.z);
-		}
-
-		function fromDifPoint(pt:Point3F) {
-			return new Vector(pt.x, pt.y, pt.z);
-		}
-
-		function hashEdge(i1:Int, i2:Int) {
-			return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
-		}
-
 		var contacts = [];
 
 		for (obj in surfaces) {
