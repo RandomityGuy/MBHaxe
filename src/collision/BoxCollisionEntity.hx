@@ -10,6 +10,7 @@ import h3d.col.Ray;
 import h3d.Vector;
 import h3d.col.Sphere;
 import h3d.col.Bounds;
+import src.Debug;
 
 class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 	var bounds:Bounds;
@@ -25,24 +26,28 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 	public override function generateBoundingBox() {
 		this.boundingBox = bounds.clone();
 		this.boundingBox.transform(this.transform);
-		// if (_dbgEntity == null) {
-		// 	_dbgEntity = this.boundingBox.makeDebugObj();
-		// 	_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
-		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
-		// } else {
-		// 	_dbgEntity = this.boundingBox.makeDebugObj();
-		// 	_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
-		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
-		// }
+		if (Debug.drawBounds) {
+			if (_dbgEntity == null) {
+				_dbgEntity = this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+				MarbleGame.instance.scene.addChild(_dbgEntity);
+			} else {
+				_dbgEntity = this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+				MarbleGame.instance.scene.addChild(_dbgEntity);
+			}
+		}
 	}
 
 	public override function setTransform(transform:Matrix) {
 		super.setTransform(transform);
-		// if (_dbgEntity != null) {
-		// 	_dbgEntity = this.boundingBox.makeDebugObj();
-		// 	_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
-		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
-		// }
+		if (Debug.drawBounds) {
+			if (_dbgEntity != null) {
+				_dbgEntity = this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+				MarbleGame.instance.scene.addChild(_dbgEntity);
+			}
+		}
 	}
 
 	public override function rayCast(rayOrigin:Vector, rayDirection:Vector) {

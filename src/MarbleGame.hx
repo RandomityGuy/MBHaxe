@@ -19,6 +19,7 @@ import src.Util;
 import src.ProfilerUI;
 import src.Settings;
 import src.Console;
+import src.Debug;
 
 @:publicFields
 class MarbleGame {
@@ -173,7 +174,7 @@ class MarbleGame {
 				touchInput.update();
 			}
 			if (!paused) {
-				world.update(dt);
+				world.update(dt * Debug.timeScale);
 			}
 			if (Key.isPressed(Key.ESCAPE) && world.finishTime == null && world._ready) {
 				#if hl

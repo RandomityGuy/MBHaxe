@@ -1,5 +1,8 @@
 package gui;
 
+import hxd.Key;
+import gui.GuiControl.MouseState;
+import h2d.Scene;
 import src.Console.ConsoleEntry;
 import h2d.Graphics;
 import h2d.Tile;
@@ -13,6 +16,13 @@ import src.Console;
 class ConsoleDlg extends GuiControl {
 	var onConsoleEntry:(e:ConsoleEntry) -> Void;
 	var isShowing = false;
+
+	var consoleContent:GuiMLText;
+	var scroll:GuiConsoleScrollCtrl;
+	var consoleInput:GuiTextInput;
+
+	var cmdHistory:Array<String> = [];
+	var cmdHistoryIndex = 0;
 
 	public function new() {
 		super();
@@ -28,8 +38,7 @@ class ConsoleDlg extends GuiControl {
 		consoleWhite.vertSizing = Top;
 		this.addChild(consoleWhite);
 
-		var scroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/darkscroll.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
+		scroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/darkscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		scroll.position = new Vector(0, 0);
 		scroll.extent = new Vector(640, 350);
 		scroll.horizSizing = Width;
@@ -46,7 +55,7 @@ class ConsoleDlg extends GuiControl {
 			return null;
 		}
 
-		var consoleContent = new GuiMLText(consoleb, mlFontLoader);
+		consoleContent = new GuiMLText(consoleb, mlFontLoader);
 		consoleContent.position = new Vector(0, 0);
 		consoleContent.extent = new Vector(640, 350);
 		consoleContent.horizSizing = Width;
@@ -77,7 +86,7 @@ class ConsoleDlg extends GuiControl {
 		bord.horizSizing = Width;
 		consoleContent.addChild(bord);
 
-		var consoleInput = new GuiTextInput(arial14);
+		consoleInput = new GuiTextInput(arial14);
 		consoleInput.position = new Vector(1, 351);
 		consoleInput.extent = new Vector(638, 20);
 		consoleInput.horizSizing = Width;
@@ -103,5 +112,38 @@ class ConsoleDlg extends GuiControl {
 	override function dispose() {
 		super.dispose();
 		Console.removeConsumer(onConsoleEntry);
+	}
+
+	public override function render(scene2d:Scene) {
+		super.render(scene2d);
+
+		scroll.setScrollMax(consoleContent.text.textHeight);
+	}
+
+	public override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+
+		if (Key.isPressed(Key.ENTER) && consoleInput.text.text != "") {
+			var cmdText = consoleInput.text.text;
+			cmdHistory.push(cmdText);
+			consoleContent.text.text += '==> ${cmdText}<br/>';
+			Console.eval(cmdText);
+			consoleInput.text.text = "";
+			consoleInput.text.focus();
+		}
+
+		if (Key.isPressed(Key.UP)) {
+			if (cmdHistoryIndex < cmdHistory.length) {
+				cmdHistoryIndex++;
+				consoleInput.text.text = cmdHistory[cmdHistory.length - cmdHistoryIndex];
+			}
+		}
+
+		if (Key.isPressed(Key.DOWN)) {
+			if (cmdHistoryIndex > 1) {
+				cmdHistoryIndex--;
+				consoleInput.text.text = cmdHistory[cmdHistory.length - cmdHistoryIndex];
+			}
+		}
 	}
 }

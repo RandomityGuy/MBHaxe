@@ -109,13 +109,14 @@ class Main extends hxd.App {
 		if (loaded) {
 			ProfilerUI.begin();
 			ProfilerUI.measure("updateBegin");
-			try {
-				marbleGame.update(dt);
-			} catch (e) {
-				Console.error(e.message);
-				Console.error(e.stack.toString());
-				throw e;
-			}
+
+			// try {
+			marbleGame.update(dt);
+			// } catch (e) {
+			// Console.error(e.message);
+			// Console.error(e.stack.toString());
+			// 	throw e;
+			// }
 			// world.update(dt);
 			ProfilerUI.update(this.engine.fps);
 		}
