@@ -32,6 +32,7 @@ import src.InteriorObject;
 import src.MarbleGame;
 import src.ResourceLoaderWorker;
 import src.Console;
+import src.Debug;
 
 class DifBuilderTriangle {
 	public var texture:String;
@@ -753,7 +754,8 @@ class DifBuilder {
 						material.receiveShadows = true;
 					}
 					// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
-					// material.mainPass.wireframe = true;
+					if (Debug.wireFrame)
+						material.mainPass.wireframe = true;
 					var mesh = new Mesh(prim, material, itr);
 				}
 

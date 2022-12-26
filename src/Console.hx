@@ -1,6 +1,8 @@
 package src;
 
+import mis.MisParser;
 import src.Settings;
+import src.Debug;
 
 @:publicFields
 class ConsoleEntry {
@@ -96,5 +98,50 @@ class Console {
 
 	public static function removeConsumer(c:ConsoleEntry->Void) {
 		instance.consumers.remove(c);
+	}
+
+	public static function eval(cmd:String) {
+		var cmdSplit = cmd.split(" ");
+		if (cmdSplit.length != 0) {
+			var cmdType = cmdSplit[0];
+			if (cmdType == "help") {
+				log("Available commands:");
+				log("help");
+				log("timeScale <scale>");
+				log("drawBounds <true/false>");
+				log("wireframe <true/false>");
+			} else if (cmdType == "timeScale") {
+				if (cmdSplit.length == 2) {
+					var scale = Std.parseFloat(cmdSplit[1]);
+					if (Math.isNaN(scale))
+						scale = 1;
+					Debug.timeScale = scale;
+					log("Time scale set to " + scale);
+				} else {
+					error("Expected one argument, got " + (cmdSplit.length - 1));
+				}
+			} else if (cmdType == "drawBounds") {
+				if (cmdSplit.length == 2) {
+					var scale = MisParser.parseBoolean(cmdSplit[1]);
+					Debug.drawBounds = scale;
+					log("Debug.drawBounds set to " + scale);
+				} else {
+					error("Expected one argument, got " + (cmdSplit.length - 1));
+				}
+			} else if (cmdType == "wireframe") {
+				if (cmdSplit.length == 2) {
+					var scale = MisParser.parseBoolean(cmdSplit[1]);
+					Debug.wireFrame = scale;
+					log("Debug.wireframe set to " + scale);
+				} else {
+					error("Expected one argument, got " + (cmdSplit.length - 1));
+				}
+			} else {
+				error("Unknown command");
+			}
+
+			return;
+		}
+		error("Unknown command");
 	}
 }

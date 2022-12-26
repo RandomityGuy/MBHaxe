@@ -8,6 +8,7 @@ import h3d.Vector;
 import h3d.col.Sphere;
 import h3d.col.Bounds;
 import src.MarbleGame;
+import src.Debug;
 
 class SphereCollisionEntity extends CollisionEntity {
 	public var radius:Float;
@@ -31,37 +32,41 @@ class SphereCollisionEntity extends CollisionEntity {
 		boundingBox.transform3x3(transform);
 		this.boundingBox = boundingBox;
 
-		// if (_dbgEntity == null) {
-		// 	var cube = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
-		// 	cube.addNormals();
-		// 	cube.addUVs();
-		// 	_dbgEntity = new h3d.scene.Mesh(cube);
-		// 	_dbgEntity.material.mainPass.wireframe = true;
-		// 	_dbgEntity.setTransform(transform);
-		// 	MarbleGame.instance.scene.addChild(_dbgEntity);
+		if (Debug.drawBounds) {
+			if (_dbgEntity == null) {
+				var cube = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
+				cube.addNormals();
+				cube.addUVs();
+				_dbgEntity = new h3d.scene.Mesh(cube);
+				_dbgEntity.material.mainPass.wireframe = true;
+				_dbgEntity.setTransform(transform);
+				MarbleGame.instance.scene.addChild(_dbgEntity);
 
-		// 	var cube2 = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
-		// 	cube2.addNormals();
-		// 	cube2.addUVs();
-		// 	_dbgEntity2 = new h3d.scene.Mesh(cube2);
-		// 	_dbgEntity2.material.mainPass.wireframe = true;
-		// 	_dbgEntity2.setTransform(transform);
-		// 	MarbleGame.instance.scene.addChild(_dbgEntity2);
-		// } else {
-		// 	_dbgEntity.setTransform(transform);
-		// 	var cube2 = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
-		// 	cube2.addNormals();
-		// 	cube2.addUVs();
-		// 	_dbgEntity2.primitive = cube2;
-		// 	_dbgEntity2.setPosition(pos.x, pos.y, pos.z);
-		// }
+				var cube2 = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
+				cube2.addNormals();
+				cube2.addUVs();
+				_dbgEntity2 = new h3d.scene.Mesh(cube2);
+				_dbgEntity2.material.mainPass.wireframe = true;
+				_dbgEntity2.setTransform(transform);
+				MarbleGame.instance.scene.addChild(_dbgEntity2);
+			} else {
+				_dbgEntity.setTransform(transform);
+				var cube2 = new h3d.prim.Cube(this.boundingBox.xSize, this.boundingBox.ySize, this.boundingBox.zSize, true);
+				cube2.addNormals();
+				cube2.addUVs();
+				_dbgEntity2.primitive = cube2;
+				_dbgEntity2.setPosition(pos.x, pos.y, pos.z);
+			}
+		}
 	}
 
 	public override function setTransform(transform:Matrix) {
 		super.setTransform(transform);
-		// if (_dbgEntity != null) {
-		// 	_dbgEntity.setTransform(transform);
-		// }
+		if (Debug.drawBounds) {
+			if (_dbgEntity != null) {
+				_dbgEntity.setTransform(transform);
+			}
+		}
 	}
 
 	public override function rayCast(rayOrigin:Vector, rayDirection:Vector) {

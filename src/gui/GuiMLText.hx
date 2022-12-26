@@ -22,6 +22,8 @@ class GuiMLText extends GuiControl {
 
 	public var scrollable:Bool = false;
 
+	var _scroll:Float = 0;
+
 	public function new(font:h2d.Font, loadFontFunc:String->h2d.Font) {
 		super();
 		this.text = new HtmlText(font);
@@ -57,10 +59,11 @@ class GuiMLText extends GuiControl {
 			text.textAlign = Center;
 		}
 
+		if (scrollable)
+			text.setPosition(0, -_scroll);
+
 		if (scene2d.contains(obj))
 			scene2d.removeChild(obj);
-
-		scene2d.addChild(obj);
 
 		scene2d.addChild(obj);
 		super.render(scene2d);
@@ -86,6 +89,9 @@ class GuiMLText extends GuiControl {
 	}
 
 	public override function onScroll(scrollX:Float, scrollY:Float) {
+		_scroll = scrollY;
 		text.setPosition(0, -scrollY);
+		if (flow != null)
+			flow.getProperties(text).offsetY = cast - scrollY;
 	}
 }

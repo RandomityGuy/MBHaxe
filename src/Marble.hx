@@ -60,6 +60,7 @@ import h3d.mat.Texture;
 import collision.CCDCollision.TraceInfo;
 import src.ResourceLoaderWorker;
 import src.InteriorObject;
+import src.Console;
 
 class Move {
 	public var d:Vector;
@@ -310,6 +311,7 @@ class Marble extends GameObject {
 		var isUltra = level.mission.game.toLowerCase() == "ultra";
 
 		var marbleDts = new DtsObject();
+		Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
 		marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
 		marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
 		marbleDts.showSequences = false;
