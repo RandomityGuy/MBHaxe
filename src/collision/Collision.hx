@@ -242,20 +242,20 @@ class Collision {
 			res.normal = P.sub(res.point).normalized();
 			res.result = true;
 
-			if (res.normal.dot(N) > 0.8) {
-				// Internal edge
-				if (chosenEdge & edgeData > 0) {
-					chosenEdge -= 1;
-					if (chosenEdge > 2)
-						chosenEdge--;
-					// if (edgeNormals[chosenEdge].length() < 0.5) {
-					//	res.normal = center.sub(res.point).normalized();
-					// } else
-					if (edgeConcavities[chosenEdge]) { // Our edge is concave
-						res.normal = N.clone();
-					}
-				}
-			}
+			// if (res.normal.dot(N) > 0.8) {
+			// 	// Internal edge
+			// 	if (chosenEdge & edgeData > 0) {
+			// 		chosenEdge -= 1;
+			// 		if (chosenEdge > 2)
+			// 			chosenEdge--;
+			// 		// if (edgeNormals[chosenEdge].length() < 0.5) {
+			// 		//	res.normal = center.sub(res.point).normalized();
+			// 		// } else
+			// 		if (edgeConcavities[chosenEdge]) { // Our edge is concave
+			// 			res.normal = N.clone();
+			// 		}
+			// 	}
+			// }
 		}
 		return res;
 	}
