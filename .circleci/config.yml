@@ -265,16 +265,13 @@ jobs:
   build-win:
     executor: 
         name: win/server-2022
-        shell: cmd.exe # executor type
+        shell: bash.exe # executor type
     # Checkout the code as the first step. This is a dedicated CircleCI step.
     # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
     # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
     # Then run your tests!
     # CircleCI will report the results back to your VCS provider.
     steps:
-        - add_ssh_keys:
-              fingerprints:
-                  - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
         - checkout
         - run:
             name: Install dependencies
@@ -282,15 +279,17 @@ jobs:
               curl -fsSL --retry 3 --retry-delay 5 -o /tmp/sdl.zip https://www.libsdl.org/release/SDL2-devel-2.0.5-VC.zip
               curl -fsSL --retry 3 --retry-delay 5 -o /tmp/openal.zip https://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip
               curl -fsSL --retry 3 --retry-delay 5 -o /tmp/ffmpeg.zip https://github.com/HaxeFoundation/hashlink/files/5648056/ffmpeg-3.4.2-win64-dev.zip
-              7z x /tmp/sdl.zip    -oinclude; mv include/SDL2*   include/sdl
-              7z x /tmp/openal.zip -oinclude; mv include/openal* include/openal
-              7z x /tmp/ffmpeg.zip -oinclude; mv include/ffmpeg* include/ffmpeg
+              cd /tmp
+              7z x /tmp/sdl.zip    -oinclude; mv /tmp/include/SDL2*   /tmp/include/sdl
+              7z x /tmp/openal.zip -oinclude; mv /tmp/include/openal* /tmp/include/openal
+              7z x /tmp/ffmpeg.zip -oinclude; mv /tmp/include/ffmpeg* /tmp/include/ffmpeg
         - run:
             name: Install Neko
             command: |
               choco install --no-progress neko -y
-              nekopath=$(find C:/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
               set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
         - run:
             name: Install Haxe
             command: |
@@ -300,17 +299,86 @@ jobs:
               curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.zip
               7z x /tmp/haxe.zip -o/tmp
               mv -v /tmp/haxe_* /tmp/haxe
-              set PATH=%PATH%;/tmp/haxe/
-              set HAXE_STD_PATH=/tmp/haxe/std
+              cd /tmp/haxe
+              mv haxe_* haxe
+              export PATH=/tmp/haxe/haxe:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
               haxelib setup ~/haxelib
               haxelib list
-              haxelib install hashlink
         - run: 
             name: Build Hashlink
             command: |
-              MSBuild.exe hl.sln //nologo //m //clp:ErrorsOnly \ 
-                //p:Configuration=Release \
-                //p:Platform=x64
+              mkdir ~/deps
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/hashlink
+              cd hashlink
+              mv /tmp/include/sdl include/sdl
+              mv /tmp/include/openal include/openal
+              MSBuild.exe hl.sln -m -nologo -p:Configuration=Release -p:Platform=x64
+
+        - run:
+            name: Install haxe dependencies
+            command: |
+              export PATH=/tmp/haxe/haxe:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
+              haxelib git heaps https://github.com/RandomityGuy/heaps
+              haxelib dev hlopenal ~/deps/hashlink/libs/openal
+              haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+              haxelib dev hashlink ~/deps/hashlink/other/haxelib
+
+        - run:
+            name: Compile MBHaxe
+            command: |
+              export PATH=/tmp/haxe/haxe:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
+              cd ~/project
+              haxe compile-c.hxml
+              cd native
+              sed -i -e 's/MaxSpeed/Disabled/g' marblegame.vcxproj
+              sed -i -e 's/<FunctionLevelLinking>true<\/FunctionLevelLinking>//g' marblegame.vcxproj
+              sed -i -e 's/<IntrinsicFunctions>true<\/IntrinsicFunctions>//g' marblegame.vcxproj
+              sed -i -e 's/<EnableCOMDATFolding>true<\/EnableCOMDATFolding>//g' marblegame.vcxproj
+              sed -i -e 's/<OptimizeReferences>true<\/OptimizeReferences>//g' marblegame.vcxproj
+              sed -i -e 's/HL_MAKE;//g' marblegame.vcxproj
+              sed -i -e 's/<ClInclude Include=".*" \/>//g' marblegame.vcxproj
+              sed -i -e 's/<ClCompile Include=".*" \/>//g' marblegame.vcxproj
+              perl -0777 -i.marblegame.vcxproj -pe 's/<ItemGroup>[^.]*<\/ItemGroup>/<ItemGroup><ClCompile Include="marblegame.c" \/><\/ItemGroup>/g' marblegame.vcxproj
+              HASHLINKPATH=~/deps/hashlink
+              MSBuild.exe marblegame.sln -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH
+        - run:
+            name: Package app bundle
+            command: |
+              cd ~/project
+              mkdir release
+              cd release
+              cp ../native/x64/Release/marblegame.exe .
+              mv marblegame.exe marbleblast.exe
+              cp -r ../data .
+              cp ~/deps/hashlink/x64/Release/libhl.dll .
+              cp ~/deps/hashlink/x64/Release/fmt.hdll .
+              cp ~/deps/hashlink/x64/Release/ui.hdll .
+              cp ~/deps/hashlink/x64/Release/openal.hdll .
+              cp ~/deps/hashlink/x64/Release/sdl.hdll .
+              cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
+              cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 
+        - run:
+            name: Zip bundle
+            command: |
+              cd ~/project
+              7z a MBHaxe-Platinum-Win.zip release/
+
+        - store_artifacts:
+            path: ~/project/MBHaxe-Platinum-Win.zip
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
