@@ -176,7 +176,7 @@ class Settings {
 		return hl.Bytes.fromValue("null", i);
 	}
 
-	@:hlNative("std", "sys_special") static function sys_special(key:hl.Bytes):hl.Bytes {
+	@:hlNative static function get_storage_path():hl.Bytes {
 		return null;
 	}
 	#end
@@ -296,7 +296,7 @@ class Settings {
 		settingsExists = FileSystem.exists(Path.join([settingsDir, "settings.json"]));
 		#end
 		#if android
-		settingsDir = @:privateAccess String.fromUCS2(sys_special(@:privateAccess Sys.getPath("android_internal_storage_path")));
+		// settingsDir = @:privateAccess String.fromUTF8(get_storage_path());
 		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();
