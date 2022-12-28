@@ -36,7 +36,7 @@ class Console {
 		entries = [];
 		consumers = [];
 		timeSinceStart = haxe.Timer.stamp();
-		#if hl
+		#if (hl && !android)
 		consoleFileHandle = sys.io.File.write(haxe.io.Path.join([Settings.settingsDir, "console.log"]), false);
 		#end
 	}
@@ -52,7 +52,7 @@ class Console {
 	function addEntry(type:String, msg:String) {
 		var e = new ConsoleEntry(getTime(), type, msg);
 		entries.push(e);
-		#if hl
+		#if (hl && !android)
 		consoleFileHandle.writeString('[${e.time}] ${e.text}\n');
 		#end
 		for (c in consumers) {
