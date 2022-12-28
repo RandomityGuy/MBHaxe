@@ -1955,18 +1955,27 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function saveReplay() {
+		this.replay.name = MarbleGame.instance.recordingName;
 		var replayBytes = this.replay.write();
 		#if hl
-		hxd.File.saveAs(replayBytes, {
-			title: 'Save Replay',
-			fileTypes: [
-				{
-					name: "Replay (*.mbr)",
-					extensions: ["mbr"]
-				}
-			],
-			defaultPath: '${this.mission.title}${this.timeState.gameplayClock}.mbr'
-		});
+		// hxd.File.saveAs(replayBytes, {
+		// 	title: 'Save Replay',
+		// 	fileTypes: [
+		// 		{
+		// 			name: "Replay (*.mbr)",
+		// 			extensions: ["mbr"]
+		// 		}
+		// 	],
+		// 	defaultPath: 'data/replay/${this.mission.title}${this.timeState.gameplayClock}.mbr'
+		// });
+		sys.FileSystem.createDirectory(haxe.io.Path.join([Settings.settingsDir, "data", "replays"]));
+		var replayPath = haxe.io.Path.join([
+			Settings.settingsDir,
+			"data",
+			"replays",
+			'${this.mission.title}${this.timeState.gameplayClock}.mbr'
+		]);
+		sys.io.File.saveBytes(replayPath, replayBytes);
 		#end
 		#if js
 		var blob = new js.html.Blob([replayBytes.getData()], {
