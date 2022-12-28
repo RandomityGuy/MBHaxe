@@ -292,11 +292,11 @@ class Settings {
 	public static function load() {
 		Console.log("Loading settings");
 		var settingsExists = false;
-		#if hl
+		#if (hl && !android)
 		settingsExists = FileSystem.exists(Path.join([settingsDir, "settings.json"]));
 		#end
 		#if android
-		// settingsDir = @:privateAccess String.fromUTF8(get_storage_path());
+		settingsDir = @:privateAccess String.fromUTF8(get_storage_path());
 		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();
