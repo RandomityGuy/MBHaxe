@@ -51,8 +51,7 @@ class ResourceLoader {
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
 		Console.log("Initializing filesystem");
-		#if hl
-		@:privateAccess @:privateAccess cast(fileSystem, TorqueFileSystem).convert.tmpDir = "data/tmp/";
+		#if (hl && !android)
 		Console.log("Filesystem Path: " + @:privateAccess cast(fileSystem, TorqueFileSystem).baseDir);
 		#end
 		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
