@@ -96,6 +96,10 @@ class MainMenuGui extends GuiImage {
 		replButton.position = new Vector(552, 536);
 		replButton.extent = new Vector(191, 141);
 		replButton.pressedAction = (sender) -> {
+			#if hl
+			MarbleGame.canvas.setContent(new ReplayCenterGui());
+			#end
+			#if js
 			hxd.File.browse((replayToLoad) -> {
 				replayToLoad.load((replayData) -> {
 					var replay = new Replay("");
@@ -126,6 +130,7 @@ class MainMenuGui extends GuiImage {
 					}
 				],
 			});
+			#end
 		};
 		mainMenuContent.addChild(replButton);
 

@@ -34,6 +34,7 @@ class MarbleGame {
 
 	var paused:Bool;
 	var toRecord:Bool = false;
+	var recordingName:String;
 
 	var exitGameDlg:ExitGameDlg;
 

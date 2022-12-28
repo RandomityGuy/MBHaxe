@@ -489,13 +489,12 @@ class Marble extends GameObject {
 	}
 
 	function getExternalForces(currentTime:Float, m:Move, dt:Float) {
+		if (this.mode == Finish)
+			return this.velocity.multiply(-16);
 		var gWorkGravityDir = this.level.currentUp.multiply(-1);
 		var A = new Vector();
-		if (this.mode != Finish)
-			A = gWorkGravityDir.multiply(this._gravity);
-		if (this.mode == Finish)
-			A = this.velocity.multiply(-16);
-		if (currentTime - this.helicopterEnableTime < 5 && this.mode != Finish) {
+		A = gWorkGravityDir.multiply(this._gravity);
+		if (currentTime - this.helicopterEnableTime < 5) {
 			A = A.multiply(0.25);
 		}
 		for (obj in level.forceObjects) {
@@ -543,7 +542,7 @@ class Marble extends GameObject {
 				}
 			}
 		}
-		if (contacts.length == 0) {
+		if (contacts.length == 0 && this.mode != Start) {
 			var axes = this.getMarbleAxis();
 			var sideDir = axes[0];
 			var motionDir = axes[1];
@@ -775,7 +774,7 @@ class Marble extends GameObject {
 				A = A.add(contacts[j].normal.multiply(normalForce2));
 			}
 		}
-		if (bestSurface != -1) {
+		if (bestSurface != -1 && this.mode != Finish) {
 			var vAtC = this.velocity.add(this.omega.cross(bestContact.normal.multiply(-this._radius))).sub(bestContact.velocity);
 			var vAtCMag = vAtC.length();
 			var slipping = false;
@@ -832,6 +831,9 @@ class Marble extends GameObject {
 			lastContactNormal = bestContact.normal;
 		}
 		a = a.add(aControl);
+		if (this.mode == Finish) {
+			a.set(); // Zero it out
+		}
 		return [A, a];
 	}
 
@@ -988,7 +990,7 @@ class Marble extends GameObject {
 
 		// for (iter in 0...10) {
 		//	var iterationFound = false;
-		for (obj in foundObjs.filter(x -> x.go is InteriorObject && !(x.go is PathedInterior))) {
+		for (obj in foundObjs.filter(x -> x.go is InteriorObject || (x.go is PathedInterior))) {
 			// Its an MP so bruh
 
 			var invMatrix = @:privateAccess obj.invTransform;
@@ -1520,6 +1522,11 @@ class Marble extends GameObject {
 			var a = retf[1];
 			this.velocity = this.velocity.add(A.multiply(timeStep));
 			this.omega = this.omega.add(a.multiply(timeStep));
+			if (this.mode == Start) {
+				// Bruh...
+				this.velocity.y = 0;
+				this.velocity.x = 0;
+			}
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, true, stoppedPaths, pathedInteriors);
 			this._totalTime += timeStep;
 			if (contacts.length != 0) {
@@ -1593,20 +1600,20 @@ class Marble extends GameObject {
 				}
 			}
 
-			if (mode == Start) {
-				var upVec = this.level.currentUp;
-				var startpadNormal = startPad.getAbsPos().up();
-				this.velocity = upVec.multiply(this.velocity.dot(upVec));
-				// Apply contact forces in startPad up direction if upVec is not startpad up, fixes the weird startpad shit in pinball wizard
-				if (upVec.dot(startpadNormal) < 0.95) {
-					for (contact in contacts) {
-						var normF = contact.normal.multiply(contact.normalForce);
-						var startpadF = startpadNormal.multiply(normF.dot(startpadNormal));
-						var upF = upVec.multiply(normF.dot(upVec));
-						this.velocity = this.velocity.add(startpadF.multiply(timeStep / 4));
-					}
-				}
-			}
+			// if (mode == Start) {
+			// 	var upVec = this.level.currentUp;
+			// 	var startpadNormal = startPad.getAbsPos().up();
+			// 	this.velocity = upVec.multiply(this.velocity.dot(upVec));
+			// 	// Apply contact forces in startPad up direction if upVec is not startpad up, fixes the weird startpad shit in pinball wizard
+			// 	if (upVec.dot(startpadNormal) < 0.95) {
+			// 		for (contact in contacts) {
+			// 			var normF = contact.normal.multiply(contact.normalForce);
+			// 			var startpadF = startpadNormal.multiply(normF.dot(startpadNormal));
+			// 			var upF = upVec.multiply(normF.dot(upVec));
+			// 			this.velocity = this.velocity.add(startpadF.multiply(timeStep / 4));
+			// 		}
+			// 	}
+			// }
 
 			// if (mode == Finish) {
 			// 	this.velocity = this.velocity.multiply(0.925);

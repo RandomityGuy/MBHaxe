@@ -667,8 +667,7 @@ class PlayMissionGui extends GuiImage {
 		pmRecord.position = new Vector(247, 46);
 		pmRecord.extent = new Vector(43, 43);
 		pmRecord.pressedAction = (sender) -> {
-			cast(this.parent, Canvas).marbleGame.toRecord = true;
-			cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
+			cast(this.parent, Canvas).pushDialog(new ReplayNameDlg());
 		};
 		pmMorePopDlg.addChild(pmRecord);
 

@@ -1,5 +1,6 @@
 package src;
 
+import hxd.fs.FileEntry;
 import shapes.PowerUp;
 import haxe.io.BytesInput;
 import haxe.zip.Huffman;
@@ -240,6 +241,7 @@ class ReplayInitialState {
 
 class Replay {
 	public var mission:String;
+	public var name:String;
 
 	var frames:Array<ReplayFrame>;
 	var initialState:ReplayInitialState;
@@ -250,7 +252,8 @@ class Replay {
 	var currentPlaybackFrameIdx:Int;
 	var currentPlaybackTime:Float;
 
-	var version:Int = 4;
+	var version:Int = 5;
+	var readFullEntry:FileEntry;
 
 	public function new(mission:String) {
 		this.mission = mission;
@@ -403,7 +406,6 @@ class Replay {
 	public function write() {
 		var bw = new BytesWriter();
 
-		bw.writeStr(this.mission);
 		this.initialState.write(bw);
 		bw.writeInt32(this.frames.length);
 		for (frame in this.frames) {
@@ -416,13 +418,17 @@ class Replay {
 		var compressed = haxe.zip.Compress.run(bw.getBuffer(), 9);
 		#end
 		#if js
-		var stream = zip.DeflateStream.create(zip.DeflateStream.CompressionLevel.GOOD, false);
+		var stream = zip.DeflateStream.create(zip.DeflateStream.CompressionLevel.GOOD, true);
 		stream.write(new BytesInput(bw.getBuffer()));
 		var compressed = stream.finalize();
 		#end
 
 		var finalB = new BytesBuffer();
 		finalB.addByte(version);
+		finalB.addByte(this.name.length);
+		finalB.addString(this.name);
+		finalB.addByte(this.mission.length);
+		finalB.addString(this.mission);
 		finalB.addInt32(bufsize);
 		finalB.addBytes(compressed, 0, compressed.length);
 
@@ -436,8 +442,12 @@ class Replay {
 			Console.log("Replay loading failed: unknown version");
 			return false;
 		}
-		var uncompressedLength = data.getInt32(1);
-		var compressedData = data.sub(5, data.length - 5);
+		var nameLength = data.get(1);
+		this.name = data.getString(2, nameLength);
+		var missionLength = data.get(2 + nameLength);
+		this.mission = data.getString(3 + nameLength, missionLength);
+		var uncompressedLength = data.getInt32(3 + nameLength + missionLength);
+		var compressedData = data.sub(7 + nameLength + missionLength, data.length - 7 - nameLength - missionLength);
 
 		#if hl
 		var uncompressed = haxe.zip.Uncompress.run(compressedData, uncompressedLength);
@@ -446,7 +456,6 @@ class Replay {
 		var uncompressed = haxe.zip.InflateImpl.run(new BytesInput(compressedData), uncompressedLength);
 		#end
 		var br = new BytesReader(uncompressed);
-		this.mission = br.readStr();
 		this.initialState.read(br);
 		var frameCount = br.readInt32();
 		this.frames = [];
@@ -456,5 +465,26 @@ class Replay {
 			this.frames.push(frame);
 		}
 		return true;
+	}
+
+	public function readHeader(data:Bytes, fe:FileEntry) {
+		this.readFullEntry = fe;
+		Console.log("Loading replay");
+		var replayVersion = data.get(0);
+		if (replayVersion > version) {
+			Console.log("Replay loading failed: unknown version");
+			return false;
+		}
+		var nameLength = data.get(1);
+		this.name = data.getString(2, nameLength);
+		var missionLength = data.get(2 + nameLength);
+		this.mission = data.getString(3 + nameLength, missionLength);
+		return true;
+	}
+
+	public function readFull() {
+		if (readFullEntry != null)
+			return read(readFullEntry.getBytes());
+		return false;
 	}
 }
