@@ -205,6 +205,10 @@ class Settings {
 		var i = 4;
 		return hl.Bytes.fromValue("null", i);
 	}
+
+	@:hlNative("std", "sys_special") static function sys_special(key:hl.Bytes):hl.Bytes {
+		return null;
+	}
 	#end
 
 	public static function applySettings() {
@@ -320,6 +324,9 @@ class Settings {
 		var settingsExists = false;
 		#if hl
 		settingsExists = FileSystem.exists(Path.join([settingsDir, "settings.json"]));
+		#end
+		#if android
+		settingsDir = @:privateAccess String.fromUCS2(sys_special(@:privateAccess Sys.getPath("android_internal_storage_path")));
 		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();
