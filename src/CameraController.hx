@@ -50,7 +50,7 @@ class CameraController extends Object {
 
 	var camZoomSpeed:Float;
 
-	public var CameraDistance = 2.5;
+	public var CameraDistance:Float;
 	public var CameraMinDistance = 1;
 	public var CameraMaxDistance = 25;
 	public var CameraPitch:Float;
@@ -77,6 +77,11 @@ class CameraController extends Object {
 
 	public function init(level:MarbleWorld) {
 		this.level = level;
+		this.CameraDistance = Settings.optionsSettings.cameraDistance;
+		if (this.CameraDistance <= 1 #if js || this.CameraDistance == null #end) {
+			this.CameraDistance = 2.5;
+			Settings.optionsSettings.cameraDistance = 2.5;
+		}
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
 		level.scene.camera.fovY = Settings.optionsSettings.fov;
@@ -125,6 +130,9 @@ class CameraController extends Object {
 		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
 			deltaposY = 0;
 		}
+
+		if (mouseX != 0 || mouseY != 0)
+			trace('Orbit Delta ' + mouseX + " " + mouseY);
 
 		var factor = isTouch ? Util.lerp(1 / 250, 1 / 25,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);

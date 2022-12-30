@@ -46,6 +46,8 @@ class OptionsDlg extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
+		var touch = Util.isTouchDevice();
+
 		var window = new GuiImage(ResourceLoader.getResource("data/ui/options/window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		window.horizSizing = Center;
 		window.vertSizing = Center;
@@ -61,6 +63,9 @@ class OptionsDlg extends GuiImage {
 		var hotkeysBtn = new GuiButton(loadButtonImages('data/ui/options/hotkeys'));
 		hotkeysBtn.position = new Vector(325, 19);
 		hotkeysBtn.extent = new Vector(134, 65);
+		if (touch) {
+			hotkeysBtn.disabled = true;
+		}
 		window.addChild(hotkeysBtn);
 
 		var onlineBtn = new GuiImage(ResourceLoader.getResource("data/ui/options/online_i.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -223,77 +228,120 @@ class OptionsDlg extends GuiImage {
 			optSliders.push(optSlider);
 		}
 
-		makeOption("Screen Resolution:", () -> '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', 18, generalPanel,
-			"xlarge", [
-				"1024 x 800",
-				"1280 x 720",
-				"1366 x 768",
-				"1440 x 900",
-				"1600 x 900",
-				"1920 x 1080"
-			], (idx) -> {
-				switch (idx) {
-					case 0:
-						Settings.optionsSettings.screenWidth = 1024;
-						Settings.optionsSettings.screenHeight = 800;
-					case 1:
-						Settings.optionsSettings.screenWidth = 1280;
-						Settings.optionsSettings.screenHeight = 720;
-					case 2:
-						Settings.optionsSettings.screenWidth = 1366;
-						Settings.optionsSettings.screenHeight = 768;
-					case 3:
-						Settings.optionsSettings.screenWidth = 1440;
-						Settings.optionsSettings.screenHeight = 900;
-					case 4:
-						Settings.optionsSettings.screenWidth = 1600;
-						Settings.optionsSettings.screenHeight = 900;
-					case 5:
-						Settings.optionsSettings.screenWidth = 1920;
-						Settings.optionsSettings.screenHeight = 1080;
-				}
-			});
-		makeOption("Screen Style:", () -> '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', 18, generalPanel, "small",
-			["Windowed", "Full Screen"], (idx) -> {
-				Settings.optionsSettings.isFullScreen = idx == 1;
-			}, true);
-		makeOption("Frame Rate:", () -> '${Settings.optionsSettings.frameRateVis ? "Visible" : "Hidden"}', 74, generalPanel, "small", ["Visible", "Hidden"],
-			(idx) -> {
+		var begin = 18;
+		var current = begin;
+		if (!touch) {
+			makeOption("Screen Resolution:", () -> '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', current,
+				generalPanel, "xlarge", [
+					"1024 x 800",
+					"1280 x 720",
+					"1366 x 768",
+					"1440 x 900",
+					"1600 x 900",
+					"1920 x 1080"
+				], (idx) -> {
+					switch (idx) {
+						case 0:
+							Settings.optionsSettings.screenWidth = 1024;
+							Settings.optionsSettings.screenHeight = 800;
+						case 1:
+							Settings.optionsSettings.screenWidth = 1280;
+							Settings.optionsSettings.screenHeight = 720;
+						case 2:
+							Settings.optionsSettings.screenWidth = 1366;
+							Settings.optionsSettings.screenHeight = 768;
+						case 3:
+							Settings.optionsSettings.screenWidth = 1440;
+							Settings.optionsSettings.screenHeight = 900;
+						case 4:
+							Settings.optionsSettings.screenWidth = 1600;
+							Settings.optionsSettings.screenHeight = 900;
+						case 5:
+							Settings.optionsSettings.screenWidth = 1920;
+							Settings.optionsSettings.screenHeight = 1080;
+					}
+				});
+			makeOption("Screen Style:", () -> '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', current, generalPanel, "small",
+				["Windowed", "Full Screen"], (idx) -> {
+					Settings.optionsSettings.isFullScreen = idx == 1;
+				}, true);
+
+			current += 56;
+		}
+
+		makeOption("Frame Rate:", () -> '${Settings.optionsSettings.frameRateVis ? "Visible" : "Hidden"}', current, generalPanel, "small",
+			["Visible", "Hidden"], (idx) -> {
 				Settings.optionsSettings.frameRateVis = idx == 0;
 			});
-		makeOption("OoB Insults:", () -> '${Settings.optionsSettings.oobInsults ? "Enabled" : "Disabled"}', 74, generalPanel, "small",
+		makeOption("OoB Insults:", () -> '${Settings.optionsSettings.oobInsults ? "Enabled" : "Disabled"}', current, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.oobInsults = idx == 1;
 			}, true);
-		makeOption("Free-Look:", () -> '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', 130, generalPanel, "small",
+
+		current += 56;
+
+		makeOption("Free-Look:", () -> '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', current, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.controlsSettings.alwaysFreeLook = idx == 1;
 			});
-		makeOption("Invert Y:", () -> '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', 130, generalPanel, "small", ["No", "Yes"], (idx) -> {
+		makeOption("Invert Y:", () -> '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', current, generalPanel, "small", ["No", "Yes"], (idx) -> {
 			Settings.controlsSettings.invertYAxis = idx == 1;
 		}, true);
-		makeOption("Reflective Marble:", () -> '${Settings.optionsSettings.reflectiveMarble ? "Enabled" : "Disabled"}', 186, generalPanel, "small",
+
+		current += 56;
+
+		makeOption("Reflective Marble:", () -> '${Settings.optionsSettings.reflectiveMarble ? "Enabled" : "Disabled"}', current, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.reflectiveMarble = idx == 1;
 			});
-		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', 186, generalPanel, "small", ["Disabled", "Enabled"],
-			(idx) -> {
+		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', current, generalPanel, "small",
+			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.vsync = idx == 1;
 			}, true);
-		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, 242, generalPanel, (val) -> {
+
+		current += 56;
+
+		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, current, generalPanel, (val) -> {
 			Settings.optionsSettings.musicVolume = val;
 			AudioManager.updateVolumes();
 		});
-		makeSlider("Sound Volume:", Settings.optionsSettings.soundVolume, 242, generalPanel, (val) -> {
+		makeSlider("Sound Volume:", Settings.optionsSettings.soundVolume, current, generalPanel, (val) -> {
 			Settings.optionsSettings.soundVolume = val;
 			AudioManager.updateVolumes();
 		}, true);
-		makeSlider("Field of View:", (Settings.optionsSettings.fov - 60) / (140 - 60), 298, generalPanel, (val) -> {
+
+		current += 56;
+
+		makeSlider("Field of View:", (Settings.optionsSettings.fov - 60) / (140 - 60), current, generalPanel, (val) -> {
 			Settings.optionsSettings.fov = cast(60 + val * (140 - 60));
 		});
-		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), 298, generalPanel, (val) -> {
+		makeSlider(touch ? "Camera Speed" : "Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), current, generalPanel, (val) -> {
 			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
 		}, true);
+
+		if (touch) {
+			current += 56;
+			makeSlider("Camera Distance:", (Settings.optionsSettings.cameraDistance - 1.01) / (3 - 1.01), current, generalPanel, (val) -> {
+				Settings.optionsSettings.cameraDistance = cast(1.01 + val * (3 - 1.01));
+			});
+
+			var textObj = new GuiText(markerFelt32);
+			textObj.position = new Vector(388, 298);
+			textObj.extent = new Vector(212, 14);
+			textObj.text.text = "Touch Controls";
+			textObj.text.textColor = 0xFFFFFF;
+			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			generalPanel.addChild(textObj);
+
+			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
+			remapBtn.position = new Vector(552, 298);
+			remapBtn.txtCtrl.text.text = "Edit";
+			remapBtn.setExtent(new Vector(152, 49));
+			remapBtn.pressedAction = (sender) -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			}
+			generalPanel.addChild(remapBtn);
+		}
 
 		function getConflictingBinding(bindingName:String, key:Int) {
 			if (Settings.controlsSettings.forward == key && bindingName != "Move Forward")
@@ -387,25 +435,6 @@ class OptionsDlg extends GuiImage {
 		makeRemapOption("Respawn:", 278, Util.getKeyForButton2(Settings.controlsSettings.respawn), (key) -> Settings.controlsSettings.respawn = key,
 			hotkeysPanel, true);
 		makeRemapOption("Blast:", 326, Util.getKeyForButton2(Settings.controlsSettings.blast), (key) -> Settings.controlsSettings.blast = key, hotkeysPanel);
-
-		if (Util.isTouchDevice()) {
-			var textObj = new GuiText(markerFelt32);
-			textObj.position = new Vector(368, 326);
-			textObj.extent = new Vector(212, 14);
-			textObj.text.text = "Touch Controls";
-			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
-			hotkeysPanel.addChild(textObj);
-
-			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			remapBtn.position = new Vector(363 + 203, 323);
-			remapBtn.txtCtrl.text.text = "Edit";
-			remapBtn.setExtent(new Vector(152, 49));
-			remapBtn.pressedAction = (sender) -> {
-				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-			}
-			hotkeysPanel.addChild(remapBtn);
-		}
 
 		generalBtn.pressedAction = (e) -> {
 			if (currentTab != "general") {
