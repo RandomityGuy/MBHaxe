@@ -82,8 +82,10 @@ class NoiseTileMaterial extends hxsl.Shader {
 			var tanY = n.cross(tanX) * transformedTangent.w;
 			transformedNormal = (nf.x * tanX + nf.y * tanY + nf.z * n).normalize();
 
-			var bumpDot = dirLight * lambert(transformedNormal, -dirLightDir);
+			var bumpDot = /*dirLight * */ lambert(transformedNormal, -dirLightDir);
 
+			var shading = vec3(1, 1, 0.8980392);
+			outCol.xyz *= shading;
 			outCol.xyz *= bumpDot + ambientLight;
 
 			var eyeVec = (camera.position - transformedPosition).normalize();
@@ -92,6 +94,14 @@ class NoiseTileMaterial extends hxsl.Shader {
 			var specular = specularColor * pow(specValue, shininess);
 
 			outCol += specular * diffuse.a;
+
+			// Gamma correction using our regression model
+			var a = 1.00759;
+			var b = 1.18764;
+			outCol.x = a * pow(outCol.x, b);
+			outCol.y = a * pow(outCol.y, b);
+			outCol.z = a * pow(outCol.z, b);
+
 			pixelColor = outCol;
 		}
 	}

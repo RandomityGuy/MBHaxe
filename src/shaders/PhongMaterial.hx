@@ -36,7 +36,10 @@ class PhongMaterial extends hxsl.Shader {
 			transformedTangent = vec4(input.tangent * global.modelView.mat3(), input.tangent.dot(input.tangent) > 0.5 ? 1. : -1.);
 		}
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
-			var result = isHalfTile ? dot(normal, lightPosition) : ((dot(normal, lightPosition) + 1) * 0.5);
+			if (isHalfTile) {
+				return saturate(dot(normal, lightPosition));
+			}
+			var result = ((dot(normal, lightPosition) + 1) * 0.5);
 			return result;
 		}
 		function vertex() {
@@ -54,15 +57,27 @@ class PhongMaterial extends hxsl.Shader {
 			var tanY = n.cross(tanX) * transformedTangent.w;
 			transformedNormal = (nf.x * tanX + nf.y * tanY + nf.z * n).normalize();
 
-			var bumpDot = dirLight * lambert(transformedNormal, -dirLightDir);
-			outCol.xyz *= bumpDot + ambientLight;
+			var shading = vec3(1, 1, 0.8980392);
 
+			var bumpDot = /*dirLight **/ lambert(transformedNormal, -dirLightDir);
+			if (isHalfTile)
+				outCol.xyz *= (shading * bumpDot) + ambientLight;
+			else
+				outCol.xyz *= shading * (bumpDot + ambientLight);
 			var eyeVec = (camera.position - transformedPosition).normalize();
 			var halfAng = (eyeVec - dirLightDir).normalize();
 			var specValue = saturate(transformedNormal.dot(halfAng)) * fragLightW;
 			var specular = specularColor * pow(specValue, shininess);
 
 			outCol += specular * diffuse.a;
+
+			// Gamma correction using our regression model
+			// y ~ ax^b
+			var a = 1.00759;
+			var b = 1.18764;
+			outCol.x = a * pow(outCol.x, b);
+			outCol.y = a * pow(outCol.y, b);
+			outCol.z = a * pow(outCol.z, b);
 
 			pixelColor = outCol;
 		}

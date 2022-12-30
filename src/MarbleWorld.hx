@@ -272,9 +272,6 @@ class MarbleWorld extends Scheduler {
 
 		var worker = new ResourceLoaderWorker(() -> {
 			var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
-			var gammaRes = ResourceLoader.getResource('data/shaders/gammaRamp.png', ResourceLoader.getTexture, this.textureResources);
-			gammaRes.wrap = Repeat;
-			// renderer.addShader(new Gamma(gammaRes, 1 / gammaRes.width));
 
 			for (element in mission.root.elements) {
 				if (element._type != MissionElementType.Sun)
@@ -284,11 +281,15 @@ class MarbleWorld extends Scheduler {
 
 				var directionalColor = MisParser.parseVector4(sunElement.color);
 				var ambientColor = MisParser.parseVector4(sunElement.ambient);
-				ambientColor.r *= 1.18;
-				ambientColor.g *= 1.06;
-				ambientColor.b *= 0.95;
+				if (this.game == "ultra") {
+					ambientColor.r *= 1.18;
+					ambientColor.g *= 1.06;
+					ambientColor.b *= 0.95;
+				}
 				var sunDirection = MisParser.parseVector3(sunElement.direction);
 				sunDirection.x = -sunDirection.x;
+				// sunDirection.x = 0;
+				// sunDirection.y = 0;
 				// sunDirection.z = -sunDirection.z;
 				var ls = cast(scene.lightSystem, h3d.scene.fwd.LightSystem);
 
