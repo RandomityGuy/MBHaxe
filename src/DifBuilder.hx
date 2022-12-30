@@ -336,6 +336,7 @@ class DifBuilder {
 					colliderSurface.points = [];
 					colliderSurface.normals = [];
 					colliderSurface.indices = [];
+					colliderSurface.transformKeys = [];
 					colliderSurface.edgeData = [];
 					colliderSurface.edgeConcavities = [];
 					colliderSurface.originalIndices = [];
@@ -418,6 +419,9 @@ class DifBuilder {
 						colliderSurface.indices.push(colliderSurface.indices.length);
 						colliderSurface.indices.push(colliderSurface.indices.length);
 						colliderSurface.indices.push(colliderSurface.indices.length);
+						colliderSurface.transformKeys.push(0);
+						colliderSurface.transformKeys.push(0);
+						colliderSurface.transformKeys.push(0);
 						for (v in [p1, p2, p3]) {
 							var buckets = vertexBuckets.get(v);
 							if (buckets == null) {
