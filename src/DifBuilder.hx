@@ -187,6 +187,8 @@ class DifBuilder {
 			normalTex.mipMap = Nearest;
 			var shader = new PhongMaterial(diffuseTex, normalTex, shininess, specularColor, MarbleGame.instance.world.ambient,
 				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, uvScaleFactor);
+			if (uvScaleFactor == 0.5)
+				shader.isHalfTile = true;
 			onFinish(shader);
 		});
 		worker.loadFile('interiors_mbu/${baseTexture}');

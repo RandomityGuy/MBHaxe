@@ -10,6 +10,7 @@ class PhongMaterial extends hxsl.Shader {
 		@param var dirLight:Vec3;
 		@param var dirLightDir:Vec3;
 		@param var uvScaleFactor:Float;
+		@const var isHalfTile:Bool = false;
 		@global var camera:{
 			var position:Vec3;
 			@var var dir:Vec3;
@@ -35,8 +36,8 @@ class PhongMaterial extends hxsl.Shader {
 			transformedTangent = vec4(input.tangent * global.modelView.mat3(), input.tangent.dot(input.tangent) > 0.5 ? 1. : -1.);
 		}
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
-			var result = dot(normal, lightPosition);
-			return saturate(result);
+			var result = isHalfTile ? dot(normal, lightPosition) : ((dot(normal, lightPosition) + 1) * 0.5);
+			return result;
 		}
 		function vertex() {
 			calculatedUV = input.uv * uvScaleFactor;
