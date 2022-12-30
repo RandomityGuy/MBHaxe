@@ -5,7 +5,11 @@
 native
 *.exe
 *.obj
+marblegame.hl
+marblegame
 settings.json
+console.log
+data/replays/
 release
 Export
 node_modules
