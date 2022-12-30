@@ -784,13 +784,20 @@ class Marble extends GameObject {
 
 				var i = 0;
 				while (i < surface.indices.length) {
-					var v0 = surface.points[surface.indices[i]].transformed(obj.transform);
-					var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
-					var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
+					var verts = surface.transformTriangle(i, obj.transform, @:privateAccess obj._transformKey);
+					// var v0 = surface.points[surface.indices[i]].transformed(tform);
+					// var v = surface.points[surface.indices[i + 1]].transformed(tform);
+					// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
+					var v0 = verts.v1;
+					var v = verts.v2;
+					var v2 = verts.v3;
+					// var v0 = surface.points[surface.indices[i]].transformed(obj.transform);
+					// var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
+					// var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
 
 					var triangleVerts = [v0, v, v2];
 
-					var surfaceNormal = surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
+					var surfaceNormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
 					var surfaceD = -surfaceNormal.dot(v0);
 
 					// If we're going the wrong direction or not going to touch the plane, ignore...

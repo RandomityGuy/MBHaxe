@@ -509,6 +509,7 @@ class DtsObject extends GameObject {
 			hs.points = [];
 			hs.normals = [];
 			hs.indices = [];
+			hs.transformKeys = [];
 
 			var material = this.dts.matNames[primitive.matIndex];
 			if (dtsMaterials.exists(material)) {
@@ -533,6 +534,7 @@ class DtsObject extends GameObject {
 				for (index in [i1, i2, i3]) {
 					var vertex = vertices[index];
 					hs.points.push(new Vector(vertex.x, vertex.y, vertex.z));
+					hs.transformKeys.push(0);
 
 					var normal = vertexNormals[index];
 					hs.normals.push(new Vector(normal.x, normal.y, normal.z));

@@ -38,6 +38,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public var difEdgeMap:Map<Int, dif.Edge>;
 
+	var _transformKey:Int = 0;
+
 	public function new(go:GameObject) {
 		this.go = go;
 		this.octree = new Octree();
@@ -87,6 +89,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			this.invTransform = transform.getInverse();
 			generateBoundingBox();
 		}
+		_transformKey++;
 	}
 
 	public function generateBoundingBox() {
@@ -174,9 +177,13 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 			var i = 0;
 			while (i < surface.indices.length) {
-				var v0 = surface.points[surface.indices[i]].transformed(tform);
-				var v = surface.points[surface.indices[i + 1]].transformed(tform);
-				var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
+				var verts = surface.transformTriangle(i, tform, this._transformKey);
+				// var v0 = surface.points[surface.indices[i]].transformed(tform);
+				// var v = surface.points[surface.indices[i + 1]].transformed(tform);
+				// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
+				var v0 = verts.v1;
+				var v = verts.v2;
+				var v2 = verts.v3;
 
 				// var e1e2 = hashEdge(surface.originalIndices[i], surface.originalIndices[i + 1]);
 				// var e2e3 = hashEdge(surface.originalIndices[i + 1], surface.originalIndices[i + 2]);
@@ -197,7 +204,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 				var edgeConcavities = surface.edgeConcavities.slice(Math.floor(i / 3), Math.floor(i / 3) + 3);
 
-				var surfacenormal = surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
+				var surfacenormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
 
 				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius, edgeData, edgeConcavities);
 				var closest = res.point;
