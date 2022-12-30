@@ -73,11 +73,24 @@ class CameraInput {
 				#if js
 				scaleFactor = js.Browser.window.devicePixelRatio / Settings.zoomRatio;
 				#end
-				var jumpcam = MarbleGame.instance.touchInput.jumpButton.pressed || MarbleGame.instance.touchInput.powerupButton.pressed;
+				var jumpcam = MarbleGame.instance.touchInput.jumpButton.pressed
+					|| MarbleGame.instance.touchInput.powerupButton.pressed
+					|| MarbleGame.instance.touchInput.blastbutton.pressed;
 				if (jumpcam) {
 					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
-				MarbleGame.instance.world.marble.camera.orbit(delta.x / scaleFactor, delta.y / scaleFactor, true);
+
+				var inpX = delta.x / scaleFactor;
+				var inpY = delta.y / scaleFactor;
+
+				if (jumpcam) {
+					if (Math.abs(inpX) < 1)
+						inpX = 0;
+					if (Math.abs(inpY) < 1)
+						inpY = 0;
+				}
+
+				MarbleGame.instance.world.marble.camera.orbit(inpX, inpY, true);
 				prevMouse.x = e.relX;
 				prevMouse.y = e.relY;
 			}

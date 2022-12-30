@@ -42,6 +42,7 @@ typedef OptionsSettings = {
 	var marbleSkin:String;
 	var marbleModel:String;
 	var marbleShader:String;
+	var cameraDistance:Float;
 }
 
 typedef ControlsSettings = {
@@ -119,6 +120,7 @@ class Settings {
 		marbleSkin: "base",
 		marbleModel: "data/shapes/balls/ball-superball.dts",
 		marbleShader: "Default",
+		cameraDistance: 2.5,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -249,12 +251,7 @@ class Settings {
 			touch: touchSettings,
 			gamepad: gamepadSettings,
 			stats: playStatistics,
-			highscoreName: highscoreName,
-			marbleIndex: optionsSettings.marbleIndex,
-			marbleSkin: optionsSettings.marbleSkin,
-			marbleModel: optionsSettings.marbleModel,
-			marbleCategoryIndex: optionsSettings.marbleCategoryIndex,
-			marbleShader: optionsSettings.marbleShader,
+			highscoreName: highscoreName
 		};
 		var scoreCount = 0;
 		var eggCount = 0;
