@@ -20,7 +20,10 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public var edgeConcavities:Array<Bool>;
 	public var originalIndices:Array<Int>;
 	public var originalSurfaceIndex:Int;
-	public var key:Bool = false;
+	public var transformKeys:Array<Int>;
+
+	var _transformedPoints:Array<Vector>;
+	var _transformedNormals:Array<Vector>;
 
 	public function new() {}
 
@@ -116,5 +119,36 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		}
 
 		return furthestVertex;
+	}
+
+	public function transformTriangle(idx:Int, tform:Matrix, key:Int) {
+		if (_transformedPoints == null) {
+			_transformedPoints = points.copy();
+		}
+		if (_transformedNormals == null) {
+			_transformedNormals = normals.copy();
+		}
+		var p1 = indices[idx];
+		var p2 = indices[idx + 1];
+		var p3 = indices[idx + 2];
+		if (transformKeys[p1] != key) {
+			_transformedPoints[p1] = points[p1].transformed(tform);
+			_transformedNormals[p1] = normals[p1].transformed3x3(tform).normalized();
+			transformKeys[p1] = key;
+		}
+		if (transformKeys[p2] != key) {
+			_transformedPoints[p2] = points[p2].transformed(tform);
+			transformKeys[p2] = key;
+		}
+		if (transformKeys[p3] != key) {
+			_transformedPoints[p3] = points[p3].transformed(tform);
+			transformKeys[p3] = key;
+		}
+		return {
+			v1: _transformedPoints[p1],
+			v2: _transformedPoints[p2],
+			v3: _transformedPoints[p3],
+			n: _transformedNormals[p1]
+		};
 	}
 }

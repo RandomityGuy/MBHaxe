@@ -1,6 +1,5 @@
 package src;
 
-import shaders.Gamma;
 import collision.Collision;
 import shapes.MegaMarble;
 import shapes.Blast;
