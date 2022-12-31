@@ -1238,7 +1238,7 @@ class Marble extends GameObject {
 				break;
 			prevResolved = resolved;
 			it++;
-		} while (true);
+		} while (true && it < 10);
 		return position;
 	}
 
