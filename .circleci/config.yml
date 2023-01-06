@@ -256,7 +256,7 @@ jobs:
           command: |
             cd ~/MBHaxe/macos-dist
             xattr -rc "MarbleBlast Platinum.app"
-            cp "MarbleBlast Platinum.app/Entitlements.plist" .
+            cp "MarbleBlast Platinum.app/Contents/Entitlements.plist" .
             codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Platinum.app"
 
       - run:
