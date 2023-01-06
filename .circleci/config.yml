@@ -209,6 +209,13 @@ jobs:
                       do
                       install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.1.dylib $i
                       done
+      - run:
+          name: Sign app bundle
+          command: |
+            cd ~/MBHaxe/macos-dist
+            xattr -rc "MarbleBlast Gold.app"
+            cp "MarbleBlast Gold.app/Entitlements.plist" .
+            codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Gold.app"
 
             - run:
                   name: ZIP Bundle
