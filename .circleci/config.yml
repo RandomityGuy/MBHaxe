@@ -214,7 +214,7 @@ jobs:
           command: |
             cd ~/MBHaxe/macos-dist
             xattr -rc "MarbleBlast Gold.app"
-            cp "MarbleBlast Gold.app/Entitlements.plist" .
+            cp "MarbleBlast Gold.app/Contents/Entitlements.plist" .
             codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Gold.app"
 
             - run:
