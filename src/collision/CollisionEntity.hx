@@ -58,11 +58,11 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	// Generates the bvh
 	public function finalize() {
 		this.generateBoundingBox();
-		this.bvh = new BVHTree(this.boundingBox);
+		this.bvh = new BVHTree();
 		for (surface in this.surfaces) {
-			this.bvh.insert(surface);
+			this.bvh.add(surface);
 		}
-		this.bvh.build();
+		// this.bvh.build();
 	}
 
 	public function setTransform(transform:Matrix) {

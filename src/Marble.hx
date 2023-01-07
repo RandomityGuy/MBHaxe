@@ -1294,6 +1294,11 @@ class Marble extends GameObject {
 			var a = retf[1];
 			this.velocity = this.velocity.add(A.multiply(timeStep));
 			this.omega = this.omega.add(a.multiply(timeStep));
+			if (this.mode == Start) {
+				// Bruh...
+				this.velocity.y = 0;
+				this.velocity.x = 0;
+			}
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, true, stoppedPaths, pathedInteriors);
 			this._totalTime += timeStep;
 			if (contacts.length != 0) {
@@ -1367,30 +1372,6 @@ class Marble extends GameObject {
 				}
 			}
 
-			var pos = this.getAbsPos().getPosition();
-			this.prevPos = pos.clone();
-
-			if (mode == Start) {
-				var upVec = this.level.currentUp;
-				var startpadNormal = startPad.getAbsPos().up();
-				this.velocity = upVec.multiply(this.velocity.dot(upVec));
-				// Apply contact forces in startPad up direction if upVec is not startpad up, fixes the weird startpad shit in pinball wizard
-				if (upVec.dot(startpadNormal) < 0.95) {
-					for (contact in contacts) {
-						var normF = contact.normal.multiply(contact.normalForce);
-						var startpadF = startpadNormal.multiply(normF.dot(startpadNormal));
-						var upF = upVec.multiply(normF.dot(upVec));
-						this.velocity = this.velocity.add(startpadF.multiply(timeStep / 4));
-					}
-				}
-			}
-
-			// if (mode == Finish) {
-			// 	this.velocity = this.velocity.multiply(0.925);
-			// }
-
-			var newPos = pos.add(this.velocity.multiply(timeStep));
-			newPos = nudgeToContacts(newPos, _radius);
 			var rot = this.getRotationQuat();
 			var quat = new Quat();
 			quat.initRotation(omega.x * timeStep, omega.y * timeStep, omega.z * timeStep);
