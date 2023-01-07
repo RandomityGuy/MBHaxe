@@ -21,7 +21,7 @@ import src.ResourceLoaderWorker;
 class ResourceLoader {
 	#if (hl && !android)
 	#if MACOS_BUNDLE
-	public static var fileSystem:FileSystem = new LocalFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "..", ".."])), null);
+	public static var fileSystem:FileSystem = new LocalFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "Resources"])), null);
 	#else
 	public static var fileSystem:FileSystem = new LocalFileSystem(".", null);
 	#end
@@ -44,6 +44,9 @@ class ResourceLoader {
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
+		#if hl
+		@:privateAccess @:privateAccess cast(fileSystem, LocalFileSystem).convert.tmpDir = "data/tmp/";
+		#end
 		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
 		@:privateAccess hxd.res.Image.ENABLE_AUTO_WATCH = false;
 		@:privateAccess hxd.res.Sound.ENABLE_AUTO_WATCH = false;
