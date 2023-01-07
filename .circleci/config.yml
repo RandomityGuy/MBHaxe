@@ -339,10 +339,10 @@ jobs:
             name: Zip bundle
             command: |
               cd ~/project
-              7z a MBHaxe-Platinum-Win.zip release/
+              7z a MBHaxe-Gold-Win.zip release/
 
         - store_artifacts:
-            path: ~/project/MBHaxe-Platinum-Win.zip
+            path: ~/project/MBHaxe-Gold-Win.zip
 
 
 # Invoke jobs via workflows
@@ -350,8 +350,6 @@ jobs:
 workflows:
     say-hello-workflow:
         jobs:
-            - build
-
             - build:
                   filters:
                       tags:
