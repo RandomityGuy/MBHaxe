@@ -130,7 +130,7 @@ class ManifestEntry extends FileEntry {
 			if (onReady != null)
 				haxe.Timer.delay(onReady, 1);
 		} else {
-			this.loadPromise = js.Browser.window.fetch(file).then((res:js.html.Response) -> {
+			js.Browser.window.fetch(file).then((res:js.html.Response) -> {
 				return res.arrayBuffer();
 			}).then((buf:js.lib.ArrayBuffer) -> {
 				loaded = true;
