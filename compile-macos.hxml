@@ -1,0 +1,6 @@
+-cp src
+-lib heaps
+-lib hlsdl
+-hl native/marblegame.c
+-D MACOS_BUNDLE
+--main Main
