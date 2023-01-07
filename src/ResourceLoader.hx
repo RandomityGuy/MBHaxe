@@ -24,7 +24,7 @@ import src.Console;
 class ResourceLoader {
 	#if (hl && !android)
 	#if MACOS_BUNDLE
-	public static var fileSystem:FileSystem = new TorqueFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "..", ".."])), null);
+	public static var fileSystem:FileSystem = new TorqueFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "Resources"])), null);
 	#else
 	public static var fileSystem:FileSystem = new TorqueFileSystem(".", null);
 	#end
@@ -49,6 +49,7 @@ class ResourceLoader {
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
 		Console.log("Initializing filesystem");
 		#if hl
+		@:privateAccess @:privateAccess cast(fileSystem, TorqueFileSystem).convert.tmpDir = "data/tmp/";
 		Console.log("Filesystem Path: " + @:privateAccess cast(fileSystem, TorqueFileSystem).baseDir);
 		#end
 		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
