@@ -435,6 +435,7 @@ class PlayMissionGui extends GuiImage {
 		var goldBadge = ResourceLoader.getResource("data/ui/play/goldscore.png", ResourceLoader.getImage, this.imageResources).toTile();
 		goldBadge.dy = 2.5;
 		goldBadge.dx = 8;
+		goldBadge.scaleToSize(goldBadge.width * Settings.uiScale, goldBadge.height * Settings.uiScale);
 
 		setSelectedFunc = function setSelected(index:Int) {
 			if (index > currentList.length - 1) {
