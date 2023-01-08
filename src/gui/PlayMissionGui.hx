@@ -433,9 +433,10 @@ class PlayMissionGui extends GuiImage {
 		}
 
 		var goldBadge = ResourceLoader.getResource("data/ui/play/goldscore.png", ResourceLoader.getImage, this.imageResources).toTile();
-		goldBadge.dy = 2.5;
-		goldBadge.dx = 8;
-		goldBadge.scaleToSize(goldBadge.width * Settings.uiScale, goldBadge.height * Settings.uiScale);
+		goldBadge.dy = 2.5 * Settings.uiScale;
+		goldBadge.dx = 8 * Settings.uiScale;
+		var gbWidth = goldBadge.width;
+		var gbHeight = goldBadge.height;
 
 		setSelectedFunc = function setSelected(index:Int) {
 			if (index > currentList.length - 1) {
@@ -516,8 +517,11 @@ class PlayMissionGui extends GuiImage {
 					descText2 += '<img src="goldBadge.png"></img>';
 				}
 			}
+			pmDescriptionOther.text.lineHeightMode = TextOnly;
 			pmDescriptionOther.text.text = descText2;
 			pmDescriptionOther.text.loadImage = (name) -> goldBadge;
+			goldBadge.scaleToSize((gbWidth / gbHeight) * arialBold14.lineHeight, arialBold14.lineHeight);
+			pmDescription.text.lineSpacing = pmDescriptionOther.text.lineSpacing;
 
 			#if android
 			pmPreview.bmp.tile = currentMission.getPreviewImageSync();
