@@ -7,9 +7,12 @@ The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/Ope
 The browser port supports touch controls, meaning it can be played on mobile devices.
 ### Marble Blast Gold: [Play](https://mbhaxe.netlify.app/)
 ### Marble Blast Platinum: [Play](https://mbphaxe.netlify.app/)
-## Windows
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.4)
-### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.1)
+## Windows and Mac
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.5)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.2)
+## Mac Instructions
+Put the .app file in either /Applications or ~/Applications in order to run it properly.  
+You will also have to bypass Gatekeeper since the .app is not signed.
 
 # Why Haxe?
 I chose Haxe because its a good language that can target other languages, meaning any Haxe code can be converted and used in Python, C++, Java very easily so that nobody has to take effort in porting the code to different languages, atleast thats what my mindset was when I started it, but unfortunately because of the 3d engine I used, it only compiles to C and Javascript. You will have to isolate the engine specific features yourself if you want to use this for other programming languages.
@@ -45,6 +48,9 @@ To compile to C, do `haxe compile-c.hxml` and use the instructions in https://gi
 
 ## Javascript/Browser
 If the build dependencies are fullfilled, compile with `haxe compile-js.hxml` and run the game by running a web server in the same directory as the repo where index.html is located.
+
+## MacOS
+See [here](README-macOS.md)
 
 # FAQ
 
