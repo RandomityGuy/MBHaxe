@@ -132,6 +132,7 @@ class MarbleWorld extends Scheduler {
 	// Replay
 	public var replay:Replay;
 	public var isWatching:Bool = false;
+	public var wasRecording:Bool = false;
 	public var isRecording:Bool = false;
 
 	// Loading
@@ -155,7 +156,7 @@ class MarbleWorld extends Scheduler {
 		this.scene2d = scene2d;
 		this.mission = mission;
 		this.replay = new Replay(mission.path);
-		this.isRecording = record;
+		this.isRecording = this.wasRecording = record;
 	}
 
 	public function init() {
@@ -1231,7 +1232,8 @@ class MarbleWorld extends Scheduler {
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
-			this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
+			if (!this.isWatching)
+				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
 			if (timeTravelSound != null) {
 				timeTravelSound.stop();
@@ -1241,21 +1243,29 @@ class MarbleWorld extends Scheduler {
 	}
 
 	function showFinishScreen() {
+		if (this.isWatching)
+			return 0;
 		var egg:EndGameGui = null;
 		#if js
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.hidden = false;
 		#end
-		if (this.isRecording) {
+		this.schedule(this.timeState.currentAttemptTime + 3, () -> {
 			this.isRecording = false; // Stop recording here
-			this.saveReplay();
-		}
+		}, "stopRecordingTimeout");
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.setControlsEnabled(false);
 		}
 		egg = new EndGameGui((sender) -> {
 			if (Util.isTouchDevice()) {
 				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
+			}
+			if (this.isRecording) {
+				this.isRecording = false; // Stop recording here if we haven't already
+				this.clearScheduleId("stopRecordingTimeout");
+			}
+			if (this.wasRecording) {
+				this.saveReplay();
 			}
 			this.dispose();
 			var pmg = new PlayMissionGui();
@@ -1266,6 +1276,13 @@ class MarbleWorld extends Scheduler {
 			#end
 		}, (sender) -> {
 			MarbleGame.canvas.popDialog(egg);
+			if (this.isRecording) {
+				this.clearScheduleId("stopRecordingTimeout");
+			}
+			if (this.wasRecording) {
+				this.saveReplay();
+				this.isRecording = true;
+			}
 			this.setCursorLock(true);
 			this.restart();
 			#if js
