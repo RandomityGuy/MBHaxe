@@ -6,7 +6,7 @@ new SimGroup(MissionGroup) {
          name = "Hop Skip and a Jump";
          desc = "Master your aerial skills!";
          type = "Intermediate";
-         level = "12";
+         level = "13";
          artist = "Alex Swanson";
          goldTime = "12000";
    };

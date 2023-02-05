@@ -6,7 +6,7 @@ new SimGroup(MissionGroup) {
          goldTime = "28000";
          desc = "Surf the waves to collect all the gems before time runs out!";
          startHelpText = "Grab all the gems!";
-         level = "20";
+         level = "21";
          name = "The Wave";
          type = "intermediate";
          artist = "Kevin Ryan";

@@ -5,7 +5,7 @@ new SimGroup(MissionGroup) {
          desc = "You need to take both the high road and the low road to collect both of the gems.";
          name = "Take the High Road";
          startHelpText = "You need to take both the high road and the low road to collect both of the gems.";
-         level = "13";
+         level = "14";
          type = "Intermediate";
          artist = "Kevin Ryan";
          time = "90000";
