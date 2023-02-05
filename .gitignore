@@ -5,6 +5,8 @@
 native
 *.exe
 *.obj
+marblegame.hl
+marblegame
 settings.json
 release
 Export
