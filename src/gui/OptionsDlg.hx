@@ -288,8 +288,8 @@ class OptionsDlg extends GuiImage {
 			Settings.optionsSettings.soundVolume = val;
 			AudioManager.updateVolumes();
 		}, true);
-		makeSlider("Field of View:", (Settings.optionsSettings.fov - 60) / (140 - 60), 298, generalPanel, (val) -> {
-			Settings.optionsSettings.fov = cast(60 + val * (140 - 60));
+		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), 298, generalPanel, (val) -> {
+			Settings.optionsSettings.fovX = cast(60 + val * (140 - 60));
 		});
 		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), 298, generalPanel, (val) -> {
 			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
