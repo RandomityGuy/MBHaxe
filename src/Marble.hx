@@ -1198,7 +1198,7 @@ class Marble extends GameObject {
 									edgeCollisionTime = 0.0;
 
 								// Check if the collision hasn't already happened
-								if (edgeCollisionTime >= 0.0) {
+								if (edgeCollisionTime >= 0.000001) {
 									// Resolve it and continue
 									finalT = edgeCollisionTime;
 									currentFinalPos = position.add(relVel.multiply(finalT));
@@ -1550,6 +1550,8 @@ class Marble extends GameObject {
 			var pos = this.getAbsPos().getPosition();
 			this.prevPos = pos.clone();
 
+			var tdiff = timeStep;
+
 			var finalPosData = testMove(velocity, pos, timeStep, _radius, true); // this.getIntersectionTime(timeStep, velocity);
 			if (finalPosData.found) {
 				var diff = timeStep - finalPosData.t;
@@ -1557,6 +1559,7 @@ class Marble extends GameObject {
 				this.omega = this.omega.sub(a.multiply(diff));
 				// if (finalPosData.t > 0.00001)
 				timeStep = finalPosData.t;
+				tdiff = diff;
 			}
 			var expectedPos = finalPosData.position;
 			// var newPos = expectedPos;
