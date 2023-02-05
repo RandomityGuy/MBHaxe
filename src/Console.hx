@@ -1,5 +1,6 @@
 package src;
 
+import sys.FileSystem;
 import mis.MisParser;
 import src.Settings;
 import src.Debug;
@@ -37,6 +38,9 @@ class Console {
 		consumers = [];
 		timeSinceStart = haxe.Timer.stamp();
 		#if hl
+		if (!FileSystem.exists(Settings.settingsDir)) {
+			FileSystem.createDirectory(Settings.settingsDir);
+		}
 		consoleFileHandle = sys.io.File.write(haxe.io.Path.join([Settings.settingsDir, "console.log"]), false);
 		#end
 	}
