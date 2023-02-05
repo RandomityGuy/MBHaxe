@@ -1403,6 +1403,9 @@ class MarbleWorld extends Scheduler {
 
 	public function saveReplay() {
 		var replayBytes = this.replay.write();
+		var defaultFilename = '${this.mission.title} ${
+			this.finishTime == null ? "Unfinished Run" : Std.string(this.finishTime.gameplayClock)
+		}.mbr';
 		#if hl
 		hxd.File.saveAs(replayBytes, {
 			title: 'Save Replay',
@@ -1412,7 +1415,7 @@ class MarbleWorld extends Scheduler {
 					extensions: ["mbr"]
 				}
 			],
-			defaultPath: '${this.mission.title}${this.timeState.gameplayClock}.mbr'
+			defaultPath: defaultFilename
 		});
 		#end
 		#if js
@@ -1420,7 +1423,7 @@ class MarbleWorld extends Scheduler {
 			type: 'application/octet-stream'
 		});
 		var url = js.html.URL.createObjectURL(blob);
-		var fname = '${this.mission.title}${this.timeState.gameplayClock}.mbr';
+		var fname = defaultFilename;
 		var element = js.Browser.document.createElement('a');
 		element.setAttribute('href', url);
 		element.setAttribute('download', fname);
