@@ -915,11 +915,6 @@ class MarbleWorld extends Scheduler {
 			return;
 		}
 
-		if (Key.isDown(Key.H)) {
-			this.isWatching = true;
-			this.restart();
-		}
-
 		this.updateTexts();
 	}
 
