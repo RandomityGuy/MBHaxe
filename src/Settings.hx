@@ -32,7 +32,7 @@ typedef OptionsSettings = {
 	var musicVolume:Float;
 	var soundVolume:Float;
 	var vsync:Bool;
-	var fov:Int;
+	var fovX:Int;
 }
 
 typedef ControlsSettings = {
@@ -74,7 +74,7 @@ class Settings {
 		shadows: false,
 		musicVolume: 1,
 		soundVolume: 0.7,
-		fov: 60,
+		fovX: 90,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -217,8 +217,8 @@ class Settings {
 				highScores.set(key, value);
 			}
 			optionsSettings = json.options;
-			if (optionsSettings.fov == 0 #if js || optionsSettings.fov == null #end)
-				optionsSettings.fov = 60;
+			if (optionsSettings.fovX == 0 #if js || optionsSettings.fovX == null #end)
+				optionsSettings.fovX = 90;
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
@@ -269,6 +269,11 @@ class Settings {
 			#end
 
 			MarbleGame.canvas.scene2d.scaleMode = Zoom(zoomRatio);
+
+			if (MarbleGame.instance.world != null) {
+				MarbleGame.instance.world.scene.camera.setFovX(Settings.optionsSettings.fovX,
+					Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
+			}
 
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		});
