@@ -8,8 +8,8 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Gold: [Play](https://mbhaxe.netlify.app/)
 ### Marble Blast Platinum: [Play](https://mbphaxe.netlify.app/)
 ## Windows and Mac
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.5)
-### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.2)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.6)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.3)
 ## Mac Instructions
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
