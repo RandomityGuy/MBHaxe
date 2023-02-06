@@ -1,5 +1,7 @@
 package src;
 
+import gui.ReplayCenterGui;
+import gui.ReplayNameDlg;
 import collision.Collision;
 import shapes.MegaMarble;
 import shapes.Blast;
@@ -1162,9 +1164,7 @@ class MarbleWorld extends Scheduler {
 				}
 				this.setCursorLock(false);
 				this.dispose();
-				var pmg = new PlayMissionGui();
-				PlayMissionGui.currentSelectionStatic = mission.index + 1;
-				MarbleGame.canvas.setContent(pmg);
+				MarbleGame.canvas.setContent(new ReplayCenterGui());
 				#if js
 				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 				pointercontainer.hidden = false;
@@ -1636,7 +1636,8 @@ class MarbleWorld extends Scheduler {
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
-			this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
+			if (!this.isWatching)
+				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
 			if (timeTravelSound != null) {
 				timeTravelSound.stop();
@@ -1650,16 +1651,17 @@ class MarbleWorld extends Scheduler {
 	}
 
 	function showFinishScreen() {
+		if (this.isWatching)
+			return 0;
 		Console.log("State End");
 		var egg:EndGameGui = null;
 		#if js
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.hidden = false;
 		#end
-		if (this.isRecording) {
+		this.schedule(this.timeState.currentAttemptTime + 3, () -> {
 			this.isRecording = false; // Stop recording here
-			this.saveReplay();
-		}
+		}, "stopRecordingTimeout");
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.setControlsEnabled(false);
 		}
@@ -1667,24 +1669,53 @@ class MarbleWorld extends Scheduler {
 			if (Util.isTouchDevice()) {
 				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
 			}
-			this.dispose();
-			var pmg = new PlayMissionGui();
-			PlayMissionGui.currentSelectionStatic = mission.index + 1;
-			MarbleGame.canvas.setContent(pmg);
-			#if js
-			pointercontainer.hidden = false;
-			#end
-		}, (sender) -> {
-			MarbleGame.canvas.popDialog(egg);
-			this.setCursorLock(true);
-			this.restart(true);
-			#if js
-			pointercontainer.hidden = true;
-			#end
-			if (Util.isTouchDevice()) {
-				MarbleGame.instance.touchInput.setControlsEnabled(true);
+			var endGameCode = () -> {
+				this.dispose();
+				var pmg = new PlayMissionGui();
+				PlayMissionGui.currentSelectionStatic = mission.index + 1;
+				MarbleGame.canvas.setContent(pmg);
+				#if js
+				pointercontainer.hidden = false;
+				#end
 			}
-			// @:privateAccess playGui.playGuiCtrl.render(scene2d);
+			if (MarbleGame.instance.toRecord) {
+				MarbleGame.canvas.pushDialog(new ReplayNameDlg(endGameCode));
+			} else {
+				endGameCode();
+			}
+		}, (sender) -> {
+			var restartGameCode = () -> {
+				MarbleGame.canvas.popDialog(egg);
+				this.setCursorLock(true);
+				this.restart(true);
+				#if js
+				pointercontainer.hidden = true;
+				#end
+				if (Util.isTouchDevice()) {
+					MarbleGame.instance.touchInput.setControlsEnabled(true);
+				}
+				// @:privateAccess playGui.playGuiCtrl.render(scene2d);
+			}
+			if (MarbleGame.instance.toRecord) {
+				MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
+					this.isRecording = true;
+					restartGameCode();
+				}));
+			} else {
+				restartGameCode();
+			}
+		}, (sender) -> {
+			var nextLevelCode = () -> {
+				var nextMission = mission.getNextMission();
+				if (nextMission != null) {
+					MarbleGame.instance.playMission(nextMission);
+				}
+			}
+			if (MarbleGame.instance.toRecord) {
+				MarbleGame.canvas.pushDialog(new ReplayNameDlg(nextLevelCode));
+			} else {
+				nextLevelCode();
+			}
 		}, mission, finishTime);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
@@ -1962,33 +1993,42 @@ class MarbleWorld extends Scheduler {
 
 	public function saveReplay() {
 		this.replay.name = MarbleGame.instance.recordingName;
-		var replayBytes = this.replay.write();
 		#if hl
-		// hxd.File.saveAs(replayBytes, {
-		// 	title: 'Save Replay',
-		// 	fileTypes: [
-		// 		{
-		// 			name: "Replay (*.mbr)",
-		// 			extensions: ["mbr"]
-		// 		}
-		// 	],
-		// 	defaultPath: 'data/replay/${this.mission.title}${this.timeState.gameplayClock}.mbr'
-		// });
 		sys.FileSystem.createDirectory(haxe.io.Path.join([Settings.settingsDir, "data", "replays"]));
 		var replayPath = haxe.io.Path.join([
 			Settings.settingsDir,
 			"data",
 			"replays",
-			'${this.mission.title}${this.timeState.gameplayClock}.mbr'
+			'${this.replay.name}.mbr'
 		]);
+		if (sys.FileSystem.exists(replayPath)) {
+			var count = 1;
+			var found = false;
+			while (!found) {
+				replayPath = haxe.io.Path.join([
+					Settings.settingsDir,
+					"data",
+					"replays",
+					'${this.replay.name} (${count}).mbr'
+				]);
+				if (!sys.FileSystem.exists(replayPath)) {
+					this.replay.name += ' (${count})';
+					found = true;
+				} else {
+					count++;
+				}
+			}
+		}
+		var replayBytes = this.replay.write();
 		sys.io.File.saveBytes(replayPath, replayBytes);
 		#end
 		#if js
+		var replayBytes = this.replay.write();
 		var blob = new js.html.Blob([replayBytes.getData()], {
 			type: 'application/octet-stream'
 		});
 		var url = js.html.URL.createObjectURL(blob);
-		var fname = '${this.mission.title}${this.timeState.gameplayClock}.mbr';
+		var fname = '${this.replay.name}.mbr';
 		var element = js.Browser.document.createElement('a');
 		element.setAttribute('href', url);
 		element.setAttribute('download', fname);
