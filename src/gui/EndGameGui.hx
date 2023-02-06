@@ -18,7 +18,7 @@ class EndGameGui extends GuiControl {
 
 	var scoreSubmitted:Bool = false;
 
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, mission:Mission, timeState:TimeState) {
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, timeState:TimeState) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -77,12 +77,7 @@ class EndGameGui extends GuiControl {
 		nextLevelBtn.vertSizing = Height;
 		nextLevelBtn.position = new Vector(0, 0);
 		nextLevelBtn.extent = new Vector(130, 110);
-		nextLevelBtn.pressedAction = (e) -> {
-			var nextMission = mission.getNextMission();
-			if (nextMission != null) {
-				cast(this.parent, Canvas).marbleGame.playMission(nextMission);
-			}
-		};
+		nextLevelBtn.pressedAction = (e) -> nextLevelFunc(nextLevelBtn);
 		nextLevel.addChild(nextLevelBtn);
 
 		function setButtonStates(enabled:Bool) {

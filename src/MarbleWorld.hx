@@ -1670,10 +1670,6 @@ class MarbleWorld extends Scheduler {
 			if (Util.isTouchDevice()) {
 				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
 			}
-			if (this.isRecording) {
-				this.isRecording = false; // Stop recording here if we haven't already
-				this.clearScheduleId("stopRecordingTimeout");
-			}
 			var endGameCode = () -> {
 				this.dispose();
 				var pmg = new PlayMissionGui();
@@ -1701,9 +1697,6 @@ class MarbleWorld extends Scheduler {
 				}
 				// @:privateAccess playGui.playGuiCtrl.render(scene2d);
 			}
-			if (this.isRecording) {
-				this.clearScheduleId("stopRecordingTimeout");
-			}
 			if (MarbleGame.instance.toRecord) {
 				MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
 					this.isRecording = true;
@@ -1711,6 +1704,18 @@ class MarbleWorld extends Scheduler {
 				}));
 			} else {
 				restartGameCode();
+			}
+		}, (sender) -> {
+			var nextLevelCode = () -> {
+				var nextMission = mission.getNextMission();
+				if (nextMission != null) {
+					MarbleGame.instance.playMission(nextMission);
+				}
+			}
+			if (MarbleGame.instance.toRecord) {
+				MarbleGame.canvas.pushDialog(new ReplayNameDlg(nextLevelCode));
+			} else {
+				nextLevelCode();
 			}
 		}, mission, finishTime);
 		MarbleGame.canvas.pushDialog(egg);
