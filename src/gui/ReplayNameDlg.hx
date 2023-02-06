@@ -7,7 +7,7 @@ import src.ResourceLoader;
 import src.Settings;
 
 class ReplayNameDlg extends GuiControl {
-	public function new() {
+	public function new(callback:Void->Void) {
 		super();
 		var text = "Enter a name for the recording";
 		this.horizSizing = Width;
@@ -59,6 +59,13 @@ class ReplayNameDlg extends GuiControl {
 		textInput.text.selectionTile = h2d.Tile.fromColor(0x808080, 0, hxd.Math.ceil(textInput.text.font.lineHeight));
 		textFrame.addChild(textInput);
 
+		textInput.text.text = MarbleGame.instance.world.mission.title;
+		if (MarbleGame.instance.world.finishTime == null) {
+			textInput.text.text += " Unfinished Run";
+		} else {
+			textInput.text.text += " " + MarbleGame.instance.world.finishTime.gameplayClock;
+		}
+
 		var yesButton = new GuiButton(loadButtonImages("data/ui/common/ok"));
 		yesButton.position = new Vector(171, 124);
 		yesButton.extent = new Vector(95, 45);
@@ -66,9 +73,10 @@ class ReplayNameDlg extends GuiControl {
 		yesButton.accelerator = hxd.Key.ENTER;
 		yesButton.pressedAction = (sender) -> {
 			if (StringTools.trim(textInput.text.text) != "") {
-				MarbleGame.instance.toRecord = true;
 				MarbleGame.instance.recordingName = textInput.text.text;
 				MarbleGame.canvas.popDialog(this);
+				MarbleGame.instance.world.saveReplay();
+				callback();
 			}
 		}
 		yesNoFrame.addChild(yesButton);
@@ -80,6 +88,7 @@ class ReplayNameDlg extends GuiControl {
 		noButton.accelerator = hxd.Key.ESCAPE;
 		noButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
+			callback();
 		}
 		yesNoFrame.addChild(noButton);
 

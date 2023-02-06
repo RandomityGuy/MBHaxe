@@ -1,5 +1,6 @@
 package src;
 
+import gui.ReplayNameDlg;
 import collision.Collision;
 import shapes.MegaMarble;
 import shapes.Blast;
@@ -1636,7 +1637,8 @@ class MarbleWorld extends Scheduler {
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
-			this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
+			if (!this.isWatching)
+				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
 			if (timeTravelSound != null) {
 				timeTravelSound.stop();
@@ -1650,16 +1652,17 @@ class MarbleWorld extends Scheduler {
 	}
 
 	function showFinishScreen() {
+		if (this.isWatching)
+			return 0;
 		Console.log("State End");
 		var egg:EndGameGui = null;
 		#if js
 		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 		pointercontainer.hidden = false;
 		#end
-		if (this.isRecording) {
+		this.schedule(this.timeState.currentAttemptTime + 3, () -> {
 			this.isRecording = false; // Stop recording here
-			this.saveReplay();
-		}
+		}, "stopRecordingTimeout");
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.setControlsEnabled(false);
 		}
@@ -1667,24 +1670,48 @@ class MarbleWorld extends Scheduler {
 			if (Util.isTouchDevice()) {
 				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
 			}
-			this.dispose();
-			var pmg = new PlayMissionGui();
-			PlayMissionGui.currentSelectionStatic = mission.index + 1;
-			MarbleGame.canvas.setContent(pmg);
-			#if js
-			pointercontainer.hidden = false;
-			#end
-		}, (sender) -> {
-			MarbleGame.canvas.popDialog(egg);
-			this.setCursorLock(true);
-			this.restart(true);
-			#if js
-			pointercontainer.hidden = true;
-			#end
-			if (Util.isTouchDevice()) {
-				MarbleGame.instance.touchInput.setControlsEnabled(true);
+			if (this.isRecording) {
+				this.isRecording = false; // Stop recording here if we haven't already
+				this.clearScheduleId("stopRecordingTimeout");
 			}
-			// @:privateAccess playGui.playGuiCtrl.render(scene2d);
+			var endGameCode = () -> {
+				this.dispose();
+				var pmg = new PlayMissionGui();
+				PlayMissionGui.currentSelectionStatic = mission.index + 1;
+				MarbleGame.canvas.setContent(pmg);
+				#if js
+				pointercontainer.hidden = false;
+				#end
+			}
+			if (MarbleGame.instance.toRecord) {
+				MarbleGame.canvas.pushDialog(new ReplayNameDlg(endGameCode));
+			} else {
+				endGameCode();
+			}
+		}, (sender) -> {
+			var restartGameCode = () -> {
+				MarbleGame.canvas.popDialog(egg);
+				this.setCursorLock(true);
+				this.restart(true);
+				#if js
+				pointercontainer.hidden = true;
+				#end
+				if (Util.isTouchDevice()) {
+					MarbleGame.instance.touchInput.setControlsEnabled(true);
+				}
+				// @:privateAccess playGui.playGuiCtrl.render(scene2d);
+			}
+			if (this.isRecording) {
+				this.clearScheduleId("stopRecordingTimeout");
+			}
+			if (MarbleGame.instance.toRecord) {
+				MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
+					this.isRecording = true;
+					restartGameCode();
+				}));
+			} else {
+				restartGameCode();
+			}
 		}, mission, finishTime);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
