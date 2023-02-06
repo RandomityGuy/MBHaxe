@@ -429,6 +429,7 @@ class DtsObject extends GameObject {
 				material.blendMode = BlendMode.Alpha;
 				material.mainPass.culling = h3d.mat.Data.Face.None;
 				material.receiveShadows = false;
+				material.mainPass.depthWrite = false;
 			}
 			// // TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0) {

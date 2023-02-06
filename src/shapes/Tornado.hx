@@ -53,7 +53,8 @@ class Tornado extends ForceObject {
 				this.soundChannel.pause = true;
 				for (material in this.materials) {
 					material.blendMode = Alpha;
-					// material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.mainPass.depthWrite = false;
 				}
 				onFinish();
 			});
