@@ -188,17 +188,17 @@ class Marble extends GameObject {
 
 	var _prevRadius:Float;
 
-	var _maxRollVelocity = 15;
-	var _angularAcceleration = 75;
+	var _maxRollVelocity:Float = 15;
+	var _angularAcceleration:Float = 75;
 	var _jumpImpulse = 7.5;
 	var _kineticFriction = 0.7;
 	var _staticFriction = 1.1;
-	var _brakingAcceleration = 30;
-	var _gravity = 20;
+	var _brakingAcceleration:Float = 30;
+	var _gravity:Float = 20;
 	var _airAccel:Float = 5;
 	var _maxDotSlide = 0.5;
-	var _minBounceVel = 3;
-	var _minTrailVel = 10;
+	var _minBounceVel:Float = 0.1;
+	var _minTrailVel:Float = 10;
 	var _bounceKineticFriction = 0.2;
 	var minVelocityBounceSoft = 2.5;
 	var minVelocityBounceHard = 12.0;
@@ -653,7 +653,7 @@ class Marble extends GameObject {
 								restitution = 0.9;
 							}
 							if (currentTime - this.shockAbsorberEnableTime < 5) {
-								restitution = 0;
+								restitution = 0.01;
 							}
 							restitution *= contacts[i].restitution;
 
@@ -973,6 +973,14 @@ class Marble extends GameObject {
 	}
 
 	function testMove(velocity:Vector, position:Vector, deltaT:Float, radius:Float, testPIs:Bool) {
+		if (velocity.length() < 0.001) {
+			return {
+				position: position,
+				t: deltaT,
+				found: false,
+				foundContacts: []
+			};
+		}
 		var searchbox = new Bounds();
 		searchbox.addSpherePos(position.x, position.y, position.z, _radius);
 		searchbox.addSpherePos(position.x + velocity.x * deltaT, position.y + velocity.y * deltaT, position.z + velocity.z * deltaT, _radius);
