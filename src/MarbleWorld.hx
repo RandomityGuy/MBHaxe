@@ -1994,33 +1994,42 @@ class MarbleWorld extends Scheduler {
 
 	public function saveReplay() {
 		this.replay.name = MarbleGame.instance.recordingName;
-		var replayBytes = this.replay.write();
 		#if hl
-		// hxd.File.saveAs(replayBytes, {
-		// 	title: 'Save Replay',
-		// 	fileTypes: [
-		// 		{
-		// 			name: "Replay (*.mbr)",
-		// 			extensions: ["mbr"]
-		// 		}
-		// 	],
-		// 	defaultPath: 'data/replay/${this.mission.title}${this.timeState.gameplayClock}.mbr'
-		// });
 		sys.FileSystem.createDirectory(haxe.io.Path.join([Settings.settingsDir, "data", "replays"]));
 		var replayPath = haxe.io.Path.join([
 			Settings.settingsDir,
 			"data",
 			"replays",
-			'${this.mission.title}${this.timeState.gameplayClock}.mbr'
+			'${this.replay.name}.mbr'
 		]);
+		if (sys.FileSystem.exists(replayPath)) {
+			var count = 1;
+			var found = false;
+			while (!found) {
+				replayPath = haxe.io.Path.join([
+					Settings.settingsDir,
+					"data",
+					"replays",
+					'${this.replay.name} (${count}).mbr'
+				]);
+				if (!sys.FileSystem.exists(replayPath)) {
+					this.replay.name += ' (${count})';
+					found = true;
+				} else {
+					count++;
+				}
+			}
+		}
+		var replayBytes = this.replay.write();
 		sys.io.File.saveBytes(replayPath, replayBytes);
 		#end
 		#if js
+		var replayBytes = this.replay.write();
 		var blob = new js.html.Blob([replayBytes.getData()], {
 			type: 'application/octet-stream'
 		});
 		var url = js.html.URL.createObjectURL(blob);
-		var fname = '${this.mission.title}${this.timeState.gameplayClock}.mbr';
+		var fname = '${this.replay.name}.mbr';
 		var element = js.Browser.document.createElement('a');
 		element.setAttribute('href', url);
 		element.setAttribute('download', fname);
