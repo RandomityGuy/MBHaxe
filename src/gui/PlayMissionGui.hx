@@ -65,6 +65,8 @@ class PlayMissionGui extends GuiImage {
 		currentCategory = PlayMissionGui.currentCategoryStatic;
 		currentGame = PlayMissionGui.currentGameStatic;
 
+		MarbleGame.instance.toRecord = false;
+
 		function chooseBg() {
 			if (currentGame == "gold")
 				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
@@ -667,7 +669,8 @@ class PlayMissionGui extends GuiImage {
 		pmRecord.position = new Vector(247, 46);
 		pmRecord.extent = new Vector(43, 43);
 		pmRecord.pressedAction = (sender) -> {
-			cast(this.parent, Canvas).pushDialog(new ReplayNameDlg());
+			MarbleGame.instance.toRecord = true;
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
 		};
 		pmMorePopDlg.addChild(pmRecord);
 

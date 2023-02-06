@@ -1,5 +1,6 @@
 package src;
 
+import gui.ReplayNameDlg;
 import gui.ConsoleDlg;
 import src.Replay;
 import touch.TouchInput;
@@ -218,7 +219,11 @@ class MarbleGame {
 			world.setCursorLock(false);
 			exitGameDlg = new ExitGameDlg((sender) -> {
 				canvas.popDialog(exitGameDlg);
-				quitMission();
+				if (world.isRecording) {
+					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {quitMission();}));
+				} else {
+					quitMission();
+				}
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
 				paused = !paused;
@@ -247,9 +252,6 @@ class MarbleGame {
 		var pmg = new PlayMissionGui();
 		PlayMissionGui.currentSelectionStatic = world.mission.index;
 		PlayMissionGui.currentGameStatic = world.mission.game;
-		if (world.isRecording) {
-			world.saveReplay();
-		}
 		world.dispose();
 		world = null;
 		canvas.setContent(pmg);
@@ -263,7 +265,6 @@ class MarbleGame {
 			world.dispose();
 		}
 		world = new MarbleWorld(scene, scene2d, mission, toRecord);
-		toRecord = false;
 		world.init();
 	}
 
