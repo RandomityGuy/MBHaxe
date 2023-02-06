@@ -52,7 +52,8 @@ class Tornado extends ForceObject {
 					new Vector(1e8, 1e8, 1e8), true);
 				for (material in this.materials) {
 					material.blendMode = Alpha;
-					// material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.mainPass.depthWrite = false;
 				}
 				onFinish();
 			});

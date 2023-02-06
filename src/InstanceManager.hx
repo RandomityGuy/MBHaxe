@@ -128,7 +128,8 @@ class InstanceManager {
 					if (dtsshader != null) {
 						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
 						minfo.meshbatch.material.mainPass.addShader(dtsshader);
-						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						minfo.meshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
 					}
 					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
 					minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
