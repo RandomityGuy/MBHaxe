@@ -442,6 +442,10 @@ class Replay {
 			Console.log("Replay loading failed: unknown version");
 			return false;
 		}
+		if (replayVersion < 5) { // first version with headers
+			Console.log('Replay loading failed: version ${replayVersion} does not have a header');
+			return false;
+		}
 		var nameLength = data.get(1);
 		this.name = data.getString(2, nameLength);
 		var missionLength = data.get(2 + nameLength);
@@ -473,6 +477,10 @@ class Replay {
 		var replayVersion = data.get(0);
 		if (replayVersion > version) {
 			Console.log("Replay loading failed: unknown version");
+			return false;
+		}
+		if (replayVersion < 5) { // first version with headers
+			Console.log('Replay loading failed: version ${replayVersion} does not have a header');
 			return false;
 		}
 		var nameLength = data.get(1);
