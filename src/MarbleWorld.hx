@@ -1,6 +1,8 @@
 package src;
 
+#if !js
 import gui.ReplayCenterGui;
+#end
 import gui.ReplayNameDlg;
 import collision.Collision;
 import shapes.MegaMarble;
@@ -1164,8 +1166,13 @@ class MarbleWorld extends Scheduler {
 				}
 				this.setCursorLock(false);
 				this.dispose();
+				#if !js
 				MarbleGame.canvas.setContent(new ReplayCenterGui());
+				#end
 				#if js
+				var pmg = new PlayMissionGui();
+				PlayMissionGui.currentSelectionStatic = mission.index + 1;
+				MarbleGame.canvas.setContent(pmg);
 				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 				pointercontainer.hidden = false;
 				#end
