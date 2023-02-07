@@ -1,6 +1,8 @@
 package src;
 
-#if !js
+#if js
+import gui.MainMenuGui;
+#else
 import gui.ReplayCenterGui;
 #end
 import gui.ReplayNameDlg;
@@ -1170,9 +1172,7 @@ class MarbleWorld extends Scheduler {
 				MarbleGame.canvas.setContent(new ReplayCenterGui());
 				#end
 				#if js
-				var pmg = new PlayMissionGui();
-				PlayMissionGui.currentSelectionStatic = mission.index + 1;
-				MarbleGame.canvas.setContent(pmg);
+				MarbleGame.canvas.setContent(new MainMenuGui());
 				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 				pointercontainer.hidden = false;
 				#end
