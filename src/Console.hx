@@ -1,6 +1,8 @@
 package src;
 
+#if !js
 import sys.FileSystem;
+#end
 import mis.MisParser;
 import src.Settings;
 import src.Debug;

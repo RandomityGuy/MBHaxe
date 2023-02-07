@@ -1,6 +1,10 @@
 package src;
 
+#if js
+import gui.MainMenuGui;
+#else
 import gui.ReplayCenterGui;
+#end
 import gui.ReplayNameDlg;
 import collision.Collision;
 import shapes.MegaMarble;
@@ -1164,8 +1168,11 @@ class MarbleWorld extends Scheduler {
 				}
 				this.setCursorLock(false);
 				this.dispose();
+				#if !js
 				MarbleGame.canvas.setContent(new ReplayCenterGui());
+				#end
 				#if js
+				MarbleGame.canvas.setContent(new MainMenuGui());
 				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 				pointercontainer.hidden = false;
 				#end
