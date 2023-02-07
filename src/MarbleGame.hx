@@ -1,5 +1,9 @@
 package src;
 
+import gui.MainMenuGui;
+#if !js
+import gui.ReplayCenterGui;
+#end
 import gui.ReplayNameDlg;
 import gui.ConsoleDlg;
 import src.Replay;
@@ -249,12 +253,20 @@ class MarbleGame {
 		Console.log("Quitting mission");
 		world.setCursorLock(false);
 		paused = false;
-		var pmg = new PlayMissionGui();
-		PlayMissionGui.currentSelectionStatic = world.mission.index;
-		PlayMissionGui.currentGameStatic = world.mission.game;
+		if (world.isWatching) {
+			#if !js
+			canvas.setContent(new ReplayCenterGui());
+			#else
+			canvas.setContent(new MainMenuGui());
+			#end
+		} else {
+			var pmg = new PlayMissionGui();
+			PlayMissionGui.currentSelectionStatic = world.mission.index;
+			PlayMissionGui.currentGameStatic = world.mission.game;
+			canvas.setContent(pmg);
+		}
 		world.dispose();
 		world = null;
-		canvas.setContent(pmg);
 
 		Settings.save();
 	}
