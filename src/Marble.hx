@@ -1000,7 +1000,8 @@ class Marble extends GameObject {
 		//	var iterationFound = false;
 		for (obj in foundObjs.filter(x -> x.go is InteriorObject || (x.go is PathedInterior))) {
 			// Its an MP so bruh
-
+			if (!obj.go.isCollideable)
+				continue;
 			var invMatrix = @:privateAccess obj.invTransform;
 			if (obj.go is PathedInterior)
 				invMatrix = obj.transform.getInverse();
