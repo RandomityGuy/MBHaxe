@@ -43,9 +43,9 @@ class RemapDlg extends GuiControl {
 	public override function update(dt:Float, mouseState:MouseState) {
 		super.update(dt, mouseState);
 		for (i in 0...1024) {
-			if (i == 5)
+			if (i == Key.MOUSE_WHEEL_DOWN || i == Key.MOUSE_WHEEL_UP)
 				continue;
-			if (Key.isDown(i)) {
+			if (Key.isPressed(i)) {
 				remapCallback(i);
 			}
 		}

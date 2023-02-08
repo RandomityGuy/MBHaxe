@@ -414,6 +414,9 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			remapDlg.remapCallback = (key) -> {
 				MarbleGame.canvas.popDialog(remapDlg);
 
+				if (key == Key.ESCAPE)
+					return;
+
 				var conflicting = getConflictingBinding(bindingName, key);
 				if (conflicting == null) {
 					ctrl.txtCtrl.text.text = Util.getKeyForButton2(key);
