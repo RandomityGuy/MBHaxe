@@ -198,6 +198,7 @@ class Marble extends GameObject {
 	var _airAccel:Float = 5;
 	var _maxDotSlide = 0.5;
 	var _minBounceVel:Float = 0.1;
+	var _minBounceSpeed:Float = 3;
 	var _minTrailVel:Float = 10;
 	var _bounceKineticFriction = 0.2;
 	var minVelocityBounceSoft = 2.5;
@@ -838,7 +839,7 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
-		if (this.bounceEmitDelay == 0 && this._minBounceVel <= speed) {
+		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
 			this.bounceEmitDelay = 0.3;
 		}
