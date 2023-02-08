@@ -1480,7 +1480,7 @@ class MarbleWorld extends Scheduler {
 
 		// Show a notification (and play a sound) based on the gems remaining
 		if (this.gemCount == this.totalGems) {
-			string = "You have all the gems, head for the finish!";
+			string = "You have all the diamonds, head for the finish!";
 			// if (!this.rewinding)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotallgems.wav', ResourceLoader.getAudio, this.soundResources));
 
@@ -1491,13 +1491,13 @@ class MarbleWorld extends Scheduler {
 			// 	this.touchFinish(completionOfImpact);
 			// }
 		} else {
-			string = "You picked up a gem.  ";
+			string = "You picked up a diamond.  ";
 
 			var remaining = this.totalGems - this.gemCount;
 			if (remaining == 1) {
-				string += "Only one gem to go!";
+				string += "Only one diamond to go!";
 			} else {
-				string += '${remaining} gems to go!';
+				string += '${remaining} diamonds to go!';
 			}
 
 			// if (!this.rewinding)
@@ -1634,7 +1634,7 @@ class MarbleWorld extends Scheduler {
 
 		if (this.gemCount < this.totalGems) {
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/missinggems.wav', ResourceLoader.getAudio, this.soundResources));
-			displayAlert("You can't finish without all the gems!!");
+			displayAlert("You can't finish without all the diamonds!!");
 		} else {
 			this.endPad.spawnFirework(this.timeState);
 			this.finishTime = this.timeState.clone();
