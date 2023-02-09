@@ -181,6 +181,8 @@ class MarbleWorld extends Scheduler {
 
 	public var _ready:Bool = false;
 
+	var _loadBegin:Bool = false;
+
 	var _loadingLength:Int = 0;
 
 	var _resourcesLoaded:Int = 0;
@@ -207,7 +209,15 @@ class MarbleWorld extends Scheduler {
 		Console.log("*** LOADING MISSION: " + mission.path);
 		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game);
 		MarbleGame.canvas.setContent(this.loadingGui);
+		if (this.mission.isClaMission) {
+			this.mission.download(() -> loadBegin());
+		} else {
+			loadBegin();
+		}
+	}
 
+	function loadBegin() {
+		_loadBegin = true;
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
 				if ([
@@ -249,8 +259,12 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function loadMusic(onFinish:Void->Void) {
-		var musicFileName = 'sound/music/' + this.mission.missionInfo.music;
-		ResourceLoader.load(musicFileName).entry.load(onFinish);
+		if (this.mission.missionInfo.music != null) {
+			var musicFileName = 'sound/music/' + this.mission.missionInfo.music;
+			ResourceLoader.load(musicFileName).entry.load(onFinish);
+		} else {
+			onFinish();
+		}
 	}
 
 	public function postInit() {
@@ -1031,7 +1045,7 @@ class MarbleWorld extends Scheduler {
 	public function addDtsObject(obj:DtsObject, onFinish:Void->Void) {
 		function parseIfl(path:String, onFinish:Array<String>->Void) {
 			ResourceLoader.load(path).entry.load(() -> {
-				var text = ResourceLoader.fileSystem.get(path).getText();
+				var text = ResourceLoader.getFileEntry(path).entry.getText();
 				var lines = text.split('\n');
 				var keyframes = [];
 				for (line in lines) {
@@ -1294,7 +1308,7 @@ class MarbleWorld extends Scheduler {
 			});
 			#end
 		} else {
-			if (this._resourcesLoaded < _loadingLength)
+			if (this._resourcesLoaded < _loadingLength || !this._loadBegin)
 				return;
 			if (!_ready && !postInited) {
 				postInited = true;
@@ -2002,22 +2016,12 @@ class MarbleWorld extends Scheduler {
 		this.replay.name = MarbleGame.instance.recordingName;
 		#if hl
 		sys.FileSystem.createDirectory(haxe.io.Path.join([Settings.settingsDir, "data", "replays"]));
-		var replayPath = haxe.io.Path.join([
-			Settings.settingsDir,
-			"data",
-			"replays",
-			'${this.replay.name}.mbr'
-		]);
+		var replayPath = haxe.io.Path.join([Settings.settingsDir, "data", "replays", '${this.replay.name}.mbr']);
 		if (sys.FileSystem.exists(replayPath)) {
 			var count = 1;
 			var found = false;
 			while (!found) {
-				replayPath = haxe.io.Path.join([
-					Settings.settingsDir,
-					"data",
-					"replays",
-					'${this.replay.name} (${count}).mbr'
-				]);
+				replayPath = haxe.io.Path.join([Settings.settingsDir, "data", "replays", '${this.replay.name} (${count}).mbr']);
 				if (!sys.FileSystem.exists(replayPath)) {
 					this.replay.name += ' (${count})';
 					found = true;
@@ -2066,7 +2070,8 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		this.playGui.dispose();
+		if (this.playGui != null)
+			this.playGui.dispose();
 		scene.removeChildren();
 
 		for (interior in this.interiors) {
@@ -2091,7 +2096,8 @@ class MarbleWorld extends Scheduler {
 			textureResource.release();
 		}
 
-		sky.dispose();
+		if (sky != null)
+			sky.dispose();
 
 		this._disposed = true;
 		AudioManager.stopAllSounds();

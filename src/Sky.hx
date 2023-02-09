@@ -72,8 +72,8 @@ class Sky extends Object {
 		#if (js || android)
 		dmlPath = StringTools.replace(dmlPath, "data/", "");
 		#end
-		if (ResourceLoader.fileSystem.exists(dmlPath)) {
-			var dmlFileEntry = ResourceLoader.fileSystem.get(dmlPath);
+		if (ResourceLoader.exists(dmlPath)) {
+			var dmlFileEntry = ResourceLoader.getFileEntry(dmlPath).entry;
 			dmlFileEntry.load(() -> {
 				var dmlFile = dmlFileEntry.getText();
 				var dmlDirectory = Path.directory(dmlPath);

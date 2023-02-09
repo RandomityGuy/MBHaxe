@@ -1,5 +1,6 @@
 package gui;
 
+import src.Marbleland;
 import h2d.filter.DropShadow;
 import src.Replay;
 import haxe.ds.Option;
@@ -49,6 +50,9 @@ class PlayMissionGui extends GuiImage {
 
 	#if js
 	var previewTimeoutHandle:Option<Int> = None;
+	#end
+	#if hl
+	var previewToken:Int = 0;
 	#end
 
 	public function new() {
@@ -195,7 +199,7 @@ class PlayMissionGui extends GuiImage {
 		pmSearch.position = new Vector(315, 325);
 		pmSearch.extent = new Vector(43, 43);
 		pmSearch.pressedAction = (e) -> {
-			MarbleGame.canvas.pushDialog(new SearchGui(currentGame));
+			MarbleGame.canvas.pushDialog(new SearchGui(currentGame, currentCategory == "custom"));
 		}
 		pmBox.addChild(pmSearch);
 
@@ -420,6 +424,18 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyTopCTab2.vertSizing = Bottom;
 		pmDifficultyTopC2.addChild(pmDifficultyTopCTab2);
 
+		var pmDifficultyUltraCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyUltraCustom.position = new Vector(277, 164);
+		pmDifficultyUltraCustom.ratio = -1 / 16;
+		pmDifficultyUltraCustom.setExtent(new Vector(120, 31));
+		pmDifficultyUltraCustom.txtCtrl.text.text = " Custom";
+		pmDifficultyUltraCustom.pressedAction = (e) -> {
+			currentList = Marbleland.goldMissions;
+			currentCategory = "custom";
+			setCategoryFunc("ultra", "custom");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyUltraCustom);
+
 		var pmDifficultyUltraAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
 		pmDifficultyUltraAdvanced.position = new Vector(277, 134);
 		pmDifficultyUltraAdvanced.ratio = -1 / 16;
@@ -455,6 +471,18 @@ class PlayMissionGui extends GuiImage {
 			setCategoryFunc("ultra", "intermediate");
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraIntermediate);
+
+		var pmDifficultyGoldCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyGoldCustom.position = new Vector(37, 164);
+		pmDifficultyGoldCustom.ratio = -1 / 16;
+		pmDifficultyGoldCustom.setExtent(new Vector(120, 31));
+		pmDifficultyGoldCustom.txtCtrl.text.text = " Custom";
+		pmDifficultyGoldCustom.pressedAction = (e) -> {
+			currentList = Marbleland.goldMissions;
+			currentCategory = "custom";
+			setCategoryFunc("gold", "custom");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyGoldCustom);
 
 		var pmDifficultyGoldAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
 		pmDifficultyGoldAdvanced.position = new Vector(37, 134);
@@ -741,7 +769,12 @@ class PlayMissionGui extends GuiImage {
 		currentList = MissionList.missionList["platinum"]["beginner"];
 
 		setCategoryFunc = function(game:String, category:String, ?doRender:Bool = true) {
-			currentList = "category" == "custom" ? MissionList.customMissions : MissionList.missionList[game][category];
+			currentList = category == "custom" ? (switch (game) {
+				case 'gold': Marbleland.goldMissions;
+				case 'platinum': Marbleland.platinumMissions;
+				case 'ultra': Marbleland.ultraMissions;
+				default: MissionList.customMissions;
+			}) : MissionList.missionList[game][category];
 			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
 			pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources).toTile();
 
@@ -889,13 +922,13 @@ class PlayMissionGui extends GuiImage {
 					var scoreTextTime = '<p align="right"><font color="${scoreColor}" face="MarkerFelt18">${Util.formatTime(score.time)}</font></p>';
 					rightText += scoreTextTime;
 
-					descText += '<font color="#F4E4CE" face="MarkerFelt18">${i + 1}. <font color="#FFFFFF">${score.name}</font></font><br/>';
+					descText += '<font color="#F4E4CE" face="MarkerFelt18">${i + 1}. <font color="#FFFFFF">${StringTools.htmlEscape(score.name)}</font></font><br/>';
 				}
 
 				pmDescriptionRight.text.text = rightText;
 			} else {
-				descText += '<font color="#F4EFE3" face="MarkerFelt18"><p align="center">Author: ${currentMission.artist}</p></font>';
-				descText += '<font color="#F4E4CE" face="MarkerFelt18">${currentMission.description}</font>';
+				descText += '<font color="#F4EFE3" face="MarkerFelt18"><p align="center">Author: ${StringTools.htmlEscape(currentMission.artist)}</p></font>';
+				descText += '<font color="#F4E4CE" face="MarkerFelt18">${StringTools.htmlEscape(currentMission.description)}</font>';
 				pmDescriptionRight.text.text = '';
 			}
 			pmDescription.text.text = descText;
@@ -947,7 +980,10 @@ class PlayMissionGui extends GuiImage {
 			}
 			#end
 			#if hl
+			var pTok = previewToken++;
 			var prevpath = currentMission.getPreviewImage(prevImg -> {
+				if (pTok + 1 != previewToken)
+					return;
 				pmPreview.bmp.tile = prevImg;
 			}); // Shit be sync
 			if (prevpath != pmPreview.bmp.tile.getTexture().name) {

@@ -647,18 +647,18 @@ class DifBuilder {
 				path = StringTools.replace(path, "data/", "");
 				#end
 
-				if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".jpg")) {
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
 					return true;
 				}
-				if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".png")) {
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
 					return true;
 				}
 				var prevDir = Path.directory(Path.directory(path));
 
-				if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".jpg")) {
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
 					return true;
 				}
-				if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".png")) {
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
 					return true;
 				}
 
@@ -669,19 +669,19 @@ class DifBuilder {
 					tex = tex.split('/')[1];
 				}
 
-				if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".jpg")) {
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
 					return Path.directory(path) + "/" + tex + ".jpg";
 				}
-				if (ResourceLoader.fileSystem.exists(Path.directory(path) + "/" + tex + ".png")) {
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
 					return Path.directory(path) + "/" + tex + ".png";
 				}
 
 				var prevDir = Path.directory(Path.directory(path));
 
-				if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".jpg")) {
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
 					return prevDir + "/" + tex + ".jpg";
 				}
-				if (ResourceLoader.fileSystem.exists(prevDir + "/" + tex + ".png")) {
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
 					return prevDir + "/" + tex + ".png";
 				}
 
@@ -729,7 +729,7 @@ class DifBuilder {
 					var material:Material;
 					var texture:Texture;
 					if (canFindTex(grp)) {
-						texture = ResourceLoader.getFileEntry(tex(grp)).toImage().toTexture();
+						texture = ResourceLoader.getTexture(tex(grp)).resource;
 						texture.wrap = Wrap.Repeat;
 						texture.mipMap = Nearest;
 						var exactName = StringTools.replace(texture.name, "data/", "");

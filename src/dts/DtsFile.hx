@@ -61,7 +61,7 @@ class DtsFile {
 	public function new() {}
 
 	public function read(filepath:String) {
-		var f = ResourceLoader.fileSystem.get(filepath);
+		var f = ResourceLoader.getFileEntry(filepath).entry;
 		var bytes = f.getBytes();
 		var br = new BytesReader(bytes);
 

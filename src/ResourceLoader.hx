@@ -1,5 +1,7 @@
 package src;
 
+import hxd.res.Any;
+import hxd.fs.BytesFileSystem.BytesFileEntry;
 #if (js || android)
 import fs.ManifestLoader;
 import fs.ManifestBuilder;
@@ -43,6 +45,7 @@ class ResourceLoader {
 	static var textureCache:Map<String, Resource<Texture>> = new Map();
 	static var imageCache:Map<String, Resource<Image>> = new Map();
 	static var audioCache:Map<String, Resource<Sound>> = new Map();
+	static var zipFilesystem:Map<String, BytesFileEntry> = new Map();
 
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
@@ -256,9 +259,9 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
-		if (ResourceLoader.fileSystem.exists(path))
+		if (ResourceLoader.exists(path))
 			return path;
-		if (ResourceLoader.fileSystem.exists(dirpath + fname))
+		if (ResourceLoader.exists(dirpath + fname))
 			return dirpath + fname;
 		return "";
 	}
@@ -271,6 +274,9 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		if (zipFilesystem.exists(path.toLowerCase())) {
+			return new hxd.res.Any(loader, zipFilesystem.get(path.toLowerCase()));
+		}
 		return ResourceLoader.loader.load(path);
 	}
 
@@ -284,7 +290,10 @@ class ResourceLoader {
 			var itr:Dif;
 			// var lock = new Lock();
 			// threadPool.run(() -> {
-			itr = Dif.LoadFromBuffer(fileSystem.get(path).getBytes());
+			if (zipFilesystem.exists(path.toLowerCase()))
+				itr = Dif.LoadFromBuffer(zipFilesystem.get(path.toLowerCase()).getBytes());
+			else
+				itr = Dif.LoadFromBuffer(fileSystem.get(path).getBytes());
 			var itrresource = new Resource(itr, path, interiorResources, dif -> {});
 			interiorResources.set(path, itrresource);
 			//	lock.release();
@@ -296,6 +305,7 @@ class ResourceLoader {
 
 	public static function loadDts(path:String) {
 		path = getProperFilepath(path);
+
 		if (dtsResources.exists(path))
 			return dtsResources.get(path);
 		else {
@@ -314,6 +324,18 @@ class ResourceLoader {
 
 	public static function getTexture(path:String) {
 		path = getProperFilepath(path);
+		if (zipFilesystem.exists(path.toLowerCase())) {
+			var img = new hxd.res.Image(zipFilesystem.get(path.toLowerCase()));
+			Image.setupTextureFlags = (texObj) -> {
+				texObj.flags.set(MipMapped);
+			}
+			var tex = img.toTexture();
+			tex.mipMap = Nearest;
+			var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+			textureCache.set(path, textureresource);
+
+			return textureresource;
+		}
 		if (textureCache.exists(path))
 			return textureCache.get(path);
 		if (fileSystem.exists(path)) {
@@ -336,6 +358,12 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		if (zipFilesystem.exists(path.toLowerCase())) {
+			var fentry = new hxd.res.Image(zipFilesystem.get(path.toLowerCase()));
+			var imageresource = new Resource(fentry, path, imageCache, img -> {});
+			imageCache.set(path, imageresource);
+			return imageresource;
+		}
 		if (imageCache.exists(path))
 			return imageCache.get(path);
 		if (fileSystem.exists(path)) {
@@ -379,8 +407,18 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		if (zipFilesystem.exists(path.toLowerCase())) {
+			var fentry = zipFilesystem.get(path.toLowerCase());
+			return new hxd.res.Any(loader, fentry);
+		}
 		var file = loader.load(path);
 		return file;
+	}
+
+	public static function exists(path:String) {
+		if (zipFilesystem.exists(path.toLowerCase()))
+			return true;
+		return fileSystem.exists(path);
 	}
 
 	public static function clearInteriorResources() {
@@ -404,5 +442,18 @@ class ResourceLoader {
 				names.push(file.path);
 		}
 		return names;
+	}
+
+	public static function loadZip(entries:Array<haxe.zip.Entry>) {
+		zipFilesystem.clear(); // We are only allowed to load one zip
+		for (entry in entries) {
+			var fname = entry.fileName.toLowerCase();
+			// fname = "data/" + fname;
+			if (exists(fname))
+				continue;
+			Console.log("Loaded zip entry: " + fname);
+			var zfe = new BytesFileEntry(fname, entry.data);
+			zipFilesystem.set(fname, zfe);
+		}
 	}
 }

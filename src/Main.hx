@@ -1,5 +1,6 @@
 package;
 
+import src.Marbleland;
 import src.Console;
 import hxd.Key;
 import src.Util;
@@ -18,6 +19,7 @@ import hxd.res.DefaultFont;
 import h2d.Text;
 import h3d.Vector;
 import src.ProfilerUI;
+import src.Http;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
@@ -66,10 +68,13 @@ class Main extends hxd.App {
 		#end
 
 		try {
+			Http.init();
+			haxe.MainLoop.add(() -> Http.loop());
 			Settings.init();
 			ResourceLoader.init(s2d, () -> {
 				AudioManager.init();
 				AudioManager.playShell();
+				Marbleland.init();
 				marbleGame = new MarbleGame(s2d, s3d);
 				MarbleGame.canvas.setContent(new MainMenuGui());
 

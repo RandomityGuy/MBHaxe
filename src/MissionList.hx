@@ -110,22 +110,4 @@ class MissionList {
 
 		_build = true;
 	}
-
-	static function parseCLAList() {
-		var claJson:Array<Dynamic> = Json.parse(ResourceLoader.fileSystem.get("data/cla_list.json").getText());
-
-		for (missionData in claJson) {
-			var mission = new Mission();
-			mission.id = missionData.id;
-			mission.artist = missionData.artist;
-			mission.title = missionData.name;
-			mission.description = missionData.desc;
-			mission.qualifyTime = missionData.time;
-			mission.goldTime = missionData.goldTime;
-			mission.path = missionData.baseName;
-			mission.isClaMission = true;
-
-			customMissions.push(mission);
-		}
-	}
 }

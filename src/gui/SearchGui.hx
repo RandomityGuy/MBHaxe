@@ -1,5 +1,6 @@
 package gui;
 
+import src.Marbleland;
 import h2d.Tile;
 import hxd.BitmapData;
 import src.MarbleGame;
@@ -9,7 +10,7 @@ import src.ResourceLoader;
 import src.Settings;
 
 class SearchGui extends GuiImage {
-	public function new(game:String) {
+	public function new(game:String, isCustom:Bool) {
 		var img = ResourceLoader.getImage("data/ui/search/window.png");
 		super(img.resource.toTile());
 
@@ -19,8 +20,29 @@ class SearchGui extends GuiImage {
 		this.extent = new Vector(487, 463);
 
 		var missionList = [];
-		for (diff in MissionList.missionList[game]) {
-			for (mis in diff) {
+		if (!isCustom) {
+			for (diff in MissionList.missionList[game]) {
+				for (mis in diff) {
+					missionList.push({
+						mis: mis,
+						name: mis.title,
+						artist: mis.artist,
+						path: mis.path
+					});
+				}
+			}
+		} else {
+			var customsList = switch (game) {
+				case 'gold':
+					Marbleland.goldMissions;
+				case 'platinum':
+					Marbleland.platinumMissions;
+				case 'ultra':
+					Marbleland.ultraMissions;
+				default:
+					MissionList.customMissions;
+			};
+			for (mis in customsList) {
 				missionList.push({
 					mis: mis,
 					name: mis.title,

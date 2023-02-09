@@ -471,7 +471,7 @@ class DtsObject extends GameObject {
 	}
 
 	function parseIfl(path:String) {
-		var text = ResourceLoader.fileSystem.get(path).getText();
+		var text = ResourceLoader.getFileEntry(path).entry.getText();
 		var lines = text.split('\n');
 		var keyframes = [];
 		for (line in lines) {

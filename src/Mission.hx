@@ -1,5 +1,7 @@
 package src;
 
+import gui.Canvas;
+import gui.MessageBoxOkDlg;
 import haxe.Json;
 import mis.MissionElement.MissionElementItem;
 import haxe.io.BytesBuffer;
@@ -15,6 +17,8 @@ import hxd.res.Image;
 import src.Resource;
 import src.Util;
 import src.Console;
+import src.Marbleland;
+import src.MarbleGame;
 
 class Mission {
 	public var root:MissionElementSimGroup;
@@ -45,7 +49,7 @@ class Mission {
 	public function new() {}
 
 	public function load() {
-		var misParser = new MisParser(ResourceLoader.fileSystem.get(this.path).getText());
+		var misParser = new MisParser(ResourceLoader.getFileEntry(this.path).entry.getText());
 		var contents = misParser.parse();
 		root = contents.root;
 
@@ -60,6 +64,8 @@ class Mission {
 				} else if (element._type == MissionElementType.SimGroup && !this.hasEgg) {
 					scanMission(cast element);
 				}
+				if (element._name == 'MissionInfo')
+					missionInfo = cast element;
 			}
 		};
 
@@ -153,10 +159,17 @@ class Mission {
 			onLoaded(Tile.fromBitmap(img));
 			return null;
 		} else {
-			Console.error("Preview image not found for " + this.path);
-			var img = new BitmapData(1, 1);
-			img.setPixel(0, 0, 0);
-			onLoaded(Tile.fromBitmap(img));
+			Marbleland.getMissionImage(this.id, (im) -> {
+				if (im != null) {
+					onLoaded(im.toTile());
+				} else {
+					Console.error("Preview image not found for " + this.path);
+					var img = new BitmapData(1, 1);
+					img.setPixel(0, 0, 0);
+					onLoaded(Tile.fromBitmap(img));
+				}
+			});
+
 			return null;
 		}
 	}
@@ -175,15 +188,20 @@ class Mission {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
-		if (ResourceLoader.fileSystem.exists(path))
+		if (ResourceLoader.exists(path))
 			return path;
 		if (StringTools.contains(path, 'interiors_mbg/'))
 			path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
 		var dirpath = path.substring(0, path.lastIndexOf('/') + 1);
-		if (ResourceLoader.fileSystem.exists(path))
+		if (ResourceLoader.exists(path))
 			return path;
-		if (ResourceLoader.fileSystem.exists(dirpath + fname))
+		if (ResourceLoader.exists(dirpath + fname))
 			return dirpath + fname;
+		if (game == 'gold') {
+			path = StringTools.replace(path, 'interiors/', 'interiors_mbg/');
+			if (ResourceLoader.exists(path))
+				return path;
+		}
 		Console.error("Interior resource not found: " + rawElementPath);
 		return "";
 	}
@@ -199,5 +217,18 @@ class Mission {
 		alarmStart = Math.max(0, alarmStart);
 
 		return alarmStart;
+	}
+
+	public function download(onFinish:Void->Void) {
+		if (this.isClaMission) {
+			Marbleland.download(this.id, (zipEntries) -> {
+				if (zipEntries != null) {
+					ResourceLoader.loadZip(zipEntries);
+					onFinish();
+				} else {
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to download mission"));
+				}
+			});
+		}
 	}
 }
