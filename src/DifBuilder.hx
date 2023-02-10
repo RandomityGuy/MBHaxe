@@ -729,7 +729,7 @@ class DifBuilder {
 					var material:Material;
 					var texture:Texture;
 					if (canFindTex(grp)) {
-						texture = ResourceLoader.getTexture(tex(grp)).resource;
+						texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
 						texture.wrap = Wrap.Repeat;
 						texture.mipMap = Nearest;
 						var exactName = StringTools.replace(texture.name, "data/", "");

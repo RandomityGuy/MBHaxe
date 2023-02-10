@@ -28,6 +28,16 @@ class Marbleland {
 
 	static function parseMissionList(s:String, game:String) {
 		var claJson:Array<Dynamic> = Json.parse(s);
+		if (game == 'gold') {
+			claJson = claJson.filter(x -> x.modification == 'gold');
+		}
+		if (game == 'platinum') {
+			claJson = claJson.filter(x -> x.gameType == 'single' && (x.gameMode == null || x.gameMode == 'null' || x.gamemode == ''));
+		}
+		if (game == 'ultra') {
+			claJson = claJson.filter(x -> x.gameType == 'single');
+		}
+		var platDupes = new Map();
 
 		for (missionData in claJson) {
 			var mission = new Mission();
@@ -49,6 +59,13 @@ class Marbleland {
 			mission.hasEgg = missionData.hasEgg;
 			mission.isClaMission = true;
 
+			if (game == 'platinum') {
+				if (platDupes.exists(mission.title + mission.description))
+					continue;
+				else
+					platDupes.set(mission.title + mission.description, true);
+			}
+
 			switch (game) {
 				case 'gold':
 					goldMissions.push(mission);
@@ -57,6 +74,16 @@ class Marbleland {
 				case 'platinum':
 					platinumMissions.push(mission);
 			}
+		}
+
+		// sort according to name
+		switch (game) {
+			case 'gold':
+				goldMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+			case 'platinum':
+				platinumMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+			case 'ultra':
+				ultraMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
 		}
 	}
 
@@ -70,7 +97,7 @@ class Marbleland {
 	}
 
 	public static function download(id:Int, cb:Array<haxe.zip.Entry>->Void) {
-		Http.get('https://marbleblast.vani.ga/api/custom/${id}.zip', (zipData -> {
+		Http.get('https://marbleblast.vani.ga/api/custom/${id}.zip?assuming=none', (zipData -> {
 			var reader = new Reader(new BytesInput(zipData));
 			var entries:Array<haxe.zip.Entry> = null;
 			try {

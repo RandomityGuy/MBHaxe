@@ -324,6 +324,10 @@ class ResourceLoader {
 
 	public static function getTexture(path:String) {
 		path = getProperFilepath(path);
+		return getTextureRealpath(path);
+	}
+
+	public static function getTextureRealpath(path:String) {
 		if (zipFilesystem.exists(path.toLowerCase())) {
 			var img = new hxd.res.Image(zipFilesystem.get(path.toLowerCase()));
 			Image.setupTextureFlags = (texObj) -> {
