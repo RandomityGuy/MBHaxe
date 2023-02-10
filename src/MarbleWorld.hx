@@ -555,9 +555,10 @@ class MarbleWorld extends Scheduler {
 			if (interiorScale.z == 0)
 				interiorScale.z = 0.0001;
 
-			var mat = new Matrix();
-			interiorRotation.toMatrix(mat);
-			mat.scale(interiorScale.x, interiorScale.y, interiorScale.z);
+			var mat = Matrix.S(interiorScale.x, interiorScale.y, interiorScale.z);
+			var tmp = new Matrix();
+			interiorRotation.toMatrix(tmp);
+			mat.multiply3x4(mat, tmp);
 			mat.setPosition(interiorPosition);
 
 			interior.setTransform(mat);
@@ -642,8 +643,10 @@ class MarbleWorld extends Scheduler {
 		if (shapeScale.z == 0)
 			shapeScale.z = 0.0001;
 
-		var mat = shapeRotation.toMatrix();
-		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
+		var mat = Matrix.S(shapeScale.x, shapeScale.y, shapeScale.z);
+		var tmp = new Matrix();
+		shapeRotation.toMatrix(tmp);
+		mat.multiply3x4(mat, tmp);
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(shape, () -> {
@@ -720,8 +723,10 @@ class MarbleWorld extends Scheduler {
 		if (shapeScale.z == 0)
 			shapeScale.z = 0.0001;
 
-		var mat = shapeRotation.toMatrix();
-		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
+		var mat = Matrix.S(shapeScale.x, shapeScale.y, shapeScale.z);
+		var tmp = new Matrix();
+		shapeRotation.toMatrix(tmp);
+		mat.multiply3x4(mat, tmp);
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(shape, () -> {
@@ -776,8 +781,10 @@ class MarbleWorld extends Scheduler {
 		if (shapeScale.z == 0)
 			shapeScale.z = 0.0001;
 
-		var mat = shapeRotation.toMatrix();
-		mat.scale(shapeScale.x, shapeScale.y, shapeScale.z);
+		var mat = Matrix.S(shapeScale.x, shapeScale.y, shapeScale.z);
+		var tmp = new Matrix();
+		shapeRotation.toMatrix(tmp);
+		mat.multiply3x4(mat, tmp);
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(tsShape, () -> {

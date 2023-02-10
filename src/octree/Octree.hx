@@ -31,8 +31,6 @@ class Octree {
 			return; // Don't insert if already contained in the tree
 		while (!this.root.largerThan(object) || !this.root.containsCenter(object)) {
 			// The root node does not fit the object; we need to grow the tree.
-			var a = this.root.largerThan(object);
-			var b = this.root.containsCenter(object);
 			if (this.root.depth == -32) {
 				return;
 			}
@@ -55,8 +53,15 @@ class Octree {
 
 	/** Updates an object in the tree whose bounding box has changed. */
 	public function update(object:IOctreeObject) {
-		this.remove(object);
-		this.insert(object);
+		if (!this.objectToNode.exists(object)) {
+			this.insert(object);
+			return;
+		}
+		var success = this.objectToNode.get(object).update(object);
+		if (!success) {
+			this.objectToNode.remove(object);
+			this.insert(object);
+		}
 	}
 
 	/** Expand the octree towards an object that doesn't fit in it. */
@@ -112,8 +117,25 @@ class Octree {
 			this.root.depth = 0;
 			return;
 		}
-		if (this.root.octants == null)
-			return;
+		if (this.root.octants == null) {
+			this.root.createOctants();
+
+			var fittingOctant:OctreeNode = null;
+			for (obj in this.root.objects) {
+				if (this.root.octants[0].largerThan(obj)) {
+					for (i in 0...8) {
+						var octant = this.root.octants[i];
+						if (octant.containsCenter(obj)) {
+							if (fittingOctant != null && fittingOctant != octant)
+								return;
+							fittingOctant = octant;
+						}
+					}
+				} else {
+					return;
+				}
+			}
+		}
 		// Find the only non-empty octant
 		var nonEmptyOctant:OctreeNode = null;
 		for (i in 0...8) {

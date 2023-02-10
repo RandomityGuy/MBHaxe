@@ -14,6 +14,8 @@ import h3d.Matrix;
 import h3d.col.Bounds;
 import src.PathedInterior;
 import src.Util;
+import src.Debug;
+import src.MarbleGame;
 
 class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var boundingBox:Bounds;
@@ -39,6 +41,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var difEdgeMap:Map<Int, dif.Edge>;
 
 	var _transformKey:Int = 0;
+
+	var _dbgEntity:h3d.scene.Mesh;
 
 	public function new(go:GameObject) {
 		this.go = go;
@@ -100,6 +104,18 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			boundingBox.add(tform);
 		}
 		this.boundingBox = boundingBox;
+		if (Debug.drawBounds) {
+			if (_dbgEntity == null) {
+				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+				MarbleGame.instance.scene.addChild(_dbgEntity);
+			} else {
+				_dbgEntity.remove();
+				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+				MarbleGame.instance.scene.addChild(_dbgEntity);
+			}
+		}
 	}
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
@@ -149,7 +165,9 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		localPos.transform(invMatrix);
 		// sphereBounds.addSpherePos(position.x, position.y, position.z, radius * 1.1);
 		// sphereBounds.transform(invMatrix);
-		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, radius * 1.1);
+		var invScale = invMatrix.getScale();
+		var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
+		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 1.1);
 		var surfaces = bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
 
 		var tform = transform.clone();
