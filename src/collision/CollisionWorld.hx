@@ -118,7 +118,6 @@ class CollisionWorld {
 	}
 
 	public function updateTransform(entity:CollisionEntity) {
-		this.octree.remove(entity);
-		this.octree.insert(entity);
+		this.octree.update(entity);
 	}
 }

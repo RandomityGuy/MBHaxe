@@ -1012,13 +1012,16 @@ class Marble extends GameObject {
 			var relVel = velocity.sub(obj.velocity);
 			var relLocalVel = relVel.transformed3x3(invMatrix);
 
+			var invScale = invMatrix.getScale();
+			var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
+
 			var boundThing = new Bounds();
 			boundThing.addSpherePos(localpos.x, localpos.y, localpos.z, radius * 2);
 			boundThing.addSpherePos(localpos.x
 				+ relLocalVel.x * deltaT * 5, localpos.y
 				+ relLocalVel.y * deltaT * 5, localpos.z
 				+ relLocalVel.z * deltaT * 5,
-				radius * 2);
+				Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 2);
 
 			var surfaces = obj.bvh == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.bvh.boundingSearch(boundThing);
 
@@ -1572,8 +1575,8 @@ class Marble extends GameObject {
 				tdiff = diff;
 			}
 			var expectedPos = finalPosData.position;
-			// var newPos = expectedPos;
-			var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts);
+			var newPos = expectedPos;
+			// var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts);
 
 			if (this.velocity.lengthSq() > 1e-8) {
 				var posDiff = newPos.sub(expectedPos);
@@ -1583,10 +1586,12 @@ class Marble extends GameObject {
 					var updatedTimestep = expectedProjPos.sub(pos).length() / velocity.length();
 
 					var tDiff = updatedTimestep - timeStep;
-					this.velocity = this.velocity.sub(A.multiply(tDiff));
-					this.omega = this.omega.sub(a.multiply(tDiff));
+					if (tDiff > 0) {
+						this.velocity = this.velocity.sub(A.multiply(tDiff));
+						this.omega = this.omega.sub(a.multiply(tDiff));
 
-					timeStep = updatedTimestep;
+						timeStep = updatedTimestep;
+					}
 				}
 			}
 

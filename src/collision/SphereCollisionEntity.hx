@@ -14,7 +14,6 @@ class SphereCollisionEntity extends CollisionEntity {
 	public var radius:Float;
 	public var marble:Marble;
 
-	var _dbgEntity:h3d.scene.Mesh;
 	var _dbgEntity2:h3d.scene.Mesh;
 
 	public function new(marble:Marble) {

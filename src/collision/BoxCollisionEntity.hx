@@ -15,8 +15,6 @@ import src.Debug;
 class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 	var bounds:Bounds;
 
-	var _dbgEntity:h3d.scene.Object;
-
 	public function new(bounds:Bounds, go:GameObject) {
 		super(go);
 		this.bounds = bounds;
@@ -28,11 +26,11 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		this.boundingBox.transform(this.transform);
 		if (Debug.drawBounds) {
 			if (_dbgEntity == null) {
-				_dbgEntity = this.boundingBox.makeDebugObj();
+				_dbgEntity = cast this.boundingBox.makeDebugObj();
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			} else {
-				_dbgEntity = this.boundingBox.makeDebugObj();
+				_dbgEntity = cast this.boundingBox.makeDebugObj();
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}
@@ -43,7 +41,7 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		super.setTransform(transform);
 		if (Debug.drawBounds) {
 			if (_dbgEntity != null) {
-				_dbgEntity = this.boundingBox.makeDebugObj();
+				_dbgEntity = cast this.boundingBox.makeDebugObj();
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}
