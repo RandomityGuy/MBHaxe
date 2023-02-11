@@ -1,6 +1,7 @@
 package src;
 
 import hxd.Pad;
+import src.Console;
 
 class Gamepad {
 	public static var gamepad:Pad = Pad.createDummy();
@@ -10,10 +11,13 @@ class Gamepad {
 	}
 
 	public static function onPad(pad:Pad) {
-		gamepad = pad;
+		Console.log("Gamepad found");
+		pad.axisDeadZone = 0.2;
 		pad.onDisconnect = function() {
+			Console.log("Gamepad disconnected");
 			gamepad = Pad.createDummy();
 		}
+		gamepad = pad;
 	}
 
 	public static function getId(name:String) {
@@ -64,7 +68,10 @@ class Gamepad {
 
 	public static function isDown(buttons:Array<String>) {
 		for (button in buttons) {
-			if (gamepad.isDown(getId(button)))
+			var buttonId = getId(button);
+			if (buttonId < 0 || buttonId > gamepad.buttons.length)
+				continue;
+			if (gamepad.isDown(buttonId))
 				return true;
 		}
 		return false;
@@ -72,7 +79,10 @@ class Gamepad {
 
 	public static function isPressed(buttons:Array<String>) {
 		for (button in buttons) {
-			if (gamepad.isPressed(getId(button)))
+			var buttonId = getId(button);
+			if (buttonId < 0 || buttonId > gamepad.buttons.length)
+				continue;
+			if (gamepad.isPressed(buttonId))
 				return true;
 		}
 		return false;
@@ -80,13 +90,19 @@ class Gamepad {
 
 	public static function isReleased(buttons:Array<String>) {
 		for (button in buttons) {
-			if (gamepad.isReleased(getId(button)))
+			var buttonId = getId(button);
+			if (buttonId < 0 || buttonId > gamepad.buttons.length)
+				continue;
+			if (gamepad.isReleased(buttonId))
 				return true;
 		}
 		return false;
 	}
 
 	public static function getAxis(axis:String) {
-		return gamepad.values[getId(axis)];
+		var axisId = getId(axis);
+		if (axisId < 0 || axisId > gamepad.values.length)
+			return 0.0;
+		return gamepad.values[axisId];
 	}
 }
