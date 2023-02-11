@@ -25,6 +25,7 @@ import src.ProfilerUI;
 import src.Settings;
 import src.Console;
 import src.Debug;
+import src.Gamepad;
 
 @:publicFields
 class MarbleGame {
@@ -182,7 +183,8 @@ class MarbleGame {
 			if (!paused) {
 				world.update(dt * Debug.timeScale);
 			}
-			if (Key.isPressed(Key.ESCAPE) && world.finishTime == null && world._ready) {
+			if ((Key.isPressed(Key.ESCAPE) || Gamepad.isPressed(["start"]))
+				&& world.finishTime == null && world._ready) {
 				#if hl
 				paused = !paused;
 				handlePauseGame();
