@@ -1,5 +1,7 @@
 package src;
 
+import haxe.io.BytesBuffer;
+import haxe.io.Bytes;
 import h3d.Matrix;
 import hxd.Key;
 import h2d.Tile;
@@ -217,12 +219,12 @@ class Util {
 	}
 
 	/** Gets the index of a substring like String.prototype.indexOf, but only if that index lies outside of string literals. */
-	public static function indexOfIgnoreStringLiterals(str:String, searchString:String, position = 0, strLiteralToken = '"') {
+	public static function indexOfIgnoreStringLiterals(str:String, searchString:String, position = 0, strLiteralToken:Int = '"'.code) {
 		var inString = false;
 		for (i in position...str.length) {
-			var c = str.charAt(i);
+			var c = StringTools.fastCodeAt(str, i);
 			if (inString) {
-				if (c == strLiteralToken && str.charAt(i - 1) != '\\')
+				if (c == strLiteralToken && StringTools.fastCodeAt(str, i - 1) != '\\'.code)
 					inString = false;
 				continue;
 			}
@@ -399,5 +401,15 @@ class Util {
 		#if hl
 		return Settings.optionsSettings.isFullScreen;
 		#end
+	}
+
+	public static function toASCII(bytes:haxe.io.Bytes) {
+		var totBytes = new BytesBuffer();
+		for (i in 0...bytes.length) {
+			var utfbytes = Bytes.ofString(String.fromCharCode(bytes.get(i)));
+			totBytes.add(utfbytes);
+		}
+
+		return totBytes.getBytes().toString();
 	}
 }

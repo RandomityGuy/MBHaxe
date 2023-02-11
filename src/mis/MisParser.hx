@@ -25,7 +25,7 @@ import h3d.Vector;
 import h3d.Quat;
 import src.Console;
 
-final elementHeadRegEx = ~/new (\w+)\((\w*)\) *{/g;
+final elementHeadRegEx = ~/new\s+(\w+)\((.*?)\)\s*{/g;
 final blockCommentRegEx = ~/\/\*(.|\n)*?\*\//g;
 final lineCommentRegEx = ~/\/\/.*/g;
 final assignmentRegEx = ~/(\$(?:\w|\d)+)\s*=\s*(.+?);/g;
@@ -107,6 +107,10 @@ class MisParser {
 			}
 		}
 
+		var indexOfMissionGroup = this.text.indexOf('new SimGroup(MissionGroup)');
+		if (indexOfMissionGroup != -1)
+			this.index = indexOfMissionGroup;
+
 		var elements = [];
 		while (this.hasNextElement()) {
 			var element = this.readElement();
@@ -128,7 +132,7 @@ class MisParser {
 	}
 
 	public function parseMissionInfo() {
-		var missionInfoIndex = this.text.indexOf("new ScriptObject(MissionInfo) {");
+		var missionInfoIndex = this.text.indexOf("new ScriptObject(MissionInfo)");
 		this.index = missionInfoIndex;
 		var mInfo:MissionElementScriptObject = cast readElement();
 		return mInfo;
@@ -189,7 +193,7 @@ class MisParser {
 	}
 
 	function hasNextElement() {
-		if (!elementHeadRegEx.matchSub(this.text, this.index))
+		if (!elementHeadRegEx.matchSub(this.text, Std.int(Math.min(this.text.length - 1, this.index))))
 			return false;
 		if (Util.indexOfIgnoreStringLiterals(this.text.substring(this.index, elementHeadRegEx.matchedPos().pos), '}') != -1)
 			return false;
@@ -221,6 +225,7 @@ class MisParser {
 	function readValues() {
 		// Values are either strings or string arrays.
 		var obj:Map<String, Array<String>> = new Map();
+		var textSub = this.text.substr(this.index);
 		var endingBraceIndex = Util.indexOfIgnoreStringLiterals(this.text, '};', this.index);
 		if (endingBraceIndex == -1)
 			endingBraceIndex = this.text.length;

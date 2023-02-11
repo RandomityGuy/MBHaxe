@@ -424,18 +424,6 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyTopCTab2.vertSizing = Bottom;
 		pmDifficultyTopC2.addChild(pmDifficultyTopCTab2);
 
-		var pmDifficultyUltraCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
-		pmDifficultyUltraCustom.position = new Vector(277, 164);
-		pmDifficultyUltraCustom.ratio = -1 / 16;
-		pmDifficultyUltraCustom.setExtent(new Vector(120, 31));
-		pmDifficultyUltraCustom.txtCtrl.text.text = " Custom";
-		pmDifficultyUltraCustom.pressedAction = (e) -> {
-			currentList = Marbleland.goldMissions;
-			currentCategory = "custom";
-			setCategoryFunc("ultra", "custom");
-		}
-		pmDifficultyCtrl.addChild(pmDifficultyUltraCustom);
-
 		var pmDifficultyUltraAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
 		pmDifficultyUltraAdvanced.position = new Vector(277, 134);
 		pmDifficultyUltraAdvanced.ratio = -1 / 16;
@@ -471,18 +459,6 @@ class PlayMissionGui extends GuiImage {
 			setCategoryFunc("ultra", "intermediate");
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraIntermediate);
-
-		var pmDifficultyGoldCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
-		pmDifficultyGoldCustom.position = new Vector(37, 164);
-		pmDifficultyGoldCustom.ratio = -1 / 16;
-		pmDifficultyGoldCustom.setExtent(new Vector(120, 31));
-		pmDifficultyGoldCustom.txtCtrl.text.text = " Custom";
-		pmDifficultyGoldCustom.pressedAction = (e) -> {
-			currentList = Marbleland.goldMissions;
-			currentCategory = "custom";
-			setCategoryFunc("gold", "custom");
-		}
-		pmDifficultyCtrl.addChild(pmDifficultyGoldCustom);
 
 		var pmDifficultyGoldAdvanced = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
 		pmDifficultyGoldAdvanced.position = new Vector(37, 134);
@@ -613,6 +589,42 @@ class PlayMissionGui extends GuiImage {
 		pmGameCustom.position = new Vector(395, 33);
 		pmGameCustom.extent = new Vector(120, 31);
 		pmDifficultyCtrl.addChild(pmGameCustom);
+
+		var pmDifficultyGoldCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyGoldCustom.position = new Vector(397, 75);
+		pmDifficultyGoldCustom.ratio = -1 / 16;
+		pmDifficultyGoldCustom.setExtent(new Vector(120, 31));
+		pmDifficultyGoldCustom.txtCtrl.text.text = " Gold";
+		pmDifficultyGoldCustom.pressedAction = (e) -> {
+			currentList = Marbleland.goldMissions;
+			currentCategory = "custom";
+			setCategoryFunc("gold", "custom");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyGoldCustom);
+
+		var pmDifficultyPlatinumCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyPlatinumCustom.position = new Vector(397, 104);
+		pmDifficultyPlatinumCustom.ratio = -1 / 16;
+		pmDifficultyPlatinumCustom.setExtent(new Vector(120, 31));
+		pmDifficultyPlatinumCustom.txtCtrl.text.text = " Platinum";
+		pmDifficultyPlatinumCustom.pressedAction = (e) -> {
+			currentList = Marbleland.goldMissions;
+			currentCategory = "custom";
+			setCategoryFunc("platinum", "custom");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyPlatinumCustom);
+
+		var pmDifficultyUltraCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyUltraCustom.position = new Vector(397, 134);
+		pmDifficultyUltraCustom.ratio = -1 / 16;
+		pmDifficultyUltraCustom.setExtent(new Vector(120, 31));
+		pmDifficultyUltraCustom.txtCtrl.text.text = " Ultra";
+		pmDifficultyUltraCustom.pressedAction = (e) -> {
+			currentList = Marbleland.goldMissions;
+			currentCategory = "custom";
+			setCategoryFunc("ultra", "custom");
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyUltraCustom);
 
 		var pmDividerR = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/divider-orange-r.png', ResourceLoader.getImage, this.imageResources)
 			.toTile());
