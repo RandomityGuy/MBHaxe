@@ -164,11 +164,15 @@ class CameraController extends Object {
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
 			- Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis);
-		nextCameraPitch += 0.75 * 5 * cameraPitchDelta * dt;
+		if (Settings.gamepadSettings.invertYAxis)
+			cameraPitchDelta = -cameraPitchDelta;
+		nextCameraPitch += 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
 			+ Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis);
-		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt;
+			if (Settings.gamepadSettings.invertXAxis)
+				cameraYawDelta = -cameraYawDelta;
+		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
