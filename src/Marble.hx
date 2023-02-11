@@ -1687,7 +1687,7 @@ class Marble extends GameObject {
 		var move = new Move();
 		move.d = new Vector();
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching) {
-			move.d.x = -Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
+			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
 			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
 			if (Key.isDown(Settings.controlsSettings.forward)) {
 				move.d.x -= 1;

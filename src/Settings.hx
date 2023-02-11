@@ -85,6 +85,7 @@ typedef GamepadSettings = {
 	var cameraSensitivity:Float;
 	var invertXAxis:Bool;
 	var invertYAxis:Bool;
+	var axisDeadzone:Float;
 	var respawn:Array<String>;
 	var blast:Array<String>;
 }
@@ -165,6 +166,7 @@ class Settings {
 		cameraSensitivity: 1.0,
 		invertXAxis: false,
 		invertYAxis: false,
+		axisDeadzone: 0.15,
 		respawn: ["back"],
 		blast: ["X", "LB", "RB"]
 	}

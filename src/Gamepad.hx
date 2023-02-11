@@ -2,6 +2,7 @@ package src;
 
 import hxd.Pad;
 import src.Console;
+import src.Settings;
 
 class Gamepad {
 	public static var gamepad:Pad = Pad.createDummy();
@@ -12,7 +13,7 @@ class Gamepad {
 
 	public static function onPad(pad:Pad) {
 		Console.log("Gamepad found");
-		pad.axisDeadZone = 0.2;
+		pad.axisDeadZone = Settings.gamepadSettings.axisDeadzone;
 		pad.onDisconnect = function() {
 			Console.log("Gamepad disconnected");
 			gamepad = Pad.createDummy();
@@ -100,9 +101,16 @@ class Gamepad {
 	}
 
 	public static function getAxis(axis:String) {
-		var axisId = getId(axis);
-		if (axisId < 0 || axisId > gamepad.values.length)
-			return 0.0;
-		return gamepad.values[axisId];
+		switch (axis) {
+			case "analogX":
+				return gamepad.xAxis;
+			case "analogY":
+				return gamepad.yAxis;
+			case "ranalogX":
+				return gamepad.rxAxis;
+			case "ranalogY":
+				return gamepad.ryAxis;
+		}
+		return 0.0;
 	}
 }
