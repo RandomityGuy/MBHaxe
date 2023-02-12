@@ -33,7 +33,7 @@ class Mesh {
 
 	public function new() {}
 
-	function readStandard(reader:DtsAlloc) {
+	function readStandard(reader:DtsAlloc, version:Int) {
 		reader.guard();
 
 		numFrames = reader.readU32();
@@ -73,7 +73,7 @@ class Mesh {
 		}
 
 		enormals = [];
-		if (this.parent < 0) {
+		if (this.parent < 0 && version > 21) {
 			for (i in 0...numVerts) {
 				enormals.push(reader.readU8());
 			}
@@ -103,8 +103,8 @@ class Mesh {
 		reader.guard();
 	}
 
-	function readSkinned(reader:DtsAlloc) {
-		readStandard(reader);
+	function readSkinned(reader:DtsAlloc, version:Int) {
+		readStandard(reader, version);
 
 		var numVerts = reader.readS32();
 		if (parent < 0) {
@@ -169,15 +169,15 @@ class Mesh {
 		reader.guard();
 	}
 
-	public static function read(shape:DtsFile, reader:DtsAlloc) {
+	public static function read(shape:DtsFile, reader:DtsAlloc, version:Int) {
 		var mesh = new Mesh();
 		mesh.shape = shape;
 		mesh.meshType = reader.readS32() & 7;
 
 		if (mesh.meshType == 0)
-			mesh.readStandard(reader);
+			mesh.readStandard(reader, version);
 		else if (mesh.meshType == 1)
-			mesh.readSkinned(reader);
+			mesh.readSkinned(reader, version);
 		else if (mesh.meshType == 4)
 			return null;
 		else

@@ -986,6 +986,7 @@ class MarbleWorld extends Scheduler {
 		tsShape.dtsPath = dtsPath;
 		tsShape.identifier = shapeName;
 		tsShape.isCollideable = true;
+		tsShape.showSequences = false;
 
 		if (element._name != null && element._name != "") {
 			this.namedObjects.set(element._name, {
