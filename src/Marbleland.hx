@@ -50,7 +50,7 @@ class Marbleland {
 			mission.title = missionData.name;
 			mission.artist = missionData.artist != null ? missionData.artist : "Unknown Author";
 			mission.description = missionData.desc != null ? missionData.desc : "";
-			mission.qualifyTime = missionData.qualifyingTime != null ? missionData.qualifyingTime / 1000 : Math.POSITIVE_INFINITY;
+			mission.qualifyTime = (missionData.qualifyingTime != null && missionData.qualifyingTime != 0) ? missionData.qualifyingTime / 1000 : Math.POSITIVE_INFINITY;
 			mission.goldTime = missionData.goldTime != null ? missionData.goldTime / 1000 : 0;
 			mission.game = missionData.modification;
 			if (missionData.modification == 'platinum')
@@ -97,7 +97,7 @@ class Marbleland {
 	}
 
 	public static function download(id:Int, cb:Array<haxe.zip.Entry>->Void) {
-		Http.get('https://marbleblast.vani.ga/api/custom/${id}.zip?assuming=none', (zipData -> {
+		Http.get('https://marbleland.vani.ga/api/level/${id}/zip?assuming=none', (zipData -> {
 			var reader = new Reader(new BytesInput(zipData));
 			var entries:Array<haxe.zip.Entry> = null;
 			try {

@@ -182,6 +182,7 @@ class MarbleWorld extends Scheduler {
 	public var _ready:Bool = false;
 
 	var _loadBegin:Bool = false;
+	var _loaded:Bool = false;
 
 	var _loadingLength:Int = 0;
 
@@ -1315,12 +1316,12 @@ class MarbleWorld extends Scheduler {
 			});
 			#end
 		} else {
-			if (this._resourcesLoaded < _loadingLength || !this._loadBegin)
+			if (!this._loadBegin)
 				return;
 			if (!_ready && !postInited) {
 				postInited = true;
 				Console.log("Finished loading, starting mission");
-				postInit();
+				haxe.Timer.delay(() -> postInit(), 5); // delay this a bit
 			}
 		}
 	}

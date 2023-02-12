@@ -437,6 +437,15 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		if (zipFilesystem.exists(path.toLowerCase() + ".jpg")) {
+			return [path + ".jpg"];
+		}
+		if (zipFilesystem.exists(path.toLowerCase() + ".png")) {
+			return [path + ".png"];
+		}
+		if (zipFilesystem.exists(path.toLowerCase() + ".bmp")) {
+			return [path + ".bmp"];
+		}
 		var files = fileSystem.dir(Path.directory(path)); // FileSystem.readDirectory(Path.directory(path));
 		var names = [];
 		var fname = Path.withoutDirectory(path).toLowerCase();
@@ -452,7 +461,7 @@ class ResourceLoader {
 		zipFilesystem.clear(); // We are only allowed to load one zip
 		for (entry in entries) {
 			var fname = entry.fileName.toLowerCase();
-			// fname = "data/" + fname;
+			fname = "data/" + fname;
 			if (exists(fname))
 				continue;
 			Console.log("Loaded zip entry: " + fname);
