@@ -183,18 +183,10 @@ class MarbleGame {
 			if (!paused) {
 				world.update(dt * Debug.timeScale);
 			}
-			if ((Key.isPressed(Key.ESCAPE) || Gamepad.isPressed(["start"]))
+			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
 				&& world.finishTime == null && world._ready) {
-				#if hl
 				paused = !paused;
 				handlePauseGame();
-				#end
-				#if js
-				if (paused) {
-					paused = false;
-				}
-				handlePauseGame();
-				#end
 			}
 		}
 		if (canvas != null) {
