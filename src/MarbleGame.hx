@@ -25,6 +25,7 @@ import src.ProfilerUI;
 import src.Settings;
 import src.Console;
 import src.Debug;
+import src.Gamepad;
 
 @:publicFields
 class MarbleGame {
@@ -182,17 +183,10 @@ class MarbleGame {
 			if (!paused) {
 				world.update(dt * Debug.timeScale);
 			}
-			if (Key.isPressed(Key.ESCAPE) && world.finishTime == null && world._ready) {
-				#if hl
+			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
+				&& world.finishTime == null && world._ready) {
 				paused = !paused;
 				handlePauseGame();
-				#end
-				#if js
-				if (paused) {
-					paused = false;
-				}
-				handlePauseGame();
-				#end
 			}
 		}
 		if (canvas != null) {

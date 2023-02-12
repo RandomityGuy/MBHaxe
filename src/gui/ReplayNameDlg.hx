@@ -71,6 +71,7 @@ class ReplayNameDlg extends GuiControl {
 		yesButton.extent = new Vector(95, 45);
 		yesButton.vertSizing = Top;
 		yesButton.accelerator = hxd.Key.ENTER;
+		yesButton.gamepadAccelerator = ["A"];
 		yesButton.pressedAction = (sender) -> {
 			if (StringTools.trim(textInput.text.text) != "") {
 				MarbleGame.instance.recordingName = textInput.text.text;
@@ -86,6 +87,7 @@ class ReplayNameDlg extends GuiControl {
 		noButton.extent = new Vector(88, 41);
 		noButton.vertSizing = Top;
 		noButton.accelerator = hxd.Key.ESCAPE;
+		noButton.gamepadAccelerator = ["B"];
 		noButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			callback();

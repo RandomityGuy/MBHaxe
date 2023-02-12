@@ -70,6 +70,7 @@ class EnterNameDlg extends GuiControl {
 		okbutton.position = new Vector(151, 184);
 		okbutton.extent = new Vector(110, 55);
 		okbutton.accelerator = hxd.Key.ENTER;
+		okbutton.gamepadAccelerator = ["A"];
 		okbutton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			Settings.highscoreName = enterNameEdit.text.text;
