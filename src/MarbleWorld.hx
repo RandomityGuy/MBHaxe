@@ -764,7 +764,10 @@ class MarbleWorld extends Scheduler {
 
 		var tsShape = new DtsObject();
 		tsShape.useInstancing = true;
-		tsShape.dtsPath = shapeName.substring(index + 'data/'.length);
+		tsShape.dtsPath = dtsPath;
+		tsShape.identifier = shapeName;
+		tsShape.isCollideable = true;
+		tsShape.showSequences = false;
 
 		var shapePosition = MisParser.parseVector3(element.position);
 		shapePosition.x = -shapePosition.x;
@@ -1412,9 +1415,7 @@ class MarbleWorld extends Scheduler {
 
 	public function saveReplay() {
 		var replayBytes = this.replay.write();
-		var defaultFilename = '${this.mission.title} ${
-			this.finishTime == null ? "Unfinished Run" : Std.string(this.finishTime.gameplayClock)
-		}.mbr';
+		var defaultFilename = '${this.mission.title} ${this.finishTime == null ? "Unfinished Run" : Std.string(this.finishTime.gameplayClock)}.mbr';
 		#if hl
 		hxd.File.saveAs(replayBytes, {
 			title: 'Save Replay',

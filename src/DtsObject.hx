@@ -459,7 +459,26 @@ class DtsObject extends GameObject {
 		}
 
 		if (this.materials.length == 0) {
+			#if hl
+			var bitmap = new hxd.BitmapData(1, 1);
+			bitmap.lock();
+			bitmap.setPixel(0, 0, 0xFFFFFF);
+			bitmap.unlock();
+			var texture = new Texture(1, 1);
+			texture.uploadBitmap(bitmap);
+			texture.wrap = Wrap.Repeat;
+			#end
+			// Apparently creating these bitmap datas dont work so we'll just get the snag a white texture in the filesystem
+			#if js
+			var texture:Texture = ResourceLoader.getResource("data/shapes/pads/white.jpg", ResourceLoader.getTexture, this.textureResources);
+			texture.wrap = Wrap.Repeat;
+			#end
+			var dtsshader = new DtsTexture();
 			var mat = Material.create();
+			mat.texture = texture;
+			dtsshader.texture = texture;
+			mat.mainPass.addShader(dtsshader);
+			mat.shadows = false;
 			this.materials.push(mat);
 			// TODO THIS
 		}
@@ -570,6 +589,14 @@ class DtsObject extends GameObject {
 			uvs: [],
 			indices: []
 		});
+		if (materialGeometry.length == 0 && dtsMesh.primitives.length > 0) {
+			materialGeometry.push({
+				vertices: [],
+				normals: [],
+				uvs: [],
+				indices: []
+			});
+		}
 
 		for (primitive in dtsMesh.primitives) {
 			var k = 0;
