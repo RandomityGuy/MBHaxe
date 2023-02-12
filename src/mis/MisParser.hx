@@ -429,9 +429,9 @@ class MisParser {
 
 	/** Resolves a TorqueScript rvalue expression. Currently only supports the concatenation @ operator. */
 	function resolveExpression(expr:String) {
-		var parts = Util.splitIgnoreStringLiterals(expr, ' @ ').map(x -> {
+		var parts = Util.splitIgnoreStringLiterals(expr, '@').map(x -> {
 			x = StringTools.trim(x);
-			if (StringTools.startsWith(x, '$ ') && this.variables[x] != null) {
+			if (StringTools.startsWith(x, '$') && this.variables[x] != null) {
 				// Replace the variable with its value
 				x = this.resolveExpression(this.variables[x]);
 			} else if (StringTools.startsWith(x, '"') && StringTools.endsWith(x, '"')) {
