@@ -795,7 +795,7 @@ class MarbleWorld extends Scheduler {
 		this.addDtsObject(tsShape, () -> {
 			tsShape.setTransform(mat);
 			onFinish();
-		});
+		}, true);
 	}
 
 	public function addParticleEmitterNode(element:MissionElementParticleEmitterNode) {
@@ -826,12 +826,14 @@ class MarbleWorld extends Scheduler {
 		});
 	}
 
-	public function addDtsObject(obj:DtsObject, onFinish:Void->Void) {
+	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false) {
 		obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
 		this.dtsObjects.push(obj);
 		if (obj is ForceObject) {
 			this.forceObjects.push(cast obj);
 		}
+		if (isTsStatic)
+			obj.useInstancing = false;
 		obj.init(cast this, () -> {
 			obj.update(this.timeState);
 			if (obj.useInstancing) {
