@@ -1185,10 +1185,12 @@ class MarbleWorld extends Scheduler {
 				for (collider in endpadBB) {
 					if (collider.go == this.endPad) {
 						var chull = cast(collider, collision.CollisionHull);
+						var chullinvT = @:privateAccess chull.invTransform.clone();
+						chullinvT.clone();
 						for (surface in chull.surfaces) {
 							var i = 0;
 							while (i < surface.indices.length) {
-								var surfaceN = surface.normals[surface.indices[i]].transformed3x3(chull.transform);
+								var surfaceN = surface.normals[surface.indices[i]].transformed3x3(chullinvT);
 								var v1 = surface.points[surface.indices[i]].transformed(chull.transform);
 								var surfaceD = -surfaceN.dot(v1);
 

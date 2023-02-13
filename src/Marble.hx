@@ -766,10 +766,11 @@ class Marble extends GameObject {
 
 		// for (iter in 0...10) {
 		//	var iterationFound = false;
-		for (obj in foundObjs.filter(x -> x.go is InteriorObject && !(x.go is PathedInterior))) {
+		for (obj in foundObjs) {
 			// Its an MP so bruh
 			if (!obj.go.isCollideable)
 				continue;
+
 			var invMatrix = @:privateAccess obj.invTransform;
 			if (obj.go is PathedInterior)
 				invMatrix = obj.transform.getInverse();
@@ -857,8 +858,9 @@ class Marble extends GameObject {
 						testTriangles.push({
 							v: [v0, v, v2],
 							n: surfaceNormal,
-							edge: surf.edgeData[Math.floor(i / 3)],
-							concavity: surface.edgeConcavities.slice(Math.floor(i / 3), Math.floor(i / 3) + 3)
+							edge: surf.edgeData != null ? surf.edgeData[Math.floor(i / 3)] : 0,
+							concavity: surface.edgeConcavities != null ? surface.edgeConcavities.slice(Math.floor(i / 3),
+								Math.floor(i / 3) + 3) : [false, false, false],
 						});
 
 						// Time until collision with the plane

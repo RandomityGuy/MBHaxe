@@ -260,9 +260,10 @@ class PathedInterior extends InteriorObject {
 		var m2:PathedInteriorMarker = this.markerData[1];
 		if (m1 == null) {
 			// Incase there are no markers at all
-			var mat = new Matrix();
-			this.baseOrientation.toMatrix(mat);
-			mat.scale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+			var tmp = new Matrix();
+			var mat = Matrix.S(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+			this.baseOrientation.toMatrix(tmp);
+			mat.multiply3x4(mat, tmp);
 			mat.setPosition(this.basePosition);
 			return mat;
 		}
@@ -313,10 +314,10 @@ class PathedInterior extends InteriorObject {
 		position = position.sub(firstPosition);
 		position = position.add(basePosition); // Add the base position
 
-		var mat = new Matrix();
-		this.baseOrientation.toMatrix(mat);
-
-		mat.scale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+		var tmp = new Matrix();
+		var mat = Matrix.S(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+		this.baseOrientation.toMatrix(tmp);
+		mat.multiply3x4(mat, tmp);
 		mat.setPosition(position);
 
 		return mat;

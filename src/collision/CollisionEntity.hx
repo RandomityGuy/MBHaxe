@@ -120,6 +120,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
 		var invMatrix = invTransform;
+		var invTPos = invMatrix.clone();
+		invTPos.transpose();
 		var rStart = rayOrigin.clone();
 		rStart.transform(invMatrix);
 		var rDir = rayDirection.transformed3x3(invMatrix);
@@ -128,7 +130,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			var iData:Array<RayIntersectionData> = [];
 			for (i in intersections) {
 				i.point.transform(transform);
-				i.normal.transform3x3(transform);
+				i.normal.transform3x3(invTPos);
 				i.normal.normalize();
 				iData.push({point: i.point, normal: i.normal, object: i.object});
 			}
@@ -137,7 +139,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			var intersections = this.bvh.rayCast(rStart, rDir);
 			for (i in intersections) {
 				i.point.transform(transform);
-				i.normal.transform3x3(transform);
+				i.normal.transform3x3(invTPos);
 				i.normal.normalize();
 			}
 
