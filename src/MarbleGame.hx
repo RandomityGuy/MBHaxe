@@ -176,6 +176,7 @@ class MarbleGame {
 				world = null;
 				return;
 			}
+			Debug.update();
 			if (Util.isTouchDevice()) {
 				touchInput.update();
 			}
@@ -224,7 +225,9 @@ class MarbleGame {
 			exitGameDlg = new ExitGameDlg((sender) -> {
 				canvas.popDialog(exitGameDlg);
 				if (world.isRecording) {
-					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {quitMission();}));
+					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
+						quitMission();
+					}));
 				} else {
 					quitMission();
 				}

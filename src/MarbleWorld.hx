@@ -684,7 +684,8 @@ class MarbleWorld extends Scheduler {
 			var tmp = new Matrix();
 			interiorRotation.toMatrix(tmp);
 			mat.multiply3x4(mat, tmp);
-			mat.setPosition(interiorPosition);
+			var tmat = Matrix.T(interiorPosition.x, interiorPosition.y, interiorPosition.z);
+			mat.multiply(mat, tmat);
 
 			interior.setTransform(mat);
 			interior.isCollideable = hasCollision;
@@ -809,7 +810,8 @@ class MarbleWorld extends Scheduler {
 		var tmp = new Matrix();
 		shapeRotation.toMatrix(tmp);
 		mat.multiply3x4(mat, tmp);
-		mat.setPosition(shapePosition);
+		var tmat = Matrix.T(shapePosition.x, shapePosition.y, shapePosition.z);
+		mat.multiply(mat, tmat);
 
 		this.addDtsObject(shape, () -> {
 			shape.setTransform(mat);

@@ -1006,6 +1006,8 @@ class Marble extends GameObject {
 			var invMatrix = @:privateAccess obj.invTransform;
 			if (obj.go is PathedInterior)
 				invMatrix = obj.transform.getInverse();
+			var invTform = invMatrix.clone();
+			invTform.transpose();
 			var localpos = position.clone();
 			localpos.transform(invMatrix);
 
@@ -1032,7 +1034,7 @@ class Marble extends GameObject {
 
 				var i = 0;
 				while (i < surface.indices.length) {
-					var verts = surface.transformTriangle(i, obj.transform, @:privateAccess obj._transformKey);
+					var verts = surface.transformTriangle(i, obj.transform, invTform, @:privateAccess obj._transformKey);
 					// var v0 = surface.points[surface.indices[i]].transformed(tform);
 					// var v = surface.points[surface.indices[i + 1]].transformed(tform);
 					// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
