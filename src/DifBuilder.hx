@@ -173,7 +173,15 @@ class DifBuilder {
 		"mmg_ice_shadow" => {
 			friction: 0.03,
 			restitution: 0.95
-		}
+		},
+		"friction_mp_high" => {
+			friction: 6,
+			restitution: 0.3
+		},
+		"friction_mp_high_shadow" => {
+			friction: 6,
+			restitution: 0.3
+		},
 		];
 
 	static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
@@ -268,12 +276,15 @@ class DifBuilder {
 		'interiors_mbu/wall_beginner.png' => (onFinish) -> createPhongMaterial(onFinish, 'wall_beginner.png', 'wall_mbu.normal.png', 12,
 			new Vector(0.8, 0.8, 0.6, 1)),
 		'interiors_mbu/edge_white.png' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white.png', 'edge.normal.png', 50, new Vector(0.8, 0.8, 0.8, 1)),
+		'interiors_mbu/edge_white.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white.png', 'edge.normal.png', 50, new Vector(0.8, 0.8, 0.8, 1)),
 		'interiors_mbu/edge_white_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white_shadow.png', 'edge.normal.png', 50,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
 		'interiors_mbu/beam.png' => (onFinish) -> createPhongMaterial(onFinish, 'beam.png', 'beam.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 		'interiors_mbu/beam_side.png' => (onFinish) -> createPhongMaterial(onFinish, 'beam_side.png', 'beam_side.normal.png', 12,
 			new Vector(0.8, 0.8, 0.6, 1)),
 		'interiors_mbu/friction_low.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
+			new Vector(1, 1, 1, 0.8)),
+		'interiors_mbu/friction_low.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
 			new Vector(1, 1, 1, 0.8)),
 		'interiors_mbu/friction_low_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low_shadow.png', 'friction_low.normal.png', 128,
 			new Vector(0.3, 0.3, 0.35, 1)),
@@ -402,7 +413,7 @@ class DifBuilder {
 						tri.uv3 = uv3;
 						triangles.push(tri);
 						hullTris.push(tri);
-						var materialName = stripTexName(texture);
+						var materialName = stripTexName(texture).toLowerCase();
 						var hasMaterialInfo = materialDict.exists(materialName);
 						if (hasMaterialInfo) {
 							var minfo = materialDict.get(materialName);

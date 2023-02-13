@@ -214,6 +214,9 @@ class Mission {
 			if (ResourceLoader.exists(path))
 				return path;
 		}
+		path = StringTools.replace(path, "lbinteriors", "interiors"); // This shit ew
+		if (ResourceLoader.exists(path))
+			return path;
 		Console.error("Interior resource not found: " + rawElementPath);
 		return "";
 	}

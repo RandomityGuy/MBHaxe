@@ -466,6 +466,7 @@ class ResourceLoader {
 			#end
 			if (game == 'gold')
 				fname = StringTools.replace(fname, 'interiors/', 'interiors_mbg/');
+			fname = StringTools.replace(fname, "lbinteriors", "interiors"); // Normalize
 			if (exists(fname))
 				continue;
 			Console.log("Loaded zip entry: " + fname);
