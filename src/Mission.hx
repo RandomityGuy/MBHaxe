@@ -235,7 +235,7 @@ class Mission {
 		if (this.isClaMission) {
 			Marbleland.download(this.id, (zipEntries) -> {
 				if (zipEntries != null) {
-					ResourceLoader.loadZip(zipEntries);
+					ResourceLoader.loadZip(zipEntries, game);
 					onFinish();
 				} else {
 					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to download mission"));

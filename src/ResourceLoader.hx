@@ -457,13 +457,15 @@ class ResourceLoader {
 		return names;
 	}
 
-	public static function loadZip(entries:Array<haxe.zip.Entry>) {
+	public static function loadZip(entries:Array<haxe.zip.Entry>, game:String) {
 		zipFilesystem.clear(); // We are only allowed to load one zip
 		for (entry in entries) {
 			var fname = entry.fileName.toLowerCase();
 			#if sys
 			fname = "data/" + fname;
 			#end
+			if (game == 'gold')
+				fname = StringTools.replace(fname, 'interiors/', 'interiors_mbg/');
 			if (exists(fname))
 				continue;
 			Console.log("Loaded zip entry: " + fname);
