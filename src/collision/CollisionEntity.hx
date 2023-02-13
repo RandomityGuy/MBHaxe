@@ -73,26 +73,26 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		if (this.transform.equal(transform))
 			return;
 		// Speedup
-		if (Util.mat3x3equal(this.transform, transform)) {
-			var oldPos = this.transform.getPosition();
-			var newPos = transform.getPosition();
-			this.transform.setPosition(newPos);
-			this.invTransform.setPosition(newPos.multiply(-1));
-			if (this.boundingBox == null)
-				generateBoundingBox();
-			else {
-				this.boundingBox.xMin += newPos.x - oldPos.x;
-				this.boundingBox.xMax += newPos.x - oldPos.x;
-				this.boundingBox.yMin += newPos.y - oldPos.y;
-				this.boundingBox.yMax += newPos.y - oldPos.y;
-				this.boundingBox.zMin += newPos.z - oldPos.z;
-				this.boundingBox.zMax += newPos.z - oldPos.z;
-			}
-		} else {
-			this.transform.load(transform);
-			this.invTransform = transform.getInverse();
-			generateBoundingBox();
-		}
+		// if (Util.mat3x3equal(this.transform, transform)) {
+		// 	var oldPos = this.transform.getPosition();
+		// 	var newPos = transform.getPosition();
+		// 	this.transform.setPosition(newPos);
+		// 	this.invTransform.setPosition(newPos.multiply(-1));
+		// 	if (this.boundingBox == null)
+		// 		generateBoundingBox();
+		// 	else {
+		// 		this.boundingBox.xMin += newPos.x - oldPos.x;
+		// 		this.boundingBox.xMax += newPos.x - oldPos.x;
+		// 		this.boundingBox.yMin += newPos.y - oldPos.y;
+		// 		this.boundingBox.yMax += newPos.y - oldPos.y;
+		// 		this.boundingBox.zMin += newPos.z - oldPos.z;
+		// 		this.boundingBox.zMax += newPos.z - oldPos.z;
+		// 	}
+		// } else {
+		this.transform.load(transform);
+		this.invTransform = transform.getInverse();
+		generateBoundingBox();
+		// }
 		_transformKey++;
 	}
 
@@ -169,6 +169,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
 		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 1.1);
 		var surfaces = bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
+		var invtform = invMatrix.clone();
+		invtform.transpose();
 
 		var tform = transform.clone();
 		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));
@@ -195,7 +197,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 			var i = 0;
 			while (i < surface.indices.length) {
-				var verts = surface.transformTriangle(i, tform, this._transformKey);
+				var verts = surface.transformTriangle(i, tform, invtform, this._transformKey);
 				// var v0 = surface.points[surface.indices[i]].transformed(tform);
 				// var v = surface.points[surface.indices[i + 1]].transformed(tform);
 				// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);

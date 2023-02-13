@@ -121,7 +121,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		return furthestVertex;
 	}
 
-	public function transformTriangle(idx:Int, tform:Matrix, key:Int) {
+	public function transformTriangle(idx:Int, tform:Matrix, invtform:Matrix, key:Int) {
 		if (_transformedPoints == null) {
 			_transformedPoints = points.copy();
 		}
@@ -133,7 +133,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		var p3 = indices[idx + 2];
 		if (transformKeys[p1] != key) {
 			_transformedPoints[p1] = points[p1].transformed(tform);
-			_transformedNormals[p1] = normals[p1].transformed3x3(tform).normalized();
+			_transformedNormals[p1] = normals[p1].transformed3x3(invtform).normalized();
 			transformKeys[p1] = key;
 		}
 		if (transformKeys[p2] != key) {
