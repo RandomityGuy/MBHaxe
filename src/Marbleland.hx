@@ -88,7 +88,7 @@ class Marbleland {
 	}
 
 	public static function getMissionImage(id:Int, cb:Image->Void) {
-		Http.get('https://marbleland.vani.ga/api/level/${id}/image?width=258&height=194', (imageBytes) -> {
+		return Http.get('https://marbleland.vani.ga/api/level/${id}/image?width=258&height=194', (imageBytes) -> {
 			var res = new Image(new hxd.fs.BytesFileSystem.BytesFileEntry('${id}.png', imageBytes));
 			cb(res);
 		}, (e) -> {

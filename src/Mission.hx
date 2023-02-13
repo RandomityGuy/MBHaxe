@@ -1,5 +1,6 @@
 package src;
 
+import src.Http.HttpRequest;
 import gui.Canvas;
 import gui.MessageBoxOkDlg;
 import haxe.Json;
@@ -19,6 +20,7 @@ import src.Util;
 import src.Console;
 import src.Marbleland;
 import src.MarbleGame;
+import src.Http;
 
 class Mission {
 	public var root:MissionElementSimGroup;
@@ -44,7 +46,7 @@ class Mission {
 
 	var imgFileEntry:hxd.fs.FileEntry;
 
-	static var doingLoadPreviewTimeout = false;
+	static var _previewRequest:HttpRequest;
 
 	public function new() {}
 
@@ -162,7 +164,10 @@ class Mission {
 			onLoaded(Tile.fromBitmap(img));
 			return null;
 		} else {
-			Marbleland.getMissionImage(this.id, (im) -> {
+			if (_previewRequest != null && !_previewRequest.fulfilled) {
+				Http.cancel(_previewRequest); // Cancel the previous request to save dequeing
+			}
+			_previewRequest = Marbleland.getMissionImage(this.id, (im) -> {
 				if (im != null) {
 					onLoaded(im.toTile());
 				} else {
