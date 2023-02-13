@@ -80,10 +80,19 @@ class Marbleland {
 		switch (game) {
 			case 'gold':
 				goldMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+				for (i in 0...goldMissions.length - 1) {
+					@:privateAccess goldMissions[i].next = goldMissions[i + 1];
+				}
 			case 'platinum':
 				platinumMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+				for (i in 0...platinumMissions.length - 1) {
+					@:privateAccess platinumMissions[i].next = platinumMissions[i + 1];
+				}
 			case 'ultra':
 				ultraMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+				for (i in 0...ultraMissions.length - 1) {
+					@:privateAccess ultraMissions[i].next = ultraMissions[i + 1];
+				}
 		}
 	}
 

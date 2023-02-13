@@ -461,7 +461,9 @@ class ResourceLoader {
 		zipFilesystem.clear(); // We are only allowed to load one zip
 		for (entry in entries) {
 			var fname = entry.fileName.toLowerCase();
+			#if sys
 			fname = "data/" + fname;
+			#end
 			if (exists(fname))
 				continue;
 			Console.log("Loaded zip entry: " + fname);

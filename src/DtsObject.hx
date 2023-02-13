@@ -907,7 +907,7 @@ class DtsObject extends GameObject {
 			}
 		}
 
-		if (!this.isInstanced) {
+		if (!this.isInstanced && !this.isTSStatic) {
 			for (i in 0...this.materials.length) {
 				var info = this.materialInfos.get(this.materials[i]);
 				if (info == null)

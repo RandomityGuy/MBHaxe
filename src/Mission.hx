@@ -46,7 +46,11 @@ class Mission {
 
 	var imgFileEntry:hxd.fs.FileEntry;
 
+	#if sys
 	static var _previewRequest:HttpRequest;
+	#else
+	static var _previewRequest:Int;
+	#end
 
 	public function new() {}
 
@@ -164,7 +168,7 @@ class Mission {
 			onLoaded(Tile.fromBitmap(img));
 			return null;
 		} else {
-			if (_previewRequest != null && !_previewRequest.fulfilled) {
+			if (_previewRequest != null #if sys && !_previewRequest.fulfilled #end) {
 				Http.cancel(_previewRequest); // Cancel the previous request to save dequeing
 			}
 			_previewRequest = Marbleland.getMissionImage(this.id, (im) -> {

@@ -1,7 +1,6 @@
 package src;
 
 import src.Console;
-import sys.thread.FixedThreadPool;
 
 typedef HttpRequest = {
 	var url:String;
@@ -55,6 +54,7 @@ class Http {
 	}
 	#end
 
+	// Returns HTTPRequest on sys, Int on js
 	public static function get(url:String, callback:haxe.io.Bytes->Void, errCallback:String->Void) {
 		var req = {
 			url: url,
@@ -67,7 +67,9 @@ class Http {
 		requests.add(req);
 		return req;
 		#else
-		js.Browser.window.fetch(url).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
+		return js.Browser.window.setTimeout(() -> {
+			js.Browser.window.fetch(url).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
+		}, 75);
 		#end
 	}
 
@@ -80,11 +82,15 @@ class Http {
 		#end
 	}
 
+	#if sys
 	public static function cancel(req:HttpRequest) {
-		#if sys
 		cancellationMutex.acquire();
 		req.cancelled = true;
 		cancellationMutex.release();
-		#end
 	}
+	#else
+	public static function cancel(req:Int) {
+		js.Browser.window.clearTimeout(req);
+	}
+	#end
 }

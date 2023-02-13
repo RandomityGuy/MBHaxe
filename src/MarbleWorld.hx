@@ -1021,7 +1021,7 @@ class MarbleWorld extends Scheduler {
 		this.addDtsObject(tsShape, () -> {
 			tsShape.setTransform(mat);
 			onFinish();
-		});
+		}, true);
 	}
 
 	public function addParticleEmitterNode(element:MissionElementParticleEmitterNode) {
@@ -1053,7 +1053,7 @@ class MarbleWorld extends Scheduler {
 		});
 	}
 
-	public function addDtsObject(obj:DtsObject, onFinish:Void->Void) {
+	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false) {
 		function parseIfl(path:String, onFinish:Array<String>->Void) {
 			ResourceLoader.load(path).entry.load(() -> {
 				var text = ResourceLoader.getFileEntry(path).entry.getText();
@@ -1116,6 +1116,8 @@ class MarbleWorld extends Scheduler {
 
 			for (texPath in texToLoad) {
 				if (haxe.io.Path.extension(texPath) == "ifl") {
+					if (isTsStatic)
+						obj.useInstancing = false;
 					worker.addTask(fwd -> {
 						parseIfl(texPath, keyframes -> {
 							var innerWorker = new ResourceLoaderWorker(() -> {
