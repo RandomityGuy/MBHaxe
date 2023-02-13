@@ -537,8 +537,8 @@ class DtsObject extends GameObject {
 			hs.indices = [];
 			hs.transformKeys = [];
 
-			var material = this.dts.matNames[primitive.matIndex];
-			if (dtsMaterials.exists(material)) {
+			var material = this.dts.matNames[primitive.matIndex & TSDrawPrimitive.MaterialMask];
+			if (dtsMaterials.exists(material) && !this.isTSStatic) {
 				var data = dtsMaterials.get(material);
 				hs.friction = data.friction;
 				hs.force = data.force;
