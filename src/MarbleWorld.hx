@@ -1,5 +1,6 @@
 package src;
 
+import Macros.MarbleWorldMacros;
 import shapes.PushButton;
 #if js
 import gui.MainMenuGui;
@@ -57,6 +58,7 @@ import shapes.Helicopter;
 import shapes.TriangleBumper;
 import shapes.RoundBumper;
 import shapes.SuperBounce;
+import shapes.RandomPowerup;
 import shapes.SignCaution;
 import shapes.SuperJump;
 import shapes.Gem;
@@ -712,242 +714,12 @@ class MarbleWorld extends Scheduler {
 
 	public function addStaticShape(element:MissionElementStaticShape, onFinish:Void->Void) {
 		var shape:DtsObject = null;
-
-		// Add the correct shape based on type
-		var dataBlockLowerCase = element.datablock.toLowerCase();
-		if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
-		else if (dataBlockLowerCase == "startpad")
-			shape = new StartPad();
-		else if (dataBlockLowerCase == "endpad") {
-			shape = new EndPad();
-			if (element == endPadElement)
-				endPad = cast shape;
-		} else if (dataBlockLowerCase == "signfinish")
-			shape = new SignFinish();
-		else if (StringTools.startsWith(dataBlockLowerCase, "signplain"))
-			shape = new SignPlain(element);
-		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
-			shape = new Gem(cast element);
-			this.totalGems++;
-			this.gems.push(cast shape);
-		} else if (dataBlockLowerCase == "superjumpitem")
-			shape = new SuperJump(cast element);
-		else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
-			shape = new SignCaution(element);
-		else if (dataBlockLowerCase == "superbounceitem")
-			shape = new SuperBounce(cast element);
-		else if (dataBlockLowerCase == "roundbumper")
-			shape = new RoundBumper();
-		else if (dataBlockLowerCase == "trianglebumper")
-			shape = new TriangleBumper();
-		else if (dataBlockLowerCase == "helicopteritem")
-			shape = new Helicopter(cast element);
-		else if (dataBlockLowerCase == "easteregg")
-			shape = new EasterEgg(cast element);
-		else if (dataBlockLowerCase == "checkpoint")
-			shape = new Checkpoint(cast element);
-		else if (dataBlockLowerCase == "ductfan")
-			shape = new DuctFan();
-		else if (dataBlockLowerCase == "smallductfan")
-			shape = new SmallDuctFan();
-		else if (dataBlockLowerCase == "magnet")
-			shape = new Magnet();
-		else if (dataBlockLowerCase == "antigravityitem")
-			shape = new AntiGravity(cast element);
-		else if (dataBlockLowerCase == "norespawnantigravityitem")
-			shape = new AntiGravity(cast element, true);
-		else if (dataBlockLowerCase == "landmine")
-			shape = new LandMine();
-		else if (dataBlockLowerCase == "nuke")
-			shape = new Nuke();
-		else if (dataBlockLowerCase == "shockabsorberitem")
-			shape = new ShockAbsorber(cast element);
-		else if (dataBlockLowerCase == "superspeeditem")
-			shape = new SuperSpeed(cast element);
-		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
-			shape = new TimeTravel(cast element);
-		else if (dataBlockLowerCase == "blast")
-			shape = new Blast(cast element);
-		else if (dataBlockLowerCase == "megamarble")
-			shape = new MegaMarble(cast element);
-		else if (dataBlockLowerCase == "tornado")
-			shape = new Tornado();
-		else if (dataBlockLowerCase == "trapdoor")
-			shape = new Trapdoor();
-		else if (dataBlockLowerCase == "pushbutton")
-			shape = new PushButton();
-		else if (dataBlockLowerCase == "oilslick")
-			shape = new Oilslick();
-		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
-			shape = new Sign(cast element);
-		else if ([
-			"glass_3shape",
-			"glass_6shape",
-			"glass_9shape",
-			"glass_12shape",
-			"glass_15shape",
-			"glass_18shape"
-		].contains(dataBlockLowerCase))
-			shape = new Glass(cast element);
-		else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
-			shape = new shapes.Sky(dataBlockLowerCase);
-		else {
-			Console.error("Unable to create static shape with data block '" + element.datablock + "'");
-			onFinish();
-			return;
-		}
-
-		if (element._name != null && element._name != "") {
-			this.namedObjects.set(element._name, {
-				obj: shape,
-				elem: element
-			});
-		}
-
-		var shapePosition = MisParser.parseVector3(element.position);
-		shapePosition.x = -shapePosition.x;
-		var shapeRotation = MisParser.parseRotation(element.rotation);
-		shapeRotation.x = -shapeRotation.x;
-		shapeRotation.w = -shapeRotation.w;
-		var shapeScale = MisParser.parseVector3(element.scale);
-
-		// Apparently we still do collide with zero-volume shapes
-		if (shapeScale.x == 0)
-			shapeScale.x = 0.0001;
-		if (shapeScale.y == 0)
-			shapeScale.y = 0.0001;
-		if (shapeScale.z == 0)
-			shapeScale.z = 0.0001;
-
-		var mat = Matrix.S(shapeScale.x, shapeScale.y, shapeScale.z);
-		var tmp = new Matrix();
-		shapeRotation.toMatrix(tmp);
-		mat.multiply3x4(mat, tmp);
-		var tmat = Matrix.T(shapePosition.x, shapePosition.y, shapePosition.z);
-		mat.multiply(mat, tmat);
-
-		this.addDtsObject(shape, () -> {
-			shape.setTransform(mat);
-			onFinish();
-		});
-
-		// else if (dataBlockLowerCase == "pushbutton")
-		// 	shape = new PushButton();
+		MarbleWorldMacros.addStaticShapeOrItem();
 	}
 
 	public function addItem(element:MissionElementItem, onFinish:Void->Void) {
 		var shape:DtsObject = null;
-
-		// Add the correct shape based on type
-		var dataBlockLowerCase = element.datablock.toLowerCase();
-		if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
-		else if (dataBlockLowerCase == "startpad")
-			shape = new StartPad();
-		else if (dataBlockLowerCase == "endpad")
-			shape = new EndPad();
-		else if (dataBlockLowerCase == "signfinish")
-			shape = new SignFinish();
-		else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
-			shape = new Gem(cast element);
-			this.totalGems++;
-			this.gems.push(cast shape);
-		} else if (dataBlockLowerCase == "superjumpitem")
-			shape = new SuperJump(cast element);
-		else if (dataBlockLowerCase == "superbounceitem")
-			shape = new SuperBounce(cast element);
-		else if (dataBlockLowerCase == "roundbumper")
-			shape = new RoundBumper();
-		else if (dataBlockLowerCase == "trianglebumper")
-			shape = new TriangleBumper();
-		else if (dataBlockLowerCase == "helicopteritem")
-			shape = new Helicopter(cast element);
-		else if (dataBlockLowerCase == "easteregg")
-			shape = new EasterEgg(cast element);
-		else if (dataBlockLowerCase == "checkpoint")
-			shape = new Checkpoint(cast element);
-		else if (dataBlockLowerCase == "ductfan")
-			shape = new DuctFan();
-		else if (dataBlockLowerCase == "smallductfan")
-			shape = new SmallDuctFan();
-		else if (dataBlockLowerCase == "magnet")
-			shape = new Magnet();
-		else if (dataBlockLowerCase == "antigravityitem")
-			shape = new AntiGravity(cast element);
-		else if (dataBlockLowerCase == "norespawnantigravityitem")
-			shape = new AntiGravity(cast element, true);
-		else if (dataBlockLowerCase == "landmine")
-			shape = new LandMine();
-		else if (dataBlockLowerCase == "nuke")
-			shape = new Nuke();
-		else if (dataBlockLowerCase == "shockabsorberitem")
-			shape = new ShockAbsorber(cast element);
-		else if (dataBlockLowerCase == "superspeeditem")
-			shape = new SuperSpeed(cast element);
-		else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
-			shape = new TimeTravel(cast element);
-		else if (dataBlockLowerCase == "blastitem")
-			shape = new Blast(cast element);
-		else if (dataBlockLowerCase == "megamarbleitem")
-			shape = new MegaMarble(cast element);
-		else if (dataBlockLowerCase == "tornado")
-			shape = new Tornado();
-		else if (dataBlockLowerCase == "trapdoor")
-			shape = new Trapdoor();
-		else if (dataBlockLowerCase == "pushbutton")
-			shape = new PushButton();
-		else if (dataBlockLowerCase == "oilslick")
-			shape = new Oilslick();
-		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
-			shape = new Sign(cast element);
-		else if ([
-			"glass_3shape",
-			"glass_6shape",
-			"glass_9shape",
-			"glass_12shape",
-			"glass_15shape",
-			"glass_18shape"
-		].contains(dataBlockLowerCase))
-			shape = new Glass(cast element);
-		else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
-			shape = new shapes.Sky(dataBlockLowerCase);
-		else {
-			Console.error("Unknown item: " + element.datablock);
-			onFinish();
-			return;
-		}
-
-		if (element._name != null && element._name != "") {
-			this.namedObjects.set(element._name, {
-				obj: shape,
-				elem: element
-			});
-		}
-
-		var shapePosition = MisParser.parseVector3(element.position);
-		shapePosition.x = -shapePosition.x;
-		var shapeRotation = MisParser.parseRotation(element.rotation);
-		shapeRotation.x = -shapeRotation.x;
-		shapeRotation.w = -shapeRotation.w;
-		var shapeScale = MisParser.parseVector3(element.scale);
-
-		// Apparently we still do collide with zero-volume shapes
-		if (shapeScale.x == 0)
-			shapeScale.x = 0.0001;
-		if (shapeScale.y == 0)
-			shapeScale.y = 0.0001;
-		if (shapeScale.z == 0)
-			shapeScale.z = 0.0001;
-
-		var mat = Matrix.S(shapeScale.x, shapeScale.y, shapeScale.z);
-		var tmp = new Matrix();
-		shapeRotation.toMatrix(tmp);
-		mat.multiply3x4(mat, tmp);
-		mat.setPosition(shapePosition);
-
-		this.addDtsObject(shape, () -> {
-			shape.setTransform(mat);
-			onFinish();
-		});
+		MarbleWorldMacros.addStaticShapeOrItem();
 	}
 
 	public function addTrigger(element:MissionElementTrigger, onFinish:Void->Void) {

@@ -8,29 +8,10 @@ import src.Util;
 import h3d.Vector;
 import src.DtsObject;
 
-class PowerupParams {
-	public var duration:Float = 5;
-	public var airAccel = 1.0;
-	public var activateTime:Float = 0;
-	public var bounce = -1.0;
-	public var sizeScale = 1.0;
-	public var massScale = 1.0;
-	public var gravityMod = 1.0;
-	public var repulseDist = 0.0;
-	public var repulseMax = 0.0;
-	public var boostDir = new Vector();
-	public var timeFreeze:Float = 0;
-	public var boostAmount = 0.0;
-	public var boostMassless = 0.0;
-
-	public function new() {};
-}
-
 abstract class PowerUp extends DtsObject {
 	public var lastPickUpTime:Float = -1;
 	public var cooldownDuration:Float = 7;
 	public var autoUse:Bool = false;
-	public var powerupParams:PowerupParams = new PowerupParams();
 	public var pickUpName:String;
 	public var element:MissionElementItem;
 	public var pickupSound:Sound;

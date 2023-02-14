@@ -202,6 +202,7 @@ class ReplayInitialState {
 	var trapdoorLastCompletions:Array<Float> = [];
 	var landMineDisappearTimes:Array<Float> = [];
 	var pushButtonContactTimes:Array<Float> = [];
+	var randomGens:Array<Int> = [];
 
 	public function new() {}
 
@@ -224,6 +225,10 @@ class ReplayInitialState {
 		for (time in this.pushButtonContactTimes) {
 			bw.writeFloat(time);
 		}
+		bw.writeInt16(this.randomGens.length);
+		for (ri in this.randomGens) {
+			bw.writeByte(ri);
+		}
 	}
 
 	public function read(br:BytesReader) {
@@ -244,6 +249,10 @@ class ReplayInitialState {
 		var pushButtonCount = br.readInt16();
 		for (i in 0...pushButtonCount) {
 			this.pushButtonContactTimes.push(br.readFloat());
+		}
+		var rcount = br.readInt16();
+		for (i in 0...rcount) {
+			this.randomGens.push(br.readByte());
 		}
 	}
 }
@@ -341,6 +350,14 @@ class Replay {
 		initialState.pushButtonContactTimes.push(lastContactTime);
 	}
 
+	public function recordRandomGenState(ri:Int) {
+		initialState.randomGens.push(ri);
+	}
+
+	public function getRandomGenState() {
+		return initialState.randomGens.shift();
+	}
+
 	public function getTrapdoorState(idx:Int) {
 		return {
 			lastContactTime: initialState.trapdoorLastContactTimes[idx],
@@ -359,6 +376,7 @@ class Replay {
 
 	public function clear() {
 		this.frames = [];
+		this.initialState.randomGens = [];
 		currentRecordFrame = null;
 	}
 
