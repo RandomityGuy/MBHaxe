@@ -147,6 +147,7 @@ class ReplayInitialState {
 	var trapdoorLastDirections:Array<Int> = [];
 	var trapdoorLastCompletions:Array<Float> = [];
 	var landMineDisappearTimes:Array<Float> = [];
+	var pushButtonContactTimes:Array<Float> = [];
 
 	public function new() {}
 
@@ -163,6 +164,10 @@ class ReplayInitialState {
 		}
 		bw.writeInt16(this.landMineDisappearTimes.length);
 		for (time in this.landMineDisappearTimes) {
+			bw.writeFloat(time);
+		}
+		bw.writeInt16(this.pushButtonContactTimes.length);
+		for (time in this.pushButtonContactTimes) {
 			bw.writeFloat(time);
 		}
 	}
@@ -182,6 +187,10 @@ class ReplayInitialState {
 		for (i in 0...landMineCount) {
 			this.landMineDisappearTimes.push(br.readFloat());
 		}
+		var pushButtonCount = br.readInt16();
+		for (i in 0...pushButtonCount) {
+			this.pushButtonContactTimes.push(br.readFloat());
+		}
 	}
 }
 
@@ -197,7 +206,7 @@ class Replay {
 	var currentPlaybackFrameIdx:Int;
 	var currentPlaybackTime:Float;
 
-	var version:Int = 1;
+	var version:Int = 6;
 
 	public function new(mission:String) {
 		this.mission = mission;
@@ -255,6 +264,10 @@ class Replay {
 		initialState.landMineDisappearTimes.push(disappearTime);
 	}
 
+	public function recordPushButtonState(lastContactTime:Float) {
+		initialState.pushButtonContactTimes.push(lastContactTime);
+	}
+
 	public function getTrapdoorState(idx:Int) {
 		return {
 			lastContactTime: initialState.trapdoorLastContactTimes[idx],
@@ -265,6 +278,10 @@ class Replay {
 
 	public function getLandMineState(idx:Int) {
 		return initialState.landMineDisappearTimes[idx];
+	}
+
+	public function getPushButtonState(idx:Int) {
+		return initialState.pushButtonContactTimes[idx];
 	}
 
 	public function clear() {
