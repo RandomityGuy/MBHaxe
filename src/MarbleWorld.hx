@@ -1283,7 +1283,6 @@ class MarbleWorld extends Scheduler {
 				this.saveReplay();
 				this.isRecording = true;
 			}
-			this.setCursorLock(true);
 			this.restart();
 			#if js
 			pointercontainer.hidden = true;
