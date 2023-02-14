@@ -1,5 +1,6 @@
 package gui;
 
+import src.Marbleland;
 import src.Mission;
 import hxd.BitmapData;
 import hxd.res.BitmapFont;
@@ -66,8 +67,15 @@ class ReplayCenterGui extends GuiImage {
 				var repmis = repl.mission;
 				if (!StringTools.contains(repmis, "data/"))
 					repmis = "data/" + repmis;
-				var mi = MissionList.missions.get(repmis);
-				MarbleGame.instance.watchMissionReplay(mi, repl);
+				var mi = repl.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(repl.customId);
+				if (mi.isClaMission) {
+					mi.download(() -> {
+						MarbleGame.instance.watchMissionReplay(mi, repl);
+					});
+					playButton.disabled = true; // Don't let us play anything else
+				} else {
+					MarbleGame.instance.watchMissionReplay(mi, repl);
+				}
 			}
 		}
 		wnd.addChild(playButton);
@@ -128,7 +136,7 @@ class ReplayCenterGui extends GuiImage {
 				repmis = "data/" + repmis;
 			if (MissionList.missions == null)
 				MissionList.buildMissionList();
-			var m = MissionList.missions.get(repmis);
+			var m = thisReplay.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(thisReplay.customId);
 			missionName.text.text = m.title;
 			m.getPreviewImage((t) -> {
 				pmPreview.bmp.tile = t;

@@ -231,7 +231,7 @@ class ReplayInitialState {
 		}
 	}
 
-	public function read(br:BytesReader) {
+	public function read(br:BytesReader, version:Int) {
 		var trapdoorCount = br.readInt16();
 		for (i in 0...trapdoorCount) {
 			this.trapdoorLastContactTimes.push(br.readFloat());
@@ -246,13 +246,15 @@ class ReplayInitialState {
 		for (i in 0...landMineCount) {
 			this.landMineDisappearTimes.push(br.readFloat());
 		}
-		var pushButtonCount = br.readInt16();
-		for (i in 0...pushButtonCount) {
-			this.pushButtonContactTimes.push(br.readFloat());
-		}
-		var rcount = br.readInt16();
-		for (i in 0...rcount) {
-			this.randomGens.push(br.readByte());
+		if (version > 5) {
+			var pushButtonCount = br.readInt16();
+			for (i in 0...pushButtonCount) {
+				this.pushButtonContactTimes.push(br.readFloat());
+			}
+			var rcount = br.readInt16();
+			for (i in 0...rcount) {
+				this.randomGens.push(br.readByte());
+			}
 		}
 	}
 }
@@ -260,6 +262,7 @@ class ReplayInitialState {
 class Replay {
 	public var mission:String;
 	public var name:String;
+	public var customId:Int;
 
 	var frames:Array<ReplayFrame>;
 	var initialState:ReplayInitialState;
@@ -273,8 +276,9 @@ class Replay {
 	var version:Int = 6;
 	var readFullEntry:FileEntry;
 
-	public function new(mission:String) {
+	public function new(mission:String, customId:Int = 0) {
 		this.mission = mission;
+		this.customId = customId;
 		this.initialState = new ReplayInitialState();
 	}
 
@@ -464,6 +468,7 @@ class Replay {
 		finalB.addString(this.name);
 		finalB.addByte(this.mission.length);
 		finalB.addString(this.mission);
+		finalB.addInt32(this.customId);
 		finalB.addInt32(bufsize);
 		finalB.addBytes(compressed, 0, compressed.length);
 
@@ -485,8 +490,16 @@ class Replay {
 		this.name = data.getString(2, nameLength);
 		var missionLength = data.get(2 + nameLength);
 		this.mission = data.getString(3 + nameLength, missionLength);
-		var uncompressedLength = data.getInt32(3 + nameLength + missionLength);
-		var compressedData = data.sub(7 + nameLength + missionLength, data.length - 7 - nameLength - missionLength);
+		var uncompressedLength = 0;
+		var compressedData:haxe.io.Bytes = null;
+		if (replayVersion > 5) {
+			this.customId = data.getInt32(3 + nameLength + missionLength);
+			uncompressedLength = data.getInt32(7 + nameLength + missionLength);
+			compressedData = data.sub(11 + nameLength + missionLength, data.length - 11 - nameLength - missionLength);
+		} else {
+			uncompressedLength = data.getInt32(3 + nameLength + missionLength);
+			compressedData = data.sub(7 + nameLength + missionLength, data.length - 7 - nameLength - missionLength);
+		}
 
 		#if hl
 		var uncompressed = haxe.zip.Uncompress.run(compressedData, uncompressedLength);
@@ -495,7 +508,7 @@ class Replay {
 		var uncompressed = haxe.zip.InflateImpl.run(new BytesInput(compressedData), uncompressedLength);
 		#end
 		var br = new BytesReader(uncompressed);
-		this.initialState.read(br);
+		this.initialState.read(br, replayVersion);
 		var frameCount = br.readInt32();
 		this.frames = [];
 		for (i in 0...frameCount) {
@@ -522,6 +535,9 @@ class Replay {
 		this.name = data.getString(2, nameLength);
 		var missionLength = data.get(2 + nameLength);
 		this.mission = data.getString(3 + nameLength, missionLength);
+		if (replayVersion > 5) {
+			this.customId = data.getInt32(3 + nameLength + missionLength);
+		}
 		return true;
 	}
 

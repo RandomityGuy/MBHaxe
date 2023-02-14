@@ -13,6 +13,7 @@ class Marbleland {
 	public static var goldMissions = [];
 	public static var ultraMissions = [];
 	public static var platinumMissions = [];
+	public static var missions:Map<Int, Mission> = [];
 
 	public static function init() {
 		Http.get('https://raw.githubusercontent.com/Vanilagy/MarbleBlast/master/src/assets/customs_gold.json', (b) -> {
@@ -77,6 +78,8 @@ class Marbleland {
 				case 'platinum':
 					platinumMissions.push(mission);
 			}
+
+			missions.set(mission.id, mission);
 		}
 
 		// sort according to name
