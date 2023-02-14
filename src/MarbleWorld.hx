@@ -1,5 +1,6 @@
 package src;
 
+import shapes.PushButton;
 #if js
 import gui.MainMenuGui;
 #else
@@ -473,6 +474,7 @@ class MarbleWorld extends Scheduler {
 		if (full) {
 			var tidx = 0;
 			var lidx = 0;
+			var pidx = 0;
 			for (dtss in this.dtsObjects) {
 				if (dtss is Trapdoor) {
 					var trapdoor:Trapdoor = cast dtss;
@@ -495,6 +497,15 @@ class MarbleWorld extends Scheduler {
 						landmine.disappearTime = this.replay.getLandMineState(lidx) + this.timeState.timeSinceLoad;
 					}
 					lidx++;
+				}
+				if (dtss is PushButton) {
+					var pushbutton:PushButton = cast dtss;
+					if (!this.isWatching) {
+						this.replay.recordPushButtonState(pushbutton.lastContactTime - this.timeState.timeSinceLoad);
+					} else {
+						pushbutton.lastContactTime = this.replay.getPushButtonState(pidx) + this.timeState.timeSinceLoad;
+					}
+					pidx++;
 				}
 			}
 		}
@@ -763,6 +774,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Tornado();
 		else if (dataBlockLowerCase == "trapdoor")
 			shape = new Trapdoor();
+		else if (dataBlockLowerCase == "pushbutton")
+			shape = new PushButton();
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
 		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
@@ -880,6 +893,8 @@ class MarbleWorld extends Scheduler {
 			shape = new Tornado();
 		else if (dataBlockLowerCase == "trapdoor")
 			shape = new Trapdoor();
+		else if (dataBlockLowerCase == "pushbutton")
+			shape = new PushButton();
 		else if (dataBlockLowerCase == "oilslick")
 			shape = new Oilslick();
 		else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
