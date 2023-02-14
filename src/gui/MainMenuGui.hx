@@ -47,6 +47,7 @@ class MainMenuGui extends GuiImage {
 		var playButton = new GuiButton(loadButtonImages("data/ui/home/play"));
 		playButton.position = new Vector(50, 113);
 		playButton.extent = new Vector(270, 95);
+		playButton.gamepadAccelerator = ["A"];
 		playButton.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new PlayMissionGui());
 		}

@@ -62,6 +62,19 @@ typedef TouchSettings = {
 	var buttonJoystickMultiplier:Float;
 }
 
+typedef GamepadSettings = {
+	var moveXAxis:String;
+	var moveYAxis:String;
+	var cameraXAxis:String;
+	var cameraYAxis:String;
+	var jump:Array<String>;
+	var powerup:Array<String>;
+	var cameraSensitivity:Float;
+	var invertXAxis:Bool;
+	var invertYAxis:Bool;
+	var axisDeadzone:Float;
+}
+
 class Settings {
 	public static var highScores:Map<String, Array<Score>> = [];
 
@@ -107,6 +120,20 @@ class Settings {
 		powerupButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
+
+	public static var gamepadSettings:GamepadSettings = {
+		moveXAxis: "analogX",
+		moveYAxis: "analogY",
+		cameraXAxis: "ranalogX",
+		cameraYAxis: "ranalogY",
+		jump: ["A", "LT"],
+		powerup: ["B", "RT"],
+		cameraSensitivity: 1.0,
+		invertXAxis: false,
+		invertYAxis: false,
+		axisDeadzone: 0.15
+	}
+
 	public static var progression = [24, 24, 52];
 	public static var highscoreName = "";
 
@@ -158,6 +185,7 @@ class Settings {
 			options: optionsSettings,
 			controls: controlsSettings,
 			touch: touchSettings,
+			gamepad: gamepadSettings,
 			progression: progression,
 			highscoreName: highscoreName
 		};
@@ -222,6 +250,9 @@ class Settings {
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
+			}
+			if (json.gamepad != null) {
+				gamepadSettings = json.gamepad;
 			}
 			progression = json.progression;
 			highscoreName = json.highscoreName;
