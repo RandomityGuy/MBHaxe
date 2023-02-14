@@ -222,6 +222,7 @@ class PlayMissionGui extends GuiImage {
 		var pmPlay = new GuiButton(loadButtonImages("data/ui/play/play"));
 		pmPlay.position = new Vector(391, 257);
 		pmPlay.extent = new Vector(121, 62);
+		pmPlay.gamepadAccelerator = ["A"];
 		pmPlay.pressedAction = (sender) -> {
 			// Wacky hacks
 			currentList[currentSelection].index = currentSelection;
@@ -235,6 +236,7 @@ class PlayMissionGui extends GuiImage {
 		var pmPrev = new GuiButton(loadButtonImages("data/ui/play/prev"));
 		pmPrev.position = new Vector(321, 260);
 		pmPrev.extent = new Vector(77, 58);
+		pmPrev.gamepadAccelerator = ["dpadLeft"];
 		pmPrev.pressedAction = (sender) -> {
 			setSelectedFunc(currentSelection - 1);
 		}
@@ -243,6 +245,7 @@ class PlayMissionGui extends GuiImage {
 		var pmNext = new GuiButton(loadButtonImages("data/ui/play/next"));
 		pmNext.position = new Vector(507, 262);
 		pmNext.extent = new Vector(75, 60);
+		pmNext.gamepadAccelerator = ["dpadRight"];
 		pmNext.pressedAction = (sender) -> {
 			setSelectedFunc(currentSelection + 1);
 		}
@@ -280,6 +283,7 @@ class PlayMissionGui extends GuiImage {
 		var pmBack = new GuiButton(loadButtonImages("data/ui/play/back"));
 		pmBack.position = new Vector(102, 260);
 		pmBack.extent = new Vector(79, 61);
+		pmBack.gamepadAccelerator = ["B"];
 		pmBack.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new MainMenuGui());
 		};

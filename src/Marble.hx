@@ -51,6 +51,7 @@ import h3d.mat.Texture;
 import collision.CCDCollision.TraceInfo;
 import src.ResourceLoaderWorker;
 import src.InteriorObject;
+import src.Gamepad;
 
 class Move {
 	public var d:Vector;
@@ -136,6 +137,7 @@ class Marble extends GameObject {
 	var _airAccel:Float = 5;
 	var _maxDotSlide = 0.5;
 	var _minBounceVel:Float = 0.1;
+	var _minBounceSpeed:Float = 3;
 	var _minTrailVel:Float = 10;
 	var _bounceKineticFriction = 0.2;
 	var minVelocityBounceSoft = 2.5;
@@ -635,7 +637,7 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
-		if (this.bounceEmitDelay == 0 && this._minBounceVel <= speed) {
+		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
 			this.bounceEmitDelay = 0.3;
 		}
@@ -1428,6 +1430,8 @@ class Marble extends GameObject {
 		var move = new Move();
 		move.d = new Vector();
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching) {
+			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
+			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
 			if (Key.isDown(Settings.controlsSettings.forward)) {
 				move.d.x -= 1;
 			}
@@ -1440,10 +1444,14 @@ class Marble extends GameObject {
 			if (Key.isDown(Settings.controlsSettings.right)) {
 				move.d.y -= 1;
 			}
-			if (Key.isDown(Settings.controlsSettings.jump) || MarbleGame.instance.touchInput.jumpButton.pressed) {
+			if (Key.isDown(Settings.controlsSettings.jump)
+				|| MarbleGame.instance.touchInput.jumpButton.pressed
+				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
 				move.jump = true;
 			}
-			if (Util.isTouchDevice() ? MarbleGame.instance.touchInput.powerupButton.pressed : Key.isDown(Settings.controlsSettings.powerup)) {
+			if (Key.isDown(Settings.controlsSettings.powerup)
+				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
+				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
 				move.powerup = true;
 			}
 			if (MarbleGame.instance.touchInput.movementInput.pressed) {

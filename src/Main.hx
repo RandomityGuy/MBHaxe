@@ -17,6 +17,7 @@ import hxd.res.DefaultFont;
 import h2d.Text;
 import h3d.Vector;
 import src.ProfilerUI;
+import src.Gamepad;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
@@ -58,6 +59,7 @@ class Main extends hxd.App {
 
 		ResourceLoader.init(s2d, () -> {
 			Settings.init();
+			Gamepad.init();
 			AudioManager.init();
 			AudioManager.playShell();
 			marbleGame = new MarbleGame(s2d, s3d);

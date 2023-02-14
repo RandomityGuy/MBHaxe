@@ -75,6 +75,7 @@ import src.Marble;
 import src.Resource;
 import src.ProfilerUI;
 import src.ResourceLoaderWorker;
+import src.Gamepad;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -910,7 +911,9 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup)) {
+		if (this.outOfBounds
+			&& this.finishTime == null
+			&& (Key.isDown(Settings.controlsSettings.powerup) || Gamepad.isDown(Settings.gamepadSettings.powerup))) {
 			this.clearSchedule();
 			this.restart();
 			return;

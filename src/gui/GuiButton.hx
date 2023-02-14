@@ -6,6 +6,7 @@ import gui.GuiControl.MouseState;
 import hxd.Window;
 import h2d.Tile;
 import src.ResourceLoader;
+import src.Gamepad;
 
 enum ButtonType {
 	Normal;
@@ -28,6 +29,8 @@ class GuiButton extends GuiAnim {
 	public var buttonSounds:Bool = true;
 
 	public var accelerator:Int = 0;
+	public var gamepadAccelerator:Array<String> = [];
+	public var acceleratorWasPressed = false;
 
 	public function new(anim:Array<Tile>) {
 		super(anim);
@@ -69,10 +72,19 @@ class GuiButton extends GuiAnim {
 				}
 			}
 		}
-		if (!disabled && accelerator != 0 && hxd.Key.isReleased(accelerator)) {
-			if (this.pressedAction != null) {
-				this.pressedAction(this);
+		if (!disabled) {
+			if (acceleratorWasPressed &&
+				(accelerator != 0 && hxd.Key.isReleased(accelerator)) || Gamepad.isReleased(gamepadAccelerator)) {
+				if (this.pressedAction != null) {
+					this.pressedAction(this);
+				}
+			} else if ((accelerator != 0 && hxd.Key.isPressed(accelerator)) || Gamepad.isPressed(gamepadAccelerator)) {
+				acceleratorWasPressed = true;
 			}
+		}
+		if (acceleratorWasPressed) {
+			if ((accelerator != 0 && hxd.Key.isReleased(accelerator)) || Gamepad.isReleased(gamepadAccelerator))
+				acceleratorWasPressed = false;
 		}
 		super.update(dt, mouseState);
 	}
