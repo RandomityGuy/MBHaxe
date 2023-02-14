@@ -1701,7 +1701,6 @@ class MarbleWorld extends Scheduler {
 		}, (sender) -> {
 			var restartGameCode = () -> {
 				MarbleGame.canvas.popDialog(egg);
-				this.setCursorLock(true);
 				this.restart(true);
 				#if js
 				pointercontainer.hidden = true;
