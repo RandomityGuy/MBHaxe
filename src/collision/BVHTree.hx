@@ -27,7 +27,7 @@ class BVHTree<T:IBVHObject> {
 
 	public function new() {}
 
-	function update() {
+	public function update() {
 		var invalidNodes = [];
 		this.traverse(node -> {
 			if (node.isLeaf) {

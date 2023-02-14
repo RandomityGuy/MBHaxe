@@ -3,11 +3,11 @@ package src;
 import haxe.io.BytesInput;
 import haxe.zip.Reader;
 import hxd.res.Image;
-import hxd.BitmapData;
 import haxe.Json;
 import src.Mission;
 import src.Http;
 import src.ResourceLoader;
+import src.Console;
 
 class Marbleland {
 	public static var goldMissions = [];
@@ -17,12 +17,15 @@ class Marbleland {
 	public static function init() {
 		Http.get('https://raw.githubusercontent.com/Vanilagy/MarbleBlast/master/src/assets/customs_gold.json', (b) -> {
 			parseMissionList(b.toString(), "gold");
+			Console.log('Loaded gold customs: ${goldMissions.length}');
 		}, (e) -> {});
 		Http.get('https://raw.githubusercontent.com/Vanilagy/MarbleBlast/master/src/assets/customs_ultra.json', (b) -> {
 			parseMissionList(b.toString(), "ultra");
+			Console.log('Loaded ultra customs: ${ultraMissions.length}');
 		}, (e) -> {});
 		Http.get('https://raw.githubusercontent.com/Vanilagy/MarbleBlast/master/src/assets/customs_platinum.json', (b) -> {
 			parseMissionList(b.toString(), "platinum");
+			Console.log('Loaded platinum customs: ${platinumMissions.length}');
 		}, (e) -> {});
 	}
 

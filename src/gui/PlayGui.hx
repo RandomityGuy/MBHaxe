@@ -136,7 +136,7 @@ class PlayGui {
 			timerNumbers.push(new GuiAnim(numberTiles));
 		}
 
-		for (i in 0...4) {
+		for (i in 0...6) {
 			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
 
@@ -277,21 +277,29 @@ class PlayGui {
 		gemCountNumbers[1].position = new Vector(54, 0);
 		gemCountNumbers[1].extent = new Vector(43, 55);
 
-		gemCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
-		gemCountSlash.position = new Vector(75, 0);
-		gemCountSlash.extent = new Vector(43, 55);
-
-		gemCountNumbers[2].position = new Vector(96, 0);
+		gemCountNumbers[2].position = new Vector(78, 0);
 		gemCountNumbers[2].extent = new Vector(43, 55);
+
+		gemCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
+		gemCountSlash.position = new Vector(99, 0);
+		gemCountSlash.extent = new Vector(43, 55);
 
 		gemCountNumbers[3].position = new Vector(120, 0);
 		gemCountNumbers[3].extent = new Vector(43, 55);
 
+		gemCountNumbers[4].position = new Vector(144, 0);
+		gemCountNumbers[4].extent = new Vector(43, 55);
+
+		gemCountNumbers[5].position = new Vector(168, 0);
+		gemCountNumbers[5].extent = new Vector(43, 55);
+
 		playGuiCtrl.addChild(gemCountNumbers[0]);
 		playGuiCtrl.addChild(gemCountNumbers[1]);
-		playGuiCtrl.addChild(gemCountSlash);
 		playGuiCtrl.addChild(gemCountNumbers[2]);
+		playGuiCtrl.addChild(gemCountSlash);
 		playGuiCtrl.addChild(gemCountNumbers[3]);
+		playGuiCtrl.addChild(gemCountNumbers[4]);
+		playGuiCtrl.addChild(gemCountNumbers[5]);
 
 		this.gemImageScene = new h3d.scene.Scene();
 		// var gemImageRenderer = cast(this.gemImageScene.renderer, h3d.scene.Renderer);
@@ -576,16 +584,20 @@ class PlayGui {
 			gemImageSceneTargetBitmap.visible = true;
 		}
 
-		var totalTenths = Math.floor(total / 10);
+		var totalHundredths = Math.floor(total / 100);
+		var totalTenths = Math.floor(total / 10) % 10;
 		var totalOnes = total % 10;
 
-		var collectedTenths = Math.floor(collected / 10);
+		var collectedHundredths = Math.floor(collected / 100);
+		var collectedTenths = Math.floor(collected / 10) % 10;
 		var collectedOnes = collected % 10;
 
-		gemCountNumbers[0].anim.currentFrame = collectedTenths;
-		gemCountNumbers[1].anim.currentFrame = collectedOnes;
-		gemCountNumbers[2].anim.currentFrame = totalTenths;
-		gemCountNumbers[3].anim.currentFrame = totalOnes;
+		gemCountNumbers[0].anim.currentFrame = collectedHundredths;
+		gemCountNumbers[1].anim.currentFrame = collectedTenths;
+		gemCountNumbers[2].anim.currentFrame = collectedOnes;
+		gemCountNumbers[3].anim.currentFrame = totalHundredths;
+		gemCountNumbers[4].anim.currentFrame = totalTenths;
+		gemCountNumbers[5].anim.currentFrame = totalOnes;
 	}
 
 	// 0: default
@@ -602,7 +614,7 @@ class PlayGui {
 		var secondsOne = seconds % 10;
 		var secondsTen = (seconds - secondsOne) / 10;
 		var minutesOne = minutes % 10;
-		var minutesTen = (minutes - minutesOne) / 10;
+		var minutesTen = ((minutes - minutesOne) / 10) % 10;
 		var hundredthOne = hundredth % 10;
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 

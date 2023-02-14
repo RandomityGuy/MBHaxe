@@ -782,10 +782,10 @@ class PlayMissionGui extends GuiImage {
 
 		setCategoryFunc = function(game:String, category:String, ?doRender:Bool = true) {
 			currentList = category == "custom" ? (switch (game) {
-				case 'gold': Marbleland.goldMissions;
-				case 'platinum': Marbleland.platinumMissions;
-				case 'ultra': Marbleland.ultraMissions;
-				default: MissionList.customMissions;
+				case 'gold' if (Marbleland.goldMissions.length != 0): Marbleland.goldMissions;
+				case 'platinum' if (Marbleland.platinumMissions.length != 0): Marbleland.platinumMissions;
+				case 'ultra' if (Marbleland.ultraMissions.length != 0): Marbleland.ultraMissions;
+				default: currentList;
 			}) : MissionList.missionList[game][category];
 			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
 			pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources).toTile();
