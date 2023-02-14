@@ -1579,8 +1579,8 @@ class Marble extends GameObject {
 				tdiff = diff;
 			}
 			var expectedPos = finalPosData.position;
-			var newPos = expectedPos;
-			// var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts);
+			// var newPos = expectedPos;
+			var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts);
 
 			if (this.velocity.lengthSq() > 1e-8) {
 				var posDiff = newPos.sub(expectedPos);
