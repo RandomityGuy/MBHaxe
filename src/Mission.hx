@@ -200,6 +200,8 @@ class Mission {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		if (!StringTools.endsWith(path, ".dif"))
+			path += ".dif";
 		if (ResourceLoader.exists(path))
 			return path;
 		if (StringTools.contains(path, 'interiors_mbg/'))
