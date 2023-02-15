@@ -884,6 +884,7 @@ class MarbleWorld extends Scheduler {
 				if (obj is ForceObject) {
 					this.forceObjects.push(cast obj);
 				}
+				obj.isTSStatic = isTsStatic;
 				obj.init(cast this, () -> {
 					obj.update(this.timeState);
 					if (obj.useInstancing) {

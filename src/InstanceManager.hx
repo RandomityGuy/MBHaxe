@@ -1,5 +1,7 @@
 package src;
 
+import shaders.EnvMap;
+import h3d.shader.CubeMap;
 import shaders.NormalMaterial;
 import shaders.NoiseTileMaterial;
 import shaders.PhongMaterial;
@@ -160,6 +162,10 @@ class InstanceManager {
 						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
 						minfo.meshbatch.material.mainPass.addShader(nmapshdr);
 						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					}
+					var cubemapshdr = mat.mainPass.getShader(EnvMap);
+					if (cubemapshdr != null) {
+						minfo.meshbatch.material.mainPass.addShader(cubemapshdr);
 					}
 					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
 					minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);

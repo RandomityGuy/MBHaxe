@@ -1,5 +1,7 @@
 package src;
 
+import shaders.EnvMap;
+import h3d.shader.CubeMap;
 import dts.TSDrawPrimitive;
 import hxd.res.Sound;
 import h3d.col.Bounds;
@@ -374,7 +376,11 @@ class DtsObject extends GameObject {
 
 			if (fullName == null || (this.isTSStatic && ((flags & (1 << 31) > 0)))) {
 				if (this.isTSStatic) {
-					Console.warn('Unsupported material type for ${fullName}, dts: ${this.dtsPath}');
+					material.mainPass.enableLights = false;
+					if (flags & (1 << 31) > 0) {
+						environmentMaterial = material;
+					}
+					// Console.warn('Unsupported material type for ${fullName}, dts: ${this.dtsPath}');
 					// TODO USE PBR???
 				}
 			} else if (Path.extension(fullName) == "ifl") {
@@ -431,11 +437,8 @@ class DtsObject extends GameObject {
 				material.receiveShadows = false;
 				material.mainPass.depthWrite = false;
 			}
-			// // TODO TRANSPARENCY SHIT
 			if (flags & 8 > 0) {
 				material.blendMode = BlendMode.Add;
-				// material.mainPass.setPassName("overlay");
-				// material.textureShader.additive = true;
 			}
 			if (flags & 16 > 0) {
 				material.blendMode = BlendMode.Sub;
@@ -444,20 +447,13 @@ class DtsObject extends GameObject {
 			if (flags & 32 > 0) {
 				material.mainPass.enableLights = false;
 				material.receiveShadows = false;
-				// material.mainPass.setPassName("overlay");
-				// var pbrprops = material.mainPass.getShader(h3d.shader.pbr.PropsValues);
-				// pbrprops.emissiveValue = 1;
-				// pbrprops.roughnessValue = 1;
-				// pbrprops.occlusionValue = 0;
-				// pbrprops.metalnessValue = 0;
 			}
 
-			// if (this.isTSStatic && !(flags & 64 > 0)) {
-			// 	// TODO THIS SHIT
-			// }
-			// ((flags & 32) || environmentMaterial) ? new Materia
-
-			// material.mainPass.addShader(new AlphaMult());
+			if (this.isTSStatic && !(flags & 64 > 0)) {
+				var reflectivity = this.dts.matNames.length == 1 ? 1 : (environmentMaterial != null ? 0.5 : 0.333);
+				var cubemapshader = new EnvMap(this.level.sky.cubemap, reflectivity);
+				material.mainPass.addShader(cubemapshader);
+			}
 
 			this.materials.push(material);
 		}
