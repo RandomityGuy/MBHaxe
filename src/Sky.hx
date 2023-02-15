@@ -1,5 +1,7 @@
 package src;
 
+import mis.MisParser;
+import mis.MissionElement.MissionElementSky;
 import hxd.Pixels;
 import shaders.Skybox;
 import h3d.shader.pbr.PropsValues;
@@ -29,8 +31,8 @@ class Sky extends Object {
 		super();
 	}
 
-	public function init(level:MarbleWorld, onFinish:Void->Void) {
-		createSkyboxCubeTextured(this.dmlPath, texture -> {
+	public function init(level:MarbleWorld, onFinish:Void->Void, element:MissionElementSky) {
+		createSkyboxCubeTextured(this.dmlPath, element, texture -> {
 			var sky = new h3d.prim.Sphere(1, 128, 128);
 			sky.addNormals();
 			sky.addUVs();
@@ -68,7 +70,7 @@ class Sky extends Object {
 		}
 	}
 
-	function createSkyboxCubeTextured(dmlPath:String, onFinish:Texture->Void) {
+	function createSkyboxCubeTextured(dmlPath:String, element:MissionElementSky, onFinish:Texture->Void) {
 		#if (js || android)
 		dmlPath = StringTools.replace(dmlPath, "data/", "");
 		#end
@@ -93,13 +95,27 @@ class Sky extends Object {
 					}
 				}
 
+				var fogColor = MisParser.parseVector4(element.fogcolor);
+				var skySolidColor = MisParser.parseVector4(element.skysolidcolor);
+				var skyColor = fogColor;
+				if (skySolidColor.x != 0.6 || skySolidColor.y != 0.6 || skySolidColor.z != 0.6)
+					skyColor = skySolidColor;
+				if (skyColor.x > 1)
+					skyColor.x = 1 - (skyColor.x - 1) % 256 / 256;
+				if (skyColor.y > 1)
+					skyColor.y = 1 - (skyColor.y - 1) % 256 / 256;
+				if (skyColor.z > 1)
+					skyColor.z = 1 - (skyColor.z - 1) % 256 / 256;
+
+				var noSkyTexture = element.useskytextures == "0";
+
 				var worker = new ResourceLoaderWorker(() -> {
 					var fnames = [];
 					for (i in 0...6) {
 						var line = StringTools.trim(lines[i]);
 						var filenames = ResourceLoader.getFullNamesOf(dmlDirectory + '/' + line);
-						if (filenames.length == 0) {
-							var pixels = Texture.fromColor(0).capturePixels(0, 0);
+						if (filenames.length == 0 || noSkyTexture) {
+							var pixels = Texture.fromColor(skyColor.toColor()).capturePixels(0, 0);
 							skyboxImages.push(pixels);
 							// var tex = new h3d.mat.Texture();
 							// skyboxImages.push(new BitmapData(128, 128));

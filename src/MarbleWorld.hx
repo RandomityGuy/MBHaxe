@@ -355,7 +355,7 @@ class MarbleWorld extends Scheduler {
 
 		sky.dmlPath = ResourceLoader.getProperFilepath(skyElement.materiallist);
 
-		worker.addTask(fwd -> sky.init(cast this, fwd));
+		worker.addTask(fwd -> sky.init(cast this, fwd, skyElement));
 		// worker.addTask(fwd -> {
 		// 	scene.addChild(sky);
 		// 	return fwd();
