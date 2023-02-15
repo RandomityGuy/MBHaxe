@@ -34,6 +34,23 @@ class RandomPowerup extends PowerUp {
 				"sound/putimetravelvoice.wav",
 				"sound/timetravelactive.wav"
 			];
+			#if js
+			// Load all the resources of the other powerups
+			sounds = sounds.concat([
+				"shapes/items/powerup-bounce.png",
+				"shapes/items/rocket.jpg",
+				"shapes/items/shockabsorber.dts",
+				"shapes/items/shockabsorber.png",
+				"shapes/items/sji_shinysteel.png",
+				"shapes/items/superbounce.dts",
+				"shapes/items/superjump.dts",
+				"shapes/items/superspeed.dts",
+				"shapes/items/itemarrow.jpg",
+				"shapes/items/enviro1.jpg",
+				"shapes/images/helicopter.dts",
+				"shapes/images/helicopter.jpg"
+			]);
+			#end
 			var rlw = new ResourceLoaderWorker(onFinish);
 			for (sound in sounds) {
 				rlw.loadFile(sound);
