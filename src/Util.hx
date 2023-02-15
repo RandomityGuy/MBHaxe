@@ -124,10 +124,13 @@ class Util {
 
 	public static function flipImage(bitmap:hxd.Pixels, hflip:Bool, vflip:Bool) {
 		var curpixels = bitmap.clone();
-		if (hflip)
+
+		if (hflip && vflip) {
 			for (x in 0...curpixels.width) {
 				for (y in 0...curpixels.height) {
-					var psrc = ((curpixels.width - x - 1) + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel + curpixels.offset;
+					var psrc = ((curpixels.width - x - 1)
+						+ (curpixels.width - y - 1) * curpixels.width) * @:privateAccess curpixels.bytesPerPixel
+						+ curpixels.offset;
 
 					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
 
@@ -147,29 +150,54 @@ class Util {
 					}
 				}
 			}
-		if (vflip)
-			for (x in 0...curpixels.width) {
-				for (y in 0...curpixels.height) {
-					var psrc = (x + (curpixels.width - y - 1) * curpixels.width) * @:privateAccess curpixels.bytesPerPixel + curpixels.offset;
+		} else {
+			if (hflip)
+				for (x in 0...curpixels.width) {
+					for (y in 0...curpixels.height) {
+						var psrc = ((curpixels.width - x - 1) + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel + curpixels.offset;
 
-					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+						var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
 
-					switch (curpixels.format) {
-						case R8:
-							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
-						case BGRA | RGBA | ARGB:
-							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
-							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
-							bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
-							bitmap.bytes.set(pdest + 3, curpixels.bytes.get(psrc + 3));
-						case RG8:
-							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
-							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
-						default:
-							null;
+						switch (curpixels.format) {
+							case R8:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+							case BGRA | RGBA | ARGB:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+								bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
+								bitmap.bytes.set(pdest + 3, curpixels.bytes.get(psrc + 3));
+							case RG8:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							default:
+								null;
+						}
 					}
 				}
-			}
+			if (vflip)
+				for (x in 0...curpixels.width) {
+					for (y in 0...curpixels.height) {
+						var psrc = (x + (curpixels.width - y - 1) * curpixels.width) * @:privateAccess curpixels.bytesPerPixel + curpixels.offset;
+
+						var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+
+						switch (curpixels.format) {
+							case R8:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+							case BGRA | RGBA | ARGB:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+								bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
+								bitmap.bytes.set(pdest + 3, curpixels.bytes.get(psrc + 3));
+							case RG8:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							default:
+								null;
+						}
+					}
+				}
+		}
 	}
 
 	public static function splitIgnoreStringLiterals(str:String, splitter:String, strLiteralToken = '"') {

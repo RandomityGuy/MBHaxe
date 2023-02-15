@@ -329,31 +329,83 @@ class ResourceLoader {
 
 	public static function getTextureRealpath(path:String) {
 		if (zipFilesystem.exists(path.toLowerCase())) {
-			var img = new hxd.res.Image(zipFilesystem.get(path.toLowerCase()));
-			Image.setupTextureFlags = (texObj) -> {
-				texObj.flags.set(MipMapped);
-			}
-			var tex = img.toTexture();
-			tex.mipMap = Nearest;
-			var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
-			textureCache.set(path, textureresource);
+			if (StringTools.endsWith(path.toLowerCase(), ".bmp")) { // Handle bmp specially
+				var bmpContents = zipFilesystem.get(path.toLowerCase());
+				var bmpreader = new format.bmp.Reader(new haxe.io.BytesInput(bmpContents.getBytes()));
+				var bmpdata = bmpreader.read();
 
-			return textureresource;
+				var bbuf = new haxe.io.BytesBuffer();
+				var i = 0;
+				while (i < bmpdata.pixels.length) {
+					bbuf.addByte(bmpdata.pixels.get(i));
+					bbuf.addByte(bmpdata.pixels.get(i + 1));
+					bbuf.addByte(bmpdata.pixels.get(i + 2));
+					bbuf.addByte(1);
+					i += 3;
+				}
+
+				var pixs = new hxd.Pixels(bmpdata.header.width, bmpdata.header.height, bbuf.getBytes(), hxd.PixelFormat.BGRA);
+				var tex = h3d.mat.Texture.fromPixels(pixs);
+				tex.mipMap = Nearest;
+				tex.flags.set(MipMapped);
+
+				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+				textureCache.set(path, textureresource);
+
+				return textureresource;
+			} else {
+				var img = new hxd.res.Image(zipFilesystem.get(path.toLowerCase()));
+				Image.setupTextureFlags = (texObj) -> {
+					texObj.flags.set(MipMapped);
+				}
+				var tex = img.toTexture();
+				tex.mipMap = Nearest;
+				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+				textureCache.set(path, textureresource);
+
+				return textureresource;
+			}
 		}
 		if (textureCache.exists(path))
 			return textureCache.get(path);
 		if (fileSystem.exists(path)) {
-			var img = loader.load(path).toImage();
-			Image.setupTextureFlags = (texObj) -> {
-				texObj.flags.set(MipMapped);
-			}
-			var tex = img.toTexture();
-			tex.mipMap = Nearest;
-			// tex.filter = Nearest;
-			var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
-			textureCache.set(path, textureresource);
+			if (StringTools.endsWith(path.toLowerCase(), ".bmp")) { // Handle bmp specially
+				var bmpContents = zipFilesystem.get(path.toLowerCase());
+				var bmpreader = new format.bmp.Reader(new haxe.io.BytesInput(bmpContents.getBytes()));
+				var bmpdata = bmpreader.read();
 
-			return textureresource;
+				var bbuf = new haxe.io.BytesBuffer();
+				var i = 0;
+				while (i < bmpdata.pixels.length) {
+					bbuf.addByte(bmpdata.pixels.get(i));
+					bbuf.addByte(bmpdata.pixels.get(i + 1));
+					bbuf.addByte(bmpdata.pixels.get(i + 2));
+					bbuf.addByte(1);
+					i += 3;
+				}
+				var pixs = new hxd.Pixels(bmpdata.header.width, bmpdata.header.height, bbuf.getBytes(), hxd.PixelFormat.BGRA);
+				pixs.setFlip(true);
+				var tex = h3d.mat.Texture.fromPixels(pixs);
+				tex.mipMap = Nearest;
+				tex.flags.set(MipMapped);
+
+				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+				textureCache.set(path, textureresource);
+
+				return textureresource;
+			} else {
+				var img = loader.load(path).toImage();
+				Image.setupTextureFlags = (texObj) -> {
+					texObj.flags.set(MipMapped);
+				}
+				var tex = img.toTexture();
+				tex.mipMap = Nearest;
+				// tex.filter = Nearest;
+				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+				textureCache.set(path, textureresource);
+
+				return textureresource;
+			}
 		}
 		return null;
 	}
