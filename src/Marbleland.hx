@@ -88,17 +88,26 @@ class Marbleland {
 				goldMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
 				for (i in 0...goldMissions.length - 1) {
 					@:privateAccess goldMissions[i].next = goldMissions[i + 1];
+					goldMissions[i].index = i;
 				}
+				@:privateAccess goldMissions[goldMissions.length - 1].next = goldMissions[0];
+				goldMissions[goldMissions.length - 1].index = goldMissions.length - 1;
 			case 'platinum':
 				platinumMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
 				for (i in 0...platinumMissions.length - 1) {
 					@:privateAccess platinumMissions[i].next = platinumMissions[i + 1];
+					platinumMissions[i].index = i;
 				}
+				@:privateAccess platinumMissions[platinumMissions.length - 1].next = platinumMissions[0];
+				platinumMissions[platinumMissions.length - 1].index = platinumMissions.length - 1;
 			case 'ultra':
 				ultraMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
 				for (i in 0...ultraMissions.length - 1) {
 					@:privateAccess ultraMissions[i].next = ultraMissions[i + 1];
+					ultraMissions[i].index = i;
 				}
+				@:privateAccess ultraMissions[ultraMissions.length - 1].next = ultraMissions[0];
+				ultraMissions[ultraMissions.length - 1].index = ultraMissions.length - 1;
 		}
 	}
 

@@ -122,10 +122,9 @@ class Sky extends Object {
 							fnames.push("");
 							Console.error("Skybox image " + filenames[0] + " does not exist");
 						} else {
-							var pixels = ResourceLoader.getTexture(filenames[0]).resource.capturePixels(0, 0);
+							// var pixels = ResourceLoader.getTexture(filenames[0]).resource.capturePixels(0, 0);
 							fnames.push(filenames[0]);
-							// var image = ResourceLoader.getResource(filenames[0], ResourceLoader.getImage, this.imageResources).toBitmap();
-							// var pixels = image.getPixels();
+							var pixels = ResourceLoader.getImagePixels(filenames[0]);
 							skyboxImages.push(pixels);
 						}
 					}

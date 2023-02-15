@@ -410,6 +410,55 @@ class ResourceLoader {
 		return null;
 	}
 
+	public static function getImagePixels(path:String) {
+		if (zipFilesystem.exists(path.toLowerCase())) {
+			if (StringTools.endsWith(path.toLowerCase(), ".bmp")) { // Handle bmp specially
+				var bmpContents = zipFilesystem.get(path.toLowerCase());
+				var bmpreader = new format.bmp.Reader(new haxe.io.BytesInput(bmpContents.getBytes()));
+				var bmpdata = bmpreader.read();
+
+				var bbuf = new haxe.io.BytesBuffer();
+				var i = 0;
+				while (i < bmpdata.pixels.length) {
+					bbuf.addByte(bmpdata.pixels.get(i));
+					bbuf.addByte(bmpdata.pixels.get(i + 1));
+					bbuf.addByte(bmpdata.pixels.get(i + 2));
+					bbuf.addByte(1);
+					i += 3;
+				}
+
+				var pixs = new hxd.Pixels(bmpdata.header.width, bmpdata.header.height, bbuf.getBytes(), hxd.PixelFormat.BGRA);
+				return pixs;
+			} else {
+				var img = new hxd.res.Image(zipFilesystem.get(path.toLowerCase()));
+				return img.getPixels();
+			}
+		}
+		if (fileSystem.exists(path)) {
+			if (StringTools.endsWith(path.toLowerCase(), ".bmp")) { // Handle bmp specially
+				var bmpContents = zipFilesystem.get(path.toLowerCase());
+				var bmpreader = new format.bmp.Reader(new haxe.io.BytesInput(bmpContents.getBytes()));
+				var bmpdata = bmpreader.read();
+
+				var bbuf = new haxe.io.BytesBuffer();
+				var i = 0;
+				while (i < bmpdata.pixels.length) {
+					bbuf.addByte(bmpdata.pixels.get(i));
+					bbuf.addByte(bmpdata.pixels.get(i + 1));
+					bbuf.addByte(bmpdata.pixels.get(i + 2));
+					bbuf.addByte(1);
+					i += 3;
+				}
+				var pixs = new hxd.Pixels(bmpdata.header.width, bmpdata.header.height, bbuf.getBytes(), hxd.PixelFormat.BGRA);
+				return pixs;
+			} else {
+				var img = loader.load(path).toImage();
+				return img.getPixels();
+			}
+		}
+		return null;
+	}
+
 	public static function getImage(path:String) {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");

@@ -185,7 +185,8 @@ class MarbleGame {
 				world.update(dt * Debug.timeScale);
 			}
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
-				&& world.finishTime == null && world._ready) {
+				&& world.finishTime == null
+				&& world._ready) {
 				paused = !paused;
 				handlePauseGame();
 			}
