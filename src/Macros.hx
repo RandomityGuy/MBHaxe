@@ -64,12 +64,16 @@ class MarbleWorldMacros {
 					endPad = cast shape;
 			} else if (dataBlockLowerCase == "signfinish")
 				shape = new SignFinish();
+			else if (StringTools.startsWith(dataBlockLowerCase, "signplain"))
+				shape = new SignPlain(cast element);
 			else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
 				shape = new Gem(cast element);
 				this.totalGems++;
 				this.gems.push(cast shape);
 			} else if (dataBlockLowerCase == "superjumpitem")
 				shape = new SuperJump(cast element);
+			else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
+				shape = new SignCaution(cast element);
 			else if (dataBlockLowerCase == "superbounceitem")
 				shape = new SuperBounce(cast element);
 			else if (dataBlockLowerCase == "roundbumper")
