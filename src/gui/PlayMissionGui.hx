@@ -828,7 +828,7 @@ class PlayMissionGui extends GuiImage {
 				if (topScore.time < currentMission.ultimateTime) {
 					scoreColor = "#FFCC33";
 				} else if (topScore.time < currentMission.goldTime) {
-					if (currentMission.game == "gold" || currentMission.game == "Ultra")
+					if (currentMission.game == "gold" || currentMission.game.toLowerCase() == "ultra")
 						scoreColor = "#FFFF00"
 					else
 						scoreColor = "#CCCCCC";
