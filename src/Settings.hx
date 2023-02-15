@@ -75,6 +75,21 @@ typedef TouchSettings = {
 	var buttonJoystickMultiplier:Float;
 }
 
+typedef GamepadSettings = {
+	var moveXAxis:String;
+	var moveYAxis:String;
+	var cameraXAxis:String;
+	var cameraYAxis:String;
+	var jump:Array<String>;
+	var powerup:Array<String>;
+	var cameraSensitivity:Float;
+	var invertXAxis:Bool;
+	var invertYAxis:Bool;
+	var axisDeadzone:Float;
+	var respawn:Array<String>;
+	var blast:Array<String>;
+}
+
 typedef PlayStatistics = {
 	var oobs:Int;
 	var respawns:Int;
@@ -141,6 +156,21 @@ class Settings {
 		buttonJoystickMultiplier: 2.5
 	}
 
+	public static var gamepadSettings:GamepadSettings = {
+		moveXAxis: "analogX",
+		moveYAxis: "analogY",
+		cameraXAxis: "ranalogX",
+		cameraYAxis: "ranalogY",
+		jump: ["A", "LT"],
+		powerup: ["B", "RT"],
+		cameraSensitivity: 1.0,
+		invertXAxis: false,
+		invertYAxis: false,
+		axisDeadzone: 0.15,
+		respawn: ["back"],
+		blast: ["X", "LB", "RB"]
+	}
+
 	public static var playStatistics:PlayStatistics = {
 		oobs: 0,
 		respawns: 0,
@@ -200,6 +230,7 @@ class Settings {
 			options: optionsSettings,
 			controls: controlsSettings,
 			touch: touchSettings,
+			gamepad: gamepadSettings,
 			stats: playStatistics,
 			highscoreName: highscoreName,
 			marbleIndex: optionsSettings.marbleIndex,
@@ -309,6 +340,9 @@ class Settings {
 			if (touchSettings.blastButtonPos == null) {
 				touchSettings.blastButtonPos = [300, 240];
 				touchSettings.blastButtonSize = 60;
+			}
+			if (json.gamepad != null) {
+				gamepadSettings = json.gamepad;
 			}
 			if (json.stats != null) {
 				playStatistics = json.stats;

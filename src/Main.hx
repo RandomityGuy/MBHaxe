@@ -19,6 +19,7 @@ import hxd.res.DefaultFont;
 import h2d.Text;
 import h3d.Vector;
 import src.ProfilerUI;
+import src.Gamepad;
 import src.Http;
 
 class Main extends hxd.App {
@@ -71,6 +72,7 @@ class Main extends hxd.App {
 			Http.init();
 			haxe.MainLoop.add(() -> Http.loop());
 			Settings.init();
+			Gamepad.init();
 			ResourceLoader.init(s2d, () -> {
 				AudioManager.init();
 				AudioManager.playShell();

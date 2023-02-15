@@ -97,6 +97,7 @@ import src.ProfilerUI;
 import src.ResourceLoaderWorker;
 import haxe.io.Path;
 import src.Console;
+import src.Gamepad;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -998,12 +999,15 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
-		if ((Key.isPressed(Settings.controlsSettings.respawn)) && this.finishTime == null) {
+		if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
+			&& this.finishTime == null) {
 			performRestart();
 			return;
 		}
 
-		if ((Key.isDown(Settings.controlsSettings.respawn) || MarbleGame.instance.touchInput.restartButton.pressed)
+		if ((Key.isDown(Settings.controlsSettings.respawn)
+			|| MarbleGame.instance.touchInput.restartButton.pressed
+			|| Gamepad.isDown(Settings.gamepadSettings.respawn))
 			&& !this.isWatching
 			&& this.finishTime == null) {
 			if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
@@ -1017,6 +1021,7 @@ class MarbleWorld extends Scheduler {
 
 		if (Key.isPressed(Settings.controlsSettings.blast)
 			|| (MarbleGame.instance.touchInput.blastbutton.pressed)
+			|| Gamepad.isPressed(Settings.gamepadSettings.blast)
 			&& !this.isWatching
 			&& this.game == "ultra") {
 			this.marble.useBlast();
@@ -1060,7 +1065,10 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
-		if (this.outOfBounds && this.finishTime == null && Key.isDown(Settings.controlsSettings.powerup) && !this.isWatching) {
+		if (this.outOfBounds
+			&& this.finishTime == null
+			&& (Key.isDown(Settings.controlsSettings.powerup) || Gamepad.isDown(Settings.gamepadSettings.powerup))
+			&& !this.isWatching) {
 			this.restart();
 			return;
 		}
@@ -1510,7 +1518,6 @@ class MarbleWorld extends Scheduler {
 		}, (sender) -> {
 			var restartGameCode = () -> {
 				MarbleGame.canvas.popDialog(egg);
-				this.setCursorLock(true);
 				this.restart(true);
 				#if js
 				pointercontainer.hidden = true;

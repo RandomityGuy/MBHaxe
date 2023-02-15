@@ -61,6 +61,7 @@ import collision.CCDCollision.TraceInfo;
 import src.ResourceLoaderWorker;
 import src.InteriorObject;
 import src.Console;
+import src.Gamepad;
 
 class Move {
 	public var d:Vector;
@@ -1695,6 +1696,8 @@ class Marble extends GameObject {
 		var move = new Move();
 		move.d = new Vector();
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching) {
+			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
+			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
 			if (Key.isDown(Settings.controlsSettings.forward)) {
 				move.d.x -= 1;
 			}
@@ -1707,10 +1710,14 @@ class Marble extends GameObject {
 			if (Key.isDown(Settings.controlsSettings.right)) {
 				move.d.y -= 1;
 			}
-			if (Key.isDown(Settings.controlsSettings.jump) || MarbleGame.instance.touchInput.jumpButton.pressed) {
+			if (Key.isDown(Settings.controlsSettings.jump)
+				|| MarbleGame.instance.touchInput.jumpButton.pressed
+				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
 				move.jump = true;
 			}
-			if (Util.isTouchDevice() ? MarbleGame.instance.touchInput.powerupButton.pressed : Key.isDown(Settings.controlsSettings.powerup)) {
+			if (Key.isDown(Settings.controlsSettings.powerup)
+				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
+				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
 				move.powerup = true;
 			}
 			if (MarbleGame.instance.touchInput.movementInput.pressed) {

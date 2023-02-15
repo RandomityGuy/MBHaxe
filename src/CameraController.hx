@@ -26,6 +26,7 @@ import h3d.Camera;
 import h3d.Vector;
 import hxsl.Types.Matrix;
 import h3d.scene.Scene;
+import src.Gamepad;
 
 enum CameraMode {
 	FreeOrbit;
@@ -160,18 +161,18 @@ class CameraController extends Object {
 
 		var lerpt = hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
-		if (Key.isDown(Settings.controlsSettings.camForward)) {
-			nextCameraPitch += 0.75 * 5 * dt;
-		}
-		if (Key.isDown(Settings.controlsSettings.camBackward)) {
-			nextCameraPitch -= 0.75 * 5 * dt;
-		}
-		if (Key.isDown(Settings.controlsSettings.camLeft)) {
-			nextCameraYaw -= 0.75 * 5 * dt;
-		}
-		if (Key.isDown(Settings.controlsSettings.camRight)) {
-			nextCameraYaw += 0.75 * 5 * dt;
-		}
+		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
+			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
+			+ Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis);
+		if (Settings.gamepadSettings.invertYAxis)
+			cameraPitchDelta = -cameraPitchDelta;
+		nextCameraPitch += 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
+		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0)
+			- (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
+			+ Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis);
+			if (Settings.gamepadSettings.invertXAxis)
+				cameraYawDelta = -cameraYawDelta;
+		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
