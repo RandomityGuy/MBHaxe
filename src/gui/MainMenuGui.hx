@@ -8,6 +8,7 @@ import src.ResourceLoader;
 import src.Settings;
 import src.Util;
 import src.Replay;
+import src.Marbleland;
 
 class MainMenuGui extends GuiImage {
 	public function new() {
@@ -114,11 +115,17 @@ class MainMenuGui extends GuiImage {
 						#end
 						if (MissionList.missions == null)
 							MissionList.buildMissionList();
-						var playMis = MissionList.missions.get(repmis);
-						if (playMis != null) {
-							cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);
+						var mi = replay.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(replay.customId);
+						if (mi.isClaMission) {
+							mi.download(() -> {
+								MarbleGame.instance.watchMissionReplay(mi, replay);
+							});
 						} else {
-							cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+							if (mi != null) {
+								cast(this.parent, Canvas).marbleGame.watchMissionReplay(mi, replay);
+							} else {
+								cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
+							}
 						}
 					}
 				});
