@@ -15,11 +15,15 @@ class GuiScrollCtrl extends GuiControl {
 
 	var maxScrollY:Float;
 
-	var scrollBarY:Graphics;
+	var scrollBarY:h2d.Object;
 
 	var scrollTopTile:Tile;
 	var scrollBottomTile:Tile;
 	var scrollFillTile:Tile;
+
+	var scrollTopBmp:h2d.Bitmap;
+	var scrollBottomBmp:h2d.Bitmap;
+	var scrollFillBmp:h2d.Bitmap;
 
 	var scrollTopPressedTile:Tile;
 	var scrollBottomPressedTile:Tile;
@@ -39,7 +43,13 @@ class GuiScrollCtrl extends GuiControl {
 		this.scrollTopPressedTile = scrollBar.sub(11, 4, 10, 6);
 		this.scrollBottomPressedTile = scrollBar.sub(11, 13, 10, 6);
 		this.scrollFillPressedTile = scrollBar.sub(11, 11, 10, 1);
-		this.scrollBarY = new Graphics();
+		this.scrollBarY = new h2d.Object();
+		scrollTopBmp = new h2d.Bitmap(scrollTopTile);
+		scrollBottomBmp = new h2d.Bitmap(scrollBottomTile);
+		scrollFillBmp = new h2d.Bitmap(scrollFillTile);
+		this.scrollBarY.addChild(scrollTopBmp);
+		this.scrollBarY.addChild(scrollBottomBmp);
+		this.scrollBarY.addChild(scrollFillBmp);
 		this.scrollBarY.scale(Settings.uiScale);
 		this.clickInteractive = new Interactive(10 * Settings.uiScale, 1);
 		this.clickInteractive.onPush = (e) -> {
@@ -108,15 +118,20 @@ class GuiScrollCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 
 		if (maxScrollY < renderRect.extent.y) {
-			scrollBarY.clear();
+			scrollBarY.visible = false;
 			return;
 		}
+		scrollBarY.visible = true;
 
 		var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
-
+		var scrollYOld = scrollY;
 		this.scrollY = Util.clamp(scrollY, 0, renderRect.extent.y - scrollBarYSize * Settings.uiScale);
 
-		this.scrollBarY.setPosition(renderRect.position.x + renderRect.extent.x - 10 * Settings.uiScale, renderRect.position.y + scrollY);
+		scrollBarYSize = Math.max(scrollBarYSize, 13);
+
+		var visScrollY = Util.clamp(scrollYOld, 0, renderRect.extent.y - scrollBarYSize * Settings.uiScale);
+
+		this.scrollBarY.setPosition(renderRect.position.x + renderRect.extent.x - 10 * Settings.uiScale, renderRect.position.y + visScrollY);
 
 		this.clickInteractive.setPosition(renderRect.position.x + renderRect.extent.x - 10 * Settings.uiScale, renderRect.position.y);
 
@@ -125,19 +140,25 @@ class GuiScrollCtrl extends GuiControl {
 		if (this.dirty) {
 			if (scrollBarYSize > renderRect.extent.y) {
 				scrollBarYSize = renderRect.extent.y;
-				scrollBarY.clear();
+				scrollBarY.visible = false;
 				return;
 			}
 
-			scrollBarY.clear();
-			scrollBarY.drawTile(0, 0, pressed ? scrollTopPressedTile : scrollTopTile);
+			// scrollBarY.clear();
+			scrollTopBmp.tile = pressed ? scrollTopPressedTile : scrollTopTile;
+			scrollBottomBmp.tile = pressed ? scrollBottomPressedTile : scrollBottomTile;
+			scrollFillBmp.tile = pressed ? scrollFillPressedTile : scrollFillTile;
+			scrollBottomBmp.y = scrollBarYSize - 6;
+			scrollFillBmp.y = 6;
+			scrollFillBmp.scaleY = scrollBarYSize - 12;
+			// scrollBarY.drawTile(0, 0, pressed ? scrollTopPressedTile : scrollTopTile);
 
 			// :skull:
-			for (i in 0...cast(scrollBarYSize - 12)) {
-				scrollBarY.drawTile(0, i + 6, pressed ? scrollFillPressedTile : scrollFillTile);
-			}
+			// for (i in 0...cast(scrollBarYSize - 12)) {
+			// 	scrollBarY.drawTile(0, i + 6, pressed ? scrollFillPressedTile : scrollFillTile);
+			// }
 
-			scrollBarY.drawTile(0, scrollBarYSize - 6, pressed ? scrollBottomPressedTile : scrollBottomTile);
+			// scrollBarY.drawTile(0, scrollBarYSize - 6, pressed ? scrollBottomPressedTile : scrollBottomTile);
 
 			this.dirty = false;
 		}
