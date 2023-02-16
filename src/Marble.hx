@@ -1,5 +1,6 @@
 package src;
 
+import collision.CollisionHull;
 import h3d.shader.AlphaMult;
 import shaders.DtsTexture;
 import collision.gjk.GJK;
@@ -786,173 +787,245 @@ class Marble extends GameObject {
 				+ relLocalVel.z * deltaT * 5,
 				radius * 2);
 
-			var surfaces = obj.bvh == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.bvh.boundingSearch(boundThing);
+			var currentFinalPos = position.add(relVel.multiply(finalT)); // localpos.add(relLocalVel.multiply(finalT));
 
-			for (surf in surfaces) {
-				var surface:CollisionSurface = cast surf;
-
-				var currentFinalPos = position.add(relVel.multiply(finalT)); // localpos.add(relLocalVel.multiply(finalT));
-
-				var i = 0;
-				while (i < surface.indices.length) {
-					var verts = surface.transformTriangle(i, obj.transform, @:privateAccess obj._transformKey);
-					// var v0 = surface.points[surface.indices[i]].transformed(tform);
-					// var v = surface.points[surface.indices[i + 1]].transformed(tform);
-					// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
-					var v0 = verts.v1;
-					var v = verts.v2;
-					var v2 = verts.v3;
-					// var v0 = surface.points[surface.indices[i]].transformed(obj.transform);
-					// var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
-					// var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
-
-					var triangleVerts = [v0, v, v2];
-
-					var surfaceNormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
-					var surfaceD = -surfaceNormal.dot(v0);
-
-					// If we're going the wrong direction or not going to touch the plane, ignore...
-					if (surfaceNormal.dot(relVel) > -0.001 || surfaceNormal.dot(currentFinalPos) + surfaceD > radius) {
-						i += 3;
-						continue;
+			if (obj.go is DtsObject) {
+				var chull = cast(obj, CollisionHull);
+				var rayisecs = chull.rayCast(position, velocity);
+				if (rayisecs.length != 0) {
+					var raymax = rayisecs[0];
+					var mindist = raymax.point.distanceSq(position);
+					if (rayisecs.length > 1) {
+						for (i in 0...rayisecs.length) {
+							var dd = rayisecs[i].point.distanceSq(position);
+							if (dd < mindist) {
+								mindist = dd;
+								raymax = rayisecs[i];
+							}
+						}
 					}
+					var collidePoint = raymax.point;
+					var collideT = (collidePoint.sub(velocity.normalized().multiply(radius)).sub(position).length()) / velocity.length();
+					if (collideT < finalT && collideT > 0.0001) {
+						finalT = collideT;
+						currentFinalPos = position.add(relVel.multiply(finalT));
+					}
+				}
+			} else {
+				var surfaces = obj.bvh == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.bvh.boundingSearch(boundThing);
 
-					// var v0T = v0.transformed(obj.transform);
-					// var vT = v.transformed(obj.transform);
-					// var v2T = v2.transformed(obj.transform);
-					// var vN = surfaceNormal.transformed3x3(obj.transform);
-					testTriangles.push({
-						v: [v0, v, v2],
-						n: surfaceNormal,
-						edge: surf.edgeData[Math.floor(i / 3)],
-						concavity: surface.edgeConcavities.slice(Math.floor(i / 3), Math.floor(i / 3) + 3)
-					});
+				for (surf in surfaces) {
+					var surface:CollisionSurface = cast surf;
 
-					// Time until collision with the plane
-					var collisionTime = (radius - position.dot(surfaceNormal) - surfaceD) / surfaceNormal.dot(relVel);
+					currentFinalPos = position.add(relVel.multiply(finalT));
 
-					// Are we going to touch the plane during this time step?
-					if (collisionTime >= 0.000001 && finalT >= collisionTime) {
-						var collisionPoint = position.add(relVel.multiply(collisionTime));
-						// var lastPoint = v2;
-						// var j = 0;
-						// while (j < 3) {
-						// 	var testPoint = surface.points[surface.indices[i + j]];
-						// 	if (testPoint != lastPoint) {
-						// 		var a = surfaceNormal;
-						// 		var b = lastPoint.sub(testPoint);
-						// 		var planeNorm = b.cross(a);
-						// 		var planeD = -planeNorm.dot(testPoint);
-						// 		lastPoint = testPoint;
-						// 		// if we are on the far side of the edge
-						// 		if (planeNorm.dot(collisionPoint) + planeD >= 0.0)
-						// 			break;
-						// 	}
-						// 	j++;
-						// }
-						// If we're inside the poly, just get the position
-						if (Collision.PointInTriangle(collisionPoint, v0, v, v2)) {
-							finalT = collisionTime;
-							currentFinalPos = position.add(relVel.multiply(finalT));
-							found = true;
-							// iterationFound = true;
+					var i = 0;
+					while (i < surface.indices.length) {
+						var verts = surface.transformTriangle(i, obj.transform, @:privateAccess obj._transformKey);
+						// var v0 = surface.points[surface.indices[i]].transformed(tform);
+						// var v = surface.points[surface.indices[i + 1]].transformed(tform);
+						// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
+						var v0 = verts.v1;
+						var v = verts.v2;
+						var v2 = verts.v3;
+						// var v0 = surface.points[surface.indices[i]].transformed(obj.transform);
+						// var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
+						// var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
+
+						var triangleVerts = [v0, v, v2];
+
+						var surfaceNormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
+						if (obj is DtsObject)
+							surfaceNormal.multiply(-1);
+						var surfaceD = -surfaceNormal.dot(v0);
+
+						// If we're going the wrong direction or not going to touch the plane, ignore...
+						if (surfaceNormal.dot(relVel) > -0.001 || surfaceNormal.dot(currentFinalPos) + surfaceD > radius) {
 							i += 3;
 							continue;
 						}
-					}
-					// We *might* be colliding with an edge
 
-					var lastVert = v2;
+						// var v0T = v0.transformed(obj.transform);
+						// var vT = v.transformed(obj.transform);
+						// var v2T = v2.transformed(obj.transform);
+						// var vN = surfaceNormal.transformed3x3(obj.transform);
+						testTriangles.push({
+							v: [v0, v, v2],
+							n: surfaceNormal,
+							edge: surf.edgeData[Math.floor(i / 3)],
+							concavity: surface.edgeConcavities.slice(Math.floor(i / 3), Math.floor(i / 3) + 3)
+						});
 
-					var radSq = radius * radius;
-					for (iter in 0...3) {
-						var thisVert = triangleVerts[iter];
+						// Time until collision with the plane
+						var collisionTime = (radius - position.dot(surfaceNormal) - surfaceD) / surfaceNormal.dot(relVel);
 
-						var vertDiff = lastVert.sub(thisVert);
-						var posDiff = position.sub(thisVert);
-
-						var velRejection = vertDiff.cross(relVel);
-						var posRejection = vertDiff.cross(posDiff);
-
-						// Build a quadratic equation to solve for the collision time
-						var a = velRejection.lengthSq();
-						var b = 2 * posRejection.dot(velRejection);
-						var c = (posRejection.lengthSq() - vertDiff.lengthSq() * radSq);
-
-						var discriminant = b * b - (4 * a * c);
-
-						// If it's not quadratic or has no solution, ignore this edge.
-						if (a == 0.0 || discriminant < 0.0) {
-							lastVert = thisVert;
-							continue;
-						}
-
-						var oneOverTwoA = 0.5 / a;
-						var discriminantSqrt = Math.sqrt(discriminant);
-
-						// Solve using the quadratic formula
-						var edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
-						var edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
-
-						// Make sure the 2 times are in ascending order
-						if (edgeCollisionTime2 < edgeCollisionTime) {
-							var temp = edgeCollisionTime2;
-							edgeCollisionTime2 = edgeCollisionTime;
-							edgeCollisionTime = temp;
-						}
-
-						// If the collision doesn't happen on this time step, ignore this edge.
-						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert = thisVert;
-							continue;
-						}
-
-						// Check if the collision hasn't already happened
-						if (edgeCollisionTime >= 0.000001) {
-							// if (edgeCollisionTime < 0.000001) {
-							// 	edgeCollisionTime = edgeCollisionTime2;
+						// Are we going to touch the plane during this time step?
+						if (collisionTime >= 0.000001 && finalT >= collisionTime) {
+							var collisionPoint = position.add(relVel.multiply(collisionTime));
+							// var lastPoint = v2;
+							// var j = 0;
+							// while (j < 3) {
+							// 	var testPoint = surface.points[surface.indices[i + j]];
+							// 	if (testPoint != lastPoint) {
+							// 		var a = surfaceNormal;
+							// 		var b = lastPoint.sub(testPoint);
+							// 		var planeNorm = b.cross(a);
+							// 		var planeD = -planeNorm.dot(testPoint);
+							// 		lastPoint = testPoint;
+							// 		// if we are on the far side of the edge
+							// 		if (planeNorm.dot(collisionPoint) + planeD >= 0.0)
+							// 			break;
+							// 	}
+							// 	j++;
 							// }
-							// if (edgeCollisionTime < 0.00001)
-							// 	continue;
-							// if (edgeCollisionTime > finalT)
-							// 	continue;
-
-							var edgeLen = vertDiff.length();
-
-							var relativeCollisionPos = position.add(relVel.multiply(edgeCollisionTime)).sub(thisVert);
-
-							var distanceAlongEdge = relativeCollisionPos.dot(vertDiff) / edgeLen;
-
-							// If the collision happens outside the boundaries of the edge, ignore this edge.
-							if (-radius > distanceAlongEdge || edgeLen + radius < distanceAlongEdge) {
-								lastVert = thisVert;
-								continue;
-							}
-
-							// If the collision is within the edge, resolve the collision and continue.
-							if (distanceAlongEdge >= 0.0 && distanceAlongEdge <= edgeLen) {
-								finalT = edgeCollisionTime;
+							// If we're inside the poly, just get the position
+							if (Collision.PointInTriangle(collisionPoint, v0, v, v2)) {
+								finalT = collisionTime;
 								currentFinalPos = position.add(relVel.multiply(finalT));
-								lastContactPos = vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert);
-								lastVert = thisVert;
 								found = true;
 								// iterationFound = true;
+								i += 3;
 								continue;
 							}
 						}
+						// We *might* be colliding with an edge
 
-						// This is what happens when we collide with a corner
+						var lastVert = v2;
 
-						a = relVel.lengthSq();
+						var radSq = radius * radius;
+						for (iter in 0...3) {
+							var thisVert = triangleVerts[iter];
 
-						// Build a quadratic equation to solve for the collision time
-						var posVertDiff = position.sub(thisVert);
-						b = 2 * posVertDiff.dot(relVel);
-						c = posVertDiff.lengthSq() - radSq;
-						discriminant = b * b - (4 * a * c);
+							var vertDiff = lastVert.sub(thisVert);
+							var posDiff = position.sub(thisVert);
 
-						// If it's quadratic and has a solution ...
-						if (a != 0.0 && discriminant >= 0.0) {
+							var velRejection = vertDiff.cross(relVel);
+							var posRejection = vertDiff.cross(posDiff);
+
+							// Build a quadratic equation to solve for the collision time
+							var a = velRejection.lengthSq();
+							var b = 2 * posRejection.dot(velRejection);
+							var c = (posRejection.lengthSq() - vertDiff.lengthSq() * radSq);
+
+							var discriminant = b * b - (4 * a * c);
+
+							// If it's not quadratic or has no solution, ignore this edge.
+							if (a == 0.0 || discriminant < 0.0) {
+								lastVert = thisVert;
+								continue;
+							}
+
+							var oneOverTwoA = 0.5 / a;
+							var discriminantSqrt = Math.sqrt(discriminant);
+
+							// Solve using the quadratic formula
+							var edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
+							var edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
+
+							// Make sure the 2 times are in ascending order
+							if (edgeCollisionTime2 < edgeCollisionTime) {
+								var temp = edgeCollisionTime2;
+								edgeCollisionTime2 = edgeCollisionTime;
+								edgeCollisionTime = temp;
+							}
+
+							// If the collision doesn't happen on this time step, ignore this edge.
+							if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
+								lastVert = thisVert;
+								continue;
+							}
+
+							// Check if the collision hasn't already happened
+							if (edgeCollisionTime >= 0.000001) {
+								// if (edgeCollisionTime < 0.000001) {
+								// 	edgeCollisionTime = edgeCollisionTime2;
+								// }
+								// if (edgeCollisionTime < 0.00001)
+								// 	continue;
+								// if (edgeCollisionTime > finalT)
+								// 	continue;
+
+								var edgeLen = vertDiff.length();
+
+								var relativeCollisionPos = position.add(relVel.multiply(edgeCollisionTime)).sub(thisVert);
+
+								var distanceAlongEdge = relativeCollisionPos.dot(vertDiff) / edgeLen;
+
+								// If the collision happens outside the boundaries of the edge, ignore this edge.
+								if (-radius > distanceAlongEdge || edgeLen + radius < distanceAlongEdge) {
+									lastVert = thisVert;
+									continue;
+								}
+
+								// If the collision is within the edge, resolve the collision and continue.
+								if (distanceAlongEdge >= 0.0 && distanceAlongEdge <= edgeLen) {
+									finalT = edgeCollisionTime;
+									currentFinalPos = position.add(relVel.multiply(finalT));
+									lastContactPos = vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert);
+									lastVert = thisVert;
+									found = true;
+									// iterationFound = true;
+									continue;
+								}
+							}
+
+							// This is what happens when we collide with a corner
+
+							a = relVel.lengthSq();
+
+							// Build a quadratic equation to solve for the collision time
+							var posVertDiff = position.sub(thisVert);
+							b = 2 * posVertDiff.dot(relVel);
+							c = posVertDiff.lengthSq() - radSq;
+							discriminant = b * b - (4 * a * c);
+
+							// If it's quadratic and has a solution ...
+							if (a != 0.0 && discriminant >= 0.0) {
+								oneOverTwoA = 0.5 / a;
+								discriminantSqrt = Math.sqrt(discriminant);
+
+								// Solve using the quadratic formula
+								edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
+								edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
+
+								// Make sure the 2 times are in ascending order
+								if (edgeCollisionTime2 < edgeCollisionTime) {
+									var temp = edgeCollisionTime2;
+									edgeCollisionTime2 = edgeCollisionTime;
+									edgeCollisionTime = temp;
+								}
+
+								// If the collision doesn't happen on this time step, ignore this corner
+								if (edgeCollisionTime2 > 0.0001 && finalT > edgeCollisionTime) {
+									// Adjust to make sure very small negative times are counted as zero
+									if (edgeCollisionTime <= 0.0 && edgeCollisionTime > -0.0001)
+										edgeCollisionTime = 0.0;
+
+									// Check if the collision hasn't already happened
+									if (edgeCollisionTime >= 0.000001) {
+										// Resolve it and continue
+										finalT = edgeCollisionTime;
+										currentFinalPos = position.add(relVel.multiply(finalT));
+										lastContactPos = thisVert;
+										found = true;
+										// iterationFound = true;
+									}
+								}
+							}
+
+							// We still need to check the other corner ...
+							// Build one last quadratic equation to solve for the collision time
+							posVertDiff = position.sub(lastVert);
+							b = 2 * posVertDiff.dot(relVel);
+							c = posVertDiff.lengthSq() - radSq;
+							discriminant = b * b - (4 * a * c);
+
+							// If it's not quadratic or has no solution, then skip this corner
+							if (a == 0.0 || discriminant < 0.0) {
+								lastVert = thisVert;
+								continue;
+							}
+
 							oneOverTwoA = 0.5 / a;
 							discriminantSqrt = Math.sqrt(discriminant);
 
@@ -967,73 +1040,29 @@ class Marble extends GameObject {
 								edgeCollisionTime = temp;
 							}
 
-							// If the collision doesn't happen on this time step, ignore this corner
-							if (edgeCollisionTime2 > 0.0001 && finalT > edgeCollisionTime) {
-								// Adjust to make sure very small negative times are counted as zero
-								if (edgeCollisionTime <= 0.0 && edgeCollisionTime > -0.0001)
-									edgeCollisionTime = 0.0;
-
-								// Check if the collision hasn't already happened
-								if (edgeCollisionTime >= 0.000001) {
-									// Resolve it and continue
-									finalT = edgeCollisionTime;
-									currentFinalPos = position.add(relVel.multiply(finalT));
-									lastContactPos = thisVert;
-									found = true;
-									// iterationFound = true;
-								}
+							if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
+								lastVert = thisVert;
+								continue;
 							}
-						}
 
-						// We still need to check the other corner ...
-						// Build one last quadratic equation to solve for the collision time
-						posVertDiff = position.sub(lastVert);
-						b = 2 * posVertDiff.dot(relVel);
-						c = posVertDiff.lengthSq() - radSq;
-						discriminant = b * b - (4 * a * c);
+							if (edgeCollisionTime <= 0.0 && edgeCollisionTime > -0.0001)
+								edgeCollisionTime = 0;
 
-						// If it's not quadratic or has no solution, then skip this corner
-						if (a == 0.0 || discriminant < 0.0) {
+							if (edgeCollisionTime < 0.000001) {
+								lastVert = thisVert;
+								continue;
+							}
+
+							finalT = edgeCollisionTime;
+							currentFinalPos = position.add(relVel.multiply(finalT));
+
 							lastVert = thisVert;
-							continue;
+							found = true;
+							// iterationFound = true;
 						}
 
-						oneOverTwoA = 0.5 / a;
-						discriminantSqrt = Math.sqrt(discriminant);
-
-						// Solve using the quadratic formula
-						edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
-						edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
-
-						// Make sure the 2 times are in ascending order
-						if (edgeCollisionTime2 < edgeCollisionTime) {
-							var temp = edgeCollisionTime2;
-							edgeCollisionTime2 = edgeCollisionTime;
-							edgeCollisionTime = temp;
-						}
-
-						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert = thisVert;
-							continue;
-						}
-
-						if (edgeCollisionTime <= 0.0 && edgeCollisionTime > -0.0001)
-							edgeCollisionTime = 0;
-
-						if (edgeCollisionTime < 0.000001) {
-							lastVert = thisVert;
-							continue;
-						}
-
-						finalT = edgeCollisionTime;
-						currentFinalPos = position.add(relVel.multiply(finalT));
-
-						lastVert = thisVert;
-						found = true;
-						// iterationFound = true;
+						i += 3;
 					}
-
-					i += 3;
 				}
 			}
 		}

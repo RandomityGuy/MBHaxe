@@ -551,6 +551,7 @@ class DtsObject extends GameObject {
 			hs.generateBoundingBox();
 			chull.addSurface(hs);
 			chull.generateBoundingBox();
+			chull.finalize();
 			hulls.push(chull);
 		}
 		return hulls;
