@@ -78,6 +78,7 @@ class MarbleGame {
 				case x: x;
 			};
 			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+			@:privateAccess Window.getInstance().onMouseDown(e);
 		});
 		pointercontainer.addEventListener('mouseup', (e:js.html.MouseEvent) -> {
 			var buttonCode = switch (e.button) {
@@ -86,6 +87,7 @@ class MarbleGame {
 				case x: x;
 			};
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+			@:privateAccess Window.getInstance().onMouseUp(e);
 		});
 		canvas.addEventListener('mousedown', (e:js.html.MouseEvent) -> {
 			var buttonCode = switch (e.button) {
@@ -103,13 +105,18 @@ class MarbleGame {
 			};
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
 		});
+		pointercontainer.addEventListener('keypress', (e:js.html.KeyboardEvent) -> {
+			@:privateAccess Window.getInstance().onKeyPress(e);
+		});
 		pointercontainer.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+			@:privateAccess Window.getInstance().onKeyDown(e);
 		});
 		pointercontainer.addEventListener('keyup', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+			@:privateAccess Window.getInstance().onKeyUp(e);
 		});
 		js.Browser.window.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
@@ -163,7 +170,8 @@ class MarbleGame {
 				world.update(dt);
 			}
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
-				&& world.finishTime == null && world._ready) {
+				&& world.finishTime == null
+				&& world._ready) {
 				paused = !paused;
 				handlePauseGame();
 			}
