@@ -600,9 +600,13 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyGoldCustom.setExtent(new Vector(120, 31));
 		pmDifficultyGoldCustom.txtCtrl.text.text = " Gold";
 		pmDifficultyGoldCustom.pressedAction = (e) -> {
-			currentList = Marbleland.goldMissions;
-			currentCategory = "custom";
-			setCategoryFunc("gold", "custom");
+			if (Marbleland.goldMissions.length == 0) {
+				var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
+				MarbleGame.canvas.pushDialog(mbo);
+			} else {
+				currentCategory = "custom";
+				setCategoryFunc("gold", "custom");
+			}
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyGoldCustom);
 
@@ -612,9 +616,13 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyPlatinumCustom.setExtent(new Vector(120, 31));
 		pmDifficultyPlatinumCustom.txtCtrl.text.text = " Platinum";
 		pmDifficultyPlatinumCustom.pressedAction = (e) -> {
-			currentList = Marbleland.goldMissions;
-			currentCategory = "custom";
-			setCategoryFunc("platinum", "custom");
+			if (Marbleland.platinumMissions.length == 0) {
+				var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
+				MarbleGame.canvas.pushDialog(mbo);
+			} else {
+				currentCategory = "custom";
+				setCategoryFunc("platinum", "custom");
+			}
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyPlatinumCustom);
 
@@ -624,9 +632,13 @@ class PlayMissionGui extends GuiImage {
 		pmDifficultyUltraCustom.setExtent(new Vector(120, 31));
 		pmDifficultyUltraCustom.txtCtrl.text.text = " Ultra";
 		pmDifficultyUltraCustom.pressedAction = (e) -> {
-			currentList = Marbleland.goldMissions;
-			currentCategory = "custom";
-			setCategoryFunc("ultra", "custom");
+			if (Marbleland.ultraMissions.length == 0) {
+				var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
+				MarbleGame.canvas.pushDialog(mbo);
+			} else {
+				currentCategory = "custom";
+				setCategoryFunc("ultra", "custom");
+			}
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraCustom);
 
