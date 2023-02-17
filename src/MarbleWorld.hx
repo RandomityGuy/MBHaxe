@@ -1404,6 +1404,7 @@ class MarbleWorld extends Scheduler {
 						var chull = cast(collider, collision.CollisionHull);
 						var chullinvT = @:privateAccess chull.invTransform.clone();
 						chullinvT.clone();
+						chullinvT.transpose();
 						for (surface in chull.surfaces) {
 							var i = 0;
 							while (i < surface.indices.length) {

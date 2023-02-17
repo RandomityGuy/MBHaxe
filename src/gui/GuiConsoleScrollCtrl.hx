@@ -16,12 +16,16 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 	var maxScrollY:Float;
 
-	var scrollBarY:Graphics;
+	var scrollBarY:h2d.Object;
 	var scrollTrack:Bitmap;
 
 	var scrollTopTile:Tile;
 	var scrollBottomTile:Tile;
 	var scrollFillTile:Tile;
+
+	var scrollTopBmp:h2d.Bitmap;
+	var scrollBottomBmp:h2d.Bitmap;
+	var scrollFillBmp:h2d.Bitmap;
 
 	var scrollTopPressedTile:Tile;
 	var scrollBottomPressedTile:Tile;
@@ -75,6 +79,12 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		this.addChild(scrollDownButton);
 
 		this.scrollBarY = new Graphics();
+		scrollTopBmp = new h2d.Bitmap(scrollTopTile);
+		scrollBottomBmp = new h2d.Bitmap(scrollBottomTile);
+		scrollFillBmp = new h2d.Bitmap(scrollFillTile);
+		this.scrollBarY.addChild(scrollTopBmp);
+		this.scrollBarY.addChild(scrollBottomBmp);
+		this.scrollBarY.addChild(scrollFillBmp);
 		this.scrollBarY.scale(Settings.uiScale);
 		this.clickInteractive = new Interactive(18 * Settings.uiScale, 1);
 		this.clickInteractive.onPush = (e) -> {
@@ -154,9 +164,10 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 
 		if (maxScrollY < renderRect.extent.y) {
-			scrollBarY.clear();
+			scrollBarY.visible = false;
 			return;
 		}
+		scrollBarY.visible = true;
 
 		this.scrollTrack.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y);
 
@@ -182,22 +193,30 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		if (this.dirty) {
 			if (scrollBarYSize > scrollExtentY) {
 				scrollBarYSize = scrollExtentY;
-				scrollBarY.clear();
+				scrollBarY.visible = false;
+				// scrollBarY.clear();
 				return;
 			}
 
-			scrollBarY.clear();
+			scrollTopBmp.tile = pressed ? scrollTopPressedTile : scrollTopTile;
+			scrollBottomBmp.tile = pressed ? scrollBottomPressedTile : scrollBottomTile;
+			scrollFillBmp.tile = pressed ? scrollFillPressedTile : scrollFillTile;
+			scrollBottomBmp.y = scrollBarYSize - 8;
+			scrollFillBmp.y = 8;
+			scrollFillBmp.scaleY = scrollBarYSize - 12;
 
-			scrollBarY.tileWrap = true;
+			// scrollBarY.clear();
 
-			scrollBarY.drawTile(0, 0, pressed ? scrollTopPressedTile : scrollTopTile);
+			// scrollBarY.tileWrap = true;
 
-			// :skull:
-			for (i in 0...cast(scrollBarYSize - 12)) {
-				scrollBarY.drawTile(0, i + 8, pressed ? scrollFillPressedTile : scrollFillTile);
-			}
+			// scrollBarY.drawTile(0, 0, pressed ? scrollTopPressedTile : scrollTopTile);
 
-			scrollBarY.drawTile(0, scrollBarYSize - 8, pressed ? scrollBottomPressedTile : scrollBottomTile);
+			// // :skull:
+			// for (i in 0...cast(scrollBarYSize - 12)) {
+			// 	scrollBarY.drawTile(0, i + 8, pressed ? scrollFillPressedTile : scrollFillTile);
+			// }
+
+			// scrollBarY.drawTile(0, scrollBarYSize - 8, pressed ? scrollBottomPressedTile : scrollBottomTile);
 
 			this.dirty = false;
 		}
