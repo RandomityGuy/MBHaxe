@@ -50,14 +50,23 @@ class MainMenuGui extends GuiImage {
 		siteButton.vertSizing = Top;
 		siteButton.position = new Vector(363, 664);
 		siteButton.extent = new Vector(400, 30);
-		siteButton.pressedAction = (sender) -> {}
+		siteButton.pressedAction = (sender) -> {
+			#if sys
+			hxd.System.openURL("https://marbleblast.com");
+			#end
+			#if js
+			#end
+		}
 		mainMenuContent.addChild(siteButton);
 
-		var motdButton = new GuiImage(ResourceLoader.getResource('data/ui/menu/totd_i.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var motdButton = new GuiButton(loadButtonImages('data/ui/menu/changelog'));
 		motdButton.horizSizing = Left;
 		motdButton.vertSizing = Top;
 		motdButton.position = new Vector(706, 536);
 		motdButton.extent = new Vector(191, 141);
+		motdButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.pushDialog(new VersionGui());
+		}
 		mainMenuContent.addChild(motdButton);
 
 		var playButton = new GuiButton(loadButtonImages("data/ui/menu/play"));
