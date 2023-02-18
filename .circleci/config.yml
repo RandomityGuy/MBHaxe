@@ -184,7 +184,7 @@ jobs:
             cd hashlink
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DWITH_SSL=OFF -DWITH_UV=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
@@ -225,7 +225,7 @@ jobs:
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll} -lsdl2 -lhl
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll} -lsdl2 -lhl
 
       - run:
           name: Package app bundle
@@ -266,8 +266,8 @@ jobs:
             rm -rf "macos-dist/MarbleBlast Platinum.app.in"
             zip -r MBHaxe-Platinum.zip macos-dist/
 
-      - store_artifacts:
-          path: ~/MBHaxe/MBHaxe-Platinum.zip
+      # - store_artifacts:
+      #     path: ~/MBHaxe/MBHaxe-Platinum.zip
 
   build-win:
     executor: 
@@ -375,6 +375,8 @@ jobs:
               cp ~/deps/hashlink/x64/Release/ui.hdll .
               cp ~/deps/hashlink/x64/Release/openal.hdll .
               cp ~/deps/hashlink/x64/Release/sdl.hdll .
+              cp ~/deps/hashlink/x64/Release/ssl.hdll .
+              cp ~/deps/hashlink/x64/Release/uv.hdll .
               cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
               cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 
         - run:
@@ -383,8 +385,8 @@ jobs:
               cd ~/project
               7z a MBHaxe-Platinum-Win.zip release/
 
-        - store_artifacts:
-            path: ~/project/MBHaxe-Platinum-Win.zip
+        # - store_artifacts:
+        #     path: ~/project/MBHaxe-Platinum-Win.zip
 
 
 # Invoke jobs via workflows
