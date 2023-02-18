@@ -235,7 +235,7 @@ jobs:
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll} -lsdl2 -lhl
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll} -lsdl2 -lhl
 
       - run:
           name: Package app bundle
@@ -245,7 +245,7 @@ jobs:
             cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
-            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib} .
+            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll} .
             cp /usr/local/lib/libhl.1.13.0.dylib libhl.1.dylib
             cp /usr/local/lib/libogg.0.8.5.dylib libogg.0.dylib
             cp /usr/local/lib/libopenal.1.22.2.dylib libopenal.1.dylib
@@ -255,7 +255,7 @@ jobs:
             cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
             cp /usr/local/lib/libvorbisenc.2.0.12.dylib libvorbisenc.2.0.12.dylib
             cp /usr/local/lib/libz.1.2.13.dylib libz.1.dylib
-            cp /usr/local/lib/libuv.1.44.2.dylib libuv.1.44.2.dylib
+            cp /usr/local/lib/libuv.1.dylib libuv.1.dylib
             # These libraries have dangling RPATHs
             install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib
             for i in fmt.hdll libpng16.16.dylib
