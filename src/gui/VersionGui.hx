@@ -1,5 +1,6 @@
 package gui;
 
+import src.Http;
 import src.MarbleGame;
 import hxd.res.BitmapFont;
 import h3d.Vector;
@@ -22,17 +23,6 @@ class VersionGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var noButton = new GuiButton(loadButtonImages("data/ui/loading/cancel"));
-		noButton.position = new Vector(400, 370);
-		noButton.extent = new Vector(88, 41);
-		noButton.vertSizing = Top;
-		noButton.accelerator = hxd.Key.ESCAPE;
-		noButton.gamepadAccelerator = ["B"];
-		noButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.popDialog(this);
-		}
-		this.addChild(noButton);
-
 		var dlButton = new GuiButton(loadButtonImages("data/ui/motd/ok"));
 		dlButton.position = new Vector(500, 370);
 		dlButton.extent = new Vector(88, 41);
@@ -43,14 +33,15 @@ class VersionGui extends GuiImage {
 		this.addChild(dlButton);
 
 		var scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
-		scrollCtrl.position = new Vector(31, 10);
-		scrollCtrl.extent = new Vector(568, 337);
+		scrollCtrl.position = new Vector(31, 30);
+		scrollCtrl.extent = new Vector(568, 317);
 		this.addChild(scrollCtrl);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
 		var arial14 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+		var arial16 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
 
 		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
 		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
@@ -74,12 +65,28 @@ class VersionGui extends GuiImage {
 			}
 		}
 
-		var changelogContent = new GuiMLText(arial14, mlFontLoader);
-		changelogContent.position = new Vector(0, 20);
-		changelogContent.extent = new Vector(566, 81);
+		var changelogContent = new GuiMLText(markerFelt18, mlFontLoader);
+		changelogContent.position = new Vector(0, 0);
+		changelogContent.extent = new Vector(566, 317);
 		changelogContent.text.textColor = 0;
 		changelogContent.scrollable = true;
-		changelogContent.text.text = "CHNAGELOG";
+		changelogContent.text.text = "Loading changelog, please wait.<br/>";
+		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
+			var mdtext = res.toString();
+			var res = "";
+			changelogContent.text.text = "";
+			for (line in mdtext.split("\n")) {
+				if (StringTools.startsWith(line, "#")) {
+					line = StringTools.replace(line, "#", "");
+					line = '<font face="MarkerFelt24">' + line + "</font>";
+				}
+				res += line + "<br/>";
+			}
+			changelogContent.text.text += res;
+			scrollCtrl.setScrollMax(changelogContent.text.textHeight);
+		}, (e) -> {
+			changelogContent.text.text = "Failed to fetch changelog.";
+		});
 		scrollCtrl.addChild(changelogContent);
 	}
 }
