@@ -56,6 +56,7 @@ class MainMenuGui extends GuiImage {
 			hxd.System.openURL("https://marbleblast.com");
 			#end
 			#if js
+			js.Browser.window.open("https://marbleblast.com");
 			#end
 		}
 		mainMenuContent.addChild(siteButton);
