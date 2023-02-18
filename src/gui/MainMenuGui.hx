@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.filter.DropShadow;
 import src.MarbleGame;
 import gui.GuiControl.MouseState;
 import hxd.res.BitmapFont;
@@ -25,7 +26,7 @@ class MainMenuGui extends GuiImage {
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var domcasual32 = domcasual32b.toSdfFont(cast 42 * Settings.uiScale, MultiChannel);
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -174,9 +175,10 @@ class MainMenuGui extends GuiImage {
 
 		versionText.horizSizing = Left;
 		versionText.vertSizing = Bottom;
-		versionText.position = new Vector(502, 66);
+		versionText.position = new Vector(502, 61);
 		versionText.extent = new Vector(97, 72);
 		versionText.text.text = "<p align=\"center\">1.4.0</p>";
+		versionText.text.filter = new DropShadow(1.414, 0.785, 0x3333337F, 1, 0, 0.7, 1, true);
 		this.addChild(versionText);
 	}
 }
