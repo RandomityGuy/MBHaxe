@@ -275,10 +275,10 @@ jobs:
           command: |
             cd ~/MBHaxe
             rm -rf "macos-dist/MarbleBlast Platinum.app.in"
-            zip -r MBHaxe-Platinum.zip macos-dist/
+            zip -r MBHaxe-Platinum-Mac.zip macos-dist/
 
-      # - store_artifacts:
-      #     path: ~/MBHaxe/MBHaxe-Platinum.zip
+      - store_artifacts:
+          path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
 
   build-win:
     executor: 
@@ -396,8 +396,8 @@ jobs:
               cd ~/project
               7z a MBHaxe-Platinum-Win.zip release/
 
-        # - store_artifacts:
-        #     path: ~/project/MBHaxe-Platinum-Win.zip
+        - store_artifacts:
+            path: ~/project/MBHaxe-Platinum-Win.zip
 
 
 # Invoke jobs via workflows

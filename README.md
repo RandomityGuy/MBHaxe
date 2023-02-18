@@ -1,7 +1,8 @@
 # MBHaxe
 A Haxe port of Marble Blast Gold and Platinum, name subject to change.
-The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/OpenMBU) along with my own collision detection code, game logic was partially from scratch and taken with permission from [Marble Blast Web Port](https://github.com/Vanilagy/MarbleBlast).
+The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/OpenMBU) along with my own collision detection code, game logic was partially from scratch and taken with permission from [Marble Blast Web Port](https://github.com/Vanilagy/MarbleBlast).  
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H5FRTTL)
 # Play
 ## Web Browser
 The browser port supports touch controls, meaning it can be played on mobile devices.
@@ -51,6 +52,7 @@ If the build dependencies are fullfilled, compile with `haxe compile-js.hxml` an
 
 ## MacOS
 See [here](README-macOS.md)
+
 
 # FAQ
 
