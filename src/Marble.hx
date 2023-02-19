@@ -1127,6 +1127,7 @@ class Marble extends GameObject {
 								found = true;
 								// iterationFound = true;
 								i += 3;
+								// Debug.drawSphere(currentFinalPos, radius);
 								continue;
 							}
 						}
@@ -1206,6 +1207,7 @@ class Marble extends GameObject {
 									lastContactPos = vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert);
 									lastVert = thisVert;
 									found = true;
+									// Debug.drawSphere(currentFinalPos, radius);
 									// iterationFound = true;
 									continue;
 								}
@@ -1250,6 +1252,7 @@ class Marble extends GameObject {
 										currentFinalPos = position.add(relVel.multiply(finalT));
 										lastContactPos = thisVert;
 										found = true;
+										// Debug.drawSphere(currentFinalPos, radius);
 										// iterationFound = true;
 									}
 								}
@@ -1297,6 +1300,7 @@ class Marble extends GameObject {
 
 							finalT = edgeCollisionTime;
 							currentFinalPos = position.add(relVel.multiply(finalT));
+							// Debug.drawSphere(currentFinalPos, radius);
 
 							lastVert = thisVert;
 							found = true;
@@ -1503,13 +1507,30 @@ class Marble extends GameObject {
 		do {
 			var resolved = 0;
 			for (testTri in concernedContacts) {
+				// Check if we are on wrong side of the triangle
+				if (testTri.n.dot(position) - testTri.n.dot(testTri.v[0]) < 0) {
+					continue;
+				}
+
+				var t1 = testTri.v[1].sub(testTri.v[0]);
+				var t2 = testTri.v[2].sub(testTri.v[0]);
+				var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+
+				// Check if our triangle is too small to be collided with
+				if (tarea < 0.001) {
+					continue;
+				}
+
 				var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius, testTri.edge,
 					testTri.concavity);
 				if (tsi.result) {
+					var separatingDistance = position.sub(tsi.point).normalized();
 					var distToContactPlane = tsi.point.distance(position);
 					if (radius - 0.005 - distToContactPlane > 0.0001) {
 						// Nudge to the surface of the contact plane
-						position = position.add(tsi.normal.multiply(radius - distToContactPlane - 0.005));
+						Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
+						Debug.drawSphere(position, radius);
+						position = position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005));
 						resolved++;
 					}
 				}

@@ -24,6 +24,7 @@ typedef ITSResult = {
 	var result:Bool;
 	var normal:Vector;
 	var point:Vector;
+	var resIdx:Int;
 }
 
 class Collision {
@@ -67,7 +68,8 @@ class Collision {
 		var res:ITSResult = {
 			result: false,
 			point: null,
-			normal: null
+			normal: null,
+			resIdx: 0
 		};
 
 		var pnorm = normal.clone();
@@ -146,7 +148,8 @@ class Collision {
 		var res:ITSResult = {
 			result: false,
 			point: null,
-			normal: null
+			normal: null,
+			resIdx: -1
 		};
 
 		var v0 = A;
@@ -217,6 +220,7 @@ class Collision {
 			res.result = true;
 			res.normal = N.clone();
 			res.point = P.sub(N.multiply(P.sub(v0).dot(N)));
+			res.resIdx = 0;
 		} else {
 			var closestPt = P.sub(N.multiply(P.sub(v0).dot(N)));
 			var r1 = ClosestPointLine(v0, v1, closestPt);
@@ -241,6 +245,8 @@ class Collision {
 			}
 			res.normal = P.sub(res.point).normalized();
 			res.result = true;
+
+			res.resIdx = chosenEdge;
 
 			// if (res.normal.dot(N) > 0.8) {
 			// 	// Internal edge

@@ -1,5 +1,6 @@
 package;
 
+import src.Debug;
 import src.Marbleland;
 import src.Console;
 import hxd.Key;

@@ -10,8 +10,15 @@ class Debug {
 	static var drawBounds:Bool = false;
 
 	static var _triangles:Array<h3d.col.Point> = [];
+	static var _spheres:Array<{
+		position:Vector,
+		radius:Float
+	}> = [];
 
 	static var debugTriangles:h3d.scene.Mesh;
+	static var debugSphere:h3d.scene.MeshBatch;
+
+	public static function init() {}
 
 	public static function update() {
 		if (_triangles.length != 0 && drawBounds) {
@@ -30,11 +37,37 @@ class Debug {
 				debugTriangles = null;
 			}
 		}
+		if (_spheres.length != 0 && drawBounds) {
+			if (debugSphere == null) {
+				var sphprim = new h3d.prim.Sphere();
+				sphprim.addUVs();
+				sphprim.addNormals();
+				debugSphere = new h3d.scene.MeshBatch(sphprim, h3d.mat.Material.create());
+				debugSphere.material.castShadows = false;
+				debugSphere.material.receiveShadows = false;
+				MarbleGame.instance.scene.addChild(debugSphere);
+			}
+			debugSphere.begin(_spheres.length);
+			for (sph in _spheres) {
+				debugSphere.setPosition(sph.position.x, sph.position.y, sph.position.z);
+				debugSphere.setScale(sph.radius);
+				debugSphere.emitInstance();
+			}
+		} else {
+			if (debugSphere != null) {
+				debugSphere.remove();
+				debugSphere = null;
+			}
+		}
 	}
 
 	public static function drawTriangle(p1:Vector, p2:Vector, p3:Vector) {
 		_triangles.push(p3.toPoint());
 		_triangles.push(p2.toPoint());
 		_triangles.push(p1.toPoint());
+	}
+
+	public static function drawSphere(centre:Vector, radius:Float) {
+		_spheres.push({position: centre.clone(), radius: radius});
 	}
 }
