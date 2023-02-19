@@ -51,6 +51,7 @@ class Mission {
 	#else
 	static var _previewRequest:Int;
 	#end
+	static var _previewCache:Map<Mission, h2d.Tile> = [];
 
 	public function new() {}
 
@@ -171,9 +172,16 @@ class Mission {
 			if (_previewRequest != null #if sys && !_previewRequest.fulfilled #end) {
 				Http.cancel(_previewRequest); // Cancel the previous request to save dequeing
 			}
+			if (_previewCache.exists(this)) {
+				var t = _previewCache.get(this);
+				onLoaded(t);
+				return t.getTexture().name;
+			}
 			_previewRequest = Marbleland.getMissionImage(this.id, (im) -> {
 				if (im != null) {
-					onLoaded(im.toTile());
+					var t = im.toTile();
+					_previewCache.set(this, t);
+					onLoaded(t);
 				} else {
 					Console.error("Preview image not found for " + this.path);
 					var img = new BitmapData(1, 1);
