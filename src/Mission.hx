@@ -62,7 +62,7 @@ class Mission {
 		if (missionInfo.goldtime != null) {
 			mission.goldTime = MisParser.parseNumber(missionInfo.goldtime) / 1000;
 		}
-		mission.type = missionInfo.type.toLowerCase();
+		mission.type = missionInfo.type != null ? missionInfo.type.toLowerCase() : "custom";
 		mission.missionInfo = missionInfo;
 		return mission;
 	}
