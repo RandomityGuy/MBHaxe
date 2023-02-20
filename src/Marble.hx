@@ -197,14 +197,6 @@ class Marble extends GameObject {
 
 	public function new() {
 		super();
-		var geom = Sphere.defaultUnitSphere();
-		geom.addUVs();
-		var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
-		var marbleMaterial = Material.create(marbleTexture);
-		marbleMaterial.shadows = false;
-		marbleMaterial.castShadows = true;
-		var obj = new Mesh(geom, marbleMaterial, this);
-		obj.scale(_radius);
 
 		this.velocity = new Vector();
 		this.omega = new Vector();
@@ -239,6 +231,19 @@ class Marble extends GameObject {
 
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.level = level;
+
+		var marbleDts = new DtsObject();
+		marbleDts.dtsPath = 'data/shapes/balls/ball-superball.dts';
+		marbleDts.showSequences = false;
+		marbleDts.useInstancing = false;
+		marbleDts.init(null, () -> {}); // SYNC
+		for (mat in marbleDts.materials) {
+			mat.castShadows = true;
+			mat.shadows = true;
+			mat.receiveShadows = false;
+		}
+		this.addChild(marbleDts);
+
 		this.forcefield = new DtsObject();
 		this.forcefield.dtsPath = "data/shapes/images/glow_bounce.dts";
 		this.forcefield.useInstancing = true;

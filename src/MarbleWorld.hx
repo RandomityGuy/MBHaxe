@@ -320,6 +320,7 @@ class MarbleWorld extends Scheduler {
 			"shapes/pads/green.jpg",
 			"shapes/items/gem.dts", // Ew ew
 			"shapes/items/gemshine.png",
+			"shapes/balls/base.marble.png"
 		];
 		for (file in marblefiles) {
 			worker.loadFile(file);
