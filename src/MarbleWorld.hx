@@ -211,6 +211,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function postInit() {
+		this.scene.addChild(this.sky);
 		this._ready = true;
 		this.playGui.init(this.scene2d);
 		var musicFileName = [
@@ -283,10 +284,6 @@ class MarbleWorld extends Scheduler {
 		sky.dmlPath = "data/skies/sky_day.dml";
 
 		worker.addTask(fwd -> sky.init(cast this, fwd, skyElement));
-		worker.addTask(fwd -> {
-			scene.addChild(sky);
-			return fwd();
-		});
 
 		worker.run();
 	}
@@ -795,7 +792,7 @@ class MarbleWorld extends Scheduler {
 		var tsShape = new DtsObject();
 		tsShape.useInstancing = true;
 		tsShape.dtsPath = dtsPath;
-		tsShape.identifier = shapeName;
+		tsShape.identifier = shapeName + "tsStatic";
 		tsShape.isCollideable = true;
 		tsShape.showSequences = false;
 
@@ -1214,7 +1211,7 @@ class MarbleWorld extends Scheduler {
 					if (collider.go == this.endPad) {
 						var chull = cast(collider, collision.CollisionHull);
 						var chullinvT = @:privateAccess chull.invTransform.clone();
-						chullinvT.clone();
+						chullinvT.transpose();
 						for (surface in chull.surfaces) {
 							var i = 0;
 							while (i < surface.indices.length) {
