@@ -1,5 +1,6 @@
 package src;
 
+import dts.TSDrawPrimitive;
 import hxd.res.Sound;
 import h3d.col.Bounds;
 import src.TimeState;

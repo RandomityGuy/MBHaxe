@@ -1293,8 +1293,6 @@ class Marble extends GameObject {
 					var distToContactPlane = tsi.point.distance(position);
 					if (radius - 0.005 - distToContactPlane > 0.0001) {
 						// Nudge to the surface of the contact plane
-						Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
-						Debug.drawSphere(position, radius);
 						position = position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005));
 						resolved++;
 					}

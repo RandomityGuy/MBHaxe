@@ -77,6 +77,7 @@ import src.Resource;
 import src.ProfilerUI;
 import src.ResourceLoaderWorker;
 import src.Gamepad;
+import src.ResourceLoader;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -102,6 +103,7 @@ class MarbleWorld extends Scheduler {
 
 	var endPadElement:MissionElementStaticShape;
 	var endPad:EndPad;
+	var skyElement:MissionElementSky;
 
 	public var scene:Scene;
 	public var scene2d:h2d.Scene;
@@ -176,7 +178,8 @@ class MarbleWorld extends Scheduler {
 					MissionElementType.Item,
 					MissionElementType.PathedInterior,
 					MissionElementType.StaticShape,
-					MissionElementType.TSStatic
+					MissionElementType.TSStatic,
+					MissionElementType.Sky
 				].contains(element._type)) {
 					// this.loadingState.total++;
 
@@ -185,6 +188,10 @@ class MarbleWorld extends Scheduler {
 						var so:MissionElementStaticShape = cast element;
 						if (so.datablock.toLowerCase() == 'endpad')
 							this.endPadElement = so;
+					}
+
+					if (element._type == Sky) {
+						this.skyElement = cast element;
 					}
 				} else if (element._type == MissionElementType.SimGroup) {
 					scanMission(cast element);
@@ -778,6 +785,12 @@ class MarbleWorld extends Scheduler {
 		var index = shapeName.indexOf('data/');
 		if (index == -1)
 			return;
+
+		var dtsPath = 'data/' + shapeName.substring(index + 'data/'.length);
+		if (ResourceLoader.getProperFilepath(dtsPath) == "") {
+			onFinish();
+			return;
+		}
 
 		var tsShape = new DtsObject();
 		tsShape.useInstancing = true;
