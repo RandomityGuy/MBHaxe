@@ -39,6 +39,10 @@ class MissionList {
 					missions.set(file.path, mission);
 					difficultyMissions.push(mission);
 				}
+				if (file.isDirectory) {
+					var retdir = parseDifficulty(difficulty + "/" + file.name);
+					difficultyMissions = difficultyMissions.concat(retdir);
+				}
 			}
 			difficultyMissions.sort((a, b) -> Std.parseInt(a.missionInfo.level) - Std.parseInt(b.missionInfo.level));
 			return difficultyMissions;
