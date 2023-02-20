@@ -11,6 +11,7 @@ import mis.MissionElement.MissionElementSimGroup;
 import src.ResourceLoader;
 import hxd.res.Image;
 import src.Resource;
+import src.Util;
 
 class Mission {
 	public var root:MissionElementSimGroup;
@@ -36,8 +37,8 @@ class Mission {
 	public function new() {}
 
 	public function load() {
-		var entry = ResourceLoader.fileSystem.get(this.path).entry;
-		var misText = Util.toASCII(getBytes());
+		var entry = ResourceLoader.fileSystem.get(this.path);
+		var misText = Util.toASCII(entry.getBytes());
 
 		var misParser = new MisParser(misText);
 		var contents = misParser.parse();

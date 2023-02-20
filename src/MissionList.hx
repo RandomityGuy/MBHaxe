@@ -2,6 +2,7 @@ import haxe.Json;
 import mis.MisParser;
 import src.ResourceLoader;
 import src.Mission;
+import src.Util;
 
 @:publicFields
 class MissionList {
@@ -32,7 +33,7 @@ class MissionList {
 			var difficultyMissions = [];
 			for (file in difficultyFiles) {
 				if (file.extension == "mis") {
-					var misParser = new MisParser(file.getText());
+					var misParser = new MisParser(Util.toASCII(file.getBytes()));
 					var mInfo = misParser.parseMissionInfo();
 					var mission = Mission.fromMissionInfo(file.path, mInfo);
 					missions.set(file.path, mission);
