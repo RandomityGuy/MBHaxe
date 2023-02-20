@@ -14,7 +14,6 @@ import h3d.Matrix;
 import h3d.col.Bounds;
 import src.PathedInterior;
 import src.Util;
-import src.Debug;
 import src.MarbleGame;
 
 class CollisionEntity implements IOctreeObject implements IBVHObject {
@@ -104,18 +103,18 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			boundingBox.add(tform);
 		}
 		this.boundingBox = boundingBox;
-		if (Debug.drawBounds) {
-			if (_dbgEntity == null) {
-				_dbgEntity = cast this.boundingBox.makeDebugObj();
-				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
-				MarbleGame.instance.scene.addChild(_dbgEntity);
-			} else {
-				_dbgEntity.remove();
-				_dbgEntity = cast this.boundingBox.makeDebugObj();
-				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
-				MarbleGame.instance.scene.addChild(_dbgEntity);
-			}
-		}
+		// if (Debug.drawBounds) {
+		// 	if (_dbgEntity == null) {
+		// 		_dbgEntity = cast this.boundingBox.makeDebugObj();
+		// 		_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+		// 		MarbleGame.instance.scene.addChild(_dbgEntity);
+		// 	} else {
+		// 		_dbgEntity.remove();
+		// 		_dbgEntity = cast this.boundingBox.makeDebugObj();
+		// 		_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+		// 		MarbleGame.instance.scene.addChild(_dbgEntity);
+		// 	}
+		// }
 	}
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {

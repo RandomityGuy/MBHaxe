@@ -357,4 +357,21 @@ class ResourceLoader {
 		}
 		return names;
 	}
+
+	public static function getProperFilepath(rawElementPath:String) {
+		var fname = rawElementPath.substring(rawElementPath.lastIndexOf('/') + 1);
+		rawElementPath = rawElementPath.toLowerCase();
+		var path = StringTools.replace(rawElementPath.substring(rawElementPath.indexOf('data/')), "\"", "");
+		if (StringTools.contains(path, 'interiors_mbg/'))
+			path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
+		var dirpath = path.substring(0, path.lastIndexOf('/') + 1);
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
+		#end
+		if (fileSystem.exists(path))
+			return path;
+		if (fileSystem.exists(dirpath + fname))
+			return dirpath + fname;
+		return "";
+	}
 }
