@@ -15,6 +15,9 @@ jobs:
       NPROC: 4
       COMMIT_TAG: pipeline.git.tag
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
       - checkout:
           path: ~/MBHaxe
 
@@ -277,8 +280,13 @@ jobs:
             rm -rf "macos-dist/MarbleBlast Platinum.app.in"
             zip -r MBHaxe-Platinum-Mac.zip macos-dist/
 
-      - store_artifacts:
-          path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
+      - run:
+          name: Upload to Artifact Storage
+          command: |
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Platinum-Mac.zip $REMOTEDIR/MBHaxe-Platinum-Mac.zip
+
+      # - store_artifacts:
+      #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
 
   build-win:
     executor: 
@@ -290,6 +298,9 @@ jobs:
     # Then run your tests!
     # CircleCI will report the results back to your VCS provider.
     steps:
+        - add_ssh_keys:
+            fingerprints:
+                - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
         - checkout
         - run:
             name: Install dependencies
@@ -396,8 +407,12 @@ jobs:
               cd ~/project
               7z a MBHaxe-Platinum-Win.zip release/
 
-        - store_artifacts:
-            path: ~/project/MBHaxe-Platinum-Win.zip
+        - run:
+            name: Upload to Artifact Storage
+            command: |
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Platinum-Win.zip $REMOTEDIR/MBHaxe-Platinum-Win.zip
+        # - store_artifacts:
+        #     path: ~/project/MBHaxe-Platinum-Win.zip
 
 
 # Invoke jobs via workflows
