@@ -1,3 +1,12 @@
+# 1.4.0
+This update adds all the playable MBG, MBP, MBU custom levels via Marbleland integration. Play the entire custom level archive without manually installing with, with a single click.
+- Added controller support. (Thanks thearst3rd)
+- Improved replay saving flow.
+- Improved marble physics a bit.
+- Cleaned up some UI.
+- Fixed collision detection bugs.
+- Fixed various graphical bugs.
+- Fixed item hitboxes being too small. 
 # 1.3.3
 This update addresses the following issues:
 - FOV is now based on horizontal FOV instead of vertical, matching with- original MB.
