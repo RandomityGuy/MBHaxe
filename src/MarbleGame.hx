@@ -258,6 +258,9 @@ class MarbleGame {
 			canvas.setContent(new MainMenuGui());
 			#end
 		} else {
+			if (!world.mission.isClaMission) {
+				PlayMissionGui.currentCategoryStatic = world.mission.type;
+			}
 			var pmg = new PlayMissionGui();
 			PlayMissionGui.currentSelectionStatic = world.mission.index;
 			PlayMissionGui.currentGameStatic = world.mission.game;
