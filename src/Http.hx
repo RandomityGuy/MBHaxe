@@ -40,14 +40,17 @@ class Http {
 			cancellationMutex.release();
 			var http = new sys.Http(req.url);
 			http.onError = (e) -> {
+				trace('HTTP Request Failed: ' + req.url);
 				responses.add(() -> req.errCallback(e));
 				req.fulfilled = true;
 			};
 			http.onBytes = (b) -> {
+				trace('HTTP Request Succeeded: ' + req.url);
 				responses.add(() -> req.callback(b));
 				req.fulfilled = true;
 			};
 			hl.Gc.blocking(true); // Wtf is this shit
+			trace('HTTP Request: ' + req.url);
 			http.request(false);
 			hl.Gc.blocking(false);
 		}

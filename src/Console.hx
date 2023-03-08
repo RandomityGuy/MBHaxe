@@ -58,6 +58,9 @@ class Console {
 		#if (hl && !android)
 		consoleFileHandle.writeString('[${e.time}] ${e.text}\n');
 		#end
+		#if android
+		trace('[${e.time}] ${msg}');
+		#end
 		for (c in consumers) {
 			c(e);
 		}

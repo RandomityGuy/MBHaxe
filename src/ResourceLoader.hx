@@ -564,7 +564,7 @@ class ResourceLoader {
 		zipFilesystem.clear(); // We are only allowed to load one zip
 		for (entry in entries) {
 			var fname = entry.fileName.toLowerCase();
-			#if sys
+			#if (sys && !android)
 			fname = "data/" + fname;
 			#end
 			if (game == 'gold')

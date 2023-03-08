@@ -17,7 +17,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags '-lstdc++'
-                arguments "-DANDROID_LD=lld"
+                arguments "-DANDROID_LD=lld",'-DANDROID_PLATFORM=android-24'
             }
         }
     }
@@ -27,6 +27,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable true
         }
     }
     compileOptions {

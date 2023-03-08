@@ -6,6 +6,7 @@ import src.Settings;
 
 class Gamepad {
 	public static var gamepad:Pad = Pad.createDummy();
+	static var hasPad = false;
 
 	public static function init() {
 		Pad.wait(onPad);
@@ -17,8 +18,10 @@ class Gamepad {
 		pad.onDisconnect = function() {
 			Console.log("Gamepad disconnected");
 			gamepad = Pad.createDummy();
+			hasPad = false;
 		}
 		gamepad = pad;
+		hasPad = true;
 	}
 
 	public static function getId(name:String) {
@@ -68,6 +71,8 @@ class Gamepad {
 	}
 
 	public static function isDown(buttons:Array<String>) {
+		if (!hasPad)
+			return false;
 		for (button in buttons) {
 			var buttonId = getId(button);
 			if (buttonId < 0 || buttonId > gamepad.buttons.length)
@@ -79,6 +84,8 @@ class Gamepad {
 	}
 
 	public static function isPressed(buttons:Array<String>) {
+		if (!hasPad)
+			return false;
 		for (button in buttons) {
 			var buttonId = getId(button);
 			if (buttonId < 0 || buttonId > gamepad.buttons.length)
@@ -90,6 +97,8 @@ class Gamepad {
 	}
 
 	public static function isReleased(buttons:Array<String>) {
+		if (!hasPad)
+			return false;
 		for (button in buttons) {
 			var buttonId = getId(button);
 			if (buttonId < 0 || buttonId > gamepad.buttons.length)
@@ -101,6 +110,8 @@ class Gamepad {
 	}
 
 	public static function getAxis(axis:String) {
+		if (!hasPad)
+			return 0.0;
 		switch (axis) {
 			case "analogX":
 				return gamepad.xAxis;
