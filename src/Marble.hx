@@ -1511,7 +1511,7 @@ class Marble extends GameObject {
 				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
 				move.jump = true;
 			}
-			if (Key.isDown(Settings.controlsSettings.powerup)
+			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
 				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
 				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
 				move.powerup = true;
