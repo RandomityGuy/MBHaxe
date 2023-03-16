@@ -6,8 +6,8 @@ The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/Ope
 # Play
 ## Web Browser
 The browser port supports touch controls, meaning it can be played on mobile devices.
-### Marble Blast Gold: [Play](https://mbhaxe.netlify.app/)
-### Marble Blast Platinum: [Play](https://mbphaxe.netlify.app/)
+### Marble Blast Gold: [Play](https://marbleblastgold.randomityguy.me/)
+### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ## Windows and Mac
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.7)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.4.0)
