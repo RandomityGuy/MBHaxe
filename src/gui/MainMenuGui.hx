@@ -78,5 +78,22 @@ class MainMenuGui extends GuiImage {
 			#end
 		};
 		homebase.addChild(exitButton);
+
+		#if js
+		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
+		kofi.horizSizing = Left;
+		kofi.vertSizing = Top;
+		kofi.position = new Vector(473, 424);
+		kofi.extent = new Vector(143, 36);
+		kofi.pressedAction = (sender) -> {
+			#if sys
+			hxd.System.openURL("https://ko-fi.com/H2H5FRTTL");
+			#end
+			#if js
+			js.Browser.window.open("https://ko-fi.com/H2H5FRTTL");
+			#end
+		}
+		this.addChild(kofi);
+		#end
 	}
 }
