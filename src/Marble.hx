@@ -1956,9 +1956,8 @@ class Marble extends GameObject {
 		this.cloak = false;
 		this._firstTick = true;
 		if (this.teleporting) {
-			var mesh:Mesh = cast this.children[0];
-			mesh.material.mainPass.removeShader(mesh.material.mainPass.getShader(AlphaMult));
-			mesh.material.blendMode = None;
+			var ourDts:DtsObject = cast this.children[0];
+			ourDts.setOpacity(1);
 		}
 		this.teleporting = false;
 		this.teleportDisableTime = null;
