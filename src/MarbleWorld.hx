@@ -1117,12 +1117,12 @@ class MarbleWorld extends Scheduler {
 			});
 			#end
 		} else {
-			if (!this._loadBegin)
+			if (!this._loadBegin || lock)
 				return;
 			if (!_ready && !postInited) {
 				postInited = true;
 				Console.log("Finished loading, starting mission");
-				haxe.Timer.delay(() -> postInit(), 5); // delay this a bit
+				haxe.Timer.delay(() -> postInit(), 15); // delay this a bit
 			}
 		}
 	}
