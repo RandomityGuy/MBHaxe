@@ -991,7 +991,7 @@ class MarbleWorld extends Scheduler {
 			});
 			#end
 		} else {
-			if (this._resourcesLoaded < _loadingLength)
+			if (this._resourcesLoaded < _loadingLength || lock)
 				return;
 			if (!_ready)
 				postInit();
