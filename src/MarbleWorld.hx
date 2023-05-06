@@ -1,5 +1,6 @@
 package src;
 
+import rewind.RewindManager;
 import Macros.MarbleWorldMacros;
 import shapes.PushButton;
 #if js
@@ -178,6 +179,10 @@ class MarbleWorld extends Scheduler {
 	public var isWatching:Bool = false;
 	public var isRecording:Bool = false;
 
+	// Rewind
+	public var rewindManager:RewindManager;
+	public var rewinding:Bool = false;
+
 	// Loading
 	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
 
@@ -204,6 +209,7 @@ class MarbleWorld extends Scheduler {
 		this.game = mission.game.toLowerCase();
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
+		this.rewindManager = new RewindManager(this);
 	}
 
 	public function init() {
@@ -446,6 +452,8 @@ class MarbleWorld extends Scheduler {
 			this.replay.clear();
 		} else
 			this.replay.rewind();
+
+		this.rewindManager.clear();
 
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = 0;
@@ -996,6 +1004,23 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
+		if (Key.isDown(Key.R)) {
+			this.rewinding = true;
+		} else {
+			this.rewinding = false;
+		}
+
+		if (this.rewinding) {
+			var rframe = rewindManager.getNextRewindFrame(timeState.currentAttemptTime - dt);
+			if (rframe != null) {
+				var actualDt = timeState.currentAttemptTime - rframe.timeState.currentAttemptTime - dt;
+				dt = actualDt;
+				rewindManager.applyFrame(rframe);
+			}
+		}
+		if (dt < 0)
+			return;
+
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
@@ -1078,6 +1103,9 @@ class MarbleWorld extends Scheduler {
 				this.replay.endFrame();
 			}
 		}
+
+		if (!this.rewinding)
+			this.rewindManager.recordFrame();
 
 		this.updateTexts();
 	}

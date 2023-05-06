@@ -27,9 +27,11 @@ class AntiGravity extends PowerUp {
 	}
 
 	public function use(timeState:TimeState) {
-		var direction = new Vector(0, 0, -1);
-		direction.transform(this.getRotationQuat().toMatrix());
-		this.level.setUp(direction, timeState);
+		if (!this.level.rewinding) {
+			var direction = new Vector(0, 0, -1);
+			direction.transform(this.getRotationQuat().toMatrix());
+			this.level.setUp(direction, timeState);
+		}
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
 		//	AudioManager.play(this.sounds[1]);
