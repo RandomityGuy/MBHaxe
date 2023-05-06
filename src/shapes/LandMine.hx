@@ -122,13 +122,13 @@ class LandMine extends DtsObject {
 	}
 
 	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
-		if (this.isCollideable) {
+		if (this.isCollideable && !this.level.rewinding) {
 			// marble.velocity = marble.velocity.add(vec);
 			this.disappearTime = timeState.timeSinceLoad;
 			this.setCollisionEnabled(false);
 
-			// if (!this.level.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource("data/sound/explode1.wav", ResourceLoader.getAudio, this.soundResources));
+			if (!this.level.rewinding)
+				AudioManager.playSound(ResourceLoader.getResource("data/sound/explode1.wav", ResourceLoader.getAudio, this.soundResources));
 			this.level.particleManager.createEmitter(landMineParticle, landMineParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());

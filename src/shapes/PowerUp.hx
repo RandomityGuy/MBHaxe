@@ -45,7 +45,7 @@ abstract class PowerUp extends DtsObject {
 			if (this.element.showhelponpickup == "1" && !this.autoUse)
 				this.level.displayHelp('Press <func:bind mousefire> to use the ${this.pickUpName}!');
 
-			if (pickupSound != null) {
+			if (pickupSound != null && !this.level.rewinding) {
 				AudioManager.playSound(pickupSound);
 			}
 		}

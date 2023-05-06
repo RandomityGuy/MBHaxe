@@ -122,7 +122,7 @@ class Nuke extends DtsObject {
 	}
 
 	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
-		if (this.isCollideable) {
+		if (this.isCollideable && !this.level.rewinding) {
 			// marble.velocity = marble.velocity.add(vec);
 			this.disappearTime = timeState.timeSinceLoad;
 			this.setCollisionEnabled(false);
