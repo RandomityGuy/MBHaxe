@@ -62,6 +62,7 @@ typedef ControlsSettings = {
 	var invertYAxis:Bool;
 	var respawn:Int;
 	var blast:Int;
+	var rewind:Int;
 }
 
 typedef TouchSettings = {
@@ -143,7 +144,8 @@ class Settings {
 		cameraSensitivity: 0.6,
 		invertYAxis: false,
 		respawn: Key.BACKSPACE,
-		blast: Key.E
+		blast: Key.E,
+		rewind: Key.R,
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -395,6 +397,9 @@ class Settings {
 			}
 			if (controlsSettings.blast == null) {
 				controlsSettings.blast = Key.E;
+			}
+			if (controlsSettings.rewind == null) {
+				controlsSettings.rewind = Key.R;
 			}
 			#end
 			highscoreName = json.highscoreName;
