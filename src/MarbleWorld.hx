@@ -1004,6 +1004,8 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
+		var realDt = dt;
+
 		if (Key.isDown(Key.R)) {
 			this.rewinding = true;
 		} else {
@@ -1084,7 +1086,10 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateInstances");
 		this.instanceManager.render();
 		ProfilerUI.measure("updateParticles");
-		this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
+		if (this.rewinding) {
+			this.particleManager.update(1000 * timeState.timeSinceLoad, -realDt);
+		} else
+			this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
 		ProfilerUI.measure("updatePlayGui");
 		this.playGui.update(timeState);
 		ProfilerUI.measure("updateAudio");
