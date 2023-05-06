@@ -50,6 +50,7 @@ typedef ControlsSettings = {
 	var alwaysFreeLook:Bool;
 	var cameraSensitivity:Float;
 	var invertYAxis:Bool;
+	var rewind:Int;
 }
 
 typedef TouchSettings = {
@@ -108,7 +109,8 @@ class Settings {
 		freelook: Key.MOUSE_RIGHT,
 		alwaysFreeLook: true,
 		cameraSensitivity: 0.6,
-		invertYAxis: false
+		invertYAxis: false,
+		rewind: Key.R,
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -253,6 +255,9 @@ class Settings {
 			}
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;
+			}
+			if (controlsSettings.rewind == null) {
+				controlsSettings.rewind = Key.R;
 			}
 			progression = json.progression;
 			highscoreName = json.highscoreName;

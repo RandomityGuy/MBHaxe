@@ -75,13 +75,13 @@ class Particle {
 		var elapsed = time - this.spawnTime;
 		var completion = Util.clamp(elapsed / this.lifeTime, 0, 1);
 
-		if (currentAge > this.lifeTime) // Again, rewind needs this
+		if (currentAge > this.lifeTime || currentAge < 0) // Again, rewind needs this
 		{
 			this.manager.removeParticle(this.data, this);
 			return;
 		}
 
-		if (completion == 1) {
+		if (completion == 1 || completion < 0) {
 			// The particle can die
 			this.manager.removeParticle(this.data, this);
 			return;
