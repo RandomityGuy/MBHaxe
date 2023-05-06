@@ -49,7 +49,7 @@ class Gem extends DtsObject {
 
 	override function onMarbleInside(timeState:TimeState) {
 		super.onMarbleInside(timeState);
-		if (this.pickedUp)
+		if (this.pickedUp || this.level.rewinding)
 			return;
 		this.pickedUp = true;
 		this.setOpacity(0); // Hide the gem
