@@ -204,6 +204,14 @@ class RewindManager {
 				td.lastContactTime = tdState.lastContactTime;
 			}
 		}
+
+		if (!rf.oobState.oob) {
+			@:privateAccess level.cancel(level.oobSchedule);
+			@:privateAccess level.cancel(level.oobSchedule2);
+		} else {
+			level.goOutOfBounds();
+		}
+
 		level.outOfBounds = rf.oobState.oob;
 		level.marble.camera.oob = rf.oobState.oob;
 		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;

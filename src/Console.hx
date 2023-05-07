@@ -6,6 +6,7 @@ import sys.FileSystem;
 import mis.MisParser;
 import src.Settings;
 import src.Debug;
+import src.MarbleGame;
 
 @:publicFields
 class ConsoleEntry {
@@ -139,6 +140,19 @@ class Console {
 					var scale = MisParser.parseBoolean(cmdSplit[1]);
 					Debug.wireFrame = scale;
 					log("Debug.wireframe set to " + scale);
+				} else {
+					error("Expected one argument, got " + (cmdSplit.length - 1));
+				}
+			} else if (cmdType == "rewindTimeScale") {
+				if (cmdSplit.length == 2) {
+					var scale = Std.parseFloat(cmdSplit[1]);
+					if (Math.isNaN(scale))
+						scale = 1;
+					if (MarbleGame.instance.world != null) {
+						MarbleGame.instance.world.rewindManager.timeScale = scale;
+
+						log("Rewind Time scale set to " + scale);
+					}
 				} else {
 					error("Expected one argument, got " + (cmdSplit.length - 1));
 				}

@@ -203,6 +203,7 @@ class ReplayInitialState {
 	var landMineDisappearTimes:Array<Float> = [];
 	var pushButtonContactTimes:Array<Float> = [];
 	var randomGens:Array<Int> = [];
+	var randomGenTimes:Array<Float> = [];
 
 	public function new() {}
 
@@ -293,12 +294,16 @@ class Replay {
 	}
 
 	public function recordTimeState(time:Float, clockTime:Float, bonusTime:Float) {
+		if (currentRecordFrame == null)
+			return;
 		currentRecordFrame.time = time;
 		currentRecordFrame.clockTime = clockTime;
 		currentRecordFrame.bonusTime = bonusTime;
 	}
 
 	public function recordMarbleState(position:Vector, velocity:Vector, orientation:Quat, angularVelocity:Vector) {
+		if (currentRecordFrame == null)
+			return;
 		currentRecordFrame.marblePosition = position.clone();
 		currentRecordFrame.marbleVelocity = velocity.clone();
 		currentRecordFrame.marbleOrientation = orientation.clone();
@@ -306,6 +311,8 @@ class Replay {
 	}
 
 	public function recordMarbleStateFlags(jumped:Bool, usedPowerup:Bool, instantTeleport:Bool, usedBlast:Bool) {
+		if (currentRecordFrame == null)
+			return;
 		if (jumped)
 			currentRecordFrame.marbleStateFlags.set(Jumped);
 		if (usedPowerup)
@@ -317,6 +324,8 @@ class Replay {
 	}
 
 	public function recordPowerupPickup(powerup:PowerUp) {
+		if (currentRecordFrame == null)
+			return;
 		if (powerup == null)
 			currentRecordFrame.powerupPickup = ""; // Use powerup
 		else
@@ -324,16 +333,22 @@ class Replay {
 	}
 
 	public function recordMarbleInput(x:Float, y:Float) {
+		if (currentRecordFrame == null)
+			return;
 		currentRecordFrame.marbleX = x;
 		currentRecordFrame.marbleY = y;
 	}
 
 	public function recordCameraState(pitch:Float, yaw:Float) {
+		if (currentRecordFrame == null)
+			return;
 		currentRecordFrame.cameraPitch = pitch;
 		currentRecordFrame.cameraYaw = yaw;
 	}
 
 	public function recordGravity(gravity:Vector, instant:Bool) {
+		if (currentRecordFrame == null)
+			return;
 		currentRecordFrame.gravityChange = true;
 		currentRecordFrame.gravity = gravity.clone();
 		if (instant)
@@ -341,21 +356,30 @@ class Replay {
 	}
 
 	public function recordTrapdoorState(lastContactTime:Float, lastDirection:Int, lastCompletion:Float) {
+		if (currentRecordFrame == null)
+			return;
 		initialState.trapdoorLastContactTimes.push(lastContactTime);
 		initialState.trapdoorLastDirections.push(lastDirection);
 		initialState.trapdoorLastCompletions.push(lastCompletion);
 	}
 
 	public function recordLandMineState(disappearTime:Float) {
+		if (currentRecordFrame == null)
+			return;
 		initialState.landMineDisappearTimes.push(disappearTime);
 	}
 
 	public function recordPushButtonState(lastContactTime:Float) {
+		if (currentRecordFrame == null)
+			return;
 		initialState.pushButtonContactTimes.push(lastContactTime);
 	}
 
 	public function recordRandomGenState(ri:Int) {
+		if (currentRecordFrame == null)
+			return;
 		initialState.randomGens.push(ri);
+		initialState.randomGenTimes.push(currentRecordFrame.time);
 	}
 
 	public function getRandomGenState() {
@@ -440,6 +464,24 @@ class Replay {
 		this.currentPlaybackTime = 0;
 		this.currentPlaybackFrame = null;
 		this.currentPlaybackFrameIdx = 0;
+	}
+
+	public function spliceReplay(cutAfterTime:Float) {
+		if (this.frames.length > 0) {
+			var curframe = this.frames[this.frames.length - 1];
+			while (curframe.time > cutAfterTime && this.frames.length > 0) {
+				this.frames.pop();
+				curframe = this.frames[this.frames.length - 1];
+			}
+		}
+		if (this.initialState.randomGenTimes.length > 0) {
+			var rtimeIdx = this.initialState.randomGenTimes.length - 1;
+			while (this.initialState.randomGenTimes[rtimeIdx] > cutAfterTime && this.initialState.randomGenTimes.length > 0) {
+				this.initialState.randomGenTimes.pop();
+				this.initialState.randomGens.pop();
+				rtimeIdx = this.initialState.randomGenTimes.length - 1;
+			}
+		}
 	}
 
 	public function write() {
