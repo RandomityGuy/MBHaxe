@@ -158,6 +158,9 @@ class MarbleWorld extends Scheduler {
 	var textureResources:Array<Resource<h3d.mat.Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
 
+	var oobSchedule:Float;
+	var oobSchedule2:Float;
+
 	var lock:Bool = false;
 
 	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission, record:Bool = false) {
@@ -909,8 +912,22 @@ class MarbleWorld extends Scheduler {
 		if (!_ready) {
 			return;
 		}
+
+		var realDt = dt;
+
+		if (Key.isDown(Settings.controlsSettings.rewind) && Settings.optionsSettings.rewindEnabled && !this.isWatching) {
+			this.rewinding = true;
+		} else {
+			this.rewinding = false;
+			if (Key.isReleased(Settings.controlsSettings.rewind)) {
+				if (this.isRecording) {
+					this.replay.spliceReplay(timeState.currentAttemptTime);
+				}
+			}
+		}
+
 		if (!this.isWatching) {
-			if (this.isRecording) {
+			if (this.isRecording && !this.rewinding) {
 				this.replay.startFrame();
 			}
 		} else {
@@ -931,15 +948,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		var realDt = dt;
-
-		if (Key.isDown(Key.R)) {
-			this.rewinding = true;
-		} else {
-			this.rewinding = false;
-		}
-
-		if (this.rewinding) {
+		if (this.rewinding && !this.isWatching) {
 			var rframe = rewindManager.getNextRewindFrame(timeState.currentAttemptTime - dt * rewindManager.timeScale);
 			if (rframe != null) {
 				var actualDt = timeState.currentAttemptTime - rframe.timeState.currentAttemptTime - dt * rewindManager.timeScale;
@@ -981,12 +990,12 @@ class MarbleWorld extends Scheduler {
 		AudioManager.update(this.scene);
 
 		if (!this.isWatching) {
-			if (this.isRecording) {
+			if (this.isRecording && !this.rewinding) {
 				this.replay.endFrame();
 			}
 		}
 
-		if (!this.rewinding)
+		if (!this.rewinding && Settings.optionsSettings.rewindEnabled)
 			this.rewindManager.recordFrame();
 
 		if (this.outOfBounds
@@ -1462,11 +1471,11 @@ class MarbleWorld extends Scheduler {
 		playGui.setCenterText('outofbounds');
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 		// if (this.replay.mode != = 'playback')
-		this.schedule(this.timeState.currentAttemptTime + 2, () -> {
+		this.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2, () -> {
 			playGui.setCenterText('none');
 			return null;
 		});
-		this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
+		this.oobSchedule2 = this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
 			this.restart();
 			return null;
 		});
