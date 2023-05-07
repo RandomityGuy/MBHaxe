@@ -1014,9 +1014,9 @@ class MarbleWorld extends Scheduler {
 		}
 
 		if (this.rewinding) {
-			var rframe = rewindManager.getNextRewindFrame(timeState.currentAttemptTime - dt);
+			var rframe = rewindManager.getNextRewindFrame(timeState.currentAttemptTime - dt * rewindManager.timeScale);
 			if (rframe != null) {
-				var actualDt = timeState.currentAttemptTime - rframe.timeState.currentAttemptTime - dt;
+				var actualDt = timeState.currentAttemptTime - rframe.timeState.currentAttemptTime - dt * rewindManager.timeScale;
 				dt = actualDt;
 				rewindManager.applyFrame(rframe);
 			}
@@ -1084,11 +1084,15 @@ class MarbleWorld extends Scheduler {
 		for (marble in marbles) {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
 		}
+		if (this.rewinding) {
+			// Update camera separately
+			marble.camera.update(timeState.currentAttemptTime, realDt);
+		}
 		ProfilerUI.measure("updateInstances");
 		this.instanceManager.render();
 		ProfilerUI.measure("updateParticles");
 		if (this.rewinding) {
-			this.particleManager.update(1000 * timeState.timeSinceLoad, -realDt);
+			this.particleManager.update(1000 * timeState.timeSinceLoad, -realDt * rewindManager.timeScale);
 		} else
 			this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
 		ProfilerUI.measure("updatePlayGui");

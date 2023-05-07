@@ -30,6 +30,8 @@ class Main extends hxd.App {
 
 	var frameByFrame:Bool = false;
 
+	// var timeAccumulator:Float = 0.0;
+
 	override function init() {
 		super.init();
 
@@ -119,6 +121,11 @@ class Main extends hxd.App {
 			ProfilerUI.measure("updateBegin");
 
 			// try {
+			// timeAccumulator += dt;
+			// while (timeAccumulator > 1 / 60) {
+			// 	marbleGame.update(1 / 60);
+			// 	timeAccumulator -= 1 / 60;
+			// }
 			marbleGame.update(dt);
 			// } catch (e) {
 			// Console.error(e.message);
