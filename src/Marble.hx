@@ -1557,7 +1557,7 @@ class Marble extends GameObject {
 			this.omega = expectedOmega;
 		}
 
-		if (this.controllable) {
+		if (this.controllable && !this.level.rewinding) {
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
 

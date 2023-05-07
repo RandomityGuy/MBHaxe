@@ -4,11 +4,15 @@ import shapes.PowerUp;
 import shapes.LandMine;
 import src.MarbleWorld;
 import shapes.Trapdoor;
+import shapes.PushButton;
 import src.Util;
+import shapes.Nuke;
 
 class RewindManager {
 	var frames:Array<RewindFrame> = [];
 	var level:MarbleWorld;
+
+	public var timeScale:Float = 1;
 
 	public function new(level:MarbleWorld) {
 		this.level = level;
@@ -63,8 +67,16 @@ class RewindManager {
 				var pow:PowerUp = cast dts;
 				rf.powerupStates.push(pow.lastPickUpTime);
 			}
+			if (dts is PushButton) {
+				var pow:PushButton = cast dts;
+				rf.powerupStates.push(pow.lastContactTime);
+			}
 			if (dts is LandMine) {
 				var lm:LandMine = cast dts;
+				rf.landMineStates.push(lm.disappearTime);
+			}
+			if (dts is Nuke) {
+				var lm:Nuke = cast dts;
 				rf.landMineStates.push(lm.disappearTime);
 			}
 			if (dts is Trapdoor) {
@@ -76,6 +88,19 @@ class RewindManager {
 				});
 			}
 		}
+		rf.blastAmt = level.blastAmount;
+		rf.oobState = {
+			oob: level.outOfBounds,
+			timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
+		};
+		rf.checkpointState = {
+			currentCheckpoint: @:privateAccess level.currentCheckpoint,
+			currentCheckpointTrigger: @:privateAccess level.currentCheckpointTrigger,
+			checkpointBlast: @:privateAccess level.cheeckpointBlast,
+			checkpointCollectedGems: @:privateAccess level.checkpointCollectedGems.copy(),
+			checkpointHeldPowerup: @:privateAccess level.checkpointHeldPowerup,
+			checkpointUp: @:privateAccess level.checkpointUp != null ? @:privateAccess level.checkpointUp.clone() : null,
+		};
 		frames.push(rf);
 	}
 
@@ -159,8 +184,16 @@ class RewindManager {
 				var pow:PowerUp = cast dts;
 				pow.lastPickUpTime = pstates.shift();
 			}
+			if (dts is PushButton) {
+				var pow:PushButton = cast dts;
+				pow.lastContactTime = pstates.shift();
+			}
 			if (dts is LandMine) {
 				var lm:LandMine = cast dts;
+				lm.disappearTime = lmstates.shift();
+			}
+			if (dts is Nuke) {
+				var lm:Nuke = cast dts;
 				lm.disappearTime = lmstates.shift();
 			}
 			if (dts is Trapdoor) {
@@ -171,6 +204,16 @@ class RewindManager {
 				td.lastContactTime = tdState.lastContactTime;
 			}
 		}
+		level.outOfBounds = rf.oobState.oob;
+		level.marble.camera.oob = rf.oobState.oob;
+		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
+		level.blastAmount = rf.blastAmt;
+		@:privateAccess level.checkpointUp = rf.checkpointState.checkpointUp;
+		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;
+		@:privateAccess level.cheeckpointBlast = rf.checkpointState.checkpointBlast;
+		@:privateAccess level.checkpointHeldPowerup = rf.checkpointState.checkpointHeldPowerup;
+		@:privateAccess level.currentCheckpoint = rf.checkpointState.currentCheckpoint;
+		@:privateAccess level.currentCheckpointTrigger = rf.checkpointState.currentCheckpointTrigger;
 	}
 
 	public function getNextRewindFrame(absTime:Float):RewindFrame {
