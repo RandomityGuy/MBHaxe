@@ -178,8 +178,8 @@ class DtsObject extends GameObject {
 						continue;
 
 					if (!isInstanced) {
-						var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
-						var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
+						var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+						var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
 						var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
 						for (k in 0...geometry.length) {
@@ -249,8 +249,8 @@ class DtsObject extends GameObject {
 				var skinObj = new Object();
 
 				if (!isInstanced) {
-					var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
-					var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
+					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
 					for (k in 0...geometry.length) {
 						if (geometry[k].vertices.length == 0)
@@ -329,7 +329,7 @@ class DtsObject extends GameObject {
 			rootObject.addChild(this.skinMeshData.geometry);
 		}
 
-		rootObject.scaleX = -1;
+		// rootObject.scaleX = -1;
 
 		if (this.level != null && this.isBoundingBoxCollideable) {
 			var boundthing = new Bounds();
@@ -615,7 +615,7 @@ class DtsObject extends GameObject {
 					i3 = temp;
 				}
 
-				for (index in [i3, i2, i1]) {
+				for (index in [i1, i2, i3]) {
 					var vertex = vertices[index];
 					geometrydata.vertices.push(new Vector(vertex.x, vertex.y, vertex.z));
 
