@@ -235,8 +235,8 @@ class DtsObject extends GameObject {
 							if (mesh == null)
 								continue;
 
-							var vertices = mesh.vertices.map(v -> new Vector(v.x, v.y, v.z));
-							var vertexNormals = mesh.normals.map(v -> new Vector(v.x, v.y, v.z));
+							var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+							var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
 							var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, i);
 							localColliders = localColliders.concat(hulls);
@@ -518,11 +518,11 @@ class DtsObject extends GameObject {
 			var translation = this.dts.defaultTranslations[i];
 			var rotation = this.dts.defaultRotations[i];
 			var mat = Matrix.I();
-			var quat = new Quat(rotation.x, rotation.y, rotation.z, rotation.w);
+			var quat = new Quat(-rotation.x, rotation.y, rotation.z, -rotation.w);
 			quat.normalize();
 			quat.conjugate();
 			quat.toMatrix(mat);
-			mat.setPosition(new Vector(translation.x, translation.y, translation.z));
+			mat.setPosition(new Vector(-translation.x, translation.y, translation.z));
 			this.graphNodes[i].setTransform(mat);
 			var absTform = this.graphNodes[i].getAbsPos().clone();
 			if (this.colliders[i] != null)
@@ -739,11 +739,11 @@ class DtsObject extends GameObject {
 						var rot1 = this.dts.nodeRotations[sequence.numKeyFrames * affectedCount + keyframeLow];
 						var rot2 = this.dts.nodeRotations[sequence.numKeyFrames * affectedCount + keyframeHigh];
 
-						var q1 = new Quat(rot1.x, rot1.y, rot1.z, rot1.w);
+						var q1 = new Quat(-rot1.x, rot1.y, rot1.z, -rot1.w);
 						q1.normalize();
 						q1.conjugate();
 
-						var q2 = new Quat(rot2.x, rot2.y, rot2.z, rot2.w);
+						var q2 = new Quat(-rot2.x, rot2.y, rot2.z, -rot2.w);
 						q2.normalize();
 						q2.conjugate();
 
@@ -757,7 +757,7 @@ class DtsObject extends GameObject {
 						// quaternions.push(quat);
 					} else {
 						var rotation = this.dts.defaultRotations[i];
-						var quat = new Quat(rotation.x, rotation.y, rotation.z, rotation.w);
+						var quat = new Quat(-rotation.x, rotation.y, rotation.z, -rotation.w);
 						quat.normalize();
 						quat.conjugate();
 						this.graphNodes[i].setRotationQuat(quat);
@@ -777,8 +777,8 @@ class DtsObject extends GameObject {
 						var trans1 = this.dts.nodeTranslations[sequence.numKeyFrames * affectedCount + keyframeLow];
 						var trans2 = this.dts.nodeTranslations[sequence.numKeyFrames * affectedCount + keyframeHigh];
 
-						var v1 = new Vector(trans1.x, trans1.y, trans1.z);
-						var v2 = new Vector(trans2.x, trans2.y, trans2.z);
+						var v1 = new Vector(-trans1.x, trans1.y, trans1.z);
+						var v2 = new Vector(-trans2.x, trans2.y, trans2.z);
 						var trans = Util.lerpThreeVectors(v1, v2, t);
 						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
 						this.dirtyTransforms[i] = true;
@@ -786,7 +786,7 @@ class DtsObject extends GameObject {
 						// translations.push(Util.lerpThreeVectors(v1, v2, t));
 					} else {
 						var translation = this.dts.defaultTranslations[i];
-						var trans = new Vector(translation.x, translation.y, translation.z);
+						var trans = new Vector(-translation.x, translation.y, translation.z);
 						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
 						// translations.push();
 					}
