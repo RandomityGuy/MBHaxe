@@ -1,5 +1,6 @@
 package rewind;
 
+import shapes.AbstractBumper;
 import shapes.PowerUp;
 import shapes.LandMine;
 import src.MarbleWorld;
@@ -86,6 +87,10 @@ class RewindManager {
 					lastDirection: td.lastDirection,
 					lastContactTime: td.lastContactTime
 				});
+			}
+			if (dts is AbstractBumper) {
+				var ab:AbstractBumper = cast dts;
+				rf.powerupStates.push(ab.lastContactTime);
 			}
 		}
 		rf.blastAmt = level.blastAmount;
@@ -202,6 +207,10 @@ class RewindManager {
 				td.lastCompletion = tdState.lastCompletion;
 				td.lastDirection = tdState.lastDirection;
 				td.lastContactTime = tdState.lastContactTime;
+			}
+			if (dts is AbstractBumper) {
+				var ab:AbstractBumper = cast dts;
+				ab.lastContactTime = pstates.shift();
 			}
 		}
 
