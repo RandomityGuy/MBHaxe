@@ -814,8 +814,10 @@ class DtsObject extends GameObject {
 
 			for (i in 0...mesh.nodeIndices.length) {
 				var mat = mesh.initialTransforms[i].clone();
+				mat.scale(-1);
 				mat.transpose();
 				var tform = this.graphNodes[mesh.nodeIndices[i]].getRelPos(this).clone();
+				tform.prependScale(-1);
 				mat.multiply(mat, tform);
 
 				boneTransformations.push(mat);
@@ -829,8 +831,8 @@ class DtsObject extends GameObject {
 				var vec = new Vector();
 				var vec2 = new Vector();
 
-				vec.set(vertex.x, vertex.y, vertex.z);
-				vec2.set(normal.x, normal.y, normal.z);
+				vec.set(-vertex.x, vertex.y, vertex.z);
+				vec2.set(-normal.x, normal.y, normal.z);
 				var mat = boneTransformations[mesh.boneIndices[i]];
 
 				vec.transform(mat);
