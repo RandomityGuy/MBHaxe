@@ -1448,7 +1448,7 @@ class MarbleWorld extends Scheduler {
 				var found = false;
 				for (collider in endpadBB) {
 					if (collider.go == this.endPad) {
-						var chull = cast(collider, collision.CollisionHull);
+						var chull = cast(collider, collision.CollisionEntity);
 						var chullinvT = @:privateAccess chull.invTransform.clone();
 						chullinvT.clone();
 						chullinvT.transpose();

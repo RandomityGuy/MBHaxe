@@ -77,7 +77,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			var oldPos = this.transform.getPosition();
 			var newPos = transform.getPosition();
 			this.transform.setPosition(newPos);
-			this.invTransform.setPosition(newPos.multiply(-1));
+			this.invTransform = this.transform.getInverse();
 			if (this.boundingBox == null)
 				generateBoundingBox();
 			else {
@@ -244,6 +244,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 							cinfo.force = surface.force;
 							cinfo.friction = surface.friction;
 							contacts.push(cinfo);
+							this.go.onMarbleContact(timeState, cinfo);
 							// surfaceBestContact = cinfo;
 							// }
 						}
