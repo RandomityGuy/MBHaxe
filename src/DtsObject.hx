@@ -615,13 +615,17 @@ class DtsObject extends GameObject {
 			var dot1 = normal.dot(vertexNormals[i1]);
 			var dot2 = normal.dot(vertexNormals[i2]);
 			var dot3 = normal.dot(vertexNormals[i3]);
-			if (!StringTools.contains(this.dtsPath, 'helicopter.dts') && !StringTools.contains(this.dtsPath, 'tornado.dts'))
-				if (dot1 < 0 && dot2 < 0 && dot3 < 0) {
-					var temp = i1;
-					i1 = i3;
-					i3 = temp;
-				}
+			// if (!StringTools.contains(this.dtsPath, 'helicopter.dts') && !StringTools.contains(this.dtsPath, 'tornado.dts'))
 			// ^ temp hardcoded fix
+
+			// if (dot1 < 0 && dot2 < 0 && dot3 < 0) {
+			if ((dot1 < 0 && dot2 < 0 && dot3 < 0) || StringTools.contains(this.dtsPath, 'helicopter.dts')) {
+				var temp = i1;
+				i1 = i3;
+				i3 = temp;
+			}
+
+			// }
 
 			var geometrydata = materialGeometry[materialIndex];
 
@@ -834,8 +838,10 @@ class DtsObject extends GameObject {
 
 			for (i in 0...mesh.nodeIndices.length) {
 				var mat = mesh.initialTransforms[i].clone();
+				mat.scale(-1);
 				mat.transpose();
 				var tform = this.graphNodes[mesh.nodeIndices[i]].getRelPos(this).clone();
+				tform.prependScale(-1);
 				mat.multiply(mat, tform);
 
 				boneTransformations.push(mat);
@@ -849,8 +855,8 @@ class DtsObject extends GameObject {
 				var vec = new Vector();
 				var vec2 = new Vector();
 
-				vec.set(vertex.x, vertex.y, vertex.z);
-				vec2.set(normal.x, normal.y, normal.z);
+				vec.set(-vertex.x, vertex.y, vertex.z);
+				vec2.set(-normal.x, normal.y, normal.z);
 				var mat = boneTransformations[mesh.boneIndices[i]];
 
 				vec.transform(mat);
