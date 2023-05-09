@@ -532,17 +532,21 @@ class DtsObject extends GameObject {
 	}
 
 	function generateCollisionGeometry(dtsMesh:dts.Mesh, vertices:Array<Vector>, vertexNormals:Array<Vector>, node:Int) {
-		var hulls:Array<CollisionEntity> = [];
+		var hulls:Array<CollisionEntity> = [new CollisionEntity(cast this)];
+		var ent = hulls[0];
+		ent.userData = node;
 		for (primitive in dtsMesh.primitives) {
 			var k = 0;
 
-			var chull = new CollisionHull(cast this);
-			chull.userData = node;
+			// var chull = new CollisionEntity(cast this); // new CollisionHull(cast this);
+			// chull.userData = node;
 			var hs = new CollisionSurface();
 			hs.points = [];
 			hs.normals = [];
 			hs.indices = [];
 			hs.transformKeys = [];
+			hs.edgeConcavities = [];
+			hs.edgeData = [];
 
 			var material = this.dts.matNames[primitive.matIndex & TSDrawPrimitive.MaterialMask];
 			if (dtsMaterials.exists(material) && !this.isTSStatic) {
@@ -581,11 +585,22 @@ class DtsObject extends GameObject {
 			}
 
 			hs.generateBoundingBox();
-			chull.addSurface(hs);
-			chull.generateBoundingBox();
-			chull.finalize();
-			hulls.push(chull);
+			ent.addSurface(hs);
+			// chull.generateBoundingBox();
+			// chull.finalize();
+			// hulls.push(chull);
 		}
+		for (colliderSurface in ent.surfaces) {
+			var i = 0;
+			while (i < colliderSurface.indices.length) {
+				var edgeData = 0;
+				colliderSurface.edgeConcavities.push(false);
+				colliderSurface.edgeData.push(edgeData);
+				i += 3;
+			}
+		}
+		ent.generateBoundingBox();
+		ent.finalize();
 		return hulls;
 	}
 
