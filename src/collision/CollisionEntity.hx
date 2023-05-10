@@ -157,7 +157,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
 		var position = collisionEntity.transform.getPosition();
-		var radius = collisionEntity.radius;
+		var radius = collisionEntity.radius + 0.001;
 
 		var invMatrix = invTransform;
 		if (this.go is PathedInterior)
@@ -221,7 +221,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
 				if (closest != null) {
 					var contactDist = closest.distanceSq(position);
-					if (contactDist <= radius * radius) {
+					if (contactDist <= radius * radius && contactDist > 0.0225) {
 						var normal = res.normal;
 
 						if (position.sub(closest).dot(surfacenormal) > 0) {
