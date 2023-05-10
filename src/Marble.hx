@@ -559,9 +559,7 @@ class Marble extends GameObject {
 		return A;
 	}
 
-	function computeMoveForces(m:Move) {
-		var aControl = new Vector();
-		var desiredOmega = new Vector();
+	function computeMoveForces(m:Move, aControl:Vector, desiredOmega:Vector) {
 		var currentGravityDir = this.level.currentUp.multiply(-1);
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
@@ -593,15 +591,16 @@ class Marble extends GameObject {
 				desiredXVelocity = currentXVelocity;
 			}
 			var rsq = R.lengthSq();
-			desiredOmega = R.cross(motionDir.multiply(desiredYVelocity).add(sideDir.multiply(desiredXVelocity))).multiply(1 / rsq);
-			aControl = desiredOmega.sub(this.omega);
+			var crossP = R.cross(motionDir.multiply(desiredYVelocity).add(sideDir.multiply(desiredXVelocity))).multiply(1 / rsq);
+			desiredOmega.set(crossP.x, crossP.y, crossP.z);
+			aControl.set(desiredOmega.x - this.omega.x, desiredOmega.y - this.omega.y, desiredOmega.z - this.omega.z);
 			var aScalar = aControl.length();
 			if (aScalar > this._angularAcceleration) {
-				aControl = aControl.multiply(this._angularAcceleration / aScalar);
+				aControl.scale(this._angularAcceleration / aScalar);
 			}
-			return {result: false, aControl: aControl, desiredOmega: desiredOmega};
+			return false;
 		}
-		return {result: true, aControl: aControl, desiredOmega: desiredOmega};
+		return return true;
 	}
 
 	function velocityCancel(currentTime:Float, dt:Float, surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
@@ -774,7 +773,10 @@ class Marble extends GameObject {
 		for (j in 0...contacts.length) {
 			var normalForce2 = -contacts[j].normal.dot(A);
 			if (normalForce2 > 0 && contacts[j].normal.dot(this.velocity.sub(contacts[j].velocity)) <= 0.0001) {
-				A = A.add(contacts[j].normal.multiply(normalForce2));
+				A.set(A.x
+					+ contacts[j].normal.x * normalForce2, A.y
+					+ contacts[j].normal.y * normalForce2, A.z
+					+ contacts[j].normal.z * normalForce2);
 			}
 		}
 		if (bestSurface != -1 && this.mode != Finish) {
@@ -807,7 +809,7 @@ class Marble extends GameObject {
 				var aadd = R.cross(A).multiply(1 / R.lengthSq());
 				if (isCentered) {
 					var nextOmega = this.omega.add(a.multiply(dt));
-					aControl = desiredOmega.clone().sub(nextOmega);
+					aControl = desiredOmega.sub(nextOmega);
 					var aScalar = aControl.length();
 					if (aScalar > this._brakingAcceleration) {
 						aControl = aControl.multiply(this._brakingAcceleration / aScalar);
@@ -825,19 +827,19 @@ class Marble extends GameObject {
 						friction2 = this._kineticFriction * bestContact.friction;
 					Aadd = Aadd.multiply(friction2 * bestNormalForce / aAtCMag);
 				}
-				A = A.add(Aadd);
-				a = a.add(aadd);
+				A.set(A.x + Aadd.x, A.y + Aadd.y, A.z + Aadd.z);
+				a.set(a.x + aadd.x, a.y + aadd.y, a.z + aadd.z);
 			}
-			A = A.add(AFriction);
-			a = a.add(aFriction);
+			A.set(A.x + AFriction.x, A.y + AFriction.y, A.z + AFriction.z);
+			a.set(a.x + aFriction.x, a.y + aFriction.y, a.z + aFriction.z);
 
 			lastContactNormal = bestContact.normal;
 		}
-		a = a.add(aControl);
+		a.set(a.x + aControl.x, a.y + aControl.y, a.z + aControl.z);
 		if (this.mode == Finish) {
 			a.set(); // Zero it out
 		}
-		return [A, a];
+		return a;
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
@@ -1560,18 +1562,15 @@ class Marble extends GameObject {
 				this._firstTick = false;
 			}
 
-			var cmf = this.computeMoveForces(m);
-			var isCentered:Bool = cmf.result;
-			var aControl = cmf.aControl;
-			var desiredOmega = cmf.desiredOmega;
+			var aControl = new Vector();
+			var desiredOmega = new Vector();
+			var isCentered = this.computeMoveForces(m, aControl, desiredOmega);
 
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
 			var A = this.getExternalForces(timeState.currentAttemptTime, m, timeStep);
-			var retf = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
-			A = retf[0];
-			var a = retf[1];
-			this.velocity = this.velocity.add(A.multiply(timeStep));
-			this.omega = this.omega.add(a.multiply(timeStep));
+			var a = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
+			this.velocity.set(this.velocity.x + A.x * timeStep, this.velocity.y + A.y * timeStep, this.velocity.z + A.z * timeStep);
+			this.omega.set(this.omega.x + a.x * timeStep, this.omega.y + a.y * timeStep, this.omega.z + a.z * timeStep);
 			if (this.mode == Start) {
 				// Bruh...
 				this.velocity.y = 0;
