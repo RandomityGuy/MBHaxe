@@ -114,8 +114,8 @@ class ConsoleDlg extends GuiControl {
 		Console.removeConsumer(onConsoleEntry);
 	}
 
-	public override function render(scene2d:Scene) {
-		super.render(scene2d);
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
+		super.render(scene2d, parent);
 
 		scroll.setScrollMax(consoleContent.text.textHeight);
 	}

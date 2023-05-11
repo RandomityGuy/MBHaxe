@@ -30,43 +30,66 @@ class GuiMLText extends GuiControl {
 		this.text.loadFont = loadFontFunc;
 	}
 
-	public override function render(scene2d:Scene) {
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		var renderRect = this.getRenderRectangle();
 		text.maxWidth = renderRect.extent.x;
 
-		if (this.scrollable) {
-			this.flow = new Flow();
-			this.flow.addChild(this.text);
+		if (parent != null) {
+			if (parent.contains(this.text)) {
+				parent.removeChild(this.text);
+			}
+			parent.addChild(this.text);
+			var off = this.getOffsetFromParent();
+			var props = parent.getProperties(this.text);
+			props.isAbsolute = true;
 
-			this.flow.maxWidth = cast renderRect.extent.x;
-			this.flow.maxHeight = cast renderRect.extent.y;
-			this.flow.multiline = true;
-			this.flow.overflow = FlowOverflow.Hidden;
+			if (justify == Left) {
+				text.setPosition(Math.floor(off.x), Math.floor(off.y));
+				text.textAlign = Left;
+			}
+			if (justify == Right) {
+				text.setPosition(Math.floor(off.x + renderRect.extent.x), Math.floor(off.y));
+				text.textAlign = Right;
+			}
+			if (justify == Center) {
+				text.setPosition(Math.floor(off.x + renderRect.extent.x / 2), Math.floor(off.y));
+				text.textAlign = Center;
+			}
 		}
 
-		var obj:h2d.Object = this.scrollable ? flow : text;
+		// if (this.scrollable) {
+		// 	this.flow = new Flow();
+		// 	this.flow.addChild(this.text);
 
-		if (justify == Left) {
-			obj.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
-			text.textAlign = Left;
-		}
-		if (justify == Right) {
-			obj.setPosition(Math.floor(renderRect.position.x + renderRect.extent.x), Math.floor(renderRect.position.y));
-			text.textAlign = Right;
-		}
-		if (justify == Center) {
-			obj.setPosition(Math.floor(renderRect.position.x + renderRect.extent.x / 2), Math.floor(renderRect.position.y));
-			text.textAlign = Center;
-		}
+		// 	this.flow.maxWidth = cast renderRect.extent.x;
+		// 	this.flow.maxHeight = cast renderRect.extent.y;
+		// 	this.flow.multiline = true;
+		// 	this.flow.overflow = FlowOverflow.Hidden;
+		// }
+		super.render(scene2d, parent);
 
-		if (scrollable)
-			text.setPosition(0, -_scroll);
+		// var obj:h2d.Object = this.scrollable ? flow : text;
 
-		if (scene2d.contains(obj))
-			scene2d.removeChild(obj);
+		// if (justify == Left) {
+		// 	obj.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
+		// 	text.textAlign = Left;
+		// }
+		// if (justify == Right) {
+		// 	obj.setPosition(Math.floor(renderRect.position.x + renderRect.extent.x), Math.floor(renderRect.position.y));
+		// 	text.textAlign = Right;
+		// }
+		// if (justify == Center) {
+		// 	obj.setPosition(Math.floor(renderRect.position.x + renderRect.extent.x / 2), Math.floor(renderRect.position.y));
+		// 	text.textAlign = Center;
+		// }
 
-		scene2d.addChild(obj);
-		super.render(scene2d);
+		// if (scrollable)
+		// 	text.setPosition(0, -_scroll);
+
+		// if (scene2d.contains(obj))
+		// 	scene2d.removeChild(obj);
+
+		// scene2d.addChild(obj);
 	}
 
 	public override function dispose() {
@@ -76,6 +99,7 @@ class GuiMLText extends GuiControl {
 		} else {
 			this.flow.remove();
 		}
+		this.text.remove();
 	}
 
 	public override function onRemove() {
@@ -86,11 +110,12 @@ class GuiMLText extends GuiControl {
 		if (MarbleGame.canvas.scene2d.contains(text)) {
 			MarbleGame.canvas.scene2d.removeChild(text); // Refresh "layer"
 		}
+		this.text.remove();
 	}
 
 	public override function onScroll(scrollX:Float, scrollY:Float) {
 		_scroll = scrollY;
-		text.setPosition(0, -scrollY);
+		text.setPosition(text.x, -scrollY);
 		if (flow != null)
 			flow.getProperties(text).offsetY = cast - scrollY;
 	}

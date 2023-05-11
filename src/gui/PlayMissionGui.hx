@@ -821,8 +821,8 @@ class PlayMissionGui extends GuiImage {
 			}
 
 			setSelectedFunc(currentList.length - 1);
-			if (doRender)
-				this.render(cast(this.parent, Canvas).scene2d);
+			// if (doRender)
+			//	this.render(cast(this.parent, Canvas).scene2d);
 		}
 
 		setScoreHover = (isHover) -> {
@@ -1040,8 +1040,8 @@ class PlayMissionGui extends GuiImage {
 		#end
 	}
 
-	public override function render(scene2d:Scene) {
-		super.render(scene2d);
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
+		super.render(scene2d, parent);
 		setSelectedFunc(currentSelectionStatic);
 	}
 

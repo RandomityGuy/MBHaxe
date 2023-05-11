@@ -7,5 +7,6 @@
 -D js-es=6
 -D keep-inline-positions
 -D highDPI
+-D flow_border
 --main Main
 -debug

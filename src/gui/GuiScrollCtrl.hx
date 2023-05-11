@@ -97,7 +97,7 @@ class GuiScrollCtrl extends GuiControl {
 		return rrec;
 	}
 
-	public override function render(scene2d:Scene) {
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		this.dirty = true;
 
 		if (scene2d.contains(scrollBarY))
@@ -111,7 +111,7 @@ class GuiScrollCtrl extends GuiControl {
 
 		updateScrollVisual();
 
-		super.render(scene2d);
+		super.render(scene2d, parent);
 	}
 
 	public function updateScrollVisual() {

@@ -130,8 +130,8 @@ class HelpCreditsGui extends GuiImage {
 		};
 	}
 
-	public override function render(scene2d:Scene) {
-		super.render(scene2d);
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
+		super.render(scene2d, parent);
 
 		manualPageList.onSelectedFunc(0);
 	}

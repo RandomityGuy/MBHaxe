@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.Flow;
 import hxd.res.Image;
 import h2d.Graphics;
 import hxd.Key;
@@ -55,11 +56,42 @@ class GuiControl {
 
 	var _disposed = false;
 
+	var _flow:Flow;
+
 	public function new() {}
 
-	public function render(scene2d:Scene) {
+	public function render(scene2d:Scene, ?parent:Flow) {
+		if (this._flow == null) {
+			this._flow = new Flow(parent != null ? parent : scene2d);
+		}
+		if (parent == null) {
+			if (scene2d.contains(this._flow)) {
+				scene2d.removeChild(this._flow);
+			}
+			scene2d.addChild(this._flow);
+		} else {
+			if (parent.contains(this._flow)) {
+				parent.removeChild(this._flow);
+			}
+			parent.addChild(this._flow);
+		}
+		var rrect = getRenderRectangle();
+		this._flow.maxWidth = cast rrect.extent.x;
+		this._flow.maxHeight = cast rrect.extent.y;
+		this._flow.borderWidth = cast rrect.extent.x;
+		this._flow.borderHeight = cast rrect.extent.y;
+		this._flow.borderRight = cast rrect.extent.x;
+		this._flow.borderBottom = cast rrect.extent.y;
+		this._flow.overflow = Hidden;
+		this._flow.multiline = true;
+		if (parent != null) {
+			var props = parent.getProperties(this._flow);
+			props.isAbsolute = true;
+			var off = this.getOffsetFromParent();
+			this._flow.setPosition(off.x, off.y);
+		}
 		for (c in children) {
-			c.render(scene2d);
+			c.render(scene2d, this._flow);
 		}
 		this._skipNextEvent = true;
 	}
@@ -203,6 +235,59 @@ class GuiControl {
 		}
 	}
 
+	public function getOffsetFromParent() {
+		var rect = new Rect(this.position, this.extent);
+		var parentRect:Rect = null;
+
+		var uiScaleFactor = Settings.uiScale;
+
+		var offset = this.position.clone();
+
+		if (this.parent != null) {
+			parentRect = this.parent.getRenderRectangle();
+			offset = this.position.multiply(uiScaleFactor);
+		}
+
+		var scaleFactor = 1.0 / Window.getInstance().windowToPixelRatio;
+		#if (js || android)
+		scaleFactor = 1 / Settings.zoomRatio; // 768 / js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio; // 0.5; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
+		#end
+
+		if (this.horizSizing == HorizSizing.Center) {
+			if (this.parent != null) {
+				offset.x = parentRect.extent.x / 2 - (rect.extent.x * uiScaleFactor) / 2;
+			}
+		}
+		if (this.vertSizing == VertSizing.Center) {
+			if (this.parent != null) {
+				offset.y = parentRect.extent.y / 2 - (rect.extent.y * uiScaleFactor) / 2;
+			}
+		}
+		if (this.horizSizing == HorizSizing.Right) {
+			if (this.parent != null) {
+				offset.x = this.position.x * uiScaleFactor;
+			}
+		}
+		if (this.vertSizing == VertSizing.Bottom) {
+			if (this.parent != null) {
+				offset.y = this.position.y * uiScaleFactor;
+			}
+		}
+		if (this.horizSizing == HorizSizing.Left) {
+			if (this.parent != null) {
+				offset.x = parentRect.extent.x - (parent.extent.x - this.position.x) * uiScaleFactor;
+			}
+		}
+		if (this.vertSizing == VertSizing.Top) {
+			if (this.parent != null) {
+				offset.y = parentRect.extent.y - (parent.extent.y - this.position.y) * uiScaleFactor;
+			}
+		}
+		offset.x = Math.floor(offset.x);
+		offset.y = Math.floor(offset.y);
+		return offset;
+	}
+
 	public function guiToScreen(point:Vector) {
 		var rect = this.getRenderRectangle();
 		return rect.position.add(point);
@@ -261,6 +346,7 @@ class GuiControl {
 	public function onScroll(scrollX:Float, scrollY:Float) {}
 
 	public function onRemove() {
+		this._flow.remove();
 		for (c in this.children) {
 			c.onRemove();
 		}

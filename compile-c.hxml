@@ -2,6 +2,7 @@
 -lib heaps
 -lib hlsdl
 -D highDPI
+-D flow_border
 -D hlgen.makefile=vs2019
 -hl native/marblegame.c
 --main Main

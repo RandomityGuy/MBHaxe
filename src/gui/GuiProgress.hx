@@ -17,23 +17,31 @@ class GuiProgress extends GuiControl {
 		super();
 	}
 
-	public override function render(scene2d:Scene) {
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		var renderRect = getRenderRectangle();
 		if (this.progressRect == null) {
 			this.progressRect = new Graphics();
 		}
-		if (scene2d.contains(progressRect))
-			progressRect.remove();
-		scene2d.addChild(progressRect);
+		if (parent != null) {
+			if (parent.contains(this.progressRect)) {
+				parent.removeChild(this.progressRect);
+			}
+			parent.addChild(this.progressRect);
+			var off = this.getOffsetFromParent();
+			var props = parent.getProperties(this.progressRect);
+			props.isAbsolute = true;
+			this.progressRect.setPosition(off.x, off.y);
+		}
+		// if (scene2d.contains(progressRect))
+		// 	progressRect.remove();
+		// scene2d.addChild(progressRect);
 		var rgb = progressColor >> 2;
 		var a = progressColor & 0xFF;
 		this.progressRect.clear();
 		this.progressRect.beginFill(rgb, a / 0xFF);
 		this.progressRect.drawRect(0, 0, renderRect.extent.x * progress, renderRect.extent.y);
 		this.progressRect.endFill();
-		this.progressRect.x = renderRect.position.x;
-		this.progressRect.y = renderRect.position.y;
-		super.render(scene2d);
+		super.render(scene2d, parent);
 	}
 
 	public override function dispose() {
@@ -47,6 +55,7 @@ class GuiProgress extends GuiControl {
 		if (MarbleGame.canvas.scene2d.contains(progressRect)) {
 			MarbleGame.canvas.scene2d.removeChild(progressRect); // Refresh "layer"
 		}
+		this.progressRect.remove();
 	}
 
 	function get_progress() {

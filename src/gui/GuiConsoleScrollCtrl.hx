@@ -136,7 +136,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		return rrec;
 	}
 
-	public override function render(scene2d:Scene) {
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		this.dirty = true;
 
 		scrollUpButton.position = new Vector(this.extent.x - 18, 0);
@@ -157,7 +157,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 		updateScrollVisual();
 
-		super.render(scene2d);
+		super.render(scene2d, parent);
 	}
 
 	public function updateScrollVisual() {

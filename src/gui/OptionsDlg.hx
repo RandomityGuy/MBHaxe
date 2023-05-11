@@ -164,7 +164,7 @@ class OptionsDlg extends GuiImage {
 			optDropdown.pressedAction = (sender) -> {
 				if (currentDropDown == null) {
 					parent.addChild(optDropdownImg);
-					optDropdownImg.render(MarbleGame.canvas.scene2d);
+					optDropdownImg.render(MarbleGame.canvas.scene2d, @:privateAccess parent._flow);
 					currentDropDown = optDropdownImg;
 					setAllBtnState(false);
 					return;
@@ -187,6 +187,7 @@ class OptionsDlg extends GuiImage {
 				case 'xlarge': 97;
 				default: 0;
 			});
+			// optDropdownList.scrollable = true;
 			optDropdownList.textYOffset = -5;
 			optDropdownList.onSelectedFunc = (idx) -> {
 				onSelect(idx);

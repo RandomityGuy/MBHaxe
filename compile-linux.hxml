@@ -2,5 +2,6 @@
 -lib heaps
 -lib hlsdl
 -D highDPI
+-D flow_border
 -hl native/marblegame.c
 --main Main
