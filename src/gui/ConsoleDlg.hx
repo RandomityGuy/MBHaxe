@@ -84,7 +84,7 @@ class ConsoleDlg extends GuiControl {
 		bord.position = new Vector(0, 350);
 		bord.extent = new Vector(640, 18);
 		bord.horizSizing = Width;
-		consoleContent.addChild(bord);
+		this.addChild(bord);
 
 		consoleInput = new GuiTextInput(arial14);
 		consoleInput.position = new Vector(1, 351);
@@ -96,7 +96,7 @@ class ConsoleDlg extends GuiControl {
 		consoleInput.text.selectionColor.set(1, 1, 1);
 		consoleInput.text.selectionTile = h2d.Tile.fromColor(0x808080, 0, hxd.Math.ceil(consoleInput.text.font.lineHeight));
 
-		consoleContent.addChild(consoleInput);
+		this.addChild(consoleInput);
 
 		onConsoleEntry = (e) -> {
 			var txt = '[${e.time}] ${StringTools.htmlEscape(e.text)}<br/>';

@@ -593,19 +593,23 @@ class MarbleWorld extends Scheduler {
 			return; // We will update state manually
 		if (this.timeState.currentAttemptTime < 0.5) {
 			this.playGui.setCenterText('none');
+			this.marble.mode = Start;
 		}
 		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 2)) {
 			this.playGui.setCenterText('ready');
+			this.marble.mode = Start;
 		}
 		if ((this.timeState.currentAttemptTime >= 2) && (this.timeState.currentAttemptTime < 3.5)) {
 			this.playGui.setCenterText('set');
+			this.marble.mode = Start;
 		}
 		if ((this.timeState.currentAttemptTime >= 3.5) && (this.timeState.currentAttemptTime < 5.5)) {
 			this.playGui.setCenterText('go');
 			this.marble.mode = Play;
 		}
-		if (this.timeState.currentAttemptTime >= 5.5) {
+		if (this.timeState.currentAttemptTime >= 5.5 && this.finishTime == null) {
 			this.playGui.setCenterText('none');
+			this.marble.mode = Play;
 		}
 	}
 
@@ -991,12 +995,12 @@ class MarbleWorld extends Scheduler {
 		if (Key.isDown(Settings.controlsSettings.rewind) && Settings.optionsSettings.rewindEnabled && !this.isWatching) {
 			this.rewinding = true;
 		} else {
-			this.rewinding = false;
-			if (Key.isReleased(Settings.controlsSettings.rewind)) {
+			if (Key.isReleased(Settings.controlsSettings.rewind) && this.rewinding) {
 				if (this.isRecording) {
 					this.replay.spliceReplay(timeState.currentAttemptTime);
 				}
 			}
+			this.rewinding = false;
 		}
 
 		if (!this.isWatching) {
