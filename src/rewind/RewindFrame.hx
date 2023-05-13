@@ -100,7 +100,7 @@ class RewindFrame {
 		c.blastAmt = blastAmt;
 		c.oobState = {
 			oob: oobState.oob,
-			timeState: oobState.timeState.clone()
+			timeState: oobState.timeState != null ? oobState.timeState.clone() : null
 		};
 		c.checkpointState = {
 			currentCheckpoint: checkpointState.currentCheckpoint != null ? {
@@ -113,5 +113,6 @@ class RewindFrame {
 			checkpointUp: checkpointState.checkpointUp != null ? checkpointState.checkpointUp.clone() : null,
 			checkpointBlast: checkpointState.checkpointBlast,
 		};
+		return c;
 	}
 }

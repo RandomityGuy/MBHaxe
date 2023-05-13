@@ -241,6 +241,9 @@ class RewindManager {
 
 		var topFrame = frames[frames.length - 1];
 		while (topFrame.timeState.currentAttemptTime > absTime) {
+			if (frames.length == 1) {
+				return frames[0];
+			}
 			frames.pop();
 			if (frames.length == 0)
 				return null;

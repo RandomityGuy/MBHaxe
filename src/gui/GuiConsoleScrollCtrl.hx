@@ -17,7 +17,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	var maxScrollY:Float;
 
 	var scrollBarY:h2d.Object;
-	var scrollTrack:Bitmap;
+	var scrollTrack:GuiImage;
 
 	var scrollTopTile:Tile;
 	var scrollBottomTile:Tile;
@@ -57,6 +57,10 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		var scrollDownPressedTile = scrollBar.sub(19, 19, 18, 17);
 		var scrollUpDisabledTile = scrollBar.sub(38, 1, 18, 17);
 		var scrollDownDisabledTile = scrollBar.sub(38, 19, 18, 17);
+		this._manualScroll = true;
+
+		this.scrollTrack = new GuiImage(scrollTrackTile);
+		this.addChild(this.scrollTrack);
 
 		scrollUpButton = new GuiButton([scrollUpTile, scrollUpTile, scrollUpPressedTile, scrollUpDisabledTile]);
 		scrollUpButton.position = new Vector(0, 0);
@@ -117,7 +121,6 @@ class GuiConsoleScrollCtrl extends GuiControl {
 				});
 			}
 		};
-		this.scrollTrack = new Bitmap(scrollTrackTile);
 	}
 
 	public function setScrollMax(max:Float) {
@@ -132,18 +135,18 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 	public override function getRenderRectangle():Rect {
 		var rrec = super.getRenderRectangle();
-		rrec.scroll.y = scrollY * this.maxScrollY / (rrec.extent.y - 34 * Settings.uiScale);
+		// rrec.scroll.y = scrollY * this.maxScrollY / (rrec.extent.y - 34 * Settings.uiScale);
 		return rrec;
 	}
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		this.dirty = true;
 
+		this.scrollTrack.position = new Vector(extent.x - 18 * Settings.uiScale, 0);
+		this.scrollTrack.extent = new Vector(18, this.extent.y);
+
 		scrollUpButton.position = new Vector(this.extent.x - 18, 0);
 		scrollDownButton.position = new Vector(this.extent.x - 18, this.extent.y - 17);
-
-		if (scene2d.contains(scrollTrack))
-			scene2d.removeChild(scrollTrack);
 
 		if (scene2d.contains(scrollBarY))
 			scene2d.removeChild(scrollBarY);
@@ -151,12 +154,10 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		if (scene2d.contains(clickInteractive))
 			scene2d.removeChild(clickInteractive);
 
-		scene2d.addChild(scrollTrack);
 		scene2d.addChild(scrollBarY);
 		scene2d.addChild(clickInteractive);
 
 		updateScrollVisual();
-
 		super.render(scene2d, parent);
 	}
 
@@ -169,13 +170,13 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		}
 		scrollBarY.visible = true;
 
-		this.scrollTrack.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y);
+		// this.scrollTrack.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y);
 
 		var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
 
 		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
 
-		this.scrollTrack.scaleY = renderRect.extent.y;
+		this.scrollTrack.bmp.scaleY = renderRect.extent.y;
 
 		this.scrollY = Util.clamp(scrollY, 0, scrollExtentY - scrollBarYSize * Settings.uiScale);
 
@@ -222,6 +223,8 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		}
 
 		for (c in this.children) {
+			if (c == this.scrollTrack || c == this.scrollUpButton || c == this.scrollDownButton)
+				continue;
 			c.onScroll(0, scrollY * (this.maxScrollY - 34 * Settings.uiScale) / scrollExtentY);
 		}
 	}
@@ -229,7 +232,6 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	public override function dispose() {
 		super.dispose();
 		this.scrollBarY.remove();
-		this.scrollTrack.remove();
 		this.clickInteractive.remove();
 	}
 
@@ -244,9 +246,6 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 	public override function onRemove() {
 		super.onRemove();
-		if (MarbleGame.canvas.scene2d.contains(scrollTrack)) {
-			MarbleGame.canvas.scene2d.removeChild(scrollTrack); // Refresh "layer"
-		}
 		if (MarbleGame.canvas.scene2d.contains(scrollBarY)) {
 			MarbleGame.canvas.scene2d.removeChild(scrollBarY); // Refresh "layer"
 		}
