@@ -115,6 +115,7 @@ class Console {
 				log("Available commands:");
 				log("help");
 				log("timeScale <scale>");
+				log("rewindTimeScale <scale>");
 				log("drawBounds <true/false>");
 				log("wireframe <true/false>");
 			} else if (cmdType == "timeScale") {
@@ -147,6 +148,8 @@ class Console {
 				if (cmdSplit.length == 2) {
 					var scale = Std.parseFloat(cmdSplit[1]);
 					if (Math.isNaN(scale))
+						scale = 1;
+					if (scale <= 0)
 						scale = 1;
 					if (MarbleGame.instance.world != null) {
 						MarbleGame.instance.world.rewindManager.timeScale = scale;
