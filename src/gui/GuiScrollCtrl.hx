@@ -12,6 +12,8 @@ import src.Util;
 
 class GuiScrollCtrl extends GuiControl {
 	public var scrollY:Float = 0;
+	public var enabled:Bool = true;
+	public var childrenHandleScroll:Bool = false;
 
 	var maxScrollY:Float;
 
@@ -35,6 +37,10 @@ class GuiScrollCtrl extends GuiControl {
 	var dirty:Bool = true;
 	var prevMousePos:Vector;
 
+	var _contentYPositions:Map<h2d.Object, Float> = [];
+
+	var deltaY:Float = 0;
+
 	public function new(scrollBar:Tile) {
 		super();
 		this.scrollTopTile = scrollBar.sub(0, 4, 10, 6);
@@ -53,7 +59,7 @@ class GuiScrollCtrl extends GuiControl {
 		this.scrollBarY.scale(Settings.uiScale);
 		this.clickInteractive = new Interactive(10 * Settings.uiScale, 1);
 		this.clickInteractive.onPush = (e) -> {
-			if (!this.pressed) {
+			if (!this.pressed && enabled) {
 				this.pressed = true;
 				this.dirty = true;
 				this.updateScrollVisual();
@@ -63,12 +69,14 @@ class GuiScrollCtrl extends GuiControl {
 				this.clickInteractive.startCapture(e2 -> {
 					if (e2.kind == ERelease) {
 						this.clickInteractive.stopCapture();
+						deltaY = 0;
 					}
 					if (e2.kind == EMove) {
 						if (prevEY == null) {
 							prevEY = e2.relY;
 						} else {
 							this.scrollY += (e2.relY - prevEY);
+							deltaY = (e2.relY - prevEY);
 							prevEY = e2.relY;
 							this.updateScrollVisual();
 						}
@@ -77,6 +85,7 @@ class GuiScrollCtrl extends GuiControl {
 					if (this.pressed) {
 						this.pressed = false;
 						this.dirty = true;
+						deltaY = 0;
 						this.updateScrollVisual();
 					}
 				});
@@ -112,6 +121,10 @@ class GuiScrollCtrl extends GuiControl {
 		updateScrollVisual();
 
 		super.render(scene2d, parent);
+		for (i in 0...this._flow.numChildren) {
+			var ch = this._flow.getChildAt(i);
+			_contentYPositions.set(ch, ch.y);
+		}
 	}
 
 	public function updateScrollVisual() {
@@ -165,6 +178,17 @@ class GuiScrollCtrl extends GuiControl {
 
 		for (c in this.children) {
 			c.onScroll(0, scrollY * this.maxScrollY / renderRect.extent.y);
+		}
+
+		if (this._flow != null && !childrenHandleScroll) {
+			var actualDelta = deltaY;
+			if (scrollY != scrollYOld) {
+				actualDelta -= (scrollYOld - scrollY);
+			}
+			for (i in 0...this._flow.numChildren) {
+				var ch = this._flow.getChildAt(i);
+				ch.y -= cast actualDelta * this.maxScrollY / renderRect.extent.y;
+			}
 		}
 	}
 

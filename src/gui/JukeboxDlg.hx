@@ -66,6 +66,7 @@ class JukeboxDlg extends GuiImage {
 		var scroll = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		scroll.position = new Vector(51, 39);
 		scroll.extent = new Vector(439, 216);
+		scroll.childrenHandleScroll = true;
 		this.addChild(scroll);
 
 		var songCtrl = new GuiTextListCtrl(markerFelt24, songList);

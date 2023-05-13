@@ -43,6 +43,7 @@ typedef OptionsSettings = {
 	var marbleModel:String;
 	var marbleShader:String;
 	var rewindEnabled:Bool;
+	var rewindTimescale:Float;
 }
 
 typedef ControlsSettings = {
@@ -122,6 +123,7 @@ class Settings {
 		marbleModel: "data/shapes/balls/ball-superball.dts",
 		marbleShader: "Default",
 		rewindEnabled: false,
+		rewindTimescale: 1,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -339,6 +341,8 @@ class Settings {
 				optionsSettings.fovX = 90;
 			if (optionsSettings.rewindEnabled == false #if js || optionsSettings.rewindEnabled == null #end)
 				optionsSettings.rewindEnabled = false;
+			if (optionsSettings.rewindTimescale == 0 #if js || optionsSettings.rewindTimescale == null #end)
+				optionsSettings.rewindTimescale = 1;
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
@@ -382,6 +386,9 @@ class Settings {
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;
+			}
+			if (optionsSettings.rewindTimescale == null) {
+				optionsSettings.rewindTimescale = 1;
 			}
 			#end
 			highscoreName = json.highscoreName;

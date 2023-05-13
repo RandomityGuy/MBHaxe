@@ -28,6 +28,7 @@ class GuiMLText extends GuiControl {
 		super();
 		this.text = new HtmlText(font);
 		this.text.loadFont = loadFontFunc;
+		this._manualScroll = true;
 	}
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {

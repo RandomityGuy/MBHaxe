@@ -185,7 +185,6 @@ class PlayGui {
 			.toTile());
 		timerTransparency.position = new Vector(14, -7);
 		timerTransparency.extent = new Vector(228, 71);
-		timerTransparency.doClipping = false;
 		timerCtrl.addChild(timerTransparency);
 
 		timerNumbers[0].position = new Vector(23, 0);
@@ -463,7 +462,6 @@ class PlayGui {
 		blastFill = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFill.position = new Vector(5, 5);
 		blastFill.extent = new Vector(58, 17);
-		blastFill.doClipping = false;
 		blastBar.addChild(blastFill);
 
 		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile());

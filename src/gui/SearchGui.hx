@@ -164,6 +164,7 @@ class SearchGui extends GuiImage {
 		scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		scrollCtrl.position = new Vector(19, 65);
 		scrollCtrl.extent = new Vector(447, 317);
+		scrollCtrl.childrenHandleScroll = true;
 		this.addChild(scrollCtrl);
 
 		searchMissionList = new GuiTextListCtrl(markerFelt24, displayList);

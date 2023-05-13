@@ -1,5 +1,6 @@
 package gui;
 
+import format.abc.Data.ABCData;
 import h2d.Flow;
 import hxd.res.Image;
 import h2d.Graphics;
@@ -58,12 +59,20 @@ class GuiControl {
 
 	var _flow:Flow;
 
+	var _manualScroll = false;
+
+	// var _border:h2d.Graphics = null;
+
 	public function new() {}
 
 	public function render(scene2d:Scene, ?parent:Flow) {
 		if (this._flow == null) {
 			this._flow = new Flow(parent != null ? parent : scene2d);
+			// this._flow.debug = true;
 		}
+		// if (_border == null) {
+		// 	_border = new h2d.Graphics(scene2d);
+		// }
 		if (parent == null) {
 			if (scene2d.contains(this._flow)) {
 				scene2d.removeChild(this._flow);
@@ -98,7 +107,10 @@ class GuiControl {
 
 	public function update(dt:Float, mouseState:MouseState) {
 		if (!_skipNextEvent) {
-			var hitTestRect = getHitTestRect();
+			var hitTestRect = getHitTestRect(!_manualScroll);
+			// _border.clear();
+			// _border.lineStyle(2, 0x0000FF);
+			// _border.drawRect(hitTestRect.position.x, hitTestRect.position.y, hitTestRect.extent.x, hitTestRect.extent.y);
 			if (hitTestRect.inRect(mouseState.position)) {
 				if (Key.isPressed(Key.MOUSE_LEFT)) {
 					mouseState.button = Key.MOUSE_LEFT;
@@ -226,12 +238,21 @@ class GuiControl {
 		return rect;
 	}
 
-	public function getHitTestRect() {
+	public function getHitTestRect(useScroll:Bool = true) {
 		var thisRect = this.getRenderRectangle();
+		if (useScroll)
+			thisRect.position.y -= thisRect.scroll.y;
 		if (this.parent == null)
 			return thisRect;
 		else {
-			return thisRect.intersect(this.parent.getRenderRectangle());
+			var parRect = this.parent.getRenderRectangle();
+			// parRect.position.y -= parRect.scroll.y;
+			var rr = thisRect.intersect(parRect);
+			if (useScroll) {
+				thisRect.position.y -= thisRect.scroll.y;
+				rr.scroll.y = thisRect.scroll.y;
+			}
+			return rr;
 		}
 	}
 
@@ -313,6 +334,7 @@ class GuiControl {
 	}
 
 	public function dispose() {
+		this._flow.remove();
 		for (c in this.children) {
 			c.dispose();
 		}

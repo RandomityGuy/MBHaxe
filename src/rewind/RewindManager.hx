@@ -8,6 +8,7 @@ import shapes.Trapdoor;
 import shapes.PushButton;
 import src.Util;
 import shapes.Nuke;
+import src.Settings;
 
 class RewindManager {
 	var frames:Array<RewindFrame> = [];
@@ -17,6 +18,7 @@ class RewindManager {
 
 	public function new(level:MarbleWorld) {
 		this.level = level;
+		this.timeScale = Settings.optionsSettings.rewindTimescale;
 	}
 
 	public function recordFrame() {

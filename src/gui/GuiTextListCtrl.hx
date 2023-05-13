@@ -38,6 +38,7 @@ class GuiTextListCtrl extends GuiControl {
 		super();
 		this.font = font;
 		this.texts = texts;
+		this._manualScroll = true;
 		this.textObjs = [];
 		for (text in texts) {
 			var tobj = new Text(font);
@@ -89,7 +90,7 @@ class GuiTextListCtrl extends GuiControl {
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		var renderRect = this.getRenderRectangle();
-		var htr = this.getHitTestRect();
+		var htr = this.getHitTestRect(false);
 
 		if (parent != null) {
 			if (parent.contains(g))
@@ -270,7 +271,7 @@ class GuiTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 
 		this.scroll = scrollY;
-		var hittestrect = this.getHitTestRect();
+		var hittestrect = this.getHitTestRect(false);
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
 			text.y = Math.floor((i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - scrollY));

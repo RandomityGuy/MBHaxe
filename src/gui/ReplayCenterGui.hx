@@ -100,6 +100,7 @@ class ReplayCenterGui extends GuiImage {
 		var scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		scrollCtrl.position = new Vector(30, 25);
 		scrollCtrl.extent = new Vector(283, 346);
+		scrollCtrl.childrenHandleScroll = true;
 		wnd.addChild(scrollCtrl);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");

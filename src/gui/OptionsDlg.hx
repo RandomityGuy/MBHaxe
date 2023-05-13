@@ -68,7 +68,10 @@ class OptionsDlg extends GuiImage {
 		onlineBtn.extent = new Vector(134, 65);
 		window.addChild(onlineBtn);
 
+		var generalPanel:GuiScrollCtrl = null;
+
 		var applyFunc:Void->Void = () -> {
+			generalPanel.scrollY = 0;
 			Settings.applySettings();
 		};
 
@@ -89,9 +92,10 @@ class OptionsDlg extends GuiImage {
 		}
 		window.addChild(applyBtn);
 
-		var generalPanel = new GuiControl();
+		generalPanel = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		generalPanel.position = new Vector(30, 88);
-		generalPanel.extent = new Vector(726, 394);
+		generalPanel.extent = new Vector(726, 364);
+		generalPanel.maxScrollY = 394;
 		window.addChild(generalPanel);
 
 		var currentTab = "general";
@@ -130,6 +134,8 @@ class OptionsDlg extends GuiImage {
 				var dropdownparent = currentDropDown.parent;
 				currentDropDown.parent.removeChild(currentDropDown);
 				currentDropDown = null;
+				if (dropdownparent is GuiScrollCtrl)
+					cast(dropdownparent, GuiScrollCtrl).enabled = true;
 				haxe.Timer.delay(() -> setAllBtnState(true), 5); // delay this a bit to avoid update();
 			}
 		}
@@ -147,6 +153,8 @@ class OptionsDlg extends GuiImage {
 			var optDropdownImg = new GuiImage(ResourceLoader.getResource('data/ui/options/dropdown-${size}.png', ResourceLoader.getImage, this.imageResources)
 				.toTile());
 
+			var dropDownYPos = yPos + 39;
+
 			optDropdownImg.position = new Vector(right ? 552 : 222, yPos + 39);
 			optDropdownImg.extent = new Vector(163, 79 + switch (size) {
 				case 'small': 0;
@@ -163,16 +171,24 @@ class OptionsDlg extends GuiImage {
 			optDropdown.txtCtrl.text.textColor = 0;
 			optDropdown.pressedAction = (sender) -> {
 				if (currentDropDown == null) {
+					var pScroll = parent.getRenderRectangle();
+					optDropdownImg.position.y = dropDownYPos - pScroll.scroll.y;
 					parent.addChild(optDropdownImg);
 					optDropdownImg.render(MarbleGame.canvas.scene2d, @:privateAccess parent._flow);
 					currentDropDown = optDropdownImg;
+					if (parent is GuiScrollCtrl)
+						cast(parent, GuiScrollCtrl).enabled = false;
 					setAllBtnState(false);
 					return;
 				}
 				if (currentDropDown == optDropdownImg) {
 					parent.removeChild(optDropdownImg);
 					currentDropDown = null;
-					haxe.Timer.delay(() -> setAllBtnState(true), 5); // delay this a bit to avoid update();
+					haxe.Timer.delay(() -> {
+						setAllBtnState(true);
+						if (parent is GuiScrollCtrl)
+							cast(parent, GuiScrollCtrl).enabled = true;
+					}, 5); // delay this a bit to avoid update();
 					return;
 				}
 			}
@@ -187,7 +203,7 @@ class OptionsDlg extends GuiImage {
 				case 'xlarge': 97;
 				default: 0;
 			});
-			// optDropdownList.scrollable = true;
+			optDropdownList.scrollable = true;
 			optDropdownList.textYOffset = -5;
 			optDropdownList.onSelectedFunc = (idx) -> {
 				onSelect(idx);
@@ -224,7 +240,9 @@ class OptionsDlg extends GuiImage {
 			optSliders.push(optSlider);
 		}
 
-		makeOption("Screen Resolution:", () -> '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', 18, generalPanel,
+		var yPos = 18;
+
+		makeOption("Screen Resolution:", () -> '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', yPos, generalPanel,
 			"xlarge", [
 				"1024 x 800",
 				"1280 x 720",
@@ -254,45 +272,71 @@ class OptionsDlg extends GuiImage {
 						Settings.optionsSettings.screenHeight = 1080;
 				}
 			});
-		makeOption("Screen Style:", () -> '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', 18, generalPanel, "small",
+		makeOption("Screen Style:", () -> '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', yPos, generalPanel, "small",
 			["Windowed", "Full Screen"], (idx) -> {
 				Settings.optionsSettings.isFullScreen = idx == 1;
 			}, true);
-		makeOption("Frame Rate:", () -> '${Settings.optionsSettings.frameRateVis ? "Visible" : "Hidden"}', 74, generalPanel, "small", ["Visible", "Hidden"],
+
+		yPos += 56;
+
+		makeOption("Frame Rate:", () -> '${Settings.optionsSettings.frameRateVis ? "Visible" : "Hidden"}', yPos, generalPanel, "small", ["Visible", "Hidden"],
 			(idx) -> {
 				Settings.optionsSettings.frameRateVis = idx == 0;
 			});
-		makeOption("OoB Insults:", () -> '${Settings.optionsSettings.oobInsults ? "Enabled" : "Disabled"}', 74, generalPanel, "small",
+		makeOption("OoB Insults:", () -> '${Settings.optionsSettings.oobInsults ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.oobInsults = idx == 1;
 			}, true);
-		makeOption("Free-Look:", () -> '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', 130, generalPanel, "small",
+
+		yPos += 56;
+
+		makeOption("Free-Look:", () -> '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.controlsSettings.alwaysFreeLook = idx == 1;
 			});
-		makeOption("Invert Y:", () -> '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', 130, generalPanel, "small", ["No", "Yes"], (idx) -> {
+		makeOption("Invert Y:", () -> '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', yPos, generalPanel, "small", ["No", "Yes"], (idx) -> {
 			Settings.controlsSettings.invertYAxis = idx == 1;
 		}, true);
-		makeOption("Reflective Marble:", () -> '${Settings.optionsSettings.reflectiveMarble ? "Enabled" : "Disabled"}', 186, generalPanel, "small",
+
+		yPos += 56;
+
+		makeOption("Reflective Marble:", () -> '${Settings.optionsSettings.reflectiveMarble ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.reflectiveMarble = idx == 1;
 			});
-		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', 186, generalPanel, "small", ["Disabled", "Enabled"],
+		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', yPos, generalPanel, "small", ["Disabled", "Enabled"],
 			(idx) -> {
 				Settings.optionsSettings.vsync = idx == 1;
 			}, true);
-		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, 242, generalPanel, (val) -> {
+
+		yPos += 56;
+
+		makeOption("Rewind:", () -> '${Settings.optionsSettings.rewindEnabled ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
+			["Disabled", "Enabled"], (idx) -> {
+				Settings.optionsSettings.rewindEnabled = idx == 1;
+			}, false);
+
+		makeSlider("Rewind Speed:", (Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1), yPos, generalPanel, (val) -> {
+			Settings.optionsSettings.rewindTimescale = cast(0.1 + val * (1 - 0.1));
+		}, true);
+
+		yPos += 56;
+
+		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.musicVolume = val;
 			AudioManager.updateVolumes();
 		});
-		makeSlider("Sound Volume:", Settings.optionsSettings.soundVolume, 242, generalPanel, (val) -> {
+		makeSlider("Sound Volume:", Settings.optionsSettings.soundVolume, yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.soundVolume = val;
 			AudioManager.updateVolumes();
 		}, true);
-		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), 298, generalPanel, (val) -> {
+
+		yPos += 56;
+
+		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.fovX = cast(60 + val * (140 - 60));
 		});
-		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), 298, generalPanel, (val) -> {
+		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), yPos, generalPanel, (val) -> {
 			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
 		}, true);
 
@@ -319,6 +363,8 @@ class OptionsDlg extends GuiImage {
 				return "Use PowerUp";
 			if (Settings.controlsSettings.freelook == key && bindingName != "Free Look")
 				return "Free Look";
+			if (Settings.controlsSettings.rewind == key && bindingName != "Rewind")
+				return "Rewind";
 
 			return null;
 		}
@@ -409,12 +455,16 @@ class OptionsDlg extends GuiImage {
 				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
 			}
 			hotkeysPanel.addChild(remapBtn);
+		} else {
+			makeRemapOption("Rewind:", 326, Util.getKeyForButton2(Settings.controlsSettings.rewind), (key) -> Settings.controlsSettings.rewind = key,
+				hotkeysPanel, true);
 		}
 
 		generalBtn.pressedAction = (e) -> {
 			if (currentTab != "general") {
 				currentTab = "general";
 				hotkeysPanel.parent.removeChild(hotkeysPanel);
+				generalPanel.scrollY = 0;
 				window.addChild(generalPanel);
 				MarbleGame.canvas.render(MarbleGame.canvas.scene2d); // Force refresh
 			}
