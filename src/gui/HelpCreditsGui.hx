@@ -81,6 +81,7 @@ class HelpCreditsGui extends GuiImage {
 			.toTile());
 		scrollCtrl2.position = new Vector(219, 28);
 		scrollCtrl2.extent = new Vector(386, 342);
+		scrollCtrl2.childrenHandleScroll = true;
 		wnd.addChild(scrollCtrl2);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");

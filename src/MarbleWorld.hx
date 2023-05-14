@@ -992,10 +992,13 @@ class MarbleWorld extends Scheduler {
 
 		var realDt = dt;
 
-		if (Key.isDown(Settings.controlsSettings.rewind) && Settings.optionsSettings.rewindEnabled && !this.isWatching) {
+		if ((Key.isDown(Settings.controlsSettings.rewind) || MarbleGame.instance.touchInput.rewindButton.pressed)
+			&& Settings.optionsSettings.rewindEnabled
+			&& !this.isWatching) {
 			this.rewinding = true;
 		} else {
-			if (Key.isReleased(Settings.controlsSettings.rewind) && this.rewinding) {
+			if ((Key.isReleased(Settings.controlsSettings.rewind) || !MarbleGame.instance.touchInput.rewindButton.pressed)
+				&& this.rewinding) {
 				if (this.isRecording) {
 					this.replay.spliceReplay(timeState.currentAttemptTime);
 				}
