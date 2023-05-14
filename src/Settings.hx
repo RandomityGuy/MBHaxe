@@ -93,6 +93,7 @@ typedef GamepadSettings = {
 	var axisDeadzone:Float;
 	var respawn:Array<String>;
 	var blast:Array<String>;
+	var rewind:Array<String>;
 }
 
 typedef PlayStatistics = {
@@ -178,7 +179,8 @@ class Settings {
 		invertYAxis: false,
 		axisDeadzone: 0.15,
 		respawn: ["back"],
-		blast: ["X", "LB", "RB"]
+		blast: ["X", "LB", "RB"],
+		rewind: ["Y"],
 	}
 
 	public static var playStatistics:PlayStatistics = {
@@ -364,6 +366,9 @@ class Settings {
 			}
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;
+			}
+			if (gamepadSettings.rewind == null) {
+				gamepadSettings.rewind = ["Y"];
 			}
 			if (json.stats != null) {
 				playStatistics = json.stats;
