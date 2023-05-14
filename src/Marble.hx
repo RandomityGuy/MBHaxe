@@ -696,14 +696,14 @@ class Marble extends GameObject {
 					done = true;
 
 				for (contact in contacts) {
-					contact.velocity = new Vector();
+					contact.velocity.set(0, 0, 0);
 				}
 
 				for (interior in pi) {
 					interior.setStopped();
 				}
 			}
-		} while (!done);
+		} while (!done && itersIn < 1e4); // Maximum limit pls
 			//	if (this.velocity.lengthSq() < 625) {
 		var gotOne = false;
 		var dir = new Vector(0, 0, 0);
@@ -1710,6 +1710,9 @@ class Marble extends GameObject {
 				contactTime += timeStep;
 
 			timeRemaining -= timeStep;
+
+			if (tdiff == 0 || it > 10)
+				break;
 		} while (true);
 		this.queuedContacts = [];
 

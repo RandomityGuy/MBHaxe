@@ -171,7 +171,7 @@ class PathedInterior extends InteriorObject {
 		// if (!stopped)
 		// 	this.currentTime = timeState.currentAttemptTime;
 
-		velocity = position.sub(this.prevPosition).multiply(1 / timeState.dt);
+		velocity.set((position.x - prevPosition.x) / timeState.dt, (position.y - prevPosition.y) / timeState.dt, (position.z - prevPosition.z) / timeState.dt);
 
 		this.updatePosition();
 	}
@@ -187,7 +187,7 @@ class PathedInterior extends InteriorObject {
 
 		var transform = this.getTransformAtTime(this.getInternalTime(thisTime));
 		var position = transform.getPosition();
-		velocity = position.sub(this.currentPosition).multiply(1 / dt);
+		velocity.set((position.x - currentPosition.x) / dt, (position.y - currentPosition.y) / dt, (position.z - currentPosition.z) / dt);
 		this.collider.velocity = velocity;
 	}
 
@@ -198,7 +198,7 @@ class PathedInterior extends InteriorObject {
 			changeTime: changeTime,
 			prevPosition: prevPosition,
 			currentPosition: currentPosition,
-			velocity: velocity
+			velocity: velocity.clone()
 		};
 	}
 
@@ -208,7 +208,7 @@ class PathedInterior extends InteriorObject {
 		this.changeTime = this.previousState.changeTime;
 		this.prevPosition = this.previousState.prevPosition;
 		this.currentPosition = this.previousState.currentPosition;
-		this.velocity = this.previousState.velocity;
+		this.velocity = this.previousState.velocity.clone();
 		this.collider.velocity = this.velocity;
 		// this.updatePosition();
 	}
