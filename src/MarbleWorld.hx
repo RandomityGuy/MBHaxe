@@ -915,12 +915,15 @@ class MarbleWorld extends Scheduler {
 
 		var realDt = dt;
 
-		if ((Key.isDown(Settings.controlsSettings.rewind) || Gamepad.isDown(Settings.gamepadSettings.rewind))
+		if ((Key.isDown(Settings.controlsSettings.rewind)
+			|| MarbleGame.instance.touchInput.rewindButton.pressed
+			|| Gamepad.isDown(Settings.gamepadSettings.rewind))
 			&& Settings.optionsSettings.rewindEnabled
 			&& !this.isWatching) {
 			this.rewinding = true;
 		} else {
-			if ((Key.isReleased(Settings.controlsSettings.rewind) || Gamepad.isReleased(Settings.gamepadSettings.rewind))
+			if (((Key.isReleased(Settings.controlsSettings.rewind) || Gamepad.isReleased(Settings.gamepadSettings.rewind))
+				|| !MarbleGame.instance.touchInput.rewindButton.pressed)
 				&& this.rewinding) {
 				if (this.isRecording) {
 					this.replay.spliceReplay(timeState.currentAttemptTime);

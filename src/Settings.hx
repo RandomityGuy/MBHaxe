@@ -61,6 +61,8 @@ typedef TouchSettings = {
 	var jumpButtonSize:Float;
 	var powerupButtonPos:Array<Float>;
 	var powerupButtonSize:Float;
+	var rewindButtonPos:Array<Float>;
+	var rewindButtonSize:Float;
 	var buttonJoystickMultiplier:Float;
 }
 
@@ -123,6 +125,8 @@ class Settings {
 		jumpButtonSize: 60,
 		powerupButtonPos: [440, 180],
 		powerupButtonSize: 60,
+		rewindButtonPos: [380, 240],
+		rewindButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
 
@@ -261,6 +265,10 @@ class Settings {
 			}
 			if (controlsSettings.rewind == 0) {
 				controlsSettings.rewind = Key.R;
+			}
+			if (touchSettings.rewindButtonPos == null) {
+				touchSettings.rewindButtonPos = [380, 240];
+				touchSettings.rewindButtonSize = 60;
 			}
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;

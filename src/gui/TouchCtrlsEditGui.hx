@@ -55,10 +55,14 @@ class TouchCtrlsEditGui extends GuiImage {
 		var powerupBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/energy.png").resource,
 			new Vector(Settings.touchSettings.powerupButtonPos[0], Settings.touchSettings.powerupButtonPos[1]), Settings.touchSettings.powerupButtonSize);
 
+		var rewindBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/rewind.png").resource,
+			new Vector(Settings.touchSettings.rewindButtonPos[0], Settings.touchSettings.rewindButtonPos[1]), Settings.touchSettings.rewindButtonSize);
+
 		jumpBtn.onClick = (sender, mousePos) -> {
 			sender.setSelected(true);
 			powerupBtn.setSelected(false);
 			joystick.setSelected(false);
+			rewindBtn.setSelected(false);
 		}
 
 		jumpBtn.onChangeCb = (sender, value, rvalue) -> {
@@ -70,6 +74,7 @@ class TouchCtrlsEditGui extends GuiImage {
 			sender.setSelected(true);
 			jumpBtn.setSelected(false);
 			joystick.setSelected(false);
+			rewindBtn.setSelected(false);
 		}
 
 		powerupBtn.onChangeCb = (sender, value, rvalue) -> {
@@ -81,6 +86,7 @@ class TouchCtrlsEditGui extends GuiImage {
 			joystick.setSelected(true);
 			jumpBtn.setSelected(false);
 			powerupBtn.setSelected(false);
+			rewindBtn.setSelected(false);
 		}
 
 		joystick.onChangeCb = (value, rvalue) -> {
@@ -93,5 +99,6 @@ class TouchCtrlsEditGui extends GuiImage {
 		this.addChild(joystick);
 		this.addChild(jumpBtn);
 		this.addChild(powerupBtn);
+		this.addChild(rewindBtn);
 	}
 }
