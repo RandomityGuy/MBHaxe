@@ -67,11 +67,15 @@ class TouchCtrlsEditGui extends GuiImage {
 		var blastBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/explosion.png").resource,
 			new Vector(Settings.touchSettings.blastButtonPos[0], Settings.touchSettings.blastButtonPos[1]), Settings.touchSettings.blastButtonSize);
 
+		var rewindBtn = new TouchEditButton(ResourceLoader.getImage("data/ui/touch/rewind.png").resource,
+			new Vector(Settings.touchSettings.rewindButtonPos[0], Settings.touchSettings.rewindButtonPos[1]), Settings.touchSettings.rewindButtonSize);
+
 		jumpBtn.onClick = (sender, mousePos) -> {
 			sender.setSelected(true);
 			powerupBtn.setSelected(false);
 			joystick.setSelected(false);
 			blastBtn.setSelected(false);
+			rewindBtn.setSelected(false);
 		}
 
 		jumpBtn.onChangeCb = (sender, value, rvalue) -> {
@@ -84,6 +88,7 @@ class TouchCtrlsEditGui extends GuiImage {
 			jumpBtn.setSelected(false);
 			joystick.setSelected(false);
 			blastBtn.setSelected(false);
+			rewindBtn.setSelected(false);
 		}
 
 		powerupBtn.onChangeCb = (sender, value, rvalue) -> {
@@ -96,6 +101,7 @@ class TouchCtrlsEditGui extends GuiImage {
 			jumpBtn.setSelected(false);
 			powerupBtn.setSelected(false);
 			joystick.setSelected(false);
+			rewindBtn.setSelected(false);
 		}
 
 		blastBtn.onChangeCb = (sender, value, rvalue) -> {
@@ -103,11 +109,25 @@ class TouchCtrlsEditGui extends GuiImage {
 			Settings.touchSettings.blastButtonSize = rvalue;
 		}
 
+		rewindBtn.onClick = (sender, mousePos) -> {
+			sender.setSelected(true);
+			jumpBtn.setSelected(false);
+			powerupBtn.setSelected(false);
+			joystick.setSelected(false);
+			blastBtn.setSelected(false);
+		}
+
+		rewindBtn.onChangeCb = (sender, value, rvalue) -> {
+			Settings.touchSettings.rewindButtonPos = [value.x, value.y];
+			Settings.touchSettings.rewindButtonSize = rvalue;
+		}
+
 		joystick.onClick = (mousePos) -> {
 			joystick.setSelected(true);
 			jumpBtn.setSelected(false);
 			powerupBtn.setSelected(false);
 			blastBtn.setSelected(false);
+			rewindBtn.setSelected(false);
 		}
 
 		joystick.onChangeCb = (value, rvalue) -> {
@@ -121,5 +141,6 @@ class TouchCtrlsEditGui extends GuiImage {
 		this.addChild(jumpBtn);
 		this.addChild(powerupBtn);
 		this.addChild(blastBtn);
+		this.addChild(rewindBtn);
 	}
 }

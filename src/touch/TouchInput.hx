@@ -42,6 +42,7 @@ class TouchInput {
 	public var powerupButton:PowerupButton;
 	public var blastbutton:BlastButton;
 	public var pauseButton:PauseButton;
+	public var rewindButton:RewindButton;
 	public var restartButton:RestartButton;
 
 	public var currentTouchState:TouchEventState;
@@ -57,6 +58,7 @@ class TouchInput {
 		this.powerupButton = new PowerupButton();
 		this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
+		this.rewindButton = new RewindButton();
 		this.restartButton = new RestartButton();
 		this.currentTouchState = new TouchEventState();
 		this.previousTouchState = new TouchEventState();
@@ -116,6 +118,8 @@ class TouchInput {
 		this.movementInput = new MovementInput();
 		this.jumpButton = new JumpButton();
 		this.powerupButton = new PowerupButton();
+		if (Settings.optionsSettings.rewindEnabled)
+			this.rewindButton = new RewindButton();
 		if (ultra)
 			this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
@@ -124,6 +128,8 @@ class TouchInput {
 		restartButton.add(parentGui);
 		jumpButton.add(parentGui);
 		powerupButton.add(parentGui);
+		if (Settings.optionsSettings.rewindEnabled)
+			rewindButton.add(parentGui);
 		if (ultra)
 			blastbutton.add(parentGui);
 		movementInput.add(parentGui);
@@ -139,6 +145,8 @@ class TouchInput {
 		this.movementInput.setVisible(enabled);
 		this.pauseButton.setVisible(enabled);
 		this.restartButton.setVisible(enabled);
+		if (this.rewindButton != null)
+			this.rewindButton.setVisible(enabled);
 		this.cameraInput.enabled = enabled;
 	}
 
@@ -151,11 +159,15 @@ class TouchInput {
 		pauseButton.remove(parentGui);
 		restartButton.remove(parentGui);
 		cameraInput.remove(parentGui);
+		if (this.rewindButton != null)
+			rewindButton.remove(parentGui);
 		jumpButton.dispose();
 		powerupButton.dispose();
 		movementInput.dispose();
 		pauseButton.dispose();
 		restartButton.dispose();
 		cameraInput.dispose();
+		if (this.rewindButton != null)
+			rewindButton.dispose();
 	}
 }
