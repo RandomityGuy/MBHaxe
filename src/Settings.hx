@@ -162,7 +162,7 @@ class Settings {
 		powerupButtonSize: 60,
 		blastButtonPos: [300, 240],
 		blastButtonSize: 60,
-		rewindButtonPos: [380, 240],
+		rewindButtonPos: [300, 100],
 		rewindButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}
@@ -361,7 +361,7 @@ class Settings {
 				touchSettings.blastButtonSize = 60;
 			}
 			if (touchSettings.rewindButtonPos == null) {
-				touchSettings.rewindButtonPos = [380, 240];
+				touchSettings.rewindButtonPos = [300, 100];
 				touchSettings.rewindButtonSize = 60;
 			}
 			if (json.gamepad != null) {
