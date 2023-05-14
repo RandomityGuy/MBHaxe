@@ -75,6 +75,7 @@ typedef GamepadSettings = {
 	var invertXAxis:Bool;
 	var invertYAxis:Bool;
 	var axisDeadzone:Float;
+	var rewind:Array<String>;
 }
 
 class Settings {
@@ -135,7 +136,8 @@ class Settings {
 		cameraSensitivity: 1.0,
 		invertXAxis: false,
 		invertYAxis: false,
-		axisDeadzone: 0.15
+		axisDeadzone: 0.15,
+		rewind: ["Y"],
 	}
 
 	public static var progression = [24, 24, 52];
@@ -262,6 +264,9 @@ class Settings {
 			}
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;
+			}
+			if (gamepadSettings.rewind == null) {
+				gamepadSettings.rewind = ["Y"];
 			}
 			if (controlsSettings.rewind == null) {
 				controlsSettings.rewind = Key.R;
