@@ -78,7 +78,7 @@ class PlayMissionGui extends GuiImage {
 				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
 			if (currentGame == "ultra")
 				return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-			return null;
+			return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
 		}
 
 		var img = chooseBg();
@@ -642,6 +642,22 @@ class PlayMissionGui extends GuiImage {
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraCustom);
 
+		var pmDifficultyCustomCustom = new GuiButtonText(loadButtonImages("data/ui/play/difficulty_highlight-120"), markerFelt24);
+		pmDifficultyCustomCustom.position = new Vector(397, 164);
+		pmDifficultyCustomCustom.ratio = -1 / 16;
+		pmDifficultyCustomCustom.setExtent(new Vector(120, 31));
+		pmDifficultyCustomCustom.txtCtrl.text.text = " Custom";
+		pmDifficultyCustomCustom.pressedAction = (e) -> {
+			if (MissionList.customMissions.length == 0) {
+				var mbo = new MessageBoxOkDlg("No custom missions are installed!");
+				MarbleGame.canvas.pushDialog(mbo);
+			} else {
+				currentCategory = "custom";
+				setCategoryFunc("custom", "custom");
+			}
+		}
+		pmDifficultyCtrl.addChild(pmDifficultyCustomCustom);
+
 		var pmDividerR = new GuiImage(ResourceLoader.getResource('data/ui/menu/brown/divider-orange-r.png', ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		pmDividerR.horizSizing = Left;
@@ -801,10 +817,18 @@ class PlayMissionGui extends GuiImage {
 				case 'gold' if (Marbleland.goldMissions.length != 0): Marbleland.goldMissions;
 				case 'platinum' if (Marbleland.platinumMissions.length != 0): Marbleland.platinumMissions;
 				case 'ultra' if (Marbleland.ultraMissions.length != 0): Marbleland.ultraMissions;
+				case 'custom' if (MissionList.customMissions.length != 0): MissionList.customMissions;
 				default: currentList;
 			}) : MissionList.missionList[game][category];
+
 			@:privateAccess pmDifficulty.anim.frames = loadButtonImages('data/ui/play/difficulty_${category}');
-			pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			if (game != "custom") {
+				pmDifficultyMarble.bmp.visible = true;
+				pmDifficultyMarble.bmp.tile = ResourceLoader.getResource('data/ui/play/marble_${game}.png', ResourceLoader.getImage, this.imageResources)
+					.toTile();
+			} else {
+				pmDifficultyMarble.bmp.visible = false;
+			}
 
 			if (game == "platinum") {
 				pmAchievements.disabled = false;
