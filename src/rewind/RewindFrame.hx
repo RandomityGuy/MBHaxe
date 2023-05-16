@@ -1,7 +1,6 @@
 package rewind;
 
 import mis.MissionElement.MissionElementBase;
-import triggers.CheckpointTrigger;
 import src.PathedInterior.PIState;
 import shapes.PowerUp;
 import h3d.Vector;
@@ -33,19 +32,9 @@ class RewindFrame {
 	var currentUp:Vector;
 	var trapdoorStates:Array<{lastContactTime:Float, lastDirection:Int, lastCompletion:Float}>;
 	var lastContactNormal:Vector;
-	var blastAmt:Float;
 	var oobState:{
 		oob:Bool,
 		timeState:TimeState
-	};
-
-	var checkpointState:{
-		currentCheckpoint:{obj:DtsObject, elem:MissionElementBase},
-		currentCheckpointTrigger:CheckpointTrigger,
-		checkpointCollectedGems:Map<Gem, Bool>,
-		checkpointHeldPowerup:PowerUp,
-		checkpointUp:Vector,
-		checkpointBlast:Float
 	};
 
 	public function new() {}
@@ -97,21 +86,9 @@ class RewindFrame {
 				lastCompletion: s.lastCompletion,
 			});
 		}
-		c.blastAmt = blastAmt;
 		c.oobState = {
 			oob: oobState.oob,
 			timeState: oobState.timeState.clone()
-		};
-		c.checkpointState = {
-			currentCheckpoint: checkpointState.currentCheckpoint != null ? {
-				obj: checkpointState.currentCheckpoint.obj,
-				elem: checkpointState.currentCheckpoint.elem,
-			} : null,
-			currentCheckpointTrigger: checkpointState.currentCheckpointTrigger,
-			checkpointCollectedGems: checkpointState.checkpointCollectedGems.copy(),
-			checkpointHeldPowerup: checkpointState.checkpointHeldPowerup,
-			checkpointUp: checkpointState.checkpointUp != null ? checkpointState.checkpointUp.clone() : null,
-			checkpointBlast: checkpointState.checkpointBlast,
 		};
 	}
 }

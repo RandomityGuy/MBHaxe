@@ -344,14 +344,6 @@ class Replay {
 				curframe = this.frames[this.frames.length - 1];
 			}
 		}
-		if (this.initialState.randomGenTimes.length > 0) {
-			var rtimeIdx = this.initialState.randomGenTimes.length - 1;
-			while (this.initialState.randomGenTimes[rtimeIdx] > cutAfterTime && this.initialState.randomGenTimes.length > 0) {
-				this.initialState.randomGenTimes.pop();
-				this.initialState.randomGens.pop();
-				rtimeIdx = this.initialState.randomGenTimes.length - 1;
-			}
-		}
 	}
 
 	public function write() {

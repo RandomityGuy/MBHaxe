@@ -268,12 +268,14 @@ class Settings {
 			if (gamepadSettings.rewind == null) {
 				gamepadSettings.rewind = ["Y"];
 			}
+			#if js
 			if (controlsSettings.rewind == null) {
 				controlsSettings.rewind = Key.R;
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;
 			}
+			#end
 			progression = json.progression;
 			highscoreName = json.highscoreName;
 		} else {

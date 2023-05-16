@@ -7,7 +7,6 @@ import src.MarbleWorld;
 import shapes.Trapdoor;
 import shapes.PushButton;
 import src.Util;
-import shapes.Nuke;
 
 class RewindManager {
 	var frames:Array<RewindFrame> = [];
@@ -29,12 +28,11 @@ class RewindManager {
 		rf.marblePowerup = level.marble.heldPowerup;
 		rf.bonusTime = level.bonusTime;
 		rf.gemCount = level.gemCount;
-		rf.gemStates = level.gems.map(x -> x.pickedUp);
+		rf.gemStates = level.dtsObjects.filter(x -> x is shapes.Gem).map(x -> cast(x, shapes.Gem).pickedUp);
 		rf.activePowerupStates = [@:privateAccess
 			level.marble.superBounceEnableTime, @:privateAccess
 			level.marble.shockAbsorberEnableTime, @:privateAccess
-			level.marble.helicopterEnableTime, @:privateAccess
-			level.marble.megaMarbleEnableTime
+			level.marble.helicopterEnableTime,
 		];
 		rf.currentUp = level.currentUp.clone();
 		rf.lastContactNormal = level.marble.lastContactNormal.clone();
@@ -76,10 +74,6 @@ class RewindManager {
 				var lm:LandMine = cast dts;
 				rf.landMineStates.push(lm.disappearTime);
 			}
-			if (dts is Nuke) {
-				var lm:Nuke = cast dts;
-				rf.landMineStates.push(lm.disappearTime);
-			}
 			if (dts is Trapdoor) {
 				var td:Trapdoor = cast dts;
 				rf.trapdoorStates.push({
@@ -93,18 +87,9 @@ class RewindManager {
 				rf.powerupStates.push(ab.lastContactTime);
 			}
 		}
-		rf.blastAmt = level.blastAmount;
 		rf.oobState = {
 			oob: level.outOfBounds,
 			timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
-		};
-		rf.checkpointState = {
-			currentCheckpoint: @:privateAccess level.currentCheckpoint,
-			currentCheckpointTrigger: @:privateAccess level.currentCheckpointTrigger,
-			checkpointBlast: @:privateAccess level.cheeckpointBlast,
-			checkpointCollectedGems: @:privateAccess level.checkpointCollectedGems.copy(),
-			checkpointHeldPowerup: @:privateAccess level.checkpointHeldPowerup,
-			checkpointUp: @:privateAccess level.checkpointUp != null ? @:privateAccess level.checkpointUp.clone() : null,
 		};
 		frames.push(rf);
 	}
@@ -131,13 +116,13 @@ class RewindManager {
 		level.bonusTime = rf.bonusTime;
 		level.gemCount = rf.gemCount;
 		@:privateAccess level.playGui.formatGemCounter(level.gemCount, level.totalGems);
+		var gems = level.dtsObjects.filter(x -> x is shapes.Gem);
 		for (i in 0...rf.gemStates.length) {
-			level.gems[i].setHide(rf.gemStates[i]);
+			gems[i].setHide(rf.gemStates[i]);
 		}
 		@:privateAccess level.marble.superBounceEnableTime = rf.activePowerupStates[0];
 		@:privateAccess level.marble.shockAbsorberEnableTime = rf.activePowerupStates[1];
 		@:privateAccess level.marble.helicopterEnableTime = rf.activePowerupStates[2];
-		@:privateAccess level.marble.megaMarbleEnableTime = rf.activePowerupStates[3];
 
 		if (level.currentUp.x != rf.currentUp.x || level.currentUp.y != rf.currentUp.y || level.currentUp.z != rf.currentUp.z) {
 			level.setUp(rf.currentUp, level.timeState);
@@ -197,10 +182,6 @@ class RewindManager {
 				var lm:LandMine = cast dts;
 				lm.disappearTime = lmstates.shift();
 			}
-			if (dts is Nuke) {
-				var lm:Nuke = cast dts;
-				lm.disappearTime = lmstates.shift();
-			}
 			if (dts is Trapdoor) {
 				var td:Trapdoor = cast dts;
 				var tdState = tstates.shift();
@@ -224,13 +205,6 @@ class RewindManager {
 		level.outOfBounds = rf.oobState.oob;
 		level.marble.camera.oob = rf.oobState.oob;
 		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
-		level.blastAmount = rf.blastAmt;
-		@:privateAccess level.checkpointUp = rf.checkpointState.checkpointUp;
-		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;
-		@:privateAccess level.cheeckpointBlast = rf.checkpointState.checkpointBlast;
-		@:privateAccess level.checkpointHeldPowerup = rf.checkpointState.checkpointHeldPowerup;
-		@:privateAccess level.currentCheckpoint = rf.checkpointState.currentCheckpoint;
-		@:privateAccess level.currentCheckpointTrigger = rf.checkpointState.currentCheckpointTrigger;
 	}
 
 	public function getNextRewindFrame(absTime:Float):RewindFrame {
