@@ -36,6 +36,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var go:GameObject;
 
 	public var userData:Int;
+	public var fastTransform:Bool = false;
 
 	public var difEdgeMap:Map<Int, dif.Edge>;
 
@@ -72,7 +73,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		if (this.transform.equal(transform))
 			return;
 		// Speedup
-		if (Util.mat3x3equal(this.transform, transform)) {
+		if (this.fastTransform && Util.mat3x3equal(this.transform, transform)) {
 			var oldPos = this.transform.getPosition();
 			var newPos = transform.getPosition();
 			this.transform.setPosition(newPos);

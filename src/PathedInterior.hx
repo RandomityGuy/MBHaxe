@@ -107,6 +107,7 @@ class PathedInterior extends InteriorObject {
 
 		this.setRotationQuat(this.baseOrientation.clone());
 		this.collider.setTransform(this.getTransform());
+		this.collider.fastTransform = true;
 
 		this.path = cast this.simGroup.elements.filter((element) -> element._type == MissionElementType.Path)[0];
 
