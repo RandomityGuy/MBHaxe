@@ -135,11 +135,15 @@ class Nuke extends DtsObject {
 
 			var marble = this.level.marble;
 			var minePos = this.getAbsPos().getPosition();
+			var dtsCenter = this.dts.bounds.center();
+			// dtsCenter.x = -dtsCenter.x;
+			// minePos.x += dtsCenter.x;
+			// minePos.y += dtsCenter.y;
+			// minePos.z += dtsCenter.z;
 			var off = marble.getAbsPos().getPosition().sub(minePos);
 
 			var force = computeExplosionForce(off);
-
-			marble.applyImpulse(force);
+			marble.applyImpulse(force, true);
 
 			// for (collider in this.colliders) {
 			// 	var hull:CollisionHull = cast collider;

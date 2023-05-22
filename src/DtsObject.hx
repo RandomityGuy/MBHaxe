@@ -348,8 +348,8 @@ class DtsObject extends GameObject {
 				for (pt in mesh.vertices)
 					boundthing.addPoint(new h3d.col.Point(-pt.x, pt.y, pt.z));
 			}
-			boundthing.addPoint(new h3d.col.Point(this.dts.bounds.minX, this.dts.bounds.minY, this.dts.bounds.minZ));
-			boundthing.addPoint(new h3d.col.Point(this.dts.bounds.maxX, this.dts.bounds.maxY, this.dts.bounds.maxZ));
+			boundthing.addPoint(new h3d.col.Point(-this.dts.bounds.minX, this.dts.bounds.minY, this.dts.bounds.minZ));
+			boundthing.addPoint(new h3d.col.Point(-this.dts.bounds.maxX, this.dts.bounds.maxY, this.dts.bounds.maxZ));
 			this.boundingCollider = new BoxCollisionEntity(boundthing, cast this);
 			this.boundingCollider.setTransform(this.getTransform());
 		}
