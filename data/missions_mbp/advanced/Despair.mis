@@ -11,7 +11,7 @@ new SimGroup(MissionGroup) {
          music = "Grudge.ogg";
          level = "30";
          desc = "Stay on the platform to pass the level!";
-         ultimateTime = "27500";
+         ultimateTime = "82750";
          goldTime = "87750";
    };
    new MissionArea(MissionArea) {
