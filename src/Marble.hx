@@ -224,7 +224,7 @@ class Marble extends GameObject {
 	public var contactEntities:Array<CollisionEntity> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
-	var appliedImpulses:Array<Vector> = [];
+	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
 
 	public var heldPowerup:PowerUp;
 	public var lastContactNormal:Vector;
@@ -1498,11 +1498,14 @@ class Marble extends GameObject {
 					continue;
 				}
 
-				var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius, testTri.edge,
-					testTri.concavity);
-				if (tsi.result) {
-					var separatingDistance = position.sub(tsi.point).normalized();
-					var distToContactPlane = tsi.point.distance(position);
+				// Intersection with plane of testTri and current position
+				var t = (testTri.v[0].sub(position)).dot(testTri.n) / testTri.n.lengthSq();
+				var intersect = position.add(testTri.n.multiply(t));
+
+				var tsi = Collision.PointInTriangle(intersect, testTri.v[0], testTri.v[1], testTri.v[2]);
+				if (tsi) {
+					var separatingDistance = position.sub(intersect).normalized();
+					var distToContactPlane = intersect.distance(position);
 					if (radius - 0.005 - distToContactPlane > 0.0001) {
 						// Nudge to the surface of the contact plane
 						Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
@@ -1511,6 +1514,20 @@ class Marble extends GameObject {
 						resolved++;
 					}
 				}
+
+				// var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius, testTri.edge,
+				// 	testTri.concavity);
+				// if (tsi.result) {
+				// 	var separatingDistance = position.sub(tsi.point).normalized();
+				// 	var distToContactPlane = tsi.point.distance(position);
+				// 	if (radius - 0.005 - distToContactPlane > 0.0001) {
+				// 		// Nudge to the surface of the contact plane
+				// 		Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
+				// 		Debug.drawSphere(position, radius);
+				// 		position = position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005));
+				// 		resolved++;
+				// 	}
+				// }
 
 				// var distToContactPlane = position.dot(contact.normal) - contact.point.dot(contact.normal);
 			}
@@ -1583,7 +1600,10 @@ class Marble extends GameObject {
 			}
 
 			for (impulse in appliedImpulses) {
-				this.velocity = this.velocity.add(impulse);
+				this.velocity = this.velocity.add(impulse.impulse);
+				if (m.jump && impulse.contactImpulse) {
+					this.velocity = this.velocity.add(impulse.impulse.normalized().multiply(this._jumpImpulse));
+				}
 			}
 			appliedImpulses = [];
 
@@ -1866,8 +1886,8 @@ class Marble extends GameObject {
 		this.level.blastAmount = 0;
 	}
 
-	public function applyImpulse(impulse:Vector) {
-		this.appliedImpulses.push(impulse);
+	public function applyImpulse(impulse:Vector, contactImpulse:Bool = false) {
+		this.appliedImpulses.push({impulse: impulse, contactImpulse: contactImpulse});
 	}
 
 	public function enableSuperBounce(time:Float) {
