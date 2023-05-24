@@ -95,6 +95,14 @@ class ConsoleDlg extends GuiControl {
 		consoleInput.text.backgroundColor = 0xFFFFFFFF;
 		consoleInput.text.selectionColor.set(1, 1, 1);
 		consoleInput.text.selectionTile = h2d.Tile.fromColor(0x808080, 0, hxd.Math.ceil(consoleInput.text.font.lineHeight));
+		consoleInput.text.onKeyDown = (e) -> {
+			if (e.keyCode == hxd.Key.QWERTY_TILDE)
+				e.cancel = true;
+		}
+		consoleInput.text.onTextInput = (e) -> {
+			if (e.charCode == '`'.code)
+				e.cancel = true;
+		}
 
 		this.addChild(consoleInput);
 
@@ -118,6 +126,10 @@ class ConsoleDlg extends GuiControl {
 		super.render(scene2d);
 
 		scroll.setScrollMax(consoleContent.text.textHeight);
+	}
+
+	public function unfocus() {
+		@:privateAccess consoleInput.text.interactive.blur();
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {

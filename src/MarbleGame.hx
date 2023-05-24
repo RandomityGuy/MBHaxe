@@ -202,6 +202,7 @@ class MarbleGame {
 					canvas.pushDialog(console);
 				} else {
 					@:privateAccess console.isShowing = false;
+					console.unfocus();
 					canvas.popDialog(console, false);
 				}
 			}
