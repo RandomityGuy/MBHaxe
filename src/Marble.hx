@@ -1541,14 +1541,24 @@ class Marble extends GameObject {
 
 	function advancePhysics(timeState:TimeState, m:Move, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var timeRemaining = timeState.dt;
+		var startTime = timeRemaining;
 		var it = 0;
 
-		var piTime = timeState.currentAttemptTime;
+		var piTime = timeRemaining;
 
 		_bounceYet = false;
 
 		var contactTime = 0.0;
 		var it = 0;
+
+		var passedTime = timeState.currentAttemptTime;
+
+		if (this.controllable) {
+			for (interior in pathedInteriors) {
+				// interior.pushTickState();
+				interior.computeNextPathStep(timeRemaining);
+			}
+		}
 
 		do {
 			if (timeRemaining <= 0)
@@ -1558,12 +1568,7 @@ class Marble extends GameObject {
 			if (timeRemaining < timeStep)
 				timeStep = timeRemaining;
 
-			if (this.controllable) {
-				for (interior in pathedInteriors) {
-					interior.pushTickState();
-					interior.recomputeVelocity(piTime + timeStep * 4, timeStep * 4);
-				}
-			}
+			passedTime += timeStep;
 
 			var stoppedPaths = false;
 			var tempState = timeState.clone();
@@ -1662,18 +1667,6 @@ class Marble extends GameObject {
 			// var expectedPos = pos.add(posAdd);
 			// var newPos = nudgeToContacts(expectedPos, _radius);
 
-			piTime += timeStep;
-			if (this.controllable) {
-				for (interior in pathedInteriors) {
-					interior.popTickState();
-					interior.setStopped(stoppedPaths);
-					var piDT = timeState.clone();
-					piDT.currentAttemptTime = piTime;
-					piDT.dt = timeStep;
-					interior.update(piDT);
-				}
-			}
-
 			// if (mode == Start) {
 			// 	var upVec = this.level.currentUp;
 			// 	var startpadNormal = startPad.getAbsPos().up();
@@ -1711,7 +1704,7 @@ class Marble extends GameObject {
 			if (this.heldPowerup != null && m.powerup && !this.level.outOfBounds) {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
-				pTime.currentAttemptTime = piTime;
+				pTime.currentAttemptTime = passedTime;
 				this.heldPowerup.use(pTime);
 				this.heldPowerup = null;
 				if (this.level.isRecording) {
@@ -1721,7 +1714,7 @@ class Marble extends GameObject {
 
 			if (this.controllable && this.prevPos != null) {
 				var tempTimeState = timeState.clone();
-				tempState.currentAttemptTime = piTime;
+				tempState.currentAttemptTime = passedTime;
 				tempState.dt = timeStep;
 				this.level.callCollisionHandlers(cast this, tempTimeState, pos, newPos, rot, quat);
 			}
@@ -1731,9 +1724,25 @@ class Marble extends GameObject {
 
 			timeRemaining -= timeStep;
 
+			if (this.controllable) {
+				for (interior in pathedInteriors) {
+					interior.advance(timeStep);
+				}
+			}
+
+			piTime += timeStep;
+
 			if (tdiff == 0 || it > 10)
 				break;
 		} while (true);
+		if (timeRemaining > 0) {
+			// Advance pls
+			if (this.controllable) {
+				for (interior in pathedInteriors) {
+					interior.advance(timeRemaining);
+				}
+			}
+		}
 		this.queuedContacts = [];
 
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
