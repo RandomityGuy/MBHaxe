@@ -21,9 +21,7 @@ class RewindFrame {
 	var bonusTime:Float;
 	var mpStates:Array<{
 		curState:PIState,
-		prevState:PIState,
 		stopped:Bool,
-		stopTime:Float
 	}>;
 	var gemCount:Int;
 	var gemStates:Array<Bool>;
@@ -73,20 +71,8 @@ class RewindFrame {
 					currentTime: s.curState.currentTime,
 					targetTime: s.curState.targetTime,
 					velocity: s.curState.velocity.clone(),
-					currentPosition: s.curState.currentPosition.clone(),
-					prevPosition: s.curState.prevPosition.clone(),
-					changeTime: s.curState.changeTime,
 				},
-				stopTime: s.stopTime,
 				stopped: s.stopped,
-				prevState: s.prevState != null ? {
-					currentTime: s.prevState.currentTime,
-					targetTime: s.prevState.targetTime,
-					velocity: s.prevState.velocity.clone(),
-					currentPosition: s.prevState.currentPosition.clone(),
-					prevPosition: s.prevState.prevPosition.clone(),
-					changeTime: s.prevState.changeTime,
-				} : null,
 			});
 		}
 		c.trapdoorStates = [];
