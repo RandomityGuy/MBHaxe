@@ -265,22 +265,16 @@ class Replay {
 	}
 
 	public function recordTrapdoorState(lastContactTime:Float, lastDirection:Int, lastCompletion:Float) {
-		if (currentRecordFrame == null)
-			return;
 		initialState.trapdoorLastContactTimes.push(lastContactTime);
 		initialState.trapdoorLastDirections.push(lastDirection);
 		initialState.trapdoorLastCompletions.push(lastCompletion);
 	}
 
 	public function recordLandMineState(disappearTime:Float) {
-		if (currentRecordFrame == null)
-			return;
 		initialState.landMineDisappearTimes.push(disappearTime);
 	}
 
 	public function recordPushButtonState(lastContactTime:Float) {
-		if (currentRecordFrame == null)
-			return;
 		initialState.pushButtonContactTimes.push(lastContactTime);
 	}
 
