@@ -24,9 +24,6 @@ import src.Resource;
 typedef PIState = {
 	var currentTime:Float;
 	var targetTime:Float;
-	var changeTime:Float;
-	var prevPosition:Vector;
-	var currentPosition:Vector;
 	var velocity:Vector;
 }
 
@@ -42,21 +39,14 @@ class PathedInterior extends InteriorObject {
 	public var duration:Float;
 	public var currentTime:Float;
 	public var targetTime:Float;
-	public var changeTime:Float;
 
 	var basePosition:Vector;
 	var baseOrientation:Quat;
 	var baseScale:Vector;
 
-	public var prevPosition:Vector;
-	public var currentPosition:Vector;
-
 	public var velocity:Vector;
 
 	var stopped:Bool = false;
-	var stopTime:Float;
-
-	var previousState:PIState;
 
 	var soundChannel:Channel;
 
@@ -145,76 +135,61 @@ class PathedInterior extends InteriorObject {
 		onFinish();
 	}
 
-	public function update(timeState:TimeState) {
-		// this.previousState = {
-		// 	currentTime: currentTime,
-		// 	targetTime: targetTime,
-		// 	changeTime: changeTime,
-		// 	prevPosition: prevPosition,
-		// 	currentPosition: currentPosition,
-		// 	velocity: velocity
-		// };
+	public function computeNextPathStep(timeDelta:Float) {
+		stopped = false;
+		if (currentTime == targetTime) {
+			velocity.set(0, 0, 0);
+		} else {
+			var delta = 0.0;
+			if (targetTime < 0) {
+				if (targetTime == -1)
+					delta = timeDelta;
+				else if (targetTime == -2)
+					delta = -timeDelta;
+				currentTime += delta;
+				while (currentTime >= duration)
+					currentTime -= duration;
+				while (currentTime < 0)
+					currentTime += duration;
+			} else {
+				delta = targetTime - currentTime;
+				if (delta < -timeDelta)
+					delta = -timeDelta;
+				else if (delta > timeDelta)
+					delta = timeDelta;
+				currentTime += delta;
+			}
 
-		var thisTime = timeState.currentAttemptTime;
+			var curTform = this.getAbsPos();
+			var tForm = getTransformAtTime(currentTime);
 
-		if (stopped) {
-			thisTime = stopTime;
-			popTickState();
+			var displaceDelta = tForm.getPosition().sub(curTform.getPosition());
+			velocity.set(displaceDelta.x / timeDelta, displaceDelta.y / timeDelta, displaceDelta.z / timeDelta);
+			this.collider.velocity = velocity.clone();
 		}
-
-		var transform = this.getTransformAtTime(this.getInternalTime(thisTime));
-		this.setTransform(transform);
-
-		var position = transform.getPosition();
-		this.prevPosition = this.currentPosition;
-		this.currentPosition = position;
-		if (!stopped) {
-			this.stopTime = timeState.currentAttemptTime;
-			pushTickState();
-		}
-		// if (!stopped)
-		// 	this.currentTime = timeState.currentAttemptTime;
-
-		velocity = position.sub(this.prevPosition).multiply(1 / timeState.dt);
-
-		this.updatePosition();
 	}
+
+	public function advance(timeDelta:Float) {
+		if (stopped)
+			return;
+		if (this.velocity.length() == 0)
+			return;
+		var newp = this.getAbsPos().getPosition().add(velocity.multiply(timeDelta));
+		this.setPosition(newp.x, newp.y, newp.z);
+		this.collider.setTransform(this.getTransform());
+
+		if (this.soundChannel != null) {
+			var spat = this.soundChannel.getEffect(Spatialization);
+			spat.position = newp;
+		}
+	}
+
+	public function update(timeState:TimeState) {}
 
 	public function setStopped(stopped:Bool = true) {
 		// if (!this.stopped)
 		// 	this.stopTime = currentTime;
 		this.stopped = stopped;
-	}
-
-	public function recomputeVelocity(currentTime:Float, dt:Float) {
-		var thisTime = currentTime;
-
-		var transform = this.getTransformAtTime(this.getInternalTime(thisTime));
-		var position = transform.getPosition();
-		velocity = position.sub(this.currentPosition).multiply(1 / dt);
-		this.collider.velocity = velocity;
-	}
-
-	public function pushTickState() {
-		this.previousState = {
-			currentTime: currentTime,
-			targetTime: targetTime,
-			changeTime: changeTime,
-			prevPosition: prevPosition,
-			currentPosition: currentPosition,
-			velocity: velocity
-		};
-	}
-
-	public function popTickState() {
-		this.currentTime = this.previousState.currentTime;
-		this.targetTime = this.previousState.targetTime;
-		this.changeTime = this.previousState.changeTime;
-		this.prevPosition = this.previousState.prevPosition;
-		this.currentPosition = this.previousState.currentPosition;
-		this.velocity = this.previousState.velocity;
-		this.collider.velocity = this.velocity;
-		// this.updatePosition();
 	}
 
 	function computeDuration() {
@@ -227,32 +202,18 @@ class PathedInterior extends InteriorObject {
 	}
 
 	public function setTargetTime(now:TimeState, target:Float) {
-		var currentInternalTime = this.getInternalTime(now.currentAttemptTime);
-		this.currentTime = currentInternalTime; // Start where the interior currently is
 		this.targetTime = target;
-		this.changeTime = now.currentAttemptTime;
-	}
-
-	public function getInternalTime(externalTime:Float) {
-		if (this.targetTime < 0) {
-			var direction = (this.targetTime == -1) ? 1 : (this.targetTime == -2) ? -1 : 0;
-			return Util.adjustedMod(this.currentTime + (externalTime - this.changeTime) * direction, this.duration);
-		} else {
-			var dur = Math.abs(this.currentTime - this.targetTime);
-
-			var compvarion = Util.clamp(dur != 0 ? (externalTime - this.changeTime) / dur : 1, 0, 1);
-			return Util.clamp(Util.lerp(this.currentTime, this.targetTime, compvarion), 0, this.duration);
-		}
 	}
 
 	function updatePosition() {
-		this.setPosition(this.currentPosition.x, this.currentPosition.y, this.currentPosition.z);
+		var newp = this.getAbsPos().getPosition();
+		this.setPosition(newp.x, newp.y, newp.z);
 		this.collider.setTransform(this.getTransform());
 		this.collider.velocity = this.velocity;
 
 		if (this.soundChannel != null) {
 			var spat = this.soundChannel.getEffect(Spatialization);
-			spat.position = this.currentPosition;
+			spat.position = newp;
 		}
 	}
 
@@ -327,7 +288,6 @@ class PathedInterior extends InteriorObject {
 	override function reset() {
 		this.currentTime = 0;
 		this.targetTime = 0;
-		this.changeTime = 0;
 
 		if (this.element.initialposition != "") {
 			this.currentTime = MisParser.parseNumber(this.element.initialposition) / 1000;
@@ -342,14 +302,11 @@ class PathedInterior extends InteriorObject {
 				this.currentTime = this.duration;
 		}
 
-		this.stopTime = 0;
 		this.stopped = false;
 		// Reset the position
-		var transform = this.getTransformAtTime(this.getInternalTime(0));
-		var position = transform.getPosition();
-		this.prevPosition = position.clone();
-		this.currentPosition = position;
 		this.velocity = new Vector();
+		var initialTform = this.getTransformAtTime(this.currentTime);
+		this.setTransform(initialTform);
 		updatePosition();
 	}
 }
