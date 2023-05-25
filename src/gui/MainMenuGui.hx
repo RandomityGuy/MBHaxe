@@ -25,9 +25,10 @@ class MainMenuGui extends GuiImage {
 
 		versionText.horizSizing = Center;
 		versionText.vertSizing = Top;
-		versionText.position = new Vector(289, 457);
+		versionText.position = new Vector(289, 450);
 		versionText.extent = new Vector(62, 18);
-		versionText.text.text = "1.1.7";
+		versionText.text.text = "1.1.8";
+		versionText.text.textColor = 0;
 		this.addChild(versionText);
 
 		var homebase = new GuiImage(ResourceLoader.getResource("data/ui/home/homegui.png", ResourceLoader.getImage, this.imageResources).toTile());
