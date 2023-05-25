@@ -453,7 +453,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		rewindPane.addChild(rewindTimescaleKnob);
 
 		var rewindBtn = new GuiButtonText(loadButtonImages("data/ui/options/cntr_rwnd"), arial14);
-		rewindBtn.position = new Vector(112, 76);
+		rewindBtn.position = new Vector(142, 122);
 		rewindBtn.setExtent(new Vector(118, 48));
 		rewindBtn.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.rewind);
 		rewindBtn.pressedAction = (sender) -> {
@@ -462,11 +462,12 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		rewindPane.addChild(rewindBtn);
 
 		var rwndEnableButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
-		rwndEnableButton.position = new Vector(142, 116);
+		rwndEnableButton.position = new Vector(112, 72);
+
 		rwndEnableButton.extent = new Vector(46, 54);
 		rwndEnableButton.buttonType = Toggle;
 		rwndEnableButton.pressedAction = (sender) -> {
-			Settings.optionsSettings.rewindEnabled = rwndEnableButton.pressed;
+			Settings.optionsSettings.rewindEnabled = !rwndEnableButton.pressed;
 		}
 		rewindPane.addChild(rwndEnableButton);
 		if (Settings.optionsSettings.rewindEnabled) {
