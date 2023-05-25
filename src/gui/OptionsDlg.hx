@@ -53,6 +53,10 @@ class OptionsDlg extends GuiImage {
 		controlsTab.position = new Vector(315, 15);
 		controlsTab.extent = new Vector(149, 65);
 
+		var rewindTab = new GuiImage(ResourceLoader.getResource("data/ui/options/rwnd_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
+		rewindTab.position = new Vector(459, 76);
+		rewindTab.extent = new Vector(59, 162);
+
 		var boxFrame = new GuiImage(ResourceLoader.getResource("data/ui/options/options_base.png", ResourceLoader.getImage, this.imageResources).toTile());
 		boxFrame.position = new Vector(25, 14);
 		boxFrame.extent = new Vector(470, 422);
@@ -65,6 +69,7 @@ class OptionsDlg extends GuiImage {
 
 		tabs.addChild(audioTab);
 		tabs.addChild(controlsTab);
+		tabs.addChild(rewindTab);
 		tabs.addChild(boxFrame);
 		tabs.addChild(graphicsTab);
 
@@ -367,19 +372,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			Settings.applySettings();
 		}
 
-		// CONTROLS PANEL
-		var controlsPane = new GuiControl();
-		controlsPane.position = new Vector(44, 58);
-		controlsPane.extent = new Vector(459, 339);
-		// MARBLE PANEL
-		var marbleControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_marb_bse.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		marbleControlsPane.position = new Vector(0, 5);
-		marbleControlsPane.extent = new Vector(438, 320);
-		controlsPane.addChild(marbleControlsPane);
-
-		var cameraControlsPane:GuiImage = null;
-		var mouseControlsPane:GuiImage = null;
+		// REWIND PANEL
 
 		function getConflictingBinding(bindingName:String, key:Int) {
 			if (Settings.controlsSettings.forward == key && bindingName != "Move Forward")
@@ -404,6 +397,8 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 				return "Use PowerUp";
 			if (Settings.controlsSettings.freelook == key && bindingName != "Free Look")
 				return "Free Look";
+			if (Settings.controlsSettings.rewind == key && bindingName != "Rewind")
+				return "Rewind";
 
 			return null;
 		}
@@ -431,6 +426,66 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 				}
 			}
 		}
+
+		var rewindPane = new GuiControl();
+		rewindPane.position = new Vector(41, 91);
+		rewindPane.extent = new Vector(425, 281);
+
+		var rwndTimescaleSlide = new GuiImage(ResourceLoader.getResource("data/ui/options/rwnd_timescale.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		rwndTimescaleSlide.position = new Vector(29, 44);
+		rwndTimescaleSlide.extent = new Vector(381, 33);
+		rewindPane.addChild(rwndTimescaleSlide);
+
+		var rwndTxt = new GuiImage(ResourceLoader.getResource("data/ui/options/rwnd_txt.png", ResourceLoader.getImage, this.imageResources).toTile());
+		rwndTxt.position = new Vector(32, 83);
+		rwndTxt.extent = new Vector(146, 261);
+		rewindPane.addChild(rwndTxt);
+
+		var rewindTimescaleKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		rewindTimescaleKnob.position = new Vector(144, 44);
+		rewindTimescaleKnob.extent = new Vector(250, 34);
+		rewindTimescaleKnob.sliderValue = (Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1);
+		rewindTimescaleKnob.pressedAction = (sender) -> {
+			Settings.optionsSettings.rewindTimescale = cast(0.1 + rewindTimescaleKnob.sliderValue * (1 - 0.1));
+		}
+		rewindPane.addChild(rewindTimescaleKnob);
+
+		var rewindBtn = new GuiButtonText(loadButtonImages("data/ui/options/cntr_rwnd"), arial14);
+		rewindBtn.position = new Vector(112, 76);
+		rewindBtn.setExtent(new Vector(118, 48));
+		rewindBtn.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.rewind);
+		rewindBtn.pressedAction = (sender) -> {
+			remapFunc("Rewind", (key) -> Settings.controlsSettings.rewind = key, rewindBtn);
+		}
+		rewindPane.addChild(rewindBtn);
+
+		var rwndEnableButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
+		rwndEnableButton.position = new Vector(142, 116);
+		rwndEnableButton.extent = new Vector(46, 54);
+		rwndEnableButton.buttonType = Toggle;
+		rwndEnableButton.pressedAction = (sender) -> {
+			Settings.optionsSettings.rewindEnabled = rwndEnableButton.pressed;
+		}
+		rewindPane.addChild(rwndEnableButton);
+		if (Settings.optionsSettings.rewindEnabled) {
+			rwndEnableButton.pressed = true;
+		}
+
+		// CONTROLS PANEL
+		var controlsPane = new GuiControl();
+		controlsPane.position = new Vector(44, 58);
+		controlsPane.extent = new Vector(459, 339);
+		// MARBLE PANEL
+		var marbleControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_marb_bse.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		marbleControlsPane.position = new Vector(0, 5);
+		marbleControlsPane.extent = new Vector(438, 320);
+		controlsPane.addChild(marbleControlsPane);
+
+		var cameraControlsPane:GuiImage = null;
+		var mouseControlsPane:GuiImage = null;
 
 		var moveForward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_fw"), arial14);
 		moveForward.position = new Vector(82, 104);
@@ -663,6 +718,12 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		graphicsTabBtn.pressedAction = (sender) -> setTab("Graphics");
 		mainPane.addChild(graphicsTabBtn);
 
+		var rewindTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
+		rewindTabBtn.position = new Vector(480, 76);
+		rewindTabBtn.extent = new Vector(48, 160);
+		rewindTabBtn.pressedAction = (sender) -> setTab("Rewind");
+		mainPane.addChild(rewindTabBtn);
+
 		// Touch Controls buttons???
 		if (Util.isTouchDevice()) {
 			var touchControlsTxt = new GuiText(domcasual24);
@@ -686,14 +747,17 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		setTab = function(tab:String) {
 			tabs.removeChild(audioTab);
 			tabs.removeChild(controlsTab);
+			tabs.removeChild(rewindTab);
 			tabs.removeChild(boxFrame);
 			tabs.removeChild(graphicsTab);
 			mainPane.removeChild(graphicsPane);
 			mainPane.removeChild(audioPane);
 			mainPane.removeChild(controlsPane);
+			mainPane.removeChild(rewindPane);
 			if (tab == "Graphics") {
 				tabs.addChild(audioTab);
 				tabs.addChild(controlsTab);
+				tabs.addChild(rewindTab);
 				tabs.addChild(boxFrame);
 				tabs.addChild(graphicsTab);
 				mainPane.addChild(graphicsPane);
@@ -701,6 +765,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			if (tab == "Audio") {
 				tabs.addChild(graphicsTab);
 				tabs.addChild(controlsTab);
+				tabs.addChild(rewindTab);
 				tabs.addChild(boxFrame);
 				tabs.addChild(audioTab);
 				mainPane.addChild(audioPane);
@@ -708,9 +773,18 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			if (tab == "Controls") {
 				tabs.addChild(audioTab);
 				tabs.addChild(graphicsTab);
+				tabs.addChild(rewindTab);
 				tabs.addChild(boxFrame);
 				tabs.addChild(controlsTab);
 				mainPane.addChild(controlsPane);
+			}
+			if (tab == "Rewind") {
+				tabs.addChild(audioTab);
+				tabs.addChild(graphicsTab);
+				tabs.addChild(controlsTab);
+				tabs.addChild(boxFrame);
+				tabs.addChild(rewindTab);
+				mainPane.addChild(rewindPane);
 			}
 			this.render(MarbleGame.canvas.scene2d);
 		}

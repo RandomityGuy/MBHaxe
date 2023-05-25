@@ -34,6 +34,7 @@ typedef OptionsSettings = {
 	var vsync:Bool;
 	var fovX:Int;
 	var rewindEnabled:Bool;
+	var rewindTimescale:Float;
 }
 
 typedef ControlsSettings = {
@@ -94,6 +95,7 @@ class Settings {
 		soundVolume: 0.7,
 		fovX: 90,
 		rewindEnabled: false,
+		rewindTimescale: 1,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -259,6 +261,8 @@ class Settings {
 				optionsSettings.fovX = 90;
 			if (optionsSettings.rewindEnabled == false #if js || optionsSettings.rewindEnabled == null #end)
 				optionsSettings.rewindEnabled = false;
+			if (optionsSettings.rewindTimescale == 0 #if js || optionsSettings.rewindTimescale == null #end)
+				optionsSettings.rewindTimescale = 1;
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
@@ -282,6 +286,9 @@ class Settings {
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;
+			}
+			if (optionsSettings.rewindTimescale == null) {
+				optionsSettings.rewindTimescale = 1;
 			}
 			#end
 			progression = json.progression;
