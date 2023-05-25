@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.Scene;
 import hxd.snd.Channel;
 import hxd.res.Sound;
 import hxd.Key;
@@ -32,5 +33,14 @@ class GuiSlider extends GuiImage {
 		this.bmp.x = Util.clamp(this.bmp.x, renderRect.position.x, renderRect.position.x + renderRect.extent.x - bmp.width / 2);
 		this.bmp.width = this.bmp.tile.width * Settings.uiScale;
 		super.update(dt, mouseState);
+	}
+
+	public override function render(scene2d:Scene) {
+		super.render(scene2d);
+		var renderRect = getRenderRectangle();
+		this.bmp.width = this.bmp.tile.width * Settings.uiScale;
+		this.bmp.x = renderRect.position.x + renderRect.extent.x * sliderValue;
+		this.bmp.x = Util.clamp(this.bmp.x, renderRect.position.x, renderRect.position.x + renderRect.extent.x - bmp.width / 2);
+		this.bmp.width = this.bmp.tile.width * Settings.uiScale;
 	}
 }
