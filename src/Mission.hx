@@ -39,6 +39,7 @@ class Mission {
 	public var isClaMission:Bool;
 	public var game:String;
 	public var hasEgg:Bool;
+	public var isCustom:Bool;
 
 	var next:Mission;
 
