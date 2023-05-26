@@ -9,8 +9,8 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Gold: [Play](https://marbleblastgold.randomityguy.me/)
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ## Windows and Mac
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.7)
-### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.4.0)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.8)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.0)
 ## Mac Instructions
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
@@ -71,11 +71,12 @@ In browser, you can just resize your window. You can use the browser zoom featur
 In native version, you can just resize the window if windowed or use the resolution options in the menu or just directly modify settings.json  
 
 ## How do I change my FOV?
-Edit settings.json for native version, edit the MBHaxeSettings key in LocalStorage in browser
+Edit settings.json for native version, edit the MBHaxeSettings key in LocalStorage in browser.  
+In the platinum version, there is an FOV slider.
 
 ## How do I unlock/lock FPS?
 You cannot unlock fps in the browser, it is forever set to vsync.
-In the native version, edit settings.json
+In the native version, edit settings.json or the options menu in the platinum.
 
 ## Hey can you please add this new feature?
 If this new feature of yours already exists in MBG but not in this port, then I will try to add it, if I get time to do so, otherwise chances are, I won't add it since I have other things to do and would rather not waste my time on this any further. You are free to do pull requests if you have already implemented said feature.
