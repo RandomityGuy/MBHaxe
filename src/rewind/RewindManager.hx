@@ -16,6 +16,7 @@ class RewindManager {
 
 	public function new(level:MarbleWorld) {
 		this.level = level;
+		this.timeScale = Settings.optionsSettings.rewindTimescale;
 	}
 
 	public function recordFrame() {
