@@ -7,6 +7,7 @@ import src.MarbleWorld;
 import shapes.Trapdoor;
 import shapes.PushButton;
 import src.Util;
+import src.Settings;
 
 class RewindManager {
 	var frames:Array<RewindFrame> = [];
