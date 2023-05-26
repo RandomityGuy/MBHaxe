@@ -80,7 +80,7 @@ class GuiTextListCtrl extends GuiControl {
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
 			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - this.scroll)));
+				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset - this.scroll) * Settings.uiScale));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;
@@ -140,7 +140,8 @@ class GuiTextListCtrl extends GuiControl {
 			}
 
 			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - this.scroll)));
+				Math.floor((!scrollable ? renderRect.position.y : 0)
+					+ (i * (text.font.size + 4 * Settings.uiScale) + (5 + textYOffset) * Settings.uiScale - this.scroll)));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;
@@ -152,7 +153,7 @@ class GuiTextListCtrl extends GuiControl {
 	}
 
 	public function calculateFullHeight() {
-		return (this.texts.length * (font.size + 4));
+		return (this.texts.length * (font.size + 4 * Settings.uiScale));
 	}
 
 	public override function dispose() {
@@ -184,7 +185,7 @@ class GuiTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 		var yStart = renderRect.position.y;
 		var dy = mousePos.y - yStart;
-		var hoverIndex = Math.floor(dy / (font.size + 4));
+		var hoverIndex = Math.floor(dy / (font.size + 4 * Settings.uiScale));
 		if (hoverIndex >= this.texts.length) {
 			hoverIndex = -1;
 		}
@@ -216,7 +217,7 @@ class GuiTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 		var yStart = renderRect.position.y;
 		var dy = mousePos.y - yStart;
-		var selectedIndex = Math.floor((dy + this.scroll) / (font.size + 4));
+		var selectedIndex = Math.floor((dy + this.scroll) / (font.size + 4 * Settings.uiScale));
 		if (selectedIndex >= this.texts.length) {
 			selectedIndex = -1;
 		}
@@ -238,25 +239,29 @@ class GuiTextListCtrl extends GuiControl {
 
 			var off = this.getOffsetFromParent();
 			// Check if we are between the top and bottom, render normally in that case
-			var topY = 2 + (_prevSelected * (font.size + 4)) + g.y;
-			var bottomY = 2 + (_prevSelected * (font.size + 4)) + g.y + font.size + 4;
+			var topY = 2 * Settings.uiScale + (_prevSelected * (font.size + 4 * Settings.uiScale)) + g.y;
+			var bottomY = 2 * Settings.uiScale + (_prevSelected * (font.size + 4 * Settings.uiScale)) + g.y + font.size + 4 * Settings.uiScale;
 			var topRectY = off.y;
 			var bottomRectY = off.y + renderRect.extent.y;
 
 			if (topY >= topRectY && bottomY <= bottomRectY)
-				g.drawRect(0, 5 + (_prevSelected * (font.size + 4)) - 3, renderRect.extent.x, font.size + 4);
+				g.drawRect(0, 5 * Settings.uiScale
+					+ (_prevSelected * (font.size + 4 * Settings.uiScale))
+					- 3 * Settings.uiScale, renderRect.extent.x,
+					font.size
+					+ 4 * Settings.uiScale);
 			// We need to do math the draw the partially visible top selected
 			if (topY <= topRectY && bottomY >= topRectY) {
-				g.drawRect(0, this.scroll, renderRect.extent.x, topY + font.size + 4 - off.y);
+				g.drawRect(0, this.scroll, renderRect.extent.x, topY + font.size + 4 * Settings.uiScale - off.y);
 			}
 			// Same for the bottom
 			if (topY <= bottomRectY && bottomY >= bottomRectY) {
 				g.drawRect(0, this.scroll
 					+ renderRect.extent.y
 					- font.size
-					- 4
-					+ (topY + font.size + 4 - bottomRectY), renderRect.extent.x,
-					off.y
+					- 4 * Settings.uiScale
+					+ (topY + font.size + 4 * Settings.uiScale - bottomRectY),
+					renderRect.extent.x, off.y
 					+ renderRect.extent.y
 					- (topY));
 			}
@@ -274,7 +279,7 @@ class GuiTextListCtrl extends GuiControl {
 		var hittestrect = this.getHitTestRect(false);
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
-			text.y = Math.floor((i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - scrollY));
+			text.y = Math.floor((i * (text.font.size + 4 * Settings.uiScale) + (5 + textYOffset) * Settings.uiScale - scrollY));
 			g.y = -scrollY;
 		}
 		redrawSelectionRect(hittestrect);

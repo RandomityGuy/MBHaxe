@@ -75,6 +75,7 @@ class HelpCreditsGui extends GuiImage {
 		manualPageList = new GuiTextListCtrl(arial14, pageheadings);
 		manualPageList.position = new Vector(0, 0);
 		manualPageList.extent = new Vector(176, 352);
+		manualPageList.scrollable = true;
 		scrollCtrl1.addChild(manualPageList);
 
 		var scrollCtrl2 = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources)

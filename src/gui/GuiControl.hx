@@ -263,6 +263,8 @@ class GuiControl {
 		var uiScaleFactor = Settings.uiScale;
 
 		var offset = this.position.clone();
+		offset.x *= uiScaleFactor;
+		offset.y *= uiScaleFactor;
 
 		if (this.parent != null) {
 			parentRect = this.parent.getRenderRectangle();

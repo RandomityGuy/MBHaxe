@@ -424,6 +424,7 @@ class Settings {
 		#if js
 		Window.getInstance().propagateKeyEvents = true;
 		#end
+
 		// @:privateAccess Window.getInstance().window.center();
 		Window.getInstance().addResizeEvent(() -> {
 			var wnd = Window.getInstance();

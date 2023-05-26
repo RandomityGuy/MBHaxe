@@ -189,7 +189,7 @@ class GuiScrollCtrl extends GuiControl {
 			}
 			for (i in 0...this._flow.numChildren) {
 				var ch = this._flow.getChildAt(i);
-				ch.y -= cast actualDelta * this.maxScrollY / renderRect.extent.y;
+				ch.y -= cast(actualDelta * this.maxScrollY * Settings.uiScale * Settings.uiScale / renderRect.extent.y);
 			}
 		}
 	}
