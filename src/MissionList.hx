@@ -35,7 +35,14 @@ class MissionList {
 					var misParser = new MisParser(file.getText());
 					var mInfo = misParser.parseMissionInfo();
 					var mission = Mission.fromMissionInfo(file.path, mInfo);
-					mission.game = game;
+					if (game != "custom")
+						mission.game = game;
+					else if (mInfo.game != null && mInfo.game != "")
+						mission.game = mInfo.game.toLowerCase();
+					else
+						mission.game = game; // Last case scenario
+					if (game == "custom")
+						mission.isCustom = true;
 					// do egg thing
 					if (StringTools.contains(file.getText().toLowerCase(), 'datablock = "easteregg"')) { // Ew
 						mission.hasEgg = true;

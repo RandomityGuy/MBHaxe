@@ -57,6 +57,7 @@ class MissionElementScriptObject extends MissionElementBase {
 	var ultimatetime:String;
 	var music:String;
 	var alarmstarttime:String;
+	var game:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;
