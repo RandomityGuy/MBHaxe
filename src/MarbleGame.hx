@@ -49,6 +49,8 @@ class MarbleGame {
 	var consoleShown:Bool = false;
 	var console:ConsoleDlg;
 
+	var _mouseWheelDelta:Float;
+
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
 		Console.log("Initializing the game...");
 		canvas = new Canvas(scene2d, cast this);
@@ -169,6 +171,9 @@ class MarbleGame {
 
 		Window.getInstance().removeEventTarget(@:privateAccess Key.onEvent);
 		#end
+		scene2d.addEventListener(e -> {
+			_mouseWheelDelta = e.wheelDelta;
+		});
 	}
 
 	public function update(dt:Float) {
@@ -207,7 +212,8 @@ class MarbleGame {
 			}
 
 			var mouseState:MouseState = {
-				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY)
+				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY),
+				wheel: _mouseWheelDelta
 			}
 			ProfilerUI.measure("canvasUpdate");
 			canvas.update(dt, mouseState);

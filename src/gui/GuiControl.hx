@@ -33,6 +33,7 @@ enum VertSizing {
 typedef MouseState = {
 	var position:Vector;
 	var ?button:Int;
+	var ?wheel:Float;
 }
 
 @:publicFields

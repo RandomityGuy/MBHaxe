@@ -242,14 +242,14 @@ class GuiScrollCtrl extends GuiControl {
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {
-		if (Key.isPressed(Key.MOUSE_WHEEL_DOWN)) {
+		if (Key.isPressed(Key.MOUSE_WHEEL_DOWN) && Math.abs(mouseState.wheel) >= 1) {
 			var renderRect = this.getRenderRectangle();
 			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
 			this.scrollY += scrollBarYSize / 10;
 			deltaY = scrollBarYSize / 10;
 			this.updateScrollVisual();
 		}
-		if (Key.isPressed(Key.MOUSE_WHEEL_UP)) {
+		if (Key.isPressed(Key.MOUSE_WHEEL_UP) && Math.abs(mouseState.wheel) >= 1) {
 			var renderRect = this.getRenderRectangle();
 			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
 			this.scrollY -= scrollBarYSize / 10;
