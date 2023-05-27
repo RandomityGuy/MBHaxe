@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Key;
 import h3d.Vector;
 import src.Settings;
 import gui.GuiControl.MouseState;
@@ -189,7 +190,7 @@ class GuiScrollCtrl extends GuiControl {
 			}
 			for (i in 0...this._flow.numChildren) {
 				var ch = this._flow.getChildAt(i);
-				ch.y -= cast(actualDelta * this.maxScrollY * Settings.uiScale * Settings.uiScale / renderRect.extent.y);
+				ch.y -= cast(actualDelta * this.maxScrollY / renderRect.extent.y);
 			}
 		}
 	}
@@ -238,6 +239,24 @@ class GuiScrollCtrl extends GuiControl {
 				this.updateScrollVisual();
 			}
 		}
+	}
+
+	public override function update(dt:Float, mouseState:MouseState) {
+		if (Key.isPressed(Key.MOUSE_WHEEL_DOWN)) {
+			var renderRect = this.getRenderRectangle();
+			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
+			this.scrollY += scrollBarYSize / 10;
+			deltaY = scrollBarYSize / 10;
+			this.updateScrollVisual();
+		}
+		if (Key.isPressed(Key.MOUSE_WHEEL_UP)) {
+			var renderRect = this.getRenderRectangle();
+			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
+			this.scrollY -= scrollBarYSize / 10;
+			deltaY = -scrollBarYSize / 10;
+			this.updateScrollVisual();
+		}
+		super.update(dt, mouseState);
 	}
 
 	// public override function onMouseDown(mouseState:MouseState) {

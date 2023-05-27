@@ -80,7 +80,8 @@ class GuiTextListCtrl extends GuiControl {
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
 			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset - this.scroll) * Settings.uiScale));
+				Math.floor((!scrollable ? renderRect.position.y : 0)
+					+ (i * (text.font.size + 4 * Settings.uiScale) + (5 + textYOffset) * Settings.uiScale - this.scroll)));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;

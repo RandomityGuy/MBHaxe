@@ -95,7 +95,7 @@ class OptionsDlg extends GuiImage {
 		generalPanel = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		generalPanel.position = new Vector(30, 88);
 		generalPanel.extent = new Vector(726, 364);
-		generalPanel.maxScrollY = 394;
+		generalPanel.maxScrollY = 394 * Settings.uiScale;
 		window.addChild(generalPanel);
 
 		var currentTab = "general";
