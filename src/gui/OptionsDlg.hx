@@ -301,6 +301,17 @@ class OptionsDlg extends GuiImage {
 
 		current += 56;
 
+		makeOption("Rewind:", () -> '${Settings.optionsSettings.rewindEnabled ? "Enabled" : "Disabled"}', current, generalPanel, "small",
+			["Disabled", "Enabled"], (idx) -> {
+				Settings.optionsSettings.rewindEnabled = idx == 1;
+			}, false);
+
+		makeSlider("Rewind Speed:", (Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1), current, generalPanel, (val) -> {
+			Settings.optionsSettings.rewindTimescale = cast(0.1 + val * (1 - 0.1));
+		}, true);
+
+		current += 56;
+
 		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, current, generalPanel, (val) -> {
 			Settings.optionsSettings.musicVolume = val;
 			AudioManager.updateVolumes();
