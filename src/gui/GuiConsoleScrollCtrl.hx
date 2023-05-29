@@ -57,7 +57,6 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		var scrollDownPressedTile = scrollBar.sub(19, 19, 18, 17);
 		var scrollUpDisabledTile = scrollBar.sub(38, 1, 18, 17);
 		var scrollDownDisabledTile = scrollBar.sub(38, 19, 18, 17);
-		this._manualScroll = true;
 
 		this.scrollTrack = new GuiImage(scrollTrackTile);
 		this.addChild(this.scrollTrack);

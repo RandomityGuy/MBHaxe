@@ -44,6 +44,7 @@ typedef OptionsSettings = {
 	var marbleShader:String;
 	var cameraDistance:Float;
 	var rewindEnabled:Bool;
+	var rewindTimescale:Float;
 }
 
 typedef ControlsSettings = {
@@ -127,6 +128,7 @@ class Settings {
 		marbleShader: "Default",
 		cameraDistance: 2.5,
 		rewindEnabled: false,
+		rewindTimescale: 1.0,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -394,6 +396,8 @@ class Settings {
 			if (gamepadSettings.rewind == null) {
 				gamepadSettings.rewind = ["Y"];
 			}
+			if (optionsSettings.rewindTimescale == 0)
+				optionsSettings.rewindTimescale = 1;
 			if (json.stats != null) {
 				playStatistics = json.stats;
 			}

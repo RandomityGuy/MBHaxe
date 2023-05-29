@@ -912,7 +912,7 @@ class PlayMissionGui extends GuiImage {
 				}
 
 				pmPreview.addChild(pmEgg);
-				pmEgg.render(MarbleGame.canvas.scene2d, @:privateAccess pmPreview._flow);
+				pmEgg.render(MarbleGame.canvas.scene2d);
 			}
 
 			// if (currentCategory != "custom"

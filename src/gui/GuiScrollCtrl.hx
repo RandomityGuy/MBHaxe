@@ -93,8 +93,7 @@ class GuiScrollCtrl extends GuiControl {
 
 	public override function getRenderRectangle():Rect {
 		var rrec = super.getRenderRectangle();
-		if (!this.childrenHandleScroll)
-			rrec.scroll.y = scrollY * this.maxScrollY / rrec.extent.y;
+		rrec.scroll.y = scrollY * this.maxScrollY / rrec.extent.y;
 		return rrec;
 	}
 
@@ -197,7 +196,6 @@ class GuiScrollCtrl extends GuiControl {
 		if (Util.isTouchDevice()) {
 			this.pressed = false;
 			this.dirty = true;
-			deltaY = 0;
 			this.updateScrollVisual();
 		}
 	}
@@ -206,8 +204,7 @@ class GuiScrollCtrl extends GuiControl {
 		if (Util.isTouchDevice()) {
 			super.onMouseMove(mouseState);
 			if (this.pressed) {
-				var dy = (mouseState.position.y - this.prevMousePos.y) * scrollSpeed / this.maxScrollY;
-				deltaY = -dy;
+				var dy = mouseState.position.y - this.prevMousePos.y;
 				this.scrollY -= dy;
 				this.prevMousePos = mouseState.position;
 				this.updateScrollVisual();
