@@ -337,7 +337,7 @@ class OptionsDlg extends GuiImage {
 			});
 
 			var textObj = new GuiText(markerFelt32);
-			textObj.position = new Vector(388, 298);
+			textObj.position = new Vector(388, current - 6);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = "Touch Controls";
 			textObj.text.textColor = 0xFFFFFF;
@@ -345,7 +345,7 @@ class OptionsDlg extends GuiImage {
 			generalPanel.addChild(textObj);
 
 			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			remapBtn.position = new Vector(552, 298);
+			remapBtn.position = new Vector(552, current - 6);
 			remapBtn.txtCtrl.text.text = "Edit";
 			remapBtn.setExtent(new Vector(152, 49));
 			remapBtn.pressedAction = (sender) -> {
