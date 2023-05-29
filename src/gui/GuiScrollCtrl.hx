@@ -14,6 +14,7 @@ class GuiScrollCtrl extends GuiControl {
 	public var scrollY:Float = 0;
 
 	var maxScrollY:Float;
+	var scrollSpeed = 500.0;
 
 	var scrollBarY:h2d.Object;
 
@@ -204,7 +205,7 @@ class GuiScrollCtrl extends GuiControl {
 		if (Util.isTouchDevice()) {
 			super.onMouseMove(mouseState);
 			if (this.pressed) {
-				var dy = mouseState.position.y - this.prevMousePos.y;
+				var dy = (mouseState.position.y - this.prevMousePos.y) * scrollSpeed / this.maxScrollY;
 				this.scrollY -= dy;
 				this.prevMousePos = mouseState.position;
 				this.updateScrollVisual();
