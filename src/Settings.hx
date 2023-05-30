@@ -336,6 +336,7 @@ class Settings {
 		#end
 		#if android
 		settingsDir = @:privateAccess String.fromUTF8(get_storage_path());
+		trace('Storage path is ${settingsDir}');
 		#end
 		#if js
 		var localStorage = js.Browser.getLocalStorage();

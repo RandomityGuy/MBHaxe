@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.fs.BytesFileSystem.BytesFileEntry;
 import src.Marbleland;
 import src.Mission;
 import hxd.BitmapData;
@@ -49,6 +50,7 @@ class ReplayCenterGui extends GuiImage {
 		var replayList = [];
 		sys.FileSystem.createDirectory(haxe.io.Path.join([Settings.settingsDir, "data", "replays"]));
 		var replayPath = haxe.io.Path.join([Settings.settingsDir, "data", "replays",]);
+		#if (sys && !android)
 		var replayFiles = ResourceLoader.fileSystem.dir(replayPath);
 		for (replayFile in replayFiles) {
 			if (replayFile.extension == "mbr") {
@@ -57,6 +59,23 @@ class ReplayCenterGui extends GuiImage {
 					replayList.push(replayF);
 			}
 		}
+		#end
+		// #if android
+		var replayFiles = sys.FileSystem.readDirectory(replayPath);
+		for (replayFile in replayFiles) {
+			var extension = haxe.io.Path.extension(replayFile);
+			trace('Replay file: ${replayFile}}');
+			if (extension == "mbr") {
+				var replayF = new Replay(null);
+				var fullpath = haxe.io.Path.join([Settings.settingsDir, "data", "replays", replayFile]);
+				trace('Replay file path: ${fullpath}}');
+				var replayBytes = sys.io.File.getBytes(fullpath);
+				var fe = new BytesFileEntry(fullpath, replayBytes);
+				if (replayF.readHeader(replayBytes, fe))
+					replayList.push(replayF);
+			}
+		}
+		// #end
 
 		var playButton = new GuiButton(loadButtonImages('data/ui/replay/play', true));
 		playButton.position = new Vector(323, 386);
@@ -68,6 +87,9 @@ class ReplayCenterGui extends GuiImage {
 				var repmis = repl.mission;
 				if (!StringTools.contains(repmis, "data/"))
 					repmis = "data/" + repmis;
+				#if android
+				repmis = StringTools.replace(repmis, "data/", "");
+				#end
 				var mi = repl.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(repl.customId);
 				if (mi.isClaMission) {
 					mi.download(() -> {
@@ -135,6 +157,9 @@ class ReplayCenterGui extends GuiImage {
 			var repmis = thisReplay.mission;
 			if (!StringTools.contains(repmis, "data/"))
 				repmis = "data/" + repmis;
+			#if android
+			repmis = StringTools.replace(repmis, "data/", "");
+			#end
 			if (MissionList.missions == null)
 				MissionList.buildMissionList();
 			var m = thisReplay.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(thisReplay.customId);
