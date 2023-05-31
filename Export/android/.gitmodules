@@ -1,0 +1,15 @@
+[submodule "app/src/main/cpp/hashlink"]
+	path = app/src/main/cpp/hashlink
+	url = https://github.com/HaxeFoundation/hashlink
+[submodule "app/src/main/cpp/heaps"]
+	path = app/src/main/cpp/heaps
+	url = https://github.com/HeapsIO/heaps
+[submodule "app/src/main/cpp/sdl2"]
+	path = app/src/main/cpp/sdl2
+	url = https://github.com/spurious/SDL-mirror.git
+[submodule "app/src/main/cpp/libjpeg-turbo"]
+	path = app/src/main/cpp/libjpeg-turbo
+	url = https://github.com/openstf/android-libjpeg-turbo.git
+[submodule "app/src/main/cpp/openal-soft"]
+	path = app/src/main/cpp/openal-soft
+	url = https://github.com/kcat/openal-soft.git

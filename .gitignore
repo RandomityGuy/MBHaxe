@@ -9,7 +9,13 @@ marblegame.hl
 marblegame
 settings.json
 release
-Export
+Export/html5
+Export/.hxml
+Export/android/local.properties
+Export/android/app/src/main/assets
+Export/android/app/src/main/cpp
+Export/android/app/src/main/java
+Export/android/app/src/main/build.hxml
 
 macos-dist/MarbleBlast Gold.app/
 macos-dist/data/
