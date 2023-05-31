@@ -621,7 +621,7 @@ class MarbleSelectGui extends GuiImage {
 					dtsObj.init(null, () -> {}); // The lambda is not gonna run async anyway
 					for (mat in dtsObj.materials) {
 						mat.mainPass.enableLights = false;
-						mat.mainPass.culling = None;
+						mat.mainPass.culling = Front;
 						if (mat.blendMode != Alpha && mat.blendMode != Add)
 							mat.mainPass.addShader(new AlphaChannel());
 					}
@@ -686,7 +686,7 @@ class MarbleSelectGui extends GuiImage {
 		dtsObj.init(null, () -> {}); // The lambda is not gonna run async anyway
 		for (mat in dtsObj.materials) {
 			mat.mainPass.enableLights = false;
-			mat.mainPass.culling = None;
+			mat.mainPass.culling = Front;
 			if (mat.blendMode != Alpha && mat.blendMode != Add)
 				mat.mainPass.addShader(new AlphaChannel());
 		}

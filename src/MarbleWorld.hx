@@ -456,9 +456,6 @@ class MarbleWorld extends Scheduler {
 			this.replay.clear();
 		} else {
 			this.replay.rewind();
-			if (Util.isTouchDevice()) {
-				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
-			}
 		}
 
 		this.rewindManager.clear();
