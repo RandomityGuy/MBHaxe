@@ -129,6 +129,7 @@ class PlayMissionGui extends GuiImage {
 		var filt = new ColorMatrix(Matrix.I());
 		pmPreview.bmp.filter = filt;
 
+		#if (!android)
 		var replayPlayButton = new GuiImage(ResourceLoader.getResource("data/ui/play/playback.png", ResourceLoader.getImage, this.imageResources).toTile());
 		replayPlayButton.position = new Vector(38, 315);
 		replayPlayButton.extent = new Vector(18, 18);
@@ -172,6 +173,7 @@ class PlayMissionGui extends GuiImage {
 			cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
 		};
 		pmBox.addChild(replayRecordButton);
+		#end
 
 		var levelWnd = new GuiImage(ResourceLoader.getResource("data/ui/play/level_window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		levelWnd.position = new Vector();
