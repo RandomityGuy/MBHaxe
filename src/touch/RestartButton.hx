@@ -11,7 +11,7 @@ class RestartButton extends TouchButton {
 		this.guiElement.horizSizing = Right;
 		this.guiElement.vertSizing = Bottom;
 		this.onClick = () -> {
-			if (MarbleGame.instance.world.finishTime == null)
+			if (MarbleGame.instance.world.finishTime == null && !MarbleGame.instance.paused)
 				MarbleGame.instance.world.performRestart();
 		}
 	}
