@@ -47,13 +47,11 @@ class Http {
 				responses.add(() -> req.callback(b));
 				req.fulfilled = true;
 			};
-			#if !MACOS_BUNDLE
+			hl.Gc.enable(false);
 			hl.Gc.blocking(true); // Wtf is this shit
-			#end
 			http.request(false);
-			#if !MACOS_BUNDLE
 			hl.Gc.blocking(false);
-			#end
+			hl.Gc.enable(true);
 		}
 	}
 	#end
