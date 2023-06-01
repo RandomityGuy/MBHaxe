@@ -46,6 +46,14 @@ class OptionsDlg extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
+		function loadButtonImages2(path:String) {
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed, disabled];
+		}
+
 		var touch = Util.isTouchDevice();
 
 		var window = new GuiImage(ResourceLoader.getResource("data/ui/options/window.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -60,7 +68,7 @@ class OptionsDlg extends GuiImage {
 		generalBtn.extent = new Vector(134, 65);
 		window.addChild(generalBtn);
 
-		var hotkeysBtn = new GuiButton(loadButtonImages('data/ui/options/hotkeys'));
+		var hotkeysBtn = new GuiButton(loadButtonImages2('data/ui/options/hotkeys'));
 		hotkeysBtn.position = new Vector(325, 19);
 		hotkeysBtn.extent = new Vector(134, 65);
 		if (touch) {
