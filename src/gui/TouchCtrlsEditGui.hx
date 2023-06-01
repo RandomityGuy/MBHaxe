@@ -82,6 +82,18 @@ class TouchCtrlsEditGui extends GuiImage {
 			Settings.touchSettings.powerupButtonSize = rvalue;
 		}
 
+		rewindBtn.onClick = (sender, mousePos) -> {
+			sender.setSelected(true);
+			jumpBtn.setSelected(false);
+			powerupBtn.setSelected(false);
+			joystick.setSelected(false);
+		}
+
+		rewindBtn.onChangeCb = (sender, value, rvalue) -> {
+			Settings.touchSettings.rewindButtonPos = [value.x, value.y];
+			Settings.touchSettings.rewindButtonSize = rvalue;
+		}
+
 		joystick.onClick = (mousePos) -> {
 			joystick.setSelected(true);
 			jumpBtn.setSelected(false);

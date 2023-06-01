@@ -127,7 +127,7 @@ class Settings {
 		jumpButtonSize: 60,
 		powerupButtonPos: [440, 180],
 		powerupButtonSize: 60,
-		rewindButtonPos: [380, 240],
+		rewindButtonPos: [300, 100],
 		rewindButtonSize: 60,
 		buttonJoystickMultiplier: 2.5
 	}

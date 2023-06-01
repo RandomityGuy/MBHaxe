@@ -404,6 +404,9 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		}
 
 		function remapFunc(bindingName:String, bindingFunc:Int->Void, ctrl:GuiButtonText) {
+			#if android
+			return; // Don't
+			#end
 			var remapDlg = new RemapDlg(bindingName);
 			MarbleGame.canvas.pushDialog(remapDlg);
 			remapDlg.remapCallback = (key) -> {
