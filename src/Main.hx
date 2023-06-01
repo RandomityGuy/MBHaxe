@@ -57,11 +57,16 @@ class Main extends hxd.App {
 		});
 		#end
 
+		trace("ResourceLoader::init");
 		ResourceLoader.init(s2d, () -> {
+			trace("Settings::init");
 			Settings.init();
+			trace("Gamepad::init");
 			Gamepad.init();
+			trace("AudioManager::init");
 			AudioManager.init();
 			AudioManager.playShell();
+			trace("MarbleGame::new");
 			marbleGame = new MarbleGame(s2d, s3d);
 			MarbleGame.canvas.setContent(new MainMenuGui());
 

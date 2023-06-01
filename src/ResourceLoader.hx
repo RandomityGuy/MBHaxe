@@ -44,7 +44,7 @@ class ResourceLoader {
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
-		#if hl
+		#if (hl && !android)
 		@:privateAccess @:privateAccess cast(fileSystem, LocalFileSystem).convert.tmpDir = "data/tmp/";
 		#end
 		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames

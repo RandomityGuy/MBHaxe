@@ -80,6 +80,7 @@ class ManifestEntry extends FileEntry {
 		#if (sys && !android)
 		return sys.io.File.getBytes(file);
 		#elseif android
+		trace('Trying to get bytes for ${name}');
 		bytes = AssetsTools.getBytes(file);
 		return bytes;
 		#else

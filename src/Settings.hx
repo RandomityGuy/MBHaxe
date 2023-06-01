@@ -180,7 +180,7 @@ class Settings {
 	#end
 
 	public static function applySettings() {
-		#if hl
+		#if (hl && !android)
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
 		#end
@@ -336,7 +336,7 @@ class Settings {
 	public static function init() {
 		load();
 		#if hl
-		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
+		Window.getInstance().resize(Window.getInstance().width, Window.getInstance().height);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
 		uiScale = 1 / Window.getInstance().windowToPixelRatio;
 		#end
