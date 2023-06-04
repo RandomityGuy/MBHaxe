@@ -74,7 +74,8 @@ class RewindFrame {
 		}
 		c.oobState = {
 			oob: oobState.oob,
-			timeState: oobState.timeState.clone()
+			timeState: oobState.timeState != null ? oobState.timeState.clone() : null
 		};
+		return c;
 	}
 }
