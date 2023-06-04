@@ -470,12 +470,15 @@ class MarbleWorld extends Scheduler {
 			return; // We will update state manually
 		if (this.timeState.currentAttemptTime < 0.5) {
 			this.playGui.setCenterText('none');
+			this.marble.mode = Start;
 		}
 		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 2)) {
 			this.playGui.setCenterText('ready');
+			this.marble.mode = Start;
 		}
 		if ((this.timeState.currentAttemptTime >= 2) && (this.timeState.currentAttemptTime < 3.5)) {
 			this.playGui.setCenterText('set');
+			this.marble.mode = Start;
 		}
 		if ((this.timeState.currentAttemptTime >= 3.5) && (this.timeState.currentAttemptTime < 5.5)) {
 			this.playGui.setCenterText('go');
@@ -483,6 +486,7 @@ class MarbleWorld extends Scheduler {
 		}
 		if (this.timeState.currentAttemptTime >= 5.5) {
 			this.playGui.setCenterText('none');
+			this.marble.mode = Play;
 		}
 	}
 
