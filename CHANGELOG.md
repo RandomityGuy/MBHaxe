@@ -1,3 +1,8 @@
+# 1.5.1
+This update fixes the following bugs:
+- Fixed a bug concerning moving platform collisions.
+- Made moving platforms rewind correctly in case of traplaunches.
+
 # 1.5.0
 This update brings the following big changes:
 - Added Rewind capabilities. Open options to configure it.

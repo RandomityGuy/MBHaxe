@@ -9,8 +9,8 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Gold: [Play](https://marbleblastgold.randomityguy.me/)
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ## Windows and Mac
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.8)
-### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.0)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.9)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.1)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
