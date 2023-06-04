@@ -48,6 +48,7 @@ class RewindManager {
 					velocity: x.velocity.clone(),
 				},
 				stopped: @:privateAccess x.stopped,
+				position: x.getAbsPos().getPosition().clone(),
 			}
 		});
 		rf.powerupStates = [];
@@ -151,6 +152,8 @@ class RewindManager {
 			level.pathedInteriors[i].targetTime = rf.mpStates[i].curState.targetTime;
 			level.pathedInteriors[i].velocity.set(rf.mpStates[i].curState.velocity.x, rf.mpStates[i].curState.velocity.y, rf.mpStates[i].curState.velocity.z);
 			@:privateAccess level.pathedInteriors[i].stopped = rf.mpStates[i].stopped;
+			level.pathedInteriors[i].setPosition(rf.mpStates[i].position.x, rf.mpStates[i].position.y, rf.mpStates[i].position.z);
+			level.pathedInteriors[i].setTransform(level.pathedInteriors[i].getTransform());
 		}
 		var pstates = rf.powerupStates.copy();
 		var lmstates = rf.landMineStates.copy();
