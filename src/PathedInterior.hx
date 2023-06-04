@@ -173,7 +173,7 @@ class PathedInterior extends InteriorObject {
 			return;
 		var newp = this.getAbsPos().getPosition().add(velocity.multiply(timeDelta));
 		this.setPosition(newp.x, newp.y, newp.z);
-		this.collider.setTransform(this.getTransform());
+		this.setTransform(this.getTransform());
 
 		if (this.soundChannel != null) {
 			var spat = this.soundChannel.getEffect(Spatialization);

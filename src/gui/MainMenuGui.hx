@@ -178,7 +178,7 @@ class MainMenuGui extends GuiImage {
 		versionText.vertSizing = Bottom;
 		versionText.position = new Vector(502, 61);
 		versionText.extent = new Vector(97, 72);
-		versionText.text.text = "<p align=\"center\">1.5.0</p>";
+		versionText.text.text = "<p align=\"center\">1.5.1</p>";
 		versionText.text.filter = new DropShadow(1.414, 0.785, 0x3333337F, 1, 0, 0.7, 1, true);
 		this.addChild(versionText);
 
