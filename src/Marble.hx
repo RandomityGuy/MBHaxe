@@ -509,7 +509,7 @@ class Marble extends GameObject {
 					interior.setStopped();
 				}
 			}
-		} while (!done);
+		} while (!done && itersIn < 1e4);
 			//	if (this.velocity.lengthSq() < 625) {
 		var gotOne = false;
 		var dir = new Vector(0, 0, 0);
