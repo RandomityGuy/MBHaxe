@@ -923,7 +923,8 @@ class MarbleWorld extends Scheduler {
 			|| MarbleGame.instance.touchInput.rewindButton.pressed
 			|| Gamepad.isDown(Settings.gamepadSettings.rewind))
 			&& Settings.optionsSettings.rewindEnabled
-			&& !this.isWatching) {
+			&& !this.isWatching
+			&& this.finishTime == null) {
 			this.rewinding = true;
 		} else {
 			if (((Key.isReleased(Settings.controlsSettings.rewind) || Gamepad.isReleased(Settings.gamepadSettings.rewind))
