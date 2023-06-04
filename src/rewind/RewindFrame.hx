@@ -21,6 +21,7 @@ class RewindFrame {
 	var mpStates:Array<{
 		curState:PIState,
 		stopped:Bool,
+		position:Vector
 	}>;
 	var gemCount:Int;
 	var gemStates:Array<Bool>;
@@ -62,6 +63,7 @@ class RewindFrame {
 					velocity: s.curState.velocity.clone(),
 				},
 				stopped: s.stopped,
+				position: s.position.clone(),
 			});
 		}
 		c.trapdoorStates = [];
