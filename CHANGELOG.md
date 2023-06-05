@@ -1,3 +1,6 @@
+# 1.5.2
+- Updated Marbleland integration link to the new site.
+
 # 1.5.1
 This update fixes the following bugs:
 - Fixed a bug concerning moving platform collisions.
