@@ -1,3 +1,20 @@
+# 1.5.2
+- Updated Marbleland integration link to the new site.
+
+# 1.5.1
+This update fixes the following bugs:
+- Fixed a bug concerning moving platform collisions.
+- Made moving platforms rewind correctly in case of traplaunches.
+
+# 1.5.0
+This update brings the following big changes:
+- Added Rewind capabilities. Open options to configure it.
+- Added capability to play locally installed custom levels. Install your customs in platinum/data/missions.
+- Improved traplaunches, now they should be much more easier to do.
+- Buffed nuke a bit, hold jump key to make it blast much stronger.
+- Minor physics improvements.
+- Minor performance improvements.
+
 # 1.4.0
 This update adds all the playable MBG, MBP, MBU custom levels via Marbleland integration. Play the entire custom level archive without manually installing with, with a single click.
 - Added controller support. (Thanks thearst3rd)

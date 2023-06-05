@@ -112,7 +112,7 @@ class Marbleland {
 	}
 
 	public static function getMissionImage(id:Int, cb:Image->Void) {
-		return Http.get('https://marbleland.vani.ga/api/level/${id}/image?width=258&height=194', (imageBytes) -> {
+		return Http.get('https://marbleland.vaniverse.io/api/level/${id}/image?width=258&height=194', (imageBytes) -> {
 			var res = new Image(new hxd.fs.BytesFileSystem.BytesFileEntry('${id}.png', imageBytes));
 			cb(res);
 		}, (e) -> {
@@ -121,7 +121,7 @@ class Marbleland {
 	}
 
 	public static function download(id:Int, cb:Array<haxe.zip.Entry>->Void) {
-		Http.get('https://marbleland.vani.ga/api/level/${id}/zip?assuming=none', (zipData -> {
+		Http.get('https://marbleland.vaniverse.io/api/level/${id}/zip?assuming=none', (zipData -> {
 			var reader = new Reader(new BytesInput(zipData));
 			var entries:Array<haxe.zip.Entry> = null;
 			try {
