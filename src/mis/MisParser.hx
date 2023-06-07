@@ -38,8 +38,24 @@ class MisParser {
 	var currentElementId = 0;
 	var variables:Map<String, String>;
 
+	static var localizations:Map<String, String>;
+
 	public function new(text:String) {
 		this.text = text;
+		if (localizations == null) {
+			// Read the localization strings
+			var lfile = ResourceLoader.getFileEntry("data/englishStrings.inf");
+			var contents = lfile.entry.getText();
+			var lines = contents.split('\r\n');
+			localizations = [];
+			var rgx = ~/(\$(?:\w|\d|:)+)\s*=\s*"(.+?)";/g;
+			for (line in lines) {
+				if (rgx.match(line)) {
+					if (!localizations.exists(rgx.matched(1)))
+						localizations.set(rgx.matched(1), rgx.matched(2));
+				}
+			}
+		}
 	}
 
 	public function parse() {
@@ -50,6 +66,9 @@ class MisParser {
 
 		// Find all specified variables
 		this.variables = ["$usermods" => '""']; // Just make $usermods point to nothing
+		for (key => value in localizations) {
+			this.variables.set(key, '"' + value + '"');
+		}
 
 		var startText = outsideText;
 

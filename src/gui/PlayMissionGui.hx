@@ -28,9 +28,9 @@ import src.MarbleGame;
 class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
 	static var currentCategoryStatic:String = "beginner";
-	static var currentGameStatic:String = "platinum";
+	static var currentGameStatic:String = "ultra";
 
-	var currentGame:String = "platinum";
+	var currentGame:String = "ultra";
 	var currentSelection:Int = 0;
 	var currentCategory:String = "beginner";
 	var currentList:Array<Mission>;
@@ -62,7 +62,7 @@ class PlayMissionGui extends GuiImage {
 		// 	currentSelectionStatic = cast Math.min(MissionList.missionList["platinum"]["beginner"].length - 1,
 		// 		Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)]);
 		if (currentSelectionStatic == -1) {
-			currentSelectionStatic = MissionList.missionList["platinum"]["beginner"].length - 1;
+			currentSelectionStatic = MissionList.missionList["ultra"]["beginner"].length - 1;
 		}
 
 		// currentSelection = PlayMissionGui.currentSelectionStatic;
@@ -810,7 +810,7 @@ class PlayMissionGui extends GuiImage {
 			}
 		}
 
-		currentList = MissionList.missionList["platinum"]["beginner"];
+		currentList = MissionList.missionList["ultra"]["beginner"];
 
 		setCategoryFunc = function(game:String, category:String, ?doRender:Bool = true) {
 			currentList = category == "custom" ? (switch (game) {
