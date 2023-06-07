@@ -2,7 +2,6 @@ package src;
 
 import rewind.RewindManager;
 import Macros.MarbleWorldMacros;
-import shapes.PushButton;
 #if js
 import gui.MainMenuGui;
 #else
@@ -21,8 +20,6 @@ import shapes.EasterEgg;
 import shapes.Sign;
 import triggers.TeleportTrigger;
 import triggers.DestinationTrigger;
-import shapes.Nuke;
-import shapes.Magnet;
 import src.Replay;
 import gui.Canvas;
 import hxd.snd.Channel;
@@ -47,25 +44,17 @@ import triggers.HelpTrigger;
 import triggers.InBoundsTrigger;
 import triggers.OutOfBoundsTrigger;
 import shapes.Trapdoor;
-import shapes.Oilslick;
-import shapes.Tornado;
 import shapes.TimeTravel;
 import shapes.SuperSpeed;
-import shapes.ShockAbsorber;
-import shapes.LandMine;
 import shapes.AntiGravity;
 import shapes.SmallDuctFan;
 import shapes.DuctFan;
 import shapes.Helicopter;
-import shapes.TriangleBumper;
 import shapes.RoundBumper;
-import shapes.SuperBounce;
-import shapes.RandomPowerup;
 import shapes.SignCaution;
 import shapes.SuperJump;
 import shapes.Gem;
 import shapes.SignPlain;
-import shapes.SignFinish;
 import shapes.EndPad;
 import shapes.StartPad;
 import h3d.Matrix;
@@ -504,24 +493,6 @@ class MarbleWorld extends Scheduler {
 						trapdoor.lastCompletion = state.lastCompletion;
 					}
 					tidx++;
-				}
-				if (dtss is LandMine) {
-					var landmine:LandMine = cast dtss;
-					if (!this.isWatching) {
-						this.replay.recordLandMineState(landmine.disappearTime - this.timeState.timeSinceLoad);
-					} else {
-						landmine.disappearTime = this.replay.getLandMineState(lidx) + this.timeState.timeSinceLoad;
-					}
-					lidx++;
-				}
-				if (dtss is PushButton) {
-					var pushbutton:PushButton = cast dtss;
-					if (!this.isWatching) {
-						this.replay.recordPushButtonState(pushbutton.lastContactTime - this.timeState.timeSinceLoad);
-					} else {
-						pushbutton.lastContactTime = this.replay.getPushButtonState(pidx) + this.timeState.timeSinceLoad;
-					}
-					pidx++;
 				}
 			}
 		}

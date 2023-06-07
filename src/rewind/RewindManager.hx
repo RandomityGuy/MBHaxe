@@ -2,12 +2,9 @@ package rewind;
 
 import shapes.AbstractBumper;
 import shapes.PowerUp;
-import shapes.LandMine;
 import src.MarbleWorld;
 import shapes.Trapdoor;
-import shapes.PushButton;
 import src.Util;
-import shapes.Nuke;
 
 class RewindManager {
 	var frames:Array<RewindFrame> = [];
@@ -56,18 +53,6 @@ class RewindManager {
 			if (dts is PowerUp) {
 				var pow:PowerUp = cast dts;
 				rf.powerupStates.push(pow.lastPickUpTime);
-			}
-			if (dts is PushButton) {
-				var pow:PushButton = cast dts;
-				rf.powerupStates.push(pow.lastContactTime);
-			}
-			if (dts is LandMine) {
-				var lm:LandMine = cast dts;
-				rf.landMineStates.push(lm.disappearTime);
-			}
-			if (dts is Nuke) {
-				var lm:Nuke = cast dts;
-				rf.landMineStates.push(lm.disappearTime);
 			}
 			if (dts is Trapdoor) {
 				var td:Trapdoor = cast dts;
@@ -160,18 +145,6 @@ class RewindManager {
 			if (dts is PowerUp) {
 				var pow:PowerUp = cast dts;
 				pow.lastPickUpTime = pstates.shift();
-			}
-			if (dts is PushButton) {
-				var pow:PushButton = cast dts;
-				pow.lastContactTime = pstates.shift();
-			}
-			if (dts is LandMine) {
-				var lm:LandMine = cast dts;
-				lm.disappearTime = lmstates.shift();
-			}
-			if (dts is Nuke) {
-				var lm:Nuke = cast dts;
-				lm.disappearTime = lmstates.shift();
 			}
 			if (dts is Trapdoor) {
 				var td:Trapdoor = cast dts;

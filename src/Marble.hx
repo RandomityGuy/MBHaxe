@@ -17,7 +17,6 @@ import collision.gjk.ConvexHull;
 import hxd.snd.effect.Pitch;
 import hxd.snd.effect.Spatialization;
 import hxd.snd.Channel;
-import shapes.TriangleBumper;
 import shapes.RoundBumper;
 import src.Util;
 import src.AudioManager;
@@ -517,12 +516,6 @@ class Marble extends GameObject {
 						if (!playedSounds.contains("data/sound/bumperding1.wav")) {
 							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
 							playedSounds.push("data/sound/bumperding1.wav");
-						}
-					}
-					if (contact.otherObject is TriangleBumper) {
-						if (!playedSounds.contains("data/sound/bumper1.wav")) {
-							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumper1.wav", ResourceLoader.getAudio, this.soundResources));
-							playedSounds.push("data/sound/bumper1.wav");
 						}
 					}
 					forceObjectCount++;

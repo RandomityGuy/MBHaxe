@@ -62,9 +62,7 @@ class MarbleWorldMacros {
 				shape = new EndPad();
 				if (element is MissionElementStaticShape && cast(element, MissionElementStaticShape) == endPadElement)
 					endPad = cast shape;
-			} else if (dataBlockLowerCase == "signfinish")
-				shape = new SignFinish();
-			else if (StringTools.startsWith(dataBlockLowerCase, "signplain"))
+			} else if (StringTools.startsWith(dataBlockLowerCase, "signplain"))
 				shape = new SignPlain(cast element);
 			else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
 				shape = new Gem(cast element);
@@ -74,12 +72,8 @@ class MarbleWorldMacros {
 				shape = new SuperJump(cast element);
 			else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
 				shape = new SignCaution(cast element);
-			else if (dataBlockLowerCase == "superbounceitem")
-				shape = new SuperBounce(cast element);
 			else if (dataBlockLowerCase == "roundbumper")
 				shape = new RoundBumper();
-			else if (dataBlockLowerCase == "trianglebumper")
-				shape = new TriangleBumper();
 			else if (dataBlockLowerCase == "helicopteritem")
 				shape = new Helicopter(cast element);
 			else if (dataBlockLowerCase == "easteregg")
@@ -90,36 +84,20 @@ class MarbleWorldMacros {
 				shape = new DuctFan();
 			else if (dataBlockLowerCase == "smallductfan")
 				shape = new SmallDuctFan();
-			else if (dataBlockLowerCase == "magnet")
-				shape = new Magnet();
 			else if (dataBlockLowerCase == "antigravityitem")
 				shape = new AntiGravity(cast element);
 			else if (dataBlockLowerCase == "norespawnantigravityitem")
 				shape = new AntiGravity(cast element, true);
-			else if (dataBlockLowerCase == "landmine")
-				shape = new LandMine();
-			else if (dataBlockLowerCase == "nuke")
-				shape = new Nuke();
-			else if (dataBlockLowerCase == "shockabsorberitem")
-				shape = new ShockAbsorber(cast element);
 			else if (dataBlockLowerCase == "superspeeditem")
 				shape = new SuperSpeed(cast element);
 			else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
 				shape = new TimeTravel(cast element);
-			else if (dataBlockLowerCase == "randompowerupitem")
-				shape = new RandomPowerup(cast element);
 			else if (dataBlockLowerCase == "blastitem")
 				shape = new Blast(cast element);
 			else if (dataBlockLowerCase == "megamarbleitem")
 				shape = new MegaMarble(cast element);
-			else if (dataBlockLowerCase == "tornado")
-				shape = new Tornado();
 			else if (dataBlockLowerCase == "trapdoor")
 				shape = new Trapdoor();
-			else if (dataBlockLowerCase == "pushbutton")
-				shape = new PushButton();
-			else if (dataBlockLowerCase == "oilslick")
-				shape = new Oilslick();
 			else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
 				shape = new Sign(cast element);
 			else if ([
