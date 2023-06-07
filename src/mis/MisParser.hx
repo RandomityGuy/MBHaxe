@@ -24,6 +24,7 @@ import src.Util;
 import h3d.Vector;
 import h3d.Quat;
 import src.Console;
+import src.ResourceLoader;
 
 final elementHeadRegEx = ~/new\s+(\w+)\((.*?)\)\s*{/g;
 final blockCommentRegEx = ~/\/\*(.|\n)*?\*\//g;
@@ -151,6 +152,10 @@ class MisParser {
 	}
 
 	public function parseMissionInfo() {
+		this.variables = ["$usermods" => '""']; // Just make $usermods point to nothing
+		for (key => value in localizations) {
+			this.variables.set(key, '"' + value + '"');
+		}
 		var missionInfoIndex = this.text.indexOf("new ScriptObject(MissionInfo)");
 		this.index = missionInfoIndex;
 		var mInfo:MissionElementScriptObject = cast readElement();

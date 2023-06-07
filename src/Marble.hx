@@ -564,11 +564,11 @@ class Marble extends GameObject {
 		var currentXVelocity = rollVelocity.dot(sideDir);
 		var mv = m.d;
 
-		// mv = mv.multiply(1.538461565971375);
-		// var mvlen = mv.length();
-		// if (mvlen > 1) {
-		// 	mv = mv.multiply(1 / mvlen);
-		// }
+		mv = mv.multiply(1.538461565971375);
+		var mvlen = mv.length();
+		if (mvlen > 1) {
+			mv = mv.multiply(1 / mvlen);
+		}
 		var desiredYVelocity = this._maxRollVelocity * mv.y;
 		var desiredXVelocity = this._maxRollVelocity * mv.x;
 
@@ -696,38 +696,38 @@ class Marble extends GameObject {
 					interior.setStopped();
 				}
 			}
-		} while (!done && itersIn < 1e4); // Maximum limit pls
-			//	if (this.velocity.lengthSq() < 625) {
-		var gotOne = false;
-		var dir = new Vector(0, 0, 0);
-		for (j in 0...contacts.length) {
-			var dir2 = dir.add(contacts[j].normal);
-			if (dir2.lengthSq() < 0.01) {
-				dir2 = dir2.add(contacts[j].normal);
-			}
-			dir = dir2;
-			dir.normalize();
-			gotOne = true;
-		}
-		if (gotOne) {
-			dir.normalize();
-			var soFar = 0.0;
-			for (k in 0...contacts.length) {
-				var dist = this._radius - contacts[k].contactDistance;
-				var timeToSeparate = 0.1;
-				var vel = this.velocity.sub(contacts[k].velocity);
-				var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
-				if (dist > timeToSeparate * outVel) {
-					soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+		} while (!done && itersIn < 20); // Maximum limit pls
+		if (this.velocity.lengthSq() < 625) {
+			var gotOne = false;
+			var dir = new Vector(0, 0, 0);
+			for (j in 0...contacts.length) {
+				var dir2 = dir.add(contacts[j].normal);
+				if (dir2.lengthSq() < 0.01) {
+					dir2 = dir2.add(contacts[j].normal);
 				}
+				dir = dir2;
+				dir.normalize();
+				gotOne = true;
 			}
-			// if (soFar < -25)
-			// 	soFar = -25;
-			// if (soFar > 25)
-			// 	soFar = 25;
-			this.velocity = this.velocity.add(dir.multiply(soFar));
+			if (gotOne) {
+				dir.normalize();
+				var soFar = 0.0;
+				for (k in 0...contacts.length) {
+					var dist = this._radius - contacts[k].contactDistance;
+					var timeToSeparate = 0.1;
+					var vel = this.velocity.sub(contacts[k].velocity);
+					var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
+					if (dist > timeToSeparate * outVel) {
+						soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+					}
+				}
+				if (soFar < -25)
+					soFar = -25;
+				if (soFar > 25)
+					soFar = 25;
+				this.velocity = this.velocity.add(dir.multiply(soFar));
+			}
 		}
-		//	}
 
 		return stoppedPaths;
 	}
@@ -1587,9 +1587,7 @@ class Marble extends GameObject {
 			this.velocity.set(this.velocity.x + A.x * timeStep, this.velocity.y + A.y * timeStep, this.velocity.z + A.z * timeStep);
 			this.omega.set(this.omega.x + a.x * timeStep, this.omega.y + a.y * timeStep, this.omega.z + a.z * timeStep);
 			if (this.mode == Start) {
-				// Bruh...
-				this.velocity.y = 0;
-				this.velocity.x = 0;
+				this.velocity.set(0, 0, 0);
 			}
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, true, stoppedPaths, pathedInteriors);
 			this._totalTime += timeStep;

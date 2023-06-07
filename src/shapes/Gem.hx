@@ -23,7 +23,7 @@ class Gem extends DtsObject {
 		useInstancing = true;
 		showSequences = false; // Gems actually have an animation for the little shiny thing, but the actual game ignores that. I get it, it was annoying as hell.
 
-		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
+		var GEM_COLORS = ["red"];
 		var color = element.datablock.substring("GemItem".length);
 		if (color.length == 0)
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
