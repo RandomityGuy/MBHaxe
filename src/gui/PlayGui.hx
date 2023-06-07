@@ -313,7 +313,7 @@ class PlayGui {
 		// gemImageSceneTargetBitmap.blendMode = None;
 		// gemImageSceneTargetBitmap.addShader(new ColorKey());
 
-		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
+		var GEM_COLORS = ["red"];
 		var gemColor = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 
 		gemImageObject = new DtsObject();

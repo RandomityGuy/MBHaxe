@@ -815,26 +815,53 @@ class DtsObject extends GameObject {
 			if (scale > 0) {
 				scales = [];
 
-				for (i in 0...this.dts.nodes.length) {
-					var affected = ((1 << i) & scale) != 0;
+				if (sequence.flags & 1 > 0) { // Uniform scales
+					for (i in 0...this.dts.nodes.length) {
+						var affected = ((1 << i) & scale) != 0;
 
-					if (affected) {
-						var scale1 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeLow];
-						var scale2 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeHigh];
+						if (affected) {
+							var scale1 = this.dts.nodeUniformScales[sequence.numKeyFrames * affectedCount + keyframeLow];
+							var scale2 = this.dts.nodeUniformScales[sequence.numKeyFrames * affectedCount + keyframeHigh];
 
-						var v1 = new Vector(scale1.x, scale1.y, scale1.z);
-						var v2 = new Vector(scale2.x, scale2.y, scale2.z);
+							var v1 = new Vector(scale1, scale1, scale1);
+							var v2 = new Vector(scale2, scale2, scale2);
 
-						var scaleVec = Util.lerpThreeVectors(v1, v2, t);
-						this.graphNodes[i].scaleX = scaleVec.x;
-						this.graphNodes[i].scaleY = scaleVec.y;
-						this.graphNodes[i].scaleZ = scaleVec.z;
+							var scaleVec = Util.lerpThreeVectors(v1, v2, t);
+							this.graphNodes[i].scaleX = scaleVec.x;
+							this.graphNodes[i].scaleY = scaleVec.y;
+							this.graphNodes[i].scaleZ = scaleVec.z;
 
-						this.dirtyTransforms[i] = true;
-					} else {
-						this.graphNodes[i].scaleX = 1;
-						this.graphNodes[i].scaleY = 1;
-						this.graphNodes[i].scaleZ = 1;
+							this.dirtyTransforms[i] = true;
+						} else {
+							this.graphNodes[i].scaleX = 1;
+							this.graphNodes[i].scaleY = 1;
+							this.graphNodes[i].scaleZ = 1;
+						}
+					}
+				}
+
+				if (sequence.flags & 2 > 0) { // `Aligned` scales
+					for (i in 0...this.dts.nodes.length) {
+						var affected = ((1 << i) & scale) != 0;
+
+						if (affected) {
+							var scale1 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeLow];
+							var scale2 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeHigh];
+
+							var v1 = new Vector(scale1.x, scale1.y, scale1.z);
+							var v2 = new Vector(scale2.x, scale2.y, scale2.z);
+
+							var scaleVec = Util.lerpThreeVectors(v1, v2, t);
+							this.graphNodes[i].scaleX = scaleVec.x;
+							this.graphNodes[i].scaleY = scaleVec.y;
+							this.graphNodes[i].scaleZ = scaleVec.z;
+
+							this.dirtyTransforms[i] = true;
+						} else {
+							this.graphNodes[i].scaleX = 1;
+							this.graphNodes[i].scaleY = 1;
+							this.graphNodes[i].scaleZ = 1;
+						}
 					}
 				}
 			}

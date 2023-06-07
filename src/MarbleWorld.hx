@@ -393,11 +393,7 @@ class MarbleWorld extends Scheduler {
 			"shapes/images/glow_bounce.dts",
 			"shapes/images/glow_bounce.png",
 			"shapes/images/helicopter.dts",
-			"shapes/images/helicopter.jpg",
-			"shapes/pads/white.jpg", // These irk us a lot because ifl shit
-			"shapes/pads/red.jpg",
-			"shapes/pads/blue.jpg",
-			"shapes/pads/green.jpg",
+			"shapes/images/helicopter.jpg", // These irk us a lot because ifl shit
 			"shapes/items/gem.dts", // Ew ew
 			"shapes/items/gemshine.png",
 			"shapes/items/enviro1.jpg",
