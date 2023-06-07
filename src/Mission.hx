@@ -217,6 +217,10 @@ class Mission {
 		}
 		var fname = rawElementPath.substring(rawElementPath.lastIndexOf('/') + 1);
 		rawElementPath = rawElementPath.toLowerCase();
+		if (StringTools.startsWith(rawElementPath, "./")) {
+			rawElementPath = rawElementPath.substring(2);
+			rawElementPath = haxe.io.Path.directory(this.path) + '/' + rawElementPath;
+		}
 		var path = StringTools.replace(rawElementPath.substring(rawElementPath.indexOf('data/')), "\"", "");
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
