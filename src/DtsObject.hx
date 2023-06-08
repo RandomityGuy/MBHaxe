@@ -19,7 +19,7 @@ import hxd.FloatBuffer;
 import src.DynamicPolygon;
 import dts.Sequence;
 import h3d.scene.Mesh;
-import h3d.prim.Polygon;
+import mesh.Polygon;
 import h3d.prim.UV;
 import h3d.Vector;
 import h3d.Quat;
@@ -61,6 +61,9 @@ typedef GraphNode = {
 typedef MaterialGeometry = {
 	var vertices:Array<Vector>;
 	var normals:Array<Vector>;
+	var tangents:Array<Vector>;
+	var bitangents:Array<Vector>;
+	var texNormals:Array<Vector>;
 	var uvs:Array<UV>;
 	var indices:Array<Int>;
 }
@@ -198,6 +201,9 @@ class DtsObject extends GameObject {
 							var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
 							poly.normals = geometry[k].normals.map(x -> x.toPoint());
 							poly.uvs = geometry[k].uvs;
+							poly.tangents = geometry[k].tangents.map(x -> x.toPoint());
+							poly.bitangents = geometry[k].bitangents.map(x -> x.toPoint());
+							poly.texMatNormals = geometry[k].texNormals.map(x -> x.toPoint());
 
 							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
 						}
@@ -609,15 +615,131 @@ class DtsObject extends GameObject {
 			vertices: [],
 			normals: [],
 			uvs: [],
-			indices: []
+			indices: [],
+			tangents: [],
+			bitangents: [],
+			texNormals: []
 		});
 		if (materialGeometry.length == 0 && dtsMesh.primitives.length > 0) {
 			materialGeometry.push({
 				vertices: [],
 				normals: [],
 				uvs: [],
-				indices: []
+				indices: [],
+				tangents: [],
+				bitangents: [],
+				texNormals: []
 			});
+		}
+
+		function createTextureSpaceMatrix(i0:Int, i1:Int, i2:Int) {
+			var t0 = new Vector();
+			var t1 = new Vector();
+			var t2 = new Vector();
+			var b0 = new Vector();
+			var b1 = new Vector();
+			var b2 = new Vector();
+			var edge1 = new Vector();
+			var edge2 = new Vector();
+			var cp = new Vector();
+			edge1.set(vertices[i1].x - vertices[i0].x, vertices[i1].y - vertices[i0].y, vertices[i1].z - vertices[i0].z);
+			edge2.set(vertices[i2].x - vertices[i0].x, vertices[i2].y - vertices[i0].y, vertices[i2].z - vertices[i0].z);
+			var fVar1 = vertices[i1].x - vertices[i0].x;
+			var fVar2 = vertices[i2].x - vertices[i0].x;
+			var fVar4 = dtsMesh.uv[i1].x - dtsMesh.uv[i0].x;
+			var fVar5 = dtsMesh.uv[i2].x - dtsMesh.uv[i0].x;
+			var fVar6 = dtsMesh.uv[i1].y - dtsMesh.uv[i0].y;
+			var fVar7 = dtsMesh.uv[i2].y - dtsMesh.uv[i0].y;
+			var fVar3 = fVar7 * fVar4 - fVar5 * fVar6;
+			if (1e-12 < Math.abs(fVar3)) {
+				fVar3 = 1.0 / fVar3;
+				fVar4 = -(fVar3 * (fVar5 * fVar1 - fVar4 * fVar2));
+				fVar1 = -(fVar3 * (fVar6 * fVar2 - fVar7 * fVar1));
+				t0.x = fVar1;
+				t1.x = fVar1;
+				t2.x = fVar1;
+				b0.x = fVar4;
+				b1.x = fVar4;
+				b2.x = fVar4;
+			}
+			fVar1 = dtsMesh.uv[i1].x - dtsMesh.uv[i0].x;
+			fVar2 = dtsMesh.uv[i2].x - dtsMesh.uv[i0].x;
+			fVar3 = dtsMesh.uv[i1].y - dtsMesh.uv[i0].y;
+			fVar6 = vertices[i1].y - vertices[i0].y;
+			fVar4 = dtsMesh.uv[i2].y - dtsMesh.uv[i0].y;
+			fVar7 = vertices[i2].y - vertices[i0].y;
+			fVar5 = fVar4 * fVar1 - fVar2 * fVar3;
+			if (1e-12 < Math.abs(fVar5)) {
+				fVar5 = 1.0 / fVar5;
+				fVar3 = -(fVar5 * (fVar3 * fVar7 - fVar4 * fVar6));
+				fVar1 = -(fVar5 * (fVar2 * fVar6 - fVar1 * fVar7));
+				b0.y = fVar1;
+				b1.y = fVar1;
+				b2.y = fVar1;
+				t0.y = fVar3;
+				t1.y = fVar3;
+				t2.y = fVar3;
+			}
+			fVar1 = dtsMesh.uv[i1].x - dtsMesh.uv[i0].x;
+			fVar2 = dtsMesh.uv[i2].x - dtsMesh.uv[i0].x;
+			fVar3 = dtsMesh.uv[i1].y - dtsMesh.uv[i0].y;
+			fVar5 = vertices[i1].z - vertices[i0].z;
+			fVar4 = dtsMesh.uv[i2].y - dtsMesh.uv[i0].y;
+			fVar6 = vertices[i2].z - vertices[i0].z;
+			fVar7 = fVar4 * fVar1 - fVar2 * fVar3;
+			if (1e-12 < Math.abs(fVar7)) {
+				fVar7 = 1.0 / fVar7;
+				fVar3 = -(fVar7 * (fVar3 * fVar6 - fVar4 * fVar5));
+				fVar1 = -(fVar7 * (fVar2 * fVar5 - fVar1 * fVar6));
+				b0.z = fVar1;
+				b1.z = fVar1;
+				b2.z = fVar1;
+				t0.z = fVar3;
+				t1.z = fVar3;
+				t2.z = fVar3;
+			}
+
+			// v0
+			t0.normalize();
+			b0.normalized();
+			var n0 = t0.cross(b0);
+			if (n0.dot(vertexNormals[i0]) < 0.0) {
+				n0.scale(-1);
+			}
+
+			// v1
+			t1.normalize();
+			b1.normalized();
+			var n1 = t1.cross(b1);
+			if (n1.dot(vertexNormals[i1]) < 0.0) {
+				n1.scale(-1);
+			}
+
+			// v2
+			t2.normalize();
+			b2.normalized();
+			var n2 = t2.cross(b2);
+			if (n2.dot(vertexNormals[i2]) < 0.0) {
+				n2.scale(-1);
+			}
+
+			return [
+				{
+					tangent: t0,
+					bitangent: b0,
+					normal: n0
+				},
+				{
+					tangent: t1,
+					bitangent: b1,
+					normal: n1
+				},
+				{
+					tangent: t2,
+					bitangent: b2,
+					normal: n2
+				}
+			];
 		}
 
 		var ab = new Vector();
@@ -654,6 +776,17 @@ class DtsObject extends GameObject {
 				var normal = vertexNormals[index];
 				geometrydata.normals.push(new Vector(normal.x, normal.y, normal.z));
 			}
+
+			var tbn = createTextureSpaceMatrix(i1, i2, i3);
+			geometrydata.tangents.push(tbn[0].tangent);
+			geometrydata.tangents.push(tbn[1].tangent);
+			geometrydata.tangents.push(tbn[2].tangent);
+			geometrydata.bitangents.push(tbn[0].bitangent);
+			geometrydata.bitangents.push(tbn[1].bitangent);
+			geometrydata.bitangents.push(tbn[2].bitangent);
+			geometrydata.texNormals.push(tbn[0].normal);
+			geometrydata.texNormals.push(tbn[1].normal);
+			geometrydata.texNormals.push(tbn[2].normal);
 
 			geometrydata.indices.push(i1);
 			geometrydata.indices.push(i2);
