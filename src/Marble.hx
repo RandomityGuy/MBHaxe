@@ -335,13 +335,6 @@ class Marble extends GameObject {
 					mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
 				} else {
 					// Generate tangents for next shaders, only for Ultra
-					for (node in marbleDts.graphNodes) {
-						for (ch in node.children) {
-							var chmesh = cast(ch, Mesh);
-							var chpoly = cast(chmesh.primitive, h3d.prim.Polygon);
-							chpoly.addTangents();
-						}
-					}
 
 					mat.mainPass.removeShader(mat.textureShader);
 

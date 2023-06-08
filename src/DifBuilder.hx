@@ -1,5 +1,8 @@
 package src;
 
+import shaders.DefaultNormalMaterial;
+import shaders.DefaultMaterial;
+import h3d.scene.Mesh;
 import shaders.NormalMaterial;
 import shaders.NoiseTileMaterial;
 import shaders.DirLight;
@@ -19,10 +22,9 @@ import hxd.res.Image;
 import h3d.mat.Texture;
 import haxe.io.Path;
 import hxd.File;
-import h3d.scene.Mesh;
+import mesh.Polygon;
 import h3d.prim.UV;
 import h3d.col.Point;
-import h3d.prim.Polygon;
 import dif.math.Point2F;
 import dif.math.Point3F;
 import h3d.prim.BigPrimitive;
@@ -45,6 +47,15 @@ class DifBuilderTriangle {
 	public var uv1:Point2F;
 	public var uv2:Point2F;
 	public var uv3:Point2F;
+	public var t1:Point3F;
+	public var t2:Point3F;
+	public var t3:Point3F;
+	public var b1:Point3F;
+	public var b2:Point3F;
+	public var b3:Point3F;
+	public var n1:Point3F;
+	public var n2:Point3F;
+	public var n3:Point3F;
 
 	public function new() {}
 }
@@ -184,45 +195,53 @@ class DifBuilder {
 		},
 		];
 
-	static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
-			uvScaleFactor:Float = 1) {
+	static function createDefaultMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
+			uvScaleFactor:Float = 1, half:Bool = false) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
 			diffuseTex.wrap = Repeat;
 			diffuseTex.mipMap = Nearest;
-			var normalTex = ResourceLoader.getTexture('data/shaders/tex/${normalTexture}').resource;
+			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
 			normalTex.mipMap = Nearest;
-			var shader = new PhongMaterial(diffuseTex, normalTex, shininess, specularColor, MarbleGame.instance.world.ambient,
-				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, uvScaleFactor);
-			if (uvScaleFactor == 0.5)
-				shader.isHalfTile = true;
+			var shader = new DefaultMaterial(diffuseTex, normalTex, shininess, specularColor, uvScaleFactor, half);
 			onFinish(shader);
 		});
-		worker.loadFile('interiors_mbu/${baseTexture}');
-		worker.loadFile('shaders/tex/${normalTexture}');
+		worker.loadFile(baseTexture);
+		worker.loadFile(normalTexture);
+		worker.run();
+	}
+
+	static function createDefaultNormalMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, shininess:Float, specularColor:Vector,
+			uvScaleFactor:Float = 1) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			var shader = new DefaultNormalMaterial(diffuseTex, shininess, specularColor, uvScaleFactor);
+			onFinish(shader);
+		});
+		worker.loadFile(baseTexture);
 		worker.run();
 	}
 
 	static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String, shininess:Float, specular:Vector) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var diffuseTex = ResourceLoader.getTexture('data/textures/${baseTexture}').resource;
 			diffuseTex.wrap = Repeat;
 			diffuseTex.mipMap = Nearest;
-			var normalTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.normal.png').resource;
+			var normalTex = ResourceLoader.getTexture('data/textures/tile_intermediate.normal.png').resource;
 			normalTex.wrap = Repeat;
 			normalTex.mipMap = Nearest;
-			var noiseTex = ResourceLoader.getTexture('data/shaders/tex/noise${noiseSuffix}.jpg').resource;
+			var noiseTex = ResourceLoader.getTexture('data/textures/noise${noiseSuffix}.jpg').resource;
 			noiseTex.wrap = Repeat;
 			noiseTex.mipMap = Nearest;
-			var shader = new NoiseTileMaterial(diffuseTex, normalTex, noiseTex, shininess, specular, MarbleGame.instance.world.ambient,
-				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, 1);
+			var shader = new NoiseTileMaterial(diffuseTex, normalTex, noiseTex, shininess, specular, 1);
 			onFinish(shader);
 		});
-		worker.loadFile('interiors_mbu/${baseTexture}');
-		worker.loadFile('shaders/tex/noise${noiseSuffix}.jpg');
-		worker.loadFile('shaders/tex/tile_mbu.spec.jpg');
-		worker.loadFile('shaders/tex/tile_mbu.normal.png');
+		worker.loadFile('textures/${baseTexture}');
+		worker.loadFile('textures/noise${noiseSuffix}.jpg');
+		worker.loadFile('textures/tile_intermediate.normal.png');
 		worker.run();
 	}
 
@@ -241,59 +260,49 @@ class DifBuilder {
 	}
 
 	static var shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void> = [
-		'interiors_mbu/plate_1.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'plate.randomize.png', 'plate.normal.png', 8, new Vector(1, 1, 0.8, 1),
-			0.5),
-		'interiors_mbu/tile_beginner.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_beginner_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_shadow', 40,
+		'plate_1' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/plate.randomize.png', 'data/textures/plate.normal.png', 8,
+			new Vector(1, 1, 0.8, 1), 1, true),
+		'tile_beginner' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1)),
+		'tile_beginner_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_beginner_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red', 40, new Vector(1, 1, 1, 1)),
+		'tile_beginner_red_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_beginner_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue', 40, new Vector(1, 1, 1, 1)),
+		'tile_beginner_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_beginner_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_beginner_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red_shadow', 40,
+		'tile_intermediate' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '', 40, new Vector(1, 1, 1, 1)),
+		'tile_intermediate_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_intermediate_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40, new Vector(1, 1, 1, 1)),
+		'tile_intermediate_red_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_beginner_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_beginner_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue_shadow', 40,
+		'tile_intermediate_green' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green', 40, new Vector(1, 1, 1, 1)),
+		'tile_intermediate_green_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_intermediate.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_intermediate_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_shadow', 40,
+		'tile_advanced' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '', 40, new Vector(1, 1, 1, 1)),
+		'tile_advanced_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_advanced_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)),
+		'tile_advanced_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_intermediate_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40,
-			new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_intermediate_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red_shadow', 40,
+		'tile_advanced_green' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)),
+		'tile_advanced_green_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_intermediate_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green', 40,
-			new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_intermediate_green_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green_shadow', 40,
+		'tile_underside' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.png', '', 40, new Vector(1, 1, 1, 1)),
+		'wall_beginner' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/wall_beginner.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
+		'edge_white' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/edge_white.png', 'data/textures/edge.normal.png', 50,
+			new Vector(0.8, 0.8, 0.8, 1)),
+		'edge_white_shadow' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/edge_white_shadow.png', 'data/textures/edge.normal.png', 50,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_advanced.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_advanced_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_advanced_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_advanced_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_advanced_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_advanced_green_shadow.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/tile_underside.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/wall_beginner.png' => (onFinish) -> createPhongMaterial(onFinish, 'wall_beginner.png', 'wall_mbu.normal.png', 12,
+		'beam' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/beam.png', 'data/textures/beam.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
+		'beam_side' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/beam_side.png', 'data/textures/beam_side.normal.png', 12,
 			new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/edge_white.png' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white.png', 'edge.normal.png', 50, new Vector(0.8, 0.8, 0.8, 1)),
-		'interiors_mbu/edge_white.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white.png', 'edge.normal.png', 50, new Vector(0.8, 0.8, 0.8, 1)),
-		'interiors_mbu/edge_white_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white_shadow.png', 'edge.normal.png', 50,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/beam.png' => (onFinish) -> createPhongMaterial(onFinish, 'beam.png', 'beam.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/beam_side.png' => (onFinish) -> createPhongMaterial(onFinish, 'beam_side.png', 'beam_side.normal.png', 12,
-			new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/friction_low.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
-			new Vector(1, 1, 1, 0.8)),
-		'interiors_mbu/friction_low.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
-			new Vector(1, 1, 1, 0.8)),
-		'interiors_mbu/friction_low_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low_shadow.png', 'friction_low.normal.png', 128,
+		// 'friction_low.png' => (onFinish) -> createPhongMaterial(onFinish, 'data/textures/friction_low.png', 'data/textures/friction_low.normal.png', 128,
+		// 	new Vector(1, 1, 1, 0.8)),
+		// 'friction_low_shadow' => (onFinish) -> createPhongMaterial(onFinish, 'data/textures/friction_low_shadow.png', 'data/textures/friction_low.normal.png',
+		// 	128, new Vector(0.3, 0.3, 0.35, 1)),
+		'friction_high' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high.png', 'data/textures/friction_high.normal.png', 10,
 			new Vector(0.3, 0.3, 0.35, 1)),
-		'interiors_mbu/friction_high.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high.png', 'friction_high.normal.png', 10,
-			new Vector(0.3, 0.3, 0.35, 1)),
-		'interiors_mbu/friction_high_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high_shadow.png', 'friction_high.normal.png', 10,
-			new Vector(0.15, 0.15, 0.16, 1.0)),
-		'interiors_mbu/stripe_caution.png' => (onFinish) -> createPhongMaterial(onFinish, 'stripe_caution.png', 'DefaultNormal.png', 12,
-			new Vector(0.8, 0.8, 0.6, 1)),
+		'friction_high_shadow' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high_shadow.png',
+			'data/textures/friction_high.normal.png', 10, new Vector(0.15, 0.15, 0.16, 1.0)),
+		'stripe_caution' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/stripe_caution.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 	];
 
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
@@ -348,9 +357,77 @@ class DifBuilder {
 				colliderSurface.edgeConcavities = [];
 				colliderSurface.originalIndices = [];
 				colliderSurface.originalSurfaceIndex = surfaceindex;
+
+				var pc0 = geo.points[geo.windings[surface.windingStart + 1]];
+				var pc1 = geo.points[geo.windings[surface.windingStart + 0]];
+				var pc2 = geo.points[geo.windings[surface.windingStart + 2]];
+
+				var texPlanes = geo.texGenEQs[surface.texGenIndex];
+				var tc0 = new Vector(texPlanes.planeX.x * pc0.x
+					+ texPlanes.planeX.y * pc0.y
+					+ texPlanes.planeX.z * pc0.z
+					+ texPlanes.planeX.d,
+					texPlanes.planeY.x * pc0.x
+					+ texPlanes.planeY.y * pc0.y
+					+ texPlanes.planeY.z * pc0.z
+					+ texPlanes.planeY.d, 0, 0);
+				var tc1 = new Vector(texPlanes.planeX.x * pc1.x
+					+ texPlanes.planeX.y * pc1.y
+					+ texPlanes.planeX.z * pc1.z
+					+ texPlanes.planeX.d,
+					texPlanes.planeY.x * pc1.x
+					+ texPlanes.planeY.y * pc1.y
+					+ texPlanes.planeY.z * pc1.z
+					+ texPlanes.planeY.d, 0, 0);
+				var tc2 = new Vector(texPlanes.planeX.x * pc2.x
+					+ texPlanes.planeX.y * pc2.y
+					+ texPlanes.planeX.z * pc2.z
+					+ texPlanes.planeX.d,
+					texPlanes.planeY.x * pc2.x
+					+ texPlanes.planeY.y * pc2.y
+					+ texPlanes.planeY.z * pc2.z
+					+ texPlanes.planeY.d, 0, 0);
+
+				var edge1 = new Vector(pc1.x - pc0.x, tc1.x - tc0.x, tc1.y - tc0.y);
+				var edge2 = new Vector(pc2.x - pc0.x, tc2.x - tc0.x, tc2.y - tc0.y);
+				var cp = edge1.cross(edge2);
+				var s = new Vector();
+				var t = new Vector();
+				if (Math.abs(cp.x) > 1e-12) {
+					s.x = -cp.y / cp.x;
+					t.x = -cp.z / cp.x;
+				}
+				edge1.set(pc1.y - pc0.y, tc1.x - tc0.x, tc1.y - tc0.y);
+				edge2.set(pc2.y - pc0.y, tc2.x - tc0.x, tc2.y - tc0.y);
+				cp = edge1.cross(edge2);
+				if (Math.abs(cp.x) > 1e-12) {
+					s.y = -cp.y / cp.x;
+					t.y = -cp.z / cp.x;
+				}
+				edge1.set(pc1.z - pc0.z, tc1.x - tc0.x, tc1.y - tc0.y);
+				edge2.set(pc2.z - pc0.z, tc2.x - tc0.x, tc2.y - tc0.y);
+				cp = edge1.cross(edge2);
+				if (Math.abs(cp.x) > 1e-12) {
+					s.z = -cp.y / cp.x;
+					t.z = -cp.z / cp.x;
+				}
+				s.normalize();
+				t.normalize();
+				var st = s.cross(t);
+				if (st.x * normal.x + st.y * normal.y + st.z * normal.z < 0) {
+					st.scale(-1);
+				}
+				s.x *= -1;
+				t.x *= -1;
+				st.x *= -1;
+
 				for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
 					var p1, p2, p3;
+					var i1, i2, i3;
 					if ((k - (surface.windingStart + 2)) % 2 == 0) {
+						i1 = k;
+						i2 = k - 1;
+						i3 = k - 2;
 						p1 = points[geo.windings[k]];
 						p2 = points[geo.windings[k - 1]];
 						p3 = points[geo.windings[k - 2]];
@@ -358,6 +435,9 @@ class DifBuilder {
 						colliderSurface.originalIndices.push(geo.windings[k - 1]);
 						colliderSurface.originalIndices.push(geo.windings[k - 2]);
 					} else {
+						i1 = k - 2;
+						i2 = k - 1;
+						i3 = k;
 						p1 = points[geo.windings[k - 2]];
 						p2 = points[geo.windings[k - 1]];
 						p3 = points[geo.windings[k]];
@@ -407,6 +487,37 @@ class DifBuilder {
 					tri.uv1 = uv1;
 					tri.uv2 = uv2;
 					tri.uv3 = uv3;
+
+					// if (geo.normalIndices != null && geo.normalIndices.length > 0) {
+					// 	tri.t1 = geo.normals2[geo.normalIndices[3 * i1 + 3 * surface.windingStart]];
+					// 	tri.t1.x *= -1;
+					// 	tri.n1 = geo.normals2[geo.normalIndices[3 * i1 + 1 + 3 * surface.windingStart]];
+					// 	tri.n1.x *= -1;
+					// 	tri.b1 = geo.normals2[geo.normalIndices[3 * i1 + 2 + 3 * surface.windingStart]];
+					// 	tri.b1.x *= -1;
+					// 	tri.t2 = geo.normals2[geo.normalIndices[3 * i2 + 3 * surface.windingStart]];
+					// 	tri.t2.x *= -1;
+					// 	tri.n2 = geo.normals2[geo.normalIndices[3 * i2 + 1 + 3 * surface.windingStart]];
+					// 	tri.n2.x *= -1;
+					// 	tri.b2 = geo.normals2[geo.normalIndices[3 * i2 + 2 + 3 * surface.windingStart]];
+					// 	tri.b2.x *= -1;
+					// 	tri.t3 = geo.normals2[geo.normalIndices[3 * i3 + 3 * surface.windingStart]];
+					// 	tri.t3.x *= -1;
+					// 	tri.n3 = geo.normals2[geo.normalIndices[3 * i3 + 1 + 3 * surface.windingStart]];
+					// 	tri.n3.x *= -1;
+					// 	tri.b3 = geo.normals2[geo.normalIndices[3 * i3 + 2 + 3 * surface.windingStart]];
+					// 	tri.b3.x *= -1;
+					// } else {
+					tri.t1 = new Point3F(s.x, s.y, s.z);
+					tri.n1 = new Point3F(st.x, st.y, st.z);
+					tri.b1 = new Point3F(t.x, t.y, t.z);
+					tri.t2 = new Point3F(s.x, s.y, s.z);
+					tri.n2 = new Point3F(st.x, st.y, st.z);
+					tri.b2 = new Point3F(t.x, t.y, t.z);
+					tri.t3 = new Point3F(s.x, s.y, s.z);
+					tri.n3 = new Point3F(st.x, st.y, st.z);
+					tri.b3 = new Point3F(t.x, t.y, t.z);
+					// }
 					triangles.push(tri);
 					var materialName = stripTexName(texture).toLowerCase();
 					var hasMaterialInfo = materialDict.exists(materialName);
@@ -652,18 +763,10 @@ class DifBuilder {
 				path = StringTools.replace(path, "data/", "");
 				#end
 
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
+				if (ResourceLoader.exists("data/textures/" + tex + ".jpg")) {
 					return true;
 				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
-					return true;
-				}
-				var prevDir = Path.directory(Path.directory(path));
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
+				if (ResourceLoader.exists("data/textures/" + tex + ".png")) {
 					return true;
 				}
 
@@ -674,20 +777,11 @@ class DifBuilder {
 					tex = tex.split('/')[1];
 				}
 
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
-					return Path.directory(path) + "/" + tex + ".jpg";
+				if (ResourceLoader.exists("data/textures/" + tex + ".jpg")) {
+					return "data/textures/" + tex + ".jpg";
 				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
-					return Path.directory(path) + "/" + tex + ".png";
-				}
-
-				var prevDir = Path.directory(Path.directory(path));
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return prevDir + "/" + tex + ".jpg";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return prevDir + "/" + tex + ".png";
+				if (ResourceLoader.exists("data/textures/" + tex + ".png")) {
+					return "data/textures/" + tex + ".png";
 				}
 
 				return null;
@@ -708,6 +802,9 @@ class DifBuilder {
 					var points = [];
 					var normals = [];
 					var uvs = [];
+					var t = [];
+					var b = [];
+					var n = [];
 					for (tri in tris) {
 						var p1 = new Point(-tri.p1.x, tri.p1.y, tri.p1.z);
 						var p2 = new Point(-tri.p2.x, tri.p2.y, tri.p2.z);
@@ -727,18 +824,27 @@ class DifBuilder {
 						uvs.push(uv3);
 						uvs.push(uv2);
 						uvs.push(uv1);
+						t.push(new Point(tri.t3.x, tri.t3.y, tri.t3.z));
+						t.push(new Point(tri.t2.x, tri.t2.y, tri.t2.z));
+						t.push(new Point(tri.t1.x, tri.t1.y, tri.t1.z));
+						b.push(new Point(tri.b3.x, tri.b3.y, tri.b3.z));
+						b.push(new Point(tri.b2.x, tri.b2.y, tri.b2.z));
+						b.push(new Point(tri.b1.x, tri.b1.y, tri.b1.z));
+						n.push(new Point(tri.n3.x, tri.n3.y, tri.n3.z));
+						n.push(new Point(tri.n2.x, tri.n2.y, tri.n2.z));
+						n.push(new Point(tri.n1.x, tri.n1.y, tri.n1.z));
 					}
 					var prim = new Polygon(points);
 					prim.uvs = uvs;
 					prim.normals = normals;
+					prim.tangents = t;
+					prim.bitangents = b;
+					prim.texMatNormals = n;
 					var material:Material;
 					var texture:Texture;
-					if (canFindTex(grp)) {
-						texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
-						texture.wrap = Wrap.Repeat;
-						texture.mipMap = Nearest;
-						var exactName = StringTools.replace(texture.name, "data/", "");
-						material = h3d.mat.Material.create(texture);
+					var exactName = StringTools.replace(grp.toLowerCase(), "textures/", "");
+					if (canFindTex(grp) || shaderMaterialDict.exists(exactName)) {
+						material = h3d.mat.Material.create();
 						if (shaderMaterialDict.exists(exactName)) {
 							var retrievefunc = shaderMaterialDict[exactName];
 							shaderWorker.addTask(fwd -> {
@@ -753,8 +859,11 @@ class DifBuilder {
 									fwd();
 								});
 							});
-							prim.addTangents();
 						} else {
+							texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
+							texture.wrap = Wrap.Repeat;
+							texture.mipMap = Nearest;
+							material.texture = texture;
 							material.shadows = false;
 							material.receiveShadows = true;
 						}
