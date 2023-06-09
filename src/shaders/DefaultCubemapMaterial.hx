@@ -1,11 +1,11 @@
 package shaders;
 
-class NoiseTileMaterial extends hxsl.Shader {
+class DefaultCubemapMaterial extends hxsl.Shader {
 	static var SRC = {
 		@param var diffuseMap:Sampler2D;
 		@param var specularColor:Vec4;
 		@param var normalMap:Sampler2D;
-		@param var noiseMap:Sampler2D;
+		@param var cubeMap:SamplerCube;
 		@param var shininess:Float;
 		@param var secondaryMapUvFactor:Float;
 		@global var camera:{
@@ -28,6 +28,9 @@ class NoiseTileMaterial extends hxsl.Shader {
 		var pixelColor:Vec4;
 		var specColor:Vec3;
 		var specPower:Float;
+		var pixelTransformedPosition:Vec3;
+		var transformedNormal:Vec3;
+		// @var var outReflectVec:Vec3;
 		@var var outLightVec:Vec4;
 		@var var outPos:Vec3;
 		@var var outEyePos:Vec3;
@@ -36,55 +39,40 @@ class NoiseTileMaterial extends hxsl.Shader {
 			return saturate(result);
 		}
 		function vertex() {
-			calculatedUV = input.uv;
-			var objToTangentSpace = mat3(input.t, input.b, input.n);
-			outLightVec = vec4(0);
-			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
 			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
+			var cubeTrans = mat3(global.modelView);
+			var cubeEyePos = camera.position - global.modelView[3].xyz;
+
+			calculatedUV = input.uv;
+
+			var objToTangentSpace = mat3(input.t, input.b, input.n);
+			outLightVec = vec4(0);
+
+			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
 			outLightVec.xyz = -inLightVec * objToTangentSpace;
+			// var cubeVertPos = input.position * cubeTrans;
+			// var cubeNormal = input.normal * cubeTrans;
+			// var eyeToVert = (cubeVertPos - cubeEyePos).normalize();
+			// outReflectVec = reflect(eyeToVert, cubeNormal);
 			outPos = (input.position / 100.0) * objToTangentSpace;
 			outEyePos = (eyePos / 100.0) * objToTangentSpace;
-			outLightVec.w = step(0, dot(input.normal, -inLightVec));
+			outLightVec.w = step(-0.5, dot(input.normal, -inLightVec));
 		}
 		function fragment() {
-			var bumpNormal = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
-			var bumpDot = saturate(dot(bumpNormal, outLightVec.xyz));
-			// Diffuse part
-			var diffuse = diffuseMap.get(calculatedUV);
 			var ambient = vec4(0.472, 0.424, 0.475, 1.00);
-			// noise
+			var shading = vec4(1.08, 1.03, 0.90, 1);
 
-			var noiseIndex:Vec2;
-			var noiseColor1:Vec4;
-			var noiseColor2:Vec4;
-			var noiseColor3:Vec4;
-			var noiseColor4:Vec4;
-			var halfPixel = vec2(1.0 / 64.0, 1.0 / 64.0);
+			var diffuse = diffuseMap.get(calculatedUV);
+			var outCol = diffuse;
+			var bumpNormal = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
 
-			noiseIndex.x = floor(calculatedUV.x - halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y - halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor1 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
+			var incidentRay = normalize(pixelTransformedPosition - camera.position);
+			var reflectionRay = reflect(incidentRay, transformedNormal);
 
-			noiseIndex.x = floor(calculatedUV.x - halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y + halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor2 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
-
-			noiseIndex.x = floor(calculatedUV.x + halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y + halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor3 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
-
-			noiseIndex.x = floor(calculatedUV.x + halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y - halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor4 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
-
-			var finalNoiseCol = (noiseColor1 + noiseColor2 + noiseColor3 + noiseColor4) / 4.0;
-			var noiseAdd = finalNoiseCol * diffuse.a;
-
-			var outCol = diffuse + noiseAdd;
-			var shading = vec3(1.08, 1.03, 0.90);
-			outCol.xyz *= shading;
-			outCol *= bumpDot + ambient;
+			var bumpDot = ((dot(bumpNormal, outLightVec.xyz) + 1) * 0.5);
+			outCol *= (shading * bumpDot) + ambient;
+			outCol += diffuse.a * cubeMap.get(reflectionRay);
 
 			var eyeVec = (outEyePos - outPos).normalize();
 			var halfAng = (eyeVec + outLightVec.xyz).normalize();
@@ -104,11 +92,11 @@ class NoiseTileMaterial extends hxsl.Shader {
 		}
 	}
 
-	public function new(diffuse, normal, noise, shininess, specularColor, secondaryMapUvFactor) {
+	public function new(diffuse, normal, shininess, specularColor, secondaryMapUvFactor, skybox) {
 		super();
 		this.diffuseMap = diffuse;
+		this.cubeMap = skybox;
 		this.normalMap = normal;
-		this.noiseMap = noise;
 		this.shininess = shininess;
 		this.specularColor = specularColor;
 		this.secondaryMapUvFactor = secondaryMapUvFactor;

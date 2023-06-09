@@ -138,38 +138,55 @@ class InstanceManager {
 				}
 				if (isMesh) {
 					var mat = cast(obj, Mesh).material;
-					var dtsshader = mat.mainPass.getShader(DtsTexture);
-					if (dtsshader != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(dtsshader);
-						minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-						minfo.meshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
+					var minfoshaders = [];
+					for (shader in minfo.meshbatch.material.mainPass.getShaders()) {
+						minfoshaders.push(shader);
 					}
-					var phongshader = mat.mainPass.getShader(PhongMaterial);
-					if (phongshader != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(phongshader);
-						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					for (shader in minfoshaders)
+						minfo.meshbatch.material.mainPass.removeShader(shader);
+					for (shader in mat.mainPass.getShaders()) {
+						minfo.meshbatch.material.mainPass.addShader(shader);
 					}
-					var noiseshder = mat.mainPass.getShader(NoiseTileMaterial);
-					if (noiseshder != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(noiseshder);
-						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-					}
-					var nmapshdr = mat.mainPass.getShader(NormalMaterial);
-					if (nmapshdr != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(nmapshdr);
-						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-					}
-					var cubemapshdr = mat.mainPass.getShader(EnvMap);
-					if (cubemapshdr != null) {
-						minfo.meshbatch.material.mainPass.addShader(cubemapshdr);
-					}
+					// var dtsshader = mat.mainPass.getShader(DtsTexture);
+					// if (dtsshader != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(dtsshader);
+					// 	minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// 	minfo.meshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
+					// }
+					// var phongshader = mat.mainPass.getShader(PhongMaterial);
+					// if (phongshader != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(phongshader);
+					// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// }
+					// var noiseshder = mat.mainPass.getShader(NoiseTileMaterial);
+					// if (noiseshder != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(noiseshder);
+					// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// }
+					// var nmapshdr = mat.mainPass.getShader(NormalMaterial);
+					// if (nmapshdr != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(nmapshdr);
+					// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// }
+					// var cubemapshdr = mat.mainPass.getShader(EnvMap);
+					// if (cubemapshdr != null) {
+					// 	minfo.meshbatch.material.mainPass.addShader(cubemapshdr);
+					// }
 					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
+					minfoshaders = [];
+					for (shader in minfo.transparencymeshbatch.material.mainPass.getShaders()) {
+						minfoshaders.push(shader);
+					}
+					for (shader in minfoshaders)
+						minfo.transparencymeshbatch.material.mainPass.removeShader(shader);
 					minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-					minfo.transparencymeshbatch.material.mainPass.addShader(dtsshader);
+					for (shader in mat.mainPass.getShaders()) {
+						minfo.transparencymeshbatch.material.mainPass.addShader(shader);
+					}
 					// minfo.transparencymeshbatch.material.mainPass.culling = mat.mainPass.culling;
 
 					// minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.mainPass.getShader(PropsValues));

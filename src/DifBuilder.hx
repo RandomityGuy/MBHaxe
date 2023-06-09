@@ -1,5 +1,6 @@
 package src;
 
+import shaders.DefaultCubemapMaterial;
 import shaders.DefaultNormalMaterial;
 import shaders.DefaultMaterial;
 import h3d.scene.Mesh;
@@ -212,6 +213,38 @@ class DifBuilder {
 		worker.run();
 	}
 
+	static function createDefaultCubemapMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
+			uvScaleFactor:Float = 1) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
+			normalTex.wrap = Repeat;
+			normalTex.mipMap = Nearest;
+
+			var cubemapTex = new h3d.mat.Texture(128, 128, [Cube]);
+			var cubemapFace1 = ResourceLoader.getImage('data/textures/acubexpos2.png').resource;
+			var cubemapFace2 = ResourceLoader.getImage('data/textures/acubexneg2.png').resource;
+			var cubemapFace3 = ResourceLoader.getImage('data/textures/acubezneg2.png').resource;
+			var cubemapFace4 = ResourceLoader.getImage('data/textures/acubezpos2.png').resource;
+			var cubemapFace5 = ResourceLoader.getImage('data/textures/acubeypos2.png').resource;
+			var cubemapFace6 = ResourceLoader.getImage('data/textures/acubeyneg2.png').resource;
+			cubemapTex.uploadPixels(cubemapFace1.getPixels(), 0, 0);
+			cubemapTex.uploadPixels(cubemapFace2.getPixels(), 0, 1);
+			cubemapTex.uploadPixels(cubemapFace3.getPixels(), 0, 2);
+			cubemapTex.uploadPixels(cubemapFace4.getPixels(), 0, 3);
+			cubemapTex.uploadPixels(cubemapFace5.getPixels(), 0, 4);
+			cubemapTex.uploadPixels(cubemapFace6.getPixels(), 0, 5);
+
+			var shader = new DefaultCubemapMaterial(diffuseTex, normalTex, shininess, specularColor, uvScaleFactor, cubemapTex);
+			onFinish(shader);
+		});
+		worker.loadFile(baseTexture);
+		worker.loadFile(normalTexture);
+		worker.run();
+	}
+
 	static function createDefaultNormalMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, shininess:Float, specularColor:Vector,
 			uvScaleFactor:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
@@ -294,10 +327,10 @@ class DifBuilder {
 		'beam' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/beam.png', 'data/textures/beam.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 		'beam_side' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/beam_side.png', 'data/textures/beam_side.normal.png', 12,
 			new Vector(0.8, 0.8, 0.6, 1)),
-		// 'friction_low.png' => (onFinish) -> createPhongMaterial(onFinish, 'data/textures/friction_low.png', 'data/textures/friction_low.normal.png', 128,
-		// 	new Vector(1, 1, 1, 0.8)),
-		// 'friction_low_shadow' => (onFinish) -> createPhongMaterial(onFinish, 'data/textures/friction_low_shadow.png', 'data/textures/friction_low.normal.png',
-		// 	128, new Vector(0.3, 0.3, 0.35, 1)),
+		'friction_low' => (onFinish) -> createDefaultCubemapMaterial(onFinish, 'data/textures/friction_low.png', 'data/textures/friction_low.normal.png', 128,
+			new Vector(1, 1, 1, 0.8)),
+		'friction_low_shadow' => (onFinish) -> createDefaultCubemapMaterial(onFinish, 'data/textures/friction_low_shadow.png',
+			'data/textures/friction_low.normal.png', 128, new Vector(0.3, 0.3, 0.35, 1)),
 		'friction_high' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high.png', 'data/textures/friction_high.normal.png', 10,
 			new Vector(0.3, 0.3, 0.35, 1)),
 		'friction_high_shadow' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high_shadow.png',
