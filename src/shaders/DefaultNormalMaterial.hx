@@ -38,7 +38,7 @@ class DefaultNormalMaterial extends hxsl.Shader {
 			outLightVec = vec4(0);
 			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
-			eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
+			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
 			outLightVec.xyz = -inLightVec;
 			outLightVec.w = step(-0.5, dot(input.normal, -inLightVec));
 			outEyePos = eyePos;

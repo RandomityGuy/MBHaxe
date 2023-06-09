@@ -10,7 +10,7 @@ import h3d.scene.Object;
 class InteriorObject extends GameObject {
 	public var collider:CollisionEntity;
 	public var interiorFile:String;
-	public var useInstancing = false;
+	public var useInstancing = true;
 	public var level:MarbleWorld;
 
 	public function new() {
