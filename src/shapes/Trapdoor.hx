@@ -77,4 +77,22 @@ class Trapdoor extends DtsObject {
 
 		// this.level.replay.recordMarbleContact(this);
 	}
+
+	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
+		if (matName == "trapdoor") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/hazards/trapdoor.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			var shader = new shaders.DefaultDiffuseMaterial(diffuseTex);
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
+	}
 }

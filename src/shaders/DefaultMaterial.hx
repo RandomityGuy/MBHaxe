@@ -31,6 +31,7 @@ class DefaultMaterial extends hxsl.Shader {
 		@var var outPos:Vec3;
 		@var var outEyePos:Vec3;
 		@const var isHalfTile:Bool;
+		@const var doGammaRamp:Bool;
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
 			var result = dot(normal, lightPosition);
 			return saturate(result);
@@ -73,11 +74,13 @@ class DefaultMaterial extends hxsl.Shader {
 			outCol += specular * diffuse.a;
 
 			// Gamma correction using our regression model
-			var a = 1.00759;
-			var b = 1.18764;
-			outCol.x = a * pow(outCol.x, b);
-			outCol.y = a * pow(outCol.y, b);
-			outCol.z = a * pow(outCol.z, b);
+			if (doGammaRamp) {
+				var a = 1.00759;
+				var b = 1.18764;
+				outCol.x = a * pow(outCol.x, b);
+				outCol.y = a * pow(outCol.y, b);
+				outCol.z = a * pow(outCol.z, b);
+			}
 
 			pixelColor = outCol;
 		}
@@ -91,5 +94,6 @@ class DefaultMaterial extends hxsl.Shader {
 		this.specularColor = specularColor;
 		this.secondaryMapUvFactor = secondaryMapUvFactor;
 		this.isHalfTile = isHalfTile;
+		this.doGammaRamp = true;
 	}
 }

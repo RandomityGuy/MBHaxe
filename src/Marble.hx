@@ -444,9 +444,9 @@ class Marble extends GameObject {
 		this.forcefield.isBoundingBoxCollideable = false;
 
 		this.helicopter = new DtsObject();
-		this.helicopter.dtsPath = "data/shapes/images/helicopter.dts";
+		this.helicopter.dtsPath = "data/shapes/images/helicopter_image.dts";
 		this.helicopter.useInstancing = true;
-		this.helicopter.identifier = "Helicopter";
+		this.helicopter.identifier = "HelicopterImage";
 		this.helicopter.showSequences = true;
 		this.helicopter.isBoundingBoxCollideable = false;
 		// this.addChild(this.helicopter);
