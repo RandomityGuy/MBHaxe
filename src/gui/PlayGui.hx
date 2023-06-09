@@ -542,7 +542,7 @@ class PlayGui {
 			powerupImageObject.dtsPath = "data/shapes/images/helicopter.dts";
 		} else if (powerupIdentifier == "MegaMarble") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/megamarble.dts";
+			powerupImageObject.dtsPath = "data/shapes/images/grow.dts";
 		} else {
 			powerupIdentifier = "";
 			this.powerupImageObject = null;

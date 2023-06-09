@@ -368,6 +368,8 @@ class DtsObject extends GameObject {
 		onFinish();
 	}
 
+	function postProcessMaterial(matName:String, material:Material) {}
+
 	function computeMaterials() {
 		var environmentMaterial:Material = null;
 
@@ -466,6 +468,8 @@ class DtsObject extends GameObject {
 				var cubemapshader = new EnvMap(this.level.sky.cubemap, reflectivity);
 				material.mainPass.addShader(cubemapshader);
 			}
+
+			postProcessMaterial(matName, material);
 
 			this.materials.push(material);
 		}
@@ -722,6 +726,16 @@ class DtsObject extends GameObject {
 			if (n2.dot(vertexNormals[i2]) < 0.0) {
 				n2.scale(-1);
 			}
+
+			t0.x *= -1;
+			t1.x *= -1;
+			t2.x *= -1;
+			b0.x *= -1;
+			b1.x *= -1;
+			b2.x *= -1;
+			n0.x *= -1;
+			n1.x *= -1;
+			n2.x *= -1;
 
 			return [
 				{

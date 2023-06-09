@@ -48,4 +48,23 @@ class DuctFan extends ForceObject {
 		if (this.soundChannel.pause)
 			this.soundChannel.pause = false;
 	}
+
+	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
+		if (matName == "fan") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/hazards/fan.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			var shader = new shaders.DefaultNormalMaterial(diffuseTex, 12, new Vector(0.8, 0.8, 0.6, 1), 1);
+			shader.doGammaRamp = false;
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
+	}
 }

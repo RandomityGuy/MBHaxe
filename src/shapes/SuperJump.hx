@@ -71,4 +71,26 @@ class SuperJump extends PowerUp {
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp();
 	}
+
+	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
+		if (matName == "superJump_skin") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/items/superjump_skin.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			var normalTex = ResourceLoader.getTexture("data/shapes/items/superjump_bump.png").resource;
+			normalTex.wrap = Repeat;
+			normalTex.mipMap = Nearest;
+			var shader = new shaders.DefaultMaterial(diffuseTex, normalTex, 32, new h3d.Vector(1, 1, 1, 1), 1);
+			shader.doGammaRamp = false;
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
+	}
 }

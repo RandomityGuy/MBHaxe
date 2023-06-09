@@ -62,7 +62,7 @@ class MarbleWorldMacros {
 				shape = new EndPad();
 				if (element is MissionElementStaticShape && cast(element, MissionElementStaticShape) == endPadElement)
 					endPad = cast shape;
-			} else if (StringTools.startsWith(dataBlockLowerCase, "signplain"))
+			} else if (StringTools.startsWith(dataBlockLowerCase, "arrow"))
 				shape = new SignPlain(cast element);
 			else if (StringTools.startsWith(dataBlockLowerCase, "gemitem")) {
 				shape = new Gem(cast element);
@@ -76,9 +76,9 @@ class MarbleWorldMacros {
 				shape = new RoundBumper();
 			else if (dataBlockLowerCase == "helicopteritem")
 				shape = new Helicopter(cast element);
-			else if (dataBlockLowerCase == "easteregg")
+			else if (dataBlockLowerCase == "eastereggitem")
 				shape = new EasterEgg(cast element);
-			else if (dataBlockLowerCase == "checkpoint")
+			else if (dataBlockLowerCase == "checkpointshape")
 				shape = new Checkpoint(cast element);
 			else if (dataBlockLowerCase == "ductfan")
 				shape = new DuctFan();
@@ -98,8 +98,6 @@ class MarbleWorldMacros {
 				shape = new MegaMarble(cast element);
 			else if (dataBlockLowerCase == "trapdoor")
 				shape = new Trapdoor();
-			else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
-				shape = new Sign(cast element);
 			else if ([
 				"glass_3shape",
 				"glass_6shape",
@@ -109,7 +107,11 @@ class MarbleWorldMacros {
 				"glass_18shape"
 			].contains(dataBlockLowerCase))
 				shape = new Glass(cast element);
-			else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
+			else if ([
+				"astrolabecloudsbeginnershape",
+				"astrolabecloudsintermediateshape",
+				"astrolabecloudsadvancedshape"
+			].contains(dataBlockLowerCase))
 				shape = new shapes.Sky(dataBlockLowerCase);
 			else {
 				Console.error("Unknown item: " + element.datablock);

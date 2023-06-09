@@ -65,4 +65,28 @@ class Gem extends DtsObject {
 		this.pickedUp = false;
 		this.setOpacity(1);
 	}
+
+	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
+		if (matName == "red.gem") {
+			var diffuseTex = ResourceLoader.getTexture('data/shapes/items/red.gem.png').resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+
+			var cubemapTex = new h3d.mat.Texture(64, 64, [Cube]);
+			var cubemapFace = ResourceLoader.getImage('data/skies/gemCubemapUp.png').resource;
+			for (i in 0...6) {
+				cubemapTex.uploadPixels(cubemapFace.getPixels(), 0, i);
+			}
+			var shader = new shaders.DefaultCubemapNormalNoSpecMaterial(diffuseTex, 1, cubemapTex);
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
+	}
 }

@@ -10,7 +10,7 @@ import src.AudioManager;
 class MegaMarble extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/megamarble.dts";
+		this.dtsPath = "data/shapes/images/grow.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.showSequences = true;
@@ -42,5 +42,27 @@ class MegaMarble extends PowerUp {
 		this.level.marble.enableMegaMarble(timeState.currentAttemptTime);
 		this.level.deselectPowerUp();
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/dosuperjump.wav', ResourceLoader.getAudio, this.soundResources));
+	}
+
+	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
+		if (matName == "grow") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/images/grow.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			var normalTex = ResourceLoader.getTexture("data/shapes/images/grow_bump.png").resource;
+			normalTex.wrap = Repeat;
+			normalTex.mipMap = Nearest;
+			var shader = new shaders.DefaultMaterial(diffuseTex, normalTex, 32, new h3d.Vector(0.8, 0.8, 0.6, 1), 1);
+			shader.doGammaRamp = false;
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
 	}
 }

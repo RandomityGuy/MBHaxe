@@ -7,7 +7,7 @@ import src.ResourceLoader;
 class EasterEgg extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/easteregg.dts";
+		this.dtsPath = "data/shapes/items/egg.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "EasterEgg";

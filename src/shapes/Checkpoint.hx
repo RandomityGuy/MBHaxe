@@ -13,7 +13,7 @@ class Checkpoint extends DtsObject {
 
 	public function new(element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = "data/shapes/buttons/checkpoint.dts";
+		this.dtsPath = "data/shapes/pads/checkpad.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		this.identifier = "Checkpoint";
