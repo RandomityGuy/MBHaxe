@@ -294,7 +294,7 @@ class MarbleWorld extends Scheduler {
 		this.particleManager = new ParticleManager(cast this);
 
 		var worker = new ResourceLoaderWorker(() -> {
-			var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
+			var renderer = cast(this.scene.renderer, src.Renderer);
 
 			for (element in mission.root.elements) {
 				if (element._type != MissionElementType.Sun)

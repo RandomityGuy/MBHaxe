@@ -29,6 +29,7 @@ class Sky extends DtsObject {
 			mat.receiveShadows = false;
 			mat.blendMode = Alpha;
 			mat.mainPass.culling = h3d.mat.Data.Face.None;
+			mat.mainPass.setPassName("skyshape");
 		}
 	}
 }
