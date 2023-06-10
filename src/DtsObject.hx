@@ -545,6 +545,8 @@ class DtsObject extends GameObject {
 		var hulls:Array<CollisionEntity> = [new CollisionEntity(cast this)];
 		var ent = hulls[0];
 		ent.userData = node;
+		ent.correctNormals = true;
+
 		for (primitive in dtsMesh.primitives) {
 			var k = 0;
 
@@ -565,33 +567,81 @@ class DtsObject extends GameObject {
 				hs.force = data.force;
 				hs.restitution = data.restitution;
 			}
+			var drawType = primitive.matIndex & TSDrawPrimitive.TypeMask;
 
-			for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
-				var i1 = dtsMesh.indices[i];
-				var i2 = dtsMesh.indices[i + 1];
-				var i3 = dtsMesh.indices[i + 2];
+			if (drawType == TSDrawPrimitive.Triangles) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				if (k % 2 == 0) {
-					// Swap the first and last index to mainting correct winding order
-					var temp = i1;
-					i1 = i3;
-					i3 = temp;
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.points.push(new Vector(vertex.x, vertex.y, vertex.z));
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.normals.push(new Vector(normal.x, normal.y, normal.z));
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					i += 3;
 				}
+			} else if (drawType == TSDrawPrimitive.Strip) {
+				var k = 0;
+				for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				for (index in [i1, i2, i3]) {
-					var vertex = vertices[index];
-					hs.points.push(new Vector(vertex.x, vertex.y, vertex.z));
-					hs.transformKeys.push(0);
+					if (k % 2 == 0) {
+						// Swap the first and last index to mainting correct winding order
+						var temp = i1;
+						i1 = i3;
+						i3 = temp;
+					}
 
-					var normal = vertexNormals[index];
-					hs.normals.push(new Vector(normal.x, normal.y, normal.z));
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.points.push(new Vector(vertex.x, vertex.y, vertex.z));
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.normals.push(new Vector(normal.x, normal.y, normal.z));
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					k++;
 				}
+			} else if (drawType == TSDrawPrimitive.Fan) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements - 2) {
+					var i1 = dtsMesh.indices[primitive.firstElement];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				hs.indices.push(hs.indices.length);
-				hs.indices.push(hs.indices.length);
-				hs.indices.push(hs.indices.length);
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.points.push(new Vector(vertex.x, vertex.y, vertex.z));
+						hs.transformKeys.push(0);
 
-				k++;
+						var normal = vertexNormals[index];
+						hs.normals.push(new Vector(normal.x, normal.y, normal.z));
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					i++;
+				}
 			}
 
 			hs.generateBoundingBox();
@@ -770,17 +820,17 @@ class DtsObject extends GameObject {
 			// ^ temp hardcoded fix
 
 			// if (dot1 < 0 && dot2 < 0 && dot3 < 0) {
-			if ((dot1 < 0 && dot2 < 0 && dot3 < 0) || StringTools.contains(this.dtsPath, 'helicopter.dts')) {
-				var temp = i1;
-				i1 = i3;
-				i3 = temp;
-			}
+			// if ((dot1 < 0 && dot2 < 0 && dot3 < 0) || StringTools.contains(this.dtsPath, 'helicopter.dts')) {
+			// 	var temp = i1;
+			// 	i1 = i3;
+			// 	i3 = temp;
+			// }
 
 			// }
 
 			var geometrydata = materialGeometry[materialIndex];
 
-			for (index in [i1, i2, i3]) {
+			for (index in [i3, i2, i1]) {
 				var vertex = vertices[index];
 				geometrydata.vertices.push(new Vector(vertex.x, vertex.y, vertex.z));
 
@@ -811,6 +861,7 @@ class DtsObject extends GameObject {
 			var materialIndex = primitive.matIndex & TSDrawPrimitive.MaterialMask;
 			var drawType = primitive.matIndex & TSDrawPrimitive.TypeMask;
 			var geometrydata = materialGeometry[materialIndex];
+			var hasIndices = primitive.matIndex & TSDrawPrimitive.Indexed;
 
 			if (drawType == TSDrawPrimitive.Triangles) {
 				var i = primitive.firstElement;
@@ -869,6 +920,18 @@ class DtsObject extends GameObject {
 		}
 	}
 
+	function propagateDirtyFlags(nodeIndex:Int, doSiblings:Bool = false) {
+		this.dirtyTransforms[nodeIndex] = true;
+		if (this.dts.nodes[nodeIndex].firstChild != -1) {
+			this.propagateDirtyFlags(this.dts.nodes[nodeIndex].firstChild, true);
+		}
+		if (doSiblings) {
+			if (this.dts.nodes[nodeIndex].nextSibling != -1) {
+				this.propagateDirtyFlags(this.dts.nodes[nodeIndex].nextSibling, true);
+			}
+		}
+	}
+
 	public function update(timeState:TimeState) {
 		for (sequence in this.dts.sequences) {
 			if (!this.showSequences)
@@ -902,8 +965,8 @@ class DtsObject extends GameObject {
 					var affected = ((1 << i) & rot) != 0;
 
 					if (affected) {
-						var rot1 = this.dts.nodeRotations[sequence.numKeyFrames * affectedCount + keyframeLow];
-						var rot2 = this.dts.nodeRotations[sequence.numKeyFrames * affectedCount + keyframeHigh];
+						var rot1 = this.dts.nodeRotations[sequence.baseRotation + sequence.numKeyFrames * affectedCount + keyframeLow];
+						var rot2 = this.dts.nodeRotations[sequence.baseRotation + sequence.numKeyFrames * affectedCount + keyframeHigh];
 
 						var q1 = new Quat(-rot1.x, rot1.y, rot1.z, -rot1.w);
 						q1.normalize();
@@ -918,7 +981,7 @@ class DtsObject extends GameObject {
 						quat.normalize();
 
 						this.graphNodes[i].setRotationQuat(quat);
-						this.dirtyTransforms[i] = true;
+						propagateDirtyFlags(i);
 						affectedCount++;
 						// quaternions.push(quat);
 					} else {
@@ -940,15 +1003,15 @@ class DtsObject extends GameObject {
 					var affected = ((1 << i) & trans) != 0;
 
 					if (affected) {
-						var trans1 = this.dts.nodeTranslations[sequence.numKeyFrames * affectedCount + keyframeLow];
-						var trans2 = this.dts.nodeTranslations[sequence.numKeyFrames * affectedCount + keyframeHigh];
+						var trans1 = this.dts.nodeTranslations[sequence.baseTranslation + sequence.numKeyFrames * affectedCount + keyframeLow];
+						var trans2 = this.dts.nodeTranslations[sequence.baseTranslation + sequence.numKeyFrames * affectedCount + keyframeHigh];
 
 						var v1 = new Vector(-trans1.x, trans1.y, trans1.z);
 						var v2 = new Vector(-trans2.x, trans2.y, trans2.z);
 						var trans = Util.lerpThreeVectors(v1, v2, t);
 						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
-						this.dirtyTransforms[i] = true;
-
+						propagateDirtyFlags(i);
+						affectedCount++;
 						// translations.push(Util.lerpThreeVectors(v1, v2, t));
 					} else {
 						var translation = this.dts.defaultTranslations[i];
@@ -959,6 +1022,7 @@ class DtsObject extends GameObject {
 				}
 			}
 
+			affectedCount = 0;
 			if (scale > 0) {
 				scales = [];
 
@@ -967,8 +1031,8 @@ class DtsObject extends GameObject {
 						var affected = ((1 << i) & scale) != 0;
 
 						if (affected) {
-							var scale1 = this.dts.nodeUniformScales[sequence.numKeyFrames * affectedCount + keyframeLow];
-							var scale2 = this.dts.nodeUniformScales[sequence.numKeyFrames * affectedCount + keyframeHigh];
+							var scale1 = this.dts.nodeUniformScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
+							var scale2 = this.dts.nodeUniformScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
 
 							var v1 = new Vector(scale1, scale1, scale1);
 							var v2 = new Vector(scale2, scale2, scale2);
@@ -977,8 +1041,8 @@ class DtsObject extends GameObject {
 							this.graphNodes[i].scaleX = scaleVec.x;
 							this.graphNodes[i].scaleY = scaleVec.y;
 							this.graphNodes[i].scaleZ = scaleVec.z;
-
-							this.dirtyTransforms[i] = true;
+							affectedCount++;
+							propagateDirtyFlags(i);
 						} else {
 							this.graphNodes[i].scaleX = 1;
 							this.graphNodes[i].scaleY = 1;
@@ -992,8 +1056,8 @@ class DtsObject extends GameObject {
 						var affected = ((1 << i) & scale) != 0;
 
 						if (affected) {
-							var scale1 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeLow];
-							var scale2 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeHigh];
+							var scale1 = this.dts.nodeAlignedScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
+							var scale2 = this.dts.nodeAlignedScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
 
 							var v1 = new Vector(scale1.x, scale1.y, scale1.z);
 							var v2 = new Vector(scale2.x, scale2.y, scale2.z);
@@ -1002,8 +1066,8 @@ class DtsObject extends GameObject {
 							this.graphNodes[i].scaleX = scaleVec.x;
 							this.graphNodes[i].scaleY = scaleVec.y;
 							this.graphNodes[i].scaleZ = scaleVec.z;
-
-							this.dirtyTransforms[i] = true;
+							affectedCount++;
+							propagateDirtyFlags(i);
 						} else {
 							this.graphNodes[i].scaleX = 1;
 							this.graphNodes[i].scaleY = 1;

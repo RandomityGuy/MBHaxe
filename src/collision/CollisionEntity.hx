@@ -35,6 +35,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	var invTransform:Matrix;
 
 	public var go:GameObject;
+	public var correctNormals:Bool = false;
 
 	public var userData:Int;
 	public var fastTransform:Bool = false;
@@ -217,12 +218,25 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 				var surfacenormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
 
+				if (correctNormals) {
+					var vn = v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1);
+					var vdot = vn.dot(surfacenormal);
+					if (vdot < 0.95) {
+						v0 = verts.v1;
+						v = verts.v3;
+						v2 = verts.v2;
+
+						surfacenormal = vn;
+					}
+				}
+
 				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius, edgeData, edgeConcavities);
 				var closest = res.point;
 				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
 				if (closest != null) {
 					var contactDist = closest.distanceSq(position);
-					if (contactDist <= radius * radius && contactDist > 0.0225) {
+					Debug.drawTriangle(v0, v, v2);
+					if (contactDist <= radius * radius) {
 						var normal = res.normal;
 
 						if (position.sub(closest).dot(surfacenormal) > 0) {
