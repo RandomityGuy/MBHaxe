@@ -58,6 +58,7 @@ class Sky extends Object {
 			skyMesh.material.mainPass.addShader(shad);
 			skyMesh.material.mainPass.depthWrite = false;
 			skyMesh.material.mainPass.depth(false, h3d.mat.Data.Compare.LessEqual);
+			skyMesh.material.mainPass.setPassName("sky");
 			cubemap = texture;
 			onFinish();
 		});

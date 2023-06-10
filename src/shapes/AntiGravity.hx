@@ -16,6 +16,7 @@ class AntiGravity extends PowerUp {
 		this.identifier = "AntiGravity";
 		this.pickUpName = "Gravity Defier";
 		this.autoUse = true;
+		this.useInstancing = true;
 		if (norespawn)
 			this.cooldownDuration = Math.NEGATIVE_INFINITY;
 	}
@@ -58,8 +59,8 @@ class AntiGravity extends PowerUp {
 			normalTex.mipMap = Nearest;
 			var shader = new shaders.DefaultMaterial(diffuseTex, normalTex, 32, new h3d.Vector(0.8, 0.8, 0.6, 1), 1);
 			shader.doGammaRamp = false;
-			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
-			dtsTex.passThrough = true;
+			// var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			// dtsTex.passThrough = true;
 			material.mainPass.removeShader(material.textureShader);
 			material.mainPass.addShader(shader);
 			var thisprops:Dynamic = material.getDefaultProps();
@@ -67,6 +68,19 @@ class AntiGravity extends PowerUp {
 			material.props = thisprops;
 			material.shadows = false;
 			material.receiveShadows = true;
+		}
+		if (matName == "item_glow") {
+			var glowpass = material.mainPass.clone();
+			glowpass.setPassName("glow");
+			glowpass.depthTest = LessEqual;
+
+			material.addPass(glowpass);
+			material.mainPass.setPassName("glowPre");
+
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
 		}
 	}
 }
