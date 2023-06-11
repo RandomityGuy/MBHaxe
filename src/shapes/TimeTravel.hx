@@ -8,6 +8,7 @@ import src.MarbleWorld;
 
 class TimeTravel extends PowerUp {
 	var timeBonus:Float = 5;
+	var shader:shaders.RefractMaterial;
 
 	public function new(element:MissionElementItem) {
 		super(element);
@@ -65,7 +66,29 @@ class TimeTravel extends PowerUp {
 			material.receiveShadows = true;
 		}
 		if (matName == "timeTravel_glass") {
-			// TODO
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+			material.mainPass.depthWrite = false;
+			material.blendMode = Alpha;
+
+			var refractTex = ResourceLoader.getTexture('data/shapes/structures/glass.png').resource;
+			refractTex.wrap = Repeat;
+			refractTex.mipMap = Nearest;
+			var normalTex = ResourceLoader.getTexture("data/shapes/structures/time.normal.jpg").resource;
+			normalTex.wrap = Repeat;
+			normalTex.mipMap = Nearest;
+			shader = new shaders.RefractMaterial(refractTex, normalTex, 10, new h3d.Vector(1, 1, 1, 1), 1);
+			shader.refractMap = src.Renderer.getSfxBuffer();
+
+			var dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			material.mainPass.setPassName("refract");
 		}
 	}
 }

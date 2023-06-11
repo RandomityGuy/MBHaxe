@@ -81,6 +81,14 @@ class InstanceManager {
 						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						minfo.meshbatch.worldPosition = transform;
 						minfo.meshbatch.material.mainPass.culling = minfo.mesh.material.mainPass.culling;
+
+						minfo.meshbatch.material.mainPass.blendSrc = minfo.mesh.material.mainPass.blendSrc;
+						minfo.meshbatch.material.mainPass.blendDst = minfo.mesh.material.mainPass.blendDst;
+						minfo.meshbatch.material.mainPass.blendOp = minfo.mesh.material.mainPass.blendOp;
+						minfo.meshbatch.material.mainPass.blendAlphaSrc = minfo.mesh.material.mainPass.blendAlphaSrc;
+						minfo.meshbatch.material.mainPass.blendAlphaDst = minfo.mesh.material.mainPass.blendAlphaDst;
+						minfo.meshbatch.material.mainPass.blendAlphaOp = minfo.mesh.material.mainPass.blendAlphaOp;
+
 						minfo.meshbatch.emitInstance();
 					}
 				}
@@ -173,6 +181,34 @@ class InstanceManager {
 						for (shader in minfoshaders)
 							gpass.removeShader(shader);
 						for (shader in glowPass.getShaders()) {
+							gpass.addShader(shader);
+						}
+
+						minfo.meshbatch.material.addPass(gpass);
+					}
+					var refractPass = mat.getPass("refract");
+					if (refractPass != null) {
+						var gpass = refractPass.clone();
+						gpass.enableLights = false;
+						gpass.depthTest = refractPass.depthTest;
+						gpass.blendSrc = refractPass.blendSrc;
+						gpass.blendDst = refractPass.blendDst;
+						gpass.blendOp = refractPass.blendOp;
+						gpass.blendAlphaSrc = refractPass.blendAlphaSrc;
+						gpass.blendAlphaDst = refractPass.blendAlphaDst;
+						gpass.blendAlphaOp = refractPass.blendAlphaOp;
+						if (refractPass.culling == None) {
+							gpass.culling = refractPass.culling;
+						}
+
+						minfoshaders = [];
+
+						for (shader in gpass.getShaders()) {
+							minfoshaders.push(shader);
+						}
+						for (shader in minfoshaders)
+							gpass.removeShader(shader);
+						for (shader in refractPass.getShaders()) {
 							gpass.addShader(shader);
 						}
 

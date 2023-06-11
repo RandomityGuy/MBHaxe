@@ -1,5 +1,7 @@
 package shapes;
 
+import h3d.shader.UVScroll;
+import h3d.shader.UVAnim;
 import src.DtsObject;
 import src.ResourceLoader;
 
@@ -9,7 +11,7 @@ class StartPad extends DtsObject {
 		dtsPath = "data/shapes/pads/startarea.dts";
 		isCollideable = true;
 		identifier = "StartPad";
-		useInstancing = true;
+		useInstancing = false;
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
@@ -37,8 +39,11 @@ class StartPad extends DtsObject {
 
 			var shader = new shaders.DefaultCubemapMaterial(diffuseTex, normalTex, 12, new h3d.Vector(0.8, 0.8, 0.8, 1), 1, cubemapTex);
 			shader.doGammaRamp = false;
-			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
-			dtsTex.passThrough = true;
+			var dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			// var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			// dtsTex.passThrough = true;
 			material.mainPass.removeShader(material.textureShader);
 			material.mainPass.addShader(shader);
 			var thisprops:Dynamic = material.getDefaultProps();
@@ -57,8 +62,11 @@ class StartPad extends DtsObject {
 			diffuseTex.mipMap = Nearest;
 			var shader = new shaders.DefaultNormalMaterial(diffuseTex, 14, new h3d.Vector(0.3, 0.3, 0.3, 7), 1);
 			shader.doGammaRamp = false;
-			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
-			dtsTex.passThrough = true;
+			var dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			// var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			// dtsTex.passThrough = true;
 			material.mainPass.removeShader(material.textureShader);
 			material.mainPass.addShader(shader);
 			var thisprops:Dynamic = material.getDefaultProps();
@@ -74,6 +82,8 @@ class StartPad extends DtsObject {
 			material.props = thisprops;
 			material.shadows = false;
 			material.receiveShadows = true;
+			var rotshader = new shaders.UVRotAnim(-0.5, -0.5, 1);
+			material.mainPass.addShader(rotshader);
 		}
 
 		if (matName == "abyss2") {
@@ -85,6 +95,9 @@ class StartPad extends DtsObject {
 
 			material.mainPass.setPassName("glowPre");
 			material.mainPass.enableLights = false;
+
+			var rotshader = new shaders.UVRotAnim(-0.5, -0.5, 1);
+			material.mainPass.addShader(rotshader);
 
 			var thisprops:Dynamic = material.getDefaultProps();
 			thisprops.light = false; // We will calculate our own lighting
@@ -98,9 +111,11 @@ class StartPad extends DtsObject {
 			diffuseTex.mipMap = Nearest;
 
 			var trivialShader = new shaders.TrivialMaterial(diffuseTex);
+			var scrollShader = new h3d.shader.UVScroll(0, 0.5);
 
 			var glowpass = material.mainPass.clone();
 			glowpass.addShader(trivialShader);
+			glowpass.addShader(scrollShader);
 			var dtsshader = glowpass.getShader(shaders.DtsTexture);
 			if (dtsshader != null)
 				glowpass.removeShader(dtsshader);
