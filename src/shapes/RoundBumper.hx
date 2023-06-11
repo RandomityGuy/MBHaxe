@@ -32,5 +32,77 @@ class RoundBumper extends AbstractBumper {
 			material.shadows = false;
 			material.receiveShadows = true;
 		}
+		if (matName == "antigrav_glow") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/items/antigrav_glow.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+
+			var trivialShader = new shaders.TrivialMaterial(diffuseTex);
+
+			var glowpass = material.mainPass.clone();
+			glowpass.addShader(trivialShader);
+			var dtsshader = glowpass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				glowpass.removeShader(dtsshader);
+			glowpass.setPassName("glow");
+			glowpass.depthTest = LessEqual;
+			glowpass.enableLights = false;
+			material.addPass(glowpass);
+
+			material.mainPass.setPassName("glowPre");
+			material.mainPass.addShader(trivialShader);
+			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			material.mainPass.enableLights = false;
+
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+		}
+
+		if (matName == "blastwave") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/images/blastwave.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			// aa
+			var trivialShader = new shaders.TrivialMaterial(diffuseTex);
+			material.mainPass.removeShader(material.textureShader);
+			var glowpass = material.mainPass.clone();
+
+			glowpass.addShader(trivialShader);
+			var dtsshader = glowpass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				glowpass.removeShader(dtsshader);
+			glowpass.setPassName("glow");
+			glowpass.depthTest = LessEqual;
+			glowpass.depthWrite = false;
+			glowpass.enableLights = false;
+			glowpass.blendSrc = SrcAlpha;
+			glowpass.blendDst = One;
+			glowpass.blendOp = Add;
+			glowpass.blendAlphaSrc = SrcAlpha;
+			glowpass.blendAlphaDst = One;
+			glowpass.blendAlphaOp = Add;
+			// glowpass.blendSrc = SrcAlpha;
+			// glowpass.blendDst = OneMinusSrcAlpha;
+			material.addPass(glowpass);
+
+			material.mainPass.setPassName("glowPreNoRender");
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(trivialShader);
+			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			material.mainPass.enableLights = false;
+
+			// var thisprops:Dynamic = material.getDefaultProps();
+			// thisprops.light = false; // We will calculate our own lighting
+			// material.props = thisprops;
+			material.shadows = false;
+			// material.blendMode = Alpha;
+			material.mainPass.depthWrite = false;
+		}
 	}
 }

@@ -154,7 +154,17 @@ class InstanceManager {
 					if (glowPass != null) {
 						var gpass = glowPass.clone();
 						gpass.enableLights = false;
-						gpass.depthTest = LessEqual;
+						gpass.depthTest = glowPass.depthTest;
+						gpass.blendSrc = glowPass.blendSrc;
+						gpass.blendDst = glowPass.blendDst;
+						gpass.blendOp = glowPass.blendOp;
+						gpass.blendAlphaSrc = glowPass.blendAlphaSrc;
+						gpass.blendAlphaDst = glowPass.blendAlphaDst;
+						gpass.blendAlphaOp = glowPass.blendAlphaOp;
+						if (glowPass.culling == None) {
+							gpass.culling = glowPass.culling;
+						}
+
 						minfoshaders = [];
 
 						for (shader in gpass.getShaders()) {

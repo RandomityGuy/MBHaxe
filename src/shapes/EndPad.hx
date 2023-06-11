@@ -169,25 +169,27 @@ class EndPad extends DtsObject {
 				glowpass.removeShader(dtsshader);
 			glowpass.setPassName("glow");
 			glowpass.depthTest = LessEqual;
+			glowpass.depthWrite = false;
 			glowpass.enableLights = false;
 			glowpass.blendSrc = SrcAlpha;
 			glowpass.blendDst = OneMinusSrcAlpha;
 			material.addPass(glowpass);
 
-			material.mainPass.setPassName("glowPre");
+			material.mainPass.setPassName("glowPreNoRender");
 			material.mainPass.addShader(trivialShader);
 			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
 			if (dtsshader != null)
 				material.mainPass.removeShader(dtsshader);
 			material.mainPass.enableLights = false;
 
-			var thisprops:Dynamic = material.getDefaultProps();
-			thisprops.light = false; // We will calculate our own lighting
-			material.props = thisprops;
-			material.shadows = false;
-			material.blendMode = Alpha;
-			material.mainPass.blendSrc = SrcAlpha;
-			material.mainPass.blendDst = OneMinusSrcAlpha;
+			// var thisprops:Dynamic = material.getDefaultProps();
+			// thisprops.light = false; // We will calculate our own lighting
+			// material.props = thisprops;
+			// material.shadows = false;
+			// material.blendMode = Alpha;
+			// material.mainPass.depthWrite = false;
+			// material.mainPass.blendSrc = SrcAlpha;
+			// material.mainPass.blendDst = OneMinusSrcAlpha;
 		}
 	}
 }
