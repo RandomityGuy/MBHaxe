@@ -36,7 +36,7 @@ class EndPad extends DtsObject {
 		this.dtsPath = "data/shapes/pads/endarea.dts";
 		this.isCollideable = true;
 		this.identifier = "EndPad";
-		this.useInstancing = false;
+		this.useInstancing = true;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -118,6 +118,76 @@ class EndPad extends DtsObject {
 			if (timeState.timeSinceLoad - firework.spawnTime >= 10)
 				this.fireworks.remove(firework);
 			// We can safely remove the firework
+		}
+	}
+
+	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
+		if (matName == "abyss2") {
+			var glowpass = material.mainPass.clone();
+			glowpass.setPassName("glow");
+			glowpass.depthTest = LessEqual;
+			glowpass.enableLights = false;
+			material.addPass(glowpass);
+
+			material.mainPass.setPassName("glowPre");
+			material.mainPass.enableLights = false;
+
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+		}
+
+		if (matName == "ringtex") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/pads/ringtex.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+			var shader = new shaders.DefaultNormalMaterial(diffuseTex, 14, new h3d.Vector(0.3, 0.3, 0.3, 7), 1);
+			shader.doGammaRamp = false;
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
+
+		if (matName == "misty") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/pads/misty.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+
+			var trivialShader = new shaders.TrivialMaterial(diffuseTex);
+
+			var glowpass = material.mainPass.clone();
+			glowpass.addShader(trivialShader);
+			var dtsshader = glowpass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				glowpass.removeShader(dtsshader);
+			glowpass.setPassName("glow");
+			glowpass.depthTest = LessEqual;
+			glowpass.enableLights = false;
+			glowpass.blendSrc = SrcAlpha;
+			glowpass.blendDst = OneMinusSrcAlpha;
+			material.addPass(glowpass);
+
+			material.mainPass.setPassName("glowPre");
+			material.mainPass.addShader(trivialShader);
+			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			material.mainPass.enableLights = false;
+
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.blendMode = Alpha;
+			material.mainPass.blendSrc = SrcAlpha;
+			material.mainPass.blendDst = OneMinusSrcAlpha;
 		}
 	}
 }
