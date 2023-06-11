@@ -78,8 +78,9 @@ class InstanceManager {
 						minfo.meshbatch.material.mainPass.depthTest = minfo.mesh.material.mainPass.depthTest;
 						// minfo.meshbatch.shadersChanged = true;
 						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						// minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
+						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						minfo.meshbatch.worldPosition = transform;
+						minfo.meshbatch.material.mainPass.culling = minfo.mesh.material.mainPass.culling;
 						minfo.meshbatch.emitInstance();
 					}
 				}
@@ -151,7 +152,21 @@ class InstanceManager {
 					}
 					var glowPass = mat.getPass("glow");
 					if (glowPass != null) {
-						minfo.meshbatch.material.addPass(glowPass.clone());
+						var gpass = glowPass.clone();
+						gpass.enableLights = false;
+						gpass.depthTest = LessEqual;
+						minfoshaders = [];
+
+						for (shader in gpass.getShaders()) {
+							minfoshaders.push(shader);
+						}
+						for (shader in minfoshaders)
+							gpass.removeShader(shader);
+						for (shader in glowPass.getShaders()) {
+							gpass.addShader(shader);
+						}
+
+						minfo.meshbatch.material.addPass(gpass);
 					}
 					// var dtsshader = mat.mainPass.getShader(DtsTexture);
 					// if (dtsshader != null) {

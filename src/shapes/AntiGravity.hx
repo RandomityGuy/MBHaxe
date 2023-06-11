@@ -70,12 +70,28 @@ class AntiGravity extends PowerUp {
 			material.receiveShadows = true;
 		}
 		if (matName == "item_glow") {
+			var diffuseTex = ResourceLoader.getTexture("data/shapes/items/antigrav_glow.png").resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+
+			var trivialShader = new shaders.TrivialMaterial(diffuseTex);
+
 			var glowpass = material.mainPass.clone();
+			glowpass.addShader(trivialShader);
+			var dtsshader = glowpass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				glowpass.removeShader(dtsshader);
 			glowpass.setPassName("glow");
 			glowpass.depthTest = LessEqual;
-
+			glowpass.enableLights = false;
 			material.addPass(glowpass);
+
 			material.mainPass.setPassName("glowPre");
+			material.mainPass.addShader(trivialShader);
+			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			material.mainPass.enableLights = false;
 
 			var thisprops:Dynamic = material.getDefaultProps();
 			thisprops.light = false; // We will calculate our own lighting

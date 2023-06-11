@@ -30,6 +30,7 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 		var specPower:Float;
 		var pixelTransformedPosition:Vec3;
 		var transformedNormal:Vec3;
+		@const var doGammaRamp:Bool;
 		// @var var outReflectVec:Vec3;
 		@var var outLightVec:Vec4;
 		@var var outPos:Vec3;
@@ -82,11 +83,13 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 			outCol += specular * diffuse.a;
 
 			// Gamma correction using our regression model
-			var a = 1.00759;
-			var b = 1.18764;
-			outCol.x = a * pow(outCol.x, b);
-			outCol.y = a * pow(outCol.y, b);
-			outCol.z = a * pow(outCol.z, b);
+			if (doGammaRamp) {
+				var a = 1.00759;
+				var b = 1.18764;
+				outCol.x = a * pow(outCol.x, b);
+				outCol.y = a * pow(outCol.y, b);
+				outCol.z = a * pow(outCol.z, b);
+			}
 
 			pixelColor = outCol;
 		}
@@ -100,5 +103,6 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 		this.shininess = shininess;
 		this.specularColor = specularColor;
 		this.secondaryMapUvFactor = secondaryMapUvFactor;
+		this.doGammaRamp = true;
 	}
 }
