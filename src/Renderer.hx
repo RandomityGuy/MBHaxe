@@ -1,5 +1,6 @@
 package src;
 
+import h3d.mat.Texture;
 import h3d.Vector;
 import shaders.Blur;
 import h3d.pass.ScreenFx;
@@ -13,7 +14,9 @@ class Renderer extends h3d.scene.Renderer {
 	public var shadow = new h3d.pass.DefaultShadowMap(1024);
 
 	var glowBuffer:h3d.mat.Texture;
-	var backBuffers:Array<h3d.mat.Texture>;
+
+	static var sfxBuffer:h3d.mat.Texture;
+
 	var curentBackBuffer = 0;
 	var blurShader:ScreenFx<Blur>;
 	var growBufferTemps:Array<h3d.mat.Texture>;
@@ -26,14 +29,15 @@ class Renderer extends h3d.scene.Renderer {
 		allPasses = [defaultPass, depth, normal, shadow];
 		blurShader = new ScreenFx<Blur>(new Blur());
 		copyPass = new h3d.pass.Copy();
+		sfxBuffer = new Texture(512, 512, [Target]);
+	}
+
+	public inline static function getSfxBuffer() {
+		return sfxBuffer;
 	}
 
 	inline function get_def()
 		return defaultPass;
-
-	public inline function getBackBuffer():h3d.mat.Texture {
-		return backBuffers[1];
-	}
 
 	// can be overriden for benchmark purposes
 	function renderPass(p:h3d.pass.Base, passes, ?sort) {
@@ -41,7 +45,7 @@ class Renderer extends h3d.scene.Renderer {
 	}
 
 	override function getPassByName(name:String):h3d.pass.Base {
-		if (name == "alpha" || name == "additive" || name == "glowPre" || name == "glow")
+		if (name == "alpha" || name == "additive" || name == "glowPre" || name == "glow" || name == "refract")
 			return defaultPass;
 		return super.getPassByName(name);
 	}
@@ -62,17 +66,6 @@ class Renderer extends h3d.scene.Renderer {
 		if (has("normal"))
 			renderPass(normal, get("normal"));
 
-		if (backBuffers == null) {
-			var commonDepth = new DepthBuffer(ctx.engine.width, ctx.engine.height);
-			backBuffers = [
-				ctx.textures.allocTarget("backbuffer1", 320, 320, false),
-				ctx.textures.allocTarget("backbuffer2", 320, 320, false),
-			];
-			backBuffers[0].depthBuffer = commonDepth;
-			// backBuffers[1].depthBuffer = commonDepth;
-			// new h3d.mat.Texture(ctx.engine.width, ctx.engine.height, [Target]);
-			// refractTexture.depthBuffer = new DepthBuffer(ctx.engine.width, ctx.engine.height);
-		}
 		if (growBufferTemps == null) {
 			glowBuffer = ctx.textures.allocTarget("glowBuffer", ctx.engine.width, ctx.engine.height);
 			growBufferTemps = [
@@ -88,6 +81,7 @@ class Renderer extends h3d.scene.Renderer {
 		renderPass(defaultPass, get("default"));
 		renderPass(defaultPass, get("glowPre"));
 
+		// Glow pass
 		ctx.engine.pushTarget(glowBuffer);
 		ctx.engine.clear(0);
 		renderPass(defaultPass, get("glow"));
@@ -97,6 +91,9 @@ class Renderer extends h3d.scene.Renderer {
 		copyPass.pass.blend(One, One);
 		copyPass.pass.depth(false, Always);
 		copyPass.render();
+		// Refraction pass
+		h3d.pass.Copy.run(backBuffer, sfxBuffer);
+		renderPass(defaultPass, get("refract"));
 
 		renderPass(defaultPass, get("alpha"), backToFront);
 		renderPass(defaultPass, get("additive"));

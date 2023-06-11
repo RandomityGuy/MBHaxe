@@ -36,7 +36,7 @@ class EndPad extends DtsObject {
 		this.dtsPath = "data/shapes/pads/endarea.dts";
 		this.isCollideable = true;
 		this.identifier = "EndPad";
-		this.useInstancing = true;
+		this.useInstancing = false;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -132,6 +132,9 @@ class EndPad extends DtsObject {
 			material.mainPass.setPassName("glowPre");
 			material.mainPass.enableLights = false;
 
+			var rotshader = new shaders.UVRotAnim(-0.5, -0.5, 1);
+			material.mainPass.addShader(rotshader);
+
 			var thisprops:Dynamic = material.getDefaultProps();
 			thisprops.light = false; // We will calculate our own lighting
 			material.props = thisprops;
@@ -144,8 +147,11 @@ class EndPad extends DtsObject {
 			diffuseTex.mipMap = Nearest;
 			var shader = new shaders.DefaultNormalMaterial(diffuseTex, 14, new h3d.Vector(0.3, 0.3, 0.3, 7), 1);
 			shader.doGammaRamp = false;
-			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
-			dtsTex.passThrough = true;
+			var dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+			if (dtsshader != null)
+				material.mainPass.removeShader(dtsshader);
+			// var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			// dtsTex.passThrough = true;
 			material.mainPass.removeShader(material.textureShader);
 			material.mainPass.addShader(shader);
 			var thisprops:Dynamic = material.getDefaultProps();
@@ -161,9 +167,11 @@ class EndPad extends DtsObject {
 			diffuseTex.mipMap = Nearest;
 
 			var trivialShader = new shaders.TrivialMaterial(diffuseTex);
+			var scrollShader = new h3d.shader.UVScroll(0, 0.25);
 
 			var glowpass = material.mainPass.clone();
 			glowpass.addShader(trivialShader);
+			glowpass.addShader(scrollShader);
 			var dtsshader = glowpass.getShader(shaders.DtsTexture);
 			if (dtsshader != null)
 				glowpass.removeShader(dtsshader);

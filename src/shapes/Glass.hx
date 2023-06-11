@@ -9,6 +9,8 @@ import src.DtsObject;
 import src.ResourceLoader;
 
 class Glass extends DtsObject {
+	var shader:shaders.RefractMaterial;
+
 	public function new(element:MissionElementStaticShape) {
 		super();
 
@@ -29,8 +31,61 @@ class Glass extends DtsObject {
 		}
 
 		this.isCollideable = true;
-		this.useInstancing = false;
+		this.useInstancing = true;
 
 		this.identifier = datablockLowercase;
+	}
+
+	override function postProcessMaterial(matName:String, material:Material) {
+		var refractTex = ResourceLoader.getTexture('data/shapes/structures/glass.png').resource;
+		refractTex.wrap = Repeat;
+		refractTex.mipMap = Nearest;
+		var diffuseTex = ResourceLoader.getTexture('data/shapes/structures/glass2.png').resource;
+		diffuseTex.wrap = Repeat;
+		diffuseTex.mipMap = Nearest;
+		var normalTex = ResourceLoader.getTexture("data/shapes/structures/glass.normal.png").resource;
+		normalTex.wrap = Repeat;
+		normalTex.mipMap = Nearest;
+
+		var trivialShader = new shaders.TrivialMaterial(diffuseTex);
+
+		shader = new shaders.RefractMaterial(refractTex, normalTex, 12, new h3d.Vector(1, 1, 1, 1), 1);
+		shader.refractMap = src.Renderer.getSfxBuffer();
+
+		// var phonshader = new shaders.PhongMaterial(diffuseTex, normalTex2, 12, new h3d.Vector(1, 1, 1, 1), src.MarbleGame.instance.world.ambient,
+		// 	src.MarbleGame.instance.world.dirLight, src.MarbleGame.instance.world.dirLightDir, 1);
+
+		var refractPass = material.mainPass.clone();
+
+		material.texture = diffuseTex;
+		var dtsshader = material.mainPass.getShader(shaders.DtsTexture);
+		if (dtsshader != null)
+			material.mainPass.removeShader(dtsshader);
+		material.mainPass.removeShader(material.textureShader);
+		material.mainPass.addShader(trivialShader);
+		material.mainPass.setBlendMode(Alpha);
+		material.mainPass.enableLights = false;
+		material.mainPass.depthWrite = false;
+		material.shadows = false;
+		material.mainPass.setPassName("glowPre");
+
+		refractPass.setPassName("refract");
+		refractPass.addShader(shader);
+		dtsshader = refractPass.getShader(shaders.DtsTexture);
+		if (dtsshader != null)
+			material.mainPass.removeShader(dtsshader);
+		refractPass.removeShader(material.textureShader);
+		refractPass.enableLights = false;
+
+		// refractPass.blendSrc = One;
+		// refractPass.blendDst = One;
+		// refractPass.blendAlphaSrc = One;
+		// refractPass.blendAlphaDst = One;
+		// refractPass.blendOp = Add;
+		// refractPass.blendAlphaOp = Add;
+		refractPass.blend(One, Zero); // disable blend
+		refractPass.depthWrite = true;
+		refractPass.depthTest = LessEqual;
+		material.addPass(refractPass);
 	}
 }
