@@ -113,6 +113,8 @@ class MarbleWorldMacros {
 				"astrolabecloudsadvancedshape"
 			].contains(dataBlockLowerCase))
 				shape = new shapes.Sky(dataBlockLowerCase);
+			else if (dataBlockLowerCase == "astrolabeshape")
+				shape = new shapes.Astrolabe();
 			else {
 				Console.error("Unknown item: " + element.datablock);
 				onFinish();

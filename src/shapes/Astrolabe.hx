@@ -2,21 +2,15 @@ package shapes;
 
 import src.DtsObject;
 
-class Sky extends DtsObject {
-	public function new(type:String) {
+class Astrolabe extends DtsObject {
+	public function new() {
 		super();
-
-		if (type == "astrolabecloudsbeginnershape")
-			this.dtsPath = 'data/shapes/astrolabe/astrolabe_clouds_beginner.dts';
-		if (type == "astrolabecloudsintermediateshape")
-			this.dtsPath = 'data/shapes/astrolabe/astrolabe_clouds_intermediate.dts';
-		if (type == "astrolabecloudsadvancedshape")
-			this.dtsPath = 'data/shapes/astrolabe/astrolabe_clouds_advanced.dts';
-
+		this.dtsPath = "data/shapes/astrolabe/astrolabe.dts";
+		this.sequencePath = "data/shapes/astrolabe/astrolabe_root.dsq";
 		this.isCollideable = false;
+		this.isTSStatic = false;
+		this.identifier = "Astrolabe";
 		this.useInstancing = false;
-
-		this.identifier = type + "Sky";
 	}
 
 	public override function init(level:src.MarbleWorld, onFinish:() -> Void) {

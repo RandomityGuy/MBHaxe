@@ -45,7 +45,12 @@ class Renderer extends h3d.scene.Renderer {
 	}
 
 	override function getPassByName(name:String):h3d.pass.Base {
-		if (name == "alpha" || name == "additive" || name == "glowPre" || name == "glow" || name == "refract")
+		if (name == "alpha"
+			|| name == "additive"
+			|| name == "glowPre"
+			|| name == "glow"
+			|| name == "refract"
+			|| name == "glowPreNoRender")
 			return defaultPass;
 		return super.getPassByName(name);
 	}

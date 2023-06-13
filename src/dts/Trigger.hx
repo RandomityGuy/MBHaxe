@@ -2,6 +2,7 @@ package dts;
 
 import dif.io.BytesReader;
 
+@:publicFields
 class Trigger {
 	var state:Int;
 	var position:Float;

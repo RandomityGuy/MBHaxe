@@ -13,9 +13,14 @@ class GameObject extends Object {
 	public var isCollideable:Bool = false;
 	public var isBoundingBoxCollideable:Bool = false;
 	public var enableCollideCallbacks:Bool = false;
+	public var animateSubObjectOpacities:Bool = false;
 
 	var textureResources:Array<Resource<Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
+
+	public function getSubObjectOpacity(obj:Object) {
+		return currentOpacity;
+	}
 
 	public function onMarbleContact(time:TimeState, ?contact:CollisionInfo) {}
 

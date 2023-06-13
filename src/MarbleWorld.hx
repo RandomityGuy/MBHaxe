@@ -493,7 +493,7 @@ class MarbleWorld extends Scheduler {
 
 		var startquat = this.getStartPositionAndOrientation();
 
-		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 3);
+		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 1.5);
 		var oldtransform = this.marble.collider.transform.clone();
 		oldtransform.setPosition(startquat.position);
 		this.marble.collider.setTransform(oldtransform);
@@ -854,6 +854,8 @@ class MarbleWorld extends Scheduler {
 			var texToLoad = [];
 			for (i in 0...dtsFile.resource.matNames.length) {
 				var matName = obj.matNameOverride.exists(dtsFile.resource.matNames[i]) ? obj.matNameOverride.get(dtsFile.resource.matNames[i]) : dtsFile.resource.matNames[i];
+				if (matName.indexOf('/') != -1)
+					matName = matName.substring(matName.lastIndexOf('/'));
 				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
 				var fullName = fullNames.length > 0 ? fullNames[0] : null;
 				if (fullName != null) {

@@ -2,6 +2,7 @@ package dts;
 
 import dif.io.BytesReader;
 
+@:publicFields
 class ObjectState {
 	var vis:Float;
 	var frame:Int;
