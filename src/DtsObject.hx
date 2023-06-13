@@ -79,6 +79,7 @@ typedef SkinMeshData = {
 @:publicFields
 class DtsObject extends GameObject {
 	var dtsPath:String;
+	var sequencePath:String;
 	var directoryPath:String;
 	var dts:DtsFile;
 	var dtsResource:Resource<DtsFile>;
@@ -91,9 +92,14 @@ class DtsObject extends GameObject {
 
 	var sequenceKeyframeOverride:Map<Sequence, Float> = new Map();
 	var lastSequenceKeyframes:Map<Sequence, Float> = new Map();
+	var doSequenceOnce:Bool;
+	var doSequenceOnceBeginTime:Float;
 
 	var graphNodes:Array<Object> = [];
 	var dirtyTransforms:Array<Bool> = [];
+	var meshVisibilities:Array<Float> = [];
+	var meshToIndex:Map<Object, Int> = [];
+	var meshes:Array<Object> = [];
 
 	var useInstancing:Bool = true;
 	var isTSStatic:Bool;
@@ -113,7 +119,7 @@ class DtsObject extends GameObject {
 	var alphaShader:AlphaMult;
 
 	var ambientRotate = false;
-	var ambientSpinFactor = -1 / 3 * Math.PI * 2;
+	var ambientSpinFactor = -1 / 6 * Math.PI * 2;
 
 	public var idInLevel:Int = -1;
 
@@ -125,6 +131,8 @@ class DtsObject extends GameObject {
 		this.dtsResource = ResourceLoader.loadDts(this.dtsPath);
 		this.dtsResource.acquire();
 		this.dts = this.dtsResource.resource;
+		if (this.sequencePath != null)
+			this.dts.importSequences(this.sequencePath);
 
 		this.directoryPath = Path.directory(this.dtsPath);
 		if (level != null)
@@ -143,6 +151,11 @@ class DtsObject extends GameObject {
 
 		for (i in 0...this.dts.nodes.length) {
 			graphNodes.push(new Object());
+		}
+
+		for (i in 0...this.dts.objects.length) {
+			meshes.push(null);
+			meshVisibilities.push(1);
 		}
 
 		for (i in 0...this.dts.nodes.length) {
@@ -206,6 +219,7 @@ class DtsObject extends GameObject {
 							poly.texMatNormals = geometry[k].texNormals.map(x -> x.toPoint());
 
 							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
+							meshToIndex.set(obj, dts.objects.indexOf(object));
 						}
 					} else {
 						var usedMats = [];
@@ -218,9 +232,12 @@ class DtsObject extends GameObject {
 
 						for (k in usedMats) {
 							var obj = new Object(this.graphNodes[i]);
+							meshToIndex.set(obj, dts.objects.indexOf(object));
 						}
 					}
 				}
+
+				meshes[dts.objects.indexOf(object)] = graphNodes[i];
 			}
 		}
 
@@ -375,6 +392,8 @@ class DtsObject extends GameObject {
 
 		for (i in 0...dts.matNames.length) {
 			var matName = matNameOverride.exists(dts.matNames[i]) ? matNameOverride.get(dts.matNames[i]) : this.dts.matNames[i];
+			if (matName.indexOf('/') != -1)
+				matName = matName.substring(matName.lastIndexOf('/'));
 			var flags = dts.matFlags[i];
 			var fullNames = ResourceLoader.getFullNamesOf(this.directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
 			var fullName = fullNames.length > 0 ? fullNames[0] : null;
@@ -948,8 +967,12 @@ class DtsObject extends GameObject {
 			var rot = sequence.rotationMatters.length > 0 ? sequence.rotationMatters[0] : 0;
 			var trans = sequence.translationMatters.length > 0 ? sequence.translationMatters[0] : 0;
 			var scale = sequence.scaleMatters.length > 0 ? sequence.scaleMatters[0] : 0;
+			var vis = sequence.visMatters.length > 0 ? sequence.visMatters[0] : 0;
 			var affectedCount = 0;
 			var completion = timeState.timeSinceLoad / sequence.duration;
+			if (doSequenceOnce) {
+				completion = Util.clamp((timeState.timeSinceLoad - doSequenceOnceBeginTime) / sequence.duration, 0, 0.98);
+			}
 
 			var quaternions:Array<Quat> = null;
 			var translations:Array<Vector> = null;
@@ -961,7 +984,9 @@ class DtsObject extends GameObject {
 			lastSequenceKeyframes.set(sequence, actualKeyframe);
 
 			var keyframeLow = Math.floor(actualKeyframe);
-			var keyframeHigh = Math.ceil(actualKeyframe) % sequence.numKeyFrames;
+			var keyframeHigh = doSequenceOnce ? Math.ceil(actualKeyframe) : Math.ceil(actualKeyframe) % sequence.numKeyFrames;
+			if (doSequenceOnce && keyframeHigh >= sequence.numKeyFrames)
+				continue;
 			var t = (actualKeyframe - keyframeLow) % 1;
 
 			if (rot > 0) {
@@ -1080,6 +1105,31 @@ class DtsObject extends GameObject {
 							this.graphNodes[i].scaleZ = 1;
 						}
 					}
+				}
+			}
+
+			affectedCount = 0;
+			var visIterIdx = 0;
+			if (vis > 0 && animateSubObjectOpacities) {
+				while (vis > 0) {
+					if (affectedCount >= this.dts.subshapes[0].numNodes)
+						break;
+					if (vis & 1 != 0) {
+						var v1 = this.dts.objectStates[sequence.baseObjectState + sequence.numKeyFrames * affectedCount + keyframeLow].vis;
+						var v2 = this.dts.objectStates[sequence.baseObjectState + sequence.numKeyFrames * affectedCount + keyframeHigh].vis;
+
+						if (this.identifier == "RoundBumper") {
+							trace('Bumper: ${v1} ${v2}');
+						}
+						var v = Util.lerp(v1, v2, t);
+						meshVisibilities[visIterIdx] = v;
+						updateSubObjectOpacity(visIterIdx);
+						affectedCount++;
+					} else {
+						meshVisibilities[visIterIdx] = this.dts.objectStates[visIterIdx].vis;
+					}
+					vis >>= 1;
+					visIterIdx++;
 				}
 			}
 		}
@@ -1258,6 +1308,32 @@ class DtsObject extends GameObject {
 				}
 			}
 		}
+	}
+
+	function updateSubObjectOpacity(idx:Int) {
+		if (!this.useInstancing) {
+			var opacity = meshVisibilities[idx];
+			var node = this.meshes[idx];
+			if (node != null) {
+				for (ch in node.getMeshes()) {
+					for (pass in ch.material.getPasses()) {
+						var alphashader = pass.getShader(AlphaMult);
+						if (alphashader != null)
+							alphashader.alpha = opacity * this.currentOpacity;
+						else {
+							alphashader = new AlphaMult();
+							alphashader.alpha = opacity * this.currentOpacity;
+							pass.addShader(alphashader);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public override function getSubObjectOpacity(obj:Object):Float {
+		var idx = meshToIndex.get(obj);
+		return meshVisibilities[idx];
 	}
 
 	public function setHide(hide:Bool) {

@@ -70,8 +70,14 @@ class InstanceManager {
 					minfo.meshbatch.begin(opaqueinstances.length);
 					for (instance in opaqueinstances) { // Draw the opaque shit first
 						var dtsShader = minfo.meshbatch.material.mainPass.getShader(DtsTexture);
+						var subOpacity = 1.0;
 						if (dtsShader != null) {
-							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
+							if (instance.gameObject.animateSubObjectOpacities) {
+								subOpacity = instance.gameObject.getSubObjectOpacity(instance.emptyObj);
+								minfo.meshbatch.shadersChanged = true;
+							}
+
+							dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
 						}
 						var transform = instance.emptyObj.getAbsPos();
 						minfo.meshbatch.material.mainPass.depthWrite = minfo.mesh.material.mainPass.depthWrite;
@@ -88,6 +94,14 @@ class InstanceManager {
 						minfo.meshbatch.material.mainPass.blendAlphaSrc = minfo.mesh.material.mainPass.blendAlphaSrc;
 						minfo.meshbatch.material.mainPass.blendAlphaDst = minfo.mesh.material.mainPass.blendAlphaDst;
 						minfo.meshbatch.material.mainPass.blendAlphaOp = minfo.mesh.material.mainPass.blendAlphaOp;
+
+						// handle the glow pass too
+						var glowPass = minfo.meshbatch.material.getPass("glow");
+						if (glowPass != null) {
+							dtsShader = glowPass.getShader(DtsTexture);
+							if (dtsShader != null)
+								dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
+						}
 
 						minfo.meshbatch.emitInstance();
 					}
@@ -155,9 +169,12 @@ class InstanceManager {
 					}
 					for (shader in minfoshaders)
 						minfo.meshbatch.material.mainPass.removeShader(shader);
+					var addshaders = [];
 					for (shader in mat.mainPass.getShaders()) {
-						minfo.meshbatch.material.mainPass.addShader(shader);
+						addshaders.push(shader);
 					}
+					for (shader in addshaders)
+						minfo.meshbatch.material.mainPass.addShader(shader);
 					var glowPass = mat.getPass("glow");
 					if (glowPass != null) {
 						var gpass = glowPass.clone();
@@ -180,9 +197,12 @@ class InstanceManager {
 						}
 						for (shader in minfoshaders)
 							gpass.removeShader(shader);
+						var addshaders = [];
 						for (shader in glowPass.getShaders()) {
-							gpass.addShader(shader);
+							addshaders.push(shader);
 						}
+						for (shader in addshaders)
+							gpass.addShader(shader);
 
 						minfo.meshbatch.material.addPass(gpass);
 					}
@@ -208,9 +228,12 @@ class InstanceManager {
 						}
 						for (shader in minfoshaders)
 							gpass.removeShader(shader);
+						var addshaders = [];
 						for (shader in refractPass.getShaders()) {
-							gpass.addShader(shader);
+							addshaders.push(shader);
 						}
+						for (shader in addshaders)
+							gpass.addShader(shader);
 
 						minfo.meshbatch.material.addPass(gpass);
 					}

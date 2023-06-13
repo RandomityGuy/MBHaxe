@@ -1,5 +1,6 @@
 package dts;
 
+import src.Console;
 import haxe.Exception;
 import dif.io.BytesReader;
 import dif.math.QuatF;
@@ -599,5 +600,248 @@ class DtsFile {
 		for (i in 0...numMaterials) {
 			matReflectionAmounts.push(br.readFloat());
 		}
+	}
+
+	function readName(br:BytesReader, addName:Bool) {
+		var sz = br.readInt32();
+		var nameIndex = -1;
+		if (sz > 0) {
+			var str = "";
+			for (i in 0...sz) {
+				str += String.fromCharCode(br.readByte());
+			}
+			nameIndex = names.indexOf(str);
+			if (nameIndex < 0 && addName) {
+				nameIndex = names.length;
+				names.push(str);
+			}
+		}
+		return nameIndex;
+	}
+
+	public function importSequences(filepath:String) {
+		var f = ResourceLoader.getFileEntry(filepath).entry;
+		var bytes = f.getBytes();
+		var br = new BytesReader(bytes);
+
+		var version = br.readInt32();
+		var sz = br.readInt32();
+		var checkForDups = [];
+		var nodeMap = [];
+		for (i in 0...sz)
+			nodeMap.push(0);
+		for (i in 0...sz) {
+			var startSize = names.length;
+			var nameIndex = readName(br, true);
+			var count = 0;
+			if (nameIndex >= 0) {
+				while (checkForDups.length < nameIndex + 1)
+					checkForDups.push(0);
+				count = checkForDups[nameIndex]++;
+			}
+			if (count > 0) {
+				nodeMap[i] = -1;
+				var jout = 0;
+				for (j in 0...nodes.length) {
+					if (nodes[j].name == nameIndex && count-- == 0)
+						break;
+					jout++;
+				}
+				nodeMap[i] = jout;
+				if (jout == nodes.length) {
+					Console.error("Sequence import failed, a node is duplicated more in sequence than in shape.");
+					return false;
+				}
+			} else {
+				nodeMap[i] = nodes.indexOf(nodes.filter(x -> x.name == nameIndex)[0]);
+			}
+			if (nodeMap[i] < 0) {
+				// error -- node found in sequence but not shape
+				Console.error("Sequence import failed, a node is duplicated more in sequence than in shape.");
+				if (names.length != startSize) {
+					names.pop();
+				}
+				return false;
+			}
+		}
+
+		sz = br.readInt32();
+		var oldShapeNumObjects = br.readInt32();
+
+		var keyframes = [];
+		if (version < 17) {
+			var sz = br.readInt32();
+			for (i in 0...sz) {
+				keyframes.push(KeyFrame.read(br));
+			}
+		}
+
+		var adjNodeRots = version < 22 ? nodeRotations.length - nodeMap.length : nodeRotations.length;
+		var adjNodeTrans = version < 22 ? nodeTranslations.length - nodeMap.length : nodeTranslations.length;
+		var adjNodeScales1 = nodeUniformScales.length;
+		var adjNodeScales2 = nodeAlignedScales.length;
+		var adjNodeScales3 = nodeArbitraryScaleFactors.length;
+		var adjObjectStates = objectStates.length - oldShapeNumObjects;
+		var adjGroundStates = version < 22 ? 0 : groundTranslations.length; // groundTrans==groundRot
+
+		for (i in 0...keyframes.length) {
+			// have keyframes only for old shapes...use adjNodeRots for adjustment
+			// since same as adjNodeScales...
+			keyframes[i].firstNodeState += adjNodeRots;
+			keyframes[i].firstObjectState += adjObjectStates;
+		}
+
+		function readS16() {
+			var val = br.readInt16();
+			if (val > 32767)
+				val -= 65536;
+			return val;
+		}
+
+		// add these node states to our own
+		if (version > 21) {
+			sz = br.readInt32();
+			for (i in 0...sz) {
+				var q = new QuatF();
+				q.x = readS16();
+				q.y = readS16();
+				q.z = readS16();
+				q.w = readS16();
+				nodeRotations.push(q);
+			}
+			sz = br.readInt32();
+			for (i in 0...sz) {
+				var p = new Point3F();
+				p.x = br.readFloat();
+				p.y = br.readFloat();
+				p.z = br.readFloat();
+				nodeTranslations.push(p);
+			}
+			sz = br.readInt32();
+			for (i in 0...sz)
+				nodeUniformScales.push(br.readFloat());
+			sz = br.readInt32();
+			for (i in 0...sz) {
+				var p = new Point3F();
+				p.x = br.readFloat();
+				p.y = br.readFloat();
+				p.z = br.readFloat();
+				nodeAlignedScales.push(p);
+			}
+			sz = br.readInt32();
+			for (i in 0...sz) {
+				var q = new QuatF();
+				q.x = readS16();
+				q.y = readS16();
+				q.z = readS16();
+				q.w = readS16();
+				nodeArbitraryScaleRots.push(q);
+			}
+			for (i in 0...sz) {
+				var p = new Point3F();
+				p.x = br.readFloat();
+				p.y = br.readFloat();
+				p.z = br.readFloat();
+				nodeArbitraryScaleFactors.push(p);
+			}
+			sz = br.readInt32();
+			for (i in 0...sz) {
+				var p = new Point3F();
+				p.x = br.readFloat();
+				p.y = br.readFloat();
+				p.z = br.readFloat();
+				groundTranslations.push(p);
+			}
+			for (i in 0...sz) {
+				var q = new QuatF();
+				q.x = readS16();
+				q.y = readS16();
+				q.z = readS16();
+				q.w = readS16();
+				groundRots.push(q);
+			}
+		} else {
+			sz = br.readInt32();
+			for (i in 0...sz) {
+				var q = new QuatF();
+				q.x = readS16();
+				q.y = readS16();
+				q.z = readS16();
+				q.w = readS16();
+				var p = new Point3F();
+				p.x = br.readFloat();
+				p.y = br.readFloat();
+				p.z = br.readFloat();
+				nodeRotations.push(q);
+				nodeTranslations.push(p);
+			}
+		}
+
+		sz = br.readInt32();
+		sz = br.readInt32();
+		var startSeqNum = sequences.length;
+		for (i in 0...sz) {
+			var seq = new Sequence();
+			seq.nameIndex = readName(br, true);
+			seq.read(br, fileVersion, false);
+
+			if (version > 21) {
+				seq.baseRotation += adjNodeRots;
+				seq.baseTranslation += adjNodeTrans;
+				if (seq.flags & 1 > 0)
+					seq.baseScale += adjNodeScales1;
+				else if (seq.flags & 2 > 0)
+					seq.baseScale += adjNodeScales2;
+				else if (seq.flags & 4 > 0)
+					seq.baseScale += adjNodeScales3;
+			} else if (version >= 17) {
+				seq.baseRotation += adjNodeRots; // == adjNodeTrans
+				seq.baseTranslation += adjNodeTrans; // == adjNodeTrans
+			}
+
+			var newTM = 0;
+			var newRM = 0;
+			var newSM = 0;
+			for (j in 0...nodeMap.length) {
+				if (seq.translationMatters[0] & (1 << j) > 0)
+					newTM |= (1 << nodeMap[j]);
+				if (seq.rotationMatters[0] & (1 << j) > 0)
+					newRM |= (1 << nodeMap[j]);
+				if (seq.scaleMatters[0] & (1 << j) > 0)
+					newSM |= (1 << nodeMap[j]);
+			}
+			seq.translationMatters[0] = newTM;
+			seq.rotationMatters[0] = newRM;
+			seq.scaleMatters[0] = newSM;
+			seq.firstTrigger += triggers.length;
+			seq.firstGroundFrame += adjGroundStates;
+
+			sequences.push(seq);
+		}
+
+		if (version < 17)
+			return false; // Cannot, not actually needed in this game
+
+		if (version < 22) {
+			for (i in startSeqNum...sequences.length) {
+				var oldSz = groundTranslations.length;
+				for (j in 0...sequences[i].numGroundFrames) {
+					groundTranslations.push(nodeTranslations[sequences[i].firstGroundFrame + adjNodeTrans + j]);
+					groundRots.push(nodeRotations[sequences[i].firstGroundFrame + adjNodeRots + j]);
+				}
+				sequences[i].firstGroundFrame = oldSz;
+			}
+		}
+
+		if (version > 8) {
+			sz = br.readInt32();
+			for (i in 0...sz) {
+				var t = new Trigger();
+				t.state = br.readInt32();
+				t.position = br.readFloat();
+			}
+		}
+
+		return true;
 	}
 }

@@ -13,6 +13,7 @@ class RoundBumper extends AbstractBumper {
 		dtsPath = "data/shapes/bumpers/pball_round.dts";
 		isCollideable = true;
 		identifier = "RoundBumper";
+		animateSubObjectOpacities = true;
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
@@ -42,8 +43,8 @@ class RoundBumper extends AbstractBumper {
 			var glowpass = material.mainPass.clone();
 			glowpass.addShader(trivialShader);
 			var dtsshader = glowpass.getShader(shaders.DtsTexture);
-			if (dtsshader != null)
-				glowpass.removeShader(dtsshader);
+			dtsshader.passThrough = true;
+
 			glowpass.setPassName("glow");
 			glowpass.depthTest = LessEqual;
 			glowpass.enableLights = false;
@@ -73,18 +74,12 @@ class RoundBumper extends AbstractBumper {
 
 			glowpass.addShader(trivialShader);
 			var dtsshader = glowpass.getShader(shaders.DtsTexture);
-			if (dtsshader != null)
-				glowpass.removeShader(dtsshader);
+			dtsshader.passThrough = true;
 			glowpass.setPassName("glow");
 			glowpass.depthTest = LessEqual;
 			glowpass.depthWrite = false;
 			glowpass.enableLights = false;
-			glowpass.blendSrc = SrcAlpha;
-			glowpass.blendDst = One;
-			glowpass.blendOp = Add;
-			glowpass.blendAlphaSrc = SrcAlpha;
-			glowpass.blendAlphaDst = One;
-			glowpass.blendAlphaOp = Add;
+			glowpass.setBlendMode(Alpha);
 			// glowpass.blendSrc = SrcAlpha;
 			// glowpass.blendDst = OneMinusSrcAlpha;
 			material.addPass(glowpass);
@@ -93,8 +88,7 @@ class RoundBumper extends AbstractBumper {
 			material.mainPass.removeShader(material.textureShader);
 			material.mainPass.addShader(trivialShader);
 			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
-			if (dtsshader != null)
-				material.mainPass.removeShader(dtsshader);
+			dtsshader.passThrough = true;
 			material.mainPass.enableLights = false;
 
 			// var thisprops:Dynamic = material.getDefaultProps();

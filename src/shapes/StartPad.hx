@@ -12,6 +12,14 @@ class StartPad extends DtsObject {
 		isCollideable = true;
 		identifier = "StartPad";
 		useInstancing = false;
+		animateSubObjectOpacities = true;
+		doSequenceOnce = true;
+		doSequenceOnceBeginTime = 0;
+	}
+
+	override function reset() {
+		super.reset();
+		doSequenceOnceBeginTime = level.timeState.timeSinceLoad;
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
