@@ -1,5 +1,6 @@
 package src;
 
+import h3d.scene.fwd.Light;
 import rewind.RewindManager;
 import Macros.MarbleWorldMacros;
 #if js
@@ -157,12 +158,14 @@ class MarbleWorld extends Scheduler {
 	public var newOrientationQuat = new Quat();
 
 	// Checkpoint
-	var currentCheckpoint:{obj:DtsObject, elem:MissionElementBase} = null;
+	var currentCheckpoint:DtsObject = null;
 	var currentCheckpointTrigger:CheckpointTrigger = null;
 	var checkpointCollectedGems:Map<Gem, Bool> = [];
 	var checkpointHeldPowerup:PowerUp = null;
 	var checkpointUp:Vector = null;
 	var cheeckpointBlast:Float = 0;
+	var checkpointSequence:Int = 0;
+	var _previousCheckpointTrigger:CheckpointTrigger;
 
 	// Replay
 	public var replay:Replay;
@@ -317,6 +320,7 @@ class MarbleWorld extends Scheduler {
 				var ls = cast(scene.lightSystem, h3d.scene.fwd.LightSystem);
 
 				ls.ambientLight.load(ambientColor);
+				// ls.shadowLight.setDirection(new Vector(0, 0, -1));
 				this.ambient = ambientColor;
 				// ls.perPixelLighting = false;
 
@@ -463,6 +467,7 @@ class MarbleWorld extends Scheduler {
 		this.checkpointHeldPowerup = null;
 		this.checkpointUp = null;
 		this.cheeckpointBlast = 0;
+		this.checkpointSequence = 0;
 
 		if (this.endPad != null)
 			this.endPad.inFinish = false;
@@ -495,7 +500,7 @@ class MarbleWorld extends Scheduler {
 
 		var startquat = this.getStartPositionAndOrientation();
 
-		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 1.5);
+		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 0.727843);
 		var oldtransform = this.marble.collider.transform.clone();
 		oldtransform.setPosition(startquat.position);
 		this.marble.collider.setTransform(oldtransform);
@@ -725,6 +730,7 @@ class MarbleWorld extends Scheduler {
 			trigger = new DestinationTrigger(element, cast this);
 		} else if (datablockLowercase == "checkpointtrigger") {
 			trigger = new CheckpointTrigger(element, cast this);
+			_previousCheckpointTrigger = cast trigger;
 		} else {
 			Console.error("Unknown trigger: " + element.datablock);
 			onFinish();
@@ -1723,22 +1729,20 @@ class MarbleWorld extends Scheduler {
 	}
 
 	/** Sets a new active checkpoint. */
-	public function saveCheckpointState(shape:{obj:DtsObject, elem:MissionElementBase}, trigger:CheckpointTrigger = null) {
+	public function saveCheckpointState(shape:DtsObject, trigger:CheckpointTrigger = null) {
 		if (this.currentCheckpoint != null)
-			if (this.currentCheckpoint.obj == shape.obj)
-				return;
+			if (this.currentCheckpoint == shape)
+				return false;
 		var disableOob = false;
-		if (shape != null) {
-			if (shape.elem.fields.exists('disableOob')) {
-				disableOob = MisParser.parseBoolean(shape.elem.fields.get('disableOob')[0]);
-			}
-		}
 		if (trigger != null) {
 			disableOob = trigger.disableOOB;
+			if (checkpointSequence > trigger.seqNum)
+				return false;
 		}
+		checkpointSequence = trigger.seqNum;
 		// (shape.srcElement as any) ?.disableOob || trigger?.element.disableOob;
 		if (disableOob && this.outOfBounds)
-			return; // The checkpoint is configured to not work when the player is already OOB
+			return false; // The checkpoint is configured to not work when the player is already OOB
 		this.currentCheckpoint = shape;
 		this.currentCheckpointTrigger = trigger;
 		this.checkpointCollectedGems.clear();
@@ -1752,34 +1756,15 @@ class MarbleWorld extends Scheduler {
 		this.checkpointHeldPowerup = this.marble.heldPowerup;
 		this.displayAlert("Checkpoint reached!");
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
+		return true;
 	}
 
 	/** Resets to the last stored checkpoint state. */
 	public function loadCheckpointState() {
 		var marble = this.marble;
 		// Determine where to spawn the marble
-		var offset = new Vector(0, 0, 3);
-		var add = ""; // (this.currentCheckpoint.srcElement as any)?.add || this.currentCheckpointTrigger?.element.add;
-		if (this.currentCheckpoint.elem.fields.exists('add')) {
-			add = this.currentCheckpoint.elem.fields.get('add')[0];
-		}
-		var sub = "";
-		if (this.currentCheckpoint.elem.fields.exists('sub')) {
-			sub = this.currentCheckpoint.elem.fields.get('sub')[0];
-		}
-		if (this.currentCheckpointTrigger != null) {
-			if (this.currentCheckpointTrigger.add != null)
-				offset = this.currentCheckpointTrigger.add;
-		}
-		if (add != "") {
-			offset = MisParser.parseVector3(add);
-			offset.x = -offset.x;
-		}
-		if (sub != "") {
-			offset = MisParser.parseVector3(sub).multiply(-1);
-			offset.x = -offset.x;
-		}
-		var mpos = this.currentCheckpoint.obj.getAbsPos().getPosition().add(offset);
+		var offset = new Vector(0, 0, 0.727843);
+		var mpos = this.currentCheckpoint.getAbsPos().getPosition().add(offset);
 		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
 		marble.velocity.load(new Vector(0, 0, 0));
 		marble.omega.load(new Vector(0, 0, 0));
@@ -1788,7 +1773,7 @@ class MarbleWorld extends Scheduler {
 		Console.log('Marble Velocity: ${marble.velocity.x} ${marble.velocity.y} ${marble.velocity.z}');
 		Console.log('Marble Angular: ${marble.omega.x} ${marble.omega.y} ${marble.omega.z}');
 		// Set camera orientation
-		var euler = this.currentCheckpoint.obj.getRotationQuat().toEuler();
+		var euler = this.currentCheckpoint.getRotationQuat().toEuler();
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
 		this.marble.camera.CameraPitch = 0.45;
 		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
@@ -1806,9 +1791,6 @@ class MarbleWorld extends Scheduler {
 			this.replay.recordMarbleStateFlags(false, false, true, false);
 		}
 		var gravityField = ""; // (this.currentCheckpoint.srcElement as any) ?.gravity || this.currentCheckpointTrigger?.element.gravity;
-		if (this.currentCheckpoint.elem.fields.exists('gravity')) {
-			gravityField = this.currentCheckpoint.elem.fields.get('gravity')[0];
-		}
 		if (this.currentCheckpointTrigger != null) {
 			if (@:privateAccess this.currentCheckpointTrigger.element.fields.exists('gravity')) {
 				gravityField = @:privateAccess this.currentCheckpointTrigger.element.fields.get('gravity')[0];
@@ -1817,7 +1799,7 @@ class MarbleWorld extends Scheduler {
 		if (MisParser.parseBoolean(gravityField)) {
 			// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
 			var up = new Vector(0, 0, 1);
-			up.transform(this.currentCheckpoint.obj.getRotationQuat().toMatrix());
+			up.transform(this.currentCheckpoint.getRotationQuat().toMatrix());
 			this.setUp(up, this.timeState, true);
 		} else {
 			// Otherwise, we restore gravity to what was stored.

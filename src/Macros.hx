@@ -78,9 +78,11 @@ class MarbleWorldMacros {
 				shape = new Helicopter(cast element);
 			else if (dataBlockLowerCase == "eastereggitem")
 				shape = new EasterEgg(cast element);
-			else if (dataBlockLowerCase == "checkpointshape")
+			else if (dataBlockLowerCase == "checkpointshape") {
 				shape = new Checkpoint(cast element);
-			else if (dataBlockLowerCase == "ductfan")
+				if (_previousCheckpointTrigger != null)
+					_previousCheckpointTrigger.checkpoint = cast shape;
+			} else if (dataBlockLowerCase == "ductfan")
 				shape = new DuctFan();
 			else if (dataBlockLowerCase == "smallductfan")
 				shape = new SmallDuctFan();

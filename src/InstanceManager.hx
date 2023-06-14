@@ -74,6 +74,8 @@ class InstanceManager {
 						if (dtsShader != null) {
 							if (instance.gameObject.animateSubObjectOpacities) {
 								subOpacity = instance.gameObject.getSubObjectOpacity(instance.emptyObj);
+								if (subOpacity == 0)
+									continue; // Do not draw
 								minfo.meshbatch.shadersChanged = true;
 							}
 

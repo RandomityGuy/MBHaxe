@@ -39,7 +39,7 @@ class RewindFrame {
 	};
 
 	var checkpointState:{
-		currentCheckpoint:{obj:DtsObject, elem:MissionElementBase},
+		currentCheckpoint:DtsObject,
 		currentCheckpointTrigger:CheckpointTrigger,
 		checkpointCollectedGems:Map<Gem, Bool>,
 		checkpointHeldPowerup:PowerUp,
@@ -91,10 +91,7 @@ class RewindFrame {
 			timeState: oobState.timeState != null ? oobState.timeState.clone() : null
 		};
 		c.checkpointState = {
-			currentCheckpoint: checkpointState.currentCheckpoint != null ? {
-				obj: checkpointState.currentCheckpoint.obj,
-				elem: checkpointState.currentCheckpoint.elem,
-			} : null,
+			currentCheckpoint: checkpointState.currentCheckpoint,
 			currentCheckpointTrigger: checkpointState.currentCheckpointTrigger,
 			checkpointCollectedGems: checkpointState.checkpointCollectedGems.copy(),
 			checkpointHeldPowerup: checkpointState.checkpointHeldPowerup,
