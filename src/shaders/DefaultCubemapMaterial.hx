@@ -91,6 +91,9 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 				outCol.z = a * pow(outCol.z, b);
 			}
 
+			// outCol *= 0.001;
+			// outCol += diffuse;
+			// outCol *= (shading * bumpDot) + ambient;
 			pixelColor = outCol;
 		}
 	}

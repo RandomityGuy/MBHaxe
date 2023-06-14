@@ -33,7 +33,7 @@ class DirLight extends Light {
 	}
 
 	override function getShadowDirection():h3d.Vector {
-		return absPos.front();
+		return new h3d.Vector(0, 0, -1);
 	}
 
 	override function emit(ctx) {

@@ -235,8 +235,7 @@ class MissionElementTrigger extends MissionElementBase {
 
 	// checkpoint stuff:
 	var respawnpoint:Null<String>;
-	var add:Null<String>;
-	var sub:Null<String>;
+	var sequence:Null<String>;
 	var gravity:Null<String>;
 	var disableOob:Null<String>;
 	// teleport/destination trigger stuff:

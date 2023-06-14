@@ -14,6 +14,7 @@ class Blast extends PowerUp {
 		this.showSequences = true;
 		this.identifier = "Blast";
 		this.pickUpName = "Blast PowerUp";
+		this.ambientRotate = false;
 		this.autoUse = true;
 	}
 

@@ -46,7 +46,7 @@ var dtsMaterials = [
 	"bumper-rubber" => {friction: 0.5, restitution: 0.0, force: 15.0},
 	"triang-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
 	"triang-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
-	"pball-round-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
+	"bumper" => {friction: 0.5, restitution: 0.0, force: 15.0},
 	"pball-round-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
 	"pball-round-bottm" => {friction: 0.5, restitution: 0.0, force: 15.0}
 ];
@@ -705,6 +705,13 @@ class DtsObject extends GameObject {
 			});
 		}
 
+		function normalizeSafe(v:Vector) {
+			var mag = ((v.x * v.x) <= 1e-4) && ((v.y * v.y) <= 1e-4) && ((v.z * v.z) <= 1e-4) ? 0.0 : v.length();
+			if (mag > 1e-4) {
+				v.scale(1 / mag);
+			}
+		}
+
 		function createTextureSpaceMatrix(i0:Int, i1:Int, i2:Int) {
 			var t0 = new Vector();
 			var t1 = new Vector();
@@ -715,8 +722,8 @@ class DtsObject extends GameObject {
 			var edge1 = new Vector();
 			var edge2 = new Vector();
 			var cp = new Vector();
-			edge1.set(vertices[i1].x - vertices[i0].x, vertices[i1].y - vertices[i0].y, vertices[i1].z - vertices[i0].z);
-			edge2.set(vertices[i2].x - vertices[i0].x, vertices[i2].y - vertices[i0].y, vertices[i2].z - vertices[i0].z);
+			edge1.set(vertices[i1].x - vertices[i0].x, dtsMesh.uv[i1].x - dtsMesh.uv[i0].x, dtsMesh.uv[i1].y - dtsMesh.uv[i0].y);
+			edge2.set(vertices[i2].x - vertices[i0].x, dtsMesh.uv[i2].x - dtsMesh.uv[i0].x, dtsMesh.uv[i2].y - dtsMesh.uv[i0].y);
 			var fVar1 = vertices[i1].x - vertices[i0].x;
 			var fVar2 = vertices[i2].x - vertices[i0].x;
 			var fVar4 = dtsMesh.uv[i1].x - dtsMesh.uv[i0].x;
@@ -773,25 +780,28 @@ class DtsObject extends GameObject {
 			}
 
 			// v0
-			t0.normalize();
-			b0.normalized();
+			normalizeSafe(t0);
+			normalizeSafe(b0);
 			var n0 = t0.cross(b0);
+			n0.x *= -1;
 			if (n0.dot(vertexNormals[i0]) < 0.0) {
 				n0.scale(-1);
 			}
 
 			// v1
-			t1.normalize();
-			b1.normalized();
+			normalizeSafe(t1);
+			normalizeSafe(b1);
 			var n1 = t1.cross(b1);
+			n1.x *= -1;
 			if (n1.dot(vertexNormals[i1]) < 0.0) {
 				n1.scale(-1);
 			}
 
 			// v2
-			t2.normalize();
-			b2.normalized();
+			normalizeSafe(t2);
+			normalizeSafe(b2);
 			var n2 = t2.cross(b2);
+			n2.x *= -1;
 			if (n2.dot(vertexNormals[i2]) < 0.0) {
 				n2.scale(-1);
 			}
@@ -802,9 +812,6 @@ class DtsObject extends GameObject {
 			b0.x *= -1;
 			b1.x *= -1;
 			b2.x *= -1;
-			n0.x *= -1;
-			n1.x *= -1;
-			n2.x *= -1;
 
 			return [
 				{
@@ -866,17 +873,6 @@ class DtsObject extends GameObject {
 				geometrydata.normals.push(new Vector(normal.x, normal.y, normal.z));
 			}
 
-			var tbn = createTextureSpaceMatrix(i1, i2, i3);
-			geometrydata.tangents.push(tbn[0].tangent);
-			geometrydata.tangents.push(tbn[1].tangent);
-			geometrydata.tangents.push(tbn[2].tangent);
-			geometrydata.bitangents.push(tbn[0].bitangent);
-			geometrydata.bitangents.push(tbn[1].bitangent);
-			geometrydata.bitangents.push(tbn[2].bitangent);
-			geometrydata.texNormals.push(tbn[0].normal);
-			geometrydata.texNormals.push(tbn[1].normal);
-			geometrydata.texNormals.push(tbn[2].normal);
-
 			geometrydata.indices.push(i1);
 			geometrydata.indices.push(i2);
 			geometrydata.indices.push(i3);
@@ -897,6 +893,17 @@ class DtsObject extends GameObject {
 
 					addTriangleFromIndices(i1, i2, i3, materialIndex);
 
+					var tbn = createTextureSpaceMatrix(dtsMesh.indices[i], dtsMesh.indices[i + 1], dtsMesh.indices[i + 2]);
+					geometrydata.tangents.push(tbn[2].tangent);
+					geometrydata.tangents.push(tbn[1].tangent);
+					geometrydata.tangents.push(tbn[0].tangent);
+					geometrydata.bitangents.push(tbn[2].bitangent);
+					geometrydata.bitangents.push(tbn[1].bitangent);
+					geometrydata.bitangents.push(tbn[0].bitangent);
+					geometrydata.texNormals.push(tbn[2].normal);
+					geometrydata.texNormals.push(tbn[1].normal);
+					geometrydata.texNormals.push(tbn[0].normal);
+
 					i += 3;
 				}
 			} else if (drawType == TSDrawPrimitive.Strip) {
@@ -915,6 +922,17 @@ class DtsObject extends GameObject {
 
 					addTriangleFromIndices(i1, i2, i3, materialIndex);
 
+					var tbn = createTextureSpaceMatrix(dtsMesh.indices[i], dtsMesh.indices[i + 1], dtsMesh.indices[i + 2]);
+					geometrydata.tangents.push(tbn[2].tangent);
+					geometrydata.tangents.push(tbn[1].tangent);
+					geometrydata.tangents.push(tbn[0].tangent);
+					geometrydata.bitangents.push(tbn[2].bitangent);
+					geometrydata.bitangents.push(tbn[1].bitangent);
+					geometrydata.bitangents.push(tbn[0].bitangent);
+					geometrydata.texNormals.push(tbn[2].normal);
+					geometrydata.texNormals.push(tbn[1].normal);
+					geometrydata.texNormals.push(tbn[0].normal);
+
 					k++;
 				}
 			} else if (drawType == TSDrawPrimitive.Fan) {
@@ -925,6 +943,17 @@ class DtsObject extends GameObject {
 					var i3 = dtsMesh.indices[i + 2];
 
 					addTriangleFromIndices(i1, i2, i3, materialIndex);
+
+					var tbn = createTextureSpaceMatrix(dtsMesh.indices[primitive.firstElement], dtsMesh.indices[i + 1], dtsMesh.indices[i + 2]);
+					geometrydata.tangents.push(tbn[2].tangent);
+					geometrydata.tangents.push(tbn[1].tangent);
+					geometrydata.tangents.push(tbn[0].tangent);
+					geometrydata.bitangents.push(tbn[2].bitangent);
+					geometrydata.bitangents.push(tbn[1].bitangent);
+					geometrydata.bitangents.push(tbn[0].bitangent);
+					geometrydata.texNormals.push(tbn[2].normal);
+					geometrydata.texNormals.push(tbn[1].normal);
+					geometrydata.texNormals.push(tbn[0].normal);
 
 					i++;
 				}
@@ -1118,14 +1147,12 @@ class DtsObject extends GameObject {
 						var v1 = this.dts.objectStates[sequence.baseObjectState + sequence.numKeyFrames * affectedCount + keyframeLow].vis;
 						var v2 = this.dts.objectStates[sequence.baseObjectState + sequence.numKeyFrames * affectedCount + keyframeHigh].vis;
 
-						if (this.identifier == "RoundBumper") {
-							trace('Bumper: ${v1} ${v2}');
-						}
 						var v = Util.lerp(v1, v2, t);
 						meshVisibilities[visIterIdx] = v;
 						updateSubObjectOpacity(visIterIdx);
 						affectedCount++;
 					} else {
+						updateSubObjectOpacity(visIterIdx);
 						meshVisibilities[visIterIdx] = this.dts.objectStates[visIterIdx].vis;
 					}
 					vis >>= 1;

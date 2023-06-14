@@ -4,10 +4,13 @@ import collision.CollisionInfo;
 import mis.MisParser;
 import src.DtsObject;
 import src.ResourceLoader;
+import src.Util;
 import mis.MissionElement.MissionElementStaticShape;
 
 class Checkpoint extends DtsObject {
 	public var disableOOB = false;
+
+	var lastActivatedTime:Float = Math.POSITIVE_INFINITY;
 
 	var element:MissionElementStaticShape;
 
@@ -29,11 +32,24 @@ class Checkpoint extends DtsObject {
 		});
 	}
 
-	public override function onMarbleContact(time:src.TimeState, ?contact:CollisionInfo) {
-		this.level.saveCheckpointState({
-			obj: this,
-			elem: this.element
-		}, null);
+	public override function update(timeState:src.TimeState) {
+		// Override the keyframe
+		var currentCompletion = getCurrentCompletion(timeState);
+		this.sequenceKeyframeOverride.set(this.dts.sequences[0], currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
+		this.sequenceKeyframeOverride.set(this.dts.sequences[1], 0); // Always
+		super.update(timeState);
+	}
+
+	function getCurrentCompletion(timeState:src.TimeState) {
+		var elapsed = timeState.timeSinceLoad - this.lastActivatedTime;
+		var completion = Util.clamp(elapsed / this.dts.sequences[0].duration, 0, 1);
+		return completion;
+	}
+
+	override function reset() {
+		super.reset();
+		lastActivatedTime = Math.POSITIVE_INFINITY;
+		meshVisibilities = [0, 1, 0]; // pls
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
@@ -57,8 +73,7 @@ class Checkpoint extends DtsObject {
 			material.mainPass.setPassName("glowPre");
 			material.mainPass.addShader(trivialShader);
 			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
-			if (dtsshader != null)
-				material.mainPass.removeShader(dtsshader);
+			dtsshader.passThrough = true;
 			material.mainPass.enableLights = false;
 			material.mainPass.setBlendMode(Alpha);
 		}
