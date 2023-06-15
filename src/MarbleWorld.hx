@@ -1116,17 +1116,6 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	function determineClockColor(timeToDisplay:Float) {
-		if (this.finishTime != null)
-			return 1;
-		if (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0)
-			return 1;
-		if (timeToDisplay >= this.mission.qualifyTime)
-			return 2;
-
-		return 0; // Default yellow
-	}
-
 	public function updateTimer(dt:Float) {
 		this.timeState.dt = dt;
 
@@ -1175,7 +1164,7 @@ class MarbleWorld extends Scheduler {
 
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
-		playGui.formatTimer(this.timeState.gameplayClock, determineClockColor(this.timeState.gameplayClock));
+		playGui.formatTimer(this.timeState.gameplayClock);
 
 		if (!this.isWatching && this.isRecording)
 			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);
