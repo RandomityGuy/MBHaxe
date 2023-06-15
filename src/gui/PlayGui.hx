@@ -42,22 +42,12 @@ class PlayGui {
 	public function new() {}
 
 	var timerNumbers:Array<GuiAnim> = [];
-	var timerPoint:GuiAnim;
-	var timerColon:GuiAnim;
+	var timerPoint:GuiImage;
+	var timerColon:GuiImage;
 
 	var gemCountNumbers:Array<GuiAnim> = [];
 	var gemCountSlash:GuiImage;
-	var gemImageScene:h3d.scene.Scene;
-	var gemImageSceneTarget:Texture;
-	var gemImageObject:DtsObject;
-	var gemImageSceneTargetBitmap:Bitmap;
-
-	var powerupBox:GuiImage;
-	var powerupImageScene:h3d.scene.Scene;
-	var powerupImageSceneTarget:Texture;
-	var powerupImageSceneTargetBitmap:Bitmap;
-	var powerupImageObject:DtsObject;
-
+	var powerupBox:GuiAnim;
 	var RSGOCenterText:Anim;
 
 	var helpTextForeground:GuiText;
@@ -86,12 +76,6 @@ class PlayGui {
 	public function dispose() {
 		if (_init) {
 			playGuiCtrl.dispose();
-			gemImageScene.dispose();
-			gemImageSceneTarget.dispose();
-			gemImageSceneTargetBitmap.remove();
-			powerupImageScene.dispose();
-			powerupImageSceneTarget.dispose();
-			powerupImageSceneTargetBitmap.remove();
 			RSGOCenterText.remove();
 
 			for (textureResource in textureResources) {
@@ -123,14 +107,6 @@ class PlayGui {
 			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}.png', ResourceLoader.getImage, this.imageResources).toTile();
 			numberTiles.push(tile);
 		}
-		for (i in 0...10) {
-			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_green.png', ResourceLoader.getImage, this.imageResources).toTile();
-			numberTiles.push(tile);
-		}
-		for (i in 0...10) {
-			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_red.png', ResourceLoader.getImage, this.imageResources).toTile();
-			numberTiles.push(tile);
-		}
 
 		for (i in 0...7) {
 			timerNumbers.push(new GuiAnim(numberTiles));
@@ -147,11 +123,8 @@ class PlayGui {
 		rsgo.push(ResourceLoader.getResource("data/ui/game/outofbounds.png", ResourceLoader.getImage, this.imageResources).toTile());
 		RSGOCenterText = new Anim(rsgo, 0, scene2d);
 
-		powerupBox = new GuiImage(ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile());
 		initTimer();
-		initGemCounter(() -> {
-			onFinish();
-		});
+		initGemCounter();
 		initCenterText();
 		initPowerupBox();
 		if (game == 'ultra')
@@ -169,74 +142,66 @@ class PlayGui {
 		resizeEv = () -> {
 			var wnd = Window.getInstance();
 			playGuiCtrl.render(MarbleGame.canvas.scene2d);
-			powerupImageSceneTargetBitmap.x = wnd.width - 88;
 		};
 
 		Window.getInstance().addResizeEvent(resizeEv);
+
+		onFinish();
 	}
 
 	public function initTimer() {
-		var timerCtrl = new GuiControl();
+		var timerCtrl = new GuiImage(ResourceLoader.getResource('data/ui/game/timebackdrop0.png', ResourceLoader.getImage, this.imageResources).toTile());
 		timerCtrl.horizSizing = HorizSizing.Center;
-		timerCtrl.position = new Vector(215, 1);
-		timerCtrl.extent = new Vector(234, 58);
+		timerCtrl.position = new Vector(215, 0);
+		timerCtrl.extent = new Vector(256, 64);
 
-		var timerTransparency = new GuiImage(ResourceLoader.getResource('data/ui/game/transparency.png', ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		timerTransparency.position = new Vector(14, -7);
-		timerTransparency.extent = new Vector(228, 71);
-		timerCtrl.addChild(timerTransparency);
+		var innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(26, 0);
+		innerCtrl.extent = new Vector(256, 64);
+		timerCtrl.addChild(innerCtrl);
 
-		timerNumbers[0].position = new Vector(23, 0);
+		timerNumbers[0].position = new Vector(20, 4);
 		timerNumbers[0].extent = new Vector(43, 55);
 
-		timerNumbers[1].position = new Vector(47, 0);
+		timerNumbers[1].position = new Vector(40, 4);
 		timerNumbers[1].extent = new Vector(43, 55);
 
-		var colonCols = [
-			ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/colon_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/colon_red.png', ResourceLoader.getImage, this.imageResources).toTile()
-		];
+		var colonCols = ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile();
 
-		timerColon = new GuiAnim(colonCols);
-		timerColon.position = new Vector(67, 0);
+		timerColon = new GuiImage(colonCols);
+		timerColon.position = new Vector(55, 4);
 		timerColon.extent = new Vector(43, 55);
 
-		timerNumbers[2].position = new Vector(83, 0);
+		timerNumbers[2].position = new Vector(70, 4);
 		timerNumbers[2].extent = new Vector(43, 55);
 
-		timerNumbers[3].position = new Vector(107, 0);
+		timerNumbers[3].position = new Vector(90, 4);
 		timerNumbers[3].extent = new Vector(43, 55);
 
-		var pointCols = [
-			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/point_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/point_red.png', ResourceLoader.getImage, this.imageResources).toTile()
-		];
+		var pointCols = ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile();
 
-		timerPoint = new GuiAnim(pointCols);
-		timerPoint.position = new Vector(127, 0);
+		timerPoint = new GuiImage(pointCols);
+		timerPoint.position = new Vector(105, 4);
 		timerPoint.extent = new Vector(43, 55);
 
-		timerNumbers[4].position = new Vector(143, 0);
+		timerNumbers[4].position = new Vector(120, 4);
 		timerNumbers[4].extent = new Vector(43, 55);
 
-		timerNumbers[5].position = new Vector(167, 0);
+		timerNumbers[5].position = new Vector(140, 4);
 		timerNumbers[5].extent = new Vector(43, 55);
 
 		timerNumbers[6].position = new Vector(191, 0);
 		timerNumbers[6].extent = new Vector(43, 55);
 
-		timerCtrl.addChild(timerNumbers[0]);
-		timerCtrl.addChild(timerNumbers[1]);
-		timerCtrl.addChild(timerColon);
-		timerCtrl.addChild(timerNumbers[2]);
-		timerCtrl.addChild(timerNumbers[3]);
-		timerCtrl.addChild(timerPoint);
-		timerCtrl.addChild(timerNumbers[4]);
-		timerCtrl.addChild(timerNumbers[5]);
-		timerCtrl.addChild(timerNumbers[6]);
+		innerCtrl.addChild(timerNumbers[0]);
+		innerCtrl.addChild(timerNumbers[1]);
+		innerCtrl.addChild(timerColon);
+		innerCtrl.addChild(timerNumbers[2]);
+		innerCtrl.addChild(timerNumbers[3]);
+		innerCtrl.addChild(timerPoint);
+		innerCtrl.addChild(timerNumbers[4]);
+		innerCtrl.addChild(timerNumbers[5]);
+		// innerCtrl.addChild(timerNumbers[6]);
 
 		playGuiCtrl.addChild(timerCtrl);
 	}
@@ -269,103 +234,72 @@ class PlayGui {
 		}
 	}
 
-	public function initGemCounter(onFinish:Void->Void) {
-		gemCountNumbers[0].position = new Vector(30, 0);
+	public function initGemCounter() {
+		var gemBox = new GuiControl();
+		gemBox.position = new Vector(0, 0);
+		gemBox.extent = new Vector(300, 200);
+
+		var innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(26, 0);
+		innerCtrl.extent = new Vector(256, 64);
+		gemBox.addChild(innerCtrl);
+
+		gemCountNumbers[0].position = new Vector(20, 4);
 		gemCountNumbers[0].extent = new Vector(43, 55);
 
-		gemCountNumbers[1].position = new Vector(54, 0);
+		gemCountNumbers[1].position = new Vector(38, 4);
 		gemCountNumbers[1].extent = new Vector(43, 55);
 
-		gemCountNumbers[2].position = new Vector(78, 0);
+		gemCountNumbers[2].position = new Vector(56, 4);
 		gemCountNumbers[2].extent = new Vector(43, 55);
 
 		gemCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
-		gemCountSlash.position = new Vector(99, 0);
+		gemCountSlash.position = new Vector(73, 4);
 		gemCountSlash.extent = new Vector(43, 55);
 
-		gemCountNumbers[3].position = new Vector(120, 0);
+		gemCountNumbers[3].position = new Vector(89, 4);
 		gemCountNumbers[3].extent = new Vector(43, 55);
 
-		gemCountNumbers[4].position = new Vector(144, 0);
+		gemCountNumbers[4].position = new Vector(107, 4);
 		gemCountNumbers[4].extent = new Vector(43, 55);
 
-		gemCountNumbers[5].position = new Vector(168, 0);
+		gemCountNumbers[5].position = new Vector(125, 4);
 		gemCountNumbers[5].extent = new Vector(43, 55);
 
-		playGuiCtrl.addChild(gemCountNumbers[0]);
-		playGuiCtrl.addChild(gemCountNumbers[1]);
-		playGuiCtrl.addChild(gemCountNumbers[2]);
-		playGuiCtrl.addChild(gemCountSlash);
-		playGuiCtrl.addChild(gemCountNumbers[3]);
-		playGuiCtrl.addChild(gemCountNumbers[4]);
-		playGuiCtrl.addChild(gemCountNumbers[5]);
+		var gemHUD = new GuiImage(ResourceLoader.getResource('data/ui/game/gem.png', ResourceLoader.getImage, this.imageResources).toTile());
+		gemHUD.position = new Vector(144, 2);
+		gemHUD.extent = new Vector(64, 64);
 
-		this.gemImageScene = new h3d.scene.Scene();
-		// var gemImageRenderer = cast(this.gemImageScene.renderer, h3d.scene.Renderer);
-		// gemImageRenderer.skyMode = Hide;
+		innerCtrl.addChild(gemCountNumbers[0]);
+		innerCtrl.addChild(gemCountNumbers[1]);
+		innerCtrl.addChild(gemCountNumbers[2]);
+		innerCtrl.addChild(gemCountSlash);
+		innerCtrl.addChild(gemCountNumbers[3]);
+		innerCtrl.addChild(gemCountNumbers[4]);
+		innerCtrl.addChild(gemCountNumbers[5]);
+		innerCtrl.addChild(gemHUD);
 
-		gemImageSceneTarget = new Texture(60, 60, [Target]);
-		gemImageSceneTarget.depthBuffer = new DepthBuffer(60, 60);
-
-		gemImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(gemImageSceneTarget), scene2d);
-		gemImageSceneTargetBitmap.x = -8 * Settings.uiScale;
-		gemImageSceneTargetBitmap.y = -8 * Settings.uiScale;
-		gemImageSceneTargetBitmap.setScale(Settings.uiScale);
+		playGuiCtrl.addChild(gemBox);
 		// gemImageSceneTargetBitmap.blendMode = None;
 		// gemImageSceneTargetBitmap.addShader(new ColorKey());
-
-		var GEM_COLORS = ["red"];
-		var gemColor = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
-
-		gemImageObject = new DtsObject();
-		gemImageObject.dtsPath = "data/shapes/items/gem.dts";
-		gemImageObject.ambientRotate = true;
-		gemImageObject.showSequences = false;
-		gemImageObject.matNameOverride.set('base.gem', gemColor + ".gem");
-		// gemImageObject.matNameOverride.set("base.gem", "base.gem.");
-		gemImageObject.ambientSpinFactor /= -2;
-		// ["base.gem"] = color + ".gem";
-		ResourceLoader.load("shapes/items/gem.dts").entry.load(() -> {
-			ResourceLoader.load("shapes/items/" + gemColor + ".gem.png").entry.load(() -> {
-				gemImageObject.init(null, () -> {
-					for (mat in gemImageObject.materials) {
-						mat.mainPass.enableLights = false;
-
-						// Huge hacks
-						if (mat.blendMode != Add) {
-							var alphaShader = new h3d.shader.AlphaChannel();
-							mat.mainPass.addShader(alphaShader);
-						}
-					}
-					gemImageScene.addChild(gemImageObject);
-					var gemImageCenter = gemImageObject.getBounds().getCenter();
-
-					gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
-					gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
-					onFinish();
-				});
-			});
-		});
 	}
 
 	function initPowerupBox() {
-		powerupBox.position = new Vector(538, 6);
-		powerupBox.extent = new Vector(97, 96);
+		var powerupImgs = [
+			ResourceLoader.getResource('data/ui/game/pc/powerup.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/pc/powerup_copter.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/pc/powerup_jump.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/pc/powerup_mega.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/pc/powerup_speed.png', ResourceLoader.getImage, this.imageResources).toTile(),
+		];
+
+		powerupBox = new GuiAnim(powerupImgs);
+		powerupBox.position = new Vector(469, 0);
+		powerupBox.extent = new Vector(170, 170);
 		powerupBox.horizSizing = Left;
+		powerupBox.vertSizing = Bottom;
 
 		playGuiCtrl.addChild(powerupBox);
-
-		this.powerupImageScene = new h3d.scene.Scene();
-		// var powerupImageRenderer = cast(this.powerupImageScene.renderer, h3d.scene.pbr.Renderer);
-		// powerupImageRenderer.skyMode = Hide;
-
-		powerupImageSceneTarget = new Texture(68, 67, [Target]);
-		powerupImageSceneTarget.depthBuffer = new DepthBuffer(68, 67);
-
-		powerupImageSceneTargetBitmap = new Bitmap(Tile.fromTexture(powerupImageSceneTarget), scene2d);
-		powerupImageSceneTargetBitmap.x = scene2d.width - 88 * Settings.uiScale;
-		powerupImageSceneTargetBitmap.y = 18 * Settings.uiScale;
-		powerupImageSceneTargetBitmap.setScale(Settings.uiScale);
 	}
 
 	function initTexts() {
@@ -524,46 +458,16 @@ class PlayGui {
 	}
 
 	public function setPowerupImage(powerupIdentifier:String) {
-		this.powerupImageScene.removeChildren();
 		if (powerupIdentifier == "SuperJump") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/superjump.dts";
+			powerupBox.anim.currentFrame = 2;
 		} else if (powerupIdentifier == "SuperSpeed") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/superspeed.dts";
-		} else if (powerupIdentifier == "ShockAbsorber") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/shockabsorber.dts";
-		} else if (powerupIdentifier == "SuperBounce") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/superbounce.dts";
+			powerupBox.anim.currentFrame = 4;
 		} else if (powerupIdentifier == "Helicopter") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/images/helicopter.dts";
+			powerupBox.anim.currentFrame = 1;
 		} else if (powerupIdentifier == "MegaMarble") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/images/grow.dts";
+			powerupBox.anim.currentFrame = 3;
 		} else {
-			powerupIdentifier = "";
-			this.powerupImageObject = null;
-		}
-
-		if (powerupIdentifier != "") {
-			powerupImageObject.ambientRotate = true;
-			powerupImageObject.ambientSpinFactor /= 2;
-			powerupImageObject.showSequences = false;
-			powerupImageObject.init(null, () -> {
-				for (mat in powerupImageObject.materials) {
-					mat.mainPass.enableLights = false;
-					if (mat.blendMode != Alpha && mat.blendMode != Add)
-						mat.mainPass.addShader(new h3d.shader.AlphaChannel());
-				}
-				powerupImageScene.addChild(powerupImageObject);
-				var powerupImageCenter = powerupImageObject.getBounds().getCenter();
-
-				powerupImageScene.camera.pos = new Vector(0, 4, powerupImageCenter.z);
-				powerupImageScene.camera.target = new Vector(powerupImageCenter.x, powerupImageCenter.y, powerupImageCenter.z);
-			});
+			powerupBox.anim.currentFrame = 0;
 		}
 	}
 
@@ -573,13 +477,11 @@ class PlayGui {
 				number.anim.visible = false;
 			}
 			gemCountSlash.bmp.visible = false;
-			gemImageSceneTargetBitmap.visible = false;
 		} else {
 			for (number in gemCountNumbers) {
 				number.anim.visible = true;
 			}
 			gemCountSlash.bmp.visible = true;
-			gemImageSceneTargetBitmap.visible = true;
 		}
 
 		var totalHundredths = Math.floor(total / 100);
@@ -601,7 +503,7 @@ class PlayGui {
 	// 0: default
 	// 1: green
 	// 2: red
-	public function formatTimer(time:Float, color:Int = 0) {
+	public function formatTimer(time:Float) {
 		var et = time * 1000;
 		var thousandth = et % 10;
 		var hundredth = Math.floor((et % 1000) / 10);
@@ -616,40 +518,20 @@ class PlayGui {
 		var hundredthOne = hundredth % 10;
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 
-		timerNumbers[0].anim.currentFrame = minutesTen + color * 10;
-		timerNumbers[1].anim.currentFrame = minutesOne + color * 10;
-		timerNumbers[2].anim.currentFrame = secondsTen + color * 10;
-		timerNumbers[3].anim.currentFrame = secondsOne + color * 10;
-		timerNumbers[4].anim.currentFrame = hundredthTen + color * 10;
-		timerNumbers[5].anim.currentFrame = hundredthOne + color * 10;
-		timerNumbers[6].anim.currentFrame = thousandth + color * 10;
-
-		timerPoint.anim.currentFrame = color;
-		timerColon.anim.currentFrame = color;
+		timerNumbers[0].anim.currentFrame = minutesTen;
+		timerNumbers[1].anim.currentFrame = minutesOne;
+		timerNumbers[2].anim.currentFrame = secondsTen;
+		timerNumbers[3].anim.currentFrame = secondsOne;
+		timerNumbers[4].anim.currentFrame = hundredthTen;
+		timerNumbers[5].anim.currentFrame = hundredthOne;
+		timerNumbers[6].anim.currentFrame = thousandth;
 	}
 
 	public function render(engine:h3d.Engine) {
-		engine.pushTarget(this.gemImageSceneTarget);
-
-		engine.clear(0, 1);
-		this.gemImageScene.render(engine);
-
-		engine.popTarget();
-		engine.pushTarget(this.powerupImageSceneTarget);
-
-		engine.clear(0, 1);
-		this.powerupImageScene.render(engine);
-
-		engine.popTarget();
+		// Do nothing
 	}
 
 	public function update(timeState:TimeState) {
-		this.gemImageObject.update(timeState);
-		this.gemImageScene.setElapsedTime(timeState.dt);
-		if (this.powerupImageObject != null)
-			this.powerupImageObject.update(timeState);
-		this.powerupImageScene.setElapsedTime(timeState.dt);
-
 		if (this.fpsMeter != null) {
 			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} fps';
 		}
