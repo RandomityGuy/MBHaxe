@@ -21,8 +21,8 @@ class Helicopter extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/pugyrocoptervoice.wav").entry.load(() -> {
-				this.pickupSound = ResourceLoader.getResource("data/sound/pugyrocoptervoice.wav", ResourceLoader.getAudio, this.soundResources);
+			ResourceLoader.load("sound/gyrocopter.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/gyrocopter.wav", ResourceLoader.getAudio, this.soundResources);
 				onFinish();
 			});
 		});

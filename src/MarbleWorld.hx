@@ -18,8 +18,6 @@ import shapes.Checkpoint;
 import triggers.CheckpointTrigger;
 import shapes.EasterEgg;
 import shapes.Sign;
-import triggers.TeleportTrigger;
-import triggers.DestinationTrigger;
 import src.Replay;
 import gui.Canvas;
 import hxd.snd.Channel;
@@ -143,7 +141,6 @@ class MarbleWorld extends Scheduler {
 	public var cursorLock:Bool = true;
 
 	var timeTravelSound:Channel;
-	var alarmSound:Channel;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -386,12 +383,7 @@ class MarbleWorld extends Scheduler {
 			"sound/bouncehard2.wav",
 			"sound/bouncehard3.wav",
 			"sound/bouncehard4.wav",
-			"sound/spawn.wav",
-			"sound/ready.wav",
-			"sound/set.wav",
-			"sound/go.wav",
-			"sound/alarm.wav",
-			"sound/alarm_timeout.wav",
+			"sound/spawn_alternate.wav",
 			"sound/missinggems.wav",
 			"shapes/images/glow_bounce.dts",
 			"shapes/images/glow_bounce.png",
@@ -454,10 +446,6 @@ class MarbleWorld extends Scheduler {
 		this.blastAmount = 0;
 		this.outOfBoundsTime = null;
 		this.finishTime = null;
-		if (this.alarmSound != null) {
-			this.alarmSound.stop();
-			this.alarmSound = null;
-		}
 
 		this.currentCheckpoint = null;
 		this.currentCheckpointTrigger = null;
@@ -532,29 +520,7 @@ class MarbleWorld extends Scheduler {
 		this.newOrientationQuat = new Quat();
 		this.deselectPowerUp();
 
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
-
-		Console.log("State Start");
-		this.clearSchedule();
-		this.schedule(0.5, () -> {
-			// setCenterText('ready');
-			Console.log("State Ready");
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/ready.wav', ResourceLoader.getAudio, this.soundResources));
-			return 0;
-		});
-		this.schedule(2, () -> {
-			// setCenterText('set');
-			Console.log("State Set");
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/set.wav', ResourceLoader.getAudio, this.soundResources));
-			return 0;
-		});
-		this.schedule(3.5, () -> {
-			// setCenterText('go');
-			Console.log("State Go");
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/go.wav', ResourceLoader.getAudio, this.soundResources));
-			Console.log("State Play");
-			return 0;
-		});
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 
 		return 0;
 	}
@@ -566,19 +532,11 @@ class MarbleWorld extends Scheduler {
 			this.playGui.setCenterText('none');
 			this.marble.mode = Start;
 		}
-		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 2)) {
-			this.playGui.setCenterText('ready');
+		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
+			this.playGui.setCenterText('none');
 			this.marble.mode = Start;
 		}
-		if ((this.timeState.currentAttemptTime >= 2) && (this.timeState.currentAttemptTime < 3.5)) {
-			this.playGui.setCenterText('set');
-			this.marble.mode = Start;
-		}
-		if ((this.timeState.currentAttemptTime >= 3.5) && (this.timeState.currentAttemptTime < 5.5)) {
-			this.playGui.setCenterText('go');
-			this.marble.mode = Play;
-		}
-		if (this.timeState.currentAttemptTime >= 5.5 && this.finishTime == null) {
+		if (this.timeState.currentAttemptTime >= 3.5 && this.finishTime == null) {
 			this.playGui.setCenterText('none');
 			this.marble.mode = Play;
 		}
@@ -722,10 +680,6 @@ class MarbleWorld extends Scheduler {
 			trigger = new InBoundsTrigger(element, cast this);
 		} else if (datablockLowercase == "helptrigger") {
 			trigger = new HelpTrigger(element, cast this);
-		} else if (datablockLowercase == "teleporttrigger") {
-			trigger = new TeleportTrigger(element, cast this);
-		} else if (datablockLowercase == "destinationtrigger") {
-			trigger = new DestinationTrigger(element, cast this);
 		} else if (datablockLowercase == "checkpointtrigger") {
 			trigger = new CheckpointTrigger(element, cast this);
 			_previousCheckpointTrigger = cast trigger;
@@ -1168,16 +1122,6 @@ class MarbleWorld extends Scheduler {
 		if (timeToDisplay >= this.mission.qualifyTime)
 			return 2;
 
-		if (this.timeState.currentAttemptTime >= 3.5) {
-			// Create the flashing effect
-			var alarmStart = this.mission.computeAlarmStartTime();
-			var elapsed = timeToDisplay - alarmStart;
-			if (elapsed < 0)
-				return 0;
-			if (Math.floor(elapsed) % 2 == 0)
-				return 2;
-		}
-
 		return 0; // Default yellow
 	}
 
@@ -1196,16 +1140,11 @@ class MarbleWorld extends Scheduler {
 				if (timeTravelSound == null) {
 					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
 					timeTravelSound = AudioManager.playSound(ttsnd, null, true);
-
-					if (alarmSound != null)
-						alarmSound.pause = true;
 				}
 			} else {
 				if (timeTravelSound != null) {
 					timeTravelSound.stop();
 					timeTravelSound = null;
-					if (alarmSound != null)
-						alarmSound.pause = false;
 				}
 				if (this.timeState.currentAttemptTime >= 3.5) {
 					this.timeState.gameplayClock += dt;
@@ -1231,27 +1170,6 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 		this.timeState.timeSinceLoad += dt;
-
-		// Handle alarm warnings (that the user is about to exceed the par time)
-		if (this.timeState.currentAttemptTime >= 3.5) {
-			var alarmStart = this.mission.computeAlarmStartTime();
-
-			if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
-				// Start the alarm
-				this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
-					null, true); // AudioManager.createAudioSource('alarm.wav');
-				this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.');
-			}
-			if (prevGameplayClock < this.mission.qualifyTime && this.timeState.gameplayClock >= this.mission.qualifyTime) {
-				// Stop the alarm
-				if (this.alarmSound != null) {
-					this.alarmSound.stop();
-					this.alarmSound = null;
-				}
-				this.displayHelp("The clock has passed the Par Time.");
-				AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
-			}
-		}
 
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
@@ -1338,7 +1256,7 @@ class MarbleWorld extends Scheduler {
 		if (this.gemCount == this.totalGems) {
 			string = "You have all the diamonds, head for the finish!";
 			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotallgems.wav', ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_all.wav', ResourceLoader.getAudio, this.soundResources));
 
 			// Some levels with this package end immediately upon collection of all gems
 			// if (this.mission.misFile.activatedPackages.includes('endWithTheGems')) {
@@ -1357,7 +1275,7 @@ class MarbleWorld extends Scheduler {
 			}
 
 			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_collect.wav', ResourceLoader.getAudio, this.soundResources));
 		}
 
 		displayAlert(string);
@@ -1508,10 +1426,6 @@ class MarbleWorld extends Scheduler {
 			if (timeTravelSound != null) {
 				timeTravelSound.stop();
 				timeTravelSound = null;
-			}
-			if (alarmSound != null) {
-				alarmSound.stop();
-				alarmSound = null;
 			}
 		}
 	}
@@ -1714,7 +1628,6 @@ class MarbleWorld extends Scheduler {
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
 		playGui.setCenterText('outofbounds');
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 		// if (this.replay.mode != = 'playback')
 		this.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2, () -> {
 			playGui.setCenterText('none');
@@ -1818,7 +1731,7 @@ class MarbleWorld extends Scheduler {
 		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
 		if (this.checkpointHeldPowerup != null)
 			this.schedule(this.timeState.currentAttemptTime + 0.5, () -> this.pickUpPowerUp(this.checkpointHeldPowerup));
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	public function setCursorLock(enabled:Bool) {

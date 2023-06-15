@@ -43,8 +43,8 @@ class AntiGravity extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/gravitychange.wav").entry.load(() -> {
-				this.pickupSound = ResourceLoader.getResource("data/sound/gravitychange.wav", ResourceLoader.getAudio, this.soundResources);
+			ResourceLoader.load("sound/pu_gravity.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/pu_gravity.wav", ResourceLoader.getAudio, this.soundResources);
 				onFinish();
 			});
 		});

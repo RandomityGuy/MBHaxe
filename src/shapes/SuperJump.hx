@@ -51,9 +51,9 @@ class SuperJump extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/pusuperjumpvoice.wav").entry.load(() -> {
-				this.pickupSound = ResourceLoader.getResource("data/sound/pusuperjumpvoice.wav", ResourceLoader.getAudio, this.soundResources);
-				ResourceLoader.load("sound/dosuperjump.wav").entry.load(onFinish);
+			ResourceLoader.load("sound/super_jump.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/super_jump.wav", ResourceLoader.getAudio, this.soundResources);
+				ResourceLoader.load("sound/use_superjump.wav").entry.load(onFinish);
 			});
 		});
 	}
@@ -68,7 +68,7 @@ class SuperJump extends PowerUp {
 		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperjump.wav", ResourceLoader.getAudio, this.soundResources));
+		AudioManager.playSound(ResourceLoader.getResource("data/sound/use_superjump.wav", ResourceLoader.getAudio, this.soundResources));
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp();
 	}

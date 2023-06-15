@@ -20,15 +20,15 @@ class MegaMarble extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/pumegamarblevoice.wav").entry.load(() -> {
+			ResourceLoader.load("sound/mega_marble.wav").entry.load(() -> {
 				var worker = new ResourceLoaderWorker(onFinish);
 				worker.loadFile("sound/mega_bouncehard1.wav");
 				worker.loadFile("sound/mega_bouncehard2.wav");
 				worker.loadFile("sound/mega_bouncehard3.wav");
 				worker.loadFile("sound/mega_bouncehard4.wav");
 				worker.loadFile("sound/mega_roll.wav");
-				worker.loadFile("sound/dosuperjump.wav");
-				this.pickupSound = ResourceLoader.getResource("data/sound/pumegamarblevoice.wav", ResourceLoader.getAudio, this.soundResources);
+				worker.loadFile("sound/use_mega.wav");
+				this.pickupSound = ResourceLoader.getResource("data/sound/mega_marble.wav", ResourceLoader.getAudio, this.soundResources);
 				worker.run();
 			});
 		});
@@ -41,7 +41,7 @@ class MegaMarble extends PowerUp {
 	public function use(timeState:TimeState) {
 		this.level.marble.enableMegaMarble(timeState.currentAttemptTime);
 		this.level.deselectPowerUp();
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/dosuperjump.wav', ResourceLoader.getAudio, this.soundResources));
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_mega.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {

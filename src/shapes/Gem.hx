@@ -35,8 +35,8 @@ class Gem extends DtsObject {
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
 			var worker = new ResourceLoaderWorker(onFinish);
-			worker.loadFile('sound/gotgem.wav');
-			worker.loadFile('sound/gotallgems.wav');
+			worker.loadFile('sound/gem_collect.wav');
+			worker.loadFile('sound/gem_all.wav');
 			worker.run();
 		});
 	}
