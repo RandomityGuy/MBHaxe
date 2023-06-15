@@ -20,8 +20,8 @@ class Blast extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/publastvoice.wav").entry.load(() -> {
-				this.pickupSound = ResourceLoader.getResource("data/sound/publastvoice.wav", ResourceLoader.getAudio, this.soundResources);
+			ResourceLoader.load("sound/ultrablast.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/ultrablast.wav", ResourceLoader.getAudio, this.soundResources);
 				onFinish();
 			});
 		});

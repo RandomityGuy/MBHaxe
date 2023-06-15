@@ -32,8 +32,8 @@ class TimeTravel extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/putimetravelvoice.wav").entry.load(() -> {
-				this.pickupSound = ResourceLoader.getResource("data/sound/putimetravelvoice.wav", ResourceLoader.getAudio, this.soundResources);
+			ResourceLoader.load("sound/time_travel.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/time_travel.wav", ResourceLoader.getAudio, this.soundResources);
 				ResourceLoader.load("sound/timetravelactive.wav").entry.load(onFinish);
 			});
 		});

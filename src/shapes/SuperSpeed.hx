@@ -56,9 +56,9 @@ class SuperSpeed extends PowerUp {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/pusuperspeedvoice.wav").entry.load(() -> {
-				this.pickupSound = ResourceLoader.getResource("data/sound/pusuperspeedvoice.wav", ResourceLoader.getAudio, this.soundResources);
-				ResourceLoader.load("sound/dosuperspeed.wav").entry.load(onFinish);
+			ResourceLoader.load("sound/super_speed.wav").entry.load(() -> {
+				this.pickupSound = ResourceLoader.getResource("data/sound/super_speed.wav", ResourceLoader.getAudio, this.soundResources);
+				ResourceLoader.load("sound/use_speed.wav").entry.load(onFinish);
 			});
 		});
 	}
@@ -85,7 +85,7 @@ class SuperSpeed extends PowerUp {
 		// marble.body.addLinearVelocity(Util.vecThreeToOimo(movementVector).scale(24.7)); // Whirligig's determined value
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperspeed.wav", ResourceLoader.getAudio, this.soundResources));
+		AudioManager.playSound(ResourceLoader.getResource("data/sound/use_speed.wav", ResourceLoader.getAudio, this.soundResources));
 		this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		this.level.deselectPowerUp();
 	}

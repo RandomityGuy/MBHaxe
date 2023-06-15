@@ -22,7 +22,7 @@ class EasterEgg extends PowerUp {
 		}
 		if (!found) {
 			Settings.easterEggs.set(this.level.mission.path, this.level.timeState.currentAttemptTime);
-			this.pickupSound = ResourceLoader.getResource("data/sound/easter.wav", ResourceLoader.getAudio, this.soundResources);
+			this.pickupSound = ResourceLoader.getResource("data/sound/easter_egg.wav", ResourceLoader.getAudio, this.soundResources);
 			this.customPickupMessage = "You found an Easter Egg!";
 		} else {
 			this.pickupSound = ResourceLoader.getResource("data/sound/easterfound.wav", ResourceLoader.getAudio, this.soundResources);
@@ -34,7 +34,7 @@ class EasterEgg extends PowerUp {
 
 	public override function init(level:src.MarbleWorld, onFinish:() -> Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/easter.wav").entry.load(() -> {
+			ResourceLoader.load("sound/easter_egg.wav").entry.load(() -> {
 				ResourceLoader.load("sound/easterfound.wav").entry.load(onFinish);
 			});
 		});
