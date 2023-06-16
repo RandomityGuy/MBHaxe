@@ -70,7 +70,6 @@ class RefractMaterial extends hxsl.Shader {
 			var specular = specularColor * pow(specValue, shininess);
 
 			outCol += specular * diffuse.a;
-			outCol = refractColor;
 
 			// Gamma correction using our regression model
 			if (doGammaRamp) {
