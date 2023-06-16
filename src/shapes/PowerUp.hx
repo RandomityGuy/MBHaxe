@@ -41,7 +41,7 @@ abstract class PowerUp extends DtsObject {
 			if (customPickupMessage != null)
 				this.level.displayAlert(customPickupMessage);
 			else
-				this.level.displayAlert('You picked up a ${this.pickUpName}!');
+				this.level.displayAlert('You picked up ${this.pickUpName}!');
 			if (this.element.showhelponpickup == "1" && !this.autoUse)
 				this.level.displayHelp('Press <func:bind mousefire> to use the ${this.pickUpName}!');
 

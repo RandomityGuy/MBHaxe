@@ -23,10 +23,10 @@ class EasterEgg extends PowerUp {
 		if (!found) {
 			Settings.easterEggs.set(this.level.mission.path, this.level.timeState.currentAttemptTime);
 			this.pickupSound = ResourceLoader.getResource("data/sound/easter_egg.wav", ResourceLoader.getAudio, this.soundResources);
-			this.customPickupMessage = "You found an Easter Egg!";
+			this.customPickupMessage = "You picked up an Easter Egg!";
 		} else {
 			this.pickupSound = ResourceLoader.getResource("data/sound/easterfound.wav", ResourceLoader.getAudio, this.soundResources);
-			this.customPickupMessage = "You already found this Easter Egg.";
+			this.customPickupMessage = "You picked up an Easter Egg!.";
 		}
 
 		return true;

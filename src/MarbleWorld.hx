@@ -139,6 +139,8 @@ class MarbleWorld extends Scheduler {
 	public var gemCount:Int = 0;
 	public var blastAmount:Float = 0;
 
+	var renderBlastAmount:Float = 0;
+
 	public var cursorLock:Bool = true;
 
 	var timeTravelSound:Channel;
@@ -446,6 +448,7 @@ class MarbleWorld extends Scheduler {
 		this.bonusTime = 0;
 		this.outOfBounds = false;
 		this.blastAmount = 0;
+		this.renderBlastAmount = 0;
 		this.outOfBoundsTime = null;
 		this.finishTime = null;
 
@@ -1173,9 +1176,12 @@ class MarbleWorld extends Scheduler {
 	function updateBlast(timestate:TimeState) {
 		if (this.game == "ultra") {
 			if (this.blastAmount < 1) {
-				this.blastAmount = Util.clamp(this.blastAmount + (timeState.dt / 25), 0, 1);
+				this.blastAmount = Util.clamp(this.blastAmount + (timeState.dt / 30), 0, 1);
+				this.renderBlastAmount = this.blastAmount;
+			} else {
+				this.renderBlastAmount = Math.min(this.blastAmount, timestate.dt * 0.75 + this.renderBlastAmount);
 			}
-			this.playGui.setBlastValue(this.blastAmount);
+			this.playGui.setBlastValue(this.renderBlastAmount);
 		}
 	}
 
@@ -1245,7 +1251,7 @@ class MarbleWorld extends Scheduler {
 
 		// Show a notification (and play a sound) based on the gems remaining
 		if (this.gemCount == this.totalGems) {
-			string = "You have all the diamonds, head for the finish!";
+			string = "You have all the gems, head for the finish!";
 			// if (!this.rewinding)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_all.wav', ResourceLoader.getAudio, this.soundResources));
 
@@ -1256,13 +1262,13 @@ class MarbleWorld extends Scheduler {
 			// 	this.touchFinish(completionOfImpact);
 			// }
 		} else {
-			string = "You picked up a diamond.  ";
+			string = "You picked up a gem. ";
 
 			var remaining = this.totalGems - this.gemCount;
 			if (remaining == 1) {
-				string += "Only one diamond to go!";
+				string += "Only one gem to go!";
 			} else {
-				string += '${remaining} diamonds to go!';
+				string += '${remaining} gems to go!';
 			}
 
 			// if (!this.rewinding)
@@ -1402,7 +1408,7 @@ class MarbleWorld extends Scheduler {
 
 		if (this.gemCount < this.totalGems) {
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/missinggems.wav', ResourceLoader.getAudio, this.soundResources));
-			displayAlert("You can't finish without all the diamonds!!");
+			displayAlert("You can't finish without all the gems!");
 		} else {
 			this.endPad.spawnFirework(this.timeState);
 			this.finishTime = this.timeState.clone();

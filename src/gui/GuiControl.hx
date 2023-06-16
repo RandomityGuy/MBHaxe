@@ -18,6 +18,7 @@ enum HorizSizing {
 	Left;
 	Center;
 	Relative;
+	Height;
 }
 
 enum VertSizing {
@@ -26,6 +27,7 @@ enum VertSizing {
 	Top;
 	Center;
 	Relative;
+	Width;
 }
 
 typedef MouseState = {
@@ -40,6 +42,8 @@ class GuiControl {
 
 	var position:Vector;
 	var extent:Vector;
+	var xScale:Float = 1;
+	var yScale:Float = 1;
 
 	var children:Array<GuiControl> = [];
 
@@ -130,7 +134,7 @@ class GuiControl {
 
 		if (this.parent != null) {
 			parentRect = this.parent.getRenderRectangle();
-			rect.position = parentRect.position.add(this.position.multiply(uiScaleFactor));
+			rect.position = parentRect.position.add(new Vector(this.position.x * uiScaleFactor * xScale, this.position.y * uiScaleFactor * yScale));
 		}
 
 		var scaleFactor = 1.0 / Window.getInstance().windowToPixelRatio;
@@ -144,6 +148,14 @@ class GuiControl {
 			else
 				rect.extent.x = Window.getInstance().width * scaleFactor;
 		}
+
+		if (this.horizSizing == HorizSizing.Height) {
+			if (this.parent != null)
+				rect.extent.x = parentRect.extent.y * (this.extent.y / parent.extent.y);
+			else
+				rect.extent.x = Window.getInstance().height * scaleFactor;
+		}
+
 		if (this.vertSizing == VertSizing.Height) {
 			if (this.parent != null)
 				rect.extent.y = parentRect.extent.y * (this.extent.y / parent.extent.y);
@@ -151,40 +163,47 @@ class GuiControl {
 				rect.extent.y = Window.getInstance().height * scaleFactor;
 		}
 
+		if (this.vertSizing == VertSizing.Width) {
+			if (this.parent != null)
+				rect.extent.y = parentRect.extent.x * (this.extent.x / parent.extent.x);
+			else
+				rect.extent.y = Window.getInstance().width * scaleFactor;
+		}
+
 		if (this.horizSizing == HorizSizing.Center) {
 			if (this.parent != null) {
-				rect.position.x = parentRect.position.x + parentRect.extent.x / 2 - (rect.extent.x * uiScaleFactor) / 2;
-				rect.extent.x *= uiScaleFactor;
+				rect.position.x = parentRect.position.x + parentRect.extent.x / 2 - (rect.extent.x * uiScaleFactor * xScale) / 2;
+				rect.extent.x *= uiScaleFactor * xScale;
 			}
 		}
 		if (this.vertSizing == VertSizing.Center) {
 			if (this.parent != null) {
-				rect.position.y = parentRect.position.y + parentRect.extent.y / 2 - (rect.extent.y * uiScaleFactor) / 2;
-				rect.extent.y *= uiScaleFactor;
+				rect.position.y = parentRect.position.y + parentRect.extent.y / 2 - (rect.extent.y * uiScaleFactor * yScale) / 2;
+				rect.extent.y *= uiScaleFactor * yScale;
 			}
 		}
 		if (this.horizSizing == HorizSizing.Right) {
 			if (this.parent != null) {
-				rect.position.x = parentRect.position.x + this.position.x * uiScaleFactor;
-				rect.extent.x *= uiScaleFactor;
+				rect.position.x = parentRect.position.x + this.position.x * uiScaleFactor * xScale;
+				rect.extent.x *= uiScaleFactor * xScale;
 			}
 		}
 		if (this.vertSizing == VertSizing.Bottom) {
 			if (this.parent != null) {
-				rect.position.y = parentRect.position.y + this.position.y * uiScaleFactor;
-				rect.extent.y *= uiScaleFactor;
+				rect.position.y = parentRect.position.y + this.position.y * uiScaleFactor * yScale;
+				rect.extent.y *= uiScaleFactor * yScale;
 			}
 		}
 		if (this.horizSizing == HorizSizing.Left) {
 			if (this.parent != null) {
-				rect.position.x = parentRect.position.x + parentRect.extent.x - (parent.extent.x - this.position.x) * uiScaleFactor;
-				rect.extent.x *= uiScaleFactor;
+				rect.position.x = parentRect.position.x + parentRect.extent.x - (parent.extent.x - this.position.x) * uiScaleFactor * xScale;
+				rect.extent.x *= uiScaleFactor * xScale;
 			}
 		}
 		if (this.vertSizing == VertSizing.Top) {
 			if (this.parent != null) {
-				rect.position.y = parentRect.position.y + parentRect.extent.y - (parent.extent.y - this.position.y) * uiScaleFactor;
-				rect.extent.y *= uiScaleFactor;
+				rect.position.y = parentRect.position.y + parentRect.extent.y - (parent.extent.y - this.position.y) * uiScaleFactor * yScale;
+				rect.extent.y *= uiScaleFactor * yScale;
 			}
 		}
 		if (this.parent != null) {

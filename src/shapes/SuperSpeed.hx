@@ -47,7 +47,7 @@ class SuperSpeed extends PowerUp {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperSpeed";
-		this.pickUpName = "Speed Booster PowerUp";
+		this.pickUpName = "a Super Speed powerup";
 		this.useInstancing = true;
 		ssEmitterParticleData = new ParticleData();
 		ssEmitterParticleData.identifier = "superSpeedParticle";

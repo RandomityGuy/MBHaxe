@@ -15,7 +15,7 @@ class MegaMarble extends PowerUp {
 		this.isTSStatic = false;
 		this.showSequences = true;
 		this.identifier = "MegaMarble";
-		this.pickUpName = "Mega Marble PowerUp";
+		this.pickUpName = "a Mega-Marble powerup";
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

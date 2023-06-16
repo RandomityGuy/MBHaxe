@@ -13,7 +13,7 @@ class Blast extends PowerUp {
 		this.isTSStatic = false;
 		this.showSequences = true;
 		this.identifier = "Blast";
-		this.pickUpName = "Blast PowerUp";
+		this.pickUpName = "a Blast powerup";
 		this.ambientRotate = false;
 		this.autoUse = true;
 	}
@@ -32,7 +32,7 @@ class Blast extends PowerUp {
 	}
 
 	public function use(timeState:TimeState) {
-		this.level.blastAmount = 1.03;
+		this.level.blastAmount = 1.2;
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
