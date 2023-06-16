@@ -1,5 +1,6 @@
 package gui;
 
+import h3d.Matrix;
 import src.ProfilerUI;
 import hxd.App;
 import hxd.res.Image;
@@ -47,6 +48,7 @@ class PlayGui {
 
 	var gemCountNumbers:Array<GuiAnim> = [];
 	var gemCountSlash:GuiImage;
+	var gemHUD:GuiImage;
 	var powerupBox:GuiAnim;
 	var RSGOCenterText:Anim;
 
@@ -57,12 +59,14 @@ class PlayGui {
 
 	var blastBar:GuiControl;
 	var blastFill:GuiImage;
+	var blastFillUltra:GuiImage;
 	var blastFrame:GuiImage;
 
 	var imageResources:Array<Resource<Image>> = [];
 	var textureResources:Array<Resource<Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
 
+	var playGuiCtrlOuter:GuiControl;
 	var playGuiCtrl:GuiControl;
 
 	var resizeEv:Void->Void;
@@ -73,9 +77,11 @@ class PlayGui {
 
 	var middleMessages:Array<MiddleMessage> = [];
 
+	var totalGems:Int = 0;
+
 	public function dispose() {
 		if (_init) {
-			playGuiCtrl.dispose();
+			playGuiCtrlOuter.dispose();
 			RSGOCenterText.remove();
 
 			for (textureResource in textureResources) {
@@ -95,12 +101,24 @@ class PlayGui {
 	public function init(scene2d:h2d.Scene, game:String, onFinish:Void->Void) {
 		this.scene2d = scene2d;
 		this._init = true;
+		// Settings.uiScale = 2.25;
+
+		playGuiCtrlOuter = new GuiControl();
+		playGuiCtrlOuter.position = new Vector();
+		playGuiCtrlOuter.extent = new Vector(640, 480);
+		playGuiCtrlOuter.horizSizing = Width;
+		playGuiCtrlOuter.vertSizing = Height;
 
 		playGuiCtrl = new GuiControl();
-		playGuiCtrl.position = new Vector();
-		playGuiCtrl.extent = new Vector(640, 480);
+		playGuiCtrl.position = new Vector(145, 82);
+
+		var subX = 640 - (scene2d.width - 145 * 2) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - 82 * 2) * 480 / scene2d.height;
+
+		playGuiCtrl.extent = new Vector(640 - subX, 480 - subY);
 		playGuiCtrl.horizSizing = Width;
 		playGuiCtrl.vertSizing = Height;
+		playGuiCtrlOuter.addChild(playGuiCtrl);
 
 		var numberTiles = [];
 		for (i in 0...10) {
@@ -137,11 +155,12 @@ class PlayGui {
 			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
 		}
 
-		playGuiCtrl.render(scene2d);
+		playGuiCtrlOuter.render(scene2d);
 
 		resizeEv = () -> {
 			var wnd = Window.getInstance();
-			playGuiCtrl.render(MarbleGame.canvas.scene2d);
+			powerupBox.position.x = wnd.width * 469.0 / 640.0;
+			playGuiCtrlOuter.render(MarbleGame.canvas.scene2d);
 		};
 
 		Window.getInstance().addResizeEvent(resizeEv);
@@ -151,44 +170,64 @@ class PlayGui {
 
 	public function initTimer() {
 		var timerCtrl = new GuiImage(ResourceLoader.getResource('data/ui/game/timebackdrop0.png', ResourceLoader.getImage, this.imageResources).toTile());
-		timerCtrl.horizSizing = HorizSizing.Center;
 		timerCtrl.position = new Vector(215, 0);
 		timerCtrl.extent = new Vector(256, 64);
+		timerCtrl.horizSizing = Center;
+		timerCtrl.xScale = (scene2d.height - 82 * 2) / 480;
+		timerCtrl.yScale = (scene2d.height - 82 * 2) / 480;
 
 		var innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(26, 0);
 		innerCtrl.extent = new Vector(256, 64);
+		innerCtrl.xScale = (scene2d.height - 82 * 2) / 480;
+		innerCtrl.yScale = (scene2d.height - 82 * 2) / 480;
 		timerCtrl.addChild(innerCtrl);
 
 		timerNumbers[0].position = new Vector(20, 4);
 		timerNumbers[0].extent = new Vector(43, 55);
+		timerNumbers[0].xScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[0].yScale = (scene2d.height - 82 * 2) / 480;
 
 		timerNumbers[1].position = new Vector(40, 4);
 		timerNumbers[1].extent = new Vector(43, 55);
+		timerNumbers[1].xScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[1].yScale = (scene2d.height - 82 * 2) / 480;
 
 		var colonCols = ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile();
 
 		timerColon = new GuiImage(colonCols);
 		timerColon.position = new Vector(55, 4);
 		timerColon.extent = new Vector(43, 55);
+		timerColon.xScale = (scene2d.height - 82 * 2) / 480;
+		timerColon.yScale = (scene2d.height - 82 * 2) / 480;
 
 		timerNumbers[2].position = new Vector(70, 4);
 		timerNumbers[2].extent = new Vector(43, 55);
+		timerNumbers[2].xScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[2].yScale = (scene2d.height - 82 * 2) / 480;
 
 		timerNumbers[3].position = new Vector(90, 4);
 		timerNumbers[3].extent = new Vector(43, 55);
+		timerNumbers[3].xScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[3].yScale = (scene2d.height - 82 * 2) / 480;
 
 		var pointCols = ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile();
 
 		timerPoint = new GuiImage(pointCols);
 		timerPoint.position = new Vector(105, 4);
 		timerPoint.extent = new Vector(43, 55);
+		timerPoint.xScale = (scene2d.height - 82 * 2) / 480;
+		timerPoint.yScale = (scene2d.height - 82 * 2) / 480;
 
 		timerNumbers[4].position = new Vector(120, 4);
 		timerNumbers[4].extent = new Vector(43, 55);
+		timerNumbers[4].xScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[4].yScale = (scene2d.height - 82 * 2) / 480;
 
 		timerNumbers[5].position = new Vector(140, 4);
 		timerNumbers[5].extent = new Vector(43, 55);
+		timerNumbers[5].xScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[5].yScale = (scene2d.height - 82 * 2) / 480;
 
 		timerNumbers[6].position = new Vector(191, 0);
 		timerNumbers[6].extent = new Vector(43, 55);
@@ -238,37 +277,57 @@ class PlayGui {
 		var gemBox = new GuiControl();
 		gemBox.position = new Vector(0, 0);
 		gemBox.extent = new Vector(300, 200);
+		gemBox.xScale = (scene2d.height - 82 * 2) / 480;
+		gemBox.yScale = (scene2d.height - 82 * 2) / 480;
 
 		var innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(26, 0);
 		innerCtrl.extent = new Vector(256, 64);
+		innerCtrl.xScale = (scene2d.height - 82 * 2) / 480;
+		innerCtrl.yScale = (scene2d.height - 82 * 2) / 480;
 		gemBox.addChild(innerCtrl);
 
 		gemCountNumbers[0].position = new Vector(20, 4);
 		gemCountNumbers[0].extent = new Vector(43, 55);
+		gemCountNumbers[0].xScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[0].yScale = (scene2d.height - 82 * 2) / 480;
 
 		gemCountNumbers[1].position = new Vector(38, 4);
 		gemCountNumbers[1].extent = new Vector(43, 55);
+		gemCountNumbers[1].xScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[1].yScale = (scene2d.height - 82 * 2) / 480;
 
 		gemCountNumbers[2].position = new Vector(56, 4);
 		gemCountNumbers[2].extent = new Vector(43, 55);
+		gemCountNumbers[2].xScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[2].yScale = (scene2d.height - 82 * 2) / 480;
 
 		gemCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
 		gemCountSlash.position = new Vector(73, 4);
 		gemCountSlash.extent = new Vector(43, 55);
+		gemCountSlash.xScale = (scene2d.height - 82 * 2) / 480;
+		gemCountSlash.yScale = (scene2d.height - 82 * 2) / 480;
 
 		gemCountNumbers[3].position = new Vector(89, 4);
 		gemCountNumbers[3].extent = new Vector(43, 55);
+		gemCountNumbers[3].xScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[3].yScale = (scene2d.height - 82 * 2) / 480;
 
 		gemCountNumbers[4].position = new Vector(107, 4);
 		gemCountNumbers[4].extent = new Vector(43, 55);
+		gemCountNumbers[4].xScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[4].yScale = (scene2d.height - 82 * 2) / 480;
 
 		gemCountNumbers[5].position = new Vector(125, 4);
 		gemCountNumbers[5].extent = new Vector(43, 55);
+		gemCountNumbers[5].xScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[5].yScale = (scene2d.height - 82 * 2) / 480;
 
-		var gemHUD = new GuiImage(ResourceLoader.getResource('data/ui/game/gem.png', ResourceLoader.getImage, this.imageResources).toTile());
+		gemHUD = new GuiImage(ResourceLoader.getResource('data/ui/game/gem.png', ResourceLoader.getImage, this.imageResources).toTile());
 		gemHUD.position = new Vector(144, 2);
 		gemHUD.extent = new Vector(64, 64);
+		gemHUD.xScale = (scene2d.height - 82 * 2) / 480;
+		gemHUD.yScale = (scene2d.height - 82 * 2) / 480;
 
 		innerCtrl.addChild(gemCountNumbers[0]);
 		innerCtrl.addChild(gemCountNumbers[1]);
@@ -294,36 +353,39 @@ class PlayGui {
 		];
 
 		powerupBox = new GuiAnim(powerupImgs);
-		powerupBox.position = new Vector(469, 0);
+		// powerupBox.position = new Vector(469, 0);
+		powerupBox.position = new Vector(playGuiCtrl.extent.x - 171, 0);
 		powerupBox.extent = new Vector(170, 170);
 		powerupBox.horizSizing = Left;
 		powerupBox.vertSizing = Bottom;
+		powerupBox.xScale = (scene2d.height - 82 * 2) / 480;
+		powerupBox.yScale = (scene2d.height - 82 * 2) / 480;
 
 		playGuiCtrl.addChild(powerupBox);
 	}
 
 	function initTexts() {
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var helpTextCtrl = new GuiControl();
-		helpTextCtrl.position = new Vector(0, 210);
+		helpTextCtrl.position = new Vector(0, playGuiCtrl.extent.y * 190 / 480);
 		helpTextCtrl.extent = new Vector(640, 60);
 		helpTextCtrl.vertSizing = Center;
 		helpTextCtrl.horizSizing = Width;
 
-		helpTextBackground = new GuiText(bfont);
-		helpTextBackground.text.textColor = 0x777777;
-		helpTextBackground.position = new Vector(1, 1);
+		helpTextBackground = new GuiText(arial14);
+		helpTextBackground.text.textColor = 0x000000;
+		helpTextBackground.position = new Vector(2, 2);
 		helpTextBackground.extent = new Vector(640, 14);
 		helpTextBackground.vertSizing = Height;
 		helpTextBackground.horizSizing = Width;
 		helpTextBackground.justify = Center;
 
-		helpTextForeground = new GuiText(bfont);
-		helpTextForeground.text.textColor = 0xFFFFFF;
+		helpTextForeground = new GuiText(arial14);
+		helpTextForeground.text.textColor = 0xEBEBEB;
 		helpTextForeground.position = new Vector(0, 0);
 		helpTextForeground.extent = new Vector(640, 16);
 		helpTextForeground.vertSizing = Height;
@@ -334,21 +396,21 @@ class PlayGui {
 		helpTextCtrl.addChild(helpTextForeground);
 
 		var alertTextCtrl = new GuiControl();
-		alertTextCtrl.position = new Vector(0, 371);
+		alertTextCtrl.position = new Vector(0, playGuiCtrl.extent.y * 375 / 480);
 		alertTextCtrl.extent = new Vector(640, 105);
 		alertTextCtrl.vertSizing = Top;
 		alertTextCtrl.horizSizing = Width;
 
-		alertTextBackground = new GuiText(bfont);
-		alertTextBackground.text.textColor = 0x776622;
-		alertTextBackground.position = new Vector(1, 1);
+		alertTextBackground = new GuiText(arial14);
+		alertTextBackground.text.textColor = 0x000000;
+		alertTextBackground.position = new Vector(2, 2);
 		alertTextBackground.extent = new Vector(640, 32);
 		alertTextBackground.vertSizing = Height;
 		alertTextBackground.horizSizing = Width;
 		alertTextBackground.justify = Center;
 
-		alertTextForeground = new GuiText(bfont);
-		alertTextForeground.text.textColor = 0xffEE99;
+		alertTextForeground = new GuiText(arial14);
+		alertTextForeground.text.textColor = 0xEBEBEB;
 		alertTextForeground.position = new Vector(0, 0);
 		alertTextForeground.extent = new Vector(640, 32);
 		alertTextForeground.vertSizing = Height;
@@ -358,8 +420,8 @@ class PlayGui {
 		alertTextCtrl.addChild(alertTextBackground);
 		alertTextCtrl.addChild(alertTextForeground);
 
-		playGuiCtrl.addChild(helpTextCtrl);
-		playGuiCtrl.addChild(alertTextCtrl);
+		playGuiCtrlOuter.addChild(helpTextCtrl);
+		playGuiCtrlOuter.addChild(alertTextCtrl);
 	}
 
 	function initFPSMeter() {
@@ -388,43 +450,72 @@ class PlayGui {
 
 	function initBlastBar() {
 		blastBar = new GuiControl();
-		blastBar.position = new Vector(6, 445);
-		blastBar.extent = new Vector(120, 28);
-		blastBar.vertSizing = Top;
+		blastBar.position = new Vector(0, 400);
+		blastBar.extent = new Vector(170, 83);
+		blastBar.vertSizing = Bottom;
+		blastBar.xScale = (scene2d.height - 82 * 2) / 480;
+		blastBar.yScale = (scene2d.height - 82 * 2) / 480;
 		this.playGuiCtrl.addChild(blastBar);
 
-		blastFill = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile());
-		blastFill.position = new Vector(5, 5);
-		blastFill.extent = new Vector(58, 17);
+		blastFill = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbarMask.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFill.position = new Vector(36, 38);
+		blastFill.extent = new Vector(100, 27);
+		blastFill.xScale = (scene2d.height - 82 * 2) / 480;
+		blastFill.yScale = (scene2d.height - 82 * 2) / 480;
+		var colorMat = Matrix.I();
+		colorMat.colorSet(0x0080FF);
+		blastFill.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
+
 		blastBar.addChild(blastFill);
 
-		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFillUltra = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbarMask.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFillUltra.position = new Vector(36, 38);
+		blastFillUltra.extent = new Vector(100, 27);
+		blastFillUltra.xScale = (scene2d.height - 82 * 2) / 480;
+		blastFillUltra.yScale = (scene2d.height - 82 * 2) / 480;
+		var colorMat = Matrix.I();
+		colorMat.colorSet(0xC4FF00);
+		blastFillUltra.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
+
+		blastBar.addChild(blastFillUltra);
+
+		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbar.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFrame.position = new Vector(0, 0);
-		blastFrame.extent = new Vector(120, 28);
+		blastFrame.extent = new Vector(170, 83);
+		blastFrame.xScale = (scene2d.height - 82 * 2) / 480;
+		blastFrame.yScale = (scene2d.height - 82 * 2) / 480;
 		blastBar.addChild(blastFrame);
 	}
 
+	var blastValue:Float = 0;
+
 	public function setBlastValue(value:Float) {
 		if (value <= 1) {
-			if (blastFill.extent.y == 16) { // Was previously charged
-				blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile();
-			}
-			var oldVal = blastFill.extent.x;
-			blastFill.extent = new Vector(Util.lerp(0, 110, value), 17);
-			if (oldVal < 22 && blastFill.extent.x >= 22) {
-				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile();
+			var oldVal = blastValue;
+			blastValue = value;
+			blastFill.bmp.tile.setSize(Util.lerp(0, 75, value), 20);
+			blastFill.bmp.scaleX = value;
+			// blastFill.extent = new Vector(Util.lerp(0, 100, value), 27);
+			if (oldVal < 0.25 && value >= 0.25) {
+				var colorMat = cast(blastFill.bmp.filter, h2d.filter.ColorMatrix);
+				colorMat.matrix.colorSet(0x0080FF);
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 			}
-			if (oldVal >= 22 && blastFill.extent.x < 22) {
-				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargray.png", ResourceLoader.getImage, this.imageResources).toTile();
+			if (oldVal >= 0.25 && value < 0.25) {
+				var colorMat = cast(blastFill.bmp.filter, h2d.filter.ColorMatrix);
+				colorMat.matrix.colorSet(0xCDD2D7);
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(false);
 			}
+			blastFillUltra.bmp.visible = false;
 		} else {
-			blastFill.extent = new Vector(0, 16); // WE will just use this extra number to store whether it was previously charged or not
-			blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_charged.png", ResourceLoader.getImage, this.imageResources).toTile();
+			blastFillUltra.bmp.visible = true;
+
+			var fillPercent = (value - 1) * 6;
+			blastFillUltra.bmp.tile.setSize(Util.lerp(0, 75, fillPercent), 20);
+			blastFillUltra.bmp.scaleX = fillPercent;
+
 			MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 		}
-		this.blastBar.render(scene2d);
 	}
 
 	public function setHelpTextOpacity(value:Float) {
@@ -471,17 +562,70 @@ class PlayGui {
 		}
 	}
 
+	public function resizeGemCounter(total:Int) {
+		if (total >= 100) {
+			// 3 digits
+			gemCountNumbers[0].anim.visible = true;
+			gemCountNumbers[1].anim.visible = true;
+			gemCountNumbers[2].anim.visible = true;
+			gemCountNumbers[3].anim.visible = true;
+			gemCountNumbers[4].anim.visible = true;
+			gemCountNumbers[5].anim.visible = true;
+
+			gemCountNumbers[0].position.x = 20;
+			gemCountNumbers[1].position.x = 38;
+			gemCountNumbers[2].position.x = 56;
+			gemCountNumbers[3].position.x = 89;
+			gemCountNumbers[4].position.x = 107;
+			gemCountNumbers[5].position.x = 125;
+			gemCountSlash.position.x = 73;
+			gemHUD.position.x = 144;
+		} else if (total >= 10) {
+			// 2 digits
+			gemCountNumbers[0].anim.visible = false;
+			gemCountNumbers[1].anim.visible = true;
+			gemCountNumbers[2].anim.visible = true;
+			gemCountNumbers[3].anim.visible = false;
+			gemCountNumbers[4].anim.visible = true;
+			gemCountNumbers[5].anim.visible = true;
+
+			gemCountNumbers[2].position.x = 32;
+			gemCountNumbers[5].position.x = 83;
+			gemCountNumbers[1].position.x = 14;
+			gemCountNumbers[4].position.x = 65;
+			gemCountSlash.position.x = 49;
+			gemHUD.position.x = 101;
+		} else {
+			// 1 digit
+			gemCountNumbers[0].anim.visible = false;
+			gemCountNumbers[1].anim.visible = false;
+			gemCountNumbers[2].anim.visible = true;
+			gemCountNumbers[3].anim.visible = false;
+			gemCountNumbers[4].anim.visible = false;
+			gemCountNumbers[5].anim.visible = true;
+
+			gemCountNumbers[2].position.x = 8;
+			gemCountNumbers[5].position.x = 41;
+			gemCountSlash.position.x = 25;
+			gemHUD.position.x = 59;
+		}
+		gemHUD.parent.render(scene2d, @:privateAccess gemHUD.parent.parent._flow);
+	}
+
 	public function formatGemCounter(collected:Int, total:Int) {
 		if (total == 0) {
 			for (number in gemCountNumbers) {
 				number.anim.visible = false;
 			}
 			gemCountSlash.bmp.visible = false;
+			gemHUD.bmp.visible = false;
 		} else {
-			for (number in gemCountNumbers) {
-				number.anim.visible = true;
+			if (totalGems != total) {
+				resizeGemCounter(total);
+				totalGems = total;
 			}
 			gemCountSlash.bmp.visible = true;
+			gemHUD.bmp.visible = true;
 		}
 
 		var totalHundredths = Math.floor(total / 100);

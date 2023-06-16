@@ -42,7 +42,7 @@ class SuperJump extends PowerUp {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperJump";
-		this.pickUpName = "Jump Boost PowerUp";
+		this.pickUpName = "a Super Jump powerup";
 		this.showSequences = false;
 		sjEmitterParticleData = new ParticleData();
 		sjEmitterParticleData.identifier = "superJumpParticle";

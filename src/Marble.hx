@@ -1865,7 +1865,7 @@ class Marble extends GameObject {
 	}
 
 	public function useBlast() {
-		if (this.level.blastAmount < 0.2 || this.level.game != "ultra")
+		if (this.level.blastAmount < 0.25 || this.level.game != "ultra")
 			return;
 		var impulse = this.level.currentUp.multiply(Math.max(Math.sqrt(this.level.blastAmount), this.level.blastAmount) * 10);
 		this.applyImpulse(impulse);
