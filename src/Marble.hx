@@ -78,24 +78,28 @@ enum Mode {
 }
 
 final bounceParticleOptions:ParticleEmitterOptions = {
-	ejectionPeriod: 80,
+	ejectionPeriod: 5,
 	ambientVelocity: new Vector(0, 0, 0.0),
-	ejectionVelocity: 3,
+	ejectionVelocity: 6,
 	velocityVariance: 0.25,
-	emitterLifetime: 250,
+	emitterLifetime: 50,
 	inheritedVelFactor: 0,
 	particleOptions: {
-		texture: 'particles/star.png',
-		blending: Alpha,
+		texture: 'particles/burst.png',
+		blending: Add,
 		spinSpeed: 90,
 		spinRandomMin: -90,
 		spinRandomMax: 90,
-		lifetime: 500,
-		lifetimeVariance: 100,
-		dragCoefficient: 1,
+		lifetime: 400,
+		lifetimeVariance: 50,
+		dragCoefficient: 0.5,
 		acceleration: -2,
-		colors: [new Vector(0.9, 0, 0, 1), new Vector(0.9, 0.9, 0, 1), new Vector(0.9, 0.9, 0, 0)],
-		sizes: [0.25, 0.25, 0.25],
+		colors: [
+			new Vector(0.5, 0.5, 0.5, 0.3),
+			new Vector(0.3, 0.3, 0.2, 0.1),
+			new Vector(0.2, 0.2, 0.1, 0)
+		],
+		sizes: [0.8, 0.4, 0.2],
 		times: [0, 0.75, 1]
 	}
 };
@@ -276,7 +280,7 @@ class Marble extends GameObject {
 
 		this.bounceEmitterData = new ParticleData();
 		this.bounceEmitterData.identifier = "MarbleBounceParticle";
-		this.bounceEmitterData.texture = ResourceLoader.getResource("data/particles/star.png", ResourceLoader.getTexture, this.textureResources);
+		this.bounceEmitterData.texture = ResourceLoader.getResource("data/particles/burst.png", ResourceLoader.getTexture, this.textureResources);
 
 		this.trailEmitterData = new ParticleData();
 		this.trailEmitterData.identifier = "MarbleTrailParticle";
@@ -830,7 +834,8 @@ class Marble extends GameObject {
 
 	function bounceEmitter(speed:Float, normal:Vector) {
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
-			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
+			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData,
+				this.getAbsPos().getPosition().sub(normal.multiply(_radius)), null, new Vector(1, 1, 1).add(normal.multiply(-0.8)));
 			this.bounceEmitDelay = 0.3;
 		}
 	}

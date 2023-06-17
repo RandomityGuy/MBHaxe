@@ -13,28 +13,28 @@ import src.MarbleWorld;
 
 final superSpeedParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
-	ambientVelocity: new Vector(0, 0, 0.2),
+	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 1,
 	velocityVariance: 0.25,
 	emitterLifetime: 1100,
 	inheritedVelFactor: 0.25,
 	particleOptions: {
-		texture: 'particles/spark.png',
+		texture: 'particles/smoke.png',
 		blending: Add,
 		spinSpeed: 0,
 		spinRandomMin: 0,
 		spinRandomMax: 0,
 		lifetime: 1500,
-		lifetimeVariance: 150,
-		dragCoefficient: 0.25,
+		lifetimeVariance: 750,
+		dragCoefficient: 4,
 		acceleration: 0,
 		colors: [
-			new Vector(0.8, 0.8, 0, 0),
-			new Vector(0.8, 0.8, 0, 1),
-			new Vector(0.8, 0.8, 0, 0)
+			new Vector(0.42, 0.42, 0.38, 0.1),
+			new Vector(0.34, 0.34, 0.34, 0.1),
+			new Vector(0.30, 0.30, 0.30, 0.1)
 		],
-		sizes: [0.25, 0.25, 1],
-		times: [0, 0.25, 1]
+		sizes: [0.3, 0.7, 1.4],
+		times: [0, 0.5, 1]
 	}
 };
 
@@ -51,7 +51,7 @@ class SuperSpeed extends PowerUp {
 		this.useInstancing = true;
 		ssEmitterParticleData = new ParticleData();
 		ssEmitterParticleData.identifier = "superSpeedParticle";
-		ssEmitterParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
+		ssEmitterParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
