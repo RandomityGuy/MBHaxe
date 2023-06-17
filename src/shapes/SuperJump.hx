@@ -12,7 +12,7 @@ import src.MarbleWorld;
 
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ejectionPeriod: 10,
-	ambientVelocity: new Vector(0, 0, 0.05),
+	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 1,
 	velocityVariance: 0.25,
 	emitterLifetime: 1000,
@@ -27,7 +27,11 @@ final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 		lifetimeVariance: 150,
 		dragCoefficient: 0.25,
 		acceleration: 0,
-		colors: [new Vector(0, 0.5, 1, 0), new Vector(0, 0.6, 1, 1), new Vector(0, 0.6, 1, 0)],
+		colors: [
+			new Vector(0.38, 0.38, 0.38, 0),
+			new Vector(0.34, 0.34, 0.34, 1),
+			new Vector(0.3, 0.3, 0.3, 0)
+		],
 		sizes: [0.25, 0.25, 0.5],
 		times: [0, 0.75, 1]
 	}
