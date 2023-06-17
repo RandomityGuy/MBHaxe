@@ -57,7 +57,7 @@ class AntiGravity extends PowerUp {
 			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture("data/shapes/items/antigrav_bump.png").resource;
 			normalTex.wrap = Repeat;
-			normalTex.mipMap = Nearest;
+			normalTex.mipMap = None;
 			var shader = new shaders.DefaultMaterial(diffuseTex, normalTex, 32, new h3d.Vector(0.8, 0.8, 0.6, 1), 1);
 			shader.doGammaRamp = false;
 			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);

@@ -32,6 +32,7 @@ class DefaultCubemapNormalMaterial extends hxsl.Shader {
 		@var var outLightVec:Vec4;
 		@var var outEyePos:Vec3;
 		@var var outReflectVec:Vec3;
+		@var var outNormal:Vec3;
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
 			var result = dot(normal, lightPosition);
 			return saturate(result);
@@ -39,21 +40,28 @@ class DefaultCubemapNormalMaterial extends hxsl.Shader {
 		function vertex() {
 			calculatedUV = input.uv;
 			outLightVec = vec4(0);
-			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
+			var inLightVec = vec3(0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
+			eyePos.x *= -1;
+			outNormal = input.normal;
+			outNormal.x *= -1;
 			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
 			outLightVec.xyz = -inLightVec;
-			outLightVec.w = step(-0.5, dot(input.normal, -inLightVec));
+			outLightVec.w = step(-0.5, dot(outNormal, -inLightVec));
 			outEyePos = eyePos;
-			outShading = vec4(saturate(dot(-inLightVec, input.normal)));
+			outShading = vec4(saturate(dot(-inLightVec, outNormal)));
 			outShading.w = 1;
 			outShading *= vec4(1.08, 1.03, 0.90, 1);
 
 			var cubeTrans = mat3(global.modelView);
 			var cubeEyePos = camera.position - global.modelView[3].xyz;
+			cubeEyePos.x *= -1;
 
-			var cubeVertPos = input.position * cubeTrans;
-			var cubeNormal = (input.normal * cubeTrans).normalize();
+			var p = input.position;
+			p.x *= -1;
+
+			var cubeVertPos = p * cubeTrans;
+			var cubeNormal = (outNormal * cubeTrans).normalize();
 			var eyeToVert = cubeVertPos - cubeEyePos;
 			outReflectVec = reflect(eyeToVert, cubeNormal);
 		}
@@ -67,7 +75,7 @@ class DefaultCubemapNormalMaterial extends hxsl.Shader {
 
 			var eyeVec = (outEyePos - input.position).normalize();
 			var halfAng = (eyeVec + outLightVec.xyz).normalize();
-			var specValue = saturate(input.normal.dot(halfAng)) * outLightVec.w;
+			var specValue = saturate(outNormal.dot(halfAng)) * outLightVec.w;
 			var specular = specularColor * pow(specValue, shininess);
 
 			outCol.a = 1;

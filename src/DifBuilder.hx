@@ -450,9 +450,9 @@ class DifBuilder {
 				if (st.x * normal.x + st.y * normal.y + st.z * normal.z < 0) {
 					st.scale(-1);
 				}
-				s.x *= -1;
-				t.x *= -1;
-				st.x *= -1;
+				// s.x *= -1;
+				// t.x *= -1;
+				// st.x *= -1;
 
 				for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
 					var p1, p2, p3;
@@ -589,7 +589,7 @@ class DifBuilder {
 							bucket = {
 								referenceNormal: normal,
 								triangleIndices: [],
-								normals: []
+								normals: [],
 							};
 							buckets.push(bucket);
 						}
@@ -764,12 +764,24 @@ class DifBuilder {
 					for (j in 0...bucket.triangleIndices.length) {
 						var index = bucket.triangleIndices[j];
 						var tri = triangles[index];
-						if (tri.p1 == vtex)
+						if (tri.p1 == vtex) {
 							tri.normal1 = avgNormal;
-						if (tri.p2 == vtex)
+							tri.n1 = avgNormal;
+							tri.t1 = tri.t1.sub(avgNormal.scalar(avgNormal.dot(tri.t1))).normalized();
+							tri.b1 = tri.b1.sub(avgNormal.scalar(avgNormal.dot(tri.b1))).normalized();
+						}
+						if (tri.p2 == vtex) {
 							tri.normal2 = avgNormal;
-						if (tri.p3 == vtex)
+							tri.n2 = avgNormal;
+							tri.t2 = tri.t2.sub(avgNormal.scalar(avgNormal.dot(tri.t2))).normalized();
+							tri.b2 = tri.b2.sub(avgNormal.scalar(avgNormal.dot(tri.b2))).normalized();
+						}
+						if (tri.p3 == vtex) {
 							tri.normal3 = avgNormal;
+							tri.n3 = avgNormal;
+							tri.t3 = tri.t3.sub(avgNormal.scalar(avgNormal.dot(tri.t3))).normalized();
+							tri.b3 = tri.b3.sub(avgNormal.scalar(avgNormal.dot(tri.b3))).normalized();
+						}
 					}
 				}
 			}
