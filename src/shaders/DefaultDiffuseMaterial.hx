@@ -25,8 +25,10 @@ class DefaultDiffuseMaterial extends hxsl.Shader {
 		function vertex() {
 			calculatedUV = input.uv;
 			var objToTangentSpace = mat3(input.t, input.b, input.n);
-			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
-			outShading = vec4(saturate(dot(-inLightVec, input.normal)));
+			var inLightVec = vec3(0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
+			var n = input.normal;
+			n.x *= -1;
+			outShading = vec4(saturate(dot(-inLightVec, n)));
 			outShading.w = 1;
 			outShading *= vec4(1.08, 1.03, 0.90, 1);
 		}

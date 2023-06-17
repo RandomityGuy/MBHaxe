@@ -783,7 +783,7 @@ class DtsObject extends GameObject {
 			normalizeSafe(t0);
 			normalizeSafe(b0);
 			var n0 = t0.cross(b0);
-			n0.x *= -1;
+			// n0.x *= -1;
 			if (n0.dot(vertexNormals[i0]) < 0.0) {
 				n0.scale(-1);
 			}
@@ -792,7 +792,7 @@ class DtsObject extends GameObject {
 			normalizeSafe(t1);
 			normalizeSafe(b1);
 			var n1 = t1.cross(b1);
-			n1.x *= -1;
+			// n1.x *= -1;
 			if (n1.dot(vertexNormals[i1]) < 0.0) {
 				n1.scale(-1);
 			}
@@ -801,17 +801,17 @@ class DtsObject extends GameObject {
 			normalizeSafe(t2);
 			normalizeSafe(b2);
 			var n2 = t2.cross(b2);
-			n2.x *= -1;
+			// n2.x *= -1;
 			if (n2.dot(vertexNormals[i2]) < 0.0) {
 				n2.scale(-1);
 			}
 
-			t0.x *= -1;
-			t1.x *= -1;
-			t2.x *= -1;
-			b0.x *= -1;
-			b1.x *= -1;
-			b2.x *= -1;
+			// t0.x *= -1;
+			// t1.x *= -1;
+			// t2.x *= -1;
+			// b0.x *= -1;
+			// b1.x *= -1;
+			// b2.x *= -1;
 
 			return [
 				{
@@ -831,6 +831,8 @@ class DtsObject extends GameObject {
 				}
 			];
 		}
+
+		var triangles = [];
 
 		var ab = new Vector();
 		var ac = new Vector();
@@ -860,22 +862,29 @@ class DtsObject extends GameObject {
 
 			// }
 
-			var geometrydata = materialGeometry[materialIndex];
-
-			for (index in [i3, i2, i1]) {
-				var vertex = vertices[index];
-				geometrydata.vertices.push(new Vector(vertex.x, vertex.y, vertex.z));
-
-				var uv = dtsMesh.uv[index];
-				geometrydata.uvs.push(new UV(uv.x, uv.y));
-
-				var normal = vertexNormals[index];
-				geometrydata.normals.push(new Vector(normal.x, normal.y, normal.z));
-			}
-
-			geometrydata.indices.push(i1);
-			geometrydata.indices.push(i2);
-			geometrydata.indices.push(i3);
+			var tri = {
+				material: materialIndex,
+				vertices: [
+					new Vector(vertices[i3].x, vertices[i3].y, vertices[i3].z),
+					new Vector(vertices[i2].x, vertices[i2].y, vertices[i2].z),
+					new Vector(vertices[i1].x, vertices[i1].y, vertices[i1].z)
+				],
+				uvs: [
+					new UV(dtsMesh.uv[i3].x, dtsMesh.uv[i3].y),
+					new UV(dtsMesh.uv[i2].x, dtsMesh.uv[i2].y),
+					new UV(dtsMesh.uv[i1].x, dtsMesh.uv[i1].y)
+				],
+				normals: [
+					new Vector(vertexNormals[i3].x, vertexNormals[i3].y, vertexNormals[i3].z),
+					new Vector(vertexNormals[i2].x, vertexNormals[i2].y, vertexNormals[i2].z),
+					new Vector(vertexNormals[i1].x, vertexNormals[i1].y, vertexNormals[i1].z)
+				],
+				indices: [i1, i2, i3],
+				t: [],
+				b: [],
+				n: [],
+			};
+			return tri;
 		}
 
 		for (primitive in dtsMesh.primitives) {
@@ -891,18 +900,18 @@ class DtsObject extends GameObject {
 					var i2 = dtsMesh.indices[i + 1];
 					var i3 = dtsMesh.indices[i + 2];
 
-					addTriangleFromIndices(i1, i2, i3, materialIndex);
-
+					var tri = addTriangleFromIndices(i1, i2, i3, materialIndex);
 					var tbn = createTextureSpaceMatrix(dtsMesh.indices[i], dtsMesh.indices[i + 1], dtsMesh.indices[i + 2]);
-					geometrydata.tangents.push(tbn[2].tangent);
-					geometrydata.tangents.push(tbn[1].tangent);
-					geometrydata.tangents.push(tbn[0].tangent);
-					geometrydata.bitangents.push(tbn[2].bitangent);
-					geometrydata.bitangents.push(tbn[1].bitangent);
-					geometrydata.bitangents.push(tbn[0].bitangent);
-					geometrydata.texNormals.push(tbn[2].normal);
-					geometrydata.texNormals.push(tbn[1].normal);
-					geometrydata.texNormals.push(tbn[0].normal);
+					tri.t.push(tbn[2].tangent);
+					tri.t.push(tbn[1].tangent);
+					tri.t.push(tbn[0].tangent);
+					tri.b.push(tbn[2].bitangent);
+					tri.b.push(tbn[1].bitangent);
+					tri.b.push(tbn[0].bitangent);
+					tri.n.push(tbn[2].normal);
+					tri.n.push(tbn[1].normal);
+					tri.n.push(tbn[0].normal);
+					triangles.push(tri);
 
 					i += 3;
 				}
@@ -920,18 +929,18 @@ class DtsObject extends GameObject {
 						i3 = temp;
 					}
 
-					addTriangleFromIndices(i1, i2, i3, materialIndex);
-
+					var tri = addTriangleFromIndices(i1, i2, i3, materialIndex);
 					var tbn = createTextureSpaceMatrix(dtsMesh.indices[i], dtsMesh.indices[i + 1], dtsMesh.indices[i + 2]);
-					geometrydata.tangents.push(tbn[2].tangent);
-					geometrydata.tangents.push(tbn[1].tangent);
-					geometrydata.tangents.push(tbn[0].tangent);
-					geometrydata.bitangents.push(tbn[2].bitangent);
-					geometrydata.bitangents.push(tbn[1].bitangent);
-					geometrydata.bitangents.push(tbn[0].bitangent);
-					geometrydata.texNormals.push(tbn[2].normal);
-					geometrydata.texNormals.push(tbn[1].normal);
-					geometrydata.texNormals.push(tbn[0].normal);
+					tri.t.push(tbn[2].tangent);
+					tri.t.push(tbn[1].tangent);
+					tri.t.push(tbn[0].tangent);
+					tri.b.push(tbn[2].bitangent);
+					tri.b.push(tbn[1].bitangent);
+					tri.b.push(tbn[0].bitangent);
+					tri.n.push(tbn[2].normal);
+					tri.n.push(tbn[1].normal);
+					tri.n.push(tbn[0].normal);
+					triangles.push(tri);
 
 					k++;
 				}
@@ -942,22 +951,129 @@ class DtsObject extends GameObject {
 					var i2 = dtsMesh.indices[i + 1];
 					var i3 = dtsMesh.indices[i + 2];
 
-					addTriangleFromIndices(i1, i2, i3, materialIndex);
-
+					var tri = addTriangleFromIndices(i1, i2, i3, materialIndex);
 					var tbn = createTextureSpaceMatrix(dtsMesh.indices[primitive.firstElement], dtsMesh.indices[i + 1], dtsMesh.indices[i + 2]);
-					geometrydata.tangents.push(tbn[2].tangent);
-					geometrydata.tangents.push(tbn[1].tangent);
-					geometrydata.tangents.push(tbn[0].tangent);
-					geometrydata.bitangents.push(tbn[2].bitangent);
-					geometrydata.bitangents.push(tbn[1].bitangent);
-					geometrydata.bitangents.push(tbn[0].bitangent);
-					geometrydata.texNormals.push(tbn[2].normal);
-					geometrydata.texNormals.push(tbn[1].normal);
-					geometrydata.texNormals.push(tbn[0].normal);
+					tri.t.push(tbn[2].tangent);
+					tri.t.push(tbn[1].tangent);
+					tri.t.push(tbn[0].tangent);
+					tri.b.push(tbn[2].bitangent);
+					tri.b.push(tbn[1].bitangent);
+					tri.b.push(tbn[0].bitangent);
+					tri.n.push(tbn[2].normal);
+					tri.n.push(tbn[1].normal);
+					tri.n.push(tbn[0].normal);
+					triangles.push(tri);
 
 					i++;
 				}
 			}
+		}
+
+		var vertexBuckets = new Map<Vector, Array<{
+			refNormal:Vector,
+			triangles:Array<Int>,
+			normals:Array<Vector>,
+			ns:Array<Vector>
+		}>>();
+
+		for (i in 0...triangles.length) {
+			var tri = triangles[i];
+			var norm = tri.normals[0].add(tri.normals[1]).add(tri.normals[2]).multiply(1 / 3);
+			for (k in 0...triangles[i].vertices.length) {
+				var v = triangles[i].vertices[k];
+				var buckets = vertexBuckets.get(v);
+				if (buckets == null) {
+					buckets = [];
+					vertexBuckets.set(v, buckets);
+				}
+				var bucket:{
+					refNormal:Vector,
+					triangles:Array<Int>,
+					normals:Array<Vector>,
+					ns:Array<Vector>
+				} = null;
+				for (j in 0...buckets.length) {
+					bucket = buckets[j];
+					if (tri.normals[k].dot(bucket.refNormal) > Math.cos(Math.PI / 12)) {
+						break;
+					}
+					bucket = null;
+				}
+				if (bucket == null) {
+					bucket = {
+						refNormal: norm,
+						triangles: [],
+						normals: [],
+						ns: [],
+					};
+					buckets.push(bucket);
+				}
+				bucket.triangles.push(i);
+				bucket.normals.push(tri.normals[k]);
+				bucket.ns.push(tri.n[k]);
+			}
+		}
+
+		for (vtex => buckets in vertexBuckets) {
+			for (i in 0...buckets.length) {
+				var bucket = buckets[i];
+				var avgNormal = new Vector();
+				var averageN = new Vector();
+				for (normal in bucket.normals)
+					avgNormal = avgNormal.add(normal);
+				avgNormal.scale(1 / bucket.normals.length);
+				for (n in bucket.ns)
+					averageN = averageN.add(n);
+				averageN.scale(1 / bucket.ns.length);
+				for (j in 0...bucket.triangles.length) {
+					var index = bucket.triangles[j];
+					var tri = triangles[index];
+					if (tri.vertices[0] == vtex) {
+						tri.normals[0] = avgNormal;
+						tri.n[0] = averageN;
+						tri.t[0] = tri.t[0].sub(averageN.multiply(averageN.dot(tri.t[0]))).normalized();
+						tri.b[0] = tri.b[0].sub(averageN.multiply(averageN.dot(tri.b[0]))).normalized();
+					}
+					if (tri.vertices[1] == vtex) {
+						tri.normals[1] = avgNormal;
+						tri.n[1] = averageN;
+						tri.t[1] = tri.t[1].sub(averageN.multiply(averageN.dot(tri.t[1]))).normalized();
+						tri.b[1] = tri.b[1].sub(averageN.multiply(averageN.dot(tri.b[1]))).normalized();
+					}
+					if (tri.vertices[2] == vtex) {
+						tri.normals[2] = avgNormal;
+						tri.n[2] = averageN;
+						tri.t[2] = tri.t[2].sub(averageN.multiply(averageN.dot(tri.t[2]))).normalized();
+						tri.b[2] = tri.b[2].sub(averageN.multiply(averageN.dot(tri.b[2]))).normalized();
+					}
+				}
+			}
+		}
+
+		// Now *actually* generate the material geometry
+		for (tri in triangles) {
+			var matGeo = materialGeometry[tri.material];
+			matGeo.vertices.push(tri.vertices[0]);
+			matGeo.vertices.push(tri.vertices[1]);
+			matGeo.vertices.push(tri.vertices[2]);
+			matGeo.normals.push(tri.normals[0]);
+			matGeo.normals.push(tri.normals[1]);
+			matGeo.normals.push(tri.normals[2]);
+			matGeo.tangents.push(tri.t[0]);
+			matGeo.tangents.push(tri.t[1]);
+			matGeo.tangents.push(tri.t[2]);
+			matGeo.bitangents.push(tri.b[0]);
+			matGeo.bitangents.push(tri.b[1]);
+			matGeo.bitangents.push(tri.b[2]);
+			matGeo.texNormals.push(tri.n[0]);
+			matGeo.texNormals.push(tri.n[1]);
+			matGeo.texNormals.push(tri.n[2]);
+			matGeo.uvs.push(tri.uvs[0]);
+			matGeo.uvs.push(tri.uvs[1]);
+			matGeo.uvs.push(tri.uvs[2]);
+			matGeo.indices.push(tri.indices[0]);
+			matGeo.indices.push(tri.indices[1]);
+			matGeo.indices.push(tri.indices[2]);
 		}
 
 		return materialGeometry;
