@@ -1,5 +1,7 @@
 package src;
 
+import shapes.HelicopterImage;
+import shapes.BlastWave;
 import collision.CollisionHull;
 import dif.Plane;
 import shaders.marble.ClassicGlass;
@@ -233,11 +235,13 @@ class Marble extends GameObject {
 	public var lastContactNormal:Vector;
 
 	var forcefield:DtsObject;
-	var helicopter:DtsObject;
+	var helicopter:HelicopterImage;
+	var blastWave:BlastWave;
 	var superBounceEnableTime:Float = -1e8;
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
 	var megaMarbleEnableTime:Float = -1e8;
+	var blastUseTime:Float = -1e8;
 
 	var teleportEnableTime:Null<Float> = null;
 	var teleportDisableTime:Null<Float> = null;
@@ -436,6 +440,13 @@ class Marble extends GameObject {
 		// 	marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
 		// }
 
+		this.blastWave = new BlastWave();
+		// this.addChild(this.blastWave);
+		this.blastWave.x = 1e8;
+		this.blastWave.y = 1e8;
+		this.blastWave.z = 1e8;
+		this.blastWave.isBoundingBoxCollideable = false;
+
 		this.forcefield = new DtsObject();
 		this.forcefield.dtsPath = "data/shapes/images/glow_bounce.dts";
 		this.forcefield.useInstancing = true;
@@ -447,20 +458,18 @@ class Marble extends GameObject {
 		this.forcefield.z = 1e8;
 		this.forcefield.isBoundingBoxCollideable = false;
 
-		this.helicopter = new DtsObject();
-		this.helicopter.dtsPath = "data/shapes/images/helicopter_image.dts";
-		this.helicopter.useInstancing = true;
-		this.helicopter.identifier = "HelicopterImage";
-		this.helicopter.showSequences = true;
+		this.helicopter = new HelicopterImage();
 		this.helicopter.isBoundingBoxCollideable = false;
 		// this.addChild(this.helicopter);
 		this.helicopter.x = 1e8;
 		this.helicopter.y = 1e8;
 		this.helicopter.z = 1e8;
+		this.helicopter.scale(0.3 / 0.2);
 
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
+		worker.addTask(fwd -> level.addDtsObject(this.blastWave, fwd));
 		worker.run();
 	}
 
@@ -1867,6 +1876,12 @@ class Marble extends GameObject {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
 			this.helicopterSound.pause = true;
 		}
+		if (currentTime - this.blastUseTime < this.blastWave.dts.sequences[0].duration) {
+			this.blastWave.setPosition(x, y, z);
+			this.blastWave.setRotationQuat(this.level.getOrientationQuat(this.level.timeState.currentAttemptTime));
+		} else {
+			this.blastWave.setPosition(1e8, 1e8, 1e8);
+		}
 	}
 
 	public function useBlast() {
@@ -1875,12 +1890,8 @@ class Marble extends GameObject {
 		var impulse = this.level.currentUp.multiply(Math.max(Math.sqrt(this.level.blastAmount), this.level.blastAmount) * 10);
 		this.applyImpulse(impulse);
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
-		this.level.particleManager.createEmitter(this.level.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
-			this.level.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
-				this.getAbsPos().getPosition().add(this.level.currentUp.multiply(-this._radius * 0.4));
-			},
-			new Vector(1, 1,
-				1).add(new Vector(Math.abs(this.level.currentUp.x), Math.abs(this.level.currentUp.y), Math.abs(this.level.currentUp.z)).multiply(-0.8)));
+		this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
+		this.blastUseTime = this.level.timeState.currentAttemptTime;
 		this.level.blastAmount = 0;
 	}
 
@@ -1946,6 +1957,7 @@ class Marble extends GameObject {
 		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
 		this.megaMarbleEnableTime = Math.NEGATIVE_INFINITY;
+		this.blastUseTime = Math.NEGATIVE_INFINITY;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.contactEntities = [];
 		this.cloak = false;

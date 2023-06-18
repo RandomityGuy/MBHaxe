@@ -1251,6 +1251,31 @@ class DtsObject extends GameObject {
 						}
 					}
 				}
+
+				if (sequence.flags & 4 > 0) { // Arbitrary scales
+					for (i in 0...this.dts.nodes.length) {
+						var affected = ((1 << i) & scale) != 0;
+
+						if (affected) {
+							var scale1 = this.dts.nodeArbitraryScaleFactors[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
+							var scale2 = this.dts.nodeArbitraryScaleFactors[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
+
+							var v1 = new Vector(scale1.x, scale1.y, scale1.z);
+							var v2 = new Vector(scale2.x, scale2.y, scale2.z);
+
+							var scaleVec = Util.lerpThreeVectors(v1, v2, t);
+							this.graphNodes[i].scaleX = scaleVec.x;
+							this.graphNodes[i].scaleY = scaleVec.y;
+							this.graphNodes[i].scaleZ = scaleVec.z;
+							affectedCount++;
+							propagateDirtyFlags(i);
+						} else {
+							this.graphNodes[i].scaleX = 1;
+							this.graphNodes[i].scaleY = 1;
+							this.graphNodes[i].scaleZ = 1;
+						}
+					}
+				}
 			}
 
 			affectedCount = 0;
