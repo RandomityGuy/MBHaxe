@@ -479,7 +479,7 @@ class PlayGui {
 
 		blastBar.addChild(blastFillUltra);
 
-		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbar.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/pc/powerbar.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFrame.position = new Vector(0, 0);
 		blastFrame.extent = new Vector(170, 83);
 		blastFrame.xScale = (scene2d.height - 82 * 2) / 480;
