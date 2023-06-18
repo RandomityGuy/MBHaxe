@@ -40,6 +40,9 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 			var result = dot(normal, lightPosition);
 			return saturate(result);
 		}
+		function transposeMat3(m:Mat3):Mat3 {
+			return mat3(vec3(m[0].x, m[1].x, m[2].x), vec3(m[0].y, m[1].y, m[2].y), vec3(m[0].z, m[1].z, m[2].z));
+		}
 		function vertex() {
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
 			eyePos.x *= -1;
@@ -55,7 +58,8 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 			outNormal = input.normal;
 			outNormal.x *= -1;
 
-			var inLightVec = vec3(0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
+			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
+			inLightVec.x *= -1;
 			outLightVec.xyz = -inLightVec * objToTangentSpace;
 			// var cubeVertPos = input.position * cubeTrans;
 			// var cubeNormal = input.normal * cubeTrans;
@@ -73,7 +77,8 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 
 			var diffuse = diffuseMap.get(calculatedUV);
 			var outCol = diffuse;
-			var bumpNormal = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
+			var bumpNormal = normalMap.get(calculatedUV * secondaryMapUvFactor).xyz * 2 - 1;
+			bumpNormal.y *= -1;
 
 			var incidentRay = normalize(pixelTransformedPosition - camera.position);
 			var reflectionRay = reflect(incidentRay, transformedNormal);

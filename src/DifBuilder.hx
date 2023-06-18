@@ -204,7 +204,7 @@ class DifBuilder {
 			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
-			normalTex.mipMap = Nearest;
+			normalTex.mipMap = None;
 			var shader = new DefaultMaterial(diffuseTex, normalTex, shininess, specularColor, uvScaleFactor, half);
 			onFinish(shader);
 		});
@@ -221,7 +221,7 @@ class DifBuilder {
 			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
-			normalTex.mipMap = Nearest;
+			normalTex.mipMap = None;
 
 			var cubemapTex = new h3d.mat.Texture(128, 128, [Cube]);
 			var cubemapFace1 = ResourceLoader.getImage('data/textures/acubexpos2.png').resource;
@@ -268,7 +268,7 @@ class DifBuilder {
 			normalTex.mipMap = Nearest;
 			var noiseTex = ResourceLoader.getTexture('data/textures/noise${noiseSuffix}.jpg').resource;
 			noiseTex.wrap = Repeat;
-			noiseTex.mipMap = Nearest;
+			noiseTex.mipMap = None;
 			var shader = new NoiseTileMaterial(diffuseTex, normalTex, noiseTex, shininess, specular, 1);
 			onFinish(shader);
 		});

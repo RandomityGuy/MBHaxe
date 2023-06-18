@@ -36,6 +36,9 @@ class DefaultMaterial extends hxsl.Shader {
 			var result = dot(normal, lightPosition);
 			return saturate(result);
 		}
+		function transposeMat3(m:Mat3):Mat3 {
+			return mat3(vec3(m[0].x, m[1].x, m[2].x), vec3(m[0].y, m[1].y, m[2].y), vec3(m[0].z, m[1].z, m[2].z));
+		}
 		function vertex() {
 			calculatedUV = input.uv;
 			if (isHalfTile) {
@@ -43,9 +46,10 @@ class DefaultMaterial extends hxsl.Shader {
 			}
 			var objToTangentSpace = mat3(input.t, input.b, input.n);
 			outLightVec = vec4(0);
-			var inLightVec = vec3(0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
+			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
+			inLightVec.x *= -1;
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
-			eyePos *= -1;
+			eyePos.x *= -1;
 			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
 			outLightVec.xyz = -inLightVec * objToTangentSpace;
 			var p = input.position;
@@ -54,10 +58,10 @@ class DefaultMaterial extends hxsl.Shader {
 			outEyePos = (eyePos / 100.0) * objToTangentSpace;
 			var pN = input.normal;
 			pN.x *= -1;
-			outLightVec.w = step(-0.5, dot(pN, -inLightVec));
+			outLightVec.w = isHalfTile ? step(0, dot(pN, -inLightVec)) : step(-0.5, dot(pN, -inLightVec));
 		}
 		function fragment() {
-			var bumpNormal = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
+			var bumpNormal = normalMap.get(calculatedUV * secondaryMapUvFactor).xyz * 2 - 1;
 			var bumpDot = isHalfTile ? saturate(dot(bumpNormal, outLightVec.xyz)) : ((dot(bumpNormal, outLightVec.xyz) + 1) * 0.5);
 			// Diffuse part
 			var diffuse = diffuseMap.get(calculatedUV);

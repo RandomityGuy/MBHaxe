@@ -33,14 +33,19 @@ class DefaultCubemapNormalMaterial extends hxsl.Shader {
 		@var var outEyePos:Vec3;
 		@var var outReflectVec:Vec3;
 		@var var outNormal:Vec3;
+		@var var outPos:Vec3;
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
 			var result = dot(normal, lightPosition);
 			return saturate(result);
 		}
+		function transposeMat3(m:Mat3):Mat3 {
+			return mat3(vec3(m[0].x, m[1].x, m[2].x), vec3(m[0].y, m[1].y, m[2].y), vec3(m[0].z, m[1].z, m[2].z));
+		}
 		function vertex() {
 			calculatedUV = input.uv;
 			outLightVec = vec4(0);
-			var inLightVec = vec3(0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
+			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
+			inLightVec.x *= -1;
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
 			eyePos.x *= -1;
 			outNormal = input.normal;
@@ -57,11 +62,13 @@ class DefaultCubemapNormalMaterial extends hxsl.Shader {
 			var cubeEyePos = camera.position - global.modelView[3].xyz;
 			cubeEyePos.x *= -1;
 
-			var p = input.position;
-			p.x *= -1;
+			outPos = input.position;
+			outPos.x *= -1;
 
-			var cubeVertPos = p * cubeTrans;
-			var cubeNormal = (outNormal * cubeTrans).normalize();
+			var cubeVertPos = input.position * cubeTrans;
+			cubeVertPos.x *= -1;
+			var cubeNormal = (input.normal * cubeTrans).normalize();
+			cubeNormal.x *= -1;
 			var eyeToVert = cubeVertPos - cubeEyePos;
 			outReflectVec = reflect(eyeToVert, cubeNormal);
 		}
@@ -73,7 +80,7 @@ class DefaultCubemapNormalMaterial extends hxsl.Shader {
 			var outCol = (outShading + ambient) * diffuse;
 			outCol += diffuse.a * cubeMap.get(outReflectVec);
 
-			var eyeVec = (outEyePos - input.position).normalize();
+			var eyeVec = (outEyePos - outPos).normalize();
 			var halfAng = (eyeVec + outLightVec.xyz).normalize();
 			var specValue = saturate(outNormal.dot(halfAng)) * outLightVec.w;
 			var specular = specularColor * pow(specValue, shininess);
