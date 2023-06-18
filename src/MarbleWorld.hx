@@ -323,7 +323,7 @@ class MarbleWorld extends Scheduler {
 				// ls.perPixelLighting = false;
 
 				var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
-				shadow.power = 0.5;
+				shadow.power = 1;
 				shadow.mode = Dynamic;
 				shadow.minDist = 0.1;
 				shadow.maxDist = 200;

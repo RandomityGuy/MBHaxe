@@ -194,6 +194,9 @@ class Marble extends GameObject {
 	public var _radius = 0.2;
 
 	var _prevRadius:Float;
+	var _renderScale:Float = 1;
+	var _marbleScale:Float = 1;
+	var _defaultScale:Float = 1;
 
 	var _maxRollVelocity:Float = 15;
 	var _angularAcceleration:Float = 75;
@@ -404,6 +407,9 @@ class Marble extends GameObject {
 		var avgRadius = (b.xSize + b.ySize + b.zSize) / 6;
 		if (isUltra) {
 			this._radius = 0.3;
+			this._renderScale = 0.3 / avgRadius;
+			this._marbleScale = this._renderScale;
+			this._defaultScale = this._marbleScale;
 			marbleDts.scale(0.3 / avgRadius);
 		} else
 			this._radius = avgRadius;
@@ -1821,18 +1827,32 @@ class Marble extends GameObject {
 
 		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
 
-		if (this._radius != 0.6666 && timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+		var s = this._renderScale * this._renderScale;
+		if (s <= this._marbleScale * this._marbleScale)
+			s = 0.1;
+		else
+			s = 0.4;
+
+		s = timeState.dt / s * 2.302585124969482;
+		s = 1.0 / (s * (s * 0.2349999994039536 * s) + s + 1.0 + 0.4799999892711639 * s * s);
+		this._renderScale *= s;
+		s = 1 - s;
+		this._renderScale += s * this._marbleScale;
+		var marbledts = cast(this.getChildAt(0), DtsObject);
+		marbledts.setScale(this._renderScale);
+
+		if (this._radius != 0.675 && timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
 			this._prevRadius = this._radius;
-			this._radius = 0.6666;
-			this.collider.radius = 0.6666;
-			var marbledts = cast(this.getChildAt(0), DtsObject);
-			marbledts.scale(this._radius / this._prevRadius);
+			this._radius = 0.675;
+			this.collider.radius = 0.675;
+			this._marbleScale *= 2.25;
+			var boost = this.level.currentUp.multiply(5);
+			this.velocity = this.velocity.add(boost);
 		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > 10) {
 			if (this._radius != this._prevRadius) {
 				this._radius = this._prevRadius;
 				this.collider.radius = this._radius;
-				var marbledts = cast(this.getChildAt(0), DtsObject);
-				marbledts.scale(this._prevRadius / 0.6666);
+				this._marbleScale = this._defaultScale;
 			}
 		}
 
@@ -1884,10 +1904,18 @@ class Marble extends GameObject {
 		}
 	}
 
+	public function getMass() {
+		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+			return 5;
+		} else {
+			return 1;
+		}
+	}
+
 	public function useBlast() {
 		if (this.level.blastAmount < 0.25 || this.level.game != "ultra")
 			return;
-		var impulse = this.level.currentUp.multiply(Math.max(Math.sqrt(this.level.blastAmount), this.level.blastAmount) * 10);
+		var impulse = this.level.currentUp.multiply(this.level.blastAmount * 8);
 		this.applyImpulse(impulse);
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
 		this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
@@ -1971,9 +1999,10 @@ class Marble extends GameObject {
 		this.teleportEnableTime = null;
 		if (this._radius != this._prevRadius) {
 			this._radius = this._prevRadius;
+			this._marbleScale = this._renderScale = this._defaultScale;
 			this.collider.radius = this._radius;
 			var marbledts = cast(this.getChildAt(0), DtsObject);
-			marbledts.scale(this._prevRadius / 0.6666);
+			marbledts.scale(this._prevRadius / 0.675);
 		}
 	}
 }

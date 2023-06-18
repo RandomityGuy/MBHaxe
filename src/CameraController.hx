@@ -232,7 +232,7 @@ class CameraController extends Object {
 		var up = new Vector(0, 0, 1);
 		up.transform(orientationQuat.toMatrix());
 		var directionVector = new Vector(1, 0, 0);
-		var cameraVerticalTranslation = new Vector(0, 0, 0.325);
+		var cameraVerticalTranslation = new Vector(0, 0, 0.55);
 
 		var q1 = new Quat();
 		q1.initRotateAxis(0, 1, 0, CameraPitch);
@@ -248,7 +248,7 @@ class CameraController extends Object {
 		camera.target = marblePosition.add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
-		var rayCastOrigin = marblePosition.add(level.currentUp.multiply(marble._radius));
+		var rayCastOrigin = marblePosition.add(level.currentUp.multiply(marble._radius)).add(cameraVerticalTranslation);
 
 		var processedShapes = [];
 		for (i in 0...3) {
@@ -289,7 +289,7 @@ class CameraController extends Object {
 					var rightVec = camera.up.cross(forwardVec).normalized();
 					var upVec = forwardVec.cross(rightVec);
 
-					camera.target = marblePosition.add(upVec.multiply(0.3));
+					camera.target = marblePosition.add(upVec.multiply(0.55));
 					camera.up = upVec;
 					continue;
 				}
