@@ -80,7 +80,8 @@ class SuperSpeed extends PowerUp {
 		// Determine the necessary rotation to rotate the up vector to the contact normal.
 		quat2.initMoveTo(this.level.currentUp, marble.lastContactNormal);
 		movementVector.transform(quat2.toMatrix());
-		marble.velocity = marble.velocity.add(movementVector.multiply(-25));
+		var masslessFactor = marble.getMass() * 0.7 + 1 - 0.7;
+		marble.velocity = marble.velocity.add(movementVector.multiply(-25 * masslessFactor / marble.getMass()));
 
 		// marble.body.addLinearVelocity(Util.vecThreeToOimo(movementVector).scale(24.7)); // Whirligig's determined value
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
