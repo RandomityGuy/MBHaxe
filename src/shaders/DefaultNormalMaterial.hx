@@ -31,14 +31,19 @@ class DefaultNormalMaterial extends hxsl.Shader {
 		@var var outLightVec:Vec4;
 		@var var outEyePos:Vec3;
 		@var var outNormal:Vec3;
+		@var var outPos:Vec3;
 		function lambert(normal:Vec3, lightPosition:Vec3):Float {
 			var result = dot(normal, lightPosition);
 			return saturate(result);
 		}
+		function transposeMat3(m:Mat3):Mat3 {
+			return mat3(vec3(m[0].x, m[1].x, m[2].x), vec3(m[0].y, m[1].y, m[2].y), vec3(m[0].z, m[1].z, m[2].z));
+		}
 		function vertex() {
 			calculatedUV = input.uv;
 			outLightVec = vec4(0);
-			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewInverse);
+			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
+			inLightVec.x *= -1;
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
 			eyePos.x *= -1;
 			outNormal = input.normal;
@@ -50,6 +55,8 @@ class DefaultNormalMaterial extends hxsl.Shader {
 			outShading = vec4(saturate(dot(-inLightVec, outNormal)));
 			outShading.w = 1;
 			outShading *= vec4(1.08, 1.03, 0.90, 1);
+			outPos = input.position;
+			outPos.x *= -1;
 		}
 		function fragment() {
 			// Diffuse part
@@ -58,7 +65,7 @@ class DefaultNormalMaterial extends hxsl.Shader {
 
 			var outCol = (outShading + ambient) * diffuse;
 
-			var eyeVec = (outEyePos - input.position).normalize();
+			var eyeVec = (outEyePos - outPos).normalize();
 			var halfAng = (eyeVec + outLightVec.xyz).normalize();
 			var specValue = saturate(outNormal.dot(halfAng)) * outLightVec.w;
 			var specular = specularColor * pow(specValue, shininess);
