@@ -491,10 +491,7 @@ class MarbleWorld extends Scheduler {
 
 		var startquat = this.getStartPositionAndOrientation();
 
-		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 0.727843);
-		var oldtransform = this.marble.collider.transform.clone();
-		oldtransform.setPosition(startquat.position);
-		this.marble.collider.setTransform(oldtransform);
+		this.marble.setMarblePosition(startquat.position.x, startquat.position.y, startquat.position.z + 0.727843);
 		this.marble.reset();
 
 		var euler = startquat.quat.toEuler();
@@ -505,7 +502,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.nextCameraYaw = euler.z + Math.PI / 2;
 		this.marble.camera.oob = false;
 		this.marble.camera.finish = false;
-		this.marble.mode = Start;
+		this.marble.setMode(Start);
 		this.marble.startPad = cast startquat.pad;
 		sky.follow = marble.camera;
 
@@ -535,15 +532,15 @@ class MarbleWorld extends Scheduler {
 			return; // We will update state manually
 		if (this.timeState.currentAttemptTime < 0.5) {
 			this.playGui.setCenterText('none');
-			this.marble.mode = Start;
+			this.marble.setMode(Start);
 		}
 		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
 			this.playGui.setCenterText('none');
-			this.marble.mode = Start;
+			this.marble.setMode(Start);
 		}
 		if (this.timeState.currentAttemptTime >= 3.5 && this.finishTime == null) {
 			this.playGui.setCenterText('none');
-			this.marble.mode = Play;
+			this.marble.setMode(Play);
 		}
 	}
 
@@ -1412,7 +1409,7 @@ class MarbleWorld extends Scheduler {
 		} else {
 			this.endPad.spawnFirework(this.timeState);
 			this.finishTime = this.timeState.clone();
-			this.marble.mode = Finish;
+			this.marble.setMode(Finish);
 			this.marble.camera.finish = true;
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
@@ -1673,7 +1670,7 @@ class MarbleWorld extends Scheduler {
 		// Determine where to spawn the marble
 		var offset = new Vector(0, 0, 0.727843);
 		var mpos = this.currentCheckpoint.getAbsPos().getPosition().add(offset);
-		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
+		this.marble.setMarblePosition(mpos.x, mpos.y, mpos.z);
 		marble.velocity.load(new Vector(0, 0, 0));
 		marble.omega.load(new Vector(0, 0, 0));
 		Console.log('Respawn:');
