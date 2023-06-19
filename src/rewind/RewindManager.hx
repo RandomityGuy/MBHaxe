@@ -87,7 +87,7 @@ class RewindManager {
 
 	public function applyFrame(rf:RewindFrame) {
 		level.timeState = rf.timeState.clone();
-		level.marble.setPosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
+		level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
 		level.marble.setRotationQuat(rf.marbleOrientation.clone());
 		level.marble.velocity.set(rf.marbleVelocity.x, rf.marbleVelocity.y, rf.marbleVelocity.z);
 		level.marble.omega.set(rf.marbleAngularVelocity.x, rf.marbleAngularVelocity.y, rf.marbleAngularVelocity.z);

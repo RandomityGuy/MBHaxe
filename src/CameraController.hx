@@ -214,9 +214,8 @@ class CameraController extends Object {
 
 		if (this.finish) {
 			// Make the camera spin around slowly
-			CameraPitch = Util.lerp(this.level.finishPitch, 0.45,
-				Util.clamp((this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / 0.3, 0, 1));
-			CameraYaw = this.level.finishYaw - (this.level.timeState.currentAttemptTime - this.level.finishTime.currentAttemptTime) / -1.2;
+			CameraPitch = this.level.finishPitch;
+			CameraYaw = this.level.finishYaw;
 		}
 
 		if (!this.level.isWatching) {
@@ -228,7 +227,7 @@ class CameraController extends Object {
 			CameraYaw = this.level.replay.currentPlaybackFrame.cameraYaw;
 		}
 
-		var marblePosition = level.marble.getAbsPos().getPosition();
+		var marblePosition = level.marble.collider.transform.getPosition();
 		var up = new Vector(0, 0, 1);
 		up.transform(orientationQuat.toMatrix());
 		var directionVector = new Vector(1, 0, 0);
