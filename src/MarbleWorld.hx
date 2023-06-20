@@ -259,17 +259,7 @@ class MarbleWorld extends Scheduler {
 			this._loadingLength = resourceLoadFuncs.length;
 			fwd();
 		});
-		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
-	}
-
-	public function loadMusic(onFinish:Void->Void) {
-		if (this.mission.missionInfo.music != null) {
-			var musicFileName = 'sound/music/' + this.mission.missionInfo.music;
-			ResourceLoader.load(musicFileName).entry.load(onFinish);
-		} else {
-			onFinish();
-		}
 	}
 
 	public function postInit() {
@@ -277,8 +267,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui.init(this.scene2d, this.mission.game.toLowerCase(), () -> {
 			this.scene.addChild(this.sky);
 			this._ready = true;
-			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
-			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
+			AudioManager.playShell();
 			MarbleGame.canvas.clearContent();
 			this.endPad.generateCollider();
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
@@ -374,11 +363,8 @@ class MarbleWorld extends Scheduler {
 			"particles/smoke.png",
 			"sound/rolling_hard.wav",
 			"sound/sliding.wav",
-			"sound/superbounceactive.wav",
-			"sound/forcefield.wav",
 			"sound/use_gyrocopter.wav",
 			"sound/bumperding1.wav",
-			"sound/bumper1.wav",
 			"sound/jump.wav",
 			"sound/mega_roll.wav",
 			"sound/bouncehard1.wav",
@@ -387,8 +373,6 @@ class MarbleWorld extends Scheduler {
 			"sound/bouncehard4.wav",
 			"sound/spawn_alternate.wav",
 			"sound/missinggems.wav",
-			"shapes/images/glow_bounce.dts",
-			"shapes/images/glow_bounce.png",
 			"shapes/images/helicopter.dts",
 			"shapes/images/helicopter.jpg", // These irk us a lot because ifl shit
 			"shapes/items/gem.dts", // Ew ew
@@ -399,7 +383,7 @@ class MarbleWorld extends Scheduler {
 			marblefiles.push("shapes/balls/pack1/marble20.normal.png");
 			marblefiles.push("shapes/balls/pack1/marble18.normal.png");
 			marblefiles.push("shapes/balls/pack1/marble01.normal.png");
-			marblefiles.push("sound/blast.wav");
+			marblefiles.push("sound/use_blast.wav");
 		}
 		// Hacky
 		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
@@ -1405,7 +1389,7 @@ class MarbleWorld extends Scheduler {
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/missinggems.wav', ResourceLoader.getAudio, this.soundResources));
 			displayAlert("You can't finish without all the gems!");
 		} else {
-			this.endPad.spawnFirework(this.timeState);
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, this.soundResources));
 			this.finishTime = this.timeState.clone();
 			this.marble.setMode(Finish);
 			this.marble.camera.finish = true;
@@ -1682,8 +1666,6 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
 		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
 		this.marble.camera.oob = false;
-		@:privateAccess this.marble.superBounceEnableTime = -1e8;
-		@:privateAccess this.marble.shockAbsorberEnableTime = -1e8;
 		@:privateAccess this.marble.helicopterEnableTime = -1e8;
 		@:privateAccess this.marble.megaMarbleEnableTime = -1e8;
 		this.blastAmount = this.cheeckpointBlast;
