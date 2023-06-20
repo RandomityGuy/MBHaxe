@@ -224,6 +224,7 @@ class MarbleGame {
 		if (paused && world._ready) {
 			Console.log("Game paused");
 			world.setCursorLock(false);
+			@:privateAccess world.playGui.setGuiVisibility(false);
 			exitGameDlg = new ExitGameDlg((sender) -> {
 				canvas.popDialog(exitGameDlg);
 				if (world.isRecording) {
@@ -234,10 +235,12 @@ class MarbleGame {
 					quitMission();
 				}
 			}, (sender) -> {
+				@:privateAccess world.playGui.setGuiVisibility(true);
 				canvas.popDialog(exitGameDlg);
 				paused = !paused;
 				world.setCursorLock(true);
 			}, (sender) -> {
+				@:privateAccess world.playGui.setGuiVisibility(true);
 				canvas.popDialog(exitGameDlg);
 				world.restart(true);
 				// world.setCursorLock(true);
@@ -247,8 +250,10 @@ class MarbleGame {
 		} else {
 			if (world._ready) {
 				Console.log("Game unpaused");
-				if (exitGameDlg != null)
+				if (exitGameDlg != null) {
 					canvas.popDialog(exitGameDlg);
+					@:privateAccess world.playGui.setGuiVisibility(true);
+				}
 				world.setCursorLock(true);
 			}
 		}
