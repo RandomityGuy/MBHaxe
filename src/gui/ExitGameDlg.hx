@@ -1,14 +1,18 @@
 package gui;
 
+import src.AudioManager;
 import src.MarbleGame;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 
-class ExitGameDlg extends GuiControl {
+class ExitGameDlg extends GuiImage {
 	public function new(yesFunc:GuiControl->Void, noFunc:GuiControl->Void, restartFunc:GuiControl->Void) {
-		super();
+		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
+		super(res);
+
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/level_text.wav', ResourceLoader.getAudio, this.soundResources));
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -22,10 +26,46 @@ class ExitGameDlg extends GuiControl {
 			return [normal, hover, pressed];
 		}
 
+		var innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(320, 180);
+		innerCtrl.extent = new Vector(1280, 720);
+
+		var scene2d = MarbleGame.canvas.scene2d;
+
+		// var subX = 640 - (scene2d.width - 145 * 2) * 640 g/ scene2d.width;
+		// var subY = 480 - (scene2d.height - 82 * 2) * 480 / scene2d.height;
+
+		// innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		innerCtrl.horizSizing = Width;
+		innerCtrl.vertSizing = Height;
+		this.addChild(innerCtrl);
+
+		var coliseumfontdata = ResourceLoader.getFileEntry("data/font/ColiseumRR.fnt");
+		var coliseumb = new BitmapFont(coliseumfontdata.entry);
+		@:privateAccess coliseumb.loader = ResourceLoader.loader;
+		var coliseum = coliseumb.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+
+		var rootTitle = new GuiText(coliseum);
+		rootTitle.position = new Vector(100, 30);
+		rootTitle.extent = new Vector(1120, 80);
+		rootTitle.text.textColor = 0xFFFFFF;
+		rootTitle.text.text = "Paused";
+		rootTitle.text.alpha = 0.5;
+		innerCtrl.addChild(rootTitle);
+
+		var levelTitle = new GuiText(coliseum);
+		levelTitle.position = new Vector(100, 75);
+		levelTitle.extent = new Vector(1120, 80);
+		levelTitle.text.textColor = 0xFFFFFF;
+		levelTitle.text.alpha = 0.5;
+		levelTitle.text.text = 'Level ${MarbleGame.instance.world.mission.index + 1}';
+		innerCtrl.addChild(levelTitle);
+
 		var dialogImg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
 		dialogImg.horizSizing = Center;
 		dialogImg.vertSizing = Center;
 		dialogImg.position = new Vector(162, 160);
+
 		dialogImg.extent = new Vector(315, 160);
 
 		var overlay = new GuiImage(ResourceLoader.getResource("data/ui/common/quitfromthislvl_overlay.png", ResourceLoader.getImage, this.imageResources)

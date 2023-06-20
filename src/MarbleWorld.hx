@@ -472,6 +472,9 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
+		this.cancel(this.oobSchedule);
+		this.cancel(this.oobSchedule2);
+
 		var startquat = this.getStartPositionAndOrientation();
 
 		this.marble.setMarblePosition(startquat.position.x, startquat.position.y, startquat.position.z + 0.727843);

@@ -726,4 +726,22 @@ class PlayGui {
 
 		this.middleMessages.push({ctrl: middleMsg, age: 0});
 	}
+
+	var pgoChildren = [];
+
+	public function setGuiVisibility(show:Bool) {
+		if (show) {
+			if (pgoChildren.length != 0) {
+				for (ch in pgoChildren) {
+					playGuiCtrlOuter.addChild(ch);
+				}
+				playGuiCtrlOuter.render(MarbleGame.canvas.scene2d);
+				pgoChildren = [];
+			}
+		} else {
+			pgoChildren = playGuiCtrlOuter.children.copy();
+			playGuiCtrlOuter.removeChildren();
+			playGuiCtrlOuter.render(MarbleGame.canvas.scene2d);
+		}
+	}
 }
