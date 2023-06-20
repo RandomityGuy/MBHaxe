@@ -27,12 +27,7 @@ class RewindManager {
 		rf.bonusTime = level.bonusTime;
 		rf.gemCount = level.gemCount;
 		rf.gemStates = level.gems.map(x -> x.pickedUp);
-		rf.activePowerupStates = [@:privateAccess
-			level.marble.superBounceEnableTime, @:privateAccess
-			level.marble.shockAbsorberEnableTime, @:privateAccess
-			level.marble.helicopterEnableTime, @:privateAccess
-			level.marble.megaMarbleEnableTime
-		];
+		rf.activePowerupStates = [@:privateAccess level.marble.helicopterEnableTime, @:privateAccess level.marble.megaMarbleEnableTime];
 		rf.currentUp = level.currentUp.clone();
 		rf.lastContactNormal = level.marble.lastContactNormal.clone();
 		rf.mpStates = level.pathedInteriors.map(x -> {
@@ -108,10 +103,8 @@ class RewindManager {
 		for (i in 0...rf.gemStates.length) {
 			level.gems[i].setHide(rf.gemStates[i]);
 		}
-		@:privateAccess level.marble.superBounceEnableTime = rf.activePowerupStates[0];
-		@:privateAccess level.marble.shockAbsorberEnableTime = rf.activePowerupStates[1];
-		@:privateAccess level.marble.helicopterEnableTime = rf.activePowerupStates[2];
-		@:privateAccess level.marble.megaMarbleEnableTime = rf.activePowerupStates[3];
+		@:privateAccess level.marble.helicopterEnableTime = rf.activePowerupStates[0];
+		@:privateAccess level.marble.megaMarbleEnableTime = rf.activePowerupStates[1];
 
 		if (level.currentUp.x != rf.currentUp.x || level.currentUp.y != rf.currentUp.y || level.currentUp.z != rf.currentUp.z) {
 			level.setUp(rf.currentUp, level.timeState);

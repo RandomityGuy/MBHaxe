@@ -25,7 +25,7 @@ class EasterEgg extends PowerUp {
 			this.pickupSound = ResourceLoader.getResource("data/sound/easter_egg.wav", ResourceLoader.getAudio, this.soundResources);
 			this.customPickupMessage = "You picked up an Easter Egg!";
 		} else {
-			this.pickupSound = ResourceLoader.getResource("data/sound/easterfound.wav", ResourceLoader.getAudio, this.soundResources);
+			this.pickupSound = ResourceLoader.getResource("data/sound/pu_easter.wav", ResourceLoader.getAudio, this.soundResources);
 			this.customPickupMessage = "You picked up an Easter Egg!.";
 		}
 
@@ -35,7 +35,7 @@ class EasterEgg extends PowerUp {
 	public override function init(level:src.MarbleWorld, onFinish:() -> Void) {
 		super.init(level, () -> {
 			ResourceLoader.load("sound/easter_egg.wav").entry.load(() -> {
-				ResourceLoader.load("sound/easterfound.wav").entry.load(onFinish);
+				ResourceLoader.load("sound/pu_easter.wav").entry.load(onFinish);
 			});
 		});
 	}

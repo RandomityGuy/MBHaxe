@@ -60,7 +60,7 @@ class AudioManager {
 
 	public static function playShell() {
 		AudioManager.manager.stopByName("music");
-		var sndres = ResourceLoader.getAudio("data/sound/music/Pianoforte.ogg");
+		var sndres = ResourceLoader.getAudio("data/sound/music/Tim Trance.ogg");
 		if (sndres == null)
 			return;
 		sndres.acquire();
