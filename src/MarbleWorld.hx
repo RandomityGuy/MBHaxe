@@ -504,6 +504,7 @@ class MarbleWorld extends Scheduler {
 		this.oldOrientationQuat = new Quat();
 		this.newOrientationQuat = new Quat();
 		this.deselectPowerUp();
+		playGui.setCenterText('');
 
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 
@@ -514,15 +515,12 @@ class MarbleWorld extends Scheduler {
 		if (this.outOfBounds)
 			return; // We will update state manually
 		if (this.timeState.currentAttemptTime < 0.5) {
-			this.playGui.setCenterText('none');
 			this.marble.setMode(Start);
 		}
 		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
-			this.playGui.setCenterText('none');
 			this.marble.setMode(Start);
 		}
 		if (this.timeState.currentAttemptTime >= 3.5 && this.finishTime == null) {
-			this.playGui.setCenterText('none');
 			this.marble.setMode(Play);
 		}
 	}
@@ -1604,10 +1602,10 @@ class MarbleWorld extends Scheduler {
 		}
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
-		playGui.setCenterText('outofbounds');
+		playGui.setCenterText('Out of Bounds');
 		// if (this.replay.mode != = 'playback')
 		this.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2, () -> {
-			playGui.setCenterText('none');
+			playGui.setCenterText('');
 			return null;
 		});
 		this.oobSchedule2 = this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
@@ -1699,7 +1697,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
-		this.playGui.setCenterText('none');
+		this.playGui.setCenterText('');
 		this.clearSchedule();
 		this.outOfBounds = false;
 		this.deselectPowerUp(); // Always deselect first
