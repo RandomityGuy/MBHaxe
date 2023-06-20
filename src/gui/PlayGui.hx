@@ -50,7 +50,8 @@ class PlayGui {
 	var gemCountSlash:GuiImage;
 	var gemHUD:GuiImage;
 	var powerupBox:GuiAnim;
-	var RSGOCenterText:Anim;
+	var centerText:GuiText;
+	var centerTextBg:GuiImage;
 
 	var helpTextForeground:GuiText;
 	var helpTextBackground:GuiText;
@@ -82,7 +83,6 @@ class PlayGui {
 	public function dispose() {
 		if (_init) {
 			playGuiCtrlOuter.dispose();
-			RSGOCenterText.remove();
 
 			for (textureResource in textureResources) {
 				textureResource.release();
@@ -133,17 +133,8 @@ class PlayGui {
 		for (i in 0...6) {
 			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
-
-		var rsgo = [];
-		rsgo.push(ResourceLoader.getResource("data/ui/game/ready.png", ResourceLoader.getImage, this.imageResources).toTile());
-		rsgo.push(ResourceLoader.getResource("data/ui/game/set.png", ResourceLoader.getImage, this.imageResources).toTile());
-		rsgo.push(ResourceLoader.getResource("data/ui/game/go.png", ResourceLoader.getImage, this.imageResources).toTile());
-		rsgo.push(ResourceLoader.getResource("data/ui/game/outofbounds.png", ResourceLoader.getImage, this.imageResources).toTile());
-		RSGOCenterText = new Anim(rsgo, 0, scene2d);
-
 		initTimer();
 		initGemCounter();
-		initCenterText();
 		initPowerupBox();
 		if (game == 'ultra')
 			initBlastBar();
@@ -245,31 +236,14 @@ class PlayGui {
 		playGuiCtrl.addChild(timerCtrl);
 	}
 
-	public function initCenterText() {
-		RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[0].width * Settings.uiScale / 2;
-		RSGOCenterText.y = scene2d.height * 0.3; // - RSGOCenterText.frames[0].height / 2;
-		RSGOCenterText.setScale(Settings.uiScale);
-	}
-
-	public function setCenterText(identifier:String) {
-		if (identifier == 'none') {
-			this.RSGOCenterText.visible = false;
-		} else if (identifier == 'ready') {
-			this.RSGOCenterText.visible = true;
-			this.RSGOCenterText.currentFrame = 0;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[0].width * Settings.uiScale / 2;
-		} else if (identifier == 'set') {
-			this.RSGOCenterText.visible = true;
-			this.RSGOCenterText.currentFrame = 1;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[1].width * Settings.uiScale / 2;
-		} else if (identifier == 'go') {
-			this.RSGOCenterText.visible = true;
-			this.RSGOCenterText.currentFrame = 2;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[2].width * Settings.uiScale / 2;
-		} else if (identifier == 'outofbounds') {
-			this.RSGOCenterText.visible = true;
-			this.RSGOCenterText.currentFrame = 3;
-			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[3].width * Settings.uiScale / 2;
+	public function setCenterText(text:String) {
+		if (text != "") {
+			centerText.text.text = text;
+			centerText.text.visible = true;
+			centerTextBg.bmp.visible = true;
+		} else {
+			centerText.text.visible = false;
+			centerTextBg.bmp.visible = false;
 		}
 	}
 
@@ -369,6 +343,38 @@ class PlayGui {
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
 		var arial14 = arial14b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
+		var coliseumfontdata = ResourceLoader.getFileEntry("data/font/ColiseumRR.fnt");
+		var coliseumb = new BitmapFont(coliseumfontdata.entry);
+		@:privateAccess coliseumb.loader = ResourceLoader.loader;
+		var coliseum = coliseumb.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+
+		var centerTextCtrl = new GuiControl();
+		centerTextCtrl.position = new Vector(0, 0);
+		centerTextCtrl.extent = new Vector(640, 480);
+		centerTextCtrl.vertSizing = Center;
+		centerTextCtrl.horizSizing = Center;
+
+		var centerTextBitmap = new GuiImage(ResourceLoader.getResource("data/ui/xbox/bgShadeCircle.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		centerTextBitmap.position = new Vector(225, 142);
+		centerTextBitmap.extent = new Vector(200, 64);
+		centerTextBitmap.vertSizing = Bottom;
+		centerTextBitmap.horizSizing = Left;
+		centerTextBg = centerTextBitmap;
+		centerTextCtrl.addChild(centerTextBitmap);
+
+		var centerTextText = new GuiText(coliseum);
+		centerTextText.text.textColor = 0xEBEBEB;
+		centerTextText.position = new Vector(0, 146);
+		centerTextText.extent = new Vector(640, 80);
+		centerTextText.vertSizing = Bottom;
+		centerTextText.horizSizing = Left;
+		centerTextText.justify = Center;
+		centerTextCtrl.addChild(centerTextText);
+		centerText = centerTextText;
+
+		playGuiCtrlOuter.addChild(centerTextCtrl);
 
 		var helpTextCtrl = new GuiControl();
 		helpTextCtrl.position = new Vector(0, playGuiCtrl.extent.y * 190 / 480);
