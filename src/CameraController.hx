@@ -63,6 +63,7 @@ class CameraController extends Object {
 	public var phi:Float;
 	public var theta:Float;
 
+	var lastTargetPos:Vector;
 	var lastCamPos:Vector;
 	var lastVertTranslation:Vector;
 
@@ -212,10 +213,19 @@ class CameraController extends Object {
 		}
 		var orientationQuat = level.getOrientationQuat(currentTime);
 
+		var cameraDistance = CameraDistance;
+
 		if (this.finish) {
 			// Make the camera spin around slowly
 			CameraPitch = this.level.finishPitch;
 			CameraYaw = this.level.finishYaw;
+			var effectTime = 1.0;
+			if (@:privateAccess this.marble.finishAnimTime >= 2.0)
+				effectTime = 1.0;
+			else
+				effectTime = @:privateAccess this.marble.finishAnimTime * 0.5;
+			effectTime *= 0.5 * CameraDistance;
+			cameraDistance += effectTime;
 		}
 
 		if (!this.level.isWatching) {
@@ -228,6 +238,18 @@ class CameraController extends Object {
 		}
 
 		var marblePosition = level.marble.collider.transform.getPosition();
+
+		if (this.finish) {
+			// Move the target to the centre of the finish
+			var padMat = @:privateAccess this.level.endPad.getAbsPos();
+			var offset = padMat.up();
+			var padPos = padMat.getPosition();
+			var focusPos = padPos.add(offset);
+			focusPos.scale(0.025);
+			focusPos = focusPos.add(lastTargetPos.multiply(0.975));
+			marblePosition = focusPos;
+		}
+
 		var up = new Vector(0, 0, 1);
 		up.transform(orientationQuat.toMatrix());
 		var directionVector = new Vector(1, 0, 0);
@@ -236,14 +258,14 @@ class CameraController extends Object {
 		var q1 = new Quat();
 		q1.initRotateAxis(0, 1, 0, CameraPitch);
 		directionVector.transform(q1.toMatrix());
-		cameraVerticalTranslation.transform(q1.toMatrix());
+		// cameraVerticalTranslation.transform(q1.toMatrix());
 		q1.initRotateAxis(0, 0, 1, CameraYaw);
 		directionVector.transform(q1.toMatrix());
-		cameraVerticalTranslation.transform(q1.toMatrix());
+		// cameraVerticalTranslation.transform(q1.toMatrix());
 		directionVector.transform(orientationQuat.toMatrix());
 		cameraVerticalTranslation.transform(orientationQuat.toMatrix());
 		camera.up = up;
-		camera.pos = marblePosition.sub(directionVector.multiply(CameraDistance));
+		camera.pos = marblePosition.sub(directionVector.multiply(cameraDistance)).add(cameraVerticalTranslation);
 		camera.target = marblePosition.add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
@@ -270,7 +292,7 @@ class CameraController extends Object {
 			}
 
 			if (firstHit != null) {
-				if (firstHitDistance < CameraDistance) {
+				if (firstHitDistance < cameraDistance) {
 					// camera.pos = marblePosition.sub(directionVector.multiply(firstHit.distance * 0.7));
 					var plane = new Plane(firstHit.normal.x, firstHit.normal.y, firstHit.normal.z, firstHit.point.dot(firstHit.normal));
 					var normal = firstHit.normal.multiply(-1);
@@ -304,6 +326,7 @@ class CameraController extends Object {
 		if (!oob) {
 			lastCamPos = camera.pos;
 			lastVertTranslation = cameraVerticalTranslation;
+			lastTargetPos = marblePosition.clone();
 		}
 
 		this.setPosition(camera.pos.x, camera.pos.y, camera.pos.z);
