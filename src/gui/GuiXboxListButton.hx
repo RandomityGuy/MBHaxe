@@ -114,6 +114,8 @@ class GuiXboxListButton extends GuiControl {
 	}
 
 	public override function onMouseRelease(mouseState:MouseState) {
+		if (mouseState.handled)
+			return;
 		mouseState.handled = true;
 		super.onMouseRelease(mouseState);
 		if (this.pressedAction != null && !disabled) {
@@ -122,6 +124,8 @@ class GuiXboxListButton extends GuiControl {
 	}
 
 	public override function onMouseEnter(mouseState:MouseState) {
+		if (mouseState.handled)
+			return;
 		mouseState.handled = true;
 		super.onMouseEnter(mouseState);
 
