@@ -26,16 +26,19 @@ class ExitGameDlg extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var innerCtrl = new GuiControl();
-		innerCtrl.position = new Vector(320, 180);
-		innerCtrl.extent = new Vector(1280, 720);
-
 		var scene2d = MarbleGame.canvas.scene2d;
 
-		// var subX = 640 - (scene2d.width - 145 * 2) * 640 g/ scene2d.width;
-		// var subY = 480 - (scene2d.height - 82 * 2) * 480 / scene2d.height;
+		var offsetX = (scene2d.width - 1280) / 2;
+		var offsetY = (scene2d.height - 720) / 2;
 
-		// innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		var innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		// innerCtrl.extent = new Vector(640, 480);
+
+		var subX = 640 - (scene2d.width - offsetX * 2) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - offsetY * 2) * 480 / scene2d.height;
+
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
 		innerCtrl.horizSizing = Width;
 		innerCtrl.vertSizing = Height;
 		this.addChild(innerCtrl);
@@ -61,50 +64,18 @@ class ExitGameDlg extends GuiImage {
 		levelTitle.text.text = 'Level ${MarbleGame.instance.world.mission.index + 1}';
 		innerCtrl.addChild(levelTitle);
 
-		var dialogImg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
-		dialogImg.horizSizing = Center;
-		dialogImg.vertSizing = Center;
-		dialogImg.position = new Vector(162, 160);
+		var btnList = new GuiXboxList();
+		btnList.position = new Vector(70, 95);
+		btnList.horizSizing = Left;
+		btnList.extent = new Vector(502, 500);
+		innerCtrl.addChild(btnList);
 
-		dialogImg.extent = new Vector(315, 160);
-
-		var overlay = new GuiImage(ResourceLoader.getResource("data/ui/common/quitfromthislvl_overlay.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		overlay.horizSizing = Right;
-		overlay.vertSizing = Bottom;
-		overlay.position = new Vector(36, 22);
-		overlay.extent = new Vector(235, 42);
-
-		var yesButton = new GuiButton(loadButtonImages("data/ui/common/yes"));
-		yesButton.position = new Vector(19, 103);
-		yesButton.extent = new Vector(86, 40);
-		yesButton.vertSizing = Top;
-		yesButton.horizSizing = Right;
-		yesButton.accelerator = hxd.Key.ENTER;
-		yesButton.gamepadAccelerator = ["A"];
-		yesButton.pressedAction = (sender) -> yesFunc(yesButton);
-
-		var noButton = new GuiButton(loadButtonImages("data/ui/common/no"));
-		noButton.position = new Vector(105, 102);
-		noButton.extent = new Vector(86, 40);
-		noButton.vertSizing = Top;
-		noButton.horizSizing = Right;
-		noButton.gamepadAccelerator = ["B"];
-		noButton.pressedAction = (sender) -> noFunc(noButton);
-
-		var restartButton = new GuiButton(loadButtonImages("data/ui/common/restart"));
-		restartButton.position = new Vector(214, 104);
-		restartButton.extent = new Vector(86, 40);
-		restartButton.vertSizing = Top;
-		restartButton.horizSizing = Right;
-		restartButton.gamepadAccelerator = ["X"];
-		restartButton.pressedAction = (sender) -> restartFunc(restartButton);
-
-		dialogImg.addChild(overlay);
-		dialogImg.addChild(yesButton);
-		dialogImg.addChild(noButton);
-		dialogImg.addChild(restartButton);
-
-		this.addChild(dialogImg);
+		btnList.addButton(0, "Resume", (evt) -> noFunc(btnList));
+		btnList.addButton(0, "Restart", (evt) -> restartFunc(btnList));
+		btnList.addButton(4, "Exit Level", (evt) -> yesFunc(btnList));
+		btnList.addButton(3, "Help & Options", (evt) -> {}, 20);
+		btnList.addButton(2, "Leaderboards", (evt) -> {});
+		btnList.addButton(2, "Achievements", (evt) -> {});
+		btnList.addButton(4, "Main Menu", (evt) -> yesFunc(btnList));
 	}
 }

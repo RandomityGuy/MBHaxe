@@ -208,7 +208,9 @@ class MarbleGame {
 			}
 
 			var mouseState:MouseState = {
-				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY)
+				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY),
+				wheel: _mouseWheelDelta,
+				handled: false
 			}
 			ProfilerUI.measure("canvasUpdate");
 			canvas.update(dt, mouseState);
