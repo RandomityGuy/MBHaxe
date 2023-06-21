@@ -65,7 +65,7 @@ class ExitGameDlg extends GuiImage {
 		innerCtrl.addChild(levelTitle);
 
 		var btnList = new GuiXboxList();
-		btnList.position = new Vector(70, 95);
+		btnList.position = new Vector(70 - offsetX / 2, 95);
 		btnList.horizSizing = Left;
 		btnList.extent = new Vector(502, 500);
 		innerCtrl.addChild(btnList);
