@@ -109,11 +109,14 @@ class PlayGui {
 		playGuiCtrlOuter.horizSizing = Width;
 		playGuiCtrlOuter.vertSizing = Height;
 
-		playGuiCtrl = new GuiControl();
-		playGuiCtrl.position = new Vector(145, 82);
+		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+		var safeHorMargin = 1 + (scene2d.width * 0.15) / 2;
 
-		var subX = 640 - (scene2d.width - 145 * 2) * 640 / scene2d.width;
-		var subY = 480 - (scene2d.height - 82 * 2) * 480 / scene2d.height;
+		playGuiCtrl = new GuiControl();
+		playGuiCtrl.position = new Vector(safeHorMargin, safeVerMargin);
+
+		var subX = 640 - (scene2d.width - safeHorMargin * 2) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - safeVerMargin * 2) * 480 / scene2d.height;
 
 		playGuiCtrl.extent = new Vector(640 - subX, 480 - subY);
 		playGuiCtrl.horizSizing = Width;
@@ -160,65 +163,67 @@ class PlayGui {
 	}
 
 	public function initTimer() {
+		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+
 		var timerCtrl = new GuiImage(ResourceLoader.getResource('data/ui/game/timebackdrop0.png', ResourceLoader.getImage, this.imageResources).toTile());
 		timerCtrl.position = new Vector(215, 0);
 		timerCtrl.extent = new Vector(256, 64);
 		timerCtrl.horizSizing = Center;
-		timerCtrl.xScale = (scene2d.height - 82 * 2) / 480;
-		timerCtrl.yScale = (scene2d.height - 82 * 2) / 480;
+		timerCtrl.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerCtrl.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		var innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(26, 0);
 		innerCtrl.extent = new Vector(256, 64);
-		innerCtrl.xScale = (scene2d.height - 82 * 2) / 480;
-		innerCtrl.yScale = (scene2d.height - 82 * 2) / 480;
+		innerCtrl.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		innerCtrl.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		timerCtrl.addChild(innerCtrl);
 
 		timerNumbers[0].position = new Vector(20, 4);
 		timerNumbers[0].extent = new Vector(43, 55);
-		timerNumbers[0].xScale = (scene2d.height - 82 * 2) / 480;
-		timerNumbers[0].yScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[0].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerNumbers[0].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		timerNumbers[1].position = new Vector(40, 4);
 		timerNumbers[1].extent = new Vector(43, 55);
-		timerNumbers[1].xScale = (scene2d.height - 82 * 2) / 480;
-		timerNumbers[1].yScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[1].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerNumbers[1].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		var colonCols = ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile();
 
 		timerColon = new GuiImage(colonCols);
 		timerColon.position = new Vector(55, 4);
 		timerColon.extent = new Vector(43, 55);
-		timerColon.xScale = (scene2d.height - 82 * 2) / 480;
-		timerColon.yScale = (scene2d.height - 82 * 2) / 480;
+		timerColon.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerColon.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		timerNumbers[2].position = new Vector(70, 4);
 		timerNumbers[2].extent = new Vector(43, 55);
-		timerNumbers[2].xScale = (scene2d.height - 82 * 2) / 480;
-		timerNumbers[2].yScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[2].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerNumbers[2].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		timerNumbers[3].position = new Vector(90, 4);
 		timerNumbers[3].extent = new Vector(43, 55);
-		timerNumbers[3].xScale = (scene2d.height - 82 * 2) / 480;
-		timerNumbers[3].yScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[3].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerNumbers[3].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		var pointCols = ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile();
 
 		timerPoint = new GuiImage(pointCols);
 		timerPoint.position = new Vector(105, 4);
 		timerPoint.extent = new Vector(43, 55);
-		timerPoint.xScale = (scene2d.height - 82 * 2) / 480;
-		timerPoint.yScale = (scene2d.height - 82 * 2) / 480;
+		timerPoint.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerPoint.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		timerNumbers[4].position = new Vector(120, 4);
 		timerNumbers[4].extent = new Vector(43, 55);
-		timerNumbers[4].xScale = (scene2d.height - 82 * 2) / 480;
-		timerNumbers[4].yScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[4].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerNumbers[4].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		timerNumbers[5].position = new Vector(140, 4);
 		timerNumbers[5].extent = new Vector(43, 55);
-		timerNumbers[5].xScale = (scene2d.height - 82 * 2) / 480;
-		timerNumbers[5].yScale = (scene2d.height - 82 * 2) / 480;
+		timerNumbers[5].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		timerNumbers[5].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		timerNumbers[6].position = new Vector(191, 0);
 		timerNumbers[6].extent = new Vector(43, 55);
@@ -248,60 +253,62 @@ class PlayGui {
 	}
 
 	public function initGemCounter() {
+		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+
 		var gemBox = new GuiControl();
 		gemBox.position = new Vector(0, 0);
 		gemBox.extent = new Vector(300, 200);
-		gemBox.xScale = (scene2d.height - 82 * 2) / 480;
-		gemBox.yScale = (scene2d.height - 82 * 2) / 480;
+		gemBox.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemBox.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		var innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(26, 0);
 		innerCtrl.extent = new Vector(256, 64);
-		innerCtrl.xScale = (scene2d.height - 82 * 2) / 480;
-		innerCtrl.yScale = (scene2d.height - 82 * 2) / 480;
+		innerCtrl.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		innerCtrl.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		gemBox.addChild(innerCtrl);
 
 		gemCountNumbers[0].position = new Vector(20, 4);
 		gemCountNumbers[0].extent = new Vector(43, 55);
-		gemCountNumbers[0].xScale = (scene2d.height - 82 * 2) / 480;
-		gemCountNumbers[0].yScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[0].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemCountNumbers[0].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		gemCountNumbers[1].position = new Vector(38, 4);
 		gemCountNumbers[1].extent = new Vector(43, 55);
-		gemCountNumbers[1].xScale = (scene2d.height - 82 * 2) / 480;
-		gemCountNumbers[1].yScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[1].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemCountNumbers[1].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		gemCountNumbers[2].position = new Vector(56, 4);
 		gemCountNumbers[2].extent = new Vector(43, 55);
-		gemCountNumbers[2].xScale = (scene2d.height - 82 * 2) / 480;
-		gemCountNumbers[2].yScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[2].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemCountNumbers[2].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		gemCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
 		gemCountSlash.position = new Vector(73, 4);
 		gemCountSlash.extent = new Vector(43, 55);
-		gemCountSlash.xScale = (scene2d.height - 82 * 2) / 480;
-		gemCountSlash.yScale = (scene2d.height - 82 * 2) / 480;
+		gemCountSlash.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemCountSlash.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		gemCountNumbers[3].position = new Vector(89, 4);
 		gemCountNumbers[3].extent = new Vector(43, 55);
-		gemCountNumbers[3].xScale = (scene2d.height - 82 * 2) / 480;
-		gemCountNumbers[3].yScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[3].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemCountNumbers[3].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		gemCountNumbers[4].position = new Vector(107, 4);
 		gemCountNumbers[4].extent = new Vector(43, 55);
-		gemCountNumbers[4].xScale = (scene2d.height - 82 * 2) / 480;
-		gemCountNumbers[4].yScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[4].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemCountNumbers[4].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		gemCountNumbers[5].position = new Vector(125, 4);
 		gemCountNumbers[5].extent = new Vector(43, 55);
-		gemCountNumbers[5].xScale = (scene2d.height - 82 * 2) / 480;
-		gemCountNumbers[5].yScale = (scene2d.height - 82 * 2) / 480;
+		gemCountNumbers[5].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemCountNumbers[5].yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		gemHUD = new GuiImage(ResourceLoader.getResource('data/ui/game/gem.png', ResourceLoader.getImage, this.imageResources).toTile());
 		gemHUD.position = new Vector(144, 2);
 		gemHUD.extent = new Vector(64, 64);
-		gemHUD.xScale = (scene2d.height - 82 * 2) / 480;
-		gemHUD.yScale = (scene2d.height - 82 * 2) / 480;
+		gemHUD.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		gemHUD.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		innerCtrl.addChild(gemCountNumbers[0]);
 		innerCtrl.addChild(gemCountNumbers[1]);
@@ -318,6 +325,8 @@ class PlayGui {
 	}
 
 	function initPowerupBox() {
+		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+
 		var powerupImgs = [
 			ResourceLoader.getResource('data/ui/game/pc/powerup.png', ResourceLoader.getImage, this.imageResources).toTile(),
 			ResourceLoader.getResource('data/ui/game/pc/powerup_copter.png', ResourceLoader.getImage, this.imageResources).toTile(),
@@ -332,8 +341,8 @@ class PlayGui {
 		powerupBox.extent = new Vector(170, 170);
 		powerupBox.horizSizing = Left;
 		powerupBox.vertSizing = Bottom;
-		powerupBox.xScale = (scene2d.height - 82 * 2) / 480;
-		powerupBox.yScale = (scene2d.height - 82 * 2) / 480;
+		powerupBox.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		powerupBox.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 
 		playGuiCtrl.addChild(powerupBox);
 	}
@@ -455,19 +464,21 @@ class PlayGui {
 	}
 
 	function initBlastBar() {
+		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+
 		blastBar = new GuiControl();
 		blastBar.position = new Vector(0, 400);
 		blastBar.extent = new Vector(170, 83);
 		blastBar.vertSizing = Bottom;
-		blastBar.xScale = (scene2d.height - 82 * 2) / 480;
-		blastBar.yScale = (scene2d.height - 82 * 2) / 480;
+		blastBar.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		blastBar.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		this.playGuiCtrl.addChild(blastBar);
 
 		blastFill = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbarMask.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFill.position = new Vector(36, 38);
 		blastFill.extent = new Vector(100, 27);
-		blastFill.xScale = (scene2d.height - 82 * 2) / 480;
-		blastFill.yScale = (scene2d.height - 82 * 2) / 480;
+		blastFill.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		blastFill.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		var colorMat = Matrix.I();
 		colorMat.colorSet(0x0080FF);
 		blastFill.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
@@ -477,8 +488,8 @@ class PlayGui {
 		blastFillUltra = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbarMask.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFillUltra.position = new Vector(36, 38);
 		blastFillUltra.extent = new Vector(100, 27);
-		blastFillUltra.xScale = (scene2d.height - 82 * 2) / 480;
-		blastFillUltra.yScale = (scene2d.height - 82 * 2) / 480;
+		blastFillUltra.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		blastFillUltra.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		var colorMat = Matrix.I();
 		colorMat.colorSet(0xC4FF00);
 		blastFillUltra.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
@@ -488,8 +499,8 @@ class PlayGui {
 		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/pc/powerbar.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFrame.position = new Vector(0, 0);
 		blastFrame.extent = new Vector(170, 83);
-		blastFrame.xScale = (scene2d.height - 82 * 2) / 480;
-		blastFrame.yScale = (scene2d.height - 82 * 2) / 480;
+		blastFrame.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+		blastFrame.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		blastBar.addChild(blastFrame);
 	}
 

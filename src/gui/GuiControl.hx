@@ -36,6 +36,7 @@ typedef MouseState = {
 	var position:Vector;
 	var ?button:Int;
 	var ?wheel:Float;
+	var handled:Bool;
 }
 
 @:publicFields
@@ -120,47 +121,67 @@ class GuiControl {
 				if (Key.isPressed(Key.MOUSE_LEFT)) {
 					mouseState.button = Key.MOUSE_LEFT;
 					this.onMousePress(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 				if (Key.isPressed(Key.MOUSE_RIGHT)) {
 					mouseState.button = Key.MOUSE_RIGHT;
 					this.onMousePress(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 				if (Key.isReleased(Key.MOUSE_LEFT)) {
 					mouseState.button = Key.MOUSE_LEFT;
 					this.onMouseRelease(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 				if (Key.isReleased(Key.MOUSE_RIGHT)) {
 					mouseState.button = Key.MOUSE_RIGHT;
 					this.onMouseRelease(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 				if (Key.isDown(Key.MOUSE_LEFT)) {
 					mouseState.button = Key.MOUSE_LEFT;
 					this.onMouseDown(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 				if (Key.isDown(Key.MOUSE_RIGHT)) {
 					mouseState.button = Key.MOUSE_RIGHT;
 					this.onMouseDown(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 
 				if (!_entered) {
 					_entered = true;
 					this.onMouseEnter(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 				if (_entered) {
 					if (this._mousePos != null) {
 						if (!this._mousePos.equals(mouseState.position)) {
 							this.onMouseMove(mouseState);
 							this._mousePos = mouseState.position.clone();
+							if (mouseState.handled)
+								return;
 						}
 					} else {
 						this._mousePos = mouseState.position.clone();
 						this.onMouseMove(mouseState);
+						if (mouseState.handled)
+							return;
 					}
 				}
 			} else {
 				if (_entered) {
 					_entered = false;
 					this.onMouseLeave(mouseState);
+					if (mouseState.handled)
+						return;
 				}
 			}
 		} else {
