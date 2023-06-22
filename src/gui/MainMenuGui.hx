@@ -13,15 +13,7 @@ import src.Marbleland;
 
 class MainMenuGui extends GuiImage {
 	public function new() {
-		function chooseBg() {
-			var rand = Math.random();
-			if (rand >= 0 && rand <= 0.244)
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (rand > 0.244 && rand <= 0.816)
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-		}
-		var img = chooseBg();
+		var img = ResourceLoader.getImage('data/ui/EngineSplashBG.jpg');
 		super(img.resource.toTile());
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
@@ -33,82 +25,43 @@ class MainMenuGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var mainMenuContent = new GuiControl();
-		mainMenuContent.horizSizing = Center;
-		mainMenuContent.vertSizing = Center;
-		mainMenuContent.position = new Vector(-130, -110);
-		mainMenuContent.extent = new Vector(900, 700);
+		var scene2d = MarbleGame.canvas.scene2d;
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
+		var offsetX = (scene2d.width - 1280) / 2;
+		var offsetY = (scene2d.height - 720) / 2;
 
-		var siteButton = new GuiButton(loadButtonImages('data/ui/menu/site'));
-		siteButton.horizSizing = Right;
-		siteButton.vertSizing = Top;
-		siteButton.position = new Vector(363, 664);
-		siteButton.extent = new Vector(400, 30);
-		siteButton.pressedAction = (sender) -> {
-			#if sys
-			hxd.System.openURL("https://marbleblast.com");
-			#end
-			#if js
-			js.Browser.window.open("https://marbleblast.com");
-			#end
-		}
-		mainMenuContent.addChild(siteButton);
+		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
 
-		var motdButton = new GuiButton(loadButtonImages('data/ui/menu/changelog'));
-		motdButton.horizSizing = Left;
-		motdButton.vertSizing = Top;
-		motdButton.position = new Vector(706, 536);
-		motdButton.extent = new Vector(191, 141);
-		motdButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.pushDialog(new VersionGui());
-		}
-		mainMenuContent.addChild(motdButton);
+		var innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		innerCtrl.horizSizing = Width;
+		innerCtrl.vertSizing = Height;
+		this.addChild(innerCtrl);
 
-		var playButton = new GuiButton(loadButtonImages("data/ui/menu/play"));
-		playButton.position = new Vector(-5, -2);
-		playButton.extent = new Vector(247, 164);
-		playButton.gamepadAccelerator = ["A"];
-		playButton.pressedAction = (sender) -> {
+		var logo = new GuiImage(ResourceLoader.getResource('data/ui/logo.png', ResourceLoader.getImage, this.imageResources).toTile());
+		logo.position = new Vector(200, 50);
+		logo.extent = new Vector(512, 400);
+		innerCtrl.addChild(logo);
+
+		var glogo = new GuiImage(ResourceLoader.getResource('data/ui/g.png', ResourceLoader.getImage, this.imageResources).toTile());
+		glogo.position = new Vector(240, 536);
+		glogo.extent = new Vector(128, 128);
+		innerCtrl.addChild(glogo);
+
+		var btnList = new GuiXboxList();
+		btnList.position = new Vector(70 - offsetX, 95);
+		btnList.horizSizing = Left;
+		btnList.extent = new Vector(502, 500);
+		innerCtrl.addChild(btnList);
+
+		btnList.addButton(0, "Single Player Game", (sender) -> {
 			cast(this.parent, Canvas).setContent(new PlayMissionGui());
-		}
-		mainMenuContent.addChild(playButton);
-
-		var lbButton = new GuiImage(ResourceLoader.getResource('data/ui/menu/online_i.png', ResourceLoader.getImage, this.imageResources).toTile());
-		lbButton.position = new Vector(-5, 128);
-		lbButton.extent = new Vector(247, 164);
-		mainMenuContent.addChild(lbButton);
-
-		var optionsButton = new GuiButton(loadButtonImages("data/ui/menu/options"));
-		optionsButton.position = new Vector(-5, 258);
-		optionsButton.extent = new Vector(247, 164);
-		optionsButton.pressedAction = (sender) -> {
-			cast(this.parent, Canvas).setContent(new OptionsDlg());
-		}
-		mainMenuContent.addChild(optionsButton);
-
-		var exitButton = new GuiButton(loadButtonImages("data/ui/menu/quit"));
-		exitButton.position = new Vector(-5, 388);
-		exitButton.extent = new Vector(247, 164);
-		exitButton.pressedAction = (sender) -> {
-			#if hl
-			Sys.exit(0);
-			#end
-		};
-		mainMenuContent.addChild(exitButton);
-
-		var replButton = new GuiButton(loadButtonImages("data/ui/menu/replay"));
-		replButton.horizSizing = Left;
-		replButton.vertSizing = Top;
-		replButton.position = new Vector(552, 536);
-		replButton.extent = new Vector(191, 141);
-		replButton.pressedAction = (sender) -> {
+		});
+		btnList.addButton(2, "Leaderboards", (e) -> {}, 20);
+		btnList.addButton(2, "Achievements", (e) -> {});
+		btnList.addButton(3, "Replays", (sender) -> {
 			#if hl
 			MarbleGame.canvas.setContent(new ReplayCenterGui());
 			#end
@@ -150,27 +103,25 @@ class MainMenuGui extends GuiImage {
 				],
 			});
 			#end
-		};
-		mainMenuContent.addChild(replButton);
+		});
+		btnList.addButton(3, "Help & Options", (sender) -> {
+			cast(this.parent, Canvas).setContent(new OptionsDlg());
+		});
+		btnList.addButton(2, "Changelog", (sender) -> {
+			MarbleGame.canvas.pushDialog(new VersionGui());
+		});
+		btnList.addButton(4, "Return to Arcade", (sender) -> {
+			#if hl
+			Sys.exit(0);
+			#end
+		});
 
-		var helpButton = new GuiButton(loadButtonImages("data/ui/menu/help"));
-		helpButton.horizSizing = Left;
-		helpButton.vertSizing = Top;
-		helpButton.position = new Vector(398, 536);
-		helpButton.extent = new Vector(191, 141);
-		helpButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.setContent(new HelpCreditsGui());
+		function loadButtonImages(path:String) {
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed];
 		}
-		mainMenuContent.addChild(helpButton);
-
-		this.addChild(mainMenuContent);
-
-		var mbp = new GuiImage(ResourceLoader.getResource("data/ui/menu/mbp.png", ResourceLoader.getImage, this.imageResources).toTile());
-		mbp.horizSizing = Left;
-		mbp.vertSizing = Bottom;
-		mbp.position = new Vector(476, 12);
-		mbp.extent = new Vector(153, 150);
-		this.addChild(mbp);
 
 		var versionText = new GuiMLText(domcasual32, null);
 
