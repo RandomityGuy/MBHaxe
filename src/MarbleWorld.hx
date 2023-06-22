@@ -1399,7 +1399,7 @@ class MarbleWorld extends Scheduler {
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
 			if (!this.isWatching)
-				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
+				this.schedule(this.timeState.currentAttemptTime + 5, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
 			if (timeTravelSound != null) {
 				timeTravelSound.stop();
@@ -1411,6 +1411,7 @@ class MarbleWorld extends Scheduler {
 	function showFinishScreen() {
 		if (this.isWatching)
 			return 0;
+		playGui.setGuiVisibility(false);
 		Console.log("State End");
 		var egg:EndGameGui = null;
 		#if js
