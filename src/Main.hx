@@ -1,5 +1,6 @@
 package;
 
+import gui.PresentsGui;
 import src.Debug;
 import src.Marbleland;
 import src.Console;
@@ -81,11 +82,12 @@ class Main extends hxd.App {
 		Settings.init();
 		Gamepad.init();
 		ResourceLoader.init(s2d, () -> {
-			MissionList.buildMissionList(); // Yeah pls
 			AudioManager.init();
 			AudioManager.playShell();
 			Marbleland.init();
 			marbleGame = new MarbleGame(s2d, s3d);
+			MarbleGame.canvas.setContent(new PresentsGui());
+			MissionList.buildMissionList(); // Yeah pls
 			marbleGame.startPreviewWorld(() -> {
 				marbleGame.setPreviewMission('urban', () -> {
 					MarbleGame.canvas.setContent(new MainMenuGui());
