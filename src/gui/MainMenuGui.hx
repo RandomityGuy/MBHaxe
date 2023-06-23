@@ -12,11 +12,10 @@ import src.Replay;
 import src.Marbleland;
 import src.MissionList;
 
-class MainMenuGui extends GuiControl {
+class MainMenuGui extends GuiImage {
 	public function new() {
-		// var img = ResourceLoader.getImage('data/ui/EngineSplashBG.jpg');
-		// super(img.resource.toTile());
-		super();
+		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
+		super(res);
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
@@ -59,7 +58,7 @@ class MainMenuGui extends GuiControl {
 		innerCtrl.addChild(btnList);
 
 		btnList.addButton(0, "Single Player Game", (sender) -> {
-			cast(this.parent, Canvas).setContent(new PlayMissionGui());
+			cast(this.parent, Canvas).setContent(new DifficultySelectGui());
 		});
 		btnList.addButton(2, "Leaderboards", (e) -> {}, 20);
 		btnList.addButton(2, "Achievements", (e) -> {});
