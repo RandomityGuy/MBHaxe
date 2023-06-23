@@ -8,6 +8,7 @@ import src.Settings;
 import src.Settings.PlayStatistics;
 import src.Mission;
 import src.Util;
+import src.MissionList;
 
 class StatisticsGui extends GuiImage {
 	public function new(game:String) {

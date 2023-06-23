@@ -8,6 +8,7 @@ enum MissionElementType {
 	Sun;
 	InteriorInstance;
 	StaticShape;
+	SpawnSphere;
 	Item;
 	Path;
 	Marker;
@@ -148,6 +149,20 @@ class MissionElementStaticShape extends MissionElementBase {
 
 	public function new() {
 		_type = MissionElementType.StaticShape;
+	}
+}
+
+@:publicFields
+class MissionElementSpawnSphere extends MissionElementBase {
+	var position:String;
+	var rotation:String;
+	var scale:String;
+	var datablock:String;
+	var resettime:Null<String>;
+	var timeout:Null<String>;
+
+	public function new() {
+		_type = MissionElementType.SpawnSphere;
 	}
 }
 

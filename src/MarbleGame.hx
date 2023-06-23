@@ -26,6 +26,7 @@ import src.Settings;
 import src.Console;
 import src.Debug;
 import src.Gamepad;
+import src.PreviewWorld;
 
 @:publicFields
 class MarbleGame {
@@ -34,6 +35,7 @@ class MarbleGame {
 	static var instance:MarbleGame;
 
 	var world:MarbleWorld;
+	var previewWorld:PreviewWorld;
 
 	var scene2d:h2d.Scene;
 	var scene:h3d.scene.Scene;
@@ -196,6 +198,9 @@ class MarbleGame {
 				handlePauseGame();
 			}
 		}
+		if (world == null && previewWorld != null) {
+			previewWorld.update(dt * Debug.timeScale);
+		}
 		if (canvas != null) {
 			if (Key.isPressed(Key.QWERTY_TILDE)) {
 				consoleShown = !consoleShown;
@@ -287,6 +292,7 @@ class MarbleGame {
 
 	public function playMission(mission:Mission) {
 		canvas.clearContent();
+		destroyPreviewWorld();
 		if (world != null) {
 			world.dispose();
 		}
@@ -300,6 +306,19 @@ class MarbleGame {
 		world.replay = replay;
 		world.isWatching = true;
 		world.init();
+	}
+
+	public function startPreviewWorld(onFinish:() -> Void) {
+		previewWorld = new PreviewWorld(scene);
+		previewWorld.init(onFinish);
+	}
+
+	public function destroyPreviewWorld() {
+		previewWorld.destroyAllObjects();
+	}
+
+	public function setPreviewMission(misname:String, onFinish:() -> Void) {
+		previewWorld.loadMission(misname, onFinish);
 	}
 
 	public function render(e:h3d.Engine) {

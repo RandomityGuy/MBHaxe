@@ -10,11 +10,13 @@ import src.Settings;
 import src.Util;
 import src.Replay;
 import src.Marbleland;
+import src.MissionList;
 
-class MainMenuGui extends GuiImage {
+class MainMenuGui extends GuiControl {
 	public function new() {
-		var img = ResourceLoader.getImage('data/ui/EngineSplashBG.jpg');
-		super(img.resource.toTile());
+		// var img = ResourceLoader.getImage('data/ui/EngineSplashBG.jpg');
+		// super(img.resource.toTile());
+		super();
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
