@@ -23,6 +23,7 @@ import src.ProfilerUI;
 import src.Gamepad;
 import src.Http;
 import src.Renderer;
+import src.MissionList;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
@@ -74,27 +75,32 @@ class Main extends hxd.App {
 		Console.log("System: " + Sys.systemName());
 		#end
 
-		try {
-			Http.init();
-			haxe.MainLoop.add(() -> Http.loop());
-			Settings.init();
-			Gamepad.init();
-			ResourceLoader.init(s2d, () -> {
-				AudioManager.init();
-				AudioManager.playShell();
-				Marbleland.init();
-				marbleGame = new MarbleGame(s2d, s3d);
-				MarbleGame.canvas.setContent(new MainMenuGui());
-
-				new ProfilerUI(s2d);
-
-				loaded = true;
+		// try {
+		Http.init();
+		haxe.MainLoop.add(() -> Http.loop());
+		Settings.init();
+		Gamepad.init();
+		ResourceLoader.init(s2d, () -> {
+			MissionList.buildMissionList(); // Yeah pls
+			AudioManager.init();
+			AudioManager.playShell();
+			Marbleland.init();
+			marbleGame = new MarbleGame(s2d, s3d);
+			marbleGame.startPreviewWorld(() -> {
+				marbleGame.setPreviewMission('urban', () -> {
+					MarbleGame.canvas.setContent(new MainMenuGui());
+				});
 			});
-		} catch (e) {
-			Console.error(e.message);
-			Console.error(e.stack.toString());
-			throw e;
-		}
+
+			new ProfilerUI(s2d);
+
+			loaded = true;
+		});
+		// } catch (e) {
+		// 	Console.error(e.message);
+		// 	Console.error(e.stack.toString());
+		// 	throw e;
+		// }
 
 		// ResourceLoader.init(s2d, () -> {
 		// 	Settings.init();

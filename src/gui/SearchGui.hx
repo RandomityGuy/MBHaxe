@@ -8,6 +8,7 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
+import src.MissionList;
 
 class SearchGui extends GuiImage {
 	public function new(game:String, isCustom:Bool) {

@@ -21,12 +21,13 @@ class InteriorObject extends GameObject {
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.identifier = this.interiorFile;
 		this.level = level;
-		DifBuilder.loadDif(this.interiorFile, cast this, onFinish);
+		DifBuilder.loadDif(this.interiorFile, cast this, onFinish, -1, this.isCollideable);
 	}
 
 	public override function setTransform(transform:Matrix) {
 		super.setTransform(transform);
 		collider.setTransform(transform);
-		this.level.collisionWorld.updateTransform(this.collider);
+		if (level != null)
+			this.level.collisionWorld.updateTransform(this.collider);
 	}
 }

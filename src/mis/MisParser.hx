@@ -20,6 +20,7 @@ import mis.MissionElement.MissionElementSky;
 import mis.MissionElement.MissionElementMissionArea;
 import mis.MissionElement.MissionElementType;
 import mis.MissionElement.MissionElementScriptObject;
+import mis.MissionElement.MissionElementSpawnSphere;
 import src.Util;
 import h3d.Vector;
 import h3d.Quat;
@@ -185,6 +186,8 @@ class MisParser {
 				MisParserMacros.parseObject(name, MissionElementInteriorInstance, MissionElementType.InteriorInstance);
 			case "StaticShape":
 				MisParserMacros.parseObject(name, MissionElementStaticShape, MissionElementType.StaticShape);
+			case "SpawnSphere":
+				MisParserMacros.parseObject(name, MissionElementSpawnSphere, MissionElementType.SpawnSphere);
 			case "Item":
 				MisParserMacros.parseObject(name, MissionElementItem, MissionElementType.Item);
 			case "Path":

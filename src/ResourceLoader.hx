@@ -84,6 +84,11 @@ class ResourceLoader {
 		});
 		worker.addTask(fwd -> preloadUI(fwd));
 		worker.addTask(fwd -> {
+			loadg.text = "Loading Textures..";
+			fwd();
+		});
+		worker.addTask(fwd -> preloadTextures(fwd));
+		worker.addTask(fwd -> {
 			loadg.text = "Loading Missions..";
 			fwd();
 		});
@@ -157,30 +162,6 @@ class ResourceLoader {
 				toloadfiles.push(file);
 			}
 		}
-		filestats = fileSystem.dir("missions_mbg");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_mbp");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_mbu");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
 		while (toloaddirs.length > 0) {
 			var nextdir = toloaddirs.pop();
 			for (file in fileSystem.dir(nextdir.path.substring(2))) {
@@ -211,6 +192,32 @@ class ResourceLoader {
 		worker.loadFile("sound/testing.wav");
 		worker.loadFile("sound/buttonover.wav");
 		worker.loadFile("sound/buttonpress.wav");
+		worker.run();
+	}
+
+	// For preload purposes
+	static function preloadTextures(onFinish:Void->Void) {
+		var toloadfiles = [];
+		var filestats = fileSystem.dir("textures");
+		for (file in filestats) {
+			toloadfiles.push(file);
+		}
+		filestats = fileSystem.dir("shapes/structures");
+		for (file in filestats) {
+			toloadfiles.push(file);
+		}
+		filestats = fileSystem.dir("shapes/astrolabe");
+		for (file in filestats) {
+			toloadfiles.push(file);
+		}
+		filestats = fileSystem.dir("skies");
+		for (file in filestats) {
+			toloadfiles.push(file);
+		}
+		var worker = new ResourceLoaderWorker(onFinish);
+		for (file in toloadfiles) {
+			worker.addTaskParallel((fwd) -> file.load(fwd));
+		}
 		worker.run();
 	}
 
@@ -286,23 +293,23 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
-		if (interiorResources.exists(path))
-			return interiorResources.get(path);
-		else {
-			var itr:Dif;
-			// var lock = new Lock();
-			// threadPool.run(() -> {
-			if (zipFilesystem.exists(path.toLowerCase()))
-				itr = Dif.LoadFromBuffer(zipFilesystem.get(path.toLowerCase()).getBytes());
-			else
-				itr = Dif.LoadFromBuffer(fileSystem.get(path).getBytes());
-			var itrresource = new Resource(itr, path, interiorResources, dif -> {});
-			interiorResources.set(path, itrresource);
-			//	lock.release();
-			// });
-			// lock.wait();
-			return itrresource;
-		}
+		// if (interiorResources.exists(path))
+		//	return interiorResources.get(path);
+		// else {
+		var itr:Dif;
+		// var lock = new Lock();
+		// threadPool.run(() -> {
+		if (zipFilesystem.exists(path.toLowerCase()))
+			itr = Dif.LoadFromBuffer(zipFilesystem.get(path.toLowerCase()).getBytes());
+		else
+			itr = Dif.LoadFromBuffer(fileSystem.get(path).getBytes());
+		var itrresource = new Resource(itr, path, interiorResources, dif -> {});
+		interiorResources.set(path, itrresource);
+		//	lock.release();
+		// });
+		// lock.wait();
+		return itrresource;
+		// }
 	}
 
 	public static function loadDts(path:String) {

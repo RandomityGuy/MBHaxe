@@ -1,3 +1,5 @@
+package src;
+
 import haxe.Json;
 import mis.MisParser;
 import src.ResourceLoader;
@@ -10,6 +12,7 @@ class MissionList {
 	static var customMissions:Array<Mission>;
 
 	static var missions:Map<String, Mission>;
+	static var missionsFilenameLookup:Map<String, Mission>;
 
 	static var _build:Bool = false;
 
@@ -20,9 +23,10 @@ class MissionList {
 			return;
 
 		missions = new Map<String, Mission>();
+		missionsFilenameLookup = new Map<String, Mission>();
 		missionList = [];
 
-		function parseDifficulty(game:String, mispath:String, difficulty:String) {
+		function parseDifficulty(game:String, mispath:String, difficulty:String, difficultyIndex:Int) {
 			#if (hl && !android)
 			var difficultyFiles = ResourceLoader.fileSystem.dir('data/${mispath}/' + difficulty);
 			#end
@@ -49,7 +53,9 @@ class MissionList {
 						if (StringTools.contains(file.getText().toLowerCase(), 'datablock = "easteregg"')) { // Ew
 							mission.hasEgg = true;
 						}
+						mission.difficultyIndex = difficultyIndex;
 						missions.set(file.path, mission);
+						missionsFilenameLookup.set(file.name.toLowerCase(), mission);
 						difficultyMissions.push(mission);
 					}
 				}
@@ -68,9 +74,9 @@ class MissionList {
 
 		var ultraMissions:Map<String, Array<Mission>> = [];
 
-		ultraMissions.set("beginner", parseDifficulty("ultra", "missions", "beginner"));
-		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions", "intermediate"));
-		ultraMissions.set("advanced", parseDifficulty("ultra", "missions", "advanced"));
+		ultraMissions.set("beginner", parseDifficulty("ultra", "missions", "beginner", 0));
+		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions", "intermediate", 1));
+		ultraMissions.set("advanced", parseDifficulty("ultra", "missions", "advanced", 2));
 
 		@:privateAccess ultraMissions["beginner"][ultraMissions["beginner"].length - 1].next = ultraMissions["intermediate"][0];
 		@:privateAccess ultraMissions["intermediate"][ultraMissions["intermediate"].length - 1].next = ultraMissions["advanced"][0];

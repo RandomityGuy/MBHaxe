@@ -81,6 +81,16 @@ class TriangleEdge {
 	}
 }
 
+@:publicFields
+class DifCache {
+	var dif:Dif;
+	var difTriangles:Map<String, Array<DifBuilderTriangle>>;
+	var colliderSurfaces:Array<CollisionSurface>;
+	var difEdgeMap:Map<Int, Edge>;
+
+	public function new() {}
+}
+
 typedef VertexBucket = {
 	var referenceNormal:Point3F;
 	var triangleIndices:Array<Int>;
@@ -88,6 +98,8 @@ typedef VertexBucket = {
 }
 
 class DifBuilder {
+	static var difCache:Map<String, DifCache> = [];
+
 	static var materialDict:Map<String, {
 		friction:Float,
 		restitution:Float,
@@ -338,464 +350,505 @@ class DifBuilder {
 		'stripe_caution' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/stripe_caution.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 	];
 
-	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
+	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1, makeCollideable = true) {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+
+		function stripTexName(tex:String) {
+			var dotpos = tex.lastIndexOf(".");
+			var slashpos = tex.lastIndexOf("/") + 1;
+			if (dotpos == -1) {
+				dotpos = tex.length;
+			}
+			if (slashpos == -1) {
+				slashpos = 0;
+			}
+			return tex.substring(slashpos, dotpos);
+		}
+
 		ResourceLoader.load(path).entry.load(() -> {
+			var dif:Dif = null;
+			var cache:DifCache = null;
+			// if (difCache.exists(path)) {
+			// 	cache = difCache.get(path);
+			// 	dif = cache.dif;
+			// } else {
 			var difresource = ResourceLoader.loadInterior(path);
 			difresource.acquire();
-			var dif = difresource.resource;
-			var geo = so == -1 ? dif.interiors[0] : dif.subObjects[so];
+			dif = difresource.resource;
+			// }
+			var geo = cache == null ? (so == -1 ? dif.interiors[0] : dif.subObjects[so]) : null;
 			var triangles = [];
 			var textures = [];
 			var collider = new CollisionEntity(itr);
-			function stripTexName(tex:String) {
-				var dotpos = tex.lastIndexOf(".");
-				var slashpos = tex.lastIndexOf("/") + 1;
-				if (dotpos == -1) {
-					dotpos = tex.length;
-				}
-				if (slashpos == -1) {
-					slashpos = 0;
-				}
-				return tex.substring(slashpos, dotpos);
-			}
 			var vertexBuckets = new Map<Point3F, Array<VertexBucket>>();
 			var edges = [];
 			var colliderSurfaces = [];
-			for (i in 0...geo.surfaces.length) {
-				var surfaceindex = i;
-				var surface = geo.surfaces[surfaceindex];
-				if (surface == null)
-					continue;
-				var planeindex = surface.planeIndex;
-				var planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-				var plane = geo.planes[planeindex];
-				var normal = geo.normals[plane.normalIndex];
-				if (planeFlipped)
-					normal = normal.scalar(-1);
-				var texture = geo.materialList[surface.textureIndex];
-				if (!textures.contains(texture))
-					textures.push(texture);
-				var points = geo.points;
-				var colliderSurface = new CollisionSurface();
-				colliderSurface.points = [];
-				colliderSurface.normals = [];
-				colliderSurface.indices = [];
-				colliderSurface.transformKeys = [];
-				colliderSurface.edgeData = [];
-				colliderSurface.edgeConcavities = [];
-				colliderSurface.originalIndices = [];
-				colliderSurface.originalSurfaceIndex = surfaceindex;
-
-				var pc0 = geo.points[geo.windings[surface.windingStart + 1]];
-				var pc1 = geo.points[geo.windings[surface.windingStart + 0]];
-				var pc2 = geo.points[geo.windings[surface.windingStart + 2]];
-
-				var texPlanes = geo.texGenEQs[surface.texGenIndex];
-				var tc0 = new Vector(texPlanes.planeX.x * pc0.x
-					+ texPlanes.planeX.y * pc0.y
-					+ texPlanes.planeX.z * pc0.z
-					+ texPlanes.planeX.d,
-					texPlanes.planeY.x * pc0.x
-					+ texPlanes.planeY.y * pc0.y
-					+ texPlanes.planeY.z * pc0.z
-					+ texPlanes.planeY.d, 0, 0);
-				var tc1 = new Vector(texPlanes.planeX.x * pc1.x
-					+ texPlanes.planeX.y * pc1.y
-					+ texPlanes.planeX.z * pc1.z
-					+ texPlanes.planeX.d,
-					texPlanes.planeY.x * pc1.x
-					+ texPlanes.planeY.y * pc1.y
-					+ texPlanes.planeY.z * pc1.z
-					+ texPlanes.planeY.d, 0, 0);
-				var tc2 = new Vector(texPlanes.planeX.x * pc2.x
-					+ texPlanes.planeX.y * pc2.y
-					+ texPlanes.planeX.z * pc2.z
-					+ texPlanes.planeX.d,
-					texPlanes.planeY.x * pc2.x
-					+ texPlanes.planeY.y * pc2.y
-					+ texPlanes.planeY.z * pc2.z
-					+ texPlanes.planeY.d, 0, 0);
-
-				var edge1 = new Vector(pc1.x - pc0.x, tc1.x - tc0.x, tc1.y - tc0.y);
-				var edge2 = new Vector(pc2.x - pc0.x, tc2.x - tc0.x, tc2.y - tc0.y);
-				var cp = edge1.cross(edge2);
-				var s = new Vector();
-				var t = new Vector();
-				if (Math.abs(cp.x) > 1e-12) {
-					s.x = -cp.y / cp.x;
-					t.x = -cp.z / cp.x;
-				}
-				edge1.set(pc1.y - pc0.y, tc1.x - tc0.x, tc1.y - tc0.y);
-				edge2.set(pc2.y - pc0.y, tc2.x - tc0.x, tc2.y - tc0.y);
-				cp = edge1.cross(edge2);
-				if (Math.abs(cp.x) > 1e-12) {
-					s.y = -cp.y / cp.x;
-					t.y = -cp.z / cp.x;
-				}
-				edge1.set(pc1.z - pc0.z, tc1.x - tc0.x, tc1.y - tc0.y);
-				edge2.set(pc2.z - pc0.z, tc2.x - tc0.x, tc2.y - tc0.y);
-				cp = edge1.cross(edge2);
-				if (Math.abs(cp.x) > 1e-12) {
-					s.z = -cp.y / cp.x;
-					t.z = -cp.z / cp.x;
-				}
-				s.normalize();
-				t.normalize();
-				var st = s.cross(t);
-				if (st.x * normal.x + st.y * normal.y + st.z * normal.z < 0) {
-					st.scale(-1);
-				}
-				// s.x *= -1;
-				// t.x *= -1;
-				// st.x *= -1;
-
-				for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
-					var p1, p2, p3;
-					var i1, i2, i3;
-					if ((k - (surface.windingStart + 2)) % 2 == 0) {
-						i1 = k;
-						i2 = k - 1;
-						i3 = k - 2;
-						p1 = points[geo.windings[k]];
-						p2 = points[geo.windings[k - 1]];
-						p3 = points[geo.windings[k - 2]];
-						colliderSurface.originalIndices.push(geo.windings[k]);
-						colliderSurface.originalIndices.push(geo.windings[k - 1]);
-						colliderSurface.originalIndices.push(geo.windings[k - 2]);
-					} else {
-						i1 = k - 2;
-						i2 = k - 1;
-						i3 = k;
-						p1 = points[geo.windings[k - 2]];
-						p2 = points[geo.windings[k - 1]];
-						p3 = points[geo.windings[k]];
-						colliderSurface.originalIndices.push(geo.windings[k - 2]);
-						colliderSurface.originalIndices.push(geo.windings[k - 1]);
-						colliderSurface.originalIndices.push(geo.windings[k]);
-					}
-					var e1 = new TriangleEdge(geo.windings[k], geo.windings[k - 1], geo.windings[k - 2], surfaceindex);
-					var e2 = new TriangleEdge(geo.windings[k - 1], geo.windings[k - 2], geo.windings[k], surfaceindex);
-					var e3 = new TriangleEdge(geo.windings[k], geo.windings[k - 2], geo.windings[k - 1], surfaceindex);
-					edges.push(e1);
-					edges.push(e2);
-					edges.push(e3);
-					var texgen = geo.texGenEQs[surface.texGenIndex];
-					var uv1 = new Point2F(p1.x * texgen.planeX.x
-						+ p1.y * texgen.planeX.y
-						+ p1.z * texgen.planeX.z
-						+ texgen.planeX.d,
-						p1.x * texgen.planeY.x
-						+ p1.y * texgen.planeY.y
-						+ p1.z * texgen.planeY.z
-						+ texgen.planeY.d);
-					var uv2 = new Point2F(p2.x * texgen.planeX.x
-						+ p2.y * texgen.planeX.y
-						+ p2.z * texgen.planeX.z
-						+ texgen.planeX.d,
-						p2.x * texgen.planeY.x
-						+ p2.y * texgen.planeY.y
-						+ p2.z * texgen.planeY.z
-						+ texgen.planeY.d);
-					var uv3 = new Point2F(p3.x * texgen.planeX.x
-						+ p3.y * texgen.planeX.y
-						+ p3.z * texgen.planeX.z
-						+ texgen.planeX.d,
-						p3.x * texgen.planeY.x
-						+ p3.y * texgen.planeY.y
-						+ p3.z * texgen.planeY.z
-						+ texgen.planeY.d);
-					var tri = new DifBuilderTriangle();
-					tri.texture = texture;
-					tri.normal1 = normal;
-					tri.normal2 = normal;
-					tri.normal3 = normal;
-					tri.p1 = p1;
-					tri.p2 = p2;
-					tri.p3 = p3;
-					tri.uv1 = uv1;
-					tri.uv2 = uv2;
-					tri.uv3 = uv3;
-
-					// if (geo.normalIndices != null && geo.normalIndices.length > 0) {
-					// 	tri.t1 = geo.normals2[geo.normalIndices[3 * i1 + 3 * surface.windingStart]];
-					// 	tri.t1.x *= -1;
-					// 	tri.n1 = geo.normals2[geo.normalIndices[3 * i1 + 1 + 3 * surface.windingStart]];
-					// 	tri.n1.x *= -1;
-					// 	tri.b1 = geo.normals2[geo.normalIndices[3 * i1 + 2 + 3 * surface.windingStart]];
-					// 	tri.b1.x *= -1;
-					// 	tri.t2 = geo.normals2[geo.normalIndices[3 * i2 + 3 * surface.windingStart]];
-					// 	tri.t2.x *= -1;
-					// 	tri.n2 = geo.normals2[geo.normalIndices[3 * i2 + 1 + 3 * surface.windingStart]];
-					// 	tri.n2.x *= -1;
-					// 	tri.b2 = geo.normals2[geo.normalIndices[3 * i2 + 2 + 3 * surface.windingStart]];
-					// 	tri.b2.x *= -1;
-					// 	tri.t3 = geo.normals2[geo.normalIndices[3 * i3 + 3 * surface.windingStart]];
-					// 	tri.t3.x *= -1;
-					// 	tri.n3 = geo.normals2[geo.normalIndices[3 * i3 + 1 + 3 * surface.windingStart]];
-					// 	tri.n3.x *= -1;
-					// 	tri.b3 = geo.normals2[geo.normalIndices[3 * i3 + 2 + 3 * surface.windingStart]];
-					// 	tri.b3.x *= -1;
-					// } else {
-					tri.t1 = new Point3F(s.x, s.y, s.z);
-					tri.n1 = new Point3F(st.x, st.y, st.z);
-					tri.b1 = new Point3F(t.x, t.y, t.z);
-					tri.t2 = new Point3F(s.x, s.y, s.z);
-					tri.n2 = new Point3F(st.x, st.y, st.z);
-					tri.b2 = new Point3F(t.x, t.y, t.z);
-					tri.t3 = new Point3F(s.x, s.y, s.z);
-					tri.n3 = new Point3F(st.x, st.y, st.z);
-					tri.b3 = new Point3F(t.x, t.y, t.z);
-					// }
-					triangles.push(tri);
-					var materialName = stripTexName(texture).toLowerCase();
-					var hasMaterialInfo = materialDict.exists(materialName);
-					if (hasMaterialInfo) {
-						var minfo = materialDict.get(materialName);
-						colliderSurface.friction = minfo.friction;
-						colliderSurface.restitution = minfo.restitution;
-						colliderSurface.force = minfo.force != null ? minfo.force : 0;
-					}
-					colliderSurface.points.push(new Vector(-p1.x, p1.y, p1.z));
-					colliderSurface.points.push(new Vector(-p2.x, p2.y, p2.z));
-					colliderSurface.points.push(new Vector(-p3.x, p3.y, p3.z));
-					colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
-					colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
-					colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
-					colliderSurface.indices.push(colliderSurface.indices.length);
-					colliderSurface.indices.push(colliderSurface.indices.length);
-					colliderSurface.indices.push(colliderSurface.indices.length);
-					colliderSurface.transformKeys.push(0);
-					colliderSurface.transformKeys.push(0);
-					colliderSurface.transformKeys.push(0);
-					for (v in [p1, p2, p3]) {
-						var buckets = vertexBuckets.get(v);
-						if (buckets == null) {
-							buckets = [];
-							vertexBuckets.set(v, buckets);
-						}
-						var bucket:VertexBucket = null;
-						for (j in 0...buckets.length) {
-							bucket = buckets[j];
-							if (normal.dot(bucket.referenceNormal) > Math.cos(Math.PI / 12))
-								break;
-							bucket = null;
-						}
-						if (bucket == null) {
-							bucket = {
-								referenceNormal: normal,
-								triangleIndices: [],
-								normals: [],
-							};
-							buckets.push(bucket);
-						}
-						bucket.triangleIndices.push(triangles.length - 1);
-						bucket.normals.push(normal);
-					}
-				}
-				colliderSurface.generateBoundingBox();
-				collider.addSurface(colliderSurface);
-				colliderSurfaces.push(colliderSurface);
-			}
-			var edgeMap:Map<Int, TriangleEdge> = new Map();
-			var internalEdges:Map<Int, Bool> = new Map();
-			var difEdges:Map<Int, Edge> = [];
-			for (edge in edges) {
-				var edgeHash = edge.index1 >= edge.index2 ? edge.index1 * edge.index1 + edge.index1 + edge.index2 : edge.index1 + edge.index2 * edge.index2;
-				if (internalEdges.exists(edgeHash))
-					continue;
-				if (edgeMap.exists(edgeHash)) {
-					if (edgeMap[edgeHash].surfaceIndex == edge.surfaceIndex) {
-						// Internal edge
-						internalEdges.set(edgeHash, true);
-						edgeMap.remove(edgeHash);
-						// trace('Removing internal edge: ${edge.index1} ${edge.index2}');
-					} else {
-						var difEdge = new Edge(edge.index1, edge.index2, edge.surfaceIndex, edgeMap[edgeHash].surfaceIndex);
-						difEdge.farPoint0 = edge.farPoint;
-						difEdge.farPoint1 = edgeMap[edgeHash].farPoint;
-						difEdges.set(edgeHash, difEdge); // Literal edge
-					}
-				} else {
-					edgeMap.set(edgeHash, edge);
-				}
-			}
-			function hashEdge(i1:Int, i2:Int) {
-				return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
-			}
-			function getEdgeConcavity(edge:Edge) {
-				var edgeSurface0 = edge.surfaceIndex0;
-				var surface0 = geo.surfaces[edgeSurface0];
-
-				var planeindex = surface0.planeIndex;
-
-				var planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				var plane = geo.planes[planeindex];
-				var normal0 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal0 = normal0.scalar(-1);
-
-				var edgeSurface1 = edge.surfaceIndex1;
-				var surface1 = geo.surfaces[edgeSurface1];
-
-				planeindex = surface1.planeIndex;
-
-				planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				plane = geo.planes[planeindex];
-				var normal1 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal1 = normal1.scalar(-1);
-
-				var dot = normal0.dot(normal1);
-
-				if (Math.abs(dot) < 0.1)
-					return false;
-
-				var farP0 = geo.points[edge.farPoint0];
-				var farP1 = geo.points[edge.farPoint1];
-
-				var diff = farP1.sub(farP0);
-				var cdot0 = normal0.dot(diff);
-				if (cdot0 > -0.1) {
-					return true;
-				}
-
-				return false;
-			}
-			function getEdgeNormal(edge:Edge) {
-				var edgeSurface0 = edge.surfaceIndex0;
-				var surface0 = geo.surfaces[edgeSurface0];
-
-				var planeindex = surface0.planeIndex;
-
-				var planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				var plane = geo.planes[planeindex];
-				var normal0 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal0 = normal0.scalar(-1);
-
-				var edgeSurface1 = edge.surfaceIndex1;
-				var surface1 = geo.surfaces[edgeSurface1];
-
-				planeindex = surface1.planeIndex;
-
-				planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				plane = geo.planes[planeindex];
-				var normal1 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal1 = normal1.scalar(-1);
-
-				var norm = normal0.add(normal1).scalarDiv(2).normalized();
-
-				var vec = new Vector(norm.x, norm.y, norm.z);
-
-				return vec;
-			}
-			for (colliderSurface in colliderSurfaces) {
-				var i = 0;
-				while (i < colliderSurface.indices.length) {
-					var e1e2 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 1]);
-					var e2e3 = hashEdge(colliderSurface.originalIndices[i + 1], colliderSurface.originalIndices[i + 2]);
-					var e1e3 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 2]);
-					var edgeData = 0;
-					if (difEdges.exists(e1e2)) {
-						// if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
-						edgeData |= 1;
-						// }
-						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e2]));
-						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e2]));
-					} else {
-						colliderSurface.edgeConcavities.push(false);
-						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-					}
-					if (difEdges.exists(e2e3)) {
-						// if (getEdgeDot(difEdges[e2e3]) < Math.cos(Math.PI / 12)) {
-						edgeData |= 2;
-						// }
-						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e2e3]));
-						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e2e3]));
-						// colliderSurface.edgeDots.push(dot);
-					} else {
-						colliderSurface.edgeConcavities.push(false);
-						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-					}
-					if (difEdges.exists(e1e3)) {
-						// if (getEdgeDot(difEdges[e1e3]) < Math.cos(Math.PI / 12)) {
-						edgeData |= 4;
-						// }
-						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e3]));
-						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e3]));
-						// colliderSurface.edgeDots.push(dot);
-					} else {
-						colliderSurface.edgeConcavities.push(false);
-						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-					}
-					colliderSurface.edgeData.push(edgeData);
-					i += 3;
-				}
-			}
-			for (vtex => buckets in vertexBuckets) {
-				for (i in 0...buckets.length) {
-					var bucket = buckets[i];
-					var avgNormal = new Point3F();
-					for (normal in bucket.normals)
-						avgNormal = avgNormal.add(normal);
-					avgNormal = avgNormal.scalarDiv(bucket.normals.length);
-					for (j in 0...bucket.triangleIndices.length) {
-						var index = bucket.triangleIndices[j];
-						var tri = triangles[index];
-						if (tri.p1 == vtex) {
-							tri.normal1 = avgNormal;
-							tri.n1 = avgNormal;
-							tri.t1 = tri.t1.sub(avgNormal.scalar(avgNormal.dot(tri.t1))).normalized();
-							tri.b1 = tri.b1.sub(avgNormal.scalar(avgNormal.dot(tri.b1))).normalized();
-						}
-						if (tri.p2 == vtex) {
-							tri.normal2 = avgNormal;
-							tri.n2 = avgNormal;
-							tri.t2 = tri.t2.sub(avgNormal.scalar(avgNormal.dot(tri.t2))).normalized();
-							tri.b2 = tri.b2.sub(avgNormal.scalar(avgNormal.dot(tri.b2))).normalized();
-						}
-						if (tri.p3 == vtex) {
-							tri.normal3 = avgNormal;
-							tri.n3 = avgNormal;
-							tri.t3 = tri.t3.sub(avgNormal.scalar(avgNormal.dot(tri.t3))).normalized();
-							tri.b3 = tri.b3.sub(avgNormal.scalar(avgNormal.dot(tri.b3))).normalized();
-						}
-					}
-				}
-			}
 			var mats = new Map<String, Array<DifBuilderTriangle>>();
-			for (index => value in triangles) {
-				if (mats.exists(value.texture)) {
-					mats[value.texture].push(value);
-				} else {
-					mats.set(value.texture, [value]);
-				}
+			var difEdges:Map<Int, Edge> = [];
+			if (cache != null) {
+				colliderSurfaces = cache.colliderSurfaces;
+				mats = cache.difTriangles;
 			}
-			collider.difEdgeMap = difEdges;
-			collider.finalize();
-			itr.collider = collider;
+			if (cache == null) {
+				for (i in 0...geo.surfaces.length) {
+					var surfaceindex = i;
+					var surface = geo.surfaces[surfaceindex];
+					if (surface == null)
+						continue;
+					var planeindex = surface.planeIndex;
+					var planeFlipped = (planeindex & 0x8000) == 0x8000;
+					if (planeFlipped)
+						planeindex &= ~0x8000;
+					var plane = geo.planes[planeindex];
+					var normal = geo.normals[plane.normalIndex];
+					if (planeFlipped)
+						normal = normal.scalar(-1);
+					var texture = geo.materialList[surface.textureIndex];
+					if (!textures.contains(texture))
+						textures.push(texture);
+					var points = geo.points;
+					var colliderSurface = new CollisionSurface();
+					colliderSurface.points = [];
+					colliderSurface.normals = [];
+					colliderSurface.indices = [];
+					colliderSurface.transformKeys = [];
+					colliderSurface.edgeData = [];
+					colliderSurface.edgeConcavities = [];
+					colliderSurface.originalIndices = [];
+					colliderSurface.originalSurfaceIndex = surfaceindex;
+
+					var pc0 = geo.points[geo.windings[surface.windingStart + 1]];
+					var pc1 = geo.points[geo.windings[surface.windingStart + 0]];
+					var pc2 = geo.points[geo.windings[surface.windingStart + 2]];
+
+					var texPlanes = geo.texGenEQs[surface.texGenIndex];
+					var tc0 = new Vector(texPlanes.planeX.x * pc0.x
+						+ texPlanes.planeX.y * pc0.y
+						+ texPlanes.planeX.z * pc0.z
+						+ texPlanes.planeX.d,
+						texPlanes.planeY.x * pc0.x
+						+ texPlanes.planeY.y * pc0.y
+						+ texPlanes.planeY.z * pc0.z
+						+ texPlanes.planeY.d, 0, 0);
+					var tc1 = new Vector(texPlanes.planeX.x * pc1.x
+						+ texPlanes.planeX.y * pc1.y
+						+ texPlanes.planeX.z * pc1.z
+						+ texPlanes.planeX.d,
+						texPlanes.planeY.x * pc1.x
+						+ texPlanes.planeY.y * pc1.y
+						+ texPlanes.planeY.z * pc1.z
+						+ texPlanes.planeY.d, 0, 0);
+					var tc2 = new Vector(texPlanes.planeX.x * pc2.x
+						+ texPlanes.planeX.y * pc2.y
+						+ texPlanes.planeX.z * pc2.z
+						+ texPlanes.planeX.d,
+						texPlanes.planeY.x * pc2.x
+						+ texPlanes.planeY.y * pc2.y
+						+ texPlanes.planeY.z * pc2.z
+						+ texPlanes.planeY.d, 0, 0);
+
+					var edge1 = new Vector(pc1.x - pc0.x, tc1.x - tc0.x, tc1.y - tc0.y);
+					var edge2 = new Vector(pc2.x - pc0.x, tc2.x - tc0.x, tc2.y - tc0.y);
+					var cp = edge1.cross(edge2);
+					var s = new Vector();
+					var t = new Vector();
+					if (Math.abs(cp.x) > 1e-12) {
+						s.x = -cp.y / cp.x;
+						t.x = -cp.z / cp.x;
+					}
+					edge1.set(pc1.y - pc0.y, tc1.x - tc0.x, tc1.y - tc0.y);
+					edge2.set(pc2.y - pc0.y, tc2.x - tc0.x, tc2.y - tc0.y);
+					cp = edge1.cross(edge2);
+					if (Math.abs(cp.x) > 1e-12) {
+						s.y = -cp.y / cp.x;
+						t.y = -cp.z / cp.x;
+					}
+					edge1.set(pc1.z - pc0.z, tc1.x - tc0.x, tc1.y - tc0.y);
+					edge2.set(pc2.z - pc0.z, tc2.x - tc0.x, tc2.y - tc0.y);
+					cp = edge1.cross(edge2);
+					if (Math.abs(cp.x) > 1e-12) {
+						s.z = -cp.y / cp.x;
+						t.z = -cp.z / cp.x;
+					}
+					s.normalize();
+					t.normalize();
+					var st = s.cross(t);
+					if (st.x * normal.x + st.y * normal.y + st.z * normal.z < 0) {
+						st.scale(-1);
+					}
+					// s.x *= -1;
+					// t.x *= -1;
+					// st.x *= -1;
+
+					for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
+						var p1, p2, p3;
+						var i1, i2, i3;
+						if ((k - (surface.windingStart + 2)) % 2 == 0) {
+							i1 = k;
+							i2 = k - 1;
+							i3 = k - 2;
+							p1 = points[geo.windings[k]];
+							p2 = points[geo.windings[k - 1]];
+							p3 = points[geo.windings[k - 2]];
+							if (makeCollideable) {
+								colliderSurface.originalIndices.push(geo.windings[k]);
+								colliderSurface.originalIndices.push(geo.windings[k - 1]);
+								colliderSurface.originalIndices.push(geo.windings[k - 2]);
+							}
+						} else {
+							i1 = k - 2;
+							i2 = k - 1;
+							i3 = k;
+							p1 = points[geo.windings[k - 2]];
+							p2 = points[geo.windings[k - 1]];
+							p3 = points[geo.windings[k]];
+							if (makeCollideable) {
+								colliderSurface.originalIndices.push(geo.windings[k - 2]);
+								colliderSurface.originalIndices.push(geo.windings[k - 1]);
+								colliderSurface.originalIndices.push(geo.windings[k]);
+							}
+						}
+						var e1 = new TriangleEdge(geo.windings[k], geo.windings[k - 1], geo.windings[k - 2], surfaceindex);
+						var e2 = new TriangleEdge(geo.windings[k - 1], geo.windings[k - 2], geo.windings[k], surfaceindex);
+						var e3 = new TriangleEdge(geo.windings[k], geo.windings[k - 2], geo.windings[k - 1], surfaceindex);
+						edges.push(e1);
+						edges.push(e2);
+						edges.push(e3);
+						var texgen = geo.texGenEQs[surface.texGenIndex];
+						var uv1 = new Point2F(p1.x * texgen.planeX.x
+							+ p1.y * texgen.planeX.y
+							+ p1.z * texgen.planeX.z
+							+ texgen.planeX.d,
+							p1.x * texgen.planeY.x
+							+ p1.y * texgen.planeY.y
+							+ p1.z * texgen.planeY.z
+							+ texgen.planeY.d);
+						var uv2 = new Point2F(p2.x * texgen.planeX.x
+							+ p2.y * texgen.planeX.y
+							+ p2.z * texgen.planeX.z
+							+ texgen.planeX.d,
+							p2.x * texgen.planeY.x
+							+ p2.y * texgen.planeY.y
+							+ p2.z * texgen.planeY.z
+							+ texgen.planeY.d);
+						var uv3 = new Point2F(p3.x * texgen.planeX.x
+							+ p3.y * texgen.planeX.y
+							+ p3.z * texgen.planeX.z
+							+ texgen.planeX.d,
+							p3.x * texgen.planeY.x
+							+ p3.y * texgen.planeY.y
+							+ p3.z * texgen.planeY.z
+							+ texgen.planeY.d);
+						var tri = new DifBuilderTriangle();
+						tri.texture = texture;
+						tri.normal1 = normal;
+						tri.normal2 = normal;
+						tri.normal3 = normal;
+						tri.p1 = p1;
+						tri.p2 = p2;
+						tri.p3 = p3;
+						tri.uv1 = uv1;
+						tri.uv2 = uv2;
+						tri.uv3 = uv3;
+
+						// if (geo.normalIndices != null && geo.normalIndices.length > 0) {
+						// 	tri.t1 = geo.normals2[geo.normalIndices[3 * i1 + 3 * surface.windingStart]];
+						// 	tri.t1.x *= -1;
+						// 	tri.n1 = geo.normals2[geo.normalIndices[3 * i1 + 1 + 3 * surface.windingStart]];
+						// 	tri.n1.x *= -1;
+						// 	tri.b1 = geo.normals2[geo.normalIndices[3 * i1 + 2 + 3 * surface.windingStart]];
+						// 	tri.b1.x *= -1;
+						// 	tri.t2 = geo.normals2[geo.normalIndices[3 * i2 + 3 * surface.windingStart]];
+						// 	tri.t2.x *= -1;
+						// 	tri.n2 = geo.normals2[geo.normalIndices[3 * i2 + 1 + 3 * surface.windingStart]];
+						// 	tri.n2.x *= -1;
+						// 	tri.b2 = geo.normals2[geo.normalIndices[3 * i2 + 2 + 3 * surface.windingStart]];
+						// 	tri.b2.x *= -1;
+						// 	tri.t3 = geo.normals2[geo.normalIndices[3 * i3 + 3 * surface.windingStart]];
+						// 	tri.t3.x *= -1;
+						// 	tri.n3 = geo.normals2[geo.normalIndices[3 * i3 + 1 + 3 * surface.windingStart]];
+						// 	tri.n3.x *= -1;
+						// 	tri.b3 = geo.normals2[geo.normalIndices[3 * i3 + 2 + 3 * surface.windingStart]];
+						// 	tri.b3.x *= -1;
+						// } else {
+						tri.t1 = new Point3F(s.x, s.y, s.z);
+						tri.n1 = new Point3F(st.x, st.y, st.z);
+						tri.b1 = new Point3F(t.x, t.y, t.z);
+						tri.t2 = new Point3F(s.x, s.y, s.z);
+						tri.n2 = new Point3F(st.x, st.y, st.z);
+						tri.b2 = new Point3F(t.x, t.y, t.z);
+						tri.t3 = new Point3F(s.x, s.y, s.z);
+						tri.n3 = new Point3F(st.x, st.y, st.z);
+						tri.b3 = new Point3F(t.x, t.y, t.z);
+						// }
+						triangles.push(tri);
+						var materialName = stripTexName(texture).toLowerCase();
+						var hasMaterialInfo = materialDict.exists(materialName);
+						if (hasMaterialInfo) {
+							var minfo = materialDict.get(materialName);
+							if (makeCollideable) {
+								colliderSurface.friction = minfo.friction;
+								colliderSurface.restitution = minfo.restitution;
+								colliderSurface.force = minfo.force != null ? minfo.force : 0;
+							}
+						}
+						if (makeCollideable) {
+							colliderSurface.points.push(new Vector(-p1.x, p1.y, p1.z));
+							colliderSurface.points.push(new Vector(-p2.x, p2.y, p2.z));
+							colliderSurface.points.push(new Vector(-p3.x, p3.y, p3.z));
+							colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
+							colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
+							colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
+							colliderSurface.indices.push(colliderSurface.indices.length);
+							colliderSurface.indices.push(colliderSurface.indices.length);
+							colliderSurface.indices.push(colliderSurface.indices.length);
+							colliderSurface.transformKeys.push(0);
+							colliderSurface.transformKeys.push(0);
+							colliderSurface.transformKeys.push(0);
+						}
+						for (v in [p1, p2, p3]) {
+							var buckets = vertexBuckets.get(v);
+							if (buckets == null) {
+								buckets = [];
+								vertexBuckets.set(v, buckets);
+							}
+							var bucket:VertexBucket = null;
+							for (j in 0...buckets.length) {
+								bucket = buckets[j];
+								if (normal.dot(bucket.referenceNormal) > Math.cos(Math.PI / 12))
+									break;
+								bucket = null;
+							}
+							if (bucket == null) {
+								bucket = {
+									referenceNormal: normal,
+									triangleIndices: [],
+									normals: [],
+								};
+								buckets.push(bucket);
+							}
+							bucket.triangleIndices.push(triangles.length - 1);
+							bucket.normals.push(normal);
+						}
+					}
+					if (makeCollideable) {
+						colliderSurface.generateBoundingBox();
+						collider.addSurface(colliderSurface);
+						colliderSurfaces.push(colliderSurface);
+					}
+				}
+				var edgeMap:Map<Int, TriangleEdge> = new Map();
+				var internalEdges:Map<Int, Bool> = new Map();
+				for (edge in edges) {
+					var edgeHash = edge.index1 >= edge.index2 ? edge.index1 * edge.index1 + edge.index1 + edge.index2 : edge.index1
+						+ edge.index2 * edge.index2;
+					if (internalEdges.exists(edgeHash))
+						continue;
+					if (edgeMap.exists(edgeHash)) {
+						if (edgeMap[edgeHash].surfaceIndex == edge.surfaceIndex) {
+							// Internal edge
+							internalEdges.set(edgeHash, true);
+							edgeMap.remove(edgeHash);
+							// trace('Removing internal edge: ${edge.index1} ${edge.index2}');
+						} else {
+							var difEdge = new Edge(edge.index1, edge.index2, edge.surfaceIndex, edgeMap[edgeHash].surfaceIndex);
+							difEdge.farPoint0 = edge.farPoint;
+							difEdge.farPoint1 = edgeMap[edgeHash].farPoint;
+							difEdges.set(edgeHash, difEdge); // Literal edge
+						}
+					} else {
+						edgeMap.set(edgeHash, edge);
+					}
+				}
+				function hashEdge(i1:Int, i2:Int) {
+					return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
+				}
+				function getEdgeConcavity(edge:Edge) {
+					var edgeSurface0 = edge.surfaceIndex0;
+					var surface0 = geo.surfaces[edgeSurface0];
+
+					var planeindex = surface0.planeIndex;
+
+					var planeFlipped = (planeindex & 0x8000) == 0x8000;
+					if (planeFlipped)
+						planeindex &= ~0x8000;
+
+					var plane = geo.planes[planeindex];
+					var normal0 = geo.normals[plane.normalIndex];
+
+					if (planeFlipped)
+						normal0 = normal0.scalar(-1);
+
+					var edgeSurface1 = edge.surfaceIndex1;
+					var surface1 = geo.surfaces[edgeSurface1];
+
+					planeindex = surface1.planeIndex;
+
+					planeFlipped = (planeindex & 0x8000) == 0x8000;
+					if (planeFlipped)
+						planeindex &= ~0x8000;
+
+					plane = geo.planes[planeindex];
+					var normal1 = geo.normals[plane.normalIndex];
+
+					if (planeFlipped)
+						normal1 = normal1.scalar(-1);
+
+					var dot = normal0.dot(normal1);
+
+					if (Math.abs(dot) < 0.1)
+						return false;
+
+					var farP0 = geo.points[edge.farPoint0];
+					var farP1 = geo.points[edge.farPoint1];
+
+					var diff = farP1.sub(farP0);
+					var cdot0 = normal0.dot(diff);
+					if (cdot0 > -0.1) {
+						return true;
+					}
+
+					return false;
+				}
+				function getEdgeNormal(edge:Edge) {
+					var edgeSurface0 = edge.surfaceIndex0;
+					var surface0 = geo.surfaces[edgeSurface0];
+
+					var planeindex = surface0.planeIndex;
+
+					var planeFlipped = (planeindex & 0x8000) == 0x8000;
+					if (planeFlipped)
+						planeindex &= ~0x8000;
+
+					var plane = geo.planes[planeindex];
+					var normal0 = geo.normals[plane.normalIndex];
+
+					if (planeFlipped)
+						normal0 = normal0.scalar(-1);
+
+					var edgeSurface1 = edge.surfaceIndex1;
+					var surface1 = geo.surfaces[edgeSurface1];
+
+					planeindex = surface1.planeIndex;
+
+					planeFlipped = (planeindex & 0x8000) == 0x8000;
+					if (planeFlipped)
+						planeindex &= ~0x8000;
+
+					plane = geo.planes[planeindex];
+					var normal1 = geo.normals[plane.normalIndex];
+
+					if (planeFlipped)
+						normal1 = normal1.scalar(-1);
+
+					var norm = normal0.add(normal1).scalarDiv(2).normalized();
+
+					var vec = new Vector(norm.x, norm.y, norm.z);
+
+					return vec;
+				}
+				if (makeCollideable) {
+					for (colliderSurface in colliderSurfaces) {
+						var i = 0;
+						while (i < colliderSurface.indices.length) {
+							var e1e2 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 1]);
+							var e2e3 = hashEdge(colliderSurface.originalIndices[i + 1], colliderSurface.originalIndices[i + 2]);
+							var e1e3 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 2]);
+							var edgeData = 0;
+							if (difEdges.exists(e1e2)) {
+								// if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
+								edgeData |= 1;
+								// }
+								colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e2]));
+								// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e2]));
+							} else {
+								colliderSurface.edgeConcavities.push(false);
+								// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
+							}
+							if (difEdges.exists(e2e3)) {
+								// if (getEdgeDot(difEdges[e2e3]) < Math.cos(Math.PI / 12)) {
+								edgeData |= 2;
+								// }
+								colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e2e3]));
+								// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e2e3]));
+								// colliderSurface.edgeDots.push(dot);
+							} else {
+								colliderSurface.edgeConcavities.push(false);
+								// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
+							}
+							if (difEdges.exists(e1e3)) {
+								// if (getEdgeDot(difEdges[e1e3]) < Math.cos(Math.PI / 12)) {
+								edgeData |= 4;
+								// }
+								colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e3]));
+								// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e3]));
+								// colliderSurface.edgeDots.push(dot);
+							} else {
+								colliderSurface.edgeConcavities.push(false);
+								// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
+							}
+							colliderSurface.edgeData.push(edgeData);
+							i += 3;
+						}
+					}
+				}
+				for (vtex => buckets in vertexBuckets) {
+					for (i in 0...buckets.length) {
+						var bucket = buckets[i];
+						var avgNormal = new Point3F();
+						for (normal in bucket.normals)
+							avgNormal = avgNormal.add(normal);
+						avgNormal = avgNormal.scalarDiv(bucket.normals.length);
+						for (j in 0...bucket.triangleIndices.length) {
+							var index = bucket.triangleIndices[j];
+							var tri = triangles[index];
+							if (tri.p1 == vtex) {
+								tri.normal1 = avgNormal;
+								tri.n1 = avgNormal;
+								tri.t1 = tri.t1.sub(avgNormal.scalar(avgNormal.dot(tri.t1))).normalized();
+								tri.b1 = tri.b1.sub(avgNormal.scalar(avgNormal.dot(tri.b1))).normalized();
+							}
+							if (tri.p2 == vtex) {
+								tri.normal2 = avgNormal;
+								tri.n2 = avgNormal;
+								tri.t2 = tri.t2.sub(avgNormal.scalar(avgNormal.dot(tri.t2))).normalized();
+								tri.b2 = tri.b2.sub(avgNormal.scalar(avgNormal.dot(tri.b2))).normalized();
+							}
+							if (tri.p3 == vtex) {
+								tri.normal3 = avgNormal;
+								tri.n3 = avgNormal;
+								tri.t3 = tri.t3.sub(avgNormal.scalar(avgNormal.dot(tri.t3))).normalized();
+								tri.b3 = tri.b3.sub(avgNormal.scalar(avgNormal.dot(tri.b3))).normalized();
+							}
+						}
+					}
+				}
+				for (index => value in triangles) {
+					if (mats.exists(value.texture)) {
+						mats[value.texture].push(value);
+					} else {
+						mats.set(value.texture, [value]);
+					}
+				}
+				collider.difEdgeMap = difEdges;
+			}
+			if (makeCollideable) {
+				if (cache != null) {
+					collider.difEdgeMap = cache.difEdgeMap;
+					difEdges = cache.difEdgeMap;
+				}
+				collider.finalize();
+				itr.collider = collider;
+			}
+			if (cache == null) {
+				cache = new DifCache();
+				cache.difTriangles = mats;
+				cache.difEdgeMap = difEdges;
+				cache.colliderSurfaces = colliderSurfaces;
+				difCache.set(path, cache);
+			}
 			function canFindTex(tex:String) {
 				if (["NULL"].contains(tex)) {
 					return false;
@@ -837,9 +890,10 @@ class DifBuilder {
 					loadtexs.push(tex(grp));
 				}
 			}
+			var memStats = hl.Gc.stats();
+			trace('Interior: ${path} ${memStats.currentMemory} ${memStats.totalAllocated} ${memStats.allocationCount}');
 			var worker = new ResourceLoaderWorker(() -> {
 				var shaderWorker = new ResourceLoaderWorker(() -> {
-					difresource.release();
 					onFinish();
 				});
 

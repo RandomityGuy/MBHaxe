@@ -44,7 +44,9 @@ class InstanceManager {
 	public function render() {
 		var renderFrustums = [scene.camera.frustum];
 		// This sucks holy shit
-		if (MarbleGame.instance.world.marble != null && MarbleGame.instance.world.marble.cubemapRenderer != null)
+		if (MarbleGame.instance.world != null
+			&& MarbleGame.instance.world.marble != null
+			&& MarbleGame.instance.world.marble.cubemapRenderer != null)
 			renderFrustums = renderFrustums.concat(MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums());
 
 		for (meshes in objects) {
