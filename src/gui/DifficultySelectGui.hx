@@ -56,22 +56,28 @@ class DifficultySelectGui extends GuiImage {
 		btnList.extent = new Vector(502, 500);
 		innerCtrl.addChild(btnList);
 
-		btnList.addButton(0, 'Beginner Levels', (e) -> {});
-		btnList.addButton(0, 'Intermediate Levels', (e) -> {});
-		btnList.addButton(0, 'Advanced Levels', (e) -> {});
+		btnList.addButton(0, 'Beginner Levels', (e) -> {
+			MarbleGame.canvas.setContent(new LevelSelectGui("beginner"));
+		});
+		btnList.addButton(0, 'Intermediate Levels', (e) -> {
+			MarbleGame.canvas.setContent(new LevelSelectGui("intermediate"));
+		});
+		btnList.addButton(0, 'Advanced Levels', (e) -> {
+			MarbleGame.canvas.setContent(new LevelSelectGui("advanced"));
+		});
 		btnList.addButton(0, 'Gem Hunt', (e) -> {}, 20);
 
 		var bottomBar = new GuiControl();
-		bottomBar.position = new Vector(0, innerCtrl.extent.x * 590 / 480);
+		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
 		bottomBar.horizSizing = Width;
 		bottomBar.vertSizing = Bottom;
-		this.addChild(bottomBar);
+		innerCtrl.addChild(bottomBar);
 
 		var backButton = new GuiXboxButton("Back", 160);
-		backButton.position = new Vector(-240, 0);
+		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
-		backButton.horizSizing = Left;
+		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["B"];
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
 		bottomBar.addChild(backButton);
