@@ -33,10 +33,10 @@ class ReaderExtensions {
 		var signed = false;
 		var param = 0;
 
-		if ((length & 0x80000000) > 0) {
+		if ((length & 0x80000000) == 0x80000000) {
 			length ^= 0x80000000;
 			signed = true;
-			param = io.readInt32();
+			param = io.readByte();
 		}
 
 		var array = new Array<V>();

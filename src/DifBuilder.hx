@@ -216,7 +216,7 @@ class DifBuilder {
 			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
-			normalTex.mipMap = None;
+			normalTex.mipMap = Nearest;
 			var shader = new DefaultMaterial(diffuseTex, normalTex, shininess, specularColor, uvScaleFactor, half);
 			onFinish(shader);
 		});
@@ -233,7 +233,7 @@ class DifBuilder {
 			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
-			normalTex.mipMap = None;
+			normalTex.mipMap = Nearest;
 
 			var cubemapTex = new h3d.mat.Texture(128, 128, [Cube]);
 			var cubemapFace1 = ResourceLoader.getImage('data/textures/acubexpos2.png').resource;
@@ -370,15 +370,16 @@ class DifBuilder {
 		ResourceLoader.load(path).entry.load(() -> {
 			var dif:Dif = null;
 			var cache:DifCache = null;
-			// if (difCache.exists(path)) {
-			// 	cache = difCache.get(path);
-			// 	dif = cache.dif;
-			// } else {
-			var difresource = ResourceLoader.loadInterior(path);
-			difresource.acquire();
-			dif = difresource.resource;
-			// }
-			var geo = cache == null ? (so == -1 ? dif.interiors[0] : dif.subObjects[so]) : null;
+			var cachePath = '${path}${so}';
+			if (difCache.exists(cachePath)) {
+				cache = difCache.get(cachePath);
+				dif = cache.dif;
+			} else {
+				var difresource = ResourceLoader.loadInterior(path);
+				difresource.acquire();
+				dif = difresource.resource;
+			}
+			var geo = (so == -1 ? dif.interiors[0] : dif.subObjects[so]);
 			var triangles = [];
 			var textures = [];
 			var collider = new CollisionEntity(itr);
@@ -391,7 +392,10 @@ class DifBuilder {
 				colliderSurfaces = cache.colliderSurfaces;
 				mats = cache.difTriangles;
 			}
-			if (cache == null) {
+			if (cache == null || (colliderSurfaces.length == 0 && makeCollideable)) {
+				mats = [];
+				colliderSurfaces = [];
+				difEdges = [];
 				for (i in 0...geo.surfaces.length) {
 					var surfaceindex = i;
 					var surface = geo.surfaces[surfaceindex];
@@ -750,6 +754,7 @@ class DifBuilder {
 					return vec;
 				}
 				if (makeCollideable) {
+					var time = Sys.time();
 					for (colliderSurface in colliderSurfaces) {
 						var i = 0;
 						while (i < colliderSurface.indices.length) {
@@ -793,7 +798,10 @@ class DifBuilder {
 							i += 3;
 						}
 					}
+					var interval = Sys.time() - time;
+					Console.log('Collision build time: ${interval}');
 				}
+				var time = Sys.time();
 				for (vtex => buckets in vertexBuckets) {
 					for (i in 0...buckets.length) {
 						var bucket = buckets[i];
@@ -832,6 +840,8 @@ class DifBuilder {
 						mats.set(value.texture, [value]);
 					}
 				}
+				var interval = Sys.time() - time;
+				Console.log('Normal smoothing build time: ${interval}');
 				collider.difEdgeMap = difEdges;
 			}
 			if (makeCollideable) {
@@ -847,7 +857,8 @@ class DifBuilder {
 				cache.difTriangles = mats;
 				cache.difEdgeMap = difEdges;
 				cache.colliderSurfaces = colliderSurfaces;
-				difCache.set(path, cache);
+				cache.dif = dif;
+				difCache.set(cachePath, cache);
 			}
 			function canFindTex(tex:String) {
 				if (["NULL"].contains(tex)) {
@@ -897,6 +908,7 @@ class DifBuilder {
 					onFinish();
 				});
 
+				var time = Sys.time();
 				for (grp => tris in mats) {
 					var points = [];
 					var normals = [];
@@ -977,6 +989,8 @@ class DifBuilder {
 						material.mainPass.wireframe = true;
 					var mesh = new Mesh(prim, material, itr);
 				}
+				var interval = Sys.time() - time;
+				Console.log('Geometry build time ${interval}');
 
 				shaderWorker.run();
 			});

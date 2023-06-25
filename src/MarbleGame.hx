@@ -320,6 +320,7 @@ class MarbleGame {
 	}
 
 	public function setPreviewMission(misname:String, onFinish:() -> Void) {
+		Console.log("Setting preview mission " + misname);
 		previewWorld.loadMission(misname, onFinish);
 	}
 
