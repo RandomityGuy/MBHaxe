@@ -55,6 +55,7 @@ class PreviewWorld extends Scheduler {
 	var instanceManager:InstanceManager;
 
 	var misFile:MisFile;
+	var currentMission:String;
 
 	var levelGroups:Map<String, MissionElementSimGroup> = [];
 
@@ -70,8 +71,6 @@ class PreviewWorld extends Scheduler {
 	}
 
 	public function init(onFinish:() -> Void) {
-		this.instanceManager = new InstanceManager(scene);
-
 		var entry = ResourceLoader.getFileEntry("data/missions/megaMission.mis").entry;
 		var misText = entry.getText();
 		var mparser = new MisParser(misText);
@@ -124,10 +123,16 @@ class PreviewWorld extends Scheduler {
 	}
 
 	public function loadMission(misname:String, onFinish:() -> Void) {
-		var groupName = misname + "group";
+		if (currentMission == misname) {
+			onFinish();
+			return;
+		}
+		currentMission = misname;
+		var groupName = (misname + "group").toLowerCase();
 		var group = levelGroups.get(groupName);
 		if (group != null) {
 			destroyAllObjects();
+			this.instanceManager = new InstanceManager(scene);
 
 			var p = new h3d.prim.Cube(0.001, 0.001, 0.001);
 			p.addUVs();
@@ -154,24 +159,15 @@ class PreviewWorld extends Scheduler {
 						camPos.x *= -1;
 						var camRot = MisParser.parseRotation(shapeElem.rotation);
 						camRot.x *= -1;
-						camRot.z *= -1;
+						camRot.w *= -1;
 
 						var camMat = camRot.toMatrix();
-
-						var eu = camRot.toEuler();
-						var camPitch = eu.y;
-						var camYaw = eu.z + Math.PI / 2;
 
 						var off = new Vector(0, 0, 1.5);
 						off.transform3x3(camMat);
 
-						var directionVector = new Vector(1, 0, 0);
-
-						var q1 = new Quat();
-						q1.initRotateAxis(0, 1, 0, camPitch);
-						directionVector.transform(q1.toMatrix());
-						q1.initRotateAxis(0, 0, 1, camYaw);
-						directionVector.transform(q1.toMatrix());
+						var directionVector = new Vector(0, 1, 0);
+						directionVector.transform3x3(camMat);
 
 						scene.camera.setFovX(90, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 
@@ -181,7 +177,7 @@ class PreviewWorld extends Scheduler {
 				}
 			}
 
-			var mis = MissionList.missionsFilenameLookup.get(misname + '.mis');
+			var mis = MissionList.missionsFilenameLookup.get((misname + '.mis').toLowerCase());
 			var difficulty = ["beginner", "intermediate", "advanced"][mis.difficultyIndex];
 
 			var worker = new ResourceLoaderWorker(onFinish);
@@ -248,6 +244,8 @@ class PreviewWorld extends Scheduler {
 		for (shape in dtsObjects) {
 			shape.dispose();
 		}
+		interiors = [];
+		dtsObjects = [];
 		scene.removeChildren();
 	}
 

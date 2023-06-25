@@ -130,30 +130,30 @@ class EndGameGui extends GuiImage {
 		endGameWnd.addChild(egResultRight);
 
 		var bottomBar = new GuiControl();
-		bottomBar.position = new Vector(0, innerCtrl.extent.x * 590 / 480);
+		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
 		bottomBar.horizSizing = Width;
 		bottomBar.vertSizing = Bottom;
-		this.addChild(bottomBar);
+		innerCtrl.addChild(bottomBar);
 
 		var retryButton = new GuiXboxButton("Retry", 160);
-		retryButton.position = new Vector(-240, 0);
+		retryButton.position = new Vector(400, 0);
 		retryButton.vertSizing = Bottom;
-		retryButton.horizSizing = Left;
+		retryButton.horizSizing = Right;
 		retryButton.gamepadAccelerator = ["B"];
 		retryButton.pressedAction = (e) -> restartFunc(retryButton);
 		bottomBar.addChild(retryButton);
 
 		var lbButton = new GuiXboxButton("Leaderboard", 220);
-		lbButton.position = new Vector(110, 0);
+		lbButton.position = new Vector(750, 0);
 		lbButton.vertSizing = Bottom;
-		lbButton.horizSizing = Left;
+		lbButton.horizSizing = Right;
 		bottomBar.addChild(lbButton);
 
 		var nextButton = new GuiXboxButton("Next", 160);
-		nextButton.position = new Vector(320, 0);
+		nextButton.position = new Vector(960, 0);
 		nextButton.vertSizing = Bottom;
-		nextButton.horizSizing = Left;
+		nextButton.horizSizing = Right;
 		nextButton.pressedAction = (e) -> continueFunc(nextButton);
 		bottomBar.addChild(nextButton);
 	}

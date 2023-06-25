@@ -34,6 +34,8 @@ class DirLight extends Light {
 	}
 
 	override function getShadowDirection():h3d.Vector {
+		if (MarbleGame.instance.world == null)
+			return new h3d.Vector(0, 0, -1);
 		return MarbleGame.instance.world.currentUp.multiply(-1);
 	}
 
