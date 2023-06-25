@@ -1,5 +1,6 @@
 package src;
 
+import gui.LevelSelectGui;
 import gui.MainMenuGui;
 #if !js
 import gui.ReplayCenterGui;
@@ -267,25 +268,26 @@ class MarbleGame {
 
 	public function quitMission() {
 		Console.log("Quitting mission");
+		var watching = world.isWatching;
+		var missionType = world.mission.type;
+		var isNotCustom = !world.mission.isClaMission && !world.mission.isCustom;
 		world.setCursorLock(false);
+		world.dispose();
+		world = null;
 		paused = false;
-		if (world.isWatching) {
+		if (watching) {
 			#if !js
 			canvas.setContent(new ReplayCenterGui());
 			#else
 			canvas.setContent(new MainMenuGui());
 			#end
 		} else {
-			if (!world.mission.isClaMission && !world.mission.isCustom) {
-				PlayMissionGui.currentCategoryStatic = world.mission.type;
+			if (isNotCustom) {
+				PlayMissionGui.currentCategoryStatic = missionType;
 			}
-			var pmg = new PlayMissionGui();
-			PlayMissionGui.currentSelectionStatic = world.mission.index;
-			PlayMissionGui.currentGameStatic = world.mission.game;
+			var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
 			canvas.setContent(pmg);
 		}
-		world.dispose();
-		world = null;
 
 		Settings.save();
 	}

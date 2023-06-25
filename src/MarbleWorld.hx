@@ -1078,13 +1078,11 @@ class MarbleWorld extends Scheduler {
 			func(() -> {
 				lock = false;
 				this._resourcesLoaded++;
-				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
 			});
 			#end
 			#if js
 			func(() -> {
 				lock = false;
-				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
 				this._resourcesLoaded++;
 			});
 			#end

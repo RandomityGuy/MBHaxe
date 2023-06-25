@@ -66,6 +66,8 @@ class PreviewWorld extends Scheduler {
 
 	var sky:Sky;
 
+	var itrAddTime:Float = 0;
+
 	public function new(scene:Scene) {
 		this.scene = scene;
 	}
@@ -183,8 +185,15 @@ class PreviewWorld extends Scheduler {
 			var worker = new ResourceLoaderWorker(onFinish);
 
 			worker.addTask(fwd -> addScenery(difficulty, fwd));
+			itrAddTime = 0;
 			for (elem in itrpaths) {
-				worker.addTask(fwd -> addInteriorFromMis(cast elem, fwd));
+				worker.addTask(fwd -> {
+					var startTime = Sys.time();
+					addInteriorFromMis(cast elem, () -> {
+						itrAddTime += Sys.time() - startTime;
+						fwd();
+					});
+				});
 			}
 			for (elem in shapeDbs) {
 				worker.addTask(fwd -> addStaticShape(cast elem, fwd));
@@ -192,6 +201,7 @@ class PreviewWorld extends Scheduler {
 			worker.addTask(fwd -> {
 				timeState.timeSinceLoad = 0;
 				timeState.dt = 0;
+				Console.log('ITR ADD TIME: ' + itrAddTime);
 				fwd();
 			});
 			worker.run();
@@ -238,6 +248,7 @@ class PreviewWorld extends Scheduler {
 	}
 
 	public function destroyAllObjects() {
+		currentMission = null;
 		for (itr in interiors) {
 			itr.dispose();
 		}

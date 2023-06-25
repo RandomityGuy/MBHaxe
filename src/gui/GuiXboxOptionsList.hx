@@ -170,4 +170,9 @@ class GuiXboxOptionsList extends GuiControl {
 		}
 		super.update(dt, mouseState);
 	}
+
+	public function setCurrentOption(opt:Int) {
+		currentOption = opt;
+		optionText.text.text = options[currentOption];
+	}
 }
