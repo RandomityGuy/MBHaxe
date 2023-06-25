@@ -270,7 +270,8 @@ class MarbleWorld extends Scheduler {
 		this._ready = true;
 		AudioManager.playShell();
 		MarbleGame.canvas.clearContent();
-		this.endPad.generateCollider();
+		if (this.endPad != null)
+			this.endPad.generateCollider();
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 		Console.log("MISSION LOADED");
 		start();
@@ -1312,7 +1313,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		if (this.finishTime == null) {
+		if (this.finishTime == null && this.endPad != null) {
 			if (marbleHitbox.collide(this.endPad.finishBounds)) {
 				var padUp = this.endPad.getAbsPos().up();
 				padUp = padUp.multiply(10);
