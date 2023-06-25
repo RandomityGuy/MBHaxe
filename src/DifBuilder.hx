@@ -36,6 +36,7 @@ import src.MarbleGame;
 import src.ResourceLoaderWorker;
 import src.Console;
 import src.Debug;
+import src.LRUCache;
 
 class DifBuilderTriangle {
 	public var texture:String;
@@ -98,7 +99,7 @@ typedef VertexBucket = {
 }
 
 class DifBuilder {
-	static var difCache:Map<String, DifCache> = [];
+	static var difCache:LRUCache<DifCache> = new LRUCache(16);
 
 	static var materialDict:Map<String, {
 		friction:Float,
@@ -213,7 +214,8 @@ class DifBuilder {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
 			diffuseTex.wrap = Repeat;
-			diffuseTex.mipMap = Nearest;
+			diffuseTex.mipMap = Linear;
+			diffuseTex.filter = Linear;
 			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
 			normalTex.mipMap = Nearest;
@@ -230,7 +232,8 @@ class DifBuilder {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
 			diffuseTex.wrap = Repeat;
-			diffuseTex.mipMap = Nearest;
+			diffuseTex.mipMap = Linear;
+			diffuseTex.filter = Linear;
 			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
 			normalTex.mipMap = Nearest;
@@ -262,7 +265,8 @@ class DifBuilder {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
 			diffuseTex.wrap = Repeat;
-			diffuseTex.mipMap = Nearest;
+			diffuseTex.mipMap = Linear;
+			diffuseTex.filter = Linear;
 			var shader = new DefaultNormalMaterial(diffuseTex, shininess, specularColor, uvScaleFactor);
 			onFinish(shader);
 		});
@@ -274,7 +278,8 @@ class DifBuilder {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/textures/${baseTexture}').resource;
 			diffuseTex.wrap = Repeat;
-			diffuseTex.mipMap = Nearest;
+			diffuseTex.mipMap = Linear;
+			diffuseTex.filter = Linear;
 			var normalTex = ResourceLoader.getTexture('data/textures/tile_intermediate.normal.png').resource;
 			normalTex.wrap = Repeat;
 			normalTex.mipMap = Nearest;
@@ -973,7 +978,7 @@ class DifBuilder {
 						} else {
 							texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
 							texture.wrap = Wrap.Repeat;
-							texture.mipMap = Nearest;
+							texture.mipMap = Linear;
 							material.texture = texture;
 							material.shadows = false;
 							material.receiveShadows = true;
