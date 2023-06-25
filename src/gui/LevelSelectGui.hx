@@ -16,8 +16,49 @@ class LevelSelectGui extends GuiImage {
 	static var currentDifficultyStatic:String = "beginner";
 
 	public function new(difficulty:String) {
-		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
+		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
 		super(res);
+
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
+		function mlFontLoader(text:String) {
+			return arial14;
+		}
+
+		var fadeEdge = new GuiImage(ResourceLoader.getResource("data/ui/xbox/BG_fadeOutSoftEdge.png", ResourceLoader.getImage, this.imageResources).toTile());
+		fadeEdge.position = new Vector(0, 0);
+		fadeEdge.extent = new Vector(640, 480);
+		fadeEdge.vertSizing = Height;
+		fadeEdge.horizSizing = Width;
+		this.addChild(fadeEdge);
+
+		var loadAnim = new GuiLoadAnim();
+		loadAnim.position = new Vector(610, 253);
+		loadAnim.extent = new Vector(63, 63);
+		loadAnim.horizSizing = Center;
+		loadAnim.vertSizing = Bottom;
+		this.addChild(loadAnim);
+
+		var loadTextBg = new GuiText(arial14);
+		loadTextBg.position = new Vector(608, 335);
+		loadTextBg.extent = new Vector(63, 40);
+		loadTextBg.horizSizing = Center;
+		loadTextBg.vertSizing = Bottom;
+		loadTextBg.justify = Center;
+		loadTextBg.text.text = "Loading";
+		loadTextBg.text.textColor = 0;
+		this.addChild(loadTextBg);
+
+		var loadText = new GuiText(arial14);
+		loadText.position = new Vector(610, 334);
+		loadText.extent = new Vector(63, 40);
+		loadText.horizSizing = Center;
+		loadText.vertSizing = Bottom;
+		loadText.justify = Center;
+		loadText.text.text = "Loading";
+		this.addChild(loadText);
 
 		if (currentDifficultyStatic != difficulty) {
 			currentSelectionStatic = 0;
@@ -32,6 +73,10 @@ class LevelSelectGui extends GuiImage {
 		var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
 		MarbleGame.instance.setPreviewMission(misFile, () -> {
 			lock = false;
+			this.bmp.visible = false;
+			loadAnim.anim.visible = false;
+			loadText.text.visible = false;
+			loadTextBg.text.visible = false;
 		});
 
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
@@ -114,14 +159,6 @@ class LevelSelectGui extends GuiImage {
 		statIcon.extent = new Vector(20, 20);
 		levelWnd.addChild(statIcon);
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
-		var arial14b = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
-		function mlFontLoader(text:String) {
-			return arial14;
-		}
-
 		var c0 = 0xEBEBEB;
 		var c1 = 0x8DFF8D;
 		var c2 = 0x88BCEE;
@@ -151,12 +188,21 @@ class LevelSelectGui extends GuiImage {
 		function setLevel(idx:Int) {
 			if (lock)
 				return false;
+			this.bmp.visible = true;
+			loadAnim.anim.visible = true;
+			loadText.text.visible = true;
+			loadTextBg.text.visible = true;
 			lock = true;
 			curMission = difficultyMissions[idx];
+			currentSelectionStatic = idx;
 			var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
 			var mis = difficultyMissions[idx];
 			MarbleGame.instance.setPreviewMission(misFile, () -> {
 				lock = false;
+				this.bmp.visible = false;
+				loadAnim.anim.visible = false;
+				loadText.text.visible = false;
+				loadTextBg.text.visible = false;
 			});
 			var myScore = Settings.getScores(mis.path);
 			var scoreDisp = "None";
@@ -180,6 +226,7 @@ class LevelSelectGui extends GuiImage {
 		levelSelectOpts.horizSizing = Right;
 		levelSelectOpts.alwaysActive = true;
 		levelSelectOpts.onChangeFunc = setLevel;
+		levelSelectOpts.setCurrentOption(currentSelectionStatic);
 		innerCtrl.addChild(levelSelectOpts);
 	}
 }

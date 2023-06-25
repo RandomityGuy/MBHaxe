@@ -27,6 +27,8 @@ class Sky extends Object {
 
 	var imageResources:Array<Resource<Image>> = [];
 
+	static var cubemapTextureCache:Map<String, Texture> = [];
+
 	public function new() {
 		super();
 	}
@@ -111,68 +113,74 @@ class Sky extends Object {
 				var noSkyTexture = element.useskytextures == "0";
 
 				var worker = new ResourceLoaderWorker(() -> {
-					var fnames = [];
-					for (i in 0...6) {
-						var line = StringTools.trim(lines[i]);
-						var filenames = ResourceLoader.getFullNamesOf(dmlDirectory + '/' + line);
-						if (filenames.length == 0 || noSkyTexture) {
-							var pixels = Texture.fromColor(skyColor.toColor()).capturePixels(0, 0);
-							skyboxImages.push(pixels);
-							// var tex = new h3d.mat.Texture();
-							// skyboxImages.push(new BitmapData(128, 128));
-							fnames.push("");
-							Console.error("Skybox image " + filenames[0] + " does not exist");
-						} else {
-							// var pixels = ResourceLoader.getTexture(filenames[0]).resource.capturePixels(0, 0);
-							fnames.push(filenames[0]);
-							var pixels = ResourceLoader.getImagePixels(filenames[0]);
-							skyboxImages.push(pixels);
+					var cubemaptexture:Texture = null;
+					if (cubemapTextureCache.exists(dmlPath))
+						cubemaptexture = cubemapTextureCache.get(dmlPath);
+					else {
+						var fnames = [];
+						for (i in 0...6) {
+							var line = StringTools.trim(lines[i]);
+							var filenames = ResourceLoader.getFullNamesOf(dmlDirectory + '/' + line);
+							if (filenames.length == 0 || noSkyTexture) {
+								var pixels = Texture.fromColor(skyColor.toColor()).capturePixels(0, 0);
+								skyboxImages.push(pixels);
+								// var tex = new h3d.mat.Texture();
+								// skyboxImages.push(new BitmapData(128, 128));
+								fnames.push("");
+								Console.error("Skybox image " + filenames[0] + " does not exist");
+							} else {
+								// var pixels = ResourceLoader.getTexture(filenames[0]).resource.capturePixels(0, 0);
+								fnames.push(filenames[0]);
+								var pixels = ResourceLoader.getImagePixels(filenames[0]);
+								skyboxImages.push(pixels);
+							}
 						}
-					}
-					var maxwidth = 0;
-					var maxheight = 0;
-					for (texture in skyboxImages) {
-						if (texture.height > maxheight)
-							maxheight = texture.height;
-						if (texture.width > maxwidth)
-							maxwidth = texture.width;
-					}
+						var maxwidth = 0;
+						var maxheight = 0;
+						for (texture in skyboxImages) {
+							if (texture.height > maxheight)
+								maxheight = texture.height;
+							if (texture.width > maxwidth)
+								maxwidth = texture.width;
+						}
 
-					// Handle the bmp files specially to flip y
-					if (StringTools.endsWith(fnames[0].toLowerCase(), ".bmp")) {
-						Util.flipImage(skyboxImages[0], true, true);
-					} else
-						Util.flipImage(skyboxImages[0], true, false);
-					if (StringTools.endsWith(fnames[4].toLowerCase(), ".bmp")) {
-						Util.flipImage(skyboxImages[4], true, true);
-					} else
-						Util.flipImage(skyboxImages[4], true, false);
-					Util.rotateImage(skyboxImages[5], Math.PI);
-					if (StringTools.endsWith(fnames[5].toLowerCase(), ".bmp")) {
-						Util.flipImage(skyboxImages[5], true, true);
-					} else
-						Util.flipImage(skyboxImages[5], true, false);
-					Util.rotateImage(skyboxImages[1], -Math.PI / 2);
-					if (StringTools.endsWith(fnames[1].toLowerCase(), ".bmp")) {
-						// Util.flipImage(skyboxImages[1], true, true);
-					} else
-						Util.flipImage(skyboxImages[1], true, false);
-					Util.rotateImage(skyboxImages[2], Math.PI);
-					if (StringTools.endsWith(fnames[2].toLowerCase(), ".bmp")) {
-						Util.flipImage(skyboxImages[2], true, true);
-						// Util.flipImage(skyboxImages[2], true, false);
-					} else
-						Util.flipImage(skyboxImages[2], true, false);
-					Util.rotateImage(skyboxImages[3], Math.PI / 2);
-					if (StringTools.endsWith(fnames[3].toLowerCase(), ".bmp")) {
-						// Util.flipImage(skyboxImages[3], true, false);
-						// Util.flipImage(skyboxImages[3], false, true);
-					} else
-						Util.flipImage(skyboxImages[3], true, false);
+						// Handle the bmp files specially to flip y
+						if (StringTools.endsWith(fnames[0].toLowerCase(), ".bmp")) {
+							Util.flipImage(skyboxImages[0], true, true);
+						} else
+							Util.flipImage(skyboxImages[0], true, false);
+						if (StringTools.endsWith(fnames[4].toLowerCase(), ".bmp")) {
+							Util.flipImage(skyboxImages[4], true, true);
+						} else
+							Util.flipImage(skyboxImages[4], true, false);
+						Util.rotateImage(skyboxImages[5], Math.PI);
+						if (StringTools.endsWith(fnames[5].toLowerCase(), ".bmp")) {
+							Util.flipImage(skyboxImages[5], true, true);
+						} else
+							Util.flipImage(skyboxImages[5], true, false);
+						Util.rotateImage(skyboxImages[1], -Math.PI / 2);
+						if (StringTools.endsWith(fnames[1].toLowerCase(), ".bmp")) {
+							// Util.flipImage(skyboxImages[1], true, true);
+						} else
+							Util.flipImage(skyboxImages[1], true, false);
+						Util.rotateImage(skyboxImages[2], Math.PI);
+						if (StringTools.endsWith(fnames[2].toLowerCase(), ".bmp")) {
+							Util.flipImage(skyboxImages[2], true, true);
+							// Util.flipImage(skyboxImages[2], true, false);
+						} else
+							Util.flipImage(skyboxImages[2], true, false);
+						Util.rotateImage(skyboxImages[3], Math.PI / 2);
+						if (StringTools.endsWith(fnames[3].toLowerCase(), ".bmp")) {
+							// Util.flipImage(skyboxImages[3], true, false);
+							// Util.flipImage(skyboxImages[3], false, true);
+						} else
+							Util.flipImage(skyboxImages[3], true, false);
 
-					var cubemaptexture = new Texture(maxheight, maxwidth, [Cube]);
-					for (i in 0...6) {
-						cubemaptexture.uploadPixels(skyboxImages[skyboxIndices[i]], 0, i);
+						cubemaptexture = new Texture(maxheight, maxwidth, [Cube]);
+						for (i in 0...6) {
+							cubemaptexture.uploadPixels(skyboxImages[skyboxIndices[i]], 0, i);
+						}
+						cubemapTextureCache.set(dmlPath, cubemaptexture);
 					}
 					onFinish(cubemaptexture);
 				});

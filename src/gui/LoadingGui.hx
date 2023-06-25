@@ -8,77 +8,50 @@ import src.Settings;
 import src.Util;
 
 class LoadingGui extends GuiImage {
-	public var setProgress:Float->Void;
-
 	public function new(missionName:String, game:String) {
-		function chooseBg() {
-			if (game == "gold")
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (game == "platinum")
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			if (game == "ultra")
-				return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-		}
-
-		var img = chooseBg();
-		super(img.resource.toTile());
+		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
+		super(res);
+		this.position = new Vector();
+		this.extent = new Vector(640, 480);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
-		this.extent = new Vector(640, 480);
-		this.position = new Vector();
 
-		var loadingGui = new GuiImage(ResourceLoader.getResource("data/ui/loading/loadinggui.png", ResourceLoader.getImage, this.imageResources).toTile());
-		loadingGui.horizSizing = Center;
-		loadingGui.vertSizing = Center;
-		loadingGui.position = new Vector(86, 77);
-		loadingGui.extent = new Vector(468, 325);
+		var fadeEdge = new GuiImage(ResourceLoader.getResource("data/ui/xbox/BG_fadeOutSoftEdge.png", ResourceLoader.getImage, this.imageResources).toTile());
+		fadeEdge.position = new Vector(0, 0);
+		fadeEdge.extent = new Vector(640, 480);
+		fadeEdge.vertSizing = Height;
+		fadeEdge.horizSizing = Width;
+		this.addChild(fadeEdge);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var loadAnim = new GuiLoadAnim();
+		loadAnim.position = new Vector(610, 253);
+		loadAnim.extent = new Vector(63, 63);
+		loadAnim.horizSizing = Center;
+		loadAnim.vertSizing = Bottom;
+		this.addChild(loadAnim);
 
-		var mapName = new GuiText(domcasual32);
-		mapName.position = new Vector(6, 33);
-		mapName.extent = new Vector(456, 14);
-		mapName.text.text = missionName;
-		mapName.text.textColor = 0;
-		mapName.justify = Center;
+		var loadTextBg = new GuiText(arial14);
+		loadTextBg.position = new Vector(608, 335);
+		loadTextBg.extent = new Vector(63, 40);
+		loadTextBg.horizSizing = Center;
+		loadTextBg.vertSizing = Bottom;
+		loadTextBg.justify = Center;
+		loadTextBg.text.text = "Loading";
+		loadTextBg.text.textColor = 0;
+		this.addChild(loadTextBg);
 
-		var progress = new GuiProgress();
-		progress.vertSizing = Top;
-		progress.position = new Vector(194, 145);
-		progress.extent = new Vector(225, 56);
-		progress.progress = 0.5;
-
-		setProgress = (progressPz) -> {
-			progress.progress = progressPz;
-		}
-
-		var cancelButton = new GuiButton(loadButtonImages("data/ui/loading/cancel"));
-		cancelButton.position = new Vector(333, 243);
-		cancelButton.extent = new Vector(112, 59);
-		cancelButton.pressedAction = (sender) -> {
-			MarbleGame.instance.quitMission();
-		}
-
-		var overlay = new GuiImage(ResourceLoader.getResource("data/ui/loading/overlay.png", ResourceLoader.getImage, this.imageResources).toTile());
-		overlay.position = new Vector(188, 139);
-		overlay.extent = new Vector(242, 75);
-
-		loadingGui.addChild(mapName);
-		loadingGui.addChild(progress);
-		loadingGui.addChild(cancelButton);
-		loadingGui.addChild(overlay);
-
-		this.addChild(loadingGui);
+		var loadText = new GuiText(arial14);
+		loadText.position = new Vector(610, 334);
+		loadText.extent = new Vector(63, 40);
+		loadText.horizSizing = Center;
+		loadText.vertSizing = Bottom;
+		loadText.justify = Center;
+		loadText.text.text = "Loading";
+		this.addChild(loadText);
 	}
 }
