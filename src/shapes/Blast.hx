@@ -35,6 +35,13 @@ class Blast extends PowerUp {
 		this.level.blastAmount = 1.2;
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/images/blast_orbit_bump.png");
+		mats.push("data/shapes/items/item_glow.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "blast_orbit_skin") {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/images/blast_orbit_skin.png").resource;

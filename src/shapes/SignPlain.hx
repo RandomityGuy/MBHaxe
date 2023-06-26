@@ -25,6 +25,12 @@ class SignPlain extends DtsObject {
 		this.identifier = "SignPlain" + direction;
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/signs/arrowsign_post_bump.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "arrowsign_arrow") {
 			var diffuseTex = ResourceLoader.getTexture('data/shapes/signs/arrowsign_arrow.png').resource;
@@ -133,7 +139,7 @@ class SignPlain extends DtsObject {
 			var diffuseTex = ResourceLoader.getTexture('data/shapes/signs/arrowsign_post.png').resource;
 			diffuseTex.wrap = Repeat;
 			diffuseTex.mipMap = Nearest;
-			var normalTex = ResourceLoader.getTexture("data/shapes/items/arrowsign_post_bump.png").resource;
+			var normalTex = ResourceLoader.getTexture("data/shapes/signs/arrowsign_post_bump.png").resource;
 			normalTex.wrap = Repeat;
 			normalTex.mipMap = Nearest;
 			var shader = new shaders.DefaultMaterial(diffuseTex, normalTex, 12, new h3d.Vector(0.8, 0.8, 0.6, 1), 1);

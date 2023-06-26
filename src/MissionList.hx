@@ -35,30 +35,30 @@ class MissionList {
 			#end
 			var difficultyMissions = [];
 			for (file in difficultyFiles) {
-				var subfiles = ResourceLoader.fileSystem.dir(file.path);
-				for (file in subfiles) {
-					if (file.extension == "mis") {
-						var misParser = new MisParser(file.getText());
-						var mInfo = misParser.parseMissionInfo();
-						var mission = Mission.fromMissionInfo(file.path, mInfo);
-						if (game != "custom")
-							mission.game = game;
-						else if (mInfo.game != null && mInfo.game != "")
-							mission.game = mInfo.game.toLowerCase();
-						else
-							mission.game = game; // Last case scenario
-						if (game == "custom")
-							mission.isCustom = true;
-						// do egg thing
-						if (StringTools.contains(file.getText().toLowerCase(), 'datablock = "easteregg"')) { // Ew
-							mission.hasEgg = true;
+				if (file.isDirectory)
+					for (sfile in file) {
+						if (sfile.extension == "mis") {
+							var misParser = new MisParser(sfile.getText());
+							var mInfo = misParser.parseMissionInfo();
+							var mission = Mission.fromMissionInfo(sfile.path, mInfo);
+							if (game != "custom")
+								mission.game = game;
+							else if (mInfo.game != null && mInfo.game != "")
+								mission.game = mInfo.game.toLowerCase();
+							else
+								mission.game = game; // Last case scenario
+							if (game == "custom")
+								mission.isCustom = true;
+							// do egg thing
+							if (StringTools.contains(sfile.getText().toLowerCase(), 'datablock = "easteregg"')) { // Ew
+								mission.hasEgg = true;
+							}
+							mission.difficultyIndex = difficultyIndex;
+							missions.set(sfile.path, mission);
+							missionsFilenameLookup.set(sfile.name.toLowerCase(), mission);
+							difficultyMissions.push(mission);
 						}
-						mission.difficultyIndex = difficultyIndex;
-						missions.set(file.path, mission);
-						missionsFilenameLookup.set(file.name.toLowerCase(), mission);
-						difficultyMissions.push(mission);
 					}
-				}
 			}
 			difficultyMissions.sort((a, b) -> Std.parseInt(a.missionInfo.level) - Std.parseInt(b.missionInfo.level));
 

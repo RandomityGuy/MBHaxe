@@ -22,6 +22,12 @@ class StartPad extends DtsObject {
 		doSequenceOnceBeginTime = level.timeState.timeSinceLoad;
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/pads/ringnormal.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "ringglass") {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/pads/ringglass.png").resource;

@@ -52,6 +52,10 @@ class Console {
 		entries = [];
 	}
 
+	public static function time() {
+		return haxe.Timer.stamp();
+	}
+
 	function getTime() {
 		return Std.int((haxe.Timer.stamp() - timeSinceStart) * 1000) / 1000;
 	}

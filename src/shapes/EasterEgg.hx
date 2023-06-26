@@ -42,6 +42,12 @@ class EasterEgg extends PowerUp {
 
 	public function use(timeState:src.TimeState) {}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/skies/gemCubemapUp.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "egg_skin") {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/items/egg_skin.png").resource;

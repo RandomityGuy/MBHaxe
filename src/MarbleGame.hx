@@ -173,6 +173,7 @@ class MarbleGame {
 		JSPlatform.initFullscreenEnforcer();
 
 		Window.getInstance().removeEventTarget(@:privateAccess Key.onEvent);
+		Window.getInstance().addResizeEvent(() -> {});
 		#end
 		scene2d.addEventListener(e -> {
 			_mouseWheelDelta = e.wheelDelta;

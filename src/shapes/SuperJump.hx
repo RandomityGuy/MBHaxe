@@ -79,6 +79,12 @@ class SuperJump extends PowerUp {
 		this.level.deselectPowerUp();
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/items/superjump_bump.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "superJump_skin") {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/items/superjump_skin.png").resource;

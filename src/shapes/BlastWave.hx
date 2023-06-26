@@ -24,6 +24,13 @@ class BlastWave extends DtsObject {
 		super.update(timeState);
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/images/blast_glow.png");
+		mats.push("data/shapes/pads/endpad_glow.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:Material) {
 		if (matName == "refract") {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/images/blast_glow.png").resource;
