@@ -6,7 +6,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 
-class OptionsListGui extends GuiImage {
+class AboutMenuOptionsGui extends GuiImage {
 	public function new() {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
@@ -44,7 +44,7 @@ class OptionsListGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "HELP & OPTIONS";
+		rootTitle.text.text = "HOW TO PLAY";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
@@ -54,17 +54,20 @@ class OptionsListGui extends GuiImage {
 		btnList.extent = new Vector(502, 500);
 		innerCtrl.addChild(btnList);
 
-		btnList.addButton(3, 'Marble Appearance', (e) -> {
-			MarbleGame.canvas.pushDialog(new MarbleSelectGui());
+		btnList.addButton(5, 'Marble Controls', (e) -> {
+			MarbleGame.canvas.setContent(new HelpCreditsGui(4));
 		});
-		btnList.addButton(3, 'Input and Sound Options', (e) -> {});
-		btnList.addButton(3, 'Video Options', (e) -> {});
-		btnList.addButton(3, 'Misc Options', (e) -> {});
-		btnList.addButton(5, 'How to Play', (e) -> {
-			MarbleGame.canvas.setContent(new AboutMenuOptionsGui());
+		btnList.addButton(5, 'Powerups', (e) -> {
+			MarbleGame.canvas.setContent(new HelpCreditsGui(0));
 		});
-		btnList.addButton(5, 'Credits', (e) -> {
-			MarbleGame.canvas.setContent(new HelpCreditsGui(5));
+		btnList.addButton(5, 'Blast Meter', (e) -> {
+			MarbleGame.canvas.setContent(new HelpCreditsGui(1));
+		});
+		btnList.addButton(5, 'Single Player Mode', (e) -> {
+			MarbleGame.canvas.setContent(new HelpCreditsGui(2));
+		});
+		btnList.addButton(5, 'Multiplayer Mode', (e) -> {
+			MarbleGame.canvas.setContent(new HelpCreditsGui(3));
 		});
 
 		var bottomBar = new GuiControl();
@@ -79,7 +82,7 @@ class OptionsListGui extends GuiImage {
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["B"];
-		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
+		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
 		bottomBar.addChild(backButton);
 	}
 }
