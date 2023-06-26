@@ -48,6 +48,13 @@ class TimeTravel extends PowerUp {
 			level.addBonusTime(this.timeBonus);
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/structures/glass.png");
+		mats.push("data/shapes/structures/time.normal.jpg");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "timeTravel_skin") {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/items/timeTravel_skin.png").resource;

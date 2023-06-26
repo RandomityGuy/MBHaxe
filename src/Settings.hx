@@ -394,6 +394,12 @@ class Settings {
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;
 			}
+			if (gamepadSettings.respawn == null) {
+				gamepadSettings.respawn = ["back"];
+			}
+			if (gamepadSettings.blast == null) {
+				gamepadSettings.blast = ["X", "LB", "RB"];
+			}
 			if (gamepadSettings.rewind == null) {
 				gamepadSettings.rewind = ["Y"];
 			}

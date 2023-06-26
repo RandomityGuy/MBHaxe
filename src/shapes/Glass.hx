@@ -36,6 +36,14 @@ class Glass extends DtsObject {
 		this.identifier = datablockLowercase;
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/structures/glass.png");
+		mats.push("data/shapes/structures/glass2.png");
+		mats.push("data/shapes/structures/glass.normal.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:Material) {
 		var refractTex = ResourceLoader.getTexture('data/shapes/structures/glass.png').resource;
 		refractTex.wrap = Repeat;

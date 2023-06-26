@@ -1,5 +1,6 @@
 package shapes;
 
+import dts.DtsFile;
 import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
@@ -48,6 +49,13 @@ class AntiGravity extends PowerUp {
 				onFinish();
 			});
 		});
+	}
+
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/items/antigrav_bump.png");
+		mats.push("data/shapes/items/antigrav_glow.png");
+		return mats;
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {

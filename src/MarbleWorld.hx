@@ -362,6 +362,7 @@ class MarbleWorld extends Scheduler {
 		var marblefiles = [
 			"particles/star.png",
 			"particles/smoke.png",
+			"particles/burst.png",
 			"sound/rolling_hard.wav",
 			"sound/sliding.wav",
 			"sound/use_gyrocopter.wav",
@@ -374,11 +375,15 @@ class MarbleWorld extends Scheduler {
 			"sound/bouncehard4.wav",
 			"sound/spawn_alternate.wav",
 			"sound/missinggems.wav",
+			"sound/level_text.wav",
+			"sound/level_finish.wav",
+			"sound/finish.wav",
 			"shapes/images/helicopter.dts",
 			"shapes/images/helicopter.jpg", // These irk us a lot because ifl shit
 			"shapes/items/gem.dts", // Ew ew
 			"shapes/items/gemshine.png",
 			"shapes/items/enviro1.jpg",
+			"shapes/hazards/null.png"
 		];
 		if (this.game == "ultra") {
 			marblefiles.push("shapes/balls/pack1/marble20.normal.png");
@@ -797,18 +802,7 @@ class MarbleWorld extends Scheduler {
 
 		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
 			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
-			var directoryPath = haxe.io.Path.directory(obj.dtsPath);
-			var texToLoad = [];
-			for (i in 0...dtsFile.resource.matNames.length) {
-				var matName = obj.matNameOverride.exists(dtsFile.resource.matNames[i]) ? obj.matNameOverride.get(dtsFile.resource.matNames[i]) : dtsFile.resource.matNames[i];
-				if (matName.indexOf('/') != -1)
-					matName = matName.substring(matName.lastIndexOf('/'));
-				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
-				var fullName = fullNames.length > 0 ? fullNames[0] : null;
-				if (fullName != null) {
-					texToLoad.push(fullName);
-				}
-			}
+			var texToLoad = obj.getPreloadMaterials(dtsFile.resource);
 
 			var worker = new ResourceLoaderWorker(() -> {
 				obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
@@ -835,27 +829,7 @@ class MarbleWorld extends Scheduler {
 			});
 
 			for (texPath in texToLoad) {
-				if (haxe.io.Path.extension(texPath) == "ifl") {
-					if (isTsStatic)
-						obj.useInstancing = false;
-					worker.addTask(fwd -> {
-						parseIfl(texPath, keyframes -> {
-							var innerWorker = new ResourceLoaderWorker(() -> {
-								fwd();
-							});
-							var loadedkf = [];
-							for (kf in keyframes) {
-								if (!loadedkf.contains(kf)) {
-									innerWorker.loadFile(directoryPath + '/' + kf);
-									loadedkf.push(kf);
-								}
-							}
-							innerWorker.run();
-						});
-					});
-				} else {
-					worker.loadFile(texPath);
-				}
+				worker.loadFile(texPath);
 			}
 
 			worker.run();

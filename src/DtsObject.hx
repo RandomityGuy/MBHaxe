@@ -387,13 +387,29 @@ class DtsObject extends GameObject {
 
 	function postProcessMaterial(matName:String, material:Material) {}
 
+	function getPreloadMaterials(dts:DtsFile) {
+		var texToLoad = [];
+		var directoryPath = Path.directory(this.dtsPath);
+		for (i in 0...dts.matNames.length) {
+			var matName = this.matNameOverride.exists(dts.matNames[i]) ? this.matNameOverride.get(dts.matNames[i]) : dts.matNames[i];
+			if (matName.indexOf('/') != -1)
+				matName = matName.substring(matName.lastIndexOf('/') + 1);
+			var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
+			var fullName = fullNames.length > 0 ? fullNames[0] : null;
+			if (fullName != null) {
+				texToLoad.push(fullName);
+			}
+		}
+		return texToLoad;
+	}
+
 	function computeMaterials() {
 		var environmentMaterial:Material = null;
 
 		for (i in 0...dts.matNames.length) {
 			var matName = matNameOverride.exists(dts.matNames[i]) ? matNameOverride.get(dts.matNames[i]) : this.dts.matNames[i];
 			if (matName.indexOf('/') != -1)
-				matName = matName.substring(matName.lastIndexOf('/'));
+				matName = matName.substring(matName.lastIndexOf('/') + 1);
 			var flags = dts.matFlags[i];
 			var fullNames = ResourceLoader.getFullNamesOf(this.directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
 			var fullName = fullNames.length > 0 ? fullNames[0] : null;
@@ -455,7 +471,7 @@ class DtsObject extends GameObject {
 				#end
 				// Apparently creating these bitmap datas dont work so we'll just get the snag a white texture in the filesystem
 				#if js
-				var texture:Texture = ResourceLoader.getResource("data/shapes/pads/white.jpg", ResourceLoader.getTexture, this.textureResources);
+				var texture:Texture = ResourceLoader.getResource("data/shapes/hazards/null.png", ResourceLoader.getTexture, this.textureResources);
 				texture.wrap = Wrap.Repeat;
 				#end
 				Console.warn('Unable to load ${matName}');

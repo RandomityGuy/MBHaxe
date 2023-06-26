@@ -27,6 +27,7 @@ class MegaMarble extends PowerUp {
 				worker.loadFile("sound/mega_bouncehard3.wav");
 				worker.loadFile("sound/mega_bouncehard4.wav");
 				worker.loadFile("sound/mega_roll.wav");
+				worker.loadFile("sound/MegaShrink.wav");
 				worker.loadFile("sound/use_mega.wav");
 				this.pickupSound = ResourceLoader.getResource("data/sound/mega_marble.wav", ResourceLoader.getAudio, this.soundResources);
 				worker.run();
@@ -42,6 +43,13 @@ class MegaMarble extends PowerUp {
 		this.level.marble.enableMegaMarble(timeState.currentAttemptTime);
 		this.level.deselectPowerUp();
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_mega.wav', ResourceLoader.getAudio, this.soundResources));
+	}
+
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/images/grow_bump.png");
+		mats.push("data/shapes/images/grow_glow.png");
+		return mats;
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {

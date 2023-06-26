@@ -188,9 +188,9 @@ class PreviewWorld extends Scheduler {
 			itrAddTime = 0;
 			for (elem in itrpaths) {
 				worker.addTask(fwd -> {
-					var startTime = Sys.time();
+					var startTime = Console.time();
 					addInteriorFromMis(cast elem, () -> {
-						itrAddTime += Sys.time() - startTime;
+						itrAddTime += Console.time() - startTime;
 						fwd();
 					});
 				});
@@ -436,18 +436,7 @@ class PreviewWorld extends Scheduler {
 
 		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
 			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
-			var directoryPath = haxe.io.Path.directory(obj.dtsPath);
-			var texToLoad = [];
-			for (i in 0...dtsFile.resource.matNames.length) {
-				var matName = obj.matNameOverride.exists(dtsFile.resource.matNames[i]) ? obj.matNameOverride.get(dtsFile.resource.matNames[i]) : dtsFile.resource.matNames[i];
-				if (matName.indexOf('/') != -1)
-					matName = matName.substring(matName.lastIndexOf('/'));
-				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
-				var fullName = fullNames.length > 0 ? fullNames[0] : null;
-				if (fullName != null) {
-					texToLoad.push(fullName);
-				}
-			}
+			var texToLoad = obj.getPreloadMaterials(dtsFile.resource);
 
 			var worker = new ResourceLoaderWorker(() -> {
 				obj.isTSStatic = isTsStatic;
@@ -464,27 +453,7 @@ class PreviewWorld extends Scheduler {
 			});
 
 			for (texPath in texToLoad) {
-				if (haxe.io.Path.extension(texPath) == "ifl") {
-					if (isTsStatic)
-						obj.useInstancing = false;
-					worker.addTask(fwd -> {
-						parseIfl(texPath, keyframes -> {
-							var innerWorker = new ResourceLoaderWorker(() -> {
-								fwd();
-							});
-							var loadedkf = [];
-							for (kf in keyframes) {
-								if (!loadedkf.contains(kf)) {
-									innerWorker.loadFile(directoryPath + '/' + kf);
-									loadedkf.push(kf);
-								}
-							}
-							innerWorker.run();
-						});
-					});
-				} else {
-					worker.loadFile(texPath);
-				}
+				worker.loadFile(texPath);
 			}
 
 			worker.run();

@@ -66,6 +66,12 @@ class Gem extends DtsObject {
 		this.setOpacity(1);
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/skies/gemCubemapUp.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "red.gem") {
 			var diffuseTex = ResourceLoader.getTexture('data/shapes/items/red.gem.png').resource;

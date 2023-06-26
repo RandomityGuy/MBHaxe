@@ -759,7 +759,7 @@ class DifBuilder {
 					return vec;
 				}
 				if (makeCollideable) {
-					var time = Sys.time();
+					var time = Console.time();
 					for (colliderSurface in colliderSurfaces) {
 						var i = 0;
 						while (i < colliderSurface.indices.length) {
@@ -803,10 +803,10 @@ class DifBuilder {
 							i += 3;
 						}
 					}
-					var interval = Sys.time() - time;
+					var interval = Console.time() - time;
 					Console.log('Collision build time: ${interval}');
 				}
-				var time = Sys.time();
+				var time = Console.time();
 				for (vtex => buckets in vertexBuckets) {
 					for (i in 0...buckets.length) {
 						var bucket = buckets[i];
@@ -845,7 +845,7 @@ class DifBuilder {
 						mats.set(value.texture, [value]);
 					}
 				}
-				var interval = Sys.time() - time;
+				var interval = Console.time() - time;
 				Console.log('Normal smoothing build time: ${interval}');
 				collider.difEdgeMap = difEdges;
 			}
@@ -906,14 +906,16 @@ class DifBuilder {
 					loadtexs.push(tex(grp));
 				}
 			}
+			#if hl
 			var memStats = hl.Gc.stats();
 			trace('Interior: ${path} ${memStats.currentMemory} ${memStats.totalAllocated} ${memStats.allocationCount}');
+			#end
 			var worker = new ResourceLoaderWorker(() -> {
 				var shaderWorker = new ResourceLoaderWorker(() -> {
 					onFinish();
 				});
 
-				var time = Sys.time();
+				var time = Console.time();
 				for (grp => tris in mats) {
 					var points = [];
 					var normals = [];
@@ -994,7 +996,7 @@ class DifBuilder {
 						material.mainPass.wireframe = true;
 					var mesh = new Mesh(prim, material, itr);
 				}
-				var interval = Sys.time() - time;
+				var interval = Console.time() - time;
 				Console.log('Geometry build time ${interval}');
 
 				shaderWorker.run();

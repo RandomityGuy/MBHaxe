@@ -174,6 +174,7 @@ class ResourceLoader {
 			}
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
+		worker.loadFile('englishStrings.inf');
 		for (file in toloadfiles) {
 			worker.addTaskParallel((fwd) -> file.load(fwd));
 		}
@@ -182,8 +183,7 @@ class ResourceLoader {
 
 	static function preloadMusic(onFinish:Void->Void) {
 		var worker = new ResourceLoaderWorker(onFinish);
-		worker.loadFile("sound/music/shell.ogg");
-		worker.loadFile("sound/music/pianoforte.ogg");
+		worker.loadFile("sound/music/Tim Trance.ogg");
 		worker.run();
 	}
 

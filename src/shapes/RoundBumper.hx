@@ -16,6 +16,13 @@ class RoundBumper extends AbstractBumper {
 		animateSubObjectOpacities = true;
 	}
 
+	override function getPreloadMaterials(dts:dts.DtsFile) {
+		var mats = super.getPreloadMaterials(dts);
+		mats.push("data/shapes/items/antigrav_glow.png");
+		mats.push("data/shapes/images/blastwave.png");
+		return mats;
+	}
+
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {
 		if (matName == "bumper") {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/bumpers/bumper.png").resource;
