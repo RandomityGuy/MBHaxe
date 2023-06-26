@@ -106,7 +106,7 @@ class MainMenuGui extends GuiImage {
 			#end
 		});
 		btnList.addButton(3, "Help & Options", (sender) -> {
-			cast(this.parent, Canvas).setContent(new OptionsDlg());
+			cast(this.parent, Canvas).setContent(new OptionsListGui());
 		});
 		btnList.addButton(2, "Changelog", (sender) -> {
 			MarbleGame.canvas.pushDialog(new VersionGui());
