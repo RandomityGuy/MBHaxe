@@ -7,9 +7,6 @@ class ClassicGlassPureSphere extends hxsl.Shader {
 		@param var envMap:SamplerCube;
 		@param var shininess:Float;
 		@param var specularColor:Vec4;
-		@param var ambientLight:Vec3;
-		@param var dirLight:Vec3;
-		@param var dirLightDir:Vec3;
 		@param var uvScaleFactor:Float;
 		@global var camera:{
 			var position:Vec3;
@@ -37,12 +34,16 @@ class ClassicGlassPureSphere extends hxsl.Shader {
 		}
 		function vertex() {
 			calculatedUV = input.uv * uvScaleFactor;
+			var dirLight = vec3(-0.5732, 0.27536, -0.77176);
 			fragLightW = step(-0.5, dot(dirLight, input.normal));
 		}
 		function fragment() {
 			// Diffuse part
 			var texColor = diffuseMap.get(calculatedUV);
 			var bumpColor = normalMap.get(calculatedUV);
+
+			var dirLight = vec4(1.08, 1.03, 0.90, 1);
+			var dirLightDir = vec3(-0.5732, 0.27536, -0.77176);
 
 			var diffuse = dirLight * (dot(transformedNormal, -dirLightDir) + 1.3) * 0.5;
 
@@ -66,23 +67,20 @@ class ClassicGlassPureSphere extends hxsl.Shader {
 			var reflectColor = envMap.get(reflectionRay);
 
 			var outCol = mix(texColor * 1.2, reflectColor, fresnelTerm);
-			outCol *= vec4(diffuse, 1);
+			outCol *= diffuse;
 			outCol += specular * bumpColor.a;
 
 			pixelColor = outCol;
 		}
 	}
 
-	public function new(diffuse, normal, skybox, shininess, specularVal, ambientLight, dirLight, dirLightDir, uvScaleFactor) {
+	public function new(diffuse, normal, skybox, shininess, specularVal, uvScaleFactor) {
 		super();
 		this.diffuseMap = diffuse;
 		this.normalMap = normal;
 		this.envMap = skybox;
 		this.shininess = shininess;
 		this.specularColor = specularVal;
-		this.ambientLight = ambientLight.clone();
-		this.dirLight = dirLight.clone();
-		this.dirLightDir = dirLightDir.clone();
 		this.uvScaleFactor = uvScaleFactor;
 	}
 }

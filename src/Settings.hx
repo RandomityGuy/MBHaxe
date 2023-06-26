@@ -124,7 +124,7 @@ class Settings {
 		marbleIndex: 0,
 		marbleCategoryIndex: 0,
 		marbleSkin: "base",
-		marbleModel: "data/shapes/balls/ball-superball.dts",
+		marbleModel: "data/shapes/balls/marble01.dts",
 		marbleShader: "Default",
 		cameraDistance: 2.5,
 		rewindEnabled: false,
@@ -418,7 +418,7 @@ class Settings {
 			if (optionsSettings.marbleIndex == null) {
 				optionsSettings.marbleIndex = 0;
 				optionsSettings.marbleSkin = "base";
-				optionsSettings.marbleModel = "data/shapes/balls/ball-superball.dts";
+				optionsSettings.marbleModel = "data/shapes/balls/marble01.dts";
 			}
 			if (optionsSettings.marbleCategoryIndex == null) {
 				optionsSettings.marbleCategoryIndex = 0;

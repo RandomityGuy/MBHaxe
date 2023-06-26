@@ -386,17 +386,17 @@ class MarbleWorld extends Scheduler {
 			"shapes/hazards/null.png"
 		];
 		if (this.game == "ultra") {
-			marblefiles.push("shapes/balls/pack1/marble20.normal.png");
-			marblefiles.push("shapes/balls/pack1/marble18.normal.png");
-			marblefiles.push("shapes/balls/pack1/marble01.normal.png");
+			marblefiles.push("shapes/balls/marble20.normal.png");
+			marblefiles.push("shapes/balls/marble18.normal.png");
+			marblefiles.push("shapes/balls/marble01.normal.png");
 			marblefiles.push("sound/use_blast.wav");
 		}
 		// Hacky
 		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
-		if (Settings.optionsSettings.marbleCategoryIndex == 0)
-			marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
-		else
-			marblefiles.push("shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+		// if (Settings.optionsSettings.marbleCategoryIndex == 0)
+		// 	marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+		// else
+		// 	marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		for (file in marblefiles) {
 			worker.loadFile(file);
 		}

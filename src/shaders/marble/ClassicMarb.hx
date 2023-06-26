@@ -1,6 +1,6 @@
 package shaders.marble;
 
-class ClassicMarb2 extends hxsl.Shader {
+class ClassicMarb extends hxsl.Shader {
 	static var SRC = {
 		@param var diffuseMap:Sampler2D;
 		@param var envMap:SamplerCube;
@@ -43,7 +43,7 @@ class ClassicMarb2 extends hxsl.Shader {
 			var dirLight = vec4(1.08, 1.03, 0.90, 1);
 			var dirLightDir = vec3(-0.5732, 0.27536, -0.77176);
 
-			var diffuse = dirLight * (dot(transformedNormal, -dirLightDir) + 1.3) * 0.5;
+			var diffuse = dirLight * (((dot(transformedNormal, -dirLightDir) + 1) * 0.5) + 0.4);
 
 			// Specular
 			var eyeVec = (camera.position - transformedPosition).normalize();
@@ -54,14 +54,19 @@ class ClassicMarb2 extends hxsl.Shader {
 			var viewDir = normalize(camera.position - pixelTransformedPosition);
 
 			// Fresnel
+			var fresnelBias = 0.0;
+			var fresnelPow = 1.2;
+			var fresnelScale = 1.0;
+			var fresnelTerm = fresnelBias + fresnelScale * (1.0 - fresnelBias) * pow(1.0 - max(dot(viewDir, transformedNormal), 0.0), fresnelPow);
 
 			var incidentRay = normalize(pixelTransformedPosition - camera.position);
 			var reflectionRay = reflect(incidentRay, transformedNormal);
 
 			var reflectColor = envMap.get(reflectionRay);
 
-			var outCol = mix(texColor * diffuse * 1.2, reflectColor * diffuse, texColor.a);
-			outCol += specular * texColor.a * 0.5;
+			var outCol = mix(texColor * 1.2, reflectColor, fresnelTerm);
+			outCol *= diffuse;
+			outCol += specular * 0.5;
 
 			pixelColor = outCol;
 		}

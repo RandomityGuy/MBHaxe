@@ -853,6 +853,9 @@ class DifBuilder {
 				if (cache != null) {
 					collider.difEdgeMap = cache.difEdgeMap;
 					difEdges = cache.difEdgeMap;
+					for (surf in colliderSurfaces) {
+						collider.addSurface(surf);
+					}
 				}
 				collider.finalize();
 				itr.collider = collider;
