@@ -5,9 +5,10 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
+import src.Util;
 
 class VideoOptionsGui extends GuiImage {
-	public function new() {
+	public function new(pauseGui:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
@@ -58,6 +59,40 @@ class VideoOptionsGui extends GuiImage {
 			"1600 x 900",
 			"1920 x 1080"
 		], 0.35);
+		resolutionOpt.optionText.text.text = '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}';
+		var curOpt = [
+			"1024 x 800",
+			"1280 x 720",
+			"1366 x 768",
+			"1440 x 900",
+			"1600 x 900",
+			"1920 x 1080"
+		].indexOf(resolutionOpt.optionText.text.text);
+		if (curOpt != -1)
+			resolutionOpt.setCurrentOption(curOpt);
+		resolutionOpt.onChangeFunc = (idx) -> {
+			switch (idx) {
+				case 0:
+					Settings.optionsSettings.screenWidth = 1024;
+					Settings.optionsSettings.screenHeight = 800;
+				case 1:
+					Settings.optionsSettings.screenWidth = 1280;
+					Settings.optionsSettings.screenHeight = 720;
+				case 2:
+					Settings.optionsSettings.screenWidth = 1366;
+					Settings.optionsSettings.screenHeight = 768;
+				case 3:
+					Settings.optionsSettings.screenWidth = 1440;
+					Settings.optionsSettings.screenHeight = 900;
+				case 4:
+					Settings.optionsSettings.screenWidth = 1600;
+					Settings.optionsSettings.screenHeight = 900;
+				case 5:
+					Settings.optionsSettings.screenWidth = 1920;
+					Settings.optionsSettings.screenHeight = 1080;
+			}
+			return true;
+		}
 
 		resolutionOpt.vertSizing = Bottom;
 		resolutionOpt.horizSizing = Right;
@@ -72,6 +107,11 @@ class VideoOptionsGui extends GuiImage {
 		displayOpt.horizSizing = Right;
 		displayOpt.position = new Vector(380, yPos);
 		displayOpt.extent = new Vector(815, 94);
+		displayOpt.setCurrentOption(Settings.optionsSettings.isFullScreen ? 0 : 1);
+		displayOpt.onChangeFunc = (idx) -> {
+			Settings.optionsSettings.isFullScreen = (idx == 0);
+			return true;
+		}
 		innerCtrl.addChild(displayOpt);
 
 		yPos += 60;
@@ -81,7 +121,35 @@ class VideoOptionsGui extends GuiImage {
 		vsyncOpt.horizSizing = Right;
 		vsyncOpt.position = new Vector(380, yPos);
 		vsyncOpt.extent = new Vector(815, 94);
+		vsyncOpt.setCurrentOption(Settings.optionsSettings.vsync ? 1 : 0);
+		vsyncOpt.onChangeFunc = (idx) -> {
+			Settings.optionsSettings.vsync = (idx == 1);
+			return true;
+		}
 		innerCtrl.addChild(vsyncOpt);
+
+		yPos += 60;
+
+		function numberRange(start:Int, stop:Int, step:Int) {
+			var range = [];
+			while (start <= stop) {
+				range.push('${start}');
+				start += step;
+			}
+			return range;
+		}
+
+		var fovOpt = new GuiXboxOptionsList(1, "Field of Vision", numberRange(60, 140, 5), 0.35);
+		fovOpt.vertSizing = Bottom;
+		fovOpt.horizSizing = Right;
+		fovOpt.position = new Vector(380, yPos);
+		fovOpt.extent = new Vector(815, 94);
+		fovOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.fovX - 60) / (140 - 60)) * 16), 0, 16)));
+		fovOpt.onChangeFunc = (idx) -> {
+			Settings.optionsSettings.fovX = cast(60 + (idx / 16.0) * (140 - 60));
+			return true;
+		}
+		innerCtrl.addChild(fovOpt);
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -95,7 +163,17 @@ class VideoOptionsGui extends GuiImage {
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["OK"];
-		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
+		if (pauseGui)
+			backButton.pressedAction = (e) -> {
+				Settings.applySettings();
+				MarbleGame.canvas.popDialog(this);
+				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+			}
+		else
+			backButton.pressedAction = (e) -> {
+				Settings.applySettings();
+				MarbleGame.canvas.setContent(new OptionsListGui());
+			};
 		bottomBar.addChild(backButton);
 	}
 }

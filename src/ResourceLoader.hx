@@ -47,6 +47,8 @@ class ResourceLoader {
 	static var audioCache:Map<String, Resource<Sound>> = new Map();
 	static var zipFilesystem:Map<String, BytesFileEntry> = new Map();
 
+	public static var initialized = false;
+
 	// static var threadPool:FixedThreadPool = new FixedThreadPool(4);
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
@@ -64,6 +66,7 @@ class ResourceLoader {
 		var preloader = new ManifestProgress(mloader, () -> {
 			loader = mloader;
 			fileSystem = mfileSystem;
+			initialized = true;
 			onLoadedFunc();
 		}, scene2d);
 		#if js
@@ -110,6 +113,7 @@ class ResourceLoader {
 		worker.addTask(fwd -> preloadShapes(fwd));
 		worker.addTask(fwd -> {
 			scene2d.removeChild(loadg);
+			initialized = true;
 			fwd();
 		});
 		worker.run();
@@ -119,6 +123,7 @@ class ResourceLoader {
 		#end
 		#end
 		#if (hl && !android)
+		initialized = true;
 		onLoadedFunc();
 		#end
 	}

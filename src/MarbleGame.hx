@@ -224,33 +224,37 @@ class MarbleGame {
 		}
 	}
 
+	public function showPauseUI() {
+		exitGameDlg = new ExitGameDlg((sender) -> {
+			canvas.popDialog(exitGameDlg);
+			if (world.isRecording) {
+				MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
+					quitMission();
+				}));
+			} else {
+				quitMission();
+			}
+		}, (sender) -> {
+			@:privateAccess world.playGui.setGuiVisibility(true);
+			canvas.popDialog(exitGameDlg);
+			paused = !paused;
+			world.setCursorLock(true);
+		}, (sender) -> {
+			@:privateAccess world.playGui.setGuiVisibility(true);
+			canvas.popDialog(exitGameDlg);
+			world.restart(true);
+			// world.setCursorLock(true);
+			paused = !paused;
+		});
+		canvas.pushDialog(exitGameDlg);
+	}
+
 	public function handlePauseGame() {
 		if (paused && world._ready) {
 			Console.log("Game paused");
 			world.setCursorLock(false);
 			@:privateAccess world.playGui.setGuiVisibility(false);
-			exitGameDlg = new ExitGameDlg((sender) -> {
-				canvas.popDialog(exitGameDlg);
-				if (world.isRecording) {
-					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
-						quitMission();
-					}));
-				} else {
-					quitMission();
-				}
-			}, (sender) -> {
-				@:privateAccess world.playGui.setGuiVisibility(true);
-				canvas.popDialog(exitGameDlg);
-				paused = !paused;
-				world.setCursorLock(true);
-			}, (sender) -> {
-				@:privateAccess world.playGui.setGuiVisibility(true);
-				canvas.popDialog(exitGameDlg);
-				world.restart(true);
-				// world.setCursorLock(true);
-				paused = !paused;
-			});
-			canvas.pushDialog(exitGameDlg);
+			showPauseUI();
 		} else {
 			if (world._ready) {
 				Console.log("Game unpaused");
