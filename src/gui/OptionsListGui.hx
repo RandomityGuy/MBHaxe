@@ -55,7 +55,7 @@ class OptionsListGui extends GuiImage {
 		innerCtrl.addChild(btnList);
 
 		btnList.addButton(3, 'Marble Appearance', (e) -> {
-			MarbleGame.canvas.pushDialog(new MarbleSelectGui());
+			MarbleGame.canvas.setContent(new MarblePickerGui());
 		});
 		btnList.addButton(3, 'Input and Sound Options', (e) -> {
 			MarbleGame.canvas.setContent(new InputOptionsGui(pauseGui));

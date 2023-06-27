@@ -57,6 +57,7 @@ class PathedInterior extends InteriorObject {
 			onFinish(null);
 		var pathedInterior = new PathedInterior();
 		pathedInterior.level = level;
+		pathedInterior.collisionWorld = level.collisionWorld;
 
 		DifBuilder.loadDif(difFile, pathedInterior, () -> {
 			pathedInterior.identifier = difFile + interiorElement.interiorindex;

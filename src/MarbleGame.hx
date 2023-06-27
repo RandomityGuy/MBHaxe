@@ -324,14 +324,16 @@ class MarbleGame {
 		previewWorld.destroyAllObjects();
 	}
 
-	public function setPreviewMission(misname:String, onFinish:() -> Void) {
+	public function setPreviewMission(misname:String, onFinish:() -> Void, physics:Bool = false) {
 		Console.log("Setting preview mission " + misname);
-		previewWorld.loadMission(misname, onFinish);
+		previewWorld.loadMission(misname, onFinish, physics);
 	}
 
 	public function render(e:h3d.Engine) {
 		if (world != null && !world._disposed)
 			world.render(e);
+		if (previewWorld != null && world == null)
+			previewWorld.render(e);
 		canvas.renderEngine(e);
 	}
 }

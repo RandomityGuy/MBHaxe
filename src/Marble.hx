@@ -192,6 +192,7 @@ class Marble extends GameObject {
 	public var omega:Vector;
 
 	public var level:MarbleWorld;
+	public var collisionWorld:CollisionWorld;
 
 	public var _radius = 0.2;
 
@@ -315,8 +316,10 @@ class Marble extends GameObject {
 
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.level = level;
+		if (this.level != null)
+			this.collisionWorld = this.level.collisionWorld;
 
-		var isUltra = level.mission.game.toLowerCase() == "ultra";
+		var isUltra = true;
 
 		var marbleDts = new DtsObject();
 		Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
@@ -332,7 +335,8 @@ class Marble extends GameObject {
 			// mat.mainPass.culling = None;
 
 			if (Settings.optionsSettings.reflectiveMarble) {
-				this.cubemapRenderer = new CubemapRenderer(level.scene, level.sky);
+				var csky = level != null ? level.sky : (@:privateAccess MarbleGame.instance.previewWorld.sky);
+				this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky);
 
 				if (Settings.optionsSettings.marbleShader == null
 					|| Settings.optionsSettings.marbleShader == "Default"
@@ -342,8 +346,7 @@ class Marble extends GameObject {
 				} else {
 					// Generate tangents for next shaders, only for Ultra
 					for (node in marbleDts.graphNodes) {
-						for (ch in node.children) {
-							var chmesh = cast(ch, Mesh);
+						for (chmesh in node.getMeshes()) {
 							var chpoly = cast(chmesh.primitive, mesh.Polygon);
 							chpoly.addTangents();
 						}
@@ -483,10 +486,14 @@ class Marble extends GameObject {
 		this.helicopter.z = 1e8;
 		this.helicopter.scale(0.3 / 0.2);
 
-		var worker = new ResourceLoaderWorker(onFinish);
-		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
-		worker.addTask(fwd -> level.addDtsObject(this.blastWave, fwd));
-		worker.run();
+		if (this.controllable) {
+			var worker = new ResourceLoaderWorker(onFinish);
+			worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
+			worker.addTask(fwd -> level.addDtsObject(this.blastWave, fwd));
+			worker.run();
+		} else {
+			onFinish();
+		}
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
@@ -502,28 +509,34 @@ class Marble extends GameObject {
 
 	public function getMarbleAxis() {
 		var motiondir = new Vector(0, -1, 0);
-		motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
-		motiondir.transform(level.newOrientationQuat.toMatrix());
-		var updir = this.level.currentUp;
-		var sidedir = motiondir.cross(updir);
+		if (this.controllable) {
+			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
+			motiondir.transform(level.newOrientationQuat.toMatrix());
+			var updir = this.level.currentUp;
+			var sidedir = motiondir.cross(updir);
 
-		sidedir.normalize();
-		motiondir = updir.cross(sidedir);
-		return [sidedir, motiondir, updir];
+			sidedir.normalize();
+			motiondir = updir.cross(sidedir);
+			return [sidedir, motiondir, updir];
+		} else {
+			return [new Vector(1, 0, 0), motiondir, new Vector(0, 0, 1)];
+		}
 	}
 
 	function getExternalForces(currentTime:Float, m:Move, dt:Float) {
 		if (this.mode == Finish)
 			return this.velocity.multiply(-16);
-		var gWorkGravityDir = this.level.currentUp.multiply(-1);
+		var gWorkGravityDir = this.level != null ? this.level.currentUp.multiply(-1) : new Vector(0, 0, -1);
 		var A = new Vector();
 		A = gWorkGravityDir.multiply(this._gravity);
 		if (currentTime - this.helicopterEnableTime < 5) {
 			A = A.multiply(0.25);
 		}
-		for (obj in level.forceObjects) {
-			var force = cast(obj, ForceObject).getForce(this.collider.transform.getPosition());
-			A = A.add(force.multiply(1 / _mass));
+		if (this.level != null) {
+			for (obj in level.forceObjects) {
+				var force = cast(obj, ForceObject).getForce(this.collider.transform.getPosition());
+				A = A.add(force.multiply(1 / _mass));
+			}
 		}
 		if (contacts.length != 0 && this.mode != Start) {
 			var contactForce = 0.0;
@@ -575,7 +588,7 @@ class Marble extends GameObject {
 	}
 
 	function computeMoveForces(m:Move, aControl:Vector, desiredOmega:Vector) {
-		var currentGravityDir = this.level.currentUp.multiply(-1);
+		var currentGravityDir = this.level != null ? this.level.currentUp.multiply(-1) : new Vector(0, 0, -1);
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
@@ -751,7 +764,7 @@ class Marble extends GameObject {
 	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector) {
 		var a = new Vector();
 		this._slipAmount = 0;
-		var gWorkGravityDir = this.level.currentUp.multiply(-1);
+		var gWorkGravityDir = this.level != null ? this.level.currentUp.multiply(-1) : new Vector(0, 0, -1);
 		var bestSurface = -1;
 		var bestNormalForce = 0.0;
 		for (i in 0...contacts.length) {
@@ -852,6 +865,8 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
+		if (!this.controllable)
+			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData,
 				this.collider.transform.getPosition().sub(normal.multiply(_radius)), null, new Vector(1, 1, 1).add(normal.multiply(-0.8)));
@@ -1002,7 +1017,7 @@ class Marble extends GameObject {
 		searchbox.addSpherePos(position.x, position.y, position.z, _radius);
 		searchbox.addSpherePos(position.x + velocity.x * deltaT, position.y + velocity.y * deltaT, position.z + velocity.z * deltaT, _radius);
 
-		var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
+		var foundObjs = this.collisionWorld.boundingSearch(searchbox);
 
 		var finalT = deltaT;
 		var found = false;
@@ -1339,7 +1354,7 @@ class Marble extends GameObject {
 
 		var position = this.collider.transform.getPosition();
 
-		var foundObjs = this.level.collisionWorld.boundingSearch(searchbox);
+		var foundObjs = this.collisionWorld.boundingSearch(searchbox);
 		// var foundObjs = this.contactEntities;
 
 		function toDifPoint(vec:Vector) {
@@ -1758,14 +1773,14 @@ class Marble extends GameObject {
 			}
 		}
 
-		if (this.level.isWatching) {
+		if (this.controllable && this.level.isWatching) {
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(Jumped))
 				move.jump = true;
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(UsedPowerup))
 				move.powerup = true;
 			move.d = new Vector(this.level.replay.currentPlaybackFrame.marbleX, this.level.replay.currentPlaybackFrame.marbleY, 0);
 		} else {
-			if (this.level.isRecording) {
+			if (this.controllable && this.level.isRecording) {
 				this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false, false);
 				this.level.replay.recordMarbleInput(move.d.x, move.d.y);
 			}
@@ -1774,27 +1789,29 @@ class Marble extends GameObject {
 		playedSounds = [];
 		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
 
-		if (!this.level.isWatching) {
-			if (this.level.isRecording) {
-				this.level.replay.recordMarbleState(this.getAbsPos().getPosition(), this.velocity, this.getRotationQuat(), this.omega);
+		if (this.controllable) {
+			if (!this.level.isWatching) {
+				if (this.level.isRecording) {
+					this.level.replay.recordMarbleState(this.getAbsPos().getPosition(), this.velocity, this.getRotationQuat(), this.omega);
+				}
+			} else {
+				var expectedPos = this.level.replay.currentPlaybackFrame.marblePosition.clone();
+				var expectedVel = this.level.replay.currentPlaybackFrame.marbleVelocity.clone();
+				var expectedOmega = this.level.replay.currentPlaybackFrame.marbleAngularVelocity.clone();
+
+				this.setPosition(expectedPos.x, expectedPos.y, expectedPos.z);
+				var tform = this.level.replay.currentPlaybackFrame.marbleOrientation.toMatrix();
+
+				tform.setPosition(new Vector(expectedPos.x, expectedPos.y, expectedPos.z));
+				this.collider.setTransform(tform);
+				this.velocity = expectedVel;
+				var rQuat = this.level.replay.currentPlaybackFrame.marbleOrientation.clone();
+				this.setRotationQuat(rQuat);
+				this.omega = expectedOmega;
 			}
-		} else {
-			var expectedPos = this.level.replay.currentPlaybackFrame.marblePosition.clone();
-			var expectedVel = this.level.replay.currentPlaybackFrame.marbleVelocity.clone();
-			var expectedOmega = this.level.replay.currentPlaybackFrame.marbleAngularVelocity.clone();
-
-			this.setPosition(expectedPos.x, expectedPos.y, expectedPos.z);
-			var tform = this.level.replay.currentPlaybackFrame.marbleOrientation.toMatrix();
-
-			tform.setPosition(new Vector(expectedPos.x, expectedPos.y, expectedPos.z));
-			this.collider.setTransform(tform);
-			this.velocity = expectedVel;
-			var rQuat = this.level.replay.currentPlaybackFrame.marbleOrientation.clone();
-			this.setRotationQuat(rQuat);
-			this.omega = expectedOmega;
 		}
 
-		if (this.controllable && !this.level.rewinding) {
+		if (this.controllable && this.level != null && !this.level.rewinding) {
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
 
@@ -1922,6 +1939,8 @@ class Marble extends GameObject {
 	}
 
 	public function updatePowerupStates(currentTime:Float, dt:Float) {
+		if (!this.controllable)
+			return;
 		if (currentTime - this.helicopterEnableTime < 5) {
 			this.helicopter.setPosition(x, y, z);
 			this.helicopter.setRotationQuat(this.level.getOrientationQuat(currentTime));
@@ -1939,6 +1958,8 @@ class Marble extends GameObject {
 	}
 
 	public function getMass() {
+		if (this.level == null)
+			return 1;
 		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
 			return 5;
 		} else {

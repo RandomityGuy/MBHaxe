@@ -1,5 +1,6 @@
 package src;
 
+import collision.CollisionWorld;
 import shaders.EnvMap;
 import h3d.shader.CubeMap;
 import dts.TSDrawPrimitive;
@@ -85,6 +86,7 @@ class DtsObject extends GameObject {
 	var dtsResource:Resource<DtsFile>;
 
 	var level:MarbleWorld;
+	var collisionWorld:CollisionWorld;
 
 	var materials:Array<Material> = [];
 	var materialInfos:Map<Material, Array<String>> = new Map();
@@ -135,8 +137,10 @@ class DtsObject extends GameObject {
 			this.dts.importSequences(this.sequencePath);
 
 		this.directoryPath = Path.directory(this.dtsPath);
-		if (level != null)
+		if (level != null) {
 			this.level = level;
+			this.collisionWorld = this.level.collisionWorld;
+		}
 
 		isInstanced = false;
 		if (this.level != null)
@@ -1099,7 +1103,7 @@ class DtsObject extends GameObject {
 		super.setTransform(mat);
 		if (this.isBoundingBoxCollideable) {
 			this.boundingCollider.setTransform(mat);
-			this.level.collisionWorld.updateTransform(this.boundingCollider);
+			this.collisionWorld.updateTransform(this.boundingCollider);
 		}
 		for (i in 0...this.dirtyTransforms.length) {
 			this.dirtyTransforms[i] = true;
@@ -1447,7 +1451,7 @@ class DtsObject extends GameObject {
 				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
 				if (this.colliders[i] != null) {
 					this.colliders[i].setTransform(absTform);
-					this.level.collisionWorld.updateTransform(this.colliders[i]);
+					this.collisionWorld.updateTransform(this.colliders[i]);
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package src;
 
+import collision.CollisionWorld;
 import mis.MissionElement.MissionElementSky;
 import shapes.Astrolabe;
 import src.Sky;
@@ -49,10 +50,12 @@ import src.Console;
 import src.TimeState;
 import src.MissionList;
 import src.Settings;
+import src.Marble;
 
 class PreviewWorld extends Scheduler {
 	var scene:Scene;
 	var instanceManager:InstanceManager;
+	var collisionWorld:CollisionWorld;
 
 	var misFile:MisFile;
 	var currentMission:String;
@@ -63,6 +66,7 @@ class PreviewWorld extends Scheduler {
 
 	var interiors:Array<InteriorObject> = [];
 	var dtsObjects:Array<DtsObject> = [];
+	var marbles:Array<Marble> = [];
 
 	var sky:Sky;
 
@@ -126,18 +130,22 @@ class PreviewWorld extends Scheduler {
 		}
 	}
 
-	public function loadMission(misname:String, onFinish:() -> Void) {
+	public function loadMission(misname:String, onFinish:() -> Void, physics:Bool = false) {
 		if (currentMission == misname) {
 			onFinish();
 			return;
 		}
 		_loadToken++;
-		currentMission = misname;
 		var groupName = (misname + "group").toLowerCase();
 		var group = levelGroups.get(groupName);
 		if (group != null) {
 			destroyAllObjects();
+			this.currentMission = misname;
 			this.instanceManager = new InstanceManager(scene);
+			if (physics)
+				this.collisionWorld = new CollisionWorld();
+			else
+				this.collisionWorld = null;
 
 			var p = new h3d.prim.Cube(0.001, 0.001, 0.001);
 			p.addUVs();
@@ -182,8 +190,12 @@ class PreviewWorld extends Scheduler {
 				}
 			}
 
+			var difficulty = "beginner";
 			var mis = MissionList.missionsFilenameLookup.get((misname + '.mis').toLowerCase());
-			var difficulty = ["beginner", "intermediate", "advanced"][mis.difficultyIndex];
+			if (misname == "marblepicker")
+				difficulty = "advanced";
+			else
+				difficulty = ["beginner", "intermediate", "advanced"][mis.difficultyIndex];
 
 			var curToken = _loadToken;
 
@@ -205,7 +217,7 @@ class PreviewWorld extends Scheduler {
 						addInteriorFromMis(cast elem, curToken, () -> {
 							itrAddTime += Console.time() - startTime;
 							fwd();
-						});
+						}, physics);
 					}
 				});
 			}
@@ -268,18 +280,23 @@ class PreviewWorld extends Scheduler {
 
 	public function destroyAllObjects() {
 		currentMission = null;
+		collisionWorld = null;
 		for (itr in interiors) {
 			itr.dispose();
 		}
 		for (shape in dtsObjects) {
 			shape.dispose();
 		}
+		for (marb in marbles) {
+			marb.dispose();
+		}
 		interiors = [];
 		dtsObjects = [];
+		marbles = [];
 		scene.removeChildren();
 	}
 
-	public function addInteriorFromMis(element:MissionElementInteriorInstance, token:Int, onFinish:Void->Void) {
+	public function addInteriorFromMis(element:MissionElementInteriorInstance, token:Int, onFinish:Void->Void, physics:Bool = false) {
 		var difPath = getDifPath(element.interiorfile);
 		if (difPath == "" || token != _loadToken) {
 			onFinish();
@@ -288,6 +305,7 @@ class PreviewWorld extends Scheduler {
 		Console.log('Adding interior: ${difPath}');
 		var interior = new InteriorObject();
 		interior.interiorFile = difPath;
+		interior.isCollideable = physics;
 		// DifBuilder.loadDif(difPath, interior);
 		// this.interiors.push(interior);
 		this.addInterior(interior, token, () -> {
@@ -315,12 +333,12 @@ class PreviewWorld extends Scheduler {
 			mat.multiply(mat, tmat);
 
 			interior.setTransform(mat);
-			interior.isCollideable = hasCollision;
+			interior.isCollideable = hasCollision && physics;
 			onFinish();
-		});
+		}, physics);
 	}
 
-	function addInterior(obj:InteriorObject, token:Int, onFinish:Void->Void) {
+	function addInterior(obj:InteriorObject, token:Int, onFinish:Void->Void, physics:Bool = false) {
 		if (token != _loadToken) {
 			onFinish();
 			return;
@@ -335,6 +353,10 @@ class PreviewWorld extends Scheduler {
 				this.instanceManager.addObject(obj);
 			else
 				this.scene.addChild(obj);
+			if (physics) {
+				this.collisionWorld.addEntity(obj.collider);
+				obj.collisionWorld = this.collisionWorld;
+			}
 			onFinish();
 		});
 	}
@@ -543,12 +565,44 @@ class PreviewWorld extends Scheduler {
 		return "";
 	}
 
+	public function spawnMarble(onFinish:Marble->Void) {
+		var marb = new Marble();
+		marb.controllable = false;
+		marb.init(null, () -> {
+			marb.collisionWorld = this.collisionWorld;
+			this.collisionWorld.addMovingEntity(marb.collider);
+			this.scene.addChild(marb);
+			this.marbles.push(marb);
+			onFinish(marb);
+		});
+	}
+
+	public function removeMarble(marb:Marble) {
+		if (this.marbles.remove(marb)) {
+			this.scene.removeChild(marb);
+			this.collisionWorld.removeMovingEntity(marb.collider);
+			marb.dispose();
+		}
+	}
+
 	public function update(dt:Float) {
 		timeState.dt = dt;
 		timeState.timeSinceLoad += dt;
 		for (dts in dtsObjects) {
 			dts.update(timeState);
 		}
+		for (marb in marbles) {
+			marb.update(timeState, this.collisionWorld, []);
+		}
 		this.instanceManager.render();
+	}
+
+	public function render(e:h3d.Engine) {
+		for (marble in marbles) {
+			if (marble != null && marble.cubemapRenderer != null) {
+				marble.cubemapRenderer.position.load(marble.getAbsPos().getPosition());
+				marble.cubemapRenderer.render(e, 0.002);
+			}
+		}
 	}
 }

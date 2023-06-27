@@ -120,6 +120,12 @@ class CollisionWorld {
 		this.dynamicEntitySet.set(entity, true);
 	}
 
+	public function removeMovingEntity(entity:CollisionEntity) {
+		this.dynamicEntities.remove(entity);
+		this.dynamicOctree.remove(entity);
+		this.dynamicEntitySet.remove(entity);
+	}
+
 	public function updateTransform(entity:CollisionEntity) {
 		if (!dynamicEntitySet.exists(entity)) {
 			this.octree.update(entity);
