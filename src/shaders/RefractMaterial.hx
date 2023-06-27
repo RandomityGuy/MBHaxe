@@ -60,7 +60,6 @@ class RefractMaterial extends hxsl.Shader {
 		}
 		function fragment() {
 			var bumpNormal = normalMap.get(calculatedUV * secondaryMapUvFactor).xyz * 2 - 1;
-			bumpNormal.y *= -1;
 			// Refract
 			var distortion = 0.3;
 			var off = projectedPosition;

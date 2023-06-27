@@ -58,7 +58,6 @@ class NoiseTileMaterial extends hxsl.Shader {
 		}
 		function fragment() {
 			var bumpNormal = normalMap.get(calculatedUV * secondaryMapUvFactor).xyz * 2 - 1;
-			bumpNormal.y *= -1;
 			var bumpDot = saturate(dot(bumpNormal, outLightVec.xyz));
 			// Diffuse part
 			var diffuse = diffuseMap.get(calculatedUV);

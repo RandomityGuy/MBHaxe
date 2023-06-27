@@ -22,7 +22,7 @@ class GuiXboxOptionsList extends GuiControl {
 
 	var onChangeFunc:Int->Bool = null;
 
-	public function new(icon:Int, name:String, values:Array<String>) {
+	public function new(icon:Int, name:String, values:Array<String>, midcolumn:Float = 0.3) {
 		super();
 
 		this.options = values;
@@ -58,7 +58,7 @@ class GuiXboxOptionsList extends GuiControl {
 		rightShadeFilter.enable = false;
 
 		leftButton = new GuiAnim([arrowButtonImage, arrowButtonImagePressed]);
-		leftButton.position = new Vector(815 * 0.3, 0);
+		leftButton.position = new Vector(815 * midcolumn, 0);
 		leftButton.extent = new Vector(114, 94);
 		leftButton.anim.filter = leftShadeFilter;
 		this.addChild(leftButton);
@@ -82,19 +82,20 @@ class GuiXboxOptionsList extends GuiControl {
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 26 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 25 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
 		labelText = new GuiText(arial14);
-		labelText.position = new Vector(155, 36);
+		labelText.position = new Vector(815 * midcolumn - 125, 36);
 		labelText.extent = new Vector(100, 35);
 		labelText.vertSizing = Top;
+		labelText.justify = Right;
 		labelText.text.text = name;
 		labelText.text.textColor = 0x787878;
 		this.addChild(labelText);
 
 		optionText = new GuiText(arial14);
-		optionText.position = new Vector(400, 36);
-		optionText.extent = new Vector(200, 35);
+		optionText.position = new Vector(815 * midcolumn + 155.5, 36);
+		optionText.extent = new Vector(815 * (0.8 - midcolumn) / 2, 35);
 		optionText.vertSizing = Top;
 		optionText.text.text = values[0];
 		optionText.text.textColor = 0x787878;
@@ -108,6 +109,21 @@ class GuiXboxOptionsList extends GuiControl {
 			optIcon.anim.currentFrame = 1;
 			labelText.text.textColor = 0x101010;
 			optionText.text.textColor = 0x101010;
+		} else {
+			var htr = this.getHitTestRect();
+			htr.position = htr.position.add(new Vector(24, 20));
+			htr.extent.set(776, 53);
+			if (htr.inRect(mouseState.position)) {
+				bgFill.anim.currentFrame = 1;
+				optIcon.anim.currentFrame = 1;
+				labelText.text.textColor = 0x101010;
+				optionText.text.textColor = 0x101010;
+			} else {
+				bgFill.anim.currentFrame = 0;
+				optIcon.anim.currentFrame = 0;
+				labelText.text.textColor = 0x787878;
+				optionText.text.textColor = 0x787878;
+			}
 		}
 		var leftBtnRect = leftButton.getHitTestRect();
 		var rightBtnRect = rightButton.getHitTestRect();

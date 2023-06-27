@@ -114,9 +114,12 @@ class GuiXboxListButton extends GuiControl {
 	}
 
 	public override function onMouseRelease(mouseState:MouseState) {
-		if (mouseState.handled)
+		var renderRect = getHitTestRect();
+		renderRect.position = renderRect.position.add(new Vector(24, 20)); // Offset
+		renderRect.extent.set(439, 53);
+		if (!renderRect.inRect(mouseState.position))
 			return;
-		mouseState.handled = true;
+
 		super.onMouseRelease(mouseState);
 		if (this.pressedAction != null && !disabled) {
 			this.pressedAction(new GuiEvent(this));
@@ -124,9 +127,12 @@ class GuiXboxListButton extends GuiControl {
 	}
 
 	public override function onMouseEnter(mouseState:MouseState) {
-		if (mouseState.handled)
+		var renderRect = getHitTestRect();
+		renderRect.position = renderRect.position.add(new Vector(24, 20)); // Offset
+		renderRect.extent.set(439, 53);
+		if (!renderRect.inRect(mouseState.position))
 			return;
-		mouseState.handled = true;
+
 		super.onMouseEnter(mouseState);
 
 		if (buttonSounds && !disabled) {
