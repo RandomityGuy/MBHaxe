@@ -86,8 +86,6 @@ class TriangleEdge {
 class DifCache {
 	var dif:Dif;
 	var difTriangles:Map<String, Array<DifBuilderTriangle>>;
-	var colliderSurfaces:Array<CollisionSurface>;
-	var difEdgeMap:Map<Int, Edge>;
 
 	public function new() {}
 }
@@ -99,7 +97,7 @@ typedef VertexBucket = {
 }
 
 class DifBuilder {
-	static var difCache:LRUCache<DifCache> = new LRUCache(16);
+	static var difCache:LRUCache<DifCache> = new LRUCache(24);
 
 	static var materialDict:Map<String, {
 		friction:Float,
@@ -394,10 +392,9 @@ class DifBuilder {
 			var mats = new Map<String, Array<DifBuilderTriangle>>();
 			var difEdges:Map<Int, Edge> = [];
 			if (cache != null) {
-				colliderSurfaces = cache.colliderSurfaces;
 				mats = cache.difTriangles;
 			}
-			if (cache == null || (colliderSurfaces.length == 0 && makeCollideable)) {
+			if (cache == null || makeCollideable) {
 				mats = [];
 				colliderSurfaces = [];
 				difEdges = [];
@@ -850,21 +847,12 @@ class DifBuilder {
 				collider.difEdgeMap = difEdges;
 			}
 			if (makeCollideable) {
-				if (cache != null) {
-					collider.difEdgeMap = cache.difEdgeMap;
-					difEdges = cache.difEdgeMap;
-					for (surf in colliderSurfaces) {
-						collider.addSurface(surf);
-					}
-				}
 				collider.finalize();
 				itr.collider = collider;
 			}
 			if (cache == null) {
 				cache = new DifCache();
 				cache.difTriangles = mats;
-				cache.difEdgeMap = difEdges;
-				cache.colliderSurfaces = colliderSurfaces;
 				cache.dif = dif;
 				difCache.set(cachePath, cache);
 			}
