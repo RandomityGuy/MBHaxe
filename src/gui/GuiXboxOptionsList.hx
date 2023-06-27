@@ -22,7 +22,7 @@ class GuiXboxOptionsList extends GuiControl {
 
 	var onChangeFunc:Int->Bool = null;
 
-	public function new(icon:Int, name:String, values:Array<String>, midcolumn:Float = 0.3) {
+	public function new(icon:Int, name:String, values:Array<String>, midcolumn:Float = 0.3, textOff = 155.5) {
 		super();
 
 		this.options = values;
@@ -94,7 +94,7 @@ class GuiXboxOptionsList extends GuiControl {
 		this.addChild(labelText);
 
 		optionText = new GuiText(arial14);
-		optionText.position = new Vector(815 * midcolumn + 155.5, 36);
+		optionText.position = new Vector(815 * midcolumn + textOff, 36);
 		optionText.extent = new Vector(815 * (0.8 - midcolumn) / 2, 35);
 		optionText.vertSizing = Top;
 		optionText.text.text = values[0];
@@ -126,7 +126,11 @@ class GuiXboxOptionsList extends GuiControl {
 			}
 		}
 		var leftBtnRect = leftButton.getHitTestRect();
+		leftBtnRect.position = leftBtnRect.position.add(new Vector(15, 21));
+		leftBtnRect.extent.set(83, 53);
 		var rightBtnRect = rightButton.getHitTestRect();
+		rightBtnRect.position = rightBtnRect.position.add(new Vector(15, 21));
+		rightBtnRect.extent.set(83, 53);
 		if (leftBtnRect.inRect(mouseState.position) || rightBtnRect.inRect(mouseState.position)) {
 			if (Key.isPressed(Key.MOUSE_LEFT)) {
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));

@@ -5,8 +5,9 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
+import src.Util;
 
-class AboutMenuOptionsGui extends GuiImage {
+class MiscOptionsGui extends GuiImage {
 	public function new(pauseGui:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
@@ -44,54 +45,49 @@ class AboutMenuOptionsGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "HOW TO PLAY";
+		rootTitle.text.text = "MISC OPTIONS";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var btnList = new GuiXboxList();
-		btnList.position = new Vector(70 - offsetX, 165);
-		btnList.horizSizing = Left;
-		btnList.extent = new Vector(502, 500);
-		innerCtrl.addChild(btnList);
-
-		if (pauseGui) {
-			btnList.addButton(5, 'Marble Controls', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(4, true));
-			});
-			btnList.addButton(5, 'Powerups', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(0, true));
-			});
-			btnList.addButton(5, 'Blast Meter', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(1, true));
-			});
-			btnList.addButton(5, 'Single Player Mode', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(2, true));
-			});
-			btnList.addButton(5, 'Multiplayer Mode', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(3, true));
-			});
-		} else {
-			btnList.addButton(5, 'Marble Controls', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(4));
-			});
-			btnList.addButton(5, 'Powerups', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(0));
-			});
-			btnList.addButton(5, 'Blast Meter', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(1));
-			});
-			btnList.addButton(5, 'Single Player Mode', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(2));
-			});
-			btnList.addButton(5, 'Multiplayer Mode', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(3));
-			});
+		function numberRange(start:Int, stop:Int, step:Int) {
+			var range = [];
+			while (start <= stop) {
+				range.push('${start}');
+				start += step;
+			}
+			return range;
 		}
+
+		var yPos = 160;
+
+		var rwOpt = new GuiXboxOptionsList(1, "Rewind", ["Disabled", "Enabled"], 0.5, 118);
+		rwOpt.vertSizing = Bottom;
+		rwOpt.horizSizing = Right;
+		rwOpt.position = new Vector(380, yPos);
+		rwOpt.extent = new Vector(815, 94);
+		rwOpt.setCurrentOption(Settings.optionsSettings.rewindEnabled ? 1 : 0);
+		rwOpt.onChangeFunc = (idx) -> {
+			Settings.optionsSettings.rewindEnabled = (idx == 1);
+			return true;
+		}
+		innerCtrl.addChild(rwOpt);
+
+		yPos += 60;
+
+		var rsOpt = new GuiXboxOptionsList(1, "Rewind Speed", numberRange(10, 100, 5), 0.5, 118);
+
+		rsOpt.vertSizing = Bottom;
+		rsOpt.horizSizing = Right;
+		rsOpt.position = new Vector(380, yPos);
+		rsOpt.extent = new Vector(815, 94);
+		rsOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1)) * 18), 0, 18)));
+		rsOpt.onChangeFunc = (idx) -> {
+			Settings.optionsSettings.rewindTimescale = cast(0.1 + (idx / 18.0) * (1 - 0.1));
+			return true;
+		}
+		innerCtrl.addChild(rsOpt);
+
+		yPos += 60;
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -100,18 +96,22 @@ class AboutMenuOptionsGui extends GuiImage {
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
 
-		var backButton = new GuiXboxButton("Back", 160);
-		backButton.position = new Vector(400, 0);
+		var backButton = new GuiXboxButton("Ok", 160);
+		backButton.position = new Vector(960, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = ["OK"];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {
+				Settings.applySettings();
 				MarbleGame.canvas.popDialog(this);
 				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
 			}
 		else
-			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
+			backButton.pressedAction = (e) -> {
+				Settings.applySettings();
+				MarbleGame.canvas.setContent(new OptionsListGui());
+			};
 		bottomBar.addChild(backButton);
 	}
 }

@@ -1,5 +1,7 @@
 package src;
 
+import src.ResourceLoader;
+import shaders.GammaRamp;
 import h3d.mat.Texture;
 import h3d.Vector;
 import shaders.Blur;
@@ -87,18 +89,24 @@ class Renderer extends h3d.scene.Renderer {
 		renderPass(defaultPass, get("glowPre"));
 
 		// Glow pass
-		ctx.engine.pushTarget(glowBuffer);
-		ctx.engine.clear(0);
-		renderPass(defaultPass, get("glow"));
-		bloomPass(ctx);
-		ctx.engine.popTarget();
-		copyPass.shader.texture = growBufferTemps[0];
-		copyPass.pass.blend(One, One);
-		copyPass.pass.depth(false, Always);
-		copyPass.render();
+		var glowObjects = get("glow");
+		if (!glowObjects.isEmpty()) {
+			ctx.engine.pushTarget(glowBuffer);
+			ctx.engine.clear(0);
+			renderPass(defaultPass, glowObjects);
+			bloomPass(ctx);
+			ctx.engine.popTarget();
+			copyPass.shader.texture = growBufferTemps[0];
+			copyPass.pass.blend(One, One);
+			copyPass.pass.depth(false, Always);
+			copyPass.render();
+		}
 		// Refraction pass
-		h3d.pass.Copy.run(backBuffer, sfxBuffer);
-		renderPass(defaultPass, get("refract"));
+		var refractObjects = get("refract");
+		if (!refractObjects.isEmpty()) {
+			h3d.pass.Copy.run(backBuffer, sfxBuffer);
+			renderPass(defaultPass, refractObjects);
+		}
 
 		renderPass(defaultPass, get("alpha"), backToFront);
 		renderPass(defaultPass, get("additive"));

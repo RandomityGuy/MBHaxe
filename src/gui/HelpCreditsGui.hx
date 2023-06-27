@@ -18,7 +18,7 @@ class HelpCreditsGui extends GuiImage {
 	var curScroll:Float = -50;
 	var doScroll = false;
 
-	public function new(index:Int) {
+	public function new(index:Int, pauseGui:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
@@ -141,10 +141,23 @@ class HelpCreditsGui extends GuiImage {
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["OK"];
-		if (index == 5)
-			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
-		else
-			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new AboutMenuOptionsGui());
+		if (pauseGui)
+			if (index == 5)
+				backButton.pressedAction = (e) -> {
+					MarbleGame.canvas.popDialog(this);
+					MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+				}
+			else
+				backButton.pressedAction = (e) -> {
+					MarbleGame.canvas.popDialog(this);
+					MarbleGame.canvas.pushDialog(new AboutMenuOptionsGui(true));
+				}
+		else {
+			if (index == 5)
+				backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
+			else
+				backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new AboutMenuOptionsGui());
+		}
 		bottomBar.addChild(backButton);
 	}
 

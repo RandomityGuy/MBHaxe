@@ -73,7 +73,10 @@ class ExitGameDlg extends GuiImage {
 		btnList.addButton(0, "Resume", (evt) -> noFunc(btnList));
 		btnList.addButton(0, "Restart", (evt) -> restartFunc(btnList));
 		btnList.addButton(4, "Exit Level", (evt) -> yesFunc(btnList));
-		btnList.addButton(3, "Help & Options", (evt) -> {}, 20);
+		btnList.addButton(3, "Help & Options", (evt) -> {
+			MarbleGame.canvas.popDialog(this);
+			MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+		}, 20);
 		btnList.addButton(2, "Leaderboards", (evt) -> {});
 		btnList.addButton(2, "Achievements", (evt) -> {});
 		btnList.addButton(4, "Main Menu", (evt) -> {
