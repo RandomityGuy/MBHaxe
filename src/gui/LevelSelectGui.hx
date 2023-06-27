@@ -69,10 +69,14 @@ class LevelSelectGui extends GuiImage {
 		var curMission = difficultyMissions[currentSelectionStatic];
 
 		var lock = true;
+		var currentToken = 0;
+		var requestToken = 0;
 
 		var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
 		MarbleGame.instance.setPreviewMission(misFile, () -> {
 			lock = false;
+			if (currentToken != requestToken)
+				return;
 			this.bmp.visible = false;
 			loadAnim.anim.visible = false;
 			loadText.text.visible = false;
@@ -186,8 +190,8 @@ class LevelSelectGui extends GuiImage {
 		levelWnd.addChild(levelInfoRight);
 
 		function setLevel(idx:Int) {
-			if (lock)
-				return false;
+			// if (lock)
+			//	return false;
 			this.bmp.visible = true;
 			loadAnim.anim.visible = true;
 			loadText.text.visible = true;
@@ -195,10 +199,14 @@ class LevelSelectGui extends GuiImage {
 			lock = true;
 			curMission = difficultyMissions[idx];
 			currentSelectionStatic = idx;
+			currentToken++;
 			var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
 			var mis = difficultyMissions[idx];
+			var requestToken = currentToken;
 			MarbleGame.instance.setPreviewMission(misFile, () -> {
 				lock = false;
+				if (requestToken != currentToken)
+					return;
 				this.bmp.visible = false;
 				loadAnim.anim.visible = false;
 				loadText.text.visible = false;

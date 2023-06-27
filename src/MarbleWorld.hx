@@ -1,5 +1,6 @@
 package src;
 
+import gui.LevelSelectGui;
 import h3d.scene.fwd.Light;
 import rewind.RewindManager;
 import Macros.MarbleWorldMacros;
@@ -1402,8 +1403,8 @@ class MarbleWorld extends Scheduler {
 			}
 			var endGameCode = () -> {
 				this.dispose();
-				var pmg = new PlayMissionGui();
-				PlayMissionGui.currentSelectionStatic = mission.index + 1;
+				var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced"][mission.difficultyIndex]);
+				LevelSelectGui.currentSelectionStatic = mission.index + 1;
 				MarbleGame.canvas.setContent(pmg);
 				#if js
 				pointercontainer.hidden = false;

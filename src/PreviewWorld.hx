@@ -68,6 +68,8 @@ class PreviewWorld extends Scheduler {
 
 	var itrAddTime:Float = 0;
 
+	var _loadToken = 0;
+
 	public function new(scene:Scene) {
 		this.scene = scene;
 	}
@@ -129,6 +131,7 @@ class PreviewWorld extends Scheduler {
 			onFinish();
 			return;
 		}
+		_loadToken++;
 		currentMission = misname;
 		var groupName = (misname + "group").toLowerCase();
 		var group = levelGroups.get(groupName);
@@ -182,21 +185,37 @@ class PreviewWorld extends Scheduler {
 			var mis = MissionList.missionsFilenameLookup.get((misname + '.mis').toLowerCase());
 			var difficulty = ["beginner", "intermediate", "advanced"][mis.difficultyIndex];
 
+			var curToken = _loadToken;
+
 			var worker = new ResourceLoaderWorker(onFinish);
 
-			worker.addTask(fwd -> addScenery(difficulty, fwd));
+			worker.addTask(fwd -> {
+				if (_loadToken != curToken)
+					fwd();
+				else
+					addScenery(difficulty, fwd);
+			});
 			itrAddTime = 0;
 			for (elem in itrpaths) {
 				worker.addTask(fwd -> {
-					var startTime = Console.time();
-					addInteriorFromMis(cast elem, () -> {
-						itrAddTime += Console.time() - startTime;
+					if (_loadToken != curToken)
 						fwd();
-					});
+					else {
+						var startTime = Console.time();
+						addInteriorFromMis(cast elem, curToken, () -> {
+							itrAddTime += Console.time() - startTime;
+							fwd();
+						});
+					}
 				});
 			}
 			for (elem in shapeDbs) {
-				worker.addTask(fwd -> addStaticShape(cast elem, fwd));
+				worker.addTask(fwd -> {
+					if (_loadToken != curToken)
+						fwd();
+					else
+						addStaticShape(cast elem, curToken, fwd);
+				});
 			}
 			worker.addTask(fwd -> {
 				timeState.timeSinceLoad = 0;
@@ -260,9 +279,9 @@ class PreviewWorld extends Scheduler {
 		scene.removeChildren();
 	}
 
-	public function addInteriorFromMis(element:MissionElementInteriorInstance, onFinish:Void->Void) {
+	public function addInteriorFromMis(element:MissionElementInteriorInstance, token:Int, onFinish:Void->Void) {
 		var difPath = getDifPath(element.interiorfile);
-		if (difPath == "") {
+		if (difPath == "" || token != _loadToken) {
 			onFinish();
 			return;
 		}
@@ -271,7 +290,7 @@ class PreviewWorld extends Scheduler {
 		interior.interiorFile = difPath;
 		// DifBuilder.loadDif(difPath, interior);
 		// this.interiors.push(interior);
-		this.addInterior(interior, () -> {
+		this.addInterior(interior, token, () -> {
 			var interiorPosition = MisParser.parseVector3(element.position);
 			interiorPosition.x = -interiorPosition.x;
 			var interiorRotation = MisParser.parseRotation(element.rotation);
@@ -301,9 +320,17 @@ class PreviewWorld extends Scheduler {
 		});
 	}
 
-	function addInterior(obj:InteriorObject, onFinish:Void->Void) {
+	function addInterior(obj:InteriorObject, token:Int, onFinish:Void->Void) {
+		if (token != _loadToken) {
+			onFinish();
+			return;
+		}
 		this.interiors.push(obj);
 		obj.init(null, () -> {
+			if (token != _loadToken) {
+				onFinish();
+				return;
+			}
 			if (obj.useInstancing)
 				this.instanceManager.addObject(obj);
 			else
@@ -312,7 +339,11 @@ class PreviewWorld extends Scheduler {
 		});
 	}
 
-	public function addStaticShape(element:MissionElementStaticShape, onFinish:Void->Void) {
+	public function addStaticShape(element:MissionElementStaticShape, token:Int, onFinish:Void->Void) {
+		if (token != _loadToken) {
+			onFinish();
+			return;
+		}
 		var shape:DtsObject = null;
 
 		// Add the correct shape based on type
@@ -403,13 +434,21 @@ class PreviewWorld extends Scheduler {
 		shape.isCollideable = false;
 		shape.isBoundingBoxCollideable = false;
 
-		this.addDtsObject(shape, () -> {
+		this.addDtsObject(shape, token, () -> {
+			if (token != _loadToken) {
+				onFinish();
+				return;
+			}
 			shape.setTransform(mat);
 			onFinish();
 		});
 	}
 
-	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false) {
+	public function addDtsObject(obj:DtsObject, token:Int, onFinish:Void->Void, isTsStatic:Bool = false) {
+		if (token != _loadToken) {
+			onFinish();
+			return;
+		}
 		function parseIfl(path:String, onFinish:Array<String>->Void) {
 			ResourceLoader.load(path).entry.load(() -> {
 				var text = ResourceLoader.getFileEntry(path).entry.getText();
@@ -435,6 +474,10 @@ class PreviewWorld extends Scheduler {
 		}
 
 		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
+			if (token != _loadToken) {
+				onFinish();
+				return;
+			}
 			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
 			var texToLoad = obj.getPreloadMaterials(dtsFile.resource);
 
@@ -442,6 +485,10 @@ class PreviewWorld extends Scheduler {
 				obj.isTSStatic = isTsStatic;
 				this.dtsObjects.push(obj);
 				obj.init(null, () -> {
+					if (token != _loadToken) {
+						onFinish();
+						return;
+					}
 					obj.update(this.timeState);
 					if (obj.useInstancing) {
 						this.instanceManager.addObject(obj);
