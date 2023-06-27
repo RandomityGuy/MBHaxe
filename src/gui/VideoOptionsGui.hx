@@ -6,7 +6,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 
-class OptionsListGui extends GuiImage {
+class VideoOptionsGui extends GuiImage {
 	public function new() {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
@@ -44,30 +44,44 @@ class OptionsListGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "HELP & OPTIONS";
+		rootTitle.text.text = "VIDEO OPTIONS";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var btnList = new GuiXboxList();
-		btnList.position = new Vector(70 - offsetX, 165);
-		btnList.horizSizing = Left;
-		btnList.extent = new Vector(502, 500);
-		innerCtrl.addChild(btnList);
+		var yPos = 160;
 
-		btnList.addButton(3, 'Marble Appearance', (e) -> {
-			MarbleGame.canvas.pushDialog(new MarbleSelectGui());
-		});
-		btnList.addButton(3, 'Input and Sound Options', (e) -> {});
-		btnList.addButton(3, 'Video Options', (e) -> {
-			MarbleGame.canvas.setContent(new VideoOptionsGui());
-		});
-		btnList.addButton(3, 'Misc Options', (e) -> {});
-		btnList.addButton(5, 'How to Play', (e) -> {
-			MarbleGame.canvas.setContent(new AboutMenuOptionsGui());
-		});
-		btnList.addButton(5, 'Credits', (e) -> {
-			MarbleGame.canvas.setContent(new HelpCreditsGui(5));
-		});
+		var resolutionOpt = new GuiXboxOptionsList(1, "Fullscreen Res", [
+			"1024 x 800",
+			"1280 x 720",
+			"1366 x 768",
+			"1440 x 900",
+			"1600 x 900",
+			"1920 x 1080"
+		], 0.35);
+
+		resolutionOpt.vertSizing = Bottom;
+		resolutionOpt.horizSizing = Right;
+		resolutionOpt.position = new Vector(380, yPos);
+		resolutionOpt.extent = new Vector(815, 94);
+		innerCtrl.addChild(resolutionOpt);
+
+		yPos += 60;
+
+		var displayOpt = new GuiXboxOptionsList(1, "Resolution", ["Fullscreen", "Windowed"], 0.35);
+		displayOpt.vertSizing = Bottom;
+		displayOpt.horizSizing = Right;
+		displayOpt.position = new Vector(380, yPos);
+		displayOpt.extent = new Vector(815, 94);
+		innerCtrl.addChild(displayOpt);
+
+		yPos += 60;
+
+		var vsyncOpt = new GuiXboxOptionsList(1, "VSync", ["Disabled", "Enabled"], 0.35);
+		vsyncOpt.vertSizing = Bottom;
+		vsyncOpt.horizSizing = Right;
+		vsyncOpt.position = new Vector(380, yPos);
+		vsyncOpt.extent = new Vector(815, 94);
+		innerCtrl.addChild(vsyncOpt);
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -76,12 +90,12 @@ class OptionsListGui extends GuiImage {
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
 
-		var backButton = new GuiXboxButton("Back", 160);
-		backButton.position = new Vector(400, 0);
+		var backButton = new GuiXboxButton("Ok", 160);
+		backButton.position = new Vector(960, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
-		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
+		backButton.gamepadAccelerator = ["OK"];
+		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
 		bottomBar.addChild(backButton);
 	}
 }

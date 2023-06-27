@@ -78,7 +78,6 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 			var diffuse = diffuseMap.get(calculatedUV);
 			var outCol = diffuse;
 			var bumpNormal = normalMap.get(calculatedUV * secondaryMapUvFactor).xyz * 2 - 1;
-			bumpNormal.y *= -1;
 
 			var incidentRay = normalize(pixelTransformedPosition - camera.position);
 			var reflectionRay = reflect(incidentRay, transformedNormal);
