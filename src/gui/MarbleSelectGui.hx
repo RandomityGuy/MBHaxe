@@ -75,37 +75,37 @@ class MarbleSelectGui extends GuiImage {
 					name: "9",
 					dts: "data/shapes/balls/marble02.dts",
 					skin: "base",
-					shader: "Default"
+					shader: "CrystalMarb"
 				},
 				{
 					name: "10",
 					dts: "data/shapes/balls/marble26.dts",
 					skin: "base",
-					shader: "Default"
+					shader: "CrystalMarb"
 				},
 				{
 					name: "11",
 					dts: "data/shapes/balls/marble27.dts",
 					skin: "base",
-					shader: "Default"
+					shader: "CrystalMarb"
 				},
 				{
 					name: "12",
 					dts: "data/shapes/balls/marble28.dts",
 					skin: "base",
-					shader: "Default"
+					shader: "CrystalMarb"
 				},
 				{
 					name: "13",
 					dts: "data/shapes/balls/marble29.dts",
 					skin: "base",
-					shader: "Default"
+					shader: "CrystalMarb"
 				},
 				{
 					name: "14",
 					dts: "data/shapes/balls/marble30.dts",
 					skin: "base",
-					shader: "Default"
+					shader: "CrystalMarb"
 				},
 				{
 					name: "15",

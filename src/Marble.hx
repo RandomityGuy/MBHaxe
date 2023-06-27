@@ -1,5 +1,6 @@
 package src;
 
+import shaders.marble.CrystalMarb;
 import shaders.marble.ClassicMarb;
 import shapes.HelicopterImage;
 import shapes.BlastWave;
@@ -403,6 +404,12 @@ class Marble extends GameObject {
 						marbleNormal.wrap = Repeat;
 						var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6),
 							1);
+						mat.mainPass.addShader(classicGlassShader);
+					}
+					if (Settings.optionsSettings.marbleShader == "CrystalMarb") {
+						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble02.normal.png").resource;
+						marbleNormal.wrap = Repeat;
+						var classicGlassShader = new CrystalMarb(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 1);
 						mat.mainPass.addShader(classicGlassShader);
 					}
 
@@ -1782,7 +1789,8 @@ class Marble extends GameObject {
 			tform.setPosition(new Vector(expectedPos.x, expectedPos.y, expectedPos.z));
 			this.collider.setTransform(tform);
 			this.velocity = expectedVel;
-			this.setRotationQuat(this.level.replay.currentPlaybackFrame.marbleOrientation.clone());
+			var rQuat = this.level.replay.currentPlaybackFrame.marbleOrientation.clone();
+			this.setRotationQuat(rQuat);
 			this.omega = expectedOmega;
 		}
 
