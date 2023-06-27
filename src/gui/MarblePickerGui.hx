@@ -285,6 +285,7 @@ class MarblePickerGui extends GuiImage {
 		mbOpt.alwaysActive = true;
 		mbOpt.position = new Vector(380, yPos);
 		mbOpt.extent = new Vector(815, 94);
+		mbOpt.setCurrentOption(Settings.optionsSettings.marbleIndex);
 		mbOpt.onChangeFunc = (idx) -> {
 			var selectedMarble = marbleData[idx];
 			Settings.optionsSettings.marbleIndex = idx;
