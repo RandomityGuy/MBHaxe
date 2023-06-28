@@ -11,7 +11,6 @@ import src.Replay;
 import touch.TouchInput;
 import src.ResourceLoader;
 import src.AudioManager;
-import gui.PlayMissionGui;
 import gui.ExitGameDlg;
 import hxd.Key;
 import src.Mission;
@@ -287,9 +286,6 @@ class MarbleGame {
 			canvas.setContent(new MainMenuGui());
 			#end
 		} else {
-			if (isNotCustom) {
-				PlayMissionGui.currentCategoryStatic = missionType;
-			}
 			var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
 			canvas.setContent(pmg);
 		}

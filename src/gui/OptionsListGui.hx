@@ -54,18 +54,22 @@ class OptionsListGui extends GuiImage {
 		btnList.extent = new Vector(502, 500);
 		innerCtrl.addChild(btnList);
 
-		btnList.addButton(3, 'Marble Appearance', (e) -> {
-			MarbleGame.canvas.setContent(new MarblePickerGui());
-		});
+		if (!pauseGui) {
+			btnList.addButton(3, 'Marble Appearance', (e) -> {
+				MarbleGame.canvas.setContent(new MarblePickerGui());
+			});
+		}
 		btnList.addButton(3, 'Input and Sound Options', (e) -> {
 			MarbleGame.canvas.setContent(new InputOptionsGui(pauseGui));
 		});
 		btnList.addButton(3, 'Video Options', (e) -> {
 			MarbleGame.canvas.setContent(new VideoOptionsGui(pauseGui));
 		});
-		btnList.addButton(3, 'Misc Options', (e) -> {
-			MarbleGame.canvas.setContent(new MiscOptionsGui(pauseGui));
-		});
+		if (!pauseGui) {
+			btnList.addButton(3, 'Misc Options', (e) -> {
+				MarbleGame.canvas.setContent(new MiscOptionsGui(pauseGui));
+			});
+		}
 		btnList.addButton(5, 'How to Play', (e) -> {
 			MarbleGame.canvas.setContent(new AboutMenuOptionsGui(pauseGui));
 		});
