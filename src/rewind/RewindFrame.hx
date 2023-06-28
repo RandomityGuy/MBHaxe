@@ -43,7 +43,6 @@ class RewindFrame {
 		currentCheckpointTrigger:CheckpointTrigger,
 		checkpointCollectedGems:Map<Gem, Bool>,
 		checkpointHeldPowerup:PowerUp,
-		checkpointUp:Vector,
 		checkpointBlast:Float
 	};
 
@@ -95,7 +94,6 @@ class RewindFrame {
 			currentCheckpointTrigger: checkpointState.currentCheckpointTrigger,
 			checkpointCollectedGems: checkpointState.checkpointCollectedGems.copy(),
 			checkpointHeldPowerup: checkpointState.checkpointHeldPowerup,
-			checkpointUp: checkpointState.checkpointUp != null ? checkpointState.checkpointUp.clone() : null,
 			checkpointBlast: checkpointState.checkpointBlast,
 		};
 		return c;

@@ -1,5 +1,6 @@
 package triggers;
 
+import mis.MissionElement.MissionElementSimGroup;
 import shapes.Checkpoint;
 import h3d.Vector;
 import src.MarbleWorld;
@@ -10,7 +11,7 @@ import mis.MisParser;
 class CheckpointTrigger extends Trigger {
 	public var disableOOB = false;
 	public var add:Vector = null;
-	public var checkpoint:Checkpoint;
+	public var simGroup:MissionElementSimGroup;
 	public var seqNum:Int;
 
 	override public function new(element:MissionElementTrigger, level:MarbleWorld) {
@@ -29,13 +30,16 @@ class CheckpointTrigger extends Trigger {
 
 	public override function onMarbleEnter(time:src.TimeState) {
 		super.onMarbleEnter(time);
-		var shape = checkpoint;
-		if (shape == null)
+		if (simGroup == null)
 			return;
-		if (this.level.saveCheckpointState(shape, this)) {
-			shape.lastActivatedTime = time.timeSinceLoad;
+		var shape = level.simGroups[simGroup].filter(x -> x.identifier == "Checkpoint");
+		if (shape.length == 0)
+			return;
+		var chk:Checkpoint = cast shape[0];
+		if (this.level.saveCheckpointState(chk, this)) {
+			chk.lastActivatedTime = time.timeSinceLoad;
 			for (obj in this.level.dtsObjects) {
-				if (obj.identifier == "Checkpoint" && obj != shape)
+				if (obj.identifier == "Checkpoint" && obj != chk)
 					cast(obj, Checkpoint).lastActivatedTime = Math.POSITIVE_INFINITY;
 			}
 		}
