@@ -73,7 +73,6 @@ class RewindManager {
 			checkpointBlast: @:privateAccess level.cheeckpointBlast,
 			checkpointCollectedGems: @:privateAccess level.checkpointCollectedGems.copy(),
 			checkpointHeldPowerup: @:privateAccess level.checkpointHeldPowerup,
-			checkpointUp: @:privateAccess level.checkpointUp != null ? @:privateAccess level.checkpointUp.clone() : null,
 		};
 		frames.push(rf);
 	}
@@ -163,7 +162,6 @@ class RewindManager {
 		level.marble.camera.oob = rf.oobState.oob;
 		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
 		level.blastAmount = rf.blastAmt;
-		@:privateAccess level.checkpointUp = rf.checkpointState.checkpointUp;
 		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;
 		@:privateAccess level.cheeckpointBlast = rf.checkpointState.checkpointBlast;
 		@:privateAccess level.checkpointHeldPowerup = rf.checkpointState.checkpointHeldPowerup;

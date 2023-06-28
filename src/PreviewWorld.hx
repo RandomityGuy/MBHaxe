@@ -184,6 +184,7 @@ class PreviewWorld extends Scheduler {
 
 						scene.camera.setFovX(90, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 
+						scene.camera.up.set(0, 0, 1);
 						scene.camera.pos.load(camPos.add(off));
 						scene.camera.target.load(scene.camera.pos.add(directionVector));
 					}

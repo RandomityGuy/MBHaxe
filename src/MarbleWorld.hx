@@ -105,6 +105,7 @@ class MarbleWorld extends Scheduler {
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
+	public var simGroups:Map<MissionElementSimGroup, Array<GameObject>> = [];
 
 	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<GameObject> = [];
@@ -161,10 +162,8 @@ class MarbleWorld extends Scheduler {
 	var currentCheckpointTrigger:CheckpointTrigger = null;
 	var checkpointCollectedGems:Map<Gem, Bool> = [];
 	var checkpointHeldPowerup:PowerUp = null;
-	var checkpointUp:Vector = null;
 	var cheeckpointBlast:Float = 0;
 	var checkpointSequence:Int = 0;
-	var _previousCheckpointTrigger:CheckpointTrigger;
 
 	// Replay
 	public var replay:Replay;
@@ -389,6 +388,7 @@ class MarbleWorld extends Scheduler {
 			marblefiles.push("shapes/balls/marble20.normal.png");
 			marblefiles.push("shapes/balls/marble18.normal.png");
 			marblefiles.push("shapes/balls/marble01.normal.png");
+			marblefiles.push("shapes/balls/marble02.normal.png");
 			marblefiles.push("sound/use_blast.wav");
 		}
 		// Hacky
@@ -445,7 +445,6 @@ class MarbleWorld extends Scheduler {
 		this.currentCheckpointTrigger = null;
 		this.checkpointCollectedGems.clear();
 		this.checkpointHeldPowerup = null;
-		this.checkpointUp = null;
 		this.cheeckpointBlast = 0;
 		this.checkpointSequence = 0;
 
@@ -553,6 +552,15 @@ class MarbleWorld extends Scheduler {
 		};
 	}
 
+	function addToSimgroup(obj:GameObject, simGroup:MissionElementSimGroup) {
+		if (simGroup == null)
+			return;
+		if (!simGroups.exists(simGroup))
+			simGroups[simGroup] = [obj];
+		else
+			simGroups[simGroup].push(obj);
+	}
+
 	public function addSimGroup(simGroup:MissionElementSimGroup) {
 		if (simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior).length != 0) {
 			// Create the pathed interior
@@ -584,15 +592,15 @@ class MarbleWorld extends Scheduler {
 				case MissionElementType.SimGroup:
 					this.addSimGroup(cast element);
 				case MissionElementType.InteriorInstance:
-					resourceLoadFuncs.push(fwd -> this.addInteriorFromMis(cast element, fwd));
+					resourceLoadFuncs.push(fwd -> this.addInteriorFromMis(cast element, simGroup, fwd));
 				case MissionElementType.StaticShape:
-					resourceLoadFuncs.push(fwd -> this.addStaticShape(cast element, fwd));
+					resourceLoadFuncs.push(fwd -> this.addStaticShape(cast element, simGroup, fwd));
 				case MissionElementType.Item:
-					resourceLoadFuncs.push(fwd -> this.addItem(cast element, fwd));
+					resourceLoadFuncs.push(fwd -> this.addItem(cast element, simGroup, fwd));
 				case MissionElementType.Trigger:
-					resourceLoadFuncs.push(fwd -> this.addTrigger(cast element, fwd));
+					resourceLoadFuncs.push(fwd -> this.addTrigger(cast element, simGroup, fwd));
 				case MissionElementType.TSStatic:
-					resourceLoadFuncs.push(fwd -> this.addTSStatic(cast element, fwd));
+					resourceLoadFuncs.push(fwd -> this.addTSStatic(cast element, simGroup, fwd));
 				case MissionElementType.ParticleEmitterNode:
 					resourceLoadFuncs.push(fwd -> {
 						this.addParticleEmitterNode(cast element);
@@ -603,7 +611,7 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	public function addInteriorFromMis(element:MissionElementInteriorInstance, onFinish:Void->Void) {
+	public function addInteriorFromMis(element:MissionElementInteriorInstance, simGroup:MissionElementSimGroup, onFinish:Void->Void) {
 		var difPath = this.mission.getDifPath(element.interiorfile);
 		if (difPath == "") {
 			onFinish();
@@ -615,6 +623,8 @@ class MarbleWorld extends Scheduler {
 		// DifBuilder.loadDif(difPath, interior);
 		// this.interiors.push(interior);
 		this.addInterior(interior, () -> {
+			addToSimgroup(interior, simGroup);
+
 			var interiorPosition = MisParser.parseVector3(element.position);
 			interiorPosition.x = -interiorPosition.x;
 			var interiorRotation = MisParser.parseRotation(element.rotation);
@@ -650,17 +660,17 @@ class MarbleWorld extends Scheduler {
 		// 	this.physics.addInterior(interior);
 	}
 
-	public function addStaticShape(element:MissionElementStaticShape, onFinish:Void->Void) {
+	public function addStaticShape(element:MissionElementStaticShape, simGroup:MissionElementSimGroup, onFinish:Void->Void) {
 		var shape:DtsObject = null;
 		MarbleWorldMacros.addStaticShapeOrItem();
 	}
 
-	public function addItem(element:MissionElementItem, onFinish:Void->Void) {
+	public function addItem(element:MissionElementItem, simGroup:MissionElementSimGroup, onFinish:Void->Void) {
 		var shape:DtsObject = null;
 		MarbleWorldMacros.addStaticShapeOrItem();
 	}
 
-	public function addTrigger(element:MissionElementTrigger, onFinish:Void->Void) {
+	public function addTrigger(element:MissionElementTrigger, simGroup:MissionElementSimGroup, onFinish:Void->Void) {
 		var trigger:Trigger = null;
 
 		var datablockLowercase = element.datablock.toLowerCase();
@@ -673,8 +683,9 @@ class MarbleWorld extends Scheduler {
 		} else if (datablockLowercase == "helptrigger") {
 			trigger = new HelpTrigger(element, cast this);
 		} else if (datablockLowercase == "checkpointtrigger") {
-			trigger = new CheckpointTrigger(element, cast this);
-			_previousCheckpointTrigger = cast trigger;
+			var chk = new CheckpointTrigger(element, cast this);
+			trigger = chk;
+			chk.simGroup = simGroup;
 		} else {
 			Console.error("Unknown trigger: " + element.datablock);
 			onFinish();
@@ -683,12 +694,13 @@ class MarbleWorld extends Scheduler {
 
 		trigger.init(() -> {
 			this.triggers.push(trigger);
+			addToSimgroup(trigger, simGroup);
 			this.collisionWorld.addEntity(trigger.collider);
 			onFinish();
 		});
 	}
 
-	public function addTSStatic(element:MissionElementTSStatic, onFinish:Void->Void) {
+	public function addTSStatic(element:MissionElementTSStatic, simGroup:MissionElementSimGroup, onFinish:Void->Void) {
 		// !! WARNING - UNTESTED !!
 		var shapeName = element.shapename;
 		var index = shapeName.indexOf('data/');
@@ -741,6 +753,7 @@ class MarbleWorld extends Scheduler {
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(tsShape, () -> {
+			addToSimgroup(tsShape, simGroup);
 			tsShape.setTransform(mat);
 			onFinish();
 		}, true);
@@ -1607,7 +1620,6 @@ class MarbleWorld extends Scheduler {
 		this.currentCheckpoint = shape;
 		this.currentCheckpointTrigger = trigger;
 		this.checkpointCollectedGems.clear();
-		this.checkpointUp = this.currentUp.clone();
 		this.cheeckpointBlast = this.blastAmount;
 		// Remember all gems that were collected up to this point
 		for (gem in this.gems) {
@@ -1625,6 +1637,7 @@ class MarbleWorld extends Scheduler {
 		var marble = this.marble;
 		// Determine where to spawn the marble
 		var offset = new Vector(0, 0, 0.727843);
+		offset.transform(this.currentCheckpoint.getRotationQuat().toMatrix());
 		var mpos = this.currentCheckpoint.getAbsPos().getPosition().add(offset);
 		this.marble.setMarblePosition(mpos.x, mpos.y, mpos.z);
 		marble.velocity.load(new Vector(0, 0, 0));
@@ -1655,15 +1668,12 @@ class MarbleWorld extends Scheduler {
 				gravityField = @:privateAccess this.currentCheckpointTrigger.element.fields.get('gravity')[0];
 			}
 		}
-		if (MisParser.parseBoolean(gravityField)) {
-			// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
-			var up = new Vector(0, 0, 1);
-			up.transform(this.currentCheckpoint.getRotationQuat().toMatrix());
-			this.setUp(up, this.timeState, true);
-		} else {
-			// Otherwise, we restore gravity to what was stored.
-			this.setUp(this.checkpointUp, this.timeState, true);
-		}
+
+		// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
+		var up = new Vector(0, 0, 1);
+		up.transform(this.currentCheckpoint.getRotationQuat().toMatrix());
+		this.setUp(up, this.timeState, true);
+
 		// Restore gem states
 		for (gem in this.gems) {
 			if (gem.pickedUp && !this.checkpointCollectedGems.exists(gem)) {

@@ -223,8 +223,16 @@ class MarblePickerGui extends GuiImage {
 			}
 		];
 
-		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
+		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
 		super(res);
+
+		var fadeEdge = new GuiImage(ResourceLoader.getResource("data/ui/xbox/BG_fadeOutSoftEdge.png", ResourceLoader.getImage, this.imageResources).toTile());
+		fadeEdge.position = new Vector(0, 0);
+		fadeEdge.extent = new Vector(640, 480);
+		fadeEdge.vertSizing = Height;
+		fadeEdge.horizSizing = Width;
+		this.addChild(fadeEdge);
+
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
@@ -267,6 +275,7 @@ class MarblePickerGui extends GuiImage {
 		var prevPreview = @:privateAccess MarbleGame.instance.previewWorld.currentMission;
 
 		MarbleGame.instance.setPreviewMission("marblepicker", () -> {
+			this.bmp.visible = false;
 			@:privateAccess MarbleGame.instance.previewWorld.spawnMarble(marb -> {
 				var spawnPos = @:privateAccess MarbleGame.instance.scene.camera.pos.add(new Vector(0, 1, 1));
 				var velAdd = new Vector((1 - 2 * Math.random()) * 2, (1 - 2 * Math.random()) * 1.5, (1 - 2 * Math.random()) * 1);
@@ -319,8 +328,10 @@ class MarblePickerGui extends GuiImage {
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["OK"];
 		backButton.pressedAction = (e) -> {
-			MarbleGame.canvas.setContent(new OptionsListGui());
-			MarbleGame.instance.setPreviewMission(prevPreview, () -> {}, false);
+			this.bmp.visible = true;
+			MarbleGame.instance.setPreviewMission(prevPreview, () -> {
+				MarbleGame.canvas.setContent(new OptionsListGui());
+			}, false);
 		};
 
 		bottomBar.addChild(backButton);

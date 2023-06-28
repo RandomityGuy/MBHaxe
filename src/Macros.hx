@@ -80,8 +80,6 @@ class MarbleWorldMacros {
 				shape = new EasterEgg(cast element);
 			else if (dataBlockLowerCase == "checkpointshape") {
 				shape = new Checkpoint(cast element);
-				if (_previousCheckpointTrigger != null)
-					_previousCheckpointTrigger.checkpoint = cast shape;
 			} else if (dataBlockLowerCase == "ductfan")
 				shape = new DuctFan();
 			else if (dataBlockLowerCase == "smallductfan")
@@ -152,6 +150,7 @@ class MarbleWorldMacros {
 			mat.setPosition(shapePosition);
 
 			this.addDtsObject(shape, () -> {
+				addToSimgroup(shape, simGroup);
 				shape.setTransform(mat);
 				onFinish();
 			});
