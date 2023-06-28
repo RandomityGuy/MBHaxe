@@ -13,6 +13,9 @@ import src.Marbleland;
 import src.MissionList;
 
 class MainMenuGui extends GuiImage {
+	var innerCtrl:GuiControl;
+	var btnList:GuiXboxList;
+
 	public function new() {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
@@ -34,7 +37,7 @@ class MainMenuGui extends GuiImage {
 		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
 		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
 
-		var innerCtrl = new GuiControl();
+		innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
 		innerCtrl.horizSizing = Width;
@@ -51,7 +54,7 @@ class MainMenuGui extends GuiImage {
 		glogo.extent = new Vector(128, 128);
 		innerCtrl.addChild(glogo);
 
-		var btnList = new GuiXboxList();
+		btnList = new GuiXboxList();
 		btnList.position = new Vector(70 - offsetX, 95);
 		btnList.horizSizing = Left;
 		btnList.extent = new Vector(502, 500);
@@ -150,5 +153,18 @@ class MainMenuGui extends GuiImage {
 		}
 		this.addChild(kofi);
 		#end
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		btnList.position = new Vector(70 - offsetX, 95);
+
+		super.onResize(width, height);
 	}
 }

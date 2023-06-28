@@ -7,6 +7,9 @@ import src.ResourceLoader;
 import src.Settings;
 
 class AboutMenuOptionsGui extends GuiImage {
+	var innerCtrl:GuiControl;
+	var btnList:GuiXboxList;
+
 	public function new(pauseGui:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
@@ -28,7 +31,7 @@ class AboutMenuOptionsGui extends GuiImage {
 		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
 		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
 
-		var innerCtrl = new GuiControl();
+		innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
 		innerCtrl.horizSizing = Width;
@@ -48,7 +51,7 @@ class AboutMenuOptionsGui extends GuiImage {
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var btnList = new GuiXboxList();
+		btnList = new GuiXboxList();
 		btnList.position = new Vector(70 - offsetX, 165);
 		btnList.horizSizing = Left;
 		btnList.extent = new Vector(502, 500);
@@ -113,5 +116,18 @@ class AboutMenuOptionsGui extends GuiImage {
 		else
 			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
 		bottomBar.addChild(backButton);
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		btnList.position = new Vector(70 - offsetX, 165);
+
+		super.onResize(width, height);
 	}
 }

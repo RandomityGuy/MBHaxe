@@ -9,6 +9,8 @@ import src.ResourceLoader;
 import src.Settings;
 
 class MarblePickerGui extends GuiImage {
+	var innerCtrl:GuiControl;
+
 	public function new() {
 		var marbleData = [
 			{
@@ -251,7 +253,7 @@ class MarblePickerGui extends GuiImage {
 		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
 		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
 
-		var innerCtrl = new GuiControl();
+		innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
 		innerCtrl.horizSizing = Width;
@@ -337,5 +339,17 @@ class MarblePickerGui extends GuiImage {
 		};
 
 		bottomBar.addChild(backButton);
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+
+		super.onResize(width, height);
 	}
 }

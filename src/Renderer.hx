@@ -1,5 +1,6 @@
 package src;
 
+import hxd.Window;
 import src.ResourceLoader;
 import shaders.GammaRamp;
 import h3d.mat.Texture;
@@ -32,6 +33,7 @@ class Renderer extends h3d.scene.Renderer {
 		blurShader = new ScreenFx<Blur>(new Blur());
 		copyPass = new h3d.pass.Copy();
 		sfxBuffer = new Texture(512, 512, [Target]);
+		Window.getInstance().addResizeEvent(() -> onResize());
 	}
 
 	public inline static function getSfxBuffer() {
@@ -44,6 +46,17 @@ class Renderer extends h3d.scene.Renderer {
 	// can be overriden for benchmark purposes
 	function renderPass(p:h3d.pass.Base, passes, ?sort) {
 		p.draw(passes, sort);
+	}
+
+	function onResize() {
+		if (backBuffer != null) {
+			backBuffer.dispose();
+			backBuffer = null;
+		}
+		if (glowBuffer != null) {
+			glowBuffer.dispose();
+			glowBuffer = null;
+		}
 	}
 
 	override function getPassByName(name:String):h3d.pass.Base {
@@ -73,8 +86,9 @@ class Renderer extends h3d.scene.Renderer {
 		if (has("normal"))
 			renderPass(normal, get("normal"));
 
-		if (growBufferTemps == null) {
+		if (glowBuffer == null)
 			glowBuffer = ctx.textures.allocTarget("glowBuffer", ctx.engine.width, ctx.engine.height);
+		if (growBufferTemps == null) {
 			growBufferTemps = [
 				ctx.textures.allocTarget("gb1", 320, 320, false),
 				ctx.textures.allocTarget("gb2", 320, 320, false),

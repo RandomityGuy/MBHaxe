@@ -15,6 +15,8 @@ class LevelSelectGui extends GuiImage {
 	static var currentSelectionStatic:Int = 0;
 	static var currentDifficultyStatic:String = "beginner";
 
+	var innerCtrl:GuiControl;
+
 	public function new(difficulty:String) {
 		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
 		super(res);
@@ -100,7 +102,7 @@ class LevelSelectGui extends GuiImage {
 		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
 		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
 
-		var innerCtrl = new GuiControl();
+		innerCtrl = new GuiControl();
 
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
@@ -237,5 +239,17 @@ class LevelSelectGui extends GuiImage {
 		levelSelectOpts.setCurrentOption(currentSelectionStatic);
 		setLevel(currentSelectionStatic);
 		innerCtrl.addChild(levelSelectOpts);
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+
+		super.onResize(width, height);
 	}
 }

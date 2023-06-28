@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Window;
 import src.Console;
 import src.MarbleGame;
 import h3d.Vector;
@@ -21,6 +22,10 @@ class Canvas extends GuiControl {
 		this.extent = new Vector(640, 480);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
+		Window.getInstance().addResizeEvent(() -> {
+			var wnd = Window.getInstance();
+			onResize(wnd.width, wnd.height);
+		});
 	}
 
 	public function setContent(content:GuiControl) {

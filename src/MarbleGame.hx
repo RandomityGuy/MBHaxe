@@ -171,7 +171,6 @@ class MarbleGame {
 		JSPlatform.initFullscreenEnforcer();
 
 		Window.getInstance().removeEventTarget(@:privateAccess Key.onEvent);
-		Window.getInstance().addResizeEvent(() -> {});
 		#end
 	}
 
