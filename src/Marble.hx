@@ -327,173 +327,183 @@ class Marble extends GameObject {
 		marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
 		marbleDts.showSequences = false;
 		marbleDts.useInstancing = false;
-		marbleDts.init(null, () -> {}); // SYNC
-		for (mat in marbleDts.materials) {
-			mat.castShadows = true;
-			mat.shadows = true;
-			mat.receiveShadows = false;
-			// mat.mainPass.culling = None;
+		var dtsFile = ResourceLoader.loadDts(marbleDts.dtsPath).resource;
+		var marbleMats = marbleDts.getPreloadMaterials(dtsFile);
+		var matWorker = new ResourceLoaderWorker(() -> {
+			marbleDts.init(null, () -> {}); // SYNC
+			for (mat in marbleDts.materials) {
+				mat.castShadows = true;
+				mat.shadows = true;
+				mat.receiveShadows = false;
+				// mat.mainPass.culling = None;
 
-			if (Settings.optionsSettings.reflectiveMarble) {
-				var csky = level != null ? level.sky : (@:privateAccess MarbleGame.instance.previewWorld.sky);
-				this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky);
+				if (Settings.optionsSettings.reflectiveMarble) {
+					var csky = level != null ? level.sky : (@:privateAccess MarbleGame.instance.previewWorld.sky);
+					this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky);
 
-				if (Settings.optionsSettings.marbleShader == null
-					|| Settings.optionsSettings.marbleShader == "Default"
-					|| Settings.optionsSettings.marbleShader == ""
-					|| !isUltra) { // Use this shit everywhere except ultra
-					mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
-				} else {
-					// Generate tangents for next shaders, only for Ultra
-					for (node in marbleDts.graphNodes) {
-						for (chmesh in node.getMeshes()) {
-							var chpoly = cast(chmesh.primitive, mesh.Polygon);
-							chpoly.addTangents();
+					if (Settings.optionsSettings.marbleShader == null
+						|| Settings.optionsSettings.marbleShader == "Default"
+						|| Settings.optionsSettings.marbleShader == ""
+						|| !isUltra) { // Use this shit everywhere except ultra
+						mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+					} else {
+						// Generate tangents for next shaders, only for Ultra
+						for (node in marbleDts.graphNodes) {
+							for (chmesh in node.getMeshes()) {
+								var chpoly = cast(chmesh.primitive, mesh.Polygon);
+								chpoly.addTangents();
+							}
 						}
-					}
 
-					mat.mainPass.removeShader(mat.textureShader);
+						mat.mainPass.removeShader(mat.textureShader);
 
-					if (Settings.optionsSettings.marbleShader == "ClassicGlassPureSphere") {
-						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble01.normal.png").resource;
-						var classicGlassShader = new ClassicGlassPureSphere(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
-							new Vector(0.6, 0.6, 0.6, 0.6), 1);
-						mat.mainPass.addShader(classicGlassShader);
-					}
-
-					if (Settings.optionsSettings.marbleShader == "ClassicMarb") {
-						var classicMarb = new ClassicMarb(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), 1);
-						mat.mainPass.addShader(classicMarb);
-					}
-
-					if (Settings.optionsSettings.marbleShader == "ClassicMarb2") {
-						var classicMarb2 = new ClassicMarb2(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), 1);
-						mat.mainPass.addShader(classicMarb2);
-					}
-
-					if (Settings.optionsSettings.marbleShader == "ClassicMarb3") {
-						var marbSpecColor = new Vector(0.6, 0.6, 0.6, 0.6);
-						var marbSpec = 12.0;
-						if (Settings.optionsSettings.marbleModel == "data/shapes/balls/marble16.dts") {
-							marbSpec = 6;
-							marbSpecColor.set(0.2, 0.2, 0.2, 0.2);
+						if (Settings.optionsSettings.marbleShader == "ClassicGlassPureSphere") {
+							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble01.normal.png").resource;
+							var classicGlassShader = new ClassicGlassPureSphere(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
+								new Vector(0.6, 0.6, 0.6, 0.6), 1);
+							mat.mainPass.addShader(classicGlassShader);
 						}
-						if (Settings.optionsSettings.marbleModel == "data/shapes/balls/marble31.dts") {
-							marbSpec = 24;
-							marbSpecColor.set(0.3, 0.3, 0.3, 0.3);
+
+						if (Settings.optionsSettings.marbleShader == "ClassicMarb") {
+							var classicMarb = new ClassicMarb(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), 1);
+							mat.mainPass.addShader(classicMarb);
 						}
-						var classicMarb3 = new ClassicMarb3(mat.texture, this.cubemapRenderer.cubemap, marbSpec, marbSpecColor, 1);
-						mat.mainPass.addShader(classicMarb3);
-					}
 
-					if (Settings.optionsSettings.marbleShader == "ClassicMetal") {
-						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble18.normal.png").resource;
-						marbleNormal.wrap = Repeat;
-						var classicMetalShader = new ClassicMetal(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6),
-							1);
-						mat.mainPass.addShader(classicMetalShader);
-					}
+						if (Settings.optionsSettings.marbleShader == "ClassicMarb2") {
+							var classicMarb2 = new ClassicMarb2(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), 1);
+							mat.mainPass.addShader(classicMarb2);
+						}
 
-					if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass20") {
-						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble20.normal.png").resource;
-						marbleNormal.wrap = Repeat;
-						var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6),
-							1);
-						mat.mainPass.addShader(classicGlassShader);
-					}
+						if (Settings.optionsSettings.marbleShader == "ClassicMarb3") {
+							var marbSpecColor = new Vector(0.6, 0.6, 0.6, 0.6);
+							var marbSpec = 12.0;
+							if (Settings.optionsSettings.marbleModel == "data/shapes/balls/marble16.dts") {
+								marbSpec = 6;
+								marbSpecColor.set(0.2, 0.2, 0.2, 0.2);
+							}
+							if (Settings.optionsSettings.marbleModel == "data/shapes/balls/marble31.dts") {
+								marbSpec = 24;
+								marbSpecColor.set(0.3, 0.3, 0.3, 0.3);
+							}
+							var classicMarb3 = new ClassicMarb3(mat.texture, this.cubemapRenderer.cubemap, marbSpec, marbSpecColor, 1);
+							mat.mainPass.addShader(classicMarb3);
+						}
 
-					if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass18") {
-						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble18.normal.png").resource;
-						marbleNormal.wrap = Repeat;
-						var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6),
-							1);
-						mat.mainPass.addShader(classicGlassShader);
-					}
-					if (Settings.optionsSettings.marbleShader == "CrystalMarb") {
-						var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble02.normal.png").resource;
-						marbleNormal.wrap = Repeat;
-						var classicGlassShader = new CrystalMarb(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 1);
-						mat.mainPass.addShader(classicGlassShader);
-					}
+						if (Settings.optionsSettings.marbleShader == "ClassicMetal") {
+							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble18.normal.png").resource;
+							marbleNormal.wrap = Repeat;
+							var classicMetalShader = new ClassicMetal(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
+								new Vector(0.6, 0.6, 0.6, 0.6), 1);
+							mat.mainPass.addShader(classicMetalShader);
+						}
 
-					var thisprops:Dynamic = mat.getDefaultProps();
-					thisprops.light = false; // We will calculate our own lighting
-					mat.props = thisprops;
-					mat.castShadows = true;
-					mat.shadows = true;
-					mat.receiveShadows = false;
+						if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass20") {
+							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble20.normal.png").resource;
+							marbleNormal.wrap = Repeat;
+							var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
+								new Vector(0.6, 0.6, 0.6, 0.6), 1);
+							mat.mainPass.addShader(classicGlassShader);
+						}
+
+						if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass18") {
+							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble18.normal.png").resource;
+							marbleNormal.wrap = Repeat;
+							var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
+								new Vector(0.6, 0.6, 0.6, 0.6), 1);
+							mat.mainPass.addShader(classicGlassShader);
+						}
+						if (Settings.optionsSettings.marbleShader == "CrystalMarb") {
+							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble02.normal.png").resource;
+							marbleNormal.wrap = Repeat;
+							var classicGlassShader = new CrystalMarb(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 1);
+							mat.mainPass.addShader(classicGlassShader);
+						}
+
+						var thisprops:Dynamic = mat.getDefaultProps();
+						thisprops.light = false; // We will calculate our own lighting
+						mat.props = thisprops;
+						mat.castShadows = true;
+						mat.shadows = true;
+						mat.receiveShadows = false;
+					}
 				}
 			}
+
+			// Calculate radius according to marble model (egh)
+			var b = marbleDts.getBounds();
+			var avgRadius = (b.xSize + b.ySize + b.zSize) / 6;
+			if (isUltra) {
+				this._radius = 0.3;
+				this._renderScale = 0.3 / avgRadius;
+				this._marbleScale = this._renderScale;
+				this._defaultScale = this._marbleScale;
+				marbleDts.scale(0.3 / avgRadius);
+			} else
+				this._radius = avgRadius;
+
+			this._prevRadius = this._radius;
+
+			if (isUltra) {
+				this.rollMegaSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/mega_roll.wav", ResourceLoader.getAudio,
+					this.soundResources), this.getAbsPos().getPosition(),
+					true);
+				this.rollMegaSound.volume = 0;
+			}
+
+			this.isUltra = isUltra;
+
+			this.collider = new SphereCollisionEntity(cast this);
+			this.collider.setTransform(this.getAbsPos());
+
+			this.addChild(marbleDts);
+
+			// var geom = Sphere.defaultUnitSphere();
+			// geom.addUVs();
+			// var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
+			// var marbleMaterial = Material.create(marbleTexture);
+			// marbleMaterial.shadows = false;
+			// marbleMaterial.castShadows = true;
+			// marbleMaterial.mainPass.removeShader(marbleMaterial.textureShader);
+			// var dtsShader = new DtsTexture();
+			// dtsShader.texture = marbleTexture;
+			// dtsShader.currentOpacity = 1;
+			// marbleMaterial.mainPass.addShader(dtsShader);
+			// var obj = new Mesh(geom, marbleMaterial, this);
+			// obj.scale(_radius * 0.1);
+			// if (Settings.optionsSettings.reflectiveMarble) {
+			// 	this.cubemapRenderer = new CubemapRenderer(level.scene);
+			// 	marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+			// }
+
+			this.blastWave = new BlastWave();
+			// this.addChild(this.blastWave);
+			this.blastWave.x = 1e8;
+			this.blastWave.y = 1e8;
+			this.blastWave.z = 1e8;
+			this.blastWave.isBoundingBoxCollideable = false;
+
+			this.helicopter = new HelicopterImage();
+			this.helicopter.isBoundingBoxCollideable = false;
+			// this.addChild(this.helicopter);
+			this.helicopter.x = 1e8;
+			this.helicopter.y = 1e8;
+			this.helicopter.z = 1e8;
+			this.helicopter.scale(0.3 / 0.2);
+
+			if (this.controllable) {
+				var worker = new ResourceLoaderWorker(onFinish);
+				worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
+				worker.addTask(fwd -> level.addDtsObject(this.blastWave, fwd));
+				worker.run();
+			} else {
+				onFinish();
+			}
+		});
+		for (texPath in marbleMats) {
+			matWorker.loadFile(texPath);
 		}
 
-		// Calculate radius according to marble model (egh)
-		var b = marbleDts.getBounds();
-		var avgRadius = (b.xSize + b.ySize + b.zSize) / 6;
-		if (isUltra) {
-			this._radius = 0.3;
-			this._renderScale = 0.3 / avgRadius;
-			this._marbleScale = this._renderScale;
-			this._defaultScale = this._marbleScale;
-			marbleDts.scale(0.3 / avgRadius);
-		} else
-			this._radius = avgRadius;
-
-		this._prevRadius = this._radius;
-
-		if (isUltra) {
-			this.rollMegaSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/mega_roll.wav", ResourceLoader.getAudio, this.soundResources),
-				this.getAbsPos().getPosition(), true);
-			this.rollMegaSound.volume = 0;
-		}
-
-		this.isUltra = isUltra;
-
-		this.collider = new SphereCollisionEntity(cast this);
-		this.collider.setTransform(this.getAbsPos());
-
-		this.addChild(marbleDts);
-
-		// var geom = Sphere.defaultUnitSphere();
-		// geom.addUVs();
-		// var marbleTexture = ResourceLoader.getFileEntry("data/shapes/balls/base.marble.png").toTexture();
-		// var marbleMaterial = Material.create(marbleTexture);
-		// marbleMaterial.shadows = false;
-		// marbleMaterial.castShadows = true;
-		// marbleMaterial.mainPass.removeShader(marbleMaterial.textureShader);
-		// var dtsShader = new DtsTexture();
-		// dtsShader.texture = marbleTexture;
-		// dtsShader.currentOpacity = 1;
-		// marbleMaterial.mainPass.addShader(dtsShader);
-		// var obj = new Mesh(geom, marbleMaterial, this);
-		// obj.scale(_radius * 0.1);
-		// if (Settings.optionsSettings.reflectiveMarble) {
-		// 	this.cubemapRenderer = new CubemapRenderer(level.scene);
-		// 	marbleMaterial.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
-		// }
-
-		this.blastWave = new BlastWave();
-		// this.addChild(this.blastWave);
-		this.blastWave.x = 1e8;
-		this.blastWave.y = 1e8;
-		this.blastWave.z = 1e8;
-		this.blastWave.isBoundingBoxCollideable = false;
-
-		this.helicopter = new HelicopterImage();
-		this.helicopter.isBoundingBoxCollideable = false;
-		// this.addChild(this.helicopter);
-		this.helicopter.x = 1e8;
-		this.helicopter.y = 1e8;
-		this.helicopter.z = 1e8;
-		this.helicopter.scale(0.3 / 0.2);
-
-		if (this.controllable) {
-			var worker = new ResourceLoaderWorker(onFinish);
-			worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
-			worker.addTask(fwd -> level.addDtsObject(this.blastWave, fwd));
-			worker.run();
-		} else {
-			onFinish();
-		}
+		matWorker.run();
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
