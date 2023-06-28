@@ -72,16 +72,16 @@ class LevelSelectGui extends GuiImage {
 		var currentToken = 0;
 		var requestToken = 0;
 
-		var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
-		MarbleGame.instance.setPreviewMission(misFile, () -> {
-			lock = false;
-			if (currentToken != requestToken)
-				return;
-			this.bmp.visible = false;
-			loadAnim.anim.visible = false;
-			loadText.text.visible = false;
-			loadTextBg.text.visible = false;
-		});
+		// var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
+		// MarbleGame.instance.setPreviewMission(misFile, () -> {
+		// 	lock = false;
+		// 	if (currentToken != requestToken)
+		// 		return;
+		// 	this.bmp.visible = false;
+		// 	loadAnim.anim.visible = false;
+		// 	loadText.text.visible = false;
+		// 	loadTextBg.text.visible = false;
+		// });
 
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
@@ -235,6 +235,7 @@ class LevelSelectGui extends GuiImage {
 		levelSelectOpts.alwaysActive = true;
 		levelSelectOpts.onChangeFunc = setLevel;
 		levelSelectOpts.setCurrentOption(currentSelectionStatic);
+		setLevel(currentSelectionStatic);
 		innerCtrl.addChild(levelSelectOpts);
 	}
 }

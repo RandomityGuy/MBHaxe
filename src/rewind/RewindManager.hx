@@ -159,6 +159,10 @@ class RewindManager {
 		}
 
 		level.outOfBounds = rf.oobState.oob;
+		if (level.outOfBounds)
+			@:privateAccess level.playGui.setCenterText('Out of Bounds');
+		else
+			@:privateAccess level.playGui.setCenterText('');
 		level.marble.camera.oob = rf.oobState.oob;
 		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
 		level.blastAmount = rf.blastAmt;
