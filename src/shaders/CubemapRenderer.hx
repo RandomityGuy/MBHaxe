@@ -1,5 +1,6 @@
 package shaders;
 
+import src.Renderer;
 import src.Sky;
 import h3d.Vector;
 import h3d.scene.Scene;
@@ -33,7 +34,7 @@ class CubemapRenderer {
 
 		var start = haxe.Timer.stamp();
 		var renderedFaces = 0;
-
+		Renderer.cubemapPass = true;
 		for (i in 0...6) {
 			var index = (nextFaceToRender + i) % 6;
 
@@ -51,6 +52,7 @@ class CubemapRenderer {
 			if (elapsedPerFace * (renderedFaces + 1) >= budget)
 				break;
 		}
+		Renderer.cubemapPass = false;
 		scene.camera = scenecam;
 
 		this.nextFaceToRender += renderedFaces;
