@@ -424,4 +424,10 @@ class GuiControl {
 			c.renderEngine(engine);
 		}
 	}
+
+	public function onResize(width:Int, height:Int) {
+		for (c in this.children) {
+			c.onResize(width, height);
+		}
+	}
 }

@@ -16,6 +16,8 @@ import src.Util;
 
 class EndGameGui extends GuiImage {
 	var mission:Mission;
+	var innerCtrl:GuiControl;
+	var endGameWnd:GuiImage;
 
 	var scoreSubmitted:Bool = false;
 
@@ -43,7 +45,7 @@ class EndGameGui extends GuiImage {
 		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
 		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
 
-		var innerCtrl = new GuiControl();
+		innerCtrl = new GuiControl();
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
 		innerCtrl.horizSizing = Width;
@@ -63,7 +65,7 @@ class EndGameGui extends GuiImage {
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var endGameWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/endGameWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
+		endGameWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/endGameWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
 		endGameWnd.horizSizing = Left;
 		endGameWnd.vertSizing = Top;
 		endGameWnd.position = new Vector(80 - offsetX, 170 - offsetY);
@@ -156,5 +158,18 @@ class EndGameGui extends GuiImage {
 		nextButton.horizSizing = Right;
 		nextButton.pressedAction = (e) -> continueFunc(nextButton);
 		bottomBar.addChild(nextButton);
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		endGameWnd.position = new Vector(80 - offsetX, 170 - offsetY);
+
+		super.onResize(width, height);
 	}
 }
