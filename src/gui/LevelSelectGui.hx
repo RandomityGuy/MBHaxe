@@ -165,6 +165,11 @@ class LevelSelectGui extends GuiImage {
 		statIcon.extent = new Vector(20, 20);
 		levelWnd.addChild(statIcon);
 
+		var eggIcon = new GuiImage(ResourceLoader.getResource("data/ui/xbox/eggIcon.png", ResourceLoader.getImage, this.imageResources).toTile());
+		eggIcon.position = new Vector(29, 79);
+		eggIcon.extent = new Vector(20, 20);
+		levelWnd.addChild(eggIcon);
+
 		var c0 = 0xEBEBEB;
 		var c1 = 0x8DFF8D;
 		var c2 = 0x88BCEE;
@@ -205,6 +210,10 @@ class LevelSelectGui extends GuiImage {
 			var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
 			var mis = difficultyMissions[idx];
 			var requestToken = currentToken;
+			if (Settings.easterEggs.exists(mis.path))
+				eggIcon.bmp.visible = true;
+			else
+				eggIcon.bmp.visible = false;
 			MarbleGame.instance.setPreviewMission(misFile, () -> {
 				lock = false;
 				if (requestToken != currentToken)

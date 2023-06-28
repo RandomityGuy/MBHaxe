@@ -26,6 +26,8 @@ class Renderer extends h3d.scene.Renderer {
 	var copyPass:h3d.pass.Copy;
 	var backBuffer:h3d.mat.Texture;
 
+	public static var cubemapPass:Bool = false;
+
 	public function new() {
 		super();
 		defaultPass = new h3d.pass.Default("default");
@@ -103,23 +105,27 @@ class Renderer extends h3d.scene.Renderer {
 		renderPass(defaultPass, get("glowPre"));
 
 		// Glow pass
-		var glowObjects = get("glow");
-		if (!glowObjects.isEmpty()) {
-			ctx.engine.pushTarget(glowBuffer);
-			ctx.engine.clear(0);
-			renderPass(defaultPass, glowObjects);
-			bloomPass(ctx);
-			ctx.engine.popTarget();
-			copyPass.shader.texture = growBufferTemps[0];
-			copyPass.pass.blend(One, One);
-			copyPass.pass.depth(false, Always);
-			copyPass.render();
+		if (!cubemapPass) {
+			var glowObjects = get("glow");
+			if (!glowObjects.isEmpty()) {
+				ctx.engine.pushTarget(glowBuffer);
+				ctx.engine.clear(0);
+				renderPass(defaultPass, glowObjects);
+				bloomPass(ctx);
+				ctx.engine.popTarget();
+				copyPass.shader.texture = growBufferTemps[0];
+				copyPass.pass.blend(One, One);
+				copyPass.pass.depth(false, Always);
+				copyPass.render();
+			}
 		}
 		// Refraction pass
-		var refractObjects = get("refract");
-		if (!refractObjects.isEmpty()) {
-			h3d.pass.Copy.run(backBuffer, sfxBuffer);
-			renderPass(defaultPass, refractObjects);
+		if (!cubemapPass) {
+			var refractObjects = get("refract");
+			if (!refractObjects.isEmpty()) {
+				h3d.pass.Copy.run(backBuffer, sfxBuffer);
+				renderPass(defaultPass, refractObjects);
+			}
 		}
 
 		renderPass(defaultPass, get("alpha"), backToFront);
