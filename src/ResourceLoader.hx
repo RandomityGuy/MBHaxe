@@ -227,11 +227,29 @@ class ResourceLoader {
 	}
 
 	static function preloadShapes(onFinish:Void->Void) {
+		// var toloadfiles = [
+		// 	StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""),
+		// 	(Settings.optionsSettings.marbleCategoryIndex == 0)
+		// 	? "shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png" : "shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin +
+		// 	".marble.png"
+		// ];
 		var toloadfiles = [
 			StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""),
-			(Settings.optionsSettings.marbleCategoryIndex == 0)
-			? "shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png" : "shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin +
-			".marble.png"
+			"particles/star.png",
+			"particles/smoke.png",
+			"particles/burst.png",
+			"sound/rolling_hard.wav",
+			"sound/sliding.wav",
+			"sound/use_gyrocopter.wav",
+			"sound/bouncehard1.wav",
+			"sound/bouncehard2.wav",
+			"sound/bouncehard3.wav",
+			"sound/bouncehard4.wav",
+			"sound/mega_roll.wav",
+			"shapes/balls/marble20.normal.png",
+			"shapes/balls/marble18.normal.png",
+			"shapes/balls/marble01.normal.png",
+			"shapes/balls/marble02.normal.png",
 		];
 		// var toloaddirs = [];
 		// var filestats = fileSystem.dir("shapes");

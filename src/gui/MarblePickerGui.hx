@@ -302,14 +302,16 @@ class MarblePickerGui extends GuiImage {
 			Settings.optionsSettings.marbleSkin = selectedMarble.skin;
 			Settings.optionsSettings.marbleModel = selectedMarble.dts;
 			Settings.optionsSettings.marbleShader = selectedMarble.shader;
-			@:privateAccess MarbleGame.instance.previewWorld.removeMarble(myMarb);
-			@:privateAccess MarbleGame.instance.previewWorld.spawnMarble(marb -> {
-				var spawnPos = @:privateAccess MarbleGame.instance.scene.camera.pos.add(new Vector(0, 1, 1));
-				var velAdd = new Vector((1 - 2 * Math.random()) * 2, (1 - 2 * Math.random()) * 1.5, (1 - 2 * Math.random()) * 1);
-				velAdd = velAdd.add(new Vector(0, 3, 0));
-				marb.setMarblePosition(spawnPos.x, spawnPos.y, spawnPos.z);
-				marb.velocity.load(velAdd);
-				myMarb = marb;
+			ResourceLoader.load(Settings.optionsSettings.marbleModel).entry.load(() -> {
+				@:privateAccess MarbleGame.instance.previewWorld.removeMarble(myMarb);
+				@:privateAccess MarbleGame.instance.previewWorld.spawnMarble(marb -> {
+					var spawnPos = @:privateAccess MarbleGame.instance.scene.camera.pos.add(new Vector(0, 1, 1));
+					var velAdd = new Vector((1 - 2 * Math.random()) * 2, (1 - 2 * Math.random()) * 1.5, (1 - 2 * Math.random()) * 1);
+					velAdd = velAdd.add(new Vector(0, 3, 0));
+					marb.setMarblePosition(spawnPos.x, spawnPos.y, spawnPos.z);
+					marb.velocity.load(velAdd);
+					myMarb = marb;
+				});
 			});
 			return true;
 		}
