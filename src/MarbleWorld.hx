@@ -1,5 +1,6 @@
 package src;
 
+import src.Radar;
 import gui.LevelSelectGui;
 import h3d.scene.fwd.Light;
 import rewind.RewindManager;
@@ -94,6 +95,7 @@ class MarbleWorld extends Scheduler {
 
 	var playGui:PlayGui;
 	var loadingGui:LoadingGui;
+	var radar:Radar;
 
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
@@ -281,6 +283,8 @@ class MarbleWorld extends Scheduler {
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
+		this.radar = new Radar(this, this.scene2d);
+		radar.init();
 
 		var worker = new ResourceLoaderWorker(() -> {
 			var renderer = cast(this.scene.renderer, src.Renderer);
@@ -452,6 +456,8 @@ class MarbleWorld extends Scheduler {
 			this.gemCount = 0;
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 		}
+
+		radar.reset();
 
 		// Record/Playback trapdoor and landmine states
 		if (full) {
@@ -992,6 +998,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
+		radar.update(dt);
 		this.updateGameState();
 		this.updateBlast(timeState);
 		ProfilerUI.measure("updateDTS");
@@ -1758,6 +1765,8 @@ class MarbleWorld extends Scheduler {
 				Settings.levelStatistics[mission.path].totalTime += this.timeState.timeSinceLoad;
 			}
 		}
+
+		radar.dispose();
 
 		if (this.playGui != null)
 			this.playGui.dispose();
