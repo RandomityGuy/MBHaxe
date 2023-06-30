@@ -15,7 +15,7 @@ class UVRotAnim extends hxsl.Shader {
 			var vx = v.x * c - v.y * s;
 			var vy = v.x * s + v.y * c;
 
-			calculatedUV += vec2(offset.x + vx, offset.y + vy);
+			calculatedUV = vec2(offset.x + vx, offset.y + vy);
 		}
 	};
 

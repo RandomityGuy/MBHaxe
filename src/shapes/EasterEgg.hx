@@ -1,5 +1,6 @@
 package shapes;
 
+import gui.AchievementsGui;
 import src.Settings;
 import mis.MissionElement.MissionElementItem;
 import src.ResourceLoader;
@@ -24,6 +25,7 @@ class EasterEgg extends PowerUp {
 			Settings.easterEggs.set(this.level.mission.path, this.level.timeState.currentAttemptTime);
 			this.pickupSound = ResourceLoader.getResource("data/sound/easter_egg.wav", ResourceLoader.getAudio, this.soundResources);
 			this.customPickupMessage = "You found a new egg! Yeah!";
+			AchievementsGui.check();
 		} else {
 			this.pickupSound = ResourceLoader.getResource("data/sound/pu_easter.wav", ResourceLoader.getAudio, this.soundResources);
 			this.customPickupMessage = "You already found this egg!";

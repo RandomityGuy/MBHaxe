@@ -81,7 +81,10 @@ class ExitGameDlg extends GuiImage {
 			MarbleGame.canvas.pushDialog(new OptionsListGui(true));
 		}, 20);
 		btnList.addButton(2, "Leaderboards", (evt) -> {});
-		btnList.addButton(2, "Achievements", (evt) -> {});
+		btnList.addButton(2, "Achievements", (evt) -> {
+			MarbleGame.canvas.popDialog(this);
+			MarbleGame.canvas.pushDialog(new AchievementsGui(true));
+		});
 		btnList.addButton(4, "Main Menu", (evt) -> {
 			yesFunc(btnList);
 			MarbleGame.canvas.setContent(new MainMenuGui());

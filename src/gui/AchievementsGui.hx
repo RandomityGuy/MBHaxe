@@ -9,184 +9,309 @@ import src.Mission;
 import src.MissionList;
 
 class AchievementsGui extends GuiImage {
-	public function new() {
-		var img = ResourceLoader.getImage("data/ui/achiev/window.png");
-		super(img.resource.toTile());
-		this.horizSizing = Center;
-		this.vertSizing = Center;
-		this.position = new Vector(73, -21);
-		this.extent = new Vector(493, 512);
+	var innerCtrl:GuiControl;
+	var btnList:GuiXboxList;
 
-		var achiev = new GuiImage(ResourceLoader.getResource("data/ui/achiev/achiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		achiev.position = new Vector(152, 26);
-		achiev.extent = new Vector(176, 50);
-		this.addChild(achiev);
+	public function new(isPause:Bool = false) {
+		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
+		super(res);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var domcasual64 = domcasual32b.toSdfFont(cast 58 * Settings.uiScale, MultiChannel);
-		var domcasual24 = domcasual32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		this.horizSizing = Width;
+		this.vertSizing = Height;
+		this.position = new Vector();
+		this.extent = new Vector(640, 480);
 
-		function mlFontLoader(text:String) {
-			switch (text) {
-				case "DomCasual24":
-					return domcasual24;
-				case "Arial14":
-					return arial14;
-				default:
-					return null;
+		var scene2d = MarbleGame.canvas.scene2d;
+
+		var offsetX = (scene2d.width - 1280) / 2;
+		var offsetY = (scene2d.height - 720) / 2;
+
+		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
+
+		innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		innerCtrl.horizSizing = Width;
+		innerCtrl.vertSizing = Height;
+		this.addChild(innerCtrl);
+
+		var achievementsWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/achievementWindow.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		achievementsWnd.horizSizing = Center;
+		achievementsWnd.vertSizing = Center;
+		achievementsWnd.position = new Vector(25, 58);
+		achievementsWnd.extent = new Vector(600, 480);
+		innerCtrl.addChild(achievementsWnd);
+
+		function imgLoader(path:String) {
+			switch (path) {
+				case "locked":
+					return ResourceLoader.getResource("data/ui/xbox/DemoOutOfTimeIcon.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unlocked":
+					return ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
 			}
+			return null;
 		}
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed, disabled];
+		var curSelection = -1;
+
+		check(); // Check achievements
+
+		var achNameDisplays = [
+			"<img src='locked'></img>Timely Marble",
+			"<img src='locked'></img>Apprentice's Badge",
+			"<img src='locked'></img>Journeyman's Badge",
+			"<img src='locked'></img>Adept's Badge",
+			"<img src='locked'></img>Marble-fu Initiate",
+			"<img src='locked'></img>Marble-fu Master",
+			"<img src='locked'></img>Marble-fu Transcendent",
+			"<img src='locked'></img>Egg Seeker",
+			"<img src='locked'></img>Egg Basket"
+		];
+		if (Settings.achievementProgression & 1 == 1)
+			achNameDisplays[0] = "<img src='unlocked'></img>Timely Marble";
+		if (Settings.achievementProgression & 2 == 2)
+			achNameDisplays[1] = "<img src='unlocked'></img>Apprentice's Badge";
+		if (Settings.achievementProgression & 4 == 4)
+			achNameDisplays[2] = "<img src='unlocked'></img>Journeyman's Badge";
+		if (Settings.achievementProgression & 8 == 8)
+			achNameDisplays[3] = "<img src='unlocked'></img>Adept's Badge";
+		if (Settings.achievementProgression & 16 == 16)
+			achNameDisplays[4] = "<img src='unlocked'></img>Marble-fu Initiate";
+		if (Settings.achievementProgression & 32 == 32)
+			achNameDisplays[5] = "<img src='unlocked'></img>Marble-fu Master";
+		if (Settings.achievementProgression & 64 == 64)
+			achNameDisplays[6] = "<img src='unlocked'></img>Marble-fu Transcendent";
+		if (Settings.achievementProgression & 128 == 128)
+			achNameDisplays[7] = "<img src='unlocked'></img>Egg Seeker";
+		if (Settings.achievementProgression & 256 == 256)
+			achNameDisplays[8] = "<img src='unlocked'></img>Egg Basket";
+
+		var achievementsList = new GuiMLTextListCtrl(arial14, achNameDisplays, imgLoader);
+
+		achievementsList.selectedColor = 0xF29515;
+		achievementsList.selectedFillColor = 0xEBEBEB;
+		achievementsList.position = new Vector(25, 22);
+		achievementsList.extent = new Vector(550, 480);
+		achievementsList.scrollable = true;
+		achievementsList.onSelectedFunc = (sel) -> {
+			curSelection = sel;
 		}
+		achievementsWnd.addChild(achievementsList);
 
-		var achievText = new GuiMLText(domcasual32, mlFontLoader);
-		achievText.position = new Vector(156, 60);
-		achievText.extent = new Vector(262, 410);
-		achievText.text.textColor = 0;
-		achievText.text.text = '<font face="DomCasual24">Amateur Marbler</font><br/><font face="Arial14">Beat all Beginner levels.</font><br/>
-<font face="DomCasual24">Experienced Marbler</font><br/><font face="Arial14">Beat all Intermediate levels.</font><br/>
-<font face="DomCasual24">Pro Marbler</font><br/><font face="Arial14">Beat all Advanced levels.</font><br/>
-<font face="DomCasual24">Skilled Marbler</font><br/><font face="Arial14">Beat all Expert Levels</font><br/>
-<font face="DomCasual24">Marble Master</font><br/><font face="Arial14">Beat all of the Platinum Times.</font><br/>
-<font face="DomCasual24">Legendary Marbler</font><br/><font face="Arial14">Beat all of the Ultimate Times.</font><br/>
-<font face="DomCasual24">Egg Seeker</font><br/><font face="Arial14">Find any Easter Egg.</font><br/>
-<font face="DomCasual24">Easter Bunny</font><br/><font face="Arial14">Find all of the Easter Eggs.</font>';
+		var bottomBar = new GuiControl();
+		bottomBar.position = new Vector(0, 590);
+		bottomBar.extent = new Vector(640, 200);
+		bottomBar.horizSizing = Width;
+		bottomBar.vertSizing = Bottom;
+		innerCtrl.addChild(bottomBar);
 
-		this.addChild(achievText);
+		var backButton = new GuiXboxButton("Back", 160);
+		backButton.position = new Vector(400, 0);
+		backButton.vertSizing = Bottom;
+		backButton.horizSizing = Right;
+		backButton.gamepadAccelerator = ["B"];
+		if (isPause)
+			backButton.pressedAction = (e) -> {
+				MarbleGame.canvas.popDialog(this);
+				MarbleGame.instance.showPauseUI();
+			}
+		else
+			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
+		bottomBar.addChild(backButton);
 
-		var bmp1 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp1.position = new Vector(39, 62);
-		bmp1.extent = new Vector(113, 44);
-		this.addChild(bmp1);
+		var nextButton = new GuiXboxButton("Details", 160);
+		nextButton.position = new Vector(960, 0);
+		nextButton.vertSizing = Bottom;
+		nextButton.horizSizing = Right;
+		nextButton.pressedAction = (e) -> {
+			var desc = "Select an achievement from the list.";
+			var selection = curSelection;
+			switch (selection) {
+				case 0: desc = "Finish any level under par time.";
+				case 1: desc = "Complete all Beginner levels.";
+				case 2: desc = "Complete all Intermediate levels.";
+				case 3: desc = "Complete all Advanced levels.";
+				case 4: desc = "Finish all Beginner levels under par time.";
+				case 5: desc = "Finish all Intermediate levels under par time.";
+				case 6: desc = "Finish all Advanced levels under par time.";
+				case 7: desc = "Find any hidden easter egg.";
+				case 8: desc = "Find all twenty easter eggs.";
+				case 9: desc = "Get first place in a multiplayer match.";
+				case 10: desc = "Get 75 points in a multiplayer match.";
+				case 11: desc = "Collect 2,000 total points in multiplayer.";
+				case 12: desc = "Complete all Bonus levels.";
+				case 13: desc = "Finish all Bonus levels under par time.";
+			}
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg(desc));
+		};
+		bottomBar.addChild(nextButton);
+	}
 
-		var bmp2 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp2.position = new Vector(35, 115);
-		bmp2.extent = new Vector(117, 44);
-		this.addChild(bmp2);
-
-		var bmp3 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp3.position = new Vector(30, 168);
-		bmp3.extent = new Vector(122, 44);
-		this.addChild(bmp3);
-
-		var bmp4 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp4.position = new Vector(30, 221);
-		bmp4.extent = new Vector(122, 44);
-		this.addChild(bmp4);
-
-		var bmp5 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp5.position = new Vector(36, 274);
-		bmp5.extent = new Vector(116, 44);
-		this.addChild(bmp5);
-
-		var bmp6 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp6.position = new Vector(37, 327);
-		bmp6.extent = new Vector(115, 44);
-		this.addChild(bmp6);
-
-		var bmp7 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp7.position = new Vector(38, 380);
-		bmp7.extent = new Vector(114, 44);
-		this.addChild(bmp7);
-
-		var bmp8 = new GuiImage(ResourceLoader.getResource("data/ui/achiev/nonachiev.png", ResourceLoader.getImage, this.imageResources).toTile());
-		bmp8.position = new Vector(39, 433);
-		bmp8.extent = new Vector(113, 44);
-		this.addChild(bmp8);
-
-		var closeButton = new GuiButton(loadButtonImages("data/ui/achiev/close"));
-		closeButton.position = new Vector(355, 426);
-		closeButton.extent = new Vector(95, 45);
-		closeButton.pressedAction = (e) -> {
-			MarbleGame.canvas.popDialog(this);
-		}
-		this.addChild(closeButton);
-
+	public static function check() {
 		// Now do the actual achievement check logic
 		var completions:Map<String, Array<{
 			mission:Mission,
 			beatPar:Bool,
-			beatPlatinum:Bool,
-			beatUltimate:Bool,
 			beaten:Bool
 		}>> = [];
 
-		var totalPlatinums = 0;
-		var totalUltimates = 0;
 		var totalEggs = 0;
+		var totalPars = 0;
 
-		for (difficulty => missions in MissionList.missionList["platinum"]) {
+		var notifies = 0;
+
+		for (difficulty => missions in MissionList.missionList["ultra"]) {
 			completions.set(difficulty, missions.map(mis -> {
 				var misScores = Settings.getScores(mis.path);
 				if (misScores.length == 0) {
 					return {
 						mission: mis,
 						beatPar: false,
-						beatPlatinum: false,
-						beatUltimate: false,
 						beaten: false
 					}
 				}
 				var bestTime = misScores[0];
 				var beatPar = bestTime.time < mis.qualifyTime;
-				var beatPlatinum = bestTime.time < mis.goldTime;
-				var beatUltimate = bestTime.time < mis.ultimateTime;
-				var beaten = beatPar || beatPlatinum || beatUltimate;
+				if (beatPar)
+					totalPars++;
+				var beaten = true;
 
-				if (beatPlatinum)
-					totalPlatinums++;
-				if (beatUltimate)
-					totalUltimates++;
 				if (Settings.easterEggs.exists(mis.path))
 					totalEggs++;
 				return {
 					mission: mis,
 					beatPar: beatPar,
-					beatPlatinum: beatPlatinum,
-					beatUltimate: beatUltimate,
 					beaten: beaten
 				};
 			}));
 		}
 
-		var beginnerFinishAchiev = completions["beginner"].filter(x -> !x.beatPar).length == 0;
-		var intermediateFinishAchiev = completions["intermediate"].filter(x -> !x.beatPar).length == 0;
-		var advancedFinishAchiev = completions["advanced"].filter(x -> !x.beatPar).length == 0;
-		var expertFinishAchiev = completions["expert"].filter(x -> !x.beatPar).length == 0;
-		var beatPlatinumAchiev = totalPlatinums == 120;
-		var beatUltimateAchiev = totalUltimates == 120;
-		var easterEggAny = totalEggs != 0;
-		var easterEggAll = totalEggs == 96;
+		// Timely marble
+		if (Settings.achievementProgression & 1 != 1) {
+			if (totalPars > 0) {
+				Settings.achievementProgression |= 1;
+				notifies |= 1;
+			}
+		}
 
-		if (beginnerFinishAchiev)
-			bmp1.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n1.png", ResourceLoader.getImage, this.imageResources).toTile();
-		if (intermediateFinishAchiev)
-			bmp2.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n2.png", ResourceLoader.getImage, this.imageResources).toTile();
-		if (advancedFinishAchiev)
-			bmp3.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n3.png", ResourceLoader.getImage, this.imageResources).toTile();
-		if (expertFinishAchiev)
-			bmp4.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n4.png", ResourceLoader.getImage, this.imageResources).toTile();
-		if (beatPlatinumAchiev)
-			bmp5.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n6.png", ResourceLoader.getImage, this.imageResources).toTile();
-		if (beatUltimateAchiev)
-			bmp6.bmp.tile = ResourceLoader.getResource("data/ui/achiev/n5.png", ResourceLoader.getImage, this.imageResources).toTile();
-		if (easterEggAny)
-			bmp7.bmp.tile = ResourceLoader.getResource("data/ui/achiev/1.png", ResourceLoader.getImage, this.imageResources).toTile();
-		if (easterEggAll)
-			bmp8.bmp.tile = ResourceLoader.getResource("data/ui/achiev/2.png", ResourceLoader.getImage, this.imageResources).toTile();
+		// All Beginners
+		if (Settings.achievementProgression & 2 != 2) {
+			if (completions.get("beginner")
+				.filter(x -> x.beaten)
+				.length == completions.get("beginner")
+				.length) {
+				Settings.achievementProgression |= 2;
+				notifies |= 2;
+			}
+		}
+
+		// All Intermediates
+		if (Settings.achievementProgression & 4 != 4) {
+			if (completions.get("intermediate")
+				.filter(x -> x.beaten)
+				.length == completions.get("intermediate")
+				.length) {
+				Settings.achievementProgression |= 4;
+				notifies |= 4;
+			}
+		}
+
+		// All Advanced
+		if (Settings.achievementProgression & 8 != 8) {
+			if (completions.get("advanced")
+				.filter(x -> x.beaten)
+				.length == completions.get("advanced")
+				.length) {
+				Settings.achievementProgression |= 8;
+				notifies |= 8;
+			}
+		}
+
+		// All Beginner pars
+		if (Settings.achievementProgression & 16 != 16) {
+			if (completions.get("beginner")
+				.filter(x -> x.beatPar)
+				.length == completions.get("beginner")
+				.length) {
+				Settings.achievementProgression |= 16;
+				notifies |= 16;
+			}
+		}
+
+		// All Intermediate pars
+		if (Settings.achievementProgression & 32 != 32) {
+			if (completions.get("intermediate")
+				.filter(x -> x.beatPar)
+				.length == completions.get("intermediate")
+				.length) {
+				Settings.achievementProgression |= 32;
+				notifies |= 32;
+			}
+		}
+
+		// All Advanced pars
+		if (Settings.achievementProgression & 64 != 64) {
+			if (completions.get("advanced")
+				.filter(x -> x.beatPar)
+				.length == completions.get("advanced")
+				.length) {
+				Settings.achievementProgression |= 64;
+				notifies |= 64;
+			}
+		}
+
+		// Egg Seeker
+		if (Settings.achievementProgression & 128 != 128) {
+			if (totalEggs >= 1) {
+				Settings.achievementProgression |= 128;
+				notifies |= 128;
+			}
+		}
+
+		// Egg Basket
+		if (Settings.achievementProgression & 256 != 256) {
+			if (totalEggs >= 20) {
+				Settings.achievementProgression |= 256;
+				notifies |= 256;
+			}
+		}
+
+		var showdlgs = [];
+		for (i in 0...9) {
+			if (notifies & (1 << i) > 0) {
+				var popup = new AchievementPopupDlg(i + 1);
+				showdlgs.push(popup);
+			}
+		}
+		if (showdlgs.length > 1) {
+			for (i in 0...showdlgs.length - 1) {
+				showdlgs[i].onFinish = () -> {
+					MarbleGame.canvas.pushDialog(showdlgs[i + 1]);
+				}
+			}
+		}
+		if (showdlgs.length != 0)
+			MarbleGame.canvas.pushDialog(showdlgs[0]); // Start off!
+
+		return notifies;
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+
+		super.onResize(width, height);
 	}
 }

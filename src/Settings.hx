@@ -191,6 +191,8 @@ class Settings {
 
 	public static var levelStatistics:Map<String, PlayStatistics> = [];
 
+	public static var achievementProgression:Int;
+
 	public static var highscoreName = "";
 
 	public static var uiScale = 1.0;
@@ -250,6 +252,7 @@ class Settings {
 			marbleModel: optionsSettings.marbleModel,
 			marbleCategoryIndex: optionsSettings.marbleCategoryIndex,
 			marbleShader: optionsSettings.marbleShader,
+			achievementProgression: achievementProgression
 		};
 		var scoreCount = 0;
 		var eggCount = 0;
@@ -379,6 +382,7 @@ class Settings {
 			if (json.stats != null) {
 				playStatistics = json.stats;
 			}
+			achievementProgression = json.achievementProgression;
 			if (json.levelStatistics != null) {
 				var levelStatData:DynamicAccess<PlayStatistics> = json.levelStatistics;
 				for (key => value in levelStatData) {
@@ -409,6 +413,8 @@ class Settings {
 			if (optionsSettings.rewindTimescale == null) {
 				optionsSettings.rewindTimescale = 1;
 			}
+			if (achievementProgression == null)
+				achievementProgression = 0;
 			#end
 			highscoreName = json.highscoreName;
 		} else {
