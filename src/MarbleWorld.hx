@@ -1,5 +1,6 @@
 package src;
 
+import gui.AchievementsGui;
 import src.Radar;
 import gui.LevelSelectGui;
 import h3d.scene.fwd.Light;
@@ -1390,8 +1391,18 @@ class MarbleWorld extends Scheduler {
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
-			if (!this.isWatching)
-				this.schedule(this.timeState.currentAttemptTime + 5, () -> cast showFinishScreen());
+			if (!this.isWatching) {
+				var notifies = AchievementsGui.check();
+				var delay = 5.0;
+				var achDelay = 0.0;
+				for (i in 0...9) {
+					if (notifies & (1 << i) > 0)
+						achDelay += 3;
+				}
+				if (notifies > 0)
+					achDelay += 0.5;
+				this.schedule(this.timeState.currentAttemptTime + Math.max(delay, achDelay), () -> cast showFinishScreen());
+			}
 			// Stop the ongoing sounds
 			if (timeTravelSound != null) {
 				timeTravelSound.stop();

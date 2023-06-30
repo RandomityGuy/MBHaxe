@@ -106,7 +106,7 @@ class EndPad extends DtsObject {
 			material.mainPass.setPassName("glowPre");
 			material.mainPass.enableLights = false;
 
-			var rotshader = new shaders.UVRotAnim(-0.5, -0.5, 1);
+			var rotshader = new shaders.UVRotAnim(0.5, 0.5, 1);
 			material.mainPass.addShader(rotshader);
 
 			var thisprops:Dynamic = material.getDefaultProps();

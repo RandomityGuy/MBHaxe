@@ -64,7 +64,9 @@ class MainMenuGui extends GuiImage {
 			cast(this.parent, Canvas).setContent(new DifficultySelectGui());
 		});
 		btnList.addButton(2, "Leaderboards", (e) -> {}, 20);
-		btnList.addButton(2, "Achievements", (e) -> {});
+		btnList.addButton(2, "Achievements", (e) -> {
+			cast(this.parent, Canvas).setContent(new AchievementsGui());
+		});
 		btnList.addButton(3, "Replays", (sender) -> {
 			#if hl
 			MarbleGame.canvas.setContent(new ReplayCenterGui());
