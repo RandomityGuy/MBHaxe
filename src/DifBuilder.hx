@@ -933,15 +933,15 @@ class DifBuilder {
 						uvs.push(uv3);
 						uvs.push(uv2);
 						uvs.push(uv1);
-						t.push(new Point(tri.t3.x, tri.t3.y, tri.t3.z));
-						t.push(new Point(tri.t2.x, tri.t2.y, tri.t2.z));
-						t.push(new Point(tri.t1.x, tri.t1.y, tri.t1.z));
-						b.push(new Point(tri.b3.x, tri.b3.y, tri.b3.z));
-						b.push(new Point(tri.b2.x, tri.b2.y, tri.b2.z));
-						b.push(new Point(tri.b1.x, tri.b1.y, tri.b1.z));
-						n.push(new Point(tri.n3.x, tri.n3.y, tri.n3.z));
-						n.push(new Point(tri.n2.x, tri.n2.y, tri.n2.z));
-						n.push(new Point(tri.n1.x, tri.n1.y, tri.n1.z));
+						t.push(new Point(-tri.t3.x, tri.t3.y, tri.t3.z));
+						t.push(new Point(-tri.t2.x, tri.t2.y, tri.t2.z));
+						t.push(new Point(-tri.t1.x, tri.t1.y, tri.t1.z));
+						b.push(new Point(-tri.b3.x, tri.b3.y, tri.b3.z));
+						b.push(new Point(-tri.b2.x, tri.b2.y, tri.b2.z));
+						b.push(new Point(-tri.b1.x, tri.b1.y, tri.b1.z));
+						n.push(new Point(-tri.n3.x, tri.n3.y, tri.n3.z));
+						n.push(new Point(-tri.n2.x, tri.n2.y, tri.n2.z));
+						n.push(new Point(-tri.n1.x, tri.n1.y, tri.n1.z));
 					}
 					var prim = new Polygon(points);
 					prim.uvs = uvs;

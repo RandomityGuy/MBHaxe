@@ -43,17 +43,17 @@ class NoiseTileMaterial extends hxsl.Shader {
 			var objToTangentSpace = mat3(input.t, input.b, input.n);
 			outLightVec = vec4(0);
 			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
-			inLightVec.x *= -1;
+			// inLightVec.x *= -1;
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
-			eyePos.x *= -1;
+			// eyePos.x *= -1;
 			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
 			outLightVec.xyz = -inLightVec * objToTangentSpace;
 			var p = input.position;
-			p.x *= -1;
+			// p.x *= -1;
 			outPos = (p / 100.0) * objToTangentSpace;
 			outEyePos = (eyePos / 100.0) * objToTangentSpace;
 			var n = input.normal;
-			n.x *= -1;
+			// n.x *= -1;
 			outLightVec.w = step(0, dot(n, -inLightVec));
 		}
 		function fragment() {

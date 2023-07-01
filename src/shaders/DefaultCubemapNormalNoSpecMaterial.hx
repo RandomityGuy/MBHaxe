@@ -39,9 +39,9 @@ class DefaultCubemapNormalNoSpecMaterial extends hxsl.Shader {
 		function vertex() {
 			calculatedUV = input.uv;
 			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
-			inLightVec.x *= -1;
+			// inLightVec.x *= -1;
 			var pN = input.normal;
-			pN.x *= -1;
+			// pN.x *= -1;
 			outShading = vec4(saturate(dot(-inLightVec, pN)));
 			outShading.w = 1;
 			outShading *= vec4(1.08, 1.03, 0.90, 1);
@@ -49,10 +49,10 @@ class DefaultCubemapNormalNoSpecMaterial extends hxsl.Shader {
 			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
 			var cubeTrans = mat3(global.modelView);
 			var cubeEyePos = camera.position - global.modelView[3].xyz;
-			cubeEyePos.x *= -1;
+			// cubeEyePos.x *= -1;
 
 			var p = input.position;
-			p.x *= -1;
+			// p.x *= -1;
 
 			var cubeVertPos = p * cubeTrans;
 			var cubeNormal = (pN * cubeTrans).normalize();
