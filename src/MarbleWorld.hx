@@ -410,7 +410,11 @@ class MarbleWorld extends Scheduler {
 		// 	marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		// else
 		// 	marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+		var gameModeFiles = this.gameMode.getPreloadFiles();
 		for (file in marblefiles) {
+			worker.loadFile(file);
+		}
+		for (file in gameModeFiles) {
 			worker.loadFile(file);
 		}
 		worker.addTask(fwd -> {
