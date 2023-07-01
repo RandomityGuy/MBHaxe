@@ -958,6 +958,16 @@ class DifBuilder {
 							var retrievefunc = shaderMaterialDict[exactName];
 							shaderWorker.addTask(fwd -> {
 								retrievefunc(shad -> {
+									var zPass = material.mainPass.clone();
+									zPass.removeShader(material.textureShader);
+									var tx = zPass.getShader(h3d.shader.Texture);
+									zPass.removeShader(tx);
+									zPass.setColorMask(false, false, false, false);
+									zPass.depthWrite = true;
+									zPass.setPassName("zPass");
+									material.addPass(zPass);
+
+									material.mainPass.depthTest = LessEqual;
 									material.mainPass.removeShader(material.textureShader);
 									material.mainPass.addShader(shad);
 									var thisprops:Dynamic = material.getDefaultProps();
@@ -965,6 +975,7 @@ class DifBuilder {
 									material.props = thisprops;
 									material.shadows = false;
 									material.receiveShadows = true;
+									material.mainPass.setPassName("interior");
 									fwd();
 								});
 							});

@@ -200,6 +200,8 @@ class MarbleWorld extends Scheduler {
 	var oobSchedule:Float;
 	var oobSchedule2:Float;
 
+	var _cubemapNeedsUpdate:Bool = false;
+
 	var lock:Bool = false;
 
 	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission, record:Bool = false) {
@@ -1044,6 +1046,7 @@ class MarbleWorld extends Scheduler {
 		for (marble in marbles) {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
 		}
+		_cubemapNeedsUpdate = true;
 		if (this.rewinding) {
 			// Update camera separately
 			marble.camera.update(timeState.currentAttemptTime, realDt);
@@ -1086,8 +1089,12 @@ class MarbleWorld extends Scheduler {
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
 		if (this.marble != null && this.marble.cubemapRenderer != null) {
-			this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
-			this.marble.cubemapRenderer.render(e, 0.002);
+			ProfilerUI.measure("renderCubemap");
+			if (_cubemapNeedsUpdate) {
+				this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
+				this.marble.cubemapRenderer.render(e);
+				_cubemapNeedsUpdate = false;
+			}
 		}
 	}
 

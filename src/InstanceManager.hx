@@ -241,6 +241,34 @@ class InstanceManager {
 
 						minfo.meshbatch.material.addPass(gpass);
 					}
+					var zPass = mat.getPass("zPass");
+					if (zPass != null) {
+						var gpass = zPass.clone();
+						gpass.enableLights = false;
+						gpass.depthTest = zPass.depthTest;
+						gpass.blendSrc = zPass.blendSrc;
+						gpass.blendDst = zPass.blendDst;
+						gpass.blendOp = zPass.blendOp;
+						gpass.blendAlphaSrc = zPass.blendAlphaSrc;
+						gpass.blendAlphaDst = zPass.blendAlphaDst;
+						gpass.blendAlphaOp = zPass.blendAlphaOp;
+						gpass.colorMask = zPass.colorMask;
+						minfoshaders = [];
+
+						for (shader in gpass.getShaders()) {
+							minfoshaders.push(shader);
+						}
+						for (shader in minfoshaders)
+							gpass.removeShader(shader);
+						var addshaders = [];
+						for (shader in zPass.getShaders()) {
+							addshaders.push(shader);
+						}
+						for (shader in addshaders)
+							gpass.addShader(shader);
+
+						minfo.meshbatch.material.addPass(gpass);
+					}
 					// var dtsshader = mat.mainPass.getShader(DtsTexture);
 					// if (dtsshader != null) {
 					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);

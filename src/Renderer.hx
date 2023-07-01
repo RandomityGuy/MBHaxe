@@ -8,6 +8,8 @@ import h3d.Vector;
 import shaders.Blur;
 import h3d.pass.ScreenFx;
 import h3d.mat.DepthBuffer;
+import src.ProfilerUI;
+import src.Settings;
 
 class Renderer extends h3d.scene.Renderer {
 	var def(get, never):h3d.pass.Base;
@@ -62,12 +64,8 @@ class Renderer extends h3d.scene.Renderer {
 	}
 
 	override function getPassByName(name:String):h3d.pass.Base {
-		if (name == "alpha"
-			|| name == "additive"
-			|| name == "glowPre"
-			|| name == "glow"
-			|| name == "refract"
-			|| name == "glowPreNoRender")
+		if (name == "alpha" || name == "additive" || name == "glowPre" || name == "glow" || name == "refract" || name == "glowPreNoRender"
+			|| name == "interior" || name == "zPass")
 			return defaultPass;
 		return super.getPassByName(name);
 	}
@@ -99,13 +97,32 @@ class Renderer extends h3d.scene.Renderer {
 		// ctx.engine.pushTarget(backBuffers[0]);
 		// ctx.engine.clear(0, 1);
 
-		renderPass(defaultPass, get("sky"));
-		renderPass(defaultPass, get("skyshape"), backToFront);
-		renderPass(defaultPass, get("default"));
-		renderPass(defaultPass, get("glowPre"));
+		if (!cubemapPass)
+			ProfilerUI.measure("sky");
+		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 1) {
+			renderPass(defaultPass, get("sky"));
+			renderPass(defaultPass, get("skyshape"), backToFront);
+		}
+		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 2) {
+			if (!cubemapPass)
+				ProfilerUI.measure("interiorZPass");
+			renderPass(defaultPass, get("zPass"));
+			if (!cubemapPass)
+				ProfilerUI.measure("interior");
+			renderPass(defaultPass, get("interior"));
+		}
+		if (!cubemapPass)
+			ProfilerUI.measure("render");
+		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 3) {
+			renderPass(defaultPass, get("default"));
+		}
+		if (!cubemapPass)
+			ProfilerUI.measure("glow");
+		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4)
+			renderPass(defaultPass, get("glowPre"));
 
 		// Glow pass
-		if (!cubemapPass) {
+		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
 			var glowObjects = get("glow");
 			if (!glowObjects.isEmpty()) {
 				ctx.engine.pushTarget(glowBuffer);
@@ -119,17 +136,23 @@ class Renderer extends h3d.scene.Renderer {
 				copyPass.render();
 			}
 		}
+		if (!cubemapPass)
+			ProfilerUI.measure("refract");
 		// Refraction pass
-		if (!cubemapPass) {
+		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
 			var refractObjects = get("refract");
 			if (!refractObjects.isEmpty()) {
 				h3d.pass.Copy.run(backBuffer, sfxBuffer);
 				renderPass(defaultPass, refractObjects);
 			}
 		}
+		if (!cubemapPass)
+			ProfilerUI.measure("alpha");
 
-		renderPass(defaultPass, get("alpha"), backToFront);
-		renderPass(defaultPass, get("additive"));
+		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
+			renderPass(defaultPass, get("alpha"), backToFront);
+			renderPass(defaultPass, get("additive"));
+		}
 
 		ctx.engine.popTarget();
 

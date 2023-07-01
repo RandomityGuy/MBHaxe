@@ -36,7 +36,6 @@ typedef OptionsSettings = {
 	var fovX:Int;
 	var frameRateVis:Bool;
 	var oobInsults:Bool;
-	var reflectiveMarble:Bool;
 	var marbleIndex:Int;
 	var marbleCategoryIndex:Int;
 	var marbleSkin:String;
@@ -44,6 +43,7 @@ typedef OptionsSettings = {
 	var marbleShader:String;
 	var rewindEnabled:Bool;
 	var rewindTimescale:Float;
+	var reflectionDetail:Int;
 }
 
 typedef ControlsSettings = {
@@ -119,7 +119,6 @@ class Settings {
 		fovX: 90,
 		frameRateVis: true,
 		oobInsults: true,
-		reflectiveMarble: true,
 		marbleIndex: 0,
 		marbleCategoryIndex: 0,
 		marbleSkin: "base",
@@ -127,6 +126,7 @@ class Settings {
 		marbleShader: "Default",
 		rewindEnabled: false,
 		rewindTimescale: 1,
+		reflectionDetail: 3,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -352,6 +352,10 @@ class Settings {
 				optionsSettings.rewindEnabled = false;
 			if (optionsSettings.rewindTimescale == 0 #if js || optionsSettings.rewindTimescale == null #end)
 				optionsSettings.rewindTimescale = 1;
+			#if js
+			if (optionsSettings.reflectionDetail == null)
+				optionsSettings.reflectionDetail = 2;
+			#end
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
