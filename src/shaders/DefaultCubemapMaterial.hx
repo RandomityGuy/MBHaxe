@@ -45,28 +45,28 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 		}
 		function vertex() {
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
-			eyePos.x *= -1;
+			// eyePos.x *= -1;
 			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
 			var cubeTrans = mat3(global.modelView);
 			var cubeEyePos = camera.position - global.modelView[3].xyz;
-			cubeEyePos.x *= -1;
+			// cubeEyePos.x *= -1;
 			calculatedUV = input.uv;
 
 			var objToTangentSpace = mat3(input.t, input.b, input.n);
 			outLightVec = vec4(0);
 
 			outNormal = input.normal;
-			outNormal.x *= -1;
+			// outNormal.x *= -1;
 
 			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
-			inLightVec.x *= -1;
+			// inLightVec.x *= -1;
 			outLightVec.xyz = -inLightVec * objToTangentSpace;
 			// var cubeVertPos = input.position * cubeTrans;
 			// var cubeNormal = input.normal * cubeTrans;
 			// var eyeToVert = (cubeVertPos - cubeEyePos).normalize();
 			// outReflectVec = reflect(eyeToVert, cubeNormal);
 			var p = input.position;
-			p.x *= -1;
+			// p.x *= -1;
 			outPos = (p / 100.0) * objToTangentSpace;
 			outEyePos = (eyePos / 100.0) * objToTangentSpace;
 			outLightVec.w = step(-0.5, dot(outNormal, -inLightVec));

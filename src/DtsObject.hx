@@ -826,12 +826,15 @@ class DtsObject extends GameObject {
 				n2.scale(-1);
 			}
 
-			// t0.x *= -1;
-			// t1.x *= -1;
-			// t2.x *= -1;
-			// b0.x *= -1;
-			// b1.x *= -1;
-			// b2.x *= -1;
+			t0.x *= -1;
+			t1.x *= -1;
+			t2.x *= -1;
+			b0.x *= -1;
+			b1.x *= -1;
+			b2.x *= -1;
+			n0.x *= -1;
+			n1.x *= -1;
+			n2.x *= -1;
 
 			return [
 				{

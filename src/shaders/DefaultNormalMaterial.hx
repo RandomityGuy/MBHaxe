@@ -43,11 +43,11 @@ class DefaultNormalMaterial extends hxsl.Shader {
 			calculatedUV = input.uv;
 			outLightVec = vec4(0);
 			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
-			inLightVec.x *= -1;
+			// inLightVec.x *= -1;
 			var eyePos = camera.position * mat3x4(global.modelViewInverse);
-			eyePos.x *= -1;
+			// eyePos.x *= -1;
 			outNormal = input.normal;
-			outNormal.x *= -1;
+			// outNormal.x *= -1;
 			// eyePos /= vec3(global.modelViewInverse[0].x, global.modelViewInverse[1].y, global.modelViewInverse[2].z);
 			outLightVec.xyz = -inLightVec;
 			outLightVec.w = step(-0.5, dot(outNormal, -inLightVec));
@@ -56,7 +56,7 @@ class DefaultNormalMaterial extends hxsl.Shader {
 			outShading.w = 1;
 			outShading *= vec4(1.08, 1.03, 0.90, 1);
 			outPos = input.position;
-			outPos.x *= -1;
+			// outPos.x *= -1;
 		}
 		function fragment() {
 			// Diffuse part
