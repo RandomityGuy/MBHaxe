@@ -128,10 +128,9 @@ class Main extends hxd.App {
 
 	override function update(dt:Float) {
 		super.update(dt);
+		ProfilerUI.begin();
+		ProfilerUI.measure("updateBegin");
 		if (loaded) {
-			ProfilerUI.begin();
-			ProfilerUI.measure("updateBegin");
-
 			// try {
 			// timeAccumulator += dt;
 			// while (timeAccumulator > 1 / 60) {
@@ -154,9 +153,9 @@ class Main extends hxd.App {
 		if (loaded) {
 			ProfilerUI.measure("renderBegin");
 			marbleGame.render(e);
-			ProfilerUI.end();
 		}
 		super.render(e);
+		ProfilerUI.end();
 	}
 
 	static function main() {

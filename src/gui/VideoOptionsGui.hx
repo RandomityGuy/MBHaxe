@@ -153,6 +153,21 @@ class VideoOptionsGui extends GuiImage {
 		}
 		innerCtrl.addChild(fovOpt);
 
+		yPos += 60;
+
+		var rfOpt = new GuiXboxOptionsList(1, "Reflection Detail", ["None", "Sky Only", "Level and Sky", "Level, Sky and Items", "Everything"], 0.35);
+
+		rfOpt.vertSizing = Bottom;
+		rfOpt.horizSizing = Right;
+		rfOpt.position = new Vector(380, yPos);
+		rfOpt.extent = new Vector(815, 94);
+		rfOpt.setCurrentOption(Settings.optionsSettings.reflectionDetail);
+		rfOpt.onChangeFunc = (idx) -> {
+			Settings.optionsSettings.reflectionDetail = idx;
+			return true;
+		}
+		innerCtrl.addChild(rfOpt);
+
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);

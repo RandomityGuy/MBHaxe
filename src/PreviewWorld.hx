@@ -73,6 +73,7 @@ class PreviewWorld extends Scheduler {
 	var itrAddTime:Float = 0;
 
 	var _loadToken = 0;
+	var _cubemapNeedsUpdate:Bool = false;
 
 	public function new(scene:Scene) {
 		this.scene = scene;
@@ -595,14 +596,18 @@ class PreviewWorld extends Scheduler {
 		for (marb in marbles) {
 			marb.update(timeState, this.collisionWorld, []);
 		}
+		_cubemapNeedsUpdate = true;
 		this.instanceManager.render();
 	}
 
 	public function render(e:h3d.Engine) {
 		for (marble in marbles) {
 			if (marble != null && marble.cubemapRenderer != null) {
-				marble.cubemapRenderer.position.load(marble.getAbsPos().getPosition());
-				marble.cubemapRenderer.render(e, 0.002);
+				if (_cubemapNeedsUpdate) {
+					marble.cubemapRenderer.position.load(marble.getAbsPos().getPosition());
+					marble.cubemapRenderer.render(e);
+					_cubemapNeedsUpdate = false;
+				}
 			}
 		}
 	}

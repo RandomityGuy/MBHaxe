@@ -336,7 +336,7 @@ class Marble extends GameObject {
 				mat.receiveShadows = false;
 				// mat.mainPass.culling = None;
 
-				if (Settings.optionsSettings.reflectiveMarble) {
+				if (Settings.optionsSettings.reflectionDetail > 0) {
 					var csky = level != null ? level.sky : (@:privateAccess MarbleGame.instance.previewWorld.sky);
 					this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky);
 

@@ -17,6 +17,7 @@ class CubemapRenderer {
 	var camera:Camera;
 	var scene:Scene;
 	var nextFaceToRender:Int;
+	var facesPerRender:Int = 2;
 
 	public function new(scene:Scene, sky:Sky) {
 		this.scene = scene;
@@ -28,14 +29,13 @@ class CubemapRenderer {
 		this.nextFaceToRender = 0;
 	}
 
-	public function render(e:Engine, budget:Float = 1e8) {
+	public function render(e:Engine) {
 		var scenecam = scene.camera;
 		scene.camera = camera;
 
-		var start = haxe.Timer.stamp();
 		var renderedFaces = 0;
 		Renderer.cubemapPass = true;
-		for (i in 0...6) {
+		for (i in 0...facesPerRender) {
 			var index = (nextFaceToRender + i) % 6;
 
 			e.pushTarget(cubemap, index);
@@ -45,12 +45,6 @@ class CubemapRenderer {
 			e.popTarget();
 
 			renderedFaces++;
-			var time = haxe.Timer.stamp();
-			var elapsed = time - start;
-			var elapsedPerFace = elapsed / renderedFaces;
-
-			if (elapsedPerFace * (renderedFaces + 1) >= budget)
-				break;
 		}
 		Renderer.cubemapPass = false;
 		scene.camera = scenecam;
