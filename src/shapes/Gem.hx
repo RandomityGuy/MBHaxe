@@ -83,7 +83,7 @@ class Gem extends DtsObject {
 				mats.push("data/skies/gemCubemapUp2.png");
 			case "blue":
 				mats.push('data/shapes/items/blue.gem.png');
-				mats.push("data/skies/gemCubemapUp4.png");
+				mats.push("data/skies/gemCubemapUp3.png");
 			default:
 				mats.push('data/shapes/items/red.gem.png');
 				mats.push("data/skies/gemCubemapUp.png");

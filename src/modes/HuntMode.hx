@@ -306,7 +306,7 @@ class HuntMode extends NullMode {
 			'data/shapes/items/yellow.gem.png',
 			"data/skies/gemCubemapUp2.png",
 			'data/shapes/items/blue.gem.png',
-			"data/skies/gemCubemapUp4.png",
+			"data/skies/gemCubemapUp3.png",
 			'data/shapes/items/red.gem.png',
 			"data/skies/gemCubemapUp.png",
 			'sound/gem_collect.wav'
