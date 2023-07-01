@@ -40,7 +40,7 @@ class Radar {
 		var gemCount = 0;
 		for (gem in level.gems) {
 			if (!gem.pickedUp) {
-				renderArrow(gem.boundingCollider.boundingBox.getCenter().toVector(), 0xE60000);
+				renderArrow(gem.boundingCollider.boundingBox.getCenter().toVector(), gem.radarColor);
 				gemCount++;
 			}
 		}
@@ -68,7 +68,6 @@ class Radar {
 		var fovY = (level.scene.camera.fovY * 0.5) * Math.PI / 180.0;
 
 		var blink = time < 3 ? ((Std.int(Math.floor((time * 1000) / 500))) % 2 == 1) : false;
-		trace((Std.int(time * 1000) / 500));
 
 		var gravityMat = level.getOrientationQuat(level.timeState.currentAttemptTime).toMatrix();
 

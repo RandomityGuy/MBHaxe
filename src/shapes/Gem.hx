@@ -13,6 +13,8 @@ class Gem extends DtsObject {
 
 	var gemColor:String;
 
+	public var radarColor:Int;
+
 	public function new(element:MissionElementItem) {
 		super();
 		dtsPath = "data/shapes/items/gem.dts";
@@ -30,6 +32,14 @@ class Gem extends DtsObject {
 		this.identifier = "Gem" + color;
 		this.matNameOverride.set('base.gem', color + ".gem");
 		gemColor = color + ".gem";
+		radarColor = switch (color) {
+			case "blue":
+				0x0000E6;
+			case "yellow":
+				0xE6FF00;
+			default:
+				0xE60000;
+		}
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -68,7 +78,18 @@ class Gem extends DtsObject {
 
 	override function getPreloadMaterials(dts:dts.DtsFile) {
 		var mats = super.getPreloadMaterials(dts);
-		mats.push("data/skies/gemCubemapUp.png");
+		switch (gemColor) {
+			case "yellow":
+				mats.push('data/shapes/items/yellow.gem.png');
+				mats.push("data/skies/gemCubemapUp2.png");
+			case "blue":
+				mats.push('data/shapes/items/blue.gem.png');
+				mats.push("data/skies/gemCubemapUp4.png");
+			default:
+				mats.push('data/shapes/items/red.gem.png');
+				mats.push("data/skies/gemCubemapUp.png");
+		}
+
 		return mats;
 	}
 
@@ -80,6 +101,48 @@ class Gem extends DtsObject {
 
 			var cubemapTex = new h3d.mat.Texture(64, 64, [Cube]);
 			var cubemapFace = ResourceLoader.getImage('data/skies/gemCubemapUp.png').resource;
+			for (i in 0...6) {
+				cubemapTex.uploadPixels(cubemapFace.getPixels(), 0, i);
+			}
+			var shader = new shaders.DefaultCubemapNormalNoSpecMaterial(diffuseTex, 1, cubemapTex);
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
+		if (matName == "yellow.gem") {
+			var diffuseTex = ResourceLoader.getTexture('data/shapes/items/yellow.gem.png').resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+
+			var cubemapTex = new h3d.mat.Texture(64, 64, [Cube]);
+			var cubemapFace = ResourceLoader.getImage('data/skies/gemCubemapUp2.png').resource;
+			for (i in 0...6) {
+				cubemapTex.uploadPixels(cubemapFace.getPixels(), 0, i);
+			}
+			var shader = new shaders.DefaultCubemapNormalNoSpecMaterial(diffuseTex, 1, cubemapTex);
+			var dtsTex = material.mainPass.getShader(shaders.DtsTexture);
+			dtsTex.passThrough = true;
+			material.mainPass.removeShader(material.textureShader);
+			material.mainPass.addShader(shader);
+			var thisprops:Dynamic = material.getDefaultProps();
+			thisprops.light = false; // We will calculate our own lighting
+			material.props = thisprops;
+			material.shadows = false;
+			material.receiveShadows = true;
+		}
+		if (matName == "blue.gem") {
+			var diffuseTex = ResourceLoader.getTexture('data/shapes/items/blue.gem.png').resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Nearest;
+
+			var cubemapTex = new h3d.mat.Texture(64, 64, [Cube]);
+			var cubemapFace = ResourceLoader.getImage('data/skies/gemCubemapUp3.png').resource;
 			for (i in 0...6) {
 				cubemapTex.uploadPixels(cubemapFace.getPixels(), 0, i);
 			}

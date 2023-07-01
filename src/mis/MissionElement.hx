@@ -60,6 +60,9 @@ class MissionElementScriptObject extends MissionElementBase {
 	var alarmstarttime:String;
 	var game:String;
 	var difficulty:String;
+	var gamemode:String;
+	var gemgroupradius:String;
+	var maxgemspergroup:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;
@@ -160,6 +163,7 @@ class MissionElementSpawnSphere extends MissionElementBase {
 	var datablock:String;
 	var resettime:Null<String>;
 	var timeout:Null<String>;
+	var gemdatablock:String;
 
 	public function new() {
 		_type = MissionElementType.SpawnSphere;

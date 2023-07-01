@@ -12,7 +12,7 @@ class PriorityQueue<T> {
 
 	public function enqueue(val:T, priority:Float) {
 		var node = new PriorityQueueNode<T>(val, priority);
-		if (this.queue == null) {
+		if (this.queue == null || this.queue.length == 0) {
 			this.queue = [node];
 		} else {
 			if (this.queue[0].priority >= priority) {
