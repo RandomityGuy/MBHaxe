@@ -1,0 +1,29 @@
+package modes;
+
+import shapes.Gem;
+import h3d.Quat;
+import h3d.Vector;
+import src.MarbleWorld;
+import src.Mission;
+
+interface GameMode {
+	public function getSpawnTransform():{position:Vector, orientation:Quat, up:Vector};
+	public function getRespawnTransform():{position:Vector, orientation:Quat, up:Vector};
+	public function missionScan(mission:Mission):Void;
+	public function getStartTime():Float;
+	public function timeMultiplier():Float;
+
+	public function onRestart():Void;
+	public function onGemPickup(gem:Gem):Void;
+}
+
+class GameModeFactory {
+	public static function getGameMode(level:MarbleWorld, mode:String):GameMode {
+		if (mode != null)
+			switch (mode.toLowerCase()) {
+				case "scrum":
+					return new HuntMode(level);
+			}
+		return new NullMode(level);
+	}
+}

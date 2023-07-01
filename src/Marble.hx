@@ -239,6 +239,7 @@ class Marble extends GameObject {
 
 	public var heldPowerup:PowerUp;
 	public var lastContactNormal:Vector;
+	public var lastContactPosition:Vector;
 
 	var helicopter:HelicopterImage;
 	var blastWave:BlastWave;
@@ -268,8 +269,6 @@ class Marble extends GameObject {
 	var finishAnimTime:Float = 0;
 
 	public var mode:Mode = Play;
-
-	public var startPad:StartPad;
 
 	public var prevPos:Vector;
 
@@ -866,6 +865,7 @@ class Marble extends GameObject {
 			a.set(a.x + aFriction.x, a.y + aFriction.y, a.z + aFriction.z);
 
 			lastContactNormal = bestContact.normal;
+			lastContactPosition = this.getAbsPos().getPosition();
 		}
 		a.set(a.x + aControl.x, a.y + aControl.y, a.z + aControl.z);
 		if (this.mode == Finish) {
