@@ -629,6 +629,39 @@ class PlayGui {
 		gemHUD.parent.render(scene2d, @:privateAccess gemHUD.parent.parent._flow);
 	}
 
+	public function resizeGemHuntCounter(total:Int) {
+		if (total >= 100) {
+			// 3 digits
+			gemCountNumbers[0].anim.visible = true;
+			gemCountNumbers[1].anim.visible = true;
+			gemCountNumbers[2].anim.visible = true;
+
+			gemCountNumbers[0].position.x = 20;
+			gemCountNumbers[1].position.x = 38;
+			gemCountNumbers[2].position.x = 56;
+		} else if (total >= 10) {
+			// 2 digits
+			gemCountNumbers[0].anim.visible = false;
+			gemCountNumbers[1].anim.visible = true;
+			gemCountNumbers[2].anim.visible = true;
+
+			gemCountNumbers[0].position.x = 20;
+			gemCountNumbers[1].position.x = 38;
+			gemCountNumbers[2].position.x = 56;
+		} else {
+			// 1 digit
+			gemCountNumbers[0].anim.visible = false;
+			gemCountNumbers[1].anim.visible = false;
+			gemCountNumbers[2].anim.visible = true;
+
+			gemCountNumbers[0].position.x = 20;
+			gemCountNumbers[1].position.x = 38;
+			gemCountNumbers[2].position.x = 56;
+		}
+		gemHUD.position.x = 74;
+		gemHUD.parent.render(scene2d, @:privateAccess gemHUD.parent.parent._flow);
+	}
+
 	public function formatGemCounter(collected:Int, total:Int) {
 		if (total == 0) {
 			for (number in gemCountNumbers) {
@@ -659,6 +692,26 @@ class PlayGui {
 		gemCountNumbers[3].anim.currentFrame = totalHundredths;
 		gemCountNumbers[4].anim.currentFrame = totalTenths;
 		gemCountNumbers[5].anim.currentFrame = totalOnes;
+	}
+
+	public function formatGemHuntCounter(collected:Int) {
+		gemCountNumbers[0].anim.visible = true;
+		gemCountNumbers[1].anim.visible = true;
+		gemCountNumbers[2].anim.visible = true;
+		gemCountNumbers[3].anim.visible = false;
+		gemCountNumbers[4].anim.visible = false;
+		gemCountNumbers[5].anim.visible = false;
+		gemHUD.bmp.visible = true;
+
+		var collectedHundredths = Math.floor(collected / 100);
+		var collectedTenths = Math.floor(collected / 10) % 10;
+		var collectedOnes = collected % 10;
+
+		gemCountNumbers[0].anim.currentFrame = collectedHundredths;
+		gemCountNumbers[1].anim.currentFrame = collectedTenths;
+		gemCountNumbers[2].anim.currentFrame = collectedOnes;
+
+		resizeGemHuntCounter(collected);
 	}
 
 	// 0: default

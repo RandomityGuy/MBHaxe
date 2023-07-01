@@ -79,4 +79,8 @@ class NullMode implements GameMode {
 		this.level.displayAlert(string);
 		@:privateAccess this.level.playGui.formatGemCounter(this.level.gemCount, this.level.totalGems);
 	}
+
+	public function getPreloadFiles() {
+		return ['data/sound/gem_all.wav'];
+	}
 }

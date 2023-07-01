@@ -15,6 +15,8 @@ interface GameMode {
 
 	public function onRestart():Void;
 	public function onGemPickup(gem:Gem):Void;
+
+	public function getPreloadFiles():Array<String>;
 }
 
 class GameModeFactory {

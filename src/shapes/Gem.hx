@@ -46,7 +46,6 @@ class Gem extends DtsObject {
 		super.init(level, () -> {
 			var worker = new ResourceLoaderWorker(onFinish);
 			worker.loadFile('sound/gem_collect.wav');
-			worker.loadFile('sound/gem_all.wav');
 			worker.run();
 		});
 	}

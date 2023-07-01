@@ -85,6 +85,8 @@ class HuntMode extends NullMode {
 	var gemBeams:Array<GemBeam> = [];
 	var gemToBeamMap:Map<Gem, GemBeam> = [];
 
+	var points:Int = 0;
+
 	override function missionScan(mission:Mission) {
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
@@ -162,6 +164,8 @@ class HuntMode extends NullMode {
 
 	override function onRestart() {
 		setupGems();
+		points = 0;
+		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
 	override function onGemPickup(gem:Gem) {
@@ -170,6 +174,16 @@ class HuntMode extends NullMode {
 		var beam = gemToBeamMap.get(gem);
 		beam.setHide(true);
 		refillGemGroups();
+
+		switch (gem.gemColor) {
+			case "red.gem":
+				points += 1;
+			case "yellow.gem":
+				points += 2;
+			case "blue.gem":
+				points += 5;
+		}
+		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
 	function setupGems() {
@@ -184,6 +198,16 @@ class HuntMode extends NullMode {
 		for (gemSpawn in gemSpawnPoints) {
 			var vec = gemSpawn.position;
 			gemOctree.insert(new GemOctreeElem(vec, gemSpawn));
+		}
+
+		if (activeGemSpawnGroup != null) {
+			for (gemSpawn in activeGemSpawnGroup) {
+				if (gemSpawn.gem != null) {
+					gemSpawn.gem.pickedUp = true;
+					gemSpawn.gem.setHide(true);
+					gemSpawn.gemBeam.setHide(true);
+				}
+			}
 		}
 
 		activeGems = [];
@@ -275,5 +299,17 @@ class HuntMode extends NullMode {
 		}
 		outSpawnPoint.load(pos);
 		return results;
+	}
+
+	override function getPreloadFiles():Array<String> {
+		return [
+			'data/shapes/items/yellow.gem.png',
+			"data/skies/gemCubemapUp2.png",
+			'data/shapes/items/blue.gem.png',
+			"data/skies/gemCubemapUp4.png",
+			'data/shapes/items/red.gem.png',
+			"data/skies/gemCubemapUp.png",
+			'sound/gem_collect.wav'
+		];
 	}
 }
