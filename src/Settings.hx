@@ -44,6 +44,7 @@ typedef OptionsSettings = {
 	var rewindEnabled:Bool;
 	var rewindTimescale:Float;
 	var reflectionDetail:Int;
+	var maxPixelRatio:Float;
 }
 
 typedef ControlsSettings = {
@@ -127,6 +128,7 @@ class Settings {
 		rewindEnabled: false,
 		rewindTimescale: 1,
 		reflectionDetail: 3,
+		maxPixelRatio: 1,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -356,6 +358,8 @@ class Settings {
 			if (optionsSettings.reflectionDetail == null)
 				optionsSettings.reflectionDetail = 2;
 			#end
+			if (optionsSettings.maxPixelRatio == 0 #if js || optionsSettings.maxPixelRatio == null #end)
+				optionsSettings.maxPixelRatio = 1;
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;

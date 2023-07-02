@@ -91,6 +91,7 @@ import src.Gamepad;
 import modes.GameMode;
 import modes.NullMode;
 import modes.GameMode.GameModeFactory;
+import src.Renderer;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -1051,6 +1052,7 @@ class MarbleWorld extends Scheduler {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
 		}
 		_cubemapNeedsUpdate = true;
+		Renderer.dirtyBuffers = true;
 		if (this.rewinding) {
 			// Update camera separately
 			marble.camera.update(timeState.currentAttemptTime, realDt);
