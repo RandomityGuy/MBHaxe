@@ -28,6 +28,12 @@ class Renderer extends h3d.scene.Renderer {
 	var copyPass:h3d.pass.Copy;
 	var backBuffer:h3d.mat.Texture;
 
+	public static var dirtyBuffers:Bool = true;
+
+	var depthBuffer:DepthBuffer;
+
+	static var pixelRatio:Float = 1;
+
 	public static var cubemapPass:Bool = false;
 
 	public function new() {
@@ -61,6 +67,14 @@ class Renderer extends h3d.scene.Renderer {
 			glowBuffer.dispose();
 			glowBuffer = null;
 		}
+		if (depthBuffer != null) {
+			depthBuffer.dispose();
+			depthBuffer = null;
+		}
+		pixelRatio = 1;
+		#if js
+		pixelRatio = js.Browser.window.devicePixelRatio / Math.min(Settings.optionsSettings.maxPixelRatio, js.Browser.window.devicePixelRatio);
+		#end
 	}
 
 	override function getPassByName(name:String):h3d.pass.Base {
@@ -72,7 +86,9 @@ class Renderer extends h3d.scene.Renderer {
 
 	override function render() {
 		if (backBuffer == null) {
-			backBuffer = ctx.textures.allocTarget("backBuffer", ctx.engine.width, ctx.engine.height);
+			depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24Stencil8);
+			backBuffer = ctx.textures.allocTarget("backBuffer", cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, false);
+			backBuffer.depthBuffer = depthBuffer;
 		}
 		ctx.engine.pushTarget(backBuffer);
 		ctx.engine.clear(0, 1);
@@ -86,8 +102,10 @@ class Renderer extends h3d.scene.Renderer {
 		if (has("normal"))
 			renderPass(normal, get("normal"));
 
-		if (glowBuffer == null)
-			glowBuffer = ctx.textures.allocTarget("glowBuffer", ctx.engine.width, ctx.engine.height);
+		if (glowBuffer == null) {
+			glowBuffer = ctx.textures.allocTarget("glowBuffer", cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio);
+			glowBuffer.depthBuffer = depthBuffer;
+		}
 		if (growBufferTemps == null) {
 			growBufferTemps = [
 				ctx.textures.allocTarget("gb1", 320, 320, false),
@@ -125,11 +143,13 @@ class Renderer extends h3d.scene.Renderer {
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
 			var glowObjects = get("glow");
 			if (!glowObjects.isEmpty()) {
-				ctx.engine.pushTarget(glowBuffer);
-				ctx.engine.clear(0);
-				renderPass(defaultPass, glowObjects);
-				bloomPass(ctx);
-				ctx.engine.popTarget();
+				if (dirtyBuffers) {
+					ctx.engine.pushTarget(glowBuffer);
+					ctx.engine.clear(0);
+					renderPass(defaultPass, glowObjects);
+					bloomPass(ctx);
+					ctx.engine.popTarget();
+				}
 				copyPass.shader.texture = growBufferTemps[0];
 				copyPass.pass.blend(One, One);
 				copyPass.pass.depth(false, Always);
@@ -142,7 +162,9 @@ class Renderer extends h3d.scene.Renderer {
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
 			var refractObjects = get("refract");
 			if (!refractObjects.isEmpty()) {
-				h3d.pass.Copy.run(backBuffer, sfxBuffer);
+				if (dirtyBuffers) {
+					h3d.pass.Copy.run(backBuffer, sfxBuffer);
+				}
 				renderPass(defaultPass, refractObjects);
 			}
 		}
@@ -153,6 +175,9 @@ class Renderer extends h3d.scene.Renderer {
 			renderPass(defaultPass, get("alpha"), backToFront);
 			renderPass(defaultPass, get("additive"));
 		}
+
+		if (!cubemapPass && dirtyBuffers)
+			dirtyBuffers = false;
 
 		ctx.engine.popTarget();
 

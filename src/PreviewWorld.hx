@@ -597,6 +597,7 @@ class PreviewWorld extends Scheduler {
 			marb.update(timeState, this.collisionWorld, []);
 		}
 		_cubemapNeedsUpdate = true;
+		Renderer.dirtyBuffers = true;
 		this.instanceManager.render();
 	}
 

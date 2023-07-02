@@ -168,6 +168,44 @@ class VideoOptionsGui extends GuiImage {
 		}
 		innerCtrl.addChild(rfOpt);
 
+		yPos += 60;
+
+		#if js
+		var pxOpt = new GuiXboxOptionsList(1, "Pixel Ratio", ["Max 0.5", "Max 1", "Max 1.5", "Max 2", "Max Infinity"], 0.35);
+
+		var curPixelRatioIndex = 1;
+		if (Settings.optionsSettings.maxPixelRatio == 0.5)
+			curPixelRatioIndex = 0;
+		else if (Settings.optionsSettings.maxPixelRatio == 1)
+			curPixelRatioIndex = 1;
+		else if (Settings.optionsSettings.maxPixelRatio == 1.5)
+			curPixelRatioIndex = 2;
+		else if (Settings.optionsSettings.maxPixelRatio == 2)
+			curPixelRatioIndex = 3;
+		else if (Settings.optionsSettings.maxPixelRatio == 100)
+			curPixelRatioIndex = 4;
+
+		pxOpt.vertSizing = Bottom;
+		pxOpt.horizSizing = Right;
+		pxOpt.position = new Vector(380, yPos);
+		pxOpt.extent = new Vector(815, 94);
+		pxOpt.setCurrentOption(curPixelRatioIndex);
+		pxOpt.onChangeFunc = (idx) -> {
+			if (idx == 0)
+				Settings.optionsSettings.maxPixelRatio = 0.5;
+			else if (idx == 1)
+				Settings.optionsSettings.maxPixelRatio = 1;
+			else if (idx == 2)
+				Settings.optionsSettings.maxPixelRatio = 1.5;
+			else if (idx == 3)
+				Settings.optionsSettings.maxPixelRatio = 2;
+			else if (idx == 4)
+				Settings.optionsSettings.maxPixelRatio = 100;
+			return true;
+		}
+		innerCtrl.addChild(pxOpt);
+		#end
+
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
