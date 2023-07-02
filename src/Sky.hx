@@ -39,7 +39,7 @@ class Sky extends Object {
 			sky.addNormals();
 			sky.addUVs();
 			var skyMesh = new h3d.scene.Mesh(sky, this);
-			skyMesh.material.mainPass.culling = Front;
+			skyMesh.material.mainPass.culling = None;
 			// This is such a hack
 			// skyMesh.material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 			skyMesh.material.mainPass.enableLights = false;
@@ -51,7 +51,7 @@ class Sky extends Object {
 			// pbrprops.occlusionValue = 0;
 			// pbrprops.metalnessValue = 1;
 
-			skyMesh.scale(3500);
+			skyMesh.scale(10);
 			// var env = new Environment(texture);
 			// env.compute();
 			// var renderer = cast(level.scene.renderer, h3d.scene.pbr.Renderer);
@@ -59,7 +59,7 @@ class Sky extends Object {
 			skyMesh.material.mainPass.removeShader(skyMesh.material.textureShader);
 			skyMesh.material.mainPass.addShader(shad);
 			skyMesh.material.mainPass.depthWrite = false;
-			skyMesh.material.mainPass.depth(false, h3d.mat.Data.Compare.LessEqual);
+			skyMesh.material.mainPass.depth(false, Always);
 			skyMesh.material.mainPass.setPassName("sky");
 			cubemap = texture;
 			onFinish();

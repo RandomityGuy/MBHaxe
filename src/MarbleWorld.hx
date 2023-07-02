@@ -354,7 +354,7 @@ class MarbleWorld extends Scheduler {
 			worker.loadFile(file);
 		}
 
-		this.scene.camera.zFar = Math.max(4000, Std.parseFloat(this.skyElement.visibledistance));
+		this.scene.camera.zFar = Std.parseFloat(this.skyElement.visibledistance);
 
 		this.sky = new Sky();
 
