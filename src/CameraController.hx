@@ -241,13 +241,15 @@ class CameraController extends Object {
 
 		if (this.finish) {
 			// Move the target to the centre of the finish
-			var padMat = @:privateAccess this.level.endPad.getAbsPos();
-			var offset = padMat.up();
-			var padPos = padMat.getPosition();
-			var focusPos = padPos.add(offset);
-			focusPos.scale(0.025);
-			focusPos = focusPos.add(lastTargetPos.multiply(0.975));
-			marblePosition = focusPos;
+			if (@:privateAccess this.level.endPad != null) {
+				var padMat = @:privateAccess this.level.endPad.getAbsPos();
+				var offset = padMat.up();
+				var padPos = padMat.getPosition();
+				var focusPos = padPos.add(offset);
+				focusPos.scale(0.025);
+				focusPos = focusPos.add(lastTargetPos.multiply(0.975));
+				marblePosition = focusPos;
+			}
 		}
 
 		var up = new Vector(0, 0, 1);

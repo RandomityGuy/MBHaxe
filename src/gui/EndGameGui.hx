@@ -1,5 +1,6 @@
 package gui;
 
+import modes.GameMode.ScoreType;
 import mis.MisParser;
 import hxd.BitmapData;
 import h2d.Tile;
@@ -21,7 +22,8 @@ class EndGameGui extends GuiImage {
 
 	var scoreSubmitted:Bool = false;
 
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, timeState:TimeState) {
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, score:Float,
+			scoreType:ScoreType) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 		this.horizSizing = Width;
@@ -86,12 +88,15 @@ class EndGameGui extends GuiImage {
 			return arial14;
 		}
 
-		var beatPar = timeState.gameplayClock < mission.qualifyTime;
+		var beatPar = score < mission.qualifyTime;
 
 		var egResultLeft = new GuiMLText(arial14, mlFontLoader);
 		egResultLeft.position = new Vector(28, 26);
 		egResultLeft.extent = new Vector(180, 100);
-		egResultLeft.text.text = '<p align="right"><font color="${beatPar ? "#8DFF8D" : "0xFF7575"}">Time:</font><br/><font color="#88BCEE">Par Time:</font><br/><font color="#EBEBEB">Rating:</font><br/><font color="#EBEBEB">My Best Time:</font></p>';
+		if (scoreType == Time)
+			egResultLeft.text.text = '<p align="right"><font color="${beatPar ? "#8DFF8D" : "#FF7575"}">Time:</font><br/><font color="#88BCEE">Par Time:</font><br/><font color="#EBEBEB">Rating:</font><br/><font color="#EBEBEB">My Best Time:</font></p>';
+		if (scoreType == Score)
+			egResultLeft.text.text = '<p align="right"><font color="#8DFF8D">Score:</font><br/><font color="#EBEBEB">My Best Score:</font></p>';
 		endGameWnd.addChild(egResultLeft);
 		var c0 = 0xEBEBEB;
 		var c1 = 0x8DFF8D;
@@ -111,15 +116,17 @@ class EndGameGui extends GuiImage {
 			return (completionBonus + timeBonus) * difficulty;
 		}
 
-		var rating = calcRating(timeState.gameplayClock * 1000, mission.qualifyTime * 1000, mission.goldTime * 1000,
-			Std.parseInt(mission.missionInfo.difficulty));
+		var rating = calcRating(score * 1000, mission.qualifyTime * 1000, mission.goldTime * 1000, Std.parseInt(mission.missionInfo.difficulty));
 
-		var myScore = {name: "Player", time: timeState.gameplayClock};
-		Settings.saveScore(mission.path, myScore);
+		var myScore = {name: "Player", time: score};
+		Settings.saveScore(mission.path, myScore, scoreType);
 
 		var scoreData:Array<Score> = Settings.getScores(mission.path);
 		while (scoreData.length < 1) {
-			scoreData.push({name: "Nardo Polo", time: 5999.999});
+			if (scoreType == Score)
+				scoreData.push({name: "Nardo Polo", time: 0});
+			if (scoreType == Time)
+				scoreData.push({name: "Nardo Polo", time: 5999.999});
 		}
 
 		var bestScore = scoreData[0];
@@ -128,7 +135,10 @@ class EndGameGui extends GuiImage {
 
 		egResultRight.position = new Vector(214, 26);
 		egResultRight.extent = new Vector(180, 100);
-		egResultRight.text.text = '<font color="${beatPar ? "#8DFF8D" : "0xFF7575"}">${Util.formatTime(timeState.gameplayClock)}</font><br/><font color="#88BCEE">${Util.formatTime(mission.qualifyTime)}</font><br/><font color="#EBEBEB">${rating}</font><br/><font color="#EBEBEB">${Util.formatTime(bestScore.time)}</font>';
+		if (scoreType == Score)
+			egResultRight.text.text = '<font color="#8DFF8D">${Util.formatScore(score)}</font><br/><font color="#EBEBEB">${Util.formatScore(bestScore.time)}</font>';
+		if (scoreType == Time)
+			egResultRight.text.text = '<font color="${beatPar ? "#8DFF8D" : "0xFF7575"}">${Util.formatTime(score)}</font><br/><font color="#88BCEE">${Util.formatTime(mission.qualifyTime)}</font><br/><font color="#EBEBEB">${rating}</font><br/><font color="#EBEBEB">${Util.formatTime(bestScore.time)}</font>';
 		endGameWnd.addChild(egResultRight);
 
 		var bottomBar = new GuiControl();

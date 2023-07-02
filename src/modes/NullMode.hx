@@ -1,5 +1,6 @@
 package modes;
 
+import modes.GameMode.ScoreType;
 import shapes.Gem;
 import h3d.Quat;
 import h3d.Vector;
@@ -82,5 +83,15 @@ class NullMode implements GameMode {
 
 	public function getPreloadFiles() {
 		return ['data/sound/gem_all.wav'];
+	}
+
+	public function onTimeExpire() {}
+
+	public function getScoreType():ScoreType {
+		return Time;
+	}
+
+	public function getFinishScore():Float {
+		return level.finishTime.gameplayClock;
 	}
 }
