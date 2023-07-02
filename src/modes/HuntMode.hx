@@ -1,5 +1,7 @@
 package modes;
 
+import gui.AchievementsGui;
+import modes.GameMode.ScoreType;
 import shapes.GemBeam;
 import shapes.Gem;
 import src.Console;
@@ -219,6 +221,7 @@ class HuntMode extends NullMode {
 			var spawnGroup = pickGemSpawnGroup();
 			activeGemSpawnGroup = spawnGroup;
 			fillGemGroup(spawnGroup);
+			@:privateAccess level.radar.blink();
 		}
 	}
 
@@ -311,5 +314,42 @@ class HuntMode extends NullMode {
 			"data/skies/gemCubemapUp.png",
 			'sound/gem_collect.wav'
 		];
+	}
+
+	override function getScoreType():ScoreType {
+		return Score;
+	}
+
+	override function onTimeExpire() {
+		if (level.finishTime != null)
+			return;
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
+		level.finishTime = level.timeState.clone();
+		level.marble.setMode(Start);
+		level.marble.camera.finish = true;
+		level.finishYaw = level.marble.camera.CameraYaw;
+		level.finishPitch = level.marble.camera.CameraPitch;
+		level.displayAlert("Congratulations! You've finished!");
+		if (!level.isWatching) {
+			var notifies = AchievementsGui.check();
+			var delay = 5.0;
+			var achDelay = 0.0;
+			for (i in 0...9) {
+				if (notifies & (1 << i) > 0)
+					achDelay += 3;
+			}
+			if (notifies > 0)
+				achDelay += 0.5;
+			@:privateAccess level.schedule(level.timeState.currentAttemptTime + Math.max(delay, achDelay), () -> cast level.showFinishScreen());
+		}
+		// Stop the ongoing sounds
+		if (@:privateAccess level.timeTravelSound != null) {
+			@:privateAccess level.timeTravelSound.stop();
+			@:privateAccess level.timeTravelSound = null;
+		}
+	}
+
+	override function getFinishScore():Float {
+		return points;
 	}
 }

@@ -6,13 +6,20 @@ import h3d.Vector;
 import src.MarbleWorld;
 import src.Mission;
 
+enum ScoreType {
+	Time;
+	Score;
+}
+
 interface GameMode {
 	public function getSpawnTransform():{position:Vector, orientation:Quat, up:Vector};
 	public function getRespawnTransform():{position:Vector, orientation:Quat, up:Vector};
 	public function missionScan(mission:Mission):Void;
 	public function getStartTime():Float;
 	public function timeMultiplier():Float;
-
+	public function getScoreType():ScoreType;
+	public function getFinishScore():Float;
+	public function onTimeExpire():Void;
 	public function onRestart():Void;
 	public function onGemPickup(gem:Gem):Void;
 

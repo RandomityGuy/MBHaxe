@@ -718,6 +718,8 @@ class PlayGui {
 	// 1: green
 	// 2: red
 	public function formatTimer(time:Float) {
+		if (time < 0)
+			time = 0; // Can't support negatives for now
 		var et = time * 1000;
 		var thousandth = et % 10;
 		var hundredth = Math.floor((et % 1000) / 10);

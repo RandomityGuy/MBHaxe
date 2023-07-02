@@ -1165,6 +1165,8 @@ class MarbleWorld extends Scheduler {
 				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
 					this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
 				}
+				if (this.timeState.gameplayClock < 0)
+					this.gameMode.onTimeExpire();
 			}
 			this.timeState.currentAttemptTime += dt;
 		} else {
@@ -1493,7 +1495,7 @@ class MarbleWorld extends Scheduler {
 			} else {
 				nextLevelCode();
 			}
-		}, mission, finishTime);
+		}, mission, this.gameMode.getFinishScore(), this.gameMode.getScoreType());
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;

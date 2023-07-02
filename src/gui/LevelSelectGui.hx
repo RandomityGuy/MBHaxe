@@ -1,5 +1,6 @@
 package gui;
 
+import modes.GameMode.ScoreType;
 import src.Util;
 import haxe.io.Path;
 import h2d.filter.DropShadow;
@@ -223,16 +224,29 @@ class LevelSelectGui extends GuiImage {
 				loadText.text.visible = false;
 				loadTextBg.text.visible = false;
 			});
+
+			var scoreType = mis.missionInfo.gamemode != null
+				&& mis.missionInfo.gamemode.toLowerCase() == 'scrum' ? ScoreType.Score : ScoreType.Time;
+
 			var myScore = Settings.getScores(mis.path);
 			var scoreDisp = "None";
 			if (myScore.length != 0)
-				scoreDisp = Util.formatTime(myScore[0].time);
+				scoreDisp = scoreType == Time ? Util.formatTime(myScore[0].time) : Util.formatScore(myScore[0].time);
 			var isPar = myScore.length != 0 && myScore[0].time < mis.qualifyTime;
 			var scoreColor = "#EBEBEB";
 			if (isPar)
 				scoreColor = "#8DFF8D";
-			levelInfoMid.text.text = '<p align="left"><font color="${scoreColor}">${scoreDisp}</font><br/><font color="#88BCEE">${Util.formatTime(mis.qualifyTime)}</font></p>';
-			levelInfoRight.text.text = '<p align="left"><font color="#EBEBEB">Level ${mis.missionInfo.level}<br/>Difficulty ${mis.missionInfo.difficulty}</font></p>';
+			if (scoreType == Score && myScore.length == 0)
+				scoreColor = "#EBEBEB";
+			if (scoreType == Time) {
+				levelInfoLeft.text.text = '<p align="right"><font color="#EBEBEB">My Best Time:</font><br/><font color="#EBEBEB">Par Time:</font></p>';
+				levelInfoMid.text.text = '<p align="left"><font color="${scoreColor}">${scoreDisp}</font><br/><font color="#88BCEE">${Util.formatTime(mis.qualifyTime)}</font></p>';
+			}
+			if (scoreType == Score) {
+				levelInfoLeft.text.text = '<p align="right"><font color="#EBEBEB">My Best Score:</font></p>';
+				levelInfoMid.text.text = '<p align="left"><font color="${scoreColor}">${scoreDisp}</font></p>';
+			}
+			levelInfoRight.text.text = '<p align="left"><font color="#EBEBEB">Level ${mis.missionInfo.level}<br/>Difficulty ${mis.missionInfo.difficulty == null ? "" : mis.missionInfo.difficulty}</font></p>';
 			return true;
 		}
 

@@ -297,6 +297,11 @@ class Util {
 		return false;
 	}
 
+	public static function formatScore(score:Float) {
+		var scoreInt = Std.int(Math.round(score));
+		return '${scoreInt}';
+	}
+
 	public static function formatTime(time:Float) {
 		var et = time * 1000;
 		var thousandth = Std.int(et % 10);

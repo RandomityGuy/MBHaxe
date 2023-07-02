@@ -1,5 +1,6 @@
 package src;
 
+import modes.GameMode.ScoreType;
 import h3d.Vector;
 import haxe.ds.Option;
 import gui.Canvas;
@@ -241,11 +242,13 @@ class Settings {
 		save();
 	}
 
-	public static function saveScore(mapPath:String, score:Score) {
+	public static function saveScore(mapPath:String, score:Score, scoreType:ScoreType = Time) {
 		if (highScores.exists(mapPath)) {
 			var scoreList = highScores.get(mapPath);
 			scoreList.push(score);
 			scoreList.sort((a, b) -> a.time == b.time ? 0 : (a.time > b.time ? 1 : -1));
+			if (scoreType == Score)
+				scoreList.reverse();
 		} else {
 			highScores.set(mapPath, [score]);
 		}

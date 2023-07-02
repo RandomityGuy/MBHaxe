@@ -49,6 +49,10 @@ class Radar {
 		}
 	}
 
+	public function blink() {
+		time = 0;
+	}
+
 	public function reset() {
 		time = 0;
 		g.clear();
