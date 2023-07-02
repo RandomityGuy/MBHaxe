@@ -24,7 +24,7 @@ class CubemapRenderer {
 		this.sky = sky;
 		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGB8);
 		this.cubemap.depthBuffer = new h3d.mat.DepthBuffer(128, 128, h3d.mat.DepthBuffer.DepthFormat.Depth16);
-		this.camera = new Camera(90, 1, 1, 0.02, scene.camera.zFar);
+		this.camera = new Camera(90, 1, 1, 0.1, 1000);
 		this.position = new Vector();
 		this.nextFaceToRender = 0;
 	}

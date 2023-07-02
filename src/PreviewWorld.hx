@@ -197,7 +197,7 @@ class PreviewWorld extends Scheduler {
 			if (misname == "marblepicker")
 				difficulty = "advanced";
 			else
-				difficulty = ["beginner", "intermediate", "advanced"][mis.difficultyIndex];
+				difficulty = mis.type;
 
 			var curToken = _loadToken;
 
@@ -273,6 +273,7 @@ class PreviewWorld extends Scheduler {
 		worker.addTask(fwd -> {
 			sky.init(null, () -> {
 				scene.addChild(sky);
+				sky.setPosition(scene.camera.pos.x, scene.camera.pos.y, scene.camera.pos.z);
 				fwd();
 			}, skyElem);
 		});
