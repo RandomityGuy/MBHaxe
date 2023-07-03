@@ -212,8 +212,8 @@ class DifBuilder {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
 			diffuseTex.wrap = Repeat;
-			diffuseTex.mipMap = Linear;
-			diffuseTex.filter = Linear;
+			diffuseTex.mipMap = Nearest;
+			// diffuseTex.filter = Linear;
 			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
 			normalTex.wrap = Repeat;
 			normalTex.mipMap = Nearest;

@@ -77,7 +77,7 @@ class MissionList {
 		ultraMissions.set("beginner", parseDifficulty("ultra", "missions", "beginner", 0));
 		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions", "intermediate", 1));
 		ultraMissions.set("advanced", parseDifficulty("ultra", "missions", "advanced", 2));
-		ultraMissions.set("multiplayer", parseDifficulty("ultra", "missions", "multiplayer", 2));
+		ultraMissions.set("multiplayer", parseDifficulty("ultra", "missions", "multiplayer", 3));
 
 		@:privateAccess ultraMissions["beginner"][ultraMissions["beginner"].length - 1].next = ultraMissions["intermediate"][0];
 		@:privateAccess ultraMissions["intermediate"][ultraMissions["intermediate"].length - 1].next = ultraMissions["advanced"][0];

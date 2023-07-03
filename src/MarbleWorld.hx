@@ -279,7 +279,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui.init(this.scene2d, this.mission.game.toLowerCase());
 		this.scene.addChild(this.sky);
 		this._ready = true;
-		AudioManager.playShell();
+		// AudioManager.playShell();
 		MarbleGame.canvas.clearContent();
 		if (this.endPad != null)
 			this.endPad.generateCollider();
@@ -1451,7 +1451,7 @@ class MarbleWorld extends Scheduler {
 			}
 			var endGameCode = () -> {
 				this.dispose();
-				var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced"][mission.difficultyIndex]);
+				var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
 				LevelSelectGui.currentSelectionStatic = mission.index + 1;
 				MarbleGame.canvas.setContent(pmg);
 				#if js
@@ -1466,6 +1466,7 @@ class MarbleWorld extends Scheduler {
 		}, (sender) -> {
 			var restartGameCode = () -> {
 				MarbleGame.canvas.popDialog(egg);
+				playGui.setGuiVisibility(true);
 				this.restart(true);
 				#if js
 				pointercontainer.hidden = true;
@@ -1829,7 +1830,7 @@ class MarbleWorld extends Scheduler {
 
 		this._disposed = true;
 		AudioManager.stopAllSounds();
-		AudioManager.playShell();
+		// AudioManager.playShell();
 	}
 }
 
