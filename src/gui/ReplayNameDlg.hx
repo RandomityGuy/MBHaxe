@@ -56,7 +56,7 @@ class ReplayNameDlg extends GuiImage {
 		if (MarbleGame.instance.world.finishTime == null) {
 			textInput.text.text += " Unfinished Run";
 		} else {
-			textInput.text.text += " " + MarbleGame.instance.world.finishTime.gameplayClock;
+			textInput.text.text += " " + MarbleGame.instance.world.gameMode.getFinishScore();
 		}
 
 		var okButton = new GuiXboxButton("Ok", 120);
@@ -86,40 +86,5 @@ class ReplayNameDlg extends GuiImage {
 			callback();
 		}
 		yesNoFrame.addChild(cancelButton);
-
-		// var yesButton = new GuiButton(loadButtonImages("data/ui/common/ok"));
-		// yesButton.position = new Vector(171, 124);
-		// yesButton.extent = new Vector(95, 45);
-		// yesButton.vertSizing = Top;
-		// yesButton.accelerator = hxd.Key.ENTER;
-		// yesButton.gamepadAccelerator = ["A"];
-		// yesButton.pressedAction = (sender) -> {
-		// 	if (StringTools.trim(textInput.text.text) != "") {
-		// 		MarbleGame.instance.recordingName = textInput.text.text;
-		// 		MarbleGame.canvas.popDialog(this);
-		// 		MarbleGame.instance.world.saveReplay();
-		// 		callback();
-		// 	}
-		// }
-		// yesNoFrame.addChild(yesButton);
-
-		// var noButton = new GuiButton(loadButtonImages("data/ui/common/cancel"));
-		// noButton.position = new Vector(44, 124);
-		// noButton.extent = new Vector(88, 41);
-		// noButton.vertSizing = Top;
-		// noButton.accelerator = hxd.Key.ESCAPE;
-		// noButton.gamepadAccelerator = ["B"];
-		// noButton.pressedAction = (sender) -> {
-		// 	MarbleGame.canvas.popDialog(this);
-		// 	callback();
-		// }
-		// yesNoFrame.addChild(noButton);
-
-		// if (yesNoText.text.getBounds().yMax > yesNoText.extent.y) {
-		// 	var diff = yesNoText.text.getBounds().yMax - yesNoText.extent.y;
-		// 	yesNoFrame.extent.y += diff;
-		// 	yesButton.position.y += diff;
-		// 	noButton.position.y += diff;
-		// }
 	}
 }
