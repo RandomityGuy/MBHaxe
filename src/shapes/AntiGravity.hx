@@ -1,5 +1,6 @@
 package shapes;
 
+import mis.MisParser;
 import dts.DtsFile;
 import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
@@ -19,6 +20,8 @@ class AntiGravity extends PowerUp {
 		this.autoUse = true;
 		this.useInstancing = true;
 		this.animateSubObjectOpacities = true;
+		if (MisParser.parseBoolean(element.permanent))
+			norespawn = true;
 		if (norespawn)
 			this.cooldownDuration = Math.NEGATIVE_INFINITY;
 	}

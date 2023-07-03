@@ -8,85 +8,142 @@ import src.ResourceLoader;
 import src.Settings;
 
 class VersionGui extends GuiImage {
+	var innerCtrl:GuiControl;
+
 	public function new() {
-		var img = ResourceLoader.getImage("data/ui/motd/messagewindow.png");
-		super(img.resource.toTile());
-		this.horizSizing = Center;
-		this.vertSizing = Center;
-		this.position = new Vector(4, 12);
-		this.extent = new Vector(631, 455);
+		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
+		super(res);
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(cast 42 * Settings.uiScale, MultiChannel);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
+		this.horizSizing = Width;
+		this.vertSizing = Height;
+		this.position = new Vector();
+		this.extent = new Vector(640, 480);
 
-		var dlButton = new GuiButton(loadButtonImages("data/ui/motd/ok"));
-		dlButton.position = new Vector(500, 370);
-		dlButton.extent = new Vector(88, 41);
-		dlButton.vertSizing = Top;
-		dlButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.popDialog(this);
-		}
-		this.addChild(dlButton);
+		var scene2d = MarbleGame.canvas.scene2d;
 
-		var scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
-		scrollCtrl.position = new Vector(31, 30);
-		scrollCtrl.extent = new Vector(568, 317);
-		this.addChild(scrollCtrl);
+		var offsetX = (scene2d.width - 1280) / 2;
+		var offsetY = (scene2d.height - 720) / 2;
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
+
+		innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		innerCtrl.horizSizing = Width;
+		innerCtrl.vertSizing = Height;
+		this.addChild(innerCtrl);
+
+		var coliseumfontdata = ResourceLoader.getFileEntry("data/font/ColiseumRR.fnt");
+		var coliseumb = new BitmapFont(coliseumfontdata.entry);
+		@:privateAccess coliseumb.loader = ResourceLoader.loader;
+		var coliseum = coliseumb.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+
+		var rootTitle = new GuiText(coliseum);
+		rootTitle.position = new Vector(100, 30);
+		rootTitle.extent = new Vector(1120, 80);
+		rootTitle.text.textColor = 0xFFFFFF;
+		rootTitle.text.text = "CHANGELOG";
+		rootTitle.text.alpha = 0.5;
+		innerCtrl.addChild(rootTitle);
+
+		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/helpWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
+		wnd.position = new Vector(260, 107);
+		wnd.extent = new Vector(736, 460);
+		wnd.horizSizing = Right;
+		wnd.vertSizing = Bottom;
+		innerCtrl.addChild(wnd);
+
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
-		var arial16 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
+		var arial14big = arial14b.toSdfFont(cast 30 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
+		var arial14med = arial14b.toSdfFont(cast 26 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
-		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+		var bottomBar = new GuiControl();
+		bottomBar.position = new Vector(0, 590);
+		bottomBar.extent = new Vector(640, 200);
+		bottomBar.horizSizing = Width;
+		bottomBar.vertSizing = Bottom;
+		innerCtrl.addChild(bottomBar);
+
+		var backButton = new GuiXboxButton("Ok", 160);
+		backButton.position = new Vector(960, 0);
+		backButton.vertSizing = Bottom;
+		backButton.horizSizing = Right;
+		backButton.gamepadAccelerator = ["OK"];
+		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
+		bottomBar.addChild(backButton);
+
+		var textCtrl = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/osxscroll.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		textCtrl.position = new Vector(30, 33);
+		textCtrl.extent = new Vector(683, 403);
+		textCtrl.scrollToBottom = false;
+		wnd.addChild(textCtrl);
 
 		function mlFontLoader(text:String) {
 			switch (text) {
-				case "MarkerFelt32":
-					return markerFelt32;
-				case "MarkerFelt24":
-					return markerFelt24;
-				case "MarkerFelt18":
-					return markerFelt18;
-				case "Arial16":
-					return arial14;
+				case "ArialBig":
+					return arial14big;
+				case "ArialMed":
+					return arial14med;
 				default:
-					return null;
+					return arial14;
 			}
 		}
 
-		var changelogContent = new GuiMLText(markerFelt18, mlFontLoader);
-		changelogContent.position = new Vector(0, 0);
-		changelogContent.extent = new Vector(566, 317);
-		changelogContent.text.textColor = 0;
-		changelogContent.scrollable = true;
-		changelogContent.text.text = "Loading changelog, please wait.<br/>";
+		var wndTxtBg = new GuiMLText(arial14, mlFontLoader);
+		wndTxtBg.position = new Vector(2, 7);
+		wndTxtBg.extent = new Vector(683, 343);
+		wndTxtBg.text.textColor = 0x101010;
+		wndTxtBg.text.text = "Loading changelog, please wait.<br/>";
+		wndTxtBg.scrollable = true;
+		textCtrl.addChild(wndTxtBg);
+
+		var wndTxt = new GuiMLText(arial14, mlFontLoader);
+		wndTxt.position = new Vector(0, 5);
+		wndTxt.extent = new Vector(683, 343);
+		wndTxt.text.textColor = 0xEBEBEB;
+		wndTxt.text.text = "Loading changelog, please wait.<br/>";
+		wndTxt.scrollable = true;
+		textCtrl.addChild(wndTxt);
+
 		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
 			var mdtext = res.toString();
 			var res = "";
-			changelogContent.text.text = "";
+			wndTxt.text.text = "";
+			wndTxtBg.text.text = "";
 			for (line in mdtext.split("\n")) {
 				if (StringTools.startsWith(line, "#")) {
 					line = StringTools.replace(line, "#", "");
-					line = '<font face="MarkerFelt24">' + line + "</font>";
+					line = '<font face="ArialMed">' + line + "</font>";
 				}
 				res += line + "<br/>";
 			}
-			changelogContent.text.text += res;
-			scrollCtrl.setScrollMax(changelogContent.text.textHeight);
+			wndTxt.text.text += res;
+			wndTxtBg.text.text += res;
+			textCtrl.setScrollMax(wndTxt.text.textHeight);
 		}, (e) -> {
-			changelogContent.text.text = "Failed to fetch changelog.";
+			wndTxt.text.text = "Failed to fetch changelog.";
+			wndTxtBg.text.text = "Failed to fetch changelog.";
 		});
-		scrollCtrl.addChild(changelogContent);
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+
+		super.onResize(width, height);
 	}
 }

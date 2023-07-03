@@ -180,6 +180,7 @@ class MissionElementItem extends MissionElementBase {
 	var collideable:String;
 	var isStatic:String;
 	var rotate:String;
+	var permanent:String;
 	var showhelponpickup:String;
 	var timebonus:Null<String>;
 	var timepenalty:Null<String>;
