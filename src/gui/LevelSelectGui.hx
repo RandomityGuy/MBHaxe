@@ -139,6 +139,16 @@ class LevelSelectGui extends GuiImage {
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new DifficultySelectGui());
 		bottomBar.addChild(backButton);
 
+		var recordButton = new GuiXboxButton("Record", 200);
+		recordButton.position = new Vector(560, 0);
+		recordButton.vertSizing = Bottom;
+		recordButton.horizSizing = Right;
+		recordButton.pressedAction = (e) -> {
+			MarbleGame.instance.toRecord = true;
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
+		}
+		bottomBar.addChild(recordButton);
+
 		var lbButton = new GuiXboxButton("Leaderboard", 220);
 		lbButton.position = new Vector(750, 0);
 		lbButton.vertSizing = Bottom;

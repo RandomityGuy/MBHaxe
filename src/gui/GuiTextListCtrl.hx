@@ -169,7 +169,7 @@ class GuiTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 		var yStart = renderRect.position.y;
 		var dy = mousePos.y - yStart;
-		var hoverIndex = Math.floor(dy / (font.size + 4));
+		var hoverIndex = Math.floor((dy + this.scroll) / (font.size + 4));
 		if (hoverIndex >= this.texts.length) {
 			hoverIndex = -1;
 		}

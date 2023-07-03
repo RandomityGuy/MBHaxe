@@ -13,6 +13,7 @@ import src.Util;
 
 class GuiConsoleScrollCtrl extends GuiControl {
 	public var scrollY:Float = 0;
+	public var childrenHandleScroll:Bool = false;
 
 	var maxScrollY:Float;
 
@@ -48,8 +49,8 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		this.scrollBottomTile = scrollBar.sub(0, 55, 18, 8);
 		this.scrollFillTile = scrollBar.sub(0, 46, 18, 1);
 		this.scrollTopPressedTile = scrollBar.sub(19, 37, 18, 8);
-		this.scrollBottomPressedTile = scrollBar.sub(19, 46, 18, 8);
-		this.scrollFillPressedTile = scrollBar.sub(19, 55, 18, 1);
+		this.scrollBottomPressedTile = scrollBar.sub(19, 55, 18, 8);
+		this.scrollFillPressedTile = scrollBar.sub(19, 46, 18, 1);
 		this.scrollTrackTile = scrollBar.sub(0, 64, 18, 1);
 		var scrollUpTile = scrollBar.sub(0, 1, 18, 17);
 		var scrollDownTile = scrollBar.sub(0, 19, 18, 17);
