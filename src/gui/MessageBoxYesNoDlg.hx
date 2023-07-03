@@ -6,71 +6,56 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 
-class MessageBoxYesNoDlg extends GuiControl {
+class MessageBoxYesNoDlg extends GuiImage {
 	public function new(text:String, yesFunc:Void->Void, noFunc:Void->Void) {
-		super();
+		var res = ResourceLoader.getImage("data/ui/xbox/roundedBG.png").resource.toTile();
+		super(res);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
-		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
-		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
-
-		var yesNoFrame = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
+		var yesNoFrame = new GuiImage(ResourceLoader.getResource("data/ui/xbox/popupGUI.png", ResourceLoader.getImage, this.imageResources).toTile());
 		yesNoFrame.horizSizing = Center;
 		yesNoFrame.vertSizing = Center;
-		yesNoFrame.position = new Vector(187, 156);
-		yesNoFrame.extent = new Vector(265, 167);
+		yesNoFrame.position = new Vector(70, 30);
+		yesNoFrame.extent = new Vector(512, 400);
 		this.addChild(yesNoFrame);
 
-		var yesNoText = new GuiMLText(domcasual24, null);
-		yesNoText.position = new Vector(33, 46);
-		yesNoText.horizSizing = Center;
-		yesNoText.extent = new Vector(198, 23);
+		var yesNoText = new GuiMLText(arial14, null);
+		yesNoText.position = new Vector(103, 85);
+		yesNoText.extent = new Vector(313, 186);
 		yesNoText.text.text = text;
-		yesNoText.text.textColor = 0;
-		yesNoText.text.maxWidth = 198;
+		yesNoText.text.textColor = 0xEBEBEB;
 		yesNoFrame.addChild(yesNoText);
 
-		var yesButton = new GuiButton(loadButtonImages("data/ui/common/yes"));
-		yesButton.position = new Vector(44, 94);
-		yesButton.extent = new Vector(82, 35);
-		yesButton.vertSizing = Top;
-		yesButton.accelerator = hxd.Key.ENTER;
-		yesButton.gamepadAccelerator = ["A"];
-		yesButton.pressedAction = (sender) -> {
+		var okButton = new GuiXboxButton("Yes", 120);
+		okButton.position = new Vector(211, 248);
+		okButton.extent = new Vector(120, 94);
+		okButton.vertSizing = Top;
+		okButton.accelerator = hxd.Key.ENTER;
+		okButton.gamepadAccelerator = ["A"];
+		okButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			yesFunc();
 		}
-		yesNoFrame.addChild(yesButton);
+		yesNoFrame.addChild(okButton);
 
-		var noButton = new GuiButton(loadButtonImages("data/ui/common/no"));
-		noButton.position = new Vector(151, 94);
-		noButton.extent = new Vector(75, 35);
-		noButton.vertSizing = Top;
-		noButton.accelerator = hxd.Key.ESCAPE;
-		noButton.gamepadAccelerator = ["B"];
-		noButton.pressedAction = (sender) -> {
+		var cancelButton = new GuiXboxButton("No", 120);
+		cancelButton.position = new Vector(321, 248);
+		cancelButton.extent = new Vector(120, 94);
+		cancelButton.vertSizing = Top;
+		cancelButton.accelerator = hxd.Key.ENTER;
+		cancelButton.gamepadAccelerator = ["A"];
+		cancelButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			noFunc();
 		}
-		yesNoFrame.addChild(noButton);
-
-		if (yesNoText.text.getBounds().yMax > yesNoText.extent.y) {
-			var diff = yesNoText.text.getBounds().yMax - yesNoText.extent.y;
-			yesNoFrame.extent.y += diff;
-			yesButton.position.y += diff;
-			noButton.position.y += diff;
-		}
+		yesNoFrame.addChild(cancelButton);
 	}
 }

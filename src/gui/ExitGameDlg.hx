@@ -75,7 +75,10 @@ class ExitGameDlg extends GuiImage {
 
 		btnList.addButton(0, "Resume", (evt) -> noFunc(btnList));
 		btnList.addButton(0, "Restart", (evt) -> restartFunc(btnList));
-		btnList.addButton(4, "Exit Level", (evt) -> yesFunc(btnList));
+		btnList.addButton(4, "Exit Level", (evt) -> {
+			MarbleGame.canvas.pushDialog(new MessageBoxYesNoDlg("Are you sure you want to exit this level?  You will lose your current level progress.",
+				() -> yesFunc(btnList), () -> {}));
+		});
 		btnList.addButton(3, "Help & Options", (evt) -> {
 			MarbleGame.canvas.popDialog(this);
 			MarbleGame.canvas.pushDialog(new OptionsListGui(true));
@@ -86,8 +89,11 @@ class ExitGameDlg extends GuiImage {
 			MarbleGame.canvas.pushDialog(new AchievementsGui(true));
 		});
 		btnList.addButton(4, "Main Menu", (evt) -> {
-			yesFunc(btnList);
-			MarbleGame.canvas.setContent(new MainMenuGui());
+			MarbleGame.canvas.pushDialog(new MessageBoxYesNoDlg("Are you sure you want to exit this level?  You will lose your current level progress.",
+				() -> {
+					yesFunc(btnList);
+					MarbleGame.canvas.setContent(new MainMenuGui());
+				}, () -> {}));
 		});
 	}
 
