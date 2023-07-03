@@ -84,6 +84,7 @@ class ReplayCenterGui extends GuiImage {
 			.toTile());
 		scrollCtrl.position = new Vector(25, 22);
 		scrollCtrl.extent = new Vector(550, 280);
+		scrollCtrl.scrollToBottom = false;
 		achievementsWnd.addChild(scrollCtrl);
 
 		var replayListCtrl = new GuiTextListCtrl(arial14, replayList.map(x -> x.name));

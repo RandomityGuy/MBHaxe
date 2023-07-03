@@ -14,6 +14,7 @@ import src.Util;
 class GuiConsoleScrollCtrl extends GuiControl {
 	public var scrollY:Float = 0;
 	public var childrenHandleScroll:Bool = false;
+	public var scrollToBottom:Bool = true;
 
 	var maxScrollY:Float;
 
@@ -126,9 +127,13 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 	public function setScrollMax(max:Float) {
 		var renderRect = this.getRenderRectangle();
-		var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
-		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
-		this.scrollY = scrollExtentY - scrollBarYSize * Settings.uiScale;
+		if (scrollToBottom) {
+			var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
+			var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
+			this.scrollY = scrollExtentY - scrollBarYSize * Settings.uiScale;
+		} else {
+			this.scrollY = 0;
+		}
 		this.maxScrollY = max;
 		this.dirty = true;
 		this.updateScrollVisual();
