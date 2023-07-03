@@ -289,7 +289,12 @@ class HuntMode extends NullMode {
 
 	function findGemSpawnGroup(outSpawnPoint:Vector) {
 		// Pick random spawn point
-		var spawnPoint = gemSpawnPoints[Math.floor(Math.random() * gemSpawnPoints.length)];
+		var rnd:Int = Std.int(Math.random() * gemSpawnPoints.length);
+		if (level.isRecording)
+			level.replay.recordRandomGenState(rnd);
+		if (level.isWatching)
+			rnd = level.replay.getRandomGenState();
+		var spawnPoint = gemSpawnPoints[rnd];
 		var pos = spawnPoint.position;
 
 		var results = [];

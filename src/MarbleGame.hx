@@ -300,6 +300,7 @@ class MarbleGame {
 
 	public function watchMissionReplay(mission:Mission, replay:Replay) {
 		canvas.clearContent();
+		destroyPreviewWorld();
 		world = new MarbleWorld(scene, scene2d, mission);
 		world.replay = replay;
 		world.isWatching = true;
