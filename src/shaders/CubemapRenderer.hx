@@ -8,6 +8,7 @@ import h3d.Engine;
 import h3d.Camera;
 import src.MarbleGame;
 import h3d.mat.Texture;
+import src.Settings;
 
 class CubemapRenderer {
 	public var cubemap:Texture;
@@ -38,7 +39,8 @@ class CubemapRenderer {
 		Renderer.cubemapPass = true;
 		for (i in 0...facesPerRender) {
 			var index = (nextFaceToRender + i) % 6;
-			Renderer.dirtyBuffers = true;
+			if (Settings.optionsSettings.reflectionDetail >= 4)
+				Renderer.dirtyBuffers = true;
 
 			e.pushTarget(cubemap, index);
 			this.camera.setCubeMap(index, position);
