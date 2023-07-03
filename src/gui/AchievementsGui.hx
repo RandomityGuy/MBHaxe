@@ -10,7 +10,6 @@ import src.MissionList;
 
 class AchievementsGui extends GuiImage {
 	var innerCtrl:GuiControl;
-	var btnList:GuiXboxList;
 
 	public function new(isPause:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
