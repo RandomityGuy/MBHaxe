@@ -54,7 +54,7 @@ class ReplayCenterGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "REPLAY CENTRE";
+		rootTitle.text.text = "REPLAYS";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
@@ -138,100 +138,6 @@ class ReplayCenterGui extends GuiImage {
 			}
 		};
 		bottomBar.addChild(nextButton);
-
-		// var playButton = new GuiButton(loadButtonImages('data/ui/replay/play', true));
-		// playButton.position = new Vector(323, 386);
-		// playButton.extent = new Vector(94, 46);
-		// playButton.disabled = true;
-		// playButton.pressedAction = (e) -> {
-		// 	var repl = replayList[selectedIdx];
-		// 	if (repl.readFull()) {
-		// 		var repmis = repl.mission;
-		// 		if (!StringTools.contains(repmis, "data/"))
-		// 			repmis = "data/" + repmis;
-		// 		var mi = repl.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(repl.customId);
-		// 		if (mi.isClaMission) {
-		// 			mi.download(() -> {
-		// 				MarbleGame.instance.watchMissionReplay(mi, repl);
-		// 			});
-		// 			playButton.disabled = true; // Don't let us play anything else
-		// 		} else {
-		// 			MarbleGame.instance.watchMissionReplay(mi, repl);
-		// 		}
-		// 	}
-		// }
-		// wnd.addChild(playButton);
-
-		// var homeButton = new GuiButton(loadButtonImages('data/ui/replay/home'));
-		// homeButton.position = new Vector(224, 386);
-		// homeButton.extent = new Vector(94, 46);
-		// homeButton.pressedAction = (e) -> {
-		// 	MarbleGame.canvas.setContent(new MainMenuGui());
-		// }
-		// wnd.addChild(homeButton);
-
-		// var temprev = new BitmapData(1, 1);
-		// temprev.setPixel(0, 0, 0);
-		// var tmpprevtile = h2d.Tile.fromBitmap(temprev);
-
-		// var pmPreview = new GuiImage(tmpprevtile);
-		// pmPreview.position = new Vector(360, 29);
-		// pmPreview.extent = new Vector(216, 150);
-		// wnd.addChild(pmPreview);
-
-		// var scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
-		// scrollCtrl.position = new Vector(30, 25);
-		// scrollCtrl.extent = new Vector(283, 346);
-		// scrollCtrl.childrenHandleScroll = true;
-		// wnd.addChild(scrollCtrl);
-
-		// var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
-		// var arial14b = new BitmapFont(arial14fontdata.entry);
-		// @:privateAccess arial14b.loader = ResourceLoader.loader;
-		// var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
-		// var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		// var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		// @:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		// var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		// var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
-		// var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
-
-		// var missionName = new GuiText(markerFelt24);
-		// missionName.position = new Vector(327, 181);
-		// missionName.extent = new Vector(278, 14);
-		// missionName.text.textColor = 0;
-		// missionName.justify = Center;
-		// wnd.addChild(missionName);
-
-		// var replayListBox = new GuiTextListCtrl(markerFelt24, replayList.map(x -> x.name));
-		// replayListBox.position = new Vector(0, 0);
-		// replayListBox.extent = new Vector(283, 346);
-		// replayListBox.textYOffset = -6;
-		// replayListBox.scrollable = true;
-		// replayListBox.onSelectedFunc = (idx) -> {
-		// 	if (idx < 0)
-		// 		return;
-		// 	selectedIdx = idx;
-		// 	playButton.disabled = false;
-		// 	var thisReplay = replayList[idx];
-		// 	var repmis = thisReplay.mission;
-		// 	if (!StringTools.contains(repmis, "data/"))
-		// 		repmis = "data/" + repmis;
-		// 	if (MissionList.missions == null)
-		// 		MissionList.buildMissionList();
-		// 	var m = thisReplay.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(thisReplay.customId);
-		// 	missionName.text.text = m.title;
-		// 	m.getPreviewImage((t) -> {
-		// 		pmPreview.bmp.tile = t;
-		// 	});
-		// }
-		// scrollCtrl.addChild(replayListBox);
-		// scrollCtrl.setScrollMax(replayListBox.calculateFullHeight());
-
-		// var replayFrame = new GuiImage(ResourceLoader.getResource("data/ui/replay/replayframe.png", ResourceLoader.getImage, this.imageResources).toTile());
-		// replayFrame.position = new Vector(351, 21);
-		// replayFrame.extent = new Vector(234, 168);
-		// wnd.addChild(replayFrame);
 	}
 
 	override function onResize(width:Int, height:Int) {

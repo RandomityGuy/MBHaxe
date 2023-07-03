@@ -371,7 +371,10 @@ class Replay {
 
 	public function recordRandomGenState(ri:Int) {
 		initialState.randomGens.push(ri);
-		initialState.randomGenTimes.push(currentRecordFrame.time);
+		if (currentRecordFrame == null)
+			initialState.randomGenTimes.push(0);
+		else
+			initialState.randomGenTimes.push(currentRecordFrame.time);
 	}
 
 	public function getRandomGenState() {

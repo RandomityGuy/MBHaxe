@@ -966,15 +966,19 @@ class MarbleWorld extends Scheduler {
 					MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
 				}
 				this.setCursorLock(false);
+				var misFile = haxe.io.Path.withoutExtension(haxe.io.Path.withoutDirectory(mission.path));
 				this.dispose();
-				#if !js
-				MarbleGame.canvas.setContent(new ReplayCenterGui());
-				#end
-				#if js
-				MarbleGame.canvas.setContent(new MainMenuGui());
-				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
-				pointercontainer.hidden = false;
-				#end
+				MarbleGame.instance.setPreviewMission(misFile, () -> {
+					#if !js
+					MarbleGame.canvas.setContent(new ReplayCenterGui());
+					#end
+					#if js
+					MarbleGame.canvas.setContent(new MainMenuGui());
+					var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+					pointercontainer.hidden = false;
+					#end
+				});
+
 				return;
 			}
 		}
