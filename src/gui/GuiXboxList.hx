@@ -16,5 +16,6 @@ class GuiXboxList extends GuiControl {
 		btn.pressedAction = func;
 		this.addChild(btn);
 		currentOffset += 60 + addOffset;
+		return btn;
 	}
 }

@@ -11,50 +11,64 @@ import src.Settings;
 import src.Util;
 
 class TouchCtrlsEditGui extends GuiImage {
-	public function new() {
-		function chooseBg() {
-			var rand = Math.random();
-			if (rand >= 0 && rand <= 0.244)
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (rand > 0.244 && rand <= 0.816)
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-		}
-		var img = chooseBg();
-		super(img.resource.toTile());
+	var innerCtrl:GuiControl;
+
+	public function new(paused:Bool) {
+		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
+		super(res);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
+		var scene2d = MarbleGame.canvas.scene2d;
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var offsetX = (scene2d.width - 1280) / 2;
+		var offsetY = (scene2d.height - 720) / 2;
 
-		var mainMenuButton = new GuiButton(loadButtonImages("data/ui/menu/options"));
-		mainMenuButton.position = new Vector(380, 15);
-		mainMenuButton.extent = new Vector(247, 164);
-		mainMenuButton.horizSizing = Left;
-		mainMenuButton.vertSizing = Bottom;
-		mainMenuButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.setContent(new OptionsDlg());
-		}
+		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
 
-		var touchControlsTxt = new GuiText(domcasual32);
-		touchControlsTxt.position = new Vector(350, 415);
-		touchControlsTxt.extent = new Vector(121, 53);
-		touchControlsTxt.text.text = "Edit Touch Controls";
-		touchControlsTxt.horizSizing = Center;
-		touchControlsTxt.vertSizing = Top;
-		touchControlsTxt.text.textColor = 0;
+		innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		innerCtrl.horizSizing = Width;
+		innerCtrl.vertSizing = Height;
+		this.addChild(innerCtrl);
+
+		var coliseumfontdata = ResourceLoader.getFileEntry("data/font/ColiseumRR.fnt");
+		var coliseumb = new BitmapFont(coliseumfontdata.entry);
+		@:privateAccess coliseumb.loader = ResourceLoader.loader;
+		var coliseum = coliseumb.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+
+		var rootTitle = new GuiText(coliseum);
+		rootTitle.position = new Vector(100, 30);
+		rootTitle.extent = new Vector(1120, 80);
+		rootTitle.text.textColor = 0xFFFFFF;
+		rootTitle.text.text = "TOUCH CONTROLS";
+		rootTitle.text.alpha = 0.5;
+		innerCtrl.addChild(rootTitle);
+
+		var bottomBar = new GuiControl();
+		bottomBar.position = new Vector(0, 590);
+		bottomBar.extent = new Vector(640, 200);
+		bottomBar.horizSizing = Width;
+		bottomBar.vertSizing = Bottom;
+		innerCtrl.addChild(bottomBar);
+
+		var nextButton = new GuiXboxButton("Save", 160);
+		nextButton.position = new Vector(960, 100);
+		nextButton.vertSizing = Bottom;
+		nextButton.horizSizing = Right;
+		nextButton.pressedAction = (e) -> {
+			if (paused) {
+				MarbleGame.canvas.popDialog(this);
+				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+			} else {
+				MarbleGame.canvas.setContent(new OptionsListGui());
+			}
+		};
+		innerCtrl.addChild(nextButton);
 
 		var joystick = new MovementInputEdit();
 
@@ -135,12 +149,22 @@ class TouchCtrlsEditGui extends GuiImage {
 			Settings.touchSettings.joystickSize = rvalue;
 		}
 
-		this.addChild(mainMenuButton);
-		this.addChild(touchControlsTxt);
 		this.addChild(joystick);
 		this.addChild(jumpBtn);
 		this.addChild(powerupBtn);
 		this.addChild(blastBtn);
 		this.addChild(rewindBtn);
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+
+		super.onResize(width, height);
 	}
 }

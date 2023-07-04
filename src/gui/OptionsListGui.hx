@@ -5,6 +5,7 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
+import src.Util;
 
 class OptionsListGui extends GuiImage {
 	var innerCtrl:GuiControl;
@@ -64,6 +65,17 @@ class OptionsListGui extends GuiImage {
 		btnList.addButton(3, 'Input and Sound Options', (e) -> {
 			MarbleGame.canvas.setContent(new InputOptionsGui(pauseGui));
 		});
+		if (Util.isTouchDevice()) {
+			if (!pauseGui) {
+				btnList.addButton(3, 'Touch Controls', (e) -> {
+					MarbleGame.canvas.setContent(new TouchCtrlsEditGui(pauseGui));
+				});
+			}
+		} else {
+			btnList.addButton(3, 'Key Bindings', (e) -> {
+				MarbleGame.canvas.setContent(new KeyBindingsGui(pauseGui));
+			});
+		}
 		btnList.addButton(3, 'Video Options', (e) -> {
 			MarbleGame.canvas.setContent(new VideoOptionsGui(pauseGui));
 		});
