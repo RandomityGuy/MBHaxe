@@ -38,7 +38,7 @@ class MessageBoxYesNoDlg extends GuiImage {
 		okButton.position = new Vector(211, 248);
 		okButton.extent = new Vector(120, 94);
 		okButton.vertSizing = Top;
-		okButton.accelerator = hxd.Key.ENTER;
+		okButton.accelerators = [hxd.Key.ENTER];
 		okButton.gamepadAccelerator = ["A"];
 		okButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
@@ -50,7 +50,7 @@ class MessageBoxYesNoDlg extends GuiImage {
 		cancelButton.position = new Vector(321, 248);
 		cancelButton.extent = new Vector(120, 94);
 		cancelButton.vertSizing = Top;
-		cancelButton.accelerator = hxd.Key.ENTER;
+		cancelButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		cancelButton.gamepadAccelerator = ["A"];
 		cancelButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);

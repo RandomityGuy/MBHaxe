@@ -116,6 +116,7 @@ class AchievementsGui extends GuiImage {
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["B"];
+		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (isPause)
 			backButton.pressedAction = (e) -> {
 				MarbleGame.canvas.popDialog(this);
@@ -129,6 +130,8 @@ class AchievementsGui extends GuiImage {
 		nextButton.position = new Vector(960, 0);
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
+		nextButton.accelerators = [hxd.Key.ENTER];
+		nextButton.gamepadAccelerator = ["X"];
 		nextButton.pressedAction = (e) -> {
 			var desc = "Select an achievement from the list.";
 			var selection = curSelection;

@@ -103,6 +103,7 @@ class OptionsListGui extends GuiImage {
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["B"];
+		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {
 				MarbleGame.canvas.popDialog(this);

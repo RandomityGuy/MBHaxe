@@ -143,7 +143,8 @@ class InputOptionsGui extends GuiImage {
 		backButton.position = new Vector(960, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["OK"];
+		backButton.gamepadAccelerator = ["A"];
+		backButton.accelerators = [hxd.Key.ENTER];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {
 				Settings.applySettings();

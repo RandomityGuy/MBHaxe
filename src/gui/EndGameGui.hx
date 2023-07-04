@@ -153,6 +153,7 @@ class EndGameGui extends GuiImage {
 		retryButton.vertSizing = Bottom;
 		retryButton.horizSizing = Right;
 		retryButton.gamepadAccelerator = ["B"];
+		retryButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		retryButton.pressedAction = (e) -> restartFunc(retryButton);
 		bottomBar.addChild(retryButton);
 
@@ -166,6 +167,8 @@ class EndGameGui extends GuiImage {
 		nextButton.position = new Vector(960, 0);
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
+		nextButton.gamepadAccelerator = ["A"];
+		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.pressedAction = (e) -> continueFunc(nextButton);
 		bottomBar.addChild(nextButton);
 	}

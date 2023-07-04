@@ -20,12 +20,16 @@ class GuiXboxListButton extends GuiControl {
 	public var disabled:Bool = false;
 
 	public var pressed:Bool = false;
+	public var selected:Bool = false;
 
 	public var buttonSounds:Bool = true;
 
 	public var accelerator:Int = 0;
 	public var gamepadAccelerator:Array<String> = [];
 	public var acceleratorWasPressed = false;
+	public var list:GuiXboxList;
+
+	var _prevMousePos:Vector;
 
 	public function new(icon:Int, text:String) {
 		super();
@@ -76,7 +80,20 @@ class GuiXboxListButton extends GuiControl {
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
 			}
 		}
-		if (renderRect.inRect(mouseState.position) && !disabled) {
+		if (_prevMousePos == null || !_prevMousePos.equals(mouseState.position)) {
+			if (renderRect.inRect(mouseState.position) && !selected) {
+				if (list != null) {
+					list.buttons[list.selected].selected = false;
+					list.selected = list.buttons.indexOf(this);
+				}
+				this.selected = true;
+			}
+			if (!renderRect.inRect(mouseState.position) && selected) {
+				this.selected = false;
+			}
+			_prevMousePos = mouseState.position.clone();
+		}
+		if (selected && !disabled) {
 			if (Key.isDown(Key.MOUSE_LEFT)) {
 				this.button.anim.currentFrame = 1;
 				this.buttonIcon.anim.currentFrame = 1;
