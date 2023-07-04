@@ -1,5 +1,6 @@
 package modes;
 
+import rewind.RewindableState;
 import shapes.Gem;
 import h3d.Quat;
 import h3d.Vector;
@@ -19,6 +20,8 @@ interface GameMode {
 	public function timeMultiplier():Float;
 	public function getScoreType():ScoreType;
 	public function getFinishScore():Float;
+	public function getRewindState():RewindableState;
+	public function applyRewindState(state:RewindableState):Void;
 	public function onTimeExpire():Void;
 	public function onRestart():Void;
 	public function onGemPickup(gem:Gem):Void;

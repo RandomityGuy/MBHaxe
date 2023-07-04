@@ -1,5 +1,6 @@
 package modes;
 
+import rewind.RewindableState;
 import modes.GameMode.ScoreType;
 import shapes.Gem;
 import h3d.Quat;
@@ -94,4 +95,10 @@ class NullMode implements GameMode {
 	public function getFinishScore():Float {
 		return level.finishTime.gameplayClock;
 	}
+
+	public function getRewindState():RewindableState {
+		return null;
+	}
+
+	public function applyRewindState(state:RewindableState) {}
 }

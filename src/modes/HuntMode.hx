@@ -1,5 +1,6 @@
 package modes;
 
+import rewind.RewindableState;
 import gui.AchievementsGui;
 import modes.GameMode.ScoreType;
 import shapes.GemBeam;
@@ -72,6 +73,28 @@ class GemOctreeElem implements IOctreeObject {
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
 		throw new haxe.exceptions.NotImplementedException(); // Not applicable
+	}
+}
+
+@:publicFields
+class HuntState implements RewindableState {
+	var activeGemSpawnGroup:Array<GemSpawnSphere>;
+	var activeGems:Array<Gem>;
+	var points:Int;
+
+	public function new() {}
+
+	public function apply(level:src.MarbleWorld) {
+		var mode:HuntMode = cast level.gameMode;
+		mode.applyRewindState(this);
+	}
+
+	public function clone():RewindableState {
+		var c = new HuntState();
+		c.activeGemSpawnGroup = activeGemSpawnGroup.copy();
+		c.points = points;
+		c.activeGems = activeGems.copy();
+		return c;
 	}
 }
 
@@ -356,5 +379,33 @@ class HuntMode extends NullMode {
 
 	override function getFinishScore():Float {
 		return points;
+	}
+
+	override function getRewindState():RewindableState {
+		var s = new HuntState();
+		s.points = points;
+		s.activeGemSpawnGroup = activeGemSpawnGroup;
+		s.activeGems = activeGems.copy();
+		return s;
+	}
+
+	override function applyRewindState(state:RewindableState) {
+		var s:HuntState = cast state;
+		points = s.points;
+		@:privateAccess level.playGui.formatGemHuntCounter(points);
+		for (gem in activeGems) {
+			gem.pickedUp = true;
+			gem.setHide(true);
+			var gemBeam = gemToBeamMap.get(gem);
+			gemBeam.setHide(true);
+		}
+		activeGemSpawnGroup = s.activeGemSpawnGroup;
+		activeGems = s.activeGems;
+		for (gem in activeGems) {
+			gem.pickedUp = false;
+			gem.setHide(false);
+			var gemBeam = gemToBeamMap.get(gem);
+			gemBeam.setHide(false);
+		}
 	}
 }

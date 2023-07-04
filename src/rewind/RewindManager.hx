@@ -76,6 +76,7 @@ class RewindManager {
 			checkpointCollectedGems: @:privateAccess level.checkpointCollectedGems.copy(),
 			checkpointHeldPowerup: @:privateAccess level.checkpointHeldPowerup,
 		};
+		rf.modeState = level.gameMode.getRewindState();
 		frames.push(rf);
 	}
 
@@ -173,6 +174,8 @@ class RewindManager {
 		@:privateAccess level.checkpointHeldPowerup = rf.checkpointState.checkpointHeldPowerup;
 		@:privateAccess level.currentCheckpoint = rf.checkpointState.currentCheckpoint;
 		@:privateAccess level.currentCheckpointTrigger = rf.checkpointState.currentCheckpointTrigger;
+		if (rf.modeState != null)
+			rf.modeState.apply(level);
 	}
 
 	public function getNextRewindFrame(absTime:Float):RewindFrame {
