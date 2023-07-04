@@ -24,7 +24,7 @@ class GuiXboxButton extends GuiControl {
 
 	public var buttonSounds:Bool = true;
 
-	public var accelerator:Int = 0;
+	public var accelerators:Array<Int> = [];
 	public var gamepadAccelerator:Array<String> = [];
 	public var acceleratorWasPressed = false;
 
@@ -116,16 +116,21 @@ class GuiXboxButton extends GuiControl {
 			pressed = false;
 		}
 		if (!disabled) {
-			if (acceleratorWasPressed && (accelerator != 0 && hxd.Key.isReleased(accelerator)) || Gamepad.isReleased(gamepadAccelerator)) {
+			if (acceleratorWasPressed
+				&& (accelerators.length != 0 && accelerators.map(x -> hxd.Key.isReleased(x)).contains(true))
+				|| Gamepad.isReleased(gamepadAccelerator)) {
 				if (this.pressedAction != null) {
 					this.pressedAction(new GuiEvent(this));
 				}
-			} else if ((accelerator != 0 && hxd.Key.isPressed(accelerator)) || Gamepad.isPressed(gamepadAccelerator)) {
+			} else if (accelerators.length != 0
+				&& accelerators.map(x -> hxd.Key.isPressed(x)).contains(true)
+				|| Gamepad.isPressed(gamepadAccelerator)) {
 				acceleratorWasPressed = true;
 			}
 		}
 		if (acceleratorWasPressed) {
-			if ((accelerator != 0 && hxd.Key.isReleased(accelerator)) || Gamepad.isReleased(gamepadAccelerator))
+			if ((accelerators.length != 0 && accelerators.map(x -> hxd.Key.isReleased(x)).contains(true))
+				|| Gamepad.isReleased(gamepadAccelerator))
 				acceleratorWasPressed = false;
 		}
 		super.update(dt, mouseState);

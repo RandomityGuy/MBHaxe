@@ -72,7 +72,8 @@ class VersionGui extends GuiImage {
 		backButton.position = new Vector(960, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["OK"];
+		backButton.gamepadAccelerator = ["A"];
+		backButton.accelerators = [hxd.Key.ENTER];
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
 		bottomBar.addChild(backButton);
 

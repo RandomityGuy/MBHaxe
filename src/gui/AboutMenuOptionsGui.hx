@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Key;
 import src.MarbleGame;
 import hxd.res.BitmapFont;
 import h3d.Vector;
@@ -108,6 +109,7 @@ class AboutMenuOptionsGui extends GuiImage {
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["B"];
+		backButton.accelerators = [Key.ESCAPE, Key.BACKSPACE];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {
 				MarbleGame.canvas.popDialog(this);

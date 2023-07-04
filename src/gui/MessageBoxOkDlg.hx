@@ -38,7 +38,7 @@ class MessageBoxOkDlg extends GuiImage {
 		okButton.position = new Vector(211, 248);
 		okButton.extent = new Vector(120, 94);
 		okButton.vertSizing = Top;
-		okButton.accelerator = hxd.Key.ENTER;
+		okButton.accelerators = [hxd.Key.ENTER];
 		okButton.gamepadAccelerator = ["A"];
 		okButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
