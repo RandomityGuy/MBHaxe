@@ -45,6 +45,7 @@ class RewindFrame {
 		checkpointHeldPowerup:PowerUp,
 		checkpointBlast:Float
 	};
+	var modeState:RewindableState;
 
 	public function new() {}
 
@@ -96,6 +97,7 @@ class RewindFrame {
 			checkpointHeldPowerup: checkpointState.checkpointHeldPowerup,
 			checkpointBlast: checkpointState.checkpointBlast,
 		};
+		c.modeState = modeState != null ? modeState.clone() : null;
 		return c;
 	}
 }
