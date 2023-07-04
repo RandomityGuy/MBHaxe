@@ -7,35 +7,33 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 
-class RemapDlg extends GuiControl {
+class RemapDlg extends GuiImage {
 	var remapCallback:Int->Void;
 
 	public function new(bindingName:String) {
-		super();
+		var res = ResourceLoader.getImage("data/ui/xbox/roundedBG.png").resource.toTile();
+		super(res);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var remapDlg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
+
+		var remapDlg = new GuiImage(ResourceLoader.getResource("data/ui/xbox/popupGUI.png", ResourceLoader.getImage, this.imageResources).toTile());
 		remapDlg.horizSizing = Center;
 		remapDlg.vertSizing = Center;
-		remapDlg.position = new Vector(170, 159);
-		remapDlg.extent = new Vector(300, 161);
+		remapDlg.position = new Vector(70, 30);
+		remapDlg.extent = new Vector(512, 400);
 		this.addChild(remapDlg);
 
-		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
-		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
-
-		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
-
-		var remapText = new GuiMLText(domcasual24, null);
-		remapText.horizSizing = Center;
-		remapText.vertSizing = Bottom;
-		remapText.position = new Vector(46, 60);
-		remapText.extent = new Vector(213, 23);
-		remapText.text.textColor = 0;
+		var remapText = new GuiMLText(arial14, null);
+		remapText.position = new Vector(103, 85);
+		remapText.extent = new Vector(313, 186);
+		remapText.text.textColor = 0xEBEBEB;
 		remapText.text.text = '<p align="center">Press a new key or button for <br/>"${bindingName}"</p>';
 		remapDlg.addChild(remapText);
 	}
