@@ -11,6 +11,8 @@ class GuiXboxList extends GuiControl {
 
 	var buttons:Array<GuiXboxListButton> = [];
 
+	public var active:Bool = true;
+
 	public function new() {
 		super();
 	}
@@ -30,20 +32,29 @@ class GuiXboxList extends GuiControl {
 	override function update(dt:Float, mouseState:MouseState) {
 		super.update(dt, mouseState);
 
-		var prevSelected = selected;
-		if (Key.isPressed(Key.DOWN) || Gamepad.isPressed(["dpadDown"]))
-			selected++;
-		if (Key.isPressed(Key.UP) || Gamepad.isPressed(["dpadUp"]))
-			selected--;
-		if (selected < 0)
-			selected = buttons.length - 1;
-		if (selected >= buttons.length)
-			selected = 0;
-		if (prevSelected != selected) {
-			buttons[prevSelected].selected = false;
-			buttons[selected].selected = true;
+		if (active) {
+			if (!buttons[selected].selected)
+				buttons[selected].selected = true;
+			var prevSelected = selected;
+			if (Key.isPressed(Key.DOWN) || Gamepad.isPressed(["dpadDown"]))
+				selected++;
+			if (Key.isPressed(Key.UP) || Gamepad.isPressed(["dpadUp"]))
+				selected--;
+			if (selected < 0)
+				selected = buttons.length - 1;
+			if (selected >= buttons.length)
+				selected = 0;
+			if (prevSelected != selected) {
+				buttons[prevSelected].selected = false;
+				buttons[selected].selected = true;
+			}
+			if (Key.isPressed(Key.ENTER) || Gamepad.isPressed(["A"]))
+				buttons[selected].pressedAction(new GuiEvent(buttons[selected]));
+		} else {
+			for (b in buttons) {
+				if (b.selected)
+					b.selected = false;
+			}
 		}
-		if (Key.isPressed(Key.ENTER) || Gamepad.isPressed(["A"]))
-			buttons[selected].pressedAction(new GuiEvent(buttons[selected]));
 	}
 }

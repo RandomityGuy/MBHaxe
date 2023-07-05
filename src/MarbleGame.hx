@@ -190,7 +190,6 @@ class MarbleGame {
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
 				&& world.finishTime == null
 				&& world._ready) {
-				paused = !paused;
 				handlePauseGame();
 			}
 		}
@@ -248,19 +247,23 @@ class MarbleGame {
 	}
 
 	public function handlePauseGame() {
-		if (paused && world._ready) {
+		if (!paused && world._ready) {
+			paused = true;
 			Console.log("Game paused");
 			world.setCursorLock(false);
 			@:privateAccess world.playGui.setGuiVisibility(false);
 			showPauseUI();
 		} else {
 			if (world._ready) {
-				Console.log("Game unpaused");
-				if (exitGameDlg != null) {
-					canvas.popDialog(exitGameDlg);
-					@:privateAccess world.playGui.setGuiVisibility(true);
+				if (canvas.children[0] is ExitGameDlg) {
+					paused = false;
+					Console.log("Game unpaused");
+					if (exitGameDlg != null) {
+						canvas.popDialog(exitGameDlg);
+						@:privateAccess world.playGui.setGuiVisibility(true);
+					}
+					world.setCursorLock(true);
 				}
-				world.setCursorLock(true);
 			}
 		}
 	}
