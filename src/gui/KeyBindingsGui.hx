@@ -1,5 +1,7 @@
 package gui;
 
+import src.Gamepad;
+import gui.GuiControl.MouseState;
 import hxd.Key;
 import src.MarbleGame;
 import hxd.res.BitmapFont;
@@ -12,6 +14,9 @@ class KeyBindingsGui extends GuiImage {
 	var innerCtrl:GuiControl;
 	var btnListLeft:GuiXboxList;
 	var btnListRight:GuiXboxList;
+
+	var selectedColumn = 0;
+	var _prevMousePosition:Vector;
 
 	public function new(pauseGui:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
@@ -111,6 +116,7 @@ class KeyBindingsGui extends GuiImage {
 		btnListLeft.position = new Vector(70 - offsetX, 135);
 		btnListLeft.horizSizing = Left;
 		btnListLeft.extent = new Vector(502, 500);
+		btnListLeft.active = false;
 		innerCtrl.addChild(btnListLeft);
 
 		btnListRight = new GuiXboxList();
@@ -190,6 +196,61 @@ class KeyBindingsGui extends GuiImage {
 		else
 			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
 		bottomBar.addChild(backButton);
+	}
+
+	override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+		var prevSelected = selectedColumn;
+		if (Key.isPressed(Key.RIGHT) || Gamepad.isPressed(["dpadRight"]))
+			selectedColumn++;
+		if (Key.isPressed(Key.LEFT) || Gamepad.isPressed(["dpadLeft"]))
+			selectedColumn++;
+		if (selectedColumn < 0)
+			selectedColumn = 1;
+		if (selectedColumn > 1)
+			selectedColumn = 0;
+		if (selectedColumn == 1) {
+			btnListLeft.active = true;
+			btnListRight.active = false;
+		} else {
+			btnListLeft.active = false;
+			btnListRight.active = true;
+		}
+		if (prevSelected == 0 && selectedColumn == 1) {
+			btnListLeft.selected = btnListRight.selected;
+		}
+		if (prevSelected == 1 && selectedColumn == 0) {
+			btnListRight.selected = btnListLeft.selected;
+		}
+		if (_prevMousePosition == null || !_prevMousePosition.equals(mouseState.position)) {
+			for (i in 0...btnListLeft.buttons.length) {
+				var btn = btnListLeft.buttons[i];
+				var renderRect = btn.getHitTestRect();
+				renderRect.position = renderRect.position.add(new Vector(24, 20)); // Offset
+				renderRect.extent.set(439, 53);
+				if (renderRect.inRect(mouseState.position)) {
+					selectedColumn = 1;
+					btnListLeft.selected = i;
+					btnListLeft.active = true;
+					btnListRight.active = false;
+					break;
+				}
+			}
+			for (i in 0...btnListRight.buttons.length) {
+				var btn = btnListRight.buttons[i];
+				var renderRect = btn.getHitTestRect();
+				renderRect.position = renderRect.position.add(new Vector(24, 20)); // Offset
+				renderRect.extent.set(439, 53);
+				if (renderRect.inRect(mouseState.position)) {
+					selectedColumn = 0;
+					btnListRight.selected = i;
+					btnListRight.active = true;
+					btnListLeft.active = false;
+					break;
+				}
+			}
+			_prevMousePosition = mouseState.position.clone();
+		}
 	}
 
 	override function onResize(width:Int, height:Int) {

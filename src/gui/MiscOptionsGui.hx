@@ -60,36 +60,22 @@ class MiscOptionsGui extends GuiImage {
 			return range;
 		}
 
-		var yPos = 160;
+		var optionCollection = new GuiXboxOptionsListCollection();
+		optionCollection.position = new Vector(380, 160);
+		optionCollection.extent = new Vector(815, 500);
+		innerCtrl.addChild(optionCollection);
 
-		var rwOpt = new GuiXboxOptionsList(1, "Rewind", ["Disabled", "Enabled"], 0.5, 118);
-		rwOpt.vertSizing = Bottom;
-		rwOpt.horizSizing = Right;
-		rwOpt.position = new Vector(380, yPos);
-		rwOpt.extent = new Vector(815, 94);
-		rwOpt.setCurrentOption(Settings.optionsSettings.rewindEnabled ? 1 : 0);
-		rwOpt.onChangeFunc = (idx) -> {
+		var rwOpt = optionCollection.addOption(1, "Rewind", ["Disabled", "Enabled"], (idx) -> {
 			Settings.optionsSettings.rewindEnabled = (idx == 1);
 			return true;
-		}
-		innerCtrl.addChild(rwOpt);
+		}, 0.5, 118);
+		rwOpt.setCurrentOption(Settings.optionsSettings.rewindEnabled ? 1 : 0);
 
-		yPos += 60;
-
-		var rsOpt = new GuiXboxOptionsList(1, "Rewind Speed", numberRange(10, 100, 5), 0.5, 118);
-
-		rsOpt.vertSizing = Bottom;
-		rsOpt.horizSizing = Right;
-		rsOpt.position = new Vector(380, yPos);
-		rsOpt.extent = new Vector(815, 94);
-		rsOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1)) * 18), 0, 18)));
-		rsOpt.onChangeFunc = (idx) -> {
+		var rsOpt = optionCollection.addOption(1, "Rewind Speed", numberRange(10, 100, 5), (idx) -> {
 			Settings.optionsSettings.rewindTimescale = cast(0.1 + (idx / 18.0) * (1 - 0.1));
 			return true;
-		}
-		innerCtrl.addChild(rsOpt);
-
-		yPos += 60;
+		}, 0.5, 118);
+		rsOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1)) * 18), 0, 18)));
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);

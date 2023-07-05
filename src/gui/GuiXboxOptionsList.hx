@@ -1,5 +1,6 @@
 package gui;
 
+import src.Gamepad;
 import hxd.Key;
 import h3d.Matrix;
 import hxd.res.BitmapFont;
@@ -21,6 +22,12 @@ class GuiXboxOptionsList extends GuiControl {
 	var alwaysActive:Bool = false;
 
 	var onChangeFunc:Int->Bool = null;
+
+	var _prevMousePos:Vector;
+
+	public var selected:Bool = false;
+
+	public var list:GuiXboxOptionsListCollection;
 
 	public function new(icon:Int, name:String, values:Array<String>, midcolumn:Float = 0.3, textOff = 155.5) {
 		super();
@@ -113,7 +120,22 @@ class GuiXboxOptionsList extends GuiControl {
 			var htr = this.getHitTestRect();
 			htr.position = htr.position.add(new Vector(24, 20));
 			htr.extent.set(776, 53);
-			if (htr.inRect(mouseState.position)) {
+
+			if (_prevMousePos == null || !_prevMousePos.equals(mouseState.position)) {
+				if (htr.inRect(mouseState.position) && !selected) {
+					this.selected = true;
+					if (list != null) {
+						list.options[list.selected].selected = false;
+						list.selected = list.options.indexOf(this);
+					}
+				}
+				// if (!htr.inRect(mouseState.position) && selected) {
+				// 	this.selected = false;
+				// }
+				_prevMousePos = mouseState.position.clone();
+			}
+
+			if (selected) {
 				bgFill.anim.currentFrame = 1;
 				optIcon.anim.currentFrame = 1;
 				labelText.text.textColor = 0x101010;
@@ -187,6 +209,34 @@ class GuiXboxOptionsList extends GuiControl {
 		} else {
 			rightButton.anim.currentFrame = 0;
 			rightButton.anim.filter.enable = false;
+		}
+		if (selected || alwaysActive) {
+			if (Key.isPressed(Key.LEFT) || Gamepad.isPressed(['dpadLeft'])) {
+				var newOption = currentOption - 1;
+				if (newOption < 0)
+					newOption = options.length - 1;
+
+				var doChange = true;
+				if (onChangeFunc != null)
+					doChange = onChangeFunc(newOption);
+				if (doChange) {
+					currentOption = newOption;
+					optionText.text.text = options[currentOption];
+				}
+			}
+			if (Key.isPressed(Key.RIGHT) || Gamepad.isPressed(['dpadRight'])) {
+				var newOption = currentOption + 1;
+				if (newOption >= options.length)
+					newOption = 0;
+
+				var doChange = true;
+				if (onChangeFunc != null)
+					doChange = onChangeFunc(newOption);
+				if (doChange) {
+					currentOption = newOption;
+					optionText.text.text = options[currentOption];
+				}
+			}
 		}
 		super.update(dt, mouseState);
 	}

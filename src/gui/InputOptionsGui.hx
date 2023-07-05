@@ -60,77 +60,43 @@ class InputOptionsGui extends GuiImage {
 			return range;
 		}
 
-		var yPos = 160;
+		var optionCollection = new GuiXboxOptionsListCollection();
+		optionCollection.position = new Vector(380, 160);
+		optionCollection.extent = new Vector(815, 500);
+		innerCtrl.addChild(optionCollection);
 
-		var iyOpt = new GuiXboxOptionsList(1, "Camera Y-Axis", ["Normal", "Inverted"], 0.5, 118);
-		iyOpt.vertSizing = Bottom;
-		iyOpt.horizSizing = Right;
-		iyOpt.position = new Vector(380, yPos);
-		iyOpt.extent = new Vector(815, 94);
-		iyOpt.setCurrentOption(Settings.controlsSettings.invertYAxis ? 1 : 0);
-		iyOpt.onChangeFunc = (idx) -> {
+		var iyOpt = optionCollection.addOption(1, "Camera Y-Axis", ["Normal", "Inverted"], (idx) -> {
 			Settings.controlsSettings.invertYAxis = (idx == 1);
 			return true;
-		}
-		innerCtrl.addChild(iyOpt);
+		}, 0.5, 118);
+		iyOpt.setCurrentOption(Settings.controlsSettings.invertYAxis ? 1 : 0);
 
-		yPos += 60;
-
-		var musicOpt = new GuiXboxOptionsList(1, "Music Volume", numberRange(0, 100, 5), 0.5, 118);
-
-		musicOpt.vertSizing = Bottom;
-		musicOpt.horizSizing = Right;
-		musicOpt.position = new Vector(380, yPos);
-		musicOpt.extent = new Vector(815, 94);
-		musicOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(Settings.optionsSettings.musicVolume * 20), 0, 20)));
-		musicOpt.onChangeFunc = (idx) -> {
+		var musicOpt = optionCollection.addOption(1, "Music Volume", numberRange(0, 100, 5), (idx) -> {
 			Settings.optionsSettings.musicVolume = (idx / 20.0);
 			return true;
-		}
-		innerCtrl.addChild(musicOpt);
+		}, 0.5, 118);
 
-		yPos += 60;
+		musicOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(Settings.optionsSettings.musicVolume * 20), 0, 20)));
 
-		var soundOpt = new GuiXboxOptionsList(1, "Effects Volume", numberRange(0, 100, 5), 0.5, 118);
-
-		soundOpt.vertSizing = Bottom;
-		soundOpt.horizSizing = Right;
-		soundOpt.position = new Vector(380, yPos);
-		soundOpt.extent = new Vector(815, 94);
-		soundOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(Settings.optionsSettings.soundVolume * 20), 0, 20)));
-		soundOpt.onChangeFunc = (idx) -> {
+		var soundOpt = optionCollection.addOption(1, "Effects Volume", numberRange(0, 100, 5), (idx) -> {
 			Settings.optionsSettings.soundVolume = (idx / 20.0);
 			return true;
-		}
-		innerCtrl.addChild(soundOpt);
+		}, 0.5, 118);
 
-		yPos += 60;
+		soundOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(Settings.optionsSettings.soundVolume * 20), 0, 20)));
 
-		var flOpt = new GuiXboxOptionsList(1, "Free-Look", ["Disabled", "Enabled"], 0.5, 118);
-		flOpt.vertSizing = Bottom;
-		flOpt.horizSizing = Right;
-		flOpt.position = new Vector(380, yPos);
-		flOpt.extent = new Vector(815, 94);
-		flOpt.setCurrentOption(Settings.optionsSettings.vsync ? 1 : 0);
-		flOpt.onChangeFunc = (idx) -> {
+		var flOpt = optionCollection.addOption(1, "Free-Look", ["Disabled", "Enabled"], (idx) -> {
 			Settings.controlsSettings.alwaysFreeLook = (idx == 1);
 			return true;
-		}
-		innerCtrl.addChild(flOpt);
+		}, 0.5, 118);
 
-		yPos += 60;
+		flOpt.setCurrentOption(Settings.optionsSettings.vsync ? 1 : 0);
 
-		var msOpt = new GuiXboxOptionsList(1, "Mouse Sensitivity", numberRange(10, 100, 5), 0.5, 118);
-		msOpt.vertSizing = Bottom;
-		msOpt.horizSizing = Right;
-		msOpt.position = new Vector(380, yPos);
-		msOpt.extent = new Vector(815, 94);
-		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2)) * 18), 0, 18)));
-		msOpt.onChangeFunc = (idx) -> {
+		var msOpt = optionCollection.addOption(1, "Mouse Sensitivity", numberRange(10, 100, 5), (idx) -> {
 			Settings.controlsSettings.cameraSensitivity = cast(0.2 + (idx / 18.0) * (3 - 0.2));
 			return true;
-		}
-		innerCtrl.addChild(msOpt);
+		}, 0.5, 118);
+		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2)) * 18), 0, 18)));
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);

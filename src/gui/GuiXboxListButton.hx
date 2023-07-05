@@ -88,9 +88,9 @@ class GuiXboxListButton extends GuiControl {
 				}
 				this.selected = true;
 			}
-			if (!renderRect.inRect(mouseState.position) && selected) {
-				this.selected = false;
-			}
+			// if (!renderRect.inRect(mouseState.position) && selected) {
+			// 	this.selected = false;
+			// }
 			_prevMousePos = mouseState.position.clone();
 		}
 		if (selected && !disabled) {

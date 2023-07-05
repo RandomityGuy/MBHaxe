@@ -51,28 +51,19 @@ class VideoOptionsGui extends GuiImage {
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var yPos = 160;
+		var optionCollection = new GuiXboxOptionsListCollection();
+		optionCollection.position = new Vector(380, 160);
+		optionCollection.extent = new Vector(815, 500);
+		innerCtrl.addChild(optionCollection);
 
-		var resolutionOpt = new GuiXboxOptionsList(1, "Fullscreen Res", [
+		var resolutionOpt = optionCollection.addOption(1, "Fullscreen Res", [
 			"1024 x 800",
 			"1280 x 720",
 			"1366 x 768",
 			"1440 x 900",
 			"1600 x 900",
 			"1920 x 1080"
-		], 0.35);
-		resolutionOpt.optionText.text.text = '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}';
-		var curOpt = [
-			"1024 x 800",
-			"1280 x 720",
-			"1366 x 768",
-			"1440 x 900",
-			"1600 x 900",
-			"1920 x 1080"
-		].indexOf(resolutionOpt.optionText.text.text);
-		if (curOpt != -1)
-			resolutionOpt.setCurrentOption(curOpt);
-		resolutionOpt.onChangeFunc = (idx) -> {
+		], (idx) -> {
 			switch (idx) {
 				case 0:
 					Settings.optionsSettings.screenWidth = 1024;
@@ -94,43 +85,31 @@ class VideoOptionsGui extends GuiImage {
 					Settings.optionsSettings.screenHeight = 1080;
 			}
 			return true;
-		}
+		}, 0.35);
 
-		resolutionOpt.vertSizing = Bottom;
-		resolutionOpt.horizSizing = Right;
-		resolutionOpt.position = new Vector(380, yPos);
-		resolutionOpt.extent = new Vector(815, 94);
-		innerCtrl.addChild(resolutionOpt);
+		resolutionOpt.optionText.text.text = '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}';
+		var curOpt = [
+			"1024 x 800",
+			"1280 x 720",
+			"1366 x 768",
+			"1440 x 900",
+			"1600 x 900",
+			"1920 x 1080"
+		].indexOf(resolutionOpt.optionText.text.text);
+		if (curOpt != -1)
+			resolutionOpt.setCurrentOption(curOpt);
 
-		yPos += 60;
-
-		var displayOpt = new GuiXboxOptionsList(1, "Resolution", ["Fullscreen", "Windowed"], 0.35);
-		displayOpt.vertSizing = Bottom;
-		displayOpt.horizSizing = Right;
-		displayOpt.position = new Vector(380, yPos);
-		displayOpt.extent = new Vector(815, 94);
-		displayOpt.setCurrentOption(Settings.optionsSettings.isFullScreen ? 0 : 1);
-		displayOpt.onChangeFunc = (idx) -> {
+		var displayOpt = optionCollection.addOption(1, "Resolution", ["Fullscreen", "Windowed"], (idx) -> {
 			Settings.optionsSettings.isFullScreen = (idx == 0);
 			return true;
-		}
-		innerCtrl.addChild(displayOpt);
+		}, 0.35);
+		displayOpt.setCurrentOption(Settings.optionsSettings.isFullScreen ? 0 : 1);
 
-		yPos += 60;
-
-		var vsyncOpt = new GuiXboxOptionsList(1, "VSync", ["Disabled", "Enabled"], 0.35);
-		vsyncOpt.vertSizing = Bottom;
-		vsyncOpt.horizSizing = Right;
-		vsyncOpt.position = new Vector(380, yPos);
-		vsyncOpt.extent = new Vector(815, 94);
-		vsyncOpt.setCurrentOption(Settings.optionsSettings.vsync ? 1 : 0);
-		vsyncOpt.onChangeFunc = (idx) -> {
+		var vsyncOpt = optionCollection.addOption(1, "VSync", ["Disabled", "Enabled"], (idx) -> {
 			Settings.optionsSettings.vsync = (idx == 1);
 			return true;
-		}
-		innerCtrl.addChild(vsyncOpt);
-
-		yPos += 60;
+		}, 0.35);
+		vsyncOpt.setCurrentOption(Settings.optionsSettings.vsync ? 1 : 0);
 
 		function numberRange(start:Int, stop:Int, step:Int) {
 			var range = [];
@@ -141,37 +120,32 @@ class VideoOptionsGui extends GuiImage {
 			return range;
 		}
 
-		var fovOpt = new GuiXboxOptionsList(1, "Field of Vision", numberRange(60, 140, 5), 0.35);
-		fovOpt.vertSizing = Bottom;
-		fovOpt.horizSizing = Right;
-		fovOpt.position = new Vector(380, yPos);
-		fovOpt.extent = new Vector(815, 94);
-		fovOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.fovX - 60) / (140 - 60)) * 16), 0, 16)));
-		fovOpt.onChangeFunc = (idx) -> {
+		var fovOpt = optionCollection.addOption(1, "Field of Vision", numberRange(60, 140, 5), (idx) -> {
 			Settings.optionsSettings.fovX = cast(60 + (idx / 16.0) * (140 - 60));
 			return true;
-		}
-		innerCtrl.addChild(fovOpt);
+		}, 0.35);
+		fovOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.fovX - 60) / (140 - 60)) * 16), 0, 16)));
 
-		yPos += 60;
-
-		var rfOpt = new GuiXboxOptionsList(1, "Reflection Detail", ["None", "Sky Only", "Level and Sky", "Level, Sky and Items", "Everything"], 0.35);
-
-		rfOpt.vertSizing = Bottom;
-		rfOpt.horizSizing = Right;
-		rfOpt.position = new Vector(380, yPos);
-		rfOpt.extent = new Vector(815, 94);
-		rfOpt.setCurrentOption(Settings.optionsSettings.reflectionDetail);
-		rfOpt.onChangeFunc = (idx) -> {
+		var rfOpt = optionCollection.addOption(1, "Reflection Detail", ["None", "Sky Only", "Level and Sky", "Level, Sky and Items", "Everything"], (idx) -> {
 			Settings.optionsSettings.reflectionDetail = idx;
 			return true;
-		}
-		innerCtrl.addChild(rfOpt);
-
-		yPos += 60;
+		}, 0.35);
+		rfOpt.setCurrentOption(Settings.optionsSettings.reflectionDetail);
 
 		#if js
-		var pxOpt = new GuiXboxOptionsList(1, "Pixel Ratio", ["Max 0.5", "Max 1", "Max 1.5", "Max 2", "Max Infinity"], 0.35);
+		var pxOpt = optionCollection.addOption(1, "Pixel Ratio", ["Max 0.5", "Max 1", "Max 1.5", "Max 2", "Max Infinity"], (idx) -> {
+			if (idx == 0)
+				Settings.optionsSettings.maxPixelRatio = 0.5;
+			else if (idx == 1)
+				Settings.optionsSettings.maxPixelRatio = 1;
+			else if (idx == 2)
+				Settings.optionsSettings.maxPixelRatio = 1.5;
+			else if (idx == 3)
+				Settings.optionsSettings.maxPixelRatio = 2;
+			else if (idx == 4)
+				Settings.optionsSettings.maxPixelRatio = 100;
+			return true;
+		}, 0.35);
 
 		var curPixelRatioIndex = 1;
 		if (Settings.optionsSettings.maxPixelRatio == 0.5)
@@ -184,26 +158,7 @@ class VideoOptionsGui extends GuiImage {
 			curPixelRatioIndex = 3;
 		else if (Settings.optionsSettings.maxPixelRatio == 100)
 			curPixelRatioIndex = 4;
-
-		pxOpt.vertSizing = Bottom;
-		pxOpt.horizSizing = Right;
-		pxOpt.position = new Vector(380, yPos);
-		pxOpt.extent = new Vector(815, 94);
 		pxOpt.setCurrentOption(curPixelRatioIndex);
-		pxOpt.onChangeFunc = (idx) -> {
-			if (idx == 0)
-				Settings.optionsSettings.maxPixelRatio = 0.5;
-			else if (idx == 1)
-				Settings.optionsSettings.maxPixelRatio = 1;
-			else if (idx == 2)
-				Settings.optionsSettings.maxPixelRatio = 1.5;
-			else if (idx == 3)
-				Settings.optionsSettings.maxPixelRatio = 2;
-			else if (idx == 4)
-				Settings.optionsSettings.maxPixelRatio = 100;
-			return true;
-		}
-		innerCtrl.addChild(pxOpt);
 		#end
 
 		var bottomBar = new GuiControl();
