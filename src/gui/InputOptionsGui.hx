@@ -90,7 +90,7 @@ class InputOptionsGui extends GuiImage {
 			return true;
 		}, 0.5, 118);
 
-		flOpt.setCurrentOption(Settings.optionsSettings.vsync ? 1 : 0);
+		flOpt.setCurrentOption(Settings.controlsSettings.alwaysFreeLook ? 1 : 0);
 
 		var msOpt = optionCollection.addOption(1, "Mouse Sensitivity", numberRange(10, 100, 5), (idx) -> {
 			Settings.controlsSettings.cameraSensitivity = cast(0.2 + (idx / 18.0) * (3 - 0.2));

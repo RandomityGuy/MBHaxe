@@ -1822,6 +1822,7 @@ class Marble extends GameObject {
 		}
 
 		if (this.controllable && this.level != null && !this.level.rewinding) {
+			// this.camera.startCenterCamera();
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
 

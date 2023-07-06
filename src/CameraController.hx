@@ -37,23 +37,9 @@ class CameraController extends Object {
 	var marble:Marble;
 	var level:MarbleWorld;
 
-	public var Position:Vector;
-	public var Direction:Vector;
-	public var Up:Vector;
-	public var LookAtPoint:Vector;
-	public var Mode = CameraMode.FixedOrbit;
-	public var CameraSensitivity = 0.6;
-	public var CameraPanSensitivity = 0.05;
-	public var CameraZoomSensitivity = 0.7;
-	public var CameraZoomSpeed = 15.0;
-	public var CameraZoomDeceleration = 250.0;
-	public var CameraSpeed = 15.0;
-
 	var camZoomSpeed:Float;
 
 	public var CameraDistance:Float;
-	public var CameraMinDistance = 1;
-	public var CameraMaxDistance = 25;
 	public var CameraPitch:Float;
 	public var CameraYaw:Float;
 
@@ -69,6 +55,11 @@ class CameraController extends Object {
 
 	public var oob:Bool = false;
 	public var finish:Bool = false;
+
+	public var centeringCamera:Bool = false;
+
+	var radsLeftToCenter:Float = 0;
+	var radsStartingToCenter:Float = 0;
 
 	var _ignoreCursor:Bool = false;
 
@@ -129,12 +120,6 @@ class CameraController extends Object {
 
 		var deltaposX = mouseX * scaleFactor;
 		var deltaposY = mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1) * scaleFactor;
-		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
-			deltaposY = 0;
-		}
-
-		if (mouseX != 0 || mouseY != 0)
-			trace('Orbit Delta ' + mouseX + " " + mouseY);
 
 		var factor = isTouch ? Util.lerp(1 / 250, 1 / 25,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
@@ -162,6 +147,39 @@ class CameraController extends Object {
 		// 	CameraPitch = 0.001;
 	}
 
+	function rescaleDeadZone(value:Float, deadZone:Float) {
+		if (deadZone >= value) {
+			if (-deadZone <= value)
+				return 0.0;
+			else
+				return (value + deadZone) / (1.0 - deadZone);
+		} else
+			return (value - deadZone) / (1.0 - deadZone);
+	}
+
+	function computePitchSpeedFromDelta(delta:Float) {
+		return Util.clamp(delta, Math.PI / 10, Math.PI / 2) * 4;
+	}
+
+	public function startCenterCamera() {
+		if (this.marble.velocity.lengthSq() >= 81) {
+			var marbAxis = this.marble.getMarbleAxis();
+			var motionDir = marbAxis[0].multiply(-1);
+
+			radsLeftToCenter = Math.atan2(marble.velocity.x, marble.velocity.y) - Math.atan2(motionDir.x, motionDir.y);
+
+			if (Math.abs(radsLeftToCenter) >= 0.5235987755982988) {
+				if (radsLeftToCenter <= Math.PI) {
+					if (radsLeftToCenter < 0.0 && radsLeftToCenter < -Math.PI)
+						radsLeftToCenter = radsLeftToCenter + Math.PI * 2;
+				} else
+					radsLeftToCenter = radsLeftToCenter - Math.PI * 2;
+				centeringCamera = true;
+				radsStartingToCenter = radsLeftToCenter;
+			}
+		}
+	}
+
 	public function update(currentTime:Float, dt:Float) {
 		// camera.position.set(marblePosition.x, marblePosition.y, marblePosition.z).sub(directionVector.clone().multiplyScalar(2.5));
 		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
@@ -175,20 +193,67 @@ class CameraController extends Object {
 			+ Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis);
 		if (Settings.gamepadSettings.invertYAxis)
 			cameraPitchDelta = -cameraPitchDelta;
-		nextCameraPitch += 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
 			+ Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis);
 		if (Settings.gamepadSettings.invertXAxis)
 			cameraYawDelta = -cameraYawDelta;
-		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
+		var deltaX = 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
+		var deltaY = 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
+
+		var deltaNew = deltaX;
+
+		if (false /*centeringCamera*/) { // This doesnt work
+			var yawDiff = Math.abs(Math.abs(deltaNew) - Math.abs(radsLeftToCenter));
+			if (yawDiff >= 0.15)
+				yawDiff = Math.sin(radsLeftToCenter / radsStartingToCenter) * 0.15;
+			else {
+				if (yawDiff >= 0.05)
+					yawDiff = 0.050000001;
+				else
+					centeringCamera = false;
+			}
+
+			if (radsLeftToCenter <= deltaNew) {
+				deltaNew = deltaNew - yawDiff;
+				radsLeftToCenter += yawDiff;
+			} else {
+				deltaNew = yawDiff + deltaNew;
+				radsLeftToCenter -= yawDiff;
+			}
+			deltaX = deltaNew;
+		}
+		deltaX = deltaNew;
+
+		// Center the pitch
+		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
+			var rescaledY = deltaY;
+			if (rescaledY <= 0.0)
+				rescaledY = 0.4 - rescaledY * -0.75;
+			else
+				rescaledY = rescaledY * 1.1 + 0.4;
+			var movePitchDelta = (rescaledY - CameraPitch);
+			var movePitchSpeed = computePitchSpeedFromDelta(Math.abs(movePitchDelta)) * dt * 0.8;
+			if (movePitchDelta <= 0.0) {
+				movePitchDelta = -movePitchDelta;
+				if (movePitchDelta < movePitchSpeed)
+					movePitchSpeed = movePitchDelta;
+				movePitchDelta = -movePitchSpeed;
+				movePitchSpeed = movePitchDelta;
+			} else if (movePitchSpeed > movePitchDelta) {
+				movePitchSpeed = movePitchDelta;
+			}
+			deltaY = movePitchSpeed;
+		}
+
+		nextCameraYaw += deltaX;
+		nextCameraPitch += deltaY;
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
 		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
 		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
-		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4,
-			Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
+		CameraPitch = Util.clamp(CameraPitch, -0.35, 1.5); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {
