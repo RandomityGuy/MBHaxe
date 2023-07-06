@@ -18,6 +18,7 @@ import src.ResourceLoader;
 import haxe.Json;
 import src.Util;
 import src.Console;
+import src.Renderer;
 
 typedef Score = {
 	var name:String;
@@ -237,6 +238,7 @@ class Settings {
 		#end
 		AudioManager.updateVolumes();
 		Window.getInstance().vsync = optionsSettings.vsync;
+		@:privateAccess cast(MarbleGame.instance.scene.renderer, Renderer).onResize();
 
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		save();
