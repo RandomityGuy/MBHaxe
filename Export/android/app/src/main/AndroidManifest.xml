@@ -2,7 +2,7 @@
 <!-- Replace com.example.heapsandroid.helloword with the identifier of your game below, e.g.
      com.gamemaker.game -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.randomityguy.mbhaxe.mbp"
+    package="com.randomityguy.mbhaxe.mbu"
     android:installLocation="auto"
     android:versionCode="1"
     android:versionName="1.5.0">
