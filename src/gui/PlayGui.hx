@@ -159,8 +159,6 @@ class PlayGui {
 		};
 
 		Window.getInstance().addResizeEvent(resizeEv);
-
-		onFinish();
 	}
 
 	public function initTimer() {
@@ -627,7 +625,7 @@ class PlayGui {
 			gemCountSlash.position.x = 25;
 			gemHUD.position.x = 59;
 		}
-		gemHUD.parent.render(scene2d, @:privateAccess gemHUD.parent.parent._flow);
+		gemHUD.parent.render(scene2d);
 	}
 
 	public function resizeGemHuntCounter(total:Int) {
@@ -660,7 +658,7 @@ class PlayGui {
 			gemCountNumbers[2].position.x = 56;
 		}
 		gemHUD.position.x = 74;
-		gemHUD.parent.render(scene2d, @:privateAccess gemHUD.parent.parent._flow);
+		gemHUD.parent.render(scene2d);
 	}
 
 	public function formatGemCounter(collected:Int, total:Int) {
@@ -787,7 +785,7 @@ class PlayGui {
 		middleMsg.text.textColor = color;
 		middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg);
-		middleMsg.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
+		middleMsg.render(scene2d);
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
 		this.middleMessages.push({ctrl: middleMsg, age: 0, yPos: middleMsg.text.y});

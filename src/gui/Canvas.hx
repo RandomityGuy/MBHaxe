@@ -36,7 +36,7 @@ class Canvas extends GuiControl {
 
 	public function pushDialog(content:GuiControl) {
 		this.addChild(content);
-		content.render(scene2d, @:privateAccess this._flow);
+		content.render(scene2d);
 		// this.render(scene2d);
 	}
 
