@@ -35,6 +35,7 @@ import src.Util;
 typedef MiddleMessage = {
 	ctrl:GuiText,
 	age:Float,
+	yPos:Float
 }
 
 class PlayGui {
@@ -756,28 +757,27 @@ class PlayGui {
 
 	function updateMiddleMessages(dt:Float) {
 		var itermessages = this.middleMessages.copy();
-		if (itermessages.length > 0) {
+		while (itermessages.length > 0) {
 			var thismsg = itermessages.shift();
 			thismsg.age += dt;
-			if (thismsg.age > 0.6) {
+			if (thismsg.age > 3) {
 				this.middleMessages.remove(thismsg);
 				thismsg.ctrl.parent.removeChild(thismsg.ctrl); // Delete it
 			} else {
-				if (thismsg.age >= 0.3) {
-					thismsg.ctrl.text.alpha = 1 - (thismsg.age - 0.3) / 0.3;
-				}
-				thismsg.ctrl.text.y -= (0.1 / playGuiCtrl.extent.y) * scene2d.height;
+				var t = thismsg.age;
+				thismsg.ctrl.text.alpha = 1 - thismsg.age / 3;
+				thismsg.ctrl.text.y = thismsg.yPos - (-33 * 0.5 * t * t + 100 * t);
 			}
 		}
 	}
 
 	public function addMiddleMessage(text:String, color:Int) {
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 33 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
-		var middleMsg = new GuiText(markerFelt32);
+		var middleMsg = new GuiText(arial14);
 		middleMsg.position = new Vector(200, 50);
 		middleMsg.extent = new Vector(400, 100);
 		middleMsg.horizSizing = Center;
@@ -785,12 +785,12 @@ class PlayGui {
 		middleMsg.text.text = text;
 		middleMsg.justify = Center;
 		middleMsg.text.textColor = color;
-		middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
+		middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg);
-		middleMsg.render(scene2d);
+		middleMsg.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
-		this.middleMessages.push({ctrl: middleMsg, age: 0});
+		this.middleMessages.push({ctrl: middleMsg, age: 0, yPos: middleMsg.text.y});
 	}
 
 	var pgoChildren = [];

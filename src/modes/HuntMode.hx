@@ -203,10 +203,13 @@ class HuntMode extends NullMode {
 		switch (gem.gemColor) {
 			case "red.gem":
 				points += 1;
+				@:privateAccess level.playGui.addMiddleMessage('+1', 0xFF6666);
 			case "yellow.gem":
 				points += 2;
+				@:privateAccess level.playGui.addMiddleMessage('+2', 0xFFFF66);
 			case "blue.gem":
 				points += 5;
+				@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
 		}
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
