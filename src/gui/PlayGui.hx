@@ -147,7 +147,7 @@ class PlayGui {
 			initFPSMeter();
 
 		if (Util.isTouchDevice()) {
-			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
+			MarbleGame.instance.touchInput.showControls(this.playGuiCtrlOuter, game == 'ultra');
 		}
 
 		playGuiCtrlOuter.render(scene2d);
@@ -798,6 +798,9 @@ class PlayGui {
 			if (pgoChildren.length != 0) {
 				for (ch in pgoChildren) {
 					playGuiCtrlOuter.addChild(ch);
+				}
+				if (Util.isTouchDevice()) {
+					MarbleGame.instance.touchInput.showControls(this.playGuiCtrlOuter, true);
 				}
 				playGuiCtrlOuter.render(MarbleGame.canvas.scene2d);
 				pgoChildren = [];

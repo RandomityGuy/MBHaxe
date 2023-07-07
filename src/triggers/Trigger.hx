@@ -44,13 +44,15 @@ class Trigger extends GameObject {
 		var p7 = origin.add(d2).add(d3);
 		var p8 = origin.add(d1).add(d2).add(d3);
 
+		var scale = MisParser.parseVector3(element.scale);
 		var mat = new Matrix();
+		mat.identity();
+		mat.scale(scale.x, scale.y, scale.z);
 		var quat = MisParser.parseRotation(element.rotation);
 		quat.x = -quat.x;
 		quat.w = -quat.w;
-		quat.toMatrix(mat);
-		var scale = MisParser.parseVector3(element.scale);
-		mat.scale(scale.x, scale.y, scale.z);
+		mat.multiply(mat, quat.toMatrix());
+
 		var pos = MisParser.parseVector3(element.position);
 		pos.x = -pos.x;
 		// mat.setPosition(pos);
