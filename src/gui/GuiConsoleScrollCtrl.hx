@@ -178,22 +178,18 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 		// this.scrollTrack.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y);
 
-		var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
-
-		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
-
+		var scrollBarYSize = (renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale));
+		var scrollYOld = scrollY;
 		this.scrollTrack.bmp.scaleY = renderRect.extent.y;
 
-		this.scrollY = Util.clamp(scrollY, 0, scrollExtentY - scrollBarYSize * Settings.uiScale);
+		this.scrollY = Util.clamp(scrollY, 0, renderRect.extent.y - scrollBarYSize * Settings.uiScale);
+		scrollBarYSize = Math.max(scrollBarYSize, 13);
 
-		this.scrollBarY.setPosition(renderRect.position.x
-			+ renderRect.extent.x
-			- 18 * Settings.uiScale,
-			18 * Settings.uiScale
-			+ renderRect.position.y
-			+ scrollY);
+		var visScrollY = Util.clamp(scrollYOld, 0, renderRect.extent.y - scrollBarYSize * Settings.uiScale);
 
-		this.clickInteractive.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, 18 * Settings.uiScale + renderRect.position.y);
+		this.scrollBarY.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y + visScrollY);
+
+		this.clickInteractive.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y);
 
 		this.clickInteractive.height = scrollExtentY;
 
@@ -231,7 +227,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		for (c in this.children) {
 			if (c == this.scrollTrack || c == this.scrollUpButton || c == this.scrollDownButton)
 				continue;
-			c.onScroll(0, scrollY * (this.maxScrollY - 34 * Settings.uiScale) / scrollExtentY);
+			c.onScroll(0, scrollY * (this.maxScrollY / renderRect.extent.y) / scrollExtentY);
 		}
 	}
 
