@@ -56,54 +56,56 @@ class VideoOptionsGui extends GuiImage {
 		optionCollection.extent = new Vector(815, 500);
 		innerCtrl.addChild(optionCollection);
 
-		var resolutionOpt = optionCollection.addOption(1, "Fullscreen Res", [
-			"1024 x 800",
-			"1280 x 720",
-			"1366 x 768",
-			"1440 x 900",
-			"1600 x 900",
-			"1920 x 1080"
-		], (idx) -> {
-			switch (idx) {
-				case 0:
-					Settings.optionsSettings.screenWidth = 1024;
-					Settings.optionsSettings.screenHeight = 800;
-				case 1:
-					Settings.optionsSettings.screenWidth = 1280;
-					Settings.optionsSettings.screenHeight = 720;
-				case 2:
-					Settings.optionsSettings.screenWidth = 1366;
-					Settings.optionsSettings.screenHeight = 768;
-				case 3:
-					Settings.optionsSettings.screenWidth = 1440;
-					Settings.optionsSettings.screenHeight = 900;
-				case 4:
-					Settings.optionsSettings.screenWidth = 1600;
-					Settings.optionsSettings.screenHeight = 900;
-				case 5:
-					Settings.optionsSettings.screenWidth = 1920;
-					Settings.optionsSettings.screenHeight = 1080;
-			}
-			return true;
-		}, 0.35);
+		if (!Util.isTouchDevice()) {
+			var resolutionOpt = optionCollection.addOption(1, "Fullscreen Res", [
+				"1024 x 800",
+				"1280 x 720",
+				"1366 x 768",
+				"1440 x 900",
+				"1600 x 900",
+				"1920 x 1080"
+			], (idx) -> {
+				switch (idx) {
+					case 0:
+						Settings.optionsSettings.screenWidth = 1024;
+						Settings.optionsSettings.screenHeight = 800;
+					case 1:
+						Settings.optionsSettings.screenWidth = 1280;
+						Settings.optionsSettings.screenHeight = 720;
+					case 2:
+						Settings.optionsSettings.screenWidth = 1366;
+						Settings.optionsSettings.screenHeight = 768;
+					case 3:
+						Settings.optionsSettings.screenWidth = 1440;
+						Settings.optionsSettings.screenHeight = 900;
+					case 4:
+						Settings.optionsSettings.screenWidth = 1600;
+						Settings.optionsSettings.screenHeight = 900;
+					case 5:
+						Settings.optionsSettings.screenWidth = 1920;
+						Settings.optionsSettings.screenHeight = 1080;
+				}
+				return true;
+			}, 0.35);
 
-		resolutionOpt.optionText.text.text = '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}';
-		var curOpt = [
-			"1024 x 800",
-			"1280 x 720",
-			"1366 x 768",
-			"1440 x 900",
-			"1600 x 900",
-			"1920 x 1080"
-		].indexOf(resolutionOpt.optionText.text.text);
-		if (curOpt != -1)
-			resolutionOpt.setCurrentOption(curOpt);
+			resolutionOpt.optionText.text.text = '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}';
+			var curOpt = [
+				"1024 x 800",
+				"1280 x 720",
+				"1366 x 768",
+				"1440 x 900",
+				"1600 x 900",
+				"1920 x 1080"
+			].indexOf(resolutionOpt.optionText.text.text);
+			if (curOpt != -1)
+				resolutionOpt.setCurrentOption(curOpt);
 
-		var displayOpt = optionCollection.addOption(1, "Resolution", ["Fullscreen", "Windowed"], (idx) -> {
-			Settings.optionsSettings.isFullScreen = (idx == 0);
-			return true;
-		}, 0.35);
-		displayOpt.setCurrentOption(Settings.optionsSettings.isFullScreen ? 0 : 1);
+			var displayOpt = optionCollection.addOption(1, "Resolution", ["Fullscreen", "Windowed"], (idx) -> {
+				Settings.optionsSettings.isFullScreen = (idx == 0);
+				return true;
+			}, 0.35);
+			displayOpt.setCurrentOption(Settings.optionsSettings.isFullScreen ? 0 : 1);
+		}
 
 		var vsyncOpt = optionCollection.addOption(1, "VSync", ["Disabled", "Enabled"], (idx) -> {
 			Settings.optionsSettings.vsync = (idx == 1);
@@ -132,7 +134,6 @@ class VideoOptionsGui extends GuiImage {
 		}, 0.35);
 		rfOpt.setCurrentOption(Settings.optionsSettings.reflectionDetail);
 
-		#if js
 		var pxOpt = optionCollection.addOption(1, "Pixel Ratio", ["Max 0.5", "Max 1", "Max 1.5", "Max 2", "Max Infinity"], (idx) -> {
 			if (idx == 0)
 				Settings.optionsSettings.maxPixelRatio = 0.5;
@@ -159,7 +160,6 @@ class VideoOptionsGui extends GuiImage {
 		else if (Settings.optionsSettings.maxPixelRatio == 100)
 			curPixelRatioIndex = 4;
 		pxOpt.setCurrentOption(curPixelRatioIndex);
-		#end
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);

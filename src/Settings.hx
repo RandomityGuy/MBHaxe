@@ -232,7 +232,7 @@ class Settings {
 	#end
 
 	public static function applySettings() {
-		#if hl
+		#if (hl && !android)
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
 		#end
