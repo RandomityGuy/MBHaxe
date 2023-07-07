@@ -70,7 +70,7 @@ class EndGameGui extends GuiImage {
 		endGameWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/endGameWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
 		endGameWnd.horizSizing = Left;
 		endGameWnd.vertSizing = Top;
-		endGameWnd.position = new Vector(80 - offsetX, 170 - offsetY);
+		endGameWnd.position = new Vector(80 - offsetX, 150 - offsetY);
 		endGameWnd.extent = new Vector(336, 150);
 		innerCtrl.addChild(endGameWnd);
 
