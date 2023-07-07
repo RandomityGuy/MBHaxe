@@ -86,7 +86,11 @@ class Renderer extends h3d.scene.Renderer {
 
 	override function render() {
 		if (backBuffer == null) {
-			depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24Stencil8);
+			depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24);
+			if (depthBuffer.format != Depth24) {
+				depthBuffer.dispose();
+				depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24);
+			}
 			backBuffer = ctx.textures.allocTarget("backBuffer", cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, false);
 			backBuffer.depthBuffer = depthBuffer;
 		}
@@ -122,9 +126,9 @@ class Renderer extends h3d.scene.Renderer {
 			renderPass(defaultPass, get("skyshape"), backToFront);
 		}
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 2) {
-			if (!cubemapPass)
-				ProfilerUI.measure("interiorZPass");
-			renderPass(defaultPass, get("zPass"));
+			// if (!cubemapPass)
+			// 	ProfilerUI.measure("interiorZPass");
+			// renderPass(defaultPass, get("zPass"));
 			if (!cubemapPass)
 				ProfilerUI.measure("interior");
 			renderPass(defaultPass, get("interior"));

@@ -58,7 +58,8 @@ class Mission {
 
 	public function load() {
 		var entry = ResourceLoader.getFileEntry(this.path).entry;
-		var misText = Util.toASCII(entry.getBytes());
+		var misText = entry.getText();
+		trace('Loading ${this.path}');
 
 		var misParser = new MisParser(misText);
 		var contents = misParser.parse();

@@ -13,7 +13,6 @@ class PauseButton extends TouchButton {
 
 		this.onClick = () -> {
 			if (MarbleGame.instance.world != null) {
-				@:privateAccess MarbleGame.instance.paused = true;
 				MarbleGame.instance.handlePauseGame();
 			}
 		}
