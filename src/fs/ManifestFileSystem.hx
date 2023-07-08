@@ -33,6 +33,8 @@ import zygame.utils.hl.AssetsTools;
 
 @:allow(fs.ManifestFileSystem)
 class ManifestEntry extends FileEntry {
+	public static var doQuickLoad:Bool = true;
+
 	private var fs:ManifestFileSystem;
 	private var relPath:String;
 
@@ -141,8 +143,10 @@ class ManifestEntry extends FileEntry {
 		}
 		#else
 		if (onReady != null)
-			onReady();
-		// haxe.Timer.delay(onReady, 1);
+			if (doQuickLoad)
+				onReady();
+			else
+				haxe.Timer.delay(onReady, 1);
 		#end
 	}
 

@@ -88,12 +88,14 @@ class Main extends hxd.App {
 			// Marbleland.init();
 			marbleGame = new MarbleGame(s2d, s3d);
 			MarbleGame.canvas.setContent(new PresentsGui());
-			MissionList.buildMissionList(); // Yeah pls
-			marbleGame.startPreviewWorld(() -> {
-				marbleGame.setPreviewMission('urban', () -> {
-					MarbleGame.canvas.setContent(new MainMenuGui());
+			haxe.Timer.delay(() -> {
+				MissionList.buildMissionList(); // Yeah pls
+				marbleGame.startPreviewWorld(() -> {
+					marbleGame.setPreviewMission('urban', () -> {
+						MarbleGame.canvas.setContent(new MainMenuGui());
+					});
 				});
-			});
+			}, 100);
 
 			new ProfilerUI(s2d);
 

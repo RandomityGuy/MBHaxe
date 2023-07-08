@@ -191,11 +191,11 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 		this.clickInteractive.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y);
 
-		this.clickInteractive.height = scrollExtentY;
+		this.clickInteractive.height = renderRect.extent.y;
 
 		if (this.dirty) {
-			if (scrollBarYSize > scrollExtentY) {
-				scrollBarYSize = scrollExtentY;
+			if (scrollBarYSize > renderRect.extent.y) {
+				scrollBarYSize = renderRect.extent.y;
 				scrollBarY.visible = false;
 				// scrollBarY.clear();
 				return;
@@ -227,7 +227,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		for (c in this.children) {
 			if (c == this.scrollTrack || c == this.scrollUpButton || c == this.scrollDownButton)
 				continue;
-			c.onScroll(0, scrollY * (this.maxScrollY / renderRect.extent.y) / scrollExtentY);
+			c.onScroll(0, scrollY * this.maxScrollY / renderRect.extent.y);
 		}
 	}
 

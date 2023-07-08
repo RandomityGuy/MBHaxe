@@ -6,6 +6,7 @@ import hxd.fs.BytesFileSystem.BytesFileEntry;
 import fs.ManifestLoader;
 import fs.ManifestBuilder;
 import fs.ManifestProgress;
+import fs.ManifestFileSystem.ManifestEntry;
 #end
 import hxd.res.Image;
 import hxd.res.Sound;
@@ -59,6 +60,7 @@ class ResourceLoader {
 		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
 		@:privateAccess hxd.res.Image.ENABLE_AUTO_WATCH = false;
 		@:privateAccess hxd.res.Sound.ENABLE_AUTO_WATCH = false;
+
 		haxe.MainLoop.add(() -> {});
 		#if (js || android)
 		var mfileSystem = ManifestBuilder.create("data");
@@ -67,6 +69,7 @@ class ResourceLoader {
 			loader = mloader;
 			fileSystem = mfileSystem;
 			initialized = true;
+			ManifestEntry.doQuickLoad = false;
 			onLoadedFunc();
 		}, scene2d);
 		#if js

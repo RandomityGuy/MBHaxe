@@ -1667,7 +1667,6 @@ class MarbleWorld extends Scheduler {
 				this.checkpointCollectedGems.set(gem, true);
 		}
 		this.checkpointHeldPowerup = this.marble.heldPowerup;
-		this.displayAlert("Checkpoint reached!");
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
 		return true;
 	}
