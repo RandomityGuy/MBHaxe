@@ -16,7 +16,7 @@ class Renderer extends h3d.scene.Renderer {
 
 	public var depth:h3d.pass.Base = new h3d.scene.fwd.Renderer.DepthPass();
 	public var normal:h3d.pass.Base = new h3d.scene.fwd.Renderer.NormalPass();
-	public var shadow = new h3d.pass.CascadeShadowMap(null);
+	public var shadow = new h3d.pass.DefaultShadowMap(1024);
 
 	var glowBuffer:h3d.mat.Texture;
 
