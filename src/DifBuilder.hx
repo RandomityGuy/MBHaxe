@@ -86,6 +86,7 @@ class TriangleEdge {
 class DifCache {
 	var dif:Dif;
 	var difTriangles:Map<String, Array<DifBuilderTriangle>>;
+	var prims:Map<String, Polygon>;
 
 	public function new() {}
 }
@@ -850,10 +851,13 @@ class DifBuilder {
 				collider.finalize();
 				itr.collider = collider;
 			}
+			var buildNewCache = false;
 			if (cache == null) {
 				cache = new DifCache();
 				cache.difTriangles = mats;
 				cache.dif = dif;
+				cache.prims = [];
+				buildNewCache = true;
 				difCache.set(cachePath, cache);
 			}
 			function canFindTex(tex:String) {
@@ -908,49 +912,59 @@ class DifBuilder {
 
 				var time = Console.time();
 				for (grp => tris in mats) {
-					var points = [];
-					var normals = [];
-					var uvs = [];
-					var t = [];
-					var b = [];
-					var n = [];
-					for (tri in tris) {
-						var p1 = new Point(-tri.p1.x, tri.p1.y, tri.p1.z);
-						var p2 = new Point(-tri.p2.x, tri.p2.y, tri.p2.z);
-						var p3 = new Point(-tri.p3.x, tri.p3.y, tri.p3.z);
-						var n1 = new Point(-tri.normal1.x, tri.normal1.y, tri.normal1.z);
-						var n2 = new Point(-tri.normal2.x, tri.normal2.y, tri.normal2.z);
-						var n3 = new Point(-tri.normal3.x, tri.normal3.y, tri.normal3.z);
-						var uv1 = new UV(tri.uv1.x, tri.uv1.y);
-						var uv2 = new UV(tri.uv2.x, tri.uv2.y);
-						var uv3 = new UV(tri.uv3.x, tri.uv3.y);
-						points.push(p3);
-						points.push(p2);
-						points.push(p1);
-						normals.push(n3);
-						normals.push(n2);
-						normals.push(n1);
-						uvs.push(uv3);
-						uvs.push(uv2);
-						uvs.push(uv1);
-						t.push(new Point(-tri.t3.x, tri.t3.y, tri.t3.z));
-						t.push(new Point(-tri.t2.x, tri.t2.y, tri.t2.z));
-						t.push(new Point(-tri.t1.x, tri.t1.y, tri.t1.z));
-						b.push(new Point(-tri.b3.x, tri.b3.y, tri.b3.z));
-						b.push(new Point(-tri.b2.x, tri.b2.y, tri.b2.z));
-						b.push(new Point(-tri.b1.x, tri.b1.y, tri.b1.z));
-						n.push(new Point(-tri.n3.x, tri.n3.y, tri.n3.z));
-						n.push(new Point(-tri.n2.x, tri.n2.y, tri.n2.z));
-						n.push(new Point(-tri.n1.x, tri.n1.y, tri.n1.z));
+					var prim:Polygon = null;
+
+					if (!buildNewCache && cache != null) {
+						prim = cache.prims.get(grp);
+					} else {
+						var points = [];
+						var normals = [];
+						var uvs = [];
+						var t = [];
+						var b = [];
+						var n = [];
+						for (tri in tris) {
+							var p1 = new Point(-tri.p1.x, tri.p1.y, tri.p1.z);
+							var p2 = new Point(-tri.p2.x, tri.p2.y, tri.p2.z);
+							var p3 = new Point(-tri.p3.x, tri.p3.y, tri.p3.z);
+							var n1 = new Point(-tri.normal1.x, tri.normal1.y, tri.normal1.z);
+							var n2 = new Point(-tri.normal2.x, tri.normal2.y, tri.normal2.z);
+							var n3 = new Point(-tri.normal3.x, tri.normal3.y, tri.normal3.z);
+							var uv1 = new UV(tri.uv1.x, tri.uv1.y);
+							var uv2 = new UV(tri.uv2.x, tri.uv2.y);
+							var uv3 = new UV(tri.uv3.x, tri.uv3.y);
+							points.push(p3);
+							points.push(p2);
+							points.push(p1);
+							normals.push(n3);
+							normals.push(n2);
+							normals.push(n1);
+							uvs.push(uv3);
+							uvs.push(uv2);
+							uvs.push(uv1);
+							t.push(new Point(-tri.t3.x, tri.t3.y, tri.t3.z));
+							t.push(new Point(-tri.t2.x, tri.t2.y, tri.t2.z));
+							t.push(new Point(-tri.t1.x, tri.t1.y, tri.t1.z));
+							b.push(new Point(-tri.b3.x, tri.b3.y, tri.b3.z));
+							b.push(new Point(-tri.b2.x, tri.b2.y, tri.b2.z));
+							b.push(new Point(-tri.b1.x, tri.b1.y, tri.b1.z));
+							n.push(new Point(-tri.n3.x, tri.n3.y, tri.n3.z));
+							n.push(new Point(-tri.n2.x, tri.n2.y, tri.n2.z));
+							n.push(new Point(-tri.n1.x, tri.n1.y, tri.n1.z));
+						}
+						prim = new Polygon(points);
+						prim.uvs = uvs;
+						prim.normals = normals;
+						prim.tangents = t;
+						prim.bitangents = b;
+						prim.texMatNormals = n;
+						if (buildNewCache) {
+							cache.prims.set(grp, prim);
+						}
 					}
-					var prim = new Polygon(points);
-					prim.uvs = uvs;
-					prim.normals = normals;
-					prim.tangents = t;
-					prim.bitangents = b;
-					prim.texMatNormals = n;
-					var material:Material;
+
 					var texture:Texture;
+					var material:Material;
 					var exactName = StringTools.replace(grp.toLowerCase(), "textures/", "");
 					if (canFindTex(grp) || shaderMaterialDict.exists(exactName)) {
 						material = h3d.mat.Material.create();
@@ -996,12 +1010,16 @@ class DifBuilder {
 					// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 					if (Debug.wireFrame)
 						material.mainPass.wireframe = true;
+
 					var mesh = new Mesh(prim, material, itr);
 				}
 				var interval = Console.time() - time;
 				Console.log('Geometry build time ${interval}');
 
+				time = Console.time();
 				shaderWorker.run();
+				interval = Console.time() - time;
+				Console.log('Shader building time ${interval}');
 			});
 			for (f in loadtexs) {
 				worker.loadFile(f);

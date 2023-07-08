@@ -54,6 +54,8 @@ class ResourceLoaderWorker {
 	}
 
 	public function loadFile(path:String) {
+		if (ResourceLoader.loadedFiles.exists(path))
+			return;
 		paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
 	}
 }
