@@ -47,6 +47,7 @@ class ResourceLoader {
 	static var imageCache:Map<String, Resource<Image>> = new Map();
 	static var audioCache:Map<String, Resource<Sound>> = new Map();
 	static var zipFilesystem:Map<String, BytesFileEntry> = new Map();
+	public static var loadedFiles:Map<String, Bool> = new Map(); // For js, don't load files more than once
 
 	public static var initialized = false;
 
@@ -312,6 +313,7 @@ class ResourceLoader {
 		if (zipFilesystem.exists(path.toLowerCase())) {
 			return new hxd.res.Any(loader, zipFilesystem.get(path.toLowerCase()));
 		}
+		loadedFiles.set(path, true); // Loaded
 		return ResourceLoader.loader.load(path);
 	}
 

@@ -60,6 +60,8 @@ class ResourceLoaderWorker {
 	}
 
 	public function loadFile(path:String) {
+		if (ResourceLoader.loadedFiles.exists(path))
+			return;
 		#if (!android)
 		paralleltasks.push(fwd -> {
 			ResourceLoader.load(path).entry.load(fwd);

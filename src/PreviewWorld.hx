@@ -71,6 +71,7 @@ class PreviewWorld extends Scheduler {
 	var sky:Sky;
 
 	var itrAddTime:Float = 0;
+	var ssAddTime:Float = 0;
 
 	var _loadToken = 0;
 	var _cubemapNeedsUpdate:Bool = false;
@@ -210,6 +211,7 @@ class PreviewWorld extends Scheduler {
 					addScenery(difficulty, fwd);
 			});
 			itrAddTime = 0;
+			ssAddTime = 0;
 			for (elem in itrpaths) {
 				worker.addTask(fwd -> {
 					if (_loadToken != curToken)
@@ -227,14 +229,20 @@ class PreviewWorld extends Scheduler {
 				worker.addTask(fwd -> {
 					if (_loadToken != curToken)
 						fwd();
-					else
-						addStaticShape(cast elem, curToken, fwd);
+					else {
+						var startTime = Console.time();
+						addStaticShape(cast elem, curToken, () -> {
+							ssAddTime += Console.time() - startTime;
+							fwd();
+						});
+					}
 				});
 			}
 			worker.addTask(fwd -> {
 				timeState.timeSinceLoad = 0;
 				timeState.dt = 0;
 				Console.log('ITR ADD TIME: ' + itrAddTime);
+				Console.log('SS ADD TIME: ' + ssAddTime);
 				fwd();
 			});
 			worker.run();
@@ -347,11 +355,14 @@ class PreviewWorld extends Scheduler {
 			return;
 		}
 		this.interiors.push(obj);
+		var t = Console.time();
 		obj.init(null, () -> {
 			if (token != _loadToken) {
 				onFinish();
 				return;
 			}
+			var interval = Console.time() - t;
+			Console.log('Init interior: ${interval}ms');
 			if (obj.useInstancing)
 				this.instanceManager.addObject(obj);
 			else
