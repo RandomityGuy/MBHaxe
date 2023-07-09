@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.randomityguy.mbhaxe.mbp</string>
+	<string>com.randomityguy.mbhaxe.mbu</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

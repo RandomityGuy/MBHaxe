@@ -48,13 +48,13 @@ class MisParser {
 			// Read the localization strings
 			var lfile = ResourceLoader.getFileEntry("data/englishStrings.inf");
 			var contents = lfile.entry.getText();
-			var lines = contents.split('\r\n');
+			var lines = contents.split('\n');
 			localizations = [];
 			var rgx = ~/(\$(?:\w|\d|:)+)\s*=\s*"(.+?)";/g;
 			for (line in lines) {
 				if (rgx.match(line)) {
-					if (!localizations.exists(rgx.matched(1)))
-						localizations.set(rgx.matched(1), rgx.matched(2));
+					if (!localizations.exists(StringTools.trim(rgx.matched(1))))
+						localizations.set(StringTools.trim(rgx.matched(1)), StringTools.trim(rgx.matched(2)));
 				}
 			}
 		}

@@ -39,7 +39,9 @@ class Main extends hxd.App {
 		super.init();
 
 		s3d.renderer = new Renderer();
+		#if debug
 		s3d.checkPasses = false;
+		#end
 
 		#if (hl && !android)
 		hl.UI.closeConsole();
