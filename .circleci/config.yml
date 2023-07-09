@@ -182,7 +182,7 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            curl https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz | tar xz
+            curl -fsSL https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz | tar xz
             cd libuv-v1.44.2
             cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
             cmake --build build --config Release -j$NPROC
