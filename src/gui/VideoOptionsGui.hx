@@ -122,11 +122,26 @@ class VideoOptionsGui extends GuiImage {
 			return range;
 		}
 
+		function numberRangeFlt(start:Float, stop:Float, step:Float) {
+			var range = [];
+			while (start <= stop) {
+				range.push('${start}');
+				start += step;
+			}
+			return range;
+		}
+
 		var fovOpt = optionCollection.addOption(1, "Field of Vision", numberRange(60, 140, 5), (idx) -> {
 			Settings.optionsSettings.fovX = cast(60 + (idx / 16.0) * (140 - 60));
 			return true;
 		}, 0.35);
 		fovOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.fovX - 60) / (140 - 60)) * 16), 0, 16)));
+
+		var cameraOpt = optionCollection.addOption(1, "Camera Distance", numberRangeFlt(1.5, 3, 0.3), (idx) -> {
+			Settings.optionsSettings.cameraDistance = cast(1.5 + (idx / 5.0) * (3 - 1.5));
+			return true;
+		}, 0.35);
+		cameraOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.cameraDistance - 1.5) / (3 - 1.5)) * 5), 0, 5)));
 
 		var rfOpt = optionCollection.addOption(1, "Reflection Detail", ["None", "Sky Only", "Level and Sky", "Level, Sky and Items", "Everything"], (idx) -> {
 			Settings.optionsSettings.reflectionDetail = idx;
