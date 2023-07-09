@@ -72,6 +72,7 @@ class PlayGui {
 	var playGuiCtrl:GuiControl;
 
 	var resizeEv:Void->Void;
+	var resizeControlEvents:Array<Void->Void> = [];
 
 	var _init:Bool;
 
@@ -153,12 +154,26 @@ class PlayGui {
 		playGuiCtrlOuter.render(scene2d);
 
 		resizeEv = () -> {
-			var wnd = Window.getInstance();
-			powerupBox.position.x = wnd.width * 469.0 / 640.0;
+			var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+			var safeHorMargin = 1 + (scene2d.width * 0.15) / 2;
+			playGuiCtrl.position = new Vector(safeHorMargin, safeVerMargin);
+
+			var subX = 640 - (scene2d.width - safeHorMargin * 2) * 640 / scene2d.width;
+			var subY = 480 - (scene2d.height - safeVerMargin * 2) * 480 / scene2d.height;
+
+			playGuiCtrl.extent = new Vector(640 - subX, 480 - subY);
+			resizeControls();
+
 			playGuiCtrlOuter.render(MarbleGame.canvas.scene2d);
 		};
 
 		Window.getInstance().addResizeEvent(resizeEv);
+	}
+
+	function resizeControls() {
+		for (resizeControl in resizeControlEvents) {
+			resizeControl();
+		}
 	}
 
 	public function initTimer() {
@@ -236,6 +251,21 @@ class PlayGui {
 		innerCtrl.addChild(timerNumbers[4]);
 		innerCtrl.addChild(timerNumbers[5]);
 		// innerCtrl.addChild(timerNumbers[6]);
+
+		resizeControlEvents.push(() -> {
+			var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+			innerCtrl.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			innerCtrl.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			for (i in 0...6) {
+				timerNumbers[i].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+				timerNumbers[i].yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			}
+			timerColon.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			timerColon.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+
+			timerPoint.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			timerPoint.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+		});
 
 		playGuiCtrl.addChild(timerCtrl);
 	}
@@ -318,6 +348,20 @@ class PlayGui {
 		innerCtrl.addChild(gemCountNumbers[5]);
 		innerCtrl.addChild(gemHUD);
 
+		resizeControlEvents.push(() -> {
+			var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+			gemBox.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			gemBox.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			innerCtrl.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			innerCtrl.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			for (i in 0...6) {
+				gemCountNumbers[i].xScale = (scene2d.height - safeVerMargin * 2) / 480;
+				gemCountNumbers[i].yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			}
+			gemHUD.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			gemHUD.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+		});
+
 		playGuiCtrl.addChild(gemBox);
 		// gemImageSceneTargetBitmap.blendMode = None;
 		// gemImageSceneTargetBitmap.addShader(new ColorKey());
@@ -342,6 +386,13 @@ class PlayGui {
 		powerupBox.vertSizing = Bottom;
 		powerupBox.xScale = (scene2d.height - safeVerMargin * 2) / 480;
 		powerupBox.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+
+		resizeControlEvents.push(() -> {
+			var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+			powerupBox.position = new Vector(playGuiCtrl.extent.x - 171, 0);
+			powerupBox.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			powerupBox.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+		});
 
 		playGuiCtrl.addChild(powerupBox);
 	}
@@ -436,6 +487,11 @@ class PlayGui {
 
 		playGuiCtrlOuter.addChild(helpTextCtrl);
 		playGuiCtrlOuter.addChild(alertTextCtrl);
+
+		resizeControlEvents.push(() -> {
+			helpTextCtrl.position = new Vector(0, playGuiCtrl.extent.y * 190 / 480);
+			alertTextCtrl.position = new Vector(0, playGuiCtrl.extent.y * 375 / 480);
+		});
 	}
 
 	function initFPSMeter() {
@@ -501,6 +557,18 @@ class PlayGui {
 		blastFrame.xScale = (scene2d.height - safeVerMargin * 2) / 480;
 		blastFrame.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		blastBar.addChild(blastFrame);
+
+		resizeControlEvents.push(() -> {
+			var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+			blastBar.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			blastBar.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			blastFill.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			blastFill.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			blastFillUltra.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			blastFillUltra.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+			blastFrame.xScale = (scene2d.height - safeVerMargin * 2) / 480;
+			blastFrame.yScale = (scene2d.height - safeVerMargin * 2) / 480;
+		});
 	}
 
 	var blastValue:Float = 0;

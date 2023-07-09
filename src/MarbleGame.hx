@@ -69,7 +69,6 @@ class MarbleGame {
 			if (!paused && world != null) {
 				if (world.finishTime == null && world._ready) {
 					if (js.Browser.document.pointerLockElement != @:privateAccess Window.getInstance().canvas) {
-						paused = true;
 						handlePauseGame();
 						// Focus the shit again
 						var jsCanvas = @:privateAccess Window.getInstance().canvas;

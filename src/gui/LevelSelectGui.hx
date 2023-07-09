@@ -30,6 +30,8 @@ class LevelSelectGui extends GuiImage {
 			return arial14;
 		}
 
+		MarbleGame.instance.toRecord = false;
+
 		var fadeEdge = new GuiImage(ResourceLoader.getResource("data/ui/xbox/BG_fadeOutSoftEdge.png", ResourceLoader.getImage, this.imageResources).toTile());
 		fadeEdge.position = new Vector(0, 0);
 		fadeEdge.extent = new Vector(640, 480);
@@ -69,6 +71,8 @@ class LevelSelectGui extends GuiImage {
 		currentDifficultyStatic = difficulty;
 
 		var difficultyMissions = MissionList.missionList['ultra'][currentDifficultyStatic];
+		if (currentSelectionStatic >= difficultyMissions.length)
+			currentSelectionStatic = 0;
 		var curMission = difficultyMissions[currentSelectionStatic];
 
 		var lock = true;
@@ -151,11 +155,11 @@ class LevelSelectGui extends GuiImage {
 		}
 		bottomBar.addChild(recordButton);
 
-		var lbButton = new GuiXboxButton("Leaderboard", 220);
-		lbButton.position = new Vector(750, 0);
-		lbButton.vertSizing = Bottom;
-		lbButton.horizSizing = Right;
-		bottomBar.addChild(lbButton);
+		// var lbButton = new GuiXboxButton("Leaderboard", 220);
+		// lbButton.position = new Vector(750, 0);
+		// lbButton.vertSizing = Bottom;
+		// lbButton.horizSizing = Right;
+		// bottomBar.addChild(lbButton);
 
 		var nextButton = new GuiXboxButton("Play", 160);
 		nextButton.position = new Vector(960, 0);
