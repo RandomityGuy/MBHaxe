@@ -85,7 +85,7 @@ class Main extends hxd.App {
 		ResourceLoader.init(s2d, () -> {
 			AudioManager.init();
 			AudioManager.playShell();
-			Marbleland.init();
+			// Marbleland.init();
 			marbleGame = new MarbleGame(s2d, s3d);
 			MarbleGame.canvas.setContent(new PresentsGui());
 			MissionList.buildMissionList(); // Yeah pls
