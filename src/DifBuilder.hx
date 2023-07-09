@@ -371,6 +371,7 @@ class DifBuilder {
 			return tex.substring(slashpos, dotpos);
 		}
 
+		fs.ManifestFileSystem.ManifestEntry.doQuickLoad = true;
 		ResourceLoader.load(path).entry.load(() -> {
 			var dif:Dif = null;
 			var cache:DifCache = null;
@@ -1024,6 +1025,7 @@ class DifBuilder {
 			for (f in loadtexs) {
 				worker.loadFile(f);
 			}
+			fs.ManifestFileSystem.ManifestEntry.doQuickLoad = false;
 			worker.run();
 		});
 	}

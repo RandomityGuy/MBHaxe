@@ -84,7 +84,10 @@ class CameraInput {
 				var inpY = delta.y / scaleFactor;
 
 				if (jumpcam) {
-					trace('Input: ${inpX} ${inpY}');
+					if (Math.abs(inpX) < 1.3)
+						inpX = 0;
+					if (Math.abs(inpY) < 1.3)
+						inpY = 0;
 				}
 
 				MarbleGame.instance.world.marble.camera.orbit(inpX, inpY, true);
