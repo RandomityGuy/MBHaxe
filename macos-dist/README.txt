@@ -4,4 +4,4 @@ It will say "Unverified Developer". Go to System Preferences (or System Settings
 If you get error saying that the app is "damaged,"
 please remove the quarantine flag.
 
-sudo xattr -r -d com.apple.quarantine "MarbleBlast Platinum.app"
+sudo xattr -r -d com.apple.quarantine "MarbleBlast Ultra.app"

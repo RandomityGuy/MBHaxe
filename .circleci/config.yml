@@ -34,7 +34,7 @@ jobs:
           name: Install Haxe
           command: |
             set -eux
-            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-osx.tar.gz"
+            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.1/haxe-4.3.1-osx.tar.gz"
             echo "Downloading [$download_url]..."
             mkdir /tmp/haxe
             curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
@@ -245,7 +245,7 @@ jobs:
           command: |
             cd ~/MBHaxe
             ./package-macos.sh v$COMMIT_TAG
-            cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS"
+            cd "macos-dist/MarbleBlast Ultra.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
             cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll} .
@@ -269,21 +269,21 @@ jobs:
           name: Sign app bundle
           command: |
             cd ~/MBHaxe/macos-dist
-            xattr -rc "MarbleBlast Platinum.app"
-            cp "MarbleBlast Platinum.app/Contents/Entitlements.plist" .
-            codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Platinum.app"
+            xattr -rc "MarbleBlast Ultra.app"
+            cp "MarbleBlast Ultra.app/Contents/Entitlements.plist" .
+            codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Ultra.app"
 
       - run:
           name: ZIP Bundle
           command: |
             cd ~/MBHaxe
-            rm -rf "macos-dist/MarbleBlast Platinum.app.in"
-            zip -r MBHaxe-Platinum-Mac.zip macos-dist/
+            rm -rf "macos-dist/MarbleBlast Ultra.app.in"
+            zip -r MBHaxe-Ultra-Mac.zip macos-dist/
 
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Platinum-Mac.zip $REMOTEDIR/MBHaxe-Platinum-Mac.zip
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Ultra-Mac.zip $REMOTEDIR/MBHaxe-Ultra-Mac.zip
 
       # - store_artifacts:
       #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
@@ -322,7 +322,7 @@ jobs:
         - run:
             name: Install Haxe
             command: |
-              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-win64.zip"
+              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.1/haxe-4.3.1-win64.zip"
               echo "Downloading [$download_url]..."
               mkdir /tmp/haxe
               curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.zip
@@ -405,12 +405,12 @@ jobs:
             name: Zip bundle
             command: |
               cd ~/project
-              7z a MBHaxe-Platinum-Win.zip release/
+              7z a MBHaxe-Ultra-Win.zip release/
 
         - run:
             name: Upload to Artifact Storage
             command: |
-              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Platinum-Win.zip $REMOTEDIR/MBHaxe-Platinum-Win.zip
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Ultra-Win.zip $REMOTEDIR/MBHaxe-Ultra-Win.zip
         # - store_artifacts:
         #     path: ~/project/MBHaxe-Platinum-Win.zip
 
