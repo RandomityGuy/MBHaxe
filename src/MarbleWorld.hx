@@ -1454,8 +1454,8 @@ class MarbleWorld extends Scheduler {
 			}
 			var endGameCode = () -> {
 				this.dispose();
-				var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
 				LevelSelectGui.currentSelectionStatic = mission.index + 1;
+				var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
 				MarbleGame.canvas.setContent(pmg);
 				#if js
 				pointercontainer.hidden = false;
