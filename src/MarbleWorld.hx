@@ -1018,14 +1018,15 @@ class MarbleWorld extends Scheduler {
 
 		this.tickSchedule(timeState.currentAttemptTime);
 
-		if (Key.isPressed(Settings.controlsSettings.blast)
+		if (Key.isDown(Settings.controlsSettings.blast)
 			|| (MarbleGame.instance.touchInput.blastbutton.pressed)
-			|| Gamepad.isPressed(Settings.gamepadSettings.blast)
+			|| Gamepad.isDown(Settings.gamepadSettings.blast)
 			&& !this.isWatching
 			&& this.game == "ultra") {
-			this.marble.useBlast();
-			if (this.isRecording) {
-				this.replay.recordMarbleStateFlags(false, false, false, true);
+			if (this.marble.useBlast()) {
+				if (this.isRecording) {
+					this.replay.recordMarbleStateFlags(false, false, false, true);
+				}
 			}
 		}
 

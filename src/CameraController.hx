@@ -310,7 +310,7 @@ class CameraController extends Object {
 			CameraYaw = this.level.replay.currentPlaybackFrame.cameraYaw;
 		}
 
-		var marblePosition = level.marble.collider.transform.getPosition();
+		var marblePosition = this.finish ? level.marble.collider.transform.getPosition() : level.marble.getAbsPos().getPosition();
 
 		if (this.finish) {
 			// Move the target to the centre of the finish
@@ -345,6 +345,10 @@ class CameraController extends Object {
 
 		var closeness = 0.1;
 		var rayCastOrigin = marblePosition.add(level.currentUp.multiply(marble._radius)).add(cameraVerticalTranslation);
+
+		for (pi in level.pathedInteriors) {
+			pi.pushTickState();
+		}
 
 		var processedShapes = [];
 		for (i in 0...3) {
@@ -391,6 +395,10 @@ class CameraController extends Object {
 				}
 			}
 			break;
+		}
+
+		for (pi in level.pathedInteriors) {
+			pi.popTickState();
 		}
 
 		if (oob) {

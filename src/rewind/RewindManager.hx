@@ -19,8 +19,11 @@ class RewindManager {
 	public function recordFrame() {
 		var rf = new RewindFrame();
 		rf.timeState = level.timeState.clone();
-		rf.marblePosition = level.marble.getAbsPos().getPosition().clone();
-		rf.marbleOrientation = level.marble.getRotationQuat().clone();
+		rf.marbleColliderTransform = level.marble.collider.transform.clone();
+		rf.marblePrevPosition = @:privateAccess level.marble.oldPos.clone();
+		rf.marbleNextPosition = @:privateAccess level.marble.newPos.clone();
+		rf.marbleOrientation = @:privateAccess level.marble.prevRot.clone();
+		rf.marblePhysicsAccmulator = @:privateAccess level.marble.physicsAccumulator;
 		rf.marbleVelocity = level.marble.velocity.clone();
 		rf.marbleAngularVelocity = level.marble.omega.clone();
 		rf.marblePowerup = level.marble.heldPowerup;
@@ -38,7 +41,9 @@ class RewindManager {
 					velocity: x.velocity.clone(),
 				},
 				stopped: @:privateAccess x.stopped,
-				position: x.getAbsPos().getPosition().clone(),
+				position: @:privateAccess x.position.clone(),
+				prevPosition: @:privateAccess x.prevPosition.clone(),
+				stoppedPosition: @:privateAccess x.stoppedPosition != null ? @:privateAccess x.stoppedPosition.clone() : null,
 			}
 		});
 		rf.powerupStates = [];
@@ -80,10 +85,15 @@ class RewindManager {
 
 	public function applyFrame(rf:RewindFrame) {
 		level.timeState = rf.timeState.clone();
-		level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
-		level.marble.setRotationQuat(rf.marbleOrientation.clone());
-		level.marble.velocity.set(rf.marbleVelocity.x, rf.marbleVelocity.y, rf.marbleVelocity.z);
-		level.marble.omega.set(rf.marbleAngularVelocity.x, rf.marbleAngularVelocity.y, rf.marbleAngularVelocity.z);
+		@:privateAccess level.marble.oldPos.load(rf.marblePrevPosition);
+		@:privateAccess level.marble.newPos.load(rf.marbleNextPosition);
+		@:privateAccess level.marble.collider.transform.load(rf.marbleColliderTransform);
+		@:privateAccess level.marble.physicsAccumulator = rf.marblePhysicsAccmulator;
+		@:privateAccess level.marble.prevRot.load(rf.marbleOrientation);
+		// level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
+		// level.marble.setRotationQuat(rf.marbleOrientation.clone());
+		level.marble.velocity.load(rf.marbleVelocity);
+		level.marble.omega.load(rf.marbleAngularVelocity);
 
 		if (level.marble.heldPowerup == null) {
 			if (rf.marblePowerup != null) {
@@ -121,15 +131,17 @@ class RewindManager {
 			@:privateAccess level.orientationChangeTime = -1e8;
 		}
 
-		level.currentUp.set(rf.currentUp.x, rf.currentUp.y, rf.currentUp.z);
-		level.marble.lastContactNormal.set(rf.lastContactNormal.x, rf.lastContactNormal.y, rf.lastContactNormal.z);
+		level.currentUp.load(rf.currentUp);
+		level.marble.lastContactNormal.load(rf.lastContactNormal);
 		for (i in 0...rf.mpStates.length) {
 			level.pathedInteriors[i].currentTime = rf.mpStates[i].curState.currentTime;
 			level.pathedInteriors[i].targetTime = rf.mpStates[i].curState.targetTime;
-			level.pathedInteriors[i].velocity.set(rf.mpStates[i].curState.velocity.x, rf.mpStates[i].curState.velocity.y, rf.mpStates[i].curState.velocity.z);
+			level.pathedInteriors[i].velocity.load(rf.mpStates[i].curState.velocity);
 			@:privateAccess level.pathedInteriors[i].stopped = rf.mpStates[i].stopped;
-			level.pathedInteriors[i].setPosition(rf.mpStates[i].position.x, rf.mpStates[i].position.y, rf.mpStates[i].position.z);
-			level.pathedInteriors[i].setTransform(level.pathedInteriors[i].getTransform());
+			@:privateAccess level.pathedInteriors[i].position.load(rf.mpStates[i].position);
+			@:privateAccess level.pathedInteriors[i].prevPosition.load(rf.mpStates[i].prevPosition);
+			@:privateAccess level.pathedInteriors[i].stoppedPosition = rf.mpStates[i].stoppedPosition;
+			// level.pathedInteriors[i].setTransform(level.pathedInteriors[i].getTransform());
 		}
 		var pstates = rf.powerupStates.copy();
 		var lmstates = rf.landMineStates.copy();

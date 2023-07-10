@@ -94,7 +94,7 @@ class GuiXboxListButton extends GuiControl {
 			_prevMousePos = mouseState.position.clone();
 		}
 		if (selected && !disabled) {
-			if (Key.isDown(Key.MOUSE_LEFT)) {
+			if (Key.isDown(Key.MOUSE_LEFT) && renderRect.inRect(mouseState.position)) {
 				this.button.anim.currentFrame = 1;
 				this.buttonIcon.anim.currentFrame = 1;
 				buttonText.text.textColor = 0x101010;
