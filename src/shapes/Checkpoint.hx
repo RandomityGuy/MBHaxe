@@ -67,6 +67,7 @@ class Checkpoint extends DtsObject {
 			glowpass.setPassName("glow");
 			glowpass.depthTest = LessEqual;
 			glowpass.enableLights = false;
+			glowpass.depthWrite = false;
 			glowpass.setBlendMode(Alpha);
 			material.addPass(glowpass);
 
@@ -75,6 +76,7 @@ class Checkpoint extends DtsObject {
 			dtsshader = material.mainPass.getShader(shaders.DtsTexture);
 			dtsshader.passThrough = true;
 			material.mainPass.enableLights = false;
+			material.mainPass.depthWrite = false;
 			material.mainPass.setBlendMode(Alpha);
 		}
 		if (matName == "sigiloff") {

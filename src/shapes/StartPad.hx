@@ -1,11 +1,14 @@
 package shapes;
 
+import src.Util;
 import h3d.shader.UVScroll;
 import h3d.shader.UVAnim;
 import src.DtsObject;
 import src.ResourceLoader;
 
 class StartPad extends DtsObject {
+	var animStart:Float = Math.POSITIVE_INFINITY;
+
 	public function new() {
 		super();
 		dtsPath = "data/shapes/pads/startarea.dts";
@@ -13,13 +16,30 @@ class StartPad extends DtsObject {
 		identifier = "StartPad";
 		useInstancing = false;
 		animateSubObjectOpacities = true;
-		doSequenceOnce = true;
-		doSequenceOnceBeginTime = 0;
+	}
+
+	override function onLevelStart() {
+		animStart = level.timeState.timeSinceLoad;
+	}
+
+	override function update(timeState:src.TimeState) {
+		// Override the keyframe
+		var currentCompletion = getCompletion(timeState);
+		this.sequenceKeyframeOverride.set(this.dts.sequences[0], currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
+		super.update(timeState);
 	}
 
 	override function reset() {
 		super.reset();
-		doSequenceOnceBeginTime = level.timeState.timeSinceLoad;
+		animStart = level.timeState.timeSinceLoad;
+	}
+
+	function getCompletion(timeState:src.TimeState) {
+		var elapsed = (timeState.timeSinceLoad - this.animStart) - 0.5; // 500ms for 'start' state;
+		if (elapsed < 0)
+			return 1.0;
+		var completion = Util.clamp(elapsed / this.dts.sequences[0].duration, 0, 1);
+		return completion;
 	}
 
 	override function getPreloadMaterials(dts:dts.DtsFile) {

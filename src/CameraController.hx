@@ -290,8 +290,8 @@ class CameraController extends Object {
 
 		if (this.finish) {
 			// Make the camera spin around slowly
-			CameraPitch = this.level.finishPitch;
-			CameraYaw = this.level.finishYaw;
+			// CameraPitch = this.level.finishPitch;
+			// CameraYaw = this.level.finishYaw;
 			var effectTime = 1.0;
 			if (@:privateAccess this.marble.finishAnimTime >= 2.0)
 				effectTime = 1.0;
