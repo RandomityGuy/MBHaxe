@@ -147,6 +147,7 @@ class MarbleWorld extends Scheduler {
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
 	public var blastAmount:Float = 0;
+	public var skipStartBug:Bool = false;
 
 	var renderBlastAmount:Float = 0;
 
@@ -466,6 +467,7 @@ class MarbleWorld extends Scheduler {
 		this.renderBlastAmount = 0;
 		this.outOfBoundsTime = null;
 		this.finishTime = null;
+		this.skipStartBug = false;
 
 		this.currentCheckpoint = null;
 		this.currentCheckpointTrigger = null;
@@ -591,7 +593,7 @@ class MarbleWorld extends Scheduler {
 		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
 			this.marble.setMode(Start);
 		}
-		if (this.timeState.currentAttemptTime >= 3.5 && this.finishTime == null) {
+		if ((this.timeState.currentAttemptTime >= 3.5 && this.finishTime == null) || skipStartBug) {
 			this.marble.setMode(Play);
 		}
 	}
@@ -1150,7 +1152,7 @@ class MarbleWorld extends Scheduler {
 		var timeMultiplier = this.gameMode.timeMultiplier();
 
 		if (!this.isWatching) {
-			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
+			if (this.bonusTime != 0 && (this.timeState.currentAttemptTime >= 3.5 || skipStartBug)) {
 				this.bonusTime -= dt;
 				if (this.bonusTime < 0) {
 					this.timeState.gameplayClock -= this.bonusTime * timeMultiplier;
@@ -1165,7 +1167,7 @@ class MarbleWorld extends Scheduler {
 					timeTravelSound.stop();
 					timeTravelSound = null;
 				}
-				if (this.timeState.currentAttemptTime >= 3.5) {
+				if ((this.timeState.currentAttemptTime >= 3.5 || skipStartBug)) {
 					this.timeState.gameplayClock += dt * timeMultiplier;
 				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
 					this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
@@ -1178,7 +1180,7 @@ class MarbleWorld extends Scheduler {
 			this.timeState.currentAttemptTime = this.replay.currentPlaybackFrame.time;
 			this.timeState.gameplayClock = this.replay.currentPlaybackFrame.clockTime;
 			this.bonusTime = this.replay.currentPlaybackFrame.bonusTime;
-			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
+			if (this.bonusTime != 0 && (this.timeState.currentAttemptTime >= 3.5 || skipStartBug)) {
 				if (timeTravelSound == null) {
 					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
 					timeTravelSound = AudioManager.playSound(ttsnd, null, true);
@@ -1547,9 +1549,11 @@ class MarbleWorld extends Scheduler {
 
 	/** Get the current interpolated orientation quaternion. */
 	public function getOrientationQuat(time:Float) {
-		var completion = Util.clamp((time - this.orientationChangeTime) / 0.3, 0, 1);
+		var completion = Util.clamp((time - this.orientationChangeTime) / 0.8, 0, 1);
+		var newDt = completion / 0.4 * 2.302585124969482;
+		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
 		var q = this.oldOrientationQuat.clone();
-		q.slerp(q, this.newOrientationQuat, completion);
+		q.slerp(q, this.newOrientationQuat, 1 - smooth);
 		return q;
 	}
 

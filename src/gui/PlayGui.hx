@@ -535,7 +535,7 @@ class PlayGui {
 		blastFill.xScale = (scene2d.height - safeVerMargin * 2) / 480;
 		blastFill.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		var colorMat = Matrix.I();
-		colorMat.colorSet(0x0080FF);
+		colorMat.colorSet(0xCDD2D7);
 		blastFill.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
 
 		blastBar.addChild(blastFill);
