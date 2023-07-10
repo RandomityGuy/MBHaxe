@@ -241,6 +241,7 @@ class Radar {
 			}
 			g.endFill();
 			g.lineStyle(1, 0x000000, arrowAlpha);
+			g.setColor(0x000000, arrowAlpha);
 
 			if (foldArrow) {
 				g.moveTo(lowerRight.x, lowerRight.y);
@@ -308,6 +309,7 @@ class Radar {
 
 				// Border
 				g.lineStyle(1, 0x000000, circleAlpha);
+				g.setColor(0x000000, circleAlpha);
 				g.moveTo(midTopLeft.x, topLeft.y);
 				g.lineTo(topLeft.x, midTopLeft.y);
 
@@ -336,6 +338,7 @@ class Radar {
 				g.endFill();
 
 				g.lineStyle(1, 0x000000, circleAlpha);
+				g.setColor(0x000000, circleAlpha);
 
 				g.moveTo(halfBottomRight.x, drawPoint.y);
 				g.lineTo(drawPoint.x, halfTopLeft.y);

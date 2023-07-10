@@ -384,8 +384,8 @@ class CameraController extends Object {
 					var rightVec = camera.up.cross(forwardVec).normalized();
 					var upVec = forwardVec.cross(rightVec);
 
-					camera.target = marblePosition.add(upVec.multiply(0.55));
-					camera.up = upVec;
+					camera.target = marblePosition.add(cameraVerticalTranslation);
+					// camera.up = upVec;
 					continue;
 				}
 			}

@@ -1,5 +1,6 @@
 package gui;
 
+import gui.GuiControl.MouseState;
 import src.AudioManager;
 import src.MarbleGame;
 import hxd.res.BitmapFont;
@@ -10,6 +11,8 @@ import src.Settings;
 class ExitGameDlg extends GuiImage {
 	var innerCtrl:GuiControl;
 	var btnList:GuiXboxList;
+
+	var timeMenu:Float = 0.0;
 
 	public function new(yesFunc:GuiControl->Void, noFunc:GuiControl->Void, restartFunc:GuiControl->Void) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
@@ -108,5 +111,12 @@ class ExitGameDlg extends GuiImage {
 		btnList.position = new Vector(70 - offsetX / 2, 95);
 
 		super.onResize(width, height);
+	}
+
+	override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+		timeMenu += dt;
+		if (timeMenu > 3)
+			MarbleGame.instance.world.skipStartBug = true; // Trigger this lol
 	}
 }
