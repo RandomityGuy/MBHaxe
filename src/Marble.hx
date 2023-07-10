@@ -1863,6 +1863,7 @@ class Marble extends GameObject {
 		this.updateFinishAnimation(timeState.dt);
 		if (this.mode == Finish) {
 			this.setPosition(this.finishAnimPosition.x, this.finishAnimPosition.y, this.finishAnimPosition.z);
+			updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
 		}
 
 		this.trailEmitter();
