@@ -1,5 +1,6 @@
 package rewind;
 
+import h3d.Matrix;
 import mis.MissionElement.MissionElementBase;
 import triggers.CheckpointTrigger;
 import src.PathedInterior.PIState;
@@ -13,7 +14,10 @@ import shapes.Gem;
 @:publicFields
 class RewindFrame {
 	var timeState:TimeState;
-	var marblePosition:Vector;
+	var marbleColliderTransform:Matrix;
+	var marblePrevPosition:Vector;
+	var marbleNextPosition:Vector;
+	var marblePhysicsAccmulator:Float;
 	var marbleOrientation:Quat;
 	var marbleVelocity:Vector;
 	var marbleAngularVelocity:Vector;
@@ -22,7 +26,9 @@ class RewindFrame {
 	var mpStates:Array<{
 		curState:PIState,
 		stopped:Bool,
-		position:Vector
+		stoppedPosition:Vector,
+		prevPosition:Vector,
+		position:Vector,
 	}>;
 	var gemCount:Int;
 	var gemStates:Array<Bool>;
@@ -52,7 +58,10 @@ class RewindFrame {
 	public function clone() {
 		var c = new RewindFrame();
 		c.timeState = timeState.clone();
-		c.marblePosition = marblePosition.clone();
+		c.marbleColliderTransform = marbleColliderTransform.clone();
+		c.marblePrevPosition = marblePrevPosition.clone();
+		c.marbleNextPosition = marbleNextPosition.clone();
+		c.marblePhysicsAccmulator = marblePhysicsAccmulator;
 		c.marbleOrientation = marbleOrientation.clone();
 		c.marbleVelocity = marbleVelocity.clone();
 		c.marbleAngularVelocity = marbleAngularVelocity.clone();
@@ -75,6 +84,8 @@ class RewindFrame {
 				},
 				stopped: s.stopped,
 				position: s.position.clone(),
+				prevPosition: s.prevPosition.clone(),
+				stoppedPosition: s.stoppedPosition != null ? s.stoppedPosition.clone() : null,
 			});
 		}
 		c.trapdoorStates = [];

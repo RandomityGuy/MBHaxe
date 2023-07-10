@@ -230,6 +230,11 @@ class Marble extends GameObject {
 
 	public var _mass:Float = 1;
 
+	var physicsAccumulator:Float = 0;
+	var oldPos:Vector;
+	var newPos:Vector;
+	var prevRot:Quat;
+
 	public var contacts:Array<CollisionInfo> = [];
 	public var bestContact:CollisionInfo;
 	public var contactEntities:Array<CollisionEntity> = [];
@@ -1593,6 +1598,9 @@ class Marble extends GameObject {
 
 		var passedTime = timeState.currentAttemptTime;
 
+		oldPos = this.collider.transform.getPosition();
+		prevRot = this.getRotationQuat().clone();
+
 		if (this.controllable) {
 			for (interior in pathedInteriors) {
 				// interior.pushTickState();
@@ -1604,7 +1612,7 @@ class Marble extends GameObject {
 			if (timeRemaining <= 0)
 				break;
 
-			var timeStep = 0.004;
+			var timeStep = 0.008;
 			if (timeRemaining < timeStep)
 				timeStep = timeRemaining;
 
@@ -1691,13 +1699,13 @@ class Marble extends GameObject {
 			var quat = new Quat();
 			quat.initRotation(omega.x * timeStep, omega.y * timeStep, omega.z * timeStep);
 			quat.multiply(quat, rot);
-			this.setRotationQuat(quat);
+			// this.setRotationQuat(quat);
 
 			var totMatrix = quat.toMatrix();
 			newPos.w = 1; // Fix shit blowing up
 			totMatrix.setPosition(newPos);
 
-			this.setPosition(newPos.x, newPos.y, newPos.z);
+			// this.setPosition(newPos.x, newPos.y, newPos.z);
 
 			this.collider.setTransform(totMatrix);
 			this.collider.velocity = this.velocity;
@@ -1746,6 +1754,7 @@ class Marble extends GameObject {
 		}
 		this.queuedContacts = [];
 
+		newPos = this.collider.transform.getPosition();
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 	}
 
@@ -1796,8 +1805,32 @@ class Marble extends GameObject {
 			}
 		}
 
+		physicsAccumulator += timeState.dt;
+
 		playedSounds = [];
-		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
+		while (physicsAccumulator > 0.032) {
+			var adt = timeState.clone();
+			adt.dt = 0.032;
+			advancePhysics(adt, move, collisionWorld, pathedInteriors);
+			physicsAccumulator -= 0.032;
+		}
+		if (oldPos != null && newPos != null) {
+			var deltaT = physicsAccumulator / 0.032;
+			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
+			this.setPosition(renderPos.x, renderPos.y, renderPos.z);
+
+			var rot = this.prevRot;
+			var quat = new Quat();
+			quat.initRotation(omega.x * physicsAccumulator, omega.y * physicsAccumulator, omega.z * physicsAccumulator);
+			quat.multiply(quat, rot);
+			this.setRotationQuat(quat);
+
+			var adt = timeState.clone();
+			adt.dt = physicsAccumulator;
+			for (pi in pathedInteriors) {
+				pi.update(adt);
+			}
+		}
 
 		if (this.controllable) {
 			if (!this.level.isWatching) {
@@ -1983,13 +2016,14 @@ class Marble extends GameObject {
 
 	public function useBlast() {
 		if (this.level.blastAmount < 0.25 || this.level.game != "ultra")
-			return;
+			return false;
 		var impulse = this.level.currentUp.multiply(this.level.blastAmount * 8);
 		this.applyImpulse(impulse);
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
 		this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
 		this.blastUseTime = this.level.timeState.currentAttemptTime;
 		this.level.blastAmount = 0;
+		return true;
 	}
 
 	public function applyImpulse(impulse:Vector, contactImpulse:Bool = false) {
@@ -2071,6 +2105,10 @@ class Marble extends GameObject {
 		this.teleportDisableTime = null;
 		this.teleportEnableTime = null;
 		this.finishAnimTime = 0;
+		this.physicsAccumulator = 0;
+		this.prevRot = this.getRotationQuat().clone();
+		this.oldPos = this.getAbsPos().getPosition();
+		this.newPos = this.getAbsPos().getPosition();
 		if (this._radius != this._prevRadius) {
 			this._radius = this._prevRadius;
 			this._marbleScale = this._renderScale = this._defaultScale;
