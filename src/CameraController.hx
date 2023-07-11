@@ -186,7 +186,7 @@ class CameraController extends Object {
 		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
 
-		var lerpt = hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+		var lerpt = dt / 0.032; // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)

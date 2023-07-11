@@ -152,7 +152,7 @@ class Settings {
 		powerup: Key.MOUSE_LEFT,
 		freelook: Key.MOUSE_RIGHT,
 		alwaysFreeLook: true,
-		cameraSensitivity: 0.6,
+		cameraSensitivity: 1.3,
 		invertYAxis: false,
 		respawn: Key.BACKSPACE,
 		blast: Key.E,
