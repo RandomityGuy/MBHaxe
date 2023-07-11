@@ -212,6 +212,9 @@ class Radar {
 			var lowerRight = arrowBack.add(halfArrowSideVec);
 			var lowerLeft = arrowBack.sub(halfArrowSideVec);
 
+			if (foldAmount == 0)
+				foldArrow = false;
+
 			var halfFoldWidth = 0.5 * arrowWidth * foldAmount;
 			var halfFoldForwardWidthVec = new Vector(halfFoldWidth * arrowDir.y, -halfFoldWidth * arrowDir.x);
 
@@ -227,6 +230,7 @@ class Radar {
 			var foldedTip = drawPoint.sub(doubleFoldVec);
 
 			g.beginFill(color, arrowAlpha);
+			g.lineStyle(0, color, arrowAlpha);
 			if (foldArrow) {
 				g.moveTo(lowerRight.x, lowerRight.y);
 				g.lineTo(lowerLeft.x, lowerLeft.y);
@@ -246,22 +250,17 @@ class Radar {
 			if (foldArrow) {
 				g.moveTo(lowerRight.x, lowerRight.y);
 				g.lineTo(foldLowerRight.x, foldLowerRight.y);
-				g.moveTo(foldLowerRight.x, foldLowerRight.y);
 				g.lineTo(foldLowerLeft.x, foldLowerLeft.y);
-				g.moveTo(foldLowerLeft.x, foldLowerLeft.y);
 				g.lineTo(lowerLeft.x, lowerLeft.y);
-				g.moveTo(lowerLeft.x, lowerLeft.y);
 				g.lineTo(lowerRight.x, lowerRight.y);
-				g.lineTo(foldLowerRight.x, foldLowerRight.y);
+				g.moveTo(foldLowerRight.x, foldLowerRight.y);
 				g.lineTo(foldedTip.x, foldedTip.y);
 				g.lineTo(foldLowerLeft.x, foldLowerLeft.y);
-				g.lineTo(foldedTip.x, foldedTip.y);
+				g.moveTo(foldedTip.x, foldedTip.y);
 			} else {
 				g.moveTo(drawPoint.x, drawPoint.y);
 				g.lineTo(lowerRight.x, lowerRight.y);
-				g.moveTo(lowerRight.x, lowerRight.y);
 				g.lineTo(lowerLeft.x, lowerLeft.y);
-				g.moveTo(lowerLeft.x, lowerLeft.y);
 				g.lineTo(drawPoint.x, drawPoint.y);
 			}
 		}
@@ -281,6 +280,7 @@ class Radar {
 
 				// Top Left
 				g.beginFill(color, circleAlpha);
+				g.lineStyle(0, color, circleAlpha);
 				g.moveTo(midTopLeft.x, midTopLeft.y);
 				g.lineTo(midTopLeft.x, topLeft.y);
 				g.lineTo(topLeft.x, midTopLeft.y);
@@ -288,6 +288,7 @@ class Radar {
 
 				// Top Right
 				g.beginFill(color, circleAlpha);
+				g.lineStyle(0, color, circleAlpha);
 				g.moveTo(midBottomRight.x, midTopLeft.y);
 				g.lineTo(midBottomRight.x, topLeft.y);
 				g.lineTo(bottomRight.x, midTopLeft.y);
@@ -295,6 +296,7 @@ class Radar {
 
 				// Bottom Right
 				g.beginFill(color, circleAlpha);
+				g.lineStyle(0, color, circleAlpha);
 				g.moveTo(midBottomRight.x, midBottomRight.y);
 				g.lineTo(midBottomRight.x, bottomRight.y);
 				g.lineTo(bottomRight.x, midBottomRight.y);
@@ -302,6 +304,7 @@ class Radar {
 
 				// Bottom Left
 				g.beginFill(color, circleAlpha);
+				g.lineStyle(0, color, circleAlpha);
 				g.moveTo(midTopLeft.x, midBottomRight.y);
 				g.lineTo(midTopLeft.x, bottomRight.y);
 				g.lineTo(topLeft.x, midBottomRight.y);
@@ -326,12 +329,14 @@ class Radar {
 				var halfBottomRight = drawPoint.add(new Vector(halfArrowLen, halfArrowLen));
 
 				g.beginFill(color, circleAlpha);
+				g.lineStyle(0, color, circleAlpha);
 				g.moveTo(halfTopLeft.x, drawPoint.y);
 				g.lineTo(drawPoint.x, halfTopLeft.y);
 				g.lineTo(halfBottomRight.x, drawPoint.y);
 				g.endFill();
 
 				g.beginFill(color, circleAlpha);
+				g.lineStyle(0, color, circleAlpha);
 				g.moveTo(halfTopLeft.x, drawPoint.y);
 				g.lineTo(drawPoint.x, halfBottomRight.y);
 				g.lineTo(halfBottomRight.x, drawPoint.y);
