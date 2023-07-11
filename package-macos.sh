@@ -5,21 +5,21 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-if [ ! -d "macos-dist/MarbleBlast Platinum.app" ]; then
-	cp -r "macos-dist/MarbleBlast Platinum.app.in" "macos-dist/MarbleBlast Platinum.app" || exit $?
+if [ ! -d "macos-dist/MarbleBlast Ultra.app" ]; then
+	cp -r "macos-dist/MarbleBlast Ultra.app.in" "macos-dist/MarbleBlast Ultra.app" || exit $?
 else
-	cp "macos-dist/MarbleBlast Platinum.app.in/Contents/Info.plist" "macos-dist/MarbleBlast Platinum.app/Contents/Info.plist"  || exit $?
+	cp "macos-dist/MarbleBlast Ultra.app.in/Contents/Info.plist" "macos-dist/MarbleBlast Ultra.app/Contents/Info.plist"  || exit $?
 fi
 
 # Replace version string
-sed -i "" -e "s/@VERSION@/$1/" "macos-dist/MarbleBlast Platinum.app/Contents/Info.plist" || exit $?
+sed -i "" -e "s/@VERSION@/$1/" "macos-dist/MarbleBlast Ultra.app/Contents/Info.plist" || exit $?
 
 # Copy binary
-cp native/marblegame "macos-dist/MarbleBlast Platinum.app/Contents/MacOS/marblegame" || exit $?
+cp native/marblegame "macos-dist/MarbleBlast Ultra.app/Contents/MacOS/marblegame" || exit $?
 # Copy data
-cp -r data "macos-dist/MarbleBlast Platinum.app/Contents/Resources/" || exit $?
+cp -r data "macos-dist/MarbleBlast Ultra.app/Contents/Resources/" || exit $?
 
-cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS/"
+cd "macos-dist/MarbleBlast Ultra.app/Contents/MacOS/"
 install_name_tool -change ui.hdll @rpath/ui.hdll \
 	-change openal.hdll @rpath/openal.hdll \
 	-change fmt.hdll @rpath/fmt.hdll \
@@ -31,6 +31,6 @@ install_name_tool -change ui.hdll @rpath/ui.hdll \
 echo "Tried to update dylib references in executable."
 echo "Please use otool -L to ensure that the libraries are referenced as @rpath. This is usually an issue with libSDL2-2.0.0.dylib"
 echo
-echo "Please fill macos-dist/MarbleBlast Platinum.app/Contents/Frameworks with the dylibs,"
+echo "Please fill macos-dist/MarbleBlast Ultra.app/Contents/Frameworks with the dylibs,"
 echo "and use install_name_tool to update their IDs to match with marblegame executable."
 
