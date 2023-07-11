@@ -157,11 +157,11 @@ class EndGameGui extends GuiImage {
 		retryButton.pressedAction = (e) -> restartFunc(retryButton);
 		bottomBar.addChild(retryButton);
 
-		var lbButton = new GuiXboxButton("Leaderboard", 220);
-		lbButton.position = new Vector(750, 0);
-		lbButton.vertSizing = Bottom;
-		lbButton.horizSizing = Right;
-		bottomBar.addChild(lbButton);
+		// var lbButton = new GuiXboxButton("Leaderboard", 220);
+		// lbButton.position = new Vector(750, 0);
+		// lbButton.vertSizing = Bottom;
+		// lbButton.horizSizing = Right;
+		// bottomBar.addChild(lbButton);
 
 		var nextButton = new GuiXboxButton("Next", 160);
 		nextButton.position = new Vector(960, 0);
