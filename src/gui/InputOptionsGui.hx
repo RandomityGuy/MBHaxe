@@ -6,6 +6,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 import src.Util;
+import src.AudioManager;
 
 class InputOptionsGui extends GuiImage {
 	var innerCtrl:GuiControl;
@@ -73,6 +74,7 @@ class InputOptionsGui extends GuiImage {
 
 		var musicOpt = optionCollection.addOption(1, "Music Volume", numberRange(0, 100, 5), (idx) -> {
 			Settings.optionsSettings.musicVolume = (idx / 20.0);
+			AudioManager.updateVolumes();
 			return true;
 		}, 0.5, 118);
 
@@ -80,6 +82,7 @@ class InputOptionsGui extends GuiImage {
 
 		var soundOpt = optionCollection.addOption(1, "Effects Volume", numberRange(0, 100, 5), (idx) -> {
 			Settings.optionsSettings.soundVolume = (idx / 20.0);
+			AudioManager.updateVolumes();
 			return true;
 		}, 0.5, 118);
 
