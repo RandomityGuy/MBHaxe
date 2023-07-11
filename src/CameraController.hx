@@ -123,6 +123,17 @@ class CameraController extends Object {
 
 		var deltaposX = mouseX * scaleFactor;
 		var deltaposY = mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1) * scaleFactor;
+
+		if (deltaposX != 0 || deltaposY != 0) {
+			var absX = Math.abs(deltaposX);
+			var absY = Math.abs(deltaposY);
+			var len = Math.sqrt(deltaposX * deltaposX + deltaposY * deltaposY);
+			var max = Math.max(absX, absY);
+			if (max > 0.01) {
+				deltaposX *= len / max;
+				deltaposY *= len / max;
+			}
+		}
 		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
 			deltaposY = 0;
 		}
@@ -159,7 +170,7 @@ class CameraController extends Object {
 		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
 
-		var lerpt = hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
@@ -167,11 +178,10 @@ class CameraController extends Object {
 		if (Settings.gamepadSettings.invertYAxis)
 			cameraPitchDelta = -cameraPitchDelta;
 		nextCameraPitch += 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
-		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0)
-			- (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
+		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
 			+ Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis);
-			if (Settings.gamepadSettings.invertXAxis)
-				cameraYawDelta = -cameraYawDelta;
+		if (Settings.gamepadSettings.invertXAxis)
+			cameraYawDelta = -cameraYawDelta;
 		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
