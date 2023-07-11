@@ -592,7 +592,7 @@ class MarbleWorld extends Scheduler {
 		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
 			this.marble.setMode(Start);
 		}
-		if ((this.timeState.currentAttemptTime >= 3.5 && this.finishTime == null) || skipStartBug) {
+		if ((this.timeState.currentAttemptTime >= 3.5 || skipStartBug) && this.finishTime == null) {
 			this.marble.setMode(Play);
 		}
 	}

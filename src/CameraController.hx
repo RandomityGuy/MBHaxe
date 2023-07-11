@@ -116,6 +116,17 @@ class CameraController extends Object {
 		var deltaposX = mouseX * scaleFactor;
 		var deltaposY = mouseY * (Settings.controlsSettings.invertYAxis ? -1 : 1) * scaleFactor;
 
+		if (deltaposX != 0 || deltaposY != 0) {
+			var absX = Math.abs(deltaposX);
+			var absY = Math.abs(deltaposY);
+			var len = Math.sqrt(deltaposX * deltaposX + deltaposY * deltaposY);
+			var max = Math.max(absX, absY);
+			if (max > 0.01) {
+				deltaposX *= len / max;
+				deltaposY *= len / max;
+			}
+		}
+
 		var factor = isTouch ? Util.lerp(1 / 250, 1 / 25,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
@@ -181,7 +192,7 @@ class CameraController extends Object {
 		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
 
-		var lerpt = dt / 0.032; // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
