@@ -233,7 +233,7 @@ class PathedInterior extends InteriorObject {
 
 	function computeDuration() {
 		var total = 0.0;
-		for (i in 0...(markerData.length - 1)) {
+		for (i in 0...markerData.length) {
 			var marker = markerData[i];
 			total += marker.msToNext;
 		}
