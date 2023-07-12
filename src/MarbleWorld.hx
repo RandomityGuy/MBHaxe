@@ -146,7 +146,7 @@ class MarbleWorld extends Scheduler {
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
 	public var blastAmount:Float = 0;
-	public var skipStartBug:Bool = false;
+	public var skipStartBugPauseTime:Float = 0.0;
 
 	var renderBlastAmount:Float = 0;
 
@@ -466,7 +466,7 @@ class MarbleWorld extends Scheduler {
 		this.renderBlastAmount = 0;
 		this.outOfBoundsTime = null;
 		this.finishTime = null;
-		this.skipStartBug = false;
+		this.skipStartBugPauseTime = 0.0;
 
 		this.currentCheckpoint = null;
 		this.currentCheckpointTrigger = null;
@@ -592,7 +592,7 @@ class MarbleWorld extends Scheduler {
 		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
 			this.marble.setMode(Start);
 		}
-		if ((this.timeState.currentAttemptTime >= 3.5 || skipStartBug) && this.finishTime == null) {
+		if (this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5 && this.finishTime == null) {
 			this.marble.setMode(Play);
 		}
 	}
@@ -1151,7 +1151,7 @@ class MarbleWorld extends Scheduler {
 		var timeMultiplier = this.gameMode.timeMultiplier();
 
 		if (!this.isWatching) {
-			if (this.bonusTime != 0 && (this.timeState.currentAttemptTime >= 3.5 || skipStartBug)) {
+			if (this.bonusTime != 0 && this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5) {
 				this.bonusTime -= dt;
 				if (this.bonusTime < 0) {
 					this.timeState.gameplayClock -= this.bonusTime * timeMultiplier;
@@ -1166,7 +1166,7 @@ class MarbleWorld extends Scheduler {
 					timeTravelSound.stop();
 					timeTravelSound = null;
 				}
-				if ((this.timeState.currentAttemptTime >= 3.5 || skipStartBug)) {
+				if (this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5) {
 					this.timeState.gameplayClock += dt * timeMultiplier;
 				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
 					this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
@@ -1179,7 +1179,7 @@ class MarbleWorld extends Scheduler {
 			this.timeState.currentAttemptTime = this.replay.currentPlaybackFrame.time;
 			this.timeState.gameplayClock = this.replay.currentPlaybackFrame.clockTime;
 			this.bonusTime = this.replay.currentPlaybackFrame.bonusTime;
-			if (this.bonusTime != 0 && (this.timeState.currentAttemptTime >= 3.5 || skipStartBug)) {
+			if (this.bonusTime != 0 && this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5) {
 				if (timeTravelSound == null) {
 					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
 					timeTravelSound = AudioManager.playSound(ttsnd, null, true);

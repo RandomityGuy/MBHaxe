@@ -116,7 +116,9 @@ class ExitGameDlg extends GuiImage {
 	override function update(dt:Float, mouseState:MouseState) {
 		super.update(dt, mouseState);
 		timeMenu += dt;
-		if (timeMenu > 3)
-			MarbleGame.instance.world.skipStartBug = true; // Trigger this lol
+	}
+
+	override function onRemove() {
+		MarbleGame.instance.world.skipStartBugPauseTime += timeMenu;
 	}
 }
