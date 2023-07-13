@@ -448,7 +448,6 @@ class Settings {
 		#end
 		#if js
 		Window.getInstance().propagateKeyEvents = true;
-		uiScale = 2;
 		#end
 
 		// @:privateAccess Window.getInstance().window.center();
