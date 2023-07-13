@@ -111,14 +111,16 @@ class PlayGui {
 		playGuiCtrlOuter.horizSizing = Width;
 		playGuiCtrlOuter.vertSizing = Height;
 
-		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
-		var safeHorMargin = 1 + (scene2d.width * 0.15) / 2;
+		var wnd = hxd.Window.getInstance();
+
+		var safeVerMargin = 1 + (wnd.height * 0.15) / 2;
+		var safeHorMargin = 1 + (wnd.width * 0.15) / 2;
 
 		playGuiCtrl = new GuiControl();
 		playGuiCtrl.position = new Vector(safeHorMargin, safeVerMargin);
 
-		var subX = 640 - (scene2d.width - safeHorMargin * 2) * 640 / scene2d.width;
-		var subY = 480 - (scene2d.height - safeVerMargin * 2) * 480 / scene2d.height;
+		var subX = 640 - (wnd.width - safeHorMargin * 2) * 640 / wnd.width;
+		var subY = 480 - (wnd.height - safeVerMargin * 2) * 480 / wnd.height;
 
 		playGuiCtrl.extent = new Vector(640 - subX, 480 - subY);
 		playGuiCtrl.horizSizing = Width;
@@ -144,8 +146,8 @@ class PlayGui {
 		if (game == 'ultra')
 			initBlastBar();
 		initTexts();
-		if (Settings.optionsSettings.frameRateVis)
-			initFPSMeter();
+		// if (Settings.optionsSettings.frameRateVis)
+		// 	initFPSMeter();
 
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.showControls(this.playGuiCtrlOuter, game == 'ultra');
@@ -154,12 +156,12 @@ class PlayGui {
 		playGuiCtrlOuter.render(scene2d);
 
 		resizeEv = () -> {
-			var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
-			var safeHorMargin = 1 + (scene2d.width * 0.15) / 2;
+			var safeVerMargin = 1 + (wnd.height * 0.15) / 2;
+			var safeHorMargin = 1 + (wnd.width * 0.15) / 2;
 			playGuiCtrl.position = new Vector(safeHorMargin, safeVerMargin);
 
-			var subX = 640 - (scene2d.width - safeHorMargin * 2) * 640 / scene2d.width;
-			var subY = 480 - (scene2d.height - safeVerMargin * 2) * 480 / scene2d.height;
+			var subX = 640 - (wnd.width - safeHorMargin * 2) * 640 / wnd.width;
+			var subY = 480 - (wnd.height - safeVerMargin * 2) * 480 / wnd.height;
 
 			playGuiCtrl.extent = new Vector(640 - subX, 480 - subY);
 			resizeControls();
@@ -179,6 +181,7 @@ class PlayGui {
 	}
 
 	public function initTimer() {
+		var scene2d = hxd.Window.getInstance();
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		var timerCtrl = new GuiImage(ResourceLoader.getResource('data/ui/game/timebackdrop0.png', ResourceLoader.getImage, this.imageResources).toTile());
@@ -284,6 +287,7 @@ class PlayGui {
 	}
 
 	public function initGemCounter() {
+		var scene2d = hxd.Window.getInstance();
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		var gemBox = new GuiControl();
@@ -370,6 +374,7 @@ class PlayGui {
 	}
 
 	function initPowerupBox() {
+		var scene2d = hxd.Window.getInstance();
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		var powerupImgs = [
@@ -521,6 +526,7 @@ class PlayGui {
 	}
 
 	function initBlastBar() {
+		var scene2d = hxd.Window.getInstance();
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		blastBar = new GuiControl();

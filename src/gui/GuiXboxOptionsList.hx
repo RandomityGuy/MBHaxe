@@ -118,8 +118,8 @@ class GuiXboxOptionsList extends GuiControl {
 			optionText.text.textColor = 0x101010;
 		} else {
 			var htr = this.getHitTestRect();
-			htr.position = htr.position.add(new Vector(24, 20));
-			htr.extent.set(776, 53);
+			htr.position = htr.position.add(new Vector(24 * Settings.uiScale, 20 * Settings.uiScale));
+			htr.extent.set(776 * Settings.uiScale, 53 * Settings.uiScale);
 
 			if (_prevMousePos == null || !_prevMousePos.equals(mouseState.position)) {
 				if (htr.inRect(mouseState.position) && !selected) {
@@ -148,11 +148,11 @@ class GuiXboxOptionsList extends GuiControl {
 			}
 		}
 		var leftBtnRect = leftButton.getHitTestRect();
-		leftBtnRect.position = leftBtnRect.position.add(new Vector(15, 21));
-		leftBtnRect.extent.set(83, 53);
+		leftBtnRect.position = leftBtnRect.position.add(new Vector(15 * Settings.uiScale, 21 * Settings.uiScale));
+		leftBtnRect.extent.set(83 * Settings.uiScale, 53 * Settings.uiScale);
 		var rightBtnRect = rightButton.getHitTestRect();
-		rightBtnRect.position = rightBtnRect.position.add(new Vector(15, 21));
-		rightBtnRect.extent.set(83, 53);
+		rightBtnRect.position = rightBtnRect.position.add(new Vector(15 * Settings.uiScale, 21 * Settings.uiScale));
+		rightBtnRect.extent.set(83 * Settings.uiScale, 53 * Settings.uiScale);
 		if (leftBtnRect.inRect(mouseState.position) || rightBtnRect.inRect(mouseState.position)) {
 			if (Key.isPressed(Key.MOUSE_LEFT)) {
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));

@@ -84,7 +84,7 @@ class KeyBindingsGui extends GuiImage {
 			}
 		}
 
-		var scene2d = MarbleGame.canvas.scene2d;
+		var scene2d = hxd.Window.getInstance();
 
 		var offsetX = (scene2d.width - 1280) / 2;
 		var offsetY = (scene2d.height - 720) / 2;

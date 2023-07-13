@@ -25,6 +25,7 @@ class Canvas extends GuiControl {
 		Window.getInstance().addResizeEvent(() -> {
 			var wnd = Window.getInstance();
 			onResize(wnd.width, wnd.height);
+			Console.log('Window resized to ${wnd.width} x ${wnd.height}, scene ${scene2d.width} x ${scene2d.height}');
 		});
 	}
 

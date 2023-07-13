@@ -23,7 +23,7 @@ class VideoOptionsGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var scene2d = MarbleGame.canvas.scene2d;
+		var scene2d = hxd.Window.getInstance();
 
 		var offsetX = (scene2d.width - 1280) / 2;
 		var offsetY = (scene2d.height - 720) / 2;
@@ -132,7 +132,7 @@ class VideoOptionsGui extends GuiImage {
 		}, 0.35);
 		rfOpt.setCurrentOption(Settings.optionsSettings.reflectionDetail);
 
-		#if js
+		#if (js || MACOS_BUNDLE)
 		var pxOpt = optionCollection.addOption(1, "Pixel Ratio", ["Max 0.5", "Max 1", "Max 1.5", "Max 2", "Max Infinity"], (idx) -> {
 			if (idx == 0)
 				Settings.optionsSettings.maxPixelRatio = 0.5;

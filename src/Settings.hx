@@ -207,7 +207,7 @@ class Settings {
 
 	#if hl
 	#if MACOS_BUNDLE
-	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBP"]);
+	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBU"]);
 	#else
 	public static var settingsDir = ".";
 	#end
@@ -448,6 +448,7 @@ class Settings {
 		#end
 		#if js
 		Window.getInstance().propagateKeyEvents = true;
+		uiScale = 2;
 		#end
 
 		// @:privateAccess Window.getInstance().window.center();

@@ -148,7 +148,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		this.dirty = true;
 
-		this.scrollTrack.position = new Vector(extent.x - 18 * Settings.uiScale, 0);
+		this.scrollTrack.position = new Vector(extent.x - 18, 0);
 		this.scrollTrack.extent = new Vector(18, this.extent.y);
 
 		scrollUpButton.position = new Vector(this.extent.x - 18, 0);

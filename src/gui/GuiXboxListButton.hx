@@ -73,8 +73,8 @@ class GuiXboxListButton extends GuiControl {
 
 	public override function update(dt:Float, mouseState:MouseState) {
 		var renderRect = getHitTestRect();
-		renderRect.position = renderRect.position.add(new Vector(24, 20)); // Offset
-		renderRect.extent.set(439, 53);
+		renderRect.position = renderRect.position.add(new Vector(24 * Settings.uiScale, 20 * Settings.uiScale)); // Offset
+		renderRect.extent.set(439 * Settings.uiScale, 53 * Settings.uiScale);
 		if (renderRect.inRect(mouseState.position) && !disabled) {
 			if (buttonSounds && Key.isPressed(Key.MOUSE_LEFT)) {
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
@@ -132,8 +132,8 @@ class GuiXboxListButton extends GuiControl {
 
 	public override function onMouseRelease(mouseState:MouseState) {
 		var renderRect = getHitTestRect();
-		renderRect.position = renderRect.position.add(new Vector(24, 20)); // Offset
-		renderRect.extent.set(439, 53);
+		renderRect.position = renderRect.position.add(new Vector(24 * Settings.uiScale, 20 * Settings.uiScale)); // Offset
+		renderRect.extent.set(439 * Settings.uiScale, 53 * Settings.uiScale);
 		if (!renderRect.inRect(mouseState.position))
 			return;
 
@@ -145,8 +145,8 @@ class GuiXboxListButton extends GuiControl {
 
 	public override function onMouseEnter(mouseState:MouseState) {
 		var renderRect = getHitTestRect();
-		renderRect.position = renderRect.position.add(new Vector(24, 20)); // Offset
-		renderRect.extent.set(439, 53);
+		renderRect.position = renderRect.position.add(new Vector(24 * Settings.uiScale, 20 * Settings.uiScale)); // Offset
+		renderRect.extent.set(439 * Settings.uiScale, 53 * Settings.uiScale);
 		if (!renderRect.inRect(mouseState.position))
 			return;
 

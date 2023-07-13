@@ -75,6 +75,10 @@ class Renderer extends h3d.scene.Renderer {
 		#if js
 		pixelRatio = js.Browser.window.devicePixelRatio / Math.min(Settings.optionsSettings.maxPixelRatio, js.Browser.window.devicePixelRatio);
 		#end
+		#if hl
+		pixelRatio = hxd.Window.getInstance()
+			.windowToPixelRatio / Math.min(Settings.optionsSettings.maxPixelRatio, hxd.Window.getInstance().windowToPixelRatio);
+		#end
 	}
 
 	override function getPassByName(name:String):h3d.pass.Base {
