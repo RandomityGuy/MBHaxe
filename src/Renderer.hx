@@ -1,5 +1,6 @@
 package src;
 
+import h3d.pass.PassList;
 import hxd.Window;
 import src.ResourceLoader;
 import shaders.GammaRamp;
@@ -147,17 +148,28 @@ class Renderer extends h3d.scene.Renderer {
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
 			var glowObjects = get("glow");
 			if (!glowObjects.isEmpty()) {
-				if (dirtyBuffers) {
-					ctx.engine.pushTarget(glowBuffer);
-					ctx.engine.clear(0);
-					renderPass(defaultPass, glowObjects);
-					bloomPass(ctx);
-					ctx.engine.popTarget();
+				var frustum = ctx.camera.frustum;
+				var hasOne = false;
+				for (obj in glowObjects) {
+					var bounds = obj.obj.getBounds();
+					if (frustum.hasBounds(bounds)) {
+						hasOne = true;
+						break;
+					}
 				}
-				copyPass.shader.texture = growBufferTemps[0];
-				copyPass.pass.blend(One, One);
-				copyPass.pass.depth(false, Always);
-				copyPass.render();
+				if (hasOne) {
+					if (dirtyBuffers) {
+						ctx.engine.pushTarget(glowBuffer);
+						ctx.engine.clear(0);
+						renderPass(defaultPass, glowObjects);
+						bloomPass(ctx);
+						ctx.engine.popTarget();
+					}
+					copyPass.shader.texture = growBufferTemps[0];
+					copyPass.pass.blend(One, One);
+					copyPass.pass.depth(false, Always);
+					copyPass.render();
+				}
 			}
 		}
 		if (!cubemapPass)

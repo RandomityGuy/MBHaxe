@@ -13,6 +13,7 @@ class CameraInput {
 	var identifier:Int = -1;
 
 	public var enabled = false;
+	public var pressed = false;
 
 	var added = false;
 
@@ -35,7 +36,7 @@ class CameraInput {
 		this.collider.horizSizing = Width;
 		this.collider.vertSizing = Height;
 
-		var pressed = false;
+		pressed = false;
 
 		var prevMouse = new Vector(0, 0);
 		interactive.onPush = (e) -> {

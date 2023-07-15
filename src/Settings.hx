@@ -126,7 +126,7 @@ class Settings {
 		marbleCategoryIndex: 0,
 		marbleSkin: "base",
 		marbleModel: "data/shapes/balls/marble01.dts",
-		marbleShader: "Default",
+		marbleShader: "ClassicGlassPureSphere",
 		rewindEnabled: false,
 		rewindTimescale: 1,
 		reflectionDetail: 3,
@@ -412,7 +412,7 @@ class Settings {
 				optionsSettings.marbleCategoryIndex = 0;
 			}
 			if (optionsSettings.marbleShader == null) {
-				optionsSettings.marbleShader = "Default";
+				optionsSettings.marbleShader = "ClassicGlassPureSphere";
 			}
 			if (controlsSettings.blast == null) {
 				controlsSettings.blast = Key.E;

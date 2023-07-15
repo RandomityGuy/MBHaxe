@@ -111,7 +111,12 @@ class PlayGui {
 		playGuiCtrlOuter.horizSizing = Width;
 		playGuiCtrlOuter.vertSizing = Height;
 
+		#if hl
 		var wnd = hxd.Window.getInstance();
+		#end
+		#if js
+		var wnd = MarbleGame.instance.scene2d;
+		#end
 
 		var safeVerMargin = 1 + (wnd.height * 0.15) / 2;
 		var safeHorMargin = 1 + (wnd.width * 0.15) / 2;
@@ -181,7 +186,12 @@ class PlayGui {
 	}
 
 	public function initTimer() {
+		#if hl
 		var scene2d = hxd.Window.getInstance();
+		#end
+		#if js
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		var timerCtrl = new GuiImage(ResourceLoader.getResource('data/ui/game/timebackdrop0.png', ResourceLoader.getImage, this.imageResources).toTile());
@@ -287,7 +297,12 @@ class PlayGui {
 	}
 
 	public function initGemCounter() {
+		#if hl
 		var scene2d = hxd.Window.getInstance();
+		#end
+		#if js
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		var gemBox = new GuiControl();
@@ -374,7 +389,12 @@ class PlayGui {
 	}
 
 	function initPowerupBox() {
+		#if hl
 		var scene2d = hxd.Window.getInstance();
+		#end
+		#if js
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		var powerupImgs = [
@@ -526,7 +546,12 @@ class PlayGui {
 	}
 
 	function initBlastBar() {
+		#if hl
 		var scene2d = hxd.Window.getInstance();
+		#end
+		#if js
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
 		blastBar = new GuiControl();

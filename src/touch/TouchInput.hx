@@ -34,7 +34,7 @@ class TouchEventState {
 }
 
 class TouchInput {
-	var cameraInput:CameraInput;
+	public var cameraInput:CameraInput;
 
 	public var movementInput:MovementInput;
 
