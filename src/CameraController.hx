@@ -133,13 +133,13 @@ class CameraController extends Object {
 		}
 
 		var factor = isTouch ? Util.lerp(1 / 25, 1 / 15,
-			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 750, 1 / 50, Settings.controlsSettings.cameraSensitivity);
+			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
-		nextCameraPitch = CameraPitch + deltaposY * factor;
-		nextCameraYaw = CameraYaw + deltaposX * factor;
+		nextCameraPitch += deltaposY * factor;
+		nextCameraYaw += deltaposX * factor;
 
 		if (Math.abs(deltaposX) > 0.001)
 			hasXInput = true;
