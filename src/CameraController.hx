@@ -27,6 +27,7 @@ import h3d.Vector;
 import hxsl.Types.Matrix;
 import h3d.scene.Scene;
 import src.Gamepad;
+import src.MarbleGame;
 
 enum CameraMode {
 	FreeOrbit;
@@ -237,7 +238,9 @@ class CameraController extends Object {
 		deltaX = deltaNew;
 
 		// Center the pitch
-		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
+		if (!Settings.controlsSettings.alwaysFreeLook
+			&& !Key.isDown(Settings.controlsSettings.freelook)
+			&& !MarbleGame.instance.touchInput.cameraInput.pressed) {
 			var rescaledY = deltaY;
 			if (rescaledY <= 0.0)
 				rescaledY = 0.4 - rescaledY * -0.75;

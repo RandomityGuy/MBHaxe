@@ -147,7 +147,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	public override function render(scene2d:Scene) {
 		this.dirty = true;
 
-		this.scrollTrack.position = new Vector(extent.x - 18 * Settings.uiScale, 0);
+		this.scrollTrack.position = new Vector(extent.x - 18, 0);
 		this.scrollTrack.extent = new Vector(18, this.extent.y);
 
 		scrollUpButton.position = new Vector(this.extent.x - 18, 0);
@@ -180,7 +180,6 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 		var scrollBarYSize = (renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale));
 		var scrollYOld = scrollY;
-		this.scrollTrack.bmp.scaleY = renderRect.extent.y;
 
 		this.scrollY = Util.clamp(scrollY, 0, renderRect.extent.y - scrollBarYSize * Settings.uiScale);
 		scrollBarYSize = Math.max(scrollBarYSize, 13);
