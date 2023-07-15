@@ -1,5 +1,6 @@
 package;
 
+import gui.VersionGui;
 import gui.PresentsGui;
 import src.Debug;
 import src.Marbleland;
@@ -93,6 +94,7 @@ class Main extends hxd.App {
 				marbleGame.startPreviewWorld(() -> {
 					marbleGame.setPreviewMission('urban', () -> {
 						MarbleGame.canvas.setContent(new MainMenuGui());
+						VersionGui.checkVersion();
 					});
 				});
 			}, 100);
