@@ -18,6 +18,7 @@ import h3d.scene.Object;
 import h3d.scene.Mesh;
 import h3d.scene.MeshBatch;
 import src.MarbleGame;
+import src.ProfilerUI;
 
 typedef MeshBatchInfo = {
 	var instances:Array<MeshInstance>;
@@ -78,7 +79,7 @@ class InstanceManager {
 								subOpacity = instance.gameObject.getSubObjectOpacity(instance.emptyObj);
 								if (subOpacity == 0)
 									continue; // Do not draw
-								minfo.meshbatch.shadersChanged = true;
+								// minfo.meshbatch.shadersChanged = true;
 							}
 
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
