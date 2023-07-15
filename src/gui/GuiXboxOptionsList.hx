@@ -24,6 +24,7 @@ class GuiXboxOptionsList extends GuiControl {
 	var onChangeFunc:Int->Bool = null;
 
 	var _prevMousePos:Vector;
+	var usedGamepad:Bool = false;
 
 	public var selected:Bool = false;
 
@@ -211,7 +212,7 @@ class GuiXboxOptionsList extends GuiControl {
 			rightButton.anim.filter.enable = false;
 		}
 		if (selected || alwaysActive) {
-			if (Key.isPressed(Key.LEFT) || Gamepad.isPressed(['dpadLeft'])) {
+			if (Key.isPressed(Key.LEFT) || Gamepad.isPressed(['dpadLeft']) || (Gamepad.getAxis('analogX') < -0.75 && !usedGamepad)) {
 				var newOption = currentOption - 1;
 				if (newOption < 0)
 					newOption = options.length - 1;
@@ -224,7 +225,7 @@ class GuiXboxOptionsList extends GuiControl {
 					optionText.text.text = options[currentOption];
 				}
 			}
-			if (Key.isPressed(Key.RIGHT) || Gamepad.isPressed(['dpadRight'])) {
+			if (Key.isPressed(Key.RIGHT) || Gamepad.isPressed(['dpadRight']) || (Gamepad.getAxis('analogX') > 0.75 && !usedGamepad)) {
 				var newOption = currentOption + 1;
 				if (newOption >= options.length)
 					newOption = 0;
@@ -237,6 +238,10 @@ class GuiXboxOptionsList extends GuiControl {
 					optionText.text.text = options[currentOption];
 				}
 			}
+			if (Math.abs(Gamepad.getAxis('analogX')) > 0.75)
+				usedGamepad = true;
+			else
+				usedGamepad = false;
 		}
 		super.update(dt, mouseState);
 	}

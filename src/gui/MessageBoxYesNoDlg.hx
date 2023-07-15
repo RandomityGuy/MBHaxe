@@ -51,7 +51,7 @@ class MessageBoxYesNoDlg extends GuiImage {
 		cancelButton.extent = new Vector(120, 94);
 		cancelButton.vertSizing = Top;
 		cancelButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
-		cancelButton.gamepadAccelerator = ["A"];
+		cancelButton.gamepadAccelerator = ["B"];
 		cancelButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			noFunc();

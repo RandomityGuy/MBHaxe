@@ -118,7 +118,7 @@ class GuiXboxButton extends GuiControl {
 		if (!disabled) {
 			if (acceleratorWasPressed
 				&& (accelerators.length != 0 && accelerators.map(x -> hxd.Key.isReleased(x)).contains(true))
-				|| Gamepad.isReleased(gamepadAccelerator)) {
+				|| Gamepad.isPressed(gamepadAccelerator)) {
 				if (this.pressedAction != null) {
 					this.pressedAction(new GuiEvent(this));
 				}
@@ -130,7 +130,7 @@ class GuiXboxButton extends GuiControl {
 		}
 		if (acceleratorWasPressed) {
 			if ((accelerators.length != 0 && accelerators.map(x -> hxd.Key.isReleased(x)).contains(true))
-				|| Gamepad.isReleased(gamepadAccelerator))
+				|| Gamepad.isPressed(gamepadAccelerator))
 				acceleratorWasPressed = false;
 		}
 		super.update(dt, mouseState);

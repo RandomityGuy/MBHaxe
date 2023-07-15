@@ -186,6 +186,10 @@ class CameraController extends Object {
 		return Util.clamp(delta, Math.PI / 10, Math.PI / 2) * 4;
 	}
 
+	function applyNonlinearScale(value:Float) {
+		return Math.pow(Math.abs(value), 3.2) * (value >= 0 ? 1 : -1);
+	}
+
 	public function startCenterCamera() {
 		if (this.marble.velocity.lengthSq() >= 81) {
 			var marbAxis = this.marble.getMarbleAxis();
@@ -214,13 +218,15 @@ class CameraController extends Object {
 
 		var lerpt = 1 - Math.pow(0.5, dt / 0.016); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
+		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), 0.25));
+		var gamepadY = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), 0.25));
+
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
-			+ Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis);
+			+ gamepadY;
 		if (Settings.gamepadSettings.invertYAxis)
 			cameraPitchDelta = -cameraPitchDelta;
-		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
-			+ Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis);
+		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0) + gamepadX;
 		if (Settings.gamepadSettings.invertXAxis)
 			cameraYawDelta = -cameraYawDelta;
 
@@ -252,7 +258,10 @@ class CameraController extends Object {
 		deltaX = deltaNew;
 
 		// Center the pitch
-		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook) && !(hasXInput || hasYInput)) {
+		if (!Settings.controlsSettings.alwaysFreeLook
+			&& !Key.isDown(Settings.controlsSettings.freelook)
+			&& !(hasXInput || hasYInput)
+			&& deltaY == 0.0) {
 			var rescaledY = deltaY;
 			if (rescaledY <= 0.0)
 				rescaledY = 0.4 - rescaledY * -0.75;

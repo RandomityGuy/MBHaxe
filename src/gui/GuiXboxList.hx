@@ -10,6 +10,7 @@ class GuiXboxList extends GuiControl {
 	var selected:Int = 0;
 
 	var buttons:Array<GuiXboxListButton> = [];
+	var usedGamepad:Bool = false;
 
 	public var active:Bool = true;
 
@@ -36,10 +37,14 @@ class GuiXboxList extends GuiControl {
 			if (!buttons[selected].selected)
 				buttons[selected].selected = true;
 			var prevSelected = selected;
-			if (Key.isPressed(Key.DOWN) || Gamepad.isPressed(["dpadDown"]))
+			if (Key.isPressed(Key.DOWN) || Gamepad.isPressed(["dpadDown"]) || (Gamepad.getAxis('analogY') > 0.75 && !usedGamepad))
 				selected++;
-			if (Key.isPressed(Key.UP) || Gamepad.isPressed(["dpadUp"]))
+			if (Key.isPressed(Key.UP) || Gamepad.isPressed(["dpadUp"]) || (Gamepad.getAxis('analogY') < -0.75 && !usedGamepad))
 				selected--;
+			if (Math.abs(Gamepad.getAxis('analogY')) > 0.75)
+				usedGamepad = true;
+			else
+				usedGamepad = false;
 			if (selected < 0)
 				selected = buttons.length - 1;
 			if (selected >= buttons.length)
