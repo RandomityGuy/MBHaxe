@@ -144,8 +144,6 @@ class PlayGui {
 		if (game == 'ultra')
 			initBlastBar();
 		initTexts();
-		if (Settings.optionsSettings.frameRateVis)
-			initFPSMeter();
 
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.showControls(this.playGuiCtrlOuter, game == 'ultra');
