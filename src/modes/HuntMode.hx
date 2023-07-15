@@ -226,6 +226,11 @@ class HuntMode extends NullMode {
 		for (gemSpawn in gemSpawnPoints) {
 			var vec = gemSpawn.position;
 			gemOctree.insert(new GemOctreeElem(vec, gemSpawn));
+			if (gemSpawn.gem != null) {
+				gemSpawn.gem.setHide(true);
+				gemSpawn.gem.pickedUp = true;
+				gemSpawn.gemBeam.setHide(true);
+			}
 		}
 
 		if (activeGemSpawnGroup != null) {
