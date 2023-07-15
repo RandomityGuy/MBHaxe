@@ -76,8 +76,6 @@ class PlayGui {
 
 	var _init:Bool;
 
-	var fpsMeter:GuiText;
-
 	var middleMessages:Array<MiddleMessage> = [];
 
 	var totalGems:Int = 0;
@@ -492,30 +490,6 @@ class PlayGui {
 		});
 	}
 
-	function initFPSMeter() {
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-
-		var fpsMeterCtrl = new GuiImage(ResourceLoader.getResource("data/ui/game/transparency-fps.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		fpsMeterCtrl.position = new Vector(544, 448);
-		fpsMeterCtrl.horizSizing = Left;
-		fpsMeterCtrl.vertSizing = Top;
-		fpsMeterCtrl.extent = new Vector(96, 32);
-
-		fpsMeter = new GuiText(bfont);
-		fpsMeter.horizSizing = Width;
-		fpsMeter.vertSizing = Height;
-		fpsMeter.position = new Vector(10, 3);
-		fpsMeter.text.textColor = 0;
-		fpsMeter.extent = new Vector(96, 32);
-		fpsMeterCtrl.addChild(fpsMeter);
-
-		playGuiCtrl.addChild(fpsMeterCtrl);
-	}
-
 	function initBlastBar() {
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
 
@@ -813,9 +787,6 @@ class PlayGui {
 	}
 
 	public function update(timeState:TimeState) {
-		if (this.fpsMeter != null) {
-			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} fps';
-		}
 		this.updateMiddleMessages(timeState.dt);
 	}
 
