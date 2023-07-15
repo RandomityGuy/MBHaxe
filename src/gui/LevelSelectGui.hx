@@ -148,7 +148,7 @@ class LevelSelectGui extends GuiImage {
 		recordButton.position = new Vector(560, 0);
 		recordButton.vertSizing = Bottom;
 		recordButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["X"];
+		recordButton.gamepadAccelerator = ["X"];
 		recordButton.pressedAction = (e) -> {
 			MarbleGame.instance.toRecord = true;
 			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
