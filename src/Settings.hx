@@ -148,12 +148,12 @@ class Settings {
 		camRight: Key.RIGHT,
 		jump: Key.SPACE,
 		powerup: Key.MOUSE_LEFT,
-		freelook: Key.MOUSE_RIGHT,
+		freelook: Key.MOUSE_MIDDLE,
 		alwaysFreeLook: true,
 		cameraSensitivity: 0.6,
 		invertYAxis: false,
 		respawn: Key.BACKSPACE,
-		blast: Key.E,
+		blast: Key.MOUSE_RIGHT,
 		rewind: Key.R,
 	};
 

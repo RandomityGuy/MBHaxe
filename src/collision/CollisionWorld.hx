@@ -119,11 +119,10 @@ class CollisionWorld {
 
 	public function removeMovingEntity(entity:CollisionEntity) {
 		this.dynamicEntities.remove(entity);
-		this.dynamicOctree.remove(entity);
-		this.dynamicEntitySet.remove(entity);
 	}
 
 	public function updateTransform(entity:CollisionEntity) {
 		this.octree.update(entity);
+		this.dynamicBVH.update();
 	}
 }

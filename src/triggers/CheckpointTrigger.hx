@@ -36,11 +36,15 @@ class CheckpointTrigger extends Trigger {
 		if (shape.length == 0)
 			return;
 		var chk:Checkpoint = cast shape[0];
+		var prevChk = @:privateAccess this.level.currentCheckpoint;
+		var issame = prevChk == chk;
 		if (this.level.saveCheckpointState(chk, this)) {
-			chk.lastActivatedTime = time.timeSinceLoad;
-			for (obj in this.level.dtsObjects) {
-				if (obj.identifier == "Checkpoint" && obj != chk)
-					cast(obj, Checkpoint).lastActivatedTime = Math.POSITIVE_INFINITY;
+			if (!issame) {
+				chk.lastActivatedTime = time.timeSinceLoad;
+				for (obj in this.level.dtsObjects) {
+					if (obj.identifier == "Checkpoint" && obj != chk)
+						cast(obj, Checkpoint).lastActivatedTime = Math.POSITIVE_INFINITY;
+				}
 			}
 		}
 	}
