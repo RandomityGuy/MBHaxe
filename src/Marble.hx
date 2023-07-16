@@ -2117,4 +2117,16 @@ class Marble extends GameObject {
 			marbledts.scale(this._prevRadius / 0.675);
 		}
 	}
+
+	override function dispose() {
+		if (this.rollSound != null)
+			this.rollSound.stop();
+		if (this.rollMegaSound != null)
+			this.rollMegaSound.stop();
+		if (this.slipSound != null)
+			this.slipSound.stop();
+		if (this.helicopterSound != null)
+			this.helicopterSound.stop();
+		super.dispose();
+	}
 }

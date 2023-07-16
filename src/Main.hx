@@ -39,8 +39,6 @@ class Main extends hxd.App {
 	override function init() {
 		super.init();
 
-		hxd.Timer.smoothFactor = 0;
-
 		s3d.renderer = new Renderer();
 		#if debug
 		s3d.checkPasses = false;
