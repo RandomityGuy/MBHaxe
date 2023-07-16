@@ -1079,7 +1079,7 @@ class MarbleWorld extends Scheduler {
 
 		if (this.outOfBounds
 			&& this.finishTime == null
-			&& (Key.isDown(Settings.controlsSettings.powerup) || Gamepad.isDown(Settings.gamepadSettings.powerup))
+			&& (Key.isDown(Settings.controlsSettings.jump) || Gamepad.isDown(Settings.gamepadSettings.jump))
 			&& !this.isWatching) {
 			this.restart();
 			return;
@@ -1550,8 +1550,10 @@ class MarbleWorld extends Scheduler {
 	/** Get the current interpolated orientation quaternion. */
 	public function getOrientationQuat(time:Float) {
 		var completion = Util.clamp((time - this.orientationChangeTime) / 0.8, 0, 1);
-		var newDt = completion / 0.4 * 2.302585124969482;
+		var newDt = completion / 0.15;
 		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
+		if (completion > 0.9)
+			smooth = Util.lerp(25.0 / 1876.0, 0, (completion - 0.9) * 10);
 		var q = this.oldOrientationQuat.clone();
 		q.slerp(q, this.newOrientationQuat, 1 - smooth);
 		return q;
@@ -1642,10 +1644,8 @@ class MarbleWorld extends Scheduler {
 
 	/** Sets a new active checkpoint. */
 	public function saveCheckpointState(shape:DtsObject, trigger:CheckpointTrigger = null) {
-		if (this.currentCheckpoint != null)
-			if (this.currentCheckpoint == shape)
-				return false;
 		var disableOob = false;
+		var isSame = this.currentCheckpoint == shape;
 		if (trigger != null) {
 			disableOob = trigger.disableOOB;
 			if (checkpointSequence > trigger.seqNum)
@@ -1665,7 +1665,9 @@ class MarbleWorld extends Scheduler {
 				this.checkpointCollectedGems.set(gem, true);
 		}
 		this.checkpointHeldPowerup = this.marble.heldPowerup;
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
+		if (!isSame) {
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
+		}
 		return true;
 	}
 
