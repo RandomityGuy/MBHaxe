@@ -1,5 +1,6 @@
 package rewind;
 
+import rewind.RewindFrame.RewindMPState;
 import shapes.AbstractBumper;
 import shapes.PowerUp;
 import src.MarbleWorld;
@@ -13,87 +14,93 @@ class RewindManager {
 
 	public var timeScale:Float = 1;
 
+	var timeAccumulator:Float = 0.0;
+	var saveResolution:Float = 0.032;
+
 	public function new(level:MarbleWorld) {
 		this.level = level;
 		this.timeScale = Settings.optionsSettings.rewindTimescale;
 	}
 
 	public function recordFrame() {
-		var rf = new RewindFrame();
-		rf.timeState = level.timeState.clone();
-		rf.marbleColliderTransform = level.marble.collider.transform.clone();
-		rf.marblePrevPosition = @:privateAccess level.marble.oldPos.clone();
-		rf.marbleNextPosition = @:privateAccess level.marble.newPos.clone();
-		rf.marbleOrientation = @:privateAccess level.marble.prevRot.clone();
-		rf.marblePhysicsAccmulator = @:privateAccess level.marble.physicsAccumulator;
-		rf.marbleVelocity = level.marble.velocity.clone();
-		rf.marbleAngularVelocity = level.marble.omega.clone();
-		rf.marblePowerup = level.marble.heldPowerup;
-		rf.bonusTime = level.bonusTime;
-		rf.gemCount = level.gemCount;
-		rf.gemStates = level.gems.map(x -> x.pickedUp);
-		rf.activePowerupStates = [@:privateAccess level.marble.helicopterEnableTime, @:privateAccess level.marble.megaMarbleEnableTime];
-		rf.currentUp = level.currentUp.clone();
-		rf.lastContactNormal = level.marble.lastContactNormal.clone();
-		rf.mpStates = level.pathedInteriors.map(x -> {
-			return {
-				curState: {
-					currentTime: x.currentTime,
-					targetTime: x.targetTime,
-					velocity: x.velocity.clone(),
-				},
-				stopped: @:privateAccess x.stopped,
-				position: @:privateAccess x.position.clone(),
-				prevPosition: @:privateAccess x.prevPosition.clone(),
-				stoppedPosition: @:privateAccess x.stoppedPosition != null ? @:privateAccess x.stoppedPosition.clone() : null,
+		timeAccumulator += level.timeState.dt;
+		while (timeAccumulator >= saveResolution) {
+			timeAccumulator -= saveResolution;
+			var rf = new RewindFrame();
+			rf.timeState = level.timeState.clone();
+			rf.marbleColliderTransform = level.marble.collider.transform.clone();
+			rf.marblePrevPosition = @:privateAccess level.marble.oldPos.clone();
+			rf.marbleNextPosition = @:privateAccess level.marble.newPos.clone();
+			rf.marbleOrientation = @:privateAccess level.marble.getRotationQuat().clone();
+			rf.marblePrevOrientation = @:privateAccess level.marble.prevRot.clone();
+			rf.marblePhysicsAccmulator = @:privateAccess level.marble.physicsAccumulator;
+			rf.marbleVelocity = level.marble.velocity.clone();
+			rf.marbleAngularVelocity = level.marble.omega.clone();
+			rf.marblePowerup = level.marble.heldPowerup;
+			rf.bonusTime = level.bonusTime;
+			rf.gemCount = level.gemCount;
+			rf.gemStates = level.gems.map(x -> x.pickedUp);
+			rf.activePowerupStates = [@:privateAccess level.marble.helicopterEnableTime, @:privateAccess level.marble.megaMarbleEnableTime];
+			rf.currentUp = level.currentUp.clone();
+			rf.lastContactNormal = level.marble.lastContactNormal.clone();
+			rf.mpStates = level.pathedInteriors.map(x -> {
+				var mpstate = new RewindMPState();
+				mpstate.currentTime = x.currentTime;
+				mpstate.targetTime = x.targetTime;
+				mpstate.velocity = x.velocity.clone();
+				mpstate.stoppedPosition = @:privateAccess x.stopped ? @:privateAccess x.stoppedPosition.clone() : null;
+				mpstate.position = @:privateAccess x.position.clone();
+				mpstate.prevPosition = @:privateAccess x.prevPosition.clone();
+				return mpstate;
+			});
+			rf.powerupStates = [];
+			rf.landMineStates = [];
+			rf.trapdoorStates = [];
+			for (dts in level.dtsObjects) {
+				if (dts is PowerUp) {
+					var pow:PowerUp = cast dts;
+					rf.powerupStates.push(pow.lastPickUpTime);
+				}
+				if (dts is Trapdoor) {
+					var td:Trapdoor = cast dts;
+					rf.trapdoorStates.push({
+						lastCompletion: td.lastCompletion,
+						lastDirection: td.lastDirection,
+						lastContactTime: td.lastContactTime
+					});
+				}
+				if (dts is AbstractBumper) {
+					var ab:AbstractBumper = cast dts;
+					rf.powerupStates.push(ab.lastContactTime);
+				}
 			}
-		});
-		rf.powerupStates = [];
-		rf.landMineStates = [];
-		rf.trapdoorStates = [];
-		for (dts in level.dtsObjects) {
-			if (dts is PowerUp) {
-				var pow:PowerUp = cast dts;
-				rf.powerupStates.push(pow.lastPickUpTime);
-			}
-			if (dts is Trapdoor) {
-				var td:Trapdoor = cast dts;
-				rf.trapdoorStates.push({
-					lastCompletion: td.lastCompletion,
-					lastDirection: td.lastDirection,
-					lastContactTime: td.lastContactTime
-				});
-			}
-			if (dts is AbstractBumper) {
-				var ab:AbstractBumper = cast dts;
-				rf.powerupStates.push(ab.lastContactTime);
-			}
+			rf.blastAmt = level.blastAmount;
+			rf.oobState = {
+				oob: level.outOfBounds,
+				timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
+			};
+			rf.checkpointState = {
+				currentCheckpoint: @:privateAccess level.currentCheckpoint,
+				currentCheckpointTrigger: @:privateAccess level.currentCheckpointTrigger,
+				checkpointBlast: @:privateAccess level.cheeckpointBlast,
+				checkpointCollectedGems: @:privateAccess level.checkpointCollectedGems.copy(),
+				checkpointHeldPowerup: @:privateAccess level.checkpointHeldPowerup,
+			};
+			rf.modeState = level.gameMode.getRewindState();
+			frames.push(rf);
 		}
-		rf.blastAmt = level.blastAmount;
-		rf.oobState = {
-			oob: level.outOfBounds,
-			timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
-		};
-		rf.checkpointState = {
-			currentCheckpoint: @:privateAccess level.currentCheckpoint,
-			currentCheckpointTrigger: @:privateAccess level.currentCheckpointTrigger,
-			checkpointBlast: @:privateAccess level.cheeckpointBlast,
-			checkpointCollectedGems: @:privateAccess level.checkpointCollectedGems.copy(),
-			checkpointHeldPowerup: @:privateAccess level.checkpointHeldPowerup,
-		};
-		rf.modeState = level.gameMode.getRewindState();
-		frames.push(rf);
 	}
 
 	public function applyFrame(rf:RewindFrame) {
+		timeAccumulator = rf.rewindAccumulator;
 		level.timeState = rf.timeState.clone();
 		@:privateAccess level.marble.oldPos.load(rf.marblePrevPosition);
 		@:privateAccess level.marble.newPos.load(rf.marbleNextPosition);
 		@:privateAccess level.marble.collider.transform.load(rf.marbleColliderTransform);
 		@:privateAccess level.marble.physicsAccumulator = rf.marblePhysicsAccmulator;
-		@:privateAccess level.marble.prevRot.load(rf.marbleOrientation);
+		@:privateAccess level.marble.prevRot.load(rf.marblePrevOrientation);
 		// level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
-		// level.marble.setRotationQuat(rf.marbleOrientation.clone());
+		level.marble.setRotationQuat(rf.marbleOrientation.clone());
 		level.marble.velocity.load(rf.marbleVelocity);
 		level.marble.omega.load(rf.marbleAngularVelocity);
 
@@ -136,13 +143,19 @@ class RewindManager {
 		level.currentUp.load(rf.currentUp);
 		level.marble.lastContactNormal.load(rf.lastContactNormal);
 		for (i in 0...rf.mpStates.length) {
-			level.pathedInteriors[i].currentTime = rf.mpStates[i].curState.currentTime;
-			level.pathedInteriors[i].targetTime = rf.mpStates[i].curState.targetTime;
-			level.pathedInteriors[i].velocity.load(rf.mpStates[i].curState.velocity);
-			@:privateAccess level.pathedInteriors[i].stopped = rf.mpStates[i].stopped;
+			level.pathedInteriors[i].currentTime = rf.mpStates[i].currentTime;
+			level.pathedInteriors[i].targetTime = rf.mpStates[i].targetTime;
+			level.pathedInteriors[i].velocity.load(rf.mpStates[i].velocity);
+			@:privateAccess level.pathedInteriors[i].stopped = rf.mpStates[i].stoppedPosition != null;
 			@:privateAccess level.pathedInteriors[i].position.load(rf.mpStates[i].position);
 			@:privateAccess level.pathedInteriors[i].prevPosition.load(rf.mpStates[i].prevPosition);
 			@:privateAccess level.pathedInteriors[i].stoppedPosition = rf.mpStates[i].stoppedPosition;
+			if (level.pathedInteriors[i].isCollideable) {
+				var tform = level.pathedInteriors[i].getAbsPos().clone();
+				tform.setPosition(rf.mpStates[i].position);
+				@:privateAccess level.pathedInteriors[i].collider.setTransform(tform);
+				level.collisionWorld.updateTransform(@:privateAccess level.pathedInteriors[i].collider);
+			}
 			// level.pathedInteriors[i].setTransform(level.pathedInteriors[i].getTransform());
 		}
 		var pstates = rf.powerupStates.copy();
@@ -209,5 +222,6 @@ class RewindManager {
 
 	public function clear() {
 		frames = [];
+		timeAccumulator = 0.0;
 	}
 }
