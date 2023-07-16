@@ -68,6 +68,8 @@ class CameraController extends Object {
 	var hasYInput:Bool = false;
 	var dt:Float;
 
+	var wasLastGamepadInput:Bool = false;
+
 	public function new(marble:Marble) {
 		super();
 		this.marble = marble;
@@ -135,6 +137,10 @@ class CameraController extends Object {
 		var factor = isTouch ? Util.lerp(1 / 25, 1 / 15,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
+		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook) && !isTouch) {
+			deltaposY = 0;
+		}
+
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
@@ -154,6 +160,11 @@ class CameraController extends Object {
 			hasXInput = true;
 			hasYInput = true;
 		}
+
+		if (!isTouch)
+			wasLastGamepadInput = false;
+		else
+			wasLastGamepadInput = true;
 
 		// var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		// var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
@@ -221,6 +232,10 @@ class CameraController extends Object {
 		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), 0.25));
 		var gamepadY = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), 0.25));
 
+		if (gamepadX != 0.0 || gamepadY != 0.0) {
+			wasLastGamepadInput = true;
+		}
+
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
 			+ gamepadY;
@@ -258,10 +273,7 @@ class CameraController extends Object {
 		deltaX = deltaNew;
 
 		// Center the pitch
-		if (!Settings.controlsSettings.alwaysFreeLook
-			&& !Key.isDown(Settings.controlsSettings.freelook)
-			&& !(hasXInput || hasYInput)
-			&& deltaY == 0.0) {
+		if (Settings.controlsSettings.controllerVerticalCenter && !(hasXInput || hasYInput) && deltaY == 0.0 && wasLastGamepadInput) {
 			var rescaledY = deltaY;
 			if (rescaledY <= 0.0)
 				rescaledY = 0.4 - rescaledY * -0.75;

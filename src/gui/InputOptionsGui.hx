@@ -100,6 +100,13 @@ class InputOptionsGui extends GuiImage {
 
 		flOpt.setCurrentOption(Settings.controlsSettings.alwaysFreeLook ? 1 : 0);
 
+		var clOpt = optionCollection.addOption(1, "Camera Recentering", ["Disabled", "Enabled"], (idx) -> {
+			Settings.controlsSettings.controllerVerticalCenter = (idx == 1);
+			return true;
+		}, 0.5, 118);
+
+		clOpt.setCurrentOption(Settings.controlsSettings.controllerVerticalCenter ? 1 : 0);
+
 		var msOpt = optionCollection.addOption(1, "Mouse Sensitivity", numberRange(10, 100, 5), (idx) -> {
 			Settings.controlsSettings.cameraSensitivity = cast(0.2 + (idx / 18.0) * (3 - 0.2));
 			return true;

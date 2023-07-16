@@ -62,6 +62,7 @@ typedef ControlsSettings = {
 	var powerup:Int;
 	var freelook:Int;
 	var alwaysFreeLook:Bool;
+	var controllerVerticalCenter:Bool;
 	var cameraSensitivity:Float;
 	var invertYAxis:Bool;
 	var respawn:Int;
@@ -150,6 +151,7 @@ class Settings {
 		powerup: Key.MOUSE_LEFT,
 		freelook: Key.MOUSE_MIDDLE,
 		alwaysFreeLook: true,
+		controllerVerticalCenter: true,
 		cameraSensitivity: 0.6,
 		invertYAxis: false,
 		respawn: Key.BACKSPACE,
@@ -362,6 +364,8 @@ class Settings {
 			#if js
 			if (optionsSettings.reflectionDetail == null)
 				optionsSettings.reflectionDetail = 2;
+			if (controlsSettings.controllerVerticalCenter == null)
+				controlsSettings.controllerVerticalCenter = true;
 			#end
 			if (optionsSettings.maxPixelRatio == 0 #if js || optionsSettings.maxPixelRatio == null #end)
 				optionsSettings.maxPixelRatio = 1;
