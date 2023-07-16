@@ -12,24 +12,43 @@ import src.DtsObject;
 import shapes.Gem;
 
 @:publicFields
+class RewindMPState {
+	var currentTime:Float;
+	var targetTime:Float;
+	var stoppedPosition:Vector;
+	var prevPosition:Vector;
+	var position:Vector;
+	var velocity:Vector;
+
+	public function new() {}
+
+	public function clone() {
+		var c = new RewindMPState();
+		c.currentTime = currentTime;
+		c.targetTime = targetTime;
+		c.stoppedPosition = stoppedPosition != null ? stoppedPosition.clone() : null;
+		c.prevPosition = prevPosition.clone();
+		c.position = position.clone();
+		c.velocity = velocity.clone();
+		return c;
+	}
+}
+
+@:publicFields
 class RewindFrame {
 	var timeState:TimeState;
+	var rewindAccumulator:Float;
 	var marbleColliderTransform:Matrix;
 	var marblePrevPosition:Vector;
 	var marbleNextPosition:Vector;
 	var marblePhysicsAccmulator:Float;
 	var marbleOrientation:Quat;
+	var marblePrevOrientation:Quat;
 	var marbleVelocity:Vector;
 	var marbleAngularVelocity:Vector;
 	var marblePowerup:PowerUp;
 	var bonusTime:Float;
-	var mpStates:Array<{
-		curState:PIState,
-		stopped:Bool,
-		stoppedPosition:Vector,
-		prevPosition:Vector,
-		position:Vector,
-	}>;
+	var mpStates:Array<RewindMPState>;
 	var gemCount:Int;
 	var gemStates:Array<Bool>;
 	var powerupStates:Array<Float>;
@@ -58,11 +77,13 @@ class RewindFrame {
 	public function clone() {
 		var c = new RewindFrame();
 		c.timeState = timeState.clone();
+		c.rewindAccumulator = rewindAccumulator;
 		c.marbleColliderTransform = marbleColliderTransform.clone();
 		c.marblePrevPosition = marblePrevPosition.clone();
 		c.marbleNextPosition = marbleNextPosition.clone();
 		c.marblePhysicsAccmulator = marblePhysicsAccmulator;
 		c.marbleOrientation = marbleOrientation.clone();
+		c.marblePrevOrientation = marblePrevOrientation.clone();
 		c.marbleVelocity = marbleVelocity.clone();
 		c.marbleAngularVelocity = marbleAngularVelocity.clone();
 		c.marblePowerup = marblePowerup;
@@ -74,20 +95,7 @@ class RewindFrame {
 		c.activePowerupStates = activePowerupStates.copy();
 		c.currentUp = currentUp.clone();
 		c.lastContactNormal = lastContactNormal.clone();
-		c.mpStates = [];
-		for (s in mpStates) {
-			c.mpStates.push({
-				curState: {
-					currentTime: s.curState.currentTime,
-					targetTime: s.curState.targetTime,
-					velocity: s.curState.velocity.clone(),
-				},
-				stopped: s.stopped,
-				position: s.position.clone(),
-				prevPosition: s.prevPosition.clone(),
-				stoppedPosition: s.stoppedPosition != null ? s.stoppedPosition.clone() : null,
-			});
-		}
+		c.mpStates = mpStates.copy();
 		c.trapdoorStates = [];
 		for (s in trapdoorStates) {
 			c.trapdoorStates.push({
