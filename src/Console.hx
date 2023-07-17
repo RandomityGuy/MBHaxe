@@ -173,6 +173,17 @@ class Console {
 				} else {
 					error("Expected one argument, got " + (cmdSplit.length - 1));
 				}
+			} else if (cmdType == "dumpMem") {
+				#if hl
+				hl.Gc.dumpMemory();
+				#end
+			} else if (cmdType == 'gcStats') {
+				#if hl
+				var gc = hl.Gc.stats();
+				log('Total: ${gc.totalAllocated}');
+				log('Allocation Count: ${gc.allocationCount}');
+				log('Memory usage: ${gc.currentMemory}');
+				#end
 			} else {
 				error("Unknown command");
 			}

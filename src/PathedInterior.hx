@@ -314,8 +314,7 @@ class PathedInterior extends InteriorObject {
 		}
 		// Offset by the position of the first marker
 		var firstPosition = this.markerData[0].position;
-		position = position.sub(firstPosition);
-		position = position.add(basePosition); // Add the base position
+		position = position.sub(firstPosition).add(basePosition);
 
 		var tmp = new Matrix();
 		var mat = Matrix.S(this.baseScale.x, this.baseScale.y, this.baseScale.z);

@@ -1,5 +1,6 @@
 package src;
 
+import h3d.col.Point;
 import collision.CollisionWorld;
 import shaders.EnvMap;
 import h3d.shader.CubeMap;
@@ -60,11 +61,11 @@ typedef GraphNode = {
 }
 
 typedef MaterialGeometry = {
-	var vertices:Array<Vector>;
-	var normals:Array<Vector>;
-	var tangents:Array<Vector>;
-	var bitangents:Array<Vector>;
-	var texNormals:Array<Vector>;
+	var vertices:Array<Point>;
+	var normals:Array<Point>;
+	var tangents:Array<Point>;
+	var bitangents:Array<Point>;
+	var texNormals:Array<Point>;
 	var uvs:Array<UV>;
 	var indices:Array<Int>;
 }
@@ -215,12 +216,12 @@ class DtsObject extends GameObject {
 							if (geometry[k].vertices.length == 0)
 								continue;
 
-							var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
-							poly.normals = geometry[k].normals.map(x -> x.toPoint());
+							var poly = new Polygon(geometry[k].vertices);
+							poly.normals = geometry[k].normals;
 							poly.uvs = geometry[k].uvs;
-							poly.tangents = geometry[k].tangents.map(x -> x.toPoint());
-							poly.bitangents = geometry[k].bitangents.map(x -> x.toPoint());
-							poly.texMatNormals = geometry[k].texNormals.map(x -> x.toPoint());
+							poly.tangents = geometry[k].tangents;
+							poly.bitangents = geometry[k].bitangents;
+							poly.texMatNormals = geometry[k].texNormals;
 
 							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
 							meshToIndex.set(obj, dts.objects.indexOf(object));
@@ -292,8 +293,8 @@ class DtsObject extends GameObject {
 						if (geometry[k].vertices.length == 0)
 							continue;
 
-						var poly = new DynamicPolygon(geometry[k].vertices.map(x -> x.toPoint()));
-						poly.normals = geometry[k].normals.map(x -> x.toPoint());
+						var poly = new DynamicPolygon(geometry[k].vertices);
+						poly.normals = geometry[k].normals;
 						poly.uvs = geometry[k].uvs;
 
 						var obj = new Mesh(poly, materials[k], skinObj);
@@ -838,19 +839,19 @@ class DtsObject extends GameObject {
 
 			return [
 				{
-					tangent: t0,
-					bitangent: b0,
-					normal: n0
+					tangent: t0.toPoint(),
+					bitangent: b0.toPoint(),
+					normal: n0.toPoint()
 				},
 				{
-					tangent: t1,
-					bitangent: b1,
-					normal: n1
+					tangent: t1.toPoint(),
+					bitangent: b1.toPoint(),
+					normal: n1.toPoint()
 				},
 				{
-					tangent: t2,
-					bitangent: b2,
-					normal: n2
+					tangent: t2.toPoint(),
+					bitangent: b2.toPoint(),
+					normal: n2.toPoint()
 				}
 			];
 		}
@@ -888,9 +889,9 @@ class DtsObject extends GameObject {
 			var tri = {
 				material: materialIndex,
 				vertices: [
-					new Vector(vertices[i3].x, vertices[i3].y, vertices[i3].z),
-					new Vector(vertices[i2].x, vertices[i2].y, vertices[i2].z),
-					new Vector(vertices[i1].x, vertices[i1].y, vertices[i1].z)
+					new Point(vertices[i3].x, vertices[i3].y, vertices[i3].z),
+					new Point(vertices[i2].x, vertices[i2].y, vertices[i2].z),
+					new Point(vertices[i1].x, vertices[i1].y, vertices[i1].z)
 				],
 				uvs: [
 					new UV(dtsMesh.uv[i3].x, dtsMesh.uv[i3].y),
@@ -898,9 +899,9 @@ class DtsObject extends GameObject {
 					new UV(dtsMesh.uv[i1].x, dtsMesh.uv[i1].y)
 				],
 				normals: [
-					new Vector(vertexNormals[i3].x, vertexNormals[i3].y, vertexNormals[i3].z),
-					new Vector(vertexNormals[i2].x, vertexNormals[i2].y, vertexNormals[i2].z),
-					new Vector(vertexNormals[i1].x, vertexNormals[i1].y, vertexNormals[i1].z)
+					new Point(vertexNormals[i3].x, vertexNormals[i3].y, vertexNormals[i3].z),
+					new Point(vertexNormals[i2].x, vertexNormals[i2].y, vertexNormals[i2].z),
+					new Point(vertexNormals[i1].x, vertexNormals[i1].y, vertexNormals[i1].z)
 				],
 				indices: [i1, i2, i3],
 				t: [],
@@ -992,11 +993,11 @@ class DtsObject extends GameObject {
 			}
 		}
 
-		var vertexBuckets = new Map<Vector, Array<{
-			refNormal:Vector,
+		var vertexBuckets = new Map<Point, Array<{
+			refNormal:Point,
 			triangles:Array<Int>,
-			normals:Array<Vector>,
-			ns:Array<Vector>
+			normals:Array<Point>,
+			ns:Array<Point>
 		}>>();
 
 		for (i in 0...triangles.length) {
@@ -1010,10 +1011,10 @@ class DtsObject extends GameObject {
 					vertexBuckets.set(v, buckets);
 				}
 				var bucket:{
-					refNormal:Vector,
+					refNormal:Point,
 					triangles:Array<Int>,
-					normals:Array<Vector>,
-					ns:Array<Vector>
+					normals:Array<Point>,
+					ns:Array<Point>
 				} = null;
 				for (j in 0...buckets.length) {
 					bucket = buckets[j];
@@ -1040,8 +1041,8 @@ class DtsObject extends GameObject {
 		for (vtex => buckets in vertexBuckets) {
 			for (i in 0...buckets.length) {
 				var bucket = buckets[i];
-				var avgNormal = new Vector();
-				var averageN = new Vector();
+				var avgNormal = new Point();
+				var averageN = new Point();
 				for (normal in bucket.normals)
 					avgNormal = avgNormal.add(normal);
 				avgNormal.scale(1 / bucket.normals.length);
