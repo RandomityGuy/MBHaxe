@@ -568,7 +568,7 @@ class Marble extends GameObject {
 						}
 					}
 					forceObjectCount++;
-					contactNormal = contactNormal.add(contact.normal);
+					contactNormal.load(contactNormal.add(contact.normal));
 					contactForce += contact.force;
 					forceObjects.push(contact.otherObject);
 				}
@@ -583,7 +583,7 @@ class Marble extends GameObject {
 					if (dot > 0)
 						a -= dot;
 
-					A = A.add(contactNormal.multiply(a / dt));
+					A.load(A.add(contactNormal.multiply(a / dt)));
 				}
 			}
 		}
@@ -596,7 +596,7 @@ class Marble extends GameObject {
 			if (currentTime - this.helicopterEnableTime < 5) {
 				airAccel *= 2;
 			}
-			A = A.add(sideDir.multiply(m.d.x).add(motionDir.multiply(m.d.y)).multiply(airAccel));
+			A.load(A.add(sideDir.multiply(m.d.x).add(motionDir.multiply(m.d.y)).multiply(airAccel)));
 		}
 		return A;
 	}
@@ -616,7 +616,7 @@ class Marble extends GameObject {
 		mv = mv.multiply(1.538461565971375);
 		var mvlen = mv.length();
 		if (mvlen > 1) {
-			mv = mv.multiply(1 / mvlen);
+			mv.scale(1 / mvlen);
 		}
 		var desiredYVelocity = this._maxRollVelocity * mv.y;
 		var desiredXVelocity = this._maxRollVelocity * mv.x;
@@ -679,18 +679,18 @@ class Marble extends GameObject {
 						var dp = this.velocity.multiply(ourMass).sub(otherMarble.velocity.multiply(theirMass));
 						var normP = contacts[i].normal.multiply(dp.dot(contacts[i].normal));
 
-						normP = normP.multiply(1 + bounce);
+						normP.scale(1 + bounce);
 
-						otherMarble.velocity = otherMarble.velocity.add(normP.multiply(1 / theirMass));
-						contacts[i].velocity = otherMarble.velocity;
+						otherMarble.velocity.load(otherMarble.velocity.add(normP.multiply(1 / theirMass)));
+						contacts[i].velocity.load(otherMarble.velocity);
 					} else {
 						if (contacts[i].velocity.length() == 0 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
-							this.velocity = this.velocity.sub(surfaceVel);
+							this.velocity.load(this.velocity.sub(surfaceVel));
 							this.velocity.normalize();
-							this.velocity = this.velocity.multiply(velLen);
+							this.velocity.scale(velLen);
 							surfaceSlide = true;
 						} else if (surfaceDot >= -this._minBounceVel) {
-							this.velocity = this.velocity.sub(surfaceVel);
+							this.velocity.load(this.velocity.sub(surfaceVel));
 						} else {
 							var restitution = this._bounceRestitution;
 							restitution *= contacts[i].restitution;
@@ -701,7 +701,7 @@ class Marble extends GameObject {
 
 							bounceEmitter(sVel.length() * restitution, contacts[i].normal);
 
-							vAtC = vAtC.sub(contacts[i].normal.multiply(contacts[i].normal.dot(sVel)));
+							vAtC.load(vAtC.sub(contacts[i].normal.multiply(contacts[i].normal.dot(sVel))));
 
 							var vAtCMag = vAtC.length();
 							if (vAtCMag != 0) {
@@ -714,11 +714,11 @@ class Marble extends GameObject {
 								var vAtCDir = vAtC.multiply(1 / vAtCMag);
 
 								var deltaOmega = contacts[i].normal.cross(vAtCDir).multiply(angVMagnitude);
-								this.omega = this.omega.add(deltaOmega);
+								this.omega.load(this.omega.add(deltaOmega));
 
-								this.velocity = this.velocity.sub(deltaOmega.cross(contacts[i].normal.multiply(_radius)));
+								this.velocity.load(this.velocity.sub(deltaOmega.cross(contacts[i].normal.multiply(_radius))));
 							}
-							this.velocity = this.velocity.add(velocityAdd);
+							this.velocity.load(this.velocity.add(velocityAdd));
 						}
 					}
 
@@ -768,7 +768,7 @@ class Marble extends GameObject {
 					soFar = -25;
 				if (soFar > 25)
 					soFar = 25;
-				this.velocity = this.velocity.add(dir.multiply(soFar));
+				this.velocity.load(this.velocity.add(dir.multiply(soFar)));
 			}
 		}
 
@@ -799,7 +799,7 @@ class Marble extends GameObject {
 				sv = 0;
 			}
 			if (sv < this._jumpImpulse) {
-				this.velocity = this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv)));
+				this.velocity.load(this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv))));
 				if (!playedSounds.contains("data/sound/jump.wav")) {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/jump.wav", ResourceLoader.getAudio, this.soundResources));
 					playedSounds.push("data/sound/jump.wav");
@@ -861,7 +861,7 @@ class Marble extends GameObject {
 					friction2 = 0;
 					if (mode != Start)
 						friction2 = this._kineticFriction * bestContact.friction;
-					Aadd = Aadd.multiply(friction2 * bestNormalForce / aAtCMag);
+					Aadd.load(Aadd.multiply(friction2 * bestNormalForce / aAtCMag));
 				}
 				A.set(A.x + Aadd.x, A.y + Aadd.y, A.z + Aadd.z);
 				a.set(a.x + aadd.x, a.y + aadd.y, a.z + aadd.z);
