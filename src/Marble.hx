@@ -963,7 +963,7 @@ class Marble extends GameObject {
 		if (rollVolume > 1)
 			rollVolume = 1;
 		if (contactPct < 0.05)
-			rollVolume = 0;
+			rollVolume = rollSound.volume / 5; // We decrease it slowly
 
 		var slipVolume = 0.0;
 		if (slipAmount > 1e-4) {
@@ -989,7 +989,7 @@ class Marble extends GameObject {
 				rollMegaSound.volume = 0;
 			}
 		}
-		slipSound.volume = slipVolume;
+		slipVolume = 0;
 
 		if (rollSound.getEffect(Pitch) == null) {
 			rollSound.addEffect(new Pitch());
@@ -1001,13 +1001,8 @@ class Marble extends GameObject {
 			}
 		}
 
-		var pitch = Util.clamp(rollVel.length() / 15, 0, 1) * 0.75 + 0.75;
+		var pitch = Util.clamp(rollVel.length() / _maxRollVelocity, 0, 1) * 0.75 + 0.75;
 
-		// #if js
-		// // Apparently audio crashes the whole thing if pitch is less than 0.2
-		// if (pitch < 0.2)
-		// 	pitch = 0.2;
-		// #end
 		var rPitch = rollSound.getEffect(Pitch);
 		rPitch.value = pitch;
 
