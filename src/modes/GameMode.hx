@@ -24,6 +24,7 @@ interface GameMode {
 	public function applyRewindState(state:RewindableState):Void;
 	public function onTimeExpire():Void;
 	public function onRestart():Void;
+	public function onRespawn():Void;
 	public function onGemPickup(gem:Gem):Void;
 
 	public function getPreloadFiles():Array<String>;
