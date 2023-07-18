@@ -1,5 +1,6 @@
 package modes;
 
+import hxd.Rand;
 import rewind.RewindableState;
 import gui.AchievementsGui;
 import modes.GameMode.ScoreType;
@@ -81,6 +82,8 @@ class HuntState implements RewindableState {
 	var activeGemSpawnGroup:Array<GemSpawnSphere>;
 	var activeGems:Array<Gem>;
 	var points:Int;
+	var rngState:Int;
+	var rngState2:Int;
 
 	public function new() {}
 
@@ -94,6 +97,8 @@ class HuntState implements RewindableState {
 		c.activeGemSpawnGroup = activeGemSpawnGroup.copy();
 		c.points = points;
 		c.activeGems = activeGems.copy();
+		c.rngState = rngState;
+		c.rngState2 = rngState2;
 		return c;
 	}
 }
@@ -109,6 +114,8 @@ class HuntMode extends NullMode {
 	var activeGems:Array<Gem> = [];
 	var gemBeams:Array<GemBeam> = [];
 	var gemToBeamMap:Map<Gem, GemBeam> = [];
+	var rng:RandomLCG = new RandomLCG(100);
+	var rng2:RandomLCG = new RandomLCG(100);
 
 	var points:Int = 0;
 
@@ -131,7 +138,7 @@ class HuntMode extends NullMode {
 	};
 
 	override function getSpawnTransform() {
-		var randomSpawn = playerSpawnPoints[Math.floor(Math.random() * playerSpawnPoints.length)];
+		var randomSpawn = playerSpawnPoints[Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1))];
 		var spawnPos = MisParser.parseVector3(randomSpawn.position);
 		spawnPos.x *= -1;
 		var spawnRot = MisParser.parseRotation(randomSpawn.rotation);
@@ -170,6 +177,7 @@ class HuntMode extends NullMode {
 			var spawnMat = spawnRot.toMatrix();
 			var up = spawnMat.up();
 			spawnPos = spawnPos.add(up.multiply(0.727843 / 3)); // 1.5 -> 0.5
+
 			return {
 				position: spawnPos,
 				orientation: spawnRot,
@@ -177,6 +185,26 @@ class HuntMode extends NullMode {
 			}
 		}
 		return null;
+	}
+
+	override function onRespawn() {
+		if (activeGemSpawnGroup.length != 0) {
+			var gemAvg = new Vector();
+			for (g in activeGemSpawnGroup) {
+				gemAvg = gemAvg.add(g.position);
+			}
+			gemAvg.scale(1 / activeGemSpawnGroup.length);
+			var delta = gemAvg.sub(level.marble.getAbsPos().getPosition());
+			var gravFrame = level.getOrientationQuat(0).toMatrix();
+			var v1 = gravFrame.front();
+			var v2 = gravFrame.right();
+			var deltaRot = new Vector(delta.dot(v2), delta.dot(v1));
+			if (deltaRot.length() >= 0.001) {
+				var ang = Math.atan2(deltaRot.x, deltaRot.y);
+				level.marble.camera.CameraYaw = ang;
+				level.marble.camera.nextCameraYaw = ang;
+			}
+		}
 	}
 
 	override public function getStartTime() {
@@ -188,6 +216,8 @@ class HuntMode extends NullMode {
 	}
 
 	override function onRestart() {
+		rng.setSeed(100);
+		rng2.setSeed(100);
 		setupGems();
 		points = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
@@ -242,9 +272,26 @@ class HuntMode extends NullMode {
 				}
 			}
 		}
+		activeGemSpawnGroup = [];
 
 		activeGems = [];
 		refillGemGroups();
+
+		var gemAvg = new Vector();
+		for (g in activeGemSpawnGroup) {
+			gemAvg = gemAvg.add(g.position);
+		}
+		gemAvg.scale(1 / activeGemSpawnGroup.length);
+		var delta = gemAvg.sub(level.marble.getAbsPos().getPosition());
+		var gravFrame = level.getOrientationQuat(0).toMatrix();
+		var v1 = gravFrame.front();
+		var v2 = gravFrame.right();
+		var deltaRot = new Vector(delta.dot(v2), delta.dot(v1));
+		if (deltaRot.length() >= 0.001) {
+			var ang = Math.atan2(deltaRot.x, deltaRot.y);
+			level.marble.camera.CameraYaw = ang;
+			level.marble.camera.nextCameraYaw = ang;
+		}
 	}
 
 	function refillGemGroups() {
@@ -320,7 +367,7 @@ class HuntMode extends NullMode {
 
 	function findGemSpawnGroup(outSpawnPoint:Vector) {
 		// Pick random spawn point
-		var rnd:Int = Std.int(Math.random() * gemSpawnPoints.length);
+		var rnd:Int = Std.int(rng.randRange(0, gemSpawnPoints.length - 1));
 		if (level.isRecording)
 			level.replay.recordRandomGenState(rnd);
 		if (level.isWatching)
@@ -394,6 +441,8 @@ class HuntMode extends NullMode {
 		s.points = points;
 		s.activeGemSpawnGroup = activeGemSpawnGroup;
 		s.activeGems = activeGems.copy();
+		s.rngState = @:privateAccess rng.seed;
+		s.rngState2 = @:privateAccess rng2.seed;
 		return s;
 	}
 
@@ -415,5 +464,7 @@ class HuntMode extends NullMode {
 			var gemBeam = gemToBeamMap.get(gem);
 			gemBeam.setHide(false);
 		}
+		rng.setSeed(s.rngState);
+		rng2.setSeed(s.rngState2);
 	}
 }

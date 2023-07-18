@@ -56,6 +56,8 @@ class NullMode implements GameMode {
 
 	public function onRestart() {}
 
+	public function onRespawn() {}
+
 	public function onGemPickup(gem:Gem) {
 		this.level.gemCount++;
 		var string:String;

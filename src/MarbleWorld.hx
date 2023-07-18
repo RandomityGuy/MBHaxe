@@ -581,6 +581,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui.setCenterText('');
 		this.clearSchedule();
 		this.outOfBounds = false;
+		this.gameMode.onRespawn();
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
