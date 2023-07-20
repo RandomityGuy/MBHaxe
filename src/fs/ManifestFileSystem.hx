@@ -27,6 +27,7 @@ import hxd.fs.FileSystem;
 import haxe.io.Encoding;
 import haxe.io.Path;
 import haxe.io.Bytes;
+import src.Settings;
 #if android
 import zygame.utils.hl.AssetsTools;
 #end
@@ -143,7 +144,7 @@ class ManifestEntry extends FileEntry {
 		}
 		#else
 		if (onReady != null)
-			if (doQuickLoad)
+			if (doQuickLoad || Settings.optionsSettings.fastLoad)
 				onReady();
 			else
 				haxe.Timer.delay(onReady, 1);
