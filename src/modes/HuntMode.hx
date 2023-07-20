@@ -20,6 +20,7 @@ import src.Mission;
 import mis.MissionElement.MissionElementSpawnSphere;
 import src.AudioManager;
 import src.ResourceLoader;
+import src.Settings;
 
 @:publicFields
 class GemSpawnSphere {
@@ -218,6 +219,10 @@ class HuntMode extends NullMode {
 	override function onRestart() {
 		rng.setSeed(100);
 		rng2.setSeed(100);
+		if (Settings.optionsSettings.huntRandom) {
+			rng.setSeed(cast Math.random() * 10000);
+			rng2.setSeed(cast Math.random() * 10000);
+		}
 		setupGems();
 		points = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
@@ -464,7 +469,9 @@ class HuntMode extends NullMode {
 			var gemBeam = gemToBeamMap.get(gem);
 			gemBeam.setHide(false);
 		}
-		rng.setSeed(s.rngState);
-		rng2.setSeed(s.rngState2);
+		if (!Settings.optionsSettings.huntRandom) {
+			rng.setSeed(s.rngState);
+			rng2.setSeed(s.rngState2);
+		}
 	}
 }

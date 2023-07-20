@@ -82,6 +82,20 @@ class MiscOptionsGui extends GuiImage {
 		}, 0.5, 118);
 		rsOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1)) * 18), 0, 18)));
 
+		var sgOpt = optionCollection.addOption(1, "Seeded Gem Hunt", ["Disabled", "Enabled"], (idx) -> {
+			Settings.optionsSettings.huntRandom = (idx == 0);
+			return true;
+		}, 0.5, 118);
+		sgOpt.setCurrentOption(Settings.optionsSettings.huntRandom ? 0 : 1);
+
+		#if hl
+		var flOpt = optionCollection.addOption(1, "Fast Loading", ["Disabled", "Enabled"], (idx) -> {
+			Settings.optionsSettings.fastLoad = (idx == 1);
+			return true;
+		}, 0.5, 118);
+		flOpt.setCurrentOption(Settings.optionsSettings.fastLoad ? 1 : 0);
+		#end
+
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
