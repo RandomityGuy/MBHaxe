@@ -147,20 +147,6 @@ class CameraController extends Object {
 		nextCameraPitch += deltaposY * factor;
 		nextCameraYaw += deltaposX * factor;
 
-		if (Math.abs(deltaposX) > 0.001)
-			hasXInput = true;
-		else
-			hasXInput = false;
-		if (Math.abs(deltaposY) > 0.001)
-			hasYInput = true;
-		else
-			hasYInput = false;
-
-		if (MarbleGame.instance.touchInput.cameraInput.pressed) {
-			hasXInput = true;
-			hasYInput = true;
-		}
-
 		// var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		// var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		// CameraYaw -= rotX;
