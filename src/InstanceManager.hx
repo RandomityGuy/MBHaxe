@@ -60,7 +60,7 @@ class InstanceManager {
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
 						var transform = instance.emptyObj.getAbsPos();
-						minfo.meshbatch.shadersChanged = true;
+						// minfo.meshbatch.shadersChanged = true;
 						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						minfo.meshbatch.setTransform(transform);
@@ -78,7 +78,7 @@ class InstanceManager {
 						minfo.transparencymeshbatch.material.blendMode = Alpha;
 						// minfo.transparencymeshbatch.material.color.a = instance.gameObject.currentOpacity;
 						// minfo.transparencymeshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						minfo.transparencymeshbatch.shadersChanged = true;
+						// minfo.transparencymeshbatch.shadersChanged = true;
 						minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						// minfo.transparencymeshbatch.material.mainPass.depthWrite = false;
 						// if (dtsShader != null) {
