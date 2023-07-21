@@ -196,6 +196,7 @@ class MarbleWorld extends Scheduler {
 	var _loadingLength:Int = 0;
 
 	var _resourcesLoaded:Int = 0;
+	var _cubemapNeedsUpdate:Bool = true;
 
 	var textureResources:Array<Resource<h3d.mat.Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
@@ -1137,6 +1138,8 @@ class MarbleWorld extends Scheduler {
 		if (!this.rewinding && Settings.optionsSettings.rewindEnabled)
 			this.rewindManager.recordFrame();
 
+		_cubemapNeedsUpdate = true;
+
 		this.updateTexts();
 	}
 
@@ -1145,7 +1148,8 @@ class MarbleWorld extends Scheduler {
 			asyncLoadResources();
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
-		if (this.marble != null && this.marble.cubemapRenderer != null) {
+		if (this.marble != null && this.marble.cubemapRenderer != null && _cubemapNeedsUpdate) {
+			_cubemapNeedsUpdate = false;
 			this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
 			this.marble.cubemapRenderer.render(e, 0.002);
 		}
