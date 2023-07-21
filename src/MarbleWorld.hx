@@ -592,19 +592,19 @@ class MarbleWorld extends Scheduler {
 	public function updateGameState() {
 		if (this.outOfBounds)
 			return; // We will update state manually
-		if (this.timeState.currentAttemptTime < 0.5) {
+		if (this.timeState.currentAttemptTime < 0.5 && this.finishTime == null) {
 			this.playGui.setCenterText('none');
 			this.marble.mode = Start;
 		}
-		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 2)) {
+		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 2) && this.finishTime == null) {
 			this.playGui.setCenterText('ready');
 			this.marble.mode = Start;
 		}
-		if ((this.timeState.currentAttemptTime >= 2) && (this.timeState.currentAttemptTime < 3.5)) {
+		if ((this.timeState.currentAttemptTime >= 2) && (this.timeState.currentAttemptTime < 3.5) && this.finishTime == null) {
 			this.playGui.setCenterText('set');
 			this.marble.mode = Start;
 		}
-		if ((this.timeState.currentAttemptTime >= 3.5) && (this.timeState.currentAttemptTime < 5.5)) {
+		if ((this.timeState.currentAttemptTime >= 3.5) && (this.timeState.currentAttemptTime < 5.5) && this.finishTime == null) {
 			this.playGui.setCenterText('go');
 			this.marble.mode = Play;
 		}
