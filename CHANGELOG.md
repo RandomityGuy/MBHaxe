@@ -1,3 +1,9 @@
+# 1.5.3
+This update fixes the following bugs:
+- Slightly improved marble cubemaps.
+- Fixed camera movement for varying FPS and sensitivities.
+- Fixed rolling sound bug.
+
 # 1.5.2
 - Updated Marbleland integration link to the new site.
 
