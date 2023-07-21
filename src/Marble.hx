@@ -712,7 +712,7 @@ class Marble extends GameObject {
 		if (rollVolume > 1)
 			rollVolume = 1;
 		if (contactPct < 0.05)
-			rollVolume = 0;
+			rollVolume = rollSound.volume / 5;
 
 		var slipVolume = 0.0;
 		if (slipAmount > 1e-4) {
