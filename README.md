@@ -10,7 +10,7 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ## Windows and Mac
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.9)
-### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.2)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.3)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
@@ -38,7 +38,7 @@ I chose Haxe because its a good language that can target other languages, meanin
 The `master` branch is currently for Marble Blast Platinum. 
 If you want to build Marble Blast Gold, go to the [mbg](https://github.com/RandomityGuy/MBHaxe/tree/mbg) tag
 
-Requires Haxe 4.2.2 or above
+Requires Haxe 4.3.0 or above
 You require the following Haxe libraries: 
 - heaps: The specific version located [here](https://github.com/RandomityGuy/heaps)
 - hlsdl (Obtain the haxelib version of hlsdl, then patch it with these files [here](https://github.com/RandomityGuy/hashlink/tree/master/libs/sdl)) (Hashlink/C native target)
