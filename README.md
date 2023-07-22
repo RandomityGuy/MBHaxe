@@ -1,5 +1,5 @@
 # MBHaxe
-A Haxe port of Marble Blast Gold and Platinum, name subject to change.
+A Haxe port of Marble Blast Gold, Ultra and Platinum, name subject to change.
 The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/OpenMBU) along with my own collision detection code, game logic was partially from scratch and taken with permission from [Marble Blast Web Port](https://github.com/Vanilagy/MarbleBlast).  
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H5FRTTL)
@@ -8,20 +8,30 @@ The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/Ope
 The browser port supports touch controls, meaning it can be played on mobile devices.
 ### Marble Blast Gold: [Play](https://marbleblastgold.randomityguy.me/)
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
+### Marble Blast Ultra: [Play](https://marbleblastultra.randomityguy.me/)
 ## Windows and Mac
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.10)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.3)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.0.0-mbu)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.10/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.5.3/MBHaxe-Platinum.apk)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.0.0-mbu/MBHaxe-Ultra.apk)
 
-# Why Haxe?
-I chose Haxe because its a good language that can target other languages, meaning any Haxe code can be converted and used in Python, C++, Java very easily so that nobody has to take effort in porting the code to different languages, atleast thats what my mindset was when I started it, but unfortunately because of the 3d engine I used, it only compiles to C and Javascript. You will have to isolate the engine specific features yourself if you want to use this for other programming languages.
+## Additional Features
+- Replay System: You can record your run using the built in replay system and watch it later.  
+- Rewind: You can rewind your marble by enabling rewind in the Options and holding down the rewind key (defaults to R). 
+- Controller Support: Full controller support is added to Marble Blast Ultra, with incomplete support for the rest.
+- Touch Controls: Available in the web (mobile) and android versions.
 
 # Screenshots
+<img src="https://imgur.com/lfLBKqO.png" width="640">
+<img src="https://imgur.com/DN1A2Mf.png" width="640">
+<img src="https://imgur.com/2UngOAy.png" width="640">
+<img src="https://imgur.com/Jvfip72.png" width="640">
 <img src="https://imgur.com/CS693zi.png" width="640">
 <img src="https://imgur.com/iryo0AL.png" width="640">
 <img src="https://imgur.com/vsuNqUi.png" width="640">
@@ -33,6 +43,9 @@ I chose Haxe because its a good language that can target other languages, meanin
 <img src="https://imgur.com/qn9aThu.png" width="640">
 <img src="https://imgur.com/eEfU2we.png" width="640">
 <img src="https://imgur.com/7OSISYJ.png" width="640">
+
+# Why Haxe?
+I chose Haxe because its a good language that can target other languages, meaning any Haxe code can be converted and used in Python, C++, Java very easily so that nobody has to take effort in porting the code to different languages, atleast thats what my mindset was when I started it, but unfortunately because of the 3d engine I used, it only compiles to C and Javascript. You will have to isolate the engine specific features yourself if you want to use this for other programming languages.
 
 # Build
 The `master` branch is currently for Marble Blast Platinum. 
