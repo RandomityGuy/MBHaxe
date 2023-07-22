@@ -3,6 +3,7 @@ package fs;
 import hxd.fs.LocalFileSystem;
 import src.Settings;
 
+#if hl
 class TorqueFileEntry extends LocalEntry {
 	override function load(?onReady:Void->Void):Void {
 		#if macro
@@ -17,6 +18,7 @@ class TorqueFileEntry extends LocalEntry {
 		#end
 	}
 }
+#end
 
 class TorqueFileSystem extends LocalFileSystem {
 	#if hl

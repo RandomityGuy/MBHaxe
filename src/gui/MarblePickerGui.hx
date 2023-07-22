@@ -302,6 +302,7 @@ class MarblePickerGui extends GuiImage {
 		mbOpt.position = new Vector(380, yPos);
 		mbOpt.extent = new Vector(815, 94);
 		mbOpt.setCurrentOption(Settings.optionsSettings.marbleIndex);
+		var curToken = 0;
 		mbOpt.onChangeFunc = (idx) -> {
 			var selectedMarble = marbleData[idx];
 			Settings.optionsSettings.marbleIndex = idx;
@@ -309,9 +310,12 @@ class MarblePickerGui extends GuiImage {
 			Settings.optionsSettings.marbleSkin = selectedMarble.skin;
 			Settings.optionsSettings.marbleModel = selectedMarble.dts;
 			Settings.optionsSettings.marbleShader = selectedMarble.shader;
+			var changeToken = curToken++;
 			ResourceLoader.load(Settings.optionsSettings.marbleModel).entry.load(() -> {
 				@:privateAccess MarbleGame.instance.previewWorld.removeMarble(myMarb);
 				@:privateAccess MarbleGame.instance.previewWorld.spawnMarble(marb -> {
+					if (changeToken + 1 != curToken)
+						return;
 					var spawnPos = @:privateAccess MarbleGame.instance.scene.camera.pos.add(new Vector(0, 1, 1));
 					var velAdd = new Vector((1 - 2 * Math.random()) * 2, (1 - 2 * Math.random()) * 1.5, (1 - 2 * Math.random()) * 1);
 					velAdd = velAdd.add(new Vector(0, 3, 0));

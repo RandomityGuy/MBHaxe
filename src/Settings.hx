@@ -367,10 +367,10 @@ class Settings {
 				optionsSettings.reflectionDetail = 2;
 			if (controlsSettings.controllerVerticalCenter == null)
 				controlsSettings.controllerVerticalCenter = true;
-			if (controlsSettings.huntRandom == null)
-				controlsSettings.huntRandom = false;
-			if (controlsSettings.fastLoad == null)
-				controlsSettings.fastLoad = false;
+			if (optionsSettings.huntRandom == null)
+				optionsSettings.huntRandom = false;
+			if (optionsSettings.fastLoad == null)
+				optionsSettings.fastLoad = false;
 			#end
 			if (optionsSettings.maxPixelRatio == 0 #if js || optionsSettings.maxPixelRatio == null #end)
 				optionsSettings.maxPixelRatio = 1;
