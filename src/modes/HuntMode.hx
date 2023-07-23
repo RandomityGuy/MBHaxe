@@ -418,6 +418,8 @@ class HuntMode extends NullMode {
 		level.finishYaw = level.marble.camera.CameraYaw;
 		level.finishPitch = level.marble.camera.CameraPitch;
 		level.displayAlert("Congratulations! You've finished!");
+		level.cancel(@:privateAccess level.oobSchedule);
+		level.cancel(@:privateAccess level.oobSchedule2);
 		if (!level.isWatching) {
 			var notifies = AchievementsGui.check();
 			var delay = 5.0;
