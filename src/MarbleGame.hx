@@ -53,6 +53,7 @@ class MarbleGame {
 	var console:ConsoleDlg;
 
 	var _mouseWheelDelta:Float;
+	var _exitingToMenu:Bool = false;
 
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
 		Console.log("Initializing the game...");
@@ -289,7 +290,12 @@ class MarbleGame {
 			#end
 		} else {
 			var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
-			canvas.setContent(pmg);
+			if (_exitingToMenu) {
+				_exitingToMenu = false;
+				canvas.setContent(new MainMenuGui());
+			} else {
+				canvas.setContent(pmg);
+			}
 		}
 
 		Settings.save();

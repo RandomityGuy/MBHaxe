@@ -99,8 +99,8 @@ class ExitGameDlg extends GuiImage {
 		btnList.addButton(4, "Main Menu", (evt) -> {
 			MarbleGame.canvas.pushDialog(new MessageBoxYesNoDlg("Are you sure you want to exit this level?  You will lose your current level progress.",
 				() -> {
+					MarbleGame.instance._exitingToMenu = true;
 					yesFunc(btnList);
-					MarbleGame.canvas.setContent(new MainMenuGui());
 				}, () -> {}));
 		});
 	}
