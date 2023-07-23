@@ -25,7 +25,7 @@ new SimGroup(MissionGroup) {
       rotation = "1 0 0 0";
       scale = "1 1 1";
       hidden = "0";
-      materialList = "~/data/skies/sky_intermediate.dml";
+      materialList = "~/data/skies/sky_advanced.dml";
       cloudHeightPer[0] = "0";
       cloudHeightPer[1] = "0";
       cloudHeightPer[2] = "0";
