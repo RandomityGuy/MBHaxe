@@ -12,14 +12,14 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ## Windows and Mac
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.10)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.3)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.0.0-mbu)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.0.1-mbu)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.10/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.5.3/MBHaxe-Platinum.apk)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.0.0-mbu/MBHaxe-Ultra.apk)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.0.1-mbu/MBHaxe-Ultra.apk)
 
 ## Additional Features
 - Replay System: You can record your run using the built in replay system and watch it later.  
@@ -49,7 +49,8 @@ I chose Haxe because its a good language that can target other languages, meanin
 
 # Build
 The `master` branch is currently for Marble Blast Platinum. 
-If you want to build Marble Blast Gold, go to the [mbg](https://github.com/RandomityGuy/MBHaxe/tree/mbg) tag
+If you want to build Marble Blast Ultra, go to the [mbu-port](https://github.com/RandomityGuy/MBHaxe/tree/mbu-port) branch.    
+If you want to build Marble Blast Gold, go to the [mbg](https://github.com/RandomityGuy/MBHaxe/tree/mbg) branch.  
 
 Requires Haxe 4.3.0 or above
 You require the following Haxe libraries: 
