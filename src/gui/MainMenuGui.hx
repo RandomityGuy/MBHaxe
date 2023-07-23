@@ -32,6 +32,8 @@ class MainMenuGui extends GuiImage {
 
 		var scene2d = MarbleGame.canvas.scene2d;
 
+		MarbleGame.instance.toRecord = false;
+
 		var offsetX = (scene2d.width - 1280) / 2;
 		var offsetY = (scene2d.height - 720) / 2;
 
