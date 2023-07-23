@@ -281,6 +281,11 @@ class PathedInterior extends InteriorObject {
 		}
 		if (m2 == null)
 			m2 = m1;
+		if (i == this.markerData.length && currentEndTime < time) {
+			m1 = m2;
+			m2 = this.markerData[0];
+			currentEndTime += m1.msToNext;
+		}
 
 		var m1Time = currentEndTime - m1.msToNext;
 		var m2Time = currentEndTime;
