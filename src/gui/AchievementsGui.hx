@@ -10,6 +10,7 @@ import src.MissionList;
 
 class AchievementsGui extends GuiImage {
 	var innerCtrl:GuiControl;
+	var achievementsWnd:GuiImage;
 
 	public function new(isPause:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
@@ -45,12 +46,12 @@ class AchievementsGui extends GuiImage {
 		innerCtrl.vertSizing = Height;
 		this.addChild(innerCtrl);
 
-		var achievementsWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/achievementWindow.png", ResourceLoader.getImage, this.imageResources)
+		achievementsWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/achievementWindow.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
-		achievementsWnd.horizSizing = Center;
-		achievementsWnd.vertSizing = Center;
-		achievementsWnd.position = new Vector(25, 58);
-		achievementsWnd.extent = new Vector(600, 480);
+		achievementsWnd.horizSizing = Right;
+		achievementsWnd.vertSizing = Bottom;
+		achievementsWnd.position = new Vector(innerCtrl.extent.x / 2 + 25, innerCtrl.extent.y / 3);
+		achievementsWnd.extent = new Vector(640, 480);
 		innerCtrl.addChild(achievementsWnd);
 
 		function imgLoader(path:String) {
@@ -318,6 +319,7 @@ class AchievementsGui extends GuiImage {
 		var subY = 480 - (height - offsetY) * 480 / height;
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		achievementsWnd.position = new Vector(innerCtrl.extent.x / 2 + 25, innerCtrl.extent.y / 3);
 
 		super.onResize(width, height);
 	}
