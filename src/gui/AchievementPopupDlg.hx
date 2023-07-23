@@ -18,8 +18,8 @@ class AchievementPopupDlg extends GuiControl {
 
 		var popup = new GuiImage(ResourceLoader.getResource('data/ui/achievement/${id}.png', ResourceLoader.getImage, this.imageResources).toTile());
 		popup.horizSizing = Center;
-		popup.vertSizing = Bottom;
-		popup.position = new Vector(70, 465);
+		popup.vertSizing = Top;
+		popup.position = new Vector(70, 225);
 		popup.extent = new Vector(477, 90);
 		this.addChild(popup);
 	}

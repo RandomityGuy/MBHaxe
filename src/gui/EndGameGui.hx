@@ -68,9 +68,9 @@ class EndGameGui extends GuiImage {
 		innerCtrl.addChild(rootTitle);
 
 		endGameWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/endGameWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
-		endGameWnd.horizSizing = Left;
-		endGameWnd.vertSizing = Top;
-		endGameWnd.position = new Vector(80 - offsetX, 150 - offsetY);
+		endGameWnd.horizSizing = Right;
+		endGameWnd.vertSizing = Bottom;
+		endGameWnd.position = new Vector(720, 420);
 		endGameWnd.extent = new Vector(336, 150);
 		innerCtrl.addChild(endGameWnd);
 
@@ -181,7 +181,6 @@ class EndGameGui extends GuiImage {
 		var subY = 480 - (height - offsetY) * 480 / height;
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
-		endGameWnd.position = new Vector(80 - offsetX, 170 - offsetY);
 
 		super.onResize(width, height);
 	}

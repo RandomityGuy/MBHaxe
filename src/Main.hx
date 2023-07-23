@@ -45,7 +45,9 @@ class Main extends hxd.App {
 		#if (hl && !android)
 		hl.UI.closeConsole();
 		#end
+
 		#if js
+		Window.getInstance().useScreenPixels = false;
 		var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // js.Browser.window.devicePixelRatio;
 		s2d.scaleMode = Zoom(zoomRatio);
 		#end
