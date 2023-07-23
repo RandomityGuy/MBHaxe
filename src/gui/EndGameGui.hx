@@ -118,8 +118,8 @@ class EndGameGui extends GuiImage {
 
 		var rating = calcRating(score * 1000, mission.qualifyTime * 1000, mission.goldTime * 1000, Std.parseInt(mission.missionInfo.difficulty));
 
-		var myScore = {name: "Player", time: score};
-		Settings.saveScore(mission.path, myScore, scoreType);
+		// var myScore = {name: "Player", time: score};
+		// Settings.saveScore(mission.path, myScore, scoreType);
 
 		var scoreData:Array<Score> = Settings.getScores(mission.path);
 		while (scoreData.length < 1) {

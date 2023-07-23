@@ -1418,6 +1418,11 @@ class MarbleWorld extends Scheduler {
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
 			if (!this.isWatching) {
+				var myScore = {
+					name: "Player",
+					time: this.gameMode.getFinishScore()
+				};
+				Settings.saveScore(mission.path, myScore, this.gameMode.getScoreType());
 				var notifies = AchievementsGui.check();
 				var delay = 5.0;
 				var achDelay = 0.0;
@@ -1577,7 +1582,7 @@ class MarbleWorld extends Scheduler {
 
 			var u = v1.normalized();
 			var v = v2.normalized();
-			if (u.dot(v) == -1) {
+			if (Math.abs(u.dot(v) + 1) < hxd.Math.EPSILON) {
 				var q = new Quat();
 				var o = orthogonal(u).normalized();
 				q.x = o.x;
