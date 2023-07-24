@@ -421,6 +421,11 @@ class HuntMode extends NullMode {
 		level.cancel(@:privateAccess level.oobSchedule);
 		level.cancel(@:privateAccess level.oobSchedule2);
 		if (!level.isWatching) {
+			var myScore = {
+				name: "Player",
+				time: getFinishScore()
+			};
+			Settings.saveScore(level.path, myScore, getScoreType());
 			var notifies = AchievementsGui.check();
 			var delay = 5.0;
 			var achDelay = 0.0;
