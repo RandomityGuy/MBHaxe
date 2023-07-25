@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.fs.BytesFileSystem.BytesFileEntry;
 import src.Marbleland;
 import src.Mission;
 import hxd.BitmapData;
@@ -76,11 +77,15 @@ class ReplayCenterGui extends GuiImage {
 		var replayList = [];
 		sys.FileSystem.createDirectory(haxe.io.Path.join([Settings.settingsDir, "data", "replays"]));
 		var replayPath = haxe.io.Path.join([Settings.settingsDir, "data", "replays",]);
-		var replayFiles = ResourceLoader.fileSystem.dir(replayPath);
+		var replayFiles = sys.FileSystem.readDirectory(replayPath);
 		for (replayFile in replayFiles) {
-			if (replayFile.extension == "mbr") {
+			var extension = haxe.io.Path.extension(replayFile);
+			if (extension == "mbr") {
 				var replayF = new Replay(null);
-				if (replayF.readHeader(replayFile.getBytes(), replayFile))
+				var fullpath = haxe.io.Path.join([Settings.settingsDir, "data", "replays", replayFile]);
+				var replayBytes = sys.io.File.getBytes(fullpath);
+				var fe = new BytesFileEntry(fullpath, replayBytes);
+				if (replayF.readHeader(replayBytes, fe))
 					replayList.push(replayF);
 			}
 		}
