@@ -425,7 +425,7 @@ class HuntMode extends NullMode {
 				name: "Player",
 				time: getFinishScore()
 			};
-			Settings.saveScore(level.path, myScore, getScoreType());
+			Settings.saveScore(level.mission.path, myScore, getScoreType());
 			var notifies = AchievementsGui.check();
 			var delay = 5.0;
 			var achDelay = 0.0;
