@@ -8,6 +8,7 @@ import gui.GuiControl;
 import src.MarbleGame;
 import src.Settings;
 import touch.TouchInput.TouchEventState;
+import src.Util;
 
 class CameraInput {
 	var identifier:Int = -1;
@@ -89,7 +90,7 @@ class CameraInput {
 						inpY = 0;
 				}
 
-				MarbleGame.instance.world.marble.camera.orbit(inpX, inpY, true);
+				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(inpX), applyNonlinearScale(inpY), true);
 				prevMouse.x = e.relX;
 				prevMouse.y = e.relY;
 			}
@@ -106,6 +107,11 @@ class CameraInput {
 			pressed = false;
 			this.identifier = -1;
 		}
+	}
+
+	function applyNonlinearScale(value:Float) {
+		var clamped = Util.clamp(value, -10, 10);
+		return Math.abs(clamped) < 3 ? Math.pow(Math.abs(clamped / 2), 2.7) * (clamped >= 0 ? 1 : -1) : clamped;
 	}
 
 	// public function update(touchState:TouchEventState, joycam:Bool) {
