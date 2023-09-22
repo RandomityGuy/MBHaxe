@@ -79,6 +79,10 @@ class CameraInput {
 				if (jumpcam) {
 					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
+				if (Math.abs(delta.x) < 0.05)
+					delta.x = 0;
+				if (Math.abs(delta.y) < 0.05)
+					delta.y = 0;
 				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(delta.x / scaleFactor), applyNonlinearScale(delta.y / scaleFactor), true);
 				prevMouse.x = e.relX;
 				prevMouse.y = e.relY;
