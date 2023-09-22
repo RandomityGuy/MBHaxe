@@ -1716,13 +1716,6 @@ class Marble extends GameObject {
 				}
 			}
 
-			if (this.controllable && this.prevPos != null) {
-				var tempTimeState = timeState.clone();
-				tempState.currentAttemptTime = passedTime;
-				tempState.dt = timeStep;
-				this.level.callCollisionHandlers(cast this, tempTimeState, pos, newPos, rot, quat);
-			}
-
 			if (contacts.length != 0)
 				contactTime += timeStep;
 
@@ -1750,6 +1743,13 @@ class Marble extends GameObject {
 		this.queuedContacts = [];
 
 		newPos = this.collider.transform.getPosition();
+
+		if (this.controllable && this.prevPos != null) {
+			var tempTimeState = timeState.clone();
+			tempTimeState.currentAttemptTime = passedTime;
+			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
+		}
+
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 	}
 
