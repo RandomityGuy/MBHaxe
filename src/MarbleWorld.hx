@@ -1279,21 +1279,22 @@ class MarbleWorld extends Scheduler {
 		this.gameMode.onGemPickup(gem);
 	}
 
-	public function callCollisionHandlers(marble:Marble, timeState:TimeState, start:Vector, end:Vector, startQuat:Quat, endQuat:Quat) {
+	public function callCollisionHandlers(marble:Marble, timeState:TimeState, start:Vector, end:Vector) {
 		var expansion = marble._radius + 0.2;
 		var minP = new Vector(Math.min(start.x, end.x) - expansion, Math.min(start.y, end.y) - expansion, Math.min(start.z, end.z) - expansion);
 		var maxP = new Vector(Math.max(start.x, end.x) + expansion, Math.max(start.y, end.y) + expansion, Math.max(start.z, end.z) + expansion);
 		var box = Bounds.fromPoints(minP.toPoint(), maxP.toPoint());
 
-		var marbleHitbox = new Bounds();
-		marbleHitbox.addSpherePos(0, 0, 0, marble._radius);
-		marbleHitbox.transform(startQuat.toMatrix());
-		marbleHitbox.transform(endQuat.toMatrix());
-		marbleHitbox.offset(end.x, end.y, end.z);
+		// var marbleHitbox = new Bounds();
+		// marbleHitbox.addSpherePos(0, 0, 0, marble._radius);
+		// marbleHitbox.transform(startQuat.toMatrix());
+		// marbleHitbox.transform(endQuat.toMatrix());
+		// marbleHitbox.offset(end.x, end.y, end.z);
 
 		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
 		// var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
-		var contacts = marble.contactEntities;
+		// var contacts = marble.contactEntities;
+		var contacts = this.collisionWorld.boundingSearch(box);
 		var inside = [];
 
 		for (contact in contacts) {
@@ -1301,7 +1302,7 @@ class MarbleWorld extends Scheduler {
 				if (contact.go is DtsObject) {
 					var shape:DtsObject = cast contact.go;
 
-					if (contact.boundingBox.collide(marbleHitbox)) {
+					if (contact.boundingBox.collide(box)) {
 						shape.onMarbleInside(timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
@@ -1314,7 +1315,7 @@ class MarbleWorld extends Scheduler {
 					var trigger:Trigger = cast contact.go;
 					var triggeraabb = trigger.collider.boundingBox;
 
-					if (triggeraabb.collide(marbleHitbox)) {
+					if (triggeraabb.collide(box)) {
 						trigger.onMarbleInside(timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
@@ -1334,7 +1335,7 @@ class MarbleWorld extends Scheduler {
 		}
 
 		if (this.finishTime == null && this.endPad != null) {
-			if (marbleHitbox.collide(this.endPad.finishBounds)) {
+			if (box.collide(this.endPad.finishBounds)) {
 				var padUp = this.endPad.getAbsPos().up();
 				padUp = padUp.multiply(10);
 
