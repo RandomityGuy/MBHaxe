@@ -1334,6 +1334,8 @@ class Marble extends GameObject {
 			}
 		}
 
+		var oldPos = this.getAbsPos().getPosition().clone();
+
 		do {
 			if (timeRemaining <= 0)
 				break;
@@ -1483,13 +1485,6 @@ class Marble extends GameObject {
 				this.heldPowerup = null;
 			}
 
-			if (this.controllable && this.prevPos != null) {
-				var tempTimeState = timeState.clone();
-				tempState.currentAttemptTime = passedTime;
-				tempState.dt = timeStep;
-				this.level.callCollisionHandlers(cast this, tempTimeState, pos, newPos, rot, quat);
-			}
-
 			if (contacts.length != 0)
 				contactTime += timeStep;
 
@@ -1515,6 +1510,14 @@ class Marble extends GameObject {
 			}
 		}
 		this.queuedContacts = [];
+
+		var newPos = this.getAbsPos().getPosition().clone();
+
+		if (this.controllable && this.prevPos != null) {
+			var tempTimeState = timeState.clone();
+			tempTimeState.currentAttemptTime = passedTime;
+			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
+		}
 
 		this.updateRollSound(contactTime / timeState.dt, this._slipAmount);
 	}
