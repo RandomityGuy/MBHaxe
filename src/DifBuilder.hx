@@ -241,8 +241,7 @@ class DifBuilder {
 	}
 
 	static var shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void> = [
-		'interiors_mbu/plate_1.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'plate.randomize.png', 'plate.normal.png', 8, new Vector(1, 1, 0.8, 1),
-			0.5),
+		'interiors_mbu/plate_1.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'plate.randomize.png', 'plate.normal.png', 8, new Vector(1, 1, 0.8, 1), 0.5),
 		'interiors_mbu/tile_beginner.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_beginner_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
@@ -280,8 +279,7 @@ class DifBuilder {
 		'interiors_mbu/edge_white_shadow.png' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white_shadow.png', 'edge.normal.png', 50,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
 		'interiors_mbu/beam.png' => (onFinish) -> createPhongMaterial(onFinish, 'beam.png', 'beam.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/beam_side.png' => (onFinish) -> createPhongMaterial(onFinish, 'beam_side.png', 'beam_side.normal.png', 12,
-			new Vector(0.8, 0.8, 0.6, 1)),
+		'interiors_mbu/beam_side.png' => (onFinish) -> createPhongMaterial(onFinish, 'beam_side.png', 'beam_side.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 		'interiors_mbu/friction_low.png' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
 			new Vector(1, 1, 1, 0.8)),
 		'interiors_mbu/friction_low.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
