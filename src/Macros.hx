@@ -56,9 +56,9 @@ class MarbleWorldMacros {
 			// Add the correct shape based on type
 			var dataBlockLowerCase = element.datablock.toLowerCase();
 			if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
-			else if (dataBlockLowerCase == "startpad")
+			else if (["startpad", "startpad_mbg", "startpad_mbp"].contains(dataBlockLowerCase))
 				shape = new StartPad();
-			else if (dataBlockLowerCase == "endpad") {
+			else if (["endpad", "endpad_mbg", "endpad_mbp"].contains(dataBlockLowerCase)) {
 				shape = new EndPad();
 				if (element is MissionElementStaticShape && cast(element, MissionElementStaticShape) == endPadElement)
 					endPad = cast shape;

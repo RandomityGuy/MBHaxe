@@ -16,31 +16,18 @@ class Marbleland {
 	public static var missions:Map<Int, Mission> = [];
 
 	public static function init() {
-		Http.get('https://raw.githubusercontent.com/Vanilagy/MarbleBlast/master/src/assets/customs_gold.json', (b) -> {
-			parseMissionList(b.toString(), "gold");
+		Http.get('https://marbleblast.vaniverse.io/api/customs', (b) -> {
+			parseMissionList(b.toString());
 			Console.log('Loaded gold customs: ${goldMissions.length}');
-		}, (e) -> {});
-		Http.get('https://raw.githubusercontent.com/Vanilagy/MarbleBlast/master/src/assets/customs_ultra.json', (b) -> {
-			parseMissionList(b.toString(), "ultra");
 			Console.log('Loaded ultra customs: ${ultraMissions.length}');
-		}, (e) -> {});
-		Http.get('https://raw.githubusercontent.com/Vanilagy/MarbleBlast/master/src/assets/customs_platinum.json', (b) -> {
-			parseMissionList(b.toString(), "platinum");
 			Console.log('Loaded platinum customs: ${platinumMissions.length}');
-		}, (e) -> {});
+		}, (e) -> {
+			Console.log('Error getting custom list from marbleland.');
+		});
 	}
 
-	static function parseMissionList(s:String, game:String) {
+	static function parseMissionList(s:String) {
 		var claJson:Array<Dynamic> = Json.parse(s);
-		if (game == 'gold') {
-			claJson = claJson.filter(x -> x.modification == 'gold');
-		}
-		if (game == 'platinum') {
-			claJson = claJson.filter(x -> x.gameType == 'single' && (x.gameMode == null || x.gameMode == 'null' || x.gamemode == ''));
-		}
-		if (game == 'ultra') {
-			claJson = claJson.filter(x -> x.gameType == 'single');
-		}
 		var platDupes = new Map();
 
 		for (missionData in claJson) {
@@ -63,6 +50,8 @@ class Marbleland {
 			mission.hasEgg = missionData.hasEgg;
 			mission.isClaMission = true;
 
+			var game = missionData.modification;
+
 			if (game == 'platinum') {
 				if (platDupes.exists(mission.title + mission.description))
 					continue;
@@ -83,32 +72,27 @@ class Marbleland {
 		}
 
 		// sort according to name
-		switch (game) {
-			case 'gold':
-				goldMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
-				for (i in 0...goldMissions.length - 1) {
-					@:privateAccess goldMissions[i].next = goldMissions[i + 1];
-					goldMissions[i].index = i;
-				}
-				@:privateAccess goldMissions[goldMissions.length - 1].next = goldMissions[0];
-				goldMissions[goldMissions.length - 1].index = goldMissions.length - 1;
-			case 'platinum':
-				platinumMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
-				for (i in 0...platinumMissions.length - 1) {
-					@:privateAccess platinumMissions[i].next = platinumMissions[i + 1];
-					platinumMissions[i].index = i;
-				}
-				@:privateAccess platinumMissions[platinumMissions.length - 1].next = platinumMissions[0];
-				platinumMissions[platinumMissions.length - 1].index = platinumMissions.length - 1;
-			case 'ultra':
-				ultraMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
-				for (i in 0...ultraMissions.length - 1) {
-					@:privateAccess ultraMissions[i].next = ultraMissions[i + 1];
-					ultraMissions[i].index = i;
-				}
-				@:privateAccess ultraMissions[ultraMissions.length - 1].next = ultraMissions[0];
-				ultraMissions[ultraMissions.length - 1].index = ultraMissions.length - 1;
+		goldMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+		for (i in 0...goldMissions.length - 1) {
+			@:privateAccess goldMissions[i].next = goldMissions[i + 1];
+			goldMissions[i].index = i;
 		}
+		@:privateAccess goldMissions[goldMissions.length - 1].next = goldMissions[0];
+		goldMissions[goldMissions.length - 1].index = goldMissions.length - 1;
+		platinumMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+		for (i in 0...platinumMissions.length - 1) {
+			@:privateAccess platinumMissions[i].next = platinumMissions[i + 1];
+			platinumMissions[i].index = i;
+		}
+		@:privateAccess platinumMissions[platinumMissions.length - 1].next = platinumMissions[0];
+		platinumMissions[platinumMissions.length - 1].index = platinumMissions.length - 1;
+		ultraMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+		for (i in 0...ultraMissions.length - 1) {
+			@:privateAccess ultraMissions[i].next = ultraMissions[i + 1];
+			ultraMissions[i].index = i;
+		}
+		@:privateAccess ultraMissions[ultraMissions.length - 1].next = ultraMissions[0];
+		ultraMissions[ultraMissions.length - 1].index = ultraMissions.length - 1;
 	}
 
 	public static function getMissionImage(id:Int, cb:Image->Void) {

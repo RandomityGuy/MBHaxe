@@ -11,6 +11,7 @@ import src.ParticleSystem.ParticleData;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleWorld;
+import src.MarbleGame;
 
 final landMineParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 2,
@@ -96,6 +97,8 @@ class LandMine extends DtsObject {
 	var landMineSmokeParticleData:ParticleData;
 	var landMineSparkParticleData:ParticleData;
 
+	var light:h3d.scene.fwd.PointLight;
+
 	public function new() {
 		super();
 		dtsPath = "data/shapes/hazards/landmine.dts";
@@ -142,6 +145,10 @@ class LandMine extends DtsObject {
 			var impulse = off.normalized().multiply(strength);
 			marble.applyImpulse(impulse);
 
+			// light = new h3d.scene.fwd.PointLight(MarbleGame.instance.scene);
+			// light.setPosition(minePos.x, minePos.y, minePos.z);
+			// light.enableSpecular = false;
+
 			// for (collider in this.colliders) {
 			// 	var hull:CollisionHull = cast collider;
 			// 	hull.force = strength;
@@ -173,6 +180,19 @@ class LandMine extends DtsObject {
 		} else {
 			this.setHide(true);
 		}
+
+		// if (light != null) {
+		// 	var t = Util.clamp((timeState.timeSinceLoad - this.disappearTime) / 1.2, 0, 1);
+
+		// 	light.color = Util.lerpThreeVectors(new Vector(0.5, 0.5, 0), new Vector(0, 0, 0), t);
+		// 	var radius = Util.lerp(6, 3, t);
+		// 	light.params = new Vector(0, 1 / radius, 0);
+
+		// 	if (t >= 1) {
+		// 		light.remove();
+		// 		light = null;
+		// 	}
+		// }
 
 		var opacity = Util.clamp((timeState.timeSinceLoad - (this.disappearTime + 5)), 0, 1);
 		this.setOpacity(opacity);
