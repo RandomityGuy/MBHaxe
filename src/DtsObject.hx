@@ -1545,6 +1545,8 @@ class DtsObject extends GameObject {
 	public override function dispose() {
 		super.dispose();
 		this.level = null;
+		boundingCollider = null;
+		colliders = null;
 		this.dtsResource.release();
 	}
 }

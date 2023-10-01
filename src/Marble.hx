@@ -449,8 +449,7 @@ class Marble extends GameObject {
 
 			if (isUltra) {
 				this.rollMegaSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/mega_roll.wav", ResourceLoader.getAudio,
-					this.soundResources), this.getAbsPos().getPosition(),
-					true);
+					this.soundResources), this.getAbsPos().getPosition(), true);
 				this.rollMegaSound.volume = 0;
 			}
 
@@ -2123,5 +2122,8 @@ class Marble extends GameObject {
 		if (this.helicopterSound != null)
 			this.helicopterSound.stop();
 		super.dispose();
+		removeChildren();
+		camera = null;
+		collider = null;
 	}
 }
