@@ -1978,4 +1978,11 @@ class Marble extends GameObject {
 			marbledts.scale(this._prevRadius / 0.6666);
 		}
 	}
+
+	public override function dispose() {
+		super.dispose();
+		removeChildren();
+		camera = null;
+		collider = null;
+	}
 }

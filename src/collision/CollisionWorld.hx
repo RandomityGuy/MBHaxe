@@ -127,4 +127,18 @@ class CollisionWorld {
 			this.dynamicOctree.update(entity);
 		}
 	}
+
+	public function dispose() {
+		for (e in entities) {
+			e.dispose();
+		}
+		for (e in dynamicEntities) {
+			e.dispose();
+		}
+		octree = null;
+		entities = null;
+		dynamicEntities = null;
+		dynamicOctree = null;
+		dynamicEntitySet = null;
+	}
 }
