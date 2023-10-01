@@ -226,7 +226,8 @@ class MarbleGame {
 			world.setCursorLock(false);
 			exitGameDlg = new ExitGameDlg((sender) -> {
 				canvas.popDialog(exitGameDlg);
-				if (world.isRecording) {
+				var w = getWorld();
+				if (w.isRecording) {
 					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
 						quitMission();
 					}));
@@ -236,10 +237,12 @@ class MarbleGame {
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
 				paused = !paused;
-				world.setCursorLock(true);
+				var w = getWorld();
+				w.setCursorLock(true);
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
-				world.restart(true);
+				var w = getWorld();
+				w.restart(true);
 				// world.setCursorLock(true);
 				paused = !paused;
 			});
@@ -252,6 +255,11 @@ class MarbleGame {
 				world.setCursorLock(true);
 			}
 		}
+	}
+
+	public function getWorld() {
+		// So that we don't actually store this somewhere in any closure stack
+		return world;
 	}
 
 	public function quitMission() {

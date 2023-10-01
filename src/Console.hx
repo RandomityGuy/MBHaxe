@@ -159,6 +159,10 @@ class Console {
 				} else {
 					error("Expected one argument, got " + (cmdSplit.length - 1));
 				}
+			} else if (cmdType == "dumpmem") {
+				#if sys
+				hl.Gc.dumpMemory();
+				#end
 			} else {
 				error("Unknown command");
 			}
