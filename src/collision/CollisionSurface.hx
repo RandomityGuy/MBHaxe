@@ -151,4 +151,15 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			n: _transformedNormals[p1]
 		};
 	}
+
+	public function dispose() {
+		points = null;
+		normals = null;
+		indices = null;
+		_transformedPoints = null;
+		_transformedNormals = null;
+		edgeData = null;
+		edgeConcavities = null;
+		originalIndices = null;
+	}
 }
