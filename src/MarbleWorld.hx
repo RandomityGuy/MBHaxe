@@ -1571,8 +1571,9 @@ class MarbleWorld extends Scheduler {
 		gems = null;
 
 		sky.dispose();
-
+		sky = null;
 		instanceManager = null;
+		collisionWorld.dispose();
 		collisionWorld = null;
 		particleManager = null;
 		namedObjects = null;

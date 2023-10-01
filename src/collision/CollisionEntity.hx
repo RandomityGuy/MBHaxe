@@ -69,6 +69,15 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		// this.bvh.build();
 	}
 
+	public function dispose() {
+		for (s in this.surfaces)
+			s.dispose();
+		go = null;
+		surfaces = null;
+		bvh = null;
+		octree = null;
+	}
+
 	public function setTransform(transform:Matrix) {
 		if (this.transform.equal(transform))
 			return;

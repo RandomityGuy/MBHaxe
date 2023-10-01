@@ -1664,4 +1664,11 @@ class Marble extends GameObject {
 		this.contactEntities = [];
 		this._firstTick = true;
 	}
+
+	public override function dispose() {
+		super.dispose();
+		removeChildren();
+		camera = null;
+		collider = null;
+	}
 }
