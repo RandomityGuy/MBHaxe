@@ -991,6 +991,7 @@ class DtsObject extends GameObject {
 
 	public override function dispose() {
 		super.dispose();
+		this.level = null;
 		this.dtsResource.release();
 	}
 }

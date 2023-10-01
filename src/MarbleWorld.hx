@@ -1545,26 +1545,42 @@ class MarbleWorld extends Scheduler {
 		for (interior in this.interiors) {
 			interior.dispose();
 		}
+		interiors = null;
 		for (pathedInteriors in this.pathedInteriors) {
 			pathedInteriors.dispose();
 		}
+		pathedInteriors = null;
 		for (marble in this.marbles) {
 			marble.dispose();
 		}
+		marbles = null;
 		for (dtsObject in this.dtsObjects) {
 			dtsObject.dispose();
 		}
+		dtsObjects = null;
 		for (trigger in this.triggers) {
 			trigger.dispose();
 		}
+		triggers = null;
 		for (soundResource in this.soundResources) {
 			soundResource.release();
 		}
 		for (textureResource in this.textureResources) {
 			textureResource.release();
 		}
+		gems = null;
 
 		sky.dispose();
+
+		instanceManager = null;
+		collisionWorld = null;
+		particleManager = null;
+		namedObjects = null;
+		shapeOrTriggerInside = null;
+		shapeImmunity = null;
+		currentCheckpoint = null;
+		checkpointCollectedGems = null;
+		marble = null;
 
 		this._disposed = true;
 		AudioManager.stopAllSounds();
