@@ -17,6 +17,7 @@ import gui.Canvas;
 import src.Util;
 import src.ProfilerUI;
 import src.Gamepad;
+import src.Analytics;
 
 @:publicFields
 class MarbleGame {
@@ -155,6 +156,9 @@ class MarbleGame {
 
 		Window.getInstance().removeEventTarget(@:privateAccess Key.onEvent);
 		#end
+
+		Analytics.trackSingle("game-start");
+		Analytics.trackPlatformInfo();
 	}
 
 	public function update(dt:Float) {
@@ -220,6 +224,9 @@ class MarbleGame {
 
 	public function quitMission() {
 		world.setCursorLock(false);
+		var stats = Settings.levelStatistics[world.mission.path];
+		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
+			Settings.optionsSettings.rewindEnabled);
 		paused = false;
 		var pmg = new PlayMissionGui();
 		PlayMissionGui.currentSelectionStatic = world.mission.index;
@@ -233,6 +240,10 @@ class MarbleGame {
 
 	public function playMission(mission:Mission) {
 		canvas.clearContent();
+		if (world != null) {
+			world.dispose();
+		}
+		Analytics.trackLevelPlay(mission.title, mission.path);
 		world = new MarbleWorld(scene, scene2d, mission, toRecord);
 		toRecord = false;
 		world.init();
@@ -240,6 +251,7 @@ class MarbleGame {
 
 	public function watchMissionReplay(mission:Mission, replay:Replay) {
 		canvas.clearContent();
+		Analytics.trackSingle("replay-watch");
 		world = new MarbleWorld(scene, scene2d, mission);
 		world.replay = replay;
 		world.isWatching = true;
