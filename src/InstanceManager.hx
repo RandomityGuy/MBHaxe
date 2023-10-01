@@ -20,16 +20,25 @@ import h3d.scene.MeshBatch;
 import src.MarbleGame;
 import src.ProfilerUI;
 
-typedef MeshBatchInfo = {
+@:publicFields
+class MeshBatchInfo {
 	var instances:Array<MeshInstance>;
 	var meshbatch:MeshBatch;
-	var ?transparencymeshbatch:MeshBatch;
+	var transparencymeshbatch:MeshBatch;
 	var mesh:Mesh;
+
+	public function new() {}
 }
 
-typedef MeshInstance = {
+@:publicFields
+class MeshInstance {
 	var emptyObj:Object;
 	var gameObject:GameObject;
+
+	public function new(eo, go) {
+		this.emptyObj = eo;
+		this.gameObject = go;
+	}
 }
 
 class InstanceManager {
@@ -152,7 +161,7 @@ class InstanceManager {
 			var objs = getAllChildren(object);
 			var minfos = objects[objectMap.get(object.identifier)]; // objects.get(object.identifier);
 			for (i in 0...objs.length) {
-				minfos[i].instances.push({emptyObj: objs[i], gameObject: object});
+				minfos[i].instances.push(new MeshInstance(objs[i], object));
 			}
 		} else {
 			// First time appending the thing so bruh
@@ -161,11 +170,11 @@ class InstanceManager {
 			var minfos = [];
 			for (obj in objs) {
 				var isMesh = obj is Mesh;
-				var minfo:MeshBatchInfo = {
-					instances: [{emptyObj: obj, gameObject: object}],
-					meshbatch: isMesh ? new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene) : null,
-					mesh: isMesh ? cast obj : null
-				}
+				var minfo:MeshBatchInfo = new MeshBatchInfo();
+				minfo.instances = [new MeshInstance(obj, object)];
+				minfo.meshbatch = isMesh ? new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene) : null;
+				minfo.mesh = isMesh ? cast obj : null;
+
 				if (isMesh) {
 					var mat = cast(obj, Mesh).material;
 					var minfoshaders = [];
