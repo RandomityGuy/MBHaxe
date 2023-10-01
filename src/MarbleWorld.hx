@@ -100,6 +100,7 @@ import src.ResourceLoaderWorker;
 import haxe.io.Path;
 import src.Console;
 import src.Gamepad;
+import src.Analytics;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -1533,6 +1534,15 @@ class MarbleWorld extends Scheduler {
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
+			if (!Settings.levelStatistics.exists(mission.path)) {
+				Settings.levelStatistics.set(mission.path, {
+					oobs: 0,
+					respawns: 0,
+					totalTime: 0,
+				});
+			}
+			Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.levelStatistics[mission.path].oobs,
+				Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
 			if (!this.isWatching)
 				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
