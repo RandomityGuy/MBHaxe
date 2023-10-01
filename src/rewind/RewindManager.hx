@@ -1,5 +1,9 @@
 package rewind;
 
+import haxe.io.BytesInput;
+import haxe.io.BytesBuffer;
+import mis.MissionElement.MissionElementBase;
+import src.GameObject;
 import shapes.AbstractBumper;
 import shapes.PowerUp;
 import shapes.LandMine;
@@ -10,14 +14,24 @@ import src.Util;
 import src.Settings;
 
 class RewindManager {
-	var frames:Array<RewindFrame> = [];
+	var frameData:BytesBuffer;
+	var frameElapsedTimes:Array<Float> = [];
+	var frameDataOffsets:Array<Int> = [];
+	var frameSizes:Array<Int> = [];
+	var allocObjMap:Map<GameObject, Int> = [];
+	var allocObjs:Array<GameObject> = [];
+	var allocMeMap:Map<MissionElementBase, Int> = [];
+	var allocMes:Array<MissionElementBase> = [];
 	var level:MarbleWorld;
+	var allocId = 0;
+	var allocMeId = 0;
 
 	public var timeScale:Float = 1;
 
 	public function new(level:MarbleWorld) {
 		this.level = level;
 		this.timeScale = Settings.optionsSettings.rewindTimescale;
+		this.frameData = new BytesBuffer();
 	}
 
 	public function recordFrame() {
@@ -182,23 +196,88 @@ class RewindManager {
 	}
 
 	public function getNextRewindFrame(absTime:Float):RewindFrame {
-		if (frames.length == 0)
+		if (frameElapsedTimes.length == 0)
 			return null;
 
-		var topFrame = frames[frames.length - 1];
-		while (topFrame.timeState.currentAttemptTime > absTime) {
-			if (frames.length == 1) {
-				return frames[0];
+		var topFrame = frameElapsedTimes[frameElapsedTimes.length - 1];
+		while (topFrame > absTime) {
+			if (frameElapsedTimes.length == 1) {
+				return getFrameAtIndex(0);
 			}
-			frames.pop();
-			if (frames.length == 0)
+			popFrame();
+			if (frameElapsedTimes.length == 0)
 				return null;
-			topFrame = frames[frames.length - 1];
+			topFrame = frameElapsedTimes[frameElapsedTimes.length - 1];
 		}
-		return topFrame;
+		return getFrameAtIndex(frameElapsedTimes.length - 1);
+		// return topFrame;
+	}
+
+	function getFrameAtIndex(index:Int) {
+		var offset = frameDataOffsets[index];
+		var size = frameSizes[index];
+		#if sys
+		var frameBytes = @:privateAccess frameData.b.sub(offset, size);
+		var bi = new BytesInput(frameBytes.toBytes(size));
+		#end
+		#if js
+		var frameBytes = @:privateAccess frameData.buffer.slice(offset, offset + size);
+		var bi = new BytesInput(haxe.io.Bytes.ofData(frameBytes));
+		#end
+		var fr = new RewindFrame();
+		fr.deserialize(this, bi);
+		return fr;
+		return null;
+	}
+
+	function popFrame() {
+		frameElapsedTimes.pop();
+		var offset = frameDataOffsets[frameDataOffsets.length - 1];
+		@:privateAccess frameData.pos = offset;
+		frameDataOffsets.pop();
+		frameSizes.pop();
+	}
+
+	public function allocGO(go:GameObject) {
+		if (go == null)
+			return -1;
+		if (allocObjMap.exists(go))
+			return allocObjMap.get(go);
+		var newId = allocId++;
+		allocObjMap.set(go, newId);
+		allocObjs.push(go);
+		return newId;
+	}
+
+	public function getGO(id:Int):GameObject {
+		return allocObjs[id];
+	}
+
+	public function allocME(me:MissionElementBase) {
+		if (me == null)
+			return -1;
+		if (allocMeMap.exists(me))
+			return allocMeMap.get(me);
+		var newId = allocMeId++;
+		allocMeMap.set(me, newId);
+		allocMes.push(me);
+		return newId;
+	}
+
+	public function getME(id:Int):MissionElementBase {
+		return allocMes[id];
 	}
 
 	public function clear() {
-		frames = [];
+		frameData = new BytesBuffer(); // clear
+		frameDataOffsets = [];
+		frameElapsedTimes = [];
+		frameSizes = [];
+		allocObjs = [];
+		allocObjMap = [];
+		allocMes = [];
+		allocMeMap = [];
+		allocId = 0;
+		allocMeId = 0;
 	}
 }
