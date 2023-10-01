@@ -26,6 +26,7 @@ import src.Settings;
 import src.Console;
 import src.Debug;
 import src.Gamepad;
+import src.Analytics;
 
 @:publicFields
 class MarbleGame {
@@ -174,6 +175,9 @@ class MarbleGame {
 		scene2d.addEventListener(e -> {
 			_mouseWheelDelta = e.wheelDelta;
 		});
+
+		Analytics.trackSingle("game-start");
+		Analytics.trackPlatformInfo();
 	}
 
 	public function update(dt:Float) {
@@ -265,6 +269,9 @@ class MarbleGame {
 	public function quitMission() {
 		Console.log("Quitting mission");
 		world.setCursorLock(false);
+		var stats = Settings.levelStatistics[world.mission.path];
+		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
+			Settings.optionsSettings.rewindEnabled);
 		paused = false;
 		if (world.isWatching) {
 			#if !js
@@ -292,12 +299,14 @@ class MarbleGame {
 		if (world != null) {
 			world.dispose();
 		}
+		Analytics.trackLevelPlay(mission.title, mission.path);
 		world = new MarbleWorld(scene, scene2d, mission, toRecord);
 		world.init();
 	}
 
 	public function watchMissionReplay(mission:Mission, replay:Replay) {
 		canvas.clearContent();
+		Analytics.trackSingle("replay-watch");
 		world = new MarbleWorld(scene, scene2d, mission);
 		world.replay = replay;
 		world.isWatching = true;

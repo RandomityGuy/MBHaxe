@@ -1,6 +1,7 @@
 package src;
 
 import src.Console;
+import src.Util;
 
 typedef HttpRequest = {
 	var url:String;
@@ -8,6 +9,8 @@ typedef HttpRequest = {
 	var errCallback:String->Void;
 	var cancelled:Bool;
 	var fulfilled:Bool;
+	var post:Bool;
+	var postData:String;
 };
 
 class Http {
@@ -40,7 +43,7 @@ class Http {
 			cancellationMutex.release();
 			var http = new sys.Http(req.url);
 			http.onError = (e) -> {
-				responses.add(() -> req.errCallback(e));
+				responses.add(() -> req.errCallback(e + ":" + http.responseBytes.toString()));
 				req.fulfilled = true;
 			};
 			http.onBytes = (b) -> {
@@ -49,7 +52,12 @@ class Http {
 			};
 			hl.Gc.enable(false);
 			hl.Gc.blocking(true); // Wtf is this shit
-			http.request(false);
+			if (req.post) {
+				http.setHeader('User-Agent', 'MBHaxe/1.0 ${Util.getPlatform()}');
+				http.setHeader('Content-Type', "application/json"); // support json data only (for now)
+				http.setPostData(req.postData);
+			}
+			http.request(req.post);
 			hl.Gc.blocking(false);
 			hl.Gc.enable(true);
 		}
@@ -63,7 +71,9 @@ class Http {
 			callback: callback,
 			errCallback: errCallback,
 			cancelled: false,
-			fulfilled: false
+			fulfilled: false,
+			post: false,
+			postData: null,
 		};
 		#if sys
 		requests.add(req);
@@ -71,6 +81,35 @@ class Http {
 		#else
 		return js.Browser.window.setTimeout(() -> {
 			js.Browser.window.fetch(url).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
+		}, 75);
+		#end
+	}
+
+	// Returns HTTPRequest on sys, Int on js
+	public static function post(url:String, postData:String, callback:haxe.io.Bytes->Void, errCallback:String->Void) {
+		var req = {
+			url: url,
+			callback: callback,
+			errCallback: errCallback,
+			cancelled: false,
+			fulfilled: false,
+			post: true,
+			postData: postData
+		};
+		#if sys
+		requests.add(req);
+		return req;
+		#else
+		return js.Browser.window.setTimeout(() -> {
+			js.Browser.window.fetch(url,
+				{
+					method: "POST",
+					headers: {
+						"User-Agent": js.Browser.window.navigator.userAgent,
+						"Content-Type": "application/json",
+					},
+					body: postData
+				}).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
 		}, 75);
 		#end
 	}
