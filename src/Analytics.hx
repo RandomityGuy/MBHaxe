@@ -31,8 +31,10 @@ class Analytics {
 
 	public static function trackLevelPlay(levelName:String, levelFile:String) {
 		var p = payload("level-play", {
-			name: levelName,
-			file: levelFile
+			level: {
+				name: levelName,
+				file: levelFile
+			}
 		});
 		var json = Json.stringify(p);
 		Http.post(umami, json, (b) -> {
@@ -44,12 +46,14 @@ class Analytics {
 
 	public static function trackLevelScore(levelName:String, levelFile:String, time:Int, oobs:Int, respawns:Int, rewind:Bool) {
 		var p = payload("level-score", {
-			name: levelName,
-			file: levelFile,
-			time: time,
-			oobs: oobs,
-			respawns: respawns,
-			rewind: rewind
+			level_play: Json.stringify({
+				name: levelName,
+				file: levelFile,
+				time: time,
+				oobs: oobs,
+				respawns: respawns,
+				rewind: rewind
+			})
 		});
 		var json = Json.stringify(p);
 		Http.post(umami, json, (b) -> {
@@ -61,12 +65,14 @@ class Analytics {
 
 	public static function trackLevelQuit(levelName:String, levelFile:String, time:Int, oobs:Int, respawns:Int, rewind:Bool) {
 		var p = payload("level-quit", {
-			name: levelName,
-			file: levelFile,
-			time: time,
-			oobs: oobs,
-			respawns: respawns,
-			rewind: rewind
+			level_quit: Json.stringify({
+				name: levelName,
+				file: levelFile,
+				time: time,
+				oobs: oobs,
+				respawns: respawns,
+				rewind: rewind
+			})
 		});
 		var json = Json.stringify(p);
 		Http.post(umami, json, (b) -> {
