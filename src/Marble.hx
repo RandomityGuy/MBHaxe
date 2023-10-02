@@ -339,7 +339,7 @@ class Marble extends GameObject {
 					for (node in marbleDts.graphNodes) {
 						for (ch in node.children) {
 							var chmesh = cast(ch, Mesh);
-							var chpoly = cast(chmesh.primitive, h3d.prim.Polygon);
+							var chpoly = cast(chmesh.primitive, src.Polygon);
 							chpoly.addTangents();
 						}
 					}

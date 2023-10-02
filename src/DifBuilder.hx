@@ -22,7 +22,7 @@ import hxd.File;
 import h3d.scene.Mesh;
 import h3d.prim.UV;
 import h3d.col.Point;
-import h3d.prim.Polygon;
+import src.Polygon;
 import dif.math.Point2F;
 import dif.math.Point3F;
 import h3d.prim.BigPrimitive;
@@ -681,8 +681,8 @@ class DifBuilder {
 						uvs.push(uv1);
 					}
 					var prim = new Polygon(points);
-					prim.uvs = uvs;
-					prim.normals = normals;
+					prim.setUVs(uvs);
+					prim.setNormals(normals);
 					var material:Material;
 					var texture:Texture;
 					if (canFindTex(grp)) {
