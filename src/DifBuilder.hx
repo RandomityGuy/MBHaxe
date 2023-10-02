@@ -316,8 +316,7 @@ class DifBuilder {
 		'tile_beginner_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red', 40, new Vector(1, 1, 1, 1)),
 		'tile_beginner_red_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_beginner_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue', 40, new Vector(1, 1, 1, 1)),
-		'tile_beginner_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_beginner_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_intermediate' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '', 40, new Vector(1, 1, 1, 1)),
 		'tile_intermediate_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_intermediate_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40, new Vector(1, 1, 1, 1)),
@@ -329,8 +328,7 @@ class DifBuilder {
 		'tile_advanced' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '', 40, new Vector(1, 1, 1, 1)),
 		'tile_advanced_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_advanced_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)),
-		'tile_advanced_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_advanced_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_advanced_green' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)),
 		'tile_advanced_green_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
@@ -421,8 +419,6 @@ class DifBuilder {
 					colliderSurface.normals = [];
 					colliderSurface.indices = [];
 					colliderSurface.transformKeys = [];
-					colliderSurface.edgeData = [];
-					colliderSurface.edgeConcavities = [];
 					colliderSurface.originalIndices = [];
 					colliderSurface.originalSurfaceIndex = surfaceindex;
 
@@ -602,12 +598,12 @@ class DifBuilder {
 							}
 						}
 						if (makeCollideable) {
-							colliderSurface.points.push(new Vector(-p1.x, p1.y, p1.z));
-							colliderSurface.points.push(new Vector(-p2.x, p2.y, p2.z));
-							colliderSurface.points.push(new Vector(-p3.x, p3.y, p3.z));
-							colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
-							colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
-							colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
+							colliderSurface.addPoint(-p1.x, p1.y, p1.z);
+							colliderSurface.addPoint(-p2.x, p2.y, p2.z);
+							colliderSurface.addPoint(-p3.x, p3.y, p3.z);
+							colliderSurface.addNormal(-normal.x, normal.y, normal.z);
+							colliderSurface.addNormal(-normal.x, normal.y, normal.z);
+							colliderSurface.addNormal(-normal.x, normal.y, normal.z);
 							colliderSurface.indices.push(colliderSurface.indices.length);
 							colliderSurface.indices.push(colliderSurface.indices.length);
 							colliderSurface.indices.push(colliderSurface.indices.length);
@@ -756,54 +752,6 @@ class DifBuilder {
 
 					return vec;
 				}
-				if (makeCollideable) {
-					var time = Console.time();
-					for (colliderSurface in colliderSurfaces) {
-						var i = 0;
-						while (i < colliderSurface.indices.length) {
-							var e1e2 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 1]);
-							var e2e3 = hashEdge(colliderSurface.originalIndices[i + 1], colliderSurface.originalIndices[i + 2]);
-							var e1e3 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 2]);
-							var edgeData = 0;
-							if (difEdges.exists(e1e2)) {
-								// if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
-								edgeData |= 1;
-								// }
-								colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e2]));
-								// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e2]));
-							} else {
-								colliderSurface.edgeConcavities.push(false);
-								// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-							}
-							if (difEdges.exists(e2e3)) {
-								// if (getEdgeDot(difEdges[e2e3]) < Math.cos(Math.PI / 12)) {
-								edgeData |= 2;
-								// }
-								colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e2e3]));
-								// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e2e3]));
-								// colliderSurface.edgeDots.push(dot);
-							} else {
-								colliderSurface.edgeConcavities.push(false);
-								// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-							}
-							if (difEdges.exists(e1e3)) {
-								// if (getEdgeDot(difEdges[e1e3]) < Math.cos(Math.PI / 12)) {
-								edgeData |= 4;
-								// }
-								colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e3]));
-								// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e3]));
-								// colliderSurface.edgeDots.push(dot);
-							} else {
-								colliderSurface.edgeConcavities.push(false);
-								// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-							}
-							colliderSurface.edgeData.push(edgeData);
-							i += 3;
-						}
-					}
-					var interval = Console.time() - time;
-					Console.log('Collision build time: ${interval}');
-				}
 				var time = Console.time();
 				for (vtex => buckets in vertexBuckets) {
 					for (i in 0...buckets.length) {
@@ -845,7 +793,6 @@ class DifBuilder {
 				}
 				var interval = Console.time() - time;
 				Console.log('Normal smoothing build time: ${interval}');
-				collider.difEdgeMap = difEdges;
 			}
 			if (makeCollideable) {
 				collider.finalize();
