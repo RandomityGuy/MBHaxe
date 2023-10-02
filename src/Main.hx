@@ -1,5 +1,6 @@
 package;
 
+import src.Http;
 import hxd.Key;
 import src.Util;
 import src.ResourceLoader;
@@ -18,6 +19,7 @@ import h2d.Text;
 import h3d.Vector;
 import src.ProfilerUI;
 import src.Gamepad;
+import src.Http;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
@@ -58,6 +60,7 @@ class Main extends hxd.App {
 		#end
 
 		ResourceLoader.init(s2d, () -> {
+			Http.init();
 			Settings.init();
 			Gamepad.init();
 			AudioManager.init();

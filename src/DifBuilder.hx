@@ -167,8 +167,6 @@ class DifBuilder {
 					colliderSurface.normals = [];
 					colliderSurface.indices = [];
 					colliderSurface.transformKeys = [];
-					colliderSurface.edgeData = [];
-					colliderSurface.edgeConcavities = [];
 					colliderSurface.originalIndices = [];
 					colliderSurface.originalSurfaceIndex = surfaceindex;
 
@@ -243,12 +241,12 @@ class DifBuilder {
 							colliderSurface.friction = minfo.friction;
 							colliderSurface.restitution = minfo.restitution;
 						}
-						colliderSurface.points.push(new Vector(-p1.x, p1.y, p1.z));
-						colliderSurface.points.push(new Vector(-p2.x, p2.y, p2.z));
-						colliderSurface.points.push(new Vector(-p3.x, p3.y, p3.z));
-						colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
-						colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
-						colliderSurface.normals.push(new Vector(-normal.x, normal.y, normal.z));
+						colliderSurface.addPoint(-p1.x, p1.y, p1.z);
+						colliderSurface.addPoint(-p2.x, p2.y, p2.z);
+						colliderSurface.addPoint(-p3.x, p3.y, p3.z);
+						colliderSurface.addNormal(-normal.x, normal.y, normal.z);
+						colliderSurface.addNormal(-normal.x, normal.y, normal.z);
+						colliderSurface.addNormal(-normal.x, normal.y, normal.z);
 						colliderSurface.indices.push(colliderSurface.indices.length);
 						colliderSurface.indices.push(colliderSurface.indices.length);
 						colliderSurface.indices.push(colliderSurface.indices.length);
@@ -405,52 +403,6 @@ class DifBuilder {
 				return vec;
 			}
 
-			for (colliderSurface in colliderSurfaces) {
-				var i = 0;
-				while (i < colliderSurface.indices.length) {
-					var e1e2 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 1]);
-					var e2e3 = hashEdge(colliderSurface.originalIndices[i + 1], colliderSurface.originalIndices[i + 2]);
-					var e1e3 = hashEdge(colliderSurface.originalIndices[i], colliderSurface.originalIndices[i + 2]);
-
-					var edgeData = 0;
-					if (difEdges.exists(e1e2)) {
-						// if (getEdgeDot(difEdges[e1e2]) < Math.cos(Math.PI / 12)) {
-						edgeData |= 1;
-						// }
-						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e2]));
-						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e2]));
-					} else {
-						colliderSurface.edgeConcavities.push(false);
-						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-					}
-					if (difEdges.exists(e2e3)) {
-						// if (getEdgeDot(difEdges[e2e3]) < Math.cos(Math.PI / 12)) {
-						edgeData |= 2;
-						// }
-						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e2e3]));
-						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e2e3]));
-						// colliderSurface.edgeDots.push(dot);
-					} else {
-						colliderSurface.edgeConcavities.push(false);
-						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-					}
-					if (difEdges.exists(e1e3)) {
-						// if (getEdgeDot(difEdges[e1e3]) < Math.cos(Math.PI / 12)) {
-						edgeData |= 4;
-						// }
-						colliderSurface.edgeConcavities.push(getEdgeConcavity(difEdges[e1e3]));
-						// colliderSurface.edgeNormals.push(getEdgeNormal(difEdges[e1e3]));
-						// colliderSurface.edgeDots.push(dot);
-					} else {
-						colliderSurface.edgeConcavities.push(false);
-						// colliderSurface.edgeNormals.push(new Vector(0, 0, 0));
-					}
-
-					colliderSurface.edgeData.push(edgeData);
-					i += 3;
-				}
-			}
-
 			for (vtex => buckets in vertexBuckets) {
 				for (i in 0...buckets.length) {
 					var bucket = buckets[i];
@@ -483,7 +435,6 @@ class DifBuilder {
 				}
 			}
 
-			collider.difEdgeMap = difEdges;
 			collider.finalize();
 			itr.collider = collider;
 

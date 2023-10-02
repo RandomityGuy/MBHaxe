@@ -4,7 +4,6 @@ import haxe.Json;
 import src.Util;
 import src.Settings;
 import src.Http;
-import src.Console;
 
 typedef PayloadData = {
 	type:String,
@@ -44,14 +43,12 @@ class Analytics {
 		});
 	}
 
-	public static function trackLevelScore(levelName:String, levelFile:String, time:Int, oobs:Int, respawns:Int, rewind:Bool) {
+	public static function trackLevelScore(levelName:String, levelFile:String, time:Int, rewind:Bool) {
 		var p = payload("level-score", {
 			level_play: Json.stringify({
 				name: levelName,
 				file: levelFile,
 				time: time,
-				oobs: oobs,
-				respawns: respawns,
 				rewind: rewind
 			})
 		});
@@ -63,14 +60,12 @@ class Analytics {
 		});
 	}
 
-	public static function trackLevelQuit(levelName:String, levelFile:String, time:Int, oobs:Int, respawns:Int, rewind:Bool) {
+	public static function trackLevelQuit(levelName:String, levelFile:String, time:Int, rewind:Bool) {
 		var p = payload("level-quit", {
 			level_quit: Json.stringify({
 				name: levelName,
 				file: levelFile,
 				time: time,
-				oobs: oobs,
-				respawns: respawns,
 				rewind: rewind
 			})
 		});
@@ -103,9 +98,9 @@ class Analytics {
 				language: language(),
 				referrer: referrer(),
 				screen: screen(),
-				title: "MBHaxe Platinum",
+				title: "MBHaxe Gold",
 				url: "/",
-				website: "e6da43f0-fc6a-49cb-a4a9-4b7e7745e538",
+				website: "737bbe05-ad2e-43a5-820b-4e3014f5683e",
 				name: eventName
 			}
 		};
@@ -120,7 +115,7 @@ class Analytics {
 		return js.Browser.window.location.hostname;
 		#end
 		#if hl
-		return "marbleblast.randomityguy.me";
+		return "marbleblastgold.randomityguy.me";
 		#end
 	}
 
