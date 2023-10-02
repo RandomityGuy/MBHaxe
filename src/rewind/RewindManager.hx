@@ -279,6 +279,8 @@ class RewindManager {
 	}
 
 	public function getGO(id:Int):GameObject {
+		if (id == -1)
+			return null;
 		return allocObjs[id];
 	}
 
@@ -294,6 +296,8 @@ class RewindManager {
 	}
 
 	public function getME(id:Int):MissionElementBase {
+		if (id == -1)
+			return null;
 		return allocMes[id];
 	}
 
