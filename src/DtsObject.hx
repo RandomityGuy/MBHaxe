@@ -19,7 +19,7 @@ import hxd.FloatBuffer;
 import src.DynamicPolygon;
 import dts.Sequence;
 import h3d.scene.Mesh;
-import h3d.prim.Polygon;
+import src.Polygon;
 import h3d.prim.UV;
 import h3d.Vector;
 import h3d.Quat;
@@ -196,8 +196,8 @@ class DtsObject extends GameObject {
 								continue;
 
 							var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
-							poly.normals = geometry[k].normals.map(x -> x.toPoint());
-							poly.uvs = geometry[k].uvs;
+							poly.setNormals(geometry[k].normals.map(x -> x.toPoint()));
+							poly.setUVs(geometry[k].uvs);
 
 							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
 						}
