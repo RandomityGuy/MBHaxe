@@ -128,8 +128,13 @@ class RewindFrame {
 		var bb = new BytesOutput();
 		var framesize = 0;
 		framesize += 32; // timeState
-		framesize += 24; // marblePosition
+		framesize += 8; // rewindAcculumulator
+		framesize += 128; // marbleColliderTransform
+		framesize += 24; // marblePrevPosition
+		framesize += 24; // marbleNextPosition
+		framesize += 8; // marblePhysicsAccumulator
 		framesize += 32; // marbleOrientation
+		framesize += 32; // marblePrevOrientation
 		framesize += 24; // marbleVelocity
 		framesize += 24; // marbleAngularVelocity
 		framesize += 2; // marblePowerup
@@ -138,16 +143,19 @@ class RewindFrame {
 		framesize += 2 + gemStates.length * 1; // gemStates
 		framesize += 2 + powerupStates.length * 8; // powerupStates
 		framesize += 2 + landMineStates.length * 8; // landMineStates
-		framesize += 32; // activePowerupStates
+		framesize += 16; // activePowerupStates
 		framesize += 24; // currentUp
 		framesize += 24; // lastContactNormal
 		framesize += 2; // mpStates.length
 		for (s in mpStates) {
-			framesize += 8; // s.curState.currentTime
-			framesize += 8; // s.curState.targetTime
-			framesize += 24; // s.curState.velocity
-			framesize += 1; // s.stopped
+			framesize += 8; // s.currentTime
+			framesize += 8; // s.targetTime
+			framesize += 1; // Null<s.stoppedPosition>
+			if (s.stoppedPosition != null)
+				framesize += 24; // s.stoppedPosition
+			framesize += 24; // s.prevPosition
 			framesize += 24; // s.position
+			framesize += 24; // s.velocity
 		}
 		framesize += 2; // trapdoorStates.length
 		for (s in trapdoorStates) {
@@ -161,7 +169,7 @@ class RewindFrame {
 		framesize += 32; // oobState.timeState
 		framesize += 1; // Null<checkpointState>
 		if (checkpointState != null) {
-			framesize += 4; // checkpointState.currentCheckpoint
+			framesize += 2; // checkpointState.currentCheckpoint
 		}
 		framesize += 2; // checkpointState.currentCheckpointTrigger
 		framesize += 2; // checkpointState.checkpointCollectedGems.length
@@ -170,23 +178,48 @@ class RewindFrame {
 			framesize += 1; // checkpointState.checkpointCollectedGems[gem]
 		}
 		framesize += 2; // checkpointState.checkpointHeldPowerup
-		framesize += 1; // Null<checkpointState.checkpointUp>
-		if (checkpointState.checkpointUp != null)
-			framesize += 24; // checkpointState.checkpointUp
 		framesize += 8; // checkpointState.checkpointBlast
+		framesize += 1; // Null<modeState>
+		if (modeState != null)
+			framesize += modeState.getSize();
 		bb.prepare(framesize);
 		// Now actually write
 		bb.writeDouble(timeState.currentAttemptTime);
 		bb.writeDouble(timeState.timeSinceLoad);
 		bb.writeDouble(timeState.gameplayClock);
 		bb.writeDouble(timeState.dt);
-		bb.writeDouble(marblePosition.x);
-		bb.writeDouble(marblePosition.y);
-		bb.writeDouble(marblePosition.z);
+		bb.writeDouble(rewindAccumulator);
+		bb.writeDouble(marbleColliderTransform._11);
+		bb.writeDouble(marbleColliderTransform._12);
+		bb.writeDouble(marbleColliderTransform._13);
+		bb.writeDouble(marbleColliderTransform._14);
+		bb.writeDouble(marbleColliderTransform._21);
+		bb.writeDouble(marbleColliderTransform._22);
+		bb.writeDouble(marbleColliderTransform._23);
+		bb.writeDouble(marbleColliderTransform._24);
+		bb.writeDouble(marbleColliderTransform._31);
+		bb.writeDouble(marbleColliderTransform._32);
+		bb.writeDouble(marbleColliderTransform._33);
+		bb.writeDouble(marbleColliderTransform._34);
+		bb.writeDouble(marbleColliderTransform._41);
+		bb.writeDouble(marbleColliderTransform._42);
+		bb.writeDouble(marbleColliderTransform._43);
+		bb.writeDouble(marbleColliderTransform._44);
+		bb.writeDouble(marblePrevPosition.x);
+		bb.writeDouble(marblePrevPosition.y);
+		bb.writeDouble(marblePrevPosition.z);
+		bb.writeDouble(marbleNextPosition.x);
+		bb.writeDouble(marbleNextPosition.y);
+		bb.writeDouble(marbleNextPosition.z);
+		bb.writeDouble(marblePhysicsAccmulator);
 		bb.writeDouble(marbleOrientation.x);
 		bb.writeDouble(marbleOrientation.y);
 		bb.writeDouble(marbleOrientation.z);
 		bb.writeDouble(marbleOrientation.w);
+		bb.writeDouble(marblePrevOrientation.x);
+		bb.writeDouble(marblePrevOrientation.y);
+		bb.writeDouble(marblePrevOrientation.z);
+		bb.writeDouble(marblePrevOrientation.w);
 		bb.writeDouble(marbleVelocity.x);
 		bb.writeDouble(marbleVelocity.y);
 		bb.writeDouble(marbleVelocity.z);
@@ -210,8 +243,6 @@ class RewindFrame {
 		}
 		bb.writeDouble(activePowerupStates[0]);
 		bb.writeDouble(activePowerupStates[1]);
-		bb.writeDouble(activePowerupStates[2]);
-		bb.writeDouble(activePowerupStates[3]);
 		bb.writeDouble(currentUp.x);
 		bb.writeDouble(currentUp.y);
 		bb.writeDouble(currentUp.z);
@@ -220,15 +251,23 @@ class RewindFrame {
 		bb.writeDouble(lastContactNormal.z);
 		bb.writeInt16(mpStates.length);
 		for (s in mpStates) {
-			bb.writeDouble(s.curState.currentTime);
-			bb.writeDouble(s.curState.targetTime);
-			bb.writeDouble(s.curState.velocity.x);
-			bb.writeDouble(s.curState.velocity.y);
-			bb.writeDouble(s.curState.velocity.z);
-			bb.writeByte(s.stopped ? 1 : 0);
+			bb.writeDouble(s.currentTime);
+			bb.writeDouble(s.targetTime);
+			bb.writeByte(s.stoppedPosition == null ? 0 : 1);
+			if (s.stoppedPosition != null) {
+				bb.writeDouble(s.stoppedPosition.x);
+				bb.writeDouble(s.stoppedPosition.y);
+				bb.writeDouble(s.stoppedPosition.z);
+			}
+			bb.writeDouble(s.prevPosition.x);
+			bb.writeDouble(s.prevPosition.y);
+			bb.writeDouble(s.prevPosition.z);
 			bb.writeDouble(s.position.x);
 			bb.writeDouble(s.position.y);
 			bb.writeDouble(s.position.z);
+			bb.writeDouble(s.velocity.x);
+			bb.writeDouble(s.velocity.y);
+			bb.writeDouble(s.velocity.z);
 		}
 		bb.writeInt16(trapdoorStates.length);
 		for (s in trapdoorStates) {
@@ -246,8 +285,7 @@ class RewindFrame {
 		}
 		bb.writeByte(checkpointState.currentCheckpoint == null ? 0 : 1);
 		if (checkpointState.currentCheckpoint != null) {
-			bb.writeInt16(rm.allocGO(checkpointState.currentCheckpoint.obj));
-			bb.writeInt16(rm.allocME(checkpointState.currentCheckpoint.elem));
+			bb.writeInt16(rm.allocGO(checkpointState.currentCheckpoint));
 		}
 		bb.writeInt16(rm.allocGO(checkpointState.currentCheckpointTrigger));
 		var chkgemcount = 0;
@@ -260,18 +298,18 @@ class RewindFrame {
 			bb.writeByte(checkpointState.checkpointCollectedGems[gem] ? 1 : 0);
 		}
 		bb.writeInt16(rm.allocGO(checkpointState.checkpointHeldPowerup));
-		bb.writeByte(checkpointState.checkpointUp == null ? 0 : 1);
-		if (checkpointState.checkpointUp != null) {
-			bb.writeDouble(checkpointState.checkpointUp.x);
-			bb.writeDouble(checkpointState.checkpointUp.y);
-			bb.writeDouble(checkpointState.checkpointUp.z);
-		}
 		bb.writeDouble(checkpointState.checkpointBlast);
+		bb.writeByte(modeState == null ? 0 : 1);
+		if (modeState != null)
+			modeState.serialize(rm, bb);
 		return bb.getBytes();
 	}
 
 	public inline function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
-		marblePosition = new Vector();
+		marbleColliderTransform = new Matrix();
+		marblePrevPosition = new Vector();
+		marbleNextPosition = new Vector();
+		marblePrevOrientation = new Quat();
 		marbleOrientation = new Quat();
 		marbleVelocity = new Vector();
 		marbleAngularVelocity = new Vector();
@@ -282,13 +320,38 @@ class RewindFrame {
 		timeState.timeSinceLoad = br.readDouble();
 		timeState.gameplayClock = br.readDouble();
 		timeState.dt = br.readDouble();
-		marblePosition.x = br.readDouble();
-		marblePosition.y = br.readDouble();
-		marblePosition.z = br.readDouble();
+		rewindAccumulator = br.readDouble();
+		marbleColliderTransform._11 = br.readDouble();
+		marbleColliderTransform._12 = br.readDouble();
+		marbleColliderTransform._13 = br.readDouble();
+		marbleColliderTransform._14 = br.readDouble();
+		marbleColliderTransform._21 = br.readDouble();
+		marbleColliderTransform._22 = br.readDouble();
+		marbleColliderTransform._23 = br.readDouble();
+		marbleColliderTransform._24 = br.readDouble();
+		marbleColliderTransform._31 = br.readDouble();
+		marbleColliderTransform._32 = br.readDouble();
+		marbleColliderTransform._33 = br.readDouble();
+		marbleColliderTransform._34 = br.readDouble();
+		marbleColliderTransform._41 = br.readDouble();
+		marbleColliderTransform._42 = br.readDouble();
+		marbleColliderTransform._43 = br.readDouble();
+		marbleColliderTransform._44 = br.readDouble();
+		marblePrevPosition.x = br.readDouble();
+		marblePrevPosition.y = br.readDouble();
+		marblePrevPosition.z = br.readDouble();
+		marbleNextPosition.x = br.readDouble();
+		marbleNextPosition.y = br.readDouble();
+		marbleNextPosition.z = br.readDouble();
+		marblePhysicsAccmulator = br.readDouble();
 		marbleOrientation.x = br.readDouble();
 		marbleOrientation.y = br.readDouble();
 		marbleOrientation.z = br.readDouble();
 		marbleOrientation.w = br.readDouble();
+		marblePrevOrientation.x = br.readDouble();
+		marblePrevOrientation.y = br.readDouble();
+		marblePrevOrientation.z = br.readDouble();
+		marblePrevOrientation.w = br.readDouble();
 		marbleVelocity.x = br.readDouble();
 		marbleVelocity.y = br.readDouble();
 		marbleVelocity.z = br.readDouble();
@@ -316,8 +379,6 @@ class RewindFrame {
 		activePowerupStates = [];
 		activePowerupStates.push(br.readDouble());
 		activePowerupStates.push(br.readDouble());
-		activePowerupStates.push(br.readDouble());
-		activePowerupStates.push(br.readDouble());
 		currentUp.x = br.readDouble();
 		currentUp.y = br.readDouble();
 		currentUp.z = br.readDouble();
@@ -327,24 +388,29 @@ class RewindFrame {
 		mpStates = [];
 		var mpStates_len = br.readInt16();
 		for (i in 0...mpStates_len) {
-			var mpStates_item = {
-				curState: {
-					currentTime: 0.0,
-					targetTime: 0.0,
-					velocity: new Vector(),
-				},
-				stopped: false,
-				position: new Vector()
-			};
-			mpStates_item.curState.currentTime = br.readDouble();
-			mpStates_item.curState.targetTime = br.readDouble();
-			mpStates_item.curState.velocity.x = br.readDouble();
-			mpStates_item.curState.velocity.y = br.readDouble();
-			mpStates_item.curState.velocity.z = br.readDouble();
-			mpStates_item.stopped = br.readByte() != 0;
+			var mpStates_item = new RewindMPState();
+			mpStates_item.currentTime = br.readDouble();
+			mpStates_item.targetTime = br.readDouble();
+			mpStates_item.stoppedPosition = new Vector();
+			mpStates_item.prevPosition = new Vector();
+			mpStates_item.position = new Vector();
+			mpStates_item.velocity = new Vector();
+			if (br.readByte() != 0) {
+				mpStates_item.stoppedPosition.x = br.readDouble();
+				mpStates_item.stoppedPosition.y = br.readDouble();
+				mpStates_item.stoppedPosition.z = br.readDouble();
+			} else {
+				mpStates_item.stoppedPosition = null;
+			}
+			mpStates_item.prevPosition.x = br.readDouble();
+			mpStates_item.prevPosition.y = br.readDouble();
+			mpStates_item.prevPosition.z = br.readDouble();
 			mpStates_item.position.x = br.readDouble();
 			mpStates_item.position.y = br.readDouble();
 			mpStates_item.position.z = br.readDouble();
+			mpStates_item.velocity.x = br.readDouble();
+			mpStates_item.velocity.y = br.readDouble();
+			mpStates_item.velocity.z = br.readDouble();
 			mpStates.push(mpStates_item);
 		}
 		trapdoorStates = [];
@@ -378,13 +444,11 @@ class RewindFrame {
 			currentCheckpointTrigger: null,
 			checkpointCollectedGems: new Map<Gem, Bool>(),
 			checkpointHeldPowerup: null,
-			checkpointUp: null,
 			checkpointBlast: 0.0,
 		};
 		if (hasCheckpoint) {
 			var co = rm.getGO(br.readInt16());
-			var ce = rm.getME(br.readInt16());
-			checkpointState.currentCheckpoint = {obj: cast co, elem: ce};
+			checkpointState.currentCheckpoint = cast co;
 		}
 		checkpointState.currentCheckpointTrigger = cast rm.getGO(br.readInt16());
 		var checkpointState_checkpointCollectedGems_len = br.readInt16();
@@ -394,13 +458,11 @@ class RewindFrame {
 			checkpointState.checkpointCollectedGems.set(cast gem, c);
 		}
 		checkpointState.checkpointHeldPowerup = cast rm.getGO(br.readInt16());
-		var checkpointState_checkpointUp_has = br.readByte() != 0;
-		if (checkpointState_checkpointUp_has) {
-			checkpointState.checkpointUp = new Vector();
-			checkpointState.checkpointUp.x = br.readDouble();
-			checkpointState.checkpointUp.y = br.readDouble();
-			checkpointState.checkpointUp.z = br.readDouble();
-		}
 		checkpointState.checkpointBlast = br.readDouble();
+		var hasModeState = br.readByte() != 0;
+		if (hasModeState) {
+			modeState = rm.level.gameMode.constructRewindState();
+			modeState.deserialize(rm, br);
+		}
 	}
 }

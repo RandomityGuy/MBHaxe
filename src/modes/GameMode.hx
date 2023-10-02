@@ -28,6 +28,7 @@ interface GameMode {
 	public function onGemPickup(gem:Gem):Void;
 
 	public function getPreloadFiles():Array<String>;
+	public function constructRewindState():RewindableState;
 }
 
 class GameModeFactory {

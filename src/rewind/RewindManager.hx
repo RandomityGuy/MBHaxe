@@ -20,7 +20,9 @@ class RewindManager {
 	var allocObjs:Array<GameObject> = [];
 	var allocMeMap:Map<MissionElementBase, Int> = [];
 	var allocMes:Array<MissionElementBase> = [];
-	var level:MarbleWorld;
+
+	public var level:MarbleWorld;
+
 	var allocId = 0;
 	var allocMeId = 0;
 
@@ -39,6 +41,7 @@ class RewindManager {
 		while (timeAccumulator >= saveResolution) {
 			timeAccumulator -= saveResolution;
 			var rf = new RewindFrame();
+			rf.rewindAccumulator = timeAccumulator;
 			rf.timeState = level.timeState.clone();
 			rf.marbleColliderTransform = level.marble.collider.transform.clone();
 			rf.marblePrevPosition = @:privateAccess level.marble.oldPos.clone();
@@ -275,6 +278,8 @@ class RewindManager {
 	}
 
 	public function getGO(id:Int):GameObject {
+		if (id == -1)
+			return null;
 		return allocObjs[id];
 	}
 
@@ -290,6 +295,8 @@ class RewindManager {
 	}
 
 	public function getME(id:Int):MissionElementBase {
+		if (id == -1)
+			return null;
 		return allocMes[id];
 	}
 

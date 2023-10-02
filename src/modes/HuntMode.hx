@@ -1,5 +1,6 @@
 package modes;
 
+import rewind.RewindManager;
 import hxd.Rand;
 import rewind.RewindableState;
 import gui.AchievementsGui;
@@ -55,14 +56,16 @@ class GemSpawnSphere {
 class GemOctreeElem implements IOctreeObject {
 	public var boundingBox:Bounds;
 	public var spawn:GemSpawnSphere;
+	public var spawnIndex:Int;
 
 	var priority:Int;
 
-	public function new(vec:Vector, spawn:GemSpawnSphere) {
+	public function new(vec:Vector, spawn:GemSpawnSphere, spawnIndex:Int) {
 		boundingBox = new Bounds();
 		boundingBox.addPoint(vec.add(new Vector(-0.5, -0.5, -0.5)).toPoint());
 		boundingBox.addPoint(vec.add(new Vector(0.5, 0.5, 0.5)).toPoint());
 		this.spawn = spawn;
+		this.spawnIndex = spawnIndex;
 	}
 
 	public function getElementType() {
@@ -80,7 +83,7 @@ class GemOctreeElem implements IOctreeObject {
 
 @:publicFields
 class HuntState implements RewindableState {
-	var activeGemSpawnGroup:Array<GemSpawnSphere>;
+	var activeGemSpawnGroup:Array<Int>;
 	var activeGems:Array<Gem>;
 	var points:Int;
 	var rngState:Int;
@@ -102,6 +105,47 @@ class HuntState implements RewindableState {
 		c.rngState2 = rngState2;
 		return c;
 	}
+
+	public function getSize():Int {
+		var size = 2;
+		size += 2 + activeGemSpawnGroup.length * 2;
+		size += 2 + activeGems.length * 2;
+		size += 4;
+		size += 4;
+		size += 4;
+		return size;
+	}
+
+	public function serialize(rm:RewindManager, bw:haxe.io.BytesOutput) {
+		bw.writeUInt16(points);
+		bw.writeUInt16(activeGemSpawnGroup.length);
+		for (elem in activeGemSpawnGroup) {
+			bw.writeUInt16(elem);
+		}
+		bw.writeUInt16(activeGems.length);
+		for (elem in activeGems) {
+			bw.writeUInt16(rm.allocGO(elem));
+		}
+		bw.writeInt32(rngState);
+		bw.writeInt32(rngState2);
+	}
+
+	public function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
+		points = br.readUInt16();
+		activeGemSpawnGroup = [];
+		var len = br.readUInt16();
+		for (i in 0...len) {
+			activeGemSpawnGroup.push(br.readUInt16());
+		}
+		activeGems = [];
+		var len = br.readUInt16();
+		for (i in 0...len) {
+			var uid = br.readUInt16();
+			activeGems.push(cast rm.getGO(uid));
+		}
+		rngState = br.readInt32();
+		rngState2 = br.readInt32();
+	}
 }
 
 class HuntMode extends NullMode {
@@ -111,7 +155,7 @@ class HuntMode extends NullMode {
 	var gemOctree:Octree;
 	var gemGroupRadius:Float;
 	var maxGemsPerGroup:Int;
-	var activeGemSpawnGroup:Array<GemSpawnSphere>;
+	var activeGemSpawnGroup:Array<Int>;
 	var activeGems:Array<Gem> = [];
 	var gemBeams:Array<GemBeam> = [];
 	var gemToBeamMap:Map<Gem, GemBeam> = [];
@@ -191,7 +235,8 @@ class HuntMode extends NullMode {
 	override function onRespawn() {
 		if (activeGemSpawnGroup.length != 0) {
 			var gemAvg = new Vector();
-			for (g in activeGemSpawnGroup) {
+			for (gi in activeGemSpawnGroup) {
+				var g = gemSpawnPoints[gi];
 				gemAvg = gemAvg.add(g.position);
 			}
 			gemAvg.scale(1 / activeGemSpawnGroup.length);
@@ -258,9 +303,10 @@ class HuntMode extends NullMode {
 			maxGemsPerGroup = Std.parseInt(level.mission.missionInfo.maxgemspergroup);
 
 		gemOctree = new Octree();
-		for (gemSpawn in gemSpawnPoints) {
+		for (gi in 0...gemSpawnPoints.length) {
+			var gemSpawn = gemSpawnPoints[gi];
 			var vec = gemSpawn.position;
-			gemOctree.insert(new GemOctreeElem(vec, gemSpawn));
+			gemOctree.insert(new GemOctreeElem(vec, gemSpawn, gi));
 			if (gemSpawn.gem != null) {
 				gemSpawn.gem.setHide(true);
 				gemSpawn.gem.pickedUp = true;
@@ -269,7 +315,8 @@ class HuntMode extends NullMode {
 		}
 
 		if (activeGemSpawnGroup != null) {
-			for (gemSpawn in activeGemSpawnGroup) {
+			for (gemSpawnIndex in activeGemSpawnGroup) {
+				var gemSpawn = gemSpawnPoints[gemSpawnIndex];
 				if (gemSpawn.gem != null) {
 					gemSpawn.gem.pickedUp = true;
 					gemSpawn.gem.setHide(true);
@@ -283,7 +330,8 @@ class HuntMode extends NullMode {
 		refillGemGroups();
 
 		var gemAvg = new Vector();
-		for (g in activeGemSpawnGroup) {
+		for (gi in activeGemSpawnGroup) {
+			var g = gemSpawnPoints[gi];
 			gemAvg = gemAvg.add(g.position);
 		}
 		gemAvg.scale(1 / activeGemSpawnGroup.length);
@@ -308,8 +356,9 @@ class HuntMode extends NullMode {
 		}
 	}
 
-	function fillGemGroup(group:Array<GemSpawnSphere>) {
-		for (gemSpawn in group) {
+	function fillGemGroup(group:Array<Int>) {
+		for (gi in group) {
+			var gemSpawn = gemSpawnPoints[gi];
 			if (gemSpawn.gem != null) {
 				gemSpawn.gem.pickedUp = false;
 				gemSpawn.gem.setHide(false);
@@ -354,7 +403,8 @@ class HuntMode extends NullMode {
 
 			var ok = true;
 			if (activeGemSpawnGroup != null) {
-				for (gemSpawn in activeGemSpawnGroup) {
+				for (gi in activeGemSpawnGroup) {
+					var gemSpawn = gemSpawnPoints[gi];
 					if (gemSpawn.position.distance(groupMainPt) < searchRadius) {
 						ok = false;
 						break;
@@ -384,7 +434,7 @@ class HuntMode extends NullMode {
 		var search = gemOctree.radiusSearch(pos, gemGroupRadius);
 		for (elem in search) {
 			var gemElem:GemOctreeElem = cast elem;
-			results.push(gemElem.spawn);
+			results.push(gemElem.spawnIndex);
 			if (results.length >= maxGemsPerGroup)
 				break;
 		}
@@ -481,4 +531,8 @@ class HuntMode extends NullMode {
 			rng2.setSeed(s.rngState2);
 		}
 	}
+
+	override function constructRewindState():RewindableState {
+		return new HuntState();
+	};
 }
