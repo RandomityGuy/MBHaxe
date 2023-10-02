@@ -40,9 +40,9 @@ class RewindFrame {
 		timeState:TimeState
 	};
 
-	public function new() {}
+	inline public function new() {}
 
-	public function clone() {
+	public inline function clone() {
 		var c = new RewindFrame();
 		c.timeState = timeState.clone();
 		c.marblePosition = marblePosition.clone();
@@ -85,7 +85,7 @@ class RewindFrame {
 		return c;
 	}
 
-	public function serialize(rm:RewindManager) {
+	public inline function serialize(rm:RewindManager) {
 		var bb = new BytesOutput();
 		var framesize = 0;
 		framesize += 32; // timeState
@@ -231,7 +231,7 @@ class RewindFrame {
 		return bb.getBytes();
 	}
 
-	public function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
+	public inline function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
 		marblePosition = new Vector();
 		marbleOrientation = new Quat();
 		marbleVelocity = new Vector();
