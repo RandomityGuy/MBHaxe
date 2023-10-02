@@ -224,6 +224,13 @@ class MarbleGame {
 
 	public function quitMission() {
 		world.setCursorLock(false);
+		if (!Settings.levelStatistics.exists(world.mission.path)) {
+			Settings.levelStatistics.set(world.mission.path, {
+				oobs: 0,
+				respawns: 0,
+				totalTime: 0,
+			});
+		}
 		var stats = Settings.levelStatistics[world.mission.path];
 		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
 			Settings.optionsSettings.rewindEnabled);
