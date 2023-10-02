@@ -1473,8 +1473,8 @@ class MarbleWorld extends Scheduler {
 						for (surface in chull.surfaces) {
 							var i = 0;
 							while (i < surface.indices.length) {
-								var surfaceN = surface.normals[surface.indices[i]].transformed3x3(chullinvT);
-								var v1 = surface.points[surface.indices[i]].transformed(chull.transform);
+								var surfaceN = surface.getNormal(surface.indices[i]).transformed3x3(chullinvT);
+								var v1 = surface.getPoint(surface.indices[i]).transformed(chull.transform);
 								var surfaceD = -surfaceN.dot(v1);
 
 								if (surfaceN.dot(padUp.multiply(-10)) < 0) {
@@ -1482,8 +1482,8 @@ class MarbleWorld extends Scheduler {
 									if (dist >= 0 && dist < 5) {
 										var intersectT = -(checkBoundsCenter.dot(surfaceN.toPoint()) + surfaceD) / (padUp.dot(surfaceN));
 										var intersectP = checkBoundsCenter.add(padUp.multiply(intersectT).toPoint()).toVector();
-										if (Collision.PointInTriangle(intersectP, v1, surface.points[surface.indices[i + 1]].transformed(chull.transform),
-											surface.points[surface.indices[i + 2]].transformed(chull.transform))) {
+										if (Collision.PointInTriangle(intersectP, v1, surface.getPoint(surface.indices[i + 1]).transformed(chull.transform),
+											surface.getPoint(surface.indices[i + 2]).transformed(chull.transform))) {
 											found = true;
 											break;
 										}
