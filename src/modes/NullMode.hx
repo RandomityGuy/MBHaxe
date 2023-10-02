@@ -103,4 +103,8 @@ class NullMode implements GameMode {
 	}
 
 	public function applyRewindState(state:RewindableState) {}
+
+	public function constructRewindState() {
+		return null;
+	}
 }
