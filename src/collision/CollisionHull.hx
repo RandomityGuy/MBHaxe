@@ -60,7 +60,9 @@ class CollisionHull extends CollisionEntity {
 		super.addSurface(surface);
 		if (hull == null)
 			hull = new ConvexHull([]);
-		hull.vertices = hull.vertices.concat(surface.points);
+		for (i in 0...(Std.int(surface.points.length / 3))) {
+			hull.vertices.push(new Vector(surface.points[i * 3], surface.points[i * 3 + 1], surface.points[i * 3 + 2]));
+		}
 		if (surface.points.length != 0) {
 			this.force = surface.force;
 			this.friction = surface.friction;

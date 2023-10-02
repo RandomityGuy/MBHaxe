@@ -62,12 +62,16 @@ class Debug {
 	}
 
 	public static function drawTriangle(p1:Vector, p2:Vector, p3:Vector) {
+		if (!drawBounds)
+			return;
 		_triangles.push(p3.toPoint());
 		_triangles.push(p2.toPoint());
 		_triangles.push(p1.toPoint());
 	}
 
 	public static function drawSphere(centre:Vector, radius:Float) {
+		if (!drawBounds)
+			return;
 		_spheres.push({position: centre.clone(), radius: radius});
 	}
 }

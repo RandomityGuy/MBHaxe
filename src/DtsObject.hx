@@ -545,8 +545,6 @@ class DtsObject extends GameObject {
 			hs.normals = [];
 			hs.indices = [];
 			hs.transformKeys = [];
-			hs.edgeConcavities = [];
-			hs.edgeData = [];
 
 			var material = this.dts.matNames[primitive.matIndex & TSDrawPrimitive.MaterialMask];
 			if (dtsMaterials.exists(material) && !this.isTSStatic) {
@@ -570,11 +568,11 @@ class DtsObject extends GameObject {
 
 				for (index in [i1, i2, i3]) {
 					var vertex = vertices[index];
-					hs.points.push(new Vector(vertex.x, vertex.y, vertex.z));
+					hs.addPoint(vertex.x, vertex.y, vertex.z);
 					hs.transformKeys.push(0);
 
 					var normal = vertexNormals[index];
-					hs.normals.push(new Vector(normal.x, normal.y, normal.z));
+					hs.addNormal(normal.x, normal.y, normal.z);
 				}
 
 				hs.indices.push(hs.indices.length);
@@ -589,15 +587,6 @@ class DtsObject extends GameObject {
 			// chull.generateBoundingBox();
 			// chull.finalize();
 			// hulls.push(chull);
-		}
-		for (colliderSurface in ent.surfaces) {
-			var i = 0;
-			while (i < colliderSurface.indices.length) {
-				var edgeData = 0;
-				colliderSurface.edgeConcavities.push(false);
-				colliderSurface.edgeData.push(edgeData);
-				i += 3;
-			}
 		}
 		ent.generateBoundingBox();
 		ent.finalize();

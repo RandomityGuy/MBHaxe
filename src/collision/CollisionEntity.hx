@@ -39,8 +39,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var userData:Int;
 	public var fastTransform:Bool = false;
 
-	public var difEdgeMap:Map<Int, dif.Edge>;
-
 	var _transformKey:Int = 0;
 
 	var _dbgEntity:h3d.scene.Mesh;
@@ -205,28 +203,9 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 				var v = verts.v2;
 				var v2 = verts.v3;
 
-				// var e1e2 = hashEdge(surface.originalIndices[i], surface.originalIndices[i + 1]);
-				// var e2e3 = hashEdge(surface.originalIndices[i + 1], surface.originalIndices[i + 2]);
-				// var e1e3 = hashEdge(surface.originalIndices[i], surface.originalIndices[i + 3]);
-
-				// var edgeData = 0;
-				// if (this.difEdgeMap.exists(e1e2)) {
-				// 	edgeData |= 1;
-				// }
-				// if (this.difEdgeMap.exists(e2e3)) {
-				// 	edgeData |= 2;
-				// }
-				// if (this.difEdgeMap.exists(e1e3)) {
-				// 	edgeData |= 4;
-				// }
-
-				var edgeData = surface.edgeData[Math.floor(i / 3)];
-
-				var edgeConcavities = surface.edgeConcavities.slice(Math.floor(i / 3), Math.floor(i / 3) + 3);
-
 				var surfacenormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
 
-				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius, edgeData, edgeConcavities);
+				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius);
 				var closest = res.point;
 				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
 				if (closest != null) {
