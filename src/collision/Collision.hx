@@ -144,7 +144,7 @@ class Collision {
 		return res;
 	}
 
-	public static function TriangleSphereIntersection(A:Vector, B:Vector, C:Vector, N:Vector, P:Vector, r:Float, edgeData:Int, edgeConcavities:Array<Bool>) {
+	public static function TriangleSphereIntersection(A:Vector, B:Vector, C:Vector, N:Vector, P:Vector, r:Float) {
 		var res:ITSResult = {
 			result: false,
 			point: null,
@@ -356,7 +356,7 @@ class Collision {
 		return res;
 	}
 
-	public static function PointInTriangle(point:Vector, v0:Vector, v1:Vector, v2:Vector):Bool {
+	public static inline function PointInTriangle(point:Vector, v0:Vector, v1:Vector, v2:Vector):Bool {
 		var u = v1.sub(v0);
 		var v = v2.sub(v0);
 		var w = point.sub(v0);
