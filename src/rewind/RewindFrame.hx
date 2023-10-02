@@ -116,25 +116,9 @@ class RewindFrame {
 			framesize += 1; // s.lastDirection
 			framesize += 8; // s.lastCompletion
 		}
-		framesize += 8; // blastAmt
 		if (oobState.oob)
 			framesize += 1; // oobState.oob
 		framesize += 32; // oobState.timeState
-		framesize += 1; // Null<checkpointState>
-		if (checkpointState != null) {
-			framesize += 4; // checkpointState.currentCheckpoint
-		}
-		framesize += 2; // checkpointState.currentCheckpointTrigger
-		framesize += 2; // checkpointState.checkpointCollectedGems.length
-		for (gem in checkpointState.checkpointCollectedGems.keys()) {
-			framesize += 2; // gem
-			framesize += 1; // checkpointState.checkpointCollectedGems[gem]
-		}
-		framesize += 2; // checkpointState.checkpointHeldPowerup
-		framesize += 1; // Null<checkpointState.checkpointUp>
-		if (checkpointState.checkpointUp != null)
-			framesize += 24; // checkpointState.checkpointUp
-		framesize += 8; // checkpointState.checkpointBlast
 		bb.prepare(framesize);
 		// Now actually write
 		bb.writeDouble(timeState.currentAttemptTime);
@@ -197,7 +181,6 @@ class RewindFrame {
 			bb.writeByte(s.lastDirection);
 			bb.writeDouble(s.lastCompletion);
 		}
-		bb.writeDouble(blastAmt);
 		bb.writeByte(oobState.oob ? 1 : 0);
 		if (oobState.oob) {
 			bb.writeDouble(oobState.timeState.currentAttemptTime);
@@ -205,29 +188,6 @@ class RewindFrame {
 			bb.writeDouble(oobState.timeState.gameplayClock);
 			bb.writeDouble(oobState.timeState.dt);
 		}
-		bb.writeByte(checkpointState.currentCheckpoint == null ? 0 : 1);
-		if (checkpointState.currentCheckpoint != null) {
-			bb.writeInt16(rm.allocGO(checkpointState.currentCheckpoint.obj));
-			bb.writeInt16(rm.allocME(checkpointState.currentCheckpoint.elem));
-		}
-		bb.writeInt16(rm.allocGO(checkpointState.currentCheckpointTrigger));
-		var chkgemcount = 0;
-		for (g in checkpointState.checkpointCollectedGems) {
-			chkgemcount++;
-		}
-		bb.writeInt16(chkgemcount);
-		for (gem in checkpointState.checkpointCollectedGems.keys()) {
-			bb.writeInt16(rm.allocGO(gem));
-			bb.writeByte(checkpointState.checkpointCollectedGems[gem] ? 1 : 0);
-		}
-		bb.writeInt16(rm.allocGO(checkpointState.checkpointHeldPowerup));
-		bb.writeByte(checkpointState.checkpointUp == null ? 0 : 1);
-		if (checkpointState.checkpointUp != null) {
-			bb.writeDouble(checkpointState.checkpointUp.x);
-			bb.writeDouble(checkpointState.checkpointUp.y);
-			bb.writeDouble(checkpointState.checkpointUp.z);
-		}
-		bb.writeDouble(checkpointState.checkpointBlast);
 		return bb.getBytes();
 	}
 
@@ -321,7 +281,6 @@ class RewindFrame {
 			trapdoorStates_item.lastCompletion = br.readDouble();
 			trapdoorStates.push(trapdoorStates_item);
 		}
-		blastAmt = br.readDouble();
 		oobState = {
 			oob: br.readByte() != 0,
 			timeState: null
@@ -333,35 +292,5 @@ class RewindFrame {
 			oobState.timeState.gameplayClock = br.readDouble();
 			oobState.timeState.dt = br.readDouble();
 		}
-		var hasCheckpoint = br.readByte() != 0;
-		checkpointState = {
-			currentCheckpoint: null,
-			currentCheckpointTrigger: null,
-			checkpointCollectedGems: new Map<Gem, Bool>(),
-			checkpointHeldPowerup: null,
-			checkpointUp: null,
-			checkpointBlast: 0.0,
-		};
-		if (hasCheckpoint) {
-			var co = rm.getGO(br.readInt16());
-			var ce = rm.getME(br.readInt16());
-			checkpointState.currentCheckpoint = {obj: cast co, elem: ce};
-		}
-		checkpointState.currentCheckpointTrigger = cast rm.getGO(br.readInt16());
-		var checkpointState_checkpointCollectedGems_len = br.readInt16();
-		for (i in 0...checkpointState_checkpointCollectedGems_len) {
-			var gem = cast rm.getGO(br.readInt16());
-			var c = br.readByte() != 0;
-			checkpointState.checkpointCollectedGems.set(cast gem, c);
-		}
-		checkpointState.checkpointHeldPowerup = cast rm.getGO(br.readInt16());
-		var checkpointState_checkpointUp_has = br.readByte() != 0;
-		if (checkpointState_checkpointUp_has) {
-			checkpointState.checkpointUp = new Vector();
-			checkpointState.checkpointUp.x = br.readDouble();
-			checkpointState.checkpointUp.y = br.readDouble();
-			checkpointState.checkpointUp.z = br.readDouble();
-		}
-		checkpointState.checkpointBlast = br.readDouble();
 	}
 }

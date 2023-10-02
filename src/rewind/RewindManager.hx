@@ -96,7 +96,12 @@ class RewindManager {
 			oob: level.outOfBounds,
 			timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
 		};
-		frames.push(rf);
+		frameElapsedTimes.push(level.timeState.currentAttemptTime);
+		frameDataOffsets.push(frameData.length);
+		var frameDataSerialized = rf.serialize(this);
+		frameSizes.push(frameDataSerialized.length);
+		frameData.addBytes(frameDataSerialized, 0, frameDataSerialized.length);
+		// frames.push(rf);
 	}
 
 	public function applyFrame(rf:RewindFrame) {

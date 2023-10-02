@@ -1336,15 +1336,7 @@ class MarbleWorld extends Scheduler {
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
-			if (!Settings.levelStatistics.exists(mission.path)) {
-				Settings.levelStatistics.set(mission.path, {
-					oobs: 0,
-					respawns: 0,
-					totalTime: 0,
-				});
-			}
-			Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.levelStatistics[mission.path].oobs,
-				Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
+			Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.optionsSettings.rewindEnabled);
 			if (!this.isWatching)
 				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
@@ -1578,7 +1570,6 @@ class MarbleWorld extends Scheduler {
 		for (textureResource in this.textureResources) {
 			textureResource.release();
 		}
-		gems = null;
 
 		sky.dispose();
 		sky = null;
@@ -1586,11 +1577,8 @@ class MarbleWorld extends Scheduler {
 		collisionWorld.dispose();
 		collisionWorld = null;
 		particleManager = null;
-		namedObjects = null;
 		shapeOrTriggerInside = null;
 		shapeImmunity = null;
-		currentCheckpoint = null;
-		checkpointCollectedGems = null;
 		marble = null;
 
 		this._disposed = true;

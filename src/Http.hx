@@ -1,6 +1,5 @@
 package src;
 
-import src.Console;
 import src.Util;
 
 typedef HttpRequest = {

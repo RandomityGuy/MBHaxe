@@ -1131,8 +1131,7 @@ class Marble extends GameObject {
 					continue;
 				}
 
-				var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius, testTri.edge,
-					testTri.concavity);
+				var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius);
 				if (tsi.result) {
 					var separatingDistance = position.sub(tsi.point).normalized();
 					var distToContactPlane = tsi.point.distance(position);

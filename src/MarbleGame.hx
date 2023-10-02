@@ -18,6 +18,7 @@ import src.Util;
 import src.ProfilerUI;
 import src.Gamepad;
 import src.Analytics;
+import src.Settings;
 
 @:publicFields
 class MarbleGame {
@@ -224,15 +225,7 @@ class MarbleGame {
 
 	public function quitMission() {
 		world.setCursorLock(false);
-		if (!Settings.levelStatistics.exists(world.mission.path)) {
-			Settings.levelStatistics.set(world.mission.path, {
-				oobs: 0,
-				respawns: 0,
-				totalTime: 0,
-			});
-		}
-		var stats = Settings.levelStatistics[world.mission.path];
-		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
+		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000),
 			Settings.optionsSettings.rewindEnabled);
 		paused = false;
 		var pmg = new PlayMissionGui();
@@ -258,6 +251,9 @@ class MarbleGame {
 
 	public function watchMissionReplay(mission:Mission, replay:Replay) {
 		canvas.clearContent();
+		if (world != null) {
+			world.dispose();
+		}
 		Analytics.trackSingle("replay-watch");
 		world = new MarbleWorld(scene, scene2d, mission);
 		world.replay = replay;
