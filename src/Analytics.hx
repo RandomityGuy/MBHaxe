@@ -103,9 +103,9 @@ class Analytics {
 				language: language(),
 				referrer: referrer(),
 				screen: screen(),
-				title: "MBHaxe Platinum",
+				title: "MBHaxe Ultra",
 				url: "/",
-				website: "e6da43f0-fc6a-49cb-a4a9-4b7e7745e538",
+				website: "359e2bfd-5152-4284-969f-c9f5b56fcb76",
 				name: eventName
 			}
 		};
@@ -120,7 +120,7 @@ class Analytics {
 		return js.Browser.window.location.hostname;
 		#end
 		#if hl
-		return "marbleblast.randomityguy.me";
+		return "marbleblastultra.randomityguy.me";
 		#end
 	}
 

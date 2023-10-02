@@ -1425,8 +1425,9 @@ class MarbleWorld extends Scheduler {
 					totalTime: 0,
 				});
 			}
-			Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.levelStatistics[mission.path].oobs,
-				Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
+			Analytics.trackLevelScore(mission.title, mission.path,
+				gameMode.getScoreType() == Time ? Std.int(1000 * gameMode.getFinishScore()) : Std.int(gameMode.getFinishScore()),
+				Settings.levelStatistics[mission.path].oobs, Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
 			if (!this.isWatching) {
 				var myScore = {
 					name: "Player",
