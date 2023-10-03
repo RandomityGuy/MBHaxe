@@ -178,11 +178,10 @@ class MainMenuGui extends GuiImage {
 		versionText.vertSizing = Bottom;
 		versionText.position = new Vector(502, 61);
 		versionText.extent = new Vector(97, 72);
-		versionText.text.text = "<p align=\"center\">1.5.3</p>";
+		versionText.text.text = "<p align=\"center\">1.5.4</p>";
 		versionText.text.filter = new DropShadow(1.414, 0.785, 0x3333337F, 1, 0, 0.7, 1, true);
 		this.addChild(versionText);
 
-		#if js
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
 		kofi.horizSizing = Left;
 		kofi.vertSizing = Top;
@@ -197,6 +196,20 @@ class MainMenuGui extends GuiImage {
 			#end
 		}
 		this.addChild(kofi);
-		#end
+
+		var github = new GuiButton(loadButtonImages("data/ui/github"));
+		github.horizSizing = Left;
+		github.vertSizing = Top;
+		github.position = new Vector(522, 380);
+		github.extent = new Vector(94, 38);
+		github.pressedAction = (sender) -> {
+			#if sys
+			hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe");
+			#end
+			#if js
+			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
+			#end
+		}
+		this.addChild(github);
 	}
 }
