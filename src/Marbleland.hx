@@ -16,7 +16,7 @@ class Marbleland {
 	public static var missions:Map<Int, Mission> = [];
 
 	public static function init() {
-		Http.get('https://marbleblast.vaniverse.io/api/customs', (b) -> {
+		Http.get('https://marbleland.vaniverse.io/api/level/list', (b) -> {
 			parseMissionList(b.toString());
 			Console.log('Loaded gold customs: ${goldMissions.length}');
 			Console.log('Loaded ultra customs: ${ultraMissions.length}');
@@ -31,6 +31,16 @@ class Marbleland {
 		var platDupes = new Map();
 
 		for (missionData in claJson) {
+			// filter
+			if (missionData.compatibility != 'mbw' && missionData.compatibility != 'mbg')
+				continue;
+			if (!['gold', 'platinum', 'ultra', 'platinumquest'].contains(missionData.modification))
+				continue;
+			if (missionData.gameMode != null && missionData.gameMode != 'null')
+				continue;
+			if (missionData.gameType != 'single')
+				continue;
+
 			var mission = new Mission();
 			mission.id = missionData.id;
 			mission.path = 'missions/' + missionData.baseName;
@@ -43,6 +53,8 @@ class Marbleland {
 			mission.description = missionData.desc != null ? missionData.desc : "";
 			mission.qualifyTime = (missionData.qualifyingTime != null && missionData.qualifyingTime != 0) ? missionData.qualifyingTime / 1000 : Math.POSITIVE_INFINITY;
 			mission.goldTime = missionData.goldTime != null ? missionData.goldTime / 1000 : 0;
+			if (missionData.modification == 'platinumquest')
+				missionData.modification = 'platinum'; // play PQ levels compatible with web pls
 			mission.game = missionData.modification;
 			if (missionData.modification == 'platinum')
 				mission.goldTime = missionData.platinumTime != null ? missionData.platinumTime / 1000 : mission.goldTime;
