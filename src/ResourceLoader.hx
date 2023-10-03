@@ -549,6 +549,9 @@ class ResourceLoader {
 		if (zipFilesystem.exists(path.toLowerCase() + ".bmp")) {
 			return [path + ".bmp"];
 		}
+		if (zipFilesystem.exists(path.toLowerCase() + ".dds")) {
+			return [path + ".dds"];
+		}
 		var files = fileSystem.dir(Path.directory(path)); // FileSystem.readDirectory(Path.directory(path));
 		var names = [];
 		var fname = Path.withoutDirectory(path).toLowerCase();
