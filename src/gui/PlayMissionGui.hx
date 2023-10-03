@@ -1,5 +1,6 @@
 package gui;
 
+import src.MarbleGame;
 import src.Replay;
 import haxe.ds.Option;
 import hxd.Key;
@@ -98,9 +99,23 @@ class PlayMissionGui extends GuiImage {
 		tabCustom.position = new Vector(589, 91);
 		tabCustom.extent = new Vector(52, 198);
 		tabCustom.pressedAction = (sender) -> {
+			#if (js || android || MACOS_BUNDLE)
+			var mbo = new MessageBoxYesNoDlg("The custom level browser is not available in this game.\n Please play Marble Blast Platinum to get access to 5000+ cummunity made customs of both Marble Blast Gold and Marble Blast Platinum. Visit download link?",
+				() -> {
+					#if sys
+					hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe");
+					#end
+					#if js
+					js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
+					#end
+				}, () -> {});
+
+			MarbleGame.canvas.pushDialog(mbo);
+			#else
 			currentList = MissionList.customMissions;
 			currentCategory = "custom";
 			setCategoryFunc("custom");
+			#end
 		}
 		localContainer.addChild(tabCustom);
 
@@ -406,8 +421,7 @@ class PlayMissionGui extends GuiImage {
 			}
 			currentCategoryStatic = currentCategory;
 			if (currentCategory != "custom")
-				setSelectedFunc(cast Math.min(currentList.length - 1,
-					Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
+				setSelectedFunc(cast Math.min(currentList.length - 1, Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
 			else
 				setSelectedFunc(currentList.length - 1);
 			if (doRender)
