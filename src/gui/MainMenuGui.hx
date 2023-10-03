@@ -80,7 +80,6 @@ class MainMenuGui extends GuiImage {
 		};
 		homebase.addChild(exitButton);
 
-		#if js
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
 		kofi.horizSizing = Left;
 		kofi.vertSizing = Top;
@@ -95,6 +94,20 @@ class MainMenuGui extends GuiImage {
 			#end
 		}
 		this.addChild(kofi);
-		#end
+
+		var github = new GuiButton(loadButtonImages("data/ui/github"));
+		github.horizSizing = Left;
+		github.vertSizing = Top;
+		github.position = new Vector(522, 380);
+		github.extent = new Vector(94, 38);
+		github.pressedAction = (sender) -> {
+			#if sys
+			hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe");
+			#end
+			#if js
+			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
+			#end
+		}
+		this.addChild(github);
 	}
 }
