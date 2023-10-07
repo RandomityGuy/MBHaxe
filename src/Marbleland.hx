@@ -32,7 +32,7 @@ class Marbleland {
 
 		for (missionData in claJson) {
 			// filter
-			if (missionData.compatibility != 'mbw' && missionData.compatibility != 'mbg')
+			if (missionData.datablockCompatibility != 'mbw' && missionData.datablockCompatibility != 'mbg')
 				continue;
 			if (!['gold', 'platinum', 'ultra', 'platinumquest'].contains(missionData.modification))
 				continue;
@@ -61,6 +61,7 @@ class Marbleland {
 			mission.ultimateTime = missionData.ultimateTime != null ? missionData.ultimateTime / 1000 : 0;
 			mission.hasEgg = missionData.hasEgg;
 			mission.isClaMission = true;
+			mission.addedAt = missionData.addedAt;
 
 			var game = missionData.modification;
 
