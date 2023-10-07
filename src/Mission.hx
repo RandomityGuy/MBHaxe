@@ -1,5 +1,6 @@
 package src;
 
+import haxe.Int64;
 import src.Http.HttpRequest;
 import gui.Canvas;
 import gui.MessageBoxOkDlg;
@@ -40,6 +41,7 @@ class Mission {
 	public var game:String;
 	public var hasEgg:Bool;
 	public var isCustom:Bool;
+	public var addedAt:Int64;
 
 	var next:Mission;
 
