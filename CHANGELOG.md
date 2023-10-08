@@ -1,3 +1,11 @@
+# 1.5.4
+This update fixes the following bugs:
+- Updated Marbleland support. New levels will now automatically show up.
+- Implement "Latest" and "Alphabetical" sorting for Marbleland customs.
+- Optimized rewind to use memory better.
+- Fixed a handful of memory leaks.
+- Match with MBG Collision code.
+
 # 1.5.3
 This update fixes the following bugs:
 - Slightly improved marble cubemaps.
