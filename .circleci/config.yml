@@ -227,7 +227,7 @@ jobs:
             - /usr/local/lib/libvorbis.0.4.9.dylib
             - /usr/local/lib/libvorbisfile.3.3.8.dylib
             - /usr/local/lib/libvorbisenc.2.0.12.dylib
-            - /usr/local/lib/libz.1.2.13.dylib
+            - /usr/local/lib/libz.1.3.dylib
 
 
       - run:
@@ -258,7 +258,7 @@ jobs:
             cp /usr/local/lib/libvorbis.0.4.9.dylib libvorbis.0.4.9.dylib
             cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
             cp /usr/local/lib/libvorbisenc.2.0.12.dylib libvorbisenc.2.0.12.dylib
-            cp /usr/local/lib/libz.1.2.13.dylib libz.1.dylib
+            cp /usr/local/lib/libz.1.3.dylib libz.1.dylib
             cp /usr/local/lib/libuv.1.dylib libuv.1.dylib
             # These libraries have dangling RPATHs
             install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib
