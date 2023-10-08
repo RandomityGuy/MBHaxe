@@ -223,6 +223,8 @@ class Settings {
 	@:hlNative static function get_storage_path():hl.Bytes {
 		return null;
 	}
+
+	@:hlNative public static function open_url(url:String):Void {}
 	#end
 
 	public static function applySettings() {
