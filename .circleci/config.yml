@@ -157,6 +157,17 @@ jobs:
             sudo cmake --install build
 
       - run:
+          name: Compile libuv
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            curl -fsSL https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz | tar xz
+            cd libuv-1.44.2
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
           name: Install hashlink
           command: |
             mkdir -p ~/deps
@@ -165,7 +176,7 @@ jobs:
             cd hashlink
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DWITH_SSL=OFF -DWITH_UV=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
@@ -187,7 +198,7 @@ jobs:
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll} -lsdl2 -lhl
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll} -lsdl2 -lhl -luv
 
       - run:
           name: Package app bundle
@@ -197,7 +208,7 @@ jobs:
             cd "macos-dist/MarbleBlast Gold.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
-            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib} .
+            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll} .
             cp /usr/local/lib/libhl.1.13.0.dylib libhl.1.dylib
             cp /usr/local/lib/libogg.0.8.5.dylib libogg.0.dylib
             cp /usr/local/lib/libopenal.1.22.2.dylib libopenal.1.dylib
@@ -207,6 +218,7 @@ jobs:
             cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
             cp /usr/local/lib/libvorbisenc.2.0.12.dylib libvorbisenc.2.0.12.dylib
             cp /usr/local/lib/libz.1.2.13.dylib libz.1.dylib
+            cp /usr/local/lib/libuv.1.dylib libuv.1.dylib
             # These libraries have dangling RPATHs
             install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib
             for i in fmt.hdll libpng16.16.dylib
@@ -345,6 +357,8 @@ jobs:
               cp ~/deps/hashlink/x64/Release/ui.hdll .
               cp ~/deps/hashlink/x64/Release/openal.hdll .
               cp ~/deps/hashlink/x64/Release/sdl.hdll .
+              cp ~/deps/hashlink/x64/Release/ssl.hdll .
+              cp ~/deps/hashlink/x64/Release/uv.hdll .
               cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
               cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 
         - run:
