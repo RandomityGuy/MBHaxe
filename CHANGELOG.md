@@ -1,3 +1,9 @@
+# 1.0.2
+This update fixes the following bugs.
+- Optimized rewind to use memory better.
+- Fixed a handful of memory leaks.
+- Match with MBG Collision code.
+
 # 1.0.1
 This update fixes the following bugs:
 - Updated the skyboxes for specific levels.
