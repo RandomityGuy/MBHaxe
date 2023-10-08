@@ -442,15 +442,6 @@ class Util {
 	}
 
 	public static function getPlatform() {
-		#if js
-		return js.Browser.navigator.platform;
-		#end
-		#if hl
-		#if MACOS_BUNDLE
-		return "MacOS";
-		#else
-		return "Windows";
-		#end
-		#end
+		return "Android";
 	}
 }
