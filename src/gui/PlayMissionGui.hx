@@ -1047,7 +1047,6 @@ class PlayMissionGui extends GuiImage {
 
 		setCategoryFunc(currentGame, currentCategoryStatic, false);
 
-		#if js
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
 		kofi.horizSizing = Left;
 		kofi.vertSizing = Top;
@@ -1055,14 +1054,13 @@ class PlayMissionGui extends GuiImage {
 		kofi.extent = new Vector(143, 36);
 		kofi.pressedAction = (sender) -> {
 			#if sys
-			hxd.System.openURL("https://ko-fi.com/H2H5FRTTL");
+			Settings.open_url("https://ko-fi.com/H2H5FRTTL");
 			#end
 			#if js
 			js.Browser.window.open("https://ko-fi.com/H2H5FRTTL");
 			#end
 		}
 		this.addChild(kofi);
-		#end
 	}
 
 	public override function render(scene2d:Scene) {

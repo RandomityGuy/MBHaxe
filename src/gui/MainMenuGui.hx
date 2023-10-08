@@ -149,7 +149,7 @@ class MainMenuGui extends GuiImage {
 		kofi.extent = new Vector(143, 36);
 		kofi.pressedAction = (sender) -> {
 			#if sys
-			hxd.System.openURL("https://ko-fi.com/H2H5FRTTL");
+			Settings.open_url("https://ko-fi.com/H2H5FRTTL");
 			#end
 			#if js
 			js.Browser.window.open("https://ko-fi.com/H2H5FRTTL");
@@ -164,7 +164,7 @@ class MainMenuGui extends GuiImage {
 		github.extent = new Vector(94, 38);
 		github.pressedAction = (sender) -> {
 			#if sys
-			hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe");
+			Settings.open_url("https://github.com/RandomityGuy/MBHaxe");
 			#end
 			#if js
 			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
