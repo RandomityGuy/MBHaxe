@@ -1743,8 +1743,10 @@ class MarbleWorld extends Scheduler {
 		this.outOfBounds = false;
 		this.deselectPowerUp(); // Always deselect first
 		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
-		if (this.checkpointHeldPowerup != null)
-			this.schedule(this.timeState.currentAttemptTime + 0.5, () -> this.pickUpPowerUp(this.checkpointHeldPowerup));
+		if (this.checkpointHeldPowerup != null) {
+			var powerup = this.checkpointHeldPowerup;
+			this.pickUpPowerUp(powerup);
+		}
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
