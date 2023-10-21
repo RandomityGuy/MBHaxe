@@ -1829,6 +1829,10 @@ class Marble extends GameObject {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
 			this.helicopterSound.pause = true;
 		}
+		if (this.blastUseTime > currentTime) {
+			this.blastUseTime = Math.POSITIVE_INFINITY;
+			this.blastWave.doSequenceOnceBeginTime = 0;
+		}
 		if (currentTime - this.blastUseTime < this.blastWave.dts.sequences[0].duration) {
 			this.blastWave.setPosition(x, y, z);
 			this.blastWave.setRotationQuat(this.level.getOrientationQuat(this.level.timeState.currentAttemptTime));
