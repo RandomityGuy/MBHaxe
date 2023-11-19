@@ -91,8 +91,10 @@ class CameraInput {
 				}
 
 				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(inpX), applyNonlinearScale(inpY), true);
-				prevMouse.x = e.relX;
-				prevMouse.y = e.relY;
+				if (inpX != 0)
+					prevMouse.x = e.relX;
+				if (inpY != 0)
+					prevMouse.y = e.relY;
 			}
 		}
 
