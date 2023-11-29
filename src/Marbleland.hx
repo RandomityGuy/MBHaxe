@@ -8,6 +8,7 @@ import src.Mission;
 import src.Http;
 import src.ResourceLoader;
 import src.Console;
+import src.MarbleGame;
 
 class Marbleland {
 	public static var goldMissions = [];
@@ -21,6 +22,20 @@ class Marbleland {
 			Console.log('Loaded gold customs: ${goldMissions.length}');
 			Console.log('Loaded ultra customs: ${ultraMissions.length}');
 			Console.log('Loaded platinum customs: ${platinumMissions.length}');
+			// Load the marbleland level from JS
+			#if js
+			var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);
+			var playParam = urlParams.get("play");
+			if (playParam != null) {
+				var intParam = Std.parseInt(playParam);
+				if (intParam != null) {
+					var mission = missions.get(intParam);
+					if (mission != null) {
+						MarbleGame.instance.playMission(mission);
+					}
+				}
+			}
+			#end
 		}, (e) -> {
 			Console.log('Error getting custom list from marbleland.');
 		});
