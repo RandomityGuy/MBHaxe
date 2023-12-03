@@ -41,7 +41,12 @@ class Mission {
 	public var game:String;
 	public var hasEgg:Bool;
 	public var isCustom:Bool;
+	#if hl
 	public var addedAt:Int64;
+	#end
+	#if js
+	public var addedAt:Int;
+	#end
 
 	var next:Mission;
 
