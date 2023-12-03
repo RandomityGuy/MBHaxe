@@ -50,13 +50,13 @@ class Http {
 				responses.add(() -> req.callback(b));
 				req.fulfilled = true;
 			};
-			hl.Gc.enable(false);
-			hl.Gc.blocking(true); // Wtf is this shit
 			if (req.post) {
 				http.setHeader('User-Agent', 'MBHaxe/1.0 ${Util.getPlatform()}');
 				http.setHeader('Content-Type', "application/json"); // support json data only (for now)
 				http.setPostData(req.postData);
 			}
+			hl.Gc.enable(false);
+			hl.Gc.blocking(true); // Wtf is this shit
 			http.request(req.post);
 			hl.Gc.blocking(false);
 			hl.Gc.enable(true);
