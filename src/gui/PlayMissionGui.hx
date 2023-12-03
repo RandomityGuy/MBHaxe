@@ -204,7 +204,7 @@ class PlayMissionGui extends GuiImage {
 		}
 		pmBox.addChild(pmSearch);
 
-		var sortType = 0; // 0 = alphabetical, 1 = date
+		var sortType = 1; // 0 = alphabetical, 1 = date
 
 		var sortAlphaImgs = loadButtonImages("data/ui/play/sort_alpha");
 		var sortDateImgs = loadButtonImages("data/ui/play/sort_date");
