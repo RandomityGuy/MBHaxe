@@ -1,7 +1,7 @@
 {
-	"name": "Marble Blast Gold Haxe Port",
-	"short_name": "Marble Blast Gold",
-	"description": "A reimplementation of Marble Blast Gold in Haxe",
+	"name": "Marble Blast Ultra Haxe Port",
+	"short_name": "Marble Blast Ultra",
+	"description": "A reimplementation of Marble Blast Ultra in Haxe",
 	"dir": "ltr",
 	"start_url": "/index.html?app=true",
 	"scope": "/",
