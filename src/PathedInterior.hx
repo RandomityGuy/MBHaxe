@@ -136,6 +136,7 @@ class PathedInterior extends InteriorObject {
 		stopped = false;
 		if (currentTime == targetTime) {
 			velocity.set(0, 0, 0);
+			this.collider.velocity.set(0, 0, 0);
 		} else {
 			var delta = 0.0;
 			if (targetTime < 0) {
