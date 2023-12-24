@@ -1131,10 +1131,14 @@ class Marble extends GameObject {
 					continue;
 				}
 
-				var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius);
-				if (tsi.result) {
-					var separatingDistance = position.sub(tsi.point).normalized();
-					var distToContactPlane = tsi.point.distance(position);
+				// Intersection with plane of testTri and current position
+				var t = (testTri.v[0].sub(position)).dot(testTri.n) / testTri.n.lengthSq();
+				var intersect = position.add(testTri.n.multiply(t));
+
+				var tsi = Collision.PointInTriangle(intersect, testTri.v[0], testTri.v[1], testTri.v[2]);
+				if (tsi) {
+					var separatingDistance = position.sub(intersect).normalized();
+					var distToContactPlane = intersect.distance(position);
 					if (radius - 0.005 - distToContactPlane > 0.0001) {
 						// Nudge to the surface of the contact plane
 						position = position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005));
