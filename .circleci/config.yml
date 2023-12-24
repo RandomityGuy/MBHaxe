@@ -75,11 +75,16 @@ jobs:
               git clone https://github.com/RandomityGuy/MBHaxeAndroidLibs
               cd ~/MBHaxe/Export/android
               cp -R ~/deps/MBHaxeAndroidLibs/* app/
+              cd ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft
+              rm CMakeLists.txt
+              mv 'CMakeLists 2.txt' CMakeLists.txt
+              cmake .
+              cmake --build .
+              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/* ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
         - run:
             name: Compile MBHaxe
             command: |
-              export PATH=/tmp/haxe/haxe:"$PATH"
-              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              export PATH=/tmp/haxe/:"$PATH"
               haxe Export/android/app/src/main/build.hxml
               cd Export/android
               chmod +x gradlew
