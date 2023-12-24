@@ -31,27 +31,60 @@ jobs:
               mkdir /tmp/haxe
               curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
               tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
+              sudo apt-get update
+              sudo apt install neko
               export PATH=/tmp/haxe/:"$PATH"
               export HAXE_STD_PATH=/tmp/haxe/std
               haxelib setup ~/haxelib
               haxelib list
-        - android/install-ndk: 
-            version: 18.1.5063045
+        - run:
+            name: Install Android NDK
+            command: |-
+              #!/bin/bash
+              echo y | sdkmanager "ndk;18.1.5063045"
+              android_ndk_home=""
+                if [[ -d "${HOME}/android-sdk/ndk/18.1.5063045" ]]; then
+                  android_ndk_home="$HOME/android-sdk/ndk/18.1.5063045"
+                elif [[ -d "/opt/android/sdk/ndk/18.1.5063045" ]]; then
+                  android_ndk_home="/opt/android/sdk/ndk/18.1.5063045"
+                else
+                  echo "Android NDK did not install successfully"
+                  exit 1
+                fi
+              echo "export ANDROID_NDK_HOME=$android_ndk_home" >> "$BASH_ENV"
+              echo "Android NDK was installed at \"$android_ndk_home\"."
+              echo y | sdkmanager "platforms;android-31"
+          
         - run:
             name: Install haxe dependencies
             command: |
               export PATH=/tmp/haxe/:"$PATH"
               export HAXE_STD_PATH=/tmp/haxe/std
+              mkdir ~/deps
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/hashlink
               haxelib git heaps https://github.com/RandomityGuy/heaps
               haxelib dev hlopenal ~/deps/hashlink/libs/openal
               haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+              haxelib dev hashlink ~/deps/hashlink/other/haxelib
+              haxelib git zyheaps https://github.com/rainyt/zyheaps
+        - run:
+            name: Prepare directories
+            command: |
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/MBHaxeAndroidLibs
+              cd ~/MBHaxe/Export/android
+              cp -R ~/deps/MBHaxeAndroidLibs/* app/
         - run:
             name: Compile MBHaxe
             command: |
               export PATH=/tmp/haxe/haxe:"$PATH"
               export HAXE_STD_PATH=/tmp/haxe/haxe/std
-              cd ~/MBHaxe
-              git clone https://github.com/RandomityGuy/MBHaxeAndroidLibs
+              haxe Export/android/app/src/main/build.hxml
+              cd Export/android
+              chmod +x gradlew
+              ./gradlew
+              ./gradlew assembleRelease
 
 
 # Invoke jobs via workflows
