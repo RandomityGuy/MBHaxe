@@ -104,7 +104,12 @@ jobs:
             command: |
               cd ~/MBHaxe
               sudo apt install apksigner
-              apksigner.bat sign --ks ~/MBHaxe/keystore Export/android/app/build/outputs/apk/release/app-release-unsigned.apk
+              echo $RELEASE_STORE_PASSWORD | apksigner sign --ks ~/MBHaxe/keystore Export/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+        - run:
+            name: Upload to Artifact Storage
+            command: |
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/Export/android/app/build/outputs/apk/release/app-release-unsigned.apk $REMOTEDIR/MBHaxe-Gold.apk
 
 
 # Invoke jobs via workflows
