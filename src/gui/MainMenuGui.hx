@@ -27,7 +27,7 @@ class MainMenuGui extends GuiImage {
 		versionText.vertSizing = Top;
 		versionText.position = new Vector(289, 450);
 		versionText.extent = new Vector(62, 18);
-		versionText.text.text = "1.1.11";
+		versionText.text.text = "1.1.12";
 		versionText.text.textColor = 0;
 		this.addChild(versionText);
 
