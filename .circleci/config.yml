@@ -76,11 +76,12 @@ jobs:
               cd ~/MBHaxe/Export/android
               cp -R ~/deps/MBHaxeAndroidLibs/* app/
               cd ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft
-              rm CMakeLists.txt
+              mv CMakeLists.txt CMakeLists-copy.txt
               mv 'CMakeLists 2.txt' CMakeLists.txt
               cmake .
               cmake --build .
-              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/* ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
+              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bsincgen ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
+              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bin2h ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
         - run:
             name: Compile MBHaxe
             command: |
@@ -89,6 +90,7 @@ jobs:
               cd Export/android
               chmod +x gradlew
               ./gradlew
+              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists-copy.txt ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists.txt
               ./gradlew assembleRelease
 
 
