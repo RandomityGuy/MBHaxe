@@ -9,7 +9,6 @@ jobs:
   build:
     executor: 
         name: android/android-machine
-        shell: bash.exe # executor type
         tag: 2021.10.1
     # Checkout the code as the first step. This is a dedicated CircleCI step.
     # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
