@@ -165,7 +165,7 @@ class Settings {
 	public static function applySettings() {
 		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
-		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		Window.getInstance().displayMode = optionsSettings.isFullScreen ? Fullscreen : Windowed;
 		#end
 		AudioManager.updateVolumes();
 
