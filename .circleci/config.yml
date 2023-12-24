@@ -23,6 +23,9 @@ jobs:
         - checkout:
             path: ~/MBHaxe
         - run:
+            name: Decode Android key store
+            command: echo $BASE64_KEYSTORE | base64 -d | tee keystore ~/MBHaxe/keystore > /dev/null
+        - run:
             name: Install dependencies
             command: |
               set -eux
@@ -86,12 +89,22 @@ jobs:
             name: Compile MBHaxe
             command: |
               export PATH=/tmp/haxe/:"$PATH"
+              cd ~/MBHaxe
               haxe Export/android/app/src/main/build.hxml
+              mkdir Export/android/app/src/assets/data
+              cp -rf data/* Export/android/app/src/assets/data
               cd Export/android
               chmod +x gradlew
               ./gradlew
               cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists-copy.txt ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists.txt
               ./gradlew assembleRelease
+
+        - run:
+            name: Sign APK
+            command: |
+              cd ~/MBHaxe
+              sudo apt install apksigner
+              apksigner.bat sign --ks ~/MBHaxe/keystore Export/android/app/build/outputs/apk/release/app-release-unsigned.apk
 
 
 # Invoke jobs via workflows
