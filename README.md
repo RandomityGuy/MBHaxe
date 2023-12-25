@@ -70,6 +70,13 @@ If the build dependencies are fullfilled, compile with `haxe compile-js.hxml` an
 ## MacOS
 See [here](README-macOS.md)
 
+## Android
+The branches used for Android builds are `mbg-android`, `mbp-android-new` or `mbu-android`.  
+Clone [this repository](https://github.com/RandomityGuy/MBHaxeAndroidLibs) containing the necessary libraries for the build and merge its src folder with that of Export/android/app/src folder.  
+Android NDK version 18.1.5063045 and platform SDK version 31 is needed.  
+Install zyheaps haxelib as well.  
+Finally run `gradlew` in Export/android folder and run `gradlew assembleRelease`  
+This will build the apk file at Export/android/app/build/outputs/apk/release/app-release-unsigned.apk which you can sign yourself and install on your device.  
 
 # FAQ
 
