@@ -98,17 +98,17 @@ class SphereCollisionEntity extends CollisionEntity {
 			contact.penetration = radius - (position.sub(contact.point).dot(contact.normal));
 			contacts.push(contact);
 
-			// var othercontact = new CollisionInfo();
-			// othercontact.collider = collisionEntity;
-			// othercontact.friction = 1;
-			// othercontact.restitution = 1;
-			// othercontact.velocity = this.velocity;
-			// othercontact.point = thispos.add(position).multiply(0.5);
-			// othercontact.normal = contact.point.sub(position).normalized();
-			// othercontact.contactDistance = contact.point.distance(position);
-			// othercontact.force = 0;
-			// othercontact.penetration = this.radius - (thispos.sub(othercontact.point).dot(othercontact.normal));
-			// this.marble.queueCollision(othercontact);
+			var othercontact = new CollisionInfo();
+			othercontact.collider = collisionEntity;
+			othercontact.friction = 1;
+			othercontact.restitution = 1;
+			othercontact.velocity = this.velocity;
+			othercontact.point = thispos.add(position).multiply(0.5);
+			othercontact.normal = contact.point.sub(position).normalized();
+			othercontact.contactDistance = contact.point.distance(position);
+			othercontact.force = 0;
+			othercontact.penetration = this.radius - (thispos.sub(othercontact.point).dot(othercontact.normal));
+			this.marble.queueCollision(othercontact);
 		}
 		return contacts;
 	}

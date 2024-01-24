@@ -1,0 +1,5 @@
+--library hxWebSockets
+--library datachannel
+--main Signalling
+-cp .
+--hl bin/signalling.hl

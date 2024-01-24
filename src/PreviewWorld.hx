@@ -582,7 +582,7 @@ class PreviewWorld extends Scheduler {
 	public function spawnMarble(onFinish:Marble->Void) {
 		var marb = new Marble();
 		marb.controllable = false;
-		marb.init(null, () -> {
+		marb.init(null, null, () -> {
 			marb.collisionWorld = this.collisionWorld;
 			this.collisionWorld.addMovingEntity(marb.collider);
 			this.scene.addChild(marb);
