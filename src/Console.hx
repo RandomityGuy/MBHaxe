@@ -184,6 +184,9 @@ class Console {
 				log('Allocation Count: ${gc.allocationCount}');
 				log('Memory usage: ${gc.currentMemory}');
 				#end
+			} else if (cmdType == 'rollback') {
+				var t = Std.parseFloat(cmdSplit[1]);
+				MarbleGame.instance.world.rollback(t);
 			} else {
 				error("Unknown command");
 			}

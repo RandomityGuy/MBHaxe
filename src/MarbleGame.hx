@@ -318,14 +318,14 @@ class MarbleGame {
 		Settings.save();
 	}
 
-	public function playMission(mission:Mission) {
+	public function playMission(mission:Mission, multiplayer:Bool = false) {
 		canvas.clearContent();
 		destroyPreviewWorld();
 		if (world != null) {
 			world.dispose();
 		}
 		Analytics.trackLevelPlay(mission.title, mission.path);
-		world = new MarbleWorld(scene, scene2d, mission, toRecord);
+		world = new MarbleWorld(scene, scene2d, mission, toRecord, multiplayer);
 		world.init();
 	}
 

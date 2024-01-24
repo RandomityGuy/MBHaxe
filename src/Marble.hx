@@ -66,6 +66,7 @@ import src.ResourceLoaderWorker;
 import src.InteriorObject;
 import src.Console;
 import src.Gamepad;
+import net.Net;
 
 class Move {
 	public var d:Vector;
@@ -284,12 +285,15 @@ class Marble extends GameObject {
 
 	public var cubemapRenderer:CubemapRenderer;
 
+	var connection:net.Net.ClientConnection;
+
 	public function new() {
 		super();
 
 		this.velocity = new Vector();
 		this.omega = new Vector();
 		this.camera = new CameraController(cast this);
+		this.isCollideable = true;
 
 		this.bounceEmitterData = new ParticleData();
 		this.bounceEmitterData.identifier = "MarbleBounceParticle";
@@ -318,8 +322,9 @@ class Marble extends GameObject {
 		this.helicopterSound.pause = true;
 	}
 
-	public function init(level:MarbleWorld, onFinish:Void->Void) {
+	public function init(level:MarbleWorld, connection:ClientConnection, onFinish:Void->Void) {
 		this.level = level;
+		this.connection = connection;
 		if (this.level != null)
 			this.collisionWorld = this.level.collisionWorld;
 
@@ -522,6 +527,8 @@ class Marble extends GameObject {
 
 	public function getMarbleAxis() {
 		var motiondir = new Vector(0, -1, 0);
+		if (level.isReplayingMovement)
+			return level.currentInputMoves[1].marbleAxes;
 		if (this.controllable) {
 			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
 			motiondir.transform(level.newOrientationQuat.toMatrix());
@@ -561,7 +568,7 @@ class Marble extends GameObject {
 			for (contact in contacts) {
 				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
 					if (contact.otherObject is RoundBumper) {
-						if (!playedSounds.contains("data/sound/bumperding1.wav")) {
+						if (!level.isReplayingMovement && !playedSounds.contains("data/sound/bumperding1.wav")) {
 							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
 							playedSounds.push("data/sound/bumperding1.wav");
 						}
@@ -605,6 +612,8 @@ class Marble extends GameObject {
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
+		if (!level.isReplayingMovement)
+			level.inputRecorder.recordAxis(axes);
 		var sideDir = axes[0];
 		var motionDir = axes[1];
 		var upDir = axes[2];
@@ -799,7 +808,7 @@ class Marble extends GameObject {
 			}
 			if (sv < this._jumpImpulse) {
 				this.velocity.load(this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv))));
-				if (!playedSounds.contains("data/sound/jump.wav")) {
+				if (!level.isReplayingMovement && !playedSounds.contains("data/sound/jump.wav")) {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/jump.wav", ResourceLoader.getAudio, this.soundResources));
 					playedSounds.push("data/sound/jump.wav");
 				}
@@ -879,7 +888,7 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
-		if (!this.controllable)
+		if (!this.controllable || level.isReplayingMovement)
 			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData,
@@ -914,6 +923,8 @@ class Marble extends GameObject {
 	}
 
 	function playBoundSound(time:Float, contactVel:Float) {
+		if (level.isReplayingMovement)
+			return;
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
 			var bounceSoundNum = Math.floor(Math.random() * 4);
@@ -943,6 +954,8 @@ class Marble extends GameObject {
 	}
 
 	function updateRollSound(time:TimeState, contactPct:Float, slipAmount:Float) {
+		if (level.isReplayingMovement)
+			return;
 		var rSpat = rollSound.getEffect(Spatialization);
 		rSpat.position = this.collider.transform.getPosition();
 
@@ -1542,6 +1555,7 @@ class Marble extends GameObject {
 			// this.setPosition(newPos.x, newPos.y, newPos.z);
 
 			this.collider.setTransform(totMatrix);
+			this.collisionWorld.updateTransform(this.collider);
 			this.collider.velocity = this.velocity;
 
 			if (this.heldPowerup != null && m.powerup && !this.level.outOfBounds) {
@@ -1592,41 +1606,139 @@ class Marble extends GameObject {
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 	}
 
-	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
-		var move = new Move();
-		move.d = new Vector();
-		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching) {
-			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
-			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
-			if (Key.isDown(Settings.controlsSettings.forward)) {
-				move.d.x -= 1;
+	// MP Only Functions
+	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
+		var move:Move = null;
+		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
+			move = recordMove();
+		}
+		if (!this.controllable && this.connection != null) {
+			move = new Move();
+			move.d = new Vector(0, 0);
+		}
+
+		playedSounds = [];
+		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
+
+		physicsAccumulator = 0;
+	}
+
+	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {
+		if (oldPos != null && newPos != null) {
+			var deltaT = physicsAccumulator / 0.032;
+			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
+			this.setPosition(renderPos.x, renderPos.y, renderPos.z);
+
+			var rot = this.prevRot;
+			var quat = new Quat();
+			quat.initRotation(omega.x * physicsAccumulator, omega.y * physicsAccumulator, omega.z * physicsAccumulator);
+			quat.multiply(quat, rot);
+			this.setRotationQuat(quat);
+
+			var adt = timeState.clone();
+			adt.dt = physicsAccumulator;
+			for (pi in pathedInteriors) {
+				pi.update(adt);
 			}
-			if (Key.isDown(Settings.controlsSettings.backward)) {
-				move.d.x += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.left)) {
-				move.d.y += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.right)) {
-				move.d.y -= 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.jump)
-				|| MarbleGame.instance.touchInput.jumpButton.pressed
-				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
-				move.jump = true;
-			}
-			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
-				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
-				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
-				move.powerup = true;
-			}
-			if (MarbleGame.instance.touchInput.movementInput.pressed) {
-				move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
-				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
+		}
+		physicsAccumulator += timeState.dt;
+
+		if (this.controllable && this.level != null && !this.level.rewinding) {
+			// this.camera.startCenterCamera();
+			this.camera.update(timeState.currentAttemptTime, timeState.dt);
+		}
+
+		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+
+		var s = this._renderScale * this._renderScale;
+		if (s <= this._marbleScale * this._marbleScale)
+			s = 0.1;
+		else
+			s = 0.4;
+
+		s = timeState.dt / s * 2.302585124969482;
+		s = 1.0 / (s * (s * 0.2349999994039536 * s) + s + 1.0 + 0.4799999892711639 * s * s);
+		this._renderScale *= s;
+		s = 1 - s;
+		this._renderScale += s * this._marbleScale;
+		var marbledts = cast(this.getChildAt(0), DtsObject);
+		marbledts.setScale(this._renderScale);
+
+		if (this._radius != 0.675 && timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+			this._prevRadius = this._radius;
+			this._radius = 0.675;
+			this.collider.radius = 0.675;
+			this._marbleScale *= 2.25;
+			var boost = this.level.currentUp.multiply(5);
+			this.velocity = this.velocity.add(boost);
+		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > 10) {
+			if (this._radius != this._prevRadius) {
+				this._radius = this._prevRadius;
+				this.collider.radius = this._radius;
+				this._marbleScale = this._defaultScale;
+				AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null, false);
 			}
 		}
 
+		this.updateFinishAnimation(timeState.dt);
+		if (this.mode == Finish) {
+			this.setPosition(this.finishAnimPosition.x, this.finishAnimPosition.y, this.finishAnimPosition.z);
+			updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+		}
+
+		this.trailEmitter();
+		if (bounceEmitDelay > 0)
+			bounceEmitDelay -= timeState.dt;
+		if (bounceEmitDelay < 0)
+			bounceEmitDelay = 0;
+	}
+
+	public function recordMove() {
+		var move = new Move();
+		move.d = new Vector();
+		move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
+		move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
+		if (Key.isDown(Settings.controlsSettings.forward)) {
+			move.d.x -= 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.backward)) {
+			move.d.x += 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.left)) {
+			move.d.y += 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.right)) {
+			move.d.y -= 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.jump)
+			|| MarbleGame.instance.touchInput.jumpButton.pressed
+			|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
+			move.jump = true;
+		}
+		if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
+			|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
+			|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
+			move.powerup = true;
+		}
+		if (MarbleGame.instance.touchInput.movementInput.pressed) {
+			move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
+			move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
+		}
+		return move;
+	}
+
+	// SP only function
+	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
+		var move:Move = null;
+		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
+			move = recordMove();
+		}
+
+		if (level.isReplayingMovement)
+			move = level.currentInputMoves[1].move;
+
 		if (this.controllable && this.level.isWatching) {
+			move = new Move();
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(Jumped))
 				move.jump = true;
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(UsedPowerup))
@@ -1637,6 +1749,10 @@ class Marble extends GameObject {
 				this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false, false);
 				this.level.replay.recordMarbleInput(move.d.x, move.d.y);
 			}
+		}
+		if (!this.controllable && this.connection != null) {
+			move = new Move();
+			move.d = new Vector(0, 0);
 		}
 
 		physicsAccumulator += timeState.dt;

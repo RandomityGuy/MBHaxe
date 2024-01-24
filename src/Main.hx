@@ -1,5 +1,6 @@
 package;
 
+import datachannel.RTC;
 import gui.VersionGui;
 import gui.PresentsGui;
 import src.Debug;
@@ -81,6 +82,7 @@ class Main extends hxd.App {
 		#end
 
 		// try {
+		RTC.init();
 		Http.init();
 		haxe.MainLoop.add(() -> Http.loop());
 		Settings.init();
@@ -143,6 +145,7 @@ class Main extends hxd.App {
 			// 	marbleGame.update(1 / 60);
 			// 	timeAccumulator -= 1 / 60;
 			// }
+			RTC.processEvents();
 			marbleGame.update(dt);
 			// } catch (e) {
 			// Console.error(e.message);

@@ -1,5 +1,9 @@
 package src;
 
+import net.NetCommands;
+import net.Net;
+import net.Net.ClientConnection;
+import rewind.InputRecorder;
 import gui.AchievementsGui;
 import src.Radar;
 import gui.LevelSelectGui;
@@ -106,7 +110,6 @@ class MarbleWorld extends Scheduler {
 
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
-	public var marbles:Array<Marble> = [];
 	public var dtsObjects:Array<DtsObject> = [];
 	public var forceObjects:Array<ForceObject> = [];
 	public var triggers:Array<Trigger> = [];
@@ -184,6 +187,18 @@ class MarbleWorld extends Scheduler {
 	public var rewindManager:RewindManager;
 	public var rewinding:Bool = false;
 
+	public var inputRecorder:InputRecorder;
+	public var isReplayingMovement:Bool = false;
+	public var currentInputMoves:Array<InputRecorderFrame>;
+
+	// Multiplayer
+	public var isMultiplayer:Bool;
+
+	public var startRealTime:Float = 0;
+	public var multiplayerStarted:Bool = false;
+
+	var clientMarbles:Map<ClientConnection, Marble> = [];
+
 	// Loading
 	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
 
@@ -208,7 +223,7 @@ class MarbleWorld extends Scheduler {
 
 	var lock:Bool = false;
 
-	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission, record:Bool = false) {
+	public function new(scene:Scene, scene2d:h2d.Scene, mission:Mission, record:Bool = false, multiplayer:Bool = false) {
 		this.scene = scene;
 		this.scene2d = scene2d;
 		this.mission = mission;
@@ -217,6 +232,17 @@ class MarbleWorld extends Scheduler {
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(this);
+		this.inputRecorder = new InputRecorder(this);
+		this.isMultiplayer = multiplayer;
+
+		// Set the network RNG for hunt
+		if (isMultiplayer && gameMode is modes.HuntMode && Net.isHost) {
+			var hunt:modes.HuntMode = cast gameMode;
+			var rng = Math.random() * 10000;
+			NetCommands.setNetworkRNG(rng);
+			@:privateAccess hunt.rng.setSeed(cast rng);
+			@:privateAccess hunt.rng2.setSeed(cast rng);
+		}
 	}
 
 	public function init() {
@@ -267,7 +293,12 @@ class MarbleWorld extends Scheduler {
 		scanMission(this.mission.root);
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
-		this.resourceLoadFuncs.push(fwd -> this.initMarble(fwd));
+		if (this.isMultiplayer) {
+			for (client in Net.clients) {
+				this.resourceLoadFuncs.push(fwd -> this.initMarble(client, fwd)); // Others
+			}
+		}
+		this.resourceLoadFuncs.push(fwd -> this.initMarble(null, fwd)); // Self
 		this.resourceLoadFuncs.push(fwd -> {
 			this.addSimGroup(this.mission.root);
 			this._loadingLength = resourceLoadFuncs.length;
@@ -371,7 +402,7 @@ class MarbleWorld extends Scheduler {
 		worker.run();
 	}
 
-	public function initMarble(onFinish:Void->Void) {
+	public function initMarble(client:ClientConnection, onFinish:Void->Void) {
 		Console.log("Initializing marble");
 		var worker = new ResourceLoaderWorker(onFinish);
 		var marblefiles = [
@@ -422,8 +453,9 @@ class MarbleWorld extends Scheduler {
 		}
 		worker.addTask(fwd -> {
 			var marble = new Marble();
-			marble.controllable = true;
-			this.addMarble(marble, fwd);
+			if (client == null)
+				marble.controllable = true;
+			this.addMarble(marble, client, fwd);
 		});
 		worker.run();
 	}
@@ -435,6 +467,8 @@ class MarbleWorld extends Scheduler {
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
 			shape.onLevelStart();
+		if (this.isMultiplayer && Net.isClient)
+			NetCommands.clientIsReady(Net.clientId);
 	}
 
 	public function restart(full:Bool = false) {
@@ -527,6 +561,15 @@ class MarbleWorld extends Scheduler {
 		this.marble.setMode(Start);
 		sky.follow = marble.camera;
 
+		if (isMultiplayer) {
+			for (client => marble in clientMarbles) {
+				var marbleStartQuat = this.gameMode.getSpawnTransform();
+				marble.setMarblePosition(marbleStartQuat.position.x, marbleStartQuat.position.y, marbleStartQuat.position.z);
+				marble.reset();
+				marble.setMode(Start);
+			}
+		}
+
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
 			&& element._name == "MissionInfo")[0];
 		if (missionInfo.starthelptext != null)
@@ -586,17 +629,32 @@ class MarbleWorld extends Scheduler {
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
+	public function allClientsReady() {
+		NetCommands.setStartTime(3); // Start after 3 seconds
+	}
+
 	public function updateGameState() {
 		if (this.outOfBounds)
 			return; // We will update state manually
-		if (this.timeState.currentAttemptTime < 0.5) {
-			this.marble.setMode(Start);
-		}
-		if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
-			this.marble.setMode(Start);
-		}
-		if (this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5 && this.finishTime == null) {
-			this.marble.setMode(Play);
+		if (!this.isMultiplayer) {
+			if (this.timeState.currentAttemptTime < 0.5) {
+				this.marble.setMode(Start);
+			}
+			if ((this.timeState.currentAttemptTime >= 0.5) && (this.timeState.currentAttemptTime < 3.5)) {
+				this.marble.setMode(Start);
+			}
+			if (this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5 && this.finishTime == null) {
+				this.marble.setMode(Play);
+			}
+		} else {
+			if (!this.multiplayerStarted) {
+				if (this.startRealTime != 0 && this.timeState.timeSinceLoad > this.startRealTime) {
+					this.multiplayerStarted = true;
+					this.marble.setMode(Play);
+					for (client => marble in this.clientMarbles)
+						marble.setMode(Play);
+				}
+			}
 		}
 	}
 
@@ -897,24 +955,44 @@ class MarbleWorld extends Scheduler {
 		});
 	}
 
-	public function addMarble(marble:Marble, onFinish:Void->Void) {
-		this.marbles.push(marble);
+	public function addMarble(marble:Marble, client:ClientConnection, onFinish:Void->Void) {
 		marble.level = cast this;
 		if (marble.controllable) {
-			marble.init(cast this, () -> {
+			marble.init(cast this, client, () -> {
 				this.scene.addChild(marble.camera);
 				this.marble = marble;
 				// Ugly hack
 				// sky.follow = marble;
 				sky.follow = marble.camera;
 				this.collisionWorld.addMovingEntity(marble.collider);
+				this.collisionWorld.addMarbleEntity(marble.collider);
 				this.scene.addChild(marble);
 				onFinish();
 			});
 		} else {
-			this.collisionWorld.addMovingEntity(marble.collider);
-			this.scene.addChild(marble);
+			marble.init(cast this, client, () -> {
+				marble.collisionWorld = this.collisionWorld;
+				this.collisionWorld.addMovingEntity(marble.collider);
+				this.collisionWorld.addMarbleEntity(marble.collider);
+				this.scene.addChild(marble);
+				if (client != null)
+					clientMarbles.set(client, marble);
+				onFinish();
+			});
 		}
+	}
+
+	public function addGhostMarble(onFinish:Marble->Void) {
+		var marb = new Marble();
+		marb.controllable = false;
+		marb.init(null, null, () -> {
+			marb.collisionWorld = this.collisionWorld;
+			this.collisionWorld.addMovingEntity(marb.collider);
+			this.collisionWorld.addMarbleEntity(marb.collider);
+			this.scene.addChild(marb);
+			onFinish(marb);
+		});
+		return marb;
 	}
 
 	public function performRestart() {
@@ -935,9 +1013,51 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	public function rollback(t:Float) {
+		var newT = timeState.currentAttemptTime - t;
+		var rewindFrame = rewindManager.getNextRewindFrame(timeState.currentAttemptTime - t);
+		rewindManager.applyFrame(rewindFrame);
+		this.isReplayingMovement = true;
+		this.currentInputMoves = this.inputRecorder.getMovesFrom(timeState.currentAttemptTime);
+	}
+
+	public function advanceWorld(dt:Float) {
+		ProfilerUI.measure("updateTimer");
+		this.updateTimer(dt);
+		this.tickSchedule(timeState.currentAttemptTime);
+
+		if (Key.isDown(Settings.controlsSettings.blast)
+			|| (MarbleGame.instance.touchInput.blastbutton.pressed)
+			|| Gamepad.isDown(Settings.gamepadSettings.blast)
+			&& !this.isWatching
+			&& this.game == "ultra") {
+			this.marble.useBlast();
+		}
+
+		this.updateGameState();
+		this.updateBlast(timeState);
+		ProfilerUI.measure("updateDTS");
+		for (obj in dtsObjects) {
+			obj.update(timeState);
+		}
+		for (obj in triggers) {
+			obj.update(timeState);
+		}
+
+		ProfilerUI.measure("updateMarbles");
+		marble.update(timeState, collisionWorld, this.pathedInteriors);
+		for (client => marble in clientMarbles) {
+			marble.update(timeState, collisionWorld, this.pathedInteriors);
+		}
+	}
+
 	public function update(dt:Float) {
 		if (!_ready) {
 			return;
+		}
+
+		if (Key.isPressed(Key.T)) {
+			rollback(0.4);
 		}
 
 		var realDt = dt;
@@ -996,8 +1116,33 @@ class MarbleWorld extends Scheduler {
 				rewindManager.applyFrame(rframe);
 			}
 		}
+
 		if (dt < 0)
 			return;
+
+		if (this.isReplayingMovement) {
+			while (this.currentInputMoves.length > 1) {
+				while (this.currentInputMoves[1].time <= timeState.currentAttemptTime) {
+					this.currentInputMoves = this.currentInputMoves.slice(1);
+					if (this.currentInputMoves.length == 1)
+						break;
+				}
+				if (this.currentInputMoves.length > 1) {
+					dt = this.currentInputMoves[1].time - this.currentInputMoves[0].time;
+				}
+
+				if (this.isReplayingMovement) {
+					if (this.timeState.currentAttemptTime != this.currentInputMoves[0].time)
+						trace("fucked");
+				}
+
+				if (this.currentInputMoves.length > 1) {
+					advanceWorld(dt);
+					// trace('Position: ${@:privateAccess marble.newPos.sub(currentInputMoves[1].pos).length()}. Vel: ${marble.velocity.sub(currentInputMoves[1].velocity).length()}');
+				}
+			}
+			this.isReplayingMovement = false;
+		}
 
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
@@ -1057,8 +1202,14 @@ class MarbleWorld extends Scheduler {
 		for (obj in triggers) {
 			obj.update(timeState);
 		}
+
+		if (!isReplayingMovement) {
+			inputRecorder.recordInput(timeState.currentAttemptTime);
+		}
+
 		ProfilerUI.measure("updateMarbles");
-		for (marble in marbles) {
+		marble.update(timeState, collisionWorld, this.pathedInteriors);
+		for (client => marble in clientMarbles) {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
 		}
 		_cubemapNeedsUpdate = true;
@@ -1095,6 +1246,10 @@ class MarbleWorld extends Scheduler {
 
 		if (!this.rewinding && Settings.optionsSettings.rewindEnabled)
 			this.rewindManager.recordFrame();
+
+		if (!this.isReplayingMovement) {
+			inputRecorder.recordMarble();
+		}
 
 		this.updateTexts();
 	}
@@ -1177,7 +1332,8 @@ class MarbleWorld extends Scheduler {
 				if (this.timeState.gameplayClock < 0)
 					this.gameMode.onTimeExpire();
 			}
-			this.timeState.currentAttemptTime += dt;
+			if (!this.isMultiplayer || this.multiplayerStarted)
+				this.timeState.currentAttemptTime += dt;
 		} else {
 			this.timeState.currentAttemptTime = this.replay.currentPlaybackFrame.time;
 			this.timeState.gameplayClock = this.replay.currentPlaybackFrame.clockTime;
@@ -1834,10 +1990,10 @@ class MarbleWorld extends Scheduler {
 			pathedInteriors.dispose();
 		}
 		pathedInteriors = null;
-		for (marble in this.marbles) {
+		for (client => marble in clientMarbles) {
 			marble.dispose();
 		}
-		marbles = null;
+		clientMarbles = null;
 		for (dtsObject in this.dtsObjects) {
 			dtsObject.dispose();
 		}

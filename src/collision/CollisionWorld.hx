@@ -13,6 +13,8 @@ class CollisionWorld {
 	public var dynamicEntities:Array<CollisionEntity> = [];
 	public var dynamicOctree:Octree;
 
+	var marbleEntities:Array<SphereCollisionEntity> = [];
+
 	var dynamicEntitySet:Map<CollisionEntity, Bool> = [];
 
 	public function new() {
@@ -53,6 +55,13 @@ class CollisionWorld {
 			if (obj != spherecollision) {
 				if (obj.boundingBox.collide(box) && obj.go.isCollideable)
 					contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
+			}
+		}
+
+		for (marb in marbleEntities) {
+			if (marb != spherecollision) {
+				if (spherecollision.go.isCollideable)
+					contacts = contacts.concat(marb.sphereIntersection(spherecollision, timeState));
 			}
 		}
 		return {foundEntities: foundEntities, contacts: contacts};
@@ -112,6 +121,14 @@ class CollisionWorld {
 
 		// this.rtree.insert([entity.boundingBox.xMin, entity.boundingBox.yMin, entity.boundingBox.zMin],
 		// 	[entity.boundingBox.xSize, entity.boundingBox.ySize, entity.boundingBox.zSize], entity);
+	}
+
+	public function addMarbleEntity(entity:SphereCollisionEntity) {
+		this.marbleEntities.push(entity);
+	}
+
+	public function removeMarbleEntity(entity:SphereCollisionEntity) {
+		this.marbleEntities.remove(entity);
 	}
 
 	public function addMovingEntity(entity:CollisionEntity) {
