@@ -1,5 +1,6 @@
 package src;
 
+import net.MoveManager;
 import net.NetCommands;
 import net.Net;
 import net.Net.ClientConnection;
@@ -196,6 +197,9 @@ class MarbleWorld extends Scheduler {
 
 	public var startRealTime:Float = 0;
 	public var multiplayerStarted:Bool = false;
+	public var ticks:Int = 0; // How many 32ms ticks have happened
+
+	var tickAccumulator:Float = 0.0;
 
 	var clientMarbles:Map<ClientConnection, Marble> = [];
 
@@ -234,6 +238,10 @@ class MarbleWorld extends Scheduler {
 		this.rewindManager = new RewindManager(this);
 		this.inputRecorder = new InputRecorder(this);
 		this.isMultiplayer = multiplayer;
+		if (this.isMultiplayer) {
+			isRecording = false;
+			isWatching = false;
+		}
 
 		// Set the network RNG for hunt
 		if (isMultiplayer && gameMode is modes.HuntMode && Net.isHost) {
@@ -1056,16 +1064,13 @@ class MarbleWorld extends Scheduler {
 			return;
 		}
 
-		if (Key.isPressed(Key.T)) {
-			rollback(0.4);
-		}
-
 		var realDt = dt;
 
 		if ((Key.isDown(Settings.controlsSettings.rewind)
 			|| MarbleGame.instance.touchInput.rewindButton.pressed
 			|| Gamepad.isDown(Settings.gamepadSettings.rewind))
 			&& Settings.optionsSettings.rewindEnabled
+			&& !this.isMultiplayer
 			&& !this.isWatching
 			&& this.finishTime == null) {
 			this.rewinding = true;
@@ -1073,7 +1078,8 @@ class MarbleWorld extends Scheduler {
 			if ((Key.isReleased(Settings.controlsSettings.rewind)
 				|| !MarbleGame.instance.touchInput.rewindButton.pressed
 				|| Gamepad.isReleased(Settings.gamepadSettings.rewind))
-				&& this.rewinding) {
+				&& this.rewinding
+				&& !this.isMultiplayer) {
 				if (this.isRecording) {
 					this.replay.spliceReplay(timeState.currentAttemptTime);
 				}
@@ -1208,9 +1214,35 @@ class MarbleWorld extends Scheduler {
 		}
 
 		ProfilerUI.measure("updateMarbles");
-		marble.update(timeState, collisionWorld, this.pathedInteriors);
-		for (client => marble in clientMarbles) {
+		if (this.isMultiplayer) {
+			tickAccumulator += timeState.dt;
+			while (tickAccumulator >= 0.032) {
+				var fixedDt = timeState.clone();
+				fixedDt.dt = 0.032;
+				tickAccumulator -= 0.032;
+				var packets = [];
+				marble.updateServer(fixedDt, collisionWorld, pathedInteriors, packets);
+				for (client => marble in clientMarbles) {
+					marble.updateServer(fixedDt, collisionWorld, pathedInteriors, packets);
+				}
+				if (Net.isHost) {
+					for (client => marble in clientMarbles) { // Oh no!
+						for (packet in packets) {
+							client.datachannel.sendBytes(packet);
+						}
+					}
+				}
+				ticks++;
+			}
+			marble.updateClient(timeState, this.pathedInteriors);
+			for (client => marble in clientMarbles) {
+				marble.updateClient(timeState, this.pathedInteriors);
+			}
+		} else {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
+			for (client => marble in clientMarbles) {
+				marble.update(timeState, collisionWorld, this.pathedInteriors);
+			}
 		}
 		_cubemapNeedsUpdate = true;
 		Renderer.dirtyBuffers = true;
@@ -1244,7 +1276,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		if (!this.rewinding && Settings.optionsSettings.rewindEnabled)
+		if (!this.rewinding && Settings.optionsSettings.rewindEnabled && !this.isMultiplayer)
 			this.rewindManager.recordFrame();
 
 		if (!this.isReplayingMovement) {

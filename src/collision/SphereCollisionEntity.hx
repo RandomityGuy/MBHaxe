@@ -89,7 +89,7 @@ class SphereCollisionEntity extends CollisionEntity {
 			contact.collider = this;
 			contact.friction = 1;
 			contact.restitution = 1;
-			contact.velocity = this.velocity;
+			contact.velocity = this.velocity.clone();
 			contact.otherObject = this.go;
 			contact.point = position.add(normDist);
 			contact.normal = normDist.multiply(-1);
@@ -102,9 +102,9 @@ class SphereCollisionEntity extends CollisionEntity {
 			othercontact.collider = collisionEntity;
 			othercontact.friction = 1;
 			othercontact.restitution = 1;
-			othercontact.velocity = this.velocity;
-			othercontact.point = thispos.add(position).multiply(0.5);
-			othercontact.normal = contact.point.sub(position).normalized();
+			othercontact.velocity = collisionEntity.velocity.clone();
+			othercontact.point = thispos.sub(normDist);
+			othercontact.normal = normDist.clone();
 			othercontact.contactDistance = contact.point.distance(position);
 			othercontact.force = 0;
 			othercontact.penetration = this.radius - (thispos.sub(othercontact.point).dot(othercontact.normal));

@@ -6,6 +6,8 @@ import datachannel.RTCDataChannel;
 import hx.ws.WebSocket;
 import src.Console;
 import net.NetCommands;
+import src.MarbleGame;
+import hx.ws.Types.MessageType;
 
 enum abstract GameplayState(Int) from Int to Int {
 	var UNKNOWN;
@@ -19,6 +21,8 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var NetCommand;
 	var Ping;
 	var PingBack;
+	var MarbleUpdate;
+	var MarbleMove;
 }
 
 @:publicFields
@@ -27,6 +31,7 @@ class ClientConnection {
 	var socket:RTCPeerConnection;
 	var datachannel:RTCDataChannel;
 	var state:GameplayState;
+	var moveManager:MoveManager;
 	var rtt:Float;
 	var pingSendTime:Float;
 	var _rttRecords:Array<Float> = [];
@@ -37,6 +42,7 @@ class ClientConnection {
 		this.id = id;
 		this.state = GameplayState.LOBBY;
 		this.rtt = 0;
+		this.moveManager = new MoveManager(this);
 	}
 
 	public function ready() {
@@ -60,6 +66,7 @@ class Net {
 	public static var networkRNG:Float;
 	public static var clients:Map<RTCPeerConnection, ClientConnection> = [];
 	public static var clientIdMap:Map<Int, ClientConnection> = [];
+	public static var clientConnection:ClientConnection;
 
 	public static function hostServer() {
 		// host = new RTCPeerConnection(["stun.l.google.com:19302"], "0.0.0.0");
@@ -76,41 +83,45 @@ class Net {
 			switch (m) {
 				case StrMessage(content):
 					var conts = Json.parse(content);
-					var peer = new RTCPeerConnection(["stun.l.google.com:19302"], "0.0.0.0");
+					var peer = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
 					peer.setRemoteDescription(conts.sdp, conts.type);
+					addClient(peer);
 
-					var candidates = [];
-					peer.onLocalCandidate = (c) -> {
-						if (c != "")
-							candidates.push('a=${c}');
-					}
-					peer.onGatheringStateChange = (s) -> {
-						if (s == RTC_GATHERING_COMPLETE) {
-							var sdpObj = StringTools.trim(peer.localDescription);
-							sdpObj = sdpObj + '\r\n' + candidates.join('\r\n');
-							masterWs.send(Json.stringify({
-								type: "connect",
-								sdpObj: {
-									sdp: sdpObj,
-									type: "offer"
-								}
-							}));
-						}
-					}
-					peer.onDataChannel = (dc) -> {
-						onClientConnect(peer, dc);
-					};
-				case _: {}
+				case BytesMessage(content): {}
 			}
 		}
 
 		isMP = true;
 	}
 
+	static function addClient(peer:RTCPeerConnection) {
+		var candidates = [];
+		peer.onLocalCandidate = (c) -> {
+			if (c != "")
+				candidates.push('a=${c}');
+		}
+		peer.onGatheringStateChange = (s) -> {
+			if (s == RTC_GATHERING_COMPLETE) {
+				var sdpObj = StringTools.trim(peer.localDescription);
+				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n');
+				masterWs.send(Json.stringify({
+					type: "connect",
+					sdpObj: {
+						sdp: sdpObj,
+						type: "answer"
+					}
+				}));
+			}
+		}
+		peer.onDataChannel = (dc:datachannel.RTCDataChannel) -> {
+			onClientConnect(peer, dc);
+		}
+	}
+
 	public static function joinServer(connectedCb:() -> Void) {
 		masterWs = new WebSocket("ws://localhost:8080");
 
-		client = new RTCPeerConnection(["stun.l.google.com:19302"], "0.0.0.0");
+		client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
 		var candidates = [];
 
 		client.onLocalCandidate = (c) -> {
@@ -119,6 +130,7 @@ class Net {
 		}
 		client.onGatheringStateChange = (s) -> {
 			if (s == RTC_GATHERING_COMPLETE) {
+				Console.log("Local Description Set!");
 				var sdpObj = StringTools.trim(client.localDescription);
 				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n');
 				masterWs.send(Json.stringify({
@@ -134,6 +146,7 @@ class Net {
 		masterWs.onmessage = (m) -> {
 			switch (m) {
 				case StrMessage(content):
+					Console.log("Remote Description Received!");
 					var conts = Json.parse(content);
 					client.setRemoteDescription(conts.sdp, conts.type);
 				case _: {}
@@ -142,8 +155,10 @@ class Net {
 
 		clientDatachannel = client.createDatachannel("mp");
 		clientDatachannel.onOpen = (n) -> {
+			Console.log("Successfully connected!");
 			clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
 			clientIdMap[0] = clients[client];
+			clientConnection = clients[client];
 			onConnectedToServer();
 			haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
 		}
@@ -172,7 +187,7 @@ class Net {
 		var b = haxe.io.Bytes.alloc(2);
 		b.set(0, Ping);
 		b.set(1, 3); // Count
-		clients[c].pingSendTime = Sys.time();
+		clients[c].pingSendTime = Console.time();
 		dc.sendBytes(b);
 		Console.log("Sending ping packet!");
 	}
@@ -183,7 +198,7 @@ class Net {
 		var b = haxe.io.Bytes.alloc(2);
 		b.set(0, Ping);
 		b.set(1, 3); // Count
-		clients[client].pingSendTime = Sys.time();
+		clients[client].pingSendTime = Console.time();
 		clientDatachannel.sendBytes(b);
 		Console.log("Sending ping packet!");
 	}
@@ -210,7 +225,7 @@ class Net {
 				var pingLeft = input.readByte();
 				Console.log("Got pingback packet!");
 				var conn = clients[c];
-				var now = Sys.time();
+				var now = Console.time();
 				conn._rttRecords.push((now - conn.pingSendTime));
 				if (pingLeft > 0) {
 					conn.pingSendTime = now;
@@ -224,6 +239,23 @@ class Net {
 					conn.rtt /= conn._rttRecords.length;
 					Console.log('Got RTT ${conn.rtt} for client ${conn.id}');
 				}
+
+			case MarbleUpdate:
+				var marbleClientId = input.readUInt16();
+				if (marbleClientId == clientId) {
+					if (MarbleGame.instance.world != null)
+						MarbleGame.instance.world.marble.unpackUpdate(input);
+				} else {
+					var cc = clientIdMap[marbleClientId];
+					if (MarbleGame.instance.world != null)
+						@:privateAccess MarbleGame.instance.world.clientMarbles[cc].unpackUpdate(input);
+				}
+
+			case MarbleMove:
+				var marbleClientId = input.readUInt16();
+				var cc = clientIdMap[marbleClientId];
+				var m = MoveManager.unpackMove(input);
+				cc.moveManager.queueMove(m);
 
 			case _:
 				trace("unknown command: " + packetType);

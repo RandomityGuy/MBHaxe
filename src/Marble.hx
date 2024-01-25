@@ -1,5 +1,7 @@
 package src;
 
+import net.MoveManager;
+import net.MoveManager.NetMove;
 import shaders.marble.CrystalMarb;
 import shaders.marble.ClassicMarb;
 import shapes.HelicopterImage;
@@ -286,6 +288,8 @@ class Marble extends GameObject {
 	public var cubemapRenderer:CubemapRenderer;
 
 	var connection:net.Net.ClientConnection;
+	var moveMotionDir:Vector;
+	var isNetUpdate:Bool = false;
 
 	public function new() {
 		super();
@@ -529,7 +533,7 @@ class Marble extends GameObject {
 		var motiondir = new Vector(0, -1, 0);
 		if (level.isReplayingMovement)
 			return level.currentInputMoves[1].marbleAxes;
-		if (this.controllable) {
+		if (this.controllable && !this.isNetUpdate) {
 			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
 			motiondir.transform(level.newOrientationQuat.toMatrix());
 			var updir = this.level.currentUp;
@@ -539,7 +543,11 @@ class Marble extends GameObject {
 			motiondir = updir.cross(sidedir);
 			return [sidedir, motiondir, updir];
 		} else {
-			return [new Vector(1, 0, 0), motiondir, new Vector(0, 0, 1)];
+			if (moveMotionDir != null)
+				motiondir = moveMotionDir;
+			var updir = this.level.currentUp;
+			var sidedir = motiondir.cross(updir);
+			return [sidedir, motiondir, updir];
 		}
 	}
 
@@ -568,7 +576,7 @@ class Marble extends GameObject {
 			for (contact in contacts) {
 				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
 					if (contact.otherObject is RoundBumper) {
-						if (!level.isReplayingMovement && !playedSounds.contains("data/sound/bumperding1.wav")) {
+						if (!level.isReplayingMovement && !playedSounds.contains("data/sound/bumperding1.wav") && !this.isNetUpdate) {
 							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
 							playedSounds.push("data/sound/bumperding1.wav");
 						}
@@ -808,7 +816,10 @@ class Marble extends GameObject {
 			}
 			if (sv < this._jumpImpulse) {
 				this.velocity.load(this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv))));
-				if (!level.isReplayingMovement && !playedSounds.contains("data/sound/jump.wav")) {
+				if (!level.isReplayingMovement
+					&& !playedSounds.contains("data/sound/jump.wav")
+					&& !this.isNetUpdate
+					&& this.controllable) {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/jump.wav", ResourceLoader.getAudio, this.soundResources));
 					playedSounds.push("data/sound/jump.wav");
 				}
@@ -888,7 +899,7 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
-		if (!this.controllable || level.isReplayingMovement)
+		if (!this.controllable || level.isReplayingMovement || this.isNetUpdate)
 			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData,
@@ -923,7 +934,7 @@ class Marble extends GameObject {
 	}
 
 	function playBoundSound(time:Float, contactVel:Float) {
-		if (level.isReplayingMovement)
+		if (level.isReplayingMovement || this.isNetUpdate)
 			return;
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
@@ -1607,20 +1618,102 @@ class Marble extends GameObject {
 	}
 
 	// MP Only Functions
-	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
-		var move:Move = null;
-		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
-			move = recordMove();
+
+	public function packUpdate(move:NetMove) {
+		var b = new haxe.io.BytesOutput();
+		b.writeByte(NetPacketType.MarbleUpdate);
+		b.writeUInt16(connection != null ? connection.id : 0);
+		MoveManager.packMove(move, b);
+		b.writeUInt16(this.level.ticks); // So we can get the clients to do stuff about it
+		b.writeFloat(this.newPos.x);
+		b.writeFloat(this.newPos.y);
+		b.writeFloat(this.newPos.z);
+		b.writeFloat(this.velocity.x);
+		b.writeFloat(this.velocity.y);
+		b.writeFloat(this.velocity.z);
+		b.writeFloat(this.omega.x);
+		b.writeFloat(this.omega.y);
+		b.writeFloat(this.omega.z);
+		return b.getBytes();
+	}
+
+	public function unpackUpdate(b:haxe.io.BytesInput) {
+		// Assume packet header is already read
+		var serverMove = MoveManager.unpackMove(b);
+		if (Net.isClient)
+			Net.clientConnection.moveManager.acknowledgeMove(serverMove.id);
+		var serverTicks = b.readUInt16();
+		this.oldPos = this.newPos;
+		this.newPos = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+		this.collider.transform.setPosition(this.newPos);
+		this.velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+		this.omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+
+		// Apply the moves we have queued
+		if (Net.isClient) {
+			this.isNetUpdate = true;
+			if (this.controllable) {
+				for (move in @:privateAccess Net.clientConnection.moveManager.queuedMoves) {
+					moveMotionDir = move.motionDir;
+					advancePhysics(move.timeState, move.move, this.level.collisionWorld, this.level.pathedInteriors);
+				}
+			} else {
+				var tickDiff = this.level.ticks - serverTicks;
+				if (tickDiff > 0) {
+					var timeState = this.level.timeState.clone();
+					timeState.dt = 0.032;
+					var m = serverMove.move;
+					moveMotionDir = serverMove.motionDir;
+					for (o in 0...tickDiff) {
+						advancePhysics(timeState, m, this.level.collisionWorld, this.level.pathedInteriors);
+					}
+				}
+			}
+			this.isNetUpdate = false;
 		}
-		if (!this.controllable && this.connection != null) {
-			move = new Move();
-			move.d = new Vector(0, 0);
+	}
+
+	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>, packets:Array<haxe.io.Bytes>) {
+		var move:NetMove = null;
+		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
+			if (Net.isClient) {
+				var axis = getMarbleAxis()[1];
+				move = Net.clientConnection.moveManager.recordMove(axis, timeState);
+			} else if (Net.isHost) {
+				var axis = getMarbleAxis()[1];
+				var innerMove = recordMove();
+				move = new NetMove(innerMove, axis, timeState, 65535);
+			}
+		}
+		var moveId = 65535;
+		if (!this.controllable && this.connection != null && Net.isHost) {
+			var nextMove = this.connection.moveManager.getNextMove();
+			if (nextMove == null) {
+				var axis = getMarbleAxis()[1];
+				var innerMove = new Move();
+				innerMove.d = new Vector(0, 0);
+				move = new NetMove(innerMove, axis, timeState, 65535);
+			} else {
+				move = nextMove;
+				moveMotionDir = nextMove.motionDir;
+				moveId = nextMove.id;
+			}
+		}
+		if (move == null) {
+			var axis = getMarbleAxis()[1];
+			var innerMove = new Move();
+			innerMove.d = new Vector(0, 0);
+			move = new NetMove(innerMove, axis, timeState, 65535);
 		}
 
 		playedSounds = [];
-		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
+		advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
 
 		physicsAccumulator = 0;
+
+		if (Net.isHost) {
+			packets.push(packUpdate(move));
+		}
 	}
 
 	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {
