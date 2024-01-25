@@ -21,6 +21,7 @@ class SignallingHandler extends WebSocketHandler {
 				case StrMessage(content):
 					var conts = Json.parse(content);
 					if (conts.type == "connect") {
+						trace('Connect received');
 						var other = clients.find(x -> x != this);
 						other.send(Json.stringify(conts.sdpObj));
 					}
