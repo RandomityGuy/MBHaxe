@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import src.MarbleWorld;
 import src.ResourceLoader;
 import src.TimeState;
@@ -27,11 +28,11 @@ class Blast extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:Marble):Bool {
 		return true;
 	}
 
-	public function use(timeState:TimeState) {
+	public function use(marble:Marble, timeState:TimeState) {
 		this.level.blastAmount = 1.2;
 	}
 

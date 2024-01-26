@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import mis.MisParser;
 import dts.DtsFile;
 import src.ResourceLoader;
@@ -26,13 +27,13 @@ class AntiGravity extends PowerUp {
 			this.cooldownDuration = Math.NEGATIVE_INFINITY;
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:Marble):Bool {
 		var direction = new Vector(0, 0, -1);
 		direction.transform(this.getRotationQuat().toMatrix());
 		return !direction.equals(this.level.currentUp);
 	}
 
-	public function use(timeState:TimeState) {
+	public function use(marble:Marble, timeState:TimeState) {
 		if (!this.level.rewinding) {
 			var direction = new Vector(0, 0, -1);
 			direction.transform(this.getRotationQuat().toMatrix());

@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.ResourceLoader;
@@ -63,12 +64,11 @@ class SuperSpeed extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
+	public function use(marble:Marble, timeState:TimeState) {
 		var movementVector = marble.getMarbleAxis()[0];
 
 		// Okay, so super speed directionality is a bit strange. In general, the direction is based on the normal vector of the last surface you had contact with.
@@ -86,9 +86,10 @@ class SuperSpeed extends PowerUp {
 		// marble.body.addLinearVelocity(Util.vecThreeToOimo(movementVector).scale(24.7)); // Whirligig's determined value
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/use_speed.wav", ResourceLoader.getAudio, this.soundResources));
+		if (level.marble == marble)
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/use_speed.wav", ResourceLoader.getAudio, this.soundResources));
 		this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
-		this.level.deselectPowerUp();
+		this.level.deselectPowerUp(marble);
 	}
 
 	override function postProcessMaterial(matName:String, material:h3d.mat.Material) {

@@ -10,6 +10,7 @@ import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.MarbleWorld;
+import src.Marble;
 
 class Trapdoor extends DtsObject {
 	var lastContactTime = -1e8;
@@ -64,8 +65,8 @@ class Trapdoor extends DtsObject {
 		return completion;
 	}
 
-	override function onMarbleContact(time:TimeState, ?contact:CollisionInfo) {
-		super.onMarbleContact(time, contact);
+	override function onMarbleContact(marble:Marble, time:TimeState, ?contact:CollisionInfo) {
+		super.onMarbleContact(marble, time, contact);
 		if (time.timeSinceLoad - this.lastContactTime <= 0)
 			return; // The trapdoor is queued to open, so don't do anything.
 		var currentCompletion = this.getCurrentCompletion(time);

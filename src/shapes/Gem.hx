@@ -7,6 +7,7 @@ import src.TimeState;
 import src.DtsObject;
 import src.ResourceLoaderWorker;
 import src.ResourceLoader;
+import src.Marble;
 
 class Gem extends DtsObject {
 	public var pickedUp:Bool;
@@ -60,8 +61,8 @@ class Gem extends DtsObject {
 		}
 	}
 
-	override function onMarbleInside(timeState:TimeState) {
-		super.onMarbleInside(timeState);
+	override function onMarbleInside(marble:Marble, timeState:TimeState) {
+		super.onMarbleInside(marble, timeState);
 		if (this.pickedUp || this.level.rewinding)
 			return;
 		this.pickedUp = true;

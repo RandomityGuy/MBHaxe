@@ -1,5 +1,6 @@
 package src;
 
+import net.NetPacket.MarbleUpdatePacket;
 import net.MoveManager;
 import net.MoveManager.NetMove;
 import shaders.marble.CrystalMarb;
@@ -1573,7 +1574,7 @@ class Marble extends GameObject {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = passedTime;
-				this.heldPowerup.use(pTime);
+				this.heldPowerup.use(this, pTime);
 				this.heldPowerup = null;
 				if (this.level.isRecording) {
 					this.level.replay.recordPowerupPickup(null);
@@ -1608,7 +1609,7 @@ class Marble extends GameObject {
 
 		newPos = this.collider.transform.getPosition();
 
-		if (this.controllable && this.prevPos != null) {
+		if (this.prevPos != null) {
 			var tempTimeState = timeState.clone();
 			tempTimeState.currentAttemptTime = passedTime;
 			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
@@ -1622,55 +1623,24 @@ class Marble extends GameObject {
 	public function packUpdate(move:NetMove) {
 		var b = new haxe.io.BytesOutput();
 		b.writeByte(NetPacketType.MarbleUpdate);
-		b.writeUInt16(connection != null ? connection.id : 0);
-		MoveManager.packMove(move, b);
-		b.writeUInt16(this.level.ticks); // So we can get the clients to do stuff about it
-		b.writeFloat(this.newPos.x);
-		b.writeFloat(this.newPos.y);
-		b.writeFloat(this.newPos.z);
-		b.writeFloat(this.velocity.x);
-		b.writeFloat(this.velocity.y);
-		b.writeFloat(this.velocity.z);
-		b.writeFloat(this.omega.x);
-		b.writeFloat(this.omega.y);
-		b.writeFloat(this.omega.z);
+		var marbleUpdate = new MarbleUpdatePacket();
+		marbleUpdate.clientId = connection != null ? connection.id : 0;
+		marbleUpdate.serverTicks = move.timeState.ticks;
+		marbleUpdate.position = this.newPos;
+		marbleUpdate.velocity = this.velocity;
+		marbleUpdate.omega = this.omega;
+		marbleUpdate.move = move;
+		marbleUpdate.serialize(b);
 		return b.getBytes();
 	}
 
-	public function unpackUpdate(b:haxe.io.BytesInput) {
+	public function unpackUpdate(p:MarbleUpdatePacket) {
 		// Assume packet header is already read
-		var serverMove = MoveManager.unpackMove(b);
-		if (Net.isClient)
-			Net.clientConnection.moveManager.acknowledgeMove(serverMove.id);
-		var serverTicks = b.readUInt16();
 		this.oldPos = this.newPos;
-		this.newPos = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+		this.newPos = p.position;
 		this.collider.transform.setPosition(this.newPos);
-		this.velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
-		this.omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
-
-		// Apply the moves we have queued
-		if (Net.isClient) {
-			this.isNetUpdate = true;
-			if (this.controllable) {
-				for (move in @:privateAccess Net.clientConnection.moveManager.queuedMoves) {
-					moveMotionDir = move.motionDir;
-					advancePhysics(move.timeState, move.move, this.level.collisionWorld, this.level.pathedInteriors);
-				}
-			} else {
-				var tickDiff = this.level.ticks - serverTicks;
-				if (tickDiff > 0) {
-					var timeState = this.level.timeState.clone();
-					timeState.dt = 0.032;
-					var m = serverMove.move;
-					moveMotionDir = serverMove.motionDir;
-					for (o in 0...tickDiff) {
-						advancePhysics(timeState, m, this.level.collisionWorld, this.level.pathedInteriors);
-					}
-				}
-			}
-			this.isNetUpdate = false;
-		}
+		this.velocity = p.velocity;
+		this.omega = p.omega;
 	}
 
 	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>, packets:Array<haxe.io.Bytes>) {

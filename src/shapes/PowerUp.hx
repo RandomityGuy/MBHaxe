@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import src.AudioManager;
 import hxd.res.Sound;
 import mis.MissionElement.MissionElementItem;
@@ -26,27 +27,29 @@ abstract class PowerUp extends DtsObject {
 		this.element = element;
 	}
 
-	public override function onMarbleInside(timeState:TimeState) {
+	public override function onMarbleInside(marble:Marble, timeState:TimeState) {
 		var pickupable = this.lastPickUpTime == -1 || (timeState.currentAttemptTime - this.lastPickUpTime) >= this.cooldownDuration;
 		if (!pickupable)
 			return;
 
-		if (this.pickUp()) {
+		if (this.pickUp(marble)) {
 			// this.level.replay.recordMarbleInside(this);
 
 			this.lastPickUpTime = timeState.currentAttemptTime;
 			if (this.autoUse)
-				this.use(timeState);
+				this.use(marble, timeState);
 
-			if (customPickupMessage != null)
-				this.level.displayAlert(customPickupMessage);
-			else
-				this.level.displayAlert('You picked up ${this.pickUpName}!');
-			if (this.element.showhelponpickup == "1" && !this.autoUse)
-				this.level.displayHelp('Press <func:bind mousefire> to use the ${this.pickUpName}!');
+			if (level.marble == marble) {
+				if (customPickupMessage != null)
+					this.level.displayAlert(customPickupMessage);
+				else
+					this.level.displayAlert('You picked up ${this.pickUpName}!');
+				if (this.element.showhelponpickup == "1" && !this.autoUse)
+					this.level.displayHelp('Press <func:bind mousefire> to use the ${this.pickUpName}!');
 
-			if (pickupSound != null && !this.level.rewinding) {
-				AudioManager.playSound(pickupSound);
+				if (pickupSound != null && !this.level.rewinding) {
+					AudioManager.playSound(pickupSound);
+				}
 			}
 		}
 	}
@@ -62,9 +65,9 @@ abstract class PowerUp extends DtsObject {
 		this.setOpacity(opacity);
 	}
 
-	public abstract function pickUp():Bool;
+	public abstract function pickUp(marble:Marble):Bool;
 
-	public abstract function use(timeState:TimeState):Void;
+	public abstract function use(marble:Marble, timeState:TimeState):Void;
 
 	public override function reset() {
 		this.lastPickUpTime = Math.NEGATIVE_INFINITY;

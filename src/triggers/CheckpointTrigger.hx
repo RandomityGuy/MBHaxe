@@ -7,6 +7,7 @@ import src.MarbleWorld;
 import mis.MissionElement.MissionElementTrigger;
 import src.ResourceLoader;
 import mis.MisParser;
+import src.Marble;
 
 class CheckpointTrigger extends Trigger {
 	public var disableOOB = false;
@@ -28,8 +29,8 @@ class CheckpointTrigger extends Trigger {
 		});
 	}
 
-	public override function onMarbleEnter(time:src.TimeState) {
-		super.onMarbleEnter(time);
+	public override function onMarbleEnter(marble:Marble, time:src.TimeState) {
+		super.onMarbleEnter(marble, time);
 		if (simGroup == null)
 			return;
 		var shape = level.simGroups[simGroup].filter(x -> x.identifier == "Checkpoint");

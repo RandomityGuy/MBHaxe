@@ -1,5 +1,6 @@
 package net;
 
+import net.NetPacket.MarbleMovePacket;
 import src.TimeState;
 import src.Console;
 import net.Net.ClientConnection;
@@ -35,7 +36,7 @@ class MoveManager {
 	var lastMove:NetMove;
 	var lastAckMoveId:Int = -1;
 
-	static var maxMoves = 45; // Taken from Torque
+	static var maxMoves = 16;
 
 	public function new(connection:ClientConnection) {
 		queuedMoves = [];
@@ -84,15 +85,19 @@ class MoveManager {
 			nextMoveId = 0;
 
 		var b = new haxe.io.BytesOutput();
+		var movePacket = new MarbleMovePacket();
+		movePacket.clientId = Net.clientId;
+		movePacket.move = netMove;
+		movePacket.clientTicks = timeState.ticks;
 		b.writeByte(NetPacketType.MarbleMove);
-		b.writeUInt16(Net.clientId);
+		movePacket.serialize(b);
 
-		Net.sendPacketToHost(packMove(netMove, b));
+		Net.sendPacketToHost(b);
 
 		return netMove;
 	}
 
-	public static function packMove(m:NetMove, b:haxe.io.BytesOutput) {
+	public static inline function packMove(m:NetMove, b:haxe.io.BytesOutput) {
 		b.writeUInt16(m.id);
 		b.writeFloat(m.move.d.x);
 		b.writeFloat(m.move.d.y);
@@ -108,7 +113,7 @@ class MoveManager {
 		return b;
 	}
 
-	public static function unpackMove(b:haxe.io.BytesInput) {
+	public static inline function unpackMove(b:haxe.io.BytesInput) {
 		var moveId = b.readUInt16();
 		var move = new Move();
 		move.d = new Vector();
@@ -147,7 +152,6 @@ class MoveManager {
 		if (queuedMoves.length == 0)
 			return;
 		while (m != queuedMoves[0].id) {
-			trace('Ignoring move ${queuedMoves[0].id}, need ${m}');
 			queuedMoves.shift();
 		}
 		if (m == queuedMoves[0].id)

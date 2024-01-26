@@ -49,7 +49,7 @@ class CollisionHull extends CollisionEntity {
 				cinfo.otherObject = this.go;
 				cinfo.friction = friction;
 				cinfo.force = force;
-				this.go.onMarbleContact(timeState, cinfo);
+				this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
 				return [cinfo];
 			}
 		}

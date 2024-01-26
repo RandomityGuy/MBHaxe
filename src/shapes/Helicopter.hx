@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import h3d.mat.Material;
 import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
@@ -28,14 +29,13 @@ class Helicopter extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
+	public function use(marble:Marble, timeState:TimeState) {
 		marble.enableHelicopter(timeState.currentAttemptTime);
-		this.level.deselectPowerUp();
+		this.level.deselectPowerUp(marble);
 	}
 
 	override function postProcessMaterial(matName:String, material:Material) {

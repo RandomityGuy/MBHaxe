@@ -247,7 +247,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 							cinfo.force = surface.force;
 							cinfo.friction = surface.friction;
 							contacts.push(cinfo);
-							this.go.onMarbleContact(timeState, cinfo);
+							this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
 							// surfaceBestContact = cinfo;
 							// }
 						}

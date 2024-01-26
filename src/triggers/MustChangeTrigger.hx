@@ -4,6 +4,7 @@ import src.PathedInterior;
 import mis.MissionElement.MissionElementTrigger;
 import src.TimeState;
 import mis.MisParser;
+import src.Marble;
 
 class MustChangeTrigger extends Trigger {
 	var interior:PathedInterior;
@@ -13,7 +14,7 @@ class MustChangeTrigger extends Trigger {
 		this.interior = interior;
 	}
 
-	public override function onMarbleEnter(time:TimeState) {
+	public override function onMarbleEnter(marble:Marble, time:TimeState) {
 		var ttime = MisParser.parseNumber(this.element.targettime);
 		if (ttime > 0)
 			ttime /= 1000;
