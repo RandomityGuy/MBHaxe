@@ -1,5 +1,7 @@
 package src;
 
+import net.NetPacket.MarbleUpdatePacket;
+import net.NetPacket.MarbleMovePacket;
 import net.MoveManager;
 import net.NetCommands;
 import net.Net;
@@ -197,11 +199,13 @@ class MarbleWorld extends Scheduler {
 
 	public var startRealTime:Float = 0;
 	public var multiplayerStarted:Bool = false;
-	public var ticks:Int = 0; // How many 32ms ticks have happened
 
 	var tickAccumulator:Float = 0.0;
+	var maxPredictionTicks:Int = 16;
 
 	var clientMarbles:Map<ClientConnection, Marble> = [];
+
+	public var lastMoves:Map<Int, MarbleUpdatePacket> = [];
 
 	// Loading
 	var resourceLoadFuncs:Array<(() -> Void)->Void> = [];
@@ -589,7 +593,7 @@ class MarbleWorld extends Scheduler {
 			interior.reset();
 
 		this.setUp(startquat.up, this.timeState, true);
-		this.deselectPowerUp();
+		this.deselectPowerUp(this.marble);
 		playGui.setCenterText('');
 
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
@@ -1021,6 +1025,53 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	public function applyReceivedMoves() {
+		for (client => lastMove in lastMoves) {
+			if (lastMove.applied)
+				continue;
+			if (lastMove.clientId == Net.clientId)
+				marble.unpackUpdate(lastMove);
+			else
+				clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
+		}
+	}
+
+	public function applyClientPrediction() {
+		for (client => lastMove in lastMoves) {
+			if (lastMove.applied)
+				continue;
+			var marbleToUpdate = lastMove.clientId == Net.clientId ? marble : clientMarbles[Net.clientIdMap[client]];
+
+			@:privateAccess marbleToUpdate.isNetUpdate = true;
+			if (marbleToUpdate == marble) {
+				var moveManager = @:privateAccess Net.clientConnection.moveManager;
+				var catchUpTickCount = 0;
+				Net.clientConnection.moveManager.acknowledgeMove(lastMove.move.id);
+				var advanceTimeState = timeState.clone();
+				advanceTimeState.dt = 0.032;
+				for (move in @:privateAccess moveManager.queuedMoves) {
+					@:privateAccess marbleToUpdate.moveMotionDir = move.motionDir;
+					@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, move.move, this.collisionWorld, this.pathedInteriors);
+				}
+			} else {
+				var tickDiff = timeState.ticks - lastMove.serverTicks;
+				if (tickDiff > this.maxPredictionTicks)
+					tickDiff = this.maxPredictionTicks;
+				if (tickDiff > 0) {
+					var advanceTimeState = timeState.clone();
+					advanceTimeState.dt = 0.032;
+					var m = lastMove.move.move;
+					@:privateAccess marbleToUpdate.moveMotionDir = lastMove.move.motionDir;
+					for (o in 0...(tickDiff + 1)) {
+						@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
+					}
+				}
+			}
+			@:privateAccess marbleToUpdate.isNetUpdate = false;
+			lastMove.applied = true;
+		}
+	}
+
 	public function rollback(t:Float) {
 		var newT = timeState.currentAttemptTime - t;
 		var rewindFrame = rewindManager.getNextRewindFrame(timeState.currentAttemptTime - t);
@@ -1217,6 +1268,14 @@ class MarbleWorld extends Scheduler {
 		if (this.isMultiplayer) {
 			tickAccumulator += timeState.dt;
 			while (tickAccumulator >= 0.032) {
+				// Apply the server side ticks
+				if (Net.isClient) {
+					applyReceivedMoves();
+					// Catch up
+					applyClientPrediction();
+				}
+
+				// Do the clientside prediction sim
 				var fixedDt = timeState.clone();
 				fixedDt.dt = 0.032;
 				tickAccumulator -= 0.032;
@@ -1232,7 +1291,7 @@ class MarbleWorld extends Scheduler {
 						}
 					}
 				}
-				ticks++;
+				timeState.ticks++;
 			}
 			marble.updateClient(timeState, this.pathedInteriors);
 			for (client => marble in clientMarbles) {
@@ -1492,10 +1551,10 @@ class MarbleWorld extends Scheduler {
 					var shape:DtsObject = cast contact.go;
 
 					if (contact.boundingBox.collide(box)) {
-						shape.onMarbleInside(timeState);
+						shape.onMarbleInside(marble, timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
-							shape.onMarbleEnter(timeState);
+							shape.onMarbleEnter(marble, timeState);
 						}
 						inside.push(contact.go);
 					}
@@ -1505,10 +1564,10 @@ class MarbleWorld extends Scheduler {
 					var triggeraabb = trigger.collider.boundingBox;
 
 					if (triggeraabb.collide(box)) {
-						trigger.onMarbleInside(timeState);
+						trigger.onMarbleInside(marble, timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
-							trigger.onMarbleEnter(timeState);
+							trigger.onMarbleEnter(marble, timeState);
 						}
 						inside.push(contact.go);
 					}
@@ -1519,7 +1578,7 @@ class MarbleWorld extends Scheduler {
 		for (object in shapeOrTriggerInside) {
 			if (!inside.contains(object)) {
 				this.shapeOrTriggerInside.remove(object);
-				object.onMarbleLeave(timeState);
+				object.onMarbleLeave(marble, timeState);
 			}
 		}
 
@@ -1727,26 +1786,30 @@ class MarbleWorld extends Scheduler {
 		return true;
 	}
 
-	public function pickUpPowerUp(powerUp:PowerUp) {
+	public function pickUpPowerUp(marble:Marble, powerUp:PowerUp) {
 		if (powerUp == null)
 			return false;
-		if (this.marble.heldPowerup != null)
-			if (this.marble.heldPowerup.identifier == powerUp.identifier)
+		if (marble.heldPowerup != null)
+			if (marble.heldPowerup.identifier == powerUp.identifier)
 				return false;
 		Console.log("PowerUp pickup: " + powerUp.identifier);
-		this.marble.heldPowerup = powerUp;
-		this.playGui.setPowerupImage(powerUp.identifier);
-		MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
+		marble.heldPowerup = powerUp;
+		if (this.marble == marble) {
+			this.playGui.setPowerupImage(powerUp.identifier);
+			MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
+		}
 		if (this.isRecording) {
 			this.replay.recordPowerupPickup(powerUp);
 		}
 		return true;
 	}
 
-	public function deselectPowerUp() {
-		this.marble.heldPowerup = null;
-		this.playGui.setPowerupImage("");
-		MarbleGame.instance.touchInput.powerupButton.setEnabled(false);
+	public function deselectPowerUp(marble:Marble) {
+		marble.heldPowerup = null;
+		if (this.marble == marble) {
+			this.playGui.setPowerupImage("");
+			MarbleGame.instance.touchInput.powerupButton.setEnabled(false);
+		}
 	}
 
 	public function addBonusTime(t:Float) {
@@ -1930,11 +1993,11 @@ class MarbleWorld extends Scheduler {
 		this.playGui.setCenterText('');
 		this.clearSchedule();
 		this.outOfBounds = false;
-		this.deselectPowerUp(); // Always deselect first
+		this.deselectPowerUp(this.marble); // Always deselect first
 		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
 		if (this.checkpointHeldPowerup != null) {
 			var powerup = this.checkpointHeldPowerup;
-			this.pickUpPowerUp(powerup);
+			this.pickUpPowerUp(this.marble, powerup);
 		}
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}

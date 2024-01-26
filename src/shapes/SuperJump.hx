@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
@@ -62,21 +63,21 @@ class SuperJump extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
+	public function use(marble:Marble, timeState:TimeState) {
 		var masslessFactor = marble.getMass() * 0.7 + 1 - 0.7;
 		var boost = this.level.currentUp.multiply(20 * masslessFactor / marble.getMass());
 		marble.velocity = marble.velocity.add(boost);
 		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/use_superjump.wav", ResourceLoader.getAudio, this.soundResources));
+		if (level.marble == marble)
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/use_superjump.wav", ResourceLoader.getAudio, this.soundResources));
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
-		this.level.deselectPowerUp();
+		this.level.deselectPowerUp(marble);
 	}
 
 	override function getPreloadMaterials(dts:dts.DtsFile) {

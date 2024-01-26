@@ -6,6 +6,7 @@ import src.ResourceLoader;
 import src.TimeState;
 import mis.MissionElement.MissionElementItem;
 import src.AudioManager;
+import src.Marble;
 
 class MegaMarble extends PowerUp {
 	public function new(element:MissionElementItem) {
@@ -35,13 +36,13 @@ class MegaMarble extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		this.level.marble.enableMegaMarble(timeState.currentAttemptTime);
-		this.level.deselectPowerUp();
+	public function use(marble:Marble, timeState:TimeState) {
+		marble.enableMegaMarble(timeState.currentAttemptTime);
+		this.level.deselectPowerUp(marble);
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_mega.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 

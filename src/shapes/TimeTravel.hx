@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
@@ -39,11 +40,11 @@ class TimeTravel extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:Marble):Bool {
 		return true;
 	}
 
-	public function use(time:TimeState) {
+	public function use(marble:Marble, time:TimeState) {
 		if (!this.level.rewinding)
 			level.addBonusTime(this.timeBonus);
 	}

@@ -1,5 +1,7 @@
 package net;
 
+import net.NetPacket.MarbleUpdatePacket;
+import net.NetPacket.MarbleMovePacket;
 import haxe.Json;
 import datachannel.RTCPeerConnection;
 import datachannel.RTCDataChannel;
@@ -241,21 +243,24 @@ class Net {
 				}
 
 			case MarbleUpdate:
-				var marbleClientId = input.readUInt16();
-				if (marbleClientId == clientId) {
-					if (MarbleGame.instance.world != null)
-						MarbleGame.instance.world.marble.unpackUpdate(input);
-				} else {
-					var cc = clientIdMap[marbleClientId];
-					if (MarbleGame.instance.world != null)
-						@:privateAccess MarbleGame.instance.world.clientMarbles[cc].unpackUpdate(input);
+				var marbleUpdatePacket = new MarbleUpdatePacket();
+				marbleUpdatePacket.deserialize(input);
+				var cc = marbleUpdatePacket.clientId;
+				if (MarbleGame.instance.world != null) {
+					var m = MarbleGame.instance.world.lastMoves;
+					if (m.exists(cc)) {
+						if (m[cc].serverTicks < marbleUpdatePacket.serverTicks)
+							m.set(cc, marbleUpdatePacket);
+					} else {
+						m.set(cc, marbleUpdatePacket);
+					}
 				}
 
 			case MarbleMove:
-				var marbleClientId = input.readUInt16();
-				var cc = clientIdMap[marbleClientId];
-				var m = MoveManager.unpackMove(input);
-				cc.moveManager.queueMove(m);
+				var movePacket = new MarbleMovePacket();
+				movePacket.deserialize(input);
+				var cc = clientIdMap[movePacket.clientId];
+				cc.moveManager.queueMove(movePacket.move);
 
 			case _:
 				trace("unknown command: " + packetType);

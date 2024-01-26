@@ -6,6 +6,7 @@ import h3d.scene.Object;
 import src.Resource;
 import h3d.mat.Texture;
 import hxd.res.Sound;
+import src.Marble;
 
 class GameObject extends Object {
 	public var identifier:String;
@@ -22,13 +23,13 @@ class GameObject extends Object {
 		return currentOpacity;
 	}
 
-	public function onMarbleContact(time:TimeState, ?contact:CollisionInfo) {}
+	public function onMarbleContact(marble:Marble, time:TimeState, ?contact:CollisionInfo) {}
 
-	public function onMarbleInside(time:TimeState) {}
+	public function onMarbleInside(marble:Marble, time:TimeState) {}
 
-	public function onMarbleEnter(time:TimeState) {}
+	public function onMarbleEnter(marble:Marble, time:TimeState) {}
 
-	public function onMarbleLeave(time:TimeState) {}
+	public function onMarbleLeave(marble:Marble, time:TimeState) {}
 
 	public function onLevelStart() {}
 

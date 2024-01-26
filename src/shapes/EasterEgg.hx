@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import gui.AchievementsGui;
 import src.Settings;
 import mis.MissionElement.MissionElementItem;
@@ -16,7 +17,7 @@ class EasterEgg extends PowerUp {
 		this.autoUse = true;
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:Marble):Bool {
 		var found:Bool = false;
 		if (Settings.easterEggs.exists(this.level.mission.path)) {
 			found = true;
@@ -42,7 +43,7 @@ class EasterEgg extends PowerUp {
 		});
 	}
 
-	public function use(timeState:src.TimeState) {}
+	public function use(marble:Marble, timeState:src.TimeState) {}
 
 	override function getPreloadMaterials(dts:dts.DtsFile) {
 		var mats = super.getPreloadMaterials(dts);

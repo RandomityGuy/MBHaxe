@@ -4,6 +4,7 @@ import collision.CollisionInfo;
 import src.DtsObject;
 import src.TimeState;
 import src.Util;
+import src.Marble;
 
 class AbstractBumper extends DtsObject {
 	var lastContactTime = Math.NEGATIVE_INFINITY;
@@ -27,8 +28,8 @@ class AbstractBumper extends DtsObject {
 		return completion;
 	}
 
-	override function onMarbleContact(time:TimeState, ?contact:CollisionInfo) {
-		super.onMarbleContact(time, contact);
+	override function onMarbleContact(marble:Marble, time:TimeState, ?contact:CollisionInfo) {
+		super.onMarbleContact(marble, time, contact);
 		if (time.timeSinceLoad - this.lastContactTime <= 0)
 			return;
 		var currentCompletion = this.getCurrentCompletion(time);

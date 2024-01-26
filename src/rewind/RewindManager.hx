@@ -126,13 +126,13 @@ class RewindManager {
 
 		if (level.marble.heldPowerup == null) {
 			if (rf.marblePowerup != null) {
-				level.pickUpPowerUp(rf.marblePowerup);
+				level.pickUpPowerUp(level.marble, rf.marblePowerup);
 			}
 		} else {
 			if (rf.marblePowerup == null) {
-				level.deselectPowerUp();
+				level.deselectPowerUp(level.marble);
 			} else {
-				level.pickUpPowerUp(rf.marblePowerup);
+				level.pickUpPowerUp(level.marble, rf.marblePowerup);
 			}
 		}
 
