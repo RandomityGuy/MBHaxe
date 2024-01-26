@@ -396,7 +396,7 @@ class CameraController extends Object {
 		camera.target = marblePosition.add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
-		var rayCastOrigin = marblePosition.add(level.currentUp.multiply(marble._radius)).add(cameraVerticalTranslation);
+		var rayCastOrigin = marblePosition.add(level.marble.currentUp.multiply(marble._radius)).add(cameraVerticalTranslation);
 
 		for (pi in level.pathedInteriors) {
 			pi.pushTickState();

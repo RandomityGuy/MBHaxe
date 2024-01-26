@@ -33,7 +33,7 @@ class Blast extends PowerUp {
 	}
 
 	public function use(marble:Marble, timeState:TimeState) {
-		this.level.blastAmount = 1.2;
+		marble.blastAmount = 1.2;
 	}
 
 	override function getPreloadMaterials(dts:dts.DtsFile) {

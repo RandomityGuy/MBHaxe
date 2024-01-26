@@ -58,7 +58,7 @@ class RewindManager {
 			rf.gemCount = level.gemCount;
 			rf.gemStates = level.gems.map(x -> x.pickedUp);
 			rf.activePowerupStates = [@:privateAccess level.marble.helicopterEnableTime, @:privateAccess level.marble.megaMarbleEnableTime];
-			rf.currentUp = level.currentUp.clone();
+			rf.currentUp = level.marble.currentUp.clone();
 			rf.lastContactNormal = level.marble.lastContactNormal.clone();
 			rf.mpStates = level.pathedInteriors.map(x -> {
 				var mpstate = new RewindMPState();
@@ -91,7 +91,7 @@ class RewindManager {
 					rf.powerupStates.push(ab.lastContactTime);
 				}
 			}
-			rf.blastAmt = level.blastAmount;
+			rf.blastAmt = level.marble.blastAmount;
 			rf.oobState = {
 				oob: level.outOfBounds,
 				timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
@@ -147,7 +147,9 @@ class RewindManager {
 		@:privateAccess level.marble.helicopterEnableTime = rf.activePowerupStates[0];
 		@:privateAccess level.marble.megaMarbleEnableTime = rf.activePowerupStates[1];
 
-		if (level.currentUp.x != rf.currentUp.x || level.currentUp.y != rf.currentUp.y || level.currentUp.z != rf.currentUp.z) {
+		if (level.marble.currentUp.x != rf.currentUp.x
+			|| level.marble.currentUp.y != rf.currentUp.y
+			|| level.marble.currentUp.z != rf.currentUp.z) {
 			level.setUp(rf.currentUp, level.timeState);
 			// Hacky things
 			@:privateAccess level.orientationChangeTime = level.timeState.currentAttemptTime - 300;
@@ -162,7 +164,7 @@ class RewindManager {
 			@:privateAccess level.orientationChangeTime = -1e8;
 		}
 
-		level.currentUp.load(rf.currentUp);
+		level.marble.currentUp.load(rf.currentUp);
 		level.marble.lastContactNormal.load(rf.lastContactNormal);
 		for (i in 0...rf.mpStates.length) {
 			level.pathedInteriors[i].currentTime = rf.mpStates[i].currentTime;
@@ -215,7 +217,7 @@ class RewindManager {
 			@:privateAccess level.playGui.setCenterText('');
 		level.marble.camera.oob = rf.oobState.oob;
 		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
-		level.blastAmount = rf.blastAmt;
+		level.marble.blastAmount = rf.blastAmt;
 		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;
 		@:privateAccess level.cheeckpointBlast = rf.checkpointState.checkpointBlast;
 		@:privateAccess level.checkpointHeldPowerup = rf.checkpointState.checkpointHeldPowerup;

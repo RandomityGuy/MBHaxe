@@ -69,7 +69,7 @@ class SuperJump extends PowerUp {
 
 	public function use(marble:Marble, timeState:TimeState) {
 		var masslessFactor = marble.getMass() * 0.7 + 1 - 0.7;
-		var boost = this.level.currentUp.multiply(20 * masslessFactor / marble.getMass());
+		var boost = marble.currentUp.multiply(20 * masslessFactor / marble.getMass());
 		marble.velocity = marble.velocity.add(boost);
 		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity

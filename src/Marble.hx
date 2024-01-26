@@ -75,6 +75,7 @@ class Move {
 	public var d:Vector;
 	public var jump:Bool;
 	public var powerup:Bool;
+	public var blast:Bool;
 
 	public function new() {}
 }
@@ -249,12 +250,15 @@ class Marble extends GameObject {
 	public var heldPowerup:PowerUp;
 	public var lastContactNormal:Vector;
 	public var lastContactPosition:Vector;
+	public var currentUp = new Vector(0, 0, 1);
 
 	var helicopter:HelicopterImage;
 	var blastWave:BlastWave;
 	var helicopterEnableTime:Float = -1e8;
 	var megaMarbleEnableTime:Float = -1e8;
 	var blastUseTime:Float = -1e8;
+
+	public var blastAmount:Float = 0;
 
 	var teleportEnableTime:Null<Float> = null;
 	var teleportDisableTime:Null<Float> = null;
@@ -537,7 +541,7 @@ class Marble extends GameObject {
 		if (this.controllable && !this.isNetUpdate) {
 			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
 			motiondir.transform(level.newOrientationQuat.toMatrix());
-			var updir = this.level.currentUp;
+			var updir = this.currentUp;
 			var sidedir = motiondir.cross(updir);
 
 			sidedir.normalize();
@@ -546,7 +550,7 @@ class Marble extends GameObject {
 		} else {
 			if (moveMotionDir != null)
 				motiondir = moveMotionDir;
-			var updir = this.level.currentUp;
+			var updir = this.currentUp;
 			var sidedir = motiondir.cross(updir);
 			return [sidedir, motiondir, updir];
 		}
@@ -555,7 +559,7 @@ class Marble extends GameObject {
 	function getExternalForces(currentTime:Float, m:Move, dt:Float) {
 		if (this.mode == Finish)
 			return this.velocity.multiply(-16);
-		var gWorkGravityDir = this.level != null ? this.level.currentUp.multiply(-1) : new Vector(0, 0, -1);
+		var gWorkGravityDir = this.currentUp.multiply(-1);
 		var A = new Vector();
 		A = gWorkGravityDir.multiply(this._gravity);
 		if (currentTime - this.helicopterEnableTime < 5) {
@@ -617,7 +621,7 @@ class Marble extends GameObject {
 	}
 
 	function computeMoveForces(m:Move, aControl:Vector, desiredOmega:Vector) {
-		var currentGravityDir = this.level != null ? this.level.currentUp.multiply(-1) : new Vector(0, 0, -1);
+		var currentGravityDir = this.currentUp.multiply(-1);
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
@@ -795,7 +799,7 @@ class Marble extends GameObject {
 	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector) {
 		var a = new Vector();
 		this._slipAmount = 0;
-		var gWorkGravityDir = this.level != null ? this.level.currentUp.multiply(-1) : new Vector(0, 0, -1);
+		var gWorkGravityDir = this.currentUp.multiply(-1);
 		var bestSurface = -1;
 		var bestNormalForce = 0.0;
 		for (i in 0...contacts.length) {
@@ -1467,6 +1471,14 @@ class Marble extends GameObject {
 			}
 		}
 
+		// Blast
+		if (m.blast) {
+			this.useBlast();
+			if (level.isRecording) {
+				level.replay.recordMarbleStateFlags(false, false, false, true);
+			}
+		}
+
 		do {
 			if (timeRemaining <= 0)
 				break;
@@ -1687,6 +1699,7 @@ class Marble extends GameObject {
 	}
 
 	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {
+		this.level.updateBlast(this, timeState);
 		if (oldPos != null && newPos != null) {
 			var deltaT = physicsAccumulator / 0.032;
 			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
@@ -1732,7 +1745,7 @@ class Marble extends GameObject {
 			this._radius = 0.675;
 			this.collider.radius = 0.675;
 			this._marbleScale *= 2.25;
-			var boost = this.level.currentUp.multiply(5);
+			var boost = this.currentUp.multiply(5);
 			this.velocity = this.velocity.add(boost);
 		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > 10) {
 			if (this._radius != this._prevRadius) {
@@ -1893,7 +1906,7 @@ class Marble extends GameObject {
 			this._radius = 0.675;
 			this.collider.radius = 0.675;
 			this._marbleScale *= 2.25;
-			var boost = this.level.currentUp.multiply(5);
+			var boost = this.currentUp.multiply(5);
 			this.velocity = this.velocity.add(boost);
 		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > 10) {
 			if (this._radius != this._prevRadius) {
@@ -2032,14 +2045,15 @@ class Marble extends GameObject {
 	}
 
 	public function useBlast() {
-		if (this.level.blastAmount < 0.25 || this.level.game != "ultra")
+		if (this.blastAmount < 0.25)
 			return false;
-		var impulse = this.level.currentUp.multiply(this.level.blastAmount * 8);
+		var impulse = this.currentUp.multiply(this.blastAmount * 8);
 		this.applyImpulse(impulse);
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
+		if (this.controllable)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
 		this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
 		this.blastUseTime = this.level.timeState.currentAttemptTime;
-		this.level.blastAmount = 0;
+		this.blastAmount = 0;
 		return true;
 	}
 
