@@ -144,8 +144,6 @@ class MarbleWorld extends Scheduler {
 	public var game:String;
 
 	public var marble:Marble;
-	public var worldOrientation:Quat;
-	public var currentUp = new Vector(0, 0, 1);
 	public var outOfBounds:Bool = false;
 	public var outOfBoundsTime:TimeState;
 	public var finishTime:TimeState;
@@ -153,7 +151,6 @@ class MarbleWorld extends Scheduler {
 	public var finishYaw:Float;
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
-	public var blastAmount:Float = 0;
 	public var skipStartBugPauseTime:Float = 0.0;
 
 	var renderBlastAmount:Float = 0;
@@ -510,7 +507,7 @@ class MarbleWorld extends Scheduler {
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
 		this.bonusTime = 0;
 		this.outOfBounds = false;
-		this.blastAmount = 0;
+		this.marble.blastAmount = 0;
 		this.renderBlastAmount = 0;
 		this.outOfBoundsTime = null;
 		this.finishTime = null;
@@ -1094,7 +1091,7 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.updateGameState();
-		this.updateBlast(timeState);
+		this.updateBlast(this.marble, timeState);
 		ProfilerUI.measure("updateDTS");
 		for (obj in dtsObjects) {
 			obj.update(timeState);
@@ -1224,18 +1221,6 @@ class MarbleWorld extends Scheduler {
 
 		this.tickSchedule(timeState.currentAttemptTime);
 
-		if (Key.isDown(Settings.controlsSettings.blast)
-			|| (MarbleGame.instance.touchInput.blastbutton.pressed)
-			|| Gamepad.isDown(Settings.gamepadSettings.blast)
-			&& !this.isWatching
-			&& this.game == "ultra") {
-			if (this.marble.useBlast()) {
-				if (this.isRecording) {
-					this.replay.recordMarbleStateFlags(false, false, false, true);
-				}
-			}
-		}
-
 		if (this.isWatching && this.replay.currentPlaybackFrame.marbleStateFlags.has(UsedBlast))
 			this.marble.useBlast();
 
@@ -1251,7 +1236,8 @@ class MarbleWorld extends Scheduler {
 
 		radar.update(dt);
 		this.updateGameState();
-		this.updateBlast(timeState);
+		if (!this.isMultiplayer)
+			this.updateBlast(this.marble, timeState);
 		ProfilerUI.measure("updateDTS");
 		for (obj in dtsObjects) {
 			obj.update(timeState);
@@ -1451,16 +1437,17 @@ class MarbleWorld extends Scheduler {
 			this.replay.recordTimeState(timeState.currentAttemptTime, timeState.gameplayClock, this.bonusTime);
 	}
 
-	function updateBlast(timestate:TimeState) {
-		if (this.game == "ultra") {
-			if (this.blastAmount < 1) {
-				this.blastAmount = Util.clamp(this.blastAmount + (timeState.dt / 30), 0, 1);
-				this.renderBlastAmount = this.blastAmount;
-			} else {
-				this.renderBlastAmount = Math.min(this.blastAmount, timestate.dt * 0.75 + this.renderBlastAmount);
-			}
-			this.playGui.setBlastValue(this.renderBlastAmount);
+	public function updateBlast(marble:Marble, timestate:TimeState) {
+		if (marble.blastAmount < 1) {
+			marble.blastAmount = Util.clamp(marble.blastAmount + (timeState.dt / 30), 0, 1);
+			if (marble == this.marble)
+				this.renderBlastAmount = marble.blastAmount;
+		} else {
+			if (marble == this.marble)
+				this.renderBlastAmount = Math.min(marble.blastAmount, timestate.dt * 0.75 + this.renderBlastAmount);
 		}
+		if (marble == this.marble)
+			this.playGui.setBlastValue(this.renderBlastAmount);
 	}
 
 	function updateTexts() {
@@ -1829,7 +1816,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function setUp(vec:Vector, timeState:TimeState, instant:Bool = false) {
-		this.currentUp = vec;
+		this.marble.currentUp = vec;
 		var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
 		var oldUp = new Vector(0, 0, 1);
 		oldUp.transform(currentQuat.toMatrix());
@@ -1927,7 +1914,7 @@ class MarbleWorld extends Scheduler {
 		this.currentCheckpoint = shape;
 		this.currentCheckpointTrigger = trigger;
 		this.checkpointCollectedGems.clear();
-		this.cheeckpointBlast = this.blastAmount;
+		this.cheeckpointBlast = this.marble.blastAmount;
 		// Remember all gems that were collected up to this point
 		for (gem in this.gems) {
 			if (gem.pickedUp)
@@ -1963,7 +1950,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.oob = false;
 		@:privateAccess this.marble.helicopterEnableTime = -1e8;
 		@:privateAccess this.marble.megaMarbleEnableTime = -1e8;
-		this.blastAmount = this.cheeckpointBlast;
+		this.marble.blastAmount = this.cheeckpointBlast;
 		if (this.isRecording) {
 			this.replay.recordCameraState(this.marble.camera.CameraYaw, this.marble.camera.CameraPitch);
 			this.replay.recordMarbleInput(0, 0);

@@ -30,20 +30,18 @@ class AntiGravity extends PowerUp {
 	public function pickUp(marble:Marble):Bool {
 		var direction = new Vector(0, 0, -1);
 		direction.transform(this.getRotationQuat().toMatrix());
-		return !direction.equals(this.level.currentUp);
+		return !direction.equals(this.level.marble.currentUp);
 	}
 
 	public function use(marble:Marble, timeState:TimeState) {
 		if (!this.level.rewinding) {
 			var direction = new Vector(0, 0, -1);
 			direction.transform(this.getRotationQuat().toMatrix());
-			this.level.setUp(direction, timeState);
+			if (marble == level.marble)
+				this.level.setUp(direction, timeState);
+			else
+				marble.currentUp.load(direction);
 		}
-		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
-		// if (!this.level.rewinding)
-		//	AudioManager.play(this.sounds[1]);
-		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
-		// this.level.deselectPowerUp();
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
