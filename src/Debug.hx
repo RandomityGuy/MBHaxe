@@ -53,6 +53,7 @@ class Debug {
 				debugSphere.setScale(sph.radius);
 				debugSphere.emitInstance();
 			}
+			_spheres = [];
 		} else {
 			if (debugSphere != null) {
 				debugSphere.remove();

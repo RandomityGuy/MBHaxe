@@ -34,6 +34,7 @@ class MarbleUpdatePacket implements NetPacket {
 	var clientId:Int;
 	var move:NetMove;
 	var serverTicks:Int;
+	var calculationTicks:Int;
 	var position:Vector;
 	var velocity:Vector;
 	var omega:Vector;
@@ -60,6 +61,7 @@ class MarbleUpdatePacket implements NetPacket {
 		clientId = b.readUInt16();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
+		calculationTicks = serverTicks;
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());

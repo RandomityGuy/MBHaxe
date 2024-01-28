@@ -1,5 +1,6 @@
 package src;
 
+import haxe.Exception;
 import net.NetPacket.MarbleUpdatePacket;
 import net.NetPacket.MarbleMovePacket;
 import net.MoveManager;
@@ -1022,48 +1023,178 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function applyReceivedMoves() {
-		for (client => lastMove in lastMoves) {
-			if (lastMove.applied)
-				continue;
-			if (lastMove.clientId == Net.clientId)
-				marble.unpackUpdate(lastMove);
-			else
-				clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
+		if (!lastMoves[Net.clientId].applied) {
+			var allApplied = false;
+			for (client => lastMove in lastMoves) {
+				if (lastMove.applied) {
+					allApplied = true;
+					break;
+				}
+			}
+			if (!allApplied) {
+				for (client => lastMove in lastMoves) {
+					var isApplied = lastMove.clientId == Net.clientId ? marble.unpackUpdate(lastMove) : clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
+				}
+			}
 		}
+		// for (client => lastMove in lastMoves) {
+		// 	if (lastMove.applied)
+		// 		continue;
+
+		// 	var isApplied = lastMove.clientId == Net.clientId ? marble.unpackUpdate(lastMove) : clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
+
+		// 	if (!isApplied)
+		// 		lastMove.applied = true;
+		// }
 	}
 
 	public function applyClientPrediction() {
-		for (client => lastMove in lastMoves) {
-			if (lastMove.applied)
-				continue;
-			var marbleToUpdate = lastMove.clientId == Net.clientId ? marble : clientMarbles[Net.clientIdMap[client]];
+		// First acknowledge the marble's last move so we can get that over with
+		var ourLastMove = lastMoves[Net.clientId];
+		if (ourLastMove == null)
+			return;
+		var ackLag = -1;
+		if (!ourLastMove.applied)
+			ackLag = Net.clientConnection.moveManager.acknowledgeMove(ourLastMove.move.id);
+		else
+			return;
 
-			@:privateAccess marbleToUpdate.isNetUpdate = true;
-			if (marbleToUpdate == marble) {
-				var moveManager = @:privateAccess Net.clientConnection.moveManager;
-				var catchUpTickCount = 0;
-				Net.clientConnection.moveManager.acknowledgeMove(lastMove.move.id);
-				var advanceTimeState = timeState.clone();
-				advanceTimeState.dt = 0.032;
-				for (move in @:privateAccess moveManager.queuedMoves) {
-					@:privateAccess marbleToUpdate.moveMotionDir = move.motionDir;
-					@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, move.move, this.collisionWorld, this.pathedInteriors);
-				}
-			} else {
-				var tickDiff = timeState.ticks - lastMove.serverTicks;
-				if (tickDiff > this.maxPredictionTicks)
-					tickDiff = this.maxPredictionTicks;
-				if (tickDiff > 0) {
-					var advanceTimeState = timeState.clone();
-					advanceTimeState.dt = 0.032;
-					var m = lastMove.move.move;
-					@:privateAccess marbleToUpdate.moveMotionDir = lastMove.move.motionDir;
-					for (o in 0...(tickDiff + 1)) {
+		var ourLastMoveTime = ourLastMove.serverTicks;
+
+		// Then find the minimum tick from which we need to begin our predictions from
+		var tickStart = timeState.ticks;
+		var ourQueuedMoves = @:privateAccess Net.clientConnection.moveManager.queuedMoves.copy();
+		if (ourQueuedMoves.length > 0 && ourQueuedMoves[0].timeState.ticks < tickStart)
+			tickStart = ourQueuedMoves[0].timeState.ticks;
+
+		var advanceTimeState = timeState.clone();
+		advanceTimeState.dt = 0.032;
+		/*
+			for (client => lastMove in lastMoves) {
+				if (lastMove.applied)
+					continue;
+				if (lastMove.serverTicks < tickStart)
+					tickStart = lastMove.serverTicks;
+			}
+
+			// Now actually do the sim, tick by tick
+			for (tick in tickStart...timeState.ticks) {
+				for (client => lastMove in lastMoves) {
+					if (lastMove.applied || (tick < lastMove.serverTicks && lastMove.clientId != Net.clientId))
+						continue;
+
+					var marbleToUpdate = lastMove.clientId == Net.clientId ? marble : clientMarbles[Net.clientIdMap[client]];
+					@:privateAccess marbleToUpdate.isNetUpdate = true;
+					if (marbleToUpdate == marble) {
+						if (ourQueuedMoves.length > 0) {
+							if (ourQueuedMoves[0].timeState.ticks <= tick) {
+								var move = ourQueuedMoves.shift();
+								Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
+								@:privateAccess marbleToUpdate.moveMotionDir = move.motionDir;
+								@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, move.move, this.collisionWorld, this.pathedInteriors);
+							}
+						} else {
+							lastMove.applied = true;
+						}
+					} else {
+						var m = lastMove.move.move;
+						Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
+						@:privateAccess marbleToUpdate.moveMotionDir = lastMove.move.motionDir;
 						@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
 					}
+					@:privateAccess marbleToUpdate.isNetUpdate = false;
 				}
 			}
-			@:privateAccess marbleToUpdate.isNetUpdate = false;
+		 */
+
+		// Tick the remaining moves (ours)
+		if (!ourLastMove.applied) {
+			@:privateAccess this.marble.isNetUpdate = true;
+			var totalTicksToDo = ourQueuedMoves.length;
+			var endTick = ourLastMoveTime + totalTicksToDo;
+			for (move in ourQueuedMoves) {
+				var m = move.move;
+				Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
+				@:privateAccess this.marble.moveMotionDir = move.motionDir;
+				@:privateAccess this.marble.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
+
+				// for (client => lastMove in lastMoves) {
+				// 	if (lastMove.clientId == Net.clientId || lastMove.calculationTicks >= endTick)
+				// 		continue;
+
+				// 	trace('tick diff: ${lastMove.serverTicks - ourLastMoveTime}');
+
+				// 	lastMove.calculationTicks++;
+				// 	// lastMove.serverTicks++;
+
+				// 	var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+				// 	@:privateAccess marbleToUpdate.isNetUpdate = true;
+				// 	var m = lastMove.move.move;
+				// 	@:privateAccess marbleToUpdate.moveMotionDir = lastMove.move.motionDir;
+				// 	@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
+				// 	@:privateAccess marbleToUpdate.isNetUpdate = false;
+				// }
+			}
+
+			for (client => lastMove in lastMoves) {
+				if (lastMove.clientId == Net.clientId)
+					continue;
+
+				// lastMove.calculationTicks++;
+				// lastMove.serverTicks++;
+
+				var tickDiff = ackLag + 1; // - (lastMove.serverTicks - ourLastMoveTime) + 1;
+				while (tickDiff > 0) {
+					var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+					@:privateAccess marbleToUpdate.isNetUpdate = true;
+					var m = lastMove.move.move;
+					@:privateAccess marbleToUpdate.moveMotionDir = lastMove.move.motionDir;
+					@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
+					@:privateAccess marbleToUpdate.isNetUpdate = false;
+					tickDiff--;
+				}
+			}
+
+			// if (ourQueuedMoves.length >= 2) {
+			// 	trace('Move queue tick diff: ${ourQueuedMoves[ourQueuedMoves.length - 1].timeState.ticks - ourQueuedMoves[0].timeState.ticks}');
+			// }
+			ourLastMove.applied = true;
+			@:privateAccess this.marble.isNetUpdate = false;
+		}
+
+		// for (client => lastMove in lastMoves) {
+		// 	if (lastMove.applied)
+		// 		continue;
+		// 	if (lastMove.serverTicks > timeState.ticks) {
+		// 		trace('Marble ticked ahead ${lastMove.serverTicks - timeState.ticks} ticks');
+		// 		lastMove.serverTicks = timeState.ticks;
+		// 	}
+		// 	if (lastMove.serverTicks < tickStart)
+		// 		tickStart = lastMove.serverTicks;
+		// }
+
+		// for (tick in tickStart...timeState.ticks) {
+		// 	for (client => lastMove in lastMoves) {
+		// 		if (lastMove.applied || tick < lastMove.serverTicks)
+		// 			continue;
+
+		// 		// if (lastMove.calculationTicks > 0) {
+		// 		// 	lastMove.calculationTicks--;
+		// 		// 	continue;
+		// 		// }
+
+		// 		var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+		// 		@:privateAccess marbleToUpdate.isNetUpdate = true;
+		// 		var m = lastMove.move.move;
+		// 		Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
+		// 		@:privateAccess marbleToUpdate.moveMotionDir = lastMove.move.motionDir;
+		// 		@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
+		// 		@:privateAccess marbleToUpdate.isNetUpdate = false;
+		// 	}
+		// }
+
+		// Now mark them all as applied
+		for (client => lastMove in lastMoves) {
 			lastMove.applied = true;
 		}
 	}
