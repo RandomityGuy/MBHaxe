@@ -12,7 +12,8 @@ class Debug {
 	static var _triangles:Array<h3d.col.Point> = [];
 	static var _spheres:Array<{
 		position:Vector,
-		radius:Float
+		radius:Float,
+		lifetime:Float
 	}> = [];
 
 	static var debugTriangles:h3d.scene.Mesh;
@@ -20,7 +21,7 @@ class Debug {
 
 	public static function init() {}
 
-	public static function update() {
+	public static function update(dt:Float) {
 		if (_triangles.length != 0 && drawBounds) {
 			var prim = new h3d.prim.Polygon(_triangles.copy());
 			if (debugTriangles != null) {
@@ -48,12 +49,17 @@ class Debug {
 				MarbleGame.instance.scene.addChild(debugSphere);
 			}
 			debugSphere.begin(_spheres.length);
+			var toremove = [];
 			for (sph in _spheres) {
 				debugSphere.setPosition(sph.position.x, sph.position.y, sph.position.z);
 				debugSphere.setScale(sph.radius);
 				debugSphere.emitInstance();
+				sph.lifetime -= dt;
+				if (sph.lifetime < 0)
+					toremove.push(sph);
 			}
-			_spheres = [];
+			for (sph in toremove)
+				_spheres.remove(sph);
 		} else {
 			if (debugSphere != null) {
 				debugSphere.remove();
@@ -72,6 +78,6 @@ class Debug {
 
 	public static function drawSphere(centre:Vector, radius:Float) {
 		if (drawBounds)
-			_spheres.push({position: centre.clone(), radius: radius});
+			_spheres.push({position: centre.clone(), radius: radius, lifetime: 0.032});
 	}
 }

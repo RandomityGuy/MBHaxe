@@ -243,6 +243,7 @@ class Marble extends GameObject {
 	public var contacts:Array<CollisionInfo> = [];
 	public var bestContact:CollisionInfo;
 	public var contactEntities:Array<CollisionEntity> = [];
+	public var collidingMarbles:Array<Marble> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
 	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
@@ -295,6 +296,7 @@ class Marble extends GameObject {
 	var connection:net.Net.ClientConnection;
 	var moveMotionDir:Vector;
 	var isNetUpdate:Bool = false;
+	var collisionToken:Int = 0;
 
 	public function new() {
 		super();
@@ -527,6 +529,11 @@ class Marble extends GameObject {
 		this.contacts = queuedContacts;
 		var c = collisiomWorld.sphereIntersection(this.collider, timeState);
 		this.contactEntities = c.foundEntities;
+		this.collidingMarbles = [];
+		for (e in this.contacts) {
+			if (e.collider is SphereCollisionEntity)
+				this.collidingMarbles.push(cast(e.collider, SphereCollisionEntity).marble);
+		}
 		contacts = contacts.concat(c.contacts);
 	}
 
@@ -1661,7 +1668,7 @@ class Marble extends GameObject {
 
 		newPos = this.collider.transform.getPosition();
 
-		if (this.prevPos != null) {
+		if (this.prevPos != null && !this.isNetUpdate) {
 			var tempTimeState = timeState.clone();
 			tempTimeState.currentAttemptTime = passedTime;
 			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
@@ -1697,7 +1704,7 @@ class Marble extends GameObject {
 		// }
 		this.oldPos = this.newPos;
 		this.newPos = p.position;
-		this.collider.transform.setPosition(this.newPos);
+		this.collider.transform.setPosition(p.position);
 		this.velocity = p.velocity;
 		this.omega = p.omega;
 		return true;
@@ -1738,6 +1745,12 @@ class Marble extends GameObject {
 
 		playedSounds = [];
 		advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
+
+		for (marble in this.collidingMarbles) {
+			marble.collisionToken = timeState.ticks;
+		}
+		if (this.collidingMarbles.length != 0)
+			this.collisionToken = timeState.ticks;
 
 		physicsAccumulator = 0;
 

@@ -248,12 +248,7 @@ class Net {
 				var cc = marbleUpdatePacket.clientId;
 				if (MarbleGame.instance.world != null) {
 					var m = MarbleGame.instance.world.lastMoves;
-					if (m.exists(cc)) {
-						if (m[cc].serverTicks < marbleUpdatePacket.serverTicks)
-							m.set(cc, marbleUpdatePacket);
-					} else {
-						m.set(cc, marbleUpdatePacket);
-					}
+					m.enqueue(marbleUpdatePacket);
 				}
 
 			case MarbleMove:
