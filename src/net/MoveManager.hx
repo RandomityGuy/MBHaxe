@@ -36,7 +36,7 @@ class MoveManager {
 	var lastMove:NetMove;
 	var lastAckMoveId:Int = -1;
 
-	static var maxMoves = 32;
+	static var maxMoves = 45;
 
 	public function new(connection:ClientConnection) {
 		queuedMoves = [];
