@@ -477,4 +477,51 @@ class Collision {
 		}
 		return null;
 	}
+
+	public static function capsuleSphereNearestOverlap(a0:Vector, a1:Vector, radA:Float, b:Vector, radB:Float) {
+		var V = a1.sub(a0);
+		var A0B = a0.sub(b);
+		var d1 = A0B.dot(V);
+		var d2 = A0B.dot(A0B);
+		var d3 = V.dot(V);
+		var R2 = (radA + radB) * (radA + radB);
+		if (d2 < R2) {
+			// starting in collision state
+			return {
+				result: true,
+				t: 0.0
+			}
+		}
+		if (d3 < 0.01) // no movement, and don't start in collision state, so no collision
+			return {
+				result: false,
+				t: 0.0
+			}
+
+		var b24ac = Math.sqrt(d1 * d1 - d2 * d3 + d3 * R2);
+		var t1 = (-d1 - b24ac) / d3;
+		if (t1 > 0 && t1 < 1.0) {
+			return {
+				result: true,
+				t: t1
+			}
+		}
+		var t2 = (-d1 + b24ac) / d3;
+		if (t2 > 0 && t2 < 1.0) {
+			return {
+				result: true,
+				t: t2
+			}
+		}
+		if (t1 < 0 && t2 > 0) {
+			return {
+				result: true,
+				t: 0.0
+			}
+		}
+		return {
+			result: false,
+			t: 0.0
+		}
+	}
 }

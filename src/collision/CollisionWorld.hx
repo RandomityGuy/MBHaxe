@@ -13,7 +13,7 @@ class CollisionWorld {
 	public var dynamicEntities:Array<CollisionEntity> = [];
 	public var dynamicOctree:Octree;
 
-	var marbleEntities:Array<SphereCollisionEntity> = [];
+	public var marbleEntities:Array<SphereCollisionEntity> = [];
 
 	var dynamicEntitySet:Map<CollisionEntity, Bool> = [];
 

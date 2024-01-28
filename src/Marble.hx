@@ -702,6 +702,8 @@ class Marble extends GameObject {
 
 						normP.scale(1 + bounce);
 
+						velocity.load(velocity.sub(normP.multiply(ourMass)));
+
 						otherMarble.velocity.load(otherMarble.velocity.add(normP.multiply(1 / theirMass)));
 						contacts[i].velocity.load(otherMarble.velocity);
 					} else {
@@ -1048,7 +1050,8 @@ class Marble extends GameObject {
 				found: false,
 				foundContacts: [],
 				lastContactPos: null,
-				lastContactNormal: null
+				lastContactNormal: null,
+				foundMarbles: [],
 			};
 		}
 		var searchbox = new Bounds();
@@ -1065,6 +1068,34 @@ class Marble extends GameObject {
 		var testTriangles = [];
 
 		var finalContacts = [];
+		var foundMarbles = [];
+
+		// Marble-Marble
+		var nextPos = position.add(velocity.multiply(deltaT));
+		for (marble in this.collisionWorld.marbleEntities) {
+			if (marble == this.collider)
+				continue;
+			var otherPosition = marble.transform.getPosition();
+			var isec = Collision.capsuleSphereNearestOverlap(position, nextPos, _radius, otherPosition, marble.radius);
+			if (isec.result) {
+				foundMarbles.push(marble);
+				isec.t *= deltaT;
+				if (isec.t >= finalT) {
+					var vel = position.add(velocity.multiply(finalT)).sub(otherPosition);
+					vel.normalize();
+					var newVelLen = this.velocity.sub(marble.velocity).dot(vel);
+					if (newVelLen < 0.0) {
+						finalT = isec.t;
+
+						var posDiff = nextPos.sub(position).multiply(isec.t);
+						var p = posDiff.add(position);
+						lastContactNormal = p.sub(otherPosition);
+						lastContactNormal.normalize();
+						lastContactPos = p.sub(lastContactNormal.multiply(_radius));
+					}
+				}
+			}
+		}
 
 		// for (iter in 0...10) {
 		//	var iterationFound = false;
@@ -1379,13 +1410,14 @@ class Marble extends GameObject {
 			foundContacts: testTriangles,
 			lastContactPos: lastContactPos,
 			lastContactNormal: position.sub(lastContactPos).normalized(),
+			foundMarbles: foundMarbles
 		};
 	}
 
 	function nudgeToContacts(position:Vector, radius:Float, foundContacts:Array<{
 		v:Array<Vector>,
 		n:Vector
-	}>) {
+	}>, foundMarbles:Array<SphereCollisionEntity>) {
 		var it = 0;
 		var concernedContacts = foundContacts; // PathedInteriors have their own nudge logic
 		var prevResolved = 0;
@@ -1444,6 +1476,14 @@ class Marble extends GameObject {
 			prevResolved = resolved;
 			it++;
 		} while (true && it < 10);
+		for (marble in foundMarbles) {
+			var marblePosition = marble.transform.getPosition();
+			var dist = marblePosition.distance(position);
+			if (dist < radius + marble.radius + 0.001) {
+				var separatingDistance = position.sub(marblePosition).normalized();
+				position = position.add(separatingDistance.multiply(radius + marble.radius + 0.001 - dist));
+			}
+		}
 		return position;
 	}
 
@@ -1547,7 +1587,7 @@ class Marble extends GameObject {
 			}
 			var expectedPos = finalPosData.position;
 			// var newPos = expectedPos;
-			var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts);
+			var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts, finalPosData.foundMarbles);
 
 			if (this.velocity.lengthSq() > 1e-8) {
 				var posDiff = newPos.sub(expectedPos);
@@ -1648,11 +1688,19 @@ class Marble extends GameObject {
 
 	public function unpackUpdate(p:MarbleUpdatePacket) {
 		// Assume packet header is already read
+		// Check if we aren't colliding with a marble
+		// for (marble in this.level.collisionWorld.marbleEntities) {
+		// 	if (marble != this.collider && marble.transform.getPosition().distance(p.position) < marble.radius + this._radius) {
+		// 		Console.log("Marble updated inside another one!");
+		// 		return false;
+		// 	}
+		// }
 		this.oldPos = this.newPos;
 		this.newPos = p.position;
 		this.collider.transform.setPosition(this.newPos);
 		this.velocity = p.velocity;
 		this.omega = p.omega;
+		return true;
 	}
 
 	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>, packets:Array<haxe.io.Bytes>) {
