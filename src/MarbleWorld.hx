@@ -1057,7 +1057,7 @@ class MarbleWorld extends Scheduler {
 		var ackLag = @:privateAccess Net.clientConnection.moveManager.queuedMoves.length;
 		var mvStored = null;
 		if (!lastMoves.ourMoveApplied)
-			mvStored = Net.clientConnection.moveManager.acknowledgeMove(ourLastMove.move.id);
+			mvStored = Net.clientConnection.moveManager.acknowledgeMove(ourLastMove.move.id, timeState);
 		else
 			return;
 

@@ -35,8 +35,9 @@ class MoveManager {
 	var nextMoveId:Int;
 	var lastMove:NetMove;
 	var lastAckMoveId:Int = -1;
+	var ackRTT:Int = -1;
 
-	static var maxMoves = 45;
+	var maxMoves = 45;
 
 	public function new(connection:ClientConnection) {
 		queuedMoves = [];
@@ -153,7 +154,7 @@ class MoveManager {
 		}
 	}
 
-	public function acknowledgeMove(m:Int) {
+	public function acknowledgeMove(m:Int, timeState:TimeState) {
 		if (m == 65535 || m == -1)
 			return null;
 		if (m <= lastAckMoveId)
@@ -168,6 +169,8 @@ class MoveManager {
 		if (m == queuedMoves[0].id) {
 			delta = queuedMoves[0].id - lastAckMoveId;
 			mv = queuedMoves.shift();
+			ackRTT = timeState.ticks - mv.timeState.ticks;
+			maxMoves = Std.int(ackRTT * 1.5);
 		}
 		lastAckMoveId = m;
 		return mv;
