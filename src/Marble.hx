@@ -1679,12 +1679,12 @@ class Marble extends GameObject {
 
 	// MP Only Functions
 
-	public function packUpdate(move:NetMove) {
+	public function packUpdate(move:NetMove, timeState:TimeState) {
 		var b = new haxe.io.BytesOutput();
 		b.writeByte(NetPacketType.MarbleUpdate);
 		var marbleUpdate = new MarbleUpdatePacket();
 		marbleUpdate.clientId = connection != null ? connection.id : 0;
-		marbleUpdate.serverTicks = move.timeState.ticks;
+		marbleUpdate.serverTicks = timeState.ticks;
 		marbleUpdate.position = this.newPos;
 		marbleUpdate.velocity = this.velocity;
 		marbleUpdate.omega = this.omega;
@@ -1710,7 +1710,7 @@ class Marble extends GameObject {
 		return true;
 	}
 
-	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>, packets:Array<haxe.io.Bytes>) {
+	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var move:NetMove = null;
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
 			if (Net.isClient) {
@@ -1742,21 +1742,18 @@ class Marble extends GameObject {
 			innerMove.d = new Vector(0, 0);
 			move = new NetMove(innerMove, axis, timeState, 65535);
 		}
-
 		playedSounds = [];
 		advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
-
 		for (marble in this.collidingMarbles) {
 			marble.collisionToken = timeState.ticks;
 		}
 		if (this.collidingMarbles.length != 0)
 			this.collisionToken = timeState.ticks;
-
 		physicsAccumulator = 0;
-
-		if (Net.isHost) {
-			packets.push(packUpdate(move));
-		}
+		return move;
+		// if (Net.isHost) {
+		// 	packets.push({b: packUpdate(move, timeState), c: this.connection != null ? this.connection.id : 0});
+		// }
 	}
 
 	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {

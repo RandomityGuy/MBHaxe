@@ -155,20 +155,21 @@ class MoveManager {
 
 	public function acknowledgeMove(m:Int) {
 		if (m == 65535 || m == -1)
-			return -1;
+			return null;
 		if (m <= lastAckMoveId)
-			return -1; // Already acked
+			return null; // Already acked
 		if (queuedMoves.length == 0)
-			return -1;
+			return null;
 		while (m != queuedMoves[0].id) {
 			queuedMoves.shift();
 		}
 		var delta = -1;
+		var mv = null;
 		if (m == queuedMoves[0].id) {
 			delta = queuedMoves[0].id - lastAckMoveId;
-			queuedMoves.shift();
+			mv = queuedMoves.shift();
 		}
 		lastAckMoveId = m;
-		return delta;
+		return mv;
 	}
 }

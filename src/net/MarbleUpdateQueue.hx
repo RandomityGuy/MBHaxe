@@ -8,15 +8,14 @@ class MarbleUpdateQueue {
 	var otherMarbleUpdates:Map<Int, Array<MarbleUpdatePacket>> = [];
 	var myMarbleUpdate:MarbleUpdatePacket;
 	var ourMoveApplied:Bool = false;
-	var collisionFrame:Int;
 
 	public function new() {}
 
 	public function enqueue(update:MarbleUpdatePacket) {
 		var cc = update.clientId;
-		if (update.serverTicks < collisionFrame)
-			return;
 		if (cc != Net.clientId) {
+			if (myMarbleUpdate != null && update.serverTicks > myMarbleUpdate.serverTicks)
+				ourMoveApplied = true;
 			if (otherMarbleUpdates.exists(cc)) {
 				otherMarbleUpdates[cc].push(update);
 			} else {
@@ -28,9 +27,5 @@ class MarbleUpdateQueue {
 				ourMoveApplied = false;
 			}
 		}
-	}
-
-	public function addCollisionFrame(tick:Int) {
-		collisionFrame = tick + 2;
 	}
 }
