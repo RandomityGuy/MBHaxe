@@ -39,6 +39,8 @@ class MoveManager {
 
 	var maxMoves = 45;
 
+	public var stall = false;
+
 	public function new(connection:ClientConnection) {
 		queuedMoves = [];
 		nextMoveId = 0;
@@ -46,7 +48,7 @@ class MoveManager {
 	}
 
 	public function recordMove(motionDir:Vector, timeState:TimeState) {
-		if (queuedMoves.length >= maxMoves)
+		if (queuedMoves.length >= maxMoves || stall)
 			return queuedMoves[queuedMoves.length - 1];
 		var move = new Move();
 		move.d = new Vector();
@@ -154,6 +156,10 @@ class MoveManager {
 		}
 	}
 
+	public function getQueueSize() {
+		return queuedMoves.length;
+	}
+
 	public function acknowledgeMove(m:Int, timeState:TimeState) {
 		if (m == 65535 || m == -1)
 			return null;
@@ -170,7 +176,7 @@ class MoveManager {
 			delta = queuedMoves[0].id - lastAckMoveId;
 			mv = queuedMoves.shift();
 			ackRTT = timeState.ticks - mv.timeState.ticks;
-			maxMoves = Std.int(ackRTT * 1.5);
+			maxMoves = ackRTT + 2;
 		}
 		lastAckMoveId = m;
 		return mv;

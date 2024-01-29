@@ -243,7 +243,6 @@ class Marble extends GameObject {
 	public var contacts:Array<CollisionInfo> = [];
 	public var bestContact:CollisionInfo;
 	public var contactEntities:Array<CollisionEntity> = [];
-	public var collidingMarbles:Array<Marble> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
 	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
@@ -296,7 +295,6 @@ class Marble extends GameObject {
 	var connection:net.Net.ClientConnection;
 	var moveMotionDir:Vector;
 	var isNetUpdate:Bool = false;
-	var collisionToken:Int = 0;
 
 	public function new() {
 		super();
@@ -529,11 +527,6 @@ class Marble extends GameObject {
 		this.contacts = queuedContacts;
 		var c = collisiomWorld.sphereIntersection(this.collider, timeState);
 		this.contactEntities = c.foundEntities;
-		this.collidingMarbles = [];
-		for (e in this.contacts) {
-			if (e.collider is SphereCollisionEntity)
-				this.collidingMarbles.push(cast(e.collider, SphereCollisionEntity).marble);
-		}
 		contacts = contacts.concat(c.contacts);
 	}
 
@@ -1689,6 +1682,7 @@ class Marble extends GameObject {
 		marbleUpdate.velocity = this.velocity;
 		marbleUpdate.omega = this.omega;
 		marbleUpdate.move = move;
+		marbleUpdate.moveQueueSize = this.connection != null ? this.connection.moveManager.getQueueSize() : 255;
 		marbleUpdate.serialize(b);
 		return b.getBytes();
 	}
@@ -1707,6 +1701,16 @@ class Marble extends GameObject {
 		this.collider.transform.setPosition(p.position);
 		this.velocity = p.velocity;
 		this.omega = p.omega;
+		if (this.controllable && Net.isClient) {
+			// We are client, need to do something about the queue
+			var mm = Net.clientConnection.moveManager;
+			// trace('Queue size: ${mm.getQueueSize()}, server: ${p.moveQueueSize}');
+			if (mm.getQueueSize() / p.moveQueueSize < 2) {
+				mm.stall = true;
+			} else {
+				mm.stall = false;
+			}
+		}
 		return true;
 	}
 
@@ -1745,11 +1749,6 @@ class Marble extends GameObject {
 		}
 		playedSounds = [];
 		advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
-		for (marble in this.collidingMarbles) {
-			marble.collisionToken = timeState.ticks;
-		}
-		if (this.collidingMarbles.length != 0)
-			this.collisionToken = timeState.ticks;
 		physicsAccumulator = 0;
 		return move;
 		// if (Net.isHost) {
