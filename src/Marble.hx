@@ -1725,6 +1725,7 @@ class Marble extends GameObject {
 		var moveId = 65535;
 		if (!this.controllable && this.connection != null && Net.isHost) {
 			var nextMove = this.connection.moveManager.getNextMove();
+			// trace('Moves left: ${@:privateAccess this.connection.moveManager.queuedMoves.length}');
 			if (nextMove == null) {
 				var axis = getMarbleAxis()[1];
 				var innerMove = new Move();
