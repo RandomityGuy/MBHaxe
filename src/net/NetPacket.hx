@@ -38,7 +38,7 @@ class MarbleUpdatePacket implements NetPacket {
 	var position:Vector;
 	var velocity:Vector;
 	var omega:Vector;
-	var collisionToken:Int;
+	var moveQueueSize:Int;
 
 	public function new() {}
 
@@ -46,7 +46,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeUInt16(clientId);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
-		b.writeUInt16(collisionToken);
+		b.writeByte(moveQueueSize);
 		b.writeFloat(position.x);
 		b.writeFloat(position.y);
 		b.writeFloat(position.z);
@@ -62,7 +62,7 @@ class MarbleUpdatePacket implements NetPacket {
 		clientId = b.readUInt16();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
-		collisionToken = b.readUInt16();
+		moveQueueSize = b.readByte();
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());

@@ -1071,7 +1071,7 @@ class MarbleWorld extends Scheduler {
 		ackLag = ourQueuedMoves.length;
 
 		if (mvStored != null) {
-			trace('ACK Lag: ${timeState.ticks - mvStored.timeState.ticks} ${ourQueuedMoves.length}');
+			// trace('ACK Lag: ${timeState.ticks - mvStored.timeState.ticks} ${ourQueuedMoves.length}');
 		}
 
 		// Tick the remaining moves (ours)
@@ -1086,10 +1086,10 @@ class MarbleWorld extends Scheduler {
 			for (client => arr in lastMoves.otherMarbleUpdates) {
 				if (arr.length > 0) {
 					var m = arr[0];
-					if (m.serverTicks == ourLastMoveTime) {
+					if (m.serverTicks <= ourLastMoveTime) {
 						var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
 						Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
-						m.calculationTicks = Std.int(ackLag / 2);
+						m.calculationTicks = Std.int(ackLag);
 						marblesToTick.set(client, m);
 						arr.shift();
 					}
