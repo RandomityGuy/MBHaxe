@@ -71,10 +71,11 @@ class SuperJump extends PowerUp {
 		var masslessFactor = marble.getMass() * 0.7 + 1 - 0.7;
 		var boost = marble.currentUp.multiply(20 * masslessFactor / marble.getMass());
 		marble.velocity = marble.velocity.add(boost);
-		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
+		if (@:privateAccess !marble.isNetUpdate)
+			this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		if (level.marble == marble)
+		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/use_superjump.wav", ResourceLoader.getAudio, this.soundResources));
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp(marble);
