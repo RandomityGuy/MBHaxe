@@ -60,8 +60,12 @@ class CollisionWorld {
 
 		for (marb in marbleEntities) {
 			if (marb != spherecollision) {
-				if (spherecollision.go.isCollideable)
-					contacts = contacts.concat(marb.sphereIntersection(spherecollision, timeState));
+				if (spherecollision.go.isCollideable) {
+					var isecs = marb.sphereIntersection(spherecollision, timeState);
+					if (isecs.length > 0)
+						foundEntities.push(marb);
+					contacts = contacts.concat(isecs);
+				}
 			}
 		}
 		return {foundEntities: foundEntities, contacts: contacts};

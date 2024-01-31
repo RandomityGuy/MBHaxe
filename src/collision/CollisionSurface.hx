@@ -6,6 +6,37 @@ import octree.IOctreeObject;
 import h3d.Vector;
 import collision.BVHTree.IBVHObject;
 
+@:publicFields
+class TransformedCollisionTriangle {
+	var v1x:Float;
+	var v1y:Float;
+	var v1z:Float;
+	var v2x:Float;
+	var v2y:Float;
+	var v2z:Float;
+	var v3x:Float;
+	var v3y:Float;
+	var v3z:Float;
+	var nx:Float;
+	var ny:Float;
+	var nz:Float;
+
+	inline public function new(v1:Vector, v2:Vector, v3:Vector, n:Vector) {
+		v1x = v1.x;
+		v1y = v1.y;
+		v1z = v1.z;
+		v2x = v2.x;
+		v2y = v2.y;
+		v2z = v2.z;
+		v3x = v3.x;
+		v3y = v3.y;
+		v3z = v3.z;
+		nx = n.x;
+		ny = n.y;
+		nz = n.z;
+	}
+}
+
 class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public var priority:Int;
 	public var position:Int;
@@ -147,7 +178,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		return furthestVertex;
 	}
 
-	public function transformTriangle(idx:Int, tform:Matrix, invtform:Matrix, key:Int) {
+	public inline function transformTriangle(idx:Int, tform:Matrix, invtform:Matrix, key:Int) {
 		if (_transformedPoints == null) {
 			_transformedPoints = points.copy();
 		}
@@ -182,12 +213,10 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			_transformedPoints[p3 * 3 + 2] = pt.z;
 			transformKeys[p3] = key;
 		}
-		return {
-			v1: new Vector(_transformedPoints[p1 * 3], _transformedPoints[p1 * 3 + 1], _transformedPoints[p1 * 3 + 2]),
-			v2: new Vector(_transformedPoints[p2 * 3], _transformedPoints[p2 * 3 + 1], _transformedPoints[p2 * 3 + 2]),
-			v3: new Vector(_transformedPoints[p3 * 3], _transformedPoints[p3 * 3 + 1], _transformedPoints[p3 * 3 + 2]),
-			n: new Vector(_transformedNormals[p1 * 3], _transformedNormals[p1 * 3 + 1], _transformedNormals[p1 * 3 + 2])
-		};
+		return new TransformedCollisionTriangle(new Vector(_transformedPoints[p1 * 3], _transformedPoints[p1 * 3 + 1], _transformedPoints[p1 * 3 + 2]),
+			new Vector(_transformedPoints[p2 * 3], _transformedPoints[p2 * 3 + 1], _transformedPoints[p2 * 3 + 2]),
+			new Vector(_transformedPoints[p3 * 3], _transformedPoints[p3 * 3 + 1], _transformedPoints[p3 * 3 + 2]),
+			new Vector(_transformedNormals[p1 * 3], _transformedNormals[p1 * 3 + 1], _transformedNormals[p1 * 3 + 2]));
 	}
 
 	public function dispose() {

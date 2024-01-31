@@ -1,5 +1,6 @@
 package collision;
 
+import collision.Collision.ITSResult;
 import collision.BVHTree.IBVHObject;
 import src.TimeState;
 import src.GameObject;
@@ -200,33 +201,31 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 				// var v0 = surface.points[surface.indices[i]].transformed(tform);
 				// var v = surface.points[surface.indices[i + 1]].transformed(tform);
 				// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
-				var v0 = verts.v1;
-				var v = verts.v2;
-				var v2 = verts.v3;
+				var v0 = new Vector(verts.v1x, verts.v1y, verts.v1z);
+				var v = new Vector(verts.v2x, verts.v2y, verts.v2z);
+				var v2 = new Vector(verts.v3x, verts.v3y, verts.v3z);
 
-				var surfacenormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
+				var surfacenormal = new Vector(verts.nx, verts.ny, verts.nz); // surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
 
 				if (correctNormals) {
 					var vn = v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1);
 					var vdot = vn.dot(surfacenormal);
 					if (vdot < 0.95) {
-						v0 = verts.v1;
-						v = verts.v3;
-						v2 = verts.v2;
+						v.set(verts.v3x, verts.v3y, verts.v3z);
+						v2.set(verts.v2x, verts.v2y, verts.v2z);
 
-						surfacenormal = vn;
+						surfacenormal.load(vn);
 					}
 				}
 
-				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius);
-				var closest = res.point;
+				var closest = new Vector();
+				var normal = new Vector();
+				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius, closest, normal);
 				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
-				if (closest != null) {
+				if (res) {
 					var contactDist = closest.distanceSq(position);
-					Debug.drawTriangle(v0, v, v2);
+					// Debug.drawTriangle(v0, v, v2);
 					if (contactDist <= radius * radius) {
-						var normal = res.normal;
-
 						if (position.sub(closest).dot(surfacenormal) > 0) {
 							normal.normalize();
 
@@ -236,8 +235,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 							// 	bestDot = testDot;
 
 							var cinfo = new CollisionInfo();
-							cinfo.normal = normal;
-							cinfo.point = closest;
+							cinfo.normal = normal.clone();
+							cinfo.point = closest.clone();
 							// cinfo.collider = this;
 							cinfo.velocity = this.velocity.clone();
 							cinfo.contactDistance = Math.sqrt(contactDist);
