@@ -294,6 +294,7 @@ class Marble extends GameObject {
 
 	var connection:net.Net.ClientConnection;
 	var moveMotionDir:Vector;
+	var lastMove:Move;
 	var isNetUpdate:Bool = false;
 
 	public function new() {
@@ -1140,16 +1141,17 @@ class Marble extends GameObject {
 					// var v0 = surface.points[surface.indices[i]].transformed(tform);
 					// var v = surface.points[surface.indices[i + 1]].transformed(tform);
 					// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
-					var v0 = verts.v1;
-					var v = verts.v2;
-					var v2 = verts.v3;
+					var v0 = new Vector(verts.v1x, verts.v1y, verts.v1z);
+					var v = new Vector(verts.v2x, verts.v2y, verts.v2z);
+					var v2 = new Vector(verts.v3x, verts.v3y, verts.v3z);
 					// var v0 = surface.points[surface.indices[i]].transformed(obj.transform);
 					// var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
 					// var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
 
 					var triangleVerts = [v0, v, v2];
 
-					var surfaceNormal = verts.n; // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
+					var surfaceNormal = new Vector(verts.nx, verts.ny,
+						verts.nz); // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
 					if (obj is DtsObject)
 						surfaceNormal.multiply(-1);
 					var surfaceD = -surfaceNormal.dot(v0);
@@ -1160,10 +1162,6 @@ class Marble extends GameObject {
 						continue;
 					}
 
-					// var v0T = v0.transformed(obj.transform);
-					// var vT = v.transformed(obj.transform);
-					// var v2T = v2.transformed(obj.transform);
-					// var vN = surfaceNormal.transformed3x3(obj.transform);
 					testTriangles.push({
 						v: [v0, v, v2],
 						n: surfaceNormal,
@@ -1175,22 +1173,6 @@ class Marble extends GameObject {
 					// Are we going to touch the plane during this time step?
 					if (collisionTime >= 0.000001 && finalT >= collisionTime) {
 						var collisionPoint = position.add(relVel.multiply(collisionTime));
-						// var lastPoint = v2;
-						// var j = 0;
-						// while (j < 3) {
-						// 	var testPoint = surface.points[surface.indices[i + j]];
-						// 	if (testPoint != lastPoint) {
-						// 		var a = surfaceNormal;
-						// 		var b = lastPoint.sub(testPoint);
-						// 		var planeNorm = b.cross(a);
-						// 		var planeD = -planeNorm.dot(testPoint);
-						// 		lastPoint = testPoint;
-						// 		// if we are on the far side of the edge
-						// 		if (planeNorm.dot(collisionPoint) + planeD >= 0.0)
-						// 			break;
-						// 	}
-						// 	j++;
-						// }
 						// If we're inside the poly, just get the position
 						if (Collision.PointInTriangle(collisionPoint, v0, v, v2)) {
 							finalT = collisionTime;
@@ -1252,14 +1234,6 @@ class Marble extends GameObject {
 
 						// Check if the collision hasn't already happened
 						if (edgeCollisionTime >= 0.000001) {
-							// if (edgeCollisionTime < 0.000001) {
-							// 	edgeCollisionTime = edgeCollisionTime2;
-							// }
-							// if (edgeCollisionTime < 0.00001)
-							// 	continue;
-							// if (edgeCollisionTime > finalT)
-							// 	continue;
-
 							var edgeLen = vertDiff.length();
 
 							var relativeCollisionPos = position.add(relVel.multiply(edgeCollisionTime)).sub(thisVert);
@@ -1391,18 +1365,6 @@ class Marble extends GameObject {
 		var finalPosition = position.add(deltaPosition);
 		position = finalPosition;
 
-		// for (testTri in testTriangles) {
-		// 	var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, finalPosition, radius, testTri.edge,
-		// 		testTri.concavity);
-		// 	if (tsi.result) {
-		// 		var contact = new CollisionInfo();
-		// 		contact.point = tsi.point;
-		// 		contact.normal = tsi.normal;
-		// 		contact.contactDistance = tsi.point.distance(position);
-		// 		finalContacts.push(contact);
-		// 	}
-		// }
-
 		return {
 			position: position,
 			t: finalT,
@@ -1493,6 +1455,10 @@ class Marble extends GameObject {
 		var it = 0;
 
 		var piTime = timeRemaining;
+
+		if (this.isNetUpdate) {
+			lastMove = m;
+		}
 
 		_bounceYet = false;
 
@@ -1661,7 +1627,7 @@ class Marble extends GameObject {
 
 		newPos = this.collider.transform.getPosition();
 
-		if (this.prevPos != null && !this.isNetUpdate) {
+		if (this.prevPos != null) {
 			var tempTimeState = timeState.clone();
 			tempTimeState.currentAttemptTime = passedTime;
 			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
@@ -1719,7 +1685,7 @@ class Marble extends GameObject {
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
 			if (Net.isClient) {
 				var axis = getMarbleAxis()[1];
-				move = Net.clientConnection.moveManager.recordMove(axis, timeState);
+				move = Net.clientConnection.moveManager.recordMove(this, axis, timeState);
 			} else if (Net.isHost) {
 				var axis = getMarbleAxis()[1];
 				var innerMove = recordMove();
@@ -1742,9 +1708,12 @@ class Marble extends GameObject {
 			}
 		}
 		if (move == null) {
-			var axis = getMarbleAxis()[1];
-			var innerMove = new Move();
-			innerMove.d = new Vector(0, 0);
+			var axis = moveMotionDir != null ? moveMotionDir : new Vector(0, -1, 0);
+			var innerMove = lastMove;
+			if (innerMove == null) {
+				innerMove = new Move();
+				innerMove.d = new Vector(0, 0);
+			}
 			move = new NetMove(innerMove, axis, timeState, 65535);
 		}
 		playedSounds = [];

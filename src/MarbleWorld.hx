@@ -116,6 +116,7 @@ class MarbleWorld extends Scheduler {
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
 	public var dtsObjects:Array<DtsObject> = [];
+	public var powerUps:Array<PowerUp> = [];
 	public var forceObjects:Array<ForceObject> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
@@ -938,6 +939,8 @@ class MarbleWorld extends Scheduler {
 			var worker = new ResourceLoaderWorker(() -> {
 				obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
 				this.dtsObjects.push(obj);
+				if (obj is PowerUp)
+					this.powerUps.push(cast obj);
 				if (obj is ForceObject) {
 					this.forceObjects.push(cast obj);
 				}
@@ -1066,14 +1069,21 @@ class MarbleWorld extends Scheduler {
 
 		var ourQueuedMoves = @:privateAccess Net.clientConnection.moveManager.queuedMoves.copy();
 
-		var advanceTimeState = timeState.clone();
+		var qm = ourQueuedMoves[0];
+		var advanceTimeState = qm != null ? qm.timeState.clone() : timeState.clone();
 		advanceTimeState.dt = 0.032;
 
-		ackLag = ourQueuedMoves.length;
-
-		if (mvStored != null) {
-			// trace('ACK Lag: ${timeState.ticks - mvStored.timeState.ticks} ${ourQueuedMoves.length}');
+		if (qm != null) {
+			var mvs = qm.powerupStates.copy();
+			for (pw in marble.level.powerUps) {
+				pw.lastPickUpTime = mvs.shift();
+			}
+			@:privateAccess marble.helicopterEnableTime = qm.helicopterState;
+			@:privateAccess marble.megaMarbleEnableTime = qm.megaState;
+			marble.blastAmount = qm.blastAmt;
 		}
+
+		ackLag = ourQueuedMoves.length;
 
 		// Tick the remaining moves (ours)
 		if (!lastMoves.ourMoveApplied) {
@@ -1081,16 +1091,19 @@ class MarbleWorld extends Scheduler {
 			var totalTicksToDo = ourQueuedMoves.length;
 			var endTick = ourLastMoveTime + totalTicksToDo;
 			var currentTick = ourLastMoveTime;
+			//- Std.int(ourLastMove.moveQueueSize - @:privateAccess Net.clientConnection.moveManager.ackRTT); // - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT)) - offset;
 
 			var marblesToTick = new Map();
 
 			for (client => arr in lastMoves.otherMarbleUpdates) {
 				if (arr.length > 0) {
 					var m = arr[0];
-					if (m.serverTicks <= ourLastMoveTime) {
+					if (m.serverTicks == ourLastMoveTime) {
 						var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
 						Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
-						m.calculationTicks = Std.int(ackLag);
+						m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
+
+						// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
 						marblesToTick.set(client, m);
 						arr.shift();
 					}
@@ -1098,17 +1111,20 @@ class MarbleWorld extends Scheduler {
 			}
 
 			Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
+			// var syncTickStates = new Map();
 
 			for (move in ourQueuedMoves) {
 				var m = move.move;
 				// Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
+				this.marble.heldPowerup = move.powerup;
 				@:privateAccess this.marble.moveMotionDir = move.motionDir;
 				@:privateAccess this.marble.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
+				// var collidings = @:privateAccess this.marble.contactEntities.filter(x -> x is SphereCollisionEntity);
+				advanceTimeState.currentAttemptTime += 0.032;
 
 				for (client => m in marblesToTick) {
 					if (m.calculationTicks > 0) {
 						var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
-
 						// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
 						var beforePos = @:privateAccess marbleToUpdate.newPos.clone();
@@ -1125,20 +1141,24 @@ class MarbleWorld extends Scheduler {
 				currentTick++;
 			}
 
-			for (client => m in marblesToTick) {
-				if (m.calculationTicks >= 0) {
-					var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+			// for (marble => state in syncTickStates) {
+			// 	marble.restoreState(state);
+			// }
 
-					while (m.calculationTicks > 0) {
-						var mv = m.move.move;
-						@:privateAccess marbleToUpdate.isNetUpdate = true;
-						@:privateAccess marbleToUpdate.moveMotionDir = m.move.motionDir;
-						@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, mv, this.collisionWorld, this.pathedInteriors);
-						@:privateAccess marbleToUpdate.isNetUpdate = false;
-						m.calculationTicks--;
-					}
-				}
-			}
+			// for (client => m in marblesToTick) {
+			// 	if (m.calculationTicks >= 0) {
+			// 		var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+
+			// 		while (m.calculationTicks > 0) {
+			// 			var mv = m.move.move;
+			// 			@:privateAccess marbleToUpdate.isNetUpdate = true;
+			// 			@:privateAccess marbleToUpdate.moveMotionDir = m.move.motionDir;
+			// 			@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, mv, this.collisionWorld, this.pathedInteriors);
+			// 			@:privateAccess marbleToUpdate.isNetUpdate = false;
+			// 			m.calculationTicks--;
+			// 		}
+			// 	}
+			// }
 
 			lastMoves.ourMoveApplied = true;
 			@:privateAccess this.marble.isNetUpdate = false;
@@ -2166,6 +2186,7 @@ class MarbleWorld extends Scheduler {
 			dtsObject.dispose();
 		}
 		dtsObjects = null;
+		powerUps = [];
 		for (trigger in this.triggers) {
 			trigger.dispose();
 		}

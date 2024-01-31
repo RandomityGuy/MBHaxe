@@ -1,5 +1,6 @@
 package net;
 
+import shapes.PowerUp;
 import net.NetPacket.MarbleMovePacket;
 import src.TimeState;
 import src.Console;
@@ -13,6 +14,7 @@ import src.Settings;
 import hxd.Key;
 import src.MarbleGame;
 import src.Util;
+import src.Marble;
 
 @:publicFields
 class NetMove {
@@ -20,6 +22,12 @@ class NetMove {
 	var move:Move;
 	var id:Int;
 	var timeState:TimeState;
+	// For rewind purposes
+	var powerup:PowerUp;
+	var powerupStates:Array<Float>;
+	var helicopterState:Float;
+	var megaState:Float;
+	var blastAmt:Float;
 
 	public function new(move:Move, motionDir:Vector, timeState:TimeState, id:Int) {
 		this.move = move;
@@ -47,7 +55,7 @@ class MoveManager {
 		this.connection = connection;
 	}
 
-	public function recordMove(motionDir:Vector, timeState:TimeState) {
+	public function recordMove(marble:Marble, motionDir:Vector, timeState:TimeState) {
 		if (queuedMoves.length >= maxMoves || stall)
 			return queuedMoves[queuedMoves.length - 1];
 		var move = new Move();
@@ -88,6 +96,14 @@ class MoveManager {
 		}
 
 		var netMove = new NetMove(move, motionDir, timeState.clone(), nextMoveId++);
+		netMove.powerup = marble.heldPowerup;
+		netMove.powerupStates = [];
+		netMove.helicopterState = @:privateAccess marble.helicopterEnableTime;
+		netMove.megaState = @:privateAccess marble.megaMarbleEnableTime;
+		netMove.blastAmt = marble.blastAmount;
+		for (pw in marble.level.powerUps) {
+			netMove.powerupStates.push(pw.lastPickUpTime);
+		}
 		queuedMoves.push(netMove);
 
 		if (nextMoveId >= 65535) // 65535 is reserved for null move
@@ -108,8 +124,8 @@ class MoveManager {
 
 	public static inline function packMove(m:NetMove, b:haxe.io.BytesOutput) {
 		b.writeUInt16(m.id);
-		b.writeFloat(m.move.d.x);
-		b.writeFloat(m.move.d.y);
+		b.writeByte(Std.int((m.move.d.x * 16) + 16));
+		b.writeByte(Std.int((m.move.d.y * 16) + 16));
 		var flags = 0;
 		if (m.move.jump)
 			flags |= 1;
@@ -128,8 +144,8 @@ class MoveManager {
 		var moveId = b.readUInt16();
 		var move = new Move();
 		move.d = new Vector();
-		move.d.x = b.readFloat();
-		move.d.y = b.readFloat();
+		move.d.x = (b.readByte() - 16) / 16.0;
+		move.d.y = (b.readByte() - 16) / 16.0;
 		var flags = b.readByte();
 		move.jump = (flags & 1) != 0;
 		move.powerup = (flags & 2) != 0;

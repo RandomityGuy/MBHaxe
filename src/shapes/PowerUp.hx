@@ -39,7 +39,7 @@ abstract class PowerUp extends DtsObject {
 			if (this.autoUse)
 				this.use(marble, timeState);
 
-			if (level.marble == marble) {
+			if (level.marble == marble && @:privateAccess !marble.isNetUpdate) {
 				if (customPickupMessage != null)
 					this.level.displayAlert(customPickupMessage);
 				else

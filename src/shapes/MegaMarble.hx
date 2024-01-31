@@ -43,7 +43,8 @@ class MegaMarble extends PowerUp {
 	public function use(marble:Marble, timeState:TimeState) {
 		marble.enableMegaMarble(timeState.currentAttemptTime);
 		this.level.deselectPowerUp(marble);
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/use_mega.wav', ResourceLoader.getAudio, this.soundResources));
+		if (this.level.marble == marble && @:privateAccess !marble.isNetUpdate)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/use_mega.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	override function getPreloadMaterials(dts:dts.DtsFile) {

@@ -122,55 +122,56 @@ class Net {
 
 	public static function joinServer(connectedCb:() -> Void) {
 		masterWs = new WebSocket("ws://localhost:8080");
+		masterWs.onopen = () -> {
+			client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
+			var candidates = [];
 
-		client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
-		var candidates = [];
-
-		client.onLocalCandidate = (c) -> {
-			if (c != "")
-				candidates.push('a=${c}');
-		}
-		client.onGatheringStateChange = (s) -> {
-			if (s == RTC_GATHERING_COMPLETE) {
-				Console.log("Local Description Set!");
-				var sdpObj = StringTools.trim(client.localDescription);
-				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n');
-				masterWs.send(Json.stringify({
-					type: "connect",
-					sdpObj: {
-						sdp: sdpObj,
-						type: "offer"
-					}
-				}));
+			client.onLocalCandidate = (c) -> {
+				if (c != "")
+					candidates.push('a=${c}');
 			}
-		}
-
-		masterWs.onmessage = (m) -> {
-			switch (m) {
-				case StrMessage(content):
-					Console.log("Remote Description Received!");
-					var conts = Json.parse(content);
-					client.setRemoteDescription(conts.sdp, conts.type);
-				case _: {}
+			client.onGatheringStateChange = (s) -> {
+				if (s == RTC_GATHERING_COMPLETE) {
+					Console.log("Local Description Set!");
+					var sdpObj = StringTools.trim(client.localDescription);
+					sdpObj = sdpObj + '\r\n' + candidates.join('\r\n');
+					masterWs.send(Json.stringify({
+						type: "connect",
+						sdpObj: {
+							sdp: sdpObj,
+							type: "offer"
+						}
+					}));
+				}
 			}
-		}
 
-		clientDatachannel = client.createDatachannel("mp");
-		clientDatachannel.onOpen = (n) -> {
-			Console.log("Successfully connected!");
-			clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
-			clientIdMap[0] = clients[client];
-			clientConnection = clients[client];
-			onConnectedToServer();
-			haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
-		}
-		clientDatachannel.onMessage = (b) -> {
-			onPacketReceived(client, clientDatachannel, new haxe.io.BytesInput(b));
-		}
+			masterWs.onmessage = (m) -> {
+				switch (m) {
+					case StrMessage(content):
+						Console.log("Remote Description Received!");
+						var conts = Json.parse(content);
+						client.setRemoteDescription(conts.sdp, conts.type);
+					case _: {}
+				}
+			}
 
-		isMP = true;
-		isHost = false;
-		isClient = true;
+			clientDatachannel = client.createDatachannel("mp");
+			clientDatachannel.onOpen = (n) -> {
+				Console.log("Successfully connected!");
+				clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
+				clientIdMap[0] = clients[client];
+				clientConnection = clients[client];
+				onConnectedToServer();
+				haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
+			}
+			clientDatachannel.onMessage = (b) -> {
+				onPacketReceived(client, clientDatachannel, new haxe.io.BytesInput(b));
+			}
+
+			isMP = true;
+			isHost = false;
+			isClient = true;
+		}
 	}
 
 	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel) {
