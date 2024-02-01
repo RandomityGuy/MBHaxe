@@ -1,5 +1,6 @@
 package collision;
 
+import h3d.Matrix;
 import src.MarbleGame;
 import src.TimeState;
 import h3d.col.Bounds;
@@ -8,6 +9,7 @@ import h3d.Vector;
 import octree.Octree;
 
 class CollisionWorld {
+	public var staticWorld:CollisionEntity;
 	public var octree:Octree;
 	public var entities:Array<CollisionEntity> = [];
 	public var dynamicEntities:Array<CollisionEntity> = [];
@@ -20,6 +22,7 @@ class CollisionWorld {
 	public function new() {
 		this.octree = new Octree();
 		this.dynamicOctree = new Octree();
+		this.staticWorld = new CollisionEntity(null);
 	}
 
 	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState) {
@@ -49,6 +52,8 @@ class CollisionWorld {
 				contacts = contacts.concat(entity.sphereIntersection(spherecollision, timeState));
 			}
 		}
+
+		contacts = contacts.concat(this.staticWorld.sphereIntersection(spherecollision, timeState));
 
 		var dynSearch = dynamicOctree.boundingSearch(box).map(x -> cast(x, CollisionEntity));
 		for (obj in dynSearch) {
@@ -116,6 +121,7 @@ class CollisionWorld {
 		for (obj in objs) {
 			results = results.concat(obj.rayCast(rayStart, rayDirection));
 		}
+		results = results.concat(this.staticWorld.rayCast(rayStart, rayDirection));
 		return results;
 	}
 
@@ -153,6 +159,17 @@ class CollisionWorld {
 		}
 	}
 
+	public function addStaticInterior(entity:CollisionEntity, transform:Matrix) {
+		var invTform = transform.getInverse();
+		for (surf in entity.surfaces) {
+			staticWorld.addSurface(surf.getTransformed(transform, invTform));
+		}
+	}
+
+	public function finalizeStaticGeometry() {
+		this.staticWorld.finalize();
+	}
+
 	public function dispose() {
 		for (e in entities) {
 			e.dispose();
@@ -165,5 +182,7 @@ class CollisionWorld {
 		dynamicEntities = null;
 		dynamicOctree = null;
 		dynamicEntitySet = null;
+		staticWorld.dispose();
+		staticWorld = null;
 	}
 }

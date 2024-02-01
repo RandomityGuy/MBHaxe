@@ -40,6 +40,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public var userData:Int;
 	public var fastTransform:Bool = false;
+	public var isWorldStatic:Bool = false;
 
 	var _transformKey:Int = 0;
 
@@ -187,6 +188,11 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var tform = transform.clone();
 		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));
 
+		if (isWorldStatic) {
+			tform.load(Matrix.I());
+			invtform.load(Matrix.I());
+		}
+
 		var contacts = [];
 
 		for (obj in surfaces) {
@@ -246,7 +252,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 							cinfo.force = surface.force;
 							cinfo.friction = surface.friction;
 							contacts.push(cinfo);
-							this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
+							if (this.go != null)
+								this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
 							// surfaceBestContact = cinfo;
 							// }
 						}

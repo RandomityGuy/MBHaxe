@@ -1,5 +1,6 @@
 package net;
 
+import net.ClientConnection;
 import net.NetPacket.MarbleUpdatePacket;
 import net.NetPacket.MarbleMovePacket;
 import haxe.Json;
@@ -11,12 +12,6 @@ import net.NetCommands;
 import src.MarbleGame;
 import hx.ws.Types.MessageType;
 
-enum abstract GameplayState(Int) from Int to Int {
-	var UNKNOWN;
-	var LOBBY;
-	var GAME;
-}
-
 enum abstract NetPacketType(Int) from Int to Int {
 	var NullPacket;
 	var ClientIdAssign;
@@ -25,31 +20,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var PingBack;
 	var MarbleUpdate;
 	var MarbleMove;
-}
-
-@:publicFields
-class ClientConnection {
-	var id:Int;
-	var socket:RTCPeerConnection;
-	var datachannel:RTCDataChannel;
-	var state:GameplayState;
-	var moveManager:MoveManager;
-	var rtt:Float;
-	var pingSendTime:Float;
-	var _rttRecords:Array<Float> = [];
-
-	public function new(id:Int, socket:RTCPeerConnection, datachannel:RTCDataChannel) {
-		this.socket = socket;
-		this.datachannel = datachannel;
-		this.id = id;
-		this.state = GameplayState.LOBBY;
-		this.rtt = 0;
-		this.moveManager = new MoveManager(this);
-	}
-
-	public function ready() {
-		state = GameplayState.GAME;
-	}
+	var PlayerInfo;
 }
 
 class Net {
@@ -66,8 +37,8 @@ class Net {
 
 	public static var clientId:Int;
 	public static var networkRNG:Float;
-	public static var clients:Map<RTCPeerConnection, ClientConnection> = [];
-	public static var clientIdMap:Map<Int, ClientConnection> = [];
+	public static var clients:Map<RTCPeerConnection, GameConnection> = [];
+	public static var clientIdMap:Map<Int, GameConnection> = [];
 	public static var clientConnection:ClientConnection;
 
 	public static function hostServer() {
@@ -105,7 +76,7 @@ class Net {
 		peer.onGatheringStateChange = (s) -> {
 			if (s == RTC_GATHERING_COMPLETE) {
 				var sdpObj = StringTools.trim(peer.localDescription);
-				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n');
+				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
 				masterWs.send(Json.stringify({
 					type: "connect",
 					sdpObj: {
@@ -118,6 +89,11 @@ class Net {
 		peer.onDataChannel = (dc:datachannel.RTCDataChannel) -> {
 			onClientConnect(peer, dc);
 		}
+	}
+
+	static function addGhost(id:Int) {
+		var ghost = new DummyConnection(id);
+		clientIdMap[id] = ghost;
 	}
 
 	public static function joinServer(connectedCb:() -> Void) {
@@ -134,7 +110,7 @@ class Net {
 				if (s == RTC_GATHERING_COMPLETE) {
 					Console.log("Local Description Set!");
 					var sdpObj = StringTools.trim(client.localDescription);
-					sdpObj = sdpObj + '\r\n' + candidates.join('\r\n');
+					sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
 					masterWs.send(Json.stringify({
 						type: "connect",
 						sdpObj: {
@@ -160,7 +136,7 @@ class Net {
 				Console.log("Successfully connected!");
 				clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
 				clientIdMap[0] = clients[client];
-				clientConnection = clients[client];
+				clientConnection = cast clients[client];
 				onConnectedToServer();
 				haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
 			}
@@ -190,7 +166,7 @@ class Net {
 		var b = haxe.io.Bytes.alloc(2);
 		b.set(0, Ping);
 		b.set(1, 3); // Count
-		clients[c].pingSendTime = Console.time();
+		cast(clients[c], ClientConnection).pingSendTime = Console.time();
 		dc.sendBytes(b);
 		Console.log("Sending ping packet!");
 	}
@@ -201,9 +177,21 @@ class Net {
 		var b = haxe.io.Bytes.alloc(2);
 		b.set(0, Ping);
 		b.set(1, 3); // Count
-		clients[client].pingSendTime = Console.time();
+		cast(clients[client], ClientConnection).pingSendTime = Console.time();
 		clientDatachannel.sendBytes(b);
 		Console.log("Sending ping packet!");
+	}
+
+	static function sendPlayerInfosBytes() {
+		var b = new haxe.io.BytesOutput();
+		b.writeByte(PlayerInfo);
+		var cnt = 0;
+		for (c in clientIdMap)
+			cnt++;
+		b.writeByte(cnt);
+		for (c => v in clientIdMap)
+			b.writeByte(c);
+		return b.getBytes();
 	}
 
 	static function onPacketReceived(c:RTCPeerConnection, dc:RTCDataChannel, input:haxe.io.BytesInput) {
@@ -227,7 +215,7 @@ class Net {
 			case PingBack:
 				var pingLeft = input.readByte();
 				Console.log("Got pingback packet!");
-				var conn = clients[c];
+				var conn:ClientConnection = cast clients[c];
 				var now = Console.time();
 				conn._rttRecords.push((now - conn.pingSendTime));
 				if (pingLeft > 0) {
@@ -241,6 +229,10 @@ class Net {
 						conn.rtt += r;
 					conn.rtt /= conn._rttRecords.length;
 					Console.log('Got RTT ${conn.rtt} for client ${conn.id}');
+					if (Net.isHost) {
+						var b = sendPlayerInfosBytes();
+						conn.sendBytes(b);
+					}
 				}
 
 			case MarbleUpdate:
@@ -258,20 +250,36 @@ class Net {
 				var cc = clientIdMap[movePacket.clientId];
 				cc.moveManager.queueMove(movePacket.move);
 
+			case PlayerInfo:
+				var count = input.readByte();
+				for (i in 0...count) {
+					var id = input.readByte();
+					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
+						Console.log('Adding ghost connection ${id}');
+						addGhost(id);
+					}
+				}
+
 			case _:
-				trace("unknown command: " + packetType);
+				Console.log("unknown command: " + packetType);
 		}
 	}
 
 	public static function sendPacketToAll(packetData:haxe.io.BytesOutput) {
 		var bytes = packetData.getBytes();
 		for (c => v in clients) {
-			v.datachannel.sendBytes(packetData.getBytes());
+			v.sendBytes(bytes);
 		}
 	}
 
 	public static function sendPacketToHost(packetData:haxe.io.BytesOutput) {
 		var bytes = packetData.getBytes();
 		clientDatachannel.sendBytes(bytes);
+	}
+
+	public static function addDummyConnection() {
+		if (Net.isHost) {
+			addGhost(Net.clientId++);
+		}
 	}
 }

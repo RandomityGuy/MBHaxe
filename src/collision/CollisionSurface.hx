@@ -219,6 +219,42 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			new Vector(_transformedNormals[p1 * 3], _transformedNormals[p1 * 3 + 1], _transformedNormals[p1 * 3 + 2]));
 	}
 
+	public inline function getTriangle(idx:Int) {
+		var p1 = indices[idx];
+		var p2 = indices[idx + 1];
+		var p3 = indices[idx + 2];
+
+		return new TransformedCollisionTriangle(getPoint(p1), getPoint(p2), getPoint(p3), getNormal(p1));
+	}
+
+	public function getTransformed(m:Matrix, invtform:Matrix) {
+		var tformed = new CollisionSurface();
+		tformed.points = this.points.copy();
+		tformed.normals = this.normals.copy();
+		tformed.indices = this.indices.copy();
+		tformed.friction = this.friction;
+		tformed.force = this.force;
+		tformed.restitution = this.restitution;
+		tformed.transformKeys = this.transformKeys.copy();
+
+		for (i in 0...Std.int(points.length / 3)) {
+			var v = getPoint(i);
+			var v2 = v.transformed(m);
+			tformed.points[i * 3] = v2.x;
+			tformed.points[i * 3 + 1] = v2.y;
+			tformed.points[i * 3 + 2] = v2.z;
+
+			var n = getNormal(i);
+			var n2 = n.transformed3x3(invtform).normalized();
+			tformed.normals[i * 3] = n2.x;
+			tformed.normals[i * 3 + 1] = n2.y;
+			tformed.normals[i * 3 + 2] = n2.z;
+		}
+		tformed.generateBoundingBox();
+
+		return tformed;
+	}
+
 	public function dispose() {
 		points = null;
 		normals = null;

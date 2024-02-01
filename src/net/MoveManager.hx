@@ -4,7 +4,7 @@ import shapes.PowerUp;
 import net.NetPacket.MarbleMovePacket;
 import src.TimeState;
 import src.Console;
-import net.Net.ClientConnection;
+import net.ClientConnection;
 import net.Net.NetPacketType;
 import src.MarbleWorld;
 import src.Marble.Move;
@@ -38,7 +38,7 @@ class NetMove {
 }
 
 class MoveManager {
-	var connection:ClientConnection;
+	var connection:GameConnection;
 	var queuedMoves:Array<NetMove>;
 	var nextMoveId:Int;
 	var lastMove:NetMove;
@@ -49,10 +49,12 @@ class MoveManager {
 
 	public var stall = false;
 
-	public function new(connection:ClientConnection) {
+	public function new(connection:GameConnection) {
 		queuedMoves = [];
 		nextMoveId = 0;
 		this.connection = connection;
+		var mv = new Move();
+		mv.d = new Vector(0, 0);
 	}
 
 	public function recordMove(marble:Marble, motionDir:Vector, timeState:TimeState) {

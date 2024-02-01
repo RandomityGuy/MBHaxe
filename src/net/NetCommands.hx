@@ -1,6 +1,6 @@
 package net;
 
-import net.Net.GameplayState;
+import net.ClientConnection.GameplayState;
 import net.Net.NetPacketType;
 import gui.MultiplayerLevelSelectGui;
 import src.MarbleGame;
@@ -46,7 +46,7 @@ class NetCommands {
 	@:rpc(server) public static function setStartTime(t:Float) {
 		if (MarbleGame.instance.world != null) {
 			if (Net.isClient) {
-				t -= Net.clientIdMap[0].rtt / 2; // Subtract receving time
+				t -= cast(Net.clientIdMap[0], ClientConnection).rtt / 2; // Subtract receving time
 			}
 			MarbleGame.instance.world.startRealTime = MarbleGame.instance.world.timeState.timeSinceLoad + t;
 		}
