@@ -1,5 +1,6 @@
 package net;
 
+import net.NetPacket.MarbleUpdatePacket;
 import shapes.PowerUp;
 import net.NetPacket.MarbleMovePacket;
 import src.TimeState;
@@ -198,5 +199,21 @@ class MoveManager {
 		}
 		lastAckMoveId = m;
 		return mv;
+	}
+
+	public function getMoveForTick(m:Int) {
+		if (m <= lastAckMoveId)
+			return null;
+		if (m == 65535 || m == -1)
+			return null;
+		if (queuedMoves.length == 0)
+			return null;
+		for (i in 0...queuedMoves.length) {
+			if (queuedMoves[i].id == m)
+				return queuedMoves[i];
+			if (queuedMoves[i].id > m)
+				return null;
+		}
+		return null;
 	}
 }

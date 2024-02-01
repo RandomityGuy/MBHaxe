@@ -50,7 +50,7 @@ class Net {
 		isHost = true;
 		isClient = false;
 		clientId = 0;
-		masterWs = new WebSocket("ws://localhost:8080");
+		masterWs = new WebSocket("ws://192.168.1.2:8080");
 
 		masterWs.onmessage = (m) -> {
 			switch (m) {
@@ -97,7 +97,7 @@ class Net {
 	}
 
 	public static function joinServer(connectedCb:() -> Void) {
-		masterWs = new WebSocket("ws://localhost:8080");
+		masterWs = new WebSocket("ws://192.168.1.2:8080");
 		masterWs.onopen = () -> {
 			client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
 			var candidates = [];

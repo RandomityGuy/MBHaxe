@@ -53,7 +53,7 @@ class CollisionWorld {
 			}
 		}
 
-		contacts = contacts.concat(this.staticWorld.sphereIntersection(spherecollision, timeState));
+		// contacts = contacts.concat(this.staticWorld.sphereIntersection(spherecollision, timeState));
 
 		var dynSearch = dynamicOctree.boundingSearch(box).map(x -> cast(x, CollisionEntity));
 		for (obj in dynSearch) {
