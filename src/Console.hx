@@ -1,5 +1,6 @@
 package src;
 
+import net.Net;
 #if !js
 import sys.FileSystem;
 #end
@@ -187,6 +188,8 @@ class Console {
 			} else if (cmdType == 'rollback') {
 				var t = Std.parseFloat(cmdSplit[1]);
 				MarbleGame.instance.world.rollback(t);
+			} else if (cmdType == 'addDummy') {
+				Net.addDummyConnection();
 			} else {
 				error("Unknown command");
 			}

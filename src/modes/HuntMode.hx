@@ -151,6 +151,7 @@ class HuntState implements RewindableState {
 class HuntMode extends NullMode {
 	var gemSpawnPoints:Array<GemSpawnSphere> = [];
 	var playerSpawnPoints:Array<MissionElementSpawnSphere> = [];
+	var spawnPointTaken = [];
 
 	var gemOctree:Octree;
 	var gemGroupRadius:Float;
@@ -170,8 +171,10 @@ class HuntMode extends NullMode {
 				if ([MissionElementType.SpawnSphere].contains(element._type)) {
 					var spawnSphere:MissionElementSpawnSphere = cast element;
 					var dbname = spawnSphere.datablock.toLowerCase();
-					if (dbname == "spawnspheremarker")
+					if (dbname == "spawnspheremarker") {
 						playerSpawnPoints.push(spawnSphere);
+						spawnPointTaken.push(false);
+					}
 					if (dbname == "gemspawnspheremarker")
 						gemSpawnPoints.push(new GemSpawnSphere(spawnSphere));
 				} else if (element._type == MissionElementType.SimGroup) {
@@ -183,7 +186,12 @@ class HuntMode extends NullMode {
 	};
 
 	override function getSpawnTransform() {
-		var randomSpawn = playerSpawnPoints[Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1))];
+		var idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+		while (spawnPointTaken[idx]) {
+			idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+		}
+		spawnPointTaken[idx] = true;
+		var randomSpawn = playerSpawnPoints[idx];
 		var spawnPos = MisParser.parseVector3(randomSpawn.position);
 		spawnPos.x *= -1;
 		var spawnRot = MisParser.parseRotation(randomSpawn.rotation);

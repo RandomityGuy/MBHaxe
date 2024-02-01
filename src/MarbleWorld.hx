@@ -7,7 +7,8 @@ import net.NetPacket.MarbleMovePacket;
 import net.MoveManager;
 import net.NetCommands;
 import net.Net;
-import net.Net.ClientConnection;
+import net.ClientConnection;
+import net.ClientConnection.GameConnection;
 import rewind.InputRecorder;
 import gui.AchievementsGui;
 import src.Radar;
@@ -203,7 +204,7 @@ class MarbleWorld extends Scheduler {
 	var tickAccumulator:Float = 0.0;
 	var maxPredictionTicks:Int = 16;
 
-	var clientMarbles:Map<ClientConnection, Marble> = [];
+	var clientMarbles:Map<GameConnection, Marble> = [];
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -307,7 +308,7 @@ class MarbleWorld extends Scheduler {
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		if (this.isMultiplayer) {
-			for (client in Net.clients) {
+			for (client in Net.clientIdMap) {
 				this.resourceLoadFuncs.push(fwd -> this.initMarble(client, fwd)); // Others
 			}
 		}
@@ -322,6 +323,7 @@ class MarbleWorld extends Scheduler {
 
 	public function postInit() {
 		// Add the sky at the last so that cubemap reflections work
+		this.collisionWorld.finalizeStaticGeometry();
 		this.playGui.init(this.scene2d, this.mission.game.toLowerCase());
 		this.scene.addChild(this.sky);
 		this._ready = true;
@@ -415,7 +417,7 @@ class MarbleWorld extends Scheduler {
 		worker.run();
 	}
 
-	public function initMarble(client:ClientConnection, onFinish:Void->Void) {
+	public function initMarble(client:GameConnection, onFinish:Void->Void) {
 		Console.log("Initializing marble");
 		var worker = new ResourceLoaderWorker(onFinish);
 		var marblefiles = [
@@ -767,8 +769,11 @@ class MarbleWorld extends Scheduler {
 			var tmat = Matrix.T(interiorPosition.x, interiorPosition.y, interiorPosition.z);
 			mat.multiply(mat, tmat);
 
+			if (hasCollision)
+				this.collisionWorld.addStaticInterior(interior.collider, mat);
+
+			interior.isCollideable = false;
 			interior.setTransform(mat);
-			interior.isCollideable = hasCollision;
 			onFinish();
 		});
 
@@ -886,7 +891,7 @@ class MarbleWorld extends Scheduler {
 	public function addInterior(obj:InteriorObject, onFinish:Void->Void) {
 		this.interiors.push(obj);
 		obj.init(cast this, () -> {
-			this.collisionWorld.addEntity(obj.collider);
+			// this.collisionWorld.addEntity(obj.collider);
 			if (obj.useInstancing)
 				this.instanceManager.addObject(obj);
 			else
@@ -970,7 +975,7 @@ class MarbleWorld extends Scheduler {
 		});
 	}
 
-	public function addMarble(marble:Marble, client:ClientConnection, onFinish:Void->Void) {
+	public function addMarble(marble:Marble, client:GameConnection, onFinish:Void->Void) {
 		marble.level = cast this;
 		if (marble.controllable) {
 			marble.init(cast this, client, () -> {
@@ -1379,7 +1384,7 @@ class MarbleWorld extends Scheduler {
 						// 	return (a.c == client.id) ? 1 : (b.c == client.id) ? -1 : 0;
 						// });
 						for (packet in packets) {
-							client.datachannel.sendBytes(packet);
+							client.sendBytes(packet);
 						}
 					}
 				}

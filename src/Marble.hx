@@ -1,5 +1,7 @@
 package src;
 
+import net.ClientConnection;
+import net.ClientConnection.GameConnection;
 import net.NetPacket.MarbleUpdatePacket;
 import net.MoveManager;
 import net.MoveManager.NetMove;
@@ -292,7 +294,7 @@ class Marble extends GameObject {
 
 	public var cubemapRenderer:CubemapRenderer;
 
-	var connection:net.Net.ClientConnection;
+	var connection:GameConnection;
 	var moveMotionDir:Vector;
 	var lastMove:Move;
 	var isNetUpdate:Bool = false;
@@ -332,7 +334,7 @@ class Marble extends GameObject {
 		this.helicopterSound.pause = true;
 	}
 
-	public function init(level:MarbleWorld, connection:ClientConnection, onFinish:Void->Void) {
+	public function init(level:MarbleWorld, connection:GameConnection, onFinish:Void->Void) {
 		this.level = level;
 		this.connection = connection;
 		if (this.level != null)
@@ -1060,6 +1062,7 @@ class Marble extends GameObject {
 		searchbox.addSpherePos(position.x + velocity.x * deltaT, position.y + velocity.y * deltaT, position.z + velocity.z * deltaT, _radius);
 
 		var foundObjs = this.collisionWorld.boundingSearch(searchbox);
+		foundObjs.push(this.collisionWorld.staticWorld);
 
 		var finalT = deltaT;
 		var found = false;
@@ -1102,7 +1105,7 @@ class Marble extends GameObject {
 		//	var iterationFound = false;
 		for (obj in foundObjs) {
 			// Its an MP so bruh
-			if (!obj.go.isCollideable)
+			if (obj.go != null && !obj.go.isCollideable)
 				continue;
 
 			var invMatrix = @:privateAccess obj.invTransform;
