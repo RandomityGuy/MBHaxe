@@ -1,5 +1,7 @@
 package src;
 
+import net.MarblePredictionStore;
+import net.MarblePredictionStore.MarblePrediction;
 import net.MarbleUpdateQueue;
 import haxe.Exception;
 import net.NetPacket.MarbleUpdatePacket;
@@ -103,6 +105,7 @@ import modes.NullMode;
 import modes.GameMode.GameModeFactory;
 import src.Renderer;
 import src.Analytics;
+import src.Debug;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -204,6 +207,7 @@ class MarbleWorld extends Scheduler {
 	var maxPredictionTicks:Int = 16;
 
 	var clientMarbles:Map<GameConnection, Marble> = [];
+	var predictions:MarblePredictionStore;
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -246,6 +250,7 @@ class MarbleWorld extends Scheduler {
 			isRecording = false;
 			isWatching = false;
 			lastMoves = new MarbleUpdateQueue();
+			predictions = new MarblePredictionStore();
 		}
 
 		// Set the network RNG for hunt
@@ -768,10 +773,10 @@ class MarbleWorld extends Scheduler {
 			var tmat = Matrix.T(interiorPosition.x, interiorPosition.y, interiorPosition.z);
 			mat.multiply(mat, tmat);
 
-			if (hasCollision)
-				this.collisionWorld.addStaticInterior(interior.collider, mat);
+			// if (hasCollision)
+			//	this.collisionWorld.addStaticInterior(interior.collider, mat);
 
-			interior.isCollideable = false;
+			interior.isCollideable = hasCollision;
 			interior.setTransform(mat);
 			onFinish();
 		});
@@ -890,7 +895,7 @@ class MarbleWorld extends Scheduler {
 	public function addInterior(obj:InteriorObject, onFinish:Void->Void) {
 		this.interiors.push(obj);
 		obj.init(cast this, () -> {
-			// this.collisionWorld.addEntity(obj.collider);
+			this.collisionWorld.addEntity(obj.collider);
 			if (obj.useInstancing)
 				this.instanceManager.addObject(obj);
 			else
@@ -1033,9 +1038,12 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function applyReceivedMoves() {
+		var needsPrediction = 0;
 		if (!lastMoves.ourMoveApplied) {
 			var ourMove = lastMoves.myMarbleUpdate;
 			if (ourMove != null) {
+				var ourMoveStruct = Net.clientConnection.moveManager.acknowledgeMove(ourMove.move.id, timeState);
+				lastMoves.ourMoveApplied = true;
 				for (client => arr in lastMoves.otherMarbleUpdates) {
 					var lastMove = null;
 					while (arr.length > 0) {
@@ -1047,27 +1055,61 @@ class MarbleWorld extends Scheduler {
 						}
 					}
 					if (lastMove != null) {
-						if (ourMove.serverTicks == lastMove.serverTicks)
+						// if (ourMove.serverTicks == lastMove.serverTicks) {
+						if (ourMoveStruct != null) {
+							var otherPred = predictions.retrieveState(clientMarbles[Net.clientIdMap[client]], ourMoveStruct.timeState.ticks);
+							if (otherPred != null) {
+								if (otherPred.getError(lastMove) > 0.001) {
+									// trace('Prediction error: ${otherPred.getError(lastMove)}');
+									trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+									clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
+									needsPrediction |= 1 << client;
+									arr.insert(0, lastMove);
+								}
+							} else {
+								trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+								clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
+								needsPrediction |= 1 << client;
+								arr.insert(0, lastMove);
+							}
+						} else {
+							trace('Desync in General');
 							clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
-						arr.insert(0, lastMove);
+							needsPrediction |= 1 << client;
+							arr.insert(0, lastMove);
+						}
+						// }
 					}
 				}
-				marble.unpackUpdate(ourMove);
+				if (ourMoveStruct != null) {
+					var ourPred = predictions.retrieveState(marble, ourMoveStruct.timeState.ticks);
+					if (ourPred != null) {
+						if (ourPred.getError(ourMove) > 0.001) {
+							trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+							marble.unpackUpdate(ourMove);
+							needsPrediction |= 1 << Net.clientId;
+						}
+					} else {
+						trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+						marble.unpackUpdate(ourMove);
+						needsPrediction |= 1 << Net.clientId;
+					}
+				} else {
+					trace('Desync in General');
+					marble.unpackUpdate(ourMove);
+					needsPrediction |= 1 << Net.clientId;
+				}
 			}
 		}
+		return needsPrediction;
 	}
 
-	public function applyClientPrediction() {
+	public function applyClientPrediction(marbleNeedsPrediction:Int) {
 		// First acknowledge the marble's last move so we can get that over with
 		var ourLastMove = lastMoves.myMarbleUpdate;
-		if (ourLastMove == null)
-			return;
+		if (ourLastMove == null || marbleNeedsPrediction == 0)
+			return -1;
 		var ackLag = @:privateAccess Net.clientConnection.moveManager.queuedMoves.length;
-		var mvStored = null;
-		if (!lastMoves.ourMoveApplied)
-			mvStored = Net.clientConnection.moveManager.acknowledgeMove(ourLastMove.move.id, timeState);
-		else
-			return;
 
 		var ourLastMoveTime = ourLastMove.serverTicks;
 
@@ -1076,97 +1118,87 @@ class MarbleWorld extends Scheduler {
 		var qm = ourQueuedMoves[0];
 		var advanceTimeState = qm != null ? qm.timeState.clone() : timeState.clone();
 		advanceTimeState.dt = 0.032;
+		advanceTimeState.ticks = ourLastMoveTime;
 
-		if (qm != null) {
-			var mvs = qm.powerupStates.copy();
-			for (pw in marble.level.powerUps) {
-				pw.lastPickUpTime = mvs.shift();
+		if (marbleNeedsPrediction & (1 << Net.clientId) > 0) {
+			if (qm != null) {
+				var mvs = qm.powerupStates.copy();
+				for (pw in marble.level.powerUps) {
+					pw.lastPickUpTime = mvs.shift();
+				}
+				@:privateAccess marble.helicopterEnableTime = qm.helicopterState;
+				@:privateAccess marble.megaMarbleEnableTime = qm.megaState;
+				marble.blastAmount = qm.blastAmt;
 			}
-			@:privateAccess marble.helicopterEnableTime = qm.helicopterState;
-			@:privateAccess marble.megaMarbleEnableTime = qm.megaState;
-			marble.blastAmount = qm.blastAmt;
 		}
 
 		ackLag = ourQueuedMoves.length;
 
 		// Tick the remaining moves (ours)
-		if (!lastMoves.ourMoveApplied) {
-			@:privateAccess this.marble.isNetUpdate = true;
-			var totalTicksToDo = ourQueuedMoves.length;
-			var endTick = ourLastMoveTime + totalTicksToDo;
-			var currentTick = ourLastMoveTime;
-			//- Std.int(ourLastMove.moveQueueSize - @:privateAccess Net.clientConnection.moveManager.ackRTT); // - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT)) - offset;
+		@:privateAccess this.marble.isNetUpdate = true;
+		var totalTicksToDo = ourQueuedMoves.length;
+		var endTick = ourLastMoveTime + totalTicksToDo;
+		var currentTick = ourLastMoveTime;
+		//- Std.int(ourLastMove.moveQueueSize - @:privateAccess Net.clientConnection.moveManager.ackRTT); // - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT)) - offset;
 
-			var marblesToTick = new Map();
+		var marblesToTick = new Map();
 
-			for (client => arr in lastMoves.otherMarbleUpdates) {
-				if (arr.length > 0) {
-					var m = arr[0];
-					if (m.serverTicks == ourLastMoveTime) {
-						var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
-						Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
-						m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
+		for (client => arr in lastMoves.otherMarbleUpdates) {
+			if (marbleNeedsPrediction & (1 << client) > 0 && arr.length > 0) {
+				var m = arr[0];
+				// if (m.serverTicks == ourLastMoveTime) {
+				var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+				Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
+				if (marbleNeedsPrediction & (1 << Net.clientId) > 0)
+					m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
+				else
+					m.calculationTicks = ourQueuedMoves.length;
+				// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
 
-						// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
-						marblesToTick.set(client, m);
-						arr.shift();
-					}
-				}
+				marblesToTick.set(client, m);
+				arr.shift();
+				// }
 			}
+		}
 
-			Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
-			// var syncTickStates = new Map();
+		Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
+		// var syncTickStates = new Map();
 
-			for (move in ourQueuedMoves) {
-				var m = move.move;
-				// Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
+		for (move in ourQueuedMoves) {
+			var m = move.move;
+			// Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
+			if (marbleNeedsPrediction & (1 << Net.clientId) > 0) {
 				this.marble.heldPowerup = move.powerup;
 				@:privateAccess this.marble.moveMotionDir = move.motionDir;
 				@:privateAccess this.marble.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
-				// var collidings = @:privateAccess this.marble.contactEntities.filter(x -> x is SphereCollisionEntity);
-				advanceTimeState.currentAttemptTime += 0.032;
-
-				for (client => m in marblesToTick) {
-					if (m.calculationTicks > 0) {
-						var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
-						// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
-
-						var beforePos = @:privateAccess marbleToUpdate.newPos.clone();
-						var mv = m.move.move;
-						@:privateAccess marbleToUpdate.isNetUpdate = true;
-						@:privateAccess marbleToUpdate.moveMotionDir = m.move.motionDir;
-						@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, mv, this.collisionWorld, this.pathedInteriors);
-						@:privateAccess marbleToUpdate.isNetUpdate = false;
-						m.calculationTicks--;
-
-						var afterPos = @:privateAccess marbleToUpdate.newPos;
-					}
-				}
-				currentTick++;
+				this.predictions.storeState(this.marble, move.timeState.ticks);
 			}
+			// var collidings = @:privateAccess this.marble.contactEntities.filter(x -> x is SphereCollisionEntity);
 
-			// for (marble => state in syncTickStates) {
-			// 	marble.restoreState(state);
-			// }
+			for (client => m in marblesToTick) {
+				if (m.calculationTicks > 0) {
+					var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+					// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
-			// for (client => m in marblesToTick) {
-			// 	if (m.calculationTicks >= 0) {
-			// 		var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
-
-			// 		while (m.calculationTicks > 0) {
-			// 			var mv = m.move.move;
-			// 			@:privateAccess marbleToUpdate.isNetUpdate = true;
-			// 			@:privateAccess marbleToUpdate.moveMotionDir = m.move.motionDir;
-			// 			@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, mv, this.collisionWorld, this.pathedInteriors);
-			// 			@:privateAccess marbleToUpdate.isNetUpdate = false;
-			// 			m.calculationTicks--;
-			// 		}
-			// 	}
-			// }
-
-			lastMoves.ourMoveApplied = true;
-			@:privateAccess this.marble.isNetUpdate = false;
+					var mv = m.move.move;
+					@:privateAccess marbleToUpdate.isNetUpdate = true;
+					@:privateAccess marbleToUpdate.moveMotionDir = m.move.motionDir;
+					@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, mv, this.collisionWorld, this.pathedInteriors);
+					this.predictions.storeState(marbleToUpdate, move.timeState.ticks);
+					@:privateAccess marbleToUpdate.isNetUpdate = false;
+					m.calculationTicks--;
+				}
+			}
+			advanceTimeState.currentAttemptTime += 0.032;
+			advanceTimeState.ticks++;
+			currentTick++;
 		}
+
+		lastMoves.ourMoveApplied = true;
+		@:privateAccess this.marble.isNetUpdate = false;
+		return advanceTimeState.ticks;
+
+		return -1;
 	}
 
 	public function rollback(t:Float) {
@@ -1355,10 +1387,11 @@ class MarbleWorld extends Scheduler {
 			tickAccumulator += timeState.dt;
 			while (tickAccumulator >= 0.032) {
 				// Apply the server side ticks
+				var lastPredTick = -1;
 				if (Net.isClient) {
-					applyReceivedMoves();
+					var marbleNeedsTicking = applyReceivedMoves();
 					// Catch up
-					applyClientPrediction();
+					lastPredTick = applyClientPrediction(marbleNeedsTicking);
 				}
 
 				// Do the clientside prediction sim
@@ -1370,6 +1403,10 @@ class MarbleWorld extends Scheduler {
 				var otherMoves = [];
 				for (client => marble in clientMarbles) {
 					otherMoves.push(marble.updateServer(fixedDt, collisionWorld, pathedInteriors));
+				}
+				this.predictions.storeState(marble, myMove.timeState.ticks);
+				for (client => marble in clientMarbles) {
+					this.predictions.storeState(marble, myMove.timeState.ticks);
 				}
 				if (Net.isHost) {
 					for (client => othermarble in clientMarbles) { // Oh no!

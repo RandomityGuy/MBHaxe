@@ -1062,7 +1062,7 @@ class Marble extends GameObject {
 		searchbox.addSpherePos(position.x + velocity.x * deltaT, position.y + velocity.y * deltaT, position.z + velocity.z * deltaT, _radius);
 
 		var foundObjs = this.collisionWorld.boundingSearch(searchbox);
-		foundObjs.push(this.collisionWorld.staticWorld);
+		// foundObjs.push(this.collisionWorld.staticWorld);
 
 		var finalT = deltaT;
 		var found = false;
@@ -1151,7 +1151,7 @@ class Marble extends GameObject {
 					// var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
 					// var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
 
-					var triangleVerts = [v0, v, v2];
+					// var triangleVerts = [v0, v, v2];
 
 					var surfaceNormal = new Vector(verts.nx, verts.ny,
 						verts.nz); // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
@@ -1166,8 +1166,8 @@ class Marble extends GameObject {
 					}
 
 					testTriangles.push({
-						v: [v0, v, v2],
-						n: surfaceNormal,
+						v: [v0.clone(), v.clone(), v2.clone()],
+						n: surfaceNormal.clone(),
 					});
 
 					// Time until collision with the plane
@@ -1190,7 +1190,9 @@ class Marble extends GameObject {
 					}
 					// We *might* be colliding with an edge
 
-					var lastVert = v2;
+					var triangleVerts = [v0.clone(), v.clone(), v2.clone()];
+
+					var lastVert = v2.clone();
 
 					var radSq = radius * radius;
 					for (iter in 0...3) {
@@ -1211,7 +1213,7 @@ class Marble extends GameObject {
 
 						// If it's not quadratic or has no solution, ignore this edge.
 						if (a == 0.0 || discriminant < 0.0) {
-							lastVert = thisVert;
+							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1231,7 +1233,7 @@ class Marble extends GameObject {
 
 						// If the collision doesn't happen on this time step, ignore this edge.
 						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert = thisVert;
+							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1245,7 +1247,7 @@ class Marble extends GameObject {
 
 							// If the collision happens outside the boundaries of the edge, ignore this edge.
 							if (-radius > distanceAlongEdge || edgeLen + radius < distanceAlongEdge) {
-								lastVert = thisVert;
+								lastVert.load(thisVert);
 								continue;
 							}
 
@@ -1309,14 +1311,14 @@ class Marble extends GameObject {
 
 						// We still need to check the other corner ...
 						// Build one last quadratic equation to solve for the collision time
-						posVertDiff = position.sub(lastVert);
+						var posVertDiff = position.sub(lastVert);
 						b = 2 * posVertDiff.dot(relVel);
 						c = posVertDiff.lengthSq() - radSq;
 						discriminant = b * b - (4 * a * c);
 
 						// If it's not quadratic or has no solution, then skip this corner
 						if (a == 0.0 || discriminant < 0.0) {
-							lastVert = thisVert;
+							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1335,7 +1337,7 @@ class Marble extends GameObject {
 						}
 
 						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert = thisVert;
+							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1343,7 +1345,7 @@ class Marble extends GameObject {
 							edgeCollisionTime = 0;
 
 						if (edgeCollisionTime < 0.000001) {
-							lastVert = thisVert;
+							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1351,7 +1353,7 @@ class Marble extends GameObject {
 						currentFinalPos = position.add(relVel.multiply(finalT));
 						// Debug.drawSphere(currentFinalPos, radius);
 
-						lastVert = thisVert;
+						lastVert.load(thisVert);
 						found = true;
 						// iterationFound = true;
 					}
@@ -1415,7 +1417,7 @@ class Marble extends GameObject {
 						// Nudge to the surface of the contact plane
 						Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
 						Debug.drawSphere(position, radius);
-						position = position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005));
+						position.load(position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005)));
 						resolved++;
 					}
 				}
@@ -1446,7 +1448,7 @@ class Marble extends GameObject {
 			var dist = marblePosition.distance(position);
 			if (dist < radius + marble.radius + 0.001) {
 				var separatingDistance = position.sub(marblePosition).normalized();
-				position = position.add(separatingDistance.multiply(radius + marble.radius + 0.001 - dist));
+				position.load(position.add(separatingDistance.multiply(radius + marble.radius + 0.001 - dist)));
 			}
 		}
 		return position;
