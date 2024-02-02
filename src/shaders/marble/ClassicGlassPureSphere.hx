@@ -14,6 +14,7 @@ class ClassicGlassPureSphere extends hxsl.Shader {
 		};
 		@global var global:{
 			@perObject var modelView:Mat4;
+			@perObject var modelViewTranspose:Mat4;
 			@perObject var modelViewInverse:Mat4;
 		};
 		@input var input:{
