@@ -8,7 +8,7 @@ import src.Console;
 import net.ClientConnection;
 import net.Net.NetPacketType;
 import src.MarbleWorld;
-import src.Marble.Move;
+import net.Move;
 import h3d.Vector;
 import src.Gamepad;
 import src.Settings;
