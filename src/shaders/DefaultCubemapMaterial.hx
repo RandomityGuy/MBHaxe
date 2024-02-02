@@ -14,6 +14,7 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 		};
 		@global var global:{
 			@perObject var modelView:Mat4;
+			@perObject var modelViewTranspose:Mat4;
 			@perObject var modelViewInverse:Mat4;
 		};
 		@input var input:{
@@ -58,7 +59,7 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 			outNormal = input.normal;
 			// outNormal.x *= -1;
 
-			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
+			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewTranspose);
 			// inLightVec.x *= -1;
 			outLightVec.xyz = -inLightVec * objToTangentSpace;
 			// var cubeVertPos = input.position * cubeTrans;

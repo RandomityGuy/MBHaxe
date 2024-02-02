@@ -12,6 +12,7 @@ class DefaultCubemapNormalNoSpecMaterial extends hxsl.Shader {
 		@global var global:{
 			@perObject var modelView:Mat4;
 			@perObject var modelViewInverse:Mat4;
+			@perObject var modelViewTranspose:Mat4;
 		};
 		@input var input:{
 			var position:Vec3;
@@ -38,7 +39,7 @@ class DefaultCubemapNormalNoSpecMaterial extends hxsl.Shader {
 		}
 		function vertex() {
 			calculatedUV = input.uv;
-			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * transposeMat3(mat3(global.modelView));
+			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewTranspose);
 			// inLightVec.x *= -1;
 			var pN = input.normal;
 			// pN.x *= -1;

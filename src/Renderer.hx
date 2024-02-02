@@ -1,5 +1,6 @@
 package src;
 
+import shaders.RendererDefaultPass;
 import h3d.pass.PassList;
 import hxd.Window;
 import src.ResourceLoader;
@@ -39,7 +40,7 @@ class Renderer extends h3d.scene.Renderer {
 
 	public function new() {
 		super();
-		defaultPass = new h3d.pass.Default("default");
+		defaultPass = new RendererDefaultPass("default");
 		allPasses = [defaultPass, depth, normal, shadow];
 		blurShader = new ScreenFx<Blur>(new Blur());
 		copyPass = new h3d.pass.Copy();

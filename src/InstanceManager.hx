@@ -16,7 +16,7 @@ import src.GameObject;
 import h3d.scene.Scene;
 import h3d.scene.Object;
 import h3d.scene.Mesh;
-import h3d.scene.MeshBatch;
+import src.MeshBatch;
 import src.MarbleGame;
 import src.ProfilerUI;
 

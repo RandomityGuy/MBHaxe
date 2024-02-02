@@ -85,7 +85,7 @@ import collision.SphereCollisionEntity;
 import src.Sky;
 import h3d.scene.Mesh;
 import src.InstanceManager;
-import h3d.scene.MeshBatch;
+import src.MeshBatch;
 import src.DtsObject;
 import src.PathedInterior;
 import hxd.Key;
