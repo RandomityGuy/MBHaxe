@@ -59,4 +59,12 @@ class MarblePredictionStore {
 		}
 		return null;
 	}
+
+	public function clearStatesAfterTick(marble:Marble, tick:Int) {
+		if (predictions.exists(marble)) {
+			var arr = predictions[marble];
+			while (arr.length != 0 && arr[arr.length - 1].tick >= tick)
+				arr.pop();
+		}
+	}
 }
