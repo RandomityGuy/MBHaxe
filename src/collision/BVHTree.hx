@@ -15,10 +15,124 @@ class BVHNode<T:IBVHObject> {
 	var child1:Int = -1;
 	var child2:Int = -1;
 	var isLeaf:Bool;
-	var bounds:Bounds;
 	var object:T;
+	var xMin:Float = 0;
+	var yMin:Float = 0;
+	var zMin:Float = 0;
+	var xMax:Float = 0;
+	var yMax:Float = 0;
+	var zMax:Float = 0;
 
 	public function new() {}
+
+	public inline function containsBounds(b:Bounds) {
+		return xMin <= b.xMin && yMin <= b.yMin && zMin <= b.zMin && xMax >= b.xMax && yMax >= b.yMax && zMax >= b.zMax;
+	}
+
+	public inline function setBounds(b:Bounds) {
+		xMin = b.xMin;
+		yMin = b.yMin;
+		zMin = b.zMin;
+		xMax = b.xMax;
+		yMax = b.yMax;
+		zMax = b.zMax;
+	}
+
+	public inline function setBoundsFromNode(b:BVHNode<T>) {
+		xMin = b.xMin;
+		yMin = b.yMin;
+		zMin = b.zMin;
+		xMax = b.xMax;
+		yMax = b.yMax;
+		zMax = b.zMax;
+	}
+
+	public inline function getBounds() {
+		return Bounds.fromValues(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - zMin);
+	}
+
+	public inline function add(b:Bounds) {
+		if (b.xMin < xMin)
+			xMin = b.xMin;
+		if (b.xMax > xMax)
+			xMax = b.xMax;
+		if (b.yMin < yMin)
+			yMin = b.yMin;
+		if (b.yMax > yMax)
+			yMax = b.yMax;
+		if (b.zMin < zMin)
+			zMin = b.zMin;
+		if (b.zMax > zMax)
+			zMax = b.zMax;
+	}
+
+	public inline function addNodeBounds(b:BVHNode<T>) {
+		if (b.xMin < xMin)
+			xMin = b.xMin;
+		if (b.xMax > xMax)
+			xMax = b.xMax;
+		if (b.yMin < yMin)
+			yMin = b.yMin;
+		if (b.yMax > yMax)
+			yMax = b.yMax;
+		if (b.zMin < zMin)
+			zMin = b.zMin;
+		if (b.zMax > zMax)
+			zMax = b.zMax;
+	}
+
+	public inline function collide(b:Bounds) {
+		return !(xMin > b.xMax || yMin > b.yMax || zMin > b.zMax || xMax < b.xMin || yMax < b.yMin || zMax < b.zMin);
+	}
+
+	public inline function getExpansionCost(b:BVHNode<T>) {
+		var xm = xMin;
+		var ym = yMin;
+		var zm = zMin;
+		var xp = xMax;
+		var yp = yMax;
+		var zp = zMax;
+		if (b.xMin < xm)
+			xm = b.xMin;
+		if (b.xMax > xp)
+			xp = b.xMax;
+		if (b.yMin < ym)
+			ym = b.yMin;
+		if (b.yMax > yp)
+			yp = b.yMax;
+		if (b.zMin < zm)
+			zm = b.zMin;
+		if (b.zMax > zp)
+			zp = b.zMax;
+		var xs = xp - xm;
+		var ys = yp - ym;
+		var zs = zp - zm;
+		return xs * ys + ys * zs + xs * zs;
+	}
+
+	public inline function collideRay(r:h3d.col.Ray):Bool {
+		var dx = 1 / r.lx;
+		var dy = 1 / r.ly;
+		var dz = 1 / r.lz;
+		var t1 = (xMin - r.px) * dx;
+		var t2 = (xMax - r.px) * dx;
+		var t3 = (yMin - r.py) * dy;
+		var t4 = (yMax - r.py) * dy;
+		var t5 = (zMin - r.pz) * dz;
+		var t6 = (zMax - r.pz) * dz;
+		var tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
+		var tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
+		if (tmax < 0) {
+			// t = tmax;
+			return false;
+		} else if (tmin > tmax) {
+			// t = tmax;
+			return false;
+		} else {
+			// t = tmin;
+			return true;
+		}
+	}
 }
 
 class BVHTree<T:IBVHObject> {
@@ -40,9 +154,8 @@ class BVHTree<T:IBVHObject> {
 		this.traverse(node -> {
 			if (node.isLeaf) {
 				var entity = node.object;
-				var tightAABB = entity.boundingBox;
 
-				if (node.bounds.containsBounds(tightAABB)) {
+				if (node.containsBounds(entity.boundingBox)) {
 					return;
 				}
 
@@ -60,7 +173,7 @@ class BVHTree<T:IBVHObject> {
 		var aabb = entity.boundingBox;
 
 		var newNode = allocateNode();
-		newNode.bounds = aabb;
+		newNode.setBounds(aabb);
 		newNode.object = entity;
 		newNode.isLeaf = true;
 
@@ -71,7 +184,7 @@ class BVHTree<T:IBVHObject> {
 
 		// Find the best sibling for the new leaf
 		var bestSibling = this.root;
-		var bestCostBox = this.root.bounds.clone();
+		var bestCostBox = this.root.getBounds();
 		bestCostBox.add(aabb);
 		var bestCost = bestCostBox.xSize * bestCostBox.ySize + bestCostBox.xSize * bestCostBox.zSize + bestCostBox.ySize * bestCostBox.zSize;
 		var q = [{p1: this.root.index, p2: 0.0}];
@@ -81,7 +194,7 @@ class BVHTree<T:IBVHObject> {
 			var current = nodes[front.p1];
 			var inheritedCost = front.p2;
 
-			var combined = current.bounds.clone();
+			var combined = current.getBounds();
 			combined.add(aabb);
 			var directCost = combined.xSize * combined.ySize + combined.xSize * combined.zSize + combined.ySize * combined.zSize;
 
@@ -90,9 +203,11 @@ class BVHTree<T:IBVHObject> {
 				bestCost = costForCurrent;
 				bestSibling = current;
 			}
+			var xs = (current.xMax - current.xMin);
+			var ys = (current.yMax - current.yMin);
+			var zs = (current.zMax - current.zMin);
 
-			inheritedCost += directCost
-				- (current.bounds.xSize * current.bounds.ySize + current.bounds.xSize * current.bounds.zSize + current.bounds.ySize * current.bounds.zSize);
+			inheritedCost += directCost - (xs * ys + xs * zs + ys * zs);
 
 			var aabbCost = aabb.xSize * aabb.ySize + aabb.xSize * aabb.zSize + aabb.ySize * aabb.zSize;
 			var lowerBoundCost = aabbCost + inheritedCost;
@@ -110,8 +225,8 @@ class BVHTree<T:IBVHObject> {
 		var oldParent = bestSibling.parent != -1 ? nodes[bestSibling.parent] : null;
 		var newParent = allocateNode();
 		newParent.parent = oldParent != null ? oldParent.index : -1;
-		newParent.bounds = bestSibling.bounds.clone();
-		newParent.bounds.add(aabb);
+		newParent.setBoundsFromNode(bestSibling);
+		newParent.add(aabb);
 		newParent.isLeaf = false;
 
 		if (oldParent != null) {
@@ -140,11 +255,10 @@ class BVHTree<T:IBVHObject> {
 			var child1 = ancestor.child1;
 			var child2 = ancestor.child2;
 
-			ancestor.bounds = new Bounds();
 			if (child1 != -1)
-				ancestor.bounds.add(nodes[child1].bounds);
+				ancestor.addNodeBounds(nodes[child1]);
 			if (child2 != -1)
-				ancestor.bounds.add(nodes[child2].bounds);
+				ancestor.addNodeBounds(nodes[child2]);
 
 			this.rotate(ancestor);
 
@@ -205,8 +319,8 @@ class BVHTree<T:IBVHObject> {
 				var child1 = nodes[ancestornode.child1];
 				var child2 = nodes[ancestornode.child2];
 
-				ancestornode.bounds = child1.bounds.clone();
-				ancestornode.bounds.add(child2.bounds);
+				ancestornode.setBoundsFromNode(child1);
+				ancestornode.addNodeBounds(child2);
 				ancestor = ancestornode.parent;
 			}
 		} else {
@@ -223,27 +337,24 @@ class BVHTree<T:IBVHObject> {
 		var parent = nodes[node.parent];
 		var sibling = nodes[parent.child1 == node.index ? parent.child2 : parent.child1];
 		var costDiffs = [];
-		var nodeArea = node.bounds.xSize * node.bounds.ySize + node.bounds.zSize * node.bounds.ySize + node.bounds.xSize * node.bounds.zSize;
+		var nxs = node.xMax - node.xMin;
+		var nys = node.yMax - node.yMin;
+		var nzs = node.zMax - node.zMin;
+		var nodeArea = nxs * nys + nzs * nys + nxs * nzs;
 
-		var ch1 = sibling.bounds.clone();
-		ch1.add(nodes[node.child1].bounds);
-		costDiffs.push(ch1.xSize * ch1.ySize + ch1.zSize * ch1.ySize + ch1.xSize * ch1.zSize - nodeArea);
-		var ch2 = sibling.bounds.clone();
-		ch2.add(nodes[node.child2].bounds);
-		costDiffs.push(ch2.xSize * ch2.ySize + ch2.zSize * ch2.ySize + ch2.xSize * ch2.zSize - nodeArea);
+		costDiffs.push(sibling.getExpansionCost(nodes[node.child1]) - nodeArea);
+		costDiffs.push(sibling.getExpansionCost(nodes[node.child2]) - nodeArea);
 
 		if (!sibling.isLeaf) {
-			var siblingArea = sibling.bounds.xSize * sibling.bounds.ySize + sibling.bounds.zSize * sibling.bounds.ySize
-				+ sibling.bounds.xSize * sibling.bounds.zSize;
+			var sxs = sibling.xMax - sibling.xMin;
+			var sys = sibling.yMax - sibling.yMin;
+			var szs = sibling.zMax - sibling.zMin;
+			var siblingArea = sxs * sys + sys * szs + sxs * szs;
 			if (sibling.child1 != -1) {
-				var ch3 = node.bounds.clone();
-				ch3.add(nodes[sibling.child1].bounds);
-				costDiffs.push(ch3.xSize * ch3.ySize + ch3.zSize * ch3.ySize + ch3.xSize * ch3.zSize - siblingArea);
+				costDiffs.push(node.getExpansionCost(nodes[sibling.child1]) - siblingArea);
 			}
 			if (sibling.child2 != -1) {
-				var ch4 = node.bounds.clone();
-				ch4.add(nodes[sibling.child2].bounds);
-				costDiffs.push(ch4.xSize * ch4.ySize + ch4.zSize * ch4.ySize + ch4.xSize * ch4.zSize - siblingArea);
+				costDiffs.push(node.getExpansionCost(nodes[sibling.child2]) - siblingArea);
 			}
 		}
 
@@ -269,9 +380,9 @@ class BVHTree<T:IBVHObject> {
 
 					node.child2 = sibling.index;
 					sibling.parent = node.index;
-					node.bounds = sibling.bounds.clone();
+					node.setBoundsFromNode(sibling);
 					if (node.child1 != -1) {
-						node.bounds.add(nodes[node.child1].bounds);
+						node.addNodeBounds(nodes[node.child1]);
 					}
 				case 1:
 					if (parent.child1 == sibling.index) {
@@ -284,9 +395,9 @@ class BVHTree<T:IBVHObject> {
 					}
 					node.child1 = sibling.index;
 					sibling.parent = node.index;
-					node.bounds = sibling.bounds.clone();
+					node.setBoundsFromNode(sibling);
 					if (node.child2 != -1) {
-						node.bounds.add(nodes[node.child2].bounds);
+						node.addNodeBounds(nodes[node.child2]);
 					}
 				case 2:
 					if (parent.child1 == node.index) {
@@ -299,9 +410,9 @@ class BVHTree<T:IBVHObject> {
 					}
 					sibling.child2 = node.index;
 					node.parent = sibling.index;
-					sibling.bounds = node.bounds.clone();
+					sibling.setBoundsFromNode(node);
 					if (sibling.child2 != -1) {
-						sibling.bounds.add(nodes[sibling.child2].bounds);
+						sibling.addNodeBounds(nodes[sibling.child2]);
 					}
 
 				case 3:
@@ -315,9 +426,9 @@ class BVHTree<T:IBVHObject> {
 					}
 					sibling.child1 = node.index;
 					node.parent = sibling.index;
-					sibling.bounds = node.bounds.clone();
+					sibling.setBoundsFromNode(node);
 					if (sibling.child1 != -1) {
-						sibling.bounds.add(nodes[sibling.child1].bounds);
+						sibling.addNodeBounds(nodes[sibling.child1]);
 					}
 			}
 		}
@@ -335,7 +446,7 @@ class BVHTree<T:IBVHObject> {
 			var current = q[qptr++];
 			var currentnode = this.nodes[current];
 
-			if (currentnode.bounds.containsBounds(searchbox) || currentnode.bounds.collide(searchbox)) {
+			if (currentnode.containsBounds(searchbox) || currentnode.collide(searchbox)) {
 				if (currentnode.isLeaf) {
 					res.push(currentnode.object);
 				} else {
@@ -361,7 +472,7 @@ class BVHTree<T:IBVHObject> {
 		while (qptr != q.length) {
 			var current = q[qptr++];
 			var currentnode = this.nodes[current];
-			if (ray.collide(currentnode.bounds)) {
+			if (currentnode.collideRay(ray)) {
 				if (currentnode.isLeaf) {
 					res = res.concat(currentnode.object.rayCast(origin, direction));
 				} else {

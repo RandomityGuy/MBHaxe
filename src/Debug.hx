@@ -76,8 +76,8 @@ class Debug {
 		}
 	}
 
-	public static function drawSphere(centre:Vector, radius:Float) {
+	public static function drawSphere(centre:Vector, radius:Float, lifetime = 0.032) {
 		if (drawBounds)
-			_spheres.push({position: centre.clone(), radius: radius, lifetime: 0.032});
+			_spheres.push({position: centre.clone(), radius: radius, lifetime: lifetime});
 	}
 }

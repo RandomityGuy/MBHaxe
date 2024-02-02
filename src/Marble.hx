@@ -360,7 +360,7 @@ class Marble extends GameObject {
 
 				if (Settings.optionsSettings.reflectionDetail > 0) {
 					var csky = level != null ? level.sky : (@:privateAccess MarbleGame.instance.previewWorld.sky);
-					this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky);
+					this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky, !this.controllable);
 
 					if (Settings.optionsSettings.marbleShader == null
 						|| Settings.optionsSettings.marbleShader == "Default"
