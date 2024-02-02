@@ -17,7 +17,7 @@ class Debug {
 	}> = [];
 
 	static var debugTriangles:h3d.scene.Mesh;
-	static var debugSphere:h3d.scene.MeshBatch;
+	static var debugSphere:src.MeshBatch;
 
 	public static function init() {}
 
@@ -43,7 +43,7 @@ class Debug {
 				var sphprim = new h3d.prim.Sphere();
 				sphprim.addUVs();
 				sphprim.addNormals();
-				debugSphere = new h3d.scene.MeshBatch(sphprim, h3d.mat.Material.create());
+				debugSphere = new src.MeshBatch(sphprim, h3d.mat.Material.create());
 				debugSphere.material.castShadows = false;
 				debugSphere.material.receiveShadows = false;
 				MarbleGame.instance.scene.addChild(debugSphere);

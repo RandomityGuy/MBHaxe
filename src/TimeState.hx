@@ -7,6 +7,7 @@ class TimeState {
 	var gameplayClock:Float;
 	var dt:Float;
 	var ticks:Int; // How many 32ms ticks have happened
+	var subframe:Float;
 
 	public function new() {}
 
@@ -17,6 +18,7 @@ class TimeState {
 		n.gameplayClock = this.gameplayClock;
 		n.dt = this.dt;
 		n.ticks = ticks;
+		n.subframe = subframe;
 		return n;
 	}
 }

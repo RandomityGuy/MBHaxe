@@ -2,7 +2,7 @@ package rewind;
 
 import src.MarbleWorld;
 import h3d.Vector;
-import src.Marble.Move;
+import net.Move;
 
 @:publicFields
 class InputRecorderFrame {

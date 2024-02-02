@@ -12,16 +12,22 @@ class MarblePrediction {
 	var position:Vector;
 	var velocity:Vector;
 	var omega:Vector;
+	var isControl:Bool;
+	var blastAmount:Int;
 
 	public function new(marble:Marble, tick:Int) {
 		this.tick = tick;
 		position = @:privateAccess marble.newPos.clone();
 		velocity = @:privateAccess marble.velocity.clone();
 		omega = @:privateAccess marble.omega.clone();
+		blastAmount = @:privateAccess marble.blastTicks;
+		isControl = @:privateAccess marble.controllable;
 	}
 
 	public inline function getError(p:MarbleUpdatePacket) {
 		var subs = position.sub(p.position).lengthSq() + velocity.sub(p.velocity).lengthSq() + omega.sub(p.omega).lengthSq();
+		if (isControl)
+			subs += Math.abs(blastAmount - p.blastAmount);
 		return subs;
 	}
 }

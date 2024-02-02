@@ -38,6 +38,8 @@ class MarbleUpdatePacket implements NetPacket {
 	var position:Vector;
 	var velocity:Vector;
 	var omega:Vector;
+	var blastAmount:Int;
+	var blastTick:Int;
 	var moveQueueSize:Int;
 
 	public function new() {}
@@ -56,6 +58,8 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeFloat(omega.x);
 		b.writeFloat(omega.y);
 		b.writeFloat(omega.z);
+		b.writeUInt16(blastAmount);
+		b.writeUInt16(blastTick);
 	}
 
 	public inline function deserialize(b:haxe.io.BytesInput) {
@@ -66,5 +70,7 @@ class MarbleUpdatePacket implements NetPacket {
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+		blastAmount = b.readUInt16();
+		blastTick = b.readUInt16();
 	}
 }

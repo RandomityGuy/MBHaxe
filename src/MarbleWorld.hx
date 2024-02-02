@@ -118,6 +118,7 @@ class MarbleWorld extends Scheduler {
 
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
+	public var marbles:Array<Marble> = [];
 	public var dtsObjects:Array<DtsObject> = [];
 	public var powerUps:Array<PowerUp> = [];
 	public var forceObjects:Array<ForceObject> = [];
@@ -981,6 +982,7 @@ class MarbleWorld extends Scheduler {
 
 	public function addMarble(marble:Marble, client:GameConnection, onFinish:Void->Void) {
 		marble.level = cast this;
+		this.marbles.push(marble);
 		if (marble.controllable) {
 			marble.init(cast this, client, () -> {
 				this.scene.addChild(marble.camera);
@@ -1233,7 +1235,7 @@ class MarbleWorld extends Scheduler {
 			|| Gamepad.isDown(Settings.gamepadSettings.blast)
 			&& !this.isWatching
 			&& this.game == "ultra") {
-			this.marble.useBlast();
+			this.marble.useBlast(timeState);
 		}
 
 		this.updateGameState();
@@ -1368,7 +1370,7 @@ class MarbleWorld extends Scheduler {
 		this.tickSchedule(timeState.currentAttemptTime);
 
 		if (this.isWatching && this.replay.currentPlaybackFrame.marbleStateFlags.has(UsedBlast))
-			this.marble.useBlast();
+			this.marble.useBlast(timeState);
 
 		// Replay gravity
 		if (this.isWatching) {
@@ -1440,6 +1442,7 @@ class MarbleWorld extends Scheduler {
 				}
 				timeState.ticks++;
 			}
+			timeState.subframe = tickAccumulator / 0.032;
 			marble.updateClient(timeState, this.pathedInteriors);
 			for (client => marble in clientMarbles) {
 				marble.updateClient(timeState, this.pathedInteriors);
@@ -1599,16 +1602,27 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function updateBlast(marble:Marble, timestate:TimeState) {
-		if (marble.blastAmount < 1) {
-			marble.blastAmount = Util.clamp(marble.blastAmount + (timeState.dt / 30), 0, 1);
-			if (marble == this.marble)
-				this.renderBlastAmount = marble.blastAmount;
+		if (this.isMultiplayer) {
+			if (marble == this.marble) {
+				if (marble.blastTicks < (36000 >> 5)) {
+					this.renderBlastAmount = (marble.blastTicks + timestate.subframe) / (30000 >> 5);
+				} else {
+					this.renderBlastAmount = Math.min(marble.blastTicks / (30000 >> 5), timestate.dt * 0.75 + this.renderBlastAmount);
+				}
+				this.playGui.setBlastValue(this.renderBlastAmount);
+			}
 		} else {
+			if (marble.blastAmount < 1) {
+				marble.blastAmount = Util.clamp(marble.blastAmount + (timeState.dt / 30), 0, 1);
+				if (marble == this.marble)
+					this.renderBlastAmount = marble.blastAmount;
+			} else {
+				if (marble == this.marble)
+					this.renderBlastAmount = Math.min(marble.blastAmount, timestate.dt * 0.75 + this.renderBlastAmount);
+			}
 			if (marble == this.marble)
-				this.renderBlastAmount = Math.min(marble.blastAmount, timestate.dt * 0.75 + this.renderBlastAmount);
+				this.playGui.setBlastValue(this.renderBlastAmount);
 		}
-		if (marble == this.marble)
-			this.playGui.setBlastValue(this.renderBlastAmount);
 	}
 
 	function updateTexts() {
@@ -2233,7 +2247,7 @@ class MarbleWorld extends Scheduler {
 			pathedInteriors.dispose();
 		}
 		pathedInteriors = null;
-		for (client => marble in clientMarbles) {
+		for (marble in marbles) {
 			marble.dispose();
 		}
 		clientMarbles = null;

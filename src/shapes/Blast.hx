@@ -34,6 +34,7 @@ class Blast extends PowerUp {
 
 	public function use(marble:Marble, timeState:TimeState) {
 		marble.blastAmount = 1.2;
+		marble.blastTicks = 36000 >> 5;
 	}
 
 	override function getPreloadMaterials(dts:dts.DtsFile) {
