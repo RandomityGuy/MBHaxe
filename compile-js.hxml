@@ -1,4 +1,6 @@
 -cp src
+-lib hxWebSockets
+-lib datachannel
 -lib heaps
 -lib stb_ogg_sound
 -lib zip
@@ -7,5 +9,6 @@
 -D js-es=6
 -D keep-inline-positions
 -D highDPI
+-D analyzer-optimize
 --main Main
 -debug

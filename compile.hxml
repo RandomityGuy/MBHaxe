@@ -7,5 +7,6 @@
 -D windowSize=1280x720
 -D keep-inline-positions
 -D highDPI
+-D analyzer-optimize
 --main Main
 -debug

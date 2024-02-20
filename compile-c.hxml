@@ -1,7 +1,10 @@
 -cp src
 -lib heaps
 -lib hlsdl
+-lib hxWebSockets
+-lib datachannel
 -D highDPI
 -D hlgen.makefile=vs2019
+-D analyzer-optimize
 -hl native/marblegame.c
 --main Main
