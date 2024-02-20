@@ -619,6 +619,15 @@ class DifBuilder {
 					return true;
 				}
 
+				prevDir = Path.directory(prevDir);
+
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
+					return true;
+				}
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
+					return true;
+				}
+
 				return false;
 			}
 			function tex(tex:String):String {
@@ -634,6 +643,15 @@ class DifBuilder {
 				}
 
 				var prevDir = Path.directory(Path.directory(path));
+
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
+					return prevDir + "/" + tex + ".jpg";
+				}
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
+					return prevDir + "/" + tex + ".png";
+				}
+
+				var prevDir = Path.directory(prevDir);
 
 				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
 					return prevDir + "/" + tex + ".jpg";
