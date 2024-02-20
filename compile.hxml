@@ -8,5 +8,6 @@
 -D keep-inline-positions
 -D highDPI
 -D flow_border
+-D analyzer-optimize
 --main Main
 -debug
