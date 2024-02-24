@@ -25,9 +25,10 @@ class MarblePrediction {
 	}
 
 	public inline function getError(p:MarbleUpdatePacket) {
-		var subs = position.sub(p.position).lengthSq() + velocity.sub(p.velocity).lengthSq() + omega.sub(p.omega).lengthSq();
-		if (isControl)
-			subs += Math.abs(blastAmount - p.blastAmount);
+		// Just doing position errors is enough to make it work
+		var subs = position.sub(p.position).lengthSq(); // + velocity.sub(p.velocity).lengthSq() + omega.sub(p.omega).lengthSq();
+		// if (isControl)
+		// 	subs += Math.abs(blastAmount - p.blastAmount);
 		return subs;
 	}
 }

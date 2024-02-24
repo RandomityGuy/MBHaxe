@@ -1166,10 +1166,12 @@ class MarbleWorld extends Scheduler {
 				// if (m.serverTicks == ourLastMoveTime) {
 				var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
 				Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
-				if (marbleNeedsPrediction & (1 << Net.clientId) > 0)
+
+				var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
+				if (distFromUs < 5)
 					m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
 				else
-					m.calculationTicks = ourQueuedMoves.length;
+					m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 5));
 				// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
 
 				marblesToTick.set(client, m);

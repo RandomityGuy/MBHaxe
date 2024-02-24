@@ -255,14 +255,15 @@ class Marble extends GameObject {
 	var megaMarbleEnableTime:Float = -1e8;
 	var blastUseTime:Float = -1e8;
 
+	public var helicopterUseTick:Int = 0;
+	public var megaMarbleUseTick:Int = 0;
+
 	public var blastAmount:Float = 0;
 	public var blastTicks:Int = 0;
 	public var blastUseTick:Int = 0; // blast is 12 ticks long
 
 	var blastPerc:Float = 0.0;
 
-	var teleportEnableTime:Null<Float> = null;
-	var teleportDisableTime:Null<Float> = null;
 	var bounceEmitDelay:Float = 0;
 
 	var bounceEmitterData:ParticleData;
@@ -286,8 +287,6 @@ class Marble extends GameObject {
 
 	public var prevPos:Vector;
 
-	var cloak:Bool = false;
-	var teleporting:Bool = false;
 	var isUltra:Bool = false;
 	var _firstTick = true;
 
@@ -564,7 +563,7 @@ class Marble extends GameObject {
 		var gWorkGravityDir = this.currentUp.multiply(-1);
 		var A = new Vector();
 		A = gWorkGravityDir.multiply(this._gravity);
-		if (currentTime - this.helicopterEnableTime < 5) {
+		if (currentTime - this.helicopterEnableTime < 5 || (helicopterUseTick > 0 && (tick - helicopterUseTick) <= 156)) {
 			A = A.multiply(0.25);
 		}
 		if (this.level != null) {
@@ -620,7 +619,7 @@ class Marble extends GameObject {
 			var motionDir = axes[1];
 			var upDir = axes[2];
 			var airAccel = this._airAccel;
-			if (currentTime - this.helicopterEnableTime < 5) {
+			if (currentTime - this.helicopterEnableTime < 5 || (helicopterUseTick > 0 && (tick - helicopterUseTick) <= 156)) {
 				airAccel *= 2;
 			}
 			A.load(A.add(sideDir.multiply(m.d.x).add(motionDir.multiply(m.d.y)).multiply(airAccel)));
@@ -954,17 +953,18 @@ class Marble extends GameObject {
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
 			var bounceSoundNum = Math.floor(Math.random() * 4);
-			var sndList = (time - this.megaMarbleEnableTime < 10) ? [
-				"data/sound/mega_bouncehard1.wav",
-				"data/sound/mega_bouncehard2.wav",
-				"data/sound/mega_bouncehard3.wav",
-				"data/sound/mega_bouncehard4.wav"
-			] : [
-				"data/sound/bouncehard1.wav",
-				"data/sound/bouncehard2.wav",
-				"data/sound/bouncehard3.wav",
-				"data/sound/bouncehard4.wav"
-			];
+			var sndList = ((time - this.megaMarbleEnableTime < 10)
+				|| (this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) ? [
+					"data/sound/mega_bouncehard1.wav",
+					"data/sound/mega_bouncehard2.wav",
+					"data/sound/mega_bouncehard3.wav",
+					"data/sound/mega_bouncehard4.wav"
+				] : [
+					"data/sound/bouncehard1.wav",
+					"data/sound/bouncehard2.wav",
+					"data/sound/bouncehard3.wav",
+					"data/sound/bouncehard4.wav"
+				];
 
 			var snd = ResourceLoader.getResource(sndList[bounceSoundNum], ResourceLoader.getAudio, this.soundResources);
 			var gain = bounceMinGain;
@@ -1016,7 +1016,8 @@ class Marble extends GameObject {
 		if (slipVolume < 0)
 			slipVolume = 0;
 
-		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10
+			|| (this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) {
 			if (this.rollMegaSound != null) {
 				rollMegaSound.volume = rollVolume;
 				rollSound.volume = 0;
@@ -1661,6 +1662,8 @@ class Marble extends GameObject {
 		marbleUpdate.moveQueueSize = this.connection != null ? this.connection.moveManager.getQueueSize() : 255;
 		marbleUpdate.blastAmount = this.blastTicks;
 		marbleUpdate.blastTick = this.blastUseTick;
+		marbleUpdate.heliTick = this.helicopterUseTick;
+		marbleUpdate.megaTick = this.megaMarbleUseTick;
 		marbleUpdate.serialize(b);
 		return b.getBytes();
 	}
@@ -1681,6 +1684,8 @@ class Marble extends GameObject {
 		this.omega = p.omega;
 		this.blastTicks = p.blastAmount;
 		this.blastUseTick = p.blastTick;
+		this.helicopterUseTick = p.heliTick;
+		this.megaMarbleUseTick = p.megaTick;
 		if (this.controllable && Net.isClient) {
 			// We are client, need to do something about the queue
 			var mm = Net.clientConnection.moveManager;
@@ -1737,6 +1742,19 @@ class Marble extends GameObject {
 		playedSounds = [];
 		advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
 		physicsAccumulator = 0;
+
+		if (this.megaMarbleUseTick > 0) {
+			if ((this.level.timeState.ticks - this.megaMarbleUseTick) < 312) {
+				this._radius = 0.675;
+				this.collider.radius = 0.675;
+			} else if ((this.level.timeState.ticks - this.megaMarbleUseTick) > 312) {
+				this.collider.radius = this._radius = 0.3;
+				if (!this.isNetUpdate && this.controllable)
+					AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null, false);
+				this.megaMarbleUseTick = 0;
+			}
+		}
+
 		return move;
 		// if (Net.isHost) {
 		// 	packets.push({b: packUpdate(move, timeState), c: this.connection != null ? this.connection.id : 0});
@@ -1771,6 +1789,12 @@ class Marble extends GameObject {
 
 		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
 
+		if ((this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) {
+			this._marbleScale = this._defaultScale * 2.25;
+		} else {
+			this._marbleScale = this._defaultScale;
+		}
+
 		var s = this._renderScale * this._renderScale;
 		if (s <= this._marbleScale * this._marbleScale)
 			s = 0.1;
@@ -1778,28 +1802,12 @@ class Marble extends GameObject {
 			s = 0.4;
 
 		s = timeState.dt / s * 2.302585124969482;
-		s = 1.0 / (s * (s * 0.2349999994039536 * s) + s + 1.0 + 0.4799999892711639 * s * s);
+		s = 1.0 / (s * (s * 0.235 * s) + s + 1.0 + 0.48 * s * s);
 		this._renderScale *= s;
 		s = 1 - s;
 		this._renderScale += s * this._marbleScale;
 		var marbledts = cast(this.getChildAt(0), DtsObject);
 		marbledts.setScale(this._renderScale);
-
-		if (this._radius != 0.675 && timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
-			this._prevRadius = this._radius;
-			this._radius = 0.675;
-			this.collider.radius = 0.675;
-			this._marbleScale *= 2.25;
-			var boost = this.currentUp.multiply(5);
-			this.velocity = this.velocity.add(boost);
-		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > 10) {
-			if (this._radius != this._prevRadius) {
-				this._radius = this._prevRadius;
-				this.collider.radius = this._radius;
-				this._marbleScale = this._defaultScale;
-				AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null, false);
-			}
-		}
 
 		this.updateFinishAnimation(timeState.dt);
 		if (this.mode == Finish) {
@@ -1968,8 +1976,6 @@ class Marble extends GameObject {
 			}
 		}
 
-		this.updateTeleporterState(timeState);
-
 		this.updateFinishAnimation(timeState.dt);
 		if (this.mode == Finish) {
 			this.setPosition(this.finishAnimPosition.x, this.finishAnimPosition.y, this.finishAnimPosition.z);
@@ -2063,7 +2069,8 @@ class Marble extends GameObject {
 	public function updatePowerupStates(currentTime:Float, dt:Float) {
 		if (!this.controllable && this.connection == null)
 			return;
-		if (currentTime - this.helicopterEnableTime < 5) {
+		if (currentTime - this.helicopterEnableTime < 5
+			|| (helicopterUseTick > 0 && (this.level.timeState.ticks - helicopterUseTick) <= 156)) {
 			this.helicopter.setPosition(x, y, z);
 			this.helicopter.setRotationQuat(this.level.getOrientationQuat(currentTime));
 			this.helicopterSound.pause = false;
@@ -2089,7 +2096,8 @@ class Marble extends GameObject {
 	public function getMass() {
 		if (this.level == null)
 			return 1;
-		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10
+			|| (this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) {
 			return 5;
 		} else {
 			return 1;
@@ -2156,46 +2164,18 @@ class Marble extends GameObject {
 		this.appliedImpulses.push({impulse: impulse, contactImpulse: contactImpulse});
 	}
 
-	public function enableHelicopter(time:Float) {
-		this.helicopterEnableTime = time;
+	public function enableHelicopter(timeState:TimeState) {
+		if (this.level.isMultiplayer)
+			this.helicopterUseTick = timeState.ticks;
+		else
+			this.helicopterEnableTime = timeState.currentAttemptTime;
 	}
 
-	public function enableMegaMarble(time:Float) {
-		this.megaMarbleEnableTime = time;
-	}
-
-	function updateTeleporterState(time:TimeState) {
-		var teleportFadeCompletion:Float = 0;
-
-		if (this.teleportEnableTime != null)
-			teleportFadeCompletion = Util.clamp((time.currentAttemptTime - this.teleportEnableTime) / 0.5, 0, 1);
-		if (this.teleportDisableTime != null)
-			teleportFadeCompletion = Util.clamp(1 - (time.currentAttemptTime - this.teleportDisableTime) / 0.5, 0, 1);
-
-		if (teleportFadeCompletion > 0) {
-			var ourDts:DtsObject = cast this.children[0];
-			ourDts.setOpacity(Util.lerp(1, 0.25, teleportFadeCompletion));
-			this.teleporting = true;
-		} else {
-			if (this.teleporting) {
-				var ourDts:DtsObject = cast this.children[0];
-				ourDts.setOpacity(1);
-				this.teleporting = false;
-			}
-		}
-	}
-
-	public function setCloaking(active:Bool, time:TimeState) {
-		this.cloak = active;
-		if (this.cloak) {
-			var completion = (this.teleportDisableTime != null) ? Util.clamp((time.currentAttemptTime - this.teleportDisableTime) / 0.5, 0, 1) : 1;
-			this.teleportEnableTime = time.currentAttemptTime - 0.5 * (1 - completion);
-			this.teleportDisableTime = null;
-		} else {
-			var completion = Util.clamp((time.currentAttemptTime - this.teleportEnableTime) / 0.5, 0, 1);
-			this.teleportDisableTime = time.currentAttemptTime - 0.5 * (1 - completion);
-			this.teleportEnableTime = null;
-		}
+	public function enableMegaMarble(timeState:TimeState) {
+		if (this.level.isMultiplayer)
+			this.megaMarbleUseTick = timeState.ticks;
+		else
+			this.megaMarbleEnableTime = timeState.currentAttemptTime;
 	}
 
 	public function setMode(mode:Mode) {
@@ -2221,17 +2201,11 @@ class Marble extends GameObject {
 		this.blastUseTime = Math.NEGATIVE_INFINITY;
 		this.blastUseTick = 0;
 		this.blastTicks = 0;
+		this.helicopterUseTick = 0;
+		this.megaMarbleUseTick = 0;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.contactEntities = [];
-		this.cloak = false;
 		this._firstTick = true;
-		if (this.teleporting) {
-			var ourDts:DtsObject = cast this.children[0];
-			ourDts.setOpacity(1);
-		}
-		this.teleporting = false;
-		this.teleportDisableTime = null;
-		this.teleportEnableTime = null;
 		this.finishAnimTime = 0;
 		this.physicsAccumulator = 0;
 		this.prevRot = this.getRotationQuat().clone();

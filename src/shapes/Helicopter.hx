@@ -34,7 +34,7 @@ class Helicopter extends PowerUp {
 	}
 
 	public function use(marble:Marble, timeState:TimeState) {
-		marble.enableHelicopter(timeState.currentAttemptTime);
+		marble.enableHelicopter(timeState);
 		this.level.deselectPowerUp(marble);
 	}
 
