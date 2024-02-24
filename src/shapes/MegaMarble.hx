@@ -41,7 +41,9 @@ class MegaMarble extends PowerUp {
 	}
 
 	public function use(marble:Marble, timeState:TimeState) {
-		marble.enableMegaMarble(timeState.currentAttemptTime);
+		marble.enableMegaMarble(timeState);
+		var boost = marble.currentUp.multiply(5);
+		marble.velocity.load(marble.velocity.add(boost));
 		this.level.deselectPowerUp(marble);
 		if (this.level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/use_mega.wav', ResourceLoader.getAudio, this.soundResources));
