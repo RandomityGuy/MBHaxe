@@ -1,5 +1,6 @@
 package src;
 
+import net.PowerupPredictionStore;
 import net.MarblePredictionStore;
 import net.MarblePredictionStore.MarblePrediction;
 import net.MarbleUpdateQueue;
@@ -207,6 +208,7 @@ class MarbleWorld extends Scheduler {
 
 	var clientMarbles:Map<GameConnection, Marble> = [];
 	var predictions:MarblePredictionStore;
+	var powerupPredictions:PowerupPredictionStore;
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -238,17 +240,18 @@ class MarbleWorld extends Scheduler {
 		this.scene2d = scene2d;
 		this.mission = mission;
 		this.game = mission.game.toLowerCase();
-		this.gameMode = GameModeFactory.getGameMode(this, mission.missionInfo.gamemode);
+		this.gameMode = GameModeFactory.getGameMode(cast this, mission.missionInfo.gamemode);
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
-		this.rewindManager = new RewindManager(this);
-		this.inputRecorder = new InputRecorder(this);
+		this.rewindManager = new RewindManager(cast this);
+		this.inputRecorder = new InputRecorder(cast this);
 		this.isMultiplayer = multiplayer;
 		if (this.isMultiplayer) {
 			isRecording = false;
 			isWatching = false;
 			lastMoves = new MarbleUpdateQueue();
 			predictions = new MarblePredictionStore();
+			powerupPredictions = new PowerupPredictionStore();
 		}
 
 		// Set the network RNG for hunt
@@ -345,7 +348,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
-		this.radar = new Radar(this, this.scene2d);
+		this.radar = new Radar(cast this, this.scene2d);
 		radar.init();
 
 		var worker = new ResourceLoaderWorker(() -> {
@@ -954,8 +957,13 @@ class MarbleWorld extends Scheduler {
 			var worker = new ResourceLoaderWorker(() -> {
 				obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
 				this.dtsObjects.push(obj);
-				if (obj is PowerUp)
+				if (obj is PowerUp) {
+					var pw:PowerUp = cast obj;
+					pw.netIndex = this.powerUps.length;
 					this.powerUps.push(cast obj);
+					if (Net.isClient)
+						powerupPredictions.alloc();
+				}
 				if (obj is ForceObject) {
 					this.forceObjects.push(cast obj);
 				}
@@ -1141,13 +1149,16 @@ class MarbleWorld extends Scheduler {
 		advanceTimeState.dt = 0.032;
 		advanceTimeState.ticks = ourLastMoveTime;
 
-		if (marbleNeedsPrediction & (1 << Net.clientId) > 0) {
-			if (qm != null) {
-				var mvs = qm.powerupStates.copy();
-				for (pw in marble.level.powerUps) {
-					pw.lastPickUpTime = mvs.shift();
-				}
+		if (marbleNeedsPrediction > 0) {
+			// if (qm != null) {
+			// var mvs = qm.powerupStates.copy();
+			for (pw in marble.level.powerUps) {
+				// var val = mvs.shift();
+				// if (pw.lastPickUpTime != val)
+				// 	Console.log('Revert powerup pickup: ${pw.lastPickUpTime} -> ${val}');
+				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 			}
+			// }
 		}
 
 		ackLag = ourQueuedMoves.length;
@@ -1188,7 +1199,6 @@ class MarbleWorld extends Scheduler {
 			var m = move.move;
 			// Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
 			if (marbleNeedsPrediction & (1 << Net.clientId) > 0) {
-				this.marble.heldPowerup = move.powerup;
 				@:privateAccess this.marble.moveMotionDir = move.motionDir;
 				@:privateAccess this.marble.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
 				this.predictions.storeState(this.marble, move.timeState.ticks);
@@ -1475,12 +1485,14 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
-		if (this.marble.outOfBounds
-			&& this.finishTime == null
-			&& (Key.isDown(Settings.controlsSettings.jump) || Gamepad.isDown(Settings.gamepadSettings.jump))
-			&& !this.isWatching) {
-			this.restart(this.marble);
-			return;
+		if (!this.isMultiplayer) {
+			if (this.marble.outOfBounds
+				&& this.finishTime == null
+				&& (Key.isDown(Settings.controlsSettings.jump) || Gamepad.isDown(Settings.gamepadSettings.jump))
+				&& !this.isWatching) {
+				this.restart(this.marble);
+				return;
+			}
 		}
 
 		if (!this.isWatching) {
@@ -1689,8 +1701,8 @@ class MarbleWorld extends Scheduler {
 		this.helpTextTimeState = this.timeState.timeSinceLoad;
 	}
 
-	public function pickUpGem(gem:Gem) {
-		this.gameMode.onGemPickup(gem);
+	public function pickUpGem(marble:Marble, gem:Gem) {
+		this.gameMode.onGemPickup(marble, gem);
 	}
 
 	public function callCollisionHandlers(marble:Marble, timeState:TimeState, start:Vector, end:Vector) {

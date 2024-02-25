@@ -14,6 +14,7 @@ class MarblePrediction {
 	var omega:Vector;
 	var isControl:Bool;
 	var blastAmount:Int;
+	var powerupItemId:Int;
 
 	public function new(marble:Marble, tick:Int) {
 		this.tick = tick;
@@ -22,11 +23,14 @@ class MarblePrediction {
 		omega = @:privateAccess marble.omega.clone();
 		blastAmount = @:privateAccess marble.blastTicks;
 		isControl = @:privateAccess marble.controllable;
+		powerupItemId = marble.heldPowerup != null ? marble.heldPowerup.netIndex : 0xFFFF;
 	}
 
 	public inline function getError(p:MarbleUpdatePacket) {
 		// Just doing position errors is enough to make it work
 		var subs = position.sub(p.position).lengthSq(); // + velocity.sub(p.velocity).lengthSq() + omega.sub(p.omega).lengthSq();
+		if (p.powerUpId != powerupItemId)
+			subs += 1;
 		// if (isControl)
 		// 	subs += Math.abs(blastAmount - p.blastAmount);
 		return subs;

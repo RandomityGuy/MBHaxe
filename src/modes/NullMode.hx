@@ -59,7 +59,7 @@ class NullMode implements GameMode {
 
 	public function onRespawn(marble:Marble) {}
 
-	public function onGemPickup(gem:Gem) {
+	public function onGemPickup(marble:Marble, gem:Gem) {
 		this.level.gemCount++;
 		var string:String;
 

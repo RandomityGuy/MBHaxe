@@ -1,5 +1,7 @@
 package net;
 
+import net.BitStream.OutputBitStream;
+import net.BitStream.InputBitStream;
 import net.NetPacket.MarbleUpdatePacket;
 import shapes.PowerUp;
 import net.NetPacket.MarbleMovePacket;
@@ -23,9 +25,6 @@ class NetMove {
 	var move:Move;
 	var id:Int;
 	var timeState:TimeState;
-	// For rewind purposes
-	var powerup:PowerUp;
-	var powerupStates:Array<Float>;
 
 	public function new(move:Move, motionDir:Vector, timeState:TimeState, id:Int) {
 		this.move = move;
@@ -96,17 +95,12 @@ class MoveManager {
 		}
 
 		var netMove = new NetMove(move, motionDir, timeState.clone(), nextMoveId++);
-		netMove.powerup = marble.heldPowerup;
-		netMove.powerupStates = [];
-		for (pw in marble.level.powerUps) {
-			netMove.powerupStates.push(pw.lastPickUpTime);
-		}
 		queuedMoves.push(netMove);
 
 		if (nextMoveId >= 65535) // 65535 is reserved for null move
 			nextMoveId = 0;
 
-		var b = new haxe.io.BytesOutput();
+		var b = new OutputBitStream();
 		var movePacket = new MarbleMovePacket();
 		movePacket.clientId = Net.clientId;
 		movePacket.move = netMove;
@@ -119,7 +113,7 @@ class MoveManager {
 		return netMove;
 	}
 
-	public static inline function packMove(m:NetMove, b:haxe.io.BytesOutput) {
+	public static inline function packMove(m:NetMove, b:OutputBitStream) {
 		b.writeUInt16(m.id);
 		b.writeByte(Std.int((m.move.d.x * 16) + 16));
 		b.writeByte(Std.int((m.move.d.y * 16) + 16));
@@ -137,7 +131,7 @@ class MoveManager {
 		return b;
 	}
 
-	public static inline function unpackMove(b:haxe.io.BytesInput) {
+	public static inline function unpackMove(b:InputBitStream) {
 		var moveId = b.readUInt16();
 		var move = new Move();
 		move.d = new Vector();
@@ -155,7 +149,7 @@ class MoveManager {
 		return netMove;
 	}
 
-	public function queueMove(m:NetMove) {
+	public inline function queueMove(m:NetMove) {
 		queuedMoves.push(m);
 	}
 
@@ -169,7 +163,7 @@ class MoveManager {
 		}
 	}
 
-	public function getQueueSize() {
+	public inline function getQueueSize() {
 		return queuedMoves.length;
 	}
 

@@ -1,5 +1,8 @@
 package shapes;
 
+import net.BitStream.OutputBitStream;
+import net.NetPacket.PowerupPickupPacket;
+import net.Net;
 import src.Marble;
 import src.AudioManager;
 import hxd.res.Sound;
@@ -16,6 +19,7 @@ abstract class PowerUp extends DtsObject {
 	public var pickUpName:String;
 	public var element:MissionElementItem;
 	public var pickupSound:Sound;
+	public var netIndex:Int;
 
 	var customPickupMessage:String = null;
 
@@ -34,6 +38,17 @@ abstract class PowerUp extends DtsObject {
 
 		if (this.pickUp(marble)) {
 			// this.level.replay.recordMarbleInside(this);
+
+			if (level.isMultiplayer && Net.isHost) {
+				var b = new OutputBitStream();
+				b.writeByte(NetPacketType.PowerupPickup);
+				var pickupPacket = new PowerupPickupPacket();
+				pickupPacket.clientId = @:privateAccess marble.connection != null ? @:privateAccess marble.connection.id : 0;
+				pickupPacket.serverTicks = timeState.ticks;
+				pickupPacket.powerupItemId = this.netIndex;
+				pickupPacket.serialize(b);
+				Net.sendPacketToAll(b);
+			}
 
 			this.lastPickUpTime = timeState.currentAttemptTime;
 			if (this.autoUse)

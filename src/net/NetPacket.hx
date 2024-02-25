@@ -1,11 +1,13 @@
 package net;
 
+import net.BitStream.InputBitStream;
+import net.BitStream.OutputBitStream;
 import h3d.Vector;
 import net.MoveManager.NetMove;
 
 interface NetPacket {
-	public function serialize(b:haxe.io.BytesOutput):Void;
-	public function deserialize(b:haxe.io.BytesInput):Void;
+	public function serialize(b:OutputBitStream):Void;
+	public function deserialize(b:InputBitStream):Void;
 }
 
 @:publicFields
@@ -16,13 +18,13 @@ class MarbleMovePacket implements NetPacket {
 
 	public function new() {}
 
-	public inline function deserialize(b:haxe.io.BytesInput) {
+	public inline function deserialize(b:InputBitStream) {
 		clientId = b.readUInt16();
 		clientTicks = b.readUInt16();
 		move = MoveManager.unpackMove(b);
 	}
 
-	public inline function serialize(b:haxe.io.BytesOutput) {
+	public inline function serialize(b:OutputBitStream) {
 		b.writeUInt16(clientId);
 		b.writeUInt16(clientTicks);
 		MoveManager.packMove(move, b);
@@ -43,11 +45,12 @@ class MarbleUpdatePacket implements NetPacket {
 	var megaTick:Int;
 	var heliTick:Int;
 	var oob:Bool;
+	var powerUpId:Int;
 	var moveQueueSize:Int;
 
 	public function new() {}
 
-	public inline function serialize(b:haxe.io.BytesOutput) {
+	public inline function serialize(b:OutputBitStream) {
 		b.writeUInt16(clientId);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
@@ -66,9 +69,10 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeUInt16(heliTick);
 		b.writeUInt16(megaTick);
 		b.writeByte(oob ? 1 : 0);
+		b.writeUInt16(powerUpId);
 	}
 
-	public inline function deserialize(b:haxe.io.BytesInput) {
+	public inline function deserialize(b:InputBitStream) {
 		clientId = b.readUInt16();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
@@ -81,5 +85,27 @@ class MarbleUpdatePacket implements NetPacket {
 		heliTick = b.readUInt16();
 		megaTick = b.readUInt16();
 		oob = b.readByte() != 0;
+		powerUpId = b.readUInt16();
+	}
+}
+
+@:publicFields
+class PowerupPickupPacket implements NetPacket {
+	var clientId:Int;
+	var serverTicks:Int;
+	var powerupItemId:Int;
+
+	public function new() {}
+
+	public inline function deserialize(b:InputBitStream) {
+		clientId = b.readUInt16();
+		serverTicks = b.readUInt16();
+		powerupItemId = b.readUInt16();
+	}
+
+	public inline function serialize(b:OutputBitStream) {
+		b.writeUInt16(clientId);
+		b.writeUInt16(serverTicks);
+		b.writeUInt16(powerupItemId);
 	}
 }

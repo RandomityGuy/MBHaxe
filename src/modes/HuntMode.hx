@@ -282,25 +282,32 @@ class HuntMode extends NullMode {
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
-	override function onGemPickup(gem:Gem) {
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_collect.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
+	override function onGemPickup(marble:Marble, gem:Gem) {
+		if (marble == level.marble)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_collect.wav', ResourceLoader.getAudio,
+				@:privateAccess this.level.soundResources));
+		else
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/opponent_gem_collect.wav', ResourceLoader.getAudio,
+				@:privateAccess this.level.soundResources));
 		activeGems.remove(gem);
 		var beam = gemToBeamMap.get(gem);
 		beam.setHide(true);
 		refillGemGroups();
 
-		switch (gem.gemColor) {
-			case "red.gem":
-				points += 1;
-				@:privateAccess level.playGui.addMiddleMessage('+1', 0xFF6666);
-			case "yellow.gem":
-				points += 2;
-				@:privateAccess level.playGui.addMiddleMessage('+2', 0xFFFF66);
-			case "blue.gem":
-				points += 5;
-				@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
+		if (marble == level.marble) {
+			switch (gem.gemColor) {
+				case "red.gem":
+					points += 1;
+					@:privateAccess level.playGui.addMiddleMessage('+1', 0xFF6666);
+				case "yellow.gem":
+					points += 2;
+					@:privateAccess level.playGui.addMiddleMessage('+2', 0xFFFF66);
+				case "blue.gem":
+					points += 5;
+					@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
+			}
+			@:privateAccess level.playGui.formatGemHuntCounter(points);
 		}
-		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
 	function setupGems() {
