@@ -59,7 +59,7 @@ class RPCMacro {
 								case EConst(CIdent("server")):
 									var lastExpr = macro {
 										if (Net.isHost) {
-											var stream = new haxe.io.BytesOutput();
+											var stream = new net.BitStream.OutputBitStream();
 											stream.writeByte(NetPacketType.NetCommand);
 											stream.writeByte($v{rpcFnId});
 											$b{serializeFns};
@@ -72,7 +72,7 @@ class RPCMacro {
 								case EConst(CIdent("client")):
 									var lastExpr = macro {
 										if (!Net.isHost) {
-											var stream = new haxe.io.BytesOutput();
+											var stream = new net.BitStream.OutputBitStream();
 											stream.writeByte(NetPacketType.NetCommand);
 											stream.writeByte($v{rpcFnId});
 											$b{serializeFns};
@@ -113,7 +113,7 @@ class RPCMacro {
 				args: [
 					{
 						name: "stream",
-						type: haxe.macro.TypeTools.toComplexType(Context.getType('haxe.io.Input'))
+						type: haxe.macro.TypeTools.toComplexType(Context.getType('net.BitStream.InputBitStream'))
 					}
 				],
 				expr: macro {

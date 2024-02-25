@@ -67,7 +67,7 @@ class Gem extends DtsObject {
 			return;
 		this.pickedUp = true;
 		this.setOpacity(0); // Hide the gem
-		this.level.pickUpGem(this);
+		this.level.pickUpGem(marble, this);
 		// this.level.replay.recordMarbleInside(this);
 	}
 

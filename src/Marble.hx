@@ -1,5 +1,6 @@
 package src;
 
+import net.BitStream.OutputBitStream;
 import net.ClientConnection;
 import net.ClientConnection.GameConnection;
 import net.NetPacket.MarbleUpdatePacket;
@@ -577,7 +578,7 @@ class Marble extends GameObject {
 				A = A.add(force.multiply(1 / mass));
 			}
 			for (marble in level.marbles) {
-				if (marble != this) {
+				if (marble != cast this) {
 					var force = marble.getForce(this.collider.transform.getPosition(), tick);
 					A = A.add(force.multiply(1 / mass));
 				}
@@ -1608,7 +1609,7 @@ class Marble extends GameObject {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = passedTime;
-				this.heldPowerup.use(this, pTime);
+				this.heldPowerup.use(cast this, pTime);
 				this.heldPowerup = null;
 				if (this.level.isRecording) {
 					this.level.replay.recordPowerupPickup(null);
@@ -1655,7 +1656,7 @@ class Marble extends GameObject {
 	// MP Only Functions
 
 	public function packUpdate(move:NetMove, timeState:TimeState) {
-		var b = new haxe.io.BytesOutput();
+		var b = new OutputBitStream();
 		b.writeByte(NetPacketType.MarbleUpdate);
 		var marbleUpdate = new MarbleUpdatePacket();
 		marbleUpdate.clientId = connection != null ? connection.id : 0;
@@ -1670,6 +1671,7 @@ class Marble extends GameObject {
 		marbleUpdate.heliTick = this.helicopterUseTick;
 		marbleUpdate.megaTick = this.megaMarbleUseTick;
 		marbleUpdate.oob = this.outOfBounds;
+		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0xFFFF;
 		marbleUpdate.serialize(b);
 		return b.getBytes();
 	}
@@ -1694,6 +1696,11 @@ class Marble extends GameObject {
 		this.megaMarbleUseTick = p.megaTick;
 		this.outOfBounds = p.oob;
 		this.camera.oob = p.oob;
+		if (p.powerUpId == 0xFFFF) {
+			this.level.deselectPowerUp(cast this);
+		} else {
+			this.level.pickUpPowerUp(cast this, this.level.powerUps[p.powerUpId]);
+		}
 		if (this.controllable && Net.isClient) {
 			// We are client, need to do something about the queue
 			var mm = Net.clientConnection.moveManager;
@@ -1712,7 +1719,7 @@ class Marble extends GameObject {
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
 			if (Net.isClient) {
 				var axis = getMarbleAxis()[1];
-				move = Net.clientConnection.moveManager.recordMove(this, axis, timeState);
+				move = Net.clientConnection.moveManager.recordMove(cast this, axis, timeState);
 			} else if (Net.isHost) {
 				var axis = getMarbleAxis()[1];
 				var innerMove = recordMove();
@@ -1763,6 +1770,11 @@ class Marble extends GameObject {
 			}
 		}
 
+		if (move.move.jump && this.outOfBounds) {
+			this.level.cancel(this.oobSchedule);
+			this.level.restart(cast this);
+		}
+
 		return move;
 		// if (Net.isHost) {
 		// 	packets.push({b: packUpdate(move, timeState), c: this.connection != null ? this.connection.id : 0});
@@ -1770,7 +1782,7 @@ class Marble extends GameObject {
 	}
 
 	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {
-		this.level.updateBlast(this, timeState);
+		this.level.updateBlast(cast this, timeState);
 		if (oldPos != null && newPos != null) {
 			var deltaT = physicsAccumulator / 0.032;
 			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);

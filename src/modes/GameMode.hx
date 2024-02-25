@@ -26,7 +26,7 @@ interface GameMode {
 	public function onTimeExpire():Void;
 	public function onRestart():Void;
 	public function onRespawn(marble:Marble):Void;
-	public function onGemPickup(gem:Gem):Void;
+	public function onGemPickup(marble:Marble, gem:Gem):Void;
 
 	public function getPreloadFiles():Array<String>;
 	public function constructRewindState():RewindableState;

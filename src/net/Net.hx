@@ -1,5 +1,8 @@
 package net;
 
+import net.BitStream.InputBitStream;
+import net.BitStream.OutputBitStream;
+import net.NetPacket.PowerupPickupPacket;
 import net.ClientConnection;
 import net.NetPacket.MarbleUpdatePacket;
 import net.NetPacket.MarbleMovePacket;
@@ -20,6 +23,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var PingBack;
 	var MarbleUpdate;
 	var MarbleMove;
+	var PowerupPickup;
 	var PlayerInfo;
 }
 
@@ -141,7 +145,7 @@ class Net {
 				haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
 			}
 			clientDatachannel.onMessage = (b) -> {
-				onPacketReceived(client, clientDatachannel, new haxe.io.BytesInput(b));
+				onPacketReceived(client, clientDatachannel, new InputBitStream(b));
 			}
 
 			isMP = true;
@@ -155,7 +159,7 @@ class Net {
 		clients.set(c, new ClientConnection(clientId, c, dc));
 		clientIdMap[clientId] = clients[c];
 		dc.onMessage = (msgBytes) -> {
-			onPacketReceived(c, dc, new haxe.io.BytesInput(msgBytes));
+			onPacketReceived(c, dc, new InputBitStream(msgBytes));
 		}
 		var b = haxe.io.Bytes.alloc(3);
 		b.set(0, ClientIdAssign);
@@ -194,7 +198,7 @@ class Net {
 		return b.getBytes();
 	}
 
-	static function onPacketReceived(c:RTCPeerConnection, dc:RTCDataChannel, input:haxe.io.BytesInput) {
+	static function onPacketReceived(c:RTCPeerConnection, dc:RTCDataChannel, input:InputBitStream) {
 		var packetType = input.readByte();
 		switch (packetType) {
 			case NetCommand:
@@ -250,6 +254,14 @@ class Net {
 				var cc = clientIdMap[movePacket.clientId];
 				cc.moveManager.queueMove(movePacket.move);
 
+			case PowerupPickup:
+				var powerupPickupPacket = new PowerupPickupPacket();
+				powerupPickupPacket.deserialize(input);
+				if (MarbleGame.instance.world != null) {
+					var m = @:privateAccess MarbleGame.instance.world.powerupPredictions;
+					m.acknowledgePowerupPickup(powerupPickupPacket, MarbleGame.instance.world.timeState, clientConnection.moveManager.getQueueSize());
+				}
+
 			case PlayerInfo:
 				var count = input.readByte();
 				for (i in 0...count) {
@@ -265,14 +277,14 @@ class Net {
 		}
 	}
 
-	public static function sendPacketToAll(packetData:haxe.io.BytesOutput) {
+	public static function sendPacketToAll(packetData:OutputBitStream) {
 		var bytes = packetData.getBytes();
 		for (c => v in clients) {
 			v.sendBytes(bytes);
 		}
 	}
 
-	public static function sendPacketToHost(packetData:haxe.io.BytesOutput) {
+	public static function sendPacketToHost(packetData:OutputBitStream) {
 		var bytes = packetData.getBytes();
 		clientDatachannel.sendBytes(bytes);
 	}

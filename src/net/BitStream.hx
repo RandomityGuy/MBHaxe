@@ -1,5 +1,6 @@
 package net;
 
+import haxe.io.FPHelper;
 import haxe.io.BytesOutput;
 import haxe.io.BytesInput;
 import haxe.io.Bytes;
@@ -64,7 +65,7 @@ class InputBitStream {
 	}
 
 	public function readFloat() {
-		return readInt32();
+		return FPHelper.i32ToFloat(readInt32());
 	}
 }
 
@@ -128,5 +129,9 @@ class OutputBitStream {
 	public function getBytes() {
 		this.data.writeByte(this.lastByte);
 		return this.data.getBytes();
+	}
+
+	public function writeFloat(value:Float) {
+		writeInt(FPHelper.floatToI32(value), 32);
 	}
 }
