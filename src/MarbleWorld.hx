@@ -152,8 +152,6 @@ class MarbleWorld extends Scheduler {
 	public var game:String;
 
 	public var marble:Marble;
-	public var outOfBounds:Bool = false;
-	public var outOfBoundsTime:TimeState;
 	public var finishTime:TimeState;
 	public var finishPitch:Float;
 	public var finishYaw:Float;
@@ -231,7 +229,6 @@ class MarbleWorld extends Scheduler {
 	var soundResources:Array<Resource<Sound>> = [];
 
 	var oobSchedule:Float;
-	var oobSchedule2:Float;
 
 	var _cubemapNeedsUpdate:Bool = false;
 
@@ -483,7 +480,7 @@ class MarbleWorld extends Scheduler {
 
 	public function start() {
 		Console.log("LEVEL START");
-		restart(true);
+		restart(this.marble, true);
 		for (interior in this.interiors)
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
@@ -492,7 +489,7 @@ class MarbleWorld extends Scheduler {
 			NetCommands.clientIsReady(Net.clientId);
 	}
 
-	public function restart(full:Bool = false) {
+	public function restart(marble:Marble, full:Bool = false) {
 		Console.log("LEVEL RESTART");
 		if (!full && this.currentCheckpoint != null) {
 			this.loadCheckpointState();
@@ -502,7 +499,7 @@ class MarbleWorld extends Scheduler {
 		if (!full) {
 			var respawnT = this.gameMode.getRespawnTransform();
 			if (respawnT != null) {
-				respawn(respawnT.position, respawnT.orientation, respawnT.up);
+				respawn(marble, respawnT.position, respawnT.orientation, respawnT.up);
 				return 0;
 			}
 		}
@@ -518,10 +515,10 @@ class MarbleWorld extends Scheduler {
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
 		this.bonusTime = 0;
-		this.outOfBounds = false;
+		this.marble.outOfBounds = false;
 		this.marble.blastAmount = 0;
 		this.renderBlastAmount = 0;
-		this.outOfBoundsTime = null;
+		this.marble.outOfBoundsTime = null;
 		this.finishTime = null;
 		this.skipStartBugPauseTime = 0.0;
 
@@ -564,7 +561,7 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.cancel(this.oobSchedule);
-		this.cancel(this.oobSchedule2);
+		this.cancel(this.marble.oobSchedule);
 
 		var startquat = this.gameMode.getSpawnTransform();
 
@@ -584,6 +581,7 @@ class MarbleWorld extends Scheduler {
 
 		if (isMultiplayer) {
 			for (client => marble in clientMarbles) {
+				this.cancel(marble.oobSchedule);
 				var marbleStartQuat = this.gameMode.getSpawnTransform();
 				marble.setMarblePosition(marbleStartQuat.position.x, marbleStartQuat.position.y, marbleStartQuat.position.z);
 				marble.reset();
@@ -601,7 +599,7 @@ class MarbleWorld extends Scheduler {
 		for (interior in this.interiors)
 			interior.reset();
 
-		this.setUp(startquat.up, this.timeState, true);
+		this.setUp(this.marble, startquat.up, this.timeState, true);
 		this.deselectPowerUp(this.marble);
 		playGui.setCenterText('');
 
@@ -612,10 +610,9 @@ class MarbleWorld extends Scheduler {
 		return 0;
 	}
 
-	public function respawn(respawnPos:Vector, respawnQuat:Quat, respawnUp:Vector) {
-		var marble = this.marble;
+	public function respawn(marble:Marble, respawnPos:Vector, respawnQuat:Quat, respawnUp:Vector) {
 		// Determine where to spawn the marble
-		this.marble.setMarblePosition(respawnPos.x, respawnPos.y, respawnPos.z);
+		marble.setMarblePosition(respawnPos.x, respawnPos.y, respawnPos.z);
 		marble.velocity.set(0, 0, 0);
 		marble.omega.set(0, 0, 0);
 		Console.log('Respawn:');
@@ -624,15 +621,20 @@ class MarbleWorld extends Scheduler {
 		Console.log('Marble Angular: ${marble.omega.x} ${marble.omega.y} ${marble.omega.z}');
 		// Set camera orientation
 		var euler = respawnQuat.toEuler();
-		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
-		this.marble.camera.CameraPitch = 0.45;
-		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
-		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
-		this.marble.camera.oob = false;
-		@:privateAccess this.marble.helicopterEnableTime = -1e8;
-		@:privateAccess this.marble.megaMarbleEnableTime = -1e8;
+		marble.camera.CameraYaw = euler.z + Math.PI / 2;
+		marble.camera.CameraPitch = 0.45;
+		marble.camera.nextCameraYaw = marble.camera.CameraYaw;
+		marble.camera.nextCameraPitch = marble.camera.CameraPitch;
+		marble.camera.oob = false;
+		if (isMultiplayer) {
+			marble.megaMarbleUseTick = 0;
+			marble.helicopterUseTick = 0;
+		} else {
+			@:privateAccess marble.helicopterEnableTime = -1e8;
+			@:privateAccess marble.megaMarbleEnableTime = -1e8;
+		}
 		if (this.isRecording) {
-			this.replay.recordCameraState(this.marble.camera.CameraYaw, this.marble.camera.CameraPitch);
+			this.replay.recordCameraState(marble.camera.CameraYaw, marble.camera.CameraPitch);
 			this.replay.recordMarbleInput(0, 0);
 			this.replay.recordMarbleState(respawnPos, marble.velocity, marble.getRotationQuat(), marble.omega);
 			this.replay.recordMarbleStateFlags(false, false, true, false);
@@ -641,13 +643,16 @@ class MarbleWorld extends Scheduler {
 		// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
 		var up = new Vector(0, 0, 1);
 		up.transform(respawnQuat.toMatrix());
-		this.setUp(up, this.timeState, true);
+		this.setUp(marble, up, this.timeState, true);
 
-		this.playGui.setCenterText('');
-		this.clearSchedule();
-		this.outOfBounds = false;
-		this.gameMode.onRespawn();
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
+		if (marble == this.marble)
+			this.playGui.setCenterText('');
+		if (!this.isMultiplayer)
+			this.clearSchedule();
+		marble.outOfBounds = false;
+		this.gameMode.onRespawn(marble);
+		if (marble == this.marble)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	public function allClientsReady() {
@@ -655,7 +660,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function updateGameState() {
-		if (this.outOfBounds)
+		if (this.marble.outOfBounds)
 			return; // We will update state manually
 		if (!this.isMultiplayer) {
 			if (this.timeState.currentAttemptTime < 0.5) {
@@ -1024,7 +1029,7 @@ class MarbleWorld extends Scheduler {
 
 	public function performRestart() {
 		this.respawnPressedTime = timeState.timeSinceLoad;
-		this.restart();
+		this.restart(this.marble);
 		if (!this.isWatching) {
 			Settings.playStatistics.respawns++;
 
@@ -1143,9 +1148,6 @@ class MarbleWorld extends Scheduler {
 				for (pw in marble.level.powerUps) {
 					pw.lastPickUpTime = mvs.shift();
 				}
-				@:privateAccess marble.helicopterEnableTime = qm.helicopterState;
-				@:privateAccess marble.megaMarbleEnableTime = qm.megaState;
-				marble.blastAmount = qm.blastAmt;
 			}
 		}
 
@@ -1171,7 +1173,7 @@ class MarbleWorld extends Scheduler {
 				if (distFromUs < 5)
 					m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
 				else
-					m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 5));
+					m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 3));
 				// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
 
 				marblesToTick.set(client, m);
@@ -1378,7 +1380,7 @@ class MarbleWorld extends Scheduler {
 		// Replay gravity
 		if (this.isWatching) {
 			if (this.replay.currentPlaybackFrame.gravityChange) {
-				this.setUp(this.replay.currentPlaybackFrame.gravity, timeState, this.replay.currentPlaybackFrame.gravityInstant);
+				this.setUp(this.marble, this.replay.currentPlaybackFrame.gravity, timeState, this.replay.currentPlaybackFrame.gravityInstant);
 			}
 			if (this.replay.currentPlaybackFrame.powerupPickup != null) {
 				this.pickUpPowerUpReplay(this.replay.currentPlaybackFrame.powerupPickup);
@@ -1474,11 +1476,11 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateAudio");
 		AudioManager.update(this.scene);
 
-		if (this.outOfBounds
+		if (this.marble.outOfBounds
 			&& this.finishTime == null
 			&& (Key.isDown(Settings.controlsSettings.jump) || Gamepad.isDown(Settings.gamepadSettings.jump))
 			&& !this.isWatching) {
-			this.restart();
+			this.restart(this.marble);
 			return;
 		}
 
@@ -1817,7 +1819,7 @@ class MarbleWorld extends Scheduler {
 
 	function touchFinish() {
 		if (this.finishTime != null
-			|| (this.outOfBounds && this.timeState.currentAttemptTime - this.outOfBoundsTime.currentAttemptTime >= 0.5))
+			|| (this.marble.outOfBounds && this.timeState.currentAttemptTime - this.marble.outOfBoundsTime.currentAttemptTime >= 0.5))
 			return;
 
 		if (this.gemCount < this.totalGems) {
@@ -1904,7 +1906,7 @@ class MarbleWorld extends Scheduler {
 			var restartGameCode = () -> {
 				MarbleGame.canvas.popDialog(egg);
 				playGui.setGuiVisibility(true);
-				this.restart(true);
+				this.restart(this.marble, true);
 				#if js
 				pointercontainer.hidden = true;
 				#end
@@ -1993,64 +1995,66 @@ class MarbleWorld extends Scheduler {
 		return q;
 	}
 
-	public function setUp(vec:Vector, timeState:TimeState, instant:Bool = false) {
-		this.marble.currentUp = vec;
-		var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
-		var oldUp = new Vector(0, 0, 1);
-		oldUp.transform(currentQuat.toMatrix());
+	public function setUp(marble:Marble, vec:Vector, timeState:TimeState, instant:Bool = false) {
+		marble.currentUp = vec;
+		if (marble == this.marble) {
+			var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
+			var oldUp = new Vector(0, 0, 1);
+			oldUp.transform(currentQuat.toMatrix());
 
-		function getRotQuat(v1:Vector, v2:Vector) {
-			function orthogonal(v:Vector) {
-				var x = Math.abs(v.x);
-				var y = Math.abs(v.y);
-				var z = Math.abs(v.z);
-				var other = x < y ? (x < z ? new Vector(1, 0, 0) : new Vector(0, 0, 1)) : (y < z ? new Vector(0, 1, 0) : new Vector(0, 0, 1));
-				return v.cross(other);
-			}
+			function getRotQuat(v1:Vector, v2:Vector) {
+				function orthogonal(v:Vector) {
+					var x = Math.abs(v.x);
+					var y = Math.abs(v.y);
+					var z = Math.abs(v.z);
+					var other = x < y ? (x < z ? new Vector(1, 0, 0) : new Vector(0, 0, 1)) : (y < z ? new Vector(0, 1, 0) : new Vector(0, 0, 1));
+					return v.cross(other);
+				}
 
-			var u = v1.normalized();
-			var v = v2.normalized();
-			if (Math.abs(u.dot(v) + 1) < hxd.Math.EPSILON) {
+				var u = v1.normalized();
+				var v = v2.normalized();
+				if (Math.abs(u.dot(v) + 1) < hxd.Math.EPSILON) {
+					var q = new Quat();
+					var o = orthogonal(u).normalized();
+					q.x = o.x;
+					q.y = o.y;
+					q.z = o.z;
+					q.w = 0;
+					return q;
+				}
+				var half = u.add(v).normalized();
 				var q = new Quat();
-				var o = orthogonal(u).normalized();
-				q.x = o.x;
-				q.y = o.y;
-				q.z = o.z;
-				q.w = 0;
+				q.w = u.dot(half);
+				var vr = u.cross(half);
+				q.x = vr.x;
+				q.y = vr.y;
+				q.z = vr.z;
 				return q;
 			}
-			var half = u.add(v).normalized();
-			var q = new Quat();
-			q.w = u.dot(half);
-			var vr = u.cross(half);
-			q.x = vr.x;
-			q.y = vr.y;
-			q.z = vr.z;
-			return q;
+
+			var quatChange = getRotQuat(oldUp, vec);
+			// Instead of calculating the new quat from nothing, calculate it from the last one to guarantee the shortest possible rotation.
+			// quatChange.initMoveTo(oldUp, vec);
+			quatChange.multiply(quatChange, currentQuat);
+
+			if (this.isRecording) {
+				this.replay.recordGravity(vec, instant);
+			}
+
+			this.newOrientationQuat = quatChange;
+			this.oldOrientationQuat = currentQuat;
+			this.orientationChangeTime = instant ? -1e8 : timeState.currentAttemptTime;
 		}
-
-		var quatChange = getRotQuat(oldUp, vec);
-		// Instead of calculating the new quat from nothing, calculate it from the last one to guarantee the shortest possible rotation.
-		// quatChange.initMoveTo(oldUp, vec);
-		quatChange.multiply(quatChange, currentQuat);
-
-		if (this.isRecording) {
-			this.replay.recordGravity(vec, instant);
-		}
-
-		this.newOrientationQuat = quatChange;
-		this.oldOrientationQuat = currentQuat;
-		this.orientationChangeTime = instant ? -1e8 : timeState.currentAttemptTime;
 	}
 
-	public function goOutOfBounds() {
-		if (this.outOfBounds || this.finishTime != null)
+	public function goOutOfBounds(marble:Marble) {
+		if (marble.outOfBounds || this.finishTime != null)
 			return;
 		// this.updateCamera(this.timeState); // Update the camera at the point of OOB-ing
-		this.outOfBounds = true;
-		this.outOfBoundsTime = this.timeState.clone();
-		this.marble.camera.oob = true;
-		if (!this.isWatching) {
+		marble.outOfBounds = true;
+		marble.outOfBoundsTime = this.timeState.clone();
+		marble.camera.oob = true;
+		if (!this.isWatching && !this.isMultiplayer) {
 			Settings.playStatistics.oobs++;
 			if (!Settings.levelStatistics.exists(mission.path)) {
 				Settings.levelStatistics.set(mission.path, {
@@ -2061,19 +2065,24 @@ class MarbleWorld extends Scheduler {
 			} else {
 				Settings.levelStatistics[mission.path].oobs++;
 			}
+
+			// sky.follow = null;
+			// this.oobCameraPosition = camera.position.clone();
 		}
-		// sky.follow = null;
-		// this.oobCameraPosition = camera.position.clone();
-		playGui.setCenterText('Out of Bounds');
-		// if (this.replay.mode != = 'playback')
-		this.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2, () -> {
-			playGui.setCenterText('');
-			return null;
-		});
-		this.oobSchedule2 = this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
-			this.restart();
-			return null;
-		});
+		if (marble == this.marble) {
+			playGui.setCenterText('Out of Bounds');
+			// if (this.replay.mode != = 'playback')
+			this.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2, () -> {
+				playGui.setCenterText('');
+				return null;
+			});
+		}
+		if (Net.isHost) {
+			marble.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
+				this.restart(marble);
+				return null;
+			});
+		}
 	}
 
 	/** Sets a new active checkpoint. */
@@ -2087,7 +2096,7 @@ class MarbleWorld extends Scheduler {
 		}
 		checkpointSequence = trigger.seqNum;
 		// (shape.srcElement as any) ?.disableOob || trigger?.element.disableOob;
-		if (disableOob && this.outOfBounds)
+		if (disableOob && this.marble.outOfBounds)
 			return false; // The checkpoint is configured to not work when the player is already OOB
 		this.currentCheckpoint = shape;
 		this.currentCheckpointTrigger = trigger;
@@ -2145,7 +2154,7 @@ class MarbleWorld extends Scheduler {
 		// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
 		var up = new Vector(0, 0, 1);
 		up.transform(this.currentCheckpoint.getRotationQuat().toMatrix());
-		this.setUp(up, this.timeState, true);
+		this.setUp(marble, up, this.timeState, true);
 
 		// Restore gem states
 		for (gem in this.gems) {
@@ -2157,7 +2166,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 		this.playGui.setCenterText('');
 		this.clearSchedule();
-		this.outOfBounds = false;
+		this.marble.outOfBounds = false;
 		this.deselectPowerUp(this.marble); // Always deselect first
 		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
 		if (this.checkpointHeldPowerup != null) {
