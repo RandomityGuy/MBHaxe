@@ -251,7 +251,7 @@ class MarbleGame {
 			@:privateAccess world.playGui.setGuiVisibility(true);
 			canvas.popDialog(exitGameDlg);
 			var w = getWorld();
-			w.restart(true);
+			w.restart(w.marble, true);
 			// world.setCursorLock(true);
 			paused = !paused;
 		});

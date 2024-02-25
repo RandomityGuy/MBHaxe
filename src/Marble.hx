@@ -249,6 +249,10 @@ class Marble extends GameObject {
 	public var lastContactPosition:Vector;
 	public var currentUp = new Vector(0, 0, 1);
 
+	public var outOfBounds:Bool = false;
+	public var outOfBoundsTime:TimeState;
+	public var oobSchedule:Float;
+
 	var helicopter:HelicopterImage;
 	var blastWave:BlastWave;
 	var helicopterEnableTime:Float = -1e8;
@@ -567,14 +571,15 @@ class Marble extends GameObject {
 			A = A.multiply(0.25);
 		}
 		if (this.level != null) {
+			var mass = this.getMass();
 			for (obj in level.forceObjects) {
 				var force = cast(obj, ForceObject).getForce(this.collider.transform.getPosition());
-				A = A.add(force.multiply(1 / _mass));
+				A = A.add(force.multiply(1 / mass));
 			}
 			for (marble in level.marbles) {
 				if (marble != this) {
 					var force = marble.getForce(this.collider.transform.getPosition(), tick);
-					A = A.add(force.multiply(1 / _mass));
+					A = A.add(force.multiply(1 / mass));
 				}
 			}
 		}
@@ -603,7 +608,7 @@ class Marble extends GameObject {
 			if (forceObjectCount != 0) {
 				contactNormal.normalize();
 
-				var a = contactForce / this._mass;
+				var a = contactForce / this.getMass();
 				var dot = this.velocity.dot(contactNormal);
 				if (a > dot) {
 					if (dot > 0)
@@ -699,8 +704,8 @@ class Marble extends GameObject {
 					} else if (contacts[i].collider != null) {
 						var otherMarble:Marble = cast contacts[i].collider.go;
 
-						var ourMass = this._mass;
-						var theirMass = otherMarble._mass;
+						var ourMass = this.getMass();
+						var theirMass = otherMarble.getMass();
 
 						var bounce = Math.max(this._bounceRestitution, otherMarble._bounceRestitution);
 
@@ -1599,7 +1604,7 @@ class Marble extends GameObject {
 			this.collisionWorld.updateTransform(this.collider);
 			this.collider.velocity = this.velocity;
 
-			if (this.heldPowerup != null && m.powerup && !this.level.outOfBounds) {
+			if (this.heldPowerup != null && m.powerup && !this.outOfBounds) {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = passedTime;
@@ -1664,6 +1669,7 @@ class Marble extends GameObject {
 		marbleUpdate.blastTick = this.blastUseTick;
 		marbleUpdate.heliTick = this.helicopterUseTick;
 		marbleUpdate.megaTick = this.megaMarbleUseTick;
+		marbleUpdate.oob = this.outOfBounds;
 		marbleUpdate.serialize(b);
 		return b.getBytes();
 	}
@@ -1686,6 +1692,8 @@ class Marble extends GameObject {
 		this.blastUseTick = p.blastTick;
 		this.helicopterUseTick = p.heliTick;
 		this.megaMarbleUseTick = p.megaTick;
+		this.outOfBounds = p.oob;
+		this.camera.oob = p.oob;
 		if (this.controllable && Net.isClient) {
 			// We are client, need to do something about the queue
 			var mm = Net.clientConnection.moveManager;

@@ -22,6 +22,7 @@ import mis.MissionElement.MissionElementSpawnSphere;
 import src.AudioManager;
 import src.ResourceLoader;
 import src.Settings;
+import src.Marble;
 
 @:publicFields
 class GemSpawnSphere {
@@ -240,7 +241,7 @@ class HuntMode extends NullMode {
 		return null;
 	}
 
-	override function onRespawn() {
+	override function onRespawn(marble:Marble) {
 		if (activeGemSpawnGroup.length != 0) {
 			var gemAvg = new Vector();
 			for (gi in activeGemSpawnGroup) {
@@ -248,15 +249,15 @@ class HuntMode extends NullMode {
 				gemAvg = gemAvg.add(g.position);
 			}
 			gemAvg.scale(1 / activeGemSpawnGroup.length);
-			var delta = gemAvg.sub(level.marble.getAbsPos().getPosition());
+			var delta = gemAvg.sub(marble.getAbsPos().getPosition());
 			var gravFrame = level.getOrientationQuat(0).toMatrix();
 			var v1 = gravFrame.front();
 			var v2 = gravFrame.right();
 			var deltaRot = new Vector(delta.dot(v2), delta.dot(v1));
 			if (deltaRot.length() >= 0.001) {
 				var ang = Math.atan2(deltaRot.x, deltaRot.y);
-				level.marble.camera.CameraYaw = ang;
-				level.marble.camera.nextCameraYaw = ang;
+				marble.camera.CameraYaw = ang;
+				marble.camera.nextCameraYaw = ang;
 			}
 		}
 	}
@@ -477,7 +478,7 @@ class HuntMode extends NullMode {
 		level.finishPitch = level.marble.camera.CameraPitch;
 		level.displayAlert("Congratulations! You've finished!");
 		level.cancel(@:privateAccess level.oobSchedule);
-		level.cancel(@:privateAccess level.oobSchedule2);
+		level.cancel(@:privateAccess level.marble.oobSchedule);
 		if (!level.isWatching) {
 			var myScore = {
 				name: "Player",

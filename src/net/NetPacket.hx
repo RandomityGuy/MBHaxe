@@ -42,6 +42,7 @@ class MarbleUpdatePacket implements NetPacket {
 	var blastTick:Int;
 	var megaTick:Int;
 	var heliTick:Int;
+	var oob:Bool;
 	var moveQueueSize:Int;
 
 	public function new() {}
@@ -64,6 +65,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeUInt16(blastTick);
 		b.writeUInt16(heliTick);
 		b.writeUInt16(megaTick);
+		b.writeByte(oob ? 1 : 0);
 	}
 
 	public inline function deserialize(b:haxe.io.BytesInput) {
@@ -78,5 +80,6 @@ class MarbleUpdatePacket implements NetPacket {
 		blastTick = b.readUInt16();
 		heliTick = b.readUInt16();
 		megaTick = b.readUInt16();
+		oob = b.readByte() != 0;
 	}
 }

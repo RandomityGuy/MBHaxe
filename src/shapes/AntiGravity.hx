@@ -38,7 +38,7 @@ class AntiGravity extends PowerUp {
 			var direction = new Vector(0, 0, -1);
 			direction.transform(this.getRotationQuat().toMatrix());
 			if (marble == level.marble)
-				this.level.setUp(direction, timeState);
+				this.level.setUp(marble, direction, timeState);
 			else
 				marble.currentUp.load(direction);
 		}

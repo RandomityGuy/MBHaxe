@@ -1,5 +1,6 @@
 package modes;
 
+import src.Marble;
 import rewind.RewindableState;
 import modes.GameMode.ScoreType;
 import shapes.Gem;
@@ -56,7 +57,7 @@ class NullMode implements GameMode {
 
 	public function onRestart() {}
 
-	public function onRespawn() {}
+	public function onRespawn(marble:Marble) {}
 
 	public function onGemPickup(gem:Gem) {
 		this.level.gemCount++;

@@ -26,9 +26,6 @@ class NetMove {
 	// For rewind purposes
 	var powerup:PowerUp;
 	var powerupStates:Array<Float>;
-	var helicopterState:Float;
-	var megaState:Float;
-	var blastAmt:Float;
 
 	public function new(move:Move, motionDir:Vector, timeState:TimeState, id:Int) {
 		this.move = move;
@@ -101,9 +98,6 @@ class MoveManager {
 		var netMove = new NetMove(move, motionDir, timeState.clone(), nextMoveId++);
 		netMove.powerup = marble.heldPowerup;
 		netMove.powerupStates = [];
-		netMove.helicopterState = @:privateAccess marble.helicopterEnableTime;
-		netMove.megaState = @:privateAccess marble.megaMarbleEnableTime;
-		netMove.blastAmt = marble.blastAmount;
 		for (pw in marble.level.powerUps) {
 			netMove.powerupStates.push(pw.lastPickUpTime);
 		}

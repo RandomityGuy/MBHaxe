@@ -93,8 +93,8 @@ class RewindManager {
 			}
 			rf.blastAmt = level.marble.blastAmount;
 			rf.oobState = {
-				oob: level.outOfBounds,
-				timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
+				oob: level.marble.outOfBounds,
+				timeState: level.marble.outOfBoundsTime != null ? level.marble.outOfBoundsTime.clone() : null
 			};
 			rf.checkpointState = {
 				currentCheckpoint: @:privateAccess level.currentCheckpoint,
@@ -150,7 +150,7 @@ class RewindManager {
 		if (level.marble.currentUp.x != rf.currentUp.x
 			|| level.marble.currentUp.y != rf.currentUp.y
 			|| level.marble.currentUp.z != rf.currentUp.z) {
-			level.setUp(rf.currentUp, level.timeState);
+			level.setUp(level.marble, rf.currentUp, level.timeState);
 			// Hacky things
 			@:privateAccess level.orientationChangeTime = level.timeState.currentAttemptTime - 300;
 			var oldorient = level.newOrientationQuat;
@@ -205,18 +205,18 @@ class RewindManager {
 
 		if (!rf.oobState.oob) {
 			@:privateAccess level.cancel(level.oobSchedule);
-			@:privateAccess level.cancel(level.oobSchedule2);
+			@:privateAccess level.cancel(level.marble.oobSchedule);
 		} else {
-			level.goOutOfBounds();
+			level.goOutOfBounds(level.marble);
 		}
 
-		level.outOfBounds = rf.oobState.oob;
-		if (level.outOfBounds)
+		level.marble.outOfBounds = rf.oobState.oob;
+		if (level.marble.outOfBounds)
 			@:privateAccess level.playGui.setCenterText('Out of Bounds');
 		else
 			@:privateAccess level.playGui.setCenterText('');
 		level.marble.camera.oob = rf.oobState.oob;
-		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
+		level.marble.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
 		level.marble.blastAmount = rf.blastAmt;
 		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;
 		@:privateAccess level.cheeckpointBlast = rf.checkpointState.checkpointBlast;
