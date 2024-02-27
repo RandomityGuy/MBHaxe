@@ -1063,10 +1063,10 @@ class MarbleWorld extends Scheduler {
 				lastMoves.ourMoveApplied = true;
 				for (client => arr in lastMoves.otherMarbleUpdates) {
 					var lastMove = null;
-					while (arr.length > 0) {
-						var p = arr[0];
+					while (arr.packets.length > 0) {
+						var p = arr.packets[0];
 						if (p.serverTicks <= ourMove.serverTicks) {
-							lastMove = arr.shift();
+							lastMove = arr.packets.shift();
 						} else {
 							break;
 						}
@@ -1085,7 +1085,7 @@ class MarbleWorld extends Scheduler {
 										trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 										clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
 										needsPrediction |= 1 << client;
-										arr.insert(0, lastMove);
+										arr.packets.insert(0, lastMove);
 										predictions.clearStatesAfterTick(clientMarbles[Net.clientIdMap[client]], ourMoveStruct.timeState.ticks);
 									}
 								} else {
@@ -1093,7 +1093,7 @@ class MarbleWorld extends Scheduler {
 									trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 									clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
 									needsPrediction |= 1 << client;
-									arr.insert(0, lastMove);
+									arr.packets.insert(0, lastMove);
 									predictions.clearStatesAfterTick(clientMarbles[Net.clientIdMap[client]], ourMoveStruct.timeState.ticks);
 								}
 							} else {
@@ -1101,7 +1101,7 @@ class MarbleWorld extends Scheduler {
 								trace('Desync in General');
 								clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
 								needsPrediction |= 1 << client;
-								arr.insert(0, lastMove);
+								arr.packets.insert(0, lastMove);
 								// predictions.clearStatesAfterTick(clientMarbles[Net.clientIdMap[client]], ourMoveStruct.timeState.ticks);
 							}
 						}
@@ -1175,8 +1175,8 @@ class MarbleWorld extends Scheduler {
 		var marblesToTick = new Map();
 
 		for (client => arr in lastMoves.otherMarbleUpdates) {
-			if (marbleNeedsPrediction & (1 << client) > 0 && arr.length > 0) {
-				var m = arr[0];
+			if (marbleNeedsPrediction & (1 << client) > 0 && arr.packets.length > 0) {
+				var m = arr.packets[0];
 				// if (m.serverTicks == ourLastMoveTime) {
 				var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
 				Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
@@ -1189,7 +1189,7 @@ class MarbleWorld extends Scheduler {
 				// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
 
 				marblesToTick.set(client, m);
-				arr.shift();
+				arr.packets.shift();
 				// }
 			}
 		}

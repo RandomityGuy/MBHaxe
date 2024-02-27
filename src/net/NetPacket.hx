@@ -32,11 +32,11 @@ class MarbleMovePacket implements NetPacket {
 }
 
 enum abstract MarbleNetFlags(Int) from Int to Int {
-	var NullFlag;
-	var DoBlast;
-	var DoHelicopter;
-	var DoMega;
-	var PickupPowerup;
+	var NullFlag = 0;
+	var DoBlast = 1 << 0;
+	var DoHelicopter = 1 << 1;
+	var DoMega = 1 << 2;
+	var PickupPowerup = 1 << 3;
 }
 
 @:publicFields
@@ -63,7 +63,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeByte(clientId);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
-		b.writeInt(moveQueueSize, 6);
+		b.writeByte(moveQueueSize);
 		b.writeFloat(position.x);
 		b.writeFloat(position.y);
 		b.writeFloat(position.z);
@@ -105,7 +105,7 @@ class MarbleUpdatePacket implements NetPacket {
 		clientId = b.readByte();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
-		moveQueueSize = b.readInt(6);
+		moveQueueSize = b.readByte();
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
@@ -126,6 +126,7 @@ class MarbleUpdatePacket implements NetPacket {
 		oob = b.readFlag();
 		if (b.readFlag()) {
 			powerUpId = b.readInt(9);
+			trace('pickup: ${powerUpId}');
 			this.netFlags |= MarbleNetFlags.PickupPowerup;
 		}
 	}

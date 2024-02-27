@@ -303,6 +303,7 @@ class Marble extends GameObject {
 	var lastMove:Move;
 	var isNetUpdate:Bool = false;
 	var netFlags:Int = 0;
+	var serverTicks:Int;
 
 	public function new() {
 		super();
@@ -564,13 +565,14 @@ class Marble extends GameObject {
 		}
 	}
 
-	function getExternalForces(currentTime:Float, m:Move, dt:Float, tick:Int) {
+	function getExternalForces(timeState:TimeState, m:Move) {
 		if (this.mode == Finish)
 			return this.velocity.multiply(-16);
 		var gWorkGravityDir = this.currentUp.multiply(-1);
 		var A = new Vector();
 		A = gWorkGravityDir.multiply(this._gravity);
-		if (currentTime - this.helicopterEnableTime < 5 || (helicopterUseTick > 0 && (tick - helicopterUseTick) <= 156)) {
+		var helicopter = isHelicopterEnabled(timeState);
+		if (helicopter) {
 			A = A.multiply(0.25);
 		}
 		if (this.level != null) {
@@ -581,7 +583,7 @@ class Marble extends GameObject {
 			}
 			for (marble in level.marbles) {
 				if (marble != cast this) {
-					var force = marble.getForce(this.collider.transform.getPosition(), tick);
+					var force = marble.getForce(this.collider.transform.getPosition(), timeState.ticks);
 					A = A.add(force.multiply(1 / mass));
 				}
 			}
@@ -617,7 +619,7 @@ class Marble extends GameObject {
 					if (dot > 0)
 						a -= dot;
 
-					A.load(A.add(contactNormal.multiply(a / dt)));
+					A.load(A.add(contactNormal.multiply(a / timeState.dt)));
 				}
 			}
 		}
@@ -627,7 +629,7 @@ class Marble extends GameObject {
 			var motionDir = axes[1];
 			var upDir = axes[2];
 			var airAccel = this._airAccel;
-			if (currentTime - this.helicopterEnableTime < 5 || (helicopterUseTick > 0 && (tick - helicopterUseTick) <= 156)) {
+			if (helicopter) {
 				airAccel *= 2;
 			}
 			A.load(A.add(sideDir.multiply(m.d.x).add(motionDir.multiply(m.d.y)).multiply(airAccel)));
@@ -1479,6 +1481,12 @@ class Marble extends GameObject {
 			lastMove = m;
 		}
 
+		if (this.blastTicks < (30000 >> 5))
+			this.blastTicks += 1;
+
+		if (Net.isClient)
+			this.serverTicks++;
+
 		_bounceYet = false;
 
 		var contactTime = 0.0;
@@ -1533,7 +1541,7 @@ class Marble extends GameObject {
 			var isCentered = this.computeMoveForces(m, aControl, desiredOmega);
 
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
-			var A = this.getExternalForces(timeState.currentAttemptTime, m, timeStep, timeState.ticks);
+			var A = this.getExternalForces(tempState, m);
 			var a = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
 			this.velocity.set(this.velocity.x + A.x * timeStep, this.velocity.y + A.y * timeStep, this.velocity.z + A.z * timeStep);
 			this.omega.set(this.omega.x + a.x * timeStep, this.omega.y + a.y * timeStep, this.omega.z + a.z * timeStep);
@@ -1655,6 +1663,34 @@ class Marble extends GameObject {
 		}
 
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
+
+		if (this.megaMarbleUseTick > 0) {
+			if (Net.isHost) {
+				if ((timeState.ticks - this.megaMarbleUseTick) < 312) {
+					this._radius = 0.675;
+					this.collider.radius = 0.675;
+				} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
+					this.collider.radius = this._radius = 0.3;
+					if (!this.isNetUpdate && this.controllable)
+						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
+							false);
+					this.megaMarbleUseTick = 0;
+					this.netFlags |= MarbleNetFlags.DoMega;
+				}
+			}
+			if (Net.isClient) {
+				if (this.serverTicks - this.megaMarbleUseTick < 312) {
+					this._radius = 0.675;
+					this.collider.radius = 0.675;
+				} else {
+					this.collider.radius = this._radius = 0.3;
+					if (!this.isNetUpdate && this.controllable)
+						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
+							false);
+					this.megaMarbleUseTick = 0;
+				}
+			}
+		}
 	}
 
 	// MP Only Functions
@@ -1675,7 +1711,7 @@ class Marble extends GameObject {
 		marbleUpdate.heliTick = this.helicopterUseTick;
 		marbleUpdate.megaTick = this.megaMarbleUseTick;
 		marbleUpdate.oob = this.outOfBounds;
-		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0xFFFF;
+		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0x1FF;
 		marbleUpdate.netFlags = this.netFlags;
 		this.netFlags = 0;
 		marbleUpdate.serialize(b);
@@ -1691,6 +1727,7 @@ class Marble extends GameObject {
 		// 		return false;
 		// 	}
 		// }
+		this.serverTicks = p.serverTicks;
 		this.oldPos = this.newPos;
 		this.newPos = p.position;
 		this.collider.transform.setPosition(p.position);
@@ -1702,7 +1739,7 @@ class Marble extends GameObject {
 		this.megaMarbleUseTick = p.megaTick;
 		this.outOfBounds = p.oob;
 		this.camera.oob = p.oob;
-		if (p.powerUpId == 0xFFFF) {
+		if (p.powerUpId == 0x1FF) {
 			this.level.deselectPowerUp(cast this);
 		} else {
 			this.level.pickUpPowerUp(cast this, this.level.powerUps[p.powerUpId]);
@@ -1758,24 +1795,9 @@ class Marble extends GameObject {
 			move = new NetMove(innerMove, axis, timeState, 65535);
 		}
 
-		if (this.blastTicks < (30000 >> 5))
-			this.blastTicks += 1;
-
 		playedSounds = [];
 		advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
 		physicsAccumulator = 0;
-
-		if (this.megaMarbleUseTick > 0) {
-			if ((this.level.timeState.ticks - this.megaMarbleUseTick) < 312) {
-				this._radius = 0.675;
-				this.collider.radius = 0.675;
-			} else if ((this.level.timeState.ticks - this.megaMarbleUseTick) > 312) {
-				this.collider.radius = this._radius = 0.3;
-				if (!this.isNetUpdate && this.controllable)
-					AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null, false);
-				this.megaMarbleUseTick = 0;
-			}
-		}
 
 		if (move.move.jump && this.outOfBounds) {
 			this.level.cancel(this.oobSchedule);
@@ -1814,9 +1836,9 @@ class Marble extends GameObject {
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
 
-		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+		updatePowerupStates(timeState);
 
-		if ((this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) {
+		if (isMegaMarbleEnabled(timeState)) {
 			this._marbleScale = this._defaultScale * 2.25;
 		} else {
 			this._marbleScale = this._defaultScale;
@@ -1839,7 +1861,7 @@ class Marble extends GameObject {
 		this.updateFinishAnimation(timeState.dt);
 		if (this.mode == Finish) {
 			this.setPosition(this.finishAnimPosition.x, this.finishAnimPosition.y, this.finishAnimPosition.z);
-			updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+			updatePowerupStates(timeState);
 		}
 
 		this.trailEmitter();
@@ -1971,7 +1993,7 @@ class Marble extends GameObject {
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
 
-		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+		updatePowerupStates(timeState);
 
 		var s = this._renderScale * this._renderScale;
 		if (s <= this._marbleScale * this._marbleScale)
@@ -2006,7 +2028,7 @@ class Marble extends GameObject {
 		this.updateFinishAnimation(timeState.dt);
 		if (this.mode == Finish) {
 			this.setPosition(this.finishAnimPosition.x, this.finishAnimPosition.y, this.finishAnimPosition.z);
-			updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+			updatePowerupStates(timeState);
 		}
 
 		this.trailEmitter();
@@ -2093,13 +2115,12 @@ class Marble extends GameObject {
 		}
 	}
 
-	public function updatePowerupStates(currentTime:Float, dt:Float) {
+	public function updatePowerupStates(timeState:TimeState) {
 		if (!this.controllable && this.connection == null)
 			return;
-		if (currentTime - this.helicopterEnableTime < 5
-			|| (helicopterUseTick > 0 && (this.level.timeState.ticks - helicopterUseTick) <= 156)) {
+		if (isHelicopterEnabled(timeState)) {
 			this.helicopter.setPosition(x, y, z);
-			this.helicopter.setRotationQuat(this.level.getOrientationQuat(currentTime));
+			this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
 			this.helicopterSound.pause = false;
 			this.helicopter.setScale(this._renderScale);
 		} else {
@@ -2107,13 +2128,13 @@ class Marble extends GameObject {
 			this.helicopterSound.pause = true;
 		}
 
-		if (this.blastUseTime > currentTime) {
+		if (this.blastUseTime > timeState.currentAttemptTime) {
 			this.blastUseTime = Math.POSITIVE_INFINITY;
 			this.blastWave.doSequenceOnceBeginTime = 0;
 		}
-		if (currentTime - this.blastUseTime < this.blastWave.dts.sequences[0].duration) {
+		if (timeState.currentAttemptTime - this.blastUseTime < this.blastWave.dts.sequences[0].duration) {
 			this.blastWave.setPosition(x, y, z);
-			this.blastWave.setRotationQuat(this.level.getOrientationQuat(this.level.timeState.currentAttemptTime));
+			this.blastWave.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
 			this.blastWave.setScale(this._renderScale);
 		} else {
 			this.blastWave.setPosition(1e8, 1e8, 1e8);
@@ -2202,6 +2223,30 @@ class Marble extends GameObject {
 				this.netFlags |= MarbleNetFlags.DoHelicopter;
 		} else
 			this.helicopterEnableTime = timeState.currentAttemptTime;
+	}
+
+	inline function isHelicopterEnabled(timeState:TimeState) {
+		if (!this.level.isMultiplayer) {
+			return timeState.currentAttemptTime - this.helicopterEnableTime < 5;
+		} else {
+			if (Net.isHost) {
+				return (helicopterUseTick > 0 && (this.level.timeState.ticks - helicopterUseTick) <= 156);
+			} else {
+				return (helicopterUseTick > 0 && (serverTicks - helicopterUseTick) <= 156);
+			}
+		}
+	}
+
+	inline function isMegaMarbleEnabled(timeState:TimeState) {
+		if (!this.level.isMultiplayer) {
+			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;
+		} else {
+			if (Net.isHost) {
+				return (megaMarbleUseTick > 0 && (this.level.timeState.ticks - megaMarbleUseTick) <= 312);
+			} else {
+				return (megaMarbleUseTick > 0 && (serverTicks - megaMarbleUseTick) <= 312);
+			}
+		}
 	}
 
 	public function enableMegaMarble(timeState:TimeState) {
