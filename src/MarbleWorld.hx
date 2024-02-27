@@ -1,5 +1,6 @@
 package src;
 
+import net.NetPacket.MarbleNetFlags;
 import net.PowerupPredictionStore;
 import net.MarblePredictionStore;
 import net.MarblePredictionStore.MarblePrediction;
@@ -1972,6 +1973,8 @@ class MarbleWorld extends Scheduler {
 				return false;
 		Console.log("PowerUp pickup: " + powerUp.identifier);
 		marble.heldPowerup = powerUp;
+		if (@:privateAccess !marble.isNetUpdate)
+			@:privateAccess marble.netFlags |= MarbleNetFlags.PickupPowerup;
 		if (this.marble == marble) {
 			this.playGui.setPowerupImage(powerUp.identifier);
 			MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
@@ -1984,6 +1987,7 @@ class MarbleWorld extends Scheduler {
 
 	public function deselectPowerUp(marble:Marble) {
 		marble.heldPowerup = null;
+		@:privateAccess marble.netFlags |= MarbleNetFlags.PickupPowerup;
 		if (this.marble == marble) {
 			this.playGui.setPowerupImage("");
 			MarbleGame.instance.touchInput.powerupButton.setEnabled(false);

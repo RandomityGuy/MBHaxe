@@ -117,14 +117,9 @@ class MoveManager {
 		b.writeUInt16(m.id);
 		b.writeByte(Std.int((m.move.d.x * 16) + 16));
 		b.writeByte(Std.int((m.move.d.y * 16) + 16));
-		var flags = 0;
-		if (m.move.jump)
-			flags |= 1;
-		if (m.move.powerup)
-			flags |= 2;
-		if (m.move.blast)
-			flags |= 4;
-		b.writeByte(flags);
+		b.writeFlag(m.move.jump);
+		b.writeFlag(m.move.powerup);
+		b.writeFlag(m.move.blast);
 		b.writeFloat(m.motionDir.x);
 		b.writeFloat(m.motionDir.y);
 		b.writeFloat(m.motionDir.z);
@@ -137,10 +132,9 @@ class MoveManager {
 		move.d = new Vector();
 		move.d.x = (b.readByte() - 16) / 16.0;
 		move.d.y = (b.readByte() - 16) / 16.0;
-		var flags = b.readByte();
-		move.jump = (flags & 1) != 0;
-		move.powerup = (flags & 2) != 0;
-		move.blast = (flags & 4) != 0;
+		move.jump = b.readFlag();
+		move.powerup = b.readFlag();
+		move.blast = b.readFlag();
 		var motionDir = new Vector();
 		motionDir.x = b.readFloat();
 		motionDir.y = b.readFloat();
