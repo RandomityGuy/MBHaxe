@@ -19,16 +19,24 @@ class MarbleMovePacket implements NetPacket {
 	public function new() {}
 
 	public inline function deserialize(b:InputBitStream) {
-		clientId = b.readUInt16();
+		clientId = b.readByte();
 		clientTicks = b.readUInt16();
 		move = MoveManager.unpackMove(b);
 	}
 
 	public inline function serialize(b:OutputBitStream) {
-		b.writeUInt16(clientId);
+		b.writeByte(clientId);
 		b.writeUInt16(clientTicks);
 		MoveManager.packMove(move, b);
 	}
+}
+
+enum abstract MarbleNetFlags(Int) from Int to Int {
+	var NullFlag;
+	var DoBlast;
+	var DoHelicopter;
+	var DoMega;
+	var PickupPowerup;
 }
 
 @:publicFields
@@ -47,14 +55,15 @@ class MarbleUpdatePacket implements NetPacket {
 	var oob:Bool;
 	var powerUpId:Int;
 	var moveQueueSize:Int;
+	var netFlags:Int;
 
 	public function new() {}
 
 	public inline function serialize(b:OutputBitStream) {
-		b.writeUInt16(clientId);
+		b.writeByte(clientId);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
-		b.writeByte(moveQueueSize);
+		b.writeInt(moveQueueSize, 6);
 		b.writeFloat(position.x);
 		b.writeFloat(position.y);
 		b.writeFloat(position.z);
@@ -64,28 +73,61 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeFloat(omega.x);
 		b.writeFloat(omega.y);
 		b.writeFloat(omega.z);
-		b.writeUInt16(blastAmount);
-		b.writeUInt16(blastTick);
-		b.writeUInt16(heliTick);
-		b.writeUInt16(megaTick);
-		b.writeByte(oob ? 1 : 0);
-		b.writeUInt16(powerUpId);
+		b.writeInt(blastAmount, 11);
+		if (netFlags & MarbleNetFlags.DoBlast > 0) {
+			b.writeFlag(true);
+			b.writeUInt16(blastTick);
+		} else {
+			b.writeFlag(false);
+		}
+		if (netFlags & MarbleNetFlags.DoHelicopter > 0) {
+			b.writeFlag(true);
+			b.writeUInt16(heliTick);
+		} else {
+			b.writeFlag(false);
+		}
+		if (netFlags & MarbleNetFlags.DoMega > 0) {
+			b.writeFlag(true);
+			b.writeUInt16(megaTick);
+		} else {
+			b.writeFlag(false);
+		}
+		b.writeFlag(oob);
+		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
+			b.writeFlag(true);
+			b.writeInt(powerUpId, 9);
+		} else {
+			b.writeFlag(false);
+		}
 	}
 
 	public inline function deserialize(b:InputBitStream) {
-		clientId = b.readUInt16();
+		clientId = b.readByte();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
-		moveQueueSize = b.readByte();
+		moveQueueSize = b.readInt(6);
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
-		blastAmount = b.readUInt16();
-		blastTick = b.readUInt16();
-		heliTick = b.readUInt16();
-		megaTick = b.readUInt16();
-		oob = b.readByte() != 0;
-		powerUpId = b.readUInt16();
+		blastAmount = b.readInt(11);
+		this.netFlags = 0;
+		if (b.readFlag()) {
+			blastTick = b.readUInt16();
+			this.netFlags |= MarbleNetFlags.DoBlast;
+		}
+		if (b.readFlag()) {
+			heliTick = b.readUInt16();
+			this.netFlags |= MarbleNetFlags.DoHelicopter;
+		}
+		if (b.readFlag()) {
+			megaTick = b.readUInt16();
+			this.netFlags |= MarbleNetFlags.DoMega;
+		}
+		oob = b.readFlag();
+		if (b.readFlag()) {
+			powerUpId = b.readInt(9);
+			this.netFlags |= MarbleNetFlags.PickupPowerup;
+		}
 	}
 }
 
@@ -98,14 +140,14 @@ class PowerupPickupPacket implements NetPacket {
 	public function new() {}
 
 	public inline function deserialize(b:InputBitStream) {
-		clientId = b.readUInt16();
+		clientId = b.readByte();
 		serverTicks = b.readUInt16();
-		powerupItemId = b.readUInt16();
+		powerupItemId = b.readInt(9);
 	}
 
 	public inline function serialize(b:OutputBitStream) {
-		b.writeUInt16(clientId);
+		b.writeByte(clientId);
 		b.writeUInt16(serverTicks);
-		b.writeUInt16(powerupItemId);
+		b.writeInt(powerupItemId, 9);
 	}
 }

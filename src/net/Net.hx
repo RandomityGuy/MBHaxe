@@ -161,9 +161,9 @@ class Net {
 		dc.onMessage = (msgBytes) -> {
 			onPacketReceived(c, dc, new InputBitStream(msgBytes));
 		}
-		var b = haxe.io.Bytes.alloc(3);
+		var b = haxe.io.Bytes.alloc(2);
 		b.set(0, ClientIdAssign);
-		b.setUInt16(1, clientId);
+		b.set(1, clientId);
 		dc.sendBytes(b);
 		Console.log("Client has connected!");
 		// Send the ping packet to calculcate the RTT
@@ -205,7 +205,7 @@ class Net {
 				NetCommands.readPacket(input);
 
 			case ClientIdAssign:
-				clientId = input.readUInt16();
+				clientId = input.readByte(); // 8 bit client id, hopefully we don't exceed this
 				Console.log('Client ID set to ${clientId}');
 
 			case Ping:

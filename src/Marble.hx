@@ -1,5 +1,6 @@
 package src;
 
+import net.NetPacket.MarbleNetFlags;
 import net.BitStream.OutputBitStream;
 import net.ClientConnection;
 import net.ClientConnection.GameConnection;
@@ -301,6 +302,7 @@ class Marble extends GameObject {
 	var moveMotionDir:Vector;
 	var lastMove:Move;
 	var isNetUpdate:Bool = false;
+	var netFlags:Int = 0;
 
 	public function new() {
 		super();
@@ -1611,6 +1613,8 @@ class Marble extends GameObject {
 				pTime.currentAttemptTime = passedTime;
 				this.heldPowerup.use(cast this, pTime);
 				this.heldPowerup = null;
+				if (!this.isNetUpdate)
+					this.netFlags |= MarbleNetFlags.PickupPowerup;
 				if (this.level.isRecording) {
 					this.level.replay.recordPowerupPickup(null);
 				}
@@ -1672,6 +1676,8 @@ class Marble extends GameObject {
 		marbleUpdate.megaTick = this.megaMarbleUseTick;
 		marbleUpdate.oob = this.outOfBounds;
 		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0xFFFF;
+		marbleUpdate.netFlags = this.netFlags;
+		this.netFlags = 0;
 		marbleUpdate.serialize(b);
 		return b.getBytes();
 	}
@@ -1701,6 +1707,7 @@ class Marble extends GameObject {
 		} else {
 			this.level.pickUpPowerUp(cast this, this.level.powerUps[p.powerUpId]);
 		}
+
 		if (this.controllable && Net.isClient) {
 			// We are client, need to do something about the queue
 			var mm = Net.clientConnection.moveManager;
@@ -2129,14 +2136,18 @@ class Marble extends GameObject {
 			if (this.blastTicks < (7500 >> 5))
 				return false;
 			this.blastUseTick = timeState.ticks;
+			if (!this.isNetUpdate)
+				this.netFlags |= MarbleNetFlags.DoBlast;
 			var amount = this.blastTicks / (30000 >> 5);
 			this.blastPerc = amount;
 			var impulse = this.currentUp.multiply(amount * 8);
 			this.applyImpulse(impulse);
 			if (this.controllable)
 				AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
-			this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
-			this.blastUseTime = this.level.timeState.currentAttemptTime;
+			if (!this.isNetUpdate) {
+				this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
+				this.blastUseTime = this.level.timeState.currentAttemptTime;
+			}
 			this.blastTicks = 0;
 			return true;
 		} else {
@@ -2185,16 +2196,20 @@ class Marble extends GameObject {
 	}
 
 	public function enableHelicopter(timeState:TimeState) {
-		if (this.level.isMultiplayer)
+		if (this.level.isMultiplayer) {
 			this.helicopterUseTick = timeState.ticks;
-		else
+			if (!this.isNetUpdate)
+				this.netFlags |= MarbleNetFlags.DoHelicopter;
+		} else
 			this.helicopterEnableTime = timeState.currentAttemptTime;
 	}
 
 	public function enableMegaMarble(timeState:TimeState) {
-		if (this.level.isMultiplayer)
+		if (this.level.isMultiplayer) {
 			this.megaMarbleUseTick = timeState.ticks;
-		else
+			if (!this.isNetUpdate)
+				this.netFlags |= MarbleNetFlags.DoMega;
+		} else
 			this.megaMarbleEnableTime = timeState.currentAttemptTime;
 	}
 
@@ -2223,6 +2238,7 @@ class Marble extends GameObject {
 		this.blastTicks = 0;
 		this.helicopterUseTick = 0;
 		this.megaMarbleUseTick = 0;
+		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.contactEntities = [];
 		this._firstTick = true;

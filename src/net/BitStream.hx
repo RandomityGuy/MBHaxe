@@ -49,7 +49,7 @@ class InputBitStream {
 	}
 
 	public function readFlag() {
-		return readInt(1);
+		return readInt(1) != 0;
 	}
 
 	public function readByte() {
@@ -99,6 +99,7 @@ class OutputBitStream {
 			this.shift = extra;
 		} else {
 			lastByte |= (value << this.shift) & (0xFF >> (8 - bits - this.shift));
+			this.shift += bits;
 		}
 	}
 
@@ -110,8 +111,8 @@ class OutputBitStream {
 		}
 	}
 
-	public function writeFlag(value:Int) {
-		writeInt(value, 1);
+	public function writeFlag(value:Bool) {
+		writeInt(value ? 1 : 0, 1);
 	}
 
 	public function writeByte(value:Int) {
