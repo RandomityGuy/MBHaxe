@@ -584,7 +584,7 @@ class HuntMode extends NullMode {
 	override function onTimeExpire() {
 		if (level.finishTime != null)
 			return;
-		if (!this.level.isMultiplayer || Net.isHost) {
+		if (this.level.isMultiplayer) {
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
 			level.finishTime = level.timeState.clone();
 			level.marble.setMode(Start);
@@ -598,21 +598,7 @@ class HuntMode extends NullMode {
 				NetCommands.timerRanOut();
 			}
 			if (!level.isWatching) {
-				var myScore = {
-					name: "Player",
-					time: getFinishScore()
-				};
-				Settings.saveScore(level.mission.path, myScore, getScoreType());
-				var notifies = AchievementsGui.check();
-				var delay = 5.0;
-				var achDelay = 0.0;
-				for (i in 0...9) {
-					if (notifies & (1 << i) > 0)
-						achDelay += 3;
-				}
-				if (notifies > 0)
-					achDelay += 0.5;
-				@:privateAccess level.schedule(level.timeState.currentAttemptTime + Math.max(delay, achDelay), () -> cast level.showFinishScreen());
+				@:privateAccess level.schedule(level.timeState.currentAttemptTime, () -> cast level.showFinishScreen());
 			}
 			// Stop the ongoing sounds
 			if (@:privateAccess level.timeTravelSound != null) {
