@@ -1817,9 +1817,9 @@ class Marble extends GameObject {
 			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
 			this.setPosition(renderPos.x, renderPos.y, renderPos.z);
 
-			var rot = this.prevRot;
+			var rot = this.getRotationQuat();
 			var quat = new Quat();
-			quat.initRotation(omega.x * physicsAccumulator, omega.y * physicsAccumulator, omega.z * physicsAccumulator);
+			quat.initRotation(omega.x * timeState.dt, omega.y * timeState.dt, omega.z * timeState.dt);
 			quat.multiply(quat, rot);
 			this.setRotationQuat(quat);
 
@@ -1953,9 +1953,9 @@ class Marble extends GameObject {
 			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
 			this.setPosition(renderPos.x, renderPos.y, renderPos.z);
 
-			var rot = this.prevRot;
+			var rot = this.getRotationQuat();
 			var quat = new Quat();
-			quat.initRotation(omega.x * physicsAccumulator, omega.y * physicsAccumulator, omega.z * physicsAccumulator);
+			quat.initRotation(omega.x * timeState.dt, omega.y * timeState.dt, omega.z * timeState.dt);
 			quat.multiply(quat, rot);
 			this.setRotationQuat(quat);
 
