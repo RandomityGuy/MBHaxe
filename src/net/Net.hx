@@ -1,5 +1,7 @@
 package net;
 
+import net.NetPacket.GemPickupPacket;
+import net.NetPacket.GemSpawnPacket;
 import net.BitStream.InputBitStream;
 import net.BitStream.OutputBitStream;
 import net.NetPacket.PowerupPickupPacket;
@@ -24,6 +26,8 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var MarbleUpdate;
 	var MarbleMove;
 	var PowerupPickup;
+	var GemSpawn;
+	var GemPickup;
 	var PlayerInfo;
 }
 
@@ -260,6 +264,22 @@ class Net {
 				if (MarbleGame.instance.world != null) {
 					var m = @:privateAccess MarbleGame.instance.world.powerupPredictions;
 					m.acknowledgePowerupPickup(powerupPickupPacket, MarbleGame.instance.world.timeState, clientConnection.moveManager.getQueueSize());
+				}
+
+			case GemSpawn:
+				var gemSpawnPacket = new GemSpawnPacket();
+				gemSpawnPacket.deserialize(input);
+				if (MarbleGame.instance.world != null) {
+					MarbleGame.instance.world.spawnHuntGemsClientSide(gemSpawnPacket.gemIds);
+					@:privateAccess MarbleGame.instance.world.gemPredictions.acknowledgeGemSpawn(gemSpawnPacket);
+				}
+
+			case GemPickup:
+				var gemPickupPacket = new GemPickupPacket();
+				gemPickupPacket.deserialize(input);
+				if (MarbleGame.instance.world != null) {
+					@:privateAccess MarbleGame.instance.world.playGui.incrementPlayerScore(gemPickupPacket.clientId, gemPickupPacket.scoreIncr);
+					@:privateAccess MarbleGame.instance.world.gemPredictions.acknowledgeGemPickup(gemPickupPacket);
 				}
 
 			case PlayerInfo:

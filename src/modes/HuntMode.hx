@@ -1,5 +1,11 @@
 package modes;
 
+import net.NetCommands;
+import net.NetPacket.GemPickupPacket;
+import haxe.Exception;
+import net.BitStream.OutputBitStream;
+import net.NetPacket.GemSpawnPacket;
+import net.Net;
 import rewind.RewindManager;
 import hxd.Rand;
 import rewind.RewindableState;
@@ -26,6 +32,7 @@ import src.Marble;
 
 @:publicFields
 class GemSpawnSphere {
+	var netIndex:Int;
 	var position:Vector;
 	var rotation:Quat;
 	var element:MissionElementSpawnSphere;
@@ -176,8 +183,14 @@ class HuntMode extends NullMode {
 						playerSpawnPoints.push(spawnSphere);
 						spawnPointTaken.push(false);
 					}
-					if (dbname == "gemspawnspheremarker")
-						gemSpawnPoints.push(new GemSpawnSphere(spawnSphere));
+					if (dbname == "gemspawnspheremarker") {
+						var sphere = new GemSpawnSphere(spawnSphere);
+						sphere.netIndex = gemSpawnPoints.length;
+						gemSpawnPoints.push(sphere);
+						if (level.isMultiplayer) {
+							@:privateAccess level.gemPredictions.alloc();
+						}
+					}
 				} else if (element._type == MissionElementType.SimGroup) {
 					scanMission(cast element);
 				}
@@ -271,42 +284,75 @@ class HuntMode extends NullMode {
 	}
 
 	override function onRestart() {
-		rng.setSeed(100);
-		rng2.setSeed(100);
-		if (Settings.optionsSettings.huntRandom) {
-			rng.setSeed(cast Math.random() * 10000);
-			rng2.setSeed(cast Math.random() * 10000);
+		if (!this.level.isMultiplayer || Net.isHost) {
+			rng.setSeed(100);
+			rng2.setSeed(100);
+			if (Settings.optionsSettings.huntRandom) {
+				rng.setSeed(cast Math.random() * 10000);
+				rng2.setSeed(cast Math.random() * 10000);
+			}
+			setupGems();
 		}
-		setupGems();
 		points = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
 	override function onGemPickup(marble:Marble, gem:Gem) {
-		if (marble == level.marble)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_collect.wav', ResourceLoader.getAudio,
-				@:privateAccess this.level.soundResources));
-		else
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/opponent_gem_collect.wav', ResourceLoader.getAudio,
-				@:privateAccess this.level.soundResources));
+		if (@:privateAccess !marble.isNetUpdate) {
+			if (marble == level.marble)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_collect.wav', ResourceLoader.getAudio,
+					@:privateAccess this.level.soundResources));
+			else
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/opponent_gem_collect.wav', ResourceLoader.getAudio,
+					@:privateAccess this.level.soundResources));
+		}
 		activeGems.remove(gem);
 		var beam = gemToBeamMap.get(gem);
 		beam.setHide(true);
-		refillGemGroups();
 
-		if (marble == level.marble) {
-			switch (gem.gemColor) {
-				case "red.gem":
-					points += 1;
-					@:privateAccess level.playGui.addMiddleMessage('+1', 0xFF6666);
-				case "yellow.gem":
-					points += 2;
-					@:privateAccess level.playGui.addMiddleMessage('+2', 0xFFFF66);
-				case "blue.gem":
-					points += 5;
-					@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
+		if (!this.level.isMultiplayer || Net.isHost) {
+			refillGemGroups();
+		}
+
+		var incr = 0;
+		switch (gem.gemColor) {
+			case "red.gem":
+				incr = 1;
+			case "yellow.gem":
+				incr = 2;
+			case "blue.gem":
+				incr = 5;
+		}
+
+		if (@:privateAccess !marble.isNetUpdate) {
+			if (marble == level.marble) {
+				switch (gem.gemColor) {
+					case "red.gem":
+						points += 1;
+						@:privateAccess level.playGui.addMiddleMessage('+1', 0xFF6666);
+					case "yellow.gem":
+						points += 2;
+						@:privateAccess level.playGui.addMiddleMessage('+2', 0xFFFF66);
+					case "blue.gem":
+						points += 5;
+						@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
+				}
+				@:privateAccess level.playGui.formatGemHuntCounter(points);
 			}
-			@:privateAccess level.playGui.formatGemHuntCounter(points);
+		}
+
+		if (this.level.isMultiplayer && Net.isHost) {
+			var packet = new GemPickupPacket();
+			packet.clientId = @:privateAccess marble.connection == null ? 0 : @:privateAccess marble.connection.id;
+			packet.gemId = gem.netIndex;
+			packet.serverTicks = level.timeState.ticks;
+			packet.scoreIncr = incr;
+			var os = new OutputBitStream();
+			os.writeByte(GemPickup);
+			packet.serialize(os);
+			Net.sendPacketToAll(os);
+
+			@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
 		}
 	}
 
@@ -369,6 +415,15 @@ class HuntMode extends NullMode {
 			activeGemSpawnGroup = spawnGroup;
 			fillGemGroup(spawnGroup);
 			@:privateAccess level.radar.blink();
+
+			if (level.isMultiplayer && Net.isHost) {
+				var bs = new OutputBitStream();
+				bs.writeByte(GemSpawn);
+				var packet = new GemSpawnPacket();
+				packet.gemIds = spawnGroup;
+				packet.serialize(bs);
+				Net.sendPacketToAll(bs);
+			}
 		}
 	}
 
@@ -384,6 +439,7 @@ class HuntMode extends NullMode {
 				var melem = new MissionElementItem();
 				melem.datablock = "GemItem" + gemSpawn.gemColor;
 				var gem = new Gem(melem);
+				gem.netIndex = gi;
 				gemSpawn.gem = gem;
 				gem.setPosition(gemSpawn.position.x, gemSpawn.position.y, gemSpawn.position.z);
 				gem.setRotationQuat(gemSpawn.rotation);
@@ -403,6 +459,57 @@ class HuntMode extends NullMode {
 					}); // Please be fast lol
 				});
 			}
+		}
+	}
+
+	public function setActiveSpawnSphere(spawnGroup:Array<Int>) {
+		for (sphereId in spawnGroup) {
+			var gemSpawn = gemSpawnPoints[sphereId];
+			if (gemSpawn.gem != null) {
+				gemSpawn.gem.pickedUp = false;
+				gemSpawn.gem.setHide(false);
+				gemSpawn.gemBeam.setHide(false);
+				this.activeGems.push(gemSpawn.gem);
+			} else {
+				var melem = new MissionElementItem();
+				melem.datablock = "GemItem" + gemSpawn.gemColor;
+				var gem = new Gem(melem);
+				gem.netIndex = sphereId;
+				gemSpawn.gem = gem;
+				gem.setPosition(gemSpawn.position.x, gemSpawn.position.y, gemSpawn.position.z);
+				gem.setRotationQuat(gemSpawn.rotation);
+				this.activeGems.push(gem);
+
+				var gemBeam = new GemBeam();
+				gemBeam.setPosition(gemSpawn.position.x, gemSpawn.position.y, gemSpawn.position.z);
+				gemBeam.setRotationQuat(gemSpawn.rotation);
+				this.gemBeams.push(gemBeam);
+
+				gemSpawn.gemBeam = gemBeam;
+				this.gemToBeamMap.set(gem, gemBeam);
+
+				level.addDtsObject(gemBeam, () -> {
+					level.addDtsObject(gem, () -> {
+						level.gems.push(gem);
+					}); // Please be fast lol
+				});
+			}
+		}
+		activeGemSpawnGroup = spawnGroup;
+	}
+
+	public inline function setGemHiddenStatus(gemId:Int, status:Bool) {
+		var gemSpawn = gemSpawnPoints[gemId];
+		if (gemSpawn.gem != null) {
+			gemSpawn.gem.pickedUp = status;
+			gemSpawn.gem.setHide(status);
+			gemSpawn.gemBeam.setHide(status);
+			if (status)
+				this.activeGems.push(gemSpawn.gem);
+			else
+				this.activeGems.remove(gemSpawn.gem);
+		} else {
+			throw new Exception("Setting gem status for non existent gem!");
 		}
 	}
 
@@ -477,6 +584,45 @@ class HuntMode extends NullMode {
 	override function onTimeExpire() {
 		if (level.finishTime != null)
 			return;
+		if (!this.level.isMultiplayer || Net.isHost) {
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
+			level.finishTime = level.timeState.clone();
+			level.marble.setMode(Start);
+			level.marble.camera.finish = true;
+			level.finishYaw = level.marble.camera.CameraYaw;
+			level.finishPitch = level.marble.camera.CameraPitch;
+			level.displayAlert("Congratulations! You've finished!");
+			level.cancel(@:privateAccess level.oobSchedule);
+			level.cancel(@:privateAccess level.marble.oobSchedule);
+			if (Net.isHost) {
+				NetCommands.timerRanOut();
+			}
+			if (!level.isWatching) {
+				var myScore = {
+					name: "Player",
+					time: getFinishScore()
+				};
+				Settings.saveScore(level.mission.path, myScore, getScoreType());
+				var notifies = AchievementsGui.check();
+				var delay = 5.0;
+				var achDelay = 0.0;
+				for (i in 0...9) {
+					if (notifies & (1 << i) > 0)
+						achDelay += 3;
+				}
+				if (notifies > 0)
+					achDelay += 0.5;
+				@:privateAccess level.schedule(level.timeState.currentAttemptTime + Math.max(delay, achDelay), () -> cast level.showFinishScreen());
+			}
+			// Stop the ongoing sounds
+			if (@:privateAccess level.timeTravelSound != null) {
+				@:privateAccess level.timeTravelSound.stop();
+				@:privateAccess level.timeTravelSound = null;
+			}
+		}
+	}
+
+	public function doTimerRunOut() {
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
 		level.finishTime = level.timeState.clone();
 		level.marble.setMode(Start);
@@ -484,24 +630,8 @@ class HuntMode extends NullMode {
 		level.finishYaw = level.marble.camera.CameraYaw;
 		level.finishPitch = level.marble.camera.CameraPitch;
 		level.displayAlert("Congratulations! You've finished!");
-		level.cancel(@:privateAccess level.oobSchedule);
-		level.cancel(@:privateAccess level.marble.oobSchedule);
 		if (!level.isWatching) {
-			var myScore = {
-				name: "Player",
-				time: getFinishScore()
-			};
-			Settings.saveScore(level.mission.path, myScore, getScoreType());
-			var notifies = AchievementsGui.check();
-			var delay = 5.0;
-			var achDelay = 0.0;
-			for (i in 0...9) {
-				if (notifies & (1 << i) > 0)
-					achDelay += 3;
-			}
-			if (notifies > 0)
-				achDelay += 0.5;
-			@:privateAccess level.schedule(level.timeState.currentAttemptTime + Math.max(delay, achDelay), () -> cast level.showFinishScreen());
+			@:privateAccess level.schedule(level.timeState.currentAttemptTime, () -> cast level.showFinishScreen());
 		}
 		// Stop the ongoing sounds
 		if (@:privateAccess level.timeTravelSound != null) {

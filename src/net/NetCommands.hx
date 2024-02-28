@@ -1,5 +1,6 @@
 package net;
 
+import modes.HuntMode;
 import net.ClientConnection.GameplayState;
 import net.Net.NetPacketType;
 import gui.MultiplayerLevelSelectGui;
@@ -49,6 +50,13 @@ class NetCommands {
 				t -= cast(Net.clientIdMap[0], ClientConnection).rtt / 2; // Subtract receving time
 			}
 			MarbleGame.instance.world.startRealTime = MarbleGame.instance.world.timeState.timeSinceLoad + t;
+		}
+	}
+
+	@:rpc(server) public static function timerRanOut() {
+		if (Net.isClient && MarbleGame.instance.world != null) {
+			var huntMode:HuntMode = cast MarbleGame.instance.world.gameMode;
+			huntMode.onTimeExpire();
 		}
 	}
 }

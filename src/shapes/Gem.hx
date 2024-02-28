@@ -12,6 +12,8 @@ import src.Marble;
 class Gem extends DtsObject {
 	public var pickedUp:Bool;
 
+	public var netIndex:Int;
+
 	var gemColor:String;
 
 	public var radarColor:Int;

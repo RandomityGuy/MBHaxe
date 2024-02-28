@@ -1,5 +1,7 @@
 package src;
 
+import net.GemPredictionStore;
+import modes.HuntMode;
 import net.NetPacket.MarbleNetFlags;
 import net.PowerupPredictionStore;
 import net.MarblePredictionStore;
@@ -211,6 +213,7 @@ class MarbleWorld extends Scheduler {
 	var clientMarbles:Map<GameConnection, Marble> = [];
 	var predictions:MarblePredictionStore;
 	var powerupPredictions:PowerupPredictionStore;
+	var gemPredictions:GemPredictionStore;
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -254,6 +257,7 @@ class MarbleWorld extends Scheduler {
 			lastMoves = new MarbleUpdateQueue();
 			predictions = new MarblePredictionStore();
 			powerupPredictions = new PowerupPredictionStore();
+			gemPredictions = new GemPredictionStore();
 		}
 
 		// Set the network RNG for hunt
@@ -333,6 +337,19 @@ class MarbleWorld extends Scheduler {
 		this.collisionWorld.finalizeStaticGeometry();
 		this.playGui.init(this.scene2d, this.mission.game.toLowerCase());
 		this.scene.addChild(this.sky);
+
+		if (this.isMultiplayer) {
+			// Add us
+			if (Net.isHost) {
+				this.playGui.addPlayer(0, 'Player 0', true);
+			} else {
+				this.playGui.addPlayer(Net.clientId, 'Player ${Net.clientId}', true);
+			}
+			for (client in Net.clientIdMap) {
+				this.playGui.addPlayer(client.id, 'Player ${client.id}', false);
+			}
+		}
+
 		this._ready = true;
 		// AudioManager.playShell();
 		MarbleGame.canvas.clearContent();
@@ -1160,6 +1177,10 @@ class MarbleWorld extends Scheduler {
 				// 	Console.log('Revert powerup pickup: ${pw.lastPickUpTime} -> ${val}');
 				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 			}
+			var huntMode:HuntMode = cast this.gameMode;
+			for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
+				huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+			}
 			// }
 		}
 
@@ -1182,10 +1203,10 @@ class MarbleWorld extends Scheduler {
 				Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
 				var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
-				if (distFromUs < 5)
-					m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
-				else
-					m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 3));
+				// if (distFromUs < 5)
+				m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
+				// else
+				//	m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 3));
 				// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
 
 				marblesToTick.set(client, m);
@@ -1231,6 +1252,14 @@ class MarbleWorld extends Scheduler {
 		return advanceTimeState.ticks;
 
 		return -1;
+	}
+
+	public function spawnHuntGemsClientSide(gemIds:Array<Int>) {
+		if (this.isMultiplayer && Net.isClient) {
+			var huntMode:HuntMode = cast this.gameMode;
+			huntMode.setActiveSpawnSphere(gemIds);
+			radar.blink();
+		}
 	}
 
 	public function rollback(t:Float) {

@@ -152,3 +152,50 @@ class PowerupPickupPacket implements NetPacket {
 		b.writeInt(powerupItemId, 9);
 	}
 }
+
+@:publicFields
+class GemSpawnPacket implements NetPacket {
+	var gemIds:Array<Int>;
+
+	public function new() {
+		gemIds = [];
+	}
+
+	public function serialize(b:OutputBitStream) {
+		b.writeInt(gemIds.length, 5);
+		for (gemId in gemIds) {
+			b.writeInt(gemId, 10);
+		}
+	}
+
+	public function deserialize(b:InputBitStream) {
+		var count = b.readInt(5);
+		for (i in 0...count) {
+			gemIds.push(b.readInt(10));
+		}
+	}
+}
+
+@:publicFields
+class GemPickupPacket implements NetPacket {
+	var clientId:Int;
+	var serverTicks:Int;
+	var gemId:Int;
+	var scoreIncr:Int;
+
+	public function new() {}
+
+	public inline function deserialize(b:InputBitStream) {
+		clientId = b.readByte();
+		serverTicks = b.readUInt16();
+		gemId = b.readInt(10);
+		scoreIncr = b.readInt(4);
+	}
+
+	public inline function serialize(b:OutputBitStream) {
+		b.writeByte(clientId);
+		b.writeUInt16(serverTicks);
+		b.writeInt(gemId, 10);
+		b.writeInt(scoreIncr, 4);
+	}
+}

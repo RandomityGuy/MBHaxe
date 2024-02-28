@@ -342,6 +342,13 @@ class Util {
 			'${(hours > 0 ? (hoursTen > 0 ? '${hoursTen}' : '') +'${hoursOne}' + ':' : '')}${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
 	}
 
+	public static function rightPad(str:String, len:Int, cutOff:Int) {
+		str = str.substring(0, len - cutOff);
+		while (str.length < len)
+			str += " ";
+		return str;
+	}
+
 	public static function getKeyForButton(button:Int) {
 		var keyName = Key.getKeyName(button);
 		if (keyName == "MouseLeft")
