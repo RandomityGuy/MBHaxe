@@ -2163,9 +2163,9 @@ class Marble extends GameObject {
 			this.blastPerc = amount;
 			var impulse = this.currentUp.multiply(amount * 8);
 			this.applyImpulse(impulse);
-			if (this.controllable)
-				AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
 			if (!this.isNetUpdate) {
+				if (this.controllable)
+					AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
 				this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
 				this.blastUseTime = this.level.timeState.currentAttemptTime;
 			}

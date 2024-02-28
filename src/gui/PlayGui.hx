@@ -38,6 +38,13 @@ typedef MiddleMessage = {
 	yPos:Float
 }
 
+typedef PlayerInfo = {
+	id:Int,
+	name:String,
+	us:Bool,
+	score:Int
+}
+
 class PlayGui {
 	var scene2d:h2d.Scene;
 
@@ -63,6 +70,12 @@ class PlayGui {
 	var blastFill:GuiImage;
 	var blastFillUltra:GuiImage;
 	var blastFrame:GuiImage;
+
+	var playerListContainerOuter:GuiControl;
+	var playerListContainer:GuiControl;
+	var playerListCtrl:GuiMLTextListCtrl;
+	var playerListScoresCtrl:GuiMLTextListCtrl;
+	var playerList:Array<PlayerInfo> = [];
 
 	var imageResources:Array<Resource<Image>> = [];
 	var textureResources:Array<Resource<Texture>> = [];
@@ -146,11 +159,14 @@ class PlayGui {
 			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
 		initTimer();
-		initGemCounter();
+		if (!MarbleGame.instance.world.isMultiplayer)
+			initGemCounter();
 		initPowerupBox();
 		if (game == 'ultra')
 			initBlastBar();
 		initTexts();
+		if (MarbleGame.instance.world.isMultiplayer)
+			initPlayerList();
 		// if (Settings.optionsSettings.frameRateVis)
 		// 	initFPSMeter();
 
@@ -635,6 +651,106 @@ class PlayGui {
 		}
 	}
 
+	function initPlayerList() {
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
+
+		var coliseumfontdata = ResourceLoader.getFileEntry("data/font/ColiseumRR.fnt");
+		var coliseumb = new BitmapFont(coliseumfontdata.entry);
+		@:privateAccess coliseumb.loader = ResourceLoader.loader;
+		var coliseum = coliseumb.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+
+		playerListContainer = new GuiControl();
+		playerListContainer.horizSizing = Right;
+		playerListContainer.vertSizing = Bottom;
+		playerListContainer.position = new Vector(0, 0);
+		playerListContainer.extent = new Vector(392, 360);
+		this.playGuiCtrl.addChild(playerListContainer);
+
+		var scoreBackdrop = new GuiImage(ResourceLoader.getResource("data/ui/game/scoreBackdrop.png", ResourceLoader.getImage, this.imageResources).toTile());
+		scoreBackdrop.position = new Vector(0, 0);
+		scoreBackdrop.extent = new Vector(386, 128);
+		playerListContainer.addChild(scoreBackdrop);
+
+		var scorePlusMinus = new GuiImage(ResourceLoader.getResource("data/ui/game/scoreBackdropMinus.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		scorePlusMinus.position = new Vector(20, 17);
+		scorePlusMinus.extent = new Vector(22, 111);
+		scoreBackdrop.addChild(scorePlusMinus);
+
+		function imgLoader(path:String) {
+			switch (path) {
+				case "us":
+					return ResourceLoader.getResource("data/ui/xbox/GreenDot.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "them":
+					return ResourceLoader.getResource("data/ui/xbox/EmptyDot.png", ResourceLoader.getImage, this.imageResources).toTile();
+			}
+			return null;
+		}
+
+		// var playerList = [
+		// 	'<font color="#EBEBEB"><img src="us"></img>Player 1   1</font>',
+		// 	'<font color="#EBEBEB"><img src="them"></img>Player 2    2</font>'
+		// ];
+
+		var ds = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
+
+		playerListCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader, ds);
+
+		playerListCtrl.position = new Vector(27, 43);
+		playerListCtrl.extent = new Vector(392, 271);
+		playerListCtrl.scrollable = true;
+		playerListCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListCtrl);
+
+		playerListScoresCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader, ds);
+
+		playerListScoresCtrl.position = new Vector(277, 43);
+		playerListScoresCtrl.extent = new Vector(392, 271);
+		playerListScoresCtrl.scrollable = true;
+		playerListScoresCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListScoresCtrl);
+	}
+
+	public function redrawPlayerList() {
+		var pl = [];
+		var plScores = [];
+		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
+		for (item in playerList) {
+			pl.push('<font color="#EBEBEB"><img src="${item.us ? "us" : "them"}"></img>${Util.rightPad(item.name, 25, 3)}</font>');
+			plScores.push('<font color="#EBEBEB">${item.score}</font>');
+		}
+		playerListCtrl.setTexts(pl);
+		playerListScoresCtrl.setTexts(plScores);
+	}
+
+	public function addPlayer(id:Int, name:String, us:Bool) {
+		playerList.push({
+			id: id,
+			name: name,
+			us: us,
+			score: 0
+		});
+		redrawPlayerList();
+	}
+
+	public function removePlayer(id:Int) {
+		var f = playerList.filter(x -> x.id == id);
+		if (f.length != 0)
+			playerList.remove(f[0]);
+		redrawPlayerList();
+	}
+
+	public function incrementPlayerScore(id:Int, score:Int) {
+		var f = playerList.filter(x -> x.id == id);
+		if (f.length != 0)
+			f[0].score += score;
+
+		redrawPlayerList();
+	}
+
 	public function setHelpTextOpacity(value:Float) {
 		@:privateAccess helpTextForeground.text._textColorVec.a = value;
 		@:privateAccess helpTextBackground.text._textColorVec.a = value;
@@ -763,6 +879,8 @@ class PlayGui {
 	}
 
 	public function formatGemCounter(collected:Int, total:Int) {
+		if (MarbleGame.instance.world.isMultiplayer)
+			return;
 		if (total == 0) {
 			for (number in gemCountNumbers) {
 				number.anim.visible = false;
@@ -795,6 +913,8 @@ class PlayGui {
 	}
 
 	public function formatGemHuntCounter(collected:Int) {
+		if (MarbleGame.instance.world.isMultiplayer)
+			return;
 		gemCountNumbers[0].anim.visible = true;
 		gemCountNumbers[1].anim.visible = true;
 		gemCountNumbers[2].anim.visible = true;

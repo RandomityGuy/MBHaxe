@@ -1,6 +1,5 @@
 package net;
 
-import hl.I64;
 import net.NetPacket.MarbleNetFlags;
 import net.NetPacket.MarbleUpdatePacket;
 import net.Net;

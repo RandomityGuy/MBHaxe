@@ -25,6 +25,7 @@ class GuiTextListCtrl extends GuiControl {
 
 	public var selectedColor:Int = 0x206464;
 	public var selectedFillColor:Int = 0xC8C8C8;
+	public var textColor:Int = 0;
 
 	public var textYOffset:Int = 0;
 
@@ -34,16 +35,17 @@ class GuiTextListCtrl extends GuiControl {
 
 	var flow:Flow;
 
-	public function new(font:Font, texts:Array<String>) {
+	public function new(font:Font, texts:Array<String>, textColor:Int = 0) {
 		super();
 		this.font = font;
 		this.texts = texts;
 		this._manualScroll = true;
 		this.textObjs = [];
+		this.textColor = textColor;
 		for (text in texts) {
 			var tobj = new Text(font);
 			tobj.text = text;
-			tobj.textColor = 0;
+			tobj.textColor = textColor;
 			textObjs.push(tobj);
 		}
 		this.g = new Graphics();
@@ -58,7 +60,7 @@ class GuiTextListCtrl extends GuiControl {
 		for (text in texts) {
 			var tobj = new Text(font);
 			tobj.text = text;
-			tobj.textColor = 0;
+			tobj.textColor = textColor;
 			textObjs.push(tobj);
 
 			if (this.scrollable) {
@@ -195,7 +197,7 @@ class GuiTextListCtrl extends GuiControl {
 		for (i in 0...textObjs.length) {
 			var selected = i == hoverIndex || i == this._prevSelected;
 			var text = textObjs[i];
-			text.textColor = selected ? selectedColor : 0;
+			text.textColor = selected ? selectedColor : textColor;
 			// fill color = 0xC8C8C8
 		}
 		// obviously in renderRect
@@ -206,7 +208,7 @@ class GuiTextListCtrl extends GuiControl {
 			if (i == this._prevSelected)
 				continue;
 			var text = textObjs[i];
-			text.textColor = 0;
+			text.textColor = textColor;
 			// fill color = 0xC8C8C8
 		}
 	}
