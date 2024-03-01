@@ -1,0 +1,4 @@
+--library hxWebSockets
+--main MasterServer
+-cp .
+--hl bin/master.hl
