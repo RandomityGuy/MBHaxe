@@ -31,6 +31,29 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var PlayerInfo;
 }
 
+@:publicFields
+class ServerInfo {
+	var name:String;
+	var players:Int;
+	var maxPlayers:Int;
+	var privateSlots:Int;
+	var privateServer:Bool;
+	var inviteCode:Int;
+	var state:String;
+	var platform:String;
+
+	public function new(name:String, players:Int, maxPlayers:Int, privateSlots:Int, privateServer:Bool, inviteCode:Int, state:String, platform:String) {
+		this.name = name;
+		this.players = players;
+		this.maxPlayers = maxPlayers;
+		this.privateSlots = privateSlots;
+		this.privateServer = privateServer;
+		this.inviteCode = inviteCode;
+		this.state = state;
+		this.platform = platform;
+	}
+}
+
 class Net {
 	static var client:RTCPeerConnection;
 	static var clientDatachannel:RTCDataChannel;
@@ -48,34 +71,51 @@ class Net {
 	public static var clients:Map<RTCPeerConnection, GameConnection> = [];
 	public static var clientIdMap:Map<Int, GameConnection> = [];
 	public static var clientConnection:ClientConnection;
+	public static var serverInfo:ServerInfo;
 
-	public static function hostServer() {
+	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool) {
+		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "Lobby", getPlatform());
+		MasterServerClient.connectToMasterServer(() -> {
+			isHost = true;
+			isClient = false;
+			clientId = 0;
+			isMP = true;
+			MasterServerClient.instance.sendServerInfo(serverInfo);
+		});
+
 		// host = new RTCPeerConnection(["stun.l.google.com:19302"], "0.0.0.0");
 		// host.bind("127.0.0.1", 28000, (c) -> {
 		// 	onClientConnect(c);
 		// 	isMP = true;
 		// });
-		isHost = true;
-		isClient = false;
-		clientId = 0;
-		masterWs = new WebSocket("ws://localhost:8080");
+		// isHost = true;
+		// isClient = false;
+		// clientId = 0;
+		// masterWs = new WebSocket("ws://localhost:8080");
 
-		masterWs.onmessage = (m) -> {
-			switch (m) {
-				case StrMessage(content):
-					var conts = Json.parse(content);
-					var peer = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
-					peer.setRemoteDescription(conts.sdp, conts.type);
-					addClient(peer);
+		// masterWs.onmessage = (m) -> {
+		// 	switch (m) {
+		// 		case StrMessage(content):
+		// 			var conts = Json.parse(content);
+		// 			var peer = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
+		// 			peer.setRemoteDescription(conts.sdp, conts.type);
+		// 			addClient(peer);
 
-				case BytesMessage(content): {}
-			}
-		}
+		// 		case BytesMessage(content): {}
+		// 	}
+		// }
 
-		isMP = true;
+		// isMP = true;
 	}
 
-	static function addClient(peer:RTCPeerConnection) {
+	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void) {
+		var peer = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
+		var sdpObj = Json.parse(sdpString);
+		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
+		addClient(peer, onFinishSdp);
+	}
+
+	static function addClient(peer:RTCPeerConnection, onFinishSdp:String->Void) {
 		var candidates = [];
 		peer.onLocalCandidate = (c) -> {
 			if (c != "")
@@ -85,12 +125,9 @@ class Net {
 			if (s == RTC_GATHERING_COMPLETE) {
 				var sdpObj = StringTools.trim(peer.localDescription);
 				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
-				masterWs.send(Json.stringify({
-					type: "connect",
-					sdpObj: {
-						sdp: sdpObj,
-						type: "answer"
-					}
+				onFinishSdp(Json.stringify({
+					sdp: sdpObj,
+					type: "answer"
 				}));
 			}
 		}
@@ -104,9 +141,8 @@ class Net {
 		clientIdMap[id] = ghost;
 	}
 
-	public static function joinServer(connectedCb:() -> Void) {
-		masterWs = new WebSocket("ws://localhost:8080");
-		masterWs.onopen = () -> {
+	public static function joinServer(serverName:String, connectedCb:() -> Void) {
+		MasterServerClient.connectToMasterServer(() -> {
 			client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
 			var candidates = [];
 
@@ -114,28 +150,16 @@ class Net {
 				if (c != "")
 					candidates.push('a=${c}');
 			}
+
 			client.onGatheringStateChange = (s) -> {
 				if (s == RTC_GATHERING_COMPLETE) {
 					Console.log("Local Description Set!");
 					var sdpObj = StringTools.trim(client.localDescription);
 					sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
-					masterWs.send(Json.stringify({
-						type: "connect",
-						sdpObj: {
-							sdp: sdpObj,
-							type: "offer"
-						}
+					MasterServerClient.instance.sendConnectToServer(serverName, Json.stringify({
+						sdp: sdpObj,
+						type: "offer"
 					}));
-				}
-			}
-
-			masterWs.onmessage = (m) -> {
-				switch (m) {
-					case StrMessage(content):
-						Console.log("Remote Description Received!");
-						var conts = Json.parse(content);
-						client.setRemoteDescription(conts.sdp, conts.type);
-					case _: {}
 				}
 			}
 
@@ -155,15 +179,70 @@ class Net {
 			isMP = true;
 			isHost = false;
 			isClient = true;
-		}
+		});
+		// masterWs = new WebSocket("ws://localhost:8080");
+		// masterWs.onopen = () -> {
+		// 	client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
+		// 	var candidates = [];
+
+		// 	client.onLocalCandidate = (c) -> {
+		// 		if (c != "")
+		// 			candidates.push('a=${c}');
+		// 	}
+		// 	client.onGatheringStateChange = (s) -> {
+		// 		if (s == RTC_GATHERING_COMPLETE) {
+		// 			Console.log("Local Description Set!");
+		// 			var sdpObj = StringTools.trim(client.localDescription);
+		// 			sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
+		// 			masterWs.send(Json.stringify({
+		// 				type: "connect",
+		// 				sdpObj: {
+		// 					sdp: sdpObj,
+		// 					type: "offer"
+		// 				}
+		// 			}));
+		// 		}
+		// 	}
+
+		// 	masterWs.onmessage = (m) -> {
+		// 		switch (m) {
+		// 			case StrMessage(content):
+		// 				Console.log("Remote Description Received!");
+		// 				var conts = Json.parse(content);
+		// 				client.setRemoteDescription(conts.sdp, conts.type);
+		// 			case _: {}
+		// 		}
+		// 	}
+
+		// 	clientDatachannel = client.createDatachannel("mp");
+		// 	clientDatachannel.onOpen = (n) -> {
+		// 		Console.log("Successfully connected!");
+		// 		clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
+		// 		clientIdMap[0] = clients[client];
+		// 		clientConnection = cast clients[client];
+		// 		onConnectedToServer();
+		// 		haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
+		// 	}
+		// 	clientDatachannel.onMessage = (b) -> {
+		// 		onPacketReceived(client, clientDatachannel, new InputBitStream(b));
+		// 	}
+
+		// 	isMP = true;
+		// 	isHost = false;
+		// 	isClient = true;
+		// }
 	}
 
 	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel) {
 		clientId += 1;
-		clients.set(c, new ClientConnection(clientId, c, dc));
+		var cc = new ClientConnection(clientId, c, dc);
+		clients.set(c, cc);
 		clientIdMap[clientId] = clients[c];
 		dc.onMessage = (msgBytes) -> {
 			onPacketReceived(c, dc, new InputBitStream(msgBytes));
+		}
+		dc.onClosed = () -> {
+			onClientLeave(cc);
 		}
 		var b = haxe.io.Bytes.alloc(2);
 		b.set(0, ClientIdAssign);
@@ -177,6 +256,9 @@ class Net {
 		cast(clients[c], ClientConnection).pingSendTime = Console.time();
 		dc.sendBytes(b);
 		Console.log("Sending ping packet!");
+
+		serverInfo.players++;
+		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the new player
 	}
 
 	static function onConnectedToServer() {
@@ -188,6 +270,11 @@ class Net {
 		cast(clients[client], ClientConnection).pingSendTime = Console.time();
 		clientDatachannel.sendBytes(b);
 		Console.log("Sending ping packet!");
+	}
+
+	static function onClientLeave(cc:ClientConnection) {
+		serverInfo.players--;
+		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
 	}
 
 	static function sendPlayerInfosBytes() {
@@ -313,5 +400,18 @@ class Net {
 		if (Net.isHost) {
 			addGhost(Net.clientId++);
 		}
+	}
+
+	public static function getPlatform() {
+		#if js
+		return "Browser";
+		#end
+		#if hl
+		#if MACOS_BUNDLE
+		return "MacOS";
+		#else
+		return "Windows";
+		#end
+		#end
 	}
 }

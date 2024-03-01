@@ -8,9 +8,8 @@ import src.ResourceLoader;
 import src.Settings;
 import src.Util;
 
-class MultiplayerGui extends GuiImage {
+class CreateMatchGui extends GuiImage {
 	var innerCtrl:GuiControl;
-	var btnList:GuiXboxList;
 
 	public function new() {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
@@ -54,29 +53,42 @@ class MultiplayerGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "MULTIPLAYER";
+		rootTitle.text.text = "CREATE MATCH";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var btnList = new GuiXboxList();
-		btnList.position = new Vector(70 - offsetX, 165);
-		btnList.horizSizing = Left;
-		btnList.extent = new Vector(502, 500);
-		innerCtrl.addChild(btnList);
+		function numberRange(start:Int, stop:Int, step:Int) {
+			var range = [];
+			while (start <= stop) {
+				range.push('${start}');
+				start += step;
+			}
+			return range;
+		}
 
-		btnList.addButton(3, 'Search Matches', (e) -> {
-			MarbleGame.canvas.setContent(new MPServerListGui());
-		});
+		var optionCollection = new GuiXboxOptionsListCollection();
+		optionCollection.position = new Vector(380, 373);
+		optionCollection.extent = new Vector(815, 500);
+		innerCtrl.addChild(optionCollection);
 
-		btnList.addButton(3, 'Create Match', (e) -> {
-			MarbleGame.canvas.setContent(new CreateMatchGui());
-		});
+		var maxPlayers = 2;
+		var privateSlots = 0;
+		var privateGame = false;
 
-		btnList.addButton(3, 'Join Match', (e) -> {
-			// Net.joinServer(() -> {
-			//	MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
-			// });
-		});
+		var playerOpt = optionCollection.addOption(1, "Max Players", ["2", "3", "4", "5", "6", "7", "8"], (idx) -> {
+			maxPlayers = idx + 2;
+			return true;
+		}, 0.5, 118);
+
+		var privateOpt = optionCollection.addOption(1, "Max Players", ["None", "1", "2", "3", "4", "5", "6", "7"], (idx) -> {
+			privateSlots = idx;
+			return true;
+		}, 0.5, 118);
+
+		var privateGameOpt = optionCollection.addOption(1, "Private Game", ["No", "Yes"], (idx) -> {
+			privateGame = idx == 1;
+			return true;
+		}, 0.5, 118);
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -91,19 +103,19 @@ class MultiplayerGui extends GuiImage {
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["B"];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
-		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
+		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MultiplayerGui());
 		bottomBar.addChild(backButton);
-	}
 
-	override function onResize(width:Int, height:Int) {
-		var offsetX = (width - 1280) / 2;
-		var offsetY = (height - 720) / 2;
-
-		var subX = 640 - (width - offsetX) * 640 / width;
-		var subY = 480 - (height - offsetY) * 480 / height;
-		innerCtrl.position = new Vector(offsetX, offsetY);
-		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
-
-		super.onResize(width, height);
+		var nextButton = new GuiXboxButton("Go", 160);
+		nextButton.position = new Vector(960, 0);
+		nextButton.vertSizing = Bottom;
+		nextButton.horizSizing = Right;
+		nextButton.gamepadAccelerator = ["A"];
+		nextButton.accelerators = [hxd.Key.ENTER];
+		nextButton.pressedAction = (e) -> {
+			MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(true));
+			Net.hostServer("My Server", maxPlayers, privateSlots, privateGame);
+		};
+		bottomBar.addChild(nextButton);
 	}
 }
