@@ -32,7 +32,7 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 		var pixelTransformedPosition:Vec3;
 		var transformedNormal:Vec3;
 		@const var doGammaRamp:Bool;
-		// @var var outReflectVec:Vec3;
+		@var var outReflectVec:Vec3;
 		@var var outLightVec:Vec4;
 		@var var outPos:Vec3;
 		@var var outEyePos:Vec3;
@@ -62,10 +62,12 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewTranspose);
 			// inLightVec.x *= -1;
 			outLightVec.xyz = -inLightVec * objToTangentSpace;
-			// var cubeVertPos = input.position * cubeTrans;
-			// var cubeNormal = input.normal * cubeTrans;
-			// var eyeToVert = (cubeVertPos - cubeEyePos).normalize();
-			// outReflectVec = reflect(eyeToVert, cubeNormal);
+
+			var cubeVertPos = input.position * cubeTrans;
+			var cubeNormal = (input.normal * cubeTrans).normalize();
+			var eyeToVert = (cubeVertPos - cubeEyePos);
+			outReflectVec = reflect(eyeToVert, cubeNormal);
+
 			var p = input.position;
 			// p.x *= -1;
 			outPos = (p / 100.0) * objToTangentSpace;
@@ -80,12 +82,12 @@ class DefaultCubemapMaterial extends hxsl.Shader {
 			var outCol = diffuse;
 			var bumpNormal = normalMap.get(calculatedUV * secondaryMapUvFactor).xyz * 2 - 1;
 
-			var incidentRay = normalize(pixelTransformedPosition - camera.position);
-			var reflectionRay = reflect(incidentRay, transformedNormal);
+			// var incidentRay = normalize(pixelTransformedPosition - camera.position);
+			// var reflectionRay = reflect(incidentRay, transformedNormal);
 
 			var bumpDot = ((dot(bumpNormal, outLightVec.xyz) + 1) * 0.5);
 			outCol *= (shading * bumpDot) + ambient;
-			outCol += diffuse.a * cubeMap.get(reflectionRay);
+			outCol += diffuse.a * cubeMap.get(outReflectVec);
 
 			var eyeVec = (outEyePos - outPos).normalize();
 			var halfAng = (eyeVec + outLightVec.xyz).normalize();
