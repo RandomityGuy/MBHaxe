@@ -1,5 +1,6 @@
 package src;
 
+import net.Net;
 import gui.LevelSelectGui;
 import gui.MainMenuGui;
 #if !js
@@ -189,7 +190,7 @@ class MarbleGame {
 			if (Util.isTouchDevice()) {
 				touchInput.update();
 			}
-			if (!paused) {
+			if (!paused || world.isMultiplayer) {
 				world.update(dt * Debug.timeScale);
 			}
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))

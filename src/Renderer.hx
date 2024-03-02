@@ -28,6 +28,8 @@ class Renderer extends h3d.scene.Renderer {
 	var growBufferTemps:Array<h3d.mat.Texture>;
 	var copyPass:h3d.pass.Copy;
 	var backBuffer:h3d.mat.Texture;
+	var tempCubemapBuffer:h3d.mat.Texture;
+	var tempCubemapIndex:Int;
 
 	public static var dirtyBuffers:Bool = true;
 
@@ -49,6 +51,11 @@ class Renderer extends h3d.scene.Renderer {
 
 	public inline static function getSfxBuffer() {
 		return sfxBuffer;
+	}
+
+	public function setCubemapBuffer(tex:h3d.mat.Texture, idx:Int) {
+		tempCubemapBuffer = tex;
+		tempCubemapIndex = idx;
 	}
 
 	inline function get_def()
@@ -93,7 +100,11 @@ class Renderer extends h3d.scene.Renderer {
 			backBuffer = ctx.textures.allocTarget("backBuffer", cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, false);
 			backBuffer.depthBuffer = depthBuffer;
 		}
-		ctx.engine.pushTarget(backBuffer);
+		if (tempCubemapBuffer != null) {
+			ctx.engine.pushTarget(tempCubemapBuffer, tempCubemapIndex);
+		} else {
+			ctx.engine.pushTarget(backBuffer);
+		}
 		ctx.engine.clear(0, 1);
 
 		if (has("shadow"))
@@ -184,9 +195,13 @@ class Renderer extends h3d.scene.Renderer {
 
 		ctx.engine.popTarget();
 
-		copyPass.pass.blend(One, Zero);
-		copyPass.shader.texture = backBuffer;
-		copyPass.render();
+		if (tempCubemapBuffer != null) {
+			tempCubemapBuffer = null;
+		} else {
+			copyPass.pass.blend(One, Zero);
+			copyPass.shader.texture = backBuffer;
+			copyPass.render();
+		}
 
 		// h3d.pass.Copy.run(backBuffers[0], backBuffers[1]);
 		// renderPass(defaultPass, get("refract"));
@@ -199,18 +214,25 @@ class Renderer extends h3d.scene.Renderer {
 	function bloomPass(ctx:h3d.scene.RenderContext) {
 		h3d.pass.Copy.run(glowBuffer, growBufferTemps[0]);
 
-		var offsets = [-7.5, -6.25, -5, -3.75, -2.5, -1.25, 0, 1.25, 2.5, 3.75, 5, 6.25, 7.5];
-		var divisors = [0.1, 0.3, 0.4, 0.5, 0.6, 0.7, 1.0, 0.7, 0.5, 0.5, 0.4, 0.3, 0.1];
+		static var offsets = [-7.5, -6.25, -5, -3.75, -2.5, -1.25, 0, 1.25, 2.5, 3.75, 5, 6.25, 7.5];
+		static var divisors = [0.1, 0.3, 0.4, 0.5, 0.6, 0.7, 1.0, 0.7, 0.5, 0.5, 0.4, 0.3, 0.1];
 
-		var divisor = 0.0;
-
-		var kernel = [];
-		for (i in 0...13) {
-			kernel.push(new Vector(offsets[i] / 320, 0, divisors[i]));
-			divisor += divisors[i];
+		static var divisor = 0.0;
+		static var kernelX = [];
+		static var kernelY = [];
+		static var kernelComputed = false;
+		if (!kernelComputed) {
+			for (i in 0...13) {
+				kernelX.push(new Vector(offsets[i] / 320, 0, divisors[i]));
+				divisor += divisors[i];
+			}
+			for (i in 0...13) {
+				kernelY.push(new Vector(0, offsets[i] / 320, divisors[i]));
+			}
+			kernelComputed = true;
 		}
 
-		blurShader.shader.kernel = kernel;
+		blurShader.shader.kernel = kernelX;
 		blurShader.shader.divisor = divisor;
 		blurShader.shader.texture = growBufferTemps[0];
 		ctx.engine.pushTarget(growBufferTemps[1]);
@@ -218,11 +240,7 @@ class Renderer extends h3d.scene.Renderer {
 		blurShader.render();
 		ctx.engine.popTarget();
 
-		for (i in 0...13) {
-			kernel[i].set(0, offsets[i] / 320, divisors[i]);
-		}
-
-		blurShader.shader.kernel = kernel;
+		blurShader.shader.kernel = kernelY;
 		blurShader.shader.divisor = divisor;
 		blurShader.shader.texture = growBufferTemps[1];
 		ctx.engine.pushTarget(growBufferTemps[0]);
