@@ -29,8 +29,6 @@ class Renderer extends h3d.scene.Renderer {
 	var growBufferTemps:Array<h3d.mat.Texture>;
 	var copyPass:h3d.pass.Copy;
 	var backBuffer:h3d.mat.Texture;
-	var tempCubemapBuffer:h3d.mat.Texture;
-	var tempCubemapIndex:Int;
 
 	public static var dirtyBuffers:Bool = true;
 
@@ -52,11 +50,6 @@ class Renderer extends h3d.scene.Renderer {
 
 	public inline static function getSfxBuffer() {
 		return sfxBuffer;
-	}
-
-	public function setCubemapBuffer(tex:h3d.mat.Texture, idx:Int) {
-		tempCubemapBuffer = tex;
-		tempCubemapIndex = idx;
 	}
 
 	inline function get_def()
@@ -103,9 +96,7 @@ class Renderer extends h3d.scene.Renderer {
 			backBuffer = ctx.textures.allocTarget("backBuffer", cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, false);
 			backBuffer.depthBuffer = depthBuffer;
 		}
-		if (tempCubemapBuffer != null) {
-			ctx.engine.pushTarget(tempCubemapBuffer, tempCubemapIndex);
-		} else {
+		if (!cubemapPass) { // we push the target separately
 			ctx.engine.pushTarget(backBuffer);
 		}
 		ctx.engine.clear(0, 1);
@@ -207,11 +198,10 @@ class Renderer extends h3d.scene.Renderer {
 		if (!cubemapPass && dirtyBuffers)
 			dirtyBuffers = false;
 
-		ctx.engine.popTarget();
+		if (!cubemapPass)
+			ctx.engine.popTarget();
 
-		if (tempCubemapBuffer != null) {
-			tempCubemapBuffer = null;
-		} else {
+		if (!cubemapPass) {
 			copyPass.pass.blend(One, Zero);
 			copyPass.shader.texture = backBuffer;
 			copyPass.render();

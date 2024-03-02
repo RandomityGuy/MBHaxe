@@ -61,17 +61,25 @@ class DefaultCubemapNormalMaterial extends hxsl.Shader {
 
 			var cubeTrans = mat3(global.modelView);
 			var cubeEyePos = camera.position - global.modelView[3].xyz;
+
+			var cubeVertPos = input.position * cubeTrans;
+			var cubeNormal = (input.normal * cubeTrans).normalize();
+			var eyeToVert = (cubeVertPos - cubeEyePos);
+			outReflectVec = reflect(eyeToVert, cubeNormal);
+
+			// var cubeTrans = mat3(global.modelView);
+			// var cubeEyePos = camera.position - global.modelView[3].xyz;
 			// cubeEyePos.x *= -1;
 
 			outPos = input.position;
 			// outPos.x *= -1;
 
-			var cubeVertPos = input.position * cubeTrans;
+			// var cubeVertPos = input.position * cubeTrans;
 			// cubeVertPos.x *= -1;
-			var cubeNormal = (input.normal * cubeTrans).normalize();
+			// var cubeNormal = (input.normal * cubeTrans).normalize();
 			// cubeNormal.x *= -1;
-			var eyeToVert = cubeVertPos - cubeEyePos;
-			outReflectVec = reflect(eyeToVert, cubeNormal);
+			// var eyeToVert = cubeVertPos - cubeEyePos;
+			// outReflectVec = reflect(eyeToVert, cubeNormal);
 		}
 		function fragment() {
 			// Diffuse part

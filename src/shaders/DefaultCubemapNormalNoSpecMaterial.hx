@@ -55,9 +55,9 @@ class DefaultCubemapNormalNoSpecMaterial extends hxsl.Shader {
 			var p = input.position;
 			// p.x *= -1;
 
-			var cubeVertPos = p * cubeTrans;
-			var cubeNormal = (pN * cubeTrans).normalize();
-			var eyeToVert = cubeVertPos - cubeEyePos;
+			var cubeVertPos = input.position * cubeTrans;
+			var cubeNormal = (input.normal * cubeTrans).normalize();
+			var eyeToVert = (cubeVertPos - cubeEyePos);
 			outReflectVec = reflect(eyeToVert, cubeNormal);
 		}
 		function fragment() {

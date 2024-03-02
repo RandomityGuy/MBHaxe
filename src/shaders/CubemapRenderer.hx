@@ -46,13 +46,14 @@ class CubemapRenderer {
 			if (Settings.optionsSettings.reflectionDetail >= 4)
 				Renderer.dirtyBuffers = true;
 
-			// e.pushTarget(cubemap, index);
+			e.pushTarget(cubemap, index);
 			var ourRenderer = cast(scene.renderer, Renderer);
-			ourRenderer.setCubemapBuffer(cubemap, index);
+			// ourRenderer.setCubemapBuffer(cubemap, index);
 			this.camera.setCubeMap(index, position);
-			// e.clear(0, 1);
+			this.camera.update();
+			e.clear(0, 1);
 			scene.render(e);
-			// e.popTarget();
+			e.popTarget();
 
 			renderedFaces++;
 			var time = haxe.Timer.stamp();
