@@ -294,6 +294,9 @@ class DifBuilder {
 			noiseTex.wrap = Repeat;
 			noiseTex.mipMap = None;
 			var shader = new NoiseTileMaterial(diffuseTex, normalTex, noiseTex, shininess, specular, 1);
+			#if hl
+			shader.useAccurateNoise = true;
+			#end
 			onFinish(shader);
 		});
 		worker.loadFile('textures/${baseTexture}');
