@@ -29,6 +29,8 @@ class NoiseTileMaterial extends hxsl.Shader {
 		var pixelColor:Vec4;
 		var specColor:Vec3;
 		var specPower:Float;
+		var noiseUV:Vec2;
+		@const var useAccurateNoise:Bool;
 		@var var outLightVec:Vec4;
 		@var var outPos:Vec3;
 		@var var outEyePos:Vec3;
@@ -65,30 +67,35 @@ class NoiseTileMaterial extends hxsl.Shader {
 			var ambient = vec4(0.472, 0.424, 0.475, 1.00);
 			// noise
 
-			var noiseIndex:Vec2;
-			var noiseColor1:Vec4;
-			var noiseColor2:Vec4;
-			var noiseColor3:Vec4;
-			var noiseColor4:Vec4;
 			var halfPixel = vec2(1.0 / 64.0, 1.0 / 64.0);
+			var finalNoiseCol:Vec4;
+			if (useAccurateNoise) {
+				var noiseIndex:Vec2;
+				var noiseColor1:Vec4;
+				var noiseColor2:Vec4;
+				var noiseColor3:Vec4;
+				var noiseColor4:Vec4;
 
-			noiseIndex.x = floor(calculatedUV.x - halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y - halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor1 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
+				noiseIndex.x = floor(calculatedUV.x - halfPixel.x) / 63.0 + 0.5 / 64.0;
+				noiseIndex.y = floor(calculatedUV.y - halfPixel.y) / 63.0 + 0.5 / 64.0;
+				noiseColor1 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
 
-			noiseIndex.x = floor(calculatedUV.x - halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y + halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor2 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
+				noiseIndex.x = floor(calculatedUV.x - halfPixel.x) / 63.0 + 0.5 / 64.0;
+				noiseIndex.y = floor(calculatedUV.y + halfPixel.y) / 63.0 + 0.5 / 64.0;
+				noiseColor2 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
 
-			noiseIndex.x = floor(calculatedUV.x + halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y + halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor3 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
+				noiseIndex.x = floor(calculatedUV.x + halfPixel.x) / 63.0 + 0.5 / 64.0;
+				noiseIndex.y = floor(calculatedUV.y + halfPixel.y) / 63.0 + 0.5 / 64.0;
+				noiseColor3 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
 
-			noiseIndex.x = floor(calculatedUV.x + halfPixel.x) / 63.0 + 0.5 / 64.0;
-			noiseIndex.y = floor(calculatedUV.y - halfPixel.y) / 63.0 + 0.5 / 64.0;
-			noiseColor4 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
+				noiseIndex.x = floor(calculatedUV.x + halfPixel.x) / 63.0 + 0.5 / 64.0;
+				noiseIndex.y = floor(calculatedUV.y - halfPixel.y) / 63.0 + 0.5 / 64.0;
+				noiseColor4 = noiseMap.get(noiseIndex) * 1.0 - 0.5;
 
-			var finalNoiseCol = (noiseColor1 + noiseColor2 + noiseColor3 + noiseColor4) / 4.0;
+				finalNoiseCol = (noiseColor1 + noiseColor2 + noiseColor3 + noiseColor4) / 4.0;
+			} else {
+				finalNoiseCol = noiseMap.get(floor(calculatedUV.xy) / 63.0 + 0.5 / 64.0) * 1.0 - 0.5;
+			}
 			var noiseAdd = finalNoiseCol * diffuse.a;
 
 			var outCol = diffuse + noiseAdd;
@@ -106,9 +113,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 			// Gamma correction using our regression model
 			var a = 1.00759;
 			var b = 1.18764;
-			outCol.x = a * pow(outCol.x, b);
-			outCol.y = a * pow(outCol.y, b);
-			outCol.z = a * pow(outCol.z, b);
+			outCol.xyz = a * pow(outCol.xyz, vec3(b));
 
 			pixelColor = outCol;
 		}
@@ -122,5 +127,6 @@ class NoiseTileMaterial extends hxsl.Shader {
 		this.shininess = shininess;
 		this.specularColor = specularColor;
 		this.secondaryMapUvFactor = secondaryMapUvFactor;
+		this.useAccurateNoise = false;
 	}
 }
