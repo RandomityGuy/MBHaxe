@@ -366,7 +366,7 @@ class Marble extends GameObject {
 
 				if (Settings.optionsSettings.reflectionDetail > 0) {
 					var csky = level != null ? level.sky : (@:privateAccess MarbleGame.instance.previewWorld.sky);
-					this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky, !this.controllable);
+					this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky, !this.controllable && level != null);
 
 					if (Settings.optionsSettings.marbleShader == null
 						|| Settings.optionsSettings.marbleShader == "Default"
@@ -545,8 +545,8 @@ class Marble extends GameObject {
 
 	public function getMarbleAxis() {
 		var motiondir = new Vector(0, -1, 0);
-		if (level.isReplayingMovement)
-			return level.currentInputMoves[1].marbleAxes;
+		// if (level.isReplayingMovement)
+		// 	return level.currentInputMoves[1].marbleAxes;
 		if (this.controllable && !this.isNetUpdate) {
 			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
 			motiondir.transform(level.newOrientationQuat.toMatrix());
@@ -642,8 +642,8 @@ class Marble extends GameObject {
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
-		if (!level.isReplayingMovement)
-			level.inputRecorder.recordAxis(axes);
+		// if (!level.isReplayingMovement)
+		// 	level.inputRecorder.recordAxis(axes);
 		var sideDir = axes[0];
 		var motionDir = axes[1];
 		var upDir = axes[2];
@@ -923,7 +923,7 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
-		if (!this.controllable || level.isReplayingMovement || this.isNetUpdate)
+		if (!this.controllable || this.isNetUpdate)
 			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData,
@@ -958,7 +958,7 @@ class Marble extends GameObject {
 	}
 
 	function playBoundSound(time:Float, contactVel:Float) {
-		if (level.isReplayingMovement || this.isNetUpdate)
+		if (this.isNetUpdate)
 			return;
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
@@ -990,8 +990,8 @@ class Marble extends GameObject {
 	}
 
 	function updateRollSound(time:TimeState, contactPct:Float, slipAmount:Float) {
-		if (level.isReplayingMovement)
-			return;
+		// if (level.isReplayingMovement)
+		// 	return;
 		var rSpat = rollSound.getEffect(Spatialization);
 		rSpat.position = this.collider.transform.getPosition();
 
@@ -1656,7 +1656,7 @@ class Marble extends GameObject {
 
 		newPos = this.collider.transform.getPosition();
 
-		if (this.prevPos != null) {
+		if (this.prevPos != null && this.level != null) {
 			var tempTimeState = timeState.clone();
 			tempTimeState.currentAttemptTime = passedTime;
 			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
@@ -1918,8 +1918,8 @@ class Marble extends GameObject {
 			move = recordMove();
 		}
 
-		if (level.isReplayingMovement)
-			move = level.currentInputMoves[1].move;
+		// if (level.isReplayingMovement)
+		// 	move = level.currentInputMoves[1].move;
 
 		if (this.controllable && this.level.isWatching) {
 			move = new Move();
@@ -1934,7 +1934,7 @@ class Marble extends GameObject {
 				this.level.replay.recordMarbleInput(move.d.x, move.d.y);
 			}
 		}
-		if (!this.controllable && this.connection != null) {
+		if (!this.controllable && (this.connection != null || this.level == null)) {
 			move = new Move();
 			move.d = new Vector(0, 0);
 		}
@@ -2226,6 +2226,8 @@ class Marble extends GameObject {
 	}
 
 	inline function isHelicopterEnabled(timeState:TimeState) {
+		if (this.level == null)
+			return false;
 		if (!this.level.isMultiplayer) {
 			return timeState.currentAttemptTime - this.helicopterEnableTime < 5;
 		} else {
@@ -2238,6 +2240,8 @@ class Marble extends GameObject {
 	}
 
 	inline function isMegaMarbleEnabled(timeState:TimeState) {
+		if (this.level == null)
+			return false;
 		if (!this.level.isMultiplayer) {
 			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;
 		} else {

@@ -1095,7 +1095,7 @@ class MarbleWorld extends Scheduler {
 							if (ourMoveStruct != null) {
 								var otherPred = predictions.retrieveState(clientMarbles[Net.clientIdMap[client]], ourMoveStruct.timeState.ticks);
 								if (otherPred != null) {
-									if (otherPred.getError(lastMove) > 0.001) {
+									if (otherPred.getError(lastMove) > 0.1) {
 										Debug.drawSphere(@:privateAccess clientMarbles[Net.clientIdMap[client]].newPos, 0.2, 0.5);
 										// trace('Prediction error: ${otherPred.getError(lastMove)}');
 										trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
@@ -1128,7 +1128,7 @@ class MarbleWorld extends Scheduler {
 				if (ourMoveStruct != null) {
 					var ourPred = predictions.retrieveState(marble, ourMoveStruct.timeState.ticks);
 					if (ourPred != null) {
-						if (ourPred.getError(ourMove) > 0.001) {
+						if (ourPred.getError(ourMove) > 0.1) {
 							trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 							marble.unpackUpdate(ourMove);
 							needsPrediction |= 1 << Net.clientId;
@@ -1199,11 +1199,11 @@ class MarbleWorld extends Scheduler {
 				var m = arr.packets[0];
 				// if (m.serverTicks == ourLastMoveTime) {
 				var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
-				Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
+				// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
 				var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
 				// if (distFromUs < 5)
-				m.calculationTicks = ourQueuedMoves.length; // ourQueuedMoves.length;
+				m.calculationTicks = ourQueuedMoves.length;
 				// else
 				//	m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 3));
 				// - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT - ourLastMove.moveQueueSize) / 2);
@@ -1219,7 +1219,7 @@ class MarbleWorld extends Scheduler {
 
 		for (move in ourQueuedMoves) {
 			var m = move.move;
-			// Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
+			Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
 			if (marbleNeedsPrediction & (1 << Net.clientId) > 0) {
 				@:privateAccess this.marble.moveMotionDir = move.motionDir;
 				@:privateAccess this.marble.advancePhysics(advanceTimeState, m, this.collisionWorld, this.pathedInteriors);
@@ -1230,7 +1230,7 @@ class MarbleWorld extends Scheduler {
 			for (client => m in marblesToTick) {
 				if (m.calculationTicks > 0) {
 					var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
-					// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
+					Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
 					var mv = m.move.move;
 					@:privateAccess marbleToUpdate.isNetUpdate = true;
@@ -1259,6 +1259,14 @@ class MarbleWorld extends Scheduler {
 			huntMode.setActiveSpawnSphere(gemIds);
 			radar.blink();
 		}
+	}
+
+	public function removePlayer(cc:ClientConnection) {
+		var otherMarble = this.clientMarbles[cc];
+		this.predictions.removeMarbleFromPrediction(otherMarble);
+		this.scene.removeChild(otherMarble);
+		this.collisionWorld.removeMarbleEntity(otherMarble.collider);
+		otherMarble.dispose();
 	}
 
 	public function rollback(t:Float) {
@@ -1438,9 +1446,9 @@ class MarbleWorld extends Scheduler {
 			obj.update(timeState);
 		}
 
-		if (!isReplayingMovement) {
-			inputRecorder.recordInput(timeState.currentAttemptTime);
-		}
+		// if (!isReplayingMovement) {
+		// 	inputRecorder.recordInput(timeState.currentAttemptTime);
+		// }
 
 		ProfilerUI.measure("updateMarbles");
 		if (this.isMultiplayer) {
@@ -1534,9 +1542,9 @@ class MarbleWorld extends Scheduler {
 		if (!this.rewinding && Settings.optionsSettings.rewindEnabled && !this.isMultiplayer)
 			this.rewindManager.recordFrame();
 
-		if (!this.isReplayingMovement) {
-			inputRecorder.recordMarble();
-		}
+		// if (!this.isReplayingMovement) {
+		// 	inputRecorder.recordMarble();
+		// }
 
 		this.updateTexts();
 	}

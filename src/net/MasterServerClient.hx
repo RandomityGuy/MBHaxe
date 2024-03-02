@@ -6,6 +6,7 @@ import haxe.Json;
 import net.Net.ServerInfo;
 import hx.ws.WebSocket;
 import src.Console;
+import hx.ws.Types.MessageType;
 
 typedef RemoteServerInfo = {
 	name:String,
@@ -15,7 +16,7 @@ typedef RemoteServerInfo = {
 }
 
 class MasterServerClient {
-	static var serverIp = "ws://localhost:8080";
+	static var serverIp = "ws://89.58.58.191:8080";
 	public static var instance:MasterServerClient;
 
 	var ws:WebSocket;

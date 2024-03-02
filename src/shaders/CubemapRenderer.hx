@@ -26,7 +26,7 @@ class CubemapRenderer {
 		if (useSky)
 			this.cubemap = sky.cubemap;
 		else {
-			this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGB8);
+			this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGBA);
 			this.cubemap.depthBuffer = new h3d.mat.DepthBuffer(128, 128, h3d.mat.DepthBuffer.DepthFormat.Depth16);
 		}
 		this.camera = new Camera(90, 1, 1, 0.1, 1000);
@@ -46,11 +46,13 @@ class CubemapRenderer {
 			if (Settings.optionsSettings.reflectionDetail >= 4)
 				Renderer.dirtyBuffers = true;
 
-			e.pushTarget(cubemap, index);
+			// e.pushTarget(cubemap, index);
+			var ourRenderer = cast(scene.renderer, Renderer);
+			ourRenderer.setCubemapBuffer(cubemap, index);
 			this.camera.setCubeMap(index, position);
-			e.clear(0, 1);
+			// e.clear(0, 1);
 			scene.render(e);
-			e.popTarget();
+			// e.popTarget();
 
 			renderedFaces++;
 			var time = haxe.Timer.stamp();
