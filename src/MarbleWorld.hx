@@ -1,5 +1,6 @@
 package src;
 
+import collision.CollisionPool;
 import net.GemPredictionStore;
 import modes.HuntMode;
 import net.NetPacket.MarbleNetFlags;
@@ -235,7 +236,7 @@ class MarbleWorld extends Scheduler {
 
 	var oobSchedule:Float;
 
-	var _cubemapNeedsUpdate:Bool = false;
+	var _instancesNeedsUpdate:Bool = false;
 
 	var lock:Bool = false;
 
@@ -1075,7 +1076,7 @@ class MarbleWorld extends Scheduler {
 		if (!lastMoves.ourMoveApplied) {
 			var ourMove = lastMoves.myMarbleUpdate;
 			if (ourMove != null) {
-				var ourMoveStruct = Net.clientConnection.moveManager.acknowledgeMove(ourMove.move.id, timeState);
+				var ourMoveStruct = Net.clientConnection.acknowledgeMove(ourMove.move.id, timeState);
 				lastMoves.ourMoveApplied = true;
 				for (client => arr in lastMoves.otherMarbleUpdates) {
 					var lastMove = null;
@@ -1156,11 +1157,11 @@ class MarbleWorld extends Scheduler {
 		var ourLastMove = lastMoves.myMarbleUpdate;
 		if (ourLastMove == null || marbleNeedsPrediction == 0)
 			return -1;
-		var ackLag = @:privateAccess Net.clientConnection.moveManager.queuedMoves.length;
+		var ackLag = @:privateAccess Net.clientConnection.getQueuedMovesLength();
 
 		var ourLastMoveTime = ourLastMove.serverTicks;
 
-		var ourQueuedMoves = @:privateAccess Net.clientConnection.moveManager.queuedMoves.copy();
+		var ourQueuedMoves = @:privateAccess Net.clientConnection.getQueuedMoves().copy();
 
 		var qm = ourQueuedMoves[0];
 		var advanceTimeState = qm != null ? qm.timeState.clone() : timeState.clone();
@@ -1505,14 +1506,12 @@ class MarbleWorld extends Scheduler {
 				marble.update(timeState, collisionWorld, this.pathedInteriors);
 			}
 		}
-		_cubemapNeedsUpdate = true;
+		_instancesNeedsUpdate = true;
 		Renderer.dirtyBuffers = true;
 		if (this.rewinding) {
 			// Update camera separately
 			marble.camera.update(timeState.currentAttemptTime, realDt);
 		}
-		ProfilerUI.measure("updateInstances");
-		this.instanceManager.render();
 		ProfilerUI.measure("updateParticles");
 		if (this.rewinding) {
 			this.particleManager.update(1000 * timeState.timeSinceLoad, -realDt * rewindManager.timeScale);
@@ -1554,13 +1553,16 @@ class MarbleWorld extends Scheduler {
 			asyncLoadResources();
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
-		if (this.marble != null && this.marble.cubemapRenderer != null) {
-			ProfilerUI.measure("renderCubemap");
-			if (_cubemapNeedsUpdate) {
+		if (_instancesNeedsUpdate) {
+			ProfilerUI.measure("updateInstances");
+			this.instanceManager.render();
+			if (this.marble != null && this.marble.cubemapRenderer != null) {
+				ProfilerUI.measure("renderCubemap");
+
 				this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
 				this.marble.cubemapRenderer.render(e);
-				_cubemapNeedsUpdate = false;
 			}
+			_instancesNeedsUpdate = false;
 		}
 	}
 
@@ -2296,6 +2298,8 @@ class MarbleWorld extends Scheduler {
 				Settings.levelStatistics[mission.path].totalTime += this.timeState.timeSinceLoad;
 			}
 		}
+
+		CollisionPool.freeMemory();
 
 		radar.dispose();
 

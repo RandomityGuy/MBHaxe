@@ -30,7 +30,8 @@ class MarblePrediction {
 		if (p.netFlags != 0)
 			subs += 1;
 		// if (p.powerUpId != powerupItemId)
-		// subs += 1; // temp
+		if (tick % 10 == 0)
+			subs += 1; // temp
 		// if (isControl)
 		// 	subs += Math.abs(blastAmount - p.blastAmount);
 		return subs;

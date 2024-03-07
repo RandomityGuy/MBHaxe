@@ -343,7 +343,7 @@ class Net {
 				var movePacket = new MarbleMovePacket();
 				movePacket.deserialize(input);
 				var cc = clientIdMap[movePacket.clientId];
-				cc.moveManager.queueMove(movePacket.move);
+				cc.queueMove(movePacket.move);
 
 			case PowerupPickup:
 				var powerupPickupPacket = new PowerupPickupPacket();

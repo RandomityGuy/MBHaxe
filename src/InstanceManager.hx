@@ -26,6 +26,8 @@ class MeshBatchInfo {
 	var meshbatch:MeshBatch;
 	var transparencymeshbatch:MeshBatch;
 	var mesh:Mesh;
+	var dtsShader:DtsTexture;
+	var glowPassDtsShader:DtsTexture;
 
 	public function new() {}
 }
@@ -81,7 +83,7 @@ class InstanceManager {
 					var opaqueinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity == 1);
 					minfo.meshbatch.begin(opaqueinstances.length);
 					for (instance in opaqueinstances) { // Draw the opaque shit first
-						var dtsShader = minfo.meshbatch.material.mainPass.getShader(DtsTexture);
+						var dtsShader = minfo.dtsShader; // minfo.meshbatch.material.mainPass.getShader(DtsTexture);
 						var subOpacity = 1.0;
 						if (dtsShader != null) {
 							if (instance.gameObject.animateSubObjectOpacities) {
@@ -112,7 +114,7 @@ class InstanceManager {
 						// handle the glow pass too
 						var glowPass = minfo.meshbatch.material.getPass("glow");
 						if (glowPass != null) {
-							dtsShader = glowPass.getShader(DtsTexture);
+							dtsShader = minfo.glowPassDtsShader;
 							if (dtsShader != null)
 								dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
 						}
@@ -124,7 +126,7 @@ class InstanceManager {
 					var transparentinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity != 1 && x.gameObject.currentOpacity != 0); // Filter out all zero opacity things too
 					minfo.transparencymeshbatch.begin(transparentinstances.length);
 					for (instance in transparentinstances) { // Non opaque shit
-						var dtsShader = minfo.transparencymeshbatch.material.mainPass.getShader(DtsTexture);
+						var dtsShader = minfo.dtsShader;
 						if (dtsShader != null) {
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
@@ -218,6 +220,8 @@ class InstanceManager {
 						for (shader in addshaders)
 							gpass.addShader(shader);
 
+						minfo.glowPassDtsShader = gpass.getShader(DtsTexture);
+
 						minfo.meshbatch.material.addPass(gpass);
 					}
 					var refractPass = mat.getPass("refract");
@@ -279,6 +283,7 @@ class InstanceManager {
 
 						minfo.meshbatch.material.addPass(gpass);
 					}
+					minfo.dtsShader = minfo.meshbatch.material.mainPass.getShader(DtsTexture);
 					// var dtsshader = mat.mainPass.getShader(DtsTexture);
 					// if (dtsshader != null) {
 					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);

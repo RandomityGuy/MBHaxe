@@ -4,6 +4,7 @@ import haxe.io.Bytes;
 import datachannel.RTCPeerConnection;
 import datachannel.RTCDataChannel;
 import net.MoveManager;
+import src.TimeState;
 
 enum abstract GameplayState(Int) from Int to Int {
 	var UNKNOWN;
@@ -53,6 +54,30 @@ abstract class GameConnection {
 
 	public function ready() {
 		state = GameplayState.GAME;
+	}
+
+	public function queueMove(m:NetMove) {
+		moveManager.queueMove(m);
+	}
+
+	public inline function acknowledgeMove(m:Int, timeState:TimeState) {
+		return moveManager.acknowledgeMove(m, timeState);
+	}
+
+	public inline function getQueuedMoves() {
+		return @:privateAccess moveManager.queuedMoves;
+	}
+
+	public inline function getQueuedMovesLength() {
+		return moveManager.getQueueSize();
+	}
+
+	public function recordMove(marble:src.Marble, motionDir:h3d.Vector, timeState:TimeState) {
+		return moveManager.recordMove(marble, motionDir, timeState);
+	}
+
+	public function getNextMove() {
+		return moveManager.getNextMove();
 	}
 
 	public function sendBytes(b:haxe.io.Bytes) {}

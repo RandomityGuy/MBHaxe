@@ -64,10 +64,12 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	// Generates the bvh
 	public function finalize() {
 		this.generateBoundingBox();
+		#if hl
 		this.bvh = new BVHTree();
 		for (surface in this.surfaces) {
 			this.bvh.add(surface);
 		}
+		#end
 		// this.bvh.build();
 	}
 
@@ -240,9 +242,10 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 							// if (testDot > bestDot) {
 							// 	bestDot = testDot;
 
-							var cinfo = new CollisionInfo();
+							var cinfo = CollisionPool.alloc();
 							cinfo.normal = normal.clone();
 							cinfo.point = closest.clone();
+							cinfo.collider = null;
 							// cinfo.collider = this;
 							cinfo.velocity = this.velocity.clone();
 							cinfo.contactDistance = Math.sqrt(contactDist);

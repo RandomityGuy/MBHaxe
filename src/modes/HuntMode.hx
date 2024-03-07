@@ -573,7 +573,8 @@ class HuntMode extends NullMode {
 			"data/skies/gemCubemapUp3.png",
 			'data/shapes/items/red.gem.png',
 			"data/skies/gemCubemapUp.png",
-			'sound/gem_collect.wav'
+			'sound/gem_collect.wav',
+			'sound/opponent_gem_collect.wav'
 		];
 	}
 
