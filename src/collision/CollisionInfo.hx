@@ -10,12 +10,10 @@ class CollisionInfo {
 	public var collider:CollisionEntity;
 	public var otherObject:GameObject;
 	public var friction:Float;
-	public var vAtCMag:Float;
 	public var normalForce:Float;
 	public var restitution:Float;
 	public var contactDistance:Float;
 	public var force:Float;
-	public var penetration:Float;
 
 	public function new() {}
 }

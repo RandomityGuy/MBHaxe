@@ -13,7 +13,13 @@ class OctreeNode implements IOctreeElement {
 	public var position:Int;
 
 	/** The min corner of the bounding box. */
-	public var bounds:Bounds;
+	public var xMin:Float;
+
+	public var yMin:Float;
+	public var zMin:Float;
+	public var xMax:Float;
+	public var yMax:Float;
+	public var zMax:Float;
 
 	/** The size of the bounding box on all three axes. This forces the bounding box to be a cube. */
 	public var octants:Array<OctreeNode> = null;
@@ -29,6 +35,12 @@ class OctreeNode implements IOctreeElement {
 	public function new(octree:Octree, depth:Int) {
 		this.octree = octree;
 		this.depth = depth;
+		this.xMin = 0;
+		this.yMin = 0;
+		this.zMin = 0;
+		this.xMax = 1;
+		this.yMax = 1;
+		this.zMax = 1;
 	}
 
 	public function insert(object:IOctreeObject) {
@@ -80,16 +92,13 @@ class OctreeNode implements IOctreeElement {
 		for (i in 0...8) {
 			var newNode = new OctreeNode(this.octree, this.depth + 1);
 			newNode.parent = this;
-			var newSize = this.bounds.getSize().multiply(1 / 2);
-			newNode.bounds = this.bounds.clone();
-			newNode.bounds.setMin(new Point(this.bounds.xMin
-				+ newSize.x * ((i & 1) >> 0), this.bounds.yMin
-				+ newSize.y * ((i & 2) >> 1),
-				this.bounds.zMin
-				+ newSize.z * ((i & 4) >> 2)));
-			newNode.bounds.xSize = newSize.x;
-			newNode.bounds.ySize = newSize.y;
-			newNode.bounds.zSize = newSize.z;
+			var newSize = new Vector(xMax - xMin, yMax - yMin, zMax - zMin);
+			newNode.xMin = this.xMin + newSize.x * ((i & 1) >> 0);
+			newNode.yMin = this.yMin + newSize.y * ((i & 2) >> 1);
+			newNode.zMin = this.zMin + newSize.z * ((i & 4) >> 2);
+			newNode.xMax = newNode.xMin + newSize.x;
+			newNode.yMax = newNode.yMin + newSize.y;
+			newNode.zMax = newNode.zMin + newSize.z;
 			this.octants.push(newNode);
 		}
 	}
@@ -141,24 +150,53 @@ class OctreeNode implements IOctreeElement {
 		this.octants = null; // ...then devare the octants
 	}
 
-	public function largerThan(object:IOctreeObject) {
-		return this.bounds.containsBounds(object.boundingBox);
+	public inline function largerThan(object:IOctreeObject) {
+		return xMin <= object.boundingBox.xMin && yMin <= object.boundingBox.yMin && zMin <= object.boundingBox.zMin && xMax >= object.boundingBox.xMax
+			&& yMax >= object.boundingBox.yMax && zMax >= object.boundingBox.zMax;
 		// return this.size > (box.xMax - box.xMin) && this.size > (box.yMax - box.yMin) && this.size > (box.zMax - box.zMin);
 	}
 
-	public function containsCenter(object:IOctreeObject) {
-		return this.bounds.contains(object.boundingBox.getCenter());
+	public inline function containsCenter(object:IOctreeObject) {
+		return this.containsPoint2(object.boundingBox.getCenter());
 	}
 
-	public function containsPoint(point:Vector) {
-		return this.bounds.contains(point.toPoint());
+	public inline function containsPoint(p:Vector) {
+		return p.x >= xMin && p.x < xMax && p.y >= yMin && p.y < yMax && p.z >= zMin && p.z < zMax;
+	}
+
+	public inline function containsPoint2(p:h3d.col.Point) {
+		return p.x >= xMin && p.x < xMax && p.y >= yMin && p.y < yMax && p.z >= zMin && p.z < zMax;
+	}
+
+	inline function rayIntersection(r:Ray, bestMatch:Bool):Float {
+		var minTx = (xMin - r.px) / r.lx;
+		var minTy = (yMin - r.py) / r.ly;
+		var minTz = (zMin - r.pz) / r.lz;
+		var maxTx = (xMax - r.px) / r.lx;
+		var maxTy = (yMax - r.py) / r.ly;
+		var maxTz = (zMax - r.pz) / r.lz;
+
+		var realMinTx = Math.min(minTx, maxTx);
+		var realMinTy = Math.min(minTy, maxTy);
+		var realMinTz = Math.min(minTz, maxTz);
+		var realMaxTx = Math.max(minTx, maxTx);
+		var realMaxTy = Math.max(minTy, maxTy);
+		var realMaxTz = Math.max(minTz, maxTz);
+
+		var minmax = Math.min(Math.min(realMaxTx, realMaxTy), realMaxTz);
+		var maxmin = Math.max(Math.max(realMinTx, realMinTy), realMinTz);
+
+		if (minmax < maxmin)
+			return -1;
+
+		return maxmin;
 	}
 
 	public function raycast(rayOrigin:Vector, rayDirection:Vector, intersections:Array<OctreeIntersection>) {
 		var ray = Ray.fromValues(rayOrigin.x, rayOrigin.y, rayOrigin.z, rayDirection.x, rayDirection.y, rayDirection.z);
 		// Construct the loose bounding box of this node (2x in size, with the regular bounding box in the center)
 
-		if (this.bounds.rayIntersection(ray, true) == -1)
+		if (rayIntersection(ray, true) == -1)
 			return;
 
 		for (obj in this.objects) {
@@ -181,42 +219,22 @@ class OctreeNode implements IOctreeElement {
 		}
 	}
 
-	public function boundingSearch(bounds:Bounds, intersections:Array<IOctreeElement>) {
-		if (this.bounds.collide(bounds)) {
+	public function boundingSearch(b:Bounds, intersections:Array<IOctreeElement>) {
+		if (!(xMin > b.xMax || yMin > b.yMax || zMin > b.zMax || xMax < b.xMin || yMax < b.yMin || zMax < b.zMin)) {
 			for (obj in this.objects) {
-				if (obj.boundingBox.collide(bounds))
+				if (obj.boundingBox.collide(b))
 					intersections.push(obj);
 			}
 			if (octants != null) {
 				for (octant in this.octants)
-					octant.boundingSearch(bounds, intersections);
+					octant.boundingSearch(b, intersections);
 			}
 		}
 	}
 
-	public function getClosestPoint(point:Vector) {
-		var closest = new Vector();
-		if (this.bounds.xMin > point.x)
-			closest.x = this.bounds.xMin;
-		else if (this.bounds.xMax < point.x)
-			closest.x = this.bounds.xMax;
-		else
-			closest.x = point.x;
-
-		if (this.bounds.yMin > point.y)
-			closest.y = this.bounds.yMin;
-		else if (this.bounds.yMax < point.y)
-			closest.y = this.bounds.yMax;
-		else
-			closest.y = point.y;
-
-		if (this.bounds.zMin > point.z)
-			closest.z = this.bounds.zMin;
-		else if (this.bounds.zMax < point.z)
-			closest.z = this.bounds.zMax;
-		else
-			closest.z = point.z;
-
+	public inline function getClosestPoint(point:Vector) {
+		var closest = new Vector(Math.min(Math.max(this.xMin, point.x), this.xMax), Math.min(Math.max(this.yMin, point.y), this.yMax),
+			Math.min(Math.max(this.zMin, point.z), this.zMax));
 		return closest;
 	}
 

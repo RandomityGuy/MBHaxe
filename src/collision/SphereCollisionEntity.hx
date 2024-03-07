@@ -85,7 +85,7 @@ class SphereCollisionEntity extends CollisionEntity {
 
 		if (otherRadius * otherRadius * 1.01 > otherDist.lengthSq()) {
 			var normDist = otherDist.normalized();
-			var contact = new CollisionInfo();
+			var contact = CollisionPool.alloc();
 			contact.collider = this;
 			contact.friction = 1;
 			contact.restitution = 1;
@@ -95,7 +95,6 @@ class SphereCollisionEntity extends CollisionEntity {
 			contact.normal = normDist.multiply(-1);
 			contact.force = 0;
 			contact.contactDistance = contact.point.distance(position);
-			contact.penetration = radius - (position.sub(contact.point).dot(contact.normal));
 			contacts.push(contact);
 
 			// var othercontact = new CollisionInfo();

@@ -1,5 +1,6 @@
 package src;
 
+import collision.CollisionPool;
 import net.NetPacket.MarbleNetFlags;
 import net.BitStream.OutputBitStream;
 import net.ClientConnection;
@@ -532,9 +533,10 @@ class Marble extends GameObject {
 		matWorker.run();
 	}
 
-	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
+	function findContacts(collisionWorld:CollisionWorld, timeState:TimeState) {
 		this.contacts = queuedContacts;
-		var c = collisiomWorld.sphereIntersection(this.collider, timeState);
+		CollisionPool.clear();
+		var c = collisionWorld.sphereIntersection(this.collider, timeState);
 		this.contactEntities = c.foundEntities;
 		contacts = contacts.concat(c.contacts);
 	}
@@ -1763,7 +1765,7 @@ class Marble extends GameObject {
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
 			if (Net.isClient) {
 				var axis = getMarbleAxis()[1];
-				move = Net.clientConnection.moveManager.recordMove(cast this, axis, timeState);
+				move = Net.clientConnection.recordMove(cast this, axis, timeState);
 			} else if (Net.isHost) {
 				var axis = getMarbleAxis()[1];
 				var innerMove = recordMove();
@@ -1772,7 +1774,7 @@ class Marble extends GameObject {
 		}
 		var moveId = 65535;
 		if (!this.controllable && this.connection != null && Net.isHost) {
-			var nextMove = this.connection.moveManager.getNextMove();
+			var nextMove = this.connection.getNextMove();
 			// trace('Moves left: ${@:privateAccess this.connection.moveManager.queuedMoves.length}');
 			if (nextMove == null) {
 				var axis = getMarbleAxis()[1];
