@@ -5,6 +5,7 @@ import h3d.col.Bounds;
 
 interface IBVHObject {
 	var boundingBox:Bounds;
+	var key:Int;
 	function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<octree.IOctreeObject.RayIntersectionData>;
 }
 

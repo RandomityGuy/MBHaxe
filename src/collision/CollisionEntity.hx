@@ -25,8 +25,9 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public var bvh:BVHTree<CollisionSurface>;
 
-	public var surfaces:Array<CollisionSurface>;
+	var grid:Grid;
 
+	public var surfaces:Array<CollisionSurface>;
 	public var priority:Int;
 	public var position:Int;
 	public var velocity:Vector = new Vector();
@@ -43,6 +44,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var isWorldStatic:Bool = false;
 
 	var _transformKey:Int = 0;
+
+	public var key:Int = 0;
 
 	var _dbgEntity:h3d.scene.Mesh;
 
@@ -70,6 +73,13 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			this.bvh.add(surface);
 		}
 		#end
+		var bbox = new Bounds();
+		for (surface in this.surfaces)
+			bbox.add(surface.boundingBox);
+		this.grid = new Grid(bbox);
+		for (surface in this.surfaces)
+			this.grid.insert(surface);
+		this.grid.build();
 		// this.bvh.build();
 	}
 
@@ -138,26 +148,26 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var rStart = rayOrigin.clone();
 		rStart.transform(invMatrix);
 		var rDir = rayDirection.transformed3x3(invMatrix);
-		if (bvh == null) {
-			var intersections = octree.raycast(rStart, rDir);
-			var iData:Array<RayIntersectionData> = [];
-			for (i in intersections) {
-				i.point.transform(transform);
-				i.normal.transform3x3(invTPos);
-				i.normal.normalize();
-				iData.push({point: i.point, normal: i.normal, object: i.object});
-			}
-			return iData;
-		} else {
-			var intersections = this.bvh.rayCast(rStart, rDir);
-			for (i in intersections) {
-				i.point.transform(transform);
-				i.normal.transform3x3(invTPos);
-				i.normal.normalize();
-			}
-
-			return intersections;
+		// if (bvh == null) {
+		// 	var intersections = grid.rayCast(rStart, rDir); // octree.raycast(rStart, rDir);
+		// 	// var iData:Array<RayIntersectionData> = [];
+		// 	for (i in intersections) {
+		// 		i.point.transform(transform);
+		// 		i.normal.transform3x3(invTPos);
+		// 		i.normal.normalize();
+		// 		// iData.push({point: i.point, normal: i.normal, object: i.object});
+		// 	}
+		// 	return intersections; // iData;
+		// } else {
+		var intersections = grid.rayCast(rStart, rDir); // this.bvh.rayCast(rStart, rDir);
+		for (i in intersections) {
+			i.point.transform(transform);
+			i.normal.transform3x3(invTPos);
+			i.normal.normalize();
 		}
+
+		return intersections;
+		// }
 	}
 
 	public function getElementType() {
@@ -183,7 +193,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var invScale = invMatrix.getScale();
 		var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
 		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 1.1);
-		var surfaces = bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
+		var surfaces = grid.boundingSearch(sphereBounds); // bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
 		var invtform = invMatrix.clone();
 		invtform.transpose();
 
@@ -243,11 +253,11 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 							// 	bestDot = testDot;
 
 							var cinfo = CollisionPool.alloc();
-							cinfo.normal = normal.clone();
-							cinfo.point = closest.clone();
+							cinfo.normal.load(normal);
+							cinfo.point.load(closest);
 							cinfo.collider = null;
 							// cinfo.collider = this;
-							cinfo.velocity = this.velocity.clone();
+							cinfo.velocity.load(this.velocity);
 							cinfo.contactDistance = Math.sqrt(contactDist);
 							cinfo.otherObject = this.go;
 							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
