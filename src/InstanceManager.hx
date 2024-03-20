@@ -54,33 +54,42 @@ class InstanceManager {
 	}
 
 	public function render() {
-		var renderFrustums = [scene.camera.frustum];
+		var renderFrustum = scene.camera.frustum;
+		var doFrustumCheck = true;
 		// This sucks holy shit
-		if (MarbleGame.instance.world != null
+		doFrustumCheck = MarbleGame.instance.world != null
 			&& MarbleGame.instance.world.marble != null
-			&& MarbleGame.instance.world.marble.cubemapRenderer != null)
-			renderFrustums = renderFrustums.concat(MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums());
+			&& MarbleGame.instance.world.marble.cubemapRenderer != null;
+		// renderFrustums = renderFrustums.concat(MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums());
 
 		for (meshes in objects) {
 			for (minfo in meshes) {
-				var visibleinstances = [];
+				var opaqueinstances = [];
+				var transparentinstances = [];
 				// Culling
 				if (minfo.meshbatch != null || minfo.transparencymeshbatch != null) {
 					for (inst in minfo.instances) {
-						var objBounds = @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds.clone();
-						objBounds.transform(inst.emptyObj.getAbsPos());
-						for (frustum in renderFrustums) {
-							if (frustum.hasBounds(objBounds)) {
-								visibleinstances.push(inst);
-								break;
-							}
+						// for (frustum in renderFrustums) {
+						//	if (frustum.hasBounds(objBounds)) {
+						if (doFrustumCheck) {
+							var objBounds = @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds.clone();
+							objBounds.transform(inst.emptyObj.getAbsPos());
+
+							if (!renderFrustum.hasBounds(objBounds))
+								continue;
 						}
+						if (inst.gameObject.currentOpacity == 1)
+							opaqueinstances.push(inst);
+						else if (inst.gameObject.currentOpacity != 0)
+							transparentinstances.push(inst);
+						// break;
+						//	}
+						// }
 					}
 				}
 
 				// Emit non culled primitives
 				if (minfo.meshbatch != null) {
-					var opaqueinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity == 1);
 					minfo.meshbatch.begin(opaqueinstances.length);
 					for (instance in opaqueinstances) { // Draw the opaque shit first
 						var dtsShader = minfo.dtsShader; // minfo.meshbatch.material.mainPass.getShader(DtsTexture);
@@ -123,7 +132,6 @@ class InstanceManager {
 					}
 				}
 				if (minfo.transparencymeshbatch != null) {
-					var transparentinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity != 1 && x.gameObject.currentOpacity != 0); // Filter out all zero opacity things too
 					minfo.transparencymeshbatch.begin(transparentinstances.length);
 					for (instance in transparentinstances) { // Non opaque shit
 						var dtsShader = minfo.dtsShader;

@@ -1132,10 +1132,6 @@ class DtsObject extends GameObject {
 				completion = Util.clamp((timeState.timeSinceLoad - doSequenceOnceBeginTime) / sequence.duration, 0, 0.98);
 			}
 
-			var quaternions:Array<Quat> = null;
-			var translations:Array<Vector> = null;
-			var scales:Array<Vector> = null;
-
 			var actualKeyframe = this.sequenceKeyframeOverride.exists(sequence) ? this.sequenceKeyframeOverride.get(sequence) : ((completion * sequence.numKeyFrames) % sequence.numKeyFrames);
 			if (this.lastSequenceKeyframes.get(sequence) == actualKeyframe)
 				continue;
@@ -1148,8 +1144,6 @@ class DtsObject extends GameObject {
 			var t = (actualKeyframe - keyframeLow) % 1;
 
 			if (rot > 0) {
-				quaternions = [];
-
 				for (i in 0...this.dts.nodes.length) {
 					var affected = ((1 << i) & rot) != 0;
 
@@ -1169,7 +1163,8 @@ class DtsObject extends GameObject {
 						quat.slerp(q1, q2, t);
 						quat.normalize();
 
-						this.graphNodes[i].setRotationQuat(quat);
+						this.graphNodes[i].getRotationQuat().load(quat);
+						this.graphNodes[i].posChanged = true;
 						propagateDirtyFlags(i);
 						affectedCount++;
 						// quaternions.push(quat);
@@ -1178,7 +1173,8 @@ class DtsObject extends GameObject {
 						var quat = new Quat(-rotation.x, rotation.y, rotation.z, -rotation.w);
 						quat.normalize();
 						quat.conjugate();
-						this.graphNodes[i].setRotationQuat(quat);
+						this.graphNodes[i].getRotationQuat().load(quat);
+						this.graphNodes[i].posChanged = true;
 						// quaternions.push(quat);
 					}
 				}
@@ -1186,8 +1182,6 @@ class DtsObject extends GameObject {
 
 			affectedCount = 0;
 			if (trans > 0) {
-				translations = [];
-
 				for (i in 0...this.dts.nodes.length) {
 					var affected = ((1 << i) & trans) != 0;
 
@@ -1213,8 +1207,6 @@ class DtsObject extends GameObject {
 
 			affectedCount = 0;
 			if (scale > 0) {
-				scales = [];
-
 				if (sequence.flags & 1 > 0) { // Uniform scales
 					for (i in 0...this.dts.nodes.length) {
 						var affected = ((1 << i) & scale) != 0;
@@ -1433,10 +1425,11 @@ class DtsObject extends GameObject {
 			var spinAnimation = new Quat();
 			spinAnimation.initRotateAxis(0, 0, -1, timeState.timeSinceLoad * this.ambientSpinFactor);
 
-			var orientation = this.getRotationQuat();
+			// var orientation = this.getRotationQuat();
 			// spinAnimation.multiply(orientation, spinAnimation);
 
-			this.rootObject.setRotationQuat(spinAnimation);
+			this.rootObject.getRotationQuat().load(spinAnimation);
+			this.rootObject.posChanged = true;
 		}
 
 		for (i in 0...this.colliders.length) {

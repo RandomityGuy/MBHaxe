@@ -184,6 +184,25 @@ final blastMaxParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
+@:publicFields
+@:structInit
+class MarbleTestMoveFoundContact {
+	var v:Array<Vector>;
+	var n:Vector;
+}
+
+@:publicFields
+@:structInit
+class MarbleTestMoveResult {
+	var position:Vector;
+	var t:Float;
+	var found:Bool;
+	var foundContacts:Array<MarbleTestMoveFoundContact>;
+	var lastContactPos:Null<Vector>;
+	var lastContactNormal:Null<Vector>;
+	var foundMarbles:Array<SphereCollisionEntity>;
+}
+
 class Marble extends GameObject {
 	public var camera:CameraController;
 	public var cameraObject:Object;
@@ -721,7 +740,7 @@ class Marble extends GameObject {
 
 						normP.scale(1 + bounce);
 
-						velocity.load(velocity.sub(normP.multiply(ourMass)));
+						velocity.load(velocity.sub(normP.multiply(1 / ourMass)));
 
 						otherMarble.velocity.load(otherMarble.velocity.add(normP.multiply(1 / theirMass)));
 						contacts[i].velocity.load(otherMarble.velocity);
@@ -1063,7 +1082,7 @@ class Marble extends GameObject {
 		}
 	}
 
-	function testMove(velocity:Vector, position:Vector, deltaT:Float, radius:Float, testPIs:Bool) {
+	function testMove(velocity:Vector, position:Vector, deltaT:Float, radius:Float, testPIs:Bool):MarbleTestMoveResult {
 		if (velocity.length() < 0.001) {
 			return {
 				position: position,
@@ -1087,7 +1106,7 @@ class Marble extends GameObject {
 
 		var lastContactPos = new Vector();
 
-		var testTriangles = [];
+		var testTriangles:Array<MarbleTestMoveFoundContact> = [];
 
 		var finalContacts = [];
 		var foundMarbles = [];
@@ -1149,7 +1168,8 @@ class Marble extends GameObject {
 				Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 2);
 
 			var currentFinalPos = position.add(relVel.multiply(finalT)); // localpos.add(relLocalVel.multiply(finalT));
-			var surfaces = obj.bvh == null ? obj.octree.boundingSearch(boundThing).map(x -> cast x) : obj.bvh.boundingSearch(boundThing);
+			var surfaces = @:privateAccess obj.grid != null ? @:privateAccess obj.grid.boundingSearch(boundThing) : (obj.bvh == null ? obj.octree.boundingSearch(boundThing)
+				.map(x -> cast x) : obj.bvh.boundingSearch(boundThing));
 
 			for (surf in surfaces) {
 				var surface:CollisionSurface = cast surf;
@@ -1399,10 +1419,7 @@ class Marble extends GameObject {
 		};
 	}
 
-	function nudgeToContacts(position:Vector, radius:Float, foundContacts:Array<{
-		v:Array<Vector>,
-		n:Vector
-	}>, foundMarbles:Array<SphereCollisionEntity>) {
+	function nudgeToContacts(position:Vector, radius:Float, foundContacts:Array<MarbleTestMoveFoundContact>, foundMarbles:Array<SphereCollisionEntity>) {
 		var it = 0;
 		var concernedContacts = foundContacts; // PathedInteriors have their own nudge logic
 		var prevResolved = 0;
