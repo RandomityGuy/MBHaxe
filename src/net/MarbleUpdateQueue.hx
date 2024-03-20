@@ -26,8 +26,8 @@ class MarbleUpdateQueue {
 	public function enqueue(update:MarbleUpdatePacket) {
 		var cc = update.clientId;
 		if (cc != Net.clientId) {
-			if (myMarbleUpdate != null && update.serverTicks > myMarbleUpdate.serverTicks)
-				ourMoveApplied = true;
+			// if (myMarbleUpdate != null && update.serverTicks > myMarbleUpdate.serverTicks)
+			//	ourMoveApplied = true;
 			if (otherMarbleUpdates.exists(cc)) {
 				var otherUpdate = otherMarbleUpdates[cc];
 				var ourList = otherUpdate.packets;
