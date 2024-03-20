@@ -24,6 +24,8 @@ class Radar {
 
 	var time:Float = 0.0;
 
+	var _dirty = false;
+
 	public function new(level:MarbleWorld, scene2d:Scene) {
 		this.level = level;
 		this.scene2d = scene2d;
@@ -35,7 +37,12 @@ class Radar {
 
 	public function update(dt:Float) {
 		time += dt;
+		_dirty = true;
+	}
 
+	public function render() {
+		if (!_dirty)
+			return;
 		g.clear();
 		var gemCount = 0;
 		for (gem in level.gems) {
@@ -47,6 +54,7 @@ class Radar {
 		if (@:privateAccess level.endPad != null && gemCount == 0) {
 			renderArrow(@:privateAccess level.endPad.getAbsPos().getPosition(), 0xE6E6E6);
 		}
+		_dirty = false;
 	}
 
 	public function blink() {
@@ -64,8 +72,30 @@ class Radar {
 		g = null;
 	}
 
+	inline function planeDistance(plane:h3d.col.Plane, p:Vector) {
+		return @:privateAccess plane.nx * p.x + @:privateAccess plane.ny * p.y + @:privateAccess plane.nz * p.z - @:privateAccess plane.d;
+	}
+
+	function frustumHasPoint(frustum:h3d.col.Frustum, p:Vector) {
+		if (planeDistance(frustum.pleft, p) < 0)
+			return false;
+		if (planeDistance(frustum.pright, p) < 0)
+			return false;
+		if (planeDistance(frustum.ptop, p) < 0)
+			return false;
+		if (planeDistance(frustum.pbottom, p) < 0)
+			return false;
+		if (frustum.checkNearFar) {
+			if (planeDistance(frustum.pnear, p) < 0)
+				return false;
+			if (planeDistance(frustum.pfar, p) < 0)
+				return false;
+		}
+		return true;
+	}
+
 	function renderArrow(pos:Vector, color:Int) {
-		var validProjection = level.scene.camera.frustum.hasPoint(pos.toPoint());
+		var validProjection = frustumHasPoint(level.scene.camera.frustum, pos);
 		var projectedPos = level.scene.camera.project(pos.x, pos.y, pos.z, scene2d.width, scene2d.height);
 
 		var fovX = (level.scene.camera.getFovX() * 0.5) * Math.PI / 180.0;
@@ -100,12 +130,13 @@ class Radar {
 		cc2.normalize();
 		sd.normalize();
 
-		var arrowPos = new Vector();
+		var arrowPosY = 0.0;
+		var arrowPosX = 0.0;
 		if (cc1.y >= sd.y) {
 			if (cc2.y <= sd.y) {
-				arrowPos.y = scene2d.height * ((sd.x * cc1.y - cc1.x * sd.y) / (sd.y * (cc2.x - cc1.x) - (cc2.y - cc1.y) * sd.x));
+				arrowPosY = scene2d.height * ((sd.x * cc1.y - cc1.x * sd.y) / (sd.y * (cc2.x - cc1.x) - (cc2.y - cc1.y) * sd.x));
 			} else {
-				arrowPos.y = scene2d.height;
+				arrowPosY = scene2d.height;
 			}
 		}
 		var r1 = shapeDist.transformed(gravityMat);
@@ -139,21 +170,19 @@ class Radar {
 		if (-fovX <= xfPosAngle) {
 			if (fovX >= xfPosAngle) {
 				// the new x is the fraction of where it is but convert it from an angle to tangent
-				arrowPos.x = scene2d.width * 0.5 + Math.tan(xfPosAngle) * (scene2d.width * 0.5) / Math.tan(fovX);
+				arrowPosX = scene2d.width * 0.5 + Math.tan(xfPosAngle) * (scene2d.width * 0.5) / Math.tan(fovX);
 			} else {
 				// otherwise snap to edge
-				arrowPos.x = scene2d.width;
+				arrowPosX = scene2d.width;
 			}
 		}
 
-		var drawPoint = new Vector();
-		if (!validProjection) {
-			drawPoint.load(arrowPos);
-		} else {
+		var drawPoint = new Vector(arrowPosX, arrowPosY);
+		if (validProjection) {
 			drawPoint.load(projectedPos);
 			if (drawPoint.distanceSq(projectedPos) <= 75 * 75) {
 				var distOff = drawPoint.distance(projectedPos);
-				drawPoint = Util.lerpThreeVectors(projectedPos, arrowPos, distOff / 75);
+				drawPoint = Util.lerpThreeVectors(projectedPos, new Vector(arrowPosX, arrowPosY), distOff / 75);
 			}
 		}
 

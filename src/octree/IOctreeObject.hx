@@ -3,7 +3,9 @@ package octree;
 import h3d.Vector;
 import h3d.col.Bounds;
 
-typedef RayIntersectionData = {
+@:publicFields
+@:structInit
+class RayIntersectionData {
 	var point:Vector;
 	var normal:Vector;
 	var object:IOctreeObject;

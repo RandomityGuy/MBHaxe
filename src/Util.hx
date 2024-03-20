@@ -11,18 +11,18 @@ import h3d.Vector;
 import src.Settings;
 
 class Util {
-	public static function mat3x3equal(a:Matrix, b:Matrix) {
+	public static inline function mat3x3equal(a:Matrix, b:Matrix) {
 		return a._11 == b._11 && a._12 == b._12 && a._13 == b._13 && a._21 == b._21 && a._22 == b._22 && a._23 == b._23 && a._31 == b._31 && a._32 == b._32
 			&& a._33 == b._33;
 	}
 
-	public static function adjustedMod(a:Float, n:Float) {
+	public static inline function adjustedMod(a:Float, n:Float) {
 		var r1 = a % n;
 		var r2 = (r1 + n) % n;
 		return r2;
 	}
 
-	public static function clamp(value:Float, min:Float, max:Float) {
+	public static inline function clamp(value:Float, min:Float, max:Float) {
 		if (value < min)
 			return min;
 		if (value > max)
@@ -30,11 +30,11 @@ class Util {
 		return value;
 	}
 
-	public static function lerp(a:Float, b:Float, t:Float) {
+	public static inline function lerp(a:Float, b:Float, t:Float) {
 		return a + (b - a) * t;
 	}
 
-	public static function catmullRom(t:Float, p0:Float, p1:Float, p2:Float, p3:Float) {
+	public static inline function catmullRom(t:Float, p0:Float, p1:Float, p2:Float, p3:Float) {
 		var point = t * t * t * ((-1) * p0 + 3 * p1 - 3 * p2 + p3) / 2;
 		point += t * t * (2 * p0 - 5 * p1 + 4 * p2 - p3) / 2;
 		point += t * ((-1) * p0 + p2) / 2;
@@ -42,7 +42,7 @@ class Util {
 		return point;
 	}
 
-	public static function lerpThreeVectors(v1:Vector, v2:Vector, t:Float) {
+	public static inline function lerpThreeVectors(v1:Vector, v2:Vector, t:Float) {
 		return new Vector(lerp(v1.x, v2.x, t), lerp(v1.y, v2.y, t), lerp(v1.z, v2.z, t), lerp(v1.w, v2.w, t));
 	}
 
@@ -342,7 +342,7 @@ class Util {
 			'${(hours > 0 ? (hoursTen > 0 ? '${hoursTen}' : '') +'${hoursOne}' + ':' : '')}${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
 	}
 
-	public static function rightPad(str:String, len:Int, cutOff:Int) {
+	public static inline function rightPad(str:String, len:Int, cutOff:Int) {
 		str = str.substring(0, len - cutOff);
 		while (str.length < len)
 			str += " ";
@@ -420,7 +420,7 @@ class Util {
 		#end
 	}
 
-	public static function isSafari() {
+	public static inline function isSafari() {
 		#if js
 		var reg = ~/^((?!chrome|android).)*safari/;
 		return reg.match(js.Browser.navigator.userAgent);
@@ -430,7 +430,7 @@ class Util {
 		#end
 	}
 
-	public static function isInFullscreen() {
+	public static inline function isInFullscreen() {
 		#if js
 		return (js.Browser.window.innerHeight == js.Browser.window.screen.height
 			|| (js.Browser.window.screen.orientation.type == js.html.OrientationType.PORTRAIT_PRIMARY
@@ -443,7 +443,7 @@ class Util {
 		#end
 	}
 
-	public static function toASCII(bytes:haxe.io.Bytes) {
+	public static inline function toASCII(bytes:haxe.io.Bytes) {
 		var totBytes = new BytesBuffer();
 		for (i in 0...bytes.length) {
 			var utfbytes = Bytes.ofString(String.fromCharCode(bytes.get(i)));
