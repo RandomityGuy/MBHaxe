@@ -9,16 +9,24 @@ class Grid {
 
 	public var cellSize:Vector; // The dimensions of one cell
 
-	public var CELL_DIV = new Vector(12, 12, 12); // split the bounds into cells of dimensions 1/16th of the corresponding dimensions of the bounds
+	static var CELL_SIZE = 16;
 
-	var map:Map<Int, Array<Int>> = new Map();
+	public var CELL_DIV = new Vector(CELL_SIZE, CELL_SIZE); // split the bounds into cells of dimensions 1/16th of the corresponding dimensions of the bounds
+
+	var cells:Array<Array<Int>> = [];
 
 	var surfaces:Array<CollisionSurface> = [];
+	var searchKey:Int = 0;
 
 	public function new(bounds:Bounds) {
 		this.bounds = bounds.clone();
 
-		this.cellSize = new Vector(bounds.xSize / CELL_DIV.x, bounds.ySize / CELL_DIV.y, bounds.zSize / CELL_DIV.z);
+		this.cellSize = new Vector(bounds.xSize / CELL_DIV.x, bounds.ySize / CELL_DIV.y);
+		for (i in 0...CELL_SIZE) {
+			for (j in 0...CELL_SIZE) {
+				this.cells.push([]);
+			}
+		}
 	}
 
 	public function insert(surface:CollisionSurface) {
@@ -26,61 +34,80 @@ class Grid {
 		if (this.bounds.containsBounds(surface.boundingBox)) {
 			var idx = this.surfaces.length;
 			this.surfaces.push(surface);
-
-			var xStart = Math.floor((surface.boundingBox.xMin - bounds.xMin) / this.cellSize.x);
-			var yStart = Math.floor((surface.boundingBox.yMin - bounds.yMin) / this.cellSize.y);
-			var zStart = Math.floor((surface.boundingBox.zMin - bounds.zMin) / this.cellSize.z);
-			var xEnd = Math.ceil((surface.boundingBox.xMax - bounds.xMin) / this.cellSize.x) + 1;
-			var yEnd = Math.ceil((surface.boundingBox.yMax - bounds.yMin) / this.cellSize.y) + 1;
-			var zEnd = Math.ceil((surface.boundingBox.zMax - bounds.zMin) / this.cellSize.z) + 1;
-
-			// Insert the surface references from [xStart, yStart, zStart] to [xEnd, yEnd, zEnd] into the map
-			for (i in xStart...xEnd) {
-				for (j in yStart...yEnd) {
-					for (k in zStart...zEnd) {
-						var hash = hashVector(i, j, k);
-						if (!this.map.exists(hash)) {
-							this.map.set(hash, []);
-						}
-						this.map.get(hash).push(idx);
-					}
-				}
-			}
 		} else {
 			throw new Exception("Surface is not contained in the grid's bounds");
 		}
 	}
 
+	public function build() {
+		for (i in 0...CELL_SIZE) {
+			var minX = this.bounds.xMin;
+			var maxX = this.bounds.xMin;
+			minX += i * this.cellSize.x;
+			maxX += (i + 1) * this.cellSize.x;
+			for (j in 0...CELL_SIZE) {
+				var minY = this.bounds.yMin;
+				var maxY = this.bounds.yMin;
+				minY += j * this.cellSize.y;
+				maxY += (j + 1) * this.cellSize.y;
+
+				var binRect = new h2d.col.Bounds();
+				binRect.xMin = minX;
+				binRect.yMin = minY;
+				binRect.xMax = maxX;
+				binRect.yMax = maxY;
+
+				for (idx in 0...this.surfaces.length) {
+					var surface = this.surfaces[idx];
+					var hullRect = new h2d.col.Bounds();
+					hullRect.xMin = surface.boundingBox.xMin;
+					hullRect.yMin = surface.boundingBox.yMin;
+					hullRect.xMax = surface.boundingBox.xMax;
+					hullRect.yMax = surface.boundingBox.yMax;
+
+					if (hullRect.intersects(binRect)) {
+						this.cells[16 * i + j].push(idx);
+					}
+				}
+			}
+		}
+	}
+
 	// searchbox should be in LOCAL coordinates
 	public function boundingSearch(searchbox:Bounds) {
-		var xStart = Math.floor((searchbox.xMin - bounds.xMin) / this.cellSize.x);
-		var yStart = Math.floor((searchbox.yMin - bounds.yMin) / this.cellSize.y);
-		var zStart = Math.floor((searchbox.zMin - bounds.zMin) / this.cellSize.z);
-		var xEnd = Math.ceil((searchbox.xMax - bounds.xMin) / this.cellSize.x) + 1;
-		var yEnd = Math.ceil((searchbox.yMax - bounds.yMin) / this.cellSize.y) + 1;
-		var zEnd = Math.ceil((searchbox.zMax - bounds.zMin) / this.cellSize.z) + 1;
+		var queryMinX = Math.max(searchbox.xMin, bounds.xMin);
+		var queryMinY = Math.max(searchbox.yMin, bounds.yMin);
+		var queryMaxX = Math.min(searchbox.xMax, bounds.xMax);
+		var queryMaxY = Math.min(searchbox.yMax, bounds.yMax);
+		var xStart = Math.floor((queryMinX - bounds.xMin) / this.cellSize.x);
+		var yStart = Math.floor((queryMinY - bounds.yMin) / this.cellSize.y);
+		var xEnd = Math.ceil((queryMaxX - bounds.xMin) / this.cellSize.x);
+		var yEnd = Math.ceil((queryMaxY - bounds.yMin) / this.cellSize.y);
+
+		if (xStart < 0)
+			xStart = 0;
+		if (yStart < 0)
+			yStart = 0;
+		if (xEnd > CELL_SIZE)
+			xEnd = CELL_SIZE;
+		if (yEnd > CELL_SIZE)
+			yEnd = CELL_SIZE;
 
 		var foundSurfaces = [];
 
-		for (surf in this.surfaces) {
-			surf.key = false;
-		}
+		searchKey++;
 
 		// Insert the surface references from [xStart, yStart, zStart] to [xEnd, yEnd, zEnd] into the map
 		for (i in xStart...xEnd) {
 			for (j in yStart...yEnd) {
-				for (k in zStart...zEnd) {
-					var hash = hashVector(i, j, k);
-					if (this.map.exists(hash)) {
-						var surfs = this.map.get(hash);
-						for (surf in surfs) {
-							if (surfaces[surf].key)
-								continue;
-							if (searchbox.containsBounds(surfaces[surf].boundingBox) || searchbox.collide(surfaces[surf].boundingBox)) {
-								foundSurfaces.push(surfaces[surf]);
-								surfaces[surf].key = true;
-							}
-						}
+				for (surfIdx in cells[16 * i + j]) {
+					var surf = surfaces[surfIdx];
+					if (surf.key == searchKey)
+						continue;
+					surf.key = searchKey;
+					if (searchbox.containsBounds(surf.boundingBox) || searchbox.collide(surf.boundingBox)) {
+						foundSurfaces.push(surf);
+						surf.key = 1;
 					}
 				}
 			}
@@ -101,48 +128,31 @@ class Grid {
 		var cell = origin.sub(this.bounds.getMin().toVector());
 		cell.x /= this.cellSize.x;
 		cell.y /= this.cellSize.y;
-		cell.z /= this.cellSize.z;
-
 		var stepX, outX, X = Math.floor(cell.x);
 		var stepY, outY, Y = Math.floor(cell.y);
-		var stepZ, outZ, Z = Math.floor(cell.z);
-
-		if ((X < 0) || (X >= CELL_DIV.x) || (Y < 0) || (Y >= CELL_DIV.y) || (Z < 0) || (Z >= CELL_DIV.z))
+		if ((X < 0) || (X >= CELL_DIV.x) || (Y < 0) || (Y >= CELL_DIV.y))
 			return [];
-
 		var cb = new Vector();
-
 		if (direction.x > 0) {
 			stepX = 1;
 			outX = CELL_DIV.x;
-			cb.x = this.bounds.getMin().x + (X + 1) * this.cellSize.x;
+			cb.x = this.bounds.xMin + (X + 1) * this.cellSize.x;
 		} else {
 			stepX = -1;
 			outX = -1;
-			cb.x = this.bounds.getMin().x + X * this.cellSize.x;
+			cb.x = this.bounds.xMin + X * this.cellSize.x;
 		}
 		if (direction.y > 0.0) {
 			stepY = 1;
 			outY = CELL_DIV.y;
-			cb.y = this.bounds.getMin().y + (Y + 1) * this.cellSize.y;
+			cb.y = this.bounds.yMin + (Y + 1) * this.cellSize.y;
 		} else {
 			stepY = -1;
 			outY = -1;
-			cb.y = this.bounds.getMin().y + Y * this.cellSize.y;
+			cb.y = this.bounds.yMin + Y * this.cellSize.y;
 		}
-		if (direction.z > 0.0) {
-			stepZ = 1;
-			outZ = CELL_DIV.z;
-			cb.z = this.bounds.getMin().z + (Z + 1) * this.cellSize.z;
-		} else {
-			stepZ = -1;
-			outZ = -1;
-			cb.z = this.bounds.getMin().z + Z * this.cellSize.z;
-		}
-
 		var tmax = new Vector();
 		var tdelta = new Vector();
-
 		var rxr, ryr, rzr;
 		if (direction.x != 0) {
 			rxr = 1.0 / direction.x;
@@ -156,58 +166,29 @@ class Grid {
 			tdelta.y = this.cellSize.y * stepY * ryr;
 		} else
 			tmax.y = 1000000;
-		if (direction.z != 0) {
-			rzr = 1.0 / direction.z;
-			tmax.z = (cb.z - origin.z) * rzr;
-			tdelta.z = this.cellSize.z * stepZ * rzr;
-		} else
-			tmax.z = 1000000;
-
-		for (surf in this.surfaces) {
-			surf.key = false;
-		}
-
+		searchKey++;
 		var results = [];
-
 		while (true) {
-			var hash = hashVector(X, Y, Z);
-			if (this.map.exists(hash)) {
-				var currentSurfaces = this.map.get(hash).map(x -> this.surfaces[x]);
-
-				for (surf in currentSurfaces) {
-					if (surf.key)
-						continue;
-					results = results.concat(surf.rayCast(origin, direction));
-					surf.key = true;
-				}
+			var cell = cells[16 * X + Y];
+			for (idx in cell) {
+				var surf = surfaces[idx];
+				if (surf.key == searchKey)
+					continue;
+				surf.key = searchKey;
+				results = results.concat(surf.rayCast(origin, direction));
 			}
 			if (tmax.x < tmax.y) {
-				if (tmax.x < tmax.z) {
-					X = X + stepX;
-					if (X == outX)
-						break;
-					tmax.x += tdelta.x;
-				} else {
-					Z = Z + stepZ;
-					if (Z == outZ)
-						break;
-					tmax.z += tdelta.z;
-				}
+				X = X + stepX;
+				if (X == outX)
+					break;
+				tmax.x += tdelta.x;
 			} else {
-				if (tmax.y < tmax.z) {
-					Y = Y + stepY;
-					if (Y == outY)
-						break;
-					tmax.y += tdelta.y;
-				} else {
-					Z = Z + stepZ;
-					if (Z == outZ)
-						break;
-					tmax.z += tdelta.z;
-				}
+				Y = Y + stepY;
+				if (Y == outY)
+					break;
+				tmax.y += tdelta.y;
 			}
 		}
-
 		return results;
 	}
 }

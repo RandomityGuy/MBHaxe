@@ -50,6 +50,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public var originalIndices:Array<Int>;
 	public var originalSurfaceIndex:Int;
 	public var transformKeys:Array<Int>;
+	public var key:Int = 0;
 
 	var _transformedPoints:Array<Float>;
 	var _transformedNormals:Array<Float>;
@@ -139,7 +140,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 	}
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
-		var intersections = [];
+		var intersections:Array<RayIntersectionData> = [];
 		var i = 0;
 		while (i < indices.length) {
 			var p1 = getPoint(indices[i]);
