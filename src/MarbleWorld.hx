@@ -1100,7 +1100,7 @@ class MarbleWorld extends Scheduler {
 									if (otherPred.getError(lastMove) > 0.1) {
 										Debug.drawSphere(@:privateAccess clientMarbles[Net.clientIdMap[client]].newPos, 0.2, 0.5);
 										// trace('Prediction error: ${otherPred.getError(lastMove)}');
-										trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+										// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 										clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
 										needsPrediction |= 1 << client;
 										arr.packets.insert(0, lastMove);
@@ -1108,7 +1108,7 @@ class MarbleWorld extends Scheduler {
 									}
 								} else {
 									Debug.drawSphere(@:privateAccess clientMarbles[Net.clientIdMap[client]].newPos, 0.2, 0.5);
-									trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+									// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 									clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
 									needsPrediction |= 1 << client;
 									arr.packets.insert(0, lastMove);
@@ -1116,7 +1116,7 @@ class MarbleWorld extends Scheduler {
 								}
 							} else {
 								Debug.drawSphere(@:privateAccess clientMarbles[Net.clientIdMap[client]].newPos, 0.2, 0.5);
-								trace('Desync in General');
+								// trace('Desync in General');
 								clientMarbles[Net.clientIdMap[client]].unpackUpdate(lastMove);
 								needsPrediction |= 1 << client;
 								arr.packets.insert(0, lastMove);
@@ -1131,19 +1131,19 @@ class MarbleWorld extends Scheduler {
 					var ourPred = predictions.retrieveState(marble, ourMoveStruct.timeState.ticks);
 					if (ourPred != null) {
 						if (ourPred.getError(ourMove) > 0.1) {
-							trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+							// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 							marble.unpackUpdate(ourMove);
 							needsPrediction |= 1 << Net.clientId;
 							predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
 						}
 					} else {
-						trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+						// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 						marble.unpackUpdate(ourMove);
 						needsPrediction |= 1 << Net.clientId;
 						predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
 					}
 				} else {
-					trace('Desync in General');
+					// trace('Desync in General');
 					marble.unpackUpdate(ourMove);
 					needsPrediction |= 1 << Net.clientId;
 					// predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
@@ -1169,7 +1169,7 @@ class MarbleWorld extends Scheduler {
 		advanceTimeState.dt = 0.032;
 		advanceTimeState.ticks = ourLastMoveTime;
 
-		if (marbleNeedsPrediction > 0) {
+		if (marbleNeedsPrediction & (1 << Net.clientId) > 0) { // Only for our clients pls
 			// if (qm != null) {
 			// var mvs = qm.powerupStates.copy();
 			for (pw in marble.level.powerUps) {
@@ -1203,7 +1203,7 @@ class MarbleWorld extends Scheduler {
 				var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
 				// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
-				var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
+				// var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
 				// if (distFromUs < 5)
 				m.calculationTicks = ourQueuedMoves.length;
 				// else
@@ -1238,7 +1238,7 @@ class MarbleWorld extends Scheduler {
 					@:privateAccess marbleToUpdate.isNetUpdate = true;
 					@:privateAccess marbleToUpdate.moveMotionDir = m.move.motionDir;
 					@:privateAccess marbleToUpdate.advancePhysics(advanceTimeState, mv, this.collisionWorld, this.pathedInteriors);
-					this.predictions.storeState(marbleToUpdate, move.timeState.ticks);
+					this.predictions.storeState(marbleToUpdate, @:privateAccess marbleToUpdate.serverTicks);
 					@:privateAccess marbleToUpdate.isNetUpdate = false;
 					m.calculationTicks--;
 				}
@@ -1476,7 +1476,7 @@ class MarbleWorld extends Scheduler {
 				}
 				this.predictions.storeState(marble, myMove.timeState.ticks);
 				for (client => marble in clientMarbles) {
-					this.predictions.storeState(marble, myMove.timeState.ticks);
+					this.predictions.storeState(marble, @:privateAccess marble.serverTicks);
 				}
 				if (Net.isHost) {
 					for (client => othermarble in clientMarbles) { // Oh no!
@@ -1555,6 +1555,8 @@ class MarbleWorld extends Scheduler {
 		if (this.playGui != null && _ready)
 			this.playGui.render(e);
 		if (_instancesNeedsUpdate) {
+			if (this.radar != null)
+				this.radar.render();
 			ProfilerUI.measure("updateInstances");
 			this.instanceManager.render();
 			if (this.marble != null && this.marble.cubemapRenderer != null && _ready) {
