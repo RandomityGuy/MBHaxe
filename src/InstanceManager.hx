@@ -19,6 +19,7 @@ import h3d.scene.Mesh;
 import src.MeshBatch;
 import src.MarbleGame;
 import src.ProfilerUI;
+import src.Settings;
 
 @:publicFields
 class MeshBatchInfo {
@@ -57,10 +58,8 @@ class InstanceManager {
 		var renderFrustum = scene.camera.frustum;
 		var doFrustumCheck = true;
 		// This sucks holy shit
-		doFrustumCheck = MarbleGame.instance.world != null
-			&& MarbleGame.instance.world.marble != null
-			&& MarbleGame.instance.world.marble.cubemapRenderer != null;
-		// renderFrustums = renderFrustums.concat(MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums());
+		doFrustumCheck = MarbleGame.instance.world != null && Settings.optionsSettings.reflectionDetail >= 3;
+		var cameraFrustrums = doFrustumCheck ? MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums() : null;
 
 		for (meshes in objects) {
 			for (minfo in meshes) {
@@ -71,13 +70,25 @@ class InstanceManager {
 					for (inst in minfo.instances) {
 						// for (frustum in renderFrustums) {
 						//	if (frustum.hasBounds(objBounds)) {
-						if (doFrustumCheck) {
-							var objBounds = @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds.clone();
-							objBounds.transform(inst.emptyObj.getAbsPos());
 
-							if (!renderFrustum.hasBounds(objBounds))
+						var objBounds = @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds.clone();
+						objBounds.transform(inst.emptyObj.getAbsPos());
+
+						if (cameraFrustrums == null && !renderFrustum.hasBounds(objBounds))
+							continue;
+
+						if (cameraFrustrums != null) {
+							var found = false;
+							for (frustrum in cameraFrustrums) {
+								if (frustrum.hasBounds(objBounds)) {
+									found = true;
+									break;
+								}
+							}
+							if (!found)
 								continue;
 						}
+
 						if (inst.gameObject.currentOpacity == 1)
 							opaqueinstances.push(inst);
 						else if (inst.gameObject.currentOpacity != 0)

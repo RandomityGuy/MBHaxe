@@ -3,7 +3,7 @@ package src;
 import h3d.Matrix;
 import src.DtsObject;
 import h3d.Vector;
-import h2d.Graphics;
+import gui.Graphics;
 import src.GameObject;
 import h2d.Scene;
 import src.MarbleWorld;
