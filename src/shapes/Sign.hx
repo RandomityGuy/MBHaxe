@@ -10,6 +10,7 @@ class Sign extends DtsObject {
 		this.dtsPath = "data/shapes/signs/sign.dts";
 		this.isCollideable = true;
 		this.useInstancing = true;
+		this.sharedNodeTransforms = true;
 
 		var d = "";
 		if (element.datablock.toLowerCase() != 'arrow') {

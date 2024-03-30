@@ -16,6 +16,7 @@ class TimeTravel extends PowerUp {
 		this.dtsPath = "data/shapes/items/timetravel.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
+		this.sharedNodeTransforms = true;
 		this.identifier = "TimeTravel";
 
 		if (element.timebonus != null) {

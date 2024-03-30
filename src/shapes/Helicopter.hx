@@ -17,6 +17,7 @@ class Helicopter extends PowerUp {
 		this.isTSStatic = false;
 		this.showSequences = false;
 		this.identifier = "Helicopter";
+		this.sharedNodeTransforms = true;
 		this.pickUpName = "a Gyrocopter powerup";
 	}
 

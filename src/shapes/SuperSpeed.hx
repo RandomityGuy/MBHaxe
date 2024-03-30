@@ -50,6 +50,7 @@ class SuperSpeed extends PowerUp {
 		this.identifier = "SuperSpeed";
 		this.pickUpName = "a Super Speed powerup";
 		this.useInstancing = true;
+		this.sharedNodeTransforms = true;
 		ssEmitterParticleData = new ParticleData();
 		ssEmitterParticleData.identifier = "superSpeedParticle";
 		ssEmitterParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);

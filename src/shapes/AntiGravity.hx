@@ -21,6 +21,7 @@ class AntiGravity extends PowerUp {
 		this.autoUse = true;
 		this.useInstancing = true;
 		this.animateSubObjectOpacities = true;
+		this.sharedNodeTransforms = true;
 		if (MisParser.parseBoolean(element.permanent))
 			norespawn = true;
 		if (norespawn)

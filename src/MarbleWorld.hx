@@ -2326,6 +2326,7 @@ class MarbleWorld extends Scheduler {
 			dtsObject.dispose();
 		}
 		dtsObjects = null;
+		DtsObject.disposeShared();
 		powerUps = [];
 		for (trigger in this.triggers) {
 			trigger.dispose();

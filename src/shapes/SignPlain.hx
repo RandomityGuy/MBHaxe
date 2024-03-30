@@ -10,6 +10,7 @@ class SignPlain extends DtsObject {
 
 		this.isCollideable = true;
 		this.useInstancing = true;
+		this.sharedNodeTransforms = true;
 
 		// Determine the direction to show
 		var direction = element.datablock.substring("Arrow".length).toLowerCase();

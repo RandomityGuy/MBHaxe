@@ -26,6 +26,7 @@ class Gem extends DtsObject {
 		this.isBoundingBoxCollideable = true;
 		pickedUp = false;
 		useInstancing = true;
+		this.sharedNodeTransforms = true;
 		showSequences = false; // Gems actually have an animation for the little shiny thing, but the actual game ignores that. I get it, it was annoying as hell.
 
 		var GEM_COLORS = ["red"];
