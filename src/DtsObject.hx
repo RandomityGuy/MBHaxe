@@ -97,6 +97,12 @@ class DtsObject extends GameObject {
 	var lastSequenceKeyframes:Map<Sequence, Float> = new Map();
 	var doSequenceOnce:Bool;
 	var doSequenceOnceBeginTime:Float;
+	var sharedNodeTransforms:Bool = false;
+
+	static var sharedGraphNodesMap:Map<String, Array<Object>> = [];
+
+	var sharedGraphNodes:Array<Object> = [];
+	var isSharedGraphNodesRoot = false;
 
 	var graphNodes:Array<Object> = [];
 	var dirtyTransforms:Array<Bool> = [];
@@ -357,6 +363,16 @@ class DtsObject extends GameObject {
 		}
 
 		rootObject = new Object(this);
+
+		if (this.sharedNodeTransforms) {
+			if (sharedGraphNodesMap.exists(this.identifier)) {
+				sharedGraphNodes = sharedGraphNodesMap.get(this.identifier);
+				isSharedGraphNodesRoot = false;
+			} else {
+				sharedGraphNodesMap.set(this.identifier, graphNodes.concat([this.rootObject]));
+				isSharedGraphNodesRoot = true;
+			}
+		}
 
 		for (i in rootNodesIdx) {
 			rootObject.addChild(this.graphNodes[i]);
@@ -1143,142 +1159,158 @@ class DtsObject extends GameObject {
 				continue;
 			var t = (actualKeyframe - keyframeLow) % 1;
 
-			if (rot > 0) {
-				for (i in 0...this.dts.nodes.length) {
-					var affected = ((1 << i) & rot) != 0;
+			if (rot > 0 || trans > 0 || scale > 0) {
+				if ((!this.sharedNodeTransforms || this.isSharedGraphNodesRoot)) {
+					if (rot > 0) {
+						for (i in 0...this.dts.nodes.length) {
+							var affected = ((1 << i) & rot) != 0;
 
-					if (affected) {
-						var rot1 = this.dts.nodeRotations[sequence.baseRotation + sequence.numKeyFrames * affectedCount + keyframeLow];
-						var rot2 = this.dts.nodeRotations[sequence.baseRotation + sequence.numKeyFrames * affectedCount + keyframeHigh];
+							if (affected) {
+								var rot1 = this.dts.nodeRotations[sequence.baseRotation + sequence.numKeyFrames * affectedCount + keyframeLow];
+								var rot2 = this.dts.nodeRotations[sequence.baseRotation + sequence.numKeyFrames * affectedCount + keyframeHigh];
 
-						var q1 = new Quat(-rot1.x, rot1.y, rot1.z, -rot1.w);
-						q1.normalize();
-						q1.conjugate();
+								var q1 = new Quat(-rot1.x, rot1.y, rot1.z, -rot1.w);
+								q1.normalize();
+								q1.conjugate();
 
-						var q2 = new Quat(-rot2.x, rot2.y, rot2.z, -rot2.w);
-						q2.normalize();
-						q2.conjugate();
+								var q2 = new Quat(-rot2.x, rot2.y, rot2.z, -rot2.w);
+								q2.normalize();
+								q2.conjugate();
 
-						var quat = new Quat();
-						quat.slerp(q1, q2, t);
-						quat.normalize();
+								var quat = new Quat();
+								quat.slerp(q1, q2, t);
+								quat.normalize();
 
-						this.graphNodes[i].getRotationQuat().load(quat);
-						this.graphNodes[i].posChanged = true;
-						propagateDirtyFlags(i);
-						affectedCount++;
-						// quaternions.push(quat);
-					} else {
-						var rotation = this.dts.defaultRotations[i];
-						var quat = new Quat(-rotation.x, rotation.y, rotation.z, -rotation.w);
-						quat.normalize();
-						quat.conjugate();
-						this.graphNodes[i].getRotationQuat().load(quat);
-						this.graphNodes[i].posChanged = true;
-						// quaternions.push(quat);
+								this.graphNodes[i].getRotationQuat().load(quat);
+								this.graphNodes[i].posChanged = true;
+								propagateDirtyFlags(i);
+								affectedCount++;
+								// quaternions.push(quat);
+							} else {
+								var rotation = this.dts.defaultRotations[i];
+								var quat = new Quat(-rotation.x, rotation.y, rotation.z, -rotation.w);
+								quat.normalize();
+								quat.conjugate();
+								this.graphNodes[i].getRotationQuat().load(quat);
+								this.graphNodes[i].posChanged = true;
+								// quaternions.push(quat);
+							}
+						}
 					}
-				}
-			}
 
-			affectedCount = 0;
-			if (trans > 0) {
-				for (i in 0...this.dts.nodes.length) {
-					var affected = ((1 << i) & trans) != 0;
+					affectedCount = 0;
+					if (trans > 0) {
+						for (i in 0...this.dts.nodes.length) {
+							var affected = ((1 << i) & trans) != 0;
 
-					if (affected) {
-						var trans1 = this.dts.nodeTranslations[sequence.baseTranslation + sequence.numKeyFrames * affectedCount + keyframeLow];
-						var trans2 = this.dts.nodeTranslations[sequence.baseTranslation + sequence.numKeyFrames * affectedCount + keyframeHigh];
+							if (affected) {
+								var trans1 = this.dts.nodeTranslations[sequence.baseTranslation + sequence.numKeyFrames * affectedCount + keyframeLow];
+								var trans2 = this.dts.nodeTranslations[sequence.baseTranslation + sequence.numKeyFrames * affectedCount + keyframeHigh];
 
-						var v1 = new Vector(-trans1.x, trans1.y, trans1.z);
-						var v2 = new Vector(-trans2.x, trans2.y, trans2.z);
-						var trans = Util.lerpThreeVectors(v1, v2, t);
-						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
-						propagateDirtyFlags(i);
-						affectedCount++;
-						// translations.push(Util.lerpThreeVectors(v1, v2, t));
-					} else {
-						var translation = this.dts.defaultTranslations[i];
-						var trans = new Vector(-translation.x, translation.y, translation.z);
-						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
-						// translations.push();
+								var v1 = new Vector(-trans1.x, trans1.y, trans1.z);
+								var v2 = new Vector(-trans2.x, trans2.y, trans2.z);
+								var trans = Util.lerpThreeVectors(v1, v2, t);
+								this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
+								propagateDirtyFlags(i);
+								affectedCount++;
+								// translations.push(Util.lerpThreeVectors(v1, v2, t));
+							} else {
+								var translation = this.dts.defaultTranslations[i];
+								var trans = new Vector(-translation.x, translation.y, translation.z);
+								this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
+								// translations.push();
+							}
+						}
 					}
-				}
-			}
 
-			affectedCount = 0;
-			if (scale > 0) {
-				if (sequence.flags & 1 > 0) { // Uniform scales
-					for (i in 0...this.dts.nodes.length) {
-						var affected = ((1 << i) & scale) != 0;
+					affectedCount = 0;
+					if (scale > 0) {
+						if (sequence.flags & 1 > 0) { // Uniform scales
+							for (i in 0...this.dts.nodes.length) {
+								var affected = ((1 << i) & scale) != 0;
 
-						if (affected) {
-							var scale1 = this.dts.nodeUniformScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
-							var scale2 = this.dts.nodeUniformScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
+								if (affected) {
+									var scale1 = this.dts.nodeUniformScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
+									var scale2 = this.dts.nodeUniformScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
 
-							var v1 = new Vector(scale1, scale1, scale1);
-							var v2 = new Vector(scale2, scale2, scale2);
+									var v1 = new Vector(scale1, scale1, scale1);
+									var v2 = new Vector(scale2, scale2, scale2);
 
-							var scaleVec = Util.lerpThreeVectors(v1, v2, t);
-							this.graphNodes[i].scaleX = scaleVec.x;
-							this.graphNodes[i].scaleY = scaleVec.y;
-							this.graphNodes[i].scaleZ = scaleVec.z;
-							affectedCount++;
-							propagateDirtyFlags(i);
-						} else {
-							this.graphNodes[i].scaleX = 1;
-							this.graphNodes[i].scaleY = 1;
-							this.graphNodes[i].scaleZ = 1;
+									var scaleVec = Util.lerpThreeVectors(v1, v2, t);
+									this.graphNodes[i].scaleX = scaleVec.x;
+									this.graphNodes[i].scaleY = scaleVec.y;
+									this.graphNodes[i].scaleZ = scaleVec.z;
+									affectedCount++;
+									propagateDirtyFlags(i);
+								} else {
+									this.graphNodes[i].scaleX = 1;
+									this.graphNodes[i].scaleY = 1;
+									this.graphNodes[i].scaleZ = 1;
+								}
+							}
+						}
+
+						if (sequence.flags & 2 > 0) { // `Aligned` scales
+							for (i in 0...this.dts.nodes.length) {
+								var affected = ((1 << i) & scale) != 0;
+
+								if (affected) {
+									var scale1 = this.dts.nodeAlignedScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
+									var scale2 = this.dts.nodeAlignedScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
+
+									var v1 = new Vector(scale1.x, scale1.y, scale1.z);
+									var v2 = new Vector(scale2.x, scale2.y, scale2.z);
+
+									var scaleVec = Util.lerpThreeVectors(v1, v2, t);
+									this.graphNodes[i].scaleX = scaleVec.x;
+									this.graphNodes[i].scaleY = scaleVec.y;
+									this.graphNodes[i].scaleZ = scaleVec.z;
+									affectedCount++;
+									propagateDirtyFlags(i);
+								} else {
+									this.graphNodes[i].scaleX = 1;
+									this.graphNodes[i].scaleY = 1;
+									this.graphNodes[i].scaleZ = 1;
+								}
+							}
+						}
+
+						if (sequence.flags & 4 > 0) { // Arbitrary scales
+							for (i in 0...this.dts.nodes.length) {
+								var affected = ((1 << i) & scale) != 0;
+
+								if (affected) {
+									var scale1 = this.dts.nodeArbitraryScaleFactors[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
+									var scale2 = this.dts.nodeArbitraryScaleFactors[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
+
+									var v1 = new Vector(scale1.x, scale1.y, scale1.z);
+									var v2 = new Vector(scale2.x, scale2.y, scale2.z);
+
+									var scaleVec = Util.lerpThreeVectors(v1, v2, t);
+									this.graphNodes[i].scaleX = scaleVec.x;
+									this.graphNodes[i].scaleY = scaleVec.y;
+									this.graphNodes[i].scaleZ = scaleVec.z;
+									affectedCount++;
+									propagateDirtyFlags(i);
+								} else {
+									this.graphNodes[i].scaleX = 1;
+									this.graphNodes[i].scaleY = 1;
+									this.graphNodes[i].scaleZ = 1;
+								}
+							}
 						}
 					}
 				}
-
-				if (sequence.flags & 2 > 0) { // `Aligned` scales
+				if (this.sharedNodeTransforms && !this.isSharedGraphNodesRoot) {
 					for (i in 0...this.dts.nodes.length) {
-						var affected = ((1 << i) & scale) != 0;
-
-						if (affected) {
-							var scale1 = this.dts.nodeAlignedScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
-							var scale2 = this.dts.nodeAlignedScales[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
-
-							var v1 = new Vector(scale1.x, scale1.y, scale1.z);
-							var v2 = new Vector(scale2.x, scale2.y, scale2.z);
-
-							var scaleVec = Util.lerpThreeVectors(v1, v2, t);
-							this.graphNodes[i].scaleX = scaleVec.x;
-							this.graphNodes[i].scaleY = scaleVec.y;
-							this.graphNodes[i].scaleZ = scaleVec.z;
-							affectedCount++;
-							propagateDirtyFlags(i);
-						} else {
-							this.graphNodes[i].scaleX = 1;
-							this.graphNodes[i].scaleY = 1;
-							this.graphNodes[i].scaleZ = 1;
-						}
-					}
-				}
-
-				if (sequence.flags & 4 > 0) { // Arbitrary scales
-					for (i in 0...this.dts.nodes.length) {
-						var affected = ((1 << i) & scale) != 0;
-
-						if (affected) {
-							var scale1 = this.dts.nodeArbitraryScaleFactors[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeLow];
-							var scale2 = this.dts.nodeArbitraryScaleFactors[sequence.baseScale + sequence.numKeyFrames * affectedCount + keyframeHigh];
-
-							var v1 = new Vector(scale1.x, scale1.y, scale1.z);
-							var v2 = new Vector(scale2.x, scale2.y, scale2.z);
-
-							var scaleVec = Util.lerpThreeVectors(v1, v2, t);
-							this.graphNodes[i].scaleX = scaleVec.x;
-							this.graphNodes[i].scaleY = scaleVec.y;
-							this.graphNodes[i].scaleZ = scaleVec.z;
-							affectedCount++;
-							propagateDirtyFlags(i);
-						} else {
-							this.graphNodes[i].scaleX = 1;
-							this.graphNodes[i].scaleY = 1;
-							this.graphNodes[i].scaleZ = 1;
-						}
+						var node = this.graphNodes[i];
+						var shared = this.sharedGraphNodes[i];
+						node.setPosition(shared.x, shared.y, shared.z);
+						node.qRot.load(shared.qRot);
+						node.scaleX = shared.scaleX;
+						node.scaleY = shared.scaleY;
+						node.scaleZ = shared.scaleZ;
+						// this.graphNodes[i].setTransform(this.sharedGraphNodes[i].getTransform());
 					}
 				}
 			}
@@ -1422,14 +1454,25 @@ class DtsObject extends GameObject {
 		}
 
 		if (this.ambientRotate) {
-			var spinAnimation = new Quat();
-			spinAnimation.initRotateAxis(0, 0, -1, timeState.timeSinceLoad * this.ambientSpinFactor);
+			if ((!this.sharedNodeTransforms || this.isSharedGraphNodesRoot)) {
+				var spinAnimation = new Quat();
+				spinAnimation.initRotateAxis(0, 0, -1, timeState.timeSinceLoad * this.ambientSpinFactor);
 
-			// var orientation = this.getRotationQuat();
-			// spinAnimation.multiply(orientation, spinAnimation);
+				// var orientation = this.getRotationQuat();
+				// spinAnimation.multiply(orientation, spinAnimation);
 
-			this.rootObject.getRotationQuat().load(spinAnimation);
-			this.rootObject.posChanged = true;
+				this.rootObject.getRotationQuat().load(spinAnimation);
+				this.rootObject.posChanged = true;
+			}
+			if (this.sharedNodeTransforms && !this.isSharedGraphNodesRoot) {
+				var node = this.rootObject;
+				var shared = this.sharedGraphNodes[this.sharedGraphNodes.length - 1];
+				node.setPosition(shared.x, shared.y, shared.z);
+				node.qRot.load(shared.qRot);
+				node.scaleX = shared.scaleX;
+				node.scaleY = shared.scaleY;
+				node.scaleZ = shared.scaleZ;
+			}
 		}
 
 		for (i in 0...this.colliders.length) {
@@ -1529,6 +1572,11 @@ class DtsObject extends GameObject {
 		this.level = null;
 		boundingCollider = null;
 		colliders = null;
+		sharedGraphNodes = null;
 		this.dtsResource.release();
+	}
+
+	public static function disposeShared() {
+		sharedGraphNodesMap = [];
 	}
 }

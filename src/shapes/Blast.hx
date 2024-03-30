@@ -17,6 +17,7 @@ class Blast extends PowerUp {
 		this.pickUpName = "a Blast powerup";
 		this.ambientRotate = false;
 		this.autoUse = true;
+		this.sharedNodeTransforms = true;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

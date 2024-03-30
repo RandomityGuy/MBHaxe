@@ -16,6 +16,7 @@ class MegaMarble extends PowerUp {
 		this.isTSStatic = false;
 		this.showSequences = true;
 		this.identifier = "MegaMarble";
+		this.sharedNodeTransforms = true;
 		this.pickUpName = "a Mega-Marble powerup";
 	}
 

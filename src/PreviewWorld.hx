@@ -301,6 +301,7 @@ class PreviewWorld extends Scheduler {
 		for (marb in marbles) {
 			marb.dispose();
 		}
+		DtsObject.disposeShared();
 		interiors = [];
 		dtsObjects = [];
 		marbles = [];

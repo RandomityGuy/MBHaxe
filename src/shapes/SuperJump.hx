@@ -49,6 +49,7 @@ class SuperJump extends PowerUp {
 		this.identifier = "SuperJump";
 		this.pickUpName = "a Super Jump powerup";
 		this.showSequences = false;
+		this.sharedNodeTransforms = true;
 		sjEmitterParticleData = new ParticleData();
 		sjEmitterParticleData.identifier = "superJumpParticle";
 		sjEmitterParticleData.texture = ResourceLoader.getResource("data/particles/twirl.png", ResourceLoader.getTexture, this.textureResources);

@@ -12,6 +12,7 @@ class GemBeam extends DtsObject {
 		this.isTSStatic = false;
 		this.identifier = "GemBeam";
 		this.useInstancing = true;
+		this.sharedNodeTransforms = true;
 		this.animateSubObjectOpacities = true;
 	}
 

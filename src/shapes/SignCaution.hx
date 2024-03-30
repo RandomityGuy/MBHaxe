@@ -10,6 +10,7 @@ class SignCaution extends DtsObject {
 		this.dtsPath = "data/shapes/signs/cautionsign.dts";
 		this.isCollideable = true;
 		this.useInstancing = true;
+		this.sharedNodeTransforms = true;
 
 		var type = element.datablock.substring("SignCaution".length).toLowerCase();
 		switch (type) {
