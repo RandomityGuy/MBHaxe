@@ -283,6 +283,9 @@ class MarbleGame {
 
 	public function quitMission() {
 		Console.log("Quitting mission");
+		if (Net.isMP) {
+			Net.disconnect();
+		}
 		var watching = world.isWatching;
 		var missionType = world.mission.type;
 		var isNotCustom = !world.mission.isClaMission && !world.mission.isCustom;

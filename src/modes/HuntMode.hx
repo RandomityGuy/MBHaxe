@@ -585,27 +585,51 @@ class HuntMode extends NullMode {
 	override function onTimeExpire() {
 		if (level.finishTime != null)
 			return;
-		if (this.level.isMultiplayer) {
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
-			level.finishTime = level.timeState.clone();
-			level.marble.setMode(Start);
-			level.marble.camera.finish = true;
-			level.finishYaw = level.marble.camera.CameraYaw;
-			level.finishPitch = level.marble.camera.CameraPitch;
-			level.displayAlert("Congratulations! You've finished!");
-			level.cancel(@:privateAccess level.oobSchedule);
-			level.cancel(@:privateAccess level.marble.oobSchedule);
-			if (Net.isHost) {
-				NetCommands.timerRanOut();
+
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
+		level.finishTime = level.timeState.clone();
+		level.marble.setMode(Start);
+		level.marble.camera.finish = true;
+		level.finishYaw = level.marble.camera.CameraYaw;
+		level.finishPitch = level.marble.camera.CameraPitch;
+		level.displayAlert("Congratulations! You've finished!");
+		level.cancel(@:privateAccess level.oobSchedule);
+		level.cancel(@:privateAccess level.marble.oobSchedule);
+		if (!level.isWatching) {
+			if (level.isMultiplayer) {
+				if (Net.isHost) {
+					for (marble in level.marbles) {
+						marble.setMode(Start);
+						level.cancel(@:privateAccess marble.oobSchedule);
+					}
+
+					NetCommands.timerRanOut();
+				}
+				if (!level.isWatching) {
+					@:privateAccess level.schedule(level.timeState.currentAttemptTime, () -> cast level.showFinishScreen());
+				}
+			} else {
+				var myScore = {
+					name: "Player",
+					time: getFinishScore()
+				};
+				Settings.saveScore(level.mission.path, myScore, getScoreType());
+				var notifies = AchievementsGui.check();
+				var delay = 5.0;
+				var achDelay = 0.0;
+				for (i in 0...9) {
+					if (notifies & (1 << i) > 0)
+						achDelay += 3;
+				}
+				if (notifies > 0)
+					achDelay += 0.5;
+				@:privateAccess level.schedule(level.timeState.currentAttemptTime + Math.max(delay, achDelay), () -> cast level.showFinishScreen());
 			}
-			if (!level.isWatching) {
-				@:privateAccess level.schedule(level.timeState.currentAttemptTime, () -> cast level.showFinishScreen());
-			}
-			// Stop the ongoing sounds
-			if (@:privateAccess level.timeTravelSound != null) {
-				@:privateAccess level.timeTravelSound.stop();
-				@:privateAccess level.timeTravelSound = null;
-			}
+		}
+		// Stop the ongoing sounds
+		if (@:privateAccess level.timeTravelSound != null) {
+			@:privateAccess level.timeTravelSound.stop();
+			@:privateAccess level.timeTravelSound = null;
 		}
 	}
 

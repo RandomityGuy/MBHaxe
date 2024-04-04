@@ -1,5 +1,6 @@
 package src;
 
+import net.Net;
 import collision.CollisionWorld;
 import mis.MissionElement.MissionElementSky;
 import shapes.Astrolabe;
@@ -285,6 +286,12 @@ class PreviewWorld extends Scheduler {
 				fwd();
 			}, skyElem);
 		});
+
+		if (Net.isMP) {
+			// Load the MP sounds
+			worker.loadFile("sound/spawn_alternate.wav");
+			worker.loadFile("sound/infotutorial.wav");
+		}
 
 		worker.run();
 	}

@@ -79,8 +79,9 @@ class CreateMatchGui extends GuiImage {
 			maxPlayers = idx + 2;
 			return true;
 		}, 0.5, 118);
+		playerOpt.setCurrentOption(6);
 
-		var privateOpt = optionCollection.addOption(1, "Max Players", ["None", "1", "2", "3", "4", "5", "6", "7"], (idx) -> {
+		var privateOpt = optionCollection.addOption(1, "Private Slots", ["None", "1", "2", "3", "4", "5", "6", "7"], (idx) -> {
 			privateSlots = idx;
 			return true;
 		}, 0.5, 118);

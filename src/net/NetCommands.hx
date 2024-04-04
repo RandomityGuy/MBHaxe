@@ -59,4 +59,28 @@ class NetCommands {
 			huntMode.onTimeExpire();
 		}
 	}
+
+	@:rpc(server) public static function clientDisconnected(clientId:Int) {
+		var conn = Net.clientIdMap.get(clientId);
+		if (MarbleGame.instance.world != null) {
+			MarbleGame.instance.world.removePlayer(conn);
+		}
+		Net.clientIdMap.remove(clientId);
+	}
+
+	@:rpc(server) public static function clientJoin(clientId:Int) {}
+
+	@:rpc(client) public static function clientLeave(clientId:Int) {
+		if (Net.isHost) {
+			@:privateAccess Net.onClientLeave(cast Net.clientIdMap[clientId]);
+		}
+	}
+
+	@:rpc(server) public static function serverClosed() {
+		if (Net.isClient) {
+			if (MarbleGame.instance.world != null) {
+				MarbleGame.instance.quitMission();
+			}
+		}
+	}
 }
