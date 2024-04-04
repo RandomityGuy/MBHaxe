@@ -47,6 +47,13 @@ class MasterServerClient {
 			onConnect();
 	}
 
+	public static function disconnectFromMasterServer() {
+		if (instance != null) {
+			instance.ws.close();
+			instance = null;
+		}
+	}
+
 	public function sendServerInfo(serverInfo:ServerInfo) {
 		ws.send(Json.stringify({
 			type: "serverInfo",

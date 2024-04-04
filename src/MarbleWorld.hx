@@ -1263,12 +1263,16 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	public function removePlayer(cc:ClientConnection) {
+	public function removePlayer(cc:GameConnection) {
 		var otherMarble = this.clientMarbles[cc];
-		this.predictions.removeMarbleFromPrediction(otherMarble);
-		this.scene.removeChild(otherMarble);
-		this.collisionWorld.removeMarbleEntity(otherMarble.collider);
-		otherMarble.dispose();
+		if (otherMarble != null) {
+			this.predictions.removeMarbleFromPrediction(otherMarble);
+			this.scene.removeChild(otherMarble);
+			this.collisionWorld.removeMarbleEntity(otherMarble.collider);
+			this.playGui.removePlayer(cc.id);
+			this.clientMarbles.remove(cc);
+			otherMarble.dispose();
+		}
 	}
 
 	public function rollback(t:Float) {

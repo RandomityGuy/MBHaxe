@@ -1,5 +1,7 @@
 package net;
 
+import src.ResourceLoader;
+import src.AudioManager;
 import net.NetPacket.GemPickupPacket;
 import net.NetPacket.GemSpawnPacket;
 import net.BitStream.InputBitStream;
@@ -175,6 +177,19 @@ class Net {
 			clientDatachannel.onMessage = (b) -> {
 				onPacketReceived(client, clientDatachannel, new InputBitStream(b));
 			}
+			clientDatachannel.onClosed = () -> {
+				disconnect();
+				if (MarbleGame.instance.world != null) {
+					MarbleGame.instance.quitMission();
+				}
+			}
+			clientDatachannel.onError = (msg) -> {
+				Console.log('Errored out due to ${msg}');
+				disconnect();
+				if (MarbleGame.instance.world != null) {
+					MarbleGame.instance.quitMission();
+				}
+			}
 
 			isMP = true;
 			isHost = false;
@@ -233,6 +248,32 @@ class Net {
 		// }
 	}
 
+	public static function disconnect() {
+		if (Net.isClient) {
+			NetCommands.clientLeave(Net.clientId);
+			Net.isMP = false;
+			Net.isClient = false;
+			Net.isHost = false;
+			Net.client.close();
+			Net.client = null;
+			Net.clientId = 0;
+			Net.clientIdMap.clear();
+			Net.clientConnection = null;
+		}
+		if (Net.isHost) {
+			NetCommands.serverClosed();
+			for (client => gc in clients) {
+				client.close();
+			}
+			Net.isMP = false;
+			Net.isClient = false;
+			Net.isHost = false;
+			Net.clients.clear();
+			Net.clientIdMap.clear();
+			MasterServerClient.disconnectFromMasterServer();
+		}
+	}
+
 	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel) {
 		clientId += 1;
 		var cc = new ClientConnection(clientId, c, dc);
@@ -242,6 +283,12 @@ class Net {
 			onPacketReceived(c, dc, new InputBitStream(msgBytes));
 		}
 		dc.onClosed = () -> {
+			clients.remove(c);
+			onClientLeave(cc);
+		}
+		dc.onError = (msg) -> {
+			clients.remove(c);
+			Console.log('Client ${cc.id} errored out due to: ${msg}');
 			onClientLeave(cc);
 		}
 		var b = haxe.io.Bytes.alloc(2);
@@ -256,6 +303,8 @@ class Net {
 		cast(clients[c], ClientConnection).pingSendTime = Console.time();
 		dc.sendBytes(b);
 		Console.log("Sending ping packet!");
+
+		AudioManager.playSound(ResourceLoader.getAudio("data/sound/spawn_alternate.wav").resource);
 
 		serverInfo.players++;
 		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the new player
@@ -273,8 +322,11 @@ class Net {
 	}
 
 	static function onClientLeave(cc:ClientConnection) {
+		if (!Net.isMP)
+			return;
 		serverInfo.players--;
 		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
+		NetCommands.clientDisconnected(cc.id);
 	}
 
 	static function sendPlayerInfosBytes() {
@@ -290,6 +342,8 @@ class Net {
 	}
 
 	static function onPacketReceived(c:RTCPeerConnection, dc:RTCDataChannel, input:InputBitStream) {
+		if (!Net.isMP)
+			return; // only for MP
 		var packetType = input.readByte();
 		switch (packetType) {
 			case NetCommand:
@@ -326,7 +380,9 @@ class Net {
 					Console.log('Got RTT ${conn.rtt} for client ${conn.id}');
 					if (Net.isHost) {
 						var b = sendPlayerInfosBytes();
-						conn.sendBytes(b);
+						for (cc in clients) {
+							cc.sendBytes(b);
+						}
 					}
 				}
 
@@ -371,12 +427,17 @@ class Net {
 
 			case PlayerInfo:
 				var count = input.readByte();
+				var newP = false;
 				for (i in 0...count) {
 					var id = input.readByte();
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
+						newP = true;
 					}
+				}
+				if (newP) {
+					AudioManager.playSound(ResourceLoader.getAudio("sounds/spawn_alternate.wav").resource);
 				}
 
 			case _:
@@ -392,8 +453,10 @@ class Net {
 	}
 
 	public static function sendPacketToHost(packetData:OutputBitStream) {
-		var bytes = packetData.getBytes();
-		clientDatachannel.sendBytes(bytes);
+		if (clientDatachannel.state == Open) {
+			var bytes = packetData.getBytes();
+			clientDatachannel.sendBytes(bytes);
+		}
 	}
 
 	public static function addDummyConnection() {
