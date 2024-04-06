@@ -120,8 +120,10 @@ class MPServerListGui extends GuiImage {
 		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.gamepadAccelerator = ["X"];
 		nextButton.pressedAction = (e) -> {
+			MarbleGame.canvas.setContent(new MultiplayerLoadingGui("Connecting"));
 			Net.joinServer(ourServerList[curSelection].name, () -> {
 				MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
+				Net.remoteServerInfo = ourServerList[curSelection];
 			});
 		};
 		bottomBar.addChild(nextButton);

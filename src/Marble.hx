@@ -1732,6 +1732,7 @@ class Marble extends GameObject {
 		marbleUpdate.oob = this.outOfBounds;
 		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0x1FF;
 		marbleUpdate.netFlags = this.netFlags;
+		marbleUpdate.gravityDirection = this.currentUp;
 		this.netFlags = 0;
 		marbleUpdate.serialize(b);
 		return b.getBytes();
@@ -1756,6 +1757,8 @@ class Marble extends GameObject {
 		this.blastUseTick = p.blastTick;
 		this.helicopterUseTick = p.heliTick;
 		this.megaMarbleUseTick = p.megaTick;
+		this.currentUp = p.gravityDirection;
+		this.level.setUp(cast this, this.currentUp, this.level.timeState, true);
 		this.outOfBounds = p.oob;
 		this.camera.oob = p.oob;
 		if (p.powerUpId == 0x1FF) {
@@ -2306,7 +2309,7 @@ class Marble extends GameObject {
 		this.blastTicks = 0;
 		this.helicopterUseTick = 0;
 		this.megaMarbleUseTick = 0;
-		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup;
+		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.contactEntities = [];
 		this._firstTick = true;

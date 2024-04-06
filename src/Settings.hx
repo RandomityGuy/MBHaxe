@@ -200,7 +200,7 @@ class Settings {
 
 	public static var achievementProgression:Int;
 
-	public static var highscoreName = "";
+	public static var highscoreName = "Player";
 
 	public static var uiScale = 1.0;
 

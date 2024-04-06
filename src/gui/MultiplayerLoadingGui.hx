@@ -10,8 +10,11 @@ import src.Util;
 class MultiplayerLoadingGui extends GuiImage {
 	var loadText:GuiText;
 	var loadTextBg:GuiText;
+	var loadAnim:GuiLoadAnim;
+	var bottomBar:GuiControl;
+	var innerCtrl:GuiControl;
 
-	public function new(missionName:String) {
+	public function new(initialStatus:String) {
 		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
 		super(res);
 		this.position = new Vector();
@@ -31,7 +34,7 @@ class MultiplayerLoadingGui extends GuiImage {
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
 		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
-		var loadAnim = new GuiLoadAnim();
+		loadAnim = new GuiLoadAnim();
 		loadAnim.position = new Vector(610, 253);
 		loadAnim.extent = new Vector(63, 63);
 		loadAnim.horizSizing = Center;
@@ -44,7 +47,7 @@ class MultiplayerLoadingGui extends GuiImage {
 		loadTextBg.horizSizing = Center;
 		loadTextBg.vertSizing = Bottom;
 		loadTextBg.justify = Center;
-		loadTextBg.text.text = "Loading";
+		loadTextBg.text.text = initialStatus;
 		loadTextBg.text.textColor = 0;
 		this.addChild(loadTextBg);
 
@@ -54,12 +57,69 @@ class MultiplayerLoadingGui extends GuiImage {
 		loadText.horizSizing = Center;
 		loadText.vertSizing = Bottom;
 		loadText.justify = Center;
-		loadText.text.text = "Loading";
+		loadText.text.text = initialStatus;
 		this.addChild(loadText);
+
+		#if hl
+		var scene2d = hxd.Window.getInstance();
+		#end
+		#if js
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
+
+		var offsetX = (scene2d.width - 1280) / 2;
+		var offsetY = (scene2d.height - 720) / 2;
+
+		var subX = 640 - (scene2d.width - offsetX) * 640 / scene2d.width;
+		var subY = 480 - (scene2d.height - offsetY) * 480 / scene2d.height;
+
+		innerCtrl = new GuiControl();
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		innerCtrl.horizSizing = Width;
+		innerCtrl.vertSizing = Height;
+		this.addChild(innerCtrl);
+
+		bottomBar = new GuiControl();
+		bottomBar.position = new Vector(0, 590);
+		bottomBar.extent = new Vector(640, 200);
+		bottomBar.horizSizing = Width;
+		bottomBar.vertSizing = Bottom;
+		innerCtrl.addChild(bottomBar);
 	}
 
 	public function setLoadingStatus(str:String) {
 		loadText.text.text = str;
 		loadTextBg.text.text = str;
+	}
+
+	public function setErrorStatus(str:String) {
+		loadText.text.text = str;
+		loadTextBg.text.text = str;
+		loadAnim.anim.visible = false;
+
+		var backButton = new GuiXboxButton("Ok", 160);
+		backButton.position = new Vector(960, 0);
+		backButton.vertSizing = Bottom;
+		backButton.horizSizing = Right;
+		backButton.gamepadAccelerator = ["A"];
+		backButton.accelerators = [hxd.Key.ENTER];
+		backButton.pressedAction = (e) -> {
+			MarbleGame.canvas.setContent(new MultiplayerGui());
+		};
+		bottomBar.addChild(backButton);
+		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+	}
+
+	override function onResize(width:Int, height:Int) {
+		var offsetX = (width - 1280) / 2;
+		var offsetY = (height - 720) / 2;
+
+		var subX = 640 - (width - offsetX) * 640 / width;
+		var subY = 480 - (height - offsetY) * 480 / height;
+		innerCtrl.position = new Vector(offsetX, offsetY);
+		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+
+		super.onResize(width, height);
 	}
 }

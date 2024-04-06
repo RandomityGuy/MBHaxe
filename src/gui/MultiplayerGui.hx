@@ -78,6 +78,10 @@ class MultiplayerGui extends GuiImage {
 			// });
 		});
 
+		btnList.addButton(5, 'Change Display Name', (e) -> {
+			MarbleGame.canvas.setContent(new EnterNameDlg());
+		});
+
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
