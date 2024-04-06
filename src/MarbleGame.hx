@@ -1,5 +1,7 @@
 package src;
 
+import gui.MultiplayerLevelSelectGui;
+import net.NetCommands;
 import net.Net;
 import gui.LevelSelectGui;
 import gui.MainMenuGui;
@@ -240,6 +242,9 @@ class MarbleGame {
 					quitMission();
 				}));
 			} else {
+				if (Net.isMP && Net.isClient) {
+					Net.disconnect();
+				}
 				quitMission();
 			}
 		}, (sender) -> {
@@ -289,7 +294,9 @@ class MarbleGame {
 	public function quitMission() {
 		Console.log("Quitting mission");
 		if (Net.isMP) {
-			Net.disconnect();
+			if (Net.isHost) {
+				NetCommands.endGame();
+			}
 		}
 		var watching = world.isWatching;
 		var missionType = world.mission.type;
@@ -315,12 +322,17 @@ class MarbleGame {
 			canvas.setContent(new MainMenuGui());
 			#end
 		} else {
-			var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
-			if (_exitingToMenu) {
-				_exitingToMenu = false;
-				canvas.setContent(new MainMenuGui());
+			if (Net.isMP) {
+				var lobby = new MultiplayerLevelSelectGui(Net.isHost);
+				canvas.setContent(lobby);
 			} else {
-				canvas.setContent(pmg);
+				var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
+				if (_exitingToMenu) {
+					_exitingToMenu = false;
+					canvas.setContent(new MainMenuGui());
+				} else {
+					canvas.setContent(pmg);
+				}
 			}
 		}
 

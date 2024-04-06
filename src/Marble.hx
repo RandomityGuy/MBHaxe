@@ -1757,8 +1757,8 @@ class Marble extends GameObject {
 		this.blastUseTick = p.blastTick;
 		this.helicopterUseTick = p.heliTick;
 		this.megaMarbleUseTick = p.megaTick;
-		this.currentUp = p.gravityDirection;
-		this.level.setUp(cast this, this.currentUp, this.level.timeState, true);
+		// this.currentUp = p.gravityDirection;
+		this.level.setUp(cast this, p.gravityDirection, this.level.timeState);
 		this.outOfBounds = p.oob;
 		this.camera.oob = p.oob;
 		if (p.powerUpId == 0x1FF) {
