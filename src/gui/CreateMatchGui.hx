@@ -114,8 +114,8 @@ class CreateMatchGui extends GuiImage {
 		nextButton.gamepadAccelerator = ["A"];
 		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.pressedAction = (e) -> {
+			Net.hostServer('${Settings.highscoreName}\'s Server', maxPlayers, privateSlots, privateGame);
 			MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(true));
-			Net.hostServer("My Server", maxPlayers, privateSlots, privateGame);
 		};
 		bottomBar.addChild(nextButton);
 	}

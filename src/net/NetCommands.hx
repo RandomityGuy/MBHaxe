@@ -5,6 +5,7 @@ import net.ClientConnection.GameplayState;
 import net.Net.NetPacketType;
 import gui.MultiplayerLevelSelectGui;
 import src.MarbleGame;
+import gui.MultiplayerLoadingGui;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -28,13 +29,34 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(client) public static function toggleReadiness(clientId:Int) {
+		if (Net.isHost) {
+			if (clientId == 0)
+				Net.lobbyHostReady = !Net.lobbyHostReady;
+			else
+				Net.clientIdMap[clientId].toggleLobbyReady();
+			var allReady = true;
+			for (id => client in Net.clientIdMap) {
+				if (!client.lobbyReady) {
+					allReady = false;
+					break;
+				}
+			}
+			if (allReady && Net.lobbyHostReady) {
+				NetCommands.playLevel();
+			}
+		}
+	}
+
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
 			Net.clientIdMap[clientId].ready();
 			var allReady = true;
 			for (id => client in Net.clientIdMap) {
-				if (client.state != GameplayState.GAME)
+				if (client.state != GameplayState.GAME) {
 					allReady = false;
+					break;
+				}
 			}
 			if (allReady) {
 				if (MarbleGame.instance.world != null) {
@@ -66,6 +88,9 @@ class NetCommands {
 			MarbleGame.instance.world.removePlayer(conn);
 		}
 		Net.clientIdMap.remove(clientId);
+		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+			cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+		}
 	}
 
 	@:rpc(server) public static function clientJoin(clientId:Int) {}
@@ -80,6 +105,18 @@ class NetCommands {
 		if (Net.isClient) {
 			if (MarbleGame.instance.world != null) {
 				MarbleGame.instance.quitMission();
+			}
+			var loadGui = new MultiplayerLoadingGui("Server closed");
+			MarbleGame.canvas.setContent(loadGui);
+			loadGui.setErrorStatus("Server closed");
+		}
+	}
+
+	@:rpc(client) public static function setPlayerName(clientId:Int, name:String) {
+		if (Net.isHost) {
+			Net.clientIdMap[clientId].setName(name);
+			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
 			}
 		}
 	}

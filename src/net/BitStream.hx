@@ -67,6 +67,15 @@ class InputBitStream {
 	public function readFloat() {
 		return FPHelper.i32ToFloat(readInt32());
 	}
+
+	public function readString() {
+		var length = readByte();
+		var str = "";
+		for (i in 0...length) {
+			str += String.fromCharCode(readByte());
+		}
+		return str;
+	}
 }
 
 class OutputBitStream {
@@ -134,5 +143,12 @@ class OutputBitStream {
 
 	public function writeFloat(value:Float) {
 		writeInt(FPHelper.floatToI32(value), 32);
+	}
+
+	public function writeString(value:String) {
+		writeByte(value.length);
+		for (i in 0...value.length) {
+			writeByte(StringTools.fastCodeAt(value, i));
+		}
 	}
 }

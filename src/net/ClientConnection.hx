@@ -26,6 +26,7 @@ class ClientConnection extends GameConnection {
 		this.datachannel = datachannel;
 		this.state = GameplayState.LOBBY;
 		this.rtt = 0;
+		this.name = "Unknown";
 	}
 
 	override function sendBytes(b:Bytes) {
@@ -38,6 +39,7 @@ class DummyConnection extends GameConnection {
 	public function new(id:Int) {
 		super(id);
 		this.state = GameplayState.GAME;
+		this.lobbyReady = true;
 	}
 }
 
@@ -46,14 +48,21 @@ abstract class GameConnection {
 	var id:Int;
 	var state:GameplayState;
 	var moveManager:MoveManager;
+	var name:String;
+	var lobbyReady:Bool;
 
 	public function new(id:Int) {
 		this.id = id;
 		this.moveManager = new MoveManager(this);
+		this.lobbyReady = false;
 	}
 
 	public function ready() {
 		state = GameplayState.GAME;
+	}
+
+	public function toggleLobbyReady() {
+		lobbyReady = !lobbyReady;
 	}
 
 	public function queueMove(m:NetMove) {
@@ -81,4 +90,12 @@ abstract class GameConnection {
 	}
 
 	public function sendBytes(b:haxe.io.Bytes) {}
+
+	public inline function getName() {
+		return name;
+	}
+
+	public inline function setName(value:String) {
+		name = value;
+	}
 }

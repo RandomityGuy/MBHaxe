@@ -1,5 +1,6 @@
 package gui;
 
+import net.Net;
 import net.NetCommands;
 import modes.GameMode.ScoreType;
 import src.Util;
@@ -19,6 +20,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 	static var setLevelFn:Int->Void;
 	static var playSelectedLevel:Void->Void;
 
+	var playerList:GuiMLTextListCtrl;
+	var updatePlayerCountFn:(Int, Int, Int, Int) -> Void;
 	var innerCtrl:GuiControl;
 
 	public function new(isHost:Bool) {
@@ -29,8 +32,15 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
 		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
+		var arial12 = arial14b.toSdfFont(cast 16 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 		function mlFontLoader(text:String) {
-			return arial14;
+			switch (text) {
+				case "arial14":
+					return arial14;
+				case "arial12":
+					return arial12;
+			}
+			return null;
 		}
 
 		MarbleGame.instance.toRecord = false;
@@ -127,11 +137,34 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "SELECT LEVEL";
+		rootTitle.text.text = "LOBBY";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
-		var bottomBar = new GuiControl();
 
+		var playerWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/achievementWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
+		playerWnd.horizSizing = Right;
+		playerWnd.vertSizing = Bottom;
+		playerWnd.position = new Vector(330, 58);
+		playerWnd.extent = new Vector(640, 480);
+		innerCtrl.addChild(playerWnd);
+
+		var playerListArr = [Settings.highscoreName];
+		if (Net.isClient) {
+			for (c => v in Net.clientIdMap) {
+				playerListArr.push(v.getName());
+			}
+		}
+
+		playerList = new GuiMLTextListCtrl(arial14, playerListArr, null);
+		playerList.selectedColor = 0xF29515;
+		playerList.selectedFillColor = 0xEBEBEB;
+		playerList.position = new Vector(25, 22);
+		playerList.extent = new Vector(550, 480);
+		playerList.scrollable = true;
+		playerList.onSelectedFunc = (sel) -> {}
+		playerWnd.addChild(playerList);
+
+		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
 		bottomBar.horizSizing = Width;
@@ -144,7 +177,10 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = ["B"];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
-		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new DifficultySelectGui());
+		backButton.pressedAction = (e) -> {
+			Net.disconnect();
+			MarbleGame.canvas.setContent(new CreateMatchGui());
+		}
 		bottomBar.addChild(backButton);
 
 		// var lbButton = new GuiXboxButton("Leaderboard", 220);
@@ -153,18 +189,17 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		// lbButton.horizSizing = Right;
 		// bottomBar.addChild(lbButton);
 
-		if (isHost) {
-			var nextButton = new GuiXboxButton("Play", 160);
-			nextButton.position = new Vector(960, 0);
-			nextButton.vertSizing = Bottom;
-			nextButton.horizSizing = Right;
-			nextButton.gamepadAccelerator = ["A"];
-			nextButton.accelerators = [hxd.Key.ENTER];
-			nextButton.pressedAction = (e) -> {
-				NetCommands.playLevel();
-			};
-			bottomBar.addChild(nextButton);
-		}
+		var nextButton = new GuiXboxButton("Ready", 160);
+		nextButton.position = new Vector(960, 0);
+		nextButton.vertSizing = Bottom;
+		nextButton.horizSizing = Right;
+		nextButton.gamepadAccelerator = ["A"];
+		nextButton.accelerators = [hxd.Key.ENTER];
+		nextButton.pressedAction = (e) -> {
+			NetCommands.toggleReadiness(Net.isClient ? Net.clientId : 0);
+		};
+		bottomBar.addChild(nextButton);
+
 		playSelectedLevel = () -> {
 			MarbleGame.instance.playMission(curMission, true);
 		}
@@ -176,41 +211,18 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		levelWnd.horizSizing = Right;
 		innerCtrl.addChild(levelWnd);
 
-		var statIcon = new GuiImage(ResourceLoader.getResource("data/ui/xbox/statIcon.png", ResourceLoader.getImage, this.imageResources).toTile());
-		statIcon.position = new Vector(29, 54);
-		statIcon.extent = new Vector(20, 20);
-		levelWnd.addChild(statIcon);
-
-		var eggIcon = new GuiImage(ResourceLoader.getResource("data/ui/xbox/eggIcon.png", ResourceLoader.getImage, this.imageResources).toTile());
-		eggIcon.position = new Vector(29, 79);
-		eggIcon.extent = new Vector(20, 20);
-		levelWnd.addChild(eggIcon);
-
 		var c0 = 0xEBEBEB;
 		var c1 = 0x8DFF8D;
 		var c2 = 0x88BCEE;
 		var c3 = 0xFF7575;
 
 		var levelInfoLeft = new GuiMLText(arial14, mlFontLoader);
-		levelInfoLeft.position = new Vector(69, 54);
-		levelInfoLeft.extent = new Vector(180, 100);
-		levelInfoLeft.text.text = '<p align="right"><font color="#EBEBEB">My Best Time:</font><br/><font color="#EBEBEB">Par Time:</font></p>';
-		levelInfoLeft.text.lineSpacing = 6;
+		levelInfoLeft.position = new Vector(33, 40);
+		levelInfoLeft.extent = new Vector(480, 100);
+		levelInfoLeft.text.text = '';
+		levelInfoLeft.text.lineSpacing = 0;
+		levelInfoLeft.text.filter = new h2d.filter.DropShadow(2, 0.785, 0x000000, 1, 0, 0.4, 1, true);
 		levelWnd.addChild(levelInfoLeft);
-
-		var levelInfoMid = new GuiMLText(arial14, mlFontLoader);
-		levelInfoMid.position = new Vector(269, 54);
-		levelInfoMid.extent = new Vector(180, 100);
-		levelInfoMid.text.text = '<p align="left"><font color="#EBEBEB">None</font><br/><font color="#88BCEE">99:59:99</font></p>';
-		levelInfoMid.text.lineSpacing = 6;
-		levelWnd.addChild(levelInfoMid);
-
-		var levelInfoRight = new GuiMLText(arial14, mlFontLoader);
-		levelInfoRight.position = new Vector(379, 54);
-		levelInfoRight.extent = new Vector(180, 100);
-		levelInfoRight.text.text = '<p align="left"><font color="#EBEBEB">Level 1<br/>Difficulty 1</font></p>';
-		levelInfoRight.text.lineSpacing = 6;
-		levelWnd.addChild(levelInfoRight);
 
 		var levelNames = difficultyMissions.map(x -> x.title);
 		var levelSelectOpts = new GuiXboxOptionsList(6, "Level", levelNames);
@@ -230,10 +242,6 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
 			var mis = difficultyMissions[idx];
 			var requestToken = currentToken;
-			if (Settings.easterEggs.exists(mis.path))
-				eggIcon.bmp.visible = true;
-			else
-				eggIcon.bmp.visible = false;
 			MarbleGame.instance.setPreviewMission(misFile, () -> {
 				lock = false;
 				if (requestToken != currentToken)
@@ -243,34 +251,31 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				loadText.text.visible = false;
 				loadTextBg.text.visible = false;
 			});
-
-			var scoreType = mis.missionInfo.gamemode != null
-				&& mis.missionInfo.gamemode.toLowerCase() == 'scrum' ? ScoreType.Score : ScoreType.Time;
-
-			var myScore = Settings.getScores(mis.path);
-			var scoreDisp = "None";
-			if (myScore.length != 0)
-				scoreDisp = scoreType == Time ? Util.formatTime(myScore[0].time) : Util.formatScore(myScore[0].time);
-			var isPar = myScore.length != 0 && myScore[0].time < mis.qualifyTime;
-			var scoreColor = "#EBEBEB";
-			if (isPar)
-				scoreColor = "#8DFF8D";
-			if (scoreType == Score && myScore.length == 0)
-				scoreColor = "#EBEBEB";
-			if (scoreType == Time) {
-				levelInfoLeft.text.text = '<p align="right"><font color="#EBEBEB">My Best Time:</font><br/><font color="#EBEBEB">Par Time:</font></p>';
-				levelInfoMid.text.text = '<p align="left"><font color="${scoreColor}">${scoreDisp}</font><br/><font color="#88BCEE">${Util.formatTime(mis.qualifyTime)}</font></p>';
+			var hostName = Settings.highscoreName;
+			if (!Net.isHost) {
+				hostName = Net.clientIdMap[0].getName();
 			}
-			if (scoreType == Score) {
-				levelInfoLeft.text.text = '<p align="right"><font color="#EBEBEB">My Best Score:</font></p>';
-				levelInfoMid.text.text = '<p align="left"><font color="${scoreColor}">${scoreDisp}</font></p>';
+
+			if (Net.isHost) {
+				updatePlayerCountFn = (pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) -> {
+					levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>'
+						+ '<p><font face="arial14">Level: ${mis.title}</font></p>'
+						+ '<p><font face="arial12">Private Slots: ${pub}/${publicTotal}, Public Slots: ${priv}/${privateTotal}</font></p>';
+				}
+
+				updatePlayerCountFn(0, 0, Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots, Net.serverInfo.privateSlots);
 			}
-			levelInfoRight.text.text = '<p align="left"><font color="#EBEBEB">Level ${mis.missionInfo.level}<br/>Difficulty ${mis.missionInfo.difficulty == null ? "" : mis.missionInfo.difficulty}</font></p>';
+			if (Net.isClient) {
+				updatePlayerCountFn = (pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) -> {
+					levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>' + '<p><font face="arial14">Level: ${mis.title}</font></p>';
+				}
+				updatePlayerCountFn(0, 0, 0, 0);
+			}
 			return true;
 		}
 		setLevelFn = setLevel;
 
-		levelSelectOpts.position = new Vector(380, 435);
+		levelSelectOpts.position = new Vector(380, 430);
 		levelSelectOpts.extent = new Vector(815, 94);
 		levelSelectOpts.vertSizing = Bottom;
 		levelSelectOpts.horizSizing = Right;
@@ -294,5 +299,17 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
 
 		super.onResize(width, height);
+	}
+
+	public function updateLobbyNames() {
+		var names = [Settings.highscoreName];
+		for (id => c in Net.clientIdMap) {
+			names.push(c.getName());
+		}
+		playerList.setTexts(names);
+	}
+
+	public function updatePlayerCount(pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) {
+		updatePlayerCountFn(pub, priv, publicTotal, privateTotal);
 	}
 }

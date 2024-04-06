@@ -1,5 +1,9 @@
 package net;
 
+import gui.MultiplayerLevelSelectGui;
+import gui.Canvas;
+import net.MasterServerClient.RemoteServerInfo;
+import gui.MultiplayerLoadingGui;
 import src.ResourceLoader;
 import src.AudioManager;
 import net.NetPacket.GemPickupPacket;
@@ -18,6 +22,7 @@ import src.Console;
 import net.NetCommands;
 import src.MarbleGame;
 import hx.ws.Types.MessageType;
+import src.Settings;
 
 enum abstract NetPacketType(Int) from Int to Int {
 	var NullPacket;
@@ -60,13 +65,11 @@ class Net {
 	static var client:RTCPeerConnection;
 	static var clientDatachannel:RTCDataChannel;
 
-	static var masterWs:WebSocket;
-
 	public static var isMP:Bool;
 	public static var isHost:Bool;
 	public static var isClient:Bool;
 
-	public static var startMP:Bool;
+	public static var lobbyHostReady:Bool;
 
 	public static var clientId:Int;
 	public static var networkRNG:Float;
@@ -74,6 +77,7 @@ class Net {
 	public static var clientIdMap:Map<Int, GameConnection> = [];
 	public static var clientConnection:ClientConnection;
 	public static var serverInfo:ServerInfo;
+	public static var remoteServerInfo:RemoteServerInfo;
 
 	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool) {
 		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "Lobby", getPlatform());
@@ -84,30 +88,6 @@ class Net {
 			isMP = true;
 			MasterServerClient.instance.sendServerInfo(serverInfo);
 		});
-
-		// host = new RTCPeerConnection(["stun.l.google.com:19302"], "0.0.0.0");
-		// host.bind("127.0.0.1", 28000, (c) -> {
-		// 	onClientConnect(c);
-		// 	isMP = true;
-		// });
-		// isHost = true;
-		// isClient = false;
-		// clientId = 0;
-		// masterWs = new WebSocket("ws://localhost:8080");
-
-		// masterWs.onmessage = (m) -> {
-		// 	switch (m) {
-		// 		case StrMessage(content):
-		// 			var conts = Json.parse(content);
-		// 			var peer = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
-		// 			peer.setRemoteDescription(conts.sdp, conts.type);
-		// 			addClient(peer);
-
-		// 		case BytesMessage(content): {}
-		// 	}
-		// }
-
-		// isMP = true;
 	}
 
 	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void) {
@@ -167,6 +147,10 @@ class Net {
 
 			clientDatachannel = client.createDatachannel("mp");
 			clientDatachannel.onOpen = (n) -> {
+				var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
+				if (loadGui != null) {
+					loadGui.setLoadingStatus("Handshaking");
+				}
 				Console.log("Successfully connected!");
 				clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
 				clientIdMap[0] = clients[client];
@@ -182,6 +166,11 @@ class Net {
 				if (MarbleGame.instance.world != null) {
 					MarbleGame.instance.quitMission();
 				}
+				if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
+					var loadGui = new MultiplayerLoadingGui("Server closed");
+					MarbleGame.canvas.setContent(loadGui);
+					loadGui.setErrorStatus("Server closed");
+				}
 			}
 			clientDatachannel.onError = (msg) -> {
 				Console.log('Errored out due to ${msg}');
@@ -189,63 +178,15 @@ class Net {
 				if (MarbleGame.instance.world != null) {
 					MarbleGame.instance.quitMission();
 				}
+				var loadGui = new MultiplayerLoadingGui("Connection error");
+				MarbleGame.canvas.setContent(loadGui);
+				loadGui.setErrorStatus("Connection error");
 			}
 
 			isMP = true;
 			isHost = false;
 			isClient = true;
 		});
-		// masterWs = new WebSocket("ws://localhost:8080");
-		// masterWs.onopen = () -> {
-		// 	client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
-		// 	var candidates = [];
-
-		// 	client.onLocalCandidate = (c) -> {
-		// 		if (c != "")
-		// 			candidates.push('a=${c}');
-		// 	}
-		// 	client.onGatheringStateChange = (s) -> {
-		// 		if (s == RTC_GATHERING_COMPLETE) {
-		// 			Console.log("Local Description Set!");
-		// 			var sdpObj = StringTools.trim(client.localDescription);
-		// 			sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
-		// 			masterWs.send(Json.stringify({
-		// 				type: "connect",
-		// 				sdpObj: {
-		// 					sdp: sdpObj,
-		// 					type: "offer"
-		// 				}
-		// 			}));
-		// 		}
-		// 	}
-
-		// 	masterWs.onmessage = (m) -> {
-		// 		switch (m) {
-		// 			case StrMessage(content):
-		// 				Console.log("Remote Description Received!");
-		// 				var conts = Json.parse(content);
-		// 				client.setRemoteDescription(conts.sdp, conts.type);
-		// 			case _: {}
-		// 		}
-		// 	}
-
-		// 	clientDatachannel = client.createDatachannel("mp");
-		// 	clientDatachannel.onOpen = (n) -> {
-		// 		Console.log("Successfully connected!");
-		// 		clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
-		// 		clientIdMap[0] = clients[client];
-		// 		clientConnection = cast clients[client];
-		// 		onConnectedToServer();
-		// 		haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
-		// 	}
-		// 	clientDatachannel.onMessage = (b) -> {
-		// 		onPacketReceived(client, clientDatachannel, new InputBitStream(b));
-		// 	}
-
-		// 	isMP = true;
-		// 	isHost = false;
-		// 	isClient = true;
-		// }
 	}
 
 	public static function disconnect() {
@@ -259,6 +200,9 @@ class Net {
 			Net.clientId = 0;
 			Net.clientIdMap.clear();
 			Net.clientConnection = null;
+			Net.serverInfo = null;
+			Net.remoteServerInfo = null;
+			Net.lobbyHostReady = false;
 		}
 		if (Net.isHost) {
 			NetCommands.serverClosed();
@@ -271,6 +215,9 @@ class Net {
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			MasterServerClient.disconnectFromMasterServer();
+			Net.serverInfo = null;
+			Net.remoteServerInfo = null;
+			Net.lobbyHostReady = false;
 		}
 	}
 
@@ -308,6 +255,10 @@ class Net {
 
 		serverInfo.players++;
 		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the new player
+
+		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+			cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+		}
 	}
 
 	static function onConnectedToServer() {
@@ -327,6 +278,12 @@ class Net {
 		serverInfo.players--;
 		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
 		NetCommands.clientDisconnected(cc.id);
+
+		AudioManager.playSound(ResourceLoader.getAudio("data/sound/infotutorial.wav").resource);
+
+		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+			cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+		}
 	}
 
 	static function sendPlayerInfosBytes() {
@@ -335,9 +292,22 @@ class Net {
 		var cnt = 0;
 		for (c in clientIdMap)
 			cnt++;
-		b.writeByte(cnt);
-		for (c => v in clientIdMap)
+		b.writeByte(cnt + 1); // all + host
+		for (c => v in clientIdMap) {
 			b.writeByte(c);
+			var name = v.getName();
+			b.writeByte(name.length);
+			for (i in 0...name.length) {
+				b.writeByte(StringTools.fastCodeAt(name, i));
+			}
+		}
+		// Write host data
+		b.writeByte(0);
+		var name = Settings.highscoreName;
+		b.writeByte(name.length);
+		for (i in 0...name.length) {
+			b.writeByte(StringTools.fastCodeAt(name, i));
+		}
 		return b.getBytes();
 	}
 
@@ -352,6 +322,7 @@ class Net {
 			case ClientIdAssign:
 				clientId = input.readByte(); // 8 bit client id, hopefully we don't exceed this
 				Console.log('Client ID set to ${clientId}');
+				NetCommands.setPlayerName(clientId, Settings.highscoreName); // Send our player name to the server
 
 			case Ping:
 				var pingLeft = input.readByte();
@@ -435,9 +406,20 @@ class Net {
 						addGhost(id);
 						newP = true;
 					}
+					var nameLength = input.readByte();
+					var name = "";
+					for (j in 0...nameLength) {
+						name += String.fromCharCode(input.readByte());
+					}
+					if (clientIdMap.exists(id)) {
+						clientIdMap[id].setName(name);
+					}
 				}
 				if (newP) {
 					AudioManager.playSound(ResourceLoader.getAudio("sounds/spawn_alternate.wav").resource);
+				}
+				if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+					cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
 				}
 
 			case _:

@@ -341,12 +341,12 @@ class MarbleWorld extends Scheduler {
 			if (this.isMultiplayer) {
 				// Add us
 				if (Net.isHost) {
-					this.playGui.addPlayer(0, 'Player 0', true);
+					this.playGui.addPlayer(0, Settings.highscoreName.substr(0, 15), true);
 				} else {
-					this.playGui.addPlayer(Net.clientId, 'Player ${Net.clientId}', true);
+					this.playGui.addPlayer(Net.clientId, Settings.highscoreName.substr(0, 15), true);
 				}
 				for (client in Net.clientIdMap) {
-					this.playGui.addPlayer(client.id, 'Player ${client.id}', false);
+					this.playGui.addPlayer(client.id, client.name.substr(0, 15), false);
 				}
 			}
 
@@ -650,6 +650,7 @@ class MarbleWorld extends Scheduler {
 		if (isMultiplayer) {
 			marble.megaMarbleUseTick = 0;
 			marble.helicopterUseTick = 0;
+			marble.collider.radius = marble._radius = 0.3;
 		} else {
 			@:privateAccess marble.helicopterEnableTime = -1e8;
 			@:privateAccess marble.megaMarbleEnableTime = -1e8;
@@ -1203,8 +1204,8 @@ class MarbleWorld extends Scheduler {
 				// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
 				var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
-				if (distFromUs < 5) // {
-					m.calculationTicks = ourQueuedMoves.length;
+				// if (distFromUs < 5) // {
+				m.calculationTicks = ourQueuedMoves.length;
 				// } else {
 				// 	m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 3));
 				// }
@@ -2057,7 +2058,12 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function setUp(marble:Marble, vec:Vector, timeState:TimeState, instant:Bool = false) {
+		if (vec == marble.currentUp)
+			return;
 		marble.currentUp = vec;
+		if (isMultiplayer && Net.isHost) {
+			@:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
+		}
 		if (marble == this.marble) {
 			var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
 			var oldUp = new Vector(0, 0, 1);

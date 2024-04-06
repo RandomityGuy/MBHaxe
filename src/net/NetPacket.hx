@@ -37,6 +37,7 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var DoHelicopter = 1 << 1;
 	var DoMega = 1 << 2;
 	var PickupPowerup = 1 << 3;
+	var GravityChange = 1 << 4;
 }
 
 @:publicFields
@@ -52,6 +53,7 @@ class MarbleUpdatePacket implements NetPacket {
 	var blastTick:Int;
 	var megaTick:Int;
 	var heliTick:Int;
+	var gravityDirection:Vector;
 	var oob:Bool;
 	var powerUpId:Int;
 	var moveQueueSize:Int;
@@ -99,6 +101,14 @@ class MarbleUpdatePacket implements NetPacket {
 		} else {
 			b.writeFlag(false);
 		}
+		if (netFlags & MarbleNetFlags.GravityChange > 0) {
+			b.writeFlag(true);
+			b.writeFloat(gravityDirection.x);
+			b.writeFloat(gravityDirection.y);
+			b.writeFloat(gravityDirection.z);
+		} else {
+			b.writeFlag(false);
+		}
 	}
 
 	public inline function deserialize(b:InputBitStream) {
@@ -126,8 +136,11 @@ class MarbleUpdatePacket implements NetPacket {
 		oob = b.readFlag();
 		if (b.readFlag()) {
 			powerUpId = b.readInt(9);
-			trace('pickup: ${powerUpId}');
 			this.netFlags |= MarbleNetFlags.PickupPowerup;
+		}
+		if (b.readFlag()) {
+			gravityDirection = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+			this.netFlags |= MarbleNetFlags.GravityChange;
 		}
 	}
 }

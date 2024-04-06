@@ -9,91 +9,76 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleGame;
 
-class EnterNameDlg extends GuiControl {
-	public function new(place:Int, okFunc:String->Void) {
-		super();
-		this.position = new Vector();
-		this.extent = new Vector(640, 480);
+class EnterNameDlg extends GuiImage {
+	public function new() {
+		var res = ResourceLoader.getImage("data/ui/xbox/roundedBG.png").resource.toTile();
+		super(res);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
+		this.position = new Vector();
+		this.extent = new Vector(640, 480);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
-
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 21 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var domcasual48 = domcasual32b.toSdfFont(cast 42 * Settings.uiScale, MultiChannel);
+		var yesNoFrame = new GuiImage(ResourceLoader.getResource("data/ui/xbox/popupGUI.png", ResourceLoader.getImage, this.imageResources).toTile());
+		yesNoFrame.horizSizing = Center;
+		yesNoFrame.vertSizing = Center;
+		yesNoFrame.position = new Vector(70, 30);
+		yesNoFrame.extent = new Vector(512, 400);
+		this.addChild(yesNoFrame);
 
-		function mlFontLoader(text:String) {
-			switch (text) {
-				case "DomCasual32":
-					return domcasual32;
-				case "DomCasual48":
-					return domcasual48;
-				case "Arial14":
-					return arial14;
-				default:
-					return null;
-			}
+		var text = "Enter your name";
+
+		var yesNoText = new GuiMLText(arial14, null);
+		yesNoText.position = new Vector(103, 85);
+		yesNoText.extent = new Vector(313, 186);
+		yesNoText.text.text = text;
+		yesNoText.text.textColor = 0xEBEBEB;
+		yesNoFrame.addChild(yesNoText);
+
+		var textFrame = new GuiControl();
+		textFrame.position = new Vector(33, 107);
+		textFrame.extent = new Vector(232, 40);
+		textFrame.horizSizing = Center;
+		yesNoFrame.addChild(textFrame);
+
+		var textInput = new GuiTextInput(arial14);
+		textInput.position = new Vector(6, 5);
+		textInput.extent = new Vector(216, 40);
+		textInput.horizSizing = Width;
+		textInput.vertSizing = Height;
+		textInput.text.textColor = 0xEBEBEB;
+		textInput.text.selectionColor.setColor(0x8DFF8D);
+		textInput.text.selectionTile = h2d.Tile.fromColor(0x88BCEE, 0, hxd.Math.ceil(textInput.text.font.lineHeight));
+		textFrame.addChild(textInput);
+
+		textInput.text.text = Settings.highscoreName;
+
+		var okButton = new GuiXboxButton("Ok", 120);
+		okButton.position = new Vector(211, 248);
+		okButton.extent = new Vector(120, 94);
+		okButton.vertSizing = Top;
+		okButton.accelerators = [hxd.Key.ENTER];
+		okButton.gamepadAccelerator = ["A"];
+		okButton.pressedAction = (sender) -> {
+			Settings.highscoreName = textInput.text.text.substr(0, 15); // Max 15 pls
+			Settings.save();
+			MarbleGame.canvas.setContent(new MultiplayerGui());
 		}
+		yesNoFrame.addChild(okButton);
 
-		var dlg = new GuiImage(ResourceLoader.getResource("data/ui/endgame/enternamebox.png", ResourceLoader.getImage, this.imageResources).toTile());
-		dlg.horizSizing = Center;
-		dlg.vertSizing = Center;
-		dlg.position = new Vector(110, 112);
-		dlg.extent = new Vector(420, 256);
-		this.addChild(dlg);
-
-		var enterNameEdit = new GuiTextInput(domcasual32);
-		enterNameEdit.text.textColor = 0;
-		enterNameEdit.text.selectionColor.setColor(0xFFFFFFFF);
-		enterNameEdit.text.selectionTile = h2d.Tile.fromColor(0x808080, 0, hxd.Math.ceil(enterNameEdit.text.font.lineHeight));
-		enterNameEdit.position = new Vector(28, 130);
-		enterNameEdit.extent = new Vector(363, 38);
-		enterNameEdit.text.text = Settings.highscoreName;
-		haxe.Timer.delay(() -> {
-			enterNameEdit.text.focus();
-		}, 5);
-
-		var okbutton = new GuiButton(loadButtonImages("data/ui/endgame/ok"));
-		okbutton.position = new Vector(151, 184);
-		okbutton.extent = new Vector(110, 55);
-		okbutton.accelerator = hxd.Key.ENTER;
-		okbutton.gamepadAccelerator = ["A"];
-		okbutton.pressedAction = (sender) -> {
-			MarbleGame.canvas.popDialog(this);
-			Settings.highscoreName = enterNameEdit.text.text;
-			okFunc(enterNameEdit.text.text);
+		var cancelButton = new GuiXboxButton("Cancel", 120);
+		cancelButton.position = new Vector(321, 248);
+		cancelButton.extent = new Vector(120, 94);
+		cancelButton.vertSizing = Top;
+		cancelButton.accelerators = [hxd.Key.ENTER];
+		cancelButton.gamepadAccelerator = ["A"];
+		cancelButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.setContent(new MultiplayerGui());
 		}
-		dlg.addChild(okbutton);
-
-		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/endgame/window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		wnd.horizSizing = Width;
-		wnd.vertSizing = Height;
-		wnd.position = new Vector(16, 119);
-		wnd.extent = new Vector(388, 56);
-		dlg.addChild(wnd);
-
-		var enterNameText = new GuiMLText(domcasual32, mlFontLoader);
-		enterNameText.text.textColor = 0xFFFFFF;
-		enterNameText.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
-		enterNameText.position = new Vector(37, 23);
-		enterNameText.extent = new Vector(345, 85);
-		// enterNameText.justify = Center;
-		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="DomCasual48">Well Done!<br/></font><font face="DomCasual32">You have the${["", " second", " third", " fourth", " fifth"][place]} top time!</font></p>';
-		dlg.addChild(enterNameText);
-
-		dlg.addChild(enterNameEdit);
+		yesNoFrame.addChild(cancelButton);
 	}
 }

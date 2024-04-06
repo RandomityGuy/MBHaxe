@@ -1,5 +1,6 @@
 package net;
 
+import h3d.Vector;
 import net.NetPacket.MarbleNetFlags;
 import net.NetPacket.MarbleUpdatePacket;
 import net.Net;
@@ -11,6 +12,7 @@ class OtherMarbleUpdate {
 	var lastHeliTick:Int;
 	var lastMegaTick:Int;
 	var lastPowerUpId:Int;
+	var lastGravityUp:Vector;
 
 	public function new() {}
 }
@@ -48,6 +50,10 @@ class MarbleUpdateQueue {
 					update.powerUpId = otherUpdate.lastPowerUpId;
 				else
 					otherUpdate.lastPowerUpId = update.powerUpId;
+				if (update.netFlags & MarbleNetFlags.GravityChange == 0)
+					update.gravityDirection = otherUpdate.lastGravityUp;
+				else
+					otherUpdate.lastGravityUp = update.gravityDirection;
 				ourList.push(update);
 			} else {
 				var otherUpdate = new OtherMarbleUpdate();
@@ -61,6 +67,8 @@ class MarbleUpdateQueue {
 					otherUpdate.lastMegaTick = update.megaTick;
 				if (update.netFlags & MarbleNetFlags.PickupPowerup != 0)
 					otherUpdate.lastPowerUpId = update.powerUpId;
+				if (update.netFlags & MarbleNetFlags.GravityChange != 0)
+					otherUpdate.lastGravityUp = update.gravityDirection;
 				otherMarbleUpdates[cc] = otherUpdate;
 			}
 		} else {
@@ -75,6 +83,8 @@ class MarbleUpdateQueue {
 						update.megaTick = myMarbleUpdate.megaTick;
 					if (update.netFlags & MarbleNetFlags.PickupPowerup == 0)
 						update.powerUpId = myMarbleUpdate.powerUpId;
+					if (update.netFlags & MarbleNetFlags.GravityChange == 0)
+						update.gravityDirection = myMarbleUpdate.gravityDirection;
 				}
 				myMarbleUpdate = update;
 				ourMoveApplied = false;

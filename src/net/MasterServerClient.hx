@@ -7,6 +7,7 @@ import net.Net.ServerInfo;
 import hx.ws.WebSocket;
 import src.Console;
 import hx.ws.Types.MessageType;
+import gui.MultiplayerLoadingGui;
 
 typedef RemoteServerInfo = {
 	name:String,
@@ -93,7 +94,7 @@ class MasterServerClient {
 		if (conts.type == "connect") {
 			if (!Net.isHost) {
 				ws.send(Json.stringify({
-					type: "connectResponse",
+					type: "connectFailed",
 					success: false,
 					reason: "The server has shut down"
 				}));
@@ -101,7 +102,7 @@ class MasterServerClient {
 			}
 			if (Net.serverInfo.players >= Net.serverInfo.maxPlayers) {
 				ws.send(Json.stringify({
-					type: "connectResponse",
+					type: "connectFailed",
 					success: false,
 					reason: "The server is full"
 				}));
@@ -122,7 +123,10 @@ class MasterServerClient {
 			@:privateAccess Net.client.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		}
 		if (conts.type == "connectFailed") {
-			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg(conts.reason));
+			var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
+			if (loadGui != null) {
+				loadGui.setErrorStatus(conts.reason);
+			}
 		}
 	}
 }

@@ -42,6 +42,14 @@ class RPCMacro {
 										serializeFns.push(macro stream.writeFloat($i{argName}));
 									}
 
+									case TPath({
+										name: 'String'
+									}): {
+										deserializeFns.push(macro var $argName = stream.readString());
+										callExprs.push(macro $i{argName});
+										serializeFns.push(macro stream.writeString($i{argName}));
+									}
+
 									case _: {}
 								}
 							}
