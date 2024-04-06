@@ -120,4 +120,19 @@ class NetCommands {
 			}
 		}
 	}
+
+	@:rpc(server) public static function endGame() {
+		if (Net.isClient) {
+			if (MarbleGame.instance.world != null) {
+				MarbleGame.instance.quitMission();
+			}
+		}
+		if (Net.isHost) {
+			for (c => v in Net.clientIdMap) {
+				v.state = LOBBY;
+				v.lobbyReady = false;
+			}
+			Net.lobbyHostReady = false;
+		}
+	}
 }

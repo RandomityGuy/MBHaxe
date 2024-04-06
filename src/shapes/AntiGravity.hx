@@ -1,5 +1,6 @@
 package shapes;
 
+import net.NetPacket.MarbleNetFlags;
 import src.Marble;
 import mis.MisParser;
 import dts.DtsFile;
@@ -40,8 +41,10 @@ class AntiGravity extends PowerUp {
 			direction.transform(this.getRotationQuat().toMatrix());
 			if (marble == level.marble)
 				this.level.setUp(marble, direction, timeState);
-			else
+			else {
+				@:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
 				marble.currentUp.load(direction);
+			}
 		}
 	}
 

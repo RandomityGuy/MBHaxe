@@ -1949,10 +1949,20 @@ class MarbleWorld extends Scheduler {
 				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
 			}
 			var endGameCode = () -> {
-				this.dispose();
-				LevelSelectGui.currentSelectionStatic = mission.index + 1;
-				var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
-				MarbleGame.canvas.setContent(pmg);
+				if (isMultiplayer) {
+					if (Net.isHost) {
+						NetCommands.endGame();
+					}
+					if (Net.isClient) {
+						Net.disconnect();
+						MarbleGame.instance.quitMission();
+					}
+				} else {
+					this.dispose();
+					LevelSelectGui.currentSelectionStatic = mission.index + 1;
+					var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
+					MarbleGame.canvas.setContent(pmg);
+				}
 				#if js
 				pointercontainer.hidden = false;
 				#end
@@ -2048,6 +2058,10 @@ class MarbleWorld extends Scheduler {
 
 	/** Get the current interpolated orientation quaternion. */
 	public function getOrientationQuat(time:Float) {
+		if (time < this.orientationChangeTime)
+			return this.oldOrientationQuat;
+		if (time > this.orientationChangeTime + 1.25)
+			return this.newOrientationQuat;
 		var completion = Util.clamp((time - this.orientationChangeTime) / 0.8, 0, 1);
 		var newDt = completion / 0.15;
 		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
@@ -2059,12 +2073,12 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function setUp(marble:Marble, vec:Vector, timeState:TimeState, instant:Bool = false) {
-		if (vec == marble.currentUp)
+		if (marble.currentUp == vec)
 			return;
-		marble.currentUp = vec;
 		if (isMultiplayer && Net.isHost) {
 			@:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
 		}
+		marble.currentUp = vec;
 		if (marble == this.marble) {
 			var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
 			var oldUp = new Vector(0, 0, 1);
