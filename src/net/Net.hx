@@ -79,7 +79,7 @@ class Net {
 	public static var serverInfo:ServerInfo;
 	public static var remoteServerInfo:RemoteServerInfo;
 
-	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool) {
+	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool, onHosted:() -> Void) {
 		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "Lobby", getPlatform());
 		MasterServerClient.connectToMasterServer(() -> {
 			isHost = true;
@@ -87,6 +87,7 @@ class Net {
 			clientId = 0;
 			isMP = true;
 			MasterServerClient.instance.sendServerInfo(serverInfo);
+			onHosted();
 		});
 	}
 

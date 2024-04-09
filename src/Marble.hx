@@ -258,6 +258,8 @@ class Marble extends GameObject {
 	var oldPos:Vector;
 	var newPos:Vector;
 	var prevRot:Quat;
+	var posStore:Vector;
+	var netCorrected:Bool;
 
 	public var contacts:Array<CollisionInfo> = [];
 	public var bestContact:CollisionInfo;
@@ -324,6 +326,7 @@ class Marble extends GameObject {
 	var isNetUpdate:Bool = false;
 	var netFlags:Int = 0;
 	var serverTicks:Int;
+	var recvServerTick:Int;
 
 	public function new() {
 		super();
@@ -367,6 +370,9 @@ class Marble extends GameObject {
 			this.collisionWorld = this.level.collisionWorld;
 
 		var isUltra = true;
+
+		this.posStore = new Vector();
+		this.netCorrected = false;
 
 		var marbleDts = new DtsObject();
 		Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
@@ -1748,8 +1754,9 @@ class Marble extends GameObject {
 		// 	}
 		// }
 		this.serverTicks = p.serverTicks;
-		this.oldPos = this.newPos;
-		this.newPos = p.position;
+		this.recvServerTick = p.serverTicks;
+		// this.oldPos = this.newPos;
+		// this.newPos = p.position;
 		this.collider.transform.setPosition(p.position);
 		this.velocity = p.velocity;
 		this.omega = p.omega;
@@ -1767,17 +1774,24 @@ class Marble extends GameObject {
 			this.level.pickUpPowerUp(cast this, this.level.powerUps[p.powerUpId]);
 		}
 
-		if (this.controllable && Net.isClient) {
-			// We are client, need to do something about the queue
-			var mm = Net.clientConnection.moveManager;
-			// trace('Queue size: ${mm.getQueueSize()}, server: ${p.moveQueueSize}');
-			if (mm.getQueueSize() / p.moveQueueSize < 2) {
-				mm.stall = true;
-			} else {
-				mm.stall = false;
-			}
-		}
+		// if (this.controllable && Net.isClient) {
+		// 	// We are client, need to do something about the queue
+		// 	var mm = Net.clientConnection.moveManager;
+		// 	// trace('Queue size: ${mm.getQueueSize()}, server: ${p.moveQueueSize}');
+		// 	if (mm.getQueueSize() / p.moveQueueSize < 2) {
+		// 		mm.stall = true;
+		// 	} else {
+		// 		mm.stall = false;
+		// 	}
+		// }
 		return true;
+	}
+
+	function calculateNetSmooth() {
+		if (this.netCorrected) {
+			this.netCorrected = false;
+			this.oldPos.load(this.posStore);
+		}
 	}
 
 	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
@@ -1785,11 +1799,11 @@ class Marble extends GameObject {
 		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
 			if (Net.isClient) {
 				var axis = getMarbleAxis()[1];
-				move = Net.clientConnection.recordMove(cast this, axis, timeState);
+				move = Net.clientConnection.recordMove(cast this, axis, timeState, recvServerTick);
 			} else if (Net.isHost) {
 				var axis = getMarbleAxis()[1];
 				var innerMove = recordMove();
-				move = new NetMove(innerMove, axis, timeState, 65535);
+				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
 			}
 		}
 		var moveId = 65535;
@@ -1800,30 +1814,35 @@ class Marble extends GameObject {
 				var axis = getMarbleAxis()[1];
 				var innerMove = new Move();
 				innerMove.d = new Vector(0, 0);
-				move = new NetMove(innerMove, axis, timeState, 65535);
+				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
 			} else {
 				move = nextMove;
 				moveMotionDir = nextMove.motionDir;
 				moveId = nextMove.id;
 			}
 		}
-		if (move == null) {
+		if (move == null && !this.controllable) {
 			var axis = moveMotionDir != null ? moveMotionDir : new Vector(0, -1, 0);
 			var innerMove = lastMove;
 			if (innerMove == null) {
 				innerMove = new Move();
 				innerMove.d = new Vector(0, 0);
 			}
-			move = new NetMove(innerMove, axis, timeState, 65535);
+			move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
 		}
 
-		playedSounds = [];
-		advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
-		physicsAccumulator = 0;
+		if (move != null) {
+			playedSounds = [];
+			advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
+			physicsAccumulator = 0;
 
-		if (move.move.jump && this.outOfBounds) {
-			this.level.cancel(this.oobSchedule);
-			this.level.restart(cast this);
+			if (move.move.jump && this.outOfBounds) {
+				this.level.cancel(this.oobSchedule);
+				this.level.restart(cast this);
+			}
+		} else {
+			physicsAccumulator = 0;
+			newPos.load(oldPos);
 		}
 
 		return move;
@@ -1833,6 +1852,7 @@ class Marble extends GameObject {
 	}
 
 	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {
+		calculateNetSmooth();
 		this.level.updateBlast(cast this, timeState);
 		if (oldPos != null && newPos != null) {
 			var deltaT = physicsAccumulator / 0.032;
@@ -2318,6 +2338,8 @@ class Marble extends GameObject {
 		this.prevRot = this.getRotationQuat().clone();
 		this.oldPos = this.getAbsPos().getPosition();
 		this.newPos = this.getAbsPos().getPosition();
+		this.posStore = new Vector();
+		this.netCorrected = false;
 		if (this._radius != this._prevRadius) {
 			this._radius = this._prevRadius;
 			this._marbleScale = this._renderScale = this._defaultScale;

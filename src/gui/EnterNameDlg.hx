@@ -55,7 +55,7 @@ class EnterNameDlg extends GuiImage {
 		textInput.text.selectionTile = h2d.Tile.fromColor(0x88BCEE, 0, hxd.Math.ceil(textInput.text.font.lineHeight));
 		textFrame.addChild(textInput);
 
-		textInput.text.text = Settings.highscoreName;
+		textInput.text.text = Settings.highscoreName == "" ? "Player Name" : Settings.highscoreName;
 
 		var okButton = new GuiXboxButton("Ok", 120);
 		okButton.position = new Vector(211, 248);

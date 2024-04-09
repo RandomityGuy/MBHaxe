@@ -1,5 +1,6 @@
 package gui;
 
+import net.Net;
 import gui.GuiControl.MouseState;
 import src.AudioManager;
 import src.MarbleGame;
@@ -82,7 +83,8 @@ class ExitGameDlg extends GuiImage {
 		innerCtrl.addChild(btnList);
 
 		btnList.addButton(0, "Resume", (evt) -> noFunc(btnList));
-		btnList.addButton(0, "Restart", (evt) -> restartFunc(btnList));
+		if (!Net.isMP)
+			btnList.addButton(0, "Restart", (evt) -> restartFunc(btnList));
 		btnList.addButton(4, "Exit Level", (evt) -> {
 			MarbleGame.canvas.pushDialog(new MessageBoxYesNoDlg("Are you sure you want to exit this level?  You will lose your current level progress.",
 				() -> yesFunc(btnList), () -> {}));
