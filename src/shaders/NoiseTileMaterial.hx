@@ -27,9 +27,6 @@ class NoiseTileMaterial extends hxsl.Shader {
 		};
 		var calculatedUV:Vec2;
 		var pixelColor:Vec4;
-		var specColor:Vec3;
-		var specPower:Float;
-		var noiseUV:Vec2;
 		@const var useAccurateNoise:Bool;
 		@var var outLightVec:Vec4;
 		@var var outPos:Vec3;

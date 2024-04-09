@@ -25,11 +25,13 @@ class NetMove {
 	var move:Move;
 	var id:Int;
 	var timeState:TimeState;
+	var serverTicks:Int;
 
-	public function new(move:Move, motionDir:Vector, timeState:TimeState, id:Int) {
+	public function new(move:Move, motionDir:Vector, timeState:TimeState, serverTicks:Int, id:Int) {
 		this.move = move;
 		this.motionDir = motionDir;
 		this.id = id;
+		this.serverTicks = serverTicks;
 		this.timeState = timeState;
 	}
 }
@@ -44,6 +46,12 @@ class MoveManager {
 
 	var maxMoves = 45;
 
+	var serverTargetMoveListSize = 3;
+	var serverMaxMoveListSize = 5;
+	var serverAvgMoveListSize = 3.0;
+	var serverSmoothMoveAvg = 0.15;
+	var serverMoveListSizeSlack = 1.0;
+
 	public var stall = false;
 
 	public function new(connection:GameConnection) {
@@ -54,9 +62,10 @@ class MoveManager {
 		mv.d = new Vector(0, 0);
 	}
 
-	public function recordMove(marble:Marble, motionDir:Vector, timeState:TimeState) {
-		if (queuedMoves.length >= maxMoves || stall)
+	public function recordMove(marble:Marble, motionDir:Vector, timeState:TimeState, serverTicks:Int) {
+		if (queuedMoves.length >= maxMoves || stall) {
 			return queuedMoves[queuedMoves.length - 1];
+		}
 		var move = new Move();
 		move.d = new Vector();
 		move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
@@ -94,7 +103,7 @@ class MoveManager {
 			move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
 		}
 
-		var netMove = new NetMove(move, motionDir, timeState.clone(), nextMoveId++);
+		var netMove = new NetMove(move, motionDir, timeState.clone(), serverTicks, nextMoveId++);
 		queuedMoves.push(netMove);
 
 		if (nextMoveId >= 65535) // 65535 is reserved for null move
@@ -111,6 +120,11 @@ class MoveManager {
 		Net.sendPacketToHost(b);
 
 		return netMove;
+	}
+
+	function copyMove(to:Int, from:Int) {
+		queuedMoves[to].move = queuedMoves[from].move;
+		queuedMoves[to].motionDir.load(queuedMoves[from].motionDir);
 	}
 
 	public static inline function packMove(m:NetMove, b:OutputBitStream) {
@@ -139,7 +153,7 @@ class MoveManager {
 		motionDir.x = b.readFloat();
 		motionDir.y = b.readFloat();
 		motionDir.z = b.readFloat();
-		var netMove = new NetMove(move, motionDir, MarbleGame.instance.world.timeState.clone(), moveId);
+		var netMove = new NetMove(move, motionDir, MarbleGame.instance.world.timeState.clone(), 0, moveId);
 		return netMove;
 	}
 
@@ -148,9 +162,31 @@ class MoveManager {
 	}
 
 	public function getNextMove() {
-		if (queuedMoves.length == 0)
+		if (Net.isHost) {
+			serverAvgMoveListSize *= (1 - serverSmoothMoveAvg);
+			serverAvgMoveListSize += serverSmoothMoveAvg * queuedMoves.length;
+			if (serverAvgMoveListSize < serverTargetMoveListSize - serverMoveListSizeSlack
+				&& queuedMoves.length < serverTargetMoveListSize
+				&& queuedMoves.length != 0) {
+				// Send null move
+				return null;
+			}
+			if (queuedMoves.length > serverMaxMoveListSize
+				|| (serverAvgMoveListSize > serverTargetMoveListSize + serverMoveListSizeSlack
+					&& queuedMoves.length > serverTargetMoveListSize)) {
+				var dropAmt = queuedMoves.length - serverTargetMoveListSize;
+				while (dropAmt-- > 0) {
+					queuedMoves.pop();
+				}
+				serverAvgMoveListSize = serverTargetMoveListSize;
+			}
+		}
+		if (queuedMoves.length == 0) {
+			// if (lastMove != null) {
+			//	lastMove.id++; // So that we force client's move to be overriden by this one
+			// }
 			return lastMove;
-		else {
+		} else {
 			lastMove = queuedMoves[0];
 			queuedMoves.shift();
 			return lastMove;
@@ -161,25 +197,29 @@ class MoveManager {
 		return queuedMoves.length;
 	}
 
-	public function acknowledgeMove(m:Int, timeState:TimeState) {
-		if (m == 65535 || m == -1)
+	public function acknowledgeMove(m:NetMove, timeState:TimeState) {
+		if (m.id == 65535 || m.id == -1) {
 			return null;
-		if (m <= lastAckMoveId)
+		}
+		if (m.id <= lastAckMoveId)
 			return null; // Already acked
 		if (queuedMoves.length == 0)
 			return null;
-		while (m != queuedMoves[0].id) {
+		if (m.id >= nextMoveId) {
+			return queuedMoves[0]; // Input lag
+		}
+		while (m.id != queuedMoves[0].id) {
 			queuedMoves.shift();
 		}
 		var delta = -1;
 		var mv = null;
-		if (m == queuedMoves[0].id) {
+		if (m.id == queuedMoves[0].id) {
 			delta = queuedMoves[0].id - lastAckMoveId;
 			mv = queuedMoves.shift();
 			ackRTT = timeState.ticks - mv.timeState.ticks;
 			maxMoves = ackRTT + 2;
 		}
-		lastAckMoveId = m;
+		lastAckMoveId = m.id;
 		return mv;
 	}
 

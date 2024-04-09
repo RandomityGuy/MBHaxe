@@ -55,7 +55,7 @@ class EnterNameDlg extends GuiImage {
 		textInput.text.selectionTile = h2d.Tile.fromColor(0x88BCEE, 0, hxd.Math.ceil(textInput.text.font.lineHeight));
 		textFrame.addChild(textInput);
 
-		textInput.text.text = Settings.highscoreName;
+		textInput.text.text = Settings.highscoreName == "" ? "Player Name" : Settings.highscoreName;
 		enterNameEdit.text.onFocus = (e) -> {
 			dlg.vertSizing = Bottom;
 			dlg.position = new Vector(110, 56);

@@ -69,7 +69,7 @@ abstract class GameConnection {
 		moveManager.queueMove(m);
 	}
 
-	public inline function acknowledgeMove(m:Int, timeState:TimeState) {
+	public inline function acknowledgeMove(m:NetMove, timeState:TimeState) {
 		return moveManager.acknowledgeMove(m, timeState);
 	}
 
@@ -81,8 +81,8 @@ abstract class GameConnection {
 		return moveManager.getQueueSize();
 	}
 
-	public function recordMove(marble:src.Marble, motionDir:h3d.Vector, timeState:TimeState) {
-		return moveManager.recordMove(marble, motionDir, timeState);
+	public function recordMove(marble:src.Marble, motionDir:h3d.Vector, timeState:TimeState, serverTicks:Int) {
+		return moveManager.recordMove(marble, motionDir, timeState, serverTicks);
 	}
 
 	public function getNextMove() {

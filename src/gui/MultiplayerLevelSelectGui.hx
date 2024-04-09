@@ -18,7 +18,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 	static var currentSelectionStatic:Int = 0;
 
 	static var setLevelFn:Int->Void;
-	static var playSelectedLevel:Void->Void;
+	static var playSelectedLevel:Int->Void;
 
 	var playerList:GuiMLTextListCtrl;
 	var updatePlayerCountFn:(Int, Int, Int, Int) -> Void;
@@ -200,7 +200,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		};
 		bottomBar.addChild(nextButton);
 
-		playSelectedLevel = () -> {
+		playSelectedLevel = (index:Int) -> {
+			curMission = difficultyMissions[index];
 			MarbleGame.instance.playMission(curMission, true);
 		}
 

@@ -1078,7 +1078,7 @@ class MarbleWorld extends Scheduler {
 		if (!lastMoves.ourMoveApplied) {
 			var ourMove = lastMoves.myMarbleUpdate;
 			if (ourMove != null) {
-				var ourMoveStruct = Net.clientConnection.acknowledgeMove(ourMove.move.id, timeState);
+				var ourMoveStruct = Net.clientConnection.acknowledgeMove(ourMove.move, timeState);
 				lastMoves.ourMoveApplied = true;
 				for (client => arr in lastMoves.otherMarbleUpdates) {
 					var lastMove = null;
@@ -1204,9 +1204,11 @@ class MarbleWorld extends Scheduler {
 				var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
 				// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
-				var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
+				// var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);
 				// if (distFromUs < 5) // {
 				m.calculationTicks = ourQueuedMoves.length;
+				@:privateAccess marbleToUpdate.posStore.load(marbleToUpdate.newPos);
+				@:privateAccess marbleToUpdate.netCorrected = true;
 				// } else {
 				// 	m.calculationTicks = Std.int(Math.max(1, ourQueuedMoves.length - (distFromUs - 5) / 3));
 				// }
@@ -1220,6 +1222,9 @@ class MarbleWorld extends Scheduler {
 
 		Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
 		// var syncTickStates = new Map();
+
+		@:privateAccess this.marble.posStore.load(this.marble.newPos);
+		@:privateAccess this.marble.netCorrected = true;
 
 		for (move in ourQueuedMoves) {
 			var m = move.move;
@@ -1480,9 +1485,11 @@ class MarbleWorld extends Scheduler {
 				for (client => marble in clientMarbles) {
 					otherMoves.push(marble.updateServer(fixedDt, collisionWorld, pathedInteriors));
 				}
-				this.predictions.storeState(marble, myMove.timeState.ticks);
-				for (client => marble in clientMarbles) {
+				if (myMove != null) {
 					this.predictions.storeState(marble, myMove.timeState.ticks);
+					for (client => marble in clientMarbles) {
+						this.predictions.storeState(marble, myMove.timeState.ticks);
+					}
 				}
 				if (Net.isHost) {
 					for (client => othermarble in clientMarbles) { // Oh no!

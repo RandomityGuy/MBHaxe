@@ -13,8 +13,8 @@ class NetCommands {
 		MultiplayerLevelSelectGui.setLevelFn(i);
 	}
 
-	@:rpc(server) public static function playLevel() {
-		MultiplayerLevelSelectGui.playSelectedLevel();
+	@:rpc(server) public static function playLevel(levelIndex:Int) {
+		MultiplayerLevelSelectGui.playSelectedLevel(levelIndex);
 	}
 
 	@:rpc(server) public static function setNetworkRNG(rng:Float) {
@@ -43,7 +43,7 @@ class NetCommands {
 				}
 			}
 			if (allReady && Net.lobbyHostReady) {
-				NetCommands.playLevel();
+				NetCommands.playLevel(MultiplayerLevelSelectGui.currentSelectionStatic);
 			}
 		}
 	}

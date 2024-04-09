@@ -26,10 +26,18 @@ class MasterServerClient {
 	var open = false;
 
 	public function new(onOpenFunc:() -> Void) {
+		#if sys
+		var senderThread = sys.thread.Thread.current();
+		#end
 		ws = new WebSocket(serverIp);
 		ws.onopen = () -> {
 			open = true;
+			#if sys
+			senderThread.events.run(onOpenFunc);
+			#end
+			#if js
 			onOpenFunc();
+			#end
 		}
 		ws.onmessage = (m) -> {
 			switch (m) {
@@ -44,8 +52,15 @@ class MasterServerClient {
 	public static function connectToMasterServer(onConnect:() -> Void) {
 		if (instance == null)
 			instance = new MasterServerClient(onConnect);
-		else
-			onConnect();
+		else {
+			if (instance.open)
+				onConnect();
+			else {
+				instance.ws.close();
+				instance = null;
+				instance = new MasterServerClient(onConnect);
+			}
+		}
 	}
 
 	public static function disconnectFromMasterServer() {
