@@ -1811,14 +1811,18 @@ class Marble extends GameObject {
 			var nextMove = this.connection.getNextMove();
 			// trace('Moves left: ${@:privateAccess this.connection.moveManager.queuedMoves.length}');
 			if (nextMove == null) {
-				var axis = getMarbleAxis()[1];
-				var innerMove = new Move();
-				innerMove.d = new Vector(0, 0);
+				var axis = moveMotionDir != null ? moveMotionDir : getMarbleAxis()[1];
+				var innerMove = lastMove;
+				if (innerMove == null) {
+					innerMove = new Move();
+					innerMove.d = new Vector(0, 0);
+				}
 				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
 			} else {
 				move = nextMove;
 				moveMotionDir = nextMove.motionDir;
 				moveId = nextMove.id;
+				lastMove = move.move;
 			}
 		}
 		if (move == null && !this.controllable) {
