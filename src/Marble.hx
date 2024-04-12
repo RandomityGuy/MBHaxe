@@ -1803,6 +1803,10 @@ class Marble extends GameObject {
 			} else if (Net.isHost) {
 				var axis = getMarbleAxis()[1];
 				var innerMove = recordMove();
+				var qx = Std.int((innerMove.d.x * 16) + 16);
+				var qy = Std.int((innerMove.d.y * 16) + 16);
+				innerMove.d.x = (qx - 16) / 16.0;
+				innerMove.d.y = (qy - 16) / 16.0;
 				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
 			}
 		}
