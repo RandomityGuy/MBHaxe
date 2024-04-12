@@ -203,6 +203,17 @@ jobs:
             sudo cmake --install build
 
       - run:
+          name: Compile hxDatachannel
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            git clone https://github.com/RandomityGuy/hxDatachannel
+            cd hxDatachannel/cpp
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
           name: Install haxe dependencies
           command: |
             export PATH=/tmp/haxe/:"$PATH"
@@ -210,6 +221,7 @@ jobs:
             haxelib git heaps https://github.com/RandomityGuy/heaps
             haxelib dev hlopenal ~/deps/hashlink/libs/openal
             haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+            haxelib dev datachannel ~/deps/hxDatachannel
 
       - save_cache:
           key: mbhaxe-deps-v1
@@ -228,6 +240,7 @@ jobs:
             - /usr/local/lib/libvorbisfile.3.3.8.dylib
             - /usr/local/lib/libvorbisenc.2.0.12.dylib
             - /usr/local/lib/libz.1.3.dylib
+            - /usr/local/lib/hxdatachannel.hdll
 
 
       - run:
@@ -239,7 +252,7 @@ jobs:
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll} -lsdl2 -lhl -luv
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,hxdatachannel.hdll} -lsdl2 -lhl -luv
 
       - run:
           name: Package app bundle
