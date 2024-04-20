@@ -1,5 +1,6 @@
 package src;
 
+import hxd.Key;
 import shaders.RendererDefaultPass;
 import h3d.pass.PassList;
 import hxd.Window;
@@ -205,6 +206,18 @@ class Renderer extends h3d.scene.Renderer {
 			copyPass.pass.blend(One, Zero);
 			copyPass.shader.texture = backBuffer;
 			copyPass.render();
+		}
+
+		if (!cubemapPass) {
+			#if sys
+			if (Key.isDown(Key.CTRL) && Key.isPressed(Key.P)) {
+				var pixels = backBuffer.capturePixels();
+				var filename = StringTools.replace('Screenshot ${Date.now().toString()}.png', ":", ".");
+				var pixdata = pixels.toPNG();
+				hxd.File.createDirectory("data/screenshots");
+				hxd.File.saveBytes("data/screenshots/" + filename, pixdata);
+			}
+			#end
 		}
 
 		// h3d.pass.Copy.run(backBuffers[0], backBuffers[1]);

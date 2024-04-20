@@ -4,9 +4,8 @@ import gui.MessageBoxOkDlg;
 import src.MarbleGame;
 import haxe.Json;
 import net.Net.ServerInfo;
-import hx.ws.WebSocket;
+import haxe.net.WebSocket;
 import src.Console;
-import hx.ws.Types.MessageType;
 import gui.MultiplayerLoadingGui;
 
 typedef RemoteServerInfo = {
@@ -26,27 +25,21 @@ class MasterServerClient {
 	var open = false;
 
 	public function new(onOpenFunc:() -> Void) {
-		#if sys
-		var senderThread = sys.thread.Thread.current();
-		#end
-		ws = new WebSocket(serverIp);
+		ws = WebSocket.create(serverIp);
 		ws.onopen = () -> {
 			open = true;
-			#if sys
-			senderThread.events.run(onOpenFunc);
-			#end
-			#if js
 			onOpenFunc();
-			#end
 		}
-		ws.onmessage = (m) -> {
-			switch (m) {
-				case StrMessage(content):
-					handleMessage(content);
-				case _:
-					return;
-			}
+		ws.onmessageString = (m) -> {
+			handleMessage(m);
 		}
+	}
+
+	public static function process() {
+		#if sys
+		if (instance != null)
+			instance.ws.process();
+		#end
 	}
 
 	public static function connectToMasterServer(onConnect:() -> Void) {
@@ -71,7 +64,7 @@ class MasterServerClient {
 	}
 
 	public function sendServerInfo(serverInfo:ServerInfo) {
-		ws.send(Json.stringify({
+		ws.sendString(Json.stringify({
 			type: "serverInfo",
 			name: serverInfo.name,
 			players: serverInfo.players,
@@ -84,7 +77,7 @@ class MasterServerClient {
 	}
 
 	public function sendConnectToServer(serverName:String, sdp:String) {
-		ws.send(Json.stringify({
+		ws.sendString(Json.stringify({
 			type: "connect",
 			serverName: serverName,
 			sdp: sdp
@@ -93,7 +86,7 @@ class MasterServerClient {
 
 	public function getServerList(serverListCb:Array<RemoteServerInfo>->Void) {
 		this.serverListCb = serverListCb;
-		ws.send(Json.stringify({
+		ws.sendString(Json.stringify({
 			type: "serverList"
 		}));
 	}
@@ -108,7 +101,7 @@ class MasterServerClient {
 		}
 		if (conts.type == "connect") {
 			if (!Net.isHost) {
-				ws.send(Json.stringify({
+				ws.sendString(Json.stringify({
 					type: "connectFailed",
 					success: false,
 					reason: "The server has shut down"
@@ -116,7 +109,7 @@ class MasterServerClient {
 				return;
 			}
 			if (Net.serverInfo.players >= Net.serverInfo.maxPlayers) {
-				ws.send(Json.stringify({
+				ws.sendString(Json.stringify({
 					type: "connectFailed",
 					success: false,
 					reason: "The server is full"
@@ -124,7 +117,7 @@ class MasterServerClient {
 				return;
 			}
 			Net.addClientFromSdp(conts.sdp, (sdpReply) -> {
-				ws.send(Json.stringify({
+				ws.sendString(Json.stringify({
 					success: true,
 					type: "connectResponse",
 					sdp: sdpReply,

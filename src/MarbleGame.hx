@@ -1,5 +1,6 @@
 package src;
 
+import net.MasterServerClient;
 import gui.MultiplayerLevelSelectGui;
 import net.NetCommands;
 import net.Net;
@@ -187,6 +188,7 @@ class MarbleGame {
 	}
 
 	public function update(dt:Float) {
+		MasterServerClient.process();
 		if (world != null) {
 			if (world._disposed) {
 				world = null;

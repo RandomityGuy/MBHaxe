@@ -204,7 +204,8 @@ class MarbleWorld extends Scheduler {
 	// Multiplayer
 	public var isMultiplayer:Bool;
 
-	public var startRealTime:Float = 0;
+	public var serverStartTicks:Int;
+	public var startTime:Float = 1e8;
 	public var multiplayerStarted:Bool = false;
 
 	var tickAccumulator:Float = 0.0;
@@ -511,6 +512,16 @@ class MarbleWorld extends Scheduler {
 			NetCommands.clientIsReady(Net.clientId);
 	}
 
+	public function restartMultiplayerState() {
+		if (this.isMultiplayer) {
+			serverStartTicks = 0;
+			lastMoves = new MarbleUpdateQueue();
+			predictions = new MarblePredictionStore();
+			powerupPredictions = new PowerupPredictionStore();
+			gemPredictions = new GemPredictionStore();
+		}
+	}
+
 	public function restart(marble:Marble, full:Bool = false) {
 		Console.log("LEVEL RESTART");
 		if (!full && this.currentCheckpoint != null) {
@@ -535,6 +546,7 @@ class MarbleWorld extends Scheduler {
 
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
+		this.timeState.ticks = 0;
 		this.bonusTime = 0;
 		this.marble.outOfBounds = false;
 		this.marble.blastAmount = 0;
@@ -678,7 +690,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function allClientsReady() {
-		NetCommands.setStartTime(3); // Start after 3 seconds
+		NetCommands.setStartTicks(this.timeState.ticks);
 	}
 
 	public function updateGameState() {
@@ -695,8 +707,9 @@ class MarbleWorld extends Scheduler {
 				this.marble.setMode(Play);
 			}
 		} else {
-			if (!this.multiplayerStarted) {
-				if (this.startRealTime != 0 && this.timeState.timeSinceLoad > this.startRealTime) {
+			if (!this.multiplayerStarted && this.finishTime == null) {
+				if ((Net.isHost && (this.timeState.timeSinceLoad >= startTime)) // 3.5 == 109 ticks
+					|| (Net.isClient && this.serverStartTicks != 0 && @:privateAccess this.marble.serverTicks >= this.serverStartTicks + 109)) {
 					this.multiplayerStarted = true;
 					this.marble.setMode(Play);
 					for (client => marble in this.clientMarbles)
@@ -1636,10 +1649,15 @@ class MarbleWorld extends Scheduler {
 					timeTravelSound.stop();
 					timeTravelSound = null;
 				}
-				if (this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5) {
+
+				if (!this.isMultiplayer) {
+					if (this.timeState.currentAttemptTime + skipStartBugPauseTime >= 3.5) {
+						this.timeState.gameplayClock += dt * timeMultiplier;
+					} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
+						this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
+					}
+				} else if (this.multiplayerStarted) {
 					this.timeState.gameplayClock += dt * timeMultiplier;
-				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
-					this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
 				}
 				if (this.timeState.gameplayClock < 0)
 					this.gameMode.onTimeExpire();
@@ -1989,6 +2007,9 @@ class MarbleWorld extends Scheduler {
 				if (Util.isTouchDevice()) {
 					MarbleGame.instance.touchInput.setControlsEnabled(true);
 				}
+				if (this.isMultiplayer) {
+					NetCommands.restartGame();
+				}
 				// @:privateAccess playGui.playGuiCtrl.render(scene2d);
 			}
 			if (MarbleGame.instance.toRecord) {
@@ -2165,7 +2186,7 @@ class MarbleWorld extends Scheduler {
 				return null;
 			});
 		}
-		if (Net.isHost) {
+		if (!this.isMultiplayer || Net.isHost) {
 			marble.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
 				this.restart(marble);
 				return null;

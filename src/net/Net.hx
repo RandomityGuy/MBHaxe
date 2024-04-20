@@ -17,11 +17,9 @@ import net.NetPacket.MarbleMovePacket;
 import haxe.Json;
 import datachannel.RTCPeerConnection;
 import datachannel.RTCDataChannel;
-import hx.ws.WebSocket;
 import src.Console;
 import net.NetCommands;
 import src.MarbleGame;
-import hx.ws.Types.MessageType;
 import src.Settings;
 
 enum abstract NetPacketType(Int) from Int to Int {
@@ -371,7 +369,8 @@ class Net {
 				var movePacket = new MarbleMovePacket();
 				movePacket.deserialize(input);
 				var cc = clientIdMap[movePacket.clientId];
-				cc.queueMove(movePacket.move);
+				if (cc.state == GAME)
+					cc.queueMove(movePacket.move);
 
 			case PowerupPickup:
 				var powerupPickupPacket = new PowerupPickupPacket();

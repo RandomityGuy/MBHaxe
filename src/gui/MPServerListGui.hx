@@ -121,7 +121,18 @@ class MPServerListGui extends GuiImage {
 		nextButton.gamepadAccelerator = ["X"];
 		nextButton.pressedAction = (e) -> {
 			MarbleGame.canvas.setContent(new MultiplayerLoadingGui("Connecting"));
+			var failed = true;
+			haxe.Timer.delay(() -> {
+				if (failed) {
+					var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
+					if (loadGui != null) {
+						loadGui.setErrorStatus("Failed to connect to server");
+						Net.disconnect();
+					}
+				}
+			}, 15000);
 			Net.joinServer(ourServerList[curSelection].name, () -> {
+				failed = false;
 				MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
 				Net.remoteServerInfo = ourServerList[curSelection];
 			});
