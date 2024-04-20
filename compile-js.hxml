@@ -1,5 +1,5 @@
 -cp src
--lib hxWebSockets
+-lib colyseus-websocket
 -lib datachannel
 -lib heaps
 -lib stb_ogg_sound
@@ -10,5 +10,6 @@
 -D keep-inline-positions
 -D highDPI
 -D analyzer-optimize
+--dce full
 --main Main
 -debug

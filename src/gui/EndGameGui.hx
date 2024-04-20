@@ -19,6 +19,9 @@ class EndGameGui extends GuiImage {
 	var mission:Mission;
 	var innerCtrl:GuiControl;
 	var endGameWnd:GuiImage;
+	var retryFunc:GuiControl->Void;
+	var nextFunc:GuiControl->Void;
+	var continueFunc:GuiControl->Void;
 
 	var scoreSubmitted:Bool = false;
 
@@ -31,6 +34,9 @@ class EndGameGui extends GuiImage {
 		this.position = new Vector(0, 0);
 		this.extent = new Vector(640, 480);
 		this.mission = mission;
+		this.retryFunc = restartFunc;
+		this.nextFunc = nextLevelFunc;
+		this.continueFunc = continueFunc;
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();

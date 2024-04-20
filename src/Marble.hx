@@ -1796,17 +1796,23 @@ class Marble extends GameObject {
 
 	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
 		var move:NetMove = null;
-		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching && !this.level.isReplayingMovement) {
+		if (this.controllable && this.mode != Finish) {
 			if (Net.isClient) {
 				var axis = getMarbleAxis()[1];
 				move = Net.clientConnection.recordMove(cast this, axis, timeState, recvServerTick);
 			} else if (Net.isHost) {
 				var axis = getMarbleAxis()[1];
 				var innerMove = recordMove();
-				var qx = Std.int((innerMove.d.x * 16) + 16);
-				var qy = Std.int((innerMove.d.y * 16) + 16);
-				innerMove.d.x = (qx - 16) / 16.0;
-				innerMove.d.y = (qy - 16) / 16.0;
+				if (MarbleGame.instance.paused) {
+					innerMove.d.x = 0;
+					innerMove.d.y = 0;
+					innerMove.blast = innerMove.jump = innerMove.powerup = false;
+				} else {
+					var qx = Std.int((innerMove.d.x * 16) + 16);
+					var qy = Std.int((innerMove.d.y * 16) + 16);
+					innerMove.d.x = (qx - 16) / 16.0;
+					innerMove.d.y = (qy - 16) / 16.0;
+				}
 				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
 			}
 		}
@@ -1844,7 +1850,7 @@ class Marble extends GameObject {
 			advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
 			physicsAccumulator = 0;
 
-			if (move.move.jump && this.outOfBounds) {
+			if (move.move.jump && this.outOfBounds && Net.isHost) {
 				this.level.cancel(this.oobSchedule);
 				this.level.restart(cast this);
 			}

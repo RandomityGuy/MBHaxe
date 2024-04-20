@@ -287,7 +287,7 @@ class HuntMode extends NullMode {
 		if (!this.level.isMultiplayer || Net.isHost) {
 			rng.setSeed(100);
 			rng2.setSeed(100);
-			if (Settings.optionsSettings.huntRandom) {
+			if (Settings.optionsSettings.huntRandom || Net.isMP) {
 				rng.setSeed(cast Math.random() * 10000);
 				rng2.setSeed(cast Math.random() * 10000);
 			}
@@ -592,7 +592,11 @@ class HuntMode extends NullMode {
 		level.marble.camera.finish = true;
 		level.finishYaw = level.marble.camera.CameraYaw;
 		level.finishPitch = level.marble.camera.CameraPitch;
-		level.displayAlert("Congratulations! You've finished!");
+		if (level.isMultiplayer) {
+			@:privateAccess level.playGui.doMPEndGameMessage();
+		} else {
+			level.displayAlert("Congratulations! You've finished!");
+		}
 		level.cancel(@:privateAccess level.oobSchedule);
 		level.cancel(@:privateAccess level.marble.oobSchedule);
 		if (!level.isWatching) {

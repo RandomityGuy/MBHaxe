@@ -665,6 +665,30 @@ class PlayGui {
 		playerListScoresCtrl.setTexts(plScores);
 	}
 
+	public function doMPEndGameMessage() {
+		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
+		var p1 = playerList[0];
+		var p2 = playerList.length > 1 ? playerList[1] : null;
+		if (p2 == null) {
+			var onePt = p1.score == 1;
+			if (onePt)
+				MarbleGame.instance.world.displayAlert('${p1.name} won with 1 point!');
+			else
+				MarbleGame.instance.world.displayAlert('${p1.name} won with ${p1.score} points!');
+		} else {
+			var tie = p1.score == p2.score;
+			if (tie) {
+				MarbleGame.instance.world.displayAlert('Game tied!');
+			} else {
+				var onePt = p1.score == 1;
+				if (onePt)
+					MarbleGame.instance.world.displayAlert('${p1.name} won with 1 point!');
+				else
+					MarbleGame.instance.world.displayAlert('${p1.name} won with ${p1.score} points!');
+			}
+		}
+	}
+
 	public function addPlayer(id:Int, name:String, us:Bool) {
 		playerList.push({
 			id: id,
