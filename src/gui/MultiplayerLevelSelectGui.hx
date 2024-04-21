@@ -148,14 +148,39 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		playerWnd.extent = new Vector(640, 480);
 		innerCtrl.addChild(playerWnd);
 
-		var playerListArr = [Settings.highscoreName];
+		var playerListArr = [];
+		if (Net.isHost) {
+			playerListArr.push({
+				name: Settings.highscoreName,
+				state: Net.lobbyHostReady
+			});
+		}
 		if (Net.isClient) {
+			playerListArr.push({
+				name: Settings.highscoreName,
+				state: Net.clientConnection.lobbyReady
+			});
 			for (c => v in Net.clientIdMap) {
-				playerListArr.push(v.getName());
+				playerListArr.push({
+					name: v.name,
+					state: v.lobbyReady
+				});
 			}
 		}
 
-		playerList = new GuiMLTextListCtrl(arial14, playerListArr, null);
+		function imgLoader(path:String) {
+			switch (path) {
+				case "ready":
+					return ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "notready":
+					return ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
+			}
+			return null;
+		}
+
+		playerList = new GuiMLTextListCtrl(arial14, playerListArr.map(player -> {
+			return '<img src="${player.state ? "ready" : "notready"}"></img>${player.name}';
+		}), imgLoader);
 		playerList.selectedColor = 0xF29515;
 		playerList.selectedFillColor = 0xEBEBEB;
 		playerList.position = new Vector(25, 22);
@@ -303,11 +328,29 @@ class MultiplayerLevelSelectGui extends GuiImage {
 	}
 
 	public function updateLobbyNames() {
-		var names = [Settings.highscoreName];
-		for (id => c in Net.clientIdMap) {
-			names.push(c.getName());
+		var playerListArr = [];
+		if (Net.isHost) {
+			playerListArr.push({
+				name: Settings.highscoreName,
+				state: Net.lobbyHostReady
+			});
 		}
-		playerList.setTexts(names);
+		if (Net.isClient) {
+			playerListArr.push({
+				name: Settings.highscoreName,
+				state: Net.lobbyClientReady
+			});
+		}
+		for (c => v in Net.clientIdMap) {
+			playerListArr.push({
+				name: v.name,
+				state: v.lobbyReady
+			});
+		}
+
+		playerList.setTexts(playerListArr.map(player -> {
+			return '<img src="${player.state ? "ready" : "notready"}"></img>${player.name}';
+		}));
 	}
 
 	public function updatePlayerCount(pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) {
