@@ -1,5 +1,6 @@
 package gui;
 
+import net.ClientConnection.NetPlatform;
 import net.Net;
 import net.NetCommands;
 import modes.GameMode.ScoreType;
@@ -152,18 +153,21 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		if (Net.isHost) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				state: Net.lobbyHostReady
+				state: Net.lobbyHostReady,
+				platform: Net.getPlatform()
 			});
 		}
 		if (Net.isClient) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				state: Net.clientConnection.lobbyReady
+				state: Net.clientConnection.lobbyReady,
+				platform: Net.getPlatform()
 			});
 			for (c => v in Net.clientIdMap) {
 				playerListArr.push({
 					name: v.name,
-					state: v.lobbyReady
+					state: v.lobbyReady,
+					platform: v.platform
 				});
 			}
 		}
@@ -174,12 +178,22 @@ class MultiplayerLevelSelectGui extends GuiImage {
 					return ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "notready":
 					return ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "pc":
+					return ResourceLoader.getResource("data/ui/xbox/platform_desktop.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "mac":
+					return ResourceLoader.getResource("data/ui/xbox/platform_mac.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "web":
+					return ResourceLoader.getResource("data/ui/xbox/platform_web.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "android":
+					return ResourceLoader.getResource("data/ui/xbox/platform_android.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					return ResourceLoader.getResource("data/ui/xbox/platform_unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
 			}
 			return null;
 		}
 
 		playerList = new GuiMLTextListCtrl(arial14, playerListArr.map(player -> {
-			return '<img src="${player.state ? "ready" : "notready"}"></img>${player.name}';
+			return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
 		}), imgLoader);
 		playerList.selectedColor = 0xF29515;
 		playerList.selectedFillColor = 0xEBEBEB;
@@ -327,29 +341,42 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		super.onResize(width, height);
 	}
 
+	inline function platformToString(platform:NetPlatform) {
+		return switch (platform) {
+			case Unknown: return "unknown";
+			case Android: return "android";
+			case MacOS: return "mac";
+			case PC: return "pc";
+			case Web: return "web";
+		}
+	}
+
 	public function updateLobbyNames() {
 		var playerListArr = [];
 		if (Net.isHost) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				state: Net.lobbyHostReady
+				state: Net.lobbyHostReady,
+				platform: Net.getPlatform()
 			});
 		}
 		if (Net.isClient) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				state: Net.lobbyClientReady
+				state: Net.lobbyClientReady,
+				platform: Net.getPlatform()
 			});
 		}
 		for (c => v in Net.clientIdMap) {
 			playerListArr.push({
 				name: v.name,
-				state: v.lobbyReady
+				state: v.lobbyReady,
+				platform: v.platform
 			});
 		}
 
 		playerList.setTexts(playerListArr.map(player -> {
-			return '<img src="${player.state ? "ready" : "notready"}"></img>${player.name}';
+			return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
 		}));
 	}
 

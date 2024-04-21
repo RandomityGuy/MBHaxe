@@ -1,5 +1,6 @@
 package net;
 
+import net.ClientConnection.NetPlatform;
 import gui.EndGameGui;
 import modes.HuntMode;
 import net.ClientConnection.GameplayState;
@@ -128,6 +129,15 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(client) public static function transmitPlatform(clientId:Int, platform:Int) {
+		if (Net.isHost) {
+			Net.clientIdMap[clientId].platform = platform;
+			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+			}
+		}
+	}
+
 	@:rpc(server) public static function endGame() {
 		if (Net.isClient) {
 			if (MarbleGame.instance.world != null) {
@@ -146,10 +156,8 @@ class NetCommands {
 	@:rpc(server) public static function restartGame() {
 		var world = MarbleGame.instance.world;
 		if (Net.isHost) {
-			world.schedule(1, () -> {
-				world.allClientsReady();
-				return null;
-			});
+			world.startTime = 1e8;
+			haxe.Timer.delay(() -> world.allClientsReady(), 1500);
 		}
 		if (Net.isClient) {
 			var gui = MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1];

@@ -521,6 +521,7 @@ class MarbleWorld extends Scheduler {
 	public function restartMultiplayerState() {
 		if (this.isMultiplayer) {
 			serverStartTicks = 0;
+			startTime = 1e8;
 			lastMoves = new MarbleUpdateQueue();
 			predictions = new MarblePredictionStore();
 			powerupPredictions = new PowerupPredictionStore();
@@ -1189,21 +1190,21 @@ class MarbleWorld extends Scheduler {
 		advanceTimeState.dt = 0.032;
 		advanceTimeState.ticks = ourLastMoveTime;
 
-		if (marbleNeedsPrediction & (1 << Net.clientId) > 0) { // Only for our clients pls
-			// if (qm != null) {
-			// var mvs = qm.powerupStates.copy();
-			for (pw in marble.level.powerUps) {
-				// var val = mvs.shift();
-				// if (pw.lastPickUpTime != val)
-				// 	Console.log('Revert powerup pickup: ${pw.lastPickUpTime} -> ${val}');
-				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
-			}
-			var huntMode:HuntMode = cast this.gameMode;
-			for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
-				huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
-			}
-			// }
+		// if (marbleNeedsPrediction & (1 << Net.clientId) > 0) { // Only for our clients pls
+		// if (qm != null) {
+		// var mvs = qm.powerupStates.copy();
+		for (pw in marble.level.powerUps) {
+			// var val = mvs.shift();
+			// if (pw.lastPickUpTime != val)
+			// 	Console.log('Revert powerup pickup: ${pw.lastPickUpTime} -> ${val}');
+			pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 		}
+		var huntMode:HuntMode = cast this.gameMode;
+		for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
+			huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+		}
+		// }
+		// }
 
 		ackLag = ourQueuedMoves.length;
 
