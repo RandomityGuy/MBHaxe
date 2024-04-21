@@ -12,6 +12,14 @@ enum abstract GameplayState(Int) from Int to Int {
 	var GAME;
 }
 
+enum abstract NetPlatform(Int) from Int to Int {
+	var Unknown;
+	var PC;
+	var MacOS;
+	var Web;
+	var Android;
+}
+
 @:publicFields
 class ClientConnection extends GameConnection {
 	var socket:RTCPeerConnection;
@@ -50,8 +58,9 @@ abstract class GameConnection {
 	var moveManager:MoveManager;
 	var name:String;
 	var lobbyReady:Bool;
+	var platform:NetPlatform;
 
-	public function new(id:Int) {
+	function new(id:Int) {
 		this.id = id;
 		this.moveManager = new MoveManager(this);
 		this.lobbyReady = false;

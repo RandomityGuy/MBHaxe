@@ -463,6 +463,18 @@ class HuntMode extends NullMode {
 	}
 
 	public function setActiveSpawnSphere(spawnGroup:Array<Int>) {
+		Console.log("Got new gem spawn from server!");
+		if (activeGemSpawnGroup != null) {
+			for (agem in activeGemSpawnGroup) {
+				var gemSpawn = gemSpawnPoints[agem];
+				if (gemSpawn.gem != null) {
+					gemSpawn.gem.pickedUp = true;
+					gemSpawn.gem.setHide(true);
+					gemSpawn.gemBeam.setHide(true);
+					activeGems.remove(gemSpawn.gem);
+				}
+			}
+		}
 		for (sphereId in spawnGroup) {
 			var gemSpawn = gemSpawnPoints[sphereId];
 			if (gemSpawn.gem != null) {

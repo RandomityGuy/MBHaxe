@@ -45,9 +45,9 @@ class ServerInfo {
 	var privateServer:Bool;
 	var inviteCode:Int;
 	var state:String;
-	var platform:String;
+	var platform:NetPlatform;
 
-	public function new(name:String, players:Int, maxPlayers:Int, privateSlots:Int, privateServer:Bool, inviteCode:Int, state:String, platform:String) {
+	public function new(name:String, players:Int, maxPlayers:Int, privateSlots:Int, privateServer:Bool, inviteCode:Int, state:String, platform:NetPlatform) {
 		this.name = name;
 		this.players = players;
 		this.maxPlayers = maxPlayers;
@@ -298,6 +298,7 @@ class Net {
 		for (c => v in clientIdMap) {
 			b.writeByte(c);
 			b.writeByte(v.lobbyReady ? 1 : 0);
+			b.writeByte(v.platform);
 			var name = v.getName();
 			b.writeByte(name.length);
 			for (i in 0...name.length) {
@@ -307,6 +308,7 @@ class Net {
 		// Write host data
 		b.writeByte(0);
 		b.writeByte(Net.lobbyHostReady ? 1 : 0);
+		b.writeByte(getPlatform());
 		var name = Settings.highscoreName;
 		b.writeByte(name.length);
 		for (i in 0...name.length) {
@@ -327,6 +329,7 @@ class Net {
 				clientId = input.readByte(); // 8 bit client id, hopefully we don't exceed this
 				Console.log('Client ID set to ${clientId}');
 				NetCommands.setPlayerName(clientId, Settings.highscoreName); // Send our player name to the server
+				NetCommands.transmitPlatform(clientId, getPlatform()); // send our platform too
 
 			case Ping:
 				var pingLeft = input.readByte();
@@ -407,6 +410,7 @@ class Net {
 				for (i in 0...count) {
 					var id = input.readByte();
 					var cready = input.readByte() == 1;
+					var platform = input.readByte();
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
@@ -420,6 +424,7 @@ class Net {
 					if (clientIdMap.exists(id)) {
 						clientIdMap[id].setName(name);
 						clientIdMap[id].lobbyReady = cready;
+						clientIdMap[id].platform = platform;
 					}
 					if (Net.clientId == id) {
 						Net.lobbyClientReady = cready;
@@ -457,15 +462,19 @@ class Net {
 		}
 	}
 
-	public static function getPlatform() {
+	public static inline function getPlatform() {
 		#if js
-		return "Browser";
+		return NetPlatform.Web;
 		#end
 		#if hl
 		#if MACOS_BUNDLE
-		return "MacOS";
+		return NetPlatform.MacOS;
 		#else
-		return "Windows";
+		#if android
+		return NetPlatform.Android;
+		#else
+		return NetPlatform.PC;
+		#end
 		#end
 		#end
 	}
