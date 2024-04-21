@@ -68,6 +68,7 @@ class Net {
 	public static var isClient:Bool;
 
 	public static var lobbyHostReady:Bool;
+	public static var lobbyClientReady:Bool;
 
 	public static var clientId:Int;
 	public static var networkRNG:Float;
@@ -202,6 +203,7 @@ class Net {
 			Net.serverInfo = null;
 			Net.remoteServerInfo = null;
 			Net.lobbyHostReady = false;
+			Net.lobbyClientReady = false;
 		}
 		if (Net.isHost) {
 			NetCommands.serverClosed();
@@ -217,6 +219,7 @@ class Net {
 			Net.serverInfo = null;
 			Net.remoteServerInfo = null;
 			Net.lobbyHostReady = false;
+			Net.lobbyClientReady = false;
 		}
 	}
 
@@ -285,7 +288,7 @@ class Net {
 		}
 	}
 
-	static function sendPlayerInfosBytes() {
+	public static function sendPlayerInfosBytes() {
 		var b = new haxe.io.BytesOutput();
 		b.writeByte(PlayerInfo);
 		var cnt = 0;
@@ -294,6 +297,7 @@ class Net {
 		b.writeByte(cnt + 1); // all + host
 		for (c => v in clientIdMap) {
 			b.writeByte(c);
+			b.writeByte(v.lobbyReady ? 1 : 0);
 			var name = v.getName();
 			b.writeByte(name.length);
 			for (i in 0...name.length) {
@@ -302,6 +306,7 @@ class Net {
 		}
 		// Write host data
 		b.writeByte(0);
+		b.writeByte(Net.lobbyHostReady ? 1 : 0);
 		var name = Settings.highscoreName;
 		b.writeByte(name.length);
 		for (i in 0...name.length) {
@@ -401,6 +406,7 @@ class Net {
 				var newP = false;
 				for (i in 0...count) {
 					var id = input.readByte();
+					var cready = input.readByte() == 1;
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
@@ -413,6 +419,10 @@ class Net {
 					}
 					if (clientIdMap.exists(id)) {
 						clientIdMap[id].setName(name);
+						clientIdMap[id].lobbyReady = cready;
+					}
+					if (Net.clientId == id) {
+						Net.lobbyClientReady = cready;
 					}
 				}
 				if (newP) {

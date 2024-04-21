@@ -1,5 +1,6 @@
 package net;
 
+import gui.EndGameGui;
 import modes.HuntMode;
 import net.ClientConnection.GameplayState;
 import net.Net.NetPacketType;
@@ -42,6 +43,14 @@ class NetCommands {
 					break;
 				}
 			}
+			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+			}
+			var b = Net.sendPlayerInfosBytes();
+			for (cc in Net.clients) {
+				cc.sendBytes(b);
+			}
+
 			if (allReady && Net.lobbyHostReady) {
 				NetCommands.playLevel(MultiplayerLevelSelectGui.currentSelectionStatic);
 			}
@@ -66,12 +75,10 @@ class NetCommands {
 		}
 	}
 
-	@:rpc(server) public static function setStartTime(t:Float) {
+	@:rpc(server) public static function setStartTicks(ticks:Int) {
 		if (MarbleGame.instance.world != null) {
-			if (Net.isClient) {
-				t -= cast(Net.clientIdMap[0], ClientConnection).rtt / 2; // Subtract receving time
-			}
-			MarbleGame.instance.world.startRealTime = MarbleGame.instance.world.timeState.timeSinceLoad + t;
+			MarbleGame.instance.world.serverStartTicks = ticks;
+			MarbleGame.instance.world.startTime = MarbleGame.instance.world.timeState.timeSinceLoad + 3.5;
 		}
 	}
 
@@ -134,5 +141,24 @@ class NetCommands {
 			}
 			Net.lobbyHostReady = false;
 		}
+	}
+
+	@:rpc(server) public static function restartGame() {
+		var world = MarbleGame.instance.world;
+		if (Net.isHost) {
+			world.schedule(1, () -> {
+				world.allClientsReady();
+				return null;
+			});
+		}
+		if (Net.isClient) {
+			var gui = MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1];
+			if (gui is EndGameGui) {
+				var egg = cast(gui, EndGameGui);
+				egg.retryFunc(null);
+				world.restartMultiplayerState();
+			}
+		}
+		world.multiplayerStarted = false;
 	}
 }
