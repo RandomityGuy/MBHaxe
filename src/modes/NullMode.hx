@@ -108,4 +108,6 @@ class NullMode implements GameMode {
 	public function constructRewindState() {
 		return null;
 	}
+
+	public function onClientRestart() {}
 }

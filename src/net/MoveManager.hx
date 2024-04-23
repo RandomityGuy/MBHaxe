@@ -242,7 +242,7 @@ class MoveManager {
 			delta = queuedMoves[0].id - lastAckMoveId;
 			mv = queuedMoves.shift();
 			ackRTT = timeState.ticks - mv.timeState.ticks;
-			maxMoves = ackRTT + 2;
+			// maxMoves = ackRTT + 2;
 		}
 		lastAckMoveId = m.id;
 		return mv;

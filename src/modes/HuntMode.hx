@@ -297,6 +297,18 @@ class HuntMode extends NullMode {
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
+	override function onClientRestart() {
+		for (gi in 0...gemSpawnPoints.length) {
+			var gemSpawn = gemSpawnPoints[gi];
+			var vec = gemSpawn.position;
+			if (gemSpawn.gem != null) {
+				gemSpawn.gem.setHide(true);
+				gemSpawn.gem.pickedUp = true;
+				gemSpawn.gemBeam.setHide(true);
+			}
+		}
+	}
+
 	override function onGemPickup(marble:Marble, gem:Gem) {
 		if (@:privateAccess !marble.isNetUpdate) {
 			if (marble == level.marble)
@@ -476,6 +488,7 @@ class HuntMode extends NullMode {
 			}
 		}
 		for (sphereId in spawnGroup) {
+			Console.log('Spawning gem id ${sphereId}');
 			var gemSpawn = gemSpawnPoints[sphereId];
 			if (gemSpawn.gem != null) {
 				gemSpawn.gem.pickedUp = false;
