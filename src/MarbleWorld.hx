@@ -1,5 +1,6 @@
 package src;
 
+import gui.MultiplayerLevelSelectGui;
 import collision.CollisionPool;
 import net.GemPredictionStore;
 import modes.HuntMode;
@@ -646,7 +647,11 @@ class MarbleWorld extends Scheduler {
 
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 
-		this.gameMode.onRestart();
+		if (marble == this.marble)
+			this.gameMode.onRestart();
+		if (Net.isClient) {
+			this.gameMode.onClientRestart();
+		}
 
 		return 0;
 	}
@@ -1984,6 +1989,10 @@ class MarbleWorld extends Scheduler {
 				if (isMultiplayer) {
 					if (Net.isHost) {
 						NetCommands.endGame();
+						this.dispose();
+						MultiplayerLevelSelectGui.currentSelectionStatic = mission.index + 1;
+						var pmg = new MultiplayerLevelSelectGui(true);
+						MarbleGame.canvas.setContent(pmg);
 					}
 					if (Net.isClient) {
 						Net.disconnect();
