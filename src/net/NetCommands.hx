@@ -12,7 +12,11 @@ import gui.MultiplayerLoadingGui;
 @:build(net.RPCMacro.build())
 class NetCommands {
 	@:rpc(server) public static function setLobbyLevelIndex(i:Int) {
-		MultiplayerLevelSelectGui.setLevelFn(i);
+		if (MultiplayerLevelSelectGui.setLevelFn == null) {
+			MultiplayerLevelSelectGui.currentSelectionStatic = i;
+		} else {
+			MultiplayerLevelSelectGui.setLevelFn(i);
+		}
 	}
 
 	@:rpc(server) public static function playLevel(levelIndex:Int) {

@@ -15,6 +15,8 @@ class RPCMacro {
 			deserialize:Array<Expr>
 		}> = new Map();
 
+		var fieldsToAdd = [];
+
 		for (field in fields) {
 			if (field.meta.length > 0 && field.meta[0].name == ':rpc') {
 				switch (field.kind) {
@@ -74,6 +76,32 @@ class RPCMacro {
 											Net.sendPacketToAll(stream);
 										}
 									};
+									var origExpr = f.expr;
+									var lastExprSingle = macro {
+										if (Net.isHost) {
+											var stream = new net.BitStream.OutputBitStream();
+											stream.writeByte(NetPacketType.NetCommand);
+											stream.writeByte($v{rpcFnId});
+											$b{serializeFns};
+											Net.sendPacketToClient(client, stream);
+										}
+									};
+
+									var singleClientfn:Field = {
+										name: field.name + "Client",
+										pos: Context.currentPos(),
+										access: [APublic, AStatic],
+										kind: FFun({
+											args: [
+												{
+													name: "client",
+													type: haxe.macro.TypeTools.toComplexType(Context.getType('net.ClientConnection.GameConnection'))
+												}
+											].concat(f.args),
+											expr: macro $b{[origExpr, lastExprSingle]}
+										})
+									};
+									fieldsToAdd.push(singleClientfn);
 
 									f.expr = macro $b{[f.expr, lastExpr]};
 
@@ -138,6 +166,9 @@ class RPCMacro {
 		};
 
 		fields.push(deserializeField);
+		for (fn in fieldsToAdd) {
+			fields.push(fn);
+		}
 
 		return fields;
 	}
