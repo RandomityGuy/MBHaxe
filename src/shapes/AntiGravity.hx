@@ -32,7 +32,7 @@ class AntiGravity extends PowerUp {
 	public function pickUp(marble:Marble):Bool {
 		var direction = new Vector(0, 0, -1);
 		direction.transform(this.getRotationQuat().toMatrix());
-		return !direction.equals(this.level.marble.currentUp);
+		return !direction.equals(marble.currentUp);
 	}
 
 	public function use(marble:Marble, timeState:TimeState) {

@@ -78,8 +78,8 @@ class NetCommands {
 
 	@:rpc(server) public static function setStartTicks(ticks:Int) {
 		if (MarbleGame.instance.world != null) {
-			MarbleGame.instance.world.serverStartTicks = ticks;
-			MarbleGame.instance.world.startTime = MarbleGame.instance.world.timeState.timeSinceLoad + 3.5;
+			MarbleGame.instance.world.serverStartTicks = ticks + 1; // Extra tick so we don't get 0
+			MarbleGame.instance.world.startTime = MarbleGame.instance.world.timeState.timeSinceLoad + 3.5 + 0.032; // 1 extra tick
 		}
 	}
 
