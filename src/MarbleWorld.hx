@@ -629,6 +629,7 @@ class MarbleWorld extends Scheduler {
 				marble.reset();
 				marble.setMode(Start);
 			}
+			this.playGui.resetPlayerScores();
 		}
 
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject

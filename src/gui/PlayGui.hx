@@ -714,6 +714,14 @@ class PlayGui {
 		redrawPlayerList();
 	}
 
+	public function resetPlayerScores() {
+		for (player in playerList) {
+			player.score = 0;
+		}
+
+		redrawPlayerList();
+	}
+
 	public function setHelpTextOpacity(value:Float) {
 		@:privateAccess helpTextForeground.text._textColorVec.a = value;
 		@:privateAccess helpTextBackground.text._textColorVec.a = value;
