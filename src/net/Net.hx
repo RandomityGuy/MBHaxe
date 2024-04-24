@@ -162,14 +162,17 @@ class Net {
 				onPacketReceived(client, clientDatachannel, new InputBitStream(b));
 			}
 			clientDatachannel.onClosed = () -> {
+				var weLeftOurselves = !Net.isClient; // If we left ourselves, this would be set to false due to order of ops, disconnect being called first, and then the datachannel closing
 				disconnect();
 				if (MarbleGame.instance.world != null) {
 					MarbleGame.instance.quitMission();
 				}
-				if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
-					var loadGui = new MultiplayerLoadingGui("Server closed");
-					MarbleGame.canvas.setContent(loadGui);
-					loadGui.setErrorStatus("Server closed");
+				if (!weLeftOurselves) {
+					if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
+						var loadGui = new MultiplayerLoadingGui("Server closed");
+						MarbleGame.canvas.setContent(loadGui);
+						loadGui.setErrorStatus("Server closed");
+					}
 				}
 			}
 			clientDatachannel.onError = (msg) -> {
@@ -195,7 +198,8 @@ class Net {
 			Net.isMP = false;
 			Net.isClient = false;
 			Net.isHost = false;
-			Net.client.close();
+			if (Net.client != null)
+				Net.client.close();
 			Net.client = null;
 			Net.clientId = 0;
 			Net.clientIdMap.clear();
@@ -361,6 +365,8 @@ class Net {
 						for (cc in clients) {
 							cc.sendBytes(b);
 						}
+						// Send our current mission to connecting client
+						NetCommands.setLobbyLevelIndexClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
 					}
 				}
 
@@ -454,6 +460,11 @@ class Net {
 			var bytes = packetData.getBytes();
 			clientDatachannel.sendBytes(bytes);
 		}
+	}
+
+	public static function sendPacketToClient(client:GameConnection, packetData:OutputBitStream) {
+		var bytes = packetData.getBytes();
+		client.sendBytes(bytes);
 	}
 
 	public static function addDummyConnection() {

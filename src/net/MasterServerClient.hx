@@ -33,6 +33,12 @@ class MasterServerClient {
 		ws.onmessageString = (m) -> {
 			handleMessage(m);
 		}
+		ws.onerror = (m) -> {
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to connect to master server: " + m));
+			open = false;
+			ws = null;
+			instance = null;
+		}
 	}
 
 	public static function process() {

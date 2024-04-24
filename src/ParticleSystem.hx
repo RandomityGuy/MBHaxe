@@ -67,9 +67,9 @@ class Particle {
 	public function update(time:Float, dt:Float) {
 		var t = dt;
 		var a = this.acc;
-		a = a.sub(this.vel.multiply(this.o.dragCoefficient));
-		this.vel = this.vel.add(a.multiply(dt));
-		this.position = this.position.add(this.vel.multiply(dt));
+		a.load(a.sub(this.vel.multiply(this.o.dragCoefficient)));
+		this.vel.load(this.vel.add(a.multiply(dt)));
+		this.position.load(this.position.add(this.vel.multiply(dt)));
 
 		this.currentAge += dt;
 
@@ -257,7 +257,7 @@ class ParticleEmitter {
 		this.currentWaitPeriod = this.o.ejectionPeriod;
 		var pos = this.getPosAtTime(time).clone();
 		if (this.o.spawnOffset != null)
-			pos = pos.add(this.o.spawnOffset()); // Call the spawnOffset function if it's there
+			pos.load(pos.add(this.o.spawnOffset())); // Call the spawnOffset function if it's there
 		// This isn't necessarily uniform but it's fine for the purpose.
 		var randomPointOnSphere = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalized();
 		randomPointOnSphere.x *= this.spawnSphereSquish.x;

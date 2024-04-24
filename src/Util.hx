@@ -297,7 +297,7 @@ class Util {
 		return false;
 	}
 
-	public static function formatScore(score:Float) {
+	public static inline function formatScore(score:Float) {
 		var scoreInt = Std.int(Math.round(score));
 		return '${scoreInt}';
 	}
@@ -349,7 +349,7 @@ class Util {
 		return str;
 	}
 
-	public static function getKeyForButton(button:Int) {
+	public static inline function getKeyForButton(button:Int) {
 		var keyName = Key.getKeyName(button);
 		if (keyName == "MouseLeft")
 			keyName = "the Left Mouse Button";
@@ -362,7 +362,7 @@ class Util {
 		return keyName;
 	}
 
-	public static function getKeyForButton2(button:Int) {
+	public static inline function getKeyForButton2(button:Int) {
 		var keyName = Key.getKeyName(button);
 		if (keyName == "MouseLeft")
 			keyName = "Left Mouse";

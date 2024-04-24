@@ -1,5 +1,6 @@
 package gui;
 
+import net.Net;
 import modes.GameMode.ScoreType;
 import mis.MisParser;
 import hxd.BitmapData;
@@ -154,14 +155,16 @@ class EndGameGui extends GuiImage {
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
 
-		var retryButton = new GuiXboxButton("Retry", 160);
-		retryButton.position = new Vector(400, 0);
-		retryButton.vertSizing = Bottom;
-		retryButton.horizSizing = Right;
-		retryButton.gamepadAccelerator = ["B"];
-		retryButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
-		retryButton.pressedAction = (e) -> restartFunc(retryButton);
-		bottomBar.addChild(retryButton);
+		if (!Net.isMP || Net.isHost) {
+			var retryButton = new GuiXboxButton("Retry", 160);
+			retryButton.position = new Vector(400, 0);
+			retryButton.vertSizing = Bottom;
+			retryButton.horizSizing = Right;
+			retryButton.gamepadAccelerator = ["B"];
+			retryButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
+			retryButton.pressedAction = (e) -> restartFunc(retryButton);
+			bottomBar.addChild(retryButton);
+		}
 
 		// var lbButton = new GuiXboxButton("Leaderboard", 220);
 		// lbButton.position = new Vector(750, 0);

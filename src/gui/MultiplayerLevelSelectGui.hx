@@ -163,6 +163,9 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				state: Net.clientConnection.lobbyReady,
 				platform: Net.getPlatform()
 			});
+		}
+
+		if (Net.clientIdMap != null) {
 			for (c => v in Net.clientIdMap) {
 				playerListArr.push({
 					name: v.name,
@@ -313,7 +316,6 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			}
 			return true;
 		}
-		setLevelFn = setLevel;
 
 		levelSelectOpts.position = new Vector(380, 430);
 		levelSelectOpts.extent = new Vector(815, 94);
@@ -324,6 +326,12 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			NetCommands.setLobbyLevelIndex(i);
 			return true;
 		};
+
+		setLevelFn = (idx) -> {
+			setLevel(idx);
+			levelSelectOpts.setCurrentOption(idx);
+		};
+
 		levelSelectOpts.setCurrentOption(currentSelectionStatic);
 		setLevel(currentSelectionStatic);
 		innerCtrl.addChild(levelSelectOpts);
@@ -367,12 +375,14 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				platform: Net.getPlatform()
 			});
 		}
-		for (c => v in Net.clientIdMap) {
-			playerListArr.push({
-				name: v.name,
-				state: v.lobbyReady,
-				platform: v.platform
-			});
+		if (Net.clientIdMap != null) {
+			for (c => v in Net.clientIdMap) {
+				playerListArr.push({
+					name: v.name,
+					state: v.lobbyReady,
+					platform: v.platform
+				});
+			}
 		}
 
 		playerList.setTexts(playerListArr.map(player -> {
@@ -382,5 +392,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 	public function updatePlayerCount(pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) {
 		updatePlayerCountFn(pub, priv, publicTotal, privateTotal);
+	}
+
+	override function dispose() {
+		super.dispose();
+		playSelectedLevel = null;
+		setLevelFn = null;
 	}
 }
