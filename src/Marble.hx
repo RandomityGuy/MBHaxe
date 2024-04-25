@@ -1,5 +1,6 @@
 package src;
 
+import gui.MarblePickerGui;
 import collision.CollisionPool;
 import net.NetPacket.MarbleNetFlags;
 import net.BitStream.OutputBitStream;
@@ -375,9 +376,19 @@ class Marble extends GameObject {
 		this.netCorrected = false;
 
 		var marbleDts = new DtsObject();
-		Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
-		marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
-		marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
+		var marbleShader = "";
+		if (connection == null) { // Our marble
+			Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
+			marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
+			marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
+			marbleShader = Settings.optionsSettings.marbleShader;
+		} else {
+			var marbleData = MarblePickerGui.marbleData[connection.getMarbleId()];
+			Console.log("Marble: " + marbleData.dts + " (" + marbleData.skin + ")");
+			marbleDts.dtsPath = marbleData.dts;
+			marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
+			marbleShader = marbleData.shader;
+		}
 		marbleDts.showSequences = false;
 		marbleDts.useInstancing = false;
 		var dtsFile = ResourceLoader.loadDts(marbleDts.dtsPath).resource;
@@ -394,10 +405,7 @@ class Marble extends GameObject {
 					var csky = level != null ? level.sky : (@:privateAccess MarbleGame.instance.previewWorld.sky);
 					this.cubemapRenderer = new CubemapRenderer(MarbleGame.instance.scene, csky, !this.controllable && level != null);
 
-					if (Settings.optionsSettings.marbleShader == null
-						|| Settings.optionsSettings.marbleShader == "Default"
-						|| Settings.optionsSettings.marbleShader == ""
-						|| !isUltra) { // Use this shit everywhere except ultra
+					if (marbleShader == null || marbleShader == "Default" || marbleShader == "" || !isUltra) { // Use this shit everywhere except ultra
 						mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
 					} else {
 						// Generate tangents for next shaders, only for Ultra
@@ -410,31 +418,31 @@ class Marble extends GameObject {
 
 						mat.mainPass.removeShader(mat.textureShader);
 
-						if (Settings.optionsSettings.marbleShader == "ClassicGlassPureSphere") {
+						if (marbleShader == "ClassicGlassPureSphere") {
 							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble01.normal.png").resource;
 							var classicGlassShader = new ClassicGlassPureSphere(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
 								new Vector(0.6, 0.6, 0.6, 0.6), 1);
 							mat.mainPass.addShader(classicGlassShader);
 						}
 
-						if (Settings.optionsSettings.marbleShader == "ClassicMarb") {
+						if (marbleShader == "ClassicMarb") {
 							var classicMarb = new ClassicMarb(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), 1);
 							mat.mainPass.addShader(classicMarb);
 						}
 
-						if (Settings.optionsSettings.marbleShader == "ClassicMarb2") {
+						if (marbleShader == "ClassicMarb2") {
 							var classicMarb2 = new ClassicMarb2(mat.texture, this.cubemapRenderer.cubemap, 12, new Vector(0.6, 0.6, 0.6, 0.6), 1);
 							mat.mainPass.addShader(classicMarb2);
 						}
 
-						if (Settings.optionsSettings.marbleShader == "ClassicMarb3") {
+						if (marbleShader == "ClassicMarb3") {
 							var marbSpecColor = new Vector(0.6, 0.6, 0.6, 0.6);
 							var marbSpec = 12.0;
-							if (Settings.optionsSettings.marbleModel == "data/shapes/balls/marble16.dts") {
+							if (marbleDts.dtsPath == "data/shapes/balls/marble16.dts") {
 								marbSpec = 6;
 								marbSpecColor.set(0.2, 0.2, 0.2, 0.2);
 							}
-							if (Settings.optionsSettings.marbleModel == "data/shapes/balls/marble31.dts") {
+							if (marbleDts.dtsPath == "data/shapes/balls/marble31.dts") {
 								marbSpec = 24;
 								marbSpecColor.set(0.3, 0.3, 0.3, 0.3);
 							}
@@ -442,7 +450,7 @@ class Marble extends GameObject {
 							mat.mainPass.addShader(classicMarb3);
 						}
 
-						if (Settings.optionsSettings.marbleShader == "ClassicMetal") {
+						if (marbleShader == "ClassicMetal") {
 							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble18.normal.png").resource;
 							marbleNormal.wrap = Repeat;
 							var classicMetalShader = new ClassicMetal(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
@@ -450,7 +458,7 @@ class Marble extends GameObject {
 							mat.mainPass.addShader(classicMetalShader);
 						}
 
-						if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass20") {
+						if (marbleShader == "ClassicMarbGlass20") {
 							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble20.normal.png").resource;
 							marbleNormal.wrap = Repeat;
 							var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
@@ -458,14 +466,14 @@ class Marble extends GameObject {
 							mat.mainPass.addShader(classicGlassShader);
 						}
 
-						if (Settings.optionsSettings.marbleShader == "ClassicMarbGlass18") {
+						if (marbleShader == "ClassicMarbGlass18") {
 							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble18.normal.png").resource;
 							marbleNormal.wrap = Repeat;
 							var classicGlassShader = new ClassicGlass(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 12,
 								new Vector(0.6, 0.6, 0.6, 0.6), 1);
 							mat.mainPass.addShader(classicGlassShader);
 						}
-						if (Settings.optionsSettings.marbleShader == "CrystalMarb") {
+						if (marbleShader == "CrystalMarb") {
 							var marbleNormal = ResourceLoader.getTexture("data/shapes/balls/marble02.normal.png").resource;
 							marbleNormal.wrap = Repeat;
 							var classicGlassShader = new CrystalMarb(mat.texture, marbleNormal, this.cubemapRenderer.cubemap, 1);

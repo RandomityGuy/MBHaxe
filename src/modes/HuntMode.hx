@@ -635,7 +635,7 @@ class HuntMode extends NullMode {
 					NetCommands.timerRanOut();
 				}
 				if (!level.isWatching) {
-					@:privateAccess level.schedule(level.timeState.currentAttemptTime, () -> cast level.showFinishScreen());
+					@:privateAccess level.schedule(level.timeState.currentAttemptTime + 5, () -> cast level.mpFinish());
 				}
 			} else {
 				var myScore = {
