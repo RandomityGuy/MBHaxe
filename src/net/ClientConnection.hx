@@ -59,6 +59,7 @@ abstract class GameConnection {
 	var name:String;
 	var lobbyReady:Bool;
 	var platform:NetPlatform;
+	var marbleId:Int;
 
 	function new(id:Int) {
 		this.id = id;
@@ -106,5 +107,13 @@ abstract class GameConnection {
 
 	public inline function setName(value:String) {
 		name = value;
+	}
+
+	public inline function setMarbleId(value:Int) {
+		marbleId = value;
+	}
+
+	public inline function getMarbleId() {
+		return marbleId;
 	}
 }

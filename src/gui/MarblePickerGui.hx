@@ -11,220 +11,220 @@ import src.Settings;
 class MarblePickerGui extends GuiImage {
 	var innerCtrl:GuiControl;
 
-	public function new() {
-		var marbleData = [
-			{
-				name: "1",
-				dts: "data/shapes/balls/marble01.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "2",
-				dts: "data/shapes/balls/marble03.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "3",
-				dts: "data/shapes/balls/marble04.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "4",
-				dts: "data/shapes/balls/marble05.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "5",
-				dts: "data/shapes/balls/marble06.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "6",
-				dts: "data/shapes/balls/marble07.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "7",
-				dts: "data/shapes/balls/marble12.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "8",
-				dts: "data/shapes/balls/marble15.dts",
-				skin: "base",
-				shader: "ClassicGlassPureSphere"
-			},
-			{
-				name: "9",
-				dts: "data/shapes/balls/marble02.dts",
-				skin: "base",
-				shader: "CrystalMarb"
-			},
-			{
-				name: "10",
-				dts: "data/shapes/balls/marble26.dts",
-				skin: "base",
-				shader: "CrystalMarb"
-			},
-			{
-				name: "11",
-				dts: "data/shapes/balls/marble27.dts",
-				skin: "base",
-				shader: "CrystalMarb"
-			},
-			{
-				name: "12",
-				dts: "data/shapes/balls/marble28.dts",
-				skin: "base",
-				shader: "CrystalMarb"
-			},
-			{
-				name: "13",
-				dts: "data/shapes/balls/marble29.dts",
-				skin: "base",
-				shader: "CrystalMarb"
-			},
-			{
-				name: "14",
-				dts: "data/shapes/balls/marble30.dts",
-				skin: "base",
-				shader: "CrystalMarb"
-			},
-			{
-				name: "15",
-				dts: "data/shapes/balls/marble11.dts",
-				skin: "base",
-				shader: "ClassicMetal"
-			},
-			{
-				name: "16",
-				dts: "data/shapes/balls/marble18.dts",
-				skin: "base",
-				shader: "ClassicMarbGlass18"
-			},
-			{
-				name: "17",
-				dts: "data/shapes/balls/marble20.dts",
-				skin: "base",
-				shader: "ClassicMarbGlass20"
-			},
-			{
-				name: "18",
-				dts: "data/shapes/balls/marble33.dts",
-				skin: "base",
-				shader: "ClassicMetal"
-			},
-			{
-				name: "19",
-				dts: "data/shapes/balls/marble34.dts",
-				skin: "base",
-				shader: "ClassicMarb2"
-			},
-			{
-				name: "20",
-				dts: "data/shapes/balls/marble09.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "21",
-				dts: "data/shapes/balls/marble13.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "22",
-				dts: "data/shapes/balls/marble14.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "23",
-				dts: "data/shapes/balls/marble17.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "24",
-				dts: "data/shapes/balls/marble19.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "25",
-				dts: "data/shapes/balls/marble21.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "26",
-				dts: "data/shapes/balls/marble22.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "27",
-				dts: "data/shapes/balls/marble23.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "28",
-				dts: "data/shapes/balls/marble24.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "29",
-				dts: "data/shapes/balls/marble25.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "30",
-				dts: "data/shapes/balls/marble31.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "31",
-				dts: "data/shapes/balls/marble32.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "32",
-				dts: "data/shapes/balls/marble08.dts",
-				skin: "base",
-				shader: "ClassicMarb"
-			},
-			{
-				name: "33",
-				dts: "data/shapes/balls/marble10.dts",
-				skin: "base",
-				shader: "ClassicMarb2"
-			},
-			{
-				name: "34",
-				dts: "data/shapes/balls/marble16.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			},
-			{
-				name: "35",
-				dts: "data/shapes/balls/marble35.dts",
-				skin: "base",
-				shader: "ClassicMarb3"
-			}
-		];
+	static var marbleData = [
+		{
+			name: "1",
+			dts: "data/shapes/balls/marble01.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "2",
+			dts: "data/shapes/balls/marble03.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "3",
+			dts: "data/shapes/balls/marble04.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "4",
+			dts: "data/shapes/balls/marble05.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "5",
+			dts: "data/shapes/balls/marble06.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "6",
+			dts: "data/shapes/balls/marble07.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "7",
+			dts: "data/shapes/balls/marble12.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "8",
+			dts: "data/shapes/balls/marble15.dts",
+			skin: "base",
+			shader: "ClassicGlassPureSphere"
+		},
+		{
+			name: "9",
+			dts: "data/shapes/balls/marble02.dts",
+			skin: "base",
+			shader: "CrystalMarb"
+		},
+		{
+			name: "10",
+			dts: "data/shapes/balls/marble26.dts",
+			skin: "base",
+			shader: "CrystalMarb"
+		},
+		{
+			name: "11",
+			dts: "data/shapes/balls/marble27.dts",
+			skin: "base",
+			shader: "CrystalMarb"
+		},
+		{
+			name: "12",
+			dts: "data/shapes/balls/marble28.dts",
+			skin: "base",
+			shader: "CrystalMarb"
+		},
+		{
+			name: "13",
+			dts: "data/shapes/balls/marble29.dts",
+			skin: "base",
+			shader: "CrystalMarb"
+		},
+		{
+			name: "14",
+			dts: "data/shapes/balls/marble30.dts",
+			skin: "base",
+			shader: "CrystalMarb"
+		},
+		{
+			name: "15",
+			dts: "data/shapes/balls/marble11.dts",
+			skin: "base",
+			shader: "ClassicMetal"
+		},
+		{
+			name: "16",
+			dts: "data/shapes/balls/marble18.dts",
+			skin: "base",
+			shader: "ClassicMarbGlass18"
+		},
+		{
+			name: "17",
+			dts: "data/shapes/balls/marble20.dts",
+			skin: "base",
+			shader: "ClassicMarbGlass20"
+		},
+		{
+			name: "18",
+			dts: "data/shapes/balls/marble33.dts",
+			skin: "base",
+			shader: "ClassicMetal"
+		},
+		{
+			name: "19",
+			dts: "data/shapes/balls/marble34.dts",
+			skin: "base",
+			shader: "ClassicMarb2"
+		},
+		{
+			name: "20",
+			dts: "data/shapes/balls/marble09.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "21",
+			dts: "data/shapes/balls/marble13.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "22",
+			dts: "data/shapes/balls/marble14.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "23",
+			dts: "data/shapes/balls/marble17.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "24",
+			dts: "data/shapes/balls/marble19.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "25",
+			dts: "data/shapes/balls/marble21.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "26",
+			dts: "data/shapes/balls/marble22.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "27",
+			dts: "data/shapes/balls/marble23.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "28",
+			dts: "data/shapes/balls/marble24.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "29",
+			dts: "data/shapes/balls/marble25.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "30",
+			dts: "data/shapes/balls/marble31.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "31",
+			dts: "data/shapes/balls/marble32.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "32",
+			dts: "data/shapes/balls/marble08.dts",
+			skin: "base",
+			shader: "ClassicMarb"
+		},
+		{
+			name: "33",
+			dts: "data/shapes/balls/marble10.dts",
+			skin: "base",
+			shader: "ClassicMarb2"
+		},
+		{
+			name: "34",
+			dts: "data/shapes/balls/marble16.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		},
+		{
+			name: "35",
+			dts: "data/shapes/balls/marble35.dts",
+			skin: "base",
+			shader: "ClassicMarb3"
+		}
+	];
 
+	public function new() {
 		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
 		super(res);
 

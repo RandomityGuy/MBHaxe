@@ -1,5 +1,6 @@
 package src;
 
+import gui.MarblePickerGui;
 import gui.MultiplayerLevelSelectGui;
 import collision.CollisionPool;
 import net.GemPredictionStore;
@@ -481,7 +482,12 @@ class MarbleWorld extends Scheduler {
 			marblefiles.push("sound/use_blast.wav");
 		}
 		// Hacky
-		marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
+		if (client == null)
+			marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
+		else {
+			var marbleDts = MarblePickerGui.marbleData[client.getMarbleId()].dts;
+			marblefiles.push(StringTools.replace(marbleDts, "data/", ""));
+		}
 		// if (Settings.optionsSettings.marbleCategoryIndex == 0)
 		// 	marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		// else
@@ -1458,6 +1464,8 @@ class MarbleWorld extends Scheduler {
 		// }
 
 		this.tickSchedule(timeState.currentAttemptTime);
+		if (this._disposed)
+			return;
 
 		if (this.isWatching && this.replay.currentPlaybackFrame.marbleStateFlags.has(UsedBlast))
 			this.marble.useBlast(timeState);
@@ -1963,6 +1971,23 @@ class MarbleWorld extends Scheduler {
 				timeTravelSound = null;
 			}
 		}
+	}
+
+	function mpFinish() {
+		playGui.setGuiVisibility(false);
+		Console.log("State End");
+		#if js
+		var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+		pointercontainer.hidden = false;
+		#end
+		if (Util.isTouchDevice()) {
+			MarbleGame.instance.touchInput.setControlsEnabled(false);
+		}
+		this.setCursorLock(false);
+		if (Net.isHost) {
+			MarbleGame.instance.quitMission();
+		}
+		return 0;
 	}
 
 	function showFinishScreen() {

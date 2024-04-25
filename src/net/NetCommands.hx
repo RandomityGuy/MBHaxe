@@ -124,9 +124,10 @@ class NetCommands {
 		}
 	}
 
-	@:rpc(client) public static function setPlayerName(clientId:Int, name:String) {
+	@:rpc(client) public static function setPlayerData(clientId:Int, name:String, marble:Int) {
 		if (Net.isHost) {
 			Net.clientIdMap[clientId].setName(name);
+			Net.clientIdMap[clientId].setMarbleId(marble);
 			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
 			}
