@@ -1728,7 +1728,7 @@ class Marble extends GameObject {
 
 	// MP Only Functions
 
-	public function clearNetFlags() {
+	public inline function clearNetFlags() {
 		this.netFlags = 0;
 	}
 

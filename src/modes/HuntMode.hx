@@ -223,6 +223,9 @@ class HuntMode extends NullMode {
 
 	override function getRespawnTransform() {
 		var lastContactPos = this.level.marble.lastContactPosition;
+		if (lastContactPos == null) {
+			return getSpawnTransform();
+		}
 		// Pick closest spawn point
 		var closestSpawn:MissionElementSpawnSphere = null;
 		var closestDistance = 1e10;
