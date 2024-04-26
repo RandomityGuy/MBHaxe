@@ -21,6 +21,10 @@ abstract class PowerUp extends DtsObject {
 	public var pickupSound:Sound;
 	public var netIndex:Int;
 
+	// Net
+	var pickupClient:Int = -1;
+	var pickupTicks:Int = -1;
+
 	var customPickupMessage:String = null;
 
 	public function new(element:MissionElementItem) {
@@ -48,6 +52,8 @@ abstract class PowerUp extends DtsObject {
 				pickupPacket.powerupItemId = this.netIndex;
 				pickupPacket.serialize(b);
 				Net.sendPacketToIngame(b);
+				pickupClient = pickupPacket.clientId;
+				pickupTicks = pickupPacket.serverTicks;
 			}
 
 			this.lastPickUpTime = timeState.currentAttemptTime;
@@ -86,5 +92,7 @@ abstract class PowerUp extends DtsObject {
 
 	public override function reset() {
 		this.lastPickUpTime = Math.NEGATIVE_INFINITY;
+		this.pickupClient = -1;
+		this.pickupTicks = -1;
 	}
 }

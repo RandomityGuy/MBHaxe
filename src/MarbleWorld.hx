@@ -1,5 +1,7 @@
 package src;
 
+import net.NetPacket.PowerupPickupPacket;
+import net.Move;
 import net.NetPacket.GemSpawnPacket;
 import net.BitStream.OutputBitStream;
 import net.MasterServerClient;
@@ -1137,7 +1139,43 @@ class MarbleWorld extends Scheduler {
 		packet.serialize(bs);
 		packets.push(bs.getBytes());
 
+		// Marble states
+		for (marb in this.marbles) {
+			var oldFlags = @:privateAccess marb.netFlags;
+			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange;
+
+			var innerMove = @:privateAccess marb.lastMove;
+			if (innerMove == null) {
+				innerMove = new Move();
+				innerMove.d = new Vector(0, 0);
+			}
+			var motionDir = @:privateAccess marb.moveMotionDir;
+			if (motionDir == null) {
+				motionDir = marb.getMarbleAxis()[1];
+			}
+
+			var move = new NetMove(innerMove, motionDir, timeState, timeState.ticks, 65535);
+
+			packets.push(@:privateAccess marb.packUpdate(move, timeState));
+
+			@:privateAccess marb.netFlags = oldFlags;
+		}
+
 		// Powerup states
+		for (powerup in this.powerUps) {
+			if (powerup.currentOpacity != 1.0) { // it must be picked up or something
+				if (@:privateAccess powerup.pickupClient != -1) {
+					var b = new OutputBitStream();
+					b.writeByte(NetPacketType.PowerupPickup);
+					var pickupPacket = new PowerupPickupPacket();
+					pickupPacket.clientId = @:privateAccess powerup.pickupClient;
+					pickupPacket.serverTicks = @:privateAccess powerup.pickupTicks;
+					pickupPacket.powerupItemId = powerup.netIndex;
+					pickupPacket.serialize(b);
+					packets.push(b.getBytes());
+				}
+			}
+		}
 
 		return packets;
 	}
@@ -1570,18 +1608,23 @@ class MarbleWorld extends Scheduler {
 						packets.push(marble.packUpdate(myMove, fixedDt));
 						packets.push(othermarble.packUpdate(mv, fixedDt));
 					}
+					var allRecv = true;
 					for (client => marble in clientMarbles) { // Oh no!
 						// var pktClone = packets.copy();
 						// pktClone.sort((a, b) -> {
 						// 	return (a.c == client.id) ? 1 : (b.c == client.id) ? -1 : 0;
 						// });
-						if (client.state != GAME)
+						if (client.state != GAME) {
+							allRecv = false;
 							continue; // Only send if in game
+						}
 						marble.clearNetFlags();
 						for (packet in packets) {
 							client.sendBytes(packet);
 						}
 					}
+					if (allRecv)
+						this.marble.clearNetFlags();
 				}
 				timeState.ticks++;
 			}
