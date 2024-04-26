@@ -1,5 +1,8 @@
 package src;
 
+import net.NetPacket.GemSpawnPacket;
+import net.BitStream.OutputBitStream;
+import net.MasterServerClient;
 import gui.MarblePickerGui;
 import gui.MultiplayerLevelSelectGui;
 import collision.CollisionPool;
@@ -522,7 +525,17 @@ class MarbleWorld extends Scheduler {
 			cc++;
 		if (Net.isHost && cc == 0) {
 			allClientsReady();
+			Net.serverInfo.state = "PLAYING";
+			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
 		}
+	}
+
+	public function addJoiningClient(cc:GameConnection, onAdded:() -> Void) {
+		this.initMarble(cc, () -> {
+			var addedMarble = clientMarbles.get(cc);
+			this.restart(addedMarble); // spawn it
+			onAdded();
+		});
 	}
 
 	public function restartMultiplayerState() {
@@ -654,7 +667,7 @@ class MarbleWorld extends Scheduler {
 
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 
-		if (marble == this.marble)
+		if (!this.isMultiplayer)
 			this.gameMode.onRestart();
 		if (Net.isClient) {
 			this.gameMode.onClientRestart();
@@ -711,6 +724,7 @@ class MarbleWorld extends Scheduler {
 
 	public function allClientsReady() {
 		NetCommands.setStartTicks(this.timeState.ticks);
+		this.gameMode.onRestart();
 	}
 
 	public function updateGameState() {
@@ -1105,6 +1119,29 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	public function getWorldStateForClientJoin() {
+		var packets = [];
+		// First, gem spawn packet
+		var bs = new OutputBitStream();
+		bs.writeByte(GemSpawn);
+		var packet = new GemSpawnPacket();
+
+		var hunt = cast(this.gameMode, HuntMode);
+		var activeGemIds = [];
+		for (gemId in @:privateAccess hunt.activeGemSpawnGroup) {
+			if (@:privateAccess hunt.gemSpawnPoints[gemId].gem != null && @:privateAccess !hunt.gemSpawnPoints[gemId].gem.pickedUp) {
+				activeGemIds.push(gemId);
+			}
+		}
+		packet.gemIds = activeGemIds;
+		packet.serialize(bs);
+		packets.push(bs.getBytes());
+
+		// Powerup states
+
+		return packets;
+	}
+
 	public function applyReceivedMoves() {
 		var needsPrediction = 0;
 		if (!lastMoves.ourMoveApplied) {
@@ -1212,8 +1249,10 @@ class MarbleWorld extends Scheduler {
 			pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 		}
 		var huntMode:HuntMode = cast this.gameMode;
-		for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
-			huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+		if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
+			for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
+				huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+			}
 		}
 		// }
 		// }
@@ -1519,7 +1558,7 @@ class MarbleWorld extends Scheduler {
 				for (client => marble in clientMarbles) {
 					otherMoves.push(marble.updateServer(fixedDt, collisionWorld, pathedInteriors));
 				}
-				if (myMove != null) {
+				if (myMove != null && Net.isClient) {
 					this.predictions.storeState(marble, myMove.timeState.ticks);
 					for (client => marble in clientMarbles) {
 						this.predictions.storeState(marble, myMove.timeState.ticks);
@@ -1536,6 +1575,9 @@ class MarbleWorld extends Scheduler {
 						// pktClone.sort((a, b) -> {
 						// 	return (a.c == client.id) ? 1 : (b.c == client.id) ? -1 : 0;
 						// });
+						if (client.state != GAME)
+							continue; // Only send if in game
+						marble.clearNetFlags();
 						for (packet in packets) {
 							client.sendBytes(packet);
 						}
@@ -1679,6 +1721,21 @@ class MarbleWorld extends Scheduler {
 						this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
 					}
 				} else if (this.multiplayerStarted) {
+					if (Net.isClient) {
+						var ticksSinceTimerStart = @:privateAccess this.marble.serverTicks - (this.serverStartTicks + 109);
+						var ourStartTime = this.gameMode.getStartTime();
+						var gameplayHigh = ourStartTime - ticksSinceTimerStart * 0.032;
+						var gameplayLow = ourStartTime - (ticksSinceTimerStart + 1) * 0.032;
+						// Clamp timer to be between these two
+						if (gameplayLow > this.timeState.gameplayClock) {
+							this.timeState.gameplayClock = gameplayLow - this.timeState.gameplayClock + gameplayHigh;
+						}
+
+						if (gameplayHigh < this.timeState.gameplayClock) {
+							this.timeState.gameplayClock = gameplayLow + this.timeState.gameplayClock - gameplayHigh;
+						}
+					}
+
 					this.timeState.gameplayClock += dt * timeMultiplier;
 				}
 				if (this.timeState.gameplayClock < 0)

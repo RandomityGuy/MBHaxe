@@ -47,7 +47,7 @@ abstract class PowerUp extends DtsObject {
 				pickupPacket.serverTicks = timeState.ticks;
 				pickupPacket.powerupItemId = this.netIndex;
 				pickupPacket.serialize(b);
-				Net.sendPacketToAll(b);
+				Net.sendPacketToIngame(b);
 			}
 
 			this.lastPickUpTime = timeState.currentAttemptTime;

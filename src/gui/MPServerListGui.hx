@@ -133,7 +133,6 @@ class MPServerListGui extends GuiImage {
 			}, 15000);
 			Net.joinServer(ourServerList[curSelection].name, () -> {
 				failed = false;
-				MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
 				Net.remoteServerInfo = ourServerList[curSelection];
 			});
 		};

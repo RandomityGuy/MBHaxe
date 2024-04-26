@@ -362,7 +362,7 @@ class HuntMode extends NullMode {
 			var os = new OutputBitStream();
 			os.writeByte(GemPickup);
 			packet.serialize(os);
-			Net.sendPacketToAll(os);
+			Net.sendPacketToIngame(os);
 
 			@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
 		}
@@ -434,7 +434,7 @@ class HuntMode extends NullMode {
 				var packet = new GemSpawnPacket();
 				packet.gemIds = spawnGroup;
 				packet.serialize(bs);
-				Net.sendPacketToAll(bs);
+				Net.sendPacketToIngame(bs);
 			}
 		}
 	}

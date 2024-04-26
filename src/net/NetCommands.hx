@@ -8,6 +8,8 @@ import net.Net.NetPacketType;
 import gui.MultiplayerLevelSelectGui;
 import src.MarbleGame;
 import gui.MultiplayerLoadingGui;
+import src.MissionList;
+import src.Console;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -21,6 +23,24 @@ class NetCommands {
 
 	@:rpc(server) public static function playLevel(levelIndex:Int) {
 		MultiplayerLevelSelectGui.playSelectedLevel(levelIndex);
+		if (Net.isHost) {
+			Net.serverInfo.state = "WAITING";
+			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the wait state
+		}
+	}
+
+	@:rpc(server) public static function playLevelMidJoin(index:Int) {
+		if (Net.isClient) {
+			var difficultyMissions = MissionList.missionList['ultra']["multiplayer"];
+			var curMission = difficultyMissions[index];
+			MarbleGame.instance.playMission(curMission, true);
+		}
+	}
+
+	@:rpc(server) public static function enterLobby() {
+		if (Net.isClient) {
+			MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
+		}
 	}
 
 	@:rpc(server) public static function setNetworkRNG(rng:Float) {
@@ -64,18 +84,36 @@ class NetCommands {
 
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
-			Net.clientIdMap[clientId].ready();
-			var allReady = true;
-			for (id => client in Net.clientIdMap) {
-				if (client.state != GameplayState.GAME) {
-					allReady = false;
-					break;
+			if (Net.serverInfo.state == "WAITING" && MarbleGame.instance.world != null) {
+				Net.clientIdMap[clientId].ready();
+				var allReady = true;
+				for (id => client in Net.clientIdMap) {
+					if (client.state != GameplayState.GAME) {
+						allReady = false;
+						break;
+					}
 				}
-			}
-			if (allReady) {
-				if (MarbleGame.instance.world != null) {
-					MarbleGame.instance.world.allClientsReady();
+				if (allReady) {
+					if (MarbleGame.instance.world != null) {
+						MarbleGame.instance.world.allClientsReady();
+					}
 				}
+				if (Net.isHost) {
+					Net.serverInfo.state = "PLAYING";
+					MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
+				}
+			} else {
+				// Mid game join
+				Console.log("Mid game join for client " + clientId);
+				// Send em our present world state
+				var packets = MarbleGame.instance.world.getWorldStateForClientJoin();
+				var c = Net.clientIdMap[clientId];
+				for (packet in packets) {
+					c.sendBytes(packet);
+				}
+				Net.clientIdMap[clientId].ready();
+				// Send the start ticks
+				NetCommands.setStartTicksMidJoinClient(c, MarbleGame.instance.world.serverStartTicks, MarbleGame.instance.world.timeState.ticks);
 			}
 		}
 	}
@@ -87,10 +125,22 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(server) public static function setStartTicksMidJoin(startTicks:Int, currentTicks:Int) {
+		if (MarbleGame.instance.world != null) {
+			MarbleGame.instance.world.serverStartTicks = startTicks + 1; // Extra tick so we don't get 0
+			MarbleGame.instance.world.startTime = MarbleGame.instance.world.timeState.timeSinceLoad + 0.032; // 1 extra tick
+			MarbleGame.instance.world.timeState.ticks = currentTicks;
+		}
+	}
+
 	@:rpc(server) public static function timerRanOut() {
 		if (Net.isClient && MarbleGame.instance.world != null) {
 			var huntMode:HuntMode = cast MarbleGame.instance.world.gameMode;
 			huntMode.onTimeExpire();
+		}
+		if (Net.isHost) {
+			Net.serverInfo.state = "WAITING";
+			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
 		}
 	}
 
@@ -155,6 +205,11 @@ class NetCommands {
 				v.lobbyReady = false;
 			}
 			Net.lobbyHostReady = false;
+
+			if (Net.isHost) {
+				Net.serverInfo.state = "LOBBY";
+				MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
+			}
 		}
 	}
 

@@ -79,7 +79,7 @@ class Net {
 	public static var remoteServerInfo:RemoteServerInfo;
 
 	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool, onHosted:() -> Void) {
-		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "Lobby", getPlatform());
+		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "LOBBY", getPlatform());
 		MasterServerClient.connectToMasterServer(() -> {
 			isHost = true;
 			isClient = false;
@@ -292,6 +292,20 @@ class Net {
 		}
 	}
 
+	static function onClientHandshakeComplete(conn:ClientConnection) {
+		// Send our current mission to connecting client
+		NetCommands.setLobbyLevelIndexClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
+
+		if (serverInfo.state == "PLAYING") { // We initiated the game, directly add in the marble
+			NetCommands.playLevelMidJoinClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
+			MarbleGame.instance.world.addJoiningClient(conn, () -> {});
+		}
+		if (serverInfo.state == "LOBBY") {
+			// Connect client to lobby
+			NetCommands.enterLobbyClient(conn);
+		}
+	}
+
 	public static function sendPlayerInfosBytes() {
 		var b = new haxe.io.BytesOutput();
 		b.writeByte(PlayerInfo);
@@ -367,8 +381,7 @@ class Net {
 						for (cc in clients) {
 							cc.sendBytes(b);
 						}
-						// Send our current mission to connecting client
-						NetCommands.setLobbyLevelIndexClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
+						onClientHandshakeComplete(conn);
 					}
 				}
 
@@ -456,6 +469,14 @@ class Net {
 		var bytes = packetData.getBytes();
 		for (c => v in clients) {
 			v.sendBytes(bytes);
+		}
+	}
+
+	public static function sendPacketToIngame(packetData:OutputBitStream) {
+		var bytes = packetData.getBytes();
+		for (c => v in clients) {
+			if (v.state == GAME)
+				v.sendBytes(bytes);
 		}
 	}
 

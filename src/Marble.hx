@@ -1728,6 +1728,10 @@ class Marble extends GameObject {
 
 	// MP Only Functions
 
+	public function clearNetFlags() {
+		this.netFlags = 0;
+	}
+
 	public function packUpdate(move:NetMove, timeState:TimeState) {
 		var b = new OutputBitStream();
 		b.writeByte(NetPacketType.MarbleUpdate);
@@ -1747,7 +1751,6 @@ class Marble extends GameObject {
 		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0x1FF;
 		marbleUpdate.netFlags = this.netFlags;
 		marbleUpdate.gravityDirection = this.currentUp;
-		this.netFlags = 0;
 		marbleUpdate.serialize(b);
 		return b.getBytes();
 	}
