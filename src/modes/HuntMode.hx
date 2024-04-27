@@ -221,8 +221,8 @@ class HuntMode extends NullMode {
 		}
 	}
 
-	override function getRespawnTransform() {
-		var lastContactPos = this.level.marble.lastContactPosition;
+	override function getRespawnTransform(marble:Marble) {
+		var lastContactPos = marble.lastContactPosition;
 		if (lastContactPos == null) {
 			return getSpawnTransform();
 		}

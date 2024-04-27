@@ -7,6 +7,7 @@ import h3d.Quat;
 import h3d.Vector;
 import src.MarbleWorld;
 import src.Mission;
+import src.Marble;
 
 enum ScoreType {
 	Time;
@@ -15,7 +16,7 @@ enum ScoreType {
 
 interface GameMode {
 	public function getSpawnTransform():{position:Vector, orientation:Quat, up:Vector};
-	public function getRespawnTransform():{position:Vector, orientation:Quat, up:Vector};
+	public function getRespawnTransform(marble:Marble):{position:Vector, orientation:Quat, up:Vector};
 	public function missionScan(mission:Mission):Void;
 	public function getStartTime():Float;
 	public function timeMultiplier():Float;

@@ -618,7 +618,7 @@ class Marble extends GameObject {
 			}
 			for (marble in level.marbles) {
 				if (marble != cast this) {
-					var force = marble.getForce(this.collider.transform.getPosition(), timeState.ticks);
+					var force = marble.getForce(this.collider.transform.getPosition(), Net.isHost ? timeState.ticks : serverTicks);
 					A = A.add(force.multiply(1 / mass));
 				}
 			}
@@ -2223,7 +2223,7 @@ class Marble extends GameObject {
 		if (this.level.isMultiplayer) {
 			if (this.blastTicks < (7500 >> 5))
 				return false;
-			this.blastUseTick = timeState.ticks;
+			this.blastUseTick = Net.isHost ? timeState.ticks : serverTicks;
 			if (!this.isNetUpdate)
 				this.netFlags |= MarbleNetFlags.DoBlast;
 			var amount = this.blastTicks / (30000 >> 5);

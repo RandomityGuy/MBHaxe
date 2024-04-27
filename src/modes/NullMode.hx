@@ -39,7 +39,7 @@ class NullMode implements GameMode {
 		};
 	}
 
-	public function getRespawnTransform():{up:Vector, position:Vector, orientation:Quat} {
+	public function getRespawnTransform(marble:Marble):{up:Vector, position:Vector, orientation:Quat} {
 		return null;
 	}
 
