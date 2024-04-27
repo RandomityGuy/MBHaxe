@@ -71,7 +71,7 @@ class CreateMatchGui extends GuiImage {
 		optionCollection.extent = new Vector(815, 500);
 		innerCtrl.addChild(optionCollection);
 
-		var maxPlayers = 2;
+		var maxPlayers = 8;
 		var privateSlots = 0;
 		var privateGame = false;
 
