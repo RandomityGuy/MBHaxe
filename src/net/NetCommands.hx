@@ -118,6 +118,14 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(server) public static function addMidGameJoinMarble(cc:Int) {
+		if (Net.isClient) {
+			if (MarbleGame.instance.world != null) {
+				MarbleGame.instance.world.addJoiningClientGhost(Net.clientIdMap[cc], () -> {});
+			}
+		}
+	}
+
 	@:rpc(server) public static function setStartTicks(ticks:Int) {
 		if (MarbleGame.instance.world != null) {
 			MarbleGame.instance.world.serverStartTicks = ticks + 1; // Extra tick so we don't get 0

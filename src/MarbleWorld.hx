@@ -536,6 +536,18 @@ class MarbleWorld extends Scheduler {
 		this.initMarble(cc, () -> {
 			var addedMarble = clientMarbles.get(cc);
 			this.restart(addedMarble); // spawn it
+			this.playGui.addPlayer(cc.id, cc.getName(), false);
+			this.playGui.redrawPlayerList();
+			onAdded();
+		});
+	}
+
+	public function addJoiningClientGhost(cc:GameConnection, onAdded:() -> Void) {
+		this.initMarble(cc, () -> {
+			var addedMarble = clientMarbles.get(cc);
+			this.restart(addedMarble); // spawn it
+			this.playGui.addPlayer(cc.id, cc.getName(), false);
+			this.playGui.redrawPlayerList();
 			onAdded();
 		});
 	}
@@ -1310,6 +1322,8 @@ class MarbleWorld extends Scheduler {
 				var m = arr.packets[0];
 				// if (m.serverTicks == ourLastMoveTime) {
 				var marbleToUpdate = clientMarbles[Net.clientIdMap[client]];
+				if (@:privateAccess marbleToUpdate.newPos == null)
+					continue;
 				// Debug.drawSphere(@:privateAccess marbleToUpdate.newPos, marbleToUpdate._radius);
 
 				// var distFromUs = @:privateAccess marbleToUpdate.newPos.distance(this.marble.newPos);

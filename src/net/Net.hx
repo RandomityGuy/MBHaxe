@@ -299,6 +299,13 @@ class Net {
 		if (serverInfo.state == "PLAYING") { // We initiated the game, directly add in the marble
 			NetCommands.playLevelMidJoinClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
 			MarbleGame.instance.world.addJoiningClient(conn, () -> {});
+			var playerInfoBytes = sendPlayerInfosBytes();
+			for (dc => cc in clients) {
+				if (cc != conn) {
+					cc.sendBytes(playerInfoBytes);
+					NetCommands.addMidGameJoinMarbleClient(cc, conn.id);
+				}
+			}
 		}
 		if (serverInfo.state == "LOBBY") {
 			// Connect client to lobby
@@ -454,7 +461,7 @@ class Net {
 					}
 				}
 				if (newP) {
-					AudioManager.playSound(ResourceLoader.getAudio("sounds/spawn_alternate.wav").resource);
+					// AudioManager.playSound(ResourceLoader.getAudio("sounds/spawn_alternate.wav").resource);
 				}
 				if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 					cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
