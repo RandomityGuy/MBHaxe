@@ -4,148 +4,175 @@ package collision;
 @:publicFields
 class SAPProxy {
 	var object:CollisionEntity;
-	var flags:Int;
-	var intersections:Array<CollisionEntity>;
-	var positions:Array<Int>;
+	var index:Int;
+	var value:Float;
+	var left:Bool;
+}
+
+@:structInit
+@:publicFields
+class SAPProxyHolder {
+	var isec:Int;
+	var xMinProxy:SAPProxy;
+	var yMinProxy:SAPProxy;
+	var zMinProxy:SAPProxy;
+	var xMaxProxy:SAPProxy;
+	var yMaxProxy:SAPProxy;
+	var zMaxProxy:SAPProxy;
 }
 
 class SAP {
-	var dimXEdges:Array<Float> = [];
-	var dimXEdgeLefts:Array<Bool> = [];
-	var dimXEdgeOwner:Array<Int> = [];
-	var dimYEdges:Array<Float> = [];
-	var dimYEdgeLefts:Array<Bool> = [];
-	var dimYEdgeOwner:Array<Int> = [];
-	var dimZEdges:Array<Float> = [];
-	var dimZEdgeLefts:Array<Bool> = [];
-	var dimZEdgeOwner:Array<Int> = [];
+	var dimX:Array<SAPProxy> = [];
+	var dimY:Array<SAPProxy> = [];
+	var dimZ:Array<SAPProxy> = [];
 
-	var objects:Array<SAPProxy> = [];
-	var objToProxy:Map<CollisionEntity, SAPProxy> = [];
+	var objects:Array<CollisionEntity> = [];
+	var flags:Array<Int> = [];
+	var intersections:Array<Array<CollisionEntity>> = [];
+	var objToProxy:Map<CollisionEntity, SAPProxyHolder> = [];
 	var needsSort = true;
+	var anyFlagSet = false;
 
 	public function new() {}
 
 	public function addEntity(obj:CollisionEntity) {
-		needsSort = true;
-		var edgeLen = dimXEdges.length;
-		var proxy:SAPProxy = {
-			object: obj,
-			intersections: [],
-			flags: 0,
-			positions: [edgeLen, edgeLen + 1, edgeLen, edgeLen + 1, edgeLen, edgeLen + 1]
-		};
 		var idx = objects.length;
-		objects.push(proxy);
-		dimXEdges.push(obj.boundingBox.xMin);
-		dimXEdges.push(obj.boundingBox.xMax);
-		dimYEdges.push(obj.boundingBox.yMin);
-		dimYEdges.push(obj.boundingBox.yMax);
-		dimZEdges.push(obj.boundingBox.zMin);
-		dimZEdges.push(obj.boundingBox.zMax);
-		dimXEdgeLefts.push(true);
-		dimXEdgeLefts.push(false);
-		dimYEdgeLefts.push(true);
-		dimYEdgeLefts.push(false);
-		dimZEdgeLefts.push(true);
-		dimZEdgeLefts.push(false);
-		dimXEdgeOwner.push(idx);
-		dimXEdgeOwner.push(idx);
-		dimYEdgeOwner.push(idx);
-		dimYEdgeOwner.push(idx);
-		dimZEdgeOwner.push(idx);
-		dimZEdgeOwner.push(idx);
+		var xMinProxy:SAPProxy = {
+			object: obj,
+			left: false,
+			value: obj.boundingBox.xMin,
+			index: idx
+		};
+		dimX.push(xMinProxy);
+		var xMaxProxy:SAPProxy = {
+			object: obj,
+			left: true,
+			value: obj.boundingBox.xMax,
+			index: idx
+		};
+		dimX.push(xMaxProxy);
 
-		objToProxy.set(obj, proxy);
+		var yMinProxy:SAPProxy = {
+			object: obj,
+			left: false,
+			value: obj.boundingBox.yMin,
+			index: idx
+		};
+		dimY.push(yMinProxy);
+		var yMaxProxy:SAPProxy = {
+			object: obj,
+			left: true,
+			value: obj.boundingBox.yMax,
+			index: idx
+		};
+		dimY.push(yMaxProxy);
+
+		var zMinProxy:SAPProxy = {
+			object: obj,
+			left: false,
+			value: obj.boundingBox.zMin,
+			index: idx
+		};
+		dimZ.push(zMinProxy);
+		var zMaxProxy:SAPProxy = {
+			object: obj,
+			left: true,
+			value: obj.boundingBox.zMax,
+			index: idx
+		};
+		dimZ.push(zMaxProxy);
+
+		objects.push(obj);
+		intersections.push([]);
+		objToProxy.set(obj, {
+			xMinProxy: xMinProxy,
+			xMaxProxy: xMaxProxy,
+			yMinProxy: yMinProxy,
+			yMaxProxy: yMaxProxy,
+			zMinProxy: zMinProxy,
+			zMaxProxy: zMaxProxy,
+			isec: idx
+		});
+
+		var oldFlags = flags;
+		flags = [];
+		var n = objects.length - 1;
+		for (i in 0...Std.int((idx * idx + idx) / 2))
+			flags.push(0);
+		if (anyFlagSet) {
+			for (o1 in 0...(objects.length - 1)) {
+				for (o2 in (o1 + 1)...(objects.length - 2)) {
+					// https://stackoverflow.com/questions/27086195/linear-index-upper-triangular-matrix
+					var oldN = n - 1;
+					var oldIndex = Std.int((oldN * (oldN - 1) / 2) - (oldN - o2) * ((oldN - o2) - 1) / 2 + o1 - o2 - 1);
+					var newIndex = Std.int((n * (n - 1) / 2) - (n - o2) * ((n - o2) - 1) / 2 + o1 - o2 - 1);
+
+					this.flags[newIndex] = oldFlags[oldIndex];
+				}
+			}
+		}
+
+		needsSort = true;
 	}
 
 	public function update(obj:CollisionEntity) {
 		if (!objToProxy.exists(obj))
 			addEntity(obj);
+
+		var proxyHolder = objToProxy.get(obj);
+		proxyHolder.xMinProxy.value = obj.boundingBox.xMin;
+		proxyHolder.xMaxProxy.value = obj.boundingBox.xMax;
+		proxyHolder.yMinProxy.value = obj.boundingBox.yMin;
+		proxyHolder.yMaxProxy.value = obj.boundingBox.yMax;
+		proxyHolder.zMinProxy.value = obj.boundingBox.zMin;
+		proxyHolder.zMaxProxy.value = obj.boundingBox.zMax;
+
 		needsSort = true;
-		var proxy = objToProxy.get(obj);
-		proxy.object = obj;
-		proxy.intersections = [];
-		proxy.flags = 0;
-		dimXEdges[proxy.positions[0]] = obj.boundingBox.xMin;
-		dimXEdges[proxy.positions[1]] = obj.boundingBox.xMax;
-		dimYEdges[proxy.positions[2]] = obj.boundingBox.yMin;
-		dimYEdges[proxy.positions[3]] = obj.boundingBox.yMax;
-		dimZEdges[proxy.positions[4]] = obj.boundingBox.zMin;
-		dimZEdges[proxy.positions[5]] = obj.boundingBox.zMax;
 	}
 
 	public function sort(dim:Int) {
 		var edges;
-		var edgeLefts;
-		var edgeOwner;
 		if (dim == 0) {
-			edges = dimXEdges;
-			edgeLefts = this.dimXEdgeLefts;
-			edgeOwner = this.dimXEdgeOwner;
+			edges = dimX;
 		} else if (dim == 1) {
-			edges = dimYEdges;
-			edgeLefts = this.dimYEdgeLefts;
-			edgeOwner = this.dimYEdgeOwner;
+			edges = dimY;
 		} else {
-			edges = dimZEdges;
-			edgeLefts = this.dimZEdgeLefts;
-			edgeOwner = this.dimZEdgeOwner;
+			edges = dimZ;
 		}
 
 		for (i in 0...edges.length) {
 			var j = i - 1;
 			while (j >= 0) {
-				if (edges[j] < edges[j + 1])
+				if (edges[j].value < edges[j + 1].value)
 					break;
 
 				// Swap
-
-				var edge1Owner = objects[edgeOwner[j]];
-				var edge2Owner = objects[edgeOwner[j + 1]];
-				var edge1Left = edgeLefts[j];
-				var edge2Left = edgeLefts[j + 1];
-
-				edge1Owner.positions[2 * dim + (edge1Left ? 1 : 0)] = j + 1;
-				edge2Owner.positions[2 * dim + (edge2Left ? 1 : 0)] = j;
-
 				var tmp = edges[j];
 				edges[j] = edges[j + 1];
 				edges[j + 1] = tmp;
 
-				var tmp2 = edgeLefts[j];
-				edgeLefts[j] = edgeLefts[j + 1];
-				edgeLefts[j + 1] = tmp2;
-
-				var tmp3 = edgeOwner[j];
-				edgeOwner[j] = edgeOwner[j + 1];
-				edgeOwner[j + 1] = tmp3;
-
 				// Sweep
-				var edge1 = j;
-				var edge2 = j + 1;
-				if (edgeLefts[edge1] && !edgeLefts[edge2]) {
-					var obj1 = edgeOwner[edge1];
-					var obj2 = edgeOwner[edge2];
-					objects[obj1].flags |= (1 << dim);
-					objects[obj2].flags |= (1 << dim);
+				var edge1 = edges[j];
+				var edge2 = edges[j + 1];
 
-					if (objects[obj1].flags == 7 && objects[obj2].flags == 7) {
-						objects[obj1].intersections.push(objects[obj2].object);
-						objects[obj2].intersections.push(objects[obj1].object);
-					}
-				} else if (!edgeLefts[edge1] && edgeLefts[edge2]) {
-					var obj1 = edgeOwner[edge2];
-					var obj2 = edgeOwner[edge1];
-					if (objects[obj1].flags == 7) {
-						objects[obj1].intersections.remove(objects[obj2].object);
-					}
-					if (objects[obj2].flags == 7) {
-						objects[obj2].intersections.remove(objects[obj1].object);
-					}
+				var n = objects.length;
+				var i1 = edge1.index;
+				var i2 = edge2.index;
+				var flagIndex = Std.int((n * (n - 1) / 2) - (n - i2) * ((n - i2) - 1) / 2 + i1 - i2 - 1);
 
-					objects[obj1].flags &= ~(1 << dim);
-					objects[obj2].flags &= ~(1 << dim);
+				if (edge1.left && !edge2.left) {
+					flags[flagIndex] |= (1 << dim);
+
+					if (flags[flagIndex] == 7) {
+						intersections[edge1.index].push(edge2.object);
+						intersections[edge2.index].push(edge1.object);
+					}
+				} else if (!edge1.left && edge2.left) {
+					if (flags[flagIndex] == 7) {
+						intersections[edge1.index].remove(edge2.object);
+						intersections[edge2.index].remove(edge1.object);
+					}
+					flags[flagIndex] &= ~(1 << dim);
 				}
 
 				j--;
@@ -163,6 +190,6 @@ class SAP {
 	}
 
 	public function getIntersections(obj:CollisionEntity):Array<CollisionEntity> {
-		return objToProxy[obj].intersections;
+		return intersections[objToProxy[obj].isec];
 	}
 }
