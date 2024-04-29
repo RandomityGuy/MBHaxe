@@ -75,6 +75,8 @@ class PlayGui {
 	var playerListContainer:GuiControl;
 	var playerListCtrl:GuiMLTextListCtrl;
 	var playerListScoresCtrl:GuiMLTextListCtrl;
+	var playerListShadowCtrl:GuiMLTextListCtrl;
+	var playerListScoresShadowCtrl:GuiMLTextListCtrl;
 	var playerList:Array<PlayerInfo> = [];
 
 	var imageResources:Array<Resource<Image>> = [];
@@ -695,9 +697,25 @@ class PlayGui {
 		// 	'<font color="#EBEBEB"><img src="them"></img>Player 2    2</font>'
 		// ];
 
-		var ds = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
+		// var ds = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
 
-		playerListCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader, ds);
+		playerListShadowCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader);
+
+		playerListShadowCtrl.position = new Vector(28, 44);
+		playerListShadowCtrl.extent = new Vector(392, 271);
+		playerListShadowCtrl.scrollable = true;
+		playerListShadowCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListShadowCtrl);
+
+		playerListScoresShadowCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader);
+
+		playerListScoresShadowCtrl.position = new Vector(278, 44);
+		playerListScoresShadowCtrl.extent = new Vector(392, 271);
+		playerListScoresShadowCtrl.scrollable = true;
+		playerListScoresShadowCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListScoresShadowCtrl);
+
+		playerListCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader);
 
 		playerListCtrl.position = new Vector(27, 43);
 		playerListCtrl.extent = new Vector(392, 271);
@@ -705,7 +723,7 @@ class PlayGui {
 		playerListCtrl.onSelectedFunc = (sel) -> {}
 		playerListContainer.addChild(playerListCtrl);
 
-		playerListScoresCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader, ds);
+		playerListScoresCtrl = new GuiMLTextListCtrl(arial14, [], imgLoader);
 
 		playerListScoresCtrl.position = new Vector(277, 43);
 		playerListScoresCtrl.extent = new Vector(392, 271);
@@ -717,13 +735,19 @@ class PlayGui {
 	public function redrawPlayerList() {
 		var pl = [];
 		var plScores = [];
+		var plShadow = [];
+		var plShadowScores = [];
 		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
 		for (item in playerList) {
 			pl.push('<font color="#EBEBEB"><img src="${item.us ? "us" : "them"}"></img>${Util.rightPad(item.name, 25, 3)}</font>');
 			plScores.push('<font color="#EBEBEB">${item.score}</font>');
+			plShadow.push('<font color="#000000"><img src="them"></img>${Util.rightPad(item.name, 25, 3)}</font>');
+			plShadowScores.push('<font color="#000000">${item.score}</font>');
 		}
 		playerListCtrl.setTexts(pl);
 		playerListScoresCtrl.setTexts(plScores);
+		playerListShadowCtrl.setTexts(plShadow);
+		playerListScoresShadowCtrl.setTexts(plShadowScores);
 	}
 
 	public function doMPEndGameMessage() {

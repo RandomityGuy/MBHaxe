@@ -26,14 +26,17 @@ class GuiXboxOptionsList extends GuiControl {
 	var _prevMousePos:Vector;
 	var usedGamepad:Bool = false;
 
+	var enableButtons:Bool = true;
+
 	public var selected:Bool = false;
 
 	public var list:GuiXboxOptionsListCollection;
 
-	public function new(icon:Int, name:String, values:Array<String>, midcolumn:Float = 0.3, textOff = 155.5) {
+	public function new(icon:Int, name:String, values:Array<String>, midcolumn:Float = 0.3, textOff = 155.5, enableButtons:Bool = true) {
 		super();
 
 		this.options = values;
+		this.enableButtons = enableButtons;
 
 		var baseImage = ResourceLoader.getResource("data/ui/xbox/optionsCursorArray.png", ResourceLoader.getImage, this.imageResources).toTile();
 		var inactiveImage = baseImage.sub(0, 2, 815, 94);
@@ -65,27 +68,29 @@ class GuiXboxOptionsList extends GuiControl {
 		var rightShadeFilter = new h2d.filter.ColorMatrix(cmat);
 		rightShadeFilter.enable = false;
 
-		leftButton = new GuiAnim([arrowButtonImage, arrowButtonImagePressed]);
-		leftButton.position = new Vector(815 * midcolumn, 0);
-		leftButton.extent = new Vector(114, 94);
-		leftButton.anim.filter = leftShadeFilter;
-		this.addChild(leftButton);
+		if (enableButtons) {
+			leftButton = new GuiAnim([arrowButtonImage, arrowButtonImagePressed]);
+			leftButton.position = new Vector(815 * midcolumn, 0);
+			leftButton.extent = new Vector(114, 94);
+			leftButton.anim.filter = leftShadeFilter;
+			this.addChild(leftButton);
 
-		var leftButtonIcon = new GuiAnim([leftArrow, leftArrowSelected]);
-		leftButtonIcon.position = new Vector(39, 36);
-		leftButtonIcon.extent = new Vector(22, 22);
-		leftButton.addChild(leftButtonIcon);
+			var leftButtonIcon = new GuiAnim([leftArrow, leftArrowSelected]);
+			leftButtonIcon.position = new Vector(39, 36);
+			leftButtonIcon.extent = new Vector(22, 22);
+			leftButton.addChild(leftButtonIcon);
 
-		rightButton = new GuiAnim([arrowButtonImage, arrowButtonImagePressed]);
-		rightButton.position = new Vector(815 * 0.8, 0);
-		rightButton.extent = new Vector(114, 94);
-		rightButton.anim.filter = rightShadeFilter;
-		this.addChild(rightButton);
+			rightButton = new GuiAnim([arrowButtonImage, arrowButtonImagePressed]);
+			rightButton.position = new Vector(815 * 0.8, 0);
+			rightButton.extent = new Vector(114, 94);
+			rightButton.anim.filter = rightShadeFilter;
+			this.addChild(rightButton);
 
-		var rightButtonIcon = new GuiAnim([rightArrow, rightArrowSelected]);
-		rightButtonIcon.position = new Vector(52, 36);
-		rightButtonIcon.extent = new Vector(22, 22);
-		rightButton.addChild(rightButtonIcon);
+			var rightButtonIcon = new GuiAnim([rightArrow, rightArrowSelected]);
+			rightButtonIcon.position = new Vector(52, 36);
+			rightButtonIcon.extent = new Vector(22, 22);
+			rightButton.addChild(rightButtonIcon);
+		}
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
@@ -148,100 +153,102 @@ class GuiXboxOptionsList extends GuiControl {
 				optionText.text.textColor = 0x787878;
 			}
 		}
-		var leftBtnRect = leftButton.getHitTestRect();
-		leftBtnRect.position = leftBtnRect.position.add(new Vector(15 * Settings.uiScale, 21 * Settings.uiScale));
-		leftBtnRect.extent.set(83 * Settings.uiScale, 53 * Settings.uiScale);
-		var rightBtnRect = rightButton.getHitTestRect();
-		rightBtnRect.position = rightBtnRect.position.add(new Vector(15 * Settings.uiScale, 21 * Settings.uiScale));
-		rightBtnRect.extent.set(83 * Settings.uiScale, 53 * Settings.uiScale);
-		if (leftBtnRect.inRect(mouseState.position) || rightBtnRect.inRect(mouseState.position)) {
-			if (Key.isPressed(Key.MOUSE_LEFT)) {
-				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
+		if (enableButtons) {
+			var leftBtnRect = leftButton.getHitTestRect();
+			leftBtnRect.position = leftBtnRect.position.add(new Vector(15 * Settings.uiScale, 21 * Settings.uiScale));
+			leftBtnRect.extent.set(83 * Settings.uiScale, 53 * Settings.uiScale);
+			var rightBtnRect = rightButton.getHitTestRect();
+			rightBtnRect.position = rightBtnRect.position.add(new Vector(15 * Settings.uiScale, 21 * Settings.uiScale));
+			rightBtnRect.extent.set(83 * Settings.uiScale, 53 * Settings.uiScale);
+			if (leftBtnRect.inRect(mouseState.position) || rightBtnRect.inRect(mouseState.position)) {
+				if (Key.isPressed(Key.MOUSE_LEFT)) {
+					AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
+				}
 			}
-		}
-		// Left Button
-		if (leftBtnRect.inRect(mouseState.position)) {
-			if (Key.isDown(Key.MOUSE_LEFT)) {
-				leftButton.anim.currentFrame = 1;
-				leftButton.anim.filter.enable = true;
+			// Left Button
+			if (leftBtnRect.inRect(mouseState.position)) {
+				if (Key.isDown(Key.MOUSE_LEFT)) {
+					leftButton.anim.currentFrame = 1;
+					leftButton.anim.filter.enable = true;
+				} else {
+					leftButton.anim.currentFrame = 1;
+					leftButton.anim.filter.enable = false;
+				}
+				if (Key.isReleased(Key.MOUSE_LEFT)) {
+					var newOption = currentOption - 1;
+					if (newOption < 0)
+						newOption = options.length - 1;
+
+					var doChange = true;
+					if (onChangeFunc != null)
+						doChange = onChangeFunc(newOption);
+					if (doChange) {
+						currentOption = newOption;
+						optionText.text.text = options[currentOption];
+					}
+				}
 			} else {
-				leftButton.anim.currentFrame = 1;
+				leftButton.anim.currentFrame = 0;
 				leftButton.anim.filter.enable = false;
 			}
-			if (Key.isReleased(Key.MOUSE_LEFT)) {
-				var newOption = currentOption - 1;
-				if (newOption < 0)
-					newOption = options.length - 1;
-
-				var doChange = true;
-				if (onChangeFunc != null)
-					doChange = onChangeFunc(newOption);
-				if (doChange) {
-					currentOption = newOption;
-					optionText.text.text = options[currentOption];
+			// Right Button
+			if (rightBtnRect.inRect(mouseState.position)) {
+				if (Key.isDown(Key.MOUSE_LEFT)) {
+					rightButton.anim.currentFrame = 1;
+					rightButton.anim.filter.enable = true;
+				} else {
+					rightButton.anim.currentFrame = 1;
+					rightButton.anim.filter.enable = false;
 				}
-			}
-		} else {
-			leftButton.anim.currentFrame = 0;
-			leftButton.anim.filter.enable = false;
-		}
-		// Right Button
-		if (rightBtnRect.inRect(mouseState.position)) {
-			if (Key.isDown(Key.MOUSE_LEFT)) {
-				rightButton.anim.currentFrame = 1;
-				rightButton.anim.filter.enable = true;
+				if (Key.isReleased(Key.MOUSE_LEFT)) {
+					var newOption = currentOption + 1;
+					if (newOption >= options.length)
+						newOption = 0;
+
+					var doChange = true;
+					if (onChangeFunc != null)
+						doChange = onChangeFunc(newOption);
+					if (doChange) {
+						currentOption = newOption;
+						optionText.text.text = options[currentOption];
+					}
+				}
 			} else {
-				rightButton.anim.currentFrame = 1;
+				rightButton.anim.currentFrame = 0;
 				rightButton.anim.filter.enable = false;
 			}
-			if (Key.isReleased(Key.MOUSE_LEFT)) {
-				var newOption = currentOption + 1;
-				if (newOption >= options.length)
-					newOption = 0;
+			if (selected || alwaysActive) {
+				if (Key.isPressed(Key.LEFT) || Gamepad.isPressed(['dpadLeft']) || (Gamepad.getAxis('analogX') < -0.75 && !usedGamepad)) {
+					var newOption = currentOption - 1;
+					if (newOption < 0)
+						newOption = options.length - 1;
 
-				var doChange = true;
-				if (onChangeFunc != null)
-					doChange = onChangeFunc(newOption);
-				if (doChange) {
-					currentOption = newOption;
-					optionText.text.text = options[currentOption];
+					var doChange = true;
+					if (onChangeFunc != null)
+						doChange = onChangeFunc(newOption);
+					if (doChange) {
+						currentOption = newOption;
+						optionText.text.text = options[currentOption];
+					}
 				}
-			}
-		} else {
-			rightButton.anim.currentFrame = 0;
-			rightButton.anim.filter.enable = false;
-		}
-		if (selected || alwaysActive) {
-			if (Key.isPressed(Key.LEFT) || Gamepad.isPressed(['dpadLeft']) || (Gamepad.getAxis('analogX') < -0.75 && !usedGamepad)) {
-				var newOption = currentOption - 1;
-				if (newOption < 0)
-					newOption = options.length - 1;
+				if (Key.isPressed(Key.RIGHT) || Gamepad.isPressed(['dpadRight']) || (Gamepad.getAxis('analogX') > 0.75 && !usedGamepad)) {
+					var newOption = currentOption + 1;
+					if (newOption >= options.length)
+						newOption = 0;
 
-				var doChange = true;
-				if (onChangeFunc != null)
-					doChange = onChangeFunc(newOption);
-				if (doChange) {
-					currentOption = newOption;
-					optionText.text.text = options[currentOption];
+					var doChange = true;
+					if (onChangeFunc != null)
+						doChange = onChangeFunc(newOption);
+					if (doChange) {
+						currentOption = newOption;
+						optionText.text.text = options[currentOption];
+					}
 				}
+				if (Math.abs(Gamepad.getAxis('analogX')) > 0.75)
+					usedGamepad = true;
+				else
+					usedGamepad = false;
 			}
-			if (Key.isPressed(Key.RIGHT) || Gamepad.isPressed(['dpadRight']) || (Gamepad.getAxis('analogX') > 0.75 && !usedGamepad)) {
-				var newOption = currentOption + 1;
-				if (newOption >= options.length)
-					newOption = 0;
-
-				var doChange = true;
-				if (onChangeFunc != null)
-					doChange = onChangeFunc(newOption);
-				if (doChange) {
-					currentOption = newOption;
-					optionText.text.text = options[currentOption];
-				}
-			}
-			if (Math.abs(Gamepad.getAxis('analogX')) > 0.75)
-				usedGamepad = true;
-			else
-				usedGamepad = false;
 		}
 		super.update(dt, mouseState);
 	}

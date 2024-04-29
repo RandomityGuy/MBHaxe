@@ -59,10 +59,20 @@ class MPServerListGui extends GuiImage {
 
 		function imgLoader(path:String) {
 			switch (path) {
-				case "locked":
-					return ResourceLoader.getResource("data/ui/xbox/DemoOutOfTimeIcon.png", ResourceLoader.getImage, this.imageResources).toTile();
-				case "unlocked":
+				case "ready":
 					return ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "notready":
+					return ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "pc":
+					return ResourceLoader.getResource("data/ui/xbox/platform_desktop.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "mac":
+					return ResourceLoader.getResource("data/ui/xbox/platform_mac.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "web":
+					return ResourceLoader.getResource("data/ui/xbox/platform_web.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "android":
+					return ResourceLoader.getResource("data/ui/xbox/platform_android.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					return ResourceLoader.getResource("data/ui/xbox/platform_unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
 			}
 			return null;
 		}
@@ -84,9 +94,10 @@ class MPServerListGui extends GuiImage {
 		serverWnd.addChild(serverList);
 
 		var ourServerList:Array<RemoteServerInfo> = [];
+		var platformToString = ["unknown", "pc", "mac", "web", "android"];
 
 		function updateServerListDisplay() {
-			serverDisplays = ourServerList.map(x -> x.name);
+			serverDisplays = ourServerList.map(x -> return '<img src="${platformToString[x.platform]}"></img><font color="#101010">${x.name}</font>');
 			serverList.setTexts(serverDisplays);
 		}
 
