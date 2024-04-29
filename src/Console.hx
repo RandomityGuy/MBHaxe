@@ -190,6 +190,13 @@ class Console {
 				MarbleGame.instance.world.rollback(t);
 			} else if (cmdType == 'addDummy') {
 				Net.addDummyConnection();
+			} else if (cmdType == 'setfps') {
+				var scale = Std.parseFloat(cmdSplit[1]);
+				if (Math.isNaN(scale))
+					scale = 1;
+				MarbleGame.instance.fpsLimit = scale;
+				MarbleGame.instance.limitingFps = true;
+				log("Set FPS to " + scale);
 			} else {
 				error("Unknown command");
 			}

@@ -12,7 +12,7 @@ typedef RemoteServerInfo = {
 	name:String,
 	players:Int,
 	maxPlayers:Int,
-	platform:String,
+	platform:Int,
 }
 
 class MasterServerClient {
@@ -78,7 +78,8 @@ class MasterServerClient {
 			privateSlots: serverInfo.privateSlots,
 			privateServer: serverInfo.privateServer,
 			inviteCode: serverInfo.inviteCode,
-			state: serverInfo.state
+			state: serverInfo.state,
+			platform: serverInfo.platform
 		}));
 	}
 

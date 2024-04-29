@@ -59,6 +59,10 @@ class MarbleGame {
 	var console:ConsoleDlg;
 	var _exitingToMenu:Bool = false;
 
+	var fpsLimit:Float = 60;
+	var limitingFps:Bool = false;
+	var fpsLimitAccum:Float = 0.0;
+
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
 		Console.log("Initializing the game...");
 		canvas = new Canvas(scene2d, cast this);
@@ -185,6 +189,16 @@ class MarbleGame {
 
 	public function update(dt:Float) {
 		MasterServerClient.process();
+
+		if (limitingFps) {
+			fpsLimitAccum += dt;
+			if (fpsLimitAccum < 1.0 / fpsLimit) {
+				return;
+			}
+			fpsLimitAccum -= (1.0 / fpsLimit);
+			dt = 1.0 / fpsLimit;
+		}
+
 		if (world != null) {
 			if (world._disposed) {
 				world = null;

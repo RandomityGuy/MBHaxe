@@ -268,7 +268,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		levelWnd.addChild(levelInfoLeft);
 
 		var levelNames = difficultyMissions.map(x -> x.title);
-		var levelSelectOpts = new GuiXboxOptionsList(6, "Level", levelNames);
+		var levelSelectOpts = new GuiXboxOptionsList(6, "Level", levelNames, 0.3, 155.5, isHost);
 
 		function setLevel(idx:Int) {
 			// if (lock)
