@@ -94,14 +94,16 @@ class ProfilerUI {
 				lastSentMove = @:privateAccess Net.clientConnection.moveManager.queuedMoves[Net.clientConnection.moveManager.queuedMoves.length - 1].id;
 			}
 
-			instance.networkStats.text = 'Client World Ticks: ${MarbleGame.instance.world.timeState.ticks}\n'
-				+ 'Client Marble Ticks: ${@:privateAccess MarbleGame.instance.world.marble.serverTicks}\n'
-				+ 'Server Ticks: ${@:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate.serverTicks}\n'
-				+ 'Client Move Queue Size: ${Net.isClient ? Net.clientConnection.getQueuedMovesLength() : 0}\n'
-				+ 'Server Move Queue Size: ${Net.isClient ? @:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate.moveQueueSize : 0}\n'
-				+ 'Last Sent Move: ${Net.isClient ? lastSentMove : 0}\n'
-				+ 'Last Ack Move: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.lastAckMoveId : 0}\n'
-				+ 'Move Ack RTT: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.ackRTT : 0}';
+			if (Net.isClient) {
+				instance.networkStats.text = 'Client World Ticks: ${MarbleGame.instance.world.timeState.ticks}\n'
+					+ 'Client Marble Ticks: ${@:privateAccess MarbleGame.instance.world.marble.serverTicks}\n'
+					+ 'Server Ticks: ${@:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate.serverTicks}\n'
+					+ 'Client Move Queue Size: ${Net.isClient ? Net.clientConnection.getQueuedMovesLength() : 0}\n'
+					+ 'Server Move Queue Size: ${Net.isClient ? @:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate.moveQueueSize : 0}\n'
+					+ 'Last Sent Move: ${Net.isClient ? lastSentMove : 0}\n'
+					+ 'Last Ack Move: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.lastAckMoveId : 0}\n'
+					+ 'Move Ack RTT: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.ackRTT : 0}';
+			}
 		} else {
 			instance.networkStats.text = "";
 		}

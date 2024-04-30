@@ -21,7 +21,6 @@ class CollisionWorld {
 	public var entities:Array<CollisionEntity> = [];
 	public var dynamicEntities:Array<CollisionEntity> = [];
 	public var dynamicOctree:Octree;
-	public var sap:SAP;
 
 	public var marbleEntities:Array<SphereCollisionEntity> = [];
 
@@ -31,7 +30,6 @@ class CollisionWorld {
 		this.octree = new Octree();
 		this.dynamicOctree = new Octree();
 		this.staticWorld = new CollisionEntity(null);
-		this.sap = new SAP();
 	}
 
 	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState):SphereIntersectionResult {
@@ -46,39 +44,42 @@ class CollisionWorld {
 		box.transform(rotQuat.toMatrix());
 		box.offset(position.x, position.y, position.z);
 		// box.addSpherePos(position.x + velocity.x * timeState.dt, position.y + velocity.y * timeState.dt, position.z + velocity.z * timeState.dt, radius);
-		// var intersections = this.octree.boundingSearch(box);
+		var intersections = this.octree.boundingSearch(box);
 
 		// var intersections = this.rtree.search([box.xMin, box.yMax, box.zMin], [box.xSize, box.ySize, box.zSize]);
 
 		var contacts = [];
 		var foundEntities = [];
 
-		// for (obj in intersections) {
-		// 	var entity:CollisionEntity = cast obj;
+		for (obj in intersections) {
+			var entity:CollisionEntity = cast obj;
 
-		// 	foundEntities.push(entity);
-		// 	if (entity.go.isCollideable) {
-		// 		contacts = contacts.concat(entity.sphereIntersection(spherecollision, timeState));
-		// 	}
-		// }
-
-		sap.recompute();
-		var sapCollisions = sap.getIntersections(spherecollision);
-		for (obj in sapCollisions) {
-			if (obj.boundingBox.collide(box) && obj.go.isCollideable) {
-				contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
+			foundEntities.push(entity);
+			if (entity.go.isCollideable) {
+				contacts = contacts.concat(entity.sphereIntersection(spherecollision, timeState));
 			}
 		}
 
-		// contacts = contacts.concat(this.staticWorld.sphereIntersection(spherecollision, timeState));
-
-		// var dynSearch = dynamicOctree.boundingSearch(box).map(x -> cast(x, CollisionEntity));
-		// for (obj in dynSearch) {
-		// 	if (obj != spherecollision) {
-		// 		if (obj.boundingBox.collide(box) && obj.go.isCollideable)
+		// if (marbleEntities.length > 1) {
+		// 	marbleSap.recompute();
+		// 	var sapCollisions = marbleSap.getIntersections(spherecollision);
+		// 	for (obj in sapCollisions) {
+		// 		if (obj.go.isCollideable) {
 		// 			contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
+		// 		}
 		// 	}
 		// }
+
+		// contacts = contacts.concat(this.staticWorld.sphereIntersection(spherecollision, timeState));
+
+		var dynSearch = dynamicOctree.boundingSearch(box);
+		for (obj in dynSearch) {
+			if (obj != spherecollision) {
+				var col = cast(obj, CollisionEntity);
+				if (col.boundingBox.collide(box) && col.go.isCollideable)
+					contacts = contacts.concat(col.sphereIntersection(spherecollision, timeState));
+			}
+		}
 
 		// for (marb in marbleEntities) {
 		// 	if (marb != spherecollision) {
@@ -145,7 +146,6 @@ class CollisionWorld {
 	public function addEntity(entity:CollisionEntity) {
 		this.octree.insert(entity);
 		this.entities.push(entity);
-		this.sap.addEntity(entity);
 
 		// this.rtree.insert([entity.boundingBox.xMin, entity.boundingBox.yMin, entity.boundingBox.zMin],
 		// 	[entity.boundingBox.xSize, entity.boundingBox.ySize, entity.boundingBox.zSize], entity);
@@ -163,7 +163,6 @@ class CollisionWorld {
 		this.dynamicEntities.push(entity);
 		this.dynamicOctree.insert(entity);
 		this.dynamicEntitySet.set(entity, true);
-		this.sap.addEntity(entity);
 	}
 
 	public function removeMovingEntity(entity:CollisionEntity) {
@@ -171,7 +170,6 @@ class CollisionWorld {
 	}
 
 	public function updateTransform(entity:CollisionEntity) {
-		this.sap.update(entity);
 		if (!dynamicEntitySet.exists(entity)) {
 			this.octree.update(entity);
 		} else {

@@ -19,10 +19,14 @@ class CubemapRenderer {
 	var scene:Scene;
 	var nextFaceToRender:Int;
 	var facesPerRender:Int = 2;
+	var updateFps:Float = 360.0;
+	var lastRenderTime:Float = 0;
+	var usingSky:Bool = false;
 
 	public function new(scene:Scene, sky:Sky, useSky = false) {
 		this.scene = scene;
 		this.sky = sky;
+		this.usingSky = useSky;
 		if (useSky)
 			this.cubemap = sky.cubemap;
 		else {
@@ -35,10 +39,18 @@ class CubemapRenderer {
 	}
 
 	public function render(e:Engine) {
+		if (usingSky)
+			return;
+		var start = haxe.Timer.stamp();
+		if (start - lastRenderTime > 1.0 / updateFps) {
+			lastRenderTime = start;
+		} else {
+			return;
+		}
+
 		var scenecam = scene.camera;
 		scene.camera = camera;
 
-		var start = haxe.Timer.stamp();
 		var renderedFaces = 0;
 		Renderer.cubemapPass = true;
 		for (i in 0...facesPerRender) {

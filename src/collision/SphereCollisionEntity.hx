@@ -27,8 +27,9 @@ class SphereCollisionEntity extends CollisionEntity {
 	public override function generateBoundingBox() {
 		var boundingBox = new Bounds();
 		var pos = transform.getPosition();
-		boundingBox.addSpherePos(pos.x, pos.y, pos.z, radius);
-		boundingBox.transform3x3(transform);
+		boundingBox.addSpherePos(0, 0, 0, radius);
+		boundingBox.transform(transform);
+
 		this.boundingBox = boundingBox;
 
 		if (Debug.drawBounds) {
