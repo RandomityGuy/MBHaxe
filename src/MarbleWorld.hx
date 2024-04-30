@@ -710,6 +710,7 @@ class MarbleWorld extends Scheduler {
 			marble.megaMarbleUseTick = 0;
 			marble.helicopterUseTick = 0;
 			marble.collider.radius = marble._radius = 0.3;
+			@:privateAccess marble.netFlags |= MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoMega | MarbleNetFlags.GravityChange;
 		} else {
 			@:privateAccess marble.helicopterEnableTime = -1e8;
 			@:privateAccess marble.megaMarbleEnableTime = -1e8;
@@ -1399,6 +1400,7 @@ class MarbleWorld extends Scheduler {
 	public function removePlayer(cc:GameConnection) {
 		var otherMarble = this.clientMarbles[cc];
 		if (otherMarble != null) {
+			cancel(otherMarble.oobSchedule);
 			this.predictions.removeMarbleFromPrediction(otherMarble);
 			this.scene.removeChild(otherMarble);
 			this.collisionWorld.removeMarbleEntity(otherMarble.collider);

@@ -714,20 +714,24 @@ class PlayGui {
 	}
 
 	public function addPlayer(id:Int, name:String, us:Bool) {
-		playerList.push({
-			id: id,
-			name: name,
-			us: us,
-			score: 0
-		});
-		redrawPlayerList();
+		if (playerListCtrl != null) {
+			playerList.push({
+				id: id,
+				name: name,
+				us: us,
+				score: 0
+			});
+			redrawPlayerList();
+		}
 	}
 
 	public function removePlayer(id:Int) {
-		var f = playerList.filter(x -> x.id == id);
-		if (f.length != 0)
-			playerList.remove(f[0]);
-		redrawPlayerList();
+		if (playerListCtrl != null) {
+			var f = playerList.filter(x -> x.id == id);
+			if (f.length != 0)
+				playerList.remove(f[0]);
+			redrawPlayerList();
+		}
 	}
 
 	public function incrementPlayerScore(id:Int, score:Int) {

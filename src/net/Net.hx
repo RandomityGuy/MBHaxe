@@ -201,7 +201,9 @@ class Net {
 			if (Net.client != null)
 				Net.client.close();
 			Net.client = null;
+			Net.clientDatachannel = null;
 			Net.clientId = 0;
+			Net.clients.clear();
 			Net.clientIdMap.clear();
 			Net.clientConnection = null;
 			Net.serverInfo = null;
@@ -217,6 +219,7 @@ class Net {
 			Net.isMP = false;
 			Net.isClient = false;
 			Net.isHost = false;
+			Net.clientId = 0;
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			MasterServerClient.disconnectFromMasterServer();

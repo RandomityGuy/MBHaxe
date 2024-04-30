@@ -258,7 +258,7 @@ class HuntMode extends NullMode {
 	}
 
 	override function onRespawn(marble:Marble) {
-		if (activeGemSpawnGroup.length != 0) {
+		if (marble.controllable && activeGemSpawnGroup.length != 0) {
 			var gemAvg = new Vector();
 			for (gi in activeGemSpawnGroup) {
 				var g = gemSpawnPoints[gi];
