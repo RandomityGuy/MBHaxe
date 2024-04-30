@@ -156,6 +156,17 @@ class NetCommands {
 		var conn = Net.clientIdMap.get(clientId);
 		if (MarbleGame.instance.world != null) {
 			MarbleGame.instance.world.removePlayer(conn);
+
+			var allReady = true;
+			for (id => client in Net.clientIdMap) {
+				if (client.state != GameplayState.GAME) {
+					allReady = false;
+					break;
+				}
+			}
+			if (allReady && MarbleGame.instance.world.serverStartTicks == 0) {
+				MarbleGame.instance.world.allClientsReady();
+			}
 		}
 		Net.clientIdMap.remove(clientId);
 		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
@@ -202,16 +213,16 @@ class NetCommands {
 	}
 
 	@:rpc(server) public static function endGame() {
+		for (c => v in Net.clientIdMap) {
+			v.state = LOBBY;
+			v.lobbyReady = false;
+		}
 		if (Net.isClient) {
 			if (MarbleGame.instance.world != null) {
 				MarbleGame.instance.quitMission();
 			}
 		}
 		if (Net.isHost) {
-			for (c => v in Net.clientIdMap) {
-				v.state = LOBBY;
-				v.lobbyReady = false;
-			}
 			Net.lobbyHostReady = false;
 
 			if (Net.isHost) {
