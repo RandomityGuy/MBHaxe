@@ -193,6 +193,7 @@ class MarbleGame {
 
 	public function update(dt:Float) {
 		MasterServerClient.process();
+		Net.checkPacketTimeout(dt);
 
 		if (limitingFps) {
 			fpsLimitAccum += dt;
