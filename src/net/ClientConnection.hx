@@ -27,6 +27,8 @@ class ClientConnection extends GameConnection {
 	var rtt:Float;
 	var pingSendTime:Float;
 	var _rttRecords:Array<Float> = [];
+	var lastRecvTime:Float;
+	var didWarnTimeout:Bool = false;
 
 	public function new(id:Int, socket:RTCPeerConnection, datachannel:RTCDataChannel) {
 		super(id);
@@ -39,6 +41,14 @@ class ClientConnection extends GameConnection {
 
 	override function sendBytes(b:Bytes) {
 		datachannel.sendBytes(b);
+	}
+
+	public inline function needsTimeoutWarn(t:Float) {
+		return (t - lastRecvTime) > 10 && !didWarnTimeout;
+	}
+
+	public inline function needsTimeoutKick(t:Float) {
+		return (t - lastRecvTime) > 15 && didWarnTimeout;
 	}
 }
 

@@ -159,7 +159,7 @@ class Net {
 				haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
 			}
 			clientDatachannel.onMessage = (b) -> {
-				onPacketReceived(client, clientDatachannel, new InputBitStream(b));
+				onPacketReceived(clientConnection, client, clientDatachannel, new InputBitStream(b));
 			}
 			clientDatachannel.onClosed = () -> {
 				var weLeftOurselves = !Net.isClient; // If we left ourselves, this would be set to false due to order of ops, disconnect being called first, and then the datachannel closing
@@ -230,13 +230,46 @@ class Net {
 		}
 	}
 
+	public static function checkPacketTimeout(dt:Float) {
+		if (!Net.isMP)
+			return;
+		static var accum = 0.0;
+		accum += dt;
+		if (accum > 1.0) {
+			accum = 0;
+			var t = Console.time();
+			for (dc => cc in clients) {
+				if (cc is ClientConnection) {
+					var conn = cast(cc, ClientConnection);
+					if (conn.needsTimeoutWarn(t)) {
+						conn.didWarnTimeout = true;
+						if (Net.isClient) {
+							NetCommands.requestPing();
+						}
+						if (Net.isHost) {
+							NetCommands.pingClient(cc, t);
+						}
+					}
+					if (conn.needsTimeoutKick(t)) {
+						if (Net.isHost) {
+							dc.close();
+						}
+						if (Net.isClient) {
+							disconnect();
+						}
+					}
+				}
+			}
+		}
+	}
+
 	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel) {
 		clientId += 1;
 		var cc = new ClientConnection(clientId, c, dc);
 		clients.set(c, cc);
 		clientIdMap[clientId] = clients[c];
 		dc.onMessage = (msgBytes) -> {
-			onPacketReceived(c, dc, new InputBitStream(msgBytes));
+			onPacketReceived(cc, c, dc, new InputBitStream(msgBytes));
 		}
 		dc.onClosed = () -> {
 			clients.remove(c);
@@ -347,9 +380,12 @@ class Net {
 		return b.getBytes();
 	}
 
-	static function onPacketReceived(c:RTCPeerConnection, dc:RTCDataChannel, input:InputBitStream) {
+	static function onPacketReceived(conn:ClientConnection, c:RTCPeerConnection, dc:RTCDataChannel, input:InputBitStream) {
 		if (!Net.isMP)
 			return; // only for MP
+		conn.lastRecvTime = Console.time();
+		conn.didWarnTimeout = false;
+
 		var packetType = input.readByte();
 		switch (packetType) {
 			case NetCommand:
@@ -372,7 +408,6 @@ class Net {
 			case PingBack:
 				var pingLeft = input.readByte();
 				Console.log("Got pingback packet!");
-				var conn:ClientConnection = cast clients[c];
 				var now = Console.time();
 				conn._rttRecords.push((now - conn.pingSendTime));
 				if (pingLeft > 0) {

@@ -19,7 +19,7 @@ class CubemapRenderer {
 	var scene:Scene;
 	var nextFaceToRender:Int;
 	var facesPerRender:Int = 2;
-	var updateFps:Float = 360.0;
+	var updateFps:Float = 360.0; // 6 faces in (1/60) seconds, 1 face in (1/360) seconds
 	var lastRenderTime:Float = 0;
 	var usingSky:Bool = false;
 
@@ -42,7 +42,7 @@ class CubemapRenderer {
 		if (usingSky)
 			return;
 		var start = haxe.Timer.stamp();
-		if (start - lastRenderTime > 1.0 / updateFps) {
+		if (start - lastRenderTime > facesPerRender * 1.0 / updateFps) {
 			lastRenderTime = start;
 		} else {
 			return;

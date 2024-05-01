@@ -248,4 +248,20 @@ class NetCommands {
 		}
 		world.multiplayerStarted = false;
 	}
+
+	@:rpc(server) public static function ping(sendTime:Float) {
+		if (Net.isClient) {
+			pingBack(Console.time() - sendTime);
+		}
+	}
+
+	@:rpc(client) public static function pingBack(ping:Float) {
+		// Do nothing???
+	}
+
+	@:rpc(client) public static function requestPing() {
+		if (Net.isHost) {
+			ping(Console.time());
+		}
+	}
 }

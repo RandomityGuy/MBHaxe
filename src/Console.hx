@@ -51,11 +51,11 @@ class Console {
 		entries = [];
 	}
 
-	public static function time() {
+	public static inline function time() {
 		return haxe.Timer.stamp();
 	}
 
-	function getTime() {
+	inline function getTime() {
 		return Std.int((haxe.Timer.stamp() - timeSinceStart) * 1000) / 1000;
 	}
 
@@ -73,43 +73,43 @@ class Console {
 		}
 	}
 
-	function _log(t:String) {
+	inline function _log(t:String) {
 		addEntry("log", t);
 	}
 
-	function _warn(t:String) {
+	inline function _warn(t:String) {
 		addEntry("warn", t);
 	}
 
-	function _error(t:String) {
+	inline function _error(t:String) {
 		addEntry("error", t);
 	}
 
-	function _debug(t:String) {
+	inline function _debug(t:String) {
 		addEntry("debug", t);
 	}
 
-	public static function log(t:String) {
+	public static inline function log(t:String) {
 		instance._log(t);
 	}
 
-	public static function warn(t:String) {
+	public static inline function warn(t:String) {
 		instance._warn(t);
 	}
 
-	public static function error(t:String) {
+	public static inline function error(t:String) {
 		instance._error(t);
 	}
 
-	public static function debug(t:String) {
+	public static inline function debug(t:String) {
 		instance._debug(t);
 	}
 
-	public static function addConsumer(c:ConsoleEntry->Void) {
+	public static inline function addConsumer(c:ConsoleEntry->Void) {
 		instance.consumers.push(c);
 	}
 
-	public static function removeConsumer(c:ConsoleEntry->Void) {
+	public static inline function removeConsumer(c:ConsoleEntry->Void) {
 		instance.consumers.remove(c);
 	}
 
