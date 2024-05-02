@@ -369,6 +369,9 @@ class HuntMode extends NullMode {
 
 			@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
 		}
+		if (this.level.isMultiplayer && Net.isClient) {
+			gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;
+		}
 	}
 
 	function setupGems() {
