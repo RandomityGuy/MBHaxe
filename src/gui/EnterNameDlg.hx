@@ -56,16 +56,16 @@ class EnterNameDlg extends GuiImage {
 		textFrame.addChild(textInput);
 
 		textInput.text.text = Settings.highscoreName == "" ? "Player Name" : Settings.highscoreName;
-		enterNameEdit.text.onFocus = (e) -> {
-			dlg.vertSizing = Bottom;
-			dlg.position = new Vector(110, 56);
-			dlg.render(MarbleGame.canvas.scene2d);
-		}
-		enterNameEdit.text.onFocusLost = (e) -> {
-			dlg.vertSizing = Center;
-			dlg.position = new Vector(110, 112);
-			dlg.render(MarbleGame.canvas.scene2d);
-		}
+		// textInput.text.onFocus = (e) -> {
+		// 	dlg.vertSizing = Bottom;
+		// 	dlg.position = new Vector(110, 56);
+		// 	dlg.render(MarbleGame.canvas.scene2d);
+		// }
+		// textInput.text.onFocusLost = (e) -> {
+		// 	dlg.vertSizing = Center;
+		// 	dlg.position = new Vector(110, 112);
+		// 	dlg.render(MarbleGame.canvas.scene2d);
+		// }
 
 		var okButton = new GuiXboxButton("Ok", 120);
 		okButton.position = new Vector(211, 248);
