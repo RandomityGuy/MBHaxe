@@ -1,7 +1,7 @@
 -cp src
 -lib heaps
 -lib hlsdl
--lib hxWebSockets
+-lib colyseus-websocket
 -lib datachannel
 -D highDPI
 -D flow_border
