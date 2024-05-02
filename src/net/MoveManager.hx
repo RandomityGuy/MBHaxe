@@ -45,14 +45,17 @@ class MoveManager {
 	var ackRTT:Int = -1;
 
 	var maxMoves = 45;
+	var maxSendMoveListSize = 30;
 
-	var serverTargetMoveListSize = 3;
+	var serverTargetMoveListSize = 4;
 	var serverMaxMoveListSize = 8;
-	var serverAvgMoveListSize = 3.0;
+	var serverAvgMoveListSize = 4.0;
 	var serverSmoothMoveAvg = 0.15;
-	var serverMoveListSizeSlack = 1.0;
-	var serverDefaultMinTargetMoveListSize = 3;
+	var serverMoveListSizeSlack = 1.5;
+	var serverDefaultMinTargetMoveListSize = 4;
 	var serverAbnormalMoveCount = 0;
+	var serverLastRecvMove = 0;
+	var serverLastAckMove = 0;
 
 	public var stall = false;
 
@@ -119,15 +122,19 @@ class MoveManager {
 		if (nextMoveId >= 65535) // 65535 is reserved for null move
 			nextMoveId = 0;
 
+		var moveStartIdx = queuedMoves.length - maxSendMoveListSize;
+		if (moveStartIdx < 0)
+			moveStartIdx = 0;
+
 		var b = new OutputBitStream();
 		var movePacket = new MarbleMovePacket();
 		movePacket.clientId = Net.clientId;
-		movePacket.move = netMove;
+		movePacket.moves = queuedMoves.slice(moveStartIdx);
 		movePacket.clientTicks = timeState.ticks;
 		b.writeByte(NetPacketType.MarbleMove);
 		movePacket.serialize(b);
 
-		Net.sendPacketToHost(b);
+		Net.sendPacketToHostUnreliable(b);
 
 		return netMove;
 	}
@@ -168,7 +175,17 @@ class MoveManager {
 	}
 
 	public inline function queueMove(m:NetMove) {
-		queuedMoves.push(m);
+		if (serverLastRecvMove < m.id && serverLastAckMove < m.id) {
+			queuedMoves.push(m);
+			serverLastRecvMove = m.id;
+		}
+		// if (queuedMoves.length != 0) {
+		// 	var lastQueuedMove = queuedMoves[queuedMoves.length - 1];
+		// 	if (lastQueuedMove.id < m.id)
+		// 		queuedMoves.push(m);
+		// } else if (lastMove == null || lastMove.id < m.id) {
+		// 	queuedMoves.push(m);
+		// }
 	}
 
 	public function getNextMove() {
@@ -214,6 +231,7 @@ class MoveManager {
 		} else {
 			lastMove = queuedMoves[0];
 			queuedMoves.shift();
+			lastAckMoveId = lastMove.id;
 			return lastMove;
 		}
 	}

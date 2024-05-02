@@ -62,6 +62,7 @@ class ServerInfo {
 class Net {
 	static var client:RTCPeerConnection;
 	static var clientDatachannel:RTCDataChannel;
+	static var clientDatachannelUnreliable:RTCDataChannel;
 
 	public static var isMP:Bool;
 	public static var isHost:Bool;
@@ -113,8 +114,22 @@ class Net {
 				}));
 			}
 		}
+		var reliable:datachannel.RTCDataChannel = null;
+		var unreliable:datachannel.RTCDataChannel = null;
 		peer.onDataChannel = (dc:datachannel.RTCDataChannel) -> {
-			onClientConnect(peer, dc);
+			if (dc.name == "mp")
+				reliable = dc;
+			if (dc.name == "unreliable") {
+				unreliable = dc;
+				switch (dc.reliability) {
+					case Reliable:
+						Console.log("Error opening unreliable datachannel!");
+					case Unreliable(maxRetransmits, maxLifetime):
+						Console.log("Opened unreliable datachannel: " + maxRetransmits + " " + maxLifetime);
+				}
+			}
+			if (reliable != null && unreliable != null)
+				onClientConnect(peer, reliable, unreliable);
 		}
 	}
 
@@ -146,22 +161,34 @@ class Net {
 			}
 
 			clientDatachannel = client.createDatachannel("mp");
-			clientDatachannel.onOpen = (n) -> {
-				var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
-				if (loadGui != null) {
-					loadGui.setLoadingStatus("Handshaking");
+			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", false, 0, 600);
+
+			var closing = false;
+			var openFlags = 0;
+
+			var onDatachannelOpen = (idx:Int) -> {
+				openFlags |= idx;
+				if (openFlags == 3) {
+					var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
+					if (loadGui != null) {
+						loadGui.setLoadingStatus("Handshaking");
+					}
+					Console.log("Successfully connected!");
+					clients.set(client, new ClientConnection(0, client, clientDatachannel, clientDatachannelUnreliable)); // host is always 0
+					clientIdMap[0] = clients[client];
+					clientConnection = cast clients[client];
+					onConnectedToServer();
+					haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
 				}
-				Console.log("Successfully connected!");
-				clients.set(client, new ClientConnection(0, client, clientDatachannel)); // host is always 0
-				clientIdMap[0] = clients[client];
-				clientConnection = cast clients[client];
-				onConnectedToServer();
-				haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
 			}
-			clientDatachannel.onMessage = (b) -> {
+			var onDatachannelMessage = (dc:RTCDataChannel, b:haxe.io.Bytes) -> {
 				onPacketReceived(clientConnection, client, clientDatachannel, new InputBitStream(b));
 			}
-			clientDatachannel.onClosed = () -> {
+
+			var onDatachannelClose = (dc:RTCDataChannel) -> {
+				if (closing)
+					return;
+				closing = true;
 				var weLeftOurselves = !Net.isClient; // If we left ourselves, this would be set to false due to order of ops, disconnect being called first, and then the datachannel closing
 				disconnect();
 				if (MarbleGame.instance.world != null) {
@@ -175,7 +202,11 @@ class Net {
 					}
 				}
 			}
-			clientDatachannel.onError = (msg) -> {
+
+			var onDatachannelError = (msg:String) -> {
+				if (closing)
+					return;
+				closing = true;
 				Console.log('Errored out due to ${msg}');
 				disconnect();
 				if (MarbleGame.instance.world != null) {
@@ -184,6 +215,31 @@ class Net {
 				var loadGui = new MultiplayerLoadingGui("Connection error");
 				MarbleGame.canvas.setContent(loadGui);
 				loadGui.setErrorStatus("Connection error");
+			}
+
+			clientDatachannel.onOpen = (n) -> {
+				onDatachannelOpen(1);
+			}
+			clientDatachannel.onMessage = (b) -> {
+				onDatachannelMessage(clientDatachannel, b);
+			}
+			clientDatachannel.onClosed = () -> {
+				onDatachannelClose(clientDatachannel);
+			}
+			clientDatachannel.onError = (msg) -> {
+				onDatachannelError(msg);
+			}
+			clientDatachannelUnreliable.onOpen = (n) -> {
+				onDatachannelOpen(2);
+			}
+			clientDatachannelUnreliable.onMessage = (b) -> {
+				onDatachannelMessage(clientDatachannelUnreliable, b);
+			}
+			clientDatachannelUnreliable.onClosed = () -> {
+				onDatachannelClose(clientDatachannelUnreliable);
+			}
+			clientDatachannelUnreliable.onError = (msg) -> {
+				onDatachannelError(msg);
 			}
 
 			isMP = true;
@@ -263,23 +319,54 @@ class Net {
 		}
 	}
 
-	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel) {
+	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel, dcu:RTCDataChannel) {
 		clientId += 1;
-		var cc = new ClientConnection(clientId, c, dc);
+		var cc = new ClientConnection(clientId, c, dc, dcu);
 		clients.set(c, cc);
 		clientIdMap[clientId] = clients[c];
-		dc.onMessage = (msgBytes) -> {
+
+		var closing = false;
+
+		var onMessage = (dc:RTCDataChannel, msgBytes:haxe.io.Bytes) -> {
 			onPacketReceived(cc, c, dc, new InputBitStream(msgBytes));
 		}
-		dc.onClosed = () -> {
+		var onClosed = () -> {
+			if (closing)
+				return;
+			closing = true;
 			clients.remove(c);
 			onClientLeave(cc);
 		}
-		dc.onError = (msg) -> {
+
+		var onError = (msg:String) -> {
+			if (closing)
+				return;
+			closing = true;
 			clients.remove(c);
 			Console.log('Client ${cc.id} errored out due to: ${msg}');
 			onClientLeave(cc);
 		}
+
+		dc.onMessage = (msgBytes) -> {
+			onMessage(dc, msgBytes);
+		}
+		dc.onClosed = () -> {
+			onClosed();
+		}
+		dc.onError = (msg) -> {
+			onError(msg);
+		}
+
+		dcu.onMessage = (msgBytes) -> {
+			onMessage(dcu, msgBytes);
+		}
+		dcu.onClosed = () -> {
+			onClosed();
+		}
+		dcu.onError = (msg) -> {
+			onError(msg);
+		}
+
 		var b = haxe.io.Bytes.alloc(2);
 		b.set(0, ClientIdAssign);
 		b.set(1, clientId);
@@ -444,7 +531,8 @@ class Net {
 				movePacket.deserialize(input);
 				var cc = clientIdMap[movePacket.clientId];
 				if (cc.state == GAME)
-					cc.queueMove(movePacket.move);
+					for (move in movePacket.moves)
+						cc.queueMove(move);
 
 			case PowerupPickup:
 				var powerupPickupPacket = new PowerupPickupPacket();
@@ -529,6 +617,13 @@ class Net {
 		if (clientDatachannel.state == Open) {
 			var bytes = packetData.getBytes();
 			clientDatachannel.sendBytes(bytes);
+		}
+	}
+
+	public static function sendPacketToHostUnreliable(packetData:OutputBitStream) {
+		if (clientDatachannelUnreliable.state == Open) {
+			var bytes = packetData.getBytes();
+			clientDatachannelUnreliable.sendBytes(bytes);
 		}
 	}
 

@@ -24,16 +24,18 @@ enum abstract NetPlatform(Int) from Int to Int {
 class ClientConnection extends GameConnection {
 	var socket:RTCPeerConnection;
 	var datachannel:RTCDataChannel;
+	var datachannelUnreliable:RTCDataChannel;
 	var rtt:Float;
 	var pingSendTime:Float;
 	var _rttRecords:Array<Float> = [];
 	var lastRecvTime:Float;
 	var didWarnTimeout:Bool = false;
 
-	public function new(id:Int, socket:RTCPeerConnection, datachannel:RTCDataChannel) {
+	public function new(id:Int, socket:RTCPeerConnection, datachannel:RTCDataChannel, datachannelUnreliable:RTCDataChannel) {
 		super(id);
 		this.socket = socket;
 		this.datachannel = datachannel;
+		this.datachannelUnreliable = datachannelUnreliable;
 		this.state = GameplayState.LOBBY;
 		this.rtt = 0;
 		this.name = "Unknown";
@@ -41,6 +43,10 @@ class ClientConnection extends GameConnection {
 
 	override function sendBytes(b:Bytes) {
 		datachannel.sendBytes(b);
+	}
+
+	override function sendBytesUnreliable(b:Bytes) {
+		datachannelUnreliable.sendBytes(b);
 	}
 
 	public inline function needsTimeoutWarn(t:Float) {
@@ -110,6 +116,8 @@ abstract class GameConnection {
 	}
 
 	public function sendBytes(b:haxe.io.Bytes) {}
+
+	public function sendBytesUnreliable(b:haxe.io.Bytes) {}
 
 	public inline function getName() {
 		return name;

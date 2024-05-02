@@ -14,20 +14,28 @@ interface NetPacket {
 class MarbleMovePacket implements NetPacket {
 	var clientId:Int;
 	var clientTicks:Int;
-	var move:NetMove;
+	var moves:Array<NetMove>;
 
-	public function new() {}
+	public function new() {
+		moves = [];
+	}
 
 	public inline function deserialize(b:InputBitStream) {
 		clientId = b.readByte();
 		clientTicks = b.readUInt16();
-		move = MoveManager.unpackMove(b);
+		var count = b.readInt(5);
+		moves = [];
+		for (i in 0...count) {
+			moves.push(MoveManager.unpackMove(b));
+		}
 	}
 
 	public inline function serialize(b:OutputBitStream) {
 		b.writeByte(clientId);
 		b.writeUInt16(clientTicks);
-		MoveManager.packMove(move, b);
+		b.writeInt(moves.length, 5);
+		for (move in moves)
+			MoveManager.packMove(move, b);
 	}
 }
 

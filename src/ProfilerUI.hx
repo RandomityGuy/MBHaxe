@@ -104,6 +104,15 @@ class ProfilerUI {
 					+ 'Last Ack Move: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.lastAckMoveId : 0}\n'
 					+ 'Move Ack RTT: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.ackRTT : 0}';
 			}
+			if (Net.isHost) {
+				var strs = [];
+				strs.push('World Ticks: ${MarbleGame.instance.world.timeState.ticks}');
+				for (dc => cc in Net.clients) {
+					strs.push('${cc.id} move: sz ${@:privateAccess cc.moveManager.getQueueSize()} avg ${@:privateAccess cc.moveManager.serverAvgMoveListSize}');
+				}
+
+				instance.networkStats.text = strs.join('\n');
+			}
 		} else {
 			instance.networkStats.text = "";
 		}
