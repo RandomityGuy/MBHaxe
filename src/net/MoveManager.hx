@@ -47,7 +47,7 @@ class MoveManager {
 	var maxMoves = 45;
 
 	var serverTargetMoveListSize = 3;
-	var serverMaxMoveListSize = 5;
+	var serverMaxMoveListSize = 8;
 	var serverAvgMoveListSize = 3.0;
 	var serverSmoothMoveAvg = 0.15;
 	var serverMoveListSizeSlack = 1.0;
@@ -179,12 +179,12 @@ class MoveManager {
 				&& queuedMoves.length < serverTargetMoveListSize
 				&& queuedMoves.length != 0) {
 				serverAvgMoveListSize = Math.max(Std.int(serverAvgMoveListSize + serverMoveListSizeSlack + 0.5), queuedMoves.length);
-				serverAbnormalMoveCount++;
-				if (serverAbnormalMoveCount > 3) {
-					serverTargetMoveListSize += 1;
-					if (serverTargetMoveListSize > serverMaxMoveListSize)
-						serverTargetMoveListSize = serverMaxMoveListSize;
-				}
+				// serverAbnormalMoveCount++;
+				// if (serverAbnormalMoveCount > 3) {
+				// 	serverTargetMoveListSize += 1;
+				// 	if (serverTargetMoveListSize > serverMaxMoveListSize)
+				// 		serverTargetMoveListSize = serverMaxMoveListSize;
+				// }
 				// Send null move
 				return null;
 			}
@@ -196,14 +196,14 @@ class MoveManager {
 					queuedMoves.pop();
 				}
 				serverAvgMoveListSize = serverTargetMoveListSize;
-				serverAbnormalMoveCount++;
-				if (serverAbnormalMoveCount > 3) {
-					serverTargetMoveListSize -= 1;
-					if (serverTargetMoveListSize < serverDefaultMinTargetMoveListSize)
-						serverTargetMoveListSize = serverDefaultMinTargetMoveListSize;
-				} else {
-					serverAbnormalMoveCount = 0;
-				}
+				// serverAbnormalMoveCount++;
+				// if (serverAbnormalMoveCount > 3) {
+				// 	serverTargetMoveListSize -= 1;
+				// 	if (serverTargetMoveListSize < serverDefaultMinTargetMoveListSize)
+				// 		serverTargetMoveListSize = serverDefaultMinTargetMoveListSize;
+				// } else {
+				// 	serverAbnormalMoveCount = 0;
+				// }
 			}
 		}
 		if (queuedMoves.length == 0) {

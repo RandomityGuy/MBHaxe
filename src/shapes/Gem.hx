@@ -13,6 +13,7 @@ class Gem extends DtsObject {
 	public var pickedUp:Bool;
 
 	public var netIndex:Int;
+	public var pickUpClient:Int = -1;
 
 	var gemColor:String;
 
@@ -76,6 +77,7 @@ class Gem extends DtsObject {
 
 	override function reset() {
 		this.pickedUp = false;
+		this.pickUpClient = -1;
 		this.setOpacity(1);
 	}
 

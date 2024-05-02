@@ -56,6 +56,10 @@ abstract class PowerUp extends DtsObject {
 				pickupTicks = pickupPacket.serverTicks;
 			}
 
+			if (level.isMultiplayer && Net.isClient) {
+				pickupClient = @:privateAccess marble.connection != null ? @:privateAccess marble.connection.id : Net.clientId;
+			}
+
 			this.lastPickUpTime = timeState.currentAttemptTime;
 			if (this.autoUse)
 				this.use(marble, timeState);
