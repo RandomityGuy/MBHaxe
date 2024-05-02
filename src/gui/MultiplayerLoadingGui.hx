@@ -60,12 +60,7 @@ class MultiplayerLoadingGui extends GuiImage {
 		loadText.text.text = initialStatus;
 		this.addChild(loadText);
 
-		#if hl
-		var scene2d = hxd.Window.getInstance();
-		#end
-		#if js
-		var scene2d = MarbleGame.instance.scene2d;
-		#end
+		var scene2d = MarbleGame.canvas.scene2d;
 
 		var offsetX = (scene2d.width - 1280) / 2;
 		var offsetY = (scene2d.height - 720) / 2;
