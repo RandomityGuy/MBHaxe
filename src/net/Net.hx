@@ -290,7 +290,9 @@ class Net {
 		if (!Net.isMP)
 			return;
 		static var accum = 0.0;
+		static var wsAccum = 0.0;
 		accum += dt;
+		wsAccum += dt;
 		if (accum > 1.0) {
 			accum = 0;
 			var t = Console.time();
@@ -312,9 +314,23 @@ class Net {
 						}
 						if (Net.isClient) {
 							disconnect();
+							if (MarbleGame.instance.world != null) {
+								MarbleGame.instance.quitMission();
+							}
+							if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
+								var loadGui = new MultiplayerLoadingGui("Timed out");
+								MarbleGame.canvas.setContent(loadGui);
+								loadGui.setErrorStatus("Timed out");
+							}
 						}
 					}
 				}
+			}
+		}
+		if (wsAccum >= 20.0) {
+			wsAccum = 0;
+			if (Net.isHost) {
+				MasterServerClient.instance.sendServerInfo(serverInfo); // Heartbeat
 			}
 		}
 	}
@@ -521,23 +537,25 @@ class Net {
 				var marbleUpdatePacket = new MarbleUpdatePacket();
 				marbleUpdatePacket.deserialize(input);
 				var cc = marbleUpdatePacket.clientId;
-				if (MarbleGame.instance.world != null) {
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
 					var m = MarbleGame.instance.world.lastMoves;
 					m.enqueue(marbleUpdatePacket);
 				}
 
 			case MarbleMove:
-				var movePacket = new MarbleMovePacket();
-				movePacket.deserialize(input);
-				var cc = clientIdMap[movePacket.clientId];
-				if (cc.state == GAME)
-					for (move in movePacket.moves)
-						cc.queueMove(move);
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
+					var movePacket = new MarbleMovePacket();
+					movePacket.deserialize(input);
+					var cc = clientIdMap[movePacket.clientId];
+					if (cc.state == GAME)
+						for (move in movePacket.moves)
+							cc.queueMove(move);
+				}
 
 			case PowerupPickup:
 				var powerupPickupPacket = new PowerupPickupPacket();
 				powerupPickupPacket.deserialize(input);
-				if (MarbleGame.instance.world != null) {
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
 					var m = @:privateAccess MarbleGame.instance.world.powerupPredictions;
 					m.acknowledgePowerupPickup(powerupPickupPacket, MarbleGame.instance.world.timeState, clientConnection.moveManager.getQueueSize());
 				}
@@ -545,7 +563,7 @@ class Net {
 			case GemSpawn:
 				var gemSpawnPacket = new GemSpawnPacket();
 				gemSpawnPacket.deserialize(input);
-				if (MarbleGame.instance.world != null) {
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
 					MarbleGame.instance.world.spawnHuntGemsClientSide(gemSpawnPacket.gemIds);
 					@:privateAccess MarbleGame.instance.world.gemPredictions.acknowledgeGemSpawn(gemSpawnPacket);
 				}
@@ -553,7 +571,7 @@ class Net {
 			case GemPickup:
 				var gemPickupPacket = new GemPickupPacket();
 				gemPickupPacket.deserialize(input);
-				if (MarbleGame.instance.world != null) {
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
 					@:privateAccess MarbleGame.instance.world.playGui.incrementPlayerScore(gemPickupPacket.clientId, gemPickupPacket.scoreIncr);
 					@:privateAccess MarbleGame.instance.world.gemPredictions.acknowledgeGemPickup(gemPickupPacket);
 				}

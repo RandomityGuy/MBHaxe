@@ -1142,15 +1142,17 @@ class MarbleWorld extends Scheduler {
 		var packet = new GemSpawnPacket();
 
 		var hunt = cast(this.gameMode, HuntMode);
-		var activeGemIds = [];
-		for (gemId in @:privateAccess hunt.activeGemSpawnGroup) {
-			if (@:privateAccess hunt.gemSpawnPoints[gemId].gem != null && @:privateAccess !hunt.gemSpawnPoints[gemId].gem.pickedUp) {
-				activeGemIds.push(gemId);
+		if (@:privateAccess hunt.activeGemSpawnGroup != null) {
+			var activeGemIds = [];
+			for (gemId in @:privateAccess hunt.activeGemSpawnGroup) {
+				if (@:privateAccess hunt.gemSpawnPoints[gemId].gem != null && @:privateAccess !hunt.gemSpawnPoints[gemId].gem.pickedUp) {
+					activeGemIds.push(gemId);
+				}
 			}
+			packet.gemIds = activeGemIds;
+			packet.serialize(bs);
+			packets.push(bs.getBytes());
 		}
-		packet.gemIds = activeGemIds;
-		packet.serialize(bs);
-		packets.push(bs.getBytes());
 
 		// Marble states
 		for (marb in this.marbles) {

@@ -106,14 +106,32 @@ class NetCommands {
 				// Mid game join
 				Console.log("Mid game join for client " + clientId);
 				// Send em our present world state
-				var packets = MarbleGame.instance.world.getWorldStateForClientJoin();
-				var c = Net.clientIdMap[clientId];
-				for (packet in packets) {
-					c.sendBytes(packet);
+				if (MarbleGame.instance.world != null) {
+					var packets = MarbleGame.instance.world.getWorldStateForClientJoin();
+					var c = Net.clientIdMap[clientId];
+					for (packet in packets) {
+						c.sendBytes(packet);
+					}
+					Net.clientIdMap[clientId].ready();
+
+					if (MarbleGame.instance.world.serverStartTicks == 0) {
+						var allReady = true;
+						for (id => client in Net.clientIdMap) {
+							if (client.state != GameplayState.GAME) {
+								allReady = false;
+								break;
+							}
+						}
+						if (allReady) {
+							if (MarbleGame.instance.world != null) {
+								MarbleGame.instance.world.allClientsReady();
+							}
+						}
+					} else {
+						// Send the start ticks
+						NetCommands.setStartTicksMidJoinClient(c, MarbleGame.instance.world.serverStartTicks, MarbleGame.instance.world.timeState.ticks);
+					}
 				}
-				Net.clientIdMap[clientId].ready();
-				// Send the start ticks
-				NetCommands.setStartTicksMidJoinClient(c, MarbleGame.instance.world.serverStartTicks, MarbleGame.instance.world.timeState.ticks);
 			}
 		}
 	}
@@ -143,6 +161,9 @@ class NetCommands {
 
 	@:rpc(server) public static function timerRanOut() {
 		if (Net.isClient && MarbleGame.instance.world != null) {
+			if (MarbleGame.instance.paused) {
+				MarbleGame.instance.handlePauseGame(); // Unpause
+			}
 			var huntMode:HuntMode = cast MarbleGame.instance.world.gameMode;
 			huntMode.onTimeExpire();
 		}
