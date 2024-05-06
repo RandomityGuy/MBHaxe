@@ -137,7 +137,7 @@ class MPServerListGui extends GuiImage {
 					}
 				}
 			}, 15000);
-			Net.joinServer(ourServerList[curSelection].name, () -> {
+			Net.joinServer(ourServerList[curSelection].name, false, () -> {
 				failed = false;
 				Net.remoteServerInfo = ourServerList[curSelection];
 			});

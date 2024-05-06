@@ -91,14 +91,14 @@ class Net {
 		});
 	}
 
-	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void) {
+	public static function addClientFromSdp(sdpString:String, privateJoin:Bool, onFinishSdp:String->Void) {
 		var peer = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
 		var sdpObj = Json.parse(sdpString);
 		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
-		addClient(peer, onFinishSdp);
+		addClient(peer, privateJoin, onFinishSdp);
 	}
 
-	static function addClient(peer:RTCPeerConnection, onFinishSdp:String->Void) {
+	static function addClient(peer:RTCPeerConnection, privateJoin:Bool, onFinishSdp:String->Void) {
 		var candidates = [];
 		peer.onLocalCandidate = (c) -> {
 			if (c != "")
@@ -129,7 +129,7 @@ class Net {
 				}
 			}
 			if (reliable != null && unreliable != null)
-				onClientConnect(peer, reliable, unreliable);
+				onClientConnect(peer, reliable, unreliable, privateJoin);
 		}
 	}
 
@@ -138,7 +138,7 @@ class Net {
 		clientIdMap[id] = ghost;
 	}
 
-	public static function joinServer(serverName:String, connectedCb:() -> Void) {
+	public static function joinServer(serverName:String, isInvite:Bool, connectedCb:() -> Void) {
 		MasterServerClient.connectToMasterServer(() -> {
 			client = new RTCPeerConnection(["stun:stun.l.google.com:19302"], "0.0.0.0");
 			var candidates = [];
@@ -156,7 +156,7 @@ class Net {
 					MasterServerClient.instance.sendConnectToServer(serverName, Json.stringify({
 						sdp: sdpObj,
 						type: "offer"
-					}));
+					}), isInvite);
 				}
 			}
 
@@ -335,10 +335,11 @@ class Net {
 		}
 	}
 
-	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel, dcu:RTCDataChannel) {
+	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel, dcu:RTCDataChannel, joiningPrivate:Bool) {
 		clientId += 1;
 		var cc = new ClientConnection(clientId, c, dc, dcu);
 		clients.set(c, cc);
+		cc.isPrivate = joiningPrivate;
 		clientIdMap[clientId] = clients[c];
 
 		var closing = false;

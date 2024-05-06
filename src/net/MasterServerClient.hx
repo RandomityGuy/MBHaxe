@@ -83,12 +83,20 @@ class MasterServerClient {
 		}));
 	}
 
-	public function sendConnectToServer(serverName:String, sdp:String) {
-		ws.sendString(Json.stringify({
-			type: "connect",
-			serverName: serverName,
-			sdp: sdp
-		}));
+	public function sendConnectToServer(serverName:String, sdp:String, isInvite:Bool = false) {
+		if (!isInvite) {
+			ws.sendString(Json.stringify({
+				type: "connect",
+				serverName: serverName,
+				sdp: sdp
+			}));
+		} else {
+			ws.sendString(Json.stringify({
+				type: "connectInvite",
+				sdp: sdp,
+				inviteCode: serverName
+			}));
+		}
 	}
 
 	public function getServerList(serverListCb:Array<RemoteServerInfo>->Void) {
@@ -115,6 +123,8 @@ class MasterServerClient {
 				}));
 				return;
 			}
+			var joiningPrivate = conts.isPrivate;
+
 			if (Net.serverInfo.players >= Net.serverInfo.maxPlayers) {
 				ws.sendString(Json.stringify({
 					type: "connectFailed",
@@ -123,7 +133,33 @@ class MasterServerClient {
 				}));
 				return;
 			}
-			Net.addClientFromSdp(conts.sdp, (sdpReply) -> {
+			var pubSlotsAvail = Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots;
+			var privSlotsAvail = Net.serverInfo.privateSlots;
+
+			var pubCount = 1; // Self
+			var privCount = 0;
+			for (cid => cc in Net.clientIdMap) {
+				if (cc.isPrivate) {
+					privCount++;
+				} else {
+					pubCount++;
+				}
+			}
+
+			if (!joiningPrivate && pubCount >= pubSlotsAvail) {
+				ws.sendString(Json.stringify({
+					type: "connectFailed",
+					success: false,
+					reason: "The server is full"
+				}));
+				return;
+			}
+
+			if (joiningPrivate && privCount >= privSlotsAvail) {
+				joiningPrivate = false; // Join publicly
+			}
+
+			Net.addClientFromSdp(conts.sdp, joiningPrivate, (sdpReply) -> {
 				ws.sendString(Json.stringify({
 					success: true,
 					type: "connectResponse",
