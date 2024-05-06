@@ -71,12 +71,18 @@ class CreateMatchGui extends GuiImage {
 		var privateGame = false;
 
 		var playerOpt = optionCollection.addOption(1, "Max Players", ["2", "3", "4", "5", "6", "7", "8"], (idx) -> {
+			var newMaxPlayers = idx + 2;
+			if (privateSlots >= newMaxPlayers)
+				return false;
 			maxPlayers = idx + 2;
 			return true;
 		}, 0.5, 118);
 		playerOpt.setCurrentOption(6);
 
 		var privateOpt = optionCollection.addOption(1, "Private Slots", ["None", "1", "2", "3", "4", "5", "6", "7"], (idx) -> {
+			var newPrivateSlotCount = idx;
+			if (newPrivateSlotCount >= maxPlayers)
+				return false;
 			privateSlots = idx;
 			return true;
 		}, 0.5, 118);

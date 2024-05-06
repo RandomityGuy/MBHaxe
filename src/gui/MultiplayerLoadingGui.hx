@@ -1,5 +1,6 @@
 package gui;
 
+import net.Net;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
@@ -13,6 +14,7 @@ class MultiplayerLoadingGui extends GuiImage {
 	var loadAnim:GuiLoadAnim;
 	var bottomBar:GuiControl;
 	var innerCtrl:GuiControl;
+	var backButton:GuiXboxButton;
 
 	public function new(initialStatus:String) {
 		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
@@ -81,6 +83,18 @@ class MultiplayerLoadingGui extends GuiImage {
 		bottomBar.horizSizing = Width;
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
+
+		backButton = new GuiXboxButton("Cancel", 160);
+		backButton.position = new Vector(960, 0);
+		backButton.vertSizing = Bottom;
+		backButton.horizSizing = Right;
+		backButton.gamepadAccelerator = ["A"];
+		backButton.accelerators = [hxd.Key.ENTER];
+		backButton.pressedAction = (e) -> {
+			Net.disconnect();
+			MarbleGame.canvas.setContent(new MultiplayerGui());
+		};
+		bottomBar.addChild(backButton);
 	}
 
 	public function setLoadingStatus(str:String) {
@@ -92,17 +106,11 @@ class MultiplayerLoadingGui extends GuiImage {
 		loadText.text.text = str;
 		loadTextBg.text.text = str;
 		loadAnim.anim.visible = false;
-
-		var backButton = new GuiXboxButton("Ok", 160);
-		backButton.position = new Vector(960, 0);
-		backButton.vertSizing = Bottom;
-		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["A"];
-		backButton.accelerators = [hxd.Key.ENTER];
+		backButton.text.text.text = "Ok";
 		backButton.pressedAction = (e) -> {
 			MarbleGame.canvas.setContent(new MultiplayerGui());
 		};
-		bottomBar.addChild(backButton);
+
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 	}
 

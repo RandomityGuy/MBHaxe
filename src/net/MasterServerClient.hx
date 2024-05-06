@@ -135,7 +135,8 @@ class MasterServerClient {
 		if (conts.type == "connectResponse") {
 			Console.log("Remote Description Received!");
 			var sdpObj = Json.parse(conts.sdp);
-			@:privateAccess Net.client.setRemoteDescription(sdpObj.sdp, sdpObj.type);
+			if (@:privateAccess Net.client != null)
+				@:privateAccess Net.client.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		}
 		if (conts.type == "connectFailed") {
 			var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
