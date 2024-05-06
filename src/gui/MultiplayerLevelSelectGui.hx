@@ -24,6 +24,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 	var playerList:GuiMLTextListCtrl;
 	var updatePlayerCountFn:(Int, Int, Int, Int) -> Void;
 	var innerCtrl:GuiControl;
+	var inviteVisibility:Bool = true;
 
 	public function new(isHost:Bool) {
 		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
@@ -221,15 +222,25 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> {
 			Net.disconnect();
-			MarbleGame.canvas.setContent(new CreateMatchGui());
+			if (Net.isHost) {
+				MarbleGame.canvas.setContent(new CreateMatchGui());
+			} else {
+				MarbleGame.canvas.setContent(new MultiplayerGui());
+			}
 		}
 		bottomBar.addChild(backButton);
 
-		// var lbButton = new GuiXboxButton("Leaderboard", 220);
-		// lbButton.position = new Vector(750, 0);
-		// lbButton.vertSizing = Bottom;
-		// lbButton.horizSizing = Right;
-		// bottomBar.addChild(lbButton);
+		if (Net.isHost) {
+			var inviteButton = new GuiXboxButton("Invite Visibility", 220);
+			inviteButton.position = new Vector(750, 0);
+			inviteButton.vertSizing = Bottom;
+			inviteButton.horizSizing = Right;
+			inviteButton.pressedAction = (e) -> {
+				inviteVisibility = !inviteVisibility;
+				updateLobbyNames();
+			}
+			bottomBar.addChild(inviteButton);
+		}
 
 		var nextButton = new GuiXboxButton("Ready", 160);
 		nextButton.position = new Vector(960, 0);
@@ -301,12 +312,27 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 			if (Net.isHost) {
 				updatePlayerCountFn = (pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) -> {
-					levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>'
-						+ '<p><font face="arial14">Level: ${mis.title}</font></p>'
-						+ '<p><font face="arial12">Private Slots: ${pub}/${publicTotal}, Public Slots: ${priv}/${privateTotal}</font></p>';
+					if (inviteVisibility)
+						levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>'
+							+ '<p><font face="arial14">Level: ${mis.title}</font></p>'
+							+
+							'<p><font face="arial12">Public Slots: ${pub}/${publicTotal}, Private Slots: ${priv}/${privateTotal}, Invite Code: ${Net.serverInfo.inviteCode}</font></p>';
+					else
+						levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>'
+							+ '<p><font face="arial14">Level: ${mis.title}</font></p>'
+							+ '<p><font face="arial12">Public Slots: ${pub}/${publicTotal}, Private Slots: ${priv}/${privateTotal}</font></p>';
+				}
+				var pubCount = 1; // 1 for host
+				var privCount = 0;
+				for (cid => cc in Net.clientIdMap) {
+					if (cc.isPrivate) {
+						privCount++;
+					} else {
+						pubCount++;
+					}
 				}
 
-				updatePlayerCountFn(0, 0, Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots, Net.serverInfo.privateSlots);
+				updatePlayerCountFn(pubCount, privCount, Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots, Net.serverInfo.privateSlots);
 			}
 			if (Net.isClient) {
 				updatePlayerCountFn = (pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) -> {
@@ -388,6 +414,20 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		playerList.setTexts(playerListArr.map(player -> {
 			return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
 		}));
+
+		var pubCount = 1; // Self
+		var privCount = 0;
+		for (cid => cc in Net.clientIdMap) {
+			if (cc.isPrivate) {
+				privCount++;
+			} else {
+				pubCount++;
+			}
+		}
+
+		if (Net.isHost) {
+			updatePlayerCountFn(pubCount, privCount, Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots, Net.serverInfo.privateSlots);
+		}
 	}
 
 	public function updatePlayerCount(pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) {

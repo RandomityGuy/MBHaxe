@@ -73,6 +73,7 @@ class MultiplayerGui extends GuiImage {
 		});
 
 		btnList.addButton(3, 'Join Match', (e) -> {
+			MarbleGame.canvas.setContent(new JoinServerGui());
 			// Net.joinServer(() -> {
 			//	MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
 			// });
