@@ -1,5 +1,7 @@
 package src;
 
+import haxe.io.Path;
+import gui.MultiplayerGui;
 import net.MasterServerClient;
 import gui.MultiplayerLevelSelectGui;
 import net.NetCommands;
@@ -259,10 +261,10 @@ class MarbleGame {
 					quitMission();
 				}));
 			} else {
+				quitMission(Net.isClient);
 				if (Net.isMP && Net.isClient) {
 					Net.disconnect();
 				}
-				quitMission();
 			}
 		}, (sender) -> {
 			@:privateAccess world.playGui.setGuiVisibility(true);
@@ -308,7 +310,7 @@ class MarbleGame {
 		return world;
 	}
 
-	public function quitMission() {
+	public function quitMission(weDisconnecting:Bool = false) {
 		Console.log("Quitting mission");
 		if (Net.isMP) {
 			if (Net.isHost) {
@@ -318,6 +320,7 @@ class MarbleGame {
 		var watching = world.isWatching;
 		var missionType = world.mission.type;
 		var isNotCustom = !world.mission.isClaMission && !world.mission.isCustom;
+		var lastMis = Path.withoutExtension(Path.withoutDirectory(world.mission.path));
 		world.setCursorLock(false);
 		if (!Settings.levelStatistics.exists(world.mission.path)) {
 			Settings.levelStatistics.set(world.mission.path, {
@@ -340,8 +343,14 @@ class MarbleGame {
 			#end
 		} else {
 			if (Net.isMP) {
-				var lobby = new MultiplayerLevelSelectGui(Net.isHost);
-				canvas.setContent(lobby);
+				if (weDisconnecting) {
+					MarbleGame.instance.setPreviewMission(lastMis, () -> {
+						canvas.setContent(new MultiplayerGui());
+					});
+				} else {
+					var lobby = new MultiplayerLevelSelectGui(Net.isHost);
+					canvas.setContent(lobby);
+				}
 			} else {
 				var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
 				if (_exitingToMenu) {

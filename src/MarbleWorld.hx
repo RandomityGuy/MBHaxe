@@ -732,7 +732,7 @@ class MarbleWorld extends Scheduler {
 			this.clearSchedule();
 		marble.outOfBounds = false;
 		this.gameMode.onRespawn(marble);
-		if (marble == this.marble)
+		if (marble == this.marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 

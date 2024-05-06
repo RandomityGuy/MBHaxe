@@ -1724,6 +1724,13 @@ class Marble extends GameObject {
 				}
 			}
 		}
+
+		if (Net.isMP) {
+			if (m.jump && this.outOfBounds) {
+				this.level.cancel(this.oobSchedule);
+				this.level.restart(cast this);
+			}
+		}
 	}
 
 	// MP Only Functions
@@ -1860,11 +1867,6 @@ class Marble extends GameObject {
 			playedSounds = [];
 			advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
 			physicsAccumulator = 0;
-
-			if (move.move.jump && this.outOfBounds && Net.isHost) {
-				this.level.cancel(this.oobSchedule);
-				this.level.restart(cast this);
-			}
 		} else {
 			physicsAccumulator = 0;
 			newPos.load(oldPos);

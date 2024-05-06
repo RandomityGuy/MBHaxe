@@ -80,6 +80,8 @@ class GuiXboxButton extends GuiControl {
 
 	public override function update(dt:Float, mouseState:MouseState) {
 		var renderRect = getHitTestRect();
+		renderRect.position = renderRect.position.add(new Vector(16, 22));
+		renderRect.extent = renderRect.extent.sub(new Vector(32, 44));
 		if (renderRect.inRect(mouseState.position) && !disabled) {
 			if (buttonSounds && Key.isPressed(Key.MOUSE_LEFT)) {
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
