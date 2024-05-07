@@ -64,15 +64,15 @@ class MPServerListGui extends GuiImage {
 				case "notready":
 					return ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "pc":
-					return ResourceLoader.getResource("data/ui/xbox/platform_desktop.png", ResourceLoader.getImage, this.imageResources).toTile();
+					return ResourceLoader.getResource("data/ui/xbox/platform_desktop_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "mac":
-					return ResourceLoader.getResource("data/ui/xbox/platform_mac.png", ResourceLoader.getImage, this.imageResources).toTile();
+					return ResourceLoader.getResource("data/ui/xbox/platform_mac_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "web":
-					return ResourceLoader.getResource("data/ui/xbox/platform_web.png", ResourceLoader.getImage, this.imageResources).toTile();
+					return ResourceLoader.getResource("data/ui/xbox/platform_web_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "android":
-					return ResourceLoader.getResource("data/ui/xbox/platform_android.png", ResourceLoader.getImage, this.imageResources).toTile();
+					return ResourceLoader.getResource("data/ui/xbox/platform_android_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "unknown":
-					return ResourceLoader.getResource("data/ui/xbox/platform_unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
+					return ResourceLoader.getResource("data/ui/xbox/platform_unknown_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 			}
 			return null;
 		}
@@ -84,9 +84,9 @@ class MPServerListGui extends GuiImage {
 		var serverList = new GuiMLTextListCtrl(arial14, serverDisplays, imgLoader);
 
 		serverList.selectedColor = 0xF29515;
-		serverList.selectedFillColor = 0xEBEBEB;
+		serverList.selectedFillColor = 0x858585;
 		serverList.position = new Vector(25, 22);
-		serverList.extent = new Vector(550, 480);
+		serverList.extent = new Vector(680, 480);
 		serverList.scrollable = true;
 		serverList.onSelectedFunc = (sel) -> {
 			curSelection = sel;
@@ -97,7 +97,7 @@ class MPServerListGui extends GuiImage {
 		var platformToString = ["unknown", "pc", "mac", "web", "android"];
 
 		function updateServerListDisplay() {
-			serverDisplays = ourServerList.map(x -> return '<img src="${platformToString[x.platform]}"></img><font color="#101010">${x.name}</font>');
+			serverDisplays = ourServerList.map(x -> return '<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${x.name}</font>');
 			serverList.setTexts(serverDisplays);
 		}
 
@@ -123,6 +123,20 @@ class MPServerListGui extends GuiImage {
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
 		bottomBar.addChild(backButton);
+
+		var refreshButton = new GuiXboxButton("Refresh", 220);
+		refreshButton.position = new Vector(750, 0);
+		refreshButton.vertSizing = Bottom;
+		refreshButton.horizSizing = Right;
+		refreshButton.pressedAction = (e) -> {
+			MasterServerClient.connectToMasterServer(() -> {
+				MasterServerClient.instance.getServerList((servers) -> {
+					ourServerList = servers;
+					updateServerListDisplay();
+				});
+			});
+		}
+		bottomBar.addChild(refreshButton);
 
 		var nextButton = new GuiXboxButton("Join", 160);
 		nextButton.position = new Vector(960, 0);

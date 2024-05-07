@@ -197,6 +197,10 @@ class Console {
 				MarbleGame.instance.fpsLimit = scale;
 				MarbleGame.instance.limitingFps = true;
 				log("Set FPS to " + scale);
+			} else if (cmdType == 'reload') {
+				#if sys
+				hl.Api.checkReload();
+				#end
 			} else {
 				error("Unknown command");
 			}
