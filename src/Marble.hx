@@ -1784,6 +1784,8 @@ class Marble extends GameObject {
 		this.megaMarbleUseTick = p.megaTick;
 		// this.currentUp = p.gravityDirection;
 		this.level.setUp(cast this, p.gravityDirection, this.level.timeState);
+		if (this.outOfBounds && !p.oob && this.controllable)
+			@:privateAccess this.level.playGui.setCenterText('');
 		this.outOfBounds = p.oob;
 		this.camera.oob = p.oob;
 		if (p.powerUpId == 0x1FF) {
