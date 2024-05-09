@@ -125,26 +125,26 @@ class Renderer extends h3d.scene.Renderer {
 		// ctx.engine.clear(0, 1);
 
 		if (!cubemapPass)
-			ProfilerUI.measure("sky");
+			ProfilerUI.measure("sky", 0);
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 1) {
 			renderPass(defaultPass, get("sky"));
 			renderPass(defaultPass, get("skyshape"), backToFront);
 		}
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 2) {
 			if (!cubemapPass)
-				ProfilerUI.measure("interiorZPass");
+				ProfilerUI.measure("interiorZPass", 0);
 			renderPass(defaultPass, get("zPass"));
 			if (!cubemapPass)
-				ProfilerUI.measure("interior");
+				ProfilerUI.measure("interior", 0);
 			renderPass(defaultPass, get("interior"));
 		}
 		if (!cubemapPass)
-			ProfilerUI.measure("render");
+			ProfilerUI.measure("render", 0);
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 3) {
 			renderPass(defaultPass, get("default"));
 		}
 		if (!cubemapPass)
-			ProfilerUI.measure("glow");
+			ProfilerUI.measure("glow", 0);
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4)
 			renderPass(defaultPass, get("glowPre"));
 
@@ -177,7 +177,7 @@ class Renderer extends h3d.scene.Renderer {
 			}
 		}
 		if (!cubemapPass)
-			ProfilerUI.measure("refract");
+			ProfilerUI.measure("refract", 0);
 		// Refraction pass
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
 			var refractObjects = get("refract");
@@ -189,7 +189,7 @@ class Renderer extends h3d.scene.Renderer {
 			}
 		}
 		if (!cubemapPass)
-			ProfilerUI.measure("alpha");
+			ProfilerUI.measure("alpha", 0);
 
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4) {
 			renderPass(defaultPass, get("alpha"), backToFront);

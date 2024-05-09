@@ -201,6 +201,14 @@ class Console {
 				#if sys
 				hl.Api.checkReload();
 				#end
+			} else if (cmdType == "profile") {
+				if (cmdSplit.length == 2) {
+					var scale = Std.parseInt(cmdSplit[1]);
+					ProfilerUI.setDisplayMode(scale);
+					log("FPS Display set to " + scale);
+				} else {
+					error("Expected one argument, got " + (cmdSplit.length - 1));
+				}
 			} else {
 				error("Unknown command");
 			}

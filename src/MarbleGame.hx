@@ -247,7 +247,7 @@ class MarbleGame {
 				wheel: _mouseWheelDelta,
 				handled: false
 			}
-			ProfilerUI.measure("canvasUpdate");
+			ProfilerUI.measure("canvasUpdate", 1);
 			canvas.update(dt, mouseState);
 		}
 	}

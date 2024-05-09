@@ -134,12 +134,19 @@ class CollisionWorld {
 			+ rayDirection.x * rayLength, rayStart.y
 			+ rayDirection.y * rayLength, rayStart.z
 			+ rayDirection.z * rayLength);
-		var objs = this.octree.boundingSearch(bounds).concat(dynamicOctree.boundingSearch(bounds)).map(x -> cast(x, CollisionEntity));
+		var objs = this.octree.boundingSearch(bounds);
+		var dynObjs = dynamicOctree.boundingSearch(bounds);
 		var results = [];
 		for (obj in objs) {
-			results = results.concat(obj.rayCast(rayStart, rayDirection));
+			var oo = cast(obj, CollisionEntity);
+			oo.rayCast(rayStart, rayDirection, results);
 		}
-		results = results.concat(this.staticWorld.rayCast(rayStart, rayDirection));
+
+		for (obj in dynObjs) {
+			var oo = cast(obj, CollisionEntity);
+			oo.rayCast(rayStart, rayDirection, results);
+		}
+		// results = results.concat(this.staticWorld.rayCast(rayStart, rayDirection));
 		return results;
 	}
 

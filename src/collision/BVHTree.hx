@@ -6,7 +6,7 @@ import h3d.col.Bounds;
 interface IBVHObject {
 	var boundingBox:Bounds;
 	var key:Int;
-	function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<octree.IOctreeObject.RayIntersectionData>;
+	function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>):Void;
 }
 
 @:publicFields
@@ -475,7 +475,7 @@ class BVHTree<T:IBVHObject> {
 			var currentnode = this.nodes[current];
 			if (currentnode.collideRay(ray)) {
 				if (currentnode.isLeaf) {
-					res = res.concat(currentnode.object.rayCast(origin, direction));
+					currentnode.object.rayCast(origin, direction, res);
 				} else {
 					if (currentnode.child1 != -1)
 						q.push(currentnode.child1);

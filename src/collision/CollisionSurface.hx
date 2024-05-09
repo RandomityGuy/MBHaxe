@@ -139,8 +139,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		normals.push(z);
 	}
 
-	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
-		var intersections:Array<RayIntersectionData> = [];
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector, intersections:Array<RayIntersectionData>) {
 		var i = 0;
 		while (i < indices.length) {
 			var p1 = getPoint(indices[i]);
@@ -157,7 +156,6 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			}
 			i += 3;
 		}
-		return intersections;
 	}
 
 	public function support(direction:Vector, transform:Matrix) {

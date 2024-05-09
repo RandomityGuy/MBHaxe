@@ -84,7 +84,7 @@ class GemOctreeElem implements IOctreeObject {
 		this.priority = priority;
 	}
 
-	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector, resultSet:Array<RayIntersectionData>) {
 		throw new haxe.exceptions.NotImplementedException(); // Not applicable
 	}
 }
