@@ -175,7 +175,7 @@ class Grid {
 				if (surf.key == searchKey)
 					continue;
 				surf.key = searchKey;
-				results = results.concat(surf.rayCast(origin, direction));
+				surf.rayCast(origin, direction, results);
 			}
 			if (tmax.x < tmax.y) {
 				X = X + stepX;

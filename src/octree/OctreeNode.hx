@@ -200,7 +200,8 @@ class OctreeNode implements IOctreeElement {
 			return;
 
 		for (obj in this.objects) {
-			var iSecs = obj.rayCast(rayOrigin, rayDirection);
+			var iSecs = [];
+			obj.rayCast(rayOrigin, rayDirection, iSecs);
 			for (intersection in iSecs) {
 				var intersectionData = new OctreeIntersection();
 				intersectionData.distance = rayOrigin.distance(intersection.point);

@@ -136,8 +136,8 @@ class Main extends hxd.App {
 
 	override function update(dt:Float) {
 		super.update(dt);
-		ProfilerUI.begin();
-		ProfilerUI.measure("updateBegin");
+		ProfilerUI.begin(1);
+		ProfilerUI.measure("updateBegin", 1);
 		if (loaded) {
 			// try {
 			// timeAccumulator += dt;
@@ -155,16 +155,18 @@ class Main extends hxd.App {
 			// world.update(dt);
 			ProfilerUI.update(this.engine.fps);
 		}
+		ProfilerUI.end(1);
 	}
 
 	override function render(e:h3d.Engine) {
 		// this.world.render(e);
+		ProfilerUI.begin(0);
 		if (loaded) {
-			ProfilerUI.measure("renderBegin");
+			ProfilerUI.measure("renderBegin", 0);
 			marbleGame.render(e);
 		}
 		super.render(e);
-		ProfilerUI.end();
+		ProfilerUI.end(0);
 	}
 
 	static function main() {

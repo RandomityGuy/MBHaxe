@@ -141,7 +141,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		}
 	}
 
-	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<RayIntersectionData>) {
 		var invMatrix = invTransform;
 		var invTPos = invMatrix.clone();
 		invTPos.transpose();
@@ -164,9 +164,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			i.point.transform(transform);
 			i.normal.transform3x3(invTPos);
 			i.normal.normalize();
+			results.push(i);
 		}
-
-		return intersections;
 		// }
 	}
 

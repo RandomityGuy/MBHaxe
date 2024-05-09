@@ -17,6 +17,7 @@ class ProfilerUI {
 	public static var instance:ProfilerUI;
 
 	static var enabled:Bool = false;
+	static var mode:Int = 0;
 
 	public function new(s2d:h2d.Scene) {
 		if (instance != null)
@@ -26,22 +27,25 @@ class ProfilerUI {
 		this.s2d = s2d;
 	}
 
-	public static function begin() {
+	public static function begin(type:Int) {
 		if (!enabled)
 			return;
-		instance.debugProfiler.begin();
+		if (type == mode)
+			instance.debugProfiler.begin();
 	}
 
-	public static function measure(name:String) {
+	public static function measure(name:String, type:Int) {
 		if (!enabled)
 			return;
-		instance.debugProfiler.measure(name);
+		if (type == mode)
+			instance.debugProfiler.measure(name);
 	}
 
-	public static function end() {
+	public static function end(type:Int) {
 		if (!enabled)
 			return;
-		instance.debugProfiler.end();
+		if (type == mode)
+			instance.debugProfiler.end();
 	}
 
 	public static function update(fps:Float) {
@@ -77,6 +81,8 @@ class ProfilerUI {
 			instance.networkStats = new Text(DefaultFont.get(), instance.s2d);
 			instance.networkStats.y = 150;
 			instance.networkStats.color = new Vector(1, 1, 1, 1);
+
+			instance.debugProfiler.end(); // End current frame
 		} else {
 			instance.debugProfiler.remove();
 			instance.fpsCounter.remove();
@@ -84,6 +90,13 @@ class ProfilerUI {
 			instance.debugProfiler = null;
 			instance.fpsCounter = null;
 			instance.networkStats = null;
+		}
+	}
+
+	public static function setDisplayMode(m:Int) {
+		mode = m;
+		if (instance.debugProfiler != null) {
+			instance.debugProfiler.end(); // End
 		}
 	}
 

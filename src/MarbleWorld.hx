@@ -1425,7 +1425,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function advanceWorld(dt:Float) {
-		ProfilerUI.measure("updateTimer");
+		ProfilerUI.measure("updateTimer", 1);
 		this.updateTimer(dt);
 		this.tickSchedule(timeState.currentAttemptTime);
 
@@ -1439,7 +1439,7 @@ class MarbleWorld extends Scheduler {
 
 		this.updateGameState();
 		this.updateBlast(this.marble, timeState);
-		ProfilerUI.measure("updateDTS");
+		ProfilerUI.measure("updateDTS", 1);
 		for (obj in dtsObjects) {
 			obj.update(timeState);
 		}
@@ -1447,7 +1447,7 @@ class MarbleWorld extends Scheduler {
 			obj.update(timeState);
 		}
 
-		ProfilerUI.measure("updateMarbles");
+		ProfilerUI.measure("updateMarbles", 1);
 		marble.update(timeState, collisionWorld, this.pathedInteriors);
 		for (client => marble in clientMarbles) {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
@@ -1545,7 +1545,7 @@ class MarbleWorld extends Scheduler {
 			this.isReplayingMovement = false;
 		}
 
-		ProfilerUI.measure("updateTimer");
+		ProfilerUI.measure("updateTimer", 1);
 		this.updateTimer(dt);
 
 		// if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
@@ -1587,7 +1587,7 @@ class MarbleWorld extends Scheduler {
 		this.updateGameState();
 		if (!this.isMultiplayer)
 			this.updateBlast(this.marble, timeState);
-		ProfilerUI.measure("updateDTS");
+		ProfilerUI.measure("updateDTS", 1);
 		for (obj in dtsObjects) {
 			obj.update(timeState);
 		}
@@ -1599,7 +1599,7 @@ class MarbleWorld extends Scheduler {
 		// 	inputRecorder.recordInput(timeState.currentAttemptTime);
 		// }
 
-		ProfilerUI.measure("updateMarbles");
+		ProfilerUI.measure("updateMarbles", 1);
 		if (this.isMultiplayer) {
 			tickAccumulator += timeState.dt;
 			while (tickAccumulator >= 0.032) {
@@ -1670,14 +1670,14 @@ class MarbleWorld extends Scheduler {
 			// Update camera separately
 			marble.camera.update(timeState.currentAttemptTime, realDt);
 		}
-		ProfilerUI.measure("updateParticles");
+		ProfilerUI.measure("updateParticles", 1);
 		if (this.rewinding) {
 			this.particleManager.update(1000 * timeState.timeSinceLoad, -realDt * rewindManager.timeScale);
 		} else
 			this.particleManager.update(1000 * timeState.timeSinceLoad, dt);
-		ProfilerUI.measure("updatePlayGui");
+		ProfilerUI.measure("updatePlayGui", 1);
 		this.playGui.update(timeState);
-		ProfilerUI.measure("updateAudio");
+		ProfilerUI.measure("updateAudio", 1);
 		AudioManager.update(this.scene);
 
 		if (!this.isMultiplayer) {
@@ -1714,10 +1714,10 @@ class MarbleWorld extends Scheduler {
 		if (_instancesNeedsUpdate) {
 			if (this.radar != null)
 				this.radar.render();
-			ProfilerUI.measure("updateInstances");
+			ProfilerUI.measure("updateInstances", 0);
 			this.instanceManager.render();
 			if (this.marble != null && this.marble.cubemapRenderer != null && _ready) {
-				ProfilerUI.measure("renderCubemap");
+				ProfilerUI.measure("renderCubemap", 0);
 
 				this.marble.cubemapRenderer.position.load(this.marble.getAbsPos().getPosition());
 				this.marble.cubemapRenderer.render(e);

@@ -13,5 +13,5 @@ class RayIntersectionData {
 
 interface IOctreeObject extends IOctreeElement {
 	var boundingBox:Bounds;
-	function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData>;
+	function rayCast(rayOrigin:Vector, rayDirection:Vector, resultSet:Array<RayIntersectionData>):Void;
 }

@@ -242,7 +242,7 @@ class MarbleGame {
 				position: new Vector(canvas.scene2d.mouseX, canvas.scene2d.mouseY),
 				handled: false
 			}
-			ProfilerUI.measure("canvasUpdate");
+			ProfilerUI.measure("canvasUpdate", 1);
 			canvas.update(dt, mouseState);
 		}
 	}
