@@ -6,11 +6,11 @@ import net.NetPacket.GemPickupPacket;
 class GemPredictionStore {
 	var predictions:Array<Bool>;
 
-	public function new() {
+	public inline function new() {
 		predictions = [];
 	}
 
-	public function alloc() {
+	public inline function alloc() {
 		predictions.push(true);
 	}
 
@@ -18,11 +18,11 @@ class GemPredictionStore {
 		return predictions[netIndex];
 	}
 
-	public function acknowledgeGemPickup(packet:GemPickupPacket) {
+	public inline function acknowledgeGemPickup(packet:GemPickupPacket) {
 		predictions[packet.gemId] = true;
 	}
 
-	public function acknowledgeGemSpawn(packet:GemSpawnPacket) {
+	public inline function acknowledgeGemSpawn(packet:GemSpawnPacket) {
 		for (gemId in packet.gemIds)
 			predictions[gemId] = false;
 	}

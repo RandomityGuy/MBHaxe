@@ -1,5 +1,6 @@
 package src;
 
+import hxd.res.BitmapFont;
 import h3d.Matrix;
 import src.DtsObject;
 import h3d.Vector;
@@ -8,12 +9,17 @@ import src.GameObject;
 import h2d.Scene;
 import src.MarbleWorld;
 import src.Util;
+import src.Marble;
+import src.Settings;
+import src.ResourceLoader;
 
 class Radar {
 	var level:MarbleWorld;
 	var scene2d:Scene;
 
 	var g:Graphics;
+
+	var marbleNameTexts:Array<h2d.Text>;
 
 	public var ellipseScreenFraction = new Vector(0.79, 0.9);
 	public var fullArrowLength = 60.0;
@@ -29,6 +35,7 @@ class Radar {
 	public function new(level:MarbleWorld, scene2d:Scene) {
 		this.level = level;
 		this.scene2d = scene2d;
+		this.marbleNameTexts = [];
 	}
 
 	public function init() {
@@ -54,6 +61,32 @@ class Radar {
 		if (@:privateAccess level.endPad != null && gemCount == 0) {
 			renderArrow(@:privateAccess level.endPad.getAbsPos().getPosition(), 0xE6E6E6);
 		}
+		var fadeDistance = level.scene.camera.zFar * 0.1;
+		for (marbleName in marbleNameTexts) {
+			if (marbleName != null)
+				marbleName.alpha = 0;
+		}
+		for (marble in level.marbles) {
+			if (marble != level.marble) {
+				var shapePos = marble.getAbsPos().getPosition();
+				var shapeDir = shapePos.sub(level.scene.camera.pos);
+				var shapeDist = shapeDir.lengthSq();
+				if (shapeDist == 0 || shapeDist > level.scene.camera.zFar * level.scene.camera.zFar) {
+					dontRenderName(marble);
+					continue;
+				}
+				var validProjection = frustumHasPoint(level.scene.camera.frustum, shapePos);
+				if (!validProjection) {
+					dontRenderName(marble);
+					continue;
+				}
+				shapePos.z += 0.5; // Vertical offset
+
+				var projectedPos = level.scene.camera.project(shapePos.x, shapePos.y, shapePos.z, scene2d.width, scene2d.height);
+				var opacity = (shapeDist < fadeDistance) ? 1.0 : (1.0 - (shapeDist - fadeDistance) / (level.scene.camera.zFar - fadeDistance));
+				renderName(projectedPos, marble, opacity);
+			}
+		}
 		_dirty = false;
 	}
 
@@ -70,6 +103,12 @@ class Radar {
 		g.clear();
 		scene2d.removeChild(g);
 		g = null;
+		for (txt in marbleNameTexts) {
+			if (txt != null) {
+				scene2d.removeChild(txt);
+			}
+		}
+		marbleNameTexts = null;
 	}
 
 	inline function planeDistance(plane:h3d.col.Plane, p:Vector) {
@@ -386,6 +425,34 @@ class Radar {
 				g.moveTo(drawPoint.x, halfBottomRight.y);
 				g.lineTo(halfBottomRight.x, drawPoint.y);
 			}
+		}
+	}
+
+	function renderName(pos:Vector, marble:Marble, opacity:Float) {
+		var marbleId = @:privateAccess marble.connection.getMarbleId();
+		while (marbleNameTexts.length <= marbleId)
+			marbleNameTexts.push(null);
+		if (marbleNameTexts[marbleId] == null) {
+			var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+			var arialb14b = new BitmapFont(arialb14fontdata.entry);
+			@:privateAccess arialb14b.loader = ResourceLoader.loader;
+			var arialBold14 = arialb14b.toSdfFont(cast 16 * Settings.uiScale, MultiChannel);
+
+			marbleNameTexts[marbleId] = new h2d.Text(arialBold14, scene2d);
+			marbleNameTexts[marbleId].textColor = 0xFFFF00;
+		}
+		var textObj = marbleNameTexts[marbleId];
+		textObj.text = @:privateAccess marble.connection.getName();
+		textObj.setPosition(pos.x - textObj.textWidth / 2, pos.y - textObj.textHeight);
+		textObj.alpha = opacity;
+	}
+
+	function dontRenderName(marble:Marble) {
+		var marbleId = @:privateAccess marble.connection.getMarbleId();
+		while (marbleNameTexts.length <= marbleId)
+			marbleNameTexts.push(null);
+		if (marbleNameTexts[marbleId] != null) {
+			marbleNameTexts[marbleId].alpha = 0;
 		}
 	}
 }
