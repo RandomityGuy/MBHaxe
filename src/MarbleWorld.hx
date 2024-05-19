@@ -1410,9 +1410,11 @@ class MarbleWorld extends Scheduler {
 			this.predictions.removeMarbleFromPrediction(otherMarble);
 			this.scene.removeChild(otherMarble);
 			this.collisionWorld.removeMarbleEntity(otherMarble.collider);
+			this.collisionWorld.removeMovingEntity(otherMarble.collider);
 			this.playGui.removePlayer(cc.id);
 			this.clientMarbles.remove(cc);
 			otherMarble.dispose();
+			this.marbles.remove(otherMarble);
 		}
 	}
 

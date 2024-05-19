@@ -6,11 +6,11 @@ import net.NetPacket.PowerupPickupPacket;
 class PowerupPredictionStore {
 	var predictions:Array<Float>;
 
-	public function new() {
+	public inline function new() {
 		predictions = [];
 	}
 
-	public function alloc() {
+	public inline function alloc() {
 		predictions.push(Math.NEGATIVE_INFINITY);
 	}
 
@@ -18,7 +18,7 @@ class PowerupPredictionStore {
 		return predictions[netIndex];
 	}
 
-	public function acknowledgePowerupPickup(packet:PowerupPickupPacket, timeState:TimeState, futureTicks:Int) {
+	public inline function acknowledgePowerupPickup(packet:PowerupPickupPacket, timeState:TimeState, futureTicks:Int) {
 		predictions[packet.powerupItemId] = timeState.currentAttemptTime - futureTicks * 0.032; // Approximate
 	}
 }
