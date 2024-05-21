@@ -80,10 +80,15 @@ class Net {
 	public static var remoteServerInfo:RemoteServerInfo;
 
 	static var stunServers = [
-		"stun.l.google.com:19302", "stun1.l.google.com:19302", "stun2.l.google.com:19302", "stun3.l.google.com:19302", "stun4.l.google.com:19302",
-		"stun:relay.metered.ca:80", "stun.ekiga.net", "stun.ideasip.com", "stun.rixtelecom.se", "stun.schlund.de", "stun.stunprotocol.org:3478",
-		"stun.voiparound.com", "stun.voipbuster.com", "stun.voipstunt.com", "stun.voxgratia.org"
+		"stun:stun.l.google.com:19302",
+		"stun:stun1.l.google.com:19302",
+		"stun:stun2.l.google.com:19302",
+		"stun:stun3.l.google.com:19302",
+		"stun:stun4.l.google.com:19302",
+		"stun:relay.metered.ca:80",
 	];
+
+	public static var turnServer:String = "";
 
 	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool, onHosted:() -> Void) {
 		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "LOBBY", getPlatform());
@@ -98,7 +103,7 @@ class Net {
 	}
 
 	public static function addClientFromSdp(sdpString:String, privateJoin:Bool, onFinishSdp:String->Void) {
-		var peer = new RTCPeerConnection(stunServers, "0.0.0.0");
+		var peer = new RTCPeerConnection(stunServers.concat([turnServer]), "0.0.0.0");
 		var sdpObj = Json.parse(sdpString);
 		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		addClient(peer, privateJoin, onFinishSdp);
@@ -146,7 +151,7 @@ class Net {
 
 	public static function joinServer(serverName:String, isInvite:Bool, connectedCb:() -> Void) {
 		MasterServerClient.connectToMasterServer(() -> {
-			client = new RTCPeerConnection(stunServers, "0.0.0.0");
+			client = new RTCPeerConnection(stunServers.concat([turnServer]), "0.0.0.0");
 			var candidates = [];
 
 			client.onLocalCandidate = (c) -> {
@@ -337,6 +342,9 @@ class Net {
 			wsAccum = 0;
 			if (Net.isHost) {
 				MasterServerClient.instance.sendServerInfo(serverInfo); // Heartbeat
+			}
+			if (Net.isClient) {
+				MasterServerClient.instance.heartBeat();
 			}
 		}
 	}

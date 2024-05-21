@@ -69,6 +69,12 @@ class MasterServerClient {
 		}
 	}
 
+	public function heartBeat() {
+		ws.sendString(Json.stringify({
+			type: "heartbeat"
+		}));
+	}
+
 	public function sendServerInfo(serverInfo:ServerInfo) {
 		ws.sendString(Json.stringify({
 			type: "serverInfo",
@@ -179,6 +185,9 @@ class MasterServerClient {
 			if (loadGui != null) {
 				loadGui.setErrorStatus(conts.reason);
 			}
+		}
+		if (conts.type == "turnserver") {
+			Net.turnServer = conts.server; // Turn server!
 		}
 	}
 }
