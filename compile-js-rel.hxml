@@ -1,4 +1,6 @@
 -cp src
+-lib colyseus-websocket
+-lib datachannel
 -lib heaps
 -lib stb_ogg_sound
 -lib zip
