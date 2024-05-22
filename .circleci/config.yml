@@ -190,26 +190,30 @@ jobs:
             sudo cmake --install build
 
       - run:
+          name: Prepare hxDatachannel
+          command: |
+
+            cd hxDatachannel/cpp
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
           name: Install hashlink
           command: |
             mkdir -p ~/deps
             cd ~/deps
             git clone --depth=1 https://github.com/RandomityGuy/hashlink
             cd hashlink
-            # Fix OpenAL
-            # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
-            cmake --build build --config Release -j$NPROC
-            sudo cmake --install build
-
-      - run:
-          name: Compile hxDatachannel
-          command: |
-            mkdir -p ~/deps
             cd ~/deps
             git clone https://github.com/RandomityGuy/hxDatachannel
-            cd hxDatachannel/cpp
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
+            cd hashlink
+            mv ~/deps/hxDatachannel/cpp libs/datachannel
+            echo -e "\nadd_subdirectory(datachannel)" >> libs/CMakeLists.txt
+            curl -L https://raw.githubusercontent.com/RandomityGuy/hashlink/master/libs/ssl/CMakeLists.txt > libs/ssl/CMakeLists.txt
+            # Fix OpenAL
+            # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
@@ -222,6 +226,7 @@ jobs:
             haxelib dev hlopenal ~/deps/hashlink/libs/openal
             haxelib dev hlsdl ~/deps/hashlink/libs/sdl
             haxelib dev datachannel ~/deps/hxDatachannel
+            haxelib install colyseus-websocket
 
       - save_cache:
           key: mbhaxe-deps-v1
@@ -239,8 +244,8 @@ jobs:
             - /usr/local/lib/libvorbis.0.4.9.dylib
             - /usr/local/lib/libvorbisfile.3.3.8.dylib
             - /usr/local/lib/libvorbisenc.2.0.12.dylib
-            - /usr/local/lib/libz.1.3.dylib
-            - /usr/local/lib/hxdatachannel.hdll
+            - /usr/local/lib/libz.1.3.1.dylib
+            - /usr/local/lib/datachannel.hdll
 
 
       - run:
@@ -252,7 +257,7 @@ jobs:
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,hxdatachannel.hdll} -lsdl2 -lhl -luv
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} -lsdl2 -lhl -luv
 
       - run:
           name: Package app bundle
@@ -262,7 +267,7 @@ jobs:
             cd "macos-dist/MarbleBlast Ultra.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
-            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll} .
+            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll,datachannel.hdll} .
             cp /usr/local/lib/libhl.1.13.0.dylib libhl.1.dylib
             cp /usr/local/lib/libogg.0.8.5.dylib libogg.0.dylib
             cp /usr/local/lib/libopenal.1.22.2.dylib libopenal.1.dylib
@@ -271,7 +276,7 @@ jobs:
             cp /usr/local/lib/libvorbis.0.4.9.dylib libvorbis.0.4.9.dylib
             cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
             cp /usr/local/lib/libvorbisenc.2.0.12.dylib libvorbisenc.2.0.12.dylib
-            cp /usr/local/lib/libz.1.3.dylib libz.1.dylib
+            cp /usr/local/lib/libz.1.3.1.dylib libz.1.dylib
             cp /usr/local/lib/libuv.1.dylib libuv.1.dylib
             # These libraries have dangling RPATHs
             install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib

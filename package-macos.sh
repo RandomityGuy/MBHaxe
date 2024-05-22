@@ -24,6 +24,8 @@ install_name_tool -change ui.hdll @rpath/ui.hdll \
 	-change openal.hdll @rpath/openal.hdll \
 	-change fmt.hdll @rpath/fmt.hdll \
 	-change sdl.hdll @rpath/sdl.hdll \
+	-change ssl.hdll @rpath/ssl.hdll \
+	-change datachannel.hdll @rpath/datachannel.hdll \
 	-change libhl.dylib @rpath/libhl.dylib \
 	-change libSDL2-2.0.0.dylib @rpath/libSDL2-2.0.0.dylib \
 	-add_rpath @executable_path/../Frameworks marblegame || exit $?
