@@ -115,14 +115,23 @@ class Net {
 			if (c != "")
 				candidates.push('a=${c}');
 		}
+		var sdpFinished = false;
+
+		var finishSdp = () -> {
+			if (sdpFinished)
+				return;
+			sdpFinished = true;
+			var sdpObj = StringTools.trim(peer.localDescription);
+			sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
+			onFinishSdp(Json.stringify({
+				sdp: sdpObj,
+				type: "answer"
+			}));
+		}
+
 		peer.onGatheringStateChange = (s) -> {
 			if (s == RTC_GATHERING_COMPLETE) {
-				var sdpObj = StringTools.trim(peer.localDescription);
-				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
-				onFinishSdp(Json.stringify({
-					sdp: sdpObj,
-					type: "answer"
-				}));
+				finishSdp();
 			}
 		}
 		var reliable:datachannel.RTCDataChannel = null;
@@ -159,17 +168,29 @@ class Net {
 					candidates.push('a=${c}');
 			}
 
+			var sdpFinished = false;
+			var finishSdp = () -> {
+				if (sdpFinished)
+					return;
+				sdpFinished = true;
+				Console.log("Local Description Set!");
+				var sdpObj = StringTools.trim(client.localDescription);
+				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
+				MasterServerClient.instance.sendConnectToServer(serverName, Json.stringify({
+					sdp: sdpObj,
+					type: "offer"
+				}), isInvite);
+			}
+
 			client.onGatheringStateChange = (s) -> {
 				if (s == RTC_GATHERING_COMPLETE) {
-					Console.log("Local Description Set!");
-					var sdpObj = StringTools.trim(client.localDescription);
-					sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
-					MasterServerClient.instance.sendConnectToServer(serverName, Json.stringify({
-						sdp: sdpObj,
-						type: "offer"
-					}), isInvite);
+					finishSdp();
 				}
 			}
+
+			haxe.Timer.delay(() -> {
+				finishSdp();
+			}, 5000);
 
 			clientDatachannel = client.createDatachannel("mp");
 			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", false, 0, 600);
