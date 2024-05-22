@@ -190,15 +190,6 @@ jobs:
             sudo cmake --install build
 
       - run:
-          name: Prepare hxDatachannel
-          command: |
-
-            cd hxDatachannel/cpp
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
-            cmake --build build --config Release -j$NPROC
-            sudo cmake --install build
-
-      - run:
           name: Install hashlink
           command: |
             mkdir -p ~/deps
