@@ -592,7 +592,7 @@ class PreviewWorld extends Scheduler {
 		marb.controllable = false;
 		marb.init(null, null, () -> {
 			marb.collisionWorld = this.collisionWorld;
-			// this.collisionWorld.addMovingEntity(marb.collider);
+			this.collisionWorld.addMovingEntity(marb.collider);
 			this.scene.addChild(marb);
 			this.marbles.push(marb);
 			onFinish(marb);
@@ -602,7 +602,7 @@ class PreviewWorld extends Scheduler {
 	public function removeMarble(marb:Marble) {
 		if (this.marbles.remove(marb)) {
 			this.scene.removeChild(marb);
-			// this.collisionWorld.removeMovingEntity(marb.collider);
+			this.collisionWorld.removeMovingEntity(marb.collider);
 			marb.dispose();
 		}
 	}
