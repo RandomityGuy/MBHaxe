@@ -1126,6 +1126,7 @@ class MarbleWorld extends Scheduler {
 					oobs: 0,
 					respawns: 1,
 					totalTime: 0,
+					totalMPScore: 0
 				});
 			} else {
 				Settings.levelStatistics[mission.path].respawns++;
@@ -2070,6 +2071,7 @@ class MarbleWorld extends Scheduler {
 					oobs: 0,
 					respawns: 0,
 					totalTime: 0,
+					totalMPScore: 0
 				});
 			}
 			Analytics.trackLevelScore(mission.title, mission.path,
@@ -2339,6 +2341,7 @@ class MarbleWorld extends Scheduler {
 					oobs: 1,
 					respawns: 0,
 					totalTime: 0,
+					totalMPScore: 0
 				});
 			} else {
 				Settings.levelStatistics[mission.path].oobs++;
@@ -2517,6 +2520,7 @@ class MarbleWorld extends Scheduler {
 					oobs: 0,
 					respawns: 0,
 					totalTime: this.timeState.timeSinceLoad,
+					totalMPScore: 0
 				});
 			} else {
 				Settings.levelStatistics[mission.path].totalTime += this.timeState.timeSinceLoad;

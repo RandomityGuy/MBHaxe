@@ -327,6 +327,7 @@ class MarbleGame {
 				oobs: 0,
 				respawns: 0,
 				totalTime: 0,
+				totalMPScore: 0
 			});
 		}
 		var stats = Settings.levelStatistics[world.mission.path];
