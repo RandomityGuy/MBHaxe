@@ -72,7 +72,13 @@ class AchievementsGui extends GuiImage {
 			"<img src='locked'></img>Marble-fu Master",
 			"<img src='locked'></img>Marble-fu Transcendent",
 			"<img src='locked'></img>Egg Seeker",
-			"<img src='locked'></img>Egg Basket"
+			"<img src='locked'></img>Egg Basket",
+			"<img src='locked'></img>First Place",
+			"<img src='locked'></img>Gem Collector",
+			"<img src='locked'></img>Veteran Battler",
+			"<img src='locked'></img>Blue Gem Hunt",
+			"<img src='locked'></img>Map Pack Dominator",
+			"<img src='locked'></img>Master of the Spires",
 		];
 		if (Settings.achievementProgression & 1 == 1)
 			achNameDisplays[0] = "<img src='unlocked'></img>Timely Marble";
@@ -92,6 +98,18 @@ class AchievementsGui extends GuiImage {
 			achNameDisplays[7] = "<img src='unlocked'></img>Egg Seeker";
 		if (Settings.achievementProgression & 256 == 256)
 			achNameDisplays[8] = "<img src='unlocked'></img>Egg Basket";
+		if (Settings.achievementProgression & 512 == 512)
+			achNameDisplays[9] = "<img src='unlocked'></img>First Place";
+		if (Settings.achievementProgression & 1024 == 1024)
+			achNameDisplays[10] = "<img src='unlocked'></img>Gem Collector";
+		if (Settings.achievementProgression & 2048 == 2048)
+			achNameDisplays[11] = "<img src='unlocked'></img>Veteran Battler";
+		if (Settings.achievementProgression & 4096 == 4096)
+			achNameDisplays[12] = "<img src='unlocked'></img>Blue Gem Hunt";
+		if (Settings.achievementProgression & 8192 == 8192)
+			achNameDisplays[13] = "<img src='unlocked'></img>Map Pack Dominator";
+		if (Settings.achievementProgression & 16384 == 16384)
+			achNameDisplays[14] = "<img src='unlocked'></img>Master of the Spires";
 
 		var achievementsList = new GuiMLTextListCtrl(arial14, achNameDisplays, imgLoader);
 
@@ -149,13 +167,20 @@ class AchievementsGui extends GuiImage {
 				case 9: desc = "Get first place in a multiplayer match.";
 				case 10: desc = "Get 75 points in a multiplayer match.";
 				case 11: desc = "Collect 2,000 total points in multiplayer.";
-				case 12: desc = "Complete all Bonus levels.";
-				case 13: desc = "Finish all Bonus levels under par time.";
+				case 12: desc = "Collect a blue gem in a Marble It Up! multiplayer match.";
+				case 13: desc = "Get 40 gems in any 3 of the Playground, Bowl, Concentric, Vortex Effect, Blast Club (Marble Fu Pack).";
+				case 14: desc = "Collect 50 gems in Spires (Agoraphobia pack).";
 			}
 			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg(desc));
 		};
 		bottomBar.addChild(nextButton);
 	}
+
+	public static function queueMPAchievement(mpAchFlag:Int) {
+		mpAchs |= mpAchFlag;
+	}
+
+	static var mpAchs:Int = 0;
 
 	public static function check() {
 		// Now do the actual achievement check logic
@@ -285,6 +310,56 @@ class AchievementsGui extends GuiImage {
 				notifies |= 256;
 			}
 		}
+
+		// First Place
+		if (Settings.achievementProgression & 512 != 512) {
+			if (mpAchs & 512 == 512) {
+				Settings.achievementProgression |= 512;
+				notifies |= 512;
+			}
+		}
+
+		// Gem Collector
+		if (Settings.achievementProgression & 1024 != 1024) {
+			if (mpAchs & 1024 == 1024) {
+				Settings.achievementProgression |= 1024;
+				notifies |= 1024;
+			}
+		}
+
+		//  Veteran Battler
+		if (Settings.achievementProgression & 2048 != 2048) {
+			if (mpAchs & 2048 == 2048) {
+				Settings.achievementProgression |= 2048;
+				notifies |= 2048;
+			}
+		}
+
+		// Blue Gem Hunt
+		if (Settings.achievementProgression & 4096 != 4096) {
+			if (mpAchs & 4096 == 4096) {
+				Settings.achievementProgression |= 4096;
+				notifies |= 4096;
+			}
+		}
+
+		// Map Pack Dominator
+		if (Settings.achievementProgression & 8192 != 8192) {
+			if (mpAchs & 8192 == 8192) {
+				Settings.achievementProgression |= 8192;
+				notifies |= 8192;
+			}
+		}
+
+		// Master of the Spires
+		if (Settings.achievementProgression & 16384 != 16384) {
+			if (mpAchs & 16384 == 16384) {
+				Settings.achievementProgression |= 16384;
+				notifies |= 16384;
+			}
+		}
+
+		mpAchs = 0;
 
 		var showdlgs = [];
 		for (i in 0...9) {

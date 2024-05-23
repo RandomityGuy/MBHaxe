@@ -367,6 +367,8 @@ class HuntMode extends NullMode {
 			packet.serialize(os);
 			Net.sendPacketToIngame(os);
 
+			Settings.playStatistics.totalMPScore += incr;
+
 			@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
 		}
 		if (this.level.isMultiplayer && Net.isClient) {
