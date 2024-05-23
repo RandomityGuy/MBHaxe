@@ -106,6 +106,7 @@ typedef PlayStatistics = {
 	var oobs:Int;
 	var respawns:Int;
 	var totalTime:Float;
+	var totalMPScore:Int;
 }
 
 class Settings {
@@ -194,6 +195,7 @@ class Settings {
 		oobs: 0,
 		respawns: 0,
 		totalTime: 0,
+		totalMPScore: 0
 	}
 
 	public static var levelStatistics:Map<String, PlayStatistics> = [];
@@ -403,6 +405,10 @@ class Settings {
 			}
 			if (json.stats != null) {
 				playStatistics = json.stats;
+				#if js
+				if (playStatistics.totalMPScore == null)
+					playStatistics.totalMPScore = 0;
+				#end
 			}
 			achievementProgression = json.achievementProgression;
 			if (json.levelStatistics != null) {

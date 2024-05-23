@@ -1,5 +1,6 @@
 package gui;
 
+import net.Net;
 import h3d.Matrix;
 import src.ProfilerUI;
 import hxd.App;
@@ -770,6 +771,33 @@ class PlayGui {
 					MarbleGame.instance.world.displayAlert('${p1.name} won with 1 point!');
 				else
 					MarbleGame.instance.world.displayAlert('${p1.name} won with ${p1.score} points!');
+
+				if (p1.id == Net.clientId) { // This us
+					AchievementsGui.queueMPAchievement(512);
+				}
+			}
+
+			var ourScore = playerList.filter(x -> x.id == Net.clientId);
+			if (ourScore.length != 0) {
+				var ourScoreReal = ourScore[0].score;
+				if (ourScoreReal >= 75) {
+					AchievementsGui.queueMPAchievement(1024);
+				}
+				var ourLevel = MarbleGame.instance.world.mission;
+				if (ourScoreReal >= 40) {
+					if (ourLevel.path.indexOf("playground.mis") != -1
+						|| ourLevel.path.indexOf("bowl.mis") != -1
+						|| ourLevel.path.indexOf("concentric.mis") != -1
+						|| ourLevel.path.indexOf("vortexeffect.mis") != -1
+						|| ourLevel.path.indexOf("blastclub.mis") != -1) {
+						AchievementsGui.queueMPAchievement(8192);
+					}
+				}
+				if (ourScoreReal >= 50 && ourLevel.path.indexOf("spires.mis") != -1) {
+					AchievementsGui.queueMPAchievement(16384);
+				}
+				if (Settings.playStatistics.totalMPScore >= 2000)
+					AchievementsGui.queueMPAchievement(2048);
 			}
 		}
 	}
@@ -799,6 +827,13 @@ class PlayGui {
 		var f = playerList.filter(x -> x.id == id);
 		if (f.length != 0)
 			f[0].score += score;
+
+		if (id == Net.clientId) {
+			Settings.playStatistics.totalMPScore += score;
+			if (score == 5 && MarbleGame.instance.world.mission.title == "Marble It Up!") {
+				AchievementsGui.queueMPAchievement(4096);
+			}
+		}
 
 		redrawPlayerList();
 	}
