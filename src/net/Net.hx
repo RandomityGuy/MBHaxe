@@ -112,9 +112,27 @@ class Net {
 	static function addClient(peer:RTCPeerConnection, privateJoin:Bool, onFinishSdp:String->Void) {
 		var candidates = [];
 		peer.onLocalCandidate = (c) -> {
+			Console.log('Local candidate: ' + c);
 			if (c != "")
 				candidates.push('a=${c}');
 		}
+		peer.onStateChange = (s) -> {
+			switch (s) {
+				case RTC_CLOSED:
+					Console.log("RTC State change: Connection closed!");
+				case RTC_CONNECTED:
+					Console.log("RTC State change: Connected!");
+				case RTC_CONNECTING:
+					Console.log("RTC State change: Connecting...");
+				case RTC_DISCONNECTED:
+					Console.log("RTC State change: Disconnected!");
+				case RTC_FAILED:
+					Console.log("RTC State change: Failed!");
+				case RTC_NEW:
+					Console.log("RTC State change: New...");
+			}
+		}
+
 		var sdpFinished = false;
 
 		var finishSdp = () -> {
@@ -130,6 +148,14 @@ class Net {
 		}
 
 		peer.onGatheringStateChange = (s) -> {
+			switch (s) {
+				case RTC_GATHERING_COMPLETE:
+					Console.log("Gathering complete!");
+				case RTC_GATHERING_INPROGRESS:
+					Console.log("Gathering in progress...");
+				case RTC_GATHERING_NEW:
+					Console.log("Gathering new...");
+			}
 			if (s == RTC_GATHERING_COMPLETE) {
 				finishSdp();
 			}
@@ -164,8 +190,25 @@ class Net {
 			var candidates = [];
 
 			client.onLocalCandidate = (c) -> {
+				Console.log('Local candidate: ' + c);
 				if (c != "")
 					candidates.push('a=${c}');
+			}
+			client.onStateChange = (s) -> {
+				switch (s) {
+					case RTC_CLOSED:
+						Console.log("RTC State change: Connection closed!");
+					case RTC_CONNECTED:
+						Console.log("RTC State change: Connected!");
+					case RTC_CONNECTING:
+						Console.log("RTC State change: Connecting...");
+					case RTC_DISCONNECTED:
+						Console.log("RTC State change: Disconnected!");
+					case RTC_FAILED:
+						Console.log("RTC State change: Failed!");
+					case RTC_NEW:
+						Console.log("RTC State change: New...");
+				}
 			}
 
 			var sdpFinished = false;
@@ -183,6 +226,14 @@ class Net {
 			}
 
 			client.onGatheringStateChange = (s) -> {
+				switch (s) {
+					case RTC_GATHERING_COMPLETE:
+						Console.log("Gathering complete!");
+					case RTC_GATHERING_INPROGRESS:
+						Console.log("Gathering in progress...");
+					case RTC_GATHERING_NEW:
+						Console.log("Gathering new...");
+				}
 				if (s == RTC_GATHERING_COMPLETE) {
 					finishSdp();
 				}
