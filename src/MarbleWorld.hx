@@ -1,5 +1,6 @@
 package src;
 
+import net.NetPacket.ScoreboardPacket;
 import net.NetPacket.PowerupPickupPacket;
 import net.Move;
 import net.NetPacket.GemSpawnPacket;
@@ -679,7 +680,8 @@ class MarbleWorld extends Scheduler {
 		this.deselectPowerUp(this.marble);
 		playGui.setCenterText('');
 
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
+		if (marble == this.marble)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 
 		if (!this.isMultiplayer)
 			this.gameMode.onRestart();
@@ -1192,6 +1194,16 @@ class MarbleWorld extends Scheduler {
 				}
 			}
 		}
+
+		// Scoreboard!
+		var b = new OutputBitStream();
+		b.writeByte(NetPacketType.ScoreBoardInfo);
+		var sbPacket = new ScoreboardPacket();
+		for (player in @:privateAccess this.playGui.playerList) {
+			sbPacket.scoreBoard.set(player.id, player.score);
+		}
+		sbPacket.serialize(b);
+		packets.push(b.getBytes());
 
 		return packets;
 	}

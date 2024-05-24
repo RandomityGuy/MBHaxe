@@ -360,7 +360,7 @@ class Marble extends GameObject {
 		this.rollSound.volume = 0;
 		this.slipSound.volume = 0;
 		this.helicopterSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/use_gyrocopter.wav", ResourceLoader.getAudio,
-			this.soundResources), null, true);
+			this.soundResources), this.getAbsPos().getPosition(), true);
 		this.helicopterSound.pause = true;
 	}
 
@@ -2092,7 +2092,8 @@ class Marble extends GameObject {
 				this._radius = this._prevRadius;
 				this.collider.radius = this._radius;
 				this._marbleScale = this._defaultScale;
-				AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null, false);
+				if (this.controllable)
+					AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null, false);
 			}
 		}
 
