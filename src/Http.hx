@@ -23,9 +23,7 @@ class Http {
 
 	public static function init() {
 		#if sys
-		threadPool = new sys.thread.FixedThreadPool(4);
-		threadPool.run(() -> threadLoop());
-		threadPool.run(() -> threadLoop());
+		threadPool = new sys.thread.FixedThreadPool(2);
 		threadPool.run(() -> threadLoop());
 		threadPool.run(() -> threadLoop());
 		#end
