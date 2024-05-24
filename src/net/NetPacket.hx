@@ -220,3 +220,30 @@ class GemPickupPacket implements NetPacket {
 		b.writeInt(scoreIncr, 4);
 	}
 }
+
+@:publicFields
+class ScoreboardPacket implements NetPacket {
+	var scoreBoard:Map<Int, Int>;
+
+	public function new() {
+		scoreBoard = new Map();
+	}
+
+	public inline function deserialize(b:InputBitStream) {
+		var count = b.readInt(4);
+		for (i in 0...count) {
+			scoreBoard[b.readInt(6)] = b.readInt(10);
+		}
+	}
+
+	public inline function serialize(b:OutputBitStream) {
+		var keycount = 0;
+		for (k => v in scoreBoard)
+			keycount++;
+		b.writeInt(keycount, 4);
+		for (key => v in scoreBoard) {
+			b.writeInt(key, 6);
+			b.writeInt(v, 10);
+		}
+	}
+}

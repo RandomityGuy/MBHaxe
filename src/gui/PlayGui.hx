@@ -1,5 +1,6 @@
 package gui;
 
+import net.NetPacket.ScoreboardPacket;
 import net.Net;
 import h3d.Matrix;
 import src.ProfilerUI;
@@ -32,6 +33,7 @@ import hxd.res.Sound;
 import h3d.mat.Texture;
 import src.Settings;
 import src.Util;
+import src.AudioManager;
 
 typedef MiddleMessage = {
 	ctrl:GuiText,
@@ -833,8 +835,18 @@ class PlayGui {
 			if (score == 5 && MarbleGame.instance.world.mission.title == "Marble It Up!") {
 				AchievementsGui.queueMPAchievement(4096);
 			}
-		}
+			if (Net.isClient)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_collect.wav', ResourceLoader.getAudio, this.soundResources));
+		} else if (Net.isClient)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/opponent_gem_collect.wav', ResourceLoader.getAudio, this.soundResources));
 
+		redrawPlayerList();
+	}
+
+	public function updatePlayerScores(scoreboardPacket:ScoreboardPacket) {
+		for (player in playerList) {
+			player.score = scoreboardPacket.scoreBoard.exists(player.id) ? scoreboardPacket.scoreBoard.get(player.id) : 0;
+		}
 		redrawPlayerList();
 	}
 

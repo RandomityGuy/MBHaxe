@@ -313,7 +313,7 @@ class HuntMode extends NullMode {
 	}
 
 	override function onGemPickup(marble:Marble, gem:Gem) {
-		if (@:privateAccess !marble.isNetUpdate) {
+		if (@:privateAccess !marble.isNetUpdate && Net.isHost) {
 			if (marble == level.marble)
 				AudioManager.playSound(ResourceLoader.getResource('data/sound/gem_collect.wav', ResourceLoader.getAudio,
 					@:privateAccess this.level.soundResources));

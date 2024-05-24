@@ -1,5 +1,6 @@
 package net;
 
+import net.NetPacket.ScoreboardPacket;
 import gui.MultiplayerLevelSelectGui;
 import gui.Canvas;
 import net.MasterServerClient.RemoteServerInfo;
@@ -34,6 +35,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var GemSpawn;
 	var GemPickup;
 	var PlayerInfo;
+	var ScoreBoardInfo;
 }
 
 @:publicFields
@@ -427,6 +429,7 @@ class Net {
 		clients.set(c, cc);
 		cc.isPrivate = joiningPrivate;
 		clientIdMap[clientId] = clients[c];
+		cc.lastRecvTime = Console.time(); // So it doesnt get timed out
 
 		var closing = false;
 
@@ -507,9 +510,14 @@ class Net {
 	static function onClientLeave(cc:ClientConnection) {
 		if (!Net.isMP)
 			return;
-		serverInfo.players--;
-		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
 		NetCommands.clientDisconnected(cc.id);
+
+		serverInfo.players = 1;
+		for (k => v in clientIdMap) { // Recount
+			serverInfo.players++;
+		}
+
+		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
 
 		AudioManager.playSound(ResourceLoader.getAudio("data/sound/infotutorial.wav").resource);
 
@@ -696,6 +704,13 @@ class Net {
 				}
 				if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 					cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+				}
+
+			case ScoreBoardInfo:
+				var scoreboardPacket = new ScoreboardPacket();
+				scoreboardPacket.deserialize(input);
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
+					@:privateAccess MarbleGame.instance.world.playGui.updatePlayerScores(scoreboardPacket);
 				}
 
 			case _:
