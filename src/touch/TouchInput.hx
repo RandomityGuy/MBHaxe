@@ -1,5 +1,6 @@
 package touch;
 
+import net.Net;
 import gui.GuiControl;
 import src.MarbleWorld;
 import h3d.Vector;
@@ -118,17 +119,18 @@ class TouchInput {
 		this.movementInput = new MovementInput();
 		this.jumpButton = new JumpButton();
 		this.powerupButton = new PowerupButton();
-		if (Settings.optionsSettings.rewindEnabled)
+		if (Settings.optionsSettings.rewindEnabled && !Net.isMP)
 			this.rewindButton = new RewindButton();
 		if (ultra)
 			this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
-		this.restartButton = new RestartButton();
+		if (!Net.isMP)
+			this.restartButton = new RestartButton();
 		pauseButton.add(parentGui);
 		restartButton.add(parentGui);
 		jumpButton.add(parentGui);
 		powerupButton.add(parentGui);
-		if (Settings.optionsSettings.rewindEnabled)
+		if (Settings.optionsSettings.rewindEnabled && !Net.isMP)
 			rewindButton.add(parentGui);
 		if (ultra)
 			blastbutton.add(parentGui);
@@ -144,7 +146,8 @@ class TouchInput {
 			this.blastbutton.setVisible(enabled);
 		this.movementInput.setVisible(enabled);
 		this.pauseButton.setVisible(enabled);
-		this.restartButton.setVisible(enabled);
+		if (this.restartButton != null)
+			this.restartButton.setVisible(enabled);
 		if (this.rewindButton != null)
 			this.rewindButton.setVisible(enabled);
 		this.cameraInput.enabled = enabled;
@@ -157,7 +160,8 @@ class TouchInput {
 			blastbutton.remove(parentGui);
 		movementInput.remove(parentGui);
 		pauseButton.remove(parentGui);
-		restartButton.remove(parentGui);
+		if (this.restartButton != null)
+			restartButton.remove(parentGui);
 		cameraInput.remove(parentGui);
 		if (this.rewindButton != null)
 			rewindButton.remove(parentGui);
