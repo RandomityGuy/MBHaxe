@@ -208,9 +208,11 @@ class MoveManager {
 			if (queuedMoves.length > serverMaxMoveListSize
 				|| (serverAvgMoveListSize > serverTargetMoveListSize + serverMoveListSizeSlack
 					&& queuedMoves.length > serverTargetMoveListSize)) {
-				var dropAmt = queuedMoves.length - serverTargetMoveListSize;
-				while (dropAmt-- > 0) {
-					queuedMoves.pop();
+				if (queuedMoves.length > serverMaxMoveListSize) {
+					var dropAmt = queuedMoves.length - serverTargetMoveListSize;
+					while (dropAmt-- > 0) {
+						queuedMoves.pop();
+					}
 				}
 				serverAvgMoveListSize = serverTargetMoveListSize;
 				// serverAbnormalMoveCount++;
