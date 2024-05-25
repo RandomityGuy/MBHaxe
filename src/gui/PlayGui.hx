@@ -74,7 +74,6 @@ class PlayGui {
 	var blastFillUltra:GuiImage;
 	var blastFrame:GuiImage;
 
-	var playerListContainerOuter:GuiControl;
 	var playerListContainer:GuiControl;
 	var playerListCtrl:GuiMLTextListCtrl;
 	var playerListScoresCtrl:GuiMLTextListCtrl;
@@ -101,6 +100,19 @@ class PlayGui {
 	public function dispose() {
 		if (_init) {
 			playGuiCtrlOuter.dispose();
+
+			if (playerListContainer != null) {
+				playerListContainer.dispose();
+				playerListContainer = null;
+				playerListCtrl.dispose();
+				playerListCtrl = null;
+				playerListShadowCtrl.dispose();
+				playerListShadowCtrl = null;
+				playerListScoresCtrl.dispose();
+				playerListScoresCtrl = null;
+				playerListScoresShadowCtrl.dispose();
+				playerListScoresShadowCtrl = null;
+			}
 
 			for (textureResource in textureResources) {
 				textureResource.release();

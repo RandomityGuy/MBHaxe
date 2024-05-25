@@ -107,7 +107,10 @@ class ProfilerUI {
 				lastSentMove = @:privateAccess Net.clientConnection.moveManager.queuedMoves[Net.clientConnection.moveManager.queuedMoves.length - 1].id;
 			}
 
-			if (Net.isClient) {
+			if (Net.isClient
+				&& lastSentMove != null
+				&& @:privateAccess MarbleGame.instance.world.lastMoves != null
+				&& @:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate != null) {
 				instance.networkStats.text = 'Client World Ticks: ${MarbleGame.instance.world.timeState.ticks}\n'
 					+ 'Client Marble Ticks: ${@:privateAccess MarbleGame.instance.world.marble.serverTicks}\n'
 					+ 'Server Ticks: ${@:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate.serverTicks}\n'

@@ -415,10 +415,20 @@ class Net {
 		if (wsAccum >= 20.0) {
 			wsAccum = 0;
 			if (Net.isHost) {
-				MasterServerClient.instance.sendServerInfo(serverInfo); // Heartbeat
+				if (MasterServerClient.instance != null)
+					MasterServerClient.instance.sendServerInfo(serverInfo); // Heartbeat
+				else
+					MasterServerClient.connectToMasterServer(() -> {
+						MasterServerClient.instance.sendServerInfo(serverInfo); // Heartbeat
+					});
 			}
 			if (Net.isClient) {
-				MasterServerClient.instance.heartBeat();
+				if (MasterServerClient.instance != null)
+					MasterServerClient.instance.heartBeat();
+				else
+					MasterServerClient.connectToMasterServer(() -> {
+						MasterServerClient.instance.heartBeat();
+					});
 			}
 		}
 	}
