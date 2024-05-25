@@ -108,7 +108,7 @@ class ProfilerUI {
 			}
 
 			if (Net.isClient
-				&& lastSentMove != null
+				&& lastSentMove != 0
 				&& @:privateAccess MarbleGame.instance.world.lastMoves != null
 				&& @:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate != null) {
 				instance.networkStats.text = 'Client World Ticks: ${MarbleGame.instance.world.timeState.ticks}\n'
