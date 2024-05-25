@@ -24,27 +24,99 @@ class MasterServerClient {
 
 	var open = false;
 
+	#if hl
+	var wsThread:sys.thread.Thread;
+	static var responses:sys.thread.Deque<() -> Void> = new sys.thread.Deque<() -> Void>();
+	var toSend:sys.thread.Deque<String> = new sys.thread.Deque<String>();
+	var stopping:Bool = false;
+	var stopMutex: sys.thread.Mutex = new sys.thread.Mutex();
+	#end
+
 	public function new(onOpenFunc:() -> Void) {
-		ws = WebSocket.create(serverIp);
-		ws.onopen = () -> {
-			open = true;
-			onOpenFunc();
-		}
-		ws.onmessageString = (m) -> {
-			handleMessage(m);
-		}
-		ws.onerror = (m) -> {
-			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to connect to master server: " + m));
-			open = false;
-			ws = null;
-			instance = null;
-		}
+		#if hl
+		wsThread = sys.thread.Thread.create(() -> {
+		#end
+			ws = WebSocket.create(serverIp);
+			ws.onopen = () -> {
+				open = true;
+				#if hl
+				responses.add(() -> onOpenFunc());
+				#end
+				#if js
+				onOpenFunc();
+				#end
+			}
+			ws.onmessageString = (m) -> {
+				#if hl
+				responses.add(() -> handleMessage(m));
+				#end
+				#if js
+				handleMessage(m);
+				#end
+			}
+			ws.onerror = (m) -> {
+				#if hl
+				responses.add(() -> {
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to connect to master server: " + m));
+				});
+				#end
+				#if js
+				MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to connect to master server: " + m));
+				#end
+				#if hl
+				stopMutex.acquire();
+				#end
+				open = false;
+				ws = null;
+				instance = null;
+				#if hl
+				stopMutex.acquire();
+				stopping = true;
+				stopMutex.release();
+				wsThread = null;
+				#end
+			}
+			ws.onclose = (?e) -> {
+				#if hl
+				stopMutex.acquire();
+				#end
+				open = false;
+				ws = null;
+				instance = null;
+				#if hl
+				stopping = true;
+				stopMutex.release();
+				wsThread = null;
+				#end
+			}
+			#if hl
+			while (true) {
+				stopMutex.acquire();
+				if (stopping)
+					break;
+				while (true) {
+					var s = toSend.pop(false);
+					if (s == null)
+						break;
+					ws.sendString(s);
+				}
+
+				ws.process();
+				stopMutex.release();
+				Sys.sleep(0.1);
+			}
+			#end
+		#if hl
+		});
+		#end
 	}
 
 	public static function process() {
 		#if sys
-		if (instance != null)
-			instance.ws.process();
+		var resp = responses.pop(false);
+		if (resp != null) {
+			resp();
+		}
 		#end
 	}
 
@@ -56,7 +128,6 @@ class MasterServerClient {
 				onConnect();
 			else {
 				instance.ws.close();
-				instance = null;
 				instance = new MasterServerClient(onConnect);
 			}
 		}
@@ -65,18 +136,26 @@ class MasterServerClient {
 	public static function disconnectFromMasterServer() {
 		if (instance != null) {
 			instance.ws.close();
-			instance = null;
 		}
 	}
 
+	function queueMessage(m:String) {
+		#if hl
+		toSend.add(m);
+		#end
+		#if js
+		ws.sendString(m);
+		#end
+	}
+
 	public function heartBeat() {
-		ws.sendString(Json.stringify({
+		queueMessage(Json.stringify({
 			type: "heartbeat"
 		}));
 	}
 
 	public function sendServerInfo(serverInfo:ServerInfo) {
-		ws.sendString(Json.stringify({
+		queueMessage(Json.stringify({
 			type: "serverInfo",
 			name: serverInfo.name,
 			players: serverInfo.players,
@@ -91,13 +170,13 @@ class MasterServerClient {
 
 	public function sendConnectToServer(serverName:String, sdp:String, isInvite:Bool = false) {
 		if (!isInvite) {
-			ws.sendString(Json.stringify({
+			queueMessage(Json.stringify({
 				type: "connect",
 				serverName: serverName,
 				sdp: sdp
 			}));
 		} else {
-			ws.sendString(Json.stringify({
+			queueMessage(Json.stringify({
 				type: "connectInvite",
 				sdp: sdp,
 				inviteCode: serverName
@@ -107,7 +186,7 @@ class MasterServerClient {
 
 	public function getServerList(serverListCb:Array<RemoteServerInfo>->Void) {
 		this.serverListCb = serverListCb;
-		ws.sendString(Json.stringify({
+		queueMessage(Json.stringify({
 			type: "serverList"
 		}));
 	}
@@ -122,7 +201,7 @@ class MasterServerClient {
 		}
 		if (conts.type == "connect") {
 			if (!Net.isHost) {
-				ws.sendString(Json.stringify({
+				queueMessage(Json.stringify({
 					type: "connectFailed",
 					success: false,
 					reason: "The server has shut down"
@@ -132,7 +211,7 @@ class MasterServerClient {
 			var joiningPrivate = conts.isPrivate;
 
 			if (Net.serverInfo.players >= Net.serverInfo.maxPlayers) {
-				ws.sendString(Json.stringify({
+				queueMessage(Json.stringify({
 					type: "connectFailed",
 					success: false,
 					reason: "The server is full"
@@ -153,7 +232,7 @@ class MasterServerClient {
 			}
 
 			if (!joiningPrivate && pubCount >= pubSlotsAvail) {
-				ws.sendString(Json.stringify({
+				queueMessage(Json.stringify({
 					type: "connectFailed",
 					success: false,
 					reason: "The server is full"
@@ -166,7 +245,7 @@ class MasterServerClient {
 			}
 
 			Net.addClientFromSdp(conts.sdp, joiningPrivate, (sdpReply) -> {
-				ws.sendString(Json.stringify({
+				queueMessage(Json.stringify({
 					success: true,
 					type: "connectResponse",
 					sdp: sdpReply,
