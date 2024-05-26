@@ -47,12 +47,12 @@ class MoveManager {
 	var maxMoves = 45;
 	var maxSendMoveListSize = 30;
 
-	var serverTargetMoveListSize = 3;
-	var serverMaxMoveListSize = 8;
-	var serverAvgMoveListSize = 3.0;
+	var serverTargetMoveListSize = 4;
+	var serverMaxMoveListSize = 16;
+	var serverAvgMoveListSize = 4.0;
 	var serverSmoothMoveAvg = 0.15;
 	var serverMoveListSizeSlack = 1.5;
-	var serverDefaultMinTargetMoveListSize = 3;
+	var serverDefaultMinTargetMoveListSize = 4;
 	var serverAbnormalMoveCount = 0;
 	var serverLastRecvMove = 0;
 	var serverLastAckMove = 0;
@@ -142,6 +142,12 @@ class MoveManager {
 	function copyMove(to:Int, from:Int) {
 		queuedMoves[to].move = queuedMoves[from].move;
 		queuedMoves[to].motionDir.load(queuedMoves[from].motionDir);
+	}
+
+	public inline function duplicateLastMove() {
+		if (queuedMoves.length == 0)
+			return;
+		queuedMoves.insert(0, queuedMoves[0]);
 	}
 
 	public static inline function packMove(m:NetMove, b:OutputBitStream) {
