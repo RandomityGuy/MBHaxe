@@ -100,11 +100,11 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 400,
 		lifetimeVariance: 50,
-		dragCoefficient: 0.5,
+		dragCoefficient: 0,
 		acceleration: -2,
 		colors: [
-			new Vector(0.5, 0.5, 0.5, 0.3),
-			new Vector(0.3, 0.3, 0.2, 0.1),
+			new Vector(0.5, 0.5, 0.5, 0.6),
+			new Vector(0.3, 0.3, 0.2, 0.4),
 			new Vector(0.2, 0.2, 0.1, 0)
 		],
 		sizes: [0.8, 0.4, 0.2],
