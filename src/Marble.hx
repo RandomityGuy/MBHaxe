@@ -1793,6 +1793,10 @@ class Marble extends GameObject {
 		} else {
 			this.level.pickUpPowerUp(cast this, this.level.powerUps[p.powerUpId]);
 		}
+		if (p.moveQueueSize == 0 && this.connection != null) {
+			// Pad null move on client
+			this.connection.moveManager.duplicateLastMove();
+		}
 
 		// if (this.controllable && Net.isClient) {
 		// 	// We are client, need to do something about the queue
