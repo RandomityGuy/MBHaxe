@@ -137,8 +137,7 @@ class Particle {
 		var t = (completion - this.o.times[indexLow]) / (this.o.times[indexHigh] - this.o.times[indexLow]);
 
 		// Adjust color
-		var color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
-		this.color = color;
+		this.color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
 		// this.material.opacity = color.a * * 1.5; // Adjusted because additive mixing can be kind of extreme
 
 		// Adjust sizing
@@ -150,6 +149,7 @@ class Particle {
 		this.part.r = this.color.r;
 		this.part.g = this.color.g;
 		this.part.b = this.color.b;
+		this.part.a = this.color.a;
 		this.part.ratio = 1;
 		this.part.size = this.scale / 2;
 	}
