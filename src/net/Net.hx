@@ -246,7 +246,7 @@ class Net {
 			}, 5000);
 
 			clientDatachannel = client.createDatachannel("mp");
-			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", false, null, 600);
+			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", true, null, 600);
 
 			var closing = false;
 			var openFlags = 0;
