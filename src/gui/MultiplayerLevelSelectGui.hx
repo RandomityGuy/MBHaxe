@@ -172,23 +172,28 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		}
 
 		function imgLoader(path:String) {
-			switch (path) {
+			var t = switch (path) {
 				case "ready":
-					return ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "notready":
-					return ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "pc":
-					return ResourceLoader.getResource("data/ui/xbox/platform_desktop.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_desktop.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "mac":
-					return ResourceLoader.getResource("data/ui/xbox/platform_mac.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_mac.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "web":
-					return ResourceLoader.getResource("data/ui/xbox/platform_web.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_web.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "android":
-					return ResourceLoader.getResource("data/ui/xbox/platform_android.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_android.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "unknown":
-					return ResourceLoader.getResource("data/ui/xbox/platform_unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case _:
+					return null;
 			}
-			return null;
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+
+			return t;
 		}
 
 		playerList = new GuiMLTextListCtrl(arial14, playerListArr.map(player -> {

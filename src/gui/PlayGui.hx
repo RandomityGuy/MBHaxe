@@ -637,13 +637,17 @@ class PlayGui {
 		scoreBackdrop.addChild(scorePlusMinus);
 
 		function imgLoader(path:String) {
-			switch (path) {
+			var t = switch (path) {
 				case "us":
-					return ResourceLoader.getResource("data/ui/xbox/GreenDot.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/GreenDot.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "them":
-					return ResourceLoader.getResource("data/ui/xbox/EmptyDot.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/EmptyDot.png", ResourceLoader.getImage, this.imageResources).toTile();
+				default:
+					return null;
 			}
-			return null;
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
 		}
 
 		// var playerList = [
