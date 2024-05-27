@@ -1809,18 +1809,18 @@ class MarbleWorld extends Scheduler {
 						var gameplayHigh = ourStartTime - ticksSinceTimerStart * 0.032;
 						var gameplayLow = ourStartTime - (ticksSinceTimerStart + 1) * 0.032;
 						// Clamp timer to be between these two
-						if (gameplayLow > this.timeState.gameplayClock) {
-							this.timeState.gameplayClock = gameplayLow - this.timeState.gameplayClock + gameplayHigh;
-						}
 
-						if (gameplayHigh < this.timeState.gameplayClock) {
-							this.timeState.gameplayClock = gameplayLow + this.timeState.gameplayClock - gameplayHigh;
+						if (gameplayHigh < this.timeState.gameplayClock || gameplayLow > this.timeState.gameplayClock) {
+							var clockTicks = Math.floor((ourStartTime - this.timeState.gameplayClock) / 0.032);
+							var clockTickTime = ourStartTime - clockTicks * 0.032;
+							var delta = clockTickTime - this.timeState.gameplayClock;
+							this.timeState.gameplayClock = gameplayHigh - delta;
 						}
 					}
 
 					this.timeState.gameplayClock += dt * timeMultiplier;
 				}
-				if (this.timeState.gameplayClock < 0)
+				if (this.timeState.gameplayClock < 0 && !Net.isClient)
 					this.gameMode.onTimeExpire();
 			}
 			if (!this.isMultiplayer || this.multiplayerStarted)

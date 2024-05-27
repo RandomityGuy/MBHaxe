@@ -140,6 +140,8 @@ class Net {
 		var finishSdp = () -> {
 			if (sdpFinished)
 				return;
+			if (peer == null)
+				return;
 			sdpFinished = true;
 			var sdpObj = StringTools.trim(peer.localDescription);
 			sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
@@ -218,6 +220,8 @@ class Net {
 				if (sdpFinished)
 					return;
 				sdpFinished = true;
+				if (client == null)
+					return;
 				Console.log("Local Description Set!");
 				var sdpObj = StringTools.trim(client.localDescription);
 				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';

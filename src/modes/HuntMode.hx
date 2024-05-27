@@ -634,14 +634,13 @@ class HuntMode extends NullMode {
 		level.cancel(@:privateAccess level.marble.oobSchedule);
 		if (!level.isWatching) {
 			if (level.isMultiplayer) {
-				if (Net.isHost) {
-					for (marble in level.marbles) {
-						marble.setMode(Start);
-						level.cancel(@:privateAccess marble.oobSchedule);
-					}
-
-					NetCommands.timerRanOut();
+				for (marble in level.marbles) {
+					marble.setMode(Start);
+					level.cancel(@:privateAccess marble.oobSchedule);
 				}
+				if (Net.isHost)
+					NetCommands.timerRanOut();
+
 				if (!level.isWatching) {
 					@:privateAccess level.schedule(level.timeState.currentAttemptTime + 5, () -> cast level.mpFinish());
 				}
