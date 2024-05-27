@@ -360,7 +360,7 @@ class Marble extends GameObject {
 		this.rollSound.volume = 0;
 		this.slipSound.volume = 0;
 		this.helicopterSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/use_gyrocopter.wav", ResourceLoader.getAudio,
-			this.soundResources), this.getAbsPos().getPosition(), true);
+			this.soundResources), null, true);
 		this.helicopterSound.pause = true;
 	}
 
@@ -2197,11 +2197,13 @@ class Marble extends GameObject {
 		if (isHelicopterEnabled(timeState)) {
 			this.helicopter.setPosition(x, y, z);
 			this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
-			this.helicopterSound.pause = false;
+			if (this.controllable)
+				this.helicopterSound.pause = false;
 			this.helicopter.setScale(this._renderScale);
 		} else {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
-			this.helicopterSound.pause = true;
+			if (this.controllable)
+				this.helicopterSound.pause = true;
 		}
 
 		if (this.blastUseTime > timeState.currentAttemptTime) {

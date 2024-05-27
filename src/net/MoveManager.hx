@@ -47,12 +47,12 @@ class MoveManager {
 	var maxMoves = 45;
 	var maxSendMoveListSize = 30;
 
-	var serverTargetMoveListSize = 4;
-	var serverMaxMoveListSize = 16;
-	var serverAvgMoveListSize = 4.0;
+	var serverTargetMoveListSize = 3;
+	var serverMaxMoveListSize = 8;
+	var serverAvgMoveListSize = 3.0;
 	var serverSmoothMoveAvg = 0.15;
 	var serverMoveListSizeSlack = 1.5;
-	var serverDefaultMinTargetMoveListSize = 4;
+	var serverDefaultMinTargetMoveListSize = 3;
 	var serverAbnormalMoveCount = 0;
 	var serverLastRecvMove = 0;
 	var serverLastAckMove = 0;
