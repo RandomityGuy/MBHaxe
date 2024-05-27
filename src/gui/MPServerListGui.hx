@@ -58,23 +58,27 @@ class MPServerListGui extends GuiImage {
 		innerCtrl.addChild(serverWnd);
 
 		function imgLoader(path:String) {
-			switch (path) {
+			var t = switch (path) {
 				case "ready":
-					return ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "notready":
-					return ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "pc":
-					return ResourceLoader.getResource("data/ui/xbox/platform_desktop_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_desktop_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "mac":
-					return ResourceLoader.getResource("data/ui/xbox/platform_mac_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_mac_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "web":
-					return ResourceLoader.getResource("data/ui/xbox/platform_web_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_web_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "android":
-					return ResourceLoader.getResource("data/ui/xbox/platform_android_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/xbox/platform_android_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "unknown":
-					return ResourceLoader.getResource("data/ui/xbox/platform_unknown_white.png", ResourceLoader.getImage, this.imageResources).toTile();
-			}
-			return null;
+					ResourceLoader.getResource("data/ui/xbox/platform_unknown_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case _:
+					return null;
+			};
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
 		}
 
 		var curSelection = -1;

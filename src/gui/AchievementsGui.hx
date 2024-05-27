@@ -57,9 +57,13 @@ class AchievementsGui extends GuiImage {
 		function imgLoader(path:String) {
 			switch (path) {
 				case "locked":
-					return ResourceLoader.getResource("data/ui/xbox/DemoOutOfTimeIcon.png", ResourceLoader.getImage, this.imageResources).toTile();
+					var t = ResourceLoader.getResource("data/ui/xbox/DemoOutOfTimeIcon.png", ResourceLoader.getImage, this.imageResources).toTile();
+					t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+					return t;
 				case "unlocked":
-					return ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+					var t = ResourceLoader.getResource("data/ui/xbox/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+					t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+					return t;
 			}
 			return null;
 		}
