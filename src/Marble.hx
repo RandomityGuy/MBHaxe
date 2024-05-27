@@ -1012,6 +1012,7 @@ class Marble extends GameObject {
 				];
 
 			var snd = ResourceLoader.getResource(sndList[bounceSoundNum], ResourceLoader.getAudio, this.soundResources);
+
 			var gain = bounceMinGain;
 			gain = Util.clamp(Math.pow(contactVel / 12, 1.5), 0, 1);
 
@@ -1019,8 +1020,10 @@ class Marble extends GameObject {
 			// 	gain = 1.0;
 			// else
 			// 	gain = (contactVel - minVelocityBounceSoft) / (hardBounceSpeed - minVelocityBounceSoft) * (1.0 - gain) + gain;
-
-			snd.play(false, Settings.optionsSettings.soundVolume * gain);
+			if (!this.controllable)
+				AudioManager.playSound(snd, this.getAbsPos().getPosition());
+			else
+				snd.play(false, Settings.optionsSettings.soundVolume * gain);
 		}
 	}
 
@@ -1699,7 +1702,7 @@ class Marble extends GameObject {
 
 		if (this.megaMarbleUseTick > 0) {
 			if (Net.isHost) {
-				if ((timeState.ticks - this.megaMarbleUseTick) < 312) {
+				if ((timeState.ticks - this.megaMarbleUseTick) < 312 && this.megaMarbleUseTick > 0) {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
 				} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
@@ -1712,7 +1715,7 @@ class Marble extends GameObject {
 				}
 			}
 			if (Net.isClient) {
-				if (this.serverTicks - this.megaMarbleUseTick < 312) {
+				if (this.serverTicks - this.megaMarbleUseTick < 312 && this.megaMarbleUseTick > 0) {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
 				} else {
@@ -2296,7 +2299,7 @@ class Marble extends GameObject {
 
 	public function enableHelicopter(timeState:TimeState) {
 		if (this.level.isMultiplayer) {
-			this.helicopterUseTick = timeState.ticks;
+			this.helicopterUseTick = Net.isHost ? timeState.ticks : serverTicks;
 			if (!this.isNetUpdate)
 				this.netFlags |= MarbleNetFlags.DoHelicopter;
 		} else
@@ -2333,7 +2336,7 @@ class Marble extends GameObject {
 
 	public function enableMegaMarble(timeState:TimeState) {
 		if (this.level.isMultiplayer) {
-			this.megaMarbleUseTick = timeState.ticks;
+			this.megaMarbleUseTick = Net.isHost ? timeState.ticks : serverTicks;
 			if (!this.isNetUpdate)
 				this.netFlags |= MarbleNetFlags.DoMega;
 		} else
