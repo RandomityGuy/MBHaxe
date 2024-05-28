@@ -26,17 +26,26 @@ class MasterServerClient {
 
 	#if hl
 	var wsThread:sys.thread.Thread;
+
 	static var responses:sys.thread.Deque<() -> Void> = new sys.thread.Deque<() -> Void>();
+
 	var toSend:sys.thread.Deque<String> = new sys.thread.Deque<String>();
 	var stopping:Bool = false;
-	var stopMutex: sys.thread.Mutex = new sys.thread.Mutex();
+	var stopMutex:sys.thread.Mutex = new sys.thread.Mutex();
 	#end
 
 	public function new(onOpenFunc:() -> Void) {
 		#if hl
 		wsThread = sys.thread.Thread.create(() -> {
+			hl.Gc.enable(false);
+			hl.Gc.blocking(true); // Wtf is this shit
 		#end
+
 			ws = WebSocket.create(serverIp);
+			#if hl
+			hl.Gc.enable(true);
+			hl.Gc.blocking(false);
+			#end
 			ws.onopen = () -> {
 				open = true;
 				#if hl
@@ -98,10 +107,22 @@ class MasterServerClient {
 					var s = toSend.pop(false);
 					if (s == null)
 						break;
+					#if hl
+					hl.Gc.blocking(true);
+					#end
 					ws.sendString(s);
+					#if hl
+					hl.Gc.blocking(false);
+					#end
 				}
 
+				#if hl
+				hl.Gc.blocking(true);
+				#end
 				ws.process();
+				#if hl
+				hl.Gc.blocking(false);
+				#end
 				stopMutex.release();
 				Sys.sleep(0.1);
 			}
