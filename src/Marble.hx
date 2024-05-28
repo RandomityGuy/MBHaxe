@@ -260,6 +260,8 @@ class Marble extends GameObject {
 	var newPos:Vector;
 	var prevRot:Quat;
 	var posStore:Vector;
+	var lastRenderPos:Vector;
+	var netSmoothOffset:Vector;
 	var netCorrected:Bool;
 
 	public var contacts:Array<CollisionInfo> = [];
@@ -1821,7 +1823,8 @@ class Marble extends GameObject {
 	function calculateNetSmooth() {
 		if (this.netCorrected) {
 			this.netCorrected = false;
-			this.oldPos.load(this.posStore);
+			this.netSmoothOffset.load(this.lastRenderPos.sub(this.newPos));
+			// this.oldPos.load(this.posStore);
 		}
 	}
 
@@ -1894,10 +1897,21 @@ class Marble extends GameObject {
 	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {
 		calculateNetSmooth();
 		this.level.updateBlast(cast this, timeState);
+
+		var newDt = 2.3 * (timeState.dt / 0.4);
+		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
+		this.netSmoothOffset.scale(smooth);
+
 		if (oldPos != null && newPos != null) {
 			var deltaT = physicsAccumulator / 0.032;
+			if (Net.isClient && !this.controllable)
+				deltaT *= 0.75; // Don't overshoot
 			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
+			if (Net.isClient && !this.controllable) {
+				renderPos.load(renderPos.add(this.netSmoothOffset));
+			}
 			this.setPosition(renderPos.x, renderPos.y, renderPos.z);
+			this.lastRenderPos.load(renderPos);
 
 			var rot = this.getRotationQuat();
 			var quat = new Quat();
@@ -2383,6 +2397,8 @@ class Marble extends GameObject {
 		this.oldPos = this.getAbsPos().getPosition();
 		this.newPos = this.getAbsPos().getPosition();
 		this.posStore = new Vector();
+		this.netSmoothOffset = new Vector();
+		this.lastRenderPos = new Vector();
 		this.netCorrected = false;
 		if (this._radius != this._prevRadius) {
 			this._radius = this._prevRadius;
