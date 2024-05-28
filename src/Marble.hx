@@ -999,17 +999,19 @@ class Marble extends GameObject {
 			var hardBounceSpeed = minVelocityBounceHard;
 			var bounceSoundNum = Math.floor(Math.random() * 4);
 			var sndList = ((time - this.megaMarbleEnableTime < 10)
-				|| (this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) ? [
-					"data/sound/mega_bouncehard1.wav",
-					"data/sound/mega_bouncehard2.wav",
-					"data/sound/mega_bouncehard3.wav",
-					"data/sound/mega_bouncehard4.wav"
-				] : [
-					"data/sound/bouncehard1.wav",
-					"data/sound/bouncehard2.wav",
-					"data/sound/bouncehard3.wav",
-					"data/sound/bouncehard4.wav"
-				];
+				|| (this.megaMarbleUseTick > 0
+					&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
+						|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) ? [
+							"data/sound/mega_bouncehard1.wav",
+							"data/sound/mega_bouncehard2.wav",
+							"data/sound/mega_bouncehard3.wav",
+							"data/sound/mega_bouncehard4.wav"
+						] : [
+							"data/sound/bouncehard1.wav",
+							"data/sound/bouncehard2.wav",
+							"data/sound/bouncehard3.wav",
+							"data/sound/bouncehard4.wav"
+						];
 
 			var snd = ResourceLoader.getResource(sndList[bounceSoundNum], ResourceLoader.getAudio, this.soundResources);
 
@@ -1065,7 +1067,9 @@ class Marble extends GameObject {
 			slipVolume = 0;
 
 		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10
-			|| (this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) {
+			|| (this.megaMarbleUseTick > 0
+				&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
+					|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) {
 			if (this.rollMegaSound != null) {
 				rollMegaSound.volume = rollVolume;
 				rollSound.volume = 0;
@@ -1702,7 +1706,7 @@ class Marble extends GameObject {
 
 		if (this.megaMarbleUseTick > 0) {
 			if (Net.isHost) {
-				if ((timeState.ticks - this.megaMarbleUseTick) < 312 && this.megaMarbleUseTick > 0) {
+				if ((timeState.ticks - this.megaMarbleUseTick) <= 312 && this.megaMarbleUseTick > 0) {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
 				} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
@@ -1715,7 +1719,7 @@ class Marble extends GameObject {
 				}
 			}
 			if (Net.isClient) {
-				if (this.serverTicks - this.megaMarbleUseTick < 312 && this.megaMarbleUseTick > 0) {
+				if (this.serverTicks - this.megaMarbleUseTick <= 312 && this.megaMarbleUseTick > 0) {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
 				} else {
@@ -2226,7 +2230,8 @@ class Marble extends GameObject {
 		if (this.level == null)
 			return 1;
 		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10
-			|| (this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)) {
+			|| (Net.isHost && this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)
+			|| (Net.isClient && this.megaMarbleUseTick > 0 && (this.serverTicks - this.megaMarbleUseTick) < 312)) {
 			return 5;
 		} else {
 			return 1;
