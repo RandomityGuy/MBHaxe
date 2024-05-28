@@ -59,9 +59,9 @@ class JoinServerGui extends GuiImage {
 		innerCtrl.addChild(rootTitle);
 
 		var inviteCodeBg = new GuiXboxOptionsList(1, "Invite Code: ", [""], 0.3, 155.5, false);
-		inviteCodeBg.position = new Vector(360, 211);
+		inviteCodeBg.position = new Vector(360, 111);
 		inviteCodeBg.horizSizing = Right;
-		inviteCodeBg.vertSizing = Center;
+		inviteCodeBg.vertSizing = Bottom;
 		inviteCodeBg.extent = new Vector(835, 400);
 		inviteCodeBg.selected = true;
 		innerCtrl.addChild(inviteCodeBg);
