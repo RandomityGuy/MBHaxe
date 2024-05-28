@@ -43,7 +43,7 @@ class MegaMarble extends PowerUp {
 
 	public function use(marble:Marble, timeState:TimeState) {
 		marble.enableMegaMarble(timeState);
-		var boost = marble.currentUp.multiply(5);
+		var boost = marble.currentUp.multiply(5 / marble.getMass());
 		marble.velocity.load(marble.velocity.add(boost));
 		this.level.deselectPowerUp(marble);
 		if (this.level.marble == marble && @:privateAccess !marble.isNetUpdate)

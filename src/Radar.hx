@@ -19,7 +19,7 @@ class Radar {
 
 	var g:Graphics;
 
-	var marbleNameTexts:Array<h2d.Text>;
+	var marbleNameTexts:Map<Marble, h2d.Text>;
 
 	public var ellipseScreenFraction = new Vector(0.79, 0.9);
 	public var fullArrowLength = 60.0;
@@ -62,7 +62,7 @@ class Radar {
 			renderArrow(@:privateAccess level.endPad.getAbsPos().getPosition(), 0xE6E6E6);
 		}
 		var fadeDistance = level.scene.camera.zFar * 0.1;
-		for (marbleName in marbleNameTexts) {
+		for (marble => marbleName in marbleNameTexts) {
 			if (marbleName != null)
 				marbleName.alpha = 0;
 		}
@@ -429,30 +429,24 @@ class Radar {
 	}
 
 	function renderName(pos:Vector, marble:Marble, opacity:Float) {
-		var marbleId = @:privateAccess marble.connection.getMarbleId();
-		while (marbleNameTexts.length <= marbleId)
-			marbleNameTexts.push(null);
-		if (marbleNameTexts[marbleId] == null) {
+		if (!marbleNameTexts.exists(marble)) {
 			var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 			var arialb14b = new BitmapFont(arialb14fontdata.entry);
 			@:privateAccess arialb14b.loader = ResourceLoader.loader;
 			var arialBold14 = arialb14b.toSdfFont(cast 16 * Settings.uiScale, MultiChannel);
-
-			marbleNameTexts[marbleId] = new h2d.Text(arialBold14, scene2d);
-			marbleNameTexts[marbleId].textColor = 0xFFFF00;
+			var txt = new h2d.Text(arialBold14, scene2d);
+			marbleNameTexts.set(marble, txt);
+			txt.textColor = 0xFFFF00;
 		}
-		var textObj = marbleNameTexts[marbleId];
+		var textObj = marbleNameTexts.get(marble);
 		textObj.text = @:privateAccess marble.connection.getName();
 		textObj.setPosition(pos.x - textObj.textWidth / 2, pos.y - textObj.textHeight);
 		textObj.alpha = opacity;
 	}
 
 	function dontRenderName(marble:Marble) {
-		var marbleId = @:privateAccess marble.connection.getMarbleId();
-		while (marbleNameTexts.length <= marbleId)
-			marbleNameTexts.push(null);
-		if (marbleNameTexts[marbleId] != null) {
-			marbleNameTexts[marbleId].alpha = 0;
+		if (marbleNameTexts.exists(marble)) {
+			marbleNameTexts.get(marble).alpha = 0;
 		}
 	}
 }
