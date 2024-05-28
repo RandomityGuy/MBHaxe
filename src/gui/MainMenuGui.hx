@@ -127,11 +127,18 @@ class MainMenuGui extends GuiImage {
 		btnList.addButton(2, "Changelog", (sender) -> {
 			MarbleGame.canvas.setContent(new VersionGui());
 		});
+		#if hl
 		btnList.addButton(4, "Return to Arcade", (sender) -> {
 			#if hl
 			Sys.exit(0);
 			#end
 		});
+		#end
+		#if js
+		btnList.addButton(4, "Download", (sender) -> {
+			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
+		});
+		#end
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();

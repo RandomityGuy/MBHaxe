@@ -58,6 +58,20 @@ class MultiplayerGui extends GuiImage {
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial12 = arial14b.toSdfFont(cast 18 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
+
+		#if js
+		var warningTxt = new GuiText(arial12);
+		warningTxt.text.textColor = 0xEBEBEB;
+		warningTxt.position = new Vector(150, 250);
+		warningTxt.extent = new Vector(100, 100);
+		warningTxt.text.text = "Warning: You are playing on a browser.\nFor smooth multiplayer experience, it is\nrecommended to download the game on your device.";
+		innerCtrl.addChild(warningTxt);
+		#end
+
 		var btnList = new GuiXboxList();
 		btnList.position = new Vector(70 - offsetX, 165);
 		btnList.horizSizing = Left;
