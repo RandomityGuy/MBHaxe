@@ -253,6 +253,10 @@ class NetCommands {
 
 			Net.serverInfo.state = "LOBBY";
 			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
+			var b = Net.sendPlayerInfosBytes();
+			for (cc in Net.clients) {
+				cc.sendBytes(b);
+			}
 		}
 	}
 

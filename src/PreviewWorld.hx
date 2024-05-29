@@ -120,13 +120,6 @@ class PreviewWorld extends Scheduler {
 			// ls.shadowLight.setDirection(new Vector(0, 0, -1));
 			// ls.perPixelLighting = false;
 
-			var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
-			shadow.power = 1;
-			shadow.mode = Dynamic;
-			shadow.minDist = 0.1;
-			shadow.maxDist = 200;
-			shadow.bias = 0;
-
 			var sunlight = new DirLight(sunDirection, scene);
 			sunlight.color = directionalColor;
 			return;
