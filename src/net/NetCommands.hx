@@ -85,7 +85,10 @@ class NetCommands {
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
 			if (Net.serverInfo.state == "WAITING" && MarbleGame.instance.world != null) {
-				Net.clientIdMap[clientId].ready();
+				if (clientId != -1)
+					Net.clientIdMap[clientId].ready();
+				else
+					Net.hostReady = true;
 				var allReady = true;
 				for (id => client in Net.clientIdMap) {
 					if (client.state != GameplayState.GAME) {
@@ -93,12 +96,10 @@ class NetCommands {
 						break;
 					}
 				}
-				if (allReady) {
+				if (allReady && Net.hostReady) {
 					if (MarbleGame.instance.world != null) {
 						MarbleGame.instance.world.allClientsReady();
 					}
-				}
-				if (Net.isHost) {
 					Net.serverInfo.state = "PLAYING";
 					MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
 				}
@@ -147,6 +148,9 @@ class NetCommands {
 	@:rpc(server) public static function setStartTicks(ticks:Int) {
 		if (MarbleGame.instance.world != null) {
 			MarbleGame.instance.world.serverStartTicks = ticks + 1; // Extra tick so we don't get 0
+			if (Net.isClient) {
+				@:privateAccess MarbleGame.instance.world.marble.serverTicks = ticks;
+			}
 			MarbleGame.instance.world.startTime = MarbleGame.instance.world.timeState.timeSinceLoad + 3.5 + 0.032; // 1 extra tick
 		}
 	}
@@ -245,11 +249,10 @@ class NetCommands {
 		}
 		if (Net.isHost) {
 			Net.lobbyHostReady = false;
+			Net.hostReady = false;
 
-			if (Net.isHost) {
-				Net.serverInfo.state = "LOBBY";
-				MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
-			}
+			Net.serverInfo.state = "LOBBY";
+			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
 		}
 	}
 
