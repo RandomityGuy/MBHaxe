@@ -19,7 +19,7 @@ class Renderer extends h3d.scene.Renderer {
 
 	public var depth:h3d.pass.Base = new h3d.scene.fwd.Renderer.DepthPass();
 	public var normal:h3d.pass.Base = new h3d.scene.fwd.Renderer.NormalPass();
-	public var shadow = new h3d.pass.DefaultShadowMap(1024);
+	public var shadow = new h3d.pass.DefaultShadowMap(1);
 
 	var glowBuffer:h3d.mat.Texture;
 
@@ -47,6 +47,12 @@ class Renderer extends h3d.scene.Renderer {
 		copyPass = new h3d.pass.Copy();
 		sfxBuffer = new Texture(512, 512, [Target]);
 		Window.getInstance().addResizeEvent(() -> onResize());
+		shadow.autoShrink = false;
+		shadow.power = 0;
+		shadow.mode = Static;
+		shadow.minDist = 0.1;
+		shadow.maxDist = 0.1;
+		shadow.bias = 0;
 	}
 
 	public inline static function getSfxBuffer() {
@@ -86,7 +92,7 @@ class Renderer extends h3d.scene.Renderer {
 
 	override function getPassByName(name:String):h3d.pass.Base {
 		if (name == "alpha" || name == "additive" || name == "glowPre" || name == "glow" || name == "refract" || name == "glowPreNoRender"
-			|| name == "interior" || name == "zPass")
+			|| name == "interior" || name == "zPass" || name == "marble" || name == "shadowPass1" || name == "shadowPass2" || name == "shadowPass3")
 			return defaultPass;
 		return super.getPassByName(name);
 	}
@@ -100,7 +106,7 @@ class Renderer extends h3d.scene.Renderer {
 		if (!cubemapPass) { // we push the target separately
 			ctx.engine.pushTarget(backBuffer);
 		}
-		ctx.engine.clear(0, 1);
+		ctx.engine.clear(0, 1, 0);
 
 		if (has("shadow"))
 			renderPass(shadow, get("shadow"));
@@ -143,6 +149,12 @@ class Renderer extends h3d.scene.Renderer {
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 3) {
 			renderPass(defaultPass, get("default"));
 		}
+
+		renderPass(defaultPass, get("shadowPass1"));
+		renderPass(defaultPass, get("shadowPass2"));
+		renderPass(defaultPass, get("shadowPass3"));
+		renderPass(defaultPass, get("marble"));
+
 		if (!cubemapPass)
 			ProfilerUI.measure("glow", 0);
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 4)
