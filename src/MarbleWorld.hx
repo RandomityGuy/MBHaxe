@@ -523,6 +523,9 @@ class MarbleWorld extends Scheduler {
 			shape.onLevelStart();
 		if (this.isMultiplayer && Net.isClient)
 			NetCommands.clientIsReady(Net.clientId);
+		if (this.isMultiplayer && Net.isHost) {
+			NetCommands.clientIsReady(-1);
+		}
 		var cc = 0;
 		for (client in Net.clients)
 			cc++;

@@ -72,6 +72,7 @@ class Net {
 
 	public static var lobbyHostReady:Bool;
 	public static var lobbyClientReady:Bool;
+	public static var hostReady:Bool;
 
 	public static var clientId:Int;
 	public static var networkRNG:Float;
@@ -354,6 +355,7 @@ class Net {
 			Net.remoteServerInfo = null;
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
+			Net.hostReady = false;
 		}
 		if (Net.isHost) {
 			NetCommands.serverClosed();
@@ -371,6 +373,7 @@ class Net {
 			Net.remoteServerInfo = null;
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
+			Net.hostReady = false;
 		}
 	}
 
