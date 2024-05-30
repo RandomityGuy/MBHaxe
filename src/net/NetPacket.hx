@@ -46,6 +46,7 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var DoMega = 1 << 2;
 	var PickupPowerup = 1 << 3;
 	var GravityChange = 1 << 4;
+	var UsePowerup = 1 << 5;
 }
 
 @:publicFields
@@ -103,6 +104,12 @@ class MarbleUpdatePacket implements NetPacket {
 			b.writeFlag(false);
 		}
 		b.writeFlag(oob);
+		if (netFlags & MarbleNetFlags.UsePowerup > 0) {
+			b.writeFlag(true);
+		} else {
+			b.writeFlag(false);
+		}
+
 		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
 			b.writeFlag(true);
 			b.writeInt(powerUpId, 9);
@@ -142,6 +149,8 @@ class MarbleUpdatePacket implements NetPacket {
 			this.netFlags |= MarbleNetFlags.DoMega;
 		}
 		oob = b.readFlag();
+		if (b.readFlag())
+			this.netFlags |= MarbleNetFlags.UsePowerup;
 		if (b.readFlag()) {
 			powerUpId = b.readInt(9);
 			this.netFlags |= MarbleNetFlags.PickupPowerup;
