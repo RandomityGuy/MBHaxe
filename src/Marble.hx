@@ -332,6 +332,7 @@ class Marble extends GameObject {
 	var netFlags:Int = 0;
 	var serverTicks:Int;
 	var recvServerTick:Int;
+	var serverUsePowerup:Bool;
 
 	public function new() {
 		super();
@@ -377,6 +378,8 @@ class Marble extends GameObject {
 		var isUltra = true;
 
 		this.posStore = new Vector();
+		this.lastRenderPos = new Vector();
+		this.netSmoothOffset = new Vector();
 		this.netCorrected = false;
 
 		var marbleDts = new DtsObject();
@@ -1739,14 +1742,22 @@ class Marble extends GameObject {
 			this.collisionWorld.updateTransform(this.collider);
 			this.collider.velocity = this.velocity;
 
-			if (this.heldPowerup != null && m.powerup && !this.outOfBounds) {
+			if (this.heldPowerup != null
+				&& (m.powerup || (Net.isClient && this.serverUsePowerup && !this.controllable))
+				&& !this.outOfBounds) {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = passedTime;
+				var netUpdate = this.isNetUpdate;
+				if (this.serverUsePowerup)
+					this.isNetUpdate = false;
 				this.heldPowerup.use(cast this, pTime);
+				this.isNetUpdate = netUpdate;
 				this.heldPowerup = null;
-				if (!this.isNetUpdate)
-					this.netFlags |= MarbleNetFlags.PickupPowerup;
+				this.serverUsePowerup = false;
+				if (!this.isNetUpdate) {
+					this.netFlags |= MarbleNetFlags.PickupPowerup | MarbleNetFlags.UsePowerup;
+				}
 				if (this.level.isRecording) {
 					this.level.replay.recordPowerupPickup(null);
 				}
@@ -1873,6 +1884,7 @@ class Marble extends GameObject {
 		this.blastUseTick = p.blastTick;
 		this.helicopterUseTick = p.heliTick;
 		this.megaMarbleUseTick = p.megaTick;
+		this.serverUsePowerup = p.netFlags & MarbleNetFlags.UsePowerup > 0;
 		// this.currentUp = p.gravityDirection;
 		this.level.setUp(cast this, p.gravityDirection, this.level.timeState);
 		if (this.outOfBounds && !p.oob && this.controllable)
@@ -1880,13 +1892,21 @@ class Marble extends GameObject {
 		this.outOfBounds = p.oob;
 		this.camera.oob = p.oob;
 		if (p.powerUpId == 0x1FF) {
-			this.level.deselectPowerUp(cast this);
+			if (!this.serverUsePowerup)
+				this.level.deselectPowerUp(cast this);
+			else
+				Console.log("Using powerup");
 		} else {
 			this.level.pickUpPowerUp(cast this, this.level.powerUps[p.powerUpId]);
 		}
 		if (p.moveQueueSize == 0 && this.connection != null) {
 			// Pad null move on client
 			this.connection.moveManager.duplicateLastMove();
+		}
+		if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
+			var ticksSince = (this.serverTicks - this.blastUseTick);
+			this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad - ticksSince * 0.032;
+			this.blastUseTime = this.level.timeState.currentAttemptTime - ticksSince * 0.032;
 		}
 
 		// if (this.controllable && Net.isClient) {
@@ -2354,10 +2374,10 @@ class Marble extends GameObject {
 			if (!this.isNetUpdate) {
 				if (this.controllable)
 					AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
-			}
-			this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
-			this.blastUseTime = this.level.timeState.currentAttemptTime;
 
+				this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
+				this.blastUseTime = this.level.timeState.currentAttemptTime;
+			}
 			this.blastTicks = 0;
 			return true;
 		} else {
@@ -2476,7 +2496,7 @@ class Marble extends GameObject {
 		this.blastTicks = 0;
 		this.helicopterUseTick = 0;
 		this.megaMarbleUseTick = 0;
-		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange;
+		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.contactEntities = [];
 		this._firstTick = true;
@@ -2489,6 +2509,7 @@ class Marble extends GameObject {
 		this.netSmoothOffset = new Vector();
 		this.lastRenderPos = new Vector();
 		this.netCorrected = false;
+		this.serverUsePowerup = false;
 		if (this._radius != this._prevRadius) {
 			this._radius = this._prevRadius;
 			this._marbleScale = this._renderScale = this._defaultScale;
@@ -2507,6 +2528,9 @@ class Marble extends GameObject {
 			this.slipSound.stop();
 		if (this.helicopterSound != null)
 			this.helicopterSound.stop();
+		this.shadowVolume.remove();
+		this.helicopter.remove();
+		this.blastWave.remove();
 		super.dispose();
 		removeChildren();
 		camera = null;
