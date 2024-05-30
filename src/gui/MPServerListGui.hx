@@ -146,6 +146,13 @@ class MPServerListGui extends GuiImage {
 		nextButton.gamepadAccelerator = ["X"];
 		nextButton.pressedAction = (e) -> {
 			if (curSelection != -1) {
+				var selectedServerVersion = ourServerList[curSelection].version;
+				if (selectedServerVersion != MarbleGame.currentVersion) {
+					var pup = new MessageBoxOkDlg("You are using a different version of the game than the server. Please update your game.");
+					MarbleGame.canvas.pushDialog(pup);
+					return;
+				}
+
 				MarbleGame.canvas.setContent(new MultiplayerLoadingGui("Connecting"));
 				var failed = true;
 				haxe.Timer.delay(() -> {
@@ -153,7 +160,7 @@ class MPServerListGui extends GuiImage {
 						if (MarbleGame.canvas.content is MultiplayerLoadingGui) {
 							var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
 							if (loadGui != null) {
-								loadGui.setErrorStatus("Failed to connect to server");
+								loadGui.setErrorStatus("Failed to connect to server. Please try again.");
 								Net.disconnect();
 							}
 						}
