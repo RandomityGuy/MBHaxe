@@ -13,6 +13,7 @@ typedef RemoteServerInfo = {
 	players:Int,
 	maxPlayers:Int,
 	platform:Int,
+	version:String
 }
 
 class MasterServerClient {
@@ -185,7 +186,8 @@ class MasterServerClient {
 			privateServer: serverInfo.privateServer,
 			inviteCode: serverInfo.inviteCode,
 			state: serverInfo.state,
-			platform: serverInfo.platform
+			platform: serverInfo.platform,
+			version: MarbleGame.currentVersion
 		}));
 	}
 
