@@ -704,7 +704,7 @@ class Marble extends GameObject {
 				A = A.add(force.multiply(1 / mass));
 			}
 			for (marble in level.marbles) {
-				if (marble != cast this) {
+				if ((marble != cast this) && !marble._firstTick) {
 					var force = marble.getForce(this.collider.transform.getPosition(), Net.isHost ? timeState.ticks : serverTicks);
 					A = A.add(force.multiply(1 / mass));
 				}
