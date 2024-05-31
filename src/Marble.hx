@@ -2020,13 +2020,15 @@ class Marble extends GameObject {
 		var newDt = 2.3 * (timeState.dt / 0.4);
 		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
 		this.netSmoothOffset.scale(smooth);
+		if (this.netSmoothOffset.lengthSq() < 0.1)
+			this.netSmoothOffset.set(0, 0, 0);
 
 		if (oldPos != null && newPos != null) {
 			var deltaT = physicsAccumulator / 0.032;
 			if (Net.isClient && !this.controllable)
 				deltaT *= 0.75; // Don't overshoot
 			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
-			if (Net.isClient && !this.controllable) {
+			if (Net.isClient) {
 				renderPos.load(renderPos.add(this.netSmoothOffset));
 			}
 			this.setPosition(renderPos.x, renderPos.y, renderPos.z);
