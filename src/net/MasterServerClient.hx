@@ -149,14 +149,15 @@ class MasterServerClient {
 			if (instance.open)
 				onConnect();
 			else {
-				instance.ws.close();
+				if (instance != null && instance.ws != null)
+					instance.ws.close();
 				instance = new MasterServerClient(onConnect);
 			}
 		}
 	}
 
 	public static function disconnectFromMasterServer() {
-		if (instance != null) {
+		if (instance != null && instance.ws != null) {
 			instance.ws.close();
 		}
 	}
