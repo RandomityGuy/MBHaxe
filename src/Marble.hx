@@ -760,6 +760,8 @@ class Marble extends GameObject {
 	}
 
 	function computeMoveForces(m:Move, aControl:Vector, desiredOmega:Vector) {
+		if (this.currentUp == null)
+			this.currentUp = new Vector(0, 0, 1);
 		var currentGravityDir = this.currentUp.multiply(-1);
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
@@ -1608,6 +1610,11 @@ class Marble extends GameObject {
 			lastMove = m;
 		}
 
+		if (m == null) {
+			m = new Move();
+			m.d = new Vector();
+		}
+
 		if (this.blastTicks < (30000 >> 5))
 			this.blastTicks += 1;
 
@@ -1670,6 +1677,16 @@ class Marble extends GameObject {
 			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
 			var A = this.getExternalForces(tempState, m);
 			var a = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
+
+			// NaN check so OpenAL doesn't freak out
+			if (Math.isNaN(A.lengthSq())) {
+				A.set(0, 0, 0);
+			}
+
+			if (Math.isNaN(a.lengthSq())) {
+				a.set(0, 0, 0);
+			}
+
 			this.velocity.set(this.velocity.x + A.x * timeStep, this.velocity.y + A.y * timeStep, this.velocity.z + A.z * timeStep);
 			this.omega.set(this.omega.x + a.x * timeStep, this.omega.y + a.y * timeStep, this.omega.z + a.z * timeStep);
 			if (this.mode == Start) {
