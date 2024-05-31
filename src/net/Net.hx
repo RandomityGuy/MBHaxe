@@ -194,6 +194,26 @@ class Net {
 			client = new RTCPeerConnection(stunServers.concat([turnServer]), "0.0.0.0");
 			var candidates = [];
 
+			var closing = false;
+
+			var closeFunc = (msg:String, forceShow:Bool) -> {
+				if (closing)
+					return;
+				closing = true;
+				var weLeftOurselves = !Net.isClient; // If we left ourselves, this would be set to false due to order of ops, disconnect being called first, and then the datachannel closing
+				disconnect();
+				if (MarbleGame.instance.world != null) {
+					MarbleGame.instance.quitMission();
+				}
+				if (!weLeftOurselves || forceShow) {
+					if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
+						var loadGui = new MultiplayerLoadingGui(msg);
+						MarbleGame.canvas.setContent(loadGui);
+						loadGui.setErrorStatus(msg);
+					}
+				}
+			}
+
 			client.onLocalCandidate = (c) -> {
 				Console.log('Local candidate: ' + c);
 				if (c != "")
@@ -203,6 +223,7 @@ class Net {
 				switch (s) {
 					case RTC_CLOSED:
 						Console.log("RTC State change: Connection closed!");
+						closeFunc("Connection closed", true);
 					case RTC_CONNECTED:
 						Console.log("RTC State change: Connected!");
 					case RTC_CONNECTING:
@@ -253,7 +274,6 @@ class Net {
 			clientDatachannel = client.createDatachannel("mp");
 			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", true, null, 600);
 
-			var closing = false;
 			var openFlags = 0;
 
 			var onDatachannelOpen = (idx:Int) -> {
@@ -276,35 +296,12 @@ class Net {
 			}
 
 			var onDatachannelClose = (dc:RTCDataChannel) -> {
-				if (closing)
-					return;
-				closing = true;
-				var weLeftOurselves = !Net.isClient; // If we left ourselves, this would be set to false due to order of ops, disconnect being called first, and then the datachannel closing
-				disconnect();
-				if (MarbleGame.instance.world != null) {
-					MarbleGame.instance.quitMission();
-				}
-				if (!weLeftOurselves) {
-					if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
-						var loadGui = new MultiplayerLoadingGui("Server closed");
-						MarbleGame.canvas.setContent(loadGui);
-						loadGui.setErrorStatus("Server closed");
-					}
-				}
+				closeFunc("Server closed", true);
 			}
 
 			var onDatachannelError = (msg:String) -> {
-				if (closing)
-					return;
-				closing = true;
 				Console.log('Errored out due to ${msg}');
-				disconnect();
-				if (MarbleGame.instance.world != null) {
-					MarbleGame.instance.quitMission();
-				}
-				var loadGui = new MultiplayerLoadingGui("Connection error");
-				MarbleGame.canvas.setContent(loadGui);
-				loadGui.setErrorStatus("Connection error");
+				closeFunc("Connection error", true);
 			}
 
 			clientDatachannel.onOpen = (n) -> {
@@ -443,6 +440,10 @@ class Net {
 	}
 
 	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel, dcu:RTCDataChannel, joiningPrivate:Bool) {
+		if (!Net.isMP) {
+			c.close();
+			return;
+		}
 		var clientId = allocateClientId();
 		if (clientId == -1) {
 			c.close();
@@ -511,6 +512,11 @@ class Net {
 
 		AudioManager.playSound(ResourceLoader.getAudio("data/sound/spawn_alternate.wav").resource);
 
+		serverInfo.players = 1;
+		for (k => v in clients) { // Recount
+			serverInfo.players++;
+		}
+
 		serverInfo.players++;
 		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the new player
 
@@ -531,7 +537,7 @@ class Net {
 	}
 
 	static function onClientLeave(cc:ClientConnection) {
-		if (!Net.isMP)
+		if (!Net.isMP || cc == null)
 			return;
 		NetCommands.clientDisconnected(cc.id);
 
@@ -540,7 +546,7 @@ class Net {
 		}
 
 		serverInfo.players = 1;
-		for (k => v in clientIdMap) { // Recount
+		for (k => v in clients) { // Recount
 			serverInfo.players++;
 		}
 
