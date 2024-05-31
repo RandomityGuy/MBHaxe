@@ -74,6 +74,7 @@ class Net {
 	public static var lobbyClientReady:Bool;
 	public static var hostReady:Bool;
 
+	static var clientIdAllocs:Int = 1;
 	public static var clientId:Int;
 	public static var networkRNG:Float;
 	public static var clients:Map<RTCPeerConnection, GameConnection> = [];
@@ -348,6 +349,7 @@ class Net {
 			Net.client = null;
 			Net.clientDatachannel = null;
 			Net.clientId = 0;
+			Net.clientIdAllocs = 1;
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			Net.clientConnection = null;
@@ -366,6 +368,7 @@ class Net {
 			Net.isClient = false;
 			Net.isHost = false;
 			Net.clientId = 0;
+			Net.clientIdAllocs = 1;
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			MasterServerClient.disconnectFromMasterServer();
@@ -440,7 +443,11 @@ class Net {
 	}
 
 	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel, dcu:RTCDataChannel, joiningPrivate:Bool) {
-		clientId += 1;
+		var clientId = allocateClientId();
+		if (clientId == -1) {
+			c.close();
+			return; // Failed to allocate ID
+		}
 		var cc = new ClientConnection(clientId, c, dc, dcu);
 		clients.set(c, cc);
 		cc.isPrivate = joiningPrivate;
@@ -527,6 +534,10 @@ class Net {
 		if (!Net.isMP)
 			return;
 		NetCommands.clientDisconnected(cc.id);
+
+		if (cc.id != 0) {
+			freeClientId(cc.id);
+		}
 
 		serverInfo.players = 1;
 		for (k => v in clientIdMap) { // Recount
@@ -732,6 +743,20 @@ class Net {
 			case _:
 				Console.log("unknown command: " + packetType);
 		}
+	}
+
+	static function allocateClientId() {
+		for (id in 0...32) {
+			if (Net.clientIdAllocs & (1 << id) == 0) {
+				Net.clientIdAllocs |= (1 << id);
+				return id;
+			}
+		}
+		return -1;
+	}
+
+	static function freeClientId(id:Int) {
+		Net.clientIdAllocs &= ~(1 << id);
 	}
 
 	public static function sendPacketToAll(packetData:OutputBitStream) {
