@@ -92,10 +92,10 @@ class Renderer extends h3d.scene.Renderer {
 
 	override function render() {
 		if (backBuffer == null) {
-			depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24);
-			if (depthBuffer.format != Depth24) {
+			depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24Stencil8);
+			if (depthBuffer.format != Depth24Stencil8) {
 				depthBuffer.dispose();
-				depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24);
+				depthBuffer = new DepthBuffer(cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, Depth24Stencil8);
 			}
 			backBuffer = ctx.textures.allocTarget("backBuffer", cast ctx.engine.width / pixelRatio, cast ctx.engine.height / pixelRatio, false);
 			backBuffer.depthBuffer = depthBuffer;
