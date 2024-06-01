@@ -71,6 +71,8 @@ jobs:
               haxelib dev hlsdl ~/deps/hashlink/libs/sdl
               haxelib dev hashlink ~/deps/hashlink/other/haxelib
               haxelib git zyheaps https://github.com/rainyt/zyheaps
+              haxelib install colyseus-websocket
+              haxelib git datachannel https://github.com/RandomityGuy/hxDatachannel
         - run:
             name: Prepare directories
             command: |
