@@ -322,6 +322,7 @@ jobs:
               7z x /tmp/sdl.zip    -oinclude; mv /tmp/include/SDL2*   /tmp/include/sdl
               7z x /tmp/openal.zip -oinclude; mv /tmp/include/openal* /tmp/include/openal
               7z x /tmp/ffmpeg.zip -oinclude; mv /tmp/include/ffmpeg* /tmp/include/ffmpeg
+
         - run:
             name: Install Neko
             command: |
@@ -329,6 +330,12 @@ jobs:
               nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
               set NEKOPATH=$nekopath
               export PATH=$nekopath:"$PATH"
+
+        - run:
+            name: Install CMake
+            command: |
+              choco install --no-progress cmake -y
+
         - run:
             name: Install Haxe
             command: |
@@ -359,6 +366,18 @@ jobs:
               MSBuild.exe hl.sln -m -nologo -p:Configuration=Release -p:Platform=x64
 
         - run:
+            name: Build datachannel
+            command: |
+              mkdir ~/deps
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/hxDatachannel
+              cd hxDatachannel/cpp
+              "/c/Program Files/CMake/bin/cmake" -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHASHLINK_LIBRARY_DIR="~/deps/hashlink/x64/Release" -DHASHLINK_INCLUDE_DIR="../../hashlink/src"
+              "/c/Program Files/CMake/bin/cmake" --build build --config Release -j4
+              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.hdll ~/deps/hashlink/x64/Release
+              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.lib ~/deps/hashlink/x64/Release
+
+        - run:
             name: Install haxe dependencies
             command: |
               export PATH=/tmp/haxe/haxe:"$PATH"
@@ -370,6 +389,8 @@ jobs:
               haxelib dev hlopenal ~/deps/hashlink/libs/openal
               haxelib dev hlsdl ~/deps/hashlink/libs/sdl
               haxelib dev hashlink ~/deps/hashlink/other/haxelib
+              haxelib dev datachannel ~/deps/hxDatachannel
+              haxelib install colyseus-websocket
 
         - run:
             name: Compile MBHaxe
@@ -382,15 +403,6 @@ jobs:
               cd ~/project
               haxe compile-c.hxml
               cd native
-              sed -i -e 's/MaxSpeed/Disabled/g' marblegame.vcxproj
-              sed -i -e 's/<FunctionLevelLinking>true<\/FunctionLevelLinking>//g' marblegame.vcxproj
-              sed -i -e 's/<IntrinsicFunctions>true<\/IntrinsicFunctions>//g' marblegame.vcxproj
-              sed -i -e 's/<EnableCOMDATFolding>true<\/EnableCOMDATFolding>//g' marblegame.vcxproj
-              sed -i -e 's/<OptimizeReferences>true<\/OptimizeReferences>//g' marblegame.vcxproj
-              sed -i -e 's/HL_MAKE;//g' marblegame.vcxproj
-              sed -i -e 's/<ClInclude Include=".*" \/>//g' marblegame.vcxproj
-              sed -i -e 's/<ClCompile Include=".*" \/>//g' marblegame.vcxproj
-              perl -0777 -i.marblegame.vcxproj -pe 's/<ItemGroup>[^.]*<\/ItemGroup>/<ItemGroup><ClCompile Include="marblegame.c" \/><\/ItemGroup>/g' marblegame.vcxproj
               HASHLINKPATH=~/deps/hashlink
               MSBuild.exe marblegame.sln -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH
         - run:
@@ -408,6 +420,7 @@ jobs:
               cp ~/deps/hashlink/x64/Release/openal.hdll .
               cp ~/deps/hashlink/x64/Release/sdl.hdll .
               cp ~/deps/hashlink/x64/Release/ssl.hdll .
+              cp ~/deps/hashlink/x64/Release/datachannel.hdll .
               cp ~/deps/hashlink/x64/Release/uv.hdll .
               cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
               cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 
