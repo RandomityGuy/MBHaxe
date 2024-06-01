@@ -94,8 +94,8 @@ jobs:
             command: |
               export PATH=/tmp/haxe/:"$PATH"
               cd ~/MBHaxe
-              sed -i '5i -lib datachannel' build.hxml
-              sed -i '5i -lib colyseus-websocket' build.hxml
+              sed -i '5i -lib datachannel' Export/android/app/src/main/build.hxml
+              sed -i '5i -lib colyseus-websocket' Export/android/app/src/main/build.hxml
               haxe Export/android/app/src/main/build.hxml
               mkdir -p Export/android/app/src/main/assets/data
               cp -rf data/* Export/android/app/src/main/assets/data
