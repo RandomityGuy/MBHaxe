@@ -287,13 +287,16 @@ jobs:
           name: ZIP Bundle
           command: |
             cd ~/MBHaxe
+            npm install -g create-dmg
+            create-dmg --dmg-title="Marble Blast Ultra" "MarbleBlast Ultra.app"
             rm -rf "macos-dist/MarbleBlast Ultra.app.in"
-            zip -r MBHaxe-Ultra-Mac.zip macos-dist/
+            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Ultra-Mac.dmg"
+            # zip -r MBHaxe-Ultra-Mac.zip macos-dist/
 
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Ultra-Mac.zip $REMOTEDIR/MBHaxe-Ultra-Mac.zip
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Ultra-Mac.dmg $REMOTEDIR/MBHaxe-Ultra-Mac.dmg
 
       # - store_artifacts:
       #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
