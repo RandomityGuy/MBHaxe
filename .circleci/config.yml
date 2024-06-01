@@ -66,13 +66,15 @@ jobs:
               mkdir ~/deps
               cd ~/deps
               git clone https://github.com/RandomityGuy/hashlink
+              git clone https://github.com/RandomityGuy/hxDatachannel
               haxelib git heaps https://github.com/RandomityGuy/heaps
               haxelib dev hlopenal ~/deps/hashlink/libs/openal
               haxelib dev hlsdl ~/deps/hashlink/libs/sdl
               haxelib dev hashlink ~/deps/hashlink/other/haxelib
               haxelib git zyheaps https://github.com/rainyt/zyheaps
+              haxelib git heaps https://github.com/RandomityGuy/heaps
               haxelib install colyseus-websocket
-              haxelib git datachannel https://github.com/RandomityGuy/hxDatachannel
+              haxelib dev datachannel ~/deps/hxDatachannel
         - run:
             name: Prepare directories
             command: |
