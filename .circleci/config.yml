@@ -288,7 +288,7 @@ jobs:
           command: |
             cd ~/MBHaxe/macos-dist
             npm install -g create-dmg
-            create-dmg --dmg-title="Marble Blast Ultra" "MarbleBlast Ultra.app"
+            create-dmg --dmg-title="Marble Blast Ultra" "MarbleBlast Ultra.app" || true
             rm -rf "macos-dist/MarbleBlast Ultra.app.in"
             mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Ultra-Mac.dmg"
             # zip -r MBHaxe-Ultra-Mac.zip macos-dist/
