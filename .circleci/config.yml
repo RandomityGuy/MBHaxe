@@ -286,7 +286,7 @@ jobs:
       - run:
           name: ZIP Bundle
           command: |
-            cd ~/MBHaxe
+            cd ~/MBHaxe/macos-dist
             npm install -g create-dmg
             create-dmg --dmg-title="Marble Blast Ultra" "MarbleBlast Ultra.app"
             rm -rf "macos-dist/MarbleBlast Ultra.app.in"
