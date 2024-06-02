@@ -1942,7 +1942,7 @@ class Marble extends GameObject {
 	function calculateNetSmooth() {
 		if (this.netCorrected) {
 			this.netCorrected = false;
-			this.netSmoothOffset.load(this.lastRenderPos.sub(this.newPos));
+			this.netSmoothOffset.load(this.lastRenderPos.sub(this.oldPos));
 			// this.oldPos.load(this.posStore);
 		}
 	}
@@ -2020,7 +2020,8 @@ class Marble extends GameObject {
 		var newDt = 2.3 * (timeState.dt / 0.4);
 		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
 		this.netSmoothOffset.scale(smooth);
-		if (this.netSmoothOffset.lengthSq() < 0.1)
+		var smoothScale = this.netSmoothOffset.lengthSq();
+		if (smoothScale < 0.1 || smoothScale > 10.0)
 			this.netSmoothOffset.set(0, 0, 0);
 
 		if (oldPos != null && newPos != null) {

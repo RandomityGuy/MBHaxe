@@ -39,7 +39,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 			return mat3(vec3(m[0].x, m[1].x, m[2].x), vec3(m[0].y, m[1].y, m[2].y), vec3(m[0].z, m[1].z, m[2].z));
 		}
 		function vertex() {
-			calculatedUV = input.uv;
+			calculatedUV = input.uv * secondaryMapUvFactor;
 			var objToTangentSpace = mat3(input.t, input.b, input.n);
 			outLightVec = vec4(0);
 			var inLightVec = vec3(-0.5732, 0.27536, -0.77176) * mat3(global.modelViewTranspose);
@@ -57,7 +57,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 			outLightVec.w = step(0, dot(n, -inLightVec));
 		}
 		function fragment() {
-			var bumpNormal = normalMap.get(calculatedUV * secondaryMapUvFactor).xyz * 2 - 1;
+			var bumpNormal = normalMap.get(calculatedUV).xyz * 2 - 1;
 			var bumpDot = saturate(dot(bumpNormal, outLightVec.xyz));
 			// Diffuse part
 			var diffuse = diffuseMap.get(calculatedUV);
