@@ -296,7 +296,7 @@ jobs:
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Ultra-Mac.dmg $REMOTEDIR/MBHaxe-Ultra-Mac.dmg
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-Ultra-Mac.dmg $REMOTEDIR/MBHaxe-Ultra-Mac.dmg
 
       # - store_artifacts:
       #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
