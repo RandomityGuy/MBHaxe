@@ -173,13 +173,13 @@ class PowerupPickupPacket implements NetPacket {
 	public inline function deserialize(b:InputBitStream) {
 		clientId = b.readByte();
 		serverTicks = b.readUInt16();
-		powerupItemId = b.readInt(9);
+		powerupItemId = b.readInt(10);
 	}
 
 	public inline function serialize(b:OutputBitStream) {
 		b.writeByte(clientId);
 		b.writeUInt16(serverTicks);
-		b.writeInt(powerupItemId, 9);
+		b.writeInt(powerupItemId, 10);
 	}
 }
 
@@ -194,14 +194,14 @@ class GemSpawnPacket implements NetPacket {
 	public function serialize(b:OutputBitStream) {
 		b.writeInt(gemIds.length, 5);
 		for (gemId in gemIds) {
-			b.writeInt(gemId, 10);
+			b.writeInt(gemId, 11);
 		}
 	}
 
 	public function deserialize(b:InputBitStream) {
 		var count = b.readInt(5);
 		for (i in 0...count) {
-			gemIds.push(b.readInt(10));
+			gemIds.push(b.readInt(11));
 		}
 	}
 }
@@ -218,14 +218,14 @@ class GemPickupPacket implements NetPacket {
 	public inline function deserialize(b:InputBitStream) {
 		clientId = b.readByte();
 		serverTicks = b.readUInt16();
-		gemId = b.readInt(10);
+		gemId = b.readInt(11);
 		scoreIncr = b.readInt(4);
 	}
 
 	public inline function serialize(b:OutputBitStream) {
 		b.writeByte(clientId);
 		b.writeUInt16(serverTicks);
-		b.writeInt(gemId, 10);
+		b.writeInt(gemId, 11);
 		b.writeInt(scoreIncr, 4);
 	}
 }

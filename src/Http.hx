@@ -26,6 +26,8 @@ class Http {
 		threadPool = new sys.thread.FixedThreadPool(2);
 		threadPool.run(() -> threadLoop());
 		threadPool.run(() -> threadLoop());
+		threadPool.run(() -> threadLoop());
+		threadPool.run(() -> threadLoop());
 		#end
 	}
 

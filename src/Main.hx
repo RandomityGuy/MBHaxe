@@ -94,6 +94,7 @@ class Main extends hxd.App {
 		haxe.MainLoop.add(() -> Http.loop());
 		Settings.init();
 		Gamepad.init();
+		MPCustoms.loadMissionList();
 		ResourceLoader.init(s2d, () -> {
 			AudioManager.init();
 			AudioManager.playShell();
