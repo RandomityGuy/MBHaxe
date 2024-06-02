@@ -16,7 +16,7 @@ class MultiplayerLoadingGui extends GuiImage {
 	var innerCtrl:GuiControl;
 	var backButton:GuiXboxButton;
 
-	public function new(initialStatus:String) {
+	public function new(initialStatus:String, showCancel = true) {
 		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
 		super(res);
 		this.position = new Vector();
@@ -84,17 +84,19 @@ class MultiplayerLoadingGui extends GuiImage {
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
 
-		backButton = new GuiXboxButton("Cancel", 160);
-		backButton.position = new Vector(960, 0);
-		backButton.vertSizing = Bottom;
-		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["A"];
-		backButton.accelerators = [hxd.Key.ENTER];
-		backButton.pressedAction = (e) -> {
-			Net.disconnect();
-			MarbleGame.canvas.setContent(new MultiplayerGui());
-		};
-		bottomBar.addChild(backButton);
+		if (showCancel) {
+			backButton = new GuiXboxButton("Cancel", 160);
+			backButton.position = new Vector(960, 0);
+			backButton.vertSizing = Bottom;
+			backButton.horizSizing = Right;
+			backButton.gamepadAccelerator = ["A"];
+			backButton.accelerators = [hxd.Key.ENTER];
+			backButton.pressedAction = (e) -> {
+				Net.disconnect();
+				MarbleGame.canvas.setContent(new MultiplayerGui());
+			};
+			bottomBar.addChild(backButton);
+		}
 	}
 
 	public function setLoadingStatus(str:String) {

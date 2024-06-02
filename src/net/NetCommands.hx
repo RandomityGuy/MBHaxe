@@ -1,5 +1,6 @@
 package net;
 
+import gui.MultiplayerGui;
 import net.ClientConnection.NetPlatform;
 import gui.EndGameGui;
 import modes.HuntMode;
@@ -21,8 +22,27 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(server) public static function setLobbyCustLevelName(str:String) {
+		if (MultiplayerLevelSelectGui.setLevelFn != null) {
+			MultiplayerLevelSelectGui.setLevelStr(str);
+		}
+	}
+
 	@:rpc(server) public static function playLevel(levelIndex:Int) {
 		MultiplayerLevelSelectGui.playSelectedLevel(levelIndex);
+		if (Net.isHost) {
+			Net.serverInfo.state = "WAITING";
+			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the wait state
+		}
+	}
+
+	@:rpc(server) public static function playCustomLevel(levelPath:String) {
+		var levelEntry = MPCustoms.missionList.filter(x -> x.path == levelPath)[0];
+		MarbleGame.canvas.setContent(new MultiplayerLoadingGui("Downloading", false));
+		MPCustoms.play(levelEntry, () -> {}, () -> {
+			MarbleGame.canvas.setContent(new MultiplayerGui());
+			Net.disconnect(); // disconnect from the server
+		});
 		if (Net.isHost) {
 			Net.serverInfo.state = "WAITING";
 			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the wait state
@@ -34,6 +54,12 @@ class NetCommands {
 			var difficultyMissions = MissionList.missionList['ultra']["multiplayer"];
 			var curMission = difficultyMissions[index];
 			MarbleGame.instance.playMission(curMission, true);
+		}
+	}
+
+	@:rpc(server) public static function playCustomLevelMidJoin(path:String) {
+		if (Net.isClient) {
+			playCustomLevel(path);
 		}
 	}
 
@@ -77,7 +103,10 @@ class NetCommands {
 			}
 
 			if (allReady && Net.lobbyHostReady) {
-				NetCommands.playLevel(MultiplayerLevelSelectGui.currentSelectionStatic);
+				if (MultiplayerLevelSelectGui.custSelected) {
+					NetCommands.playCustomLevel(MultiplayerLevelSelectGui.custPath);
+				} else
+					NetCommands.playLevel(MultiplayerLevelSelectGui.currentSelectionStatic);
 			}
 		}
 	}

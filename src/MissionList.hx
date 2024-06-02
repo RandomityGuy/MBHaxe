@@ -78,6 +78,8 @@ class MissionList {
 		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions", "intermediate", 1));
 		ultraMissions.set("advanced", parseDifficulty("ultra", "missions", "advanced", 2));
 		ultraMissions.set("multiplayer", parseDifficulty("ultra", "missions", "multiplayer", 3));
+		// var mpCustoms = parseDifficulty("ultra", "missions", "mpcustom", 3);
+		// ultraMissions["multiplayer"] = ultraMissions["multiplayer"].concat(mpCustoms);
 
 		@:privateAccess ultraMissions["beginner"][ultraMissions["beginner"].length - 1].next = ultraMissions["intermediate"][0];
 		@:privateAccess ultraMissions["intermediate"][ultraMissions["intermediate"].length - 1].next = ultraMissions["advanced"][0];
@@ -90,5 +92,17 @@ class MissionList {
 		// parseCLAList();
 
 		_build = true;
+	}
+
+	public static function parseMisHeader(conts:String, path:String) {
+		var misParser = new MisParser(conts);
+		var mInfo = misParser.parseMissionInfo();
+		var mission = Mission.fromMissionInfo(path, mInfo);
+		mission.game = "ultra";
+		// do egg thing
+		if (StringTools.contains(conts.toLowerCase(), 'datablock = "easteregg"')) { // Ew
+			mission.hasEgg = true;
+		}
+		return mission;
 	}
 }

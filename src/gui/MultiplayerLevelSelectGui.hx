@@ -20,11 +20,18 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 	static var setLevelFn:Int->Void;
 	static var playSelectedLevel:Int->Void;
+	static var setLevelStr:String->Void;
 
 	var playerList:GuiMLTextListCtrl;
+	var customList:GuiTextListCtrl;
 	var updatePlayerCountFn:(Int, Int, Int, Int) -> Void;
 	var innerCtrl:GuiControl;
 	var inviteVisibility:Bool = true;
+
+	static var custSelected:Bool = false;
+	static var custPath:String;
+
+	var showingCustoms = false;
 
 	public function new(isHost:Bool) {
 		var res = ResourceLoader.getImage("data/ui/game/CloudBG.jpg").resource.toTile();
@@ -145,6 +152,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		playerWnd.extent = new Vector(640, 480);
 		innerCtrl.addChild(playerWnd);
 
+		custSelected = false;
+
 		var playerListArr = [];
 		if (Net.isHost) {
 			playerListArr.push({
@@ -207,6 +216,31 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		playerList.onSelectedFunc = (sel) -> {}
 		playerWnd.addChild(playerList);
 
+		var customListScroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/osxscroll.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		customListScroll.position = new Vector(25, 22);
+		customListScroll.extent = new Vector(590, 330);
+
+		customList = new GuiTextListCtrl(arial14, MPCustoms.missionList.map(mission -> {
+			return mission.title;
+		}));
+		var custSelectedIdx = 0;
+		customList.selectedColor = 0xF29515;
+		customList.selectedFillColor = 0xEBEBEB;
+		customList.position = new Vector(0, 0);
+		customList.extent = new Vector(550, 2880);
+		customList.scrollable = true;
+		customList.onSelectedFunc = (idx) -> {
+			NetCommands.setLobbyCustLevelName(MPCustoms.missionList[idx].title);
+			custSelected = true;
+			custSelectedIdx = idx;
+			custPath = MPCustoms.missionList[idx].path;
+			updateLobbyNames();
+		}
+		customListScroll.addChild(customList);
+		customListScroll.setScrollMax(customList.calculateFullHeight());
+		// playerWnd.addChild(customList);
+
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
@@ -231,6 +265,25 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		bottomBar.addChild(backButton);
 
 		if (Net.isHost) {
+			var customsButton = new GuiXboxButton("Customs", 200);
+			customsButton.position = new Vector(560, 0);
+			customsButton.vertSizing = Bottom;
+			customsButton.horizSizing = Right;
+			customsButton.gamepadAccelerator = ["X"];
+			customsButton.pressedAction = (e) -> {
+				showingCustoms = !showingCustoms;
+				if (showingCustoms) {
+					playerWnd.addChild(customListScroll);
+					playerWnd.removeChild(playerList);
+				} else {
+					playerWnd.removeChild(customListScroll);
+					playerWnd.addChild(playerList);
+					updateLobbyNames();
+				}
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+			}
+			bottomBar.addChild(customsButton);
+
 			var inviteButton = new GuiXboxButton("Invite Visibility", 220);
 			inviteButton.position = new Vector(750, 0);
 			inviteButton.vertSizing = Bottom;
@@ -254,8 +307,12 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		bottomBar.addChild(nextButton);
 
 		playSelectedLevel = (index:Int) -> {
-			curMission = difficultyMissions[index];
-			MarbleGame.instance.playMission(curMission, true);
+			if (custSelected) {
+				NetCommands.playCustomLevel(MPCustoms.missionList[custSelectedIdx].path);
+			} else {
+				curMission = difficultyMissions[index];
+				MarbleGame.instance.playMission(curMission, true);
+			}
 		}
 
 		var levelWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/levelPreviewWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -284,6 +341,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		function setLevel(idx:Int) {
 			// if (lock)
 			//	return false;
+			custSelected = false;
 			levelSelectOpts.currentOption = idx;
 			this.bmp.visible = true;
 			loadAnim.anim.visible = true;
@@ -314,12 +372,12 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				updatePlayerCountFn = (pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) -> {
 					if (inviteVisibility)
 						levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>'
-							+ '<p><font face="arial14">Level: ${mis.title}</font></p>'
+							+ '<p><font face="arial14">Level: ${levelSelectOpts.optionText.text.text}</font></p>'
 							+
 							'<p><font face="arial12">Public Slots: ${pub}/${publicTotal}, Private Slots: ${priv}/${privateTotal}, Invite Code: ${Net.serverInfo.inviteCode}</font></p>';
 					else
 						levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>'
-							+ '<p><font face="arial14">Level: ${mis.title}</font></p>'
+							+ '<p><font face="arial14">Level: ${levelSelectOpts.optionText.text.text}</font></p>'
 							+ '<p><font face="arial12">Public Slots: ${pub}/${publicTotal}, Private Slots: ${priv}/${privateTotal}</font></p>';
 				}
 				var pubCount = 1; // 1 for host
@@ -336,7 +394,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			}
 			if (Net.isClient) {
 				updatePlayerCountFn = (pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) -> {
-					levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>' + '<p><font face="arial14">Level: ${mis.title}</font></p>';
+					levelInfoLeft.text.text = '<p><font face="arial14">Host: ${hostName}</font></p>'
+						+ '<p><font face="arial14">Level: ${levelSelectOpts.optionText.text.text}</font></p>';
 				}
 				updatePlayerCountFn(0, 0, 0, 0);
 			}
@@ -357,6 +416,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			setLevel(idx);
 			levelSelectOpts.setCurrentOption(idx);
 		};
+
+		setLevelStr = (str) -> {
+			levelSelectOpts.optionText.text.text = str;
+			updateLobbyNames();
+		}
 
 		levelSelectOpts.setCurrentOption(currentSelectionStatic);
 		setLevel(currentSelectionStatic);
@@ -411,9 +475,10 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			}
 		}
 
-		playerList.setTexts(playerListArr.map(player -> {
-			return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
-		}));
+		if (!showingCustoms)
+			playerList.setTexts(playerListArr.map(player -> {
+				return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
+			}));
 
 		var pubCount = 1; // Self
 		var privCount = 0;

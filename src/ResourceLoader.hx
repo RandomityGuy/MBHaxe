@@ -1,5 +1,6 @@
 package src;
 
+import haxe.zip.Uncompress;
 import hxd.res.Any;
 import hxd.fs.BytesFileSystem.BytesFileEntry;
 #if (js || android)
@@ -595,20 +596,21 @@ class ResourceLoader {
 		return names;
 	}
 
-	public static function loadZip(entries:Array<haxe.zip.Entry>, game:String) {
+	public static function loadZip(entries:Array<haxe.zip.Entry>, prefix:String) {
 		zipFilesystem.clear(); // We are only allowed to load one zip
 		for (entry in entries) {
-			var fname = entry.fileName.toLowerCase();
+			var fname = prefix + entry.fileName.toLowerCase();
 			#if (sys && !android)
 			fname = "data/" + fname;
 			#end
-			if (game == 'gold')
-				fname = StringTools.replace(fname, 'interiors/', 'interiors_mbg/');
 			fname = StringTools.replace(fname, "lbinteriors", "interiors"); // Normalize
 			if (exists(fname))
 				continue;
 			Console.log("Loaded zip entry: " + fname);
-			var zfe = new BytesFileEntry(fname, entry.data);
+
+			var zdata = entry.data;
+
+			var zfe = new BytesFileEntry(fname, zdata);
 			zipFilesystem.set(fname, zfe);
 		}
 	}

@@ -564,7 +564,10 @@ class Net {
 		NetCommands.setLobbyLevelIndexClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
 
 		if (serverInfo.state == "PLAYING") { // We initiated the game, directly add in the marble
-			NetCommands.playLevelMidJoinClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
+			if (MultiplayerLevelSelectGui.custSelected) {
+				NetCommands.playCustomLevelMidJoinClient(conn, MultiplayerLevelSelectGui.custPath);
+			} else
+				NetCommands.playLevelMidJoinClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
 			MarbleGame.instance.world.addJoiningClient(conn, () -> {});
 			var playerInfoBytes = sendPlayerInfosBytes();
 			for (dc => cc in clients) {
