@@ -210,7 +210,7 @@ class CameraController extends Object {
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
 			+ gamepadY;
-		if (Settings.gamepadSettings.invertYAxis)
+		if (Settings.gamepadSettings.invertYAxis || Settings.controlsSettings.invertYAxis)
 			cameraPitchDelta = -cameraPitchDelta;
 		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0) + gamepadX;
 		if (Settings.gamepadSettings.invertXAxis)
