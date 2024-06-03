@@ -420,7 +420,7 @@ class Net {
 				}
 			}
 		}
-		if (wsAccum >= 20.0) {
+		if (wsAccum >= 15.0) {
 			wsAccum = 0;
 			if (Net.isHost) {
 				if (MasterServerClient.instance != null)

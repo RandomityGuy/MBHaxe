@@ -29,6 +29,8 @@ class MasterServerClient {
 
 	var open = false;
 
+	static var wsToken:Int = 0;
+
 	#if hl
 	var wsThread:sys.thread.Thread;
 
@@ -45,6 +47,9 @@ class MasterServerClient {
 			hl.Gc.enable(false);
 			hl.Gc.blocking(true); // Wtf is this shit
 		#end
+			wsToken++;
+
+			var myToken = wsToken;
 
 			ws = WebSocket.create(serverIp);
 			#if hl
@@ -80,27 +85,35 @@ class MasterServerClient {
 				#if hl
 				stopMutex.acquire();
 				#end
-				open = false;
-				ws = null;
-				instance = null;
+				if (myToken == wsToken) {
+					open = false;
+					ws = null;
+					instance = null;
+				}
 				#if hl
 				stopMutex.acquire();
 				stopping = true;
 				stopMutex.release();
-				wsThread = null;
+				if (myToken == wsToken) {
+					wsThread = null;
+				}
 				#end
 			}
 			ws.onclose = (?e) -> {
 				#if hl
 				stopMutex.acquire();
 				#end
-				open = false;
-				ws = null;
-				instance = null;
+				if (myToken == wsToken) {
+					open = false;
+					ws = null;
+					instance = null;
+				}
 				#if hl
 				stopping = true;
 				stopMutex.release();
-				wsThread = null;
+				if (myToken == wsToken) {
+					wsThread = null;
+				}
 				#end
 			}
 			#if hl
@@ -163,6 +176,11 @@ class MasterServerClient {
 	public static function disconnectFromMasterServer() {
 		if (instance != null && instance.ws != null) {
 			instance.ws.close();
+			if (instance != null) {
+				instance.open = false;
+				instance.ws = null;
+				instance = null;
+			}
 		}
 	}
 
