@@ -221,17 +221,26 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		playerList.onSelectedFunc = (sel) -> {}
 		playerWnd.addChild(playerList);
 
+		var custWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/helpWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
+		custWnd.horizSizing = Right;
+		custWnd.vertSizing = Bottom;
+		custWnd.position = new Vector(330, 58);
+		custWnd.extent = new Vector(640, 330);
+
 		var customListScroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/osxscroll.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		customListScroll.position = new Vector(25, 22);
-		customListScroll.extent = new Vector(590, 330);
+		customListScroll.extent = new Vector(600, 280);
+		customListScroll.scrollToBottom = false;
+		custWnd.addChild(customListScroll);
 
 		customList = new GuiTextListCtrl(arial14, MPCustoms.missionList.map(mission -> {
 			return mission.title;
 		}));
 		var custSelectedIdx = 0;
 		customList.selectedColor = 0xF29515;
-		customList.selectedFillColor = 0xEBEBEB;
+		customList.selectedFillColor = 0x858585;
+		customList.textColor = 0xFFFFFF;
 		customList.position = new Vector(0, 0);
 		customList.extent = new Vector(550, 2880);
 		customList.scrollable = true;
@@ -278,11 +287,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			customsButton.pressedAction = (e) -> {
 				showingCustoms = !showingCustoms;
 				if (showingCustoms) {
-					playerWnd.addChild(customListScroll);
-					playerWnd.removeChild(playerList);
+					innerCtrl.removeChild(playerWnd);
+					innerCtrl.addChild(custWnd);
 				} else {
-					playerWnd.removeChild(customListScroll);
-					playerWnd.addChild(playerList);
+					innerCtrl.addChild(playerWnd);
+					innerCtrl.removeChild(custWnd);
 					updateLobbyNames();
 				}
 				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
@@ -418,13 +427,13 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		};
 
 		setLevelFn = (idx) -> {
-			setLevel(idx);
 			levelSelectOpts.setCurrentOption(idx);
+			setLevel(idx);
 		};
 
 		setLevelStr = (str) -> {
 			levelSelectOpts.optionText.text.text = str;
-			updateLobbyNames();
+			updatePlayerCountFn(0, 0, 0, 0);
 		}
 
 		levelSelectOpts.setCurrentOption(currentSelectionStatic);
