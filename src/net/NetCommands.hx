@@ -213,7 +213,7 @@ class NetCommands {
 
 			var allReady = true;
 			for (id => client in Net.clientIdMap) {
-				if (client.state != GameplayState.GAME) {
+				if (client.state != GameplayState.GAME && client != conn) {
 					allReady = false;
 					break;
 				}
@@ -222,7 +222,6 @@ class NetCommands {
 				MarbleGame.instance.world.allClientsReady();
 			}
 		}
-		Net.clientIdMap.remove(clientId);
 		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 			cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
 		}
