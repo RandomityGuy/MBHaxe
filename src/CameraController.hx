@@ -135,7 +135,7 @@ class CameraController extends Object {
 		}
 
 		var factor = isTouch ? Util.lerp(1 / 25, 1 / 15,
-			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
+			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 10000, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
 		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook) && !isTouch) {
 			deltaposY = 0;
@@ -239,7 +239,7 @@ class CameraController extends Object {
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
 			+ gamepadY;
-		if (Settings.gamepadSettings.invertYAxis)
+		if (Settings.gamepadSettings.invertYAxis || Settings.controlsSettings.invertYAxis)
 			cameraPitchDelta = -cameraPitchDelta;
 		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0) + gamepadX;
 		if (Settings.gamepadSettings.invertXAxis)

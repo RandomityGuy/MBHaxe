@@ -108,10 +108,10 @@ class InputOptionsGui extends GuiImage {
 		clOpt.setCurrentOption(Settings.controlsSettings.controllerVerticalCenter ? 1 : 0);
 
 		var msOpt = optionCollection.addOption(1, "Mouse Sensitivity", numberRange(10, 100, 5), (idx) -> {
-			Settings.controlsSettings.cameraSensitivity = cast(0.2 + (idx / 18.0) * (3 - 0.2));
+			Settings.controlsSettings.cameraSensitivity = cast(0.12 + (idx / 18.0) * (1.2 - 0.12));
 			return true;
 		}, 0.5, 118);
-		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2)) * 18), 0, 18)));
+		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12)) * 18), 0, 18)));
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);

@@ -279,9 +279,11 @@ class Net {
 			var onDatachannelOpen = (idx:Int) -> {
 				openFlags |= idx;
 				if (openFlags == 3) {
-					var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
-					if (loadGui != null) {
-						loadGui.setLoadingStatus("Handshaking");
+					if (MarbleGame.canvas.content is MultiplayerLoadingGui) {
+						var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
+						if (loadGui != null) {
+							loadGui.setLoadingStatus("Handshaking");
+						}
 					}
 					Console.log("Successfully connected!");
 					clients.set(client, new ClientConnection(0, client, clientDatachannel, clientDatachannelUnreliable)); // host is always 0
