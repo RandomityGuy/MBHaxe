@@ -216,6 +216,11 @@ class CameraController extends Object {
 		if (Settings.gamepadSettings.invertXAxis)
 			cameraYawDelta = -cameraYawDelta;
 
+		if (MarbleGame.instance.paused) {
+			cameraYawDelta = 0;
+			cameraPitchDelta = 0;
+		}
+
 		var deltaX = 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 		var deltaY = 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
