@@ -83,13 +83,7 @@ class Net {
 	public static var serverInfo:ServerInfo;
 	public static var remoteServerInfo:RemoteServerInfo;
 
-	static var stunServers = [
-		"stun:stun.l.google.com:19302",
-		"stun:stun1.l.google.com:19302",
-		"stun:stun2.l.google.com:19302",
-		"stun:stun3.l.google.com:19302",
-		"stun:stun4.l.google.com:19302",
-	];
+	static var stunServers = ["stun:stun.l.google.com:19302"];
 
 	public static var turnServer:String = "";
 
@@ -106,7 +100,7 @@ class Net {
 	}
 
 	public static function addClientFromSdp(sdpString:String, privateJoin:Bool, onFinishSdp:String->Void) {
-		var peer = new RTCPeerConnection(stunServers.concat([turnServer]), "0.0.0.0");
+		var peer = new RTCPeerConnection(stunServers, "0.0.0.0");
 		var sdpObj = Json.parse(sdpString);
 		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		addClient(peer, privateJoin, onFinishSdp);
@@ -191,7 +185,7 @@ class Net {
 
 	public static function joinServer(serverName:String, isInvite:Bool, connectedCb:() -> Void) {
 		MasterServerClient.connectToMasterServer(() -> {
-			client = new RTCPeerConnection(stunServers.concat([turnServer]), "0.0.0.0");
+			client = new RTCPeerConnection(stunServers, "0.0.0.0");
 			var candidates = [];
 
 			var closing = false;
@@ -267,9 +261,9 @@ class Net {
 				}
 			}
 
-			haxe.Timer.delay(() -> {
-				finishSdp();
-			}, 5000);
+			// haxe.Timer.delay(() -> {
+			// 	finishSdp();
+			// }, 5000);
 
 			clientDatachannel = client.createDatachannel("mp");
 			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", true, null, 600);
