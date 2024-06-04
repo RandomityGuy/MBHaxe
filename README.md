@@ -104,3 +104,6 @@ In the native version, edit settings.json or the options menu in the platinum.
 
 ## Hey can you please add this new feature?
 If this new feature of yours already exists in MBG but not in this port, then I will try to add it, if I get time to do so, otherwise chances are, I won't add it since I have other things to do and would rather not waste my time on this any further. You are free to do pull requests if you have already implemented said feature.
+
+# Notes
+This project is tested with BrowserStack.
