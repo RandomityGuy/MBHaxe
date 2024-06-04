@@ -721,7 +721,11 @@ class Marble extends GameObject {
 				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
 					if (contact.otherObject is RoundBumper) {
 						if (!level.isReplayingMovement && !playedSounds.contains("data/sound/bumperding1.wav") && !this.isNetUpdate) {
-							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
+							if (level.marble == cast this)
+								AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
+							else
+								AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources),
+									this.getAbsPos().getPosition());
 							playedSounds.push("data/sound/bumperding1.wav");
 						}
 					}
@@ -2503,6 +2507,14 @@ class Marble extends GameObject {
 	public function setMarblePosition(x:Float, y:Float, z:Float) {
 		this.collider.transform.setPosition(new Vector(x, y, z));
 		this.setPosition(x, y, z);
+	}
+
+	public inline function getConnectionId() {
+		if (this.connection == null) {
+			return Net.isHost ? 0 : Net.clientId;
+		} else {
+			return this.connection.id;
+		}
 	}
 
 	public override function reset() {

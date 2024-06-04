@@ -518,6 +518,13 @@ class MarbleWorld extends Scheduler {
 			NetCommands.clientIsReady(Net.clientId);
 		if (this.isMultiplayer && Net.isHost) {
 			NetCommands.clientIsReady(-1);
+
+			// Sort all the marbles so that they are updated in a deterministic order
+			this.marbles.sort((a, b) -> @:privateAccess {
+				var aId = a.connection != null ? a.connection.id : 0; // Must be a host
+				var bId = b.connection != null ? b.connection.id : 0; // Must be a host
+				return (aId > bId) ? 1 : (aId < bId) ? -1 : 0;
+			});
 		}
 		var cc = 0;
 		for (client in Net.clients)
@@ -535,6 +542,13 @@ class MarbleWorld extends Scheduler {
 			this.restart(addedMarble); // spawn it
 			this.playGui.addPlayer(cc.id, cc.getName(), false);
 			this.playGui.redrawPlayerList();
+
+			// Sort all the marbles so that they are updated in a deterministic order
+			this.marbles.sort((a, b) -> @:privateAccess {
+				var aId = a.getConnectionId();
+				var bId = b.getConnectionId();
+				return (aId > bId) ? 1 : (aId < bId) ? -1 : 0;
+			});
 			onAdded();
 		});
 	}
@@ -545,6 +559,13 @@ class MarbleWorld extends Scheduler {
 			this.restart(addedMarble); // spawn it
 			this.playGui.addPlayer(cc.id, cc.getName(), false);
 			this.playGui.redrawPlayerList();
+
+			// Sort all the marbles so that they are updated in a deterministic order
+			this.marbles.sort((a, b) -> @:privateAccess {
+				var aId = a.getConnectionId();
+				var bId = b.getConnectionId();
+				return (aId > bId) ? 1 : (aId < bId) ? -1 : 0;
+			});
 			onAdded();
 		});
 	}
@@ -1627,11 +1648,17 @@ class MarbleWorld extends Scheduler {
 				fixedDt.dt = 0.032;
 				tickAccumulator -= 0.032;
 				var packets = [];
-				var myMove = marble.updateServer(fixedDt, collisionWorld, pathedInteriors);
 				var otherMoves = [];
-				for (client => marble in clientMarbles) {
-					otherMoves.push(marble.updateServer(fixedDt, collisionWorld, pathedInteriors));
+				var myMove = null;
+
+				for (marble in marbles) {
+					var move = marble.updateServer(fixedDt, collisionWorld, pathedInteriors);
+					if (marble == this.marble)
+						myMove = move;
+					else
+						otherMoves.push(move);
 				}
+
 				if (myMove != null && Net.isClient) {
 					this.predictions.storeState(marble, myMove.timeState.ticks);
 					for (client => marble in clientMarbles) {
@@ -1639,11 +1666,18 @@ class MarbleWorld extends Scheduler {
 					}
 				}
 				if (Net.isHost) {
-					for (client => othermarble in clientMarbles) { // Oh no!
-						var mv = otherMoves.shift();
-						packets.push(marble.packUpdate(myMove, fixedDt));
-						packets.push(othermarble.packUpdate(mv, fixedDt));
+					packets.push(marble.packUpdate(myMove, fixedDt));
+					for (othermarble in marbles) {
+						if (othermarble != this.marble) {
+							var mv = otherMoves.shift();
+							packets.push(othermarble.packUpdate(mv, fixedDt));
+						}
 					}
+					// for (client => othermarble in clientMarbles) { // Oh no!
+					// 	var mv = otherMoves.shift();
+					// 	packets.push(marble.packUpdate(myMove, fixedDt));
+					// 	packets.push(othermarble.packUpdate(mv, fixedDt));
+					// }
 					var allRecv = true;
 					for (client => marble in clientMarbles) { // Oh no!
 						// var pktClone = packets.copy();
