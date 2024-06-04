@@ -423,6 +423,7 @@ class DifBuilder {
 				var difresource = ResourceLoader.loadInterior(path);
 				difresource.acquire();
 				dif = difresource.resource;
+				dumbDownDif(dif);
 			}
 			var geo = (so == -1 ? dif.interiors[0] : dif.subObjects[so]);
 			var triangles = [];
@@ -1017,5 +1018,56 @@ class DifBuilder {
 			fs.ManifestFileSystem.ManifestEntry.doQuickLoad = false;
 			worker.run();
 		});
+	}
+
+	// Keeps only relevant parts of the dif to reduce memory footprint
+	static function dumbDownDif(dif:Dif) {
+		dif.aiSpecialNodes = null;
+		dif.forceFields = null;
+		dif.triggers = null;
+		dif.gameEntities = null;
+		dif.interiorPathfollowers = null;
+		dif.triggers = null;
+		dif.vehicleCollision = null;
+		for (itr in dif.interiors.concat(dif.subObjects)) {
+			itr.alarmAmbientColor = null;
+			itr.alarmLMapIndices = null;
+			itr.animatedLights = null;
+			itr.baseAmbientColor = null;
+			itr.bspNodes = null;
+			itr.bspSolidLeaves = null;
+			itr.convexHullEmitStrings = null;
+			itr.convexHulls = null;
+			itr.coordBinIndices = null;
+			itr.boundingSphere = null;
+			itr.coordBins = null;
+			itr.edges = null;
+			itr.edges2 = null;
+			itr.hullEmitStringIndices = null;
+			itr.hullIndices = null;
+			itr.hullPlaneIndices = null;
+			itr.hullSurfaceIndices = null;
+			itr.lightMaps = null;
+			itr.lightStates = null;
+			itr.nameBuffer = null;
+			itr.normalIndices = null;
+			itr.normalLMapIndices = null;
+			itr.nullSurfaces = null;
+			itr.pointVisibilities = null;
+			itr.polyListPlanes = null;
+			itr.polyListPoints = null;
+			itr.polyListStrings = null;
+			itr.portals = null;
+			itr.solidLeafSurfaces = null;
+			itr.stateDataBuffers = null;
+			itr.zones = null;
+			itr.zoneSurfaces = null;
+			itr.zoneStaticMeshes = null;
+			itr.windingIndices = null;
+			itr.texNormals = null;
+			itr.texMatrices = null;
+			itr.texMatIndices = null;
+			itr.stateDatas = null;
+		}
 	}
 }
