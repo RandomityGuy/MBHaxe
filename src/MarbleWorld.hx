@@ -1095,9 +1095,9 @@ class MarbleWorld extends Scheduler {
 
 	public function addMarble(marble:Marble, client:GameConnection, onFinish:Void->Void) {
 		marble.level = cast this;
-		this.marbles.push(marble);
 		if (marble.controllable) {
 			marble.init(cast this, client, () -> {
+				this.marbles.push(marble);
 				this.scene.addChild(marble.camera);
 				this.marble = marble;
 				// Ugly hack
@@ -1110,6 +1110,7 @@ class MarbleWorld extends Scheduler {
 			});
 		} else {
 			marble.init(cast this, client, () -> {
+				this.marbles.push(marble);
 				marble.collisionWorld = this.collisionWorld;
 				this.collisionWorld.addMovingEntity(marble.collider);
 				this.collisionWorld.addMarbleEntity(marble.collider);
