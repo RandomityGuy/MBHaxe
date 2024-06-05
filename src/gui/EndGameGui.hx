@@ -145,7 +145,7 @@ class EndGameGui extends GuiImage {
 		if (scoreType == Score)
 			egResultRight.text.text = '<font color="#8DFF8D">${Util.formatScore(score)}</font><br/><font color="#EBEBEB">${Util.formatScore(bestScore.time)}</font>';
 		if (scoreType == Time)
-			egResultRight.text.text = '<font color="${beatPar ? "#8DFF8D" : "0xFF7575"}">${Util.formatTime(score)}</font><br/><font color="#88BCEE">${Util.formatTime(mission.qualifyTime)}</font><br/><font color="#EBEBEB">${rating}</font><br/><font color="#EBEBEB">${Util.formatTime(bestScore.time)}</font>';
+			egResultRight.text.text = '<font color="${beatPar ? "#8DFF8D" : "#FF7575"}">${Util.formatTime(score)}</font><br/><font color="#88BCEE">${Util.formatTime(mission.qualifyTime)}</font><br/><font color="#EBEBEB">${rating}</font><br/><font color="#EBEBEB">${Util.formatTime(bestScore.time)}</font>';
 		endGameWnd.addChild(egResultRight);
 
 		var bottomBar = new GuiControl();

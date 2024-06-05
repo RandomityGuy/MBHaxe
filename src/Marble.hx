@@ -848,8 +848,14 @@ class Marble extends GameObject {
 						normP.scale(1 + bounce);
 
 						velocity.load(velocity.sub(normP.multiply(1 / ourMass)));
+						if (Math.isNaN(velocity.lengthSq())) {
+							velocity.set(0, 0, 0);
+						}
 
 						otherMarble.velocity.load(otherMarble.velocity.add(normP.multiply(1 / theirMass)));
+						if (Math.isNaN(otherMarble.velocity.lengthSq())) {
+							otherMarble.velocity.set(0, 0, 0);
+						}
 						contacts[i].velocity.load(otherMarble.velocity);
 					} else {
 						if (contacts[i].velocity.length() == 0 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
@@ -1534,6 +1540,8 @@ class Marble extends GameObject {
 	}
 
 	function nudgeToContacts(position:Vector, radius:Float, foundContacts:Array<MarbleTestMoveFoundContact>, foundMarbles:Array<SphereCollisionEntity>) {
+		if (Net.isMP)
+			return position;
 		var it = 0;
 		var concernedContacts = foundContacts; // PathedInteriors have their own nudge logic
 		var prevResolved = 0;
@@ -1727,8 +1735,8 @@ class Marble extends GameObject {
 				tdiff = diff;
 			}
 			var expectedPos = finalPosData.position;
-			var newPos = expectedPos;
-			// var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts, finalPosData.foundMarbles);
+			// var newPos = expectedPos;
+			var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts, finalPosData.foundMarbles);
 
 			if (this.velocity.lengthSq() > 1e-8) {
 				var posDiff = newPos.sub(expectedPos);
@@ -1846,6 +1854,9 @@ class Marble extends GameObject {
 					this.megaMarbleUseTick = 0;
 				}
 			}
+		}
+		if (Net.isClient && this.megaMarbleUseTick == 0) {
+			this.collider.radius = this._radius = 0.3;
 		}
 
 		if (Net.isMP) {
