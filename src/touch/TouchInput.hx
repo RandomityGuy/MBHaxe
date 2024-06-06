@@ -127,7 +127,8 @@ class TouchInput {
 		if (!Net.isMP)
 			this.restartButton = new RestartButton();
 		pauseButton.add(parentGui);
-		restartButton.add(parentGui);
+		if (!Net.isMP)
+			restartButton.add(parentGui);
 		jumpButton.add(parentGui);
 		powerupButton.add(parentGui);
 		if (Settings.optionsSettings.rewindEnabled && !Net.isMP)
