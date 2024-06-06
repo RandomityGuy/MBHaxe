@@ -41,7 +41,7 @@ class MasterServerClient {
 	var stopMutex:sys.thread.Mutex = new sys.thread.Mutex();
 	#end
 
-	public function new(onOpenFunc:() -> Void) {
+	public function new(onOpenFunc:() -> Void, onErrorFunc:() -> Void) {
 		#if hl
 		wsThread = sys.thread.Thread.create(() -> {
 			hl.Gc.enable(false);
@@ -78,9 +78,15 @@ class MasterServerClient {
 				responses.add(() -> {
 					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to connect to master server: " + m));
 				});
+				if (onErrorFunc != null)
+					responses.add(() -> {
+						onErrorFunc();
+					});
 				#end
 				#if js
 				MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to connect to master server: " + m));
+				if (onErrorFunc != null)
+					onErrorFunc();
 				#end
 				#if hl
 				stopMutex.acquire();
@@ -159,16 +165,16 @@ class MasterServerClient {
 		#end
 	}
 
-	public static function connectToMasterServer(onConnect:() -> Void) {
+	public static function connectToMasterServer(onConnect:() -> Void, onError:() -> Void = null) {
 		if (instance == null)
-			instance = new MasterServerClient(onConnect);
+			instance = new MasterServerClient(onConnect, onError);
 		else {
 			if (instance.open)
 				onConnect();
 			else {
 				if (instance != null && instance.ws != null)
 					instance.ws.close();
-				instance = new MasterServerClient(onConnect);
+				instance = new MasterServerClient(onConnect, onError);
 			}
 		}
 	}

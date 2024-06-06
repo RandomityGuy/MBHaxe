@@ -124,16 +124,24 @@ class MPServerListGui extends GuiImage {
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
 		bottomBar.addChild(backButton);
 
+		var refreshing = false;
+
 		var refreshButton = new GuiXboxButton("Refresh", 220);
 		refreshButton.position = new Vector(750, 0);
 		refreshButton.vertSizing = Bottom;
 		refreshButton.horizSizing = Right;
 		refreshButton.pressedAction = (e) -> {
+			if (refreshing)
+				return;
+			refreshing = true;
 			MasterServerClient.connectToMasterServer(() -> {
 				MasterServerClient.instance.getServerList((servers) -> {
 					ourServerList = servers;
 					updateServerListDisplay();
+					refreshing = false;
 				});
+			}, () -> {
+				refreshing = false;
 			});
 		}
 		bottomBar.addChild(refreshButton);
