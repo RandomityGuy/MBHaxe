@@ -44,8 +44,6 @@ class MasterServerClient {
 	public function new(onOpenFunc:() -> Void, onErrorFunc:() -> Void) {
 		#if hl
 		wsThread = sys.thread.Thread.create(() -> {
-			hl.Gc.enable(false);
-			hl.Gc.blocking(true); // Wtf is this shit
 		#end
 			wsToken++;
 
@@ -53,8 +51,6 @@ class MasterServerClient {
 
 			ws = WebSocket.create(serverIp);
 			#if hl
-			hl.Gc.enable(true);
-			hl.Gc.blocking(false);
 			#end
 			ws.onopen = () -> {
 				open = true;
@@ -131,22 +127,10 @@ class MasterServerClient {
 					var s = toSend.pop(false);
 					if (s == null)
 						break;
-					#if hl
-					hl.Gc.blocking(true);
-					#end
 					ws.sendString(s);
-					#if hl
-					hl.Gc.blocking(false);
-					#end
 				}
 
-				#if hl
-				hl.Gc.blocking(true);
-				#end
 				ws.process();
-				#if hl
-				hl.Gc.blocking(false);
-				#end
 				stopMutex.release();
 				Sys.sleep(0.1);
 			}
