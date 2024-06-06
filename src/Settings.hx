@@ -133,7 +133,7 @@ class Settings {
 		marbleShader: "ClassicGlassPureSphere",
 		rewindEnabled: false,
 		rewindTimescale: 1,
-		reflectionDetail: 3,
+		reflectionDetail: 2,
 		maxPixelRatio: 1,
 		vsync: true,
 		huntRandom: false,
