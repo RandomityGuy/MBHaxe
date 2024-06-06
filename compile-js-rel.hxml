@@ -10,5 +10,6 @@
 -D js-es=6
 -D flow_border
 -D highDPI
+-D analyzer-optimize
 --dce full
 --main Main
