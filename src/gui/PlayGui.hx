@@ -35,17 +35,22 @@ import src.Settings;
 import src.Util;
 import src.AudioManager;
 
-typedef MiddleMessage = {
-	ctrl:GuiText,
-	age:Float,
-	yPos:Float
+@:publicFields
+@:structInit
+class MiddleMessage {
+	var ctrl:GuiText;
+	var ctrl2:GuiText;
+	var age:Float;
+	var yPos:Float;
 }
 
+@:publicFields
+@:structInit
 typedef PlayerInfo = {
-	id:Int,
-	name:String,
-	us:Bool,
-	score:Int
+	var id:Int;
+	var name:String;
+	var us:Bool;
+	var score:Int;
 }
 
 class PlayGui {
@@ -73,6 +78,8 @@ class PlayGui {
 	var blastFill:GuiImage;
 	var blastFillUltra:GuiImage;
 	var blastFrame:GuiImage;
+	var blastFillBlast:h2d.Tile;
+	var blastFillBlastLess:h2d.Tile;
 
 	var playerListContainer:GuiControl;
 	var playerListCtrl:GuiMLTextListCtrl;
@@ -595,25 +602,28 @@ class PlayGui {
 		blastBar.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		this.playGuiCtrl.addChild(blastBar);
 
-		blastFill = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbarMask.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFillBlastLess = ResourceLoader.getResource("data/ui/game/powerbarMaskLess.png", ResourceLoader.getImage, this.imageResources).toTile();
+		blastFillBlast = ResourceLoader.getResource("data/ui/game/powerbarMaskBlast.png", ResourceLoader.getImage, this.imageResources).toTile();
+
+		blastFill = new GuiImage(blastFillBlastLess.clone());
 		blastFill.position = new Vector(36, 38);
 		blastFill.extent = new Vector(100, 27);
 		blastFill.xScale = (scene2d.height - safeVerMargin * 2) / 480;
 		blastFill.yScale = (scene2d.height - safeVerMargin * 2) / 480;
-		var colorMat = Matrix.I();
-		colorMat.colorSet(0xCDD2D7);
-		blastFill.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
+		// var colorMat = Matrix.I();
+		// colorMat.colorSet(0xCDD2D7);
+		// blastFill.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
 
 		blastBar.addChild(blastFill);
 
-		blastFillUltra = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbarMask.png", ResourceLoader.getImage, this.imageResources).toTile());
+		blastFillUltra = new GuiImage(ResourceLoader.getResource("data/ui/game/powerbarMaskUltra.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFillUltra.position = new Vector(36, 38);
 		blastFillUltra.extent = new Vector(100, 27);
 		blastFillUltra.xScale = (scene2d.height - safeVerMargin * 2) / 480;
 		blastFillUltra.yScale = (scene2d.height - safeVerMargin * 2) / 480;
-		var colorMat = Matrix.I();
-		colorMat.colorSet(0xC4FF00);
-		blastFillUltra.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
+		// var colorMat = Matrix.I();
+		// colorMat.colorSet(0xC4FF00);
+		// blastFillUltra.bmp.filter = new h2d.filter.ColorMatrix(colorMat);
 
 		blastBar.addChild(blastFillUltra);
 
@@ -647,13 +657,15 @@ class PlayGui {
 			blastFill.bmp.scaleX = value;
 			// blastFill.extent = new Vector(Util.lerp(0, 100, value), 27);
 			if (oldVal < 0.25 && value >= 0.25) {
-				var colorMat = cast(blastFill.bmp.filter, h2d.filter.ColorMatrix);
-				colorMat.matrix.colorSet(0x0080FF);
+				blastFill.bmp.tile.switchTexture(blastFillBlast);
+				// var colorMat = cast(blastFill.bmp.filter, h2d.filter.ColorMatrix);
+				// colorMat.matrix.colorSet(0x0080FF);
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 			}
 			if (oldVal >= 0.25 && value < 0.25) {
-				var colorMat = cast(blastFill.bmp.filter, h2d.filter.ColorMatrix);
-				colorMat.matrix.colorSet(0xCDD2D7);
+				blastFill.bmp.tile.switchTexture(blastFillBlastLess);
+				// var colorMat = cast(blastFill.bmp.filter, h2d.filter.ColorMatrix);
+				// colorMat.matrix.colorSet(0xCDD2D7);
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(false);
 			}
 			blastFillUltra.bmp.visible = false;
@@ -1105,10 +1117,14 @@ class PlayGui {
 			if (thismsg.age > 3) {
 				this.middleMessages.remove(thismsg);
 				thismsg.ctrl.parent.removeChild(thismsg.ctrl); // Delete it
+				thismsg.ctrl2.parent.removeChild(thismsg.ctrl2);
 			} else {
 				var t = thismsg.age;
 				thismsg.ctrl.text.alpha = 1 - thismsg.age / 3;
 				thismsg.ctrl.text.y = thismsg.yPos - (-33 * 0.5 * t * t + 100 * t);
+
+				thismsg.ctrl2.text.alpha = 1 - thismsg.age / 3;
+				thismsg.ctrl2.text.y = thismsg.yPos - (-33 * 0.5 * t * t + 100 * t);
 			}
 		}
 	}
@@ -1120,19 +1136,37 @@ class PlayGui {
 		var arial14 = arial14b.toSdfFont(cast 33 * Settings.uiScale, h2d.Font.SDFChannel.MultiChannel);
 
 		var middleMsg = new GuiText(arial14);
-		middleMsg.position = new Vector(200, 50);
+		middleMsg.position = new Vector(199, 49);
 		middleMsg.extent = new Vector(400, 100);
 		middleMsg.horizSizing = Center;
 		middleMsg.vertSizing = Center;
 		middleMsg.text.text = text;
 		middleMsg.justify = Center;
-		middleMsg.text.textColor = color;
-		middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
+		middleMsg.text.textColor = 0x000000;
+		// middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg);
 		middleMsg.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
-		this.middleMessages.push({ctrl: middleMsg, age: 0, yPos: middleMsg.text.y});
+		var middleMsg2 = new GuiText(arial14);
+		middleMsg2.position = new Vector(200, 50);
+		middleMsg2.extent = new Vector(400, 100);
+		middleMsg2.horizSizing = Center;
+		middleMsg2.vertSizing = Center;
+		middleMsg2.text.text = text;
+		middleMsg2.justify = Center;
+		middleMsg2.text.textColor = color;
+		// middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
+		this.playGuiCtrl.addChild(middleMsg2);
+		middleMsg2.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
+		middleMsg2.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
+
+		this.middleMessages.push({
+			ctrl: middleMsg,
+			ctrl2: middleMsg2,
+			age: 0,
+			yPos: middleMsg.text.y
+		});
 	}
 
 	var pgoChildren = [];
