@@ -1937,8 +1937,10 @@ class Marble extends GameObject {
 		}
 		if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
 			var ticksSince = (this.serverTicks - this.blastUseTick);
-			this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad - ticksSince * 0.032;
-			this.blastUseTime = this.level.timeState.currentAttemptTime - ticksSince * 0.032;
+			if (ticksSince >= 0) {
+				this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad - ticksSince * 0.032;
+				this.blastUseTime = this.level.timeState.currentAttemptTime - ticksSince * 0.032;
+			}
 		}
 
 		// if (this.controllable && Net.isClient) {
