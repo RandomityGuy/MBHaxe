@@ -271,6 +271,11 @@ class Net {
 			var openFlags = 0;
 
 			var onDatachannelOpen = (idx:Int) -> {
+				if (!Net.isMP) {
+					// Close
+					client.close();
+					return;
+				}
 				openFlags |= idx;
 				if (openFlags == 3) {
 					if (MarbleGame.canvas.content is MultiplayerLoadingGui) {
