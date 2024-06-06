@@ -137,9 +137,9 @@ class Renderer extends h3d.scene.Renderer {
 			renderPass(defaultPass, get("skyshape"), backToFront);
 		}
 		if (!cubemapPass || Settings.optionsSettings.reflectionDetail >= 2) {
-			if (!cubemapPass)
-				ProfilerUI.measure("interiorZPass", 0);
-			renderPass(defaultPass, get("zPass"));
+			// if (!cubemapPass)
+			// 	ProfilerUI.measure("interiorZPass", 0);
+			// renderPass(defaultPass, get("zPass"));
 			if (!cubemapPass)
 				ProfilerUI.measure("interior", 0);
 			renderPass(defaultPass, get("interior"));

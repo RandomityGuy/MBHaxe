@@ -1252,7 +1252,7 @@ class MarbleWorld extends Scheduler {
 								if (ourMoveStruct != null) {
 									var otherPred = predictions.retrieveState(clientMarble, ourMoveStruct.timeState.ticks);
 									if (otherPred != null) {
-										if (otherPred.getError(lastMove) > 0.1) {
+										if (otherPred.getError(lastMove) > 0.01) {
 											// Debug.drawSphere(@:privateAccess clientMarbles[Net.clientIdMap[client]].newPos, 0.2, 0.5);
 											// trace('Prediction error: ${otherPred.getError(lastMove)}');
 											// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
@@ -1286,7 +1286,7 @@ class MarbleWorld extends Scheduler {
 				if (ourMoveStruct != null) {
 					var ourPred = predictions.retrieveState(marble, ourMoveStruct.timeState.ticks);
 					if (ourPred != null) {
-						if (ourPred.getError(ourMove) > 0.1) {
+						if (ourPred.getError(ourMove) > 0.01) {
 							// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 							marble.unpackUpdate(ourMove);
 							needsPrediction |= 1 << Net.clientId;
