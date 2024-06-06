@@ -134,7 +134,7 @@ class Settings {
 		cameraDistance: 2.5,
 		rewindEnabled: false,
 		rewindTimescale: 1.0,
-		reflectionDetail: 3,
+		reflectionDetail: 2,
 		maxPixelRatio: 1,
 		vsync: true,
 		huntRandom: false,
