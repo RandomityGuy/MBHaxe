@@ -164,6 +164,11 @@ class GuiTextListCtrl extends GuiControl {
 		}
 		if (MarbleGame.canvas.scene2d.contains(g))
 			MarbleGame.canvas.scene2d.removeChild(g);
+
+		if (this.scrollable) {
+			if (MarbleGame.canvas.scene2d.contains(this.flow))
+				MarbleGame.canvas.scene2d.removeChild(this.flow);
+		}
 	}
 
 	public override function onMouseMove(mouseState:MouseState) {

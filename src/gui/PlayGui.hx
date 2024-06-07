@@ -1094,7 +1094,7 @@ class PlayGui {
 		middleMsg2.text.textColor = color;
 		// middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg2);
-		middleMsg2.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
+		middleMsg2.render(scene2d);
 		middleMsg2.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
 		this.middleMessages.push({
