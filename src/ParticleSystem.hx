@@ -1,11 +1,9 @@
 package src;
 
 import shaders.DtsTexture;
-import h3d.parts.Particles;
 import h3d.Matrix;
 import src.TimeState;
 import h3d.prim.UV;
-import h3d.parts.Data.BlendMode;
 import src.MarbleWorld;
 import src.Util;
 import h3d.mat.Data.Wrap;
@@ -33,7 +31,7 @@ class ParticleData {
 
 @:publicFields
 class Particle {
-	public var part:h3d.parts.Particle;
+	public var part:src.ParticlesMesh.ParticleElement;
 
 	var data:ParticleData;
 	var manager:ParticleManager;
@@ -61,7 +59,7 @@ class Particle {
 		this.lifeTime = this.o.lifetime + this.o.lifetimeVariance * (Math.random() * 2 - 1);
 		this.initialSpin = Util.lerp(this.o.spinRandomMin, this.o.spinRandomMax, Math.random());
 
-		this.part = new h3d.parts.Particle();
+		this.part = new src.ParticlesMesh.ParticleElement();
 	}
 
 	public function update(time:Float, dt:Float) {
@@ -298,7 +296,7 @@ class ParticleManager {
 	var scene:Scene;
 	var currentTime:Float;
 
-	var particleGroups:Map<String, Particles> = [];
+	var particleGroups:Map<String, src.ParticlesMesh.ParticlesMesh> = [];
 	var particles:Array<Particle> = [];
 
 	var emitters:Array<ParticleEmitter> = [];
@@ -321,7 +319,7 @@ class ParticleManager {
 		if (particleGroups.exists(particleData.identifier)) {
 			particleGroups[particleData.identifier].add(particle.part);
 		} else {
-			var pGroup = new Particles(particle.data.texture, this.scene);
+			var pGroup = new src.ParticlesMesh.ParticlesMesh(particle.data.texture, this.scene);
 			pGroup.hasColor = true;
 			pGroup.material.setDefaultProps("ui");
 			// var pdts = new DtsTexture(pGroup.material.texture);
