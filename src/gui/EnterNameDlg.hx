@@ -51,6 +51,7 @@ class EnterNameDlg extends GuiImage {
 		textInput.horizSizing = Width;
 		textInput.vertSizing = Height;
 		textInput.text.textColor = 0xEBEBEB;
+		textInput.setCaretColor(0xEBEBEB);
 		textInput.text.selectionColor.setColor(0x8DFF8D);
 		textInput.text.selectionTile = h2d.Tile.fromColor(0x88BCEE, 0, hxd.Math.ceil(textInput.text.font.lineHeight));
 		textFrame.addChild(textInput);
