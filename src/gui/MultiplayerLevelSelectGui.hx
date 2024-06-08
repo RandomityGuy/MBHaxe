@@ -236,7 +236,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 		customList = new GuiTextListCtrl(arial14, MPCustoms.missionList.map(mission -> {
 			return mission.title;
-		}));
+		}), 0xFFFFFF);
 		var custSelectedIdx = 0;
 		customList.selectedColor = 0xF29515;
 		customList.selectedFillColor = 0x858585;
