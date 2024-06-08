@@ -37,7 +37,7 @@ class MPCustoms {
 
 	public static function download(mission:MPCustomEntry, onFinish:() -> Void, onFail:() -> Void) {
 		var lastSlashIdx = mission.path.lastIndexOf('/');
-		var dlPath = "https://marbleblastultra.randomityguy.me/" + mission.path.substr(0, lastSlashIdx) + ".zip";
+		var dlPath = "https://marbleblastultra.randomityguy.me/" + StringTools.urlEncode(mission.path.substr(0, lastSlashIdx)) + ".zip";
 		Http.get(dlPath, (zipData) -> {
 			var reader = new Reader(new BytesInput(zipData));
 			var entries:Array<haxe.zip.Entry> = null;
