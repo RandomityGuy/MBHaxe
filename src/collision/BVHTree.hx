@@ -9,6 +9,7 @@ interface IBVHObject {
 	function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>):Void;
 }
 
+@:generic
 @:publicFields
 class BVHNode<T:IBVHObject> {
 	var index:Int;
