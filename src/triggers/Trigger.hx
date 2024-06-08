@@ -21,6 +21,7 @@ class Trigger extends GameObject {
 	var vertices:Array<Vector>;
 
 	public var collider:BoxCollisionEntity;
+	public var accountForGravity:Bool = false;
 
 	public function new(element:MissionElementTrigger, level:MarbleWorld) {
 		super();
