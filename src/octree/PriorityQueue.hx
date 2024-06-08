@@ -1,5 +1,6 @@
 package octree;
 
+@:generic
 class PriorityQueue<T> {
 	var queue:Array<PriorityQueueNode<T>>;
 
