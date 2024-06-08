@@ -2006,20 +2006,94 @@ class MarbleWorld extends Scheduler {
 				if (contact.go is Trigger) {
 					var trigger:Trigger = cast contact.go;
 					var triggeraabb = trigger.collider.boundingBox;
-
-					if (triggeraabb.collide(box)) {
-						trigger.onMarbleInside(marble, timeState);
-						if (!this.shapeOrTriggerInside.contains(contact.go)) {
-							this.shapeOrTriggerInside.push(contact.go);
-							trigger.onMarbleEnter(marble, timeState);
+					if (trigger.accountForGravity) {
+						var up = marble.currentUp;
+						var extents = triggeraabb.getCenter();
+						var enterExtents = box.getCenter();
+						var diffExtents = enterExtents.sub(extents);
+						var upAmount = up.dot(diffExtents.toVector());
+						if (upAmount > 0) {
+							var boxC = box.clone();
+							boxC.xMin -= up.x * upAmount;
+							boxC.yMin -= up.y * upAmount;
+							boxC.zMin -= up.z * upAmount;
+							boxC.xMax -= up.x * upAmount;
+							boxC.yMax -= up.y * upAmount;
+							boxC.zMax -= up.z * upAmount;
+							// Debug.drawSphere(boxC.getCenter().toVector(), 0.3, 0.25);
+							if (triggeraabb.collide(boxC)) {
+								trigger.onMarbleInside(marble, timeState);
+								if (!this.shapeOrTriggerInside.contains(contact.go)) {
+									this.shapeOrTriggerInside.push(contact.go);
+									trigger.onMarbleEnter(marble, timeState);
+								}
+								inside.push(contact.go);
+							}
+						} else {
+							// Debug.drawSphere(box.getCenter().toVector(), 0.3, 0.25);
+							if (triggeraabb.collide(box)) {
+								trigger.onMarbleInside(marble, timeState);
+								if (!this.shapeOrTriggerInside.contains(contact.go)) {
+									this.shapeOrTriggerInside.push(contact.go);
+									trigger.onMarbleEnter(marble, timeState);
+								}
+								inside.push(contact.go);
+							}
 						}
-						inside.push(contact.go);
+					} else {
+						if (triggeraabb.collide(box)) {
+							trigger.onMarbleInside(marble, timeState);
+							if (!this.shapeOrTriggerInside.contains(contact.go)) {
+								this.shapeOrTriggerInside.push(contact.go);
+								trigger.onMarbleEnter(marble, timeState);
+							}
+							inside.push(contact.go);
+						}
 					}
 				}
 			}
 		}
 
 		for (object in shapeOrTriggerInside) {
+			if (object is Trigger) {
+				var trigger:Trigger = cast object;
+				var triggeraabb = trigger.collider.boundingBox;
+				if (trigger.accountForGravity) {
+					var up = marble.currentUp;
+					var extents = triggeraabb.getCenter();
+					var enterExtents = box.getCenter();
+					var diffExtents = enterExtents.sub(extents);
+					var upAmount = up.dot(diffExtents.toVector());
+					if (upAmount > 0) {
+						var boxC = box.clone();
+						boxC.xMin -= up.x * upAmount;
+						boxC.yMin -= up.y * upAmount;
+						boxC.zMin -= up.z * upAmount;
+						boxC.xMax -= up.x * upAmount;
+						boxC.yMax -= up.y * upAmount;
+						boxC.zMax -= up.z * upAmount;
+						// Debug.drawSphere(boxC.getCenter().toVector(), 0.3, 0.25);
+						if (triggeraabb.collide(boxC)) {
+							trigger.onMarbleInside(marble, timeState);
+							if (!this.shapeOrTriggerInside.contains(object)) {
+								this.shapeOrTriggerInside.push(object);
+								trigger.onMarbleEnter(marble, timeState);
+							}
+							inside.push(object);
+						}
+					} else {
+						// Debug.drawSphere(box.getCenter().toVector(), 0.3, 0.25);
+						if (triggeraabb.collide(box)) {
+							trigger.onMarbleInside(marble, timeState);
+							if (!this.shapeOrTriggerInside.contains(object)) {
+								this.shapeOrTriggerInside.push(object);
+								trigger.onMarbleEnter(marble, timeState);
+							}
+							inside.push(object);
+						}
+					}
+				}
+			}
 			if (!inside.contains(object)) {
 				this.shapeOrTriggerInside.remove(object);
 				object.onMarbleLeave(marble, timeState);
