@@ -555,14 +555,14 @@ class DifBuilder {
 					}
 					edge1.set(pc1.y - pc0.y, tc1.x - tc0.x, tc1.y - tc0.y);
 					edge2.set(pc2.y - pc0.y, tc2.x - tc0.x, tc2.y - tc0.y);
-					cp = edge1.cross(edge2);
+					cp.load(edge1.cross(edge2));
 					if (Math.abs(cp.x) > 1e-12) {
 						s.y = -cp.y / cp.x;
 						t.y = -cp.z / cp.x;
 					}
 					edge1.set(pc1.z - pc0.z, tc1.x - tc0.x, tc1.y - tc0.y);
 					edge2.set(pc2.z - pc0.z, tc2.x - tc0.x, tc2.y - tc0.y);
-					cp = edge1.cross(edge2);
+					cp.load(edge1.cross(edge2));
 					if (Math.abs(cp.x) > 1e-12) {
 						s.z = -cp.y / cp.x;
 						t.z = -cp.z / cp.x;
