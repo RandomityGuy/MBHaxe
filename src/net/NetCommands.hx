@@ -25,6 +25,9 @@ class NetCommands {
 	@:rpc(server) public static function setLobbyCustLevelName(str:String) {
 		if (MultiplayerLevelSelectGui.setLevelFn != null) {
 			MultiplayerLevelSelectGui.setLevelStr(str);
+		} else {
+			MultiplayerLevelSelectGui.custSelected = true;
+			MultiplayerLevelSelectGui.custPath = str;
 		}
 	}
 
@@ -113,7 +116,8 @@ class NetCommands {
 
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
-			if (Net.serverInfo.state == "WAITING" && MarbleGame.instance.world != null) {
+			if (Net.serverInfo.state == "WAITING") {
+				Console.log('Client ${clientId} is ready!');
 				if (clientId != -1)
 					Net.clientIdMap[clientId].ready();
 				else
@@ -127,6 +131,7 @@ class NetCommands {
 				}
 				if (allReady && Net.hostReady) {
 					if (MarbleGame.instance.world != null) {
+						Console.log('All are ready, starting');
 						MarbleGame.instance.world.allClientsReady();
 					}
 					Net.serverInfo.state = "PLAYING";

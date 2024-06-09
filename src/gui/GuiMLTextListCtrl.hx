@@ -76,12 +76,14 @@ class GuiMLTextListCtrl extends GuiControl {
 			textObjs.push(tobj);
 
 			if (this.scrollable) {
-				if (this.flow.contains(tobj))
-					this.flow.removeChild(tobj);
+				if (this.flow != null) {
+					if (this.flow.contains(tobj))
+						this.flow.removeChild(tobj);
 
-				this.flow.addChild(tobj);
+					this.flow.addChild(tobj);
 
-				this.flow.getProperties(tobj).isAbsolute = true;
+					this.flow.getProperties(tobj).isAbsolute = true;
+				}
 			}
 		}
 		this.texts = texts;

@@ -190,6 +190,10 @@ class Net {
 
 			var closing = false;
 
+			isMP = true;
+			isHost = false;
+			isClient = true;
+
 			var closeFunc = (msg:String, forceShow:Bool) -> {
 				if (closing)
 					return;
@@ -203,6 +207,9 @@ class Net {
 					if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
 						var loadGui = new MultiplayerLoadingGui(msg);
 						MarbleGame.canvas.setContent(loadGui);
+						loadGui.setErrorStatus(msg);
+					} else {
+						var loadGui = cast(MarbleGame.canvas.content, MultiplayerLoadingGui);
 						loadGui.setErrorStatus(msg);
 					}
 				}
@@ -297,7 +304,7 @@ class Net {
 			}
 
 			var onDatachannelClose = (dc:RTCDataChannel) -> {
-				closeFunc("Server closed", true);
+				closeFunc("Disconnected", true);
 			}
 
 			var onDatachannelError = (msg:String) -> {
@@ -329,10 +336,6 @@ class Net {
 			clientDatachannelUnreliable.onError = (msg) -> {
 				onDatachannelError(msg);
 			}
-
-			isMP = true;
-			isHost = false;
-			isClient = true;
 		});
 	}
 
@@ -356,6 +359,7 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
+			MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
 			NetCommands.serverClosed();
@@ -375,6 +379,7 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
+			MultiplayerLevelSelectGui.custSelected = false;
 		}
 	}
 
@@ -562,7 +567,11 @@ class Net {
 
 	static function onClientHandshakeComplete(conn:ClientConnection) {
 		// Send our current mission to connecting client
-		NetCommands.setLobbyLevelIndexClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
+		if (MultiplayerLevelSelectGui.custSelected) {
+			NetCommands.setLobbyCustLevelNameClient(conn, MultiplayerLevelSelectGui.custPath);
+		} else {
+			NetCommands.setLobbyLevelIndexClient(conn, MultiplayerLevelSelectGui.currentSelectionStatic);
+		}
 
 		if (serverInfo.state == "PLAYING") { // We initiated the game, directly add in the marble
 			if (MultiplayerLevelSelectGui.custSelected) {
