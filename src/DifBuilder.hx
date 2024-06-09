@@ -465,11 +465,59 @@ class DifBuilder {
 					colliderSurface.originalIndices = [];
 					colliderSurface.originalSurfaceIndex = surfaceindex;
 
-					var pc0 = geo.points[geo.windings[surface.windingStart + 1]];
-					var pc1 = geo.points[geo.windings[surface.windingStart + 0]];
-					var pc2 = geo.points[geo.windings[surface.windingStart + 2]];
-
+					// Pick the three non-collinear points
 					var texPlanes = geo.texGenEQs[surface.texGenIndex];
+
+					var startIdx = 0;
+					while (true) {
+						var pc0 = geo.points[geo.windings[surface.windingStart + startIdx + 1]];
+						var pc1 = geo.points[geo.windings[surface.windingStart + startIdx]];
+						var pc2 = geo.points[geo.windings[surface.windingStart + startIdx + 2]];
+
+						var tc0 = new Vector(texPlanes.planeX.x * pc0.x
+							+ texPlanes.planeX.y * pc0.y
+							+ texPlanes.planeX.z * pc0.z
+							+ texPlanes.planeX.d,
+							texPlanes.planeY.x * pc0.x
+							+ texPlanes.planeY.y * pc0.y
+							+ texPlanes.planeY.z * pc0.z
+							+ texPlanes.planeY.d, 0, 0);
+						var tc1 = new Vector(texPlanes.planeX.x * pc1.x
+							+ texPlanes.planeX.y * pc1.y
+							+ texPlanes.planeX.z * pc1.z
+							+ texPlanes.planeX.d,
+							texPlanes.planeY.x * pc1.x
+							+ texPlanes.planeY.y * pc1.y
+							+ texPlanes.planeY.z * pc1.z
+							+ texPlanes.planeY.d, 0, 0);
+						var tc2 = new Vector(texPlanes.planeX.x * pc2.x
+							+ texPlanes.planeX.y * pc2.y
+							+ texPlanes.planeX.z * pc2.z
+							+ texPlanes.planeX.d,
+							texPlanes.planeY.x * pc2.x
+							+ texPlanes.planeY.y * pc2.y
+							+ texPlanes.planeY.z * pc2.z
+							+ texPlanes.planeY.d, 0, 0);
+
+						var edge1 = new Vector(pc1.x - pc0.x, tc1.x - tc0.x, tc1.y - tc0.y);
+						var edge2 = new Vector(pc2.x - pc0.x, tc2.x - tc0.x, tc2.y - tc0.y);
+						var cp = edge1.cross(edge2);
+
+						if (cp.lengthSq() > 1e-12) {
+							break;
+						}
+
+						startIdx += 3;
+						if (startIdx >= surface.windingCount) {
+							startIdx = 0;
+							break;
+						}
+					}
+
+					var pc0 = geo.points[geo.windings[surface.windingStart + startIdx + 1]];
+					var pc1 = geo.points[geo.windings[surface.windingStart + startIdx]];
+					var pc2 = geo.points[geo.windings[surface.windingStart + startIdx + 2]];
+
 					var tc0 = new Vector(texPlanes.planeX.x * pc0.x
 						+ texPlanes.planeX.y * pc0.y
 						+ texPlanes.planeX.z * pc0.z

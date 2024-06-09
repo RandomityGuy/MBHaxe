@@ -157,8 +157,6 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		playerWnd.extent = new Vector(640, 480);
 		innerCtrl.addChild(playerWnd);
 
-		custSelected = false;
-
 		var playerListArr = [];
 		if (Net.isHost) {
 			playerListArr.push({
@@ -245,7 +243,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		customList.extent = new Vector(550, 2880);
 		customList.scrollable = true;
 		customList.onSelectedFunc = (idx) -> {
-			NetCommands.setLobbyCustLevelName(MPCustoms.missionList[idx].title);
+			NetCommands.setLobbyCustLevelName(MPCustoms.missionList[idx].path);
 			custSelected = true;
 			custSelectedIdx = idx;
 			custPath = MPCustoms.missionList[idx].path;
@@ -432,13 +430,24 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		};
 
 		setLevelStr = (str) -> {
-			levelSelectOpts.optionText.text.text = str;
-			updatePlayerCountFn(0, 0, 0, 0);
+			var cust = MPCustoms.missionList.filter(x -> x.path == str)[0];
+			levelSelectOpts.optionText.text.text = cust.title;
+			custSelected = true;
+			custPath = str;
+			if (Net.isHost) {
+				updateLobbyNames();
+			} else
+				updatePlayerCountFn(0, 0, 0, 0);
 		}
 
+		var customIsSelected = custSelected == true;
 		levelSelectOpts.setCurrentOption(currentSelectionStatic);
 		setLevel(currentSelectionStatic);
 		innerCtrl.addChild(levelSelectOpts);
+
+		if (customIsSelected) {
+			setLevelStr(custPath);
+		}
 	}
 
 	override function onResize(width:Int, height:Int) {
