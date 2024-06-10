@@ -1,3 +1,18 @@
+# 1.1.0
+After all these years, Marble Blast Online is finally back!
+Implemented as the Multiplayer update to Marble Blast Ultra Haxe Port.
+Multiplayer is *fully* cross platform allowing you to join and host matches across all the following platforms: Windows, Mac, Web, Android.
+
+Changelog:
+- Added Cross Platform Multiplayer
+	- Server Browser, Join and Hosting, Invite Code support.
+	- Multiplayer Customs Browser
+	- Related Multiplayer Achievements are added.
+- Optimized the game to run at much higher frame rates.
+- Matched marble shadow to match with MBU.
+- Fixed a bug regarding marble rotations when the game is playing at low fps.
+- Fixed a minor shader bug with tiles.
+
 # 1.0.2
 This update fixes the following bugs.
 - Optimized rewind to use memory better.
