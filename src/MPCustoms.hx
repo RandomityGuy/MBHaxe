@@ -26,6 +26,11 @@ class MPCustoms {
 			Http.get("https://marbleblastultra.randomityguy.me/data/ultraCustom.json", (b) -> {
 				var misList = Json.parse(b.toString());
 				missionList = misList;
+				missionList.sort((a, b) -> {
+					var a1 = a.title.toLowerCase();
+					var b1 = b.title.toLowerCase();
+					return a1 < b1 ? -1 : (a1 > b1 ? 1 : 0);
+				});
 				Console.log('Loaded ${misList.length} custom missions.');
 				_requestSent = false;
 			}, (e) -> {

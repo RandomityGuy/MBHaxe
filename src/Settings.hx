@@ -135,7 +135,7 @@ class Settings {
 		rewindTimescale: 1,
 		reflectionDetail: 2,
 		maxPixelRatio: 1,
-		vsync: true,
+		vsync: false,
 		huntRandom: false,
 		fastLoad: false
 	};

@@ -88,13 +88,13 @@ class MiscOptionsGui extends GuiImage {
 		}, 0.5, 118);
 		sgOpt.setCurrentOption(Settings.optionsSettings.huntRandom ? 0 : 1);
 
-		#if hl
+		// #if hl
 		var flOpt = optionCollection.addOption(1, "Fast Loading", ["Disabled", "Enabled"], (idx) -> {
 			Settings.optionsSettings.fastLoad = (idx == 1);
 			return true;
 		}, 0.5, 118);
 		flOpt.setCurrentOption(Settings.optionsSettings.fastLoad ? 1 : 0);
-		#end
+		// #end
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);

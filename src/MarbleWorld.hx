@@ -1778,20 +1778,51 @@ class MarbleWorld extends Scheduler {
 			if (lock)
 				return;
 
-			var func = this.resourceLoadFuncs.shift();
-			lock = true;
-			#if hl
-			func(() -> {
-				lock = false;
-				this._resourcesLoaded++;
-			});
-			#end
-			#if js
-			func(() -> {
-				lock = false;
-				this._resourcesLoaded++;
-			});
-			#end
+			if (Settings.optionsSettings.fastLoad) {
+				#if hl
+				while (this.resourceLoadFuncs.length != 0) {
+					var func = this.resourceLoadFuncs.shift();
+					lock = true;
+					func(() -> {
+						lock = false;
+						this._resourcesLoaded++;
+					});
+				}
+				#end
+				#if js
+				lock = true;
+
+				var func = this.resourceLoadFuncs.shift();
+
+				var consumeFn;
+				consumeFn = () -> {
+					this._resourcesLoaded++;
+					if (this.resourceLoadFuncs.length != 0) {
+						var fn = this.resourceLoadFuncs.shift();
+						fn(consumeFn);
+					} else {
+						lock = false;
+					}
+				}
+
+				func(consumeFn);
+				#end
+			} else {
+				var func = this.resourceLoadFuncs.shift();
+				lock = true;
+				#if hl
+				func(() -> {
+					lock = false;
+					this._resourcesLoaded++;
+				});
+				#end
+				#if js
+				func(() -> {
+					lock = false;
+					this._resourcesLoaded++;
+				});
+				#end
+			}
 		} else {
 			if (!this._loadBegin || lock)
 				return;
