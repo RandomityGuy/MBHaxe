@@ -115,6 +115,7 @@ class MovementInput {
 
 	public function setVisible(enabled:Bool) {
 		this.area.graphics.visible = enabled;
+		this.joystick.graphics.visible = enabled;
 	}
 
 	public function dispose() {

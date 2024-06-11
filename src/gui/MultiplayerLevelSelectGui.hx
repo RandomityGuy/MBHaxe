@@ -300,6 +300,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			inviteButton.position = new Vector(750, 0);
 			inviteButton.vertSizing = Bottom;
 			inviteButton.horizSizing = Right;
+			inviteButton.gamepadAccelerator = ["Y"];
 			inviteButton.pressedAction = (e) -> {
 				inviteVisibility = !inviteVisibility;
 				updateLobbyNames();

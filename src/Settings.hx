@@ -84,6 +84,7 @@ typedef TouchSettings = {
 	var rewindButtonPos:Array<Float>;
 	var rewindButtonSize:Float;
 	var buttonJoystickMultiplier:Float;
+	var hideControls:Bool;
 }
 
 typedef GamepadSettings = {
@@ -172,7 +173,8 @@ class Settings {
 		blastButtonSize: 60,
 		rewindButtonPos: [300, 100],
 		rewindButtonSize: 60,
-		buttonJoystickMultiplier: 2.5
+		buttonJoystickMultiplier: 2.5,
+		hideControls: false
 	}
 
 	public static var gamepadSettings:GamepadSettings = {
@@ -391,6 +393,11 @@ class Settings {
 				touchSettings.rewindButtonPos = [300, 100];
 				touchSettings.rewindButtonSize = 60;
 			}
+			#if js
+			if (touchSettings.hideControls == null) {
+				touchSettings.hideControls = false;
+			}
+			#end
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;
 			}
