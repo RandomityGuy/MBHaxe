@@ -163,11 +163,13 @@ class JoinServerGui extends GuiImage {
 			var failed = true;
 			haxe.Timer.delay(() -> {
 				if (failed) {
-					var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
-					if (loadGui != null) {
-						loadGui.setErrorStatus("Failed to connect to server");
-						Net.disconnect();
+					if (MarbleGame.canvas.content is MultiplayerLoadingGui) {
+						var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
+						if (loadGui != null) {
+							loadGui.setErrorStatus("Failed to connect to server");
+						}
 					}
+					Net.disconnect();
 				}
 			}, 15000);
 			Net.joinServer(inviteCodeInput.text.text, true, () -> {
