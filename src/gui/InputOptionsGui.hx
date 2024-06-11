@@ -95,12 +95,6 @@ class InputOptionsGui extends GuiImage {
 
 		flOpt.setCurrentOption(Settings.controlsSettings.alwaysFreeLook ? 1 : 0);
 
-		var msOpt = optionCollection.addOption(1, "Mouse Sensitivity", numberRange(10, 100, 5), (idx) -> {
-			Settings.controlsSettings.cameraSensitivity = cast(0.2 + (idx / 18.0) * (3 - 0.2));
-			return true;
-		}, 0.5, 118);
-		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2)) * 18), 0, 18)));
-
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);

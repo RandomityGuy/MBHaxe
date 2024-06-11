@@ -89,8 +89,9 @@ class CameraInput {
 					if (Math.abs(inpY) < 1.3)
 						inpY = 0;
 				}
+				var dt = MarbleGame.instance.world.timeState.dt;
 
-				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(inpX), applyNonlinearScale(inpY), true);
+				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(inpX) * dt * 25, applyNonlinearScale(inpY) * dt * 25, true);
 				if (inpX != 0)
 					prevMouse.x = e.relX;
 				if (inpY != 0)

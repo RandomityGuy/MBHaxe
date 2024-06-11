@@ -57,6 +57,21 @@ class TouchOptionsGui extends GuiImage {
 		optionCollection.extent = new Vector(815, 500);
 		innerCtrl.addChild(optionCollection);
 
+		function numberRange(start:Int, stop:Int, step:Int) {
+			var range = [];
+			while (start <= stop) {
+				range.push('${start}');
+				start += step;
+			}
+			return range;
+		}
+
+		var msOpt = optionCollection.addOption(1, "Camera Sensitivity", numberRange(10, 100, 5), (idx) -> {
+			Settings.controlsSettings.cameraSensitivity = cast(0.2 + (idx / 18.0) * (3 - 0.2));
+			return true;
+		}, 0.5, 118);
+		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2)) * 18), 0, 18)));
+
 		var cameraMultiplier = optionCollection.addOption(1, "Button-Camera Factor", ["0.5", "1", "1.5", "2", "2.5", "3", "3.5"], (idx) -> {
 			Settings.touchSettings.buttonJoystickMultiplier = 0.5 + (idx * 0.5);
 			return true;
