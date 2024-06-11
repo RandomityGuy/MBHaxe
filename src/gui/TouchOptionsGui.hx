@@ -6,8 +6,9 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 import src.Util;
+import src.AudioManager;
 
-class OptionsListGui extends GuiImage {
+class TouchOptionsGui extends GuiImage {
 	var innerCtrl:GuiControl;
 
 	public function new(pauseGui:Bool = false) {
@@ -23,7 +24,12 @@ class OptionsListGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var scene2d = MarbleGame.canvas.scene2d;
+		#if hl
+		var scene2d = hxd.Window.getInstance();
+		#end
+		#if js
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
 
 		var offsetX = (scene2d.width - 1280) / 2;
 		var offsetY = (scene2d.height - 720) / 2;
@@ -47,49 +53,27 @@ class OptionsListGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "HELP & OPTIONS";
+		rootTitle.text.text = "TOUCH OPTIONS";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var btnList = new GuiXboxList();
-		btnList.position = new Vector(70 - offsetX, 165);
-		btnList.horizSizing = Left;
-		btnList.extent = new Vector(502, 500);
-		innerCtrl.addChild(btnList);
+		var optionCollection = new GuiXboxOptionsListCollection();
+		optionCollection.position = new Vector(380, 160);
+		optionCollection.extent = new Vector(815, 500);
+		innerCtrl.addChild(optionCollection);
 
-		if (!pauseGui) {
-			btnList.addButton(3, 'Marble Appearance', (e) -> {
-				MarbleGame.canvas.setContent(new MarblePickerGui());
-			});
-		}
-		btnList.addButton(3, 'Input and Sound Options', (e) -> {
-			MarbleGame.canvas.setContent(new InputOptionsGui(pauseGui));
-		});
-		if (Util.isTouchDevice()) {
-			if (!pauseGui) {
-				btnList.addButton(3, 'Touch Controls', (e) -> {
-					MarbleGame.canvas.setContent(new TouchOptionsGui(pauseGui));
-				});
-			}
-		} else {
-			btnList.addButton(3, 'Key Bindings', (e) -> {
-				MarbleGame.canvas.setContent(new KeyBindingsGui(pauseGui));
-			});
-		}
-		btnList.addButton(3, 'Video Options', (e) -> {
-			MarbleGame.canvas.setContent(new VideoOptionsGui(pauseGui));
-		});
-		if (!pauseGui) {
-			btnList.addButton(3, 'Misc Options', (e) -> {
-				MarbleGame.canvas.setContent(new MiscOptionsGui(pauseGui));
-			});
-		}
-		btnList.addButton(5, 'How to Play', (e) -> {
-			MarbleGame.canvas.setContent(new AboutMenuOptionsGui(pauseGui));
-		});
-		btnList.addButton(5, 'Credits', (e) -> {
-			MarbleGame.canvas.setContent(new HelpCreditsGui(5, pauseGui));
-		});
+		var cameraMultiplier = optionCollection.addOption(1, "Button-Camera Factor", ["0.5", "1", "1.5", "2", "2.5", "3", "3.5"], (idx) -> {
+			Settings.touchSettings.buttonJoystickMultiplier = 0.5 + (idx * 0.5);
+			return true;
+		}, 0.5, 118);
+		cameraMultiplier.setCurrentOption(Std.int(Util.clamp((Settings.touchSettings.buttonJoystickMultiplier - 0.5) / 0.5, 0, 6)));
+
+		var hideCtrls = optionCollection.addOption(1, "Hide Controls", ["No", "Yes"], (idx) -> {
+			Settings.touchSettings.hideControls = idx == 1;
+			return true;
+		}, 0.5, 118);
+
+		hideCtrls.setCurrentOption(Settings.touchSettings.hideControls ? 1 : 0);
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -98,20 +82,36 @@ class OptionsListGui extends GuiImage {
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
 
-		var backButton = new GuiXboxButton("Back", 160);
-		backButton.position = new Vector(400, 0);
+		var backButton = new GuiXboxButton("Ok", 160);
+		backButton.position = new Vector(960, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
-		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
+		backButton.gamepadAccelerator = ["A"];
+		backButton.accelerators = [hxd.Key.ENTER];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {
+				Settings.applySettings();
 				MarbleGame.canvas.popDialog(this);
-				MarbleGame.instance.showPauseUI();
+				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
 			}
 		else
-			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
+			backButton.pressedAction = (e) -> {
+				Settings.applySettings();
+				MarbleGame.canvas.setContent(new OptionsListGui());
+			};
 		bottomBar.addChild(backButton);
+
+		if (!pauseGui) {
+			var ctrlButton = new GuiXboxButton("Edit Controls", 220);
+			ctrlButton.position = new Vector(750, 0);
+			ctrlButton.vertSizing = Bottom;
+			ctrlButton.horizSizing = Right;
+			ctrlButton.gamepadAccelerator = ["Y"];
+			ctrlButton.pressedAction = (e) -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui(pauseGui));
+			}
+			bottomBar.addChild(ctrlButton);
+		}
 	}
 
 	override function onResize(width:Int, height:Int) {

@@ -65,9 +65,9 @@ class TouchCtrlsEditGui extends GuiImage {
 		nextButton.pressedAction = (e) -> {
 			if (paused) {
 				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+				MarbleGame.canvas.pushDialog(new TouchOptionsGui(true));
 			} else {
-				MarbleGame.canvas.setContent(new OptionsListGui());
+				MarbleGame.canvas.setContent(new TouchOptionsGui());
 			}
 		};
 		innerCtrl.addChild(nextButton);
