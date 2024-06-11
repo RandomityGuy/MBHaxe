@@ -85,6 +85,7 @@ typedef TouchSettings = {
 	var rewindButtonSize:Float;
 	var buttonJoystickMultiplier:Float;
 	var hideControls:Bool;
+	var cameraSwipeExtent:Float;
 }
 
 typedef GamepadSettings = {
@@ -174,7 +175,8 @@ class Settings {
 		rewindButtonPos: [300, 100],
 		rewindButtonSize: 60,
 		buttonJoystickMultiplier: 2.5,
-		hideControls: false
+		hideControls: false,
+		cameraSwipeExtent: 10.0
 	}
 
 	public static var gamepadSettings:GamepadSettings = {
@@ -429,7 +431,13 @@ class Settings {
 			if (touchSettings.hideControls == null) {
 				touchSettings.hideControls = false;
 			}
+			if (touchSettings.cameraSwipeExtent == null) {
+				touchSettings.cameraSwipeExtent = 10.0;
+			}
 			#end
+			if (touchSettings.cameraSwipeExtent == 0) {
+				touchSettings.cameraSwipeExtent = 10.0;
+			}
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;
 			}
