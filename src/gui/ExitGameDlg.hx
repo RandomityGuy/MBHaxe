@@ -19,8 +19,6 @@ class ExitGameDlg extends GuiImage {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/level_text.wav', ResourceLoader.getAudio, this.soundResources));
-
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
