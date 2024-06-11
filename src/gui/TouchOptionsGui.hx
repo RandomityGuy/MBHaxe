@@ -68,6 +68,12 @@ class TouchOptionsGui extends GuiImage {
 		}, 0.5, 118);
 		cameraMultiplier.setCurrentOption(Std.int(Util.clamp((Settings.touchSettings.buttonJoystickMultiplier - 0.5) / 0.5, 0, 6)));
 
+		var swipeExtent = optionCollection.addOption(1, "Camera Swipe Extent", ["5", "10", "15", "20", "25", "30", "35"], (idx) -> {
+			Settings.touchSettings.cameraSwipeExtent = 5 + (idx * 5);
+			return true;
+		}, 0.5, 118);
+		swipeExtent.setCurrentOption(Std.int(Util.clamp((Settings.touchSettings.cameraSwipeExtent - 5) / 5, 0, 6)));
+
 		var hideCtrls = optionCollection.addOption(1, "Hide Controls", ["No", "Yes"], (idx) -> {
 			Settings.touchSettings.hideControls = idx == 1;
 			return true;

@@ -103,7 +103,7 @@ class CameraInput {
 	}
 
 	function applyNonlinearScale(value:Float) {
-		var clamped = Util.clamp(value, -10, 10);
+		var clamped = Util.clamp(value, -Settings.touchSettings.cameraSwipeExtent, Settings.touchSettings.cameraSwipeExtent);
 		return Math.abs(clamped) < 3 ? Math.pow(Math.abs(clamped / 2), 2.7) * (clamped >= 0 ? 1 : -1) : clamped;
 	}
 
