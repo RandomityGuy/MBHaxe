@@ -289,6 +289,7 @@ class MarbleGame {
 			Console.log("Game paused");
 			world.setCursorLock(false);
 			@:privateAccess world.playGui.setGuiVisibility(false);
+			AudioManager.playSound(ResourceLoader.getAudio('data/sound/level_text.wav').resource);
 			showPauseUI();
 		} else {
 			if (world._ready) {
