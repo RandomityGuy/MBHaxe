@@ -237,7 +237,7 @@ class Settings {
 		return null;
 	}
 
-	@:hlNative public static function open_url(url:String):Void {}
+	@:hlNative public static function open_web_url(url:String):Void {}
 	#end
 
 	public static function applySettings() {
@@ -506,9 +506,26 @@ class Settings {
 	public static function init() {
 		load();
 		#if hl
-		Window.getInstance().resize(Window.getInstance().width, Window.getInstance().height);
+		var wnd = Window.getInstance();
+		// var zoomRatio = Window.getInstance().windowToPixelRatio;
+		// Window.getInstance().resize(Window.getInstance().width, Window.getInstance().height);
 		// Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
-		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		// Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+		var zoomRatio = Math.min(Window.getInstance().height, Window.getInstance().width) / 700;
+		Settings.zoomRatio = zoomRatio;
+		#if hl
+		Settings.optionsSettings.screenWidth = cast wnd.width;
+		Settings.optionsSettings.screenHeight = cast wnd.height;
+		#end
+		trace("Window resized to "
+			+ Settings.optionsSettings.screenWidth
+			+ "x"
+			+ Settings.optionsSettings.screenHeight
+			+ " (Zoom "
+			+ zoomRatio
+			+ ")");
+
+		// MarbleGame.canvas.scene2d.scaleMode = Zoom(zoomRatio);
 		#end
 		#if js
 		Window.getInstance().propagateKeyEvents = true;
