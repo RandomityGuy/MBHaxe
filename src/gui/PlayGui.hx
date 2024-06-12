@@ -117,6 +117,8 @@ class PlayGui {
 	var chatHud:GuiMLText;
 	var chatHudBg:GuiMLText;
 	var chatHudInput:GuiTextInput;
+	var chatInputBg:GuiImage;
+	var chatInputBgText:GuiText;
 	var chats:Array<ChatMessage>;
 	var chatFocused:Bool = false;
 
@@ -636,19 +638,38 @@ class PlayGui {
 		this.chatHud.extent = new Vector(200, 250);
 		this.chatHudCtrl.addChild(chatHud);
 
+		this.chatInputBg = new GuiImage(ResourceLoader.getResource('data/ui/xbox/fade_black.png', ResourceLoader.getImage, this.imageResources).toTile());
+		this.chatInputBg.position = new Vector(0, 0);
+		this.chatInputBg.extent = new Vector(200, 20);
+		this.chatHudCtrl.addChild(chatInputBg);
+
+		this.chatInputBgText = new GuiText(arial14);
+		this.chatInputBgText.position = new Vector(0, 0);
+		this.chatInputBgText.extent = new Vector(200, 20);
+		this.chatInputBg.addChild(chatInputBgText);
+		this.chatInputBgText.text.textColor = 0xF29515;
+		this.chatInputBgText.text.text = "Chat:";
+
 		this.chatHudInput = new GuiTextInput(arial14);
-		this.chatHudInput.position = new Vector(0, 0);
-		this.chatHudInput.extent = new Vector(200, 20);
+		this.chatHudInput.position = new Vector(40, 0);
+		this.chatHudInput.extent = new Vector(160, 20);
 		@:privateAccess this.chatHudInput.text.interactive.forceAnywherefocus = true;
 		this.chatHudCtrl.addChild(chatHudInput);
+
+		this.chatInputBgText.text.visible = false;
+		this.chatInputBg.bmp.visible = false;
 
 		var sendText = "";
 
 		this.chatHudInput.text.onFocus = (e) -> {
+			this.chatInputBgText.text.visible = true;
+			this.chatInputBg.bmp.visible = true;
 			chatFocused = true;
 		}
 
 		this.chatHudInput.text.onFocusLost = (e) -> {
+			this.chatInputBgText.text.visible = false;
+			this.chatInputBg.bmp.visible = false;
 			sendText = "";
 			chatFocused = false;
 		}
@@ -663,10 +684,14 @@ class PlayGui {
 					NetCommands.sendServerChatMessage(StringTools.htmlEscape(sendText));
 				}
 				this.chatHudInput.text.text = "";
+				this.chatInputBgText.text.visible = false;
+				this.chatInputBg.bmp.visible = false;
 				chatFocused = false;
 			}
 			if (e.keyCode == Key.ESCAPE) {
 				this.chatHudInput.text.text = "";
+				this.chatInputBgText.text.visible = false;
+				this.chatInputBg.bmp.visible = false;
 				chatFocused = false;
 				@:privateAccess Key.keyPressed[Key.ESCAPE] = 0; // consume escape
 			}
