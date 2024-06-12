@@ -80,7 +80,7 @@ class TouchEditButton extends GuiGraphics {
 
 			if (state == 1) {
 				var renderRect = getHitTestRect();
-				var newRadius = Util.clamp(mouseState.position.sub(renderRect.position.add(renderRect.extent.multiply(0.5))).length(), 30, 80);
+				var newRadius = Util.clamp(mouseState.position.sub(renderRect.position.add(renderRect.extent.multiply(0.5))).length(), 15, 80);
 				this.radius = newRadius;
 				this.extent = new Vector(2 * newRadius, 2 * newRadius);
 

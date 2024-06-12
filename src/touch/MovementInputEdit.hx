@@ -81,7 +81,7 @@ class MovementInputEdit extends GuiGraphics {
 
 				var knobPos = new Vector(renderRect.position.x + renderRect.extent.x / 2, renderRect.position.y + 15);
 
-				var newSize = Util.clamp(Math.abs(mouseState.position.y - (renderRect.position.y + renderRect.extent.y / 2)) / 3, 30,
+				var newSize = Util.clamp(Math.abs(mouseState.position.y - (renderRect.position.y + renderRect.extent.y / 2)) / 3, 15,
 					70); // Full size is size * 6
 				var newPos = new Vector(knobPos.x - newSize * 3, mouseState.position.y);
 
