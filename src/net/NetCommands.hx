@@ -338,6 +338,10 @@ class NetCommands {
 			if (MarbleGame.instance.world._ready) {
 				@:privateAccess MarbleGame.instance.world.playGui.addChatMessage(msg);
 			}
+		} else {
+			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).addChatMessage(msg);
+			}
 		}
 	}
 }
