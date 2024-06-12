@@ -27,6 +27,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 	var updatePlayerCountFn:(Int, Int, Int, Int) -> Void;
 	var innerCtrl:GuiControl;
 	var inviteVisibility:Bool = true;
+	var chatWnd:ChatCtrl;
 
 	static var custSelected:Bool = false;
 	static var custPath:String;
@@ -207,6 +208,12 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 			return t;
 		}
+
+		chatWnd = new ChatCtrl();
+		chatWnd.horizSizing = Left;
+		chatWnd.position = new Vector(330, 58);
+		chatWnd.extent = new Vector(200, 250);
+		innerCtrl.addChild(chatWnd);
 
 		playerList = new GuiMLTextListCtrl(arial14, playerListArr.map(player -> {
 			return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
@@ -523,9 +530,18 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		updatePlayerCountFn(pub, priv, publicTotal, privateTotal);
 	}
 
+	public function addChatMessage(str:String) {
+		this.chatWnd.addChatMessage(str);
+	}
+
 	override function dispose() {
 		super.dispose();
 		playSelectedLevel = null;
 		setLevelFn = null;
+	}
+
+	override function update(dt:Float, mouseState:MouseState) {
+		this.chatWnd.updateChat(dt);
+		super.update(dt, mouseState);
 	}
 }
