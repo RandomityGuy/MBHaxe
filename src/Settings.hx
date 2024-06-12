@@ -70,6 +70,7 @@ typedef ControlsSettings = {
 	var respawn:Int;
 	var blast:Int;
 	var rewind:Int;
+	var chat:Int;
 }
 
 typedef TouchSettings = {
@@ -161,6 +162,7 @@ class Settings {
 		respawn: Key.BACKSPACE,
 		blast: Key.MOUSE_RIGHT,
 		rewind: Key.R,
+		chat: Key.T
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -419,6 +421,9 @@ class Settings {
 			if (controlsSettings.rewind == 0) {
 				controlsSettings.rewind = Key.R;
 			}
+			if (controlsSettings.chat == 0) {
+				controlsSettings.chat = Key.T;
+			}
 			if (touchSettings.blastButtonPos == null) {
 				touchSettings.blastButtonPos = [300, 240];
 				touchSettings.blastButtonSize = 60;
@@ -483,6 +488,9 @@ class Settings {
 			}
 			if (controlsSettings.rewind == null) {
 				controlsSettings.rewind = Key.R;
+			}
+			if (controlsSettings.chat == null) {
+				controlsSettings.chat = Key.T;
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;

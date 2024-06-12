@@ -76,37 +76,39 @@ class MoveManager {
 		if (!MarbleGame.instance.paused) {
 			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
 			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
-			if (Key.isDown(Settings.controlsSettings.forward)) {
-				move.d.x -= 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.backward)) {
-				move.d.x += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.left)) {
-				move.d.y += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.right)) {
-				move.d.y -= 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.jump)
-				|| MarbleGame.instance.touchInput.jumpButton.pressed
-				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
-				move.jump = true;
-			}
-			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
-				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
-				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
-				move.powerup = true;
-			}
+			if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
+				if (Key.isDown(Settings.controlsSettings.forward)) {
+					move.d.x -= 1;
+				}
+				if (Key.isDown(Settings.controlsSettings.backward)) {
+					move.d.x += 1;
+				}
+				if (Key.isDown(Settings.controlsSettings.left)) {
+					move.d.y += 1;
+				}
+				if (Key.isDown(Settings.controlsSettings.right)) {
+					move.d.y -= 1;
+				}
+				if (Key.isDown(Settings.controlsSettings.jump)
+					|| MarbleGame.instance.touchInput.jumpButton.pressed
+					|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
+					move.jump = true;
+				}
+				if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
+					|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
+					|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
+					move.powerup = true;
+				}
 
-			if (Key.isDown(Settings.controlsSettings.blast)
-				|| (MarbleGame.instance.touchInput.blastbutton.pressed)
-				|| Gamepad.isDown(Settings.gamepadSettings.blast))
-				move.blast = true;
+				if (Key.isDown(Settings.controlsSettings.blast)
+					|| (MarbleGame.instance.touchInput.blastbutton.pressed)
+					|| Gamepad.isDown(Settings.gamepadSettings.blast))
+					move.blast = true;
 
-			if (MarbleGame.instance.touchInput.movementInput.pressed) {
-				move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
-				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
+				if (MarbleGame.instance.touchInput.movementInput.pressed) {
+					move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
+					move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
+				}
 			}
 
 			// quantize moves for client
@@ -214,12 +216,12 @@ class MoveManager {
 			if (queuedMoves.length > serverMaxMoveListSize
 				|| (serverAvgMoveListSize > serverTargetMoveListSize + serverMoveListSizeSlack
 					&& queuedMoves.length > serverTargetMoveListSize)) {
-				if (queuedMoves.length > serverMaxMoveListSize) {
-					var dropAmt = queuedMoves.length - serverTargetMoveListSize;
-					while (dropAmt-- > 0) {
-						queuedMoves.pop();
-					}
+				// if (queuedMoves.length > serverMaxMoveListSize) {
+				var dropAmt = queuedMoves.length - serverTargetMoveListSize;
+				while (dropAmt-- > 0) {
+					queuedMoves.pop();
 				}
+				// }
 				serverAvgMoveListSize = serverTargetMoveListSize;
 				// serverAbnormalMoveCount++;
 				// if (serverAbnormalMoveCount > 3) {

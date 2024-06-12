@@ -326,4 +326,18 @@ class NetCommands {
 			ping(Console.time());
 		}
 	}
+
+	@:rpc(client) public static function sendChatMessage(msg:String) {
+		if (Net.isHost) {
+			sendServerChatMessage(msg);
+		}
+	}
+
+	@:rpc(server) public static function sendServerChatMessage(msg:String) {
+		if (MarbleGame.instance.world != null) {
+			if (MarbleGame.instance.world._ready) {
+				@:privateAccess MarbleGame.instance.world.playGui.addChatMessage(msg);
+			}
+		}
+	}
 }
