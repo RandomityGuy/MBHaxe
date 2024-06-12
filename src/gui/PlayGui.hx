@@ -1,5 +1,7 @@
 package gui;
 
+import net.NetCommands;
+import hxd.Key;
 import net.NetPacket.ScoreboardPacket;
 import net.Net;
 import h3d.Matrix;
@@ -46,11 +48,18 @@ class MiddleMessage {
 
 @:publicFields
 @:structInit
-typedef PlayerInfo = {
+class PlayerInfo {
 	var id:Int;
 	var name:String;
 	var us:Bool;
 	var score:Int;
+}
+
+@:publicFields
+@:structInit
+class ChatMessage {
+	var text:String;
+	var sendTime:Float;
 }
 
 class PlayGui {
@@ -108,7 +117,10 @@ class PlayGui {
 
 	var chatHudCtrl:GuiControl;
 	var chatHud:GuiMLText;
-	var chats:Array<String>;
+	var chatHudBg:GuiMLText;
+	var chatHudInput:GuiTextInput;
+	var chats:Array<ChatMessage>;
+	var chatFocused:Bool = false;
 
 	public function dispose() {
 		if (_init) {
@@ -664,21 +676,101 @@ class PlayGui {
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 16 * Settings.uiScale, MultiChannel);
+		var arial14 = arial14b.toSdfFont(cast 15 * Settings.uiScale, MultiChannel);
 
 		this.chatHudCtrl = new GuiControl();
 		this.chatHudCtrl.position = new Vector(playGuiCtrl.extent.x - 201, 150);
-		this.chatHudCtrl.extent = new Vector(150, 200);
+		this.chatHudCtrl.extent = new Vector(200, 250);
 		this.chatHudCtrl.horizSizing = Left;
 		this.playGuiCtrl.addChild(chatHudCtrl);
 
 		this.chats = [];
+
+		this.chatHudBg = new GuiMLText(arial14, (s) -> arial14);
+		this.chatHudBg.position = new Vector(1, 21);
+		this.chatHudBg.extent = new Vector(200, 250);
+		this.chatHudBg.text.textColor = 0;
+		this.chatHudCtrl.addChild(chatHudBg);
+
 		this.chatHud = new GuiMLText(arial14, (s) -> arial14);
-		this.chatHud.position = new Vector(0, 0);
-		this.chatHud.extent = new Vector(150, 200);
+		this.chatHud.position = new Vector(0, 20);
+		this.chatHud.extent = new Vector(200, 250);
 		this.chatHudCtrl.addChild(chatHud);
 
-		this.chatHud.text.text = "User 1: Hi<br/>User 2: Hello<br/>User 3: Hey";
+		this.chatHudInput = new GuiTextInput(arial14);
+		this.chatHudInput.position = new Vector(0, 0);
+		this.chatHudInput.extent = new Vector(200, 20);
+		@:privateAccess this.chatHudInput.text.interactive.forceAnywherefocus = true;
+		this.chatHudCtrl.addChild(chatHudInput);
+
+		var sendText = "";
+
+		this.chatHudInput.text.onFocus = (e) -> {
+			chatFocused = true;
+		}
+
+		this.chatHudInput.text.onFocusLost = (e) -> {
+			sendText = "";
+			chatFocused = false;
+		}
+
+		this.chatHudInput.text.onKeyDown = (e) -> {
+			if (e.keyCode == Key.ENTER) {
+				sendText = '<font color="#F29515">${StringTools.htmlEscape(Settings.highscoreName.substr(0, 20))}:</font> ${StringTools.htmlEscape(this.chatHudInput.text.text.substr(0, 50))}';
+				if (Net.isClient) {
+					NetCommands.sendChatMessage(StringTools.htmlEscape(sendText));
+				}
+				if (Net.isHost) {
+					NetCommands.sendServerChatMessage(StringTools.htmlEscape(sendText));
+				}
+				this.chatHudInput.text.text = "";
+				chatFocused = false;
+			}
+			if (e.keyCode == Key.ESCAPE) {
+				this.chatHudInput.text.text = "";
+				chatFocused = false;
+				@:privateAccess Key.keyPressed[Key.ESCAPE] = 0; // consume escape
+			}
+		}
+
+		this.chatHud.text.text = "";
+	}
+
+	public inline function isChatFocused() {
+		return chatFocused;
+	}
+
+	public function addChatMessage(text:String) {
+		var realText = StringTools.htmlUnescape(text);
+		this.chats.push({
+			text: realText,
+			sendTime: MarbleGame.instance.world.timeState.timeSinceLoad
+		});
+		if (this.chats.length > 10) {
+			this.chats = this.chats.slice(this.chats.length - 10);
+		}
+		redrawChatMessages();
+	}
+
+	function redrawChatMessages() {
+		var joined = this.chats.map(x -> x.text).join("<br/>");
+		this.chatHud.text.text = joined;
+		this.chatHudBg.text.text = StringTools.replace(joined, '#F29515', '#000000');
+	}
+
+	function tickChats(timeState:TimeState) {
+		var needsRedraw = false;
+		while (this.chats.length > 0) {
+			if (this.chats[0].sendTime + 10 < timeState.timeSinceLoad) {
+				this.chats.shift();
+				needsRedraw = true;
+			} else {
+				break;
+			}
+		}
+		if (needsRedraw) {
+			redrawChatMessages();
+		}
 	}
 
 	var blastValue:Float = 0;
@@ -1141,6 +1233,17 @@ class PlayGui {
 			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} fps';
 		}
 		this.updateMiddleMessages(timeState.dt);
+		if (Net.isMP) {
+			if (!chatFocused) {
+				if (Key.isPressed(Settings.controlsSettings.chat)) {
+					if (this.chatHudCtrl != null) {
+						this.chatHudInput.text.focus();
+					}
+				}
+			}
+
+			tickChats(timeState);
+		}
 	}
 
 	function updateMiddleMessages(dt:Float) {

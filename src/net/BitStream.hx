@@ -69,7 +69,7 @@ class InputBitStream {
 	}
 
 	public function readString() {
-		var length = readByte();
+		var length = readUInt16();
 		var str = "";
 		for (i in 0...length) {
 			str += String.fromCharCode(readByte());
@@ -146,7 +146,7 @@ class OutputBitStream {
 	}
 
 	public function writeString(value:String) {
-		writeByte(value.length);
+		writeUInt16(value.length);
 		for (i in 0...value.length) {
 			writeByte(StringTools.fastCodeAt(value, i));
 		}

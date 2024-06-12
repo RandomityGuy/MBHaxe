@@ -56,6 +56,8 @@ class KeyBindingsGui extends GuiImage {
 				return "Free Look";
 			if (Settings.controlsSettings.rewind == key && bindingName != "Rewind")
 				return "Rewind";
+			if (Settings.controlsSettings.chat == key && bindingName != "Chat")
+				return "Chat";
 
 			return null;
 		}
@@ -179,6 +181,10 @@ class KeyBindingsGui extends GuiImage {
 		b12.pressedAction = (e) -> {
 			remapFunc("Rewind", (key) -> Settings.controlsSettings.rewind = key, b12);
 		}
+		var b13 = btnListLeft.addButton(0, 'Chat: ${Util.getKeyForButton2(Settings.controlsSettings.chat)}', (e) -> {});
+		b13.pressedAction = (e) -> {
+			remapFunc("Chat", (key) -> Settings.controlsSettings.chat = key, b13);
+		}
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -226,6 +232,8 @@ class KeyBindingsGui extends GuiImage {
 		}
 		if (prevSelected == 1 && selectedColumn == 0) {
 			btnListRight.selected = btnListLeft.selected;
+			if (btnListRight.selected > btnListRight.buttons.length - 1)
+				btnListRight.selected = btnListRight.buttons.length - 1;
 		}
 		if (_prevMousePosition == null || !_prevMousePosition.equals(mouseState.position)) {
 			for (i in 0...btnListLeft.buttons.length) {
