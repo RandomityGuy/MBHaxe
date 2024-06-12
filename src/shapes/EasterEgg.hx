@@ -16,6 +16,7 @@ class EasterEgg extends PowerUp {
 		this.pickUpName = "Easter Egg";
 		this.autoUse = true;
 		this.sharedNodeTransforms = true;
+		this.cooldownDuration = 1e8;
 	}
 
 	public function pickUp(marble:Marble):Bool {
