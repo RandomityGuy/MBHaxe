@@ -19,7 +19,7 @@ You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.12/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.5.4/MBHaxe-Platinum.apk)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.0.2-mbu/MBHaxe-Ultra.apk)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.0-mbu/MBHaxe-Ultra.apk)
 
 ## Additional Features
 - Replay System: You can record your run using the built in replay system and watch it later.  
