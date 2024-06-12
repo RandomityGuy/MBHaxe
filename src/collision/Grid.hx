@@ -107,7 +107,7 @@ class Grid {
 					surf.key = searchKey;
 					if (searchbox.containsBounds(surf.boundingBox) || searchbox.collide(surf.boundingBox)) {
 						foundSurfaces.push(surf);
-						surf.key = 1;
+						surf.key = searchKey;
 					}
 				}
 			}
