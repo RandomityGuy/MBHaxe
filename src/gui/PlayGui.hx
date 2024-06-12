@@ -106,6 +106,10 @@ class PlayGui {
 
 	var totalGems:Int = 0;
 
+	var chatHudCtrl:GuiControl;
+	var chatHud:GuiMLText;
+	var chats:Array<String>;
+
 	public function dispose() {
 		if (_init) {
 			playGuiCtrlOuter.dispose();
@@ -121,6 +125,13 @@ class PlayGui {
 				playerListScoresCtrl = null;
 				playerListScoresShadowCtrl.dispose();
 				playerListScoresShadowCtrl = null;
+			}
+			if (chatHudCtrl != null) {
+				chatHudCtrl.dispose();
+				chatHudCtrl = null;
+				chatHud.dispose();
+				chatHud = null;
+				chats = null;
 			}
 
 			for (textureResource in textureResources) {
@@ -189,8 +200,10 @@ class PlayGui {
 		if (game == 'ultra')
 			initBlastBar();
 		initTexts();
-		if (MarbleGame.instance.world.isMultiplayer)
+		if (MarbleGame.instance.world.isMultiplayer) {
 			initPlayerList();
+			initChatHud();
+		}
 		// if (Settings.optionsSettings.frameRateVis)
 		// 	initFPSMeter();
 
@@ -645,6 +658,27 @@ class PlayGui {
 			blastFrame.xScale = (scene2d.height - safeVerMargin * 2) / 480;
 			blastFrame.yScale = (scene2d.height - safeVerMargin * 2) / 480;
 		});
+	}
+
+	public function initChatHud() {
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 16 * Settings.uiScale, MultiChannel);
+
+		this.chatHudCtrl = new GuiControl();
+		this.chatHudCtrl.position = new Vector(playGuiCtrl.extent.x - 201, 150);
+		this.chatHudCtrl.extent = new Vector(150, 200);
+		this.chatHudCtrl.horizSizing = Left;
+		this.playGuiCtrl.addChild(chatHudCtrl);
+
+		this.chats = [];
+		this.chatHud = new GuiMLText(arial14, (s) -> arial14);
+		this.chatHud.position = new Vector(0, 0);
+		this.chatHud.extent = new Vector(150, 200);
+		this.chatHudCtrl.addChild(chatHud);
+
+		this.chatHud.text.text = "User 1: Hi<br/>User 2: Hello<br/>User 3: Hey";
 	}
 
 	var blastValue:Float = 0;
