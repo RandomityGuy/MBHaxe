@@ -2408,7 +2408,7 @@ class Marble extends GameObject {
 				this.netFlags |= MarbleNetFlags.DoBlast;
 			var amount = this.blastTicks / (30000 >> 5);
 			this.blastPerc = amount;
-			var impulse = this.currentUp.multiply(amount * 8);
+			var impulse = this.currentUp.multiply(amount * 8).multiply(1 / this.getMass());
 			this.applyImpulse(impulse);
 			if (!this.isNetUpdate) {
 				if (this.controllable)
@@ -2422,7 +2422,7 @@ class Marble extends GameObject {
 		} else {
 			if (this.blastAmount < 0.25)
 				return false;
-			var impulse = this.currentUp.multiply(this.blastAmount * 8);
+			var impulse = this.currentUp.multiply(this.blastAmount * 8).multiply(1 / this.getMass());
 			this.applyImpulse(impulse);
 			if (this.controllable)
 				AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
