@@ -8,6 +8,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import net.NetCommands;
 import net.Net;
+import src.MarbleGame;
 
 @:publicFields
 @:structInit
@@ -78,6 +79,7 @@ class ChatCtrl extends GuiControl {
 		this.chatHudInput.text.onFocusLost = (e) -> {
 			this.chatInputBgText.text.visible = false;
 			this.chatInputBg.bmp.visible = false;
+			this.chatHudInput.text.text = "";
 			sendText = "";
 			chatFocused = false;
 		}
