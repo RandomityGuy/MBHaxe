@@ -1959,7 +1959,7 @@ class Marble extends GameObject {
 	function calculateNetSmooth() {
 		if (this.netCorrected) {
 			this.netCorrected = false;
-			this.netSmoothOffset.load(this.lastRenderPos.sub(this.oldPos).sub(this.velocity.multiply(0.032)));
+			this.netSmoothOffset.load(this.lastRenderPos.sub(this.oldPos));
 			// this.oldPos.load(this.posStore);
 		}
 	}
