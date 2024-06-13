@@ -1,3 +1,18 @@
+# 1.1.1
+This update brings the following changes:
+- Implemented Chat: Non-Mobile only for now, press T to bring up chat in Multiplayer.
+- Added a new Touch Options Page.
+  - Configure visibility of On-Screen Controls
+  - Configure behavior of buttons acting as camera joystick by altering Button Camera Factor
+  - Configure your camera sensitivity and swipe extent.
+- Improved Controller support for Android.
+- Improved Touch Camera sensitivity a bit.
+- Tried to improve network latency.
+- Fixed minor UI bugs.
+- Fixed Super Speed throwing you in the wrong direction.
+- Fixed Out of Bounds ceiling.
+- Fixed Blast force of Mega Marble.
+
 # 1.1.0
 After all these years, Marble Blast Online is finally back!
 Implemented as the Multiplayer update to Marble Blast Ultra Haxe Port.
