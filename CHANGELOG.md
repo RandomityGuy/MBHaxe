@@ -1,3 +1,7 @@
+# 1.1.2
+This update fixes the following critical issue:
+- Fixed persistent jitter when you are not the host in Multiplayer.
+
 # 1.1.1
 This update brings the following changes:
 - Implemented Chat: Non-Mobile only for now, press T to bring up chat in Multiplayer.
