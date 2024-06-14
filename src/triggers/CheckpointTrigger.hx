@@ -23,8 +23,8 @@ class CheckpointTrigger extends Trigger {
 		});
 	}
 
-	public override function onMarbleEnter(time:src.TimeState) {
-		super.onMarbleEnter(time);
+	public override function onMarbleEnter(marble:src.Marble, time:src.TimeState) {
+		super.onMarbleEnter(marble, time);
 		var shape = this.level.namedObjects.get(this.element.respawnpoint);
 		if (shape == null)
 			return;

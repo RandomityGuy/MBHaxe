@@ -6,6 +6,7 @@ import src.TimeState;
 import src.DtsObject;
 import src.AudioManager;
 import src.MarbleWorld;
+import src.Marble;
 
 class Helicopter extends PowerUp {
 	public function new(element:MissionElementItem) {
@@ -27,13 +28,12 @@ class Helicopter extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
-		marble.enableHelicopter(timeState.currentAttemptTime);
-		this.level.deselectPowerUp();
+	public function use(marble:Marble, timeState:TimeState) {
+		marble.enableHelicopter(timeState);
+		this.level.deselectPowerUp(marble);
 	}
 }

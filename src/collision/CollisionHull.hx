@@ -40,16 +40,17 @@ class CollisionHull extends CollisionEntity {
 
 			var pt = GJK.gjk(sph, this.hull).epa;
 			if (pt != null) {
-				var cinfo = new CollisionInfo();
+				var cinfo = CollisionPool.alloc();
 				cinfo.normal = pt.normalized();
 				cinfo.point = sph.position.sub(pt);
 				cinfo.velocity = velocity;
+				cinfo.collider = null;
 				cinfo.contactDistance = sph.radius + pt.length();
 				cinfo.restitution = restitution;
 				cinfo.otherObject = this.go;
 				cinfo.friction = friction;
 				cinfo.force = force;
-				this.go.onMarbleContact(timeState, cinfo);
+				this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
 				return [cinfo];
 			}
 		}

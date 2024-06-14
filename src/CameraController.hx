@@ -187,8 +187,7 @@ class CameraController extends Object {
 		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
 		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
-		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4,
-			Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
+		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {
@@ -257,7 +256,7 @@ class CameraController extends Object {
 		camera.target = marblePosition.add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
-		var rayCastOrigin = marblePosition.add(level.currentUp.multiply(marble._radius));
+		var rayCastOrigin = marblePosition.add(level.marble.currentUp.multiply(marble._radius));
 
 		var processedShapes = [];
 		for (i in 0...3) {

@@ -4,8 +4,8 @@ import src.TimeState;
 import src.ResourceLoader;
 
 class OutOfBoundsTrigger extends Trigger {
-	override function onMarbleInside(time:TimeState) {
-		this.level.goOutOfBounds();
+	override function onMarbleInside(marble:src.Marble, time:TimeState) {
+		this.level.goOutOfBounds(marble);
 		// this.level.replay.recordMarbleInside(this);
 	}
 

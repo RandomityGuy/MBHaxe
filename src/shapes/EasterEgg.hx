@@ -1,5 +1,6 @@
 package shapes;
 
+import src.Marble;
 import src.Settings;
 import mis.MissionElement.MissionElementItem;
 import src.ResourceLoader;
@@ -13,9 +14,10 @@ class EasterEgg extends PowerUp {
 		this.identifier = "EasterEgg";
 		this.pickUpName = "Easter Egg";
 		this.autoUse = true;
+		this.cooldownDuration = 1e8;
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:Marble):Bool {
 		var found:Bool = false;
 		if (Settings.easterEggs.exists(this.level.mission.path)) {
 			found = true;
@@ -40,5 +42,5 @@ class EasterEgg extends PowerUp {
 		});
 	}
 
-	public function use(timeState:src.TimeState) {}
+	public function use(marble:Marble, timeState:src.TimeState) {}
 }

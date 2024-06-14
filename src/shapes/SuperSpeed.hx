@@ -63,30 +63,32 @@ class SuperSpeed extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:src.Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
+	public function use(marble:src.Marble, timeState:TimeState) {
 		var movementVector = marble.getMarbleAxis()[0];
 
-		// Okay, so super speed directionality is a bit strange. In general, the direction is based on the normal vector of the last surface you had contact with.
+		var boostVec = movementVector.clone();
 
-		// var quat = level.newOrientationQuat;
-		// movementVector.applyQuaternion(quat);
+		var contactDot = movementVector.dot(marble.lastContactNormal);
+		boostVec.load(boostVec.sub(marble.lastContactNormal.multiply(contactDot)));
+		if (boostVec.lengthSq() > 0.01) {
+			boostVec.normalize();
+		} else {
+			boostVec.load(movementVector);
+		}
 
-		var quat2 = new Quat();
-		// Determine the necessary rotation to rotate the up vector to the contact normal.
-		quat2.initMoveTo(this.level.currentUp, marble.lastContactNormal);
-		movementVector.transform(quat2.toMatrix());
-		marble.velocity = marble.velocity.add(movementVector.multiply(-25));
+		marble.velocity.load(marble.velocity.add(boostVec.multiply(-25)));
 
 		// marble.body.addLinearVelocity(Util.vecThreeToOimo(movementVector).scale(24.7)); // Whirligig's determined value
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperspeed.wav", ResourceLoader.getAudio, this.soundResources));
-		this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
-		this.level.deselectPowerUp();
+		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperspeed.wav", ResourceLoader.getAudio, this.soundResources));
+		if (@:privateAccess !marble.isNetUpdate)
+			this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
+		this.level.deselectPowerUp(marble);
 	}
 }

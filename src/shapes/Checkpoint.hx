@@ -28,7 +28,7 @@ class Checkpoint extends DtsObject {
 		});
 	}
 
-	public override function onMarbleContact(time:src.TimeState, ?contact:CollisionInfo) {
+	public override function onMarbleContact(marble:src.Marble, time:src.TimeState, ?contact:CollisionInfo) {
 		this.level.saveCheckpointState({
 			obj: this,
 			elem: this.element

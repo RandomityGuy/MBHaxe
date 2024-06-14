@@ -124,7 +124,7 @@ class LandMine extends DtsObject {
 		});
 	}
 
-	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
+	override function onMarbleContact(marble:src.Marble, timeState:TimeState, ?contact:CollisionInfo) {
 		if (this.isCollideable && !this.level.rewinding) {
 			// marble.velocity = marble.velocity.add(vec);
 			this.disappearTime = timeState.timeSinceLoad;
@@ -136,7 +136,6 @@ class LandMine extends DtsObject {
 			this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());
 
-			var marble = this.level.marble;
 			var minePos = this.getAbsPos().getPosition();
 			var off = marble.getAbsPos().getPosition().sub(minePos);
 

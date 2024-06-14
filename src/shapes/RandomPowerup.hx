@@ -59,7 +59,7 @@ class RandomPowerup extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:src.Marble):Bool {
 		while (true) {
 			var r = Std.random(6);
 			if (this.level.isWatching)
@@ -88,7 +88,7 @@ class RandomPowerup extends PowerUp {
 			}
 			pow.level = this.level;
 
-			if (pow.pickUp()) {
+			if (pow.pickUp(marble)) {
 				this.cooldownDuration = pow.cooldownDuration;
 				this.pickUpName = pow.pickUpName;
 				if (this.level.isRecording)
@@ -99,7 +99,7 @@ class RandomPowerup extends PowerUp {
 		return true;
 	}
 
-	public function use(time:TimeState) {
+	public function use(marble:src.Marble, time:TimeState) {
 		if (this.wasTimeTravel)
 			this.level.addBonusTime(5);
 	}

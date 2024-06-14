@@ -16,8 +16,8 @@ class SuperBounce extends PowerUp {
 		this.pickUpName = "Marble Recoil PowerUp";
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:src.Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -29,13 +29,12 @@ class SuperBounce extends PowerUp {
 		});
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
-		marble.enableSuperBounce(timeState.currentAttemptTime);
+	public function use(marble:src.Marble, timeState:TimeState) {
+		marble.enableSuperBounce(timeState);
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
 		//	AudioManager.play(this.sounds[1]);
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
-		this.level.deselectPowerUp();
+		this.level.deselectPowerUp(marble);
 	}
 }

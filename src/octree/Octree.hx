@@ -18,10 +18,6 @@ class Octree {
 
 	public function new() {
 		this.root = new OctreeNode(this, 0);
-		// Init the octree to a 1x1x1 cube
-		this.root.bounds = new Bounds();
-		this.root.bounds.xMin = this.root.bounds.yMin = this.root.bounds.zMin = 0;
-		this.root.bounds.xMax = this.root.bounds.yMax = this.root.bounds.zMax = 1;
 		this.objectToNode = new Map();
 	}
 
@@ -79,22 +75,24 @@ class Octree {
 				count++;
 			}
 		}
-		averagePoint = averagePoint.multiply(1 / count); // count should be greater than 0, because that's why we're growing in the first place.
+		averagePoint.load(averagePoint.multiply(1 / count)); // count should be greater than 0, because that's why we're growing in the first place.
 		// Determine the direction from the root center to the determined point
-		var rootCenter = this.root.bounds.getCenter().toVector();
+		var rootCenter = new Vector((this.root.xMax + this.root.xMin) / 2, (this.root.yMax + this.root.yMin) / 2, (this.root.zMax + this.root.zMin) / 2);
 		var direction = averagePoint.sub(rootCenter); // Determine the "direction of growth"
 		// Create a new root. The current root will become a quadrant in this new root.
 		var newRoot = new OctreeNode(this, this.root.depth - 1);
-		newRoot.bounds = this.root.bounds.clone();
-		newRoot.bounds.xSize *= 2;
-		newRoot.bounds.ySize *= 2;
-		newRoot.bounds.zSize *= 2;
+		newRoot.xMin = this.root.xMin;
+		newRoot.yMin = this.root.yMin;
+		newRoot.zMin = this.root.zMin;
+		newRoot.xMax = 2 * this.root.xMax - this.root.xMin;
+		newRoot.yMax = 2 * this.root.yMax - this.root.yMin;
+		newRoot.zMax = 2 * this.root.zMax - this.root.zMin;
 		if (direction.x < 0)
-			newRoot.bounds.xMin -= this.root.bounds.xSize;
+			newRoot.xMin -= this.root.xMax - this.root.xMin;
 		if (direction.y < 0)
-			newRoot.bounds.yMin -= this.root.bounds.ySize;
+			newRoot.yMin -= this.root.yMax - this.root.yMin;
 		if (direction.z < 0)
-			newRoot.bounds.zMin -= this.root.bounds.zSize;
+			newRoot.zMin -= this.root.zMax - this.root.zMin;
 		if (this.root.count > 0) {
 			var octantIndex = ((direction.x < 0) ? 1 : 0) + ((direction.y < 0) ? 2 : 0) + ((direction.z < 0) ? 4 : 0);
 			newRoot.createOctants();
@@ -108,12 +106,12 @@ class Octree {
 
 	/** Tries to shrink the octree if large parts of the octree are empty. */
 	public function shrink() {
-		if (this.root.bounds.xSize < 1 || this.root.bounds.ySize < 1 || this.root.bounds.zSize < 1 || this.root.objects.length > 0)
+		if (this.root.xMax - this.root.xMin < 1 || this.root.yMax - this.root.yMin < 1 || this.root.zMax - this.root.zMin < 1 || this.root.objects.length > 0)
 			return;
 		if (this.root.count == 0) {
 			// Reset to default empty octree
-			this.root.bounds.xMin = this.root.bounds.yMin = this.root.bounds.zMin = 0;
-			this.root.bounds.xMax = this.root.bounds.yMax = this.root.bounds.zMin = 1;
+			this.root.xMin = this.root.yMin = this.root.zMin = 0;
+			this.root.xMax = this.root.yMax = this.root.zMax = 1;
 			this.root.depth = 0;
 			return;
 		}

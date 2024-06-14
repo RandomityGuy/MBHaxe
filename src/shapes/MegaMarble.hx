@@ -34,13 +34,14 @@ class MegaMarble extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:src.Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		this.level.marble.enableMegaMarble(timeState.currentAttemptTime);
-		this.level.deselectPowerUp();
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/dosuperjump.wav', ResourceLoader.getAudio, this.soundResources));
+	public function use(marble:src.Marble, timeState:TimeState) {
+		marble.enableMegaMarble(timeState);
+		this.level.deselectPowerUp(marble);
+		if (this.level.marble == marble && @:privateAccess !marble.isNetUpdate)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/dosuperjump.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 }
