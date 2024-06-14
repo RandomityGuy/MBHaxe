@@ -12,14 +12,14 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ## Windows and Mac
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.12)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.4)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.0.2-mbu)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.2-mbu)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.12/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.5.4/MBHaxe-Platinum.apk)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.0.2-mbu/MBHaxe-Ultra.apk)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.2-mbu/MBHaxe-Ultra.apk)
 
 ## Additional Features
 - Replay System: You can record your run using the built in replay system and watch it later.  
@@ -104,3 +104,6 @@ In the native version, edit settings.json or the options menu in the platinum.
 
 ## Hey can you please add this new feature?
 If this new feature of yours already exists in MBG but not in this port, then I will try to add it, if I get time to do so, otherwise chances are, I won't add it since I have other things to do and would rather not waste my time on this any further. You are free to do pull requests if you have already implemented said feature.
+
+# Notes
+This project is tested with BrowserStack.
