@@ -1,5 +1,6 @@
 package octree;
 
+@:generic
 class PriorityQueueNode<T> {
 	public var value:T;
 	public var priority:Float;

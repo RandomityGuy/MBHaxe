@@ -11,6 +11,8 @@ class Polygon extends MeshPrimitive {
 	public var uvs:Array<Float>;
 	public var idx:hxd.IndexBuffer;
 
+	var bounds:h3d.col.Bounds;
+
 	var scaled = 1.;
 	var translatedX = 0.;
 	var translatedY = 0.;
@@ -44,10 +46,16 @@ class Polygon extends MeshPrimitive {
 	}
 
 	override function getBounds() {
-		var b = new h3d.col.Bounds();
-		for (i in 0...Std.int(points.length / 3))
-			b.addPoint(new Point(points[i * 3], points[i * 3 + 1], points[i * 3 + 2]));
-		return b;
+		if (bounds == null) {
+			var b = new h3d.col.Bounds();
+			var i = 0;
+			while (i < points.length) {
+				b.addPoint(new h3d.col.Point(points[i], points[i + 1], points[i + 2]));
+				i += 3;
+			}
+			bounds = b;
+		}
+		return bounds;
 	}
 
 	override function alloc(engine:h3d.Engine) {

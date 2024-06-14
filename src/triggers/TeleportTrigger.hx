@@ -20,9 +20,9 @@ class TeleportTrigger extends Trigger {
 			this.delay = MisParser.parseNumber(element.delay) / 1000;
 	}
 
-	override function onMarbleEnter(time:src.TimeState) {
+	override function onMarbleEnter(marble:src.Marble, time:src.TimeState) {
 		this.exitTime = null;
-		this.level.marble.setCloaking(true, time);
+		marble.setCloaking(true, time);
 		if (this.entryTime != null)
 			return;
 		this.entryTime = time.currentAttemptTime;
@@ -30,9 +30,9 @@ class TeleportTrigger extends Trigger {
 		AudioManager.playSound(ResourceLoader.getResource("data/sound/teleport.wav", ResourceLoader.getAudio, this.soundResources));
 	}
 
-	override function onMarbleLeave(time:src.TimeState) {
+	override function onMarbleLeave(marble:src.Marble, time:src.TimeState) {
 		this.exitTime = time.currentAttemptTime;
-		this.level.marble.setCloaking(false, time);
+		marble.setCloaking(false, time);
 	}
 
 	public override function update(timeState:src.TimeState) {

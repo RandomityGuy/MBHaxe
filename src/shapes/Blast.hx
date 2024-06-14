@@ -26,11 +26,11 @@ class Blast extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:src.Marble):Bool {
 		return true;
 	}
 
-	public function use(timeState:TimeState) {
+	public function use(marble:src.Marble, timeState:TimeState) {
 		this.level.blastAmount = 1.03;
 	}
 }

@@ -20,11 +20,17 @@ typedef CPSSResult = {
 	var c2:Vector;
 }
 
-typedef ITSResult = {
-	var result:Bool;
+@:publicFields
+class ITSResult {
+	var result:Bool = false;
 	var normal:Vector;
 	var point:Vector;
-	var resIdx:Int;
+	var resIdx:Int = -1;
+
+	public inline function new() {
+		this.point = new Vector();
+		this.normal = new Vector();
+	}
 }
 
 class Collision {
@@ -45,7 +51,7 @@ class Collision {
 			return p;
 	}
 
-	public static function ClosestPointLine(start:Vector, end:Vector, center:Vector) {
+	public static inline function ClosestPointLine(start:Vector, end:Vector, center:Vector) {
 		var d = end.sub(start);
 		var v = center.sub(start);
 		var t = v.dot(d) / d.lengthSq();
@@ -65,12 +71,7 @@ class Collision {
 			edgeConcavities:Array<Bool>) {
 		var radiusSq = radius * radius;
 
-		var res:ITSResult = {
-			result: false,
-			point: null,
-			normal: null,
-			resIdx: 0
-		};
+		var res = new ITSResult();
 
 		var pnorm = normal.clone();
 		var d = -v0.dot(pnorm);
@@ -104,12 +105,12 @@ class Collision {
 
 		var chosenEdge = 0; // Bitfield
 
-		var chosenPt:Vector;
+		var chosenPt = new Vector();
 		if (r1.distanceSq(center) < r2.distanceSq(center)) {
-			chosenPt = r1;
+			chosenPt.load(r1);
 			chosenEdge = 1;
 		} else {
-			chosenPt = r2;
+			chosenPt.load(r2);
 			chosenEdge = 2;
 		}
 		if (chosenPt.distanceSq(center) < r3.distanceSq(center))
@@ -144,20 +145,10 @@ class Collision {
 		return res;
 	}
 
-	public static function TriangleSphereIntersection(A:Vector, B:Vector, C:Vector, N:Vector, P:Vector, r:Float) {
-		var res:ITSResult = {
-			result: false,
-			point: null,
-			normal: null,
-			resIdx: -1
-		};
-
-		var v0 = A;
-		var v1 = B;
-		var v2 = C;
-		A = A.sub(P);
-		B = B.sub(P);
-		C = C.sub(P);
+	public static inline function TriangleSphereIntersection(v0:Vector, v1:Vector, v2:Vector, N:Vector, P:Vector, r:Float, point:Vector, normal:Vector) {
+		var A = v0.sub(P);
+		var B = v1.sub(P);
+		var C = v2.sub(P);
 		var ca = C.sub(A);
 		var ba = B.sub(A);
 		var radiusSq = r * r;
@@ -165,7 +156,7 @@ class Collision {
 		var aDotCp = A.dot(cp);
 		var cpLenSq = cp.lengthSq();
 		if (aDotCp * aDotCp > radiusSq * cpLenSq) {
-			return res;
+			return false;
 		}
 
 		var aSq = A.dot(A);
@@ -176,13 +167,13 @@ class Collision {
 		var cSq = C.dot(C);
 
 		if (aSq > radiusSq && aDotB > aSq && aDotC > aSq) {
-			return res;
+			return false;
 		}
 		if (bSq > radiusSq && aDotB > bSq && bDotC > bSq) {
-			return res;
+			return false;
 		}
 		if (cSq > radiusSq && aDotC > cSq && bDotC > cSq) {
-			return res;
+			return false;
 		}
 
 		var cSubB = C.sub(B);
@@ -198,13 +189,13 @@ class Collision {
 		var rhs3 = B.multiply(aSubCSq).sub(cTest);
 
 		if (aTest.dot(aTest) > radiusSq * baSq * baSq && aTest.dot(rhs) > 0) {
-			return res;
+			return false;
 		}
 		if (bTest.dot(bTest) > radiusSq * cSubBSq * cSubBSq && bTest.dot(rhs2) > 0) {
-			return res;
+			return false;
 		}
 		if (cTest.dot(cTest) > radiusSq * aSubCSq * aSubCSq && cTest.dot(rhs3) > 0) {
-			return res;
+			return false;
 		}
 
 		var lhs = P.sub(v0);
@@ -217,10 +208,9 @@ class Collision {
 		var d2 = (baSq * lhsCa - baca * lhsBa) / len;
 
 		if (1 - d1 - d2 >= 0 && d1 >= 0 && d2 >= 0) {
-			res.result = true;
-			res.normal = N.clone();
-			res.point = P.sub(N.multiply(P.sub(v0).dot(N)));
-			res.resIdx = 0;
+			normal.load(N);
+			point.load(P.sub(N.multiply(P.sub(v0).dot(N))));
+			return true;
 		} else {
 			var closestPt = P.sub(N.multiply(P.sub(v0).dot(N)));
 			var r1 = ClosestPointLine(v0, v1, closestPt);
@@ -229,24 +219,22 @@ class Collision {
 
 			var chosenEdge = 0; // Bitfield
 
-			var chosenPt:Vector;
+			var chosenPt:Vector = new Vector();
 			if (r1.distanceSq(P) < r2.distanceSq(P)) {
-				chosenPt = r1;
+				chosenPt.load(r1);
 				chosenEdge = 1;
 			} else {
-				chosenPt = r2;
+				chosenPt.load(r2);
 				chosenEdge = 2;
 			}
 			if (chosenPt.distanceSq(P) < r3.distanceSq(P))
-				res.point = chosenPt;
+				point.load(chosenPt);
 			else {
 				chosenEdge = 4;
-				res.point = r3;
+				point.load(r3);
 			}
-			res.normal = P.sub(res.point).normalized();
-			res.result = true;
-
-			res.resIdx = chosenEdge;
+			normal.load(P.sub(point).normalized());
+			return true;
 
 			// if (res.normal.dot(N) > 0.8) {
 			// 	// Internal edge
@@ -263,7 +251,6 @@ class Collision {
 			// 	}
 			// }
 		}
-		return res;
 	}
 
 	public static function IntersectSegmentCapsule(segStart:Vector, segEnd:Vector, capStart:Vector, capEnd:Vector, radius:Float) {
@@ -476,5 +463,52 @@ class Collision {
 			return closest;
 		}
 		return null;
+	}
+
+	public static function capsuleSphereNearestOverlap(a0:Vector, a1:Vector, radA:Float, b:Vector, radB:Float) {
+		var V = a1.sub(a0);
+		var A0B = a0.sub(b);
+		var d1 = A0B.dot(V);
+		var d2 = A0B.dot(A0B);
+		var d3 = V.dot(V);
+		var R2 = (radA + radB) * (radA + radB);
+		if (d2 < R2) {
+			// starting in collision state
+			return {
+				result: true,
+				t: 0.0
+			}
+		}
+		if (d3 < 0.01) // no movement, and don't start in collision state, so no collision
+			return {
+				result: false,
+				t: 0.0
+			}
+
+		var b24ac = Math.sqrt(d1 * d1 - d2 * d3 + d3 * R2);
+		var t1 = (-d1 - b24ac) / d3;
+		if (t1 > 0 && t1 < 1.0) {
+			return {
+				result: true,
+				t: t1
+			}
+		}
+		var t2 = (-d1 + b24ac) / d3;
+		if (t2 > 0 && t2 < 1.0) {
+			return {
+				result: true,
+				t: t2
+			}
+		}
+		if (t1 < 0 && t2 > 0) {
+			return {
+				result: true,
+				t: 0.0
+			}
+		}
+		return {
+			result: false,
+			t: 0.0
+		}
 	}
 }

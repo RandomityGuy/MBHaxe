@@ -121,7 +121,7 @@ class Nuke extends DtsObject {
 		});
 	}
 
-	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
+	override function onMarbleContact(marble:src.Marble, timeState:TimeState, ?contact:CollisionInfo) {
 		if (this.isCollideable && !this.level.rewinding) {
 			// marble.velocity = marble.velocity.add(vec);
 			this.disappearTime = timeState.timeSinceLoad;
@@ -133,7 +133,6 @@ class Nuke extends DtsObject {
 			this.level.particleManager.createEmitter(nukeSmokeParticle, nukeSmokeParticleData, this.getAbsPos().getPosition());
 			this.level.particleManager.createEmitter(nukeSparksParticle, nukeSparkParticleData, this.getAbsPos().getPosition());
 
-			var marble = this.level.marble;
 			var minePos = this.getAbsPos().getPosition();
 			var dtsCenter = this.dts.bounds.center();
 			// dtsCenter.x = -dtsCenter.x;

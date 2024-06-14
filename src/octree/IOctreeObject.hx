@@ -3,7 +3,9 @@ package octree;
 import h3d.Vector;
 import h3d.col.Bounds;
 
-typedef RayIntersectionData = {
+@:publicFields
+@:structInit
+class RayIntersectionData {
 	var point:Vector;
 	var normal:Vector;
 	var object:IOctreeObject;
@@ -11,5 +13,5 @@ typedef RayIntersectionData = {
 
 interface IOctreeObject extends IOctreeElement {
 	var boundingBox:Bounds;
-	function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData>;
+	function rayCast(rayOrigin:Vector, rayDirection:Vector, resultSet:Array<RayIntersectionData>):Void;
 }

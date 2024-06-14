@@ -27,8 +27,9 @@ class SphereCollisionEntity extends CollisionEntity {
 	public override function generateBoundingBox() {
 		var boundingBox = new Bounds();
 		var pos = transform.getPosition();
-		boundingBox.addSpherePos(pos.x, pos.y, pos.z, radius);
-		boundingBox.transform3x3(transform);
+		boundingBox.addSpherePos(0, 0, 0, radius);
+		boundingBox.transform(transform);
+
 		this.boundingBox = boundingBox;
 
 		if (Debug.drawBounds) {
@@ -68,9 +69,8 @@ class SphereCollisionEntity extends CollisionEntity {
 		}
 	}
 
-	public override function rayCast(rayOrigin:Vector, rayDirection:Vector) {
+	public override function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>) {
 		// TEMP cause bruh
-		return [];
 	}
 
 	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
@@ -85,26 +85,25 @@ class SphereCollisionEntity extends CollisionEntity {
 
 		if (otherRadius * otherRadius * 1.01 > otherDist.lengthSq()) {
 			var normDist = otherDist.normalized();
-			var contact = new CollisionInfo();
+			var contact = CollisionPool.alloc();
 			contact.collider = this;
 			contact.friction = 1;
 			contact.restitution = 1;
-			contact.velocity = this.velocity;
+			contact.velocity = this.velocity.clone();
 			contact.otherObject = this.go;
 			contact.point = position.add(normDist);
 			contact.normal = normDist.multiply(-1);
 			contact.force = 0;
 			contact.contactDistance = contact.point.distance(position);
-			contact.penetration = radius - (position.sub(contact.point).dot(contact.normal));
 			contacts.push(contact);
 
 			// var othercontact = new CollisionInfo();
 			// othercontact.collider = collisionEntity;
 			// othercontact.friction = 1;
 			// othercontact.restitution = 1;
-			// othercontact.velocity = this.velocity;
-			// othercontact.point = thispos.add(position).multiply(0.5);
-			// othercontact.normal = contact.point.sub(position).normalized();
+			// othercontact.velocity = collisionEntity.velocity.clone();
+			// othercontact.point = thispos.sub(normDist);
+			// othercontact.normal = normDist.clone();
 			// othercontact.contactDistance = contact.point.distance(position);
 			// othercontact.force = 0;
 			// othercontact.penetration = this.radius - (thispos.sub(othercontact.point).dot(othercontact.normal));

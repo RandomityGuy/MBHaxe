@@ -52,7 +52,7 @@ class RewindManager {
 			level.marble.helicopterEnableTime, @:privateAccess
 			level.marble.megaMarbleEnableTime
 		];
-		rf.currentUp = level.currentUp.clone();
+		rf.currentUp = level.marble.currentUp.clone();
 		rf.lastContactNormal = level.marble.lastContactNormal.clone();
 		rf.mpStates = level.pathedInteriors.map(x -> {
 			return {
@@ -100,8 +100,8 @@ class RewindManager {
 		}
 		rf.blastAmt = level.blastAmount;
 		rf.oobState = {
-			oob: level.outOfBounds,
-			timeState: level.outOfBoundsTime != null ? level.outOfBoundsTime.clone() : null
+			oob: level.marble.outOfBounds,
+			timeState: level.marble.outOfBoundsTime != null ? level.marble.outOfBoundsTime.clone() : null
 		};
 		rf.checkpointState = {
 			currentCheckpoint: @:privateAccess level.currentCheckpoint,
@@ -128,13 +128,13 @@ class RewindManager {
 
 		if (level.marble.heldPowerup == null) {
 			if (rf.marblePowerup != null) {
-				level.pickUpPowerUp(rf.marblePowerup);
+				level.pickUpPowerUp(level.marble, rf.marblePowerup);
 			}
 		} else {
 			if (rf.marblePowerup == null) {
-				level.deselectPowerUp();
+				level.deselectPowerUp(level.marble);
 			} else {
-				level.pickUpPowerUp(rf.marblePowerup);
+				level.pickUpPowerUp(level.marble, rf.marblePowerup);
 			}
 		}
 
@@ -149,8 +149,10 @@ class RewindManager {
 		@:privateAccess level.marble.helicopterEnableTime = rf.activePowerupStates[2];
 		@:privateAccess level.marble.megaMarbleEnableTime = rf.activePowerupStates[3];
 
-		if (level.currentUp.x != rf.currentUp.x || level.currentUp.y != rf.currentUp.y || level.currentUp.z != rf.currentUp.z) {
-			level.setUp(rf.currentUp, level.timeState);
+		if (level.marble.currentUp.x != rf.currentUp.x
+			|| level.marble.currentUp.y != rf.currentUp.y
+			|| level.marble.currentUp.z != rf.currentUp.z) {
+			level.setUp(level.marble, rf.currentUp, level.timeState);
 			// Hacky things
 			@:privateAccess level.orientationChangeTime = level.timeState.currentAttemptTime - 300;
 			var oldorient = level.newOrientationQuat;
@@ -164,7 +166,7 @@ class RewindManager {
 			@:privateAccess level.orientationChangeTime = -1e8;
 		}
 
-		level.currentUp.set(rf.currentUp.x, rf.currentUp.y, rf.currentUp.z);
+		level.marble.currentUp.set(rf.currentUp.x, rf.currentUp.y, rf.currentUp.z);
 		level.marble.lastContactNormal.set(rf.lastContactNormal.x, rf.lastContactNormal.y, rf.lastContactNormal.z);
 		for (i in 0...rf.mpStates.length) {
 			level.pathedInteriors[i].currentTime = rf.mpStates[i].curState.currentTime;
@@ -209,14 +211,14 @@ class RewindManager {
 
 		if (!rf.oobState.oob) {
 			@:privateAccess level.cancel(level.oobSchedule);
-			@:privateAccess level.cancel(level.oobSchedule2);
+			@:privateAccess level.cancel(level.marble.oobSchedule);
 		} else {
-			level.goOutOfBounds();
+			level.goOutOfBounds(level.marble);
 		}
 
-		level.outOfBounds = rf.oobState.oob;
+		level.marble.outOfBounds = rf.oobState.oob;
 		level.marble.camera.oob = rf.oobState.oob;
-		level.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
+		level.marble.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
 		level.blastAmount = rf.blastAmt;
 		@:privateAccess level.checkpointUp = rf.checkpointState.checkpointUp;
 		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;

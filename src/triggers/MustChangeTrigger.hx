@@ -13,7 +13,7 @@ class MustChangeTrigger extends Trigger {
 		this.interior = interior;
 	}
 
-	public override function onMarbleEnter(time:TimeState) {
+	public override function onMarbleEnter(marble:src.Marble, time:TimeState) {
 		var ttime = MisParser.parseNumber(this.element.targettime);
 		if (ttime > 0)
 			ttime /= 1000;

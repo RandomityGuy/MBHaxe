@@ -57,18 +57,19 @@ class SuperJump extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:src.Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
-		marble.velocity = marble.velocity.add(this.level.currentUp.multiply(20));
-		this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
+	public function use(marble:src.Marble, timeState:TimeState) {
+		marble.velocity.load(marble.velocity.add(marble.currentUp.multiply(20)));
+		if (@:privateAccess !marble.isNetUpdate)
+			this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
 		// if (!this.level.rewinding)
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperjump.wav", ResourceLoader.getAudio, this.soundResources));
+		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperjump.wav", ResourceLoader.getAudio, this.soundResources));
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
-		this.level.deselectPowerUp();
+		this.level.deselectPowerUp(marble);
 	}
 }
