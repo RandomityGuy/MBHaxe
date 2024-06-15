@@ -22,12 +22,15 @@ You will also have to bypass Gatekeeper since the .app is not signed.
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.2-mbu/MBHaxe-Ultra.apk)
 
 ## Additional Features
+- Cross Platform Multiplayer: Available only in Ultra. You can host and join multiplayer matches in any of these platforms: Windows, Mac, Web, Android.
 - Replay System: You can record your run using the built in replay system and watch it later.  
 - Rewind: You can rewind your marble by enabling rewind in the Options and holding down the rewind key (defaults to R). 
 - Controller Support: Full controller support is added to Marble Blast Ultra, with incomplete support for the rest.
 - Touch Controls: Available in the web (mobile) and android versions.
 
 # Screenshots
+<img src="https://imgur.com/KQKUk0Y.png" width="640">
+<img src="https://imgur.com/VnnrIt2.png" width="640">
 <img src="https://imgur.com/lfLBKqO.png" width="640">
 <img src="https://imgur.com/DN1A2Mf.png" width="640">
 <img src="https://imgur.com/2UngOAy.png" width="640">
