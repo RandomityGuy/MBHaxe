@@ -26,7 +26,6 @@ import src.Settings;
 import h3d.scene.Mesh;
 import h3d.col.Bounds;
 import collision.CollisionEntity;
-import shapes.StartPad;
 import src.TimeState;
 import src.ParticleSystem.ParticleEmitter;
 import src.ParticleSystem.ParticleData;
@@ -305,8 +304,6 @@ class Marble extends GameObject {
 	var playedSounds = [];
 
 	public var mode:Mode = Play;
-
-	public var startPad:StartPad;
 
 	public var prevPos:Vector;
 
@@ -1604,43 +1601,6 @@ class Marble extends GameObject {
 				}
 			}
 
-			// var intersectT = intersectData.t;
-			// if (intersectData.found && intersectT > 0.001) {
-			// 	var diff = timeStep - intersectT;
-			// 	this.velocity = this.velocity.sub(A.multiply(diff));
-			// 	this.omega = this.omega.sub(a.multiply(diff));
-			// 	// var mo = new h3d.prim.Sphere();
-			// 	// mo.addNormals();
-			// 	// mo.scale(_radius);
-			// 	// var mCol = new h3d.scene.Mesh(mo);
-			// 	// mCol.setPosition(intersectData.position.x, intersectData.position.y, intersectData.position.z);
-			// 	// this.level.scene.addChild(mCol);
-			// 	timeStep = intersectT;
-			// }
-
-			// var posAdd = this.velocity.multiply(timeStep);
-			// var expectedPos = pos.add(posAdd);
-			// var newPos = nudgeToContacts(expectedPos, _radius);
-
-			// if (mode == Start) {
-			// 	var upVec = this.level.currentUp;
-			// 	var startpadNormal = startPad.getAbsPos().up();
-			// 	this.velocity = upVec.multiply(this.velocity.dot(upVec));
-			// 	// Apply contact forces in startPad up direction if upVec is not startpad up, fixes the weird startpad shit in pinball wizard
-			// 	if (upVec.dot(startpadNormal) < 0.95) {
-			// 		for (contact in contacts) {
-			// 			var normF = contact.normal.multiply(contact.normalForce);
-			// 			var startpadF = startpadNormal.multiply(normF.dot(startpadNormal));
-			// 			var upF = upVec.multiply(normF.dot(upVec));
-			// 			this.velocity = this.velocity.add(startpadF.multiply(timeStep / 4));
-			// 		}
-			// 	}
-			// }
-
-			// if (mode == Finish) {
-			// 	this.velocity = this.velocity.multiply(0.925);
-			// }
-
 			var rot = this.getRotationQuat();
 			var quat = new Quat();
 			quat.initRotation(omega.x * timeStep, omega.y * timeStep, omega.z * timeStep);
@@ -1947,6 +1907,11 @@ class Marble extends GameObject {
 			this.teleportDisableTime = time.currentAttemptTime - 0.5 * (1 - completion);
 			this.teleportEnableTime = null;
 		}
+	}
+
+	public function setMarblePosition(x:Float, y:Float, z:Float) {
+		this.collider.transform.setPosition(new Vector(x, y, z));
+		this.setPosition(x, y, z);
 	}
 
 	public override function reset() {

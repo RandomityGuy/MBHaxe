@@ -1,5 +1,7 @@
 package src;
 
+import modes.GameMode;
+import modes.GameMode.GameModeFactory;
 import rewind.RewindManager;
 import Macros.MarbleWorldMacros;
 import shapes.PushButton;
@@ -130,6 +132,8 @@ class MarbleWorld extends Scheduler {
 	var endPad:EndPad;
 	var skyElement:MissionElementSky;
 
+	public var gameMode:GameMode;
+
 	// Lighting
 	public var ambient:Vector;
 	public var dirLight:Vector;
@@ -208,6 +212,7 @@ class MarbleWorld extends Scheduler {
 		this.scene2d = scene2d;
 		this.mission = mission;
 		this.game = mission.game.toLowerCase();
+		this.gameMode = GameModeFactory.getGameMode(cast this, null);
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
@@ -259,6 +264,7 @@ class MarbleWorld extends Scheduler {
 		};
 		this.mission.load();
 		scanMission(this.mission.root);
+		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		this.resourceLoadFuncs.push(fwd -> this.initMarble(fwd));
 		this.resourceLoadFuncs.push(fwd -> {
@@ -422,7 +428,11 @@ class MarbleWorld extends Scheduler {
 			marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		else
 			marblefiles.push("shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+		var gameModeFiles = this.gameMode.getPreloadFiles();
 		for (file in marblefiles) {
+			worker.loadFile(file);
+		}
+		for (file in gameModeFiles) {
 			worker.loadFile(file);
 		}
 		worker.addTask(fwd -> {
@@ -449,6 +459,14 @@ class MarbleWorld extends Scheduler {
 			return 0; // Load checkpoint
 		}
 
+		if (!full) {
+			var respawnT = this.gameMode.getRespawnTransform(marble);
+			if (respawnT != null) {
+				respawn(marble, respawnT.position, respawnT.orientation, respawnT.up);
+				return 0;
+			}
+		}
+
 		if (!this.isWatching) {
 			this.replay.clear();
 		} else
@@ -457,7 +475,7 @@ class MarbleWorld extends Scheduler {
 		this.rewindManager.clear();
 
 		this.timeState.currentAttemptTime = 0;
-		this.timeState.gameplayClock = 0;
+		this.timeState.gameplayClock = this.gameMode.getStartTime();
 		this.timeState.ticks = 0;
 		this.bonusTime = 0;
 		this.marble.outOfBounds = false;
@@ -524,7 +542,7 @@ class MarbleWorld extends Scheduler {
 		}
 		this.cancel(this.marble.oobSchedule);
 
-		var startquat = this.getStartPositionAndOrientation();
+		var startquat = this.gameMode.getSpawnTransform();
 
 		this.marble.setPosition(startquat.position.x, startquat.position.y, startquat.position.z + 3);
 		var oldtransform = this.marble.collider.transform.clone();
@@ -532,7 +550,7 @@ class MarbleWorld extends Scheduler {
 		this.marble.collider.setTransform(oldtransform);
 		this.marble.reset();
 
-		var euler = startquat.quat.toEuler();
+		var euler = startquat.orientation.toEuler();
 		this.marble.camera.init(cast this);
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
 		this.marble.camera.CameraPitch = 0.45;
@@ -541,7 +559,6 @@ class MarbleWorld extends Scheduler {
 		this.marble.camera.oob = false;
 		this.marble.camera.finish = false;
 		this.marble.mode = Start;
-		this.marble.startPad = cast startquat.pad;
 		sky.follow = marble.camera;
 
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
@@ -565,27 +582,57 @@ class MarbleWorld extends Scheduler {
 
 		Console.log("State Start");
 		this.clearSchedule();
-		this.schedule(0.5, () -> {
-			// setCenterText('ready');
-			Console.log("State Ready");
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/ready.wav', ResourceLoader.getAudio, this.soundResources));
-			return 0;
-		});
-		this.schedule(2, () -> {
-			// setCenterText('set');
-			Console.log("State Set");
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/set.wav', ResourceLoader.getAudio, this.soundResources));
-			return 0;
-		});
-		this.schedule(3.5, () -> {
-			// setCenterText('go');
-			Console.log("State Go");
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/go.wav', ResourceLoader.getAudio, this.soundResources));
-			Console.log("State Play");
-			return 0;
-		});
+
+		this.gameMode.onRestart();
 
 		return 0;
+	}
+
+	public function respawn(marble:Marble, respawnPos:Vector, respawnQuat:Quat, respawnUp:Vector) {
+		// Determine where to spawn the marble
+		marble.setMarblePosition(respawnPos.x, respawnPos.y, respawnPos.z);
+		marble.velocity.set(0, 0, 0);
+		marble.omega.set(0, 0, 0);
+		Console.log('Respawn:');
+		Console.log('Marble Position: ${respawnPos.x} ${respawnPos.y} ${respawnPos.z}');
+		Console.log('Marble Velocity: ${marble.velocity.x} ${marble.velocity.y} ${marble.velocity.z}');
+		Console.log('Marble Angular: ${marble.omega.x} ${marble.omega.y} ${marble.omega.z}');
+		// Set camera orientation
+		var euler = respawnQuat.toEuler();
+		marble.camera.CameraYaw = euler.z + Math.PI / 2;
+		marble.camera.CameraPitch = 0.45;
+		marble.camera.nextCameraYaw = marble.camera.CameraYaw;
+		marble.camera.nextCameraPitch = marble.camera.CameraPitch;
+		marble.camera.oob = false;
+		// if (isMultiplayer) {
+		// 	marble.megaMarbleUseTick = 0;
+		// 	marble.helicopterUseTick = 0;
+		// 	marble.collider.radius = marble._radius = 0.3;
+		// 	// @:privateAccess marble.netFlags |= MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoMega | MarbleNetFlags.GravityChange;
+		// } else {
+		@:privateAccess marble.helicopterEnableTime = -1e8;
+		@:privateAccess marble.megaMarbleEnableTime = -1e8;
+		// }
+		if (this.isRecording) {
+			this.replay.recordCameraState(marble.camera.CameraYaw, marble.camera.CameraPitch);
+			this.replay.recordMarbleInput(0, 0);
+			this.replay.recordMarbleState(respawnPos, marble.velocity, marble.getRotationQuat(), marble.omega);
+			this.replay.recordMarbleStateFlags(false, false, true, false);
+		}
+
+		// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
+		var up = new Vector(0, 0, 1);
+		up.transform(respawnQuat.toMatrix());
+		this.setUp(marble, up, this.timeState, true);
+
+		if (marble == this.marble)
+			this.playGui.setCenterText('');
+		// if (!this.isMultiplayer)
+		this.clearSchedule();
+		marble.outOfBounds = false;
+		this.gameMode.onRespawn(marble);
+		if (marble == this.marble && @:privateAccess !marble.isNetUpdate)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	public function updateGameState() {
@@ -611,26 +658,6 @@ class MarbleWorld extends Scheduler {
 			this.playGui.setCenterText('none');
 			this.marble.mode = Play;
 		}
-	}
-
-	function getStartPositionAndOrientation() {
-		// The player is spawned at the last start pad in the mission file.
-		var startPad = this.dtsObjects.filter(x -> x is StartPad).pop();
-		var position:Vector;
-		var quat:Quat = new Quat();
-		if (startPad != null) {
-			// If there's a start pad, start there
-			position = startPad.getAbsPos().getPosition();
-			quat = startPad.getRotationQuat().clone();
-		} else {
-			position = new Vector(0, 0, 300);
-		}
-		return {
-			position: position,
-			quat: quat,
-			pad: startPad,
-			up: new Vector(0, 0, 1)
-		};
 	}
 
 	public function addSimGroup(simGroup:MissionElementSimGroup) {
@@ -1218,11 +1245,13 @@ class MarbleWorld extends Scheduler {
 
 		var prevGameplayClock = this.timeState.gameplayClock;
 
+		var timeMultiplier = this.gameMode.timeMultiplier();
+
 		if (!this.isWatching) {
 			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
 				this.bonusTime -= dt;
 				if (this.bonusTime < 0) {
-					this.timeState.gameplayClock -= this.bonusTime;
+					this.timeState.gameplayClock -= this.bonusTime * timeMultiplier;
 					this.bonusTime = 0;
 				}
 				if (timeTravelSound == null) {
@@ -1240,10 +1269,12 @@ class MarbleWorld extends Scheduler {
 						alarmSound.pause = false;
 				}
 				if (this.timeState.currentAttemptTime >= 3.5) {
-					this.timeState.gameplayClock += dt;
+					this.timeState.gameplayClock += dt * timeMultiplier;
 				} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
-					this.timeState.gameplayClock += (this.timeState.currentAttemptTime + dt) - 3.5;
+					this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
 				}
+				if (this.timeState.gameplayClock < 0)
+					this.gameMode.onTimeExpire();
 			}
 			this.timeState.currentAttemptTime += dt;
 		} else {
@@ -1363,37 +1394,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function pickUpGem(marble:src.Marble, gem:Gem) {
-		this.gemCount++;
-		var string:String;
-
-		// Show a notification (and play a sound) based on the gems remaining
-		if (this.gemCount == this.totalGems) {
-			string = "You have all the diamonds, head for the finish!";
-			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotallgems.wav', ResourceLoader.getAudio, this.soundResources));
-
-			// Some levels with this package end immediately upon collection of all gems
-			// if (this.mission.misFile.activatedPackages.includes('endWithTheGems')) {
-			// 	let
-			// 	completionOfImpact = this.physics.computeCompletionOfImpactWithBody(gem.bodies[0], 2); // Get the exact point of impact
-			// 	this.touchFinish(completionOfImpact);
-			// }
-		} else {
-			string = "You picked up a diamond.  ";
-
-			var remaining = this.totalGems - this.gemCount;
-			if (remaining == 1) {
-				string += "Only one diamond to go!";
-			} else {
-				string += '${remaining} diamonds to go!';
-			}
-
-			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, this.soundResources));
-		}
-
-		displayAlert(string);
-		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		this.gameMode.onGemPickup(marble, gem);
 	}
 
 	public function callCollisionHandlers(marble:Marble, timeState:TimeState, start:Vector, end:Vector) {
