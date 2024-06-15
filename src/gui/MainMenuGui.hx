@@ -80,9 +80,12 @@ class MainMenuGui extends GuiImage {
 		}
 		mainMenuContent.addChild(playButton);
 
-		var lbButton = new GuiImage(ResourceLoader.getResource('data/ui/menu/online_i.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var lbButton = new GuiButton(loadButtonImages("data/ui/menu/online"));
 		lbButton.position = new Vector(-5, 128);
 		lbButton.extent = new Vector(247, 164);
+		lbButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.setContent(new JoinServerGui());
+		}
 		mainMenuContent.addChild(lbButton);
 
 		var optionsButton = new GuiButton(loadButtonImages("data/ui/menu/options"));

@@ -58,6 +58,10 @@ class MissionElementScriptObject extends MissionElementBase {
 	var music:String;
 	var alarmstarttime:String;
 	var game:String;
+	var gamemode:String;
+	var maxgemsperspawn:String;
+	var radiusfromgem:String;
+	var spawnblock:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;

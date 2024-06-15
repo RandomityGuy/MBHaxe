@@ -41,6 +41,7 @@ class Mission {
 	public var game:String;
 	public var hasEgg:Bool;
 	public var isCustom:Bool;
+	public var gameMode:String;
 	#if hl
 	public var addedAt:Int64;
 	#end
@@ -116,6 +117,7 @@ class Mission {
 		}
 		mission.type = missionInfo.type.toLowerCase();
 		mission.missionInfo = missionInfo;
+		mission.gameMode = missionInfo.gamemode;
 		return mission;
 	}
 

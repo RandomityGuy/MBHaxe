@@ -403,6 +403,10 @@ class DtsObject extends GameObject {
 					dtsshader.currentOpacity = 1;
 					if (this.identifier == "Tornado")
 						dtsshader.normalizeNormals = false; // These arent normalized
+					if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
+						dtsshader.usePremultipliedAlpha = true;
+						dtsshader.opacityMult = 0.5; // Hardcoded
+					}
 					material.mainPass.removeShader(material.textureShader);
 					material.mainPass.addShader(dtsshader);
 				}
@@ -438,10 +442,20 @@ class DtsObject extends GameObject {
 				material.shadows = false;
 			}
 			if (flags & 4 > 0) {
-				material.blendMode = BlendMode.Alpha;
-				material.mainPass.culling = h3d.mat.Data.Face.None;
-				material.receiveShadows = false;
-				material.mainPass.depthWrite = false;
+				if (this.identifier == null || !StringTools.startsWith(this.identifier, "GemBeam")) {
+					material.blendMode = BlendMode.Alpha;
+
+					material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.receiveShadows = false;
+					material.mainPass.depthWrite = false;
+				}
+				if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
+					material.blendMode = BlendMode.Alpha;
+					material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.receiveShadows = false;
+					material.mainPass.blend(SrcAlpha, OneMinusSrcAlpha);
+					material.mainPass.depthWrite = false;
+				}
 			}
 			if (flags & 8 > 0) {
 				material.blendMode = BlendMode.Add;

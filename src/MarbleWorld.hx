@@ -212,7 +212,7 @@ class MarbleWorld extends Scheduler {
 		this.scene2d = scene2d;
 		this.mission = mission;
 		this.game = mission.game.toLowerCase();
-		this.gameMode = GameModeFactory.getGameMode(cast this, null);
+		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
@@ -293,7 +293,8 @@ class MarbleWorld extends Scheduler {
 			var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
 			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
 			MarbleGame.canvas.clearContent();
-			this.endPad.generateCollider();
+			if (this.endPad != null)
+				this.endPad.generateCollider();
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 			Console.log("MISSION LOADED");
 			start();
@@ -612,6 +613,8 @@ class MarbleWorld extends Scheduler {
 		// } else {
 		@:privateAccess marble.helicopterEnableTime = -1e8;
 		@:privateAccess marble.megaMarbleEnableTime = -1e8;
+		@:privateAccess marble.shockAbsorberEnableTime = -1e8;
+		@:privateAccess marble.superBounceEnableTime = -1e8;
 		// }
 		if (this.isRecording) {
 			this.replay.recordCameraState(marble.camera.CameraYaw, marble.camera.CameraPitch);
@@ -632,7 +635,7 @@ class MarbleWorld extends Scheduler {
 		marble.outOfBounds = false;
 		this.gameMode.onRespawn(marble);
 		if (marble == this.marble && @:privateAccess !marble.isNetUpdate)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn_alternate.wav', ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 
 	public function updateGameState() {
@@ -1451,7 +1454,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		if (this.finishTime == null) {
+		if (this.finishTime == null && this.endPad != null) {
 			if (box.collide(this.endPad.finishBounds)) {
 				var padUp = this.endPad.getAbsPos().up();
 				padUp = padUp.multiply(10);
