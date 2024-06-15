@@ -173,7 +173,7 @@ class InstanceManager {
 						if (dtsShader != null) {
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
-						minfo.transparencymeshbatch.material.blendMode = Alpha;
+						// minfo.transparencymeshbatch.material.blendMode = Alpha;
 						// minfo.transparencymeshbatch.material.color.a = instance.gameObject.currentOpacity;
 						// minfo.transparencymeshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						// minfo.transparencymeshbatch.shadersChanged = true;
@@ -229,6 +229,12 @@ class InstanceManager {
 						minfo.meshbatch.material.mainPass.addShader(dtsshader);
 						minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
 						minfo.meshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
+						minfo.meshbatch.material.mainPass.blendSrc = mat.mainPass.blendSrc;
+						minfo.meshbatch.material.mainPass.blendDst = mat.mainPass.blendDst;
+						minfo.meshbatch.material.mainPass.blendOp = mat.mainPass.blendOp;
+						minfo.meshbatch.material.mainPass.blendAlphaSrc = mat.mainPass.blendAlphaSrc;
+						minfo.meshbatch.material.mainPass.blendAlphaDst = mat.mainPass.blendAlphaDst;
+						minfo.meshbatch.material.mainPass.blendAlphaOp = mat.mainPass.blendAlphaOp;
 						minfo.dtsShader = dtsshader;
 					}
 					var phongshader = mat.mainPass.getShader(PhongMaterial);
@@ -256,6 +262,21 @@ class InstanceManager {
 					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
 					minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
 					minfo.transparencymeshbatch.material.mainPass.addShader(dtsshader);
+
+					minfo.transparencymeshbatch.material.blendMode = Alpha;
+
+					minfo.transparencymeshbatch.material.mainPass.culling = mat.mainPass.culling;
+					minfo.transparencymeshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
+					if (mat.blendMode == Alpha) {
+						minfo.transparencymeshbatch.material.mainPass.blendSrc = mat.mainPass.blendSrc;
+						minfo.transparencymeshbatch.material.mainPass.blendDst = mat.mainPass.blendDst;
+						minfo.transparencymeshbatch.material.mainPass.blendOp = mat.mainPass.blendOp;
+						minfo.transparencymeshbatch.material.mainPass.blendAlphaSrc = mat.mainPass.blendAlphaSrc;
+						minfo.transparencymeshbatch.material.mainPass.blendAlphaDst = mat.mainPass.blendAlphaDst;
+						minfo.transparencymeshbatch.material.mainPass.blendAlphaOp = mat.mainPass.blendAlphaOp;
+						minfo.transparencymeshbatch.material.mainPass.enableLights = mat.mainPass.enableLights;
+						minfo.transparencymeshbatch.material.receiveShadows = mat.receiveShadows;
+					}
 					// minfo.transparencymeshbatch.material.mainPass.culling = mat.mainPass.culling;
 
 					// minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.mainPass.getShader(PropsValues));

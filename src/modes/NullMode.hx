@@ -113,7 +113,7 @@ class NullMode implements GameMode {
 	}
 
 	public function getPreloadFiles() {
-		return ['data/sound/gem_all.wav'];
+		return [];
 	}
 
 	public function onTimeExpire() {}

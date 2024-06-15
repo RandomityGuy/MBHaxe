@@ -16,6 +16,8 @@ class DtsTexture extends hxsl.Shader {
 		@range(0, 1) @param var killAlphaThreshold:Float;
 		@param var texture:Sampler2D;
 		@const var normalizeNormals:Bool;
+		@const var usePremultipliedAlpha:Bool;
+		@param var opacityMult:Float;
 		@perInstance @param var currentOpacity:Float;
 		var calculatedUV:Vec2;
 		var pixelColor:Vec4;
@@ -40,7 +42,11 @@ class DtsTexture extends hxsl.Shader {
 				pixelColor *= c;
 			if (specularAlpha)
 				specColor *= c.aaa;
-			pixelColor.a *= c.a * currentOpacity;
+			if (usePremultipliedAlpha) {
+				pixelColor.a = c.a * currentOpacity * opacityMult;
+			} else {
+				pixelColor.a *= c.a * currentOpacity;
+			}
 		}
 	}
 
