@@ -1,7 +1,3 @@
-//         score = "20";
-//         platinumScore = "60";
-//         ultimateScore = "120";
-
 //--- OBJECT WRITE BEGIN ---
 new SimGroup(MissionGroup) {
 
@@ -25,6 +21,7 @@ new SimGroup(MissionGroup) {
          platinumScore[1] = "90";
          ultimateScore[0] = "120";
          ultimateScore[1] = "170";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -58,11 +55,13 @@ new SimGroup(MissionGroup) {
       fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
       fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+      sphereFront = "platinum/data/shapes/skies/dusk/front.png";
+      sphereBack = "platinum/data/shapes/skies/dusk/back.png";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -74,7 +73,7 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/intermediate/MarbleItUp.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/MarbleItUp.dif";
       showTerrainInside = "0";
    };
    new SimGroup(GemSpawns) {
@@ -2309,6 +2308,11 @@ new SimGroup(MissionGroup) {
       scale = "159 163 1000";
       dataBlock = "InBoundsTrigger";
       polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";

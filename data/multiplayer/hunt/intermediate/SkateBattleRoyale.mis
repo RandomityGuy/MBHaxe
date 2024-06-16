@@ -1,7 +1,3 @@
-//         score = "20";
-//         platinumScore = "60";
-//         ultimateScore = "90";
-
 //--- OBJECT WRITE BEGIN ---
 new SimGroup(MissionGroup) {
 
@@ -25,6 +21,7 @@ new SimGroup(MissionGroup) {
          platinumScore[1] = "100";
          ultimateScore[0] = "100";
          ultimateScore[1] = "140";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -60,9 +57,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -74,231 +71,231 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/intermediate/SkateBattleRoyale.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-33 29.5 -9";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_corner1.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_corner1.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-33 29.5 -9";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_corner2.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_corner2.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "33 28.5 -9";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_corner1.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_corner1.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "33 28.5 -9";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_corner2.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_corner2.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-10.5 29 -8.5";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "10.5 29 -8.5";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "33.5 6 -8.5";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "33.5 -15 -8.5";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
-      position = "33.4988 -28.0004 -8.5";
+      position = "33.5 -28 -8.5";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-33.5 52 -8.5";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-33.5 73 -8.5";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-33.5 86 -8.5";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_pipe.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_pipe.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "0 41 -8.5";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "0 17 -8.5";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "55.5 33.5 8";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "21.5 -4.5 -8.5";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-45.5 62.5 -8.5";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-55.5 24.5 8";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-21.5 62.5 -8.5";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "45.5 -4.5 -8.5";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/SkateBattleRoyale_climb.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/SkateBattleRoyale_climb.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "50.5 1 16";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-16.5 68 16";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "5.5 12 16";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-5.5 12 16";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-5.5 46 16";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "5.5 46 16";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-16.5 57 16";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-50.5 57 16";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-50.5 68 16";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "50.5 -10 16";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "16.5 -10 16";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "16.5 1 16";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_8_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_8_normal.dif";
       showTerrainInside = "0";
    };
    new SimGroup(GemSpawns) {
@@ -1637,9 +1634,14 @@ new SimGroup(MissionGroup) {
    new Trigger(Bounds) {
       position = "-102.646 98.4477 -19.5";
       rotation = "1 0 0 0";
-      scale = "205.637 138.987 2000";
+      scale = "205.637 138.987 10000";
       dataBlock = "InBoundsTrigger";
       polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";

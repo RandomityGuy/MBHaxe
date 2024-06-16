@@ -2,25 +2,26 @@
 new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
+         game = "Ultra";
          level = "5";
-         name = "Concentric";
+         gameMode = "Hunt";
+         score0 = "20";
+         ultimateScore0 = "90";
+         radiusFromGem = "12";
+         type = "Advanced";
          desc = "Speed will not be your friend.";
          music = "Tim Trance.ogg";
+         score1 = "40";
          artist = "Alex Swanson";
-         game = "Ultra";
-         gameMode = "Hunt";
-         radiusFromGem = "12";
-         time = "240000";
+         ultimateScore1 = "140";
+         platinumScore0 = "40";
          maxGemsPerSpawn = "4";
-         alarmStartTime = "20";
-         type = "Advanced";
+         name = "Concentric";
+         time = "240000";
          overviewHeight = "15";
-         score[0] = "20";
-         score[1] = "40";
-         platinumScore[0] = "40";
-         platinumScore[1] = "80";
-         ultimateScore[0] = "90";
-         ultimateScore[1] = "140";
+         platinumScore1 = "80";
+         alarmStartTime = "20";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -56,9 +57,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -70,14 +71,7 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/advanced/Concentric1.dif";
-      showTerrainInside = "0";
-   };
-   new InteriorInstance() {
-      position = "0 0 0";
-      rotation = "1 0 0 0";
-      scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/advanced/Concentric2.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/Concentric.dif";
       showTerrainInside = "0";
    };
    new SimGroup(GemSpawns) {
@@ -942,105 +936,110 @@ new SimGroup(MissionGroup) {
       polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
    };
    new TSStatic() {
-      position = "47.3172 0.000155449 5.73";
-      rotation = "0 0 1 180";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "43.7132 -18.1127 5.73";
-      rotation = "0 0 1 202.5";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "18.1038 -43.7177 5.73";
-      rotation = "0 0 -1 112.5";
-      scale = "2.49 9.76 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "33.4626 -33.4567 5.73";
-      rotation = "0 0 1 225";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "0 -47.3194 5.73";
-      rotation = "0 0 -1 90";
-      scale = "2.49 9.76 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "-33.4541 -33.4518 5.73";
-      rotation = "0 0 -1 45";
-      scale = "2.49 9.76 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "-18.102 -43.7126 5.73";
-      rotation = "0 0 -1 67.5";
-      scale = "2.49 9.76 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "-47.3129 0.0320034 5.73";
+      position = "47.5685 -9 6";
       rotation = "1 0 0 0";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "-43.7147 -18.1004 5.73";
-      rotation = "0 0 -1 22.5";
-      scale = "2.49 9.76 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      position = "39.642 -26.9245 6";
+      rotation = "0 0 1 225";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "-43.7042 18.1212 5.73";
-      rotation = "0 0 1 22.5";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      position = "46.9374 -9.6776 6";
+      rotation = "0 0 1 202.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "-18.1219 43.7094 5.73";
-      rotation = "0 0 1 67.5";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      position = "26.3519 -40.0338 6";
+      rotation = "0 0 -1 112.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "-33.4326 33.4787 5.73";
-      rotation = "0 0 1 45";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
-   };
-   new TSStatic() {
-      position = "0.0210781 47.3173 5.73";
+      position = "-9 -47.5705 6";
       rotation = "0 0 1 90";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "18.1323 43.7047 5.73";
-      rotation = "0 0 1 112.5";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      position = "-26.9036 -39.6593 6";
+      rotation = "0 0 -1 45";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "33.4765 33.4408 5.73";
-      rotation = "0 0 1 135";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      position = "-9.7197 -46.9214 6";
+      rotation = "0 0 -1 67.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "43.7208 18.0921 5.73";
-      rotation = "0 0 1 157.5";
-      scale = "2.49 9.78 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      position = "-47.0635 -9 6";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new TSStatic() {
+      position = "-40.0507 -26.2936 6";
+      rotation = "0 0 -1 22.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new TSStatic() {
+      position = "-39.6414 26.9187 6";
+      rotation = "0 0 1 45";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";
       description = "AudioMusic";
       preload = "0";
+   };
+   new TSStatic() {
+      position = "-26.2907 40.0528 6";
+      rotation = "0 0 1 67.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new TSStatic() {
+      position = "40.0495 26.3048 6";
+      rotation = "0 0 1 157.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new TSStatic() {
+      position = "26.9049 39.6604 6";
+      rotation = "0 0 1 135";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new TSStatic() {
+      position = "-9 47.068 6";
+      rotation = "0 0 1 90";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new TSStatic() {
+      position = "-46.915 9.71866 6";
+      rotation = "0 0 1 22.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new TSStatic() {
+      position = "9.72227 46.9183 6";
+      rotation = "0 0 1 112.5";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
 };
 //--- OBJECT WRITE END ---

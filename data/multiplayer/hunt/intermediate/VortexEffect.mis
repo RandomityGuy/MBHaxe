@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          name = "Vortex Effect";
          type = "Intermediate";
-         level = "8";
+         level = "9";
          desc = "Go around or cut across.";
          artist = "Alex Swanson";
          music = "Tim Trance.ogg";
@@ -24,6 +24,7 @@ new SimGroup(MissionGroup) {
          ultimateScore[1] = "150";
          alarmStartTime = "25";
          overviewHeight = "0";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -59,9 +60,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -73,35 +74,35 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/intermediate/VortexEffect.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/VortexEffect.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
-      position = "15 -28.5 -1.5";
+      position = "15 -29 -1.5";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
-      position = "15 -34.5 -1.5";
+      position = "15 -35 -1.5";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
-      position = "9 -34.5 -1.5";
+      position = "9 -35 -1.5";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
-      position = "9 -28.5 -1.5";
+      position = "9 -29 -1.5";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new Item() {
@@ -2013,6 +2014,11 @@ new SimGroup(MissionGroup) {
          polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
             add = "0 0 1";
       };
+   };
+   new Marker(Glassy) {
+      position = "12 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new Trigger(Bounds) {
       position = "-57.5 51.5 -6.5";

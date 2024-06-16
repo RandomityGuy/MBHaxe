@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          name = "Playground";
          type = "Beginner";
-         level = "4";
+         level = "5";
          desc = "Play around and collect the gems, but beware of the ice.";
          artist = "Alex Swanson";
          music = "Tim Trance.ogg";
@@ -21,6 +21,7 @@ new SimGroup(MissionGroup) {
          ultimateScore[1] = "200";
          alarmStartTime = "25";
          overviewHeight = "-40";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -54,212 +55,214 @@ new SimGroup(MissionGroup) {
       fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
       fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+      sphereFront = "platinum/data/shapes/skies/clear/front.png";
+      sphereBack = "platinum/data/shapes/skies/clear/back.png";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "10000 10000 10000";
-      dataBlock = "Clear";
+      dataBlock = "clear";
    };
    new InteriorInstance() {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/beginner/playground.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/playground.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "16.5 -8 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "9.5 -8 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "16.5 6 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "9.5 6 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-7.5 6 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-14.5 6 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-7.5 -8 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-14.5 -8 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-28 -44 1";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_corner.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_corner.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-30.5 -51.5 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-28.5 17.5 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "32.5 41.5 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "30.5 -19.5 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_2_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_2_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "28 42 1";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "32.5 41.5 2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "30.5 -19.5 2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-28.5 17.5 2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-30.5 -51.5 2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-41.5 -51.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-41.5 17.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "43.5 -19.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "43.5 41.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-28 -44 -3";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/vertical_support.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/vertical_support.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "43.5 -19.5 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_4_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_4_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "43.5 41.5 6";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_4_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_4_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-41.5 17.5 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_4_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_4_normal.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-41.5 -51.5 6";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/arch_4_normal.dif";
+      interiorFile = "~/data/lbinteriors_mbu/parts/arch_4_normal.dif";
       showTerrainInside = "0";
    };
    new SimGroup(GemSpawns) {
@@ -1443,8 +1446,13 @@ new SimGroup(MissionGroup) {
       dataBlock = "InBoundsTrigger";
       polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
    };
+   new Marker(Glassy) {
+      position = "1 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+   };
    new AudioProfile(MusicProfile) {
-      fileName = "~/data/sound/music/Pianoforte.ogg";
+      fileName = "~/data/sound/music/Comforting Mystery.ogg";
       description = "AudioMusic";
       preload = "0";
    };

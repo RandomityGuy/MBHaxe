@@ -3,7 +3,7 @@ new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
          desc = "Roll through the colorful grounds while collecting the gems.";
-         level = "3";
+         level = "2";
          name = "Apex";
          artist = "Trace";
          music = "Astrolabe.ogg";

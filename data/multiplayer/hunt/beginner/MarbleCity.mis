@@ -7,7 +7,7 @@ new SimGroup(MissionGroup) {
          name = "Marble City";
          desc = "Use the powerups to help you navigate to the gems.";
          type = "Beginner";
-         level = "9";
+         level = "11";
          Gamemode = "Hunt";
          game = "Ultra";
          time = "300000";
@@ -21,6 +21,7 @@ new SimGroup(MissionGroup) {
          ultimateScore[1] = "175";
          alarmStartTime = "25";
          overviewHeight = "10";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -56,9 +57,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -70,7 +71,7 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/beginner/MarbleCity.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/MarbleCity.dif";
       showTerrainInside = "0";
    };
    new Trigger(Bounds) {
@@ -2146,6 +2147,11 @@ new SimGroup(MissionGroup) {
       collideable = "0";
       static = "1";
       rotate = "1";
+   };
+   new Marker(Glassy) {
+      position = "3 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Pianoforte.ogg";

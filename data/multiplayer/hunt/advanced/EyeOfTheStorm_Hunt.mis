@@ -18,10 +18,11 @@ new SimGroup(MissionGroup) {
          score[1] = "35";
          platinumScore[0] = "35";
          platinumScore[1] = "60";
-         ultimateScore[0] = "75";
-         ultimateScore[1] = "95";
+         ultimateScore[0] = "85";
+         ultimateScore[1] = "125";
          alarmStartTime = "20";
          overviewHeight = "15";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -453,6 +454,11 @@ new SimGroup(MissionGroup) {
          polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
             add = "0 0 1";
       };
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Pianoforte.ogg";

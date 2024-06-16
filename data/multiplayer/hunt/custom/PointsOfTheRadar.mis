@@ -1,0 +1,5435 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         artist = "Xi am classicx";
+         name = "Points of the Radar";
+         maxGemsPerSpawn = "5";
+         Difficulty = "8";
+         game = "Ultra";
+         time = "240000";
+         type = "Custom";
+         level = "13";
+         gameMode = "hunt";
+         desc = "Grab the gems on the islands, but mind the gaps!";
+         radiusFromGem = "10";
+   };
+   new SimGroup(SpawnPoints) {
+
+      new Trigger() {
+         position = "42.5 -4.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "34.5 -12.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "34.5 3.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "12.5 25.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "4.5 33.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "-3.5 25.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "-25.5 3.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "-33.5 -4.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "-25.5 -12.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "-3.5 -34.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "4.5 -42.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "12.5 -34.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "4.5 -10.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "-1.5 -4.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "4.5 1.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+      new Trigger() {
+         position = "10.5 -4.5 2";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "SpawnTrigger";
+         polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+            center = "1";
+      };
+   };
+   new Item() {
+      position = "5 25 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "10000";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 -0.930435 -0.365184";
+      fogVolume2 = "-1 0.0780969 -0.701916";
+      fogVolume3 = "-1 0.998288 0.0494325";
+      materialList = "~/data/skies/Cloudy/cloudy.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 0.000000";
+   };
+   new StaticShape() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "5000 5000 5000";
+      dataBlock = "clear";
+   };
+   new Sun() {
+      direction = "0.5732009 0.2753569 -0.7717638";
+      color = "1.000000 1.000000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
+         shadowColor = "0.000000 0.000000 0.150000 0.350000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+      showTerrainInside = "0";
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "5.25 7 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "2500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "17.25 7 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 7 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 -17 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 -17 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 -17 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 -17 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 7 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 7 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "2500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "5.25 7 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "0";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "17.25 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "2500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "17.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "2500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "17.25 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "1";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "5.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "2500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "-6.75 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "2500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "5.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "2";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "-6.75 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "2500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "-6.75 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 7.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "17.25 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-6.75 -16.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "2500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "-6.75 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "3";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "7500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "4";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "7500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "5";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "7500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "6";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "7500";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 10.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "20.25 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "7500";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-9.75 -19.5 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "7";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "5.25 13 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "6000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "23.25 13 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 13 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 -23 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 -23 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 -23 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 -23 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 13 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 13 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "6000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "5.25 13 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "8";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "23.25 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "6000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "23.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "6000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "23.25 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "9";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "5.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "6000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "-12.75 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "6000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "5.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "10";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(MustChange_g) {
+
+      new Path() {
+            isLooping = "0";
+
+         new Marker() {
+            position = "-12.75 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "6000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "-12.75 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "3";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "4";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 13.25 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "5";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "6";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "23.25 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "7";
+            msToNext = "12000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "8";
+            msToNext = "1000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "-12.75 -22.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "9";
+            msToNext = "6000";
+            smoothingType = "Spline";
+         };
+         new Marker() {
+            position = "-12.75 -4.75 2.5";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "10";
+            msToNext = "0";
+            smoothingType = "Spline";
+         };
+      };
+      new PathedInterior(MustChange) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "platinum/data/multiplayer/interiors/custom/mbu/pointsoftheradarMBU.dif";
+         interiorIndex = "11";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialTargetPosition = "-1";
+      };
+   };
+   new Trigger(Bounds) {
+      position = "-169.459 269.651 -3";
+      rotation = "1 0 0 0";
+      scale = "309.196 880.96 5000";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Item() {
+      position = "30 -0 -1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "40 0 -1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "40 -10 -1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "30 -10 -1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "35 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "31 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "35 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "39 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "35 -5 0.5500002";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "25 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "45 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "45 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "25 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "31 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "39 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "45 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "45 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "39 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "31 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "35 3 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "43 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "35 -13 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "27 -5 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "25 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "25 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 29 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "6.75 26.75 3.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "3.25 26.75 3.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "3.25 23.25 3.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "6.75 23.25 3.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 35 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 35 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 35 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 35 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 29 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 21 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 21 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 20 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -29 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 31 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 25 2.268644";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "7.25 -2.75 2.687";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 30 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 20 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 -25 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 30 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-25 -5 4.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-26.25 -6.25 3.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-23.75 -6.25 3.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-23.75 -3.75 3.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-26.25 -3.75 3.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-30 0 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-20 0 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-20 -10 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-30 -10 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-31 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-25 -11 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-21 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-15 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-15 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-15 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-15 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-21 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-29 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-35 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-35 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-35 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-35 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-29 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 19 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-25 1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-22.5 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-25 -2.5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.5 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-25 -7.5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-17.5 -12.5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-17.5 2.5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-32.5 2.5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-32.5 -12.5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -35 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -33.25 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -36.75 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "3.25 -35 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "6.75 -35 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 -40 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 -40 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 -30 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 -30 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11 -38 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "8 -39 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12 -41 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 -42 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 -42 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2 -39 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-1 -38 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-2 -41 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-1 -32 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2 -31 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-2 -29 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 -28 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "8 -31 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 -28 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11 -32 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12 -29 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11 -35 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-19 -5 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-1 -35 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -41 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 -45 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 -45 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 -39 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 -31 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 -25 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 -25 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 -25 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 -39 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 -31 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 -45 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 -45 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -5 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "4 -4 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "6 -4 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "6 -6 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "4 -6 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 -10 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 0 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 0 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 -10 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-4 -14 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-4 4 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "14 4 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "14 -14 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 -5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "37.5 -2.5 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-3 -5 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 3 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "13 -5.25 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 2.25 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-2.25 0 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12.25 0 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 2.25 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "10 -12.25 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12.25 -10 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-2.25 -10 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "0 -12.25 2.05";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-5 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 -15 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 -9 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 -1 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "9 5 2.55";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 -13 2.7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "37.5 -7.5 2.500503";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "MegaMarbleItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "32.5 -2.5 2.500503";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "MegaMarbleItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "32.5 -7.5 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "15 25 2.268644";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2.75 -7.25 2.687";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-2.75 -32.75 2.268644";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "7.25 -7.25 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2.75 -2.75 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "5 35 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12.75 17.25 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-2.75 17.25 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.5 -2.5 2.75";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-27.5 -7.5 2.75";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-22.5 -7.5 2.75";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "MegaMarbleItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-22.5 -2.5 2.75";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "MegaMarbleItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2.75 -42.75 2.268644";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "7.25 -42.75 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12.75 -37.25 2.268644";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "HelicopterItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "12.75 -32.75 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-2.75 -37.25 2.484221";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new ScriptObject() {
+         obj = "72943";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "85885";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "85885";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "87177";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "87177";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "28931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "28931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31440";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31440";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31620";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31620";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31725";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31725";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36679";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36679";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "30368";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "30368";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "74455";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "74455";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "25555";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "25555";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "14846";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "14846";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "23542";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "23542";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "14790";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "14790";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "15512";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "15512";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "15408";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "15408";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "13572";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "13572";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "36038";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36038";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36248";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28856";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36248";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28856";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "36353";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36353";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31440";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "31440";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "74455";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "74455";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "39426";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39426";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "42195";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "42350";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "42195";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "42350";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "86600";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "86600";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "42832";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "42832";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "43424";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39886";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "39886";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "43424";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39094";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39094";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "11699";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "11699";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "9937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "9937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10013";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10013";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10997";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10997";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "8931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "8931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "8947";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "8947";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "71946";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "71946";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "8893";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "8893";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "68394";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "68394";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "39251";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39251";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "38660";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "38660";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "46119";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46119";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46326";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46326";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "45443";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "45443";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49847";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49847";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "46326";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46326";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "38937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "38937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46119";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46119";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49255";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49255";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "78280";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "78280";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "28002";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "28002";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "77083";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "77083";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "20774";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "20774";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "16542";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "16542";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "16437";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "16437";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "23542";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "23542";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "14790";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "14790";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "13572";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "13572";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "28856";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "28856";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36353";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36353";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "28931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "84100";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "84100";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "29178";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36038";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "29178";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36038";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "30368";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "30368";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "67322";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "67322";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "9002";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "71443";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "9002";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "71443";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "8751";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "8751";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "9078";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "9078";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "8839";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "8839";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "69398";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "69398";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "9243";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "9243";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "8931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "8931";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "71946";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "71946";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "8737";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "8737";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "9614";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "9614";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "71443";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "71443";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "70106";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "70106";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "9243";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "9243";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "9002";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "9002";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10680";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10819";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10819";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10680";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "11946";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "11946";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "64541";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "64541";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "57600";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "57600";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "78280";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "78280";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "61533";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "61533";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "55659";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "55659";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "79543";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "79543";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "64384";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "64384";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "61409";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "61409";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49430";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49430";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49847";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49847";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "48133";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "48133";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "87408";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "87408";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "49255";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46119";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "49255";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46119";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "29178";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "29178";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "84157";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "84157";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "29232";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "29232";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36143";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36143";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "29622";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "29622";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "28700";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "84100";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "84100";
+         amount = "1";
+         user = "7024";
+         this = "152";
+   };
+   new ScriptObject() {
+         obj = "36353";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36353";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36038";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "36038";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "74455";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "74455";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new ScriptObject() {
+         obj = "60574";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60574";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60731";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60731";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "79795";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "79795";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "54860";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "54860";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "56524";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "56524";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "65212";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "65212";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "79543";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "79543";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "44078";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44337";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44078";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44337";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41143";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "41143";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "44723";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44723";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "85885";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "85885";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "48461";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "48461";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "48617";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "48617";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44442";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44442";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "38660";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "38660";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "38937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "38937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46326";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "45443";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "46326";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41318";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "45443";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44985";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39251";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39251";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53694";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53694";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60574";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60574";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "57495";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "57495";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "61201";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "61201";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60731";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60731";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "54860";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "54860";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "63158";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "63158";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "60574";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "60574";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "56524";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "56524";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "65212";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "65212";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53694";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53694";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53954";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53954";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "57600";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "55066";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "57600";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "55066";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "53694";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53694";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53210";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "53954";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "53954";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "78871";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "79795";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "79795";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "57390";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "57390";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53518";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "79543";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "53799";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "79543";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "57233";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "57233";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "78280";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "78280";
+         amount = "1";
+         user = "7024";
+         this = "124";
+   };
+   new ScriptObject() {
+         obj = "38660";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "38660";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "39426";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "39426";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46808";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41524";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "41524";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "46808";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "47327";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "47327";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46652";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "46652";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "47540";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "86811";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "86811";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "47540";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "48617";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "85885";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "85885";
+         amount = "1";
+         user = "7024";
+         this = "132";
+   };
+   new ScriptObject() {
+         obj = "48617";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41143";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "44078";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44078";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "41143";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "44723";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44723";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "48461";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44337";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44442";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44442";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "44337";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "48461";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "86162";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "86162";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "86811";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "86811";
+         amount = "1";
+         user = "7024";
+         this = "149";
+   };
+   new ScriptObject() {
+         obj = "9243";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "9243";
+         amount = "1";
+         user = "7024";
+         this = "105";
+   };
+   new ScriptObject() {
+         obj = "8893";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "8893";
+         amount = "1";
+         user = "7024";
+         this = "107";
+   };
+   new ScriptObject() {
+         obj = "10997";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10997";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10013";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "10013";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "11699";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "9937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "11699";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "9937";
+         amount = "1";
+         user = "7024";
+         this = "106";
+   };
+   new ScriptObject() {
+         obj = "72943";
+         amount = "1";
+         user = "7024";
+         this = "116";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/music/Flanked.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

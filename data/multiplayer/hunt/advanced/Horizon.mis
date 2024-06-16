@@ -2,25 +2,26 @@
 new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
-         name = "Horizon";
-         type = "Advanced";
-         level = "3";
-         desc = "Use the Super Speeds to your advantage, but beware not to fall in the gaps.";
-         artist = "Alex Swanson";
-         music = "Tim Trance.ogg";
-         Gamemode = "Hunt";
          game = "Ultra";
+         level = "3";
+         gameMode = "Hunt";
+         score0 = "30";
+         ultimateScore0 = "135";
+         type = "Advanced";
+         radiusFromGem = "25";
+         desc = "Use the Super Speeds to your advantage, but beware not to fall in the gaps.";
+         music = "Tim Trance.ogg";
+         score1 = "60";
+         artist = "Alex Swanson";
+         ultimateScore1 = "170";
+         platinumScore0 = "85";
+         maxGemsPerSpawn = "6";
+         name = "Horizon";
          time = "300000";
-         MaxGemsPerSpawn = "6";
-         RadiusFromGem = "25";
-         score[0] = "30";
-         score[1] = "60";
-         platinumScore[0] = "85";
-         platinumScore[1] = "110";
-         ultimateScore[0] = "135";
-         ultimateScore[1] = "170";
-         alarmStartTime = "25";
          overviewHeight = "15";
+         platinumScore1 = "110";
+         alarmStartTime = "25";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -56,9 +57,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -70,7 +71,7 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/advanced/Horizon.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/Horizon.dif";
       showTerrainInside = "0";
    };
    new SimGroup(SpawnPoints) {
@@ -1221,238 +1222,243 @@ new SimGroup(MissionGroup) {
       rotate = "1";
    };
    new TSStatic() {
-      position = "-36 36.25 1.7";
+      position = "24 -72.5 0";
       rotation = "0 0 1 90";
-      scale = "2.495 6.56 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "-6 -78.25 3.7";
+      position = "-24 -78.5 4";
       rotation = "0 0 1 90";
-      scale = "2.495 19.75 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/18x3.dts";
    };
    new TSStatic() {
-      position = "-42.25 -5.7 1.7";
+      position = "-42 -12 2";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "-30.2 -72.25 1.7";
+      position = "-36 -72.5 2";
       rotation = "0 0 1 90";
-      scale = "2.495 6.3 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/6x3.dts";
    };
    new TSStatic() {
-      position = "-60.25 -41.8568 1.7";
+      position = "-60 -60 2";
       rotation = "1 0 0 0";
-      scale = "2.495 19.75 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/18x3.dts";
    };
    new TSStatic() {
-      position = "-21.1947 36.25 -0.3";
+      position = "36 -72.5 4";
       rotation = "0 0 1 90";
-      scale = "2.495 9.55 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/6x3.dts";
    };
    new TSStatic() {
-      position = "-45.0092 -72.25 3.7";
+      position = "30 -72.5 2";
       rotation = "0 0 1 90";
-      scale = "2.495 9.82 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "-57.25 -66.25 3.7";
+      position = "-60 -66.5 4";
       rotation = "0 0 1 90";
-      scale = "2.495 3.15 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "-57.25 -23.75 1.7";
+      position = "-60.5 -24 2";
       rotation = "0 0 1 90";
-      scale = "2.495 3.15 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "-48.25 -11.75 -0.3";
+      position = "-54.5 -12 0";
       rotation = "0 0 1 90";
-      scale = "2.495 6.4 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/6x3.dts";
    };
    new TSStatic() {
-      position = "-54.25 -17.8 -0.3";
+      position = "-54 -24 0";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "57.3 36.25 3.7";
+      position = "60.5 5.5 6";
       rotation = "0 0 1 90";
-      scale = "2.495 3.065 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "-6.25 48.25 1.7";
+      position = "48.5 -30.5 2";
       rotation = "0 0 1 90";
-      scale = "2.495 6.3 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "-12.25 42.3 1.7";
+      position = "-12 36.5 2";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/6x3.dts";
    };
    new TSStatic() {
-      position = "60.25 -12.145 3.7";
+      position = "60.5 -6 6";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "-0.25 51.3 1.7";
+      position = "0 48.5 2";
       rotation = "1 0 0 0";
-      scale = "2.495 3.1 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "18.25 51.2 1.7";
+      position = "18.5 48.5 2";
       rotation = "1 0 0 0";
-      scale = "2.495 3.1 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "54.25 42.3 1.7";
+      position = "54.5 36.5 2";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "48.25 -66.163 3.7";
+      position = "48.5 -72 4";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "66.25 21 5.7";
+      position = "66.5 6 6";
       rotation = "1 0 0 0";
-      scale = "2.495 16.4 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/15x3.dts";
    };
    new TSStatic() {
-      position = "60.25 -0.2 5.7";
+      position = "60.5 -18 4";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "54.25 -24.3 1.7";
+      position = "54.5 -30 2";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "9 54.25 1.7";
+      position = "60 36 6";
       rotation = "0 0 1 90";
-      scale = "2.495 9.82 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "48.25 -51.2288 -0.3";
+      position = "48.5 -60 0";
       rotation = "1 0 0 0";
-      scale = "2.495 9.75 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/9x3.dts";
    };
    new TSStatic() {
-      position = "-42.25 24.05 1.7";
+      position = "-42 12 2";
       rotation = "1 0 0 0";
-      scale = "2.495 13.2 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/12x3.dts";
    };
    new TSStatic() {
-      position = "36.2 48.25 1.7";
+      position = "18 48 2";
       rotation = "0 0 1 90";
-      scale = "2.495 19.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/18x3.dts";
    };
    new TSStatic() {
-      position = "-60.25 -63.05 3.7";
+      position = "-54 -72.5 4";
       rotation = "1 0 0 0";
-      scale = "2.495 3.3 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/3x3.dts";
    };
    new TSStatic() {
-      position = "-54.25 -69.25 3.7";
+      position = "-60 -66 4";
       rotation = "1 0 0 0";
-      scale = "2.495 3.1 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/3x3.dts";
    };
    new TSStatic() {
-      position = "-24.25 -75.25 3.7";
+      position = "-24 -78.5 4";
       rotation = "1 0 0 0";
-      scale = "2.495 3.1 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/3x3.dts";
    };
    new TSStatic() {
-      position = "12.25 -75.25 3.7";
+      position = "12.5 -78.5 4";
       rotation = "1 0 0 0";
-      scale = "2.495 3.1 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/3x3.dts";
    };
    new TSStatic() {
-      position = "48.25 -36.3 1.6";
+      position = "48.5 -42 2";
       rotation = "1 0 0 0";
-      scale = "2.495 6.5 3.35";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/6x3.dts";
    };
    new TSStatic() {
-      position = "63.1028 36.25 5.7";
+      position = "54 36 4";
       rotation = "0 0 1 90";
-      scale = "2.495 3.25 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "63.2 5.75 5.7";
+      position = "54.5 -18.5 4";
       rotation = "0 0 1 90";
-      scale = "2.495 3.1 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
    };
    new TSStatic() {
-      position = "57.3 -18.25 3.7";
+      position = "-54 -72.5 4";
       rotation = "0 0 1 90";
-      scale = "2.495 3.15 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/9x3.dts";
    };
    new TSStatic() {
-      position = "51.3 -30.25 1.7";
+      position = "-12 48 2";
       rotation = "0 0 1 90";
-      scale = "2.495 3.15 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/6x3.dts";
    };
    new TSStatic() {
-      position = "42.2 -72.25 3.7";
+      position = "-42 36 2";
       rotation = "0 0 1 90";
-      scale = "2.495 6.56 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/6x3.dts";
    };
    new TSStatic() {
-      position = "33.2108 -72.25 1.7";
+      position = "-30 36 0";
       rotation = "0 0 1 90";
-      scale = "2.495 3.22 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/9x3.dts";
    };
    new TSStatic() {
-      position = "27.0364 -72.25 -0.3";
+      position = "0 54 2";
       rotation = "0 0 1 90";
-      scale = "2.495 3.5 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/9x3.dts";
    };
    new TSStatic() {
-      position = "15.23 -72.25 3.7";
+      position = "12 -72.5 4";
       rotation = "0 0 1 90";
-      scale = "2.495 3.15 3.3";
-      shapeName = "~/data/shapes/Window03.dts";
+      scale = "1 1 1";
+      shapeName = "~/data/shapes/Glass/Col/3x3.dts";
+   };
+   new Marker(Glassy) {
+      position = "-6 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";

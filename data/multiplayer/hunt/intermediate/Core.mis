@@ -1,12 +1,8 @@
-//         score = "10";
-//         platinumScore = "40";
-//         ultimateScore = "75";
-
 //--- OBJECT WRITE BEGIN ---
 new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
-         level = "10";
+         level = "11";
          name = "Core";
          desc = "Don\'t get lost in the gravity maze on your way to the gems.";
          music = "Tim Trance.ogg";
@@ -25,6 +21,7 @@ new SimGroup(MissionGroup) {
          platinumScore[1] = "60";
          ultimateScore[0] = "75";
          ultimateScore[1] = "110";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -60,9 +57,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -74,7 +71,7 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/intermediate/Core.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/Core.dif";
       showTerrainInside = "0";
    };
    new SimGroup(SpawnPoints) {
@@ -839,7 +836,7 @@ new SimGroup(MissionGroup) {
          rotate = "1";
       };
       new Item() {
-         position = "10 -12 31.1074";
+         position = "10 -12 31";
          rotation = "1 0 0 180";
          scale = "1 1 1";
          dataBlock = "GemItemRed";
@@ -2681,6 +2678,11 @@ new SimGroup(MissionGroup) {
       collideable = "0";
       static = "1";
       rotate = "1";
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Pianoforte.ogg";

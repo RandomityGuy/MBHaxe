@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          maxGemsPerSpawn = "7";
          name = "Triple Decker";
-         level = "3";
+         level = "4";
          game = "Platinum";
          time = "240000";
          glassCenter = "glassCenter";
