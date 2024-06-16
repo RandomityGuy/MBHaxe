@@ -29,6 +29,9 @@ class MarblePrediction {
 		var subs = position.sub(p.position).lengthSq(); // + velocity.sub(p.velocity).lengthSq() + omega.sub(p.omega).lengthSq();
 		if (p.netFlags != 0)
 			subs += 1;
+		if (subs > 0.01) {
+			trace('Desync: ${position.x} ${position.y} ${position.z} != ${p.position.x} ${p.position.y} ${p.position.z}');
+		}
 		// if (p.powerUpId != powerupItemId)
 		// if (tick % 10 == 0)
 		//	subs += 1; // temp

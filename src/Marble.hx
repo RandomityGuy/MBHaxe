@@ -482,6 +482,11 @@ class Marble extends GameObject {
 		} else
 			this._radius = avgRadius;
 
+		if (Net.isMP) {
+			this._radius = 0.2; // For the sake of physics
+			marbleDts.scale(0.2 / avgRadius);
+		}
+
 		this._prevRadius = this._radius;
 
 		if (isUltra) {
@@ -556,8 +561,8 @@ class Marble extends GameObject {
 
 	public function getMarbleAxis() {
 		var motiondir = new Vector(0, -1, 0);
-		// if (level.isReplayingMovement)
-		// 	return level.currentInputMoves[1].marbleAxes;
+		if (level.isReplayingMovement)
+			return level.currentInputMoves[1].marbleAxes;
 		if (this.controllable && !this.isNetUpdate) {
 			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
 			motiondir.transform(level.newOrientationQuat.toMatrix());
@@ -663,6 +668,8 @@ class Marble extends GameObject {
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
+		// if (!level.isReplayingMovement)
+		// 	level.inputRecorder.recordAxis(axes);
 		var sideDir = axes[0];
 		var motionDir = axes[1];
 		var upDir = axes[2];
@@ -811,37 +818,37 @@ class Marble extends GameObject {
 				}
 			}
 		} while (!done && itersIn < 1e4); // Maximum limit pls
-			//	if (this.velocity.lengthSq() < 625) {
-		var gotOne = false;
-		var dir = new Vector(0, 0, 0);
-		for (j in 0...contacts.length) {
-			var dir2 = dir.add(contacts[j].normal);
-			if (dir2.lengthSq() < 0.01) {
-				dir2.load(dir2.add(contacts[j].normal));
-			}
-			dir = dir2;
-			dir.normalize();
-			gotOne = true;
-		}
-		if (gotOne) {
-			dir.normalize();
-			var soFar = 0.0;
-			for (k in 0...contacts.length) {
-				var dist = this._radius - contacts[k].contactDistance;
-				var timeToSeparate = 0.1;
-				var vel = this.velocity.sub(contacts[k].velocity);
-				var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
-				if (dist > timeToSeparate * outVel) {
-					soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+		if (this.velocity.lengthSq() < 625) {
+			var gotOne = false;
+			var dir = new Vector(0, 0, 0);
+			for (j in 0...contacts.length) {
+				var dir2 = dir.add(contacts[j].normal);
+				if (dir2.lengthSq() < 0.01) {
+					dir2.load(dir2.add(contacts[j].normal));
 				}
+				dir = dir2;
+				dir.normalize();
+				gotOne = true;
 			}
-			if (soFar < -25)
-				soFar = -25;
-			if (soFar > 25)
-				soFar = 25;
-			this.velocity.load(this.velocity.add(dir.multiply(soFar)));
+			if (gotOne) {
+				dir.normalize();
+				var soFar = 0.0;
+				for (k in 0...contacts.length) {
+					var dist = this._radius - contacts[k].contactDistance;
+					var timeToSeparate = 0.1;
+					var vel = this.velocity.sub(contacts[k].velocity);
+					var outVel = vel.add(dir.multiply(soFar)).dot(contacts[k].normal);
+					if (dist > timeToSeparate * outVel) {
+						soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
+					}
+				}
+				if (soFar < -25)
+					soFar = -25;
+				if (soFar > 25)
+					soFar = 25;
+				this.velocity.load(this.velocity.add(dir.multiply(soFar)));
+			}
 		}
-		//	}
 
 		return stoppedPaths;
 	}
@@ -1228,6 +1235,7 @@ class Marble extends GameObject {
 							finalT = collisionTime;
 							currentFinalPos = position.add(relVel.multiply(finalT));
 							found = true;
+							lastContactPos = currentFinalPos.clone();
 							// iterationFound = true;
 							i += 3;
 							// Debug.drawSphere(currentFinalPos, radius);
@@ -1427,6 +1435,8 @@ class Marble extends GameObject {
 	}
 
 	function nudgeToContacts(position:Vector, radius:Float, foundContacts:Array<MarbleTestMoveFoundContact>, foundMarbles:Array<SphereCollisionEntity>) {
+		if (Net.isMP)
+			return position;
 		var it = 0;
 		var concernedContacts = foundContacts; // PathedInteriors have their own nudge logic
 		var prevResolved = 0;
@@ -1717,36 +1727,36 @@ class Marble extends GameObject {
 
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 
-		// if (this.megaMarbleUseTick > 0) {
-		// 	if (Net.isHost) {
-		// 		if ((timeState.ticks - this.megaMarbleUseTick) <= 312 && this.megaMarbleUseTick > 0) {
-		// 			this._radius = 0.675;
-		// 			this.collider.radius = 0.675;
-		// 		} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
-		// 			this.collider.radius = this._radius = 0.3;
-		// 			if (!this.isNetUpdate && this.controllable)
-		// 				AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
-		// 					false);
-		// 			this.megaMarbleUseTick = 0;
-		// 			this.netFlags |= MarbleNetFlags.DoMega;
-		// 		}
-		// 	}
-		// 	if (Net.isClient) {
-		// 		if (this.serverTicks - this.megaMarbleUseTick <= 312 && this.megaMarbleUseTick > 0) {
-		// 			this._radius = 0.675;
-		// 			this.collider.radius = 0.675;
-		// 		} else {
-		// 			this.collider.radius = this._radius = 0.3;
-		// 			if (!this.isNetUpdate && this.controllable)
-		// 				AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
-		// 					false);
-		// 			this.megaMarbleUseTick = 0;
-		// 		}
-		// 	}
-		// }
-		// if (Net.isClient && this.megaMarbleUseTick == 0) {
-		// 	this.collider.radius = this._radius = 0.3;
-		// }
+		if (this.megaMarbleUseTick > 0) {
+			if (Net.isHost) {
+				if ((timeState.ticks - this.megaMarbleUseTick) <= 312 && this.megaMarbleUseTick > 0) {
+					this._radius = 0.675;
+					this.collider.radius = 0.675;
+				} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
+					this.collider.radius = this._radius = 0.2;
+					if (!this.isNetUpdate && this.controllable)
+						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
+							false);
+					this.megaMarbleUseTick = 0;
+					this.netFlags |= MarbleNetFlags.DoMega;
+				}
+			}
+			if (Net.isClient) {
+				if (this.serverTicks - this.megaMarbleUseTick <= 312 && this.megaMarbleUseTick > 0) {
+					this._radius = 0.675;
+					this.collider.radius = 0.675;
+				} else {
+					this.collider.radius = this._radius = 0.2;
+					if (!this.isNetUpdate && this.controllable)
+						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
+							false);
+					this.megaMarbleUseTick = 0;
+				}
+			}
+		}
+		if (Net.isClient && this.megaMarbleUseTick == 0) {
+			this.collider.radius = this._radius = 0.2;
+		}
 
 		if (Net.isMP) {
 			if (m.jump && this.outOfBounds) {
@@ -2035,6 +2045,8 @@ class Marble extends GameObject {
 		if (this.controllable && !this.level.isWatching) {
 			move = recordMove();
 		}
+		if (level.isReplayingMovement)
+			move = level.currentInputMoves[1].move;
 
 		if (this.level.isWatching) {
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(Jumped))
@@ -2055,6 +2067,32 @@ class Marble extends GameObject {
 
 		playedSounds = [];
 		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
+
+		// physicsAccumulator += timeState.dt;
+
+		// while (physicsAccumulator > 0.032) {
+		// 	var adt = timeState.clone();
+		// 	adt.dt = 0.032;
+		// 	advancePhysics(adt, move, collisionWorld, pathedInteriors);
+		// 	physicsAccumulator -= 0.032;
+		// }
+		// if (oldPos != null && newPos != null) {
+		// 	var deltaT = physicsAccumulator / 0.032;
+		// 	var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
+		// 	this.setPosition(renderPos.x, renderPos.y, renderPos.z);
+
+		// 	var rot = this.getRotationQuat();
+		// 	var quat = new Quat();
+		// 	quat.initRotation(omega.x * timeState.dt, omega.y * timeState.dt, omega.z * timeState.dt);
+		// 	quat.multiply(quat, rot);
+		// 	this.setRotationQuat(quat);
+
+		// 	var adt = timeState.clone();
+		// 	adt.dt = physicsAccumulator;
+		// 	for (pi in pathedInteriors) {
+		// 		pi.update(adt);
+		// 	}
+		// }
 
 		if (!this.level.isWatching) {
 			if (this.level.isRecording) {

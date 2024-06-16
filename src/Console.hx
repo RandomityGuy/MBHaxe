@@ -167,6 +167,9 @@ class Console {
 				#if sys
 				hl.Gc.dumpMemory();
 				#end
+			} else if (cmdType == 'rollback') {
+				var t = Std.parseFloat(cmdSplit[1]);
+				MarbleGame.instance.world.rollback(t);
 			} else {
 				error("Unknown command");
 			}
