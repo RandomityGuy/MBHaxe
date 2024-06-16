@@ -11,6 +11,8 @@ class OtherMarbleUpdate {
 	var lastBlastTick:Int;
 	var lastHeliTick:Int;
 	var lastMegaTick:Int;
+	var lastSuperBounceTick:Int;
+	var lastShockAbsorberTick:Int;
 	var lastPowerUpId:Int;
 	var lastGravityUp:Vector;
 
@@ -46,6 +48,14 @@ class MarbleUpdateQueue {
 					update.megaTick = otherUpdate.lastMegaTick;
 				else
 					otherUpdate.lastMegaTick = update.megaTick;
+				if (update.netFlags & MarbleNetFlags.DoSuperBounce == 0)
+					update.superBounceTick = otherUpdate.lastSuperBounceTick;
+				else
+					otherUpdate.lastSuperBounceTick = update.superBounceTick;
+				if (update.netFlags & MarbleNetFlags.DoShockAbsorber == 0)
+					update.shockAbsorberTick = otherUpdate.lastShockAbsorberTick;
+				else
+					otherUpdate.lastShockAbsorberTick = update.shockAbsorberTick;
 				if (update.netFlags & MarbleNetFlags.PickupPowerup == 0)
 					update.powerUpId = otherUpdate.lastPowerUpId;
 				else
@@ -65,6 +75,10 @@ class MarbleUpdateQueue {
 					otherUpdate.lastHeliTick = update.heliTick;
 				if (update.netFlags & MarbleNetFlags.DoMega != 0)
 					otherUpdate.lastMegaTick = update.megaTick;
+				if (update.netFlags & MarbleNetFlags.DoSuperBounce != 0)
+					otherUpdate.lastSuperBounceTick = update.superBounceTick;
+				if (update.netFlags & MarbleNetFlags.DoShockAbsorber != 0)
+					otherUpdate.lastShockAbsorberTick = update.shockAbsorberTick;
 				if (update.netFlags & MarbleNetFlags.PickupPowerup != 0)
 					otherUpdate.lastPowerUpId = update.powerUpId;
 				if (update.netFlags & MarbleNetFlags.GravityChange != 0)
@@ -81,6 +95,10 @@ class MarbleUpdateQueue {
 						update.heliTick = myMarbleUpdate.heliTick;
 					if (update.netFlags & MarbleNetFlags.DoMega == 0)
 						update.megaTick = myMarbleUpdate.megaTick;
+					if (update.netFlags & MarbleNetFlags.DoSuperBounce == 0)
+						update.superBounceTick = myMarbleUpdate.superBounceTick;
+					if (update.netFlags & MarbleNetFlags.DoShockAbsorber == 0)
+						update.shockAbsorberTick = myMarbleUpdate.shockAbsorberTick;
 					if (update.netFlags & MarbleNetFlags.PickupPowerup == 0)
 						update.powerUpId = myMarbleUpdate.powerUpId;
 					if (update.netFlags & MarbleNetFlags.GravityChange == 0)

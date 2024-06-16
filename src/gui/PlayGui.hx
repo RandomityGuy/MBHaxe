@@ -1,5 +1,6 @@
 package gui;
 
+import net.Net;
 import src.ProfilerUI;
 import hxd.App;
 import hxd.res.Image;
@@ -152,7 +153,7 @@ class PlayGui {
 		initGemCounter();
 		initCenterText();
 		initPowerupBox();
-		if (game == 'ultra')
+		if (game == 'ultra' || Net.isMP)
 			initBlastBar();
 		initTexts();
 		if (Settings.optionsSettings.frameRateVis)

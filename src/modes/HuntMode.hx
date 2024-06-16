@@ -157,6 +157,9 @@ class HuntMode extends NullMode {
 				this.gemSpawnPoints.push(spawn);
 				this.gemOctree.insert(spawn);
 				gem.setHide(true);
+				if (level.isMultiplayer) {
+					@:privateAccess level.gemPredictions.alloc();
+				}
 			}
 		}
 	}

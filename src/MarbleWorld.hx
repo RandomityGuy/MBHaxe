@@ -767,8 +767,10 @@ class MarbleWorld extends Scheduler {
 		if (isMultiplayer) {
 			marble.megaMarbleUseTick = 0;
 			marble.helicopterUseTick = 0;
-			// marble.collider.radius = marble._radius = 0.3;
-			@:privateAccess marble.netFlags |= MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoMega | MarbleNetFlags.GravityChange;
+			marble.shockAbsorberUseTick = 0;
+			marble.superBounceUseTick = 0;
+			marble.collider.radius = marble._radius = 0.2;
+			@:privateAccess marble.netFlags |= MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoMega | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.GravityChange;
 		} else {
 			@:privateAccess marble.helicopterEnableTime = -1e8;
 			@:privateAccess marble.megaMarbleEnableTime = -1e8;
@@ -1861,7 +1863,7 @@ class MarbleWorld extends Scheduler {
 		if (timeToDisplay >= this.mission.qualifyTime)
 			return 2;
 
-		if (this.timeState.currentAttemptTime >= 3.5) {
+		if (this.timeState.currentAttemptTime >= 3.5 && !Net.isMP) {
 			// Create the flashing effect
 			var alarmStart = this.mission.computeAlarmStartTime();
 			var elapsed = timeToDisplay - alarmStart;
@@ -1949,28 +1951,30 @@ class MarbleWorld extends Scheduler {
 		this.timeState.timeSinceLoad += dt;
 
 		// Handle alarm warnings (that the user is about to exceed the par time)
-		if (this.timeState.currentAttemptTime >= 3.5) {
-			var alarmStart = this.mission.computeAlarmStartTime();
+		if (!Net.isMP) {
+			if (this.timeState.currentAttemptTime >= 3.5) {
+				var alarmStart = this.mission.computeAlarmStartTime();
 
-			if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
-				// Start the alarm
-				this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
-					null, true); // AudioManager.createAudioSource('alarm.wav');
-				this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.');
-			}
-			if (prevGameplayClock < this.mission.qualifyTime && this.timeState.gameplayClock >= this.mission.qualifyTime) {
-				// Stop the alarm
-				if (this.alarmSound != null) {
-					this.alarmSound.stop();
-					this.alarmSound = null;
+				if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
+					// Start the alarm
+					this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
+						null, true); // AudioManager.createAudioSource('alarm.wav');
+					this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.');
 				}
-				this.displayHelp("The clock has passed the Par Time.");
-				AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
+				if (prevGameplayClock < this.mission.qualifyTime && this.timeState.gameplayClock >= this.mission.qualifyTime) {
+					// Stop the alarm
+					if (this.alarmSound != null) {
+						this.alarmSound.stop();
+						this.alarmSound = null;
+					}
+					this.displayHelp("The clock has passed the Par Time.");
+					AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
+				}
 			}
-		}
 
-		if (finishTime != null)
-			this.timeState.gameplayClock = finishTime.gameplayClock;
+			if (finishTime != null)
+				this.timeState.gameplayClock = finishTime.gameplayClock;
+		}
 		playGui.formatTimer(this.timeState.gameplayClock, determineClockColor(this.timeState.gameplayClock));
 
 		if (!this.isWatching && this.isRecording)
@@ -1978,7 +1982,11 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function updateBlast(marble:Marble, timestate:TimeState) {
-		if (this.game == "ultra") {
+		if (Net.isMP) {
+			if (this.marble == marble) {
+				this.playGui.setBlastValue(marble.blastTicks / (25000 >> 5));
+			}
+		} else if (this.game == "ultra") {
 			if (marble.blastAmount < 1) {
 				marble.blastAmount = Util.clamp(marble.blastAmount + (timeState.dt / 25), 0, 1);
 			}
