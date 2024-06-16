@@ -68,6 +68,12 @@ class InputBitStream {
 		return FPHelper.i32ToFloat(readInt32());
 	}
 
+	public function readDouble() {
+		var lo = readInt32();
+		var hi = readInt32();
+		return FPHelper.i64ToDouble(lo, hi);
+	}
+
 	public function readString() {
 		var length = readUInt16();
 		var str = "";
@@ -150,5 +156,11 @@ class OutputBitStream {
 		for (i in 0...value.length) {
 			writeByte(StringTools.fastCodeAt(value, i));
 		}
+	}
+
+	public function writeDouble(value:Float) {
+		var i64 = FPHelper.doubleToI64(value);
+		writeInt32(i64.low);
+		writeInt32(i64.high);
 	}
 }

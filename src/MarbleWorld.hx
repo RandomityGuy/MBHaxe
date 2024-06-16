@@ -1,5 +1,6 @@
 package src;
 
+import rewind.InputRecorder;
 import net.NetPacket.ScoreboardPacket;
 import net.NetPacket.PowerupPickupPacket;
 import net.Move;
@@ -209,6 +210,10 @@ class MarbleWorld extends Scheduler {
 	public var rewindManager:RewindManager;
 	public var rewinding:Bool = false;
 
+	public var inputRecorder:InputRecorder;
+	public var isReplayingMovement:Bool = false;
+	public var currentInputMoves:Array<InputRecorderFrame>;
+
 	// Multiplayer
 	public var isMultiplayer:Bool;
 
@@ -257,6 +262,7 @@ class MarbleWorld extends Scheduler {
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
+		this.inputRecorder = new InputRecorder(cast this);
 		this.isMultiplayer = multiplayer;
 		if (this.isMultiplayer) {
 			isRecording = false;
@@ -761,7 +767,7 @@ class MarbleWorld extends Scheduler {
 		if (isMultiplayer) {
 			marble.megaMarbleUseTick = 0;
 			marble.helicopterUseTick = 0;
-			marble.collider.radius = marble._radius = 0.3;
+			// marble.collider.radius = marble._radius = 0.3;
 			@:privateAccess marble.netFlags |= MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoMega | MarbleNetFlags.GravityChange;
 		} else {
 			@:privateAccess marble.helicopterEnableTime = -1e8;
@@ -1496,9 +1502,42 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	public function rollback(t:Float) {
+		var newT = timeState.currentAttemptTime - t;
+		var rewindFrame = rewindManager.getNextRewindFrame(timeState.currentAttemptTime - t);
+		rewindManager.applyFrame(rewindFrame);
+		this.isReplayingMovement = true;
+		this.currentInputMoves = this.inputRecorder.getMovesFrom(timeState.currentAttemptTime);
+	}
+
+	public function advanceWorld(dt:Float) {
+		ProfilerUI.measure("updateTimer");
+		this.updateTimer(dt);
+		this.tickSchedule(timeState.currentAttemptTime);
+
+		this.updateGameState();
+		ProfilerUI.measure("updateDTS");
+		for (obj in dtsObjects) {
+			obj.update(timeState);
+		}
+		for (obj in triggers) {
+			obj.update(timeState);
+		}
+
+		ProfilerUI.measure("updateMarbles");
+		marble.update(timeState, collisionWorld, this.pathedInteriors);
+		for (client => marble in clientMarbles) {
+			marble.update(timeState, collisionWorld, this.pathedInteriors);
+		}
+	}
+
 	public function update(dt:Float) {
 		if (!_ready) {
 			return;
+		}
+
+		if (Key.isPressed(Key.T)) {
+			rollback(0.4);
 		}
 
 		var realDt = dt;
@@ -1558,6 +1597,31 @@ class MarbleWorld extends Scheduler {
 		if (dt < 0)
 			return;
 
+		if (this.isReplayingMovement) {
+			trace('Rollback start');
+			while (this.currentInputMoves.length > 1) {
+				while (this.currentInputMoves[1].time <= timeState.currentAttemptTime) {
+					this.currentInputMoves = this.currentInputMoves.slice(1);
+					if (this.currentInputMoves.length == 1)
+						break;
+				}
+				if (this.currentInputMoves.length > 1) {
+					dt = this.currentInputMoves[1].time - this.currentInputMoves[0].time;
+				}
+
+				if (this.isReplayingMovement) {
+					if (this.timeState.currentAttemptTime != this.currentInputMoves[0].time)
+						trace("fucked");
+				}
+
+				if (this.currentInputMoves.length > 1) {
+					advanceWorld(dt);
+					trace('Position: ${@:privateAccess marble.newPos.sub(currentInputMoves[1].pos).length()}. Vel: ${marble.velocity.sub(currentInputMoves[1].velocity).length()}');
+				}
+			}
+			this.isReplayingMovement = false;
+		}
+
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
@@ -1615,6 +1679,11 @@ class MarbleWorld extends Scheduler {
 		for (obj in triggers) {
 			obj.update(timeState);
 		}
+
+		// if (!isReplayingMovement) {
+		// 	inputRecorder.recordInput(timeState.currentAttemptTime);
+		// }
+
 		ProfilerUI.measure("updateMarbles");
 		if (this.isMultiplayer) {
 			tickAccumulator += timeState.dt;
@@ -1725,6 +1794,10 @@ class MarbleWorld extends Scheduler {
 
 		if (!this.rewinding && Settings.optionsSettings.rewindEnabled && !this.isMultiplayer)
 			this.rewindManager.recordFrame();
+
+		// if (!this.isReplayingMovement) {
+		// 	inputRecorder.recordMarble();
+		// }
 
 		_instancesNeedsUpdate = true;
 

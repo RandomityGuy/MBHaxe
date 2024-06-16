@@ -1,5 +1,8 @@
 package modes;
 
+import net.BitStream.OutputBitStream;
+import net.NetPacket.GemPickupPacket;
+import net.NetPacket.GemSpawnPacket;
 import octree.IOctreeObject;
 import octree.IOctreeObject.RayIntersectionData;
 import h3d.col.Bounds;
@@ -17,6 +20,7 @@ import src.Mission;
 import src.Marble;
 import src.AudioManager;
 import src.ResourceLoader;
+import net.Net;
 
 @:structInit
 @:publicFields
@@ -142,10 +146,7 @@ class HuntMode extends NullMode {
 		return null;
 	}
 
-	function setupGems() {
-		hideExisting();
-		this.activeGems = [];
-		this.activeGemSpawnGroup = [];
+	function prepareGems() {
 		if (this.gemSpawnPoints == null) {
 			this.gemOctree = new Octree();
 			this.gemSpawnPoints = [];
@@ -158,6 +159,13 @@ class HuntMode extends NullMode {
 				gem.setHide(true);
 			}
 		}
+	}
+
+	function setupGems() {
+		hideExisting();
+		this.activeGems = [];
+		this.activeGemSpawnGroup = [];
+		prepareGems();
 		spawnHuntGems();
 	}
 
@@ -226,6 +234,15 @@ class HuntMode extends NullMode {
 			spawnGem(gem);
 		}
 		activeGemSpawnGroup = spawnSet;
+
+		if (level.isMultiplayer && Net.isHost) {
+			var bs = new OutputBitStream();
+			bs.writeByte(GemSpawn);
+			var packet = new GemSpawnPacket();
+			packet.gemIds = spawnSet;
+			packet.serialize(bs);
+			Net.sendPacketToIngame(bs);
+		}
 
 		lastSpawn = furthest;
 	}
@@ -309,21 +326,25 @@ class HuntMode extends NullMode {
 		points = 0;
 	}
 
+	override function onClientRestart() {
+		prepareGems();
+	}
+
 	override function onGemPickup(marble:Marble, gem:Gem) {
-		// if ((@:privateAccess !marble.isNetUpdate && Net.isHost) || !Net.isMP) {
-		if (marble == level.marble)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
-		else
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/opponent_gem_collect.wav', ResourceLoader.getAudio,
-				@:privateAccess this.level.soundResources));
-		// }
+		if ((@:privateAccess !marble.isNetUpdate && Net.isHost) || !Net.isMP) {
+			if (marble == level.marble)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
+			else
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/opponentdiamond.wav', ResourceLoader.getAudio,
+					@:privateAccess this.level.soundResources));
+		}
 		activeGems.remove(gem);
 		var beam = gemToBeamMap.get(gem);
 		beam.setHide(true);
 
-		// if (!this.level.isMultiplayer || Net.isHost) {
-		spawnHuntGems();
-		// }
+		if (!this.level.isMultiplayer || Net.isHost) {
+			spawnHuntGems();
+		}
 
 		var incr = 0;
 		switch (gem.gemColor) {
@@ -352,24 +373,24 @@ class HuntMode extends NullMode {
 			}
 		}
 
-		// if (this.level.isMultiplayer && Net.isHost) {
-		// 	var packet = new GemPickupPacket();
-		// 	packet.clientId = @:privateAccess marble.connection == null ? 0 : @:privateAccess marble.connection.id;
-		// 	packet.gemId = gem.netIndex;
-		// 	packet.serverTicks = level.timeState.ticks;
-		// 	packet.scoreIncr = incr;
-		// 	var os = new OutputBitStream();
-		// 	os.writeByte(GemPickup);
-		// 	packet.serialize(os);
-		// 	Net.sendPacketToIngame(os);
+		if (this.level.isMultiplayer && Net.isHost) {
+			var packet = new GemPickupPacket();
+			packet.clientId = @:privateAccess marble.connection == null ? 0 : @:privateAccess marble.connection.id;
+			packet.gemId = gem.netIndex;
+			packet.serverTicks = level.timeState.ticks;
+			packet.scoreIncr = incr;
+			var os = new OutputBitStream();
+			os.writeByte(GemPickup);
+			packet.serialize(os);
+			Net.sendPacketToIngame(os);
 
-		// 	Settings.playStatistics.totalMPScore += incr;
+			// Settings.playStatistics.totalMPScore += incr;
 
-		// 	@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
-		// }
-		// if (this.level.isMultiplayer && Net.isClient) {
-		// 	gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;
-		// }
+			// @:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
+		}
+		if (this.level.isMultiplayer && Net.isClient) {
+			gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;
+		}
 	}
 
 	override public function timeMultiplier() {

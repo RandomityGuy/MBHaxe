@@ -163,6 +163,9 @@ class Console {
 				} else {
 					error("Expected one argument, got " + (cmdSplit.length - 1));
 				}
+			} else if (cmdType == 'rollback') {
+				var t = Std.parseFloat(cmdSplit[1]);
+				MarbleGame.instance.world.rollback(t);
 			} else {
 				error("Unknown command");
 			}
