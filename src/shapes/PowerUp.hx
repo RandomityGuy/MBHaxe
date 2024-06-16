@@ -8,6 +8,9 @@ import src.Util;
 import h3d.Vector;
 import src.DtsObject;
 import src.Marble;
+import net.Net;
+import net.BitStream.OutputBitStream;
+import net.NetPacket.PowerupPickupPacket;
 
 abstract class PowerUp extends DtsObject {
 	public var lastPickUpTime:Float = -1;
@@ -39,6 +42,23 @@ abstract class PowerUp extends DtsObject {
 
 		if (this.pickUp(marble)) {
 			// this.level.replay.recordMarbleInside(this);
+
+			if (level.isMultiplayer && Net.isHost) {
+				var b = new OutputBitStream();
+				b.writeByte(NetPacketType.PowerupPickup);
+				var pickupPacket = new PowerupPickupPacket();
+				pickupPacket.clientId = @:privateAccess marble.connection != null ? @:privateAccess marble.connection.id : 0;
+				pickupPacket.serverTicks = timeState.ticks;
+				pickupPacket.powerupItemId = this.netIndex;
+				pickupPacket.serialize(b);
+				Net.sendPacketToIngame(b);
+				pickupClient = pickupPacket.clientId;
+				pickupTicks = pickupPacket.serverTicks;
+			}
+
+			if (level.isMultiplayer && Net.isClient) {
+				pickupClient = @:privateAccess marble.connection != null ? @:privateAccess marble.connection.id : Net.clientId;
+			}
 
 			this.lastPickUpTime = timeState.currentAttemptTime;
 			if (this.autoUse)

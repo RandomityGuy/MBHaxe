@@ -24,6 +24,7 @@ import src.ResourceLoader;
 import h3d.Vector;
 import src.Util;
 import src.MarbleGame;
+import src.MissionList;
 
 class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;

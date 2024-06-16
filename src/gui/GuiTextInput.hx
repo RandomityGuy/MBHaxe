@@ -77,4 +77,9 @@ class GuiTextInput extends GuiControl {
 		text.focus();
 		#end
 	}
+
+	public function setCaretColor(col:Int) {
+		text.cursorTile = h2d.Tile.fromColor(col, Std.int(1 / hxd.Window.getInstance().windowToPixelRatio), text.font.size);
+		text.cursorTile.dy = 2 / hxd.Window.getInstance().windowToPixelRatio;
+	}
 }

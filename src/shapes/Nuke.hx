@@ -128,10 +128,12 @@ class Nuke extends DtsObject {
 			this.setCollisionEnabled(false);
 
 			// if (!this.level.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource("data/sound/nukeexplode.wav", ResourceLoader.getAudio, this.soundResources));
-			this.level.particleManager.createEmitter(nukeParticle, nukeParticleData, this.getAbsPos().getPosition());
-			this.level.particleManager.createEmitter(nukeSmokeParticle, nukeSmokeParticleData, this.getAbsPos().getPosition());
-			this.level.particleManager.createEmitter(nukeSparksParticle, nukeSparkParticleData, this.getAbsPos().getPosition());
+			if (@:privateAccess !marble.isNetUpdate) {
+				AudioManager.playSound(ResourceLoader.getResource("data/sound/nukeexplode.wav", ResourceLoader.getAudio, this.soundResources));
+				this.level.particleManager.createEmitter(nukeParticle, nukeParticleData, this.getAbsPos().getPosition());
+				this.level.particleManager.createEmitter(nukeSmokeParticle, nukeSmokeParticleData, this.getAbsPos().getPosition());
+				this.level.particleManager.createEmitter(nukeSparksParticle, nukeSparkParticleData, this.getAbsPos().getPosition());
+			}
 
 			var minePos = this.getAbsPos().getPosition();
 			var dtsCenter = this.dts.bounds.center();

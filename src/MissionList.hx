@@ -1,8 +1,11 @@
+package src;
+
 import haxe.Json;
 import mis.MisParser;
 import src.ResourceLoader;
 import src.Mission;
 import src.Console;
+import src.MissionList;
 
 @:publicFields
 class MissionList {

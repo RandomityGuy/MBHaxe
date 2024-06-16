@@ -1,5 +1,8 @@
 package gui;
 
+import net.MasterServerClient;
+import net.MasterServerClient.RemoteServerInfo;
+import net.Net;
 import h2d.filter.DropShadow;
 import hxd.res.BitmapFont;
 import src.MarbleGame;
@@ -28,48 +31,6 @@ class JoinServerGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		this.horizSizing = Width;
-		this.vertSizing = Height;
-		this.position = new Vector();
-		this.extent = new Vector(640, 480);
-
-		var window = new GuiImage(ResourceLoader.getResource("data/ui/mp/join/window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		window.horizSizing = Center;
-		window.vertSizing = Center;
-		window.position = new Vector(-60, 5);
-		window.extent = new Vector(759, 469);
-
-		var hostBtn = new GuiButton(loadButtonImages("data/ui/mp/join/host"));
-		hostBtn.position = new Vector(521, 379);
-		hostBtn.extent = new Vector(93, 45);
-		hostBtn.pressedAction = (e) -> {
-			MarbleGame.canvas.setContent(new MPPlayMissionGui());
-		}
-		window.addChild(hostBtn);
-
-		var joinBtn = new GuiButton(loadButtonImages("data/ui/mp/join/join"));
-		joinBtn.position = new Vector(628, 379);
-		joinBtn.extent = new Vector(93, 45);
-		window.addChild(joinBtn);
-
-		var refreshBtn = new GuiButton(loadButtonImages("data/ui/mp/join/refresh/refresh-1"));
-		refreshBtn.position = new Vector(126, 379);
-		refreshBtn.extent = new Vector(45, 45);
-		window.addChild(refreshBtn);
-
-		var serverSettingsBtn = new GuiButton(loadButtonImages("data/ui/mp/play/settings"));
-		serverSettingsBtn.position = new Vector(171, 379);
-		serverSettingsBtn.extent = new Vector(45, 45);
-		window.addChild(serverSettingsBtn);
-
-		var exitBtn = new GuiButton(loadButtonImages("data/ui/mp/join/leave"));
-		exitBtn.position = new Vector(32, 379);
-		exitBtn.extent = new Vector(93, 45);
-		exitBtn.pressedAction = (e) -> {
-			MarbleGame.canvas.setContent(new MainMenuGui());
-		}
-		window.addChild(exitBtn);
-
 		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
 		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
 		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
@@ -89,6 +50,113 @@ class JoinServerGui extends GuiImage {
 					return null;
 			}
 		}
+
+		this.horizSizing = Width;
+		this.vertSizing = Height;
+		this.position = new Vector();
+		this.extent = new Vector(640, 480);
+
+		var window = new GuiImage(ResourceLoader.getResource("data/ui/mp/join/window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		window.horizSizing = Center;
+		window.vertSizing = Center;
+		window.position = new Vector(-60, 5);
+		window.extent = new Vector(759, 469);
+
+		var serverListContainer = new GuiControl();
+		serverListContainer.position = new Vector(30, 80);
+		serverListContainer.extent = new Vector(475, 290);
+		window.addChild(serverListContainer);
+
+		var curSelection = -1;
+		var serverList = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF);
+		serverList.position = new Vector(0, 0);
+		serverList.extent = new Vector(475, 63);
+		serverList.onSelectedFunc = (sel) -> {
+			curSelection = sel;
+		}
+		serverListContainer.addChild(serverList);
+
+		var serverDisplays = [];
+
+		var ourServerList:Array<RemoteServerInfo> = [];
+		var platformToString = ["unknown", "pc", "mac", "web", "android"];
+
+		function updateServerListDisplay() {
+			serverDisplays = ourServerList.map(x -> '${x.name}');
+			serverList.setTexts(serverDisplays);
+		}
+
+		MasterServerClient.connectToMasterServer(() -> {
+			MasterServerClient.instance.getServerList((servers) -> {
+				ourServerList = servers;
+				updateServerListDisplay();
+			});
+		});
+
+		var maxPlayers = 8;
+		var privateSlots = 0;
+		var privateGame = false;
+
+		var hostBtn = new GuiButton(loadButtonImages("data/ui/mp/join/host"));
+		hostBtn.position = new Vector(521, 379);
+		hostBtn.extent = new Vector(93, 45);
+		hostBtn.pressedAction = (e) -> {
+			Net.hostServer('${Settings.highscoreName}\'s Server', maxPlayers, privateSlots, privateGame, () -> {
+				MarbleGame.canvas.setContent(new MPPlayMissionGui(true));
+			});
+		}
+		window.addChild(hostBtn);
+
+		var joinBtn = new GuiButton(loadButtonImages("data/ui/mp/join/join"));
+		joinBtn.position = new Vector(628, 379);
+		joinBtn.extent = new Vector(93, 45);
+		joinBtn.pressedAction = (e) -> {
+			if (curSelection != -1) {
+				var selectedServerVersion = ourServerList[curSelection].version;
+				// if (selectedServerVersion != MarbleGame.currentVersion) {
+				// 	var pup = new MessageBoxOkDlg("You are using a different version of the game than the server. Please update your game.");
+				// 	MarbleGame.canvas.pushDialog(pup);
+				// 	return;
+				// }
+
+				// MarbleGame.canvas.setContent(new MultiplayerLoadingGui("Connecting"));
+				var failed = true;
+				haxe.Timer.delay(() -> {
+					if (failed) {
+						// if (MarbleGame.canvas.content is MultiplayerLoadingGui) {
+						//	var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
+						//	if (loadGui != null) {
+						//		loadGui.setErrorStatus("Failed to connect to server. Please try again.");
+						Net.disconnect();
+						//	}
+						// }
+					}
+				}, 15000);
+				Net.joinServer(ourServerList[curSelection].name, false, () -> {
+					failed = false;
+					Net.remoteServerInfo = ourServerList[curSelection];
+				});
+			}
+		}
+		window.addChild(joinBtn);
+
+		var refreshBtn = new GuiButton(loadButtonImages("data/ui/mp/join/refresh/refresh-1"));
+		refreshBtn.position = new Vector(126, 379);
+		refreshBtn.extent = new Vector(45, 45);
+		window.addChild(refreshBtn);
+
+		var serverSettingsBtn = new GuiButton(loadButtonImages("data/ui/mp/play/settings"));
+		serverSettingsBtn.position = new Vector(171, 379);
+		serverSettingsBtn.extent = new Vector(45, 45);
+		window.addChild(serverSettingsBtn);
+
+		var exitBtn = new GuiButton(loadButtonImages("data/ui/mp/join/leave"));
+		exitBtn.position = new Vector(32, 379);
+		exitBtn.extent = new Vector(93, 45);
+		exitBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.setContent(new MainMenuGui());
+		}
+		window.addChild(exitBtn);
 
 		var titleText = new GuiText(markerFelt32);
 		titleText.position = new Vector(30, 20);

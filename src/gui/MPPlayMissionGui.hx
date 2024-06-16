@@ -13,10 +13,18 @@ import h3d.Vector;
 import src.Util;
 import src.Settings;
 import src.Mission;
+import src.MissionList;
+import net.ClientConnection.NetPlatform;
+import net.Net;
+import net.NetCommands;
 
 class MPPlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
 	static var currentCategoryStatic:String = "beginner";
+
+	static var setLevelFn:(String, Int) -> Void;
+	static var playSelectedLevel:(String, Int) -> Void;
+	static var setLevelStr:String->Void;
 
 	var currentSelection:Int = 0;
 	var currentCategory:String = "beginner";
@@ -36,7 +44,7 @@ class MPPlayMissionGui extends GuiImage {
 	var previewToken:Int = 0;
 	#end
 
-	public function new() {
+	public function new(isHost:Bool = true) {
 		MissionList.buildMissionList();
 		function chooseBg() {
 			var rand = Math.random();
@@ -268,7 +276,8 @@ class MPPlayMissionGui extends GuiImage {
 		playBtn.position = new Vector(565, 514);
 		playBtn.extent = new Vector(93, 44);
 		playBtn.pressedAction = (sender) -> {
-			MarbleGame.instance.playMission(currentList[currentSelection]);
+			NetCommands.toggleReadiness(Net.isClient ? Net.clientId : 0);
+			// MarbleGame.instance.playMission(currentList[currentSelection], true);
 		}
 		window.addChild(playBtn);
 
@@ -484,6 +493,15 @@ class MPPlayMissionGui extends GuiImage {
 			#end
 		}
 
+		playSelectedLevel = (cat:String, index:Int) -> {
+			// if (custSelected) {
+			// 	NetCommands.playCustomLevel(MPCustoms.missionList[custSelectedIdx].path);
+			// } else {
+			var curMission = MissionList.missionList["multiplayer"][cat][index]; //  mission[index];
+			MarbleGame.instance.playMission(curMission, true);
+			// }
+		}
+
 		currentList = MissionList.missionList["multiplayer"]["beginner"];
 
 		setCategoryFunc(currentCategoryStatic, null, false);
@@ -503,5 +521,67 @@ class MPPlayMissionGui extends GuiImage {
 			setSelectedFunc(currentSelection - 1);
 		if (Key.isPressed(Key.RIGHT))
 			setSelectedFunc(currentSelection + 1);
+	}
+
+	inline function platformToString(platform:NetPlatform) {
+		return switch (platform) {
+			case Unknown: return "unknown";
+			case Android: return "android";
+			case MacOS: return "mac";
+			case PC: return "pc";
+			case Web: return "web";
+		}
+	}
+
+	public function updateLobbyNames() {
+		return;
+		var playerListArr = [];
+		if (Net.isHost) {
+			playerListArr.push({
+				name: Settings.highscoreName,
+				state: Net.lobbyHostReady,
+				platform: Net.getPlatform()
+			});
+		}
+		if (Net.isClient) {
+			playerListArr.push({
+				name: Settings.highscoreName,
+				state: Net.lobbyClientReady,
+				platform: Net.getPlatform()
+			});
+		}
+		if (Net.clientIdMap != null) {
+			for (c => v in Net.clientIdMap) {
+				playerListArr.push({
+					name: v.name,
+					state: v.lobbyReady,
+					platform: v.platform
+				});
+			}
+		}
+
+		// if (!showingCustoms)
+		// 	playerList.setTexts(playerListArr.map(player -> {
+		// 		return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
+		// 	}));
+
+		var pubCount = 1; // Self
+		var privCount = 0;
+		for (cid => cc in Net.clientIdMap) {
+			if (cc.isPrivate) {
+				privCount++;
+			} else {
+				pubCount++;
+			}
+		}
+
+		if (Net.isHost) {
+			// updatePlayerCountFn(pubCount, privCount, Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots, Net.serverInfo.privateSlots);
+		}
+	}
+
+	public function updatePlayerCount(pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) {
+		return;
+		// updatePlayerCountFn(pub, priv, publicTotal, privateTotal);
 	}
 }

@@ -6,6 +6,7 @@ import src.ResourceLoader;
 import src.MarbleGame;
 import src.Settings;
 import src.Mission;
+import src.MissionList;
 
 class AchievementsGui extends GuiImage {
 	public function new() {

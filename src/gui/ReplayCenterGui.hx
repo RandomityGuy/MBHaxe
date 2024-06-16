@@ -11,6 +11,7 @@ import h3d.Vector;
 import src.Util;
 import src.MarbleGame;
 import src.Settings;
+import src.MissionList;
 
 class ReplayCenterGui extends GuiImage {
 	public function new() {
