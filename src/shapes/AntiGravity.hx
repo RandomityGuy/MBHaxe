@@ -6,6 +6,7 @@ import src.TimeState;
 import h3d.Vector;
 import src.DtsObject;
 import src.MarbleWorld;
+import net.NetPacket.MarbleNetFlags;
 
 class AntiGravity extends PowerUp {
 	public function new(element:MissionElementItem, norespawn:Bool = false) {
@@ -33,7 +34,7 @@ class AntiGravity extends PowerUp {
 			if (marble == level.marble)
 				this.level.setUp(marble, direction, timeState);
 			else {
-				// @:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
+				@:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
 				marble.currentUp.load(direction);
 			}
 		}

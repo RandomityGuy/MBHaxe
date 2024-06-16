@@ -1,5 +1,6 @@
 package src;
 
+import gui.MPPlayMissionGui;
 import gui.MainMenuGui;
 #if !js
 import gui.ReplayCenterGui;
@@ -27,6 +28,9 @@ import src.Console;
 import src.Debug;
 import src.Gamepad;
 import src.Analytics;
+import net.Net;
+import net.MasterServerClient;
+import net.NetCommands;
 
 @:publicFields
 class MarbleGame {
@@ -181,6 +185,8 @@ class MarbleGame {
 	}
 
 	public function update(dt:Float) {
+		MasterServerClient.process();
+		Net.checkPacketTimeout(dt);
 		if (world != null) {
 			if (world._disposed) {
 				world = null;
@@ -190,7 +196,7 @@ class MarbleGame {
 			if (Util.isTouchDevice()) {
 				touchInput.update();
 			}
-			if (!paused) {
+			if (!paused || world.isMultiplayer) {
 				world.update(dt * Debug.timeScale);
 			}
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
@@ -236,7 +242,10 @@ class MarbleGame {
 						quitMission();
 					}));
 				} else {
-					quitMission();
+					quitMission(Net.isClient);
+					if (Net.isMP && Net.isClient) {
+						Net.disconnect();
+					}
 				}
 			}, (sender) -> {
 				canvas.popDialog(exitGameDlg);
@@ -266,8 +275,13 @@ class MarbleGame {
 		return world;
 	}
 
-	public function quitMission() {
+	public function quitMission(weDisconnecting:Bool = false) {
 		Console.log("Quitting mission");
+		if (Net.isMP) {
+			if (Net.isHost) {
+				NetCommands.endGame();
+			}
+		}
 		world.setCursorLock(false);
 		if (!Settings.levelStatistics.exists(world.mission.path)) {
 			Settings.levelStatistics.set(world.mission.path, {
@@ -287,13 +301,18 @@ class MarbleGame {
 			canvas.setContent(new MainMenuGui());
 			#end
 		} else {
-			if (!world.mission.isClaMission && !world.mission.isCustom) {
-				PlayMissionGui.currentCategoryStatic = world.mission.type;
+			if (Net.isMP) {
+				var lobby = new MPPlayMissionGui(Net.isHost);
+				canvas.setContent(lobby);
+			} else {
+				if (!world.mission.isClaMission && !world.mission.isCustom) {
+					PlayMissionGui.currentCategoryStatic = world.mission.type;
+				}
+				var pmg = new PlayMissionGui();
+				PlayMissionGui.currentSelectionStatic = world.mission.index;
+				PlayMissionGui.currentGameStatic = world.mission.game;
+				canvas.setContent(pmg);
 			}
-			var pmg = new PlayMissionGui();
-			PlayMissionGui.currentSelectionStatic = world.mission.index;
-			PlayMissionGui.currentGameStatic = world.mission.game;
-			canvas.setContent(pmg);
 		}
 		world.dispose();
 		world = null;
@@ -301,13 +320,13 @@ class MarbleGame {
 		Settings.save();
 	}
 
-	public function playMission(mission:Mission) {
+	public function playMission(mission:Mission, multiplayer:Bool = false) {
 		canvas.clearContent();
 		if (world != null) {
 			world.dispose();
 		}
 		Analytics.trackLevelPlay(mission.title, mission.path);
-		world = new MarbleWorld(scene, scene2d, mission, toRecord);
+		world = new MarbleWorld(scene, scene2d, mission, toRecord, multiplayer);
 		world.init();
 	}
 

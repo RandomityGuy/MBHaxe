@@ -28,6 +28,7 @@ class NullMode implements GameMode {
 			// If there's a start pad, start there
 			position = startPad.getAbsPos().getPosition();
 			quat = startPad.getRotationQuat().clone();
+			position.z += 3;
 		} else {
 			position = new Vector(0, 0, 300);
 		}

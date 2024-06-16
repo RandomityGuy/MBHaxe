@@ -10,6 +10,7 @@ import gui.GuiControl.MouseState;
 class Canvas extends GuiControl {
 	var scene2d:Scene;
 	var marbleGame:MarbleGame;
+	var content:GuiControl;
 
 	public function new(scene, marbleGame:MarbleGame) {
 		super();
@@ -25,6 +26,7 @@ class Canvas extends GuiControl {
 
 	public function setContent(content:GuiControl) {
 		this.dispose();
+		this.content = content;
 		this.addChild(content);
 		this.render(scene2d);
 	}

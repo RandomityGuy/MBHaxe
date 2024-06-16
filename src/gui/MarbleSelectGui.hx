@@ -13,6 +13,493 @@ import src.Settings;
 import src.ResourceLoaderWorker;
 
 class MarbleSelectGui extends GuiImage {
+	public static var marbleData = [
+		[
+			{
+				name: "Staff's Original",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "3D Marble",
+				dts: "data/shapes/balls/3dMarble.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Mid P",
+				dts: "data/shapes/balls/midp.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Spade",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin4",
+				shader: "Default"
+			},
+			{
+				name: "GMD Logo",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin5",
+				shader: "Default"
+			},
+			{
+				name: "Textured Marble",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin6",
+				shader: "Default"
+			},
+			{
+				name: "Golden Marble",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin7",
+				shader: "Default"
+			},
+			{
+				name: "Rainbow Marble",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin8",
+				shader: "Default"
+			},
+			{
+				name: "Brown Swirls",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin9",
+				shader: "Default"
+			},
+			{
+				name: "Caution Stripes",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin10",
+				shader: "Default"
+			},
+			{
+				name: "Earth",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin11",
+				shader: "Default"
+			},
+			{
+				name: "Golf Ball",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin12",
+				shader: "Default"
+			},
+			{
+				name: "Jupiter",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin13",
+				shader: "Default"
+			},
+			{
+				name: "MB Gold Marble",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin14",
+				shader: "Default"
+			},
+			{
+				name: "MBP on the Marble!",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin15",
+				shader: "Default"
+			},
+			{
+				name: "Moshe",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin16",
+				shader: "Default"
+			},
+			{
+				name: "Strong Bad",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin17",
+				shader: "Default"
+			},
+			{
+				name: "Venus",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin18",
+				shader: "Default"
+			},
+			{
+				name: "Water",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin19",
+				shader: "Default"
+			},
+			{
+				name: "Evil Eye",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin20",
+				shader: "Default"
+			},
+			{
+				name: "Desert and Sky",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin21",
+				shader: "Default"
+			},
+			{
+				name: "Dirt Marble",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin22",
+				shader: "Default"
+			},
+			{
+				name: "Friction Textured Marble",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin23",
+				shader: "Default"
+			},
+			{
+				name: "Grass",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin24",
+				shader: "Default"
+			},
+			{
+				name: "Mars",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin25",
+				shader: "Default"
+			},
+			{
+				name: "Phil's Golf Ball",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin26",
+				shader: "Default"
+			},
+			{
+				name: "Molten",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin27",
+				shader: "Default"
+			},
+			{
+				name: "Lightning",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin28",
+				shader: "Default"
+			},
+			{
+				name: "Phil'sEmpire",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin29",
+				shader: "Default"
+			},
+			{
+				name: "Matan's Red Dragon",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin30",
+				shader: "Default"
+			},
+			{
+				name: "Metallic Marble",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin31",
+				shader: "Default"
+			},
+			{
+				name: "Sun",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin32",
+				shader: "Default"
+			},
+			{
+				name: "Underwater",
+				dts: "data/shapes/balls/ball-superball.dts",
+				skin: "skin33",
+				shader: "Default"
+			},
+			{
+				name: "GarageGames logo",
+				dts: "data/shapes/balls/garageGames.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Big Marble 1",
+				dts: "data/shapes/balls/bm1.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Big Marble 2",
+				dts: "data/shapes/balls/bm2.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Big Marble 3",
+				dts: "data/shapes/balls/bm3.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Small Marble 1",
+				dts: "data/shapes/balls/sm1.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Small Marble 2",
+				dts: "data/shapes/balls/sm2.dts",
+				skin: "base",
+				shader: "Default"
+			},
+			{
+				name: "Small Marble 3",
+				dts: "data/shapes/balls/sm3.dts",
+				skin: "base",
+				shader: "Default"
+			}
+		],
+		[
+			{
+				name: "Deep Blue",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin1",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "Blood Red",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin2",
+				shader: "Default"
+			},
+			{
+				name: "Gang Green",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin6",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "Pink Candy",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin27",
+				shader: "Default"
+			},
+			{
+				name: "Chocolate",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin5",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "Grape",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin4",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "Lemon",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin28",
+				shader: "Default"
+			},
+			{
+				name: "Lime Green",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin8",
+				shader: "Default"
+			},
+			{
+				name: "Blueberry",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin7",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "Tangerine",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin3",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "8 Ball",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin9",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Ace of Hearts",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin22",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Football",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin16",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "9 Ball",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin29",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Ace of Spades",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin24",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "GarageGames",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin10",
+				shader: "ClassicMarb2"
+			},
+			{
+				name: "Bob",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin30",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Skully",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin18",
+				shader: "Default"
+			},
+			{
+				name: "Jack-o-Lantern",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin34",
+				shader: "Default"
+			},
+			{
+				name: "Walled Up",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin25",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Sunny Side Up",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin11",
+				shader: "ClassicMetal"
+			},
+			{
+				name: "Lunar",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin31",
+				shader: "ClassicMetal"
+			},
+			{
+				name: "Battery",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin14",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Static",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin32",
+				shader: "ClassicMarb2"
+			},
+			{
+				name: "Earth",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin20",
+				shader: "ClassicMarbGlass20"
+			},
+			{
+				name: "Red and X",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin13",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Orange Spiral",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin12",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "Blue Spiral",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin15",
+				shader: "ClassicGlassPureSphere"
+			},
+			{
+				name: "Sliced Marble",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin21",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Orange Checkers",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin19",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Torque",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin33",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Fred",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin17",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Pirate",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin26",
+				shader: "ClassicMarbGlass18"
+			},
+			{
+				name: "Shuriken",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin23",
+				shader: "ClassicMarb3"
+			},
+			{
+				name: "Eyeball",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin35",
+				shader: "Default"
+			},
+			{
+				name: "Woody",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin36",
+				shader: "Default"
+			},
+			{
+				name: "Dat Nostalgia",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin37",
+				shader: "Default"
+			},
+			{
+				name: "Graffiti",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin38",
+				shader: "Default"
+			},
+			{
+				name: "Asteroid",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin39",
+				shader: "Default"
+			},
+			{
+				name: "Disco Ball",
+				dts: "data/shapes/balls/pack1/pack1marble.dts",
+				skin: "uskin40",
+				shader: "Default"
+			}
+		],
+	];
+
 	public function new() {
 		var img = ResourceLoader.getImage("data/ui/marbleSelect/marbleSelect.png");
 		super(img.resource.toTile());
@@ -20,494 +507,6 @@ class MarbleSelectGui extends GuiImage {
 		this.vertSizing = Center;
 		this.position = new Vector(73, -59);
 		this.extent = new Vector(493, 361);
-
-		var marbleData = [
-			[
-				{
-					name: "Staff's Original",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "3D Marble",
-					dts: "data/shapes/balls/3dMarble.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Mid P",
-					dts: "data/shapes/balls/midp.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Spade",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin4",
-					shader: "Default"
-				},
-				{
-					name: "GMD Logo",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin5",
-					shader: "Default"
-				},
-				{
-					name: "Textured Marble",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin6",
-					shader: "Default"
-				},
-				{
-					name: "Golden Marble",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin7",
-					shader: "Default"
-				},
-				{
-					name: "Rainbow Marble",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin8",
-					shader: "Default"
-				},
-				{
-					name: "Brown Swirls",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin9",
-					shader: "Default"
-				},
-				{
-					name: "Caution Stripes",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin10",
-					shader: "Default"
-				},
-				{
-					name: "Earth",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin11",
-					shader: "Default"
-				},
-				{
-					name: "Golf Ball",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin12",
-					shader: "Default"
-				},
-				{
-					name: "Jupiter",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin13",
-					shader: "Default"
-				},
-				{
-					name: "MB Gold Marble",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin14",
-					shader: "Default"
-				},
-				{
-					name: "MBP on the Marble!",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin15",
-					shader: "Default"
-				},
-				{
-					name: "Moshe",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin16",
-					shader: "Default"
-				},
-				{
-					name: "Strong Bad",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin17",
-					shader: "Default"
-				},
-				{
-					name: "Venus",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin18",
-					shader: "Default"
-				},
-				{
-					name: "Water",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin19",
-					shader: "Default"
-				},
-				{
-					name: "Evil Eye",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin20",
-					shader: "Default"
-				},
-				{
-					name: "Desert and Sky",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin21",
-					shader: "Default"
-				},
-				{
-					name: "Dirt Marble",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin22",
-					shader: "Default"
-				},
-				{
-					name: "Friction Textured Marble",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin23",
-					shader: "Default"
-				},
-				{
-					name: "Grass",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin24",
-					shader: "Default"
-				},
-				{
-					name: "Mars",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin25",
-					shader: "Default"
-				},
-				{
-					name: "Phil's Golf Ball",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin26",
-					shader: "Default"
-				},
-				{
-					name: "Molten",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin27",
-					shader: "Default"
-				},
-				{
-					name: "Lightning",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin28",
-					shader: "Default"
-				},
-				{
-					name: "Phil'sEmpire",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin29",
-					shader: "Default"
-				},
-				{
-					name: "Matan's Red Dragon",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin30",
-					shader: "Default"
-				},
-				{
-					name: "Metallic Marble",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin31",
-					shader: "Default"
-				},
-				{
-					name: "Sun",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin32",
-					shader: "Default"
-				},
-				{
-					name: "Underwater",
-					dts: "data/shapes/balls/ball-superball.dts",
-					skin: "skin33",
-					shader: "Default"
-				},
-				{
-					name: "GarageGames logo",
-					dts: "data/shapes/balls/garageGames.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Big Marble 1",
-					dts: "data/shapes/balls/bm1.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Big Marble 2",
-					dts: "data/shapes/balls/bm2.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Big Marble 3",
-					dts: "data/shapes/balls/bm3.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Small Marble 1",
-					dts: "data/shapes/balls/sm1.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Small Marble 2",
-					dts: "data/shapes/balls/sm2.dts",
-					skin: "base",
-					shader: "Default"
-				},
-				{
-					name: "Small Marble 3",
-					dts: "data/shapes/balls/sm3.dts",
-					skin: "base",
-					shader: "Default"
-				}
-			],
-			[
-				{
-					name: "Deep Blue",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin1",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "Blood Red",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin2",
-					shader: "Default"
-				},
-				{
-					name: "Gang Green",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin6",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "Pink Candy",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin27",
-					shader: "Default"
-				},
-				{
-					name: "Chocolate",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin5",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "Grape",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin4",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "Lemon",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin28",
-					shader: "Default"
-				},
-				{
-					name: "Lime Green",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin8",
-					shader: "Default"
-				},
-				{
-					name: "Blueberry",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin7",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "Tangerine",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin3",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "8 Ball",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin9",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Ace of Hearts",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin22",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Football",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin16",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "9 Ball",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin29",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Ace of Spades",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin24",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "GarageGames",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin10",
-					shader: "ClassicMarb2"
-				},
-				{
-					name: "Bob",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin30",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Skully",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin18",
-					shader: "Default"
-				},
-				{
-					name: "Jack-o-Lantern",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin34",
-					shader: "Default"
-				},
-				{
-					name: "Walled Up",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin25",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Sunny Side Up",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin11",
-					shader: "ClassicMetal"
-				},
-				{
-					name: "Lunar",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin31",
-					shader: "ClassicMetal"
-				},
-				{
-					name: "Battery",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin14",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Static",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin32",
-					shader: "ClassicMarb2"
-				},
-				{
-					name: "Earth",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin20",
-					shader: "ClassicMarbGlass20"
-				},
-				{
-					name: "Red and X",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin13",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Orange Spiral",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin12",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "Blue Spiral",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin15",
-					shader: "ClassicGlassPureSphere"
-				},
-				{
-					name: "Sliced Marble",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin21",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Orange Checkers",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin19",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Torque",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin33",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Fred",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin17",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Pirate",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin26",
-					shader: "ClassicMarbGlass18"
-				},
-				{
-					name: "Shuriken",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin23",
-					shader: "ClassicMarb3"
-				},
-				{
-					name: "Eyeball",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin35",
-					shader: "Default"
-				},
-				{
-					name: "Woody",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin36",
-					shader: "Default"
-				},
-				{
-					name: "Dat Nostalgia",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin37",
-					shader: "Default"
-				},
-				{
-					name: "Graffiti",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin38",
-					shader: "Default"
-				},
-				{
-					name: "Asteroid",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin39",
-					shader: "Default"
-				},
-				{
-					name: "Disco Ball",
-					dts: "data/shapes/balls/pack1/pack1marble.dts",
-					skin: "uskin40",
-					shader: "Default"
-				}
-
-			],
-		];
 
 		var categoryNames = ["Official Marbles", "MBUltra"];
 

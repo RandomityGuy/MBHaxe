@@ -1,5 +1,7 @@
 package gui;
 
+import h2d.filter.Filter;
+import h2d.HtmlText;
 import h2d.Flow;
 import h3d.Engine;
 import h2d.Tile;
@@ -14,7 +16,7 @@ import h2d.Font;
 import src.MarbleGame;
 import src.Settings;
 
-class GuiTextListCtrl extends GuiControl {
+class GuiMLTextListCtrl extends GuiControl {
 	public var texts:Array<String>;
 	public var onSelectedFunc:Int->Void;
 
@@ -25,7 +27,6 @@ class GuiTextListCtrl extends GuiControl {
 
 	public var selectedColor:Int = 0x206464;
 	public var selectedFillColor:Int = 0xC8C8C8;
-	public var textColor:Int = 0;
 
 	public var textYOffset:Int = 0;
 
@@ -33,19 +34,27 @@ class GuiTextListCtrl extends GuiControl {
 
 	public var scrollable:Bool = false;
 
-	var flow:Flow;
+	var filter:Filter = null;
 
-	public function new(font:Font, texts:Array<String>, textColor:Int = 0) {
+	var flow:Flow;
+	var _imageLoader:String->Tile;
+
+	public function new(font:Font, texts:Array<String>, imageLoader:String->Tile, ?filter:Filter = null) {
 		super();
 		this.font = font;
 		this.texts = texts;
 		this._manualScroll = true;
 		this.textObjs = [];
-		this.textColor = textColor;
+		this.filter = filter;
+		this._imageLoader = imageLoader;
 		for (text in texts) {
-			var tobj = new Text(font);
+			var tobj = new HtmlText(font);
+			tobj.lineHeightMode = TextOnly;
+			tobj.loadImage = imageLoader;
 			tobj.text = text;
-			tobj.textColor = textColor;
+			tobj.textColor = 0;
+			if (filter != null)
+				tobj.filter = filter;
 			textObjs.push(tobj);
 		}
 		this.g = new Graphics();
@@ -58,18 +67,24 @@ class GuiTextListCtrl extends GuiControl {
 		}
 		this.textObjs = [];
 		for (text in texts) {
-			var tobj = new Text(font);
+			var tobj = new HtmlText(font);
+			tobj.loadImage = this._imageLoader;
+			tobj.lineHeightMode = TextOnly;
 			tobj.text = text;
-			tobj.textColor = textColor;
+			tobj.textColor = 0;
+			if (filter != null)
+				tobj.filter = filter;
 			textObjs.push(tobj);
 
 			if (this.scrollable) {
-				if (this.flow.contains(tobj))
-					this.flow.removeChild(tobj);
+				if (this.flow != null) {
+					if (this.flow.contains(tobj))
+						this.flow.removeChild(tobj);
 
-				this.flow.addChild(tobj);
+					this.flow.addChild(tobj);
 
-				this.flow.getProperties(tobj).isAbsolute = true;
+					this.flow.getProperties(tobj).isAbsolute = true;
+				}
 			}
 		}
 		this.texts = texts;
@@ -197,7 +212,7 @@ class GuiTextListCtrl extends GuiControl {
 		for (i in 0...textObjs.length) {
 			var selected = i == hoverIndex || i == this._prevSelected;
 			var text = textObjs[i];
-			text.textColor = selected ? selectedColor : textColor;
+			text.textColor = selected ? selectedColor : 0;
 			// fill color = 0xC8C8C8
 		}
 		// obviously in renderRect
@@ -208,7 +223,7 @@ class GuiTextListCtrl extends GuiControl {
 			if (i == this._prevSelected)
 				continue;
 			var text = textObjs[i];
-			text.textColor = textColor;
+			text.textColor = 0;
 			// fill color = 0xC8C8C8
 		}
 	}

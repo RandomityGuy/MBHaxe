@@ -1,5 +1,14 @@
 package src;
 
+import net.Net;
+import gui.MarbleSelectGui;
+import net.NetPacket.MarbleNetFlags;
+import net.BitStream.OutputBitStream;
+import net.ClientConnection;
+import net.ClientConnection.GameConnection;
+import net.NetPacket.MarbleUpdatePacket;
+import net.MoveManager;
+import net.MoveManager.NetMove;
 import collision.CollisionPool;
 import collision.CollisionHull;
 import dif.Plane;
@@ -63,14 +72,7 @@ import src.ResourceLoaderWorker;
 import src.InteriorObject;
 import src.Console;
 import src.Gamepad;
-
-class Move {
-	public var d:Vector;
-	public var jump:Bool;
-	public var powerup:Bool;
-
-	public function new() {}
-}
+import net.Move;
 
 enum Mode {
 	Start;
@@ -314,6 +316,7 @@ class Marble extends GameObject {
 
 	public var cubemapRenderer:CubemapRenderer;
 
+	var connection:GameConnection;
 	var moveMotionDir:Vector;
 	var lastMove:Move;
 	var isNetUpdate:Bool = false;
@@ -328,6 +331,7 @@ class Marble extends GameObject {
 		this.velocity = new Vector();
 		this.omega = new Vector();
 		this.camera = new CameraController(cast this);
+		this.isCollideable = true;
 
 		this.bounceEmitterData = new ParticleData();
 		this.bounceEmitterData.identifier = "MarbleBounceParticle";
@@ -362,10 +366,12 @@ class Marble extends GameObject {
 		this.helicopterSound.pause = true;
 	}
 
-	public function init(level:MarbleWorld, onFinish:Void->Void) {
+	public function init(level:MarbleWorld, connection:GameConnection, onFinish:Void->Void) {
 		this.level = level;
 		if (this.level != null)
 			this.collisionWorld = this.level.collisionWorld;
+
+		this.connection = connection;
 
 		var isUltra = level.mission.game.toLowerCase() == "ultra";
 
@@ -375,9 +381,16 @@ class Marble extends GameObject {
 		this.netCorrected = false;
 
 		var marbleDts = new DtsObject();
-		Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
-		marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
-		marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
+		if (connection == null) {
+			Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
+			marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
+			marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
+		} else {
+			var marbleData = MarbleSelectGui.marbleData[0][connection.getMarbleId()]; // FIXME category support
+			Console.log("Marble: " + marbleData.dts + " (" + marbleData.skin + ")");
+			marbleDts.dtsPath = marbleData.dts;
+			marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
+		}
 		marbleDts.showSequences = false;
 		marbleDts.useInstancing = false;
 		marbleDts.init(null, () -> {}); // SYNC
@@ -858,7 +871,7 @@ class Marble extends GameObject {
 			}
 			if (sv < this._jumpImpulse) {
 				this.velocity.load(this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv))));
-				if (!playedSounds.contains("data/sound/jump.wav")) {
+				if (!playedSounds.contains("data/sound/jump.wav") && !this.isNetUpdate && this.controllable) {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/jump.wav", ResourceLoader.getAudio, this.soundResources));
 					playedSounds.push("data/sound/jump.wav");
 				}
@@ -937,6 +950,8 @@ class Marble extends GameObject {
 	}
 
 	function bounceEmitter(speed:Float, normal:Vector) {
+		if (!this.controllable || this.isNetUpdate)
+			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
 			this.bounceEmitDelay = 0.3;
@@ -969,6 +984,8 @@ class Marble extends GameObject {
 	}
 
 	function playBoundSound(time:Float, contactVel:Float) {
+		if (this.isNetUpdate)
+			return;
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
 			var bounceSoundNum = Math.floor(Math.random() * 4);
@@ -1486,6 +1503,21 @@ class Marble extends GameObject {
 
 		var piTime = timeRemaining;
 
+		if (this.isNetUpdate) {
+			lastMove = m;
+		}
+
+		if (m == null) {
+			m = new Move();
+			m.d = new Vector();
+		}
+
+		if (this.blastTicks < (30000 >> 5))
+			this.blastTicks += 1;
+
+		if (Net.isClient)
+			this.serverTicks++;
+
 		_bounceYet = false;
 
 		var contactTime = 0.0;
@@ -1493,12 +1525,21 @@ class Marble extends GameObject {
 
 		var passedTime = timeState.currentAttemptTime;
 
-		var oldPos = this.getAbsPos().getPosition().clone();
+		oldPos = this.collider.transform.getPosition();
+		prevRot = this.getRotationQuat().clone();
 
 		if (this.controllable) {
 			for (interior in pathedInteriors) {
 				// interior.pushTickState();
 				interior.computeNextPathStep(timeRemaining);
+			}
+		}
+
+		// Blast
+		if (m != null && m.blast) {
+			this.useBlast(timeState);
+			if (level.isRecording) {
+				level.replay.recordMarbleStateFlags(false, false, false, true);
 			}
 		}
 
@@ -1566,7 +1607,7 @@ class Marble extends GameObject {
 
 			velocity.w = 0;
 
-			var pos = this.getAbsPos().getPosition();
+			var pos = this.collider.transform.getPosition();
 			this.prevPos = pos.clone();
 
 			var tdiff = timeStep;
@@ -1605,24 +1646,36 @@ class Marble extends GameObject {
 			var quat = new Quat();
 			quat.initRotation(omega.x * timeStep, omega.y * timeStep, omega.z * timeStep);
 			quat.multiply(quat, rot);
-			this.setRotationQuat(quat);
+			if (!Net.isMP)
+				this.setRotationQuat(quat);
 
 			var totMatrix = quat.toMatrix();
 			newPos.w = 1; // Fix shit blowing up
 			totMatrix.setPosition(newPos);
 
-			this.setPosition(newPos.x, newPos.y, newPos.z);
+			if (!Net.isMP)
+				this.setPosition(newPos.x, newPos.y, newPos.z);
 
 			this.collider.setTransform(totMatrix);
 			this.collisionWorld.updateTransform(this.collider);
 			this.collider.velocity = this.velocity;
 
-			if (this.heldPowerup != null && m.powerup && !this.outOfBounds) {
+			if (this.heldPowerup != null
+				&& (m.powerup || (Net.isClient && this.serverUsePowerup && !this.controllable))
+				&& !this.outOfBounds) {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = passedTime;
+				var netUpdate = this.isNetUpdate;
+				if (this.serverUsePowerup)
+					this.isNetUpdate = false;
 				this.heldPowerup.use(this, pTime);
+				this.isNetUpdate = netUpdate;
 				this.heldPowerup = null;
+				this.serverUsePowerup = false;
+				if (!this.isNetUpdate) {
+					this.netFlags |= MarbleNetFlags.PickupPowerup | MarbleNetFlags.UsePowerup;
+				}
 				if (this.level.isRecording) {
 					this.level.replay.recordPowerupPickup(null);
 				}
@@ -1654,49 +1707,333 @@ class Marble extends GameObject {
 		}
 		this.queuedContacts = [];
 
-		var newPos = this.getAbsPos().getPosition().clone();
+		newPos = this.collider.transform.getPosition(); // this.getAbsPos().getPosition().clone();
 
-		if (this.controllable && this.prevPos != null) {
+		if (this.prevPos != null && this.level != null) {
 			var tempTimeState = timeState.clone();
 			tempTimeState.currentAttemptTime = passedTime;
 			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
 		}
 
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
+
+		// if (this.megaMarbleUseTick > 0) {
+		// 	if (Net.isHost) {
+		// 		if ((timeState.ticks - this.megaMarbleUseTick) <= 312 && this.megaMarbleUseTick > 0) {
+		// 			this._radius = 0.675;
+		// 			this.collider.radius = 0.675;
+		// 		} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
+		// 			this.collider.radius = this._radius = 0.3;
+		// 			if (!this.isNetUpdate && this.controllable)
+		// 				AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
+		// 					false);
+		// 			this.megaMarbleUseTick = 0;
+		// 			this.netFlags |= MarbleNetFlags.DoMega;
+		// 		}
+		// 	}
+		// 	if (Net.isClient) {
+		// 		if (this.serverTicks - this.megaMarbleUseTick <= 312 && this.megaMarbleUseTick > 0) {
+		// 			this._radius = 0.675;
+		// 			this.collider.radius = 0.675;
+		// 		} else {
+		// 			this.collider.radius = this._radius = 0.3;
+		// 			if (!this.isNetUpdate && this.controllable)
+		// 				AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
+		// 					false);
+		// 			this.megaMarbleUseTick = 0;
+		// 		}
+		// 	}
+		// }
+		// if (Net.isClient && this.megaMarbleUseTick == 0) {
+		// 	this.collider.radius = this._radius = 0.3;
+		// }
+
+		if (Net.isMP) {
+			if (m.jump && this.outOfBounds) {
+				this.level.cancel(this.oobSchedule);
+				this.level.restart(cast this);
+			}
+		}
+	}
+
+	// MP Only Functions
+	public inline function clearNetFlags() {
+		this.netFlags = 0;
+	}
+
+	public function packUpdate(move:NetMove, timeState:TimeState) {
+		var b = new OutputBitStream();
+		b.writeByte(NetPacketType.MarbleUpdate);
+		var marbleUpdate = new MarbleUpdatePacket();
+		marbleUpdate.clientId = connection != null ? connection.id : 0;
+		marbleUpdate.serverTicks = timeState.ticks;
+		marbleUpdate.position = this.newPos;
+		marbleUpdate.velocity = this.velocity;
+		marbleUpdate.omega = this.omega;
+		marbleUpdate.move = move;
+		marbleUpdate.moveQueueSize = this.connection != null ? this.connection.moveManager.getQueueSize() : 255;
+		marbleUpdate.blastAmount = this.blastTicks;
+		marbleUpdate.blastTick = this.blastUseTick;
+		marbleUpdate.heliTick = this.helicopterUseTick;
+		marbleUpdate.megaTick = this.megaMarbleUseTick;
+		marbleUpdate.oob = this.outOfBounds;
+		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0x1FF;
+		marbleUpdate.netFlags = this.netFlags;
+		marbleUpdate.gravityDirection = this.currentUp;
+		marbleUpdate.serialize(b);
+		return b.getBytes();
+	}
+
+	public function unpackUpdate(p:MarbleUpdatePacket) {
+		// Assume packet header is already read
+		// Check if we aren't colliding with a marble
+		// for (marble in this.level.collisionWorld.marbleEntities) {
+		// 	if (marble != this.collider && marble.transform.getPosition().distance(p.position) < marble.radius + this._radius) {
+		// 		Console.log("Marble updated inside another one!");
+		// 		return false;
+		// 	}
+		// }
+		this.serverTicks = p.serverTicks;
+		this.recvServerTick = p.serverTicks;
+		// this.oldPos = this.newPos;
+		// this.newPos = p.position;
+		this.collider.transform.setPosition(p.position);
+		this.velocity = p.velocity;
+		this.omega = p.omega;
+		this.blastTicks = p.blastAmount;
+		this.blastUseTick = p.blastTick;
+		this.helicopterUseTick = p.heliTick;
+		this.megaMarbleUseTick = p.megaTick;
+		this.serverUsePowerup = p.netFlags & MarbleNetFlags.UsePowerup > 0;
+		// this.currentUp = p.gravityDirection;
+		this.level.setUp(cast this, p.gravityDirection, this.level.timeState);
+		if (this.outOfBounds && !p.oob && this.controllable)
+			@:privateAccess this.level.playGui.setCenterText('');
+		this.outOfBounds = p.oob;
+		this.camera.oob = p.oob;
+		if (p.powerUpId == 0x1FF) {
+			if (!this.serverUsePowerup)
+				this.level.deselectPowerUp(cast this);
+			else
+				Console.log("Using powerup");
+		} else {
+			this.level.pickUpPowerUp(cast this, this.level.powerUps[p.powerUpId]);
+		}
+		if (p.moveQueueSize == 0 && this.connection != null) {
+			// Pad null move on client
+			this.connection.moveManager.duplicateLastMove();
+		}
+		// if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
+		// 	var ticksSince = (this.serverTicks - this.blastUseTick);
+		// 	if (ticksSince >= 0) {
+		// 		this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad - ticksSince * 0.032;
+		// 		this.blastUseTime = this.level.timeState.currentAttemptTime - ticksSince * 0.032;
+		// 	}
+		// }
+
+		// if (this.controllable && Net.isClient) {
+		// 	// We are client, need to do something about the queue
+		// 	var mm = Net.clientConnection.moveManager;
+		// 	// trace('Queue size: ${mm.getQueueSize()}, server: ${p.moveQueueSize}');
+		// 	if (mm.getQueueSize() / p.moveQueueSize < 2) {
+		// 		mm.stall = true;
+		// 	} else {
+		// 		mm.stall = false;
+		// 	}
+		// }
+		return true;
+	}
+
+	function calculateNetSmooth() {
+		if (this.netCorrected) {
+			this.netCorrected = false;
+			this.netSmoothOffset.load(this.lastRenderPos.sub(this.oldPos));
+			// this.oldPos.load(this.posStore);
+		}
+	}
+
+	public function updateServer(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
+		var move:NetMove = null;
+		if (this.controllable && this.mode != Finish) {
+			if (Net.isClient) {
+				var axis = getMarbleAxis()[1];
+				move = Net.clientConnection.recordMove(cast this, axis, timeState, recvServerTick);
+			} else if (Net.isHost) {
+				var axis = getMarbleAxis()[1];
+				var innerMove = recordMove();
+				if (MarbleGame.instance.paused) {
+					innerMove.d.x = 0;
+					innerMove.d.y = 0;
+					innerMove.blast = innerMove.jump = innerMove.powerup = false;
+				} else {
+					var qx = Std.int((innerMove.d.x * 16) + 16);
+					var qy = Std.int((innerMove.d.y * 16) + 16);
+					innerMove.d.x = (qx - 16) / 16.0;
+					innerMove.d.y = (qy - 16) / 16.0;
+				}
+				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
+			}
+		}
+		var moveId = 65535;
+		if (!this.controllable && this.connection != null && Net.isHost) {
+			var nextMove = this.connection.getNextMove();
+			// trace('Moves left: ${@:privateAccess this.connection.moveManager.queuedMoves.length}');
+			if (nextMove == null) {
+				var axis = moveMotionDir != null ? moveMotionDir : getMarbleAxis()[1];
+				var innerMove = lastMove;
+				if (innerMove == null) {
+					innerMove = new Move();
+					innerMove.d = new Vector(0, 0);
+				}
+				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
+			} else {
+				move = nextMove;
+				moveMotionDir = nextMove.motionDir;
+				moveId = nextMove.id;
+				lastMove = move.move;
+			}
+		}
+		if (move == null && !this.controllable) {
+			var axis = moveMotionDir != null ? moveMotionDir : new Vector(0, -1, 0);
+			var innerMove = lastMove;
+			if (innerMove == null) {
+				innerMove = new Move();
+				innerMove.d = new Vector(0, 0);
+			}
+			move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
+		}
+
+		if (move != null) {
+			playedSounds = [];
+			advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
+			physicsAccumulator = 0;
+		} else {
+			physicsAccumulator = 0;
+			newPos.load(oldPos);
+		}
+
+		return move;
+		// if (Net.isHost) {
+		// 	packets.push({b: packUpdate(move, timeState), c: this.connection != null ? this.connection.id : 0});
+		// }
+	}
+
+	public function updateClient(timeState:TimeState, pathedInteriors:Array<PathedInterior>) {
+		calculateNetSmooth();
+		this.level.updateBlast(cast this, timeState);
+
+		var newDt = 2.3 * (timeState.dt / 0.4);
+		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
+		this.netSmoothOffset.scale(smooth);
+		var smoothScale = this.netSmoothOffset.lengthSq();
+		if (smoothScale < 0.1 || smoothScale > 10.0)
+			this.netSmoothOffset.set(0, 0, 0);
+
+		if (oldPos != null && newPos != null) {
+			var deltaT = physicsAccumulator / 0.032;
+			if (Net.isClient && !this.controllable)
+				deltaT *= 0.75; // Don't overshoot
+			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
+			if (Net.isClient) {
+				renderPos.load(renderPos.add(this.netSmoothOffset));
+			}
+			this.setPosition(renderPos.x, renderPos.y, renderPos.z);
+			this.lastRenderPos.load(renderPos);
+
+			var rot = this.getRotationQuat();
+			var quat = new Quat();
+			quat.initRotation(omega.x * timeState.dt, omega.y * timeState.dt, omega.z * timeState.dt);
+			quat.multiply(quat, rot);
+			this.setRotationQuat(quat);
+
+			var adt = timeState.clone();
+			adt.dt = physicsAccumulator;
+			for (pi in pathedInteriors) {
+				pi.update(adt);
+			}
+		}
+		physicsAccumulator += timeState.dt;
+
+		if (this.controllable && this.level != null && !this.level.rewinding) {
+			// this.camera.startCenterCamera();
+			this.camera.update(timeState.currentAttemptTime, timeState.dt);
+		}
+
+		updatePowerupStates(timeState);
+
+		// if (isMegaMarbleEnabled(timeState)) {
+		// 	this._marbleScale = this._defaultScale * 2.25;
+		// } else {
+		// 	this._marbleScale = this._defaultScale;
+		// }
+
+		// var s = this._renderScale * this._renderScale;
+		// if (s <= this._marbleScale * this._marbleScale)
+		// 	s = 0.1;
+		// else
+		// 	s = 0.4;
+
+		// s = timeState.dt / s * 2.302585124969482;
+		// s = 1.0 / (s * (s * 0.235 * s) + s + 1.0 + 0.48 * s * s);
+		// this._renderScale *= s;
+		// s = 1 - s;
+		// this._renderScale += s * this._marbleScale;
+		// var marbledts = cast(this.getChildAt(0), DtsObject);
+		// marbledts.setScale(this._renderScale);
+
+		this.trailEmitter();
+		if (bounceEmitDelay > 0)
+			bounceEmitDelay -= timeState.dt;
+		if (bounceEmitDelay < 0)
+			bounceEmitDelay = 0;
+	}
+
+	public function recordMove() {
+		var move = new Move();
+		move.d = new Vector();
+		move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
+		move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
+		// if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
+		if (Key.isDown(Settings.controlsSettings.forward)) {
+			move.d.x -= 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.backward)) {
+			move.d.x += 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.left)) {
+			move.d.y += 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.right)) {
+			move.d.y -= 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.jump)
+			|| MarbleGame.instance.touchInput.jumpButton.pressed
+			|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
+			move.jump = true;
+		}
+		if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
+			|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
+			|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
+			move.powerup = true;
+		}
+
+		if (Key.isDown(Settings.controlsSettings.blast)
+			|| (MarbleGame.instance.touchInput.blastbutton.pressed)
+			|| Gamepad.isDown(Settings.gamepadSettings.blast))
+			move.blast = true;
+
+		if (MarbleGame.instance.touchInput.movementInput.pressed) {
+			move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
+			move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
+		}
+		// }
+		return move;
 	}
 
 	public function update(timeState:TimeState, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
-		var move = new Move();
-		move.d = new Vector();
-		if (this.controllable && this.mode != Finish && !MarbleGame.instance.paused && !this.level.isWatching) {
-			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
-			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
-			if (Key.isDown(Settings.controlsSettings.forward)) {
-				move.d.x -= 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.backward)) {
-				move.d.x += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.left)) {
-				move.d.y += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.right)) {
-				move.d.y -= 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.jump)
-				|| MarbleGame.instance.touchInput.jumpButton.pressed
-				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
-				move.jump = true;
-			}
-			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
-				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
-				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
-				move.powerup = true;
-			}
-			if (MarbleGame.instance.touchInput.movementInput.pressed) {
-				move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
-				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
-			}
+		var move:Move = null;
+		if (this.controllable && !this.level.isWatching) {
+			move = recordMove();
 		}
 
 		if (this.level.isWatching) {
@@ -1710,6 +2047,10 @@ class Marble extends GameObject {
 				this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false, false);
 				this.level.replay.recordMarbleInput(move.d.x, move.d.y);
 			}
+		}
+		if (!this.controllable && (this.connection != null || this.level == null)) {
+			move = new Move();
+			move.d = new Vector(0, 0);
 		}
 
 		playedSounds = [];
@@ -1738,7 +2079,7 @@ class Marble extends GameObject {
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
 
-		updatePowerupStates(timeState.currentAttemptTime, timeState.dt);
+		updatePowerupStates(timeState);
 
 		if (this._radius != 0.6666 && timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
 			this._prevRadius = this._radius;
@@ -1766,30 +2107,30 @@ class Marble extends GameObject {
 		// this.camera.target.load(this.getAbsPos().getPosition().toPoint());
 	}
 
-	public function updatePowerupStates(currentTime:Float, dt:Float) {
-		if (currentTime - this.shockAbsorberEnableTime < 5) {
+	public function updatePowerupStates(timeState:TimeState) {
+		if (timeState.currentAttemptTime - this.shockAbsorberEnableTime < 5) {
 			this.shockabsorberSound.pause = false;
 		} else {
 			this.shockabsorberSound.pause = true;
 		}
-		if (currentTime - this.superBounceEnableTime < 5) {
+		if (timeState.currentAttemptTime - this.superBounceEnableTime < 5) {
 			this.superbounceSound.pause = false;
 		} else {
 			this.superbounceSound.pause = true;
 		}
 
-		if (currentTime - this.shockAbsorberEnableTime < 5) {
+		if (timeState.currentAttemptTime - this.shockAbsorberEnableTime < 5) {
 			this.forcefield.setPosition(0, 0, 0);
-		} else if (currentTime - this.superBounceEnableTime < 5) {
+		} else if (timeState.currentAttemptTime - this.superBounceEnableTime < 5) {
 			this.forcefield.setPosition(0, 0, 0);
 		} else {
 			this.forcefield.x = 1e8;
 			this.forcefield.y = 1e8;
 			this.forcefield.z = 1e8;
 		}
-		if (currentTime - this.helicopterEnableTime < 5) {
+		if (timeState.currentAttemptTime - this.helicopterEnableTime < 5) {
 			this.helicopter.setPosition(x, y, z);
-			this.helicopter.setRotationQuat(this.level.getOrientationQuat(currentTime));
+			this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
 			this.helicopterSound.pause = false;
 		} else {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
@@ -1807,18 +2148,18 @@ class Marble extends GameObject {
 		}
 	}
 
-	public function useBlast() {
-		if (this.level.blastAmount < 0.2 || this.level.game != "ultra")
+	public function useBlast(timeState:TimeState) {
+		if (this.blastAmount < 0.2 || this.level.game != "ultra")
 			return;
-		var impulse = this.currentUp.multiply(Math.max(Math.sqrt(this.level.blastAmount), this.level.blastAmount) * 10);
+		var impulse = this.currentUp.multiply(Math.max(Math.sqrt(this.blastAmount), this.blastAmount) * 10);
 		this.applyImpulse(impulse);
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
-		this.level.particleManager.createEmitter(this.level.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
-			this.level.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
+		this.level.particleManager.createEmitter(this.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
+			this.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
 				this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
 			},
 			new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
-		this.level.blastAmount = 0;
+		this.blastAmount = 0;
 	}
 
 	public function getForce(position:Vector, tick:Int) {
@@ -1909,9 +2250,21 @@ class Marble extends GameObject {
 		}
 	}
 
+	public inline function setMode(mode:Mode) {
+		this.mode = mode;
+	}
+
 	public function setMarblePosition(x:Float, y:Float, z:Float) {
 		this.collider.transform.setPosition(new Vector(x, y, z));
 		this.setPosition(x, y, z);
+	}
+
+	public inline function getConnectionId() {
+		if (this.connection == null) {
+			return Net.isHost ? 0 : Net.clientId;
+		} else {
+			return this.connection.id;
+		}
 	}
 
 	public override function reset() {
@@ -1922,6 +2275,11 @@ class Marble extends GameObject {
 		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
 		this.megaMarbleEnableTime = Math.NEGATIVE_INFINITY;
+		this.blastUseTick = 0;
+		this.blastTicks = 0;
+		this.helicopterUseTick = 0;
+		this.megaMarbleUseTick = 0;
+		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.contactEntities = [];
 		this.cloak = false;
@@ -1933,6 +2291,15 @@ class Marble extends GameObject {
 		this.teleporting = false;
 		this.teleportDisableTime = null;
 		this.teleportEnableTime = null;
+		this.physicsAccumulator = 0;
+		this.prevRot = this.getRotationQuat().clone();
+		this.oldPos = this.getAbsPos().getPosition();
+		this.newPos = this.getAbsPos().getPosition();
+		this.posStore = new Vector();
+		this.netSmoothOffset = new Vector();
+		this.lastRenderPos = new Vector();
+		this.netCorrected = false;
+		this.serverUsePowerup = false;
 		if (this._radius != this._prevRadius) {
 			this._radius = this._prevRadius;
 			this.collider.radius = this._radius;
@@ -1942,6 +2309,15 @@ class Marble extends GameObject {
 	}
 
 	public override function dispose() {
+		if (this.rollSound != null)
+			this.rollSound.stop();
+		if (this.rollMegaSound != null)
+			this.rollMegaSound.stop();
+		if (this.slipSound != null)
+			this.slipSound.stop();
+		if (this.helicopterSound != null)
+			this.helicopterSound.stop();
+		this.helicopter.remove();
 		super.dispose();
 		removeChildren();
 		camera = null;

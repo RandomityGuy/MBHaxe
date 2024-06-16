@@ -38,7 +38,7 @@ class RewindManager {
 	public function recordFrame() {
 		var rf = new RewindFrame();
 		rf.timeState = level.timeState.clone();
-		rf.marblePosition = level.marble.getAbsPos().getPosition().clone();
+		rf.marblePosition = level.marble.collider.transform.getPosition().clone();
 		rf.marbleOrientation = level.marble.getRotationQuat().clone();
 		rf.marbleVelocity = level.marble.velocity.clone();
 		rf.marbleAngularVelocity = level.marble.omega.clone();
@@ -98,7 +98,7 @@ class RewindManager {
 				rf.powerupStates.push(ab.lastContactTime);
 			}
 		}
-		rf.blastAmt = level.blastAmount;
+		rf.blastAmt = level.marble.blastAmount;
 		rf.oobState = {
 			oob: level.marble.outOfBounds,
 			timeState: level.marble.outOfBoundsTime != null ? level.marble.outOfBoundsTime.clone() : null
@@ -121,7 +121,7 @@ class RewindManager {
 
 	public function applyFrame(rf:RewindFrame) {
 		level.timeState = rf.timeState.clone();
-		level.marble.setPosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
+		level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
 		level.marble.setRotationQuat(rf.marbleOrientation.clone());
 		level.marble.velocity.set(rf.marbleVelocity.x, rf.marbleVelocity.y, rf.marbleVelocity.z);
 		level.marble.omega.set(rf.marbleAngularVelocity.x, rf.marbleAngularVelocity.y, rf.marbleAngularVelocity.z);
@@ -219,7 +219,7 @@ class RewindManager {
 		level.marble.outOfBounds = rf.oobState.oob;
 		level.marble.camera.oob = rf.oobState.oob;
 		level.marble.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
-		level.blastAmount = rf.blastAmt;
+		level.marble.blastAmount = rf.blastAmt;
 		@:privateAccess level.checkpointUp = rf.checkpointState.checkpointUp;
 		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;
 		@:privateAccess level.cheeckpointBlast = rf.checkpointState.checkpointBlast;

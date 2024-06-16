@@ -255,6 +255,28 @@ class HuntMode extends NullMode {
 		}
 	}
 
+	public inline function setGemHiddenStatus(gemId:Int, status:Bool) {
+		var gemSpawn = gemSpawnPoints[gemId];
+		if (gemSpawn.gem != null) {
+			gemSpawn.gem.pickedUp = status;
+			gemSpawn.gem.setHide(status);
+			gemSpawn.gemBeam.setHide(status);
+			if (status)
+				this.activeGems.push(gemSpawn.gem);
+			else
+				this.activeGems.remove(gemSpawn.gem);
+		} else {
+			throw new haxe.Exception("Setting gem status for non existent gem!");
+		}
+	}
+
+	public function setActiveSpawnSphere(gems:Array<Int>) {
+		hideExisting();
+		for (gem in gems) {
+			spawnGem(gem);
+		}
+	}
+
 	function getGemWeight(gem:Gem) {
 		if (gem.gemColor == "red")
 			return 0;
