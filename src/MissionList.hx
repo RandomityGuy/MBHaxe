@@ -87,6 +87,7 @@ class MissionList {
 		multiplayerMissions.set("beginner", parseDifficulty("multiplayer", "multiplayer/hunt", "beginner"));
 		multiplayerMissions.set("intermediate", parseDifficulty("multiplayer", "multiplayer/hunt", "intermediate"));
 		multiplayerMissions.set("advanced", parseDifficulty("multiplayer", "multiplayer/hunt", "advanced"));
+		multiplayerMissions.set("custom", parseDifficulty("multiplayer", "multiplayer/hunt", "custom"));
 
 		customMissions = parseDifficulty("custom", "missions", "custom");
 

@@ -44,9 +44,11 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var DoBlast = 1 << 0;
 	var DoHelicopter = 1 << 1;
 	var DoMega = 1 << 2;
-	var PickupPowerup = 1 << 3;
-	var GravityChange = 1 << 4;
-	var UsePowerup = 1 << 5;
+	var DoSuperBounce = 1 << 3;
+	var DoShockAbsorber = 1 << 4;
+	var PickupPowerup = 1 << 5;
+	var GravityChange = 1 << 6;
+	var UsePowerup = 1 << 7;
 }
 
 @:publicFields
@@ -62,6 +64,8 @@ class MarbleUpdatePacket implements NetPacket {
 	var blastTick:Int;
 	var megaTick:Int;
 	var heliTick:Int;
+	var superBounceTick:Int;
+	var shockAbsorberTick:Int;
 	var gravityDirection:Vector;
 	var oob:Bool;
 	var powerUpId:Int;
@@ -103,6 +107,19 @@ class MarbleUpdatePacket implements NetPacket {
 		} else {
 			b.writeFlag(false);
 		}
+		if (netFlags & MarbleNetFlags.DoSuperBounce > 0) {
+			b.writeFlag(true);
+			b.writeUInt16(superBounceTick);
+		} else {
+			b.writeFlag(false);
+		}
+		if (netFlags & MarbleNetFlags.DoShockAbsorber > 0) {
+			b.writeFlag(true);
+			b.writeUInt16(shockAbsorberTick);
+		} else {
+			b.writeFlag(false);
+		}
+
 		b.writeFlag(oob);
 		if (netFlags & MarbleNetFlags.UsePowerup > 0) {
 			b.writeFlag(true);
@@ -147,6 +164,14 @@ class MarbleUpdatePacket implements NetPacket {
 		if (b.readFlag()) {
 			megaTick = b.readUInt16();
 			this.netFlags |= MarbleNetFlags.DoMega;
+		}
+		if (b.readFlag()) {
+			superBounceTick = b.readUInt16();
+			this.netFlags |= MarbleNetFlags.DoSuperBounce;
+		}
+		if (b.readFlag()) {
+			shockAbsorberTick = b.readUInt16();
+			this.netFlags |= MarbleNetFlags.DoShockAbsorber;
 		}
 		oob = b.readFlag();
 		if (b.readFlag())

@@ -210,6 +210,8 @@ class Marble extends GameObject {
 
 	public var _radius = 0.2;
 
+	var _dtsRadius = 0.2;
+
 	var _prevRadius:Float;
 
 	var _maxRollVelocity:Float = 15;
@@ -476,6 +478,7 @@ class Marble extends GameObject {
 		// Calculate radius according to marble model (egh)
 		var b = marbleDts.getBounds();
 		var avgRadius = (b.xSize + b.ySize + b.zSize) / 6;
+		_dtsRadius = avgRadius;
 		if (isUltra) {
 			this._radius = 0.3;
 			marbleDts.scale(0.3 / avgRadius);
@@ -709,7 +712,7 @@ class Marble extends GameObject {
 		return return true;
 	}
 
-	function velocityCancel(currentTime:Float, dt:Float, surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
+	function velocityCancel(timeState:TimeState, surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
 		var SurfaceDotThreshold = 0.0001;
 		var looped = false;
 		var itersIn = 0;
@@ -727,7 +730,7 @@ class Marble extends GameObject {
 
 					if (!_bounceYet) {
 						_bounceYet = true;
-						playBoundSound(currentTime, -surfaceDot);
+						playBoundSound(timeState.currentAttemptTime, -surfaceDot);
 					}
 
 					if (noBounce) {
@@ -765,10 +768,10 @@ class Marble extends GameObject {
 							this.velocity.load(this.velocity.sub(surfaceVel));
 						} else {
 							var restitution = this._bounceRestitution;
-							if (currentTime - this.superBounceEnableTime < 5) {
+							if (isSuperBounceEnabled(timeState)) {
 								restitution = 0.9;
 							}
-							if (currentTime - this.shockAbsorberEnableTime < 5) {
+							if (isShockAbsorberEnabled(timeState)) {
 								restitution = 0.01;
 							}
 							restitution *= contacts[i].restitution;
@@ -1522,7 +1525,7 @@ class Marble extends GameObject {
 			m.d = new Vector();
 		}
 
-		if (this.blastTicks < (30000 >> 5))
+		if (Net.isMP && this.blastTicks < (25000 >> 5))
 			this.blastTicks += 1;
 
 		if (Net.isClient)
@@ -1581,7 +1584,7 @@ class Marble extends GameObject {
 			var desiredOmega = new Vector();
 			var isCentered = this.computeMoveForces(m, aControl, desiredOmega);
 
-			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
+			stoppedPaths = this.velocityCancel(timeState, isCentered, false, stoppedPaths, pathedInteriors);
 			var A = this.getExternalForces(tempState, m);
 			var a = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
 
@@ -1601,7 +1604,7 @@ class Marble extends GameObject {
 				this.velocity.y = 0;
 				this.velocity.x = 0;
 			}
-			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, true, stoppedPaths, pathedInteriors);
+			stoppedPaths = this.velocityCancel(timeState, isCentered, true, stoppedPaths, pathedInteriors);
 			this._totalTime += timeStep;
 			if (contacts.length != 0) {
 				this._contactTime += timeStep;
@@ -1730,26 +1733,20 @@ class Marble extends GameObject {
 		if (this.megaMarbleUseTick > 0) {
 			if (Net.isHost) {
 				if ((timeState.ticks - this.megaMarbleUseTick) <= 312 && this.megaMarbleUseTick > 0) {
-					this._radius = 0.675;
-					this.collider.radius = 0.675;
+					this._radius = 0.6666;
+					this.collider.radius = 0.6666;
 				} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
 					this.collider.radius = this._radius = 0.2;
-					if (!this.isNetUpdate && this.controllable)
-						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
-							false);
 					this.megaMarbleUseTick = 0;
 					this.netFlags |= MarbleNetFlags.DoMega;
 				}
 			}
 			if (Net.isClient) {
 				if (this.serverTicks - this.megaMarbleUseTick <= 312 && this.megaMarbleUseTick > 0) {
-					this._radius = 0.675;
-					this.collider.radius = 0.675;
+					this._radius = 0.6666;
+					this.collider.radius = 0.6666;
 				} else {
 					this.collider.radius = this._radius = 0.2;
-					if (!this.isNetUpdate && this.controllable)
-						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
-							false);
 					this.megaMarbleUseTick = 0;
 				}
 			}
@@ -1786,6 +1783,8 @@ class Marble extends GameObject {
 		marbleUpdate.blastTick = this.blastUseTick;
 		marbleUpdate.heliTick = this.helicopterUseTick;
 		marbleUpdate.megaTick = this.megaMarbleUseTick;
+		marbleUpdate.superBounceTick = this.superBounceUseTick;
+		marbleUpdate.shockAbsorberTick = this.shockAbsorberUseTick;
 		marbleUpdate.oob = this.outOfBounds;
 		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0x1FF;
 		marbleUpdate.netFlags = this.netFlags;
@@ -1814,6 +1813,8 @@ class Marble extends GameObject {
 		this.blastUseTick = p.blastTick;
 		this.helicopterUseTick = p.heliTick;
 		this.megaMarbleUseTick = p.megaTick;
+		this.superBounceUseTick = p.superBounceTick;
+		this.shockAbsorberUseTick = p.shockAbsorberTick;
 		this.serverUsePowerup = p.netFlags & MarbleNetFlags.UsePowerup > 0;
 		// this.currentUp = p.gravityDirection;
 		this.level.setUp(cast this, p.gravityDirection, this.level.timeState);
@@ -1970,6 +1971,14 @@ class Marble extends GameObject {
 		}
 
 		updatePowerupStates(timeState);
+
+		var marbledts = cast(this.getChildAt(0), DtsObject);
+
+		if (isMegaMarbleEnabled(timeState)) {
+			marbledts.setScale(0.6666 / _dtsRadius);
+		} else {
+			marbledts.setScale(0.2 / _dtsRadius);
+		}
 
 		// if (isMegaMarbleEnabled(timeState)) {
 		// 	this._marbleScale = this._defaultScale * 2.25;
@@ -2146,33 +2155,39 @@ class Marble extends GameObject {
 	}
 
 	public function updatePowerupStates(timeState:TimeState) {
-		if (timeState.currentAttemptTime - this.shockAbsorberEnableTime < 5) {
-			this.shockabsorberSound.pause = false;
-		} else {
-			this.shockabsorberSound.pause = true;
-		}
-		if (timeState.currentAttemptTime - this.superBounceEnableTime < 5) {
-			this.superbounceSound.pause = false;
-		} else {
-			this.superbounceSound.pause = true;
+		var shockEnabled = isShockAbsorberEnabled(timeState);
+		var bounceEnabled = isSuperBounceEnabled(timeState);
+		var helicopterEnabled = isHelicopterEnabled(timeState);
+		var selfMarble = level.marble == cast this;
+		if (selfMarble) {
+			if (shockEnabled) {
+				this.shockabsorberSound.pause = false;
+			} else {
+				this.shockabsorberSound.pause = true;
+			}
+			if (bounceEnabled) {
+				this.superbounceSound.pause = false;
+			} else {
+				this.superbounceSound.pause = true;
+			}
 		}
 
-		if (timeState.currentAttemptTime - this.shockAbsorberEnableTime < 5) {
-			this.forcefield.setPosition(0, 0, 0);
-		} else if (timeState.currentAttemptTime - this.superBounceEnableTime < 5) {
+		if (shockEnabled || bounceEnabled) {
 			this.forcefield.setPosition(0, 0, 0);
 		} else {
 			this.forcefield.x = 1e8;
 			this.forcefield.y = 1e8;
 			this.forcefield.z = 1e8;
 		}
-		if (timeState.currentAttemptTime - this.helicopterEnableTime < 5) {
+		if (helicopterEnabled) {
 			this.helicopter.setPosition(x, y, z);
 			this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
-			this.helicopterSound.pause = false;
+			if (selfMarble)
+				this.helicopterSound.pause = false;
 		} else {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
-			this.helicopterSound.pause = true;
+			if (selfMarble)
+				this.helicopterSound.pause = true;
 		}
 	}
 
@@ -2187,17 +2202,34 @@ class Marble extends GameObject {
 	}
 
 	public function useBlast(timeState:TimeState) {
-		if (this.blastAmount < 0.2 || this.level.game != "ultra")
-			return;
-		var impulse = this.currentUp.multiply(Math.max(Math.sqrt(this.blastAmount), this.blastAmount) * 10);
-		this.applyImpulse(impulse);
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
-		this.level.particleManager.createEmitter(this.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
-			this.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
-				this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
-			},
-			new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
-		this.blastAmount = 0;
+		if (Net.isMP) {
+			if (this.blastTicks < 156)
+				return;
+			var blastAmt = this.blastTicks / (25000 >> 5);
+			var impulse = this.currentUp.multiply(Math.max(Math.sqrt(blastAmt), blastAmt) * 10);
+			this.applyImpulse(impulse);
+			if (!isNetUpdate && level.marble == cast this)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
+			if (!isNetUpdate)
+				this.level.particleManager.createEmitter(blastAmt > 1 ? blastMaxParticleOptions : blastParticleOptions,
+					blastAmt > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
+						this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
+					},
+					new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+			this.blastTicks = 0;
+		} else {
+			if (this.blastAmount < 0.2 || this.level.game != "ultra")
+				return;
+			var impulse = this.currentUp.multiply(Math.max(Math.sqrt(this.blastAmount), this.blastAmount) * 10);
+			this.applyImpulse(impulse);
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
+			this.level.particleManager.createEmitter(this.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
+				this.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
+					this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
+				},
+				new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+			this.blastAmount = 0;
+		}
 	}
 
 	public function getForce(position:Vector, tick:Int) {
@@ -2232,26 +2264,95 @@ class Marble extends GameObject {
 	}
 
 	public function enableSuperBounce(timeState:TimeState) {
-		this.superBounceEnableTime = timeState.currentAttemptTime;
+		if (this.level.isMultiplayer) {
+			this.superBounceUseTick = Net.isHost ? timeState.ticks : serverTicks;
+			if (!this.isNetUpdate)
+				this.netFlags |= MarbleNetFlags.DoSuperBounce;
+		} else
+			this.superBounceEnableTime = timeState.currentAttemptTime;
+	}
+
+	inline function isSuperBounceEnabled(timeState:TimeState) {
+		if (this.level == null)
+			return false;
+		if (!this.level.isMultiplayer) {
+			return timeState.currentAttemptTime - this.superBounceEnableTime < 5;
+		} else {
+			if (Net.isHost) {
+				return (superBounceUseTick > 0 && (this.level.timeState.ticks - superBounceUseTick) <= 156);
+			} else {
+				return (superBounceUseTick > 0 && (serverTicks - superBounceUseTick) <= 156);
+			}
+		}
 	}
 
 	public function enableShockAbsorber(timeState:TimeState) {
-		this.shockAbsorberEnableTime = timeState.currentAttemptTime;
+		if (this.level.isMultiplayer) {
+			this.shockAbsorberUseTick = Net.isHost ? timeState.ticks : serverTicks;
+			if (!this.isNetUpdate)
+				this.netFlags |= MarbleNetFlags.DoShockAbsorber;
+		} else
+			this.shockAbsorberEnableTime = timeState.currentAttemptTime;
+	}
+
+	inline function isShockAbsorberEnabled(timeState:TimeState) {
+		if (this.level == null)
+			return false;
+		if (!this.level.isMultiplayer) {
+			return timeState.currentAttemptTime - this.shockAbsorberEnableTime < 5;
+		} else {
+			if (Net.isHost) {
+				return (shockAbsorberUseTick > 0 && (this.level.timeState.ticks - shockAbsorberUseTick) <= 156);
+			} else {
+				return (shockAbsorberUseTick > 0 && (serverTicks - shockAbsorberUseTick) <= 156);
+			}
+		}
 	}
 
 	public function enableHelicopter(timeState:TimeState) {
-		this.helicopterEnableTime = timeState.currentAttemptTime;
+		if (this.level.isMultiplayer) {
+			this.helicopterUseTick = Net.isHost ? timeState.ticks : serverTicks;
+			if (!this.isNetUpdate)
+				this.netFlags |= MarbleNetFlags.DoHelicopter;
+		} else
+			this.helicopterEnableTime = timeState.currentAttemptTime;
 	}
 
 	inline function isHelicopterEnabled(timeState:TimeState) {
 		if (this.level == null)
 			return false;
+		if (!this.level.isMultiplayer) {
+			return timeState.currentAttemptTime - this.helicopterEnableTime < 5;
+		} else {
+			if (Net.isHost) {
+				return (helicopterUseTick > 0 && (this.level.timeState.ticks - helicopterUseTick) <= 156);
+			} else {
+				return (helicopterUseTick > 0 && (serverTicks - helicopterUseTick) <= 156);
+			}
+		}
+	}
 
-		return timeState.currentAttemptTime - this.helicopterEnableTime < 5;
+	inline function isMegaMarbleEnabled(timeState:TimeState) {
+		if (this.level == null)
+			return false;
+		if (!this.level.isMultiplayer) {
+			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;
+		} else {
+			if (Net.isHost) {
+				return (megaMarbleUseTick > 0 && (this.level.timeState.ticks - megaMarbleUseTick) <= 312);
+			} else {
+				return (megaMarbleUseTick > 0 && (serverTicks - megaMarbleUseTick) <= 312);
+			}
+		}
 	}
 
 	public function enableMegaMarble(timeState:TimeState) {
-		this.megaMarbleEnableTime = timeState.currentAttemptTime;
+		if (this.level.isMultiplayer) {
+			this.megaMarbleUseTick = Net.isHost ? timeState.ticks : serverTicks;
+			if (!this.isNetUpdate)
+				this.netFlags |= MarbleNetFlags.DoMega;
+		} else
+			this.megaMarbleEnableTime = timeState.currentAttemptTime;
 	}
 
 	function updateTeleporterState(time:TimeState) {
@@ -2317,7 +2418,7 @@ class Marble extends GameObject {
 		this.blastTicks = 0;
 		this.helicopterUseTick = 0;
 		this.megaMarbleUseTick = 0;
-		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
+		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this.contactEntities = [];
 		this.cloak = false;
