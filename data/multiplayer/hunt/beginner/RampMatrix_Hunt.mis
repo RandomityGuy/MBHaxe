@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          name = "Ramp Matrix";
          type = "Beginner";
-         level = "2";
+         level = "3";
          desc = "Woah! I know marble-fu!";
          artist = "Alex Swanson";
          music = "Classic Vibe.ogg";
@@ -21,6 +21,7 @@ new SimGroup(MissionGroup) {
          ultimateScore[1] = "115";
          alarmStartTime = "20";
          overviewHeight = "2";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -683,6 +684,11 @@ new SimGroup(MissionGroup) {
       collideable = "0";
       static = "1";
       rotate = "1";
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Pianoforte.ogg";

@@ -15,12 +15,13 @@ new SimGroup(MissionGroup) {
          RadiusFromGem = "17.5";
          score[0] = "20";
          score[1] = "30";
-         platinumScore[0] = "60";
-         platinumScore[1] = "75";
-         ultimateScore[0] = "105";
-         ultimateScore[1] = "125";
+         platinumScore[0] = "70";
+         platinumScore[1] = "85";
+         ultimateScore[0] = "135";
+         ultimateScore[1] = "185";
          alarmStartTime = "25";
          overviewHeight = "15";
+         glassCenter = "Glassy";
    };
    new Trigger(Bounds) {
       position = "-92.5 39 -6.46107";
@@ -61,11 +62,13 @@ new SimGroup(MissionGroup) {
       fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
       fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+      sphereFront = "platinum/data/shapes/skies/wintry/front.png";
+      sphereBack = "platinum/data/shapes/skies/wintry/back.png";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -77,7 +80,7 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/advanced/Zenith.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/Zenith.dif";
       showTerrainInside = "0";
    };
    new SimGroup(GemSpawns) {
@@ -1979,6 +1982,11 @@ new SimGroup(MissionGroup) {
       collideable = "0";
       static = "1";
       rotate = "1";
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";

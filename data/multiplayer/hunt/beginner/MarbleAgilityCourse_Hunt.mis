@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          name = "Marble Agility Course";
          type = "Beginner";
-         level = "8";
+         level = "10";
          desc = "Can you take it all in stride?";
          startHelpText = "Jump for the gems!";
          artist = "Technostick, Matan and Phil";
@@ -22,6 +22,7 @@ new SimGroup(MissionGroup) {
          ultimateScore[1] = "130";
          alarmStartTime = "15";
          overviewHeight = "-3";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -695,6 +696,11 @@ new SimGroup(MissionGroup) {
       collideable = "0";
       static = "1";
       rotate = "1";
+   };
+   new Marker(Glassy) {
+      position = "2.9 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Pianoforte.ogg";

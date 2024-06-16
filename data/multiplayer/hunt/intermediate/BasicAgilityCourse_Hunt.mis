@@ -22,6 +22,7 @@ new SimGroup(MissionGroup) {
          ultimateScore[1] = "175";
          alarmStartTime = "15";
          overviewHeight = "-2";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -55,6 +56,8 @@ new SimGroup(MissionGroup) {
       fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
       fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+      sphereFront = "platinum/data/shapes/skies/dusk/front.png";
+      sphereBack = "platinum/data/shapes/skies/dusk/back.png";
    };
    new Sun() {
       direction = "0.638261 0.459006 -0.61801";
@@ -662,6 +665,11 @@ new SimGroup(MissionGroup) {
       collideable = "0";
       static = "1";
       rotate = "1";
+   };
+   new Marker(Glassy) {
+      position = "21 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";

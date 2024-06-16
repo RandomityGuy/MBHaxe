@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          name = "Bowl";
          type = "Beginner";
-         level = "7";
+         level = "9";
          desc = "Speed along the slopes of this wide level.";
          artist = "Alex Swanson";
          music = "Tim Trance.ogg";
@@ -21,6 +21,7 @@ new SimGroup(MissionGroup) {
          ultimateScore[1] = "170";
          alarmStartTime = "25";
          overviewHeight = "30";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -56,9 +57,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -70,14 +71,14 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/beginner/Bowl.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/Bowl.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/beginner/BowlOuterRing.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/BowlOuterRing.dif";
       showTerrainInside = "0";
    };
    new SimGroup(SpawnPoints) {
@@ -3088,6 +3089,11 @@ new SimGroup(MissionGroup) {
       scale = "438 326 1000";
       dataBlock = "InBoundsTrigger";
       polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Marker(Glassy) {
+      position = "22 0 -30";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";

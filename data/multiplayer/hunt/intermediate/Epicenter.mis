@@ -21,6 +21,7 @@ new SimGroup(MissionGroup) {
          platinumScore[1] = "150";
          ultimateScore[0] = "160";
          ultimateScore[1] = "215";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -56,9 +57,9 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
@@ -70,441 +71,441 @@ new SimGroup(MissionGroup) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/intermediate/Epicenter.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/Epicenter.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "51 -17.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "36.5 48 4";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-36.5 -48 4";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-17 -21 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-17 21 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-17 57 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-11 57 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "21 57 2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-21 -57 2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-26 12 0";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-26 32 -2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-26 -26 0";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-40 -26 0";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-40 -42 2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-37 21 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-26 0 0";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-26 -12 0";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-26 0 0";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "26 -12 0";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "26 -32 -2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "40 42 2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "0 26 2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "0 -26 2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "0 -52 2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "26 26 0";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "40 26 0";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "56 -8 -2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-56 8 -2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "39 9 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-39 -9 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "11 39 2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-11 -39 2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "11 -57 0";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "17 -57 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "26 0 0";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "0 52 2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "26 12 0";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "26 0 0";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "17 -21 0";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "37 -21 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-37 37.5 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-17 53.5 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-13.5 32 -2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-42.5 14 -2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "17.5 18 -2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-17.5 -18 -2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "13.5 -32 -2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "37 -37.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "17 -53.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "42.5 -14 -2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "52.5 12 0";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-52.5 -12 0";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_wide_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_wide_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-25 8.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-10.5 -24 -2";
       rotation = "0 0 1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-15 18.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "10.5 24 -2";
       rotation = "0 0 -1 90";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-15 11.5 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "-51 17.5 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "15 -18.5 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "25 -8.5 -2";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "15 -11.5 -2";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_tight_curve.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_tight_curve.dif";
       showTerrainInside = "0";
    };
    new InteriorInstance() {
       position = "17 21 0";
       rotation = "0 0 1 180";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/parts/intermediate_gentleslope.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/intermediate_gentleslope.dif";
       showTerrainInside = "0";
    };
    new SimGroup(SpawnPoints) {
@@ -1532,7 +1533,7 @@ new SimGroup(MissionGroup) {
          rotate = "1";
       };
       new Item() {
-         position = "5 -20.5 2.00952";
+         position = "5 -20.5 2.00415";
          rotation = "1 0 0 0";
          scale = "1 1 1";
          dataBlock = "GemItemRed";
@@ -2114,6 +2115,11 @@ new SimGroup(MissionGroup) {
       scale = "125 127 1000";
       dataBlock = "InBoundsTrigger";
       polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Marker(Glassy) {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";

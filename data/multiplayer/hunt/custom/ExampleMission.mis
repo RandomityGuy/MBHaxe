@@ -1,73 +1,66 @@
-// ***** Level builder, look here! *****
-//
-// Look for the line below that contains "new ScriptObject(MissionInfo) {", and
-// the nextmost line with just "};".
-//
-// Between these lines are the key level properties you can change!
-//
-// To change a property's value, change ONLY the text inside a line's pair of quotes.
-// For example, to change the level's name to My Great Level, change:
-//    name = "Mission Template";
-// to
-//    name = "My Great Level";
-//
-// Below are descriptions of each of the possible properties you can change:
-//    name             - your level's name on the level selection screen
-//    type             - leave this
-//    level            - the nth level in the level selection screen, eg. 5
-//    desc             - a brief description shown on the level selection screen
-//    startHelpText    - the text displayed when you initially spawn
-//    artist           - your name shown on the level selection screen
-//    music            - which .ogg file to play for your level (blank = random)
-//    gamemode         - must be "hunt" for hunt levels, or "free" for free world levels
-//    game             - leave this
-//    time             - the level's play time in milliseconds (1000ms = 1 second)
-//    maxGemsPerSpawn  - the maximum number of gems to spawn for a GemSpawn
-//    radiusFromGem    - the maximum radius for spawned gems from the center gem
-//    gemgroups        - whether this level spawns gem groups (0 = no groups, 1 = groups, 2 = random in groups)
-//    score[0]         - the level's qualify/par score for versus mode (more than 1 player)
-//    score[1]         - the level's qualify/par score for practice mode (1 player)
-//    platinumScore[0] - the level's platinum score for versus mode
-//    platinumScore[1] - the level's platinum score for practice mode
-//    ultimateScore[0] - the level's ultimate score for versus mode
-//    ultimateScore[1] - the level's ultimate score for practice mode
-//    alarmStartTime   - when the "you have xx seconds left" alert appears
-//    overviewHeight   - an adjustment to the height of the pregame overview screen
-//
-// One last thing (before the actual level code starts) - if you're releasing your level, feel free to delete
-// this section of lines prefixed with // (so don't delete the '//--- OBJECT WRITE BEGIN ---' line).
-//
-// Have fun creating your level!
-// - the Platinum Team
-
 //--- OBJECT WRITE BEGIN ---
 new SimGroup(MissionGroup) {
 
-   //These are the values you can change
    new ScriptObject(MissionInfo) {
-         name = "Example Mission";
-         type = "Custom";
          level = "1";
-         desc = "An example level which includes notes on all the ingame elements added in MultiPlayer.";
-         startHelpText = "Press F11 to open the level editor. Select any item to read notes on how to use it.";
-         artist = "HiGuy";
-         music = "Tim Trance.ogg";
-         Gamemode = "Hunt";
+         type = "Custom";
+         gameMode = "Hunt";
          game = "Custom";
-         time = "600000";
+         time = "180000";
+         ultimatescore0 = "0";
          maxGemsPerSpawn = "6";
-         radiusFromGem = "25";
-         gemGroups = "0";
-         score[0] = "0";
-         score[1] = "0";
-         platinumScore[0] = "0";
-         platinumScore[1] = "0";
-         ultimateScore[0] = "0";
-         ultimateScore[1] = "0";
-         alarmStartTime = "25";
-         overviewHeight = "15";
+         startHelpText = "Press F11 to open the level editor. Select any item to read notes on how to use it.";
+         platinumscore0 = "0";
+         alarmStartTime = "15";
+         music = "Tim Trance.ogg";
+         score0 = "0";
+         overviewHeight = "5";
+         radiusFromGem = "20";
+         score1 = "0";
+         desc = "An example level which includes notes on all the ingame elements added in MultiPlayer.";
+         ultimatescore1 = "0";
+         name = "Example Mission";
+         platinumscore1 = "0";
+         artist = "Threefolder / Notes by HiGuy";
    };
-   //Ends here
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/music/Comforting Mystery.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+   new Item() {
+      position = "25 5 5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "1 -5 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "5 -7 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new SimGroup(Skies) {
+         note = "These SimGroups are not required, I just added them to create a nice level hierarchy tree.";
+   };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
       flightCeiling = "300";
@@ -106,92 +99,26 @@ new SimGroup(MissionGroup) {
       color = "1.400000 1.200000 0.400000 1.000000";
       ambient = "0.300000 0.300000 0.400000 1.000000";
    };
-   new StaticShape(SkySphere) {
+   new StaticShape(ExampleSky) {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1000 1000 1000";
-      dataBlock = "Dusk";
+      dataBlock = "clear";
+         note = "These example SkySpheres are the three official skies you can choose from. Simply place one at the origin with a scale of \\\"1000 1000 1000\\\" to make it your SkySphere.";
    };
-   new Trigger(Bounds) {
-      position = "-10 10 -1";
+   new Trigger(stayHere) {
+      position = "-38 59.5 2.5";
       rotation = "1 0 0 0";
-      scale = "20 20 1000";
+      scale = "100 100 1000";
       dataBlock = "InBoundsTrigger";
       polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
          note = "Bounds triggers generally have a height of 1000 (virtually unlimited) to replicate MBUltra\'s bounds triggers.";
-   };
-   new SimGroup(Platforms) {
-         note = "These SimGroups are not required, I just added them to create a nice level hierarchy tree.";
-
-      new InteriorInstance() {
-         position = "0.125 -0.125 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "-5.375 -5.625 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "0.125 5.375 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "5.625 5.375 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "-5.375 5.375 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "-5.375 -0.125 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "5.625 -0.125 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "5.625 -5.625 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
-      new InteriorInstance() {
-         position = "0.125 -5.625 -0.125";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         interiorFile = "~/data/lbinteriors_mbg/addon/smallplatform.dif";
-         showTerrainInside = "0";
-      };
    };
    new SimGroup(SpawnTriggers) {
          note = "These SimGroups are not required, I just added them to create a nice level hierarchy tree.";
 
       new Trigger(BasicSpawnTrigger) {
-         position = "0 0 0.25";
+         position = "-9 25 8.5";
          rotation = "1 0 0 0";
          scale = "1 1 1";
          dataBlock = "SpawnTrigger";
@@ -199,106 +126,399 @@ new SimGroup(MissionGroup) {
             note = "For a spawn point, just place a basic spawn trigger. Players will spawn 3 units above the trigger\'s (+x, -y, -z) corner.";
       };
       new Trigger(CenterSpawnTrigger) {
-         position = "-0.5 0.5 0.25";
+         position = "-1.5 -12.5 8.5";
          rotation = "1 0 0 0";
          scale = "1 1 1";
          dataBlock = "SpawnTrigger";
          polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
-            note = "Defining the \"center\" field as 1 will spawn the player in the trigger\'s wiremesh center, rather than in the corner.";
             center = "1";
+            note = "Defining the \"center\" field as 1 will spawn the player in the trigger\'s wiremesh center, rather than in the corner.";
       };
       new Trigger(AddSpawnTrigger) {
-         position = "0 0 3.25";
+         position = "29 -1 4.5";
          rotation = "1 0 0 0";
          scale = "1 1 1";
          dataBlock = "SpawnTrigger";
          polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
             note = "The \"add\" parameter allows you to customize where the player will spawn in relation to the triggers (+x, -y, -z) corner";
-            add = "0 0 0";
+            add = "0 0 3";
       };
    };
-   new SimGroup(Gems) {
-         note = "These SimGroups are not required, I just added them to create a nice level hierarchy tree.";
-
-      new Item(RedGem) {
-         position = "-5.5 5.5 0.3";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "GemItemRed";
-         collideable = "0";
-         static = "1";
-         rotate = "1";
-            note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
-      };
-      new Item(YellowGem) {
-         position = "0 5.5 0.3";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "GemItemYellow";
-         collideable = "0";
-         static = "1";
-         rotate = "1";
-            note = "For a yellow (2 point) gem, use GemItemYellow instead of GemItemRed.";
-      };
-      new Item(BlueGem) {
-         position = "5.5 5.5 0.3";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "GemItemBlue";
-         collideable = "0";
-         static = "1";
-         rotate = "1";
-            note = "Blue gems (5 points) are placed in the same way as a yellow gem, but with GemItemBlue instead of GemItemYellow.";
-      };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/multiplayer/interiors/custom/exampleMission.dif";
+      showTerrainInside = "0";
    };
-   new SimGroup(PowerUps) {
-         note = "These SimGroups are not required, I just added them to create a nice level hierarchy tree.";
-
-      new Item(MegaMarblePowerUp) {
-         position = "-5.5 0 0.25";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "MegaMarbleItem";
-         collideable = "0";
-         static = "1";
-         rotate = "1";
-            note = "Mega marbles are just simple PowerUp items like any other.";
-      };
-      new Item(BlastPowerUp) {
-         position = "5.5 0 0.25";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "BlastItem";
-         collideable = "0";
-         static = "1";
-         rotate = "1";
-            note = "Blast items are basic PowerUps and can be placed like any other PowerUp.";
-      };
+   new Item() {
+      position = "23 31 13.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "For a yellow (2 point) gem, use GemItemYellow instead of GemItemRed.";
    };
-   new SimGroup(Skies) {
-         note = "These SimGroups are not required, I just added them to create a nice level hierarchy tree.";
-
-      new StaticShape(ExampleSky1) {
-         position = "-5.5 -5.5 1.5";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "Dusk";
-            note = "These example SkySpheres are the three official skies you can choose from. Simply place one at the origin with a scale of \"1000 1000 1000\" to make it your SkySphere.";
-      };
-      new StaticShape(ExampleSky2) {
-         position = "0 -5.5 1.5";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "clear";
-            note = "These example SkySpheres are the three official skies you can choose from. Simply place one at the origin with a scale of \"1000 1000 1000\" to make it your SkySphere.";
-      };
-      new StaticShape(ExampleSky3) {
-         position = "5.5 -5.5 1.5";
-         rotation = "1 0 0 0";
-         scale = "1 1 1";
-         dataBlock = "Wintry";
-            note = "These example SkySpheres are the three official skies you can choose from. Simply place one at the origin with a scale of \"1000 1000 1000\" to make it your SkySphere.";
-      };
+   new Trigger(CenterSpawnTrigger) {
+      position = "18.5 37.5 12.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SpawnTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         center = "1";
+         note = "Defining the \"center\" field as 1 will spawn the player in the trigger\'s wiremesh center, rather than in the corner.";
+   };
+   new Item() {
+      position = "19 20 6.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "MegaMarbleItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "Mega marbles are just simple PowerUp items like any other.";
+   };
+   new Item() {
+      position = "4 8 6.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "Blast items are basic PowerUps and can be placed like any other PowerUp.";
+   };
+   new Item() {
+      position = "12 -8 6.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "Blast items are basic PowerUps and can be placed like any other PowerUp.";
+   };
+   new Item() {
+      position = "18 0 4.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "MegaMarbleItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "Mega marbles are just simple PowerUp items like any other.";
+   };
+   new Item() {
+      position = "28 36 12.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "BlastItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "Blast items are basic PowerUps and can be placed like any other PowerUp.";
+   };
+   new Item() {
+      position = "10 14 6.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemBlue";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "Blue gems (5 points) are placed in the same way as a yellow gem, but with GemItemBlue instead of GemItemYellow.";
+   };
+   new Item() {
+      position = "1 -9 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "3 -7 9.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "3 -9 9.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "For a yellow (2 point) gem, use GemItemYellow instead of GemItemRed.";
+   };
+   new Item() {
+      position = "3 -11 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "23 1 5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "-7 17 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "-7 19 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "-7 21 9.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "-5 21 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "-5 23 9";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "-5 19 9.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "23 33 13.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "21 33 13";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "21 31 13";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "23 29 13";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "25 29 13";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "25 31 13";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "13 23 7.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemYellow";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "For a yellow (2 point) gem, use GemItemYellow instead of GemItemRed.";
+   };
+   new Item() {
+      position = "11 21 7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "13 21 7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "13 25 7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "11 23 7";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "9 23 7.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "23 7 5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "21 7 5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "21 5 5.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "23 5 5.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "21 3 5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
+   };
+   new Item() {
+      position = "23 3 5.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemRed";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+         note = "To place a red gem spawnpoint, simply place a GemItemRed where you want the gem to spawn. Spawns are randomly generated.";
    };
 };
 //--- OBJECT WRITE END ---

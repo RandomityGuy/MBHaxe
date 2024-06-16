@@ -6,7 +6,7 @@
 // All had GemItem in addition to the GemItemRed.
 // I think they are red, and based on LE positions they should be.
 //
-// Two gems were moved at some point (possibly for MBU/O):  
+// Two gems were moved at some point (possibly for MBU/O):
 //      position = "42.0318 1.92379 12.0112";
 //      position = "34.105 1.9607 12.0092";
 // became:
@@ -37,7 +37,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          name = "Spires";
          type = "Advanced";
-         level = "11";
+         level = "12";
          desc = "Master the hardest level of all.";
          artist = "Alex Swanson";
          music = "Tim Trance.ogg";
@@ -48,12 +48,13 @@ new SimGroup(MissionGroup) {
          RadiusFromGem = "50";
          score[0] = "15";
          score[1] = "30";
-         platinumScore[0] = "50";
-         platinumScore[1] = "75";
-         ultimateScore[0] = "100";
+         platinumScore[0] = "75";
+         platinumScore[1] = "85";
+         ultimateScore[0] = "125";
          ultimateScore[1] = "150";
          alarmStartTime = "30";
          overviewHeight = "15";
+         glassCenter = "Glassy";
    };
    new MissionArea(MissionArea) {
       area = "-360 -648 720 1296";
@@ -71,7 +72,7 @@ new SimGroup(MissionGroup) {
       cloudSpeed1 = "0.0001";
       cloudSpeed2 = "0.0002";
       cloudSpeed3 = "0.0003";
-      visibleDistance = "10000";
+      visibleDistance = "5000";
       useSkyTextures = "1";
       renderBottomTexture = "1";
       SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
@@ -89,21 +90,21 @@ new SimGroup(MissionGroup) {
       fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
    };
    new Sun() {
-      direction = "0.638261 0.459006 -0.61801";
-      color = "1.400000 1.200000 0.400000 1.000000";
-      ambient = "0.300000 0.300000 0.400000 1.000000";
+      direction = "0.573201 0.275357 -0.771764";
+      color = "1.080000 1.030000 0.900000 1.000000";
+      ambient = "0.400000 0.400000 0.500000 1.000000";
    };
    new StaticShape() {
       position = "0 0 0";
       rotation = "1 0 0 0";
-      scale = "10000 10000 10000";
+      scale = "5000 5000 5000";
       dataBlock = "Wintry";
    };
    new InteriorInstance() {
       position = "0 0 0";
       rotation = "1 0 0 0";
       scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/advanced/Spires.dif";
+      interiorFile = "~/data/multiplayer/interiors/mbu/Spires.dif";
       showTerrainInside = "0";
    };
    new Item() {
@@ -2065,6 +2066,11 @@ new SimGroup(MissionGroup) {
       collideable = "0";
       static = "1";
       rotate = "1";
+   };
+   new Marker(Glassy) {
+      position = "26 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
    };
    new AudioProfile(MusicProfile) {
       fileName = "~/data/sound/music/Comforting Mystery.ogg";
