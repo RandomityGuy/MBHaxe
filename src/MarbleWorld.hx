@@ -353,14 +353,14 @@ class MarbleWorld extends Scheduler {
 
 		if (this.isMultiplayer) {
 			// Add us
-			// if (Net.isHost) {
-			// 	this.playGui.addPlayer(0, Settings.highscoreName.substr(0, 15), true);
-			// } else {
-			// 	this.playGui.addPlayer(Net.clientId, Settings.highscoreName.substr(0, 15), true);
-			// }
-			// for (client in Net.clientIdMap) {
-			// 	this.playGui.addPlayer(client.id, client.name.substr(0, 15), false);
-			// }
+			if (Net.isHost) {
+				this.playGui.addPlayer(0, Settings.highscoreName.substr(0, 15), true);
+			} else {
+				this.playGui.addPlayer(Net.clientId, Settings.highscoreName.substr(0, 15), true);
+			}
+			for (client in Net.clientIdMap) {
+				this.playGui.addPlayer(client.id, client.name.substr(0, 15), false);
+			}
 		}
 
 		this._ready = true;
@@ -557,8 +557,8 @@ class MarbleWorld extends Scheduler {
 		this.initMarble(cc, () -> {
 			var addedMarble = clientMarbles.get(cc);
 			this.restart(addedMarble); // spawn it
-			// this.playGui.addPlayer(cc.id, cc.getName(), false);
-			// this.playGui.redrawPlayerList();
+			this.playGui.addPlayer(cc.id, cc.getName(), false);
+			this.playGui.redrawPlayerList();
 
 			// Sort all the marbles so that they are updated in a deterministic order
 			this.marbles.sort((a, b) -> @:privateAccess {
@@ -574,8 +574,8 @@ class MarbleWorld extends Scheduler {
 		this.initMarble(cc, () -> {
 			var addedMarble = clientMarbles.get(cc);
 			this.restart(addedMarble); // spawn it
-			// this.playGui.addPlayer(cc.id, cc.getName(), false);
-			// this.playGui.redrawPlayerList();
+			this.playGui.addPlayer(cc.id, cc.getName(), false);
+			this.playGui.redrawPlayerList();
 
 			// Sort all the marbles so that they are updated in a deterministic order
 			this.marbles.sort((a, b) -> @:privateAccess {
@@ -714,7 +714,7 @@ class MarbleWorld extends Scheduler {
 				marble.reset();
 				marble.setMode(Start);
 			}
-			// this.playGui.resetPlayerScores();
+			this.playGui.resetPlayerScores();
 		}
 
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
@@ -1497,7 +1497,7 @@ class MarbleWorld extends Scheduler {
 			this.scene.removeChild(otherMarble);
 			this.collisionWorld.removeMarbleEntity(otherMarble.collider);
 			this.collisionWorld.removeMovingEntity(otherMarble.collider);
-			// this.playGui.removePlayer(cc.id);
+			this.playGui.removePlayer(cc.id);
 			this.clientMarbles.remove(cc);
 			otherMarble.dispose();
 			this.marbles.remove(otherMarble);

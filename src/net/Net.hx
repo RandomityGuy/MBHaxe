@@ -712,7 +712,7 @@ class Net {
 				var gemPickupPacket = new GemPickupPacket();
 				gemPickupPacket.deserialize(input);
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-					// @:privateAccess MarbleGame.instance.world.playGui.incrementPlayerScore(gemPickupPacket.clientId, gemPickupPacket.scoreIncr);
+					@:privateAccess MarbleGame.instance.world.playGui.incrementPlayerScore(gemPickupPacket.clientId, gemPickupPacket.scoreIncr);
 					@:privateAccess MarbleGame.instance.world.gemPredictions.acknowledgeGemPickup(gemPickupPacket);
 				}
 
@@ -744,9 +744,6 @@ class Net {
 						Net.lobbyClientReady = cready;
 					}
 				}
-				if (newP) {
-					// AudioManager.playSound(ResourceLoader.getAudio("sounds/spawn_alternate.wav").resource);
-				}
 				if (MarbleGame.canvas.content is MPPlayMissionGui) {
 					cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
 				}
@@ -754,9 +751,9 @@ class Net {
 			case ScoreBoardInfo:
 				var scoreboardPacket = new ScoreboardPacket();
 				scoreboardPacket.deserialize(input);
-			// if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-			// 	@:privateAccess MarbleGame.instance.world.playGui.updatePlayerScores(scoreboardPacket);
-			// }
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
+					@:privateAccess MarbleGame.instance.world.playGui.updatePlayerScores(scoreboardPacket);
+				}
 
 			case _:
 				Console.log("unknown command: " + packetType);

@@ -363,6 +363,13 @@ class Util {
 		return keyName;
 	}
 
+	public static inline function rightPad(str:String, len:Int, cutOff:Int) {
+		str = str.substring(0, len - cutOff);
+		while (str.length < len)
+			str += " ";
+		return str;
+	}
+
 	public static function m_matF_x_vectorF(matrix:Matrix, v:Vector) {
 		var m = matrix.clone();
 		m.transpose();

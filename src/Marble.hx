@@ -230,8 +230,8 @@ class Marble extends GameObject {
 	var minVelocityBounceSoft = 2.5;
 	var minVelocityBounceHard = 12.0;
 	var bounceMinGain = 0.2;
-	var maxBlastRepulse = 60.0;
-	var blastRepulseDist = 10.0;
+	var blastShockwaveStrength = 5.0;
+	var blastRechargeShockwaveStrength = 10.0;
 
 	public var _bounceRestitution = 0.5;
 
@@ -599,12 +599,6 @@ class Marble extends GameObject {
 			for (obj in level.forceObjects) {
 				var force = cast(obj, ForceObject).getForce(this.collider.transform.getPosition());
 				A.load(A.add(force.multiply(1 / mass)));
-			}
-			for (marble in level.marbles) {
-				if ((marble != cast this) && !marble._firstTick) {
-					var force = marble.getForce(this.collider.transform.getPosition(), timeState.ticks);
-					A.load(A.add(force.multiply(1 / mass)));
-				}
 			}
 		}
 
@@ -2194,8 +2188,10 @@ class Marble extends GameObject {
 	public function getMass() {
 		if (this.level == null)
 			return 1;
-		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
-			return 5;
+		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10
+			|| (Net.isHost && this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)
+			|| (Net.isClient && this.megaMarbleUseTick > 0 && (this.serverTicks - this.megaMarbleUseTick) < 312)) {
+			return 4;
 		} else {
 			return 1;
 		}
@@ -2217,6 +2213,21 @@ class Marble extends GameObject {
 					},
 					new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
 			this.blastTicks = 0;
+			// Now send the impulse to other marbles
+			var strength = blastAmt * (blastAmt > 1 ? blastRechargeShockwaveStrength : blastShockwaveStrength);
+			var ourPos = this.collider.transform.getPosition();
+			for (marble in level.marbles) {
+				if (marble != cast this) {
+					var theirPos = marble.collider.transform.getPosition();
+					var posDiff = ourPos.distance(theirPos);
+					if (posDiff < strength) {
+						var myMod = isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
+						var theirMod = @:privateAccess marble.isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
+						var impulse = theirPos.sub(ourPos).normalized().multiply(strength * (theirMod / myMod));
+						marble.applyImpulse(impulse);
+					}
+				}
+			}
 		} else {
 			if (this.blastAmount < 0.2 || this.level.game != "ultra")
 				return;
@@ -2230,33 +2241,6 @@ class Marble extends GameObject {
 				new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
 			this.blastAmount = 0;
 		}
-	}
-
-	public function getForce(position:Vector, tick:Int) {
-		var retForce = new Vector();
-		if (tick - blastUseTick >= 12)
-			return retForce;
-		var delta = position.sub(newPos);
-		var deltaLen = delta.length();
-
-		var maxDist = Math.max(blastRepulseDist, blastRepulseDist * blastPerc);
-		var maxRepulse = maxBlastRepulse * blastPerc;
-
-		if (deltaLen > maxDist)
-			return retForce;
-
-		if (deltaLen >= 0.05) {
-			var dist = 0.0;
-			if (deltaLen >= 1.0)
-				dist = (1.0 / deltaLen - 1.0 / maxDist) * maxRepulse;
-			else
-				dist = maxRepulse / deltaLen;
-
-			retForce.load(retForce.add(delta.multiply(dist)));
-		} else {
-			retForce.load(retForce.add(this.currentUp.multiply(maxRepulse)));
-		}
-		return retForce;
 	}
 
 	public function applyImpulse(impulse:Vector, contactImpulse:Bool = false) {

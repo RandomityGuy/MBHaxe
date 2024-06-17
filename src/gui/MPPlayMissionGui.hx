@@ -44,6 +44,9 @@ class MPPlayMissionGui extends GuiImage {
 	var previewToken:Int = 0;
 	#end
 
+	var playerListCtrl:GuiTextListCtrl;
+	var playerListCtrlDs:GuiTextListCtrl;
+
 	public function new(isHost:Bool = true) {
 		MissionList.buildMissionList();
 		function chooseBg() {
@@ -305,6 +308,20 @@ class MPPlayMissionGui extends GuiImage {
 		playersBox.extent = new Vector(305, 229);
 		window.addChild(playersBox);
 
+		playerListCtrlDs = new GuiTextListCtrl(markerFelt18, [], 0x000000);
+		playerListCtrlDs.position = new Vector(-1, 25);
+		playerListCtrlDs.extent = new Vector(305, 203);
+		playerListCtrlDs.scrollable = true;
+		playerListCtrlDs.textYOffset = -6;
+		playersBox.addChild(playerListCtrlDs);
+
+		playerListCtrl = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF);
+		playerListCtrl.position = new Vector(0, 26);
+		playerListCtrl.extent = new Vector(305, 203);
+		playerListCtrl.scrollable = true;
+		playerListCtrl.textYOffset = -6;
+		playersBox.addChild(playerListCtrl);
+
 		var playerListTitle = new GuiText(markerFelt24);
 		playerListTitle.position = new Vector(7, 0);
 		playerListTitle.extent = new Vector(275, 22);
@@ -505,6 +522,7 @@ class MPPlayMissionGui extends GuiImage {
 		currentList = MissionList.missionList["multiplayer"]["beginner"];
 
 		setCategoryFunc(currentCategoryStatic, null, false);
+		updateLobbyNames();
 	}
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
@@ -534,19 +552,16 @@ class MPPlayMissionGui extends GuiImage {
 	}
 
 	public function updateLobbyNames() {
-		return;
 		var playerListArr = [];
 		if (Net.isHost) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				state: Net.lobbyHostReady,
 				platform: Net.getPlatform()
 			});
 		}
 		if (Net.isClient) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				state: Net.lobbyClientReady,
 				platform: Net.getPlatform()
 			});
 		}
@@ -554,34 +569,18 @@ class MPPlayMissionGui extends GuiImage {
 			for (c => v in Net.clientIdMap) {
 				playerListArr.push({
 					name: v.name,
-					state: v.lobbyReady,
 					platform: v.platform
 				});
 			}
 		}
 
+		var playerListCompiled = playerListArr.map(player -> player.name);
+		playerListCtrlDs.setTexts(playerListCompiled);
+		playerListCtrl.setTexts(playerListCompiled);
+
 		// if (!showingCustoms)
 		// 	playerList.setTexts(playerListArr.map(player -> {
 		// 		return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
 		// 	}));
-
-		var pubCount = 1; // Self
-		var privCount = 0;
-		for (cid => cc in Net.clientIdMap) {
-			if (cc.isPrivate) {
-				privCount++;
-			} else {
-				pubCount++;
-			}
-		}
-
-		if (Net.isHost) {
-			// updatePlayerCountFn(pubCount, privCount, Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots, Net.serverInfo.privateSlots);
-		}
-	}
-
-	public function updatePlayerCount(pub:Int, priv:Int, publicTotal:Int, privateTotal:Int) {
-		return;
-		// updatePlayerCountFn(pub, priv, publicTotal, privateTotal);
 	}
 }

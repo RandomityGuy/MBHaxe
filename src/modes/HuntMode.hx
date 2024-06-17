@@ -157,6 +157,7 @@ class HuntMode extends NullMode {
 				this.gemSpawnPoints.push(spawn);
 				this.gemOctree.insert(spawn);
 				gem.setHide(true);
+				this.level.collisionWorld.removeEntity(gem.boundingCollider); // remove from octree to make it easy
 				if (level.isMultiplayer) {
 					@:privateAccess level.gemPredictions.alloc();
 				}
@@ -254,6 +255,7 @@ class HuntMode extends NullMode {
 		var gem = gemSpawnPoints[spawn];
 		gem.gem.setHide(false);
 		gem.gem.pickedUp = false;
+		this.level.collisionWorld.addEntity(gem.gem.boundingCollider);
 		activeGems.push(gem.gem);
 		if (gem.gemBeam == null) {
 			gem.gemBeam = new GemBeam(StringTools.replace(gem.gem.gemColor, '.gem', ''));
@@ -327,6 +329,7 @@ class HuntMode extends NullMode {
 	override function onRestart() {
 		setupGems();
 		points = 0;
+		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
 	override function onClientRestart() {
@@ -350,7 +353,7 @@ class HuntMode extends NullMode {
 		}
 
 		var incr = 0;
-		switch (gem.gemColor) {
+		switch (gem.gemColor.toLowerCase()) {
 			case "red.gem":
 				incr = 1;
 			case "yellow.gem":
@@ -361,7 +364,7 @@ class HuntMode extends NullMode {
 
 		if (@:privateAccess !marble.isNetUpdate) {
 			if (marble == level.marble) {
-				switch (gem.gemColor) {
+				switch (gem.gemColor.toLowerCase()) {
 					case "red.gem":
 						points += 1;
 						@:privateAccess level.playGui.addMiddleMessage('+1', 0xFF6666);
@@ -372,7 +375,7 @@ class HuntMode extends NullMode {
 						points += 5;
 						@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
 				}
-				// @:privateAccess level.playGui.formatGemHuntCounter(points);
+				@:privateAccess level.playGui.formatGemHuntCounter(points);
 			}
 		}
 
@@ -389,7 +392,7 @@ class HuntMode extends NullMode {
 
 			// Settings.playStatistics.totalMPScore += incr;
 
-			// @:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
+			@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
 		}
 		if (this.level.isMultiplayer && Net.isClient) {
 			gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;

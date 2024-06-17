@@ -151,11 +151,16 @@ class CollisionWorld {
 	}
 
 	public function addEntity(entity:CollisionEntity) {
-		this.octree.insert(entity);
-		this.entities.push(entity);
+		if (this.octree.insert(entity))
+			this.entities.push(entity);
 
 		// this.rtree.insert([entity.boundingBox.xMin, entity.boundingBox.yMin, entity.boundingBox.zMin],
 		// 	[entity.boundingBox.xSize, entity.boundingBox.ySize, entity.boundingBox.zSize], entity);
+	}
+
+	public function removeEntity(entity:CollisionEntity) {
+		this.entities.remove(entity);
+		this.octree.remove(entity);
 	}
 
 	public function addMarbleEntity(entity:SphereCollisionEntity) {
