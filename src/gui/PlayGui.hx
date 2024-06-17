@@ -769,20 +769,26 @@ class PlayGui {
 	}
 
 	public function formatGemHuntCounter(collected:Int) {
-		gemCountNumbers[0].anim.visible = true;
-		gemCountNumbers[1].anim.visible = true;
+		var collectedHundredths = Math.floor(collected / 100);
+		var collectedTenths = Math.floor(collected / 10) % 10;
+		var collectedOnes = collected % 10;
+
+		if (collected >= 100)
+			gemCountNumbers[0].anim.visible = true;
+		else
+			gemCountNumbers[0].anim.visible = false;
+		if (collected >= 10)
+			gemCountNumbers[1].anim.visible = true;
+		else
+			gemCountNumbers[1].anim.visible = false;
 		gemCountNumbers[2].anim.visible = true;
 		gemCountNumbers[3].anim.visible = false;
 		gemCountNumbers[4].anim.visible = false;
 		gemCountNumbers[5].anim.visible = false;
 
-		var collectedHundredths = Math.floor(collected / 100);
-		var collectedTenths = Math.floor(collected / 10) % 10;
-		var collectedOnes = collected % 10;
-
-		gemCountNumbers[0].anim.currentFrame = collectedHundredths;
-		gemCountNumbers[1].anim.currentFrame = collectedTenths;
-		gemCountNumbers[2].anim.currentFrame = collectedOnes;
+		gemCountNumbers[0].anim.currentFrame = 10 + collectedHundredths;
+		gemCountNumbers[1].anim.currentFrame = 10 + collectedTenths;
+		gemCountNumbers[2].anim.currentFrame = 10 + collectedOnes;
 		gemCountSlash.bmp.visible = false;
 		gemImageSceneTargetBitmap.visible = true;
 	}
