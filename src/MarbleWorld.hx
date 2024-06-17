@@ -1,5 +1,6 @@
 package src;
 
+import src.Radar;
 import rewind.InputRecorder;
 import net.NetPacket.ScoreboardPacket;
 import net.NetPacket.PowerupPickupPacket;
@@ -135,6 +136,7 @@ class MarbleWorld extends Scheduler {
 
 	var playGui:PlayGui;
 	var loadingGui:LoadingGui;
+	var radar:Radar;
 
 	public var interiors:Array<InteriorObject> = [];
 	public var pathedInteriors:Array<PathedInterior> = [];
@@ -380,6 +382,10 @@ class MarbleWorld extends Scheduler {
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
+		if (this.isMultiplayer || this.game == "ultra") {
+			this.radar = new Radar(cast this, this.scene2d);
+			radar.init();
+		}
 
 		var worker = new ResourceLoaderWorker(() -> {
 			var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
@@ -646,6 +652,9 @@ class MarbleWorld extends Scheduler {
 			this.gemCount = 0;
 			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 		}
+
+		if (radar != null)
+			radar.reset();
 
 		// Record/Playback trapdoor and landmine states
 		if (full) {
@@ -1670,6 +1679,8 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
+		if (radar != null)
+			radar.update(dt);
 		this.updateGameState();
 		if (!this.isMultiplayer)
 			this.updateBlast(this.marble, timeState);
@@ -1815,6 +1826,8 @@ class MarbleWorld extends Scheduler {
 			this.marble.cubemapRenderer.render(e, 0.002);
 		}
 		if (_instancesNeedsUpdate) {
+			if (this.radar != null)
+				this.radar.render();
 			_instancesNeedsUpdate = false;
 			this.instanceManager.render();
 		}
@@ -2658,6 +2671,11 @@ class MarbleWorld extends Scheduler {
 		if (this.playGui != null)
 			this.playGui.dispose();
 		scene.removeChildren();
+
+		if (radar != null) {
+			radar.dispose();
+			radar = null;
+		}
 
 		CollisionPool.freeMemory();
 
