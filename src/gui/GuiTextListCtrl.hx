@@ -63,7 +63,7 @@ class GuiTextListCtrl extends GuiControl {
 			tobj.textColor = textColor;
 			textObjs.push(tobj);
 
-			if (this.scrollable) {
+			if (this.scrollable && this.flow != null) {
 				if (this.flow.contains(tobj))
 					this.flow.removeChild(tobj);
 

@@ -71,6 +71,8 @@ class JoinServerGui extends GuiImage {
 		var serverList = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF);
 		serverList.position = new Vector(0, 0);
 		serverList.extent = new Vector(475, 63);
+		serverList.scrollable = true;
+		serverList.textYOffset = -6;
 		serverList.onSelectedFunc = (sel) -> {
 			curSelection = sel;
 		}

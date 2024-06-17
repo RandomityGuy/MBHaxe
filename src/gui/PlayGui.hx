@@ -1,5 +1,6 @@
 package gui;
 
+import net.NetPacket.ScoreboardPacket;
 import net.Net;
 import src.ProfilerUI;
 import hxd.App;
@@ -31,10 +32,22 @@ import hxd.res.Sound;
 import h3d.mat.Texture;
 import src.Settings;
 import src.Util;
+import src.AudioManager;
 
-typedef MiddleMessage = {
-	ctrl:GuiText,
-	age:Float,
+@:publicFields
+@:structInit
+class MiddleMessage {
+	var ctrl:GuiText;
+	var age:Float;
+}
+
+@:publicFields
+@:structInit
+class PlayerInfo {
+	var id:Int;
+	var name:String;
+	var us:Bool;
+	var score:Int;
 }
 
 class PlayGui {
@@ -70,6 +83,13 @@ class PlayGui {
 	var blastFill:GuiImage;
 	var blastFrame:GuiImage;
 
+	var playerListContainer:GuiControl;
+	var playerListCtrl:GuiMLTextListCtrl;
+	var playerListScoresCtrl:GuiMLTextListCtrl;
+	var playerListShadowCtrl:GuiMLTextListCtrl;
+	var playerListScoresShadowCtrl:GuiMLTextListCtrl;
+	var playerList:Array<PlayerInfo> = [];
+
 	var imageResources:Array<Resource<Image>> = [];
 	var textureResources:Array<Resource<Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
@@ -87,6 +107,20 @@ class PlayGui {
 	public function dispose() {
 		if (_init) {
 			playGuiCtrl.dispose();
+
+			if (playerListContainer != null) {
+				playerListContainer.dispose();
+				playerListContainer = null;
+				playerListCtrl.dispose();
+				playerListCtrl = null;
+				playerListShadowCtrl.dispose();
+				playerListShadowCtrl = null;
+				playerListScoresCtrl.dispose();
+				playerListScoresCtrl = null;
+				playerListScoresShadowCtrl.dispose();
+				playerListScoresShadowCtrl = null;
+			}
+
 			gemImageScene.dispose();
 			gemImageSceneTarget.dispose();
 			gemImageSceneTargetBitmap.remove();
@@ -160,6 +194,11 @@ class PlayGui {
 		initTexts();
 		if (Settings.optionsSettings.frameRateVis)
 			initFPSMeter();
+
+		if (MarbleGame.instance.world.isMultiplayer) {
+			initPlayerList();
+			// initChatHud();
+		}
 
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
@@ -494,6 +533,139 @@ class PlayGui {
 		this.blastBar.render(scene2d);
 	}
 
+	function initPlayerList() {
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
+		playerListContainer = new GuiControl();
+		playerListContainer.horizSizing = Right;
+		playerListContainer.vertSizing = Height;
+		playerListContainer.position = new Vector(20, 100);
+		playerListContainer.extent = new Vector(300, 380);
+		this.playGuiCtrl.addChild(playerListContainer);
+
+		var imgLoader = (s:String) -> {
+			return null;
+		}
+
+		playerListShadowCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
+
+		playerListShadowCtrl.position = new Vector(34, 4);
+		playerListShadowCtrl.extent = new Vector(210, 271);
+		playerListShadowCtrl.scrollable = true;
+		playerListShadowCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListShadowCtrl);
+
+		playerListScoresShadowCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
+
+		playerListScoresShadowCtrl.position = new Vector(234, 4);
+		playerListScoresShadowCtrl.extent = new Vector(210, 271);
+		playerListScoresShadowCtrl.scrollable = true;
+		playerListScoresShadowCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListScoresShadowCtrl);
+
+		playerListCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
+
+		playerListCtrl.position = new Vector(33, 3);
+		playerListCtrl.extent = new Vector(210, 271);
+		playerListCtrl.scrollable = true;
+		playerListCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListCtrl);
+
+		playerListScoresCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
+
+		playerListScoresCtrl.position = new Vector(233, 3);
+		playerListScoresCtrl.extent = new Vector(210, 271);
+		playerListScoresCtrl.scrollable = true;
+		playerListScoresCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListScoresCtrl);
+	}
+
+	public function redrawPlayerList() {
+		var pl = [];
+		var plScores = [];
+		var plShadow = [];
+		var plShadowScores = [];
+		var col0 = "#CFB52B";
+		var col1 = "#CDCDCD";
+		var col2 = "#D19275";
+		var col3 = "#FFEE99";
+		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
+		for (i in 0...playerList.length) {
+			var item = playerList[i];
+			var color = switch (i) {
+				case 0:
+					col0;
+				case 1:
+					col1;
+				case 2:
+					col2;
+				default:
+					col3;
+			};
+			pl.push('<font color="${color}">${i + 1}. ${Util.rightPad(item.name, 25, 3)}</font>');
+			plScores.push('<font color="${color}">${item.score}</font>');
+			plShadow.push('<font color="#000000">${i + 1}. ${Util.rightPad(item.name, 25, 3)}</font>');
+			plShadowScores.push('<font color="#000000">${item.score}</font>');
+		}
+		playerListCtrl.setTexts(pl);
+		playerListScoresCtrl.setTexts(plScores);
+		playerListShadowCtrl.setTexts(plShadow);
+		playerListScoresShadowCtrl.setTexts(plShadowScores);
+	}
+
+	public function addPlayer(id:Int, name:String, us:Bool) {
+		if (playerListCtrl != null) {
+			playerList.push({
+				id: id,
+				name: name,
+				us: us,
+				score: 0
+			});
+			redrawPlayerList();
+		}
+	}
+
+	public function removePlayer(id:Int) {
+		if (playerListCtrl != null) {
+			var f = playerList.filter(x -> x.id == id);
+			if (f.length != 0)
+				playerList.remove(f[0]);
+			redrawPlayerList();
+		}
+	}
+
+	public function incrementPlayerScore(id:Int, score:Int) {
+		var f = playerList.filter(x -> x.id == id);
+		if (f.length != 0)
+			f[0].score += score;
+
+		if (id == Net.clientId) {
+			if (Net.isClient)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, this.soundResources));
+		} else if (Net.isClient)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/opponentdiamond.wav', ResourceLoader.getAudio, this.soundResources));
+
+		redrawPlayerList();
+	}
+
+	public function updatePlayerScores(scoreboardPacket:ScoreboardPacket) {
+		for (player in playerList) {
+			player.score = scoreboardPacket.scoreBoard.exists(player.id) ? scoreboardPacket.scoreBoard.get(player.id) : 0;
+		}
+		redrawPlayerList();
+	}
+
+	public function resetPlayerScores() {
+		for (player in playerList) {
+			player.score = 0;
+		}
+
+		redrawPlayerList();
+	}
+
 	public function setHelpTextOpacity(value:Float) {
 		@:privateAccess helpTextForeground.text._textColorVec.a = value;
 		@:privateAccess helpTextBackground.text._textColorVec.a = value;
@@ -569,6 +741,8 @@ class PlayGui {
 	}
 
 	public function formatGemCounter(collected:Int, total:Int) {
+		if (MarbleGame.instance.world.isMultiplayer)
+			return;
 		if (total == 0) {
 			for (number in gemCountNumbers) {
 				number.anim.visible = false;
@@ -597,6 +771,25 @@ class PlayGui {
 		gemCountNumbers[3].anim.currentFrame = totalHundredths;
 		gemCountNumbers[4].anim.currentFrame = totalTenths;
 		gemCountNumbers[5].anim.currentFrame = totalOnes;
+	}
+
+	public function formatGemHuntCounter(collected:Int) {
+		gemCountNumbers[0].anim.visible = true;
+		gemCountNumbers[1].anim.visible = true;
+		gemCountNumbers[2].anim.visible = true;
+		gemCountNumbers[3].anim.visible = false;
+		gemCountNumbers[4].anim.visible = false;
+		gemCountNumbers[5].anim.visible = false;
+
+		var collectedHundredths = Math.floor(collected / 100);
+		var collectedTenths = Math.floor(collected / 10) % 10;
+		var collectedOnes = collected % 10;
+
+		gemCountNumbers[0].anim.currentFrame = collectedHundredths;
+		gemCountNumbers[1].anim.currentFrame = collectedTenths;
+		gemCountNumbers[2].anim.currentFrame = collectedOnes;
+		gemCountSlash.bmp.visible = false;
+		gemImageSceneTargetBitmap.visible = true;
 	}
 
 	// 0: default

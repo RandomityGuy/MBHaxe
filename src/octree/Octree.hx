@@ -24,11 +24,11 @@ class Octree {
 	public function insert(object:IOctreeObject) {
 		var node = this.objectToNode.get(object);
 		if (node != null)
-			return; // Don't insert if already contained in the tree
+			return false; // Don't insert if already contained in the tree
 		while (!this.root.largerThan(object) || !this.root.containsCenter(object)) {
 			// The root node does not fit the object; we need to grow the tree.
 			if (this.root.depth == -32) {
-				return;
+				return true;
 			}
 			this.grow(object);
 		}
@@ -36,6 +36,7 @@ class Octree {
 		this.root.insert(object);
 		if (emptyBefore)
 			this.shrink(); // See if we can fit the octree better now that we actually have an element in it
+		return true;
 	}
 
 	public function remove(object:IOctreeObject) {
