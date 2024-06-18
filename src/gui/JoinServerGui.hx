@@ -150,6 +150,9 @@ class JoinServerGui extends GuiImage {
 		var serverSettingsBtn = new GuiButton(loadButtonImages("data/ui/mp/play/settings"));
 		serverSettingsBtn.position = new Vector(171, 379);
 		serverSettingsBtn.extent = new Vector(45, 45);
+		serverSettingsBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MPServerDlg());
+		}
 		window.addChild(serverSettingsBtn);
 
 		var exitBtn = new GuiButton(loadButtonImages("data/ui/mp/join/leave"));

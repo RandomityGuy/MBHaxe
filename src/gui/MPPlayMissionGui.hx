@@ -155,6 +155,9 @@ class MPPlayMissionGui extends GuiImage {
 		var searchBtn = new GuiButton(loadButtonImages("data/ui/mp/play/search"));
 		searchBtn.position = new Vector(255, 514);
 		searchBtn.extent = new Vector(44, 44);
+		searchBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MPSearchGui(false));
+		}
 		window.addChild(searchBtn);
 
 		var kickBtn = new GuiButton(loadButtonImages("data/ui/mp/play/kick"));
@@ -165,11 +168,17 @@ class MPPlayMissionGui extends GuiImage {
 		var serverSettingsBtn = new GuiButton(loadButtonImages("data/ui/mp/play/settings"));
 		serverSettingsBtn.position = new Vector(157, 514);
 		serverSettingsBtn.extent = new Vector(44, 44);
+		serverSettingsBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MPServerDlg());
+		}
 		window.addChild(serverSettingsBtn);
 
 		var marbleSelectBtn = new GuiButton(loadButtonImages("data/ui/mp/play/marble"));
 		marbleSelectBtn.position = new Vector(206, 514);
 		marbleSelectBtn.extent = new Vector(44, 44);
+		marbleSelectBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MPMarbleSelectGui());
+		}
 		window.addChild(marbleSelectBtn);
 
 		var temprev = new BitmapData(1, 1);
@@ -200,9 +209,10 @@ class MPPlayMissionGui extends GuiImage {
 		var difficultySelector = new GuiButton(loadButtonImages("data/ui/mp/play/difficulty_beginner"));
 		difficultySelector.position = new Vector(161, 47);
 		difficultySelector.extent = new Vector(204, 44);
-		difficultySelector.pressedAction = (e) -> {
-			MarbleGame.canvas.pushDialog(difficultyPopover);
-		};
+		if (isHost)
+			difficultySelector.pressedAction = (e) -> {
+				MarbleGame.canvas.pushDialog(difficultyPopover);
+			};
 		window.addChild(difficultySelector);
 
 		var difficultyCloseButton = new GuiButton(loadButtonImages("data/ui/mp/play/difficultymenu"));
@@ -262,18 +272,21 @@ class MPPlayMissionGui extends GuiImage {
 		prevBtn.extent = new Vector(73, 44);
 		prevBtn.gamepadAccelerator = ["dpadLeft"];
 		prevBtn.pressedAction = (sender) -> {
-			setSelectedFunc(currentSelection - 1);
+			NetCommands.setLobbyLevelIndex(currentCategory, currentSelection - 1);
 		}
-		window.addChild(prevBtn);
+		if (isHost)
+			window.addChild(prevBtn);
 
 		var nextBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/next"));
 		nextBtn.position = new Vector(659, 514);
 		nextBtn.extent = new Vector(73, 44);
 		nextBtn.gamepadAccelerator = ["dpadRight"];
+
 		nextBtn.pressedAction = (sender) -> {
-			setSelectedFunc(currentSelection + 1);
+			NetCommands.setLobbyLevelIndex(currentCategory, currentSelection + 1);
 		}
-		window.addChild(nextBtn);
+		if (isHost)
+			window.addChild(nextBtn);
 
 		var playBtn = new GuiButton(loadButtonImages("data/ui/mp/play/play"));
 		playBtn.position = new Vector(565, 514);
@@ -422,7 +435,7 @@ class MPPlayMissionGui extends GuiImage {
 
 			currentCategoryStatic = currentCategory;
 
-			setSelectedFunc(currentList.length - 1);
+			NetCommands.setLobbyLevelIndex(category, currentList.length - 1);
 			// if (doRender)
 			//	this.render(cast(this.parent, Canvas).scene2d);
 		}
@@ -517,6 +530,14 @@ class MPPlayMissionGui extends GuiImage {
 			var curMission = MissionList.missionList["multiplayer"][cat][index]; //  mission[index];
 			MarbleGame.instance.playMission(curMission, true);
 			// }
+		}
+
+		setLevelFn = (cat:String, index:Int) -> {
+			if (currentCategory != cat) {
+				currentCategory = cat;
+				setCategoryFunc(cat);
+			}
+			setSelectedFunc(index);
 		}
 
 		currentList = MissionList.missionList["multiplayer"]["beginner"];

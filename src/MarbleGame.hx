@@ -1,5 +1,7 @@
 package src;
 
+import gui.MPExitGameDlg;
+import gui.GuiControl;
 import gui.MPPlayMissionGui;
 import gui.MainMenuGui;
 #if !js
@@ -48,7 +50,7 @@ class MarbleGame {
 	var toRecord:Bool = false;
 	var recordingName:String;
 
-	var exitGameDlg:ExitGameDlg;
+	var exitGameDlg:GuiControl;
 
 	var touchInput:TouchInput;
 
@@ -229,28 +231,46 @@ class MarbleGame {
 		if (paused && world._ready) {
 			Console.log("Game paused");
 			world.setCursorLock(false);
-			exitGameDlg = new ExitGameDlg((sender) -> {
-				canvas.popDialog(exitGameDlg);
-				if (getWorld().isRecording) {
-					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
-						quitMission();
-					}));
-				} else {
+			if (world.isMultiplayer) {
+				exitGameDlg = new MPExitGameDlg(() -> {
+					canvas.popDialog(exitGameDlg);
+					paused = !paused;
+					var w = getWorld();
+					w.setCursorLock(true);
+				}, () -> {
+					canvas.popDialog(exitGameDlg);
 					quitMission(Net.isClient);
 					if (Net.isMP && Net.isClient) {
 						Net.disconnect();
 					}
-				}
-			}, (sender) -> {
-				canvas.popDialog(exitGameDlg);
-				paused = !paused;
-				getWorld().setCursorLock(true);
-			}, (sender) -> {
-				canvas.popDialog(exitGameDlg);
-				getWorld().restart(w.marble, true);
-				// world.setCursorLock(true);
-				paused = !paused;
-			});
+				});
+			} else {
+				exitGameDlg = new ExitGameDlg((sender) -> {
+					canvas.popDialog(exitGameDlg);
+					var w = getWorld();
+					if (w.isRecording) {
+						MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
+							quitMission();
+						}));
+					} else {
+						quitMission(Net.isClient);
+						if (Net.isMP && Net.isClient) {
+							Net.disconnect();
+						}
+					}
+				}, (sender) -> {
+					canvas.popDialog(exitGameDlg);
+					paused = !paused;
+					var w = getWorld();
+					w.setCursorLock(true);
+				}, (sender) -> {
+					canvas.popDialog(exitGameDlg);
+					var w = getWorld();
+					w.restart(w.marble, true);
+					// world.setCursorLock(true);
+					paused = !paused;
+				});
+			}
 			canvas.pushDialog(exitGameDlg);
 		} else {
 			if (world._ready) {
