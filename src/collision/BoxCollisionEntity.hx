@@ -48,8 +48,9 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		}
 	}
 
-	public override function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>) {
+	public override function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>, bestT:Float) {
 		// TEMP cause bruh
+		return Math.POSITIVE_INFINITY;
 	}
 
 	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {

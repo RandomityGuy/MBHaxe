@@ -153,9 +153,9 @@ class Octree {
 	}
 
 	/** Returns a list of all objects that intersect with the given ray, sorted by distance. */
-	public function raycast(rayOrigin:Vector, rayDirection:Vector) {
+	public function raycast(rayOrigin:Vector, rayDirection:Vector, bestT:Float) {
 		var intersections:Array<OctreeIntersection> = [];
-		this.root.raycast(rayOrigin, rayDirection, intersections);
+		this.root.raycast(rayOrigin, rayDirection, intersections, bestT);
 		intersections.sort((a, b) -> (a.distance == b.distance) ? 0 : (a.distance > b.distance ? 1 : -1));
 		return intersections;
 	}
