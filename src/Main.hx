@@ -23,6 +23,7 @@ import src.ProfilerUI;
 import src.Gamepad;
 import src.Http;
 import datachannel.RTC;
+import src.Renderer;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
@@ -35,6 +36,11 @@ class Main extends hxd.App {
 
 	override function init() {
 		super.init();
+
+		s3d.renderer = new Renderer();
+		#if debug
+		s3d.checkPasses = false;
+		#end
 
 		#if (hl && !android)
 		hl.UI.closeConsole();
