@@ -211,6 +211,7 @@ class Marble extends GameObject {
 	public var _radius = 0.2;
 
 	var _dtsRadius = 0.2;
+	var marbleDts:DtsObject;
 
 	var _prevRadius:Float;
 
@@ -317,6 +318,8 @@ class Marble extends GameObject {
 	var _firstTick = true;
 
 	public var cubemapRenderer:CubemapRenderer;
+
+	var shadowVolume:h3d.scene.Mesh;
 
 	var connection:GameConnection;
 	var moveMotionDir:Vector;
@@ -473,6 +476,8 @@ class Marble extends GameObject {
 					mat.receiveShadows = false;
 				}
 			}
+
+			mat.mainPass.setPassName("marble");
 		}
 
 		// Calculate radius according to marble model (egh)
@@ -489,6 +494,7 @@ class Marble extends GameObject {
 			this._radius = 0.2; // For the sake of physics
 			marbleDts.scale(0.2 / avgRadius);
 		}
+		this.marbleDts = marbleDts;
 
 		this._prevRadius = this._radius;
 
@@ -503,6 +509,10 @@ class Marble extends GameObject {
 		this.collider = new SphereCollisionEntity(cast this);
 
 		this.addChild(marbleDts);
+
+		buildShadowVolume();
+		if (level != null)
+			level.scene.addChild(this.shadowVolume);
 
 		// var geom = Sphere.defaultUnitSphere();
 		// geom.addUVs();
@@ -548,6 +558,85 @@ class Marble extends GameObject {
 		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
 		worker.run();
+	}
+
+	function buildShadowVolume() {
+		var idx = new hxd.IndexBuffer();
+		// slanted part of cone
+		var circleVerts = 32;
+		for (i in 1...circleVerts) {
+			idx.push(0);
+			idx.push(i + 1);
+			idx.push(i);
+		}
+		// connect to start
+		idx.push(0);
+		idx.push(1);
+		idx.push(circleVerts);
+
+		// base of cone
+		for (i in 1...circleVerts - 1) {
+			idx.push(1);
+			idx.push(i + 1);
+			idx.push(i + 2);
+		}
+		var pts = [];
+		pts.push(new h3d.col.Point(0, 0, -40.0));
+
+		for (i in 0...circleVerts) {
+			var x = i / (circleVerts - 1) * (2 * Math.PI);
+			pts.push(new h3d.col.Point(Math.cos(x) * 0.2, -Math.sin(x) * 0.2, 0.0));
+		}
+		var shadowPoly = new h3d.prim.Polygon(pts, idx);
+		shadowPoly.addUVs();
+		shadowPoly.addNormals();
+		shadowVolume = new h3d.scene.Mesh(shadowPoly, h3d.mat.Material.create());
+		shadowVolume.material.castShadows = false;
+		shadowVolume.material.receiveShadows = false;
+		shadowVolume.material.shadows = false;
+
+		var colShader = new h3d.shader.FixedColor(0x000026, 0.35);
+
+		var shadowPass1 = shadowVolume.material.mainPass.clone();
+		shadowPass1.setPassName("shadowPass1");
+		shadowPass1.stencil = new h3d.mat.Stencil();
+		shadowPass1.stencil.setFunc(Always, 1, 0xFF, 0xFF);
+		shadowPass1.depth(false, Less);
+		shadowPass1.setColorMask(false, false, false, false);
+		shadowPass1.culling = Back;
+		shadowPass1.stencil.setOp(Keep, Increment, Keep);
+		shadowPass1.addShader(colShader);
+
+		var shadowPass2 = shadowVolume.material.mainPass.clone();
+		shadowPass2.setPassName("shadowPass2");
+		shadowPass2.stencil = new h3d.mat.Stencil();
+		shadowPass2.stencil.setFunc(Always, 1, 0xFF, 0xFF);
+		shadowPass2.depth(false, Less);
+		shadowPass2.setColorMask(false, false, false, false);
+		shadowPass2.culling = Front;
+		shadowPass2.stencil.setOp(Keep, Decrement, Keep);
+		shadowPass2.addShader(colShader);
+
+		var shadowPass3 = shadowVolume.material.mainPass.clone();
+		shadowPass3.setPassName("shadowPass3");
+		shadowPass3.stencil = new h3d.mat.Stencil();
+		shadowPass3.stencil.setFunc(LessEqual, 1, 0xFF, 0xFF);
+		shadowPass3.depth(false, Less);
+		shadowPass3.culling = Front;
+		shadowPass3.stencil.setOp(Keep, Keep, Keep);
+		shadowPass3.blend(SrcAlpha, OneMinusSrcAlpha);
+		shadowPass3.addShader(colShader);
+
+		shadowVolume.material.addPass(shadowPass1);
+		shadowVolume.material.addPass(shadowPass2);
+		shadowVolume.material.addPass(shadowPass3);
+
+		shadowVolume.material.removePass(shadowVolume.material.mainPass);
+
+		var q = new Quat();
+		q.initNormal(@:privateAccess this.level.dirLightDir.toPoint());
+
+		shadowVolume.setRotationQuat(q);
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
@@ -1966,12 +2055,10 @@ class Marble extends GameObject {
 
 		updatePowerupStates(timeState);
 
-		var marbledts = cast(this.getChildAt(0), DtsObject);
-
 		if (isMegaMarbleEnabled(timeState)) {
-			marbledts.setScale(0.6666 / _dtsRadius);
+			marbleDts.setScale(0.6666 / _dtsRadius);
 		} else {
-			marbledts.setScale(0.2 / _dtsRadius);
+			marbleDts.setScale(0.2 / _dtsRadius);
 		}
 
 		// if (isMegaMarbleEnabled(timeState)) {
@@ -2149,6 +2236,10 @@ class Marble extends GameObject {
 	}
 
 	public function updatePowerupStates(timeState:TimeState) {
+		this.shadowVolume.setPosition(x, y, z);
+		this.shadowVolume.setScale(marbleDts.scaleX);
+		if (this.level == null)
+			return;
 		var shockEnabled = isShockAbsorberEnabled(timeState);
 		var bounceEnabled = isSuperBounceEnabled(timeState);
 		var helicopterEnabled = isHelicopterEnabled(timeState);
@@ -2440,6 +2531,7 @@ class Marble extends GameObject {
 			this.slipSound.stop();
 		if (this.helicopterSound != null)
 			this.helicopterSound.stop();
+		this.shadowVolume.remove();
 		this.helicopter.remove();
 		super.dispose();
 		removeChildren();

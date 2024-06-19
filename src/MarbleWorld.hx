@@ -388,7 +388,7 @@ class MarbleWorld extends Scheduler {
 		}
 
 		var worker = new ResourceLoaderWorker(() -> {
-			var renderer = cast(this.scene.renderer, h3d.scene.fwd.Renderer);
+			var renderer = cast(this.scene.renderer, src.Renderer);
 
 			for (element in mission.root.elements) {
 				if (element._type != MissionElementType.Sun)
@@ -413,13 +413,6 @@ class MarbleWorld extends Scheduler {
 				ls.ambientLight.load(ambientColor);
 				this.ambient = ambientColor;
 				// ls.perPixelLighting = false;
-
-				var shadow = scene.renderer.getPass(h3d.pass.DefaultShadowMap);
-				shadow.power = 0.5;
-				shadow.mode = Dynamic;
-				shadow.minDist = 0.1;
-				shadow.maxDist = 200;
-				shadow.bias = 0;
 
 				var sunlight = new DirLight(sunDirection, scene);
 				sunlight.color = directionalColor;
