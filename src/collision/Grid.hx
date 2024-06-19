@@ -9,7 +9,7 @@ class Grid {
 
 	public var cellSize:Vector; // The dimensions of one cell
 
-	static var CELL_SIZE = 16;
+	static var CELL_SIZE = 24;
 
 	public var CELL_DIV = new Vector(CELL_SIZE, CELL_SIZE); // split the bounds into cells of dimensions 1/16th of the corresponding dimensions of the bounds
 
@@ -124,7 +124,7 @@ class Grid {
 		return elegantPair(elegantPair(x, y), z);
 	}
 
-	public function rayCast(origin:Vector, direction:Vector) {
+	public function rayCast(origin:Vector, direction:Vector, bestT:Float) {
 		var cell = origin.sub(this.bounds.getMin().toVector());
 		cell.x /= this.cellSize.x;
 		cell.y /= this.cellSize.y;
@@ -175,7 +175,7 @@ class Grid {
 				if (surf.key == searchKey)
 					continue;
 				surf.key = searchKey;
-				surf.rayCast(origin, direction, results);
+				bestT = surf.rayCast(origin, direction, results, bestT);
 			}
 			if (tmax.x < tmax.y) {
 				X = X + stepX;

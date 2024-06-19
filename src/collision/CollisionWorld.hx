@@ -139,12 +139,12 @@ class CollisionWorld {
 		var results = [];
 		for (obj in objs) {
 			var oo = cast(obj, CollisionEntity);
-			oo.rayCast(rayStart, rayDirection, results);
+			oo.rayCast(rayStart, rayDirection, results, rayLength);
 		}
 
 		for (obj in dynObjs) {
 			var oo = cast(obj, CollisionEntity);
-			oo.rayCast(rayStart, rayDirection, results);
+			oo.rayCast(rayStart, rayDirection, results, rayLength);
 		}
 		// results = results.concat(this.staticWorld.rayCast(rayStart, rayDirection));
 		return results;

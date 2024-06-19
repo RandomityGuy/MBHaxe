@@ -141,7 +141,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		}
 	}
 
-	public function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<RayIntersectionData>) {
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<RayIntersectionData>, bestT:Float) {
 		var invMatrix = invTransform;
 		var invTPos = invMatrix.clone();
 		invTPos.transpose();
@@ -159,13 +159,17 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		// 	}
 		// 	return intersections; // iData;
 		// } else {
-		var intersections = grid.rayCast(rStart, rDir); // this.bvh.rayCast(rStart, rDir);
+		var intersections = grid.rayCast(rStart, rDir, bestT); // this.bvh.rayCast(rStart, rDir);
 		for (i in intersections) {
 			i.point.transform(transform);
 			i.normal.transform3x3(invTPos);
 			i.normal.normalize();
-			results.push(i);
+			if (i.t < bestT) {
+				bestT = i.t;
+				results.push(i);
+			}
 		}
+		return bestT;
 		// }
 	}
 

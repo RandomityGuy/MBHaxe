@@ -192,7 +192,7 @@ class OctreeNode implements IOctreeElement {
 		return maxmin;
 	}
 
-	public function raycast(rayOrigin:Vector, rayDirection:Vector, intersections:Array<OctreeIntersection>) {
+	public function raycast(rayOrigin:Vector, rayDirection:Vector, intersections:Array<OctreeIntersection>, bestT:Float) {
 		var ray = Ray.fromValues(rayOrigin.x, rayOrigin.y, rayOrigin.z, rayDirection.x, rayDirection.y, rayDirection.z);
 		// Construct the loose bounding box of this node (2x in size, with the regular bounding box in the center)
 
@@ -201,7 +201,7 @@ class OctreeNode implements IOctreeElement {
 
 		for (obj in this.objects) {
 			var iSecs = [];
-			obj.rayCast(rayOrigin, rayDirection, iSecs);
+			obj.rayCast(rayOrigin, rayDirection, iSecs, bestT);
 			for (intersection in iSecs) {
 				var intersectionData = new OctreeIntersection();
 				intersectionData.distance = rayOrigin.distance(intersection.point);
@@ -215,7 +215,7 @@ class OctreeNode implements IOctreeElement {
 		if (this.octants != null) {
 			for (i in 0...8) {
 				var octant = this.octants[i];
-				octant.raycast(rayOrigin, rayDirection, intersections);
+				octant.raycast(rayOrigin, rayDirection, intersections, bestT);
 			}
 		}
 	}
