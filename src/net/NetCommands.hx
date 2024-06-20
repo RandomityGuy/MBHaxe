@@ -195,6 +195,7 @@ class NetCommands {
 			if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
 				MarbleGame.canvas.popDialog(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1]);
 				MarbleGame.instance.world.setCursorLock(true);
+				MarbleGame.instance.world.marble.camera.stopOverview();
 			}
 		}
 	}

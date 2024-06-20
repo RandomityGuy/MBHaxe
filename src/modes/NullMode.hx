@@ -136,4 +136,6 @@ class NullMode implements GameMode {
 	// }
 
 	public function onClientRestart() {}
+
+	public function onMissionLoad() {}
 }

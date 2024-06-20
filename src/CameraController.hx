@@ -1,5 +1,6 @@
 package src;
 
+import mis.MisParser;
 import h3d.col.Bounds;
 import h3d.col.Plane;
 import h3d.mat.Material;
@@ -68,6 +69,11 @@ class CameraController extends Object {
 
 	public var oob:Bool = false;
 	public var finish:Bool = false;
+	public var overview:Bool = false;
+
+	var overviewCenter:Vector;
+	var overviewWidth:Vector;
+	var overviewHeight:Float;
 
 	var _ignoreCursor:Bool = false;
 
@@ -164,10 +170,73 @@ class CameraController extends Object {
 		// 	CameraPitch = 0.001;
 	}
 
+	public function startOverview() {
+		var worldBounds = new Bounds();
+		var center = new Vector(0, 0, 0);
+		for (itr in level.interiors) {
+			var itrBounds = itr.getBounds();
+			worldBounds.add(itrBounds);
+			center.load(center.add(itrBounds.getCenter().toVector()));
+		}
+		if (level.interiors.length == 0) {
+			worldBounds.xMin = -1;
+			worldBounds.xMax = 1;
+			worldBounds.yMin = -1;
+			worldBounds.yMax = 1;
+			worldBounds.zMin = -1;
+			worldBounds.zMax = 1;
+		} else
+			center.scale(1 / level.interiors.length);
+
+		overviewWidth = new Vector(worldBounds.xMax - worldBounds.xMin, worldBounds.yMax - worldBounds.yMin, worldBounds.zMax - worldBounds.zMin);
+		if (level.mission.missionInfo.overviewwidth != null) {
+			var parseTest = MisParser.parseVector3(level.mission.missionInfo.overviewwidth);
+			if (parseTest != null) {
+				overviewWidth = parseTest;
+			}
+		}
+		overviewHeight = level.mission.missionInfo.overviewheight != null ? Std.parseFloat(level.mission.missionInfo.overviewheight) : 0.0;
+		overviewCenter = center;
+
+		overview = true;
+	}
+
+	public function stopOverview() {
+		overview = false;
+	}
+
+	function doOverviewCamera(currentTime:Float, dt:Float) {
+		var angle = Util.adjustedMod(2 * currentTime * Math.PI / 100.0, 2 * Math.PI);
+		var distance = overviewWidth.multiply(2.0 / 3.0);
+		var offset = new Vector(Math.sin(angle) * distance.x, Math.cos(angle) * distance.y);
+		var position = overviewCenter.add(offset);
+
+		var top = overviewCenter.z + (overviewWidth.z / 2) + overviewHeight;
+		position.z = top;
+
+		var posDist = Math.sqrt((position.x - overviewCenter.x) * (position.x - overviewCenter.x)
+			+ (position.y - overviewCenter.y) * (position.y - overviewCenter.y));
+		var upOffset = Math.tan(0.5) * posDist / 2;
+		// position.load(position.add(new Vector(0, 0, upOffset)));
+
+		var camera = level.scene.camera;
+		camera.pos.load(position);
+		camera.target.load(overviewCenter);
+		camera.up.x = 0;
+		camera.up.y = 0;
+		camera.up.z = 1;
+	}
+
 	public function update(currentTime:Float, dt:Float) {
 		// camera.position.set(marblePosition.x, marblePosition.y, marblePosition.z).sub(directionVector.clone().multiplyScalar(2.5));
 		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
 		// camera.position.add(cameraVerticalTranslation);
+
+		if (overview) {
+			doOverviewCamera(currentTime, dt);
+			return;
+		}
+
 		var camera = level.scene.camera;
 
 		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
