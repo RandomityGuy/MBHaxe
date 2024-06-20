@@ -96,6 +96,15 @@ typedef GamepadSettings = {
 	var rewind:Array<String>;
 }
 
+typedef ServerSettings = {
+	var name:String;
+	var description:String;
+	var maxPlayers:Int;
+	var password:String;
+	var forceSpectators:Bool;
+	var quickRespawn:Bool;
+}
+
 typedef PlayStatistics = {
 	var oobs:Int;
 	var respawns:Int;
@@ -189,6 +198,15 @@ class Settings {
 		totalTime: 0,
 	}
 
+	public static var serverSettings:ServerSettings = {
+		name: "Multiplayer Server",
+		password: "",
+		maxPlayers: 8,
+		description: "My cool server",
+		forceSpectators: false,
+		quickRespawn: true
+	}
+
 	public static var levelStatistics:Map<String, PlayStatistics> = [];
 
 	public static var highscoreName = "";
@@ -244,6 +262,7 @@ class Settings {
 			touch: touchSettings,
 			gamepad: gamepadSettings,
 			stats: playStatistics,
+			server: serverSettings,
 			highscoreName: highscoreName,
 			marbleIndex: optionsSettings.marbleIndex,
 			marbleSkin: optionsSettings.marbleSkin,
@@ -378,6 +397,9 @@ class Settings {
 				for (key => value in levelStatData) {
 					levelStatistics.set(key, value);
 				}
+			}
+			if (json.serverSettings != null) {
+				serverSettings = json.serverSettings;
 			}
 			#if js
 			if (optionsSettings.marbleIndex == null) {

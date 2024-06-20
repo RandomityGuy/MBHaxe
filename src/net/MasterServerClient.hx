@@ -9,17 +9,19 @@ import src.Console;
 
 typedef RemoteServerInfo = {
 	name:String,
+	description:String,
 	players:Int,
 	maxPlayers:Int,
 	platform:Int,
-	version:String
+	version:String,
+	passworded:Bool
 }
 
 class MasterServerClient {
 	#if js
 	static var serverIp = "wss://mbomaster.randomityguy.me:8443";
 	#else
-	static var serverIp = "ws://89.58.58.191:8080";
+	static var serverIp = "ws://89.58.58.191:8084";
 	#end
 	public static var instance:MasterServerClient;
 
@@ -208,31 +210,23 @@ class MasterServerClient {
 		queueMessage(Json.stringify({
 			type: "serverInfo",
 			name: serverInfo.name,
+			description: serverInfo.description,
 			players: serverInfo.players,
 			maxPlayers: serverInfo.maxPlayers,
-			privateSlots: serverInfo.privateSlots,
-			privateServer: serverInfo.privateServer,
-			inviteCode: serverInfo.inviteCode,
+			password: serverInfo.password,
 			state: serverInfo.state,
 			platform: serverInfo.platform,
 			version: "MBP" // MarbleGame.currentVersion
 		}));
 	}
 
-	public function sendConnectToServer(serverName:String, sdp:String, isInvite:Bool = false) {
-		if (!isInvite) {
-			queueMessage(Json.stringify({
-				type: "connect",
-				serverName: serverName,
-				sdp: sdp
-			}));
-		} else {
-			queueMessage(Json.stringify({
-				type: "connectInvite",
-				sdp: sdp,
-				inviteCode: serverName
-			}));
-		}
+	public function sendConnectToServer(serverName:String, sdp:String, password:String) {
+		queueMessage(Json.stringify({
+			type: "connect",
+			serverName: serverName,
+			sdp: sdp,
+			password: password
+		}));
 	}
 
 	public function getServerList(serverListCb:Array<RemoteServerInfo>->Void) {
@@ -269,20 +263,13 @@ class MasterServerClient {
 				}));
 				return;
 			}
-			var pubSlotsAvail = Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots;
-			var privSlotsAvail = Net.serverInfo.privateSlots;
 
 			var pubCount = 1; // Self
-			var privCount = 0;
 			for (cid => cc in Net.clientIdMap) {
-				if (cc.isPrivate) {
-					privCount++;
-				} else {
-					pubCount++;
-				}
+				pubCount++;
 			}
 
-			if (!joiningPrivate && pubCount >= pubSlotsAvail) {
+			if (!joiningPrivate && pubCount >= Net.serverInfo.maxPlayers) {
 				queueMessage(Json.stringify({
 					type: "connectFailed",
 					success: false,
@@ -291,11 +278,7 @@ class MasterServerClient {
 				return;
 			}
 
-			if (joiningPrivate && privCount >= privSlotsAvail) {
-				joiningPrivate = false; // Join publicly
-			}
-
-			Net.addClientFromSdp(conts.sdp, joiningPrivate, (sdpReply) -> {
+			Net.addClientFromSdp(conts.sdp, (sdpReply) -> {
 				queueMessage(Json.stringify({
 					success: true,
 					type: "connectResponse",

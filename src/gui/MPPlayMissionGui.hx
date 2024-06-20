@@ -158,20 +158,23 @@ class MPPlayMissionGui extends GuiImage {
 		searchBtn.pressedAction = (e) -> {
 			MarbleGame.canvas.pushDialog(new MPSearchGui(false));
 		}
-		window.addChild(searchBtn);
+		if (Net.isHost)
+			window.addChild(searchBtn);
 
 		var kickBtn = new GuiButton(loadButtonImages("data/ui/mp/play/kick"));
 		kickBtn.position = new Vector(304, 514);
 		kickBtn.extent = new Vector(44, 44);
-		window.addChild(kickBtn);
+		if (Net.isHost)
+			window.addChild(kickBtn);
 
-		var serverSettingsBtn = new GuiButton(loadButtonImages("data/ui/mp/play/settings"));
+		var serverSettingsBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/settings"));
 		serverSettingsBtn.position = new Vector(157, 514);
 		serverSettingsBtn.extent = new Vector(44, 44);
 		serverSettingsBtn.pressedAction = (e) -> {
 			MarbleGame.canvas.pushDialog(new MPServerDlg());
 		}
-		window.addChild(serverSettingsBtn);
+		if (Net.isHost)
+			window.addChild(serverSettingsBtn);
 
 		var marbleSelectBtn = new GuiButton(loadButtonImages("data/ui/mp/play/marble"));
 		marbleSelectBtn.position = new Vector(206, 514);
@@ -213,6 +216,8 @@ class MPPlayMissionGui extends GuiImage {
 			difficultySelector.pressedAction = (e) -> {
 				MarbleGame.canvas.pushDialog(difficultyPopover);
 			};
+		else
+			difficultySelector.disabled = true;
 		window.addChild(difficultySelector);
 
 		var difficultyCloseButton = new GuiButton(loadButtonImages("data/ui/mp/play/difficultymenu"));
@@ -305,14 +310,24 @@ class MPPlayMissionGui extends GuiImage {
 		var pmDesc = new GuiMLText(markerFelt18, mlFontLoader);
 		pmDesc.position = new Vector(0, 0);
 		pmDesc.extent = new Vector(427, 99);
-		pmDesc.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+		pmDesc.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		pmDesc.text.lineSpacing = -1;
 		pmDescContainer.addChild(pmDesc);
 
 		var parTime = new GuiMLText(markerFelt18, mlFontLoader);
 		parTime.position = new Vector(43, 190);
 		parTime.extent = new Vector(416, 44);
-		parTime.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+		parTime.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		parTime.text.lineSpacing = -1;
 		window.addChild(parTime);
 
@@ -341,7 +356,12 @@ class MPPlayMissionGui extends GuiImage {
 		playerListTitle.text.text = "Players";
 		playerListTitle.text.textColor = 0xBDCFE4;
 		playerListTitle.justify = Center;
-		playerListTitle.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+		playerListTitle.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		playersBox.addChild(playerListTitle);
 
 		this.addChild(window);

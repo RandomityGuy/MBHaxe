@@ -21,6 +21,13 @@ class MPExitGameDlg extends GuiControl {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
 			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
 			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed];
+		}
+
+		function loadButtonImagesExt(path:String) {
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
 			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
 			return [normal, hover, pressed, disabled];
 		}
@@ -32,7 +39,7 @@ class MPExitGameDlg extends GuiControl {
 		dialogImg.extent = new Vector(347, 250);
 		this.addChild(dialogImg);
 
-		var partialRestart = new GuiButton(loadButtonImages("data/ui/mp/exit/partial"));
+		var partialRestart = new GuiButton(loadButtonImagesExt("data/ui/mp/exit/partial"));
 		partialRestart.position = new Vector(133, 80);
 		partialRestart.extent = new Vector(94, 45);
 		partialRestart.vertSizing = Top;
@@ -55,7 +62,7 @@ class MPExitGameDlg extends GuiControl {
 		resumeBtn.pressedAction = (e) -> resumeFunc();
 		dialogImg.addChild(resumeBtn);
 
-		var serverSettingsBtn = new GuiButton(loadButtonImages("data/ui/mp/play/settings"));
+		var serverSettingsBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/settings"));
 		serverSettingsBtn.position = new Vector(195, 184);
 		serverSettingsBtn.extent = new Vector(45, 45);
 		serverSettingsBtn.vertSizing = Top;
@@ -67,7 +74,7 @@ class MPExitGameDlg extends GuiControl {
 			serverSettingsBtn.disabled = true;
 		}
 
-		var kickBtn = new GuiButton(loadButtonImages("data/ui/mp/play/kick"));
+		var kickBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/kick"));
 		kickBtn.position = new Vector(108, 184);
 		kickBtn.extent = new Vector(45, 45);
 		kickBtn.vertSizing = Top;
@@ -82,7 +89,7 @@ class MPExitGameDlg extends GuiControl {
 		quickspawnBtn.vertSizing = Top;
 		dialogImg.addChild(quickspawnBtn);
 
-		var completeRestart = new GuiButton(loadButtonImages("data/ui/mp/exit/complete"));
+		var completeRestart = new GuiButton(loadButtonImagesExt("data/ui/mp/exit/complete"));
 		completeRestart.position = new Vector(224, 80);
 		completeRestart.extent = new Vector(104, 45);
 		completeRestart.vertSizing = Top;
@@ -102,7 +109,12 @@ class MPExitGameDlg extends GuiControl {
 		exitTitle.extent = new Vector(331, 30);
 		exitTitle.justify = Center;
 		exitTitle.text.text = "Ingame Options";
-		exitTitle.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+		exitTitle.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		dialogImg.addChild(exitTitle);
 
 		var restartTitle = new GuiText(markerFelt32);
@@ -110,7 +122,12 @@ class MPExitGameDlg extends GuiControl {
 		restartTitle.extent = new Vector(114, 14);
 		restartTitle.justify = Center;
 		restartTitle.text.text = "Restart:";
-		restartTitle.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+		restartTitle.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		dialogImg.addChild(restartTitle);
 
 		var jukeboxButton = new GuiButton(loadButtonImages("data/ui/jukebox/jb_pausemenu"));
