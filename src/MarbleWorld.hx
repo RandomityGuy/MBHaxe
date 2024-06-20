@@ -543,23 +543,25 @@ class MarbleWorld extends Scheduler {
 				return (aId > bId) ? 1 : (aId < bId) ? -1 : 0;
 			});
 		}
-		var cc = 0;
-		for (client in Net.clients)
-			cc++;
-		if (Net.isHost && cc == 0) {
-			allClientsReady();
-			Net.serverInfo.state = "PLAYING";
-			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
-		}
+		// var cc = 0;
+		// for (client in Net.clients)
+		// 	cc++;
+		// if (Net.isHost && cc == 0) {
+		// 	allClientsReady();
+		// 	Net.serverInfo.state = "PLAYING";
+		// 	MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
+		// }
 		if (this.isMultiplayer) {
 			// Push the pre - game
 			showPreGame();
 		}
+		this.gameMode.onMissionLoad();
 	}
 
 	public function showPreGame() {
 		MarbleGame.canvas.pushDialog(new MPPreGameDlg());
 		this.setCursorLock(false);
+		this.marble.camera.startOverview();
 	}
 
 	public function addJoiningClient(cc:GameConnection, onAdded:() -> Void) {
@@ -802,7 +804,7 @@ class MarbleWorld extends Scheduler {
 		this.setUp(marble, up, this.timeState, true);
 
 		if (marble == this.marble)
-			this.playGui.setCenterText('');
+			this.playGui.setCenterText('none');
 		if (!this.isMultiplayer)
 			this.clearSchedule();
 		marble.outOfBounds = false;
@@ -842,12 +844,42 @@ class MarbleWorld extends Scheduler {
 			}
 		} else {
 			if (!this.multiplayerStarted && this.finishTime == null) {
+				if ((Net.isHost && (this.timeState.timeSinceLoad < startTime - 3.0)) // 3.5 == 109 ticks
+					|| (Net.isClient && this.serverStartTicks != 0 && @:privateAccess this.marble.serverTicks < this.serverStartTicks + 16)) {
+					this.playGui.setCenterText('none');
+				}
+				if ((Net.isHost
+					&& (this.timeState.timeSinceLoad > startTime - 3.0)
+					&& (this.timeState.timeSinceLoad < startTime - 1.5)) // 3.5 == 109 ticks
+					|| (Net.isClient
+						&& this.serverStartTicks != 0
+						&& @:privateAccess this.marble.serverTicks > this.serverStartTicks + 16
+						&& @:privateAccess this.marble.serverTicks < this.serverStartTicks + 63)) {
+					this.playGui.setCenterText('ready');
+				}
+				if ((Net.isHost
+					&& (this.timeState.timeSinceLoad > startTime - 1.5)
+					&& (this.timeState.timeSinceLoad < startTime)) // 3.5 == 109 ticks
+					|| (Net.isClient
+						&& this.serverStartTicks != 0
+						&& @:privateAccess this.marble.serverTicks > this.serverStartTicks + 63
+						&& @:privateAccess this.marble.serverTicks < this.serverStartTicks + 109)) {
+					this.playGui.setCenterText('set');
+				}
 				if ((Net.isHost && (this.timeState.timeSinceLoad >= startTime)) // 3.5 == 109 ticks
 					|| (Net.isClient && this.serverStartTicks != 0 && @:privateAccess this.marble.serverTicks >= this.serverStartTicks + 109)) {
 					this.multiplayerStarted = true;
 					this.marble.setMode(Play);
 					for (client => marble in this.clientMarbles)
 						marble.setMode(Play);
+
+					this.playGui.setCenterText('go');
+				}
+			}
+			if (this.multiplayerStarted) {
+				if ((Net.isHost && (this.timeState.timeSinceLoad > startTime + 2.0)) // 3.5 == 109 ticks
+					|| (Net.isClient && this.serverStartTicks != 0 && @:privateAccess this.marble.serverTicks > this.serverStartTicks + 172)) {
+					this.playGui.setCenterText('none');
 				}
 			}
 		}

@@ -332,6 +332,10 @@ class HuntMode extends NullMode {
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
+	override function onMissionLoad() {
+		prepareGems();
+	}
+
 	override function onClientRestart() {
 		prepareGems();
 	}

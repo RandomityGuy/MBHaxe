@@ -62,6 +62,8 @@ class MissionElementScriptObject extends MissionElementBase {
 	var maxgemsperspawn:String;
 	var radiusfromgem:String;
 	var spawnblock:String;
+	var overviewwidth:String;
+	var overviewheight:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;

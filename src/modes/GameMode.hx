@@ -17,6 +17,7 @@ interface GameMode {
 	public function getSpawnTransform():{position:Vector, orientation:Quat, up:Vector};
 	public function getRespawnTransform(marble:Marble):{position:Vector, orientation:Quat, up:Vector};
 	public function missionScan(mission:Mission):Void;
+	public function onMissionLoad():Void;
 	public function getStartTime():Float;
 	public function timeMultiplier():Float;
 	public function getScoreType():ScoreType;
