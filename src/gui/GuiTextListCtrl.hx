@@ -25,6 +25,7 @@ class GuiTextListCtrl extends GuiControl {
 
 	public var selectedColor:Int = 0x206464;
 	public var selectedFillColor:Int = 0xC8C8C8;
+	public var selectedFillColorAlpha:Float = 1.0;
 	public var textColor:Int = 0;
 
 	public var textYOffset:Int = 0;
@@ -33,19 +34,33 @@ class GuiTextListCtrl extends GuiControl {
 
 	public var scrollable:Bool = false;
 
+	var dropShadow:{
+		dx:Float,
+		dy:Float,
+		color:Int,
+		alpha:Float
+	};
+
 	var flow:Flow;
 
-	public function new(font:Font, texts:Array<String>, textColor:Int = 0) {
+	public function new(font:Font, texts:Array<String>, textColor:Int = 0, ?filter:{
+		dx:Float,
+		dy:Float,
+		color:Int,
+		alpha:Float
+	} = null) {
 		super();
 		this.font = font;
 		this.texts = texts;
 		this._manualScroll = true;
 		this.textObjs = [];
 		this.textColor = textColor;
+		this.dropShadow = filter;
 		for (text in texts) {
 			var tobj = new Text(font);
 			tobj.text = text;
 			tobj.textColor = textColor;
+			tobj.dropShadow = this.dropShadow;
 			textObjs.push(tobj);
 		}
 		this.g = new Graphics();
@@ -61,6 +76,7 @@ class GuiTextListCtrl extends GuiControl {
 			var tobj = new Text(font);
 			tobj.text = text;
 			tobj.textColor = textColor;
+			tobj.dropShadow = this.dropShadow;
 			textObjs.push(tobj);
 
 			if (this.scrollable && this.flow != null) {
@@ -188,7 +204,7 @@ class GuiTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 		var yStart = renderRect.position.y;
 		var dy = mousePos.y - yStart;
-		var hoverIndex = Math.floor(dy / (font.size + 4 * Settings.uiScale));
+		var hoverIndex = Math.floor((dy + this.scroll) / (font.size + 4 * Settings.uiScale));
 		if (hoverIndex >= this.texts.length) {
 			hoverIndex = -1;
 		}
@@ -238,7 +254,7 @@ class GuiTextListCtrl extends GuiControl {
 	function redrawSelectionRect(renderRect:Rect) {
 		if (_prevSelected != -1) {
 			g.clear();
-			g.beginFill(selectedFillColor);
+			g.beginFill(selectedFillColor, selectedFillColorAlpha);
 
 			var off = this.getOffsetFromParent();
 			// Check if we are between the top and bottom, render normally in that case

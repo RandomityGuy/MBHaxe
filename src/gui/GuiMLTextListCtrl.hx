@@ -34,18 +34,28 @@ class GuiMLTextListCtrl extends GuiControl {
 
 	public var scrollable:Bool = false;
 
-	var filter:Filter = null;
+	var dropShadow:{
+		dx:Float,
+		dy:Float,
+		color:Int,
+		alpha:Float
+	};
 
 	var flow:Flow;
 	var _imageLoader:String->Tile;
 
-	public function new(font:Font, texts:Array<String>, imageLoader:String->Tile, ?filter:Filter = null) {
+	public function new(font:Font, texts:Array<String>, imageLoader:String->Tile, ?filter:{
+		dx:Float,
+		dy:Float,
+		color:Int,
+		alpha:Float
+	} = null) {
 		super();
 		this.font = font;
 		this.texts = texts;
 		this._manualScroll = true;
 		this.textObjs = [];
-		this.filter = filter;
+		this.dropShadow = filter;
 		this._imageLoader = imageLoader;
 		for (text in texts) {
 			var tobj = new HtmlText(font);
@@ -54,7 +64,7 @@ class GuiMLTextListCtrl extends GuiControl {
 			tobj.text = text;
 			tobj.textColor = 0;
 			if (filter != null)
-				tobj.filter = filter;
+				tobj.dropShadow = filter;
 			textObjs.push(tobj);
 		}
 		this.g = new Graphics();
@@ -72,8 +82,8 @@ class GuiMLTextListCtrl extends GuiControl {
 			tobj.lineHeightMode = TextOnly;
 			tobj.text = text;
 			tobj.textColor = 0;
-			if (filter != null)
-				tobj.filter = filter;
+			if (dropShadow != null)
+				tobj.dropShadow = dropShadow;
 			textObjs.push(tobj);
 
 			if (this.scrollable) {

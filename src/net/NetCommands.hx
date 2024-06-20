@@ -1,5 +1,6 @@
 package net;
 
+import gui.MPPreGameDlg;
 import gui.MPPlayMissionGui;
 import net.ClientConnection.NetPlatform;
 import gui.EndGameGui;
@@ -99,6 +100,9 @@ class NetCommands {
 			if (MarbleGame.canvas.content is MPPlayMissionGui) {
 				cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
 			}
+			if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+				cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
+			}
 			var b = Net.sendPlayerInfosBytes();
 			for (cc in Net.clients) {
 				cc.sendBytes(b);
@@ -108,7 +112,9 @@ class NetCommands {
 				// if (MultiplayerLevelSelectGui.custSelected) {
 				//	NetCommands.playCustomLevel(MultiplayerLevelSelectGui.custPath);
 				// } else
-				NetCommands.playLevel(MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
+				if (MarbleGame.instance.world == null) {
+					NetCommands.playLevel(MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
+				} else {}
 			}
 		}
 	}
@@ -185,6 +191,11 @@ class NetCommands {
 				@:privateAccess MarbleGame.instance.world.marble.serverTicks = ticks;
 			}
 			MarbleGame.instance.world.startTime = MarbleGame.instance.world.timeState.timeSinceLoad + 3.5 + 0.032; // 1 extra tick
+
+			if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+				MarbleGame.canvas.popDialog(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1]);
+				MarbleGame.instance.world.setCursorLock(true);
+			}
 		}
 	}
 
@@ -229,6 +240,9 @@ class NetCommands {
 		Net.clientIdMap.remove(clientId);
 		if (MarbleGame.canvas.content is MPPlayMissionGui) {
 			cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
+		}
+		if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+			cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
 		}
 	}
 

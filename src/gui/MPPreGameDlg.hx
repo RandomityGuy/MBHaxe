@@ -1,5 +1,6 @@
 package gui;
 
+import net.NetCommands;
 import h2d.filter.DropShadow;
 import net.Net;
 import src.MarbleGame;
@@ -7,6 +8,8 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
+import src.Console;
+import net.MasterServerClient;
 
 class MPPreGameDlg extends GuiControl {
 	public function new() {
@@ -53,15 +56,32 @@ class MPPreGameDlg extends GuiControl {
 		leaveBtn.vertSizing = Top;
 		leaveBtn.position = new Vector(499, 388);
 		leaveBtn.extent = new Vector(94, 45);
+		leaveBtn.pressedAction = (e) -> {
+			MarbleGame.instance.quitMission(true);
+		}
 		dialogImg.addChild(leaveBtn);
 
-		var playBtn = new GuiButton(loadButtonImages("/data/ui/mp/pre/play"));
+		var playBtn = new GuiButton(loadButtonImagesExt("/data/ui/mp/pre/play"));
 		playBtn.horizSizing = Right;
 		playBtn.vertSizing = Top;
 		playBtn.position = new Vector(406, 388);
 		playBtn.extent = new Vector(94, 45);
 		playBtn.buttonType = Toggle;
-		dialogImg.addChild(playBtn);
+		playBtn.disabled = true;
+		playBtn.pressedAction = (e) -> {
+			for (id => client in Net.clientIdMap) {
+				client.state = GAME;
+			}
+
+			if (MarbleGame.instance.world != null) {
+				Console.log('All are ready, starting');
+				MarbleGame.instance.world.allClientsReady();
+			}
+			Net.serverInfo.state = "PLAYING";
+			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
+		}
+		if (Net.isHost)
+			dialogImg.addChild(playBtn);
 
 		var readyBtn = new GuiButton(loadButtonImages("/data/ui/mp/pre/ready"));
 		readyBtn.horizSizing = Right;
@@ -144,7 +164,7 @@ class MPPreGameDlg extends GuiControl {
 		playerTitle.text.textColor = 0xDDDDEE;
 		playerTitle.position = new Vector(60, 263);
 		playerTitle.extent = new Vector(525, 14);
-		playerTitle.text.text = "Player                                                                                            Status";
+		playerTitle.text.text = "Player                                                                                        Status";
 		playerTitle.text.dropShadow = {
 			dx: 1,
 			dy: 1,
@@ -161,40 +181,101 @@ class MPPreGameDlg extends GuiControl {
 		// playerList.maxScrollY = 394 * Settings.uiScale;
 		dialogImg.addChild(playerListContainer);
 
-		var playerListLeftShadow = new GuiTextListCtrl(markerFelt18, [
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName
-		], 0);
-		playerListLeftShadow.horizSizing = Width;
-		playerListLeftShadow.position = new Vector(0, 0);
-		playerListLeftShadow.extent = new Vector(525, 99);
-		playerListLeftShadow.scrollable = true;
-		playerListLeftShadow.textYOffset = -6;
-		playerListContainer.addChild(playerListLeftShadow);
-
-		var playerListLeft = new GuiTextListCtrl(markerFelt18, [
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName,
-			Settings.highscoreName
-		], 0xFFFFFF);
+		var playerListLeft = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF, {
+			dx: 1,
+			dy: 1,
+			color: 0,
+			alpha: 1
+		});
+		playerListLeft.selectedColor = 0xFFFFFF;
+		playerListLeft.selectedFillColor = 0x6092E5;
+		playerListLeft.selectedFillColorAlpha = 0.0;
 		playerListLeft.horizSizing = Width;
 		playerListLeft.position = new Vector(-1, -1);
-		playerListLeft.extent = new Vector(525, 99);
+		playerListLeft.extent = new Vector(525, 2880);
 		playerListLeft.scrollable = true;
 		playerListLeft.textYOffset = -6;
 		playerListContainer.addChild(playerListLeft);
 
+		var playerListRight = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF, {
+			dx: 1,
+			dy: 1,
+			color: 0,
+			alpha: 1
+		});
+		playerListRight.selectedColor = 0xFFFFFF;
+		playerListRight.selectedFillColor = 0x6092E5;
+		playerListRight.selectedFillColorAlpha = 0.0;
+		playerListRight.horizSizing = Width;
+		playerListRight.position = new Vector(420, -1);
+		playerListRight.extent = new Vector(300, 2880);
+		playerListRight.scrollable = true;
+		playerListRight.textYOffset = -6;
+		playerListContainer.addChild(playerListRight);
 		playerListContainer.setScrollMax(playerListLeft.calculateFullHeight());
+
+		this.updatePlayerList = () -> {
+			var allReady = true;
+			var playerListArr = [];
+			if (Net.isHost) {
+				playerListArr.push({
+					name: Settings.highscoreName,
+					ready: Net.lobbyHostReady
+				});
+			}
+			if (Net.isClient) {
+				playerListArr.push({
+					name: Settings.highscoreName,
+					ready: Net.lobbyClientReady
+				});
+			}
+			if (Net.clientIdMap != null) {
+				for (c => v in Net.clientIdMap) {
+					playerListArr.push({
+						name: v.name,
+						ready: v.lobbyReady
+					});
+				}
+			}
+			for (p in playerListArr) {
+				if (!p.ready) {
+					allReady = false;
+					break;
+				}
+			}
+
+			playBtn.disabled = !allReady;
+
+			var playerListCompiled = playerListArr.map(player -> player.name);
+			var playerListStateCompiled = playerListArr.map(player -> player.ready ? "[Ready]" : "[Waiting]");
+			playerListLeft.setTexts(playerListCompiled);
+			playerListRight.setTexts(playerListStateCompiled);
+
+			// if (!showingCustoms)
+			// 	playerList.setTexts(playerListArr.map(player -> {
+			// 		return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
+			// 	}));
+		}
+
+		readyBtn.pressedAction = (e) -> {
+			NetCommands.toggleReadiness(Net.isHost ? 0 : Net.clientId);
+			updatePlayerList();
+		}
+
+		// Make everyone un-lobby ready (again!)
+		for (c in Net.clients) {
+			c.lobbyReady = false;
+		}
+		Net.lobbyClientReady = false;
+		Net.lobbyHostReady = false;
+		if (Net.isHost) {
+			var b = Net.sendPlayerInfosBytes();
+			for (cc in Net.clients) {
+				cc.sendBytes(b);
+			}
+		}
+		updatePlayerList();
 	}
+
+	public dynamic function updatePlayerList() {}
 }

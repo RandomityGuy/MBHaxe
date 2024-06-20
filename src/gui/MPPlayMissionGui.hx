@@ -45,7 +45,6 @@ class MPPlayMissionGui extends GuiImage {
 	#end
 
 	var playerListCtrl:GuiTextListCtrl;
-	var playerListCtrlDs:GuiTextListCtrl;
 
 	public function new(isHost:Bool = true) {
 		MissionList.buildMissionList();
@@ -336,13 +335,6 @@ class MPPlayMissionGui extends GuiImage {
 		playersBox.extent = new Vector(305, 229);
 		window.addChild(playersBox);
 
-		playerListCtrlDs = new GuiTextListCtrl(markerFelt18, [], 0x000000);
-		playerListCtrlDs.position = new Vector(-1, 25);
-		playerListCtrlDs.extent = new Vector(305, 203);
-		playerListCtrlDs.scrollable = true;
-		playerListCtrlDs.textYOffset = -6;
-		playersBox.addChild(playerListCtrlDs);
-
 		playerListCtrl = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF);
 		playerListCtrl.position = new Vector(0, 26);
 		playerListCtrl.extent = new Vector(305, 203);
@@ -616,7 +608,6 @@ class MPPlayMissionGui extends GuiImage {
 		}
 
 		var playerListCompiled = playerListArr.map(player -> player.name);
-		playerListCtrlDs.setTexts(playerListCompiled);
 		playerListCtrl.setTexts(playerListCompiled);
 
 		// if (!showingCustoms)
