@@ -1,5 +1,6 @@
 package net;
 
+import gui.MPPreGameDlg;
 import net.NetPacket.ScoreboardPacket;
 import gui.MPPlayMissionGui;
 import gui.Canvas;
@@ -537,6 +538,10 @@ class Net {
 		if (MarbleGame.canvas.content is MPPlayMissionGui) {
 			cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
 		}
+
+		if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+			cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
+		}
 	}
 
 	static function onConnectedToServer() {
@@ -570,6 +575,10 @@ class Net {
 
 		if (MarbleGame.canvas.content is MPPlayMissionGui) {
 			cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
+		}
+
+		if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+			cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
 		}
 	}
 
@@ -757,6 +766,9 @@ class Net {
 				}
 				if (MarbleGame.canvas.content is MPPlayMissionGui) {
 					cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
+				}
+				if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+					cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
 				}
 
 			case ScoreBoardInfo:

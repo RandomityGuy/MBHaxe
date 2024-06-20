@@ -86,8 +86,6 @@ class PlayGui {
 	var playerListContainer:GuiControl;
 	var playerListCtrl:GuiMLTextListCtrl;
 	var playerListScoresCtrl:GuiMLTextListCtrl;
-	var playerListShadowCtrl:GuiMLTextListCtrl;
-	var playerListScoresShadowCtrl:GuiMLTextListCtrl;
 	var playerList:Array<PlayerInfo> = [];
 
 	var imageResources:Array<Resource<Image>> = [];
@@ -113,12 +111,8 @@ class PlayGui {
 				playerListContainer = null;
 				playerListCtrl.dispose();
 				playerListCtrl = null;
-				playerListShadowCtrl.dispose();
-				playerListShadowCtrl = null;
 				playerListScoresCtrl.dispose();
 				playerListScoresCtrl = null;
-				playerListScoresShadowCtrl.dispose();
-				playerListScoresShadowCtrl = null;
 			}
 
 			gemImageScene.dispose();
@@ -545,23 +539,12 @@ class PlayGui {
 			return null;
 		}
 
-		playerListShadowCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
-
-		playerListShadowCtrl.position = new Vector(34, 4);
-		playerListShadowCtrl.extent = new Vector(210, 271);
-		playerListShadowCtrl.scrollable = true;
-		playerListShadowCtrl.onSelectedFunc = (sel) -> {}
-		playerListContainer.addChild(playerListShadowCtrl);
-
-		playerListScoresShadowCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
-
-		playerListScoresShadowCtrl.position = new Vector(234, 4);
-		playerListScoresShadowCtrl.extent = new Vector(210, 271);
-		playerListScoresShadowCtrl.scrollable = true;
-		playerListScoresShadowCtrl.onSelectedFunc = (sel) -> {}
-		playerListContainer.addChild(playerListScoresShadowCtrl);
-
-		playerListCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
+		playerListCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader, {
+			dx: 1,
+			dy: 1,
+			color: 0,
+			alpha: 1
+		});
 
 		playerListCtrl.position = new Vector(33, 3);
 		playerListCtrl.extent = new Vector(210, 271);
@@ -569,7 +552,12 @@ class PlayGui {
 		playerListCtrl.onSelectedFunc = (sel) -> {}
 		playerListContainer.addChild(playerListCtrl);
 
-		playerListScoresCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader);
+		playerListScoresCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader, {
+			dx: 1,
+			dy: 1,
+			color: 0,
+			alpha: 1
+		});
 
 		playerListScoresCtrl.position = new Vector(233, 3);
 		playerListScoresCtrl.extent = new Vector(210, 271);
@@ -581,8 +569,6 @@ class PlayGui {
 	public function redrawPlayerList() {
 		var pl = [];
 		var plScores = [];
-		var plShadow = [];
-		var plShadowScores = [];
 		var col0 = "#CFB52B";
 		var col1 = "#CDCDCD";
 		var col2 = "#D19275";
@@ -602,13 +588,9 @@ class PlayGui {
 			};
 			pl.push('<font color="${color}">${i + 1}. ${Util.rightPad(item.name, 25, 3)}</font>');
 			plScores.push('<font color="${color}">${item.score}</font>');
-			plShadow.push('<font color="#000000">${i + 1}. ${Util.rightPad(item.name, 25, 3)}</font>');
-			plShadowScores.push('<font color="#000000">${item.score}</font>');
 		}
 		playerListCtrl.setTexts(pl);
 		playerListScoresCtrl.setTexts(plScores);
-		playerListShadowCtrl.setTexts(plShadow);
-		playerListScoresShadowCtrl.setTexts(plShadowScores);
 	}
 
 	public function addPlayer(id:Int, name:String, us:Bool) {

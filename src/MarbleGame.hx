@@ -1,5 +1,6 @@
 package src;
 
+import gui.MPPreGameDlg;
 import gui.MPExitGameDlg;
 import gui.GuiControl;
 import gui.MPPlayMissionGui;
@@ -200,6 +201,9 @@ class MarbleGame {
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
 				&& world.finishTime == null
 				&& world._ready) {
+				if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+					return; // don't pause
+				}
 				paused = !paused;
 				handlePauseGame();
 			}
