@@ -128,73 +128,133 @@ class EndGameGui extends GuiControl {
 		egResult.position = new Vector(313, 54);
 		egResult.extent = new Vector(244, 69);
 		egResult.text.text = '<font face="DomCasual64" color="#FFFFFF"><p align="right">${Util.formatTime(timeState.gameplayClock)}</p></font>';
-		egResult.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		egResult.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		pg.addChild(egResult);
 
 		var egFirstLine = new GuiMLText(domcasual24, mlFontLoader);
 		egFirstLine.position = new Vector(340, 150);
 		egFirstLine.extent = new Vector(210, 25);
-		egFirstLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egFirstLine.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egFirstLine);
 
 		var egSecondLine = new GuiMLText(domcasual24, mlFontLoader);
 		egSecondLine.position = new Vector(341, 178);
 		egSecondLine.extent = new Vector(209, 25);
-		egSecondLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egSecondLine.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egSecondLine);
 
 		var egThirdLine = new GuiMLText(domcasual24, mlFontLoader);
 		egThirdLine.position = new Vector(341, 206);
 		egThirdLine.extent = new Vector(209, 25);
-		egThirdLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egThirdLine.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egThirdLine);
 
 		var egFourthLine = new GuiMLText(domcasual24, mlFontLoader);
 		egFourthLine.position = new Vector(341, 234);
 		egFourthLine.extent = new Vector(209, 25);
-		egFourthLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egFourthLine.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egFourthLine);
 
 		var egFifthLine = new GuiMLText(domcasual24, mlFontLoader);
 		egFifthLine.position = new Vector(341, 262);
 		egFifthLine.extent = new Vector(209, 25);
-		egFifthLine.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egFifthLine.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egFifthLine);
 
 		var egFirstLineScore = new GuiMLText(domcasual24, mlFontLoader);
 		egFirstLineScore.position = new Vector(475, 150);
 		egFirstLineScore.extent = new Vector(210, 25);
-		egFirstLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egFirstLineScore.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egFirstLineScore);
 
 		var egSecondLineScore = new GuiMLText(domcasual24, mlFontLoader);
 		egSecondLineScore.position = new Vector(476, 178);
 		egSecondLineScore.extent = new Vector(209, 25);
-		egSecondLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egSecondLineScore.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egSecondLineScore);
 
 		var egThirdLineScore = new GuiMLText(domcasual24, mlFontLoader);
 		egThirdLineScore.position = new Vector(476, 206);
 		egThirdLineScore.extent = new Vector(209, 25);
-		egThirdLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egThirdLineScore.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egThirdLineScore);
 
 		var egFourthLineScore = new GuiMLText(domcasual24, mlFontLoader);
 		egFourthLineScore.position = new Vector(476, 234);
 		egFourthLineScore.extent = new Vector(209, 25);
-		egFourthLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egFourthLineScore.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egFourthLineScore);
 
 		var egFifthLineScore = new GuiMLText(domcasual24, mlFontLoader);
 		egFifthLineScore.position = new Vector(476, 262);
 		egFifthLineScore.extent = new Vector(209, 25);
-		egFifthLineScore.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		egFifthLineScore.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		pg.addChild(egFifthLineScore);
 
 		var egTitleText = new GuiMLText(expo50, mlFontLoader);
 		egTitleText.text.textColor = 0xffff00;
 		egTitleText.text.text = '<font color="#FFFFFF" face="DomCasual64">Your Time:</font>';
-		egTitleText.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		egTitleText.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		egTitleText.position = new Vector(34, 54);
 		egTitleText.extent = new Vector(247, 69);
 		pg.addChild(egTitleText);
@@ -203,7 +263,12 @@ class EndGameGui extends GuiControl {
 		egTopThreeText.position = new Vector(341, 114);
 		egTopThreeText.extent = new Vector(209, 34);
 		egTopThreeText.text.text = '<font face="DomCasual32" color="#FFFFFF">Top 5 Times:</font>'; // Make toggleable 3-5
-		egTopThreeText.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		egTopThreeText.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		pg.addChild(egTopThreeText);
 
 		var text = '<font color="#FFFFFF" face="DomCasual32"><p align="center">';
@@ -229,7 +294,12 @@ class EndGameGui extends GuiControl {
 		var finishMessage = new GuiMLText(expo32, mlFontLoader);
 		finishMessage.text.textColor = 0x00ff00;
 		finishMessage.text.text = text;
-		finishMessage.text.filter = new DropShadow(1, 0.785, 0, 1, 0, 0.4, 1, true);
+		finishMessage.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		// finishMessage.justify = Center;
 		finishMessage.position = new Vector(25, 120);
 		finishMessage.extent = new Vector(293, 211);
@@ -275,7 +345,12 @@ class EndGameGui extends GuiControl {
 		leftColumn.text.lineSpacing = 5;
 		leftColumn.text.textColor = 0xFFFFFF;
 		leftColumn.text.text = 'Par Time:<br/>${mission.game == "gold" || mission.game.toLowerCase() == "ultra" ? '<font color="#FFCC00">Gold Time:</font>' : '<font color="#CCCCCC">Platinum Time:</font>'}<br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">Ultimate Time:</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">Time Passed:<br/>Clock Bonuses:</font>';
-		leftColumn.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		leftColumn.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		leftColumn.position = new Vector(25, 165);
 		leftColumn.extent = new Vector(293, 211);
 		pg.addChild(leftColumn);
@@ -287,7 +362,12 @@ class EndGameGui extends GuiControl {
 		rightColumn.text.lineSpacing = 5;
 		rightColumn.text.textColor = 0xFFFFFF;
 		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="${mission.game == "gold" || mission.game.toLowerCase() == "ultra" ? '#FFCC00' : '#CCCCCC'}">${Util.formatTime(mission.goldTime)}</font><br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">${Util.formatTime(mission.ultimateTime)}</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}</font>';
-		rightColumn.text.filter = new DropShadow(1.414, 0.785, 0xffffff, 1, 0, 0.4, 1, true);
+		rightColumn.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0x777777
+		};
 		rightColumn.position = new Vector(235, 165);
 		rightColumn.extent = new Vector(293, 211);
 		pg.addChild(rightColumn);

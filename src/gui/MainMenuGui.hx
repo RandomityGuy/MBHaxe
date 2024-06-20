@@ -182,7 +182,12 @@ class MainMenuGui extends GuiImage {
 		versionText.position = new Vector(502, 61);
 		versionText.extent = new Vector(97, 72);
 		versionText.text.text = "<p align=\"center\">1.5.4</p>";
-		versionText.text.filter = new DropShadow(1.414, 0.785, 0x3333337F, 1, 0, 0.7, 1, true);
+		versionText.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		this.addChild(versionText);
 
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));

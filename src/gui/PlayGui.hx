@@ -882,7 +882,12 @@ class PlayGui {
 		middleMsg.text.text = text;
 		middleMsg.justify = Center;
 		middleMsg.text.textColor = color;
-		middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
+		middleMsg.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		}; // new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg);
 		middleMsg.render(scene2d);
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;

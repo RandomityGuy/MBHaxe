@@ -1,5 +1,6 @@
 package src;
 
+import gui.MPPreGameDlg;
 import src.Radar;
 import rewind.InputRecorder;
 import net.NetPacket.ScoreboardPacket;
@@ -550,6 +551,15 @@ class MarbleWorld extends Scheduler {
 			Net.serverInfo.state = "PLAYING";
 			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
 		}
+		if (this.isMultiplayer) {
+			// Push the pre - game
+			showPreGame();
+		}
+	}
+
+	public function showPreGame() {
+		MarbleGame.canvas.pushDialog(new MPPreGameDlg());
+		this.setCursorLock(false);
 	}
 
 	public function addJoiningClient(cc:GameConnection, onAdded:() -> Void) {

@@ -50,7 +50,12 @@ class JukeboxDlg extends GuiImage {
 		var songTitle = new GuiMLText(markerFelt24, null);
 		songTitle.position = new Vector(61, 262);
 		songTitle.extent = new Vector(416, 22);
-		songTitle.text.filter = new DropShadow(1.414, 0.785, 0x0000007F, 1, 0, 0.4, 1, true);
+		songTitle.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		songTitle.text.textColor = 0xFFFFFF;
 		songTitle.text.text = '<p align="center">Title: ${songList[selectedIdx]}</p>';
 		this.addChild(songTitle);
@@ -58,7 +63,12 @@ class JukeboxDlg extends GuiImage {
 		var songStatus = new GuiMLText(markerFelt24, null);
 		songStatus.position = new Vector(56, 283);
 		songStatus.extent = new Vector(421, 22);
-		songStatus.text.filter = new DropShadow(1.414, 0.785, 0x0000007F, 1, 0, 0.4, 1, true);
+		songStatus.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		songStatus.text.textColor = 0xFFFFFF;
 		songStatus.text.text = '<p align="center">${playing ? "Playing" : "Stopped"}</p>';
 		this.addChild(songStatus);

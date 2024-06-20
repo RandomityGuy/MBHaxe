@@ -95,15 +95,11 @@ class JoinServerGui extends GuiImage {
 			});
 		});
 
-		var maxPlayers = 8;
-		var privateSlots = 0;
-		var privateGame = false;
-
 		var hostBtn = new GuiButton(loadButtonImages("data/ui/mp/join/host"));
 		hostBtn.position = new Vector(521, 379);
 		hostBtn.extent = new Vector(93, 45);
 		hostBtn.pressedAction = (e) -> {
-			Net.hostServer('${Settings.highscoreName}\'s Server', maxPlayers, privateSlots, privateGame, () -> {
+			Net.hostServer(Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.maxPlayers, "", () -> {
 				MarbleGame.canvas.setContent(new MPPlayMissionGui(true));
 			});
 		}
@@ -134,7 +130,7 @@ class JoinServerGui extends GuiImage {
 						// }
 					}
 				}, 15000);
-				Net.joinServer(ourServerList[curSelection].name, false, () -> {
+				Net.joinServer(ourServerList[curSelection].name, "", () -> {
 					failed = false;
 					Net.remoteServerInfo = ourServerList[curSelection];
 				});
@@ -168,7 +164,12 @@ class JoinServerGui extends GuiImage {
 		titleText.extent = new Vector(647, 30);
 		titleText.justify = Center;
 		titleText.text.text = "Join Server";
-		titleText.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		titleText.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		titleText.text.textColor = 0xFFFFFF;
 		window.addChild(titleText);
 
@@ -177,7 +178,12 @@ class JoinServerGui extends GuiImage {
 		serverInfoHeader.extent = new Vector(210, 166);
 		serverInfoHeader.justify = Center;
 		serverInfoHeader.text.text = "Select a Server";
-		serverInfoHeader.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0, 0.4, 1, true);
+		serverInfoHeader.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		serverInfoHeader.text.textColor = 0xFFFFFF;
 		window.addChild(serverInfoHeader);
 

@@ -76,7 +76,6 @@ abstract class GameConnection {
 	var lobbyReady:Bool;
 	var platform:NetPlatform;
 	var marbleId:Int;
-	var isPrivate:Bool;
 
 	function new(id:Int) {
 		this.id = id;

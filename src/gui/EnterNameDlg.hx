@@ -97,7 +97,12 @@ class EnterNameDlg extends GuiControl {
 
 		var enterNameText = new GuiMLText(domcasual32, mlFontLoader);
 		enterNameText.text.textColor = 0xFFFFFF;
-		enterNameText.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		enterNameText.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		enterNameText.position = new Vector(37, 23);
 		enterNameText.extent = new Vector(345, 85);
 		// enterNameText.justify = Center;

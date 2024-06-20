@@ -326,6 +326,15 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(server) public static function sendServerSettings(name:String, desc:String, quickRespawn:Bool, forceSpectator:Bool) {
+		Net.connectedServerInfo = {
+			name: name,
+			description: desc,
+			quickRespawn: quickRespawn,
+			forceSpectator: forceSpectator
+		};
+	}
+
 	// @:rpc(client) public static function sendChatMessage(msg:String) {
 	// 	if (Net.isHost) {
 	// 		sendServerChatMessage(msg);

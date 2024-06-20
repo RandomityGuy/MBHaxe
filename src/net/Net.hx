@@ -40,24 +40,31 @@ enum abstract NetPacketType(Int) from Int to Int {
 @:publicFields
 class ServerInfo {
 	var name:String;
+	var description:String;
 	var players:Int;
 	var maxPlayers:Int;
-	var privateSlots:Int;
-	var privateServer:Bool;
-	var inviteCode:Int;
+	var password:String;
 	var state:String;
 	var platform:NetPlatform;
 
-	public function new(name:String, players:Int, maxPlayers:Int, privateSlots:Int, privateServer:Bool, inviteCode:Int, state:String, platform:NetPlatform) {
+	public function new(name:String, description:String, players:Int, maxPlayers:Int, password:String, state:String, platform:NetPlatform) {
 		this.name = name;
+		this.description = description;
 		this.players = players;
 		this.maxPlayers = maxPlayers;
-		this.privateSlots = privateSlots;
-		this.privateServer = privateServer;
-		this.inviteCode = inviteCode;
+		this.password = password;
 		this.state = state;
 		this.platform = platform;
 	}
+}
+
+@:publicFields
+@:structInit
+class ConnectedServerInfo {
+	var name:String;
+	var description:String;
+	var quickRespawn:Bool;
+	var forceSpectator:Bool;
 }
 
 class Net {
@@ -81,13 +88,14 @@ class Net {
 	public static var clientConnection:ClientConnection;
 	public static var serverInfo:ServerInfo;
 	public static var remoteServerInfo:RemoteServerInfo;
+	public static var connectedServerInfo:ConnectedServerInfo;
 
 	static var stunServers = ["stun:stun.l.google.com:19302"];
 
 	public static var turnServer:String = "";
 
-	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool, onHosted:() -> Void) {
-		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "LOBBY", getPlatform());
+	public static function hostServer(name:String, description:String, maxPlayers:Int, password:String, onHosted:() -> Void) {
+		serverInfo = new ServerInfo(name, description, 1, maxPlayers, password, "LOBBY", getPlatform());
 		MasterServerClient.connectToMasterServer(() -> {
 			isHost = true;
 			isClient = false;
@@ -98,14 +106,14 @@ class Net {
 		});
 	}
 
-	public static function addClientFromSdp(sdpString:String, privateJoin:Bool, onFinishSdp:String->Void) {
+	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void) {
 		var peer = new RTCPeerConnection(stunServers, "0.0.0.0");
 		var sdpObj = Json.parse(sdpString);
 		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
-		addClient(peer, privateJoin, onFinishSdp);
+		addClient(peer, onFinishSdp);
 	}
 
-	static function addClient(peer:RTCPeerConnection, privateJoin:Bool, onFinishSdp:String->Void) {
+	static function addClient(peer:RTCPeerConnection, onFinishSdp:String->Void) {
 		var candidates = [];
 		peer.onLocalCandidate = (c) -> {
 			Console.log('Local candidate: ' + c);
@@ -173,7 +181,7 @@ class Net {
 				}
 			}
 			if (reliable != null && unreliable != null)
-				onClientConnect(peer, reliable, unreliable, privateJoin);
+				onClientConnect(peer, reliable, unreliable);
 		}
 	}
 
@@ -182,7 +190,7 @@ class Net {
 		clientIdMap[id] = ghost;
 	}
 
-	public static function joinServer(serverName:String, isInvite:Bool, connectedCb:() -> Void) {
+	public static function joinServer(serverName:String, password:String, connectedCb:() -> Void) {
 		MasterServerClient.connectToMasterServer(() -> {
 			client = new RTCPeerConnection(stunServers, "0.0.0.0");
 			var candidates = [];
@@ -250,7 +258,7 @@ class Net {
 				MasterServerClient.instance.sendConnectToServer(serverName, Json.stringify({
 					sdp: sdpObj,
 					type: "offer"
-				}), isInvite);
+				}), password);
 			}
 
 			client.onGatheringStateChange = (s) -> {
@@ -355,6 +363,7 @@ class Net {
 			Net.clientConnection = null;
 			Net.serverInfo = null;
 			Net.remoteServerInfo = null;
+			Net.connectedServerInfo = null;
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
@@ -375,6 +384,7 @@ class Net {
 			MasterServerClient.disconnectFromMasterServer();
 			Net.serverInfo = null;
 			Net.remoteServerInfo = null;
+			Net.connectedServerInfo = null;
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
@@ -444,7 +454,7 @@ class Net {
 		}
 	}
 
-	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel, dcu:RTCDataChannel, joiningPrivate:Bool) {
+	static function onClientConnect(c:RTCPeerConnection, dc:RTCDataChannel, dcu:RTCDataChannel) {
 		if (!Net.isMP) {
 			c.close();
 			return;
@@ -456,7 +466,6 @@ class Net {
 		}
 		var cc = new ClientConnection(clientId, c, dc, dcu);
 		clients.set(c, cc);
-		cc.isPrivate = joiningPrivate;
 		clientIdMap[clientId] = clients[c];
 		cc.lastRecvTime = Console.time(); // So it doesnt get timed out
 
@@ -569,6 +578,8 @@ class Net {
 		// if (MultiplayerLevelSelectGui.custSelected) {
 		// 	NetCommands.setLobbyCustLevelNameClient(conn, MultiplayerLevelSelectGui.custPath);
 		// } else {
+		NetCommands.sendServerSettingsClient(conn, Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.quickRespawn,
+			Settings.serverSettings.forceSpectators);
 		NetCommands.setLobbyLevelIndexClient(conn, MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
 		// }
 

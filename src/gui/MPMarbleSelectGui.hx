@@ -68,7 +68,12 @@ class MPMarbleSelectGui extends GuiImage {
 
 		var titleText = new GuiMLText(markerFelt28, null);
 		titleText.text.textColor = 0xFFFFFF;
-		titleText.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0x0000007F, 0.4, 1, true);
+		titleText.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		titleText.horizSizing = Center;
 		titleText.vertSizing = Bottom;
 		titleText.position = new Vector(140, 67);
@@ -78,7 +83,12 @@ class MPMarbleSelectGui extends GuiImage {
 
 		var marbleText = new GuiMLText(markerFelt24, null);
 		marbleText.text.textColor = 0xFFFFFF;
-		marbleText.text.filter = new DropShadow(1.414, 0.785, 0, 1, 0x0000007F, 0.4, 1, true);
+		marbleText.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
 		marbleText.horizSizing = Center;
 		marbleText.vertSizing = Bottom;
 		marbleText.position = new Vector(86, 243);

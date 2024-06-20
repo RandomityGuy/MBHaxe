@@ -154,7 +154,12 @@ class OptionsDlg extends GuiImage {
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			textObj.text.dropShadow = {
+				dx: 1,
+				dy: 1,
+				alpha: 0.5,
+				color: 0
+			};
 			parent.addChild(textObj);
 
 			var optDropdownImg = new GuiImage(ResourceLoader.getResource('data/ui/options/dropdown-${size}.png', ResourceLoader.getImage, this.imageResources)
@@ -216,7 +221,12 @@ class OptionsDlg extends GuiImage {
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			textObj.text.dropShadow = {
+				dx: 1,
+				dy: 1,
+				alpha: 0.5,
+				color: 0
+			};
 			parent.addChild(textObj);
 
 			var sliderBar = new GuiImage(ResourceLoader.getResource("data/ui/options/bar.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -419,7 +429,12 @@ class OptionsDlg extends GuiImage {
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			textObj.text.dropShadow = {
+				dx: 1,
+				dy: 1,
+				alpha: 0.5,
+				color: 0
+			};
 			parent.addChild(textObj);
 
 			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
@@ -457,6 +472,33 @@ class OptionsDlg extends GuiImage {
 		makeRemapOption("Respawn:", 278, Util.getKeyForButton2(Settings.controlsSettings.respawn), (key) -> Settings.controlsSettings.respawn = key,
 			hotkeysPanel, true);
 		makeRemapOption("Blast:", 326, Util.getKeyForButton2(Settings.controlsSettings.blast), (key) -> Settings.controlsSettings.blast = key, hotkeysPanel);
+
+		if (Util.isTouchDevice()) {
+			var textObj = new GuiText(markerFelt32);
+			textObj.position = new Vector(368, 326);
+			textObj.extent = new Vector(212, 14);
+			textObj.text.text = "Touch Controls";
+			textObj.text.textColor = 0xFFFFFF;
+			textObj.text.dropShadow = {
+				dx: 1,
+				dy: 1,
+				alpha: 0.5,
+				color: 0
+			};
+			hotkeysPanel.addChild(textObj);
+
+			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
+			remapBtn.position = new Vector(363 + 203, 323);
+			remapBtn.txtCtrl.text.text = "Edit";
+			remapBtn.setExtent(new Vector(152, 49));
+			remapBtn.pressedAction = (sender) -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			}
+			hotkeysPanel.addChild(remapBtn);
+		} else {
+			makeRemapOption("Rewind:", 326, Util.getKeyForButton2(Settings.controlsSettings.rewind), (key) -> Settings.controlsSettings.rewind = key,
+				hotkeysPanel, true);
+		}
 
 		generalBtn.pressedAction = (e) -> {
 			if (currentTab != "general") {
