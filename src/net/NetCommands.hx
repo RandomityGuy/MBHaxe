@@ -266,10 +266,10 @@ class NetCommands {
 		}
 	}
 
-	@:rpc(client) public static function setPlayerData(clientId:Int, name:String, marble:Int) {
+	@:rpc(client) public static function setPlayerData(clientId:Int, name:String, marble:Int, marbleCat:Int) {
 		if (Net.isHost) {
 			Net.clientIdMap[clientId].setName(name);
-			Net.clientIdMap[clientId].setMarbleId(marble);
+			Net.clientIdMap[clientId].setMarbleId(marble, marbleCat);
 			if (MarbleGame.canvas.content is MPPlayMissionGui) {
 				cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
 			}

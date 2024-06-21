@@ -624,6 +624,7 @@ class Net {
 			b.writeByte(v.lobbyReady ? 1 : 0);
 			b.writeByte(v.platform);
 			b.writeByte(v.marbleId);
+			b.writeByte(v.marbleCatId);
 			var name = v.getName();
 			b.writeByte(name.length);
 			for (i in 0...name.length) {
@@ -635,6 +636,7 @@ class Net {
 		b.writeByte(Net.lobbyHostReady ? 1 : 0);
 		b.writeByte(getPlatform());
 		b.writeByte(Settings.optionsSettings.marbleIndex);
+		b.writeByte(Settings.optionsSettings.marbleCategoryIndex);
 		var name = Settings.highscoreName;
 		b.writeByte(name.length);
 		for (i in 0...name.length) {
@@ -657,7 +659,8 @@ class Net {
 			case ClientIdAssign:
 				clientId = input.readByte(); // 8 bit client id, hopefully we don't exceed this
 				Console.log('Client ID set to ${clientId}');
-				NetCommands.setPlayerData(clientId, Settings.highscoreName, Settings.optionsSettings.marbleIndex); // Send our player name to the server
+				NetCommands.setPlayerData(clientId, Settings.highscoreName, Settings.optionsSettings.marbleIndex,
+					Settings.optionsSettings.marbleCategoryIndex); // Send our player name to the server
 				NetCommands.transmitPlatform(clientId, getPlatform()); // send our platform too
 
 			case Ping:
@@ -744,6 +747,7 @@ class Net {
 					var cready = input.readByte() == 1;
 					var platform = input.readByte();
 					var marble = input.readByte();
+					var marbleCat = input.readByte();
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
@@ -756,7 +760,7 @@ class Net {
 					}
 					if (clientIdMap.exists(id)) {
 						clientIdMap[id].setName(name);
-						clientIdMap[id].setMarbleId(marble);
+						clientIdMap[id].setMarbleId(marble, marbleCat);
 						clientIdMap[id].lobbyReady = cready;
 						clientIdMap[id].platform = platform;
 					}
