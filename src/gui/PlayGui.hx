@@ -48,6 +48,9 @@ class PlayerInfo {
 	var name:String;
 	var us:Bool;
 	var score:Int;
+	var r:Int;
+	var y:Int;
+	var b:Int;
 }
 
 class PlayGui {
@@ -599,7 +602,10 @@ class PlayGui {
 				id: id,
 				name: name,
 				us: us,
-				score: 0
+				score: 0,
+				r: 0,
+				y: 0,
+				b: 0
 			});
 			redrawPlayerList();
 		}
@@ -616,8 +622,18 @@ class PlayGui {
 
 	public function incrementPlayerScore(id:Int, score:Int) {
 		var f = playerList.filter(x -> x.id == id);
-		if (f.length != 0)
+		if (f.length != 0) {
 			f[0].score += score;
+			if (score == 1) {
+				f[0].r += 1;
+			}
+			if (score == 2) {
+				f[0].y += 1;
+			}
+			if (score == 5) {
+				f[0].b += 1;
+			}
+		}
 
 		if (id == Net.clientId) {
 			if (Net.isClient)
@@ -631,6 +647,9 @@ class PlayGui {
 	public function updatePlayerScores(scoreboardPacket:ScoreboardPacket) {
 		for (player in playerList) {
 			player.score = scoreboardPacket.scoreBoard.exists(player.id) ? scoreboardPacket.scoreBoard.get(player.id) : 0;
+			player.r = scoreboardPacket.rBoard.exists(player.id) ? scoreboardPacket.rBoard.get(player.id) : 0;
+			player.y = scoreboardPacket.yBoard.exists(player.id) ? scoreboardPacket.yBoard.get(player.id) : 0;
+			player.b = scoreboardPacket.bBoard.exists(player.id) ? scoreboardPacket.bBoard.get(player.id) : 0;
 		}
 		redrawPlayerList();
 	}

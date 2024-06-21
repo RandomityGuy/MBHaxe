@@ -1,5 +1,7 @@
 package modes;
 
+import gui.MPEndGameGui;
+import net.NetCommands;
 import net.BitStream.OutputBitStream;
 import net.NetPacket.GemPickupPacket;
 import net.NetPacket.GemSpawnPacket;
@@ -21,6 +23,7 @@ import src.Marble;
 import src.AudioManager;
 import src.ResourceLoader;
 import net.Net;
+import src.MarbleGame;
 
 @:structInit
 @:publicFields
@@ -94,6 +97,7 @@ class HuntMode extends NullMode {
 			idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
 		}
 		spawnPointTaken[idx] = true;
+
 		var randomSpawn = playerSpawnPoints[idx];
 		var spawnPos = MisParser.parseVector3(randomSpawn.position);
 		spawnPos.x *= -1;
@@ -113,7 +117,21 @@ class HuntMode extends NullMode {
 	override function getRespawnTransform(marble:Marble) {
 		var lastContactPos = marble.lastContactPosition;
 		if (lastContactPos == null) {
-			return getSpawnTransform();
+			var idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+			var randomSpawn = playerSpawnPoints[idx];
+			var spawnPos = MisParser.parseVector3(randomSpawn.position);
+			spawnPos.x *= -1;
+			var spawnRot = MisParser.parseRotation(randomSpawn.rotation);
+			spawnRot.x *= -1;
+			spawnRot.w *= -1;
+			var spawnMat = spawnRot.toMatrix();
+			var up = spawnMat.up();
+			spawnPos = spawnPos.add(up); // 1.5 -> 0.5
+			return {
+				position: spawnPos,
+				orientation: spawnRot,
+				up: up
+			}
 		}
 		// Pick closest spawn point
 		var closestSpawn:MissionElementTrigger = null;
@@ -338,6 +356,43 @@ class HuntMode extends NullMode {
 
 	override function onClientRestart() {
 		prepareGems();
+	}
+
+	override function onTimeExpire() {
+		if (level.finishTime != null)
+			return;
+
+		// AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
+		level.finishTime = level.timeState.clone();
+		level.marble.setMode(Finish);
+		level.marble.camera.finish = true;
+		level.finishYaw = level.marble.camera.CameraYaw;
+		level.finishPitch = level.marble.camera.CameraPitch;
+		// if (level.isMultiplayer) {
+		// 	@:privateAccess level.playGui.doMPEndGameMessage();
+		// } else {
+		// 	level.displayAlert("Congratulations! You've finished!");
+		// }
+		level.cancel(@:privateAccess level.oobSchedule);
+		level.cancel(@:privateAccess level.marble.oobSchedule);
+		for (marble in level.marbles) {
+			marble.setMode(Finish);
+			level.cancel(@:privateAccess marble.oobSchedule);
+		}
+		if (Net.isHost)
+			NetCommands.timerRanOut();
+
+		// Stop the ongoing sounds
+		if (@:privateAccess level.timeTravelSound != null) {
+			@:privateAccess level.timeTravelSound.stop();
+			@:privateAccess level.timeTravelSound = null;
+		}
+
+		level.schedule(level.timeState.currentAttemptTime + 2, () -> {
+			MarbleGame.canvas.setContent(new MPEndGameGui());
+			level.setCursorLock(false);
+			return 0;
+		});
 	}
 
 	override function onGemPickup(marble:Marble, gem:Gem) {

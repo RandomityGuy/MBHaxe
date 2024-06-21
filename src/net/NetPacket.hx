@@ -258,15 +258,25 @@ class GemPickupPacket implements NetPacket {
 @:publicFields
 class ScoreboardPacket implements NetPacket {
 	var scoreBoard:Map<Int, Int>;
+	var rBoard:Map<Int, Int>;
+	var yBoard:Map<Int, Int>;
+	var bBoard:Map<Int, Int>;
 
 	public function new() {
 		scoreBoard = new Map();
+		rBoard = new Map();
+		yBoard = new Map();
+		bBoard = new Map();
 	}
 
 	public inline function deserialize(b:InputBitStream) {
 		var count = b.readInt(4);
 		for (i in 0...count) {
-			scoreBoard[b.readInt(6)] = b.readInt(10);
+			var id = b.readInt(6);
+			scoreBoard[id] = b.readInt(10);
+			rBoard[id] = b.readInt(10);
+			yBoard[id] = b.readInt(10);
+			bBoard[id] = b.readInt(10);
 		}
 	}
 
@@ -278,6 +288,9 @@ class ScoreboardPacket implements NetPacket {
 		for (key => v in scoreBoard) {
 			b.writeInt(key, 6);
 			b.writeInt(v, 10);
+			b.writeInt(rBoard[key], 10);
+			b.writeInt(yBoard[key], 10);
+			b.writeInt(bBoard[key], 10);
 		}
 	}
 }

@@ -500,7 +500,7 @@ class MarbleWorld extends Scheduler {
 		if (client == null) {
 			marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
 		} else {
-			var marbleDts = MarbleSelectGui.marbleData[0][client.getMarbleId()].dts; // FIXME
+			var marbleDts = MarbleSelectGui.marbleData[client.getMarbleCatId()][client.getMarbleId()].dts; // FIXME
 			marblefiles.push(StringTools.replace(marbleDts, "data/", ""));
 		}
 
@@ -1582,9 +1582,9 @@ class MarbleWorld extends Scheduler {
 			return;
 		}
 
-		if (Key.isPressed(Key.T)) {
-			rollback(0.4);
-		}
+		// if (Key.isPressed(Key.T)) {
+		// 	rollback(0.4);
+		// }
 
 		var realDt = dt;
 
@@ -2022,10 +2022,9 @@ class MarbleWorld extends Scheduler {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
 				}
 			}
-
-			if (finishTime != null)
-				this.timeState.gameplayClock = finishTime.gameplayClock;
 		}
+		if (finishTime != null)
+			this.timeState.gameplayClock = finishTime.gameplayClock;
 		playGui.formatTimer(this.timeState.gameplayClock, determineClockColor(this.timeState.gameplayClock));
 
 		if (!this.isWatching && this.isRecording)
