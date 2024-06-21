@@ -1,5 +1,6 @@
 package gui;
 
+import net.NetCommands;
 import net.Net;
 import h3d.shader.AlphaChannel;
 import hxd.res.BitmapFont;
@@ -109,8 +110,13 @@ class MPEndGameGui extends GuiImage {
 		var restartBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/end/restart"));
 		restartBtn.position = new Vector(5, 7);
 		restartBtn.extent = new Vector(49, 49);
+		restartBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.popDialog(this);
+			MarbleGame.instance.paused = false;
+			NetCommands.completeRestartGame();
+		}
 		if (Net.isClient) {
-			lobbyBtn.disabled = true;
+			restartBtn.disabled = true;
 		}
 		sidebar.addChild(restartBtn);
 

@@ -1,5 +1,6 @@
 package gui;
 
+import net.NetCommands;
 import h2d.filter.DropShadow;
 import net.Net;
 import src.MarbleGame;
@@ -43,6 +44,11 @@ class MPExitGameDlg extends GuiControl {
 		partialRestart.position = new Vector(133, 80);
 		partialRestart.extent = new Vector(94, 45);
 		partialRestart.vertSizing = Top;
+		partialRestart.pressedAction = (e) -> {
+			MarbleGame.instance.paused = false;
+			NetCommands.partialRestartGame();
+			MarbleGame.canvas.popDialog(this);
+		}
 		dialogImg.addChild(partialRestart);
 		if (!Net.isHost) {
 			partialRestart.disabled = true;
@@ -93,6 +99,11 @@ class MPExitGameDlg extends GuiControl {
 		completeRestart.position = new Vector(224, 80);
 		completeRestart.extent = new Vector(104, 45);
 		completeRestart.vertSizing = Top;
+		completeRestart.pressedAction = (e) -> {
+			MarbleGame.instance.paused = false;
+			NetCommands.completeRestartGame();
+			MarbleGame.canvas.popDialog(this);
+		}
 		dialogImg.addChild(completeRestart);
 		if (!Net.isHost) {
 			completeRestart.disabled = true;

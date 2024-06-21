@@ -273,6 +273,7 @@ class Marble extends GameObject {
 
 	var forcefield:DtsObject;
 	var helicopter:DtsObject;
+	var megaHelicopter:DtsObject;
 	var superBounceEnableTime:Float = -1e8;
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
@@ -554,9 +555,21 @@ class Marble extends GameObject {
 		this.helicopter.y = 1e8;
 		this.helicopter.z = 1e8;
 
+		this.megaHelicopter = new DtsObject();
+		this.megaHelicopter.dtsPath = "data/shapes/items/megahelicopter.dts";
+		this.megaHelicopter.useInstancing = true;
+		this.megaHelicopter.identifier = "MegaHelicopter";
+		this.megaHelicopter.showSequences = true;
+		this.megaHelicopter.isBoundingBoxCollideable = false;
+		// this.addChild(this.helicopter);
+		this.megaHelicopter.x = 1e8;
+		this.megaHelicopter.y = 1e8;
+		this.megaHelicopter.z = 1e8;
+
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
+		worker.addTask(fwd -> level.addDtsObject(this.megaHelicopter, fwd));
 		worker.run();
 	}
 
@@ -1873,6 +1886,7 @@ class Marble extends GameObject {
 		marbleUpdate.netFlags = this.netFlags;
 		marbleUpdate.gravityDirection = this.currentUp;
 		marbleUpdate.serialize(b);
+
 		return b.getBytes();
 	}
 
@@ -1987,7 +2001,7 @@ class Marble extends GameObject {
 				lastMove = move.move;
 			}
 		}
-		if (move == null && !this.controllable) {
+		if (move == null && !this.controllable || this.mode == Finish) {
 			var axis = moveMotionDir != null ? moveMotionDir : new Vector(0, -1, 0);
 			var innerMove = lastMove;
 			if (innerMove == null) {
@@ -2243,6 +2257,7 @@ class Marble extends GameObject {
 		var shockEnabled = isShockAbsorberEnabled(timeState);
 		var bounceEnabled = isSuperBounceEnabled(timeState);
 		var helicopterEnabled = isHelicopterEnabled(timeState);
+		var megaEnabled = isMegaMarbleEnabled(timeState);
 		var selfMarble = level.marble == cast this;
 		if (selfMarble) {
 			if (shockEnabled) {
@@ -2264,15 +2279,30 @@ class Marble extends GameObject {
 			this.forcefield.y = 1e8;
 			this.forcefield.z = 1e8;
 		}
-		if (helicopterEnabled) {
-			this.helicopter.setPosition(x, y, z);
-			this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
-			if (selfMarble)
-				this.helicopterSound.pause = false;
-		} else {
+		if (megaEnabled) {
 			this.helicopter.setPosition(1e8, 1e8, 1e8);
-			if (selfMarble)
-				this.helicopterSound.pause = true;
+			if (helicopterEnabled) {
+				this.megaHelicopter.setPosition(x, y, z);
+				this.megaHelicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
+				if (selfMarble)
+					this.helicopterSound.pause = false;
+			} else {
+				this.megaHelicopter.setPosition(1e8, 1e8, 1e8);
+				if (selfMarble)
+					this.helicopterSound.pause = true;
+			}
+		} else {
+			this.megaHelicopter.setPosition(1e8, 1e8, 1e8);
+			if (helicopterEnabled) {
+				this.helicopter.setPosition(x, y, z);
+				this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
+				if (selfMarble)
+					this.helicopterSound.pause = false;
+			} else {
+				this.helicopter.setPosition(1e8, 1e8, 1e8);
+				if (selfMarble)
+					this.helicopterSound.pause = true;
+			}
 		}
 	}
 

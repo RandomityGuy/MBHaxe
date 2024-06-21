@@ -204,7 +204,8 @@ class DifBuilder {
 		worker.run();
 	}
 
-	static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String, shininess:Float, specular:Vector) {
+	static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String, shininess:Float, specular:Vector,
+			uvScale:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
 			diffuseTex.wrap = Repeat;
@@ -216,7 +217,7 @@ class DifBuilder {
 			noiseTex.wrap = Repeat;
 			noiseTex.mipMap = Nearest;
 			var shader = new NoiseTileMaterial(diffuseTex, normalTex, noiseTex, shininess, specular, MarbleGame.instance.world.ambient,
-				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, 1);
+				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, uvScale);
 			onFinish(shader);
 		});
 		worker.loadFile('interiors_mbu/${baseTexture}');
@@ -244,33 +245,33 @@ class DifBuilder {
 		'interiors_mbu/plate_1.jpg' => (onFinish) -> createPhongMaterial(onFinish, 'plate.randomize.png', 'plate.normal.png', 8, new Vector(1, 1, 0.8, 1), 0.5),
 		'interiors_mbu/tile_beginner.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_beginner_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_beginner_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_beginner_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_beginner_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_beginner_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_intermediate.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_intermediate_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_intermediate_red.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40,
 			new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_intermediate_red_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_intermediate_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green', 40,
 			new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_intermediate_green_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_advanced.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_advanced_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_advanced_blue.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_advanced_blue_shadow.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_advanced_green.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/tile_advanced_green_shadow.jpg' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
+			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
 		'interiors_mbu/tile_underside.png' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.png', '', 40, new Vector(1, 1, 1, 1)),
 		'interiors_mbu/wall_beginner.png' => (onFinish) -> createPhongMaterial(onFinish, 'wall_beginner.png', 'wall_mbu.normal.png', 12,
 			new Vector(0.8, 0.8, 0.6, 1)),
@@ -710,8 +711,12 @@ class DifBuilder {
 						texture.mipMap = Nearest;
 						var exactName = StringTools.replace(texture.name, "data/", "");
 						material = h3d.mat.Material.create(texture);
-						if (shaderMaterialDict.exists(exactName)) {
-							var retrievefunc = shaderMaterialDict[exactName];
+						var matDictName = exactName;
+						if (!shaderMaterialDict.exists(matDictName)) {
+							matDictName = StringTools.replace(exactName, "multiplayer/interiors/mbu", "interiors_mbu");
+						}
+						if (shaderMaterialDict.exists(matDictName)) {
+							var retrievefunc = shaderMaterialDict[matDictName];
 							shaderWorker.addTask(fwd -> {
 								retrievefunc(shad -> {
 									material.mainPass.removeShader(material.textureShader);
