@@ -114,6 +114,12 @@ class HuntMode extends NullMode {
 		}
 	}
 
+	public function freeSpawns() {
+		for (i in 0...playerSpawnPoints.length) {
+			spawnPointTaken[i] = false;
+		}
+	}
+
 	override function getRespawnTransform(marble:Marble) {
 		var lastContactPos = marble.lastContactPosition;
 		if (lastContactPos == null) {
@@ -181,12 +187,17 @@ class HuntMode extends NullMode {
 				}
 			}
 		}
+		for (i in 0...spawnPointTaken.length) {
+			spawnPointTaken[i] = false;
+		}
 	}
 
 	function setupGems() {
 		hideExisting();
 		this.activeGems = [];
 		this.activeGemSpawnGroup = [];
+		this.rng.setSeed(cast Math.random() * 10000);
+		this.rng2.setSeed(cast Math.random() * 10000);
 		prepareGems();
 		spawnHuntGems();
 	}
@@ -362,6 +373,7 @@ class HuntMode extends NullMode {
 		if (level.finishTime != null)
 			return;
 
+		AudioManager.playSound(ResourceLoader.getResource("data/sound/firewrks.wav", ResourceLoader.getAudio, @:privateAccess level.soundResources));
 		// AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
 		level.finishTime = level.timeState.clone();
 		level.marble.setMode(Finish);
@@ -389,7 +401,7 @@ class HuntMode extends NullMode {
 		}
 
 		level.schedule(level.timeState.currentAttemptTime + 2, () -> {
-			MarbleGame.canvas.setContent(new MPEndGameGui());
+			MarbleGame.canvas.pushDialog(new MPEndGameGui());
 			level.setCursorLock(false);
 			return 0;
 		});

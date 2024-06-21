@@ -873,6 +873,10 @@ class MarbleWorld extends Scheduler {
 						marble.setMode(Play);
 
 					this.playGui.setCenterText('go');
+
+					var huntMode = cast(this.gameMode, HuntMode);
+
+					huntMode.freeSpawns();
 				}
 			}
 			if (this.multiplayerStarted) {
@@ -1251,6 +1255,49 @@ class MarbleWorld extends Scheduler {
 				Settings.levelStatistics[mission.path].respawns++;
 			}
 		}
+	}
+
+	// MP ONLY
+	public function completeRestart() {
+		for (id => client in Net.clientIdMap) {
+			client.state = LOBBY;
+			client.lobbyReady = false;
+		}
+		Net.hostReady = false;
+		Net.lobbyHostReady = false;
+		Net.lobbyClientReady = false;
+
+		this.finishTime = null;
+		this.multiplayerStarted = false;
+		this.timeState.ticks = 0;
+
+		for (marble in this.marbles) {
+			restart(marble, true);
+		}
+
+		showPreGame();
+
+		serverStartTicks = 0;
+		startTime = 1e8;
+	}
+
+	public function partialRestart() {
+		this.finishTime = null;
+		this.multiplayerStarted = false;
+		this.timeState.ticks = 0;
+
+		for (marble in this.marbles) {
+			restart(marble, true);
+		}
+
+		startTime = this.timeState.timeSinceLoad + 3.5;
+
+		if (Net.isHost) {
+			haxe.Timer.delay(() -> {
+				NetCommands.setStartTicks(this.timeState.ticks);
+			}, 500);
+		}
+		this.gameMode.onRestart();
 	}
 
 	public function getWorldStateForClientJoin() {

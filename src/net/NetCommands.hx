@@ -1,5 +1,7 @@
 package net;
 
+import gui.MPExitGameDlg;
+import gui.MPEndGameGui;
 import gui.MPPreGameDlg;
 import gui.MPPlayMissionGui;
 import net.ClientConnection.NetPlatform;
@@ -308,21 +310,36 @@ class NetCommands {
 		}
 	}
 
-	@:rpc(server) public static function restartGame() {
-		var world = MarbleGame.instance.world;
-		if (Net.isHost) {
-			world.startTime = 1e8;
-			haxe.Timer.delay(() -> world.allClientsReady(), 1500);
-		}
+	@:rpc(server) public static function completeRestartGame() {
 		if (Net.isClient) {
 			var gui = MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1];
-			if (gui is EndGameGui) {
-				var egg = cast(gui, EndGameGui);
+			if (gui is MPEndGameGui || gui is MPExitGameDlg) {
+				MarbleGame.instance.paused = false;
+				MarbleGame.canvas.popDialog(gui);
 				// egg.retryFunc(null);
-				world.restartMultiplayerState();
 			}
 		}
-		world.multiplayerStarted = false;
+		var world = MarbleGame.instance.world;
+		world.completeRestart();
+		if (Net.isClient) {
+			world.restartMultiplayerState();
+		}
+	}
+
+	@:rpc(server) public static function partialRestartGame() {
+		if (Net.isClient) {
+			var gui = MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1];
+			if (gui is MPEndGameGui || gui is MPExitGameDlg) {
+				MarbleGame.instance.paused = false;
+				MarbleGame.canvas.popDialog(gui);
+				// egg.retryFunc(null);
+			}
+		}
+		var world = MarbleGame.instance.world;
+		world.partialRestart();
+		if (Net.isClient) {
+			world.restartMultiplayerState();
+		}
 	}
 
 	@:rpc(server) public static function ping(sendTime:Float) {
