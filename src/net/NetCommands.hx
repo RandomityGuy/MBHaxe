@@ -1,5 +1,7 @@
 package net;
 
+import gui.MessageBoxOkDlg;
+import gui.JoinServerGui;
 import gui.MPExitGameDlg;
 import gui.MPEndGameGui;
 import gui.MPPreGameDlg;
@@ -262,18 +264,31 @@ class NetCommands {
 			if (MarbleGame.instance.world != null) {
 				MarbleGame.instance.quitMission();
 			}
-			// var loadGui = new MultiplayerLoadingGui("Server closed");
-			// MarbleGame.canvas.setContent(loadGui);
-			// loadGui.setErrorStatus("Server closed");
+			MarbleGame.canvas.setContent(new JoinServerGui());
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Server closed"));
 		}
 	}
 
-	@:rpc(client) public static function setPlayerData(clientId:Int, name:String, marble:Int, marbleCat:Int) {
+	@:rpc(server) public static function getKicked() {
+		if (Net.isClient) {
+			Net.disconnect();
+			MarbleGame.canvas.setContent(new JoinServerGui());
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Kicked from server"));
+		}
+	}
+
+	@:rpc(client) public static function setPlayerData(clientId:Int, name:String, marble:Int, marbleCat:Int, needRetransmit:Bool) {
 		if (Net.isHost) {
 			Net.clientIdMap[clientId].setName(name);
 			Net.clientIdMap[clientId].setMarbleId(marble, marbleCat);
 			if (MarbleGame.canvas.content is MPPlayMissionGui) {
 				cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
+			}
+			if (needRetransmit) {
+				var b = Net.sendPlayerInfosBytes();
+				for (cc in Net.clients) {
+					cc.sendBytes(b);
+				}
 			}
 		}
 	}

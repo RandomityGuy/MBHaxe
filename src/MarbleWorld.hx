@@ -1291,10 +1291,11 @@ class MarbleWorld extends Scheduler {
 			restart(marble, true);
 		}
 
-		startTime = this.timeState.timeSinceLoad + 3.5;
+		startTime = this.timeState.timeSinceLoad + 4;
 
 		if (Net.isHost) {
 			haxe.Timer.delay(() -> {
+				this.gameMode.onRestart();
 				NetCommands.setStartTicks(this.timeState.ticks);
 			}, 500);
 		}

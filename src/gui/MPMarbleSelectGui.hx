@@ -1,5 +1,7 @@
 package gui;
 
+import net.Net;
+import net.NetCommands;
 import h2d.filter.DropShadow;
 import hxd.res.BitmapFont;
 import h3d.prim.Polygon;
@@ -54,6 +56,18 @@ class MPMarbleSelectGui extends GuiImage {
 			Settings.optionsSettings.marbleShader = MarbleSelectGui.marbleData[curCategorySelection][curSelection].shader;
 			Settings.save();
 			MarbleGame.canvas.popDialog(this);
+
+			// Transmit changes to the server/clients
+			if (Net.isClient) {
+				NetCommands.setPlayerData(Net.clientId, Settings.highscoreName, Settings.optionsSettings.marbleIndex,
+					Settings.optionsSettings.marbleCategoryIndex, true);
+			}
+			if (Net.isHost) {
+				var b = Net.sendPlayerInfosBytes();
+				for (cc in Net.clients) {
+					cc.sendBytes(b);
+				}
+			}
 		}
 		this.addChild(selectBtn);
 
