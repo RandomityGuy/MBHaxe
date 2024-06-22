@@ -229,7 +229,9 @@ class Settings {
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
 		#end
 		AudioManager.updateVolumes();
+		#if hl
 		Window.getInstance().vsync = optionsSettings.vsync;
+		#end
 		@:privateAccess cast(MarbleGame.instance.scene.renderer, Renderer).onResize();
 
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);

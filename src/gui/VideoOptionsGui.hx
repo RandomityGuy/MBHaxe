@@ -110,11 +110,13 @@ class VideoOptionsGui extends GuiImage {
 		}, 0.35);
 		displayOpt.setCurrentOption(Settings.optionsSettings.isFullScreen ? 0 : 1);
 
+		#if hl
 		var vsyncOpt = optionCollection.addOption(1, "VSync", ["Disabled", "Enabled"], (idx) -> {
 			Settings.optionsSettings.vsync = (idx == 1);
 			return true;
 		}, 0.35);
 		vsyncOpt.setCurrentOption(Settings.optionsSettings.vsync ? 1 : 0);
+		#end
 
 		function numberRange(start:Int, stop:Int, step:Int) {
 			var range = [];
