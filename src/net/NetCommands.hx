@@ -56,11 +56,13 @@ class NetCommands {
 	// 	}
 	// }
 
-	@:rpc(server) public static function playLevelMidJoin(index:Int) {
+	@:rpc(server) public static function playLevelMidJoin(category:String, levelIndex:Int) {
 		if (Net.isClient) {
-			var difficultyMissions = MissionList.missionList['ultra']["multiplayer"];
-			var curMission = difficultyMissions[index];
+			MissionList.buildMissionList();
+			var difficultyMissions = MissionList.missionList['multiplayer'][category];
+			var curMission = difficultyMissions[levelIndex];
 			MarbleGame.instance.playMission(curMission, true);
+			@:privateAccess MarbleGame.instance.world._skipPreGame = true;
 		}
 	}
 
@@ -146,35 +148,39 @@ class NetCommands {
 					Net.serverInfo.state = "PLAYING";
 					MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
 				}
-			} else {
-				// Mid game join
-				Console.log("Mid game join for client " + clientId);
-				// Send em our present world state
-				if (MarbleGame.instance.world != null) {
-					var packets = MarbleGame.instance.world.getWorldStateForClientJoin();
-					var c = Net.clientIdMap[clientId];
-					for (packet in packets) {
-						c.sendBytes(packet);
-					}
-					Net.clientIdMap[clientId].ready();
+			} else {}
+		}
+	}
 
-					if (MarbleGame.instance.world.serverStartTicks == 0) {
-						var allReady = true;
-						for (id => client in Net.clientIdMap) {
-							if (client.state != GameplayState.GAME) {
-								allReady = false;
-								break;
-							}
+	@:rpc(client) public static function requestMidGameJoinState(clientId:Int) {
+		if (Net.isHost) {
+			// Mid game join
+			Console.log("Mid game join for client " + clientId);
+			// Send em our present world state
+			if (MarbleGame.instance.world != null) {
+				var packets = MarbleGame.instance.world.getWorldStateForClientJoin();
+				var c = Net.clientIdMap[clientId];
+				for (packet in packets) {
+					c.sendBytes(packet);
+				}
+				Net.clientIdMap[clientId].ready();
+
+				if (MarbleGame.instance.world.serverStartTicks == 0) {
+					var allReady = true;
+					for (id => client in Net.clientIdMap) {
+						if (client.state != GameplayState.GAME) {
+							allReady = false;
+							break;
 						}
-						if (allReady) {
-							if (MarbleGame.instance.world != null) {
-								MarbleGame.instance.world.allClientsReady();
-							}
-						}
-					} else {
-						// Send the start ticks
-						NetCommands.setStartTicksMidJoinClient(c, MarbleGame.instance.world.serverStartTicks, MarbleGame.instance.world.timeState.ticks);
 					}
+					if (allReady) {
+						if (MarbleGame.instance.world != null) {
+							MarbleGame.instance.world.allClientsReady();
+						}
+					}
+				} else {
+					// Send the start ticks
+					NetCommands.setStartTicksMidJoinClient(c, MarbleGame.instance.world.serverStartTicks, MarbleGame.instance.world.timeState.ticks);
 				}
 			}
 		}
