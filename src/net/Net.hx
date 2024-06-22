@@ -1,5 +1,7 @@
 package net;
 
+import gui.MessageBoxOkDlg;
+import gui.JoinServerGui;
 import gui.MPPreGameDlg;
 import net.NetPacket.ScoreboardPacket;
 import gui.MPPlayMissionGui;
@@ -212,14 +214,8 @@ class Net {
 					MarbleGame.instance.quitMission();
 				}
 				if (!weLeftOurselves || forceShow) {
-					// if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
-					// 	var loadGui = new MultiplayerLoadingGui(msg);
-					// 	MarbleGame.canvas.setContent(loadGui);
-					// 	loadGui.setErrorStatus(msg);
-					// } else {
-					// 	var loadGui = cast(MarbleGame.canvas.content, MultiplayerLoadingGui);
-					// 	loadGui.setErrorStatus(msg);
-					// }
+					MarbleGame.canvas.setContent(new JoinServerGui());
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg(msg));
 				}
 			}
 
@@ -232,7 +228,7 @@ class Net {
 				switch (s) {
 					case RTC_CLOSED:
 						Console.log("RTC State change: Connection closed!");
-						closeFunc("Connection closed", true);
+						closeFunc("Connection closed", false);
 					case RTC_CONNECTED:
 						Console.log("RTC State change: Connected!");
 					case RTC_CONNECTING:
@@ -312,12 +308,12 @@ class Net {
 			}
 
 			var onDatachannelClose = (dc:RTCDataChannel) -> {
-				closeFunc("Disconnected", true);
+				closeFunc("Disconnected", false);
 			}
 
 			var onDatachannelError = (msg:String) -> {
 				Console.log('Errored out due to ${msg}');
-				closeFunc("Connection error", true);
+				closeFunc("Connection error", false);
 			}
 
 			clientDatachannel.onOpen = (n) -> {
@@ -424,11 +420,8 @@ class Net {
 							if (MarbleGame.instance.world != null) {
 								MarbleGame.instance.quitMission();
 							}
-							// if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
-							// 	var loadGui = new MultiplayerLoadingGui("Timed out");
-							// 	MarbleGame.canvas.setContent(loadGui);
-							// 	loadGui.setErrorStatus("Timed out");
-							// }
+							MarbleGame.canvas.setContent(new JoinServerGui());
+							MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Timed out"));
 						}
 					}
 				}
@@ -660,7 +653,7 @@ class Net {
 				clientId = input.readByte(); // 8 bit client id, hopefully we don't exceed this
 				Console.log('Client ID set to ${clientId}');
 				NetCommands.setPlayerData(clientId, Settings.highscoreName, Settings.optionsSettings.marbleIndex,
-					Settings.optionsSettings.marbleCategoryIndex); // Send our player name to the server
+					Settings.optionsSettings.marbleCategoryIndex, false); // Send our player name to the server
 				NetCommands.transmitPlatform(clientId, getPlatform()); // send our platform too
 
 			case Ping:

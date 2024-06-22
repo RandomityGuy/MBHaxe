@@ -1,5 +1,6 @@
 package net;
 
+import gui.JoinServerGui;
 import gui.MessageBoxOkDlg;
 import src.MarbleGame;
 import haxe.Json;
@@ -294,10 +295,8 @@ class MasterServerClient {
 				@:privateAccess Net.client.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		}
 		if (conts.type == "connectFailed") {
-			// var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
-			// if (loadGui != null) {
-			// 	loadGui.setErrorStatus(conts.reason);
-			// }
+			MarbleGame.canvas.setContent(new JoinServerGui());
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg(conts.reason));
 		}
 		if (conts.type == "turnserver") {
 			Net.turnServer = conts.server; // Turn server!

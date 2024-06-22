@@ -392,7 +392,7 @@ class Marble extends GameObject {
 			marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
 			marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
 		} else {
-			var marbleData = MarbleSelectGui.marbleData[0][connection.getMarbleId()]; // FIXME category support
+			var marbleData = MarbleSelectGui.marbleData[connection.getMarbleCatId()][connection.getMarbleId()]; // FIXME category support
 			Console.log("Marble: " + marbleData.dts + " (" + marbleData.skin + ")");
 			marbleDts.dtsPath = marbleData.dts;
 			marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
@@ -557,7 +557,7 @@ class Marble extends GameObject {
 
 		this.megaHelicopter = new DtsObject();
 		this.megaHelicopter.dtsPath = "data/shapes/items/megahelicopter.dts";
-		this.megaHelicopter.useInstancing = true;
+		this.megaHelicopter.useInstancing = false;
 		this.megaHelicopter.identifier = "MegaHelicopter";
 		this.megaHelicopter.showSequences = true;
 		this.megaHelicopter.isBoundingBoxCollideable = false;

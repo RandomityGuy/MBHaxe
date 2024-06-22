@@ -96,6 +96,9 @@ class MPPreGameDlg extends GuiControl {
 		kickBtn.vertSizing = Bottom;
 		kickBtn.position = new Vector(360, 388);
 		kickBtn.extent = new Vector(45, 45);
+		kickBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MPKickBanDlg());
+		}
 		if (Net.isHost)
 			dialogImg.addChild(kickBtn);
 

@@ -163,6 +163,9 @@ class MPPlayMissionGui extends GuiImage {
 		var kickBtn = new GuiButton(loadButtonImages("data/ui/mp/play/kick"));
 		kickBtn.position = new Vector(304, 514);
 		kickBtn.extent = new Vector(44, 44);
+		kickBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MPKickBanDlg());
+		}
 		if (Net.isHost)
 			window.addChild(kickBtn);
 
