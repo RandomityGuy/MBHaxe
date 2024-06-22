@@ -241,6 +241,8 @@ class MarbleWorld extends Scheduler {
 
 	public var _ready:Bool = false;
 
+	var _skipPreGame:Bool = false;
+
 	var _loadBegin:Bool = false;
 	var _loaded:Bool = false;
 
@@ -553,7 +555,12 @@ class MarbleWorld extends Scheduler {
 		// }
 		if (this.isMultiplayer) {
 			// Push the pre - game
-			showPreGame();
+			if (!_skipPreGame) {
+				showPreGame();
+			} else {
+				_skipPreGame = false;
+				NetCommands.requestMidGameJoinState(Net.clientId);
+			}
 		}
 		this.gameMode.onMissionLoad();
 	}
@@ -1361,14 +1368,17 @@ class MarbleWorld extends Scheduler {
 		}
 
 		// Scoreboard!
-		// var b = new OutputBitStream();
-		// b.writeByte(NetPacketType.ScoreBoardInfo);
-		// var sbPacket = new ScoreboardPacket();
-		// for (player in @:privateAccess this.playGui.playerList) {
-		// 	sbPacket.scoreBoard.set(player.id, player.score);
-		// }
-		// sbPacket.serialize(b);
-		// packets.push(b.getBytes());
+		var b = new OutputBitStream();
+		b.writeByte(NetPacketType.ScoreBoardInfo);
+		var sbPacket = new ScoreboardPacket();
+		for (player in @:privateAccess this.playGui.playerList) {
+			sbPacket.scoreBoard.set(player.id, player.score);
+			sbPacket.rBoard.set(player.id, player.r);
+			sbPacket.yBoard.set(player.id, player.y);
+			sbPacket.bBoard.set(player.id, player.b);
+		}
+		sbPacket.serialize(b);
+		packets.push(b.getBytes());
 
 		return packets;
 	}

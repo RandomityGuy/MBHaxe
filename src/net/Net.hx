@@ -589,7 +589,7 @@ class Net {
 			// if (MultiplayerLevelSelectGui.custSelected) {
 			// 	NetCommands.playCustomLevelMidJoinClient(conn, MultiplayerLevelSelectGui.custPath);
 			// } else
-			// NetCommands.playLevelMidJoinClient(conn, MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
+			NetCommands.playLevelMidJoinClient(conn, MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
 			MarbleGame.instance.world.addJoiningClient(conn, () -> {});
 			var playerInfoBytes = sendPlayerInfosBytes();
 			for (dc => cc in clients) {
