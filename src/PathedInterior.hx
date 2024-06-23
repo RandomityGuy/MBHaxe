@@ -44,9 +44,13 @@ class PathedInterior extends InteriorObject {
 	var baseOrientation:Quat;
 	var baseScale:Vector;
 
+	var prevPosition:Vector;
+	var position:Vector;
+
 	public var velocity:Vector;
 
 	var stopped:Bool = false;
+	var stoppedPosition:Vector;
 
 	var soundChannel:Channel;
 
@@ -57,6 +61,7 @@ class PathedInterior extends InteriorObject {
 			onFinish(null);
 		var pathedInterior = new PathedInterior();
 		pathedInterior.level = level;
+		pathedInterior.collisionWorld = level.collisionWorld;
 
 		DifBuilder.loadDif(difFile, pathedInterior, () -> {
 			pathedInterior.identifier = difFile + interiorElement.interiorindex;
@@ -158,10 +163,10 @@ class PathedInterior extends InteriorObject {
 				currentTime += delta;
 			}
 
-			var curTform = this.getAbsPos();
+			var curTform = this.position;
 			var tForm = getTransformAtTime(currentTime);
 
-			var displaceDelta = tForm.getPosition().sub(curTform.getPosition());
+			var displaceDelta = tForm.getPosition().sub(curTform);
 			velocity.set(displaceDelta.x / timeDelta, displaceDelta.y / timeDelta, displaceDelta.z / timeDelta);
 			this.collider.velocity = velocity.clone();
 		}
@@ -172,9 +177,15 @@ class PathedInterior extends InteriorObject {
 			return;
 		if (this.velocity.length() == 0)
 			return;
-		var newp = this.getAbsPos().getPosition().add(velocity.multiply(timeDelta));
-		this.setPosition(newp.x, newp.y, newp.z);
-		this.setTransform(this.getTransform());
+		var newp = position.add(velocity.multiply(timeDelta));
+		var tform = this.getAbsPos().clone();
+		tform.setPosition(newp);
+
+		if (this.isCollideable) {
+			collider.setTransform(tform);
+			collisionWorld.updateTransform(this.collider);
+		}
+		this.position.load(newp);
 
 		if (this.soundChannel != null) {
 			var spat = this.soundChannel.getEffect(Spatialization);
@@ -182,12 +193,22 @@ class PathedInterior extends InteriorObject {
 		}
 	}
 
-	public function update(timeState:TimeState) {}
+	public function update(timeState:TimeState) {
+		if (!stopped)
+			this.setPosition(prevPosition.x
+				+ velocity.x * timeState.dt, prevPosition.y
+				+ velocity.y * timeState.dt,
+				prevPosition.z
+				+ velocity.z * timeState.dt);
+		else
+			this.setPosition(stoppedPosition.x, stoppedPosition.y, stoppedPosition.z);
+	}
 
 	public function setStopped(stopped:Bool = true) {
 		// if (!this.stopped)
 		// 	this.stopTime = currentTime;
 		this.stopped = stopped;
+		this.stoppedPosition = this.position.clone();
 	}
 
 	function computeDuration() {
@@ -205,6 +226,8 @@ class PathedInterior extends InteriorObject {
 
 	function updatePosition() {
 		var newp = this.getAbsPos().getPosition();
+		this.position = newp;
+		this.prevPosition = newp;
 		this.setPosition(newp.x, newp.y, newp.z);
 		this.collider.setTransform(this.getTransform());
 		this.collider.velocity = this.velocity;
