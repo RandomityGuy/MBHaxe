@@ -1,5 +1,6 @@
 package net;
 
+import gui.MPMessageGui;
 import gui.MessageBoxOkDlg;
 import gui.JoinServerGui;
 import gui.MPPreGameDlg;
@@ -214,8 +215,14 @@ class Net {
 					MarbleGame.instance.quitMission();
 				}
 				if (!weLeftOurselves || forceShow) {
-					MarbleGame.canvas.setContent(new JoinServerGui());
-					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg(msg));
+					if (MarbleGame.canvas.content is MPMessageGui) {
+						var loadGui:MPMessageGui = cast MarbleGame.canvas.content;
+						if (loadGui != null) {
+							loadGui.setTexts("Error", msg);
+						}
+					} else {
+						MarbleGame.canvas.setContent(new MPMessageGui("Error", msg));
+					}
 				}
 			}
 
@@ -289,12 +296,12 @@ class Net {
 				}
 				openFlags |= idx;
 				if (openFlags == 3) {
-					// if (MarbleGame.canvas.content is MultiplayerLoadingGui) {
-					// 	var loadGui:MultiplayerLoadingGui = cast MarbleGame.canvas.content;
-					// 	if (loadGui != null) {
-					// 		loadGui.setLoadingStatus("Handshaking");
-					// 	}
-					// }
+					if (MarbleGame.canvas.content is MPMessageGui) {
+						var loadGui:MPMessageGui = cast MarbleGame.canvas.content;
+						if (loadGui != null) {
+							loadGui.setTexts("Please Wait", "Handshaking");
+						}
+					}
 					Console.log("Successfully connected!");
 					clients.set(client, new ClientConnection(0, client, clientDatachannel, clientDatachannelUnreliable)); // host is always 0
 					clientIdMap[0] = clients[client];
@@ -420,8 +427,10 @@ class Net {
 							if (MarbleGame.instance.world != null) {
 								MarbleGame.instance.quitMission();
 							}
-							MarbleGame.canvas.setContent(new JoinServerGui());
-							MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Timed out"));
+							if (!(MarbleGame.canvas.content is MPMessageGui)) {
+								var loadGui = new MPMessageGui("Error", "Timed out");
+								MarbleGame.canvas.setContent(loadGui);
+							}
 						}
 					}
 				}

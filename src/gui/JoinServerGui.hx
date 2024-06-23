@@ -117,13 +117,14 @@ class JoinServerGui extends GuiImage {
 				// 	return;
 				// }
 
-				// MarbleGame.canvas.setContent(new MultiplayerLoadingGui("Connecting"));
+				MarbleGame.canvas.setContent(new MPMessageGui("Please Wait", "Connecting"));
 				var failed = true;
 				haxe.Timer.delay(() -> {
-					if (failed) {
-						MarbleGame.canvas.setContent(new JoinServerGui());
-						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to connect to server. Please try again."));
-						Net.disconnect();
+					if (MarbleGame.canvas.content is MPMessageGui) {
+						var loadGui:MPMessageGui = cast MarbleGame.canvas.content;
+						if (loadGui != null) {
+							loadGui.setTexts("Error", "Failed to connect to server");
+						}
 					}
 				}, 15000);
 				Net.joinServer(ourServerList[curSelection].name, "", () -> {

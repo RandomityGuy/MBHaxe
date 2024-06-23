@@ -1,5 +1,6 @@
 package net;
 
+import gui.MPMessageGui;
 import gui.MessageBoxOkDlg;
 import gui.JoinServerGui;
 import gui.MPExitGameDlg;
@@ -270,16 +271,14 @@ class NetCommands {
 			if (MarbleGame.instance.world != null) {
 				MarbleGame.instance.quitMission();
 			}
-			MarbleGame.canvas.setContent(new JoinServerGui());
-			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Server closed"));
+			MarbleGame.canvas.setContent(new MPMessageGui("Info", "Server closed"));
 		}
 	}
 
 	@:rpc(server) public static function getKicked() {
 		if (Net.isClient) {
 			Net.disconnect();
-			MarbleGame.canvas.setContent(new JoinServerGui());
-			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Kicked from server"));
+			MarbleGame.canvas.setContent(new MPMessageGui("Info", "You have been kicked from the server"));
 		}
 	}
 
