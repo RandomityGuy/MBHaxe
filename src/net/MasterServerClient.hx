@@ -1,5 +1,6 @@
 package net;
 
+import gui.MPMessageGui;
 import gui.JoinServerGui;
 import gui.MessageBoxOkDlg;
 import src.MarbleGame;
@@ -295,8 +296,12 @@ class MasterServerClient {
 				@:privateAccess Net.client.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		}
 		if (conts.type == "connectFailed") {
-			MarbleGame.canvas.setContent(new JoinServerGui());
-			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg(conts.reason));
+			if (MarbleGame.canvas.content is MPMessageGui) {
+				var loadGui:MPMessageGui = cast MarbleGame.canvas.content;
+				if (loadGui != null) {
+					loadGui.setTexts("Error", conts.reason);
+				}
+			}
 		}
 		if (conts.type == "turnserver") {
 			Net.turnServer = conts.server; // Turn server!
