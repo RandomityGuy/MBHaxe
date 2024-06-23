@@ -263,7 +263,6 @@ class MarbleWorld extends Scheduler {
 		this.scene2d = scene2d;
 		this.mission = mission;
 		this.game = mission.game.toLowerCase();
-		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
@@ -324,6 +323,7 @@ class MarbleWorld extends Scheduler {
 			}
 		};
 		this.mission.load();
+		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
 		scanMission(this.mission.root);
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));

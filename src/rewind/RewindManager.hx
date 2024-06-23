@@ -1,5 +1,6 @@
 package rewind;
 
+import rewind.RewindFrame.RewindMPState;
 import haxe.io.BytesInput;
 import haxe.io.BytesBuffer;
 import mis.MissionElement.MissionElementBase;
@@ -53,15 +54,14 @@ class RewindManager {
 		rf.currentUp = level.marble.currentUp.clone();
 		rf.lastContactNormal = level.marble.lastContactNormal.clone();
 		rf.mpStates = level.pathedInteriors.map(x -> {
-			return {
-				curState: {
-					currentTime: x.currentTime,
-					targetTime: x.targetTime,
-					velocity: x.velocity.clone(),
-				},
-				stopped: @:privateAccess x.stopped,
-				position: x.getAbsPos().getPosition().clone(),
-			}
+			var mpstate = new RewindMPState();
+			mpstate.currentTime = x.currentTime;
+			mpstate.targetTime = x.targetTime;
+			mpstate.velocity = x.velocity.clone();
+			mpstate.stoppedPosition = @:privateAccess x.stopped ? @:privateAccess x.stoppedPosition.clone() : null;
+			mpstate.position = @:privateAccess x.position.clone();
+			mpstate.prevPosition = @:privateAccess x.prevPosition.clone();
+			return mpstate;
 		});
 		rf.powerupStates = [];
 		rf.landMineStates = [];
@@ -167,12 +167,20 @@ class RewindManager {
 		level.marble.currentUp.set(rf.currentUp.x, rf.currentUp.y, rf.currentUp.z);
 		level.marble.lastContactNormal.set(rf.lastContactNormal.x, rf.lastContactNormal.y, rf.lastContactNormal.z);
 		for (i in 0...rf.mpStates.length) {
-			level.pathedInteriors[i].currentTime = rf.mpStates[i].curState.currentTime;
-			level.pathedInteriors[i].targetTime = rf.mpStates[i].curState.targetTime;
-			level.pathedInteriors[i].velocity.set(rf.mpStates[i].curState.velocity.x, rf.mpStates[i].curState.velocity.y, rf.mpStates[i].curState.velocity.z);
-			@:privateAccess level.pathedInteriors[i].stopped = rf.mpStates[i].stopped;
-			level.pathedInteriors[i].setPosition(rf.mpStates[i].position.x, rf.mpStates[i].position.y, rf.mpStates[i].position.z);
-			level.pathedInteriors[i].setTransform(level.pathedInteriors[i].getTransform());
+			level.pathedInteriors[i].currentTime = rf.mpStates[i].currentTime;
+			level.pathedInteriors[i].targetTime = rf.mpStates[i].targetTime;
+			level.pathedInteriors[i].velocity.load(rf.mpStates[i].velocity);
+			@:privateAccess level.pathedInteriors[i].stopped = rf.mpStates[i].stoppedPosition != null;
+			@:privateAccess level.pathedInteriors[i].position.load(rf.mpStates[i].position);
+			@:privateAccess level.pathedInteriors[i].prevPosition.load(rf.mpStates[i].prevPosition);
+			@:privateAccess level.pathedInteriors[i].stoppedPosition = rf.mpStates[i].stoppedPosition;
+			if (level.pathedInteriors[i].isCollideable) {
+				var tform = level.pathedInteriors[i].getAbsPos().clone();
+				tform.setPosition(rf.mpStates[i].position);
+				@:privateAccess level.pathedInteriors[i].collider.setTransform(tform);
+				level.collisionWorld.updateTransform(@:privateAccess level.pathedInteriors[i].collider);
+			}
+			// level.pathedInteriors[i].setTransform(level.pathedInteriors[i].getTransform());
 		}
 		var pstates = rf.powerupStates.copy();
 		var lmstates = rf.landMineStates.copy();

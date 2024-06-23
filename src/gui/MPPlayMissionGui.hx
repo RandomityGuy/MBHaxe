@@ -1,5 +1,6 @@
 package gui;
 
+import src.Marbleland;
 import h2d.Scene;
 import hxd.Key;
 import gui.GuiControl.MouseState;
@@ -391,7 +392,10 @@ class MPPlayMissionGui extends GuiImage {
 		}
 
 		setCategoryFunc = function(category:String, ?sort:String = null, ?doRender:Bool = true) {
-			currentList = MissionList.missionList["multiplayer"][category];
+			if (category == "custom") {
+				currentList = Marbleland.multiplayerMissions;
+			} else
+				currentList = MissionList.missionList["multiplayer"][category];
 
 			@:privateAccess difficultySelector.anim.frames = loadButtonImages('data/ui/mp/play/difficulty_${category}');
 
@@ -542,8 +546,13 @@ class MPPlayMissionGui extends GuiImage {
 			// if (custSelected) {
 			// 	NetCommands.playCustomLevel(MPCustoms.missionList[custSelectedIdx].path);
 			// } else {
-			var curMission = MissionList.missionList["multiplayer"][cat][index]; //  mission[index];
-			MarbleGame.instance.playMission(curMission, true);
+			if (cat == "custom") {
+				var curMission = Marbleland.multiplayerMissions[index]; //  mission[index];
+				MarbleGame.instance.playMission(curMission, true);
+			} else {
+				var curMission = MissionList.missionList["multiplayer"][cat][index]; //  mission[index];
+				MarbleGame.instance.playMission(curMission, true);
+			}
 			// }
 		}
 

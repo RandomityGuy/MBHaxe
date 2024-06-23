@@ -15,6 +15,7 @@ import net.Net.NetPacketType;
 import src.MarbleGame;
 import src.MissionList;
 import src.Console;
+import src.Marbleland;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -60,9 +61,14 @@ class NetCommands {
 	@:rpc(server) public static function playLevelMidJoin(category:String, levelIndex:Int) {
 		if (Net.isClient) {
 			MissionList.buildMissionList();
-			var difficultyMissions = MissionList.missionList['multiplayer'][category];
-			var curMission = difficultyMissions[levelIndex];
-			MarbleGame.instance.playMission(curMission, true);
+			if (category == "custom") {
+				var curMission = Marbleland.multiplayerMissions[levelIndex];
+				MarbleGame.instance.playMission(curMission, true);
+			} else {
+				var difficultyMissions = MissionList.missionList['multiplayer'][category];
+				var curMission = difficultyMissions[levelIndex];
+				MarbleGame.instance.playMission(curMission, true);
+			}
 			@:privateAccess MarbleGame.instance.world._skipPreGame = true;
 		}
 	}
