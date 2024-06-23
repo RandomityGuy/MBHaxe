@@ -326,6 +326,7 @@ class RewindFrame {
 		currentUp.z = br.readDouble();
 		lastContactNormal.x = br.readDouble();
 		lastContactNormal.y = br.readDouble();
+		lastContactNormal.z = br.readDouble();
 		mpStates = [];
 		var mpStates_len = br.readInt16();
 		for (i in 0...mpStates_len) {
