@@ -139,6 +139,7 @@ class PathedInterior extends InteriorObject {
 
 	public function computeNextPathStep(timeDelta:Float) {
 		stopped = false;
+		prevPosition = this.position.clone();
 		if (currentTime == targetTime) {
 			velocity.set(0, 0, 0);
 			this.collider.velocity.set(0, 0, 0);
@@ -177,6 +178,7 @@ class PathedInterior extends InteriorObject {
 			return;
 		if (this.velocity.length() == 0)
 			return;
+		velocity.w = 0;
 		var newp = position.add(velocity.multiply(timeDelta));
 		var tform = this.getAbsPos().clone();
 		tform.setPosition(newp);

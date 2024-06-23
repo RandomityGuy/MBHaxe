@@ -2172,6 +2172,10 @@ class Marble extends GameObject {
 		playedSounds = [];
 		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
 
+		for (pi in pathedInteriors) {
+			pi.update(timeState);
+		}
+
 		// physicsAccumulator += timeState.dt;
 
 		// while (physicsAccumulator > 0.032) {
