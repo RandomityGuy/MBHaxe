@@ -31,6 +31,14 @@ class JoinServerGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
+		function loadButtonImagesExt(path:String) {
+			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed, disabled];
+		}
+
 		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
 		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
 		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
@@ -135,9 +143,27 @@ class JoinServerGui extends GuiImage {
 		}
 		window.addChild(joinBtn);
 
-		var refreshBtn = new GuiButton(loadButtonImages("data/ui/mp/join/refresh/refresh-1"));
+		var refreshing = false;
+		var refreshBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/join/refresh/refresh-1"));
 		refreshBtn.position = new Vector(126, 379);
 		refreshBtn.extent = new Vector(45, 45);
+		refreshBtn.pressedAction = (e) -> {
+			if (refreshing)
+				return;
+			refreshBtn.disabled = true;
+			refreshing = true;
+			MasterServerClient.connectToMasterServer(() -> {
+				MasterServerClient.instance.getServerList((servers) -> {
+					ourServerList = servers;
+					updateServerListDisplay();
+					refreshing = false;
+					refreshBtn.disabled = false;
+				});
+			}, () -> {
+				refreshing = false;
+				refreshBtn.disabled = false;
+			});
+		}
 		window.addChild(refreshBtn);
 
 		var serverSettingsBtn = new GuiButton(loadButtonImages("data/ui/mp/play/settings"));
