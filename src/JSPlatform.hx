@@ -32,21 +32,23 @@ class JSPlatform {
 
 		var lastImmunityTime = Math.NEGATIVE_INFINITY;
 
-		js.Browser.window.setInterval(() -> {
-			if (js.Browser.document.activeElement != null) {
-				if (Util.isTouchDevice() && !Util.isSafari()) {
-					if (Util.isInFullscreen()) {
-						// They're in fullscreen, hide the overlay
-						fullscreenEnforcer.classList.add('hidden');
-					} else if (!dislikesFullscreen && js.Browser.window.performance.now() - lastImmunityTime > 666) {
-						// They're not in fullscreen, show the overlay
-						fullscreenEnforcer.classList.remove('hidden');
+		if (!Util.isIOS()) {
+			js.Browser.window.setInterval(() -> {
+				if (js.Browser.document.activeElement != null) {
+					if (Util.isTouchDevice() && !Util.isSafari()) {
+						if (Util.isInFullscreen()) {
+							// They're in fullscreen, hide the overlay
+							fullscreenEnforcer.classList.add('hidden');
+						} else if (!dislikesFullscreen && js.Browser.window.performance.now() - lastImmunityTime > 666) {
+							// They're not in fullscreen, show the overlay
+							fullscreenEnforcer.classList.remove('hidden');
+						}
 					}
-				}
 
-				setEnterFullscreenButtonVisibility(fullscreenButtonVisibility);
-			}
-		}, 250);
+					setEnterFullscreenButtonVisibility(fullscreenButtonVisibility);
+				}
+			}, 250);
+		}
 	}
 	#end
 }

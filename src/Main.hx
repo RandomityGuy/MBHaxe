@@ -46,8 +46,19 @@ class Main extends hxd.App {
 		hl.UI.closeConsole();
 		#end
 		#if js
-		var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // js.Browser.window.devicePixelRatio;
+		var zoomRatio = (Util.isTouchDevice() && !Util.isTablet()) ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // js.Browser.window.devicePixelRatio;
+		if (Util.isIPhone())
+			zoomRatio = 1.5;
 		s2d.scaleMode = Zoom(zoomRatio);
+		Settings.zoomRatio = zoomRatio;
+		Settings.optionsSettings.screenWidth = cast Math.max(js.Browser.window.screen.width,
+			js.Browser.window.screen.height); // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
+		Settings.optionsSettings.screenHeight = cast Math.min(js.Browser.window.screen.width,
+			js.Browser.window.screen.height); // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
+		var canvasElement = js.Browser.document.getElementById("webgl");
+		canvasElement.style.width = "100%";
+		canvasElement.style.height = "100%";
+		s3d.camera.setFovX(Settings.optionsSettings.fovX, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 		#end
 		#if android
 		var zoomRatio = Window.getInstance().height / 600;
