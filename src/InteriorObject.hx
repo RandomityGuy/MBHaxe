@@ -7,6 +7,7 @@ import h3d.Matrix;
 import collision.CollisionEntity;
 import src.GameObject;
 import h3d.scene.Object;
+import src.Util;
 
 class InteriorObject extends GameObject {
 	public var collider:CollisionEntity;
@@ -25,6 +26,11 @@ class InteriorObject extends GameObject {
 		this.level = level;
 		if (this.level != null)
 			this.collisionWorld = this.level.collisionWorld;
+
+		if (!Util.isIOSInstancingSupported()) {
+			this.useInstancing = false;
+		}
+
 		DifBuilder.loadDif(this.interiorFile, cast this, onFinish, -1, this.isCollideable);
 	}
 
