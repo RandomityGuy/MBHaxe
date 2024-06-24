@@ -103,14 +103,16 @@ class CameraController extends Object {
 		pointercontainer.hidden = true;
 		#end
 		_ignoreCursor = true;
-		Window.getInstance().lockPointer((x, y) -> orbit(x, y));
+		if (!Util.isTouchDevice())
+			Window.getInstance().lockPointer((x, y) -> orbit(x, y));
 		#if hl
 		Cursor.show(false);
 		#end
 	}
 
 	public function unlockCursor() {
-		Window.getInstance().unlockPointer();
+		if (!Util.isTouchDevice())
+			Window.getInstance().unlockPointer();
 		#if hl
 		Cursor.show(true);
 		#end

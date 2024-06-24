@@ -397,6 +397,7 @@ class Marble extends GameObject {
 			marbleDts.dtsPath = marbleData.dts;
 			marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
 		}
+		marbleDts.identifier = "Marble";
 		marbleDts.showSequences = false;
 		marbleDts.useInstancing = false;
 		marbleDts.init(null, () -> {}); // SYNC

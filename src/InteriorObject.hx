@@ -7,6 +7,7 @@ import h3d.Matrix;
 import collision.CollisionEntity;
 import src.GameObject;
 import h3d.scene.Object;
+import src.Util;
 
 class InteriorObject extends GameObject {
 	public var collider:CollisionEntity;
@@ -23,6 +24,11 @@ class InteriorObject extends GameObject {
 	public function init(level:MarbleWorld, onFinish:Void->Void) {
 		this.identifier = this.interiorFile;
 		this.level = level;
+
+		if (!Util.isIOSInstancingSupported()) {
+			this.useInstancing = false;
+		}
+
 		if (this.level != null)
 			this.collisionWorld = this.level.collisionWorld;
 		DifBuilder.loadDif(this.interiorFile, cast this, onFinish);
