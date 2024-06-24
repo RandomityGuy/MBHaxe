@@ -234,6 +234,7 @@ class Marble extends GameObject {
 
 		var marbleDts = new DtsObject();
 		marbleDts.dtsPath = 'data/shapes/balls/ball-superball.dts';
+		marbleDts.identifier = "Marble";
 		marbleDts.showSequences = false;
 		marbleDts.useInstancing = false;
 		marbleDts.init(null, () -> {}); // SYNC
