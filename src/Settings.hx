@@ -432,7 +432,7 @@ class Settings {
 			#if js
 			var zoomRatio = (Util.isTouchDevice() && !Util.isTablet()) ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
 			if (Util.isIPhone())
-				zoomRatio = 1.5;
+				zoomRatio = 2;
 			Settings.zoomRatio = zoomRatio;
 			#end
 			#if android
