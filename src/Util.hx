@@ -432,67 +432,6 @@ class Util {
 		#end
 	}
 
-	public static inline function isIOS() {
-		#if js
-		var reg = ~/iPad|iPhone|iPod/;
-		return reg.match(js.Browser.navigator.userAgent);
-		#end
-		#if hl
-		return false;
-		#end
-	}
-
-	public static inline function isTablet() {
-		#if js
-		var reg = ~/iPad|tablet/;
-		return reg.match(js.Browser.navigator.userAgent);
-		#end
-		#if hl
-		return false;
-		#end
-	}
-
-	public static inline function isIPhone() {
-		#if js
-		var reg = ~/iPhone/;
-		return reg.match(js.Browser.navigator.userAgent);
-		#end
-		#if hl
-		return false;
-		#end
-	}
-
-	public static function isIOSInstancingSupported() {
-		#if js
-		static var _supported = null;
-		if (_supported != null)
-			return _supported;
-
-		if (isIOS()) {
-			var reg = ~/OS (\d+)_(\d+)_?(\d+)?/;
-			if (reg.match(js.Browser.navigator.userAgent)) {
-				var mainVer = Std.parseInt(reg.matched(1));
-				if (mainVer < 17) {
-					_supported = false;
-					return false;
-				} else {
-					_supported = true;
-					return true;
-				}
-			} else {
-				_supported = false;
-				return false;
-			}
-		} else {
-			_supported = true;
-			return true;
-		}
-		#end
-		#if hl
-		return true;
-		#end
-	}
-
 	public static inline function isInFullscreen() {
 		#if js
 		return (js.Browser.window.innerHeight == js.Browser.window.screen.height
