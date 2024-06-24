@@ -7,6 +7,7 @@ import mis.MisParser;
 import src.Settings;
 import src.Debug;
 import src.MarbleGame;
+import src.ProfilerUI;
 
 @:publicFields
 class ConsoleEntry {
@@ -122,6 +123,7 @@ class Console {
 				log("rewindTimeScale <scale>");
 				log("drawBounds <true/false>");
 				log("wireframe <true/false>");
+				log("fps <true/false>");
 			} else if (cmdType == "timeScale") {
 				if (cmdSplit.length == 2) {
 					var scale = Std.parseFloat(cmdSplit[1]);
@@ -167,6 +169,14 @@ class Console {
 				#if sys
 				hl.Gc.dumpMemory();
 				#end
+			} else if (cmdType == "fps") {
+				if (cmdSplit.length == 2) {
+					var scale = MisParser.parseBoolean(cmdSplit[1]);
+					ProfilerUI.setEnabled(scale);
+					log("FPS Display set to " + scale);
+				} else {
+					error("Expected one argument, got " + (cmdSplit.length - 1));
+				}
 			} else if (cmdType == 'rollback') {
 				var t = Std.parseFloat(cmdSplit[1]);
 				MarbleGame.instance.world.rollback(t);
