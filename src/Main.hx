@@ -51,8 +51,10 @@ class Main extends hxd.App {
 
 		#if js
 		var zoomRatio = (Util.isTouchDevice() && !Util.isTablet()) ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // js.Browser.window.devicePixelRatio;
-		if (Util.isIPhone() && js.Browser.window.devicePixelRatio > 2.001)
+		if (Util.isIPhone())
 			zoomRatio = 1.5;
+		if (Util.isIPhone() && js.Browser.window.devicePixelRatio == 2)
+			zoomRatio = 1.0;
 		s2d.scaleMode = Zoom(zoomRatio);
 		Settings.zoomRatio = zoomRatio;
 		Settings.optionsSettings.screenWidth = cast Math.max(js.Browser.window.screen.width,
