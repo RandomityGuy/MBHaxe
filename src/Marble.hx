@@ -384,6 +384,7 @@ class Marble extends GameObject {
 
 		var marbleDts = new DtsObject();
 		var marbleShader = "";
+		marbleDts.identifier = "Marble";
 		if (connection == null) { // Our marble
 			Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
 			marbleDts.dtsPath = Settings.optionsSettings.marbleModel;

@@ -495,7 +495,9 @@ class Settings {
 			var wnd = Window.getInstance();
 			var zoomRatio = Window.getInstance().windowToPixelRatio;
 			#if js
-			var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
+			var zoomRatio = (Util.isTouchDevice() && !Util.isTablet()) ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
+			if (Util.isIPhone())
+				zoomRatio = 1.5;
 			Settings.zoomRatio = zoomRatio;
 			#end
 			#if android
@@ -507,8 +509,10 @@ class Settings {
 			Settings.optionsSettings.screenHeight = cast wnd.height;
 			#end
 			#if js
-			Settings.optionsSettings.screenWidth = cast js.Browser.window.screen.width; // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
-			Settings.optionsSettings.screenHeight = cast js.Browser.window.screen.height; // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
+			Settings.optionsSettings.screenWidth = cast Math.max(js.Browser.window.screen.width,
+				js.Browser.window.screen.height); // 1024; // cast(js.Browser.window.innerWidth / js.Browser.window.innerHeight) * 768; // cast js.Browser.window.innerWidth * js.Browser.window.devicePixelRatio * 0.5;
+			Settings.optionsSettings.screenHeight = cast Math.min(js.Browser.window.screen.width,
+				js.Browser.window.screen.height); // 768; // cast js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio * 0.5;
 
 			var canvasElement = js.Browser.document.getElementById("webgl");
 			canvasElement.style.width = "100%";

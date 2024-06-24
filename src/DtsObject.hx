@@ -150,6 +150,11 @@ class DtsObject extends GameObject {
 		}
 
 		isInstanced = false;
+
+		if (!Util.isIOSInstancingSupported()) {
+			this.useInstancing = false;
+		}
+
 		if (this.level != null)
 			isInstanced = this.level.instanceManager.isInstanced(this) && useInstancing;
 		if (!isInstanced)
@@ -461,7 +466,7 @@ class DtsObject extends GameObject {
 				var texture = ResourceLoader.getResource(fullName, ResourceLoader.getTexture, this.textureResources);
 				texture.wrap = Wrap.Repeat;
 				material.texture = texture;
-				if (this.useInstancing) {
+				if (this.identifier != "Marble") {
 					var dtsshader = new DtsTexture();
 					dtsshader.texture = texture;
 					dtsshader.currentOpacity = 1;
