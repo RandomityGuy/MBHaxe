@@ -1547,6 +1547,12 @@ class MarbleWorld extends Scheduler {
 		@:privateAccess this.marble.posStore.load(this.marble.newPos);
 		@:privateAccess this.marble.netCorrected = true;
 
+		// if ((marbleNeedsPrediction & (1 << Net.clientId) > 0)) {
+		for (pi in this.pathedInteriors) {
+			pi.rollbackToTick(currentTick);
+		}
+		// }
+
 		for (move in ourQueuedMoves) {
 			var m = move.move;
 			Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
@@ -1574,6 +1580,13 @@ class MarbleWorld extends Scheduler {
 			advanceTimeState.currentAttemptTime += 0.032;
 			advanceTimeState.ticks++;
 			currentTick++;
+
+			// if ((marbleNeedsPrediction & (1 << Net.clientId) > 0)) {
+			for (pi in this.pathedInteriors) {
+				pi.computeNextPathStep(0.032);
+				pi.advance(0.032);
+			}
+			// }
 		}
 
 		lastMoves.ourMoveApplied = true;
@@ -1857,6 +1870,10 @@ class MarbleWorld extends Scheduler {
 						if (allRecv)
 							this.marble.clearNetFlags();
 					}
+				}
+				for (pi in this.pathedInteriors) {
+					pi.computeNextPathStep(0.032);
+					pi.advance(0.032);
 				}
 				timeState.ticks++;
 			}

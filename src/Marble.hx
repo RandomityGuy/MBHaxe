@@ -1637,12 +1637,13 @@ class Marble extends GameObject {
 		oldPos = this.collider.transform.getPosition();
 		prevRot = this.getRotationQuat().clone();
 
-		if (this.controllable) {
-			for (interior in pathedInteriors) {
-				// interior.pushTickState();
-				interior.computeNextPathStep(timeRemaining);
-			}
+		// if (this.controllable) {
+		for (interior in pathedInteriors) {
+			if (Net.isMP)
+				interior.pushTickState();
+			interior.computeNextPathStep(timeRemaining);
 		}
+		// }
 
 		// Blast
 		if (m != null && m.blast) {
@@ -1795,11 +1796,11 @@ class Marble extends GameObject {
 
 			timeRemaining -= timeStep;
 
-			if (this.controllable) {
-				for (interior in pathedInteriors) {
-					interior.advance(timeStep);
-				}
+			// if (this.controllable) {
+			for (interior in pathedInteriors) {
+				interior.advance(timeStep);
 			}
+			// }
 
 			piTime += timeStep;
 
@@ -1808,11 +1809,11 @@ class Marble extends GameObject {
 		} while (true);
 		if (timeRemaining > 0) {
 			// Advance pls
-			if (this.controllable) {
-				for (interior in pathedInteriors) {
-					interior.advance(timeRemaining);
-				}
+			// if (this.controllable) {
+			for (interior in pathedInteriors) {
+				interior.advance(timeRemaining);
 			}
+			// }
 		}
 		this.queuedContacts = [];
 
@@ -1855,6 +1856,10 @@ class Marble extends GameObject {
 			if (m.jump && this.outOfBounds) {
 				this.level.cancel(this.oobSchedule);
 				this.level.restart(cast this);
+			}
+
+			for (interior in pathedInteriors) {
+				interior.popTickState();
 			}
 		}
 	}
@@ -1899,6 +1904,7 @@ class Marble extends GameObject {
 		// 		return false;
 		// 	}
 		// }
+		// trace('Tick RTT: ', this.serverTicks - p.serverTicks);
 		this.serverTicks = p.serverTicks;
 		this.recvServerTick = p.serverTicks;
 		// this.oldPos = this.newPos;
@@ -2034,13 +2040,13 @@ class Marble extends GameObject {
 		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
 		this.netSmoothOffset.scale(smooth);
 		var smoothScale = this.netSmoothOffset.lengthSq();
-		if (smoothScale < 0.1 || smoothScale > 10.0)
+		if (smoothScale < 0.01 || smoothScale > 10.0)
 			this.netSmoothOffset.set(0, 0, 0);
 
 		if (oldPos != null && newPos != null) {
 			var deltaT = physicsAccumulator / 0.032;
-			if (Net.isClient && !this.controllable)
-				deltaT *= 0.75; // Don't overshoot
+			// if (Net.isClient && !this.controllable)
+			//	deltaT *= 0.75; // Don't overshoot
 			var renderPos = Util.lerpThreeVectors(this.oldPos, this.newPos, deltaT);
 			if (Net.isClient) {
 				renderPos.load(renderPos.add(this.netSmoothOffset));

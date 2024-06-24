@@ -33,7 +33,7 @@ class MPSearchGui extends GuiImage {
 				}
 			}
 		} else {
-			var customsList = MissionList.customMissions;
+			var customsList = Marbleland.multiplayerMissions;
 			for (mis in customsList) {
 				missionList.push({
 					mis: mis,

@@ -156,7 +156,7 @@ class MPPlayMissionGui extends GuiImage {
 		searchBtn.position = new Vector(255, 514);
 		searchBtn.extent = new Vector(44, 44);
 		searchBtn.pressedAction = (e) -> {
-			MarbleGame.canvas.pushDialog(new MPSearchGui(false));
+			MarbleGame.canvas.pushDialog(new MPSearchGui(currentCategory == "custom"));
 		}
 		if (Net.isHost)
 			window.addChild(searchBtn);
