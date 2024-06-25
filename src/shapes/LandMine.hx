@@ -1,5 +1,8 @@
 package shapes;
 
+import net.BitStream.OutputBitStream;
+import net.NetPacket.ExplodableUpdatePacket;
+import net.Net;
 import src.AudioManager;
 import src.TimeState;
 import collision.CollisionHull;
@@ -90,13 +93,7 @@ final landMineSparksParticle:ParticleEmitterOptions = {
 	}
 };
 
-class LandMine extends DtsObject {
-	var disappearTime = -1e8;
-
-	var landMineParticleData:ParticleData;
-	var landMineSmokeParticleData:ParticleData;
-	var landMineSparkParticleData:ParticleData;
-
+class LandMine extends Explodable {
 	var light:h3d.scene.fwd.PointLight;
 
 	public function new() {
@@ -105,57 +102,21 @@ class LandMine extends DtsObject {
 		this.identifier = "LandMine";
 		this.isCollideable = true;
 
-		landMineParticleData = new ParticleData();
-		landMineParticleData.identifier = "landMineParticle";
-		landMineParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
+		particleData = new ParticleData();
+		particleData.identifier = "landMineParticle";
+		particleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
-		landMineSmokeParticleData = new ParticleData();
-		landMineSmokeParticleData.identifier = "landMineSmokeParticle";
-		landMineSmokeParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
+		smokeParticleData = new ParticleData();
+		smokeParticleData.identifier = "landMineSmokeParticle";
+		smokeParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
-		landMineSparkParticleData = new ParticleData();
-		landMineSparkParticleData.identifier = "landMineSparkParticle";
-		landMineSparkParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
-	}
+		sparkParticleData = new ParticleData();
+		sparkParticleData.identifier = "landMineSparkParticle";
+		sparkParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
 
-	public override function init(level:MarbleWorld, onFinish:Void->Void) {
-		super.init(level, () -> {
-			ResourceLoader.load("sound/explode1.wav").entry.load(onFinish);
-		});
-	}
-
-	override function onMarbleContact(marble:src.Marble, timeState:TimeState, ?contact:CollisionInfo) {
-		if (this.isCollideable && !this.level.rewinding) {
-			// marble.velocity = marble.velocity.add(vec);
-			this.disappearTime = timeState.timeSinceLoad;
-			this.setCollisionEnabled(false);
-
-			if (!this.level.rewinding)
-				AudioManager.playSound(ResourceLoader.getResource("data/sound/explode1.wav", ResourceLoader.getAudio, this.soundResources));
-			this.level.particleManager.createEmitter(landMineParticle, landMineParticleData, this.getAbsPos().getPosition());
-			this.level.particleManager.createEmitter(landMineSmokeParticle, landMineSmokeParticleData, this.getAbsPos().getPosition());
-			this.level.particleManager.createEmitter(landMineSparksParticle, landMineSparkParticleData, this.getAbsPos().getPosition());
-
-			var minePos = this.getAbsPos().getPosition();
-			var off = marble.getAbsPos().getPosition().sub(minePos);
-
-			var strength = computeExplosionStrength(off.length());
-
-			var impulse = off.normalized().multiply(strength);
-			marble.applyImpulse(impulse);
-
-			// light = new h3d.scene.fwd.PointLight(MarbleGame.instance.scene);
-			// light.setPosition(minePos.x, minePos.y, minePos.z);
-			// light.enableSpecular = false;
-
-			// for (collider in this.colliders) {
-			// 	var hull:CollisionHull = cast collider;
-			// 	hull.force = strength;
-			// }
-		}
-		// Normally, we would add a light here, but that's too expensive for THREE, apparently.
-
-		// this.level.replay.recordMarbleContact(this);
+		this.smokeParticle = landMineSmokeParticle;
+		this.sparksParticle = landMineSparksParticle;
+		this.particle = landMineParticle;
 	}
 
 	function computeExplosionStrength(r:Float) {
@@ -172,28 +133,13 @@ class LandMine extends DtsObject {
 		return v;
 	}
 
-	override function update(timeState:TimeState) {
-		super.update(timeState);
-		if (timeState.timeSinceLoad >= this.disappearTime + 5 || timeState.timeSinceLoad < this.disappearTime) {
-			this.setHide(false);
-		} else {
-			this.setHide(true);
-		}
+	public function applyImpulse(marble:src.Marble) {
+		var minePos = this.getAbsPos().getPosition();
+		var off = marble.getAbsPos().getPosition().sub(minePos);
 
-		// if (light != null) {
-		// 	var t = Util.clamp((timeState.timeSinceLoad - this.disappearTime) / 1.2, 0, 1);
+		var strength = computeExplosionStrength(off.length());
 
-		// 	light.color = Util.lerpThreeVectors(new Vector(0.5, 0.5, 0), new Vector(0, 0, 0), t);
-		// 	var radius = Util.lerp(6, 3, t);
-		// 	light.params = new Vector(0, 1 / radius, 0);
-
-		// 	if (t >= 1) {
-		// 		light.remove();
-		// 		light = null;
-		// 	}
-		// }
-
-		var opacity = Util.clamp((timeState.timeSinceLoad - (this.disappearTime + 5)), 0, 1);
-		this.setOpacity(opacity);
+		var impulse = off.normalized().multiply(strength);
+		marble.applyImpulse(impulse);
 	}
 }

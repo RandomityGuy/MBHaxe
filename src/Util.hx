@@ -429,7 +429,7 @@ class Util {
 		#end
 	}
 
-	public static inline inline function isIOS() {
+	public static inline function isIOS() {
 		#if js
 		var reg = ~/iPad|iPhone|iPod/;
 		return reg.match(js.Browser.navigator.userAgent);
