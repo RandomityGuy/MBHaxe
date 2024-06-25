@@ -1,5 +1,7 @@
 package src;
 
+import shapes.Explodable;
+import net.ExplodablePredictionStore;
 import gui.MPPreGameDlg;
 import src.Radar;
 import rewind.InputRecorder;
@@ -146,6 +148,7 @@ class MarbleWorld extends Scheduler {
 	public var dtsObjects:Array<DtsObject> = [];
 	public var powerUps:Array<PowerUp> = [];
 	public var forceObjects:Array<ForceObject> = [];
+	public var explodables:Array<Explodable> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
@@ -231,6 +234,7 @@ class MarbleWorld extends Scheduler {
 	var predictions:MarblePredictionStore;
 	var powerupPredictions:PowerupPredictionStore;
 	var gemPredictions:GemPredictionStore;
+	var explodablePredictions:ExplodablePredictionStore;
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -275,6 +279,7 @@ class MarbleWorld extends Scheduler {
 			predictions = new MarblePredictionStore();
 			powerupPredictions = new PowerupPredictionStore();
 			gemPredictions = new GemPredictionStore();
+			explodablePredictions = new ExplodablePredictionStore();
 		}
 	}
 
@@ -613,6 +618,7 @@ class MarbleWorld extends Scheduler {
 			predictions = new MarblePredictionStore();
 			powerupPredictions = new PowerupPredictionStore();
 			gemPredictions = new GemPredictionStore();
+			explodablePredictions = new ExplodablePredictionStore();
 		}
 	}
 
@@ -1172,6 +1178,13 @@ class MarbleWorld extends Scheduler {
 				if (obj is ForceObject) {
 					this.forceObjects.push(cast obj);
 				}
+				if (obj is Explodable) {
+					var exp:Explodable = cast obj;
+					exp.netId = this.explodables.length;
+					this.explodables.push(exp);
+					if (Net.isClient)
+						explodablePredictions.alloc();
+				}
 				obj.isTSStatic = isTsStatic;
 				obj.init(cast this, () -> {
 					obj.update(this.timeState);
@@ -1486,13 +1499,16 @@ class MarbleWorld extends Scheduler {
 		// if (marbleNeedsPrediction & (1 << Net.clientId) > 0) { // Only for our clients pls
 		//	if (qm != null) {
 		// var mvs = qm.powerupStates.copy();
-		for (pw in marble.level.powerUps) {
+		for (pw in powerUps) {
 			// var val = mvs.shift();
 			// if (pw.lastPickUpTime != val)
 			//	Console.log('Revert powerup pickup: ${pw.lastPickUpTime} -> ${val}');
 
 			if (pw.pickupClient != -1 && marbleNeedsPrediction & (1 << pw.pickupClient) > 0)
 				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
+		}
+		for (exp in explodables) {
+			exp.revertContactTicks(explodablePredictions.getState(exp.netId));
 		}
 		var huntMode:HuntMode = cast this.gameMode;
 		if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
@@ -2808,7 +2824,8 @@ class MarbleWorld extends Scheduler {
 			dtsObject.dispose();
 		}
 		dtsObjects = null;
-		powerUps = [];
+		powerUps = null;
+		explodables = null;
 		for (trigger in this.triggers) {
 			trigger.dispose();
 		}

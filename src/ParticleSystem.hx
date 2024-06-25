@@ -65,9 +65,9 @@ class Particle {
 	public function update(time:Float, dt:Float) {
 		var t = dt;
 		var a = this.acc;
-		a.load(a.sub(this.vel.multiply(this.o.dragCoefficient)));
-		this.vel.load(this.vel.add(a.multiply(dt)));
-		this.position.load(this.position.add(this.vel.multiply(dt)));
+		a = a.sub(this.vel.multiply(this.o.dragCoefficient));
+		this.vel = this.vel.add(a.multiply(dt));
+		this.position = this.position.add(this.vel.multiply(dt));
 
 		this.currentAge += dt;
 

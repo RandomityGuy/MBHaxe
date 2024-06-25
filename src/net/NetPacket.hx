@@ -209,6 +209,24 @@ class PowerupPickupPacket implements NetPacket {
 }
 
 @:publicFields
+class ExplodableUpdatePacket implements NetPacket {
+	var serverTicks:Int;
+	var explodableId:Int;
+
+	public function new() {}
+
+	public inline function deserialize(b:InputBitStream) {
+		serverTicks = b.readUInt16();
+		explodableId = b.readInt(11);
+	}
+
+	public inline function serialize(b:OutputBitStream) {
+		b.writeUInt16(serverTicks);
+		b.writeInt(explodableId, 11);
+	}
+}
+
+@:publicFields
 class GemSpawnPacket implements NetPacket {
 	var gemIds:Array<Int>;
 

@@ -1,5 +1,6 @@
 package net;
 
+import net.NetPacket.ExplodableUpdatePacket;
 import gui.MPMessageGui;
 import gui.MessageBoxOkDlg;
 import gui.JoinServerGui;
@@ -37,6 +38,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var PowerupPickup;
 	var GemSpawn;
 	var GemPickup;
+	var ExplodableUpdate;
 	var PlayerInfo;
 	var ScoreBoardInfo;
 }
@@ -782,6 +784,13 @@ class Net {
 				scoreboardPacket.deserialize(input);
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
 					@:privateAccess MarbleGame.instance.world.playGui.updatePlayerScores(scoreboardPacket);
+				}
+
+			case ExplodableUpdate:
+				var explodableUpdatePacket = new ExplodableUpdatePacket();
+				explodableUpdatePacket.deserialize(input);
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
+					@:privateAccess MarbleGame.instance.world.explodablePredictions.acknowledgeExplodableUpdate(explodableUpdatePacket);
 				}
 
 			case _:
