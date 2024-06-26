@@ -132,6 +132,26 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(client) public static function toggleSpectate(clientId:Int) {
+		if (Net.isHost) {
+			if (clientId == 0)
+				Net.hostSpectate = !Net.hostSpectate;
+			else
+				Net.clientIdMap[clientId].toggleSpectate();
+
+			if (MarbleGame.canvas.content is MPPlayMissionGui) {
+				cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
+			}
+			if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+				cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
+			}
+			var b = Net.sendPlayerInfosBytes();
+			for (cc in Net.clients) {
+				cc.sendBytes(b);
+			}
+		}
+	}
+
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
 			if (Net.serverInfo.state == "WAITING") {
@@ -213,6 +233,12 @@ class NetCommands {
 				MarbleGame.canvas.popDialog(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1]);
 				MarbleGame.instance.world.setCursorLock(true);
 				MarbleGame.instance.world.marble.camera.stopOverview();
+			}
+
+			if (Net.clientSpectate || Net.hostSpectate) {
+				MarbleGame.instance.world.marble.camera.enableSpectate();
+			} else {
+				MarbleGame.instance.world.marble.camera.stopSpectate();
 			}
 		}
 	}

@@ -107,6 +107,11 @@ class MPPreGameDlg extends GuiControl {
 		spectateBtn.vertSizing = Top;
 		spectateBtn.position = new Vector(190, 394);
 		spectateBtn.extent = new Vector(127, 33);
+		spectateBtn.buttonType = Toggle;
+		spectateBtn.pressedAction = (e) -> {
+			NetCommands.toggleSpectate(Net.isHost ? 0 : Net.clientId);
+			updatePlayerList();
+		}
 		dialogImg.addChild(spectateBtn);
 
 		var serverTitle = new GuiText(markerFelt24);
@@ -223,20 +228,23 @@ class MPPreGameDlg extends GuiControl {
 			if (Net.isHost) {
 				playerListArr.push({
 					name: Settings.highscoreName,
-					ready: Net.lobbyHostReady
+					ready: Net.lobbyHostReady,
+					spectate: Net.hostSpectate
 				});
 			}
 			if (Net.isClient) {
 				playerListArr.push({
 					name: Settings.highscoreName,
-					ready: Net.lobbyClientReady
+					ready: Net.lobbyClientReady,
+					spectate: Net.clientSpectate
 				});
 			}
 			if (Net.clientIdMap != null) {
 				for (c => v in Net.clientIdMap) {
 					playerListArr.push({
 						name: v.name,
-						ready: v.lobbyReady
+						ready: v.lobbyReady,
+						spectate: v.spectator
 					});
 				}
 			}
@@ -249,7 +257,7 @@ class MPPreGameDlg extends GuiControl {
 
 			playBtn.disabled = !allReady;
 
-			var playerListCompiled = playerListArr.map(player -> player.name);
+			var playerListCompiled = playerListArr.map(player -> player.spectate ? '[S] ${player.name}' : player.name);
 			var playerListStateCompiled = playerListArr.map(player -> player.ready ? "[Ready]" : "[Waiting]");
 			playerListLeft.setTexts(playerListCompiled);
 			playerListRight.setTexts(playerListStateCompiled);
@@ -268,7 +276,9 @@ class MPPreGameDlg extends GuiControl {
 		// Make everyone un-lobby ready (again!)
 		for (c in Net.clients) {
 			c.lobbyReady = false;
+			c.spectator = false;
 		}
+		Net.hostSpectate = false;
 		Net.lobbyClientReady = false;
 		Net.lobbyHostReady = false;
 		if (Net.isHost) {
