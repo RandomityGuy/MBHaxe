@@ -1,5 +1,6 @@
 package src;
 
+import net.TrapdoorPredictionStore;
 import shapes.Explodable;
 import net.ExplodablePredictionStore;
 import gui.MPPreGameDlg;
@@ -150,6 +151,8 @@ class MarbleWorld extends Scheduler {
 	public var forceObjects:Array<ForceObject> = [];
 	public var explodables:Array<Explodable> = [];
 	public var explodablesToTick:Array<Int> = [];
+	public var trapdoors:Array<Trapdoor> = [];
+	public var trapdoorsToTick:Array<Int> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
@@ -236,6 +239,7 @@ class MarbleWorld extends Scheduler {
 	var powerupPredictions:PowerupPredictionStore;
 	var gemPredictions:GemPredictionStore;
 	var explodablePredictions:ExplodablePredictionStore;
+	var trapdoorPredictions:TrapdoorPredictionStore;
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -281,6 +285,7 @@ class MarbleWorld extends Scheduler {
 			powerupPredictions = new PowerupPredictionStore();
 			gemPredictions = new GemPredictionStore();
 			explodablePredictions = new ExplodablePredictionStore(cast this);
+			trapdoorPredictions = new TrapdoorPredictionStore(cast this);
 		}
 	}
 
@@ -620,9 +625,6 @@ class MarbleWorld extends Scheduler {
 			powerupPredictions.reset();
 			gemPredictions.reset();
 			explodablePredictions.reset();
-			for (exp in explodables) {
-				exp.lastContactTick = -100000;
-			}
 		}
 	}
 
@@ -1189,6 +1191,13 @@ class MarbleWorld extends Scheduler {
 					if (Net.isClient)
 						explodablePredictions.alloc();
 				}
+				if (obj is Trapdoor) {
+					var t:Trapdoor = cast obj;
+					t.netId = this.trapdoors.length;
+					this.trapdoors.push(t);
+					if (Net.isClient)
+						trapdoorPredictions.alloc();
+				}
 				obj.isTSStatic = isTsStatic;
 				obj.init(cast this, () -> {
 					obj.update(this.timeState);
@@ -1300,6 +1309,14 @@ class MarbleWorld extends Scheduler {
 			restart(marble, true);
 		}
 
+		for (exp in explodables) {
+			exp.lastContactTick = -100000;
+		}
+		trapdoorPredictions.reset();
+		for (t in trapdoors) {
+			t.lastContactTicks = -100000;
+		}
+
 		showPreGame();
 
 		serverStartTicks = 0;
@@ -1316,6 +1333,14 @@ class MarbleWorld extends Scheduler {
 		}
 
 		startTime = this.timeState.timeSinceLoad + 4;
+
+		for (exp in explodables) {
+			exp.lastContactTick = -100000;
+		}
+		trapdoorPredictions.reset();
+		for (t in trapdoors) {
+			t.lastContactTicks = -100000;
+		}
 
 		if (Net.isHost) {
 			haxe.Timer.delay(() -> {
@@ -1516,6 +1541,12 @@ class MarbleWorld extends Scheduler {
 			exp.revertContactTicks(explodablePredictions.getState(exp.netId));
 		}
 		explodablesToTick = [];
+		for (tT in trapdoorsToTick) {
+			var t = trapdoors[tT];
+			t.lastContactTicks = trapdoorPredictions.getState(t.netId);
+			t.update(advanceTimeState);
+		}
+
 		var huntMode:HuntMode = cast this.gameMode;
 		if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
 			for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
@@ -1599,6 +1630,7 @@ class MarbleWorld extends Scheduler {
 					m.calculationTicks--;
 				}
 			}
+
 			advanceTimeState.currentAttemptTime += 0.032;
 			advanceTimeState.ticks++;
 			currentTick++;
@@ -1608,8 +1640,15 @@ class MarbleWorld extends Scheduler {
 				pi.computeNextPathStep(0.032);
 				pi.advance(0.032);
 			}
+
+			for (tT in trapdoorsToTick) {
+				var t = trapdoors[tT];
+				t.update(advanceTimeState);
+			}
 			// }
 		}
+
+		trapdoorsToTick = [];
 
 		lastMoves.ourMoveApplied = true;
 		@:privateAccess this.marble.isNetUpdate = false;
@@ -2832,6 +2871,7 @@ class MarbleWorld extends Scheduler {
 		dtsObjects = null;
 		powerUps = null;
 		explodables = null;
+		trapdoors = null;
 		for (trigger in this.triggers) {
 			trigger.dispose();
 		}

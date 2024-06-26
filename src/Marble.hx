@@ -330,6 +330,7 @@ class Marble extends GameObject {
 	var serverTicks:Int;
 	var recvServerTick:Int;
 	var serverUsePowerup:Bool;
+	var trapdoorContacts:Map<Int, Int> = [];
 
 	public function new() {
 		super();
@@ -1870,6 +1871,11 @@ class Marble extends GameObject {
 		this.netFlags = 0;
 	}
 
+	public inline function queueTrapdoorUpdate(tId:Int, lastContactTick:Int) {
+		trapdoorContacts.set(tId, lastContactTick);
+		this.netFlags |= MarbleNetFlags.UpdateTrapdoor;
+	}
+
 	public function packUpdate(move:NetMove, timeState:TimeState) {
 		var b = new OutputBitStream();
 		b.writeByte(NetPacketType.MarbleUpdate);
@@ -1891,7 +1897,10 @@ class Marble extends GameObject {
 		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0x1FF;
 		marbleUpdate.netFlags = this.netFlags;
 		marbleUpdate.gravityDirection = this.currentUp;
+		marbleUpdate.trapdoorUpdates = this.trapdoorContacts;
 		marbleUpdate.serialize(b);
+
+		this.trapdoorContacts = [];
 
 		return b.getBytes();
 	}
@@ -1937,6 +1946,11 @@ class Marble extends GameObject {
 		if (p.moveQueueSize == 0 && this.connection != null) {
 			// Pad null move on client
 			this.connection.moveManager.duplicateLastMove();
+		}
+		if (p.netFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+			for (tId => tTime in p.trapdoorUpdates) {
+				@:privateAccess level.trapdoorPredictions.acknowledgeTrapdoorUpdate(tId, tTime);
+			}
 		}
 		// if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
 		// 	var ticksSince = (this.serverTicks - this.blastUseTick);

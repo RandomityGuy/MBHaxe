@@ -49,6 +49,7 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var PickupPowerup = 1 << 5;
 	var GravityChange = 1 << 6;
 	var UsePowerup = 1 << 7;
+	var UpdateTrapdoor = 1 << 8;
 }
 
 @:publicFields
@@ -71,6 +72,7 @@ class MarbleUpdatePacket implements NetPacket {
 	var powerUpId:Int;
 	var moveQueueSize:Int;
 	var netFlags:Int;
+	var trapdoorUpdates:Map<Int, Int> = [];
 
 	public function new() {}
 
@@ -141,6 +143,20 @@ class MarbleUpdatePacket implements NetPacket {
 		} else {
 			b.writeFlag(false);
 		}
+		if (netFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+			b.writeFlag(true);
+			var cnt = 0;
+			for (k => v in trapdoorUpdates) {
+				cnt++;
+			}
+			b.writeInt(cnt, 4);
+			for (k => v in trapdoorUpdates) {
+				b.writeInt(k, 8);
+				b.writeUInt16(v);
+			}
+		} else {
+			b.writeFlag(false);
+		}
 	}
 
 	public inline function deserialize(b:InputBitStream) {
@@ -183,6 +199,15 @@ class MarbleUpdatePacket implements NetPacket {
 		if (b.readFlag()) {
 			gravityDirection = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 			this.netFlags |= MarbleNetFlags.GravityChange;
+		}
+		if (b.readFlag()) {
+			var cnt = b.readInt(4);
+			for (i in 0...cnt) {
+				var k = b.readInt(8);
+				var v = b.readUInt16();
+				trapdoorUpdates[k] = v;
+			}
+			this.netFlags |= MarbleNetFlags.UpdateTrapdoor;
 		}
 	}
 }
