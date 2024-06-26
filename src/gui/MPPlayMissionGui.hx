@@ -148,6 +148,7 @@ class MPPlayMissionGui extends GuiImage {
 		leaveBtn.position = new Vector(59, 514);
 		leaveBtn.extent = new Vector(93, 44);
 		leaveBtn.pressedAction = (e) -> {
+			Net.disconnect();
 			MarbleGame.canvas.setContent(new JoinServerGui());
 		}
 		window.addChild(leaveBtn);

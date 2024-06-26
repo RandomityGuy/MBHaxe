@@ -8,6 +8,7 @@ import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
+import hxd.Key;
 
 class MPExitGameDlg extends GuiControl {
 	public function new(resumeFunc:() -> Void, exitFunc:() -> Void) {
@@ -93,6 +94,9 @@ class MPExitGameDlg extends GuiControl {
 		quickspawnBtn.position = new Vector(224, 132);
 		quickspawnBtn.extent = new Vector(104, 45);
 		quickspawnBtn.vertSizing = Top;
+		quickspawnBtn.pressedAction = (e) -> {
+			@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = Key.getFrame() - 1; // jank
+		}
 		dialogImg.addChild(quickspawnBtn);
 
 		var completeRestart = new GuiButton(loadButtonImagesExt("data/ui/mp/exit/complete"));
