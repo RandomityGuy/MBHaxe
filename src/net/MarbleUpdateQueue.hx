@@ -15,6 +15,7 @@ class OtherMarbleUpdate {
 	var lastShockAbsorberTick:Int;
 	var lastPowerUpId:Int;
 	var lastGravityUp:Vector;
+	var lastTrapdoorUpdates:Map<Int, Int> = [];
 
 	public function new() {}
 }
@@ -64,6 +65,10 @@ class MarbleUpdateQueue {
 					update.gravityDirection = otherUpdate.lastGravityUp;
 				else
 					otherUpdate.lastGravityUp = update.gravityDirection;
+				if (update.netFlags & MarbleNetFlags.UpdateTrapdoor == 0)
+					update.trapdoorUpdates = otherUpdate.lastTrapdoorUpdates;
+				else
+					otherUpdate.lastTrapdoorUpdates = update.trapdoorUpdates;
 				ourList.push(update);
 			} else {
 				var otherUpdate = new OtherMarbleUpdate();
@@ -83,6 +88,8 @@ class MarbleUpdateQueue {
 					otherUpdate.lastPowerUpId = update.powerUpId;
 				if (update.netFlags & MarbleNetFlags.GravityChange != 0)
 					otherUpdate.lastGravityUp = update.gravityDirection;
+				if (update.netFlags & MarbleNetFlags.UpdateTrapdoor != 0)
+					otherUpdate.lastTrapdoorUpdates = update.trapdoorUpdates;
 				otherMarbleUpdates[cc] = otherUpdate;
 			}
 		} else {
@@ -103,6 +110,8 @@ class MarbleUpdateQueue {
 						update.powerUpId = myMarbleUpdate.powerUpId;
 					if (update.netFlags & MarbleNetFlags.GravityChange == 0)
 						update.gravityDirection = myMarbleUpdate.gravityDirection;
+					if (update.netFlags & MarbleNetFlags.UpdateTrapdoor == 0)
+						update.trapdoorUpdates = myMarbleUpdate.trapdoorUpdates;
 				}
 				myMarbleUpdate = update;
 				ourMoveApplied = false;

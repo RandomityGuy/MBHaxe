@@ -1,5 +1,6 @@
 package shapes;
 
+import net.Net;
 import hxd.snd.effect.Spatialization;
 import src.TimeState;
 import collision.CollisionInfo;
@@ -16,6 +17,10 @@ class Trapdoor extends DtsObject {
 	var timeout:Float = 0.2;
 	var lastDirection:Int;
 	var lastCompletion:Float = 0;
+
+	var lastContactTicks:Int = -100000;
+
+	var netId:Int;
 
 	public function new() {
 		super();
@@ -57,24 +62,70 @@ class Trapdoor extends DtsObject {
 	}
 
 	function getCurrentCompletion(timeState:TimeState) {
-		var elapsed = timeState.timeSinceLoad - this.lastContactTime;
-		var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-		if (elapsed > 5)
-			completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
-		return completion;
+		if (level.isMultiplayer) {
+			if (Net.isHost) {
+				var elapsed = (timeState.ticks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
+				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
+				if (elapsed > 5)
+					completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+				return completion;
+			} else {
+				var elapsed = (@:privateAccess level.marble.serverTicks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
+				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
+				if (elapsed > 5)
+					completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+				return completion;
+			}
+		} else {
+			var elapsed = timeState.timeSinceLoad - this.lastContactTime;
+			var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
+			if (elapsed > 5)
+				completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+			return completion;
+		}
 	}
 
 	override function onMarbleContact(marble:src.Marble, time:TimeState, ?contact:CollisionInfo) {
 		super.onMarbleContact(marble, time, contact);
-		if (time.timeSinceLoad - this.lastContactTime <= 0)
-			return; // The trapdoor is queued to open, so don't do anything.
+		if (level.isMultiplayer) {
+			if (Net.isHost) {
+				if (time.ticks - this.lastContactTicks <= 0)
+					return; // The trapdoor is queued to open, so don't do anything.
+			} else {
+				if (@:privateAccess marble.serverTicks - this.lastContactTicks <= 0)
+					return; // The trapdoor is queued to open, so don't do anything.
+			}
+		} else {
+			if (time.timeSinceLoad - this.lastContactTime <= 0)
+				return; // The trapdoor is queued to open, so don't do anything.
+		}
 		var currentCompletion = this.getCurrentCompletion(time);
 
 		// Set the last contact time accordingly so that the trapdoor starts closing (again)
-		this.lastContactTime = time.timeSinceLoad - currentCompletion * 1.6666676998138428;
-		if (currentCompletion == 0)
-			this.lastContactTime += this.timeout;
 
+		if (level.isMultiplayer) {
+			if (Net.isHost) {
+				this.lastContactTicks = Std.int(time.ticks - currentCompletion * 1.6666676998138428 / 0.032);
+			} else {
+				this.lastContactTicks = Std.int(@:privateAccess marble.serverTicks - currentCompletion * 1.6666676998138428 / 0.032);
+			}
+			if (currentCompletion == 0) {
+				this.lastContactTicks += Std.int(this.timeout / 0.032);
+			}
+		} else {
+			this.lastContactTime = time.timeSinceLoad - currentCompletion * 1.6666676998138428;
+			if (currentCompletion == 0)
+				this.lastContactTime += this.timeout;
+		}
+
+		if (Net.isHost) {
+			marble.queueTrapdoorUpdate(netId, this.lastContactTicks);
+		}
+
+		if (Net.isClient) {
+			if (!level.trapdoorsToTick.contains(netId))
+				level.trapdoorsToTick.push(netId);
+		}
 		// this.level.replay.recordMarbleContact(this);
 	}
 }
