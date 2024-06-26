@@ -98,6 +98,11 @@ abstract class Explodable extends DtsObject {
 				emitter3 = this.level.particleManager.createEmitter(sparksParticle, sparkParticleData, this.getAbsPos().getPosition());
 			}
 
+			if (Net.isClient) {
+				if (!level.explodablesToTick.contains(netId))
+					level.explodablesToTick.push(netId);
+			}
+
 			// var minePos = this.getAbsPos().getPosition();
 			// var off = marble.getAbsPos().getPosition().sub(minePos);
 
@@ -134,17 +139,17 @@ abstract class Explodable extends DtsObject {
 		this.lastContactTick = ticks;
 		if (level.timeState.ticks >= this.lastContactTick + (renewTime >> 5) || level.timeState.ticks < this.lastContactTick) {
 			if (emitter1 != null) {
-				this.level.particleManager.removeEmitter(emitter1);
+				this.level.particleManager.removeEmitterWithParticles(emitter1);
 				emitter1 = null;
 			}
 
 			if (emitter2 != null) {
-				this.level.particleManager.removeEmitter(emitter2);
+				this.level.particleManager.removeEmitterWithParticles(emitter2);
 				emitter2 = null;
 			}
 
 			if (emitter3 != null) {
-				this.level.particleManager.removeEmitter(emitter3);
+				this.level.particleManager.removeEmitterWithParticles(emitter3);
 				emitter3 = null;
 			}
 		}

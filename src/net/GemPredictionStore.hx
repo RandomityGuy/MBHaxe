@@ -26,4 +26,10 @@ class GemPredictionStore {
 		for (gemId in packet.gemIds)
 			predictions[gemId] = false;
 	}
+
+	public inline function reset() {
+		for (i in 0...predictions.length) {
+			predictions[i] = true;
+		}
+	}
 }

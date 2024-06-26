@@ -148,6 +148,7 @@ class MarbleWorld extends Scheduler {
 	public var powerUps:Array<PowerUp> = [];
 	public var forceObjects:Array<ForceObject> = [];
 	public var explodables:Array<Explodable> = [];
+	public var explodablesToTick:Array<Int> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
@@ -278,7 +279,7 @@ class MarbleWorld extends Scheduler {
 			predictions = new MarblePredictionStore();
 			powerupPredictions = new PowerupPredictionStore();
 			gemPredictions = new GemPredictionStore();
-			explodablePredictions = new ExplodablePredictionStore();
+			explodablePredictions = new ExplodablePredictionStore(cast this);
 		}
 	}
 
@@ -616,9 +617,12 @@ class MarbleWorld extends Scheduler {
 			startTime = 1e8;
 			lastMoves = new MarbleUpdateQueue();
 			predictions = new MarblePredictionStore();
-			powerupPredictions = new PowerupPredictionStore();
-			gemPredictions = new GemPredictionStore();
-			explodablePredictions = new ExplodablePredictionStore();
+			powerupPredictions.reset();
+			gemPredictions.reset();
+			explodablePredictions.reset();
+			for (exp in explodables) {
+				exp.lastContactTick = -100000;
+			}
 		}
 	}
 
@@ -1506,9 +1510,11 @@ class MarbleWorld extends Scheduler {
 			if (pw.pickupClient != -1 && marbleNeedsPrediction & (1 << pw.pickupClient) > 0)
 				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 		}
-		for (exp in explodables) {
+		for (expT in explodablesToTick) {
+			var exp = explodables[expT];
 			exp.revertContactTicks(explodablePredictions.getState(exp.netId));
 		}
+		explodablesToTick = [];
 		var huntMode:HuntMode = cast this.gameMode;
 		if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
 			for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
