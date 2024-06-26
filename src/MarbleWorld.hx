@@ -1802,21 +1802,23 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
-		if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
-			&& this.finishTime == null) {
-			performRestart();
-			return;
-		}
-
-		if ((Key.isDown(Settings.controlsSettings.respawn)
-			|| MarbleGame.instance.touchInput.restartButton.pressed
-			|| Gamepad.isDown(Settings.gamepadSettings.respawn))
-			&& !this.isWatching
-			&& this.finishTime == null) {
-			if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
-				this.restart(this.marble, true);
-				this.respawnPressedTime = Math.POSITIVE_INFINITY;
+		if (!this.isMultiplayer) {
+			if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
+				&& this.finishTime == null) {
+				performRestart();
 				return;
+			}
+
+			if ((Key.isDown(Settings.controlsSettings.respawn)
+				|| MarbleGame.instance.touchInput.restartButton.pressed
+				|| Gamepad.isDown(Settings.gamepadSettings.respawn))
+				&& !this.isWatching
+				&& this.finishTime == null) {
+				if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
+					this.restart(this.marble, true);
+					this.respawnPressedTime = Math.POSITIVE_INFINITY;
+					return;
+				}
 			}
 		}
 

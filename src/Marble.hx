@@ -330,6 +330,7 @@ class Marble extends GameObject {
 	var serverTicks:Int;
 	var recvServerTick:Int;
 	var serverUsePowerup:Bool;
+	var lastRespawnTick:Int = -100000;
 	var trapdoorContacts:Map<Int, Int> = [];
 
 	public function new() {
@@ -1049,6 +1050,7 @@ class Marble extends GameObject {
 			a.set(a.x + aFriction.x, a.y + aFriction.y, a.z + aFriction.z);
 
 			lastContactNormal = bestContact.normal;
+			lastContactPosition = this.getAbsPos().getPosition();
 		}
 		a.set(a.x + aControl.x, a.y + aControl.y, a.z + aControl.z);
 		if (this.mode == Finish) {
@@ -1863,6 +1865,13 @@ class Marble extends GameObject {
 			for (interior in pathedInteriors) {
 				interior.popTickState();
 			}
+
+			if (m.respawn) {
+				if (timeState.ticks - lastRespawnTick > (25000 >> 5)) {
+					this.level.restart(cast this);
+					lastRespawnTick = timeState.ticks;
+				}
+			}
 		}
 	}
 
@@ -2156,6 +2165,12 @@ class Marble extends GameObject {
 			|| (MarbleGame.instance.touchInput.blastbutton.pressed)
 			|| Gamepad.isDown(Settings.gamepadSettings.blast))
 			move.blast = true;
+
+		if (Key.isDown(Settings.controlsSettings.respawn) || Gamepad.isDown(Settings.gamepadSettings.respawn)) {
+			move.respawn = true;
+			@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = 0;
+			Gamepad.releaseKey(Settings.gamepadSettings.respawn);
+		}
 
 		if (MarbleGame.instance.touchInput.movementInput.pressed) {
 			move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
@@ -2553,6 +2568,7 @@ class Marble extends GameObject {
 		this.contactEntities = [];
 		this.cloak = false;
 		this._firstTick = true;
+		this.lastRespawnTick = -100000;
 		if (this.teleporting) {
 			var ourDts:DtsObject = cast this.children[0];
 			ourDts.setOpacity(1);

@@ -78,6 +78,15 @@ class Gamepad {
 		return false;
 	}
 
+	public static function releaseKey(buttons:Array<String>) {
+		for (button in buttons) {
+			var buttonId = getId(button);
+			if (buttonId < 0 || buttonId > gamepad.buttons.length)
+				continue;
+			@:privateAccess gamepad.buttons[buttonId] = false;
+		}
+	}
+
 	public static function isPressed(buttons:Array<String>) {
 		for (button in buttons) {
 			var buttonId = getId(button);

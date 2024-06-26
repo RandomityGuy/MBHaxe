@@ -105,6 +105,12 @@ class MoveManager {
 				|| Gamepad.isDown(Settings.gamepadSettings.blast))
 				move.blast = true;
 
+			if (Key.isDown(Settings.controlsSettings.respawn) || Gamepad.isDown(Settings.gamepadSettings.respawn)) {
+				move.respawn = true;
+				@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = 0;
+				Gamepad.releaseKey(Settings.gamepadSettings.respawn);
+			}
+
 			if (MarbleGame.instance.touchInput.movementInput.pressed) {
 				move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
 				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
@@ -159,6 +165,7 @@ class MoveManager {
 		b.writeFlag(m.move.jump);
 		b.writeFlag(m.move.powerup);
 		b.writeFlag(m.move.blast);
+		b.writeFlag(m.move.respawn);
 		b.writeFloat(m.motionDir.x);
 		b.writeFloat(m.motionDir.y);
 		b.writeFloat(m.motionDir.z);
@@ -174,6 +181,7 @@ class MoveManager {
 		move.jump = b.readFlag();
 		move.powerup = b.readFlag();
 		move.blast = b.readFlag();
+		move.respawn = b.readFlag();
 		var motionDir = new Vector();
 		motionDir.x = b.readFloat();
 		motionDir.y = b.readFloat();
