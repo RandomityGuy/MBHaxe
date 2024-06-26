@@ -77,11 +77,13 @@ abstract class GameConnection {
 	var platform:NetPlatform;
 	var marbleId:Int;
 	var marbleCatId:Int;
+	var spectator:Bool;
 
 	function new(id:Int) {
 		this.id = id;
 		this.moveManager = new MoveManager(this);
 		this.lobbyReady = false;
+		this.spectator = false;
 	}
 
 	public function ready() {
@@ -90,6 +92,10 @@ abstract class GameConnection {
 
 	public function toggleLobbyReady() {
 		lobbyReady = !lobbyReady;
+	}
+
+	public function toggleSpectate() {
+		spectator = !spectator;
 	}
 
 	public function queueMove(m:NetMove) {

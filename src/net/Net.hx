@@ -85,6 +85,8 @@ class Net {
 	public static var lobbyHostReady:Bool;
 	public static var lobbyClientReady:Bool;
 	public static var hostReady:Bool;
+	public static var hostSpectate:Bool;
+	public static var clientSpectate:Bool;
 
 	static var clientIdAllocs:Int = 1;
 	public static var clientId:Int;
@@ -373,6 +375,8 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
+			Net.hostSpectate = false;
+			Net.clientSpectate = false;
 			// MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
@@ -394,6 +398,8 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
+			Net.hostSpectate = false;
+			Net.clientSpectate = false;
 			// MultiplayerLevelSelectGui.custSelected = false;
 		}
 	}
@@ -629,6 +635,7 @@ class Net {
 			b.writeByte(v.platform);
 			b.writeByte(v.marbleId);
 			b.writeByte(v.marbleCatId);
+			b.writeByte(v.spectator ? 1 : 0);
 			var name = v.getName();
 			b.writeByte(name.length);
 			for (i in 0...name.length) {
@@ -641,6 +648,7 @@ class Net {
 		b.writeByte(getPlatform());
 		b.writeByte(Settings.optionsSettings.marbleIndex);
 		b.writeByte(Settings.optionsSettings.marbleCategoryIndex);
+		b.writeByte(Net.hostSpectate ? 1 : 0);
 		var name = Settings.highscoreName;
 		b.writeByte(name.length);
 		for (i in 0...name.length) {
@@ -752,6 +760,7 @@ class Net {
 					var platform = input.readByte();
 					var marble = input.readByte();
 					var marbleCat = input.readByte();
+					var cspectator = input.readByte() == 1;
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
@@ -767,9 +776,11 @@ class Net {
 						clientIdMap[id].setMarbleId(marble, marbleCat);
 						clientIdMap[id].lobbyReady = cready;
 						clientIdMap[id].platform = platform;
+						clientIdMap[id].spectator = cspectator;
 					}
 					if (Net.clientId == id) {
 						Net.lobbyClientReady = cready;
+						Net.clientSpectate = cspectator;
 					}
 				}
 				if (MarbleGame.canvas.content is MPPlayMissionGui) {

@@ -540,6 +540,7 @@ class MarbleWorld extends Scheduler {
 	public function start() {
 		Console.log("LEVEL START");
 		restart(this.marble, true);
+
 		for (interior in this.interiors)
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
