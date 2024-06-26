@@ -85,6 +85,9 @@ class MPExitGameDlg extends GuiControl {
 		kickBtn.position = new Vector(108, 184);
 		kickBtn.extent = new Vector(45, 45);
 		kickBtn.vertSizing = Top;
+		kickBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new MPKickBanDlg());
+		}
 		dialogImg.addChild(kickBtn);
 		if (!Net.isHost) {
 			kickBtn.disabled = true;

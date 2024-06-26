@@ -1,5 +1,6 @@
 package triggers;
 
+import src.Marble;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.AudioManager;
@@ -8,11 +9,17 @@ import src.MarbleWorld;
 import mis.MissionElement.MissionElementTrigger;
 import src.Console;
 
+@:publicFields
+@:structInit
+class TeleportationState {
+	var entryTime:Null<Float>;
+	var exitTime:Null<Float>;
+}
+
 class TeleportTrigger extends Trigger {
 	var delay:Float = 2;
 
-	var entryTime:Null<Float> = null;
-	var exitTime:Null<Float> = null;
+	var marbleStates:Map<Marble, TeleportationState> = [];
 
 	public function new(element:MissionElementTrigger, level:MarbleWorld) {
 		super(element, level);
@@ -20,35 +27,48 @@ class TeleportTrigger extends Trigger {
 			this.delay = MisParser.parseNumber(element.delay) / 1000;
 	}
 
+	function getState(marble:Marble) {
+		if (marbleStates.exists(marble))
+			return marbleStates.get(marble);
+		else {
+			marbleStates.set(marble, {entryTime: null, exitTime: null});
+			return marbleStates.get(marble);
+		}
+	}
+
 	override function onMarbleEnter(marble:src.Marble, time:src.TimeState) {
-		this.exitTime = null;
+		var state = getState(marble);
+		state.exitTime = null;
 		marble.setCloaking(true, time);
-		if (this.entryTime != null)
+		if (state.entryTime != null)
 			return;
-		this.entryTime = time.currentAttemptTime;
-		this.level.displayAlert("Teleporter has been activated, please wait.");
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/teleport.wav", ResourceLoader.getAudio, this.soundResources));
+		state.entryTime = time.currentAttemptTime;
+		if (level.marble == marble && @:privateAccess !marble.isNetUpdate) {
+			this.level.displayAlert("Teleporter has been activated, please wait.");
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/teleport.wav", ResourceLoader.getAudio, this.soundResources));
+		}
 	}
 
 	override function onMarbleLeave(marble:src.Marble, time:src.TimeState) {
-		this.exitTime = time.currentAttemptTime;
+		var state = getState(marble);
+		state.exitTime = time.currentAttemptTime;
 		marble.setCloaking(false, time);
 	}
 
 	public override function update(timeState:src.TimeState) {
-		if (this.entryTime == null)
-			return;
+		for (marble => state in marbleStates) {
+			if (state.entryTime == null)
+				continue;
+			if (state.exitTime != null && timeState.currentAttemptTime - state.exitTime > 0.05) {
+				state.entryTime = null;
+				state.exitTime = null;
+				continue;
+			}
 
-		if (timeState.currentAttemptTime - this.entryTime >= this.delay) {
-			this.executeTeleport();
-			return;
-		}
-
-		// There's a little delay after exiting before the teleporter gets cancelled
-		if (this.exitTime != null && timeState.currentAttemptTime - this.exitTime > 0.050) {
-			this.entryTime = null;
-			this.exitTime = null;
-			return;
+			if (timeState.currentAttemptTime - state.entryTime >= this.delay) {
+				state.entryTime = null;
+				this.executeTeleport(marble);
+			}
 		}
 	}
 
@@ -56,9 +76,7 @@ class TeleportTrigger extends Trigger {
 		ResourceLoader.load("sound/teleport.wav").entry.load(onFinish);
 	}
 
-	function executeTeleport() {
-		this.entryTime = null;
-
+	function executeTeleport(marble:Marble) {
 		function chooseNonNull(a:String, b:String) {
 			if (a != null)
 				return a;
@@ -88,45 +106,46 @@ class TeleportTrigger extends Trigger {
 			position = destination.vertices[0].add(new Vector(0, 0, 3)).add(pos); // destination.vertices[0].clone().add(new Vector(0, 0, 3));
 		}
 		position.w = 1;
-		this.level.marble.prevPos.load(position);
-		this.level.marble.setPosition(position.x, position.y, position.z);
-		var ct = this.level.marble.collider.transform.clone();
+		marble.prevPos.load(position);
+		marble.setPosition(position.x, position.y, position.z);
+		var ct = marble.collider.transform.clone();
 		ct.setPosition(position);
-		this.level.marble.collider.setTransform(ct);
+		marble.collider.setTransform(ct);
 		if (this.level.isRecording) {
 			this.level.replay.recordMarbleStateFlags(false, false, true, false);
 		}
 
 		if (!MisParser.parseBoolean(chooseNonNull(this.element.keepvelocity, destination.element.keepvelocity)))
-			this.level.marble.velocity.set(0, 0, 0);
+			marble.velocity.set(0, 0, 0);
 		if (MisParser.parseBoolean(chooseNonNull(this.element.inversevelocity, destination.element.inversevelocity)))
-			this.level.marble.velocity.scale(-1);
+			marble.velocity.scale(-1);
 		if (!MisParser.parseBoolean(chooseNonNull(this.element.keepangular, destination.element.keepangular)))
-			this.level.marble.omega.set(0, 0, 0);
+			marble.omega.set(0, 0, 0);
 
 		Console.log('Teleport:');
 		Console.log('Marble Position: ${position.x} ${position.y} ${position.z}');
-		Console.log('Marble Velocity: ${this.level.marble.velocity.x} ${this.level.marble.velocity.y} ${this.level.marble.velocity.z}');
-		Console.log('Marble Angular: ${this.level.marble.omega.x} ${this.level.marble.omega.y} ${this.level.marble.omega.z}');
+		Console.log('Marble Velocity: ${marble.velocity.x} ${marble.velocity.y} ${marble.velocity.z}');
+		Console.log('Marble Angular: ${marble.omega.x} ${marble.omega.y} ${marble.omega.z}');
 
 		// Determine camera orientation
-		if (!MisParser.parseBoolean(chooseNonNull(this.element.keepcamera, destination.element.keepcamera))) {
-			var yaw:Float;
-			if (this.element.camerayaw != null)
-				yaw = MisParser.parseNumber(this.element.camerayaw) * Math.PI / 180;
-			else if (destination.element.camerayaw != null)
-				yaw = MisParser.parseNumber(destination.element.camerayaw) * Math.PI / 180;
-			else
-				yaw = 0;
+		if (marble == level.marble) {
+			if (!MisParser.parseBoolean(chooseNonNull(this.element.keepcamera, destination.element.keepcamera))) {
+				var yaw:Float;
+				if (this.element.camerayaw != null)
+					yaw = MisParser.parseNumber(this.element.camerayaw) * Math.PI / 180;
+				else if (destination.element.camerayaw != null)
+					yaw = MisParser.parseNumber(destination.element.camerayaw) * Math.PI / 180;
+				else
+					yaw = 0;
 
-			yaw = -yaw; // Need to flip it for some reason
+				yaw = -yaw; // Need to flip it for some reason
 
-			this.level.marble.camera.CameraYaw = yaw + Math.PI / 2;
-			this.level.marble.camera.CameraPitch = 0.45;
-			this.level.marble.camera.nextCameraYaw = yaw + Math.PI / 2;
-			this.level.marble.camera.nextCameraPitch = 0.45;
+				marble.camera.CameraYaw = yaw + Math.PI / 2;
+				marble.camera.CameraPitch = 0.45;
+				marble.camera.nextCameraYaw = yaw + Math.PI / 2;
+				marble.camera.nextCameraPitch = 0.45;
+			}
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/spawn.wav", ResourceLoader.getAudio, this.soundResources));
 		}
-
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/spawn.wav", ResourceLoader.getAudio, this.soundResources));
 	}
 }
