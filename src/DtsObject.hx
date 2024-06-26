@@ -731,6 +731,9 @@ class DtsObject extends GameObject {
 	}
 
 	public function update(timeState:TimeState) {
+		if (this.currentOpacity == 0)
+			return;
+
 		for (sequence in this.dts.sequences) {
 			if (!this.showSequences)
 				break;
