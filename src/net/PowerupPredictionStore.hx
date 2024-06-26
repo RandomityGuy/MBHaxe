@@ -21,4 +21,10 @@ class PowerupPredictionStore {
 	public inline function acknowledgePowerupPickup(packet:PowerupPickupPacket, timeState:TimeState, futureTicks:Int) {
 		predictions[packet.powerupItemId] = timeState.currentAttemptTime - futureTicks * 0.032; // Approximate
 	}
+
+	public inline function reset() {
+		for (i in 0...predictions.length) {
+			predictions[i] = Math.NEGATIVE_INFINITY;
+		}
+	}
 }

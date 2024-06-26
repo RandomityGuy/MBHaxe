@@ -221,6 +221,8 @@ class ParticleEmitter {
 	var getPos:Void->Vector;
 	var spawnSphereSquish:Vector;
 
+	var emittedParticles:Array<Particle> = [];
+
 	public function new(options:ParticleEmitterOptions, data:ParticleData, manager:ParticleManager, ?getPos:Void->Vector, ?spawnSphereSquish:Vector) {
 		this.o = options;
 		this.manager = manager;
@@ -270,6 +272,7 @@ class ParticleEmitter {
 		// 	.add(this.o.ambientVelocity);
 		var particle = new Particle(this.o.particleOptions, this.manager, this.data, time, pos, vel);
 		this.manager.addParticle(data, particle);
+		this.emittedParticles.push(particle);
 	}
 
 	/** Computes the interpolated emitter position at a point in time. */
@@ -359,6 +362,12 @@ class ParticleManager {
 
 	public function removeEmitter(emitter:ParticleEmitter) {
 		this.emitters.remove(emitter);
+	}
+
+	public function removeEmitterWithParticles(emitter:ParticleEmitter) {
+		this.removeEmitter(emitter);
+		for (particle in emitter.emittedParticles)
+			this.removeParticle(particle.data, particle);
 	}
 
 	public function removeEverything() {

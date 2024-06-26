@@ -1,14 +1,17 @@
 package net;
 
+import src.MarbleWorld;
 import net.NetPacket.ExplodableUpdatePacket;
 import src.TimeState;
 import net.NetPacket.PowerupPickupPacket;
 
 class ExplodablePredictionStore {
+	var world:MarbleWorld;
 	var predictions:Array<Int>;
 
-	public inline function new() {
+	public inline function new(world:MarbleWorld) {
 		predictions = [];
+		this.world = world;
 	}
 
 	public inline function alloc() {
@@ -21,5 +24,13 @@ class ExplodablePredictionStore {
 
 	public inline function acknowledgeExplodableUpdate(packet:ExplodableUpdatePacket) {
 		predictions[packet.explodableId] = packet.serverTicks;
+		if (!world.explodablesToTick.contains(packet.explodableId))
+			world.explodablesToTick.push(packet.explodableId);
+	}
+
+	public inline function reset() {
+		for (i in 0...predictions.length) {
+			predictions[i] = -100000;
+		}
 	}
 }
