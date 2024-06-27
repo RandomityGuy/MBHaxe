@@ -1642,11 +1642,14 @@ class Marble extends GameObject {
 		prevRot = this.getRotationQuat().clone();
 
 		// Handle spectator hacky bullshit
-		if (Net.isMP) {
+		if (Net.isMP && this.level.serverStartTicks != 0) {
 			if ((connection != null && connection.spectator) || (connection == null && (Net.hostSpectate || Net.clientSpectate))) {
 				this.collider.transform.setPosition(new Vector(1e8, 1e8, 1e8));
 				this.collisionWorld.updateTransform(this.collider);
 				this.setPosition(1e8, 1e8, 1e8);
+
+				if (Net.clientSpectate && this.connection == null)
+					this.camera.enableSpectate();
 				return;
 			}
 		}

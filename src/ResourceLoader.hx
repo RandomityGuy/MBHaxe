@@ -129,7 +129,10 @@ class ResourceLoader {
 		}
 		while (toloaddirs.length > 0) {
 			var nextdir = toloaddirs.pop();
-			for (file in fileSystem.dir(nextdir.path.substring(2))) {
+			var pathToSearch = nextdir.path;
+			if (StringTools.startsWith(pathToSearch, "./"))
+				pathToSearch = pathToSearch.substring(2);
+			for (file in fileSystem.dir(pathToSearch)) {
 				if (file.isDirectory) {
 					toloaddirs.push(file);
 				} else {
@@ -179,9 +182,20 @@ class ResourceLoader {
 				toloadfiles.push(file);
 			}
 		}
+		filestats = fileSystem.dir("multiplayer/hunt");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
 		while (toloaddirs.length > 0) {
 			var nextdir = toloaddirs.pop();
-			for (file in fileSystem.dir(nextdir.path.substring(2))) {
+			var pathToSearch = nextdir.path;
+			if (StringTools.startsWith(pathToSearch, "./"))
+				pathToSearch = pathToSearch.substring(2);
+			for (file in fileSystem.dir(pathToSearch)) {
 				if (file.isDirectory) {
 					toloaddirs.push(file);
 				} else {

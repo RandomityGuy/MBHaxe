@@ -51,7 +51,7 @@ class MPPreGameDlg extends GuiControl {
 		dialogImg.extent = new Vector(640, 480);
 		this.addChild(dialogImg);
 
-		var leaveBtn = new GuiButton(loadButtonImages("/data/ui/mp/pre/leave"));
+		var leaveBtn = new GuiButton(loadButtonImages("data/ui/mp/pre/leave"));
 		leaveBtn.horizSizing = Left;
 		leaveBtn.vertSizing = Top;
 		leaveBtn.position = new Vector(499, 388);
@@ -61,7 +61,7 @@ class MPPreGameDlg extends GuiControl {
 		}
 		dialogImg.addChild(leaveBtn);
 
-		var playBtn = new GuiButton(loadButtonImagesExt("/data/ui/mp/pre/play"));
+		var playBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/pre/play"));
 		playBtn.horizSizing = Right;
 		playBtn.vertSizing = Top;
 		playBtn.position = new Vector(406, 388);
@@ -71,6 +71,15 @@ class MPPreGameDlg extends GuiControl {
 		playBtn.pressedAction = (e) -> {
 			for (id => client in Net.clientIdMap) {
 				client.state = GAME;
+			}
+			if (Settings.serverSettings.forceSpectators) {
+				for (id => client in Net.clientIdMap) {
+					client.spectator = true; // Make them spectator
+				}
+			}
+			var b = Net.sendPlayerInfosBytes(); // Update spectator status
+			for (cc in Net.clients) {
+				cc.sendBytes(b);
 			}
 
 			if (MarbleGame.instance.world != null) {
@@ -83,7 +92,7 @@ class MPPreGameDlg extends GuiControl {
 		if (Net.isHost)
 			dialogImg.addChild(playBtn);
 
-		var readyBtn = new GuiButton(loadButtonImages("/data/ui/mp/pre/ready"));
+		var readyBtn = new GuiButton(loadButtonImages("data/ui/mp/pre/ready"));
 		readyBtn.horizSizing = Right;
 		readyBtn.vertSizing = Top;
 		readyBtn.position = new Vector(53, 394);
@@ -91,7 +100,7 @@ class MPPreGameDlg extends GuiControl {
 		readyBtn.buttonType = Toggle;
 		dialogImg.addChild(readyBtn);
 
-		var kickBtn = new GuiButton(loadButtonImages("/data/ui/mp/play/kick"));
+		var kickBtn = new GuiButton(loadButtonImages("data/ui/mp/play/kick"));
 		kickBtn.horizSizing = Right;
 		kickBtn.vertSizing = Bottom;
 		kickBtn.position = new Vector(360, 388);
@@ -102,7 +111,7 @@ class MPPreGameDlg extends GuiControl {
 		if (Net.isHost)
 			dialogImg.addChild(kickBtn);
 
-		var spectateBtn = new GuiButton(loadButtonImages("/data/ui/mp/pre/spectate"));
+		var spectateBtn = new GuiButton(loadButtonImages("data/ui/mp/pre/spectate"));
 		spectateBtn.horizSizing = Right;
 		spectateBtn.vertSizing = Top;
 		spectateBtn.position = new Vector(190, 394);

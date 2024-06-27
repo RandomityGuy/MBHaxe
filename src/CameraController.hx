@@ -92,7 +92,8 @@ class CameraController extends Object {
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
 		level.scene.camera.setFovX(Settings.optionsSettings.fovX, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
-		lockCursor();
+		if (!Net.isMP)
+			lockCursor();
 	}
 
 	public function lockCursor() {

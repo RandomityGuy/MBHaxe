@@ -192,6 +192,10 @@ class HuntMode extends NullMode {
 		}
 	}
 
+	override function getPreloadFiles() {
+		return ['data/sound/opponentdiamond.wav'];
+	}
+
 	function setupGems() {
 		hideExisting();
 		this.activeGems = [];
@@ -223,7 +227,7 @@ class HuntMode extends NullMode {
 		var furthest = null;
 
 		for (i in 0...6) {
-			var gem = gemSpawnPoints[rng.randRange(0, gemSpawnPoints.length - 1)];
+			var gem = gemSpawnPoints[Std.int(rng.randRange(0, gemSpawnPoints.length - 1))];
 			if (lastPos != null) {
 				var dist = gem.gem.getAbsPos().getPosition().distance(lastPos);
 				if (dist < spawnBlock) {
@@ -241,7 +245,7 @@ class HuntMode extends NullMode {
 			}
 		}
 		if (furthest == null) {
-			furthest = gemSpawnPoints[rng.randRange(0, gemSpawnPoints.length - 1)];
+			furthest = gemSpawnPoints[Std.int(rng.randRange(0, gemSpawnPoints.length - 1))];
 		}
 		var pos = furthest.gem.getAbsPos().getPosition();
 
