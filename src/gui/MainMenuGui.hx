@@ -10,6 +10,7 @@ import src.Settings;
 import src.Util;
 import src.Replay;
 import src.Marbleland;
+import src.MissionList;
 
 class MainMenuGui extends GuiImage {
 	public function new() {

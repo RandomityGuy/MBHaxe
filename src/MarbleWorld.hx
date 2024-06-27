@@ -370,12 +370,12 @@ class MarbleWorld extends Scheduler {
 		if (this.isMultiplayer) {
 			// Add us
 			if (Net.isHost) {
-				this.playGui.addPlayer(0, Settings.highscoreName.substr(0, 15), true);
+				this.playGui.addPlayer(0, (Net.hostSpectate ? "[S] " : "") + Settings.highscoreName.substr(0, 15), true);
 			} else {
-				this.playGui.addPlayer(Net.clientId, Settings.highscoreName.substr(0, 15), true);
+				this.playGui.addPlayer(Net.clientId, (Net.clientSpectate ? "[S] " : "") + Settings.highscoreName.substr(0, 15), true);
 			}
 			for (client in Net.clientIdMap) {
-				this.playGui.addPlayer(client.id, client.name.substr(0, 15), false);
+				this.playGui.addPlayer(client.id, (client.spectator ? "[S] " : "") + client.name.substr(0, 15), false);
 			}
 		}
 
@@ -503,7 +503,7 @@ class MarbleWorld extends Scheduler {
 			"shapes/items/gemshine.png",
 			"shapes/items/enviro1.jpg",
 		];
-		if (this.game == "ultra") {
+		if (this.game == "ultra" || Net.isMP) {
 			marblefiles.push("shapes/balls/pack1/marble20.normal.png");
 			marblefiles.push("shapes/balls/pack1/marble18.normal.png");
 			marblefiles.push("shapes/balls/pack1/marble01.normal.png");
@@ -512,15 +512,23 @@ class MarbleWorld extends Scheduler {
 		// Hacky
 		if (client == null) {
 			marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
+
+			if (Settings.optionsSettings.marbleCategoryIndex == 0)
+				marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+			else
+				marblefiles.push("shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		} else {
 			var marbleDts = MarbleSelectGui.marbleData[client.getMarbleCatId()][client.getMarbleId()].dts; // FIXME
 			marblefiles.push(StringTools.replace(marbleDts, "data/", ""));
+
+			var marbleSkin = MarbleSelectGui.marbleData[client.getMarbleCatId()][client.getMarbleId()].skin;
+
+			if (client.getMarbleCatId() == 0)
+				marblefiles.push("shapes/balls/" + marbleSkin + ".marble.png");
+			else
+				marblefiles.push("shapes/balls/pack1/" + marbleSkin + ".marble.png");
 		}
 
-		if (Settings.optionsSettings.marbleCategoryIndex == 0)
-			marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
-		else
-			marblefiles.push("shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		var gameModeFiles = this.gameMode.getPreloadFiles();
 		for (file in marblefiles) {
 			worker.loadFile(file);
@@ -571,6 +579,7 @@ class MarbleWorld extends Scheduler {
 				showPreGame();
 			} else {
 				_skipPreGame = false;
+				this.setCursorLock(true);
 				NetCommands.requestMidGameJoinState(Net.clientId);
 			}
 		}
@@ -587,7 +596,7 @@ class MarbleWorld extends Scheduler {
 		this.initMarble(cc, () -> {
 			var addedMarble = clientMarbles.get(cc);
 			this.restart(addedMarble); // spawn it
-			this.playGui.addPlayer(cc.id, cc.getName(), false);
+			this.playGui.addPlayer(cc.id, (cc.spectator ? "[S] " : "") + cc.getName(), false);
 			this.playGui.redrawPlayerList();
 
 			// Sort all the marbles so that they are updated in a deterministic order
@@ -604,7 +613,7 @@ class MarbleWorld extends Scheduler {
 		this.initMarble(cc, () -> {
 			var addedMarble = clientMarbles.get(cc);
 			this.restart(addedMarble); // spawn it
-			this.playGui.addPlayer(cc.id, cc.getName(), false);
+			this.playGui.addPlayer(cc.id, (cc.spectator ? "[S] " : "") + cc.getName(), false);
 			this.playGui.redrawPlayerList();
 
 			// Sort all the marbles so that they are updated in a deterministic order

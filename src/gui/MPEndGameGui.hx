@@ -125,6 +125,13 @@ class MPEndGameGui extends GuiImage {
 		exitBtn.extent = new Vector(49, 49);
 		exitBtn.vertSizing = Top;
 		exitBtn.horizSizing = Left;
+		exitBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.popDialog(this);
+			MarbleGame.instance.paused = false;
+			MarbleGame.instance.quitMission();
+			Net.disconnect();
+			MarbleGame.canvas.setContent(new JoinServerGui());
+		}
 		sidebar.addChild(exitBtn);
 
 		var middleCtrl = new GuiControl();

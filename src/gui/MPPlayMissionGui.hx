@@ -18,6 +18,7 @@ import src.MissionList;
 import net.ClientConnection.NetPlatform;
 import net.Net;
 import net.NetCommands;
+import haxe.ds.Option;
 
 class MPPlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;

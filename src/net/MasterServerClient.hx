@@ -20,11 +20,11 @@ typedef RemoteServerInfo = {
 }
 
 class MasterServerClient {
-	#if js
-	static var serverIp = "wss://mbomaster.randomityguy.me:8443";
-	#else
+	// #if js
+	// static var serverIp = "wss://mbomaster.randomityguy.me:8443";
+	// #else
 	static var serverIp = "ws://89.58.58.191:8084";
-	#end
+	// #end
 	public static var instance:MasterServerClient;
 
 	var ws:WebSocket;
