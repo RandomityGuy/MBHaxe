@@ -224,6 +224,8 @@ class InstanceManager {
 				minfo.baseBounds = isMesh ? @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds : null;
 
 				if (isMesh) {
+					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, MultiMaterial).primitive), null, scene);
+					minfo.transparencymeshbatch.materials = [];
 					minfo.meshbatch.materials = [];
 					for (mat in cast(obj, MultiMaterial).materials) {
 						var matclone:Material = cast mat.clone();
@@ -271,9 +273,6 @@ class InstanceManager {
 						minfo.meshbatch.materials.push(matclone);
 
 						var matclonetransp:Material = cast mat.clone();
-
-						minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, MultiMaterial).primitive), null, scene);
-						minfo.transparencymeshbatch.materials = [];
 
 						matclonetransp.mainPass.removeShader(minfo.meshbatch.material.textureShader);
 						matclonetransp.mainPass.addShader(dtsshader);
