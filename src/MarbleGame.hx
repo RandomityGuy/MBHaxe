@@ -74,7 +74,7 @@ class MarbleGame {
 
 		js.Browser.document.addEventListener('pointerlockchange', () -> {
 			if (!paused && world != null) {
-				if (world.finishTime == null && world._ready) {
+				if (world.finishTime == null && world._ready && @:privateAccess !world.playGui.isChatFocused()) {
 					if (js.Browser.document.pointerLockElement != @:privateAccess Window.getInstance().canvas) {
 						paused = true;
 						handlePauseGame();
