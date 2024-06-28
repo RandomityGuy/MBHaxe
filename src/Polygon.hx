@@ -10,39 +10,56 @@ class Polygon extends MeshPrimitive {
 	public var tangents:Array<Float>;
 	public var uvs:Array<Float>;
 	public var idx:hxd.IndexBuffer;
+	public var indexStarts:Array<Int>;
+	public var indexCounts:Array<Int>;
+
+	var currentMaterial:Int = 0;
+	var curTris = 0;
 
 	var bounds:h3d.col.Bounds;
 
-	var scaled = 1.;
-	var translatedX = 0.;
-	var translatedY = 0.;
-	var translatedZ = 0.;
-
-	public function new(points:Array<h3d.col.Point>, ?idx) {
+	public function new(?idx) {
+		this.indexStarts = [0];
+		this.indexCounts = [];
+		this.idx = idx;
 		this.points = [];
+		this.uvs = [];
+		this.normals = [];
+	}
+
+	public function addPoints(points:Array<h3d.col.Point>) {
 		for (p in points) {
 			this.points.push(p.x);
 			this.points.push(p.y);
 			this.points.push(p.z);
 		}
-		this.idx = idx;
+		curTris += Math.floor(points.length / 3);
 	}
 
-	public function setUVs(uvs:Array<h3d.prim.UV>) {
-		this.uvs = [];
+	public function addUVs(uvs:Array<h3d.prim.UV>) {
 		for (uv in uvs) {
 			this.uvs.push(uv.u);
 			this.uvs.push(uv.v);
 		}
 	}
 
-	public function setNormals(normals:Array<h3d.col.Point>) {
-		this.normals = [];
+	public function addNormals(normals:Array<h3d.col.Point>) {
 		for (n in normals) {
 			this.normals.push(n.x);
 			this.normals.push(n.y);
 			this.normals.push(n.z);
 		}
+	}
+
+	public function nextMaterial() {
+		indexStarts.push(Math.floor(this.points.length / 9));
+		indexCounts.push(curTris);
+		curTris = 0;
+	}
+
+	public function endPrimitive() {
+		indexCounts.push(curTris);
+		curTris = 0;
 	}
 
 	override function getBounds() {
@@ -182,6 +199,14 @@ class Polygon extends MeshPrimitive {
 		return Std.int(points.length / 3);
 	}
 
+	override function selectMaterial(material:Int) {
+		currentMaterial = material;
+	}
+
+	override function getMaterialIndexes(material:Int):{count:Int, start:Int} {
+		return {start: indexStarts[material] * 3, count: indexCounts[material] * 3};
+	}
+
 	override function render(engine:h3d.Engine) {
 		if (buffer == null || buffer.isDisposed())
 			alloc(engine);
@@ -191,6 +216,6 @@ class Polygon extends MeshPrimitive {
 		else if (buffer.flags.has(Quads))
 			engine.renderMultiBuffers(bufs, engine.mem.quadIndexes, 0, triCount());
 		else
-			engine.renderMultiBuffers(bufs, engine.mem.triIndexes, 0, triCount());
+			engine.renderMultiBuffers(bufs, engine.mem.triIndexes, indexStarts[currentMaterial], indexCounts[currentMaterial]);
 	}
 }

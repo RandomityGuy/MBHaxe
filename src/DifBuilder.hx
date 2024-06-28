@@ -1,5 +1,6 @@
 package src;
 
+import h3d.scene.MultiMaterial;
 import shaders.NormalMaterial;
 import shaders.NoiseTileMaterial;
 import shaders.DirLight;
@@ -672,6 +673,10 @@ class DifBuilder {
 					onFinish();
 				});
 
+				var prim = new Polygon();
+
+				var materials = [];
+
 				for (grp => tris in mats) {
 					var points = [];
 					var normals = [];
@@ -696,9 +701,12 @@ class DifBuilder {
 						uvs.push(uv2);
 						uvs.push(uv1);
 					}
-					var prim = new Polygon(points);
-					prim.setUVs(uvs);
-					prim.setNormals(normals);
+
+					prim.addPoints(points);
+					prim.addUVs(uvs);
+					prim.addNormals(normals);
+					prim.nextMaterial();
+
 					var material:Material;
 					var texture:Texture;
 					if (canFindTex(grp)) {
@@ -740,8 +748,11 @@ class DifBuilder {
 					// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 					if (Debug.wireFrame)
 						material.mainPass.wireframe = true;
-					var mesh = new Mesh(prim, material, itr);
+					materials.push(material);
 				}
+
+				prim.endPrimitive();
+				var mesh = new MultiMaterial(prim, materials, itr);
 
 				shaderWorker.run();
 			});

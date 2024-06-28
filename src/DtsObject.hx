@@ -1,5 +1,6 @@
 package src;
 
+import h3d.scene.MultiMaterial;
 import shaders.EnvMap;
 import h3d.shader.CubeMap;
 import dts.TSDrawPrimitive;
@@ -196,28 +197,33 @@ class DtsObject extends GameObject {
 						var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
 						var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+						var poly = new Polygon();
+						var usedMats = [];
 						for (k in 0...geometry.length) {
 							if (geometry[k].vertices.length == 0)
 								continue;
 
-							var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
-							poly.setNormals(geometry[k].normals.map(x -> x.toPoint()));
-							poly.setUVs(geometry[k].uvs);
+							poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
+							poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
+							poly.addUVs(geometry[k].uvs);
+							poly.nextMaterial();
 
-							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
+							usedMats.push(materials[k]);
 						}
+						poly.endPrimitive();
+						var obj = new MultiMaterial(poly, usedMats, this.graphNodes[i]);
 					} else {
-						var usedMats = [];
+						// var usedMats = [];
 
-						for (prim in mesh.primitives) {
-							if (!usedMats.contains(prim.matIndex)) {
-								usedMats.push(prim.matIndex);
-							}
-						}
+						// for (prim in mesh.primitives) {
+						// 	if (!usedMats.contains(prim.matIndex)) {
+						// 		usedMats.push(prim.matIndex);
+						// 	}
+						// }
 
-						for (k in usedMats) {
-							var obj = new Object(this.graphNodes[i]);
-						}
+						// for (k in usedMats) {
+						var obj = new Object(this.graphNodes[i]);
+						// }
 					}
 				}
 			}
@@ -274,7 +280,7 @@ class DtsObject extends GameObject {
 						poly.normals = geometry[k].normals.map(x -> x.toPoint());
 						poly.uvs = geometry[k].uvs;
 
-						var obj = new Mesh(poly, materials[k], skinObj);
+						var obj = new MultiMaterial(poly, [materials[k]], skinObj);
 					}
 					skinMeshData = {
 						meshIndex: i,
