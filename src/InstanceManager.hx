@@ -160,18 +160,23 @@ class InstanceManager {
 					for (instance in opaqueinstances) { // Draw the opaque shit first
 						// minfo.meshbatch.material.mainPass.getShader(DtsTexture);
 						var subOpacity = 1.0;
+						var noDraw = false;
 						for (dtsShader in minfo.dtsShaders) {
 							if (dtsShader != null) {
 								if (instance.gameObject.animateSubObjectOpacities) {
 									subOpacity = instance.gameObject.getSubObjectOpacity(instance.emptyObj);
-									if (subOpacity == 0)
-										continue; // Do not draw
+									if (subOpacity == 0) {
+										noDraw = true;
+										break;
+									}
 									// minfo.meshbatch.shadersChanged = true;
 								}
 
 								dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
 							}
 						}
+						if (noDraw)
+							continue;
 						var transform = instance.emptyObj.getAbsPos();
 						// minfo.meshbatch.material.mainPass.depthWrite = minfo.mesh.material.mainPass.depthWrite;
 						// minfo.meshbatch.material.mainPass.depthTest = minfo.mesh.material.mainPass.depthTest;
