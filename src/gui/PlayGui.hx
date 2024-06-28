@@ -96,6 +96,7 @@ class PlayGui {
 	var soundResources:Array<Resource<Sound>> = [];
 
 	var playGuiCtrl:GuiControl;
+	var chatCtrl:ChatCtrl;
 
 	var resizeEv:Void->Void;
 
@@ -116,6 +117,11 @@ class PlayGui {
 				playerListCtrl = null;
 				playerListScoresCtrl.dispose();
 				playerListScoresCtrl = null;
+			}
+
+			if (chatCtrl != null) {
+				chatCtrl.dispose();
+				chatCtrl = null;
 			}
 
 			gemImageScene.dispose();
@@ -192,7 +198,7 @@ class PlayGui {
 
 		if (MarbleGame.instance.world.isMultiplayer) {
 			initPlayerList();
-			// initChatHud();
+			initChatHud();
 		}
 
 		if (Util.isTouchDevice()) {
@@ -481,6 +487,22 @@ class PlayGui {
 		fpsMeterCtrl.addChild(fpsMeter);
 
 		playGuiCtrl.addChild(fpsMeterCtrl);
+	}
+
+	public function initChatHud() {
+		this.chatCtrl = new ChatCtrl();
+		this.chatCtrl.position = new Vector(playGuiCtrl.extent.x - 201, 150);
+		this.chatCtrl.extent = new Vector(200, 250);
+		this.chatCtrl.horizSizing = Left;
+		this.playGuiCtrl.addChild(chatCtrl);
+	}
+
+	public inline function isChatFocused() {
+		return this.chatCtrl?.chatFocused;
+	}
+
+	public inline function addChatMessage(str:String) {
+		this.chatCtrl.addChatMessage(str);
 	}
 
 	function initBlastBar() {

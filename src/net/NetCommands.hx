@@ -16,6 +16,7 @@ import src.MarbleGame;
 import src.MissionList;
 import src.Console;
 import src.Marbleland;
+import src.Settings;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -187,10 +188,19 @@ class NetCommands {
 			if (MarbleGame.instance.world != null) {
 				var packets = MarbleGame.instance.world.getWorldStateForClientJoin();
 				var c = Net.clientIdMap[clientId];
+
 				for (packet in packets) {
 					c.sendBytes(packet);
 				}
 				Net.clientIdMap[clientId].ready();
+
+				if (Settings.serverSettings.forceSpectators) {
+					Net.clientIdMap[clientId].spectator = true;
+					var b = Net.sendPlayerInfosBytes();
+					for (cc in Net.clients) {
+						cc.sendBytes(b);
+					}
+				}
 
 				if (MarbleGame.instance.world.serverStartTicks == 0) {
 					var allReady = true;
@@ -419,20 +429,21 @@ class NetCommands {
 		};
 	}
 
-	// @:rpc(client) public static function sendChatMessage(msg:String) {
-	// 	if (Net.isHost) {
-	// 		sendServerChatMessage(msg);
-	// 	}
-	// }
-	// @:rpc(server) public static function sendServerChatMessage(msg:String) {
-	// 	if (MarbleGame.instance.world != null) {
-	// 		if (MarbleGame.instance.world._ready) {
-	// 			@:privateAccess MarbleGame.instance.world.playGui.addChatMessage(msg);
-	// 		}
-	// 	} else {
-	// 		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
-	// 			cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).addChatMessage(msg);
-	// 		}
-	// 	}
-	// }
+	@:rpc(client) public static function sendChatMessage(msg:String) {
+		if (Net.isHost) {
+			sendServerChatMessage(msg);
+		}
+	}
+
+	@:rpc(server) public static function sendServerChatMessage(msg:String) {
+		if (MarbleGame.instance.world != null) {
+			if (MarbleGame.instance.world._ready) {
+				@:privateAccess MarbleGame.instance.world.playGui.addChatMessage(msg);
+			}
+		} else {
+			// if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+			// 	cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).addChatMessage(msg);
+			// }
+		}
+	}
 }
