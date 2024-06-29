@@ -14,7 +14,7 @@ import src.Marble;
 
 class Trapdoor extends DtsObject {
 	var lastContactTime = -1e8;
-	var timeout:Float = 0;
+	var timeout:Float = 0.2;
 	var lastDirection:Int;
 	var lastCompletion:Float = 0;
 
