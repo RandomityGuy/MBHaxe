@@ -51,6 +51,10 @@ class CameraInput {
 
 			var scene2d = interactive.getScene();
 			if (e.relX < scene2d.width / 2) {
+				if (Settings.touchSettings.dynamicJoystick) {
+					// Move that joystick over our finger
+					MarbleGame.instance.touchInput.movementInput.moveToFinger(e);
+				}
 				return;
 			}
 
