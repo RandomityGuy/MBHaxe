@@ -30,6 +30,7 @@ class ClientConnection extends GameConnection {
 	var _rttRecords:Array<Float> = [];
 	var lastRecvTime:Float;
 	var didWarnTimeout:Bool = false;
+	var leftAlready = false;
 
 	public function new(id:Int, socket:RTCPeerConnection, datachannel:RTCDataChannel, datachannelUnreliable:RTCDataChannel) {
 		super(id);
