@@ -306,6 +306,7 @@ class MarblePickerGui extends GuiImage {
 			Settings.optionsSettings.marbleSkin = selectedMarble.skin;
 			Settings.optionsSettings.marbleModel = selectedMarble.dts;
 			Settings.optionsSettings.marbleShader = selectedMarble.shader;
+			var changeToken = curToken++;
 			ResourceLoader.load(Settings.optionsSettings.marbleModel).entry.load(() -> {
 				if (changeToken + 1 != curToken)
 					return;
