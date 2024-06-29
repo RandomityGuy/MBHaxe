@@ -376,6 +376,12 @@ class HuntMode extends NullMode {
 		}
 	}
 
+	public function freeSpawns() {
+		for (i in 0...playerSpawnPoints.length) {
+			spawnPointTaken[i] = false;
+		}
+	}
+
 	function setupGems() {
 		gemGroupRadius = 20.0;
 		maxGemsPerGroup = 4;
