@@ -49,6 +49,7 @@ jobs:
             export PATH=~/neko/:"$PATH"
             export HAXE_STD_PATH=~/haxe/std
             export DYLD_LIBRARY_PATH=~/neko
+            sudo chmod +x ~/neko/neko
             haxelib setup ~/haxelib
             haxelib list
             haxelib install hashlink
