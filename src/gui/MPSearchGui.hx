@@ -1,5 +1,6 @@
 package gui;
 
+import net.NetCommands;
 import src.Marbleland;
 import h2d.Tile;
 import hxd.BitmapData;
@@ -22,13 +23,14 @@ class MPSearchGui extends GuiImage {
 
 		var missionList = [];
 		if (!isCustom) {
-			for (diff in MissionList.missionList["multiplayer"]) {
+			for (diffName => diff in MissionList.missionList["multiplayer"]) {
 				for (mis in diff) {
 					missionList.push({
 						mis: mis,
 						name: mis.title,
 						artist: mis.artist,
-						path: mis.path
+						path: mis.path,
+						difficulty: diffName,
 					});
 				}
 			}
@@ -39,7 +41,8 @@ class MPSearchGui extends GuiImage {
 					mis: mis,
 					name: mis.title,
 					artist: mis.artist,
-					path: mis.path
+					path: mis.path,
+					difficulty: "custom"
 				});
 			}
 		}
@@ -130,7 +133,15 @@ class MPSearchGui extends GuiImage {
 		searchPlay.pressedAction = (e) -> {
 			if (selectedIdx != -1) {
 				var mis = retrieveMissionList[selectedIdx];
-				cast(this.parent, Canvas).marbleGame.playMission(mis.mis);
+
+				if (mis.difficulty == "custom") {
+					var idx = Marbleland.multiplayerMissions.indexOf(mis.mis);
+					NetCommands.setLobbyLevelIndex(mis.difficulty, idx);
+				} else {
+					var idx = MissionList.missionList["multiplayer"][mis.difficulty].indexOf(mis.mis);
+					NetCommands.setLobbyLevelIndex(mis.difficulty, idx);
+				}
+				MarbleGame.canvas.popDialog(this);
 			}
 		}
 		this.addChild(searchPlay);
