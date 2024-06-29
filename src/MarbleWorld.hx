@@ -781,6 +781,10 @@ class MarbleWorld extends Scheduler {
 					this.marble.setMode(Play);
 					for (client => marble in this.clientMarbles)
 						marble.setMode(Play);
+
+					var huntMode = cast(this.gameMode, HuntMode);
+
+					huntMode.freeSpawns();
 				}
 			}
 		}
