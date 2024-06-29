@@ -72,6 +72,12 @@ class TouchOptionsGui extends GuiImage {
 		}, 0.5, 118);
 		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2)) * 18), 0, 18)));
 
+		var dynamicJoystick = optionCollection.addOption(1, "Joystick Position", ["Fixed", "Dynamic"], (idx) -> {
+			Settings.touchSettings.dynamicJoystick = idx == 1;
+			return true;
+		}, 0.5, 118);
+		dynamicJoystick.setCurrentOption(Settings.touchSettings.dynamicJoystick ? 1 : 0);
+
 		var cameraMultiplier = optionCollection.addOption(1, "Button-Camera Factor", ["0.5", "1", "1.5", "2", "2.5", "3", "3.5"], (idx) -> {
 			Settings.touchSettings.buttonJoystickMultiplier = 0.5 + (idx * 0.5);
 			return true;
