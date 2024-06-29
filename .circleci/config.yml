@@ -29,7 +29,6 @@ jobs:
             brew install cmake
             brew install pkg-config
             brew install libpthread-stubs
-            brew install neko
             brew install nasm
 
       - run:
@@ -41,8 +40,14 @@ jobs:
             mkdir /tmp/haxe
             curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
             tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
-            export PATH=/tmp/haxe/:"$PATH"
+            download_url="https://github.com/HaxeFoundation/neko/releases/download/v2-4-0-rc/neko-2.4.0-rc-osx-universal.tar.gz"
+            echo "Downloading [$download_url]..."
+            mkdir /tmp/neko
+            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/neko.tar.gz
+            tar xzvf /tmp/neko.tar.gz -C /tmp/haxe --strip-components=1
+            export PATH=/tmp/neko/:"$PATH"
             export HAXE_STD_PATH=/tmp/haxe/std
+            export DYLD_LIBRARY_PATH=/tmp/neko
             haxelib setup ~/haxelib
             haxelib list
             haxelib install hashlink
@@ -214,6 +219,8 @@ jobs:
           command: |
             export PATH=/tmp/haxe/:"$PATH"
             export HAXE_STD_PATH=/tmp/haxe/std
+            export PATH=/tmp/neko/:"$PATH"
+            export DYLD_LIBRARY_PATH=/tmp/neko
             haxelib git heaps https://github.com/RandomityGuy/heaps
             haxelib dev hlopenal ~/deps/hashlink/libs/openal
             haxelib dev hlsdl ~/deps/hashlink/libs/sdl
@@ -245,6 +252,8 @@ jobs:
           command: |
             export PATH=/tmp/haxe/:"$PATH"
             export HAXE_STD_PATH=/tmp/haxe/std
+            export PATH=/tmp/neko/:"$PATH"
+            export DYLD_LIBRARY_PATH=/tmp/neko
             cd ~/MBHaxe
             haxe compile-macos.hxml
             cd native
