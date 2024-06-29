@@ -101,10 +101,26 @@ class MPServerListGui extends GuiImage {
 			serverList.setTexts(serverDisplays);
 		}
 
+		var serverListStatusText = new GuiText(arial14);
+		serverListStatusText.text.text = "Searching for matches...";
+		serverListStatusText.justify = Center;
+		serverListStatusText.horizSizing = Center;
+		serverListStatusText.vertSizing = Center;
+		serverListStatusText.position = new Vector();
+		serverListStatusText.extent = new Vector(100, 30);
+		serverList.addChild(serverListStatusText);
+
 		MasterServerClient.connectToMasterServer(() -> {
 			MasterServerClient.instance.getServerList((servers) -> {
 				ourServerList = servers;
 				updateServerListDisplay();
+
+				if (ourServerList.length == 0) {
+					serverListStatusText.text.visible = true;
+					serverListStatusText.text.text = "No matches found, you should start a match for others.";
+				} else {
+					serverListStatusText.text.visible = false;
+				}
 			});
 		});
 
@@ -134,14 +150,25 @@ class MPServerListGui extends GuiImage {
 			if (refreshing)
 				return;
 			refreshing = true;
+			serverListStatusText.text.visible = true;
+			serverListStatusText.text.text = "Searching for matches...";
 			MasterServerClient.connectToMasterServer(() -> {
 				MasterServerClient.instance.getServerList((servers) -> {
 					ourServerList = servers;
 					updateServerListDisplay();
 					refreshing = false;
+
+					if (ourServerList.length == 0) {
+						serverListStatusText.text.visible = true;
+						serverListStatusText.text.text = "No matches found, you should start a match for others.";
+					} else {
+						serverListStatusText.text.visible = false;
+					}
 				});
 			}, () -> {
 				refreshing = false;
+				serverListStatusText.text.visible = true;
+				serverListStatusText.text.text = "Failed to connect to master server.";
 			});
 		}
 		bottomBar.addChild(refreshButton);
