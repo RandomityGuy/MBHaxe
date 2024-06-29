@@ -436,8 +436,18 @@ class Util {
 
 	public static inline function isIOS() {
 		#if js
-		var reg = ~/iPad|iPhone|iPod/;
-		return reg.match(js.Browser.navigator.userAgent);
+		var reg = ~/iPad|iPhone|iPod/gm;
+		var t1 = reg.match(js.Browser.navigator.userAgent);
+		if (!t1) {
+			var reg2 = ~/Mac/gm;
+			if (reg2.match(js.Browser.navigator.userAgent)
+				&& js.Browser.navigator.maxTouchPoints != null
+				&& js.Browser.navigator.maxTouchPoints > 2) {
+				return true; // Is ipad pro
+			}
+			return false;
+		}
+		return true;
 		#end
 		#if hl
 		return false;
@@ -446,8 +456,18 @@ class Util {
 
 	public static inline function isTablet() {
 		#if js
-		var reg = ~/iPad|tablet/;
-		return reg.match(js.Browser.navigator.userAgent);
+		var reg = ~/iPad|tablet/gm;
+		var t1 = reg.match(js.Browser.navigator.userAgent);
+		if (!t1) {
+			var reg2 = ~/Mac/gm;
+			if (reg2.match(js.Browser.navigator.userAgent)
+				&& js.Browser.navigator.maxTouchPoints != null
+				&& js.Browser.navigator.maxTouchPoints > 2) {
+				return true; // Is ipad pro
+			}
+			return false;
+		}
+		return true;
 		#end
 		#if hl
 		return false;
@@ -456,7 +476,7 @@ class Util {
 
 	public static inline function isIPhone() {
 		#if js
-		var reg = ~/iPhone/;
+		var reg = ~/iPhone/gm;
 		return reg.match(js.Browser.navigator.userAgent);
 		#end
 		#if hl
