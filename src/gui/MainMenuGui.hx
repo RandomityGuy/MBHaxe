@@ -75,8 +75,12 @@ class MainMenuGui extends GuiImage {
 			if (MPCustoms.missionList.length == 0) {
 				cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Custom levels not loaded yet, please wait."));
 				MPCustoms.loadMissionList();
-			} else
-				cast(this.parent, Canvas).setContent(new MultiplayerGui());
+			} else {
+				if (StringTools.trim(Settings.highscoreName) == "" || Settings.highscoreName == "Player") {
+					MarbleGame.canvas.setContent(new EnterNameDlg());
+				} else
+					cast(this.parent, Canvas).setContent(new MultiplayerGui());
+			}
 		});
 		// btnList.addButton(2, "Leaderboards", (e) -> {}, 20);
 		btnList.addButton(2, "Achievements", (e) -> {
