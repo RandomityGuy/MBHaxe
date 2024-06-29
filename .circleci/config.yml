@@ -3,6 +3,7 @@
 version: 2.1
 orbs:
     win: circleci/windows@4.1.1 # The Windows orb give you everything you need to start using the Windows executor.
+    macos: circleci/macos@2.5.1
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -21,7 +22,7 @@ jobs:
             - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
       - checkout:
           path: ~/MBHaxe
-
+      - macos/install-rosetta
       - run:
           name: Install brew dependencies
           command: |
