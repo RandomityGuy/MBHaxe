@@ -103,6 +103,12 @@ class MovementInput {
 		this.joystick.graphics.alpha = 1;
 	}
 
+	public function moveToFinger(e:hxd.Event) {
+		var size = Settings.touchSettings.joystickSize;
+		this.area.graphics.setPosition(e.relX - size * 3, e.relY - size * 3);
+		this.collider.onPush(e);
+	}
+
 	public function add(parentGui:GuiControl) {
 		parentGui.addChild(this.area);
 		added = true;

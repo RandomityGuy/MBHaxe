@@ -86,6 +86,7 @@ typedef TouchSettings = {
 	var rewindButtonSize:Float;
 	var buttonJoystickMultiplier:Float;
 	var hideControls:Bool;
+	var dynamicJoystick:Bool;
 	var cameraSwipeExtent:Float;
 }
 
@@ -178,6 +179,7 @@ class Settings {
 		rewindButtonSize: 60,
 		buttonJoystickMultiplier: 2.5,
 		hideControls: false,
+		dynamicJoystick: false,
 		cameraSwipeExtent: 10.0
 	}
 
@@ -439,6 +441,9 @@ class Settings {
 			if (touchSettings.cameraSwipeExtent == null) {
 				touchSettings.cameraSwipeExtent = 10.0;
 			}
+			if (touchSettings.dynamicJoystick == null) {
+				touchSettings.dynamicJoystick = false;
+			}
 			#end
 			if (touchSettings.cameraSwipeExtent == 0) {
 				touchSettings.cameraSwipeExtent = 10.0;
@@ -576,6 +581,11 @@ class Settings {
 				MarbleGame.instance.world.scene.camera.setFovX(Settings.optionsSettings.fovX,
 					Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 			}
+
+			#if js
+			MarbleGame.canvas.onResize(MarbleGame.canvas.scene2d.width, MarbleGame.canvas.scene2d.height);
+			#end
+			// Console.log('Window resized to ${wnd.width} x ${wnd.height}, scene ${scene2d.width} x ${scene2d.height}');
 
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		});
