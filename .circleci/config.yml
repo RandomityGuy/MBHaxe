@@ -37,18 +37,18 @@ jobs:
             set -eux
             download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.1/haxe-4.3.1-osx.tar.gz"
             echo "Downloading [$download_url]..."
-            mkdir /tmp/haxe
-            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
-            tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
+            mkdir ~/haxe
+            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o ~/haxe.tar.gz
+            tar xzvf ~/haxe.tar.gz -C ~/haxe --strip-components=1
             download_url="https://github.com/HaxeFoundation/neko/releases/download/v2-4-0-rc/neko-2.4.0-rc-osx-universal.tar.gz"
             echo "Downloading [$download_url]..."
-            mkdir /tmp/neko
-            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/neko.tar.gz
-            tar xzvf /tmp/neko.tar.gz -C /tmp/haxe --strip-components=1
-            export PATH=/tmp/haxe/:"$PATH"
-            export PATH=/tmp/neko/:"$PATH"
-            export HAXE_STD_PATH=/tmp/haxe/std
-            export DYLD_LIBRARY_PATH=/tmp/neko
+            mkdir ~/neko
+            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o ~/neko.tar.gz
+            tar xzvf ~/neko.tar.gz -C ~/neko --strip-components=1
+            export PATH=~/haxe/:"$PATH"
+            export PATH=~/neko/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            export DYLD_LIBRARY_PATH=~/neko
             haxelib setup ~/haxelib
             haxelib list
             haxelib install hashlink
@@ -218,10 +218,10 @@ jobs:
       - run:
           name: Install haxe dependencies
           command: |
-            export PATH=/tmp/haxe/:"$PATH"
-            export HAXE_STD_PATH=/tmp/haxe/std
-            export PATH=/tmp/neko/:"$PATH"
-            export DYLD_LIBRARY_PATH=/tmp/neko
+            export PATH=~/haxe/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            export PATH=~/neko/:"$PATH"
+            export DYLD_LIBRARY_PATH=~/neko
             haxelib git heaps https://github.com/RandomityGuy/heaps
             haxelib dev hlopenal ~/deps/hashlink/libs/openal
             haxelib dev hlsdl ~/deps/hashlink/libs/sdl
@@ -251,10 +251,10 @@ jobs:
       - run:
           name: Compile MBHaxe
           command: |
-            export PATH=/tmp/haxe/:"$PATH"
-            export HAXE_STD_PATH=/tmp/haxe/std
-            export PATH=/tmp/neko/:"$PATH"
-            export DYLD_LIBRARY_PATH=/tmp/neko
+            export PATH=~/haxe/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            export PATH=~/neko/:"$PATH"
+            export DYLD_LIBRARY_PATH=~/neko
             cd ~/MBHaxe
             haxe compile-macos.hxml
             cd native
