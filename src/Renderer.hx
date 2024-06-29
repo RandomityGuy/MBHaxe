@@ -31,6 +31,7 @@ class Renderer extends h3d.scene.Renderer {
 		if (has("shadow"))
 			renderPass(shadow, get("shadow"));
 
+		renderPass(defaultPass, get("skyshape"));
 		renderPass(defaultPass, get("default"));
 		renderPass(defaultPass, get("shadowPass1"));
 		renderPass(defaultPass, get("shadowPass2"));
