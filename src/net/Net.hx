@@ -408,6 +408,7 @@ class Net {
 					if (conn.needsTimeoutKick(t)) {
 						if (Net.isHost) {
 							dc.close();
+							onClientLeave(conn);
 						}
 						if (Net.isClient) {
 							disconnect();
@@ -545,6 +546,10 @@ class Net {
 	static function onClientLeave(cc:ClientConnection) {
 		if (!Net.isMP || cc == null)
 			return;
+		if (cc.leftAlready)
+			return;
+		cc.leftAlready = true;
+
 		NetCommands.clientDisconnected(cc.id);
 
 		if (cc.id != 0) {
