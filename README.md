@@ -12,14 +12,14 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ## Windows and Mac
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.12)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.5.4)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.2-mbu)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.3-mbu)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.12/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.5.4/MBHaxe-Platinum.apk)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.2-mbu/MBHaxe-Ultra.apk)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.3-mbu/MBHaxe-Ultra.apk)
 
 ## Additional Features
 - Cross Platform Multiplayer: Available only in Ultra. You can host and join multiplayer matches in any of these platforms: Windows, Mac, Web, Android.
