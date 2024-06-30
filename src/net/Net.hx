@@ -46,6 +46,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 @:publicFields
 class ServerInfo {
 	var name:String;
+	var hostname:String;
 	var description:String;
 	var players:Int;
 	var maxPlayers:Int;
@@ -53,8 +54,9 @@ class ServerInfo {
 	var state:String;
 	var platform:NetPlatform;
 
-	public function new(name:String, description:String, players:Int, maxPlayers:Int, password:String, state:String, platform:NetPlatform) {
+	public function new(name:String, hostname:String, description:String, players:Int, maxPlayers:Int, password:String, state:String, platform:NetPlatform) {
 		this.name = name;
+		this.hostname = hostname;
 		this.description = description;
 		this.players = players;
 		this.maxPlayers = maxPlayers;
@@ -103,7 +105,7 @@ class Net {
 	public static var turnServer:String = "";
 
 	public static function hostServer(name:String, description:String, maxPlayers:Int, password:String, onHosted:() -> Void) {
-		serverInfo = new ServerInfo(name, description, 1, maxPlayers, password, "LOBBY", getPlatform());
+		serverInfo = new ServerInfo(name, Settings.highscoreName, description, 1, maxPlayers, password, "LOBBY", getPlatform());
 		MasterServerClient.connectToMasterServer(() -> {
 			isHost = true;
 			isClient = false;

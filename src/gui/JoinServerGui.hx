@@ -64,16 +64,90 @@ class JoinServerGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
+		var passwordPopup = new GuiControl();
+		passwordPopup.position = new Vector(0, 0);
+		passwordPopup.extent = new Vector(640, 480);
+		passwordPopup.horizSizing = Width;
+		passwordPopup.vertSizing = Height;
+
+		var passwordWindow = new GuiImage(ResourceLoader.getResource("data/ui/mp/join/window2.png", ResourceLoader.getImage, this.imageResources).toTile());
+		passwordWindow.horizSizing = Center;
+		passwordWindow.vertSizing = Center;
+		passwordWindow.position = new Vector(144, 199);
+		passwordWindow.extent = new Vector(508, 202);
+		passwordPopup.addChild(passwordWindow);
+
+		var passwordTitle = new GuiText(markerFelt32);
+		passwordTitle.position = new Vector(22, 28);
+		passwordTitle.extent = new Vector(463, 14);
+		passwordTitle.text.textColor = 0xFFFFFF;
+		passwordTitle.horizSizing = Center;
+		passwordTitle.justify = Center;
+		passwordTitle.text.text = "Password Required";
+		passwordTitle.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
+		passwordWindow.addChild(passwordTitle);
+
+		var passwordBar = new GuiImage(ResourceLoader.getResource("data/ui/mp/join/textbar.png", ResourceLoader.getImage, this.imageResources).toTile());
+		passwordBar.position = new Vector(22, 73);
+		passwordBar.extent = new Vector(463, 47);
+		passwordWindow.addChild(passwordBar);
+
+		var passwordInput = new GuiTextInput(markerFelt24);
+		passwordInput.position = new Vector(30, 79);
+		passwordInput.extent = new Vector(447, 38);
+		passwordInput.horizSizing = Center;
+		passwordInput.text.textColor = 0;
+		passwordWindow.addChild(passwordInput);
+
+		var passwordCancel = new GuiButton(loadButtonImages("data/ui/mp/join/cancel"));
+		passwordCancel.position = new Vector(29, 126);
+		passwordCancel.extent = new Vector(94, 45);
+		passwordCancel.pressedAction = (e) -> {
+			passwordInput.text.text = "";
+			MarbleGame.canvas.popDialog(passwordPopup, false);
+		}
+		passwordWindow.addChild(passwordCancel);
+
+		var passwordJoin = new GuiButton(loadButtonImages("data/ui/mp/join/join"));
+		passwordJoin.position = new Vector(385, 126);
+		passwordJoin.extent = new Vector(94, 45);
+		passwordWindow.addChild(passwordJoin);
+
 		var window = new GuiImage(ResourceLoader.getResource("data/ui/mp/join/window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		window.horizSizing = Center;
 		window.vertSizing = Center;
 		window.position = new Vector(-60, 5);
 		window.extent = new Vector(759, 469);
 
+		var serverInfoContainer = new GuiControl();
+		serverInfoContainer.position = new Vector(520, 58);
+		serverInfoContainer.extent = new Vector(210, 166);
+		window.addChild(serverInfoContainer);
+
+		var serverInfo = new GuiMLText(markerFelt24, mlFontLoader);
+		serverInfo.position = new Vector(0, 0);
+		serverInfo.extent = new Vector(210, 166);
+		serverInfo.text.text = '<p align="center">Select a Server</p>';
+		serverInfo.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
+		serverInfo.text.textColor = 0xFFFFFF;
+		serverInfoContainer.addChild(serverInfo);
+
 		var serverListContainer = new GuiControl();
 		serverListContainer.position = new Vector(30, 80);
 		serverListContainer.extent = new Vector(475, 290);
 		window.addChild(serverListContainer);
+
+		var ourServerList:Array<RemoteServerInfo> = [];
 
 		var curSelection = -1;
 		var serverList = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF);
@@ -83,12 +157,18 @@ class JoinServerGui extends GuiImage {
 		serverList.textYOffset = -6;
 		serverList.onSelectedFunc = (sel) -> {
 			curSelection = sel;
+
+			if (curSelection == -1) {
+				serverInfo.text.text = '<p align="center">Select a Server</p><p align="center">or Host your own</p>';
+			} else {
+				var server = ourServerList[curSelection];
+				serverInfo.text.text = '<p align="center">${server.name}</p><p align="center"><font face="MarkerFelt18" color="#DDDDEE">Hosted by ${server.host}</font></p><p align="left">${server.description}</p>';
+			}
 		}
 		serverListContainer.addChild(serverList);
 
 		var serverDisplays = [];
 
-		var ourServerList:Array<RemoteServerInfo> = [];
 		var platformToString = ["unknown", "pc", "mac", "web", "android"];
 
 		function updateServerListDisplay() {
@@ -113,10 +193,7 @@ class JoinServerGui extends GuiImage {
 		}
 		window.addChild(hostBtn);
 
-		var joinBtn = new GuiButton(loadButtonImages("data/ui/mp/join/join"));
-		joinBtn.position = new Vector(628, 379);
-		joinBtn.extent = new Vector(93, 45);
-		joinBtn.pressedAction = (e) -> {
+		var joinFunc = (password:String) -> {
 			if (curSelection != -1) {
 				var selectedServerVersion = ourServerList[curSelection].version;
 				// if (selectedServerVersion != MarbleGame.currentVersion) {
@@ -135,13 +212,30 @@ class JoinServerGui extends GuiImage {
 						}
 					}
 				}, 15000);
-				Net.joinServer(ourServerList[curSelection].name, "", () -> {
+				Net.joinServer(ourServerList[curSelection].name, password, () -> {
 					failed = false;
 					Net.remoteServerInfo = ourServerList[curSelection];
 				});
 			}
 		}
+
+		var joinBtn = new GuiButton(loadButtonImages("data/ui/mp/join/join"));
+		joinBtn.position = new Vector(628, 379);
+		joinBtn.extent = new Vector(93, 45);
+		joinBtn.pressedAction = (e) -> {
+			if (curSelection != -1) {
+				if (ourServerList[curSelection].passworded) {
+					MarbleGame.canvas.pushDialog(passwordPopup);
+				} else {
+					joinFunc("");
+				}
+			}
+		}
 		window.addChild(joinBtn);
+
+		passwordJoin.pressedAction = (e) -> {
+			joinFunc(passwordInput.text.text);
+		}
 
 		var refreshing = false;
 		var refreshBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/join/refresh/refresh-1"));
@@ -196,19 +290,18 @@ class JoinServerGui extends GuiImage {
 		titleText.text.textColor = 0xFFFFFF;
 		window.addChild(titleText);
 
-		var serverInfoHeader = new GuiText(markerFelt24);
-		serverInfoHeader.position = new Vector(520, 58);
-		serverInfoHeader.extent = new Vector(210, 166);
-		serverInfoHeader.justify = Center;
-		serverInfoHeader.text.text = "Select a Server";
-		serverInfoHeader.text.dropShadow = {
+		var listTitle = new GuiText(markerFelt24);
+		listTitle.position = new Vector(30, 48);
+		listTitle.extent = new Vector(480, 22);
+		listTitle.text.textColor = 0xDDDDEE;
+		listTitle.text.dropShadow = {
 			dx: 1,
 			dy: 1,
 			alpha: 0.5,
 			color: 0
 		};
-		serverInfoHeader.text.textColor = 0xFFFFFF;
-		window.addChild(serverInfoHeader);
+		listTitle.text.text = "  Server Name";
+		window.addChild(listTitle);
 
 		this.addChild(window);
 	}
