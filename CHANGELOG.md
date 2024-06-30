@@ -1,3 +1,16 @@
+# 1.1.3
+This update brings the following changes:
+- Added IOS support for the Web version of the game.
+- Added Dynamic Joystick for Touch Controls.
+- Improved server list with status.
+- Improved marble smoothing in Multiplayer.
+- Increase chat character limit.
+- Now you will be prompted to set display name if the name is not valid.
+- Fixed marbles glitching out in Marble Picker.
+- Fixed server crash caused when players try to join a game more than 8 times.
+- Fixed trapdoor not having correct duration.
+- Minor performance improvement.
+
 # 1.1.2
 This update fixes the following critical issue:
 - Fixed persistent jitter when you are not the host in Multiplayer.
