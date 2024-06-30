@@ -419,7 +419,7 @@ jobs:
               haxe compile-c.hxml
               cd native
               HASHLINKPATH=~/deps/hashlink
-              MSBuild.exe marblegame.sln -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH
+              MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH marblegame.sln
         - run:
             name: Package app bundle
             command: |
