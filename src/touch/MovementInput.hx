@@ -105,7 +105,9 @@ class MovementInput {
 
 	public function moveToFinger(e:hxd.Event) {
 		var size = Settings.touchSettings.joystickSize;
-		this.area.graphics.setPosition(e.relX - size * 3, e.relY - size * 3);
+		var scene2d = collider.getScene();
+		this.area.graphics.setPosition(Util.clamp(e.relX - size * 3, 0, scene2d.width / 2 - size * 6),
+			Util.clamp(e.relY - size * 3, 0, scene2d.height - size * 6));
 		this.collider.onPush(e);
 	}
 
@@ -125,6 +127,7 @@ class MovementInput {
 	}
 
 	public function dispose() {
+		this.collider.stopCapture();
 		this.area.dispose();
 	}
 }
