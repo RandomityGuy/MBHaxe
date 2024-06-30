@@ -21,6 +21,8 @@ class MovementInput {
 
 	public var value:Vector = new Vector();
 
+	var capturing = false;
+
 	var touchId = -1;
 
 	public function new() {
@@ -68,6 +70,7 @@ class MovementInput {
 
 				var stopped = false;
 
+				capturing = true;
 				collider.startCapture((emove) -> {
 					if (e.touchId != emove.touchId) {
 						emove.propagate = true;
@@ -85,6 +88,7 @@ class MovementInput {
 					if (emove.kind == ERelease || emove.kind == EReleaseOutside) {
 						stopped = true;
 						collider.stopCapture();
+						capturing = false;
 					}
 				}, () -> {
 					if (stopped) {
@@ -92,6 +96,7 @@ class MovementInput {
 						this.joystick.graphics.alpha = 0;
 
 						pressed = false;
+						capturing = false;
 
 						this.value = new Vector(0, 0);
 					}
@@ -127,7 +132,6 @@ class MovementInput {
 	}
 
 	public function dispose() {
-		this.collider.stopCapture();
 		this.area.dispose();
 	}
 }
