@@ -49,10 +49,16 @@ class CameraInput {
 
 			var scene2d = interactive.getScene();
 			if (e.relX < scene2d.width / 2) {
-				if (Settings.touchSettings.dynamicJoystick) {
-					// Move that joystick over our finger
-					MarbleGame.instance.touchInput.movementInput.moveToFinger(e);
+				var restartG = @:privateAccess MarbleGame.instance.touchInput.pauseButton?.collider;
+				if (restartG != null) {
+					if (e.relY > restartG.getAbsPos().y + restartG.height) {
+						if (Settings.touchSettings.dynamicJoystick) {
+							// Move that joystick over our finger
+							MarbleGame.instance.touchInput.movementInput.moveToFinger(e);
+						}
+					}
 				}
+
 				return;
 			}
 
