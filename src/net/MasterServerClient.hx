@@ -11,6 +11,7 @@ import src.Console;
 
 typedef RemoteServerInfo = {
 	name:String,
+	host:String,
 	description:String,
 	players:Int,
 	maxPlayers:Int,
@@ -212,6 +213,7 @@ class MasterServerClient {
 		queueMessage(Json.stringify({
 			type: "serverInfo",
 			name: serverInfo.name,
+			host: serverInfo.hostname,
 			description: serverInfo.description,
 			players: serverInfo.players,
 			maxPlayers: serverInfo.maxPlayers,
