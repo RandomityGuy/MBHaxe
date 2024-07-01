@@ -590,6 +590,14 @@ class MarbleWorld extends Scheduler {
 		MarbleGame.canvas.pushDialog(new MPPreGameDlg());
 		this.setCursorLock(false);
 		this.marble.camera.startOverview();
+
+		// Hide all gems
+		for (gem in this.gems) {
+			gem.setHide(true);
+			gem.pickedUp = true;
+			gem.setHide(true);
+			this.collisionWorld.removeEntity(gem.boundingCollider); // remove from octree to make it easy
+		}
 	}
 
 	public function addJoiningClient(cc:GameConnection, onAdded:() -> Void) {
@@ -660,6 +668,8 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.rewindManager.clear();
+
+		setCursorLock(true);
 
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
@@ -2014,7 +2024,7 @@ class MarbleWorld extends Scheduler {
 		}
 		if (_instancesNeedsUpdate) {
 			if (this.radar != null)
-				this.radar.render();
+				this.radar.render(this.serverStartTicks != 0);
 			_instancesNeedsUpdate = false;
 			this.instanceManager.render();
 		}
@@ -2057,22 +2067,37 @@ class MarbleWorld extends Scheduler {
 	function determineClockColor(timeToDisplay:Float) {
 		if (this.finishTime != null)
 			return 1;
-		if (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0)
-			return 1;
-		if (timeToDisplay >= this.mission.qualifyTime)
-			return 2;
+		if (this.isMultiplayer) {
+			if (!this.multiplayerStarted)
+				return 1;
 
-		if (this.timeState.currentAttemptTime >= 3.5 && !Net.isMP) {
 			// Create the flashing effect
 			var alarmStart = this.mission.computeAlarmStartTime();
 			var elapsed = timeToDisplay - alarmStart;
-			if (elapsed < 0)
+			if (alarmStart < timeToDisplay)
 				return 0;
 			if (Math.floor(elapsed) % 2 == 0)
 				return 2;
-		}
 
-		return 0; // Default yellow
+			return 0;
+		} else {
+			if (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0)
+				return 1;
+			if (timeToDisplay >= this.mission.qualifyTime)
+				return 2;
+
+			if (this.timeState.currentAttemptTime >= 3.5 && !Net.isMP) {
+				// Create the flashing effect
+				var alarmStart = this.mission.computeAlarmStartTime();
+				var elapsed = timeToDisplay - alarmStart;
+				if (elapsed < 0)
+					return 0;
+				if (Math.floor(elapsed) % 2 == 0)
+					return 2;
+			}
+
+			return 0; // Default yellow
+		}
 	}
 
 	public function updateTimer(dt:Float) {
@@ -2121,14 +2146,17 @@ class MarbleWorld extends Scheduler {
 							var clockTicks = Math.floor((ourStartTime - this.timeState.gameplayClock) / 0.032);
 							var clockTickTime = ourStartTime - clockTicks * 0.032;
 							var delta = clockTickTime - this.timeState.gameplayClock;
-							this.timeState.gameplayClock = gameplayHigh - delta;
+							this.timeState.gameplayClock = Math.max(0, gameplayHigh - delta);
 						}
 					}
 
 					this.timeState.gameplayClock += dt * timeMultiplier;
+					this.timeState.gameplayClock = Math.max(0, this.timeState.gameplayClock);
 				}
-				if (this.timeState.gameplayClock < 0 && !Net.isClient)
+				if (this.timeState.gameplayClock <= 0 && !Net.isClient) {
 					this.gameMode.onTimeExpire();
+					this.timeState.gameplayClock = 0;
+				}
 			}
 			this.timeState.currentAttemptTime += dt;
 		} else {
@@ -2168,6 +2196,24 @@ class MarbleWorld extends Scheduler {
 					}
 					this.displayHelp("The clock has passed the Par Time.");
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
+				}
+			}
+		} else {
+			if (this.multiplayerStarted) {
+				var alarmStart = this.mission.computeAlarmStartTime();
+
+				if (prevGameplayClock > alarmStart && this.timeState.gameplayClock <= alarmStart) {
+					// Start the alarm
+					this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
+						null, true); // AudioManager.createAudioSource('alarm.wav');
+					this.displayHelp('You have ${alarmStart} seconds remaining.');
+				}
+				if (prevGameplayClock > 0 && this.timeState.gameplayClock <= 0) {
+					// Stop the alarm
+					if (this.alarmSound != null) {
+						this.alarmSound.stop();
+						this.alarmSound = null;
+					}
 				}
 			}
 		}

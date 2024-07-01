@@ -266,6 +266,12 @@ class MPPreGameDlg extends GuiControl {
 
 			playBtn.disabled = !allReady;
 
+			if (playerListArr.length > 1) {
+				spectateBtn.anim.visible = true;
+			} else {
+				spectateBtn.anim.visible = false;
+			}
+
 			var playerListCompiled = playerListArr.map(player -> player.spectate ? '[S] ${player.name}' : player.name);
 			var playerListStateCompiled = playerListArr.map(player -> player.ready ? "[Ready]" : "[Waiting]");
 			playerListLeft.setTexts(playerListCompiled);

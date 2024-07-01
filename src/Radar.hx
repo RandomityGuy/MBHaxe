@@ -64,10 +64,17 @@ class Radar {
 		_dirty = true;
 	}
 
-	public function render() {
+	public function render(doRender) {
 		if (!_dirty)
 			return;
 		g.clear();
+		if (!doRender) {
+			for (marble => marbleName in marbleNameTexts) {
+				if (marbleName != null)
+					marbleName.alpha = 0;
+			}
+			return;
+		}
 		var gemCount = 0;
 		for (gem in level.gems) {
 			if (!gem.pickedUp) {

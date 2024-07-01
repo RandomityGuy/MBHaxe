@@ -113,6 +113,9 @@ class Mission {
 		mission.type = missionInfo.type.toLowerCase();
 		mission.missionInfo = missionInfo;
 		mission.gameMode = missionInfo.gamemode;
+		if (mission.gameMode != null) {
+			mission.gameMode = StringTools.trim(mission.gameMode).toLowerCase();
+		}
 		return mission;
 	}
 
@@ -239,11 +242,19 @@ class Mission {
 	/** Computes the clock time in MBP when the user should be warned that they're about to exceed the par time. */
 	public function computeAlarmStartTime() {
 		var alarmStart = this.qualifyTime;
+		if (this.gameMode != null && this.gameMode == 'hunt') {
+			alarmStart = 15;
+			if (this.missionInfo.alarmstarttime != null)
+				alarmStart = MisParser.parseNumber(this.missionInfo.alarmstarttime);
+			return alarmStart;
+		}
+		alarmStart = 0;
 		if (this.missionInfo.alarmstarttime != null)
 			alarmStart -= MisParser.parseNumber(this.missionInfo.alarmstarttime);
 		else {
 			alarmStart -= 15;
 		}
+
 		alarmStart = Math.max(0, alarmStart);
 
 		return alarmStart;
