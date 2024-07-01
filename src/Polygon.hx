@@ -9,7 +9,7 @@ class Polygon extends MeshPrimitive {
 	public var normals:Array<Float>;
 	public var tangents:Array<Float>;
 	public var uvs:Array<Float>;
-	public var idx:hxd.IndexBuffer;
+
 	public var indexStarts:Array<Int>;
 	public var indexCounts:Array<Int>;
 
@@ -18,10 +18,9 @@ class Polygon extends MeshPrimitive {
 
 	var bounds:h3d.col.Bounds;
 
-	public function new(?idx) {
+	public function new() {
 		this.indexStarts = [0];
 		this.indexCounts = [];
-		this.idx = idx;
 		this.points = [];
 		this.uvs = [];
 		this.normals = [];
@@ -121,8 +120,7 @@ class Polygon extends MeshPrimitive {
 			}
 		}
 		var flags:Array<h3d.Buffer.BufferFlag> = [];
-		if (idx == null)
-			flags.push(Triangles);
+		flags.push(Triangles);
 		if (normals == null || tangents != null)
 			flags.push(RawFormat);
 		buffer = h3d.Buffer.ofFloats(buf, size, flags);
@@ -130,8 +128,13 @@ class Polygon extends MeshPrimitive {
 		for (i in 0...names.length)
 			addBuffer(names[i], buffer, positions[i]);
 
-		if (idx != null)
-			indexes = h3d.Indexes.alloc(idx);
+		if (indexes == null && Std.int(points.length / 3) > 65535) {
+			var indices = new haxe.io.BytesOutput();
+			for (i in 0...Std.int(points.length / 3))
+				indices.writeInt32(i);
+			indexes = new h3d.Indexes(indices.length >> 2, true);
+			indexes.uploadBytes(indices.getBytes(), 0, indices.length >> 2);
+		}
 	}
 
 	public function addTangents() {
@@ -141,15 +144,9 @@ class Polygon extends MeshPrimitive {
 		var pos = 0;
 		for (i in 0...triCount()) {
 			var i0, i1, i2;
-			if (idx == null) {
-				i0 = pos++;
-				i1 = pos++;
-				i2 = pos++;
-			} else {
-				i0 = idx[pos++];
-				i1 = idx[pos++];
-				i2 = idx[pos++];
-			}
+			i0 = pos++;
+			i1 = pos++;
+			i2 = pos++;
 			var p0 = new Vector(points[i0 * 3], points[i0 * 3 + 1], points[i0 * 3 + 2]);
 			var p1 = new Vector(points[i1 * 3], points[i1 * 3 + 1], points[i1 * 3 + 2]);
 			var p2 = new Vector(points[i2 * 3], points[i2 * 3 + 1], points[i2 * 3 + 2]);
@@ -192,7 +189,7 @@ class Polygon extends MeshPrimitive {
 		var n = super.triCount();
 		if (n != 0)
 			return n;
-		return Std.int((idx == null ? points.length / 3 : idx.length) / 3);
+		return Std.int(points.length / 3);
 	}
 
 	override function vertexCount() {
@@ -212,9 +209,7 @@ class Polygon extends MeshPrimitive {
 			alloc(engine);
 		var bufs = getBuffers(engine);
 		if (indexes != null)
-			engine.renderMultiBuffers(bufs, indexes);
-		else if (buffer.flags.has(Quads))
-			engine.renderMultiBuffers(bufs, engine.mem.quadIndexes, 0, triCount());
+			engine.renderMultiBuffers(bufs, indexes, indexStarts[currentMaterial], indexCounts[currentMaterial]);
 		else
 			engine.renderMultiBuffers(bufs, engine.mem.triIndexes, indexStarts[currentMaterial], indexCounts[currentMaterial]);
 	}
