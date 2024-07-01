@@ -581,12 +581,18 @@ class DifBuilder {
 					}
 				}
 			}
-			var mats = new Map<String, Array<DifBuilderTriangle>>();
+			var mats = new Map<String, Array<Array<DifBuilderTriangle>>>();
 			for (index => value in triangles) {
 				if (mats.exists(value.texture)) {
-					mats[value.texture].push(value);
+					var arr = mats[value.texture];
+					if (arr[arr.length - 1].length >= Math.floor(65535 / 3)) {
+						var newArr = [value];
+						arr.push(newArr);
+					} else {
+						arr[arr.length - 1].push(value);
+					}
 				} else {
-					mats.set(value.texture, [value]);
+					mats.set(value.texture, [[value]]);
 				}
 			}
 			collider.finalize();
@@ -674,81 +680,89 @@ class DifBuilder {
 				});
 
 				var prim = new Polygon();
-
 				var materials = [];
 
-				for (grp => tris in mats) {
-					var points = [];
-					var normals = [];
-					var uvs = [];
-					for (tri in tris) {
-						var p1 = new Point(-tri.p1.x, tri.p1.y, tri.p1.z);
-						var p2 = new Point(-tri.p2.x, tri.p2.y, tri.p2.z);
-						var p3 = new Point(-tri.p3.x, tri.p3.y, tri.p3.z);
-						var n1 = new Point(-tri.normal1.x, tri.normal1.y, tri.normal1.z);
-						var n2 = new Point(-tri.normal2.x, tri.normal2.y, tri.normal2.z);
-						var n3 = new Point(-tri.normal3.x, tri.normal3.y, tri.normal3.z);
-						var uv1 = new UV(tri.uv1.x, tri.uv1.y);
-						var uv2 = new UV(tri.uv2.x, tri.uv2.y);
-						var uv3 = new UV(tri.uv3.x, tri.uv3.y);
-						points.push(p3);
-						points.push(p2);
-						points.push(p1);
-						normals.push(n3);
-						normals.push(n2);
-						normals.push(n1);
-						uvs.push(uv3);
-						uvs.push(uv2);
-						uvs.push(uv1);
-					}
-
-					prim.addPoints(points);
-					prim.addUVs(uvs);
-					prim.addNormals(normals);
-					prim.nextMaterial();
-
-					var material:Material;
-					var texture:Texture;
-					if (canFindTex(grp)) {
-						texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
-						texture.wrap = Wrap.Repeat;
-						texture.mipMap = Nearest;
-						var exactName = StringTools.replace(texture.name, "data/", "").toLowerCase();
-						exactName = exactName.substring(0, exactName.lastIndexOf('.'));
-						material = h3d.mat.Material.create(texture);
-						var matDictName = exactName;
-						if (!shaderMaterialDict.exists(matDictName)) {
-							matDictName = StringTools.replace(exactName, "multiplayer/interiors/mbu", "interiors_mbu");
+				for (grp => trigroup in mats) {
+					for (tris in trigroup) {
+						var points = [];
+						var normals = [];
+						var uvs = [];
+						for (tri in tris) {
+							var p1 = new Point(-tri.p1.x, tri.p1.y, tri.p1.z);
+							var p2 = new Point(-tri.p2.x, tri.p2.y, tri.p2.z);
+							var p3 = new Point(-tri.p3.x, tri.p3.y, tri.p3.z);
+							var n1 = new Point(-tri.normal1.x, tri.normal1.y, tri.normal1.z);
+							var n2 = new Point(-tri.normal2.x, tri.normal2.y, tri.normal2.z);
+							var n3 = new Point(-tri.normal3.x, tri.normal3.y, tri.normal3.z);
+							var uv1 = new UV(tri.uv1.x, tri.uv1.y);
+							var uv2 = new UV(tri.uv2.x, tri.uv2.y);
+							var uv3 = new UV(tri.uv3.x, tri.uv3.y);
+							points.push(p3);
+							points.push(p2);
+							points.push(p1);
+							normals.push(n3);
+							normals.push(n2);
+							normals.push(n1);
+							uvs.push(uv3);
+							uvs.push(uv2);
+							uvs.push(uv1);
 						}
-						if (shaderMaterialDict.exists(matDictName)) {
-							var retrievefunc = shaderMaterialDict[matDictName];
-							shaderWorker.addTask(fwd -> {
-								retrievefunc(shad -> {
-									material.mainPass.removeShader(material.textureShader);
-									material.mainPass.addShader(shad);
-									var thisprops:Dynamic = material.getDefaultProps();
-									thisprops.light = false; // We will calculate our own lighting
-									material.props = thisprops;
-									material.shadows = false;
-									material.receiveShadows = true;
-									fwd();
+
+						if (prim.vertexCount() + points.length > 65535) {
+							prim.endPrimitive();
+							var mesh = new MultiMaterial(prim, materials, itr);
+							materials = [];
+							prim = new Polygon();
+						}
+
+						prim.addPoints(points);
+						prim.addUVs(uvs);
+						prim.addNormals(normals);
+						prim.nextMaterial();
+
+						var material:Material;
+						var texture:Texture;
+						if (canFindTex(grp)) {
+							texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
+							texture.wrap = Wrap.Repeat;
+							texture.mipMap = Nearest;
+							var exactName = StringTools.replace(texture.name, "data/", "").toLowerCase();
+							exactName = exactName.substring(0, exactName.lastIndexOf('.'));
+							material = h3d.mat.Material.create(texture);
+							var matDictName = exactName;
+							if (!shaderMaterialDict.exists(matDictName)) {
+								matDictName = StringTools.replace(exactName, "multiplayer/interiors/mbu", "interiors_mbu");
+							}
+							if (shaderMaterialDict.exists(matDictName)) {
+								var retrievefunc = shaderMaterialDict[matDictName];
+								shaderWorker.addTask(fwd -> {
+									retrievefunc(shad -> {
+										material.mainPass.removeShader(material.textureShader);
+										material.mainPass.addShader(shad);
+										var thisprops:Dynamic = material.getDefaultProps();
+										thisprops.light = false; // We will calculate our own lighting
+										material.props = thisprops;
+										material.shadows = false;
+										material.receiveShadows = true;
+										fwd();
+									});
 								});
-							});
-							prim.addTangents();
+								prim.addTangents();
+							} else {
+								material.shadows = false;
+								material.receiveShadows = true;
+							}
 						} else {
+							Console.warn('Unable to load ${grp} texture for dif ${path}');
+							material = Material.create();
 							material.shadows = false;
 							material.receiveShadows = true;
 						}
-					} else {
-						Console.warn('Unable to load ${grp} texture for dif ${path}');
-						material = Material.create();
-						material.shadows = false;
-						material.receiveShadows = true;
+						// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
+						if (Debug.wireFrame)
+							material.mainPass.wireframe = true;
+						materials.push(material);
 					}
-					// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
-					if (Debug.wireFrame)
-						material.mainPass.wireframe = true;
-					materials.push(material);
 				}
 
 				prim.endPrimitive();
