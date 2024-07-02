@@ -717,14 +717,22 @@ class Marble extends GameObject {
 			for (contact in contacts) {
 				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
 					if (contact.otherObject is RoundBumper) {
-						if (!playedSounds.contains("data/sound/bumperding1.wav")) {
-							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
+						if (!playedSounds.contains("data/sound/bumperding1.wav") && !this.isNetUpdate) {
+							if (level.marble == cast this)
+								AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources));
+							else
+								AudioManager.playSound(ResourceLoader.getResource("data/sound/bumperding1.wav", ResourceLoader.getAudio, this.soundResources),
+									this.getAbsPos().getPosition());
 							playedSounds.push("data/sound/bumperding1.wav");
 						}
 					}
 					if (contact.otherObject is TriangleBumper) {
-						if (!playedSounds.contains("data/sound/bumper1.wav")) {
-							AudioManager.playSound(ResourceLoader.getResource("data/sound/bumper1.wav", ResourceLoader.getAudio, this.soundResources));
+						if (!playedSounds.contains("data/sound/bumper1.wav") && !this.isNetUpdate) {
+							if (level.marble == cast this)
+								AudioManager.playSound(ResourceLoader.getResource("data/sound/bumper1.wav", ResourceLoader.getAudio, this.soundResources));
+							else
+								AudioManager.playSound(ResourceLoader.getResource("data/sound/bumper1.wav", ResourceLoader.getAudio, this.soundResources),
+									this.getAbsPos().getPosition());
 							playedSounds.push("data/sound/bumper1.wav");
 						}
 					}
@@ -1099,17 +1107,20 @@ class Marble extends GameObject {
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
 			var bounceSoundNum = Math.floor(Math.random() * 4);
-			var sndList = (time - this.megaMarbleEnableTime < 10) ? [
-				"data/sound/mega_bouncehard1.wav",
-				"data/sound/mega_bouncehard2.wav",
-				"data/sound/mega_bouncehard3.wav",
-				"data/sound/mega_bouncehard4.wav"
-			] : [
-				"data/sound/bouncehard1.wav",
-				"data/sound/bouncehard2.wav",
-				"data/sound/bouncehard3.wav",
-				"data/sound/bouncehard4.wav"
-			];
+			var sndList = ((time - this.megaMarbleEnableTime < 10)
+				|| (this.megaMarbleUseTick > 0
+					&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
+						|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) ? [
+							"data/sound/mega_bouncehard1.wav",
+							"data/sound/mega_bouncehard2.wav",
+							"data/sound/mega_bouncehard3.wav",
+							"data/sound/mega_bouncehard4.wav"
+						] : [
+							"data/sound/bouncehard1.wav",
+							"data/sound/bouncehard2.wav",
+							"data/sound/bouncehard3.wav",
+							"data/sound/bouncehard4.wav"
+						];
 
 			var snd = ResourceLoader.getResource(sndList[bounceSoundNum], ResourceLoader.getAudio, this.soundResources);
 			var gain = bounceMinGain;
@@ -1120,7 +1131,10 @@ class Marble extends GameObject {
 			// else
 			// 	gain = (contactVel - minVelocityBounceSoft) / (hardBounceSpeed - minVelocityBounceSoft) * (1.0 - gain) + gain;
 
-			snd.play(false, Settings.optionsSettings.soundVolume * gain);
+			if (!this.controllable)
+				AudioManager.playSound(snd, this.getAbsPos().getPosition());
+			else
+				snd.play(false, Settings.optionsSettings.soundVolume * gain);
 		}
 	}
 
@@ -1159,7 +1173,10 @@ class Marble extends GameObject {
 		if (slipVolume < 0)
 			slipVolume = 0;
 
-		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10
+			|| (this.megaMarbleUseTick > 0
+				&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
+					|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) {
 			if (this.rollMegaSound != null) {
 				rollMegaSound.volume = rollVolume;
 				rollSound.volume = 0;
@@ -2378,7 +2395,7 @@ class Marble extends GameObject {
 			var blastAmt = this.blastTicks / (25000 >> 5);
 			var impulse = this.currentUp.multiply(Math.max(Math.sqrt(blastAmt), blastAmt) * 10);
 			this.applyImpulse(impulse);
-			if (!isNetUpdate && level.marble == cast this)
+			if (!isNetUpdate && this.controllable)
 				AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
 			if (!isNetUpdate)
 				this.level.particleManager.createEmitter(blastAmt > 1 ? blastMaxParticleOptions : blastParticleOptions,

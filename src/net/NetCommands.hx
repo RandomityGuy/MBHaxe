@@ -445,5 +445,6 @@ class NetCommands {
 			// 	cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).addChatMessage(msg);
 			// }
 		}
+		MPPlayMissionGui.addChatMessage(msg);
 	}
 }

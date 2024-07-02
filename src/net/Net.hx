@@ -379,6 +379,7 @@ class Net {
 			Net.hostReady = false;
 			Net.hostSpectate = false;
 			Net.clientSpectate = false;
+			MPPlayMissionGui.allChats = [];
 			// MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
@@ -402,6 +403,7 @@ class Net {
 			Net.hostReady = false;
 			Net.hostSpectate = false;
 			Net.clientSpectate = false;
+			MPPlayMissionGui.allChats = [];
 			// MultiplayerLevelSelectGui.custSelected = false;
 		}
 	}
