@@ -384,7 +384,11 @@ class MarbleWorld extends Scheduler {
 			MarbleGame.canvas.clearContent();
 			if (this.endPad != null)
 				this.endPad.generateCollider();
-			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+			if (this.isMultiplayer) {
+				this.playGui.formatGemHuntCounter(0);
+			} else {
+				this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+			}
 			Console.log("MISSION LOADED");
 			start();
 		});
