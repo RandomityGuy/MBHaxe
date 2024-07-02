@@ -16,6 +16,7 @@ class GuiScrollCtrl extends GuiControl {
 	public var enabled:Bool = true;
 	public var childrenHandleScroll:Bool = false;
 	public var scrollSpeed = 500;
+	public var scrollToBottom:Bool = false;
 
 	var maxScrollY:Float;
 
@@ -96,7 +97,13 @@ class GuiScrollCtrl extends GuiControl {
 	}
 
 	public function setScrollMax(max:Float) {
-		this.scrollY = 0;
+		var renderRect = this.getRenderRectangle();
+		if (scrollToBottom) {
+			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (max * Settings.uiScale);
+			this.scrollY = renderRect.extent.y - scrollBarYSize * Settings.uiScale;
+		} else {
+			this.scrollY = 0;
+		}
 		this.maxScrollY = max;
 		this.dirty = true;
 		this.updateScrollVisual();

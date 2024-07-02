@@ -24,6 +24,8 @@ class MPPlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
 	static var currentCategoryStatic:String = "beginner";
 
+	public static var allChats:Array<String> = [];
+
 	static var setLevelFn:(String, Int) -> Void;
 	static var playSelectedLevel:(String, Int) -> Void;
 	static var setLevelStr:String->Void;
@@ -47,6 +49,9 @@ class MPPlayMissionGui extends GuiImage {
 	#end
 
 	var playerListCtrl:GuiTextListCtrl;
+	var chatInput:GuiTextInput;
+	var chatScroll:GuiScrollCtrl;
+	var chatBox:GuiMLText;
 
 	public function new(isHost:Bool = true) {
 		MissionList.buildMissionList();
@@ -362,6 +367,50 @@ class MPPlayMissionGui extends GuiImage {
 		};
 		playersBox.addChild(playerListTitle);
 
+		chatScroll = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
+		chatScroll.position = new Vector(47, 282);
+		chatScroll.extent = new Vector(407, 193);
+		chatScroll.childrenHandleScroll = true;
+		chatScroll.scrollToBottom = true;
+		window.addChild(chatScroll);
+
+		chatBox = new GuiMLText(markerFelt18, mlFontLoader);
+		chatBox.text.textColor = 0x000000;
+		chatBox.horizSizing = Width;
+		chatBox.position = new Vector(0, 0);
+		chatBox.extent = new Vector(396, 1184);
+		chatScroll.addChild(chatBox);
+
+		var chatInputContainer = new GuiControl();
+		chatInputContainer.position = new Vector(50, 476);
+		chatInputContainer.extent = new Vector(402, 30);
+		window.addChild(chatInputContainer);
+
+		chatInput = new GuiTextInput(markerFelt18);
+		chatInput.text.textColor = 0x000000;
+		chatInput.horizSizing = Width;
+		chatInput.position = new Vector(0, 0);
+		chatInput.extent = new Vector(402, 30);
+		chatInputContainer.addChild(chatInput);
+		@:privateAccess chatInput.text.interactive.forceAnywherefocus = true;
+
+		chatInput.text.onKeyDown = (e) -> {
+			if (e.keyCode == Key.ENTER) {
+				if (StringTools.trim(chatInput.text.text) != "") {
+					var sendText = '<font color="#F29515">${StringTools.htmlEscape(Settings.highscoreName.substr(0, 20))}:</font> ${StringTools.htmlEscape(chatInput.text.text.substr(0, 100))}';
+					if (Net.isClient) {
+						NetCommands.sendChatMessage(StringTools.htmlEscape(sendText));
+					}
+					if (Net.isHost) {
+						NetCommands.sendServerChatMessage(StringTools.htmlEscape(sendText));
+					}
+				}
+				chatInput.text.text = "";
+				haxe.Timer.delay(() -> chatInput.text.focus(), 10);
+			}
+			@:privateAccess Key.keyPressed[e.keyCode] = 0; // consume keys
+		}
+
 		this.addChild(window);
 
 		buttonHoldFunc = (dt:Float, mouseState:MouseState) -> {
@@ -570,6 +619,7 @@ class MPPlayMissionGui extends GuiImage {
 
 		setCategoryFunc(currentCategoryStatic, null, false);
 		updateLobbyNames();
+		redrawChat();
 	}
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
@@ -628,5 +678,24 @@ class MPPlayMissionGui extends GuiImage {
 		// 	playerList.setTexts(playerListArr.map(player -> {
 		// 		return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
 		// 	}));
+	}
+
+	public static function addChatMessage(s:String) {
+		var realText = StringTools.htmlUnescape(s);
+		allChats.push(realText);
+		if (allChats.length > 100) {
+			allChats = allChats.slice(allChats.length - 100);
+		}
+		if (MarbleGame.canvas.content is MPPlayMissionGui) {
+			var mpp = cast(MarbleGame.canvas.content, MPPlayMissionGui);
+			mpp.redrawChat();
+		}
+	}
+
+	public function redrawChat() {
+		var joined = allChats.join("<br/>");
+		this.chatBox.text.text = StringTools.replace(joined, '#F29515', '#000000');
+		this.chatScroll.setScrollMax(chatBox.text.textHeight);
+		this.chatScroll.updateScrollVisual();
 	}
 }

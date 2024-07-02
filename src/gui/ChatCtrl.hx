@@ -87,7 +87,7 @@ class ChatCtrl extends GuiControl {
 		this.chatHudInput.text.onKeyDown = (e) -> {
 			if (e.keyCode == Key.ENTER) {
 				if (StringTools.trim(this.chatHudInput.text.text) != "") {
-					sendText = '<font color="#F29515">${StringTools.htmlEscape(Settings.highscoreName.substr(0, 20))}:</font> ${StringTools.htmlEscape(this.chatHudInput.text.text.substr(0, 50))}';
+					sendText = '<font color="#F29515">${StringTools.htmlEscape(Settings.highscoreName.substr(0, 20))}:</font> ${StringTools.htmlEscape(this.chatHudInput.text.text.substr(0, 150))}';
 					if (Net.isClient) {
 						NetCommands.sendChatMessage(StringTools.htmlEscape(sendText));
 					}
