@@ -132,10 +132,12 @@ class CameraController extends Object {
 
 	public function enableSpectate() {
 		spectate = true;
+		@:privateAccess this.level.playGui.setSpectateMenu(true);
 	}
 
 	public function stopSpectate() {
 		spectate = false;
+		@:privateAccess this.level.playGui.setSpectateMenu(false);
 	}
 
 	public function orbit(mouseX:Float, mouseY:Float, isTouch:Bool = false) {
@@ -296,6 +298,7 @@ class CameraController extends Object {
 		var orientationQuat = level.getOrientationQuat(currentTime);
 
 		if (spectateMarbleIndex == -1) {
+			@:privateAccess level.playGui.setSpectateMenuText(0);
 			var up = new Vector(0, 0, 1);
 			up.transform(orientationQuat.toMatrix());
 			var directionVector = new Vector(1, 0, 0);
@@ -359,6 +362,7 @@ class CameraController extends Object {
 			camera.up = up;
 			camera.target = camera.pos.add(directionVector);
 		} else {
+			@:privateAccess level.playGui.setSpectateMenuText(1);
 			if (Key.isPressed(Settings.controlsSettings.left)) {
 				spectateMarbleIndex = (spectateMarbleIndex - 1 + level.marbles.length) % level.marbles.length;
 				@:privateAccess while (level.marbles[spectateMarbleIndex].connection == null

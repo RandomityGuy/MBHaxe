@@ -193,11 +193,11 @@ class Radar {
 
 	function renderName(pos:Vector, marble:Marble, opacity:Float) {
 		if (!marbleNameTexts.exists(marble)) {
-			var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
-			var arialb14b = new BitmapFont(arialb14fontdata.entry);
-			@:privateAccess arialb14b.loader = ResourceLoader.loader;
-			var arialBold14 = arialb14b.toSdfFont(cast 16 * Settings.uiScale, MultiChannel);
-			var txt = new h2d.Text(arialBold14, scene2d);
+			var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
+			var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
+			@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
+			var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+			var txt = new h2d.Text(markerFelt18, scene2d);
 			marbleNameTexts.set(marble, txt);
 			txt.textColor = 0xFFFF00;
 		}
@@ -209,7 +209,8 @@ class Radar {
 
 	function dontRenderName(marble:Marble) {
 		if (marbleNameTexts.exists(marble)) {
-			marbleNameTexts.get(marble).alpha = 0;
+			var el = marbleNameTexts.get(marble);
+			el.alpha = 0;
 		}
 	}
 }

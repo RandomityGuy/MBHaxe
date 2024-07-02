@@ -97,6 +97,9 @@ class PlayGui {
 
 	var playGuiCtrl:GuiControl;
 	var chatCtrl:ChatCtrl;
+	var spectatorCtrl:GuiControl;
+	var spectatorTxt:GuiMLText;
+	var spectatorTxtMode:Int = -1;
 
 	var resizeEv:Void->Void;
 
@@ -122,6 +125,11 @@ class PlayGui {
 			if (chatCtrl != null) {
 				chatCtrl.dispose();
 				chatCtrl = null;
+			}
+
+			if (spectatorCtrl != null) {
+				spectatorCtrl.dispose();
+				spectatorCtrl = null;
 			}
 
 			gemImageScene.dispose();
@@ -199,6 +207,8 @@ class PlayGui {
 		if (MarbleGame.instance.world.isMultiplayer) {
 			initPlayerList();
 			initChatHud();
+			if (Net.hostSpectate || Net.clientSpectate)
+				initSpectatorMenu();
 		}
 
 		if (Util.isTouchDevice()) {
@@ -682,6 +692,111 @@ class PlayGui {
 		}
 
 		redrawPlayerList();
+	}
+
+	public function initSpectatorMenu() {
+		spectatorCtrl = new GuiControl();
+		spectatorCtrl.vertSizing = Top;
+		spectatorCtrl.position = new Vector(0, 330);
+		spectatorCtrl.extent = new Vector(302, 150);
+
+		var specWnd = new GuiImage(ResourceLoader.getResource("data/ui/mp/play/spectator.png", ResourceLoader.getImage, this.imageResources).toTile());
+		specWnd.horizSizing = Width;
+		specWnd.vertSizing = Top;
+		specWnd.position = new Vector(0, 0);
+		specWnd.extent = new Vector(302, 150);
+
+		spectatorCtrl.addChild(specWnd);
+
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
+		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
+		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+
+		var domcasual32 = domcasual24b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+
+		var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arialb14b = new BitmapFont(arialb14fontdata.entry);
+		@:privateAccess arialb14b.loader = ResourceLoader.loader;
+		var arialBold14 = arialb14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+
+		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
+		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
+		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
+		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var markerFelt24 = markerFelt32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		var markerFelt20 = markerFelt32b.toSdfFont(cast 18.5 * Settings.uiScale, MultiChannel);
+		var markerFelt18 = markerFelt32b.toSdfFont(cast 17 * Settings.uiScale, MultiChannel);
+		var markerFelt26 = markerFelt32b.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
+
+		function mlFontLoader(text:String) {
+			switch (text) {
+				case "DomCasual24":
+					return domcasual24;
+				case "Arial14":
+					return arial14;
+				case "ArialBold14":
+					return arialBold14;
+				case "MarkerFelt32":
+					return markerFelt32;
+				case "MarkerFelt24":
+					return markerFelt24;
+				case "MarkerFelt18":
+					return markerFelt18;
+				case "MarkerFelt20":
+					return markerFelt20;
+				case "MarkerFelt26":
+					return markerFelt26;
+				default:
+					return null;
+			}
+		}
+
+		spectatorTxt = new GuiMLText(markerFelt24, mlFontLoader);
+		spectatorTxt.position = new Vector(6, 9);
+		spectatorTxt.extent = new Vector(282, 14);
+		spectatorTxt.text.textColor = 0x000000;
+
+		specWnd.addChild(spectatorTxt);
+		playGuiCtrl.addChild(spectatorCtrl);
+	}
+
+	public function setSpectateMenu(enabled:Bool) {
+		if (enabled && spectatorCtrl == null) {
+			initSpectatorMenu();
+			playGuiCtrl.render(MarbleGame.canvas.scene2d);
+			blastFill.bmp.visible = false;
+			blastFrame.bmp.visible = false;
+		}
+		if (!enabled && spectatorCtrl != null) {
+			spectatorCtrl.dispose();
+			spectatorCtrl = null;
+			blastFill.bmp.visible = true;
+			blastFrame.bmp.visible = true;
+			spectatorTxtMode = -1;
+		}
+	}
+
+	public function setSpectateMenuText(mode:Int) {
+		if (spectatorTxtMode != mode) {
+			if (mode == 0) {
+				spectatorTxt.text.text = '<p align="center"><font face="MarkerFelt32">Spectator Info</font></p>
+					<font face="MarkerFelt24">Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}</font>';
+			}
+			if (mode == 1) {
+				spectatorTxt.text.text = '<p align="center"><font face="MarkerFelt32">Spectator Info</font></p>
+					<font face="MarkerFelt24">Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}
+					<br/>Prev Player: ${Util.getKeyForButton2(Settings.controlsSettings.left)}
+					<br/>Next Player: ${Util.getKeyForButton2(Settings.controlsSettings.right)}</font>';
+			}
+
+			spectatorTxtMode = mode;
+		}
 	}
 
 	public function setHelpTextOpacity(value:Float) {

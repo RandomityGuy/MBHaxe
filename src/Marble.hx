@@ -1665,8 +1665,9 @@ class Marble extends GameObject {
 				this.collisionWorld.updateTransform(this.collider);
 				this.setPosition(1e8, 1e8, 1e8);
 
-				if (Net.clientSpectate && this.connection == null)
+				if (Net.clientSpectate && this.connection == null) {
 					this.camera.enableSpectate();
+				}
 				return;
 			}
 		}
