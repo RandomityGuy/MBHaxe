@@ -258,6 +258,14 @@ class JoinServerGui extends GuiImage {
 		}
 		window.addChild(joinBtn);
 
+		var usernameBtn = new GuiButton(loadButtonImages("data/ui/mp/join/username"));
+		usernameBtn.position = new Vector(216, 379);
+		usernameBtn.extent = new Vector(125, 45);
+		usernameBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new EnterNameDlg(-1, (n) -> {}));
+		}
+		window.addChild(usernameBtn);
+
 		passwordJoin.pressedAction = (e) -> {
 			joinFunc(passwordInput.text.text);
 		}
@@ -329,5 +337,9 @@ class JoinServerGui extends GuiImage {
 		window.addChild(listTitle);
 
 		this.addChild(window);
+
+		if (StringTools.trim(Settings.highscoreName).length == 0 || Settings.highscoreName == "Player") {
+			MarbleGame.canvas.pushDialog(new EnterNameDlg(-1, (n) -> {})); // Pls enter name
+		}
 	}
 }
