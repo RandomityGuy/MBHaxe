@@ -1506,26 +1506,28 @@ class MarbleWorld extends Scheduler {
 				}
 				// marble.unpackUpdate(ourMove);
 				// needsPrediction |= 1 << Net.clientId;
-				if (ourMoveStruct != null) {
-					var ourPred = predictions.retrieveState(marble, ourMoveStruct.timeState.ticks);
-					if (ourPred != null) {
-						if (ourPred.getError(ourMove) > 0.01) {
+				if (!Net.clientSpectate) {
+					if (ourMoveStruct != null) {
+						var ourPred = predictions.retrieveState(marble, ourMoveStruct.timeState.ticks);
+						if (ourPred != null) {
+							if (ourPred.getError(ourMove) > 0.01) {
+								// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+								marble.unpackUpdate(ourMove);
+								needsPrediction |= 1 << Net.clientId;
+								predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
+							}
+						} else {
 							// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
 							marble.unpackUpdate(ourMove);
 							needsPrediction |= 1 << Net.clientId;
 							predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
 						}
 					} else {
-						// trace('Desync for tick ${ourMoveStruct.timeState.ticks}');
+						// trace('Desync in General');
 						marble.unpackUpdate(ourMove);
 						needsPrediction |= 1 << Net.clientId;
-						predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
+						// predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
 					}
-				} else {
-					// trace('Desync in General');
-					marble.unpackUpdate(ourMove);
-					needsPrediction |= 1 << Net.clientId;
-					// predictions.clearStatesAfterTick(marble, ourMoveStruct.timeState.ticks);
 				}
 			}
 		}
@@ -1967,6 +1969,10 @@ class MarbleWorld extends Scheduler {
 			marble.updateClient(timeState, this.pathedInteriors);
 			for (client => marble in clientMarbles) {
 				marble.updateClient(timeState, this.pathedInteriors);
+			}
+			if (Net.clientSpectate || Net.hostSpectate) {
+				// this.camera.startCenterCamera();
+				marble.camera.update(timeState.currentAttemptTime, timeState.dt);
 			}
 		} else {
 			for (marble in marbles) {

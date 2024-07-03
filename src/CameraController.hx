@@ -389,7 +389,7 @@ class CameraController extends Object {
 				return;
 			}
 
-			var marblePosition = level.marbles[spectateMarbleIndex].getAbsPos().getPosition();
+			var marblePosition = @:privateAccess level.marbles[spectateMarbleIndex].lastRenderPos;
 			var up = new Vector(0, 0, 1);
 			up.transform(orientationQuat.toMatrix());
 			var directionVector = new Vector(1, 0, 0);
