@@ -677,26 +677,29 @@ class MPPlayMissionGui extends GuiImage {
 		if (Net.isHost) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				ready: Net.lobbyHostReady
 			});
 		}
 		if (Net.isClient) {
 			playerListArr.push({
 				name: Settings.highscoreName,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				ready: Net.lobbyClientReady
 			});
 		}
 		if (Net.clientIdMap != null) {
 			for (c => v in Net.clientIdMap) {
 				playerListArr.push({
 					name: v.name,
-					platform: v.platform
+					platform: v.platform,
+					ready: v.lobbyReady
 				});
 			}
 		}
 
 		var playerListCompiled = playerListArr.map(player ->
-			'<img src="${platformToString(player.platform)}"></img><font color="#FFFFFF">${player.name}</font>');
+			'<img src="${platformToString(player.platform)}"></img><font color="#FFFFFF">${player.name}<offset value="${220 * Settings.uiScale}">${player.ready ? "Ready" : ""}</offset></font>');
 		playerListCtrl.setTexts(playerListCompiled);
 
 		// if (!showingCustoms)

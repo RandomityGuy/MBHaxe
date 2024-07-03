@@ -1,7 +1,6 @@
 package gui;
 
 import h2d.filter.Filter;
-import h2d.HtmlText;
 import h2d.Flow;
 import h3d.Engine;
 import h2d.Tile;
@@ -84,6 +83,7 @@ class GuiMLTextListCtrl extends GuiControl {
 			tobj.lineHeightMode = TextOnly;
 			tobj.text = text;
 			tobj.textColor = 0;
+
 			if (dropShadow != null)
 				tobj.dropShadow = dropShadow;
 			textObjs.push(tobj);
