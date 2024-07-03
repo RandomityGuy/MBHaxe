@@ -7,7 +7,6 @@ import h2d.Bitmap;
 import h3d.Engine;
 import h3d.Vector;
 import gui.GuiText.Justification;
-import h2d.HtmlText;
 import h2d.Scene;
 import hxd.res.BitmapFont;
 import h2d.Text;

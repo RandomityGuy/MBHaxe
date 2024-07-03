@@ -196,7 +196,8 @@ class JoinServerGui extends GuiImage {
 		var platformToString = ["unknown", "pc", "mac", "web", "android"];
 
 		function updateServerListDisplay() {
-			serverDisplays = ourServerList.map(x -> '<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${x.name}</font>');
+			serverDisplays = ourServerList.map(x ->
+				'<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${x.name} <offset value="${400 * Settings.uiScale}">${x.players}/${x.maxPlayers}</offset></font>');
 			serverList.setTexts(serverDisplays);
 		}
 
@@ -324,7 +325,7 @@ class JoinServerGui extends GuiImage {
 			alpha: 0.5,
 			color: 0
 		};
-		listTitle.text.text = "  Server Name";
+		listTitle.text.text = "  Server Name                                                              Players";
 		window.addChild(listTitle);
 
 		this.addChild(window);
