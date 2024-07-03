@@ -129,7 +129,7 @@ class Settings {
 		fovX: 90,
 		frameRateVis: true,
 		oobInsults: true,
-		reflectiveMarble: true,
+		reflectiveMarble: false,
 		marbleIndex: 0,
 		marbleCategoryIndex: 0,
 		marbleSkin: "base",

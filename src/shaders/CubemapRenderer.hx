@@ -21,11 +21,15 @@ class CubemapRenderer {
 	var lastRenderTime:Float = 0;
 	var usingSky:Bool = false;
 
-	public function new(scene:Scene, sky:Sky) {
+	public function new(scene:Scene, sky:Sky, useSky = false) {
 		this.scene = scene;
 		this.sky = sky;
-		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGB8);
-		this.cubemap.depthBuffer = new h3d.mat.DepthBuffer(128, 128, h3d.mat.DepthBuffer.DepthFormat.Depth16);
+		if (useSky)
+			this.cubemap = sky.cubemap;
+		else {
+			this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGBA);
+			this.cubemap.depthBuffer = new h3d.mat.DepthBuffer(128, 128, h3d.mat.DepthBuffer.DepthFormat.Depth16);
+		}
 		this.camera = new Camera(90, 1, 1, 0.02, scene.camera.zFar);
 		this.position = new Vector();
 		this.nextFaceToRender = 0;
