@@ -7,6 +7,7 @@ import h2d.col.Bounds;
 import gui.GuiControl;
 import h3d.Vector;
 import gui.GuiGraphics;
+import src.MarbleGame;
 
 class MovementInput {
 	var area:GuiGraphics;
@@ -101,6 +102,26 @@ class MovementInput {
 
 		this.area.graphics.alpha = 1;
 		this.joystick.graphics.alpha = 1;
+	}
+
+	public function moveToFinger(e:hxd.Event) {
+		var restartG = @:privateAccess MarbleGame.instance.touchInput.pauseButton?.collider;
+		if (restartG != null) {
+			var size = Settings.touchSettings.joystickSize;
+			var scene2d = collider.getScene();
+			this.area.graphics.setPosition(Util.clamp(e.relX - size * 3, 0, scene2d.width / 2 - size * 6),
+				Util.clamp(e.relY - size * 3, restartG.getAbsPos().y + restartG.height, scene2d.height - size * 6));
+
+			var xPos = Util.clamp(e.relX - this.area.graphics.x, size, size * 5);
+			var yPos = Util.clamp(e.relY - this.area.graphics.y, size, size * 5);
+
+			this.value.x = (xPos - (size * 3)) / (size * 2);
+			this.value.y = (yPos - (size * 3)) / (size * 2);
+
+			this.joystick.graphics.setPosition(this.area.graphics.x + xPos, this.area.graphics.y + yPos);
+
+			this.collider.onPush(e);
+		}
 	}
 
 	public function add(parentGui:GuiControl) {
