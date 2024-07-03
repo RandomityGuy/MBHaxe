@@ -71,16 +71,18 @@ class MarbleUpdatePacket implements NetPacket {
 	var oob:Bool;
 	var powerUpId:Int;
 	var moveQueueSize:Int;
+	var pingTicks:Int;
 	var netFlags:Int;
 	var trapdoorUpdates:Map<Int, Int> = [];
 
 	public function new() {}
 
 	public inline function serialize(b:OutputBitStream) {
-		b.writeByte(clientId);
+		b.writeInt(clientId, 6);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
-		b.writeByte(moveQueueSize);
+		b.writeInt(moveQueueSize, 6);
+		b.writeInt(pingTicks, 6);
 		b.writeFloat(position.x);
 		b.writeFloat(position.y);
 		b.writeFloat(position.z);
@@ -160,10 +162,11 @@ class MarbleUpdatePacket implements NetPacket {
 	}
 
 	public inline function deserialize(b:InputBitStream) {
-		clientId = b.readByte();
+		clientId = b.readInt(6);
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
-		moveQueueSize = b.readByte();
+		moveQueueSize = b.readInt(6);
+		pingTicks = b.readInt(6);
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());

@@ -1938,6 +1938,7 @@ class Marble extends GameObject {
 		marbleUpdate.netFlags = this.netFlags;
 		marbleUpdate.gravityDirection = this.currentUp;
 		marbleUpdate.trapdoorUpdates = this.trapdoorContacts;
+		marbleUpdate.pingTicks = connection != null ? connection.pingTicks : 0;
 		marbleUpdate.serialize(b);
 
 		this.trapdoorContacts = [];
