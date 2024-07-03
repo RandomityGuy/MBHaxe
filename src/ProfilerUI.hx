@@ -118,13 +118,14 @@ class ProfilerUI {
 					+ 'Server Move Queue Size: ${Net.isClient ? @:privateAccess MarbleGame.instance.world.lastMoves.myMarbleUpdate.moveQueueSize : 0}\n'
 					+ 'Last Sent Move: ${Net.isClient ? lastSentMove : 0}\n'
 					+ 'Last Ack Move: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.lastAckMoveId : 0}\n'
-					+ 'Move Ack RTT: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.ackRTT : 0}';
+					+ 'Move Ack RTT: ${Net.isClient ? @:privateAccess Net.clientConnection.moveManager.ackRTT : 0}'
+					+ 'Ping: ${Net.clientConnection.pingTicks}';
 			}
 			if (Net.isHost) {
 				var strs = [];
 				strs.push('World Ticks: ${MarbleGame.instance.world.timeState.ticks}');
 				for (dc => cc in Net.clients) {
-					strs.push('${cc.id} move: sz ${@:privateAccess cc.moveManager.getQueueSize()} avg ${@:privateAccess cc.moveManager.serverAvgMoveListSize}');
+					strs.push('${cc.id} move: sz ${@:privateAccess cc.moveManager.getQueueSize()} avg ${@:privateAccess cc.moveManager.serverAvgMoveListSize}, ping: ${cc.pingTicks}');
 				}
 
 				instance.networkStats.text = strs.join('\n');

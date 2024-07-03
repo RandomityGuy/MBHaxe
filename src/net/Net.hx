@@ -716,6 +716,8 @@ class Net {
 				var marbleUpdatePacket = new MarbleUpdatePacket();
 				marbleUpdatePacket.deserialize(input);
 				var cc = marbleUpdatePacket.clientId;
+				var client = cc != Net.clientId ? clientIdMap[cc] : Net.clientConnection;
+				client.pingTicks = marbleUpdatePacket.pingTicks;
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
 					var m = MarbleGame.instance.world.lastMoves;
 					m.enqueue(marbleUpdatePacket);
@@ -726,9 +728,13 @@ class Net {
 					var movePacket = new MarbleMovePacket();
 					movePacket.deserialize(input);
 					var cc = clientIdMap[movePacket.clientId];
-					if (cc.state == GAME)
+					if (cc.state == GAME) {
+						var startRecvId = cc.moveManager.getQueueSize();
 						for (move in movePacket.moves)
 							cc.queueMove(move);
+						var endRecvId = cc.moveManager.getQueueSize();
+						cc.pingTicks = movePacket.moves.length - (endRecvId - startRecvId);
+					}
 				}
 
 			case PowerupPickup:
