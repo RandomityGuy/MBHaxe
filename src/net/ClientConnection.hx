@@ -78,6 +78,7 @@ abstract class GameConnection {
 	var marbleId:Int;
 	var marbleCatId:Int;
 	var spectator:Bool;
+	var pingTicks:Int;
 
 	function new(id:Int) {
 		this.id = id;
