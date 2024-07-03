@@ -2123,7 +2123,10 @@ class Marble extends GameObject {
 		}
 		physicsAccumulator += timeState.dt;
 
-		if (this.controllable && this.level != null && !this.level.rewinding) {
+		if (this.controllable
+			&& this.level != null
+			&& !this.level.rewinding
+			&& !(Net.clientSpectate || Net.hostSpectate)) { // Separately update the camera if spectate
 			// this.camera.startCenterCamera();
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
