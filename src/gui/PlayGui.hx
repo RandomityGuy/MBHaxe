@@ -572,10 +572,22 @@ class PlayGui {
 		playerListContainer.horizSizing = Right;
 		playerListContainer.vertSizing = Height;
 		playerListContainer.position = new Vector(20, 100);
-		playerListContainer.extent = new Vector(300, 380);
+		playerListContainer.extent = new Vector(380, 380);
 		this.playGuiCtrl.addChild(playerListContainer);
 
 		var imgLoader = (s:String) -> {
+			switch (s) {
+				case "high":
+					return ResourceLoader.getResource("data/ui/mp/play/connection-high.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "medium":
+					return ResourceLoader.getResource("data/ui/mp/play/connection-medium.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "low":
+					return ResourceLoader.getResource("data/ui/mp/play/connection-low.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "matanny":
+					return ResourceLoader.getResource("data/ui/mp/play/connection-matanny.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					return ResourceLoader.getResource("data/ui/mp/play/connection-unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
+			}
 			return null;
 		}
 
@@ -600,7 +612,7 @@ class PlayGui {
 		});
 
 		playerListScoresCtrl.position = new Vector(233, 3);
-		playerListScoresCtrl.extent = new Vector(210, 271);
+		playerListScoresCtrl.extent = new Vector(280, 271);
 		playerListScoresCtrl.scrollable = true;
 		playerListScoresCtrl.onSelectedFunc = (sel) -> {}
 		playerListContainer.addChild(playerListScoresCtrl);
@@ -627,7 +639,17 @@ class PlayGui {
 					col3;
 			};
 			pl.push('<font color="${color}">${i + 1}. ${Util.rightPad(item.name, 25, 3)}</font>');
-			plScores.push('<font color="${color}">${item.score}</font>');
+			var connPing = item.us ? (Net.isHost ? 0 : Net.clientConnection.pingTicks) : (item.id == 0 ? 0 : Net.clientIdMap[item.id].pingTicks);
+			var pingStatus = "unknown";
+			if (connPing <= 5)
+				pingStatus = "high";
+			else if (connPing <= 8)
+				pingStatus = "medium";
+			else if (connPing <= 16)
+				pingStatus = "low";
+			else if (connPing < 32)
+				pingStatus = "matanny";
+			plScores.push('<font color="${color}">${item.score}</font><offset value="${50 * Settings.uiScale}"><img src="${pingStatus}"></img></offset>');
 		}
 		playerListCtrl.setTexts(pl);
 		playerListScoresCtrl.setTexts(plScores);
