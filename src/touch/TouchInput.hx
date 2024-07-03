@@ -135,6 +135,19 @@ class TouchInput {
 		movementInput.add(parentGui);
 		cameraInput.add(parentGui);
 		cameraInput.enabled = true;
+
+		if (Settings.touchSettings.hideControls) {
+			this.jumpButton.setVisible(false);
+			this.powerupButton.setVisible(false);
+			if (this.blastbutton != null)
+				this.blastbutton.setVisible(false);
+			this.movementInput.setVisible(false);
+			this.pauseButton.setVisible(false);
+			if (this.restartButton != null)
+				this.restartButton.setVisible(false);
+			if (this.rewindButton != null)
+				this.rewindButton.setVisible(false);
+		}
 	}
 
 	public function setControlsEnabled(enabled:Bool) {
@@ -148,6 +161,16 @@ class TouchInput {
 		if (this.rewindButton != null)
 			this.rewindButton.setVisible(enabled);
 		this.cameraInput.enabled = enabled;
+
+		if (Settings.touchSettings.hideControls) {
+			this.jumpButton.setVisible(false);
+			this.powerupButton.setVisible(false);
+			if (this.blastbutton != null)
+				this.blastbutton.setVisible(false);
+			this.movementInput.setVisible(false);
+			if (this.rewindButton != null)
+				this.rewindButton.setVisible(false);
+		}
 	}
 
 	public function hideControls(parentGui:GuiControl) {
