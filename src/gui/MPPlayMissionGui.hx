@@ -48,7 +48,7 @@ class MPPlayMissionGui extends GuiImage {
 	var previewToken:Int = 0;
 	#end
 
-	var playerListCtrl:GuiTextListCtrl;
+	var playerListCtrl:GuiMLTextListCtrl;
 	var chatInput:GuiTextInput;
 	var chatScroll:GuiScrollCtrl;
 	var chatBox:GuiMLText;
@@ -341,12 +341,36 @@ class MPPlayMissionGui extends GuiImage {
 		parTime.text.lineSpacing = -1;
 		window.addChild(parTime);
 
+		function imgLoader(path:String) {
+			var t = switch (path) {
+				case "ready":
+					ResourceLoader.getResource("data/ui/mp/play/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "notready":
+					ResourceLoader.getResource("data/ui/mp/play/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "pc":
+					ResourceLoader.getResource("data/ui/mp/play/platform_desktop_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "mac":
+					ResourceLoader.getResource("data/ui/mp/play/platform_mac_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "web":
+					ResourceLoader.getResource("data/ui/mp/play/platform_web_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "android":
+					ResourceLoader.getResource("data/ui/mp/play/platform_android_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					ResourceLoader.getResource("data/ui/mp/play/platform_unknown_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case _:
+					return null;
+			};
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
+		}
+
 		var playersBox = new GuiControl();
 		playersBox.position = new Vector(463, 279);
 		playersBox.extent = new Vector(305, 229);
 		window.addChild(playersBox);
 
-		playerListCtrl = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF);
+		playerListCtrl = new GuiMLTextListCtrl(markerFelt18, [], imgLoader);
 		playerListCtrl.position = new Vector(0, 26);
 		playerListCtrl.extent = new Vector(305, 203);
 		playerListCtrl.scrollable = true;
@@ -671,7 +695,8 @@ class MPPlayMissionGui extends GuiImage {
 			}
 		}
 
-		var playerListCompiled = playerListArr.map(player -> player.name);
+		var playerListCompiled = playerListArr.map(player ->
+			'<img src="${platformToString(player.platform)}"></img><font color="#FFFFFF">${player.name}</font>');
 		playerListCtrl.setTexts(playerListCompiled);
 
 		// if (!showingCustoms)

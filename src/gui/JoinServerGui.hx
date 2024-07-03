@@ -147,10 +147,34 @@ class JoinServerGui extends GuiImage {
 		serverListContainer.extent = new Vector(475, 290);
 		window.addChild(serverListContainer);
 
+		function imgLoader(path:String) {
+			var t = switch (path) {
+				case "ready":
+					ResourceLoader.getResource("data/ui/mp/play/Ready.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "notready":
+					ResourceLoader.getResource("data/ui/mp/play/NotReady.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "pc":
+					ResourceLoader.getResource("data/ui/mp/play/platform_desktop_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "mac":
+					ResourceLoader.getResource("data/ui/mp/play/platform_mac_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "web":
+					ResourceLoader.getResource("data/ui/mp/play/platform_web_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "android":
+					ResourceLoader.getResource("data/ui/mp/play/platform_android_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					ResourceLoader.getResource("data/ui/mp/play/platform_unknown_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case _:
+					return null;
+			};
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
+		}
+
 		var ourServerList:Array<RemoteServerInfo> = [];
 
 		var curSelection = -1;
-		var serverList = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF);
+		var serverList = new GuiMLTextListCtrl(markerFelt18, [], imgLoader);
 		serverList.position = new Vector(0, 0);
 		serverList.extent = new Vector(475, 63);
 		serverList.scrollable = true;
@@ -172,7 +196,7 @@ class JoinServerGui extends GuiImage {
 		var platformToString = ["unknown", "pc", "mac", "web", "android"];
 
 		function updateServerListDisplay() {
-			serverDisplays = ourServerList.map(x -> '${x.name}');
+			serverDisplays = ourServerList.map(x -> '<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${x.name}</font>');
 			serverList.setTexts(serverDisplays);
 		}
 

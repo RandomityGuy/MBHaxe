@@ -60,6 +60,7 @@ class GuiMLTextListCtrl extends GuiControl {
 		for (text in texts) {
 			var tobj = new HtmlText(font);
 			tobj.lineHeightMode = TextOnly;
+			tobj.imageVerticalAlign = Top;
 			tobj.loadImage = imageLoader;
 			tobj.text = text;
 			tobj.textColor = 0;
@@ -79,6 +80,7 @@ class GuiMLTextListCtrl extends GuiControl {
 		for (text in texts) {
 			var tobj = new HtmlText(font);
 			tobj.loadImage = this._imageLoader;
+			tobj.imageVerticalAlign = Top;
 			tobj.lineHeightMode = TextOnly;
 			tobj.text = text;
 			tobj.textColor = 0;
