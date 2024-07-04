@@ -1,5 +1,6 @@
 package;
 
+import gui.VersionGui;
 import src.Debug;
 import src.Marbleland;
 import src.Console;
@@ -103,6 +104,7 @@ class Main extends hxd.App {
 				Marbleland.init();
 				marbleGame = new MarbleGame(s2d, s3d);
 				MarbleGame.canvas.setContent(new MainMenuGui());
+				VersionGui.checkVersion();
 
 				new ProfilerUI(s2d);
 

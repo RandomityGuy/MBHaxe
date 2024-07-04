@@ -42,6 +42,8 @@ class MarbleGame {
 
 	static var instance:MarbleGame;
 
+	static var currentVersion = "1.5.4";
+
 	var world:MarbleWorld;
 
 	var scene2d:h2d.Scene;
