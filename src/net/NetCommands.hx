@@ -17,6 +17,7 @@ import src.MissionList;
 import src.Console;
 import src.Marbleland;
 import src.Settings;
+import src.Util;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -242,6 +243,10 @@ class NetCommands {
 			if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
 				MarbleGame.canvas.popDialog(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1]);
 				MarbleGame.instance.world.setCursorLock(true);
+				if (Util.isTouchDevice()) {
+					MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+					MarbleGame.instance.touchInput.setControlsEnabled(true);
+				}
 				MarbleGame.instance.world.marble.camera.stopOverview();
 			}
 

@@ -593,6 +593,9 @@ class MarbleWorld extends Scheduler {
 	public function showPreGame() {
 		MarbleGame.canvas.pushDialog(new MPPreGameDlg());
 		this.setCursorLock(false);
+		if (Util.isTouchDevice()) {
+			MarbleGame.instance.touchInput.setControlsEnabled(false);
+		}
 		this.marble.camera.startOverview();
 
 		// Hide all gems

@@ -89,4 +89,18 @@ class VersionGui extends GuiImage {
 		});
 		scrollCtrl.addChild(changelogContent);
 	}
+
+	public static function checkVersion() {
+		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
+			var mdtext = res.toString();
+			var firstline = mdtext.split("\n")[0];
+			firstline = StringTools.replace(firstline, "#", "");
+			firstline = StringTools.trim(firstline);
+			if (firstline != MarbleGame.currentVersion) {
+				// We need to update lol
+				var mbo = new MessageBoxOkDlg("New version available! Please update your game.");
+				MarbleGame.canvas.pushDialog(mbo);
+			}
+		}, (e) -> {});
+	}
 }
