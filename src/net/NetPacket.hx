@@ -50,6 +50,7 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var GravityChange = 1 << 6;
 	var UsePowerup = 1 << 7;
 	var UpdateTrapdoor = 1 << 8;
+	var DoUltraBlast = 1 << 9;
 }
 
 @:publicFields
@@ -95,6 +96,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeInt(blastAmount, 11);
 		if (netFlags & MarbleNetFlags.DoBlast > 0) {
 			b.writeFlag(true);
+			b.writeFlag(netFlags & MarbleNetFlags.DoUltraBlast > 0);
 			b.writeUInt16(blastTick);
 		} else {
 			b.writeFlag(false);
@@ -173,6 +175,9 @@ class MarbleUpdatePacket implements NetPacket {
 		blastAmount = b.readInt(11);
 		this.netFlags = 0;
 		if (b.readFlag()) {
+			if (b.readFlag()) {
+				this.netFlags |= MarbleNetFlags.DoUltraBlast;
+			}
 			blastTick = b.readUInt16();
 			this.netFlags |= MarbleNetFlags.DoBlast;
 		}

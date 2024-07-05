@@ -221,11 +221,11 @@ class JoinServerGui extends GuiImage {
 		var joinFunc = (password:String) -> {
 			if (curSelection != -1) {
 				var selectedServerVersion = ourServerList[curSelection].version;
-				// if (selectedServerVersion != MarbleGame.currentVersion) {
-				// 	var pup = new MessageBoxOkDlg("You are using a different version of the game than the server. Please update your game.");
-				// 	MarbleGame.canvas.pushDialog(pup);
-				// 	return;
-				// }
+				if (selectedServerVersion != MarbleGame.currentVersion) {
+					var pup = new MessageBoxOkDlg("You are using a different version of the game than the server. Please update your game.");
+					MarbleGame.canvas.pushDialog(pup);
+					return;
+				}
 
 				MarbleGame.canvas.setContent(new MPMessageGui("Please Wait", "Connecting"));
 				var failed = true;

@@ -220,7 +220,7 @@ class MasterServerClient {
 			password: serverInfo.password,
 			state: serverInfo.state,
 			platform: serverInfo.platform,
-			version: "MBP" // MarbleGame.currentVersion
+			version: MarbleGame.currentVersion
 		}));
 	}
 

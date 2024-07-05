@@ -387,6 +387,7 @@ class Marble extends GameObject {
 		this.lastRenderPos = new Vector();
 		this.netSmoothOffset = new Vector();
 		this.netCorrected = false;
+		this.currentUp = new Vector(0, 0, 1);
 
 		var marbleDts = new DtsObject();
 		var marbleShader = "";
@@ -772,8 +773,6 @@ class Marble extends GameObject {
 	}
 
 	function computeMoveForces(m:Move, aControl:Vector, desiredOmega:Vector) {
-		if (this.currentUp == null)
-			this.currentUp = new Vector(0, 0, 1);
 		var currentGravityDir = this.currentUp.multiply(-1);
 		var R = currentGravityDir.multiply(-this._radius);
 		var rollVelocity = this.omega.cross(R);
@@ -1971,7 +1970,8 @@ class Marble extends GameObject {
 		this.shockAbsorberUseTick = p.shockAbsorberTick;
 		this.serverUsePowerup = p.netFlags & MarbleNetFlags.UsePowerup > 0;
 		// this.currentUp = p.gravityDirection;
-		this.level.setUp(cast this, p.gravityDirection, this.level.timeState);
+		if (p.gravityDirection != null)
+			this.level.setUp(cast this, p.gravityDirection, this.level.timeState);
 		if (this.outOfBounds && !p.oob && this.controllable)
 			@:privateAccess this.level.playGui.setCenterText('');
 		this.outOfBounds = p.oob;
@@ -1992,6 +1992,14 @@ class Marble extends GameObject {
 			for (tId => tTime in p.trapdoorUpdates) {
 				@:privateAccess level.trapdoorPredictions.acknowledgeTrapdoorUpdate(tId, tTime);
 			}
+		}
+		if (p.netFlags & MarbleNetFlags.DoBlast > 0 && blastUseTick != 0 && !this.controllable) {
+			var ublast = p.netFlags & MarbleNetFlags.DoUltraBlast > 0;
+			this.level.particleManager.createEmitter(ublast ? blastMaxParticleOptions : blastParticleOptions, ublast ? blastMaxEmitterData : blastEmitterData,
+				this.getAbsPos().getPosition(), () -> {
+					this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
+				},
+				new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
 		}
 		// if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
 		// 	var ticksSince = (this.serverTicks - this.blastUseTick);
@@ -2423,6 +2431,12 @@ class Marble extends GameObject {
 						marble.applyImpulse(impulse);
 					}
 				}
+			}
+			if (Net.isHost) {
+				this.blastUseTick = timeState.ticks;
+				this.netFlags |= MarbleNetFlags.DoBlast;
+				if (blastAmt > 1)
+					this.netFlags |= MarbleNetFlags.DoUltraBlast;
 			}
 		} else {
 			if (this.blastAmount < 0.2 || this.level.game != "ultra")

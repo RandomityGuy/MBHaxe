@@ -26,6 +26,7 @@ class ExplodablePredictionStore {
 		predictions[packet.explodableId] = packet.serverTicks;
 		if (!world.explodablesToTick.contains(packet.explodableId))
 			world.explodablesToTick.push(packet.explodableId);
+		world.explodables[packet.explodableId].playExplosionSound();
 	}
 
 	public inline function reset() {

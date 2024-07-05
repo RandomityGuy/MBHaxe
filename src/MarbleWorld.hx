@@ -786,11 +786,10 @@ class MarbleWorld extends Scheduler {
 		for (interior in this.interiors)
 			interior.reset();
 
-		this.setUp(this.marble, startquat.up, this.timeState, true);
-		this.deselectPowerUp(this.marble);
-		this.orientationChangeTime = -1e8;
 		this.oldOrientationQuat = new Quat();
 		this.newOrientationQuat = new Quat();
+		this.orientationChangeTime = -1e8;
+		this.setUp(this.marble, startquat.up, this.timeState, true);
 		this.deselectPowerUp(this.marble);
 
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
