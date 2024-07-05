@@ -111,7 +111,9 @@ class InstanceManager {
 		var renderFrustum = scene.camera.frustum;
 		var doFrustumCheck = true;
 		// This sucks holy shit
-		doFrustumCheck = MarbleGame.instance.world != null && MarbleGame.instance.world.marble.cubemapRenderer != null;
+		doFrustumCheck = MarbleGame.instance.world != null
+			&& MarbleGame.instance.world.marble.cubemapRenderer != null
+			&& @:privateAccess !MarbleGame.instance.world.marble.camera.spectate;
 		var cameraFrustrums = doFrustumCheck ? MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums() : null;
 
 		for (meshes in objects) {

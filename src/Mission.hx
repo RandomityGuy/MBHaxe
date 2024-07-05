@@ -246,6 +246,8 @@ class Mission {
 			alarmStart = 15;
 			if (this.missionInfo.alarmstarttime != null)
 				alarmStart = MisParser.parseNumber(this.missionInfo.alarmstarttime);
+			if (alarmStart == 0)
+				alarmStart = 15;
 			return alarmStart;
 		}
 		alarmStart = 0;

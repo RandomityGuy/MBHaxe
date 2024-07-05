@@ -79,6 +79,11 @@ abstract class Explodable extends DtsObject {
 		});
 	}
 
+	public inline function playExplosionSound() {
+		if (!this.level.rewinding && !Net.isClient)
+			AudioManager.playSound(ResourceLoader.getResource(explodeSoundFile, ResourceLoader.getAudio, this.soundResources));
+	}
+
 	override function onMarbleContact(marble:src.Marble, timeState:TimeState, ?contact:CollisionInfo) {
 		if (this.isCollideable && !this.level.rewinding) {
 			// marble.velocity = marble.velocity.add(vec);
@@ -90,7 +95,7 @@ abstract class Explodable extends DtsObject {
 			}
 			this.setCollisionEnabled(false);
 
-			if (!this.level.rewinding && @:privateAccess !marble.isNetUpdate)
+			if (!this.level.rewinding && @:privateAccess !marble.isNetUpdate && !Net.isClient)
 				AudioManager.playSound(ResourceLoader.getResource(explodeSoundFile, ResourceLoader.getAudio, this.soundResources));
 			if (@:privateAccess !marble.isNetUpdate) {
 				emitter1 = this.level.particleManager.createEmitter(particle, particleData, this.getAbsPos().getPosition());

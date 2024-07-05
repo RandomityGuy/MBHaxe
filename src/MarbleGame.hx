@@ -1,5 +1,6 @@
 package src;
 
+import gui.JoinServerGui;
 import gui.MPPreGameDlg;
 import gui.MPExitGameDlg;
 import gui.GuiControl;
@@ -248,6 +249,7 @@ class MarbleGame {
 					quitMission(Net.isClient);
 					if (Net.isMP && Net.isClient) {
 						Net.disconnect();
+						canvas.setContent(new JoinServerGui());
 					}
 				});
 			} else {
