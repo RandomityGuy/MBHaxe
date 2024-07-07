@@ -788,9 +788,6 @@ class MarbleWorld extends Scheduler {
 		for (interior in this.interiors)
 			interior.reset();
 
-		this.oldOrientationQuat = new Quat();
-		this.newOrientationQuat = new Quat();
-		this.orientationChangeTime = -1e8;
 		this.setUp(this.marble, startquat.up, this.timeState, true);
 		this.deselectPowerUp(this.marble);
 
@@ -2619,6 +2616,14 @@ class MarbleWorld extends Scheduler {
 
 	/** Get the current interpolated orientation quaternion. */
 	public function getOrientationQuat(time:Float) {
+		if (this.oldOrientationQuat.lengthSq() == 0.0) {
+			this.oldOrientationQuat = new Quat();
+			// this.oldOrientationQuat.init(this.marble.currentUp.toPoint());
+		}
+		if (this.newOrientationQuat.lengthSq() == 0.0) {
+			this.newOrientationQuat = new Quat();
+			// this.newOrientationQuat.initNormal(this.marble.currentUp.toPoint());
+		}
 		if (time < this.orientationChangeTime)
 			return this.oldOrientationQuat;
 		if (time > this.orientationChangeTime + 0.3)
@@ -2652,7 +2657,7 @@ class MarbleWorld extends Scheduler {
 
 				var u = v1.normalized();
 				var v = v2.normalized();
-				if (u.dot(v) == -1) {
+				if (Math.abs(u.dot(v) + 1) < hxd.Math.EPSILON) {
 					var q = new Quat();
 					var o = orthogonal(u).normalized();
 					q.x = o.x;

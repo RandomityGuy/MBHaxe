@@ -250,7 +250,7 @@ class Mission {
 				alarmStart = 15;
 			return alarmStart;
 		}
-		alarmStart = 0;
+		var alarmStart = this.qualifyTime;
 		if (this.missionInfo.alarmstarttime != null)
 			alarmStart -= MisParser.parseNumber(this.missionInfo.alarmstarttime);
 		else {

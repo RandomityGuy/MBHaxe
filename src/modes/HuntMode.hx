@@ -113,6 +113,10 @@ class HuntMode extends NullMode {
 		spawnRot.w *= -1;
 		var spawnMat = spawnRot.toMatrix();
 		var up = spawnMat.up();
+
+		if (MisParser.parseBoolean(randomSpawn.g))
+			up.load(up.multiply(-1));
+
 		spawnPos = spawnPos.add(up); // 1.5 -> 0.5
 		return {
 			position: spawnPos,
@@ -139,6 +143,9 @@ class HuntMode extends NullMode {
 			spawnRot.w *= -1;
 			var spawnMat = spawnRot.toMatrix();
 			var up = spawnMat.up();
+			if (MisParser.parseBoolean(randomSpawn.g))
+				up.load(up.multiply(-1));
+
 			spawnPos = spawnPos.add(up); // 1.5 -> 0.5
 			return {
 				position: spawnPos,
@@ -166,6 +173,9 @@ class HuntMode extends NullMode {
 			spawnRot.w *= -1;
 			var spawnMat = spawnRot.toMatrix();
 			var up = spawnMat.up();
+			if (MisParser.parseBoolean(closestSpawn.g))
+				up.load(up.multiply(-1));
+
 			spawnPos = spawnPos.add(up); // 1.5 -> 0.5
 
 			return {
@@ -375,7 +385,14 @@ class HuntMode extends NullMode {
 		if (gemSpawn.gem != null) {
 			gemSpawn.gem.pickedUp = status;
 			gemSpawn.gem.setHide(status);
-			gemSpawn.gemBeam.setHide(status);
+
+			if (expiredGems.exists(gemSpawn.gem)) {
+				var blackBeam = gemToBlackBeamMap.get(gemSpawn.gem);
+				blackBeam.setHide(status);
+				gemSpawn.gemBeam.setHide(true);
+			} else {
+				gemSpawn.gemBeam.setHide(status);
+			}
 			if (status)
 				this.activeGems.push(gemSpawn.gem);
 			else
@@ -387,10 +404,15 @@ class HuntMode extends NullMode {
 
 	public function setActiveSpawnSphere(gems:Array<Int>, expireds:Array<Bool>) {
 		hideExisting();
+		expiredGems = [];
 		for (i in 0...gems.length) {
 			var gem = gems[i];
 			spawnGem(gem, expireds[i]);
+			if (expireds[i]) {
+				expiredGems.set(gemSpawnPoints[gem].gem, true);
+			}
 		}
+		activeGemSpawnGroup = gems;
 	}
 
 	function getGemWeight(gem:Gem) {

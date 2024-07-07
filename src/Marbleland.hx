@@ -67,6 +67,8 @@ class Marbleland {
 			mission.isClaMission = true;
 			mission.addedAt = missionData.addedAt;
 			mission.gameMode = missionData.gameMode;
+			if (mission.gameMode != null)
+				mission.gameMode = mission.gameMode.toLowerCase();
 
 			var game = missionData.modification;
 			if (isMultiplayer) {

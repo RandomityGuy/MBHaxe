@@ -190,10 +190,10 @@ class PlayGui {
 			for (i in 0...3) {
 				countdownNumbers.push(new GuiAnim(numberTiles));
 			}
+		}
 
-			for (i in 0...6) {
-				gemCountNumbers.push(new GuiAnim(numberTiles));
-			}
+		for (i in 0...6) {
+			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
 
 		var rsgo = [];
