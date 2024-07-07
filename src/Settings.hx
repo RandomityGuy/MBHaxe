@@ -107,6 +107,7 @@ typedef ServerSettings = {
 	var password:String;
 	var forceSpectators:Bool;
 	var quickRespawn:Bool;
+	var competitiveMode:Bool;
 }
 
 typedef PlayStatistics = {
@@ -212,7 +213,8 @@ class Settings {
 		maxPlayers: 8,
 		description: "My cool server",
 		forceSpectators: false,
-		quickRespawn: true
+		quickRespawn: true,
+		competitiveMode: false,
 	}
 
 	public static var levelStatistics:Map<String, PlayStatistics> = [];

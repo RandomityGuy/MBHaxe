@@ -62,6 +62,10 @@ class PlayGui {
 	var timerPoint:GuiAnim;
 	var timerColon:GuiAnim;
 
+	var countdownNumbers:Array<GuiAnim> = [];
+	var countdownPoint:GuiAnim;
+	var countdownIcon:GuiImage;
+
 	var gemCountNumbers:Array<GuiAnim> = [];
 	var gemCountSlash:GuiImage;
 	var gemImageScene:h3d.scene.Scene;
@@ -182,8 +186,14 @@ class PlayGui {
 			timerNumbers.push(new GuiAnim(numberTiles));
 		}
 
-		for (i in 0...6) {
-			gemCountNumbers.push(new GuiAnim(numberTiles));
+		if (MarbleGame.instance.world.isMultiplayer) {
+			for (i in 0...3) {
+				countdownNumbers.push(new GuiAnim(numberTiles));
+			}
+
+			for (i in 0...6) {
+				gemCountNumbers.push(new GuiAnim(numberTiles));
+			}
 		}
 
 		var rsgo = [];
@@ -209,6 +219,8 @@ class PlayGui {
 			initChatHud();
 			if (Net.hostSpectate || Net.clientSpectate)
 				initSpectatorMenu();
+
+			initGemCountdownTimer();
 		}
 
 		if (Util.isTouchDevice()) {
@@ -289,6 +301,44 @@ class PlayGui {
 		timerCtrl.addChild(timerNumbers[4]);
 		timerCtrl.addChild(timerNumbers[5]);
 		timerCtrl.addChild(timerNumbers[6]);
+
+		playGuiCtrl.addChild(timerCtrl);
+	}
+
+	public function initGemCountdownTimer() {
+		var timerCtrl = new GuiControl();
+		timerCtrl.horizSizing = HorizSizing.Center;
+		timerCtrl.position = new Vector(215, 1);
+		timerCtrl.extent = new Vector(374, 58);
+
+		countdownNumbers[0].position = new Vector(33, 10);
+		countdownNumbers[0].extent = new Vector(28, 37);
+
+		countdownNumbers[1].position = new Vector(49, 10);
+		countdownNumbers[1].extent = new Vector(28, 37);
+
+		var pointCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_red.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+
+		countdownPoint = new GuiAnim(pointCols);
+		countdownPoint.position = new Vector(59, 10);
+		countdownPoint.extent = new Vector(28, 37);
+
+		countdownNumbers[2].position = new Vector(70, 10);
+		countdownNumbers[2].extent = new Vector(28, 37);
+
+		countdownIcon = new GuiImage(ResourceLoader.getResource("data/ui/game/timerhuntrespawn.png", ResourceLoader.getImage, this.imageResources).toTile());
+		countdownIcon.position = new Vector(0, 10);
+		countdownIcon.extent = new Vector(36, 36);
+
+		timerCtrl.addChild(countdownIcon);
+		timerCtrl.addChild(countdownNumbers[0]);
+		timerCtrl.addChild(countdownNumbers[1]);
+		timerCtrl.addChild(countdownPoint);
+		timerCtrl.addChild(countdownNumbers[2]);
 
 		playGuiCtrl.addChild(timerCtrl);
 	}
@@ -981,6 +1031,44 @@ class PlayGui {
 
 		timerPoint.anim.currentFrame = color;
 		timerColon.anim.currentFrame = color;
+	}
+
+	public function formatCountdownTimer(time:Float, color:Int = 0) {
+		if (time == 0) {
+			countdownNumbers[0].anim.visible = false;
+			countdownNumbers[1].anim.visible = false;
+			countdownNumbers[2].anim.visible = false;
+			countdownPoint.anim.visible = false;
+			countdownIcon.bmp.visible = false;
+		} else {
+			countdownNumbers[0].anim.visible = true;
+			countdownNumbers[1].anim.visible = true;
+			countdownNumbers[2].anim.visible = true;
+			countdownPoint.anim.visible = true;
+			countdownIcon.bmp.visible = true;
+		}
+
+		var et = time * 1000;
+		var hundredth = Math.floor((et % 1000) / 10);
+		var totalSeconds = Math.floor(et / 1000);
+		var seconds = totalSeconds % 60;
+
+		var secondsOne = seconds % 10;
+		var secondsTen = (seconds - secondsOne) / 10;
+		var hundredthOne = hundredth % 10;
+		var hundredthTen = (hundredth - hundredthOne) / 10;
+
+		if (secondsTen > 0) {
+			countdownNumbers[0].anim.visible = true;
+			countdownNumbers[0].anim.currentFrame = secondsTen + color * 10;
+		} else {
+			countdownNumbers[0].anim.visible = false;
+		}
+
+		countdownNumbers[1].anim.currentFrame = secondsOne + color * 10;
+		countdownNumbers[2].anim.currentFrame = hundredthTen + color * 10;
+
+		countdownPoint.anim.currentFrame = color;
 	}
 
 	public function render(engine:h3d.Engine) {

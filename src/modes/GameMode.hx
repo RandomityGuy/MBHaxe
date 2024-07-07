@@ -1,5 +1,6 @@
 package modes;
 
+import src.TimeState;
 import src.Marble;
 import shapes.Gem;
 import h3d.Quat;
@@ -27,6 +28,7 @@ interface GameMode {
 	public function onClientRestart():Void;
 	public function onRespawn(marble:Marble):Void;
 	public function onGemPickup(marble:Marble, gem:Gem):Void;
+	public function update(t:TimeState):Void;
 
 	public function getPreloadFiles():Array<String>;
 }

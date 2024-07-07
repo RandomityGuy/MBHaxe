@@ -70,8 +70,13 @@ class HuntMode extends NullMode {
 	var activeGemSpawnGroup:Array<Int>;
 	var gemBeams:Array<GemBeam> = [];
 	var gemToBeamMap:Map<Gem, GemBeam> = [];
+	var gemToBlackBeamMap:Map<Gem, GemBeam> = [];
 	var activeGems:Array<Gem> = [];
 	var points:Int = 0;
+	var gemsCentroid:Vector;
+	var idealSpawnIndex:Int;
+	var expiredGems:Map<Gem, Bool> = [];
+	var competitiveTimerStartTicks:Int;
 
 	override function missionScan(mission:Mission) {
 		function scanMission(simGroup:MissionElementSimGroup) {
@@ -92,11 +97,13 @@ class HuntMode extends NullMode {
 	};
 
 	override function getSpawnTransform() {
-		var idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
-		while (spawnPointTaken[idx]) {
-			idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+		var idx = Net.connectedServerInfo.competitiveMode ? idealSpawnIndex : Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+		if (!Net.connectedServerInfo.competitiveMode) {
+			while (spawnPointTaken[idx]) {
+				idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+			}
+			spawnPointTaken[idx] = true;
 		}
-		spawnPointTaken[idx] = true;
 
 		var randomSpawn = playerSpawnPoints[idx];
 		var spawnPos = MisParser.parseVector3(randomSpawn.position);
@@ -174,6 +181,7 @@ class HuntMode extends NullMode {
 		if (this.gemSpawnPoints == null) {
 			this.gemOctree = new Octree();
 			this.gemSpawnPoints = [];
+			this.gemsCentroid = new Vector();
 			for (gem in this.level.gems) {
 				var spawn:GemSpawnPoint = new GemSpawnPoint(gem.getAbsPos().getPosition(), gem, gemSpawnPoints.length);
 				gem.setHide(true);
@@ -184,6 +192,21 @@ class HuntMode extends NullMode {
 				this.level.collisionWorld.removeEntity(gem.boundingCollider); // remove from octree to make it easy
 				if (level.isMultiplayer) {
 					@:privateAccess level.gemPredictions.alloc();
+				}
+				gemsCentroid.load(gemsCentroid.add(gem.getAbsPos().getPosition()));
+			}
+			if (gemSpawnPoints.length > 0)
+				gemsCentroid.load(gemsCentroid.multiply(1.0 / gemSpawnPoints.length));
+
+			var closestSpawnIndex = 0;
+			var closestSpawnDistance = 1e8;
+			for (i in 0...playerSpawnPoints.length) {
+				var spawn = playerSpawnPoints[i];
+				var spawnPos = MisParser.parseVector3(spawn.position);
+				spawnPos.x *= -1;
+				if (spawnPos.distance(gemsCentroid) < closestSpawnDistance) {
+					closestSpawnDistance = spawnPos.distance(gemsCentroid);
+					closestSpawnIndex = i;
 				}
 			}
 		}
@@ -206,8 +229,8 @@ class HuntMode extends NullMode {
 		spawnHuntGems();
 	}
 
-	function spawnHuntGems() {
-		if (activeGems.length != 0)
+	function spawnHuntGems(force:Bool = false) {
+		if (activeGems.length != 0 && !force)
 			return;
 		var gemGroupRadius = 15.0;
 		var maxGemsPerSpawn = 7;
@@ -267,16 +290,39 @@ class HuntMode extends NullMode {
 			return 0;
 		});
 		var spawnSet = results.slice(0, maxGemsPerSpawn).map(x -> x.gem);
+
+		if (force) {
+			for (activeGem in activeGemSpawnGroup)
+				spawnSet.remove(activeGem);
+		}
+
 		for (gem in spawnSet) {
 			spawnGem(gem);
 		}
-		activeGemSpawnGroup = spawnSet;
+		if (!force)
+			activeGemSpawnGroup = spawnSet;
+		else {
+			var uncollectedGems = [];
+			for (g in activeGemSpawnGroup) {
+				if (!gemSpawnPoints[g].gem.pickedUp)
+					uncollectedGems.push(g);
+			}
+			activeGemSpawnGroup = uncollectedGems.concat(spawnSet);
+		}
 
 		if (level.isMultiplayer && Net.isHost) {
 			var bs = new OutputBitStream();
 			bs.writeByte(GemSpawn);
 			var packet = new GemSpawnPacket();
-			packet.gemIds = spawnSet;
+			packet.gemIds = activeGemSpawnGroup;
+			packet.expireds = [];
+			for (i in 0...packet.gemIds.length) {
+				if (expiredGems.exists(gemSpawnPoints[packet.gemIds[i]].gem)) {
+					packet.expireds.push(true);
+				} else {
+					packet.expireds.push(false);
+				}
+			}
 			packet.serialize(bs);
 			Net.sendPacketToIngame(bs);
 		}
@@ -284,29 +330,43 @@ class HuntMode extends NullMode {
 		lastSpawn = furthest;
 	}
 
-	function spawnGem(spawn:Int) {
+	function spawnGem(spawn:Int, expired:Bool = false) {
 		var gem = gemSpawnPoints[spawn];
 		gem.gem.setHide(false);
 		gem.gem.pickedUp = false;
 		this.level.collisionWorld.addEntity(gem.gem.boundingCollider);
 		activeGems.push(gem.gem);
-		if (gem.gemBeam == null) {
-			gem.gemBeam = new GemBeam(StringTools.replace(gem.gem.gemColor, '.gem', ''));
+		if (!expired) {
+			if (gem.gemBeam == null) {
+				gem.gemBeam = new GemBeam(StringTools.replace(gem.gem.gemColor, '.gem', ''));
 
-			var gemPos = gem.gem.getAbsPos().getPosition();
+				var gemPos = gem.gem.getAbsPos().getPosition();
 
-			gem.gemBeam.setPosition(gemPos.x, gemPos.y, gemPos.z);
-			gem.gemBeam.setRotationQuat(gem.gem.getRotationQuat().clone());
-			// gem.gemBeam.setOpacity(0.99);
-			this.gemBeams.push(gem.gemBeam);
+				gem.gemBeam.setPosition(gemPos.x, gemPos.y, gemPos.z);
+				gem.gemBeam.setRotationQuat(gem.gem.getRotationQuat().clone());
+				// gem.gemBeam.setOpacity(0.99);
+				this.gemBeams.push(gem.gemBeam);
 
-			this.gemToBeamMap.set(gem.gem, gem.gemBeam);
+				this.gemToBeamMap.set(gem.gem, gem.gemBeam);
 
-			level.addDtsObject(gem.gemBeam, () -> {
-				// Please be fast lol
-			});
+				level.addDtsObject(gem.gemBeam, () -> {
+					// Please be fast lol
+				});
+			} else {
+				gem.gemBeam.setHide(false);
+			}
 		} else {
-			gem.gemBeam.setHide(false);
+			if (gemToBlackBeamMap.exists(gem.gem)) {
+				gemToBlackBeamMap.get(gem.gem).setHide(false);
+			} else {
+				var blackBeam = new GemBeam("black");
+				var pos = gem.gem.getAbsPos().getPosition();
+				blackBeam.setPosition(gem.gem.x, gem.gem.y, gem.gem.z);
+				blackBeam.setRotationQuat(gem.gem.getRotationQuat().clone());
+				blackBeam.setHide(false);
+				level.addDtsObject(blackBeam, () -> {});
+				gemToBlackBeamMap.set(gem.gem, blackBeam);
+			}
 		}
 	}
 
@@ -325,10 +385,11 @@ class HuntMode extends NullMode {
 		}
 	}
 
-	public function setActiveSpawnSphere(gems:Array<Int>) {
+	public function setActiveSpawnSphere(gems:Array<Int>, expireds:Array<Bool>) {
 		hideExisting();
-		for (gem in gems) {
-			spawnGem(gem);
+		for (i in 0...gems.length) {
+			var gem = gems[i];
+			spawnGem(gem, expireds[i]);
 		}
 	}
 
@@ -351,6 +412,9 @@ class HuntMode extends NullMode {
 				if (gs.gemBeam != null) {
 					gs.gemBeam.setHide(true);
 				}
+				if (gemToBlackBeamMap.exists(gs.gem)) {
+					gemToBlackBeamMap.get(gs.gem).setHide(true);
+				}
 			}
 		}
 	}
@@ -362,15 +426,18 @@ class HuntMode extends NullMode {
 	override function onRestart() {
 		setupGems();
 		points = 0;
+		competitiveTimerStartTicks = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
 	}
 
 	override function onMissionLoad() {
 		prepareGems();
+		competitiveTimerStartTicks = 0;
 	}
 
 	override function onClientRestart() {
 		prepareGems();
+		competitiveTimerStartTicks = 0;
 	}
 
 	override function onTimeExpire() {
@@ -420,6 +487,17 @@ class HuntMode extends NullMode {
 					@:privateAccess this.level.soundResources));
 		}
 		activeGems.remove(gem);
+
+		var wasExpiredGem = false;
+
+		if (expiredGems.exists(gem)) {
+			wasExpiredGem = true;
+			expiredGems.remove(gem);
+		}
+		if (gemToBlackBeamMap.exists(gem)) {
+			gemToBlackBeamMap.get(gem).setHide(true);
+		}
+
 		var beam = gemToBeamMap.get(gem);
 		beam.setHide(true);
 
@@ -455,6 +533,43 @@ class HuntMode extends NullMode {
 		}
 
 		if (this.level.isMultiplayer && Net.isHost) {
+			if (Net.connectedServerInfo.competitiveMode && !wasExpiredGem) {
+				if (competitiveTimerStartTicks == 0) {
+					NetCommands.setCompetitiveTimerStartTicks(this.level.timeState.ticks);
+				}
+				var remaining = 0;
+				for (g in activeGems)
+					if (!expiredGems.exists(g))
+						remaining++;
+				if (remaining == 3) {
+					var currentTime = level.timeState.ticks;
+					var endTime = competitiveTimerStartTicks + (20000 >> 5);
+					var remainingTicks = (endTime - currentTime);
+					if (remainingTicks > (15000 >> 5)) {
+						NetCommands.setCompetitiveTimerStartTicks(currentTime - (5000 >> 5));
+					}
+				}
+				if (remaining == 2) {
+					var currentTime = level.timeState.ticks;
+					var endTime = competitiveTimerStartTicks + (20000 >> 5);
+					var remainingTicks = (endTime - currentTime);
+					if (remainingTicks > (10000 >> 5)) {
+						NetCommands.setCompetitiveTimerStartTicks(currentTime - (10000 >> 5));
+					}
+				}
+				if (remaining == 1) {
+					var currentTime = level.timeState.ticks;
+					var endTime = competitiveTimerStartTicks + (20000 >> 5);
+					var remainingTicks = (endTime - currentTime);
+					if (remainingTicks > (5000 >> 5)) {
+						NetCommands.setCompetitiveTimerStartTicks(currentTime - (15000 >> 5));
+					}
+				}
+				if (remaining == 0) {
+					NetCommands.setCompetitiveTimerStartTicks(0);
+				}
+			}
+
 			var packet = new GemPickupPacket();
 			packet.clientId = @:privateAccess marble.connection == null ? 0 : @:privateAccess marble.connection.id;
 			packet.gemId = gem.netIndex;
@@ -471,6 +586,47 @@ class HuntMode extends NullMode {
 		}
 		if (this.level.isMultiplayer && Net.isClient) {
 			gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;
+		}
+	}
+
+	public function setCompetitiveTimerStartTicks(ticks:Int) {
+		competitiveTimerStartTicks = ticks;
+	}
+
+	function spawnNextGemCluster() {
+		// Expire all existing
+		for (g in activeGems) {
+			expiredGems.set(g, true);
+			var gemBeam = gemToBeamMap.get(g);
+			gemBeam.setHide(true);
+			if (gemToBlackBeamMap.exists(g)) {
+				gemToBlackBeamMap.get(g).setHide(false);
+			} else {
+				var blackBeam = new GemBeam("black");
+				var pos = g.getAbsPos().getPosition();
+				blackBeam.setPosition(g.x, g.y, g.z);
+				blackBeam.setRotationQuat(g.getRotationQuat().clone());
+				blackBeam.setHide(false);
+				level.addDtsObject(blackBeam, () -> {});
+				gemToBlackBeamMap.set(g, blackBeam);
+			}
+		}
+		spawnHuntGems(true);
+	}
+
+	override function update(t:src.TimeState) {
+		if (Net.connectedServerInfo.competitiveMode) {
+			if (competitiveTimerStartTicks != 0) {
+				var currentTime = Net.isHost ? t.ticks : @:privateAccess level.marble.serverTicks;
+				var endTime = competitiveTimerStartTicks + (20000 >> 5);
+				@:privateAccess level.playGui.formatCountdownTimer(Math.max(0, (endTime - currentTime) * 0.032), 0);
+				if (Net.isHost && endTime < currentTime) {
+					spawnNextGemCluster();
+					NetCommands.setCompetitiveTimerStartTicks(0);
+				}
+			} else {
+				@:privateAccess level.playGui.formatCountdownTimer(0, 0);
+			}
 		}
 	}
 
