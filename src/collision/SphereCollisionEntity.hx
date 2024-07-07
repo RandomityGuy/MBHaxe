@@ -13,6 +13,7 @@ import src.Debug;
 class SphereCollisionEntity extends CollisionEntity {
 	public var radius:Float;
 	public var marble:Marble;
+	public var ignore:Bool = false;
 
 	var _dbgEntity2:h3d.scene.Mesh;
 
@@ -75,6 +76,8 @@ class SphereCollisionEntity extends CollisionEntity {
 	}
 
 	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
+		if (ignore)
+			return [];
 		var contacts = [];
 		var thispos = transform.getPosition();
 		var position = collisionEntity.transform.getPosition();

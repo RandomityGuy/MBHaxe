@@ -683,7 +683,16 @@ class PlayGui {
 				default:
 					col3;
 			};
-			pl.push('<font color="${color}">${i + 1}. ${Util.rightPad(item.name, 25, 3)}</font>');
+			var isSpectating = false;
+			if (item.us) {
+				if (Net.isHost)
+					isSpectating = Net.hostSpectate;
+				if (Net.isClient)
+					isSpectating = Net.clientSpectate;
+			} else {
+				isSpectating = Net.clientIdMap[item.id].spectator;
+			}
+			pl.push('<font color="${color}">${i + 1}. ${isSpectating ? "[S] " : ""}${Util.rightPad(item.name, 25, 3)}</font>');
 			var connPing = item.us ? (Net.isHost ? 0 : Net.clientConnection.pingTicks) : (item.id == 0 ? 0 : Net.clientIdMap[item.id].pingTicks);
 			var pingStatus = "unknown";
 			if (connPing <= 5)
