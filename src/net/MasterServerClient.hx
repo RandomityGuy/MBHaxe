@@ -10,6 +10,7 @@ import haxe.net.WebSocket;
 import src.Console;
 
 typedef RemoteServerInfo = {
+	id:String,
 	name:String,
 	host:String,
 	description:String,
@@ -212,6 +213,7 @@ class MasterServerClient {
 	public function sendServerInfo(serverInfo:ServerInfo) {
 		queueMessage(Json.stringify({
 			type: "serverInfo",
+			id: serverInfo.id,
 			name: serverInfo.name,
 			host: serverInfo.hostname,
 			description: serverInfo.description,
@@ -224,10 +226,10 @@ class MasterServerClient {
 		}));
 	}
 
-	public function sendConnectToServer(serverName:String, sdp:String, password:String) {
+	public function sendConnectToServer(serverId:String, sdp:String, password:String) {
 		queueMessage(Json.stringify({
 			type: "connect",
-			serverName: serverName,
+			id: serverId,
 			sdp: sdp,
 			password: password
 		}));

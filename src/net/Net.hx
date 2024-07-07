@@ -45,6 +45,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 
 @:publicFields
 class ServerInfo {
+	var id:String;
 	var name:String;
 	var hostname:String;
 	var description:String;
@@ -55,6 +56,7 @@ class ServerInfo {
 	var platform:NetPlatform;
 
 	public function new(name:String, hostname:String, description:String, players:Int, maxPlayers:Int, password:String, state:String, platform:NetPlatform) {
+		this.id = '${Math.random()}';
 		this.name = name;
 		this.hostname = hostname;
 		this.description = description;
