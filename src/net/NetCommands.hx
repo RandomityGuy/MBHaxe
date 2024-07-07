@@ -425,12 +425,13 @@ class NetCommands {
 		}
 	}
 
-	@:rpc(server) public static function sendServerSettings(name:String, desc:String, quickRespawn:Bool, forceSpectator:Bool) {
+	@:rpc(server) public static function sendServerSettings(name:String, desc:String, quickRespawn:Bool, forceSpectator:Bool, competitive:Bool) {
 		Net.connectedServerInfo = {
 			name: name,
 			description: desc,
 			quickRespawn: quickRespawn,
-			forceSpectator: forceSpectator
+			forceSpectator: forceSpectator,
+			competitiveMode: competitive
 		};
 	}
 
@@ -451,5 +452,12 @@ class NetCommands {
 			// }
 		}
 		MPPlayMissionGui.addChatMessage(msg);
+	}
+
+	@:rpc(server) public static function setCompetitiveTimerStartTicks(ticks:Int) {
+		if (MarbleGame.instance.world != null) {
+			var huntMode = cast(MarbleGame.instance.world.gameMode, HuntMode);
+			huntMode.setCompetitiveTimerStartTicks(ticks);
+		}
 	}
 }

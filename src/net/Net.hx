@@ -73,6 +73,7 @@ class ConnectedServerInfo {
 	var description:String;
 	var quickRespawn:Bool;
 	var forceSpectator:Bool;
+	var competitiveMode:Bool;
 }
 
 class Net {
@@ -112,6 +113,13 @@ class Net {
 			clientId = 0;
 			isMP = true;
 			MasterServerClient.instance.sendServerInfo(serverInfo);
+			Net.connectedServerInfo = {
+				name: name,
+				description: description,
+				competitiveMode: Settings.serverSettings.competitiveMode,
+				quickRespawn: Settings.serverSettings.quickRespawn,
+				forceSpectator: Settings.serverSettings.forceSpectators,
+			};
 			onHosted();
 		});
 	}
@@ -602,7 +610,7 @@ class Net {
 		// 	NetCommands.setLobbyCustLevelNameClient(conn, MultiplayerLevelSelectGui.custPath);
 		// } else {
 		NetCommands.sendServerSettingsClient(conn, Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.quickRespawn,
-			Settings.serverSettings.forceSpectators);
+			Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode);
 		NetCommands.setLobbyLevelIndexClient(conn, MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
 		// }
 
@@ -749,7 +757,7 @@ class Net {
 				var gemSpawnPacket = new GemSpawnPacket();
 				gemSpawnPacket.deserialize(input);
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-					MarbleGame.instance.world.spawnHuntGemsClientSide(gemSpawnPacket.gemIds);
+					MarbleGame.instance.world.spawnHuntGemsClientSide(gemSpawnPacket.gemIds, gemSpawnPacket.expireds);
 					@:privateAccess MarbleGame.instance.world.gemPredictions.acknowledgeGemSpawn(gemSpawnPacket);
 				}
 

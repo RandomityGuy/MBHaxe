@@ -1861,19 +1861,21 @@ class Marble extends GameObject {
 
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 
+		var megaMarbleDurationTicks = Net.connectedServerInfo.competitiveMode ? 156 : 312;
+
 		if (this.megaMarbleUseTick > 0) {
 			if (Net.isHost) {
-				if ((timeState.ticks - this.megaMarbleUseTick) <= 312 && this.megaMarbleUseTick > 0) {
+				if ((timeState.ticks - this.megaMarbleUseTick) <= megaMarbleDurationTicks && this.megaMarbleUseTick > 0) {
 					this._radius = 0.6666;
 					this.collider.radius = 0.6666;
-				} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
+				} else if ((timeState.ticks - this.megaMarbleUseTick) > megaMarbleDurationTicks) {
 					this.collider.radius = this._radius = 0.2;
 					this.megaMarbleUseTick = 0;
 					this.netFlags |= MarbleNetFlags.DoMega;
 				}
 			}
 			if (Net.isClient) {
-				if (this.serverTicks - this.megaMarbleUseTick <= 312 && this.megaMarbleUseTick > 0) {
+				if (this.serverTicks - this.megaMarbleUseTick <= megaMarbleDurationTicks && this.megaMarbleUseTick > 0) {
 					this._radius = 0.6666;
 					this.collider.radius = 0.6666;
 				} else {
@@ -1887,7 +1889,7 @@ class Marble extends GameObject {
 		}
 
 		if (Net.isMP) {
-			if (m.jump && this.outOfBounds) {
+			if (m.powerup && this.outOfBounds) {
 				this.level.cancel(this.oobSchedule);
 				this.level.restart(cast this);
 			}
@@ -1896,7 +1898,7 @@ class Marble extends GameObject {
 				interior.popTickState();
 			}
 
-			if (m.respawn) {
+			if (m.respawn && !Net.connectedServerInfo.competitiveMode) { // Competitive mode disables quick respawning
 				if (timeState.ticks - lastRespawnTick > (25000 >> 5)) {
 					this.level.restart(cast this);
 					lastRespawnTick = timeState.ticks;
@@ -2418,17 +2420,19 @@ class Marble extends GameObject {
 					new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
 			this.blastTicks = 0;
 			// Now send the impulse to other marbles
-			var strength = blastAmt * (blastAmt > 1 ? blastRechargeShockwaveStrength : blastShockwaveStrength);
-			var ourPos = this.collider.transform.getPosition();
-			for (marble in level.marbles) {
-				if (marble != cast this) {
-					var theirPos = marble.collider.transform.getPosition();
-					var posDiff = ourPos.distance(theirPos);
-					if (posDiff < strength) {
-						var myMod = isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
-						var theirMod = @:privateAccess marble.isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
-						var impulse = theirPos.sub(ourPos).normalized().multiply(strength * (theirMod / myMod));
-						marble.applyImpulse(impulse);
+			if (!Net.connectedServerInfo.competitiveMode || blastAmt > 1) { // Competitor mode only allows ultra blasts
+				var strength = blastAmt * (blastAmt > 1 ? blastRechargeShockwaveStrength : blastShockwaveStrength);
+				var ourPos = this.collider.transform.getPosition();
+				for (marble in level.marbles) {
+					if (marble != cast this) {
+						var theirPos = marble.collider.transform.getPosition();
+						var posDiff = ourPos.distance(theirPos);
+						if (posDiff < strength) {
+							var myMod = isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
+							var theirMod = @:privateAccess marble.isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
+							var impulse = theirPos.sub(ourPos).normalized().multiply(strength * (theirMod / myMod));
+							marble.applyImpulse(impulse);
+						}
 					}
 				}
 			}
@@ -2527,15 +2531,16 @@ class Marble extends GameObject {
 	}
 
 	inline function isMegaMarbleEnabled(timeState:TimeState) {
+		var megaMarbleTicks = Net.connectedServerInfo.competitiveMode ? 156 : 312;
 		if (this.level == null)
 			return false;
 		if (!this.level.isMultiplayer) {
 			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;
 		} else {
 			if (Net.isHost) {
-				return (megaMarbleUseTick > 0 && (this.level.timeState.ticks - megaMarbleUseTick) <= 312);
+				return (megaMarbleUseTick > 0 && (this.level.timeState.ticks - megaMarbleUseTick) <= megaMarbleTicks);
 			} else {
-				return (megaMarbleUseTick > 0 && (serverTicks - megaMarbleUseTick) <= 312);
+				return (megaMarbleUseTick > 0 && (serverTicks - megaMarbleUseTick) <= megaMarbleTicks);
 			}
 		}
 	}

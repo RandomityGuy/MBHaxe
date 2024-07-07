@@ -262,15 +262,19 @@ class ExplodableUpdatePacket implements NetPacket {
 @:publicFields
 class GemSpawnPacket implements NetPacket {
 	var gemIds:Array<Int>;
+	var expireds:Array<Bool>;
 
 	public function new() {
 		gemIds = [];
+		expireds = [];
 	}
 
 	public function serialize(b:OutputBitStream) {
 		b.writeInt(gemIds.length, 5);
-		for (gemId in gemIds) {
+		for (i in 0...gemIds.length) {
+			var gemId = gemIds[i];
 			b.writeInt(gemId, 11);
+			b.writeFlag(expireds[i]);
 		}
 	}
 
@@ -278,6 +282,7 @@ class GemSpawnPacket implements NetPacket {
 		var count = b.readInt(5);
 		for (i in 0...count) {
 			gemIds.push(b.readInt(11));
+			expireds.push(b.readFlag());
 		}
 	}
 }

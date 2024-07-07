@@ -386,6 +386,7 @@ class MarbleWorld extends Scheduler {
 				this.endPad.generateCollider();
 			if (this.isMultiplayer) {
 				this.playGui.formatGemHuntCounter(0);
+				this.playGui.formatCountdownTimer(0, 0);
 			} else {
 				this.playGui.formatGemCounter(this.gemCount, this.totalGems);
 			}
@@ -1684,10 +1685,10 @@ class MarbleWorld extends Scheduler {
 		return -1;
 	}
 
-	public function spawnHuntGemsClientSide(gemIds:Array<Int>) {
+	public function spawnHuntGemsClientSide(gemIds:Array<Int>, expireds:Array<Bool>) {
 		if (this.isMultiplayer && Net.isClient) {
 			var huntMode:HuntMode = cast this.gameMode;
-			huntMode.setActiveSpawnSphere(gemIds);
+			huntMode.setActiveSpawnSphere(gemIds, expireds);
 			// radar.blink();
 		}
 	}
@@ -1829,6 +1830,7 @@ class MarbleWorld extends Scheduler {
 
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
+		this.gameMode.update(this.timeState);
 
 		if (!this.isMultiplayer) {
 			if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
@@ -2838,7 +2840,7 @@ class MarbleWorld extends Scheduler {
 		this.deselectPowerUp(this.marble); // Always deselect first
 		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
 		if (this.checkpointHeldPowerup != null)
-			this.pickUpPowerUp(this.marble, this.checkpointHeldPowerup);
+			this.schedule(this.timeState.currentAttemptTime + 0.5, () -> this.pickUpPowerUp(this.marble, this.checkpointHeldPowerup));
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 	}
 

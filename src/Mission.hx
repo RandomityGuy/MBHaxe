@@ -244,11 +244,11 @@ class Mission {
 			return path;
 		if (ResourceLoader.exists(dirpath + fname))
 			return dirpath + fname;
-		if (game == 'gold') {
-			path = StringTools.replace(path, 'interiors/', 'interiors_mbg/');
-			if (ResourceLoader.exists(path))
-				return path;
-		}
+
+		path = StringTools.replace(path, 'interiors/', 'interiors_mbg/');
+		if (ResourceLoader.exists(path))
+			return path;
+
 		path = StringTools.replace(path, "lbinteriors", "interiors"); // This shit ew
 		if (ResourceLoader.exists(path))
 			return path;

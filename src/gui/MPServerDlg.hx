@@ -95,6 +95,7 @@ class MPServerDlg extends GuiImage {
 		var curServerMaxPlayers = Settings.serverSettings.maxPlayers;
 		var curServerForceSpectators = Settings.serverSettings.forceSpectators;
 		var curServerQuickRespawn = Settings.serverSettings.quickRespawn;
+		var curServerCompetitive = Settings.serverSettings.competitiveMode;
 
 		saveBtn.pressedAction = (e) -> {
 			Settings.serverSettings.name = curServerName;
@@ -103,6 +104,7 @@ class MPServerDlg extends GuiImage {
 			Settings.serverSettings.maxPlayers = curServerMaxPlayers;
 			Settings.serverSettings.forceSpectators = curServerForceSpectators;
 			Settings.serverSettings.quickRespawn = curServerQuickRespawn;
+			Settings.serverSettings.competitiveMode = curServerCompetitive;
 			if (Net.isHost) {
 				Net.serverInfo.name = curServerName;
 				Net.serverInfo.description = curServerDescription;
@@ -110,7 +112,7 @@ class MPServerDlg extends GuiImage {
 				Net.serverInfo.password = curServerPassword;
 				MasterServerClient.instance.sendServerInfo(Net.serverInfo); // Update data on master server
 				NetCommands.sendServerSettings(Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.quickRespawn,
-					Settings.serverSettings.forceSpectators);
+					Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode);
 			}
 			MarbleGame.canvas.popDialog(this);
 		}
@@ -119,7 +121,7 @@ class MPServerDlg extends GuiImage {
 		serverSettingsContainer.vertSizing = Height;
 		serverSettingsContainer.horizSizing = Left;
 		serverSettingsContainer.position = new Vector(16, 65);
-		serverSettingsContainer.extent = new Vector(390, 276);
+		serverSettingsContainer.extent = new Vector(390, 306);
 		this.addChild(serverSettingsContainer);
 
 		var serverName = new GuiText(markerFelt18);
@@ -306,5 +308,28 @@ class MPServerDlg extends GuiImage {
 			curServerQuickRespawn = !curServerQuickRespawn;
 		};
 		serverSettingsContainer.addChild(quickRespawnChk);
+
+		var competitive = new GuiText(markerFelt18);
+		competitive.text.text = "Competitive Mode:";
+		competitive.text.textColor = 0xFFFFFF;
+		competitive.text.dropShadow = {
+			dx: 1,
+			dy: 1,
+			alpha: 0.5,
+			color: 0
+		};
+		competitive.position = new Vector(0, 39 * 7);
+		competitive.extent = new Vector(206, 14);
+		serverSettingsContainer.addChild(competitive);
+
+		var competitiveChk = new GuiButton(loadButtonImages("data/ui/mp/lb_chkbx"));
+		competitiveChk.position = new Vector(359, 9 * 4 + 29 * 8 + 4);
+		competitiveChk.extent = new Vector(31, 31);
+		competitiveChk.buttonType = Toggle;
+		competitiveChk.pressed = curServerCompetitive;
+		competitiveChk.pressedAction = (sender) -> {
+			curServerCompetitive = !curServerCompetitive;
+		};
+		serverSettingsContainer.addChild(competitiveChk);
 	}
 }
