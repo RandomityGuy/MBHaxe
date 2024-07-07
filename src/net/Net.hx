@@ -56,7 +56,7 @@ class ServerInfo {
 	var platform:NetPlatform;
 
 	public function new(name:String, hostname:String, description:String, players:Int, maxPlayers:Int, password:String, state:String, platform:NetPlatform) {
-		this.id = '${Math.random()}';
+		this.id = Uuid.v4();
 		this.name = name;
 		this.hostname = hostname;
 		this.description = description;
