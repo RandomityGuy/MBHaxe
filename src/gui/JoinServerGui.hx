@@ -212,9 +212,10 @@ class JoinServerGui extends GuiImage {
 		hostBtn.position = new Vector(521, 379);
 		hostBtn.extent = new Vector(93, 45);
 		hostBtn.pressedAction = (e) -> {
-			Net.hostServer(Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.maxPlayers, "", () -> {
-				MarbleGame.canvas.setContent(new MPPlayMissionGui(true));
-			});
+			Net.hostServer(Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.maxPlayers,
+				Settings.serverSettings.password, () -> {
+					MarbleGame.canvas.setContent(new MPPlayMissionGui(true));
+				});
 		}
 		window.addChild(hostBtn);
 
@@ -237,7 +238,7 @@ class JoinServerGui extends GuiImage {
 						}
 					}
 				}, 15000);
-				Net.joinServer(ourServerList[curSelection].name, password, () -> {
+				Net.joinServer(ourServerList[curSelection].id, password, () -> {
 					failed = false;
 					Net.remoteServerInfo = ourServerList[curSelection];
 				});

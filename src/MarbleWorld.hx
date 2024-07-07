@@ -841,10 +841,7 @@ class MarbleWorld extends Scheduler {
 			this.replay.recordMarbleStateFlags(false, false, true, false);
 		}
 
-		// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
-		var up = new Vector(0, 0, 1);
-		up.transform(respawnQuat.toMatrix());
-		this.setUp(marble, up, this.timeState, true);
+		this.setUp(marble, respawnUp, this.timeState, true);
 
 		if (marble == this.marble)
 			this.playGui.setCenterText('none');
