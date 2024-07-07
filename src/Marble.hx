@@ -1861,7 +1861,7 @@ class Marble extends GameObject {
 
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 
-		var megaMarbleDurationTicks = Net.connectedServerInfo.competitiveMode ? 156 : 312;
+		var megaMarbleDurationTicks = Net.isMP && Net.connectedServerInfo.competitiveMode ? 156 : 312;
 
 		if (this.megaMarbleUseTick > 0) {
 			if (Net.isHost) {
@@ -2531,7 +2531,7 @@ class Marble extends GameObject {
 	}
 
 	inline function isMegaMarbleEnabled(timeState:TimeState) {
-		var megaMarbleTicks = Net.connectedServerInfo.competitiveMode ? 156 : 312;
+		var megaMarbleTicks = Net.isMP && Net.connectedServerInfo.competitiveMode ? 156 : 312;
 		if (this.level == null)
 			return false;
 		if (!this.level.isMultiplayer) {

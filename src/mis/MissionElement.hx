@@ -254,6 +254,7 @@ class MissionElementTrigger extends MissionElementBase {
 	var keepangular:Null<String>;
 	var keepcamera:Null<String>;
 	var camerayaw:Null<String>;
+	var g:Null<String>;
 
 	public function new() {
 		_type = MissionElementType.Trigger;

@@ -268,8 +268,10 @@ class MPPreGameDlg extends GuiControl {
 
 			if (playerListArr.length > 1) {
 				spectateBtn.anim.visible = true;
+				spectateBtn.disabled = false;
 			} else {
 				spectateBtn.anim.visible = false;
+				spectateBtn.disabled = true;
 			}
 
 			var playerListCompiled = playerListArr.map(player -> player.spectate ? '[S] ${player.name}' : player.name);

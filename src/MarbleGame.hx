@@ -208,7 +208,8 @@ class MarbleGame {
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
 				&& world.finishTime == null
 				&& world._ready) {
-				if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
+				if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg
+					|| (Net.isMP && paused && !(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPExitGameDlg))) {
 					return; // don't pause
 				}
 				paused = !paused;
