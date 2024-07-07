@@ -1245,7 +1245,7 @@ class Marble extends GameObject {
 		// Marble-Marble
 		var nextPos = position.add(velocity.multiply(deltaT));
 		for (marble in this.collisionWorld.marbleEntities) {
-			if (marble == this.collider)
+			if (marble == this.collider || marble.ignore)
 				continue;
 			var otherPosition = marble.transform.getPosition();
 			var isec = Collision.capsuleSphereNearestOverlap(position, nextPos, _radius, otherPosition, marble.radius);
@@ -1669,6 +1669,13 @@ class Marble extends GameObject {
 				}
 				return;
 			}
+
+			var ticks = Net.isClient ? serverTicks : timeState.ticks;
+
+			if ((ticks - this.level.serverStartTicks) < (10000 >> 5)) // 10 seconds marble collision invulnerability - competitive mode needs this
+				this.collider.ignore = true;
+			else
+				this.collider.ignore = false;
 		}
 
 		// if (this.controllable) {

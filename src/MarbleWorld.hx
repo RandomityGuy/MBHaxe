@@ -369,12 +369,12 @@ class MarbleWorld extends Scheduler {
 			if (this.isMultiplayer) {
 				// Add us
 				if (Net.isHost) {
-					this.playGui.addPlayer(0, (Net.hostSpectate ? "[S] " : "") + Settings.highscoreName.substr(0, 15), true);
+					this.playGui.addPlayer(0, Settings.highscoreName.substr(0, 15), true);
 				} else {
-					this.playGui.addPlayer(Net.clientId, (Net.clientSpectate ? "[S] " : "") + Settings.highscoreName.substr(0, 15), true);
+					this.playGui.addPlayer(Net.clientId, Settings.highscoreName.substr(0, 15), true);
 				}
 				for (client in Net.clientIdMap) {
-					this.playGui.addPlayer(client.id, (client.spectator ? "[S] " : "") + client.name.substr(0, 15), false);
+					this.playGui.addPlayer(client.id, client.name.substr(0, 15), false);
 				}
 			}
 
@@ -612,7 +612,7 @@ class MarbleWorld extends Scheduler {
 		this.initMarble(cc, () -> {
 			var addedMarble = clientMarbles.get(cc);
 			this.restart(addedMarble); // spawn it
-			this.playGui.addPlayer(cc.id, (cc.spectator ? "[S] " : "") + cc.getName(), false);
+			this.playGui.addPlayer(cc.id, cc.getName(), false);
 			this.playGui.redrawPlayerList();
 
 			// Sort all the marbles so that they are updated in a deterministic order
@@ -629,7 +629,7 @@ class MarbleWorld extends Scheduler {
 		this.initMarble(cc, () -> {
 			var addedMarble = clientMarbles.get(cc);
 			this.restart(addedMarble); // spawn it
-			this.playGui.addPlayer(cc.id, (cc.spectator ? "[S] " : "") + cc.getName(), false);
+			this.playGui.addPlayer(cc.id, cc.getName(), false);
 			this.playGui.redrawPlayerList();
 
 			// Sort all the marbles so that they are updated in a deterministic order
@@ -911,6 +911,8 @@ class MarbleWorld extends Scheduler {
 					this.marble.setMode(Play);
 					for (client => marble in this.clientMarbles)
 						marble.setMode(Play);
+
+					this.playGui.redrawPlayerList(); // Update spectators display
 
 					this.playGui.setCenterText('go');
 
