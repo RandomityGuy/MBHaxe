@@ -42,6 +42,7 @@ class GemSpawnPoint implements IOctreeObject {
 		boundingBox.addPoint(vec.add(new Vector(0.5, 0.5, 0.5)).toPoint());
 		this.gem = spawn;
 		this.netIndex = netIndex;
+		this.gem.netIndex = netIndex;
 	}
 
 	public function getElementType() {
