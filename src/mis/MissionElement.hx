@@ -64,6 +64,10 @@ class MissionElementScriptObject extends MissionElementBase {
 	var spawnblock:String;
 	var overviewwidth:String;
 	var overviewheight:String;
+	var spawnchancered:String;
+	var spawnchanceyellow:String;
+	var spawnchanceblue:String;
+	var spawnchanceplatinum:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;

@@ -70,8 +70,8 @@ class MPPlayMissionGui extends GuiImage {
 			currentSelectionStatic = 0;
 		}
 
-		// currentSelection = PlayMissionGui.currentSelectionStatic;
-		currentCategory = PlayMissionGui.currentCategoryStatic;
+		currentSelection = currentSelectionStatic;
+		currentCategory = currentCategoryStatic;
 
 		MarbleGame.instance.toRecord = false;
 
@@ -529,7 +529,7 @@ class MPPlayMissionGui extends GuiImage {
 
 			currentCategoryStatic = currentCategory;
 
-			NetCommands.setLobbyLevelIndex(category, currentList.length - 1);
+			NetCommands.setLobbyLevelIndex(category, 0);
 			// if (doRender)
 			//	this.render(cast(this.parent, Canvas).scene2d);
 		}

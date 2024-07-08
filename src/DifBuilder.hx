@@ -183,6 +183,31 @@ class DifBuilder {
 			friction: 6,
 			restitution: 0.3
 		},
+		"pq_friction_bouncy" => {
+			friction: 0.2,
+			restitution: 0.0,
+			force: 15.0
+		},
+		"pq_friction_grass" => {
+			friction: 2,
+			restitution: 0.5
+		},
+		"pq_friction_ice" => {
+			friction: 0.07331,
+			restitution: 0.75
+		},
+		"pq_friction_mud" => {
+			friction: 0.3,
+			restitution: 0.5
+		},
+		"pq_friction_sand" => {
+			friction: 4,
+			restitution: 0.15
+		},
+		"pq_friction_space" => {
+			friction: 0.01,
+			restitution: 0.35
+		}
 		];
 
 	static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,

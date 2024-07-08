@@ -288,6 +288,25 @@ class HuntMode extends NullMode {
 		for (elem in search) {
 			var gemElem:GemSpawnPoint = cast elem;
 			var gemPos = gemElem.gem.getAbsPos().getPosition();
+
+			if (level.mission.missionInfo.game == "PlatinumQuest") {
+				// Spawn chances!
+				var chance = switch (gemElem.gem.gemColor) {
+					case "red":
+						level.mission.missionInfo.spawnchancered != null ? Std.parseFloat(level.mission.missionInfo.spawnchancered) : 0.9;
+					case "yellow":
+						level.mission.missionInfo.spawnchanceyellow != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceyellow) : 0.65;
+					case "blue":
+						level.mission.missionInfo.spawnchanceblue != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceblue) : 0.35;
+					case "platinum":
+						level.mission.missionInfo.spawnchanceplatinum != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceplatinum) : 0.18;
+					default:
+						1.0;
+				};
+				if (Math.random() > chance)
+					continue; // Don't spawn!
+			}
+
 			results.push({
 				gem: gemElem.netIndex,
 				weight: this.gemGroupRadius - gemPos.distance(pos) + rng.randRange(0, getGemWeight(gemElem.gem) + 3)
@@ -423,6 +442,8 @@ class HuntMode extends NullMode {
 			return 1;
 		if (gem.gemColor == "blue")
 			return 4;
+		if (gem.gemColor == "platinum")
+			return 9;
 		return 0;
 	}
 
@@ -536,6 +557,8 @@ class HuntMode extends NullMode {
 				incr = 2;
 			case "blue.gem":
 				incr = 5;
+			case "platinum.gem":
+				incr = 10;
 		}
 
 		if (@:privateAccess !marble.isNetUpdate) {
@@ -550,6 +573,9 @@ class HuntMode extends NullMode {
 					case "blue.gem":
 						points += 5;
 						@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
+					case "platinum.gem":
+						points += 10;
+						@:privateAccess level.playGui.addMiddleMessage('+10', 0xdddddd);
 				}
 				@:privateAccess level.playGui.formatGemHuntCounter(points);
 			}
