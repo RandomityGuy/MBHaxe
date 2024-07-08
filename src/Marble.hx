@@ -1139,15 +1139,15 @@ class Marble extends GameObject {
 
 	function updateRollSound(time:TimeState, contactPct:Float, slipAmount:Float) {
 		var rSpat = rollSound.getEffect(Spatialization);
-		rSpat.position = this.getAbsPos().getPosition();
+		rSpat.position = this.collider.transform.getPosition();
 
 		if (this.rollMegaSound != null) {
 			var rmspat = this.rollMegaSound.getEffect(Spatialization);
-			rmspat.position = this.getAbsPos().getPosition();
+			rmspat.position = this.collider.transform.getPosition();
 		}
 
 		var sSpat = slipSound.getEffect(Spatialization);
-		sSpat.position = this.getAbsPos().getPosition();
+		sSpat.position = this.collider.transform.getPosition();
 
 		var rollVel = bestContact != null ? this.velocity.sub(bestContact.velocity) : this.velocity;
 		var scale = rollVel.length();

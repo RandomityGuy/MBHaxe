@@ -1,5 +1,6 @@
 package src;
 
+import shaders.PQMaterial;
 import h3d.scene.MultiMaterial;
 import shaders.NormalMaterial;
 import shaders.NoiseTileMaterial;
@@ -267,6 +268,23 @@ class DifBuilder {
 		worker.run();
 	}
 
+	static function createPQMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, specularTexture:String, secondaryFactor:Float = 1) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture('data/multiplayer/interiors/platinumquest/${baseTexture}').resource;
+			var normalTex = ResourceLoader.getTexture('data/multiplayer/interiors/platinumquest/${normalTexture}').resource;
+			normalTex.wrap = Repeat;
+			var specularTex = ResourceLoader.getTexture('data/multiplayer/interiors/platinumquest/${specularTexture}').resource;
+			specularTex.wrap = Repeat;
+			var shader = new PQMaterial(diffuseTex, normalTex, 9.0, specularTex, MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight,
+				MarbleGame.instance.world.dirLightDir, secondaryFactor);
+			onFinish(shader);
+		});
+		worker.loadFile('data/multiplayer/interiors/platinumquest/${baseTexture}');
+		worker.loadFile('data/multiplayer/interiors/platinumquest/${normalTexture}');
+		worker.loadFile('data/multiplayer/interiors/platinumquest/${specularTexture}');
+		worker.run();
+	}
+
 	static var shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void> = [
 		'interiors_mbu/plate_1' => (onFinish) -> createPhongMaterial(onFinish, 'plate.randomize.png', 'plate.normal.png', 8, new Vector(1, 1, 0.8, 1), 0.5),
 		'interiors_mbu/tile_beginner' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1)),
@@ -315,6 +333,52 @@ class DifBuilder {
 			new Vector(0.15, 0.15, 0.16, 1.0)),
 		'interiors_mbu/stripe_caution' => (onFinish) -> createPhongMaterial(onFinish, 'stripe_caution.png', 'DefaultNormal.png', 12,
 			new Vector(0.8, 0.8, 0.6, 1)),
+		'multiplayer/interiors/platinumquest/pq_hot_1_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_hot_1_med.jpg', 'tile.normal.png', 'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_hot_2_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_hot_2_light.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_hot_4_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_hot_4_med.jpg', 'tile.normal.png', 'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_rays_blue_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_blue_med.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_rays_green_dark' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_dark.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_rays_green_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_light.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_rays_green_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_med.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_rays_green_random' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_random.jpg', 'tile.normal.png',
+			'tile.spec.png', 0.25),
+		'multiplayer/interiors/platinumquest/pq_rays_red_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_red_light.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_rays_purple_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_purple_light.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_rays_purple_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_purple_med.jpg', 'tile.normal.png',
+			'tile.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_friction_ice' => (onFinish) -> createPQMaterial(onFinish, 'pq_friction_ice.jpg', 'ice.normal.png',
+			'DefaultSpec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_1' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_1.png', 'pq_ray_wall_1.normal.png',
+			'pq_ray_wall_1.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_2' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_2.png', 'pq_ray_wall_2.normal.png',
+			'pq_ray_wall_2.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_3' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_3.png', 'pq_ray_wall_3.normal.png',
+			'pq_ray_wall_3.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_4' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_4.png', 'pq_ray_wall_4.normal.png',
+			'pq_ray_wall_4.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_5' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_5.png', 'pq_ray_wall_5.normal.png',
+			'pq_ray_wall_5.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_6' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_6.png', 'pq_ray_wall_6.normal.png',
+			'pq_ray_wall_6.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_7' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_7.png', 'pq_ray_wall_7.normal.png',
+			'pq_ray_wall_7.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_8' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_8.png', 'pq_ray_wall_8.normal.png',
+			'pq_ray_wall_8.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_combo' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo.png',
+			'pq_ray_wall_combo.normal.png', 'pq_ray_wall_combo.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_2.png',
+			'pq_ray_wall_combo_2.normal.png', 'pq_ray_wall_combo_2.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2_medium' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_2.png',
+			'pq_ray_wall_combo_2.normal.png', 'pq_ray_wall_combo_2.spec.png'),
+		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_small' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo.png',
+			'pq_ray_wall_combo.normal.png', 'pq_ray_wall_combo.spec.png'),
 	];
 
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {

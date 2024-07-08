@@ -83,13 +83,6 @@ new SimGroup(MissionGroup) {
       interiorFile = "~/data/multiplayer/interiors/PlatinumQuest/Marbleland.dif";
       showTerrainInside = "0";
    };
-   new InteriorInstance() {
-      position = "0 0 0";
-      rotation = "1 0 0 0";
-      scale = "1 1 1";
-      interiorFile = "~/data/multiplayer/interiors/PlatinumQuest/Marbleland2.dif";
-      showTerrainInside = "0";
-   };
    new SimGroup(SpawnPointGroup) {
 
       new Trigger() {
