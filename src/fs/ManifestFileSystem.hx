@@ -128,7 +128,7 @@ class ManifestEntry extends FileEntry {
 		#elseif js
 		if (loaded) {
 			if (onReady != null)
-				haxe.Timer.delay(onReady, 1);
+				onReady();
 		} else {
 			js.Browser.window.fetch(file).then((res:js.html.Response) -> {
 				return res.arrayBuffer();

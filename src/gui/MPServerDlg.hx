@@ -114,6 +114,7 @@ class MPServerDlg extends GuiImage {
 				NetCommands.sendServerSettings(Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.quickRespawn,
 					Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode);
 			}
+			Settings.save();
 			MarbleGame.canvas.popDialog(this);
 		}
 

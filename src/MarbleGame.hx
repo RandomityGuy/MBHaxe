@@ -78,6 +78,13 @@ class MarbleGame {
 			if (!paused && world != null) {
 				if (world.finishTime == null && world._ready && @:privateAccess !world.playGui.isChatFocused()) {
 					if (js.Browser.document.pointerLockElement != @:privateAccess Window.getInstance().canvas) {
+						if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg
+							|| (Net.isMP
+								&& paused
+								&& !(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPExitGameDlg))) {
+							return; // don't pause
+						}
+
 						paused = true;
 						handlePauseGame();
 						// Focus the shit again

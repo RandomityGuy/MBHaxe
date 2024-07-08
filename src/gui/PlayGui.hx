@@ -236,6 +236,8 @@ class PlayGui {
 		};
 
 		Window.getInstance().addResizeEvent(resizeEv);
+
+		onFinish();
 	}
 
 	public function initTimer() {
