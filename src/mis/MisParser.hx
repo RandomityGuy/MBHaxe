@@ -247,14 +247,21 @@ class MisParser {
 				var openingIndex = key.indexOf('[');
 				var arrayName = key.substring(0, openingIndex);
 				var array:Array<String>;
+				var indexToken = key.substring(openingIndex + 1, key.indexOf("]"));
 				if (obj.exists(arrayName))
 					array = obj.get(arrayName);
 				else {
 					array = [];
 					obj.set(arrayName, array);
 				} // Create a new array or use the existing one
-				var index = Std.parseInt(key.substring(openingIndex + 1, -1));
-				array[index] = this.resolveExpression(parts[1]);
+				if (~/[0-9]+/.match(indexToken)) {
+					var index = Std.parseInt(indexToken);
+					array[index] = this.resolveExpression(parts[1]);
+				} else {
+					// Not a numeric indexer
+					indexToken = StringTools.trim(StringTools.replace(indexToken, "\"", ""));
+					obj.set(arrayName + indexToken, [this.resolveExpression(parts[1])]);
+				}
 			} else {
 				obj.set(key, [this.resolveExpression(parts[1])]);
 			}

@@ -2134,7 +2134,7 @@ class Marble extends GameObject {
 			this.setRotationQuat(quat);
 
 			var adt = timeState.clone();
-			adt.dt = physicsAccumulator;
+			adt.dt = Util.adjustedMod(physicsAccumulator, 0.032);
 			for (pi in pathedInteriors) {
 				pi.update(adt);
 			}
