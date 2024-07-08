@@ -1,5 +1,6 @@
 package src;
 
+import shaders.PQMaterial;
 import h3d.mat.Material;
 import h3d.scene.MultiMaterial;
 import shaders.EnvMap;
@@ -263,6 +264,13 @@ class InstanceManager {
 							matclone.mainPass.addShader(nmapshdr);
 							// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
 						}
+						var pqshdr = mat.mainPass.getShader(PQMaterial);
+						if (pqshdr != null) {
+							matclone.mainPass.removeShader(matclone.textureShader);
+							matclone.mainPass.addShader(pqshdr);
+							// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						}
+
 						var cubemapshdr = mat.mainPass.getShader(EnvMap);
 						if (cubemapshdr != null) {
 							matclone.mainPass.addShader(cubemapshdr);
