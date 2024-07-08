@@ -1782,6 +1782,26 @@ class MarbleWorld extends Scheduler {
 			if (lock)
 				return;
 
+			#if js
+			lock = true;
+
+			var func = this.resourceLoadFuncs.shift();
+
+			var consumeFn;
+			consumeFn = () -> {
+				this._resourcesLoaded++;
+				if (this.resourceLoadFuncs.length != 0) {
+					var fn = this.resourceLoadFuncs.shift();
+					fn(consumeFn);
+				} else {
+					lock = false;
+				}
+			}
+
+			func(consumeFn);
+			#end
+
+			#if hl
 			if (Settings.optionsSettings.fastLoad) {
 				#if hl
 				while (this.resourceLoadFuncs.length != 0) {
@@ -1792,24 +1812,6 @@ class MarbleWorld extends Scheduler {
 						this._resourcesLoaded++;
 					});
 				}
-				#end
-				#if js
-				lock = true;
-
-				var func = this.resourceLoadFuncs.shift();
-
-				var consumeFn;
-				consumeFn = () -> {
-					this._resourcesLoaded++;
-					if (this.resourceLoadFuncs.length != 0) {
-						var fn = this.resourceLoadFuncs.shift();
-						fn(consumeFn);
-					} else {
-						lock = false;
-					}
-				}
-
-				func(consumeFn);
 				#end
 			} else {
 				var func = this.resourceLoadFuncs.shift();
@@ -1827,6 +1829,7 @@ class MarbleWorld extends Scheduler {
 				});
 				#end
 			}
+			#end
 		} else {
 			if (!this._loadBegin || lock)
 				return;

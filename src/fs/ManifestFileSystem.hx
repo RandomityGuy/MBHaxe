@@ -106,7 +106,7 @@ class ManifestEntry extends FileEntry {
 	public function fancyLoad(onReady:() -> Void, onProgress:(cur:Int, max:Int) -> Void) {
 		#if js
 		if (loaded) {
-			haxe.Timer.delay(onReady, 1);
+			onReady();
 		} else {
 			var br:BinaryLoader = new BinaryLoader(file);
 			br.onLoaded = (b) -> {
@@ -128,7 +128,7 @@ class ManifestEntry extends FileEntry {
 		#elseif js
 		if (loaded) {
 			if (onReady != null)
-				haxe.Timer.delay(onReady, 1);
+				onReady();
 		} else {
 			js.Browser.window.fetch(file).then((res:js.html.Response) -> {
 				return res.arrayBuffer();
