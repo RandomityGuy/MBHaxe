@@ -676,7 +676,9 @@ class MarbleWorld extends Scheduler {
 
 		this.rewindManager.clear();
 
-		setCursorLock(true);
+		if (!this.isMultiplayer || _skipPreGame) {
+			setCursorLock(true);
+		}
 
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
@@ -1353,6 +1355,8 @@ class MarbleWorld extends Scheduler {
 		for (marble in this.marbles) {
 			restart(marble, true);
 		}
+
+		setCursorLock(true);
 
 		startTime = this.timeState.timeSinceLoad + 4;
 
@@ -2046,22 +2050,59 @@ class MarbleWorld extends Scheduler {
 			if (lock)
 				return;
 
-			var func = this.resourceLoadFuncs.shift();
-			lock = true;
 			#if hl
-			func(() -> {
-				lock = false;
-				this._resourcesLoaded++;
-				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
-			});
+			var loadPerTick = Math.max(1, this.resourceLoadFuncs.length / 20);
+			var loadedFuncs = 0;
+			while (this.resourceLoadFuncs.length != 0) {
+				var func = this.resourceLoadFuncs.shift();
+				lock = true;
+				func(() -> {
+					lock = false;
+					this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+					this._resourcesLoaded++;
+				});
+				loadedFuncs += 1;
+				if (loadedFuncs >= loadPerTick)
+					break;
+			}
 			#end
+
 			#if js
-			func(() -> {
-				lock = false;
-				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+			lock = true;
+
+			var func = this.resourceLoadFuncs.shift();
+
+			var consumeFn;
+			consumeFn = () -> {
 				this._resourcesLoaded++;
-			});
+				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+				if (this.resourceLoadFuncs.length != 0) {
+					var fn = this.resourceLoadFuncs.shift();
+					fn(consumeFn);
+				} else {
+					lock = false;
+				}
+			}
+
+			func(consumeFn);
 			#end
+
+			// var func = this.resourceLoadFuncs.shift();
+			// lock = true;
+			// #if hl
+			// func(() -> {
+			// 	lock = false;
+			// 	this._resourcesLoaded++;
+			// 	this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+			// });
+			// #end
+			// #if js
+			// func(() -> {
+			// 	lock = false;
+			// 	this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
+			// 	this._resourcesLoaded++;
+			// });
+			// #end
 		} else {
 			if (!this._loadBegin || lock)
 				return;

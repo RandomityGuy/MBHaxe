@@ -220,6 +220,7 @@ class HuntMode extends NullMode {
 					closestSpawnIndex = i;
 				}
 			}
+			idealSpawnIndex = closestSpawnIndex;
 		}
 		for (i in 0...spawnPointTaken.length) {
 			spawnPointTaken[i] = false;

@@ -206,38 +206,39 @@ class PlayGui {
 		powerupBox = new GuiImage(ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile());
 		initTimer();
 		initGemCounter(() -> {
+			initCenterText();
+			initPowerupBox();
+			if (game == 'ultra' || Net.isMP)
+				initBlastBar();
+			initTexts();
+			if (Settings.optionsSettings.frameRateVis)
+				initFPSMeter();
+
+			if (MarbleGame.instance.world.isMultiplayer) {
+				initPlayerList();
+				initChatHud();
+				if (Net.hostSpectate || Net.clientSpectate)
+					initSpectatorMenu();
+
+				initGemCountdownTimer();
+			}
+
+			if (Util.isTouchDevice()) {
+				MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
+			}
+
+			playGuiCtrl.render(scene2d);
+
+			resizeEv = () -> {
+				var wnd = Window.getInstance();
+				playGuiCtrl.render(MarbleGame.canvas.scene2d);
+				powerupImageSceneTargetBitmap.x = wnd.width - 88;
+			};
+
+			Window.getInstance().addResizeEvent(resizeEv);
+
 			onFinish();
 		});
-		initCenterText();
-		initPowerupBox();
-		if (game == 'ultra' || Net.isMP)
-			initBlastBar();
-		initTexts();
-		if (Settings.optionsSettings.frameRateVis)
-			initFPSMeter();
-
-		if (MarbleGame.instance.world.isMultiplayer) {
-			initPlayerList();
-			initChatHud();
-			if (Net.hostSpectate || Net.clientSpectate)
-				initSpectatorMenu();
-
-			initGemCountdownTimer();
-		}
-
-		if (Util.isTouchDevice()) {
-			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
-		}
-
-		playGuiCtrl.render(scene2d);
-
-		resizeEv = () -> {
-			var wnd = Window.getInstance();
-			playGuiCtrl.render(MarbleGame.canvas.scene2d);
-			powerupImageSceneTargetBitmap.x = wnd.width - 88;
-		};
-
-		Window.getInstance().addResizeEvent(resizeEv);
 	}
 
 	public function initTimer() {
