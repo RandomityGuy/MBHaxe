@@ -51,6 +51,7 @@ class PlayerInfo {
 	var r:Int;
 	var y:Int;
 	var b:Int;
+	var p:Int;
 }
 
 class PlayGui {
@@ -724,7 +725,8 @@ class PlayGui {
 				score: 0,
 				r: 0,
 				y: 0,
-				b: 0
+				b: 0,
+				p: 0
 			});
 			redrawPlayerList();
 		}
@@ -752,6 +754,9 @@ class PlayGui {
 			if (score == 5) {
 				f[0].b += 1;
 			}
+			if (score == 10) {
+				f[0].p += 1;
+			}
 		}
 
 		if (id == Net.clientId) {
@@ -769,6 +774,7 @@ class PlayGui {
 			player.r = scoreboardPacket.rBoard.exists(player.id) ? scoreboardPacket.rBoard.get(player.id) : 0;
 			player.y = scoreboardPacket.yBoard.exists(player.id) ? scoreboardPacket.yBoard.get(player.id) : 0;
 			player.b = scoreboardPacket.bBoard.exists(player.id) ? scoreboardPacket.bBoard.get(player.id) : 0;
+			player.p = scoreboardPacket.pBoard.exists(player.id) ? scoreboardPacket.pBoard.get(player.id) : 0;
 		}
 		redrawPlayerList();
 	}

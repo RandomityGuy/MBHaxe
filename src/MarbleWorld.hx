@@ -2070,10 +2070,17 @@ class MarbleWorld extends Scheduler {
 			#if js
 			lock = true;
 
+			var loadPerTick = 500; // Stack limits???
+			var loadedFuncs = 0;
 			var func = this.resourceLoadFuncs.shift();
 
 			var consumeFn;
 			consumeFn = () -> {
+				if (loadedFuncs >= loadPerTick) {
+					lock = false;
+					return;
+				}
+				loadedFuncs += 1;
 				this._resourcesLoaded++;
 				this.loadingGui.setProgress((1 - resourceLoadFuncs.length / _loadingLength));
 				if (this.resourceLoadFuncs.length != 0) {

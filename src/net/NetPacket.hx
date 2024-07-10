@@ -317,12 +317,14 @@ class ScoreboardPacket implements NetPacket {
 	var rBoard:Map<Int, Int>;
 	var yBoard:Map<Int, Int>;
 	var bBoard:Map<Int, Int>;
+	var pBoard:Map<Int, Int>;
 
 	public function new() {
 		scoreBoard = new Map();
 		rBoard = new Map();
 		yBoard = new Map();
 		bBoard = new Map();
+		pBoard = new Map();
 	}
 
 	public inline function deserialize(b:InputBitStream) {
@@ -333,6 +335,7 @@ class ScoreboardPacket implements NetPacket {
 			rBoard[id] = b.readInt(10);
 			yBoard[id] = b.readInt(10);
 			bBoard[id] = b.readInt(10);
+			pBoard[id] = b.readInt(10);
 		}
 	}
 
@@ -347,6 +350,7 @@ class ScoreboardPacket implements NetPacket {
 			b.writeInt(rBoard[key], 10);
 			b.writeInt(yBoard[key], 10);
 			b.writeInt(bBoard[key], 10);
+			b.writeInt(pBoard[key], 10);
 		}
 	}
 }
