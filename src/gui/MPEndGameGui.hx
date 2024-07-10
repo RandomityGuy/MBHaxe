@@ -141,15 +141,23 @@ class MPEndGameGui extends GuiImage {
 		middleCtrl.extent = new Vector(800, 480);
 		this.addChild(middleCtrl);
 
+		var hasPlatinum = false;
+		var scores = @:privateAccess MarbleGame.instance.world.playGui.playerList;
+		for (player in scores) {
+			if (player.p > 0) {
+				hasPlatinum = true;
+				break;
+			}
+		}
+
 		var headerML = new GuiText(domcasual36);
 		headerML.position = new Vector(25, 83);
 		headerML.extent = new Vector(750, 14);
 		headerML.horizSizing = Width;
 		headerML.text.textColor = 0xFFFFFF;
-		headerML.text.text = "   Name                        Score                      Marble";
+		headerML.text.text = '   Name                        Score      ${hasPlatinum ? "         " : ""}                Marble';
 		middleCtrl.addChild(headerML);
 
-		var scores = @:privateAccess MarbleGame.instance.world.playGui.playerList;
 		var ourRank = scores.indexOf(scores.filter(x -> x.us == true)[0]) + 1;
 		var rankSuffix = ourRank == 1 ? "st" : (ourRank == 2 ? "nd" : (ourRank == 3 ? "rd" : "th"));
 
@@ -181,6 +189,10 @@ class MPEndGameGui extends GuiImage {
 		middleCtrl.addChild(yellowGem);
 		var blueGem = buildObjectShow("data/shapes/items/gem.dts", new Vector(469, 65), new Vector(64, 64), 2.5, 0, ["base.gem" => "blue.gem"]);
 		middleCtrl.addChild(blueGem);
+		if (hasPlatinum) {
+			var platinumGem = buildObjectShow("data/shapes/items/gem.dts", new Vector(521, 65), new Vector(64, 64), 2.5, 0, ["base.gem" => "platinum.gem"]);
+			middleCtrl.addChild(platinumGem);
+		}
 
 		var playerContainer = new GuiControl();
 		playerContainer.horizSizing = Center;
@@ -191,7 +203,7 @@ class MPEndGameGui extends GuiImage {
 
 		var idx = 0;
 
-		function addPlayer(rank:Int, playerName:String, score:Int, r:Int, y:Int, b:Int, marbleCat:Int, marbleSel:Int) {
+		function addPlayer(rank:Int, playerName:String, score:Int, r:Int, y:Int, b:Int, p:Int, marbleCat:Int, marbleSel:Int) {
 			var container = new GuiControl();
 			container.position = new Vector(0, 44 * idx);
 			container.extent = new Vector(750, 44);
@@ -227,16 +239,27 @@ class MPEndGameGui extends GuiImage {
 			container.addChild(playerY);
 
 			var playerB = new GuiText(domcasual36);
-			playerB.text.textColor = 0x0000FF;
+			playerB.text.textColor = 0x4040FF;
 			playerB.text.text = '${b}';
 			playerB.justify = Center;
 			playerB.position = new Vector(452, 3);
 			playerB.extent = new Vector(52, 14);
 			container.addChild(playerB);
 
-			var marble = buildObjectShow(MarbleSelectGui.marbleData[marbleCat][marbleSel].dts, new Vector(524, -10), new Vector(64, 64), 2.4, 0, [
-				"base.marble" => MarbleSelectGui.marbleData[marbleCat][marbleSel].skin + ".marble"
-			]);
+			if (hasPlatinum) {
+				var playerB = new GuiText(domcasual36);
+				playerB.text.textColor = 0xCCCCCC;
+				playerB.text.text = '${p}';
+				playerB.justify = Center;
+				playerB.position = new Vector(504, 3);
+				playerB.extent = new Vector(52, 14);
+				container.addChild(playerB);
+			}
+
+			var marble = buildObjectShow(MarbleSelectGui.marbleData[marbleCat][marbleSel].dts, new Vector((hasPlatinum ? 52 : 0) + 524, -10),
+				new Vector(64, 64), 2.4, 0, [
+					"base.marble" => MarbleSelectGui.marbleData[marbleCat][marbleSel].skin + ".marble"
+				]);
 
 			container.addChild(marble);
 
@@ -255,7 +278,7 @@ class MPEndGameGui extends GuiImage {
 				marb = c.marbleId;
 			}
 
-			addPlayer(r, player.name, player.score, player.r, player.y, player.b, cat, marb);
+			addPlayer(r, player.name, player.score, player.r, player.y, player.b, player.p, cat, marb);
 			r += 1;
 		}
 	}

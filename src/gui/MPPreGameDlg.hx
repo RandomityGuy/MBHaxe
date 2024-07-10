@@ -58,6 +58,10 @@ class MPPreGameDlg extends GuiControl {
 		leaveBtn.extent = new Vector(94, 45);
 		leaveBtn.pressedAction = (e) -> {
 			MarbleGame.instance.quitMission(true);
+			if (Net.isMP && Net.isClient) {
+				Net.disconnect();
+				MarbleGame.canvas.setContent(new JoinServerGui());
+			}
 		}
 		dialogImg.addChild(leaveBtn);
 
@@ -240,6 +244,8 @@ class MPPreGameDlg extends GuiControl {
 					ready: Net.lobbyHostReady,
 					spectate: Net.hostSpectate
 				});
+				spectateBtn.pressed = Net.hostSpectate;
+				readyBtn.pressed = Net.lobbyHostReady;
 			}
 			if (Net.isClient) {
 				playerListArr.push({
@@ -247,6 +253,8 @@ class MPPreGameDlg extends GuiControl {
 					ready: Net.lobbyClientReady,
 					spectate: Net.clientSpectate
 				});
+				spectateBtn.pressed = Net.clientSpectate;
+				readyBtn.pressed = Net.lobbyClientReady;
 			}
 			if (Net.clientIdMap != null) {
 				for (c => v in Net.clientIdMap) {
@@ -278,6 +286,12 @@ class MPPreGameDlg extends GuiControl {
 			var playerListStateCompiled = playerListArr.map(player -> player.ready ? "[Ready]" : "[Waiting]");
 			playerListLeft.setTexts(playerListCompiled);
 			playerListRight.setTexts(playerListStateCompiled);
+
+			if (playerListArr.length == 1) {
+				// Disable spectating
+				Net.hostSpectate = false;
+				Net.clientSpectate = false;
+			}
 
 			// if (!showingCustoms)
 			// 	playerList.setTexts(playerListArr.map(player -> {

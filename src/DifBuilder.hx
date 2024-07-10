@@ -375,9 +375,9 @@ class DifBuilder {
 			'pq_ray_wall_combo.normal.png', 'pq_ray_wall_combo.spec.png'),
 		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_2.png',
 			'pq_ray_wall_combo_2.normal.png', 'pq_ray_wall_combo_2.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2_medium' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_2.png',
+		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2_medium' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_2_medium.png',
 			'pq_ray_wall_combo_2.normal.png', 'pq_ray_wall_combo_2.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_small' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo.png',
+		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_small' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_small.png',
 			'pq_ray_wall_combo.normal.png', 'pq_ray_wall_combo.spec.png'),
 	];
 

@@ -284,17 +284,6 @@ class NetCommands {
 		var conn = Net.clientIdMap.get(clientId);
 		if (MarbleGame.instance.world != null) {
 			MarbleGame.instance.world.removePlayer(conn);
-
-			var allReady = true;
-			for (id => client in Net.clientIdMap) {
-				if (client.state != GameplayState.GAME && client != conn) {
-					allReady = false;
-					break;
-				}
-			}
-			if (allReady && MarbleGame.instance.world.serverStartTicks == 0) {
-				MarbleGame.instance.world.allClientsReady();
-			}
 		}
 		Net.clientIdMap.remove(clientId);
 		if (MarbleGame.canvas.content is MPPlayMissionGui) {

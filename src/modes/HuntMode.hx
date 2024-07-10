@@ -228,7 +228,7 @@ class HuntMode extends NullMode {
 	}
 
 	override function getPreloadFiles() {
-		return ['data/sound/opponentdiamond.wav'];
+		return ['data/sound/opponentdiamond.wav', 'data/sound/firewrks.wav'];
 	}
 
 	function setupGems() {
@@ -285,33 +285,36 @@ class HuntMode extends NullMode {
 		var pos = furthest.gem.getAbsPos().getPosition();
 
 		var results = [];
-		var search = gemOctree.radiusSearch(pos, gemGroupRadius);
-		for (elem in search) {
-			var gemElem:GemSpawnPoint = cast elem;
-			var gemPos = gemElem.gem.getAbsPos().getPosition();
+		while (results.length == 0) {
+			var search = gemOctree.radiusSearch(pos, gemGroupRadius);
+			for (elem in search) {
+				var gemElem:GemSpawnPoint = cast elem;
+				var gemPos = gemElem.gem.getAbsPos().getPosition();
 
-			if (level.mission.missionInfo.game == "PlatinumQuest") {
-				// Spawn chances!
-				var chance = switch (gemElem.gem.gemColor) {
-					case "red":
-						level.mission.missionInfo.spawnchancered != null ? Std.parseFloat(level.mission.missionInfo.spawnchancered) : 0.9;
-					case "yellow":
-						level.mission.missionInfo.spawnchanceyellow != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceyellow) : 0.65;
-					case "blue":
-						level.mission.missionInfo.spawnchanceblue != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceblue) : 0.35;
-					case "platinum":
-						level.mission.missionInfo.spawnchanceplatinum != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceplatinum) : 0.18;
-					default:
-						1.0;
-				};
-				if (Math.random() > chance)
-					continue; // Don't spawn!
+				if (level.mission.missionInfo.game == "PlatinumQuest") {
+					// Spawn chances!
+					var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
+						case "red.gem":
+							level.mission.missionInfo.spawnchancered != null ? Std.parseFloat(level.mission.missionInfo.spawnchancered) : 0.9;
+						case "yellow.gem":
+							level.mission.missionInfo.spawnchanceyellow != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceyellow) : 0.65;
+						case "blue.gem":
+							level.mission.missionInfo.spawnchanceblue != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceblue) : 0.35;
+						case "platinum.gem":
+							level.mission.missionInfo.spawnchanceplatinum != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceplatinum) : 0.18;
+						default:
+							1.0;
+					};
+					var choice = Math.random();
+					if (choice > chance)
+						continue; // Don't spawn!
+				}
+
+				results.push({
+					gem: gemElem.netIndex,
+					weight: this.gemGroupRadius - gemPos.distance(pos) + rng.randRange(0, getGemWeight(gemElem.gem) + 3)
+				});
 			}
-
-			results.push({
-				gem: gemElem.netIndex,
-				weight: this.gemGroupRadius - gemPos.distance(pos) + rng.randRange(0, getGemWeight(gemElem.gem) + 3)
-			});
 		}
 		results.sort((a, b) -> {
 			if (a.weight > b.weight)
@@ -437,13 +440,14 @@ class HuntMode extends NullMode {
 	}
 
 	function getGemWeight(gem:Gem) {
-		if (gem.gemColor == "red")
+		var col = gem.gemColor.toLowerCase();
+		if (col == "red.gem")
 			return 0;
-		if (gem.gemColor == "yellow")
+		if (col == "yellow.gem")
 			return 1;
-		if (gem.gemColor == "blue")
+		if (col == "blue.gem")
 			return 4;
-		if (gem.gemColor == "platinum")
+		if (col == "platinum.gem")
 			return 9;
 		return 0;
 	}
