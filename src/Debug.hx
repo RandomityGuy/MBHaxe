@@ -27,6 +27,8 @@ class Debug {
 				debugTriangles.remove();
 			}
 			debugTriangles = new h3d.scene.Mesh(prim, h3d.mat.Material.create());
+			debugTriangles.material.receiveShadows = false;
+			debugTriangles.material.castShadows = false;
 			prim.addUVs();
 			prim.addNormals();
 			MarbleGame.instance.scene.addChild(debugTriangles);

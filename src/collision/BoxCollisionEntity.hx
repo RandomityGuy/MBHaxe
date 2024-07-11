@@ -27,10 +27,12 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		if (Debug.drawBounds) {
 			if (_dbgEntity == null) {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			} else {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}
@@ -42,6 +44,7 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		if (Debug.drawBounds) {
 			if (_dbgEntity != null) {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}

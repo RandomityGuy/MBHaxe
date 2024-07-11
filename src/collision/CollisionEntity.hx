@@ -114,11 +114,13 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 				if (Debug.drawBounds) {
 					if (_dbgEntity == null) {
 						_dbgEntity = cast this.boundingBox.makeDebugObj();
+						_dbgEntity.getMaterials()[0].castShadows = false;
 						_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 						MarbleGame.instance.scene.addChild(_dbgEntity);
 					} else {
 						_dbgEntity.remove();
 						_dbgEntity = cast this.boundingBox.makeDebugObj();
+						_dbgEntity.getMaterials()[0].castShadows = false;
 						_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 						MarbleGame.instance.scene.addChild(_dbgEntity);
 					}
@@ -143,11 +145,13 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		if (Debug.drawBounds) {
 			if (_dbgEntity == null) {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			} else {
 				_dbgEntity.remove();
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}

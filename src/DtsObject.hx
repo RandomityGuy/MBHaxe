@@ -425,7 +425,7 @@ class DtsObject extends GameObject {
 			}
 			material.shadows = false;
 			if (this.isCollideable)
-				material.receiveShadows = true;
+				material.receiveShadows = false;
 			if (material.texture == null && !iflMaterial) {
 				var dtsshader = new DtsTexture();
 				dtsshader.currentOpacity = 1;

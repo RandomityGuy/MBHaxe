@@ -832,20 +832,20 @@ class DifBuilder {
 										thisprops.light = false; // We will calculate our own lighting
 										material.props = thisprops;
 										material.shadows = false;
-										material.receiveShadows = true;
+										material.receiveShadows = false;
 										fwd();
 									});
 								});
 								prim.addTangents();
 							} else {
 								material.shadows = false;
-								material.receiveShadows = true;
+								material.receiveShadows = false;
 							}
 						} else {
 							Console.warn('Unable to load ${grp} texture for dif ${path}');
 							material = Material.create();
 							material.shadows = false;
-							material.receiveShadows = true;
+							material.receiveShadows = false;
 						}
 						// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 						if (Debug.wireFrame)
