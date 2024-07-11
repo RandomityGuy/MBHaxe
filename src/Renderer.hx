@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Vector;
 import src.Console;
 
 class Renderer extends h3d.scene.Renderer {
@@ -29,8 +30,18 @@ class Renderer extends h3d.scene.Renderer {
 	}
 
 	override function render() {
-		if (has("shadow"))
-			renderPass(shadow, get("shadow"));
+		// if (has("shadow"))
+		//	renderPass(shadow, get("shadow"));
+
+		// The shadow bullshit
+		ctx.setGlobalID(@:privateAccess shadow.shadowMapId, {
+			texture: @:privateAccess shadow.dshader.shadowMap,
+			channel: @:privateAccess shadow.format == h3d.mat.Texture.nativeFormat ? hxsl.Channel.PackedFloat : hxsl.Channel.R
+		});
+		ctx.setGlobalID(@:privateAccess shadow.shadowProjId, @:privateAccess shadow.getShadowProj());
+		ctx.setGlobalID(@:privateAccess shadow.shadowColorId, new Vector(0, 0, 0, 0));
+		ctx.setGlobalID(@:privateAccess shadow.shadowPowerId, 0.0);
+		ctx.setGlobalID(@:privateAccess shadow.shadowBiasId, 0.0);
 
 		renderPass(defaultPass, get("skyshape"));
 		renderPass(defaultPass, get("default"));
