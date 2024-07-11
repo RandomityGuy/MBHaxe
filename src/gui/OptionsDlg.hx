@@ -346,8 +346,8 @@ class OptionsDlg extends GuiImage {
 		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.fovX = cast(60 + val * (140 - 60));
 		});
-		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), yPos, generalPanel, (val) -> {
-			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
+		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12), yPos, generalPanel, (val) -> {
+			Settings.controlsSettings.cameraSensitivity = cast(0.12 + val * (1.2 - 0.12));
 		}, true);
 
 		function getConflictingBinding(bindingName:String, key:Int) {

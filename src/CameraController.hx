@@ -127,12 +127,20 @@ class CameraController extends Object {
 
 	public function enableSpectate() {
 		spectate = true;
-		@:privateAccess this.level.playGui.setSpectateMenu(true);
+		if (@:privateAccess this.level.playGui.setSpectateMenu(true)) {
+			if (Util.isTouchDevice()) {
+				MarbleGame.instance.touchInput.setSpectatorControls(true);
+				MarbleGame.instance.touchInput.setSpectatorControlsVisibility(false);
+			}
+		}
 	}
 
 	public function stopSpectate() {
 		spectate = false;
 		@:privateAccess this.level.playGui.setSpectateMenu(false);
+		if (Util.isTouchDevice()) {
+			MarbleGame.instance.touchInput.setSpectatorControls(false);
+		}
 	}
 
 	public function orbit(mouseX:Float, mouseY:Float, isTouch:Bool = false) {
@@ -163,7 +171,7 @@ class CameraController extends Object {
 		}
 
 		var factor = isTouch ? Util.lerp(1 / 25, 1 / 15,
-			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
+			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 1000, 1 / 200, Settings.controlsSettings.cameraSensitivity);
 
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
@@ -264,8 +272,8 @@ class CameraController extends Object {
 
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
-		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
-		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
+		CameraYaw = nextCameraYaw; // Util.lerp(CameraYaw, nextCameraYaw, lerpt);
+		CameraPitch = nextCameraPitch; // Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
 		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
@@ -331,7 +339,7 @@ class CameraController extends Object {
 
 			if (MarbleGame.instance.touchInput.movementInput.pressed) {
 				dx = -MarbleGame.instance.touchInput.movementInput.value.x * CameraSpeed * dt;
-				dy = MarbleGame.instance.touchInput.movementInput.value.y * CameraSpeed * dt;
+				dy = -MarbleGame.instance.touchInput.movementInput.value.y * CameraSpeed * dt;
 			}
 
 			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
@@ -342,9 +350,11 @@ class CameraController extends Object {
 			}
 
 			if (Key.isPressed(Settings.controlsSettings.blast)
-				|| (MarbleGame.instance.touchInput.blastbutton.pressed)
+				|| (MarbleGame.instance.touchInput.blastbutton.pressed && MarbleGame.instance.touchInput.blastbutton.didPressIt)
 				|| Gamepad.isPressed(Settings.gamepadSettings.blast)) {
 				var freeMarbleIndex = -1;
+
+				MarbleGame.instance.touchInput.blastbutton.didPressIt = false;
 
 				for (i in 0...level.marbles.length) {
 					var marble = level.marbles[i];
@@ -354,6 +364,7 @@ class CameraController extends Object {
 					}
 				}
 				spectateMarbleIndex = freeMarbleIndex;
+				MarbleGame.instance.touchInput.setSpectatorControlsVisibility(true);
 				return;
 			}
 
@@ -366,7 +377,9 @@ class CameraController extends Object {
 			camera.target = camera.pos.add(directionVector);
 		} else {
 			@:privateAccess level.playGui.setSpectateMenuText(1);
-			if (Key.isPressed(Settings.controlsSettings.left)) {
+			if (Key.isPressed(Settings.controlsSettings.left)
+				|| (MarbleGame.instance.touchInput.leftButton.pressed && MarbleGame.instance.touchInput.leftButton.didPressIt)) {
+				MarbleGame.instance.touchInput.leftButton.didPressIt = false;
 				spectateMarbleIndex = (spectateMarbleIndex - 1 + level.marbles.length) % level.marbles.length;
 				@:privateAccess while (level.marbles[spectateMarbleIndex].connection == null
 					|| level.marbles[spectateMarbleIndex].connection.spectator) {
@@ -374,7 +387,9 @@ class CameraController extends Object {
 				}
 			}
 
-			if (Key.isPressed(Settings.controlsSettings.right)) {
+			if (Key.isPressed(Settings.controlsSettings.right)
+				|| (MarbleGame.instance.touchInput.rightButton.pressed && MarbleGame.instance.touchInput.rightButton.didPressIt)) {
+				MarbleGame.instance.touchInput.rightButton.didPressIt = false;
 				spectateMarbleIndex = (spectateMarbleIndex + 1 + level.marbles.length) % level.marbles.length;
 				@:privateAccess while (level.marbles[spectateMarbleIndex].connection == null
 					|| level.marbles[spectateMarbleIndex].connection.spectator) {
@@ -383,9 +398,16 @@ class CameraController extends Object {
 			}
 
 			if (Key.isPressed(Settings.controlsSettings.blast)
-				|| (MarbleGame.instance.touchInput.blastbutton.pressed)
+				|| (MarbleGame.instance.touchInput.blastbutton.pressed && MarbleGame.instance.touchInput.blastbutton.didPressIt)
 				|| Gamepad.isPressed(Settings.gamepadSettings.blast)) {
+				MarbleGame.instance.touchInput.blastbutton.didPressIt = false;
 				spectateMarbleIndex = -1;
+				MarbleGame.instance.touchInput.setSpectatorControlsVisibility(false);
+				return;
+			}
+			if (@:privateAccess level.marbles.length <= spectateMarbleIndex) {
+				spectateMarbleIndex = -1;
+				MarbleGame.instance.touchInput.setSpectatorControlsVisibility(false);
 				return;
 			}
 
@@ -479,7 +501,8 @@ class CameraController extends Object {
 
 		var camera = level.scene.camera;
 
-		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+		var lerpt = hxd.Math.min(1,
+			1 - Math.pow(0.6, dt * 600)); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
@@ -495,8 +518,8 @@ class CameraController extends Object {
 
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
-		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
-		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
+		CameraYaw = nextCameraYaw; // Util.lerp(CameraYaw, nextCameraYaw, lerpt);
+		CameraPitch = nextCameraPitch; // Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
 		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 

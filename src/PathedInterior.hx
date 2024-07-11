@@ -59,6 +59,7 @@ class PathedInterior extends InteriorObject {
 	var savedVelocity:Vector;
 	var savedStopped:Bool;
 	var savedStoppedPosition:Vector;
+	var savedInvPosition:Vector;
 	var savedTime:Float;
 
 	var soundChannel:Channel;
@@ -115,7 +116,14 @@ class PathedInterior extends InteriorObject {
 		this.markerData = this.path.markers.map(x -> {
 			var marker = new PathedInteriorMarker();
 			marker.msToNext = MisParser.parseNumber(x.mstonext) / 1000;
-			marker.smoothingType = x.smoothingtype;
+			marker.smoothingType = switch (x.smoothingtype) {
+				case "Accelerate":
+					PathedInteriorMarker.SMOOTHING_ACCELERATE;
+				case "Spline":
+					PathedInteriorMarker.SMOOTHING_SPLINE;
+				default:
+					PathedInteriorMarker.SMOOTHING_LINEAR;
+			};
 			marker.position = MisParser.parseVector3(x.position);
 			marker.position.x = -marker.position.x;
 			marker.rotation = MisParser.parseRotation(x.rotation);
@@ -214,9 +222,10 @@ class PathedInterior extends InteriorObject {
 			return;
 		if (this.velocity.length() == 0)
 			return;
+		static var tform = new Matrix();
 		velocity.w = 0;
 		var newp = position.add(velocity.multiply(timeDelta));
-		var tform = this.getAbsPos().clone();
+		tform.load(this.getAbsPos()); // .clone();
 		tform.setPosition(newp);
 
 		if (this.isCollideable) {
@@ -251,6 +260,7 @@ class PathedInterior extends InteriorObject {
 
 	public function pushTickState() {
 		savedPosition = this.position.clone();
+		savedInvPosition = @:privateAccess this.collider.invTransform.getPosition();
 		savedVelocity = this.velocity.clone();
 		savedStopped = this.stopped;
 		savedStoppedPosition = this.stoppedPosition != null ? this.stoppedPosition.clone() : null;
@@ -262,7 +272,17 @@ class PathedInterior extends InteriorObject {
 		this.velocity.load(savedVelocity);
 		this.stopped = savedStopped;
 		this.stoppedPosition = savedStoppedPosition;
+		var oldtPos = this.collider.transform.getPosition();
 		this.collider.transform.setPosition(savedPosition);
+		@:privateAccess this.collider.invTransform.setPosition(savedInvPosition);
+
+		this.collider.boundingBox.xMin += savedPosition.x - oldtPos.x;
+		this.collider.boundingBox.xMax += savedPosition.x - oldtPos.x;
+		this.collider.boundingBox.yMin += savedPosition.y - oldtPos.y;
+		this.collider.boundingBox.yMax += savedPosition.y - oldtPos.y;
+		this.collider.boundingBox.zMin += savedPosition.z - oldtPos.z;
+		this.collider.boundingBox.zMax += savedPosition.z - oldtPos.z;
+
 		collisionWorld.updateTransform(this.collider);
 
 		this.currentTime = savedTime;
@@ -301,7 +321,8 @@ class PathedInterior extends InteriorObject {
 		if (m1 == null) {
 			// Incase there are no markers at all
 			var tmp = new Matrix();
-			var mat = Matrix.S(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+			var mat = new Matrix();
+			mat.initScale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
 			this.baseOrientation.toMatrix(tmp);
 			mat.multiply3x4(mat, tmp);
 			mat.setPosition(this.basePosition);
@@ -324,10 +345,10 @@ class PathedInterior extends InteriorObject {
 		var duration = m2Time - m1Time;
 		var position:Vector = null;
 		var compvarion = Util.clamp(duration != 0 ? (time - m1Time) / duration : 1, 0, 1);
-		if (m1.smoothingType == "Accelerate") {
+		if (m1.smoothingType == PathedInteriorMarker.SMOOTHING_ACCELERATE) {
 			// A simple easing function
 			compvarion = Math.sin(compvarion * Math.PI - (Math.PI / 2)) * 0.5 + 0.5;
-		} else if (m1.smoothingType == "Spline") {
+		} else if (m1.smoothingType == PathedInteriorMarker.SMOOTHING_SPLINE) {
 			// Smooth the path like it's a Catmull-Rom spline.
 			var preStart = (i - 2) - 1;
 			var postEnd = (i - 1) + 1;
@@ -355,7 +376,8 @@ class PathedInterior extends InteriorObject {
 		position = position.add(basePosition); // Add the base position
 
 		var tmp = new Matrix();
-		var mat = Matrix.S(this.baseScale.x, this.baseScale.y, this.baseScale.z);
+		var mat = new Matrix();
+		mat.initScale(this.baseScale.x, this.baseScale.y, this.baseScale.z);
 		this.baseOrientation.toMatrix(tmp);
 		mat.multiply3x4(mat, tmp);
 		mat.setPosition(position);

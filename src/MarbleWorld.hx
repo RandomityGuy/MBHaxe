@@ -224,9 +224,9 @@ class MarbleWorld extends Scheduler {
 	public var currentInputMoves:Array<InputRecorderFrame>;
 
 	// Multiplayer
-	public var isMultiplayer:Bool;
+	public var isMultiplayer:Bool = false;
 
-	public var serverStartTicks:Int;
+	public var serverStartTicks:Int = 0;
 	public var startTime:Float = 1e8;
 	public var multiplayerStarted:Bool = false;
 
@@ -2762,7 +2762,8 @@ class MarbleWorld extends Scheduler {
 		// this.oobCameraPosition = camera.position.clone();
 		if (marble == this.marble) {
 			playGui.setCenterText('outofbounds');
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
+			if (@:privateAccess !this.marble.isNetUpdate)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/whoosh.wav', ResourceLoader.getAudio, this.soundResources));
 			// if (this.replay.mode != = 'playback')
 			this.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2, () -> {
 				playGui.setCenterText('none');

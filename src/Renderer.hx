@@ -11,6 +11,7 @@ class Renderer extends h3d.scene.Renderer {
 		super();
 		defaultPass = new h3d.pass.Default("default");
 		allPasses = [defaultPass, shadow];
+		shadow.enabled = false;
 	}
 
 	inline function get_def()

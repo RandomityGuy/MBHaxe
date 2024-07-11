@@ -225,7 +225,7 @@ class PlayGui {
 			}
 
 			if (Util.isTouchDevice()) {
-				MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
+				MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra' || MarbleGame.instance.world.isMultiplayer);
 			}
 
 			playGuiCtrl.render(scene2d);
@@ -592,6 +592,10 @@ class PlayGui {
 	}
 
 	public function setBlastValue(value:Float) {
+		if (Net.clientSpectate || Net.hostSpectate) {
+			MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
+			return; // Is not changed
+		}
 		if (value <= 1) {
 			if (blastFill.extent.y == 16) { // Was previously charged
 				blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile();
@@ -862,9 +866,10 @@ class PlayGui {
 	public function setSpectateMenu(enabled:Bool) {
 		if (enabled && spectatorCtrl == null) {
 			initSpectatorMenu();
-			playGuiCtrl.render(MarbleGame.canvas.scene2d);
+			spectatorCtrl.render(MarbleGame.canvas.scene2d, @:privateAccess playGuiCtrl._flow);
 			blastFill.bmp.visible = false;
 			blastFrame.bmp.visible = false;
+			return true;
 		}
 		if (!enabled && spectatorCtrl != null) {
 			spectatorCtrl.dispose();
@@ -872,7 +877,9 @@ class PlayGui {
 			blastFill.bmp.visible = true;
 			blastFrame.bmp.visible = true;
 			spectatorTxtMode = -1;
+			return true;
 		}
+		return false;
 	}
 
 	public function setSpectateMenuText(mode:Int) {
