@@ -303,7 +303,7 @@ jobs:
             npm install -g create-dmg
             create-dmg --dmg-title="Marble Blast Platinum" "MarbleBlast Platinum.app" || true
             rm -rf "macos-dist/MarbleBlast Platinum.app.in"
-            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Platinum-Platinum.dmg"
+            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Platinum-Mac.dmg"
             # zip -r MBHaxe-Ultra-Mac.zip macos-dist/
 
       - run:
