@@ -36,7 +36,7 @@ jobs:
           name: Install Haxe
           command: |
             set -eux
-            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.1/haxe-4.3.1-osx.tar.gz"
+            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-osx.tar.gz"
             echo "Downloading [$download_url]..."
             mkdir ~/haxe
             curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o ~/haxe.tar.gz
@@ -354,7 +354,7 @@ jobs:
         - run:
             name: Install Haxe
             command: |
-              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.3/haxe-4.3.3-win64.zip"
+              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-win64.zip"
               echo "Downloading [$download_url]..."
               mkdir /tmp/haxe
               curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.zip
