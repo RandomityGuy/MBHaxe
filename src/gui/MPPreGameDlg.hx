@@ -168,11 +168,11 @@ class MPPreGameDlg extends GuiControl {
 		};
 		dialogImg.addChild(levelName);
 
-		var levelDesc = new GuiText(markerFelt18);
+		var levelDesc = new GuiMLText(markerFelt18, null);
 		levelDesc.text.textColor = 0xFFFFFF;
 		levelDesc.position = new Vector(60, 185);
 		levelDesc.extent = new Vector(516, 63);
-		levelDesc.text.text = MarbleGame.instance.world.mission.description;
+		levelDesc.text.text = StringTools.htmlEscape(MarbleGame.instance.world.mission.description);
 		levelDesc.text.dropShadow = {
 			dx: 1,
 			dy: 1,
@@ -244,8 +244,8 @@ class MPPreGameDlg extends GuiControl {
 					ready: Net.lobbyHostReady,
 					spectate: Net.hostSpectate
 				});
-				spectateBtn.pressed = Net.hostSpectate;
-				readyBtn.pressed = Net.lobbyHostReady;
+				spectateBtn.anim.currentFrame = Net.hostSpectate ? 2 : 0;
+				readyBtn.anim.currentFrame = Net.lobbyHostReady ? 2 : 0;
 			}
 			if (Net.isClient) {
 				playerListArr.push({
@@ -253,8 +253,8 @@ class MPPreGameDlg extends GuiControl {
 					ready: Net.lobbyClientReady,
 					spectate: Net.clientSpectate
 				});
-				spectateBtn.pressed = Net.clientSpectate;
-				readyBtn.pressed = Net.lobbyClientReady;
+				spectateBtn.anim.currentFrame = Net.clientSpectate ? 2 : 0;
+				readyBtn.anim.currentFrame = Net.lobbyClientReady ? 2 : 0;
 			}
 			if (Net.clientIdMap != null) {
 				for (c => v in Net.clientIdMap) {

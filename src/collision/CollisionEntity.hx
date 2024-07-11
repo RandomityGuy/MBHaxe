@@ -96,26 +96,39 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		if (this.transform.equal(transform))
 			return;
 		// Speedup
-		// if (this.fastTransform && Util.mat3x3equal(this.transform, transform)) {
-		// 	var oldPos = this.transform.getPosition();
-		// 	var newPos = transform.getPosition();
-		// 	this.transform.setPosition(newPos);
-		// 	this.invTransform = this.transform.getInverse();
-		// 	if (this.boundingBox == null)
-		// 		generateBoundingBox();
-		// 	else {
-		// 		this.boundingBox.xMin += newPos.x - oldPos.x;
-		// 		this.boundingBox.xMax += newPos.x - oldPos.x;
-		// 		this.boundingBox.yMin += newPos.y - oldPos.y;
-		// 		this.boundingBox.yMax += newPos.y - oldPos.y;
-		// 		this.boundingBox.zMin += newPos.z - oldPos.z;
-		// 		this.boundingBox.zMax += newPos.z - oldPos.z;
-		// 	}
-		// } else {
-		this.transform.load(transform);
-		this.invTransform = transform.getInverse();
-		generateBoundingBox();
-		// }
+		if (this.fastTransform && Util.mat3x3equal(this.transform, transform)) {
+			var oldPos = this.transform.getPosition();
+			var newPos = transform.getPosition();
+			this.transform.setPosition(newPos);
+			this.invTransform.prependTranslation(oldPos.x - newPos.x, oldPos.y - newPos.y, oldPos.z - newPos.z);
+			if (this.boundingBox == null)
+				generateBoundingBox();
+			else {
+				this.boundingBox.xMin += newPos.x - oldPos.x;
+				this.boundingBox.xMax += newPos.x - oldPos.x;
+				this.boundingBox.yMin += newPos.y - oldPos.y;
+				this.boundingBox.yMax += newPos.y - oldPos.y;
+				this.boundingBox.zMin += newPos.z - oldPos.z;
+				this.boundingBox.zMax += newPos.z - oldPos.z;
+
+				if (Debug.drawBounds) {
+					if (_dbgEntity == null) {
+						_dbgEntity = cast this.boundingBox.makeDebugObj();
+						_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+						MarbleGame.instance.scene.addChild(_dbgEntity);
+					} else {
+						_dbgEntity.remove();
+						_dbgEntity = cast this.boundingBox.makeDebugObj();
+						_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+						MarbleGame.instance.scene.addChild(_dbgEntity);
+					}
+				}
+			}
+		} else {
+			this.transform.load(transform);
+			this.invTransform = transform.getInverse();
+			generateBoundingBox();
+		}
 		_transformKey++;
 	}
 

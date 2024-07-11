@@ -579,32 +579,99 @@ class DtsObject extends GameObject {
 				hs.restitution = data.restitution;
 			}
 
-			for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
-				var i1 = dtsMesh.indices[i];
-				var i2 = dtsMesh.indices[i + 1];
-				var i3 = dtsMesh.indices[i + 2];
+			var drawType = primitive.matIndex & TSDrawPrimitive.TypeMask;
 
-				if (k % 2 == 0) {
-					// Swap the first and last index to mainting correct winding order
-					var temp = i1;
-					i1 = i3;
-					i3 = temp;
+			if (drawType == TSDrawPrimitive.Triangles) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
+
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001)
+						continue;
+
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.addPoint(vertex.x, vertex.y, vertex.z);
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.addNormal(normal.x, normal.y, normal.z);
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					i += 3;
 				}
+			} else if (drawType == TSDrawPrimitive.Strip) {
+				var k = 0;
+				for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				for (index in [i1, i2, i3]) {
-					var vertex = vertices[index];
-					hs.addPoint(vertex.x, vertex.y, vertex.z);
-					hs.transformKeys.push(0);
+					if (k % 2 == 0) {
+						// Swap the first and last index to mainting correct winding order
+						var temp = i1;
+						i1 = i3;
+						i3 = temp;
+					}
 
-					var normal = vertexNormals[index];
-					hs.addNormal(normal.x, normal.y, normal.z);
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001)
+						continue;
+
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.addPoint(vertex.x, vertex.y, vertex.z);
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.addNormal(normal.x, normal.y, normal.z);
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					k++;
 				}
+			} else if (drawType == TSDrawPrimitive.Fan) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements - 2) {
+					var i1 = dtsMesh.indices[primitive.firstElement];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				hs.indices.push(hs.indices.length);
-				hs.indices.push(hs.indices.length);
-				hs.indices.push(hs.indices.length);
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001)
+						continue;
 
-				k++;
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.addPoint(vertex.x, vertex.y, vertex.z);
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.addNormal(normal.x, normal.y, normal.z);
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					i++;
+				}
 			}
 
 			hs.generateBoundingBox();

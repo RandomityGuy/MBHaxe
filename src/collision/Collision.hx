@@ -146,110 +146,14 @@ class Collision {
 	}
 
 	public static inline function TriangleSphereIntersection(v0:Vector, v1:Vector, v2:Vector, N:Vector, P:Vector, r:Float, point:Vector, normal:Vector) {
-		var A = v0.sub(P);
-		var B = v1.sub(P);
-		var C = v2.sub(P);
-		var ca = C.sub(A);
-		var ba = B.sub(A);
-		var radiusSq = r * r;
-		var cp = ba.cross(ca);
-		var aDotCp = A.dot(cp);
-		var cpLenSq = cp.lengthSq();
-		if (aDotCp * aDotCp > radiusSq * cpLenSq) {
-			return false;
-		}
-
-		var aSq = A.dot(A);
-		var aDotB = A.dot(B);
-		var aDotC = A.dot(C);
-		var bSq = B.dot(B);
-		var bDotC = B.dot(C);
-		var cSq = C.dot(C);
-
-		if (aSq > radiusSq && aDotB > aSq && aDotC > aSq) {
-			return false;
-		}
-		if (bSq > radiusSq && aDotB > bSq && bDotC > bSq) {
-			return false;
-		}
-		if (cSq > radiusSq && aDotC > cSq && bDotC > cSq) {
-			return false;
-		}
-
-		var cSubB = C.sub(B);
-		var aSubC = A.sub(C);
-		var baSq = ba.lengthSq();
-		var cSubBSq = cSubB.lengthSq();
-		var aSubCSq = aSubC.lengthSq();
-		var aTest = A.multiply(baSq).sub(ba.multiply(aDotB - aSq));
-		var bTest = B.multiply(cSubBSq).sub(cSubB.multiply(bDotC - bSq));
-		var cTest = C.multiply(aSubCSq).sub(aSubC.multiply(aDotC - cSq));
-		var rhs = C.multiply(baSq).sub(aTest);
-		var rhs2 = A.multiply(cSubBSq).sub(bTest);
-		var rhs3 = B.multiply(aSubCSq).sub(cTest);
-
-		if (aTest.dot(aTest) > radiusSq * baSq * baSq && aTest.dot(rhs) > 0) {
-			return false;
-		}
-		if (bTest.dot(bTest) > radiusSq * cSubBSq * cSubBSq && bTest.dot(rhs2) > 0) {
-			return false;
-		}
-		if (cTest.dot(cTest) > radiusSq * aSubCSq * aSubCSq && cTest.dot(rhs3) > 0) {
-			return false;
-		}
-
-		var lhs = P.sub(v0);
-		var baca = ba.dot(ca);
-		var caSq = ca.lengthSq();
-		var lhsBa = lhs.dot(ba);
-		var lhsCa = lhs.dot(ca);
-		var len = baSq * caSq - baca * baca;
-		var d1 = (caSq * lhsBa - baca * lhsCa) / len;
-		var d2 = (baSq * lhsCa - baca * lhsBa) / len;
-
-		if (1 - d1 - d2 >= 0 && d1 >= 0 && d2 >= 0) {
-			normal.load(N);
-			point.load(P.sub(N.multiply(P.sub(v0).dot(N))));
+		ClosestPtPointTriangle(P, v0, v1, v2, point);
+		var v = point.sub(P);
+		if (v.dot(v) <= r * r) {
+			normal.load(P.sub(point));
+			normal.normalize();
 			return true;
 		} else {
-			var closestPt = P.sub(N.multiply(P.sub(v0).dot(N)));
-			var r1 = ClosestPointLine(v0, v1, closestPt);
-			var r2 = ClosestPointLine(v1, v2, closestPt);
-			var r3 = ClosestPointLine(v2, v0, closestPt);
-
-			var chosenEdge = 0; // Bitfield
-
-			var chosenPt:Vector = new Vector();
-			if (r1.distanceSq(P) < r2.distanceSq(P)) {
-				chosenPt.load(r1);
-				chosenEdge = 1;
-			} else {
-				chosenPt.load(r2);
-				chosenEdge = 2;
-			}
-			if (chosenPt.distanceSq(P) < r3.distanceSq(P))
-				point.load(chosenPt);
-			else {
-				chosenEdge = 4;
-				point.load(r3);
-			}
-			normal.load(P.sub(point).normalized());
-			return true;
-
-			// if (res.normal.dot(N) > 0.8) {
-			// 	// Internal edge
-			// 	if (chosenEdge & edgeData > 0) {
-			// 		chosenEdge -= 1;
-			// 		if (chosenEdge > 2)
-			// 			chosenEdge--;
-			// 		// if (edgeNormals[chosenEdge].length() < 0.5) {
-			// 		//	res.normal = center.sub(res.point).normalized();
-			// 		// } else
-			// 		if (edgeConcavities[chosenEdge]) { // Our edge is concave
-			// 			res.normal = N.clone();
-			// 		}
-			// 	}
-			// }
+			return false;
 		}
 	}
 
@@ -431,38 +335,65 @@ class Collision {
 		return null;
 	}
 
-	public static function ClosestPtPointTriangle(pt:Vector, radius:Float, p0:Vector, p1:Vector, p2:Vector, normal:Vector) {
-		var closest:Vector = null;
-		var ptDot = pt.dot(normal);
-		var triDot = p0.dot(normal);
-		if (Math.abs(ptDot - triDot) > radius * 1.1) {
-			return null;
+	public static inline function ClosestPtPointTriangle(p:Vector, a:Vector, b:Vector, c:Vector, outP:Vector) {
+		// Check if P in vertex region outside A
+		var ab = b.sub(a);
+		var ac = c.sub(a);
+		var ap = p.sub(a);
+		var d1 = ab.dot(ap);
+		var d2 = ac.dot(ap);
+		if (d1 <= 0.0 && d2 <= 0.0) { // barycentric coordinates (1,0,0)
+			outP.load(a);
+			return;
 		}
-		closest = pt.add(normal.multiply(triDot - ptDot));
-		if (Collision.PointInTriangle2(closest, p0, p1, p2)) {
-			return closest;
+		// Check if P in vertex region outside B
+		var bp = p.sub(b);
+		var d3 = ab.dot(bp);
+		var d4 = ac.dot(bp);
+		if (d3 >= 0.0 && d4 <= d3) { // barycentric coordinates (0,1,0
+			outP.load(b);
+			return;
 		}
-		var t = 10.0;
-		var r1 = Collision.IntersectSegmentCapsule(pt, pt, p0, p1, radius);
-		if (r1.result && r1.tSeg < t) {
-			closest = p0.add((p1.sub(p0).multiply(r1.tCap)));
-			t = r1.tSeg;
+
+		// Check if P in edge region of AB, if so return projection of P onto AB
+		var vc = d1 * d4 - d3 * d2;
+		if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0) {
+			var v = d1 / (d1 - d3);
+			outP.load(a.add(ab.multiply(v)));
+			return;
 		}
-		var r2 = Collision.IntersectSegmentCapsule(pt, pt, p1, p2, radius);
-		if (r2.result && r2.tSeg < t) {
-			closest = p1.add((p2.sub(p1).multiply(r2.tCap)));
-			t = r2.tSeg;
+
+		// Check if P in vertex region outside C
+		var cp = p.sub(c);
+		var d5 = ab.dot(cp);
+		var d6 = ac.dot(cp);
+		if (d6 >= 0.0 && d5 <= d6) { // barycentric coordinates (0,0,1)
+			outP.load(c);
+			return;
 		}
-		var r3 = Collision.IntersectSegmentCapsule(pt, pt, p2, p0, radius);
-		if (r3.result && r3.tSeg < t) {
-			closest = p2.add((p2.sub(p2).multiply(r3.tCap)));
-			t = r3.tSeg;
+
+		// Check if P in edge region of AC, if so return projection of P onto AC
+		var vb = d5 * d2 - d1 * d6;
+		if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0) {
+			var w = d2 / (d2 - d6);
+			outP.load(a.add(ac.multiply(w)));
+			return;
 		}
-		var res = t < 1;
-		if (res) {
-			return closest;
+
+		// Check if P in edge region of BC, if so return projection of P onto BC
+		var va = d3 * d6 - d5 * d4;
+		if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0) {
+			var w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+			outP.load(b.add((c.sub(b)).multiply(w)));
+			return;
 		}
-		return null;
+		// P inside face region. Compute Q through its barycentric coordinates (u,v,w)
+
+		var denom = 1.0 / (va + vb + vc);
+		var v = vb * denom;
+		var w = vc * denom;
+		outP.load(a.add(ab.multiply(v)).add(ac.multiply(w)));
+		return;
 	}
 
 	public static function capsuleSphereNearestOverlap(a0:Vector, a1:Vector, radA:Float, b:Vector, radB:Float) {

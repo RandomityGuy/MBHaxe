@@ -1276,6 +1276,8 @@ class Marble extends GameObject {
 			if (obj.go != null && !obj.go.isCollideable)
 				continue;
 
+			var isDts = obj.go is DtsObject;
+
 			var invMatrix = @:privateAccess obj.invTransform;
 			if (obj.go is PathedInterior)
 				invMatrix = obj.transform.getInverse();
@@ -1338,10 +1340,11 @@ class Marble extends GameObject {
 					// var vT = v.transformed(obj.transform);
 					// var v2T = v2.transformed(obj.transform);
 					// var vN = surfaceNormal.transformed3x3(obj.transform);
-					testTriangles.push({
-						v: [v0.clone(), v.clone(), v2.clone()],
-						n: surfaceNormal.clone(),
-					});
+					if (!isDts)
+						testTriangles.push({
+							v: [v0.clone(), v.clone(), v2.clone()],
+							n: surfaceNormal.clone(),
+						});
 
 					// Time until collision with the plane
 					var collisionTime = (radius - position.dot(surfaceNormal) - surfaceD) / surfaceNormal.dot(relVel);

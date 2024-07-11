@@ -344,9 +344,10 @@ class OptionsDlg extends GuiImage {
 		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), current, generalPanel, (val) -> {
 			Settings.optionsSettings.fovX = cast(60 + val * (140 - 60));
 		});
-		makeSlider(touch ? "Camera Speed" : "Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), current, generalPanel, (val) -> {
-			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
-		}, true);
+		makeSlider(touch ? "Camera Speed" : "Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12), current, generalPanel,
+			(val) -> {
+				Settings.controlsSettings.cameraSensitivity = cast(0.12 + val * (1.2 - 0.12));
+			}, true);
 
 		if (touch) {
 			current += 56;

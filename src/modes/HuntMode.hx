@@ -550,10 +550,6 @@ class HuntMode extends NullMode {
 		var beam = gemToBeamMap.get(gem);
 		beam.setHide(true);
 
-		if (!this.level.isMultiplayer || Net.isHost) {
-			spawnHuntGems();
-		}
-
 		var incr = 0;
 		switch (gem.gemColor.toLowerCase()) {
 			case "red.gem":
@@ -640,6 +636,9 @@ class HuntMode extends NullMode {
 		}
 		if (this.level.isMultiplayer && Net.isClient) {
 			gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;
+		}
+		if (!this.level.isMultiplayer || Net.isHost) {
+			spawnHuntGems();
 		}
 	}
 

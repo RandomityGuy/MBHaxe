@@ -5,9 +5,13 @@ import h3d.Vector;
 
 class PathedInteriorMarker {
 	public var msToNext:Float;
-	public var smoothingType:String;
+	public var smoothingType:Int;
 	public var position:Vector;
 	public var rotation:Quat;
+
+	public static var SMOOTHING_LINEAR = 0;
+	public static var SMOOTHING_ACCELERATE = 1;
+	public static var SMOOTHING_SPLINE = 2;
 
 	public function new() {}
 
