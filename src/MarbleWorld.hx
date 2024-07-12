@@ -3012,7 +3012,8 @@ class MarbleWorld extends Scheduler {
 			sky.dispose();
 		sky = null;
 		instanceManager = null;
-		collisionWorld.dispose();
+		if (collisionWorld != null)
+			collisionWorld.dispose();
 		collisionWorld = null;
 		particleManager = null;
 		namedObjects = null;
