@@ -29,7 +29,7 @@ jobs:
             name: Install dependencies
             command: |
               set -eux
-              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.3/haxe-4.3.3-linux64.tar.gz"
+              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-linux64.tar.gz"
               echo "Downloading [$download_url]..."
               mkdir /tmp/haxe
               curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
@@ -66,11 +66,14 @@ jobs:
               mkdir ~/deps
               cd ~/deps
               git clone https://github.com/RandomityGuy/hashlink
+              git clone https://github.com/RandomityGuy/hxDatachannel
               haxelib git heaps https://github.com/RandomityGuy/heaps
               haxelib dev hlopenal ~/deps/hashlink/libs/openal
               haxelib dev hlsdl ~/deps/hashlink/libs/sdl
               haxelib dev hashlink ~/deps/hashlink/other/haxelib
               haxelib git zyheaps https://github.com/rainyt/zyheaps
+              haxelib install colyseus-websocket
+              haxelib dev datachannel ~/deps/hxDatachannel
         - run:
             name: Prepare directories
             command: |
@@ -90,6 +93,8 @@ jobs:
             command: |
               export PATH=/tmp/haxe/:"$PATH"
               cd ~/MBHaxe
+              sed -i '5i -lib datachannel' Export/android/app/src/main/build.hxml
+              sed -i '5i -lib colyseus-websocket' Export/android/app/src/main/build.hxml
               haxe Export/android/app/src/main/build.hxml
               mkdir -p Export/android/app/src/main/assets/data
               cp -rf data/* Export/android/app/src/main/assets/data
