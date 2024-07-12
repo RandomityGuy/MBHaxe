@@ -155,7 +155,7 @@ class MPEndGameGui extends GuiImage {
 		headerML.extent = new Vector(750, 14);
 		headerML.horizSizing = Width;
 		headerML.text.textColor = 0xFFFFFF;
-		headerML.text.text = '   Name                        Score      ${hasPlatinum ? "         " : ""}                Marble';
+		headerML.text.text = '   Name                        Score      ${hasPlatinum ? "      " : ""}                Marble';
 		middleCtrl.addChild(headerML);
 
 		var ourRank = scores.indexOf(scores.filter(x -> x.us == true)[0]) + 1;
