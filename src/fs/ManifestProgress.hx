@@ -102,7 +102,7 @@ class ManifestProgress extends h2d.Object {
 
 	function finish():Void {
 		// setProgress(1, 1);
-		repaint();
+		// repaint();
 		text.text = "All done!";
 		if (removeSelf)
 			remove();
@@ -110,18 +110,18 @@ class ManifestProgress extends h2d.Object {
 	}
 
 	function showFileName(task:LoaderTask) {
-		repaint();
+		// repaint();
 		// text.text = "Loading: " + task.entry.path;
 	}
 
 	function fileLoaded(task:LoaderTask) {
-		repaint();
+		// repaint();
 		// setProgress(1, 1);
 		// text.text = "Loaded : " + task.entry.path;
 	}
 
 	function fileProgress(task:LoaderTask) {
-		repaint();
+		// repaint();
 		// setProgress(task.loaded, task.total);
 	}
 }

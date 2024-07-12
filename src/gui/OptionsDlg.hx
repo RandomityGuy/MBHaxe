@@ -68,12 +68,9 @@ class OptionsDlg extends GuiImage {
 		generalBtn.extent = new Vector(134, 65);
 		window.addChild(generalBtn);
 
-		var hotkeysBtn = new GuiButton(loadButtonImages2('data/ui/options/hotkeys'));
+		var hotkeysBtn = new GuiButton(loadButtonImages2('data/ui/options/hotkeys')); // touch settings
 		hotkeysBtn.position = new Vector(325, 19);
 		hotkeysBtn.extent = new Vector(134, 65);
-		if (touch) {
-			hotkeysBtn.disabled = true;
-		}
 		window.addChild(hotkeysBtn);
 
 		var onlineBtn = new GuiImage(ResourceLoader.getResource("data/ui/options/online_i.png", ResourceLoader.getImage, this.imageResources).toTile());

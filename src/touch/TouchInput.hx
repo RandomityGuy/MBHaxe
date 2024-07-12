@@ -233,8 +233,8 @@ class TouchInput {
 				this.rightButton = new SpectatorChangeTargetButton(true);
 				this.leftButton.add(par);
 				this.rightButton.add(par);
-				this.leftButton.guiElement.render(MarbleGame.canvas.scene2d, @:privateAccess par._flow);
-				this.rightButton.guiElement.render(MarbleGame.canvas.scene2d, @:privateAccess par._flow);
+				this.leftButton.guiElement.render(MarbleGame.canvas.scene2d);
+				this.rightButton.guiElement.render(MarbleGame.canvas.scene2d);
 			}
 		} else {
 			jumpButton.setVisible(true);

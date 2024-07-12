@@ -140,9 +140,10 @@ class ManifestEntry extends FileEntry {
 			});
 		}
 		#else
-		if (onReady != null)
+		if (onReady != null) {
 			onReady();
-		// haxe.Timer.delay(onReady, 1);
+			// haxe.Timer.delay(onReady, 1);
+		}
 		#end
 	}
 

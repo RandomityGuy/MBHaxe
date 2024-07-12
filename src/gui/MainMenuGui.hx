@@ -54,7 +54,7 @@ class MainMenuGui extends GuiImage {
 		siteButton.extent = new Vector(400, 30);
 		siteButton.pressedAction = (sender) -> {
 			#if sys
-			Settings.open_url("https://marbleblast.com");
+			Settings.open_web_url("https://marbleblast.com");
 			#end
 			#if js
 			js.Browser.window.open("https://marbleblast.com");
@@ -198,7 +198,7 @@ class MainMenuGui extends GuiImage {
 		kofi.extent = new Vector(143, 36);
 		kofi.pressedAction = (sender) -> {
 			#if sys
-			Settings.open_url("https://ko-fi.com/H2H5FRTTL");
+			Settings.open_web_url("https://ko-fi.com/H2H5FRTTL");
 			#end
 			#if js
 			js.Browser.window.open("https://ko-fi.com/H2H5FRTTL");
@@ -213,7 +213,7 @@ class MainMenuGui extends GuiImage {
 		github.extent = new Vector(94, 38);
 		github.pressedAction = (sender) -> {
 			#if sys
-			Settings.open_url("https://github.com/RandomityGuy/MBHaxe");
+			Settings.open_web_url("https://github.com/RandomityGuy/MBHaxe");
 			#end
 			#if js
 			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");

@@ -198,7 +198,7 @@ class MPPreGameDlg extends GuiControl {
 			.toTile());
 		playerListContainer.position = new Vector(57, 286);
 		playerListContainer.extent = new Vector(525, 99);
-		playerListContainer.childrenHandleScroll = true;
+		// playerListContainer.childrenHandleScroll = true;
 		// playerList.maxScrollY = 394 * Settings.uiScale;
 		dialogImg.addChild(playerListContainer);
 

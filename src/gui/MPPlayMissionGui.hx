@@ -394,7 +394,7 @@ class MPPlayMissionGui extends GuiImage {
 		chatScroll = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		chatScroll.position = new Vector(47, 282);
 		chatScroll.extent = new Vector(407, 193);
-		chatScroll.childrenHandleScroll = true;
+		// chatScroll.childrenHandleScroll = true;
 		chatScroll.scrollToBottom = true;
 		window.addChild(chatScroll);
 
@@ -402,7 +402,8 @@ class MPPlayMissionGui extends GuiImage {
 		chatBox.text.textColor = 0x000000;
 		chatBox.horizSizing = Width;
 		chatBox.position = new Vector(0, 0);
-		chatBox.extent = new Vector(396, 1184);
+		chatBox.extent = new Vector(396, 193);
+		chatBox.scrollable = true;
 		chatScroll.addChild(chatBox);
 
 		var chatInputContainer = new GuiControl();
@@ -430,7 +431,7 @@ class MPPlayMissionGui extends GuiImage {
 					}
 				}
 				chatInput.text.text = "";
-				haxe.Timer.delay(() -> chatInput.text.focus(), 10);
+				// haxe.Timer.delay(() -> chatInput.text.focus(), 10);
 			}
 			@:privateAccess Key.keyPressed[e.keyCode] = 0; // consume keys
 		}
@@ -646,8 +647,8 @@ class MPPlayMissionGui extends GuiImage {
 		redrawChat();
 	}
 
-	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
-		super.render(scene2d, parent);
+	public override function render(scene2d:Scene) {
+		super.render(scene2d);
 		setSelectedFunc(currentSelectionStatic);
 	}
 

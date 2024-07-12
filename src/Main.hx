@@ -64,8 +64,16 @@ class Main extends hxd.App {
 		s3d.camera.setFovX(Settings.optionsSettings.fovX, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 		#end
 		#if android
-		var zoomRatio = Window.getInstance().height / 700;
+		var zoomRatio = Math.min(Window.getInstance().height, Window.getInstance().width) / 700;
 		s2d.scaleMode = Zoom(zoomRatio);
+
+		trace("Initial Window resized to "
+			+ Window.getInstance().width
+			+ "x"
+			+ Window.getInstance().height
+			+ " (Zoom "
+			+ zoomRatio
+			+ ")");
 		#end
 
 		#if android

@@ -1,6 +1,7 @@
 package gui;
 
 import h2d.filter.Filter;
+import h2d.HtmlText;
 import h2d.Flow;
 import h3d.Engine;
 import h2d.Tile;
@@ -52,7 +53,6 @@ class GuiMLTextListCtrl extends GuiControl {
 		super();
 		this.font = font;
 		this.texts = texts;
-		this._manualScroll = true;
 		this.textObjs = [];
 		this.dropShadow = filter;
 		this._imageLoader = imageLoader;
@@ -109,8 +109,7 @@ class GuiMLTextListCtrl extends GuiControl {
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
 			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0)
-					+ (i * (text.font.size + 4 * Settings.uiScale) + (5 + textYOffset) * Settings.uiScale - this.scroll)));
+				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - this.scroll)));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;
@@ -118,20 +117,14 @@ class GuiMLTextListCtrl extends GuiControl {
 		}
 	}
 
-	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
+	public override function render(scene2d:Scene) {
 		var renderRect = this.getRenderRectangle();
-		var htr = this.getHitTestRect(false);
+		var htr = this.getHitTestRect();
 
-		if (parent != null) {
-			if (parent.contains(g))
-				parent.removeChild(g);
-			parent.addChild(g);
-
-			var off = this.getOffsetFromParent();
-			parent.getProperties(g).isAbsolute = true;
-
-			g.setPosition(off.x, off.y - this.scroll);
-		}
+		if (scene2d.contains(g))
+			scene2d.removeChild(g);
+		scene2d.addChild(g);
+		g.setPosition(renderRect.position.x, renderRect.position.y - this.scroll);
 
 		if (scrollable) {
 			this.flow = new Flow();
@@ -141,18 +134,12 @@ class GuiMLTextListCtrl extends GuiControl {
 			this.flow.multiline = true;
 			this.flow.layout = Stack;
 			this.flow.overflow = FlowOverflow.Hidden;
+			if (scene2d.contains(this.flow))
+				scene2d.removeChild(this.flow);
 
-			if (parent != null) {
-				if (parent.contains(this.flow)) {
-					parent.removeChild(this.flow);
-				}
-				parent.addChild(this.flow);
-				var off = this.getOffsetFromParent();
-				var props = parent.getProperties(this.flow);
-				props.isAbsolute = true;
+			scene2d.addChild(this.flow);
 
-				this.flow.setPosition(off.x, off.y);
-			}
+			this.flow.setPosition(htr.position.x, htr.position.y);
 		}
 
 		for (i in 0...textObjs.length) {
@@ -170,8 +157,7 @@ class GuiMLTextListCtrl extends GuiControl {
 			}
 
 			text.setPosition(Math.floor((!scrollable ? renderRect.position.x : 0) + 5),
-				Math.floor((!scrollable ? renderRect.position.y : 0)
-					+ (i * (text.font.size + 4 * Settings.uiScale) + (5 + textYOffset) * Settings.uiScale - this.scroll)));
+				Math.floor((!scrollable ? renderRect.position.y : 0) + (i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - this.scroll)));
 
 			if (_prevSelected == i) {
 				text.textColor = selectedColor;
@@ -179,11 +165,11 @@ class GuiMLTextListCtrl extends GuiControl {
 		}
 
 		redrawSelectionRect(htr);
-		super.render(scene2d, parent);
+		super.render(scene2d);
 	}
 
 	public function calculateFullHeight() {
-		return (this.texts.length * (font.size + 4 * Settings.uiScale));
+		return (this.texts.length * (font.size + 4));
 	}
 
 	public override function dispose() {
@@ -203,11 +189,11 @@ class GuiMLTextListCtrl extends GuiControl {
 			if (MarbleGame.canvas.scene2d.contains(text)) {
 				MarbleGame.canvas.scene2d.removeChild(text); // Refresh "layer"
 			}
-			text.remove();
 		}
 		if (MarbleGame.canvas.scene2d.contains(g))
 			MarbleGame.canvas.scene2d.removeChild(g);
-		g.remove();
+		if (MarbleGame.canvas.scene2d.contains(this.flow))
+			MarbleGame.canvas.scene2d.removeChild(this.flow);
 	}
 
 	public override function onMouseMove(mouseState:MouseState) {
@@ -215,7 +201,7 @@ class GuiMLTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 		var yStart = renderRect.position.y;
 		var dy = mousePos.y - yStart;
-		var hoverIndex = Math.floor(dy / (font.size + 4 * Settings.uiScale));
+		var hoverIndex = Math.floor((dy + this.scroll) / (font.size + 4));
 		if (hoverIndex >= this.texts.length) {
 			hoverIndex = -1;
 		}
@@ -247,7 +233,7 @@ class GuiMLTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 		var yStart = renderRect.position.y;
 		var dy = mousePos.y - yStart;
-		var selectedIndex = Math.floor((dy + this.scroll) / (font.size + 4 * Settings.uiScale));
+		var selectedIndex = Math.floor((dy + this.scroll) / (font.size + 4));
 		if (selectedIndex >= this.texts.length) {
 			selectedIndex = -1;
 		}
@@ -267,31 +253,26 @@ class GuiMLTextListCtrl extends GuiControl {
 			g.clear();
 			g.beginFill(selectedFillColor);
 
-			var off = this.getOffsetFromParent();
 			// Check if we are between the top and bottom, render normally in that case
-			var topY = 2 * Settings.uiScale + (_prevSelected * (font.size + 4 * Settings.uiScale)) + g.y;
-			var bottomY = 2 * Settings.uiScale + (_prevSelected * (font.size + 4 * Settings.uiScale)) + g.y + font.size + 4 * Settings.uiScale;
-			var topRectY = off.y;
-			var bottomRectY = off.y + renderRect.extent.y;
+			var topY = 2 + (_prevSelected * (font.size + 4)) + g.y;
+			var bottomY = 2 + (_prevSelected * (font.size + 4)) + g.y + font.size + 4;
+			var topRectY = renderRect.position.y;
+			var bottomRectY = renderRect.position.y + renderRect.extent.y;
 
 			if (topY >= topRectY && bottomY <= bottomRectY)
-				g.drawRect(0, 5 * Settings.uiScale
-					+ (_prevSelected * (font.size + 4 * Settings.uiScale))
-					- 3 * Settings.uiScale, renderRect.extent.x,
-					font.size
-					+ 4 * Settings.uiScale);
+				g.drawRect(0, 5 + (_prevSelected * (font.size + 4)) - 3, renderRect.extent.x, font.size + 4);
 			// We need to do math the draw the partially visible top selected
 			if (topY <= topRectY && bottomY >= topRectY) {
-				g.drawRect(0, this.scroll, renderRect.extent.x, topY + font.size + 4 * Settings.uiScale - off.y);
+				g.drawRect(0, this.scroll, renderRect.extent.x, topY + font.size + 4 - renderRect.position.y);
 			}
 			// Same for the bottom
 			if (topY <= bottomRectY && bottomY >= bottomRectY) {
 				g.drawRect(0, this.scroll
 					+ renderRect.extent.y
 					- font.size
-					- 4 * Settings.uiScale
-					+ (topY + font.size + 4 * Settings.uiScale - bottomRectY),
-					renderRect.extent.x, off.y
+					- 4
+					+ (topY + font.size + 4 - bottomRectY), renderRect.extent.x,
+					renderRect.position.y
 					+ renderRect.extent.y
 					- (topY));
 			}
@@ -306,11 +287,11 @@ class GuiMLTextListCtrl extends GuiControl {
 		var renderRect = this.getRenderRectangle();
 
 		this.scroll = scrollY;
-		var hittestrect = this.getHitTestRect(false);
+		var hittestrect = this.getHitTestRect();
 		for (i in 0...textObjs.length) {
 			var text = textObjs[i];
-			text.y = Math.floor((i * (text.font.size + 4 * Settings.uiScale) + (5 + textYOffset) * Settings.uiScale - scrollY));
-			g.y = -scrollY;
+			text.y = Math.floor((i * (text.font.size + 4) + 5 + textYOffset * Settings.uiScale - scrollY));
+			g.y = renderRect.position.y - scrollY;
 		}
 		redrawSelectionRect(hittestrect);
 	}

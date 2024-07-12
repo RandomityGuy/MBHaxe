@@ -164,7 +164,7 @@ class CameraController extends Object {
 			deltaposY = 0;
 		}
 
-		var factor = isTouch ? Util.lerp(1 / 25, 1 / 15,
+		var factor = isTouch ? Util.lerp(1 / 200, 1 / 50,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 1000, 1 / 200, Settings.controlsSettings.cameraSensitivity);
 
 		// CameraPitch += deltaposY * factor;

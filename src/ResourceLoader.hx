@@ -61,11 +61,14 @@ class ResourceLoader {
 		#if (js || android)
 		var mfileSystem = ManifestBuilder.create("data");
 		var mloader:ManifestLoader = new ManifestLoader(mfileSystem);
-		var preloader = new ManifestProgress(mloader, () -> {
-			loader = mloader;
-			fileSystem = mfileSystem;
-			onLoadedFunc();
-		}, scene2d);
+		var entries = mfileSystem.manifest.iterator();
+		while (entries.hasNext()) {
+			var e = entries.next();
+			e.load();
+		}
+		loader = mloader;
+		fileSystem = mfileSystem;
+		onLoadedFunc();
 		#if js
 		loader = mloader;
 		fileSystem = mfileSystem;
@@ -108,9 +111,6 @@ class ResourceLoader {
 			fwd();
 		});
 		worker.run();
-		#end
-		#if android
-		preloader.start();
 		#end
 		#end
 		#if (hl && !android)

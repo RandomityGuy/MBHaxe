@@ -237,8 +237,6 @@ class PlayGui {
 		};
 
 		Window.getInstance().addResizeEvent(resizeEv);
-
-		onFinish();
 	}
 
 	public function initTimer() {
@@ -862,7 +860,7 @@ class PlayGui {
 	public function setSpectateMenu(enabled:Bool) {
 		if (enabled && spectatorCtrl == null) {
 			initSpectatorMenu();
-			spectatorCtrl.render(MarbleGame.canvas.scene2d, @:privateAccess playGuiCtrl._flow);
+			spectatorCtrl.render(MarbleGame.canvas.scene2d);
 			blastFill.bmp.visible = false;
 			blastFrame.bmp.visible = false;
 			return true;
@@ -1164,7 +1162,7 @@ class PlayGui {
 			color: 0
 		}; // new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg);
-		middleMsg.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
+		middleMsg.render(scene2d);
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
 		this.middleMessages.push({ctrl: middleMsg, age: 0});

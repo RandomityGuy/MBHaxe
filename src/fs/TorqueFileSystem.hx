@@ -9,7 +9,8 @@ class TorqueFileEntry extends LocalEntry {
 		onReady();
 		#else
 		// if (Settings.optionsSettings.fastLoad)
-		onReady();
+		if (onReady != null)
+			haxe.Timer.delay(onReady, 1);
 		// else {
 		// 	if (onReady != null)
 		// 		haxe.Timer.delay(onReady, 1);

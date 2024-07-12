@@ -1117,7 +1117,7 @@ class PlayMissionGui extends GuiImage {
 		kofi.extent = new Vector(143, 36);
 		kofi.pressedAction = (sender) -> {
 			#if sys
-			Settings.open_url("https://ko-fi.com/H2H5FRTTL");
+			Settings.open_web_url("https://ko-fi.com/H2H5FRTTL");
 			#end
 			#if js
 			js.Browser.window.open("https://ko-fi.com/H2H5FRTTL");
