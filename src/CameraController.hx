@@ -378,7 +378,9 @@ class CameraController extends Object {
 		} else {
 			@:privateAccess level.playGui.setSpectateMenuText(1);
 			if (Key.isPressed(Settings.controlsSettings.left)
-				|| (MarbleGame.instance.touchInput.leftButton.pressed && MarbleGame.instance.touchInput.leftButton.didPressIt)) {
+				|| (Util.isTouchDevice()
+					&& MarbleGame.instance.touchInput.leftButton.pressed
+					&& MarbleGame.instance.touchInput.leftButton.didPressIt)) {
 				MarbleGame.instance.touchInput.leftButton.didPressIt = false;
 				spectateMarbleIndex = (spectateMarbleIndex - 1 + level.marbles.length) % level.marbles.length;
 				@:privateAccess while (level.marbles[spectateMarbleIndex].connection == null
@@ -388,7 +390,9 @@ class CameraController extends Object {
 			}
 
 			if (Key.isPressed(Settings.controlsSettings.right)
-				|| (MarbleGame.instance.touchInput.rightButton.pressed && MarbleGame.instance.touchInput.rightButton.didPressIt)) {
+				|| (Util.isTouchDevice()
+					&& MarbleGame.instance.touchInput.rightButton.pressed
+					&& MarbleGame.instance.touchInput.rightButton.didPressIt)) {
 				MarbleGame.instance.touchInput.rightButton.didPressIt = false;
 				spectateMarbleIndex = (spectateMarbleIndex + 1 + level.marbles.length) % level.marbles.length;
 				@:privateAccess while (level.marbles[spectateMarbleIndex].connection == null
