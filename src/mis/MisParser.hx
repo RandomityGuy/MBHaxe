@@ -99,11 +99,11 @@ class MisParser {
 			else if (!lineMatch || (blockMatch && lineMatch && blockCommentRegEx.matchedPos().pos < lineCommentRegEx.matchedPos().pos)) {
 				this.text = this.text.substring(0, blockCommentRegEx.matchedPos().pos)
 					+ this.text.substring(blockCommentRegEx.matchedPos().pos + blockCommentRegEx.matchedPos().len);
-				currentIndex += blockCommentRegEx.matchedPos().pos;
+				currentIndex = blockCommentRegEx.matchedPos().pos + blockCommentRegEx.matchedPos().len;
 			} else {
 				this.text = this.text.substring(0, lineCommentRegEx.matchedPos().pos)
 					+ this.text.substring(lineCommentRegEx.matchedPos().pos + lineCommentRegEx.matchedPos().len);
-				currentIndex += lineCommentRegEx.matchedPos().pos;
+				currentIndex = lineCommentRegEx.matchedPos().pos + lineCommentRegEx.matchedPos().len;
 			}
 		}
 
@@ -294,13 +294,30 @@ class MisParser {
 
 	function readPath(name:String) {
 		var sg:MissionElementSimGroup = cast this.readSimGroup(name);
-		var obj = new MissionElementPath();
-		obj._type = MissionElementType.Path;
-		obj._name = name;
-		obj.markers = sg.elements.map(x -> cast x);
-		obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
+		var allMarkers = true;
+		// Verify if they are all markers
+		for (e in sg.elements) {
+			if (e._type != MissionElementType.Marker) {
+				allMarkers = false;
+				break;
+			}
+		}
+		if (allMarkers) {
+			var obj = new MissionElementPath();
+			obj._type = MissionElementType.Path;
+			obj._name = name;
+			obj.markers = sg.elements.map(x -> cast x);
+			obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
 
-		return obj;
+			return obj;
+		} else {
+			var obj = new MissionElementPath();
+			obj._type = MissionElementType.Path;
+			obj._name = name;
+			obj.markers = sg.elements.filter(x -> x._type == MissionElementType.Marker).map(x -> cast x);
+			obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
+			return obj;
+		}
 	}
 
 	/** Resolves a TorqueScript rvalue expression. Currently only supports the concatenation @ operator. */

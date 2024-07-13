@@ -18,6 +18,8 @@ import src.Console;
 import src.Marbleland;
 import src.Settings;
 import src.Util;
+import src.AudioManager;
+import src.ResourceLoader;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -248,6 +250,7 @@ class NetCommands {
 					MarbleGame.instance.touchInput.setControlsEnabled(true);
 				}
 				MarbleGame.instance.world.marble.camera.stopOverview();
+				AudioManager.playSound(ResourceLoader.getAudio('data/sound/spawn.wav').resource);
 			}
 
 			if (Net.clientSpectate || Net.hostSpectate) {

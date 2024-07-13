@@ -626,19 +626,23 @@ class PlayGui {
 		this.playGuiCtrl.addChild(playerListContainer);
 
 		var imgLoader = (s:String) -> {
-			switch (s) {
+			var t = switch (s) {
 				case "high":
-					return ResourceLoader.getResource("data/ui/mp/play/connection-high.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/mp/play/connection-high.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "medium":
-					return ResourceLoader.getResource("data/ui/mp/play/connection-medium.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/mp/play/connection-medium.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "low":
-					return ResourceLoader.getResource("data/ui/mp/play/connection-low.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/mp/play/connection-low.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "matanny":
-					return ResourceLoader.getResource("data/ui/mp/play/connection-matanny.png", ResourceLoader.getImage, this.imageResources).toTile();
+					ResourceLoader.getResource("data/ui/mp/play/connection-matanny.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "unknown":
-					return ResourceLoader.getResource("data/ui/mp/play/connection-unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
-			}
-			return null;
+					ResourceLoader.getResource("data/ui/mp/play/connection-unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
+				default:
+					null;
+			};
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
 		}
 
 		playerListCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader, {

@@ -53,6 +53,9 @@ class Radar {
 			radarTileRedGem, radarTileYellowGem, radarTileBlueGem, radarTileGreenGem, radarTileOrangeGem, radarTilePinkGem, radarTilePurpleGem,
 			radarTileTurquoiseGem, radarTileBlackGem, radarTilePlatinumGem, radarTileEndPad
 		];
+		for (tile in radarTiles) {
+			tile.scaleToSize(tile.width * Settings.uiScale, tile.height * Settings.uiScale);
+		}
 	}
 
 	public function init() {

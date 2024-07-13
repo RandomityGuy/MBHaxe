@@ -793,7 +793,8 @@ class MarbleWorld extends Scheduler {
 		this.setUp(this.marble, startquat.up, this.timeState, true);
 		this.deselectPowerUp(this.marble);
 
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
+		if (!this.isMultiplayer)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
 
 		Console.log("State Start");
 		this.clearSchedule();
@@ -844,6 +845,10 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.setUp(marble, respawnUp, this.timeState, true);
+
+		var store = marble.heldPowerup;
+		marble.heldPowerup = null;
+		haxe.Timer.delay(() -> marble.heldPowerup = store, 500); // This bs
 
 		if (marble == this.marble)
 			this.playGui.setCenterText('none');
@@ -2837,7 +2842,7 @@ class MarbleWorld extends Scheduler {
 			offset.x = -offset.x;
 		}
 		var mpos = this.currentCheckpoint.obj.getAbsPos().getPosition().add(offset);
-		this.marble.setPosition(mpos.x, mpos.y, mpos.z);
+		this.marble.setMarblePosition(mpos.x, mpos.y, mpos.z);
 		marble.velocity.load(new Vector(0, 0, 0));
 		marble.omega.load(new Vector(0, 0, 0));
 		Console.log('Respawn:');

@@ -416,7 +416,7 @@ class DtsObject extends GameObject {
 						dtsshader.normalizeNormals = false; // These arent normalized
 					if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
 						dtsshader.usePremultipliedAlpha = true;
-						dtsshader.opacityMult = 0.5; // Hardcoded
+						dtsshader.opacityMult = 3.0; // Hardcoded
 					}
 					material.mainPass.removeShader(material.textureShader);
 					material.mainPass.addShader(dtsshader);
