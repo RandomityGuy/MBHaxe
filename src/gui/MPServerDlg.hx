@@ -259,8 +259,8 @@ class MPServerDlg extends GuiImage {
 		playerPlus.position = new Vector(359, 9 + 29 * 5);
 		playerPlus.extent = new Vector(31, 31);
 		playerPlus.pressedAction = (sender) -> {
-			Settings.serverSettings.maxPlayers = Std.int(Math.min(8, Settings.serverSettings.maxPlayers + 1));
-			maxPlayers.text.text = "Max Players: " + Settings.serverSettings.maxPlayers;
+			curServerMaxPlayers = Std.int(Math.min(8, curServerMaxPlayers + 1));
+			maxPlayers.text.text = "Max Players: " + curServerMaxPlayers;
 		};
 		serverSettingsContainer.addChild(playerPlus);
 
