@@ -155,8 +155,8 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 				if (t < bestT) {
 					bestT = t;
 					intersections.push({
-						point: ip,
-						normal: n,
+						point: ip.clone(),
+						normal: n.clone(),
 						object: cast this,
 						t: t
 					});
