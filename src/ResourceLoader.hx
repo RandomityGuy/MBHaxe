@@ -537,6 +537,9 @@ class ResourceLoader {
 	}
 
 	public static function exists(path:String) {
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
+		#end
 		if (zipFilesystem.exists(path.toLowerCase()))
 			return true;
 		return fileSystem.exists(path);
