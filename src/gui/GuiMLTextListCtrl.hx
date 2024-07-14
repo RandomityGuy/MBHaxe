@@ -1,7 +1,6 @@
 package gui;
 
 import h2d.filter.Filter;
-import h2d.HtmlText;
 import h2d.Flow;
 import h3d.Engine;
 import h2d.Tile;
