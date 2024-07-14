@@ -503,7 +503,7 @@ class Marble extends GameObject {
 
 		this._prevRadius = this._radius;
 
-		if (isUltra) {
+		if (isUltra || level.isMultiplayer) {
 			this.rollMegaSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/mega_roll.wav", ResourceLoader.getAudio, this.soundResources),
 				this.getAbsPos().getPosition(), true);
 			this.rollMegaSound.volume = 0;
@@ -2153,6 +2153,7 @@ class Marble extends GameObject {
 		}
 
 		updatePowerupStates(timeState);
+		updateTeleporterState(timeState);
 
 		if (isMegaMarbleEnabled(timeState)) {
 			marbleDts.setScale(0.6666 / _dtsRadius);

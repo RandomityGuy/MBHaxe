@@ -691,7 +691,8 @@ class DifBuilder {
 					return false;
 				}
 				if (tex.indexOf('/') != -1) {
-					tex = tex.split('/')[1];
+					var spl = tex.split('/');
+					tex = spl[spl.length - 1];
 				}
 
 				#if (js || android)
@@ -726,7 +727,8 @@ class DifBuilder {
 			}
 			function tex(tex:String):String {
 				if (tex.indexOf('/') != -1) {
-					tex = tex.split('/')[1];
+					var spl = tex.split('/');
+					tex = spl[spl.length - 1];
 				}
 
 				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
@@ -821,6 +823,12 @@ class DifBuilder {
 							var matDictName = exactName;
 							if (!shaderMaterialDict.exists(matDictName)) {
 								matDictName = StringTools.replace(exactName, "multiplayer/interiors/mbu", "interiors_mbu");
+							}
+							if (!shaderMaterialDict.exists(matDictName)) {
+								matDictName = StringTools.replace(exactName, "multiplayer/interiors/custom/mbu", "interiors_mbu");
+							}
+							if (!shaderMaterialDict.exists(matDictName)) {
+								matDictName = StringTools.replace(exactName, "multiplayer/interiors_mbg/custom/mbu", "interiors_mbu");
 							}
 							if (shaderMaterialDict.exists(matDictName)) {
 								var retrievefunc = shaderMaterialDict[matDictName];

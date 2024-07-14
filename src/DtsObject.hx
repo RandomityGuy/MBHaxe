@@ -854,7 +854,8 @@ class DtsObject extends GameObject {
 						quat.slerp(q1, q2, t);
 						quat.normalize();
 
-						this.graphNodes[i].setRotationQuat(quat);
+						this.graphNodes[i].getRotationQuat().load(quat);
+						this.graphNodes[i].posChanged = true;
 						this.dirtyTransforms[i] = true;
 						affectedCount++;
 						// quaternions.push(quat);
@@ -863,7 +864,8 @@ class DtsObject extends GameObject {
 						var quat = new Quat(-rotation.x, rotation.y, rotation.z, -rotation.w);
 						quat.normalize();
 						quat.conjugate();
-						this.graphNodes[i].setRotationQuat(quat);
+						this.graphNodes[i].getRotationQuat().load(quat);
+						this.graphNodes[i].posChanged = true;
 						// quaternions.push(quat);
 					}
 				}
@@ -929,8 +931,8 @@ class DtsObject extends GameObject {
 			var mesh = this.dts.meshes[info.meshIndex];
 
 			for (i in 0...info.vertices.length) {
-				info.vertices[i] = new Vector();
-				info.normals[i] = new Vector();
+				info.vertices[i].set(0, 0, 0);
+				info.normals[i].set(0, 0, 0);
 			}
 
 			var boneTransformations = [];
@@ -959,13 +961,13 @@ class DtsObject extends GameObject {
 				var mat = boneTransformations[mesh.boneIndices[i]];
 
 				vec.transform(mat);
-				vec = vec.multiply(mesh.weights[i]);
+				vec.load(vec.multiply(mesh.weights[i]));
 
 				Util.m_matF_x_vectorF(mat, vec2);
-				vec2 = vec2.multiply(mesh.weights[i]);
+				vec2.load(vec2.multiply(mesh.weights[i]));
 
-				info.vertices[vIndex] = info.vertices[vIndex].add(vec);
-				info.normals[vIndex] = info.normals[vIndex].add(vec2);
+				info.vertices[vIndex].load(info.vertices[vIndex].add(vec));
+				info.normals[vIndex].load(info.normals[vIndex].add(vec2));
 			}
 
 			for (i in 0...info.normals.length) {
@@ -979,10 +981,6 @@ class DtsObject extends GameObject {
 			var meshIndex = 0;
 			var mesh:Mesh = cast info.geometry.children[meshIndex];
 			var prim:DynamicPolygon = cast mesh.primitive;
-			var vbuffer:FloatBuffer = null;
-			if (prim.buffer != null) {
-				vbuffer = prim.getDrawBuffer(prim.points.length);
-			}
 			var pos = 0;
 			for (i in info.indices) {
 				if (pos >= prim.points.length) {
@@ -991,14 +989,11 @@ class DtsObject extends GameObject {
 					mesh = cast info.geometry.children[meshIndex];
 					prim = cast mesh.primitive;
 					pos = 0;
-					if (prim.buffer != null) {
-						vbuffer = prim.getDrawBuffer(prim.points.length);
-					}
 				}
 				var vertex = info.vertices[i];
 				var normal = info.normals[i];
-				prim.points[pos] = vertex.toPoint();
-				prim.normals[pos] = normal.toPoint(); // .normalized();
+				prim.points[pos].load(vertex.toPoint());
+				prim.normals[pos].load(normal.toPoint()); // .normalized();
 				if (prim.buffer != null) {
 					prim.dirtyFlags[pos] = true;
 				}
@@ -1042,15 +1037,17 @@ class DtsObject extends GameObject {
 			var spinAnimation = new Quat();
 			spinAnimation.initRotateAxis(0, 0, -1, timeState.timeSinceLoad * this.ambientSpinFactor);
 
-			var orientation = this.getRotationQuat();
+			// var orientation = this.getRotationQuat();
 			// spinAnimation.multiply(orientation, spinAnimation);
 
-			this.rootObject.setRotationQuat(spinAnimation);
+			this.rootObject.getRotationQuat().load(spinAnimation);
+			this.rootObject.posChanged = true;
+			// setRotationQuat(spinAnimation);
 		}
 
 		for (i in 0...this.colliders.length) {
 			if (this.dirtyTransforms[this.colliders[i].userData]) {
-				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
+				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos();
 				if (this.colliders[i] != null) {
 					this.colliders[i].setTransform(absTform);
 					this.level.collisionWorld.updateTransform(this.colliders[i]);

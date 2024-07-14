@@ -374,6 +374,23 @@ class PlayGui {
 		}
 	}
 
+	public function doStateChangeSound(state:String) {
+		static var curState = "none";
+		if (curState != state) {
+			if (state == "ready") {
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/ready.wav', ResourceLoader.getAudio, @:privateAccess this.soundResources));
+			}
+			if (state == "set") {
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/set.wav', ResourceLoader.getAudio, @:privateAccess this.soundResources));
+			}
+			if (state == "go") {
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/go.wav', ResourceLoader.getAudio, @:privateAccess this.soundResources));
+			}
+		}
+
+		curState = state;
+	}
+
 	public function initGemCounter(onFinish:Void->Void) {
 		gemCountNumbers[0].position = new Vector(30, 0);
 		gemCountNumbers[0].extent = new Vector(43, 55);
