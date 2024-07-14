@@ -128,27 +128,36 @@ class Grid {
 		var cell = origin.sub(this.bounds.getMin().toVector());
 		cell.x /= this.cellSize.x;
 		cell.y /= this.cellSize.y;
+		var destCell = origin.add(direction.multiply(bestT)).sub(this.bounds.getMin().toVector());
+		destCell.x /= this.cellSize.x;
+		destCell.y /= this.cellSize.y;
 		var stepX, outX, X = Math.floor(cell.x);
 		var stepY, outY, Y = Math.floor(cell.y);
+		var destX = Math.max(Math.floor(destCell.x), 0);
+		var destY = Math.max(Math.floor(destCell.y), 0);
 		if ((X < 0) || (X >= CELL_DIV.x) || (Y < 0) || (Y >= CELL_DIV.y))
 			return [];
 		var cb = new Vector();
 		if (direction.x > 0) {
 			stepX = 1;
-			outX = CELL_DIV.x;
+			outX = destX;
+			if (outX == X)
+				outX = Math.min(CELL_DIV.x, outX + 1);
 			cb.x = this.bounds.xMin + (X + 1) * this.cellSize.x;
 		} else {
 			stepX = -1;
-			outX = -1;
+			outX = destX - 1;
 			cb.x = this.bounds.xMin + X * this.cellSize.x;
 		}
 		if (direction.y > 0.0) {
 			stepY = 1;
-			outY = CELL_DIV.y;
+			outY = destY;
+			if (outY == Y)
+				outY = Math.min(CELL_DIV.y, outY + 1);
 			cb.y = this.bounds.yMin + (Y + 1) * this.cellSize.y;
 		} else {
 			stepY = -1;
-			outY = -1;
+			outY = destY - 1;
 			cb.y = this.bounds.yMin + Y * this.cellSize.y;
 		}
 		var tmax = new Vector();
