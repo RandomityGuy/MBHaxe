@@ -641,9 +641,11 @@ class MPPlayMissionGui extends GuiImage {
 
 		currentList = MissionList.missionList["multiplayer"]["beginner"];
 
-		setCategoryFunc(currentCategoryStatic, null, false);
+		// setCategoryFunc(currentCategoryStatic, null, false);
 		if (Net.isHost) {
 			NetCommands.setLobbyLevelIndex(currentCategoryStatic, currentSelectionStatic);
+		} else {
+			setCategoryFunc(currentCategoryStatic, null, false);
 		}
 		updateLobbyNames();
 		redrawChat();
