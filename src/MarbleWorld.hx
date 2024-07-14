@@ -356,7 +356,10 @@ class MarbleWorld extends Scheduler {
 	public function loadMusic(onFinish:Void->Void) {
 		if (this.mission.missionInfo.music != null) {
 			var musicFileName = 'sound/music/' + this.mission.missionInfo.music;
-			ResourceLoader.load(musicFileName).entry.load(onFinish);
+			if (ResourceLoader.exists(musicFileName))
+				ResourceLoader.load(musicFileName).entry.load(onFinish);
+			else
+				onFinish();
 		} else {
 			onFinish();
 		}
@@ -381,7 +384,10 @@ class MarbleWorld extends Scheduler {
 
 		this._ready = true;
 		var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
-		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
+		if (ResourceLoader.exists(musicFileName))
+			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
+		else
+			AudioManager.playShell();
 		MarbleGame.canvas.clearContent();
 		if (this.endPad != null)
 			this.endPad.generateCollider();
@@ -894,6 +900,7 @@ class MarbleWorld extends Scheduler {
 				if ((Net.isHost && (this.timeState.timeSinceLoad < startTime - 3.0)) // 3.5 == 109 ticks
 					|| (Net.isClient && this.serverStartTicks != 0 && @:privateAccess this.marble.serverTicks < this.serverStartTicks + 16)) {
 					this.playGui.setCenterText('none');
+					this.playGui.doStateChangeSound('none');
 				}
 				if ((Net.isHost
 					&& (this.timeState.timeSinceLoad > startTime - 3.0)
@@ -903,6 +910,7 @@ class MarbleWorld extends Scheduler {
 						&& @:privateAccess this.marble.serverTicks > this.serverStartTicks + 16
 						&& @:privateAccess this.marble.serverTicks < this.serverStartTicks + 63)) {
 					this.playGui.setCenterText('ready');
+					this.playGui.doStateChangeSound('ready');
 				}
 				if ((Net.isHost
 					&& (this.timeState.timeSinceLoad > startTime - 1.5)
@@ -912,6 +920,7 @@ class MarbleWorld extends Scheduler {
 						&& @:privateAccess this.marble.serverTicks > this.serverStartTicks + 63
 						&& @:privateAccess this.marble.serverTicks < this.serverStartTicks + 109)) {
 					this.playGui.setCenterText('set');
+					this.playGui.doStateChangeSound('set');
 				}
 				if ((Net.isHost && (this.timeState.timeSinceLoad >= startTime)) // 3.5 == 109 ticks
 					|| (Net.isClient && this.serverStartTicks != 0 && @:privateAccess this.marble.serverTicks >= this.serverStartTicks + 109)) {
@@ -923,6 +932,7 @@ class MarbleWorld extends Scheduler {
 					this.playGui.redrawPlayerList(); // Update spectators display
 
 					this.playGui.setCenterText('go');
+					this.playGui.doStateChangeSound('go');
 
 					var huntMode = cast(this.gameMode, HuntMode);
 
