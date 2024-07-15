@@ -155,10 +155,21 @@ class MarbleGame {
 		js.Browser.window.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
+			if (world != null && @:privateAccess world.playGui.isChatFocused()) {
+				@:privateAccess Window.getInstance().onKeyDown(e);
+			}
 		});
 		js.Browser.window.addEventListener('keyup', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
+			if (world != null && @:privateAccess world.playGui.isChatFocused()) {
+				@:privateAccess Window.getInstance().onKeyUp(e);
+			}
+		});
+		js.Browser.window.addEventListener('keypress', (e:js.html.KeyboardEvent) -> {
+			if (world != null && @:privateAccess world.playGui.isChatFocused()) {
+				@:privateAccess Window.getInstance().onKeyPress(e);
+			}
 		});
 
 		pointercontainer.addEventListener('touchstart', (e:js.html.TouchEvent) -> {

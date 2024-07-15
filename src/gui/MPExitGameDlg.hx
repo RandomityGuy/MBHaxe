@@ -70,7 +70,7 @@ class MPExitGameDlg extends GuiControl {
 		dialogImg.addChild(resumeBtn);
 
 		var serverSettingsBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/settings"));
-		serverSettingsBtn.position = new Vector(195, 184);
+		serverSettingsBtn.position = new Vector(155, 184);
 		serverSettingsBtn.extent = new Vector(45, 45);
 		serverSettingsBtn.vertSizing = Top;
 		serverSettingsBtn.pressedAction = (e) -> {
@@ -82,7 +82,7 @@ class MPExitGameDlg extends GuiControl {
 		}
 
 		var kickBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/kick"));
-		kickBtn.position = new Vector(108, 184);
+		kickBtn.position = new Vector(68, 184);
 		kickBtn.extent = new Vector(45, 45);
 		kickBtn.vertSizing = Top;
 		kickBtn.pressedAction = (e) -> {
@@ -92,6 +92,15 @@ class MPExitGameDlg extends GuiControl {
 		if (!Net.isHost) {
 			kickBtn.disabled = true;
 		}
+
+		var optionsBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/playersettings"));
+		optionsBtn.position = new Vector(242, 184);
+		optionsBtn.extent = new Vector(45, 45);
+		optionsBtn.vertSizing = Top;
+		optionsBtn.pressedAction = (e) -> {
+			MarbleGame.canvas.pushDialog(new OptionsDlg(true));
+		}
+		dialogImg.addChild(optionsBtn);
 
 		var quickspawnBtn = new GuiButton(loadButtonImages("data/ui/mp/exit/respawn"));
 		quickspawnBtn.position = new Vector(224, 132);

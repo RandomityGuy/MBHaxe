@@ -228,7 +228,14 @@ class HuntMode extends NullMode {
 	}
 
 	override function getPreloadFiles() {
-		return ['data/sound/opponentdiamond.wav', 'data/sound/firewrks.wav'];
+		return [
+			'data/sound/opponentdiamond.wav',
+			'data/sound/firewrks.wav',
+			'data/shapes/items/blue.gem.png',
+			'data/shapes/items/red.gem.png',
+			'data/shapes/items/yellow.gem.png',
+			'data/shapes/items/platinum.gem.png'
+		];
 	}
 
 	function setupGems() {

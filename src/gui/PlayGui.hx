@@ -1186,6 +1186,8 @@ class PlayGui {
 	}
 
 	public function addMiddleMessage(text:String, color:Int) {
+		if (this.middleMessages.length > 10)
+			return;
 		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
 		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
 		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
