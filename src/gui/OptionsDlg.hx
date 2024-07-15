@@ -374,9 +374,10 @@ class OptionsDlg extends GuiImage {
 			remapBtn.position = new Vector(552, current - 6);
 			remapBtn.txtCtrl.text.text = "Edit";
 			remapBtn.setExtent(new Vector(152, 49));
-			remapBtn.pressedAction = (sender) -> {
-				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-			}
+			if (!pause)
+				remapBtn.pressedAction = (sender) -> {
+					MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+				}
 			generalPanel.addChild(remapBtn);
 		}
 
