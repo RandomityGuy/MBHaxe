@@ -95,7 +95,7 @@ class Radar {
 		}
 		for (marble in level.marbles) {
 			if (marble != level.marble) {
-				var shapePos = marble.getAbsPos().getPosition();
+				var shapePos = @:privateAccess marble.lastRenderPos.clone();
 				var shapeDir = shapePos.sub(level.scene.camera.pos);
 				var shapeDist = shapeDir.lengthSq();
 				if (shapeDist == 0 || shapeDist > level.scene.camera.zFar * level.scene.camera.zFar) {
@@ -166,7 +166,9 @@ class Radar {
 
 		if (validProjection && tile != null) {
 			g.lineStyle(0, 0, 0);
-			g.drawTile(projectedPos.x - tile.width / 2, projectedPos.y - tile.height / 2, tile);
+			g.beginTileFill(projectedPos.x - tile.width / 2, projectedPos.y - tile.height / 2, Settings.uiScale, Settings.uiScale, tile);
+			g.drawRect(projectedPos.x - tile.width / 2, projectedPos.y - tile.height / 2, tile.width, tile.height);
+			g.endFill();
 		} else if (!validProjection) {
 			var centerDiff = projectedPos.sub(new Vector(scene2d.width / 2, scene2d.height / 2));
 

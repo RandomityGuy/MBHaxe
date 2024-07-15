@@ -437,6 +437,9 @@ class PlayGui {
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
 		var gemColor = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 
+		if (MarbleGame.instance.world.mission.missionInfo.game == "PlatinumQuest")
+			gemColor = "platinum";
+
 		gemImageObject = new DtsObject();
 		gemImageObject.dtsPath = "data/shapes/items/gem.dts";
 		gemImageObject.ambientRotate = true;
@@ -696,6 +699,7 @@ class PlayGui {
 		var col1 = "#CDCDCD";
 		var col2 = "#D19275";
 		var col3 = "#FFEE99";
+		var prevLead = playerList[0].us;
 		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
 		for (i in 0...playerList.length) {
 			var item = playerList[i];
@@ -733,6 +737,17 @@ class PlayGui {
 		}
 		playerListCtrl.setTexts(pl);
 		playerListScoresCtrl.setTexts(plScores);
+
+		if ((playerList[0].us && !prevLead)) {
+			gemCountNumbers[0].anim.currentFrame += 10;
+			gemCountNumbers[1].anim.currentFrame += 10;
+			gemCountNumbers[2].anim.currentFrame += 10;
+		}
+		if (prevLead && !playerList[0].us) {
+			gemCountNumbers[0].anim.currentFrame -= 10;
+			gemCountNumbers[1].anim.currentFrame -= 10;
+			gemCountNumbers[2].anim.currentFrame -= 10;
+		}
 	}
 
 	public function addPlayer(id:Int, name:String, us:Bool) {
@@ -1039,9 +1054,11 @@ class PlayGui {
 		gemCountNumbers[4].anim.visible = false;
 		gemCountNumbers[5].anim.visible = false;
 
-		gemCountNumbers[0].anim.currentFrame = 10 + collectedHundredths;
-		gemCountNumbers[1].anim.currentFrame = 10 + collectedTenths;
-		gemCountNumbers[2].anim.currentFrame = 10 + collectedOnes;
+		var off = playerList[0].us ? 10 : 0;
+
+		gemCountNumbers[0].anim.currentFrame = off + collectedHundredths;
+		gemCountNumbers[1].anim.currentFrame = off + collectedTenths;
+		gemCountNumbers[2].anim.currentFrame = off + collectedOnes;
 		gemCountSlash.bmp.visible = false;
 		gemImageSceneTargetBitmap.visible = true;
 	}

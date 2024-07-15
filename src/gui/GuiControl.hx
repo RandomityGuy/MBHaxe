@@ -258,6 +258,12 @@ class GuiControl {
 
 	public function onMouseMove(mouseState:MouseState) {}
 
+	public function onDormant(scene2d:h2d.Scene) {
+		for (ch in this.children) {
+			ch.onDormant(scene2d);
+		}
+	}
+
 	public function onScroll(scrollX:Float, scrollY:Float) {}
 
 	public function onRemove() {

@@ -79,9 +79,13 @@ abstract class Explodable extends DtsObject {
 		});
 	}
 
-	public inline function playExplosionSound() {
+	public inline function playExplosion() {
 		if (!this.level.rewinding && !Net.isClient)
 			AudioManager.playSound(ResourceLoader.getResource(explodeSoundFile, ResourceLoader.getAudio, this.soundResources));
+
+		emitter1 = this.level.particleManager.createEmitter(particle, particleData, this.getAbsPos().getPosition());
+		emitter2 = this.level.particleManager.createEmitter(smokeParticle, smokeParticleData, this.getAbsPos().getPosition());
+		emitter3 = this.level.particleManager.createEmitter(sparksParticle, sparkParticleData, this.getAbsPos().getPosition());
 	}
 
 	override function onMarbleContact(marble:src.Marble, timeState:TimeState, ?contact:CollisionInfo) {
