@@ -3,6 +3,7 @@ package collision;
 import haxe.Exception;
 import h3d.Vector;
 import h3d.col.Bounds;
+import src.Util;
 
 class Grid {
 	public var bounds:Bounds; // The bounds of the grid
@@ -133,8 +134,8 @@ class Grid {
 		destCell.y /= this.cellSize.y;
 		var stepX, outX, X = Math.floor(cell.x);
 		var stepY, outY, Y = Math.floor(cell.y);
-		var destX = Math.max(Math.floor(destCell.x), 0);
-		var destY = Math.max(Math.floor(destCell.y), 0);
+		var destX = Util.clamp(Math.max(Math.floor(destCell.x), 0), 0, CELL_DIV.x);
+		var destY = Util.clamp(Math.max(Math.floor(destCell.y), 0), 0, CELL_DIV.y);
 		if ((X < 0) || (X >= CELL_DIV.x) || (Y < 0) || (Y >= CELL_DIV.y))
 			return [];
 		var cb = new Vector();
