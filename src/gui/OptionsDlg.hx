@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.BitmapData;
 import h2d.filter.DropShadow;
 import h2d.Text;
 import gui.GuiControl.MouseState;
@@ -18,7 +19,7 @@ import src.Settings;
 class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
 
-	public function new() {
+	public function new(pause:Bool = false) {
 		function chooseBg() {
 			var rand = Math.random();
 			if (rand >= 0 && rand <= 0.244)
@@ -28,7 +29,13 @@ class OptionsDlg extends GuiImage {
 			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
 		}
 		var img = chooseBg();
-		super(img.resource.toTile());
+		var temprev = new BitmapData(1, 1);
+		temprev.setPixel(0, 0, 0);
+		var tmpprevtile = Tile.fromBitmap(temprev);
+		if (!pause)
+			super(img.resource.toTile());
+		else
+			super(tmpprevtile);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
@@ -87,7 +94,10 @@ class OptionsDlg extends GuiImage {
 		homeBtn.extent = new Vector(94, 46);
 		homeBtn.pressedAction = (sender) -> {
 			applyFunc();
-			MarbleGame.canvas.setContent(new MainMenuGui());
+			if (!pause)
+				MarbleGame.canvas.setContent(new MainMenuGui());
+			else
+				MarbleGame.canvas.popDialog(this);
 		}
 		window.addChild(homeBtn);
 
@@ -464,9 +474,10 @@ class OptionsDlg extends GuiImage {
 			remapBtn.position = new Vector(5 + 203, 35);
 			remapBtn.txtCtrl.text.text = "Edit";
 			remapBtn.setExtent(new Vector(152, 49));
-			remapBtn.pressedAction = (sender) -> {
-				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-			}
+			if (!pause)
+				remapBtn.pressedAction = (sender) -> {
+					MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+				}
 			hotkeysPanel.addChild(remapBtn);
 
 			makeOption("Hide Controls:", () -> '${Settings.touchSettings.hideControls ? "Yes" : "No"}', 38, hotkeysPanel, "small", ["No", "Yes"], (idx) -> {
