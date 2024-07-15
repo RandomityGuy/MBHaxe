@@ -61,8 +61,8 @@ class MPServerDlg extends GuiImage {
 		title.text.text = "Server Settings";
 		title.text.textColor = 0xFFFFFF;
 		title.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -129,8 +129,8 @@ class MPServerDlg extends GuiImage {
 		serverName.text.text = "Server Name:";
 		serverName.text.textColor = 0xFFFFFF;
 		serverName.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -148,8 +148,8 @@ class MPServerDlg extends GuiImage {
 		serverNameEdit.position = new Vector(3, 3);
 		serverNameEdit.extent = new Vector(291, 29);
 		serverNameEdit.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -165,8 +165,8 @@ class MPServerDlg extends GuiImage {
 		password.text.text = "Password:";
 		password.text.textColor = 0xFFFFFF;
 		password.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -184,8 +184,8 @@ class MPServerDlg extends GuiImage {
 		passwordEdit.position = new Vector(3, 3);
 		passwordEdit.extent = new Vector(291, 29);
 		passwordEdit.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -201,8 +201,8 @@ class MPServerDlg extends GuiImage {
 		serverDescTitle.text.text = "Server Info:";
 		serverDescTitle.text.textColor = 0xFFFFFF;
 		serverDescTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -220,8 +220,8 @@ class MPServerDlg extends GuiImage {
 		serverDescEdit.position = new Vector(3, 3);
 		serverDescEdit.extent = new Vector(291 + 93, 29);
 		serverDescEdit.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -237,8 +237,8 @@ class MPServerDlg extends GuiImage {
 		maxPlayers.text.text = "Max Players: " + curServerMaxPlayers;
 		maxPlayers.text.textColor = 0xFFFFFF;
 		maxPlayers.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -268,8 +268,8 @@ class MPServerDlg extends GuiImage {
 		forceSpectators.text.text = "Force Spectators:";
 		forceSpectators.text.textColor = 0xFFFFFF;
 		forceSpectators.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -291,8 +291,8 @@ class MPServerDlg extends GuiImage {
 		quickRespawn.text.text = "Allow Quick Respawn:";
 		quickRespawn.text.textColor = 0xFFFFFF;
 		quickRespawn.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -314,8 +314,8 @@ class MPServerDlg extends GuiImage {
 		competitive.text.text = "Competitive Mode:";
 		competitive.text.textColor = 0xFFFFFF;
 		competitive.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

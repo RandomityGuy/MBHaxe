@@ -88,8 +88,8 @@ class EnterNameDlg extends GuiControl {
 		var enterNameText = new GuiMLText(domcasual32, mlFontLoader);
 		enterNameText.text.textColor = 0xFFFFFF;
 		enterNameText.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

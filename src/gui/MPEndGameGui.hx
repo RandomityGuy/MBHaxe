@@ -175,8 +175,8 @@ class MPEndGameGui extends GuiImage {
 		titleML.horizSizing = Width;
 		titleML.text.textColor = rankColor;
 		titleML.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

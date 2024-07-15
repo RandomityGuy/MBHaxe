@@ -69,8 +69,8 @@ class MPKickBanDlg extends GuiImage {
 		kickTitle.text.textColor = 0xFFFFFF;
 		kickTitle.text.text = "Kick Players";
 		kickTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

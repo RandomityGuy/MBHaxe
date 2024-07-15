@@ -85,8 +85,8 @@ class JoinServerGui extends GuiImage {
 		passwordTitle.justify = Center;
 		passwordTitle.text.text = "Password Required";
 		passwordTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -134,8 +134,8 @@ class JoinServerGui extends GuiImage {
 		serverInfo.extent = new Vector(210, 166);
 		serverInfo.text.text = '<p align="center">Select a Server</p>';
 		serverInfo.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -316,8 +316,8 @@ class JoinServerGui extends GuiImage {
 		titleText.justify = Center;
 		titleText.text.text = "Join Server";
 		titleText.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -329,8 +329,8 @@ class JoinServerGui extends GuiImage {
 		listTitle.extent = new Vector(480, 22);
 		listTitle.text.textColor = 0xDDDDEE;
 		listTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
