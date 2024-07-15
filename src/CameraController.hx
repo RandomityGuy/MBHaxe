@@ -270,12 +270,14 @@ class CameraController extends Object {
 			cameraYawDelta = -cameraYawDelta;
 		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
-		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
+		var limits = spectateMarbleIndex == -1 ? 0.0001 : Math.PI / 4;
+
+		nextCameraPitch = Math.max(-Math.PI / 2 + limits, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
 		CameraYaw = nextCameraYaw; // Util.lerp(CameraYaw, nextCameraYaw, lerpt);
 		CameraPitch = nextCameraPitch; // Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
-		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
+		CameraPitch = Math.max(-Math.PI / 2 + limits, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {
@@ -381,7 +383,8 @@ class CameraController extends Object {
 				|| (Util.isTouchDevice()
 					&& MarbleGame.instance.touchInput.leftButton.pressed
 					&& MarbleGame.instance.touchInput.leftButton.didPressIt)) {
-				MarbleGame.instance.touchInput.leftButton.didPressIt = false;
+				if (Util.isTouchDevice())
+					MarbleGame.instance.touchInput.leftButton.didPressIt = false;
 				spectateMarbleIndex = (spectateMarbleIndex - 1 + level.marbles.length) % level.marbles.length;
 				@:privateAccess while (level.marbles[spectateMarbleIndex].connection == null
 					|| level.marbles[spectateMarbleIndex].connection.spectator) {
@@ -393,7 +396,8 @@ class CameraController extends Object {
 				|| (Util.isTouchDevice()
 					&& MarbleGame.instance.touchInput.rightButton.pressed
 					&& MarbleGame.instance.touchInput.rightButton.didPressIt)) {
-				MarbleGame.instance.touchInput.rightButton.didPressIt = false;
+				if (Util.isTouchDevice())
+					MarbleGame.instance.touchInput.rightButton.didPressIt = false;
 				spectateMarbleIndex = (spectateMarbleIndex + 1 + level.marbles.length) % level.marbles.length;
 				@:privateAccess while (level.marbles[spectateMarbleIndex].connection == null
 					|| level.marbles[spectateMarbleIndex].connection.spectator) {
@@ -404,7 +408,8 @@ class CameraController extends Object {
 			if (Key.isPressed(Settings.controlsSettings.blast)
 				|| (MarbleGame.instance.touchInput.blastbutton.pressed && MarbleGame.instance.touchInput.blastbutton.didPressIt)
 				|| Gamepad.isPressed(Settings.gamepadSettings.blast)) {
-				MarbleGame.instance.touchInput.blastbutton.didPressIt = false;
+				if (Util.isTouchDevice())
+					MarbleGame.instance.touchInput.blastbutton.didPressIt = false;
 				spectateMarbleIndex = -1;
 				MarbleGame.instance.touchInput.setSpectatorControlsVisibility(false);
 				return;

@@ -159,23 +159,25 @@ class MPPlayMissionGui extends GuiImage {
 		}
 		window.addChild(leaveBtn);
 
-		var searchBtn = new GuiButton(loadButtonImages("data/ui/mp/play/search"));
+		var searchBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/search"));
 		searchBtn.position = new Vector(255, 514);
 		searchBtn.extent = new Vector(44, 44);
 		searchBtn.pressedAction = (e) -> {
 			MarbleGame.canvas.pushDialog(new MPSearchGui(currentCategory == "custom"));
 		}
-		if (Net.isHost)
-			window.addChild(searchBtn);
+		window.addChild(searchBtn);
+		if (Net.isClient)
+			searchBtn.disabled = true;
 
-		var kickBtn = new GuiButton(loadButtonImages("data/ui/mp/play/kick"));
+		var kickBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/kick"));
 		kickBtn.position = new Vector(304, 514);
 		kickBtn.extent = new Vector(44, 44);
 		kickBtn.pressedAction = (e) -> {
 			MarbleGame.canvas.pushDialog(new MPKickBanDlg());
 		}
-		if (Net.isHost)
-			window.addChild(kickBtn);
+		window.addChild(kickBtn);
+		if (Net.isClient)
+			kickBtn.disabled = true;
 
 		var serverSettingsBtn = new GuiButton(loadButtonImagesExt("data/ui/mp/play/settings"));
 		serverSettingsBtn.position = new Vector(157, 514);
@@ -183,8 +185,9 @@ class MPPlayMissionGui extends GuiImage {
 		serverSettingsBtn.pressedAction = (e) -> {
 			MarbleGame.canvas.pushDialog(new MPServerDlg());
 		}
-		if (Net.isHost)
-			window.addChild(serverSettingsBtn);
+		window.addChild(serverSettingsBtn);
+		if (Net.isClient)
+			serverSettingsBtn.disabled = true;
 
 		var marbleSelectBtn = new GuiButton(loadButtonImages("data/ui/mp/play/marble"));
 		marbleSelectBtn.position = new Vector(206, 514);
@@ -219,7 +222,7 @@ class MPPlayMissionGui extends GuiImage {
 		}
 		difficultyPopover.addChild(difficultyPopoverInner);
 
-		var difficultySelector = new GuiButton(loadButtonImages("data/ui/mp/play/difficulty_beginner"));
+		var difficultySelector = new GuiButton(loadButtonImagesExt("data/ui/mp/play/difficulty_beginner"));
 		difficultySelector.position = new Vector(161, 47);
 		difficultySelector.extent = new Vector(204, 44);
 		if (isHost)
@@ -472,7 +475,7 @@ class MPPlayMissionGui extends GuiImage {
 			} else
 				currentList = MissionList.missionList["multiplayer"][category];
 
-			@:privateAccess difficultySelector.anim.frames = loadButtonImages('data/ui/mp/play/difficulty_${category}');
+			@:privateAccess difficultySelector.anim.frames = loadButtonImagesExt('data/ui/mp/play/difficulty_${category}');
 
 			if (category == "beginner") {
 				difficulty0.txtCtrl.text.text = "Intermediate";

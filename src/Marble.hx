@@ -1,5 +1,6 @@
 package src;
 
+import triggers.Trigger;
 import net.Net;
 import gui.MarbleSelectGui;
 import net.NetPacket.MarbleNetFlags;
@@ -332,6 +333,9 @@ class Marble extends GameObject {
 	var serverUsePowerup:Bool;
 	var lastRespawnTick:Int = -100000;
 	var trapdoorContacts:Map<Int, Int> = [];
+
+	var shapeImmunity:Array<DtsObject> = [];
+	var shapeOrTriggerInside:Array<GameObject> = [];
 
 	public function new() {
 		super();
@@ -1130,7 +1134,7 @@ class Marble extends GameObject {
 			// else
 			// 	gain = (contactVel - minVelocityBounceSoft) / (hardBounceSpeed - minVelocityBounceSoft) * (1.0 - gain) + gain;
 
-			if (!this.controllable)
+			if (this.connection != null)
 				AudioManager.playSound(snd, this.getAbsPos().getPosition());
 			else
 				snd.play(false, Settings.optionsSettings.soundVolume * gain);
@@ -1670,6 +1674,7 @@ class Marble extends GameObject {
 				if (Net.clientSpectate && this.connection == null) {
 					this.camera.enableSpectate();
 				}
+				this.blastTicks = 0;
 				return;
 			}
 
@@ -1866,7 +1871,7 @@ class Marble extends GameObject {
 		if (this.prevPos != null && this.level != null) {
 			var tempTimeState = timeState.clone();
 			tempTimeState.currentAttemptTime = passedTime;
-			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
+			this.callCollisionHandlers(tempTimeState, oldPos, newPos);
 		}
 
 		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
@@ -1913,6 +1918,128 @@ class Marble extends GameObject {
 					this.level.restart(cast this);
 					lastRespawnTick = timeState.ticks;
 				}
+			}
+		}
+	}
+
+	public function callCollisionHandlers(timeState:TimeState, start:Vector, end:Vector) {
+		var expansion = this._radius + 0.2;
+		var minP = new Vector(Math.min(start.x, end.x) - expansion, Math.min(start.y, end.y) - expansion, Math.min(start.z, end.z) - expansion);
+		var maxP = new Vector(Math.max(start.x, end.x) + expansion, Math.max(start.y, end.y) + expansion, Math.max(start.z, end.z) + expansion);
+		var box = Bounds.fromPoints(minP.toPoint(), maxP.toPoint());
+
+		// var marbleHitbox = new Bounds();
+		// marbleHitbox.addSpherePos(0, 0, 0, marble._radius);
+		// marbleHitbox.transform(startQuat.toMatrix());
+		// marbleHitbox.transform(endQuat.toMatrix());
+		// marbleHitbox.offset(end.x, end.y, end.z);
+
+		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
+		var contacts = this.collisionWorld.boundingSearch(box);
+		// var contacts = marble.contactEntities;
+		var inside = [];
+
+		for (contact in contacts) {
+			if (contact.go != this) {
+				if (contact.go is DtsObject) {
+					var shape:DtsObject = cast contact.go;
+
+					if (contact.boundingBox.collide(box)) {
+						shape.onMarbleInside(cast this, timeState);
+						if (!this.shapeOrTriggerInside.contains(contact.go)) {
+							this.shapeOrTriggerInside.push(contact.go);
+							shape.onMarbleEnter(cast this, timeState);
+						}
+						inside.push(contact.go);
+					}
+				}
+				if (contact.go is Trigger) {
+					var trigger:Trigger = cast contact.go;
+					var triggeraabb = trigger.collider.boundingBox;
+
+					if (triggeraabb.collide(box)) {
+						trigger.onMarbleInside(cast this, timeState);
+						if (!this.shapeOrTriggerInside.contains(contact.go)) {
+							this.shapeOrTriggerInside.push(contact.go);
+							trigger.onMarbleEnter(cast this, timeState);
+						}
+						inside.push(contact.go);
+					}
+				}
+			}
+		}
+
+		for (object in shapeOrTriggerInside) {
+			if (!inside.contains(object)) {
+				this.shapeOrTriggerInside.remove(object);
+				object.onMarbleLeave(cast this, timeState);
+			}
+		}
+
+		if (this.level.finishTime == null && @:privateAccess this.level.endPad != null) {
+			if (box.collide(@:privateAccess this.level.endPad.finishBounds)) {
+				var padUp = @:privateAccess this.level.endPad.getAbsPos().up();
+				padUp = padUp.multiply(10);
+
+				var checkBounds = box.clone();
+				checkBounds.zMin -= 10;
+				checkBounds.zMax += 10;
+				var checkBoundsCenter = checkBounds.getCenter();
+				var checkSphereRadius = checkBounds.getMax().sub(checkBoundsCenter).length();
+				var checkSphere = new Bounds();
+				checkSphere.addSpherePos(checkBoundsCenter.x, checkBoundsCenter.y, checkBoundsCenter.z, checkSphereRadius);
+				var endpadBB = this.collisionWorld.boundingSearch(checkSphere, false);
+				var found = false;
+				for (collider in endpadBB) {
+					if (collider.go == @:privateAccess this.level.endPad) {
+						var chull = cast(collider, collision.CollisionEntity);
+						var chullinvT = @:privateAccess chull.invTransform.clone();
+						chullinvT.clone();
+						chullinvT.transpose();
+						for (surface in chull.surfaces) {
+							var i = 0;
+							while (i < surface.indices.length) {
+								var surfaceN = surface.getNormal(surface.indices[i]).transformed3x3(chullinvT);
+								var v1 = surface.getPoint(surface.indices[i]).transformed(chull.transform);
+								var surfaceD = -surfaceN.dot(v1);
+
+								if (surfaceN.dot(padUp.multiply(-10)) < 0) {
+									var dist = surfaceN.dot(checkBoundsCenter.toVector()) + surfaceD;
+									if (dist >= 0 && dist < 5) {
+										var intersectT = -(checkBoundsCenter.dot(surfaceN.toPoint()) + surfaceD) / (padUp.dot(surfaceN));
+										var intersectP = checkBoundsCenter.add(padUp.multiply(intersectT).toPoint()).toVector();
+										if (Collision.PointInTriangle(intersectP, v1, surface.getPoint(surface.indices[i + 1]).transformed(chull.transform),
+											surface.getPoint(surface.indices[i + 2]).transformed(chull.transform))) {
+											found = true;
+											break;
+										}
+									}
+								}
+
+								i += 3;
+							}
+
+							if (found) {
+								break;
+							}
+						}
+						if (found) {
+							break;
+						}
+					}
+				}
+				if (found) {
+					if (@:privateAccess !this.level.endPad.inFinish) {
+						@:privateAccess this.level.touchFinish();
+						@:privateAccess this.level.endPad.inFinish = true;
+					}
+				} else {
+					if (@:privateAccess this.level.endPad.inFinish)
+						@:privateAccess this.level.endPad.inFinish = false;
+				}
+			} else {
+				if (@:privateAccess this.level.endPad.inFinish)
+					@:privateAccess this.level.endPad.inFinish = false;
 			}
 		}
 	}
@@ -2438,7 +2565,7 @@ class Marble extends GameObject {
 					if (marble != cast this) {
 						var theirPos = marble.collider.transform.getPosition();
 						var posDiff = ourPos.distance(theirPos);
-						if (posDiff < strength) {
+						if (posDiff < 5) {
 							var myMod = isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
 							var theirMod = @:privateAccess marble.isMegaMarbleEnabled(timeState) ? 0.7 : 1.0;
 							var impulse = theirPos.sub(ourPos).normalized().multiply(strength * (theirMod / myMod));

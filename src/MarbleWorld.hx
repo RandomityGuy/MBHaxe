@@ -156,9 +156,6 @@ class MarbleWorld extends Scheduler {
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
 
-	var shapeImmunity:Array<DtsObject> = [];
-	var shapeOrTriggerInside:Array<GameObject> = [];
-
 	public var timeState:TimeState = new TimeState();
 	public var bonusTime:Float = 0;
 	public var sky:Sky;
@@ -1893,8 +1890,6 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		if (radar != null)
-			radar.update(dt);
 		this.updateGameState();
 		if (!this.isMultiplayer)
 			this.updateBlast(this.marble, timeState);
@@ -2003,6 +1998,9 @@ class MarbleWorld extends Scheduler {
 			marble.camera.update(timeState.currentAttemptTime, realDt);
 		}
 
+		if (radar != null)
+			radar.update(dt);
+
 		ProfilerUI.measure("updateParticles");
 		if (this.rewinding) {
 			this.particleManager.update(1000 * timeState.timeSinceLoad, -realDt * rewindManager.timeScale);
@@ -2052,7 +2050,7 @@ class MarbleWorld extends Scheduler {
 		}
 		if (_instancesNeedsUpdate) {
 			if (this.radar != null)
-				this.radar.render(this.serverStartTicks != 0);
+				this.radar.render(this.serverStartTicks != 0 || !Net.isMP);
 			_instancesNeedsUpdate = false;
 			this.instanceManager.render();
 		}
@@ -2372,128 +2370,6 @@ class MarbleWorld extends Scheduler {
 
 	public function pickUpGem(marble:src.Marble, gem:Gem) {
 		this.gameMode.onGemPickup(marble, gem);
-	}
-
-	public function callCollisionHandlers(marble:Marble, timeState:TimeState, start:Vector, end:Vector) {
-		var expansion = marble._radius + 0.2;
-		var minP = new Vector(Math.min(start.x, end.x) - expansion, Math.min(start.y, end.y) - expansion, Math.min(start.z, end.z) - expansion);
-		var maxP = new Vector(Math.max(start.x, end.x) + expansion, Math.max(start.y, end.y) + expansion, Math.max(start.z, end.z) + expansion);
-		var box = Bounds.fromPoints(minP.toPoint(), maxP.toPoint());
-
-		// var marbleHitbox = new Bounds();
-		// marbleHitbox.addSpherePos(0, 0, 0, marble._radius);
-		// marbleHitbox.transform(startQuat.toMatrix());
-		// marbleHitbox.transform(endQuat.toMatrix());
-		// marbleHitbox.offset(end.x, end.y, end.z);
-
-		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
-		var contacts = this.collisionWorld.boundingSearch(box);
-		// var contacts = marble.contactEntities;
-		var inside = [];
-
-		for (contact in contacts) {
-			if (contact.go != marble) {
-				if (contact.go is DtsObject) {
-					var shape:DtsObject = cast contact.go;
-
-					if (contact.boundingBox.collide(box)) {
-						shape.onMarbleInside(marble, timeState);
-						if (!this.shapeOrTriggerInside.contains(contact.go)) {
-							this.shapeOrTriggerInside.push(contact.go);
-							shape.onMarbleEnter(marble, timeState);
-						}
-						inside.push(contact.go);
-					}
-				}
-				if (contact.go is Trigger) {
-					var trigger:Trigger = cast contact.go;
-					var triggeraabb = trigger.collider.boundingBox;
-
-					if (triggeraabb.collide(box)) {
-						trigger.onMarbleInside(marble, timeState);
-						if (!this.shapeOrTriggerInside.contains(contact.go)) {
-							this.shapeOrTriggerInside.push(contact.go);
-							trigger.onMarbleEnter(marble, timeState);
-						}
-						inside.push(contact.go);
-					}
-				}
-			}
-		}
-
-		for (object in shapeOrTriggerInside) {
-			if (!inside.contains(object)) {
-				this.shapeOrTriggerInside.remove(object);
-				object.onMarbleLeave(marble, timeState);
-			}
-		}
-
-		if (this.finishTime == null && this.endPad != null) {
-			if (box.collide(this.endPad.finishBounds)) {
-				var padUp = this.endPad.getAbsPos().up();
-				padUp = padUp.multiply(10);
-
-				var checkBounds = box.clone();
-				checkBounds.zMin -= 10;
-				checkBounds.zMax += 10;
-				var checkBoundsCenter = checkBounds.getCenter();
-				var checkSphereRadius = checkBounds.getMax().sub(checkBoundsCenter).length();
-				var checkSphere = new Bounds();
-				checkSphere.addSpherePos(checkBoundsCenter.x, checkBoundsCenter.y, checkBoundsCenter.z, checkSphereRadius);
-				var endpadBB = this.collisionWorld.boundingSearch(checkSphere, false);
-				var found = false;
-				for (collider in endpadBB) {
-					if (collider.go == this.endPad) {
-						var chull = cast(collider, collision.CollisionEntity);
-						var chullinvT = @:privateAccess chull.invTransform.clone();
-						chullinvT.clone();
-						chullinvT.transpose();
-						for (surface in chull.surfaces) {
-							var i = 0;
-							while (i < surface.indices.length) {
-								var surfaceN = surface.getNormal(surface.indices[i]).transformed3x3(chullinvT);
-								var v1 = surface.getPoint(surface.indices[i]).transformed(chull.transform);
-								var surfaceD = -surfaceN.dot(v1);
-
-								if (surfaceN.dot(padUp.multiply(-10)) < 0) {
-									var dist = surfaceN.dot(checkBoundsCenter.toVector()) + surfaceD;
-									if (dist >= 0 && dist < 5) {
-										var intersectT = -(checkBoundsCenter.dot(surfaceN.toPoint()) + surfaceD) / (padUp.dot(surfaceN));
-										var intersectP = checkBoundsCenter.add(padUp.multiply(intersectT).toPoint()).toVector();
-										if (Collision.PointInTriangle(intersectP, v1, surface.getPoint(surface.indices[i + 1]).transformed(chull.transform),
-											surface.getPoint(surface.indices[i + 2]).transformed(chull.transform))) {
-											found = true;
-											break;
-										}
-									}
-								}
-
-								i += 3;
-							}
-
-							if (found) {
-								break;
-							}
-						}
-						if (found) {
-							break;
-						}
-					}
-				}
-				if (found) {
-					if (!endPad.inFinish) {
-						touchFinish();
-						endPad.inFinish = true;
-					}
-				} else {
-					if (endPad.inFinish)
-						endPad.inFinish = false;
-				}
-			} else {
-				if (endPad.inFinish)
-					endPad.inFinish = false;
-			}
-		}
 	}
 
 	function touchFinish() {
@@ -3032,8 +2908,6 @@ class MarbleWorld extends Scheduler {
 		collisionWorld = null;
 		particleManager = null;
 		namedObjects = null;
-		shapeOrTriggerInside = null;
-		shapeImmunity = null;
 		currentCheckpoint = null;
 		checkpointCollectedGems = null;
 		marble = null;
