@@ -184,8 +184,8 @@ class MainMenuGui extends GuiImage {
 		versionText.extent = new Vector(97, 72);
 		versionText.text.text = "<p align=\"center\">1.5.4</p>";
 		versionText.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

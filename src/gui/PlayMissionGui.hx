@@ -893,8 +893,8 @@ class PlayMissionGui extends GuiImage {
 			var currentMission = currentList[currentSelection];
 
 			pmScoreText.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};
@@ -987,16 +987,16 @@ class PlayMissionGui extends GuiImage {
 			}
 
 			pmDescription.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};
 			pmDescription.text.lineSpacing = -1;
 
 			pmDescriptionRight.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};
@@ -1040,14 +1040,14 @@ class PlayMissionGui extends GuiImage {
 			pmDescription.text.text = descText;
 
 			pmParText.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};
 			pmParTextRight.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};

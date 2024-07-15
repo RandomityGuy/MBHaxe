@@ -51,8 +51,8 @@ class JukeboxDlg extends GuiImage {
 		songTitle.position = new Vector(61, 262);
 		songTitle.extent = new Vector(416, 22);
 		songTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -64,8 +64,8 @@ class JukeboxDlg extends GuiImage {
 		songStatus.position = new Vector(56, 283);
 		songStatus.extent = new Vector(421, 22);
 		songStatus.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

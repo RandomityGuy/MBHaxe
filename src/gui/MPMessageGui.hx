@@ -58,8 +58,8 @@ class MPMessageGui extends GuiImage {
 		title.text.text = titleText;
 		title.text.textColor = 0xFFFFFF;
 		title.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -73,8 +73,8 @@ class MPMessageGui extends GuiImage {
 		msg.text.text = msgText;
 		msg.text.textColor = 0xFFFFFF;
 		msg.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

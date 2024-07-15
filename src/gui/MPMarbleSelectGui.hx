@@ -83,8 +83,8 @@ class MPMarbleSelectGui extends GuiImage {
 		var titleText = new GuiMLText(markerFelt28, null);
 		titleText.text.textColor = 0xFFFFFF;
 		titleText.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -98,8 +98,8 @@ class MPMarbleSelectGui extends GuiImage {
 		var marbleText = new GuiMLText(markerFelt24, null);
 		marbleText.text.textColor = 0xFFFFFF;
 		marbleText.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

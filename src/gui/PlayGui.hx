@@ -663,8 +663,8 @@ class PlayGui {
 		}
 
 		playerListCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader, {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			color: 0,
 			alpha: 1
 		});
@@ -676,8 +676,8 @@ class PlayGui {
 		playerListContainer.addChild(playerListCtrl);
 
 		playerListScoresCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader, {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			color: 0,
 			alpha: 1
 		});
@@ -1177,8 +1177,8 @@ class PlayGui {
 		middleMsg.justify = Center;
 		middleMsg.text.textColor = color;
 		middleMsg.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		}; // new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);

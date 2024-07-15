@@ -321,8 +321,8 @@ class MPPlayMissionGui extends GuiImage {
 		pmDesc.position = new Vector(0, 0);
 		pmDesc.extent = new Vector(427, 99);
 		pmDesc.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -333,8 +333,8 @@ class MPPlayMissionGui extends GuiImage {
 		parTime.position = new Vector(43, 190);
 		parTime.extent = new Vector(416, 44);
 		parTime.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -384,8 +384,8 @@ class MPPlayMissionGui extends GuiImage {
 		playerListTitle.text.textColor = 0xBDCFE4;
 		playerListTitle.justify = Center;
 		playerListTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

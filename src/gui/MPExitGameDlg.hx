@@ -128,8 +128,8 @@ class MPExitGameDlg extends GuiControl {
 		exitTitle.justify = Center;
 		exitTitle.text.text = "Ingame Options";
 		exitTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -141,8 +141,8 @@ class MPExitGameDlg extends GuiControl {
 		restartTitle.justify = Center;
 		restartTitle.text.text = "Restart:";
 		restartTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};

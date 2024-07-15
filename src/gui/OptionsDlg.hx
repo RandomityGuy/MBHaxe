@@ -152,8 +152,8 @@ class OptionsDlg extends GuiImage {
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
 			textObj.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};
@@ -219,8 +219,8 @@ class OptionsDlg extends GuiImage {
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
 			textObj.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};
@@ -428,8 +428,8 @@ class OptionsDlg extends GuiImage {
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
 			textObj.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};
@@ -453,8 +453,8 @@ class OptionsDlg extends GuiImage {
 			textObj.text.text = "Touch Controls";
 			textObj.text.textColor = 0xFFFFFF;
 			textObj.text.dropShadow = {
-				dx: 1,
-				dy: 1,
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
 				alpha: 0.5,
 				color: 0
 			};

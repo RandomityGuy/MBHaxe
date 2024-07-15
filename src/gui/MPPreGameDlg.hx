@@ -133,8 +133,8 @@ class MPPreGameDlg extends GuiControl {
 		serverTitle.extent = new Vector(525, 30);
 		serverTitle.text.text = Net.isHost ? Settings.serverSettings.name : Net.connectedServerInfo.name;
 		serverTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -147,8 +147,8 @@ class MPPreGameDlg extends GuiControl {
 		serverDesc.extent = new Vector(525, 66);
 		serverDesc.text.text = Net.isHost ? Settings.serverSettings.description : Net.connectedServerInfo.description;
 		serverDesc.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -161,8 +161,8 @@ class MPPreGameDlg extends GuiControl {
 		levelName.extent = new Vector(525, 22);
 		levelName.text.text = MarbleGame.instance.world.mission.title;
 		levelName.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -174,8 +174,8 @@ class MPPreGameDlg extends GuiControl {
 		levelDesc.extent = new Vector(516, 63);
 		levelDesc.text.text = StringTools.htmlEscape(MarbleGame.instance.world.mission.description);
 		levelDesc.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -187,8 +187,8 @@ class MPPreGameDlg extends GuiControl {
 		playerTitle.extent = new Vector(525, 14);
 		playerTitle.text.text = "Player                                                                                        Status";
 		playerTitle.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -203,8 +203,8 @@ class MPPreGameDlg extends GuiControl {
 		dialogImg.addChild(playerListContainer);
 
 		var playerListLeft = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF, {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			color: 0,
 			alpha: 1
 		});
@@ -219,8 +219,8 @@ class MPPreGameDlg extends GuiControl {
 		playerListContainer.addChild(playerListLeft);
 
 		var playerListRight = new GuiTextListCtrl(markerFelt18, [], 0xFFFFFF, {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			color: 0,
 			alpha: 1
 		});

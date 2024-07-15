@@ -129,8 +129,8 @@ class EndGameGui extends GuiControl {
 		egResult.extent = new Vector(244, 69);
 		egResult.text.text = '<font face="DomCasual64" color="#FFFFFF"><p align="right">${Util.formatTime(timeState.gameplayClock)}</p></font>';
 		egResult.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -140,8 +140,8 @@ class EndGameGui extends GuiControl {
 		egFirstLine.position = new Vector(340, 150);
 		egFirstLine.extent = new Vector(210, 25);
 		egFirstLine.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -151,8 +151,8 @@ class EndGameGui extends GuiControl {
 		egSecondLine.position = new Vector(341, 178);
 		egSecondLine.extent = new Vector(209, 25);
 		egSecondLine.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -162,8 +162,8 @@ class EndGameGui extends GuiControl {
 		egThirdLine.position = new Vector(341, 206);
 		egThirdLine.extent = new Vector(209, 25);
 		egThirdLine.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -173,8 +173,8 @@ class EndGameGui extends GuiControl {
 		egFourthLine.position = new Vector(341, 234);
 		egFourthLine.extent = new Vector(209, 25);
 		egFourthLine.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -184,8 +184,8 @@ class EndGameGui extends GuiControl {
 		egFifthLine.position = new Vector(341, 262);
 		egFifthLine.extent = new Vector(209, 25);
 		egFifthLine.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -195,8 +195,8 @@ class EndGameGui extends GuiControl {
 		egFirstLineScore.position = new Vector(475, 150);
 		egFirstLineScore.extent = new Vector(210, 25);
 		egFirstLineScore.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -206,8 +206,8 @@ class EndGameGui extends GuiControl {
 		egSecondLineScore.position = new Vector(476, 178);
 		egSecondLineScore.extent = new Vector(209, 25);
 		egSecondLineScore.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -217,8 +217,8 @@ class EndGameGui extends GuiControl {
 		egThirdLineScore.position = new Vector(476, 206);
 		egThirdLineScore.extent = new Vector(209, 25);
 		egThirdLineScore.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -228,8 +228,8 @@ class EndGameGui extends GuiControl {
 		egFourthLineScore.position = new Vector(476, 234);
 		egFourthLineScore.extent = new Vector(209, 25);
 		egFourthLineScore.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -239,8 +239,8 @@ class EndGameGui extends GuiControl {
 		egFifthLineScore.position = new Vector(476, 262);
 		egFifthLineScore.extent = new Vector(209, 25);
 		egFifthLineScore.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -250,8 +250,8 @@ class EndGameGui extends GuiControl {
 		egTitleText.text.textColor = 0xffff00;
 		egTitleText.text.text = '<font color="#FFFFFF" face="DomCasual64">Your Time:</font>';
 		egTitleText.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -264,8 +264,8 @@ class EndGameGui extends GuiControl {
 		egTopThreeText.extent = new Vector(209, 34);
 		egTopThreeText.text.text = '<font face="DomCasual32" color="#FFFFFF">Top 5 Times:</font>'; // Make toggleable 3-5
 		egTopThreeText.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -295,8 +295,8 @@ class EndGameGui extends GuiControl {
 		finishMessage.text.textColor = 0x00ff00;
 		finishMessage.text.text = text;
 		finishMessage.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0
 		};
@@ -346,8 +346,8 @@ class EndGameGui extends GuiControl {
 		leftColumn.text.textColor = 0xFFFFFF;
 		leftColumn.text.text = 'Par Time:<br/>${mission.game == "gold" || mission.game.toLowerCase() == "ultra" ? '<font color="#FFCC00">Gold Time:</font>' : '<font color="#CCCCCC">Platinum Time:</font>'}<br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">Ultimate Time:</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">Time Passed:<br/>Clock Bonuses:</font>';
 		leftColumn.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
@@ -363,8 +363,8 @@ class EndGameGui extends GuiControl {
 		rightColumn.text.textColor = 0xFFFFFF;
 		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="${mission.game == "gold" || mission.game.toLowerCase() == "ultra" ? '#FFCC00' : '#CCCCCC'}">${Util.formatTime(mission.goldTime)}</font><br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">${Util.formatTime(mission.ultimateTime)}</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}</font>';
 		rightColumn.text.dropShadow = {
-			dx: 1,
-			dy: 1,
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
 			color: 0x777777
 		};
