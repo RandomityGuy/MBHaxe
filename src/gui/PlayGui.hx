@@ -80,6 +80,11 @@ class PlayGui {
 	var powerupImageSceneTargetBitmap:Bitmap;
 	var powerupImageObject:DtsObject;
 
+	var blastBarTile:h2d.Tile;
+	var blastBarGreenTile:h2d.Tile;
+	var blastBarGrayTile:h2d.Tile;
+	var blastBarChargedTile:h2d.Tile;
+
 	var RSGOCenterText:Anim;
 
 	var helpTextForeground:GuiText;
@@ -603,6 +608,11 @@ class PlayGui {
 		blastFrame.position = new Vector(0, 0);
 		blastFrame.extent = new Vector(120, 28);
 		blastBar.addChild(blastFrame);
+
+		blastBarTile = ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile();
+		blastBarGreenTile = ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile();
+		blastBarGrayTile = ResourceLoader.getResource("data/ui/game/blastbar_bargray.png", ResourceLoader.getImage, this.imageResources).toTile();
+		blastBarChargedTile = ResourceLoader.getResource("data/ui/game/blastbar_charged.png", ResourceLoader.getImage, this.imageResources).toTile();
 	}
 
 	public function setBlastValue(value:Float) {
@@ -612,21 +622,21 @@ class PlayGui {
 		}
 		if (value <= 1) {
 			if (blastFill.extent.y == 16) { // Was previously charged
-				blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile();
+				blastFrame.bmp.tile = blastBarTile;
 			}
 			var oldVal = blastFill.extent.x;
 			blastFill.extent = new Vector(Util.lerp(0, 110, value), 17);
 			if (oldVal < 22 && blastFill.extent.x >= 22) {
-				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile();
+				blastFill.bmp.tile = blastBarGreenTile;
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 			}
 			if (oldVal >= 22 && blastFill.extent.x < 22) {
-				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargray.png", ResourceLoader.getImage, this.imageResources).toTile();
+				blastFill.bmp.tile = blastBarGrayTile;
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(false);
 			}
 		} else {
 			blastFill.extent = new Vector(0, 16); // WE will just use this extra number to store whether it was previously charged or not
-			blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_charged.png", ResourceLoader.getImage, this.imageResources).toTile();
+			blastFrame.bmp.tile = blastBarChargedTile;
 			MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 		}
 		this.blastBar.render(scene2d);

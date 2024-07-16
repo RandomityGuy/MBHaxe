@@ -370,15 +370,12 @@ class Util {
 		return str;
 	}
 
-	public static function m_matF_x_vectorF(matrix:Matrix, v:Vector) {
-		var m = matrix.clone();
-		m.transpose();
-
+	public static inline function m_matF_x_vectorF(m:Matrix, v:Vector) {
 		var v0 = v.x, v1 = v.y, v2 = v.z;
 
-		var vresult_0 = m._11 * v0 + m._12 * v1 + m._13 * v2;
-		var vresult_1 = m._21 * v0 + m._22 * v1 + m._23 * v2;
-		var vresult_2 = m._31 * v0 + m._23 * v1 + m._33 * v2;
+		var vresult_0 = m._11 * v0 + m._21 * v1 + m._31 * v2;
+		var vresult_1 = m._12 * v0 + m._22 * v1 + m._32 * v2;
+		var vresult_2 = m._13 * v0 + m._23 * v1 + m._33 * v2;
 
 		v.set(vresult_0, vresult_1, vresult_2);
 	}
