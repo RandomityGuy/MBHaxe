@@ -16,7 +16,7 @@ class AbstractBumper extends DtsObject {
 	override function update(timeState:src.TimeState) {
 		// Override the keyframe
 		var currentCompletion = getCurrentCompletion(timeState);
-		this.sequenceKeyframeOverride.set(this.dts.sequences[0], currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
+		this.sequenceKeyframeOverride[0] = (currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
 
 		super.update(timeState);
 	}

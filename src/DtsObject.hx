@@ -84,7 +84,7 @@ class DtsObject extends GameObject {
 	var materialInfos:Map<Material, Array<String>> = new Map();
 	var matNameOverride:Map<String, String> = new Map();
 
-	var sequenceKeyframeOverride:Map<Sequence, Float> = new Map();
+	var sequenceKeyframeOverride:Array<Float> = [];
 	var lastSequenceKeyframes:Array<Float> = [];
 
 	var graphNodes:Array<Object> = [];
@@ -333,6 +333,7 @@ class DtsObject extends GameObject {
 
 		for (seq in this.dts.sequences) {
 			lastSequenceKeyframes.push(0);
+			sequenceKeyframeOverride.push(-1);
 		}
 
 		if (!this.isInstanced) {
@@ -843,7 +844,7 @@ class DtsObject extends GameObject {
 			var translations:Array<Vector> = null;
 			var scales:Array<Vector> = null;
 
-			var actualKeyframe = this.sequenceKeyframeOverride.exists(sequence) ? this.sequenceKeyframeOverride.get(sequence) : ((completion * sequence.numKeyFrames) % sequence.numKeyFrames);
+			var actualKeyframe = this.sequenceKeyframeOverride[i] != -1 ? this.sequenceKeyframeOverride[i] : ((completion * sequence.numKeyFrames) % sequence.numKeyFrames);
 			if (lastSequenceKeyframes[i] == actualKeyframe)
 				continue;
 			lastSequenceKeyframes[i] = actualKeyframe;
