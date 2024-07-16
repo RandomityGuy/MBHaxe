@@ -1134,9 +1134,10 @@ class Marble extends GameObject {
 			// else
 			// 	gain = (contactVel - minVelocityBounceSoft) / (hardBounceSpeed - minVelocityBounceSoft) * (1.0 - gain) + gain;
 
-			if (this.connection != null)
-				AudioManager.playSound(snd, this.getAbsPos().getPosition());
-			else
+			if (this.connection != null) {
+				var distFromUs = @:privateAccess this.level.marble.lastRenderPos.distanceSq(this.lastRenderPos);
+				snd.play(false, Settings.optionsSettings.soundVolume * gain / Math.max(1, distFromUs));
+			} else
 				snd.play(false, Settings.optionsSettings.soundVolume * gain);
 		}
 	}
@@ -2546,7 +2547,7 @@ class Marble extends GameObject {
 			if (this.blastTicks < 156)
 				return;
 			var blastAmt = this.blastTicks / (25000 >> 5);
-			var impulse = this.currentUp.multiply(Math.max(Math.sqrt(blastAmt), blastAmt) * 10);
+			var impulse = this.currentUp.multiply((blastAmt > 1.0 ? blastAmt : Math.sqrt(blastAmt)) * 10);
 			this.applyImpulse(impulse);
 			if (!isNetUpdate && this.controllable)
 				AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
@@ -2583,7 +2584,7 @@ class Marble extends GameObject {
 		} else {
 			if (this.blastAmount < 0.2 || this.level.game != "ultra")
 				return;
-			var impulse = this.currentUp.multiply(Math.max(Math.sqrt(this.blastAmount), this.blastAmount) * 10);
+			var impulse = this.currentUp.multiply((this.blastAmount > 1.0 ? this.blastAmount : Math.sqrt(this.blastAmount)) * 10);
 			this.applyImpulse(impulse);
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/blast.wav', ResourceLoader.getAudio, this.soundResources));
 			this.level.particleManager.createEmitter(this.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
