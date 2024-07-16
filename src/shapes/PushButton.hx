@@ -28,7 +28,7 @@ class PushButton extends DtsObject {
 		var currentCompletion = this.getCurrentCompletion(timeState);
 
 		// Override the keyframe
-		this.sequenceKeyframeOverride.set(this.dts.sequences[0], currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
+		this.sequenceKeyframeOverride[0] = (currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
 		super.update(timeState);
 	}
 

@@ -96,8 +96,14 @@ class ReusableList<T> {
 	}
 }
 
+@:publicFields
+@:structInit
+class InstancedMesh {
+	var batches:Array<MeshBatchInfo>;
+}
+
 class InstanceManager {
-	var objects:Array<Array<MeshBatchInfo>> = [];
+	var objects:Array<InstancedMesh> = [];
 
 	var objectMap:Map<String, Int> = [];
 	var scene:Scene;
@@ -119,7 +125,7 @@ class InstanceManager {
 		var cameraFrustrums = doFrustumCheck ? MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums() : null;
 
 		for (meshes in objects) {
-			for (minfo in meshes) {
+			for (minfo in meshes.batches) {
 				opaqueinstances.clear();
 				transparentinstances.clear();
 				// Culling
@@ -218,7 +224,7 @@ class InstanceManager {
 			var objs = getAllChildren(object);
 			var minfos = objects[objectMap.get(object.identifier)]; // objects.get(object.identifier);
 			for (i in 0...objs.length) {
-				minfos[i].instances.push(new MeshInstance(objs[i], object));
+				minfos.batches[i].instances.push(new MeshInstance(objs[i], object));
 			}
 		} else {
 			// First time appending the thing so bruh
@@ -329,14 +335,14 @@ class InstanceManager {
 				minfos.push(minfo);
 			}
 			var curidx = objects.length;
-			objects.push(minfos);
+			objects.push({batches: minfos});
 			objectMap.set(object.identifier, curidx);
 		}
 	}
 
 	public function getObjectBounds(object:GameObject) {
 		if (isInstanced(object)) {
-			var minfos = objects[objectMap.get(object.identifier)];
+			var minfos = objects[objectMap.get(object.identifier)].batches;
 			var invmat = minfos[0].instances[0].gameObject.getInvPos();
 			var b = minfos[0].instances[0].gameObject.getBounds().clone();
 			b.transform(invmat);
