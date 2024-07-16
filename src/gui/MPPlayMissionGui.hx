@@ -70,8 +70,8 @@ class MPPlayMissionGui extends GuiImage {
 			currentSelectionStatic = 0;
 		}
 
-		currentSelection = currentSelectionStatic;
-		currentCategory = currentCategoryStatic;
+		// currentSelection = currentSelectionStatic;
+		// currentCategory = currentCategoryStatic;
 
 		MarbleGame.instance.toRecord = false;
 
@@ -417,10 +417,18 @@ class MPPlayMissionGui extends GuiImage {
 		chatInput = new GuiTextInput(markerFelt18);
 		chatInput.text.textColor = 0x000000;
 		chatInput.horizSizing = Width;
-		chatInput.position = new Vector(0, 0);
-		chatInput.extent = new Vector(402, 30);
+		chatInput.position = new Vector(50, 0);
+		chatInput.extent = new Vector(352, 30);
 		chatInputContainer.addChild(chatInput);
 		@:privateAccess chatInput.text.interactive.forceAnywherefocus = true;
+
+		var chatInputFocusTxt = new GuiText(markerFelt18);
+		chatInputFocusTxt.position = new Vector(0, 0);
+		chatInputFocusTxt.extent = new Vector(50, 30);
+		chatInputFocusTxt.text.text = "Chat:";
+		chatInputFocusTxt.text.textColor = 0x000000;
+		chatInputFocusTxt.justify = Center;
+		chatInputContainer.addChild(chatInputFocusTxt);
 
 		chatInput.text.onKeyDown = (e) -> {
 			if (e.keyCode == Key.ENTER) {

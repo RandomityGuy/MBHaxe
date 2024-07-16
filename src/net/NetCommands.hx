@@ -28,6 +28,8 @@ class NetCommands {
 			MPPlayMissionGui.currentCategoryStatic = category;
 			MPPlayMissionGui.currentSelectionStatic = i;
 		} else {
+			MPPlayMissionGui.currentCategoryStatic = category;
+			MPPlayMissionGui.currentSelectionStatic = i;
 			MPPlayMissionGui.setLevelFn(category, i);
 		}
 	}

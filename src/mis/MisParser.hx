@@ -68,13 +68,13 @@ class MisParser {
 			startText = marbleAttributesRegEx.matchedRight();
 		}
 
-		var activatedPackages = [];
+		// var activatedPackages = [];
 		startText = outsideText;
 
-		while (activatePackageRegEx.match(startText)) {
-			activatedPackages.push(this.resolveExpression(activatePackageRegEx.matched(1)));
-			startText = marbleAttributesRegEx.matchedRight();
-		}
+		// while (activatePackageRegEx.match(startText)) {
+		// 	activatedPackages.push(this.resolveExpression(activatePackageRegEx.matched(1)));
+		// 	startText = marbleAttributesRegEx.matchedRight();
+		// }
 
 		if (objectWriteBeginIndex != -1 && objectWriteEndIndex != -1) {
 			this.text = this.text.substring(objectWriteBeginIndex, objectWriteEndIndex);
@@ -127,7 +127,6 @@ class MisParser {
 		var mf = new MisFile();
 		mf.root = cast elements[0];
 		mf.marbleAttributes = marbleAttributes;
-		mf.activatedPackages = activatedPackages;
 		return mf;
 	}
 
