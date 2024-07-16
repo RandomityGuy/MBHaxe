@@ -38,6 +38,7 @@ class MeshBatchInfo {
 class MeshInstance {
 	var emptyObj:Object;
 	var gameObject:GameObject;
+	var visibleTicks:Int = 10;
 
 	public function new(eo, go) {
 		this.emptyObj = eo;
@@ -127,22 +128,28 @@ class InstanceManager {
 						// for (frustum in renderFrustums) {
 						//	if (frustum.hasBounds(objBounds)) {
 
-						tmpBounds.load(minfo.baseBounds);
-						tmpBounds.transform(inst.emptyObj.getAbsPos());
+						if (inst.visibleTicks == 0) {
+							tmpBounds.load(minfo.baseBounds);
+							tmpBounds.transform(inst.emptyObj.getAbsPos());
 
-						if (cameraFrustrums == null && !renderFrustum.hasBounds(tmpBounds))
-							continue;
-
-						if (cameraFrustrums != null) {
-							var found = false;
-							for (frustrum in cameraFrustrums) {
-								if (frustrum.hasBounds(tmpBounds)) {
-									found = true;
-									break;
-								}
-							}
-							if (!found)
+							if (cameraFrustrums == null && !renderFrustum.hasBounds(tmpBounds))
 								continue;
+
+							if (cameraFrustrums != null) {
+								var found = false;
+								for (frustrum in cameraFrustrums) {
+									if (frustrum.hasBounds(tmpBounds)) {
+										found = true;
+										break;
+									}
+								}
+								if (!found)
+									continue;
+							}
+
+							inst.visibleTicks = 10;
+						} else {
+							inst.visibleTicks = inst.visibleTicks - 1;
 						}
 
 						if (inst.gameObject.currentOpacity == 1)

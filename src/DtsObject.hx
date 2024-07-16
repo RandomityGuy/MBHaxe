@@ -1,5 +1,6 @@
 package src;
 
+import h3d.prim.DynamicPrimitive;
 import h3d.scene.MultiMaterial;
 import shaders.EnvMap;
 import h3d.shader.CubeMap;
@@ -52,13 +53,6 @@ var dtsMaterials = [
 	"pball-round-bottm" => {friction: 0.5, restitution: 0.0, force: 15.0}
 ];
 
-typedef GraphNode = {
-	var index:Int;
-	var node:Node;
-	var children:Array<GraphNode>;
-	var parent:GraphNode;
-}
-
 typedef MaterialGeometry = {
 	var vertices:Array<Vector>;
 	var normals:Array<Vector>;
@@ -66,12 +60,15 @@ typedef MaterialGeometry = {
 	var indices:Array<Int>;
 }
 
-typedef SkinMeshData = {
+@:structInit
+@:publicFields
+class SkinMeshData {
 	var meshIndex:Int;
-	var vertices:Array<Vector>;
-	var normals:Array<Vector>;
+	var vertices:Array<Float>; // Turn THIS into a FloatBuffer
+	var normals:Array<Float>; // SAME HERE
 	var indices:Array<Int>;
 	var geometry:Object;
+	var primitives:Array<DynamicPolygon>;
 }
 
 @:publicFields
@@ -88,7 +85,7 @@ class DtsObject extends GameObject {
 	var matNameOverride:Map<String, String> = new Map();
 
 	var sequenceKeyframeOverride:Map<Sequence, Float> = new Map();
-	var lastSequenceKeyframes:Map<Sequence, Float> = new Map();
+	var lastSequenceKeyframes:Array<Float> = [];
 
 	var graphNodes:Array<Object> = [];
 	var dirtyTransforms:Array<Bool> = [];
@@ -272,22 +269,39 @@ class DtsObject extends GameObject {
 					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
 					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+					var prims = [];
 					for (k in 0...geometry.length) {
 						if (geometry[k].vertices.length == 0)
 							continue;
 
-						var poly = new DynamicPolygon(geometry[k].vertices.map(x -> x.toPoint()));
-						poly.normals = geometry[k].normals.map(x -> x.toPoint());
-						poly.uvs = geometry[k].uvs;
+						var poly = new DynamicPolygon();
+						poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
+						poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
+						poly.addUVs(geometry[k].uvs);
 
 						var obj = new MultiMaterial(poly, [materials[k]], skinObj);
+
+						prims.push(poly);
+					}
+					var flatVerts = [];
+					var flatNormals = [];
+					for (v in vertices) {
+						flatVerts.push(v.x);
+						flatVerts.push(v.y);
+						flatVerts.push(v.z);
+					}
+					for (n in vertexNormals) {
+						flatNormals.push(n.x);
+						flatNormals.push(n.y);
+						flatNormals.push(n.z);
 					}
 					skinMeshData = {
 						meshIndex: i,
-						vertices: vertices,
-						normals: vertexNormals,
+						vertices: flatVerts,
+						normals: flatNormals,
 						indices: [],
-						geometry: skinObj
+						geometry: skinObj,
+						primitives: prims
 					};
 					var idx = geometry.map(x -> x.indices);
 					for (indexes in idx) {
@@ -310,10 +324,15 @@ class DtsObject extends GameObject {
 						vertices: [],
 						normals: [],
 						indices: [],
-						geometry: skinObj
+						geometry: skinObj,
+						primitives: []
 					};
 				}
 			}
+		}
+
+		for (seq in this.dts.sequences) {
+			lastSequenceKeyframes.push(0);
 		}
 
 		if (!this.isInstanced) {
@@ -807,7 +826,8 @@ class DtsObject extends GameObject {
 		if (this.currentOpacity == 0)
 			return;
 
-		for (sequence in this.dts.sequences) {
+		for (i in 0...this.dts.sequences.length) {
+			var sequence = this.dts.sequences[i];
 			if (!this.showSequences)
 				break;
 			if (!this.hasNonVisualSequences)
@@ -824,9 +844,9 @@ class DtsObject extends GameObject {
 			var scales:Array<Vector> = null;
 
 			var actualKeyframe = this.sequenceKeyframeOverride.exists(sequence) ? this.sequenceKeyframeOverride.get(sequence) : ((completion * sequence.numKeyFrames) % sequence.numKeyFrames);
-			if (this.lastSequenceKeyframes.get(sequence) == actualKeyframe)
+			if (lastSequenceKeyframes[i] == actualKeyframe)
 				continue;
-			lastSequenceKeyframes.set(sequence, actualKeyframe);
+			lastSequenceKeyframes[i] = actualKeyframe;
 
 			var keyframeLow = Math.floor(actualKeyframe);
 			var keyframeHigh = Math.ceil(actualKeyframe) % sequence.numKeyFrames;
@@ -931,8 +951,8 @@ class DtsObject extends GameObject {
 			var mesh = this.dts.meshes[info.meshIndex];
 
 			for (i in 0...info.vertices.length) {
-				info.vertices[i].set(0, 0, 0);
-				info.normals[i].set(0, 0, 0);
+				info.vertices[i] = 0;
+				info.normals[i] = 0;
 			}
 
 			var boneTransformations = [];
@@ -966,34 +986,42 @@ class DtsObject extends GameObject {
 				Util.m_matF_x_vectorF(mat, vec2);
 				vec2.load(vec2.multiply(mesh.weights[i]));
 
-				info.vertices[vIndex].load(info.vertices[vIndex].add(vec));
-				info.normals[vIndex].load(info.normals[vIndex].add(vec2));
+				info.vertices[3 * vIndex] = info.vertices[3 * vIndex] + vec.x;
+				info.vertices[3 * vIndex + 1] = info.vertices[3 * vIndex + 1] + vec.y;
+				info.vertices[3 * vIndex + 2] = info.vertices[3 * vIndex + 2] + vec.z;
+				info.normals[3 * vIndex] = info.normals[3 * vIndex] + vec2.x;
+				info.normals[3 * vIndex + 1] = info.normals[3 * vIndex + 1] + vec2.y;
+				info.normals[3 * vIndex + 2] = info.normals[3 * vIndex + 2] + vec2.z;
 			}
 
-			for (i in 0...info.normals.length) {
-				var norm = info.normals[i];
+			for (i in 0...Std.int(info.normals.length / 3)) {
+				var norm = new Vector(info.normals[3 * i], info.normals[3 * i + 1], info.normals[3 * i + 2]);
 				var len2 = norm.dot(norm);
 
-				if (len2 > 0.01)
+				if (len2 > 0.01) {
 					norm.normalize();
+
+					info.normals[3 * i] = norm.x;
+					info.normals[3 * i + 1] = norm.y;
+					info.normals[3 * i + 2] = norm.z;
+				}
 			}
 
 			var meshIndex = 0;
-			var mesh:Mesh = cast info.geometry.children[meshIndex];
-			var prim:DynamicPolygon = cast mesh.primitive;
+			var prim = info.primitives[meshIndex];
 			var pos = 0;
 			for (i in info.indices) {
-				if (pos >= prim.points.length) {
+				if (pos >= Std.int(prim.points.length / 3)) {
 					meshIndex++;
-					mesh.primitive = prim;
-					mesh = cast info.geometry.children[meshIndex];
-					prim = cast mesh.primitive;
+					prim = info.primitives[meshIndex];
 					pos = 0;
 				}
-				var vertex = info.vertices[i];
-				var normal = info.normals[i];
-				prim.points[pos].load(vertex.toPoint());
-				prim.normals[pos].load(normal.toPoint()); // .normalized();
+				prim.points[3 * pos] = info.vertices[3 * i];
+				prim.points[3 * pos + 1] = info.vertices[3 * i + 1];
+				prim.points[3 * pos + 2] = info.vertices[3 * i + 2];
+				prim.normals[3 * pos] = info.normals[3 * i];
+				prim.normals[3 * pos + 1] = info.normals[3 * i + 1];
+				prim.normals[3 * pos + 2] = info.normals[3 * i + 2];
 				if (prim.buffer != null) {
 					prim.dirtyFlags[pos] = true;
 				}

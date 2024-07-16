@@ -30,6 +30,7 @@ class Sequence {
 	var priority:Int;
 	var flags:Int;
 	var dirtyFlags:Int;
+	var lastSequenceKeyframe:Float;
 
 	public function new() {}
 
