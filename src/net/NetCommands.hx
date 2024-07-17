@@ -419,13 +419,15 @@ class NetCommands {
 		}
 	}
 
-	@:rpc(server) public static function sendServerSettings(name:String, desc:String, quickRespawn:Bool, forceSpectator:Bool, competitive:Bool) {
+	@:rpc(server) public static function sendServerSettings(name:String, desc:String, quickRespawn:Bool, forceSpectator:Bool, competitive:Bool,
+			oldSpawns:Bool) {
 		Net.connectedServerInfo = {
 			name: name,
 			description: desc,
 			quickRespawn: quickRespawn,
 			forceSpectator: forceSpectator,
-			competitiveMode: competitive
+			competitiveMode: competitive,
+			oldSpawns: oldSpawns
 		};
 	}
 
