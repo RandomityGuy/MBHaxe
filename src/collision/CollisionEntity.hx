@@ -84,8 +84,10 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	}
 
 	public function dispose() {
-		for (s in this.surfaces)
-			s.dispose();
+		if (this.surfaces != null) {
+			for (s in this.surfaces)
+				s.dispose();
+		}
 		go = null;
 		surfaces = null;
 		bvh = null;

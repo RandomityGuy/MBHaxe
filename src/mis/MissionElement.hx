@@ -68,6 +68,10 @@ class MissionElementScriptObject extends MissionElementBase {
 	var spawnchanceyellow:String;
 	var spawnchanceblue:String;
 	var spawnchanceplatinum:String;
+	var redspawnchance:String;
+	var yellowspawnchance:String;
+	var bluespawnchance:String;
+	var platinumspawnchance:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;

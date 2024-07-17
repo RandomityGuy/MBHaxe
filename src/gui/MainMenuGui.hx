@@ -182,7 +182,7 @@ class MainMenuGui extends GuiImage {
 		versionText.vertSizing = Bottom;
 		versionText.position = new Vector(502, 61);
 		versionText.extent = new Vector(97, 72);
-		versionText.text.text = "<p align=\"center\">1.5.4</p>";
+		versionText.text.text = '<p align=\"center\">${MarbleGame.currentVersion}</p>';
 		versionText.text.dropShadow = {
 			dx: 1 * Settings.uiScale,
 			dy: 1 * Settings.uiScale,

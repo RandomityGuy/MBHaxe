@@ -24,6 +24,7 @@ import src.AudioManager;
 import src.ResourceLoader;
 import net.Net;
 import src.MarbleGame;
+import src.Util;
 
 @:structInit
 @:publicFields
@@ -81,6 +82,7 @@ class HuntMode extends NullMode {
 
 	override function missionScan(mission:Mission) {
 		function scanMission(simGroup:MissionElementSimGroup) {
+			var elToRemove = [];
 			for (element in simGroup.elements) {
 				if ([MissionElementType.Trigger].contains(element._type)) {
 					var spawnSphere:MissionElementTrigger = cast element;
@@ -90,8 +92,26 @@ class HuntMode extends NullMode {
 						spawnPointTaken.push(false);
 					}
 				} else if (element._type == MissionElementType.SimGroup) {
-					scanMission(cast element);
+					var scanPls = true;
+					if (Net.connectedServerInfo.oldSpawns) {
+						if (element._name.toLowerCase() == "newversion") {
+							// Remove this
+							elToRemove.push(element);
+							scanPls = false;
+						}
+					} else {
+						if (element._name.toLowerCase() == "oldversion") {
+							// Remove this
+							elToRemove.push(element);
+							scanPls = false;
+						}
+					}
+					if (scanPls)
+						scanMission(cast element);
 				}
+			}
+			while (elToRemove.length > 0) {
+				simGroup.elements.remove(elToRemove.pop());
 			}
 		}
 		scanMission(mission.root);
@@ -299,22 +319,41 @@ class HuntMode extends NullMode {
 				var gemPos = gemElem.gem.getAbsPos().getPosition();
 
 				if (level.mission.missionInfo.game == "PlatinumQuest") {
-					// Spawn chances!
-					var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
-						case "red.gem":
-							level.mission.missionInfo.spawnchancered != null ? Std.parseFloat(level.mission.missionInfo.spawnchancered) : 0.9;
-						case "yellow.gem":
-							level.mission.missionInfo.spawnchanceyellow != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceyellow) : 0.65;
-						case "blue.gem":
-							level.mission.missionInfo.spawnchanceblue != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceblue) : 0.35;
-						case "platinum.gem":
-							level.mission.missionInfo.spawnchanceplatinum != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceplatinum) : 0.18;
-						default:
-							1.0;
-					};
-					var choice = Math.random();
-					if (choice > chance)
-						continue; // Don't spawn!
+					if (Net.connectedServerInfo.oldSpawns) {
+						// Spawn chances!
+						var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
+							case "red.gem":
+								level.mission.missionInfo.spawnchancered != null ? Std.parseFloat(level.mission.missionInfo.spawnchancered) : 0.9;
+							case "yellow.gem":
+								level.mission.missionInfo.spawnchanceyellow != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceyellow) : 0.65;
+							case "blue.gem":
+								level.mission.missionInfo.spawnchanceblue != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceblue) : 0.35;
+							case "platinum.gem":
+								level.mission.missionInfo.spawnchanceplatinum != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceplatinum) : 0.18;
+							default:
+								1.0;
+						};
+						var choice = Math.random();
+						if (choice > chance)
+							continue; // Don't spawn!
+					} else {
+						// Spawn chances!
+						var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
+							case "red.gem":
+								level.mission.missionInfo.redspawnchance != null ? Std.parseFloat(level.mission.missionInfo.redspawnchance) : 0.9;
+							case "yellow.gem":
+								level.mission.missionInfo.yellowspawnchance != null ? Std.parseFloat(level.mission.missionInfo.yellowspawnchance) : 0.65;
+							case "blue.gem":
+								level.mission.missionInfo.bluespawnchance != null ? Std.parseFloat(level.mission.missionInfo.bluespawnchance) : 0.35;
+							case "platinum.gem":
+								level.mission.missionInfo.platinumspawnchance != null ? Std.parseFloat(level.mission.missionInfo.platinumspawnchance) : 0.18;
+							default:
+								1.0;
+						};
+						var choice = Math.random();
+						if (choice > chance)
+							continue; // Don't spawn!
+					}
 				}
 
 				results.push({
@@ -533,6 +572,13 @@ class HuntMode extends NullMode {
 		}
 
 		level.schedule(level.timeState.currentAttemptTime + 2, () -> {
+			if (Util.isTouchDevice()) {
+				MarbleGame.instance.touchInput.setControlsEnabled(false);
+			}
+			#if js
+			var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+			pointercontainer.hidden = false;
+			#end
 			MarbleGame.canvas.pushDialog(new MPEndGameGui());
 			level.setCursorLock(false);
 			return 0;
