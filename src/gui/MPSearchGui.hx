@@ -267,8 +267,15 @@ class MPSearchGui extends GuiImage {
 		searchRandom.position = new Vector(44, 45);
 		searchRandom.extent = new Vector(44, 44);
 		searchRandom.pressedAction = (e) -> {
-			var mis = missionList[Math.floor(Math.random() * missionList.length)];
-			cast(this.parent, Canvas).marbleGame.playMission(mis.mis);
+			var mis = retrieveMissionList[Math.floor(Math.random() * missionList.length)];
+
+			if (mis.difficulty == "custom") {
+				var idx = Marbleland.multiplayerMissions.indexOf(mis.mis);
+				NetCommands.setLobbyLevelIndex(mis.difficulty, idx);
+			} else {
+				var idx = MissionList.missionList["multiplayer"][mis.difficulty].indexOf(mis.mis);
+				NetCommands.setLobbyLevelIndex(mis.difficulty, idx);
+			}
 		}
 		optionsBg.addChild(searchRandom);
 	}

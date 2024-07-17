@@ -850,7 +850,10 @@ class MarbleWorld extends Scheduler {
 
 		var store = marble.heldPowerup;
 		marble.heldPowerup = null;
-		haxe.Timer.delay(() -> marble.heldPowerup = store, 500); // This bs
+		haxe.Timer.delay(() -> {
+			if (marble.heldPowerup == null)
+				marble.heldPowerup = store;
+		}, 500); // This bs
 
 		if (marble == this.marble)
 			this.playGui.setCenterText('none');
@@ -2274,9 +2277,12 @@ class MarbleWorld extends Scheduler {
 
 				if (prevGameplayClock > alarmStart && this.timeState.gameplayClock <= alarmStart) {
 					// Start the alarm
-					this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
-						null, true); // AudioManager.createAudioSource('alarm.wav');
-					this.displayHelp('You have ${alarmStart} seconds remaining.');
+					if (this.alarmSound == null) {
+						this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio,
+							this.soundResources), null,
+							true); // AudioManager.createAudioSource('alarm.wav');
+						this.displayHelp('You have ${alarmStart} seconds remaining.');
+					}
 				}
 				if (prevGameplayClock > 0 && this.timeState.gameplayClock <= 0) {
 					// Stop the alarm

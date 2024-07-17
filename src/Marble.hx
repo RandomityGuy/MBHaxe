@@ -74,6 +74,7 @@ import src.InteriorObject;
 import src.Console;
 import src.Gamepad;
 import net.Move;
+import src.ProfilerUI;
 
 enum Mode {
 	Start;
@@ -2128,6 +2129,11 @@ class Marble extends GameObject {
 			// Pad null move on client
 			this.connection.moveManager.duplicateLastMove();
 		}
+		if (ProfilerUI.instance.fps < 30) {
+			this.connection.moveManager.stall = true; // Our fps fucked, stall pls
+		} else {
+			this.connection.moveManager.stall = false;
+		}
 		if (p.netFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
 			for (tId => tTime in p.trapdoorUpdates) {
 				@:privateAccess level.trapdoorPredictions.acknowledgeTrapdoorUpdate(tId, tTime);
@@ -2244,7 +2250,7 @@ class Marble extends GameObject {
 		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
 		this.netSmoothOffset.scale(smooth);
 		var smoothScale = this.netSmoothOffset.lengthSq();
-		if (smoothScale < 0.01 || smoothScale > 10.0)
+		if (smoothScale < 0.01 || smoothScale > 25.0)
 			this.netSmoothOffset.set(0, 0, 0);
 
 		if (oldPos != null && newPos != null) {

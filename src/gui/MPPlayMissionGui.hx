@@ -660,6 +660,9 @@ class MPPlayMissionGui extends GuiImage {
 		}
 		updateLobbyNames();
 		redrawChat();
+		haxe.Timer.delay(() -> {
+			this.chatScroll.updateScrollVisual();
+		}, 50);
 	}
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {

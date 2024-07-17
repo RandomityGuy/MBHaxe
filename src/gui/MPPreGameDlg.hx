@@ -255,6 +255,8 @@ class MPPreGameDlg extends GuiControl {
 				});
 				spectateBtn.anim.currentFrame = Net.clientSpectate ? 2 : 0;
 				readyBtn.anim.currentFrame = Net.lobbyClientReady ? 2 : 0;
+				spectateBtn.pressed = Net.clientSpectate;
+				readyBtn.pressed = Net.lobbyClientReady;
 			}
 			if (Net.clientIdMap != null) {
 				for (c => v in Net.clientIdMap) {

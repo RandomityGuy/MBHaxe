@@ -53,8 +53,10 @@ class Trapdoor extends DtsObject {
 			direction = -1;
 		if (direction != 0 && direction != this.lastDirection) {
 			// If the direction has changed, play the sound
+			var distFromUs = @:privateAccess this.level.marble.lastRenderPos.distanceSq(this.getAbsPos().getPosition());
 			var ch = AudioManager.playSound(ResourceLoader.getResource("data/sound/trapdooropen.wav", ResourceLoader.getAudio, this.soundResources),
 				this.getAbsPos().getPosition());
+			ch.volume *= (1 / Math.max(1, distFromUs));
 		}
 
 		this.lastCompletion = currentCompletion;
