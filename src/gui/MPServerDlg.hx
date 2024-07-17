@@ -22,7 +22,7 @@ class MPServerDlg extends GuiImage {
 		this.horizSizing = Center;
 		this.vertSizing = Center;
 		this.position = new Vector(100, 17);
-		this.extent = new Vector(440, 446);
+		this.extent = new Vector(440, 486);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -43,7 +43,7 @@ class MPServerDlg extends GuiImage {
 		var cancelBtn = new GuiButton(loadButtonImages("data/ui/mp/join/cancel"));
 		cancelBtn.vertSizing = Top;
 		cancelBtn.horizSizing = Left;
-		cancelBtn.position = new Vector(123, 384);
+		cancelBtn.position = new Vector(123, 424);
 		cancelBtn.extent = new Vector(94, 45);
 		cancelBtn.pressedAction = (e) -> {
 			MarbleGame.canvas.popDialog(this);
@@ -53,7 +53,7 @@ class MPServerDlg extends GuiImage {
 		var saveBtn = new GuiButton(loadButtonImages("data/ui/mp/join/save"));
 		saveBtn.horizSizing = Left;
 		saveBtn.vertSizing = Top;
-		saveBtn.position = new Vector(223, 384);
+		saveBtn.position = new Vector(223, 424);
 		saveBtn.extent = new Vector(94, 45);
 		this.addChild(saveBtn);
 
@@ -96,6 +96,7 @@ class MPServerDlg extends GuiImage {
 		var curServerForceSpectators = Settings.serverSettings.forceSpectators;
 		var curServerQuickRespawn = Settings.serverSettings.quickRespawn;
 		var curServerCompetitive = Settings.serverSettings.competitiveMode;
+		var curServerOldSpawns = Settings.serverSettings.oldSpawns;
 
 		saveBtn.pressedAction = (e) -> {
 			Settings.serverSettings.name = curServerName;
@@ -105,6 +106,7 @@ class MPServerDlg extends GuiImage {
 			Settings.serverSettings.forceSpectators = curServerForceSpectators;
 			Settings.serverSettings.quickRespawn = curServerQuickRespawn;
 			Settings.serverSettings.competitiveMode = curServerCompetitive;
+			Settings.serverSettings.oldSpawns = curServerOldSpawns;
 			if (Net.isHost) {
 				Net.serverInfo.name = curServerName;
 				Net.serverInfo.description = curServerDescription;
@@ -112,7 +114,7 @@ class MPServerDlg extends GuiImage {
 				Net.serverInfo.password = curServerPassword;
 				MasterServerClient.instance.sendServerInfo(Net.serverInfo); // Update data on master server
 				NetCommands.sendServerSettings(Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.quickRespawn,
-					Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode);
+					Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode, Settings.serverSettings.oldSpawns);
 			}
 			Settings.save();
 			MarbleGame.canvas.popDialog(this);
@@ -122,7 +124,7 @@ class MPServerDlg extends GuiImage {
 		serverSettingsContainer.vertSizing = Height;
 		serverSettingsContainer.horizSizing = Left;
 		serverSettingsContainer.position = new Vector(16, 65);
-		serverSettingsContainer.extent = new Vector(390, 306);
+		serverSettingsContainer.extent = new Vector(390, 346);
 		this.addChild(serverSettingsContainer);
 
 		var serverName = new GuiText(markerFelt18);
@@ -332,5 +334,28 @@ class MPServerDlg extends GuiImage {
 			curServerCompetitive = !curServerCompetitive;
 		};
 		serverSettingsContainer.addChild(competitiveChk);
+
+		var oldSpawns = new GuiText(markerFelt18);
+		oldSpawns.text.text = "Old Spawns:";
+		oldSpawns.text.textColor = 0xFFFFFF;
+		oldSpawns.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0
+		};
+		oldSpawns.position = new Vector(0, 39 * 8);
+		oldSpawns.extent = new Vector(206, 14);
+		serverSettingsContainer.addChild(oldSpawns);
+
+		var oldSpawnsChk = new GuiButton(loadButtonImages("data/ui/mp/lb_chkbx"));
+		oldSpawnsChk.position = new Vector(359, 9 * 5 + 29 * 9 + 4);
+		oldSpawnsChk.extent = new Vector(31, 31);
+		oldSpawnsChk.buttonType = Toggle;
+		oldSpawnsChk.pressed = curServerOldSpawns;
+		oldSpawnsChk.pressedAction = (sender) -> {
+			curServerOldSpawns = !curServerOldSpawns;
+		};
+		serverSettingsContainer.addChild(oldSpawnsChk);
 	}
 }

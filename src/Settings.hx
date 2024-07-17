@@ -107,6 +107,7 @@ typedef ServerSettings = {
 	var forceSpectators:Bool;
 	var quickRespawn:Bool;
 	var competitiveMode:Bool;
+	var oldSpawns:Bool;
 }
 
 typedef PlayStatistics = {
@@ -213,6 +214,7 @@ class Settings {
 		forceSpectators: false,
 		quickRespawn: true,
 		competitiveMode: false,
+		oldSpawns: false
 	}
 
 	public static var levelStatistics:Map<String, PlayStatistics> = [];
@@ -424,6 +426,9 @@ class Settings {
 				serverSettings = json.serverSettings;
 			}
 			#if js
+			if (serverSettings.oldSpawns == null) {
+				serverSettings.oldSpawns = false;
+			}
 			if (optionsSettings.marbleIndex == null) {
 				optionsSettings.marbleIndex = 0;
 				optionsSettings.marbleSkin = "base";
