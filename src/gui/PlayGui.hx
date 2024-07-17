@@ -801,6 +801,9 @@ class PlayGui {
 			if (score == 10) {
 				f[0].p += 1;
 			}
+			if (f[0].us && Net.isClient) {
+				@:privateAccess formatGemHuntCounter(f[0].score);
+			}
 		}
 
 		if (id == Net.clientId) {

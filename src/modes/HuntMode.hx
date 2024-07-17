@@ -527,6 +527,11 @@ class HuntMode extends NullMode {
 			@:privateAccess level.timeTravelSound = null;
 		}
 
+		if (@:privateAccess level.alarmSound != null) {
+			@:privateAccess level.alarmSound.stop();
+			@:privateAccess level.alarmSound = null;
+		}
+
 		level.schedule(level.timeState.currentAttemptTime + 2, () -> {
 			MarbleGame.canvas.pushDialog(new MPEndGameGui());
 			level.setCursorLock(false);
@@ -548,7 +553,6 @@ class HuntMode extends NullMode {
 
 		if (expiredGems.exists(gem)) {
 			wasExpiredGem = true;
-			expiredGems.remove(gem);
 		}
 		if (gemToBlackBeamMap.exists(gem)) {
 			gemToBlackBeamMap.get(gem).setHide(true);
@@ -585,7 +589,8 @@ class HuntMode extends NullMode {
 						points += 10;
 						@:privateAccess level.playGui.addMiddleMessage('+10', 0xdddddd);
 				}
-				@:privateAccess level.playGui.formatGemHuntCounter(points);
+				if (Net.isHost)
+					@:privateAccess level.playGui.formatGemHuntCounter(points);
 			}
 		}
 
@@ -624,6 +629,7 @@ class HuntMode extends NullMode {
 				}
 				if (remaining == 0) {
 					NetCommands.setCompetitiveTimerStartTicks(0);
+					spawnNextGemCluster();
 				}
 			}
 
@@ -641,6 +647,8 @@ class HuntMode extends NullMode {
 
 			@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
 		}
+		if (wasExpiredGem)
+			expiredGems.remove(gem);
 		if (this.level.isMultiplayer && Net.isClient) {
 			gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;
 		}
