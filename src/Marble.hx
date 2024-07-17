@@ -2129,10 +2129,12 @@ class Marble extends GameObject {
 			// Pad null move on client
 			this.connection.moveManager.duplicateLastMove();
 		}
-		if (ProfilerUI.instance.fps < 30) {
-			this.connection.moveManager.stall = true; // Our fps fucked, stall pls
-		} else {
-			this.connection.moveManager.stall = false;
+		if (this.connection != null) {
+			if (ProfilerUI.instance.fps < 30) {
+				this.connection.moveManager.stall = true; // Our fps fucked, stall pls
+			} else {
+				this.connection.moveManager.stall = false;
+			}
 		}
 		if (p.netFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
 			for (tId => tTime in p.trapdoorUpdates) {
