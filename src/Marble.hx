@@ -708,8 +708,9 @@ class Marble extends GameObject {
 		if (this.level != null && level.forceObjects.length > 0) {
 			var mass = this.getMass();
 			var externalForce = new Vector();
+			var pos = this.collider.transform.getPosition();
 			for (obj in level.forceObjects) {
-				cast(obj, ForceObject).getForce(this.collider.transform.getPosition(), externalForce);
+				cast(obj, ForceObject).getForce(pos, externalForce);
 			}
 			A.load(A.add(externalForce.multiply(1 / mass)));
 		}
