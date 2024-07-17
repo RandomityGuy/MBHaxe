@@ -557,6 +557,8 @@ class MarbleWorld extends Scheduler {
 		Console.log("LEVEL START");
 		restart(this.marble, true);
 
+		this.collisionWorld.build();
+
 		for (interior in this.interiors)
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
