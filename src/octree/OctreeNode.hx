@@ -32,7 +32,9 @@ class OctreeNode implements IOctreeElement {
 
 	public var depth:Int;
 
-	public function new(octree:Octree, depth:Int) {
+	var disableMerge:Bool;
+
+	public function new(octree:Octree, depth:Int, disableMerge:Bool = false) {
 		this.octree = octree;
 		this.depth = depth;
 		this.xMin = 0;
@@ -41,6 +43,7 @@ class OctreeNode implements IOctreeElement {
 		this.xMax = 1;
 		this.yMax = 1;
 		this.zMax = 1;
+		this.disableMerge = disableMerge;
 	}
 
 	public function insert(object:IOctreeObject) {
@@ -90,7 +93,7 @@ class OctreeNode implements IOctreeElement {
 	public function createOctants() {
 		this.octants = [];
 		for (i in 0...8) {
-			var newNode = new OctreeNode(this.octree, this.depth + 1);
+			var newNode = new OctreeNode(this.octree, this.depth + 1, disableMerge);
 			newNode.parent = this;
 			var newSize = new Vector(xMax - xMin, yMax - yMin, zMax - zMin);
 			newNode.xMin = this.xMin + newSize.x * ((i & 1) >> 0);
@@ -137,7 +140,7 @@ class OctreeNode implements IOctreeElement {
 	}
 
 	public function merge() {
-		if (this.count > 8 || (this.octants == null))
+		if (this.count > 8 || (this.octants == null) || disableMerge)
 			return;
 		// Add all objects in the octants back to this node
 		for (i in 0...8) {

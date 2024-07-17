@@ -705,12 +705,13 @@ class Marble extends GameObject {
 		if (helicopter) {
 			A.load(A.multiply(0.25));
 		}
-		if (this.level != null) {
+		if (this.level != null && level.forceObjects.length > 0) {
 			var mass = this.getMass();
+			var externalForce = new Vector();
 			for (obj in level.forceObjects) {
-				var force = cast(obj, ForceObject).getForce(this.collider.transform.getPosition());
-				A.load(A.add(force.multiply(1 / mass)));
+				cast(obj, ForceObject).getForce(this.collider.transform.getPosition(), externalForce);
 			}
+			A.load(A.add(externalForce.multiply(1 / mass)));
 		}
 
 		if (contacts.length != 0 && this.mode != Start) {

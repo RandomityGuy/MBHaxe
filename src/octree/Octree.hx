@@ -16,8 +16,8 @@ class Octree {
 	var prevBoundSearch:Bounds;
 	var boundSearchCache:Array<IOctreeElement>;
 
-	public function new() {
-		this.root = new OctreeNode(this, 0);
+	public function new(disableMerge:Bool = false) {
+		this.root = new OctreeNode(this, 0, disableMerge);
 		this.objectToNode = new Map();
 	}
 
