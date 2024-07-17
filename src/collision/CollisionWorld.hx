@@ -28,7 +28,7 @@ class CollisionWorld {
 
 	public function new() {
 		this.octree = new Octree();
-		this.dynamicOctree = new Octree();
+		this.dynamicOctree = new Octree(true);
 		this.staticWorld = new CollisionEntity(null);
 	}
 
