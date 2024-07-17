@@ -76,6 +76,7 @@ class ConnectedServerInfo {
 	var quickRespawn:Bool;
 	var forceSpectator:Bool;
 	var competitiveMode:Bool;
+	var oldSpawns:Bool;
 }
 
 class Net {
@@ -121,6 +122,7 @@ class Net {
 				competitiveMode: Settings.serverSettings.competitiveMode,
 				quickRespawn: Settings.serverSettings.quickRespawn,
 				forceSpectator: Settings.serverSettings.forceSpectators,
+				oldSpawns: Settings.serverSettings.oldSpawns
 			};
 			onHosted();
 		});
@@ -612,7 +614,7 @@ class Net {
 		// 	NetCommands.setLobbyCustLevelNameClient(conn, MultiplayerLevelSelectGui.custPath);
 		// } else {
 		NetCommands.sendServerSettingsClient(conn, Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.quickRespawn,
-			Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode);
+			Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode, Settings.serverSettings.oldSpawns);
 		NetCommands.setLobbyLevelIndexClient(conn, MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
 		// }
 
