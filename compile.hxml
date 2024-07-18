@@ -1,6 +1,8 @@
 -cp src
 -lib heaps
 -lib hlsdl
+-lib colyseus-websocket
+-lib datachannel
 -hl marblegame.hl
 -D windowSize=1280x720
 -D keep-inline-positions
