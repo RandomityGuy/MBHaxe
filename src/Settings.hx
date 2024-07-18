@@ -255,6 +255,10 @@ class Settings {
 	@:hlNative public static function open_web_url(url:String):Void {}
 	#end
 
+	#if (!android)
+	public static function open_web_url(url:String):Void {}
+	#end
+
 	public static function applySettings() {
 		#if (hl && !android)
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);

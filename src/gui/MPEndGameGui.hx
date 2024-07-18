@@ -308,6 +308,7 @@ class MPEndGameGui extends GuiImage {
 		oShow.extent = extent;
 		oShow.renderDistance = dist;
 		oShow.renderPitch = pitch;
+		oShow.visible = true;
 		return oShow;
 	}
 }
