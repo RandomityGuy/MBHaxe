@@ -107,6 +107,7 @@ class MPExitGameDlg extends GuiControl {
 		quickspawnBtn.extent = new Vector(104, 45);
 		quickspawnBtn.vertSizing = Top;
 		quickspawnBtn.pressedAction = (e) -> {
+			MarbleGame.instance.paused = false;
 			@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = Key.getFrame() - 1; // jank
 			MarbleGame.canvas.popDialog(this);
 		}
