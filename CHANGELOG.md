@@ -1,3 +1,33 @@
+# 1.6.0
+A big update! Bringing in the cross platform multiplayer the way it was meant to be played!
+Please note that it is always and always recommended to download the native client for unlocked FPS and higher performance.
+- Added cross platform multiplayer, the Online button is now unlocked.
+  - Gem Hunt Free-for-all only, no other game modes are present.
+  - Server authoritative marble physics and rollback netcode for all gameplay elements - including moving platforms.
+  - Up to 8 players due to platform technical limitations.
+  - Seamless multiplayer custom levels integration through Marbleland.
+  - Spectator mode is implemented but lasts until the end of match.
+  - Four PlatinumQuest levels that were present in MBP multiplayer have been added along with their shaders.
+  - Added the Ability to toggle between old spawns and new spawns for certain multiplayer maps.
+  - Added Competitor Mode:
+    - A new gem spawn will happen automatically after a certain duration depending on number of gems picked up.
+    - Reduced Mega Marble duration.
+    - Only Ultra Blasts can affect marbles.
+    - Fixed starting point.
+- Touch controls improvements:
+  - Configure visibility of On-Screen Controls
+  - Configure behavior of buttons acting as camera joystick by altering Button Camera Factor
+  - Configure your camera sensitivity and swipe extent.
+  - Improved touch camera sensitivity a bit.
+  - Added Dynamic Joystick for Touch Controls.
+- Added support for iOS for the web version.
+- Improved Controller support for Android.
+- Optimized the game to run at much higher framerates.
+- Improved marble shadow.
+- Fixed certain customs missing interiors/textures.
+- Fixed marble collision at varying radii.
+- Fixed Super Speed throwing you in the wrong direction.
+
 # 1.5.4
 This update fixes the following bugs:
 - Updated Marbleland support. New levels will now automatically show up.
