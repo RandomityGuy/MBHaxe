@@ -27,10 +27,12 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		if (Debug.drawBounds) {
 			if (_dbgEntity == null) {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			} else {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}
@@ -42,15 +44,16 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		if (Debug.drawBounds) {
 			if (_dbgEntity != null) {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}
 		}
 	}
 
-	public override function rayCast(rayOrigin:Vector, rayDirection:Vector) {
+	public override function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>, bestT:Float) {
 		// TEMP cause bruh
-		return [];
+		return Math.POSITIVE_INFINITY;
 	}
 
 	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {

@@ -15,6 +15,29 @@ import src.DtsObject;
 import shapes.Gem;
 
 @:publicFields
+class RewindMPState {
+	var currentTime:Float;
+	var targetTime:Float;
+	var stoppedPosition:Vector;
+	var prevPosition:Vector;
+	var position:Vector;
+	var velocity:Vector;
+
+	public function new() {}
+
+	public function clone() {
+		var c = new RewindMPState();
+		c.currentTime = currentTime;
+		c.targetTime = targetTime;
+		c.stoppedPosition = stoppedPosition != null ? stoppedPosition.clone() : null;
+		c.prevPosition = prevPosition.clone();
+		c.position = position.clone();
+		c.velocity = velocity.clone();
+		return c;
+	}
+}
+
+@:publicFields
 class RewindFrame {
 	var timeState:TimeState;
 	var marblePosition:Vector;
@@ -23,11 +46,7 @@ class RewindFrame {
 	var marbleAngularVelocity:Vector;
 	var marblePowerup:PowerUp;
 	var bonusTime:Float;
-	var mpStates:Array<{
-		curState:PIState,
-		stopped:Bool,
-		position:Vector
-	}>;
+	var mpStates:Array<RewindMPState>;
 	var gemCount:Int;
 	var gemStates:Array<Bool>;
 	var powerupStates:Array<Float>;
@@ -69,18 +88,7 @@ class RewindFrame {
 		c.activePowerupStates = activePowerupStates.copy();
 		c.currentUp = currentUp.clone();
 		c.lastContactNormal = lastContactNormal.clone();
-		c.mpStates = [];
-		for (s in mpStates) {
-			c.mpStates.push({
-				curState: {
-					currentTime: s.curState.currentTime,
-					targetTime: s.curState.targetTime,
-					velocity: s.curState.velocity.clone(),
-				},
-				stopped: s.stopped,
-				position: s.position.clone(),
-			});
-		}
+		c.mpStates = mpStates.copy();
 		c.trapdoorStates = [];
 		for (s in trapdoorStates) {
 			c.trapdoorStates.push({
@@ -127,11 +135,14 @@ class RewindFrame {
 		framesize += 24; // lastContactNormal
 		framesize += 2; // mpStates.length
 		for (s in mpStates) {
-			framesize += 8; // s.curState.currentTime
-			framesize += 8; // s.curState.targetTime
-			framesize += 24; // s.curState.velocity
-			framesize += 1; // s.stopped
+			framesize += 8; // s.currentTime
+			framesize += 8; // s.targetTime
+			framesize += 1; // Null<s.stoppedPosition>
+			if (s.stoppedPosition != null)
+				framesize += 24; // s.stoppedPosition
+			framesize += 24; // s.prevPosition
 			framesize += 24; // s.position
+			framesize += 24; // s.velocity
 		}
 		framesize += 2; // trapdoorStates.length
 		for (s in trapdoorStates) {
@@ -204,15 +215,23 @@ class RewindFrame {
 		bb.writeDouble(lastContactNormal.z);
 		bb.writeInt16(mpStates.length);
 		for (s in mpStates) {
-			bb.writeDouble(s.curState.currentTime);
-			bb.writeDouble(s.curState.targetTime);
-			bb.writeDouble(s.curState.velocity.x);
-			bb.writeDouble(s.curState.velocity.y);
-			bb.writeDouble(s.curState.velocity.z);
-			bb.writeByte(s.stopped ? 1 : 0);
+			bb.writeDouble(s.currentTime);
+			bb.writeDouble(s.targetTime);
+			bb.writeByte(s.stoppedPosition == null ? 0 : 1);
+			if (s.stoppedPosition != null) {
+				bb.writeDouble(s.stoppedPosition.x);
+				bb.writeDouble(s.stoppedPosition.y);
+				bb.writeDouble(s.stoppedPosition.z);
+			}
+			bb.writeDouble(s.prevPosition.x);
+			bb.writeDouble(s.prevPosition.y);
+			bb.writeDouble(s.prevPosition.z);
 			bb.writeDouble(s.position.x);
 			bb.writeDouble(s.position.y);
 			bb.writeDouble(s.position.z);
+			bb.writeDouble(s.velocity.x);
+			bb.writeDouble(s.velocity.y);
+			bb.writeDouble(s.velocity.z);
 		}
 		bb.writeInt16(trapdoorStates.length);
 		for (s in trapdoorStates) {
@@ -311,24 +330,29 @@ class RewindFrame {
 		mpStates = [];
 		var mpStates_len = br.readInt16();
 		for (i in 0...mpStates_len) {
-			var mpStates_item = {
-				curState: {
-					currentTime: 0.0,
-					targetTime: 0.0,
-					velocity: new Vector(),
-				},
-				stopped: false,
-				position: new Vector()
-			};
-			mpStates_item.curState.currentTime = br.readDouble();
-			mpStates_item.curState.targetTime = br.readDouble();
-			mpStates_item.curState.velocity.x = br.readDouble();
-			mpStates_item.curState.velocity.y = br.readDouble();
-			mpStates_item.curState.velocity.z = br.readDouble();
-			mpStates_item.stopped = br.readByte() != 0;
+			var mpStates_item = new RewindMPState();
+			mpStates_item.currentTime = br.readDouble();
+			mpStates_item.targetTime = br.readDouble();
+			mpStates_item.stoppedPosition = new Vector();
+			mpStates_item.prevPosition = new Vector();
+			mpStates_item.position = new Vector();
+			mpStates_item.velocity = new Vector();
+			if (br.readByte() != 0) {
+				mpStates_item.stoppedPosition.x = br.readDouble();
+				mpStates_item.stoppedPosition.y = br.readDouble();
+				mpStates_item.stoppedPosition.z = br.readDouble();
+			} else {
+				mpStates_item.stoppedPosition = null;
+			}
+			mpStates_item.prevPosition.x = br.readDouble();
+			mpStates_item.prevPosition.y = br.readDouble();
+			mpStates_item.prevPosition.z = br.readDouble();
 			mpStates_item.position.x = br.readDouble();
 			mpStates_item.position.y = br.readDouble();
 			mpStates_item.position.z = br.readDouble();
+			mpStates_item.velocity.x = br.readDouble();
+			mpStates_item.velocity.y = br.readDouble();
+			mpStates_item.velocity.z = br.readDouble();
 			mpStates.push(mpStates_item);
 		}
 		trapdoorStates = [];

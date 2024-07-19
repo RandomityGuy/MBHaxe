@@ -1,11 +1,9 @@
 package src;
 
 import shaders.DtsTexture;
-import h3d.parts.Particles;
 import h3d.Matrix;
 import src.TimeState;
 import h3d.prim.UV;
-import h3d.parts.Data.BlendMode;
 import src.MarbleWorld;
 import src.Util;
 import h3d.mat.Data.Wrap;
@@ -33,7 +31,7 @@ class ParticleData {
 
 @:publicFields
 class Particle {
-	public var part:h3d.parts.Particle;
+	public var part:src.ParticlesMesh.ParticleElement;
 
 	var data:ParticleData;
 	var manager:ParticleManager;
@@ -61,7 +59,7 @@ class Particle {
 		this.lifeTime = this.o.lifetime + this.o.lifetimeVariance * (Math.random() * 2 - 1);
 		this.initialSpin = Util.lerp(this.o.spinRandomMin, this.o.spinRandomMax, Math.random());
 
-		this.part = new h3d.parts.Particle();
+		this.part = new src.ParticlesMesh.ParticleElement();
 	}
 
 	public function update(time:Float, dt:Float) {
@@ -137,8 +135,7 @@ class Particle {
 		var t = (completion - this.o.times[indexLow]) / (this.o.times[indexHigh] - this.o.times[indexLow]);
 
 		// Adjust color
-		var color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
-		this.color = color;
+		this.color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
 		// this.material.opacity = color.a * * 1.5; // Adjusted because additive mixing can be kind of extreme
 
 		// Adjust sizing
@@ -150,6 +147,7 @@ class Particle {
 		this.part.r = this.color.r;
 		this.part.g = this.color.g;
 		this.part.b = this.color.b;
+		this.part.a = this.color.a;
 		this.part.ratio = 1;
 		this.part.size = this.scale / 2;
 	}
@@ -223,6 +221,8 @@ class ParticleEmitter {
 	var getPos:Void->Vector;
 	var spawnSphereSquish:Vector;
 
+	var emittedParticles:Array<Particle> = [];
+
 	public function new(options:ParticleEmitterOptions, data:ParticleData, manager:ParticleManager, ?getPos:Void->Vector, ?spawnSphereSquish:Vector) {
 		this.o = options;
 		this.manager = manager;
@@ -257,7 +257,7 @@ class ParticleEmitter {
 		this.currentWaitPeriod = this.o.ejectionPeriod;
 		var pos = this.getPosAtTime(time).clone();
 		if (this.o.spawnOffset != null)
-			pos = pos.add(this.o.spawnOffset()); // Call the spawnOffset function if it's there
+			pos.load(pos.add(this.o.spawnOffset())); // Call the spawnOffset function if it's there
 		// This isn't necessarily uniform but it's fine for the purpose.
 		var randomPointOnSphere = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1).normalized();
 		randomPointOnSphere.x *= this.spawnSphereSquish.x;
@@ -272,6 +272,7 @@ class ParticleEmitter {
 		// 	.add(this.o.ambientVelocity);
 		var particle = new Particle(this.o.particleOptions, this.manager, this.data, time, pos, vel);
 		this.manager.addParticle(data, particle);
+		this.emittedParticles.push(particle);
 	}
 
 	/** Computes the interpolated emitter position at a point in time. */
@@ -298,7 +299,7 @@ class ParticleManager {
 	var scene:Scene;
 	var currentTime:Float;
 
-	var particleGroups:Map<String, Particles> = [];
+	var particleGroups:Map<String, src.ParticlesMesh.ParticlesMesh> = [];
 	var particles:Array<Particle> = [];
 
 	var emitters:Array<ParticleEmitter> = [];
@@ -321,7 +322,7 @@ class ParticleManager {
 		if (particleGroups.exists(particleData.identifier)) {
 			particleGroups[particleData.identifier].add(particle.part);
 		} else {
-			var pGroup = new Particles(particle.data.texture, this.scene);
+			var pGroup = new src.ParticlesMesh.ParticlesMesh(particle.data.texture, this.scene);
 			pGroup.hasColor = true;
 			pGroup.material.setDefaultProps("ui");
 			// var pdts = new DtsTexture(pGroup.material.texture);
@@ -361,6 +362,12 @@ class ParticleManager {
 
 	public function removeEmitter(emitter:ParticleEmitter) {
 		this.emitters.remove(emitter);
+	}
+
+	public function removeEmitterWithParticles(emitter:ParticleEmitter) {
+		this.removeEmitter(emitter);
+		for (particle in emitter.emittedParticles)
+			this.removeParticle(particle.data, particle);
 	}
 
 	public function removeEverything() {

@@ -10,7 +10,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 		@param var ambientLight:Vec3;
 		@param var dirLight:Vec3;
 		@param var dirLightDir:Vec3;
-		@param var secondaryMapUvFactor:Float;
+		@param var uvScaleFactor:Float;
 		@global var camera:{
 			var position:Vec3;
 			@var var dir:Vec3;
@@ -40,7 +40,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 			return saturate(result);
 		}
 		function vertex() {
-			calculatedUV = input.uv;
+			calculatedUV = input.uv * uvScaleFactor;
 			fragLightW = step(0, dot(dirLight, input.normal));
 		}
 		function fragment() {
@@ -77,7 +77,7 @@ class NoiseTileMaterial extends hxsl.Shader {
 			var outCol = diffuse + noiseAdd;
 
 			var n = transformedNormal;
-			var nf = unpackNormal(normalMap.get(calculatedUV * secondaryMapUvFactor));
+			var nf = unpackNormal(normalMap.get(calculatedUV));
 			var tanX = transformedTangent.xyz.normalize();
 			var tanY = n.cross(tanX) * transformedTangent.w;
 			transformedNormal = (nf.x * tanX + nf.y * tanY + nf.z * n).normalize();
@@ -116,6 +116,6 @@ class NoiseTileMaterial extends hxsl.Shader {
 		this.ambientLight = ambientLight.clone();
 		this.dirLight = dirLight.clone();
 		this.dirLightDir = dirLightDir.clone();
-		this.secondaryMapUvFactor = secondaryMapUvFactor;
+		this.uvScaleFactor = secondaryMapUvFactor;
 	}
 }

@@ -16,6 +16,7 @@ class GuiScrollCtrl extends GuiControl {
 	public var enabled:Bool = true;
 	public var childrenHandleScroll:Bool = false;
 	public var scrollSpeed = 500;
+	public var scrollToBottom:Bool = false;
 
 	var maxScrollY:Float;
 
@@ -96,7 +97,13 @@ class GuiScrollCtrl extends GuiControl {
 	}
 
 	public function setScrollMax(max:Float) {
-		this.scrollY = 0;
+		var renderRect = this.getRenderRectangle();
+		if (scrollToBottom) {
+			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (max * Settings.uiScale);
+			this.scrollY = renderRect.extent.y - scrollBarYSize * Settings.uiScale;
+		} else {
+			this.scrollY = 0;
+		}
 		this.maxScrollY = max;
 		this.dirty = true;
 		this.updateScrollVisual();
@@ -121,6 +128,14 @@ class GuiScrollCtrl extends GuiControl {
 		scene2d.addChild(scrollBarY);
 		scene2d.addChild(clickInteractive);
 
+		var renderRect = this.getRenderRectangle();
+		if (scrollToBottom) {
+			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (this.maxScrollY * Settings.uiScale);
+			this.scrollY = renderRect.extent.y - scrollBarYSize * Settings.uiScale;
+		} else {
+			this.scrollY = 0;
+		}
+
 		updateScrollVisual();
 
 		super.render(scene2d, parent);
@@ -128,6 +143,19 @@ class GuiScrollCtrl extends GuiControl {
 			var ch = this._flow.getChildAt(i);
 			_contentYPositions.set(ch, ch.y);
 		}
+
+		if (scrollToBottom) {
+			updateScrollVisual();
+		}
+	}
+
+	public override function onDormant(scene2d:h2d.Scene) {
+		super.onDormant(scene2d);
+		if (scene2d.contains(scrollBarY))
+			scene2d.removeChild(scrollBarY);
+
+		if (scene2d.contains(clickInteractive))
+			scene2d.removeChild(clickInteractive);
 	}
 
 	public function updateScrollVisual() {

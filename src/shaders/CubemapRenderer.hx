@@ -16,22 +16,36 @@ class CubemapRenderer {
 	var camera:Camera;
 	var scene:Scene;
 	var nextFaceToRender:Int;
+	var facesPerRender:Int = 2;
+	var updateFps:Float = 360.0; // 6 faces in (1/60) seconds, 1 face in (1/360) seconds
+	var lastRenderTime:Float = 0;
+	var usingSky:Bool = false;
 
-	public function new(scene:Scene, sky:Sky) {
+	public function new(scene:Scene, sky:Sky, useSky = false) {
 		this.scene = scene;
 		this.sky = sky;
-		this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGB8);
-		this.cubemap.depthBuffer = new h3d.mat.DepthBuffer(128, 128, h3d.mat.DepthBuffer.DepthFormat.Depth24);
+		if (useSky)
+			this.cubemap = sky.cubemap;
+		else {
+			this.cubemap = new Texture(128, 128, [Cube, Dynamic, Target], h3d.mat.Data.TextureFormat.RGBA);
+			this.cubemap.depthBuffer = new h3d.mat.DepthBuffer(128, 128, h3d.mat.DepthBuffer.DepthFormat.Depth16);
+		}
 		this.camera = new Camera(90, 1, 1, 0.02, scene.camera.zFar);
 		this.position = new Vector();
 		this.nextFaceToRender = 0;
 	}
 
 	public function render(e:Engine, budget:Float = 1e8) {
+		var start = haxe.Timer.stamp();
+		if (start - lastRenderTime > facesPerRender * 1.0 / updateFps) {
+			lastRenderTime = start;
+		} else {
+			return;
+		}
+
 		var scenecam = scene.camera;
 		scene.camera = camera;
 
-		var start = haxe.Timer.stamp();
 		var renderedFaces = 0;
 
 		for (i in 0...6) {
@@ -39,6 +53,7 @@ class CubemapRenderer {
 
 			e.pushTarget(cubemap, index);
 			this.camera.setCubeMap(index, position);
+			this.camera.update();
 			e.clear(0, 1);
 			scene.render(e);
 			e.popTarget();

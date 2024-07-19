@@ -6,6 +6,37 @@ import octree.IOctreeObject;
 import h3d.Vector;
 import collision.BVHTree.IBVHObject;
 
+@:publicFields
+class TransformedCollisionTriangle {
+	var v1x:Float;
+	var v1y:Float;
+	var v1z:Float;
+	var v2x:Float;
+	var v2y:Float;
+	var v2z:Float;
+	var v3x:Float;
+	var v3y:Float;
+	var v3z:Float;
+	var nx:Float;
+	var ny:Float;
+	var nz:Float;
+
+	inline public function new(v1:Vector, v2:Vector, v3:Vector, n:Vector) {
+		v1x = v1.x;
+		v1y = v1.y;
+		v1z = v1.z;
+		v2x = v2.x;
+		v2y = v2.y;
+		v2z = v2.z;
+		v3x = v3.x;
+		v3y = v3.y;
+		v3z = v3.z;
+		nx = n.x;
+		ny = n.y;
+		nz = n.z;
+	}
+}
+
 class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public var priority:Int;
 	public var position:Int;
@@ -19,6 +50,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public var originalIndices:Array<Int>;
 	public var originalSurfaceIndex:Int;
 	public var transformKeys:Array<Int>;
+	public var key:Int = 0;
 
 	var _transformedPoints:Array<Float>;
 	var _transformedNormals:Array<Float>;
@@ -107,8 +139,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		normals.push(z);
 	}
 
-	public function rayCast(rayOrigin:Vector, rayDirection:Vector):Array<RayIntersectionData> {
-		var intersections = [];
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector, intersections:Array<RayIntersectionData>, bestT:Float) {
 		var i = 0;
 		while (i < indices.length) {
 			var p1 = getPoint(indices[i]);
@@ -121,11 +152,19 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			var ip = rayOrigin.add(rayDirection.multiply(t));
 			ip.w = 1;
 			if (t >= 0 && Collision.PointInTriangle(ip, p1, p2, p3)) {
-				intersections.push({point: ip, normal: n, object: cast this});
+				if (t < bestT) {
+					bestT = t;
+					intersections.push({
+						point: ip.clone(),
+						normal: n.clone(),
+						object: cast this,
+						t: t
+					});
+				}
 			}
 			i += 3;
 		}
-		return intersections;
+		return bestT;
 	}
 
 	public function support(direction:Vector, transform:Matrix) {
@@ -147,7 +186,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		return furthestVertex;
 	}
 
-	public function transformTriangle(idx:Int, tform:Matrix, invtform:Matrix, key:Int) {
+	public inline function transformTriangle(idx:Int, tform:Matrix, invtform:Matrix, key:Int) {
 		if (_transformedPoints == null) {
 			_transformedPoints = points.copy();
 		}
@@ -182,12 +221,46 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			_transformedPoints[p3 * 3 + 2] = pt.z;
 			transformKeys[p3] = key;
 		}
-		return {
-			v1: new Vector(_transformedPoints[p1 * 3], _transformedPoints[p1 * 3 + 1], _transformedPoints[p1 * 3 + 2]),
-			v2: new Vector(_transformedPoints[p2 * 3], _transformedPoints[p2 * 3 + 1], _transformedPoints[p2 * 3 + 2]),
-			v3: new Vector(_transformedPoints[p3 * 3], _transformedPoints[p3 * 3 + 1], _transformedPoints[p3 * 3 + 2]),
-			n: new Vector(_transformedNormals[p1 * 3], _transformedNormals[p1 * 3 + 1], _transformedNormals[p1 * 3 + 2])
-		};
+		return new TransformedCollisionTriangle(new Vector(_transformedPoints[p1 * 3], _transformedPoints[p1 * 3 + 1], _transformedPoints[p1 * 3 + 2]),
+			new Vector(_transformedPoints[p2 * 3], _transformedPoints[p2 * 3 + 1], _transformedPoints[p2 * 3 + 2]),
+			new Vector(_transformedPoints[p3 * 3], _transformedPoints[p3 * 3 + 1], _transformedPoints[p3 * 3 + 2]),
+			new Vector(_transformedNormals[p1 * 3], _transformedNormals[p1 * 3 + 1], _transformedNormals[p1 * 3 + 2]));
+	}
+
+	public inline function getTriangle(idx:Int) {
+		var p1 = indices[idx];
+		var p2 = indices[idx + 1];
+		var p3 = indices[idx + 2];
+
+		return new TransformedCollisionTriangle(getPoint(p1), getPoint(p2), getPoint(p3), getNormal(p1));
+	}
+
+	public function getTransformed(m:Matrix, invtform:Matrix) {
+		var tformed = new CollisionSurface();
+		tformed.points = this.points.copy();
+		tformed.normals = this.normals.copy();
+		tformed.indices = this.indices.copy();
+		tformed.friction = this.friction;
+		tformed.force = this.force;
+		tformed.restitution = this.restitution;
+		tformed.transformKeys = this.transformKeys.copy();
+
+		for (i in 0...Std.int(points.length / 3)) {
+			var v = getPoint(i);
+			var v2 = v.transformed(m);
+			tformed.points[i * 3] = v2.x;
+			tformed.points[i * 3 + 1] = v2.y;
+			tformed.points[i * 3 + 2] = v2.z;
+
+			var n = getNormal(i);
+			var n2 = n.transformed3x3(invtform).normalized();
+			tformed.normals[i * 3] = n2.x;
+			tformed.normals[i * 3 + 1] = n2.y;
+			tformed.normals[i * 3 + 2] = n2.z;
+		}
+		tformed.generateBoundingBox();
+
+		return tformed;
 	}
 
 	public function dispose() {

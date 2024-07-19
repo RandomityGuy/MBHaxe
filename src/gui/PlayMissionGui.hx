@@ -24,6 +24,7 @@ import src.ResourceLoader;
 import h3d.Vector;
 import src.Util;
 import src.MarbleGame;
+import src.MissionList;
 
 class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
@@ -891,8 +892,12 @@ class PlayMissionGui extends GuiImage {
 		setScoreHover = (isHover) -> {
 			var currentMission = currentList[currentSelection];
 
-			pmScoreText.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
-
+			pmScoreText.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			var scoreTextTime = "";
 			var scoreData = Settings.getScores(currentMission.path);
 			if (scoreData.length == 0) {
@@ -981,10 +986,20 @@ class PlayMissionGui extends GuiImage {
 				currentSelection = -1;
 			}
 
-			pmDescription.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			pmDescription.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			pmDescription.text.lineSpacing = -1;
 
-			pmDescriptionRight.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			pmDescriptionRight.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			pmDescriptionRight.text.lineSpacing = -1;
 
 			var descText = '<font color="#FDFEFE" face="MarkerFelt26"><p align="center">#${currentList.indexOf(currentMission) + 1}: ${currentMission.title}</p></font>';
@@ -1024,8 +1039,18 @@ class PlayMissionGui extends GuiImage {
 			}
 			pmDescription.text.text = descText;
 
-			pmParText.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
-			pmParTextRight.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			pmParText.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
+			pmParTextRight.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			if (this.scoreShowing) {
 				if (currentMission.game == "platinum") {
 					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Platinum: <font color="#CCCCCC">${Util.formatTime(currentMission.goldTime)}</font></font>';

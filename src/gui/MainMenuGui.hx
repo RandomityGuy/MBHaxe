@@ -10,6 +10,7 @@ import src.Settings;
 import src.Util;
 import src.Replay;
 import src.Marbleland;
+import src.MissionList;
 
 class MainMenuGui extends GuiImage {
 	public function new() {
@@ -80,9 +81,12 @@ class MainMenuGui extends GuiImage {
 		}
 		mainMenuContent.addChild(playButton);
 
-		var lbButton = new GuiImage(ResourceLoader.getResource('data/ui/menu/online_i.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var lbButton = new GuiButton(loadButtonImages("data/ui/menu/online"));
 		lbButton.position = new Vector(-5, 128);
 		lbButton.extent = new Vector(247, 164);
+		lbButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.setContent(new JoinServerGui());
+		}
 		mainMenuContent.addChild(lbButton);
 
 		var optionsButton = new GuiButton(loadButtonImages("data/ui/menu/options"));
@@ -178,8 +182,13 @@ class MainMenuGui extends GuiImage {
 		versionText.vertSizing = Bottom;
 		versionText.position = new Vector(502, 61);
 		versionText.extent = new Vector(97, 72);
-		versionText.text.text = "<p align=\"center\">1.5.4</p>";
-		versionText.text.filter = new DropShadow(1.414, 0.785, 0x3333337F, 1, 0, 0.7, 1, true);
+		versionText.text.text = '<p align=\"center\">${MarbleGame.currentVersion}</p>';
+		versionText.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0
+		};
 		this.addChild(versionText);
 
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));

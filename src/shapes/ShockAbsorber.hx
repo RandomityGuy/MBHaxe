@@ -25,13 +25,12 @@ class ShockAbsorber extends PowerUp {
 		});
 	}
 
-	public function pickUp():Bool {
-		return this.level.pickUpPowerUp(this);
+	public function pickUp(marble:src.Marble):Bool {
+		return this.level.pickUpPowerUp(marble, this);
 	}
 
-	public function use(timeState:TimeState) {
-		var marble = this.level.marble;
-		marble.enableShockAbsorber(timeState.currentAttemptTime);
-		this.level.deselectPowerUp();
+	public function use(marble:src.Marble, timeState:TimeState) {
+		marble.enableShockAbsorber(timeState);
+		this.level.deselectPowerUp(marble);
 	}
 }

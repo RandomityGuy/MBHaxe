@@ -68,13 +68,13 @@ class MisParser {
 			startText = marbleAttributesRegEx.matchedRight();
 		}
 
-		var activatedPackages = [];
+		// var activatedPackages = [];
 		startText = outsideText;
 
-		while (activatePackageRegEx.match(startText)) {
-			activatedPackages.push(this.resolveExpression(activatePackageRegEx.matched(1)));
-			startText = marbleAttributesRegEx.matchedRight();
-		}
+		// while (activatePackageRegEx.match(startText)) {
+		// 	activatedPackages.push(this.resolveExpression(activatePackageRegEx.matched(1)));
+		// 	startText = marbleAttributesRegEx.matchedRight();
+		// }
 
 		if (objectWriteBeginIndex != -1 && objectWriteEndIndex != -1) {
 			this.text = this.text.substring(objectWriteBeginIndex, objectWriteEndIndex);
@@ -99,11 +99,11 @@ class MisParser {
 			else if (!lineMatch || (blockMatch && lineMatch && blockCommentRegEx.matchedPos().pos < lineCommentRegEx.matchedPos().pos)) {
 				this.text = this.text.substring(0, blockCommentRegEx.matchedPos().pos)
 					+ this.text.substring(blockCommentRegEx.matchedPos().pos + blockCommentRegEx.matchedPos().len);
-				currentIndex += blockCommentRegEx.matchedPos().pos;
+				currentIndex = blockCommentRegEx.matchedPos().pos + blockCommentRegEx.matchedPos().len;
 			} else {
 				this.text = this.text.substring(0, lineCommentRegEx.matchedPos().pos)
 					+ this.text.substring(lineCommentRegEx.matchedPos().pos + lineCommentRegEx.matchedPos().len);
-				currentIndex += lineCommentRegEx.matchedPos().pos;
+				currentIndex = lineCommentRegEx.matchedPos().pos + lineCommentRegEx.matchedPos().len;
 			}
 		}
 
@@ -127,7 +127,6 @@ class MisParser {
 		var mf = new MisFile();
 		mf.root = cast elements[0];
 		mf.marbleAttributes = marbleAttributes;
-		mf.activatedPackages = activatedPackages;
 		return mf;
 	}
 
@@ -247,14 +246,21 @@ class MisParser {
 				var openingIndex = key.indexOf('[');
 				var arrayName = key.substring(0, openingIndex);
 				var array:Array<String>;
+				var indexToken = key.substring(openingIndex + 1, key.indexOf("]"));
 				if (obj.exists(arrayName))
 					array = obj.get(arrayName);
 				else {
 					array = [];
 					obj.set(arrayName, array);
 				} // Create a new array or use the existing one
-				var index = Std.parseInt(key.substring(openingIndex + 1, -1));
-				array[index] = this.resolveExpression(parts[1]);
+				if (~/[0-9]+/.match(indexToken)) {
+					var index = Std.parseInt(indexToken);
+					array[index] = this.resolveExpression(parts[1]);
+				} else {
+					// Not a numeric indexer
+					indexToken = StringTools.trim(StringTools.replace(indexToken, "\"", ""));
+					obj.set(arrayName + indexToken, [this.resolveExpression(parts[1])]);
+				}
 			} else {
 				obj.set(key, [this.resolveExpression(parts[1])]);
 			}
@@ -287,13 +293,30 @@ class MisParser {
 
 	function readPath(name:String) {
 		var sg:MissionElementSimGroup = cast this.readSimGroup(name);
-		var obj = new MissionElementPath();
-		obj._type = MissionElementType.Path;
-		obj._name = name;
-		obj.markers = sg.elements.map(x -> cast x);
-		obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
+		var allMarkers = true;
+		// Verify if they are all markers
+		for (e in sg.elements) {
+			if (e._type != MissionElementType.Marker) {
+				allMarkers = false;
+				break;
+			}
+		}
+		if (allMarkers) {
+			var obj = new MissionElementPath();
+			obj._type = MissionElementType.Path;
+			obj._name = name;
+			obj.markers = sg.elements.map(x -> cast x);
+			obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
 
-		return obj;
+			return obj;
+		} else {
+			var obj = new MissionElementPath();
+			obj._type = MissionElementType.Path;
+			obj._name = name;
+			obj.markers = sg.elements.filter(x -> x._type == MissionElementType.Marker).map(x -> cast x);
+			obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
+			return obj;
+		}
 	}
 
 	/** Resolves a TorqueScript rvalue expression. Currently only supports the concatenation @ operator. */

@@ -78,6 +78,9 @@ typedef TouchSettings = {
 	var rewindButtonPos:Array<Float>;
 	var rewindButtonSize:Float;
 	var buttonJoystickMultiplier:Float;
+	var hideControls:Bool;
+	var cameraSwipeExtent:Float;
+	var dynamicJoystick:Bool;
 }
 
 typedef GamepadSettings = {
@@ -94,6 +97,17 @@ typedef GamepadSettings = {
 	var respawn:Array<String>;
 	var blast:Array<String>;
 	var rewind:Array<String>;
+}
+
+typedef ServerSettings = {
+	var name:String;
+	var description:String;
+	var maxPlayers:Int;
+	var password:String;
+	var forceSpectators:Bool;
+	var quickRespawn:Bool;
+	var competitiveMode:Bool;
+	var oldSpawns:Bool;
 }
 
 typedef PlayStatistics = {
@@ -119,7 +133,7 @@ class Settings {
 		fovX: 90,
 		frameRateVis: true,
 		oobInsults: true,
-		reflectiveMarble: true,
+		reflectiveMarble: false,
 		marbleIndex: 0,
 		marbleCategoryIndex: 0,
 		marbleSkin: "base",
@@ -164,7 +178,10 @@ class Settings {
 		blastButtonSize: 60,
 		rewindButtonPos: [300, 100],
 		rewindButtonSize: 60,
-		buttonJoystickMultiplier: 2.5
+		buttonJoystickMultiplier: 2.5,
+		hideControls: false,
+		cameraSwipeExtent: 10.0,
+		dynamicJoystick: false
 	}
 
 	public static var gamepadSettings:GamepadSettings = {
@@ -187,6 +204,17 @@ class Settings {
 		oobs: 0,
 		respawns: 0,
 		totalTime: 0,
+	}
+
+	public static var serverSettings:ServerSettings = {
+		name: "Multiplayer Server",
+		password: "",
+		maxPlayers: 8,
+		description: "My cool server",
+		forceSpectators: false,
+		quickRespawn: true,
+		competitiveMode: false,
+		oldSpawns: false
 	}
 
 	public static var levelStatistics:Map<String, PlayStatistics> = [];
@@ -244,6 +272,7 @@ class Settings {
 			touch: touchSettings,
 			gamepad: gamepadSettings,
 			stats: playStatistics,
+			server: serverSettings,
 			highscoreName: highscoreName,
 			marbleIndex: optionsSettings.marbleIndex,
 			marbleSkin: optionsSettings.marbleSkin,
@@ -364,6 +393,20 @@ class Settings {
 				touchSettings.rewindButtonPos = [300, 100];
 				touchSettings.rewindButtonSize = 60;
 			}
+			#if js
+			if (touchSettings.hideControls == null) {
+				touchSettings.hideControls = false;
+			}
+			if (touchSettings.cameraSwipeExtent == null) {
+				touchSettings.cameraSwipeExtent = 10.0;
+			}
+			if (touchSettings.dynamicJoystick == null) {
+				touchSettings.dynamicJoystick = false;
+			}
+			#end
+			if (touchSettings.cameraSwipeExtent == 0) {
+				touchSettings.cameraSwipeExtent = 10.0;
+			}
 			if (json.gamepad != null) {
 				gamepadSettings = json.gamepad;
 			}
@@ -379,7 +422,13 @@ class Settings {
 					levelStatistics.set(key, value);
 				}
 			}
+			if (json.serverSettings != null) {
+				serverSettings = json.serverSettings;
+			}
 			#if js
+			if (serverSettings.oldSpawns == null) {
+				serverSettings.oldSpawns = false;
+			}
 			if (optionsSettings.marbleIndex == null) {
 				optionsSettings.marbleIndex = 0;
 				optionsSettings.marbleSkin = "base";

@@ -50,6 +50,15 @@ class CameraInput {
 
 			var scene2d = interactive.getScene();
 			if (e.relX < scene2d.width / 2) {
+				var restartG = @:privateAccess MarbleGame.instance.touchInput.pauseButton?.collider;
+				if (restartG != null) {
+					if (e.relY > restartG.getAbsPos().y + restartG.height) {
+						if (Settings.touchSettings.dynamicJoystick) {
+							// Move that joystick over our finger
+							MarbleGame.instance.touchInput.movementInput.moveToFinger(e);
+						}
+					}
+				}
 				return;
 			}
 
@@ -78,9 +87,9 @@ class CameraInput {
 				if (jumpcam) {
 					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
-				if (Math.abs(delta.x) < 0.03)
+				if (Math.abs(delta.x) < 0.05)
 					delta.x = 0;
-				if (Math.abs(delta.y) < 0.03)
+				if (Math.abs(delta.y) < 0.05)
 					delta.y = 0;
 				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(delta.x / scaleFactor), applyNonlinearScale(delta.y / scaleFactor), true);
 				if (delta.x != 0)
@@ -104,7 +113,7 @@ class CameraInput {
 	}
 
 	function applyNonlinearScale(value:Float) {
-		var clamped = Util.clamp(value, -10, 10);
+		var clamped = Util.clamp(value, -Settings.touchSettings.cameraSwipeExtent, Settings.touchSettings.cameraSwipeExtent);
 		return Math.abs(clamped) < 3 ? Math.pow(Math.abs(clamped / 2), 2.7) * (clamped >= 0 ? 1 : -1) : clamped;
 	}
 

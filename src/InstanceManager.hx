@@ -1,5 +1,8 @@
 package src;
 
+import shaders.PQMaterial;
+import h3d.mat.Material;
+import h3d.scene.MultiMaterial;
 import shaders.EnvMap;
 import h3d.shader.CubeMap;
 import shaders.NormalMaterial;
@@ -25,6 +28,8 @@ class MeshBatchInfo {
 	var meshbatch:MeshBatch;
 	var transparencymeshbatch:MeshBatch;
 	var mesh:Mesh;
+	var dtsShader:DtsTexture;
+	var baseBounds:h3d.col.Bounds;
 
 	public function new() {}
 }
@@ -33,6 +38,7 @@ class MeshBatchInfo {
 class MeshInstance {
 	var emptyObj:Object;
 	var gameObject:GameObject;
+	var visibleTicks:Int = 10;
 
 	public function new(eo, go) {
 		this.emptyObj = eo;
@@ -40,69 +46,156 @@ class MeshInstance {
 	}
 }
 
+@:generic
+class ReusableListIterator<T> {
+	var l:ReusableList<T>;
+	var i = 0;
+
+	public function new(l:ReusableList<T>) {
+		this.l = l;
+	}
+
+	public inline function hasNext() {
+		return i != l.length;
+	}
+
+	public inline function next() {
+		var ret = @:privateAccess l.array[i];
+		i += 1;
+		return ret;
+	}
+}
+
+@:allow(ReusableListIterator)
+@:generic
+class ReusableList<T> {
+	var array:Array<T>;
+
+	public var length:Int = 0;
+
+	public inline function new() {
+		array = [];
+	}
+
+	public inline function push(item:T) {
+		if (array.length == length) {
+			array.push(item);
+			length += 1;
+		} else {
+			array[length] = item;
+			length += 1;
+		}
+	}
+
+	public inline function clear() {
+		length = 0;
+	}
+
+	public inline function iterator():ReusableListIterator<T> {
+		return new ReusableListIterator<T>(this);
+	}
+}
+
+@:publicFields
+@:structInit
+class InstancedMesh {
+	var batches:Array<MeshBatchInfo>;
+}
+
 class InstanceManager {
-	var objects:Array<Array<MeshBatchInfo>> = [];
+	var objects:Array<InstancedMesh> = [];
 
 	var objectMap:Map<String, Int> = [];
 	var scene:Scene;
+	var opaqueinstances = new ReusableList<MeshInstance>();
+	var transparentinstances = new ReusableList<MeshInstance>();
 
 	public function new(scene:Scene) {
 		this.scene = scene;
 	}
 
 	public function render() {
-		var renderFrustums = [scene.camera.frustum];
+		static var tmpBounds = new h3d.col.Bounds();
+		var renderFrustum = scene.camera.frustum;
+		var doFrustumCheck = true;
 		// This sucks holy shit
-		if (MarbleGame.instance.world.marble != null && MarbleGame.instance.world.marble.cubemapRenderer != null)
-			renderFrustums = renderFrustums.concat(MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums());
+		doFrustumCheck = MarbleGame.instance.world != null
+			&& MarbleGame.instance.world.marble.cubemapRenderer != null
+			&& @:privateAccess !MarbleGame.instance.world.marble.camera.spectate;
+		var cameraFrustrums = doFrustumCheck ? MarbleGame.instance.world.marble.cubemapRenderer.getCameraFrustums() : null;
 
 		for (meshes in objects) {
-			for (minfo in meshes) {
-				var visibleinstances = [];
+			for (minfo in meshes.batches) {
+				opaqueinstances.clear();
+				transparentinstances.clear();
 				// Culling
 				if (minfo.meshbatch != null || minfo.transparencymeshbatch != null) {
 					for (inst in minfo.instances) {
-						var objBounds = @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds.clone();
-						objBounds.transform(inst.emptyObj.getAbsPos());
-						for (frustum in renderFrustums) {
-							if (frustum.hasBounds(objBounds)) {
-								visibleinstances.push(inst);
-								break;
+						// for (frustum in renderFrustums) {
+						//	if (frustum.hasBounds(objBounds)) {
+
+						if (inst.visibleTicks == 0) {
+							tmpBounds.load(minfo.baseBounds);
+							tmpBounds.transform(inst.emptyObj.getAbsPos());
+
+							if (cameraFrustrums == null && !renderFrustum.hasBounds(tmpBounds))
+								continue;
+
+							if (cameraFrustrums != null) {
+								var found = false;
+								for (frustrum in cameraFrustrums) {
+									if (frustrum.hasBounds(tmpBounds)) {
+										found = true;
+										break;
+									}
+								}
+								if (!found)
+									continue;
 							}
+
+							inst.visibleTicks = 10;
+						} else {
+							inst.visibleTicks = inst.visibleTicks - 1;
 						}
+
+						if (inst.gameObject.currentOpacity == 1)
+							opaqueinstances.push(inst);
+						else if (inst.gameObject.currentOpacity != 0)
+							transparentinstances.push(inst);
+						// break;
+						//	}
+						// }
 					}
 				}
 
 				// Emit non culled primitives
 				if (minfo.meshbatch != null) {
-					var opaqueinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity == 1);
 					minfo.meshbatch.begin(opaqueinstances.length);
 					for (instance in opaqueinstances) { // Draw the opaque shit first
-						var dtsShader = minfo.meshbatch.material.mainPass.getShader(DtsTexture);
+						var dtsShader = minfo.dtsShader;
 						if (dtsShader != null) {
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
 						var transform = instance.emptyObj.getAbsPos();
 						// minfo.meshbatch.shadersChanged = true;
-						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
+						// minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
+						// minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						minfo.meshbatch.worldPosition = transform;
 						minfo.meshbatch.emitInstance();
 					}
 				}
 				if (minfo.transparencymeshbatch != null) {
-					var transparentinstances = visibleinstances.filter(x -> x.gameObject.currentOpacity != 1 && x.gameObject.currentOpacity != 0); // Filter out all zero opacity things too
 					minfo.transparencymeshbatch.begin(transparentinstances.length);
 					for (instance in transparentinstances) { // Non opaque shit
-						var dtsShader = minfo.transparencymeshbatch.material.mainPass.getShader(DtsTexture);
+						var dtsShader = minfo.dtsShader;
 						if (dtsShader != null) {
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
-						minfo.transparencymeshbatch.material.blendMode = Alpha;
+						// minfo.transparencymeshbatch.material.blendMode = Alpha;
 						// minfo.transparencymeshbatch.material.color.a = instance.gameObject.currentOpacity;
 						// minfo.transparencymeshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						// minfo.transparencymeshbatch.shadersChanged = true;
-						minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
+						// minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						// minfo.transparencymeshbatch.material.mainPass.depthWrite = false;
 						// if (dtsShader != null) {
 						// 	dtsShader.currentOpacity = instance.gameObject.currentOpacity;
@@ -131,7 +224,7 @@ class InstanceManager {
 			var objs = getAllChildren(object);
 			var minfos = objects[objectMap.get(object.identifier)]; // objects.get(object.identifier);
 			for (i in 0...objs.length) {
-				minfos[i].instances.push(new MeshInstance(objs[i], object));
+				minfos.batches[i].instances.push(new MeshInstance(objs[i], object));
 			}
 		} else {
 			// First time appending the thing so bruh
@@ -139,68 +232,117 @@ class InstanceManager {
 			var objs = getAllChildren(object);
 			var minfos = [];
 			for (obj in objs) {
-				var isMesh = obj is Mesh;
+				var isMesh = obj is MultiMaterial;
 				var minfo:MeshBatchInfo = new MeshBatchInfo();
 				minfo.instances = [new MeshInstance(obj, object)];
-				minfo.meshbatch = isMesh ? new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene) : null;
+				minfo.meshbatch = isMesh ? new MeshBatch(cast(cast(obj, MultiMaterial).primitive), null, scene) : null;
 				minfo.mesh = isMesh ? cast obj : null;
+				minfo.baseBounds = isMesh ? @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds : null;
 
 				if (isMesh) {
-					var mat = cast(obj, Mesh).material;
-					var dtsshader = mat.mainPass.getShader(DtsTexture);
-					if (dtsshader != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(dtsshader);
-						minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-						minfo.meshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
-					}
-					var phongshader = mat.mainPass.getShader(PhongMaterial);
-					if (phongshader != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(phongshader);
-						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-					}
-					var noiseshder = mat.mainPass.getShader(NoiseTileMaterial);
-					if (noiseshder != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(noiseshder);
-						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-					}
-					var nmapshdr = mat.mainPass.getShader(NormalMaterial);
-					if (nmapshdr != null) {
-						minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						minfo.meshbatch.material.mainPass.addShader(nmapshdr);
-						// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-					}
-					var cubemapshdr = mat.mainPass.getShader(EnvMap);
-					if (cubemapshdr != null) {
-						minfo.meshbatch.material.mainPass.addShader(cubemapshdr);
-					}
-					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
-					minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-					minfo.transparencymeshbatch.material.mainPass.addShader(dtsshader);
-					// minfo.transparencymeshbatch.material.mainPass.culling = mat.mainPass.culling;
+					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, MultiMaterial).primitive), null, scene);
+					minfo.transparencymeshbatch.materials = [];
+					minfo.meshbatch.materials = [];
+					for (mat in cast(obj, MultiMaterial).materials) {
+						var matclone:Material = cast mat.clone();
+						var dtsshader = mat.mainPass.getShader(DtsTexture);
+						if (dtsshader != null) {
+							matclone.mainPass.removeShader(matclone.textureShader);
+							matclone.mainPass.addShader(dtsshader);
+							matclone.mainPass.culling = mat.mainPass.culling;
+							matclone.mainPass.depthWrite = mat.mainPass.depthWrite;
+							matclone.mainPass.blendSrc = mat.mainPass.blendSrc;
+							matclone.mainPass.blendDst = mat.mainPass.blendDst;
+							matclone.mainPass.blendOp = mat.mainPass.blendOp;
+							matclone.mainPass.blendAlphaSrc = mat.mainPass.blendAlphaSrc;
+							matclone.mainPass.blendAlphaDst = mat.mainPass.blendAlphaDst;
+							matclone.mainPass.blendAlphaOp = mat.mainPass.blendAlphaOp;
+							minfo.dtsShader = dtsshader;
+						}
+						var phongshader = mat.mainPass.getShader(PhongMaterial);
+						if (phongshader != null) {
+							matclone.mainPass.removeShader(matclone.textureShader);
+							matclone.mainPass.addShader(phongshader);
+							// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						}
+						var noiseshder = mat.mainPass.getShader(NoiseTileMaterial);
+						if (noiseshder != null) {
+							matclone.mainPass.removeShader(matclone.textureShader);
+							matclone.mainPass.addShader(noiseshder);
+							// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						}
+						var nmapshdr = mat.mainPass.getShader(NormalMaterial);
+						if (nmapshdr != null) {
+							matclone.mainPass.removeShader(matclone.textureShader);
+							matclone.mainPass.addShader(nmapshdr);
+							// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						}
+						var pqshdr = mat.mainPass.getShader(PQMaterial);
+						if (pqshdr != null) {
+							matclone.mainPass.removeShader(matclone.textureShader);
+							matclone.mainPass.addShader(pqshdr);
+							// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						}
 
-					// minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.mainPass.getShader(PropsValues));
-					// minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.transparencymeshbatch.material.mainPass.getShader(PropsValues));
+						var cubemapshdr = mat.mainPass.getShader(EnvMap);
+						if (cubemapshdr != null) {
+							matclone.mainPass.addShader(cubemapshdr);
+						}
+						matclone.mainPass.enableLights = mat.mainPass.enableLights;
+						matclone.mainPass.setPassName(mat.mainPass.name);
 
-					// var pbrshader = mat.mainPass.getShader(PropsValues);
-					// if (pbrshader != null) {
-					// 	minfo.meshbatch.material.mainPass.addShader(pbrshader);
-					// 	minfo.transparencymeshbatch.material.mainPass.addShader(pbrshader);
-					// }
+						for (p in matclone.getPasses())
+							@:privateAccess p.batchMode = true;
+						minfo.meshbatch.materials.push(matclone);
+
+						var matclonetransp:Material = cast mat.clone();
+
+						matclonetransp.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+						matclonetransp.mainPass.addShader(dtsshader);
+
+						matclonetransp.blendMode = Alpha;
+
+						matclonetransp.mainPass.culling = mat.mainPass.culling;
+						matclonetransp.mainPass.depthWrite = mat.mainPass.depthWrite;
+						if (mat.blendMode == Alpha) {
+							matclonetransp.mainPass.blendSrc = mat.mainPass.blendSrc;
+							matclonetransp.mainPass.blendDst = mat.mainPass.blendDst;
+							matclonetransp.mainPass.blendOp = mat.mainPass.blendOp;
+							matclonetransp.mainPass.blendAlphaSrc = mat.mainPass.blendAlphaSrc;
+							matclonetransp.mainPass.blendAlphaDst = mat.mainPass.blendAlphaDst;
+							matclonetransp.mainPass.blendAlphaOp = mat.mainPass.blendAlphaOp;
+							matclonetransp.mainPass.enableLights = mat.mainPass.enableLights;
+							matclonetransp.receiveShadows = mat.receiveShadows;
+						}
+
+						matclonetransp.mainPass.enableLights = mat.mainPass.enableLights;
+
+						for (p in matclonetransp.getPasses())
+							@:privateAccess p.batchMode = true;
+						minfo.transparencymeshbatch.materials.push(matclonetransp);
+						// minfo.transparencymeshbatch.material.mainPass.culling = mat.mainPass.culling;
+
+						// minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.mainPass.getShader(PropsValues));
+						// minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.transparencymeshbatch.material.mainPass.getShader(PropsValues));
+
+						// var pbrshader = mat.mainPass.getShader(PropsValues);
+						// if (pbrshader != null) {
+						// 	minfo.meshbatch.material.mainPass.addShader(pbrshader);
+						// 	minfo.transparencymeshbatch.material.mainPass.addShader(pbrshader);
+						// }
+					}
 				}
 				minfos.push(minfo);
 			}
 			var curidx = objects.length;
-			objects.push(minfos);
+			objects.push({batches: minfos});
 			objectMap.set(object.identifier, curidx);
 		}
 	}
 
 	public function getObjectBounds(object:GameObject) {
 		if (isInstanced(object)) {
-			var minfos = objects[objectMap.get(object.identifier)];
+			var minfos = objects[objectMap.get(object.identifier)].batches;
 			var invmat = minfos[0].instances[0].gameObject.getInvPos();
 			var b = minfos[0].instances[0].gameObject.getBounds().clone();
 			b.transform(invmat);

@@ -22,11 +22,11 @@ typedef ForceData = {
 class ForceObject extends DtsObject {
 	var forceDatas:Array<ForceData>;
 
-	public function getForce(pos:Vector) {
+	public function getForce(pos:Vector, outForce:Vector) {
+		if (pos.distanceSq(this.getAbsPos().getPosition()) > 50 * 50)
+			return;
 		var strength = 0.0;
 		var dot = 0.0;
-		var posVec = new Vector();
-		var retForce = new Vector();
 		for (forceData in forceDatas) {
 			if (forceData.forceType == NoForce) {
 				continue;
@@ -40,7 +40,7 @@ class ForceObject extends DtsObject {
 				nodeVec = forceData.forceVector;
 			}
 
-			posVec = pos.sub(node.getPosition());
+			var posVec = pos.sub(node.getPosition());
 			dot = posVec.length();
 
 			if (forceData.forceRadius < dot) {
@@ -52,23 +52,21 @@ class ForceObject extends DtsObject {
 
 			if (forceType == ForceSpherical) {
 				dot = strength / dot;
-				retForce = retForce.add(posVec.multiply(dot));
+				outForce.load(outForce.add(posVec.multiply(dot)));
 			}
 
 			if (forceType == ForceField) {
-				retForce = retForce.add(nodeVec.multiply(strength));
+				outForce.load(outForce.add(nodeVec.multiply(strength)));
 			}
 
 			if (forceType == ForceCone) {
-				posVec = posVec.multiply(1 / dot);
+				posVec.load(posVec.multiply(1 / dot));
 				var newDot = nodeVec.dot(posVec);
 				var arc = forceData.forceArc;
 				if (arc < newDot) {
-					retForce = retForce.add(posVec.multiply(strength).multiply(newDot - arc).multiply(1 / (1 - arc)));
+					outForce.load(outForce.add(posVec.multiply(strength).multiply(newDot - arc).multiply(1 / (1 - arc))));
 				}
 			}
 		}
-
-		return retForce;
 	}
 }

@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.BitmapData;
 import h2d.filter.DropShadow;
 import h2d.Text;
 import gui.GuiControl.MouseState;
@@ -18,7 +19,7 @@ import src.Settings;
 class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
 
-	public function new() {
+	public function new(pause:Bool = false) {
 		function chooseBg() {
 			var rand = Math.random();
 			if (rand >= 0 && rand <= 0.244)
@@ -28,7 +29,13 @@ class OptionsDlg extends GuiImage {
 			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
 		}
 		var img = chooseBg();
-		super(img.resource.toTile());
+		var temprev = new BitmapData(1, 1);
+		temprev.setPixel(0, 0, 0);
+		var tmpprevtile = Tile.fromBitmap(temprev);
+		if (!pause)
+			super(img.resource.toTile());
+		else
+			super(tmpprevtile);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
@@ -80,7 +87,10 @@ class OptionsDlg extends GuiImage {
 		homeBtn.extent = new Vector(94, 46);
 		homeBtn.pressedAction = (sender) -> {
 			applyFunc();
-			MarbleGame.canvas.setContent(new MainMenuGui());
+			if (!pause)
+				MarbleGame.canvas.setContent(new MainMenuGui());
+			else
+				MarbleGame.canvas.popDialog(this);
 		}
 		window.addChild(homeBtn);
 
@@ -141,13 +151,18 @@ class OptionsDlg extends GuiImage {
 		}
 
 		function makeOption(text:String, valueFunc:Void->String, yPos:Float, parent:GuiControl, size:String, options:Array<String>, onSelect:Int->Void,
-				right:Bool = false) {
-			var textObj = new GuiText(markerFelt32);
+				right:Bool = false, smallfont:Bool = false) {
+			var textObj = new GuiText(smallfont ? markerFelt24 : markerFelt32);
 			textObj.position = new Vector(right ? 388 : 7, yPos);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			textObj.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			parent.addChild(textObj);
 
 			var optDropdownImg = new GuiImage(ResourceLoader.getResource('data/ui/options/dropdown-${size}.png', ResourceLoader.getImage, this.imageResources)
@@ -214,13 +229,18 @@ class OptionsDlg extends GuiImage {
 			optBtns.push(optDropdown);
 		}
 
-		function makeSlider(text:String, value:Float, yPos:Float, parent:GuiControl, onChange:Float->Void, right:Bool = false) {
-			var textObj = new GuiText(markerFelt32);
+		function makeSlider(text:String, value:Float, yPos:Float, parent:GuiControl, onChange:Float->Void, right:Bool = false, smallfont:Bool = false) {
+			var textObj = new GuiText(smallfont ? markerFelt24 : markerFelt32);
 			textObj.position = new Vector(right ? 388 : 7, yPos);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			textObj.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			parent.addChild(textObj);
 
 			var sliderBar = new GuiImage(ResourceLoader.getResource("data/ui/options/bar.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -336,8 +356,8 @@ class OptionsDlg extends GuiImage {
 		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.fovX = cast(60 + val * (140 - 60));
 		});
-		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2), yPos, generalPanel, (val) -> {
-			Settings.controlsSettings.cameraSensitivity = cast(0.2 + val * (3 - 0.2));
+		makeSlider("Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12), yPos, generalPanel, (val) -> {
+			Settings.controlsSettings.cameraSensitivity = cast(0.12 + val * (1.2 - 0.12));
 		}, true);
 
 		function getConflictingBinding(bindingName:String, key:Int) {
@@ -399,7 +419,12 @@ class OptionsDlg extends GuiImage {
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
 			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			textObj.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			parent.addChild(textObj);
 
 			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
@@ -413,49 +438,72 @@ class OptionsDlg extends GuiImage {
 			parent.addChild(remapBtn);
 		}
 
-		makeRemapOption("Move Forward:", 38, Util.getKeyForButton2(Settings.controlsSettings.forward), (key) -> Settings.controlsSettings.forward = key,
-			hotkeysPanel);
-		makeRemapOption("Move Left:", 38, Util.getKeyForButton2(Settings.controlsSettings.left), (key) -> Settings.controlsSettings.left = key, hotkeysPanel,
-			true);
-		makeRemapOption("Move Backward:", 86, Util.getKeyForButton2(Settings.controlsSettings.backward), (key) -> Settings.controlsSettings.backward = key,
-			hotkeysPanel);
-		makeRemapOption("Move Right:", 86, Util.getKeyForButton2(Settings.controlsSettings.right), (key) -> Settings.controlsSettings.right = key,
-			hotkeysPanel, true);
-		makeRemapOption("Look Up:", 134, Util.getKeyForButton2(Settings.controlsSettings.camForward), (key) -> Settings.controlsSettings.camForward = key,
-			hotkeysPanel);
-		makeRemapOption("Look Left:", 134, Util.getKeyForButton2(Settings.controlsSettings.camLeft), (key) -> Settings.controlsSettings.camLeft = key,
-			hotkeysPanel, true);
-		makeRemapOption("Look Down:", 182, Util.getKeyForButton2(Settings.controlsSettings.camBackward), (key) -> Settings.controlsSettings.camBackward = key,
-			hotkeysPanel);
-		makeRemapOption("Look Right:", 182, Util.getKeyForButton2(Settings.controlsSettings.camRight), (key) -> Settings.controlsSettings.camRight = key,
-			hotkeysPanel, true);
-		makeRemapOption("Jump:", 230, Util.getKeyForButton2(Settings.controlsSettings.jump), (key) -> Settings.controlsSettings.jump = key, hotkeysPanel);
-		makeRemapOption("Use Powerup:", 230, Util.getKeyForButton2(Settings.controlsSettings.powerup), (key) -> Settings.controlsSettings.powerup = key,
-			hotkeysPanel, true);
-		makeRemapOption("Free Look:", 278, Util.getKeyForButton2(Settings.controlsSettings.freelook), (key) -> Settings.controlsSettings.freelook = key,
-			hotkeysPanel);
-		makeRemapOption("Respawn:", 278, Util.getKeyForButton2(Settings.controlsSettings.respawn), (key) -> Settings.controlsSettings.respawn = key,
-			hotkeysPanel, true);
-		makeRemapOption("Blast:", 326, Util.getKeyForButton2(Settings.controlsSettings.blast), (key) -> Settings.controlsSettings.blast = key, hotkeysPanel);
-
 		if (Util.isTouchDevice()) {
 			var textObj = new GuiText(markerFelt32);
-			textObj.position = new Vector(368, 326);
+			textObj.position = new Vector(5, 38);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = "Touch Controls";
 			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
+			textObj.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
 			hotkeysPanel.addChild(textObj);
 
 			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			remapBtn.position = new Vector(363 + 203, 323);
+			remapBtn.position = new Vector(5 + 203, 35);
 			remapBtn.txtCtrl.text.text = "Edit";
 			remapBtn.setExtent(new Vector(152, 49));
-			remapBtn.pressedAction = (sender) -> {
-				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-			}
+			if (!pause)
+				remapBtn.pressedAction = (sender) -> {
+					MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+				}
 			hotkeysPanel.addChild(remapBtn);
+
+			makeOption("Hide Controls:", () -> '${Settings.touchSettings.hideControls ? "Yes" : "No"}', 38, hotkeysPanel, "small", ["No", "Yes"], (idx) -> {
+				Settings.touchSettings.hideControls = idx == 1;
+			}, true);
+
+			makeSlider("Button-Camera Factor:", (Settings.touchSettings.buttonJoystickMultiplier) / 3, 86, hotkeysPanel, (val) -> {
+				Settings.touchSettings.buttonJoystickMultiplier = val * 3;
+			}, false, true);
+
+			makeSlider("Camera Swipe Extent:", (Settings.touchSettings.cameraSwipeExtent - 5) / (35 - 5), 86, hotkeysPanel, (val) -> {
+				Settings.touchSettings.cameraSwipeExtent = 5 + (35 - 5) * val;
+			}, true, true);
+
+			makeOption("Dynamic Joystick:", () -> '${Settings.touchSettings.dynamicJoystick ? "Yes" : "No"}', 134, hotkeysPanel, "small", ["No", "Yes"],
+				(idx) -> {
+					Settings.touchSettings.dynamicJoystick = idx == 1;
+				}, false, true);
 		} else {
+			makeRemapOption("Move Forward:", 38, Util.getKeyForButton2(Settings.controlsSettings.forward), (key) -> Settings.controlsSettings.forward = key,
+				hotkeysPanel);
+			makeRemapOption("Move Left:", 38, Util.getKeyForButton2(Settings.controlsSettings.left), (key) -> Settings.controlsSettings.left = key,
+				hotkeysPanel, true);
+			makeRemapOption("Move Backward:", 86, Util.getKeyForButton2(Settings.controlsSettings.backward),
+				(key) -> Settings.controlsSettings.backward = key, hotkeysPanel);
+			makeRemapOption("Move Right:", 86, Util.getKeyForButton2(Settings.controlsSettings.right), (key) -> Settings.controlsSettings.right = key,
+				hotkeysPanel, true);
+			makeRemapOption("Look Up:", 134, Util.getKeyForButton2(Settings.controlsSettings.camForward), (key) -> Settings.controlsSettings.camForward = key,
+				hotkeysPanel);
+			makeRemapOption("Look Left:", 134, Util.getKeyForButton2(Settings.controlsSettings.camLeft), (key) -> Settings.controlsSettings.camLeft = key,
+				hotkeysPanel, true);
+			makeRemapOption("Look Down:", 182, Util.getKeyForButton2(Settings.controlsSettings.camBackward),
+				(key) -> Settings.controlsSettings.camBackward = key, hotkeysPanel);
+			makeRemapOption("Look Right:", 182, Util.getKeyForButton2(Settings.controlsSettings.camRight), (key) -> Settings.controlsSettings.camRight = key,
+				hotkeysPanel, true);
+			makeRemapOption("Jump:", 230, Util.getKeyForButton2(Settings.controlsSettings.jump), (key) -> Settings.controlsSettings.jump = key, hotkeysPanel);
+			makeRemapOption("Use Powerup:", 230, Util.getKeyForButton2(Settings.controlsSettings.powerup), (key) -> Settings.controlsSettings.powerup = key,
+				hotkeysPanel, true);
+			makeRemapOption("Free Look:", 278, Util.getKeyForButton2(Settings.controlsSettings.freelook), (key) -> Settings.controlsSettings.freelook = key,
+				hotkeysPanel);
+			makeRemapOption("Respawn:", 278, Util.getKeyForButton2(Settings.controlsSettings.respawn), (key) -> Settings.controlsSettings.respawn = key,
+				hotkeysPanel, true);
+			makeRemapOption("Blast:", 326, Util.getKeyForButton2(Settings.controlsSettings.blast), (key) -> Settings.controlsSettings.blast = key,
+				hotkeysPanel);
 			makeRemapOption("Rewind:", 326, Util.getKeyForButton2(Settings.controlsSettings.rewind), (key) -> Settings.controlsSettings.rewind = key,
 				hotkeysPanel, true);
 		}

@@ -11,18 +11,18 @@ import h3d.Vector;
 import src.Settings;
 
 class Util {
-	public static function mat3x3equal(a:Matrix, b:Matrix) {
+	public static inline function mat3x3equal(a:Matrix, b:Matrix) {
 		return a._11 == b._11 && a._12 == b._12 && a._13 == b._13 && a._21 == b._21 && a._22 == b._22 && a._23 == b._23 && a._31 == b._31 && a._32 == b._32
 			&& a._33 == b._33;
 	}
 
-	public static function adjustedMod(a:Float, n:Float) {
+	public static inline function adjustedMod(a:Float, n:Float) {
 		var r1 = a % n;
 		var r2 = (r1 + n) % n;
 		return r2;
 	}
 
-	public static function clamp(value:Float, min:Float, max:Float) {
+	public static inline function clamp(value:Float, min:Float, max:Float) {
 		if (value < min)
 			return min;
 		if (value > max)
@@ -30,11 +30,11 @@ class Util {
 		return value;
 	}
 
-	public static function lerp(a:Float, b:Float, t:Float) {
+	public static inline function lerp(a:Float, b:Float, t:Float) {
 		return a + (b - a) * t;
 	}
 
-	public static function catmullRom(t:Float, p0:Float, p1:Float, p2:Float, p3:Float) {
+	public static inline function catmullRom(t:Float, p0:Float, p1:Float, p2:Float, p3:Float) {
 		var point = t * t * t * ((-1) * p0 + 3 * p1 - 3 * p2 + p3) / 2;
 		point += t * t * (2 * p0 - 5 * p1 + 4 * p2 - p3) / 2;
 		point += t * ((-1) * p0 + p2) / 2;
@@ -42,11 +42,11 @@ class Util {
 		return point;
 	}
 
-	public static function lerpThreeVectors(v1:Vector, v2:Vector, t:Float) {
+	public static inline function lerpThreeVectors(v1:Vector, v2:Vector, t:Float) {
 		return new Vector(lerp(v1.x, v2.x, t), lerp(v1.y, v2.y, t), lerp(v1.z, v2.z, t), lerp(v1.w, v2.w, t));
 	}
 
-	public static function rotateImage(bitmap:hxd.Pixels, angle:Float) {
+	public static inline function rotateImage(bitmap:hxd.Pixels, angle:Float) {
 		var curpixels = bitmap.clone();
 		if (angle == Math.PI / 2)
 			for (x in 0...curpixels.width) {
@@ -337,7 +337,7 @@ class Util {
 			'${(hours > 0 ? (hoursTen > 0 ? '${hoursTen}' : '') +'${hoursOne}' + ':' : '')}${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
 	}
 
-	public static function getKeyForButton(button:Int) {
+	public static inline function getKeyForButton(button:Int) {
 		var keyName = Key.getKeyName(button);
 		if (keyName == "MouseLeft")
 			keyName = "the Left Mouse Button";
@@ -350,7 +350,7 @@ class Util {
 		return keyName;
 	}
 
-	public static function getKeyForButton2(button:Int) {
+	public static inline function getKeyForButton2(button:Int) {
 		var keyName = Key.getKeyName(button);
 		if (keyName == "MouseLeft")
 			keyName = "Left Mouse";
@@ -363,15 +363,19 @@ class Util {
 		return keyName;
 	}
 
-	public static function m_matF_x_vectorF(matrix:Matrix, v:Vector) {
-		var m = matrix.clone();
-		m.transpose();
+	public static inline function rightPad(str:String, len:Int, cutOff:Int) {
+		str = str.substring(0, len - cutOff);
+		while (str.length < len)
+			str += " ";
+		return str;
+	}
 
+	public static inline function m_matF_x_vectorF(m:Matrix, v:Vector) {
 		var v0 = v.x, v1 = v.y, v2 = v.z;
 
-		var vresult_0 = m._11 * v0 + m._12 * v1 + m._13 * v2;
-		var vresult_1 = m._21 * v0 + m._22 * v1 + m._23 * v2;
-		var vresult_2 = m._31 * v0 + m._23 * v1 + m._33 * v2;
+		var vresult_0 = m._11 * v0 + m._21 * v1 + m._31 * v2;
+		var vresult_1 = m._12 * v0 + m._22 * v1 + m._32 * v2;
+		var vresult_2 = m._13 * v0 + m._23 * v1 + m._33 * v2;
 
 		v.set(vresult_0, vresult_1, vresult_2);
 	}
@@ -412,7 +416,7 @@ class Util {
 		#end
 	}
 
-	public static function isSafari() {
+	public static inline function isSafari() {
 		#if js
 		var reg = ~/^((?!chrome|android).)*safari/;
 		return reg.match(js.Browser.navigator.userAgent);
@@ -496,7 +500,7 @@ class Util {
 		#end
 	}
 
-	public static function toASCII(bytes:haxe.io.Bytes) {
+	public static inline function toASCII(bytes:haxe.io.Bytes) {
 		var totBytes = new BytesBuffer();
 		for (i in 0...bytes.length) {
 			var utfbytes = Bytes.ofString(String.fromCharCode(bytes.get(i)));
@@ -506,7 +510,7 @@ class Util {
 		return totBytes.getBytes().toString();
 	}
 
-	public static function getPlatform() {
+	public static inline function getPlatform() {
 		#if js
 		return js.Browser.navigator.platform;
 		#end

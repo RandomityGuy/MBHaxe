@@ -14,6 +14,7 @@ class Marbleland {
 	public static var goldMissions = [];
 	public static var ultraMissions = [];
 	public static var platinumMissions = [];
+	public static var multiplayerMissions = [];
 	public static var missions:Map<Int, Mission> = [];
 
 	public static function init() {
@@ -22,6 +23,7 @@ class Marbleland {
 			Console.log('Loaded gold customs: ${goldMissions.length}');
 			Console.log('Loaded ultra customs: ${ultraMissions.length}');
 			Console.log('Loaded platinum customs: ${platinumMissions.length}');
+			Console.log('Loaded multiplayer customs: ${multiplayerMissions.length}');
 			// Load the marbleland level from JS
 			#if js
 			var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);
@@ -51,9 +53,11 @@ class Marbleland {
 				continue;
 			if (!['gold', 'platinum', 'ultra', 'platinumquest'].contains(missionData.modification))
 				continue;
-			if (missionData.gameMode != null && missionData.gameMode != 'null')
+			if (missionData.gameMode != null && !(missionData.gameMode == 'null' || missionData.gameMode.toLowerCase() == 'hunt'))
 				continue;
-			if (missionData.gameType != 'single')
+
+			var isMultiplayer = missionData.gameType == 'multi';
+			if (isMultiplayer && (missionData.gameMode == null || missionData.gameMode.toLowerCase() != 'hunt'))
 				continue;
 
 			var mission = new Mission();
@@ -77,8 +81,14 @@ class Marbleland {
 			mission.hasEgg = missionData.hasEgg;
 			mission.isClaMission = true;
 			mission.addedAt = missionData.addedAt;
+			mission.gameMode = missionData.gameMode;
+			if (mission.gameMode != null)
+				mission.gameMode = mission.gameMode.toLowerCase();
 
 			var game = missionData.modification;
+			if (isMultiplayer) {
+				game = 'multiplayer';
+			}
 
 			if (game == 'platinum') {
 				if (platDupes.exists(mission.title + mission.description))
@@ -94,6 +104,8 @@ class Marbleland {
 					ultraMissions.push(mission);
 				case 'platinum':
 					platinumMissions.push(mission);
+				case 'multiplayer':
+					multiplayerMissions.push(mission);
 			}
 
 			missions.set(mission.id, mission);
@@ -121,6 +133,14 @@ class Marbleland {
 		}
 		@:privateAccess ultraMissions[ultraMissions.length - 1].next = ultraMissions[0];
 		ultraMissions[ultraMissions.length - 1].index = ultraMissions.length - 1;
+
+		multiplayerMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+		for (i in 0...multiplayerMissions.length - 1) {
+			@:privateAccess multiplayerMissions[i].next = multiplayerMissions[i + 1];
+			multiplayerMissions[i].index = i;
+		}
+		@:privateAccess multiplayerMissions[multiplayerMissions.length - 1].next = multiplayerMissions[0];
+		multiplayerMissions[multiplayerMissions.length - 1].index = multiplayerMissions.length - 1;
 	}
 
 	public static function getMissionImage(id:Int, cb:Image->Void) {

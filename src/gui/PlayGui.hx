@@ -1,5 +1,7 @@
 package gui;
 
+import net.NetPacket.ScoreboardPacket;
+import net.Net;
 import src.ProfilerUI;
 import hxd.App;
 import hxd.res.Image;
@@ -30,10 +32,26 @@ import hxd.res.Sound;
 import h3d.mat.Texture;
 import src.Settings;
 import src.Util;
+import src.AudioManager;
 
-typedef MiddleMessage = {
-	ctrl:GuiText,
-	age:Float,
+@:publicFields
+@:structInit
+class MiddleMessage {
+	var ctrl:GuiText;
+	var age:Float;
+}
+
+@:publicFields
+@:structInit
+class PlayerInfo {
+	var id:Int;
+	var name:String;
+	var us:Bool;
+	var score:Int;
+	var r:Int;
+	var y:Int;
+	var b:Int;
+	var p:Int;
 }
 
 class PlayGui {
@@ -44,6 +62,10 @@ class PlayGui {
 	var timerNumbers:Array<GuiAnim> = [];
 	var timerPoint:GuiAnim;
 	var timerColon:GuiAnim;
+
+	var countdownNumbers:Array<GuiAnim> = [];
+	var countdownPoint:GuiAnim;
+	var countdownIcon:GuiImage;
 
 	var gemCountNumbers:Array<GuiAnim> = [];
 	var gemCountSlash:GuiImage;
@@ -58,6 +80,11 @@ class PlayGui {
 	var powerupImageSceneTargetBitmap:Bitmap;
 	var powerupImageObject:DtsObject;
 
+	var blastBarTile:h2d.Tile;
+	var blastBarGreenTile:h2d.Tile;
+	var blastBarGrayTile:h2d.Tile;
+	var blastBarChargedTile:h2d.Tile;
+
 	var RSGOCenterText:Anim;
 
 	var helpTextForeground:GuiText;
@@ -69,11 +96,20 @@ class PlayGui {
 	var blastFill:GuiImage;
 	var blastFrame:GuiImage;
 
+	var playerListContainer:GuiControl;
+	var playerListCtrl:GuiMLTextListCtrl;
+	var playerListScoresCtrl:GuiMLTextListCtrl;
+	var playerList:Array<PlayerInfo> = [];
+
 	var imageResources:Array<Resource<Image>> = [];
 	var textureResources:Array<Resource<Texture>> = [];
 	var soundResources:Array<Resource<Sound>> = [];
 
 	var playGuiCtrl:GuiControl;
+	var chatCtrl:ChatCtrl;
+	var spectatorCtrl:GuiControl;
+	var spectatorTxt:GuiMLText;
+	var spectatorTxtMode:Int = -1;
 
 	var resizeEv:Void->Void;
 
@@ -86,6 +122,26 @@ class PlayGui {
 	public function dispose() {
 		if (_init) {
 			playGuiCtrl.dispose();
+
+			if (playerListContainer != null) {
+				playerListContainer.dispose();
+				playerListContainer = null;
+				playerListCtrl.dispose();
+				playerListCtrl = null;
+				playerListScoresCtrl.dispose();
+				playerListScoresCtrl = null;
+			}
+
+			if (chatCtrl != null) {
+				chatCtrl.dispose();
+				chatCtrl = null;
+			}
+
+			if (spectatorCtrl != null) {
+				spectatorCtrl.dispose();
+				spectatorCtrl = null;
+			}
+
 			gemImageScene.dispose();
 			gemImageSceneTarget.dispose();
 			gemImageSceneTargetBitmap.remove();
@@ -136,6 +192,12 @@ class PlayGui {
 			timerNumbers.push(new GuiAnim(numberTiles));
 		}
 
+		if (MarbleGame.instance.world.isMultiplayer) {
+			for (i in 0...3) {
+				countdownNumbers.push(new GuiAnim(numberTiles));
+			}
+		}
+
 		for (i in 0...6) {
 			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
@@ -150,29 +212,39 @@ class PlayGui {
 		powerupBox = new GuiImage(ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile());
 		initTimer();
 		initGemCounter(() -> {
+			initCenterText();
+			initPowerupBox();
+			if (game == 'ultra' || Net.isMP)
+				initBlastBar();
+			initTexts();
+			if (Settings.optionsSettings.frameRateVis)
+				initFPSMeter();
+
+			if (MarbleGame.instance.world.isMultiplayer) {
+				initPlayerList();
+				initChatHud();
+				if (Net.hostSpectate || Net.clientSpectate)
+					initSpectatorMenu();
+
+				initGemCountdownTimer();
+			}
+
+			if (Util.isTouchDevice()) {
+				MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra' || MarbleGame.instance.world.isMultiplayer);
+			}
+
+			playGuiCtrl.render(scene2d);
+
+			resizeEv = () -> {
+				var wnd = Window.getInstance();
+				playGuiCtrl.render(MarbleGame.canvas.scene2d);
+				powerupImageSceneTargetBitmap.x = wnd.width - 88;
+			};
+
+			Window.getInstance().addResizeEvent(resizeEv);
+
 			onFinish();
 		});
-		initCenterText();
-		initPowerupBox();
-		if (game == 'ultra')
-			initBlastBar();
-		initTexts();
-		if (Settings.optionsSettings.frameRateVis)
-			initFPSMeter();
-
-		if (Util.isTouchDevice()) {
-			MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra');
-		}
-
-		playGuiCtrl.render(scene2d);
-
-		resizeEv = () -> {
-			var wnd = Window.getInstance();
-			playGuiCtrl.render(MarbleGame.canvas.scene2d);
-			powerupImageSceneTargetBitmap.x = wnd.width - 88;
-		};
-
-		Window.getInstance().addResizeEvent(resizeEv);
 	}
 
 	public function initTimer() {
@@ -241,6 +313,44 @@ class PlayGui {
 		playGuiCtrl.addChild(timerCtrl);
 	}
 
+	public function initGemCountdownTimer() {
+		var timerCtrl = new GuiControl();
+		timerCtrl.horizSizing = HorizSizing.Center;
+		timerCtrl.position = new Vector(215, 1);
+		timerCtrl.extent = new Vector(374, 58);
+
+		countdownNumbers[0].position = new Vector(33, 10);
+		countdownNumbers[0].extent = new Vector(28, 37);
+
+		countdownNumbers[1].position = new Vector(49, 10);
+		countdownNumbers[1].extent = new Vector(28, 37);
+
+		var pointCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			ResourceLoader.getResource('data/ui/game/numbers/point_red.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+
+		countdownPoint = new GuiAnim(pointCols);
+		countdownPoint.position = new Vector(59, 10);
+		countdownPoint.extent = new Vector(28, 37);
+
+		countdownNumbers[2].position = new Vector(70, 10);
+		countdownNumbers[2].extent = new Vector(28, 37);
+
+		countdownIcon = new GuiImage(ResourceLoader.getResource("data/ui/game/timerhuntrespawn.png", ResourceLoader.getImage, this.imageResources).toTile());
+		countdownIcon.position = new Vector(0, 10);
+		countdownIcon.extent = new Vector(36, 36);
+
+		timerCtrl.addChild(countdownIcon);
+		timerCtrl.addChild(countdownNumbers[0]);
+		timerCtrl.addChild(countdownNumbers[1]);
+		timerCtrl.addChild(countdownPoint);
+		timerCtrl.addChild(countdownNumbers[2]);
+
+		playGuiCtrl.addChild(timerCtrl);
+	}
+
 	public function initCenterText() {
 		RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[0].width * Settings.uiScale / 2;
 		RSGOCenterText.y = scene2d.height * 0.3; // - RSGOCenterText.frames[0].height / 2;
@@ -267,6 +377,23 @@ class PlayGui {
 			this.RSGOCenterText.currentFrame = 3;
 			RSGOCenterText.x = scene2d.width / 2 - RSGOCenterText.frames[3].width * Settings.uiScale / 2;
 		}
+	}
+
+	public function doStateChangeSound(state:String) {
+		static var curState = "none";
+		if (curState != state) {
+			if (state == "ready") {
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/ready.wav', ResourceLoader.getAudio, @:privateAccess this.soundResources));
+			}
+			if (state == "set") {
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/set.wav', ResourceLoader.getAudio, @:privateAccess this.soundResources));
+			}
+			if (state == "go") {
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/go.wav', ResourceLoader.getAudio, @:privateAccess this.soundResources));
+			}
+		}
+
+		curState = state;
 	}
 
 	public function initGemCounter(onFinish:Void->Void) {
@@ -316,6 +443,9 @@ class PlayGui {
 
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
 		var gemColor = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
+
+		if (MarbleGame.instance.world.mission.missionInfo.game == "PlatinumQuest")
+			gemColor = "platinum";
 
 		gemImageObject = new DtsObject();
 		gemImageObject.dtsPath = "data/shapes/items/gem.dts";
@@ -452,6 +582,22 @@ class PlayGui {
 		playGuiCtrl.addChild(fpsMeterCtrl);
 	}
 
+	public function initChatHud() {
+		this.chatCtrl = new ChatCtrl();
+		this.chatCtrl.position = new Vector(playGuiCtrl.extent.x - 201, 150);
+		this.chatCtrl.extent = new Vector(200, 250);
+		this.chatCtrl.horizSizing = Left;
+		this.playGuiCtrl.addChild(chatCtrl);
+	}
+
+	public inline function isChatFocused() {
+		return this.chatCtrl?.chatFocused;
+	}
+
+	public inline function addChatMessage(str:String) {
+		this.chatCtrl.addChatMessage(str);
+	}
+
 	function initBlastBar() {
 		blastBar = new GuiControl();
 		blastBar.position = new Vector(6, 445);
@@ -468,29 +614,338 @@ class PlayGui {
 		blastFrame.position = new Vector(0, 0);
 		blastFrame.extent = new Vector(120, 28);
 		blastBar.addChild(blastFrame);
+
+		blastBarTile = ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile();
+		blastBarGreenTile = ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile();
+		blastBarGrayTile = ResourceLoader.getResource("data/ui/game/blastbar_bargray.png", ResourceLoader.getImage, this.imageResources).toTile();
+		blastBarChargedTile = ResourceLoader.getResource("data/ui/game/blastbar_charged.png", ResourceLoader.getImage, this.imageResources).toTile();
 	}
 
 	public function setBlastValue(value:Float) {
+		if (Net.clientSpectate || Net.hostSpectate) {
+			MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
+			return; // Is not changed
+		}
 		if (value <= 1) {
 			if (blastFill.extent.y == 16) { // Was previously charged
-				blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile();
+				blastFrame.bmp.tile = blastBarTile;
 			}
 			var oldVal = blastFill.extent.x;
 			blastFill.extent = new Vector(Util.lerp(0, 110, value), 17);
 			if (oldVal < 22 && blastFill.extent.x >= 22) {
-				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile();
+				blastFill.bmp.tile = blastBarGreenTile;
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 			}
 			if (oldVal >= 22 && blastFill.extent.x < 22) {
-				blastFill.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_bargray.png", ResourceLoader.getImage, this.imageResources).toTile();
+				blastFill.bmp.tile = blastBarGrayTile;
 				MarbleGame.instance.touchInput.blastbutton.setEnabled(false);
 			}
 		} else {
 			blastFill.extent = new Vector(0, 16); // WE will just use this extra number to store whether it was previously charged or not
-			blastFrame.bmp.tile = ResourceLoader.getResource("data/ui/game/blastbar_charged.png", ResourceLoader.getImage, this.imageResources).toTile();
+			blastFrame.bmp.tile = blastBarChargedTile;
 			MarbleGame.instance.touchInput.blastbutton.setEnabled(true);
 		}
 		this.blastBar.render(scene2d);
+	}
+
+	function initPlayerList() {
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
+		playerListContainer = new GuiControl();
+		playerListContainer.horizSizing = Right;
+		playerListContainer.vertSizing = Height;
+		playerListContainer.position = new Vector(20, 100);
+		playerListContainer.extent = new Vector(380, 380);
+		this.playGuiCtrl.addChild(playerListContainer);
+
+		var imgLoader = (s:String) -> {
+			var t = switch (s) {
+				case "high":
+					ResourceLoader.getResource("data/ui/mp/play/connection-high.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "medium":
+					ResourceLoader.getResource("data/ui/mp/play/connection-medium.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "low":
+					ResourceLoader.getResource("data/ui/mp/play/connection-low.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "matanny":
+					ResourceLoader.getResource("data/ui/mp/play/connection-matanny.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					ResourceLoader.getResource("data/ui/mp/play/connection-unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
+				default:
+					null;
+			};
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
+		}
+
+		playerListCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader, {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			color: 0,
+			alpha: 1
+		});
+
+		playerListCtrl.position = new Vector(33, 3);
+		playerListCtrl.extent = new Vector(210, 271);
+		playerListCtrl.scrollable = true;
+		playerListCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListCtrl);
+
+		playerListScoresCtrl = new GuiMLTextListCtrl(bfont, [], imgLoader, {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			color: 0,
+			alpha: 1
+		});
+
+		playerListScoresCtrl.position = new Vector(233, 3);
+		playerListScoresCtrl.extent = new Vector(280, 271);
+		playerListScoresCtrl.scrollable = true;
+		playerListScoresCtrl.onSelectedFunc = (sel) -> {}
+		playerListContainer.addChild(playerListScoresCtrl);
+	}
+
+	public function redrawPlayerList() {
+		var pl = [];
+		var plScores = [];
+		var col0 = "#CFB52B";
+		var col1 = "#CDCDCD";
+		var col2 = "#D19275";
+		var col3 = "#FFEE99";
+		var prevLead = playerList[0].us;
+		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
+		for (i in 0...playerList.length) {
+			var item = playerList[i];
+			var color = switch (i) {
+				case 0:
+					col0;
+				case 1:
+					col1;
+				case 2:
+					col2;
+				default:
+					col3;
+			};
+			var isSpectating = false;
+			if (item.us) {
+				if (Net.isHost)
+					isSpectating = Net.hostSpectate;
+				if (Net.isClient)
+					isSpectating = Net.clientSpectate;
+			} else {
+				isSpectating = Net.clientIdMap[item.id].spectator;
+			}
+			pl.push('<font color="${color}">${i + 1}. ${isSpectating ? "[S] " : ""}${Util.rightPad(item.name, 25, 3)}</font>');
+			var connPing = item.us ? (Net.isHost ? 0 : Net.clientConnection.pingTicks) : (item.id == 0 ? 0 : Net.clientIdMap[item.id].pingTicks);
+			var pingStatus = "unknown";
+			if (connPing <= 5)
+				pingStatus = "high";
+			else if (connPing <= 8)
+				pingStatus = "medium";
+			else if (connPing <= 16)
+				pingStatus = "low";
+			else if (connPing < 32)
+				pingStatus = "matanny";
+			plScores.push('<font color="${color}">${item.score}</font><offset value="${50 * Settings.uiScale}"><img src="${pingStatus}"></img></offset>');
+		}
+		playerListCtrl.setTexts(pl);
+		playerListScoresCtrl.setTexts(plScores);
+
+		if ((playerList[0].us && !prevLead)) {
+			gemCountNumbers[0].anim.currentFrame += 10;
+			gemCountNumbers[1].anim.currentFrame += 10;
+			gemCountNumbers[2].anim.currentFrame += 10;
+		}
+		if (prevLead && !playerList[0].us) {
+			gemCountNumbers[0].anim.currentFrame -= 10;
+			gemCountNumbers[1].anim.currentFrame -= 10;
+			gemCountNumbers[2].anim.currentFrame -= 10;
+		}
+	}
+
+	public function addPlayer(id:Int, name:String, us:Bool) {
+		if (playerListCtrl != null) {
+			playerList.push({
+				id: id,
+				name: name,
+				us: us,
+				score: 0,
+				r: 0,
+				y: 0,
+				b: 0,
+				p: 0
+			});
+			redrawPlayerList();
+		}
+	}
+
+	public function removePlayer(id:Int) {
+		if (playerListCtrl != null) {
+			var f = playerList.filter(x -> x.id == id);
+			if (f.length != 0)
+				playerList.remove(f[0]);
+			redrawPlayerList();
+		}
+	}
+
+	public function incrementPlayerScore(id:Int, score:Int) {
+		var f = playerList.filter(x -> x.id == id);
+		if (f.length != 0) {
+			f[0].score += score;
+			if (score == 1) {
+				f[0].r += 1;
+			}
+			if (score == 2) {
+				f[0].y += 1;
+			}
+			if (score == 5) {
+				f[0].b += 1;
+			}
+			if (score == 10) {
+				f[0].p += 1;
+			}
+			if (f[0].us && Net.isClient) {
+				@:privateAccess formatGemHuntCounter(f[0].score);
+			}
+		}
+
+		if (id == Net.clientId) {
+			if (Net.isClient)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, this.soundResources));
+		} else if (Net.isClient)
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/opponentdiamond.wav', ResourceLoader.getAudio, this.soundResources));
+
+		redrawPlayerList();
+	}
+
+	public function updatePlayerScores(scoreboardPacket:ScoreboardPacket) {
+		for (player in playerList) {
+			player.score = scoreboardPacket.scoreBoard.exists(player.id) ? scoreboardPacket.scoreBoard.get(player.id) : 0;
+			player.r = scoreboardPacket.rBoard.exists(player.id) ? scoreboardPacket.rBoard.get(player.id) : 0;
+			player.y = scoreboardPacket.yBoard.exists(player.id) ? scoreboardPacket.yBoard.get(player.id) : 0;
+			player.b = scoreboardPacket.bBoard.exists(player.id) ? scoreboardPacket.bBoard.get(player.id) : 0;
+			player.p = scoreboardPacket.pBoard.exists(player.id) ? scoreboardPacket.pBoard.get(player.id) : 0;
+		}
+		redrawPlayerList();
+	}
+
+	public function resetPlayerScores() {
+		for (player in playerList) {
+			player.score = 0;
+		}
+
+		redrawPlayerList();
+	}
+
+	public function initSpectatorMenu() {
+		spectatorCtrl = new GuiControl();
+		spectatorCtrl.vertSizing = Top;
+		spectatorCtrl.position = new Vector(0, 330);
+		spectatorCtrl.extent = new Vector(302, 150);
+
+		var specWnd = new GuiImage(ResourceLoader.getResource("data/ui/mp/play/spectator.png", ResourceLoader.getImage, this.imageResources).toTile());
+		specWnd.horizSizing = Width;
+		specWnd.vertSizing = Top;
+		specWnd.position = new Vector(0, 0);
+		specWnd.extent = new Vector(302, 150);
+
+		spectatorCtrl.addChild(specWnd);
+
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
+		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
+		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+
+		var domcasual32 = domcasual24b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+
+		var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arialb14b = new BitmapFont(arialb14fontdata.entry);
+		@:privateAccess arialb14b.loader = ResourceLoader.loader;
+		var arialBold14 = arialb14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+
+		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
+		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
+		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
+		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var markerFelt24 = markerFelt32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		var markerFelt20 = markerFelt32b.toSdfFont(cast 18.5 * Settings.uiScale, MultiChannel);
+		var markerFelt18 = markerFelt32b.toSdfFont(cast 17 * Settings.uiScale, MultiChannel);
+		var markerFelt26 = markerFelt32b.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
+
+		function mlFontLoader(text:String) {
+			switch (text) {
+				case "DomCasual24":
+					return domcasual24;
+				case "Arial14":
+					return arial14;
+				case "ArialBold14":
+					return arialBold14;
+				case "MarkerFelt32":
+					return markerFelt32;
+				case "MarkerFelt24":
+					return markerFelt24;
+				case "MarkerFelt18":
+					return markerFelt18;
+				case "MarkerFelt20":
+					return markerFelt20;
+				case "MarkerFelt26":
+					return markerFelt26;
+				default:
+					return null;
+			}
+		}
+
+		spectatorTxt = new GuiMLText(markerFelt24, mlFontLoader);
+		spectatorTxt.position = new Vector(6, 9);
+		spectatorTxt.extent = new Vector(282, 14);
+		spectatorTxt.text.textColor = 0x000000;
+
+		specWnd.addChild(spectatorTxt);
+		playGuiCtrl.addChild(spectatorCtrl);
+	}
+
+	public function setSpectateMenu(enabled:Bool) {
+		if (enabled && spectatorCtrl == null) {
+			initSpectatorMenu();
+			spectatorCtrl.render(MarbleGame.canvas.scene2d, @:privateAccess playGuiCtrl._flow);
+			blastFill.bmp.visible = false;
+			blastFrame.bmp.visible = false;
+			return true;
+		}
+		if (!enabled && spectatorCtrl != null) {
+			spectatorCtrl.dispose();
+			spectatorCtrl = null;
+			blastFill.bmp.visible = true;
+			blastFrame.bmp.visible = true;
+			spectatorTxtMode = -1;
+			return true;
+		}
+		return false;
+	}
+
+	public function setSpectateMenuText(mode:Int) {
+		if (spectatorTxtMode != mode) {
+			if (mode == 0) {
+				spectatorTxt.text.text = '<p align="center"><font face="MarkerFelt32">Spectator Info</font></p>
+					<font face="MarkerFelt24">Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}</font>';
+			}
+			if (mode == 1) {
+				spectatorTxt.text.text = '<p align="center"><font face="MarkerFelt32">Spectator Info</font></p>
+					<font face="MarkerFelt24">Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}
+					<br/>Prev Player: ${Util.getKeyForButton2(Settings.controlsSettings.left)}
+					<br/>Next Player: ${Util.getKeyForButton2(Settings.controlsSettings.right)}</font>';
+			}
+
+			spectatorTxtMode = mode;
+		}
 	}
 
 	public function setHelpTextOpacity(value:Float) {
@@ -568,6 +1023,8 @@ class PlayGui {
 	}
 
 	public function formatGemCounter(collected:Int, total:Int) {
+		if (MarbleGame.instance.world.isMultiplayer)
+			return;
 		if (total == 0) {
 			for (number in gemCountNumbers) {
 				number.anim.visible = false;
@@ -596,6 +1053,33 @@ class PlayGui {
 		gemCountNumbers[3].anim.currentFrame = totalHundredths;
 		gemCountNumbers[4].anim.currentFrame = totalTenths;
 		gemCountNumbers[5].anim.currentFrame = totalOnes;
+	}
+
+	public function formatGemHuntCounter(collected:Int) {
+		var collectedHundredths = Math.floor(collected / 100);
+		var collectedTenths = Math.floor(collected / 10) % 10;
+		var collectedOnes = collected % 10;
+
+		if (collected >= 100)
+			gemCountNumbers[0].anim.visible = true;
+		else
+			gemCountNumbers[0].anim.visible = false;
+		if (collected >= 10)
+			gemCountNumbers[1].anim.visible = true;
+		else
+			gemCountNumbers[1].anim.visible = false;
+		gemCountNumbers[2].anim.visible = true;
+		gemCountNumbers[3].anim.visible = false;
+		gemCountNumbers[4].anim.visible = false;
+		gemCountNumbers[5].anim.visible = false;
+
+		var off = playerList[0].us ? 10 : 0;
+
+		gemCountNumbers[0].anim.currentFrame = off + collectedHundredths;
+		gemCountNumbers[1].anim.currentFrame = off + collectedTenths;
+		gemCountNumbers[2].anim.currentFrame = off + collectedOnes;
+		gemCountSlash.bmp.visible = false;
+		gemImageSceneTargetBitmap.visible = true;
 	}
 
 	// 0: default
@@ -628,6 +1112,44 @@ class PlayGui {
 		timerColon.anim.currentFrame = color;
 	}
 
+	public function formatCountdownTimer(time:Float, color:Int = 0) {
+		if (time == 0) {
+			countdownNumbers[0].anim.visible = false;
+			countdownNumbers[1].anim.visible = false;
+			countdownNumbers[2].anim.visible = false;
+			countdownPoint.anim.visible = false;
+			countdownIcon.bmp.visible = false;
+		} else {
+			countdownNumbers[0].anim.visible = true;
+			countdownNumbers[1].anim.visible = true;
+			countdownNumbers[2].anim.visible = true;
+			countdownPoint.anim.visible = true;
+			countdownIcon.bmp.visible = true;
+		}
+
+		var et = time * 1000;
+		var hundredth = Math.floor((et % 1000) / 10);
+		var totalSeconds = Math.floor(et / 1000);
+		var seconds = totalSeconds % 60;
+
+		var secondsOne = seconds % 10;
+		var secondsTen = (seconds - secondsOne) / 10;
+		var hundredthOne = hundredth % 10;
+		var hundredthTen = (hundredth - hundredthOne) / 10;
+
+		if (secondsTen > 0) {
+			countdownNumbers[0].anim.visible = true;
+			countdownNumbers[0].anim.currentFrame = secondsTen + color * 10;
+		} else {
+			countdownNumbers[0].anim.visible = false;
+		}
+
+		countdownNumbers[1].anim.currentFrame = secondsOne + color * 10;
+		countdownNumbers[2].anim.currentFrame = hundredthTen + color * 10;
+
+		countdownPoint.anim.currentFrame = color;
+	}
+
 	public function render(engine:h3d.Engine) {
 		engine.pushTarget(this.gemImageSceneTarget);
 
@@ -654,6 +1176,9 @@ class PlayGui {
 			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} fps';
 		}
 		this.updateMiddleMessages(timeState.dt);
+		if (Net.isMP) {
+			this.chatCtrl.updateChat(timeState.dt);
+		}
 	}
 
 	function updateMiddleMessages(dt:Float) {
@@ -674,6 +1199,8 @@ class PlayGui {
 	}
 
 	public function addMiddleMessage(text:String, color:Int) {
+		if (this.middleMessages.length > 10)
+			return;
 		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
 		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
 		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
@@ -687,9 +1214,14 @@ class PlayGui {
 		middleMsg.text.text = text;
 		middleMsg.justify = Center;
 		middleMsg.text.textColor = color;
-		middleMsg.text.filter = new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
+		middleMsg.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0
+		}; // new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg);
-		middleMsg.render(scene2d);
+		middleMsg.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
 		this.middleMessages.push({ctrl: middleMsg, age: 0});

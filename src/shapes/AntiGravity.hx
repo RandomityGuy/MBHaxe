@@ -6,6 +6,7 @@ import src.TimeState;
 import h3d.Vector;
 import src.DtsObject;
 import src.MarbleWorld;
+import net.NetPacket.MarbleNetFlags;
 
 class AntiGravity extends PowerUp {
 	public function new(element:MissionElementItem, norespawn:Bool = false) {
@@ -20,23 +21,23 @@ class AntiGravity extends PowerUp {
 			this.cooldownDuration = Math.NEGATIVE_INFINITY;
 	}
 
-	public function pickUp():Bool {
+	public function pickUp(marble:src.Marble):Bool {
 		var direction = new Vector(0, 0, -1);
 		direction.transform(this.getRotationQuat().toMatrix());
-		return !direction.equals(this.level.currentUp);
+		return !direction.equals(marble.currentUp);
 	}
 
-	public function use(timeState:TimeState) {
+	public function use(marble:src.Marble, timeState:TimeState) {
 		if (!this.level.rewinding) {
 			var direction = new Vector(0, 0, -1);
 			direction.transform(this.getRotationQuat().toMatrix());
-			this.level.setUp(direction, timeState);
+			if (marble == level.marble)
+				this.level.setUp(marble, direction, timeState);
+			else {
+				@:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
+				marble.currentUp.load(direction);
+			}
 		}
-		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
-		// if (!this.level.rewinding)
-		//	AudioManager.play(this.sounds[1]);
-		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
-		// this.level.deselectPowerUp();
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

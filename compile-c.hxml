@@ -1,6 +1,8 @@
 -cp src
 -lib heaps
 -lib hlsdl
+-lib datachannel
+-lib colyseus-websocket
 -D highDPI
 -D flow_border
 -D hlgen.makefile=vs2019

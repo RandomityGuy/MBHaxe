@@ -7,9 +7,14 @@ import src.TimeState;
 import src.DtsObject;
 import src.ResourceLoaderWorker;
 import src.ResourceLoader;
+import src.Marble;
 
 class Gem extends DtsObject {
 	public var pickedUp:Bool;
+	public var netIndex:Int;
+	public var pickUpClient:Int = -1;
+	public var radarGemColor:Int;
+	public var radarGemIndex:Int;
 
 	var gemColor:String;
 
@@ -30,6 +35,47 @@ class Gem extends DtsObject {
 		this.identifier = "Gem" + color;
 		this.matNameOverride.set('base.gem', color + ".gem");
 		gemColor = color + ".gem";
+		var colLower = color.toLowerCase();
+		switch (colLower) {
+			case "red":
+				radarGemColor = 0xFF0000;
+				radarGemIndex = 0;
+			case "blue":
+				radarGemColor = 0x6666E6;
+				radarGemIndex = 2;
+
+			case "yellow":
+				radarGemColor = 0xFEFF00;
+				radarGemIndex = 1;
+
+			case "green":
+				radarGemColor = 0x66E666;
+				radarGemIndex = 3;
+
+			case "orange":
+				radarGemColor = 0xE6BA66;
+				radarGemIndex = 4;
+
+			case "pink":
+				radarGemColor = 0xE666E5;
+				radarGemIndex = 5;
+
+			case "purple":
+				radarGemColor = 0xC566E6;
+				radarGemIndex = 6;
+
+			case "turquoise":
+				radarGemColor = 0x66E5E6;
+				radarGemIndex = 7;
+
+			case "black":
+				radarGemColor = 0x666666;
+				radarGemIndex = 8;
+
+			case "platinum":
+				radarGemColor = 0xA5A5A5;
+				radarGemIndex = 9;
+		}
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -51,18 +97,19 @@ class Gem extends DtsObject {
 		}
 	}
 
-	override function onMarbleInside(timeState:TimeState) {
-		super.onMarbleInside(timeState);
+	override function onMarbleInside(marble:Marble, timeState:TimeState) {
+		super.onMarbleInside(marble, timeState);
 		if (this.pickedUp || this.level.rewinding)
 			return;
 		this.pickedUp = true;
 		this.setOpacity(0); // Hide the gem
-		this.level.pickUpGem(this);
+		this.level.pickUpGem(marble, this);
 		// this.level.replay.recordMarbleInside(this);
 	}
 
 	override function reset() {
 		this.pickedUp = false;
+		this.pickUpClient = -1;
 		this.setOpacity(1);
 	}
 }

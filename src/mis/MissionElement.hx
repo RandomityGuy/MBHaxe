@@ -58,6 +58,20 @@ class MissionElementScriptObject extends MissionElementBase {
 	var music:String;
 	var alarmstarttime:String;
 	var game:String;
+	var gamemode:String;
+	var maxgemsperspawn:String;
+	var radiusfromgem:String;
+	var spawnblock:String;
+	var overviewwidth:String;
+	var overviewheight:String;
+	var spawnchancered:String;
+	var spawnchanceyellow:String;
+	var spawnchanceblue:String;
+	var spawnchanceplatinum:String;
+	var redspawnchance:String;
+	var yellowspawnchance:String;
+	var bluespawnchance:String;
+	var platinumspawnchance:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;
@@ -248,6 +262,7 @@ class MissionElementTrigger extends MissionElementBase {
 	var keepangular:Null<String>;
 	var keepcamera:Null<String>;
 	var camerayaw:Null<String>;
+	var g:Null<String>;
 
 	public function new() {
 		_type = MissionElementType.Trigger;

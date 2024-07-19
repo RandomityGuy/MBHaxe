@@ -87,11 +87,19 @@ class EnterNameDlg extends GuiControl {
 
 		var enterNameText = new GuiMLText(domcasual32, mlFontLoader);
 		enterNameText.text.textColor = 0xFFFFFF;
-		enterNameText.text.filter = new DropShadow(1.414, 0.785, 0x7777777F, 1, 0, 0.4, 1, true);
+		enterNameText.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0
+		};
 		enterNameText.position = new Vector(37, 23);
 		enterNameText.extent = new Vector(345, 85);
 		// enterNameText.justify = Center;
-		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="DomCasual48">Well Done!<br/></font><font face="DomCasual32">You have the${["", " second", " third", " fourth", " fifth"][place]} top time!</font></p>';
+		if (place != -1)
+			enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="DomCasual48">Well Done!<br/></font><font face="DomCasual32">You have the${["", " second", " third", " fourth", " fifth"][place]} top time!</font></p>';
+		else
+			enterNameText.text.text = '<p align="center"><font face="DomCasual32">Enter your desired display name</font></p>';
 		dlg.addChild(enterNameText);
 
 		dlg.addChild(enterNameEdit);

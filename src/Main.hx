@@ -1,5 +1,6 @@
 package;
 
+import gui.VersionGui;
 import src.Debug;
 import src.Marbleland;
 import src.Console;
@@ -22,6 +23,8 @@ import h3d.Vector;
 import src.ProfilerUI;
 import src.Gamepad;
 import src.Http;
+import datachannel.RTC;
+import src.Renderer;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
@@ -34,6 +37,11 @@ class Main extends hxd.App {
 
 	override function init() {
 		super.init();
+
+		s3d.renderer = new Renderer();
+		#if debug
+		s3d.checkPasses = false;
+		#end
 
 		#if (hl && !android)
 		hl.UI.closeConsole();
@@ -85,6 +93,7 @@ class Main extends hxd.App {
 		#end
 
 		try {
+			RTC.init();
 			Http.init();
 			haxe.MainLoop.add(() -> Http.loop());
 			Settings.init();
@@ -95,6 +104,7 @@ class Main extends hxd.App {
 				Marbleland.init();
 				marbleGame = new MarbleGame(s2d, s3d);
 				MarbleGame.canvas.setContent(new MainMenuGui());
+				VersionGui.checkVersion();
 
 				new ProfilerUI(s2d);
 
@@ -139,6 +149,7 @@ class Main extends hxd.App {
 			// 	marbleGame.update(1 / 60);
 			// 	timeAccumulator -= 1 / 60;
 			// }
+			RTC.processEvents();
 			marbleGame.update(dt);
 			// } catch (e) {
 			// Console.error(e.message);

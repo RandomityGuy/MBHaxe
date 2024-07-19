@@ -16,7 +16,7 @@ class AbstractBumper extends DtsObject {
 	override function update(timeState:src.TimeState) {
 		// Override the keyframe
 		var currentCompletion = getCurrentCompletion(timeState);
-		this.sequenceKeyframeOverride.set(this.dts.sequences[0], currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
+		this.sequenceKeyframeOverride[0] = (currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
 
 		super.update(timeState);
 	}
@@ -27,8 +27,8 @@ class AbstractBumper extends DtsObject {
 		return completion;
 	}
 
-	override function onMarbleContact(time:TimeState, ?contact:CollisionInfo) {
-		super.onMarbleContact(time, contact);
+	override function onMarbleContact(marble:src.Marble, time:TimeState, ?contact:CollisionInfo) {
+		super.onMarbleContact(marble, time, contact);
 		if (time.timeSinceLoad - this.lastContactTime <= 0)
 			return;
 		var currentCompletion = this.getCurrentCompletion(time);

@@ -1,5 +1,6 @@
 package src;
 
+import collision.CollisionWorld;
 import src.MarbleWorld;
 import src.DifBuilder;
 import h3d.Matrix;
@@ -13,6 +14,7 @@ class InteriorObject extends GameObject {
 	public var interiorFile:String;
 	public var useInstancing = true;
 	public var level:MarbleWorld;
+	public var collisionWorld:CollisionWorld;
 
 	public function new() {
 		super();
@@ -26,6 +28,9 @@ class InteriorObject extends GameObject {
 		if (!Util.isIOSInstancingSupported()) {
 			this.useInstancing = false;
 		}
+
+		if (this.level != null)
+			this.collisionWorld = this.level.collisionWorld;
 
 		DifBuilder.loadDif(this.interiorFile, cast this, onFinish);
 	}

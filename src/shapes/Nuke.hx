@@ -1,5 +1,7 @@
 package shapes;
 
+import net.BitStream.OutputBitStream;
+import net.NetPacket.ExplodableUpdatePacket;
 import src.AudioManager;
 import src.TimeState;
 import collision.CollisionHull;
@@ -11,6 +13,7 @@ import src.ParticleSystem.ParticleData;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleWorld;
+import net.Net;
 
 final nukeParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 0.2,
@@ -89,70 +92,31 @@ final nukeSparksParticle:ParticleEmitterOptions = {
 	}
 };
 
-class Nuke extends DtsObject {
-	var disappearTime = -1e8;
-
-	var nukeParticleData:ParticleData;
-	var nukeSmokeParticleData:ParticleData;
-	var nukeSparkParticleData:ParticleData;
-
+class Nuke extends Explodable {
 	public function new() {
 		super();
 		dtsPath = "data/shapes/hazards/nuke/nuke.dts";
 		this.identifier = "Nuke";
 		this.isCollideable = true;
 
-		nukeParticleData = new ParticleData();
-		nukeParticleData.identifier = "nukeParticle";
-		nukeParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
+		particleData = new ParticleData();
+		particleData.identifier = "nukeParticle";
+		particleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
-		nukeSmokeParticleData = new ParticleData();
-		nukeSmokeParticleData.identifier = "nukeSmokeParticle";
-		nukeSmokeParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
+		smokeParticleData = new ParticleData();
+		smokeParticleData.identifier = "nukeSmokeParticle";
+		smokeParticleData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
-		nukeSparkParticleData = new ParticleData();
-		nukeSparkParticleData.identifier = "nukeSparkParticle";
-		nukeSparkParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
-	}
+		sparkParticleData = new ParticleData();
+		sparkParticleData.identifier = "nukeSparkParticle";
+		sparkParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
 
-	public override function init(level:MarbleWorld, onFinish:Void->Void) {
-		super.init(level, () -> {
-			ResourceLoader.load("sound/nukeexplode.wav").entry.load(onFinish);
-		});
-	}
+		particle = nukeParticle;
+		smokeParticle = nukeSmokeParticle;
+		sparksParticle = nukeSparksParticle;
 
-	override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
-		if (this.isCollideable && !this.level.rewinding) {
-			// marble.velocity = marble.velocity.add(vec);
-			this.disappearTime = timeState.timeSinceLoad;
-			this.setCollisionEnabled(false);
-
-			// if (!this.level.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource("data/sound/nukeexplode.wav", ResourceLoader.getAudio, this.soundResources));
-			this.level.particleManager.createEmitter(nukeParticle, nukeParticleData, this.getAbsPos().getPosition());
-			this.level.particleManager.createEmitter(nukeSmokeParticle, nukeSmokeParticleData, this.getAbsPos().getPosition());
-			this.level.particleManager.createEmitter(nukeSparksParticle, nukeSparkParticleData, this.getAbsPos().getPosition());
-
-			var marble = this.level.marble;
-			var minePos = this.getAbsPos().getPosition();
-			var dtsCenter = this.dts.bounds.center();
-			// dtsCenter.x = -dtsCenter.x;
-			// minePos.x += dtsCenter.x;
-			// minePos.y += dtsCenter.y;
-			// minePos.z += dtsCenter.z;
-			var off = marble.getAbsPos().getPosition().sub(minePos);
-
-			var force = computeExplosionForce(off);
-			marble.applyImpulse(force, true);
-
-			// for (collider in this.colliders) {
-			// 	var hull:CollisionHull = cast collider;
-			// 	hull.force = strength;
-			// }
-		}
-		// Normally, we would add a light here, but that's too expensive for THREE, apparently.
-
-		// this.level.replay.recordMarbleContact(this);
+		renewTime = 15000;
+		explodeSoundFile = "data/sound/nukeexplode.wav";
 	}
 
 	function computeExplosionForce(distVec:Vector) {
@@ -168,15 +132,12 @@ class Nuke extends DtsObject {
 		return distVec;
 	}
 
-	override function update(timeState:TimeState) {
-		super.update(timeState);
-		if (timeState.timeSinceLoad >= this.disappearTime + 15 || timeState.timeSinceLoad < this.disappearTime) {
-			this.setHide(false);
-		} else {
-			this.setHide(true);
-		}
+	public function applyImpulse(marble:src.Marble) {
+		var minePos = this.getAbsPos().getPosition();
+		var dtsCenter = this.dts.bounds.center();
+		var off = marble.getAbsPos().getPosition().sub(minePos);
 
-		var opacity = Util.clamp((timeState.timeSinceLoad - (this.disappearTime + 15)), 0, 1);
-		this.setOpacity(opacity);
+		var force = computeExplosionForce(off);
+		marble.applyImpulse(force, true);
 	}
 }

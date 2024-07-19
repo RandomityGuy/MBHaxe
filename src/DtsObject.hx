@@ -1,5 +1,7 @@
 package src;
 
+import h3d.prim.DynamicPrimitive;
+import h3d.scene.MultiMaterial;
 import shaders.EnvMap;
 import h3d.shader.CubeMap;
 import dts.TSDrawPrimitive;
@@ -51,13 +53,6 @@ var dtsMaterials = [
 	"pball-round-bottm" => {friction: 0.5, restitution: 0.0, force: 15.0}
 ];
 
-typedef GraphNode = {
-	var index:Int;
-	var node:Node;
-	var children:Array<GraphNode>;
-	var parent:GraphNode;
-}
-
 typedef MaterialGeometry = {
 	var vertices:Array<Vector>;
 	var normals:Array<Vector>;
@@ -65,12 +60,15 @@ typedef MaterialGeometry = {
 	var indices:Array<Int>;
 }
 
-typedef SkinMeshData = {
+@:structInit
+@:publicFields
+class SkinMeshData {
 	var meshIndex:Int;
-	var vertices:Array<Vector>;
-	var normals:Array<Vector>;
+	var vertices:Array<Float>; // Turn THIS into a FloatBuffer
+	var normals:Array<Float>; // SAME HERE
 	var indices:Array<Int>;
 	var geometry:Object;
+	var primitives:Array<DynamicPolygon>;
 }
 
 @:publicFields
@@ -86,8 +84,8 @@ class DtsObject extends GameObject {
 	var materialInfos:Map<Material, Array<String>> = new Map();
 	var matNameOverride:Map<String, String> = new Map();
 
-	var sequenceKeyframeOverride:Map<Sequence, Float> = new Map();
-	var lastSequenceKeyframes:Map<Sequence, Float> = new Map();
+	var sequenceKeyframeOverride:Array<Float> = [];
+	var lastSequenceKeyframes:Array<Float> = [];
 
 	var graphNodes:Array<Object> = [];
 	var dirtyTransforms:Array<Bool> = [];
@@ -196,28 +194,33 @@ class DtsObject extends GameObject {
 						var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
 						var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+						var poly = new Polygon();
+						var usedMats = [];
 						for (k in 0...geometry.length) {
 							if (geometry[k].vertices.length == 0)
 								continue;
 
-							var poly = new Polygon(geometry[k].vertices.map(x -> x.toPoint()));
-							poly.setNormals(geometry[k].normals.map(x -> x.toPoint()));
-							poly.setUVs(geometry[k].uvs);
+							poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
+							poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
+							poly.addUVs(geometry[k].uvs);
+							poly.nextMaterial();
 
-							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
+							usedMats.push(materials[k]);
 						}
+						poly.endPrimitive();
+						var obj = new MultiMaterial(poly, usedMats, this.graphNodes[i]);
 					} else {
-						var usedMats = [];
+						// var usedMats = [];
 
-						for (prim in mesh.primitives) {
-							if (!usedMats.contains(prim.matIndex)) {
-								usedMats.push(prim.matIndex);
-							}
-						}
+						// for (prim in mesh.primitives) {
+						// 	if (!usedMats.contains(prim.matIndex)) {
+						// 		usedMats.push(prim.matIndex);
+						// 	}
+						// }
 
-						for (k in usedMats) {
-							var obj = new Object(this.graphNodes[i]);
-						}
+						// for (k in usedMats) {
+						var obj = new Object(this.graphNodes[i]);
+						// }
 					}
 				}
 			}
@@ -266,22 +269,39 @@ class DtsObject extends GameObject {
 					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
 					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+					var prims = [];
 					for (k in 0...geometry.length) {
 						if (geometry[k].vertices.length == 0)
 							continue;
 
-						var poly = new DynamicPolygon(geometry[k].vertices.map(x -> x.toPoint()));
-						poly.normals = geometry[k].normals.map(x -> x.toPoint());
-						poly.uvs = geometry[k].uvs;
+						var poly = new DynamicPolygon();
+						poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
+						poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
+						poly.addUVs(geometry[k].uvs);
 
-						var obj = new Mesh(poly, materials[k], skinObj);
+						var obj = new MultiMaterial(poly, [materials[k]], skinObj);
+
+						prims.push(poly);
+					}
+					var flatVerts = [];
+					var flatNormals = [];
+					for (v in vertices) {
+						flatVerts.push(v.x);
+						flatVerts.push(v.y);
+						flatVerts.push(v.z);
+					}
+					for (n in vertexNormals) {
+						flatNormals.push(n.x);
+						flatNormals.push(n.y);
+						flatNormals.push(n.z);
 					}
 					skinMeshData = {
 						meshIndex: i,
-						vertices: vertices,
-						normals: vertexNormals,
+						vertices: flatVerts,
+						normals: flatNormals,
 						indices: [],
-						geometry: skinObj
+						geometry: skinObj,
+						primitives: prims
 					};
 					var idx = geometry.map(x -> x.indices);
 					for (indexes in idx) {
@@ -304,10 +324,16 @@ class DtsObject extends GameObject {
 						vertices: [],
 						normals: [],
 						indices: [],
-						geometry: skinObj
+						geometry: skinObj,
+						primitives: []
 					};
 				}
 			}
+		}
+
+		for (seq in this.dts.sequences) {
+			lastSequenceKeyframes.push(0);
+			sequenceKeyframeOverride.push(-1);
 		}
 
 		if (!this.isInstanced) {
@@ -408,6 +434,10 @@ class DtsObject extends GameObject {
 					dtsshader.currentOpacity = 1;
 					if (this.identifier == "Tornado")
 						dtsshader.normalizeNormals = false; // These arent normalized
+					if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
+						dtsshader.usePremultipliedAlpha = true;
+						dtsshader.opacityMult = 3.0; // Hardcoded
+					}
 					material.mainPass.removeShader(material.textureShader);
 					material.mainPass.addShader(dtsshader);
 				}
@@ -415,7 +445,7 @@ class DtsObject extends GameObject {
 			}
 			material.shadows = false;
 			if (this.isCollideable)
-				material.receiveShadows = true;
+				material.receiveShadows = false;
 			if (material.texture == null && !iflMaterial) {
 				var dtsshader = new DtsTexture();
 				dtsshader.currentOpacity = 1;
@@ -443,10 +473,20 @@ class DtsObject extends GameObject {
 				material.shadows = false;
 			}
 			if (flags & 4 > 0) {
-				material.blendMode = BlendMode.Alpha;
-				material.mainPass.culling = h3d.mat.Data.Face.None;
-				material.receiveShadows = false;
-				material.mainPass.depthWrite = false;
+				if (this.identifier == null || !StringTools.startsWith(this.identifier, "GemBeam")) {
+					material.blendMode = BlendMode.Alpha;
+
+					material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.receiveShadows = false;
+					material.mainPass.depthWrite = false;
+				}
+				if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
+					material.blendMode = BlendMode.Alpha;
+					material.mainPass.culling = h3d.mat.Data.Face.None;
+					material.receiveShadows = false;
+					material.mainPass.blend(SrcAlpha, OneMinusSrcAlpha);
+					material.mainPass.depthWrite = false;
+				}
 			}
 			if (flags & 8 > 0) {
 				material.blendMode = BlendMode.Add;
@@ -559,32 +599,99 @@ class DtsObject extends GameObject {
 				hs.restitution = data.restitution;
 			}
 
-			for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
-				var i1 = dtsMesh.indices[i];
-				var i2 = dtsMesh.indices[i + 1];
-				var i3 = dtsMesh.indices[i + 2];
+			var drawType = primitive.matIndex & TSDrawPrimitive.TypeMask;
 
-				if (k % 2 == 0) {
-					// Swap the first and last index to mainting correct winding order
-					var temp = i1;
-					i1 = i3;
-					i3 = temp;
+			if (drawType == TSDrawPrimitive.Triangles) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
+
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001)
+						continue;
+
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.addPoint(vertex.x, vertex.y, vertex.z);
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.addNormal(normal.x, normal.y, normal.z);
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					i += 3;
 				}
+			} else if (drawType == TSDrawPrimitive.Strip) {
+				var k = 0;
+				for (i in primitive.firstElement...(primitive.firstElement + primitive.numElements - 2)) {
+					var i1 = dtsMesh.indices[i];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				for (index in [i1, i2, i3]) {
-					var vertex = vertices[index];
-					hs.addPoint(vertex.x, vertex.y, vertex.z);
-					hs.transformKeys.push(0);
+					if (k % 2 == 0) {
+						// Swap the first and last index to mainting correct winding order
+						var temp = i1;
+						i1 = i3;
+						i3 = temp;
+					}
 
-					var normal = vertexNormals[index];
-					hs.addNormal(normal.x, normal.y, normal.z);
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001)
+						continue;
+
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.addPoint(vertex.x, vertex.y, vertex.z);
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.addNormal(normal.x, normal.y, normal.z);
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					k++;
 				}
+			} else if (drawType == TSDrawPrimitive.Fan) {
+				var i = primitive.firstElement;
+				while (i < primitive.firstElement + primitive.numElements - 2) {
+					var i1 = dtsMesh.indices[primitive.firstElement];
+					var i2 = dtsMesh.indices[i + 1];
+					var i3 = dtsMesh.indices[i + 2];
 
-				hs.indices.push(hs.indices.length);
-				hs.indices.push(hs.indices.length);
-				hs.indices.push(hs.indices.length);
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001)
+						continue;
 
-				k++;
+					for (index in [i1, i2, i3]) {
+						var vertex = vertices[index];
+						hs.addPoint(vertex.x, vertex.y, vertex.z);
+						hs.transformKeys.push(0);
+
+						var normal = vertexNormals[index];
+						hs.addNormal(normal.x, normal.y, normal.z);
+					}
+
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+					hs.indices.push(hs.indices.length);
+
+					i++;
+				}
 			}
 
 			hs.generateBoundingBox();
@@ -717,7 +824,11 @@ class DtsObject extends GameObject {
 	}
 
 	public function update(timeState:TimeState) {
-		for (sequence in this.dts.sequences) {
+		if (this.currentOpacity == 0)
+			return;
+
+		for (i in 0...this.dts.sequences.length) {
+			var sequence = this.dts.sequences[i];
 			if (!this.showSequences)
 				break;
 			if (!this.hasNonVisualSequences)
@@ -733,10 +844,10 @@ class DtsObject extends GameObject {
 			var translations:Array<Vector> = null;
 			var scales:Array<Vector> = null;
 
-			var actualKeyframe = this.sequenceKeyframeOverride.exists(sequence) ? this.sequenceKeyframeOverride.get(sequence) : ((completion * sequence.numKeyFrames) % sequence.numKeyFrames);
-			if (this.lastSequenceKeyframes.get(sequence) == actualKeyframe)
+			var actualKeyframe = this.sequenceKeyframeOverride[i] != -1 ? this.sequenceKeyframeOverride[i] : ((completion * sequence.numKeyFrames) % sequence.numKeyFrames);
+			if (lastSequenceKeyframes[i] == actualKeyframe)
 				continue;
-			lastSequenceKeyframes.set(sequence, actualKeyframe);
+			lastSequenceKeyframes[i] = actualKeyframe;
 
 			var keyframeLow = Math.floor(actualKeyframe);
 			var keyframeHigh = Math.ceil(actualKeyframe) % sequence.numKeyFrames;
@@ -764,7 +875,8 @@ class DtsObject extends GameObject {
 						quat.slerp(q1, q2, t);
 						quat.normalize();
 
-						this.graphNodes[i].setRotationQuat(quat);
+						this.graphNodes[i].getRotationQuat().load(quat);
+						this.graphNodes[i].posChanged = true;
 						this.dirtyTransforms[i] = true;
 						affectedCount++;
 						// quaternions.push(quat);
@@ -773,7 +885,8 @@ class DtsObject extends GameObject {
 						var quat = new Quat(-rotation.x, rotation.y, rotation.z, -rotation.w);
 						quat.normalize();
 						quat.conjugate();
-						this.graphNodes[i].setRotationQuat(quat);
+						this.graphNodes[i].getRotationQuat().load(quat);
+						this.graphNodes[i].posChanged = true;
 						// quaternions.push(quat);
 					}
 				}
@@ -839,8 +952,8 @@ class DtsObject extends GameObject {
 			var mesh = this.dts.meshes[info.meshIndex];
 
 			for (i in 0...info.vertices.length) {
-				info.vertices[i] = new Vector();
-				info.normals[i] = new Vector();
+				info.vertices[i] = 0;
+				info.normals[i] = 0;
 			}
 
 			var boneTransformations = [];
@@ -869,46 +982,47 @@ class DtsObject extends GameObject {
 				var mat = boneTransformations[mesh.boneIndices[i]];
 
 				vec.transform(mat);
-				vec = vec.multiply(mesh.weights[i]);
+				vec.load(vec.multiply(mesh.weights[i]));
 
 				Util.m_matF_x_vectorF(mat, vec2);
-				vec2 = vec2.multiply(mesh.weights[i]);
+				vec2.load(vec2.multiply(mesh.weights[i]));
 
-				info.vertices[vIndex] = info.vertices[vIndex].add(vec);
-				info.normals[vIndex] = info.normals[vIndex].add(vec2);
+				info.vertices[3 * vIndex] = info.vertices[3 * vIndex] + vec.x;
+				info.vertices[3 * vIndex + 1] = info.vertices[3 * vIndex + 1] + vec.y;
+				info.vertices[3 * vIndex + 2] = info.vertices[3 * vIndex + 2] + vec.z;
+				info.normals[3 * vIndex] = info.normals[3 * vIndex] + vec2.x;
+				info.normals[3 * vIndex + 1] = info.normals[3 * vIndex + 1] + vec2.y;
+				info.normals[3 * vIndex + 2] = info.normals[3 * vIndex + 2] + vec2.z;
 			}
 
-			for (i in 0...info.normals.length) {
-				var norm = info.normals[i];
+			for (i in 0...Std.int(info.normals.length / 3)) {
+				var norm = new Vector(info.normals[3 * i], info.normals[3 * i + 1], info.normals[3 * i + 2]);
 				var len2 = norm.dot(norm);
 
-				if (len2 > 0.01)
+				if (len2 > 0.01) {
 					norm.normalize();
+
+					info.normals[3 * i] = norm.x;
+					info.normals[3 * i + 1] = norm.y;
+					info.normals[3 * i + 2] = norm.z;
+				}
 			}
 
 			var meshIndex = 0;
-			var mesh:Mesh = cast info.geometry.children[meshIndex];
-			var prim:DynamicPolygon = cast mesh.primitive;
-			var vbuffer:FloatBuffer = null;
-			if (prim.buffer != null) {
-				vbuffer = prim.getDrawBuffer(prim.points.length);
-			}
+			var prim = info.primitives[meshIndex];
 			var pos = 0;
 			for (i in info.indices) {
-				if (pos >= prim.points.length) {
+				if (pos >= Std.int(prim.points.length / 3)) {
 					meshIndex++;
-					mesh.primitive = prim;
-					mesh = cast info.geometry.children[meshIndex];
-					prim = cast mesh.primitive;
+					prim = info.primitives[meshIndex];
 					pos = 0;
-					if (prim.buffer != null) {
-						vbuffer = prim.getDrawBuffer(prim.points.length);
-					}
 				}
-				var vertex = info.vertices[i];
-				var normal = info.normals[i];
-				prim.points[pos] = vertex.toPoint();
-				prim.normals[pos] = normal.toPoint(); // .normalized();
+				prim.points[3 * pos] = info.vertices[3 * i];
+				prim.points[3 * pos + 1] = info.vertices[3 * i + 1];
+				prim.points[3 * pos + 2] = info.vertices[3 * i + 2];
+				prim.normals[3 * pos] = info.normals[3 * i];
+				prim.normals[3 * pos + 1] = info.normals[3 * i + 1];
+				prim.normals[3 * pos + 2] = info.normals[3 * i + 2];
 				if (prim.buffer != null) {
 					prim.dirtyFlags[pos] = true;
 				}
@@ -952,15 +1066,17 @@ class DtsObject extends GameObject {
 			var spinAnimation = new Quat();
 			spinAnimation.initRotateAxis(0, 0, -1, timeState.timeSinceLoad * this.ambientSpinFactor);
 
-			var orientation = this.getRotationQuat();
+			// var orientation = this.getRotationQuat();
 			// spinAnimation.multiply(orientation, spinAnimation);
 
-			this.rootObject.setRotationQuat(spinAnimation);
+			this.rootObject.getRotationQuat().load(spinAnimation);
+			this.rootObject.posChanged = true;
+			// setRotationQuat(spinAnimation);
 		}
 
 		for (i in 0...this.colliders.length) {
 			if (this.dirtyTransforms[this.colliders[i].userData]) {
-				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
+				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos();
 				if (this.colliders[i] != null) {
 					this.colliders[i].setTransform(absTform);
 					this.level.collisionWorld.updateTransform(this.colliders[i]);

@@ -3,6 +3,7 @@
 version: 2.1
 orbs:
     win: circleci/windows@4.1.1 # The Windows orb give you everything you need to start using the Windows executor.
+    macos: circleci/macos@2.5.1
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -10,7 +11,7 @@ jobs:
   build:
     macos:
       xcode: 14.1.0 # Specify the Xcode version to use
-    resource_class: macos.x86.medium.gen2
+    resource_class: macos.m1.medium.gen1
     environment:
       HOMEBREW_NO_AUTO_UPDATE: 1
       NPROC: 4
@@ -22,26 +23,34 @@ jobs:
       - checkout:
           path: ~/MBHaxe
 
+      - macos/install-rosetta
       - run:
           name: Install brew dependencies
           command: |
             brew install cmake
             brew install pkg-config
             brew install libpthread-stubs
-            brew install neko
             brew install nasm
 
       - run:
           name: Install Haxe
           command: |
             set -eux
-            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.3/haxe-4.3.3-osx.tar.gz"
+            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-osx.tar.gz"
             echo "Downloading [$download_url]..."
-            mkdir /tmp/haxe
-            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
-            tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
-            export PATH=/tmp/haxe/:"$PATH"
-            export HAXE_STD_PATH=/tmp/haxe/std
+            mkdir ~/haxe
+            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o ~/haxe.tar.gz
+            tar xzvf ~/haxe.tar.gz -C ~/haxe --strip-components=1
+            download_url="https://github.com/HaxeFoundation/neko/releases/download/v2-4-0-rc/neko-2.4.0-rc-osx-universal.tar.gz"
+            echo "Downloading [$download_url]..."
+            mkdir ~/neko
+            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o ~/neko.tar.gz
+            tar xzvf ~/neko.tar.gz -C ~/neko --strip-components=1
+            export PATH=~/haxe/:"$PATH"
+            export PATH=~/neko/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            export DYLD_LIBRARY_PATH=~/neko
+            sudo chmod +x ~/neko/neko
             haxelib setup ~/haxelib
             haxelib list
             haxelib install hashlink
@@ -52,9 +61,9 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            curl https://www.zlib.net/zlib-1.3.tar.xz | tar xz
-            cd zlib-1.3
-            if [ ! -f /usr/local/lib/libz.1.3.dylib ]; then
+            curl https://www.zlib.net/zlib-1.3.1.tar.xz | tar xz
+            cd zlib-1.3.1
+            if [ ! -f /usr/local/lib/libz.1.3.1.dylib ]; then
               cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
               cmake --build build --config Release -j$NPROC
               sudo cmake --install build
@@ -196,20 +205,30 @@ jobs:
             cd ~/deps
             git clone --depth=1 https://github.com/RandomityGuy/hashlink
             cd hashlink
+            cd ~/deps
+            git clone https://github.com/RandomityGuy/hxDatachannel
+            cd hashlink
+            mv ~/deps/hxDatachannel/cpp libs/datachannel
+            echo -e "\nadd_subdirectory(datachannel)" >> libs/CMakeLists.txt
+            curl -L https://raw.githubusercontent.com/RandomityGuy/hashlink/master/libs/ssl/CMakeLists.txt > libs/ssl/CMakeLists.txt
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
       - run:
           name: Install haxe dependencies
           command: |
-            export PATH=/tmp/haxe/:"$PATH"
-            export HAXE_STD_PATH=/tmp/haxe/std
+            export PATH=~/haxe/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            export PATH=~/neko/:"$PATH"
+            export DYLD_LIBRARY_PATH=~/neko
             haxelib git heaps https://github.com/RandomityGuy/heaps
             haxelib dev hlopenal ~/deps/hashlink/libs/openal
             haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+            haxelib dev datachannel ~/deps/hxDatachannel
+            haxelib install colyseus-websocket
 
       - save_cache:
           key: mbhaxe-deps-v1
@@ -227,19 +246,22 @@ jobs:
             - /usr/local/lib/libvorbis.0.4.9.dylib
             - /usr/local/lib/libvorbisfile.3.3.8.dylib
             - /usr/local/lib/libvorbisenc.2.0.12.dylib
-            - /usr/local/lib/libz.1.3.dylib
+            - /usr/local/lib/libz.1.3.1.dylib
+            - /usr/local/lib/datachannel.hdll
 
 
       - run:
           name: Compile MBHaxe
           command: |
-            export PATH=/tmp/haxe/:"$PATH"
-            export HAXE_STD_PATH=/tmp/haxe/std
+            export PATH=~/haxe/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            export PATH=~/neko/:"$PATH"
+            export DYLD_LIBRARY_PATH=~/neko
             cd ~/MBHaxe
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll} -lsdl2 -lhl -luv
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} -lsdl2 -lhl -luv
 
       - run:
           name: Package app bundle
@@ -249,7 +271,7 @@ jobs:
             cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
-            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll} .
+            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll,datachannel.hdll} .
             cp /usr/local/lib/libhl.1.13.0.dylib libhl.1.dylib
             cp /usr/local/lib/libogg.0.8.5.dylib libogg.0.dylib
             cp /usr/local/lib/libopenal.1.22.2.dylib libopenal.1.dylib
@@ -258,7 +280,7 @@ jobs:
             cp /usr/local/lib/libvorbis.0.4.9.dylib libvorbis.0.4.9.dylib
             cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
             cp /usr/local/lib/libvorbisenc.2.0.12.dylib libvorbisenc.2.0.12.dylib
-            cp /usr/local/lib/libz.1.3.dylib libz.1.dylib
+            cp /usr/local/lib/libz.1.3.1.dylib libz.1.dylib
             cp /usr/local/lib/libuv.1.dylib libuv.1.dylib
             # These libraries have dangling RPATHs
             install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib
@@ -277,14 +299,17 @@ jobs:
       - run:
           name: ZIP Bundle
           command: |
-            cd ~/MBHaxe
+            cd ~/MBHaxe/macos-dist
+            npm install -g create-dmg
+            create-dmg --dmg-title="Marble Blast Platinum" "MarbleBlast Platinum.app" || true
             rm -rf "macos-dist/MarbleBlast Platinum.app.in"
-            zip -r MBHaxe-Platinum-Mac.zip macos-dist/
+            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Platinum-Mac.dmg"
+            # zip -r MBHaxe-Ultra-Mac.zip macos-dist/
 
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Platinum-Mac.zip $REMOTEDIR/MBHaxe-Platinum-Mac.zip
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-Platinum-Mac.dmg $REMOTEDIR/MBHaxe-Platinum-Mac.dmg
 
       # - store_artifacts:
       #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
@@ -320,10 +345,16 @@ jobs:
               nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
               set NEKOPATH=$nekopath
               export PATH=$nekopath:"$PATH"
+
+        - run:
+            name: Install CMake
+            command: |
+              choco install --no-progress cmake -y
+
         - run:
             name: Install Haxe
             command: |
-              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.3/haxe-4.3.3-win64.zip"
+              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-win64.zip"
               echo "Downloading [$download_url]..."
               mkdir /tmp/haxe
               curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.zip
@@ -350,6 +381,18 @@ jobs:
               MSBuild.exe hl.sln -m -nologo -p:Configuration=Release -p:Platform=x64
 
         - run:
+            name: Build datachannel
+            command: |
+              mkdir ~/deps
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/hxDatachannel
+              cd hxDatachannel/cpp
+              "/c/Program Files/CMake/bin/cmake" -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHASHLINK_LIBRARY_DIR="~/deps/hashlink/x64/Release" -DHASHLINK_INCLUDE_DIR="../../hashlink/src"
+              "/c/Program Files/CMake/bin/cmake" --build build --config Release -j4
+              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.hdll ~/deps/hashlink/x64/Release
+              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.lib ~/deps/hashlink/x64/Release
+
+        - run:
             name: Install haxe dependencies
             command: |
               export PATH=/tmp/haxe/haxe:"$PATH"
@@ -361,6 +404,8 @@ jobs:
               haxelib dev hlopenal ~/deps/hashlink/libs/openal
               haxelib dev hlsdl ~/deps/hashlink/libs/sdl
               haxelib dev hashlink ~/deps/hashlink/other/haxelib
+              haxelib dev datachannel ~/deps/hxDatachannel
+              haxelib install colyseus-websocket
 
         - run:
             name: Compile MBHaxe
@@ -373,17 +418,8 @@ jobs:
               cd ~/project
               haxe compile-c.hxml
               cd native
-              sed -i -e 's/MaxSpeed/Disabled/g' marblegame.vcxproj
-              sed -i -e 's/<FunctionLevelLinking>true<\/FunctionLevelLinking>//g' marblegame.vcxproj
-              sed -i -e 's/<IntrinsicFunctions>true<\/IntrinsicFunctions>//g' marblegame.vcxproj
-              sed -i -e 's/<EnableCOMDATFolding>true<\/EnableCOMDATFolding>//g' marblegame.vcxproj
-              sed -i -e 's/<OptimizeReferences>true<\/OptimizeReferences>//g' marblegame.vcxproj
-              sed -i -e 's/HL_MAKE;//g' marblegame.vcxproj
-              sed -i -e 's/<ClInclude Include=".*" \/>//g' marblegame.vcxproj
-              sed -i -e 's/<ClCompile Include=".*" \/>//g' marblegame.vcxproj
-              perl -0777 -i.marblegame.vcxproj -pe 's/<ItemGroup>[^.]*<\/ItemGroup>/<ItemGroup><ClCompile Include="marblegame.c" \/><\/ItemGroup>/g' marblegame.vcxproj
               HASHLINKPATH=~/deps/hashlink
-              MSBuild.exe marblegame.sln -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH
+              MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH marblegame.sln
         - run:
             name: Package app bundle
             command: |
@@ -399,6 +435,7 @@ jobs:
               cp ~/deps/hashlink/x64/Release/openal.hdll .
               cp ~/deps/hashlink/x64/Release/sdl.hdll .
               cp ~/deps/hashlink/x64/Release/ssl.hdll .
+              cp ~/deps/hashlink/x64/Release/datachannel.hdll .
               cp ~/deps/hashlink/x64/Release/uv.hdll .
               cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
               cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 

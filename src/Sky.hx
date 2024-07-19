@@ -43,6 +43,8 @@ class Sky extends Object {
 			skyMesh.material.mainPass.enableLights = false;
 			skyMesh.material.shadows = false;
 			skyMesh.material.blendMode = None;
+			skyMesh.material.mainPass.setPassName("skyshape");
+			skyMesh.material.mainPass.layer = -1;
 			// var pbrprops = skyMesh.material.mainPass.getShader(PropsValues);
 			// pbrprops.emissiveValue = 1;
 			// pbrprops.roughnessValue = 0;`

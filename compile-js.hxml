@@ -2,6 +2,8 @@
 -lib heaps
 -lib stb_ogg_sound
 -lib zip
+-lib datachannel
+-lib colyseus-websocket
 --js marblegame.js
 -D windowSize=1280x720
 -D js-es=6

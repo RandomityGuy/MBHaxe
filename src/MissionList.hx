@@ -1,8 +1,11 @@
+package src;
+
 import haxe.Json;
 import mis.MisParser;
 import src.ResourceLoader;
 import src.Mission;
 import src.Console;
+import src.MissionList;
 
 @:publicFields
 class MissionList {
@@ -66,6 +69,7 @@ class MissionList {
 		var goldMissions:Map<String, Array<Mission>> = [];
 		var platinumMissions:Map<String, Array<Mission>> = [];
 		var ultraMissions:Map<String, Array<Mission>> = [];
+		var multiplayerMissions:Map<String, Array<Mission>> = [];
 
 		goldMissions.set("beginner", parseDifficulty("gold", "missions_mbg", "beginner"));
 		goldMissions.set("intermediate", parseDifficulty("gold", "missions_mbg", "intermediate"));
@@ -79,6 +83,10 @@ class MissionList {
 		ultraMissions.set("beginner", parseDifficulty("ultra", "missions_mbu", "beginner"));
 		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions_mbu", "intermediate"));
 		ultraMissions.set("advanced", parseDifficulty("ultra", "missions_mbu", "advanced"));
+
+		multiplayerMissions.set("beginner", parseDifficulty("multiplayer", "multiplayer/hunt", "beginner"));
+		multiplayerMissions.set("intermediate", parseDifficulty("multiplayer", "multiplayer/hunt", "intermediate"));
+		multiplayerMissions.set("advanced", parseDifficulty("multiplayer", "multiplayer/hunt", "advanced"));
 
 		customMissions = parseDifficulty("custom", "missions", "custom");
 
@@ -99,6 +107,7 @@ class MissionList {
 		missionList.set("gold", goldMissions);
 		missionList.set("platinum", platinumMissions);
 		missionList.set("ultra", ultraMissions);
+		missionList.set("multiplayer", multiplayerMissions);
 
 		Console.log("Loaded MissionList");
 		Console.log("Gold Beginner: " + goldMissions["beginner"].length);
@@ -111,6 +120,9 @@ class MissionList {
 		Console.log("Ultra Beginner: " + ultraMissions["beginner"].length);
 		Console.log("Ultra Intermediate: " + ultraMissions["intermediate"].length);
 		Console.log("Ultra Advanced: " + ultraMissions["advanced"].length);
+		Console.log("Multiplayer Beginner: " + multiplayerMissions["beginner"].length);
+		Console.log("Multiplayer Intermediate: " + multiplayerMissions["intermediate"].length);
+		Console.log("Multiplayer Advanced: " + multiplayerMissions["advanced"].length);
 		Console.log("Custom: " + customMissions.length);
 
 		// parseCLAList();
