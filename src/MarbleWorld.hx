@@ -292,7 +292,7 @@ class MarbleWorld extends Scheduler {
 
 	public function initLoading() {
 		Console.log("*** LOADING MISSION: " + mission.path);
-		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game);
+		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game, this.isMultiplayer);
 		MarbleGame.canvas.setContent(this.loadingGui);
 		if (this.mission.isClaMission) {
 			this.mission.download(() -> loadBegin());

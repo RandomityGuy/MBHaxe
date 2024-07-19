@@ -10,7 +10,7 @@ import src.Util;
 class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
 
-	public function new(missionName:String, game:String) {
+	public function new(missionName:String, game:String, isMultiplayer:Bool = false) {
 		function chooseBg() {
 			if (game == "gold")
 				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
@@ -76,7 +76,8 @@ class LoadingGui extends GuiImage {
 
 		loadingGui.addChild(mapName);
 		loadingGui.addChild(progress);
-		loadingGui.addChild(cancelButton);
+		if (!isMultiplayer)
+			loadingGui.addChild(cancelButton);
 		loadingGui.addChild(overlay);
 
 		this.addChild(loadingGui);
