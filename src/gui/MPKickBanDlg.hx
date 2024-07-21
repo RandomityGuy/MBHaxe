@@ -1,5 +1,6 @@
 package gui;
 
+import net.ClientConnection;
 import net.NetCommands;
 import net.Net;
 import h2d.filter.DropShadow;
@@ -91,6 +92,7 @@ class MPKickBanDlg extends GuiImage {
 		var playerList = new GuiTextListCtrl(markerFelt18, playerNames, 0);
 		playerList.position = new Vector(120, 60);
 		playerList.extent = new Vector(188, 180);
+		playerList.scrollable = true;
 		playerList.textYOffset = -6;
 		playerList.onSelectedFunc = (sel) -> {
 			kickBtn.disabled = false;
@@ -106,6 +108,8 @@ class MPKickBanDlg extends GuiImage {
 				playerList.setTexts(playerNames);
 				kickBtn.disabled = true;
 				NetCommands.getKickedClient(Net.clientIdMap.get(playerToKick));
+				var cc = cast(Net.clientIdMap.get(playerToKick), ClientConnection);
+				cc.socket.close();
 			}
 		}
 	}

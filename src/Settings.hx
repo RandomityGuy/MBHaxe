@@ -457,8 +457,8 @@ class Settings {
 					levelStatistics.set(key, value);
 				}
 			}
-			if (json.serverSettings != null) {
-				serverSettings = json.serverSettings;
+			if (json.server != null) {
+				serverSettings = json.server;
 			}
 			#if js
 			if (serverSettings.oldSpawns == null) {

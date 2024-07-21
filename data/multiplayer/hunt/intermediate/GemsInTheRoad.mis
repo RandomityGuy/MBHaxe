@@ -7,7 +7,7 @@ new SimGroup(MissionGroup) {
          desc = "Find the gems in the maze of roads!";
          radiusFromGem = "20";
          gameMode = "Hunt";
-         level = "5";
+         level = "4";
          type = "Intermediate";
          time = "300000";
          maxGemsPerSpawn = "6";

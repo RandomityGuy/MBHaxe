@@ -120,10 +120,19 @@ class HuntMode extends NullMode {
 	override function getSpawnTransform() {
 		var idx = Net.connectedServerInfo.competitiveMode ? idealSpawnIndex : Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
 		if (!Net.connectedServerInfo.competitiveMode) {
-			while (spawnPointTaken[idx]) {
-				idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+			var allTaken = true;
+			for (spw in spawnPointTaken) {
+				if (!spw) {
+					allTaken = false;
+					break;
+				}
 			}
-			spawnPointTaken[idx] = true;
+			if (!allTaken) {
+				while (spawnPointTaken[idx]) {
+					idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+				}
+				spawnPointTaken[idx] = true;
+			}
 		}
 
 		var randomSpawn = playerSpawnPoints[idx];

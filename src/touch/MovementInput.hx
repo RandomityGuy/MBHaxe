@@ -22,6 +22,8 @@ class MovementInput {
 
 	public var value:Vector = new Vector();
 
+	var releaseFn:() -> Void;
+
 	var touchId = -1;
 
 	public function new() {
@@ -68,6 +70,11 @@ class MovementInput {
 				// this.joystick.graphics.setPosition(this.area.graphics.x + xPos, this.area.graphics.y + yPos);
 
 				var stopped = false;
+
+				releaseFn = () -> {
+					stopped = true;
+					collider.stopCapture();
+				}
 
 				collider.startCapture((emove) -> {
 					if (e.touchId != emove.touchId) {
@@ -122,6 +129,16 @@ class MovementInput {
 
 			this.collider.onPush(e);
 		}
+	}
+
+	public function forceRelease() {
+		releaseFn();
+		this.area.graphics.alpha = 0;
+		this.joystick.graphics.alpha = 0;
+
+		pressed = false;
+
+		this.value = new Vector(0, 0);
 	}
 
 	public function add(parentGui:GuiControl) {

@@ -9,6 +9,7 @@ import src.TimeState;
 enum abstract GameplayState(Int) from Int to Int {
 	var UNKNOWN;
 	var LOBBY;
+	var LOADING;
 	var GAME;
 }
 

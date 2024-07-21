@@ -289,6 +289,8 @@ class MPPreGameDlg extends GuiControl {
 			playerListLeft.setTexts(playerListCompiled);
 			playerListRight.setTexts(playerListStateCompiled);
 
+			playerListContainer.setScrollMax(playerListLeft.calculateFullHeight());
+
 			if (playerListArr.length == 1) {
 				// Disable spectating
 				Net.hostSpectate = false;
