@@ -1984,17 +1984,19 @@ class MarbleWorld extends Scheduler {
 							// pktClone.sort((a, b) -> {
 							// 	return (a.c == client.id) ? 1 : (b.c == client.id) ? -1 : 0;
 							// });
+							marble.clearNetFlags();
+
 							if (client.state != GAME) {
 								allRecv = false;
 								continue; // Only send if in game
 							}
-							marble.clearNetFlags();
+
 							for (packet in packets) {
 								client.sendBytes(packet);
 							}
 						}
-						if (allRecv)
-							this.marble.clearNetFlags();
+						// if (allRecv)
+						this.marble.clearNetFlags();
 					}
 				}
 				for (pi in this.pathedInteriors) {
