@@ -433,6 +433,10 @@ class Net {
 			for (dc => cc in clients) {
 				if (cc is ClientConnection) {
 					var conn = cast(cc, ClientConnection);
+					if (Net.isHost && conn.state == LOADING)
+						continue;
+					if (Net.isClient && MarbleGame.instance.world != null && !MarbleGame.instance.world._ready)
+						continue; // We still loading, don't disconnect
 					if (conn.needsTimeoutWarn(t)) {
 						conn.didWarnTimeout = true;
 						if (Net.isClient) {

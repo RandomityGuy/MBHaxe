@@ -1,5 +1,6 @@
 package src;
 
+import net.NetPacket.ExplodableUpdatePacket;
 import net.TrapdoorPredictionStore;
 import shapes.Explodable;
 import net.ExplodablePredictionStore;
@@ -563,10 +564,10 @@ class MarbleWorld extends Scheduler {
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
 			shape.onLevelStart();
-		// if (this.isMultiplayer && Net.isClient)
-		// NetCommands.clientIsReady(Net.clientId);
+		if (this.isMultiplayer && Net.isClient && !_skipPreGame)
+			NetCommands.clientIsReady(Net.clientId);
 		if (this.isMultiplayer && Net.isHost) {
-			// NetCommands.clientIsReady(-1);
+			//  NetCommands.clientIsReady(-1);
 
 			// Sort all the marbles so that they are updated in a deterministic order
 			this.marbles.sort((a, b) -> @:privateAccess {
@@ -591,6 +592,7 @@ class MarbleWorld extends Scheduler {
 				_skipPreGame = false;
 				this.setCursorLock(true);
 				NetCommands.requestMidGameJoinState(Net.clientId);
+				NetCommands.clientIsReady(Net.clientId);
 			}
 		}
 		this.gameMode.onMissionLoad();
@@ -1417,7 +1419,11 @@ class MarbleWorld extends Scheduler {
 		// Marble states
 		for (marb in this.marbles) {
 			var oldFlags = @:privateAccess marb.netFlags;
-			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
+			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
+
+			if (oldFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+				@:privateAccess marb.netFlags |= MarbleNetFlags.UpdateTrapdoor;
+			}
 
 			var innerMove = @:privateAccess marb.lastMove;
 			if (innerMove == null) {
@@ -1449,6 +1455,19 @@ class MarbleWorld extends Scheduler {
 					pickupPacket.serialize(b);
 					packets.push(b.getBytes());
 				}
+			}
+		}
+
+		// Explosion states
+		for (exp in this.explodables) {
+			if (this.timeState.ticks < (exp.lastContactTick + exp.renewTime >> 5)) {
+				var b = new OutputBitStream();
+				b.writeByte(NetPacketType.ExplodableUpdate);
+				var explPacket = new ExplodableUpdatePacket();
+				explPacket.explodableId = exp.netId;
+				explPacket.serverTicks = timeState.ticks;
+				explPacket.serialize(b);
+				packets.push(b.getBytes());
 			}
 		}
 

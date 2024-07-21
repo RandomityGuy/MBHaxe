@@ -160,28 +160,7 @@ class NetCommands {
 
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
-			if (Net.serverInfo.state == "WAITING") {
-				Console.log('Client ${clientId} is ready!');
-				if (clientId != -1)
-					Net.clientIdMap[clientId].ready();
-				else
-					Net.hostReady = true;
-				var allReady = true;
-				for (id => client in Net.clientIdMap) {
-					if (client.state != GameplayState.GAME) {
-						allReady = false;
-						break;
-					}
-				}
-				if (allReady && Net.hostReady) {
-					if (MarbleGame.instance.world != null) {
-						Console.log('All are ready, starting');
-						MarbleGame.instance.world.allClientsReady();
-					}
-					Net.serverInfo.state = "PLAYING";
-					MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
-				}
-			} else {}
+			Net.clientIdMap[clientId].state = GAME;
 		}
 	}
 

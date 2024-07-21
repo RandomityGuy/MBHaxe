@@ -262,6 +262,9 @@ class MarbleGame {
 		if (paused && world._ready) {
 			Console.log("Game paused");
 			world.setCursorLock(false);
+			if (Util.isTouchDevice()) {
+				this.touchInput.movementInput.forceRelease();
+			}
 			if (world.isMultiplayer) {
 				exitGameDlg = new MPExitGameDlg(() -> {
 					canvas.popDialog(exitGameDlg);
