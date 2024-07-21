@@ -97,6 +97,7 @@ class MainMenuGui extends GuiImage {
 		}
 		mainMenuContent.addChild(optionsButton);
 
+		#if hl
 		var exitButton = new GuiButton(loadButtonImages("data/ui/menu/quit"));
 		exitButton.position = new Vector(-5, 388);
 		exitButton.extent = new Vector(247, 164);
@@ -106,6 +107,16 @@ class MainMenuGui extends GuiImage {
 			#end
 		};
 		mainMenuContent.addChild(exitButton);
+		#end
+		#if js
+		var exitButton = new GuiButton(loadButtonImages("data/ui/menu/download"));
+		exitButton.position = new Vector(-5, 388);
+		exitButton.extent = new Vector(247, 164);
+		exitButton.pressedAction = (sender) -> {
+			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
+		};
+		mainMenuContent.addChild(exitButton);
+		#end
 
 		var replButton = new GuiButton(loadButtonImages("data/ui/menu/replay"));
 		replButton.horizSizing = Left;
