@@ -1,3 +1,12 @@
+# 1.6.1
+This update fixes the following bugs:
+- Fixed a crash when there are more players than spawnpoints in multiplayer.
+- Fixed minor UI bugs with kicking and player list.
+- Prevent timing out of players who are still loading the level.
+- Fixed sort order of two multiplayer levels.
+- Attempted to improve performance when someone joins mid-game.
+- Touch Controls: Pressing pause now releases the joystick.
+
 # 1.6.0
 A big update! Bringing in the cross platform multiplayer the way it was meant to be played!
 Please note that it is always and always recommended to download the native client for unlocked FPS and higher performance.
