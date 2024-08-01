@@ -10,7 +10,7 @@ class Grid {
 
 	public var cellSize:Vector; // The dimensions of one cell
 
-	static var CELL_SIZE = 24;
+	static var CELL_SIZE = 16;
 
 	public var CELL_DIV = new Vector(CELL_SIZE, CELL_SIZE); // split the bounds into cells of dimensions 1/16th of the corresponding dimensions of the bounds
 
