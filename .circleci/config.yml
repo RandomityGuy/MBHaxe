@@ -23,6 +23,7 @@ jobs:
       - checkout:
           path: ~/MBHaxe
 
+      - macos/install-rosetta
       - run:
           name: Install brew dependencies
           command: |
@@ -268,7 +269,7 @@ jobs:
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/MBHaxe-Gold-Mac.dmg $REMOTEDIR/MBHaxe-Gold-Mac.dmg
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-Gold-Mac.dmg $REMOTEDIR/MBHaxe-Gold-Mac.dmg
 
       # - store_artifacts:
       #     path: ~/MBHaxe/MBHaxe-Gold.zip
@@ -305,6 +306,12 @@ jobs:
               nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
               set NEKOPATH=$nekopath
               export PATH=$nekopath:"$PATH"
+              
+        - run:
+            name: Install CMake
+            command: |
+              choco install --no-progress cmake -y
+
         - run:
             name: Install Haxe
             command: |
