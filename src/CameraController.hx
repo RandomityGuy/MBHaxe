@@ -141,7 +141,7 @@ class CameraController extends Object {
 		}
 
 		var factor = isTouch ? Util.lerp(1 / 25, 1 / 15,
-			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
+			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 1000, 1 / 200, Settings.controlsSettings.cameraSensitivity);
 
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
@@ -172,7 +172,8 @@ class CameraController extends Object {
 		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
 
-		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+		var lerpt = hxd.Math.min(1,
+			1 - Math.pow(0.6, dt * 600)); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
@@ -188,11 +189,10 @@ class CameraController extends Object {
 
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
-		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
-		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
+		CameraYaw = nextCameraYaw;
+		CameraPitch = nextCameraPitch;
 
-		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4,
-			Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
+		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {

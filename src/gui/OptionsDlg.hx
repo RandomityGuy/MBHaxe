@@ -300,8 +300,7 @@ class OptionsDlg extends GuiImage {
 		audSndKnob.position = new Vector(137, 95);
 		audSndKnob.extent = new Vector(254, 37);
 		audSndKnob.sliderValue = Settings.optionsSettings.soundVolume;
-		var testingSnd = AudioManager.playSound(ResourceLoader.getResource("data/sound/testing.wav", ResourceLoader.getAudio, this.soundResources), null,
-			true);
+		var testingSnd = AudioManager.playSound(ResourceLoader.getResource("data/sound/testing.wav", ResourceLoader.getAudio, this.soundResources), null, true);
 		testingSnd.pause = true;
 		audSndKnob.slidingSound = testingSnd;
 		audSndKnob.pressedAction = (sender) -> {
@@ -694,9 +693,9 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			.toTile());
 		mouseSensitivity.position = new Vector(147, 148);
 		mouseSensitivity.extent = new Vector(254, 34);
-		mouseSensitivity.sliderValue = (Settings.controlsSettings.cameraSensitivity - 0.2) / (3 - 0.2);
+		mouseSensitivity.sliderValue = (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12);
 		mouseSensitivity.pressedAction = (sender) -> {
-			Settings.controlsSettings.cameraSensitivity = 0.2 + (3 - 0.2) * mouseSensitivity.sliderValue;
+			Settings.controlsSettings.cameraSensitivity = 0.12 + (1.2 - 0.12) * mouseSensitivity.sliderValue;
 		}
 		mouseControlsPane.addChild(mouseSensitivity);
 

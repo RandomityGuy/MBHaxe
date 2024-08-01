@@ -12,7 +12,7 @@ import h3d.scene.Object;
 import haxe.io.Path;
 import dts.DtsFile;
 import dif.Dif;
-import hxd.fs.LocalFileSystem;
+import fs.TorqueFileSystem;
 import hxd.fs.FileSystem;
 import hxd.res.Loader;
 import src.Resource;
@@ -21,9 +21,9 @@ import src.ResourceLoaderWorker;
 class ResourceLoader {
 	#if (hl && !android)
 	#if MACOS_BUNDLE
-	public static var fileSystem:FileSystem = new LocalFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "Resources"])), null);
+	public static var fileSystem:FileSystem = new TorqueFileSystem(Path.normalize(Path.join([Path.directory(Sys.programPath()), "..", "Resources"])), null);
 	#else
-	public static var fileSystem:FileSystem = new LocalFileSystem(".", null);
+	public static var fileSystem:FileSystem = new TorqueFileSystem(".", null);
 	#end
 	#end
 	#if (js || android)
@@ -45,7 +45,7 @@ class ResourceLoader {
 
 	public static function init(scene2d:h2d.Scene, onLoadedFunc:Void->Void) {
 		#if hl
-		@:privateAccess @:privateAccess cast(fileSystem, LocalFileSystem).convert.tmpDir = "data/tmp/";
+		@:privateAccess @:privateAccess cast(fileSystem, TorqueFileSystem).convert.tmpDir = "data/tmp/";
 		#end
 		hxd.res.Resource.LIVE_UPDATE = false; // Disable live update to save frames
 		@:privateAccess hxd.res.Image.ENABLE_AUTO_WATCH = false;
