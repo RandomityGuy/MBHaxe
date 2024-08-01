@@ -53,6 +53,7 @@ typedef ControlsSettings = {
 	var cameraSensitivity:Float;
 	var invertYAxis:Bool;
 	var rewind:Int;
+	var respawn:Int;
 }
 
 typedef TouchSettings = {
@@ -118,6 +119,7 @@ class Settings {
 		cameraSensitivity: 0.6,
 		invertYAxis: false,
 		rewind: Key.R,
+		respawn: Key.T,
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -270,6 +272,9 @@ class Settings {
 			if (controlsSettings.rewind == 0) {
 				controlsSettings.rewind = Key.R;
 			}
+			if (controlsSettings.respawn == 0) {
+				controlsSettings.respawn = Key.T;
+			}
 			if (touchSettings.rewindButtonPos == null) {
 				touchSettings.rewindButtonPos = [380, 240];
 				touchSettings.rewindButtonSize = 60;
@@ -283,6 +288,9 @@ class Settings {
 			#if js
 			if (controlsSettings.rewind == null) {
 				controlsSettings.rewind = Key.R;
+			}
+			if (controlsSettings.respawn == null) {
+				controlsSettings.respawn = Key.T;
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;

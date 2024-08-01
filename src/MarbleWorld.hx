@@ -974,6 +974,11 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 
+		if ((Key.isPressed(Settings.controlsSettings.respawn)) && this.finishTime == null) {
+			this.restart();
+			return;
+		}
+
 		this.tickSchedule(timeState.currentAttemptTime);
 
 		this.updateGameState();
