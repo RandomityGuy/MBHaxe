@@ -541,15 +541,19 @@ jobs:
             export LD_LIBRARY_PATH=~/neko
             cd ~/MBHaxe
             haxe compile.hxml
-            cp ~/deps/hashlink/src/hlc_main.c native
-            ./compile-linux.sh
+            haxe compile-linux.hxml
+            cd native
+            cp ~/deps/hashlink/src/hlc_main.c .
+            gcc -o marblegame -O2 -I . -L /usr/local/lib marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} -lSDL2 -lhl -lm -luv
+            strip marblegame
 
       - run:
           name: Package Bundle
           command: |
             mkdir -p ~/MBHaxe-Ultra-Linux
             cd ~/MBHaxe-Ultra-Linux
-            cp ~/MBHaxe/marblegame* .
+            cp ~/MBHaxe/marblegame.hl .
+            cp ~/MBHaxe/native/marblegame .
             cp ~/MBHaxe/linux-dist/* .
             cp -r ~/MBHaxe/data data
             cp /usr/local/lib/{{fmt,openal,sdl,ssl,ui,uv}.hdll,libhl.so.1.13.0} .
