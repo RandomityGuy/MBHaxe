@@ -556,7 +556,7 @@ jobs:
             cp ~/MBHaxe/native/marblegame .
             cp ~/MBHaxe/linux-dist/* .
             cp -r ~/MBHaxe/data data
-            cp /usr/local/lib/{{fmt,openal,sdl,ssl,ui,uv}.hdll,libhl.so.1.13.0} .
+            cp /usr/local/lib/{{fmt,openal,sdl,ssl,ui,uv,datachannel}.hdll,libhl.so.1.13.0} .
             cp /usr/local/bin/hl .
             ln -s libhl.so.1.13.0 libhl.so.1
             ln -s libhl.so.1 libhl.so
