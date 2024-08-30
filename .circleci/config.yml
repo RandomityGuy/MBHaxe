@@ -53,7 +53,7 @@ jobs:
             haxelib setup ~/haxelib
             haxelib list
             haxelib install hashlink
-          
+
 
       - run:
           name: Compile zlib
@@ -314,7 +314,7 @@ jobs:
       #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
 
   build-win:
-    executor: 
+    executor:
         name: win/server-2022
         shell: bash.exe # executor type
     # Checkout the code as the first step. This is a dedicated CircleCI step.
@@ -369,7 +369,7 @@ jobs:
               export PATH=$nekopath:"$PATH"
               haxelib setup ~/haxelib
               haxelib list
-        - run: 
+        - run:
             name: Build Hashlink
             command: |
               mkdir ~/deps
@@ -438,7 +438,7 @@ jobs:
               cp ~/deps/hashlink/x64/Release/datachannel.hdll .
               cp ~/deps/hashlink/x64/Release/uv.hdll .
               cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
-              cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 
+              cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll
         - run:
             name: Zip bundle
             command: |
@@ -451,6 +451,108 @@ jobs:
               scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Ultra-Win.zip $REMOTEDIR/MBHaxe-Ultra-Win.zip
         # - store_artifacts:
         #     path: ~/project/MBHaxe-Platinum-Win.zip
+
+  build-linux:
+    machine: # executor type
+      image: ubuntu-2204:current
+    environment:
+      #HOMEBREW_NO_AUTO_UPDATE: 1
+      #NPROC: 4
+      COMMIT_TAG: pipeline.git.tag
+    steps:
+      #- add_ssh_keys:
+      #    fingerprints:
+      #      - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
+      - checkout:
+          path: ~/MBHaxe
+      - run:
+          name: Install apt dependencies
+          command: |
+            sudo apt install cmake
+            sudo apt-get install libpng-dev libturbojpeg-dev libvorbis-dev libopenal-dev libsdl2-dev libmbedtls-dev libuv1-dev libsqlite3-dev
+
+      - run:
+          name: Install Haxe
+          command: |
+            set -eux
+            download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.6/haxe-4.3.6-linux64.tar.gz"
+            echo "Downloading [$download_url]..."
+            mkdir ~/haxe
+            curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o ~/haxe.tar.gz
+            tar xzvf ~/haxe.tar.gz -C ~/haxe --strip-components=1
+            export PATH=~/haxe/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            haxelib setup ~/haxelib
+            haxelib list
+
+      - run:
+          name: Install hashlink
+          command: |
+            mkdir -p ~/deps
+            cd ~/deps
+            git clone --depth=1 https://github.com/RandomityGuy/hashlink
+            git clone --depth=1 https://github.com/RandomityGuy/hxDatachannel
+            cd hashlink/libs
+            ln -s ~/deps/hxDatachannel/cpp datachannel
+            echo -e "\nadd_subdirectory(datachannel)" >> CMakeLists.txt
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+
+      - run:
+          name: Install haxe dependencies
+          command: |
+            export PATH=~/haxe/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            haxelib dev hashlink ~/deps/hashlink/other/haxelib
+            haxelib git heaps https://github.com/RandomityGuy/heaps
+            haxelib dev hlopenal ~/deps/hashlink/libs/openal
+            haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+            haxelib dev datachannel ~/deps/hxDatachannel
+            haxelib install colyseus-websocket
+
+      - save_cache:
+          key: mbhaxe-deps-v1
+          paths:
+            - /usr/local/lib/datachannel.hdll
+            - /usr/local/lib/fmt.hdll
+            - /usr/local/lib/openal.hdll
+            - /usr/local/lib/sdl.hdll
+            - /usr/local/lib/ssl.hdll
+            - /usr/local/lib/ui.hdll
+            - /usr/local/lib/uv.hdll
+
+      - run:
+          name: Compile MBHaxe
+          command: |
+            export PATH=~/haxe/:"$PATH"
+            export HAXE_STD_PATH=~/haxe/std
+            cd ~/MBHaxe
+            haxe compile.hxml
+            ./compile-linux.sh
+
+      - run:
+          name: Package Bundle
+          command: |
+            mkdir -p ~/MBHaxe-Ultra-Linux
+            cd ~/MBHaxe-Ultra-Linux
+            cp ~/MBHaxe/marblegame* .
+            cp ~/MBHaxe/linux-dist/* .
+            cp -r ~/MBHaxe/data data
+            cp /usr/local/lib/{{fmt,openal,sdl,ssl,ui,uv}.hdll,libhl.so.1.13.0} .
+            cp /usr/local/bin/hl .
+            ln -s libhl.so.1.13.0 libhl.so.1
+            ln -s libhl.so.1 libhl.so
+            cd ..
+            tar -czvf MBHaxe-Ultra-Linux.tar.gz MBHaxe-Ultra-Linux
+
+      #- run:
+      #    name: Upload to Artifact Storage
+      #    command: |
+      #      scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-Ultra-Mac.dmg $REMOTEDIR/MBHaxe-Ultra-Mac.dmg
+
+      - store_artifacts:
+          path: ~/MBHaxe-Ultra-Linux.tar.gz
 
 
 # Invoke jobs via workflows
@@ -466,6 +568,13 @@ workflows:
   build-windows:
     jobs:
       - build-win:
+          filters:
+            tags:
+              only: /^\d+.\d+.\d+$/
+
+  build-linux:
+    jobs:
+      - build-linux:
           filters:
             tags:
               only: /^\d+.\d+.\d+$/
