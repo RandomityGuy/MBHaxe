@@ -500,9 +500,9 @@ jobs:
             cd ~/deps
             git clone --depth=1 https://github.com/RandomityGuy/hashlink
             git clone --depth=1 https://github.com/RandomityGuy/hxDatachannel
-            cd hashlink/libs
-            ln -s ~/deps/hxDatachannel/cpp datachannel
-            echo -e "\nadd_subdirectory(datachannel)" >> CMakeLists.txt
+            cd hashlink
+            ln -s ~/deps/hxDatachannel/cpp libs/datachannel
+            echo -e "\nadd_subdirectory(datachannel)" >> libs/CMakeLists.txt
             cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
