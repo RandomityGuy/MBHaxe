@@ -14,7 +14,7 @@ class PresentsGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var ggLogo = new GuiImage(ResourceLoader.getResource('data/ui/GG_logo.png', ResourceLoader.getImage, this.imageResources).toTile());
+		var ggLogo = new GuiImage(ResourceLoader.getResource('data/ui/GG_Logo.png', ResourceLoader.getImage, this.imageResources).toTile());
 		ggLogo.horizSizing = Center;
 		ggLogo.vertSizing = Center;
 		ggLogo.position = new Vector(69, 99);
