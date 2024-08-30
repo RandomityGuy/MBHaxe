@@ -541,6 +541,7 @@ jobs:
             export LD_LIBRARY_PATH=~/neko
             cd ~/MBHaxe
             haxe compile.hxml
+            cp ~/deps/hashlink/src/hlc_main.c native
             ./compile-linux.sh
 
       - run:
