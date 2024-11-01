@@ -58,6 +58,7 @@ class MarbleUpdatePacket implements NetPacket {
 	var position:Vector;
 	var velocity:Vector;
 	var omega:Vector;
+	var lastContactNormal:Vector;
 	var blastAmount:Int;
 	var blastTick:Int;
 	var megaTick:Int;
@@ -84,6 +85,9 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeFloat(omega.x);
 		b.writeFloat(omega.y);
 		b.writeFloat(omega.z);
+		b.writeFloat(lastContactNormal.x);
+		b.writeFloat(lastContactNormal.y);
+		b.writeFloat(lastContactNormal.z);
 		b.writeInt(blastAmount, 11);
 		if (netFlags & MarbleNetFlags.DoBlast > 0) {
 			b.writeFlag(true);
@@ -134,6 +138,7 @@ class MarbleUpdatePacket implements NetPacket {
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+		lastContactNormal = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		blastAmount = b.readInt(11);
 		this.netFlags = 0;
 		if (b.readFlag()) {
