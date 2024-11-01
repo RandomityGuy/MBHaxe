@@ -85,6 +85,7 @@ class ReplayFrame {
 			interpFrame.marbleVelocity = Util.lerpThreeVectors(this.marbleVelocity, next.marbleVelocity, t);
 			interpFrame.marbleOrientation = new Quat();
 			interpFrame.marbleOrientation.slerp(this.marbleOrientation, next.marbleOrientation, t);
+			interpFrame.marbleOrientation.normalize();
 			interpFrame.marbleAngularVelocity = Util.lerpThreeVectors(this.marbleAngularVelocity, next.marbleAngularVelocity, t);
 		}
 
