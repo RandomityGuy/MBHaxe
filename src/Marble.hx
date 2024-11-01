@@ -2067,6 +2067,7 @@ class Marble extends GameObject {
 		marbleUpdate.position = this.newPos;
 		marbleUpdate.velocity = this.velocity;
 		marbleUpdate.omega = this.omega;
+		marbleUpdate.lastContactNormal = this.lastContactNormal;
 		marbleUpdate.move = move;
 		marbleUpdate.moveQueueSize = this.connection != null ? this.connection.moveManager.getQueueSize() : 255;
 		marbleUpdate.blastAmount = this.blastTicks;
@@ -2105,6 +2106,7 @@ class Marble extends GameObject {
 		this.collider.transform.setPosition(p.position);
 		this.velocity = p.velocity;
 		this.omega = p.omega;
+		this.lastContactNormal = p.lastContactNormal;
 		this.blastTicks = p.blastAmount;
 		this.blastUseTick = p.blastTick;
 		this.helicopterUseTick = p.heliTick;
@@ -2383,6 +2385,8 @@ class Marble extends GameObject {
 			move = level.currentInputMoves[1].move;
 
 		if (this.level.isWatching) {
+			move = new Move();
+			move.d = new Vector(0, 0);
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(Jumped))
 				move.jump = true;
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(UsedPowerup))
