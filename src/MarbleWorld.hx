@@ -2438,6 +2438,8 @@ class MarbleWorld extends Scheduler {
 				alarmSound.stop();
 				alarmSound = null;
 			}
+
+			this.cancel(marble.oobSchedule);
 		}
 	}
 

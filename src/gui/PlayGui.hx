@@ -829,6 +829,10 @@ class PlayGui {
 	public function resetPlayerScores() {
 		for (player in playerList) {
 			player.score = 0;
+			player.r = 0;
+			player.y = 0;
+			player.b = 0;
+			player.p = 0;
 		}
 
 		redrawPlayerList();
