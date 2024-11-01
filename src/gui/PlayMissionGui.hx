@@ -30,6 +30,7 @@ class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
 	static var currentCategoryStatic:String = "beginner";
 	static var currentGameStatic:String = "platinum";
+	static var currentSortType:Int = 1;
 
 	var currentGame:String = "platinum";
 	var currentSelection:Int = 0;
@@ -205,8 +206,6 @@ class PlayMissionGui extends GuiImage {
 		}
 		pmBox.addChild(pmSearch);
 
-		var sortType = 1; // 0 = alphabetical, 1 = date
-
 		var sortAlphaImgs = loadButtonImages("data/ui/play/sort_alpha");
 		var sortDateImgs = loadButtonImages("data/ui/play/sort_date");
 
@@ -214,16 +213,24 @@ class PlayMissionGui extends GuiImage {
 		pmSort.position = new Vector(366, 325);
 		pmSort.extent = new Vector(43, 43);
 		pmSort.pressedAction = (e) -> {
-			sortType = (sortType + 1) % 2;
-			if (sortType == 0) {
+			currentSortType = (currentSortType + 1) % 2;
+			if (currentSortType == 0) {
 				@:privateAccess pmSort.anim.frames = sortAlphaImgs;
 			}
-			if (sortType == 1) {
+			if (currentSortType == 1) {
 				@:privateAccess pmSort.anim.frames = sortDateImgs;
 			}
-			setCategoryFunc(currentGame, currentCategoryStatic, sortType == 1 ? "date" : "alpha");
+			setCategoryFunc(currentGame, currentCategoryStatic, currentSortType == 1 ? "date" : "alpha");
 			// MarbleGame.canvas.pushDialog(new SearchGui(currentGame, currentCategory == "custom"));
 		}
+
+		if (currentSortType == 0) {
+			@:privateAccess pmSort.anim.frames = sortAlphaImgs;
+		}
+		if (currentSortType == 1) {
+			@:privateAccess pmSort.anim.frames = sortDateImgs;
+		}
+
 		pmBox.addChild(pmSort);
 
 		var pmPrev = new GuiButton(loadButtonImages("data/ui/play/prev"));
@@ -627,7 +634,7 @@ class PlayMissionGui extends GuiImage {
 				MarbleGame.canvas.pushDialog(mbo);
 			} else {
 				currentCategory = "custom";
-				setCategoryFunc("gold", "custom", sortType == 1 ? "date" : "alpha");
+				setCategoryFunc("gold", "custom", currentSortType == 1 ? "date" : "alpha");
 			}
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyGoldCustom);
@@ -643,7 +650,7 @@ class PlayMissionGui extends GuiImage {
 				MarbleGame.canvas.pushDialog(mbo);
 			} else {
 				currentCategory = "custom";
-				setCategoryFunc("platinum", "custom", sortType == 1 ? "date" : "alpha");
+				setCategoryFunc("platinum", "custom", currentSortType == 1 ? "date" : "alpha");
 			}
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyPlatinumCustom);
@@ -659,7 +666,7 @@ class PlayMissionGui extends GuiImage {
 				MarbleGame.canvas.pushDialog(mbo);
 			} else {
 				currentCategory = "custom";
-				setCategoryFunc("ultra", "custom", sortType == 1 ? "date" : "alpha");
+				setCategoryFunc("ultra", "custom", currentSortType == 1 ? "date" : "alpha");
 			}
 		}
 		pmDifficultyCtrl.addChild(pmDifficultyUltraCustom);
@@ -1108,7 +1115,7 @@ class PlayMissionGui extends GuiImage {
 			#end
 		}
 
-		setCategoryFunc(currentGame, currentCategoryStatic, null, false);
+		setCategoryFunc(currentGame, currentCategoryStatic, currentCategoryStatic == "custom" ? (currentSortType == 1 ? "date" : "alpha") : null, false);
 
 		#if js
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
