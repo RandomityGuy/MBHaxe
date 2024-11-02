@@ -1933,6 +1933,14 @@ class Marble extends GameObject {
 		var maxP = new Vector(Math.max(start.x, end.x) + expansion, Math.max(start.y, end.y) + expansion, Math.max(start.z, end.z) + expansion);
 		var box = Bounds.fromPoints(minP.toPoint(), maxP.toPoint());
 
+		var marbleAABB = new Bounds();
+		marbleAABB.xMin = end.x - this._radius;
+		marbleAABB.xMax = end.x + this._radius;
+		marbleAABB.yMin = end.y - this._radius;
+		marbleAABB.yMax = end.y + this._radius;
+		marbleAABB.zMin = end.z - this._radius;
+		marbleAABB.zMax = end.z + this._radius;
+
 		// var marbleHitbox = new Bounds();
 		// marbleHitbox.addSpherePos(0, 0, 0, marble._radius);
 		// marbleHitbox.transform(startQuat.toMatrix());
@@ -1962,7 +1970,7 @@ class Marble extends GameObject {
 					var trigger:Trigger = cast contact.go;
 					var triggeraabb = trigger.collider.boundingBox;
 
-					if (triggeraabb.collide(box)) {
+					if (triggeraabb.collide(marbleAABB)) {
 						trigger.onMarbleInside(cast this, timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
