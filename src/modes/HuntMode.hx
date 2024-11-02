@@ -527,6 +527,27 @@ class HuntMode extends NullMode {
 		return level.mission.qualifyTime;
 	}
 
+	override function onRespawn(marble:Marble) {
+		if (marble.controllable && activeGemSpawnGroup.length != 0) {
+			var gemAvg = new Vector();
+			for (gi in activeGemSpawnGroup) {
+				var g = gemSpawnPoints[gi];
+				gemAvg = gemAvg.add(g.boundingBox.getCenter().toVector());
+			}
+			gemAvg.scale(1 / activeGemSpawnGroup.length);
+			var delta = gemAvg.sub(marble.getAbsPos().getPosition());
+			var gravFrame = level.getOrientationQuat(0).toMatrix();
+			var v1 = gravFrame.front();
+			var v2 = gravFrame.right();
+			var deltaRot = new Vector(delta.dot(v2), delta.dot(v1));
+			if (deltaRot.length() >= 0.001) {
+				var ang = Math.atan2(deltaRot.x, deltaRot.y);
+				marble.camera.CameraYaw = ang;
+				marble.camera.nextCameraYaw = ang;
+			}
+		}
+	}
+
 	override function onRestart() {
 		setupGems();
 		points = 0;
