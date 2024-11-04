@@ -1,5 +1,6 @@
 package src;
 
+import net.Uuid;
 import h3d.Vector;
 import haxe.ds.Option;
 import gui.Canvas;
@@ -220,6 +221,7 @@ class Settings {
 	public static var levelStatistics:Map<String, PlayStatistics> = [];
 
 	public static var highscoreName = "";
+	public static var userId = "";
 
 	public static var uiScale = 1.0;
 
@@ -274,6 +276,7 @@ class Settings {
 			stats: playStatistics,
 			server: serverSettings,
 			highscoreName: highscoreName,
+			userId: userId,
 			marbleIndex: optionsSettings.marbleIndex,
 			marbleSkin: optionsSettings.marbleSkin,
 			marbleModel: optionsSettings.marbleModel,
@@ -454,6 +457,13 @@ class Settings {
 			}
 			#end
 			highscoreName = json.highscoreName;
+			if (highscoreName == null) {
+				highscoreName = "";
+			}
+			userId = json.userId;
+			if (userId == null) {
+				userId = Uuid.v4();
+			}
 		} else {
 			Console.warn("Settings file does not exist");
 			save();

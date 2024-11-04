@@ -1,5 +1,8 @@
 package gui;
 
+import src.Http;
+import src.Leaderboards;
+import net.ClientConnection.NetPlatform;
 import src.Marbleland;
 import h2d.filter.DropShadow;
 import src.Replay;
@@ -52,9 +55,12 @@ class PlayMissionGui extends GuiImage {
 
 	#if js
 	var previewTimeoutHandle:Option<Int> = None;
+	var lbRequest:Int = 0;
 	#end
 	#if hl
 	var previewToken:Int = 0;
+	var lbToken:Int = 0;
+	var lbRequest:src.Http.HttpRequest = null;
 	#end
 
 	public function new() {
@@ -117,6 +123,7 @@ class PlayMissionGui extends GuiImage {
 		var arial14b = new BitmapFont(arial14fontdata.entry);
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
 		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+		var arial12 = arial14b.toSdfFont(cast 10 * Settings.uiScale, MultiChannel);
 
 		var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 		var arialb14b = new BitmapFont(arialb14fontdata.entry);
@@ -129,6 +136,7 @@ class PlayMissionGui extends GuiImage {
 		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 		var markerFelt24 = markerFelt32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 		var markerFelt20 = markerFelt32b.toSdfFont(cast 18.5 * Settings.uiScale, MultiChannel);
+		var markerFelt16 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
 		var markerFelt18 = markerFelt32b.toSdfFont(cast 17 * Settings.uiScale, MultiChannel);
 		var markerFelt26 = markerFelt32b.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
 
@@ -136,6 +144,8 @@ class PlayMissionGui extends GuiImage {
 			switch (text) {
 				case "DomCasual24":
 					return domcasual24;
+				case "Arial12":
+					return arial14;
 				case "Arial14":
 					return arial14;
 				case "ArialBold14":
@@ -153,6 +163,30 @@ class PlayMissionGui extends GuiImage {
 				default:
 					return null;
 			}
+		}
+
+		function imgLoader(path:String) {
+			var t = switch (path) {
+				case "pc":
+					ResourceLoader.getResource("data/ui/mp/play/platform_desktop_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "mac":
+					ResourceLoader.getResource("data/ui/mp/play/platform_mac_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "web":
+					ResourceLoader.getResource("data/ui/mp/play/platform_web_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "android":
+					ResourceLoader.getResource("data/ui/mp/play/platform_android_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					ResourceLoader.getResource("data/ui/mp/play/platform_unknown_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "rewind":
+					ResourceLoader.getResource("data/ui/mp/play/rewind_ico.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "watch":
+					ResourceLoader.getResource("data/ui/play/record.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case _:
+					return null;
+			};
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
 		}
 
 		var pmBox = new GuiImage(ResourceLoader.getResource('data/ui/play/window.png', ResourceLoader.getImage, this.imageResources).toTile());
@@ -775,6 +809,114 @@ class PlayMissionGui extends GuiImage {
 		};
 		pmMorePopDlg.addChild(pmRecord);
 
+		var scoreScroll = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		scoreScroll.position = new Vector(110, 170);
+		scoreScroll.extent = new Vector(407, 143);
+		scoreScroll.childrenHandleScroll = true;
+		scoreScroll.scrollToBottom = true;
+		// window.addChild(chatScroll);
+
+		var scoreBox = new GuiMLText(markerFelt16, mlFontLoader);
+		scoreBox.text.loadImage = imgLoader;
+		scoreBox.text.onHyperlink = (url) -> {
+			if (url == "watch") {
+				var currentMission = currentList[currentSelection];
+				Leaderboards.watchTopReplay(currentMission.path, (b) -> {
+					if (b != null) {
+						var replayF = new Replay("");
+						if (replayF.read(b)) {
+							var repmis = replayF.mission;
+							// Strip data/ from the mission name
+							if (StringTools.startsWith(repmis, "data/")) {
+								repmis = repmis.substr(5);
+							}
+
+							var mi = replayF.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(replayF.customId);
+
+							// try with data/ added
+							if (mi == null && replayF.customId == 0) {
+								if (!StringTools.contains(repmis, "data/"))
+									repmis = "data/" + repmis;
+								mi = MissionList.missions.get(repmis);
+							}
+
+							if (mi.isClaMission) {
+								mi.download(() -> {
+									MarbleGame.instance.watchMissionReplay(mi, replayF);
+								});
+							} else {
+								MarbleGame.instance.watchMissionReplay(mi, replayF);
+							}
+						} else {
+							MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Could not load replay for this level."));
+						}
+					} else {
+						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("No top replay found for this level."));
+					}
+				});
+			}
+		}
+		scoreBox.text.textColor = 0xF4E4CE;
+		scoreBox.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0
+		};
+		scoreBox.text.lineSpacing = -1;
+		scoreBox.horizSizing = Width;
+		scoreBox.position = new Vector(0, 0);
+		scoreBox.extent = new Vector(407, 1184);
+		var scores = [
+			'1. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="unknown"/></offset>',
+			'2. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="pc"/></offset>',
+			'3. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="mac"/></offset>',
+			'4. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="web"/></offset>',
+			'5. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="android"/></offset>',
+		];
+		scoreBox.text.text = '<p align="center">Loading scores</p>'; // scores.join('<br/>');
+		scoreBox.text.imageVerticalAlign = Top;
+		scoreScroll.addChild(scoreBox);
+
+		var lbImgs = loadButtonImages("data/ui/play/lb");
+		var infoImgs = loadButtonImages("data/ui/play/info");
+
+		var showLBs = false;
+
+		var pmLBToggle = new GuiButton(lbImgs);
+		pmLBToggle.position = new Vector(118, 98);
+		pmLBToggle.extent = new Vector(43, 43);
+		pmLBToggle.pressedAction = (e) -> {
+			showLBs = !showLBs;
+			if (!showLBs) {
+				@:privateAccess pmLBToggle.anim.frames = lbImgs;
+			} else {
+				@:privateAccess pmLBToggle.anim.frames = infoImgs;
+			}
+
+			pmScoreButton.disabled = showLBs;
+			pmScoreText.text.visible = !showLBs;
+
+			setSelectedFunc(currentSelection);
+			if (showLBs) {
+				pmBox.addChild(scoreScroll);
+			} else {
+				pmBox.removeChild(scoreScroll);
+			}
+			pmBox.render(MarbleGame.canvas.scene2d, pmBox.parent._flow);
+			// setCategoryFunc(currentGame, currentCategoryStatic, currentSortType == 1 ? "date" : "alpha");
+			// MarbleGame.canvas.pushDialog(new SearchGui(currentGame, currentCategory == "custom"));
+		}
+
+		if (!showLBs) {
+			@:privateAccess pmLBToggle.anim.frames = lbImgs;
+		} else {
+			@:privateAccess pmLBToggle.anim.frames = infoImgs;
+		}
+
+		pmBox.addChild(pmLBToggle);
+
 		// var replayPlayButton = new GuiImage(ResourceLoader.getResource("data/ui/play/playback.png", ResourceLoader.getImage, this.imageResources).toTile());
 		// replayPlayButton.position = new Vector(38, 315);
 		// replayPlayButton.extent = new Vector(18, 18);
@@ -931,6 +1073,8 @@ class PlayMissionGui extends GuiImage {
 			}
 		}
 
+		var lbToken:Int = 0;
+
 		setSelectedFunc = function setSelected(index:Int) {
 			if (index > currentList.length - 1) {
 				index = currentList.length - 1;
@@ -1011,38 +1155,74 @@ class PlayMissionGui extends GuiImage {
 
 			var descText = '<font color="#FDFEFE" face="MarkerFelt26"><p align="center">#${currentList.indexOf(currentMission) + 1}: ${currentMission.title}</p></font>';
 
-			if (this.scoreShowing) {
-				var scoreData:Array<Score> = Settings.getScores(currentMission.path);
-				while (scoreData.length < 5) {
-					scoreData.push({name: "Matan W.", time: 5999.999});
-				}
-
-				var rightText = '<font color="#FDFEFE" face="MarkerFelt26"><br/></font><font color="#F4EFE3" face="MarkerFelt18"></font>';
-
-				for (i in 0...5) {
-					var score = scoreData[i];
-
-					var scoreColor = "#FFFFFF";
-					if (score.time < currentMission.ultimateTime) {
-						scoreColor = "#FFCC33";
-					} else if (score.time < currentMission.goldTime) {
-						if (currentMission.game == "gold" || currentMission.game.toLowerCase() == "ultra")
-							scoreColor = "#FFFF00";
-						else
-							scoreColor = "#CCCCCC";
+			if (!showLBs) {
+				if (this.scoreShowing) {
+					var scoreData:Array<Score> = Settings.getScores(currentMission.path);
+					while (scoreData.length < 5) {
+						scoreData.push({name: "Matan W.", time: 5999.999});
 					}
 
-					var scoreTextTime = '<p align="right"><font color="${scoreColor}" face="MarkerFelt18">${Util.formatTime(score.time)}</font></p>';
-					rightText += scoreTextTime;
+					var rightText = '<font color="#FDFEFE" face="MarkerFelt26"><br/></font><font color="#F4EFE3" face="MarkerFelt18"></font>';
 
-					descText += '<font color="#F4E4CE" face="MarkerFelt18">${i + 1}. <font color="#FFFFFF">${StringTools.htmlEscape(score.name)}</font></font><br/>';
+					for (i in 0...5) {
+						var score = scoreData[i];
+
+						var scoreColor = "#FFFFFF";
+						if (score.time < currentMission.ultimateTime) {
+							scoreColor = "#FFCC33";
+						} else if (score.time < currentMission.goldTime) {
+							if (currentMission.game == "gold" || currentMission.game.toLowerCase() == "ultra")
+								scoreColor = "#FFFF00";
+							else
+								scoreColor = "#CCCCCC";
+						}
+
+						var scoreTextTime = '<p align="right"><font color="${scoreColor}" face="MarkerFelt18">${Util.formatTime(score.time)}</font></p>';
+						rightText += scoreTextTime;
+
+						descText += '<font color="#F4E4CE" face="MarkerFelt18">${i + 1}. <font color="#FFFFFF">${StringTools.htmlEscape(score.name)}</font></font><br/>';
+					}
+
+					pmDescriptionRight.text.text = rightText;
+				} else {
+					descText += '<font color="#F4EFE3" face="MarkerFelt18"><p align="center">Author: ${StringTools.htmlEscape(currentMission.artist)}</p></font>';
+					descText += '<font color="#F4E4CE" face="MarkerFelt18">${StringTools.htmlEscape(currentMission.description)}</font>';
+					pmDescriptionRight.text.text = '';
 				}
-
-				pmDescriptionRight.text.text = rightText;
 			} else {
-				descText += '<font color="#F4EFE3" face="MarkerFelt18"><p align="center">Author: ${StringTools.htmlEscape(currentMission.artist)}</p></font>';
-				descText += '<font color="#F4E4CE" face="MarkerFelt18">${StringTools.htmlEscape(currentMission.description)}</font>';
 				pmDescriptionRight.text.text = '';
+				#if hl
+				if (lbRequest != null)
+					Http.cancel(lbRequest);
+				#end
+				#if js
+				if (lbRequest != 0)
+					Http.cancel(lbRequest);
+				#end
+				var lTok = lbToken++;
+				var req = Leaderboards.getScores(currentMission.path, (scoreList) -> {
+					if (lTok + 1 != lbToken || !showLBs)
+						return;
+					var sFmt = [];
+					var i = 1;
+					for (score in scoreList) {
+						sFmt.push('${i}. 
+						<offset value="15">${score.name}</offset>
+						<offset value="215">${Util.formatTime(score.score)}</offset>
+						<offset value="279"><img src="${platformToString(score.platform)}"/></offset>
+						${score.rewind == 1 ? '<offset value="299"><img src="rewind"/></offset> ' : ""}');
+						i++;
+					}
+					scoreBox.text.text = '<font color="#FDFEFE" face="MarkerFelt18">Leaderboards</font>
+					${scoreList.length != 0 ? '<offset value="220">Top Replay:<a href="watch"><img src="watch" /></a></offset>' : ""}
+					<br/>'
+						+ sFmt.join('<br/>');
+				});
+				lbRequest = req;
+				scoreBox.text.text = '<font color="#FDFEFE" face="MarkerFelt18">Leaderboards</font><br/><p align="center">Loading scores</p>';
+
+				scoreScroll.setScrollMax(scoreBox.text.textHeight);
+				scoreScroll.updateScrollVisual();
 			}
 			pmDescription.text.text = descText;
 
@@ -1058,21 +1238,26 @@ class PlayMissionGui extends GuiImage {
 				alpha: 0.5,
 				color: 0
 			};
-			if (this.scoreShowing) {
-				if (currentMission.game == "platinum") {
-					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Platinum: <font color="#CCCCCC">${Util.formatTime(currentMission.goldTime)}</font></font>';
-					pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
-				}
-				if (currentMission.game == "gold") {
-					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Qualify: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></font>';
-					pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Gold: <font color="#FFFF00">${Util.formatTime(currentMission.goldTime)}</font></font></p>';
-				}
-				if (currentMission.game.toLowerCase() == "ultra") {
-					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Gold: <font color="#FFFF00">${Util.formatTime(currentMission.goldTime)}</font></font>';
-					pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
+			if (!showLBs) {
+				if (this.scoreShowing) {
+					if (currentMission.game == "platinum") {
+						pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Platinum: <font color="#CCCCCC">${Util.formatTime(currentMission.goldTime)}</font></font>';
+						pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
+					}
+					if (currentMission.game == "gold") {
+						pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Qualify: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></font>';
+						pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Gold: <font color="#FFFF00">${Util.formatTime(currentMission.goldTime)}</font></font></p>';
+					}
+					if (currentMission.game.toLowerCase() == "ultra") {
+						pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt20">Gold: <font color="#FFFF00">${Util.formatTime(currentMission.goldTime)}</font></font>';
+						pmParTextRight.text.text = '<p align="right"><font color="#FFE3E3" face="MarkerFelt20">Ultimate: <font color="#FFCC33">${Util.formatTime(currentMission.ultimateTime)}</font></font></p>';
+					}
+				} else {
+					pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">${currentMission.game == "gold" ? "Qualify" : "Par"} Time: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></p></font>';
+					pmParTextRight.text.text = '';
 				}
 			} else {
-				pmParText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">${currentMission.game == "gold" ? "Qualify" : "Par"} Time: <font color="#FFFFFF">${(currentMission.qualifyTime != Math.POSITIVE_INFINITY) ? Util.formatTime(currentMission.qualifyTime) : "N/A"}</font></p></font>';
+				pmParText.text.text = '';
 				pmParTextRight.text.text = '';
 			}
 
@@ -1165,6 +1350,16 @@ class PlayMissionGui extends GuiImage {
 				scoreButtonDirty = true;
 			}
 			scoreButtonHover = false;
+		}
+	}
+
+	inline function platformToString(platform:NetPlatform) {
+		return switch (platform) {
+			case Unknown: return "unknown";
+			case Android: return "android";
+			case MacOS: return "mac";
+			case PC: return "pc";
+			case Web: return "web";
 		}
 	}
 }

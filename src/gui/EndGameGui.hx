@@ -1,5 +1,6 @@
 package gui;
 
+import src.Leaderboards;
 import hxd.BitmapData;
 import h2d.Tile;
 import src.MarbleGame;
@@ -422,6 +423,11 @@ class EndGameGui extends GuiControl {
 				}
 
 				Settings.saveScore(mission.path, myScore);
+				Leaderboards.submitScore(mission.path, myScore.time, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
+					if (sendReplay) {
+						Leaderboards.submitReplay(rowId, MarbleGame.instance.world.replay.write());
+					}
+				});
 
 				scoreSubmitted = true;
 			});
