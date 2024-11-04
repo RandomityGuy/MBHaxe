@@ -7,7 +7,7 @@ import src.ResourceLoader;
 import src.Settings;
 
 class MessageBoxOkDlg extends GuiControl {
-	public function new(text:String) {
+	public function new(text:String, ?onOk:() -> Void) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -50,6 +50,9 @@ class MessageBoxOkDlg extends GuiControl {
 		okButton.gamepadAccelerator = ["A"];
 		okButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
+			if (onOk != null) {
+				onOk();
+			}
 		}
 		yesNoFrame.addChild(okButton);
 

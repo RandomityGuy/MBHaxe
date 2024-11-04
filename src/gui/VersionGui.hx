@@ -98,7 +98,11 @@ class VersionGui extends GuiImage {
 			firstline = StringTools.trim(firstline);
 			if (firstline != MarbleGame.currentVersion) {
 				// We need to update lol
-				var mbo = new MessageBoxOkDlg("New version available! Please update your game.");
+				var mbo = new MessageBoxOkDlg("New version available! Please update your game.", () -> {
+					#if sys
+					hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe/blob/master/README.md");
+					#end
+				});
 				MarbleGame.canvas.pushDialog(mbo);
 			}
 		}, (e) -> {});

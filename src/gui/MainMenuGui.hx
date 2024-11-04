@@ -231,5 +231,22 @@ class MainMenuGui extends GuiImage {
 			#end
 		}
 		this.addChild(github);
+
+		#if js
+		var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);
+		var playParam = urlParams.get("app");
+		if (playParam == "1" || playParam == "true") {
+			// Get people to download the native app instead! Bruh
+			if (!Util.isIOS()) {
+				// If we aren't on iOS, then only we force them to download the native app, since thats the only valid use of PWA in this case
+				haxe.Timer.delay(() -> {
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Please download the native app for a better experience! The game will run better and smoother that way!",
+						() -> {
+						js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe/blob/master/README.md");
+					}));
+				}, 100);
+			}
+		}
+		#end
 	}
 }
