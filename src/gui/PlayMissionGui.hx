@@ -353,11 +353,18 @@ class PlayMissionGui extends GuiImage {
 		pmScoreText.extent = new Vector(235, 14);
 		pmBox.addChild(pmScoreText);
 
+		var scoreView:LeaderboardsKind = All;
+		var showLBs = false;
+
 		pmScoreButton = new GuiButton([tmpprevtile, tmpprevtile, tmpprevtile]);
 		pmScoreButton.position = new Vector(438, 282);
 		pmScoreButton.extent = new Vector(240, 39);
 		pmScoreButton.pressedAction = (e) -> {
-			scoreShowing = !scoreShowing;
+			if (showLBs) {
+				scoreView = cast((cast(scoreView, Int) + 1) % 3);
+			} else {
+				scoreShowing = !scoreShowing;
+			}
 			setSelectedFunc(currentSelection);
 		};
 		pmBox.addChild(pmScoreButton);
@@ -822,7 +829,7 @@ class PlayMissionGui extends GuiImage {
 		scoreBox.text.onHyperlink = (url) -> {
 			if (url == "watch") {
 				var currentMission = currentList[currentSelection];
-				Leaderboards.watchTopReplay(currentMission.path, (b) -> {
+				Leaderboards.watchTopReplay(currentMission.path, scoreView, (b) -> {
 					if (b != null) {
 						var replayF = new Replay("");
 						if (replayF.read(b)) {
@@ -882,8 +889,6 @@ class PlayMissionGui extends GuiImage {
 		var lbImgs = loadButtonImages("data/ui/play/lb");
 		var infoImgs = loadButtonImages("data/ui/play/info");
 
-		var showLBs = false;
-
 		var pmLBToggle = new GuiButton(lbImgs);
 		pmLBToggle.position = new Vector(118, 98);
 		pmLBToggle.extent = new Vector(43, 43);
@@ -895,8 +900,8 @@ class PlayMissionGui extends GuiImage {
 				@:privateAccess pmLBToggle.anim.frames = infoImgs;
 			}
 
-			pmScoreButton.disabled = showLBs;
-			pmScoreText.text.visible = !showLBs;
+			// pmScoreButton.disabled = showLBs;
+			// pmScoreText.text.visible = !showLBs;
 
 			setSelectedFunc(currentSelection);
 			if (showLBs) {
@@ -1041,35 +1046,51 @@ class PlayMissionGui extends GuiImage {
 		setScoreHover = (isHover) -> {
 			var currentMission = currentList[currentSelection];
 
-			pmScoreText.text.dropShadow = {
-				dx: 1 * Settings.uiScale,
-				dy: 1 * Settings.uiScale,
-				alpha: 0.5,
-				color: 0
-			};
-			var scoreTextTime = "";
-			var scoreData = Settings.getScores(currentMission.path);
-			if (scoreData.length == 0) {
-				scoreTextTime = '<font color="#FFFFFF">99:59.999</font>';
-			} else {
-				var topScore = scoreData[0];
-				var scoreColor = "#FFFFFF";
-				if (topScore.time < currentMission.ultimateTime) {
-					scoreColor = "#FFCC33";
-				} else if (topScore.time < currentMission.goldTime) {
-					if (currentMission.game == "gold" || currentMission.game.toLowerCase() == "ultra")
-						scoreColor = "#FFFF00"
-					else
-						scoreColor = "#CCCCCC";
+			if (!showLBs) {
+				pmScoreText.text.dropShadow = {
+					dx: 1 * Settings.uiScale,
+					dy: 1 * Settings.uiScale,
+					alpha: 0.5,
+					color: 0
+				};
+				var scoreTextTime = "";
+				var scoreData = Settings.getScores(currentMission.path);
+				if (scoreData.length == 0) {
+					scoreTextTime = '<font color="#FFFFFF">99:59.999</font>';
+				} else {
+					var topScore = scoreData[0];
+					var scoreColor = "#FFFFFF";
+					if (topScore.time < currentMission.ultimateTime) {
+						scoreColor = "#FFCC33";
+					} else if (topScore.time < currentMission.goldTime) {
+						if (currentMission.game == "gold" || currentMission.game.toLowerCase() == "ultra")
+							scoreColor = "#FFFF00"
+						else
+							scoreColor = "#CCCCCC";
+					}
+
+					scoreTextTime = '<font color="${scoreColor}">${Util.formatTime(topScore.time)}</font>';
 				}
 
-				scoreTextTime = '<font color="${scoreColor}">${Util.formatTime(topScore.time)}</font>';
-			}
-
-			if (isHover) {
-				pmScoreText.text.text = '<font color="#DDC1C1" face="MarkerFelt24"><p align="center">${this.scoreShowing ? "Hide" : "Show"} 5 Top Times</p></font>';
+				if (isHover) {
+					pmScoreText.text.text = '<font color="#DDC1C1" face="MarkerFelt24"><p align="center">${this.scoreShowing ? "Hide" : "Show"} 5 Top Times</p></font>';
+				} else {
+					pmScoreText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">Best Time: ${scoreTextTime}</p></font>';
+				}
 			} else {
-				pmScoreText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">Best Time: ${scoreTextTime}</p></font>';
+				var kindList = ["All Scores", "Rewind Only", "No Rewind"];
+
+				pmScoreText.text.dropShadow = {
+					dx: 1 * Settings.uiScale,
+					dy: 1 * Settings.uiScale,
+					alpha: 0.5,
+					color: 0
+				};
+				if (isHover) {
+					pmScoreText.text.text = '<font color="#DDC1C1" face="MarkerFelt24"><p align="center">Show ${kindList[(cast(scoreView, Int) + 1) % 3]}</p></font>';
+				} else {
+					pmScoreText.text.text = '<font color="#FFE3E3" face="MarkerFelt24"><p align="center">Showing: ${kindList[cast(scoreView, Int)]}</p></font>';
+				}
 			}
 		}
 
@@ -1200,7 +1221,7 @@ class PlayMissionGui extends GuiImage {
 					Http.cancel(lbRequest);
 				#end
 				var lTok = lbToken++;
-				var req = Leaderboards.getScores(currentMission.path, (scoreList) -> {
+				var req = Leaderboards.getScores(currentMission.path, scoreView, (scoreList) -> {
 					if (lTok + 1 != lbToken || !showLBs)
 						return;
 					var sFmt = [];
