@@ -11,6 +11,7 @@ typedef HttpRequest = {
 	var fulfilled:Bool;
 	var post:Bool;
 	var postData:String;
+	var ?file:haxe.io.Bytes;
 };
 
 class Http {
@@ -31,7 +32,6 @@ class Http {
 		#end
 	}
 
-	#if sys
 	static function threadLoop() {
 		while (true) {
 			var req = requests.pop(true);
@@ -52,22 +52,22 @@ class Http {
 				responses.add(() -> req.callback(b));
 				req.fulfilled = true;
 			};
-			#if !MACOS_BUNDLE
-			hl.Gc.blocking(true); // Wtf is this shit
 			if (req.post) {
 				http.setHeader('User-Agent', 'MBHaxe/1.0 ${Util.getPlatform()}');
-				http.setHeader('Content-Type', "application/json"); // support json data only (for now)
-				http.setPostData(req.postData);
+				if (req.file == null) {
+					http.setHeader('Content-Type', "application/json"); // support json data only (for now)
+					http.setPostData(req.postData);
+				}
+			}
+			if (req.post && req.file != null) {
+				http.fileTransfer("hxfile", "hxfilename", new haxe.io.BytesInput(req.file), req.file.length);
 			}
 			trace('HTTP Request: ' + req.url);
-			#end
+			hl.Gc.enable(false);
 			http.request(req.post);
-			#if !MACOS_BUNDLE
-			hl.Gc.blocking(false);
-			#end
+			hl.Gc.enable(true);
 		}
 	}
-	#end
 
 	// Returns HTTPRequest on sys, Int on js
 	public static function get(url:String, callback:haxe.io.Bytes->Void, errCallback:String->Void) {
@@ -114,6 +114,37 @@ class Http {
 						"Content-Type": "application/json",
 					},
 					body: postData
+				}).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
+		}, 75);
+		#end
+	}
+
+	// Returns HTTPRequest on sys, Int on js
+	public static function uploadFile(url:String, data:haxe.io.Bytes, callback:haxe.io.Bytes->Void, errCallback:String->Void) {
+		var req = {
+			url: url,
+			callback: callback,
+			errCallback: errCallback,
+			cancelled: false,
+			fulfilled: false,
+			post: true,
+			postData: null,
+			file: data,
+		};
+		#if sys
+		requests.add(req);
+		return req;
+		#else
+		// TODO
+		return js.Browser.window.setTimeout(() -> {
+			js.Browser.window.fetch(url,
+				{
+					method: "POST",
+					headers: {
+						"User-Agent": js.Browser.window.navigator.userAgent,
+						"Content-Type": "application/octet-stream",
+					},
+					body: data.getData()
 				}).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
 		}, 75);
 		#end
