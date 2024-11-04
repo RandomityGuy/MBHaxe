@@ -14,6 +14,12 @@ typedef LBScore = {
 	rewind:Int,
 }
 
+enum abstract LeaderboardsKind(Int) {
+	var All;
+	var Rewind;
+	var NoRewind;
+}
+
 class Leaderboards {
 	static var host = "http://127.0.0.1:7000";
 	static var game = "Platinum";
@@ -40,10 +46,10 @@ class Leaderboards {
 		});
 	}
 
-	public static function getScores(mission:String, cb:Array<LBScore>->Void) {
+	public static function getScores(mission:String, kind:LeaderboardsKind, cb:Array<LBScore>->Void) {
 		if (!StringTools.startsWith(mission, "data/"))
 			mission = "data/" + mission;
-		return Http.get('${host}/api/scores?mission=${StringTools.urlEncode(mission)}&game=${game}', (b) -> {
+		return Http.get('${host}/api/scores?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}', (b) -> {
 			var s = b.toString();
 			var scores:Array<LBScore> = Json.parse(s).scores;
 			cb(scores);
@@ -61,10 +67,10 @@ class Leaderboards {
 		});
 	}
 
-	public static function watchTopReplay(mission:String, cb:haxe.io.Bytes->Void) {
+	public static function watchTopReplay(mission:String, kind:LeaderboardsKind, cb:haxe.io.Bytes->Void) {
 		if (!StringTools.startsWith(mission, "data/"))
 			mission = "data/" + mission;
-		return Http.get('${host}/api/replay?mission=${StringTools.urlEncode(mission)}&game=${game}', (b) -> {
+		return Http.get('${host}/api/replay?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}', (b) -> {
 			cb(b);
 		}, (e) -> {
 			Console.log("Failed to get replay: " + e);
