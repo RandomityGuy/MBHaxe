@@ -2373,8 +2373,10 @@ class Marble extends GameObject {
 
 			if (Key.isDown(Settings.controlsSettings.respawn) || Gamepad.isDown(Settings.gamepadSettings.respawn)) {
 				move.respawn = true;
-				@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = 0;
-				Gamepad.releaseKey(Settings.gamepadSettings.respawn);
+				if (Net.isMP) {
+					@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = 0;
+					Gamepad.releaseKey(Settings.gamepadSettings.respawn);
+				}
 			}
 
 			if (MarbleGame.instance.touchInput.movementInput.pressed) {

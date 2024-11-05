@@ -25,12 +25,14 @@ import src.ResourceLoader;
 import net.Net;
 import src.MarbleGame;
 import src.Util;
+import src.Settings;
 
 @:structInit
 @:publicFields
 class GemSpawnPoint implements IOctreeObject {
 	var gem:Gem;
 	var gemBeam:GemBeam;
+	var weight:Float;
 
 	var boundingBox:Bounds;
 	var netIndex:Int;
@@ -44,6 +46,7 @@ class GemSpawnPoint implements IOctreeObject {
 		this.gem = spawn;
 		this.netIndex = netIndex;
 		this.gem.netIndex = netIndex;
+		this.weight = 0.0;
 	}
 
 	public function getElementType() {
@@ -290,17 +293,47 @@ class HuntMode extends NullMode {
 		if (level.mission.missionInfo.spawnblock != null && level.mission.missionInfo.spawnblock != "")
 			spawnBlock = Std.parseFloat(level.mission.missionInfo.spawnblock);
 
+		var minPointsPerSpawn = 5;
+		var minGemsPerSpawn = 3;
+		var maxSpawnSearchLoops = 15;
+
 		var lastPos = null;
 		if (lastSpawn != null)
 			lastPos = lastSpawn.gem.getAbsPos().getPosition();
 
+		// On MP, instead of blocking around the last gem, block around the player
+		// currently in the lead. This should create closer games and discourage
+		// camping for gems.
+		if (@:privateAccess level.playGui.playerList.length > 1) {
+			var leadName = @:privateAccess level.playGui.playerList[0].name;
+			var leadMarble = null;
+			if (Settings.highscoreName == leadName) {
+				leadMarble = level.marble;
+			} else {
+				for (marble in level.marbles) {
+					if (@:privateAccess marble.connection != null && @:privateAccess marble.connection.name == leadName) {
+						leadMarble = marble;
+						break;
+					}
+				}
+			}
+			if (leadMarble != null)
+				lastPos = leadMarble.getAbsPos().getPosition();
+
+			var blockFactor = Util.clamp((((@:privateAccess level.playGui.playerList[0].score / Math.max(@:privateAccess
+				level.playGui.playerList[@:privateAccess level.playGui.playerList.length - 1].score, 1.0)) - 1) * 2), 0, 3);
+
+			spawnBlock *= blockFactor;
+		}
+
 		var furthestDist = 0.0;
 		var furthest = null;
+		var validGem = null;
 
-		for (i in 0...6) {
+		for (i in 0...10) {
 			var gem = gemSpawnPoints[Std.int(rng.randRange(0, gemSpawnPoints.length - 1))];
 			if (lastPos != null) {
-				var dist = gem.gem.getAbsPos().getPosition().distance(lastPos);
+				var dist = gem.gem.getAbsPos().getPosition().distance(lastPos) + gem.weight;
 				if (dist < spawnBlock) {
 					if (dist > furthestDist) {
 						furthestDist = dist;
@@ -308,21 +341,30 @@ class HuntMode extends NullMode {
 					}
 					continue;
 				} else {
+					validGem = gem;
 					break;
 				}
 			} else {
-				furthest = gem;
+				validGem = gem;
 				break;
 			}
 		}
-		if (furthest == null) {
-			furthest = gemSpawnPoints[Std.int(rng.randRange(0, gemSpawnPoints.length - 1))];
+		if (validGem == null && furthest != null) {
+			validGem = furthest;
 		}
-		var pos = furthest.gem.getAbsPos().getPosition();
+
+		if (validGem == null) {
+			validGem = gemSpawnPoints[Std.int(rng.randRange(0, gemSpawnPoints.length - 1))];
+		}
+		var pos = validGem.gem.getAbsPos().getPosition();
 
 		var results = [];
-		while (results.length == 0) {
-			var search = gemOctree.radiusSearch(pos, gemGroupRadius);
+		var spawned = 1;
+		var points = 1 + getGemWeight(validGem.gem);
+		var loops = 0;
+		var searchRadius = gemGroupRadius;
+		while ((results.length == 0 || points < minPointsPerSpawn) && loops < 2) {
+			var search = gemOctree.radiusSearch(pos, searchRadius);
 			for (elem in search) {
 				var gemElem:GemSpawnPoint = cast elem;
 				var gemPos = gemElem.gem.getAbsPos().getPosition();
@@ -367,9 +409,12 @@ class HuntMode extends NullMode {
 
 				results.push({
 					gem: gemElem.netIndex,
-					weight: this.gemGroupRadius - gemPos.distance(pos) + rng.randRange(0, getGemWeight(gemElem.gem) + 3)
+					weight: searchRadius - gemPos.distance(pos) + rng.randRange(0, getGemWeight(gemElem.gem) + 3)
 				});
+				points += getGemWeight(gemElem.gem) + 1;
 			}
+			loops++;
+			searchRadius *= 2;
 		}
 		results.sort((a, b) -> {
 			if (a.weight > b.weight)
@@ -379,6 +424,34 @@ class HuntMode extends NullMode {
 			return 0;
 		});
 		var spawnSet = results.slice(0, maxGemsPerSpawn).map(x -> x.gem);
+
+		// Get the furthest gem
+		var maxDist = 0.0;
+		for (gem in spawnSet) {
+			var dist = gemSpawnPoints[gem].gem.getAbsPos().getPosition().distance(pos);
+			if (dist > maxDist)
+				maxDist = dist;
+		}
+
+		// Apply spawn weights
+		for (gem in spawnSet) {
+			var dist = gemSpawnPoints[gem].gem.getAbsPos().getPosition().distance(pos);
+			dist /= maxDist;
+			dist = Math.floor((1 - dist) * 10);
+			gemSpawnPoints[gem].weight += dist;
+		}
+
+		// Fix spawn weights so we don't get gems with 10000 spawn weight
+		var min = 9999.0;
+		for (gem in gemSpawnPoints) {
+			if (gem.weight < min) {
+				min = gem.weight;
+			}
+		}
+
+		for (gem in gemSpawnPoints) {
+			gem.weight -= min;
+		}
 
 		if (force) {
 			for (activeGem in activeGemSpawnGroup)
@@ -553,6 +626,10 @@ class HuntMode extends NullMode {
 		points = 0;
 		competitiveTimerStartTicks = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
+		if (gemSpawnPoints != null)
+			for (gem in gemSpawnPoints) {
+				gem.weight = 0.0;
+			}
 	}
 
 	override function onMissionLoad() {
