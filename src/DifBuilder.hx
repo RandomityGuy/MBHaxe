@@ -1,6 +1,5 @@
 package src;
 
-import h3d.scene.MultiMaterial;
 import shaders.DefaultCubemapMaterial;
 import shaders.DefaultNormalMaterial;
 import shaders.DefaultMaterial;
@@ -87,7 +86,7 @@ class TriangleEdge {
 class DifCache {
 	var dif:Dif;
 	var difTriangles:Map<String, Array<DifBuilderTriangle>>;
-	var prim:Polygon;
+	var prims:Map<String, Polygon>;
 
 	public function new() {}
 }
@@ -895,7 +894,7 @@ class DifBuilder {
 				cache = new DifCache();
 				cache.difTriangles = mats;
 				cache.dif = dif;
-				cache.prim = null;
+				cache.prims = [];
 				buildNewCache = true;
 				difCache.set(cachePath, cache);
 			}
@@ -950,16 +949,12 @@ class DifBuilder {
 				});
 
 				var time = Console.time();
-				var prim:Polygon = null;
-				if (!buildNewCache && cache != null) {
-					prim = cache.prim;
-				} else {
-					prim = new Polygon();
-					cache.prim = prim;
-				}
-				var materials = [];
 				for (grp => tris in mats) {
-					if (buildNewCache || cache == null) {
+					var prim:Polygon = null;
+
+					if (!buildNewCache && cache != null) {
+						prim = cache.prims.get(grp);
+					} else {
 						var points = [];
 						var normals = [];
 						var uvs = [];
@@ -995,13 +990,15 @@ class DifBuilder {
 							n.push(new Point(-tri.n2.x, tri.n2.y, tri.n2.z));
 							n.push(new Point(-tri.n1.x, tri.n1.y, tri.n1.z));
 						}
-						prim.appendPoints(points);
-						prim.appendUVs(uvs);
-						prim.appendNormals(normals);
-						prim.appendTangents(t);
-						prim.appendBitangents(b);
-						prim.appendTexMatNormals(n);
-						prim.nextMaterial();
+						prim = new Polygon(points);
+						prim.uvs = uvs;
+						prim.normals = normals;
+						prim.tangents = t;
+						prim.bitangents = b;
+						prim.texMatNormals = n;
+						if (buildNewCache) {
+							cache.prims.set(grp, prim);
+						}
 					}
 
 					var texture:Texture;
@@ -1029,7 +1026,7 @@ class DifBuilder {
 									thisprops.light = false; // We will calculate our own lighting
 									material.props = thisprops;
 									material.shadows = false;
-									material.receiveShadows = false;
+									material.receiveShadows = true;
 									material.mainPass.setPassName("interior");
 									fwd();
 								});
@@ -1040,26 +1037,20 @@ class DifBuilder {
 							texture.mipMap = Linear;
 							material.texture = texture;
 							material.shadows = false;
-							material.receiveShadows = false;
+							material.receiveShadows = true;
 						}
 					} else {
 						Console.warn('Unable to load ${grp} texture for dif ${path}');
 						material = Material.create();
 						material.shadows = false;
-						material.receiveShadows = false;
+						material.receiveShadows = true;
 					}
 					// material.mainPass.addShader(new h3d.shader.pbr.PropsValues(1, 0, 0, 1));
 					if (Debug.wireFrame)
 						material.mainPass.wireframe = true;
 
-					materials.push(material);
+					var mesh = new Mesh(prim, material, itr);
 				}
-
-				if (buildNewCache || cache == null) {
-					prim.endPrimitive();
-				}
-
-				var mesh = new MultiMaterial(prim, materials, itr);
 				var interval = Console.time() - time;
 				Console.log('Geometry build time ${interval}');
 
