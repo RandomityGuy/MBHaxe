@@ -34,6 +34,7 @@ typedef OptionsSettings = {
 	var musicVolume:Float;
 	var soundVolume:Float;
 	var vsync:Bool;
+	var fpsLimit:Float;
 	var fovX:Int;
 	var frameRateVis:Bool;
 	var oobInsults:Bool;
@@ -142,6 +143,7 @@ class Settings {
 		marbleShader: "Default",
 		rewindEnabled: false,
 		rewindTimescale: 1,
+		fpsLimit: -1,
 		vsync: #if js true #end
 		#if hl
 		false
@@ -240,9 +242,10 @@ class Settings {
 		#if hl
 		Window.getInstance().resize(optionsSettings.screenWidth, optionsSettings.screenHeight);
 		Window.getInstance().displayMode = optionsSettings.isFullScreen ? FullscreenResize : Windowed;
+
+		Window.getInstance().vsync = optionsSettings.vsync;
 		#end
 		AudioManager.updateVolumes();
-		Window.getInstance().vsync = optionsSettings.vsync;
 
 		MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		save();
@@ -381,6 +384,8 @@ class Settings {
 				optionsSettings.rewindEnabled = false;
 			if (optionsSettings.rewindTimescale == 0 #if js || optionsSettings.rewindTimescale == null #end)
 				optionsSettings.rewindTimescale = 1;
+			if (optionsSettings.fpsLimit == 0 #if js || optionsSettings.fpsLimit == null #end)
+				optionsSettings.fpsLimit = -1;
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;

@@ -221,7 +221,24 @@ class MarbleGame {
 				touchInput.update();
 			}
 			if (!paused || world.isMultiplayer) {
+				#if hl
+				static var dtAccumulator;
+				dtAccumulator += dt * Debug.timeScale;
+				if (Settings.optionsSettings.fpsLimit <= 0 || Settings.optionsSettings.vsync) {
+					world.update(dt * Debug.timeScale);
+					ProfilerUI.update(h3d.Engine.getCurrent().fps);
+				} else {
+					if (dtAccumulator >= 1.0 / Settings.optionsSettings.fpsLimit) {
+						world.update(dtAccumulator);
+						ProfilerUI.update(Math.floor((100.0 / dtAccumulator)) / 100);
+						dtAccumulator = 0.0;
+					}
+				}
+				#end
+				#if js
 				world.update(dt * Debug.timeScale);
+				ProfilerUI.update(h3d.Engine.getCurrent().fps);
+				#end
 			}
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
 				&& world.finishTime == null

@@ -157,7 +157,6 @@ class Main extends hxd.App {
 			// 	throw e;
 			// }
 			// world.update(dt);
-			ProfilerUI.update(this.engine.fps);
 		}
 	}
 

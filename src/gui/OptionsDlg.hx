@@ -324,10 +324,42 @@ class OptionsDlg extends GuiImage {
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.reflectiveMarble = idx == 1;
 			});
+		#if hl
+		makeOption("FPS:", () -> {
+			if (Settings.optionsSettings.vsync)
+				return "VSync";
+			if (Settings.optionsSettings.fpsLimit == -1)
+				return "Unlimited";
+			return '${Math.floor(Settings.optionsSettings.fpsLimit)}';
+		}, yPos, generalPanel, "xlarge",
+			["VSync", "60", "120", "200", "500", "Unlimited"], (idx) -> {
+				switch (idx) {
+					case 0:
+						Settings.optionsSettings.vsync = true;
+					case 1:
+						Settings.optionsSettings.fpsLimit = 60;
+						Settings.optionsSettings.vsync = false;
+					case 2:
+						Settings.optionsSettings.fpsLimit = 120;
+						Settings.optionsSettings.vsync = false;
+					case 3:
+						Settings.optionsSettings.fpsLimit = 200;
+						Settings.optionsSettings.vsync = false;
+					case 4:
+						Settings.optionsSettings.fpsLimit = 500;
+						Settings.optionsSettings.vsync = false;
+					case 5:
+						Settings.optionsSettings.fpsLimit = -1;
+						Settings.optionsSettings.vsync = false;
+				}
+			}, true);
+		#end
+		#if js
 		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', yPos, generalPanel, "small", ["Disabled", "Enabled"],
 			(idx) -> {
 				Settings.optionsSettings.vsync = idx == 1;
 			}, true);
+		#end
 
 		yPos += 56;
 
