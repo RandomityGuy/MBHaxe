@@ -1211,6 +1211,14 @@ class MarbleWorld extends Scheduler {
 		// marbleHitbox.transform(endQuat.toMatrix());
 		// marbleHitbox.offset(end.x, end.y, end.z);
 
+		var marbleAABB = new Bounds();
+		marbleAABB.xMin = end.x - this._radius;
+		marbleAABB.xMax = end.x + this._radius;
+		marbleAABB.yMin = end.y - this._radius;
+		marbleAABB.yMax = end.y + this._radius;
+		marbleAABB.zMin = end.z - this._radius;
+		marbleAABB.zMax = end.z + this._radius;
+
 		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
 		var contacts = this.collisionWorld.boundingSearch(box);
 		// var contacts = marble.contactEntities;
@@ -1234,7 +1242,7 @@ class MarbleWorld extends Scheduler {
 					var trigger:Trigger = cast contact.go;
 					var triggeraabb = trigger.collider.boundingBox;
 
-					if (triggeraabb.collide(box)) {
+					if (triggeraabb.collide(marbleAABB)) {
 						trigger.onMarbleInside(timeState);
 						if (!this.shapeOrTriggerInside.contains(contact.go)) {
 							this.shapeOrTriggerInside.push(contact.go);
