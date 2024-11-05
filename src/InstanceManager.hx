@@ -1,7 +1,5 @@
 package src;
 
-import h3d.mat.Material;
-import h3d.scene.MultiMaterial;
 import shaders.EnvMap;
 import h3d.shader.CubeMap;
 import shaders.NormalMaterial;
@@ -29,8 +27,8 @@ class MeshBatchInfo {
 	var meshbatch:MeshBatch;
 	var transparencymeshbatch:MeshBatch;
 	var mesh:Mesh;
-	var dtsShaders:Array<DtsTexture>;
-	var glowPassDtsShaders:Array<DtsTexture>;
+	var dtsShader:DtsTexture;
+	var glowPassDtsShader:DtsTexture;
 	var baseBounds:h3d.col.Bounds;
 
 	public function new() {}
@@ -158,43 +156,38 @@ class InstanceManager {
 				if (minfo.meshbatch != null) {
 					minfo.meshbatch.begin(opaqueinstances.length);
 					for (instance in opaqueinstances) { // Draw the opaque shit first
-						// minfo.meshbatch.material.mainPass.getShader(DtsTexture);
+						var dtsShader = minfo.dtsShader; // minfo.meshbatch.material.mainPass.getShader(DtsTexture);
 						var subOpacity = 1.0;
-						var noDraw = false;
-						for (dtsShader in minfo.dtsShaders) {
-							if (dtsShader != null) {
-								if (instance.gameObject.animateSubObjectOpacities) {
-									subOpacity = instance.gameObject.getSubObjectOpacity(instance.emptyObj);
-									if (subOpacity == 0) {
-										noDraw = true;
-										break;
-									}
-									// minfo.meshbatch.shadersChanged = true;
-								}
-
-								dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
+						if (dtsShader != null) {
+							if (instance.gameObject.animateSubObjectOpacities) {
+								subOpacity = instance.gameObject.getSubObjectOpacity(instance.emptyObj);
+								if (subOpacity == 0)
+									continue; // Do not draw
+								// minfo.meshbatch.shadersChanged = true;
 							}
-						}
-						if (noDraw)
-							continue;
-						var transform = instance.emptyObj.getAbsPos();
-						// minfo.meshbatch.material.mainPass.depthWrite = minfo.mesh.material.mainPass.depthWrite;
-						// minfo.meshbatch.material.mainPass.depthTest = minfo.mesh.material.mainPass.depthTest;
-						// // minfo.meshbatch.shadersChanged = true;
-						// minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						// minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
-						minfo.meshbatch.worldPosition = transform;
-						// minfo.meshbatch.material.mainPass.culling = minfo.mesh.material.mainPass.culling;
 
-						// minfo.meshbatch.material.mainPass.blendSrc = minfo.mesh.material.mainPass.blendSrc;
-						// minfo.meshbatch.material.mainPass.blendDst = minfo.mesh.material.mainPass.blendDst;
-						// minfo.meshbatch.material.mainPass.blendOp = minfo.mesh.material.mainPass.blendOp;
-						// minfo.meshbatch.material.mainPass.blendAlphaSrc = minfo.mesh.material.mainPass.blendAlphaSrc;
-						// minfo.meshbatch.material.mainPass.blendAlphaDst = minfo.mesh.material.mainPass.blendAlphaDst;
-						// minfo.meshbatch.material.mainPass.blendAlphaOp = minfo.mesh.material.mainPass.blendAlphaOp;
+							dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
+						}
+						var transform = instance.emptyObj.getAbsPos();
+						minfo.meshbatch.material.mainPass.depthWrite = minfo.mesh.material.mainPass.depthWrite;
+						minfo.meshbatch.material.mainPass.depthTest = minfo.mesh.material.mainPass.depthTest;
+						// minfo.meshbatch.shadersChanged = true;
+						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
+						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
+						minfo.meshbatch.worldPosition = transform;
+						minfo.meshbatch.material.mainPass.culling = minfo.mesh.material.mainPass.culling;
+
+						minfo.meshbatch.material.mainPass.blendSrc = minfo.mesh.material.mainPass.blendSrc;
+						minfo.meshbatch.material.mainPass.blendDst = minfo.mesh.material.mainPass.blendDst;
+						minfo.meshbatch.material.mainPass.blendOp = minfo.mesh.material.mainPass.blendOp;
+						minfo.meshbatch.material.mainPass.blendAlphaSrc = minfo.mesh.material.mainPass.blendAlphaSrc;
+						minfo.meshbatch.material.mainPass.blendAlphaDst = minfo.mesh.material.mainPass.blendAlphaDst;
+						minfo.meshbatch.material.mainPass.blendAlphaOp = minfo.mesh.material.mainPass.blendAlphaOp;
 
 						// handle the glow pass too
-						for (dtsShader in minfo.glowPassDtsShaders) {
+						var glowPass = minfo.meshbatch.material.getPass("glow");
+						if (glowPass != null) {
+							dtsShader = minfo.glowPassDtsShader;
 							if (dtsShader != null)
 								dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
 						}
@@ -205,16 +198,15 @@ class InstanceManager {
 				if (minfo.transparencymeshbatch != null) {
 					minfo.transparencymeshbatch.begin(transparentinstances.length);
 					for (instance in transparentinstances) { // Non opaque shit
-						for (dtsShader in minfo.dtsShaders) {
-							if (dtsShader != null) {
-								dtsShader.currentOpacity = instance.gameObject.currentOpacity;
-							}
+						var dtsShader = minfo.dtsShader;
+						if (dtsShader != null) {
+							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
 						}
-						// minfo.transparencymeshbatch.material.blendMode = Alpha;
+						minfo.transparencymeshbatch.material.blendMode = Alpha;
 						// minfo.transparencymeshbatch.material.color.a = instance.gameObject.currentOpacity;
 						// minfo.transparencymeshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
 						// minfo.transparencymeshbatch.shadersChanged = true;
-						// minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
+						minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
 						// minfo.transparencymeshbatch.material.mainPass.depthWrite = false;
 						// if (dtsShader != null) {
 						// 	dtsShader.currentOpacity = instance.gameObject.currentOpacity;
@@ -251,196 +243,159 @@ class InstanceManager {
 			var objs = getAllChildren(object);
 			var minfos = [];
 			for (obj in objs) {
-				var isMesh = obj is MultiMaterial;
+				var isMesh = obj is Mesh;
 				var minfo:MeshBatchInfo = new MeshBatchInfo();
 				minfo.instances = [new MeshInstance(obj, object)];
-				minfo.meshbatch = isMesh ? new MeshBatch(cast(cast(obj, MultiMaterial).primitive), null, scene) : null;
+				minfo.meshbatch = isMesh ? new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene) : null;
 				minfo.mesh = isMesh ? cast obj : null;
 				minfo.baseBounds = isMesh ? @:privateAccess cast(minfo.meshbatch.primitive, Instanced).baseBounds : null;
-				minfo.dtsShaders = [];
-				minfo.glowPassDtsShaders = [];
 
 				if (isMesh) {
-					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, MultiMaterial).primitive), null, scene);
-					minfo.transparencymeshbatch.materials = [];
-					minfo.meshbatch.materials = [];
-					for (mat in cast(obj, MultiMaterial).materials) {
-						var matclone:Material = cast mat.clone();
-						var minfoshaders = [];
-						for (shader in matclone.mainPass.getShaders()) {
+					var mat = cast(obj, Mesh).material;
+					var minfoshaders = [];
+					for (shader in minfo.meshbatch.material.mainPass.getShaders()) {
+						minfoshaders.push(shader);
+					}
+					for (shader in minfoshaders)
+						minfo.meshbatch.material.mainPass.removeShader(shader);
+					var addshaders = [];
+					for (shader in mat.mainPass.getShaders()) {
+						addshaders.push(shader);
+					}
+					for (shader in addshaders)
+						minfo.meshbatch.material.mainPass.addShader(shader);
+					var glowPass = mat.getPass("glow");
+					if (glowPass != null) {
+						var gpass = glowPass.clone();
+						gpass.enableLights = false;
+						gpass.depthTest = glowPass.depthTest;
+						gpass.blendSrc = glowPass.blendSrc;
+						gpass.blendDst = glowPass.blendDst;
+						gpass.blendOp = glowPass.blendOp;
+						gpass.blendAlphaSrc = glowPass.blendAlphaSrc;
+						gpass.blendAlphaDst = glowPass.blendAlphaDst;
+						gpass.blendAlphaOp = glowPass.blendAlphaOp;
+						if (glowPass.culling == None) {
+							gpass.culling = glowPass.culling;
+						}
+
+						minfoshaders = [];
+
+						for (shader in gpass.getShaders()) {
 							minfoshaders.push(shader);
 						}
 						for (shader in minfoshaders)
-							matclone.mainPass.removeShader(shader);
+							gpass.removeShader(shader);
 						var addshaders = [];
-						for (shader in mat.mainPass.getShaders()) {
+						for (shader in glowPass.getShaders()) {
 							addshaders.push(shader);
 						}
 						for (shader in addshaders)
-							matclone.mainPass.addShader(shader);
-						var glowPass = mat.getPass("glow");
-						if (glowPass != null) {
-							var gpass = glowPass.clone();
-							gpass.enableLights = false;
-							gpass.depthTest = glowPass.depthTest;
-							gpass.blendSrc = glowPass.blendSrc;
-							gpass.blendDst = glowPass.blendDst;
-							gpass.blendOp = glowPass.blendOp;
-							gpass.blendAlphaSrc = glowPass.blendAlphaSrc;
-							gpass.blendAlphaDst = glowPass.blendAlphaDst;
-							gpass.blendAlphaOp = glowPass.blendAlphaOp;
-							if (glowPass.culling == None) {
-								gpass.culling = glowPass.culling;
-							}
+							gpass.addShader(shader);
 
-							minfoshaders = [];
+						minfo.glowPassDtsShader = gpass.getShader(DtsTexture);
 
-							for (shader in gpass.getShaders()) {
-								minfoshaders.push(shader);
-							}
-							for (shader in minfoshaders)
-								gpass.removeShader(shader);
-							var addshaders = [];
-							for (shader in glowPass.getShaders()) {
-								addshaders.push(shader);
-							}
-							for (shader in addshaders)
-								gpass.addShader(shader);
-							minfo.glowPassDtsShaders.push(gpass.getShader(DtsTexture));
-
-							matclone.addPass(gpass);
-						} else {
-							minfo.glowPassDtsShaders.push(null);
+						minfo.meshbatch.material.addPass(gpass);
+					}
+					var refractPass = mat.getPass("refract");
+					if (refractPass != null) {
+						var gpass = refractPass.clone();
+						gpass.enableLights = false;
+						gpass.depthTest = refractPass.depthTest;
+						gpass.blendSrc = refractPass.blendSrc;
+						gpass.blendDst = refractPass.blendDst;
+						gpass.blendOp = refractPass.blendOp;
+						gpass.blendAlphaSrc = refractPass.blendAlphaSrc;
+						gpass.blendAlphaDst = refractPass.blendAlphaDst;
+						gpass.blendAlphaOp = refractPass.blendAlphaOp;
+						if (refractPass.culling == None) {
+							gpass.culling = refractPass.culling;
 						}
-						var refractPass = mat.getPass("refract");
-						if (refractPass != null) {
-							var gpass = refractPass.clone();
-							gpass.enableLights = false;
-							gpass.depthTest = refractPass.depthTest;
-							gpass.blendSrc = refractPass.blendSrc;
-							gpass.blendDst = refractPass.blendDst;
-							gpass.blendOp = refractPass.blendOp;
-							gpass.blendAlphaSrc = refractPass.blendAlphaSrc;
-							gpass.blendAlphaDst = refractPass.blendAlphaDst;
-							gpass.blendAlphaOp = refractPass.blendAlphaOp;
-							if (refractPass.culling == None) {
-								gpass.culling = refractPass.culling;
-							}
-
-							minfoshaders = [];
-
-							for (shader in gpass.getShaders()) {
-								minfoshaders.push(shader);
-							}
-							for (shader in minfoshaders)
-								gpass.removeShader(shader);
-							var addshaders = [];
-							for (shader in refractPass.getShaders()) {
-								addshaders.push(shader);
-							}
-							for (shader in addshaders)
-								gpass.addShader(shader);
-
-							matclone.addPass(gpass);
-						}
-						var zPass = mat.getPass("zPass");
-						if (zPass != null) {
-							var gpass = zPass.clone();
-							gpass.enableLights = false;
-							gpass.depthTest = zPass.depthTest;
-							gpass.blendSrc = zPass.blendSrc;
-							gpass.blendDst = zPass.blendDst;
-							gpass.blendOp = zPass.blendOp;
-							gpass.blendAlphaSrc = zPass.blendAlphaSrc;
-							gpass.blendAlphaDst = zPass.blendAlphaDst;
-							gpass.blendAlphaOp = zPass.blendAlphaOp;
-							gpass.colorMask = zPass.colorMask;
-							minfoshaders = [];
-
-							for (shader in gpass.getShaders()) {
-								minfoshaders.push(shader);
-							}
-							for (shader in minfoshaders)
-								gpass.removeShader(shader);
-							var addshaders = [];
-							for (shader in zPass.getShaders()) {
-								addshaders.push(shader);
-							}
-							for (shader in addshaders)
-								gpass.addShader(shader);
-
-							matclone.addPass(gpass);
-						}
-
-						matclone.mainPass.depthWrite = mat.mainPass.depthWrite;
-						matclone.mainPass.depthTest = mat.mainPass.depthTest;
-						// minfo.meshbatch.shadersChanged = true;
-						matclone.mainPass.setPassName(mat.mainPass.name);
-						matclone.mainPass.enableLights = mat.mainPass.enableLights;
-						matclone.mainPass.culling = mat.mainPass.culling;
-
-						matclone.mainPass.blendSrc = mat.mainPass.blendSrc;
-						matclone.mainPass.blendDst = mat.mainPass.blendDst;
-						matclone.mainPass.blendOp = mat.mainPass.blendOp;
-						matclone.mainPass.blendAlphaSrc = mat.mainPass.blendAlphaSrc;
-						matclone.mainPass.blendAlphaDst = mat.mainPass.blendAlphaDst;
-						matclone.mainPass.blendAlphaOp = mat.mainPass.blendAlphaOp;
-
-						minfo.dtsShaders.push(matclone.mainPass.getShader(DtsTexture));
-
-						for (p in matclone.getPasses())
-							@:privateAccess p.batchMode = true;
-						minfo.meshbatch.materials.push(matclone);
-						// var dtsshader = mat.mainPass.getShader(DtsTexture);
-						// if (dtsshader != null) {
-						// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						// 	minfo.meshbatch.material.mainPass.addShader(dtsshader);
-						// 	minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-						// 	minfo.meshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
-						// }
-						// var phongshader = mat.mainPass.getShader(PhongMaterial);
-						// if (phongshader != null) {
-						// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						// 	minfo.meshbatch.material.mainPass.addShader(phongshader);
-						// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-						// }
-						// var noiseshder = mat.mainPass.getShader(NoiseTileMaterial);
-						// if (noiseshder != null) {
-						// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						// 	minfo.meshbatch.material.mainPass.addShader(noiseshder);
-						// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-						// }
-						// var nmapshdr = mat.mainPass.getShader(NormalMaterial);
-						// if (nmapshdr != null) {
-						// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
-						// 	minfo.meshbatch.material.mainPass.addShader(nmapshdr);
-						// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
-						// }
-						// var cubemapshdr = mat.mainPass.getShader(EnvMap);
-						// if (cubemapshdr != null) {
-						// 	minfo.meshbatch.material.mainPass.addShader(cubemapshdr);
-						// }
-
-						var matclonetransp:Material = cast mat.clone();
 
 						minfoshaders = [];
-						for (shader in matclonetransp.mainPass.getShaders()) {
+
+						for (shader in gpass.getShaders()) {
 							minfoshaders.push(shader);
 						}
 						for (shader in minfoshaders)
-							matclonetransp.mainPass.removeShader(shader);
-						matclonetransp.mainPass.removeShader(matclonetransp.textureShader);
-						for (shader in mat.mainPass.getShaders()) {
-							matclonetransp.mainPass.addShader(shader);
+							gpass.removeShader(shader);
+						var addshaders = [];
+						for (shader in refractPass.getShaders()) {
+							addshaders.push(shader);
 						}
+						for (shader in addshaders)
+							gpass.addShader(shader);
 
-						for (p in matclonetransp.getPasses())
-							@:privateAccess p.batchMode = true;
+						minfo.meshbatch.material.addPass(gpass);
+					}
+					var zPass = mat.getPass("zPass");
+					if (zPass != null) {
+						var gpass = zPass.clone();
+						gpass.enableLights = false;
+						gpass.depthTest = zPass.depthTest;
+						gpass.blendSrc = zPass.blendSrc;
+						gpass.blendDst = zPass.blendDst;
+						gpass.blendOp = zPass.blendOp;
+						gpass.blendAlphaSrc = zPass.blendAlphaSrc;
+						gpass.blendAlphaDst = zPass.blendAlphaDst;
+						gpass.blendAlphaOp = zPass.blendAlphaOp;
+						gpass.colorMask = zPass.colorMask;
+						minfoshaders = [];
 
-						matclonetransp.blendMode = Alpha;
-						matclonetransp.mainPass.enableLights = mat.mainPass.enableLights;
+						for (shader in gpass.getShaders()) {
+							minfoshaders.push(shader);
+						}
+						for (shader in minfoshaders)
+							gpass.removeShader(shader);
+						var addshaders = [];
+						for (shader in zPass.getShaders()) {
+							addshaders.push(shader);
+						}
+						for (shader in addshaders)
+							gpass.addShader(shader);
 
-						minfo.transparencymeshbatch.materials.push(matclonetransp);
+						minfo.meshbatch.material.addPass(gpass);
+					}
+					minfo.dtsShader = minfo.meshbatch.material.mainPass.getShader(DtsTexture);
+					// var dtsshader = mat.mainPass.getShader(DtsTexture);
+					// if (dtsshader != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(dtsshader);
+					// 	minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// 	minfo.meshbatch.material.mainPass.depthWrite = mat.mainPass.depthWrite;
+					// }
+					// var phongshader = mat.mainPass.getShader(PhongMaterial);
+					// if (phongshader != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(phongshader);
+					// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// }
+					// var noiseshder = mat.mainPass.getShader(NoiseTileMaterial);
+					// if (noiseshder != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(noiseshder);
+					// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// }
+					// var nmapshdr = mat.mainPass.getShader(NormalMaterial);
+					// if (nmapshdr != null) {
+					// 	minfo.meshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					// 	minfo.meshbatch.material.mainPass.addShader(nmapshdr);
+					// 	// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+					// }
+					// var cubemapshdr = mat.mainPass.getShader(EnvMap);
+					// if (cubemapshdr != null) {
+					// 	minfo.meshbatch.material.mainPass.addShader(cubemapshdr);
+					// }
+					minfo.transparencymeshbatch = new MeshBatch(cast(cast(obj, Mesh).primitive), cast(cast(obj, Mesh)).material.clone(), scene);
+					minfoshaders = [];
+					for (shader in minfo.transparencymeshbatch.material.mainPass.getShaders()) {
+						minfoshaders.push(shader);
+					}
+					for (shader in minfoshaders)
+						minfo.transparencymeshbatch.material.mainPass.removeShader(shader);
+					minfo.transparencymeshbatch.material.mainPass.removeShader(minfo.meshbatch.material.textureShader);
+					for (shader in mat.mainPass.getShaders()) {
+						minfo.transparencymeshbatch.material.mainPass.addShader(shader);
 					}
 					// minfo.transparencymeshbatch.material.mainPass.culling = mat.mainPass.culling;
 

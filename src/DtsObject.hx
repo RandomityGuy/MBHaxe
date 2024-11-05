@@ -1,6 +1,5 @@
 package src;
 
-import h3d.scene.MultiMaterial;
 import h3d.col.Point;
 import collision.CollisionWorld;
 import shaders.EnvMap;
@@ -224,38 +223,33 @@ class DtsObject extends GameObject {
 						var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
 						var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
-						var poly = new Polygon();
-						var usedMats = [];
 						for (k in 0...geometry.length) {
 							if (geometry[k].vertices.length == 0)
 								continue;
 
-							usedMats.push(materials[k]);
+							var poly = new Polygon(geometry[k].vertices);
+							poly.normals = geometry[k].normals;
+							poly.uvs = geometry[k].uvs;
+							poly.tangents = geometry[k].tangents;
+							poly.bitangents = geometry[k].bitangents;
+							poly.texMatNormals = geometry[k].texNormals;
 
-							poly.appendPoints(geometry[k].vertices);
-							poly.appendUVs(geometry[k].uvs);
-							poly.appendNormals(geometry[k].normals);
-							poly.appendTangents(geometry[k].tangents);
-							poly.appendBitangents(geometry[k].bitangents);
-							poly.appendTexMatNormals(geometry[k].texNormals);
-							poly.nextMaterial();
+							var obj = new Mesh(poly, materials[k], this.graphNodes[i]);
+							meshToIndex.set(obj, dts.objects.indexOf(object));
 						}
-						poly.endPrimitive();
-						var obj = new MultiMaterial(poly, usedMats, this.graphNodes[i]);
-						meshToIndex.set(obj, dts.objects.indexOf(object));
-
-						poly.endPrimitive();
 					} else {
-						// var usedMats = [];
+						var usedMats = [];
 
-						// for (prim in mesh.primitives) {
-						// 	if (!usedMats.contains(prim.matIndex)) {
-						// 		usedMats.push(prim.matIndex);
-						// 	}
-						// }
+						for (prim in mesh.primitives) {
+							if (!usedMats.contains(prim.matIndex)) {
+								usedMats.push(prim.matIndex);
+							}
+						}
 
-						var obj = new Object(this.graphNodes[i]);
-						meshToIndex.set(obj, dts.objects.indexOf(object));
+						for (k in usedMats) {
+							var obj = new Object(this.graphNodes[i]);
+							meshToIndex.set(obj, dts.objects.indexOf(object));
+						}
 					}
 				}
 
@@ -1544,17 +1538,14 @@ class DtsObject extends GameObject {
 			var node = this.meshes[idx];
 			if (node != null) {
 				for (ch in node.getMeshes()) {
-					var multimat = cast(ch, MultiMaterial);
-					for (mat in multimat.materials) {
-						for (pass in ch.material.getPasses()) {
-							var alphashader = pass.getShader(AlphaMult);
-							if (alphashader != null)
-								alphashader.alpha = opacity * this.currentOpacity;
-							else {
-								alphashader = new AlphaMult();
-								alphashader.alpha = opacity * this.currentOpacity;
-								pass.addShader(alphashader);
-							}
+					for (pass in ch.material.getPasses()) {
+						var alphashader = pass.getShader(AlphaMult);
+						if (alphashader != null)
+							alphashader.alpha = opacity * this.currentOpacity;
+						else {
+							alphashader = new AlphaMult();
+							alphashader.alpha = opacity * this.currentOpacity;
+							pass.addShader(alphashader);
 						}
 					}
 				}

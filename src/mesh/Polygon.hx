@@ -4,101 +4,34 @@ import h3d.prim.*;
 import h3d.col.Point;
 
 class Polygon extends MeshPrimitive {
-	public var points:Array<Float>;
-	public var normals:Array<Float>;
-	public var tangents:Array<Float>;
-	public var bitangents:Array<Float>;
-	public var texMatNormals:Array<Float>;
-	public var uvs:Array<Float>;
-	public var indexStarts:Array<Int>;
-	public var indexCounts:Array<Int>;
-
-	var currentMaterial:Int = 0;
-	var curTris = 0;
+	public var points:Array<Point>;
+	public var normals:Array<Point>;
+	public var tangents:Array<Point>;
+	public var bitangents:Array<Point>;
+	public var texMatNormals:Array<Point>;
+	public var uvs:Array<UV>;
+	public var idx:hxd.IndexBuffer;
 
 	var bounds:h3d.col.Bounds;
 
-	public function new() {
-		this.indexStarts = [0];
-		this.indexCounts = [];
-		this.points = [];
-		this.uvs = [];
-		this.normals = [];
-		this.tangents = [];
-		this.bitangents = [];
-		this.texMatNormals = [];
+	var scaled = 1.;
+	var translatedX = 0.;
+	var translatedY = 0.;
+	var translatedZ = 0.;
+
+	public function new(points, ?idx) {
+		this.points = points;
+		this.idx = idx;
 	}
 
 	override function getBounds() {
 		if (bounds == null) {
 			var b = new h3d.col.Bounds();
-			var i = 0;
-			while (i < points.length) {
-				b.addPoint(new h3d.col.Point(points[i], points[i + 1], points[i + 2]));
-				i += 3;
-			}
+			for (p in points)
+				b.addPoint(p);
 			bounds = b;
 		}
 		return bounds;
-	}
-
-	public function appendPoints(pts:Array<Point>) {
-		for (p in pts) {
-			this.points.push(p.x);
-			this.points.push(p.y);
-			this.points.push(p.z);
-		}
-		curTris += Math.floor(pts.length / 3);
-	}
-
-	public function appendNormals(pts:Array<Point>) {
-		for (p in pts) {
-			this.normals.push(p.x);
-			this.normals.push(p.y);
-			this.normals.push(p.z);
-		}
-	}
-
-	public function appendTangents(pts:Array<Point>) {
-		for (p in pts) {
-			this.tangents.push(p.x);
-			this.tangents.push(p.y);
-			this.tangents.push(p.z);
-		}
-	}
-
-	public function appendBitangents(pts:Array<Point>) {
-		for (p in pts) {
-			this.bitangents.push(p.x);
-			this.bitangents.push(p.y);
-			this.bitangents.push(p.z);
-		}
-	}
-
-	public function appendTexMatNormals(pts:Array<Point>) {
-		for (p in pts) {
-			this.texMatNormals.push(p.x);
-			this.texMatNormals.push(p.y);
-			this.texMatNormals.push(p.z);
-		}
-	}
-
-	public function appendUVs(uvs:Array<UV>) {
-		for (uv in uvs) {
-			this.uvs.push(uv.u);
-			this.uvs.push(uv.v);
-		}
-	}
-
-	public function nextMaterial() {
-		indexStarts.push(Math.floor(this.points.length / 9));
-		indexCounts.push(curTris);
-		curTris = 0;
-	}
-
-	public function endPrimitive() {
-		indexCounts.push(curTris);
-		curTris = 0;
 	}
 
 	override function alloc(engine:h3d.Engine) {
@@ -134,84 +67,140 @@ class Polygon extends MeshPrimitive {
 		}
 
 		var buf = new hxd.FloatBuffer();
-		for (k in 0...Std.int(points.length / 3)) {
-			buf.push(points[k * 3]);
-			buf.push(points[k * 3 + 1]);
-			buf.push(points[k * 3 + 2]);
+		for (k in 0...points.length) {
+			var p = points[k];
+			buf.push(p.x);
+			buf.push(p.y);
+			buf.push(p.z);
 			if (normals != null) {
-				buf.push(normals[k * 3]);
-				buf.push(normals[k * 3 + 1]);
-				buf.push(normals[k * 3 + 2]);
+				var n = normals[k];
+				buf.push(n.x);
+				buf.push(n.y);
+				buf.push(n.z);
 			}
 			if (tangents != null) {
-				buf.push(tangents[k * 3]);
-				buf.push(tangents[k * 3 + 1]);
-				buf.push(tangents[k * 3 + 2]);
+				var t = tangents[k];
+				buf.push(t.x);
+				buf.push(t.y);
+				buf.push(t.z);
 			}
 			if (bitangents != null) {
-				buf.push(bitangents[k * 3]);
-				buf.push(bitangents[k * 3 + 1]);
-				buf.push(bitangents[k * 3 + 2]);
+				var t = bitangents[k];
+				buf.push(t.x);
+				buf.push(t.y);
+				buf.push(t.z);
 			}
 			if (texMatNormals != null) {
-				buf.push(texMatNormals[k * 3]);
-				buf.push(texMatNormals[k * 3 + 1]);
-				buf.push(texMatNormals[k * 3 + 2]);
+				var t = texMatNormals[k];
+				buf.push(t.x);
+				buf.push(t.y);
+				buf.push(t.z);
 			}
 			if (uvs != null) {
 				var t = uvs[k];
-				buf.push(uvs[k * 2]);
-				buf.push(uvs[k * 2 + 1]);
+				buf.push(t.u);
+				buf.push(t.v);
 			}
 		}
 		var flags:Array<h3d.Buffer.BufferFlag> = [];
-		flags.push(Triangles);
+		if (idx == null)
+			flags.push(Triangles);
 		if (normals == null || tangents != null)
 			flags.push(RawFormat);
 		buffer = h3d.Buffer.ofFloats(buf, size, flags);
 
 		for (i in 0...names.length)
 			addBuffer(names[i], buffer, positions[i]);
+
+		if (idx != null)
+			indexes = h3d.Indexes.alloc(idx);
+	}
+
+	public function unindex() {
+		if (idx != null && points.length != idx.length) {
+			var p = [];
+			var used = [];
+			for (i in 0...idx.length)
+				p.push(points[idx[i]].clone());
+			if (normals != null) {
+				var n = [];
+				for (i in 0...idx.length)
+					n.push(normals[idx[i]].clone());
+				normals = n;
+			}
+			if (tangents != null) {
+				var t = [];
+				for (i in 0...idx.length)
+					t.push(tangents[idx[i]].clone());
+				tangents = t;
+			}
+			if (uvs != null) {
+				var t = [];
+				for (i in 0...idx.length)
+					t.push(uvs[idx[i]].clone());
+				uvs = t;
+			}
+			points = p;
+			idx = null;
+		}
+	}
+
+	public function translate(dx, dy, dz) {
+		translatedX += dx;
+		translatedY += dy;
+		translatedZ += dz;
+		for (p in points) {
+			p.x += dx;
+			p.y += dy;
+			p.z += dz;
+		}
+	}
+
+	public function scale(s:Float) {
+		scaled *= s;
+		for (p in points) {
+			p.x *= s;
+			p.y *= s;
+			p.z *= s;
+		}
 	}
 
 	public function addNormals() {
 		// make per-point normal
 		normals = new Array();
 		for (i in 0...points.length)
-			normals[i] = 0;
+			normals[i] = new Point();
 		var pos = 0;
 		for (i in 0...triCount()) {
 			var i0, i1, i2;
-			i0 = pos++;
-			i1 = pos++;
-			i2 = pos++;
-			var p0 = new h3d.Vector(points[3 * i0], points[3 * i0 + 1], points[3 * i0 + 2]);
-			var p1 = new h3d.Vector(points[3 * i1], points[3 * i1 + 1], points[3 * i1 + 2]);
-			var p2 = new h3d.Vector(points[3 * i2], points[3 * i2 + 1], points[3 * i2 + 2]);
+			if (idx == null) {
+				i0 = pos++;
+				i1 = pos++;
+				i2 = pos++;
+			} else {
+				i0 = idx[pos++];
+				i1 = idx[pos++];
+				i2 = idx[pos++];
+			}
+			var p0 = points[i0];
+			var p1 = points[i1];
+			var p2 = points[i2];
 			// this is the per-face normal
 			var n = p1.sub(p0).cross(p2.sub(p0));
 			// add it to each point
-			normals[3 * i0] += n.x;
-			normals[3 * i0 + 1] += n.y;
-			normals[3 * i0 + 2] += n.z;
-
-			normals[3 * i1] += n.x;
-			normals[3 * i1 + 1] += n.y;
-			normals[3 * i1 + 2] += n.z;
-
-			normals[3 * i2] += n.x;
-			normals[3 * i2 + 1] += n.y;
-			normals[3 * i2 + 2] += n.z;
+			normals[i0].x += n.x;
+			normals[i0].y += n.y;
+			normals[i0].z += n.z;
+			normals[i1].x += n.x;
+			normals[i1].y += n.y;
+			normals[i1].z += n.z;
+			normals[i2].x += n.x;
+			normals[i2].y += n.y;
+			normals[i2].z += n.z;
 		}
 		// normalize all normals
-		for (k in 0...Std.int(points.length / 3)) {
-			var n = new h3d.Vector(normals[k * 3], normals[k * 3 + 1], normals[k * 3 + 2]);
+		for (n in normals)
 			n.normalize();
-
-			normals[k * 3] = n.x;
-			normals[k * 3 + 1] = n.y;
-			normals[k * 3 + 2] = n.z;
-		}
 	}
 
 	public function addTangents() {
@@ -221,21 +210,26 @@ class Polygon extends MeshPrimitive {
 			addUVs();
 		tangents = [];
 		for (i in 0...points.length)
-			tangents[i] = 0;
+			tangents[i] = new Point();
 		var pos = 0;
 		for (i in 0...triCount()) {
 			var i0, i1, i2;
-			i0 = pos++;
-			i1 = pos++;
-			i2 = pos++;
-
-			var p0 = new h3d.Vector(points[3 * i0], points[3 * i0 + 1], points[3 * i0 + 2]);
-			var p1 = new h3d.Vector(points[3 * i1], points[3 * i1 + 1], points[3 * i1 + 2]);
-			var p2 = new h3d.Vector(points[3 * i2], points[3 * i2 + 1], points[3 * i2 + 2]);
-			var uv0 = new UV(uvs[2 * i0], uvs[2 * i0 + 1]);
-			var uv1 = new UV(uvs[2 * i1], uvs[2 * i1 + 1]);
-			var uv2 = new UV(uvs[2 * i2], uvs[2 * i2 + 1]);
-			var n = new h3d.Vector(normals[3 * i0], normals[3 * i0 + 1], normals[3 * i0 + 2]);
+			if (idx == null) {
+				i0 = pos++;
+				i1 = pos++;
+				i2 = pos++;
+			} else {
+				i0 = idx[pos++];
+				i1 = idx[pos++];
+				i2 = idx[pos++];
+			}
+			var p0 = points[i0];
+			var p1 = points[i1];
+			var p2 = points[i2];
+			var uv0 = uvs[i0];
+			var uv1 = uvs[i1];
+			var uv2 = uvs[i2];
+			var n = normals[i0];
 
 			var k0 = p1.sub(p0);
 			var k1 = p2.sub(p0);
@@ -248,33 +242,36 @@ class Polygon extends MeshPrimitive {
 			t.normalize();
 
 			// add it to each point
-			tangents[3 * i0] += t.x;
-			tangents[3 * i0 + 1] += t.y;
-			tangents[3 * i0 + 2] += t.z;
-
-			tangents[3 * i1] += t.x;
-			tangents[3 * i1 + 1] += t.y;
-			tangents[3 * i1 + 2] += t.z;
-
-			tangents[3 * i2] += t.x;
-			tangents[3 * i2 + 1] += t.y;
-			tangents[3 * i2 + 2] += t.z;
+			tangents[i0].x += t.x;
+			tangents[i0].y += t.y;
+			tangents[i0].z += t.z;
+			tangents[i1].x += t.x;
+			tangents[i1].y += t.y;
+			tangents[i1].z += t.z;
+			tangents[i2].x += t.x;
+			tangents[i2].y += t.y;
+			tangents[i2].z += t.z;
 		}
-		for (k in 0...Std.int(points.length / 3)) {
-			var n = new h3d.Vector(tangents[k * 3], tangents[k * 3 + 1], tangents[k * 3 + 2]);
-			n.normalize();
-
-			tangents[k * 3] = n.x;
-			tangents[k * 3 + 1] = n.y;
-			tangents[k * 3 + 2] = n.z;
-		}
+		for (t in tangents)
+			t.normalize();
 	}
 
 	public function addUVs() {
 		uvs = [];
-		for (k in 0...Std.int(points.length / 3)) {
-			uvs[k * 2] = points[k * 3];
-			uvs[k * 2 + 1] = points[k * 3 + 1];
+		for (i in 0...points.length)
+			uvs[i] = new UV(points[i].x, points[i].y);
+	}
+
+	public function uvScale(su:Float, sv:Float) {
+		if (uvs == null)
+			throw "Missing UVs";
+		var m = new Map<UV, Bool>();
+		for (t in uvs) {
+			if (m.exists(t))
+				continue;
+			m.set(t, true);
+			t.u *= su;
+			t.v *= sv;
 		}
 	}
 
@@ -282,25 +279,38 @@ class Polygon extends MeshPrimitive {
 		var n = super.triCount();
 		if (n != 0)
 			return n;
-		return Std.int(points.length / 9);
+		return Std.int((idx == null ? points.length : idx.length) / 3);
 	}
 
 	override function vertexCount() {
 		return points.length;
 	}
 
-	override function selectMaterial(material:Int) {
-		currentMaterial = material;
-	}
-
-	override function getMaterialIndexes(material:Int):{count:Int, start:Int} {
-		return {start: indexStarts[material] * 3, count: indexCounts[material] * 3};
+	override function getCollider():h3d.col.Collider {
+		var vertexes = new haxe.ds.Vector<hxd.impl.Float32>(points.length * 3);
+		var indexes = new haxe.ds.Vector<Int>(idx.length);
+		var vid = 0;
+		for (p in points) {
+			vertexes[vid++] = p.x;
+			vertexes[vid++] = p.y;
+			vertexes[vid++] = p.z;
+		}
+		for (i in 0...idx.length)
+			indexes[i] = idx[i];
+		var poly = new h3d.col.Polygon();
+		poly.addBuffers(vertexes, indexes);
+		return poly;
 	}
 
 	override function render(engine:h3d.Engine) {
 		if (buffer == null || buffer.isDisposed())
 			alloc(engine);
 		var bufs = getBuffers(engine);
-		engine.renderMultiBuffers(bufs, engine.mem.triIndexes, indexStarts[currentMaterial], indexCounts[currentMaterial]);
+		if (indexes != null)
+			engine.renderMultiBuffers(bufs, indexes);
+		else if (buffer.flags.has(Quads))
+			engine.renderMultiBuffers(bufs, engine.mem.quadIndexes, 0, triCount());
+		else
+			engine.renderMultiBuffers(bufs, engine.mem.triIndexes, 0, triCount());
 	}
 }
