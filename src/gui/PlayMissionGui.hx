@@ -156,10 +156,22 @@ class PlayMissionGui extends GuiImage {
 						// Idk do something to notify the user here
 					} else {
 						var repmis = replay.mission;
-						#if js
-						repmis = StringTools.replace(repmis, "data/", "");
-						#end
-						var playMis = MissionList.missions.get(repmis);
+
+						// Strip data/ from the mission name
+						if (StringTools.startsWith(repmis, "data/")) {
+							repmis = repmis.substr(5);
+						}
+
+						var mi = MissionList.missions.get(repmis);
+
+						// try with data/ added
+						if (mi == null) {
+							if (!StringTools.contains(repmis, "data/"))
+								repmis = "data/" + repmis;
+							mi = MissionList.missions.get(repmis);
+						}
+
+						var playMis = mi;
 						if (playMis != null) {
 							cast(this.parent, Canvas).marbleGame.watchMissionReplay(playMis, replay);
 						} else {

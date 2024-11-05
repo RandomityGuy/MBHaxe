@@ -356,7 +356,7 @@ class Replay {
 		var compressed = haxe.zip.Compress.run(bw.getBuffer(), 9);
 		#end
 		#if js
-		var stream = zip.DeflateStream.create(zip.DeflateStream.CompressionLevel.GOOD, false);
+		var stream = zip.DeflateStream.create(zip.DeflateStream.CompressionLevel.GOOD, true);
 		stream.write(new BytesInput(bw.getBuffer()));
 		var compressed = stream.finalize();
 		#end
