@@ -149,6 +149,7 @@ class Particle {
 		this.part.r = this.color.r;
 		this.part.g = this.color.g;
 		this.part.b = this.color.b;
+		this.part.a = this.color.a;
 		this.part.ratio = 1;
 		this.part.size = this.scale / 2;
 	}
