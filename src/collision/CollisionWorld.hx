@@ -34,6 +34,7 @@ class CollisionWorld {
 
 	public function build() {
 		this.grid.build();
+		this.dynamicGrid.setBounds(this.grid.bounds);
 		this.dynamicGrid.build();
 	}
 

@@ -32,6 +32,7 @@ class GridBroadphase {
 	var searchKey:Int = 0;
 
 	var _built = false;
+	var hasBounds:Bool = false;
 
 	public function new() {
 		// this.bounds = bounds.clone();
@@ -139,37 +140,45 @@ class GridBroadphase {
 		}
 	}
 
+	public function setBounds(bounds:Bounds) {
+		this.bounds = bounds.clone();
+		this.cellSize = new Vector(bounds.xSize / CELL_DIV.x, bounds.ySize / CELL_DIV.y);
+		this.hasBounds = true;
+	}
+
 	public function build() {
 		if (_built)
 			return;
 		_built = true;
 		// Find the bounds
-		var xMin = 1e8;
-		var xMax = -1e8;
-		var yMin = 1e8;
-		var yMax = -1e8;
-		var zMin = 1e8;
-		var zMax = -1e8;
-		for (i in 0...this.objects.length) {
-			if (this.objects[i] == null)
-				continue;
-			var surface = this.objects[i].object;
-			xMin = Math.min(xMin, surface.boundingBox.xMin);
-			xMax = Math.max(xMax, surface.boundingBox.xMax);
-			yMin = Math.min(yMin, surface.boundingBox.yMin);
-			yMax = Math.max(yMax, surface.boundingBox.yMax);
-			zMin = Math.min(zMin, surface.boundingBox.zMin);
-			zMax = Math.max(zMax, surface.boundingBox.zMax);
+		if (!hasBounds) {
+			var xMin = 1e8;
+			var xMax = -1e8;
+			var yMin = 1e8;
+			var yMax = -1e8;
+			var zMin = 1e8;
+			var zMax = -1e8;
+			for (i in 0...this.objects.length) {
+				if (this.objects[i] == null)
+					continue;
+				var surface = this.objects[i].object;
+				xMin = Math.min(xMin, surface.boundingBox.xMin);
+				xMax = Math.max(xMax, surface.boundingBox.xMax);
+				yMin = Math.min(yMin, surface.boundingBox.yMin);
+				yMax = Math.max(yMax, surface.boundingBox.yMax);
+				zMin = Math.min(zMin, surface.boundingBox.zMin);
+				zMax = Math.max(zMax, surface.boundingBox.zMax);
+			}
+			// Some padding
+			xMin -= 100;
+			xMax += 100;
+			yMin -= 100;
+			yMax += 100;
+			zMin -= 100;
+			zMax += 100;
+			this.bounds = Bounds.fromValues(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - zMin);
+			this.cellSize = new Vector(this.bounds.xSize / CELL_DIV.x, this.bounds.ySize / CELL_DIV.y);
 		}
-		// Some padding
-		xMin -= 100;
-		xMax += 100;
-		yMin -= 100;
-		yMax += 100;
-		zMin -= 100;
-		zMax += 100;
-		this.bounds = Bounds.fromValues(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - zMin);
-		this.cellSize = new Vector(this.bounds.xSize / CELL_DIV.x, this.bounds.ySize / CELL_DIV.y);
 
 		// Insert the objects
 		for (i in 0...CELL_SIZE) {
