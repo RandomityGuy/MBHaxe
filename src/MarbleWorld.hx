@@ -205,6 +205,7 @@ class MarbleWorld extends Scheduler {
 	// Rewind
 	public var rewindManager:RewindManager;
 	public var rewinding:Bool = false;
+	public var rewindUsed:Bool = false;
 
 	public var inputRecorder:InputRecorder;
 	public var isReplayingMovement:Bool = false;
@@ -603,6 +604,7 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.rewindManager.clear();
+		this.rewindUsed = false;
 
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
@@ -1552,6 +1554,7 @@ class MarbleWorld extends Scheduler {
 				var actualDt = timeState.currentAttemptTime - rframe.timeState.currentAttemptTime - dt * rewindManager.timeScale;
 				dt = actualDt;
 				rewindManager.applyFrame(rframe);
+				rewindUsed = true;
 			}
 		}
 

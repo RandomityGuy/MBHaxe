@@ -15,6 +15,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.TimeState;
 import src.Util;
+import src.Leaderboards;
 
 class EndGameGui extends GuiImage {
 	var mission:Mission;
@@ -129,6 +130,7 @@ class EndGameGui extends GuiImage {
 		// Settings.saveScore(mission.path, myScore, scoreType);
 
 		var scoreData:Array<Score> = Settings.getScores(mission.path);
+
 		while (scoreData.length < 1) {
 			if (scoreType == Score)
 				scoreData.push({name: "Nardo Polo", time: 0});
@@ -162,7 +164,11 @@ class EndGameGui extends GuiImage {
 			retryButton.horizSizing = Right;
 			retryButton.gamepadAccelerator = ["B"];
 			retryButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
-			retryButton.pressedAction = (e) -> restartFunc(retryButton);
+			retryButton.pressedAction = (e) -> {
+				if (MarbleGame.canvas.children.length == 1)
+					restartFunc(retryButton);
+			}
+
 			bottomBar.addChild(retryButton);
 		}
 
@@ -178,8 +184,34 @@ class EndGameGui extends GuiImage {
 		nextButton.horizSizing = Right;
 		nextButton.gamepadAccelerator = ["A"];
 		nextButton.accelerators = [hxd.Key.ENTER];
-		nextButton.pressedAction = (e) -> continueFunc(nextButton);
+		nextButton.pressedAction = (e) -> {
+			if (MarbleGame.canvas.children.length == 1)
+				continueFunc(nextButton);
+		}
 		bottomBar.addChild(nextButton);
+
+		if (bestScore.time == score) {
+			var submitScore = () -> {
+				var lbScoreValue = score;
+				if (scoreType == Score)
+					lbScoreValue = 1000 - score;
+				Leaderboards.submitScore(mission.path, lbScoreValue, MarbleGame.instance.world.rewindUsed, (needsReplay, ref) -> {
+					if (needsReplay) {
+						Leaderboards.submitReplay(ref, MarbleGame.instance.world.replay.write());
+					}
+				});
+			}
+
+			if (Settings.highscoreName == "" || Settings.highscoreName == "Player Name") {
+				haxe.Timer.delay(() -> {
+					MarbleGame.canvas.pushDialog(new EnterNamePopupDlg(() -> {
+						submitScore();
+					}));
+				}, 100);
+			} else {
+				submitScore();
+			}
+		}
 	}
 
 	override function onResize(width:Int, height:Int) {

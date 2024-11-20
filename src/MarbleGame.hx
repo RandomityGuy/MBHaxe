@@ -251,7 +251,7 @@ class MarbleGame {
 		exitGameDlg = new ExitGameDlg((sender) -> {
 			canvas.popDialog(exitGameDlg);
 			var w = getWorld();
-			if (w.isRecording) {
+			if (MarbleGame.instance.toRecord) {
 				MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
 					quitMission();
 				}));
@@ -369,7 +369,7 @@ class MarbleGame {
 			world.dispose();
 		}
 		Analytics.trackLevelPlay(mission.title, mission.path);
-		world = new MarbleWorld(scene, scene2d, mission, toRecord, multiplayer);
+		world = new MarbleWorld(scene, scene2d, mission, !multiplayer, multiplayer);
 		world.init();
 	}
 

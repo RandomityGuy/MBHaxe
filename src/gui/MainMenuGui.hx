@@ -60,7 +60,7 @@ class MainMenuGui extends GuiImage {
 		btnList = new GuiXboxList();
 		btnList.position = new Vector(70 - offsetX, 95);
 		btnList.horizSizing = Left;
-		btnList.extent = new Vector(502, 500);
+		btnList.extent = new Vector(502, 530);
 		innerCtrl.addChild(btnList);
 
 		btnList.addButton(0, "Single Player Game", (sender) -> {
@@ -77,7 +77,9 @@ class MainMenuGui extends GuiImage {
 					cast(this.parent, Canvas).setContent(new MultiplayerGui());
 			}
 		});
-		// btnList.addButton(2, "Leaderboards", (e) -> {}, 20);
+		btnList.addButton(2, "Leaderboards", (e) -> {
+			cast(this.parent, Canvas).setContent(new LeaderboardsGui(0, "beginner", false));
+		}, 20);
 		btnList.addButton(2, "Achievements", (e) -> {
 			cast(this.parent, Canvas).setContent(new AchievementsGui());
 		});

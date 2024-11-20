@@ -19,6 +19,7 @@ import haxe.Json;
 import src.Util;
 import src.Console;
 import src.Renderer;
+import net.Uuid;
 
 typedef Score = {
 	var name:String;
@@ -211,6 +212,7 @@ class Settings {
 	public static var achievementProgression:Int;
 
 	public static var highscoreName = "Player";
+	public static var userId = "";
 
 	public static var uiScale = 1.0;
 
@@ -286,6 +288,7 @@ class Settings {
 			gamepad: gamepadSettings,
 			stats: playStatistics,
 			highscoreName: highscoreName,
+			userId: userId,
 			marbleIndex: optionsSettings.marbleIndex,
 			marbleSkin: optionsSettings.marbleSkin,
 			marbleModel: optionsSettings.marbleModel,
@@ -507,6 +510,13 @@ class Settings {
 				achievementProgression = 0;
 			#end
 			highscoreName = json.highscoreName;
+			if (highscoreName == null) {
+				highscoreName = "";
+			}
+			userId = json.userId;
+			if (userId == null) {
+				userId = Uuid.v4();
+			}
 		} else {
 			Console.warn("Settings file does not exist");
 			save();
