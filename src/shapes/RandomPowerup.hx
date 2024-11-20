@@ -73,25 +73,30 @@ class RandomPowerup extends PowerUp {
 				case 1:
 					pow = new SuperJump(this.element);
 					this.pickupSound = ResourceLoader.getResource("data/sound/pusuperjumpvoice.wav", ResourceLoader.getAudio, this.soundResources);
+					wasTimeTravel = false;
 				case 2:
 					pow = new SuperSpeed(this.element);
 					this.pickupSound = ResourceLoader.getResource("data/sound/pusuperspeedvoice.wav", ResourceLoader.getAudio, this.soundResources);
+					wasTimeTravel = false;
 				case 3:
 					pow = new ShockAbsorber(this.element);
 					this.pickupSound = ResourceLoader.getResource("data/sound/pushockabsorbervoice.wav", ResourceLoader.getAudio, this.soundResources);
+					wasTimeTravel = false;
 				case 4:
 					pow = new SuperBounce(this.element);
 					this.pickupSound = ResourceLoader.getResource("data/sound/pusuperbouncevoice.wav", ResourceLoader.getAudio, this.soundResources);
+					wasTimeTravel = false;
 				case 5:
 					pow = new Helicopter(this.element);
 					this.pickupSound = ResourceLoader.getResource("data/sound/pugyrocoptervoice.wav", ResourceLoader.getAudio, this.soundResources);
+					wasTimeTravel = false;
 			}
 			pow.level = this.level;
 
 			if (pow.pickUp(marble)) {
 				this.cooldownDuration = pow.cooldownDuration;
 				this.pickUpName = pow.pickUpName;
-				if (this.level.isRecording)
+				if (this.level.isRecording && !this.level.rewinding)
 					this.level.replay.recordRandomGenState(r);
 				return true;
 			}
@@ -100,7 +105,9 @@ class RandomPowerup extends PowerUp {
 	}
 
 	public function use(marble:src.Marble, time:TimeState) {
-		if (this.wasTimeTravel)
+		if (this.wasTimeTravel) {
 			this.level.addBonusTime(5);
+			wasTimeTravel = false;
+		}
 	}
 }
