@@ -500,6 +500,9 @@ class Replay {
 		var compressed = stream.finalize();
 		#end
 
+		if (this.name == null)
+			this.name = this.mission;
+
 		var finalB = new BytesBuffer();
 		finalB.addByte(version);
 		finalB.addByte(this.name.length);
