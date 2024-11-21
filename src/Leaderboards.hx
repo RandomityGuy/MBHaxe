@@ -49,7 +49,7 @@ class Leaderboards {
 	public static function getScores(mission:String, kind:LeaderboardsKind, cb:Array<LBScore>->Void) {
 		if (!StringTools.startsWith(mission, "data/"))
 			mission = "data/" + mission;
-		return Http.get('${host}/api/scores?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}', (b) -> {
+		return Http.get('${host}/api/scores?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}&count=10', (b) -> {
 			var s = b.toString();
 			var scores:Array<LBScore> = Json.parse(s).scores;
 			cb(scores);

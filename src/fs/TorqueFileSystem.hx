@@ -54,7 +54,7 @@ class TorqueFileSystem extends LocalFileSystem {
 	override function checkPath(path:String) {
 		// make sure the file is loaded with correct case !
 		var baseDir = new haxe.io.Path(path).dir;
-		var c = directoryCache.get(baseDir.toLowerCase());
+		var c = directoryCache.get(baseDir);
 		var isNew = false;
 		if (c == null) {
 			isNew = true;
@@ -63,13 +63,13 @@ class TorqueFileSystem extends LocalFileSystem {
 				sys.FileSystem.readDirectory(baseDir)
 			catch (e:Dynamic)
 				[])
-				c.set(f.toLowerCase(), true);
-			directoryCache.set(baseDir.toLowerCase(), c);
+				c.set(f, true);
+			directoryCache.set(baseDir, c);
 		}
-		if (!c.exists(path.substr(baseDir.length + 1).toLowerCase())) {
+		if (!c.exists(path.substr(baseDir.length + 1))) {
 			// added since then?
 			if (!isNew) {
-				directoryCache.remove(baseDir.toLowerCase());
+				directoryCache.remove(baseDir);
 				return checkPath(path);
 			}
 			return false;
