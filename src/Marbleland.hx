@@ -51,8 +51,8 @@ class Marbleland {
 			// filter
 			if (missionData.datablockCompatibility != 'mbw' && missionData.datablockCompatibility != 'mbg')
 				continue;
-			if (!['gold', 'platinum', 'ultra', 'platinumquest'].contains(missionData.modification))
-				continue;
+			// if (!['gold', 'platinum', 'ultra', 'platinumquest'].contains(missionData.modification))
+			// 	continue;
 			if (missionData.gameMode != null && !(missionData.gameMode == 'null' || missionData.gameMode.toLowerCase() == 'hunt'))
 				continue;
 
@@ -89,6 +89,8 @@ class Marbleland {
 			if (isMultiplayer) {
 				game = 'multiplayer';
 			}
+			if (game == null)
+				game = "platinum";
 
 			if (game == 'platinum') {
 				if (platDupes.exists(mission.title + mission.description))
