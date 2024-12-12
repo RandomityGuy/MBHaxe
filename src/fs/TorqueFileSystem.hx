@@ -57,7 +57,10 @@ class TorqueFileSystem extends LocalFileSystem {
 		if (c == null) {
 			isNew = true;
 			c = new Map();
-			for (f in try sys.FileSystem.readDirectory(baseDir) catch (e:Dynamic) [])
+			for (f in try
+				sys.FileSystem.readDirectory(baseDir)
+			catch (e:Dynamic)
+				[])
 				c.set(f.toLowerCase(), true);
 			directoryCache.set(baseDir.toLowerCase(), c);
 		}
