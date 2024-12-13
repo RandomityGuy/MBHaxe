@@ -336,7 +336,7 @@ class MarbleGame {
 		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
 			Settings.optionsSettings.rewindEnabled);
 		paused = false;
-		if (world.isWatching) {
+		if (world.isWatching && !world.replay.isLBReplay) {
 			#if !js
 			canvas.setContent(new ReplayCenterGui());
 			#else
@@ -349,10 +349,10 @@ class MarbleGame {
 			} else {
 				if (!world.mission.isClaMission && !world.mission.isCustom) {
 					PlayMissionGui.currentCategoryStatic = world.mission.type;
+					PlayMissionGui.currentSelectionStatic = world.mission.index;
+					PlayMissionGui.currentGameStatic = world.mission.game;
 				}
 				var pmg = new PlayMissionGui();
-				PlayMissionGui.currentSelectionStatic = world.mission.index;
-				PlayMissionGui.currentGameStatic = world.mission.game;
 				canvas.setContent(pmg);
 			}
 		}
