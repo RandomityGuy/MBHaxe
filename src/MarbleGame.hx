@@ -228,10 +228,21 @@ class MarbleGame {
 					world.update(dt * Debug.timeScale);
 					ProfilerUI.update(h3d.Engine.getCurrent().fps);
 				} else {
+					var keyPressed = @:privateAccess hxd.Key.keyPressed.copy();
 					if (dtAccumulator >= 1.0 / Settings.optionsSettings.fpsLimit) {
 						world.update(dtAccumulator);
 						ProfilerUI.update(Math.floor((100.0 / dtAccumulator)) / 100);
 						dtAccumulator = 0.0;
+					} else {
+						// Increment the frame counter for each key
+						for (i in 0...keyPressed.length) {
+							if (keyPressed[i] > 0) {
+								keyPressed[i]++;
+							} else if (keyPressed[i] < 0) {
+								keyPressed[i]--;
+							}
+						}
+						@:privateAccess hxd.Key.keyPressed = keyPressed;
 					}
 				}
 				#end
