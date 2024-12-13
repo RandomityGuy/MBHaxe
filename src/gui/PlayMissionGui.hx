@@ -829,9 +829,13 @@ class PlayMissionGui extends GuiImage {
 		scoreBox.text.onHyperlink = (url) -> {
 			if (url == "watch") {
 				var currentMission = currentList[currentSelection];
-				Leaderboards.watchTopReplay(currentMission.path, scoreView, (b) -> {
+				var lbPath = currentMission.path;
+				if (currentMission.isClaMission)
+					lbPath = 'custom/${currentMission.id}';
+				Leaderboards.watchTopReplay(lbPath, scoreView, (b) -> {
 					if (b != null) {
 						var replayF = new Replay("");
+						replayF.isLBReplay = true;
 						if (replayF.read(b)) {
 							var repmis = replayF.mission;
 							// Strip data/ from the mission name
@@ -1221,14 +1225,17 @@ class PlayMissionGui extends GuiImage {
 					Http.cancel(lbRequest);
 				#end
 				var lTok = lbToken++;
-				var req = Leaderboards.getScores(currentMission.path, scoreView, (scoreList) -> {
+				var lbPath = currentMission.path;
+				if (currentMission.isClaMission)
+					lbPath = 'custom/${currentMission.id}';
+				var req = Leaderboards.getScores(lbPath, scoreView, (scoreList) -> {
 					if (lTok + 1 != lbToken || !showLBs)
 						return;
 					var sFmt = [];
 					var i = 1;
 					for (score in scoreList) {
 						sFmt.push('${i}. 
-						<offset value="15">${score.name}</offset>
+						<offset value="15">${score.name.substr(0, 30)}</offset>
 						<offset value="215">${Util.formatTime(score.score)}</offset>
 						<offset value="279"><img src="${platformToString(score.platform)}"/></offset>
 						${score.rewind == 1 ? '<offset value="299"><img src="rewind"/></offset> ' : ""}');

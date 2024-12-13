@@ -423,15 +423,41 @@ class EndGameGui extends GuiControl {
 				}
 
 				Settings.saveScore(mission.path, myScore);
-				Leaderboards.submitScore(mission.path, myScore.time, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
+				var lbPath = mission.path;
+				if (mission.isClaMission)
+					lbPath = 'custom/${mission.id}';
+				var replayData = MarbleGame.instance.world.replay.write();
+				Leaderboards.submitScore(lbPath, myScore.time, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
 					if (sendReplay) {
-						Leaderboards.submitReplay(rowId, MarbleGame.instance.world.replay.write());
+						Leaderboards.submitReplay(rowId, replayData);
 					}
 				});
 
 				scoreSubmitted = true;
 			});
 			this.addChild(end);
+		} else {
+			// Check if we can submit LB scores
+			var replayData = MarbleGame.instance.world.replay.write();
+			var lbPath = mission.path;
+			if (mission.isClaMission)
+				lbPath = 'custom/${mission.id}';
+			Leaderboards.getScores(lbPath, All, (scores) -> {
+				var hasMyScore = false;
+				for (score in scores) {
+					if (score.name == Settings.highscoreName) {
+						hasMyScore = true;
+						break;
+					}
+				}
+				if (!hasMyScore) {
+					Leaderboards.submitScore(lbPath, timeState.gameplayClock, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
+						if (sendReplay) {
+							Leaderboards.submitReplay(rowId, replayData);
+						}
+					});
+				}
+			});
 		}
 	}
 }
