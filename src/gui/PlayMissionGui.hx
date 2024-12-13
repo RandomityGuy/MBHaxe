@@ -820,7 +820,6 @@ class PlayMissionGui extends GuiImage {
 			.toTile());
 		scoreScroll.position = new Vector(110, 170);
 		scoreScroll.extent = new Vector(407, 143);
-		scoreScroll.childrenHandleScroll = true;
 		scoreScroll.scrollToBottom = true;
 		// window.addChild(chatScroll);
 
@@ -913,7 +912,7 @@ class PlayMissionGui extends GuiImage {
 			} else {
 				pmBox.removeChild(scoreScroll);
 			}
-			pmBox.render(MarbleGame.canvas.scene2d, pmBox.parent._flow);
+			pmBox.render(MarbleGame.canvas.scene2d);
 			// setCategoryFunc(currentGame, currentCategoryStatic, currentSortType == 1 ? "date" : "alpha");
 			// MarbleGame.canvas.pushDialog(new SearchGui(currentGame, currentCategory == "custom"));
 		}
