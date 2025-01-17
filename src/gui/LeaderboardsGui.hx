@@ -96,6 +96,8 @@ class LeaderboardsGui extends GuiImage {
 					ResourceLoader.getResource("data/ui/xbox/platform_android_white.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case "unknown":
 					ResourceLoader.getResource("data/ui/xbox/platform_unknown_white.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "rewind":
+					ResourceLoader.getResource("data/ui/xbox/rewind_ico.png", ResourceLoader.getImage, this.imageResources).toTile();
 				case _:
 					return null;
 			};
@@ -168,7 +170,11 @@ class LeaderboardsGui extends GuiImage {
 				var scoreTexts = [];
 				var i = 1;
 				for (score in scoreList) {
-					var scoreText = '<offset value="10">${i}. </offset><offset value="50">${score.name}</offset><offset value="500">${Util.formatTime(score.score)}</offset><offset value="625"><img src="${platformToString(score.platform)}"/></offset>';
+					var scoreText = '<offset value="10">${i}. </offset>
+					<offset value="50">${score.name}</offset>
+					<offset value="475">${score.rewind > 0 ? "<img src='rewind'/>" : ""}</offset>
+					<offset value="500">${Util.formatTime(score.score)}</offset>
+					<offset value="625"><img src="${platformToString(score.platform)}"/></offset>';
 					scoreTexts.push(scoreText);
 					i++;
 				}

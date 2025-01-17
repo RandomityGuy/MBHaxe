@@ -21,7 +21,7 @@ enum abstract LeaderboardsKind(Int) {
 }
 
 class Leaderboards {
-	static var host = "http://127.0.0.1:7000";
+	static var host = "https://lb.randomityguy.me";
 	static var game = "Ultra";
 
 	public static function submitScore(mission:String, score:Float, rewindUsed:Bool, needsReplayCb:(Bool, Int) -> Void) {

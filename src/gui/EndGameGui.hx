@@ -194,19 +194,18 @@ class EndGameGui extends GuiImage {
 				continueFunc(nextButton);
 		}
 		bottomBar.addChild(nextButton);
-
+		var replayData = MarbleGame.instance.world.replay.write();
+		var submitScore = () -> {
+			var lbScoreValue = score;
+			if (scoreType == Score)
+				lbScoreValue = 1000 - score;
+			Leaderboards.submitScore(mission.path, lbScoreValue, MarbleGame.instance.world.rewindUsed, (needsReplay, ref) -> {
+				if (needsReplay) {
+					Leaderboards.submitReplay(ref, replayData);
+				}
+			});
+		}
 		if (bestScore.time == score) {
-			var submitScore = () -> {
-				var lbScoreValue = score;
-				if (scoreType == Score)
-					lbScoreValue = 1000 - score;
-				Leaderboards.submitScore(mission.path, lbScoreValue, MarbleGame.instance.world.rewindUsed, (needsReplay, ref) -> {
-					if (needsReplay) {
-						Leaderboards.submitReplay(ref, MarbleGame.instance.world.replay.write());
-					}
-				});
-			}
-
 			if (Settings.highscoreName == "" || Settings.highscoreName == "Player Name") {
 				haxe.Timer.delay(() -> {
 					MarbleGame.canvas.pushDialog(new EnterNamePopupDlg(() -> {
@@ -216,6 +215,19 @@ class EndGameGui extends GuiImage {
 			} else {
 				submitScore();
 			}
+		} else {
+			Leaderboards.getScores(mission.path, All, lbscores -> {
+				var foundScore = false;
+				for (lb in lbscores) {
+					if (lb.name == Settings.highscoreName) {
+						foundScore = true;
+						break;
+					}
+				}
+				if (!foundScore) {
+					submitScore();
+				}
+			});
 		}
 	}
 
