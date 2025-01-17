@@ -246,10 +246,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 						if (position.sub(closest).dot(surfacenormal) > 0) {
 							normal.normalize();
 
-							trace(v0);
-							trace(v);
-							trace(v2);
-
 							// We find the normal that is closest to the surface normal, sort of fixes weird edge cases of when colliding with
 							// var testDot = normal.dot(surfacenormal);
 							// if (testDot > bestDot) {
