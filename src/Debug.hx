@@ -68,7 +68,7 @@ class Debug {
 		}
 	}
 
-	public static function drawTriangle(p1:Vector, p2:Vector, p3:Vector) {
+	public static inline function drawTriangle(p1:Vector, p2:Vector, p3:Vector) {
 		if (drawBounds) {
 			_triangles.push(p3.toPoint());
 			_triangles.push(p2.toPoint());
@@ -76,7 +76,7 @@ class Debug {
 		}
 	}
 
-	public static function drawSphere(centre:Vector, radius:Float, lifetime = 0.032) {
+	public static inline function drawSphere(centre:Vector, radius:Float, lifetime = 0.032) {
 		if (drawBounds)
 			_spheres.push({position: centre.clone(), radius: radius, lifetime: lifetime});
 	}
