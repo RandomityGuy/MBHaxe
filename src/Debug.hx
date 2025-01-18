@@ -63,7 +63,7 @@ class Debug {
 		}
 	}
 
-	public static function drawTriangle(p1:Vector, p2:Vector, p3:Vector) {
+	public static inline function drawTriangle(p1:Vector, p2:Vector, p3:Vector) {
 		if (!drawBounds)
 			return;
 		_triangles.push(p3.toPoint());
@@ -71,7 +71,7 @@ class Debug {
 		_triangles.push(p1.toPoint());
 	}
 
-	public static function drawSphere(centre:Vector, radius:Float) {
+	public static inline function drawSphere(centre:Vector, radius:Float) {
 		if (!drawBounds)
 			return;
 		_spheres.push({position: centre.clone(), radius: radius});
