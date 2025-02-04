@@ -1326,6 +1326,7 @@ class PlayMissionGui extends GuiImage {
 			#end
 		}
 
+		var cSS = currentSelectionStatic;
 		setCategoryFunc(currentGame, currentCategoryStatic, currentCategoryStatic == "custom" ? (currentSortType == 1 ? "date" : "alpha") : null, false);
 
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
@@ -1342,6 +1343,8 @@ class PlayMissionGui extends GuiImage {
 			#end
 		}
 		this.addChild(kofi);
+
+		setSelectedFunc(cSS);
 	}
 
 	public override function render(scene2d:Scene) {
