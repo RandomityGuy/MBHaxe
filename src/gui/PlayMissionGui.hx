@@ -1327,6 +1327,7 @@ class PlayMissionGui extends GuiImage {
 			#end
 		}
 
+		var cSS = currentSelectionStatic;
 		setCategoryFunc(currentGame, currentCategoryStatic, currentCategoryStatic == "custom" ? (currentSortType == 1 ? "date" : "alpha") : null, false);
 
 		#if js
@@ -1345,6 +1346,8 @@ class PlayMissionGui extends GuiImage {
 		}
 		this.addChild(kofi);
 		#end
+
+		setSelectedFunc(cSS);
 	}
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
