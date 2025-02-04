@@ -61,6 +61,8 @@ class MarbleGame {
 	var consoleShown:Bool = false;
 	var console:ConsoleDlg;
 
+	var replayEndClass:Class<GuiControl>;
+
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
 		Console.log("Initializing the game...");
 		canvas = new Canvas(scene2d, cast this);
@@ -336,12 +338,8 @@ class MarbleGame {
 		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
 			Settings.optionsSettings.rewindEnabled);
 		paused = false;
-		if (world.isWatching && !world.replay.isLBReplay) {
-			#if !js
-			canvas.setContent(new ReplayCenterGui());
-			#else
-			canvas.setContent(new MainMenuGui());
-			#end
+		if (world.isWatching) {
+			canvas.setContent(Type.createInstance(replayEndClass, []));
 		} else {
 			if (Net.isMP) {
 				var lobby = new MPPlayMissionGui(Net.isHost);
@@ -372,8 +370,9 @@ class MarbleGame {
 		world.init();
 	}
 
-	public function watchMissionReplay(mission:Mission, replay:Replay) {
+	public function watchMissionReplay(mission:Mission, replay:Replay, replayEndGui:Class<GuiControl>) {
 		canvas.clearContent();
+		replayEndClass = replayEndGui;
 		Analytics.trackSingle("replay-watch");
 		world = new MarbleWorld(scene, scene2d, mission);
 		world.replay = replay;
