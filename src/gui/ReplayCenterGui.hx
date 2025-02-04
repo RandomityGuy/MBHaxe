@@ -76,11 +76,11 @@ class ReplayCenterGui extends GuiImage {
 				var mi = repl.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(repl.customId);
 				if (mi.isClaMission) {
 					mi.download(() -> {
-						MarbleGame.instance.watchMissionReplay(mi, repl);
+						MarbleGame.instance.watchMissionReplay(mi, repl, ReplayCenterGui);
 					});
 					playButton.disabled = true; // Don't let us play anything else
 				} else {
-					MarbleGame.instance.watchMissionReplay(mi, repl);
+					MarbleGame.instance.watchMissionReplay(mi, repl, ReplayCenterGui);
 				}
 			}
 		}

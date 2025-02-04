@@ -1818,11 +1818,8 @@ class MarbleWorld extends Scheduler {
 				}
 				this.setCursorLock(false);
 				this.dispose();
-				#if !js
-				MarbleGame.canvas.setContent(new ReplayCenterGui());
-				#end
+				MarbleGame.canvas.setContent(Type.createInstance(@:privateAccess MarbleGame.instance.replayEndClass, []));
 				#if js
-				MarbleGame.canvas.setContent(new MainMenuGui());
 				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
 				pointercontainer.hidden = false;
 				#end

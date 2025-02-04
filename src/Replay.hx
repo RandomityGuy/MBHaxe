@@ -265,7 +265,6 @@ class Replay {
 	public var mission:String;
 	public var name:String;
 	public var customId:Int;
-	public var isLBReplay:Bool;
 
 	var frames:Array<ReplayFrame>;
 	var initialState:ReplayInitialState;
@@ -283,7 +282,6 @@ class Replay {
 		this.mission = mission;
 		this.customId = customId;
 		this.initialState = new ReplayInitialState();
-		this.isLBReplay = false;
 	}
 
 	public function startFrame() {

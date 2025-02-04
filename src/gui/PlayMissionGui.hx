@@ -835,7 +835,6 @@ class PlayMissionGui extends GuiImage {
 				Leaderboards.watchTopReplay(lbPath, scoreView, (b) -> {
 					if (b != null) {
 						var replayF = new Replay("");
-						replayF.isLBReplay = true;
 						if (replayF.read(b)) {
 							var repmis = replayF.mission;
 							// Strip data/ from the mission name
@@ -854,10 +853,10 @@ class PlayMissionGui extends GuiImage {
 
 							if (mi.isClaMission) {
 								mi.download(() -> {
-									MarbleGame.instance.watchMissionReplay(mi, replayF);
+									MarbleGame.instance.watchMissionReplay(mi, replayF, PlayMissionGui);
 								});
 							} else {
-								MarbleGame.instance.watchMissionReplay(mi, replayF);
+								MarbleGame.instance.watchMissionReplay(mi, replayF, PlayMissionGui);
 							}
 						} else {
 							MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Could not load replay for this level."));

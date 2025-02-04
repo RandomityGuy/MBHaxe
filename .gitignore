@@ -16,6 +16,10 @@ node_modules
 fonts
 package.json
 package-lock.json
+leaderboards
+out
+server
+mpcustom
 
 macos-dist/MarbleBlast Platinum.app/
 macos-dist/data/
