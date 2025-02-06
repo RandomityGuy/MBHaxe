@@ -1,5 +1,6 @@
 package mis;
 
+import src.DifBuilder;
 import Macros.MisParserMacros;
 import haxe.Exception;
 import mis.MissionElement.MissionElementPathedInterior;
@@ -33,6 +34,8 @@ final lineCommentRegEx = ~/\/\/.*/g;
 final assignmentRegEx = ~/(\$(?:\w|\d)+)\s*=\s*(.+?);/g;
 final marbleAttributesRegEx = ~/setMarbleAttributes\("(\w+)",\s*(.+?)\);/g;
 final activatePackageRegEx = ~/activatePackage\((.+?)\);/g;
+final materialPropertyRegEx = ~/new MaterialProperty *\( *(.+?) *\)\s*{\s*((?:\w+ *= *(\d|\.)+;\s*)*)}/gi;
+final addMaterialMappingRegEx = ~/addMaterialMapping *\( *"(.+?)" *, *(.+?) *\)/gi;
 
 class MisParser {
 	var text:String;
@@ -90,6 +93,51 @@ class MisParser {
 		}
 
 		var activatedPackages = [];
+		startText = outsideText;
+
+		var customMaterials = new Map<String, {
+			friction:Float,
+			restitution:Float,
+			?force:Float
+		}>();
+
+		while (materialPropertyRegEx.match(startText)) {
+			var materialName = materialPropertyRegEx.matched(1);
+			var subs = materialPropertyRegEx.matched(2);
+
+			var kvps = new Map<String, Float>();
+			var splits = subs.split(';').map(spl -> StringTools.trim(spl).toLowerCase());
+			for (prop in splits) {
+				var kv = prop.split('=').map(spl -> StringTools.trim(spl).toLowerCase());
+				kvps.set(kv[0], Std.parseFloat(kv[1]));
+			}
+
+			var material = {
+				friction: kvps.get("friction") ?? 1.0,
+				restitution: kvps.get("restitution") ?? 1.0,
+				force: kvps.get("force") ?? 0.0
+			};
+			customMaterials.set(materialName, material);
+
+			startText = materialPropertyRegEx.matchedRight();
+		}
+
+		startText = outsideText;
+
+		var materialMappings = new Map<String, {
+			friction:Float,
+			restitution:Float,
+			?force:Float
+		}>();
+		while (addMaterialMappingRegEx.match(startText)) {
+			var mmap = addMaterialMappingRegEx.matched(2);
+			if (customMaterials.exists(mmap))
+				materialMappings.set(addMaterialMappingRegEx.matched(1).toLowerCase(), customMaterials.get(mmap));
+			startText = addMaterialMappingRegEx.matchedRight();
+		}
+
+		DifBuilder.setCustomMaterialDefinitions(materialMappings);
+
 		startText = outsideText;
 
 		while (activatePackageRegEx.match(startText)) {

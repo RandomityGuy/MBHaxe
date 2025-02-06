@@ -216,6 +216,12 @@ class DifBuilder {
 		},
 		];
 
+	static var customMaterialDict:Map<String, {
+		friction:Float,
+		restitution:Float,
+		?force:Float
+	}> = [];
+
 	static function createDefaultMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
 			uvScaleFactor:Float = 1, half:Bool = false) {
 		var worker = new ResourceLoaderWorker(() -> {
@@ -393,6 +399,10 @@ class DifBuilder {
 			'data/textures/friction_high.normal.png', 10, new Vector(0.15, 0.15, 0.16, 1.0)),
 		'stripe_caution' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/stripe_caution.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 	];
+
+	public static function setCustomMaterialDefinitions(materials:Map<String, {friction:Float, restitution:Float, ?force:Float}>) {
+		customMaterialDict = materials;
+	}
 
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1, makeCollideable = true) {
 		#if (js || android)
@@ -679,16 +689,23 @@ class DifBuilder {
 						// }
 						triangles.push(tri);
 						var materialName = stripTexName(texture).toLowerCase();
-						var hasMaterialInfo = materialDict.exists(materialName);
-						if (hasMaterialInfo) {
-							var minfo = materialDict.get(materialName);
-							if (makeCollideable) {
+						if (makeCollideable) {
+							var hasCustomMaterialInfo = customMaterialDict.exists(materialName);
+							if (hasCustomMaterialInfo) {
+								var minfo = customMaterialDict.get(materialName);
 								colliderSurface.friction = minfo.friction;
 								colliderSurface.restitution = minfo.restitution;
 								colliderSurface.force = minfo.force != null ? minfo.force : 0;
+							} else {
+								var hasMaterialInfo = materialDict.exists(materialName);
+								if (hasMaterialInfo) {
+									var minfo = materialDict.get(materialName);
+									colliderSurface.friction = minfo.friction;
+									colliderSurface.restitution = minfo.restitution;
+									colliderSurface.force = minfo.force != null ? minfo.force : 0;
+								}
 							}
-						}
-						if (makeCollideable) {
+
 							colliderSurface.addPoint(-p1.x, p1.y, p1.z);
 							colliderSurface.addPoint(-p2.x, p2.y, p2.z);
 							colliderSurface.addPoint(-p3.x, p3.y, p3.z);
