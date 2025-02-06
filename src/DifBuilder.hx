@@ -211,6 +211,12 @@ class DifBuilder {
 		}
 		];
 
+	static var customMaterialDict:Map<String, {
+		friction:Float,
+		restitution:Float,
+		?force:Float
+	}> = [];
+
 	static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
 			uvScaleFactor:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
@@ -381,6 +387,10 @@ class DifBuilder {
 			'pq_ray_wall_combo.normal.png', 'pq_ray_wall_combo.spec.png'),
 	];
 
+	public static function setCustomMaterialDefinitions(materials:Map<String, {friction:Float, restitution:Float, ?force:Float}>) {
+		customMaterialDict = materials;
+	}
+
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
@@ -493,12 +503,21 @@ class DifBuilder {
 					tri.uv3 = uv3;
 					triangles.push(tri);
 					var materialName = stripTexName(texture).toLowerCase();
-					var hasMaterialInfo = materialDict.exists(materialName);
-					if (hasMaterialInfo) {
-						var minfo = materialDict.get(materialName);
+
+					var hasCustomMaterialInfo = customMaterialDict.exists(materialName);
+					if (hasCustomMaterialInfo) {
+						var minfo = customMaterialDict.get(materialName);
 						colliderSurface.friction = minfo.friction;
 						colliderSurface.restitution = minfo.restitution;
 						colliderSurface.force = minfo.force != null ? minfo.force : 0;
+					} else {
+						var hasMaterialInfo = materialDict.exists(materialName);
+						if (hasMaterialInfo) {
+							var minfo = materialDict.get(materialName);
+							colliderSurface.friction = minfo.friction;
+							colliderSurface.restitution = minfo.restitution;
+							colliderSurface.force = minfo.force != null ? minfo.force : 0;
+						}
 					}
 					colliderSurface.addPoint(-p1.x, p1.y, p1.z);
 					colliderSurface.addPoint(-p2.x, p2.y, p2.z);
