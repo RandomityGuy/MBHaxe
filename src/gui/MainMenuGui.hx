@@ -104,11 +104,11 @@ class MainMenuGui extends GuiImage {
 						var mi = replay.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(replay.customId);
 						if (mi.isClaMission) {
 							mi.download(() -> {
-								MarbleGame.instance.watchMissionReplay(mi, replay);
+								MarbleGame.instance.watchMissionReplay(mi, replay, MainMenuGui);
 							});
 						} else {
 							if (mi != null) {
-								cast(this.parent, Canvas).marbleGame.watchMissionReplay(mi, replay);
+								cast(this.parent, Canvas).marbleGame.watchMissionReplay(mi, replay, MainMenuGui);
 							} else {
 								cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Cannot load replay."));
 							}
