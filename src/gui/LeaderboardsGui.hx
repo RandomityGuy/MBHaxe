@@ -259,7 +259,7 @@ class LeaderboardsGui extends GuiImage {
 							mi = MissionList.missions.get(repmis);
 						}
 
-						MarbleGame.instance.watchMissionReplay(mi, replayF);
+						MarbleGame.instance.watchMissionReplay(mi, replayF, DifficultySelectGui);
 					} else {
 						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Could not load replay for this level."));
 					}

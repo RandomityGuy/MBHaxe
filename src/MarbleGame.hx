@@ -1,5 +1,6 @@
 package src;
 
+import gui.GuiControl;
 import haxe.io.Path;
 import gui.MultiplayerGui;
 import net.MasterServerClient;
@@ -65,6 +66,8 @@ class MarbleGame {
 	var fpsLimit:Float = 60;
 	var limitingFps:Bool = false;
 	var fpsLimitAccum:Float = 0.0;
+
+	var replayExitGui:Class<GuiControl>;
 
 	public function new(scene2d:h2d.Scene, scene:h3d.scene.Scene) {
 		Console.log("Initializing the game...");
@@ -349,11 +352,7 @@ class MarbleGame {
 		world = null;
 		paused = false;
 		if (watching) {
-			#if !js
-			canvas.setContent(new ReplayCenterGui());
-			#else
-			canvas.setContent(new MainMenuGui());
-			#end
+			canvas.setContent(Type.createInstance(replayExitGui, []));
 		} else {
 			if (Net.isMP) {
 				if (weDisconnecting) {
@@ -389,7 +388,7 @@ class MarbleGame {
 		world.init();
 	}
 
-	public function watchMissionReplay(mission:Mission, replay:Replay) {
+	public function watchMissionReplay(mission:Mission, replay:Replay, replayExitGui:Class<GuiControl>) {
 		canvas.clearContent();
 		destroyPreviewWorld();
 		Analytics.trackSingle("replay-watch");
@@ -397,6 +396,7 @@ class MarbleGame {
 		world.replay = replay;
 		world.isWatching = true;
 		world.init();
+		this.replayExitGui = replayExitGui;
 	}
 
 	public function startPreviewWorld(onFinish:() -> Void) {
