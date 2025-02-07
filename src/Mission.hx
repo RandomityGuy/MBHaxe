@@ -48,6 +48,7 @@ class Mission {
 	#if js
 	public var addedAt:Int;
 	#end
+	public var marbleAttributes:Map<String, String>;
 
 	var next:Mission;
 
@@ -71,6 +72,7 @@ class Mission {
 		var misParser = new MisParser(misText);
 		var contents = misParser.parse();
 		root = contents.root;
+		marbleAttributes = contents.marbleAttributes;
 
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {

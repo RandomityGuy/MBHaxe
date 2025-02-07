@@ -1,5 +1,6 @@
 package src;
 
+import mis.MisParser;
 import triggers.Trigger;
 import net.Net;
 import gui.MarbleSelectGui;
@@ -581,6 +582,8 @@ class Marble extends GameObject {
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.megaHelicopter, fwd));
 		worker.run();
+
+		loadMarbleAttributes();
 	}
 
 	function buildShadowVolume() {
@@ -660,6 +663,36 @@ class Marble extends GameObject {
 		q.initNormal(@:privateAccess this.level.dirLightDir.toPoint());
 
 		shadowVolume.setRotationQuat(q);
+	}
+
+	function loadMarbleAttributes() {
+		var attribs = this.level.mission.marbleAttributes;
+		if (attribs.exists("maxrollvelocity"))
+			this._maxRollVelocity = MisParser.parseNumber(attribs.get("maxrollvelocity"));
+		if (attribs.exists("angularacceleration"))
+			this._angularAcceleration = MisParser.parseNumber(attribs.get("angularacceleration"));
+		if (attribs.exists("jumpimpulse"))
+			this._jumpImpulse = MisParser.parseNumber(attribs.get("jumpimpulse"));
+		if (attribs.exists("kineticfriction"))
+			this._kineticFriction = MisParser.parseNumber(attribs.get("kineticfriction"));
+		if (attribs.exists("staticfriction"))
+			this._staticFriction = MisParser.parseNumber(attribs.get("staticfriction"));
+		if (attribs.exists("brakingacceleration"))
+			this._brakingAcceleration = MisParser.parseNumber(attribs.get("brakingacceleration"));
+		if (attribs.exists("gravity"))
+			this._gravity = MisParser.parseNumber(attribs.get("gravity"));
+		if (attribs.exists("airaccel"))
+			this._airAccel = MisParser.parseNumber(attribs.get("airaccel"));
+		if (attribs.exists("maxdotslide"))
+			this._maxDotSlide = MisParser.parseNumber(attribs.get("maxdotslide"));
+		if (attribs.exists("minbouncevel"))
+			this._minBounceVel = MisParser.parseNumber(attribs.get("minbouncevel"));
+		if (attribs.exists("minbouncespeed"))
+			this._minBounceSpeed = MisParser.parseNumber(attribs.get("minbouncespeed"));
+		if (attribs.exists("mintrailvel"))
+			this._minTrailVel = MisParser.parseNumber(attribs.get("mintrailvel"));
+		if (attribs.exists("bouncekineticfriction"))
+			this._bounceKineticFriction = MisParser.parseNumber(attribs.get("bouncekineticfriction"));
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
