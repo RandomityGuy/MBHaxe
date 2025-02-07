@@ -67,7 +67,7 @@ class MisParser {
 		startText = outsideText;
 
 		while (marbleAttributesRegEx.match(startText)) {
-			marbleAttributes.set(marbleAttributesRegEx.matched(1), this.resolveExpression(marbleAttributesRegEx.matched(2)));
+			marbleAttributes.set(marbleAttributesRegEx.matched(1).toLowerCase(), this.resolveExpression(marbleAttributesRegEx.matched(2)));
 			startText = marbleAttributesRegEx.matchedRight();
 		}
 

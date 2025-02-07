@@ -43,6 +43,7 @@ class Mission {
 	public var isCustom:Bool;
 	public var gameMode:String;
 	public var addedAt:Int64;
+	public var marbleAttributes:Map<String, String>;
 
 	var next:Mission;
 
@@ -66,6 +67,7 @@ class Mission {
 		var misParser = new MisParser(misText);
 		var contents = misParser.parse();
 		root = contents.root;
+		marbleAttributes = contents.marbleAttributes;
 
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
