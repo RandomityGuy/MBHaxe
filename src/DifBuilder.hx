@@ -214,6 +214,11 @@ class DifBuilder {
 			friction: 6,
 			restitution: 0.3
 		},
+		"friction_bouncy" => {
+			friction: 0.2,
+			restitution: 2.0,
+			force: 15.0
+		}
 		];
 
 	static var customMaterialDict:Map<String, {
@@ -397,6 +402,7 @@ class DifBuilder {
 			new Vector(0.3, 0.3, 0.35, 1)),
 		'friction_high_shadow' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high_shadow.png',
 			'data/textures/friction_high.normal.png', 10, new Vector(0.15, 0.15, 0.16, 1.0)),
+		'friction_bouncy' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/friction_bouncy.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 		'stripe_caution' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/stripe_caution.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 	];
 
