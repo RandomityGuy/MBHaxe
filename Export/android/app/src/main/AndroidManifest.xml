@@ -4,8 +4,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.randomityguy.mbhaxe.mbu"
     android:installLocation="auto"
-    android:versionCode="5"
-    android:versionName="2.1.3">
+    android:versionCode="6"
+    android:versionName="2.2.0">
 
     <!-- Tell the system this app requires OpenGL ES 3.0. -->
     <uses-feature android:glEsVersion="0x00030000" android:required="true" />
