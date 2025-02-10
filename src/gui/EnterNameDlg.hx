@@ -74,7 +74,9 @@ class EnterNameDlg extends GuiControl {
 		okbutton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			Settings.highscoreName = enterNameEdit.text.text;
-			okFunc(enterNameEdit.text.text);
+			if (StringTools.trim(Settings.highscoreName) == "")
+				Settings.highscoreName = "Player";
+			okFunc(Settings.highscoreName);
 		}
 		dlg.addChild(okbutton);
 

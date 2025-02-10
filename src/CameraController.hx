@@ -493,6 +493,20 @@ class CameraController extends Object {
 		this.setPosition(camera.pos.x, camera.pos.y, camera.pos.z);
 	}
 
+	function applyNonlinearScale(value:Float) {
+		return Math.pow(Math.abs(value), 3.2) * (value >= 0 ? 1 : -1);
+	}
+
+	function rescaleDeadZone(value:Float, deadZone:Float) {
+		if (deadZone >= value) {
+			if (-deadZone <= value)
+				return 0.0;
+			else
+				return (value + deadZone) / (1.0 - deadZone);
+		} else
+			return (value - deadZone) / (1.0 - deadZone);
+	}
+
 	public function update(currentTime:Float, dt:Float) {
 		// camera.position.set(marblePosition.x, marblePosition.y, marblePosition.z).sub(directionVector.clone().multiplyScalar(2.5));
 		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
@@ -510,25 +524,26 @@ class CameraController extends Object {
 
 		var camera = level.scene.camera;
 
-		var lerpt = hxd.Math.min(1,
-			1 - Math.pow(0.6, dt * 600)); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+		var lerpt = 1 - Math.pow(0.5, dt / 0.016); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+
+		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), 0.25));
+		var gamepadY = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), 0.25));
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
-			+ Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis);
+			+ gamepadY;
 		if (Settings.gamepadSettings.invertYAxis)
 			cameraPitchDelta = -cameraPitchDelta;
 		nextCameraPitch += 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
-		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
-			+ Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis);
+		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0) + gamepadX;
 		if (Settings.gamepadSettings.invertXAxis)
 			cameraYawDelta = -cameraYawDelta;
 		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
-		CameraYaw = nextCameraYaw; // Util.lerp(CameraYaw, nextCameraYaw, lerpt);
-		CameraPitch = nextCameraPitch; // Util.lerp(CameraPitch, nextCameraPitch, lerpt);
+		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
+		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
 		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
