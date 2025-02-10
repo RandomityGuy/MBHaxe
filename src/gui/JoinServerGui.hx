@@ -339,7 +339,10 @@ class JoinServerGui extends GuiImage {
 
 		this.addChild(window);
 
-		if (StringTools.trim(Settings.highscoreName).length == 0 || Settings.highscoreName == "" || Settings.highscoreName == null) {
+		if (StringTools.trim(Settings.highscoreName).length == 0
+			|| Settings.highscoreName == ""
+			|| Settings.highscoreName == "Player"
+			|| Settings.highscoreName == null) {
 			haxe.Timer.delay(() -> MarbleGame.canvas.pushDialog(new EnterNameDlg(-1, (n) -> {})), 50); // Pls enter name
 		}
 	}
