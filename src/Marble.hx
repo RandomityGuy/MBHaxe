@@ -665,7 +665,7 @@ class Marble extends GameObject {
 	}
 
 	function loadMarbleAttributes() {
-		if (this.level == null || this.level.mission == null || this.level.marbleAttributes == null)
+		if (this.level == null || this.level.mission == null || this.level.mission.marbleAttributes == null)
 			return;
 		var attribs = this.level.mission.marbleAttributes;
 		if (attribs.exists("maxrollvelocity"))
