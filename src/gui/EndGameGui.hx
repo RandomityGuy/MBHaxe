@@ -206,7 +206,7 @@ class EndGameGui extends GuiImage {
 			});
 		}
 		if (bestScore.time == score) {
-			if (Settings.highscoreName == "" || Settings.highscoreName == "Player Name") {
+			if (Settings.highscoreName == "" || Settings.highscoreName == "Player" || Settings.highscoreName == "Player Name") {
 				haxe.Timer.delay(() -> {
 					MarbleGame.canvas.pushDialog(new EnterNamePopupDlg(() -> {
 						submitScore();

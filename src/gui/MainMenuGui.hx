@@ -76,7 +76,9 @@ class MainMenuGui extends GuiImage {
 				cast(this.parent, Canvas).pushDialog(new MessageBoxOkDlg("Custom levels not loaded yet, please wait."));
 				MPCustoms.loadMissionList();
 			} else {
-				if (StringTools.trim(Settings.highscoreName) == "" || Settings.highscoreName == "Player") {
+				if (StringTools.trim(Settings.highscoreName) == ""
+					|| Settings.highscoreName == "Player"
+					|| Settings.highscoreName == "Player Name") {
 					MarbleGame.canvas.setContent(new EnterNameDlg());
 				} else
 					cast(this.parent, Canvas).setContent(new MultiplayerGui());
