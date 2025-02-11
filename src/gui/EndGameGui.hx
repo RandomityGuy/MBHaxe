@@ -429,7 +429,7 @@ class EndGameGui extends GuiControl {
 					lbPath = 'custom/${mission.id}';
 				var replayData = MarbleGame.instance.world.replay.write();
 				Leaderboards.submitScore(lbPath, myScore.time, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
-					if (sendReplay) {
+					if (sendReplay && !mission.isClaMission) {
 						Leaderboards.submitReplay(rowId, replayData);
 					}
 				});
@@ -453,7 +453,7 @@ class EndGameGui extends GuiControl {
 				}
 				if (!hasMyScore) {
 					Leaderboards.submitScore(lbPath, timeState.gameplayClock, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
-						if (sendReplay) {
+						if (sendReplay && !mission.isClaMission) {
 							Leaderboards.submitReplay(rowId, replayData);
 						}
 					});
