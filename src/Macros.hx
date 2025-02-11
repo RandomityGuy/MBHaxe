@@ -56,9 +56,9 @@ class MarbleWorldMacros {
 			// Add the correct shape based on type
 			var dataBlockLowerCase = element.datablock.toLowerCase();
 			if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
-			else if (["startpad", "startpad_mbg", "startpad_mbp"].contains(dataBlockLowerCase))
+			else if (["startpad", "startpad_mbg", "startpad_mbp", "startpad_mbu"].contains(dataBlockLowerCase))
 				shape = new StartPad();
-			else if (["endpad", "endpad_mbg", "endpad_mbp"].contains(dataBlockLowerCase)) {
+			else if (["endpad", "endpad_mbg", "endpad_mbp", "endpad_mbu"].contains(dataBlockLowerCase)) {
 				shape = new EndPad();
 				if (element is MissionElementStaticShape && cast(element, MissionElementStaticShape) == endPadElement)
 					endPad = cast shape;
@@ -70,51 +70,53 @@ class MarbleWorldMacros {
 				shape = new Gem(cast element);
 				this.totalGems++;
 				this.gems.push(cast shape);
-			} else if (dataBlockLowerCase == "superjumpitem")
+			} else if (dataBlockLowerCase == "superjumpitem" || dataBlockLowerCase == "superjumpitem_mbu")
 				shape = new SuperJump(cast element);
 			else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
 				shape = new SignCaution(cast element);
 			else if (dataBlockLowerCase == "superbounceitem")
 				shape = new SuperBounce(cast element);
-			else if (dataBlockLowerCase == "roundbumper")
+			else if (dataBlockLowerCase == "roundbumper" || dataBlockLowerCase == "bumper")
 				shape = new RoundBumper();
 			else if (dataBlockLowerCase == "trianglebumper")
 				shape = new TriangleBumper();
-			else if (dataBlockLowerCase == "helicopteritem")
+			else if (dataBlockLowerCase == "helicopteritem" || dataBlockLowerCase == "helicopteritem_mbu")
 				shape = new Helicopter(cast element);
-			else if (dataBlockLowerCase == "easteregg")
+			else if (dataBlockLowerCase == "easteregg" || dataBlockLowerCase == "easteregg_mbu")
 				shape = new EasterEgg(cast element);
-			else if (dataBlockLowerCase == "checkpoint")
+			else if (dataBlockLowerCase == "checkpoint" || dataBlockLowerCase == "checkpoint_mbu")
 				shape = new Checkpoint(cast element);
-			else if (dataBlockLowerCase == "ductfan")
+			else if (dataBlockLowerCase == "ductfan" || dataBlockLowerCase == "ductfan_mbu" || dataBlockLowerCase == "ductfan_mbm")
 				shape = new DuctFan();
-			else if (dataBlockLowerCase == "smallductfan")
+			else if (dataBlockLowerCase == "smallductfan" || dataBlockLowerCase == "smallductfan_mbm")
 				shape = new SmallDuctFan();
 			else if (dataBlockLowerCase == "magnet")
 				shape = new Magnet();
-			else if (dataBlockLowerCase == "antigravityitem")
+			else if (dataBlockLowerCase == "antigravityitem" || dataBlockLowerCase == "antigravityitem_mbu")
 				shape = new AntiGravity(cast element);
 			else if (dataBlockLowerCase == "norespawnantigravityitem")
 				shape = new AntiGravity(cast element, true);
-			else if (dataBlockLowerCase == "landmine")
+			else if (dataBlockLowerCase == "landmine" || dataBlockLowerCase == "landmine_mbm")
 				shape = new LandMine();
 			else if (dataBlockLowerCase == "nuke")
 				shape = new Nuke();
 			else if (dataBlockLowerCase == "shockabsorberitem")
 				shape = new ShockAbsorber(cast element);
-			else if (dataBlockLowerCase == "superspeeditem")
+			else if (dataBlockLowerCase == "superspeeditem" || dataBlockLowerCase == "superspeeditem_mbu")
 				shape = new SuperSpeed(cast element);
-			else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
+			else if (dataBlockLowerCase == "timetravelitem"
+				|| dataBlockLowerCase == "timepenaltyitem"
+				|| dataBlockLowerCase == "timetravelitem_mbu")
 				shape = new TimeTravel(cast element);
 			else if (dataBlockLowerCase == "randompowerupitem")
 				shape = new RandomPowerup(cast element);
-			else if (dataBlockLowerCase == "blastitem")
+			else if (dataBlockLowerCase == "blastitem" || dataBlockLowerCase == "blastitem_mbu")
 				shape = new Blast(cast element);
-			else if (dataBlockLowerCase == "megamarbleitem")
+			else if (dataBlockLowerCase == "megamarbleitem" || dataBlockLowerCase == "megamarbleitem_mbu")
 				shape = new MegaMarble(cast element);
-			else if (dataBlockLowerCase == "tornado")
+			else if (dataBlockLowerCase == "tornado" || dataBlockLowerCase == "tornado_mbm")
 				shape = new Tornado();
-			else if (dataBlockLowerCase == "trapdoor")
+			else if (dataBlockLowerCase == "trapdoor" || dataBlockLowerCase == "trapdoor_mbu")
 				shape = new Trapdoor();
 			else if (dataBlockLowerCase == "pushbutton")
 				shape = new PushButton();
