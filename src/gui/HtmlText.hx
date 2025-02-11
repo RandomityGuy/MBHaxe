@@ -8,6 +8,7 @@ import h2d.RenderContext;
 import h2d.Interactive;
 import h2d.Object;
 import h2d.Text;
+import src.Settings;
 
 /**
 	The `HtmlText` line height calculation rules.
@@ -736,7 +737,7 @@ class HtmlText extends Text {
 						switch (a.toLowerCase()) {
 							case "value":
 								var v = e.get(a);
-								if (v != null) xPos = Std.parseFloat(v);
+								if (v != null) xPos = Std.parseFloat(v) * Settings.uiScale;
 							default:
 						}
 					}
