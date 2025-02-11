@@ -1,3 +1,14 @@
+# 1.2.0
+It's the fabled Leaderboards update!
+Leaderboards have been implemented for all the levels with automatic replay uploading for official levels as well as watching top replays. Additionally, segregation has been made to allow switching between rewind and non-rewind scores on the leaderboards.
+
+Changes:
+- Added a few more custom levels in the Multiplayer custom level list as well as bouncy floor support which some customs needed.
+- Added custom friction support as well as custom marble attributes. Now levels can modify the marble's physics parameters to their liking.
+- Fixed Superspeed powerup sometimes throwing you in the wrong direction in Multiplayer.
+- Fixed the marble being wonky at times in replays.
+- Fixed certain maps not being rendered correctly.
+- 
 # 1.1.3
 This update brings the following changes:
 - Added IOS support for the Web version of the game.
