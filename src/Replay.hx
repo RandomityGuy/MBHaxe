@@ -13,6 +13,7 @@ import h3d.Quat;
 import h3d.Vector;
 import src.Util;
 import src.Console;
+import src.MarbleGame;
 
 enum ReplayMarbleState {
 	UsedPowerup;
@@ -289,6 +290,11 @@ class Replay {
 	}
 
 	public function endFrame() {
+		// Do not record frames beyond par time/5 minutes to limit file size, if we aren't explicitly recording
+		if (!MarbleGame.instance.toRecord && currentRecordFrame.clockTime > Math.min(300, MarbleGame.instance.world.mission.qualifyTime)) {
+			currentRecordFrame = null;
+			return;
+		}
 		if (currentRecordFrame != null)
 			frames.push(currentRecordFrame);
 		currentRecordFrame = null;
