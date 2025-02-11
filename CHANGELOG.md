@@ -1,3 +1,20 @@
+# 1.7.0
+It's the fabled Leaderboards update!
+Leaderboards have been implemented for all the levels with automatic replay uploading for official levels as well as watching top replays. Additionally, segregation has been made to allow switching between rewind and non-rewind scores on the leaderboards.
+
+Changes:
+- Added an FPS limiter in the settings.
+- Added custom friction support as well as custom marble attributes. Now levels can modify the marble's physics parameters to their liking.
+- Improved level select persistence. Now your last chosen level will be displayed on quitting or finishing a level instead of last level in a category.
+- Improved the Gem Hunt algorithm to match closer to PlatinumQuest's.
+- Trigger detection now matches with the original game.
+- Camera is now smoothened.
+- Fixed camera not pointing at gems after respawn in Multiplayer.
+- Fixed Superspeed powerup sometimes throwing you in the wrong direction in Multiplayer.
+- Fixed the marble being wonky at times in replays.
+- Fixed an interaction with Random powerup giving Time Travels.
+- Fixed some collision issues with moving platforms.
+
 # 1.6.1
 This update fixes the following bugs:
 - Fixed a crash when there are more players than spawnpoints in multiplayer.
