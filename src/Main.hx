@@ -145,10 +145,7 @@ class Main extends hxd.App {
 		// });
 	}
 
-	static var updateDT:Float;
-
 	override function update(dt:Float) {
-		updateDT = dt;
 		super.update(dt);
 		if (loaded) {
 			ProfilerUI.begin();
@@ -182,16 +179,7 @@ class Main extends hxd.App {
 		super.render(e);
 
 		#if hl
-		static var dtAccumulator;
-		dtAccumulator += updateDT;
-		if (Settings.optionsSettings.fpsLimit <= 0) {
-			e.driver.present();
-		} else {
-			if (dtAccumulator >= 1.0 / Settings.optionsSettings.fpsLimit) {
-				e.driver.present();
-				dtAccumulator = 0.0;
-			}
-		}
+		e.driver.present();
 		#end
 	}
 
