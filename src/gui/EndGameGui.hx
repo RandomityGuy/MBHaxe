@@ -218,13 +218,17 @@ class EndGameGui extends GuiImage {
 		} else {
 			Leaderboards.getScores(mission.path, All, lbscores -> {
 				var foundScore = false;
+				var foundLBScore:Float = 0;
 				for (lb in lbscores) {
 					if (lb.name == Settings.highscoreName) {
 						foundScore = true;
+						foundLBScore = lb.score;
 						break;
 					}
 				}
 				if (!foundScore) {
+					submitScore();
+				} else if (foundLBScore > score) {
 					submitScore();
 				}
 			});
