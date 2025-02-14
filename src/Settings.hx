@@ -498,7 +498,7 @@ class Settings {
 				highscoreName = "";
 			}
 			userId = json.userId;
-			if (userId == null) {
+			if (userId == null || userId == "") {
 				userId = Uuid.v4();
 			}
 		} else {
