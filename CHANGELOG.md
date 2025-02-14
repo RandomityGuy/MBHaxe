@@ -1,3 +1,9 @@
+# 1.7.1
+This update brings the following bugfixes:
+- Fixed a crash when the marble goes out of bounds.
+- Fixed the FPS limiter not limiting rendered frames per second.
+- Fixed scores not being sent in certain cases.
+
 # 1.7.0
 It's the fabled Leaderboards update!
 Leaderboards have been implemented for all the levels with automatic replay uploading for official levels as well as watching top replays. Additionally, segregation has been made to allow switching between rewind and non-rewind scores on the leaderboards.
