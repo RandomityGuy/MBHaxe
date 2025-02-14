@@ -444,13 +444,15 @@ class EndGameGui extends GuiControl {
 				lbPath = 'custom/${mission.id}';
 			Leaderboards.getScores(lbPath, All, (scores) -> {
 				var hasMyScore = false;
+				var myTopScoreLB = 0.0;
 				for (score in scores) {
 					if (score.name == Settings.highscoreName) {
 						hasMyScore = true;
+						myTopScoreLB = score.score;
 						break;
 					}
 				}
-				if (!hasMyScore) {
+				if (!hasMyScore || (hasMyScore && myTopScoreLB > timeState.gameplayClock)) {
 					Leaderboards.submitScore(lbPath, timeState.gameplayClock, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
 						if (sendReplay && !mission.isClaMission) {
 							Leaderboards.submitReplay(rowId, replayData);
