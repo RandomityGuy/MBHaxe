@@ -566,17 +566,17 @@ class PlayGui {
 
 		var fpsMeterCtrl = new GuiImage(ResourceLoader.getResource("data/ui/game/transparency-fps.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
-		fpsMeterCtrl.position = new Vector(544, 448);
+		fpsMeterCtrl.position = new Vector(534, 448);
 		fpsMeterCtrl.horizSizing = Left;
 		fpsMeterCtrl.vertSizing = Top;
-		fpsMeterCtrl.extent = new Vector(96, 32);
+		fpsMeterCtrl.extent = new Vector(106, 32);
 
 		fpsMeter = new GuiText(bfont);
 		fpsMeter.horizSizing = Width;
 		fpsMeter.vertSizing = Height;
 		fpsMeter.position = new Vector(10, 3);
 		fpsMeter.text.textColor = 0;
-		fpsMeter.extent = new Vector(96, 32);
+		fpsMeter.extent = new Vector(106, 32);
 		fpsMeterCtrl.addChild(fpsMeter);
 
 		playGuiCtrl.addChild(fpsMeterCtrl);
