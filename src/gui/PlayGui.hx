@@ -1177,7 +1177,7 @@ class PlayGui {
 		this.powerupImageScene.setElapsedTime(timeState.dt);
 
 		if (this.fpsMeter != null) {
-			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} ${Settings.optionsSettings.vsync ? "T" : "F"}PS';
+			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} FPS';
 		}
 		this.updateMiddleMessages(timeState.dt);
 		if (Net.isMP) {

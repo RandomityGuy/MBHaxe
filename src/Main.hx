@@ -175,7 +175,7 @@ class Main extends hxd.App {
 		#if hl
 		static var dtAccumulator;
 		dtAccumulator += updateDT;
-		if (Settings.optionsSettings.fpsLimit <= 0) {
+		if (Settings.optionsSettings.fpsLimit <= 0 || Settings.optionsSettings.vsync) {
 			e.driver.present();
 		} else {
 			if (dtAccumulator >= 1.0 / Settings.optionsSettings.fpsLimit) {
