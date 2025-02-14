@@ -188,6 +188,9 @@ class Main extends hxd.App {
 		}
 		super.render(e);
 		ProfilerUI.end(0);
+		#if hl
+		e.driver.present();
+		#end
 	}
 
 	static function main() {
