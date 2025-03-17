@@ -2151,16 +2151,16 @@ class Marble extends GameObject {
 		move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
 		if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
 			if (Key.isDown(Settings.controlsSettings.forward)) {
-				move.d.x -= 1;
+				move.d.x = 1;
 			}
 			if (Key.isDown(Settings.controlsSettings.backward)) {
-				move.d.x += 1;
+				move.d.x = 1;
 			}
 			if (Key.isDown(Settings.controlsSettings.left)) {
-				move.d.y += 1;
+				move.d.y = 1;
 			}
 			if (Key.isDown(Settings.controlsSettings.right)) {
-				move.d.y -= 1;
+				move.d.y = 1;
 			}
 			if (Key.isDown(Settings.controlsSettings.jump)
 				|| MarbleGame.instance.touchInput.jumpButton.pressed
