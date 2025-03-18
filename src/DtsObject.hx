@@ -532,6 +532,10 @@ class DtsObject extends GameObject {
 
 			postProcessMaterial(matName, material);
 
+			if (Debug.wireFrame) {
+				material.mainPass.wireframe = true;
+			}
+
 			this.materials.push(material);
 		}
 
