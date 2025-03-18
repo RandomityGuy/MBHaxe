@@ -1349,8 +1349,9 @@ class Marble extends GameObject {
 
 					var surfaceNormal = new Vector(verts.nx, verts.ny,
 						verts.nz); // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
-					if (obj is DtsObject)
-						surfaceNormal.multiply(-1);
+					if (obj.correctNormals) {
+						surfaceNormal.load(v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1));
+					}
 					var surfaceD = -surfaceNormal.dot(v0);
 
 					// If we're going the wrong direction or not going to touch the plane, ignore...
