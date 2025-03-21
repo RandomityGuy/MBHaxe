@@ -734,6 +734,15 @@ class MarbleWorld extends Scheduler {
 		} else {
 			@:privateAccess marble.helicopterEnableTime = -1e8;
 			@:privateAccess marble.megaMarbleEnableTime = -1e8;
+
+			if (Settings.controlsSettings.oobRespawnKeyByPowerup) {
+				var store = marble.heldPowerup;
+				marble.heldPowerup = null;
+				haxe.Timer.delay(() -> {
+					if (marble.heldPowerup == null)
+						marble.heldPowerup = store;
+				}, 500); // This bs
+			}
 		}
 		if (this.isRecording) {
 			this.replay.recordCameraState(marble.camera.CameraYaw, marble.camera.CameraPitch);
@@ -1735,7 +1744,10 @@ class MarbleWorld extends Scheduler {
 		if (!this.isMultiplayer) {
 			if (this.marble.outOfBounds
 				&& this.finishTime == null
-				&& (Key.isDown(Settings.controlsSettings.jump) || Gamepad.isDown(Settings.gamepadSettings.jump))
+				&& ((!Settings.controlsSettings.oobRespawnKeyByPowerup
+					&& (Key.isDown(Settings.controlsSettings.jump) || Gamepad.isDown(Settings.gamepadSettings.jump)))
+					|| (Settings.controlsSettings.oobRespawnKeyByPowerup
+						&& (Key.isDown(Settings.controlsSettings.powerup) || Gamepad.isDown(Settings.gamepadSettings.powerup))))
 				&& !this.isWatching) {
 				this.restart(this.marble);
 				return;
