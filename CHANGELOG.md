@@ -1,11 +1,3 @@
-# 1.2.2
-This update brings the following changes:
-- Added Leaderboards for Gem Hunt levels.
-- Added an option to change the quick respawn key when out of bounds.
-- Changed Replay Center's UI a bit.
-- Fixed buggy collisions with Trapdoors.
-- Fixed a bug where you'd get stuck after restarting a certain number of times in Singleplayer Gem Hunt.
-
 # 1.2.1
 This update brings the following bugfixes:
 - Fixed a crash when the marble goes out of bounds.
