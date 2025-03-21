@@ -147,7 +147,8 @@ class LeaderboardsGui extends GuiImage {
 		var allMissions = MissionList.missionList.get('ultra')
 			.get('beginner')
 			.concat(MissionList.missionList.get('ultra').get('intermediate'))
-			.concat(MissionList.missionList.get('ultra').get('advanced'));
+			.concat(MissionList.missionList.get('ultra').get('advanced'))
+			.concat(MissionList.missionList.get('ultra').get('multiplayer'));
 
 		var actualIndex = allMissions.indexOf(MissionList.missionList.get('ultra').get(levelSelectDifficulty)[index]);
 
@@ -159,6 +160,8 @@ class LeaderboardsGui extends GuiImage {
 		var scoreView:LeaderboardsKind = All;
 
 		var currentMission = allMissions[actualIndex];
+
+		var isHuntScore = currentMission.difficultyIndex == 3;
 
 		var scoreTok = 0;
 
@@ -173,7 +176,7 @@ class LeaderboardsGui extends GuiImage {
 					var scoreText = '<offset value="10">${i}. </offset>
 					<offset value="50">${score.name}</offset>
 					<offset value="475">${score.rewind > 0 ? "<img src='rewind'/>" : ""}</offset>
-					<offset value="500">${Util.formatTime(score.score)}</offset>
+					<offset value="500">${isHuntScore ? Std.string(1000 - score.score) : Util.formatTime(score.score)}</offset>
 					<offset value="625"><img src="${platformToString(score.platform)}"/></offset>';
 					scoreTexts.push(scoreText);
 					i++;
@@ -231,6 +234,7 @@ class LeaderboardsGui extends GuiImage {
 		changeViewButton.pressedAction = (e) -> {
 			scoreView = scoreView == All ? Rewind : (scoreView == Rewind ? NoRewind : All);
 			levelSelectOpts.labelText.text.text = scoreCategories[cast(scoreView, Int)];
+			fetchScores();
 		}
 		bottomBar.addChild(changeViewButton);
 
