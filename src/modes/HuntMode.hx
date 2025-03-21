@@ -298,6 +298,10 @@ class HuntMode extends NullMode {
 		}
 		points = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
+
+		if (!Net.isMP) {
+			freeSpawns();
+		}
 	}
 
 	override function onClientRestart() {
