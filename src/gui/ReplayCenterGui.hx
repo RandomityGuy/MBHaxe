@@ -64,8 +64,7 @@ class ReplayCenterGui extends GuiImage {
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		var achievementsWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/achievementWindow.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
+		var achievementsWnd = new GuiImage(ResourceLoader.getResource("data/ui/xbox/helpWindow.png", ResourceLoader.getImage, this.imageResources).toTile());
 		achievementsWnd.horizSizing = Center;
 		achievementsWnd.vertSizing = Center;
 		achievementsWnd.position = new Vector(25, 58);
@@ -93,14 +92,15 @@ class ReplayCenterGui extends GuiImage {
 		var scrollCtrl = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/osxscroll.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		scrollCtrl.position = new Vector(25, 22);
-		scrollCtrl.extent = new Vector(550, 280);
+		scrollCtrl.extent = new Vector(550, 430);
 		scrollCtrl.scrollToBottom = false;
 		achievementsWnd.addChild(scrollCtrl);
 
 		var replayListCtrl = new GuiTextListCtrl(arial14, replayList.map(x -> x.name));
 
 		replayListCtrl.selectedColor = 0xF29515;
-		replayListCtrl.selectedFillColor = 0xEBEBEB;
+		replayListCtrl.selectedFillColor = 0x858585;
+		replayListCtrl.textColor = 0xFFFFFF;
 		replayListCtrl.position = new Vector(0, 0);
 		replayListCtrl.extent = new Vector(550, 480);
 		replayListCtrl.scrollable = true;
