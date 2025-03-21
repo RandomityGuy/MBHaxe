@@ -28,7 +28,7 @@ class EndGameGui extends GuiImage {
 	var scoreSubmitted:Bool = false;
 
 	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, score:Float,
-			scoreType:ScoreType) {
+			scoreType:ScoreType, replayData:haxe.io.Bytes) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 		this.horizSizing = Width;
@@ -194,7 +194,6 @@ class EndGameGui extends GuiImage {
 				continueFunc(nextButton);
 		}
 		bottomBar.addChild(nextButton);
-		var replayData = MarbleGame.instance.world.replay.write();
 		var submitScore = () -> {
 			var lbScoreValue = score;
 			if (scoreType == Score)
