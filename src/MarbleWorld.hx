@@ -2359,7 +2359,8 @@ class MarbleWorld extends Scheduler {
 			} else {
 				nextLevelCode();
 			}
-		}, mission, this.gameMode.getFinishScore(), this.gameMode.getScoreType());
+		}, mission, this.gameMode.getFinishScore(),
+			this.gameMode.getScoreType(), this.replay.write());
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;
