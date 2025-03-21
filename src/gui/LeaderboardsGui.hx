@@ -161,8 +161,6 @@ class LeaderboardsGui extends GuiImage {
 
 		var currentMission = allMissions[actualIndex];
 
-		var isHuntScore = currentMission.difficultyIndex == 3;
-
 		var scoreTok = 0;
 
 		function fetchScores() {
@@ -172,6 +170,9 @@ class LeaderboardsGui extends GuiImage {
 					return;
 				var scoreTexts = [];
 				var i = 1;
+
+				var isHuntScore = currentMission.difficultyIndex == 3;
+
 				for (score in scoreList) {
 					var scoreText = '<offset value="10">${i}. </offset>
 					<offset value="50">${score.name}</offset>
