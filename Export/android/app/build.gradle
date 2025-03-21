@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 29
     ndkVersion "18.1.5063045"
 
     defaultConfig {
         applicationId "com.randomityguy.mbhaxe.mbu"
-        minSdk 18
-        targetSdk 31
+        minSdk 26
+        targetSdk 29
         versionCode 1
         versionName "1.0"
 
