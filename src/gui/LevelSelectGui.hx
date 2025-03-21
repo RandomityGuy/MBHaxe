@@ -155,15 +155,15 @@ class LevelSelectGui extends GuiImage {
 		}
 		bottomBar.addChild(recordButton);
 
-		if (currentDifficultyStatic != "multiplayer") {
-			var lbButton = new GuiXboxButton("Leaderboard", 220);
-			lbButton.position = new Vector(750, 0);
-			lbButton.vertSizing = Bottom;
-			lbButton.gamepadAccelerator = ["Y"];
-			lbButton.horizSizing = Right;
-			lbButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LeaderboardsGui(currentSelectionStatic, currentDifficultyStatic, true));
-			bottomBar.addChild(lbButton);
-		}
+		// if (currentDifficultyStatic != "multiplayer") {
+		var lbButton = new GuiXboxButton("Leaderboard", 220);
+		lbButton.position = new Vector(750, 0);
+		lbButton.vertSizing = Bottom;
+		lbButton.gamepadAccelerator = ["Y"];
+		lbButton.horizSizing = Right;
+		lbButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LeaderboardsGui(currentSelectionStatic, currentDifficultyStatic, true));
+		bottomBar.addChild(lbButton);
+		// }
 
 		var nextButton = new GuiXboxButton("Play", 160);
 		nextButton.position = new Vector(960, 0);
