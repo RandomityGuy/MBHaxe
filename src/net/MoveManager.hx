@@ -76,6 +76,25 @@ class MoveManager {
 		if (!MarbleGame.instance.paused) {
 			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
 			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
+
+			if (Settings.controlsSettings.moddedController) {
+				// we need to scale the moves to square instead of circle
+				var moveLen = Math.sqrt(move.d.x * move.d.x + move.d.y * move.d.y);
+				if (moveLen > 0.00001) {
+					// Normalize the vector
+					var normalizedX = move.d.x / moveLen;
+					var normalizedY = move.d.y / moveLen;
+
+					// Scale to square - this allows diagonal movements to reach the corners
+					var scaleFactor = Math.max(Math.abs(normalizedX), Math.abs(normalizedY));
+					if (scaleFactor > 0) {
+						// Apply square mapping while preserving the original magnitude
+						move.d.x = normalizedX / scaleFactor * moveLen;
+						move.d.y = normalizedY / scaleFactor * moveLen;
+					}
+				}
+			}
+
 			if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
 				if (Key.isDown(Settings.controlsSettings.forward)) {
 					move.d.x -= 1;
@@ -89,6 +108,8 @@ class MoveManager {
 				if (Key.isDown(Settings.controlsSettings.right)) {
 					move.d.y -= 1;
 				}
+				move.d.x = Util.clamp(move.d.x, -1, 1);
+				move.d.y = Util.clamp(move.d.y, -1, 1);
 				if (Key.isDown(Settings.controlsSettings.jump)
 					|| MarbleGame.instance.touchInput.jumpButton.pressed
 					|| Gamepad.isDown(Settings.gamepadSettings.jump)) {

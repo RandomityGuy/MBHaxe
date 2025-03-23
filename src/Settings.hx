@@ -73,6 +73,7 @@ typedef ControlsSettings = {
 	var rewind:Int;
 	var chat:Int;
 	var oobRespawnKeyByPowerup:Bool;
+	var moddedController:Bool;
 }
 
 typedef TouchSettings = {
@@ -166,7 +167,8 @@ class Settings {
 		blast: Key.MOUSE_RIGHT,
 		rewind: Key.R,
 		chat: Key.T,
-		oobRespawnKeyByPowerup: false
+		oobRespawnKeyByPowerup: false,
+		moddedController: false
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -472,6 +474,9 @@ class Settings {
 			}
 			if (controlsSettings.oobRespawnKeyByPowerup == null) {
 				controlsSettings.oobRespawnKeyByPowerup = false;
+			}
+			if (controlsSettings.moddedController == null) {
+				controlsSettings.moddedController = false;
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;
