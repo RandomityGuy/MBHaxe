@@ -72,6 +72,7 @@ typedef ControlsSettings = {
 	var blast:Int;
 	var rewind:Int;
 	var chat:Int;
+	var moddedController:Bool;
 }
 
 typedef TouchSettings = {
@@ -164,7 +165,8 @@ class Settings {
 		respawn: Key.BACKSPACE,
 		blast: Key.MOUSE_RIGHT,
 		rewind: Key.R,
-		chat: Key.T
+		chat: Key.T,
+		moddedController: false
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -499,6 +501,9 @@ class Settings {
 			}
 			if (controlsSettings.chat == null) {
 				controlsSettings.chat = Key.T;
+			}
+			if (controlsSettings.moddedController == null) {
+				controlsSettings.moddedController = false;
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;

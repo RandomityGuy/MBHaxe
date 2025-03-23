@@ -91,6 +91,12 @@ class MiscOptionsGui extends GuiImage {
 		flOpt.setCurrentOption(Settings.optionsSettings.fastLoad ? 1 : 0);
 		// #end
 
+		var moddedOpt = optionCollection.addOption(1, "Emulate Modded Controller", ["No", "Yes"], (idx) -> {
+			Settings.controlsSettings.moddedController = (idx == 1);
+			return true;
+		}, 0.5, 118);
+		moddedOpt.setCurrentOption(Settings.controlsSettings.moddedController ? 1 : 0);
+
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
