@@ -69,7 +69,6 @@ jobs:
               git clone https://github.com/RandomityGuy/hxDatachannel
               haxelib git heaps https://github.com/RandomityGuy/heaps
               haxelib dev hlopenal ~/deps/hashlink/libs/openal
-              haxelib dev hlsdl ~/deps/hashlink/libs/sdl
               haxelib dev hashlink ~/deps/hashlink/other/haxelib
               haxelib git zyheaps https://github.com/rainyt/zyheaps
               haxelib git heaps https://github.com/RandomityGuy/heaps
@@ -83,6 +82,7 @@ jobs:
               cd ~/MBHaxe/Export/android
               cp -R ~/deps/MBHaxeAndroidLibs/* app/
               cd ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft
+              haxelib dev hlsdl ~/deps/MBHaxeAndroidLibs/src/main/cpp/hashlink/libs/sdl
               mv CMakeLists.txt CMakeLists-copy.txt
               mv 'CMakeLists 2.txt' CMakeLists.txt
               cmake .
