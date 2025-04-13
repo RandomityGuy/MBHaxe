@@ -176,7 +176,7 @@ class CameraController extends Object {
 	}
 
 	function applyNonlinearScale(value:Float) {
-		return Math.pow(Math.abs(value), 3.2) * (value >= 0 ? 1 : -1);
+		return Math.pow(Math.abs(value), 1.6) * (value >= 0 ? 1 : -1);
 	}
 
 	public function startCenterCamera() {
@@ -206,8 +206,8 @@ class CameraController extends Object {
 
 		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
-		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), 0.25));
-		var gamepadY = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), 0.25));
+		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), Settings.gamepadSettings.axisDeadzone));
+		var gamepadY = rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), Settings.gamepadSettings.axisDeadzone);
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
@@ -223,8 +223,13 @@ class CameraController extends Object {
 			cameraPitchDelta = 0;
 		}
 
-		var deltaX = 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
-		var deltaY = 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
+		var gamePadSensitivity = 1.0;
+		if (wasLastGamepadInput) {
+			gamePadSensitivity = (1.6 - Settings.controlsSettings.cameraSensitivity); // It defaults to 0.6
+		}
+
+		var deltaX = 0.75 * 5 * cameraYawDelta * dt * gamePadSensitivity;
+		var deltaY = 0.75 * 5 * cameraPitchDelta * dt * gamePadSensitivity;
 
 		var deltaNew = deltaX;
 
