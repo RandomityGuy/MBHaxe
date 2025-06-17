@@ -382,6 +382,7 @@ class Marble extends GameObject {
 		this.lastRenderPos = new Vector();
 		this.netSmoothOffset = new Vector();
 		this.netCorrected = false;
+		this.lastContactNormal = new Vector(0, 0, 1);
 
 		var marbleDts = new DtsObject();
 		var marbleShader = "";
