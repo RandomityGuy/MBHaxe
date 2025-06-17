@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Key;
 import h2d.filter.Filter;
 import h2d.HtmlText;
 import h2d.Flow;
@@ -15,6 +16,7 @@ import h2d.Text;
 import h2d.Font;
 import src.MarbleGame;
 import src.Settings;
+import src.Gamepad;
 
 class GuiMLTextListCtrl extends GuiControl {
 	public var texts:Array<String>;
@@ -38,6 +40,8 @@ class GuiMLTextListCtrl extends GuiControl {
 
 	var flow:Flow;
 	var _imageLoader:String->Tile;
+
+	var usedGamepad:Bool = false;
 
 	public function new(font:Font, texts:Array<String>, imageLoader:String->Tile, ?filter:Filter = null) {
 		super();
@@ -281,5 +285,52 @@ class GuiMLTextListCtrl extends GuiControl {
 			g.y = renderRect.position.y - scrollY;
 		}
 		redrawSelectionRect(hittestrect);
+	}
+
+	public override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+
+		var ps = _prevSelected;
+
+		if (Key.isPressed(Key.DOWN) || Gamepad.isPressed(["dpadDown"]) || (Gamepad.getAxis('analogY') > 0.75 && !usedGamepad)) {
+			_prevSelected++;
+			if (_prevSelected >= this.texts.length) {
+				_prevSelected = 0;
+			}
+		}
+		if (Key.isPressed(Key.UP) || Gamepad.isPressed(["dpadUp"]) || (Gamepad.getAxis('analogY') < -0.75 && !usedGamepad)) {
+			_prevSelected--;
+			if (_prevSelected < 0) {
+				_prevSelected = this.texts.length - 1;
+			}
+		}
+
+		if (ps != _prevSelected) {
+			// check if we need to scroll
+			var y = 2 * Settings.uiScale + (_prevSelected * (font.size + 4 * Settings.uiScale)) + g.y;
+
+			var renderRect = this.getRenderRectangle();
+			redrawSelectionRect(renderRect);
+			if (onSelectedFunc != null) {
+				onSelectedFunc(_prevSelected);
+			}
+
+			var hittestrect = this.getHitTestRect(false);
+
+			if (y < 0) {
+				// Scroll up
+				this.scroll = (font.size + 4 * Settings.uiScale) * _prevSelected;
+				this.onScroll(0, this.scroll);
+			} else if (y + font.size + 4 * Settings.uiScale > hittestrect.extent.y) {
+				// Scroll down
+				this.scroll = (font.size + 4 * Settings.uiScale) * _prevSelected;
+				this.onScroll(0, this.scroll);
+			}
+		}
+
+		if (Math.abs(Gamepad.getAxis('analogY')) > 0.75)
+			usedGamepad = true;
+		else
+			usedGamepad = false;
 	}
 }
