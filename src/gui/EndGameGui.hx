@@ -189,11 +189,12 @@ class EndGameGui extends GuiImage {
 				continueFunc(nextButton);
 		}
 		bottomBar.addChild(nextButton);
+		var rewindUsed = MarbleGame.instance.world.rewindUsed;
 		var submitScore = () -> {
 			var lbScoreValue = score;
 			if (scoreType == Score)
 				lbScoreValue = 1000 - score;
-			Leaderboards.submitScore(mission.path, lbScoreValue, MarbleGame.instance.world.rewindUsed, (needsReplay, ref) -> {
+			Leaderboards.submitScore(mission.path, lbScoreValue, rewindUsed, (needsReplay, ref) -> {
 				if (needsReplay) {
 					Leaderboards.submitReplay(ref, replayData);
 				}
