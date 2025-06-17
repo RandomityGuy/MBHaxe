@@ -63,7 +63,7 @@ class EnterNamePopupDlg extends GuiImage {
 		okButton.extent = new Vector(120, 94);
 		okButton.vertSizing = Top;
 		okButton.accelerators = [hxd.Key.ENTER];
-		okButton.gamepadAccelerator = ["A"];
+		okButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		okButton.pressedAction = (sender) -> {
 			Settings.highscoreName = textInput.text.text.substr(0, 15); // Max 15 pls
 			Settings.save();

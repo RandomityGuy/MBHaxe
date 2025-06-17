@@ -108,7 +108,7 @@ class MiscOptionsGui extends GuiImage {
 		backButton.position = new Vector(960, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["A"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		backButton.accelerators = [hxd.Key.ENTER];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {

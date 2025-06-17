@@ -60,7 +60,7 @@ class TouchCtrlsEditGui extends GuiImage {
 		nextButton.position = new Vector(960, 100);
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
-		nextButton.gamepadAccelerator = ["A"];
+		nextButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.pressedAction = (e) -> {
 			if (paused) {

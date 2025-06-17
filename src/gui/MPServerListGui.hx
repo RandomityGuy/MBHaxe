@@ -135,7 +135,7 @@ class MPServerListGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
 		bottomBar.addChild(backButton);
@@ -178,7 +178,7 @@ class MPServerListGui extends GuiImage {
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
 		nextButton.accelerators = [hxd.Key.ENTER];
-		nextButton.gamepadAccelerator = ["X"];
+		nextButton.gamepadAccelerator = [Settings.gamepadSettings.alt1];
 		nextButton.pressedAction = (e) -> {
 			if (curSelection != -1) {
 				var selectedServerVersion = ourServerList[curSelection].version;

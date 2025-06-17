@@ -181,7 +181,7 @@ class PlayMissionGui extends GuiImage {
 		pmMenuButton.position = new Vector(119, 325);
 		pmMenuButton.extent = new Vector(92, 43);
 		pmMenuButton.accelerator = hxd.Key.ESCAPE;
-		pmMenuButton.gamepadAccelerator = ["B"];
+		pmMenuButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		pmMenuButton.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new MainMenuGui());
 		};
@@ -217,7 +217,7 @@ class PlayMissionGui extends GuiImage {
 		var pmPlay = new GuiButton(loadButtonImages("data/ui/play/play"));
 		pmPlay.position = new Vector(510, 325);
 		pmPlay.extent = new Vector(92, 43);
-		pmPlay.gamepadAccelerator = ["A"];
+		pmPlay.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		pmPlay.pressedAction = (sender) -> {
 			// Wacky hacks
 			currentList[currentSelection].index = currentSelection;

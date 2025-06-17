@@ -1,13 +1,14 @@
 package gui;
 
-import hxd.Key;
+import h2d.filter.DropShadow;
 import src.MarbleGame;
+import gui.GuiControl.MouseState;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 
-class AboutMenuOptionsGui extends GuiImage {
+class InputSelectGui extends GuiImage {
 	var innerCtrl:GuiControl;
 	var btnList:GuiXboxList;
 
@@ -24,7 +25,12 @@ class AboutMenuOptionsGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		var scene2d = MarbleGame.canvas.scene2d;
+		#if hl
+		var scene2d = hxd.Window.getInstance();
+		#end
+		#if js
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
 
 		var offsetX = (scene2d.width - 1280) / 2;
 		var offsetY = (scene2d.height - 720) / 2;
@@ -48,7 +54,7 @@ class AboutMenuOptionsGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "HOW TO PLAY";
+		rootTitle.text.text = "SELECT CONTROLS";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
@@ -58,45 +64,12 @@ class AboutMenuOptionsGui extends GuiImage {
 		btnList.extent = new Vector(502, 500);
 		innerCtrl.addChild(btnList);
 
-		if (pauseGui) {
-			btnList.addButton(5, 'Marble Controls', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(4, true));
-			});
-			btnList.addButton(5, 'Powerups', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(0, true));
-			});
-			btnList.addButton(5, 'Blast Meter', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(1, true));
-			});
-			btnList.addButton(5, 'Single Player Mode', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(2, true));
-			});
-			btnList.addButton(5, 'Multiplayer Mode', (e) -> {
-				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new HelpCreditsGui(3, true));
-			});
-		} else {
-			btnList.addButton(5, 'Marble Controls', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(4));
-			});
-			btnList.addButton(5, 'Powerups', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(0));
-			});
-			btnList.addButton(5, 'Blast Meter', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(1));
-			});
-			btnList.addButton(5, 'Single Player Mode', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(2));
-			});
-			btnList.addButton(5, 'Multiplayer Mode', (e) -> {
-				MarbleGame.canvas.setContent(new HelpCreditsGui(3));
-			});
-		}
-
+		btnList.addButton(0, 'Keyboard Controls', (e) -> {
+			MarbleGame.canvas.setContent(new KeyBindingsGui(pauseGui));
+		});
+		btnList.addButton(0, 'Gamepad Controls', (e) -> {
+			MarbleGame.canvas.setContent(new ControllerBindingsGui(pauseGui));
+		});
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
@@ -109,14 +82,14 @@ class AboutMenuOptionsGui extends GuiImage {
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
 		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
-		backButton.accelerators = [Key.ESCAPE, Key.BACKSPACE];
+		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {
 				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+				MarbleGame.canvas.pushDialog(new OptionsListGui(pauseGui));
 			}
 		else
-			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui());
+			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui(pauseGui));
 		bottomBar.addChild(backButton);
 	}
 

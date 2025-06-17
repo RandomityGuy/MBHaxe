@@ -103,7 +103,7 @@ class MultiplayerGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
 		bottomBar.addChild(backButton);

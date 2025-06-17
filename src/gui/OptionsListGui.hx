@@ -73,7 +73,7 @@ class OptionsListGui extends GuiImage {
 			}
 		} else {
 			btnList.addButton(3, 'Key Bindings', (e) -> {
-				MarbleGame.canvas.setContent(new KeyBindingsGui(pauseGui));
+				MarbleGame.canvas.setContent(new InputSelectGui(pauseGui));
 			});
 		}
 		btnList.addButton(3, 'Video Options', (e) -> {
@@ -102,7 +102,7 @@ class OptionsListGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {

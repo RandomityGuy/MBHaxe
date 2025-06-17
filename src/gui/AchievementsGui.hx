@@ -138,7 +138,7 @@ class AchievementsGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (isPause)
 			backButton.pressedAction = (e) -> {
@@ -154,7 +154,7 @@ class AchievementsGui extends GuiImage {
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
 		nextButton.accelerators = [hxd.Key.ENTER];
-		nextButton.gamepadAccelerator = ["X"];
+		nextButton.gamepadAccelerator = [Settings.gamepadSettings.alt1];
 		nextButton.pressedAction = (e) -> {
 			var desc = "Select an achievement from the list.";
 			var selection = curSelection;

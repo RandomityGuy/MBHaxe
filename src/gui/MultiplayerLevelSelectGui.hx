@@ -266,7 +266,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> {
 			Net.disconnect();
@@ -283,7 +283,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			customsButton.position = new Vector(560, 0);
 			customsButton.vertSizing = Bottom;
 			customsButton.horizSizing = Right;
-			customsButton.gamepadAccelerator = ["X"];
+			customsButton.gamepadAccelerator = [Settings.gamepadSettings.alt1];
 			customsButton.pressedAction = (e) -> {
 				showingCustoms = !showingCustoms;
 				if (showingCustoms) {
@@ -302,7 +302,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			inviteButton.position = new Vector(750, 0);
 			inviteButton.vertSizing = Bottom;
 			inviteButton.horizSizing = Right;
-			inviteButton.gamepadAccelerator = ["Y"];
+			inviteButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
 			inviteButton.pressedAction = (e) -> {
 				inviteVisibility = !inviteVisibility;
 				updateLobbyNames();
@@ -314,7 +314,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		nextButton.position = new Vector(960, 0);
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
-		nextButton.gamepadAccelerator = ["A"];
+		nextButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.pressedAction = (e) -> {
 			NetCommands.toggleReadiness(Net.isClient ? Net.clientId : 0);
