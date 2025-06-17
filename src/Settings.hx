@@ -50,6 +50,7 @@ typedef OptionsSettings = {
 	var maxPixelRatio:Float;
 	var huntRandom:Bool;
 	var fastLoad:Bool;
+	var currentView:Int;
 }
 
 typedef ControlsSettings = {
@@ -107,6 +108,10 @@ typedef GamepadSettings = {
 	var respawn:Array<String>;
 	var blast:Array<String>;
 	var rewind:Array<String>;
+	var ok:String;
+	var back:String;
+	var alt1:String;
+	var alt2:String;
 }
 
 typedef PlayStatistics = {
@@ -144,7 +149,8 @@ class Settings {
 		maxPixelRatio: 1,
 		vsync: false,
 		huntRandom: false,
-		fastLoad: false
+		fastLoad: false,
+		currentView: 0
 	};
 
 	public static var controlsSettings:ControlsSettings = {
@@ -202,6 +208,10 @@ class Settings {
 		respawn: ["back"],
 		blast: ["X", "LB", "RB"],
 		rewind: ["Y"],
+		ok: "A",
+		back: "B",
+		alt1: "X",
+		alt2: "Y"
 	}
 
 	public static var playStatistics:PlayStatistics = {
@@ -390,6 +400,8 @@ class Settings {
 				optionsSettings.huntRandom = false;
 			if (optionsSettings.fastLoad == null)
 				optionsSettings.fastLoad = false;
+			if (optionsSettings.currentView == null)
+				optionsSettings.currentView = 0;
 			#end
 			if (optionsSettings.maxPixelRatio == 0 #if js || optionsSettings.maxPixelRatio == null #end)
 				optionsSettings.maxPixelRatio = 1;
@@ -436,6 +448,18 @@ class Settings {
 			}
 			if (gamepadSettings.rewind == null) {
 				gamepadSettings.rewind = ["Y"];
+			}
+			if (gamepadSettings.ok == null) {
+				gamepadSettings.ok = "A";
+			}
+			if (gamepadSettings.back == null) {
+				gamepadSettings.back = "B";
+			}
+			if (gamepadSettings.alt1 == null) {
+				gamepadSettings.alt1 = "X";
+			}
+			if (gamepadSettings.alt2 == null) {
+				gamepadSettings.alt2 = "Y";
 			}
 			if (json.stats != null) {
 				playStatistics = json.stats;

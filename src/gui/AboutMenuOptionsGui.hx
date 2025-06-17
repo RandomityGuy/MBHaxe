@@ -113,7 +113,7 @@ class AboutMenuOptionsGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [Key.ESCAPE, Key.BACKSPACE];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {

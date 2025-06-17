@@ -10,7 +10,7 @@ import src.ResourceLoader;
 import src.Settings;
 import src.Util;
 
-class KeyBindingsGui extends GuiImage {
+class ControllerBindingsGui extends GuiImage {
 	var innerCtrl:GuiControl;
 	var btnListLeft:GuiXboxList;
 	var btnListRight:GuiXboxList;
@@ -31,54 +31,55 @@ class KeyBindingsGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		function getConflictingBinding(bindingName:String, key:Int) {
-			if (Settings.controlsSettings.forward == key && bindingName != "Move Forward")
-				return "Move Forward";
-			if (Settings.controlsSettings.backward == key && bindingName != "Move Backward")
-				return "Move Backward";
-			if (Settings.controlsSettings.left == key && bindingName != "Move Left")
-				return "Move Left";
-			if (Settings.controlsSettings.right == key && bindingName != "Move Right")
-				return "Move Right";
-			if (Settings.controlsSettings.camForward == key && bindingName != "Rotate Camera Up")
-				return "Rotate Camera Up";
-			if (Settings.controlsSettings.camBackward == key && bindingName != "Rotate Camera Down")
-				return "Rotate Camera Down";
-			if (Settings.controlsSettings.camLeft == key && bindingName != "Rotate Camera Left")
-				return "Rotate Camera Left";
-			if (Settings.controlsSettings.camRight == key && bindingName != "Rotate Camera Right")
-				return "Rotate Camera Right";
-			if (Settings.controlsSettings.jump == key && bindingName != "Jump")
-				return "Jump";
-			if (Settings.controlsSettings.powerup == key && bindingName != "Use PowerUp")
-				return "Use PowerUp";
-			if (Settings.controlsSettings.freelook == key && bindingName != "Free Look")
-				return "Free Look";
-			if (Settings.controlsSettings.rewind == key && bindingName != "Rewind")
-				return "Rewind";
-			if (Settings.controlsSettings.chat == key && bindingName != "Chat")
-				return "Chat";
+		function getConflictingBinding(bindingName:String, key:String) {
+			// For menu bindings, it's independent of the game stuff
+			if (["Menu OK", "Menu Back", "Menu Alt 1", "Menu Alt 2"].indexOf(bindingName) != -1) {
+				if (Settings.gamepadSettings.ok == key && bindingName != "Menu OK")
+					return "Menu OK";
+				if (Settings.gamepadSettings.back == key && bindingName != "Menu Back")
+					return "Menu Back";
+				if (Settings.gamepadSettings.alt1 == key && bindingName != "Menu Alt 1")
+					return "Menu Alt 1";
+				if (Settings.gamepadSettings.alt2 == key && bindingName != "Menu Alt 2")
+					return "Menu Alt 2";
+			} else {
+				if (Settings.gamepadSettings.jump[0] == key && bindingName != "Jump")
+					return "Jump";
+				if (Settings.gamepadSettings.jump[1] == key && bindingName != "Jump")
+					return "Jump";
+				if (Settings.gamepadSettings.blast[0] == key && bindingName != "Blast")
+					return "Blast";
+				if (Settings.gamepadSettings.blast[1] == key && bindingName != "Blast")
+					return "Blast";
+				if (Settings.gamepadSettings.powerup[0] == key && bindingName != "Use Powerup")
+					return "Use Powerup";
+				if (Settings.gamepadSettings.powerup[1] == key && bindingName != "Use Powerup")
+					return "Use Powerup";
+				if (Settings.gamepadSettings.rewind[0] == key && bindingName != "Rewind")
+					return "Rewind";
+				if (Settings.gamepadSettings.rewind[1] == key && bindingName != "Rewind")
+					return "Rewind";
+			}
 
 			return null;
 		}
 
-		function remapFunc(bindingName:String, bindingFunc:Int->Void, ctrl:GuiXboxListButton) {
-			var remapDlg = new RemapDlg(bindingName);
+		function remapFunc(bindingName:String, bindingFunc:String->Void, ctrl:GuiXboxListButton) {
+			var remapDlg = new RemapDlg(bindingName, true);
 			MarbleGame.canvas.pushDialog(remapDlg);
-			remapDlg.remapCallback = (key) -> {
+			remapDlg.controllerRemapCallback = (key) -> {
 				MarbleGame.canvas.popDialog(remapDlg);
 
-				if (key == Key.ESCAPE)
+				if (key == "escape")
 					return;
 
 				var conflicting = getConflictingBinding(bindingName, key);
 				if (conflicting == null) {
-					ctrl.buttonText.text.text = '${bindingName}: ${Util.getKeyForButton2(key)}';
+					ctrl.buttonText.text.text = '${bindingName}: ${key}';
 					bindingFunc(key);
 				} else {
-					var yesNoDlg = new MessageBoxYesNoDlg('"${Util.getKeyForButton2(key)}" is already bound to "${conflicting}"!<br/>Do you want to undo this mapping?',
-						() -> {
-						ctrl.buttonText.text.text = '${bindingName}: ${Util.getKeyForButton2(key)}';
+					var yesNoDlg = new MessageBoxYesNoDlg('"${key}" is already bound to "${conflicting}"!<br/>Do you want to undo this mapping?', () -> {
+						ctrl.buttonText.text.text = '${bindingName}: ${key}';
 						bindingFunc(key);
 					}, () -> {});
 					MarbleGame.canvas.pushDialog(yesNoDlg);
@@ -115,7 +116,7 @@ class KeyBindingsGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "KEY BINDINGS";
+		rootTitle.text.text = "CONTROLLER BINDINGS";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
@@ -132,58 +133,50 @@ class KeyBindingsGui extends GuiImage {
 		btnListRight.extent = new Vector(502, 500);
 		innerCtrl.addChild(btnListRight);
 
-		var b1 = btnListRight.addButton(0, 'Move Forward: ${Util.getKeyForButton2(Settings.controlsSettings.forward)}', (e) -> {});
+		var b1 = btnListRight.addButton(0, 'Menu OK: ${Settings.gamepadSettings.ok}', (e) -> {});
 		b1.pressedAction = (e) -> {
-			remapFunc("Move Forward", (key) -> Settings.controlsSettings.forward = key, b1);
+			remapFunc("Menu OK", (key) -> Settings.gamepadSettings.ok = key, b1);
 		};
 
-		var b2 = btnListRight.addButton(0, 'Move Backward: ${Util.getKeyForButton2(Settings.controlsSettings.backward)}', (e) -> {});
+		var b2 = btnListLeft.addButton(0, 'Menu Back: ${Settings.gamepadSettings.back}', (e) -> {});
 		b2.pressedAction = (e) -> {
-			remapFunc("Move Backward", (key) -> Settings.controlsSettings.backward = key, b2);
+			remapFunc("Menu Back", (key) -> Settings.gamepadSettings.back = key, b2);
 		};
-		var b3 = btnListRight.addButton(0, 'Move Left: ${Util.getKeyForButton2(Settings.controlsSettings.left)}', (e) -> {});
+		var b3 = btnListRight.addButton(0, 'Menu Alt 1: ${Settings.gamepadSettings.alt1}', (e) -> {});
 		b3.pressedAction = (e) -> {
-			remapFunc("Move Left", (key) -> Settings.controlsSettings.left = key, b3);
+			remapFunc("Menu Alt 1", (key) -> Settings.gamepadSettings.alt1 = key, b3);
 		};
-		var b4 = btnListRight.addButton(0, 'Move Right: ${Util.getKeyForButton2(Settings.controlsSettings.right)}', (e) -> {});
+		var b4 = btnListLeft.addButton(0, 'Menu Alt 2: ${Settings.gamepadSettings.alt2}', (e) -> {});
 		b4.pressedAction = (e) -> {
-			remapFunc("Move Right", (key) -> Settings.controlsSettings.right = key, b4);
+			remapFunc("Move Right", (key) -> Settings.gamepadSettings.alt2 = key, b4);
 		}
-		var b5 = btnListRight.addButton(0, 'Jump: ${Util.getKeyForButton2(Settings.controlsSettings.jump)}', (e) -> {});
+		var b5 = btnListRight.addButton(0, 'Jump: ${Settings.gamepadSettings.jump[0]}', (e) -> {});
 		b5.pressedAction = (e) -> {
-			remapFunc("Jump", (key) -> Settings.controlsSettings.jump = key, b5);
+			remapFunc("Jump", (key) -> Settings.gamepadSettings.jump[0] = key, b5);
 		};
-		var b6 = btnListRight.addButton(0, 'Blast: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}', (e) -> {});
+		var b5 = btnListLeft.addButton(0, 'Jump: ${Settings.gamepadSettings.jump[1]}', (e) -> {});
+		b5.pressedAction = (e) -> {
+			remapFunc("Jump", (key) -> Settings.gamepadSettings.jump[1] = key, b5);
+		};
+		var b6 = btnListRight.addButton(0, 'Blast: ${Settings.gamepadSettings.blast[0]}', (e) -> {});
 		b6.pressedAction = (e) -> {
-			remapFunc("Blast", (key) -> Settings.controlsSettings.blast = key, b6);
+			remapFunc("Blast", (key) -> Settings.gamepadSettings.blast[0] = key, b6);
 		}
-		var b7 = btnListLeft.addButton(0, 'Look Up: ${Util.getKeyForButton2(Settings.controlsSettings.camForward)}', (e) -> {});
-		b7.pressedAction = (e) -> {
-			remapFunc("Look Up", (key) -> Settings.controlsSettings.camForward = key, b7);
+		var b6 = btnListLeft.addButton(0, 'Blast: ${Settings.gamepadSettings.blast[1]}', (e) -> {});
+		b6.pressedAction = (e) -> {
+			remapFunc("Blast", (key) -> Settings.gamepadSettings.blast[1] = key, b6);
 		}
-		var b8 = btnListLeft.addButton(0, 'Look Down: ${Util.getKeyForButton2(Settings.controlsSettings.camBackward)}', (e) -> {});
-		b8.pressedAction = (e) -> {
-			remapFunc("Look Down", (key) -> Settings.controlsSettings.camBackward = key, b8);
-		}
-		var b9 = btnListLeft.addButton(0, 'Look Left: ${Util.getKeyForButton2(Settings.controlsSettings.camLeft)}', (e) -> {});
-		b9.pressedAction = (e) -> {
-			remapFunc("Look Left", (key) -> Settings.controlsSettings.camLeft = key, b9);
-		}
-		var b10 = btnListLeft.addButton(0, 'Look Right: ${Util.getKeyForButton2(Settings.controlsSettings.camRight)}', (e) -> {});
-		b10.pressedAction = (e) -> {
-			remapFunc("Look Right", (key) -> Settings.controlsSettings.camRight = key, b10);
-		}
-		var b11 = btnListLeft.addButton(0, 'Use Powerup: ${Util.getKeyForButton2(Settings.controlsSettings.powerup)}', (e) -> {});
+		var b11 = btnListRight.addButton(0, 'Use Powerup: ${Settings.gamepadSettings.powerup[0]}', (e) -> {});
 		b11.pressedAction = (e) -> {
-			remapFunc("Use Powerup", (key) -> Settings.controlsSettings.powerup = key, b11);
+			remapFunc("Use Powerup", (key) -> Settings.gamepadSettings.powerup[0] = key, b11);
 		}
-		var b12 = btnListLeft.addButton(0, 'Rewind: ${Util.getKeyForButton2(Settings.controlsSettings.rewind)}', (e) -> {});
+		var b11 = btnListLeft.addButton(0, 'Use Powerup: ${Settings.gamepadSettings.powerup[1]}', (e) -> {});
+		b11.pressedAction = (e) -> {
+			remapFunc("Use Powerup", (key) -> Settings.gamepadSettings.powerup[1] = key, b11);
+		}
+		var b12 = btnListRight.addButton(0, 'Rewind: ${Settings.gamepadSettings.rewind[0]}', (e) -> {});
 		b12.pressedAction = (e) -> {
-			remapFunc("Rewind", (key) -> Settings.controlsSettings.rewind = key, b12);
-		}
-		var b13 = btnListLeft.addButton(0, 'Chat: ${Util.getKeyForButton2(Settings.controlsSettings.chat)}', (e) -> {});
-		b13.pressedAction = (e) -> {
-			remapFunc("Chat", (key) -> Settings.controlsSettings.chat = key, b13);
+			remapFunc("Rewind", (key) -> Settings.gamepadSettings.rewind[0] = key, b12);
 		}
 
 		var bottomBar = new GuiControl();
@@ -197,7 +190,7 @@ class KeyBindingsGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
+		backButton.gamepadAccelerator = ["B"];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {

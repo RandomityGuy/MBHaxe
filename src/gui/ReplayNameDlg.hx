@@ -65,7 +65,7 @@ class ReplayNameDlg extends GuiImage {
 		okButton.extent = new Vector(120, 94);
 		okButton.vertSizing = Top;
 		okButton.accelerators = [hxd.Key.ENTER];
-		okButton.gamepadAccelerator = ["A"];
+		okButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		okButton.pressedAction = (sender) -> {
 			if (StringTools.trim(textInput.text.text) != "") {
 				MarbleGame.instance.recordingName = textInput.text.text;
@@ -81,7 +81,7 @@ class ReplayNameDlg extends GuiImage {
 		cancelButton.extent = new Vector(120, 94);
 		cancelButton.vertSizing = Top;
 		cancelButton.accelerators = [hxd.Key.ENTER];
-		cancelButton.gamepadAccelerator = ["A"];
+		cancelButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		cancelButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			callback();

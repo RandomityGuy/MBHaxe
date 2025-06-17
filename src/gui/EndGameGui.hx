@@ -167,7 +167,7 @@ class EndGameGui extends GuiImage {
 			retryButton.position = new Vector(400, 0);
 			retryButton.vertSizing = Bottom;
 			retryButton.horizSizing = Right;
-			retryButton.gamepadAccelerator = ["B"];
+			retryButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 			retryButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 			retryButton.pressedAction = (e) -> {
 				if (MarbleGame.canvas.children.length == 1)
@@ -187,7 +187,7 @@ class EndGameGui extends GuiImage {
 		nextButton.position = new Vector(960, 0);
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
-		nextButton.gamepadAccelerator = ["A"];
+		nextButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.pressedAction = (e) -> {
 			if (MarbleGame.canvas.children.length == 1)
@@ -216,7 +216,11 @@ class EndGameGui extends GuiImage {
 				submitScore();
 			}
 		} else {
-			Leaderboards.getScores(mission.path, All, lbscores -> {
+			Leaderboards.getScores(mission.path, rewindUsed ? Rewind : NoRewind, lbscores -> {
+				// Score submission criteria
+				// If it is better than our non-rewind score, or better than the top non-rewind score, and we are non rewind, submit it
+				// If it is better than our rewind score, or better than the top rewind score, and we are rewind, submit it
+
 				var foundScore = false;
 				var foundLBScore:Float = 0;
 				for (lb in lbscores) {

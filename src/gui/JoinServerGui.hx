@@ -196,7 +196,7 @@ class JoinServerGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> {
 			MarbleGame.canvas.setContent(new MultiplayerGui());
@@ -207,7 +207,7 @@ class JoinServerGui extends GuiImage {
 		goButton.position = new Vector(960, 0);
 		goButton.vertSizing = Bottom;
 		goButton.horizSizing = Right;
-		goButton.gamepadAccelerator = ["A"];
+		goButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		goButton.accelerators = [hxd.Key.ENTER];
 		goButton.pressedAction = (e) -> joinFunc();
 		bottomBar.addChild(goButton);

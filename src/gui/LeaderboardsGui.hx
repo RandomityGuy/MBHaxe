@@ -157,7 +157,7 @@ class LeaderboardsGui extends GuiImage {
 		var levelNames = allMissions.map(x -> x.title);
 
 		var scoreCategories = ["Overall", "Rewind", "Non-Rewind"];
-		var scoreView:LeaderboardsKind = All;
+		var scoreView:LeaderboardsKind = cast Settings.optionsSettings.currentView;
 
 		var currentMission = allMissions[actualIndex];
 
@@ -218,7 +218,7 @@ class LeaderboardsGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (levelSelectGui)
 			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LevelSelectGui(levelSelectDifficulty));
@@ -231,9 +231,10 @@ class LeaderboardsGui extends GuiImage {
 		changeViewButton.position = new Vector(560, 0);
 		changeViewButton.vertSizing = Bottom;
 		changeViewButton.horizSizing = Right;
-		changeViewButton.gamepadAccelerator = ["X"];
+		changeViewButton.gamepadAccelerator = [Settings.gamepadSettings.alt1];
 		changeViewButton.pressedAction = (e) -> {
 			scoreView = scoreView == All ? Rewind : (scoreView == Rewind ? NoRewind : All);
+			Settings.optionsSettings.currentView = cast scoreView;
 			levelSelectOpts.labelText.text.text = scoreCategories[cast(scoreView, Int)];
 			fetchScores();
 		}
@@ -242,7 +243,7 @@ class LeaderboardsGui extends GuiImage {
 		var replayButton = new GuiXboxButton("Watch Replay", 220);
 		replayButton.position = new Vector(750, 0);
 		replayButton.vertSizing = Bottom;
-		replayButton.gamepadAccelerator = ["Y"];
+		replayButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
 		replayButton.horizSizing = Right;
 		replayButton.pressedAction = (e) -> {
 			Leaderboards.watchTopReplay(currentMission.path, scoreView, (b) -> {

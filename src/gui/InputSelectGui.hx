@@ -1,14 +1,16 @@
 package gui;
 
+import h2d.filter.DropShadow;
 import src.MarbleGame;
+import gui.GuiControl.MouseState;
 import hxd.res.BitmapFont;
 import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
-import src.Util;
 
-class MiscOptionsGui extends GuiImage {
+class InputSelectGui extends GuiImage {
 	var innerCtrl:GuiControl;
+	var btnList:GuiXboxList;
 
 	public function new(pauseGui:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
@@ -52,62 +54,22 @@ class MiscOptionsGui extends GuiImage {
 		rootTitle.position = new Vector(100, 30);
 		rootTitle.extent = new Vector(1120, 80);
 		rootTitle.text.textColor = 0xFFFFFF;
-		rootTitle.text.text = "MISC OPTIONS";
+		rootTitle.text.text = "SELECT CONTROLS";
 		rootTitle.text.alpha = 0.5;
 		innerCtrl.addChild(rootTitle);
 
-		function numberRange(start:Int, stop:Int, step:Int) {
-			var range = [];
-			while (start <= stop) {
-				range.push('${start}');
-				start += step;
-			}
-			return range;
-		}
+		btnList = new GuiXboxList();
+		btnList.position = new Vector(70 - offsetX, 165);
+		btnList.horizSizing = Left;
+		btnList.extent = new Vector(502, 500);
+		innerCtrl.addChild(btnList);
 
-		var optionCollection = new GuiXboxOptionsListCollection();
-		optionCollection.position = new Vector(380, 160);
-		optionCollection.extent = new Vector(815, 500);
-		innerCtrl.addChild(optionCollection);
-
-		var rwOpt = optionCollection.addOption(1, "Rewind", ["Disabled", "Enabled"], (idx) -> {
-			Settings.optionsSettings.rewindEnabled = (idx == 1);
-			return true;
-		}, 0.5, 118);
-		rwOpt.setCurrentOption(Settings.optionsSettings.rewindEnabled ? 1 : 0);
-
-		var rsOpt = optionCollection.addOption(1, "Rewind Speed", numberRange(10, 100, 5), (idx) -> {
-			Settings.optionsSettings.rewindTimescale = cast(0.1 + (idx / 18.0) * (1 - 0.1));
-			return true;
-		}, 0.5, 118);
-		rsOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1)) * 18), 0, 18)));
-
-		var sgOpt = optionCollection.addOption(1, "Seeded Gem Hunt", ["Disabled", "Enabled"], (idx) -> {
-			Settings.optionsSettings.huntRandom = (idx == 0);
-			return true;
-		}, 0.5, 118);
-		sgOpt.setCurrentOption(Settings.optionsSettings.huntRandom ? 0 : 1);
-
-		// #if hl
-		var flOpt = optionCollection.addOption(1, "Fast Loading", ["Disabled", "Enabled"], (idx) -> {
-			Settings.optionsSettings.fastLoad = (idx == 1);
-			return true;
-		}, 0.5, 118);
-		flOpt.setCurrentOption(Settings.optionsSettings.fastLoad ? 1 : 0);
-		// #end
-
-		var oobResOpt = optionCollection.addOption(1, "OOB Respawn Key", ["Jump", "Powerup"], (idx) -> {
-			Settings.controlsSettings.oobRespawnKeyByPowerup = (idx == 1);
-			return true;
-		}, 0.5, 118);
-		oobResOpt.setCurrentOption(Settings.controlsSettings.oobRespawnKeyByPowerup ? 1 : 0);
-
-		var moddedOpt = optionCollection.addOption(1, "Emulate Modded Controller", ["No", "Yes"], (idx) -> {
-			Settings.controlsSettings.moddedController = (idx == 1);
-			return true;
-		}, 0.5, 118);
-		moddedOpt.setCurrentOption(Settings.controlsSettings.moddedController ? 1 : 0);
-
+		btnList.addButton(0, 'Keyboard Controls', (e) -> {
+			MarbleGame.canvas.setContent(new KeyBindingsGui(pauseGui));
+		});
+		btnList.addButton(0, 'Gamepad Controls', (e) -> {
+			MarbleGame.canvas.setContent(new ControllerBindingsGui(pauseGui));
+		});
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
 		bottomBar.extent = new Vector(640, 200);
@@ -115,23 +77,19 @@ class MiscOptionsGui extends GuiImage {
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
 
-		var backButton = new GuiXboxButton("Ok", 160);
-		backButton.position = new Vector(960, 0);
+		var backButton = new GuiXboxButton("Back", 160);
+		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
-		backButton.accelerators = [hxd.Key.ENTER];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
+		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (pauseGui)
 			backButton.pressedAction = (e) -> {
-				Settings.applySettings();
 				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+				MarbleGame.canvas.pushDialog(new OptionsListGui(pauseGui));
 			}
 		else
-			backButton.pressedAction = (e) -> {
-				Settings.applySettings();
-				MarbleGame.canvas.setContent(new OptionsListGui());
-			};
+			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new OptionsListGui(pauseGui));
 		bottomBar.addChild(backButton);
 	}
 
@@ -143,6 +101,7 @@ class MiscOptionsGui extends GuiImage {
 		var subY = 480 - (height - offsetY) * 480 / height;
 		innerCtrl.position = new Vector(offsetX, offsetY);
 		innerCtrl.extent = new Vector(640 - subX, 480 - subY);
+		btnList.position = new Vector(70 - offsetX, 165);
 
 		super.onResize(width, height);
 	}

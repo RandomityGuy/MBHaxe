@@ -144,7 +144,7 @@ class LevelSelectGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new DifficultySelectGui());
 		bottomBar.addChild(backButton);
@@ -153,7 +153,7 @@ class LevelSelectGui extends GuiImage {
 		recordButton.position = new Vector(560, 0);
 		recordButton.vertSizing = Bottom;
 		recordButton.horizSizing = Right;
-		recordButton.gamepadAccelerator = ["X"];
+		recordButton.gamepadAccelerator = [Settings.gamepadSettings.alt1];
 		recordButton.pressedAction = (e) -> {
 			MarbleGame.instance.toRecord = true;
 			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("The next mission you play will be recorded."));
@@ -164,7 +164,7 @@ class LevelSelectGui extends GuiImage {
 		var lbButton = new GuiXboxButton("Leaderboard", 220);
 		lbButton.position = new Vector(750, 0);
 		lbButton.vertSizing = Bottom;
-		lbButton.gamepadAccelerator = ["Y"];
+		lbButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
 		lbButton.horizSizing = Right;
 		lbButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LeaderboardsGui(currentSelectionStatic, currentDifficultyStatic, true));
 		bottomBar.addChild(lbButton);
@@ -174,7 +174,7 @@ class LevelSelectGui extends GuiImage {
 		nextButton.position = new Vector(960, 0);
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
-		nextButton.gamepadAccelerator = ["A"];
+		nextButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.pressedAction = (e) -> {
 			MarbleGame.instance.playMission(curMission);

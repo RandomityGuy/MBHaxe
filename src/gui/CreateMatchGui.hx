@@ -108,7 +108,7 @@ class CreateMatchGui extends GuiImage {
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
-		backButton.gamepadAccelerator = ["B"];
+		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MultiplayerGui());
 		bottomBar.addChild(backButton);
@@ -117,7 +117,7 @@ class CreateMatchGui extends GuiImage {
 		nextButton.position = new Vector(960, 0);
 		nextButton.vertSizing = Bottom;
 		nextButton.horizSizing = Right;
-		nextButton.gamepadAccelerator = ["A"];
+		nextButton.gamepadAccelerator = [Settings.gamepadSettings.ok];
 		nextButton.accelerators = [hxd.Key.ENTER];
 		nextButton.pressedAction = (e) -> {
 			Net.hostServer('${Settings.highscoreName}\'s Server', maxPlayers, privateSlots, privateGame, () -> {
