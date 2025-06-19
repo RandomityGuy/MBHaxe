@@ -1,0 +1,14 @@
+-D uwp
+
+--each
+--next
+
+compile-c.hxml
+
+# Note: I don't think hashlink supports exporting a lib project..
+#       The following sed changes from Application exe to Static lib 
+#       After building the lib, you can build the final exe in a minimal uwp wrapper project (to be supplied later)
+-cmd sed -i "s/<ConfigurationType>Application<\/ConfigurationType>/<ConfigurationType>StaticLibrary<\/ConfigurationType>/g" native/marblegame.vcxproj
+-cmd sed -i "s/<TargetExt>.exe<\/TargetExt>/<TargetExt>.lib<\/TargetExt>/g" native/marblegame.vcxproj
+
+-cmd MSBuild.exe -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:PlatformToolset=v142 -v:minimal native/marblegame.sln
