@@ -79,6 +79,11 @@ class Main extends hxd.App {
 			+ ")");
 		#end
 
+		#if uwp
+		Settings.zoomRatio = Window.getInstance().height / 1200;
+		s2d.scaleMode = Zoom(Settings.zoomRatio);
+		#end
+
 		#if android
 		Window.getInstance().addEventTarget(ev -> {
 			if (ev.kind == EPush || ev.kind == ERelease || ev.kind == EMove) {

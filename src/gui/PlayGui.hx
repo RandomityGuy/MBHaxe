@@ -156,7 +156,7 @@ class PlayGui {
 		#if hl
 		var wnd = hxd.Window.getInstance();
 		#end
-		#if js
+		#if (js || uwp)
 		var wnd = MarbleGame.instance.scene2d;
 		#end
 
@@ -236,7 +236,7 @@ class PlayGui {
 		#if hl
 		var scene2d = hxd.Window.getInstance();
 		#end
-		#if js
+		#if (js || uwp)
 		var scene2d = MarbleGame.instance.scene2d;
 		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
@@ -347,7 +347,7 @@ class PlayGui {
 		#if hl
 		var scene2d = hxd.Window.getInstance();
 		#end
-		#if js
+		#if (js || uwp)
 		var scene2d = MarbleGame.instance.scene2d;
 		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
@@ -439,7 +439,7 @@ class PlayGui {
 		#if hl
 		var scene2d = hxd.Window.getInstance();
 		#end
-		#if js
+		#if (js || uwp)
 		var scene2d = MarbleGame.instance.scene2d;
 		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
@@ -596,7 +596,7 @@ class PlayGui {
 		#if hl
 		var scene2d = hxd.Window.getInstance();
 		#end
-		#if js
+		#if (js || uwp)
 		var scene2d = MarbleGame.instance.scene2d;
 		#end
 		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;

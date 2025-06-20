@@ -570,6 +570,11 @@ class Settings {
 			canvasElement.style.height = "100%";
 			#end
 
+			#if uwp
+			zoomRatio = Window.getInstance().height / 1200;
+			Settings.zoomRatio = zoomRatio;
+			#end
+
 			Console.log("Window resized to " + Settings.optionsSettings.screenWidth + "x" + Settings.optionsSettings.screenHeight + " (Zoom " + zoomRatio +
 				")");
 
