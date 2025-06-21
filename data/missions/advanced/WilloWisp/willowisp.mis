@@ -7,7 +7,7 @@ new SimGroup(MissionGroup) {
          time = "105000";
          level = "54";
          include = "1";
-         difficulty = "10";
+         difficulty = "11";
          name = $Text::LevelName70;
          artist = "Alex Swanson";
          hasEggIndex = "18";

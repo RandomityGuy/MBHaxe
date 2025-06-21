@@ -12,6 +12,13 @@ typedef LBScore = {
 	score:Float,
 	platform:Int,
 	rewind:Int,
+	rating:Int,
+}
+
+typedef LBPlayer = {
+	uid:String,
+	name:String,
+	rating:Int,
 }
 
 enum abstract LeaderboardsKind(Int) {
@@ -55,6 +62,17 @@ class Leaderboards {
 			cb(scores);
 		}, (e) -> {
 			Console.log("Failed to get scores: " + e);
+			cb([]);
+		});
+	}
+
+	public static function getTopPlayers(kind:LeaderboardsKind, cb:Array<LBPlayer>->Void) {
+		return Http.get('${host}/api/players?&game=${game}&view=${kind}', (b) -> {
+			var s = b.toString();
+			var players:Array<LBPlayer> = Json.parse(s).players;
+			cb(players);
+		}, (e) -> {
+			Console.log("Failed to get players: " + e);
 			cb([]);
 		});
 	}

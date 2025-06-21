@@ -9,7 +9,7 @@ new SimGroup(MissionGroup) {
          artist = "Alex Swanson";
          type = "beginner";
          level = "20";
-         difficulty = "4";
+         difficulty = "6";
 name  =  $Text::LevelName48;
          hasEggIndex = "5";
    };

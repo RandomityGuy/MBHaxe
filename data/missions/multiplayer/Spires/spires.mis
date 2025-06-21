@@ -12,7 +12,7 @@ new SimGroup(MissionGroup) {
          type = "advanced";
          gameMode = "Scrum";
          name = $Text::LevelNameMP21;
-         difficulty = "8";
+         difficulty = "9";
          numgems = "1";
          goldTime = "0";
          guid = "{3DCFC6EE-A2DE-465F-B040-6FC31D5C0B6E}";

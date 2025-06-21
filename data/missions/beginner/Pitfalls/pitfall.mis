@@ -7,7 +7,7 @@ new SimGroup(MissionGroup) {
          desc = "Be careful crossing these bridges.";
          level = "11";
          time = "60000";
-         difficulty = "2";
+         difficulty = "5";
          name = $Text::LevelName21;
          gameType = "SinglePlayer";
          include = true;

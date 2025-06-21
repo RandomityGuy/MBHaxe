@@ -80,7 +80,7 @@ class MainMenuGui extends GuiImage {
 			}
 		});
 		btnList.addButton(2, "Leaderboards", (e) -> {
-			cast(this.parent, Canvas).setContent(new LeaderboardsGui(0, "beginner", false));
+			cast(this.parent, Canvas).setContent(new LeaderboardsSelectGui());
 		}, 20);
 		btnList.addButton(2, "Achievements", (e) -> {
 			cast(this.parent, Canvas).setContent(new AchievementsGui());

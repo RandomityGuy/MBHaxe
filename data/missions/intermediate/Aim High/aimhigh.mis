@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          gameType = "SinglePlayer";
          include = "1";
-         difficulty = "5";
+         difficulty = "7";
          type = "Intermediate";
          artist = "Kevin Ryan and Tim Aste";
          time = "30000";

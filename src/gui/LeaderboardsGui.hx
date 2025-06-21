@@ -17,7 +17,7 @@ import gui.HtmlText;
 class LeaderboardsGui extends GuiImage {
 	var innerCtrl:GuiControl;
 
-	public function new(index:Int, levelSelectDifficulty:String, levelSelectGui:Bool = false,) {
+	public function new(index:Int, levelSelectDifficulty:String, levelSelectGui:Bool = false) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
@@ -116,7 +116,8 @@ class LeaderboardsGui extends GuiImage {
 			return null;
 		}
 
-		var headerText = '<font face="arial12">Rank<offset value="50">Name</offset><offset value="500">Score</offset><offset value="600">Platform</offset></font>';
+		var headerText = '<font face="arial12">Rank<offset value="50">Name</offset><offset value="400">Score</offset><offset value="500">Rating</offset><offset value="600">Platform</offset></font>';
+		var playerHeaderText = '<font face="arial12">Rank<offset value="50">Name</offset><offset value="575">Rating</offset></font>';
 
 		var scores = [
 			'<offset value="10">1. </offset><offset value="50">Nardo Polo</offset><offset value="500">99:59:999</offset><offset value="625"><img src="unknown"/></offset>',
@@ -145,7 +146,7 @@ class LeaderboardsGui extends GuiImage {
 			.concat(MissionList.missionList.get('ultra').get('advanced'))
 			.concat(MissionList.missionList.get('ultra').get('multiplayer'));
 
-		var actualIndex = allMissions.indexOf(MissionList.missionList.get('ultra').get(levelSelectDifficulty)[index]);
+		var actualIndex = levelSelectDifficulty != "players" ? allMissions.indexOf(MissionList.missionList.get('ultra').get(levelSelectDifficulty)[index]) : 0;
 
 		levelTitle.text.text = 'Level ${actualIndex + 1}';
 
@@ -153,6 +154,10 @@ class LeaderboardsGui extends GuiImage {
 
 		var scoreCategories = ["Overall", "Rewind", "Non-Rewind"];
 		var scoreView:LeaderboardsKind = cast Settings.optionsSettings.currentView;
+
+		if (levelSelectDifficulty == "players") {
+			levelTitle.text.text = 'Top Players: ${scoreCategories[cast scoreView]}';
+		}
 
 		var currentMission = allMissions[actualIndex];
 
@@ -171,8 +176,9 @@ class LeaderboardsGui extends GuiImage {
 				for (score in scoreList) {
 					var scoreText = '<offset value="10">${i}. </offset>
 					<offset value="50">${score.name}</offset>
-					<offset value="475">${score.rewind > 0 ? "<img src='rewind'/>" : ""}</offset>
-					<offset value="500">${isHuntScore ? Std.string(1000 - score.score) : Util.formatTime(score.score)}</offset>
+					<offset value="375">${score.rewind > 0 ? "<img src='rewind'/>" : ""}</offset>
+					<offset value="400">${isHuntScore ? Std.string(1000 - score.score) : Util.formatTime(score.score)}</offset>
+					<offset value="500">${score.rating}</offset>
 					<offset value="625"><img src="${platformToString(score.platform)}"/></offset>';
 					scoreTexts.push(scoreText);
 					i++;
@@ -187,6 +193,31 @@ class LeaderboardsGui extends GuiImage {
 			scoreCtrl.text.text = headerText + "<br/><br/><br/><br/><br/>" + '<p align="center">Loading...</p>';
 		}
 
+		function fetchPlayers() {
+			var ourToken = scoreTok++;
+			Leaderboards.getTopPlayers(scoreView, (scoreList) -> {
+				if (ourToken + 1 != scoreTok)
+					return;
+				var scoreTexts = [];
+				var i = 1;
+
+				for (score in scoreList) {
+					var scoreText = '<offset value="10">${i}. </offset>
+					<offset value="50">${score.name}</offset>
+					<offset value="575">${score.rating}</offset>';
+					scoreTexts.push(scoreText);
+					i++;
+				}
+				while (i <= 10) {
+					var scoreText = '<offset value="10">${i}. </offset><offset value="475">10000</offset>';
+					scoreTexts.push(scoreText);
+					i++;
+				}
+				scoreCtrl.text.text = playerHeaderText + "<br/>" + scoreTexts.join('<br/>');
+			});
+			scoreCtrl.text.text = playerHeaderText + "<br/><br/><br/><br/><br/>" + '<p align="center">Loading...</p>';
+		}
+
 		var levelSelectOpts = new GuiXboxOptionsList(2, "Overall", levelNames);
 		levelSelectOpts.position = new Vector(380, 485);
 		levelSelectOpts.extent = new Vector(815, 94);
@@ -194,13 +225,20 @@ class LeaderboardsGui extends GuiImage {
 		levelSelectOpts.horizSizing = Right;
 		levelSelectOpts.alwaysActive = true;
 		levelSelectOpts.onChangeFunc = (l) -> {
+			if (levelSelectDifficulty == "players") {
+				fetchPlayers();
+				levelTitle.text.text = 'Top Players: ${scoreCategories[cast scoreView]}';
+				return true;
+			}
 			levelTitle.text.text = 'Level ${l + 1}';
 			currentMission = allMissions[l];
 			fetchScores();
 			return true;
 		}
 		levelSelectOpts.setCurrentOption(actualIndex);
-		innerCtrl.addChild(levelSelectOpts);
+
+		if (levelSelectDifficulty != "players")
+			innerCtrl.addChild(levelSelectOpts);
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -218,7 +256,7 @@ class LeaderboardsGui extends GuiImage {
 		if (levelSelectGui)
 			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LevelSelectGui(levelSelectDifficulty));
 		else {
-			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new MainMenuGui());
+			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LeaderboardsSelectGui());
 		}
 		bottomBar.addChild(backButton);
 
@@ -231,47 +269,56 @@ class LeaderboardsGui extends GuiImage {
 			scoreView = scoreView == All ? Rewind : (scoreView == Rewind ? NoRewind : All);
 			Settings.optionsSettings.currentView = cast scoreView;
 			levelSelectOpts.labelText.text.text = scoreCategories[cast(scoreView, Int)];
-			fetchScores();
+			if (levelSelectDifficulty == "players") {
+				levelTitle.text.text = 'Top Players: ${scoreCategories[cast scoreView]}';
+				fetchPlayers();
+			} else
+				fetchScores();
 		}
 		bottomBar.addChild(changeViewButton);
 
-		var replayButton = new GuiXboxButton("Watch Replay", 220);
-		replayButton.position = new Vector(750, 0);
-		replayButton.vertSizing = Bottom;
-		replayButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
-		replayButton.horizSizing = Right;
-		replayButton.pressedAction = (e) -> {
-			Leaderboards.watchTopReplay(currentMission.path, scoreView, (b) -> {
-				if (b != null) {
-					var replayF = new Replay("");
-					if (replayF.read(b)) {
-						var repmis = replayF.mission;
-						// Strip data/ from the mission name
-						if (StringTools.startsWith(repmis, "data/")) {
-							repmis = repmis.substr(5);
+		if (levelSelectDifficulty != "players") {
+			var replayButton = new GuiXboxButton("Watch Replay", 220);
+			replayButton.position = new Vector(750, 0);
+			replayButton.vertSizing = Bottom;
+			replayButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
+			replayButton.horizSizing = Right;
+			replayButton.pressedAction = (e) -> {
+				Leaderboards.watchTopReplay(currentMission.path, scoreView, (b) -> {
+					if (b != null) {
+						var replayF = new Replay("");
+						if (replayF.read(b)) {
+							var repmis = replayF.mission;
+							// Strip data/ from the mission name
+							if (StringTools.startsWith(repmis, "data/")) {
+								repmis = repmis.substr(5);
+							}
+
+							var mi = MissionList.missions.get(repmis);
+
+							// try with data/ added
+							if (mi == null) {
+								if (!StringTools.contains(repmis, "data/"))
+									repmis = "data/" + repmis;
+								mi = MissionList.missions.get(repmis);
+							}
+
+							MarbleGame.instance.watchMissionReplay(mi, replayF, DifficultySelectGui);
+						} else {
+							MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Could not load replay for this level."));
 						}
-
-						var mi = MissionList.missions.get(repmis);
-
-						// try with data/ added
-						if (mi == null) {
-							if (!StringTools.contains(repmis, "data/"))
-								repmis = "data/" + repmis;
-							mi = MissionList.missions.get(repmis);
-						}
-
-						MarbleGame.instance.watchMissionReplay(mi, replayF, DifficultySelectGui);
 					} else {
-						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Could not load replay for this level."));
+						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("No top replay found for this level."));
 					}
-				} else {
-					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("No top replay found for this level."));
-				}
-			});
+				});
+			}
+			bottomBar.addChild(replayButton);
 		}
-		bottomBar.addChild(replayButton);
 
-		fetchScores();
+		if (levelSelectDifficulty == "players") {
+			fetchPlayers();
+		} else
+			fetchScores();
 	}
 
 	override function onResize(width:Int, height:Int) {

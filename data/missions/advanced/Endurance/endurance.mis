@@ -7,7 +7,7 @@ new SimGroup(MissionGroup) {
          level = "50";
          type = "advanced";
          name = $Text::LevelName106;
-         difficulty = "9";
+         difficulty = "7";
          time = "70000";
          artist = "Alex Swanson";
    };

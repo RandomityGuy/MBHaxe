@@ -6,7 +6,7 @@ new SimGroup(MissionGroup) {
          level = "15";
          name = $Text::LevelName23;
          time = "80000";
-         difficulty = "3";
+         difficulty = "5";
          gameType = "SinglePlayer";
          artist = "Alex Swanson";
          desc = "Follow the path and fly to the goal.";

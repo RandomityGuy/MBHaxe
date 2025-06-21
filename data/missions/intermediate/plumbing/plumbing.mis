@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
    new ScriptObject(MissionInfo) {
          type = "intermediate";
          include = "1";
-         difficulty = "6";
+         difficulty = "8";
          level = "37";
          time = "120000";
 name  =  $Text::LevelName73;

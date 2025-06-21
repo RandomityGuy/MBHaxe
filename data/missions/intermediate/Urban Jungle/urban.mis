@@ -6,7 +6,7 @@ new SimGroup(MissionGroup) {
          level = "22";
          name = $Text::LevelName107;
          time = "120000";
-         difficulty = "4";
+         difficulty = "8";
          gameType = "SinglePlayer";
          desc = "Its a jungle out there!";
          type = "Intermediate";

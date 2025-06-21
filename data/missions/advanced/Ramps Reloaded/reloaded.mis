@@ -2,7 +2,7 @@
 new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
-         difficulty = "8";
+         difficulty = "9";
          artist = "Alex Swanson";
          type = "advanced";
          gameType = "SinglePlayer";

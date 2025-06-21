@@ -5,7 +5,7 @@ new SimGroup(MissionGroup) {
          type = "Intermediate";
          include = "1";
          level = "35";
-         difficulty = "6";
+         difficulty = "8";
          name = $Text::LevelName103;
          desc = "Black Diamond";
          gameType = "SinglePlayer";

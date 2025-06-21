@@ -3,7 +3,7 @@ new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
          include = "1";
-         difficulty = "3";
+         difficulty = "6";
          artist = "Kevin Ryan & Tim Aste";
          type = "beginner";
          time = "90000";

@@ -9,7 +9,7 @@ new SimGroup(MissionGroup) {
          gameType = "SinglePlayer";
          time = "50000";
          include = "1";
-         difficulty = "5";
+         difficulty = "6";
          artist = "Alex Swanson";
    };
    new MissionArea(MissionArea) {
