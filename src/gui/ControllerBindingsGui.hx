@@ -222,6 +222,8 @@ class ControllerBindingsGui extends GuiImage {
 		}
 		if (prevSelected == 0 && selectedColumn == 1) {
 			btnListLeft.selected = btnListRight.selected;
+			if (btnListLeft.selected > btnListLeft.buttons.length - 1)
+				btnListLeft.selected = btnListLeft.buttons.length - 1;
 		}
 		if (prevSelected == 1 && selectedColumn == 0) {
 			btnListRight.selected = btnListLeft.selected;
