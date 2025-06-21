@@ -25,12 +25,7 @@ class InputSelectGui extends GuiImage {
 		this.position = new Vector();
 		this.extent = new Vector(640, 480);
 
-		#if hl
-		var scene2d = hxd.Window.getInstance();
-		#end
-		#if js
 		var scene2d = MarbleGame.instance.scene2d;
-		#end
 
 		var offsetX = (scene2d.width - 1280) / 2;
 		var offsetY = (scene2d.height - 720) / 2;
@@ -64,8 +59,8 @@ class InputSelectGui extends GuiImage {
 		btnList.extent = new Vector(502, 500);
 		innerCtrl.addChild(btnList);
 
-		btnList.addButton(0, 'Keyboard Controls', (e) -> {
-			MarbleGame.canvas.setContent(new KeyBindingsGui(pauseGui));
+		btnList.addButton(0, 'Touch Controls', (e) -> {
+			MarbleGame.canvas.setContent(new TouchOptionsGui(pauseGui));
 		});
 		btnList.addButton(0, 'Gamepad Controls', (e) -> {
 			MarbleGame.canvas.setContent(new ControllerBindingsGui(pauseGui));

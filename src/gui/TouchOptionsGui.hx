@@ -114,12 +114,12 @@ class TouchOptionsGui extends GuiImage {
 			backButton.pressedAction = (e) -> {
 				Settings.applySettings();
 				MarbleGame.canvas.popDialog(this);
-				MarbleGame.canvas.pushDialog(new OptionsListGui(true));
+				MarbleGame.canvas.pushDialog(new InputSelectGui(true));
 			}
 		else
 			backButton.pressedAction = (e) -> {
 				Settings.applySettings();
-				MarbleGame.canvas.setContent(new OptionsListGui());
+				MarbleGame.canvas.setContent(new InputSelectGui());
 			};
 		bottomBar.addChild(backButton);
 
