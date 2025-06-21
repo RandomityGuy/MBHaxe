@@ -3,7 +3,7 @@ new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
          include = "1";
-         difficulty = "3";
+         difficulty = "6";
          time = "20000";
          level = "19";
          type = "Beginner";

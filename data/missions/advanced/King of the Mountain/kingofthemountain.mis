@@ -9,7 +9,7 @@ new SimGroup(MissionGroup) {
          type = "advanced";
          artist = "Alex Swanson";
          gameType = "SinglePlayer";
-         difficulty = "10";
+         difficulty = "11";
          level = "58";
          hasEggIndex = "16";
    };

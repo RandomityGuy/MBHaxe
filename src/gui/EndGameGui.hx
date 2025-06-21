@@ -123,9 +123,9 @@ class EndGameGui extends GuiImage {
 			var completionBonus = 1000;
 			var timeBonus = 0;
 			if (t < parTime)
-				timeBonus = Math.floor(parTime / t) * 1000;
+				timeBonus = Math.floor((parTime / t) * 1000);
 			else
-				timeBonus = Math.floor(parTime / t) * 500;
+				timeBonus = Math.floor((parTime / t) * 500);
 			return (completionBonus + timeBonus) * difficulty;
 		}
 

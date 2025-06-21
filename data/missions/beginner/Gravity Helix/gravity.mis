@@ -9,7 +9,7 @@ new SimGroup(MissionGroup) {
          level = "12";
          include = "1";
          artist = "Alex Swanson";
-         difficulty = "2";
+         difficulty = "5";
          desc = "Change gravity to solve this puzzle.";
    };
    new MissionArea(MissionArea) {

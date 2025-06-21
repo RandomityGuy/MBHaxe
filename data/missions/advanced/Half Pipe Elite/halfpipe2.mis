@@ -2,7 +2,7 @@
 new SimGroup(MissionGroup) {
 
    new ScriptObject(MissionInfo) {
-         difficulty = "9";
+         difficulty = "7";
          type = "advanced";
          level = "53";
          gameType = "SinglePlayer";

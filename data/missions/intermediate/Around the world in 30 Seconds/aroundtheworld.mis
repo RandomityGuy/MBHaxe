@@ -4,7 +4,7 @@ new SimGroup(MissionGroup) {
          gameType = "SinglePlayer";
          desc = "Gather all the gems around the globe in less than 30 seconds.";
          include = "1";
-         difficulty = "4";
+         difficulty = "7";
          type = "Intermediate";
          artist = "Kevin Ryan";
          time = "30000";

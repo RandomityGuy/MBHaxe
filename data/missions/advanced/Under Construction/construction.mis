@@ -7,7 +7,7 @@ new SimGroup(MissionGroup) {
          level = "55";
          artist = "Alex Swanson";
          include = "1";
-         difficulty = "10";
+         difficulty = "8";
          name = $Text::LevelName97;
          gameType = "SinglePlayer";
    };

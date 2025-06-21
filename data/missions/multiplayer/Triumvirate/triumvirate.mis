@@ -11,7 +11,7 @@ new SimGroup(MissionGroup) {
          type = "beginner";
          gameMode = "Scrum";
          name = $Text::LevelNameMP18;
-         difficulty = "4";
+         difficulty = "6";
          gemGroupRadius = "25";
          goldTime = "0";
          numgems = "1";

@@ -6,7 +6,7 @@ new SimGroup(MissionGroup) {
          include = "1";
          artist = "Alex Swanson";
          level = "38";
-         difficulty = "7";
+         difficulty = "6";
          startHelpTest = "Climb to the top!";
          desc = "Climb to the top!";
          name = $Text::LevelName80;

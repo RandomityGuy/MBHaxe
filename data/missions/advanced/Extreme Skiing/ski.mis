@@ -9,7 +9,7 @@ new SimGroup(MissionGroup) {
          level = "56";
          include = "1";
          artist = "Alex Swanson";
-         difficulty = "10";
+         difficulty = "9";
          name = $Text::LevelName75;
    };
    new Sky(Sky) {

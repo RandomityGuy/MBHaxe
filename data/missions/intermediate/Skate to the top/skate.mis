@@ -2,7 +2,7 @@
 new SimGroup(MissionGroup) {
 
     new ScriptObject(MissionInfo) {
-         difficulty = "7";
+         difficulty = "6";
          type = "Intermediate";
          level = "36";
          desc = "Careful, its slippery!";

@@ -9,7 +9,7 @@ new SimGroup(MissionGroup) {
          type = "advanced";
          include = "1";
          level = "49";
-         difficulty = "9";
+         difficulty = "10";
          name = $Text::LevelName79;
    };
    new Sky(Sky) {

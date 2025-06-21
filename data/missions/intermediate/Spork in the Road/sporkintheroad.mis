@@ -6,7 +6,7 @@ new SimGroup(MissionGroup) {
          level = "33";
          name = $Text::LevelName37;
          time = "120000";
-         difficulty = "6";
+         difficulty = "7";
          gameType = "SinglePlayer";
          artist = "Kevin Ryan";
          desc = "Find the gems in the maze of roads!";
