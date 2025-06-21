@@ -8,6 +8,7 @@ import h2d.Scene;
 import hxd.res.BitmapFont;
 import gui.GuiText.Justification;
 import h2d.Text;
+import src.Gamepad;
 import src.ResourceLoader;
 import src.MarbleGame;
 
@@ -87,4 +88,16 @@ class GuiTextInput extends GuiControl {
 		text.cursorTile = h2d.Tile.fromColor(col, Std.int(1 / hxd.Window.getInstance().windowToPixelRatio), text.font.size);
 		text.cursorTile.dy = 2 / hxd.Window.getInstance().windowToPixelRatio;
 	}
+
+	#if uwp
+	override public function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+
+		// Calling focus on init causes issue with cursor pos and event tracking but works fine here
+		// This will break if there are ever multiple text inputs, but works nice for simple popup dialogs
+		if (Gamepad.isPressed(["dpadUp"]) || (Gamepad.getAxis('analogY') < -0.75)) {
+			this.text.focus();
+		}
+	}
+	#end
 }
