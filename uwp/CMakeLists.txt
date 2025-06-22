@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 include(FetchContent)
 
+# Setup UWP platform
+set(CMAKE_SYSTEM_NAME WindowsStore)
+set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
+
 # Define project
 project(mbhaxe-uwp LANGUAGES CXX)
 set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${PROJECT_NAME})
@@ -11,10 +15,6 @@ FetchContent_Declare(UwpLibs
     GIT_TAG fccbcd95794f57c949caf94c6a7160f7f8d2b7e0
 )
 FetchContent_MakeAvailable(UwpLibs)
-
-# Setup UWP platform
-set(CMAKE_SYSTEM_NAME WindowsStore) # Seems like you gotta specify these from cli for some reason
-set(CMAKE_SYSTEM_VERSION 10.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
