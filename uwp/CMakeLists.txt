@@ -4,6 +4,8 @@ include(FetchContent)
 # Setup UWP platform
 set(CMAKE_SYSTEM_NAME WindowsStore)
 set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Define project
 project(mbhaxe-uwp LANGUAGES CXX)
@@ -16,13 +18,15 @@ FetchContent_Declare(UwpLibs
 )
 FetchContent_MakeAvailable(UwpLibs)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Config for deps
+# Config for haxe dependency paths
 set(DATACHANNEL_DIR CACHE PATH "")
 set(HASHLINK_DIR CACHE PATH "")
 set(MBHAXE_DIR CACHE PATH "")
+
+add_executable(${PROJECT_NAME} WIN32
+    main.cpp
+)
 
 set(BinDeps
 	${DATACHANNEL_DIR}/datachannel.hdll
@@ -58,18 +62,10 @@ set(BinLibs
 )
 source_group("BinDep" FILES ${BinDeps})
 
-
-set_property(SOURCE ${BinDeps} PROPERTY VS_DEPLOYMENT_CONTENT 1)
-set_property(SOURCE ${BinDeps} PROPERTY VS_DEPLOYMENT_LOCATION ".")
-set_source_files_properties("${BinDeps}" PROPERTIES
-		VS_COPY_TO_OUT_DIR Always
-        	VS_DEPLOYMENT_CONTENT TRUE
-		VS_DEPLOYMENT_LOCATION ""
-    	)
-
-# Set the app source
-add_executable(${PROJECT_NAME} WIN32
-    main.cpp
+set_source_files_properties(${BinDeps} PROPERTIES
+	VS_COPY_TO_OUT_DIR Always
+	VS_DEPLOYMENT_CONTENT TRUE
+	VS_DEPLOYMENT_LOCATION "."
 )
 
 # Setup data deployment
@@ -93,8 +89,6 @@ foreach(ASSET ${DATA_FILES})
 	source_group("BinData" FILES "${FULL_PATH}")
 endforeach()
 
-
-
 target_sources(${PROJECT_NAME} PRIVATE
 	cacert.pem
 	Package.appxmanifest
@@ -102,5 +96,4 @@ target_sources(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${BinLibs} SDL2 WindowsApp.lib OneCore.lib)
-
 set_target_properties(${PROJECT_NAME} PROPERTIES VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION 10.0.19041.0)
