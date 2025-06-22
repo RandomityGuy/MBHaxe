@@ -3,6 +3,7 @@ include(FetchContent)
 
 # Define project
 project(mbhaxe-uwp LANGUAGES CXX)
+set_directory_properties(PROPERTIES VS_STARTUP_PROJECT ${PROJECT_NAME})
 
 # Fetch shared UWP deps
 FetchContent_Declare(UwpLibs
@@ -60,9 +61,14 @@ source_group("BinDep" FILES ${BinDeps})
 
 set_property(SOURCE ${BinDeps} PROPERTY VS_DEPLOYMENT_CONTENT 1)
 set_property(SOURCE ${BinDeps} PROPERTY VS_DEPLOYMENT_LOCATION ".")
+set_source_files_properties("${BinDeps}" PROPERTIES
+		VS_COPY_TO_OUT_DIR Always
+        	VS_DEPLOYMENT_CONTENT TRUE
+		VS_DEPLOYMENT_LOCATION ""
+    	)
 
 # Set the app source
-add_executable(mbhaxe WIN32
+add_executable(${PROJECT_NAME} WIN32
     main.cpp
 )
 
@@ -77,26 +83,24 @@ foreach(ASSET ${DATA_FILES})
 
 	get_filename_component(DEST_DIR ${ASSET} DIRECTORY)
 
-    	set_source_files_properties(${FULL_PATH} PROPERTIES
-        	VS_DEPLOYMENT_CONTENT TRUE
+	set_source_files_properties("${FULL_PATH}" PROPERTIES
+		VS_COPY_TO_OUT_DIR Always
+		VS_DEPLOYMENT_CONTENT TRUE
 		VS_DEPLOYMENT_LOCATION "${DEST_DIR}" # preserves folder structure
-    	)
+	)
 
-    	# Optionally add to target (so VS sees them)
-    	target_sources(mbhaxe PRIVATE ${FULL_PATH})
-
-    	# Organize under "Assets" virtual folder
-	source_group("BinData" FILES ${FULL_PATH})
+	target_sources(${PROJECT_NAME} PRIVATE "${FULL_PATH}")
+	source_group("BinData" FILES "${FULL_PATH}")
 endforeach()
 
 
 
-target_sources(mbhaxe PRIVATE
+target_sources(${PROJECT_NAME} PRIVATE
 	cacert.pem
 	Package.appxmanifest
 	${BinDeps}
 )
 
-target_link_libraries(mbhaxe PRIVATE ${BinLibs} SDL2 WindowsApp.lib OneCore.lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${BinLibs} SDL2 WindowsApp.lib OneCore.lib)
 
-set_target_properties(mbhaxe PROPERTIES VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION 10.0.19041.0)
+set_target_properties(${PROJECT_NAME} PROPERTIES VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION 10.0.19041.0)
