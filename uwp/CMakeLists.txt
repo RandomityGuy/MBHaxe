@@ -25,7 +25,15 @@ set(HASHLINK_DIR CACHE PATH "")
 set(MBHAXE_DIR CACHE PATH "")
 
 add_executable(${PROJECT_NAME} WIN32
-    main.cpp
+	main.cpp
+)
+
+set(PkgAssets
+	Assets/LockScreenLogo.scale-200.png
+	Assets/Square44x44Logo.targetsize-24_altform-unplated.png
+	Assets/Square44x44Logo.scale-200.png
+	Assets/Square150x150Logo.scale-200.png
+	Assets/StoreLogo.png
 )
 
 set(BinDeps
@@ -60,12 +68,20 @@ set(BinLibs
 	${HASHLINK_DIR}/uv.lib
 	${MBHAXE_DIR}/marblegame.lib
 )
-source_group("BinDep" FILES ${BinDeps})
+source_group("BinDeps" FILES ${BinDeps})
 
 set_source_files_properties(${BinDeps} PROPERTIES
 	VS_COPY_TO_OUT_DIR Always
 	VS_DEPLOYMENT_CONTENT TRUE
 	VS_DEPLOYMENT_LOCATION "."
+)
+
+source_group("PkgAssets" FILES ${PkgAssets})
+
+set_source_files_properties(${PkgAssets} PROPERTIES
+	#VS_COPY_TO_OUT_DIR Always
+	VS_DEPLOYMENT_CONTENT TRUE
+	VS_DEPLOYMENT_LOCATION "Assets"
 )
 
 # Setup data deployment
@@ -93,6 +109,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 	cacert.pem
 	Package.appxmanifest
 	${BinDeps}
+	${PkgAssets}
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${BinLibs} SDL2 WindowsApp.lib OneCore.lib)
