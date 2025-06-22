@@ -237,6 +237,8 @@ class Settings {
 	#if hl
 	#if MACOS_BUNDLE
 	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBU"]);
+	#elseif uwp
+	public static var settingsDir = Sys.getEnv("LOCALAPPDATA");
 	#else
 	public static var settingsDir = ".";
 	#end
