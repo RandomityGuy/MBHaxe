@@ -7,7 +7,6 @@ extern "C" int wmain(int, pchar**);
 
 int bootstrap(int, char**)
 {
-	SDL_Init(SDL_INIT_VIDEO);
 	// That's it, run the main process
 	return wmain(0, 0);
 }
