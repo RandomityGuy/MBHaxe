@@ -64,6 +64,8 @@ class CameraController extends Object {
 
 	var _ignoreCursor:Bool = false;
 
+	var wasLastGamepadInput:Bool = false;
+
 	public function new(marble:Marble) {
 		super();
 		this.marble = marble;
@@ -141,6 +143,11 @@ class CameraController extends Object {
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
+		if (!isTouch)
+			wasLastGamepadInput = false;
+		else
+			wasLastGamepadInput = true;
+
 		nextCameraPitch = CameraPitch + deltaposY * factor;
 		nextCameraYaw = CameraYaw + deltaposX * factor;
 
@@ -208,6 +215,10 @@ class CameraController extends Object {
 
 		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), Settings.gamepadSettings.axisDeadzone));
 		var gamepadY = rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), Settings.gamepadSettings.axisDeadzone);
+
+		if (gamepadX != 0.0 || gamepadY != 0.0) {
+			wasLastGamepadInput = true;
+		}
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)

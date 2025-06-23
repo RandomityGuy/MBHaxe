@@ -303,7 +303,7 @@ class GuiTextListCtrl extends GuiControl {
 				onSelectedFunc(_prevSelected);
 			}
 
-			var hittestrect = this.getHitTestRect(false);
+			var hittestrect = this.getHitTestRect();
 
 			if (y < 0) {
 				// Scroll up
