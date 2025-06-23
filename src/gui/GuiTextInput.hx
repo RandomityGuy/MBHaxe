@@ -95,7 +95,7 @@ class GuiTextInput extends GuiControl {
 
 		// Calling focus on init causes issue with cursor pos and event tracking but works fine here
 		// This will break if there are ever multiple text inputs, but works nice for simple popup dialogs
-		if (Gamepad.isPressed(["dpadUp"]) || (Gamepad.getAxis('analogY') < -0.75)) {
+		if (Gamepad.isPressed(["back"])) {
 			this.text.focus();
 		}
 	}
