@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap mp">
+
+  <Identity
+    Name="mbhaxe"
+    Publisher="CN=dlw"
+    Version="1.2.2.0" />
+
+  <mp:PhoneIdentity PhoneProductId="5a528e66-e0fc-43fb-b377-ce0b1bb0d3e8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+
+  <Properties>
+    <DisplayName>MBHaxe</DisplayName>
+    <PublisherDisplayName>danwo</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="x-generate"/>
+  </Resources>
+
+  <Applications>
+    <Application Id="App"
+      Executable="$targetnametoken$.exe"
+      EntryPoint="uwp.App">
+      <uap:VisualElements
+        DisplayName="MBHaxe"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        Description="Port of mbhaxe for UWP"
+        BackgroundColor="transparent">
+	<!--<uap:SplashScreen Image="Assets\SplashScreen.png" /> -->
+        <uap:DefaultTile/>
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+    <rescap:Capability Name="broadFileSystemAccess" />
+    <rescap:Capability Name="expandedResources" />
+    <Capability Name="internetClient" />
+    <uap:Capability Name="removableStorage"/>
+    <Capability Name="codeGeneration"/>
+    <Capability Name="internetClientServer"/>
+    <Capability Name="privateNetworkClientServer"/>
+
+  </Capabilities>
+</Package>

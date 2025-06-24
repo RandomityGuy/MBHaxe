@@ -237,6 +237,8 @@ class Settings {
 	#if hl
 	#if MACOS_BUNDLE
 	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBU"]);
+	#elseif uwp
+	public static var settingsDir = Sys.getEnv("LOCALAPPDATA");
 	#else
 	public static var settingsDir = ".";
 	#end
@@ -568,6 +570,11 @@ class Settings {
 			var canvasElement = js.Browser.document.getElementById("webgl");
 			canvasElement.style.width = "100%";
 			canvasElement.style.height = "100%";
+			#end
+
+			#if uwp
+			zoomRatio = Window.getInstance().height / 1200;
+			Settings.zoomRatio = zoomRatio;
 			#end
 
 			Console.log("Window resized to " + Settings.optionsSettings.screenWidth + "x" + Settings.optionsSettings.screenHeight + " (Zoom " + zoomRatio +

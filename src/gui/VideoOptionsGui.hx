@@ -26,7 +26,7 @@ class VideoOptionsGui extends GuiImage {
 		#if hl
 		var scene2d = hxd.Window.getInstance();
 		#end
-		#if js
+		#if (js || uwp)
 		var scene2d = MarbleGame.instance.scene2d;
 		#end
 
