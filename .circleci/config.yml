@@ -470,6 +470,7 @@ jobs:
             name: Decode Certificate
             command: |
               powershell -Command "[System.IO.File]::WriteAllBytes('key.pfx', [System.Convert]::FromBase64String('$UWP_SIGN_CERT'))"
+              powershell -Command "[System.IO.File]::WriteAllBytes('signing.cer', [System.Convert]::FromBase64String('$UWP_SIGN_PUBKEY'))"
 
         - run:
             name: Install dependencies
@@ -581,7 +582,7 @@ jobs:
                 exit 1
               fi
               cd ~/project
-              "C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /fd sha256 /a /f ~/key.pfx /p $UWP_PWD MBHaxe-Ultra-UWP.msix
+              "C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /fd sha256 /a /f key.pfx /p $UWP_PWD MBHaxe-Ultra-UWP.msix
 
         - run:
             name: Upload to Artifact Storage
