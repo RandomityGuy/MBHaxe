@@ -557,13 +557,12 @@ jobs:
               export PATH=$nekopath:"$PATH"
               cd ~/project
               haxe compile-uwp.hxml
-              HASHLINKPATH=~/deps/hashlink
-              MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH marblegame.sln
-              cd uwp
-              "/c/Program Files/CMake/bin/cmake" -B build_vs -G "Visual Studio 17 2022" -A x64 -T v142 -DDATACHANNEL_DIR=~/deps/hxDatachannel/cpp/build/Release -DHASHLINK_DIR=~/deps/hashlink/build/bin -DMBHAXE_DIR=../native/x64/Release
-              "/c/Program Files/CMake/bin/cmake" --build build_vs --config Release -j4
               cd native
               HASHLINKPATH=~/deps/hashlink
+              MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH marblegame.sln
+              cd ../uwp
+              "/c/Program Files/CMake/bin/cmake" -B build_vs -G "Visual Studio 17 2022" -A x64 -T v142 -DDATACHANNEL_DIR=~/deps/hxDatachannel/cpp/build/Release -DHASHLINK_DIR=~/deps/hashlink/build/bin -DMBHAXE_DIR=../native/x64/Release
+              "/c/Program Files/CMake/bin/cmake" --build build_vs --config Release -j4
 
         - run:
             name: Package app bundle
