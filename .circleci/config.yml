@@ -531,8 +531,6 @@ jobs:
               git checkout uwp-compat
               "/c/Program Files/CMake/bin/cmake" -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHASHLINK_LIBRARY_DIR="~/deps/hashlink/build/bin" -DHASHLINK_INCLUDE_DIR="../../hashlink/src" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               "/c/Program Files/CMake/bin/cmake" --build build --config Release -j4
-              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.hdll ~/deps/hashlink/build/bin/
-              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.lib ~/deps/hashlink/build/bin/
 
         - run:
             name: Install haxe dependencies
@@ -559,40 +557,30 @@ jobs:
               export PATH=$nekopath:"$PATH"
               cd ~/project
               haxe compile-uwp.hxml
+              HASHLINKPATH=~/deps/hashlink
+              MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:HASHLINK=$HASHLINKPATH marblegame.sln
               cd uwp
               "/c/Program Files/CMake/bin/cmake" -B build_vs -G "Visual Studio 17 2022" -A x64 -T v142 -DDATACHANNEL_DIR=~/deps/hxDatachannel/cpp/build/Release -DHASHLINK_DIR=~/deps/hashlink/build/bin -DMBHAXE_DIR=../native/x64/Release
+              "/c/Program Files/CMake/bin/cmake" --build build_vs --config Release -j4
               cd native
               HASHLINKPATH=~/deps/hashlink
 
         - run:
             name: Package app bundle
             command: |
-              cd ~/project
-              mkdir release
-              cd release
-              cp ../native/x64/Release/marblegame.exe .
-              mv marblegame.exe marbleblast.exe
-              cp -r ../data .
-              cp ~/deps/hashlink/x64/Release/libhl.dll .
-              cp ~/deps/hashlink/x64/Release/fmt.hdll .
-              cp ~/deps/hashlink/x64/Release/ui.hdll .
-              cp ~/deps/hashlink/x64/Release/openal.hdll .
-              cp ~/deps/hashlink/x64/Release/sdl.hdll .
-              cp ~/deps/hashlink/x64/Release/ssl.hdll .
-              cp ~/deps/hashlink/x64/Release/datachannel.hdll .
-              cp ~/deps/hashlink/x64/Release/uv.hdll .
-              cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
-              cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 
-        - run:
-            name: Zip bundle
-            command: |
-              cd ~/project
-              7z a MBHaxe-Ultra-Win.zip release/
+              cd ~/project/uwp/build_vs/AppPackages/mbhaxe-uwp/
+              MSIX_FILE=$(powershell -Command "Get-ChildItem -Path . -Filter '*.msix' -Recurse | Select-Object -First 1 -ExpandProperty FullName")
+              if [ -n "$MSIX_FILE" ]; then
+                cp "$MSIX_FILE" ~/project/MBHaxe-Ultra-UWP.msix
+              else
+                echo "Error: Could not find .msix file"
+                exit 1
+              fi
 
         - run:
             name: Upload to Artifact Storage
             command: |
-              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Ultra-Win.zip $REMOTEDIR/MBHaxe-Ultra-Win.zip
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Ultra-UWP.msix $REMOTEDIR/MBHaxe-Ultra-UWP.msix
         # - store_artifacts:
         #     path: ~/project/MBHaxe-Platinum-Win.zip
 
@@ -614,7 +602,7 @@ workflows:
             tags:
               only: /^\d+.\d+.\d+$/
 
-  build-uwp:
+  build-universal-windows:
     jobs:
       - build-uwp:
           filters:
