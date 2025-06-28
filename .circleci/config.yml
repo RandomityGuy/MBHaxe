@@ -514,7 +514,7 @@ jobs:
               mkdir ~/deps
               cd ~/deps
               git clone https://github.com/RandomityGuy/hashlink
-              git checkout uwp_compat
+              git checkout uwp-compat
               cd hashlink
               mv /tmp/include/sdl include/sdl
               mv /tmp/include/openal include/openal
@@ -527,7 +527,7 @@ jobs:
               mkdir ~/deps
               cd ~/deps
               git clone https://github.com/RandomityGuy/hxDatachannel
-              git checkout uwp_compat
+              git checkout uwp-compat
               cd hxDatachannel/cpp
               "/c/Program Files/CMake/bin/cmake" -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHASHLINK_LIBRARY_DIR="~/deps/hashlink/build/x64/Release" -DHASHLINK_INCLUDE_DIR="../../hashlink/src"
               "/c/Program Files/CMake/bin/cmake" --build build --config Release -j4
