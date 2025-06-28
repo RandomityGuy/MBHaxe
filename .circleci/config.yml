@@ -467,6 +467,11 @@ jobs:
                 - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
         - checkout
         - run:
+            name: Decode Certificate
+            command: |
+              powershell -Command "[System.IO.File]::WriteAllBytes('~/key.pfx', [System.Convert]::FromBase64String('$UWP_SIGN_CERT'))"
+
+        - run:
             name: Install dependencies
             command: |
               curl -fsSL --retry 3 --retry-delay 5 -o /tmp/sdl.zip https://www.libsdl.org/release/SDL2-devel-2.0.5-VC.zip
@@ -575,6 +580,8 @@ jobs:
                 echo "Error: Could not find .msix file"
                 exit 1
               fi
+              cd ~/project
+              signtool sign /fd sha256 /a /f ~/key.pfx /p $UWP_PWD MBHaxe-Ultra-UWP.msix
 
         - run:
             name: Upload to Artifact Storage
