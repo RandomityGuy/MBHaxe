@@ -70,17 +70,6 @@ class OptionsListGui extends GuiImage {
 			MarbleGame.canvas.setContent(new InputSelectGui(pauseGui));
 		});
 
-		if (Util.isTouchDevice()) {
-			if (!pauseGui) {
-				btnList.addButton(3, 'Touch Controls', (e) -> {
-					MarbleGame.canvas.setContent(new TouchOptionsGui(pauseGui));
-				});
-			}
-		} else {
-			btnList.addButton(3, 'Key Bindings', (e) -> {
-				MarbleGame.canvas.setContent(new InputSelectGui(pauseGui));
-			});
-		}
 		btnList.addButton(3, 'Video Options', (e) -> {
 			MarbleGame.canvas.setContent(new VideoOptionsGui(pauseGui));
 		});
