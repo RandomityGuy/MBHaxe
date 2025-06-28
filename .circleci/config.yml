@@ -452,6 +452,150 @@ jobs:
         # - store_artifacts:
         #     path: ~/project/MBHaxe-Platinum-Win.zip
 
+  build-uwp:
+    executor: 
+        name: win/server-2022
+        shell: bash.exe # executor type
+    # Checkout the code as the first step. This is a dedicated CircleCI step.
+    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
+    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
+    # Then run your tests!
+    # CircleCI will report the results back to your VCS provider.
+    steps:
+        - add_ssh_keys:
+            fingerprints:
+                - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
+        - checkout
+        - run:
+            name: Install dependencies
+            command: |
+              curl -fsSL --retry 3 --retry-delay 5 -o /tmp/sdl.zip https://www.libsdl.org/release/SDL2-devel-2.0.5-VC.zip
+              curl -fsSL --retry 3 --retry-delay 5 -o /tmp/openal.zip https://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip
+              curl -fsSL --retry 3 --retry-delay 5 -o /tmp/ffmpeg.zip https://github.com/HaxeFoundation/hashlink/files/5648056/ffmpeg-3.4.2-win64-dev.zip
+              cd /tmp
+              7z x /tmp/sdl.zip    -oinclude; mv /tmp/include/SDL2*   /tmp/include/sdl
+              7z x /tmp/openal.zip -oinclude; mv /tmp/include/openal* /tmp/include/openal
+              7z x /tmp/ffmpeg.zip -oinclude; mv /tmp/include/ffmpeg* /tmp/include/ffmpeg
+
+        - run:
+            name: Install Neko
+            command: |
+              choco install --no-progress neko -y
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
+
+        - run:
+            name: Install CMake
+            command: |
+              choco install --no-progress cmake -y
+
+        - run:
+            name: Install Haxe
+            command: |
+              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-win64.zip"
+              echo "Downloading [$download_url]..."
+              mkdir /tmp/haxe
+              curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.zip
+              7z x /tmp/haxe.zip -o/tmp
+              mv -v /tmp/haxe_* /tmp/haxe
+              cd /tmp/haxe
+              mv haxe_* haxe
+              export PATH=/tmp/haxe/haxe:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
+              haxelib setup ~/haxelib
+              haxelib list
+        - run: 
+            name: Build Hashlink
+            command: |
+              mkdir ~/deps
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/hashlink
+              git checkout uwp_compat
+              cd hashlink
+              mv /tmp/include/sdl include/sdl
+              mv /tmp/include/openal include/openal
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src"
+              cmake --build build --config Release -j4
+
+        - run:
+            name: Build datachannel
+            command: |
+              mkdir ~/deps
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/hxDatachannel
+              git checkout uwp_compat
+              cd hxDatachannel/cpp
+              "/c/Program Files/CMake/bin/cmake" -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHASHLINK_LIBRARY_DIR="~/deps/hashlink/build/x64/Release" -DHASHLINK_INCLUDE_DIR="../../hashlink/src"
+              "/c/Program Files/CMake/bin/cmake" --build build --config Release -j4
+              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.hdll ~/deps/hashlink/build/bin/
+              mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.lib ~/deps/hashlink/build/bin/
+
+        - run:
+            name: Install haxe dependencies
+            command: |
+              export PATH=/tmp/haxe/haxe:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
+              haxelib git heaps https://github.com/RandomityGuy/heaps
+              haxelib dev hlopenal ~/deps/hashlink/libs/openal
+              haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+              haxelib dev hashlink ~/deps/hashlink/other/haxelib
+              haxelib dev datachannel ~/deps/hxDatachannel
+              haxelib install colyseus-websocket
+
+        - run:
+            name: Compile MBHaxe
+            command: |
+              export PATH=/tmp/haxe/haxe:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
+              cd ~/project
+              haxe compile-uwp.hxml
+              cd uwp
+              cmake -B build_vs -G "Visual Studio 17 2022" -A x64 -T v142 -DDATACHANNEL_DIR=~/deps/hxDatachannel/cpp/build/Release -DHASHLINK_DIR=~/deps/hashlink/build/bin -DMBHAXE_DIR=../native/x64/Release
+              cd native
+              HASHLINKPATH=~/deps/hashlink
+
+        - run:
+            name: Package app bundle
+            command: |
+              cd ~/project
+              mkdir release
+              cd release
+              cp ../native/x64/Release/marblegame.exe .
+              mv marblegame.exe marbleblast.exe
+              cp -r ../data .
+              cp ~/deps/hashlink/x64/Release/libhl.dll .
+              cp ~/deps/hashlink/x64/Release/fmt.hdll .
+              cp ~/deps/hashlink/x64/Release/ui.hdll .
+              cp ~/deps/hashlink/x64/Release/openal.hdll .
+              cp ~/deps/hashlink/x64/Release/sdl.hdll .
+              cp ~/deps/hashlink/x64/Release/ssl.hdll .
+              cp ~/deps/hashlink/x64/Release/datachannel.hdll .
+              cp ~/deps/hashlink/x64/Release/uv.hdll .
+              cp ~/deps/hashlink/include/sdl/lib/x64/SDL2.dll .
+              cp ~/deps/hashlink/include/openal/bin/Win64/soft_oal.dll ./OpenAL32.dll 
+        - run:
+            name: Zip bundle
+            command: |
+              cd ~/project
+              7z a MBHaxe-Ultra-Win.zip release/
+
+        - run:
+            name: Upload to Artifact Storage
+            command: |
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Ultra-Win.zip $REMOTEDIR/MBHaxe-Ultra-Win.zip
+        # - store_artifacts:
+        #     path: ~/project/MBHaxe-Platinum-Win.zip
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -466,6 +610,13 @@ workflows:
   build-windows:
     jobs:
       - build-win:
+          filters:
+            tags:
+              only: /^\d+.\d+.\d+$/
+
+  build-uwp:
+    jobs:
+      - build-uwp:
           filters:
             tags:
               only: /^\d+.\d+.\d+$/
