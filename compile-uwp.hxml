@@ -12,4 +12,4 @@ compile-c.hxml
 -cmd sed -i "s/<TargetExt>.exe<\/TargetExt>/<TargetExt>.lib<\/TargetExt>/g" native/marblegame.vcxproj
 
 #-cmd MSBuild.exe -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:PlatformToolset=v142 -v:minimal native/marblegame.sln
--cmd MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -v:minimal native/marblegame.sln
+#-cmd MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -v:minimal native/marblegame.sln
