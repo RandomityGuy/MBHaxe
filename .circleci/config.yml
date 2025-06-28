@@ -469,7 +469,7 @@ jobs:
         - run:
             name: Decode Certificate
             command: |
-              powershell -Command "[System.IO.File]::WriteAllBytes('~/key.pfx', [System.Convert]::FromBase64String('$UWP_SIGN_CERT'))"
+              powershell -Command "[System.IO.File]::WriteAllBytes('key.pfx', [System.Convert]::FromBase64String('$UWP_SIGN_CERT'))"
 
         - run:
             name: Install dependencies
