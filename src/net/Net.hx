@@ -524,7 +524,6 @@ class Net {
 			serverInfo.players++;
 		}
 
-		serverInfo.players++;
 		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the new player
 
 		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
