@@ -331,7 +331,7 @@ jobs:
             name: Install dependencies
             command: |
               curl -fsSL --retry 3 --retry-delay 5 -o /tmp/sdl.zip https://www.libsdl.org/release/SDL2-devel-2.0.5-VC.zip
-              curl -fsSL --retry 3 --retry-delay 5 -o /tmp/openal.zip https://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip
+              curl -fsSLk --retry 3 --retry-delay 5 -o /tmp/openal.zip https://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip
               curl -fsSL --retry 3 --retry-delay 5 -o /tmp/ffmpeg.zip https://github.com/HaxeFoundation/hashlink/files/5648056/ffmpeg-3.4.2-win64-dev.zip
               cd /tmp
               7z x /tmp/sdl.zip    -oinclude; mv /tmp/include/SDL2*   /tmp/include/sdl
