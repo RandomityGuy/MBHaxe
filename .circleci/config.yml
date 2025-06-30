@@ -73,7 +73,7 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            curl https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2 | tar xz
+            curl -k https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2 | tar xz
             cd openal-soft-1.22.2
             if [ ! -f /usr/local/lib/libopenal.1.22.2.dylib ]; then
               cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DALSOFT_BACKEND_SNDIO=NO -DALSOFT_BACKEND_PORTAUDIO=NO -DALSOFT_BACKEND_WAVE=NO -DALSOFT_UTILS=NO -DALSOFT_EXAMPLES=NO -DCMAKE_MACOSX_RPATH=TRUE
