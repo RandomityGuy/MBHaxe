@@ -387,7 +387,7 @@ jobs:
               cd ~/deps
               git clone https://github.com/RandomityGuy/hxDatachannel
               cd hxDatachannel/cpp
-              "/c/Program Files/CMake/bin/cmake" -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHASHLINK_LIBRARY_DIR="~/deps/hashlink/x64/Release" -DHASHLINK_INCLUDE_DIR="../../hashlink/src"
+              "/c/Program Files/CMake/bin/cmake" -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHASHLINK_LIBRARY_DIR="~/deps/hashlink/x64/Release" -DHASHLINK_INCLUDE_DIR="../../hashlink/src" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               "/c/Program Files/CMake/bin/cmake" --build build --config Release -j4
               mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.hdll ~/deps/hashlink/x64/Release
               mv ~/deps/hxDatachannel/cpp/build/Release/datachannel.lib ~/deps/hashlink/x64/Release
