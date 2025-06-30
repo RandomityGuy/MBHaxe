@@ -582,7 +582,13 @@ jobs:
                 exit 1
               fi
               cd ~/project
-              "C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /fd sha256 /a /f key.pfx /p $UWP_PWD MBHaxe-Ultra-UWP.msix
+
+        - run:
+            name: Sign it
+            shell: powershell.exe
+            command: |
+              cd ~/project
+              & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /fd sha256 /f key.pfx /p $UWP_PWD MBHaxe-Ultra-UWP.msix
 
         - run:
             name: Upload to Artifact Storage
