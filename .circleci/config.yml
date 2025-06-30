@@ -78,6 +78,8 @@ jobs:
         - run:
             name: Prepare directories
             command: |
+              export PATH=/tmp/haxe/:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/std
               cd ~/deps
               git clone https://github.com/RandomityGuy/MBHaxeAndroidLibs
               cd ~/MBHaxe/Export/android
