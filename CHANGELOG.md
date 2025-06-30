@@ -1,3 +1,16 @@
+# 1.2.3
+This update brings the following changes:
+- Balanced out the Rating curves for a lot of levels.
+- Added a Rating column to the Leaderboards.
+- Added Global Player Leaderboards.
+- Added a new option to emulate modded controller inputs for Controller users.
+- Added a new menu to modify the controller bindings.
+- Added support for controllers for list navigation.
+- Tweaked the controller camera sensitivity.
+- Fixed a friction material having incorrect values.
+- Fixed a bug with the timer when playing a replay.
+- Fixed a bug with the server list showing an incorrect number of players.
+
 # 1.2.2
 This update brings the following changes:
 - Added Leaderboards for Gem Hunt levels.
