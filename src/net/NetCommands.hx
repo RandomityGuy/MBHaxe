@@ -11,6 +11,7 @@ import src.MarbleGame;
 import gui.MultiplayerLoadingGui;
 import src.MissionList;
 import src.Console;
+import src.MPCustoms;
 
 @:build(net.RPCMacro.build())
 class NetCommands {

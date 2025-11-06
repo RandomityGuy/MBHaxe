@@ -1,5 +1,10 @@
 package src;
 
+import h3d.Vector;
+import mis.MissionElement.MissionElementTrigger;
+import shapes.Checkpoint;
+import mis.MissionElement.MissionElementStaticShape;
+import mis.MissionElement.MissionElementSky;
 import src.Http.HttpRequest;
 import gui.Canvas;
 import gui.MessageBoxOkDlg;
@@ -21,6 +26,7 @@ import src.Console;
 import src.Marbleland;
 import src.MarbleGame;
 import src.Http;
+import src.MPCustoms;
 
 class Mission {
 	public var root:MissionElementSimGroup;
@@ -41,6 +47,7 @@ class Mission {
 	public var hasEgg:Bool;
 	public var isCustom:Bool;
 	public var marbleAttributes:Map<String, String>;
+	public var customSource:String; // Marbleland or MPCustom
 
 	var next:Mission;
 
@@ -84,6 +91,18 @@ class Mission {
 		};
 
 		scanMission(root); // Scan for egg
+		if (this.isClaMission)
+			postProcessFromMarbleland();
+
+		if (this.customSource == "MPCustoms") {
+			// Fill the few details from missionInfo
+			if (missionInfo.time != null && missionInfo.time != "0")
+				this.qualifyTime = MisParser.parseNumber(missionInfo.time) / 1000;
+			if (missionInfo.goldtime != null) {
+				this.goldTime = MisParser.parseNumber(missionInfo.goldtime) / 1000;
+			}
+			this.type = missionInfo.type.toLowerCase();
+		}
 	}
 
 	public function dispose() {
@@ -241,14 +260,151 @@ class Mission {
 
 	public function download(onFinish:Void->Void) {
 		if (this.isClaMission) {
-			Marbleland.download(this.id, (zipEntries) -> {
-				if (zipEntries != null) {
-					ResourceLoader.loadZip(zipEntries, game);
+			if (this.customSource == "Marbleland") {
+				Marbleland.download(this.id, (zipEntries) -> {
+					if (zipEntries != null) {
+						ResourceLoader.loadZip(zipEntries, '');
+						onFinish();
+					} else {
+						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to download mission"));
+					}
+				});
+			}
+			if (this.customSource == "MPCustoms") {
+				MPCustoms.download({
+					id: this.id,
+					title: this.title,
+					path: this.path,
+					description: this.description,
+					artist: this.artist
+				}, () -> {
 					onFinish();
-				} else {
+				}, () -> {
 					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to download mission"));
+				});
+			}
+		}
+	}
+
+	function postProcessFromMarbleland() {
+		// Since the mission is from Marbleland, we must postprocess it to port it to MBU formats.
+
+		var skyEl:MissionElementSky = null;
+
+		var processFunctions = [];
+		var cloudType = "none";
+
+		function postprocessMission(simGroup:MissionElementSimGroup) {
+			for (element in simGroup.elements) {
+				if (element._type == MissionElementType.Sky) {
+					// Change the sky!!
+					skyEl = cast(element, MissionElementSky);
+
+					var skyMaterial = skyEl.materiallist.toLowerCase();
+					switch (skyMaterial) {
+						case "~/data/skies/cloudy/cloudy.dml" | "~/data/skies/mbu/sky_beginner.dml":
+							skyEl.materiallist = "~/data/skies/sky_beginner.dml";
+							cloudType = "beginner";
+
+						case "~/data/skies/mbu/sky_intermediate.dml":
+							skyEl.materiallist = "~/data/skies/sky_intermediate.dml";
+							cloudType = "intermediate";
+
+						case "~/data/skies/mbu/sky_advanced.dml":
+							skyEl.materiallist = "~/data/skies/sky_advanced.dml";
+							cloudType = "advanced";
+					}
 				}
-			});
+				if (element._type == MissionElementType.StaticShape) {
+					var ss = cast(element, MissionElementStaticShape);
+
+					var db = ss.datablock.toLowerCase();
+					switch (db) {
+						case "clear":
+							skyEl.materiallist = "~/data/skies/sky_beginner.dml";
+							cloudType = "beginner";
+
+						case "dusk":
+							skyEl.materiallist = "~/data/skies/sky_intermediate.dml";
+							cloudType = "intermediate";
+
+						case "wintry":
+							skyEl.materiallist = "~/data/skies/sky_advanced.dml";
+							cloudType = "advanced";
+					}
+				}
+				if (element._type == MissionElementType.TSStatic) {
+					var ts = cast(element, mis.MissionElement.MissionElementTSStatic);
+					var shapeName = ts.shapename.toLowerCase();
+					switch (shapeName) {
+						case "~/data/shapes/buttons/checkpoint.dts":
+							// This one needs to be changed to a "checkpoint"
+							var sg = simGroup;
+							processFunctions.push(() -> {
+								// First remove this element
+								sg.elements.remove(ts);
+								// Then add add the actual checkpoint shape
+								var checkpointEl = new MissionElementStaticShape();
+								checkpointEl._name = ts._name;
+								checkpointEl.position = ts.position;
+								checkpointEl.rotation = ts.rotation;
+								checkpointEl.scale = ts.scale;
+								checkpointEl.datablock = "checkPointShape";
+								checkpointEl.fields = [];
+
+								// create new simgroup
+								var checkpointSG = new MissionElementSimGroup();
+								checkpointSG._name = null;
+								checkpointSG.elements = [];
+								checkpointSG.elements.push(checkpointEl);
+								checkpointSG.fields = [];
+
+								// Find the checkpoint triggers affecting this checkpoint
+								var affectedTriggers = sg.elements.filter(x -> x._type == MissionElementType.Trigger)
+									.filter(y -> cast(y, MissionElementTrigger).respawnpoint == ts._name);
+
+								for (triggerEl in affectedTriggers) {
+									var trigger = cast(triggerEl, MissionElementTrigger);
+									// remove trigger from its current simgroup
+									sg.elements.remove(trigger);
+									// add trigger to checkpoint simgroup
+									checkpointSG.elements.push(trigger);
+								}
+
+								sg.elements.push(checkpointSG);
+							});
+					}
+				}
+				if (element._type == MissionElementType.Item) {} else if (element._type == MissionElementType.SimGroup) {
+					postprocessMission(cast element);
+				}
+			}
+		};
+
+		postprocessMission(root);
+
+		// Add astrolabe, because it does not exist
+		var astrolabeEl = new MissionElementStaticShape();
+		astrolabeEl._name = "Astrolabe";
+		astrolabeEl.position = "0 0 -600";
+		astrolabeEl.rotation = "1 0 0 0";
+		astrolabeEl.scale = "1 1 1";
+		astrolabeEl.datablock = "astrolabeShape";
+		astrolabeEl.fields = [];
+		root.elements.push(astrolabeEl);
+
+		// Add the clouds
+		var cloudEl = new MissionElementStaticShape();
+		cloudEl._name = "CloudLayer";
+		cloudEl.position = "0 0 0";
+		cloudEl.rotation = "1 0 0 0";
+		cloudEl.scale = "1 1 1";
+		cloudEl.datablock = 'astrolabeClouds${cloudType}Shape';
+		cloudEl.fields = [];
+		root.elements.push(cloudEl);
+
+		for (f in processFunctions) {
+			f();
 		}
 	}
 }

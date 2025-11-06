@@ -12,6 +12,7 @@ import src.Replay;
 import src.Marbleland;
 import src.MissionList;
 import src.MarbleGame;
+import src.MPCustoms;
 
 class MainMenuGui extends GuiImage {
 	var innerCtrl:GuiControl;

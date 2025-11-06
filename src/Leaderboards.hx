@@ -32,7 +32,7 @@ class Leaderboards {
 	static var game = "Ultra";
 
 	public static function submitScore(mission:String, score:Float, rewindUsed:Bool, needsReplayCb:(Bool, Int) -> Void) {
-		if (!StringTools.startsWith(mission, "data/"))
+		if (!StringTools.startsWith(mission, "data/") && !StringTools.startsWith(mission, "custom/"))
 			mission = "data/" + mission;
 		Http.post('${host}/api/submit', Json.stringify({
 			mission: mission,
@@ -54,7 +54,7 @@ class Leaderboards {
 	}
 
 	public static function getScores(mission:String, kind:LeaderboardsKind, cb:Array<LBScore>->Void) {
-		if (!StringTools.startsWith(mission, "data/"))
+		if (!StringTools.startsWith(mission, "data/") && !StringTools.startsWith(mission, "custom/"))
 			mission = "data/" + mission;
 		return Http.get('${host}/api/scores?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}&count=10', (b) -> {
 			var s = b.toString();
@@ -86,7 +86,7 @@ class Leaderboards {
 	}
 
 	public static function watchTopReplay(mission:String, kind:LeaderboardsKind, cb:haxe.io.Bytes->Void) {
-		if (!StringTools.startsWith(mission, "data/"))
+		if (!StringTools.startsWith(mission, "data/") && !StringTools.startsWith(mission, "custom/"))
 			mission = "data/" + mission;
 		return Http.get('${host}/api/replay?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}', (b) -> {
 			cb(b);

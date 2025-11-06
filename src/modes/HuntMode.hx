@@ -659,7 +659,10 @@ class HuntMode extends NullMode {
 					name: "Player",
 					time: getFinishScore()
 				};
-				Settings.saveScore(level.mission.path, myScore, getScoreType());
+
+				var misPath = level.mission.isClaMission ? 'custom/mbu/${level.mission.id}' : level.mission.path;
+
+				Settings.saveScore(misPath, myScore, getScoreType());
 				var notifies = AchievementsGui.check();
 				var delay = 5.0;
 				var achDelay = 0.0;

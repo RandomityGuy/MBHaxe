@@ -1,3 +1,6 @@
+package src;
+
+import src.Mission;
 import src.MissionList;
 import gui.MessageBoxOkDlg;
 import haxe.zip.Reader;
@@ -7,12 +10,15 @@ import src.Http;
 import src.Console;
 import src.MarbleGame;
 import src.ResourceLoader;
+import src.Marbleland;
+import Main;
 
 typedef MPCustomEntry = {
 	artist:String,
 	description:String,
 	path:String,
-	title:String
+	title:String,
+	id:Int,
 };
 
 class MPCustoms {
@@ -31,6 +37,26 @@ class MPCustoms {
 					var b1 = b.title.toLowerCase();
 					return a1 < b1 ? -1 : (a1 > b1 ? 1 : 0);
 				});
+
+				// Add this to marbleland customs too!
+				for (mis in missionList) {
+					var mission = new Mission();
+
+					mission.id = mis.id;
+					mission.path = mis.path;
+					mission.title = mis.title;
+					mission.artist = mis.artist;
+					mission.description = mis.description;
+					mission.qualifyTime = Math.POSITIVE_INFINITY;
+					mission.goldTime = 0;
+					mission.game = 'ultra';
+					mission.isClaMission = true;
+					mission.customSource = "MPCustoms";
+
+					Marbleland.ultraMissions.push(mission);
+					Marbleland.missions.set(mission.id, mission);
+				}
+
 				Console.log('Loaded ${misList.length} custom missions.');
 				_requestSent = false;
 			}, (e) -> {

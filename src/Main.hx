@@ -27,6 +27,7 @@ import src.Gamepad;
 import src.Http;
 import src.Renderer;
 import src.MissionList;
+import src.MPCustoms;
 
 class Main extends hxd.App {
 	var marbleGame:MarbleGame;
@@ -99,7 +100,7 @@ class Main extends hxd.App {
 		ResourceLoader.init(s2d, () -> {
 			AudioManager.init();
 			AudioManager.playShell();
-			// Marbleland.init();
+			Marbleland.init();
 			marbleGame = new MarbleGame(s2d, s3d);
 			MarbleGame.canvas.setContent(new PresentsGui());
 			haxe.Timer.delay(() -> {
