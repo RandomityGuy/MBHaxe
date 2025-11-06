@@ -125,6 +125,10 @@ class DifBuilder {
 			friction: 4.5,
 			restitution: 0.5
 		},
+		"friction_ultrahigh" => {
+			friction: 4.5,
+			restitution: 0.5
+		},
 		"friction_ramp_yellow" => {
 			friction: 2.0,
 			restitution: 1.0
@@ -341,23 +345,38 @@ class DifBuilder {
 		'tile_beginner_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_beginner_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red', 40, new Vector(1, 1, 1, 1)),
 		'tile_beginner_red_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_beginner_light' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red', 40, new Vector(1, 1, 1, 1)), // MBP material
 		'tile_beginner_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue', 40, new Vector(1, 1, 1, 1)),
 		'tile_beginner_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_beginner_dark' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue', 40, new Vector(1, 1, 1, 1)), // MBP material
 		'tile_intermediate' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '', 40, new Vector(1, 1, 1, 1)),
 		'tile_intermediate_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_intermediate_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40, new Vector(1, 1, 1, 1)),
 		'tile_intermediate_red_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_intermediate_dark' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40,
+			new Vector(1, 1, 1, 1)), // MBP material
 		'tile_intermediate_green' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green', 40, new Vector(1, 1, 1, 1)),
 		'tile_intermediate_green_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_intermediate_light' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green', 40,
+			new Vector(1, 1, 1, 1)), // MBP material
 		'tile_advanced' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '', 40, new Vector(1, 1, 1, 1)),
 		'tile_advanced_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
 		'tile_advanced_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)),
 		'tile_advanced_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue_shadow', 40, new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_advanced_dark' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)), // MBP material
 		'tile_advanced_green' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)),
 		'tile_advanced_green_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green_shadow', 40,
 			new Vector(0.2, 0.2, 0.2, 0.2)),
+		'tile_advanced_light' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)), // MBP Material
+		'tile_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40, new Vector(1, 1, 1, 1)), // MBP material
+		'tile_bonus_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40, new Vector(1, 1, 1, 1)), // MBP material
+		'tile_bonus_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40, new Vector(1, 1, 1, 1)), // MBP material
+		'tile_bonus' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)), // MBP Material
+		'tile_bonus_yellow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)), // MBP Material
+		'tile_bonus_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)), // MBP material
+		'tile_expert' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)), // MBP material
 		'tile_underside' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.png', '', 40, new Vector(1, 1, 1, 1)),
 		// 4x4 Variant
 		'tile_beginner_4x4' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1), 4),
@@ -400,9 +419,13 @@ class DifBuilder {
 			'data/textures/friction_low.normal.png', 128, new Vector(0.3, 0.3, 0.35, 1)),
 		'friction_high' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high.png', 'data/textures/friction_high.normal.png', 10,
 			new Vector(0.3, 0.3, 0.35, 1)),
+		'friction_ultrahigh' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high.png', 'data/textures/friction_high.normal.png', 10,
+			new Vector(0.3, 0.3, 0.35, 1)),
 		'friction_high_shadow' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high_shadow.png',
 			'data/textures/friction_high.normal.png', 10, new Vector(0.15, 0.15, 0.16, 1.0)),
 		'friction_bouncy' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/friction_bouncy.png', 8, new Vector(0.4, 0.4, 0.2, 1)),
+		'tile_bouncy' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/friction_bouncy.png', 8, new Vector(0.4, 0.4, 0.2, 1)),
+		'tile_bouncy2' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/friction_bouncy.png', 8, new Vector(0.4, 0.4, 0.2, 1)),
 		'stripe_caution' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/stripe_caution.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 	];
 

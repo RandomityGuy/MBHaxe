@@ -1,5 +1,6 @@
 package src;
 
+import gui.SPCustomsGui;
 import gui.GuiControl;
 import haxe.io.Path;
 import gui.MultiplayerGui;
@@ -42,7 +43,7 @@ class MarbleGame {
 	static var canvas:Canvas;
 	static var instance:MarbleGame;
 
-	static var currentVersion = "1.2.4";
+	static var currentVersion = "1.2.5";
 
 	var world:MarbleWorld;
 	var previewWorld:PreviewWorld;
@@ -365,12 +366,22 @@ class MarbleGame {
 					canvas.setContent(lobby);
 				}
 			} else {
-				var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
 				if (_exitingToMenu) {
 					_exitingToMenu = false;
+					if (!isNotCustom) {
+						MarbleGame.instance.setPreviewMission('urban', () -> {});
+					}
 					canvas.setContent(new MainMenuGui());
 				} else {
-					canvas.setContent(pmg);
+					if (isNotCustom) {
+						var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
+						canvas.setContent(pmg);
+					} else {
+						// Load to the custom menu
+						MarbleGame.instance.setPreviewMission('urban', () -> {});
+						var pmg = new SPCustomsGui();
+						canvas.setContent(pmg);
+					}
 				}
 			}
 		}

@@ -13,6 +13,7 @@ import src.MissionList;
 import src.Leaderboards;
 import src.Replay;
 import gui.HtmlText;
+import src.Marbleland;
 
 class LeaderboardsGui extends GuiImage {
 	var innerCtrl:GuiControl;
@@ -124,6 +125,11 @@ class LeaderboardsGui extends GuiImage {
 		var headerText = '<font face="arial12">Rank<offset value="50">Name</offset><offset value="400">Score</offset><offset value="500">Rating</offset><offset value="600">Platform</offset></font>';
 		var playerHeaderText = '<font face="arial12">Rank<offset value="50">Name</offset><offset value="575">Rating</offset></font>';
 
+		if (levelSelectDifficulty == "customs") {
+			headerText = '<font face="arial12">Rank<offset value="50">Name</offset><offset value="500">Score</offset><offset value="600">Platform</offset></font>';
+			playerHeaderText = '<font face="arial12">Rank<offset value="50">Name</offset></font>';
+		}
+
 		var scores = [
 			'<offset value="10">1. </offset><offset value="50">Nardo Polo</offset><offset value="500">99:59:999</offset><offset value="625"><img src="unknown"/></offset>',
 			'<offset value="10">2. </offset><offset value="50">Nardo Polo</offset><offset value="500">99:59:999</offset><offset value="625"><img src="pc"/></offset>',
@@ -151,9 +157,16 @@ class LeaderboardsGui extends GuiImage {
 			.concat(MissionList.missionList.get('ultra').get('advanced'))
 			.concat(MissionList.missionList.get('ultra').get('multiplayer'));
 
-		var actualIndex = levelSelectDifficulty != "players" ? allMissions.indexOf(MissionList.missionList.get('ultra').get(levelSelectDifficulty)[index]) : 0;
+		var actualIndex = levelSelectDifficulty != "players"
+			&& levelSelectDifficulty != "customs" ? allMissions.indexOf(MissionList.missionList.get('ultra').get(levelSelectDifficulty)[index]) : 0;
+
+		if (levelSelectDifficulty == "customs")
+			actualIndex = index;
 
 		levelTitle.text.text = 'Level ${actualIndex + 1}';
+
+		if (levelSelectDifficulty == "customs")
+			levelTitle.text.text = '';
 
 		var levelNames = allMissions.map(x -> x.title);
 
@@ -164,19 +177,26 @@ class LeaderboardsGui extends GuiImage {
 			levelTitle.text.text = 'Top Players: ${scoreCategories[cast scoreView]}';
 		}
 
-		var currentMission = allMissions[actualIndex];
+		if (levelSelectDifficulty == "customs") {
+			levelTitle.text.text = 'Showing: ${scoreCategories[cast scoreView]}';
+		}
+
+		var currentMission:Mission = null;
+		if (levelSelectDifficulty != "customs")
+			currentMission = allMissions[actualIndex];
 
 		var scoreTok = 0;
 
 		function fetchScores() {
 			var ourToken = scoreTok++;
-			Leaderboards.getScores(currentMission.path, scoreView, (scoreList) -> {
+			Leaderboards.getScores(levelSelectDifficulty != "customs" ? currentMission.path : 'custom/mbu/${index}', scoreView, (scoreList) -> {
 				if (ourToken + 1 != scoreTok)
 					return;
 				var scoreTexts = [];
 				var i = 1;
 
-				var isHuntScore = currentMission.difficultyIndex == 3;
+				var isHuntScore = levelSelectDifficulty != "customs" ? currentMission.difficultyIndex == 3 : Marbleland.missions.get(index)
+					.customSource == "MPCustoms";
 
 				for (score in scoreList) {
 					var scoreText = '<offset value="10">${i}. </offset>
@@ -185,6 +205,15 @@ class LeaderboardsGui extends GuiImage {
 					<offset value="400">${isHuntScore ? Std.string(1000 - score.score) : Util.formatTime(score.score)}</offset>
 					<offset value="500">${score.rating}</offset>
 					<offset value="625"><img src="${platformToString(score.platform)}"/></offset>';
+
+					if (levelSelectDifficulty == "customs") {
+						scoreText = '<offset value="10">${i}. </offset>
+					<offset value="50">${score.name}</offset>
+					<offset value="475">${score.rewind > 0 ? "<img src='rewind'/>" : ""}</offset>
+					<offset value="500">${isHuntScore ? Std.string(1000 - score.score) : Util.formatTime(score.score)}</offset>
+					<offset value="625"><img src="${platformToString(score.platform)}"/></offset>';
+					}
+
 					scoreTexts.push(scoreText);
 					i++;
 				}
@@ -242,7 +271,7 @@ class LeaderboardsGui extends GuiImage {
 		}
 		levelSelectOpts.setCurrentOption(actualIndex);
 
-		if (levelSelectDifficulty != "players")
+		if (levelSelectDifficulty != "players" && levelSelectDifficulty != "customs")
 			innerCtrl.addChild(levelSelectOpts);
 
 		var bottomBar = new GuiControl();
@@ -259,7 +288,10 @@ class LeaderboardsGui extends GuiImage {
 		backButton.gamepadAccelerator = [Settings.gamepadSettings.back];
 		backButton.accelerators = [hxd.Key.ESCAPE, hxd.Key.BACKSPACE];
 		if (levelSelectGui)
-			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LevelSelectGui(levelSelectDifficulty));
+			if (levelSelectDifficulty == "customs")
+				backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new SPCustomsGui());
+			else
+				backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LevelSelectGui(levelSelectDifficulty));
 		else {
 			backButton.pressedAction = (e) -> MarbleGame.canvas.setContent(new LeaderboardsSelectGui());
 		}
@@ -279,10 +311,14 @@ class LeaderboardsGui extends GuiImage {
 				fetchPlayers();
 			} else
 				fetchScores();
+
+			if (levelSelectDifficulty == "customs") {
+				levelTitle.text.text = 'Showing: ${scoreCategories[cast scoreView]}';
+			}
 		}
 		bottomBar.addChild(changeViewButton);
 
-		if (levelSelectDifficulty != "players") {
+		if (levelSelectDifficulty != "players" && levelSelectDifficulty != "customs") {
 			var replayButton = new GuiXboxButton("Watch Replay", 220);
 			replayButton.position = new Vector(750, 0);
 			replayButton.vertSizing = Bottom;

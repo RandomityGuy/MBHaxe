@@ -14,6 +14,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 import src.MissionList;
+import src.MPCustoms;
 
 class MultiplayerLevelSelectGui extends GuiImage {
 	static var currentSelectionStatic:Int = 0;

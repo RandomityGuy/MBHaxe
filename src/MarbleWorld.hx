@@ -1,5 +1,6 @@
 package src;
 
+import gui.SPCustomsGui;
 import net.NetPacket.ScoreboardPacket;
 import net.NetPacket.PowerupPickupPacket;
 import net.Move;
@@ -255,7 +256,12 @@ class MarbleWorld extends Scheduler {
 		this.scene2d = scene2d;
 		this.mission = mission;
 		this.game = mission.game.toLowerCase();
-		this.gameMode = GameModeFactory.getGameMode(cast this, mission.missionInfo.gamemode);
+
+		var misGameMode = mission.missionInfo != null ? mission.missionInfo.gamemode : null;
+		if (mission.customSource == "MPCustoms")
+			misGameMode = "scrum";
+
+		this.gameMode = GameModeFactory.getGameMode(cast this, misGameMode);
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
@@ -2236,23 +2242,26 @@ class MarbleWorld extends Scheduler {
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
 			displayAlert("Congratulations! You've finished!");
-			if (!Settings.levelStatistics.exists(mission.path)) {
-				Settings.levelStatistics.set(mission.path, {
+
+			var misPath = mission.isClaMission ? 'custom/mbu/${mission.id}' : mission.path;
+
+			if (!Settings.levelStatistics.exists(misPath)) {
+				Settings.levelStatistics.set(misPath, {
 					oobs: 0,
 					respawns: 0,
 					totalTime: 0,
 					totalMPScore: 0
 				});
 			}
-			Analytics.trackLevelScore(mission.title, mission.path,
+			Analytics.trackLevelScore(mission.title, misPath,
 				gameMode.getScoreType() == Time ? Std.int(1000 * gameMode.getFinishScore()) : Std.int(gameMode.getFinishScore()),
-				Settings.levelStatistics[mission.path].oobs, Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
+				Settings.levelStatistics[misPath].oobs, Settings.levelStatistics[misPath].respawns, Settings.optionsSettings.rewindEnabled);
 			if (!this.isWatching) {
 				var myScore = {
 					name: "Player",
 					time: this.gameMode.getFinishScore()
 				};
-				Settings.saveScore(mission.path, myScore, this.gameMode.getScoreType());
+				Settings.saveScore(misPath, myScore, this.gameMode.getScoreType());
 				var notifies = AchievementsGui.check();
 				var delay = 5.0;
 				var achDelay = 0.0;
@@ -2324,9 +2333,15 @@ class MarbleWorld extends Scheduler {
 					}
 				} else {
 					this.dispose();
-					LevelSelectGui.currentSelectionStatic = mission.index + 1;
-					var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
-					MarbleGame.canvas.setContent(pmg);
+					if (mission.isClaMission) {
+						MarbleGame.instance.setPreviewMission('urban', () -> {});
+						var pmg = new SPCustomsGui();
+						MarbleGame.canvas.setContent(pmg);
+					} else {
+						LevelSelectGui.currentSelectionStatic = mission.index + 1;
+						var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
+						MarbleGame.canvas.setContent(pmg);
+					}
 				}
 				#if js
 				pointercontainer.hidden = false;
@@ -2360,18 +2375,6 @@ class MarbleWorld extends Scheduler {
 				}));
 			} else {
 				restartGameCode();
-			}
-		}, (sender) -> {
-			var nextLevelCode = () -> {
-				var nextMission = mission.getNextMission();
-				if (nextMission != null) {
-					MarbleGame.instance.playMission(nextMission);
-				}
-			}
-			if (MarbleGame.instance.toRecord) {
-				MarbleGame.canvas.pushDialog(new ReplayNameDlg(nextLevelCode));
-			} else {
-				nextLevelCode();
 			}
 		}, mission, this.gameMode.getFinishScore(),
 			this.gameMode.getScoreType(), this.replay.write());

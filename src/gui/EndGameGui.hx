@@ -22,13 +22,12 @@ class EndGameGui extends GuiImage {
 	var innerCtrl:GuiControl;
 	var endGameWnd:GuiImage;
 	var retryFunc:GuiControl->Void;
-	var nextFunc:GuiControl->Void;
 	var continueFunc:GuiControl->Void;
 
 	var scoreSubmitted:Bool = false;
 
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, score:Float,
-			scoreType:ScoreType, replayData:haxe.io.Bytes) {
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, mission:Mission, score:Float, scoreType:ScoreType,
+			replayData:haxe.io.Bytes) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 		this.horizSizing = Width;
@@ -37,7 +36,6 @@ class EndGameGui extends GuiImage {
 		this.extent = new Vector(640, 480);
 		this.mission = mission;
 		this.retryFunc = restartFunc;
-		this.nextFunc = nextLevelFunc;
 		this.continueFunc = continueFunc;
 
 		function loadButtonImages(path:String) {
@@ -106,8 +104,12 @@ class EndGameGui extends GuiImage {
 		var egResultLeft = new GuiMLText(arial14, mlFontLoader);
 		egResultLeft.position = new Vector(28, 26);
 		egResultLeft.extent = new Vector(180, 100);
-		if (scoreType == Time)
-			egResultLeft.text.text = '<p align="right"><font color="${beatPar ? "#8DFF8D" : "#FF7575"}">Time:</font><br/><font color="#88BCEE">Par Time:</font><br/><font color="#EBEBEB">Rating:</font><br/><font color="#EBEBEB">My Best Time:</font></p>';
+		if (scoreType == Time) {
+			if (mission.isClaMission)
+				egResultLeft.text.text = '<p align="right"><font color="${beatPar ? "#8DFF8D" : "#FF7575"}">Time:</font><br/><font color="#88BCEE">Par Time:</font><br/><font color="#EBEBEB">My Best Time:</font></p>';
+			else
+				egResultLeft.text.text = '<p align="right"><font color="${beatPar ? "#8DFF8D" : "#FF7575"}">Time:</font><br/><font color="#88BCEE">Par Time:</font><br/><font color="#EBEBEB">Rating:</font><br/><font color="#EBEBEB">My Best Time:</font></p>';
+		}
 		if (scoreType == Score)
 			egResultLeft.text.text = '<p align="right"><font color="#8DFF8D">Score:</font><br/><font color="#EBEBEB">My Best Score:</font></p>';
 		endGameWnd.addChild(egResultLeft);
@@ -151,8 +153,12 @@ class EndGameGui extends GuiImage {
 		egResultRight.extent = new Vector(180, 100);
 		if (scoreType == Score)
 			egResultRight.text.text = '<font color="#8DFF8D">${Util.formatScore(score)}</font><br/><font color="#EBEBEB">${Util.formatScore(bestScore.time)}</font>';
-		if (scoreType == Time)
-			egResultRight.text.text = '<font color="${beatPar ? "#8DFF8D" : "#FF7575"}">${Util.formatTime(score)}</font><br/><font color="#88BCEE">${Util.formatTime(mission.qualifyTime)}</font><br/><font color="#EBEBEB">${rating}</font><br/><font color="#EBEBEB">${Util.formatTime(bestScore.time)}</font>';
+		if (scoreType == Time) {
+			if (mission.isClaMission)
+				egResultRight.text.text = '<font color="${beatPar ? "#8DFF8D" : "#FF7575"}">${Util.formatTime(score)}</font><br/><font color="#88BCEE">${Util.formatTime(mission.qualifyTime)}</font><br/><font color="#EBEBEB">${Util.formatTime(bestScore.time)}</font>';
+			else
+				egResultRight.text.text = '<font color="${beatPar ? "#8DFF8D" : "#FF7575"}">${Util.formatTime(score)}</font><br/><font color="#88BCEE">${Util.formatTime(mission.qualifyTime)}</font><br/><font color="#EBEBEB">${rating}</font><br/><font color="#EBEBEB">${Util.formatTime(bestScore.time)}</font>';
+		}
 		endGameWnd.addChild(egResultRight);
 
 		var bottomBar = new GuiControl();
@@ -195,12 +201,15 @@ class EndGameGui extends GuiImage {
 		}
 		bottomBar.addChild(nextButton);
 		var rewindUsed = MarbleGame.instance.world.rewindUsed;
+
+		var misPath = mission.isClaMission ? 'custom/mbu/${mission.id}' : mission.path;
+
 		var submitScore = () -> {
 			var lbScoreValue = score;
 			if (scoreType == Score)
 				lbScoreValue = 1000 - score;
-			Leaderboards.submitScore(mission.path, lbScoreValue, rewindUsed, (needsReplay, ref) -> {
-				if (needsReplay) {
+			Leaderboards.submitScore(misPath, lbScoreValue, rewindUsed, (needsReplay, ref) -> {
+				if (needsReplay && !mission.isClaMission) {
 					Leaderboards.submitReplay(ref, replayData);
 				}
 			});
@@ -216,7 +225,7 @@ class EndGameGui extends GuiImage {
 				submitScore();
 			}
 		} else {
-			Leaderboards.getScores(mission.path, rewindUsed ? Rewind : NoRewind, lbscores -> {
+			Leaderboards.getScores(misPath, rewindUsed ? Rewind : NoRewind, lbscores -> {
 				// Score submission criteria
 				// If it is better than our non-rewind score, or better than the top non-rewind score, and we are non rewind, submit it
 				// If it is better than our rewind score, or better than the top rewind score, and we are rewind, submit it
