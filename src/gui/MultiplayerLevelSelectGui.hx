@@ -217,7 +217,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		innerCtrl.addChild(chatWnd);
 
 		playerList = new GuiMLTextListCtrl(arial14, playerListArr.map(player -> {
-			return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
+			return
+				'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${StringTools.htmlEscape(player.name)}';
 		}), imgLoader);
 		playerList.selectedColor = 0xF29515;
 		playerList.selectedFillColor = 0xEBEBEB;
@@ -509,7 +510,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 		if (!showingCustoms)
 			playerList.setTexts(playerListArr.map(player -> {
-				return '<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${player.name}';
+				return
+					'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${StringTools.htmlEscape(player.name)}';
 			}));
 
 		var pubCount = 1; // Self

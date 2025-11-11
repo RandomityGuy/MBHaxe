@@ -789,9 +789,9 @@ class PlayGui {
 		var plShadowScores = [];
 		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
 		for (item in playerList) {
-			pl.push('<font color="#EBEBEB"><img src="${item.us ? "us" : "them"}"></img>${Util.rightPad(item.name, 25, 3)}</font>');
+			pl.push('<font color="#EBEBEB"><img src="${item.us ? "us" : "them"}"></img>${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
 			plScores.push('<font color="#EBEBEB">${item.score}</font>');
-			plShadow.push('<font color="#000000"><img src="them"></img>${Util.rightPad(item.name, 25, 3)}</font>');
+			plShadow.push('<font color="#000000"><img src="them"></img>${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
 			plShadowScores.push('<font color="#000000">${item.score}</font>');
 		}
 		playerListCtrl.setTexts(pl);
@@ -807,9 +807,9 @@ class PlayGui {
 		if (p2 == null) {
 			var onePt = p1.score == 1;
 			if (onePt)
-				MarbleGame.instance.world.displayAlert('${p1.name} won with 1 point!');
+				MarbleGame.instance.world.displayAlert('${StringTools.htmlEscape(p1.name)} won with 1 point!');
 			else
-				MarbleGame.instance.world.displayAlert('${p1.name} won with ${p1.score} points!');
+				MarbleGame.instance.world.displayAlert('${StringTools.htmlEscape(p1.name)} won with ${p1.score} points!');
 		} else {
 			var tie = p1.score == p2.score;
 			if (tie) {
@@ -817,9 +817,9 @@ class PlayGui {
 			} else {
 				var onePt = p1.score == 1;
 				if (onePt)
-					MarbleGame.instance.world.displayAlert('${p1.name} won with 1 point!');
+					MarbleGame.instance.world.displayAlert('${StringTools.htmlEscape(p1.name)} won with 1 point!');
 				else
-					MarbleGame.instance.world.displayAlert('${p1.name} won with ${p1.score} points!');
+					MarbleGame.instance.world.displayAlert('${StringTools.htmlEscape(p1.name)} won with ${p1.score} points!');
 
 				if (p1.id == Net.clientId) { // This us
 					AchievementsGui.queueMPAchievement(512);

@@ -102,7 +102,7 @@ class MPServerListGui extends GuiImage {
 
 		function updateServerListDisplay() {
 			serverDisplays = ourServerList.map(x -> return
-				'<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${x.players}/${x.maxPlayers}  ${x.name}</font>');
+				'<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${x.players}/${x.maxPlayers}  ${StringTools.htmlEscape(x.name)}</font>');
 			serverList.setTexts(serverDisplays);
 		}
 

@@ -200,7 +200,7 @@ class LeaderboardsGui extends GuiImage {
 
 				for (score in scoreList) {
 					var scoreText = '<offset value="10">${i}. </offset>
-					<offset value="50">${score.name}</offset>
+					<offset value="50">${StringTools.htmlEscape(score.name)}</offset>
 					<offset value="375">${score.rewind > 0 ? "<img src='rewind'/>" : ""}</offset>
 					<offset value="400">${isHuntScore ? Std.string(1000 - score.score) : Util.formatTime(score.score)}</offset>
 					<offset value="500">${score.rating}</offset>
@@ -208,7 +208,7 @@ class LeaderboardsGui extends GuiImage {
 
 					if (levelSelectDifficulty == "customs") {
 						scoreText = '<offset value="10">${i}. </offset>
-					<offset value="50">${score.name}</offset>
+					<offset value="50">${StringTools.htmlEscape(score.name)}</offset>
 					<offset value="475">${score.rewind > 0 ? "<img src='rewind'/>" : ""}</offset>
 					<offset value="500">${isHuntScore ? Std.string(1000 - score.score) : Util.formatTime(score.score)}</offset>
 					<offset value="625"><img src="${platformToString(score.platform)}"/></offset>';
@@ -237,7 +237,7 @@ class LeaderboardsGui extends GuiImage {
 
 				for (score in scoreList) {
 					var scoreText = '<offset value="10">${i}. </offset>
-					<offset value="50">${score.name}</offset>
+					<offset value="50">${StringTools.htmlEscape(score.name)}</offset>
 					<offset value="575">${score.rating}</offset>';
 					scoreTexts.push(scoreText);
 					i++;
