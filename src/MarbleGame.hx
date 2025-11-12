@@ -355,6 +355,13 @@ class MarbleGame {
 		paused = false;
 		if (watching) {
 			canvas.setContent(Type.createInstance(replayExitGui, []));
+
+			setPreviewMission(lastMis, () -> {
+				#if js
+				var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
+				pointercontainer.hidden = false;
+				#end
+			});
 		} else {
 			if (Net.isMP) {
 				if (weDisconnecting) {

@@ -1546,18 +1546,7 @@ class MarbleWorld extends Scheduler {
 				}
 				this.setCursorLock(false);
 				var misFile = haxe.io.Path.withoutExtension(haxe.io.Path.withoutDirectory(mission.path));
-				this.dispose();
-				MarbleGame.instance.setPreviewMission(misFile, () -> {
-					#if !js
-					MarbleGame.canvas.setContent(new ReplayCenterGui());
-					#end
-					#if js
-					MarbleGame.canvas.setContent(new MainMenuGui());
-					var pointercontainer = js.Browser.document.querySelector("#pointercontainer");
-					pointercontainer.hidden = false;
-					#end
-				});
-
+				MarbleGame.instance.quitMission();
 				return;
 			}
 		}
