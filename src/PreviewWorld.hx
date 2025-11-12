@@ -134,6 +134,8 @@ class PreviewWorld extends Scheduler {
 		_loadToken++;
 		var groupName = (misname + "group").toLowerCase();
 		var group = levelGroups.get(groupName);
+		if (group == null)
+			group = levelGroups.get("urban"); // Use this as fallback
 		if (group != null) {
 			destroyAllObjects();
 			this.currentMission = misname;
