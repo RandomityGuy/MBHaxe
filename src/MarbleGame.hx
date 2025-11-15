@@ -360,10 +360,13 @@ class MarbleGame {
 					_exitingToMenu = false;
 					if (!isNotCustom) {
 						MarbleGame.instance.setPreviewMission('urban', () -> {});
+					} else {
+						MarbleGame.instance.setPreviewMission(lastMis, () -> {});
 					}
 					canvas.setContent(new MainMenuGui());
 				} else {
 					if (isNotCustom) {
+						MarbleGame.instance.setPreviewMission(lastMis, () -> {});
 						var pmg = new LevelSelectGui(LevelSelectGui.currentDifficultyStatic);
 						canvas.setContent(pmg);
 					} else {
