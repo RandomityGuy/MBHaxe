@@ -167,7 +167,7 @@ class MarbleGame {
 		});
 
 		pointercontainer.addEventListener('touchend', (e:js.html.TouchEvent) -> {
-			// @:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = -Key.getFrame();
+			@:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = -Key.getFrame();
 		});
 
 		pointercontainer.addEventListener('touchmove', (e:js.html.TouchEvent) -> {
