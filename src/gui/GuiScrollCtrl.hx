@@ -232,10 +232,10 @@ class GuiScrollCtrl extends GuiControl {
 		if (Util.isTouchDevice()) {
 			super.onMouseMove(mouseState);
 			if (this.pressed) {
-				var dy = (mouseState.position.y - this.prevMousePos.y) * scrollSpeed / this.maxScrollY;
-				deltaY = -dy;
-				this.scrollY -= dy;
+				this.scrollY -= (mouseState.position.y - this.prevMousePos.y) / (maxScrollY * Settings.uiScale);
+				deltaY = -(mouseState.position.y - this.prevMousePos.y) / (maxScrollY * Settings.uiScale);
 				this.prevMousePos = mouseState.position;
+
 				this.updateScrollVisual();
 			}
 		}
