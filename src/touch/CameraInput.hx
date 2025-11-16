@@ -87,7 +87,27 @@ class CameraInput {
 					delta.x = 0;
 				if (Math.abs(delta.y) < 0.05)
 					delta.y = 0;
-				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(delta.x / scaleFactor), applyNonlinearScale(delta.y / scaleFactor), true);
+
+				var inpX = clampInputs(delta.x / scaleFactor);
+				var inpY = clampInputs(delta.y / scaleFactor);
+
+				// Calculate velocity (per second) instead of per-frame delta
+				var dt = MarbleGame.instance.world.timeState.dt; // Delta time in seconds
+				var velocityX = inpX / dt;
+				var velocityY = inpY / dt;
+				var velocity = Math.sqrt(velocityX * velocityX + velocityY * velocityY) / 10.0;
+
+				// Apply non-linear scaling based on velocity
+				var scaledVelocity = applyNonlinearScale(velocity);
+				var velocityMultiplier = velocity > 0 ? scaledVelocity / velocity : 1.0;
+
+				MarbleGame.instance.world.marble.camera.orbit((inpX * velocityMultiplier), (inpY * velocityMultiplier), true);
+
+				if (inpX != 0)
+					prevMouse.x = e.relX;
+				if (inpY != 0)
+					prevMouse.y = e.relY;
+
 				prevMouse.x = e.relX;
 				prevMouse.y = e.relY;
 			}
@@ -106,8 +126,12 @@ class CameraInput {
 		}
 	}
 
+	function clampInputs(value:Float) {
+		return Util.clamp(value, -Settings.touchSettings.cameraSwipeExtent, Settings.touchSettings.cameraSwipeExtent);
+	}
+
 	function applyNonlinearScale(value:Float) {
-		var clamped = Util.clamp(value, -Settings.touchSettings.cameraSwipeExtent, Settings.touchSettings.cameraSwipeExtent);
+		var clamped = value;
 		return Math.abs(clamped) < 3 ? Math.pow(Math.abs(clamped / 2), 2.7) * (clamped >= 0 ? 1 : -1) : clamped;
 	}
 
