@@ -46,41 +46,61 @@ class MarblePredictionStore {
 	}
 
 	public function storeState(marble:Marble, tick:Int) {
-		var state = new MarblePrediction(marble, tick);
-		if (predictions.exists(marble)) {
-			var arr = predictions[marble];
-			while (arr.length != 0 && arr[0].tick >= tick)
-				arr.shift();
-			arr.push(state);
-		} else {
-			predictions.set(marble, [state]);
-		}
+		var arr = ensureHistory(marble);
+		truncateFromTick(arr, tick);
+		arr.push(new MarblePrediction(marble, tick));
 	}
 
 	public function retrieveState(marble:Marble, tick:Int) {
-		if (predictions.exists(marble)) {
-			var arr = predictions[marble];
-			while (arr.length != 0 && arr[0].tick < tick)
-				arr.shift();
-			if (arr.length == 0)
-				return null;
-			var p = arr[0];
-			if (p.tick == tick)
-				return p;
+		var arr = predictions.get(marble);
+		if (arr == null)
 			return null;
-		}
-		return null;
+
+		dropBeforeTick(arr, tick);
+		return (arr.length != 0 && arr[0].tick == tick) ? arr[0] : null;
 	}
 
 	public function clearStatesAfterTick(marble:Marble, tick:Int) {
-		if (predictions.exists(marble)) {
-			var arr = predictions[marble];
-			while (arr.length != 0 && arr[arr.length - 1].tick >= tick)
-				arr.pop();
-		}
+		var arr = predictions.get(marble);
+		if (arr != null)
+			truncateFromTick(arr, tick);
 	}
 
 	public function removeMarbleFromPrediction(marble:Marble) {
 		this.predictions.remove(marble);
+	}
+
+	inline function ensureHistory(marble:Marble) {
+		var arr = predictions.get(marble);
+		if (arr == null) {
+			arr = [];
+			predictions.set(marble, arr);
+		}
+		return arr;
+	}
+
+	inline function dropBeforeTick(arr:Array<MarblePrediction>, tick:Int) {
+		var idx = lowerBound(arr, tick);
+		if (idx > 0)
+			arr.splice(0, idx);
+	}
+
+	inline function truncateFromTick(arr:Array<MarblePrediction>, tick:Int) {
+		var idx = lowerBound(arr, tick);
+		if (idx < arr.length)
+			arr.splice(idx, arr.length - idx);
+	}
+
+	static inline function lowerBound(arr:Array<MarblePrediction>, tick:Int) {
+		var lo = 0;
+		var hi = arr.length;
+		while (lo < hi) {
+			var mid = (lo + hi) >> 1;
+			if (arr[mid].tick < tick)
+				lo = mid + 1;
+			else
+				hi = mid;
+		}
+		return lo;
 	}
 }

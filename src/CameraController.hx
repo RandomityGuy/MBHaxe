@@ -205,13 +205,9 @@ class CameraController extends Object {
 		}
 	}
 
-	public function update(currentTime:Float, dt:Float) {
-		// camera.position.set(marblePosition.x, marblePosition.y, marblePosition.z).sub(directionVector.clone().multiplyScalar(2.5));
-		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
-		// camera.position.add(cameraVerticalTranslation);
-		var camera = level.scene.camera;
-
-		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+	public function updateFixed() {
+		var dt = (1 / 60.0);
+		var lerpt = 1 - Math.pow(0.5, dt / 0.016); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
 		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), Settings.gamepadSettings.axisDeadzone));
 		var gamepadY = rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), Settings.gamepadSettings.axisDeadzone);
@@ -296,6 +292,22 @@ class CameraController extends Object {
 
 		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
 		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
+	}
+
+	var accumulatedTime:Float = 0.0;
+
+	public function update(currentTime:Float, dt:Float) {
+		// camera.position.set(marblePosition.x, marblePosition.y, marblePosition.z).sub(directionVector.clone().multiplyScalar(2.5));
+		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
+		// camera.position.add(cameraVerticalTranslation);
+		var camera = level.scene.camera;
+		this.dt = dt;
+
+		accumulatedTime += dt;
+		while (accumulatedTime >= 1 / 60.0) {
+			updateFixed();
+			accumulatedTime -= 1 / 60.0;
+		}
 
 		CameraPitch = Util.clamp(CameraPitch, -0.35, 1.5); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 

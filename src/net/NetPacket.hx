@@ -75,6 +75,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeByte(clientId);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
+		b.writeInt(netFlags, 6); // All bits flagged in one, UsePowerup flag already serialized in this
 		b.writeByte(moveQueueSize);
 		b.writeFloat(position.x);
 		b.writeFloat(position.y);
@@ -89,44 +90,24 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeFloat(lastContactNormal.y);
 		b.writeFloat(lastContactNormal.z);
 		b.writeInt(blastAmount, 11);
+		b.writeFlag(oob);
+
 		if (netFlags & MarbleNetFlags.DoBlast > 0) {
-			b.writeFlag(true);
 			b.writeUInt16(blastTick);
-		} else {
-			b.writeFlag(false);
 		}
 		if (netFlags & MarbleNetFlags.DoHelicopter > 0) {
-			b.writeFlag(true);
 			b.writeUInt16(heliTick);
-		} else {
-			b.writeFlag(false);
 		}
 		if (netFlags & MarbleNetFlags.DoMega > 0) {
-			b.writeFlag(true);
 			b.writeUInt16(megaTick);
-		} else {
-			b.writeFlag(false);
 		}
-		b.writeFlag(oob);
-		if (netFlags & MarbleNetFlags.UsePowerup > 0) {
-			b.writeFlag(true);
-		} else {
-			b.writeFlag(false);
-		}
-
 		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
-			b.writeFlag(true);
 			b.writeInt(powerUpId, 9);
-		} else {
-			b.writeFlag(false);
 		}
 		if (netFlags & MarbleNetFlags.GravityChange > 0) {
-			b.writeFlag(true);
 			b.writeFloat(gravityDirection.x);
 			b.writeFloat(gravityDirection.y);
 			b.writeFloat(gravityDirection.z);
-		} else {
-			b.writeFlag(false);
 		}
 	}
 
@@ -134,35 +115,29 @@ class MarbleUpdatePacket implements NetPacket {
 		clientId = b.readByte();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
+		netFlags = b.readInt(6);
 		moveQueueSize = b.readByte();
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		omega = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		lastContactNormal = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		blastAmount = b.readInt(11);
-		this.netFlags = 0;
-		if (b.readFlag()) {
-			blastTick = b.readUInt16();
-			this.netFlags |= MarbleNetFlags.DoBlast;
-		}
-		if (b.readFlag()) {
-			heliTick = b.readUInt16();
-			this.netFlags |= MarbleNetFlags.DoHelicopter;
-		}
-		if (b.readFlag()) {
-			megaTick = b.readUInt16();
-			this.netFlags |= MarbleNetFlags.DoMega;
-		}
 		oob = b.readFlag();
-		if (b.readFlag())
-			this.netFlags |= MarbleNetFlags.UsePowerup;
-		if (b.readFlag()) {
-			powerUpId = b.readInt(9);
-			this.netFlags |= MarbleNetFlags.PickupPowerup;
+		if (netFlags & MarbleNetFlags.DoBlast > 0) {
+			blastTick = b.readUInt16();
 		}
-		if (b.readFlag()) {
+		if (netFlags & MarbleNetFlags.DoHelicopter > 0) {
+			heliTick = b.readUInt16();
+		}
+		if (netFlags & MarbleNetFlags.DoMega > 0) {
+			megaTick = b.readUInt16();
+		}
+
+		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
+			powerUpId = b.readInt(9);
+		}
+		if (netFlags & MarbleNetFlags.GravityChange > 0) {
 			gravityDirection = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
-			this.netFlags |= MarbleNetFlags.GravityChange;
 		}
 	}
 }
