@@ -64,6 +64,9 @@ class CameraInput {
 			prevMouse.y = e.relY;
 		}
 
+		var accumulator = 0.0;
+		var accumulatedVec = new Vector(0, 0);
+
 		interactive.onMove = (e) -> {
 			e.propagate = true;
 			if (!enabled)
@@ -79,37 +82,43 @@ class CameraInput {
 				#if js
 				scaleFactor = js.Browser.window.devicePixelRatio / Settings.zoomRatio;
 				#end
-				var jumpcam = MarbleGame.instance.touchInput.jumpButton.pressed || MarbleGame.instance.touchInput.powerupButton.pressed;
+				var jumpcam = MarbleGame.instance.touchInput.jumpButton.pressed
+					|| MarbleGame.instance.touchInput.powerupButton.pressed
+					|| MarbleGame.instance.touchInput.blastbutton.pressed;
 				if (jumpcam) {
 					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
-				if (Math.abs(delta.x) < 0.05)
-					delta.x = 0;
-				if (Math.abs(delta.y) < 0.05)
-					delta.y = 0;
 
-				var inpX = clampInputs(delta.x / scaleFactor);
-				var inpY = clampInputs(delta.y / scaleFactor);
+				var inpX = delta.x / scaleFactor;
+				var inpY = delta.y / scaleFactor;
 
-				// Calculate velocity (per second) instead of per-frame delta
-				var dt = MarbleGame.instance.world.timeState.dt; // Delta time in seconds
-				var velocityX = inpX / dt;
-				var velocityY = inpY / dt;
-				var velocity = Math.sqrt(velocityX * velocityX + velocityY * velocityY) / 10.0;
+				if (jumpcam) {
+					if (Math.abs(inpX) < 1.3)
+						inpX = 0;
+					if (Math.abs(inpY) < 1.3)
+						inpY = 0;
+				}
 
-				// Apply non-linear scaling based on velocity
-				var scaledVelocity = applyNonlinearScale(velocity);
-				var velocityMultiplier = velocity > 0 ? scaledVelocity / velocity : 1.0;
+				var dt = MarbleGame.instance.world.timeState.dt;
+				accumulator += dt;
 
-				MarbleGame.instance.world.marble.camera.orbit((inpX * velocityMultiplier), (inpY * velocityMultiplier), true);
+				accumulatedVec.x += inpX;
+				accumulatedVec.y += inpY;
+
+				if (accumulator >= (1 / 60.0)) {
+					MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(accumulatedVec.x) * (1 / 60.0) * 30,
+						applyNonlinearScale(accumulatedVec.y) * (1 / 60.0) * 30, true);
+					accumulator -= (1 / 60.0);
+					accumulatedVec.x = 0;
+					accumulatedVec.y = 0;
+				}
 
 				if (inpX != 0)
 					prevMouse.x = e.relX;
 				if (inpY != 0)
 					prevMouse.y = e.relY;
-
-				prevMouse.x = e.relX;
-				prevMouse.y = e.relY;
+			} else {
+				accumulator = 0.0;
 			}
 		}
 
@@ -123,15 +132,12 @@ class CameraInput {
 
 			pressed = false;
 			this.identifier = -1;
+			accumulator = 0.0;
 		}
 	}
 
-	function clampInputs(value:Float) {
-		return Util.clamp(value, -Settings.touchSettings.cameraSwipeExtent, Settings.touchSettings.cameraSwipeExtent);
-	}
-
 	function applyNonlinearScale(value:Float) {
-		var clamped = value;
+		var clamped = Util.clamp(value, -Settings.touchSettings.cameraSwipeExtent, Settings.touchSettings.cameraSwipeExtent);
 		return Math.abs(clamped) < 3 ? Math.pow(Math.abs(clamped / 2), 2.7) * (clamped >= 0 ? 1 : -1) : clamped;
 	}
 
