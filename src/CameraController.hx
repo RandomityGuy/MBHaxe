@@ -301,7 +301,6 @@ class CameraController extends Object {
 		// this.level.scene.camera.target = marblePosition.add(cameraVerticalTranslation);
 		// camera.position.add(cameraVerticalTranslation);
 		var camera = level.scene.camera;
-		this.dt = dt;
 
 		accumulatedTime += dt;
 		while (accumulatedTime >= 1 / 60.0) {
