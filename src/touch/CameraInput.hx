@@ -68,9 +68,6 @@ class CameraInput {
 			prevMouse.y = e.relY;
 		}
 
-		var accumulator = 0.0;
-		var accumulatedVec = new Vector(0, 0);
-
 		interactive.onMove = (e) -> {
 			e.propagate = true;
 			if (!enabled)
@@ -105,25 +102,14 @@ class CameraInput {
 				}
 
 				var dt = MarbleGame.instance.world.timeState.dt;
-				accumulator += dt;
 
-				accumulatedVec.x += inpX;
-				accumulatedVec.y += inpY;
-
-				if (accumulator >= (1 / 60.0)) {
-					MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(accumulatedVec.x) * (1 / 60.0) * 30,
-						applyNonlinearScale(accumulatedVec.y) * (1 / 60.0) * 30, true);
-					accumulator -= (1 / 60.0);
-					accumulatedVec.x = 0;
-					accumulatedVec.y = 0;
-				}
+				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((inpX / dt) * (1 / 60.0)) * (1 / 60.0) * 20,
+					applyNonlinearScale((inpY / dt) * (1 / 60.0)) * (1 / 60.0) * 20, true);
 
 				if (inpX != 0)
 					prevMouse.x = e.relX;
 				if (inpY != 0)
 					prevMouse.y = e.relY;
-			} else {
-				accumulator = 0.0;
 			}
 		}
 
@@ -137,7 +123,6 @@ class CameraInput {
 
 			pressed = false;
 			this.identifier = -1;
-			accumulator = 0.0;
 		}
 	}
 

@@ -165,7 +165,7 @@ class Settings {
 		jump: Key.SPACE,
 		powerup: Key.MOUSE_LEFT,
 		freelook: Key.MOUSE_MIDDLE,
-		alwaysFreeLook: true,
+		alwaysFreeLook: false,
 		cameraSensitivity: 1.135,
 		invertYAxis: false,
 		respawn: Key.BACKSPACE,
