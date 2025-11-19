@@ -167,7 +167,7 @@ jobs:
           command: |
             if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
               cd ~/deps/libpng-1.6.50/build-arm64
-              for i in libpng16.16.39.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
+              for i in libpng16.16.50.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
               do
               lipo -create -output $i ../build-x86/$i $i
               done
