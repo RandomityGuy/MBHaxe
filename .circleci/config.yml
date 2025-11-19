@@ -10,8 +10,8 @@ orbs:
 jobs:
   build:
     macos:
-      xcode: 14.1.0 # Specify the Xcode version to use
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0 # Specify the Xcode version to use
+    resource_class: m4pro.medium
     environment:
       HOMEBREW_NO_AUTO_UPDATE: 1
       NPROC: 4
