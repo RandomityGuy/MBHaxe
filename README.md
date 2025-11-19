@@ -13,14 +13,19 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ## Windows and Mac
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.12)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.1)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.4-mbu)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.5-mbu)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.12/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.1/MBHaxe-Platinum.apk)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.4-mbu/MBHaxe-Ultra.apk)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra.apk)
+
+## Xbox (NEW!)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-UWP-Xbox.msix)
+Ported to Xbox via UWP by [Daniel Worley](https://github.com/worleydl).  
+You will need to enable Developer Mode on your Xbox in order to sideload the app. The walkthrough can be found at https://www.youtube.com/watch?v=2Ly9TIdu9uw.  
 
 ## Additional Features
 - Cross Platform Multiplayer: Available in Ultra and Platinum. You can host and join multiplayer matches in any of these platforms: Windows, Mac, Web, Android.
@@ -61,6 +66,7 @@ Requires Haxe 4.3.0 or above
 You require the following Haxe libraries: 
 - heaps: The specific version located [here](https://github.com/RandomityGuy/heaps)
 - hlsdl (Obtain the haxelib version of hlsdl, then patch it with these files [here](https://github.com/RandomityGuy/hashlink/tree/master/libs/sdl)) (Hashlink/C native target)
+- datachannel: obtained from [here](https://github.com/RandomityGuy/hxDatachannel)
 - stb_ogg_sound (JS/Browser target)
 - zip 1.1.0 (JS/Browser target)
 
@@ -89,9 +95,6 @@ This will build the apk file at Export/android/app/build/outputs/apk/release/app
 If you are on browser, please send the browser console log to me
 If you are on native, please run marbleblast-debug.bat and reproduce the crash, send the resulting stacktrace that occurs during the crash to me.
 
-## Help it shows a black screen when playing a level!
-Your PC does not support the game, please upgrade it, there is nothing I can do about it to fix it.
-
 ## How accurate are the marble physics?
 Very accurate with up to 1% deviation from the original physics. The deviations are due to traplaunches being slightly different and occassional internal edge collisions, and the lower delta t values for physics simulations.
 
@@ -101,11 +104,11 @@ In native version, you can just resize the window if windowed or use the resolut
 
 ## How do I change my FOV?
 Edit settings.json for native version, edit the MBHaxeSettings key in LocalStorage in browser.  
-In the platinum version, there is an FOV slider.
+In the Platinum and Ultra versions, there is an FOV slider.
 
 ## How do I unlock/lock FPS?
 You cannot unlock fps in the browser, it is forever set to vsync.
-In the native version, edit settings.json or the options menu in the platinum.
+In the native version, use the options menu to unlock/lock fps, or edit settings.json and set "vsync" to false to unlock fps.
 
 ## Hey can you please add this new feature?
 If this new feature of yours already exists in MBG but not in this port, then I will try to add it, if I get time to do so, otherwise chances are, I won't add it since I have other things to do and would rather not waste my time on this any further. You are free to do pull requests if you have already implemented said feature.
