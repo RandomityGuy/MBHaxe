@@ -144,9 +144,9 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            curl -L https://download.sourceforge.net/libpng/libpng-1.6.39.tar.xz | tar xz
-            cd libpng-1.6.39
-            if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
+            curl -L https://download.sourceforge.net/libpng/libpng-1.6.50.tar.xz | tar xz
+            cd libpng-1.6.50
+            if [ ! -f /usr/local/lib/libpng16.50.dylib ]; then
               cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_MACOSX_RPATH=TRUE
               cmake --build build-x86 --config release -j$NPROC
             fi
@@ -156,8 +156,8 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            cd libpng-1.6.39
-            if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
+            cd libpng-1.6.50
+            if [ ! -f /usr/local/lib/libpng16.50.dylib ]; then
               cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_MACOSX_RPATH=TRUE
               cmake --build build-arm64 --config release -j$NPROC
             fi
@@ -165,9 +165,9 @@ jobs:
       - run:
           name: Install libpng (Universal)
           command: |
-            if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
+            if [ ! -f /usr/local/lib/libpng16.50.dylib ]; then
               cd ~/deps/libpng-1.6.39/build-arm64
-              for i in libpng16.16.39.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
+              for i in libpng16.50.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
               do
               lipo -create -output $i ../build-x86/$i $i
               done
@@ -240,7 +240,7 @@ jobs:
             - /usr/local/lib/libhl.1.13.0.dylib
             - /usr/local/lib/libogg.0.8.5.dylib
             - /usr/local/lib/libopenal.1.22.2.dylib
-            - /usr/local/lib/libpng16.16.dylib
+            - /usr/local/lib/libpng16.50.dylib
             - /usr/local/lib/libturbojpeg.0.2.0.dylib
             - /usr/local/lib/libvorbis.0.4.9.dylib
             - /usr/local/lib/libvorbisfile.3.3.8.dylib
@@ -274,7 +274,7 @@ jobs:
             cp /usr/local/lib/libhl.1.13.0.dylib libhl.1.dylib
             cp /usr/local/lib/libogg.0.8.5.dylib libogg.0.dylib
             cp /usr/local/lib/libopenal.1.22.2.dylib libopenal.1.dylib
-            cp /usr/local/lib/libpng16.16.dylib libpng16.16.dylib
+            cp /usr/local/lib/libpng16.50.dylib libpng16.50.dylib
             cp /usr/local/lib/libturbojpeg.0.2.0.dylib libturbojpeg.0.dylib
             cp /usr/local/lib/libvorbis.0.4.9.dylib libvorbis.0.4.9.dylib
             cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
@@ -283,7 +283,7 @@ jobs:
             cp /usr/local/lib/libuv.1.dylib libuv.1.dylib
             # These libraries have dangling RPATHs
             install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib
-            for i in fmt.hdll libpng16.16.dylib
+            for i in fmt.hdll libpng16.50.dylib
             do
             install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.1.dylib $i
             done
