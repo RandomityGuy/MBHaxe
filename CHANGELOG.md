@@ -1,3 +1,16 @@
+# 1.2.5
+Finally, the ability to play Marbleland custom levels has arrived, check it out in the Singleplayer Custom Levels menu!
+This update brings the following changes:
+- Added support for Marbleland custom levels in Singleplayer Custom Levels menu. Only those which are marked for "Ultra" are supported.
+- Fixed a bug where player names were not escaped properly in places.
+- Fixed black screen on exiting replays.
+- Fixed exiting replays opening wrong menus.
+- Added momentum based scrolling on touch devices for menus.
+- Improve camera sensitivity on touch devices.
+
+Lastly, with this update, you can now play this game on the Xbox console via the Xbox Dev Mode! 
+Just enable Developer Mode on your Xbox, install the game as a Universal Windows Platform (UWP) app, and you're good to go!
+
 # 1.2.4
 This update brings the following changes:
 - Added Import and Export Progress to Options menu to transfer game progress between devices.
