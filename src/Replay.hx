@@ -52,6 +52,7 @@ class ReplayFrame {
 		var t = (time - this.time) / (next.time - this.time);
 
 		var dt = time - this.time;
+		var clockDt = next.clockTime - this.clockTime;
 
 		var interpFrame = new ReplayFrame();
 
@@ -59,18 +60,20 @@ class ReplayFrame {
 		interpFrame.time = time;
 		interpFrame.bonusTime = this.bonusTime;
 		interpFrame.clockTime = this.clockTime;
-		if (interpFrame.bonusTime != 0 && time >= 3.5) {
-			if (dt <= this.bonusTime) {
-				interpFrame.bonusTime -= dt;
+		if (clockDt > 0) {
+			if (interpFrame.bonusTime != 0 && time >= 3.5) {
+				if (dt <= this.bonusTime) {
+					interpFrame.bonusTime -= dt;
+				} else {
+					interpFrame.clockTime += dt - this.bonusTime;
+					interpFrame.bonusTime = 0;
+				}
 			} else {
-				interpFrame.clockTime += dt - this.bonusTime;
-				interpFrame.bonusTime = 0;
-			}
-		} else {
-			if (this.time >= 3.5)
-				interpFrame.clockTime += dt;
-			else if (this.time + dt >= 3.5) {
-				interpFrame.clockTime += (this.time + dt) - 3.5;
+				if (this.time >= 3.5)
+					interpFrame.clockTime += dt;
+				else if (this.time + dt >= 3.5) {
+					interpFrame.clockTime += (this.time + dt) - 3.5;
+				}
 			}
 		}
 

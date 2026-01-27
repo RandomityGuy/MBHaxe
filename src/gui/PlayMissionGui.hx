@@ -1234,7 +1234,7 @@ class PlayMissionGui extends GuiImage {
 					var i = 1;
 					for (score in scoreList) {
 						sFmt.push('${i}. 
-						<offset value="15">${score.name.substr(0, 30)}</offset>
+						<offset value="15">${StringTools.htmlEscape(score.name.substr(0, 30))}</offset>
 						<offset value="215">${Util.formatTime(score.score)}</offset>
 						<offset value="279"><img src="${platformToString(score.platform)}"/></offset>
 						${score.rewind == 1 ? '<offset value="299"><img src="rewind"/></offset> ' : ""}');

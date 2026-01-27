@@ -394,6 +394,7 @@ class Marble extends GameObject {
 		this.netSmoothOffset = new Vector();
 		this.netCorrected = false;
 		this.currentUp = new Vector(0, 0, 1);
+		this.lastContactNormal = new Vector(0, 0, 1);
 
 		var marbleDts = new DtsObject();
 		var marbleShader = "";
@@ -817,7 +818,7 @@ class Marble extends GameObject {
 
 	function computeMoveForces(m:Move, aControl:Vector, desiredOmega:Vector) {
 		var currentGravityDir = this.currentUp.multiply(-1);
-		var R = currentGravityDir.multiply(-this._radius);
+		var R = this.currentUp.multiply(this._radius);
 		var rollVelocity = this.omega.cross(R);
 		var axes = this.getMarbleAxis();
 		// if (!level.isReplayingMovement)
@@ -850,15 +851,15 @@ class Marble extends GameObject {
 			}
 			var rsq = R.lengthSq();
 			var crossP = R.cross(motionDir.multiply(desiredYVelocity).add(sideDir.multiply(desiredXVelocity))).multiply(1 / rsq);
-			desiredOmega.set(crossP.x, crossP.y, crossP.z);
-			aControl.set(desiredOmega.x - this.omega.x, desiredOmega.y - this.omega.y, desiredOmega.z - this.omega.z);
+			desiredOmega.load(crossP);
+			aControl.load(desiredOmega.sub(this.omega));
 			var aScalar = aControl.length();
 			if (aScalar > this._angularAcceleration) {
 				aControl.scale(this._angularAcceleration / aScalar);
 			}
 			return false;
 		}
-		return return true;
+		return true;
 	}
 
 	function velocityCancel(timeState:TimeState, surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
@@ -873,7 +874,7 @@ class Marble extends GameObject {
 				var sVel = this.velocity.sub(contacts[i].velocity);
 				var surfaceDot = contacts[i].normal.dot(sVel);
 
-				if ((!looped && surfaceDot < 0) || surfaceDot < -SurfaceDotThreshold) {
+				if ((!looped && surfaceDot < 0.0) || surfaceDot < -SurfaceDotThreshold) {
 					var velLen = this.velocity.length();
 					var surfaceVel = this.contacts[i].normal.multiply(surfaceDot);
 
@@ -908,7 +909,7 @@ class Marble extends GameObject {
 						}
 						contacts[i].velocity.load(otherMarble.velocity);
 					} else {
-						if (contacts[i].velocity.length() == 0 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
+						if (contacts[i].velocity.length() == 0.0 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
 							this.velocity.load(this.velocity.sub(surfaceVel));
 							this.velocity.normalize();
 							this.velocity.load(this.velocity.multiply(velLen));
@@ -934,7 +935,7 @@ class Marble extends GameObject {
 							vAtC.load(vAtC.sub(contacts[i].normal.multiply(contacts[i].normal.dot(sVel))));
 
 							var vAtCMag = vAtC.length();
-							if (vAtCMag != 0) {
+							if (vAtCMag != 0.0) {
 								var friction = this._bounceKineticFriction * contacts[i].friction;
 
 								var angVMagnitude = friction * 5 * normalVel / (2 * this._radius);
@@ -970,7 +971,7 @@ class Marble extends GameObject {
 				}
 			}
 		} while (!done && itersIn < 1e4); // Maximum limit pls
-		if (this.velocity.lengthSq() < 625) {
+		if (this.velocity.lengthSq() < 625.0) {
 			var gotOne = false;
 			var dir = new Vector(0, 0, 0);
 			for (j in 0...contacts.length) {
@@ -994,10 +995,10 @@ class Marble extends GameObject {
 						soFar += (dist - outVel * timeToSeparate) / timeToSeparate / contacts[k].normal.dot(dir);
 					}
 				}
-				if (soFar < -25)
-					soFar = -25;
-				if (soFar > 25)
-					soFar = 25;
+				if (soFar < -25.0)
+					soFar = -25.0;
+				if (soFar > 25.0)
+					soFar = 25.0;
 				this.velocity.load(this.velocity.add(dir.multiply(soFar)));
 			}
 		}
@@ -1066,7 +1067,7 @@ class Marble extends GameObject {
 					slipping = false;
 				}
 				var vAtCDir = vAtC.multiply(1 / vAtCMag);
-				aFriction.load(bestContact.normal.multiply(-1).cross(vAtCDir.multiply(-1)).multiply(angAMagnitude));
+				aFriction.load(bestContact.normal.cross(vAtCDir).multiply(angAMagnitude));
 				AFriction.load(vAtCDir.multiply(-AMagnitude));
 				this._slipAmount = vAtCMag - totalDeltaV;
 			}
@@ -1093,16 +1094,16 @@ class Marble extends GameObject {
 						friction2 = this._kineticFriction * bestContact.friction;
 					Aadd.load(Aadd.multiply(friction2 * bestNormalForce / aAtCMag));
 				}
-				A.set(A.x + Aadd.x, A.y + Aadd.y, A.z + Aadd.z);
-				a.set(a.x + aadd.x, a.y + aadd.y, a.z + aadd.z);
+				A.load(A.add(Aadd));
+				a.load(a.add(aadd));
 			}
-			A.set(A.x + AFriction.x, A.y + AFriction.y, A.z + AFriction.z);
-			a.set(a.x + aFriction.x, a.y + aFriction.y, a.z + aFriction.z);
+			A.load(A.add(AFriction));
+			a.load(a.add(aFriction));
 
 			lastContactNormal = bestContact.normal;
 			lastContactPosition = this.getAbsPos().getPosition();
 		}
-		a.set(a.x + aControl.x, a.y + aControl.y, a.z + aControl.z);
+		a.load(a.add(aControl));
 		if (this.mode == Finish) {
 			a.set(); // Zero it out
 		}
@@ -1371,7 +1372,7 @@ class Marble extends GameObject {
 					var surfaceNormal = new Vector(verts.nx, verts.ny,
 						verts.nz); // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
 					if (obj is DtsObject)
-						surfaceNormal.multiply(-1);
+						surfaceNormal.load(v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1));
 					var surfaceD = -surfaceNormal.dot(v0);
 
 					// If we're going the wrong direction or not going to touch the plane, ignore...
@@ -2390,6 +2391,8 @@ class Marble extends GameObject {
 			if (Key.isDown(Settings.controlsSettings.right)) {
 				move.d.y -= 1;
 			}
+			move.d.x = Util.clamp(move.d.x, -1, 1);
+			move.d.y = Util.clamp(move.d.y, -1, 1);
 			if (Key.isDown(Settings.controlsSettings.jump)
 				|| MarbleGame.instance.touchInput.jumpButton.pressed
 				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {

@@ -130,14 +130,27 @@ class ManifestEntry extends FileEntry {
 			if (onReady != null)
 				onReady();
 		} else {
-			js.Browser.window.fetch(file).then((res:js.html.Response) -> {
-				return res.arrayBuffer();
-			}).then((buf:js.lib.ArrayBuffer) -> {
-				loaded = true;
-				bytes = Bytes.ofData(buf);
-				if (onReady != null)
-					onReady();
-			});
+			js.Browser.window.fetch(file)
+				.then((res:js.html.Response) -> {
+					return res.arrayBuffer();
+				})
+				.then((buf:js.lib.ArrayBuffer) -> {
+					loaded = true;
+					bytes = Bytes.ofData(buf);
+					if (onReady != null)
+						onReady();
+				})
+				.catchError((e) -> {
+					// Try the original file path
+					js.Browser.window.fetch('data/' + originalFile).then((res:js.html.Response) -> {
+						return res.arrayBuffer();
+					}).then((buf:js.lib.ArrayBuffer) -> {
+						loaded = true;
+						bytes = Bytes.ofData(buf);
+						if (onReady != null)
+							onReady();
+					});
+				});
 		}
 		#else
 		if (onReady != null)

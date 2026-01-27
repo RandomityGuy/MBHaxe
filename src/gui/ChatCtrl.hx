@@ -118,7 +118,7 @@ class ChatCtrl extends GuiControl {
 	}
 
 	public function addChatMessage(text:String) {
-		var realText = StringTools.htmlUnescape(text);
+		var realText = StringTools.htmlEscape(text);
 		this.chats.push({
 			text: realText,
 			age: 10.0
