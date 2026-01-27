@@ -2525,7 +2525,7 @@ class MarbleWorld extends Scheduler {
 			} else {
 				nextLevelCode();
 			}
-		}, mission, finishTime);
+		}, mission, finishTime, this.replay.write());
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;

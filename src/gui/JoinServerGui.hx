@@ -186,7 +186,7 @@ class JoinServerGui extends GuiImage {
 				serverInfo.text.text = '<p align="center">Select a Server</p><p align="center">or Host your own</p>';
 			} else {
 				var server = ourServerList[curSelection];
-				serverInfo.text.text = '<p align="center">${server.name}</p><p align="center"><font face="MarkerFelt18" color="#DDDDEE">Hosted by ${server.host}</font></p><p align="left">${server.description}</p>';
+				serverInfo.text.text = '<p align="center">${StringTools.htmlEscape(server.name)}</p><p align="center"><font face="MarkerFelt18" color="#DDDDEE">Hosted by ${StringTools.htmlEscape(server.host)}</font></p><p align="left">${StringTools.htmlEscape(server.description)}</p>';
 			}
 		}
 		serverListContainer.addChild(serverList);
@@ -197,7 +197,7 @@ class JoinServerGui extends GuiImage {
 
 		function updateServerListDisplay() {
 			serverDisplays = ourServerList.map(x ->
-				'<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${x.name} <offset value="${400 * Settings.uiScale}">${x.players}/${x.maxPlayers}</offset></font>');
+				'<img src="${platformToString[x.platform]}"></img><font color="#FFFFFF">${StringTools.htmlEscape(x.name)} <offset value="${400 * Settings.uiScale}">${x.players}/${x.maxPlayers}</offset></font>');
 			serverList.setTexts(serverDisplays);
 		}
 

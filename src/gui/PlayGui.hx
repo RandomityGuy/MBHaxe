@@ -732,7 +732,7 @@ class PlayGui {
 			} else {
 				isSpectating = Net.clientIdMap[item.id].spectator;
 			}
-			pl.push('<font color="${color}">${i + 1}. ${isSpectating ? "[S] " : ""}${Util.rightPad(item.name, 25, 3)}</font>');
+			pl.push('<font color="${color}">${i + 1}. ${isSpectating ? "[S] " : ""}${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
 			var connPing = item.us ? (Net.isHost ? 0 : Net.clientConnection.pingTicks) : (item.id == 0 ? 0 : Net.clientIdMap[item.id].pingTicks);
 			var pingStatus = "unknown";
 			if (connPing <= 5)

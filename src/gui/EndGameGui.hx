@@ -19,7 +19,8 @@ class EndGameGui extends GuiControl {
 
 	var scoreSubmitted:Bool = false;
 
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, timeState:TimeState) {
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, timeState:TimeState,
+			replayData:haxe.io.Bytes) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -313,12 +314,11 @@ class EndGameGui extends GuiControl {
 			scoreData.push({name: "Matan W.", time: 5999.999});
 		}
 
-		egFirstLine.text.text = '<p align="left"><font color="#EEC884">1. </font>${scoreData[0].name}</p>';
-		egSecondLine.text.text = '<p align="left"><font color="#CDCDCD">2. </font>${scoreData[1].name}</p>';
-		egThirdLine.text.text = '<p align="left"><font color="#C9AFA0">3. </font>${scoreData[2].name}</p>';
-		egFourthLine.text.text = '<p align="left"><font color="#A4A4A4">4. </font>${scoreData[3].name}</p>';
-		egFifthLine.text.text = '<p align="left"><font color="#949494">5. </font>${scoreData[4].name}</p>';
-
+		egFirstLine.text.text = '<p align="left"><font color="#EEC884">1. </font>${StringTools.htmlEscape(scoreData[0].name)}</p>';
+		egSecondLine.text.text = '<p align="left"><font color="#CDCDCD">2. </font>${StringTools.htmlEscape(scoreData[1].name)}</p>';
+		egThirdLine.text.text = '<p align="left"><font color="#C9AFA0">3. </font>${StringTools.htmlEscape(scoreData[2].name)}</p>';
+		egFourthLine.text.text = '<p align="left"><font color="#A4A4A4">4. </font>${StringTools.htmlEscape(scoreData[3].name)}</p>';
+		egFifthLine.text.text = '<p align="left"><font color="#949494">5. </font>${StringTools.htmlEscape(scoreData[4].name)}</p>';
 		var lineelems = [
 			egFirstLineScore,
 			egSecondLineScore,
@@ -394,6 +394,8 @@ class EndGameGui extends GuiControl {
 		// }
 		Settings.save();
 
+		var rewindUsed = MarbleGame.instance.world.rewindUsed;
+
 		if (idx <= 4) {
 			setButtonStates(false);
 			var end = new EnterNameDlg(idx, (name) -> {
@@ -427,8 +429,7 @@ class EndGameGui extends GuiControl {
 				var lbPath = mission.path;
 				if (mission.isClaMission)
 					lbPath = 'custom/${mission.id}';
-				var replayData = MarbleGame.instance.world.replay.write();
-				Leaderboards.submitScore(lbPath, myScore.time, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
+				Leaderboards.submitScore(lbPath, myScore.time, rewindUsed, (sendReplay, rowId) -> {
 					if (sendReplay && !mission.isClaMission) {
 						Leaderboards.submitReplay(rowId, replayData);
 					}
@@ -439,7 +440,6 @@ class EndGameGui extends GuiControl {
 			this.addChild(end);
 		} else {
 			// Check if we can submit LB scores
-			var replayData = MarbleGame.instance.world.replay.write();
 			var lbPath = mission.path;
 			if (mission.isClaMission)
 				lbPath = 'custom/${mission.id}';
@@ -454,7 +454,7 @@ class EndGameGui extends GuiControl {
 					}
 				}
 				if (!hasMyScore || (hasMyScore && myTopScoreLB > timeState.gameplayClock)) {
-					Leaderboards.submitScore(lbPath, timeState.gameplayClock, MarbleGame.instance.world.rewindUsed, (sendReplay, rowId) -> {
+					Leaderboards.submitScore(lbPath, timeState.gameplayClock, rewindUsed, (sendReplay, rowId) -> {
 						if (sendReplay && !mission.isClaMission) {
 							Leaderboards.submitReplay(rowId, replayData);
 						}

@@ -586,11 +586,11 @@ class MPPlayMissionGui extends GuiImage {
 				currentSelection = -1;
 			}
 
-			pmDesc.text.text = '<font face="MarkerFelt32" color="#E3F3FF"><p align="center">#${currentSelection + 1}: ${currentMission.title}</p></font>'
-				+ '<font face="MarkerFelt18" color="#CEE0F4">${currentMission.description}</font>';
+			pmDesc.text.text = '<font face="MarkerFelt32" color="#E3F3FF"><p align="center">#${currentSelection + 1}: ${StringTools.htmlEscape(currentMission.title)}</p></font>'
+				+ '<font face="MarkerFelt18" color="#CEE0F4">${StringTools.htmlEscape(currentMission.description)}</font>';
 
 			parTime.text.text = '<font face="MarkerFelt24" color="#E3F3FF">Duration: <font color="#FFFFFF">${Util.formatTime(currentMission.qualifyTime)}</font></font><br/>'
-				+ '<font face="MarkerFelt24" color="#E3F3FF">Author: <font color="#FFFFFF">${currentMission.artist}</font></font>';
+				+ '<font face="MarkerFelt24" color="#E3F3FF">Author: <font color="#FFFFFF">${StringTools.htmlEscape(currentMission.artist)}</font></font>';
 
 			// pmPreview.bmp.tile = tmpprevtile;
 			#if js
@@ -719,7 +719,7 @@ class MPPlayMissionGui extends GuiImage {
 		}
 
 		var playerListCompiled = playerListArr.map(player ->
-			'<img src="${platformToString(player.platform)}"></img><font color="#FFFFFF">${player.name}<offset value="${220 * Settings.uiScale}">${player.ready ? "Ready" : ""}</offset></font>');
+			'<img src="${platformToString(player.platform)}"></img><font color="#FFFFFF">${StringTools.htmlEscape(player.name)}<offset value="${220 * Settings.uiScale}">${player.ready ? "Ready" : ""}</offset></font>');
 		playerListCtrl.setTexts(playerListCompiled);
 
 		// if (!showingCustoms)
@@ -729,7 +729,7 @@ class MPPlayMissionGui extends GuiImage {
 	}
 
 	public static function addChatMessage(s:String) {
-		var realText = StringTools.htmlUnescape(s);
+		var realText = StringTools.htmlEscape(s);
 		allChats.push(realText);
 		if (allChats.length > 100) {
 			allChats = allChats.slice(allChats.length - 100);

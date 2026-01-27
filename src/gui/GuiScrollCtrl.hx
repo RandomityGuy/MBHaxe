@@ -9,6 +9,7 @@ import h2d.Tile;
 import h2d.Graphics;
 import src.MarbleGame;
 import src.Util;
+import haxe.Timer;
 
 class GuiScrollCtrl extends GuiControl {
 	public var scrollY:Float = 0;
@@ -36,6 +37,12 @@ class GuiScrollCtrl extends GuiControl {
 	var pressed:Bool = false;
 	var dirty:Bool = true;
 	var prevMousePos:Vector;
+
+	var scrollVelocity:Float = 0;
+	var lastMoveStamp:Float = 0;
+	var momentumActive:Bool = false;
+
+	static inline var MOMENTUM_DAMPING:Float = 8;
 
 	public function new(scrollBar:Tile) {
 		super();
@@ -218,6 +225,9 @@ class GuiScrollCtrl extends GuiControl {
 			this.dirty = true;
 			this.updateScrollVisual();
 			this.prevMousePos = mouseState.position;
+			this.scrollVelocity = 0;
+			this.momentumActive = false;
+			this.lastMoveStamp = Timer.stamp();
 		}
 	}
 
@@ -226,6 +236,8 @@ class GuiScrollCtrl extends GuiControl {
 			this.pressed = false;
 			this.dirty = true;
 			this.updateScrollVisual();
+			this.momentumActive = Math.abs(scrollVelocity) > 0.01;
+			this.lastMoveStamp = 0;
 		}
 	}
 
@@ -233,11 +245,50 @@ class GuiScrollCtrl extends GuiControl {
 		if (Util.isTouchDevice()) {
 			super.onMouseMove(mouseState);
 			if (this.pressed) {
-				var dy = (mouseState.position.y - this.prevMousePos.y) * scrollSpeed / this.maxScrollY;
+				var renderRect = this.getRenderRectangle();
+				var scrollExtentY = renderRect.extent.y;
+				var dy = (mouseState.position.y - this.prevMousePos.y) / ((maxScrollY * Settings.uiScale) / scrollExtentY);
 				this.scrollY -= dy;
 				this.prevMousePos = mouseState.position;
+				var now = Timer.stamp();
+				if (lastMoveStamp > 0) {
+					var dt = now - lastMoveStamp;
+					if (dt > 0)
+						scrollVelocity = -dy / dt;
+				}
+				lastMoveStamp = now;
+				momentumActive = false;
 				this.updateScrollVisual();
 			}
+		}
+	}
+
+	public override function onMouseLeave(mouseState:MouseState) {
+		if (Util.isTouchDevice()) {
+			this.pressed = false;
+			this.dirty = true;
+			this.updateScrollVisual();
+			this.momentumActive = Math.abs(scrollVelocity) > 0.01;
+			this.lastMoveStamp = 0;
+		}
+	}
+
+	public override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+
+		if (!pressed && momentumActive) {
+			var damping = Math.exp(-MOMENTUM_DAMPING * dt);
+			scrollVelocity *= damping;
+			if (Math.abs(scrollVelocity) < 0.01) {
+				scrollVelocity = 0;
+				momentumActive = false;
+				return;
+			}
+			var before = scrollY;
+			scrollY += scrollVelocity * dt;
+			updateScrollVisual();
+			if (scrollY == 0 || scrollY == before)
+				momentumActive = false;
 		}
 	}
 
