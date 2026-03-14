@@ -714,22 +714,48 @@ class DifBuilder {
 					tex = spl[spl.length - 1];
 				}
 
+				// search with extension first
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex)) {
+					return true;
+				}
+
+				var prevDir = Path.directory(Path.directory(path));
+				if (ResourceLoader.exists(prevDir + "/" + tex)) {
+					return true;
+				}
+
+				prevDir = Path.directory(prevDir);
+				if (ResourceLoader.exists(prevDir + "/" + tex))
+					return true;
+
+				// remove extension from it
+				if (tex.lastIndexOf(".") != -1) {
+					tex = tex.substring(0, tex.lastIndexOf("."));
+				}
+
 				#if (js || android)
 				path = StringTools.replace(path, "data/", "");
 				#end
 
+				// search jpg, png and bmp
 				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
 					return true;
 				}
 				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
 					return true;
 				}
-				var prevDir = Path.directory(Path.directory(path));
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".bmp")) {
+					return true;
+				}
+				prevDir = Path.directory(Path.directory(path));
 
 				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
 					return true;
 				}
 				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
+					return true;
+				}
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
 					return true;
 				}
 
@@ -741,6 +767,9 @@ class DifBuilder {
 				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
 					return true;
 				}
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
+					return true;
+				}
 
 				return false;
 			}
@@ -750,11 +779,35 @@ class DifBuilder {
 					tex = spl[spl.length - 1];
 				}
 
+				// search with extension first
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex)) {
+					return Path.directory(path) + "/" + tex;
+				}
+
+				var prevDir = Path.directory(Path.directory(path));
+				if (ResourceLoader.exists(prevDir + "/" + tex)) {
+					return prevDir + "/" + tex;
+				}
+
+				prevDir = Path.directory(prevDir);
+
+				if (ResourceLoader.exists(prevDir + "/" + tex)) {
+					return prevDir + "/" + tex;
+				}
+
+				// remove extension from it
+				if (tex.lastIndexOf(".") != -1) {
+					tex = tex.substring(0, tex.lastIndexOf("."));
+				}
+
 				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
 					return Path.directory(path) + "/" + tex + ".jpg";
 				}
 				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
 					return Path.directory(path) + "/" + tex + ".png";
+				}
+				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".bmp")) {
+					return Path.directory(path) + "/" + tex + ".bmp";
 				}
 
 				var prevDir = Path.directory(Path.directory(path));
@@ -765,6 +818,9 @@ class DifBuilder {
 				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
 					return prevDir + "/" + tex + ".png";
 				}
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
+					return prevDir + "/" + tex + ".bmp";
+				}
 
 				var prevDir = Path.directory(prevDir);
 
@@ -773,6 +829,9 @@ class DifBuilder {
 				}
 				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
 					return prevDir + "/" + tex + ".png";
+				}
+				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
+					return prevDir + "/" + tex + ".bmp";
 				}
 
 				return null;

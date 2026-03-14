@@ -72,7 +72,7 @@ class EndGameGui extends GuiControl {
 		nextLevelPreview.doClipping = true;
 		nextLevel.addChild(nextLevelPreview);
 
-		mission.getNextMission().getPreviewImage(t -> {
+		mission.getNextMission()?.getPreviewImage(t -> {
 			nextLevelPreview.bmp.tile = t;
 		});
 
