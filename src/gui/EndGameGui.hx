@@ -71,7 +71,7 @@ class EndGameGui extends GuiControl {
 		nextLevelPreview.extent = new Vector(160, 110);
 		nextLevel.addChild(nextLevelPreview);
 
-		mission.getNextMission().getPreviewImage(t -> {
+		mission.getNextMission()?.getPreviewImage(t -> {
 			nextLevelPreview.bmp.tile = t;
 		});
 
