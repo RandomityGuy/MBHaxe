@@ -260,7 +260,8 @@ class Marble extends GameObject {
 
 	public var contacts:Array<CollisionInfo> = [];
 	public var bestContact:CollisionInfo;
-	public var contactEntities:Array<CollisionEntity> = [];
+
+	static var contactScratch:Array<CollisionEntity> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
 	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
@@ -701,9 +702,7 @@ class Marble extends GameObject {
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
 		this.contacts = queuedContacts;
 		CollisionPool.clear();
-		var c = collisiomWorld.sphereIntersection(this.collider, timeState);
-		this.contactEntities = c.foundEntities;
-		contacts = contacts.concat(c.contacts);
+		collisiomWorld.sphereIntersection(this.collider, timeState, this.contacts);
 	}
 
 	public function queueCollision(collisionInfo:CollisionInfo) {
@@ -1275,7 +1274,10 @@ class Marble extends GameObject {
 		searchbox.addSpherePos(position.x, position.y, position.z, _radius);
 		searchbox.addSpherePos(position.x + velocity.x * deltaT, position.y + velocity.y * deltaT, position.z + velocity.z * deltaT, _radius);
 
-		var foundObjs = this.collisionWorld.boundingSearch(searchbox);
+		contactScratch.resize(0);
+		this.collisionWorld.boundingSearch(searchbox, contactScratch);
+
+		var foundObjs = contactScratch;
 
 		var finalT = deltaT;
 		var found = false;
@@ -1905,7 +1907,7 @@ class Marble extends GameObject {
 			}
 			// }
 		}
-		this.queuedContacts = [];
+		this.queuedContacts.resize(0);
 
 		newPos = this.collider.transform.getPosition(); // this.getAbsPos().getPosition().clone();
 
@@ -1984,7 +1986,9 @@ class Marble extends GameObject {
 		// marbleHitbox.offset(end.x, end.y, end.z);
 
 		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
-		var contacts = this.collisionWorld.boundingSearch(box);
+		contactScratch.resize(0);
+		this.collisionWorld.boundingSearch(box, contactScratch);
+		var contacts = contactScratch;
 		// var contacts = marble.contactEntities;
 		var inside = [];
 
@@ -2037,7 +2041,9 @@ class Marble extends GameObject {
 				var checkSphereRadius = checkBounds.getMax().sub(checkBoundsCenter).length();
 				var checkSphere = new Bounds();
 				checkSphere.addSpherePos(checkBoundsCenter.x, checkBoundsCenter.y, checkBoundsCenter.z, checkSphereRadius);
-				var endpadBB = this.collisionWorld.boundingSearch(checkSphere, false);
+				contactScratch.resize(0);
+				this.collisionWorld.boundingSearch(checkSphere, contactScratch, false);
+				var endpadBB = contactScratch;
 				var found = false;
 				for (collider in endpadBB) {
 					if (collider.go == @:privateAccess this.level.endPad) {
@@ -2821,7 +2827,6 @@ class Marble extends GameObject {
 		this.megaMarbleUseTick = 0;
 		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
 		this.lastContactNormal = new Vector(0, 0, 1);
-		this.contactEntities = [];
 		this.cloak = false;
 		this._firstTick = true;
 		this.lastRespawnTick = -100000;

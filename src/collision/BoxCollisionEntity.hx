@@ -56,7 +56,5 @@ class BoxCollisionEntity extends CollisionEntity implements IBVHObject {
 		return Math.POSITIVE_INFINITY;
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
-		return [];
-	}
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {}
 }
