@@ -18,7 +18,7 @@ class CollisionHull extends CollisionEntity {
 		super(go);
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState):Array<CollisionInfo> {
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
 		var bbox = this.boundingBox;
 		var box = new Bounds();
 		var pos = collisionEntity.transform.getPosition();
@@ -51,10 +51,9 @@ class CollisionHull extends CollisionEntity {
 				cinfo.friction = friction;
 				cinfo.force = force;
 				this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
-				return [cinfo];
+				contacts.push(cinfo);
 			}
 		}
-		return [];
 	}
 
 	public override function addSurface(surface:CollisionSurface) {

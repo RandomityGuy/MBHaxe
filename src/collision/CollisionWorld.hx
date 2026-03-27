@@ -38,11 +38,12 @@ class CollisionWorld {
 		this.dynamicGrid.build();
 	}
 
-	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState):SphereIntersectionResult {
+	var contactList:Array<CollisionInfo> = [];
+	var intersectionList:Array<CollisionEntity> = [];
+
+	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
 		var position = spherecollision.transform.getPosition();
 		var radius = spherecollision.radius;
-		// var velocity = spherecollision.velocity;
-		// var intersections = this.octree.radiusSearch(position, searchdist);
 
 		var box = new Bounds();
 		box.addSpherePos(0, 0, 0, radius);
@@ -50,60 +51,24 @@ class CollisionWorld {
 		box.transform(rotQuat.toMatrix());
 		box.offset(position.x, position.y, position.z);
 		// box.addSpherePos(position.x + velocity.x * timeState.dt, position.y + velocity.y * timeState.dt, position.z + velocity.z * timeState.dt, radius);
-		var intersections = this.grid.boundingSearch(box);
+		this.intersectionList.resize(0);
+		this.grid.boundingSearch(box, this.intersectionList);
+		dynamicGrid.boundingSearch(box, this.intersectionList);
 
-		// var intersections = this.rtree.search([box.xMin, box.yMax, box.zMin], [box.xSize, box.ySize, box.zSize]);
-
-		var contacts = [];
-		var foundEntities = [];
-
-		for (obj in intersections) {
-			var entity:CollisionEntity = cast obj;
-
-			foundEntities.push(entity);
-			if (entity.go.isCollideable) {
-				contacts = contacts.concat(entity.sphereIntersection(spherecollision, timeState));
-			}
-		}
-
-		// if (marbleEntities.length > 1) {
-		// 	marbleSap.recompute();
-		// 	var sapCollisions = marbleSap.getIntersections(spherecollision);
-		// 	for (obj in sapCollisions) {
-		// 		if (obj.go.isCollideable) {
-		// 			contacts = contacts.concat(obj.sphereIntersection(spherecollision, timeState));
-		// 		}
-		// 	}
-		// }
-
-		// contacts = contacts.concat(this.staticWorld.sphereIntersection(spherecollision, timeState));
-
-		var dynSearch = dynamicGrid.boundingSearch(box);
-		for (obj in dynSearch) {
+		for (obj in this.intersectionList) {
 			if (obj != spherecollision) {
-				var col = cast(obj, CollisionEntity);
-				if (col.boundingBox.collide(box) && col.go.isCollideable)
-					contacts = contacts.concat(col.sphereIntersection(spherecollision, timeState));
+				var entity = obj;
+
+				if (obj.boundingBox.collide(box) && entity.go.isCollideable) {
+					entity.sphereIntersection(spherecollision, timeState, contacts);
+				}
 			}
 		}
-
-		// for (marb in marbleEntities) {
-		// 	if (marb != spherecollision) {
-		// 		if (spherecollision.go.isCollideable) {
-		// 			var isecs = marb.sphereIntersection(spherecollision, timeState);
-		// 			if (isecs.length > 0)
-		// 				foundEntities.push(marb);
-		// 			contacts = contacts.concat(isecs);
-		// 		}
-		// 	}
-		// }
-		return {foundEntities: foundEntities, contacts: contacts};
 	}
 
-	public function boundingSearch(bounds:Bounds, useCache:Bool = true) {
-		var contacts = this.grid.boundingSearch(bounds).map(x -> cast(x, CollisionEntity));
-		contacts = contacts.concat(dynamicGrid.boundingSearch(bounds).map(x -> cast(x, CollisionEntity)));
-		return contacts;
+	public function boundingSearch(bounds:Bounds, contacts:Array<CollisionEntity>, useCache:Bool = true) {
+		this.grid.boundingSearch(bounds, contacts);
+		dynamicGrid.boundingSearch(bounds, contacts);
 	}
 
 	public function rayCast(rayStart:Vector, rayDirection:Vector, rayLength:Float) {
@@ -116,19 +81,17 @@ class CollisionWorld {
 			+ rayDirection.x * rayLength, rayStart.y
 			+ rayDirection.y * rayLength, rayStart.z
 			+ rayDirection.z * rayLength);
-		var objs = this.grid.boundingSearch(bounds);
-		var dynObjs = dynamicGrid.boundingSearch(bounds);
+		this.intersectionList.splice(0, this.intersectionList.length);
+
+		this.grid.boundingSearch(bounds, this.intersectionList);
+		dynamicGrid.boundingSearch(bounds, this.intersectionList);
+
 		var results = [];
-		for (obj in objs) {
-			var oo = cast(obj, CollisionEntity);
+		for (obj in this.intersectionList) {
+			var oo = obj;
 			oo.rayCast(rayStart, rayDirection, results, rayLength);
 		}
 
-		for (obj in dynObjs) {
-			var oo = cast(obj, CollisionEntity);
-			oo.rayCast(rayStart, rayDirection, results, rayLength);
-		}
-		// results = results.concat(this.staticWorld.rayCast(rayStart, rayDirection));
 		return results;
 	}
 

@@ -75,10 +75,9 @@ class SphereCollisionEntity extends CollisionEntity {
 		return Math.POSITIVE_INFINITY;
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
 		if (ignore)
-			return [];
-		var contacts = [];
+			return;
 		var thispos = transform.getPosition();
 		var position = collisionEntity.transform.getPosition();
 		var velocity = collisionEntity.velocity;
@@ -113,6 +112,5 @@ class SphereCollisionEntity extends CollisionEntity {
 			// othercontact.penetration = this.radius - (thispos.sub(othercontact.point).dot(othercontact.normal));
 			// this.marble.queueCollision(othercontact);
 		}
-		return contacts;
 	}
 }

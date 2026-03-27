@@ -200,7 +200,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		this.priority = priority;
 	}
 
-	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
+	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
 		var position = collisionEntity.transform.getPosition();
 		var radius = collisionEntity.radius + 0.001;
 
@@ -226,8 +226,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			tform.load(Matrix.I());
 			invtform.load(Matrix.I());
 		}
-
-		var contacts = [];
 
 		for (obj in surfaces) {
 			var surface:CollisionSurface = cast obj;
@@ -301,7 +299,5 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			// if (surfaceBestContact != null)
 			// contacts.push(surfaceBestContact);
 		}
-
-		return contacts;
 	}
 }

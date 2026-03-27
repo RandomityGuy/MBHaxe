@@ -221,7 +221,7 @@ class GridBroadphase {
 	}
 
 	// searchbox should be in LOCAL coordinates
-	public function boundingSearch(searchbox:Bounds) {
+	public function boundingSearch(searchbox:Bounds, foundSurfaces:Array<CollisionEntity>) {
 		var queryMinX = Math.max(searchbox.xMin, bounds.xMin);
 		var queryMinY = Math.max(searchbox.yMin, bounds.yMin);
 		var queryMaxX = Math.min(searchbox.xMax, bounds.xMax);
@@ -239,8 +239,6 @@ class GridBroadphase {
 			xEnd = CELL_SIZE;
 		if (yEnd > CELL_SIZE)
 			yEnd = CELL_SIZE;
-
-		var foundSurfaces = [];
 
 		searchKey++;
 
