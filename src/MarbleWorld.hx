@@ -217,6 +217,8 @@ class MarbleWorld extends Scheduler {
 	public var rewinding:Bool = false;
 	public var rewindUsed:Bool = false;
 
+	public var cheatsUsed:Bool = false;
+
 	public var inputRecorder:InputRecorder;
 	public var isReplayingMovement:Bool = false;
 	public var currentInputMoves:Array<InputRecorderFrame>;
@@ -2254,7 +2256,8 @@ class MarbleWorld extends Scheduler {
 					name: "Player",
 					time: this.gameMode.getFinishScore()
 				};
-				Settings.saveScore(misPath, myScore, this.gameMode.getScoreType());
+				if (!this.cheatsUsed)
+					Settings.saveScore(misPath, myScore, this.gameMode.getScoreType());
 				var notifies = AchievementsGui.check();
 				var delay = 5.0;
 				var achDelay = 0.0;

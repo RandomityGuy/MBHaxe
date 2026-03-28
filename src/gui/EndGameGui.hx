@@ -196,50 +196,53 @@ class EndGameGui extends GuiImage {
 		}
 		bottomBar.addChild(nextButton);
 		var rewindUsed = MarbleGame.instance.world.rewindUsed;
+		var cheatsUsed = MarbleGame.instance.world.cheatsUsed;
 
 		var misPath = mission.isClaMission ? 'custom/mbu/${mission.id}' : mission.path;
 
-		var submitScore = () -> {
-			var lbScoreValue = score;
-			if (scoreType == Score)
-				lbScoreValue = 1000 - score;
-			Leaderboards.submitScore(misPath, lbScoreValue, rewindUsed, (needsReplay, ref) -> {
-				if (needsReplay && !mission.isClaMission) {
-					Leaderboards.submitReplay(ref, replayData);
-				}
-			});
-		}
-		if (bestScore.time == score) {
-			if (Settings.highscoreName == "" || Settings.highscoreName == "Player" || Settings.highscoreName == "Player Name") {
-				haxe.Timer.delay(() -> {
-					MarbleGame.canvas.pushDialog(new EnterNamePopupDlg(() -> {
-						submitScore();
-					}));
-				}, 100);
-			} else {
-				submitScore();
-			}
-		} else {
-			Leaderboards.getScores(misPath, rewindUsed ? Rewind : NoRewind, lbscores -> {
-				// Score submission criteria
-				// If it is better than our non-rewind score, or better than the top non-rewind score, and we are non rewind, submit it
-				// If it is better than our rewind score, or better than the top rewind score, and we are rewind, submit it
-
-				var foundScore = false;
-				var foundLBScore:Float = 0;
-				for (lb in lbscores) {
-					if (lb.name == Settings.highscoreName) {
-						foundScore = true;
-						foundLBScore = lb.score;
-						break;
+		if (!cheatsUsed) {
+			var submitScore = () -> {
+				var lbScoreValue = score;
+				if (scoreType == Score)
+					lbScoreValue = 1000 - score;
+				Leaderboards.submitScore(misPath, lbScoreValue, rewindUsed, (needsReplay, ref) -> {
+					if (needsReplay && !mission.isClaMission) {
+						Leaderboards.submitReplay(ref, replayData);
 					}
-				}
-				if (!foundScore) {
+				});
+			}
+			if (bestScore.time == score) {
+				if (Settings.highscoreName == "" || Settings.highscoreName == "Player" || Settings.highscoreName == "Player Name") {
+					haxe.Timer.delay(() -> {
+						MarbleGame.canvas.pushDialog(new EnterNamePopupDlg(() -> {
+							submitScore();
+						}));
+					}, 100);
+				} else {
 					submitScore();
-				} else if (foundLBScore > score) {
-					submitScore();
 				}
-			});
+			} else {
+				Leaderboards.getScores(misPath, rewindUsed ? Rewind : NoRewind, lbscores -> {
+					// Score submission criteria
+					// If it is better than our non-rewind score, or better than the top non-rewind score, and we are non rewind, submit it
+					// If it is better than our rewind score, or better than the top rewind score, and we are rewind, submit it
+
+					var foundScore = false;
+					var foundLBScore:Float = 0;
+					for (lb in lbscores) {
+						if (lb.name == Settings.highscoreName) {
+							foundScore = true;
+							foundLBScore = lb.score;
+							break;
+						}
+					}
+					if (!foundScore) {
+						submitScore();
+					} else if (foundLBScore > score) {
+						submitScore();
+					}
+				});
+			}
 		}
 	}
 
