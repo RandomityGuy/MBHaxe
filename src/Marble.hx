@@ -262,6 +262,7 @@ class Marble extends GameObject {
 	public var bestContact:CollisionInfo;
 
 	static var contactScratch:Array<CollisionEntity> = [];
+	static var surfaceScratch:Array<CollisionSurface> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
 	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
@@ -1319,7 +1320,7 @@ class Marble extends GameObject {
 		//	var iterationFound = false;
 		for (obj in foundObjs) {
 			// Its an MP so bruh
-			if (obj.go != null && !obj.go.isCollideable)
+			if (obj.go == this || (obj.go != null && !obj.go.isCollideable))
 				continue;
 
 			var isDts = obj.go is DtsObject;
@@ -1347,11 +1348,12 @@ class Marble extends GameObject {
 				Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 2);
 
 			var currentFinalPos = position.add(relVel.multiply(finalT)); // localpos.add(relLocalVel.multiply(finalT));
-			var surfaces = @:privateAccess obj.grid != null ? @:privateAccess obj.grid.boundingSearch(boundThing) : (obj.bvh == null ? obj.octree.boundingSearch(boundThing)
-				.map(x -> cast x) : obj.bvh.boundingSearch(boundThing));
+			surfaceScratch.resize(0);
+			@:privateAccess obj.grid.boundingSearch(boundThing, surfaceScratch);
+			var surfaces = surfaceScratch;
 
 			for (surf in surfaces) {
-				var surface:CollisionSurface = cast surf;
+				var surface:CollisionSurface = surf;
 
 				currentFinalPos = position.add(relVel.multiply(finalT));
 
