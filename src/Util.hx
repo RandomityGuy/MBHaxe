@@ -30,6 +30,14 @@ class Util {
 		return value;
 	}
 
+	public static inline function imin(a:Int, b:Int) {
+		return a < b ? a : b;
+	}
+
+	public static inline function imax(a:Int, b:Int) {
+		return a > b ? a : b;
+	}
+
 	public static inline function lerp(a:Float, b:Float, t:Float) {
 		return a + (b - a) * t;
 	}

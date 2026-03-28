@@ -111,10 +111,10 @@ class GridBroadphase {
 		var queryMinY = Math.max(object.boundingBox.yMin, bounds.yMin);
 		var queryMaxX = Math.min(object.boundingBox.xMax, bounds.xMax);
 		var queryMaxY = Math.min(object.boundingBox.yMax, bounds.yMax);
-		var xStart = Math.floor((queryMinX - bounds.xMin) / this.cellSize.x);
-		var yStart = Math.floor((queryMinY - bounds.yMin) / this.cellSize.y);
-		var xEnd = Math.floor((queryMaxX - bounds.xMin) / this.cellSize.x);
-		var yEnd = Math.floor((queryMaxY - bounds.yMin) / this.cellSize.y);
+		var xStart = Util.imax(0, Math.floor((queryMinX - bounds.xMin) / this.cellSize.x));
+		var yStart = Util.imax(0, Math.floor((queryMinY - bounds.yMin) / this.cellSize.y));
+		var xEnd = Util.imin(CELL_SIZE - 1, Math.floor((queryMaxX - bounds.xMin) / this.cellSize.x));
+		var yEnd = Util.imin(CELL_SIZE - 1, Math.floor((queryMaxY - bounds.yMin) / this.cellSize.y));
 		var proxy = objectToProxy.get(object);
 		if (proxy == null) {
 			insert(object);
