@@ -327,7 +327,8 @@ class KingMode extends NullMode {
 			} else {
 				var myScore = {name: "Player", time: getFinishScore()};
 				var misPath = level.mission.isClaMission ? 'custom/mbu/${level.mission.id}' : level.mission.path;
-				Settings.saveScore(misPath, myScore, getScoreType());
+				if (!level.cheatsUsed)
+					Settings.saveScore(misPath, myScore, getScoreType());
 				@:privateAccess level.schedule(level.timeState.currentAttemptTime + 5, () -> cast level.showFinishScreen());
 			}
 		}
