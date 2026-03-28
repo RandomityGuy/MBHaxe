@@ -395,6 +395,7 @@ class EndGameGui extends GuiControl {
 		Settings.save();
 
 		var rewindUsed = MarbleGame.instance.world.rewindUsed;
+		var cheatsUsed = MarbleGame.instance.world.cheatsUsed;
 
 		if (idx <= 4) {
 			setButtonStates(false);
@@ -425,15 +426,17 @@ class EndGameGui extends GuiControl {
 					}
 				}
 
-				Settings.saveScore(mission.path, myScore);
-				var lbPath = mission.path;
-				if (mission.isClaMission)
-					lbPath = 'custom/${mission.id}';
-				Leaderboards.submitScore(lbPath, myScore.time, rewindUsed, (sendReplay, rowId) -> {
-					if (sendReplay && !mission.isClaMission) {
-						Leaderboards.submitReplay(rowId, replayData);
-					}
-				});
+				if (!cheatsUsed) { // dont submit or save if we have cheated
+					Settings.saveScore(mission.path, myScore);
+					var lbPath = mission.path;
+					if (mission.isClaMission)
+						lbPath = 'custom/${mission.id}';
+					Leaderboards.submitScore(lbPath, myScore.time, rewindUsed, (sendReplay, rowId) -> {
+						if (sendReplay && !mission.isClaMission) {
+							Leaderboards.submitReplay(rowId, replayData);
+						}
+					});
+				}
 
 				scoreSubmitted = true;
 			});
@@ -453,12 +456,14 @@ class EndGameGui extends GuiControl {
 						break;
 					}
 				}
-				if (!hasMyScore || (hasMyScore && myTopScoreLB > timeState.gameplayClock)) {
-					Leaderboards.submitScore(lbPath, timeState.gameplayClock, rewindUsed, (sendReplay, rowId) -> {
-						if (sendReplay && !mission.isClaMission) {
-							Leaderboards.submitReplay(rowId, replayData);
-						}
-					});
+				if (!cheatsUsed) {
+					if (!hasMyScore || (hasMyScore && myTopScoreLB > timeState.gameplayClock)) {
+						Leaderboards.submitScore(lbPath, timeState.gameplayClock, rewindUsed, (sendReplay, rowId) -> {
+							if (sendReplay && !mission.isClaMission) {
+								Leaderboards.submitReplay(rowId, replayData);
+							}
+						});
+					}
 				}
 			});
 		}

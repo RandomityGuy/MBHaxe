@@ -699,6 +699,37 @@ class Marble extends GameObject {
 			this._bounceKineticFriction = MisParser.parseNumber(attribs.get("bouncekineticfriction"));
 	}
 
+	public function setMarbleAttribute(attr:String, value:Float) {
+		switch (attr.toLowerCase()) {
+			case "maxrollvelocity":
+				this._maxRollVelocity = value;
+			case "angularacceleration":
+				this._angularAcceleration = value;
+			case "jumpimpulse":
+				this._jumpImpulse = value;
+			case "kineticfriction":
+				this._kineticFriction = value;
+			case "staticfriction":
+				this._staticFriction = value;
+			case "brakingacceleration":
+				this._brakingAcceleration = value;
+			case "gravity":
+				this._gravity = value;
+			case "airaccel":
+				this._airAccel = value;
+			case "maxdotslide":
+				this._maxDotSlide = value;
+			case "minbouncevel":
+				this._minBounceVel = value;
+			case "minbouncespeed":
+				this._minBounceSpeed = value;
+			case "mintrailvel":
+				this._minTrailVel = value;
+			case "bouncekineticfriction":
+				this._bounceKineticFriction = value;
+		}
+	}
+
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
 		this.contacts = queuedContacts;
 		CollisionPool.clear();

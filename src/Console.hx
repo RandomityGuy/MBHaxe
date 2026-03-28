@@ -1,5 +1,6 @@
 package src;
 
+import net.Net;
 #if !js
 import sys.FileSystem;
 #end
@@ -113,6 +114,29 @@ class Console {
 	}
 
 	public static function eval(cmd:String) {
+		var cmdLower = cmd.toLowerCase();
+		if (StringTools.startsWith(cmdLower, "defaultmarble")) {
+			// parse regex DefaultMarble.<attribName> = <value>
+			var regex = ~/defaultmarble\.(\w+)\s*=\s*(.+)/;
+			var matched = regex.match(cmdLower);
+			if (matched) {
+				var attribName = regex.matched(1);
+				var valueStr = regex.matched(2);
+				var numValue = Std.parseFloat(valueStr);
+				if (Math.isNaN(numValue))
+					numValue = 0;
+				if (MarbleGame.instance.world != null && !Net.isMP && MarbleGame.instance.world.marble != null) {
+					MarbleGame.instance.world.marble.setMarbleAttribute(attribName, numValue);
+					MarbleGame.instance.world.cheatsUsed = true;
+					log("Set DefaultMarble." + attribName + " to " + numValue);
+					return;
+				}
+			} else {
+				error("Invalid command format. Expected: DefaultMarble.<attribName> = <value>");
+				return;
+			}
+		}
+
 		var cmdSplit = cmd.split(" ");
 		if (cmdSplit.length != 0) {
 			var cmdType = cmdSplit[0];
