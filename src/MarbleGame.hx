@@ -87,7 +87,6 @@ class MarbleGame {
 							return; // don't pause
 						}
 
-						paused = true;
 						handlePauseGame();
 						// Focus the shit again
 						var jsCanvas = @:privateAccess Window.getInstance().canvas;
@@ -228,7 +227,6 @@ class MarbleGame {
 					|| (Net.isMP && paused && !(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPExitGameDlg))) {
 					return; // don't pause
 				}
-				paused = !paused;
 				handlePauseGame();
 			}
 		}
@@ -255,57 +253,63 @@ class MarbleGame {
 		}
 	}
 
+	public function showPauseUI() {
+		if (world.isMultiplayer) {
+			exitGameDlg = new MPExitGameDlg(() -> {
+				canvas.popDialog(exitGameDlg);
+				paused = !paused;
+				var w = getWorld();
+				w.setCursorLock(true);
+			}, () -> {
+				canvas.popDialog(exitGameDlg);
+				quitMission(Net.isClient);
+				if (Net.isMP && Net.isClient) {
+					Net.disconnect();
+					canvas.setContent(new JoinServerGui());
+				}
+			});
+		} else {
+			exitGameDlg = new ExitGameDlg((sender) -> {
+				canvas.popDialog(exitGameDlg);
+				var w = getWorld();
+				if (MarbleGame.instance.toRecord) {
+					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
+						quitMission();
+					}));
+				} else {
+					quitMission(Net.isClient);
+					if (Net.isMP && Net.isClient) {
+						Net.disconnect();
+					}
+				}
+			}, (sender) -> {
+				canvas.popDialog(exitGameDlg);
+				paused = !paused;
+				var w = getWorld();
+				w.setCursorLock(true);
+			}, (sender) -> {
+				canvas.popDialog(exitGameDlg);
+				var w = getWorld();
+				w.restart(w.marble, true);
+				// world.setCursorLock(true);
+				paused = !paused;
+			});
+		}
+		canvas.pushDialog(exitGameDlg);
+	}
+
 	public function handlePauseGame() {
-		if (paused && world._ready) {
+		if (!paused && world._ready) {
+			paused = true;
 			Console.log("Game paused");
 			world.setCursorLock(false);
 			if (Util.isTouchDevice()) {
 				this.touchInput.movementInput.forceRelease();
 			}
-			if (world.isMultiplayer) {
-				exitGameDlg = new MPExitGameDlg(() -> {
-					canvas.popDialog(exitGameDlg);
-					paused = !paused;
-					var w = getWorld();
-					w.setCursorLock(true);
-				}, () -> {
-					canvas.popDialog(exitGameDlg);
-					quitMission(Net.isClient);
-					if (Net.isMP && Net.isClient) {
-						Net.disconnect();
-						canvas.setContent(new JoinServerGui());
-					}
-				});
-			} else {
-				exitGameDlg = new ExitGameDlg((sender) -> {
-					canvas.popDialog(exitGameDlg);
-					var w = getWorld();
-					if (MarbleGame.instance.toRecord) {
-						MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
-							quitMission();
-						}));
-					} else {
-						quitMission(Net.isClient);
-						if (Net.isMP && Net.isClient) {
-							Net.disconnect();
-						}
-					}
-				}, (sender) -> {
-					canvas.popDialog(exitGameDlg);
-					paused = !paused;
-					var w = getWorld();
-					w.setCursorLock(true);
-				}, (sender) -> {
-					canvas.popDialog(exitGameDlg);
-					var w = getWorld();
-					w.restart(w.marble, true);
-					// world.setCursorLock(true);
-					paused = !paused;
-				});
-			}
-			canvas.pushDialog(exitGameDlg);
+			showPauseUI();
 		} else {
 			if (world._ready) {
+				paused = false;
 				Console.log("Game unpaused");
 				if (exitGameDlg != null)
 					canvas.popDialog(exitGameDlg);

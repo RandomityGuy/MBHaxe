@@ -102,7 +102,6 @@ class MasterServerClient {
 					instance = null;
 				}
 				#if hl
-				stopMutex.acquire();
 				stopping = true;
 				stopMutex.release();
 				if (myToken == wsToken) {
