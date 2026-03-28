@@ -152,13 +152,13 @@ class RewindManager {
 			|| level.marble.currentUp.z != rf.currentUp.z) {
 			level.setUp(level.marble, rf.currentUp, level.timeState);
 			// Hacky things
-			@:privateAccess level.orientationChangeTime = level.timeState.currentAttemptTime - 300;
+			@:privateAccess level.orientationChangeTime = level.timeState.currentAttemptTime - 0.3;
 			var oldorient = level.newOrientationQuat;
 			level.newOrientationQuat = @:privateAccess level.oldOrientationQuat;
 			@:privateAccess level.oldOrientationQuat = oldorient;
 		}
 
-		var gravitycompletion = Util.clamp((level.timeState.currentAttemptTime - @:privateAccess level.orientationChangeTime) / 300, 0, 1);
+		var gravitycompletion = Util.clamp((level.timeState.currentAttemptTime - @:privateAccess level.orientationChangeTime) / 0.3, 0, 1);
 		if (gravitycompletion == 0) {
 			level.newOrientationQuat = @:privateAccess level.oldOrientationQuat;
 			@:privateAccess level.orientationChangeTime = -1e8;
