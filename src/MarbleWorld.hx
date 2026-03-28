@@ -218,6 +218,8 @@ class MarbleWorld extends Scheduler {
 	public var rewinding:Bool = false;
 	public var rewindUsed:Bool = false;
 
+	public var cheatsUsed:Bool = false;
+
 	public var inputRecorder:InputRecorder;
 	public var isReplayingMovement:Bool = false;
 	public var currentInputMoves:Array<InputRecorderFrame>;
