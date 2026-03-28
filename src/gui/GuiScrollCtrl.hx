@@ -246,59 +246,59 @@ class GuiScrollCtrl extends GuiControl {
 	}
 
 	public override function onMousePress(mouseState:MouseState) {
-		// if (Util.isTouchDevice()) {
-		this.pressed = true;
-		this.dirty = true;
-		this.updateScrollVisual();
-		this.prevMousePos = mouseState.position;
-		this.scrollVelocity = 0;
-		this.momentumActive = false;
-		this.lastMoveStamp = Timer.stamp();
-		// }
+		if (Util.isTouchDevice()) {
+			this.pressed = true;
+			this.dirty = true;
+			this.updateScrollVisual();
+			this.prevMousePos = mouseState.position;
+			this.scrollVelocity = 0;
+			this.momentumActive = false;
+			this.lastMoveStamp = Timer.stamp();
+		}
 	}
 
 	public override function onMouseRelease(mouseState:MouseState) {
-		// if (Util.isTouchDevice()) {
-		this.pressed = false;
-		this.dirty = true;
-		deltaY = 0;
-		this.updateScrollVisual();
-		this.momentumActive = Math.abs(scrollVelocity) > 0.01;
-		this.lastMoveStamp = 0;
-		// }
+		if (Util.isTouchDevice()) {
+			this.pressed = false;
+			this.dirty = true;
+			deltaY = 0;
+			this.updateScrollVisual();
+			this.momentumActive = Math.abs(scrollVelocity) > 0.01;
+			this.lastMoveStamp = 0;
+		}
 	}
 
 	public override function onMouseMove(mouseState:MouseState) {
-		// if (Util.isTouchDevice()) {
-		super.onMouseMove(mouseState);
-		if (this.pressed) {
-			var renderRect = this.getRenderRectangle();
-			var scrollExtentY = renderRect.extent.y;
-			var dy = (mouseState.position.y - this.prevMousePos.y) / ((maxScrollY * Settings.uiScale) / scrollExtentY);
-			deltaY = -dy;
-			this.scrollY -= dy;
-			this.prevMousePos = mouseState.position;
-			var now = Timer.stamp();
-			if (lastMoveStamp > 0) {
-				var dt = now - lastMoveStamp;
-				if (dt > 0)
-					scrollVelocity = -dy / dt;
+		if (Util.isTouchDevice()) {
+			super.onMouseMove(mouseState);
+			if (this.pressed) {
+				var renderRect = this.getRenderRectangle();
+				var scrollExtentY = renderRect.extent.y;
+				var dy = (mouseState.position.y - this.prevMousePos.y) / ((maxScrollY * Settings.uiScale) / scrollExtentY);
+				deltaY = -dy;
+				this.scrollY -= dy;
+				this.prevMousePos = mouseState.position;
+				var now = Timer.stamp();
+				if (lastMoveStamp > 0) {
+					var dt = now - lastMoveStamp;
+					if (dt > 0)
+						scrollVelocity = -dy / dt;
+				}
+				lastMoveStamp = now;
+				momentumActive = false;
+				this.updateScrollVisual();
 			}
-			lastMoveStamp = now;
-			momentumActive = false;
-			this.updateScrollVisual();
 		}
-		// }
 	}
 
 	public override function onMouseLeave(mouseState:MouseState) {
-		// if (Util.isTouchDevice()) {
-		this.pressed = false;
-		this.dirty = true;
-		this.updateScrollVisual();
-		this.momentumActive = Math.abs(scrollVelocity) > 0.01;
-		this.lastMoveStamp = 0;
-		// }
+		if (Util.isTouchDevice()) {
+			this.pressed = false;
+			this.dirty = true;
+			this.updateScrollVisual();
+			this.momentumActive = Math.abs(scrollVelocity) > 0.01;
+			this.lastMoveStamp = 0;
+		}
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {
