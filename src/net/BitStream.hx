@@ -77,10 +77,11 @@ class InputBitStream {
 	public function readString() {
 		var length = readUInt16();
 		var str = "";
+		var buf = new StringBuf();
 		for (i in 0...length) {
-			str += String.fromCharCode(readByte());
+			buf.addChar(readByte());
 		}
-		return str;
+		return buf.toString();
 	}
 }
 
