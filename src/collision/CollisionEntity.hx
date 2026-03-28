@@ -23,8 +23,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public var octree:Octree;
 
-	public var bvh:BVHTree<CollisionSurface>;
-
+	// public var bvh:BVHTree<CollisionSurface>;
 	var grid:Grid;
 
 	public var surfaces:Array<CollisionSurface>;
@@ -67,12 +66,12 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	// Generates the bvh
 	public function finalize() {
 		this.generateBoundingBox();
-		#if hl
-		this.bvh = new BVHTree();
-		for (surface in this.surfaces) {
-			this.bvh.add(surface);
-		}
-		#end
+		// #if hl
+		// this.bvh = new BVHTree();
+		// for (surface in this.surfaces) {
+		// 	this.bvh.add(surface);
+		// }
+		// #end
 		var bbox = new Bounds();
 		for (surface in this.surfaces)
 			bbox.add(surface.boundingBox);
@@ -90,7 +89,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		}
 		go = null;
 		surfaces = null;
-		bvh = null;
+		grid = null;
+		// bvh = null;
 		octree = null;
 	}
 
@@ -200,6 +200,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		this.priority = priority;
 	}
 
+	static var surfaceSearchPool:Array<CollisionSurface> = [];
+
 	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
 		var position = collisionEntity.transform.getPosition();
 		var radius = collisionEntity.radius + 0.001;
@@ -215,7 +217,9 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var invScale = invMatrix.getScale();
 		var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
 		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 1.1);
-		var surfaces = grid.boundingSearch(sphereBounds); // bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
+		surfaceSearchPool.resize(0);
+		grid.boundingSearch(sphereBounds, surfaceSearchPool);
+		var surfaces = surfaceSearchPool;
 		var invtform = invMatrix.clone();
 		invtform.transpose();
 

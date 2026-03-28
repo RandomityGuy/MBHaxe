@@ -81,7 +81,7 @@ class CollisionWorld {
 			+ rayDirection.x * rayLength, rayStart.y
 			+ rayDirection.y * rayLength, rayStart.z
 			+ rayDirection.z * rayLength);
-		this.intersectionList.splice(0, this.intersectionList.length);
+		this.intersectionList.resize(0);
 
 		this.grid.boundingSearch(bounds, this.intersectionList);
 		dynamicGrid.boundingSearch(bounds, this.intersectionList);
