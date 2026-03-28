@@ -1,5 +1,6 @@
 package gui;
 
+import haxe.DynamicAccess;
 import hxd.BitmapData;
 import h2d.filter.DropShadow;
 import h2d.Text;
@@ -18,6 +19,7 @@ import src.Settings;
 
 class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
+	var importing:Bool = false;
 
 	public function new(pause:Bool = false) {
 		function chooseBg() {
@@ -80,10 +82,10 @@ class OptionsDlg extends GuiImage {
 		hotkeysBtn.extent = new Vector(134, 65);
 		window.addChild(hotkeysBtn);
 
-		var onlineBtn = new GuiImage(ResourceLoader.getResource("data/ui/options/online_i.png", ResourceLoader.getImage, this.imageResources).toTile());
-		onlineBtn.position = new Vector(548, 19);
-		onlineBtn.extent = new Vector(134, 65);
-		window.addChild(onlineBtn);
+		var miscBtn = new GuiButton(loadButtonImages('data/ui/options/misc'));
+		miscBtn.position = new Vector(548, 19);
+		miscBtn.extent = new Vector(134, 65);
+		window.addChild(miscBtn);
 
 		var applyFunc:Void->Void = () -> {
 			Settings.applySettings();
@@ -119,6 +121,10 @@ class OptionsDlg extends GuiImage {
 		var hotkeysPanel = new GuiControl();
 		hotkeysPanel.position = new Vector(30, 88);
 		hotkeysPanel.extent = new Vector(726, 394);
+
+		var miscPanel = new GuiControl();
+		miscPanel.position = new Vector(30, 88);
+		miscPanel.extent = new Vector(726, 394);
 
 		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
 		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
@@ -457,6 +463,31 @@ class OptionsDlg extends GuiImage {
 			parent.addChild(remapBtn);
 		}
 
+		function makeButton(text:String, yPos:Int, buttonText:String, pressedAction:() -> Void, parent:GuiControl, right:Bool = false) {
+			var textObj = new GuiText(markerFelt32);
+			textObj.position = new Vector(right ? 368 : 5, yPos);
+			textObj.extent = new Vector(212, 14);
+			textObj.text.text = text;
+			textObj.text.textColor = 0xFFFFFF;
+			textObj.text.dropShadow = {
+				dx: 1 * Settings.uiScale,
+				dy: 1 * Settings.uiScale,
+				alpha: 0.5,
+				color: 0
+			};
+			parent.addChild(textObj);
+
+			var btn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
+			btn.position = new Vector(right ? 363 + 203 : 203, yPos - 3);
+			btn.txtCtrl.text.text = buttonText;
+			btn.setExtent(new Vector(152, 49));
+			btn.pressedAction = (sender) -> {
+				pressedAction();
+			}
+
+			parent.addChild(btn);
+		}
+
 		if (Util.isTouchDevice()) {
 			var textObj = new GuiText(markerFelt32);
 			textObj.position = new Vector(5, 38);
@@ -527,10 +558,44 @@ class OptionsDlg extends GuiImage {
 				hotkeysPanel, true);
 		}
 
+		// MISC PANEL
+		makeButton("Import Progress:", 38, "Import", () -> {
+			trace("Start prefs import");
+			importing = true;
+			Settings.start_import_prefs((data) -> {
+				try {
+					// convert to string
+					var jsonStr = @:privateAccess String.fromUTF8(data);
+					// parse JSON
+					var json = haxe.Json.parse(jsonStr);
+
+					var highScoreData:DynamicAccess<Array<Score>> = json.highScores;
+					for (key => value in highScoreData) {
+						Settings.highScores.set(key, value);
+					}
+					var easterEggData:DynamicAccess<Float> = json.easterEggs;
+					if (easterEggData != null) {
+						for (key => value in easterEggData) {
+							Settings.easterEggs.set(key, value);
+						}
+					}
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Progress data imported successfully!"));
+					Settings.save();
+				} catch (e) {
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to import progress data: " + e.message));
+				}
+				importing = false; // reset this flag after import is done
+			});
+		}, miscPanel);
+		makeButton("Export Progress:", 38, "Export", () -> {
+			Settings.export_prefs();
+		}, miscPanel, true);
+
 		generalBtn.pressedAction = (e) -> {
 			if (currentTab != "general") {
 				currentTab = "general";
-				hotkeysPanel.parent.removeChild(hotkeysPanel);
+				hotkeysPanel.parent?.removeChild(hotkeysPanel);
+				miscPanel.parent?.removeChild(miscPanel);
 				window.addChild(generalPanel);
 				MarbleGame.canvas.render(MarbleGame.canvas.scene2d); // Force refresh
 			}
@@ -539,8 +604,19 @@ class OptionsDlg extends GuiImage {
 		hotkeysBtn.pressedAction = (e) -> {
 			if (currentTab != "hotkeys") {
 				currentTab = "hotkeys";
-				generalPanel.parent.removeChild(generalPanel);
+				generalPanel.parent?.removeChild(generalPanel);
+				miscPanel.parent?.removeChild(miscPanel);
 				window.addChild(hotkeysPanel);
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d); // Force refresh
+			}
+		};
+
+		miscBtn.pressedAction = (e) -> {
+			if (currentTab != "misc") {
+				currentTab = "misc";
+				generalPanel.parent?.removeChild(generalPanel);
+				hotkeysPanel.parent?.removeChild(hotkeysPanel);
+				window.addChild(miscPanel);
 				MarbleGame.canvas.render(MarbleGame.canvas.scene2d); // Force refresh
 			}
 		};
@@ -600,5 +676,8 @@ class OptionsDlg extends GuiImage {
 		super.update(dt, mouseState);
 		if (musicSliderFunc != null)
 			musicSliderFunc(dt, mouseState);
+		if (importing) {
+			Settings.call_import_cb();
+		}
 	}
 }
