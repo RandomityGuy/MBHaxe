@@ -1380,7 +1380,8 @@ class Marble extends GameObject {
 
 			var currentFinalPos = position.add(relVel.multiply(finalT)); // localpos.add(relLocalVel.multiply(finalT));
 			surfaceScratch.resize(0);
-			@:privateAccess obj.grid.boundingSearch(boundThing, surfaceScratch);
+			if (@:privateAccess obj.grid != null)
+				@:privateAccess obj.grid.boundingSearch(boundThing, surfaceScratch);
 			var surfaces = surfaceScratch;
 
 			for (surf in surfaces) {
