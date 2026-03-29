@@ -190,6 +190,14 @@ class MasterServerClient {
 		}
 	}
 
+	public static function requestTurnCredentials() {
+		if (instance != null && instance.open) {
+			instance.queueMessage(Json.stringify({
+				type: "turn_credentials"
+			}));
+		}
+	}
+
 	function queueMessage(m:String) {
 		#if hl
 		toSend.add(m);
@@ -317,8 +325,11 @@ class MasterServerClient {
 				loadGui.setErrorStatus(conts.reason);
 			}
 		}
-		if (conts.type == "turnserver") {
-			Net.turnServer = conts.server; // Turn server!
+		if (conts.type == "turn_credentials") {
+			Net.turnServers = conts.turn_servers;
+			if (@:privateAccess Net.onTurnServersReceived != null) {
+				@:privateAccess Net.onTurnServersReceived();
+			}
 		}
 	}
 }
