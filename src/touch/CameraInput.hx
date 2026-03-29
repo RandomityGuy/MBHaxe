@@ -87,14 +87,24 @@ class CameraInput {
 				if (jumpcam) {
 					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
-				if (Math.abs(delta.x) < 0.05)
-					delta.x = 0;
-				if (Math.abs(delta.y) < 0.05)
-					delta.y = 0;
-				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale(delta.x / scaleFactor), applyNonlinearScale(delta.y / scaleFactor), true);
-				if (delta.x != 0)
+				var inpX = delta.x / scaleFactor;
+				var inpY = delta.y / scaleFactor;
+
+				if (jumpcam) {
+					if (Math.abs(inpX) < 1.3)
+						inpX = 0;
+					if (Math.abs(inpY) < 1.3)
+						inpY = 0;
+				}
+
+				var dt = MarbleGame.instance.world.timeState.dt;
+
+				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((inpX / dt) * (1 / 60.0)) * (1 / 60.0) * 20,
+					applyNonlinearScale((inpY / dt) * (1 / 60.0)) * (1 / 60.0) * 20, true);
+
+				if (inpX != 0)
 					prevMouse.x = e.relX;
-				if (delta.y != 0)
+				if (inpY != 0)
 					prevMouse.y = e.relY;
 			}
 		}
