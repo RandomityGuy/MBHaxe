@@ -632,9 +632,10 @@ class CameraController extends Object {
 					&& (firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
 					firstHit = result;
 					firstHitDistance = rayCastOrigin.distance(result.point);
-					processedShapes.push(result.object);
 				}
 			}
+			if (firstHit != null)
+				processedShapes.push(firstHit.object);
 
 			if (firstHit != null) {
 				if (firstHitDistance < CameraDistance) {
@@ -647,7 +648,7 @@ class CameraController extends Object {
 					var dist = plane.distance(camera.pos.toPoint());
 
 					if (dist >= closeness)
-						break;
+						continue;
 
 					camera.pos = projected.toVector().add(normal.multiply(-closeness));
 
