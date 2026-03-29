@@ -25,7 +25,7 @@ class MasterServerClient {
 	// #if js
 	// static var serverIp = "wss://mbomaster.randomityguy.me:8443";
 	// #else
-	static var serverIp = "ws://89.58.58.191:8084";
+	static var serverIp = "ws://51.75.65.148:8084";
 	// #end
 	public static var instance:MasterServerClient;
 
@@ -194,6 +194,14 @@ class MasterServerClient {
 		}
 	}
 
+	public static function requestTurnCredentials() {
+		if (instance != null && instance.open) {
+			instance.queueMessage(Json.stringify({
+				type: "turn_credentials"
+			}));
+		}
+	}
+
 	function queueMessage(m:String) {
 		#if hl
 		toSend.add(m);
@@ -306,8 +314,11 @@ class MasterServerClient {
 				}
 			}
 		}
-		if (conts.type == "turnserver") {
-			Net.turnServer = conts.server; // Turn server!
+		if (conts.type == "turn_credentials") {
+			Net.turnServers = conts.turn_servers;
+			if (@:privateAccess Net.onTurnServersReceived != null) {
+				@:privateAccess Net.onTurnServersReceived();
+			}
 		}
 	}
 }

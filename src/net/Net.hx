@@ -106,7 +106,9 @@ class Net {
 
 	static var stunServers = ["stun:stun.l.google.com:19302"];
 
-	public static var turnServer:String = "";
+	public static var turnServers:Array<String> = [];
+
+	static var onTurnServersReceived:Null<() -> Void> = null;
 
 	public static function hostServer(name:String, description:String, maxPlayers:Int, password:String, onHosted:() -> Void) {
 		serverInfo = new ServerInfo(name, Settings.highscoreName, description, 1, maxPlayers, password, "LOBBY", getPlatform());
@@ -128,8 +130,16 @@ class Net {
 		});
 	}
 
-	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void) {
-		var peer = new RTCPeerConnection(stunServers, "0.0.0.0");
+	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void, turnTried:Bool = false) {
+		if (Net.turnServers.length == 0 && !turnTried) {
+			MasterServerClient.requestTurnCredentials();
+			Net.onTurnServersReceived = () -> {
+				Net.onTurnServersReceived = null;
+				addClientFromSdp(sdpString, onFinishSdp, true);
+			};
+			return;
+		}
+		var peer = new RTCPeerConnection(stunServers.concat(Net.turnServers), "0.0.0.0");
 		var sdpObj = Json.parse(sdpString);
 		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		addClient(peer, onFinishSdp);
@@ -212,9 +222,18 @@ class Net {
 		clientIdMap[id] = ghost;
 	}
 
-	public static function joinServer(serverName:String, password:String, connectedCb:() -> Void) {
+	public static function joinServer(serverName:String, password:String, connectedCb:() -> Void, turnTried:Bool = false) {
 		MasterServerClient.connectToMasterServer(() -> {
-			client = new RTCPeerConnection(stunServers, "0.0.0.0");
+			if (Net.turnServers.length == 0 && !turnTried) {
+				MasterServerClient.requestTurnCredentials();
+				Net.onTurnServersReceived = () -> {
+					Net.onTurnServersReceived = null;
+					joinServer(serverName, password, connectedCb, true);
+				};
+				return;
+			}
+
+			client = new RTCPeerConnection(stunServers.concat(Net.turnServers), "0.0.0.0");
 			var candidates = [];
 
 			var closing = false;
