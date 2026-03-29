@@ -211,6 +211,21 @@ class GemPickupPacket implements NetPacket {
 }
 
 @:publicFields
+class KingInfoPacket implements NetPacket {
+	var kingClientId:Int;
+
+	public function new() {}
+
+	public inline function serialize(b:OutputBitStream) {
+		b.writeByte(kingClientId + 1); // shift by 1 so -1 → 0
+	}
+
+	public inline function deserialize(b:InputBitStream) {
+		kingClientId = b.readByte() - 1;
+	}
+}
+
+@:publicFields
 class ScoreboardPacket implements NetPacket {
 	var scoreBoard:Map<Int, Int>;
 

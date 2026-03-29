@@ -12,6 +12,7 @@ import gui.MultiplayerLevelSelectGui;
 import collision.CollisionPool;
 import net.GemPredictionStore;
 import modes.HuntMode;
+import modes.KingMode;
 import net.NetPacket.MarbleNetFlags;
 import net.PowerupPredictionStore;
 import net.MarblePredictionStore;
@@ -260,13 +261,16 @@ class MarbleWorld extends Scheduler {
 		var misGameMode = mission.missionInfo != null ? mission.missionInfo.gamemode : null;
 		if (mission.customSource == "MPCustoms")
 			misGameMode = "scrum";
+		// In multiplayer, host/client can override the game mode via the lobby selector
+		this.isMultiplayer = multiplayer;
+		if (isMultiplayer && Net.selectedGameMode != null)
+			misGameMode = Net.selectedGameMode;
 
 		this.gameMode = GameModeFactory.getGameMode(cast this, misGameMode);
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
 		this.inputRecorder = new InputRecorder(cast this);
-		this.isMultiplayer = multiplayer;
 		if (this.isMultiplayer) {
 			isRecording = false;
 			isWatching = false;
@@ -802,9 +806,7 @@ class MarbleWorld extends Scheduler {
 					for (client => marble in this.clientMarbles)
 						marble.setMode(Play);
 
-					var huntMode = cast(this.gameMode, HuntMode);
-
-					huntMode.freeSpawns();
+					this.gameMode.onMultiplayerStart();
 				}
 			}
 		}
@@ -1180,23 +1182,10 @@ class MarbleWorld extends Scheduler {
 
 	public function getWorldStateForClientJoin() {
 		var packets = [];
-		// First, gem spawn packet
-		var bs = new OutputBitStream();
-		bs.writeByte(GemSpawn);
-		var packet = new GemSpawnPacket();
 
-		var hunt = cast(this.gameMode, HuntMode);
-		if (@:privateAccess hunt.activeGemSpawnGroup != null) {
-			var activeGemIds = [];
-			for (gemId in @:privateAccess hunt.activeGemSpawnGroup) {
-				if (@:privateAccess hunt.gemSpawnPoints[gemId].gem != null && @:privateAccess !hunt.gemSpawnPoints[gemId].gem.pickedUp) {
-					activeGemIds.push(gemId);
-				}
-			}
-			packet.gemIds = activeGemIds;
-			packet.serialize(bs);
-			packets.push(bs.getBytes());
-		}
+		// Mode-specific join packets (gems for HuntMode, king state for KingMode, etc.)
+		for (p in this.gameMode.getWorldJoinPackets())
+			packets.push(p);
 
 		// Marble states
 		for (marb in this.marbles) {
@@ -1336,12 +1325,14 @@ class MarbleWorld extends Scheduler {
 			if (pw.pickupClient != -1 && marbleNeedsPrediction & (1 << pw.pickupClient) > 0)
 				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 		}
-		var huntMode:HuntMode = cast this.gameMode;
-		if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
-			for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
-				var g = @:privateAccess huntMode.gemSpawnPoints[activeGem].gem;
-				if (g != null && g.pickUpClient != -1 && marbleNeedsPrediction & (1 << g.pickUpClient) > 0)
-					huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+		if (this.gameMode is HuntMode) {
+			var huntMode:HuntMode = cast this.gameMode;
+			if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
+				for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
+					var g = @:privateAccess huntMode.gemSpawnPoints[activeGem].gem;
+					if (g != null && g.pickUpClient != -1 && marbleNeedsPrediction & (1 << g.pickUpClient) > 0)
+						huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+				}
 			}
 		}
 
@@ -1413,7 +1404,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function spawnHuntGemsClientSide(gemIds:Array<Int>) {
-		if (this.isMultiplayer && Net.isClient) {
+		if (this.isMultiplayer && Net.isClient && this.gameMode is HuntMode) {
 			var huntMode:HuntMode = cast this.gameMode;
 			huntMode.setActiveSpawnSphere(gemIds);
 			radar.blink();
@@ -1673,6 +1664,8 @@ class MarbleWorld extends Scheduler {
 					if (allRecv)
 						this.marble.clearNetFlags();
 				}
+				if (Net.isHost)
+					this.gameMode.onHostTick(fixedDt);
 				timeState.ticks++;
 			}
 			timeState.subframe = tickAccumulator / 0.032;

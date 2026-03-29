@@ -741,4 +741,26 @@ class HuntMode extends NullMode {
 	override function constructRewindState():RewindableState {
 		return new HuntState();
 	};
+
+	override function onMultiplayerStart():Void {
+		freeSpawns();
+	}
+
+	override function getWorldJoinPackets():Array<haxe.io.Bytes> {
+		var packets:Array<haxe.io.Bytes> = [];
+		if (activeGemSpawnGroup != null) {
+			var activeGemIds = [];
+			for (gemId in activeGemSpawnGroup) {
+				if (gemSpawnPoints[gemId].gem != null && !gemSpawnPoints[gemId].gem.pickedUp)
+					activeGemIds.push(gemId);
+			}
+			var bs = new OutputBitStream();
+			bs.writeByte(net.Net.NetPacketType.GemSpawn);
+			var packet = new GemSpawnPacket();
+			packet.gemIds = activeGemIds;
+			packet.serialize(bs);
+			packets.push(bs.getBytes());
+		}
+		return packets;
+	}
 }

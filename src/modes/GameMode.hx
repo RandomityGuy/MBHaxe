@@ -8,6 +8,7 @@ import h3d.Vector;
 import src.MarbleWorld;
 import src.Mission;
 import src.Marble;
+import src.TimeState;
 
 enum ScoreType {
 	Time;
@@ -30,6 +31,18 @@ interface GameMode {
 	public function onRespawn(marble:Marble):Void;
 	public function onGemPickup(marble:Marble, gem:Gem):Void;
 
+	// Called every server tick on the host during multiplayer
+	public function onHostTick(timeState:TimeState):Void;
+
+	// Called on the host when marble `attacker` physically contacts or blasts marble `victim`
+	public function onMarbleContact(attacker:Marble, victim:Marble):Void;
+
+	// Called when multiplayer gameplay officially begins (countdown finished)
+	public function onMultiplayerStart():Void;
+
+	// Returns mode-specific packets to send to a client joining mid-game
+	public function getWorldJoinPackets():Array<haxe.io.Bytes>;
+
 	public function getPreloadFiles():Array<String>;
 	public function constructRewindState():RewindableState;
 }
@@ -40,6 +53,8 @@ class GameModeFactory {
 			switch (mode.toLowerCase()) {
 				case "scrum":
 					return new HuntMode(level);
+				case "king":
+					return new KingMode(level);
 			}
 		return new NullMode(level);
 	}

@@ -286,6 +286,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		bottomBar.addChild(backButton);
 
 		if (Net.isHost) {
+			// ── Options panel (Invite Visibility + Game Mode) ──────────────
+			var showingOptions = false;
+
+			var optionsCollection = new GuiXboxOptionsListCollection();
+
 			var customsButton = new GuiXboxButton("Customs", 200);
 			customsButton.position = new Vector(560, 0);
 			customsButton.vertSizing = Bottom;
@@ -296,6 +301,10 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				if (showingCustoms) {
 					innerCtrl.removeChild(playerWnd);
 					innerCtrl.addChild(custWnd);
+					if (showingOptions) {
+						showingOptions = false;
+						innerCtrl.removeChild(optionsCollection);
+					}
 				} else {
 					innerCtrl.addChild(playerWnd);
 					innerCtrl.removeChild(custWnd);
@@ -305,16 +314,51 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			}
 			bottomBar.addChild(customsButton);
 
-			var inviteButton = new GuiXboxButton("Invite Visibility", 220);
-			inviteButton.position = new Vector(750, 0);
-			inviteButton.vertSizing = Bottom;
-			inviteButton.horizSizing = Right;
-			inviteButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
-			inviteButton.pressedAction = (e) -> {
-				inviteVisibility = !inviteVisibility;
+			optionsCollection.position = new Vector(380, 160);
+			optionsCollection.extent = new Vector(815, 500);
+			optionsCollection.vertSizing = Bottom;
+			optionsCollection.horizSizing = Right;
+
+
+			var gameModeInitIdx = (Net.selectedGameMode == "king") ? 1 : 0;
+			var gameModeOpt = optionsCollection.addOption(0, "Game Mode", ["Normal", "King"], (idx) -> {
+				var newMode = idx == 1 ? "king" : "scrum";
+				NetCommands.setLobbyGameMode(newMode);
+				return true;
+			}, 0.5, 118);
+			gameModeOpt.setCurrentOption(gameModeInitIdx);
+
+			var inviteInitIdx = inviteVisibility ? 0 : 1;
+			var inviteOpt = optionsCollection.addOption(0, "Invite Visibility", ["On", "Off"], (idx) -> {
+				inviteVisibility = idx == 0;
 				updateLobbyNames();
+				return true;
+			}, 0.5, 118);
+			inviteOpt.setCurrentOption(inviteInitIdx);
+
+			var optionsButton = new GuiXboxButton("Options", 220);
+			optionsButton.position = new Vector(750, 0);
+			optionsButton.vertSizing = Bottom;
+			optionsButton.horizSizing = Right;
+			optionsButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
+			optionsButton.pressedAction = (e) -> {
+				showingOptions = !showingOptions;
+				if (showingOptions) {
+					innerCtrl.removeChild(playerWnd);
+					innerCtrl.addChild(optionsCollection);
+					if (showingCustoms) {
+						showingCustoms = false;
+						innerCtrl.removeChild(custWnd);
+						updateLobbyNames();
+					}
+				} else {
+					innerCtrl.addChild(playerWnd);
+					innerCtrl.removeChild(optionsCollection);
+					updateLobbyNames();
+				}
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 			}
-			bottomBar.addChild(inviteButton);
+			bottomBar.addChild(optionsButton);
 		}
 
 		var nextButton = new GuiXboxButton("Ready", 160);
