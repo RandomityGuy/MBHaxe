@@ -1,6 +1,7 @@
 package net;
 
 import net.NetPacket.ScoreboardPacket;
+import net.NetPacket.KingInfoPacket;
 import gui.MultiplayerLevelSelectGui;
 import gui.Canvas;
 import net.MasterServerClient.RemoteServerInfo;
@@ -36,6 +37,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var GemPickup;
 	var PlayerInfo;
 	var ScoreBoardInfo;
+	var KingInfo;
 }
 
 @:publicFields
@@ -69,6 +71,7 @@ class Net {
 	public static var isMP:Bool;
 	public static var isHost:Bool;
 	public static var isClient:Bool;
+	public static var selectedGameMode:String = null; // overrides mission gamemode in MP
 
 	public static var lobbyHostReady:Bool;
 	public static var lobbyClientReady:Bool;
@@ -359,6 +362,7 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
+			Net.selectedGameMode = null;
 			MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
@@ -379,6 +383,7 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
+			Net.selectedGameMode = null;
 			MultiplayerLevelSelectGui.custSelected = false;
 		}
 	}
@@ -760,7 +765,21 @@ class Net {
 				var scoreboardPacket = new ScoreboardPacket();
 				scoreboardPacket.deserialize(input);
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-					@:privateAccess MarbleGame.instance.world.playGui.updatePlayerScores(scoreboardPacket);
+					var world = MarbleGame.instance.world;
+					@:privateAccess world.playGui.updatePlayerScores(scoreboardPacket);
+					if (world.gameMode is modes.KingMode)
+						cast(world.gameMode, modes.KingMode).onScoreboardUpdate(scoreboardPacket.scoreBoard);
+				}
+
+			case KingInfo:
+				var kingInfoPacket = new KingInfoPacket();
+				kingInfoPacket.deserialize(input);
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
+					var world = MarbleGame.instance.world;
+					if (world.gameMode is modes.KingMode) {
+						var kingMode:modes.KingMode = cast world.gameMode;
+						kingMode.onKingChanged(kingInfoPacket.kingClientId, -1);
+					}
 				}
 
 			case _:

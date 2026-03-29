@@ -9,6 +9,7 @@ import h3d.Vector;
 import shapes.StartPad;
 import src.MarbleWorld;
 import src.Mission;
+import src.TimeState;
 import src.AudioManager;
 import src.ResourceLoader;
 
@@ -110,4 +111,14 @@ class NullMode implements GameMode {
 	}
 
 	public function onClientRestart() {}
+
+	public function onHostTick(timeState:TimeState):Void {}
+
+	public function onMarbleContact(attacker:Marble, victim:Marble):Void {}
+
+	public function onMultiplayerStart():Void {}
+
+	public function getWorldJoinPackets():Array<haxe.io.Bytes> {
+		return [];
+	}
 }

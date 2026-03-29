@@ -4,6 +4,7 @@ import gui.MultiplayerGui;
 import net.ClientConnection.NetPlatform;
 import gui.EndGameGui;
 import modes.HuntMode;
+import modes.KingMode;
 import net.ClientConnection.GameplayState;
 import net.Net.NetPacketType;
 import gui.MultiplayerLevelSelectGui;
@@ -203,12 +204,25 @@ class NetCommands {
 			if (MarbleGame.instance.paused) {
 				MarbleGame.instance.handlePauseGame(); // Unpause
 			}
-			var huntMode:HuntMode = cast MarbleGame.instance.world.gameMode;
-			huntMode.onTimeExpire();
+			MarbleGame.instance.world.gameMode.onTimeExpire();
 		}
 		if (Net.isHost) {
 			Net.serverInfo.state = "WAITING";
 			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
+		}
+	}
+
+	@:rpc(server) public static function setLobbyGameMode(mode:String) {
+		Net.selectedGameMode = mode;
+	}
+
+	@:rpc(server) public static function setKingMarble(newKingId:Int, oldKingId:Int) {
+		if (Net.isClient && MarbleGame.instance.world != null) {
+			var world = MarbleGame.instance.world;
+			if (world.gameMode is KingMode) {
+				var kingMode:KingMode = cast world.gameMode;
+				kingMode.onKingChanged(newKingId, oldKingId);
+			}
 		}
 	}
 

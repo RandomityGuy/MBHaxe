@@ -48,6 +48,7 @@ import hxd.Cursor;
 import shapes.PowerUp;
 import src.GameObject;
 import src.ForceObject;
+import modes.GameMode;
 import src.MarbleWorld;
 import h3d.Quat;
 import src.ResourceLoader;
@@ -742,8 +743,12 @@ class Marble extends GameObject {
 			}
 			for (marble in level.marbles) {
 				if ((marble != cast this) && !marble._firstTick) {
-					var force = marble.getForce(this.collider.transform.getPosition(), Net.isHost ? timeState.ticks : serverTicks);
+					var tick = Net.isHost ? timeState.ticks : serverTicks;
+					var force = marble.getForce(this.collider.transform.getPosition(), tick);
 					A = A.add(force.multiply(1 / mass));
+					// Notify game mode on first tick(s) of blast hitting another marble
+					if (force.length() > 0.01 && Net.isHost && tick <= marble.blastUseTick + 1)
+						level.gameMode.onMarbleContact(marble, this);
 				}
 			}
 		}
@@ -894,6 +899,8 @@ class Marble extends GameObject {
 							otherMarble.velocity.set(0, 0, 0);
 						}
 						contacts[i].velocity.load(otherMarble.velocity);
+						if (Net.isHost && level != null)
+							level.gameMode.onMarbleContact(this, otherMarble);
 					} else {
 						if (contacts[i].velocity.length() == 0.0 && !surfaceSlide && surfaceDot > -this._maxDotSlide * velLen) {
 							this.velocity.load(this.velocity.sub(surfaceVel));
