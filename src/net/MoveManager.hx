@@ -147,7 +147,7 @@ class MoveManager {
 		return netMove;
 	}
 
-	function copyMove(to:Int, from:Int) {
+	inline function copyMove(to:Int, from:Int) {
 		queuedMoves[to].move = queuedMoves[from].move;
 		queuedMoves[to].motionDir.load(queuedMoves[from].motionDir);
 	}
