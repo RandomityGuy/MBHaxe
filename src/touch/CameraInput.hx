@@ -14,6 +14,7 @@ class CameraInput {
 	var identifier:Int = -1;
 
 	public var enabled = false;
+	public var pressed = false;
 
 	var added = false;
 
@@ -35,8 +36,6 @@ class CameraInput {
 		this.collider.extent = new Vector(width, height);
 		this.collider.horizSizing = Width;
 		this.collider.vertSizing = Height;
-
-		var pressed = false;
 
 		var prevMouse = new Vector(0, 0);
 		interactive.onPush = (e) -> {
@@ -101,8 +100,8 @@ class CameraInput {
 
 				var dt = MarbleGame.instance.world.timeState.dt;
 
-				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((inpX / dt) * (1 / 60.0)) * (1 / 60.0) * 35,
-					applyNonlinearScale((inpY / dt) * (1 / 60.0)) * (1 / 60.0) * 35, true);
+				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((inpX / dt) * (1 / 60.0)) * (1 / 60.0) * 20,
+					applyNonlinearScale((inpY / dt) * (1 / 60.0)) * (1 / 60.0) * 20, true);
 
 				if (inpX != 0)
 					prevMouse.x = e.relX;
