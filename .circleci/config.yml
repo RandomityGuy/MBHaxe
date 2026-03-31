@@ -64,7 +64,7 @@ jobs:
             curl https://www.zlib.net/zlib-1.3.2.tar.xz | tar xz
             cd zlib-1.3.2
             if [ ! -f /usr/local/lib/libz.1.3.2.dylib ]; then
-              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build --config Release -j$NPROC
               sudo cmake --install build
             fi
@@ -77,7 +77,7 @@ jobs:
             curl https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2 | tar xz
             cd openal-soft-1.22.2
             if [ ! -f /usr/local/lib/libopenal.1.22.2.dylib ]; then
-              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DALSOFT_BACKEND_SNDIO=NO -DALSOFT_BACKEND_PORTAUDIO=NO -DALSOFT_BACKEND_WAVE=NO -DALSOFT_UTILS=NO -DALSOFT_EXAMPLES=NO -DCMAKE_MACOSX_RPATH=TRUE
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DALSOFT_BACKEND_SNDIO=NO -DALSOFT_BACKEND_PORTAUDIO=NO -DALSOFT_BACKEND_WAVE=NO -DALSOFT_UTILS=NO -DALSOFT_EXAMPLES=NO -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build --config Release -j$NPROC
               sudo cmake --install build
             fi
@@ -89,7 +89,7 @@ jobs:
             curl -L https://downloads.sourceforge.net/project/libjpeg-turbo/2.1.4/libjpeg-turbo-2.1.4.tar.gz | tar xz
             cd libjpeg-turbo-2.1.4
             if [ ! -f /usr/local/lib/libturbojpeg.0.2.0.dylib ]; then
-              cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
+              cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build-x86 --config release -j$NPROC
             fi
 
@@ -98,7 +98,7 @@ jobs:
           command: |
             cd ~/deps/libjpeg-turbo-2.1.4
             if [ ! -f /usr/local/lib/libturbojpeg.0.2.0.dylib ]; then
-              cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local
+              cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build-arm64 --config release -j$NPROC
             fi
 
@@ -122,7 +122,7 @@ jobs:
             curl -L https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz | tar xz
             cd libogg-1.3.5
             if [ ! -f /usr/local/lib/libogg.0.8.5.dylib ]; then
-              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build --config Release -j$NPROC
               sudo cmake --install build
             fi
@@ -135,7 +135,7 @@ jobs:
             curl -L https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz | tar xz
             cd libvorbis-1.3.7
             if [ ! -f /usr/local/lib/libvorbis.0.4.9.dylib ]; then
-              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build --config Release -j$NPROC
               sudo cmake --install build
             fi
@@ -148,7 +148,7 @@ jobs:
             curl -L https://download.sourceforge.net/libpng/libpng-1.6.39.tar.xz | tar xz
             cd libpng-1.6.39
             if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
-              cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+              cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build-x86 --config release -j$NPROC
             fi
 
@@ -159,7 +159,7 @@ jobs:
             cd ~/deps
             cd libpng-1.6.39
             if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
-              cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+              cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build-arm64 --config release -j$NPROC
             fi
 
@@ -183,7 +183,7 @@ jobs:
             curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.26.1/SDL2-2.26.1.tar.gz | tar xz
             cd SDL2-2.26.1
             if [ ! -f /usr/local/lib/libSDL2-2.0.0.dylib ]; then
-              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE
+              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build --config Release -j$NPROC
               sudo cmake --install build
             fi
@@ -194,7 +194,7 @@ jobs:
             cd ~/deps
             curl -fsSL https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz | tar xz
             cd libuv-1.44.2
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
@@ -213,7 +213,7 @@ jobs:
             curl -L https://raw.githubusercontent.com/RandomityGuy/hashlink/master/libs/ssl/CMakeLists.txt > libs/ssl/CMakeLists.txt
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
