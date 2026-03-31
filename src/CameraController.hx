@@ -82,6 +82,12 @@ class CameraController extends Object {
 
 	var _ignoreCursor:Bool = false;
 
+	var hasXInput:Bool = false;
+	var hasYInput:Bool = false;
+	var dt:Float;
+
+	var wasLastGamepadInput:Bool = false;
+
 	public function new(marble:Marble) {
 		super();
 		this.marble = marble;
@@ -166,18 +172,36 @@ class CameraController extends Object {
 				deltaposY *= len / max;
 			}
 		}
-		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook)) {
-			deltaposY = 0;
-		}
-
 		var factor = isTouch ? Util.lerp(1 / 25, 1 / 15,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 1000, 1 / 200, Settings.controlsSettings.cameraSensitivity);
 
+		if (!Settings.controlsSettings.alwaysFreeLook && !Key.isDown(Settings.controlsSettings.freelook) && !isTouch) {
+			deltaposY = 0;
+		}
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
 		nextCameraPitch += deltaposY * factor;
 		nextCameraYaw += deltaposX * factor;
+
+		if (Math.abs(deltaposX) > 0.001)
+			hasXInput = true;
+		else
+			hasXInput = false;
+		if (Math.abs(deltaposY) > 0.001)
+			hasYInput = true;
+		else
+			hasYInput = false;
+
+		if (MarbleGame.instance.touchInput.cameraInput.pressed) {
+			hasXInput = true;
+			hasYInput = true;
+		}
+
+		if (!isTouch)
+			wasLastGamepadInput = false;
+		else
+			wasLastGamepadInput = true;
 
 		// var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		// var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
@@ -231,6 +255,14 @@ class CameraController extends Object {
 		overview = false;
 	}
 
+	function computePitchSpeedFromDelta(delta:Float) {
+		return Util.clamp(delta, Math.PI / 10, Math.PI / 2) * 4;
+	}
+
+	function applyNonlinearScale(value:Float) {
+		return Math.pow(Math.abs(value), 1.6) * (value >= 0 ? 1 : -1);
+	}
+
 	function doOverviewCamera(currentTime:Float, dt:Float) {
 		var angle = Util.adjustedMod(2 * currentTime * Math.PI / 100.0, 2 * Math.PI);
 		var distance = overviewWidth.multiply(2.0 / 3.0);
@@ -256,19 +288,65 @@ class CameraController extends Object {
 	function doSpectateCamera(currentTime:Float, dt:Float) {
 		var camera = level.scene.camera;
 
-		var lerpt = Math.pow(0.5, dt / 0.032); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
+		var lerpt = 1 - Math.pow(0.5, dt / 0.016); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
+		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), Settings.gamepadSettings.axisDeadzone));
+		var gamepadY = rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), Settings.gamepadSettings.axisDeadzone);
+
+		if (gamepadX != 0.0 || gamepadY != 0.0) {
+			wasLastGamepadInput = true;
+		}
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
-			+ Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis);
-		if (Settings.gamepadSettings.invertYAxis)
+			+ gamepadY;
+		if (Settings.gamepadSettings.invertYAxis || Settings.controlsSettings.invertYAxis)
 			cameraPitchDelta = -cameraPitchDelta;
-		nextCameraPitch += 0.75 * 5 * cameraPitchDelta * dt * Settings.gamepadSettings.cameraSensitivity;
-		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0)
-			+ Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis);
+		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0) + gamepadX;
 		if (Settings.gamepadSettings.invertXAxis)
 			cameraYawDelta = -cameraYawDelta;
-		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
+
+		if (MarbleGame.instance.paused) {
+			cameraYawDelta = 0;
+			cameraPitchDelta = 0;
+		}
+		var gamePadSensitivity = 1.0;
+		if (wasLastGamepadInput) {
+			gamePadSensitivity = Settings.gamepadSettings.cameraSensitivity; // It defaults to 0.6
+		}
+
+		var deltaX = 0.75 * 5 * cameraYawDelta * dt * gamePadSensitivity;
+		var deltaY = 0.75 * 5 * cameraPitchDelta * dt * gamePadSensitivity;
+
+		if (spectateMarbleIndex != -1) {
+			// Center the pitch
+			if (Util.isTouchDevice()) { // Do this only on touch devices
+				if (!Settings.controlsSettings.alwaysFreeLook
+					&& !Key.isDown(Settings.controlsSettings.freelook)
+					&& !MarbleGame.instance.touchInput.cameraInput.pressed
+					&& deltaY == 0.0) {
+					var rescaledY = deltaY;
+					if (rescaledY <= 0.0)
+						rescaledY = 0.4 - rescaledY * -0.75;
+					else
+						rescaledY = rescaledY * 1.1 + 0.4;
+					var movePitchDelta = (rescaledY - CameraPitch);
+					var movePitchSpeed = computePitchSpeedFromDelta(Math.abs(movePitchDelta)) * dt * 0.8;
+					if (movePitchDelta <= 0.0) {
+						movePitchDelta = -movePitchDelta;
+						if (movePitchDelta < movePitchSpeed)
+							movePitchSpeed = movePitchDelta;
+						movePitchDelta = -movePitchSpeed;
+						movePitchSpeed = movePitchDelta;
+					} else if (movePitchSpeed > movePitchDelta) {
+						movePitchSpeed = movePitchDelta;
+					}
+					deltaY = movePitchSpeed;
+				}
+			}
+		}
+
+		nextCameraYaw += deltaX;
+		nextCameraPitch += deltaY;
 
 		var limits = spectateMarbleIndex == -1 ? 0.0001 : Math.PI / 4;
 
@@ -458,9 +536,10 @@ class CameraController extends Object {
 						&& (firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
 						firstHit = result;
 						firstHitDistance = rayCastOrigin.distance(result.point);
-						processedShapes.push(result.object);
 					}
 				}
+				if (firstHit != null)
+					processedShapes.push(firstHit.object);
 
 				if (firstHit != null) {
 					if (firstHitDistance < CameraDistance) {
@@ -473,7 +552,7 @@ class CameraController extends Object {
 						var dist = plane.distance(camera.pos.toPoint());
 
 						if (dist >= closeness)
-							break;
+							continue;
 
 						camera.pos = projected.toVector().add(normal.multiply(-closeness));
 
@@ -491,10 +570,6 @@ class CameraController extends Object {
 		}
 
 		this.setPosition(camera.pos.x, camera.pos.y, camera.pos.z);
-	}
-
-	function applyNonlinearScale(value:Float) {
-		return Math.pow(Math.abs(value), 3.2) * (value >= 0 ? 1 : -1);
 	}
 
 	function rescaleDeadZone(value:Float, deadZone:Float) {
@@ -526,8 +601,8 @@ class CameraController extends Object {
 
 		var lerpt = 1 - Math.pow(0.5, dt / 0.016); // Math.min(1, 1 - Math.pow(0.6, dt / 0.032)); // hxd.Math.min(1, 1 - Math.pow(0.6, dt * 600));
 
-		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), 0.25));
-		var gamepadY = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), 0.25));
+		var gamepadX = applyNonlinearScale(rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraXAxis), Settings.gamepadSettings.axisDeadzone));
+		var gamepadY = rescaleDeadZone(Gamepad.getAxis(Settings.gamepadSettings.cameraYAxis), Settings.gamepadSettings.axisDeadzone);
 
 		var cameraPitchDelta = (Key.isDown(Settings.controlsSettings.camBackward) ? 1 : 0)
 			- (Key.isDown(Settings.controlsSettings.camForward) ? 1 : 0)
@@ -538,8 +613,53 @@ class CameraController extends Object {
 		var cameraYawDelta = (Key.isDown(Settings.controlsSettings.camRight) ? 1 : 0) - (Key.isDown(Settings.controlsSettings.camLeft) ? 1 : 0) + gamepadX;
 		if (Settings.gamepadSettings.invertXAxis)
 			cameraYawDelta = -cameraYawDelta;
-		nextCameraYaw += 0.75 * 5 * cameraYawDelta * dt * Settings.gamepadSettings.cameraSensitivity;
 
+		if (MarbleGame.instance.paused) {
+			cameraYawDelta = 0;
+			cameraPitchDelta = 0;
+		}
+
+		var gamePadSensitivity = 1.0;
+		if (wasLastGamepadInput) {
+			gamePadSensitivity = (1.6 - Settings.controlsSettings.cameraSensitivity); // It defaults to 0.6
+		}
+
+		var deltaX = 0.75 * 5 * cameraYawDelta * dt * gamePadSensitivity;
+		var deltaY = 0.75 * 5 * cameraPitchDelta * dt * gamePadSensitivity;
+
+		// Center the pitch
+		if (Util.isTouchDevice()) { // Do this only on touch devices
+			if (!Settings.controlsSettings.alwaysFreeLook
+				&& !Key.isDown(Settings.controlsSettings.freelook)
+				&& !MarbleGame.instance.touchInput.cameraInput.pressed
+				&& deltaY == 0.0) {
+				var rescaledY = deltaY;
+				if (rescaledY <= 0.0)
+					rescaledY = 0.4 - rescaledY * -0.75;
+				else
+					rescaledY = rescaledY * 1.1 + 0.4;
+				var movePitchDelta = (rescaledY - CameraPitch);
+				var movePitchSpeed = computePitchSpeedFromDelta(Math.abs(movePitchDelta)) * dt * 0.8;
+				if (movePitchDelta <= 0.0) {
+					movePitchDelta = -movePitchDelta;
+					if (movePitchDelta < movePitchSpeed)
+						movePitchSpeed = movePitchDelta;
+					movePitchDelta = -movePitchSpeed;
+					movePitchSpeed = movePitchDelta;
+				} else if (movePitchSpeed > movePitchDelta) {
+					movePitchSpeed = movePitchDelta;
+				}
+				deltaY = movePitchSpeed;
+			}
+		}
+
+		if (!MarbleGame.instance.touchInput.cameraInput.pressed) {
+			hasXInput = false;
+			hasYInput = false;
+		}
+
+		nextCameraYaw += deltaX;
+		nextCameraPitch += deltaY;
 		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
 		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
