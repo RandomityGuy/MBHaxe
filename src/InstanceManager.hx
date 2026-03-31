@@ -158,51 +158,37 @@ class InstanceManager {
 							inst.visibleTicks = inst.visibleTicks - 1;
 						}
 
-						if (inst.gameObject.currentOpacity == 1)
+						var opacity = inst.gameObject.currentOpacity;
+						if (opacity == 1)
 							opaqueinstances.push(inst);
-						else if (inst.gameObject.currentOpacity != 0)
+						else if (opacity != 0)
 							transparentinstances.push(inst);
 						// break;
 						//	}
 						// }
 					}
 				}
-
+				var dtsShader = minfo.dtsShader;
 				// Emit non culled primitives
 				if (minfo.meshbatch != null) {
 					minfo.meshbatch.begin(opaqueinstances.length);
-					for (instance in opaqueinstances) { // Draw the opaque shit first
-						var dtsShader = minfo.dtsShader;
-						if (dtsShader != null) {
+					var i = 0;
+					while (i < opaqueinstances.length) {
+						var instance = @:privateAccess opaqueinstances.array[i++];
+						if (dtsShader != null)
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
-						}
-						var transform = instance.emptyObj.getAbsPos();
-						// minfo.meshbatch.shadersChanged = true;
-						// minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						// minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
-						minfo.meshbatch.worldPosition = transform;
+						minfo.meshbatch.worldPosition = instance.emptyObj.getAbsPos();
 						minfo.meshbatch.emitInstance();
 					}
 				}
 				if (minfo.transparencymeshbatch != null) {
 					minfo.transparencymeshbatch.begin(transparentinstances.length);
-					for (instance in transparentinstances) { // Non opaque shit
-						var dtsShader = minfo.dtsShader;
-						if (dtsShader != null) {
+					var i = 0;
+					while (i < transparentinstances.length) {
+						var instance = @:privateAccess transparentinstances.array[i++];
+						if (dtsShader != null)
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
-						}
-						// minfo.transparencymeshbatch.material.blendMode = Alpha;
-						// minfo.transparencymeshbatch.material.color.a = instance.gameObject.currentOpacity;
-						// minfo.transparencymeshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						// minfo.transparencymeshbatch.shadersChanged = true;
-						// minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
-						// minfo.transparencymeshbatch.material.mainPass.depthWrite = false;
-						// if (dtsShader != null) {
-						// 	dtsShader.currentOpacity = instance.gameObject.currentOpacity;
-						// 	minfo.transparencymeshbatch.shadersChanged = true;
-						// }
-						var transform = instance.emptyObj.getAbsPos();
-						minfo.transparencymeshbatch.worldPosition = transform;
+						minfo.transparencymeshbatch.worldPosition = instance.emptyObj.getAbsPos();
 						minfo.transparencymeshbatch.emitInstance();
 					}
 				}
