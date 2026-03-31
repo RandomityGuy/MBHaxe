@@ -145,8 +145,8 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            curl -L https://download.sourceforge.net/libpng/libpng-1.6.39.tar.xz | tar xz
-            cd libpng-1.6.39
+            curl -L https://download.sourceforge.net/libpng/libpng-1.6.56.tar.xz | tar xz
+            cd libpng-1.6.56
             if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
               cmake -S. -Bbuild-x86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build-x86 --config release -j$NPROC
@@ -157,7 +157,7 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            cd libpng-1.6.39
+            cd libpng-1.6.56
             if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
               cmake -S. -Bbuild-arm64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build-arm64 --config release -j$NPROC
@@ -167,8 +167,8 @@ jobs:
           name: Install libpng (Universal)
           command: |
             if [ ! -f /usr/local/lib/libpng16.16.dylib ]; then
-              cd ~/deps/libpng-1.6.39/build-arm64
-              for i in libpng16.16.39.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
+              cd ~/deps/libpng-1.6.56/build-arm64
+              for i in libpng16.16.56.0.dylib libpng16.a png-fix-itxt pngfix pngimage pngstest pngtest pngunknown pngvalid
               do
               lipo -create -output $i ../build-x86/$i $i
               done
