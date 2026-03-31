@@ -122,7 +122,4 @@ jobs:
 workflows:
   build-android:
     jobs:
-      - build:
-          filters:
-            tags:
-              only: /^\d+.\d+.\d+$/
+      - build
