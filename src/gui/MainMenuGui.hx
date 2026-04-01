@@ -47,6 +47,13 @@ class MainMenuGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
+		function loadStaticButtonImages(path:String) {
+			var normal = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed];
+		}
+
 		var siteButton = new GuiButton(loadButtonImages('data/ui/menu/site'));
 		siteButton.horizSizing = Right;
 		siteButton.vertSizing = Top;
@@ -231,6 +238,28 @@ class MainMenuGui extends GuiImage {
 			#end
 		}
 		this.addChild(github);
+
+		#if js
+		var mbg = new GuiButton(loadStaticButtonImages("data/ui/icon_mbg"));
+		mbg.horizSizing = Right;
+		mbg.vertSizing = Top;
+		mbg.position = new Vector(0, 380);
+		mbg.extent = new Vector(76, 76);
+		mbg.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblastgold.randomityguy.me");
+		}
+		this.addChild(mbg);
+
+		var mbu = new GuiButton(loadStaticButtonImages("data/ui/icon_mbu"));
+		mbu.horizSizing = Right;
+		mbu.vertSizing = Top;
+		mbu.position = new Vector(76, 380);
+		mbu.extent = new Vector(76, 76);
+		mbu.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblastultra.randomityguy.me");
+		}
+		this.addChild(mbu);
+		#end
 
 		#if js
 		var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);
