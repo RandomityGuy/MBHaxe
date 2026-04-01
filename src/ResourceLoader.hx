@@ -160,38 +160,6 @@ class ResourceLoader {
 				toloadfiles.push(file);
 			}
 		}
-		filestats = fileSystem.dir("missions_mbg");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_mbp");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_mbu");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("multiplayer/hunt");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
 		while (toloaddirs.length > 0) {
 			var nextdir = toloaddirs.pop();
 			var pathToSearch = nextdir.path;
@@ -216,7 +184,9 @@ class ResourceLoader {
 	static function preloadMusic(onFinish:Void->Void) {
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.loadFile("sound/music/shell.ogg");
-		worker.loadFile("sound/music/pianoforte.ogg");
+		worker.loadFile("sound/groovepolice.ogg");
+		worker.loadFile("sound/classic vibe.ogg");
+		worker.loadFile("sound/beach party.ogg");
 		worker.run();
 	}
 
@@ -229,38 +199,29 @@ class ResourceLoader {
 	}
 
 	static function preloadShapes(onFinish:Void->Void) {
-		var toloadfiles = [
-			StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""),
-			(Settings.optionsSettings.marbleCategoryIndex == 0)
-			? "shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png" : "shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin +
-			".marble.png"
-		];
-		// var toloaddirs = [];
-		// var filestats = fileSystem.dir("shapes");
-		// for (file in filestats) {
-		// 	if (file.isDirectory) {
-		// 		toloaddirs.push(file);
-		// 	} else {
-		// 		toloadfiles.push(file);
-		// 	}
-		// }
-		// while (toloaddirs.length > 0) {
-		// 	var nextdir = toloaddirs.pop();
-		// 	for (file in fileSystem.dir(nextdir.path.substring(2))) {
-		// 		if (file.isDirectory) {
-		// 			toloaddirs.push(file);
-		// 		} else {
-		// 			toloadfiles.push(file);
-		// 		}
-		// 	}
-		// }
-		// var teleportPad = fileSystem.get("interiors_mbp/teleportpad.dts");
-		// var teleportTexture = fileSystem.get("interiors_mbp/repairbay.jpg");
-		// toloadfiles.push(teleportPad); // Because its not in the shapes folder like wtf
-		// toloadfiles.push(teleportTexture);
+		var toloadfiles = [];
+		var toloaddirs = [];
+		var filestats = fileSystem.dir("shapes");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
+		while (toloaddirs.length > 0) {
+			var nextdir = toloaddirs.pop();
+			for (file in fileSystem.dir(nextdir.path.substring(2))) {
+				if (file.isDirectory) {
+					toloaddirs.push(file);
+				} else {
+					toloadfiles.push(file);
+				}
+			}
+		}
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.loadFile(file);
+			worker.addTaskParallel((fwd) -> file.load(fwd));
 		}
 		worker.run();
 	}
