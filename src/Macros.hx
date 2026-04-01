@@ -82,24 +82,16 @@ class MarbleWorldMacros {
 				shape = new TriangleBumper();
 			else if (dataBlockLowerCase == "helicopteritem" || dataBlockLowerCase == "helicopteritem_mbu")
 				shape = new Helicopter(cast element);
-			else if (dataBlockLowerCase == "easteregg" || dataBlockLowerCase == "easteregg_mbu")
-				shape = new EasterEgg(cast element);
-			else if (dataBlockLowerCase == "checkpoint" || dataBlockLowerCase == "checkpoint_mbu")
-				shape = new Checkpoint(cast element);
 			else if (dataBlockLowerCase == "ductfan" || dataBlockLowerCase == "ductfan_mbu" || dataBlockLowerCase == "ductfan_mbm")
 				shape = new DuctFan();
 			else if (dataBlockLowerCase == "smallductfan" || dataBlockLowerCase == "smallductfan_mbm")
 				shape = new SmallDuctFan();
-			else if (dataBlockLowerCase == "magnet")
-				shape = new Magnet();
 			else if (dataBlockLowerCase == "antigravityitem" || dataBlockLowerCase == "antigravityitem_mbu")
 				shape = new AntiGravity(cast element);
 			else if (dataBlockLowerCase == "norespawnantigravityitem")
 				shape = new AntiGravity(cast element, true);
 			else if (dataBlockLowerCase == "landmine" || dataBlockLowerCase == "landmine_mbm")
 				shape = new LandMine();
-			else if (dataBlockLowerCase == "nuke")
-				shape = new Nuke();
 			else if (dataBlockLowerCase == "shockabsorberitem")
 				shape = new ShockAbsorber(cast element);
 			else if (dataBlockLowerCase == "superspeeditem" || dataBlockLowerCase == "superspeeditem_mbu")
@@ -110,10 +102,6 @@ class MarbleWorldMacros {
 				shape = new TimeTravel(cast element);
 			else if (dataBlockLowerCase == "randompowerupitem")
 				shape = new RandomPowerup(cast element);
-			else if (dataBlockLowerCase == "blastitem" || dataBlockLowerCase == "blastitem_mbu")
-				shape = new Blast(cast element);
-			else if (dataBlockLowerCase == "megamarbleitem" || dataBlockLowerCase == "megamarbleitem_mbu")
-				shape = new MegaMarble(cast element);
 			else if (dataBlockLowerCase == "tornado" || dataBlockLowerCase == "tornado_mbm")
 				shape = new Tornado();
 			else if (dataBlockLowerCase == "trapdoor" || dataBlockLowerCase == "trapdoor_mbu")
@@ -124,17 +112,6 @@ class MarbleWorldMacros {
 				shape = new Oilslick();
 			else if (dataBlockLowerCase == "arrow" || StringTools.startsWith(dataBlockLowerCase, "sign"))
 				shape = new Sign(cast element);
-			else if ([
-				"glass_3shape",
-				"glass_6shape",
-				"glass_9shape",
-				"glass_12shape",
-				"glass_15shape",
-				"glass_18shape"
-			].contains(dataBlockLowerCase))
-				shape = new Glass(cast element);
-			else if (["clear", "cloudy", "dusk", "wintry"].contains(dataBlockLowerCase))
-				shape = new shapes.Sky(dataBlockLowerCase);
 			else {
 				Console.error("Unknown item: " + element.datablock);
 				onFinish();

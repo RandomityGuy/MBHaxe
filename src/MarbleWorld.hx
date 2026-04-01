@@ -183,7 +183,6 @@ class MarbleWorld extends Scheduler {
 	public var cursorLock:Bool = true;
 
 	var timeTravelSound:Channel;
-	var alarmSound:Channel;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -646,10 +645,6 @@ class MarbleWorld extends Scheduler {
 		this.marble.blastAmount = 0;
 		this.marble.outOfBoundsTime = null;
 		this.finishTime = null;
-		if (this.alarmSound != null) {
-			this.alarmSound.stop();
-			this.alarmSound = null;
-		}
 
 		this.currentCheckpoint = null;
 		this.currentCheckpointTrigger = null;
@@ -1004,12 +999,6 @@ class MarbleWorld extends Scheduler {
 			trigger = new InBoundsTrigger(element, cast this);
 		} else if (datablockLowercase == "helptrigger") {
 			trigger = new HelpTrigger(element, cast this);
-		} else if (datablockLowercase == "teleporttrigger") {
-			trigger = new TeleportTrigger(element, cast this);
-		} else if (datablockLowercase == "destinationtrigger") {
-			trigger = new DestinationTrigger(element, cast this);
-		} else if (datablockLowercase == "checkpointtrigger") {
-			trigger = new CheckpointTrigger(element, cast this);
 		} else {
 			Console.error("Unknown trigger: " + element.datablock);
 			onFinish();
@@ -2015,16 +2004,11 @@ class MarbleWorld extends Scheduler {
 				if (timeTravelSound == null) {
 					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
 					timeTravelSound = AudioManager.playSound(ttsnd, null, true);
-
-					if (alarmSound != null)
-						alarmSound.pause = true;
 				}
 			} else {
 				if (timeTravelSound != null) {
 					timeTravelSound.stop();
 					timeTravelSound = null;
-					if (alarmSound != null)
-						alarmSound.pause = false;
 				}
 				if (!this.isMultiplayer) {
 					if (this.timeState.currentAttemptTime >= 3.5) {
@@ -2075,49 +2059,6 @@ class MarbleWorld extends Scheduler {
 		}
 		this.timeState.timeSinceLoad += dt;
 
-		// Handle alarm warnings (that the user is about to exceed the par time)
-		if (!Net.isMP) {
-			if (this.timeState.currentAttemptTime >= 3.5) {
-				var alarmStart = this.mission.computeAlarmStartTime();
-
-				if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
-					// Start the alarm
-					this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
-						null, true); // AudioManager.createAudioSource('alarm.wav');
-					this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.');
-				}
-				if (prevGameplayClock < this.mission.qualifyTime && this.timeState.gameplayClock >= this.mission.qualifyTime) {
-					// Stop the alarm
-					if (this.alarmSound != null) {
-						this.alarmSound.stop();
-						this.alarmSound = null;
-					}
-					this.displayHelp("The clock has passed the Par Time.");
-					AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
-				}
-			}
-		} else {
-			if (this.multiplayerStarted) {
-				var alarmStart = this.mission.computeAlarmStartTime();
-
-				if (prevGameplayClock > alarmStart && this.timeState.gameplayClock <= alarmStart) {
-					// Start the alarm
-					if (this.alarmSound == null) {
-						this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio,
-							this.soundResources), null,
-							true); // AudioManager.createAudioSource('alarm.wav');
-						this.displayHelp('You have ${alarmStart} seconds remaining.');
-					}
-				}
-				if (prevGameplayClock > 0 && this.timeState.gameplayClock <= 0) {
-					// Stop the alarm
-					if (this.alarmSound != null) {
-						this.alarmSound.stop();
-						this.alarmSound = null;
-					}
-				}
-			}
-		}
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
 		playGui.formatTimer(this.timeState.gameplayClock);
@@ -2231,10 +2172,6 @@ class MarbleWorld extends Scheduler {
 			if (timeTravelSound != null) {
 				timeTravelSound.stop();
 				timeTravelSound = null;
-			}
-			if (alarmSound != null) {
-				alarmSound.stop();
-				alarmSound = null;
 			}
 
 			this.cancel(marble.oobSchedule);
