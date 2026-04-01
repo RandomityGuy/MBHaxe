@@ -1,14 +1,9 @@
 package net;
 
 import net.NetPacket.ExplodableUpdatePacket;
-import gui.MPMessageGui;
 import gui.MessageBoxOkDlg;
-import gui.JoinServerGui;
-import gui.MPPreGameDlg;
 import net.NetPacket.ScoreboardPacket;
-import gui.MPPlayMissionGui;
 import gui.Canvas;
-import net.MasterServerClient.RemoteServerInfo;
 import src.ResourceLoader;
 import src.AudioManager;
 import net.NetPacket.GemPickupPacket;
@@ -101,7 +96,6 @@ class Net {
 	public static var clientIdMap:Map<Int, GameConnection> = [];
 	public static var clientConnection:ClientConnection;
 	public static var serverInfo:ServerInfo;
-	public static var remoteServerInfo:RemoteServerInfo;
 	public static var connectedServerInfo:ConnectedServerInfo;
 
 	static var stunServers = ["stun:stun.l.google.com:19302"];
@@ -112,38 +106,9 @@ class Net {
 
 	public static function hostServer(name:String, description:String, maxPlayers:Int, password:String, onHosted:() -> Void) {
 		serverInfo = new ServerInfo(name, Settings.highscoreName, description, 1, maxPlayers, password, "LOBBY", getPlatform());
-		MasterServerClient.connectToMasterServer(() -> {
-			isHost = true;
-			isClient = false;
-			clientId = 0;
-			isMP = true;
-			MasterServerClient.instance.sendServerInfo(serverInfo);
-			Net.connectedServerInfo = {
-				name: name,
-				description: description,
-				competitiveMode: Settings.serverSettings.competitiveMode,
-				quickRespawn: Settings.serverSettings.quickRespawn,
-				forceSpectator: Settings.serverSettings.forceSpectators,
-				oldSpawns: Settings.serverSettings.oldSpawns
-			};
-			onHosted();
-		});
 	}
 
-	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void, turnTried:Bool = false) {
-		if (Net.turnServers.length == 0 && !turnTried) {
-			MasterServerClient.requestTurnCredentials();
-			Net.onTurnServersReceived = () -> {
-				Net.onTurnServersReceived = null;
-				addClientFromSdp(sdpString, onFinishSdp, true);
-			};
-			return;
-		}
-		var peer = new RTCPeerConnection(stunServers.concat(Net.turnServers), "0.0.0.0");
-		var sdpObj = Json.parse(sdpString);
-		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
-		addClient(peer, onFinishSdp);
-	}
+	public static function addClientFromSdp(sdpString:String, onFinishSdp:String->Void, turnTried:Bool = false) {}
 
 	static function addClient(peer:RTCPeerConnection, onFinishSdp:String->Void) {
 		var candidates = [];
@@ -222,170 +187,7 @@ class Net {
 		clientIdMap[id] = ghost;
 	}
 
-	public static function joinServer(serverName:String, password:String, connectedCb:() -> Void, turnTried:Bool = false) {
-		MasterServerClient.connectToMasterServer(() -> {
-			if (Net.turnServers.length == 0 && !turnTried) {
-				MasterServerClient.requestTurnCredentials();
-				Net.onTurnServersReceived = () -> {
-					Net.onTurnServersReceived = null;
-					joinServer(serverName, password, connectedCb, true);
-				};
-				return;
-			}
-
-			client = new RTCPeerConnection(stunServers.concat(Net.turnServers), "0.0.0.0");
-			var candidates = [];
-
-			var closing = false;
-
-			isMP = true;
-			isHost = false;
-			isClient = true;
-
-			var closeFunc = (msg:String, forceShow:Bool) -> {
-				if (closing)
-					return;
-				closing = true;
-				var weLeftOurselves = !Net.isClient; // If we left ourselves, this would be set to false due to order of ops, disconnect being called first, and then the datachannel closing
-				disconnect();
-				if (MarbleGame.instance.world != null) {
-					MarbleGame.instance.quitMission();
-				}
-				if (!weLeftOurselves || forceShow) {
-					if (MarbleGame.canvas.content is MPMessageGui) {
-						var loadGui:MPMessageGui = cast MarbleGame.canvas.content;
-						if (loadGui != null) {
-							loadGui.setTexts("Error", msg);
-						}
-					} else {
-						MarbleGame.canvas.setContent(new MPMessageGui("Error", msg));
-					}
-				}
-			}
-
-			client.onLocalCandidate = (c) -> {
-				Console.log('Local candidate: ' + c);
-				if (c != "")
-					candidates.push('a=${c}');
-			}
-			client.onStateChange = (s) -> {
-				switch (s) {
-					case RTC_CLOSED:
-						Console.log("RTC State change: Connection closed!");
-						closeFunc("Connection closed", false);
-					case RTC_CONNECTED:
-						Console.log("RTC State change: Connected!");
-					case RTC_CONNECTING:
-						Console.log("RTC State change: Connecting...");
-					case RTC_DISCONNECTED:
-						Console.log("RTC State change: Disconnected!");
-					case RTC_FAILED:
-						Console.log("RTC State change: Failed!");
-					case RTC_NEW:
-						Console.log("RTC State change: New...");
-				}
-			}
-
-			var sdpFinished = false;
-			var finishSdp = () -> {
-				if (sdpFinished)
-					return;
-				sdpFinished = true;
-				if (client == null)
-					return;
-				Console.log("Local Description Set!");
-				var sdpObj = StringTools.trim(client.localDescription);
-				sdpObj = sdpObj + '\r\n' + candidates.join('\r\n') + '\r\n';
-				MasterServerClient.instance.sendConnectToServer(serverName, Json.stringify({
-					sdp: sdpObj,
-					type: "offer"
-				}), password);
-			}
-
-			client.onGatheringStateChange = (s) -> {
-				switch (s) {
-					case RTC_GATHERING_COMPLETE:
-						Console.log("Gathering complete!");
-					case RTC_GATHERING_INPROGRESS:
-						Console.log("Gathering in progress...");
-					case RTC_GATHERING_NEW:
-						Console.log("Gathering new...");
-				}
-				if (s == RTC_GATHERING_COMPLETE) {
-					finishSdp();
-				}
-			}
-
-			// haxe.Timer.delay(() -> {
-			// 	finishSdp();
-			// }, 5000);
-
-			clientDatachannel = client.createDatachannel("mp");
-			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", true, null, 600);
-
-			var openFlags = 0;
-
-			var onDatachannelOpen = (idx:Int) -> {
-				if (!Net.isMP) {
-					// Close
-					client.close();
-					return;
-				}
-				openFlags |= idx;
-				if (openFlags == 3) {
-					if (MarbleGame.canvas.content is MPMessageGui) {
-						var loadGui:MPMessageGui = cast MarbleGame.canvas.content;
-						if (loadGui != null) {
-							loadGui.setTexts("Please Wait", "Handshaking");
-						}
-					}
-					Console.log("Successfully connected!");
-					clients.set(client, new ClientConnection(0, client, clientDatachannel, clientDatachannelUnreliable)); // host is always 0
-					clientIdMap[0] = clients[client];
-					clientConnection = cast clients[client];
-					onConnectedToServer();
-					haxe.Timer.delay(() -> connectedCb(), 1500); // 1.5 second delay to do the RTT calculation
-				}
-			}
-			var onDatachannelMessage = (dc:RTCDataChannel, b:haxe.io.Bytes) -> {
-				onPacketReceived(clientConnection, client, clientDatachannel, new InputBitStream(b));
-			}
-
-			var onDatachannelClose = (dc:RTCDataChannel) -> {
-				closeFunc("Disconnected", false);
-			}
-
-			var onDatachannelError = (msg:String) -> {
-				Console.log('Errored out due to ${msg}');
-				closeFunc("Connection error", false);
-			}
-
-			clientDatachannel.onOpen = (n) -> {
-				onDatachannelOpen(1);
-			}
-			clientDatachannel.onMessage = (b) -> {
-				onDatachannelMessage(clientDatachannel, b);
-			}
-			clientDatachannel.onClosed = () -> {
-				onDatachannelClose(clientDatachannel);
-			}
-			clientDatachannel.onError = (msg) -> {
-				onDatachannelError(msg);
-			}
-			clientDatachannelUnreliable.onOpen = (n) -> {
-				onDatachannelOpen(2);
-			}
-			clientDatachannelUnreliable.onMessage = (b) -> {
-				onDatachannelMessage(clientDatachannelUnreliable, b);
-			}
-			clientDatachannelUnreliable.onClosed = () -> {
-				onDatachannelClose(clientDatachannelUnreliable);
-			}
-			clientDatachannelUnreliable.onError = (msg) -> {
-				onDatachannelError(msg);
-			}
-		});
-	}
+	public static function joinServer(serverName:String, password:String, connectedCb:() -> Void, turnTried:Bool = false) {}
 
 	public static function disconnect() {
 		if (Net.isClient) {
@@ -403,14 +205,12 @@ class Net {
 			Net.clientIdMap.clear();
 			Net.clientConnection = null;
 			Net.serverInfo = null;
-			Net.remoteServerInfo = null;
 			Net.connectedServerInfo = null;
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
 			Net.hostSpectate = false;
 			Net.clientSpectate = false;
-			MPPlayMissionGui.allChats = [];
 			// MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
@@ -425,16 +225,13 @@ class Net {
 			Net.clientIdAllocs = 1;
 			Net.clients.clear();
 			Net.clientIdMap.clear();
-			MasterServerClient.disconnectFromMasterServer();
 			Net.serverInfo = null;
-			Net.remoteServerInfo = null;
 			Net.connectedServerInfo = null;
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
 			Net.hostSpectate = false;
 			Net.clientSpectate = false;
-			MPPlayMissionGui.allChats = [];
 			// MultiplayerLevelSelectGui.custSelected = false;
 		}
 	}
@@ -474,32 +271,9 @@ class Net {
 							if (MarbleGame.instance.world != null) {
 								MarbleGame.instance.quitMission();
 							}
-							if (!(MarbleGame.canvas.content is MPMessageGui)) {
-								var loadGui = new MPMessageGui("Error", "Timed out");
-								MarbleGame.canvas.setContent(loadGui);
-							}
 						}
 					}
 				}
-			}
-		}
-		if (wsAccum >= 15.0) {
-			wsAccum = 0;
-			if (Net.isHost) {
-				if (MasterServerClient.instance != null)
-					MasterServerClient.instance.sendServerInfo(serverInfo); // Heartbeat
-				else
-					MasterServerClient.connectToMasterServer(() -> {
-						MasterServerClient.instance.sendServerInfo(serverInfo); // Heartbeat
-					});
-			}
-			if (Net.isClient) {
-				if (MasterServerClient.instance != null)
-					MasterServerClient.instance.heartBeat();
-				else
-					MasterServerClient.connectToMasterServer(() -> {
-						MasterServerClient.instance.heartBeat();
-					});
 			}
 		}
 	}
@@ -580,16 +354,6 @@ class Net {
 		for (k => v in clients) { // Recount
 			serverInfo.players++;
 		}
-
-		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the new player
-
-		if (MarbleGame.canvas.content is MPPlayMissionGui) {
-			cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
-		}
-
-		if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
-			cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
-		}
 	}
 
 	static function onConnectedToServer() {
@@ -617,17 +381,7 @@ class Net {
 			serverInfo.players++;
 		}
 
-		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
-
 		// AudioManager.playSound(ResourceLoader.getAudio("data/sound/infotutorial.wav").resource);
-
-		if (MarbleGame.canvas.content is MPPlayMissionGui) {
-			cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
-		}
-
-		if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
-			cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
-		}
 	}
 
 	static function onClientHandshakeComplete(conn:ClientConnection) {
@@ -637,14 +391,12 @@ class Net {
 		// } else {
 		NetCommands.sendServerSettingsClient(conn, Settings.serverSettings.name, Settings.serverSettings.description, Settings.serverSettings.quickRespawn,
 			Settings.serverSettings.forceSpectators, Settings.serverSettings.competitiveMode, Settings.serverSettings.oldSpawns);
-		NetCommands.setLobbyLevelIndexClient(conn, MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
 		// }
 
 		if (serverInfo.state == "PLAYING") { // We initiated the game, directly add in the marble
 			// if (MultiplayerLevelSelectGui.custSelected) {
 			// 	NetCommands.playCustomLevelMidJoinClient(conn, MultiplayerLevelSelectGui.custPath);
 			// } else
-			NetCommands.playLevelMidJoinClient(conn, MPPlayMissionGui.currentCategoryStatic, MPPlayMissionGui.currentSelectionStatic);
 			MarbleGame.instance.world.addJoiningClient(conn, () -> {});
 			var playerInfoBytes = sendPlayerInfosBytes();
 			for (dc => cc in clients) {
@@ -791,7 +543,6 @@ class Net {
 				var gemPickupPacket = new GemPickupPacket();
 				gemPickupPacket.deserialize(input);
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-					@:privateAccess MarbleGame.instance.world.playGui.incrementPlayerScore(gemPickupPacket.clientId, gemPickupPacket.scoreIncr);
 					@:privateAccess MarbleGame.instance.world.gemPredictions.acknowledgeGemPickup(gemPickupPacket);
 				}
 
@@ -827,19 +578,10 @@ class Net {
 						Net.clientSpectate = cspectator;
 					}
 				}
-				if (MarbleGame.canvas.content is MPPlayMissionGui) {
-					cast(MarbleGame.canvas.content, MPPlayMissionGui).updateLobbyNames();
-				}
-				if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg) {
-					cast(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1], MPPreGameDlg).updatePlayerList();
-				}
 
 			case ScoreBoardInfo:
 				var scoreboardPacket = new ScoreboardPacket();
 				scoreboardPacket.deserialize(input);
-				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-					@:privateAccess MarbleGame.instance.world.playGui.updatePlayerScores(scoreboardPacket);
-				}
 
 			case ExplodableUpdate:
 				var explodableUpdatePacket = new ExplodableUpdatePacket();

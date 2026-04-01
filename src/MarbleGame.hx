@@ -1,10 +1,6 @@
 package src;
 
-import gui.JoinServerGui;
-import gui.MPPreGameDlg;
-import gui.MPExitGameDlg;
 import gui.GuiControl;
-import gui.MPPlayMissionGui;
 import gui.MainMenuGui;
 #if !js
 import gui.ReplayCenterGui;
@@ -34,7 +30,6 @@ import src.Debug;
 import src.Gamepad;
 import src.Analytics;
 import net.Net;
-import net.MasterServerClient;
 import net.NetCommands;
 
 @:publicFields
@@ -206,7 +201,6 @@ class MarbleGame {
 	}
 
 	public function update(dt:Float) {
-		MasterServerClient.process();
 		Net.checkPacketTimeout(dt);
 		if (world != null) {
 			if (world._disposed) {
@@ -223,10 +217,6 @@ class MarbleGame {
 			if (((Key.isPressed(Key.ESCAPE) #if js && paused #end) || Gamepad.isPressed(["start"]))
 				&& world.finishTime == null
 				&& world._ready) {
-				if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg
-					|| (Net.isMP && paused && !(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPExitGameDlg))) {
-					return; // don't pause
-				}
 				handlePauseGame();
 			}
 		}
@@ -254,47 +244,22 @@ class MarbleGame {
 	}
 
 	public function showPauseUI() {
-		if (world.isMultiplayer) {
-			exitGameDlg = new MPExitGameDlg(() -> {
-				canvas.popDialog(exitGameDlg);
-				paused = !paused;
-				var w = getWorld();
-				w.setCursorLock(true);
-			}, () -> {
-				canvas.popDialog(exitGameDlg);
-				quitMission(Net.isClient);
-				if (Net.isMP && Net.isClient) {
-					Net.disconnect();
-					canvas.setContent(new JoinServerGui());
-				}
-			});
-		} else {
-			exitGameDlg = new ExitGameDlg((sender) -> {
-				canvas.popDialog(exitGameDlg);
-				var w = getWorld();
-				if (MarbleGame.instance.toRecord) {
-					MarbleGame.canvas.pushDialog(new ReplayNameDlg(() -> {
-						quitMission();
-					}));
-				} else {
-					quitMission(Net.isClient);
-					if (Net.isMP && Net.isClient) {
-						Net.disconnect();
-					}
-				}
-			}, (sender) -> {
-				canvas.popDialog(exitGameDlg);
-				paused = !paused;
-				var w = getWorld();
-				w.setCursorLock(true);
-			}, (sender) -> {
-				canvas.popDialog(exitGameDlg);
-				var w = getWorld();
-				w.restart(w.marble, true);
-				// world.setCursorLock(true);
-				paused = !paused;
-			});
-		}
+		exitGameDlg = new ExitGameDlg((sender) -> {
+			canvas.popDialog(exitGameDlg);
+			var w = getWorld();
+			quitMission(Net.isClient);
+		}, (sender) -> {
+			canvas.popDialog(exitGameDlg);
+			paused = !paused;
+			var w = getWorld();
+			w.setCursorLock(true);
+		}, (sender) -> {
+			canvas.popDialog(exitGameDlg);
+			var w = getWorld();
+			w.restart(w.marble, true);
+			// world.setCursorLock(true);
+			paused = !paused;
+		});
 		canvas.pushDialog(exitGameDlg);
 	}
 
@@ -345,18 +310,12 @@ class MarbleGame {
 		if (world.isWatching) {
 			canvas.setContent(Type.createInstance(replayEndClass, []));
 		} else {
-			if (Net.isMP) {
-				var lobby = new MPPlayMissionGui(Net.isHost);
-				canvas.setContent(lobby);
-			} else {
-				if (!world.mission.isClaMission && !world.mission.isCustom) {
-					PlayMissionGui.currentCategoryStatic = world.mission.type;
-					PlayMissionGui.currentSelectionStatic = world.mission.index;
-					PlayMissionGui.currentGameStatic = world.mission.game;
-				}
-				var pmg = new PlayMissionGui();
-				canvas.setContent(pmg);
+			if (!world.mission.isClaMission && !world.mission.isCustom) {
+				PlayMissionGui.currentCategoryStatic = world.mission.type;
+				PlayMissionGui.currentSelectionStatic = world.mission.index;
 			}
+			var pmg = new PlayMissionGui();
+			canvas.setContent(pmg);
 		}
 		world.dispose();
 		world = null;

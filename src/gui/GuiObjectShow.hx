@@ -45,7 +45,11 @@ class GuiObjectShow extends GuiControl {
 		sceneBitmap.y = renderRect.position.y;
 		sceneBitmap.width = renderRect.extent.x;
 		sceneBitmap.height = renderRect.extent.y;
-		super.render(scene2d);
+	}
+
+	public function setVisible(val:Bool) {
+		this.visible = val;
+		this.sceneBitmap.visible = val;
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {

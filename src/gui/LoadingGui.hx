@@ -5,23 +5,12 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleGame;
 import src.Settings;
-import src.Util;
 
 class LoadingGui extends GuiImage {
 	public var setProgress:Float->Void;
 
-	public function new(missionName:String, game:String, isMultiplayer:Bool = false) {
-		function chooseBg() {
-			if (game == "gold")
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (game == "platinum")
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			if (game == "ultra")
-				return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-		}
-
-		var img = chooseBg();
+	public function new(missionName:String) {
+		var img = ResourceLoader.getImage("data/ui/background.jpg");
 		super(img.resource.toTile());
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -47,16 +36,16 @@ class LoadingGui extends GuiImage {
 		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
 		var mapName = new GuiText(domcasual32);
-		mapName.position = new Vector(6, 33);
-		mapName.extent = new Vector(456, 14);
+		mapName.position = new Vector(134, 78);
+		mapName.extent = new Vector(323, 32);
 		mapName.text.text = missionName;
 		mapName.text.textColor = 0;
 		mapName.justify = Center;
 
 		var progress = new GuiProgress();
-		progress.vertSizing = Top;
-		progress.position = new Vector(194, 145);
-		progress.extent = new Vector(225, 56);
+		progress.vertSizing = Bottom;
+		progress.position = new Vector(153, 133);
+		progress.extent = new Vector(269, 78);
 		progress.progress = 0.5;
 
 		setProgress = (progressPz) -> {
@@ -64,20 +53,19 @@ class LoadingGui extends GuiImage {
 		}
 
 		var cancelButton = new GuiButton(loadButtonImages("data/ui/loading/cancel"));
-		cancelButton.position = new Vector(333, 243);
-		cancelButton.extent = new Vector(112, 59);
+		cancelButton.position = new Vector(320, 233);
+		cancelButton.extent = new Vector(88, 50);
 		cancelButton.pressedAction = (sender) -> {
 			MarbleGame.instance.quitMission();
 		}
 
 		var overlay = new GuiImage(ResourceLoader.getResource("data/ui/loading/overlay.png", ResourceLoader.getImage, this.imageResources).toTile());
-		overlay.position = new Vector(188, 139);
-		overlay.extent = new Vector(242, 75);
+		overlay.position = new Vector(151, 131);
+		overlay.extent = new Vector(278, 86);
 
 		loadingGui.addChild(mapName);
 		loadingGui.addChild(progress);
-		if (!isMultiplayer)
-			loadingGui.addChild(cancelButton);
+		loadingGui.addChild(cancelButton);
 		loadingGui.addChild(overlay);
 
 		this.addChild(loadingGui);

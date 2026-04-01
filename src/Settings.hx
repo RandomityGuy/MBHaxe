@@ -222,6 +222,7 @@ class Settings {
 
 	public static var levelStatistics:Map<String, PlayStatistics> = [];
 
+	public static var progression = [24, 24, 52];
 	public static var highscoreName = "";
 	public static var userId = "";
 
@@ -304,6 +305,7 @@ class Settings {
 			controls: controlsSettings,
 			touch: touchSettings,
 			gamepad: gamepadSettings,
+			progression: progression,
 			stats: playStatistics,
 			server: serverSettings,
 			highscoreName: highscoreName,
@@ -499,6 +501,7 @@ class Settings {
 				optionsSettings.rewindEnabled = false;
 			}
 			#end
+			progression = json.progression;
 			highscoreName = json.highscoreName;
 			if (highscoreName == null) {
 				highscoreName = "";

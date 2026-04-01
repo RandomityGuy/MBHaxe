@@ -76,7 +76,7 @@ class MoveManager {
 		if (!MarbleGame.instance.paused) {
 			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
 			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
-			if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
+			if (true) {
 				if (Key.isDown(Settings.controlsSettings.forward)) {
 					move.d.x -= 1;
 				}
@@ -99,11 +99,6 @@ class MoveManager {
 					|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
 					move.powerup = true;
 				}
-
-				if (Key.isDown(Settings.controlsSettings.blast)
-					|| (MarbleGame.instance.touchInput.blastbutton.pressed)
-					|| Gamepad.isDown(Settings.gamepadSettings.blast))
-					move.blast = true;
 
 				if (Key.isDown(Settings.controlsSettings.respawn) || Gamepad.isDown(Settings.gamepadSettings.respawn)) {
 					move.respawn = true;

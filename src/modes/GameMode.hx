@@ -35,11 +35,6 @@ interface GameMode {
 
 class GameModeFactory {
 	public static function getGameMode(level:MarbleWorld, mode:String):GameMode {
-		if (mode != null) {
-			if (mode.toLowerCase() == "hunt") {
-				return new HuntMode(level);
-			}
-		}
 		return new NullMode(level);
 	}
 }
