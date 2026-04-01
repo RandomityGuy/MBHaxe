@@ -1,0 +1,151 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         name = "Marble Materials Lab";
+         time = "0";
+         type = "Beginner";
+         desc = "Learn about different surface properties!";
+         startHelpText = "Explore the different surfaces and get the gems!";
+         level = "15";
+         artist = "Alex Swanson";
+         goldTime = "6500";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 0.29083 0.822779";
+      fogVolume2 = "-1 0.314212 0.783026";
+      fogVolume3 = "-1 0.681746 0.113754";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.360587";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.298365";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 0.271986";
+   };
+   new Sun() {
+      direction = "0.488577 0.573201 -0.657825";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/beginner/training_friction.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "7.5 0 -6";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-40 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-16.5 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape(StartPoint) {
+      position = "32 4.20237e-007 -4";
+      rotation = "0 0 -1 89.9544";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+         fixedscale = "1";
+   };
+   new StaticShape(EndPoint) {
+      position = "-60 5.80125e-007 0";
+      rotation = "0 0 -1 89.9544";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+         fixedscale = "1";
+   };
+   new Trigger(Bounds) {
+      position = "-67.5 15.5 -12";
+      rotation = "1 0 0 0";
+      scale = "107 31 33";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new StaticShape() {
+      position = "-59.9229 0.267691 6.77013";
+      rotation = "0 0 -1 104.278";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new ScriptObject() {
+         penaltyTime = "0";
+         bonusTime = "0";
+         time = "0";
+         gemCount = "0";
+         powerUp = "0";
+         pad = "1500";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Beach Party.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+   new Trigger() {
+      position = "0.0353498 12.3252 -8.04202";
+      rotation = "1 0 0 0";
+      scale = "27.6281 24.8292 6.56544";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Be careful, the mud is slippery!";
+   };
+   new Trigger() {
+      position = "-29.7787 12.3778 -8.17395";
+      rotation = "1 0 0 0";
+      scale = "27.6281 24.8292 11.7605";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "The rough grass gives you more traction!";
+   };
+   new Trigger() {
+      position = "-56.5603 12.5845 -0.347349";
+      rotation = "1 0 0 0";
+      scale = "28.4457 24.8292 6.02444";
+      dataBlock = "HelpTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+         text = "Be very careful, you get no traction at all in space!";
+   };
+};
+//--- OBJECT WRITE END ---

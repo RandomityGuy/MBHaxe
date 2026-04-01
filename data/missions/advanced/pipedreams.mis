@@ -1,0 +1,243 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         type = "advanced";
+         time = "45000";
+         name = "Pipe Dreams";
+         artist = "Alex Swanson";
+         desc = "Plummet down these pipes!";
+         startHelpText = "Try not to get caught up on the obstacles!";
+         level = "34";
+         goldTime ="27000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+      fogVolume2 = "-1 1.07208e-014 8.756e-014";
+      fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+   };
+   new Sun() {
+      direction = "0.540226 0.423195 -0.727367";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 -2.40796 30.7926";
+      rotation = "1 0 0 13.751";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe0.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "224.832 93.8972 -44.443";
+      rotation = "0 0 1 76.2034";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new InteriorInstance() {
+      position = "224.663 94.2 -52.4278";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new Trigger(Bounds) {
+      position = "-14.4342 115.46 -60.8344";
+      rotation = "1 0 0 0";
+      scale = "249.652 220.22 125.716";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new InteriorInstance() {
+      position = "117.587 94.329 -20.3875";
+      rotation = "0 -1 0 16.0428";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe7.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 -2.40796 30.7926";
+      rotation = "1 0 0 13.751";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe1.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 -2.40796 30.7926";
+      rotation = "1 0 0 13.751";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe2.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 -2.40796 30.7926";
+      rotation = "1 0 0 13.751";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe3.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 -2.40796 30.7926";
+      rotation = "1 0 0 13.751";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe4.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "117.587 94.329 -20.3875";
+      rotation = "0 -1 0 16.0428";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe5.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "117.587 94.329 -20.3875";
+      rotation = "0 -1 0 16.0428";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/pipe6.dif";
+      showTerrainInside = "0";
+   };
+   new ScriptObject() {
+         penaltyTime = "0";
+         bonusTime = "0";
+         time = "0";
+         gemCount = "0";
+         powerUp = "0";
+         pad = "2092";
+   };
+   new StaticShape(StartPoint) {
+      position = "-0.193425 -92.4163 50.9362";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new InteriorInstance() {
+      position = "0.335566 94.562 7.11139";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/advanced/platform_circle.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-0.0677553 -92.5745 50.5785";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(EndPoint) {
+      position = "224.544 94.3019 -52.0652";
+      rotation = "0 0 1 89.9544";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new ScriptObject() {
+         penaltyTime = "0";
+         bonusTime = "0";
+         time = "0";
+         gemCount = "0";
+         powerUp = "0";
+         pad = "2561";
+   };
+   new Item() {
+      position = "140.514 94.3244 -29.0638";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemTurquoise";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-1.90143 -37.2243 38.2716";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemTurquoise";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "1.29952 24.1481 23.4048";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemTurquoise";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "-0.64535 49.0361 16.2448";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemTurquoise";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "70.0351 94.324 -8.77871";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItemTurquoise";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Trigger() {
+      position = "-35.9879 68.8678 -7.93967";
+      rotation = "1 0 0 0";
+      scale = "170.631 95.0111 7.19223";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new Trigger() {
+      position = "-26.2674 -14.5248 19.4786";
+      rotation = "1 0 0 0";
+      scale = "170.631 95.0111 7.19223";
+      dataBlock = "OutOfBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new ScriptObject() {
+         penaltyTime = "0";
+         bonusTime = "0";
+         time = "0";
+         gemCount = "0";
+         powerUp = "0";
+         pad = "3029";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Shell.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---

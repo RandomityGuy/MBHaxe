@@ -1,0 +1,713 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         type = "Advanced";
+         name = "Trap Door Madness";
+         time = "0";
+         desc = "Grab all the gems to exit the mission, watch out for trap doors!";
+         artist = "Alex Swanson";
+         level = "16";
+         goldTime = 6500;
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0.349971";
+      cloudHeightPer[1] = "0.3";
+      cloudHeightPer[2] = "0.199973";
+      cloudSpeed1 = "0.0005";
+      cloudSpeed2 = "0.001";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "0 0 0";
+      fogVolume2 = "0 0 0";
+      fogVolume3 = "0 0 0";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 1 0";
+      windEffectPrecipitation = "1";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -222768174765569860000000000000000000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -170698929442160050000000000000000000000.000000";
+         locked = "true";
+   };
+   new Sun() {
+      direction = "0.464958 0.626025 -0.626025";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+         position = "0 0 0";
+         locked = "true";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "2.07137 -4.43343 495.084";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+      new StaticShape(EndPoint) {
+         position = "11.4401 18.1753 494.929";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "EndPad";
+      };
+   };
+   new Trigger(Bounds) {
+      position = "-2.70699 22.082 491.931";
+      rotation = "1 0 0 0";
+      scale = "18.1376 30.467 13.2344";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new SimGroup(Quad1) {
+
+      new StaticShape() {
+         position = "4 4 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "4 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "2 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "1.99001 3.97288 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "2 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "0 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "0 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "0 4 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "4 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "6 4 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "4 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "0 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "6 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "6 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "6 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "2 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+   };
+   new SimGroup(Quad1) {
+
+      new StaticShape() {
+         position = "12 4 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "12 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "10 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "10 4 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "10 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "8 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "8 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "8 4 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "12 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "14 4 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "12 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "8 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "14 0 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "14 2 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "14 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+      new StaticShape() {
+         position = "10 6 495";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "TrapDoor";
+            timeout = "200";
+            open = "0";
+            resetTime = "Default";
+      };
+   };
+   new StaticShape() {
+      position = "4.00087 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "4.00087 11.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "2.00087 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "1.99088 11.9667 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "2.00087 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "0.000868797 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "0.000868797 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "0.000868797 11.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "4.00087 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "6.00087 11.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "4.00087 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "0.000868797 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "6.00087 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "6.00087 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "6.00087 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "2.00087 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "12.0009 11.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "12.0009 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "10.0009 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "10.0009 11.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "10.0009 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "8.00087 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "8.00087 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "8.00087 11.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "12.0009 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "14.0009 11.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "12.0009 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "8.00087 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "14.0009 7.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "14.0009 9.99387 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "14.0009 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new StaticShape() {
+      position = "10.0009 13.9939 495.001";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "TrapDoor";
+         timeout = "200";
+         open = "0";
+         resetTime = "Default";
+   };
+   new InteriorInstance() {
+      position = "-0.962045 -1.04772 495.108";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/advanced/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "8.35185 21.2526 494.915";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/advanced/trapdoor.dif";
+      showTerrainInside = "0";
+   };
+   new Item() {
+      position = "4.03986 10.1227 494.901";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "2.04877 2.12962 495.1";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new Item() {
+      position = "11.84 6.10273 495.101";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "GemItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Beach Party.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+   new StaticShape() {
+      position = "11.4062 18.9234 501.351";
+      rotation = "0 0 1 17.7617";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+};
+//--- OBJECT WRITE END ---

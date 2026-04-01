@@ -1,0 +1,840 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         level = "14";
+         time = "90000";
+         desc = "Find the quickest path through the maze.";
+         name = "A-Maze-ing";
+         type = "Advanced";
+         artist = "Kevin Ryan";
+         goldTime = 8000;
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 -1.73483e+009 -1.73483e+009";
+      fogVolume2 = "-1 -1.73483e+009 -1.73483e+009";
+      fogVolume3 = "-1 -1.73483e+009 -1.73483e+009";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 -1734829824.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 -1734829824.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 -1734829824.000000";
+   };
+   new Sun() {
+      direction = "0.57735 0.57735 -0.57735";
+      color = "1.400000 1.200000 0.600000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new SimGroup(CheckPoints) {
+
+      new StaticShape(StartPoint) {
+         position = "0 -5.8 100";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "StartPad";
+      };
+      new StaticShape(EndPoint) {
+         position = "27.8 -5.6 100";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "EndPad";
+      };
+   };
+   new Trigger(Bounds) {
+      position = "-100 100 0";
+      rotation = "1 0 0 0";
+      scale = "200 200 200";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/advanced/a-maze-ing.dif";
+      showTerrainInside = "0";
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "-30 7.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "7000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-6 7.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "7000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-30 7.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "7000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "0";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw2_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "-16.5 20.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "4000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-13 20.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "4000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "-16.5 20.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "4000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw2) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "1";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "4.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "2000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "4.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "2000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "4.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "2";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "7.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "7.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "3000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "7.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "3";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "10.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "5000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "10.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "4000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "10.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "4";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "13.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "5000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "13.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "6000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "13.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "2000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "5";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "16.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "6000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "16.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "6000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "16.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "6000";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "6";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "19.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "5000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "19.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "5000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "19.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "5000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "7";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "22.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "4000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "22.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "4000";
+            smoothingType = "Accelerate";
+         };
+         new Marker() {
+            position = "22.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "4000";
+            smoothingType = "Accelerate";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "8";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "25.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "3000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "25.5 26 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "3000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "25.5 30.5 100";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "3000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "9";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "27 2.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "13 2.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "27 2.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "10";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "13 -0.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "27 -0.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "13 -0.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "11";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new SimGroup(mw1_g) {
+
+      new Path() {
+
+         new Marker() {
+            position = "13 -3.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "0";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "13 -8 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "1";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+         new Marker() {
+            position = "13 -3.5 99";
+            rotation = "1 0 0 0";
+            scale = "1 1 1";
+            seqNum = "2";
+            msToNext = "8000";
+            smoothingType = "Linear";
+         };
+      };
+      new PathedInterior(mw1) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         dataBlock = "PathedDefault";
+         interiorResource = "marble/data/interiors/advanced/a-maze-ing.dif";
+         interiorIndex = "12";
+         basePosition = "0 0 0";
+         baseRotation = "1 0 0 0";
+         baseScale = "1 1 1";
+            initialPosition = "0";
+            initialTargetPosition = "-1";
+      };
+   };
+   new Item() {
+      position = "14.2011 -6.43856 100.027";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperJumpItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "25.1514 40.8987 100.5";
+      rotation = "-1 0 0 90";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "25.1514 40.94 100";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.1 1.8";
+      interiorFile = "~/data/interiors/parts/boxes/woodblock.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "10.1148 38.6346 100.5";
+      rotation = "1 0 0 90";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "10.1148 38.6 100";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.1 1.8";
+      interiorFile = "~/data/interiors/parts/boxes/woodblock.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "16.1148 38.6346 100.5";
+      rotation = "1 0 0 90";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "16.1148 38.6 100";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.1 1.8";
+      interiorFile = "~/data/interiors/parts/boxes/woodblock.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "21.9148 38.6346 100.5";
+      rotation = "1 0 0 90";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "21.9148 38.6 100";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.1 1.8";
+      interiorFile = "~/data/interiors/parts/boxes/woodblock.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "7.15136 40.8987 100.5";
+      rotation = "-1 0 0 90";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "7.15136 40.94 100";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.1 1.8";
+      interiorFile = "~/data/interiors/parts/boxes/woodblock.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "13.3514 40.8987 100.5";
+      rotation = "-1 0 0 90";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "13.3514 40.94 100";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.1 1.8";
+      interiorFile = "~/data/interiors/parts/boxes/woodblock.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape() {
+      position = "19.1514 40.8987 100.5";
+      rotation = "-1 0 0 90";
+      scale = "0.5 0.5 0.5";
+      dataBlock = "SmallDuctFan";
+   };
+   new InteriorInstance() {
+      position = "19.1514 40.94 100";
+      rotation = "1 0 0 0";
+      scale = "0.5 0.1 1.8";
+      interiorFile = "~/data/interiors/parts/boxes/woodblock.dif";
+      showTerrainInside = "0";
+   };
+   new ScriptObject() {
+         bonusTime = "0";
+         gemCount = "0";
+         penaltyTime = "0";
+         time = "0";
+         powerUp = "0";
+         pad = "1434";
+   };
+   new Item() {
+      position = "4.24233 37.3543 100.254";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SuperSpeedItem";
+      collideable = "0";
+      static = "1";
+      rotate = "1";
+   };
+   new StaticShape() {
+      position = "3.22399 30.0916 100.881";
+      rotation = "0 0 -1 88.2355";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "-7.94032 24.8964 101.132";
+      rotation = "0 0 1 87.6625";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "3.10865 -1.75488 101.023";
+      rotation = "0 0 1 96.2569";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "0.833028 12.7701 101.097";
+      rotation = "0 0 1 1.14396";
+      scale = "1 1 1";
+      dataBlock = "SignPlainRight";
+   };
+   new StaticShape() {
+      position = "-2.15066 13.6969 101.313";
+      rotation = "0 0 1 180.091";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "2.22193 16.2314 100.872";
+      rotation = "0 0 1 89.9544";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "0.246939 16.2855 100.815";
+      rotation = "0 0 -1 89.9544";
+      scale = "1 1 1";
+      dataBlock = "SignPlainRight";
+   };
+   new StaticShape() {
+      position = "-7.66381 17.9709 100.974";
+      rotation = "0 0 1 90.5273";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "-21.4591 22.7657 101.069";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignPlainRight";
+   };
+   new StaticShape() {
+      position = "9.66689 15.7678 101.081";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignPlainLeft";
+   };
+   new StaticShape() {
+      position = "2.35731 38.4671 100.711";
+      rotation = "0 0 1 106.57";
+      scale = "1 1 1";
+      dataBlock = "SignCautionDanger";
+   };
+   new StaticShape() {
+      position = "2.40259 40.6726 100.772";
+      rotation = "0 0 1 61.3065";
+      scale = "1 1 1";
+      dataBlock = "SignCautionCaution";
+   };
+   new StaticShape() {
+      position = "28.7076 -6.22162 106.954";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "SignFinish";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Beach Party.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---
