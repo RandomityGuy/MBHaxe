@@ -38,6 +38,13 @@ class MainMenuGui extends GuiImage {
 		var scene2d = MarbleGame.instance.scene2d;
 		#end
 
+		function loadStaticButtonImages(path:String) {
+			var normal = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed];
+		}
+
 		MarbleGame.instance.toRecord = false;
 
 		var offsetX = (scene2d.width - 1280) / 2;
@@ -199,6 +206,28 @@ class MainMenuGui extends GuiImage {
 			#end
 		}
 		this.addChild(github);
+
+		#if js
+		var mbg = new GuiButton(loadStaticButtonImages("data/ui/icon_mbg"));
+		mbg.horizSizing = Right;
+		mbg.vertSizing = Top;
+		mbg.position = new Vector(0, 380);
+		mbg.extent = new Vector(76, 76);
+		mbg.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblastgold.randomityguy.me");
+		}
+		this.addChild(mbg);
+
+		var mbp = new GuiButton(loadStaticButtonImages("data/ui/icon_mbp"));
+		mbp.horizSizing = Right;
+		mbp.vertSizing = Top;
+		mbp.position = new Vector(76, 380);
+		mbp.extent = new Vector(76, 76);
+		mbp.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblast.randomityguy.me");
+		}
+		this.addChild(mbp);
+		#end
 	}
 
 	override function onResize(width:Int, height:Int) {
