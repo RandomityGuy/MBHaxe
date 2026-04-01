@@ -1,0 +1,253 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+
+   new ScriptObject(MissionInfo) {
+         startHelpText = "Try to stay centered to hit the end pad below!";
+         level = "30";
+         type = "advanced";
+         name = "Free Fall";
+         artist = "Alex Swanson";
+         time = "0";
+         desc = "It\'s a long way down...";
+         goldTime = "8000";
+   };
+   new MissionArea(MissionArea) {
+      area = "-360 -648 720 1296";
+      flightCeiling = "300";
+      flightCeilingRange = "20";
+         locked = "true";
+   };
+   new Sky(Sky) {
+      position = "336 136 0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      cloudHeightPer[0] = "0";
+      cloudHeightPer[1] = "0";
+      cloudHeightPer[2] = "0";
+      cloudSpeed1 = "0.0001";
+      cloudSpeed2 = "0.0002";
+      cloudSpeed3 = "0.0003";
+      visibleDistance = "500";
+      useSkyTextures = "1";
+      renderBottomTexture = "1";
+      SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+      fogDistance = "300";
+      fogColor = "0.600000 0.600000 0.600000 1.000000";
+      fogVolume1 = "-1 7.21503e+022 6.59383e-007";
+      fogVolume2 = "-1 3.97536e+028 1.77499e+028";
+      fogVolume3 = "-1 2.81751e+020 1.69209e+022";
+      materialList = "~/data/skies/sky_day.dml";
+      windVelocity = "1 0 0";
+      windEffectPrecipitation = "0";
+      noRenderBans = "1";
+      fogVolumeColor1 = "128.000000 128.000000 128.000000 14270110282885781000000.000000";
+      fogVolumeColor2 = "128.000000 128.000000 128.000000 73174428693612219000000000000.000000";
+      fogVolumeColor3 = "128.000000 128.000000 128.000000 18393446818394586000000000.000000";
+   };
+   new Sun() {
+      direction = "0.321887 0.321887 -0.89038";
+      color = "1.400000 1.200000 0.400000 1.000000";
+      ambient = "0.300000 0.300000 0.400000 1.000000";
+   };
+   new InteriorInstance() {
+      position = "0 0 64";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall0.dif";
+      showTerrainInside = "0";
+   };
+   new StaticShape(StartPoint) {
+      position = "0 0 100.348";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "StartPad";
+   };
+   new StaticShape(EndPoint) {
+      position = "0 0 -319.4";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      dataBlock = "EndPad";
+   };
+   new Trigger(Bounds) {
+      position = "-16.5578 16.9075 -355.39";
+      rotation = "1 0 0 0";
+      scale = "29.6469 31.4727 467.947";
+      dataBlock = "InBoundsTrigger";
+      polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+   };
+   new InteriorInstance() {
+      position = "-9.64951 -45.3555 -245.35";
+      rotation = "-0.891224 0.365939 -0.267971 76.6275";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall5.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 0 100";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 0 -64";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall0.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-18.713 -0.732104 -155.182";
+      rotation = "0 1 0 29.2208";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall5.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 0 -192";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall0.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 0 -256";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall0.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0 0 -320";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/smallplatform.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0.354524 -6.70897 -67.5951";
+      rotation = "-1 0 0 9.74027";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall5.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "1.20304 1.22763 77.4179";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall1.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "11.5223 1.98737 21.3452";
+      rotation = "-0.283962 0.73212 -0.619166 64.1284";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall1.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-14.7877 5.156 -42.8453";
+      rotation = "-0.261164 -0.726721 0.63535 58.9875";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall1.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0.83935 15.6737 -103.604";
+      rotation = "-1 0 0 78.4952";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall1.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "9.47379 11.2824 -240.101";
+      rotation = "-0.683033 0.346957 0.642718 76.6414";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall1.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-1.67075 0.0420091 -186.26";
+      rotation = "-0.368097 -0.813323 0.450566 90.2559";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall2.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-2.62432 5.88654 -136.408";
+      rotation = "0.41232 0.911037 0.00173356 179.561";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall2.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0.481195 0.12909 -104.5";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall3.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "2.39258 -0.626071 -32.8939";
+      rotation = "0 0 1 68.7549";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall3.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "0.553945 -2.08582 10.1879";
+      rotation = "-0.368791 -0.0557373 -0.92784 18.5032";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall3.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-3.1079 1.39753 69.8992";
+      rotation = "0.144467 0.738008 -0.659146 18.0193";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall3.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-0.949223 -3.36755 113.888";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall4.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "19.9442 -26.5969 73.3044";
+      rotation = "-0.864778 -0.457482 -0.207048 55.2508";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall4.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-17.5168 -21.1156 -83.7078";
+      rotation = "-0.750917 0.659728 0.0297081 108.338";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall4.dif";
+      showTerrainInside = "0";
+   };
+   new InteriorInstance() {
+      position = "-11.3472 -10.5383 -139.055";
+      rotation = "-0.0381725 0.772957 -0.633309 35.8094";
+      scale = "1 1 1";
+      interiorFile = "~/data/interiors/addon/freefall4.dif";
+      showTerrainInside = "0";
+   };
+   new ScriptObject() {
+         powerUp = "0";
+         pad = "7410";
+         penaltyTime = "0";
+         bonusTime = "0";
+         time = "0";
+         gemCount = "0";
+   };
+   new AudioProfile(MusicProfile) {
+      fileName = "~/data/sound/Shell.ogg";
+      description = "AudioMusic";
+      preload = "0";
+   };
+};
+//--- OBJECT WRITE END ---
