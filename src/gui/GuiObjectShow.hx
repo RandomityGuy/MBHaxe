@@ -48,6 +48,7 @@ class GuiObjectShow extends GuiControl {
 			var props = parent.getProperties(this.sceneBitmap);
 			props.isAbsolute = true;
 			this.sceneBitmap.setPosition(off.x, off.y);
+			this.sceneBitmap.visible = this.visible;
 		}
 		super.render(scene2d, parent);
 		var renderRect = this.getRenderRectangle();
@@ -60,6 +61,11 @@ class GuiObjectShow extends GuiControl {
 		// sceneBitmap.y = renderRect.position.y;
 		sceneBitmap.width = renderRect.extent.x;
 		sceneBitmap.height = renderRect.extent.y;
+	}
+
+	public function setVisible(val:Bool) {
+		this.visible = val;
+		this.sceneBitmap.visible = val;
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {

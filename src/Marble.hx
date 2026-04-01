@@ -278,7 +278,6 @@ class Marble extends GameObject {
 
 	var forcefield:DtsObject;
 	var helicopter:DtsObject;
-	var megaHelicopter:DtsObject;
 	var superBounceEnableTime:Float = -1e8;
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
@@ -569,21 +568,9 @@ class Marble extends GameObject {
 		this.helicopter.y = 1e8;
 		this.helicopter.z = 1e8;
 
-		this.megaHelicopter = new DtsObject();
-		this.megaHelicopter.dtsPath = "data/shapes/items/megahelicopter.dts";
-		this.megaHelicopter.useInstancing = false;
-		this.megaHelicopter.identifier = "MegaHelicopter";
-		this.megaHelicopter.showSequences = true;
-		this.megaHelicopter.isBoundingBoxCollideable = false;
-		// this.addChild(this.helicopter);
-		this.megaHelicopter.x = 1e8;
-		this.megaHelicopter.y = 1e8;
-		this.megaHelicopter.z = 1e8;
-
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
-		worker.addTask(fwd -> level.addDtsObject(this.megaHelicopter, fwd));
 		worker.run();
 
 		loadMarbleAttributes();
@@ -2418,49 +2405,43 @@ class Marble extends GameObject {
 		move.d = new Vector();
 		move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
 		move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
-		if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
-			if (Key.isDown(Settings.controlsSettings.forward)) {
-				move.d.x -= 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.backward)) {
-				move.d.x += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.left)) {
-				move.d.y += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.right)) {
-				move.d.y -= 1;
-			}
-			move.d.x = Util.clamp(move.d.x, -1, 1);
-			move.d.y = Util.clamp(move.d.y, -1, 1);
-			if (Key.isDown(Settings.controlsSettings.jump)
-				|| MarbleGame.instance.touchInput.jumpButton.pressed
-				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
-				move.jump = true;
-			}
-			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
-				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
-				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
-				move.powerup = true;
-			}
 
-			if (Key.isDown(Settings.controlsSettings.blast)
-				|| (MarbleGame.instance.touchInput.blastbutton.pressed)
-				|| Gamepad.isDown(Settings.gamepadSettings.blast))
-				move.blast = true;
+		if (Key.isDown(Settings.controlsSettings.forward)) {
+			move.d.x -= 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.backward)) {
+			move.d.x += 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.left)) {
+			move.d.y += 1;
+		}
+		if (Key.isDown(Settings.controlsSettings.right)) {
+			move.d.y -= 1;
+		}
+		move.d.x = Util.clamp(move.d.x, -1, 1);
+		move.d.y = Util.clamp(move.d.y, -1, 1);
+		if (Key.isDown(Settings.controlsSettings.jump)
+			|| MarbleGame.instance.touchInput.jumpButton.pressed
+			|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
+			move.jump = true;
+		}
+		if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
+			|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
+			|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
+			move.powerup = true;
+		}
 
-			if (Key.isDown(Settings.controlsSettings.respawn) || Gamepad.isDown(Settings.gamepadSettings.respawn)) {
-				move.respawn = true;
-				if (Net.isMP) {
-					@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = 0;
-					Gamepad.releaseKey(Settings.gamepadSettings.respawn);
-				}
+		if (Key.isDown(Settings.controlsSettings.respawn) || Gamepad.isDown(Settings.gamepadSettings.respawn)) {
+			move.respawn = true;
+			if (Net.isMP) {
+				@:privateAccess Key.keyPressed[Settings.controlsSettings.respawn] = 0;
+				Gamepad.releaseKey(Settings.gamepadSettings.respawn);
 			}
+		}
 
-			if (MarbleGame.instance.touchInput.movementInput.pressed) {
-				move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
-				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
-			}
+		if (MarbleGame.instance.touchInput.movementInput.pressed) {
+			move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
+			move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
 		}
 		return move;
 	}
@@ -2606,30 +2587,16 @@ class Marble extends GameObject {
 			this.forcefield.y = 1e8;
 			this.forcefield.z = 1e8;
 		}
-		if (megaEnabled) {
-			this.helicopter.setPosition(1e8, 1e8, 1e8);
-			if (helicopterEnabled) {
-				this.megaHelicopter.setPosition(x, y, z);
-				this.megaHelicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
-				if (selfMarble)
-					this.helicopterSound.pause = false;
-			} else {
-				this.megaHelicopter.setPosition(1e8, 1e8, 1e8);
-				if (selfMarble)
-					this.helicopterSound.pause = true;
-			}
+
+		if (helicopterEnabled) {
+			this.helicopter.setPosition(x, y, z);
+			this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
+			if (selfMarble)
+				this.helicopterSound.pause = false;
 		} else {
-			this.megaHelicopter.setPosition(1e8, 1e8, 1e8);
-			if (helicopterEnabled) {
-				this.helicopter.setPosition(x, y, z);
-				this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
-				if (selfMarble)
-					this.helicopterSound.pause = false;
-			} else {
-				this.helicopter.setPosition(1e8, 1e8, 1e8);
-				if (selfMarble)
-					this.helicopterSound.pause = true;
-			}
+			this.helicopter.setPosition(1e8, 1e8, 1e8);
+			if (selfMarble)
+				this.helicopterSound.pause = true;
 		}
 	}
 

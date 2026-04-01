@@ -44,7 +44,7 @@ class MessageBoxOkDlg extends GuiControl {
 
 		var okButton = new GuiButton(loadButtonImages("data/ui/common/ok"));
 		okButton.position = new Vector(117, 85);
-		okButton.extent = new Vector(88, 41);
+		okButton.extent = new Vector(78, 59);
 		okButton.vertSizing = Top;
 		okButton.accelerator = hxd.Key.ENTER;
 		okButton.gamepadAccelerator = ["A"];

@@ -1,8 +1,5 @@
 package gui;
 
-import h2d.Tile;
-import hxd.BitmapData;
-import h2d.filter.DropShadow;
 import src.Settings;
 import hxd.res.BitmapFont;
 import h3d.Vector;
@@ -33,75 +30,67 @@ class EnterNameDlg extends GuiControl {
 		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
 		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var domcasual48 = domcasual32b.toSdfFont(cast 42 * Settings.uiScale, MultiChannel);
+
+		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
+		var expo50b = new BitmapFont(expo50fontdata.entry);
+		@:privateAccess expo50b.loader = ResourceLoader.loader;
+		var expo50 = expo50b.toSdfFont(cast 35 * Settings.uiScale, MultiChannel);
+		var expo32 = expo50b.toSdfFont(cast 24 * Settings.uiScale, MultiChannel);
 
 		function mlFontLoader(text:String) {
 			switch (text) {
 				case "DomCasual32":
 					return domcasual32;
-				case "DomCasual48":
-					return domcasual48;
 				case "Arial14":
 					return arial14;
+				case "Expo50":
+					return expo50;
 				default:
 					return null;
 			}
 		}
 
-		var dlg = new GuiImage(ResourceLoader.getResource("data/ui/endgame/enternamebox.png", ResourceLoader.getImage, this.imageResources).toTile());
+		var dlg = new GuiImage(ResourceLoader.getResource("data/ui/common/dialog.png", ResourceLoader.getImage, this.imageResources).toTile());
 		dlg.horizSizing = Center;
 		dlg.vertSizing = Center;
-		dlg.position = new Vector(110, 112);
-		dlg.extent = new Vector(420, 256);
+		dlg.position = new Vector(112, 111);
+		dlg.extent = new Vector(416, 257);
 		this.addChild(dlg);
 
 		var enterNameEdit = new GuiTextInput(domcasual32);
 		enterNameEdit.text.textColor = 0;
 		enterNameEdit.text.selectionColor.setColor(0xFFFFFFFF);
 		enterNameEdit.text.selectionTile = h2d.Tile.fromColor(0x808080, 0, hxd.Math.ceil(enterNameEdit.text.font.lineHeight));
-		enterNameEdit.position = new Vector(28, 130);
-		enterNameEdit.extent = new Vector(363, 38);
+		enterNameEdit.position = new Vector(87, 136);
+		enterNameEdit.extent = new Vector(255, 36);
 		enterNameEdit.text.text = Settings.highscoreName;
 		haxe.Timer.delay(() -> {
 			enterNameEdit.text.focus();
 		}, 5);
 
-		var okbutton = new GuiButton(loadButtonImages("data/ui/endgame/ok"));
-		okbutton.position = new Vector(151, 184);
-		okbutton.extent = new Vector(110, 55);
+		var okbutton = new GuiButton(loadButtonImages("data/ui/common/ok"));
+		okbutton.position = new Vector(163, 182);
+		okbutton.extent = new Vector(78, 59);
 		okbutton.accelerator = hxd.Key.ENTER;
 		okbutton.gamepadAccelerator = ["A"];
 		okbutton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 			Settings.highscoreName = enterNameEdit.text.text;
-			if (StringTools.trim(Settings.highscoreName) == "")
-				Settings.highscoreName = "Player";
-			okFunc(Settings.highscoreName);
+			okFunc(enterNameEdit.text.text);
 		}
 		dlg.addChild(okbutton);
 
-		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/endgame/window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		wnd.horizSizing = Width;
-		wnd.vertSizing = Height;
-		wnd.position = new Vector(16, 119);
-		wnd.extent = new Vector(388, 56);
+		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/common/window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		wnd.position = new Vector(58, 124);
+		wnd.extent = new Vector(295, 55);
 		dlg.addChild(wnd);
 
 		var enterNameText = new GuiMLText(domcasual32, mlFontLoader);
-		enterNameText.text.textColor = 0xFFFFFF;
-		enterNameText.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0
-		};
-		enterNameText.position = new Vector(37, 23);
-		enterNameText.extent = new Vector(345, 85);
+		enterNameText.text.textColor = 0;
+		enterNameText.position = new Vector(41, 30);
+		enterNameText.extent = new Vector(345, 14);
 		// enterNameText.justify = Center;
-		if (place != -1)
-			enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="DomCasual48">Well Done!<br/></font><font face="DomCasual32">You have the${["", " second", " third", " fourth", " fifth"][place]} top time!</font></p>';
-		else
-			enterNameText.text.text = '<p align="center"><font face="DomCasual32">Enter your desired display name</font></p>';
+		enterNameText.text.text = '<font face="Arial14"><br/></font><p align="center"><font face="Expo50">Congratulations!<br/></font>You got the${["", " 2nd", " 3rd"][place]} best time!</p>';
 		dlg.addChild(enterNameText);
 
 		dlg.addChild(enterNameEdit);

@@ -44,7 +44,7 @@ class MessageBoxYesNoDlg extends GuiControl {
 
 		var yesButton = new GuiButton(loadButtonImages("data/ui/common/yes"));
 		yesButton.position = new Vector(44, 94);
-		yesButton.extent = new Vector(82, 35);
+		yesButton.extent = new Vector(82, 47);
 		yesButton.vertSizing = Top;
 		yesButton.accelerator = hxd.Key.ENTER;
 		yesButton.gamepadAccelerator = ["A"];
@@ -56,7 +56,7 @@ class MessageBoxYesNoDlg extends GuiControl {
 
 		var noButton = new GuiButton(loadButtonImages("data/ui/common/no"));
 		noButton.position = new Vector(151, 94);
-		noButton.extent = new Vector(75, 35);
+		noButton.extent = new Vector(75, 47);
 		noButton.vertSizing = Top;
 		noButton.accelerator = hxd.Key.ESCAPE;
 		noButton.gamepadAccelerator = ["B"];
