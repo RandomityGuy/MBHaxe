@@ -1,3 +1,21 @@
+# 1.7.2
+This update brings the following bugfixes:
+- Added Import and Export Progress to Options menu to transfer game progress between devices.
+- Added momentum based scrolling on touch devices for menus.
+- Added TURN server support for multiplayer. Players behind strict NATs should now be able to play multiplayer without issues.
+- Made the game files to be case insensitive to allow running the game on case sensitive filesystems without issues.
+- Escaped all user input to prevent HTML injection in the UI.
+- Fixed various race condition issues.
+- Improved camera sensitivity on touch devices.
+- Implemented camera centering for touch controls when free look is disabled.
+- Various performance improvements and crash fixes.
+- Implemented console cheat commands. DefaultMarble.attribute = value; to change marble attributes.
+- Fixed a bug with the timer when playing a replay.
+- Fixed a crash that could happen in multiplayer.
+- Fixed not being able to load textures in certain custom levels.
+- Fixed softlock when playing a user installed custom level.
+- Fixed gravity changes not rewinding properly.
+
 # 1.7.1
 This update brings the following bugfixes:
 - Fixed a crash when the marble goes out of bounds.
