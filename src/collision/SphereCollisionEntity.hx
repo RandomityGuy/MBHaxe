@@ -84,7 +84,7 @@ class SphereCollisionEntity extends CollisionEntity {
 		var radius = collisionEntity.radius;
 
 		var otherDist = thispos.sub(position);
-		var otherRadius = this.radius + radius;
+		var otherRadius = marble._radius + radius;
 
 		if (otherRadius * otherRadius * 1.01 > otherDist.lengthSq()) {
 			var normDist = otherDist.normalized();

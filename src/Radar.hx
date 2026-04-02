@@ -439,6 +439,8 @@ class Radar {
 	}
 
 	function renderName(pos:Vector, marble:Marble, opacity:Float) {
+		if (@:privateAccess marble.connection == null)
+			return;
 		if (!marbleNameTexts.exists(marble)) {
 			var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 			var arialb14b = new BitmapFont(arialb14fontdata.entry);
@@ -449,6 +451,9 @@ class Radar {
 			txt.textColor = 0xFFFF00;
 		}
 		var textObj = marbleNameTexts.get(marble);
+		var connName = @:privateAccess marble.connection.getName();
+		if (connName == null)
+			return;
 		textObj.text = @:privateAccess marble.connection.getName();
 		textObj.setPosition(pos.x - textObj.textWidth / 2, pos.y - textObj.textHeight);
 		textObj.alpha = opacity;

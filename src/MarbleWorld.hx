@@ -966,6 +966,8 @@ class MarbleWorld extends Scheduler {
 			var chk = new CheckpointTrigger(element, cast this);
 			trigger = chk;
 			chk.simGroup = simGroup;
+		} else if (datablockLowercase == "soccertrigger") {
+			trigger = new triggers.SoccerGoalTrigger(element, cast this);
 		} else {
 			Console.error("Unknown trigger: " + element.datablock);
 			onFinish();

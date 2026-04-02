@@ -9,6 +9,7 @@ import net.ClientConnection.NetPlatform;
 import gui.EndGameGui;
 import modes.HuntMode;
 import modes.KingMode;
+import modes.SoccerMode;
 import net.ClientConnection.GameplayState;
 import net.Net.NetPacketType;
 import gui.MultiplayerLevelSelectGui;
@@ -238,6 +239,27 @@ class NetCommands {
 
 	@:rpc(server) public static function setLobbyGameMode(mode:String) {
 		Net.selectedGameMode = mode;
+	}
+
+	@:rpc(server) public static function soccerGoalScored(scoringTeam:Int, redScore:Int, blueScore:Int) {
+		if (Net.isClient && MarbleGame.instance.world != null) {
+			var world = MarbleGame.instance.world;
+			if (world.gameMode is SoccerMode) {
+				var soccer:SoccerMode = cast world.gameMode;
+				soccer.onGoalNotification(scoringTeam, redScore, blueScore);
+			}
+		}
+	}
+
+	@:rpc(server) public static function soccerOvertime() {
+		if (Net.isClient && MarbleGame.instance.world != null) {
+			var world = MarbleGame.instance.world;
+			if (world.gameMode is SoccerMode) {
+				var soccer:SoccerMode = cast world.gameMode;
+				soccer.overtime = true;
+				soccer.onOvertimeStarted();
+			}
+		}
 	}
 
 	@:rpc(server) public static function setKingMarble(newKingId:Int, oldKingId:Int) {

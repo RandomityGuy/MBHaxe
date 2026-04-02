@@ -245,6 +245,30 @@ class GemPickupPacket implements NetPacket {
 }
 
 @:publicFields
+class SoccerStatePacket implements NetPacket {
+	var redScore:Int = 0;
+	var blueScore:Int = 0;
+	var overtime:Bool = false;
+	var footballSpawned:Bool = false;
+
+	public function new() {}
+
+	public inline function serialize(b:OutputBitStream) {
+		b.writeInt(redScore, 10);
+		b.writeInt(blueScore, 10);
+		b.writeFlag(overtime);
+		b.writeFlag(footballSpawned);
+	}
+
+	public inline function deserialize(b:InputBitStream) {
+		redScore = b.readInt(10);
+		blueScore = b.readInt(10);
+		overtime = b.readFlag();
+		footballSpawned = b.readFlag();
+	}
+}
+
+@:publicFields
 class KingInfoPacket implements NetPacket {
 	var kingClientId:Int;
 
