@@ -214,6 +214,7 @@ class Marble extends GameObject {
 	public var collisionWorld:CollisionWorld;
 
 	public var _radius = 0.2;
+	public var _defaultRadius = 0.3;
 
 	var _prevRadius:Float;
 	var _renderScale:Float = 1;
@@ -1838,7 +1839,7 @@ class Marble extends GameObject {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
 				} else if ((timeState.ticks - this.megaMarbleUseTick) > this.megaMarbleDuration) {
-					this.collider.radius = this._radius = 0.3;
+					this.collider.radius = this._radius = this._defaultRadius;
 					if (!this.isNetUpdate && this.controllable)
 						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
 							false);
@@ -1851,7 +1852,7 @@ class Marble extends GameObject {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
 				} else {
-					this.collider.radius = this._radius = 0.3;
+					this.collider.radius = this._radius = this._defaultRadius;
 					if (!this.isNetUpdate && this.controllable)
 						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
 							false);
@@ -1860,7 +1861,7 @@ class Marble extends GameObject {
 			}
 		}
 		if (Net.isClient && this.megaMarbleUseTick == 0) {
-			this.collider.radius = this._radius = 0.3;
+			this.collider.radius = this._radius = this._defaultRadius;
 		}
 
 		if (Net.isMP) {

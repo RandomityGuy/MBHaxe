@@ -65,6 +65,7 @@ class DummyConnection extends GameConnection {
 		super(id);
 		this.state = GameplayState.GAME;
 		this.lobbyReady = true;
+		this.name = "Dummy(" + id + ")";
 	}
 }
 

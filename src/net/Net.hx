@@ -38,6 +38,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var PlayerInfo;
 	var ScoreBoardInfo;
 	var KingInfo;
+	var SoccerInfo;
 }
 
 @:publicFields
@@ -199,7 +200,7 @@ class Net {
 		}
 	}
 
-	static function addGhost(id:Int) {
+	public static function addGhost(id:Int) {
 		var ghost = new DummyConnection(id);
 		clientIdMap[id] = ghost;
 	}
@@ -727,8 +728,14 @@ class Net {
 				marbleUpdatePacket.deserialize(input);
 				var cc = marbleUpdatePacket.clientId;
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-					var m = MarbleGame.instance.world.lastMoves;
-					m.enqueue(marbleUpdatePacket);
+					var world = MarbleGame.instance.world;
+					// if (cc == 32 && (world.gameMode is modes.SoccerMode)) {
+					// 	var soccer:modes.SoccerMode = cast world.gameMode;
+					// 	if (soccer.football != null)
+					// 		soccer.football.unpackUpdate(marbleUpdatePacket);
+					// } else {
+					world.lastMoves.enqueue(marbleUpdatePacket);
+					// }
 				}
 
 			case MarbleMove:
@@ -821,6 +828,17 @@ class Net {
 					if (world.gameMode is modes.KingMode) {
 						var kingMode:modes.KingMode = cast world.gameMode;
 						kingMode.onKingChanged(kingInfoPacket.kingClientId, -1);
+					}
+				}
+
+			case SoccerInfo:
+				var soccerPacket = new net.NetPacket.SoccerStatePacket();
+				soccerPacket.deserialize(input);
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
+					var world = MarbleGame.instance.world;
+					if (world.gameMode is modes.SoccerMode) {
+						var soccer:modes.SoccerMode = cast world.gameMode;
+						soccer.onSoccerStateReceived(soccerPacket);
 					}
 				}
 

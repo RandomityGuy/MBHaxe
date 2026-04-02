@@ -60,6 +60,8 @@ class GameModeFactory {
 					return new HuntMode(level, true);
 				case "king":
 					return new KingMode(level);
+				case "soccer":
+					return new SoccerMode(level);
 			}
 		return new NullMode(level);
 	}
