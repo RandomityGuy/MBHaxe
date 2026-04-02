@@ -96,7 +96,7 @@ class HuntMode extends NullMode {
 					}
 				} else if (element._type == MissionElementType.SimGroup) {
 					var scanPls = true;
-					if (Net.connectedServerInfo.oldSpawns) {
+					if (Net.isMP && Net.connectedServerInfo.oldSpawns) {
 						if (element._name.toLowerCase() == "newversion") {
 							// Remove this
 							elToRemove.push(element);
@@ -121,8 +121,8 @@ class HuntMode extends NullMode {
 	};
 
 	override function getSpawnTransform() {
-		var idx = Net.connectedServerInfo.competitiveMode ? idealSpawnIndex : Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
-		if (!Net.connectedServerInfo.competitiveMode) {
+		var idx = (Net.isMP && Net.connectedServerInfo.competitiveMode) ? idealSpawnIndex : Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+		if (!(Net.isMP && Net.connectedServerInfo.competitiveMode)) {
 			var allTaken = true;
 			for (spw in spawnPointTaken) {
 				if (!spw) {
@@ -370,7 +370,7 @@ class HuntMode extends NullMode {
 				var gemPos = gemElem.gem.getAbsPos().getPosition();
 
 				if (level.mission.missionInfo.game == "PlatinumQuest") {
-					if (Net.connectedServerInfo.oldSpawns) {
+					if (Net.isMP && Net.connectedServerInfo.oldSpawns) {
 						// Spawn chances!
 						var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
 							case "red.gem":
@@ -836,7 +836,7 @@ class HuntMode extends NullMode {
 	}
 
 	override function update(t:src.TimeState) {
-		if (Net.connectedServerInfo.competitiveMode) {
+		if (this.level.isMultiplayer && Net.connectedServerInfo.competitiveMode) {
 			if (competitiveTimerStartTicks != 0) {
 				var currentTime = Net.isHost ? t.ticks : @:privateAccess level.marble.serverTicks;
 				var endTime = competitiveTimerStartTicks + (20000 >> 5);
