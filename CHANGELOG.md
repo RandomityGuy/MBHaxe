@@ -15,6 +15,7 @@ This update brings the following bugfixes:
 - Fixed not being able to load textures in certain custom levels.
 - Fixed softlock when playing a user installed custom level.
 - Fixed gravity changes not rewinding properly.
+- Fixed skies not rendering correctly at times in the web version.
 
 # 1.7.1
 This update brings the following bugfixes:
