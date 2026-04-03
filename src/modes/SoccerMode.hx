@@ -207,8 +207,10 @@ class SoccerMode extends NullMode {
 			return;
 		var f = new Marble();
 		f.controllable = false;
-		if (!Net.clientIdMap.exists(FOOTBALL_NET_ID))
+		if (!Net.clientIdMap.exists(FOOTBALL_NET_ID)) {
 			Net.addGhost(FOOTBALL_NET_ID);
+			Net.clientIdMap[FOOTBALL_NET_ID].setMarbleId(33);
+		}
 		level.addMarble(f, Net.clientIdMap[FOOTBALL_NET_ID], () -> {
 			football = f;
 			@:privateAccess level.clientMarbles.set(football.connection, football);
@@ -219,7 +221,7 @@ class SoccerMode extends NullMode {
 	function resetBall() {
 		if (football == null || footballSpawnPos == null)
 			return;
-		@:privateAccess football.newPos = footballSpawnPos.clone();
+		football.setMarblePosition(footballSpawnPos.x, footballSpawnPos.y, footballSpawnPos.z);
 		football.velocity.load(new Vector(0, 0, 0));
 		football.omega.load(new Vector(0, 0, 0));
 		football._radius = 1.86;
@@ -262,6 +264,13 @@ class SoccerMode extends NullMode {
 		// Scoring team is the one that kicked it INTO the opposing team's goal
 		var scoringTeam = 1 - goalTeam;
 		scoreGoal(scoringTeam);
+
+		// Respawn everyone else back at their spawn points to prevent spawn camping the ball after a goal
+		for (m in level.marbles) {
+			if (m == football)
+				continue;
+			level.restart(m);
+		}
 	}
 
 	function scoreGoal(scoringTeam:Int) {
