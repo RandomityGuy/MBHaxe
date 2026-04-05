@@ -367,11 +367,12 @@ class MarbleWorld extends Scheduler {
 		this.scene.addChild(this.sky);
 
 		this._ready = true;
-		var musicFileName = 'data/sound/music/' + this.mission.missionInfo.music;
-		if (ResourceLoader.exists(musicFileName))
-			AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), this.mission.missionInfo.music);
-		else
-			AudioManager.playShell();
+		var musicFileName = [
+			'data/sound/groovepolice.ogg',
+			'data/sound/classic vibe.ogg',
+			'data/sound/beach party.ogg'
+		][(mission.index + 1) % 3];
+		AudioManager.playMusic(ResourceLoader.getResource(musicFileName, ResourceLoader.getAudio, this.soundResources), musicFileName);
 		MarbleGame.canvas.clearContent();
 		if (this.endPad != null)
 			this.endPad.generateCollider();
