@@ -259,6 +259,16 @@ class MainMenuGui extends GuiImage {
 			js.Browser.window.open("https://marbleblastultra.randomityguy.me");
 		}
 		this.addChild(mbu);
+
+		var discord = new GuiButton(loadStaticButtonImages("data/ui/discord"));
+		discord.horizSizing = Right;
+		discord.vertSizing = Top;
+		discord.position = new Vector(0, 320);
+		discord.extent = new Vector(152, 60);
+		discord.pressedAction = (sender) -> {
+			js.Browser.window.open("https://discord.gg/q4JdnRbVhF");
+		}
+		this.addChild(discord);
 		#end
 
 		#if js
