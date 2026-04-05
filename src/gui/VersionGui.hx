@@ -9,12 +9,17 @@ import src.Settings;
 
 class VersionGui extends GuiImage {
 	public function new() {
-		var img = ResourceLoader.getImage("data/ui/motd/messagewindow.png");
+		var img = ResourceLoader.getImage("data/ui/help/help_gui.png");
 		super(img.resource.toTile());
 		this.horizSizing = Center;
 		this.vertSizing = Center;
 		this.position = new Vector(4, 12);
-		this.extent = new Vector(631, 455);
+		this.extent = new Vector(609, 460);
+
+		var helpWindow = new GuiImage(ResourceLoader.getResource("data/ui/help/help_window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		helpWindow.position = new Vector(30, 31);
+		helpWindow.extent = new Vector(549, 338);
+		this.addChild(helpWindow);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -23,19 +28,20 @@ class VersionGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var dlButton = new GuiButton(loadButtonImages("data/ui/motd/ok"));
-		dlButton.position = new Vector(500, 370);
-		dlButton.extent = new Vector(88, 41);
-		dlButton.vertSizing = Top;
-		dlButton.pressedAction = (sender) -> {
+		var homeButton = new GuiButton(loadButtonImages("data/ui/play/back"));
+		homeButton.position = new Vector(278, 378);
+		homeButton.extent = new Vector(79, 61);
+		homeButton.accelerator = hxd.Key.ESCAPE;
+		homeButton.gamepadAccelerator = ["B"];
+		homeButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 		}
-		this.addChild(dlButton);
+		this.addChild(homeButton);
 
 		var scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
 		scrollCtrl.position = new Vector(31, 30);
-		scrollCtrl.extent = new Vector(568, 317);
-		this.addChild(scrollCtrl);
+		scrollCtrl.extent = new Vector(509, 298);
+		helpWindow.addChild(scrollCtrl);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
 		var arial14b = new BitmapFont(arial14fontdata.entry);
@@ -43,21 +49,8 @@ class VersionGui extends GuiImage {
 		var arial14 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
 		var arial16 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
 
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
-		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
-
 		function mlFontLoader(text:String) {
 			switch (text) {
-				case "MarkerFelt32":
-					return markerFelt32;
-				case "MarkerFelt24":
-					return markerFelt24;
-				case "MarkerFelt18":
-					return markerFelt18;
 				case "Arial16":
 					return arial14;
 				default:
@@ -65,20 +58,20 @@ class VersionGui extends GuiImage {
 			}
 		}
 
-		var changelogContent = new GuiMLText(markerFelt18, mlFontLoader);
+		var changelogContent = new GuiMLText(arial14, mlFontLoader);
 		changelogContent.position = new Vector(0, 0);
-		changelogContent.extent = new Vector(566, 317);
+		changelogContent.extent = new Vector(500, 298);
 		changelogContent.text.textColor = 0;
 		changelogContent.scrollable = true;
 		changelogContent.text.text = "Loading changelog, please wait.<br/>";
-		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
+		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/mbg/CHANGELOG.md", (res) -> {
 			var mdtext = res.toString();
 			var res = "";
 			changelogContent.text.text = "";
 			for (line in mdtext.split("\n")) {
 				if (StringTools.startsWith(line, "#")) {
 					line = StringTools.replace(line, "#", "");
-					line = '<font face="MarkerFelt24">' + line + "</font>";
+					line = '<font face="Arial16">' + line + "</font>";
 				}
 				res += line + "<br/>";
 			}
@@ -91,7 +84,7 @@ class VersionGui extends GuiImage {
 	}
 
 	public static function checkVersion() {
-		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
+		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/mbg/CHANGELOG.md", (res) -> {
 			var mdtext = res.toString();
 			var firstline = mdtext.split("\n")[0];
 			firstline = StringTools.replace(firstline, "#", "");
@@ -100,7 +93,7 @@ class VersionGui extends GuiImage {
 				// We need to update lol
 				var mbo = new MessageBoxOkDlg("New version available! Please update your game.", () -> {
 					#if sys
-					hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe/blob/master/README.md");
+					hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe/blob/mbg/README.md");
 					#end
 				});
 				MarbleGame.canvas.pushDialog(mbo);

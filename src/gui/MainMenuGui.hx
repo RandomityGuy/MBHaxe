@@ -16,6 +16,11 @@ class MainMenuGui extends GuiImage {
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
 		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
+		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
+		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
+		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
@@ -80,10 +85,23 @@ class MainMenuGui extends GuiImage {
 		};
 		homebase.addChild(exitButton);
 
+		var changelogButton = new GuiButtonText(loadButtonImages("data/ui/motd/motd_buttn_textless"), domcasual24);
+		changelogButton.txtCtrl.text.text = "Changelog";
+		changelogButton.txtCtrl.text.textColor = 0;
+		changelogButton.ratio = 0.35;
+		changelogButton.horizSizing = Left;
+		changelogButton.vertSizing = Top;
+		changelogButton.position = new Vector(530, 394);
+		changelogButton.setExtent(new Vector(106, 85));
+		changelogButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.pushDialog(new VersionGui());
+		}
+		this.addChild(changelogButton);
+
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
 		kofi.horizSizing = Left;
 		kofi.vertSizing = Top;
-		kofi.position = new Vector(473, 424);
+		kofi.position = new Vector(473, 354);
 		kofi.extent = new Vector(143, 36);
 		kofi.pressedAction = (sender) -> {
 			#if sys
@@ -98,7 +116,7 @@ class MainMenuGui extends GuiImage {
 		var github = new GuiButton(loadButtonImages("data/ui/github"));
 		github.horizSizing = Left;
 		github.vertSizing = Top;
-		github.position = new Vector(522, 380);
+		github.position = new Vector(522, 310);
 		github.extent = new Vector(94, 38);
 		github.pressedAction = (sender) -> {
 			#if sys
