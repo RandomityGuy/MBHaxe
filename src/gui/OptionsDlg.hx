@@ -29,6 +29,11 @@ class OptionsDlg extends GuiImage {
 		@:privateAccess arial14b.loader = ResourceLoader.loader;
 		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
 
+		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
+		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
+		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
 			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -108,7 +113,7 @@ class OptionsDlg extends GuiImage {
 		}
 
 		var gfxWindow = new GuiButton(loadButtonImages("data/ui/options/grafwindo"));
-		gfxWindow.position = new Vector(174, 116);
+		gfxWindow.position = new Vector(174, 58);
 		gfxWindow.extent = new Vector(97, 55);
 		gfxWindow.buttonType = Toggle;
 		gfxWindow.pressedAction = (sender) -> {
@@ -121,7 +126,7 @@ class OptionsDlg extends GuiImage {
 		windowBoxes.push(gfxWindow);
 
 		var gfxFull = new GuiButton(loadButtonImages("data/ui/options/grafful"));
-		gfxFull.position = new Vector(288, 118);
+		gfxFull.position = new Vector(288, 60);
 		gfxFull.extent = new Vector(61, 55);
 		gfxFull.buttonType = Toggle;
 		gfxFull.pressedAction = (sender) -> {
@@ -133,12 +138,67 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.addChild(gfxFull);
 		windowBoxes.push(gfxFull);
 
-		var gfxText = new GuiImage(ResourceLoader.getResource("data/ui/options/graf_txt.png", ResourceLoader.getImage, this.imageResources).toTile());
-		gfxText.horizSizing = Right;
-		gfxText.vertSizing = Bottom;
-		gfxText.position = new Vector(12, 12);
-		gfxText.extent = new Vector(146, 261);
-		graphicsPane.addChild(gfxText);
+		// var gfxText = new GuiImage(ResourceLoader.getResource("data/ui/options/graf_txt.png", ResourceLoader.getImage, this.imageResources).toTile());
+		// gfxText.horizSizing = Right;
+		// gfxText.vertSizing = Bottom;
+		// gfxText.position = new Vector(12, 12);
+		// gfxText.extent = new Vector(146, 261);
+		// graphicsPane.addChild(gfxText);
+
+		var resolutionLabel = new GuiText(domcasual32);
+		resolutionLabel.position = new Vector(12, 9);
+		resolutionLabel.extent = new Vector(146, 261);
+		resolutionLabel.text.textColor = 0x000000;
+		resolutionLabel.text.text = "Screen Resolution:";
+		resolutionLabel.justify = Right;
+		graphicsPane.addChild(resolutionLabel);
+
+		var screenStyleLabel = new GuiText(domcasual32);
+		screenStyleLabel.position = new Vector(12, 70);
+		screenStyleLabel.extent = new Vector(146, 261);
+		screenStyleLabel.text.textColor = 0x000000;
+		screenStyleLabel.text.text = "Screen Style:";
+		screenStyleLabel.justify = Right;
+		graphicsPane.addChild(screenStyleLabel);
+
+		var vsyncLabel = new GuiText(domcasual32);
+		vsyncLabel.position = new Vector(12, 120);
+		vsyncLabel.extent = new Vector(146, 261);
+		vsyncLabel.text.textColor = 0x000000;
+		vsyncLabel.text.text = "VSync:";
+		vsyncLabel.justify = Right;
+		graphicsPane.addChild(vsyncLabel);
+
+		var vsyncButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
+		vsyncButton.position = new Vector(170, 100);
+		vsyncButton.extent = new Vector(46, 54);
+		vsyncButton.buttonType = Toggle;
+		graphicsPane.addChild(vsyncButton);
+		if (Settings.optionsSettings.vsync) {
+			vsyncButton.pressed = true;
+		}
+
+		var fieldOfViewLabel = new GuiText(domcasual32);
+		fieldOfViewLabel.position = new Vector(12, 170);
+		fieldOfViewLabel.extent = new Vector(146, 261);
+		fieldOfViewLabel.text.textColor = 0x000000;
+		fieldOfViewLabel.text.text = "Field of View:";
+		fieldOfViewLabel.justify = Right;
+		graphicsPane.addChild(fieldOfViewLabel);
+
+		var fovSlide = new GuiImage(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources).toTile());
+		fovSlide.position = new Vector(170, 163);
+		fovSlide.extent = new Vector(254, 34);
+		graphicsPane.addChild(fovSlide);
+
+		var fovSlider = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage, this.imageResources).toTile());
+		fovSlider.position = new Vector(170, 163);
+		fovSlider.extent = new Vector(250, 34);
+		fovSlider.sliderValue = (Settings.optionsSettings.fovX - 60) / (140 - 60);
+		fovSlider.pressedAction = (sender) -> {
+			Settings.optionsSettings.fovX = cast(60 + fovSlider.sliderValue * (140 - 60));
+		}
+		graphicsPane.addChild(fovSlider);
 
 		var resolutionBoxes = [];
 
@@ -185,40 +245,40 @@ class OptionsDlg extends GuiImage {
 			gfx1024768.pressed = true;
 		graphicsPane.addChild(gfx1024768);
 
-		var driverBoxes = [];
+		// var driverBoxes = [];
 
-		function updateDriverFunc(sender:GuiButton) {
-			for (box in driverBoxes) {
-				if (box != sender)
-					box.pressed = false;
-			}
-		}
+		// function updateDriverFunc(sender:GuiButton) {
+		// 	for (box in driverBoxes) {
+		// 		if (box != sender)
+		// 			box.pressed = false;
+		// 	}
+		// }
 
-		var gfxopengl = new GuiButton(loadButtonImages("data/ui/options/grafopgl"));
-		gfxopengl.position = new Vector(165, 58);
-		gfxopengl.extent = new Vector(97, 54);
-		gfxopengl.buttonType = Radio;
-		driverBoxes.push(gfxopengl);
-		gfxopengl.pressedAction = (sender) -> {
-			updateDriverFunc(gfxopengl);
-		}
-		if (Settings.optionsSettings.videoDriver == 0) {
-			gfxopengl.pressed = true;
-		}
-		graphicsPane.addChild(gfxopengl);
+		// var gfxopengl = new GuiButton(loadButtonImages("data/ui/options/grafopgl"));
+		// gfxopengl.position = new Vector(165, 58);
+		// gfxopengl.extent = new Vector(97, 54);
+		// gfxopengl.buttonType = Radio;
+		// driverBoxes.push(gfxopengl);
+		// gfxopengl.pressedAction = (sender) -> {
+		// 	updateDriverFunc(gfxopengl);
+		// }
+		// if (Settings.optionsSettings.videoDriver == 0) {
+		// 	gfxopengl.pressed = true;
+		// }
+		// graphicsPane.addChild(gfxopengl);
 
-		var gfxd3d = new GuiButton(loadButtonImages("data/ui/options/grafdir3d"));
-		gfxd3d.position = new Vector(270, 59);
-		gfxd3d.extent = new Vector(104, 52);
-		gfxd3d.buttonType = Radio;
-		driverBoxes.push(gfxd3d);
-		gfxd3d.pressedAction = (sender) -> {
-			updateDriverFunc(gfxd3d);
-		}
-		if (Settings.optionsSettings.videoDriver == 1) {
-			gfxd3d.pressed = true;
-		}
-		graphicsPane.addChild(gfxd3d);
+		// var gfxd3d = new GuiButton(loadButtonImages("data/ui/options/grafdir3d"));
+		// gfxd3d.position = new Vector(270, 59);
+		// gfxd3d.extent = new Vector(104, 52);
+		// gfxd3d.buttonType = Radio;
+		// driverBoxes.push(gfxd3d);
+		// gfxd3d.pressedAction = (sender) -> {
+		// 	updateDriverFunc(gfxd3d);
+		// }
+		// if (Settings.optionsSettings.videoDriver == 1) {
+		// 	gfxd3d.pressed = true;
+		// }
+		// graphicsPane.addChild(gfxd3d);
 
 		var applyButton = new GuiButton(loadButtonImages("data/ui/options/grafapply"));
 		applyButton.position = new Vector(188, 239);
@@ -226,49 +286,49 @@ class OptionsDlg extends GuiImage {
 		applyButton.pressedAction = (sender) -> applyFunc();
 		graphicsPane.addChild(applyButton);
 
-		var bitBoxes = [];
+		// var bitBoxes = [];
 
-		function updateBitsFunc(sender:GuiButton) {
-			for (box in bitBoxes) {
-				if (box != sender)
-					box.pressed = false;
-			}
-		}
+		// function updateBitsFunc(sender:GuiButton) {
+		// 	for (box in bitBoxes) {
+		// 		if (box != sender)
+		// 			box.pressed = false;
+		// 	}
+		// }
 
-		var gfx16 = new GuiButton(loadButtonImages("data/ui/options/graf16bt"));
-		gfx16.position = new Vector(179, 170);
-		gfx16.extent = new Vector(79, 54);
-		gfx16.buttonType = Radio;
-		bitBoxes.push(gfx16);
-		gfx16.pressedAction = (sender) -> {
-			updateBitsFunc(gfx16);
-		}
-		if (Settings.optionsSettings.colorDepth == 0) {
-			gfx16.pressed = true;
-		}
-		graphicsPane.addChild(gfx16);
+		// var gfx16 = new GuiButton(loadButtonImages("data/ui/options/graf16bt"));
+		// gfx16.position = new Vector(179, 170);
+		// gfx16.extent = new Vector(79, 54);
+		// gfx16.buttonType = Radio;
+		// bitBoxes.push(gfx16);
+		// gfx16.pressedAction = (sender) -> {
+		// 	updateBitsFunc(gfx16);
+		// }
+		// if (Settings.optionsSettings.colorDepth == 0) {
+		// 	gfx16.pressed = true;
+		// }
+		// graphicsPane.addChild(gfx16);
 
-		var gfx32 = new GuiButton(loadButtonImages("data/ui/options/graf32bt"));
-		gfx32.position = new Vector(272, 174);
-		gfx32.extent = new Vector(84, 51);
-		gfx32.buttonType = Radio;
-		bitBoxes.push(gfx32);
-		gfx32.pressedAction = (sender) -> {
-			updateBitsFunc(gfx32);
-		}
-		if (Settings.optionsSettings.colorDepth == 1) {
-			gfx32.pressed = true;
-		}
-		graphicsPane.addChild(gfx32);
+		// var gfx32 = new GuiButton(loadButtonImages("data/ui/options/graf32bt"));
+		// gfx32.position = new Vector(272, 174);
+		// gfx32.extent = new Vector(84, 51);
+		// gfx32.buttonType = Radio;
+		// bitBoxes.push(gfx32);
+		// gfx32.pressedAction = (sender) -> {
+		// 	updateBitsFunc(gfx32);
+		// }
+		// if (Settings.optionsSettings.colorDepth == 1) {
+		// 	gfx32.pressed = true;
+		// }
+		// graphicsPane.addChild(gfx32);
 
-		var shadowsButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
-		shadowsButton.position = new Vector(141, 233);
-		shadowsButton.extent = new Vector(46, 54);
-		shadowsButton.buttonType = Toggle;
-		graphicsPane.addChild(shadowsButton);
-		if (Settings.optionsSettings.shadows) {
-			shadowsButton.pressed = true;
-		}
+		// var shadowsButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
+		// shadowsButton.position = new Vector(141, 233);
+		// shadowsButton.extent = new Vector(46, 54);
+		// shadowsButton.buttonType = Toggle;
+		// graphicsPane.addChild(shadowsButton);
+		// if (Settings.optionsSettings.shadows) {
+		// 	shadowsButton.pressed = true;
+		// }
 
 		// AUDIO PANEL
 
@@ -355,15 +415,15 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 				Settings.optionsSettings.isFullScreen = true;
 			else
 				Settings.optionsSettings.isFullScreen = false;
-			if (gfx16.pressed)
-				Settings.optionsSettings.colorDepth = 0;
-			else
-				Settings.optionsSettings.colorDepth = 1;
-			if (gfxopengl.pressed)
-				Settings.optionsSettings.videoDriver = 0;
-			else
-				Settings.optionsSettings.videoDriver = 1;
-			Settings.optionsSettings.shadows = shadowsButton.pressed;
+			// if (gfx16.pressed)
+			// 	Settings.optionsSettings.colorDepth = 0;
+			// else
+			// 	Settings.optionsSettings.colorDepth = 1;
+			// if (gfxopengl.pressed)
+			// 	Settings.optionsSettings.videoDriver = 0;
+			// else
+			// 	Settings.optionsSettings.videoDriver = 1;
+			// Settings.optionsSettings.shadows = shadowsButton.pressed;
 
 			Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
 			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
@@ -477,227 +537,332 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var controlsPane = new GuiControl();
 		controlsPane.position = new Vector(44, 58);
 		controlsPane.extent = new Vector(459, 339);
-		// MARBLE PANEL
-		var marbleControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_marb_bse.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		marbleControlsPane.position = new Vector(0, 5);
-		marbleControlsPane.extent = new Vector(438, 320);
-		controlsPane.addChild(marbleControlsPane);
 
-		var cameraControlsPane:GuiImage = null;
-		var mouseControlsPane:GuiImage = null;
-
-		var moveForward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_fw"), arial14);
-		moveForward.position = new Vector(82, 104);
-		moveForward.setExtent(new Vector(117, 51));
-		moveForward.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.forward);
-		moveForward.pressedAction = (sender) -> {
-			remapFunc("Move Forward", (key) -> Settings.controlsSettings.forward = key, moveForward);
-		}
-		marbleControlsPane.addChild(moveForward);
-
-		var moveRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_rt"), arial14);
-		moveRight.position = new Vector(230, 167);
-		moveRight.setExtent(new Vector(112, 45));
-		moveRight.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.right);
-		moveRight.pressedAction = (sender) -> {
-			remapFunc("Move Right", (key) -> Settings.controlsSettings.right = key, moveRight);
-		}
-		marbleControlsPane.addChild(moveRight);
-
-		var mouseFire = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_pwr"), arial14);
-		mouseFire.position = new Vector(310, 84);
-		mouseFire.setExtent(new Vector(120, 51));
-		mouseFire.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.powerup);
-		mouseFire.pressedAction = (sender) -> {
-			remapFunc("Use PowerUp", (key) -> Settings.controlsSettings.powerup = key, mouseFire);
-		}
-		marbleControlsPane.addChild(mouseFire);
-
-		var moveBackward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_bak"), arial14);
-		moveBackward.position = new Vector(135, 235);
-		moveBackward.setExtent(new Vector(118, 48));
-		moveBackward.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.backward);
-		moveBackward.pressedAction = (sender) -> {
-			remapFunc("Move Backward", (key) -> Settings.controlsSettings.backward = key, moveBackward);
-		}
-		marbleControlsPane.addChild(moveBackward);
-
-		var moveLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_lft"), arial14);
-		moveLeft.position = new Vector(19, 189);
-		moveLeft.setExtent(new Vector(108, 45));
-		moveLeft.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.left);
-		moveLeft.pressedAction = (sender) -> {
-			remapFunc("Move Left", (key) -> Settings.controlsSettings.left = key, moveLeft);
-		}
-		marbleControlsPane.addChild(moveLeft);
-
-		var moveJmp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_jmp"), arial14);
-		moveJmp.position = new Vector(299, 231);
-		moveJmp.setExtent(new Vector(120, 47));
-		moveJmp.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.jump);
-		moveJmp.pressedAction = (sender) -> {
-			remapFunc("Jump", (key) -> Settings.controlsSettings.jump = key, moveJmp);
-		}
-		marbleControlsPane.addChild(moveJmp);
+		var transparentbmp = new hxd.BitmapData(1, 1);
+		transparentbmp.setPixel(0, 0, 0);
+		var transparentTile = Tile.fromBitmap(transparentbmp);
 
 		var domcasual24fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
 		var domcasual24b = new BitmapFont(domcasual24fontdata.entry);
 		@:privateAccess domcasual24b.loader = ResourceLoader.loader;
 		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
-		var transparentbmp = new hxd.BitmapData(1, 1);
-		transparentbmp.setPixel(0, 0, 0);
-		var transparentTile = Tile.fromBitmap(transparentbmp);
+		if (Util.isTouchDevice()) {
+			var hideControlsLabel = new GuiText(domcasual32);
+			hideControlsLabel.position = new Vector(12, 62);
+			hideControlsLabel.extent = new Vector(200, 50);
+			hideControlsLabel.text.textColor = 0x000000;
+			hideControlsLabel.text.text = "Hide Controls:";
+			hideControlsLabel.justify = Right;
+			controlsPane.addChild(hideControlsLabel);
 
-		var marbleToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
-		marbleToCameraButton.position = new Vector(138, 26);
-		marbleToCameraButton.extent = new Vector(121, 40);
-		marbleToCameraButton.pressedAction = (sender) -> {
-			controlsPane.removeChild(marbleControlsPane);
-			controlsPane.addChild(cameraControlsPane);
-			this.render(cast(this.parent, Canvas).scene2d);
-		}
-		marbleControlsPane.addChild(marbleToCameraButton);
+			var hideControlsButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
+			hideControlsButton.position = new Vector(220, 46);
+			hideControlsButton.extent = new Vector(46, 54);
+			hideControlsButton.buttonType = Toggle;
+			hideControlsButton.pressedAction = (sender) -> {
+				Settings.touchSettings.hideControls = hideControlsButton.pressed;
+			}
+			controlsPane.addChild(hideControlsButton);
 
-		var marbleToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
-		marbleToMouseButton.position = new Vector(277, 0);
-		marbleToMouseButton.extent = new Vector(121, 43);
-		marbleToMouseButton.pressedAction = (sender) -> {
-			controlsPane.addChild(mouseControlsPane);
-			controlsPane.removeChild(marbleControlsPane);
-			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
-		}
-		marbleControlsPane.addChild(marbleToMouseButton);
+			var buttonCameraFactorLabel = new GuiText(domcasual32);
+			buttonCameraFactorLabel.position = new Vector(12, 110);
+			buttonCameraFactorLabel.extent = new Vector(200, 50);
+			buttonCameraFactorLabel.text.textColor = 0x000000;
+			buttonCameraFactorLabel.text.text = "Button-Camera Factor:";
+			buttonCameraFactorLabel.justify = Right;
+			controlsPane.addChild(buttonCameraFactorLabel);
 
-		// CAMERA PANEL
-		cameraControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_cam_bse.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		cameraControlsPane.position = new Vector(0, 5);
-		cameraControlsPane.extent = new Vector(438, 320);
+			var buttonCameraFactorSlider = new GuiImage(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			buttonCameraFactorSlider.position = new Vector(220, 110);
+			buttonCameraFactorSlider.extent = new Vector(200, 34);
+			controlsPane.addChild(buttonCameraFactorSlider);
 
-		var panUp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_up"), arial14);
-		panUp.position = new Vector(29, 133);
-		panUp.setExtent(new Vector(108, 42));
-		panUp.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camForward);
-		panUp.pressedAction = (sender) -> {
-			remapFunc("Rotate Camera Up", (key) -> Settings.controlsSettings.camForward = key, panUp);
-		}
-		cameraControlsPane.addChild(panUp);
+			var buttonCameraFactorKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_snd_knb.png", ResourceLoader.getImage,
+				this.imageResources)
+				.toTile());
+			buttonCameraFactorKnob.position = new Vector(220, 110);
+			buttonCameraFactorKnob.extent = new Vector(196, 34);
+			buttonCameraFactorKnob.sliderValue = Settings.touchSettings.buttonJoystickMultiplier / 3;
+			buttonCameraFactorKnob.pressedAction = (sender) -> {
+				Settings.touchSettings.buttonJoystickMultiplier = buttonCameraFactorKnob.sliderValue * 3;
+			}
+			controlsPane.addChild(buttonCameraFactorKnob);
 
-		var turnRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_rt"), arial14);
-		turnRight.position = new Vector(312, 99);
-		turnRight.setExtent(new Vector(103, 36));
-		turnRight.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camRight);
-		turnRight.pressedAction = (sender) -> {
-			remapFunc("Rotate Camera Right", (key) -> Settings.controlsSettings.camRight = key, turnRight);
-		}
-		cameraControlsPane.addChild(turnRight);
+			var cameraSwipeExtentLabel = new GuiText(domcasual32);
+			cameraSwipeExtentLabel.position = new Vector(12, 160);
+			cameraSwipeExtentLabel.extent = new Vector(200, 50);
+			cameraSwipeExtentLabel.text.textColor = 0x000000;
+			cameraSwipeExtentLabel.text.text = "Camera Swipe Extent:";
+			cameraSwipeExtentLabel.justify = Right;
+			controlsPane.addChild(cameraSwipeExtentLabel);
 
-		var panDown = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), arial14);
-		panDown.position = new Vector(42, 213);
-		panDown.setExtent(new Vector(109, 39));
-		panDown.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camBackward);
-		panDown.pressedAction = (sender) -> {
-			remapFunc("Rotate Camera Down", (key) -> Settings.controlsSettings.camBackward = key, panDown);
-		}
-		cameraControlsPane.addChild(panDown);
+			var cameraSwipeExtentSlider = new GuiImage(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			cameraSwipeExtentSlider.position = new Vector(220, 160);
+			cameraSwipeExtentSlider.extent = new Vector(200, 34);
+			controlsPane.addChild(cameraSwipeExtentSlider);
 
-		var turnLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_lft"), arial14);
-		turnLeft.position = new Vector(319, 210);
-		turnLeft.setExtent(new Vector(99, 36));
-		turnLeft.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camLeft);
-		turnLeft.pressedAction = (sender) -> {
-			remapFunc("Rotate Camera Left", (key) -> Settings.controlsSettings.camLeft = key, turnLeft);
-		}
-		cameraControlsPane.addChild(turnLeft);
+			var cameraSwipeExtentKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage,
+				this.imageResources)
+				.toTile());
+			cameraSwipeExtentKnob.position = new Vector(220, 160);
+			cameraSwipeExtentKnob.extent = new Vector(196, 34);
+			cameraSwipeExtentKnob.sliderValue = (Settings.touchSettings.cameraSwipeExtent - 5) / (35 - 5);
+			cameraSwipeExtentKnob.pressedAction = (sender) -> {
+				Settings.touchSettings.cameraSwipeExtent = 5 + (35 - 5) * cameraSwipeExtentKnob.sliderValue;
+			}
+			controlsPane.addChild(cameraSwipeExtentKnob);
 
-		var cameraToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
-		cameraToMarbleButton.position = new Vector(13, 45);
-		cameraToMarbleButton.extent = new Vector(121, 40);
-		cameraToMarbleButton.pressedAction = (sender) -> {
+			var dynamicJoystickLabel = new GuiText(domcasual32);
+			dynamicJoystickLabel.position = new Vector(12, 210);
+			dynamicJoystickLabel.extent = new Vector(200, 50);
+			dynamicJoystickLabel.text.textColor = 0x000000;
+			dynamicJoystickLabel.text.text = "Dynamic Joystick:";
+			dynamicJoystickLabel.justify = Right;
+			controlsPane.addChild(dynamicJoystickLabel);
+
+			var dynamicJoystickButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
+			dynamicJoystickButton.position = new Vector(220, 194);
+			dynamicJoystickButton.extent = new Vector(46, 54);
+			dynamicJoystickButton.buttonType = Toggle;
+			dynamicJoystickButton.pressedAction = (sender) -> {
+				Settings.touchSettings.dynamicJoystick = dynamicJoystickButton.pressed;
+			}
+			controlsPane.addChild(dynamicJoystickButton);
+
+			var touchControlsTxt = new GuiText(domcasual32);
+			touchControlsTxt.text.text = "Touch Controls:";
+			touchControlsTxt.text.textColor = 0x000000;
+			touchControlsTxt.justify = Right;
+			touchControlsTxt.position = new Vector(12, 260);
+			touchControlsTxt.extent = new Vector(200, 40);
+
+			var touchControlsEdit = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
+			touchControlsEdit.position = new Vector(82, 300);
+			touchControlsEdit.txtCtrl.text.text = "Edit";
+			touchControlsEdit.setExtent(new Vector(109, 39));
+			touchControlsEdit.pressedAction = (sender) -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			}
+
+			controlsPane.addChild(touchControlsTxt);
+			controlsPane.addChild(touchControlsEdit);
+		} else {
+			// MARBLE PANEL
+			var marbleControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_marb_bse.png", ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			marbleControlsPane.position = new Vector(0, 5);
+			marbleControlsPane.extent = new Vector(438, 320);
 			controlsPane.addChild(marbleControlsPane);
-			controlsPane.removeChild(cameraControlsPane);
-			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+
+			var cameraControlsPane:GuiImage = null;
+			var mouseControlsPane:GuiImage = null;
+
+			var moveForward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_fw"), arial14);
+			moveForward.position = new Vector(82, 104);
+			moveForward.setExtent(new Vector(117, 51));
+			moveForward.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.forward);
+			moveForward.pressedAction = (sender) -> {
+				remapFunc("Move Forward", (key) -> Settings.controlsSettings.forward = key, moveForward);
+			}
+			marbleControlsPane.addChild(moveForward);
+
+			var moveRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_rt"), arial14);
+			moveRight.position = new Vector(230, 167);
+			moveRight.setExtent(new Vector(112, 45));
+			moveRight.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.right);
+			moveRight.pressedAction = (sender) -> {
+				remapFunc("Move Right", (key) -> Settings.controlsSettings.right = key, moveRight);
+			}
+			marbleControlsPane.addChild(moveRight);
+
+			var mouseFire = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_pwr"), arial14);
+			mouseFire.position = new Vector(310, 84);
+			mouseFire.setExtent(new Vector(120, 51));
+			mouseFire.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.powerup);
+			mouseFire.pressedAction = (sender) -> {
+				remapFunc("Use PowerUp", (key) -> Settings.controlsSettings.powerup = key, mouseFire);
+			}
+			marbleControlsPane.addChild(mouseFire);
+
+			var moveBackward = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_bak"), arial14);
+			moveBackward.position = new Vector(135, 235);
+			moveBackward.setExtent(new Vector(118, 48));
+			moveBackward.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.backward);
+			moveBackward.pressedAction = (sender) -> {
+				remapFunc("Move Backward", (key) -> Settings.controlsSettings.backward = key, moveBackward);
+			}
+			marbleControlsPane.addChild(moveBackward);
+
+			var moveLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_lft"), arial14);
+			moveLeft.position = new Vector(19, 189);
+			moveLeft.setExtent(new Vector(108, 45));
+			moveLeft.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.left);
+			moveLeft.pressedAction = (sender) -> {
+				remapFunc("Move Left", (key) -> Settings.controlsSettings.left = key, moveLeft);
+			}
+			marbleControlsPane.addChild(moveLeft);
+
+			var moveJmp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_mrb_jmp"), arial14);
+			moveJmp.position = new Vector(299, 231);
+			moveJmp.setExtent(new Vector(120, 47));
+			moveJmp.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.jump);
+			moveJmp.pressedAction = (sender) -> {
+				remapFunc("Jump", (key) -> Settings.controlsSettings.jump = key, moveJmp);
+			}
+			marbleControlsPane.addChild(moveJmp);
+
+			var marbleToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+			marbleToCameraButton.position = new Vector(138, 26);
+			marbleToCameraButton.extent = new Vector(121, 40);
+			marbleToCameraButton.pressedAction = (sender) -> {
+				controlsPane.removeChild(marbleControlsPane);
+				controlsPane.addChild(cameraControlsPane);
+				this.render(cast(this.parent, Canvas).scene2d);
+			}
+			marbleControlsPane.addChild(marbleToCameraButton);
+
+			var marbleToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+			marbleToMouseButton.position = new Vector(277, 0);
+			marbleToMouseButton.extent = new Vector(121, 43);
+			marbleToMouseButton.pressedAction = (sender) -> {
+				controlsPane.addChild(mouseControlsPane);
+				controlsPane.removeChild(marbleControlsPane);
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+			}
+			marbleControlsPane.addChild(marbleToMouseButton);
+
+			// CAMERA PANEL
+			cameraControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_cam_bse.png", ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			cameraControlsPane.position = new Vector(0, 5);
+			cameraControlsPane.extent = new Vector(438, 320);
+
+			var panUp = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_up"), arial14);
+			panUp.position = new Vector(29, 133);
+			panUp.setExtent(new Vector(108, 42));
+			panUp.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camForward);
+			panUp.pressedAction = (sender) -> {
+				remapFunc("Rotate Camera Up", (key) -> Settings.controlsSettings.camForward = key, panUp);
+			}
+			cameraControlsPane.addChild(panUp);
+
+			var turnRight = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_rt"), arial14);
+			turnRight.position = new Vector(312, 99);
+			turnRight.setExtent(new Vector(103, 36));
+			turnRight.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camRight);
+			turnRight.pressedAction = (sender) -> {
+				remapFunc("Rotate Camera Right", (key) -> Settings.controlsSettings.camRight = key, turnRight);
+			}
+			cameraControlsPane.addChild(turnRight);
+
+			var panDown = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), arial14);
+			panDown.position = new Vector(42, 213);
+			panDown.setExtent(new Vector(109, 39));
+			panDown.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camBackward);
+			panDown.pressedAction = (sender) -> {
+				remapFunc("Rotate Camera Down", (key) -> Settings.controlsSettings.camBackward = key, panDown);
+			}
+			cameraControlsPane.addChild(panDown);
+
+			var turnLeft = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_lft"), arial14);
+			turnLeft.position = new Vector(319, 210);
+			turnLeft.setExtent(new Vector(99, 36));
+			turnLeft.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.camLeft);
+			turnLeft.pressedAction = (sender) -> {
+				remapFunc("Rotate Camera Left", (key) -> Settings.controlsSettings.camLeft = key, turnLeft);
+			}
+			cameraControlsPane.addChild(turnLeft);
+
+			var cameraToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+			cameraToMarbleButton.position = new Vector(13, 45);
+			cameraToMarbleButton.extent = new Vector(121, 40);
+			cameraToMarbleButton.pressedAction = (sender) -> {
+				controlsPane.addChild(marbleControlsPane);
+				controlsPane.removeChild(cameraControlsPane);
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+			}
+			cameraControlsPane.addChild(cameraToMarbleButton);
+
+			var cameraToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+			cameraToMouseButton.position = new Vector(276, 7);
+			cameraToMouseButton.extent = new Vector(121, 40);
+			cameraToMouseButton.pressedAction = (sender) -> {
+				controlsPane.addChild(mouseControlsPane);
+				controlsPane.removeChild(cameraControlsPane);
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+			}
+			cameraControlsPane.addChild(cameraToMouseButton);
+
+			// MOUSE CONTROLS
+
+			mouseControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_mous_base.png", ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			mouseControlsPane.position = new Vector(-17, -47);
+			mouseControlsPane.extent = new Vector(470, 425);
+
+			var freelook = new GuiButtonText(loadButtonImages("data/ui/options/cntrl_mous_bttn"), arial14);
+			freelook.position = new Vector(219, 225);
+			freelook.setExtent(new Vector(105, 45));
+			freelook.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.freelook);
+			freelook.pressedAction = (sender) -> {
+				remapFunc("Free Look", (key) -> Settings.controlsSettings.freelook = key, freelook);
+			}
+
+			mouseControlsPane.addChild(freelook);
+
+			var mouseToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+			mouseToMarbleButton.position = new Vector(26, 95);
+			mouseToMarbleButton.extent = new Vector(121, 40);
+			mouseToMarbleButton.pressedAction = (sender) -> {
+				controlsPane.addChild(marbleControlsPane);
+				controlsPane.removeChild(mouseControlsPane);
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+			}
+			mouseControlsPane.addChild(mouseToMarbleButton);
+
+			var mouseToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
+			mouseToCameraButton.position = new Vector(153, 71);
+			mouseToCameraButton.extent = new Vector(121, 40);
+			mouseToCameraButton.pressedAction = (sender) -> {
+				controlsPane.addChild(cameraControlsPane);
+				controlsPane.removeChild(mouseControlsPane);
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+			}
+			mouseControlsPane.addChild(mouseToCameraButton);
+
+			var invertAxis = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_invrt"));
+			invertAxis.position = new Vector(95, 249);
+			invertAxis.extent = new Vector(43, 53);
+			invertAxis.buttonType = Toggle;
+			invertAxis.pressed = Settings.controlsSettings.invertYAxis;
+			invertAxis.pressedAction = (sender) -> {
+				Settings.controlsSettings.invertYAxis = !Settings.controlsSettings.invertYAxis;
+			}
+			mouseControlsPane.addChild(invertAxis);
+
+			var alwaysFreelook = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_freel"));
+			alwaysFreelook.position = new Vector(365, 269);
+			alwaysFreelook.extent = new Vector(43, 53);
+			alwaysFreelook.buttonType = Toggle;
+			alwaysFreelook.pressed = Settings.controlsSettings.alwaysFreeLook;
+			alwaysFreelook.pressedAction = (sender) -> {
+				Settings.controlsSettings.alwaysFreeLook = !Settings.controlsSettings.alwaysFreeLook;
+			}
+			mouseControlsPane.addChild(alwaysFreelook);
+
+			var mouseSensitivity = new GuiSlider(ResourceLoader.getResource("data/ui/options/cntrl_mous_knb.png", ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			mouseSensitivity.position = new Vector(147, 148);
+			mouseSensitivity.extent = new Vector(254, 34);
+			mouseSensitivity.sliderValue = (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12);
+			mouseSensitivity.pressedAction = (sender) -> {
+				Settings.controlsSettings.cameraSensitivity = 0.12 + (1.2 - 0.12) * mouseSensitivity.sliderValue;
+			}
+			mouseControlsPane.addChild(mouseSensitivity);
 		}
-		cameraControlsPane.addChild(cameraToMarbleButton);
-
-		var cameraToMouseButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
-		cameraToMouseButton.position = new Vector(276, 7);
-		cameraToMouseButton.extent = new Vector(121, 40);
-		cameraToMouseButton.pressedAction = (sender) -> {
-			controlsPane.addChild(mouseControlsPane);
-			controlsPane.removeChild(cameraControlsPane);
-			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
-		}
-		cameraControlsPane.addChild(cameraToMouseButton);
-
-		// MOUSE CONTROLS
-
-		mouseControlsPane = new GuiImage(ResourceLoader.getResource("data/ui/options/cntrl_mous_base.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		mouseControlsPane.position = new Vector(-17, -47);
-		mouseControlsPane.extent = new Vector(470, 425);
-
-		var freelook = new GuiButtonText(loadButtonImages("data/ui/options/cntrl_mous_bttn"), arial14);
-		freelook.position = new Vector(219, 225);
-		freelook.setExtent(new Vector(105, 45));
-		freelook.txtCtrl.text.text = Util.getKeyForButton2(Settings.controlsSettings.freelook);
-		freelook.pressedAction = (sender) -> {
-			remapFunc("Free Look", (key) -> Settings.controlsSettings.freelook = key, freelook);
-		}
-
-		mouseControlsPane.addChild(freelook);
-
-		var mouseToMarbleButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
-		mouseToMarbleButton.position = new Vector(26, 95);
-		mouseToMarbleButton.extent = new Vector(121, 40);
-		mouseToMarbleButton.pressedAction = (sender) -> {
-			controlsPane.addChild(marbleControlsPane);
-			controlsPane.removeChild(mouseControlsPane);
-			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
-		}
-		mouseControlsPane.addChild(mouseToMarbleButton);
-
-		var mouseToCameraButton = new GuiButton([transparentTile, transparentTile, transparentTile]);
-		mouseToCameraButton.position = new Vector(153, 71);
-		mouseToCameraButton.extent = new Vector(121, 40);
-		mouseToCameraButton.pressedAction = (sender) -> {
-			controlsPane.addChild(cameraControlsPane);
-			controlsPane.removeChild(mouseControlsPane);
-			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
-		}
-		mouseControlsPane.addChild(mouseToCameraButton);
-
-		var invertAxis = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_invrt"));
-		invertAxis.position = new Vector(95, 249);
-		invertAxis.extent = new Vector(43, 53);
-		invertAxis.buttonType = Toggle;
-		invertAxis.pressed = Settings.controlsSettings.invertYAxis;
-		invertAxis.pressedAction = (sender) -> {
-			Settings.controlsSettings.invertYAxis = !Settings.controlsSettings.invertYAxis;
-		}
-		mouseControlsPane.addChild(invertAxis);
-
-		var alwaysFreelook = new GuiButton(loadButtonImages("data/ui/options/cntrl_mous_freel"));
-		alwaysFreelook.position = new Vector(365, 269);
-		alwaysFreelook.extent = new Vector(43, 53);
-		alwaysFreelook.buttonType = Toggle;
-		alwaysFreelook.pressed = Settings.controlsSettings.alwaysFreeLook;
-		alwaysFreelook.pressedAction = (sender) -> {
-			Settings.controlsSettings.alwaysFreeLook = !Settings.controlsSettings.alwaysFreeLook;
-		}
-		mouseControlsPane.addChild(alwaysFreelook);
-
-		var mouseSensitivity = new GuiSlider(ResourceLoader.getResource("data/ui/options/cntrl_mous_knb.png", ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		mouseSensitivity.position = new Vector(147, 148);
-		mouseSensitivity.extent = new Vector(254, 34);
-		mouseSensitivity.sliderValue = (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12);
-		mouseSensitivity.pressedAction = (sender) -> {
-			Settings.controlsSettings.cameraSensitivity = 0.12 + (1.2 - 0.12) * mouseSensitivity.sliderValue;
-		}
-		mouseControlsPane.addChild(mouseSensitivity);
 
 		// INVISIBLE BUTTON SHIT
 		var audioTabBtn = new GuiButton([transparentTile, transparentTile, transparentTile]);
