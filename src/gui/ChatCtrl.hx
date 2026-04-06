@@ -89,10 +89,10 @@ class ChatCtrl extends GuiControl {
 				if (StringTools.trim(this.chatHudInput.text.text) != "") {
 					sendText = '<font color="#F29515">${StringTools.htmlEscape(Settings.highscoreName.substr(0, 20))}:</font> ${StringTools.htmlEscape(this.chatHudInput.text.text.substr(0, 150))}';
 					if (Net.isClient) {
-						NetCommands.sendChatMessage(StringTools.htmlEscape(sendText));
+						NetCommands.sendChatMessage(sendText);
 					}
 					if (Net.isHost) {
-						NetCommands.sendServerChatMessage(StringTools.htmlEscape(sendText));
+						NetCommands.sendServerChatMessage(sendText);
 					}
 				}
 				this.chatHudInput.text.text = "";
@@ -118,7 +118,7 @@ class ChatCtrl extends GuiControl {
 	}
 
 	public function addChatMessage(text:String) {
-		var realText = StringTools.htmlEscape(text);
+		var realText = text;
 		this.chats.push({
 			text: realText,
 			age: 10.0
