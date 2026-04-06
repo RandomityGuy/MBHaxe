@@ -3,7 +3,6 @@ package src;
 import mis.MisParser;
 import triggers.Trigger;
 import net.Net;
-import gui.MarbleSelectGui;
 import net.NetPacket.MarbleNetFlags;
 import net.BitStream.OutputBitStream;
 import net.ClientConnection;
@@ -399,18 +398,19 @@ class Marble extends GameObject {
 
 		var marbleDts = new DtsObject();
 		var marbleShader = "";
-		if (connection == null) {
-			Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
-			marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
-			marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
-			marbleShader = Settings.optionsSettings.marbleShader;
-		} else {
-			var marbleData = MarbleSelectGui.marbleData[connection.getMarbleCatId()][connection.getMarbleId()]; // FIXME category support
-			Console.log("Marble: " + marbleData.dts + " (" + marbleData.skin + ")");
-			marbleDts.dtsPath = marbleData.dts;
-			marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
-			marbleShader = marbleData.shader;
-		}
+		// if (connection == null) {
+		// 	Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
+		// 	marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
+		// 	marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
+		// 	marbleShader = Settings.optionsSettings.marbleShader;
+		// } else {
+		// 	var marbleData = MarbleSelectGui.marbleData[connection.getMarbleCatId()][connection.getMarbleId()]; // FIXME category support
+		// 	Console.log("Marble: " + marbleData.dts + " (" + marbleData.skin + ")");
+		// 	marbleDts.dtsPath = marbleData.dts;
+		// 	marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
+		// 	marbleShader = marbleData.shader;
+		// }
+		marbleDts.dtsPath = "data/shapes/balls/ball-superball.dts";
 		marbleDts.identifier = "Marble";
 		marbleDts.showSequences = false;
 		marbleDts.useInstancing = false;

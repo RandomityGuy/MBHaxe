@@ -100,8 +100,6 @@ class MarbleWorldMacros {
 				|| dataBlockLowerCase == "timepenaltyitem"
 				|| dataBlockLowerCase == "timetravelitem_mbu")
 				shape = new TimeTravel(cast element);
-			else if (dataBlockLowerCase == "randompowerupitem")
-				shape = new RandomPowerup(cast element);
 			else if (dataBlockLowerCase == "tornado" || dataBlockLowerCase == "tornado_mbm")
 				shape = new Tornado();
 			else if (dataBlockLowerCase == "trapdoor" || dataBlockLowerCase == "trapdoor_mbu")

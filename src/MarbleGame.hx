@@ -5,7 +5,6 @@ import gui.MainMenuGui;
 #if !js
 import gui.ReplayCenterGui;
 #end
-import gui.ReplayNameDlg;
 import gui.ConsoleDlg;
 import gui.MessageBoxOkDlg;
 import src.Replay;

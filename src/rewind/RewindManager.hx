@@ -12,7 +12,7 @@ import src.MarbleWorld;
 import shapes.Trapdoor;
 import shapes.PushButton;
 import src.Util;
-import shapes.Nuke;
+import src.Settings;
 
 class RewindManager {
 	var frameData:BytesBuffer;
@@ -77,10 +77,6 @@ class RewindManager {
 			}
 			if (dts is LandMine) {
 				var lm:LandMine = cast dts;
-				rf.landMineStates.push(lm.disappearTime);
-			}
-			if (dts is Nuke) {
-				var lm:Nuke = cast dts;
 				rf.landMineStates.push(lm.disappearTime);
 			}
 			if (dts is Trapdoor) {
@@ -196,10 +192,6 @@ class RewindManager {
 			}
 			if (dts is LandMine) {
 				var lm:LandMine = cast dts;
-				lm.disappearTime = lmstates.shift();
-			}
-			if (dts is Nuke) {
-				var lm:Nuke = cast dts;
 				lm.disappearTime = lmstates.shift();
 			}
 			if (dts is Trapdoor) {
