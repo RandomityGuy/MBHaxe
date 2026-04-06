@@ -388,12 +388,20 @@ class Settings {
 				optionsSettings.rewindTimescale = 1;
 			if (optionsSettings.fpsLimit == 0 #if js || optionsSettings.fpsLimit == null #end)
 				optionsSettings.fpsLimit = -1;
+			if (optionsSettings.reflectiveMarble == false #if js || optionsSettings.reflectiveMarble == null #end)
+				optionsSettings.reflectiveMarble = false;
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;
 			}
 			if (controlsSettings.rewind == 0) {
 				controlsSettings.rewind = Key.R;
+			}
+			if (controlsSettings.blast == 0) {
+				controlsSettings.blast = Key.E;
+			}
+			if (controlsSettings.respawn == 0) {
+				controlsSettings.respawn = Key.BACKSPACE;
 			}
 			if (touchSettings.blastButtonPos == null) {
 				touchSettings.blastButtonPos = [300, 240];
@@ -422,6 +430,12 @@ class Settings {
 			}
 			if (gamepadSettings.rewind == null) {
 				gamepadSettings.rewind = ["Y"];
+			}
+			if (gamepadSettings.blast == null) {
+				gamepadSettings.blast = ["X", "LB", "RB"];
+			}
+			if (gamepadSettings.respawn == null) {
+				gamepadSettings.respawn = ["back"];
 			}
 			if (json.stats != null) {
 				playStatistics = json.stats;
