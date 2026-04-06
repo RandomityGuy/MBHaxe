@@ -98,14 +98,6 @@ class RewindManager {
 			oob: level.marble.outOfBounds,
 			timeState: level.marble.outOfBoundsTime != null ? level.marble.outOfBoundsTime.clone() : null
 		};
-		rf.checkpointState = {
-			currentCheckpoint: @:privateAccess level.currentCheckpoint,
-			currentCheckpointTrigger: @:privateAccess level.currentCheckpointTrigger,
-			checkpointBlast: @:privateAccess level.cheeckpointBlast,
-			checkpointCollectedGems: @:privateAccess level.checkpointCollectedGems.copy(),
-			checkpointHeldPowerup: @:privateAccess level.checkpointHeldPowerup,
-			checkpointUp: @:privateAccess level.checkpointUp != null ? @:privateAccess level.checkpointUp.clone() : null,
-		};
 		frameElapsedTimes.push(level.timeState.currentAttemptTime);
 		frameDataOffsets.push(frameData.length);
 		var frameDataSerialized = rf.serialize(this);
@@ -219,12 +211,6 @@ class RewindManager {
 		level.marble.camera.oob = rf.oobState.oob;
 		level.marble.outOfBoundsTime = rf.oobState.timeState != null ? rf.oobState.timeState.clone() : null;
 		level.marble.blastAmount = rf.blastAmt;
-		@:privateAccess level.checkpointUp = rf.checkpointState.checkpointUp;
-		@:privateAccess level.checkpointCollectedGems = rf.checkpointState.checkpointCollectedGems;
-		@:privateAccess level.cheeckpointBlast = rf.checkpointState.checkpointBlast;
-		@:privateAccess level.checkpointHeldPowerup = rf.checkpointState.checkpointHeldPowerup;
-		@:privateAccess level.currentCheckpoint = rf.checkpointState.currentCheckpoint;
-		@:privateAccess level.currentCheckpointTrigger = rf.checkpointState.currentCheckpointTrigger;
 	}
 
 	public function getNextRewindFrame(absTime:Float):RewindFrame {

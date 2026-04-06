@@ -37,14 +37,8 @@ import gui.MainMenuGui;
 import gui.ReplayCenterGui;
 #end
 import collision.Collision;
-import shapes.MegaMarble;
-import shapes.Blast;
-import shapes.Checkpoint;
-import triggers.CheckpointTrigger;
 import shapes.EasterEgg;
 import shapes.Sign;
-import triggers.TeleportTrigger;
-import triggers.DestinationTrigger;
 import shapes.Magnet;
 import src.Replay;
 import gui.Canvas;
@@ -188,14 +182,6 @@ class MarbleWorld extends Scheduler {
 	var oldOrientationQuat = new Quat();
 
 	public var newOrientationQuat = new Quat();
-
-	// Checkpoint
-	var currentCheckpoint:{obj:DtsObject, elem:MissionElementBase} = null;
-	var currentCheckpointTrigger:CheckpointTrigger = null;
-	var checkpointCollectedGems:Map<Gem, Bool> = [];
-	var checkpointHeldPowerup:PowerUp = null;
-	var checkpointUp:Vector = null;
-	var cheeckpointBlast:Float = 0;
 
 	// Replay
 	public var replay:Replay;
@@ -607,10 +593,6 @@ class MarbleWorld extends Scheduler {
 
 	public function restart(marble:Marble, full:Bool = false) {
 		Console.log("LEVEL RESTART");
-		if (!full && this.currentCheckpoint != null) {
-			this.loadCheckpointState();
-			return 0; // Load checkpoint
-		}
 
 		if (!full) {
 			var respawnT = this.gameMode.getRespawnTransform(marble);
@@ -640,13 +622,6 @@ class MarbleWorld extends Scheduler {
 		this.marble.blastAmount = 0;
 		this.marble.outOfBoundsTime = null;
 		this.finishTime = null;
-
-		this.currentCheckpoint = null;
-		this.currentCheckpointTrigger = null;
-		this.checkpointCollectedGems.clear();
-		this.checkpointHeldPowerup = null;
-		this.checkpointUp = null;
-		this.cheeckpointBlast = 0;
 
 		if (this.endPad != null)
 			this.endPad.inFinish = false;
@@ -2418,125 +2393,6 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	/** Sets a new active checkpoint. */
-	public function saveCheckpointState(shape:{obj:DtsObject, elem:MissionElementBase}, trigger:CheckpointTrigger = null) {
-		if (this.currentCheckpoint != null)
-			if (this.currentCheckpoint.obj == shape.obj)
-				return;
-		var disableOob = false;
-		if (shape != null) {
-			if (shape.elem.fields.exists('disableOob')) {
-				disableOob = MisParser.parseBoolean(shape.elem.fields.get('disableOob')[0]);
-			}
-		}
-		if (trigger != null) {
-			disableOob = trigger.disableOOB;
-		}
-		// (shape.srcElement as any) ?.disableOob || trigger?.element.disableOob;
-		if (disableOob && this.marble.outOfBounds)
-			return; // The checkpoint is configured to not work when the player is already OOB
-		this.currentCheckpoint = shape;
-		this.currentCheckpointTrigger = trigger;
-		this.checkpointCollectedGems.clear();
-		this.checkpointUp = this.marble.currentUp.clone();
-		this.cheeckpointBlast = this.marble.blastAmount;
-		// Remember all gems that were collected up to this point
-		for (gem in this.gems) {
-			if (gem.pickedUp)
-				this.checkpointCollectedGems.set(gem, true);
-		}
-		this.checkpointHeldPowerup = this.marble.heldPowerup;
-		this.displayAlert("Checkpoint reached!");
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
-	}
-
-	/** Resets to the last stored checkpoint state. */
-	public function loadCheckpointState() {
-		var marble = this.marble;
-		// Determine where to spawn the marble
-		var offset = new Vector(0, 0, 3);
-		var add = ""; // (this.currentCheckpoint.srcElement as any)?.add || this.currentCheckpointTrigger?.element.add;
-		if (this.currentCheckpoint.elem.fields.exists('add')) {
-			add = this.currentCheckpoint.elem.fields.get('add')[0];
-		}
-		var sub = "";
-		if (this.currentCheckpoint.elem.fields.exists('sub')) {
-			sub = this.currentCheckpoint.elem.fields.get('sub')[0];
-		}
-		if (this.currentCheckpointTrigger != null) {
-			if (this.currentCheckpointTrigger.add != null)
-				offset = this.currentCheckpointTrigger.add;
-		}
-		if (add != "") {
-			offset = MisParser.parseVector3(add);
-			offset.x = -offset.x;
-		}
-		if (sub != "") {
-			offset = MisParser.parseVector3(sub).multiply(-1);
-			offset.x = -offset.x;
-		}
-		var mpos = this.currentCheckpoint.obj.getAbsPos().getPosition().add(offset);
-		this.marble.setMarblePosition(mpos.x, mpos.y, mpos.z);
-		marble.velocity.load(new Vector(0, 0, 0));
-		marble.omega.load(new Vector(0, 0, 0));
-		Console.log('Respawn:');
-		Console.log('Marble Position: ${mpos.x} ${mpos.y} ${mpos.z}');
-		Console.log('Marble Velocity: ${marble.velocity.x} ${marble.velocity.y} ${marble.velocity.z}');
-		Console.log('Marble Angular: ${marble.omega.x} ${marble.omega.y} ${marble.omega.z}');
-		// Set camera orientation
-		var euler = this.currentCheckpoint.obj.getRotationQuat().toEuler();
-		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
-		this.marble.camera.CameraPitch = 0.45;
-		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
-		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
-		this.marble.camera.oob = false;
-		@:privateAccess this.marble.superBounceEnableTime = -1e8;
-		@:privateAccess this.marble.shockAbsorberEnableTime = -1e8;
-		@:privateAccess this.marble.helicopterEnableTime = -1e8;
-		@:privateAccess this.marble.megaMarbleEnableTime = -1e8;
-		this.marble.blastAmount = this.cheeckpointBlast;
-		if (this.isRecording) {
-			this.replay.recordCameraState(this.marble.camera.CameraYaw, this.marble.camera.CameraPitch);
-			this.replay.recordMarbleInput(0, 0);
-			this.replay.recordMarbleState(mpos, marble.velocity, marble.getRotationQuat(), marble.omega);
-			this.replay.recordMarbleStateFlags(false, false, true, false);
-		}
-		var gravityField = ""; // (this.currentCheckpoint.srcElement as any) ?.gravity || this.currentCheckpointTrigger?.element.gravity;
-		if (this.currentCheckpoint.elem.fields.exists('gravity')) {
-			gravityField = this.currentCheckpoint.elem.fields.get('gravity')[0];
-		}
-		if (this.currentCheckpointTrigger != null) {
-			if (@:privateAccess this.currentCheckpointTrigger.element.fields.exists('gravity')) {
-				gravityField = @:privateAccess this.currentCheckpointTrigger.element.fields.get('gravity')[0];
-			}
-		}
-		if (MisParser.parseBoolean(gravityField)) {
-			// In this case, we set the gravity to the relative "up" vector of the checkpoint shape.
-			var up = new Vector(0, 0, 1);
-			up.transform(this.currentCheckpoint.obj.getRotationQuat().toMatrix());
-			this.setUp(this.marble, up, this.timeState, true);
-		} else {
-			// Otherwise, we restore gravity to what was stored.
-			this.setUp(this.marble, this.checkpointUp, this.timeState, true);
-		}
-		// Restore gem states
-		for (gem in this.gems) {
-			if (gem.pickedUp && !this.checkpointCollectedGems.exists(gem)) {
-				gem.reset();
-				this.gemCount--;
-			}
-		}
-		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
-		this.playGui.setCenterText('none');
-		this.clearSchedule();
-		this.marble.outOfBounds = false;
-		this.deselectPowerUp(this.marble); // Always deselect first
-		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
-		if (this.checkpointHeldPowerup != null)
-			this.schedule(this.timeState.currentAttemptTime + 0.5, () -> this.pickUpPowerUp(this.marble, this.checkpointHeldPowerup));
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
-	}
-
 	public function setCursorLock(enabled:Bool) {
 		this.cursorLock = enabled;
 		if (enabled) {
@@ -2650,8 +2506,6 @@ class MarbleWorld extends Scheduler {
 		collisionWorld = null;
 		particleManager = null;
 		namedObjects = null;
-		currentCheckpoint = null;
-		checkpointCollectedGems = null;
 		marble = null;
 
 		this._disposed = true;
