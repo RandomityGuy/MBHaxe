@@ -114,7 +114,7 @@ jobs:
         - run:
             name: Upload to Artifact Storage
             command: |
-              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/Export/android/app/build/outputs/apk/release/app-release-unsigned.apk $REMOTEDIR/MBHaxe-Platinum.apk
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/Export/android/app/build/outputs/apk/release/app-release-unsigned.apk $REMOTEDIR/MBHaxe-Gold.apk
 
 
 # Invoke jobs via workflows
