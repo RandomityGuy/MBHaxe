@@ -237,7 +237,7 @@ class HelpCreditsGui extends GuiImage {
 			gem1Ctrl.render(MarbleGame.canvas.scene2d);
 			gem2Ctrl.render(MarbleGame.canvas.scene2d);
 			gem3Ctrl.render(MarbleGame.canvas.scene2d);
-			hcText2.render(MarbleGame.canvas.scene2d, @:privateAccess hcText2.parent._flow);
+			hcText2.render(MarbleGame.canvas.scene2d);
 			superJumpCtrl.render(MarbleGame.canvas.scene2d);
 			superSpeedCtrl.render(MarbleGame.canvas.scene2d);
 			shockAbsorberCtrl.render(MarbleGame.canvas.scene2d);
@@ -265,7 +265,7 @@ class HelpCreditsGui extends GuiImage {
 			gem1Ctrl.render(MarbleGame.canvas.scene2d);
 			gem2Ctrl.render(MarbleGame.canvas.scene2d);
 			gem3Ctrl.render(MarbleGame.canvas.scene2d);
-			hcText2.render(MarbleGame.canvas.scene2d, @:privateAccess hcText2.parent._flow);
+			hcText2.render(MarbleGame.canvas.scene2d);
 			superJumpCtrl.render(MarbleGame.canvas.scene2d);
 			superSpeedCtrl.render(MarbleGame.canvas.scene2d);
 			shockAbsorberCtrl.render(MarbleGame.canvas.scene2d);
@@ -289,7 +289,7 @@ class HelpCreditsGui extends GuiImage {
 			hcText2.position = new Vector(110, 35);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Gyrocopter PowerUp - slows your fall in the air.<br/><br/>Time Travel - takes some time off the clock.<br/><br/>Gravity Modifier - Changes the direction of \"down\" - the new down is in the direction of the arrow.";
-			hcText2.render(MarbleGame.canvas.scene2d, @:privateAccess hcText2.parent._flow);
+			hcText2.render(MarbleGame.canvas.scene2d);
 			superJumpCtrl.render(MarbleGame.canvas.scene2d);
 			superSpeedCtrl.render(MarbleGame.canvas.scene2d);
 			shockAbsorberCtrl.render(MarbleGame.canvas.scene2d);
@@ -315,7 +315,7 @@ class HelpCreditsGui extends GuiImage {
 			hcText2.position = new Vector(110, 38);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Duct Fan - be careful this doesn't blow you away!<br/><br/>Tornado - it'll pull you in and spit you out.<br/><br/>Trap Door - keep moving when you're rolling over one of these.";
-			hcText2.render(MarbleGame.canvas.scene2d, @:privateAccess hcText2.parent._flow);
+			hcText2.render(MarbleGame.canvas.scene2d);
 			helicopterCtrl.render(MarbleGame.canvas.scene2d);
 			timeTravelCtrl.render(MarbleGame.canvas.scene2d);
 			antiGravityCtrl.render(MarbleGame.canvas.scene2d);
@@ -337,7 +337,7 @@ class HelpCreditsGui extends GuiImage {
 			hcText2.position = new Vector(110, 30);
 			hcText2.extent = new Vector(418, 274);
 			hcText2.text.text = "<br/><br/>Bumper - this'll bounce you if you touch it.<br/><br/>Land Mine - Warning!  Explodes on contact!<br/><br/>Oil Slick - you won't have much traction on these surfaces";
-			hcText2.render(MarbleGame.canvas.scene2d, @:privateAccess hcText2.parent._flow);
+			hcText2.render(MarbleGame.canvas.scene2d);
 			ductFanCtrl.render(MarbleGame.canvas.scene2d);
 			tornadoCtrl.render(MarbleGame.canvas.scene2d);
 			trapdoorCtrl.render(MarbleGame.canvas.scene2d);
@@ -370,7 +370,7 @@ class HelpCreditsGui extends GuiImage {
 			hcText2.extent = new Vector(155, 274);
 			hcText2.text.text = '<font face="Arial14"><br/></font><font face="Expo50"><p align="center"> </p></font><br/>'
 				+ "Mark Frohnmayer<br/>Brian Hahn<br/>Tim Gift<br/>Kevin Ryan<br/>Jay Moore<br/>John Quigley";
-			hcText2.render(MarbleGame.canvas.scene2d, @:privateAccess hcText2.parent._flow);
+			hcText2.render(MarbleGame.canvas.scene2d);
 		}
 		if (page == 11) {
 			hcText2.text.text = "";

@@ -603,7 +603,6 @@ class PlayMissionGui extends GuiImage {
 			#end
 		}
 		this.addChild(kofi);
-		#end
 	}
 
 	public override function render(scene2d:Scene) {

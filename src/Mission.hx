@@ -204,6 +204,27 @@ class Mission {
 		}
 	}
 
+	public function getPreviewImageSync() {
+		if (!this.isClaMission) {
+			var basename = haxe.io.Path.withoutExtension(this.path);
+			if (ResourceLoader.fileSystem.exists(basename + ".png")) {
+				var ret = ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
+				return ret;
+			}
+			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
+				var ret = ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
+				return ret;
+			}
+			var img = new BitmapData(1, 1);
+			img.setPixel(0, 0, 0);
+			return Tile.fromBitmap(img);
+		} else {
+			var img = new BitmapData(1, 1);
+			img.setPixel(0, 0, 0);
+			return Tile.fromBitmap(img);
+		}
+	}
+
 	public function getDifPath(rawElementPath:String) {
 		if (StringTools.contains(rawElementPath, "$usermods")) {
 			rawElementPath = rawElementPath.split("@").slice(1).map(x -> {

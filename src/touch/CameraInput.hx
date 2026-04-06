@@ -83,8 +83,7 @@ class CameraInput {
 				scaleFactor = js.Browser.window.devicePixelRatio / Settings.zoomRatio;
 				#end
 				var jumpcam = MarbleGame.instance.touchInput.jumpButton.pressed
-					|| MarbleGame.instance.touchInput.powerupButton.pressed
-					|| MarbleGame.instance.touchInput.blastbutton.pressed;
+					|| MarbleGame.instance.touchInput.powerupButton.pressed;
 				if (jumpcam) {
 					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
