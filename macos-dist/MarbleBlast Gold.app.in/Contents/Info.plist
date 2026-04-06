@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.randomityguy.mbhaxe.mbp</string>
+	<string>com.randomityguy.mbhaxe.mbg</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>@VERSION@</string>
 	<key>CFBundleSignature</key>
-	<string>hxmp</string>
+	<string>hxmg</string>
 	<key>CFBundleVersion</key>
 	<string>@VERSION@</string>
 	<key>NSAppleScriptEnabled</key>

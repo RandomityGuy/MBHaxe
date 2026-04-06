@@ -268,7 +268,7 @@ jobs:
           command: |
             cd ~/MBHaxe
             ./package-macos.sh v$COMMIT_TAG
-            cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS"
+            cd "macos-dist/MarbleBlast Gold.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
             cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll,datachannel.hdll} .
@@ -292,27 +292,27 @@ jobs:
           name: Sign app bundle
           command: |
             cd ~/MBHaxe/macos-dist
-            xattr -rc "MarbleBlast Platinum.app"
-            cp "MarbleBlast Platinum.app/Contents/Entitlements.plist" .
-            codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Platinum.app"
+            xattr -rc "MarbleBlast Gold.app"
+            cp "MarbleBlast Gold.app/Contents/Entitlements.plist" .
+            codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Gold.app"
 
       - run:
           name: ZIP Bundle
           command: |
             cd ~/MBHaxe/macos-dist
             npm install -g create-dmg
-            create-dmg --dmg-title="Marble Blast Platinum" "MarbleBlast Platinum.app" || true
-            rm -rf "macos-dist/MarbleBlast Platinum.app.in"
-            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Platinum-Mac.dmg"
+            create-dmg --dmg-title="Marble Blast Gold" "MarbleBlast Gold.app" || true
+            rm -rf "macos-dist/MarbleBlast Gold.app.in"
+            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Gold-Mac.dmg"
             # zip -r MBHaxe-Ultra-Mac.zip macos-dist/
 
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-Platinum-Mac.dmg $REMOTEDIR/MBHaxe-Platinum-Mac.dmg
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-Gold-Mac.dmg $REMOTEDIR/MBHaxe-Gold-Mac.dmg
 
       # - store_artifacts:
-      #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
+      #     path: ~/MBHaxe/MBHaxe-Gold-Mac.zip
 
   build-win:
     executor: 
@@ -443,14 +443,14 @@ jobs:
             name: Zip bundle
             command: |
               cd ~/project
-              7z a MBHaxe-Platinum-Win.zip release/
+              7z a MBHaxe-Gold-Win.zip release/
 
         - run:
             name: Upload to Artifact Storage
             command: |
-              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Platinum-Win.zip $REMOTEDIR/MBHaxe-Platinum-Win.zip
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Gold-Win.zip $REMOTEDIR/MBHaxe-Gold-Win.zip
         # - store_artifacts:
-        #     path: ~/project/MBHaxe-Platinum-Win.zip
+        #     path: ~/project/MBHaxe-Gold-Win.zip
 
 
 # Invoke jobs via workflows
