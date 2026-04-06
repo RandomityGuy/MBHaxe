@@ -11,14 +11,14 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ### Marble Blast Ultra: [Play](https://marbleblastultra.randomityguy.me/)
 ## Windows and Mac
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.12)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.13)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.3)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.5-mbu)
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.12/MBHaxe-Gold.apk)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.13/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum.apk)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra.apk)
 
@@ -103,12 +103,11 @@ In browser, you can just resize your window. You can use the browser zoom featur
 In native version, you can just resize the window if windowed or use the resolution options in the menu or just directly modify settings.json  
 
 ## How do I change my FOV?
-Edit settings.json for native version, edit the MBHaxeSettings key in LocalStorage in browser.  
-In the Platinum and Ultra versions, there is an FOV slider.
+There is an FOV slider in the options menu.
 
 ## How do I unlock/lock FPS?
 You cannot unlock fps in the browser, it is forever set to vsync.
-In the native version, use the options menu to unlock/lock fps, or edit settings.json and set "vsync" to false to unlock fps.
+In the native version, use the options menu to unlock/lock fps.
 
 ## Hey can you please add this new feature?
 If this new feature of yours already exists in MBG but not in this port, then I will try to add it, if I get time to do so, otherwise chances are, I won't add it since I have other things to do and would rather not waste my time on this any further. You are free to do pull requests if you have already implemented said feature.
