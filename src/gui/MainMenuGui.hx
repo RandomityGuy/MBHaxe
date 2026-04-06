@@ -55,7 +55,7 @@ class MainMenuGui extends GuiImage {
 		playButton.extent = new Vector(270, 95);
 		playButton.gamepadAccelerator = ["A"];
 		playButton.pressedAction = (sender) -> {
-			cast(this.parent, Canvas).setContent(new PlayMissionGui());
+			MarbleGame.canvas.setContent(new PlayMissionGui());
 		}
 		homebase.addChild(playButton);
 
