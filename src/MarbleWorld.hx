@@ -11,7 +11,6 @@ import net.NetPacket.PowerupPickupPacket;
 import net.Move;
 import net.NetPacket.GemSpawnPacket;
 import net.BitStream.OutputBitStream;
-import gui.MarbleSelectGui;
 import collision.CollisionPool;
 import net.GemPredictionStore;
 import net.NetPacket.MarbleNetFlags;
@@ -37,19 +36,15 @@ import gui.MainMenuGui;
 #else
 import gui.ReplayCenterGui;
 #end
-import gui.ReplayNameDlg;
 import collision.Collision;
 import shapes.MegaMarble;
 import shapes.Blast;
-import shapes.Glass;
-import gui.OOBInsultGui;
 import shapes.Checkpoint;
 import triggers.CheckpointTrigger;
 import shapes.EasterEgg;
 import shapes.Sign;
 import triggers.TeleportTrigger;
 import triggers.DestinationTrigger;
-import shapes.Nuke;
 import shapes.Magnet;
 import src.Replay;
 import gui.Canvas;
@@ -88,7 +83,6 @@ import shapes.Helicopter;
 import shapes.TriangleBumper;
 import shapes.RoundBumper;
 import shapes.SuperBounce;
-import shapes.RandomPowerup;
 import shapes.SignCaution;
 import shapes.SuperJump;
 import shapes.Gem;
@@ -2403,8 +2397,6 @@ class MarbleWorld extends Scheduler {
 			} else {
 				Settings.levelStatistics[mission.path].oobs++;
 			}
-			if (Settings.optionsSettings.oobInsults)
-				OOBInsultGui.OOBCheck();
 		}
 		// sky.follow = null;
 		// this.oobCameraPosition = camera.position.clone();
