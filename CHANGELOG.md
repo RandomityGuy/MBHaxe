@@ -1,150 +1,111 @@
-# 1.7.1
-This update brings the following bugfixes:
-- Fixed a crash when the marble goes out of bounds.
-- Fixed the FPS limiter not limiting rendered frames per second.
-- Fixed scores not being sent in certain cases.
+# 1.1.13
+This update brings to bring feature and bugfix parity with the latest MBP version:
+- Fixed a ton of bugs that were fixed in MBP since the last update.
+- Updated the options menu to have more meaningful options and add more options for touch controls.
+- Added Import and Export Progress to Options menu to transfer game progress between devices.
+- Made the game files to be case insensitive to allow running the game on case sensitive filesystems without issues.
+- Improved camera sensitivity on touch devices.
+- Implemented camera centering for touch controls when free look is disabled.
+- Various performance improvements and crash fixes.
+- Implemented console cheat commands. DefaultMarble.attribute = value; to change marble attributes.
+- Fixed a bug with the timer when playing a replay.
+- Fixed gravity changes not rewinding properly.
 
-# 1.7.0
-It's the fabled Leaderboards update!
-Leaderboards have been implemented for all the levels with automatic replay uploading for official levels as well as watching top replays. Additionally, segregation has been made to allow switching between rewind and non-rewind scores on the leaderboards.
-
-Changes:
-- Added an FPS limiter in the settings.
-- Added custom friction support as well as custom marble attributes. Now levels can modify the marble's physics parameters to their liking.
-- Improved level select persistence. Now your last chosen level will be displayed on quitting or finishing a level instead of last level in a category.
-- Improved the Gem Hunt algorithm to match closer to PlatinumQuest's.
-- Trigger detection now matches with the original game.
-- Camera is now smoothened.
-- Fixed camera not pointing at gems after respawn in Multiplayer.
-- Fixed Superspeed powerup sometimes throwing you in the wrong direction in Multiplayer.
-- Fixed the marble being wonky at times in replays.
-- Fixed an interaction with Random powerup giving Time Travels.
-- Fixed some collision issues with moving platforms.
-
-# 1.6.1
+# 1.1.12
 This update fixes the following bugs:
-- Fixed a crash when there are more players than spawnpoints in multiplayer.
-- Fixed minor UI bugs with kicking and player list.
-- Prevent timing out of players who are still loading the level.
-- Fixed sort order of two multiplayer levels.
-- Attempted to improve performance when someone joins mid-game.
-- Touch Controls: Pressing pause now releases the joystick.
+- Fixed marble phasing through interiors when going too fast
+- Fixed jittery interaction with marble and moving platforms
 
-# 1.6.0
-A big update! Bringing in the cross platform multiplayer the way it was meant to be played!
-Please note that it is always and always recommended to download the native client for unlocked FPS and higher performance.
-- Added cross platform multiplayer, the Online button is now unlocked.
-  - Gem Hunt Free-for-all only, no other game modes are present.
-  - Server authoritative marble physics and rollback netcode for all gameplay elements - including moving platforms.
-  - Up to 8 players due to platform technical limitations.
-  - Seamless multiplayer custom levels integration through Marbleland.
-  - Spectator mode is implemented but lasts until the end of match.
-  - Four PlatinumQuest levels that were present in MBP multiplayer have been added along with their shaders.
-  - Added the Ability to toggle between old spawns and new spawns for certain multiplayer maps.
-  - Added Competitor Mode:
-    - A new gem spawn will happen automatically after a certain duration depending on number of gems picked up.
-    - Reduced Mega Marble duration.
-    - Only Ultra Blasts can affect marbles.
-    - Fixed starting point.
-- Touch controls improvements:
-  - Configure visibility of On-Screen Controls
-  - Configure behavior of buttons acting as camera joystick by altering Button Camera Factor
-  - Configure your camera sensitivity and swipe extent.
-  - Improved touch camera sensitivity a bit.
-  - Added Dynamic Joystick for Touch Controls.
-- Added support for iOS for the web version.
-- Improved Controller support for Android.
-- Optimized the game to run at much higher framerates.
-- Improved marble shadow.
-- Fixed certain customs missing interiors/textures.
-- Fixed marble collision at varying radii.
-- Fixed Super Speed throwing you in the wrong direction.
-
-# 1.5.4
-This update fixes the following bugs:
-- Updated Marbleland support. New levels will now automatically show up.
-- Implement "Latest" and "Alphabetical" sorting for Marbleland customs.
+# 1.1.11
+This update brings the following fixes:
+- Minor UI changes.
 - Optimized rewind to use memory better.
 - Fixed a handful of memory leaks.
 - Match with MBG Collision code.
 
-# 1.5.3
-This update fixes the following bugs:
-- Slightly improved marble cubemaps.
-- Fixed camera movement for varying FPS and sensitivities.
-- Fixed rolling sound bug.
+# 1.1.10
+This update brings the following fixes:
+- Fixed marble finish animation not working.
+- Fixed camera movement at varying FPS and sensitivities.
+- Minor performance improvements.
 
-# 1.5.2
-- Updated Marbleland integration link to the new site.
-
-# 1.5.1
+# 1.1.9
 This update fixes the following bugs:
+- Fixed bugs caused by rewinding past the level start.
+- Fixed crash caused by traplaunch.
+- Removed the ability to rewind if you finished the level.
 - Fixed a bug concerning moving platform collisions.
 - Made moving platforms rewind correctly in case of traplaunches.
 
-# 1.5.0
-This update brings the following big changes:
-- Added Rewind capabilities. Open options to configure it.
-- Added capability to play locally installed custom levels. Install your customs in platinum/data/missions.
-- Improved traplaunches, now they should be much more easier to do.
-- Buffed nuke a bit, hold jump key to make it blast much stronger.
-- Minor physics improvements.
-- Minor performance improvements.
+# 1.1.8
+This is the first version to support android!
+This update adds the following features and bugfixes:
+- Adds Rewind feature. Open options to enable rewind and configure its settings!
+- Improved traplaunches, they should now be more easily doable.
+- Minor physics fixes.
+- Fixed broken finish pads
 
-# 1.4.0
-This update adds all the playable MBG, MBP, MBU custom levels via Marbleland integration. Play the entire custom level archive without manually installing with, with a single click.
-- Added controller support. (Thanks thearst3rd)
-- Improved replay saving flow.
+# 1.1.7
+This update brings the following changes:
+- Added controller support.
+- Added support to load and play custom levels. (Native only)
+- Improved replay UX flow.
 - Improved marble physics a bit.
-- Cleaned up some UI.
-- Fixed collision detection bugs.
-- Fixed various graphical bugs.
-- Fixed item hitboxes being too small. 
-# 1.3.3
-This update addresses the following issues:
-- FOV is now based on horizontal FOV instead of vertical, matching with- original MB.
-- Fixed the marble getting stuck in the corners.
-- Fixed black screen on opening the game for the first time on MacOS
+- Fixed Tornado rendering.
+- Fixed some collision bugs.
 
-# 1.3.2
-This is the first build of MBHaxe Platinum that has Mac support.
-- MBU interior shaders now match more closely to those of MBU in Xbox.
-- Added Console for debug purposes. Press Tilde ~ to bring it up.
-- Added replay browser for native.
+# 1.1.6
+This release backports the fixes from MBP:
+This is the first build of MBHaxe Gold that has Mac support.
+Changelog:
+- FOV is now based on horizontal FOV instead of vertical, matching with original MB.
+- Fixed the marble getting stuck in the corners.
+- Fixed broken resolution after pressing the back button in Retina display.
+- Fixed wrong level order in Intermediate.
+
+# 1.1.5
+This release backports the fixes from MBP:
+This is the first build of MBHaxe Gold that has Mac support.
+Changelog:
 - Reduced lag caused by end pad.
 - Fixed inactive button hover sounds.
 - Fixed OOB animation timings.
 - Added HighDPI/Retina support.
 - Fixed the color bugs regarding text input.
-- Minor graphical changes to match original.
 - Minor performance and physics improvements.
 - Fixed tornado rendering.
 
-# 1.3.1
-This release fixes a lot of bugs that were reported and adds in minor improvements:
+# 1.1.4
+This release backports the fixes from MBP:
 - Fixed Pad animations not working
 - Fixed bugs relating to powerup pickup on respawn.
 - Fixed marble not using the hitbox of the rotated hitbox for item pickups.
 - Marble finish animation now matches more closely with the original.
 - Fixed camera keys not working.
 - Added keyboard shortcuts to certain buttons on certain dialog boxes.
-- Timer now becomes green on finishing, to match original.
-- Fixed double click sound on selecting level category.
-- Hypercube now uses MBG gameplay logic.
-- Added Time Travel Bonus messages to HUD.
 - Fixed lag caused by GJK/Startpad/Endpad.
-- Fixed being able to press the end game buttons while typing the name. The- input box will be focused.
+- Fixed being able to press the end game buttons while typing the name. The input box will be focused.
 - Fixed option sliders not updating values
 
-# 1.3.0
-- Added Marble Blast Ultra levels as per Platinum.
-- Added Ultra Marbles as per Platinum and their shaders.
-- Added shaders for Ultra levels closely matching original MBU. (This may- lag mobile devices)
+# 1.1.3
+This update brings the following changes:
+- Updated Particle Rendering (improved performance)
 - Fixed lot of marble physics bugs, they should now be smoother.
-- Minor performance improvements.
-- Added restart button to touch controls.
+- Minor performance improvements
 
-# 1.2.0
-- Implemented most Marble Blast Platinum 1.7.42 (except Ultra)
-- Marble reflections
-- Optimized resource loading and performance
+# 1.1.2
+This update brings the following changes:
+- Added basic state based replays.
+- Support for asynchronous resource loading on Web target.
+
+# 1.1.0
+Touch Controls and Performance Improvements Update:
+- Updated the engine to the latest version
+- Added touch controls on the web version when it is loaded on mobile, along with its settings.
+- Improved level loading speed on web version and reduced WebGL crashes
+- Improved font rendering
+- Fixed tornado rendering bug
+- Minor performance and stability improvements overall
+
+# 1.0.0
+Initial release, windows version.
