@@ -16,6 +16,7 @@ import src.Settings;
 
 class OptionsDlg extends GuiImage {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
+	var importing = false;
 
 	public function new() {
 		var img = ResourceLoader.getImage("data/ui/background.jpg");
@@ -42,21 +43,36 @@ class OptionsDlg extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var window = new GuiImage(ResourceLoader.getResource("data/ui/options/window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		window.horizSizing = Center;
-		window.vertSizing = Center;
-		window.position = new Vector(-72, -47);
-		window.extent = new Vector(784, 573);
-		this.addChild(window);
+		var tabs = new GuiControl();
+		tabs.horizSizing = Center;
+		tabs.vertSizing = Center;
+		tabs.position = new Vector(60, 15);
+		tabs.extent = new Vector(520, 450);
+		this.addChild(tabs);
 
-		var generalBtn = new GuiButton(loadButtonImages('data/ui/options/general'));
-		generalBtn.position = new Vector(102, 19);
-		generalBtn.extent = new Vector(134, 65);
-		window.addChild(generalBtn);
+		var setTab:String->Void = null;
+
+		var graphicsTab = new GuiImage(ResourceLoader.getResource("data/ui/options/graf_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
+		graphicsTab.position = new Vector(58, 44);
+		graphicsTab.extent = new Vector(149, 86);
+
+		var controlsTab = new GuiImage(ResourceLoader.getResource("data/ui/options/cntr_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
+		controlsTab.position = new Vector(315, 15);
+		controlsTab.extent = new Vector(149, 65);
+
+		var rewindTab = new GuiImage(ResourceLoader.getResource("data/ui/options/rwnd_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
+		rewindTab.position = new Vector(459, 76);
+		rewindTab.extent = new Vector(59, 162);
 
 		var audioTab = new GuiImage(ResourceLoader.getResource("data/ui/options/aud_tab.png", ResourceLoader.getImage, this.imageResources).toTile());
 		audioTab.position = new Vector(204, 33);
 		audioTab.extent = new Vector(114, 75);
+
+		var boxFrame = new GuiImage(ResourceLoader.getResource("data/ui/options/options_base.png", ResourceLoader.getImage, this.imageResources).toTile());
+		boxFrame.position = new Vector(25, 14);
+		boxFrame.extent = new Vector(470, 422);
+		boxFrame.horizSizing = Center;
+		boxFrame.vertSizing = Center;
 
 		tabs.addChild(audioTab);
 		tabs.addChild(controlsTab);

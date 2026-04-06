@@ -2,10 +2,10 @@
 <!-- Replace com.example.heapsandroid.helloword with the identifier of your game below, e.g.
      com.gamemaker.game -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.randomityguy.mbhaxe.mbp"
+    package="com.randomityguy.mbhaxe.mbg"
     android:installLocation="auto"
-    android:versionCode="6"
-    android:versionName="1.7.2">
+    android:versionCode="2"
+    android:versionName="1.1.13">
 
     <!-- Tell the system this app requires OpenGL ES 3.0. -->
     <uses-feature android:glEsVersion="0x00030000" android:required="true" />
