@@ -435,10 +435,10 @@ class MPPlayMissionGui extends GuiImage {
 				if (StringTools.trim(chatInput.text.text) != "") {
 					var sendText = '<font color="#F29515">${StringTools.htmlEscape(Settings.highscoreName.substr(0, 20))}:</font> ${StringTools.htmlEscape(chatInput.text.text.substr(0, 100))}';
 					if (Net.isClient) {
-						NetCommands.sendChatMessage(StringTools.htmlEscape(sendText));
+						NetCommands.sendChatMessage(sendText);
 					}
 					if (Net.isHost) {
-						NetCommands.sendServerChatMessage(StringTools.htmlEscape(sendText));
+						NetCommands.sendServerChatMessage(sendText);
 					}
 				}
 				chatInput.text.text = "";
@@ -729,7 +729,7 @@ class MPPlayMissionGui extends GuiImage {
 	}
 
 	public static function addChatMessage(s:String) {
-		var realText = StringTools.htmlEscape(s);
+		var realText = s;
 		allChats.push(realText);
 		if (allChats.length > 100) {
 			allChats = allChats.slice(allChats.length - 100);
