@@ -911,36 +911,31 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		importBtn.txtCtrl.text.text = "Import";
 		importBtn.setExtent(new Vector(109, 39));
 		importBtn.pressedAction = (sender) -> {
-			hxd.File.browse((sel) -> {
-				sel.load((data) -> {
-					try {
-						// convert to string
-						var jsonStr = data.toString();
-						// parse JSON
-						var json = haxe.Json.parse(jsonStr);
+			trace("Start prefs import");
+			importing = true;
+			Settings.start_import_prefs((data) -> {
+				try {
+					// convert to string
+					var jsonStr = @:privateAccess String.fromUTF8(data);
+					// parse JSON
+					var json = haxe.Json.parse(jsonStr);
 
-						var highScoreData:DynamicAccess<Array<Score>> = json.highScores;
-						for (key => value in highScoreData) {
-							Settings.highScores.set(key, value);
-						}
-						var easterEggData:DynamicAccess<Float> = json.easterEggs;
-						if (easterEggData != null) {
-							for (key => value in easterEggData) {
-								Settings.easterEggs.set(key, value);
-							}
-						}
-						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Progress data imported successfully!"));
-						Settings.save();
-					} catch (e) {
-						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to import progress data: " + e.message));
+					var highScoreData:DynamicAccess<Array<Score>> = json.highScores;
+					for (key => value in highScoreData) {
+						Settings.highScores.set(key, value);
 					}
-				});
-			}, {
-				title: "Select a progress file to import",
-				fileTypes: [
-					{name: "JSON files", extensions: ["json"]},
-					{name: "All files", extensions: ["*"]}
-				],
+					var easterEggData:DynamicAccess<Float> = json.easterEggs;
+					if (easterEggData != null) {
+						for (key => value in easterEggData) {
+							Settings.easterEggs.set(key, value);
+						}
+					}
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Progress data imported successfully!"));
+					Settings.save();
+				} catch (e) {
+					MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to import progress data: " + e.message));
+				}
+				importing = false; // reset this flag after import is done
 			});
 		}
 
@@ -949,43 +944,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		exportBtn.txtCtrl.text.text = "Export";
 		exportBtn.setExtent(new Vector(109, 39));
 		exportBtn.pressedAction = (sender) -> {
-			#if sys
-			#if MACOS_BUNDLE
-			// open the finder to that folder
-			Sys.command('open "${Settings.settingsDir}"');
-			#else
-			// Just open the folder in the explorer.exe
-			Sys.command('explorer.exe "${Settings.settingsDir}"');
-			#end
-			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("The settings.json file contains your progress data. You can copy it to another device or share it with others."));
-			#end
-			#if js
-			// Serialize Settings to JSON
-			var localStorage = js.Browser.getLocalStorage();
-			if (localStorage != null) {
-				var settingsData = localStorage.getItem("MBHaxeSettings");
-				if (settingsData != null) {
-					// Download this
-					var replayBytes = settingsData;
-					var blob = new js.html.Blob([haxe.io.Bytes.ofString(replayBytes).getData()], {
-						type: 'application/octet-stream'
-					});
-					var url = js.html.URL.createObjectURL(blob);
-					var fname = 'settings.json';
-					var element = js.Browser.document.createElement('a');
-					element.setAttribute('href', url);
-					element.setAttribute('download', fname);
-
-					element.style.display = 'none';
-					js.Browser.document.body.appendChild(element);
-
-					element.click();
-
-					js.Browser.document.body.removeChild(element);
-					js.html.URL.revokeObjectURL(url);
-				}
-			}
-			#end
+			Settings.export_prefs();
 		}
 
 		importPane.addChild(importTxt);
