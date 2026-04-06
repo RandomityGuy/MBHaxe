@@ -1,3 +1,7 @@
+# 1.7.3
+Hotfix time!
+- Fixed chat messages being escaped a bit too much.
+
 # 1.7.2
 This update brings the following bugfixes:
 - Added Import and Export Progress to Options menu to transfer game progress between devices.
