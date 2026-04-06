@@ -50,6 +50,13 @@ class MainMenuGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
+		function loadStaticButtonImages(path:String) {
+			var normal = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed];
+		}
+
 		var playButton = new GuiButton(loadButtonImages("data/ui/home/play"));
 		playButton.position = new Vector(50, 113);
 		playButton.extent = new Vector(270, 95);
@@ -97,6 +104,38 @@ class MainMenuGui extends GuiImage {
 			MarbleGame.canvas.pushDialog(new VersionGui());
 		}
 		this.addChild(changelogButton);
+
+		#if js
+		var mbp = new GuiButton(loadStaticButtonImages("data/ui/icon_mbp"));
+		mbp.horizSizing = Right;
+		mbp.vertSizing = Top;
+		mbp.position = new Vector(0, 380);
+		mbp.extent = new Vector(76, 76);
+		mbp.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblast.randomityguy.me");
+		}
+		this.addChild(mbp);
+
+		var mbu = new GuiButton(loadStaticButtonImages("data/ui/icon_mbu"));
+		mbu.horizSizing = Right;
+		mbu.vertSizing = Top;
+		mbu.position = new Vector(76, 380);
+		mbu.extent = new Vector(76, 76);
+		mbu.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblastultra.randomityguy.me");
+		}
+		this.addChild(mbu);
+
+		var discord = new GuiButton(loadStaticButtonImages("data/ui/discord"));
+		discord.horizSizing = Right;
+		discord.vertSizing = Top;
+		discord.position = new Vector(0, 320);
+		discord.extent = new Vector(152, 60);
+		discord.pressedAction = (sender) -> {
+			js.Browser.window.open("https://discord.gg/q4JdnRbVhF");
+		}
+		this.addChild(discord);
+		#end
 
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
 		kofi.horizSizing = Left;

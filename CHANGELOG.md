@@ -1,5 +1,5 @@
 # 1.1.13
-This update brings to bring feature and bugfix parity with the latest MBP version:
+This update brings feature and bugfix parity with the latest MBP version:
 - Fixed a ton of bugs that were fixed in MBP since the last update.
 - Updated the options menu to have more meaningful options and add more options for touch controls.
 - Added Import and Export Progress to Options menu to transfer game progress between devices.

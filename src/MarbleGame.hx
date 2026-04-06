@@ -73,15 +73,8 @@ class MarbleGame {
 
 		js.Browser.document.addEventListener('pointerlockchange', () -> {
 			if (!paused && world != null) {
-				if (world.finishTime == null && world._ready && @:privateAccess !world.playGui.isChatFocused()) {
+				if (world.finishTime == null && world._ready) {
 					if (js.Browser.document.pointerLockElement != @:privateAccess Window.getInstance().canvas) {
-						if (MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPPreGameDlg
-							|| (Net.isMP
-								&& paused
-								&& !(MarbleGame.canvas.children[MarbleGame.canvas.children.length - 1] is MPExitGameDlg))) {
-							return; // don't pause
-						}
-
 						handlePauseGame();
 						// Focus the shit again
 						var jsCanvas = @:privateAccess Window.getInstance().canvas;
@@ -150,22 +143,12 @@ class MarbleGame {
 		js.Browser.window.addEventListener('keydown', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = Key.getFrame();
-			if (world != null && @:privateAccess world.playGui.isChatFocused()) {
-				@:privateAccess Window.getInstance().onKeyDown(e);
-			}
 		});
 		js.Browser.window.addEventListener('keyup', (e:js.html.KeyboardEvent) -> {
 			var buttonCode = (e.keyCode);
 			@:privateAccess Key.keyPressed[buttonCode] = -Key.getFrame();
-			if (world != null && @:privateAccess world.playGui.isChatFocused()) {
-				@:privateAccess Window.getInstance().onKeyUp(e);
-			}
 		});
-		js.Browser.window.addEventListener('keypress', (e:js.html.KeyboardEvent) -> {
-			if (world != null && @:privateAccess world.playGui.isChatFocused()) {
-				@:privateAccess Window.getInstance().onKeyPress(e);
-			}
-		});
+		js.Browser.window.addEventListener('keypress', (e:js.html.KeyboardEvent) -> {});
 
 		pointercontainer.addEventListener('touchstart', (e:js.html.TouchEvent) -> {
 			@:privateAccess Key.keyPressed[Key.MOUSE_LEFT] = Key.getFrame();
