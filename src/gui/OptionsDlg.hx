@@ -1,5 +1,6 @@
 package gui;
 
+import haxe.DynamicAccess;
 import gui.GuiControl.MouseState;
 import src.AudioManager;
 import hxd.Key;
@@ -163,14 +164,14 @@ class OptionsDlg extends GuiImage {
 
 		var vsyncLabel = new GuiText(domcasual32);
 		vsyncLabel.position = new Vector(12, 120);
-		vsyncLabel.extent = new Vector(146, 261);
+		vsyncLabel.extent = new Vector(146, 271);
 		vsyncLabel.text.textColor = 0x000000;
 		vsyncLabel.text.text = "VSync:";
 		vsyncLabel.justify = Right;
 		graphicsPane.addChild(vsyncLabel);
 
 		var vsyncButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
-		vsyncButton.position = new Vector(170, 100);
+		vsyncButton.position = new Vector(170, 110);
 		vsyncButton.extent = new Vector(46, 54);
 		vsyncButton.buttonType = Toggle;
 		graphicsPane.addChild(vsyncButton);
@@ -179,7 +180,7 @@ class OptionsDlg extends GuiImage {
 		}
 
 		var fieldOfViewLabel = new GuiText(domcasual32);
-		fieldOfViewLabel.position = new Vector(12, 170);
+		fieldOfViewLabel.position = new Vector(12, 180);
 		fieldOfViewLabel.extent = new Vector(146, 261);
 		fieldOfViewLabel.text.textColor = 0x000000;
 		fieldOfViewLabel.text.text = "Field of View:";
@@ -187,12 +188,12 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.addChild(fieldOfViewLabel);
 
 		var fovSlide = new GuiImage(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources).toTile());
-		fovSlide.position = new Vector(170, 163);
+		fovSlide.position = new Vector(170, 173);
 		fovSlide.extent = new Vector(254, 34);
 		graphicsPane.addChild(fovSlide);
 
 		var fovSlider = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage, this.imageResources).toTile());
-		fovSlider.position = new Vector(170, 163);
+		fovSlider.position = new Vector(170, 173);
 		fovSlider.extent = new Vector(250, 34);
 		fovSlider.sliderValue = (Settings.optionsSettings.fovX - 60) / (140 - 60);
 		fovSlider.pressedAction = (sender) -> {
@@ -889,25 +890,108 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		rewindTabBtn.pressedAction = (sender) -> setTab("Rewind");
 		mainPane.addChild(rewindTabBtn);
 
-		// Touch Controls buttons???
-		if (Util.isTouchDevice()) {
-			var touchControlsTxt = new GuiText(domcasual24);
-			touchControlsTxt.text.text = "Touch Controls:";
-			touchControlsTxt.text.color = new Vector(0, 0, 0);
-			touchControlsTxt.position = new Vector(200, 465);
-			touchControlsTxt.extent = new Vector(200, 40);
+		// Import & Export
 
-			var touchControlsEdit = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
-			touchControlsEdit.position = new Vector(300, 455);
-			touchControlsEdit.txtCtrl.text.text = "Edit";
-			touchControlsEdit.setExtent(new Vector(109, 39));
-			touchControlsEdit.pressedAction = (sender) -> {
-				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-			}
+		var importPane = new GuiControl();
+		importPane.position = new Vector(60, 15);
+		importPane.extent = new Vector(520, 580);
+		importPane.horizSizing = Center;
+		importPane.vertSizing = Center;
+		this.addChild(importPane);
 
-			mainPane.addChild(touchControlsTxt);
-			mainPane.addChild(touchControlsEdit);
+		var importTxt = new GuiText(domcasual24);
+		importTxt.text.text = "Progress:";
+		importTxt.text.textColor = 0x000000;
+		importTxt.position = new Vector(180, 505);
+		importTxt.extent = new Vector(200, 40);
+		importTxt.horizSizing = Relative;
+		importTxt.vertSizing = Relative;
+
+		var importBtn = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
+		importBtn.position = new Vector(280, 495);
+		importBtn.txtCtrl.text.text = "Import";
+		importBtn.setExtent(new Vector(109, 39));
+		importBtn.pressedAction = (sender) -> {
+			hxd.File.browse((sel) -> {
+				sel.load((data) -> {
+					try {
+						// convert to string
+						var jsonStr = data.toString();
+						// parse JSON
+						var json = haxe.Json.parse(jsonStr);
+
+						var highScoreData:DynamicAccess<Array<Score>> = json.highScores;
+						for (key => value in highScoreData) {
+							Settings.highScores.set(key, value);
+						}
+						var easterEggData:DynamicAccess<Float> = json.easterEggs;
+						if (easterEggData != null) {
+							for (key => value in easterEggData) {
+								Settings.easterEggs.set(key, value);
+							}
+						}
+						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Progress data imported successfully!"));
+						Settings.save();
+					} catch (e) {
+						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Failed to import progress data: " + e.message));
+					}
+				});
+			}, {
+				title: "Select a progress file to import",
+				fileTypes: [
+					{name: "JSON files", extensions: ["json"]},
+					{name: "All files", extensions: ["*"]}
+				],
+			});
 		}
+
+		var exportBtn = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
+		exportBtn.position = new Vector(400, 495);
+		exportBtn.txtCtrl.text.text = "Export";
+		exportBtn.setExtent(new Vector(109, 39));
+		exportBtn.pressedAction = (sender) -> {
+			#if sys
+			#if MACOS_BUNDLE
+			// open the finder to that folder
+			Sys.command('open "${Settings.settingsDir}"');
+			#else
+			// Just open the folder in the explorer.exe
+			Sys.command('explorer.exe "${Settings.settingsDir}"');
+			#end
+			MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("The settings.json file contains your progress data. You can copy it to another device or share it with others."));
+			#end
+			#if js
+			// Serialize Settings to JSON
+			var localStorage = js.Browser.getLocalStorage();
+			if (localStorage != null) {
+				var settingsData = localStorage.getItem("MBHaxeSettings");
+				if (settingsData != null) {
+					// Download this
+					var replayBytes = settingsData;
+					var blob = new js.html.Blob([haxe.io.Bytes.ofString(replayBytes).getData()], {
+						type: 'application/octet-stream'
+					});
+					var url = js.html.URL.createObjectURL(blob);
+					var fname = 'settings.json';
+					var element = js.Browser.document.createElement('a');
+					element.setAttribute('href', url);
+					element.setAttribute('download', fname);
+
+					element.style.display = 'none';
+					js.Browser.document.body.appendChild(element);
+
+					element.click();
+
+					js.Browser.document.body.removeChild(element);
+					js.html.URL.revokeObjectURL(url);
+				}
+			}
+			#end
+		}
+
+		importPane.addChild(importTxt);
+		importPane.addChild(importBtn);
+		importPane.addChild(exportBtn);
 
 		setTab = function(tab:String) {
 			tabs.removeChild(audioTab);

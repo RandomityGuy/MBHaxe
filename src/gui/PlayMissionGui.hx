@@ -100,8 +100,8 @@ class PlayMissionGui extends GuiImage {
 		tabCustom.position = new Vector(589, 91);
 		tabCustom.extent = new Vector(52, 198);
 		tabCustom.pressedAction = (sender) -> {
-			#if (js || android || MACOS_BUNDLE)
-			var mbo = new MessageBoxYesNoDlg("The custom level browser is not available in this game.\n Please play Marble Blast Platinum to get access to 5000+ cummunity made customs of both Marble Blast Gold and Marble Blast Platinum. Visit download link?",
+			#if (js || android)
+			var mbo = new MessageBoxYesNoDlg("The custom level browser is not available in this game.\n Please play Marble Blast Platinum to get access to 7000+ cummunity made customs of both Marble Blast Gold and Marble Blast Platinum. Visit download link?",
 				() -> {
 					#if sys
 					hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe");
