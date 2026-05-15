@@ -81,7 +81,7 @@ class DtsObject extends GameObject {
 	var level:MarbleWorld;
 
 	var materials:Array<Material> = [];
-	var materialInfos:Map<Material, Array<String>> = new Map();
+	var materialInfos:Map<Material, Array<Texture>> = new Map();
 	var matNameOverride:Map<String, String> = new Map();
 
 	var sequenceKeyframeOverride:Array<Float> = [];
@@ -348,8 +348,7 @@ class DtsObject extends GameObject {
 
 				var completion = 0 / (iflSequence[0].duration);
 				var keyframe = Math.floor(completion * info.length) % info.length;
-				var currentFile = info[keyframe];
-				var texture = ResourceLoader.getResource(this.directoryPath + '/' + currentFile, ResourceLoader.getTexture, this.textureResources);
+				var texture = info[keyframe];
 
 				var flags = this.dts.matFlags[i];
 				if (flags & 1 > 0 || flags & 2 > 0)
@@ -422,7 +421,14 @@ class DtsObject extends GameObject {
 				}
 			} else if (Path.extension(fullName) == "ifl") {
 				var keyframes = parseIfl(fullName);
-				this.materialInfos.set(material, keyframes);
+				// compute textures for keyframes
+				var textures = [];
+				for (keyframe in keyframes) {
+					var texture = ResourceLoader.getResource(this.directoryPath + '/' + keyframe, ResourceLoader.getTexture, this.textureResources);
+					texture.realloc(); // alloc this in gpu!
+					textures.push(texture);
+				}
+				this.materialInfos.set(material, textures);
 				iflMaterial = true;
 			} else {
 				var texture = ResourceLoader.getResource(fullName, ResourceLoader.getTexture, this.textureResources);
@@ -1051,8 +1057,8 @@ class DtsObject extends GameObject {
 
 				var completion = timeState.timeSinceLoad / (iflSequence[0].duration);
 				var keyframe = Math.floor(completion * info.length) % info.length;
-				var currentFile = info[keyframe];
-				var texture = ResourceLoader.getResource(this.directoryPath + '/' + currentFile, ResourceLoader.getTexture, this.textureResources);
+				var texture = info[keyframe];
+				// var texture = ResourceLoader.getResource(this.directoryPath + '/' + currentFile, ResourceLoader.getTexture, this.textureResources);
 
 				var flags = this.dts.matFlags[i];
 				if (flags & 1 > 0 || flags & 2 > 0)
