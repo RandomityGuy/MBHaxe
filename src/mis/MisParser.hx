@@ -32,7 +32,7 @@ final lineCommentRegEx = ~/\/\/.*/g;
 final assignmentRegEx = ~/(\$(?:\w|\d)+)\s*=\s*(.+?);/g;
 final marbleAttributesRegEx = ~/setMarbleAttributes\("(\w+)",\s*(.+?)\);/g;
 final activatePackageRegEx = ~/activatePackage\((.+?)\);/g;
-final materialPropertyRegEx = ~/new MaterialProperty *\( *(.+?) *\)\s*{\s*((?:\w+ *= *(\d|\.)+;\s*)*)}/gi;
+final materialPropertyRegEx = ~/new MaterialProperty *\( *(.+?) *\)\s*{\s*((?:\w+ *= *-?(\d|\.)+;\s*)*)}/gi;
 final addMaterialMappingRegEx = ~/addMaterialMapping *\( *"(.+?)" *, *(.+?) *\)/gi;
 
 class MisParser {

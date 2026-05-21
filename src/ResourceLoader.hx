@@ -142,7 +142,17 @@ class ResourceLoader {
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.addTaskParallel((fwd) -> file.load(fwd));
+			worker.addTaskParallel((fwd) -> {
+				// if its a jpg, png or gif, load it as bitmap else load as file
+				var fileExtension = file.extension.toLowerCase();
+				if (fileExtension == "jpg" || fileExtension == "png" || fileExtension == "bmp") {
+					file.loadBitmap(v -> {
+						fwd();
+					});
+				} else {
+					file.load(fwd);
+				}
+			});
 		}
 		worker.run();
 	}
@@ -567,15 +577,20 @@ class ResourceLoader {
 		if (zipFilesystem.exists(path.toLowerCase() + ".dds")) {
 			return [path + ".dds"];
 		}
-		var files = fileSystem.dir(Path.directory(path)); // FileSystem.readDirectory(Path.directory(path));
-		var names = [];
-		var fname = Path.withoutDirectory(path).toLowerCase();
-		for (file in files) {
-			var fname2 = file.name;
-			if (Path.withoutExtension(fname2).toLowerCase() == fname || fname2.toLowerCase() == fname)
-				names.push(file.path);
+		var dirPath = Path.directory(path);
+		if (fileSystem.exists(dirPath)) {
+			var files = fileSystem.dir(Path.directory(path)); // FileSystem.readDirectory(Path.directory(path));
+			var names = [];
+			var fname = Path.withoutDirectory(path).toLowerCase();
+			for (file in files) {
+				var fname2 = file.name;
+				if (Path.withoutExtension(fname2).toLowerCase() == fname || fname2.toLowerCase() == fname)
+					names.push(file.path);
+			}
+			return names;
+		} else {
+			return [];
 		}
-		return names;
 	}
 
 	public static function loadZip(entries:Array<haxe.zip.Entry>, game:String) {

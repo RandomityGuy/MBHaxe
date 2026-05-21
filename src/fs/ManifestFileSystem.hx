@@ -47,6 +47,7 @@ class ManifestEntry extends FileEntry {
 	private var bytes:Bytes;
 	private var readPos:Int;
 	private var loaded:Bool;
+	var loadedBmp:LoadedBitmap;
 	#end
 
 	public function new(fs:ManifestFileSystem, name:String, relPath:String, file:String, ?originalFile:String) {
@@ -164,9 +165,16 @@ class ManifestEntry extends FileEntry {
 		var bmp = new hxd.res.Image(this).toBitmap();
 		onLoaded(new hxd.fs.LoadedBitmap(bmp));
 		#elseif js
+		if (loadedBmp != null) {
+			onLoaded(loadedBmp);
+			return;
+		}
 		load(() -> {
 			var img:js.html.Image = new js.html.Image();
-			img.onload = (_) -> onLoaded(new LoadedBitmap(img));
+			img.onload = (_) -> {
+				loadedBmp = new LoadedBitmap(img);
+				onLoaded(loadedBmp);
+			};
 			img.src = file;
 		});
 		#else

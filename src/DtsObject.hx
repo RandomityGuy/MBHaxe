@@ -425,7 +425,6 @@ class DtsObject extends GameObject {
 				var textures = [];
 				for (keyframe in keyframes) {
 					var texture = ResourceLoader.getResource(this.directoryPath + '/' + keyframe, ResourceLoader.getTexture, this.textureResources);
-					texture.realloc(); // alloc this in gpu!
 					textures.push(texture);
 				}
 				this.materialInfos.set(material, textures);
