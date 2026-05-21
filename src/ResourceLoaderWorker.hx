@@ -28,13 +28,22 @@ class ResourceLoaderWorker {
 			parallelstarted = true;
 			var taskcount = paralleltasks.length;
 			var tasksdone = 0;
+			var doneTasks = new Map();
+			var i = 0;
 			for (task in paralleltasks) {
+				var taskIndex = i;
 				task(() -> {
-					tasksdone++;
+					if (doneTasks.exists(taskIndex)) {
+						trace('Warning: Task already marked as done!');
+					} else {
+						doneTasks.set(taskIndex, true);
+						tasksdone++;
+					}
 					if (tasksdone == taskcount) {
 						this.run();
 					}
 				});
+				i++;
 			}
 			return;
 		}
@@ -54,6 +63,22 @@ class ResourceLoaderWorker {
 	}
 
 	public function loadFile(path:String) {
-		paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
+		// if its a jpg, png or gif, load it as bitmap else load as file
+		var fileExtension = path.split('.').pop();
+		if (fileExtension != null) {
+			fileExtension = fileExtension.toLowerCase();
+			if (fileExtension == "jpg" || fileExtension == "png" || fileExtension == "bmp") {
+				paralleltasks.push(fwd -> {
+					var file = ResourceLoader.load(path);
+					file.entry.loadBitmap(v -> {
+						fwd();
+					});
+				});
+			} else if (fileExtension != "") {
+				paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
+			}
+		} else {
+			paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
+		}
 	}
 }
