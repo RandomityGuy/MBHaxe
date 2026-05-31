@@ -13,6 +13,7 @@ import src.Debug;
 class SphereCollisionEntity extends CollisionEntity {
 	public var radius:Float;
 	public var marble:Marble;
+	public var ignore:Bool = false;
 
 	var _dbgEntity2:h3d.scene.Mesh;
 
@@ -69,12 +70,14 @@ class SphereCollisionEntity extends CollisionEntity {
 		}
 	}
 
-	public override function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>) {
+	public override function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<octree.IOctreeObject.RayIntersectionData>, bestT:Float) {
 		// TEMP cause bruh
+		return Math.POSITIVE_INFINITY;
 	}
 
-	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
-		var contacts = [];
+	public override function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
+		if (ignore)
+			return;
 		var thispos = transform.getPosition();
 		var position = collisionEntity.transform.getPosition();
 		var velocity = collisionEntity.velocity;
@@ -89,10 +92,10 @@ class SphereCollisionEntity extends CollisionEntity {
 			contact.collider = this;
 			contact.friction = 1;
 			contact.restitution = 1;
-			contact.velocity = this.velocity.clone();
+			contact.velocity.load(this.velocity);
 			contact.otherObject = this.go;
-			contact.point = position.add(normDist);
-			contact.normal = normDist.multiply(-1);
+			contact.point.load(position.add(normDist));
+			contact.normal.load(normDist.multiply(-1));
 			contact.force = 0;
 			contact.contactDistance = contact.point.distance(position);
 			contacts.push(contact);
@@ -109,6 +112,5 @@ class SphereCollisionEntity extends CollisionEntity {
 			// othercontact.penetration = this.radius - (thispos.sub(othercontact.point).dot(othercontact.normal));
 			// this.marble.queueCollision(othercontact);
 		}
-		return contacts;
 	}
 }

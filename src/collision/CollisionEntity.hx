@@ -23,8 +23,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public var octree:Octree;
 
-	public var bvh:BVHTree<CollisionSurface>;
-
+	// public var bvh:BVHTree<CollisionSurface>;
 	var grid:Grid;
 
 	public var surfaces:Array<CollisionSurface>;
@@ -67,12 +66,12 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	// Generates the bvh
 	public function finalize() {
 		this.generateBoundingBox();
-		#if hl
-		this.bvh = new BVHTree();
-		for (surface in this.surfaces) {
-			this.bvh.add(surface);
-		}
-		#end
+		// #if hl
+		// this.bvh = new BVHTree();
+		// for (surface in this.surfaces) {
+		// 	this.bvh.add(surface);
+		// }
+		// #end
 		var bbox = new Bounds();
 		for (surface in this.surfaces)
 			bbox.add(surface.boundingBox);
@@ -84,11 +83,14 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	}
 
 	public function dispose() {
-		for (s in this.surfaces)
-			s.dispose();
+		if (this.surfaces != null) {
+			for (s in this.surfaces)
+				s.dispose();
+		}
 		go = null;
 		surfaces = null;
-		bvh = null;
+		grid = null;
+		// bvh = null;
 		octree = null;
 	}
 
@@ -100,7 +102,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			var oldPos = this.transform.getPosition();
 			var newPos = transform.getPosition();
 			this.transform.setPosition(newPos);
-			this.invTransform = this.transform.getInverse();
+			this.invTransform.prependTranslation(oldPos.x - newPos.x, oldPos.y - newPos.y, oldPos.z - newPos.z);
 			if (this.boundingBox == null)
 				generateBoundingBox();
 			else {
@@ -110,6 +112,21 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 				this.boundingBox.yMax += newPos.y - oldPos.y;
 				this.boundingBox.zMin += newPos.z - oldPos.z;
 				this.boundingBox.zMax += newPos.z - oldPos.z;
+
+				if (Debug.drawBounds) {
+					if (_dbgEntity == null) {
+						_dbgEntity = cast this.boundingBox.makeDebugObj();
+						_dbgEntity.getMaterials()[0].castShadows = false;
+						_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+						MarbleGame.instance.scene.addChild(_dbgEntity);
+					} else {
+						_dbgEntity.remove();
+						_dbgEntity = cast this.boundingBox.makeDebugObj();
+						_dbgEntity.getMaterials()[0].castShadows = false;
+						_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
+						MarbleGame.instance.scene.addChild(_dbgEntity);
+					}
+				}
 			}
 		} else {
 			this.transform.load(transform);
@@ -130,18 +147,20 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		if (Debug.drawBounds) {
 			if (_dbgEntity == null) {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			} else {
 				_dbgEntity.remove();
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
+				_dbgEntity.getMaterials()[0].castShadows = false;
 				_dbgEntity.getMaterials()[0].mainPass.wireframe = true;
 				MarbleGame.instance.scene.addChild(_dbgEntity);
 			}
 		}
 	}
 
-	public function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<RayIntersectionData>) {
+	public function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<RayIntersectionData>, bestT:Float) {
 		var invMatrix = invTransform;
 		var invTPos = invMatrix.clone();
 		invTPos.transpose();
@@ -159,13 +178,17 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		// 	}
 		// 	return intersections; // iData;
 		// } else {
-		var intersections = grid.rayCast(rStart, rDir); // this.bvh.rayCast(rStart, rDir);
+		var intersections = grid.rayCast(rStart, rDir, bestT); // this.bvh.rayCast(rStart, rDir);
 		for (i in intersections) {
 			i.point.transform(transform);
 			i.normal.transform3x3(invTPos);
 			i.normal.normalize();
-			results.push(i);
+			if (i.t < bestT) {
+				bestT = i.t;
+				results.push(i);
+			}
 		}
+		return bestT;
 		// }
 	}
 
@@ -177,7 +200,9 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		this.priority = priority;
 	}
 
-	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState) {
+	static var surfaceSearchPool:Array<CollisionSurface> = [];
+
+	public function sphereIntersection(collisionEntity:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
 		var position = collisionEntity.transform.getPosition();
 		var radius = collisionEntity.radius + 0.001;
 
@@ -192,7 +217,9 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var invScale = invMatrix.getScale();
 		var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
 		sphereBounds.addSpherePos(localPos.x, localPos.y, localPos.z, Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 1.1);
-		var surfaces = grid.boundingSearch(sphereBounds); // bvh == null ? octree.boundingSearch(sphereBounds).map(x -> cast x) : bvh.boundingSearch(sphereBounds);
+		surfaceSearchPool.resize(0);
+		grid.boundingSearch(sphereBounds, surfaceSearchPool);
+		var surfaces = surfaceSearchPool;
 		var invtform = invMatrix.clone();
 		invtform.transpose();
 
@@ -203,8 +230,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			tform.load(Matrix.I());
 			invtform.load(Matrix.I());
 		}
-
-		var contacts = [];
 
 		for (obj in surfaces) {
 			var surface:CollisionSurface = cast obj;
@@ -278,7 +303,5 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			// if (surfaceBestContact != null)
 			// contacts.push(surfaceBestContact);
 		}
-
-		return contacts;
 	}
 }
