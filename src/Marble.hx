@@ -267,7 +267,9 @@ class Marble extends GameObject {
 
 	public var contacts:Array<CollisionInfo> = [];
 	public var bestContact:CollisionInfo;
-	public var contactEntities:Array<CollisionEntity> = [];
+
+	public static var contactScratch:Array<CollisionEntity> = [];
+	static var surfaceScratch:Array<CollisionSurface> = [];
 
 	var queuedContacts:Array<CollisionInfo> = [];
 	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
@@ -693,9 +695,7 @@ class Marble extends GameObject {
 	function findContacts(collisionWorld:CollisionWorld, timeState:TimeState) {
 		this.contacts = queuedContacts;
 		CollisionPool.clear();
-		var c = collisionWorld.sphereIntersection(this.collider, timeState);
-		this.contactEntities = c.foundEntities;
-		contacts = contacts.concat(c.contacts);
+		collisionWorld.sphereIntersection(this.collider, timeState, this.contacts);
 	}
 
 	public function queueCollision(collisionInfo:CollisionInfo) {
@@ -1255,7 +1255,10 @@ class Marble extends GameObject {
 		searchbox.addSpherePos(position.x, position.y, position.z, _radius);
 		searchbox.addSpherePos(position.x + velocity.x * deltaT, position.y + velocity.y * deltaT, position.z + velocity.z * deltaT, _radius);
 
-		var foundObjs = this.collisionWorld.boundingSearch(searchbox);
+		contactScratch.resize(0);
+		this.collisionWorld.boundingSearch(searchbox, contactScratch);
+
+		var foundObjs = contactScratch;
 		// foundObjs.push(this.collisionWorld.staticWorld);
 
 		var finalT = deltaT;
@@ -1325,11 +1328,13 @@ class Marble extends GameObject {
 				Math.max(Math.max(sphereRadius.x, sphereRadius.y), sphereRadius.z) * 2);
 
 			var currentFinalPos = position.add(relVel.multiply(finalT)); // localpos.add(relLocalVel.multiply(finalT));
-			var surfaces = @:privateAccess obj.grid != null ? @:privateAccess obj.grid.boundingSearch(boundThing) : (obj.bvh == null ? obj.octree.boundingSearch(boundThing)
-				.map(x -> cast x) : obj.bvh.boundingSearch(boundThing));
+			surfaceScratch.resize(0);
+			if (@:privateAccess obj.grid != null)
+				@:privateAccess obj.grid.boundingSearch(boundThing, surfaceScratch);
+			var surfaces = surfaceScratch;
 
 			for (surf in surfaces) {
-				var surface:CollisionSurface = cast surf;
+				var surface:CollisionSurface = surf;
 
 				currentFinalPos = position.add(relVel.multiply(finalT));
 
@@ -1851,7 +1856,7 @@ class Marble extends GameObject {
 				}
 			}
 		}
-		this.queuedContacts = [];
+		this.queuedContacts.resize(0);
 
 		newPos = this.collider.transform.getPosition();
 
@@ -2602,7 +2607,6 @@ class Marble extends GameObject {
 		this.megaMarbleUseTick = 0;
 		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
 		this.lastContactNormal = new Vector(0, 0, 1);
-		this.contactEntities = [];
 		this._firstTick = true;
 		this.finishAnimTime = 0;
 		this.physicsAccumulator = 0;
