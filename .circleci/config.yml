@@ -505,6 +505,8 @@ jobs:
               -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
               -DWITH_SQLITE=OFF \
               -DBUILD_TESTING=OFF \
+              -DUSE_MBEDTLS=OFF \
+              -DUSE_GNUTLS=OFF \
               -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
               -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
             cmake --build build --config Release -j$(nproc)
