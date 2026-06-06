@@ -464,7 +464,7 @@ jobs:
             apt-get update
             apt-get install -y \
               git curl ca-certificates openssh-client patchelf \
-              cmake pkg-config \
+              cmake ninja-build pkg-config \
               libpng-dev libturbojpeg0-dev libvorbis-dev libopenal-dev \
               libmbedtls-dev libuv1-dev libsqlite3-dev
       - add_ssh_keys:
@@ -497,20 +497,39 @@ jobs:
             git clone --depth=1 https://github.com/RandomityGuy/hashlink
             git clone --depth=1 https://github.com/RandomityGuy/hxDatachannel
             cd hashlink
-            ln -s $HOME/deps/hxDatachannel/cpp libs/datachannel
-            echo -e "\nadd_subdirectory(datachannel)" >> libs/CMakeLists.txt
             cmake -S. -Bbuild \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_FIND_FRAMEWORK=LAST \
               -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
               -DWITH_SQLITE=OFF \
               -DBUILD_TESTING=OFF \
-              -DUSE_MBEDTLS=OFF \
-              -DUSE_GNUTLS=OFF \
               -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
               -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
             cmake --build build --config Release -j$(nproc)
             cmake --install build
+            ldconfig
+
+      - run:
+          name: Build hxDatachannel
+          command: |
+            cd $HOME/deps/hxDatachannel/cpp
+            sed -i 's/target_link_libraries(hxdatachannel.hdll libhl datachannel-static)/target_link_libraries(hxdatachannel.hdll hl datachannel-static)/' CMakeLists.txt
+            sed -i 's/agent->selected_entry = ATOMIC_VAR_INIT(NULL);/atomic_init(\&agent->selected_entry, NULL);/' \
+              libdatachannel/deps/libjuice/src/agent.c
+            cmake -S . -B build -G Ninja \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+              -DCMAKE_C_STANDARD=11 \
+              -DCMAKE_C_EXTENSIONS=ON \
+              -DCMAKE_C_FLAGS="-std=gnu11 -fvisibility=hidden" \
+              -DCMAKE_CXX_FLAGS="-fvisibility=hidden" \
+              -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-Bsymbolic -Wl,--exclude-libs,ALL" \
+              -DUSE_MBEDTLS=OFF \
+              -DUSE_GNUTLS=OFF \
+              -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
+              -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" \
+              -DCMAKE_BUILD_TYPE=Release
+            cmake --build build
+            cp "$(find build -name 'datachannel.hdll' | head -n 1)" /usr/local/lib/
             ldconfig
 
       - run:
