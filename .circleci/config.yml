@@ -466,7 +466,7 @@ jobs:
               git curl ca-certificates openssh-client patchelf \
               cmake ninja-build pkg-config \
               libpng-dev libturbojpeg0-dev libvorbis-dev libopenal-dev \
-              libmbedtls-dev libuv1-dev libsqlite3-dev libsdl2-dev libssl-dev
+              libmbedtls-dev libuv1-dev libsqlite3-dev libssl-dev
       - add_ssh_keys:
           fingerprints:
             - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
