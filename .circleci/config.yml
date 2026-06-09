@@ -466,7 +466,7 @@ jobs:
               git curl ca-certificates openssh-client patchelf \
               cmake ninja-build pkg-config \
               libpng-dev libturbojpeg0-dev libvorbis-dev libopenal-dev \
-              libmbedtls-dev libuv1-dev libsqlite3-dev
+              libmbedtls-dev libuv1-dev libsqlite3-dev libsdl2-dev libssl-dev
       - add_ssh_keys:
           fingerprints:
             - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
@@ -497,18 +497,14 @@ jobs:
             git clone --depth=1 https://github.com/RandomityGuy/hashlink
             git clone --depth=1 https://github.com/RandomityGuy/hxDatachannel
             cd hashlink
-            cmake -S. -Bbuild \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_FIND_FRAMEWORK=LAST \
-              -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-              -DWITH_SQLITE=OFF \
-              -DBUILD_TESTING=OFF \
-              -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
-              -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
-            cmake --build build --config Release -j$(nproc)
-            cmake --install build
-            ldconfig
+            make clean || true
+            make -j$(nproc) hl
+            make -j$(nproc) LIBS="fmt sdl openal uv ui ssl" libs
+            copy_file "./libhl.so" "$HOME/MBHaxe/native/"
 
+            for hdll in fmt.hdll sdl.hdll openal.hdll uv.hdll ui.hdll ssl.hdll; do
+              copy_file "./$hdll" "$HOME/MBHaxe/native/"
+            done
       - run:
           name: Build hxDatachannel
           command: |
@@ -526,10 +522,10 @@ jobs:
               -DUSE_MBEDTLS=OFF \
               -DUSE_GNUTLS=OFF \
               -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
-              -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" \
+              -DHASHLINK_LIBRARY_DIR="$HOME/deps/hashlink" \
               -DCMAKE_BUILD_TYPE=Release
             cmake --build build
-            cp "$(find build -name 'datachannel.hdll' | head -n 1)" /usr/local/lib/
+            cp "$(find build -name 'datachannel.hdll' | head -n 1)" $HOME/MBHaxe/native/
             ldconfig
 
       - run:
@@ -557,10 +553,12 @@ jobs:
             cp $HOME/deps/hashlink/src/hlc_main.c .
             gcc -o marblegame -O2 \
               -I . \
-              -L /usr/local/lib \
+              -I "$HOME/deps/hashlink/src" \
+              -L "/usr/local/lib" \
+              -L $HOME/MBHaxe/native \
               marblegame.c \
-              /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} \
-              -lSDL2 -lhl -lm -luv \
+              $HOME/MBHaxe/native/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} \
+              -lSDL2 -lhl -lm -luv -lmbedtls -lmbedx509 -lmbedcrypto -lm -ldl -pthread \
               -Wl,-rpath,'$ORIGIN'
             strip marblegame
 
