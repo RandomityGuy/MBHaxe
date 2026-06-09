@@ -625,14 +625,12 @@ jobs:
             # Game data
             cp -a $HOME/MBHaxe/data "$DIST/"
             
-            cat > "$DIST/run-mbu.sh" <<'RUNEOF'
-            #!/usr/bin/env bash
-            set -e
-            DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-            export LD_LIBRARY_PATH="$DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-            cd "$DIR"
-            exec "$DIR/marblegame" "$@"
-            RUNEOF
+            echo '#!/usr/bin/env bash' > "$DIST/run-mbu.sh"
+            echo 'set -e' >> "$DIST/run-mbu.sh"
+            echo 'DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"' >> "$DIST/run-mbu.sh"
+            echo 'export LD_LIBRARY_PATH="$DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"' >> "$DIST/run-mbu.sh"
+            echo 'cd "$DIR"' >> "$DIST/run-mbu.sh"
+            echo 'exec "$DIR/marblegame" "$@"' >> "$DIST/run-mbu.sh"
             
             chmod +x "$DIST/run-mbu.sh"
 
