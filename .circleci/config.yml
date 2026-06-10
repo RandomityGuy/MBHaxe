@@ -463,7 +463,7 @@ jobs:
           command: |
             export DEBIAN_FRONTEND=noninteractive
             apt-get update
-            apt remove -y libsdl2-compat-shim
+            apt remove -y libsdl2-compat-shim libsdl2-compat-shim:i386
             apt-get install -y --no-install-recommends \
               git curl ca-certificates openssh-client patchelf file \
               cmake ninja-build pkg-config build-essential \
