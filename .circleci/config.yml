@@ -463,12 +463,13 @@ jobs:
           command: |
             export DEBIAN_FRONTEND=noninteractive
             apt-get update
+            apt remove -y libsdl2-compat-shim
             apt-get install -y --no-install-recommends \
               git curl ca-certificates openssh-client patchelf file \
               cmake ninja-build pkg-config build-essential \
               libpng-dev libturbojpeg0-dev libvorbis-dev libopenal-dev \
               libmbedtls-dev libuv1-dev libsqlite3-dev \
-              zlib1g-dev libssl-dev
+              zlib1g-dev libssl-dev libsdl2-dev
       - add_ssh_keys:
           fingerprints:
             - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
