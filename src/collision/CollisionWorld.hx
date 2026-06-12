@@ -26,6 +26,8 @@ class CollisionWorld {
 
 	var dynamicEntitySet:Map<CollisionEntity, Bool> = [];
 
+	var built = false;
+
 	public function new() {
 		this.grid = new GridBroadphase();
 		this.dynamicGrid = new GridBroadphase();
@@ -42,6 +44,10 @@ class CollisionWorld {
 	var intersectionList:Array<CollisionEntity> = [];
 
 	public function sphereIntersection(spherecollision:SphereCollisionEntity, timeState:TimeState, contacts:Array<CollisionInfo>) {
+		if (!built) {
+			this.build();
+			built = true;
+		}
 		var position = spherecollision.transform.getPosition();
 		var radius = spherecollision.radius;
 
