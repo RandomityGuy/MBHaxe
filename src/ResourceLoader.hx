@@ -151,7 +151,17 @@ class ResourceLoader {
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
 		for (file in toloadfiles) {
-			worker.addTaskParallel((fwd) -> file.load(fwd));
+			worker.addTaskParallel((fwd) -> {
+				// if its a jpg, png or gif, load it as bitmap else load as file
+				var fileExtension = file.extension.toLowerCase();
+				if (fileExtension == "jpg" || fileExtension == "png" || fileExtension == "bmp") {
+					file.loadBitmap(v -> {
+						fwd();
+					});
+				} else {
+					file.load(fwd);
+				}
+			});
 		}
 		worker.run();
 	}

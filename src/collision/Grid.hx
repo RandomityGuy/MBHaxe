@@ -3,6 +3,7 @@ package collision;
 import haxe.Exception;
 import h3d.Vector;
 import h3d.col.Bounds;
+import src.Util;
 
 class Grid {
 	public var bounds:Bounds; // The bounds of the grid
@@ -74,7 +75,7 @@ class Grid {
 	}
 
 	// searchbox should be in LOCAL coordinates
-	public function boundingSearch(searchbox:Bounds) {
+	public function boundingSearch(searchbox:Bounds, foundSurfaces:Array<CollisionSurface>) {
 		var queryMinX = Math.max(searchbox.xMin, bounds.xMin);
 		var queryMinY = Math.max(searchbox.yMin, bounds.yMin);
 		var queryMaxX = Math.min(searchbox.xMax, bounds.xMax);
@@ -93,8 +94,6 @@ class Grid {
 		if (yEnd > CELL_SIZE)
 			yEnd = CELL_SIZE;
 
-		var foundSurfaces = [];
-
 		searchKey++;
 
 		// Insert the surface references from [xStart, yStart, zStart] to [xEnd, yEnd, zEnd] into the map
@@ -112,8 +111,6 @@ class Grid {
 				}
 			}
 		}
-
-		return foundSurfaces;
 	}
 
 	function elegantPair(x:Int, y:Int) {
@@ -124,31 +121,40 @@ class Grid {
 		return elegantPair(elegantPair(x, y), z);
 	}
 
-	public function rayCast(origin:Vector, direction:Vector) {
+	public function rayCast(origin:Vector, direction:Vector, bestT:Float) {
 		var cell = origin.sub(this.bounds.getMin().toVector());
 		cell.x /= this.cellSize.x;
 		cell.y /= this.cellSize.y;
+		var destCell = origin.add(direction.multiply(bestT)).sub(this.bounds.getMin().toVector());
+		destCell.x /= this.cellSize.x;
+		destCell.y /= this.cellSize.y;
 		var stepX, outX, X = Math.floor(cell.x);
 		var stepY, outY, Y = Math.floor(cell.y);
+		var destX = Util.clamp(Math.max(Math.floor(destCell.x), 0), 0, CELL_DIV.x);
+		var destY = Util.clamp(Math.max(Math.floor(destCell.y), 0), 0, CELL_DIV.y);
 		if ((X < 0) || (X >= CELL_DIV.x) || (Y < 0) || (Y >= CELL_DIV.y))
 			return [];
 		var cb = new Vector();
 		if (direction.x > 0) {
 			stepX = 1;
-			outX = CELL_DIV.x;
+			outX = destX;
+			if (outX == X)
+				outX = Math.min(CELL_DIV.x, outX + 1);
 			cb.x = this.bounds.xMin + (X + 1) * this.cellSize.x;
 		} else {
 			stepX = -1;
-			outX = -1;
+			outX = destX - 1;
 			cb.x = this.bounds.xMin + X * this.cellSize.x;
 		}
 		if (direction.y > 0.0) {
 			stepY = 1;
-			outY = CELL_DIV.y;
+			outY = destY;
+			if (outY == Y)
+				outY = Math.min(CELL_DIV.y, outY + 1);
 			cb.y = this.bounds.yMin + (Y + 1) * this.cellSize.y;
 		} else {
 			stepY = -1;
-			outY = -1;
+			outY = destY - 1;
 			cb.y = this.bounds.yMin + Y * this.cellSize.y;
 		}
 		var tmax = new Vector();
@@ -175,7 +181,7 @@ class Grid {
 				if (surf.key == searchKey)
 					continue;
 				surf.key = searchKey;
-				surf.rayCast(origin, direction, results);
+				bestT = surf.rayCast(origin, direction, results, bestT);
 			}
 			if (tmax.x < tmax.y) {
 				X = X + stepX;

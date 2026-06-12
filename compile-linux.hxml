@@ -1,7 +1,10 @@
 -cp src
 -lib heaps
 -lib hlsdl
+-lib colyseus-websocket
+-lib datachannel
 -D highDPI
 -D flow_border
+-D analyzer-optimize
 -hl native/marblegame.c
 --main Main

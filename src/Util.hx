@@ -22,6 +22,14 @@ class Util {
 		return r2;
 	}
 
+	public static inline function imin(a:Int, b:Int) {
+		return a < b ? a : b;
+	}
+
+	public static inline function imax(a:Int, b:Int) {
+		return a > b ? a : b;
+	}
+
 	public static inline function clamp(value:Float, min:Float, max:Float) {
 		if (value < min)
 			return min;

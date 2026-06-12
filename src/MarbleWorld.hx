@@ -517,6 +517,9 @@ class MarbleWorld extends Scheduler {
 	public function start() {
 		Console.log("LEVEL START");
 		restart(this.marble, true);
+
+		this.collisionWorld.build();
+
 		for (interior in this.interiors)
 			interior.onLevelStart();
 		for (shape in this.dtsObjects)
@@ -1996,7 +1999,9 @@ class MarbleWorld extends Scheduler {
 		// spherebounds.addSpherePos(gjkCapsule.p2.x, gjkCapsule.p2.y, gjkCapsule.p2.z, gjkCapsule.radius);
 		// var contacts = this.collisionWorld.radiusSearch(marble.getAbsPos().getPosition(), marble._radius);
 		// var contacts = marble.contactEntities;
-		var contacts = this.collisionWorld.boundingSearch(box);
+		Marble.contactScratch.resize(0);
+		this.collisionWorld.boundingSearch(box, Marble.contactScratch);
+		var contacts = Marble.contactScratch;
 		var inside = [];
 
 		for (contact in contacts) {
@@ -2122,7 +2127,9 @@ class MarbleWorld extends Scheduler {
 				var checkSphereRadius = checkBounds.getMax().sub(checkBoundsCenter).length();
 				var checkSphere = new Bounds();
 				checkSphere.addSpherePos(checkBoundsCenter.x, checkBoundsCenter.y, checkBoundsCenter.z, checkSphereRadius);
-				var endpadBB = this.collisionWorld.boundingSearch(checkSphere, false);
+				Marble.contactScratch.resize(0);
+				this.collisionWorld.boundingSearch(checkSphere, Marble.contactScratch, false);
+				var endpadBB = Marble.contactScratch;
 				var found = false;
 				for (collider in endpadBB) {
 					if (collider.go == this.endPad) {
