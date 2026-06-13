@@ -132,7 +132,8 @@ class MovementInput {
 	}
 
 	public function forceRelease() {
-		releaseFn();
+		if (releaseFn != null)
+			releaseFn();
 		this.area.graphics.alpha = 0;
 		this.joystick.graphics.alpha = 0;
 

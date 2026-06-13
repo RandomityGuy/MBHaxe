@@ -915,7 +915,7 @@ class Net {
 		#if MACOS_BUNDLE
 		return NetPlatform.MacOS;
 		#else
-		#if android
+		#if (android || ios)
 		return NetPlatform.Android;
 		#else
 		return NetPlatform.PC;

@@ -73,7 +73,7 @@ class GuiTextInput extends GuiControl {
 			// js.Browser.document.documentElement.requestFullscreen();
 		}
 		#end
-		#if android
+		#if (android || ios)
 		text.focus();
 		#end
 	}
