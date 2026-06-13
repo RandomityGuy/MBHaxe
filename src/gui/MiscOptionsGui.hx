@@ -85,6 +85,10 @@ class MiscOptionsGui extends GuiImage {
 
 		// #if hl
 		var flOpt = optionCollection.addOption(1, "Fast Loading", ["Disabled", "Enabled"], (idx) -> {
+			if (idx == 1) {
+				// Show a warning essage that it can cause lag
+				MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Warning: Enabling Fast Loading may cause lag on some devices. If you experience lag, please disable this option."));
+			}
 			Settings.optionsSettings.fastLoad = (idx == 1);
 			return true;
 		}, 0.5, 118);
