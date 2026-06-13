@@ -1,0 +1,4 @@
+Config/Local.xcconfig
+MBHaxe-iOS.xcodeproj
+DerivedData/
+build/
