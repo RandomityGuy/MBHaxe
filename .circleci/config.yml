@@ -286,7 +286,7 @@ jobs:
             # --- package unsigned .ipa ---
             rm -rf Payload
             mkdir Payload
-            cp -R build/out/MBHaxe.app Payload/
+            cp -R build/out/Marble\ Blast\ Gold.app Payload/
             zip -qr ~/MBHaxe-Gold-iOS.ipa Payload
 
       - store_artifacts:
