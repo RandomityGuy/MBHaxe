@@ -266,7 +266,17 @@ class Settings {
 	@:hlNative public static function call_import_cb():Void {}
 	#end
 
-	#if (!android)
+	#if ios
+	@:hlNative public static function open_web_url(url:String):Void {}
+
+	@:hlNative public static function export_prefs():Void {}
+
+	@:hlNative public static function start_import_prefs(prefsCb:(b:hl.Bytes) -> Void):Void {}
+
+	@:hlNative public static function call_import_cb():Void {}
+	#end
+
+	#if (!android && !ios)
 	public static function open_web_url(url:String):Void {}
 	#end
 
