@@ -1,0 +1,21 @@
+// Copy this file to Local.xcconfig and point these paths at your iOS builds.
+// Local.xcconfig is intentionally not committed by default.
+
+PRODUCT_BUNDLE_IDENTIFIER = com.example.mbhaxe
+IPHONEOS_DEPLOYMENT_TARGET = 14.0
+
+HASHLINK_IOS_DIR = /Users/user/Source/backups/hashlink-ios
+SDL2_IOS_DIR = /Users/user/Library/Developer/Xcode/DerivedData/SDL-gxvqeyazaivwokhdbgiwheaxufdj/Build/Products/Debug-iphoneos
+DATACHANNEL_IOS_DIR = $(PROJECT_DIR)/Vendor/datachannel-iOS
+HASHLINK_EXTRA_IOS_DIR = $(PROJECT_DIR)/Vendor/hashlink-extra
+
+HEADER_SEARCH_PATHS = $(PROJECT_DIR)/../native/ios $(HASHLINK_IOS_DIR)/src $(HASHLINK_IOS_DIR)/include $(SDL2_IOS_DIR)/SDL2.framework/Headers $(DATACHANNEL_IOS_DIR)/include $(HASHLINK_EXTRA_IOS_DIR)/include
+LIBRARY_SEARCH_PATHS = $(HASHLINK_IOS_DIR)/build-ios/bin $(DATACHANNEL_IOS_DIR)/lib $(HASHLINK_EXTRA_IOS_DIR)/lib
+FRAMEWORK_SEARCH_PATHS = $(SDL2_IOS_DIR)
+
+// HashLink's iOS build emits *.hdll.a archives for its native libs.
+OTHER_LDFLAGS = $(HASHLINK_IOS_DIR)/build-ios/bin/libhl.a $(HASHLINK_IOS_DIR)/build-ios/bin/ui.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/sdl.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/openal.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/fmt.hdll.a $(HASHLINK_IOS_DIR)/build-ios/libs/fmt/libpng-prefix/lib/libpng16d.a $(HASHLINK_IOS_DIR)/build-ios/libs/fmt/turbojpeg-project-prefix/lib/libturbojpeg.a $(HASHLINK_IOS_DIR)/build-ios/libs/fmt/libvorbis-prefix/lib/libvorbisfile.a $(HASHLINK_IOS_DIR)/build-ios/libs/fmt/libvorbis-prefix/lib/libvorbis.a $(HASHLINK_IOS_DIR)/build-ios/libs/fmt/libogg-prefix/lib/libogg.a $(DATACHANNEL_IOS_DIR)/lib/libhxdatachannel.a $(DATACHANNEL_IOS_DIR)/lib/libdatachannel.a $(HASHLINK_EXTRA_IOS_DIR)/lib/libhlssl.a $(DATACHANNEL_IOS_DIR)/lib/libMbedTLS.a $(DATACHANNEL_IOS_DIR)/lib/libusrsctp.a $(DATACHANNEL_IOS_DIR)/lib/libjuice.a $(HASHLINK_EXTRA_IOS_DIR)/lib/libhluv.a $(HASHLINK_EXTRA_IOS_DIR)/lib/libuv.a -framework SDL2 -framework Security -framework CoreFoundation -lz -lm -lc++ -ObjC
+
+ENABLE_DEBUG_DYLIB = NO
+ENABLE_XOJIT_PREVIEWS = NO
+ENABLE_PREVIEWS = NO

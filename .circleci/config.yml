@@ -2,124 +2,308 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 orbs:
-    android: circleci/android@2.3.0 # The Windows orb give you everything you need to start using the Windows executor.
+    macos: circleci/macos@2.5.1 # The Windows orb give you everything you need to start using the Windows executor.
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
-    executor: 
-        name: android/android-machine
-        tag: 2021.10.1
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
+  # ---------------------------------------------------------------------------
+  # iOS (native device, arm64) build.
+  #
+  # Follows ios_build_scripts.txt but adapted for a DEVICE build instead of the
+  # simulator: PLATFORM=OS64 for every dependency, `-platform_version ios` for
+  # the datachannel merge, and `-sdk iphoneos` for xcodebuild. The resulting
+  # .app is built UNSIGNED and packaged into an unsigned .ipa (re-sign it with
+  # your own cert / a sideloading tool before installing on a device).
+  #
+  # NOTE: RandomityGuy/hashlink and RandomityGuy/hxDatachannel must already
+  # contain the iOS support developed locally (static .hdll.a output, the iOS
+  # SSL cert branch, the OpenAL/SDL static fixes, and the mbedTLS threading
+  # config). This job clones those repos as-is.
+  # ---------------------------------------------------------------------------
+  build-ios:
+    macos:
+      xcode: 16.4.0
+    resource_class: m4pro.medium
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      NPROC: 8
+      COMMIT_TAG: pipeline.git.tag
     steps:
-        - add_ssh_keys:
-            fingerprints:
-                - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
-  
-        - checkout:
-            path: ~/MBHaxe
-        - run:
-            name: Decode Android key store
-            command: echo $BASE64_KEYSTORE | base64 -d | tee keystore ~/MBHaxe/keystore > /dev/null
-        - run:
-            name: Install dependencies
-            command: |
-              set -eux
-              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-linux64.tar.gz"
-              echo "Downloading [$download_url]..."
-              mkdir /tmp/haxe
-              curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
-              tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
-              sudo apt-get update
-              sudo apt install neko
-              export PATH=/tmp/haxe/:"$PATH"
-              export HAXE_STD_PATH=/tmp/haxe/std
-              haxelib setup ~/haxelib
-              haxelib list
-        - run:
-            name: Install Android NDK
-            command: |-
-              #!/bin/bash
-              echo y | sdkmanager "ndk;18.1.5063045"
-              android_ndk_home=""
-                if [[ -d "${HOME}/android-sdk/ndk/18.1.5063045" ]]; then
-                  android_ndk_home="$HOME/android-sdk/ndk/18.1.5063045"
-                elif [[ -d "/opt/android/sdk/ndk/18.1.5063045" ]]; then
-                  android_ndk_home="/opt/android/sdk/ndk/18.1.5063045"
-                else
-                  echo "Android NDK did not install successfully"
-                  exit 1
-                fi
-              echo "export ANDROID_NDK_HOME=$android_ndk_home" >> "$BASH_ENV"
-              echo "Android NDK was installed at \"$android_ndk_home\"."
-              echo y | sdkmanager "platforms;android-31"
-          
-        - run:
-            name: Install haxe dependencies
-            command: |
-              export PATH=/tmp/haxe/:"$PATH"
-              export HAXE_STD_PATH=/tmp/haxe/std
-              mkdir ~/deps
-              cd ~/deps
-              git clone https://github.com/RandomityGuy/hashlink
-              git clone https://github.com/RandomityGuy/hxDatachannel
-              haxelib git heaps https://github.com/RandomityGuy/heaps
-              haxelib dev hlopenal ~/deps/hashlink/libs/openal
-              haxelib dev hlsdl ~/deps/hashlink/libs/sdl
-              haxelib dev hashlink ~/deps/hashlink/other/haxelib
-              haxelib git zyheaps https://github.com/rainyt/zyheaps
-              haxelib install colyseus-websocket
-              haxelib dev datachannel ~/deps/hxDatachannel
-        - run:
-            name: Prepare directories
-            command: |
-              cd ~/deps
-              git clone https://github.com/RandomityGuy/MBHaxeAndroidLibs
-              cd ~/MBHaxe/Export/android
-              cp -R ~/deps/MBHaxeAndroidLibs/* app/
-              cd ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft
-              mv CMakeLists.txt CMakeLists-copy.txt
-              mv 'CMakeLists 2.txt' CMakeLists.txt
-              cmake .
-              cmake --build .
-              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bsincgen ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
-              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bin2h ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
-        - run:
-            name: Compile MBHaxe
-            command: |
-              export PATH=/tmp/haxe/:"$PATH"
-              cd ~/MBHaxe
-              sed -i '5i -lib datachannel' Export/android/app/src/main/build.hxml
-              sed -i '5i -lib colyseus-websocket' Export/android/app/src/main/build.hxml
-              haxe Export/android/app/src/main/build.hxml
-              mkdir -p Export/android/app/src/main/assets/data
-              cp -rf data/* Export/android/app/src/main/assets/data
-              cd Export/android
-              chmod +x gradlew
-              ./gradlew
-              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists-copy.txt ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists.txt
-              ./gradlew assembleRelease
+      - add_ssh_keys:
+          fingerprints:
+            - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
+      - checkout:
+          path: ~/MBHaxe
 
-        - run:
-            name: Sign APK
-            command: |
-              cd ~/MBHaxe
-              sudo apt install apksigner
-              echo $RELEASE_STORE_PASSWORD | apksigner sign --ks ~/MBHaxe/keystore Export/android/app/build/outputs/apk/release/app-release-unsigned.apk
+      - macos/install-rosetta
 
-        - run:
-            name: Upload to Artifact Storage
-            command: |
-              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/Export/android/app/build/outputs/apk/release/app-release-unsigned.apk $REMOTEDIR/MBHaxe-Platinum.apk
+      - run:
+          name: Install brew dependencies
+          command: |
+            brew install cmake pkg-config nasm xcodegen
+
+      - run:
+          name: Install Haxe + Neko
+          command: |
+            set -eux
+            mkdir -p ~/haxe ~/neko ~/deps
+            curl -fsSL --retry 3 --retry-delay 5 \
+              https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-osx.tar.gz \
+              | tar xz -C ~/haxe --strip-components=1
+            curl -fsSL --retry 3 --retry-delay 5 \
+              https://github.com/HaxeFoundation/neko/releases/download/v2-4-0-rc/neko-2.4.0-rc-osx-universal.tar.gz \
+              | tar xz -C ~/neko --strip-components=1
+            chmod +x ~/neko/neko
+            # Persist env + common paths for every later step.
+            {
+              echo 'export PATH=$HOME/haxe:$HOME/neko:$PATH'
+              echo 'export HAXE_STD_PATH=$HOME/haxe/std'
+              echo 'export DYLD_LIBRARY_PATH=$HOME/neko'
+              echo 'export DEPS=$HOME/deps'
+              echo 'export TOOLCHAIN=$HOME/deps/ios-cmake/ios.toolchain.cmake'
+              echo 'export IOS_DEPLOY=14.0'
+            } >> "$BASH_ENV"
+            source "$BASH_ENV"
+            haxelib setup ~/haxelib
+
+      - run:
+          name: Fetch ios-cmake toolchain
+          command: git clone --depth=1 https://github.com/leetal/ios-cmake "$DEPS/ios-cmake"
+
+      - run:
+          name: Build SDL2 (iOS device)
+          command: |
+            cd "$DEPS"
+            curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.26.1/SDL2-2.26.1.tar.gz | tar xz
+            cd SDL2-2.26.1
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPLATFORM=OS64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=$IOS_DEPLOY \
+              -DSDL_STATIC=ON -DSDL_SHARED=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build-ios --config Release -j$NPROC
+            # Flatten headers + generated SDL_config.h into build-ios/include.
+            mkdir -p build-ios/include
+            cp -R include/* build-ios/include/
+            cp build-ios/include-config-*/SDL_config.h build-ios/include/ 2>/dev/null || \
+              cp "$(find build-ios -name SDL_config.h | head -1)" build-ios/include/
+
+      - run:
+          name: Build libuv (iOS device)
+          command: |
+            cd "$DEPS"
+            curl -fsSL https://github.com/libuv/libuv/archive/refs/tags/v1.44.2.tar.gz | tar xz
+            cd libuv-1.44.2
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPLATFORM=OS64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=$IOS_DEPLOY \
+              -DLIBUV_BUILD_SHARED=OFF -DBUILD_TESTING=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build-ios --config Release -j$NPROC
+
+      - run:
+          name: Build OpenAL Soft (iOS device)
+          command: |
+            cd "$DEPS"
+            curl -kL https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2 | tar xz
+            cd openal-soft-1.22.2
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPLATFORM=OS64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=$IOS_DEPLOY \
+              -DLIBTYPE=STATIC \
+              -DALSOFT_BACKEND_COREAUDIO=ON -DALSOFT_REQUIRE_COREAUDIO=ON \
+              -DALSOFT_BACKEND_WAVE=OFF -DALSOFT_UTILS=OFF -DALSOFT_EXAMPLES=OFF -DALSOFT_TESTS=OFF \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build-ios --config Release -j$NPROC
+
+      - run:
+          name: Build libpng (iOS device)
+          command: |
+            cd "$DEPS"
+            curl -L https://download.sourceforge.net/libpng/libpng-1.6.50.tar.xz | tar xz
+            cd libpng-1.6.50
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPLATFORM=OS64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=$IOS_DEPLOY \
+              -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_TESTS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build-ios --config Release -j$NPROC
+            # png.h (source root) needs the generated pnglibconf.h beside it.
+            cp build-ios/pnglibconf.h .
+            # hashlink expects libpng.a
+            ( cd build-ios; [ -f libpng.a ] || ln -sf "$(ls libpng16*.a libpng.a 2>/dev/null | head -1)" libpng.a )
+
+      - run:
+          name: Build libjpeg-turbo (iOS device)
+          command: |
+            cd "$DEPS"
+            curl -L https://downloads.sourceforge.net/project/libjpeg-turbo/2.1.4/libjpeg-turbo-2.1.4.tar.gz | tar xz
+            cd libjpeg-turbo-2.1.4
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPLATFORM=OS64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=$IOS_DEPLOY \
+              -DENABLE_SHARED=OFF -DENABLE_STATIC=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build-ios --config Release -j$NPROC
+
+      - run:
+          name: Build libogg (iOS device)
+          command: |
+            cd "$DEPS"
+            curl -L https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz | tar xz
+            cd libogg-1.3.5
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPLATFORM=OS64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=$IOS_DEPLOY \
+              -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build-ios --config Release -j$NPROC
+            # ogg/ogg.h (source include) needs the generated config_types.h.
+            cp build-ios/include/ogg/config_types.h include/ogg/
+
+      - run:
+          name: Build libvorbis (iOS device)
+          command: |
+            cd "$DEPS"
+            curl -L https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz | tar xz
+            cd libvorbis-1.3.7
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN -DPLATFORM=OS64 \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=$IOS_DEPLOY -DBUILD_SHARED_LIBS=OFF \
+              -DOGG_INCLUDE_DIR=$DEPS/libogg-1.3.5/include \
+              -DOGG_LIBRARY=$DEPS/libogg-1.3.5/build-ios/libogg.a \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build-ios --config Release -j$NPROC
+
+      - run:
+          name: Build HashLink (iOS device, static)
+          command: |
+            cd "$DEPS"
+            git clone --depth=1 https://github.com/RandomityGuy/hashlink
+            git clone --depth=1 https://github.com/RandomityGuy/hxDatachannel
+            cd hashlink
+            # Drop datachannel into libs and register the subdirectory.
+            mkdir -p libs/datachannel
+            cp -R "$DEPS/hxDatachannel/cpp/." libs/datachannel/
+            printf '\nadd_subdirectory(datachannel)\n' >> libs/CMakeLists.txt
+            cmake -B build-ios \
+              -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN \
+              -DCMAKE_OSX_ARCHITECTURES=arm64 \
+              -DHL_STATIC=ON \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF \
+              -DPLATFORM=OS64 \
+              -DCMAKE_SYSTEM_NAME=iOS \
+              -DSDL2_INCLUDE_DIR=$DEPS/SDL2-2.26.1/build-ios/include \
+              -DSDL2_LIBRARY=$DEPS/SDL2-2.26.1/build-ios/libSDL2.a \
+              -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+              -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+              -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+              -DOPENAL_INCLUDE_DIR=$DEPS/openal-soft-1.22.2/include/AL \
+              -DOPENAL_LIBRARY=$DEPS/openal-soft-1.22.2/build-ios/libopenal.a \
+              -DUV_INCLUDE_DIR=$DEPS/libuv-1.44.2/include \
+              -DUV_LIBRARY=$DEPS/libuv-1.44.2/build-ios/libuv_a.a \
+              -DPNG_PNG_INCLUDE_DIR=$DEPS/libpng-1.6.50 \
+              -DPNG_LIBRARY=$DEPS/libpng-1.6.50/build-ios/libpng.a \
+              -DVORBIS_INCLUDE_DIR=$DEPS/libvorbis-1.3.7/include \
+              -DOGG_INCLUDE_DIR=$DEPS/libogg-1.3.5/include \
+              -DOGG_LIBRARY=$DEPS/libogg-1.3.5/build-ios/libogg.a \
+              -DVORBIS_LIBRARY=$DEPS/libvorbis-1.3.7/build-ios/lib/libvorbis.a \
+              -DVORBISFILE_LIBRARY=$DEPS/libvorbis-1.3.7/build-ios/lib/libvorbisfile.a \
+              -DVORBISENC_LIBRARY=$DEPS/libvorbis-1.3.7/build-ios/lib/libvorbisenc.a \
+              -DOGGVORBIS_FOUND=TRUE \
+              -DOGGVORBIS_LIBRARIES="$DEPS/libvorbis-1.3.7/build-ios/lib/libvorbisfile.a;$DEPS/libvorbis-1.3.7/build-ios/lib/libvorbis.a;$DEPS/libogg-1.3.5/build-ios/libogg.a" \
+              -DTurboJPEG_INCLUDE_DIRS=$DEPS/libjpeg-turbo-2.1.4 \
+              -DTurboJPEG_LIBRARIES=$DEPS/libjpeg-turbo-2.1.4/build-ios/libturbojpeg.a \
+              -DTURBOJPEG_WORKS=TRUE
+            cmake --build build-ios --config Release -j$NPROC
+
+      - run:
+          name: Install Haxe dependencies
+          command: |
+            haxelib dev hashlink "$DEPS/hashlink/other/haxelib"
+            haxelib git heaps https://github.com/RandomityGuy/heaps
+            haxelib dev hlopenal "$DEPS/hashlink/libs/openal"
+            haxelib dev hlsdl "$DEPS/hashlink/libs/sdl"
+            haxelib dev datachannel "$DEPS/hxDatachannel"
+            haxelib install colyseus-websocket --always
+
+      - run:
+          name: Compile MBHaxe and build unsigned IPA
+          command: |
+            set -eux
+            cd ~/MBHaxe
+            haxe compile-ios.hxml
+
+            # --- merge datachannel + its mbedTLS 3.0.0 into one object so it
+            #     cannot collide with ssl.hdll's mbedTLS 2.7.0 (device variant
+            #     of ios/scripts/merge-datachannel.sh) ---
+            BIN="$DEPS/hashlink/build-ios/bin"
+            SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+            ( cd "$BIN" && ld -r -arch arm64 \
+                -platform_version ios "$IOS_DEPLOY" "$SDK_VERSION" -all_load \
+                -o datachannel_merged.o \
+                datachannel.hdll.a libdatachannel-static.a libMbedTLS.a libjuice-static.a libusrsctp.a )
+
+            # --- CA bundle used by the iOS SSL cert loader ---
+            curl -fsSL https://curl.se/ca/cacert.pem -o ios/MBHaxeIOS/cacert.pem
+
+            # --- generate Local.xcconfig with CI paths (single-quoted echos
+            #     keep the $(VAR) xcconfig references literal) ---
+            LDFLAGS='OTHER_LDFLAGS = $(HASHLINK_IOS_DIR)/build-ios/bin/ui.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/sdl.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/openal.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/fmt.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/uv.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/ssl.hdll.a $(HASHLINK_IOS_DIR)/build-ios/bin/libhl.a $(SDL2_IOS_DIR)/libSDL2.a $(OPENAL_IOS_DIR)/libopenal.a $(LIBPNG_IOS_DIR)/libpng.a $(TURBOJPEG_IOS_DIR)/libturbojpeg.a $(LIBOGG_IOS_DIR)/libogg.a $(LIBVORBIS_IOS_DIR)/libvorbisfile.a $(LIBVORBIS_IOS_DIR)/libvorbis.a $(LIBVORBIS_IOS_DIR)/libvorbisenc.a $(LIBUV_IOS_DIR)/libuv_a.a $(HASHLINK_IOS_DIR)/build-ios/bin/datachannel_merged.o -framework AudioToolbox -framework AVFoundation -framework CoreAudio -framework CoreBluetooth -framework CoreFoundation -framework CoreGraphics -framework CoreHaptics -framework CoreMotion -framework Foundation -framework GameController -framework Metal -framework QuartzCore -framework Security -framework UIKit -framework UniformTypeIdentifiers -lc++ -lz -liconv -ObjC'
+            {
+              echo 'PRODUCT_BUNDLE_IDENTIFIER = com.randomityguy.mbuhaxe'
+              echo 'IPHONEOS_DEPLOYMENT_TARGET = 14.0'
+              echo "HASHLINK_IOS_DIR = $DEPS/hashlink"
+              echo "SDL2_IOS_DIR = $DEPS/SDL2-2.26.1/build-ios"
+              echo "OPENAL_SRC_DIR = $DEPS/openal-soft-1.22.2"
+              echo 'OPENAL_IOS_DIR = $(OPENAL_SRC_DIR)/build-ios'
+              echo "LIBPNG_IOS_DIR = $DEPS/libpng-1.6.50/build-ios"
+              echo "TURBOJPEG_IOS_DIR = $DEPS/libjpeg-turbo-2.1.4/build-ios"
+              echo "LIBOGG_IOS_DIR = $DEPS/libogg-1.3.5/build-ios"
+              echo "LIBVORBIS_IOS_DIR = $DEPS/libvorbis-1.3.7/build-ios/lib"
+              echo "LIBUV_IOS_DIR = $DEPS/libuv-1.44.2/build-ios"
+              echo 'HEADER_SEARCH_PATHS = $(PROJECT_DIR)/native $(HASHLINK_IOS_DIR)/src $(HASHLINK_IOS_DIR)/include $(SDL2_IOS_DIR)/include $(OPENAL_SRC_DIR)/include/AL'
+              echo 'LIBRARY_SEARCH_PATHS = $(HASHLINK_IOS_DIR)/build-ios/bin'
+              echo "$LDFLAGS"
+              echo 'ENABLE_DEBUG_DYLIB = NO'
+              echo 'ENABLE_XOJIT_PREVIEWS = NO'
+              echo 'ENABLE_PREVIEWS = NO'
+            } > ios/Config/Local.xcconfig
+
+            # --- hlc entry point: rename main() -> hl_unused_hlc_main so it
+            #     doesn't clash with main.m's main(), which calls it ---
+            cp "$DEPS/hashlink/src/hlc_main.c" ios/native/hlc_ios_main.c
+            sed -i '' 's/int main(/int hl_unused_hlc_main(/' ios/native/hlc_ios_main.c
+            sed -i '' 's#<hlc_main.c>#"hlc_ios_main.c"#' ios/native/marblegame.c
+
+            # --- generate + build the Xcode project (unsigned) ---
+            cd ios
+            xcodegen generate --spec project.yml
+            xcodebuild \
+              -project MBHaxe-iOS.xcodeproj \
+              -target "MBHaxe-iOS" \
+              -configuration Release \
+              -sdk iphoneos -arch arm64 \
+              CONFIGURATION_BUILD_DIR="$PWD/build/out" \
+              CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+              clean build
+
+            # --- package unsigned .ipa ---
+            rm -rf Payload
+            mkdir Payload
+            cp -R build/out/Marble\ Blast\ Platinum.app Payload/
+            zip -qr ~/MBHaxe-Platinum-iOS.ipa Payload
+
+      - store_artifacts:
+          path: ~/MBHaxe-Platinum-iOS.ipa
+
+      - run:
+          name: Upload to Artifact Storage
+          command: |
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe-Platinum-iOS.ipa $REMOTEDIR/MBHaxe-Platinum-iOS.ipa
 
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  build-android:
+  build-ios:
     jobs:
-      - build
+      - build-ios:
+          filters:
+            tags:
+              only: /^\d+.\d+.\d+$/
