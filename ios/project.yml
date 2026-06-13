@@ -59,7 +59,7 @@ targets:
           NSAllowsArbitraryLoads: true
     settings:
       base:
-        PRODUCT_NAME: MBHaxe
+        PRODUCT_NAME: Marble Blast Ultra
         PRODUCT_BUNDLE_IDENTIFIER: com.randomityguy.mbuhaxe
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO
