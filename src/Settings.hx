@@ -235,6 +235,8 @@ class Settings {
 	#if hl
 	#if MACOS_BUNDLE
 	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBG"]);
+	#elseif IOS_BUNDLE
+	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Documents", "MBHaxe-MBG"]);
 	#else
 	public static var settingsDir = ".";
 	#end
@@ -533,6 +535,10 @@ class Settings {
 		Settings.optionsSettings.screenWidth = cast wnd.width;
 		Settings.optionsSettings.screenHeight = cast wnd.height;
 		#end
+		#if ios
+		Settings.optionsSettings.screenWidth = Std.int(Window.getInstance().width / Settings.zoomRatio);
+		Settings.optionsSettings.screenHeight = Std.int(Window.getInstance().height / Settings.zoomRatio);
+		#end
 		trace("Window resized to "
 			+ Settings.optionsSettings.screenWidth
 			+ "x"
@@ -558,11 +564,15 @@ class Settings {
 				zoomRatio = 1.0;
 			Settings.zoomRatio = zoomRatio;
 			#end
-			#if android
+			#if (android || ios)
 			var zoomRatio = Window.getInstance().height / 700;
 			Settings.zoomRatio = zoomRatio;
 			#end
-			#if hl
+			#if ios
+			Settings.optionsSettings.screenWidth = Std.int(wnd.width / zoomRatio);
+			Settings.optionsSettings.screenHeight = Std.int(wnd.height / zoomRatio);
+			#end
+			#if (hl && !ios)
 			Settings.optionsSettings.screenWidth = cast wnd.width;
 			Settings.optionsSettings.screenHeight = cast wnd.height;
 			#end

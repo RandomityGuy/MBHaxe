@@ -406,7 +406,7 @@ class Util {
 		#if hl
 		switch (Settings.isTouch) {
 			case None:
-				#if android
+				#if (android || ios)
 				Settings.isTouch = Some(true);
 				return true;
 				#else
@@ -416,7 +416,7 @@ class Util {
 			case Some(val):
 				return val;
 		}
-		#if android
+		#if (android || ios)
 		return true;
 		#else
 		return false;

@@ -43,7 +43,7 @@ class Main extends hxd.App {
 		s3d.checkPasses = false;
 		#end
 
-		#if (hl && !android)
+		#if (hl && !android && !ios)
 		hl.UI.closeConsole();
 		#end
 		#if js
@@ -63,8 +63,16 @@ class Main extends hxd.App {
 		canvasElement.style.height = "100%";
 		s3d.camera.setFovX(Settings.optionsSettings.fovX, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 		#end
-		#if android
+		#if (android || ios)
 		var zoomRatio = Math.min(Window.getInstance().height, Window.getInstance().width) / 700;
+
+		#if ios
+		var sw = Window.getInstance().width;
+		var sh = Window.getInstance().height;
+		Settings.optionsSettings.screenWidth = Std.int(sw / zoomRatio);
+		Settings.optionsSettings.screenHeight = Std.int(sh / zoomRatio);
+		#end
+
 		s2d.scaleMode = Zoom(zoomRatio);
 
 		trace("Initial Window resized to "
@@ -76,7 +84,7 @@ class Main extends hxd.App {
 			+ ")");
 		#end
 
-		#if android
+		#if (android || ios)
 		Window.getInstance().addEventTarget(ev -> {
 			if (ev.kind == EPush || ev.kind == ERelease || ev.kind == EMove) {
 				@:privateAccess s2d.window.curMouseX = cast ev.relX;
