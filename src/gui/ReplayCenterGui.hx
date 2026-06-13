@@ -105,7 +105,7 @@ class ReplayCenterGui extends GuiImage {
 		scrollCtrl.scrollToBottom = false;
 		achievementsWnd.addChild(scrollCtrl);
 
-		var replayListCtrl = new GuiTextListCtrl(arial14, replayList.map(x -> x.name));
+		var replayListCtrl = new GuiTextListCtrl(arial14, replayList.map(x -> x.name), 0xFFFFFF);
 
 		replayListCtrl.selectedColor = 0xF29515;
 		replayListCtrl.selectedFillColor = 0x858585;
