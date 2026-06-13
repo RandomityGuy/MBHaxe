@@ -17,6 +17,7 @@
 // SOFTWARE.
 package fs;
 
+import src.MarbleGame;
 import hxd.fs.FileInput;
 import hxd.net.BinaryLoader;
 import hxd.impl.ArrayIterator;
@@ -27,15 +28,12 @@ import hxd.fs.FileSystem;
 import haxe.io.Encoding;
 import haxe.io.Path;
 import haxe.io.Bytes;
-import src.Settings;
 #if android
 import zygame.utils.hl.AssetsTools;
 #end
 
 @:allow(fs.ManifestFileSystem)
 class ManifestEntry extends FileEntry {
-	public static var doQuickLoad:Bool = true;
-
 	private var fs:ManifestFileSystem;
 	private var relPath:String;
 
@@ -110,7 +108,7 @@ class ManifestEntry extends FileEntry {
 	public function fancyLoad(onReady:() -> Void, onProgress:(cur:Int, max:Int) -> Void) {
 		#if js
 		if (loaded) {
-			haxe.Timer.delay(onReady, 1);
+			onReady();
 		} else {
 			var br:BinaryLoader = new BinaryLoader(file);
 			br.onLoaded = (b) -> {
@@ -132,33 +130,39 @@ class ManifestEntry extends FileEntry {
 		#elseif js
 		if (loaded) {
 			if (onReady != null)
-				haxe.Timer.delay(onReady, 1);
+				onReady();
 		} else {
-			js.Browser.window.fetch(file).then((res:js.html.Response) -> {
-				return res.arrayBuffer();
-			}).then((buf:js.lib.ArrayBuffer) -> {
-				loaded = true;
-				bytes = Bytes.ofData(buf);
-				if (onReady != null)
-					onReady();
-			}).catchError((e) -> {
-				// Try the original file path
-				js.Browser.window.fetch('data/' + originalFile).then((res:js.html.Response) -> {
+			var prefix = "";
+			if (Main.isDiscord) {
+				prefix = ".proxy/";
+			}
+
+			js.Browser.window.fetch(prefix + file)
+				.then((res:js.html.Response) -> {
 					return res.arrayBuffer();
-				}).then((buf:js.lib.ArrayBuffer) -> {
+				})
+				.then((buf:js.lib.ArrayBuffer) -> {
 					loaded = true;
 					bytes = Bytes.ofData(buf);
 					if (onReady != null)
 						onReady();
+				})
+				.catchError((e) -> {
+					// Try the original file path
+					js.Browser.window.fetch(prefix + 'data/' + originalFile).then((res:js.html.Response) -> {
+						return res.arrayBuffer();
+					}).then((buf:js.lib.ArrayBuffer) -> {
+						loaded = true;
+						bytes = Bytes.ofData(buf);
+						if (onReady != null)
+							onReady();
+					});
 				});
-			});
 		}
 		#else
 		if (onReady != null)
-			if (doQuickLoad || Settings.optionsSettings.fastLoad)
-				onReady();
-			else
-				haxe.Timer.delay(onReady, 1);
+			onReady();
+		// haxe.Timer.delay(onReady, 1);
 		#end
 	}
 
@@ -290,7 +294,7 @@ class ManifestFileSystem implements FileSystem {
 			}
 			var entry:ManifestEntry = new ManifestEntry(this, Path.withoutDirectory(original), original, file, original);
 			r.contents.push(entry);
-			manifest.set(path, entry);
+			manifest.set(path.toLowerCase(), entry);
 		}
 
 		switch (_manifest.get(0)) {
@@ -321,7 +325,7 @@ class ManifestFileSystem implements FileSystem {
 				// JSON
 				var json:Array<{path:String, original:String}> = haxe.Json.parse(_manifest.toString());
 				for (entry in json) {
-					insert(entry.path, baseDir + entry.path, entry.original);
+					insert(entry.path.toLowerCase(), baseDir + entry.path, entry.original);
 				}
 		}
 	}
@@ -345,11 +349,11 @@ class ManifestFileSystem implements FileSystem {
 	}
 
 	public function exists(path:String) {
-		return find(path) != null;
+		return find(path.toLowerCase()) != null;
 	}
 
 	public function get(path:String) {
-		var entry:ManifestEntry = find(path);
+		var entry:ManifestEntry = find(path.toLowerCase());
 		if (entry == null)
 			throw new NotFound(path);
 		return entry;

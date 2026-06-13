@@ -26,7 +26,16 @@ class Canvas extends GuiControl {
 		#if hl
 		Window.getInstance().addResizeEvent(() -> {
 			var wnd = Window.getInstance();
+
+			#if ios
+			// With Zoom scaling, scene2d is the virtual viewport.
+			// Using raw wnd.width/wnd.height makes the UI anchor/crop wrong.
+			onResize(Std.int(scene2d.width), Std.int(scene2d.height));
+			#else
 			onResize(wnd.width, wnd.height);
+			#end
+
+			Console.log('Window resized to ${wnd.width} x ${wnd.height}, scene ${scene2d.width} x ${scene2d.height}');
 		});
 		#end
 	}

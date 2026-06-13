@@ -376,6 +376,7 @@ class LeaderboardsGui extends GuiImage {
 			case MacOS: return "mac";
 			case PC: return "pc";
 			case Web: return "web";
+			case iOS: return "unknown";
 		}
 	}
 }

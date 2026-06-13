@@ -44,7 +44,7 @@ class Main extends hxd.App {
 		s3d.renderer = new Renderer();
 		// s3d.checkPasses = false;
 
-		#if (hl && !android)
+		#if (hl && !android && !ios)
 		hl.UI.closeConsole();
 		#end
 
@@ -53,8 +53,14 @@ class Main extends hxd.App {
 		var zoomRatio = Util.isTouchDevice() ? js.Browser.window.screen.height * js.Browser.window.devicePixelRatio / 768 : js.Browser.window.devicePixelRatio; // js.Browser.window.devicePixelRatio;
 		s2d.scaleMode = Zoom(zoomRatio);
 		#end
-		#if android
+		#if (android || ios)
 		var zoomRatio = Math.min(Window.getInstance().height, Window.getInstance().width) / 700;
+		#if ios
+		var sw = Window.getInstance().width;
+		var sh = Window.getInstance().height;
+		Settings.optionsSettings.screenWidth = Std.int(sw / zoomRatio);
+		Settings.optionsSettings.screenHeight = Std.int(sh / zoomRatio);
+		#end
 		s2d.scaleMode = Zoom(zoomRatio);
 
 		trace("Initial Window resized to "
@@ -66,7 +72,7 @@ class Main extends hxd.App {
 			+ ")");
 		#end
 
-		#if android
+		#if (android || ios)
 		Window.getInstance().addEventTarget(ev -> {
 			if (ev.kind == EPush || ev.kind == ERelease || ev.kind == EMove) {
 				@:privateAccess s2d.window.curMouseX = cast ev.relX;

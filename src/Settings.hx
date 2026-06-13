@@ -235,6 +235,8 @@ class Settings {
 	#if hl
 	#if MACOS_BUNDLE
 	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBP"]);
+	#elseif IOS_BUNDLE
+	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Documents", "MBHaxe-MBU"]);
 	#else
 	public static var settingsDir = ".";
 	#end
@@ -254,6 +256,17 @@ class Settings {
 	@:hlNative static function get_storage_path():hl.Bytes {
 		return null;
 	}
+
+	@:hlNative public static function open_web_url(url:String):Void {}
+
+	@:hlNative public static function export_prefs():Void {}
+
+	@:hlNative public static function start_import_prefs(prefsCb:(b:hl.Bytes) -> Void):Void {}
+
+	@:hlNative public static function call_import_cb():Void {}
+	#end
+
+	#if ios
 
 	@:hlNative public static function open_web_url(url:String):Void {}
 
@@ -575,6 +588,10 @@ class Settings {
 		Settings.optionsSettings.screenWidth = cast wnd.width;
 		Settings.optionsSettings.screenHeight = cast wnd.height;
 		#end
+		#if ios
+		Settings.optionsSettings.screenWidth = Std.int(Window.getInstance().width / Settings.zoomRatio);
+		Settings.optionsSettings.screenHeight = Std.int(Window.getInstance().height / Settings.zoomRatio);
+		#end
 		trace("Window resized to "
 			+ Settings.optionsSettings.screenWidth
 			+ "x"
@@ -598,11 +615,15 @@ class Settings {
 				zoomRatio = 1.5;
 			Settings.zoomRatio = zoomRatio;
 			#end
-			#if android
+			#if (android || ios)
 			var zoomRatio = Window.getInstance().height / 700;
 			Settings.zoomRatio = zoomRatio;
 			#end
-			#if hl
+			#if ios
+			Settings.optionsSettings.screenWidth = Std.int(wnd.width / zoomRatio);
+			Settings.optionsSettings.screenHeight = Std.int(wnd.height / zoomRatio);
+			#end
+			#if (hl && !ios)
 			Settings.optionsSettings.screenWidth = cast wnd.width;
 			Settings.optionsSettings.screenHeight = cast wnd.height;
 			#end
@@ -627,7 +648,7 @@ class Settings {
 					Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 			}
 
-			#if js
+			#if (js || ios)
 			MarbleGame.canvas.onResize(MarbleGame.canvas.scene2d.width, MarbleGame.canvas.scene2d.height);
 			#end
 			// Console.log('Window resized to ${wnd.width} x ${wnd.height}, scene ${scene2d.width} x ${scene2d.height}');

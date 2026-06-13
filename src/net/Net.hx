@@ -832,6 +832,8 @@ class Net {
 		#else
 		#if android
 		return NetPlatform.Android;
+		#elseif ios
+		return NetPlatform.iOS;
 		#else
 		return NetPlatform.PC;
 		#end

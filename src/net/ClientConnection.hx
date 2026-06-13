@@ -18,6 +18,7 @@ enum abstract NetPlatform(Int) from Int to Int {
 	var MacOS;
 	var Web;
 	var Android;
+	var iOS;
 }
 
 @:publicFields
