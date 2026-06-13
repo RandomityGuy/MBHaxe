@@ -71,7 +71,7 @@ class ReplayCenterGui extends GuiImage {
 		var replayList = [];
 		sys.FileSystem.createDirectory(haxe.io.Path.join([Settings.settingsDir, "data", "replays"]));
 		var replayPath = haxe.io.Path.join([Settings.settingsDir, "data", "replays",]);
-		#if (sys && !android)
+		#if (sys && !android && !ios)
 		var replayFiles = ResourceLoader.fileSystem.dir(replayPath);
 		for (replayFile in replayFiles) {
 			if (replayFile.extension == "mbr") {

@@ -35,6 +35,28 @@ targets:
       Release: Config/Local.xcconfig
     info:
       path: MBHaxeIOS/Info.plist
+      properties:
+        CFBundleShortVersionString: "1.2.5"
+        CFBundleVersion: "1"
+        UILaunchStoryboardName: LaunchScreen
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UIViewControllerBasedStatusBarAppearance: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        "UISupportedInterfaceOrientations~ipad":
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # --- Networking ---
+        # WebRTC ICE host-candidate gathering / LAN peer discovery needs the
+        # local-network permission on iOS 14+.
+        NSLocalNetworkUsageDescription: "Marble Blast Ultra uses the local network to discover and connect to nearby players for multiplayer."
+        # The master server has a plain ws:// (and other non-TLS) fallback that
+        # App Transport Security blocks by default; allow arbitrary loads so the
+        # websocket + WebRTC transports all connect.
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
     settings:
       base:
         PRODUCT_NAME: MBHaxe
