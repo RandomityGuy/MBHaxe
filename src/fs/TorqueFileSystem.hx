@@ -1,5 +1,6 @@
 package fs;
 
+#if android
 import hxd.fs.LocalFileSystem;
 
 #if hl
@@ -97,3 +98,145 @@ class TorqueFileSystem extends LocalFileSystem {
 	}
 	#end
 }
+
+#end
+#if ios
+package fs;
+
+import hxd.fs.LocalFileSystem;
+import src.Settings;
+
+class TorqueFileEntry extends LocalEntry {
+	override function load(?onReady:Void->Void):Void {
+		if (onReady != null)
+			haxe.Timer.delay(onReady, 1);
+	}
+}
+
+class TorqueFileSystem extends LocalFileSystem {
+	// Cache of directory listings: lowercase dir path -> (lowercase entry name -> actual entry name)
+	var dirListCache:Map<String, Map<String, String>> = new Map();
+
+	static function normalizePath(path:String):String {
+		if (path == null)
+			return path;
+
+		while (StringTools.startsWith(path, "/"))
+			path = path.substr(1);
+
+		if (StringTools.startsWith(path, "ata/"))
+			path = "d" + path;
+
+		return path;
+	}
+
+	// Look up the real, case-correct name of `name` inside `dir`, or null if absent.
+	function lookupActual(dir:String, name:String):String {
+		var key = dir.toLowerCase();
+		var c = dirListCache.get(key);
+		if (c == null) {
+			c = new Map();
+			for (f in try
+				sys.FileSystem.readDirectory(dir)
+			catch (e:Dynamic)
+				[])
+				c.set(f.toLowerCase(), f);
+			dirListCache.set(key, c);
+		}
+		return c.get(name.toLowerCase());
+	}
+
+	// Resolve `path` against the real filesystem case-insensitively, returning the
+	// actual case-correct path, or null if no matching file exists.
+	function resolveCasePath(path:String):String {
+		if (path == null || path == "")
+			return path;
+
+		// Fast path: case already matches what's on disk.
+		if (sys.FileSystem.exists(path))
+			return path;
+
+		var parts = path.split("/");
+		var resolved = "";
+		for (part in parts) {
+			if (part == "")
+				continue;
+			var dir = resolved == "" ? "." : resolved;
+			var actual = lookupActual(dir, part);
+			if (actual == null)
+				return null;
+			resolved = resolved == "" ? actual : resolved + "/" + actual;
+		}
+		return resolved;
+	}
+
+	public function new(dir:String, configuration:String) {
+		super(".", configuration);
+
+		// iOS/app bundle mode:
+		// main.m already chdir()s into MBHaxe.app.
+		// Empty baseDir makes paths stay "data/..." instead of "/data/...".
+		baseDir = "";
+
+		root = new TorqueFileEntry(this, "root", null, baseDir);
+	}
+	override function checkPath(path:String) {
+		path = normalizePath(path);
+
+		// iOS bundle mode: do not do baseDir substr checks.
+		// The file already exists check happens in open().
+		return true;
+	}
+
+	override function open(path:String, check = true) {
+		path = normalizePath(path);
+
+		var r = fileCache.get(path.toLowerCase());
+		if (r != null)
+			return r.r;
+		var e = null;
+
+		// iOS safety: never allow game asset paths to become /data/...
+
+		var f = path;
+		if (f == null)
+			return null;
+		f = f.split("\\").join("/");
+
+		// Resolve the path case-insensitively so files open regardless of the
+		// input casing (iOS uses a case-sensitive filesystem).
+		var resolved = resolveCasePath(f);
+		var file = resolved != null ? resolved : f;
+
+		if (!check || resolved != null) {
+			e = new TorqueFileEntry(this, f.split("/").pop(), f, file);
+			#if ios
+			// iOS bundle mode: files are already packaged.
+			// Do not run FileConverter because it tries to create /data or /tmp cache paths.
+			#else
+			convert.run(e);
+			if (e.file == null)
+				e = null;
+			#end
+		}
+		fileCache.set(path.toLowerCase(), {r: e});
+		return e;
+	}
+
+	override function dir(path:String):Array<hxd.fs.FileEntry> {
+		path = normalizePath(path);
+
+		// Resolve the directory case-insensitively (iOS uses a case-sensitive
+		// filesystem, so "data/skies/beginner" must map to "data/skies/Beginner").
+		var resolved = resolveCasePath(path);
+		if (resolved == null || !sys.FileSystem.isDirectory(resolved))
+			throw new hxd.fs.NotFound(path);
+
+		var files = sys.FileSystem.readDirectory(resolved);
+		var r:Array<hxd.fs.FileEntry> = [];
+		for (f in files)
+			r.push(open(resolved + "/" + f, false));
+		return r;
+	}
+}
+#end
