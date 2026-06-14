@@ -547,6 +547,11 @@ class Util {
 	}
 
 	public static function getPlatform() {
+		#if ios
 		return "iOS";
+		#end
+		#if android
+		return "Android";
+		#end
 	}
 }

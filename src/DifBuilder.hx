@@ -450,6 +450,9 @@ class DifBuilder {
 			return tex.substring(slashpos, dotpos);
 		}
 
+		#if android
+		fs.ManifestFileSystem.ManifestEntry.doQuickLoad = true;
+		#end
 		ResourceLoader.load(path).entry.load(() -> {
 			var dif:Dif = null;
 			var cache:DifCache = null;
@@ -1108,6 +1111,9 @@ class DifBuilder {
 			for (f in loadtexs) {
 				worker.loadFile(f);
 			}
+			#if android
+			fs.ManifestFileSystem.ManifestEntry.doQuickLoad = false;
+			#end
 			worker.run();
 		});
 	}
