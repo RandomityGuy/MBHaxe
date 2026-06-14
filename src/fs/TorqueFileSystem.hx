@@ -81,7 +81,6 @@ class TorqueFileSystem extends LocalFileSystem {
 
 #end
 #if android
-package fs;
 
 import hxd.fs.LocalFileSystem;
 import src.Settings;
