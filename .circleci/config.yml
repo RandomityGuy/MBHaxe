@@ -2,10 +2,120 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 orbs:
+    android: circleci/android@2.3.0 
     macos: circleci/macos@2.5.1 # The Windows orb give you everything you need to start using the Windows executor.
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
+  build:
+    executor: 
+        name: android/android-machine
+        tag: 2021.10.1
+    # Checkout the code as the first step. This is a dedicated CircleCI step.
+    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
+    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
+    # Then run your tests!
+    # CircleCI will report the results back to your VCS provider.
+    steps:
+        - add_ssh_keys:
+            fingerprints:
+                - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
+  
+        - checkout:
+            path: ~/MBHaxe
+        - run:
+            name: Decode Android key store
+            command: echo $BASE64_KEYSTORE | base64 -d | tee keystore ~/MBHaxe/keystore > /dev/null
+        - run:
+            name: Install dependencies
+            command: |
+              set -eux
+              download_url="https://github.com/HaxeFoundation/haxe/releases/download/4.3.4/haxe-4.3.4-linux64.tar.gz"
+              echo "Downloading [$download_url]..."
+              mkdir /tmp/haxe
+              curl -fsSL --retry 3 --retry-delay 5 "$download_url" -o /tmp/haxe.tar.gz
+              tar xzvf /tmp/haxe.tar.gz -C /tmp/haxe --strip-components=1
+              sudo apt-get update
+              sudo apt install neko
+              export PATH=/tmp/haxe/:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/std
+              haxelib setup ~/haxelib
+              haxelib list
+        - run:
+            name: Install Android NDK
+            command: |-
+              #!/bin/bash
+              echo y | sdkmanager "ndk;18.1.5063045"
+              android_ndk_home=""
+                if [[ -d "${HOME}/android-sdk/ndk/18.1.5063045" ]]; then
+                  android_ndk_home="$HOME/android-sdk/ndk/18.1.5063045"
+                elif [[ -d "/opt/android/sdk/ndk/18.1.5063045" ]]; then
+                  android_ndk_home="/opt/android/sdk/ndk/18.1.5063045"
+                else
+                  echo "Android NDK did not install successfully"
+                  exit 1
+                fi
+              echo "export ANDROID_NDK_HOME=$android_ndk_home" >> "$BASH_ENV"
+              echo "Android NDK was installed at \"$android_ndk_home\"."
+              echo y | sdkmanager "platforms;android-31"
+          
+        - run:
+            name: Install haxe dependencies
+            command: |
+              export PATH=/tmp/haxe/:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/std
+              mkdir ~/deps
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/hashlink
+              git clone https://github.com/RandomityGuy/hxDatachannel
+              haxelib git heaps https://github.com/RandomityGuy/heaps
+              haxelib dev hlopenal ~/deps/hashlink/libs/openal
+              haxelib dev hlsdl ~/deps/hashlink/libs/sdl
+              haxelib dev hashlink ~/deps/hashlink/other/haxelib
+              haxelib git zyheaps https://github.com/rainyt/zyheaps
+              haxelib install colyseus-websocket
+              haxelib dev datachannel ~/deps/hxDatachannel
+        - run:
+            name: Prepare directories
+            command: |
+              cd ~/deps
+              git clone https://github.com/RandomityGuy/MBHaxeAndroidLibs
+              cd ~/MBHaxe/Export/android
+              cp -R ~/deps/MBHaxeAndroidLibs/* app/
+              cd ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft
+              mv CMakeLists.txt CMakeLists-copy.txt
+              mv 'CMakeLists 2.txt' CMakeLists.txt
+              cmake .
+              cmake --build .
+              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bsincgen ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
+              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bin2h ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
+        - run:
+            name: Compile MBHaxe
+            command: |
+              export PATH=/tmp/haxe/:"$PATH"
+              cd ~/MBHaxe
+              sed -i '5i -lib datachannel' Export/android/app/src/main/build.hxml
+              sed -i '5i -lib colyseus-websocket' Export/android/app/src/main/build.hxml
+              haxe Export/android/app/src/main/build.hxml
+              mkdir -p Export/android/app/src/main/assets/data
+              cp -rf data/* Export/android/app/src/main/assets/data
+              cd Export/android
+              chmod +x gradlew
+              ./gradlew
+              cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists-copy.txt ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/CMakeLists.txt
+              ./gradlew assembleRelease
+
+        - run:
+            name: Sign APK
+            command: |
+              cd ~/MBHaxe
+              sudo apt install apksigner
+              echo $RELEASE_STORE_PASSWORD | apksigner sign --ks ~/MBHaxe/keystore Export/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+        - run:
+            name: Upload to Artifact Storage
+            command: |
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/Export/android/app/build/outputs/apk/release/app-release-unsigned.apk $REMOTEDIR/MBHaxe-Platinum.apk
   # ---------------------------------------------------------------------------
   # iOS (native device, arm64) build.
   #
@@ -304,6 +414,12 @@ workflows:
   build-ios:
     jobs:
       - build-ios:
+          filters:
+            tags:
+              only: /^\d+.\d+.\d+$/
+  build-android:
+    jobs:
+      - build:
           filters:
             tags:
               only: /^\d+.\d+.\d+$/
