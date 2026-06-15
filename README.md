@@ -10,10 +10,11 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Gold: [Play](https://marbleblastgold.randomityguy.me/)
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ### Marble Blast Ultra: [Play](https://marbleblastultra.randomityguy.me/)
-## Windows and Mac
+## Windows, Mac and Linux
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.13)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.3)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.5-mbu)
+Linux port by [boucymatt](https://github.com/boucymatt). Requires Steam Runtime. Supports Steam Deck.
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
@@ -27,7 +28,10 @@ You will also have to bypass Gatekeeper since the .app is not signed.
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum-iOS.ipa)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-iOS.ipa)
 Ported to iOS by [boucymatt](https://github.com/boucymatt).  
-iOS builds ship as `.ipa` files that must be sideloaded, as Apple does not allow direct installs outside the App Store. Use [LiveContainer](https://github.com/LiveContainer/LiveContainer) or an AltStore-compatible store (AltStore, SideStore, etc.). To install and update all builds from one place, add the AltStore source `https://dl.randomityguy.me/altstore-source.json`.
+iOS builds ship as `.ipa` files that must be sideloaded, as Apple does not allow direct installs outside the App Store. Use [LiveContainer](https://github.com/LiveContainer/LiveContainer) or an AltStore-compatible store (AltStore, SideStore, etc.). To install and update all builds from one place, add the AltStore source.  
+<a href="https://stikstore.app/altdirect/?url=https://dl.randomityguy.me/altstore-source.json" target="_blank">
+   <img src="https://raw.githubusercontent.com/StikStore/altdirect/refs/heads/main/assets/png/AltSource_Blue.png" alt="Add AltSource" width="200"/>
+</a>
 
 ## Xbox (NEW!)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-UWP-Xbox.msix)
@@ -35,7 +39,7 @@ Ported to Xbox via UWP by [Daniel Worley](https://github.com/worleydl).
 You will need to enable Developer Mode on your Xbox in order to sideload the app. The walkthrough can be found at https://www.youtube.com/watch?v=2Ly9TIdu9uw.  
 
 ## Additional Features
-- Cross Platform Multiplayer: Available in Ultra and Platinum. You can host and join multiplayer matches in any of these platforms: Windows, Mac, Web, Android, and iOS.
+- Cross Platform Multiplayer: Available in Ultra and Platinum. You can host and join multiplayer matches in any of these platforms: Windows, Mac, Linux, Web, Android, and iOS.
 - Replay System: You can record your run using the built in replay system and watch it later.  
 - Rewind: You can rewind your marble by enabling rewind in the Options and holding down the rewind key (defaults to R). 
 - Controller Support: Full controller support is added to Marble Blast Ultra, with incomplete support for the rest.
