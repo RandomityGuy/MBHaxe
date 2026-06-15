@@ -85,7 +85,7 @@ class NullMode implements GameMode {
 
 		// Show a notification (and play a sound) based on the gems remaining
 		if (this.level.gemCount == this.level.totalGems) {
-			string = "You have all the diamonds, head for the finish!";
+			string = "You have all the gems, head for the finish!";
 			// if (!this.rewinding)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotallgems.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
 
@@ -96,13 +96,13 @@ class NullMode implements GameMode {
 			// 	this.touchFinish(completionOfImpact);
 			// }
 		} else {
-			string = "You picked up a diamond.  ";
+			string = "You picked up a gem. ";
 
 			var remaining = this.level.totalGems - this.level.gemCount;
 			if (remaining == 1) {
-				string += "Only one diamond to go!";
+				string += "Only one gem to go!";
 			} else {
-				string += '${remaining} diamonds to go!';
+				string += '${remaining} gems to go!';
 			}
 
 			// if (!this.rewinding)

@@ -13,7 +13,7 @@ class ShockAbsorber extends PowerUp {
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "ShockAbsorber";
-		this.pickUpName = "Anti-Recoil PowerUp";
+		this.pickUpName = "Shock Absorber PowerUp";
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
