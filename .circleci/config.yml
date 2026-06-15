@@ -57,6 +57,7 @@ jobs:
               echo "export ANDROID_NDK_HOME=$android_ndk_home" >> "$BASH_ENV"
               echo "Android NDK was installed at \"$android_ndk_home\"."
               echo y | sdkmanager "platforms;android-31"
+              echo y | sdkmanager "cmake;3.22.1"
           
         - run:
             name: Install haxe dependencies
