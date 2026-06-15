@@ -17,7 +17,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags '-lstdc++'
-                arguments "-DANDROID_LD=lld",'-DANDROID_PLATFORM=android-24'
+                arguments "-DANDROID_LD=lld",'-DANDROID_PLATFORM=android-24','-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
             }
         }
     }
@@ -40,7 +40,7 @@ android {
     externalNativeBuild {
         cmake {
             path file('src/main/cpp/CMakeLists.txt')
-            version '3.10.2'
+            version '3.22.1'
         }
     }
     buildFeatures {
