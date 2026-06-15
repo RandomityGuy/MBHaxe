@@ -635,6 +635,17 @@ jobs:
             
             chmod +x "$DIST/run-mbu.sh"
 
+            echo '#!/usr/bin/env bash' > "$DIST/run-mbu-steam-deck.sh"
+            echo 'set -e' >> "$DIST/run-mbu-steam-deck.sh"
+            echo 'DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"' >> "$DIST/run-mbu-steam-deck.sh"
+            echo 'export LD_LIBRARY_PATH="$DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"' >> "$DIST/run-mbu-steam-deck.sh"
+            echo 'export ALSOFT_DRIVERS="pulse,alsa"' >> "$DIST/run-mbu-steam-deck.sh"
+            echo 'export SDL_AUDIODRIVER="pulse"' >> "$DIST/run-mbu-steam-deck.sh"
+            echo 'cd "$DIR"' >> "$DIST/run-mbu-steam-deck.sh"
+            echo 'exec "$DIR/marblegame" "$@"' >> "$DIST/run-mbu-steam-deck.sh"
+            
+            chmod +x "$DIST/run-mbu-steam-deck.sh"
+
             # Set rpath=$ORIGIN so the bundle is self-contained
             patchelf --set-rpath '$ORIGIN' "$DIST/marblegame"
             
