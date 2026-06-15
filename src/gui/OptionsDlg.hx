@@ -549,25 +549,8 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 		var domcasual24 = domcasual24b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
 		if (Util.isTouchDevice()) {
-			var hideControlsLabel = new GuiText(domcasual32);
-			hideControlsLabel.position = new Vector(12, 62);
-			hideControlsLabel.extent = new Vector(200, 50);
-			hideControlsLabel.text.textColor = 0x000000;
-			hideControlsLabel.text.text = "Hide Controls:";
-			hideControlsLabel.justify = Right;
-			controlsPane.addChild(hideControlsLabel);
-
-			var hideControlsButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
-			hideControlsButton.position = new Vector(220, 46);
-			hideControlsButton.extent = new Vector(46, 54);
-			hideControlsButton.buttonType = Toggle;
-			hideControlsButton.pressedAction = (sender) -> {
-				Settings.touchSettings.hideControls = hideControlsButton.pressed;
-			}
-			controlsPane.addChild(hideControlsButton);
-
 			var buttonCameraFactorLabel = new GuiText(domcasual32);
-			buttonCameraFactorLabel.position = new Vector(12, 110);
+			buttonCameraFactorLabel.position = new Vector(12, 60);
 			buttonCameraFactorLabel.extent = new Vector(200, 50);
 			buttonCameraFactorLabel.text.textColor = 0x000000;
 			buttonCameraFactorLabel.text.text = "Button-Camera Factor:";
@@ -576,14 +559,14 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 
 			var buttonCameraFactorSlider = new GuiImage(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources)
 				.toTile());
-			buttonCameraFactorSlider.position = new Vector(220, 110);
+			buttonCameraFactorSlider.position = new Vector(220, 60);
 			buttonCameraFactorSlider.extent = new Vector(200, 34);
 			controlsPane.addChild(buttonCameraFactorSlider);
 
 			var buttonCameraFactorKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_snd_knb.png", ResourceLoader.getImage,
 				this.imageResources)
 				.toTile());
-			buttonCameraFactorKnob.position = new Vector(220, 110);
+			buttonCameraFactorKnob.position = new Vector(220, 60);
 			buttonCameraFactorKnob.extent = new Vector(196, 34);
 			buttonCameraFactorKnob.sliderValue = Settings.touchSettings.buttonJoystickMultiplier / 3;
 			buttonCameraFactorKnob.pressedAction = (sender) -> {
@@ -592,7 +575,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			controlsPane.addChild(buttonCameraFactorKnob);
 
 			var cameraSwipeExtentLabel = new GuiText(domcasual32);
-			cameraSwipeExtentLabel.position = new Vector(12, 160);
+			cameraSwipeExtentLabel.position = new Vector(12, 110);
 			cameraSwipeExtentLabel.extent = new Vector(200, 50);
 			cameraSwipeExtentLabel.text.textColor = 0x000000;
 			cameraSwipeExtentLabel.text.text = "Camera Swipe Extent:";
@@ -601,14 +584,14 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 
 			var cameraSwipeExtentSlider = new GuiImage(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources)
 				.toTile());
-			cameraSwipeExtentSlider.position = new Vector(220, 160);
+			cameraSwipeExtentSlider.position = new Vector(220, 110);
 			cameraSwipeExtentSlider.extent = new Vector(200, 34);
 			controlsPane.addChild(cameraSwipeExtentSlider);
 
 			var cameraSwipeExtentKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage,
 				this.imageResources)
 				.toTile());
-			cameraSwipeExtentKnob.position = new Vector(220, 160);
+			cameraSwipeExtentKnob.position = new Vector(220, 110);
 			cameraSwipeExtentKnob.extent = new Vector(196, 34);
 			cameraSwipeExtentKnob.sliderValue = (Settings.touchSettings.cameraSwipeExtent - 5) / (35 - 5);
 			cameraSwipeExtentKnob.pressedAction = (sender) -> {
@@ -616,16 +599,58 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			}
 			controlsPane.addChild(cameraSwipeExtentKnob);
 
+			var cameraSensitivityLabel = new GuiText(domcasual32);
+			cameraSensitivityLabel.position = new Vector(12, 160);
+			cameraSensitivityLabel.extent = new Vector(200, 50);
+			cameraSensitivityLabel.text.textColor = 0x000000;
+			cameraSensitivityLabel.text.text = "Camera Sensitivity:";
+			cameraSensitivityLabel.justify = Right;
+			controlsPane.addChild(cameraSensitivityLabel);
+
+			var cameraSensitivitySlider = new GuiImage(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			cameraSensitivitySlider.position = new Vector(220, 160);
+			cameraSensitivitySlider.extent = new Vector(200, 34);
+			controlsPane.addChild(cameraSensitivitySlider);
+
+			var cameraSensitivityKnob = new GuiSlider(ResourceLoader.getResource("data/ui/options/aud_mus_knb.png", ResourceLoader.getImage,
+				this.imageResources)
+				.toTile());
+			cameraSensitivityKnob.position = new Vector(220, 160);
+			cameraSensitivityKnob.extent = new Vector(196, 34);
+			cameraSensitivityKnob.sliderValue = (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12);
+			cameraSensitivityKnob.pressedAction = (sender) -> {
+				Settings.controlsSettings.cameraSensitivity = 0.12 + (1.2 - 0.12) * cameraSensitivityKnob.sliderValue;
+			}
+			controlsPane.addChild(cameraSensitivityKnob);
+
+			var hideControlsLabel = new GuiText(domcasual32);
+			hideControlsLabel.position = new Vector(250, 210);
+			hideControlsLabel.extent = new Vector(200, 50);
+			hideControlsLabel.text.textColor = 0x000000;
+			hideControlsLabel.text.text = "Hide Controls:";
+			hideControlsLabel.justify = Left;
+			controlsPane.addChild(hideControlsLabel);
+
+			var hideControlsButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
+			hideControlsButton.position = new Vector(370, 194);
+			hideControlsButton.extent = new Vector(46, 54);
+			hideControlsButton.buttonType = Toggle;
+			hideControlsButton.pressedAction = (sender) -> {
+				Settings.touchSettings.hideControls = hideControlsButton.pressed;
+			}
+			controlsPane.addChild(hideControlsButton);
+
 			var dynamicJoystickLabel = new GuiText(domcasual32);
-			dynamicJoystickLabel.position = new Vector(12, 210);
+			dynamicJoystickLabel.position = new Vector(32, 210);
 			dynamicJoystickLabel.extent = new Vector(200, 50);
 			dynamicJoystickLabel.text.textColor = 0x000000;
 			dynamicJoystickLabel.text.text = "Dynamic Joystick:";
-			dynamicJoystickLabel.justify = Right;
+			dynamicJoystickLabel.justify = Left;
 			controlsPane.addChild(dynamicJoystickLabel);
 
 			var dynamicJoystickButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
-			dynamicJoystickButton.position = new Vector(220, 194);
+			dynamicJoystickButton.position = new Vector(178, 194);
 			dynamicJoystickButton.extent = new Vector(46, 54);
 			dynamicJoystickButton.buttonType = Toggle;
 			dynamicJoystickButton.pressedAction = (sender) -> {
