@@ -6,5 +6,6 @@
 -D highDPI
 -D flow_border
 -D analyzer-optimize
+-D linux
 -hl native/marblegame.c
 --main Main

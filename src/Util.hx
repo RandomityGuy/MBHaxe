@@ -553,6 +553,8 @@ class Util {
 		#if hl
 		#if MACOS_BUNDLE
 		return "MacOS";
+		#elseif linux
+		return "Linux";
 		#else
 		return "Windows";
 		#end
