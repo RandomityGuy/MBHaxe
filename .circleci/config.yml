@@ -408,7 +408,7 @@ jobs:
               haxelib install colyseus-websocket
 
         - run:
-            name: Compile MBHaxe
+            name: Generate C source
             command: |
               export PATH=/tmp/haxe/haxe:"$PATH"
               export HAXE_STD_PATH=/tmp/haxe/haxe/std
@@ -417,9 +417,20 @@ jobs:
               export PATH=$nekopath:"$PATH"
               cd ~/project
               haxe compile-c.hxml
-              cd native
-              HASHLINKPATH=~/deps/hashlink
-              MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:MultiProcessorCompilation=true -p:HASHLINK=$HASHLINKPATH marblegame.sln
+        - run:
+            name: Compile MBHaxe (single translation unit)
+            shell: cmd.exe
+            # Build the self-contained marblegame.c in one cl invocation (like compile.bat /
+            # the macOS & Linux jobs) instead of MSBuild compiling ~900 split files serially
+            # with whole-program optimization. HL_MAKE must NOT be defined so marblegame.c
+            # #includes all the generated .c files into a single translation unit.
+            command: |
+              cd %USERPROFILE%\project\native
+              if not exist x64\Release mkdir x64\Release
+              for /f "usebackq delims=" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -find VC\Auxiliary\Build\vcvars64.bat`) do call "%%i"
+              set HL=%USERPROFILE%\deps\hashlink
+              cl /nologo marblegame.c /Fe:x64\Release\marblegame.exe /O2 /MD /DNDEBUG -I . -I "%HL%\src" -I "%HL%\include" "%HL%\x64\Release\libhl.lib" "%HL%\x64\Release\ssl.lib" "%HL%\x64\Release\ui.lib" "%HL%\x64\Release\datachannel.lib" "%HL%\x64\Release\openal.lib" "%HL%\x64\Release\uv.lib" "%HL%\x64\Release\fmt.lib" "%HL%\x64\Release\sdl.lib"
+              if not exist x64\Release\marblegame.exe exit /b 1
         - run:
             name: Package app bundle
             command: |
