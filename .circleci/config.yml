@@ -204,18 +204,39 @@ jobs:
             mkdir -p ~/deps
             cd ~/deps
             git clone --depth=1 https://github.com/RandomityGuy/hashlink
-            cd hashlink
             cd ~/deps
             git clone https://github.com/RandomityGuy/hxDatachannel
             cd hashlink
-            mv ~/deps/hxDatachannel/cpp libs/datachannel
-            echo -e "\nadd_subdirectory(datachannel)" >> libs/CMakeLists.txt
             curl -L https://raw.githubusercontent.com/RandomityGuy/hashlink/master/libs/ssl/CMakeLists.txt > libs/ssl/CMakeLists.txt
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
+
+      - run:
+          name: Build hxDatachannel
+          # Built as its own CMake project (like the Linux/Windows jobs) instead of being
+          # embedded into hashlink's build via add_subdirectory. Embedding made
+          # `cmake --install` try to install libjuice.a from a path it can't find.
+          command: |
+            cd ~/deps/hxDatachannel/cpp
+            sed -i '' 's/target_link_libraries(hxdatachannel.hdll libhl datachannel-static)/target_link_libraries(hxdatachannel.hdll hl datachannel-static)/' CMakeLists.txt || true
+            sed -i '' 's/agent->selected_entry = ATOMIC_VAR_INIT(NULL);/atomic_init(\&agent->selected_entry, NULL);/' \
+              libdatachannel/deps/libjuice/src/agent.c || true
+            cmake -S. -Bbuild \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" \
+              -DCMAKE_FIND_FRAMEWORK=LAST \
+              -DCMAKE_MACOSX_RPATH=TRUE \
+              -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
+              -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build --config Release -j$NPROC
+            DATACHANNEL_HDLL="$(find build -name 'datachannel.hdll' -type f | head -n 1)"
+            [ -n "$DATACHANNEL_HDLL" ] || { echo "ERROR: datachannel.hdll not built"; exit 1; }
+            sudo cp "$DATACHANNEL_HDLL" /usr/local/lib/
 
       - run:
           name: Install haxe dependencies
