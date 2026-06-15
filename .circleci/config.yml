@@ -89,6 +89,25 @@ jobs:
               cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bsincgen ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
               cp -pf ~/deps/MBHaxeAndroidLibs/src/main/cpp/openal-soft/native-tools/bin2h ~/MBHaxe/Export/android/app/src/main/cpp/openal-nativetools
         - run:
+            name: Select a Gradle-compatible JDK
+            command: |
+              set -eux
+              # Gradle 7.2 / AGP 7.0.3 cannot read Java 21 (class major v65)
+              # bytecode, which is the default JDK on the android machine image.
+              # Pin JAVA_HOME to JDK 17 (fall back to 11) for the gradle steps.
+              JDK=""
+              for v in 17 11; do
+                cand="$(ls -d /usr/lib/jvm/*$v* 2>/dev/null | head -1 || true)"
+                if [ -n "$cand" ]; then JDK="$cand"; break; fi
+              done
+              if [ -z "$JDK" ]; then
+                echo "No JDK 17/11 found under /usr/lib/jvm:"; ls -1 /usr/lib/jvm || true
+                exit 1
+              fi
+              echo "export JAVA_HOME=$JDK" >> "$BASH_ENV"
+              echo "export PATH=$JDK/bin:\$PATH" >> "$BASH_ENV"
+              "$JDK/bin/java" -version
+        - run:
             name: Compile MBHaxe
             command: |
               export PATH=/tmp/haxe/:"$PATH"
