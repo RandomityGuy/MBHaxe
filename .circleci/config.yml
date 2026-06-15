@@ -452,6 +452,224 @@ jobs:
         # - store_artifacts:
         #     path: ~/project/MBHaxe-Gold-Win.zip
 
+  build-lin:
+    docker:
+      - image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
+    environment:
+      COMMIT_TAG: pipeline.git.tag
+    steps:
+      - run:
+          name: Install build dependencies
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt remove -y libsdl2-compat-shim libsdl2-compat-shim:i386
+            apt-get install -y --no-install-recommends \
+              git curl ca-certificates openssh-client patchelf file \
+              cmake ninja-build pkg-config build-essential \
+              libpng-dev libturbojpeg0-dev libvorbis-dev libopenal-dev \
+              libmbedtls-dev libuv1-dev libsqlite3-dev \
+              zlib1g-dev libssl-dev libsdl2-dev
+      - add_ssh_keys:
+          fingerprints:
+            - "82:42:56:a0:57:43:95:4e:00:c0:8c:c1:7f:70:74:47"
+      - checkout:
+          path: ~/MBHaxe
+
+      - run:
+          name: Install Haxe
+          command: |
+            set -eux
+            rm -rf "$HOME/haxe" "$HOME/neko" "$HOME/haxelib"
+            mkdir -p "$HOME/haxe" "$HOME/neko" "$HOME/haxelib"
+            curl -fsSL --retry 3 --retry-delay 5 \
+              https://github.com/HaxeFoundation/haxe/releases/download/4.3.6/haxe-4.3.6-linux64.tar.gz \
+              | tar xz -C "$HOME/haxe" --strip-components=1
+            curl -fsSL --retry 3 --retry-delay 5 \
+              https://github.com/HaxeFoundation/neko/releases/download/v2-4-0/neko-2.4.0-linux64.tar.gz \
+              | tar xz -C "$HOME/neko" --strip-components=1
+            export PATH="$HOME/haxe:$HOME/neko:$PATH"
+            export HAXE_STD_PATH="$HOME/haxe/std"
+            export LD_LIBRARY_PATH="$HOME/neko${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            haxelib setup "$HOME/haxelib"
+
+      - run:
+          name: Install HashLink
+          command: |
+            rm -rf "$HOME/deps"
+            mkdir -p "$HOME/deps"
+            cd "$HOME/deps"
+            git clone --depth=1 https://github.com/RandomityGuy/hashlink
+            git clone --depth=1 https://github.com/RandomityGuy/hxDatachannel
+            cd hashlink
+            cmake -S . -B build \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_FIND_FRAMEWORK=LAST \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+              -DWITH_SQLITE=OFF \
+              -DBUILD_TESTING=OFF \
+              -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
+              -DHASHLINK_LIBRARY_DIR="/usr/local/lib/"
+            cmake --build build --config Release -j"$(nproc)"
+            cmake --install build
+            ldconfig
+
+      - run:
+          name: Build hxDatachannel
+          command: |
+            cd "$HOME/deps/hxDatachannel/cpp"
+            sed -i 's/target_link_libraries(hxdatachannel.hdll libhl datachannel-static)/target_link_libraries(hxdatachannel.hdll hl datachannel-static)/' CMakeLists.txt || true
+            sed -i 's/agent->selected_entry = ATOMIC_VAR_INIT(NULL);/atomic_init(\&agent->selected_entry, NULL);/' \
+              libdatachannel/deps/libjuice/src/agent.c || true
+            cmake -S . -B build -G Ninja \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+              -DCMAKE_C_STANDARD=11 \
+              -DCMAKE_C_EXTENSIONS=ON \
+              -DCMAKE_C_FLAGS="-std=gnu11 -fvisibility=hidden" \
+              -DCMAKE_CXX_FLAGS="-fvisibility=hidden" \
+              -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-Bsymbolic -Wl,--exclude-libs,ALL" \
+              -DUSE_MBEDTLS=OFF \
+              -DUSE_GNUTLS=OFF \
+              -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
+              -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" \
+              -DCMAKE_BUILD_TYPE=Release
+            cmake --build build -j"$(nproc)"
+            DATACHANNEL_HDLL="$(find build -name 'datachannel.hdll' -type f | head -n 1)"
+            [ -n "$DATACHANNEL_HDLL" ] || {
+              echo "ERROR: datachannel.hdll not built"
+              exit 1
+            }
+            cp "$DATACHANNEL_HDLL" /usr/local/lib/
+            ldconfig
+
+      - run:
+          name: Install Haxe dependencies
+          command: |
+            export PATH="$HOME/haxe:$HOME/neko:$PATH"
+            export HAXE_STD_PATH="$HOME/haxe/std"
+            export LD_LIBRARY_PATH="$HOME/neko${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            haxelib dev hashlink "$HOME/deps/hashlink/other/haxelib"
+            haxelib git heaps https://github.com/RandomityGuy/heaps
+            haxelib dev hlopenal "$HOME/deps/hashlink/libs/openal"
+            haxelib dev hlsdl "$HOME/deps/hashlink/libs/sdl"
+            haxelib dev datachannel "$HOME/deps/hxDatachannel"
+            haxelib install colyseus-websocket --always
+
+      - run:
+          name: Compile MBHaxe
+          command: |
+            export PATH="$HOME/haxe:$HOME/neko:$PATH"
+            export HAXE_STD_PATH="$HOME/haxe/std"
+            export LD_LIBRARY_PATH="$HOME/neko${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            cd "$HOME/MBHaxe"
+            haxe compile-linux.hxml
+            cd native
+            cp "$HOME/deps/hashlink/src/hlc_main.c" .
+            gcc -o marblegame -O2 \
+              -I . \
+              -L /usr/local/lib \
+              marblegame.c \
+              /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} \
+              -lSDL2 -lhl -lm -luv \
+              -Wl,-rpath,'$ORIGIN'
+            strip marblegame
+
+      - run:
+          name: Package portable bundle
+          command: |
+            DIST=$HOME/MBHaxe-Gold-Linux
+            mkdir -p "$DIST"
+
+            # Native binary
+            cp $HOME/MBHaxe/native/marblegame "$DIST/"
+
+            # HashLink plugins
+            cp /usr/local/lib/{fmt,openal,sdl,ssl,ui,uv,datachannel}.hdll "$DIST/"
+
+            # libhl — copy versioned file and create soname symlink
+            LIBHL_REAL="$(realpath /usr/local/lib/libhl.so)"
+            LIBHL_BASE="$(basename "$LIBHL_REAL")"
+            cp "$LIBHL_REAL" "$DIST/$LIBHL_BASE"
+            LIBHL_SONAME="$(readelf -d "$LIBHL_REAL" | grep -oP '(?<=\[)libhl\.so[^\]]+(?=\])' || true)"
+            
+            if [ -n "$LIBHL_SONAME" ] && [ "$LIBHL_SONAME" != "$LIBHL_BASE" ]; then
+              ln -sf "$LIBHL_BASE" "$DIST/$LIBHL_SONAME"
+            fi
+            
+            ln -sf "${LIBHL_SONAME:-$LIBHL_BASE}" "$DIST/libhl.so"
+            ln -sf "${LIBHL_SONAME:-$LIBHL_BASE}" "$DIST/libhl.so.1"
+
+            # Bundle Steam Runtime system libs for portability
+            get_lib() {
+              ldconfig -p | grep "^\s*$1\b" | awk '{print $NF}' | head -n 1
+            }
+            
+            for soname in libSDL2-2.0.so.0 libopenal.so.1 libuv.so.1 libturbojpeg.so.0; do
+              path="$(get_lib "$soname" || true)"
+              if [ -n "$path" ]; then
+                cp -L "$path" "$DIST/$soname"
+              else
+                echo "Warning: $soname not found"
+              fi
+            done
+            
+            # mbedtls soname varies by version
+            for libbase in libmbedtls libmbedx509 libmbedcrypto; do
+              path="$(ldconfig -p | grep "^\s*${libbase}\.so\." | awk '{print $NF}' | head -n 1 || true)"
+              if [ -n "$path" ]; then
+                cp -L "$path" "$DIST/$(basename "$path")"
+              else
+                echo "Warning: $libbase not found"
+              fi
+            done
+
+            # Game data
+            cp -a $HOME/MBHaxe/data "$DIST/"
+            
+            echo '#!/usr/bin/env bash' > "$DIST/run-mbu.sh"
+            echo 'set -e' >> "$DIST/run-mbu.sh"
+            echo 'DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"' >> "$DIST/run-mbu.sh"
+            echo 'export LD_LIBRARY_PATH="$DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"' >> "$DIST/run-mbu.sh"
+            echo 'cd "$DIR"' >> "$DIST/run-mbu.sh"
+            echo 'exec "$DIR/marblegame" "$@"' >> "$DIST/run-mbu.sh"
+            
+            chmod +x "$DIST/run-mbu.sh"
+
+            # Set rpath=$ORIGIN so the bundle is self-contained
+            patchelf --set-rpath '$ORIGIN' "$DIST/marblegame"
+            
+            for f in "$DIST"/*.hdll "$DIST"/*.so "$DIST"/*.so.*; do
+              [ -f "$f" ] || continue
+              if file "$f" | grep -q ELF; then
+                patchelf --set-rpath '$ORIGIN' "$f" || true
+              fi
+            done
+            
+            echo "Checking linked libraries..."
+            cd "$DIST"
+            LD_LIBRARY_PATH="$DIST" ldd ./marblegame | tee ldd.txt
+            
+            if grep -q "not found" ldd.txt; then
+              echo "ERROR: missing libraries:"
+              grep "not found" ldd.txt
+              exit 1
+            fi
+            
+            rm -f libhl.so libhl.so.1
+            ln -sf libhl.so.1.13.0 libhl.so.1
+            ln -sf libhl.so.1 libhl.so
+
+            cd $HOME
+            tar -czvf MBHaxe-Gold-Linux.tar.gz MBHaxe-Gold-Linux
+
+      - run:
+          name: Upload to Artifact Storage
+          command: |
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT \
+              $HOME/MBHaxe-Gold-Linux.tar.gz \
+              $REMOTEDIR/MBHaxe-Gold-Linux.tar.gz
+
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -468,6 +686,15 @@ workflows:
   build-windows:
     jobs:
       - build-win:
+          filters:
+            tags:
+              only: /^\d+.\d+.\d+$/
+            branches:
+              ignore: /.*/
+  
+  build-linux:
+    jobs:
+      - build-lin:
           filters:
             tags:
               only: /^\d+.\d+.\d+$/
