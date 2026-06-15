@@ -22,17 +22,24 @@ You will also have to bypass Gatekeeper since the .app is not signed.
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum.apk)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra.apk)
 
+## iOS (NEW!)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.13/MBHaxe-Gold-iOS.ipa)
+### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum-iOS.ipa)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-iOS.ipa)
+Ported to iOS by [boucymatt](https://github.com/boucymatt).  
+iOS builds ship as `.ipa` files that must be sideloaded, as Apple does not allow direct installs outside the App Store. Use [LiveContainer](https://github.com/LiveContainer/LiveContainer) or an AltStore-compatible store (AltStore, SideStore, etc.). To install and update all builds from one place, add the AltStore source `https://dl.randomityguy.me/altstore-source.json`.
+
 ## Xbox (NEW!)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-UWP-Xbox.msix)
 Ported to Xbox via UWP by [Daniel Worley](https://github.com/worleydl).  
 You will need to enable Developer Mode on your Xbox in order to sideload the app. The walkthrough can be found at https://www.youtube.com/watch?v=2Ly9TIdu9uw.  
 
 ## Additional Features
-- Cross Platform Multiplayer: Available in Ultra and Platinum. You can host and join multiplayer matches in any of these platforms: Windows, Mac, Web, Android.
+- Cross Platform Multiplayer: Available in Ultra and Platinum. You can host and join multiplayer matches in any of these platforms: Windows, Mac, Web, Android, and iOS.
 - Replay System: You can record your run using the built in replay system and watch it later.  
 - Rewind: You can rewind your marble by enabling rewind in the Options and holding down the rewind key (defaults to R). 
 - Controller Support: Full controller support is added to Marble Blast Ultra, with incomplete support for the rest.
-- Touch Controls: Available in the web (mobile) and android versions.
+- Touch Controls: Available in the Web (mobile) and Android and iOS versions.
 
 # Screenshots
 <img src="https://imgur.com/Ncb4atl.png" width="640">
@@ -82,12 +89,15 @@ If the build dependencies are fullfilled, compile with `haxe compile-js.hxml` an
 See [here](README-macOS.md)
 
 ## Android
-The branches used for Android builds are `mbg-android`, `mbp-android-new` or `mbu-android`.  
+The branches used for Android builds are `mbg-mobile`, `mbp-mobile` or `mbu-mobile`.  
 Clone [this repository](https://github.com/RandomityGuy/MBHaxeAndroidLibs) containing the necessary libraries for the build and merge its src folder with that of Export/android/app/src folder.  
 Android NDK version 18.1.5063045 and platform SDK version 31 is needed.  
 Install zyheaps haxelib as well.  
 Finally run `gradlew` in Export/android folder and run `gradlew assembleRelease`  
 This will build the apk file at Export/android/app/build/outputs/apk/release/app-release-unsigned.apk which you can sign yourself and install on your device.  
+
+## iOS
+The branches used for iOS builds are `mbg-mobile`, `mbp-mobile` or `mbu-mobile`. Follow the CI scripts in the .circleci folder to build the iOS version. You will need a Mac with Xcode installed and an Apple Developer account to build the iOS version. The resulting .ipa file can be sideloaded onto your device using AltStore or similar tools.
 
 # FAQ
 
