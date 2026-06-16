@@ -1,3 +1,10 @@
+# 1.1.14
+This update brings the following bugfixes:
+- Fixed PowerUp names being incorrect.
+- Fixed the absence of camera sensitivity on mobile versions.
+- Fixed being able to change resolution on iOS.
+- Fixed a crash when pressing the pause button on mobile devices.
+
 # 1.1.13
 This update brings feature and bugfix parity with the latest MBP version:
 - Fixed a ton of bugs that were fixed in MBP since the last update.
