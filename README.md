@@ -11,20 +11,20 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ### Marble Blast Ultra: [Play](https://marbleblastultra.randomityguy.me/)
 ## Windows, Mac and Linux
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.13)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.14)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.3)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.5-mbu)
-Linux port by [boucymatt](https://github.com/boucymatt). Requires Steam Runtime. Supports Steam Deck.
+Linux port by [boucymatt](https://github.com/boucymatt). Supports Steam Deck.
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.13/MBHaxe-Gold.apk)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum.apk)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra.apk)
 
 ## iOS (NEW!)
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.13/MBHaxe-Gold-iOS.ipa)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold-iOS.ipa)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum-iOS.ipa)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-iOS.ipa)
 Ported to iOS by [boucymatt](https://github.com/boucymatt).  
