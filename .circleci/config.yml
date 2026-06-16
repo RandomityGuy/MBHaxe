@@ -448,7 +448,7 @@ jobs:
             # them via `shell: cmd.exe` directly does not (cmd treats it as inline, not a script).
             command: |
               cd ~/project/native
-              cat > build.bat <<'EOF'
+              cat > build.bat \<<'EOF'
               cd /d %USERPROFILE%\project\native
               if not exist x64\Release mkdir x64\Release
               for /f "usebackq delims=" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -find VC\Auxiliary\Build\vcvars64.bat`) do call "%%i"
