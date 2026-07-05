@@ -66,8 +66,11 @@ class Radar {
 			if (marbleName != null)
 				marbleName.alpha = 0;
 		}
+		var spectating = level.marble != null && @:privateAccess level.marble.camera.spectate;
 		for (marble in level.marbles) {
-			if (marble != level.marble) {
+			if (marble != level.marble || spectating) {
+				if (@:privateAccess marble.connection == null)
+					continue;
 				var shapePos = marble.getAbsPos().getPosition();
 				var shapeDir = shapePos.sub(level.scene.camera.pos);
 				var shapeDist = shapeDir.lengthSq();
