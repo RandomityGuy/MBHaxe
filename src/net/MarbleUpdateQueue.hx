@@ -13,6 +13,7 @@ class OtherMarbleUpdate {
 	var lastMegaTick:Int;
 	var lastPowerUpId:Int;
 	var lastGravityUp:Vector;
+	var lastTrapdoorUpdates:Map<Int, Int> = [];
 
 	public function new() {}
 }
@@ -53,6 +54,8 @@ class MarbleUpdateQueue {
 					otherUpdate.lastPowerUpId = update.powerUpId;
 				if (flags & MarbleNetFlags.GravityChange != 0)
 					otherUpdate.lastGravityUp = update.gravityDirection;
+				if (flags & MarbleNetFlags.UpdateTrapdoor != 0)
+					otherUpdate.lastTrapdoorUpdates = update.trapdoorUpdates;
 			} else {
 				applyFlagged(MarbleNetFlags.DoBlast, (flags & MarbleNetFlags.DoBlast) != 0, update.blastTick, otherUpdate.lastBlastTick,
 					v -> update.blastTick = v, v -> otherUpdate.lastBlastTick = v);
@@ -64,6 +67,8 @@ class MarbleUpdateQueue {
 					v -> update.powerUpId = v, v -> otherUpdate.lastPowerUpId = v);
 				applyFlagged(MarbleNetFlags.GravityChange, (flags & MarbleNetFlags.GravityChange) != 0, update.gravityDirection, otherUpdate.lastGravityUp,
 					v -> update.gravityDirection = v, v -> otherUpdate.lastGravityUp = v);
+				applyFlagged(MarbleNetFlags.UpdateTrapdoor, (flags & MarbleNetFlags.UpdateTrapdoor) != 0, update.trapdoorUpdates,
+					otherUpdate.lastTrapdoorUpdates, v -> update.trapdoorUpdates = v, v -> otherUpdate.lastTrapdoorUpdates = v);
 			}
 			otherUpdate.packets.push(update);
 		} else if (myMarbleUpdate == null || update.serverTicks > myMarbleUpdate.serverTicks) {
@@ -78,6 +83,8 @@ class MarbleUpdateQueue {
 					update.powerUpId = myMarbleUpdate.powerUpId;
 				if ((flags & MarbleNetFlags.GravityChange) == 0)
 					update.gravityDirection = myMarbleUpdate.gravityDirection;
+				if ((flags & MarbleNetFlags.UpdateTrapdoor) == 0)
+					update.trapdoorUpdates = myMarbleUpdate.trapdoorUpdates;
 			}
 			myMarbleUpdate = update;
 			ourMoveApplied = false;

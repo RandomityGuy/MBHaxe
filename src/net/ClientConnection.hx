@@ -78,6 +78,7 @@ abstract class GameConnection {
 	var platform:NetPlatform;
 	var marbleId:Int;
 	var isPrivate:Bool;
+	var spectator:Bool;
 
 	function new(id:Int) {
 		this.id = id;
@@ -91,6 +92,14 @@ abstract class GameConnection {
 
 	public function toggleLobbyReady() {
 		lobbyReady = !lobbyReady;
+	}
+
+	public function toggleSpectate() {
+		spectator = !spectator;
+	}
+
+	public function setSpectate(spectate:Bool) {
+		spectator = spectate;
 	}
 
 	public function queueMove(m:NetMove) {

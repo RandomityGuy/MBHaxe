@@ -43,7 +43,7 @@ class MarbleGame {
 	static var canvas:Canvas;
 	static var instance:MarbleGame;
 
-	static var currentVersion = "1.2.5";
+	static var currentVersion = "1.3.0";
 
 	var world:MarbleWorld;
 	var previewWorld:PreviewWorld;

@@ -62,6 +62,10 @@ class PlayGui {
 	var timerPoint:GuiImage;
 	var timerColon:GuiImage;
 
+	var countdownNumbers:Array<GuiAnim> = [];
+	var countdownPoint:GuiImage;
+	var countdownIcon:GuiImage;
+
 	var gemCountNumbers:Array<GuiAnim> = [];
 	var gemCountSlash:GuiImage;
 	var gemHUD:GuiImage;
@@ -96,6 +100,11 @@ class PlayGui {
 	var playGuiCtrl:GuiControl;
 	var chatCtrl:ChatCtrl;
 
+	var spectatorCtrl:GuiControl;
+	var spectatorTxt:GuiMLText;
+	var spectatorShadowTxt:GuiMLText;
+	var spectatorTxtMode:Int = -1;
+
 	var resizeEv:Void->Void;
 	var resizeControlEvents:Array<Void->Void> = [];
 
@@ -126,6 +135,11 @@ class PlayGui {
 			if (chatCtrl != null) {
 				chatCtrl.dispose();
 				chatCtrl = null;
+			}
+
+			if (spectatorCtrl != null) {
+				spectatorCtrl.dispose();
+				spectatorCtrl = null;
 			}
 
 			for (textureResource in textureResources) {
@@ -184,6 +198,12 @@ class PlayGui {
 			timerNumbers.push(new GuiAnim(numberTiles));
 		}
 
+		if (MarbleGame.instance.world.isMultiplayer) {
+			for (i in 0...3) {
+				countdownNumbers.push(new GuiAnim(numberTiles));
+			}
+		}
+
 		for (i in 0...6) {
 			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
@@ -197,6 +217,8 @@ class PlayGui {
 		if (MarbleGame.instance.world.isMultiplayer) {
 			initPlayerList();
 			initChatHud();
+
+			initGemCountdownTimer();
 		}
 		// if (Settings.optionsSettings.frameRateVis)
 		// 	initFPSMeter();
@@ -330,6 +352,41 @@ class PlayGui {
 		});
 
 		playGuiCtrl.addChild(timerCtrl);
+	}
+
+	public function initGemCountdownTimer() {
+		var timerCtrl = new GuiControl();
+		timerCtrl.horizSizing = HorizSizing.Center;
+		timerCtrl.position = new Vector(316, 69);
+		timerCtrl.extent = new Vector(374, 58);
+
+		countdownNumbers[0].position = new Vector(158, 10);
+		countdownNumbers[0].extent = new Vector(28, 37);
+
+		countdownNumbers[1].position = new Vector(174, 10);
+		countdownNumbers[1].extent = new Vector(28, 37);
+
+		var pointCols = ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile();
+
+		countdownPoint = new GuiImage(pointCols);
+		countdownPoint.position = new Vector(184, 10);
+		countdownPoint.extent = new Vector(28, 37);
+
+		countdownNumbers[2].position = new Vector(195, 10);
+		countdownNumbers[2].extent = new Vector(28, 37);
+
+		countdownIcon = new GuiImage(ResourceLoader.getResource("data/ui/game/timerhuntrespawn.png", ResourceLoader.getImage, this.imageResources).toTile());
+		countdownIcon.position = new Vector(125, 10);
+		countdownIcon.extent = new Vector(36, 36);
+
+		timerCtrl.addChild(countdownIcon);
+		timerCtrl.addChild(countdownNumbers[0]);
+		timerCtrl.addChild(countdownNumbers[1]);
+		timerCtrl.addChild(countdownPoint);
+		timerCtrl.addChild(countdownNumbers[2]);
+
+		playGuiCtrl.addChild(timerCtrl);
+		formatCountdownTimer(0); // hide it
 	}
 
 	public function setCenterText(text:String) {
@@ -789,9 +846,19 @@ class PlayGui {
 		var plShadowScores = [];
 		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
 		for (item in playerList) {
-			pl.push('<font color="#EBEBEB"><img src="${item.us ? "us" : "them"}"></img>${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
+			var isSpectating = false;
+			if (item.us) {
+				if (Net.isHost)
+					isSpectating = Net.hostSpectate;
+				if (Net.isClient)
+					isSpectating = Net.clientSpectate;
+			} else {
+				isSpectating = Net.clientIdMap[item.id].spectator;
+			}
+			var spectateText = isSpectating ? "[S] " : "";
+			pl.push('<font color="#EBEBEB"><img src="${item.us ? "us" : "them"}"></img>${spectateText}${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
 			plScores.push('<font color="#EBEBEB">${item.score}</font>');
-			plShadow.push('<font color="#000000"><img src="them"></img>${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
+			plShadow.push('<font color="#000000"><img src="them"></img>${spectateText}${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
 			plShadowScores.push('<font color="#000000">${item.score}</font>');
 		}
 		playerListCtrl.setTexts(pl);
@@ -903,6 +970,88 @@ class PlayGui {
 		}
 
 		redrawPlayerList();
+	}
+
+	public function initSpectatorMenu() {
+		spectatorCtrl = new GuiControl();
+		spectatorCtrl.vertSizing = Top;
+		spectatorCtrl.position = new Vector(0, 310);
+		spectatorCtrl.extent = new Vector(386, 128);
+
+		var specWnd = new GuiImage(ResourceLoader.getResource("data/ui/game/scoreBackdrop.png", ResourceLoader.getImage, this.imageResources).toTile());
+		specWnd.horizSizing = Width;
+		specWnd.vertSizing = Top;
+		specWnd.position = new Vector(0, 0);
+		specWnd.extent = new Vector(386, 128);
+
+		spectatorCtrl.addChild(specWnd);
+
+		var arial14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
+		var arial14b = new BitmapFont(arial14fontdata.entry);
+		@:privateAccess arial14b.loader = ResourceLoader.loader;
+		var arial14 = arial14b.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
+
+		function mlFontLoader(text:String) {
+			return arial14;
+		}
+
+		spectatorShadowTxt = new GuiMLText(arial14, mlFontLoader);
+		spectatorShadowTxt.position = new Vector(39, 45);
+		spectatorShadowTxt.extent = new Vector(282, 14);
+		spectatorShadowTxt.text.textColor = 0x000000;
+
+		spectatorTxt = new GuiMLText(arial14, mlFontLoader);
+		spectatorTxt.position = new Vector(38, 44);
+		spectatorTxt.extent = new Vector(282, 14);
+		spectatorTxt.text.textColor = 0xEBEBEB;
+
+		spectatorCtrl.addChild(spectatorShadowTxt);
+		spectatorCtrl.addChild(spectatorTxt);
+		playGuiCtrl.addChild(spectatorCtrl);
+	}
+
+	public function setSpectateMenu(enabled:Bool) {
+		if (enabled && spectatorCtrl == null) {
+			initSpectatorMenu();
+			spectatorCtrl.render(MarbleGame.canvas.scene2d, @:privateAccess playGuiCtrl._flow);
+			blastFillUltra.bmp.visible = false;
+			blastFill.bmp.visible = false;
+			blastFrame.bmp.visible = false;
+			return true;
+		}
+		if (!enabled && spectatorCtrl != null) {
+			spectatorCtrl.dispose();
+			spectatorCtrl = null;
+			blastFillUltra.bmp.visible = false;
+			blastFill.bmp.visible = true;
+			blastFrame.bmp.visible = true;
+			spectatorTxtMode = -1;
+			return true;
+		}
+		return false;
+	}
+
+	public function setSpectateMenuText(mode:Int) {
+		if (spectatorTxtMode != mode) {
+			if (mode == 0) {
+				spectatorTxt.text.text = '<p align="center">Spectator Info</p>
+					Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}';
+				spectatorShadowTxt.text.text = '<p align="center">Spectator Info</p>
+					Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}';
+			}
+			if (mode == 1) {
+				spectatorTxt.text.text = '<p align="center">Spectator Info</p>
+					Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}
+					<br/>Prev Player: ${Util.getKeyForButton2(Settings.controlsSettings.left)}
+					<br/>Next Player: ${Util.getKeyForButton2(Settings.controlsSettings.right)}';
+				spectatorShadowTxt.text.text = '<p align="center">Spectator Info</p>
+					Toggle Fly / Orbit: ${Util.getKeyForButton2(Settings.controlsSettings.blast)}
+					<br/>Prev Player: ${Util.getKeyForButton2(Settings.controlsSettings.left)}
+					<br/>Next Player: ${Util.getKeyForButton2(Settings.controlsSettings.right)}';
+			}
+
+			spectatorTxtMode = mode;
+		}
 	}
 
 	public function setHelpTextOpacity(value:Float) {
@@ -1115,6 +1264,42 @@ class PlayGui {
 		timerNumbers[4].anim.currentFrame = hundredthTen;
 		timerNumbers[5].anim.currentFrame = hundredthOne;
 		timerNumbers[6].anim.currentFrame = thousandth;
+	}
+
+	public function formatCountdownTimer(time:Float) {
+		if (time == 0) {
+			countdownNumbers[0].anim.visible = false;
+			countdownNumbers[1].anim.visible = false;
+			countdownNumbers[2].anim.visible = false;
+			countdownPoint.bmp.visible = false;
+			countdownIcon.bmp.visible = false;
+		} else {
+			countdownNumbers[0].anim.visible = true;
+			countdownNumbers[1].anim.visible = true;
+			countdownNumbers[2].anim.visible = true;
+			countdownPoint.bmp.visible = true;
+			countdownIcon.bmp.visible = true;
+		}
+
+		var et = time * 1000;
+		var hundredth = Math.floor((et % 1000) / 10);
+		var totalSeconds = Math.floor(et / 1000);
+		var seconds = totalSeconds % 60;
+
+		var secondsOne = seconds % 10;
+		var secondsTen = (seconds - secondsOne) / 10;
+		var hundredthOne = hundredth % 10;
+		var hundredthTen = (hundredth - hundredthOne) / 10;
+
+		if (secondsTen > 0) {
+			countdownNumbers[0].anim.visible = true;
+			countdownNumbers[0].anim.currentFrame = secondsTen;
+		} else {
+			countdownNumbers[0].anim.visible = false;
+		}
+
+		countdownNumbers[1].anim.currentFrame = secondsOne;
+		countdownNumbers[2].anim.currentFrame = hundredthTen;
 	}
 
 	public inline function addChatMessage(str:String) {
