@@ -191,7 +191,9 @@ final blastMaxParticleOptions:ParticleEmitterOptions = {
 @:publicFields
 @:structInit
 class MarbleTestMoveFoundContact {
-	var v:Array<Vector>;
+	var v1:Vector;
+	var v2:Vector;
+	var v3:Vector;
 	var n:Vector;
 }
 
@@ -715,13 +717,15 @@ class Marble extends GameObject {
 		// if (level.isReplayingMovement)
 		// 	return level.currentInputMoves[1].marbleAxes;
 		if (this.controllable && !this.isNetUpdate) {
-			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
+			var rotMat = new Matrix();
+			rotMat.initRotation(0, 0, camera.CameraYaw);
+			motiondir.transform(rotMat);
 			motiondir.transform(level.newOrientationQuat.toMatrix());
 			var updir = this.currentUp;
 			var sidedir = motiondir.cross(updir);
 
 			sidedir.normalize();
-			motiondir = updir.cross(sidedir);
+			motiondir.load(updir.cross(sidedir));
 			return [sidedir, motiondir, updir];
 		} else {
 			if (moveMotionDir != null)
@@ -737,22 +741,22 @@ class Marble extends GameObject {
 			return this.velocity.multiply(-16);
 		var gWorkGravityDir = this.currentUp.multiply(-1);
 		var A = new Vector();
-		A = gWorkGravityDir.multiply(this._gravity);
+		A.load(gWorkGravityDir.multiply(this._gravity));
 		var helicopter = isHelicopterEnabled(timeState);
 		if (helicopter) {
-			A = A.multiply(0.25);
+			A.load(A.multiply(0.25));
 		}
 		if (this.level != null) {
 			var mass = this.getMass();
 			for (obj in level.forceObjects) {
 				var force = cast(obj, ForceObject).getForce(this.collider.transform.getPosition());
-				A = A.add(force.multiply(1 / mass));
+				A.load(A.add(force.multiply(1 / mass)));
 			}
 			for (marble in level.marbles) {
 				if ((marble != cast this) && !marble._firstTick) {
 					var tick = Net.isHost ? timeState.ticks : serverTicks;
 					var force = marble.getForce(this.collider.transform.getPosition(), tick);
-					A = A.add(force.multiply(1 / mass));
+					A.load(A.add(force.multiply(1 / mass)));
 					// Notify game mode on first tick(s) of blast hitting another marble
 					if (force.length() > 0.01 && Net.isHost && tick <= marble.blastUseTick + 1)
 						level.gameMode.onMarbleContact(marble, this);
@@ -828,7 +832,7 @@ class Marble extends GameObject {
 		var currentXVelocity = rollVelocity.dot(sideDir);
 		var mv = m.d;
 
-		mv = mv.multiply(1.538461565971375);
+		mv.load(mv.multiply(1.538461565971375));
 		var mvlen = Math.sqrt(mv.x * mv.x + mv.y * mv.y);
 		if (mvlen > 1) {
 			mv.scale(1 / mvlen);
@@ -971,9 +975,9 @@ class Marble extends GameObject {
 			for (j in 0...contacts.length) {
 				var dir2 = dir.add(contacts[j].normal);
 				if (dir2.lengthSq() < 0.01) {
-					dir2 = dir2.add(contacts[j].normal);
+					dir2.load(dir2.add(contacts[j].normal));
 				}
-				dir = dir2;
+				dir.load(dir2);
 				dir.normalize();
 				gotOne = true;
 			}
@@ -1064,8 +1068,8 @@ class Marble extends GameObject {
 					slipping = false;
 				}
 				var vAtCDir = vAtC.multiply(1 / vAtCMag);
-				aFriction = bestContact.normal.cross(vAtCDir).multiply(angAMagnitude);
-				AFriction = vAtCDir.multiply(-AMagnitude);
+				aFriction.load(bestContact.normal.cross(vAtCDir).multiply(angAMagnitude));
+				AFriction.load(vAtCDir.multiply(-AMagnitude));
 				this._slipAmount = vAtCMag - totalDeltaV;
 			}
 			if (!slipping) {
@@ -1306,7 +1310,7 @@ class Marble extends GameObject {
 						var p = posDiff.add(position);
 						lastContactNormal = p.sub(otherPosition);
 						lastContactNormal.normalize();
-						lastContactPos = p.sub(lastContactNormal.multiply(_radius));
+						lastContactPos.load(p.sub(lastContactNormal.multiply(_radius)));
 					}
 				}
 			}
@@ -1348,7 +1352,7 @@ class Marble extends GameObject {
 			for (surf in surfaces) {
 				var surface:CollisionSurface = surf;
 
-				currentFinalPos = position.add(relVel.multiply(finalT));
+				currentFinalPos.load(position.add(relVel.multiply(finalT)));
 
 				var i = 0;
 				while (i < surface.indices.length) {
@@ -1377,8 +1381,10 @@ class Marble extends GameObject {
 					}
 
 					testTriangles.push({
-						v: [v0.clone(), v.clone(), v2.clone()],
-						n: surfaceNormal.clone(),
+						v1: v0,
+						v2: v,
+						v3: v2,
+						n: surfaceNormal,
 					});
 
 					// Time until collision with the plane
@@ -1390,7 +1396,7 @@ class Marble extends GameObject {
 						// If we're inside the poly, just get the position
 						if (Collision.PointInTriangle(collisionPoint, v0, v, v2)) {
 							finalT = collisionTime;
-							currentFinalPos = position.add(relVel.multiply(finalT));
+							currentFinalPos.load(position.add(relVel.multiply(finalT)));
 							found = true;
 							lastContactPos.load(currentFinalPos);
 							// iterationFound = true;
@@ -1401,7 +1407,7 @@ class Marble extends GameObject {
 					}
 					// We *might* be colliding with an edge
 
-					var triangleVerts = [v0.clone(), v.clone(), v2.clone()];
+					var triangleVerts = [v0, v, v2];
 
 					var lastVert = v2.clone();
 
@@ -1464,7 +1470,7 @@ class Marble extends GameObject {
 							// If the collision is within the edge, resolve the collision and continue.
 							if (distanceAlongEdge >= 0.0 && distanceAlongEdge <= edgeLen) {
 								finalT = edgeCollisionTime;
-								currentFinalPos = position.add(relVel.multiply(finalT));
+								currentFinalPos.load(position.add(relVel.multiply(finalT)));
 								lastContactPos.load(vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert));
 								lastVert.load(thisVert);
 								found = true;
@@ -1510,8 +1516,8 @@ class Marble extends GameObject {
 								if (edgeCollisionTime >= 0.000001) {
 									// Resolve it and continue
 									finalT = edgeCollisionTime;
-									currentFinalPos = position.add(relVel.multiply(finalT));
-									lastContactPos = thisVert;
+									currentFinalPos.load(position.add(relVel.multiply(finalT)));
+									lastContactPos.load(thisVert);
 									found = true;
 									// Debug.drawSphere(currentFinalPos, radius);
 									// iterationFound = true;
@@ -1560,7 +1566,7 @@ class Marble extends GameObject {
 						}
 
 						finalT = edgeCollisionTime;
-						currentFinalPos = position.add(relVel.multiply(finalT));
+						currentFinalPos.load(position.add(relVel.multiply(finalT)));
 						// Debug.drawSphere(currentFinalPos, radius);
 
 						lastVert.load(thisVert);
@@ -1601,12 +1607,12 @@ class Marble extends GameObject {
 			var resolved = 0;
 			for (testTri in concernedContacts) {
 				// Check if we are on wrong side of the triangle
-				if (testTri.n.dot(position) - testTri.n.dot(testTri.v[0]) < 0) {
+				if (testTri.n.dot(position.sub(testTri.v1)) < 0) {
 					continue;
 				}
 
-				var t1 = testTri.v[1].sub(testTri.v[0]);
-				var t2 = testTri.v[2].sub(testTri.v[0]);
+				var t1 = testTri.v2.sub(testTri.v1);
+				var t2 = testTri.v3.sub(testTri.v1);
 				var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
 
 				// Check if our triangle is too small to be collided with
@@ -1615,30 +1621,30 @@ class Marble extends GameObject {
 				}
 
 				// Intersection with plane of testTri and current position
-				var t = (testTri.v[0].sub(position)).dot(testTri.n) / testTri.n.lengthSq();
+				var t = (testTri.v1.sub(position)).dot(testTri.n) / testTri.n.lengthSq();
 				var intersect = position.add(testTri.n.multiply(t));
 
-				var tsi = Collision.PointInTriangle(intersect, testTri.v[0], testTri.v[1], testTri.v[2]);
+				var tsi = Collision.PointInTriangle(intersect, testTri.v1, testTri.v2, testTri.v3);
 				if (tsi) {
 					var separatingDistance = position.sub(intersect).normalized();
 					var distToContactPlane = intersect.distance(position);
 					if (radius - 0.005 - distToContactPlane > 0.0001) {
 						// Nudge to the surface of the contact plane
-						Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
+						Debug.drawTriangle(testTri.v1, testTri.v2, testTri.v3);
 						Debug.drawSphere(position, radius);
 						position.load(position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005)));
 						resolved++;
 					}
 				}
 
-				// var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius, testTri.edge,
+				// var tsi = Collision.TriangleSphereIntersection(testTri.v1, testTri.v2, testTri.v3, testTri.n, position, radius, testTri.edge,
 				// 	testTri.concavity);
 				// if (tsi.result) {
 				// 	var separatingDistance = position.sub(tsi.point).normalized();
 				// 	var distToContactPlane = tsi.point.distance(position);
 				// 	if (radius - 0.005 - distToContactPlane > 0.0001) {
 				// 		// Nudge to the surface of the contact plane
-				// 		Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
+				// 		Debug.drawTriangle(testTri.v1, testTri.v2, testTri.v3);
 				// 		Debug.drawSphere(position, radius);
 				// 		position = position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005));
 				// 		resolved++;
@@ -1786,9 +1792,9 @@ class Marble extends GameObject {
 			}
 
 			for (impulse in appliedImpulses) {
-				this.velocity = this.velocity.add(impulse.impulse);
+				this.velocity.load(this.velocity.add(impulse.impulse));
 				if (m.jump && impulse.contactImpulse) {
-					this.velocity = this.velocity.add(impulse.impulse.normalized().multiply(this._jumpImpulse));
+					this.velocity.load(this.velocity.add(impulse.impulse.normalized().multiply(this._jumpImpulse)));
 				}
 			}
 			appliedImpulses = [];
@@ -1806,8 +1812,8 @@ class Marble extends GameObject {
 			var finalPosData = testMove(velocity, pos, timeStep, _radius, true); // this.getIntersectionTime(timeStep, velocity);
 			if (finalPosData.found) {
 				var diff = timeStep - finalPosData.t;
-				this.velocity = this.velocity.sub(A.multiply(diff));
-				this.omega = this.omega.sub(a.multiply(diff));
+				this.velocity.load(this.velocity.sub(A.multiply(diff)));
+				this.omega.load(this.omega.sub(a.multiply(diff)));
 				// if (finalPosData.t > 0.00001)
 				timeStep = finalPosData.t;
 				tdiff = diff;
@@ -1825,8 +1831,8 @@ class Marble extends GameObject {
 
 					var tDiff = updatedTimestep - timeStep;
 					if (tDiff > 0) {
-						this.velocity = this.velocity.sub(A.multiply(tDiff));
-						this.omega = this.omega.sub(a.multiply(tDiff));
+						this.velocity.load(this.velocity.sub(A.multiply(tDiff)));
+						this.omega.load(this.omega.sub(a.multiply(tDiff)));
 
 						timeStep = updatedTimestep;
 					}
