@@ -528,6 +528,11 @@ class Marble extends GameObject {
 				this.rollMegaSound.volume = 0;
 			}
 
+			this.megaMarbleDuration = 312;
+			if (this.level != null && this.level.gameMode is HuntMode && cast(this.level.gameMode, HuntMode).competitive) {
+				this.megaMarbleDuration = 156;
+			}
+
 			this.isUltra = isUltra;
 
 			this.collider = new SphereCollisionEntity(cast this);

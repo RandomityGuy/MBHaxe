@@ -44,6 +44,8 @@ interface GameMode {
 	// Returns mode-specific packets to send to a client joining mid-game
 	public function getWorldJoinPackets():Array<haxe.io.Bytes>;
 
+	public function transmitAnyNetCommands(client:net.ClientConnection.GameConnection):Void;
+
 	public function getPreloadFiles():Array<String>;
 	public function constructRewindState():RewindableState;
 }

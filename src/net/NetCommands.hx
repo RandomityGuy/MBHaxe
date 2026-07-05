@@ -166,6 +166,7 @@ class NetCommands {
 					for (packet in packets) {
 						c.sendBytes(packet);
 					}
+					MarbleGame.instance.world.gameMode.transmitAnyNetCommands(c); // send to client
 					Net.clientIdMap[clientId].ready();
 
 					if (MarbleGame.instance.world.serverStartTicks == 0) {

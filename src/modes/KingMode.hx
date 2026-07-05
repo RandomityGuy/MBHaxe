@@ -244,7 +244,8 @@ class KingMode extends NullMode {
 	public function onScoreboardUpdate(newScores:Map<Int, Int>) {
 		var myId = Net.isHost ? 0 : Net.clientId;
 		var newScore = newScores.get(myId);
-		if (newScore == null) newScore = 0;
+		if (newScore == null)
+			newScore = 0;
 		if (newScore > lastKnownScore && kingClientId == myId)
 			@:privateAccess level.playGui.addMiddleMessage('+${newScore - lastKnownScore}', 0xFFD700);
 		lastKnownScore = newScore;

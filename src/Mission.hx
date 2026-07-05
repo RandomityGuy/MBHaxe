@@ -301,6 +301,7 @@ class Mission {
 		// Since the mission is from Marbleland, we must postprocess it to port it to MBU formats.
 
 		var skyEl:MissionElementSky = null;
+		var skyMaterialList = null;
 
 		var processFunctions = [];
 		var cloudType = "none";
@@ -314,15 +315,15 @@ class Mission {
 					var skyMaterial = skyEl.materiallist.toLowerCase();
 					switch (skyMaterial) {
 						case "~/data/skies/cloudy/cloudy.dml" | "~/data/skies/mbu/sky_beginner.dml":
-							skyEl.materiallist = "~/data/skies/sky_beginner.dml";
+							skyMaterialList = "~/data/skies/sky_beginner.dml";
 							cloudType = "beginner";
 
 						case "~/data/skies/mbu/sky_intermediate.dml":
-							skyEl.materiallist = "~/data/skies/sky_intermediate.dml";
+							skyMaterialList = "~/data/skies/sky_intermediate.dml";
 							cloudType = "intermediate";
 
 						case "~/data/skies/mbu/sky_advanced.dml":
-							skyEl.materiallist = "~/data/skies/sky_advanced.dml";
+							skyMaterialList = "~/data/skies/sky_advanced.dml";
 							cloudType = "advanced";
 					}
 				}
@@ -332,15 +333,15 @@ class Mission {
 					var db = ss.datablock.toLowerCase();
 					switch (db) {
 						case "clear":
-							skyEl.materiallist = "~/data/skies/sky_beginner.dml";
+							skyMaterialList = "~/data/skies/sky_beginner.dml";
 							cloudType = "beginner";
 
 						case "dusk":
-							skyEl.materiallist = "~/data/skies/sky_intermediate.dml";
+							skyMaterialList = "~/data/skies/sky_intermediate.dml";
 							cloudType = "intermediate";
 
 						case "wintry":
-							skyEl.materiallist = "~/data/skies/sky_advanced.dml";
+							skyMaterialList = "~/data/skies/sky_advanced.dml";
 							cloudType = "advanced";
 
 						case "glass_3shape" | "glass_6shape" | "glass_9shape" | "glass_12shape" | "glass_15shape" | "glass_18shape":
@@ -421,6 +422,9 @@ class Mission {
 		};
 
 		postprocessMission(root);
+
+		if (skyMaterialList != null)
+			skyEl.materiallist = skyMaterialList;
 
 		// Add astrolabe, because it does not exist
 		var astrolabeEl = new MissionElementStaticShape();
