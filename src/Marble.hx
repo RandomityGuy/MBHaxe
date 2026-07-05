@@ -2553,7 +2553,7 @@ class Marble extends GameObject {
 
 	public function getForce(position:Vector, tick:Int) {
 		var retForce = new Vector();
-		if (tick - blastUseTick >= 12)
+		if (tick - blastUseTick >= 12 || newPos == null)
 			return retForce;
 		var delta = position.sub(newPos);
 		var deltaLen = delta.length();
