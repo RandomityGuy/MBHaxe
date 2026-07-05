@@ -1196,6 +1196,10 @@ class MarbleWorld extends Scheduler {
 			var oldFlags = @:privateAccess marb.netFlags;
 			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
 
+			if (oldFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+				@:privateAccess marb.netFlags |= MarbleNetFlags.UpdateTrapdoor;
+			}
+
 			var innerMove = @:privateAccess marb.lastMove;
 			if (innerMove == null) {
 				innerMove = new Move();

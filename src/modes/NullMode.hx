@@ -123,4 +123,6 @@ class NullMode implements GameMode {
 	public function getWorldJoinPackets():Array<haxe.io.Bytes> {
 		return [];
 	}
+
+	public function transmitAnyNetCommands(client:net.ClientConnection.GameConnection) {}
 }

@@ -212,6 +212,28 @@ class HuntMode extends NullMode {
 	};
 
 	override function getSpawnTransform() {
+		if (competitive && gemsCentroid == null) {
+			this.gemsCentroid = new Vector();
+			for (gem in this.level.gems) {
+				gemsCentroid.load(gemsCentroid.add(gem.getAbsPos().getPosition()));
+			}
+			if (gemSpawnPoints.length > 0)
+				gemsCentroid.load(gemsCentroid.multiply(1.0 / gemSpawnPoints.length));
+
+			var closestSpawnIndex = 0;
+			var closestSpawnDistance = 1e8;
+			for (i in 0...playerSpawnPoints.length) {
+				var spawn = playerSpawnPoints[i];
+				var spawnPos = MisParser.parseVector3(spawn.position);
+				spawnPos.x *= -1;
+				if (spawnPos.distance(gemsCentroid) < closestSpawnDistance) {
+					closestSpawnDistance = spawnPos.distance(gemsCentroid);
+					closestSpawnIndex = i;
+				}
+			}
+			idealSpawnIndex = closestSpawnIndex;
+		}
+
 		var idx = (Net.isMP && competitive) ? idealSpawnIndex : Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
 
 		if (!competitive) {
@@ -311,6 +333,12 @@ class HuntMode extends NullMode {
 			} else {
 				@:privateAccess level.playGui.formatCountdownTimer(0);
 			}
+		}
+	}
+
+	public override function transmitAnyNetCommands(client:net.ClientConnection.GameConnection) {
+		if (competitive) {
+			NetCommands.setCompetitiveTimerStartTicksClient(client, competitiveTimerStartTicks);
 		}
 	}
 
