@@ -155,8 +155,8 @@ class Radar {
 		var distToShape = shapeDist.length();
 		shapeDir.normalize();
 
-		var p1 = front.add(right.multiply(Math.sin(fovX))).add(up.multiply(fovY));
-		var p2 = front.add(right.multiply(Math.sin(fovX))).sub(up.multiply(fovY));
+		var p1 = front.add(right.multiply(Math.sin(fovX))).add(up.multiply(Math.sin(fovY)));
+		var p2 = front.add(right.multiply(Math.sin(fovX))).sub(up.multiply(Math.sin(fovY)));
 
 		var camCone1G = p1.transformed(gravityMat);
 		var camCone2G = p2.transformed(gravityMat);
@@ -216,12 +216,19 @@ class Radar {
 			}
 		}
 
-		var drawPoint = new Vector(arrowPosX, arrowPosY);
+		var arrowPos = new Vector(arrowPosX, arrowPosY);
+		var drawPoint = arrowPos;
 		if (validProjection) {
-			drawPoint.load(projectedPos);
-			if (drawPoint.distanceSq(projectedPos) <= 75 * 75) {
-				var distOff = drawPoint.distance(projectedPos);
-				drawPoint = Util.lerpThreeVectors(projectedPos, new Vector(arrowPosX, arrowPosY), distOff / 75);
+			// Clamp the projected point to the screen bounds
+			var projPointOnScreen = new Vector(Util.clamp(projectedPos.x, 0, scene2d.width), Util.clamp(projectedPos.y, 0, scene2d.height));
+			drawPoint = new Vector(projectedPos.x, projectedPos.y);
+			// If the point is offscreen (clamping changed it), interpolate toward the edge arrow
+			if (drawPoint.x != projPointOnScreen.x || drawPoint.y != projPointOnScreen.y) {
+				var distOff = projPointOnScreen.distance(drawPoint);
+				if (distOff <= 75)
+					drawPoint = Util.lerpThreeVectors(projPointOnScreen, arrowPos, distOff / 75);
+				else
+					drawPoint = arrowPos;
 			}
 		}
 

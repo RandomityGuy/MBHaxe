@@ -280,6 +280,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		}
 		bottomBar.addChild(backButton);
 
+		var levelSelectOpts:GuiXboxOptionsList = null;
+
 		if (Net.isHost) {
 			// ── Options panel (Invite Visibility + Game Mode) ──────────────
 			var showingOptions = false;
@@ -347,12 +349,16 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				if (showingOptions) {
 					innerCtrl.removeChild(playerWnd);
 					innerCtrl.addChild(optionsCollection);
+					levelSelectOpts.alwaysActive = false;
+					levelSelectOpts.selected = false;
 					if (showingCustoms) {
 						showingCustoms = false;
 						innerCtrl.removeChild(custWnd);
 						updateLobbyNames();
 					}
 				} else {
+					levelSelectOpts.alwaysActive = true;
+					levelSelectOpts.selected = true;
 					innerCtrl.addChild(playerWnd);
 					innerCtrl.removeChild(optionsCollection);
 					updateLobbyNames();
@@ -415,7 +421,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		levelWnd.addChild(levelInfoLeft);
 
 		var levelNames = difficultyMissions.map(x -> x.title);
-		var levelSelectOpts = new GuiXboxOptionsList(6, "Level", levelNames, 0.3, 155.5, isHost);
+		levelSelectOpts = new GuiXboxOptionsList(6, "Level", levelNames, 0.3, 155.5, isHost);
 
 		function setLevel(idx:Int) {
 			// if (lock)

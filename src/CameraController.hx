@@ -381,7 +381,8 @@ class CameraController extends Object {
 					}
 				}
 				spectateMarbleIndex = freeMarbleIndex;
-				MarbleGame.instance.touchInput.setSpectatorControlsVisibility(true);
+				if (spectateMarbleIndex != -1)
+					MarbleGame.instance.touchInput.setSpectatorControlsVisibility(true);
 				return;
 			}
 
