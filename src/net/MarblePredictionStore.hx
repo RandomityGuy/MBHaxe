@@ -15,11 +15,17 @@ class MarblePrediction {
 	var isControl:Bool;
 	var blastAmount:Int;
 
-	public function new(marble:Marble, tick:Int) {
+	public function new() {
+		position = new Vector();
+		velocity = new Vector();
+		omega = new Vector();
+	}
+
+	public inline function set(marble:Marble, tick:Int) {
 		this.tick = tick;
-		position = @:privateAccess marble.newPos.clone();
-		velocity = @:privateAccess marble.velocity.clone();
-		omega = @:privateAccess marble.omega.clone();
+		position.load(@:privateAccess marble.newPos);
+		velocity.load(@:privateAccess marble.velocity);
+		omega.load(@:privateAccess marble.omega);
 		blastAmount = @:privateAccess marble.blastTicks;
 		isControl = @:privateAccess marble.controllable;
 	}
@@ -40,15 +46,19 @@ class MarblePrediction {
 
 class MarblePredictionStore {
 	var predictions:Map<Marble, Array<MarblePrediction>>;
+	// Free list of recycled prediction states. Rollback truncates/drops history every
+	// tick, so reusing these shells avoids churning MarblePrediction + 3 Vector allocations.
+	var pool:Array<MarblePrediction>;
 
 	public function new() {
 		predictions = [];
+		pool = [];
 	}
 
 	public function storeState(marble:Marble, tick:Int) {
 		var arr = ensureHistory(marble);
 		truncateFromTick(arr, tick);
-		arr.push(new MarblePrediction(marble, tick));
+		arr.push(obtain(marble, tick));
 	}
 
 	public function retrieveState(marble:Marble, tick:Int) {
@@ -67,7 +77,18 @@ class MarblePredictionStore {
 	}
 
 	public function removeMarbleFromPrediction(marble:Marble) {
-		this.predictions.remove(marble);
+		var arr = predictions.get(marble);
+		if (arr != null) {
+			for (p in arr)
+				pool.push(p);
+			this.predictions.remove(marble);
+		}
+	}
+
+	inline function obtain(marble:Marble, tick:Int) {
+		var p = pool.length > 0 ? pool.pop() : new MarblePrediction();
+		p.set(marble, tick);
+		return p;
 	}
 
 	inline function ensureHistory(marble:Marble) {
@@ -81,14 +102,20 @@ class MarblePredictionStore {
 
 	inline function dropBeforeTick(arr:Array<MarblePrediction>, tick:Int) {
 		var idx = lowerBound(arr, tick);
-		if (idx > 0)
+		if (idx > 0) {
+			for (i in 0...idx)
+				pool.push(arr[i]);
 			arr.splice(0, idx);
+		}
 	}
 
 	inline function truncateFromTick(arr:Array<MarblePrediction>, tick:Int) {
 		var idx = lowerBound(arr, tick);
-		if (idx < arr.length)
+		if (idx < arr.length) {
+			for (i in idx...arr.length)
+				pool.push(arr[i]);
 			arr.splice(idx, arr.length - idx);
+		}
 	}
 
 	static inline function lowerBound(arr:Array<MarblePrediction>, tick:Int) {

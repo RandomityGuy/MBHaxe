@@ -599,7 +599,7 @@ class DtsObject extends GameObject {
 			quat.toMatrix(mat);
 			mat.setPosition(new Vector(-translation.x, translation.y, translation.z));
 			this.graphNodes[i].setTransform(mat);
-			var absTform = this.graphNodes[i].getAbsPos().clone();
+			var absTform = this.graphNodes[i].getAbsPos();
 			if (this.colliders[i] != null)
 				// this.colliders[i].setTransform(Matrix.I());
 				this.colliders[i].setTransform(absTform);
@@ -1486,7 +1486,7 @@ class DtsObject extends GameObject {
 
 		for (i in 0...this.colliders.length) {
 			if (this.dirtyTransforms[this.colliders[i].userData]) {
-				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos().clone();
+				var absTform = this.graphNodes[this.colliders[i].userData].getAbsPos();
 				if (this.colliders[i] != null) {
 					this.colliders[i].setTransform(absTform);
 					this.collisionWorld.updateTransform(this.colliders[i]);

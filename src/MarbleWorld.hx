@@ -149,6 +149,11 @@ class MarbleWorld extends Scheduler {
 	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<GameObject> = [];
 
+	// Reusable scratch buffers for the client rollback/prediction path (applyClientPrediction),
+	// which runs every fixed tick. Reusing these avoids per-tick allocations during resimulation.
+	var _advanceTimeState:TimeState = new TimeState();
+	var _marblesToTick:Map<Int, net.NetPacket.MarbleUpdatePacket> = new Map();
+
 	public var timeState:TimeState = new TimeState();
 	public var bonusTime:Float = 0;
 	public var sky:Sky;
@@ -1326,7 +1331,8 @@ class MarbleWorld extends Scheduler {
 		var ourLastMoveTime = ourLastMove.serverTicks;
 		var ourQueuedMoves = @:privateAccess Net.clientConnection.getQueuedMoves().copy();
 		var qm = ourQueuedMoves[0];
-		var advanceTimeState = qm != null ? qm.timeState.clone() : timeState.clone();
+		var advanceTimeState = _advanceTimeState;
+		advanceTimeState.load(qm != null ? qm.timeState : timeState);
 		advanceTimeState.dt = 0.032;
 		advanceTimeState.ticks = ourLastMoveTime;
 
@@ -1359,7 +1365,8 @@ class MarbleWorld extends Scheduler {
 		var currentTick = ourLastMoveTime;
 		//- Std.int(ourLastMove.moveQueueSize - @:privateAccess Net.clientConnection.moveManager.ackRTT); // - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT)) - offset;
 
-		var marblesToTick = new Map();
+		var marblesToTick = _marblesToTick;
+		marblesToTick.clear();
 
 		for (client => arr in lastMoves.otherMarbleUpdates) {
 			if (marbleNeedsPrediction & (1 << client) > 0 && arr.packets.length > 0) {
@@ -1426,7 +1433,7 @@ class MarbleWorld extends Scheduler {
 			}
 		}
 
-		trapdoorsToTick = [];
+		trapdoorsToTick.resize(0);
 
 		lastMoves.ourMoveApplied = true;
 		@:privateAccess this.marble.isNetUpdate = false;
