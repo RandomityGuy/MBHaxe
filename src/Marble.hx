@@ -1370,10 +1370,8 @@ class Marble extends GameObject {
 					if (obj.correctNormals) {
 						surfaceNormal.load(v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1));
 					}
-					var surfaceD = -surfaceNormal.dot(v0);
-
 					// If we're going the wrong direction or not going to touch the plane, ignore...
-					if (surfaceNormal.dot(relVel) > -0.001 || surfaceNormal.dot(currentFinalPos) + surfaceD > radius) {
+					if (surfaceNormal.dot(relVel) > -0.001 || surfaceNormal.dot(currentFinalPos.sub(v0)) > radius) {
 						i += 3;
 						continue;
 					}
@@ -1384,7 +1382,7 @@ class Marble extends GameObject {
 					});
 
 					// Time until collision with the plane
-					var collisionTime = (radius - position.dot(surfaceNormal) - surfaceD) / surfaceNormal.dot(relVel);
+					var collisionTime = (radius - surfaceNormal.dot(position.sub(v0))) / surfaceNormal.dot(relVel);
 
 					// Are we going to touch the plane during this time step?
 					if (collisionTime >= 0.000001 && finalT >= collisionTime) {
@@ -1430,12 +1428,11 @@ class Marble extends GameObject {
 							continue;
 						}
 
-						var oneOverTwoA = 0.5 / a;
 						var discriminantSqrt = Math.sqrt(discriminant);
 
-						// Solve using the quadratic formula
-						var edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
-						var edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
+						var q = -0.5 * (b + (b >= 0.0 ? discriminantSqrt : -discriminantSqrt));
+						var edgeCollisionTime = q / a;
+						var edgeCollisionTime2 = (q != 0.0) ? c / q : edgeCollisionTime;
 
 						// Make sure the 2 times are in ascending order
 						if (edgeCollisionTime2 < edgeCollisionTime) {
@@ -1454,7 +1451,7 @@ class Marble extends GameObject {
 						if (edgeCollisionTime >= 0.000001) {
 							var edgeLen = vertDiff.length();
 
-							var relativeCollisionPos = position.add(relVel.multiply(edgeCollisionTime)).sub(thisVert);
+							var relativeCollisionPos = posDiff.add(relVel.multiply(edgeCollisionTime));
 
 							var distanceAlongEdge = relativeCollisionPos.dot(vertDiff) / edgeLen;
 
@@ -1489,12 +1486,12 @@ class Marble extends GameObject {
 
 						// If it's quadratic and has a solution ...
 						if (a != 0.0 && discriminant >= 0.0) {
-							oneOverTwoA = 0.5 / a;
 							discriminantSqrt = Math.sqrt(discriminant);
 
-							// Solve using the quadratic formula
-							edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
-							edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
+							// Solve using the numerically stable quadratic
+							q = -0.5 * (b + (b >= 0.0 ? discriminantSqrt : -discriminantSqrt));
+							edgeCollisionTime = q / a;
+							edgeCollisionTime2 = (q != 0.0) ? c / q : edgeCollisionTime;
 
 							// Make sure the 2 times are in ascending order
 							if (edgeCollisionTime2 < edgeCollisionTime) {
@@ -1535,12 +1532,12 @@ class Marble extends GameObject {
 							continue;
 						}
 
-						oneOverTwoA = 0.5 / a;
 						discriminantSqrt = Math.sqrt(discriminant);
 
-						// Solve using the quadratic formula
-						edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
-						edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
+						// Solve using the numerically stable quadratic
+						q = -0.5 * (b + (b >= 0.0 ? discriminantSqrt : -discriminantSqrt));
+						edgeCollisionTime = q / a;
+						edgeCollisionTime2 = (q != 0.0) ? c / q : edgeCollisionTime;
 
 						// Make sure the 2 times are in ascending order
 						if (edgeCollisionTime2 < edgeCollisionTime) {
