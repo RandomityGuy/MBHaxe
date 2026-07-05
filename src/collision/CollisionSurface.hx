@@ -5,6 +5,7 @@ import h3d.col.Bounds;
 import octree.IOctreeObject;
 import h3d.Vector;
 import collision.BVHTree.IBVHObject;
+import src.Util;
 
 @:publicFields
 class TransformedCollisionTriangle {
@@ -201,7 +202,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			_transformedPoints[p1 * 3] = pt.x;
 			_transformedPoints[p1 * 3 + 1] = pt.y;
 			_transformedPoints[p1 * 3 + 2] = pt.z;
-			var pn = getNormal(p1).transformed3x3(invtform).normalized();
+			var pn = Util.transformTranspose3x3(getNormal(p1), invtform).normalized();
 			_transformedNormals[p1 * 3] = pn.x;
 			_transformedNormals[p1 * 3 + 1] = pn.y;
 			_transformedNormals[p1 * 3 + 2] = pn.z;

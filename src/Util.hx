@@ -16,6 +16,22 @@ class Util {
 			&& a._33 == b._33;
 	}
 
+	public static inline function transformTranspose(v:Vector, m:Matrix) {
+		var px = v.x * m._11 + v.y * m._12 + v.z * m._13 + v.w * m._14;
+		var py = v.x * m._21 + v.y * m._22 + v.z * m._23 + v.w * m._24;
+		var pz = v.x * m._31 + v.y * m._32 + v.z * m._33 + v.w * m._34;
+		var pw = v.x * m._41 + v.y * m._42 + v.z * m._43 + v.w * m._44;
+		v.set(px, py, pz, pw);
+	}
+
+	public static inline function transformTranspose3x3(v:Vector, m:Matrix) {
+		var px = v.x * m._11 + v.y * m._12 + v.z * m._13;
+		var py = v.x * m._21 + v.y * m._22 + v.z * m._23;
+		var pz = v.x * m._31 + v.y * m._32 + v.z * m._33;
+		v.set(px, py, pz, v.w);
+		return v;
+	}
+
 	public static inline function adjustedMod(a:Float, n:Float) {
 		var r1 = a % n;
 		var r2 = (r1 + n) % n;

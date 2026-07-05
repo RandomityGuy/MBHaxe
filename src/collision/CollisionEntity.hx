@@ -130,7 +130,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			}
 		} else {
 			this.transform.load(transform);
-			this.invTransform = transform.getInverse();
+			this.invTransform.load(transform.getInverse());
 			generateBoundingBox();
 		}
 		_transformKey++;
@@ -220,16 +220,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		surfaceSearchPool.resize(0);
 		grid.boundingSearch(sphereBounds, surfaceSearchPool);
 		var surfaces = surfaceSearchPool;
-		var invtform = invMatrix.clone();
-		invtform.transpose();
-
-		var tform = transform.clone();
 		// tform.setPosition(tform.getPosition().add(this.velocity.multiply(timeState.dt)));
-
-		if (isWorldStatic) {
-			tform.load(Matrix.I());
-			invtform.load(Matrix.I());
-		}
 
 		for (obj in surfaces) {
 			var surface:CollisionSurface = cast obj;
@@ -239,7 +230,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 			var i = 0;
 			while (i < surface.indices.length) {
-				var verts = surface.transformTriangle(i, tform, invtform, this._transformKey);
+				var verts = surface.transformTriangle(i, transform, invMatrix, this._transformKey);
 				// var v0 = surface.points[surface.indices[i]].transformed(tform);
 				// var v = surface.points[surface.indices[i + 1]].transformed(tform);
 				// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);

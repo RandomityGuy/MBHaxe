@@ -261,7 +261,6 @@ class Marble extends GameObject {
 	var physicsAccumulator:Float = 0;
 	var oldPos:Vector;
 	var newPos:Vector;
-	var prevRot:Quat;
 	var posStore:Vector;
 	var lastRenderPos:Vector;
 	var netSmoothOffset:Vector;
@@ -1323,8 +1322,6 @@ class Marble extends GameObject {
 			var invMatrix = @:privateAccess obj.invTransform;
 			if (obj.go is PathedInterior)
 				invMatrix = obj.transform.getInverse();
-			var invTform = invMatrix.clone();
-			invTform.transpose();
 			var localpos = position.clone();
 			localpos.transform(invMatrix);
 
@@ -1355,7 +1352,7 @@ class Marble extends GameObject {
 
 				var i = 0;
 				while (i < surface.indices.length) {
-					var verts = surface.transformTriangle(i, obj.transform, invTform, @:privateAccess obj._transformKey);
+					var verts = surface.transformTriangle(i, obj.transform, invMatrix, @:privateAccess obj._transformKey);
 					// var v0 = surface.points[surface.indices[i]].transformed(tform);
 					// var v = surface.points[surface.indices[i + 1]].transformed(tform);
 					// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
@@ -1397,7 +1394,7 @@ class Marble extends GameObject {
 							finalT = collisionTime;
 							currentFinalPos = position.add(relVel.multiply(finalT));
 							found = true;
-							lastContactPos = currentFinalPos.clone();
+							lastContactPos.load(currentFinalPos);
 							// iterationFound = true;
 							i += 3;
 							// Debug.drawSphere(currentFinalPos, radius);
@@ -1471,8 +1468,8 @@ class Marble extends GameObject {
 							if (distanceAlongEdge >= 0.0 && distanceAlongEdge <= edgeLen) {
 								finalT = edgeCollisionTime;
 								currentFinalPos = position.add(relVel.multiply(finalT));
-								lastContactPos = vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert);
-								lastVert = thisVert;
+								lastContactPos.load(vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert));
+								lastVert.load(thisVert);
 								found = true;
 								// Debug.drawSphere(currentFinalPos, radius);
 								// iterationFound = true;
@@ -1699,7 +1696,6 @@ class Marble extends GameObject {
 		var passedTime = timeState.currentAttemptTime;
 
 		oldPos = this.collider.transform.getPosition();
-		prevRot = this.getRotationQuat().clone();
 
 		for (interior in pathedInteriors) {
 			if (Net.isMP)
@@ -1751,8 +1747,8 @@ class Marble extends GameObject {
 			passedTime += timeStep;
 
 			var stoppedPaths = false;
-			var tempState = timeState.clone();
-
+			static var tempState = new TimeState();
+			tempState.load(timeState);
 			tempState.dt = timeStep;
 
 			it++;
@@ -1803,7 +1799,10 @@ class Marble extends GameObject {
 			velocity.w = 0;
 
 			var pos = this.collider.transform.getPosition();
-			this.prevPos = pos.clone();
+			if (this.prevPos == null)
+				this.prevPos = pos.clone();
+			else
+				this.prevPos.load(pos);
 
 			var tdiff = timeStep;
 
@@ -1856,7 +1855,8 @@ class Marble extends GameObject {
 			if (this.heldPowerup != null
 				&& (m.powerup || (Net.isClient && this.serverUsePowerup && !this.controllable))
 				&& !this.outOfBounds) {
-				var pTime = timeState.clone();
+				static var pTime = new TimeState();
+				pTime.load(timeState);
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = passedTime;
 				var netUpdate = this.isNetUpdate;
@@ -1896,7 +1896,8 @@ class Marble extends GameObject {
 		newPos = this.collider.transform.getPosition();
 
 		if (this.prevPos != null && this.level != null) {
-			var tempTimeState = timeState.clone();
+			static var tempTimeState = new TimeState();
+			tempTimeState.load(timeState);
 			tempTimeState.currentAttemptTime = passedTime;
 			this.level.callCollisionHandlers(cast this, tempTimeState, oldPos, newPos);
 		}
@@ -2152,7 +2153,8 @@ class Marble extends GameObject {
 			quat.multiply(quat, rot);
 			this.setRotationQuat(quat);
 
-			var adt = timeState.clone();
+			static var adt = new TimeState();
+			adt.load(timeState);
 			adt.dt = Util.adjustedMod(physicsAccumulator, 0.032);
 			for (pi in pathedInteriors) {
 				pi.update(adt);
@@ -2295,8 +2297,9 @@ class Marble extends GameObject {
 		physicsAccumulator += timeState.dt;
 
 		playedSounds = [];
+		static var adt:TimeState = new TimeState();
 		while (physicsAccumulator > 0.032) {
-			var adt = timeState.clone();
+			adt.load(timeState);
 			adt.dt = 0.032;
 			advancePhysics(adt, move, collisionWorld, pathedInteriors);
 			physicsAccumulator -= 0.032;
@@ -2312,7 +2315,7 @@ class Marble extends GameObject {
 			quat.multiply(quat, rot);
 			this.setRotationQuat(quat);
 
-			var adt = timeState.clone();
+			adt.load(timeState);
 			adt.dt = physicsAccumulator;
 			for (pi in pathedInteriors) {
 				pi.update(adt);
@@ -2670,7 +2673,6 @@ class Marble extends GameObject {
 		this._firstTick = true;
 		this.finishAnimTime = 0;
 		this.physicsAccumulator = 0;
-		this.prevRot = this.getRotationQuat().clone();
 		this.oldPos = this.getAbsPos().getPosition();
 		this.newPos = this.getAbsPos().getPosition();
 		this.posStore = new Vector();
