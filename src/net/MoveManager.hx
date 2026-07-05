@@ -240,7 +240,7 @@ class MoveManager {
 				// if (queuedMoves.length > serverMaxMoveListSize) {
 				var dropAmt = queuedMoves.length - serverTargetMoveListSize;
 				while (dropAmt-- > 0) {
-					queuedMoves.pop();
+					queuedMoves.shift();
 				}
 				// }
 				serverAvgMoveListSize = serverTargetMoveListSize;
