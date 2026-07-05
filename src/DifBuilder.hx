@@ -125,6 +125,10 @@ class DifBuilder {
 			friction: 4.5,
 			restitution: 0.5
 		},
+		"friction_high_small" => {
+			friction: 4.5,
+			restitution: 0.5
+		},
 		"friction_ultrahigh" => {
 			friction: 4.5,
 			restitution: 0.5
@@ -423,6 +427,8 @@ class DifBuilder {
 			new Vector(0.3, 0.3, 0.35, 1)),
 		'friction_high_shadow' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high_shadow.png',
 			'data/textures/friction_high.normal.png', 10, new Vector(0.15, 0.15, 0.16, 1.0)),
+		'friction_high_small' => (onFinish) -> createDefaultMaterial(onFinish, 'data/textures/friction_high.png', 'data/textures/friction_high.normal.png',
+			10, new Vector(0.3, 0.3, 0.35, 1), 2),
 		'friction_bouncy' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/friction_bouncy.png', 8, new Vector(0.4, 0.4, 0.2, 1)),
 		'tile_bouncy' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/friction_bouncy.png', 8, new Vector(0.4, 0.4, 0.2, 1)),
 		'tile_bouncy2' => (onFinish) -> createDefaultNormalMaterial(onFinish, 'data/textures/friction_bouncy.png', 8, new Vector(0.4, 0.4, 0.2, 1)),

@@ -331,6 +331,34 @@ class Mission {
 						case "wintry":
 							skyEl.materiallist = "~/data/skies/sky_advanced.dml";
 							cloudType = "advanced";
+
+						case "glass_3shape" | "glass_6shape" | "glass_9shape" | "glass_12shape" | "glass_15shape" | "glass_18shape":
+							var pos = MisParser.parseVector3(ss.position);
+							var rot = MisParser.parseRotation(ss.rotation);
+
+							var quat = new h3d.Quat();
+							quat.initRotateAxis(0, 0, 1, Math.PI / 2);
+							rot.multiply(rot, quat);
+
+							var offset = new Vector(-3, -0.25, 0);
+							offset.transform3x3(rot.toMatrix());
+							pos.load(pos.sub(offset));
+							ss.position = '${pos.x} ${pos.y} ${pos.z}';
+
+							var angle = 2 * Math.acos(rot.w);
+							var s = Math.sqrt(1 - rot.w * rot.w);
+							var x, y, z;
+							if (s < 0.001) {
+								x = rot.x;
+								y = rot.y;
+								z = rot.z;
+							} else {
+								x = rot.x / s;
+								y = rot.y / s;
+								z = rot.z / s;
+							}
+							angle = (angle * -180.0 / Math.PI) % 360.0;
+							ss.rotation = '${x} ${y} ${z} ${angle}';
 					}
 				}
 				if (element._type == MissionElementType.TSStatic) {

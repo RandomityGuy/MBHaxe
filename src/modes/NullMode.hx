@@ -112,6 +112,8 @@ class NullMode implements GameMode {
 
 	public function onClientRestart() {}
 
+	public function update(t:src.TimeState) {}
+
 	public function onHostTick(timeState:TimeState):Void {}
 
 	public function onMarbleContact(attacker:Marble, victim:Marble):Void {}

@@ -71,11 +71,13 @@ class Net {
 	public static var isMP:Bool;
 	public static var isHost:Bool;
 	public static var isClient:Bool;
-	public static var selectedGameMode:String = null; // overrides mission gamemode in MP
+	public static var selectedGameMode:String = "scrum"; // overrides mission gamemode in MP
 
 	public static var lobbyHostReady:Bool;
 	public static var lobbyClientReady:Bool;
 	public static var hostReady:Bool;
+	public static var hostSpectate:Bool;
+	public static var clientSpectate:Bool;
 
 	static var clientIdAllocs:Int = 1;
 	public static var clientId:Int;
@@ -362,7 +364,9 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
-			Net.selectedGameMode = null;
+			Net.hostSpectate = false;
+			Net.clientSpectate = false;
+			Net.selectedGameMode = "scrum";
 			MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
@@ -383,7 +387,9 @@ class Net {
 			Net.lobbyHostReady = false;
 			Net.lobbyClientReady = false;
 			Net.hostReady = false;
-			Net.selectedGameMode = null;
+			Net.hostSpectate = false;
+			Net.clientSpectate = false;
+			Net.selectedGameMode = "scrum";
 			MultiplayerLevelSelectGui.custSelected = false;
 		}
 	}
@@ -576,6 +582,7 @@ class Net {
 
 	static function onClientHandshakeComplete(conn:ClientConnection) {
 		// Send our current mission to connecting client
+		NetCommands.setLobbyGameModeClient(conn, Net.selectedGameMode);
 		if (MultiplayerLevelSelectGui.custSelected) {
 			NetCommands.setLobbyCustLevelNameClient(conn, MultiplayerLevelSelectGui.custPath);
 		} else {
@@ -614,6 +621,7 @@ class Net {
 			b.writeByte(v.lobbyReady ? 1 : 0);
 			b.writeByte(v.platform);
 			b.writeByte(v.marbleId);
+			b.writeByte(v.spectator ? 1 : 0);
 			var name = v.getName();
 			b.writeByte(name.length);
 			for (i in 0...name.length) {
@@ -625,6 +633,7 @@ class Net {
 		b.writeByte(Net.lobbyHostReady ? 1 : 0);
 		b.writeByte(getPlatform());
 		b.writeByte(Settings.optionsSettings.marbleIndex);
+		b.writeByte(Net.hostSpectate ? 1 : 0);
 		var name = Settings.highscoreName;
 		b.writeByte(name.length);
 		for (i in 0...name.length) {
@@ -734,6 +743,7 @@ class Net {
 					var cready = input.readByte() == 1;
 					var platform = input.readByte();
 					var marble = input.readByte();
+					var cspectator = input.readByte() == 1;
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
@@ -749,9 +759,11 @@ class Net {
 						clientIdMap[id].setMarbleId(marble);
 						clientIdMap[id].lobbyReady = cready;
 						clientIdMap[id].platform = platform;
+						clientIdMap[id].spectator = cspectator;
 					}
 					if (Net.clientId == id) {
 						Net.lobbyClientReady = cready;
+						Net.clientSpectate = cspectator;
 					}
 				}
 				if (newP) {

@@ -80,6 +80,7 @@ import src.Gamepad;
 import net.Net;
 import net.Move;
 import src.Debug;
+import modes.HuntMode;
 
 enum Mode {
 	Start;
@@ -292,6 +293,7 @@ class Marble extends GameObject {
 
 	public var helicopterUseTick:Int = 0;
 	public var megaMarbleUseTick:Int = 0;
+	public var megaMarbleDuration:Int = 312;
 
 	public var blastAmount:Float = 0;
 	public var blastTicks:Int = 0;
@@ -337,6 +339,7 @@ class Marble extends GameObject {
 	var serverTicks:Int;
 	var recvServerTick:Int;
 	var serverUsePowerup:Bool;
+	var trapdoorContacts:Map<Int, Int> = [];
 
 	public function new() {
 		super();
@@ -1143,8 +1146,8 @@ class Marble extends GameObject {
 			var bounceSoundNum = Math.floor(Math.random() * 4);
 			var sndList = ((time - this.megaMarbleEnableTime < 10)
 				|| (this.megaMarbleUseTick > 0
-					&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
-						|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) ? [
+					&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= this.megaMarbleDuration)
+						|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= this.megaMarbleDuration)))) ? [
 							"data/sound/mega_bouncehard1.wav",
 							"data/sound/mega_bouncehard2.wav",
 							"data/sound/mega_bouncehard3.wav",
@@ -1211,8 +1214,8 @@ class Marble extends GameObject {
 
 		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10
 			|| (this.megaMarbleUseTick > 0
-				&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
-					|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) {
+				&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= this.megaMarbleDuration)
+					|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= this.megaMarbleDuration)))) {
 			if (this.rollMegaSound != null) {
 				rollMegaSound.volume = rollVolume;
 				rollSound.volume = 0;
@@ -1693,11 +1696,35 @@ class Marble extends GameObject {
 		oldPos = this.collider.transform.getPosition();
 		prevRot = this.getRotationQuat().clone();
 
-		if (this.controllable) {
-			for (interior in pathedInteriors) {
-				// interior.pushTickState();
-				interior.computeNextPathStep(timeRemaining);
+		for (interior in pathedInteriors) {
+			if (Net.isMP)
+				interior.pushTickState();
+			interior.computeNextPathStep(timeRemaining);
+		}
+
+		// Handle spectator hacky bullshit
+		if (Net.isMP && this.level.serverStartTicks != 0) {
+			if ((connection != null && connection.spectator) || (connection == null && (Net.hostSpectate || Net.clientSpectate))) {
+				this.collider.transform.setPosition(new Vector(1e8, 1e8, 1e8));
+				this.collisionWorld.updateTransform(this.collider);
+				this.setPosition(1e8, 1e8, 1e8);
+
+				if (Net.clientSpectate && this.connection == null) {
+					this.camera.enableSpectate();
+				}
+				if (Net.hostSpectate && this.connection == null) {
+					this.camera.enableSpectate();
+				}
+				this.blastTicks = 0;
+				return;
 			}
+
+			var ticks = Net.isClient ? serverTicks : timeState.ticks;
+
+			if ((ticks - this.level.serverStartTicks) < (10000 >> 5)) // 10 seconds marble collision invulnerability - competitive mode needs this
+				this.collider.ignore = true;
+			else
+				this.collider.ignore = false;
 		}
 
 		// Blast
@@ -1847,20 +1874,16 @@ class Marble extends GameObject {
 
 			timeRemaining -= timeStep;
 
-			if (this.controllable) {
-				for (interior in pathedInteriors) {
-					interior.advance(timeStep);
-				}
+			for (interior in pathedInteriors) {
+				interior.advance(timeStep);
 			}
 
 			piTime += timeStep;
 		} while (it <= 10);
 		if (timeRemaining > 0) {
 			// Advance pls
-			if (this.controllable) {
-				for (interior in pathedInteriors) {
-					interior.advance(timeRemaining);
-				}
+			for (interior in pathedInteriors) {
+				interior.advance(timeRemaining);
 			}
 		}
 		this.queuedContacts.resize(0);
@@ -1877,10 +1900,10 @@ class Marble extends GameObject {
 
 		if (this.megaMarbleUseTick > 0) {
 			if (Net.isHost) {
-				if ((timeState.ticks - this.megaMarbleUseTick) <= 312 && this.megaMarbleUseTick > 0) {
+				if ((timeState.ticks - this.megaMarbleUseTick) <= this.megaMarbleDuration && this.megaMarbleUseTick > 0) {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
-				} else if ((timeState.ticks - this.megaMarbleUseTick) > 312) {
+				} else if ((timeState.ticks - this.megaMarbleUseTick) > this.megaMarbleDuration) {
 					this.collider.radius = this._radius = 0.3;
 					if (!this.isNetUpdate && this.controllable)
 						AudioManager.playSound(ResourceLoader.getResource("data/sound/MegaShrink.wav", ResourceLoader.getAudio, this.soundResources), null,
@@ -1890,7 +1913,7 @@ class Marble extends GameObject {
 				}
 			}
 			if (Net.isClient) {
-				if (this.serverTicks - this.megaMarbleUseTick <= 312 && this.megaMarbleUseTick > 0) {
+				if (this.serverTicks - this.megaMarbleUseTick <= this.megaMarbleDuration && this.megaMarbleUseTick > 0) {
 					this._radius = 0.675;
 					this.collider.radius = 0.675;
 				} else {
@@ -1911,6 +1934,10 @@ class Marble extends GameObject {
 				this.level.cancel(this.oobSchedule);
 				this.level.restart(cast this);
 			}
+
+			for (interior in pathedInteriors) {
+				interior.popTickState();
+			}
 		}
 	}
 
@@ -1918,6 +1945,11 @@ class Marble extends GameObject {
 
 	public inline function clearNetFlags() {
 		this.netFlags = 0;
+	}
+
+	public inline function queueTrapdoorUpdate(tId:Int, lastContactTick:Int) {
+		trapdoorContacts.set(tId, lastContactTick);
+		this.netFlags |= MarbleNetFlags.UpdateTrapdoor;
 	}
 
 	public function packUpdate(move:NetMove, timeState:TimeState) {
@@ -1940,7 +1972,10 @@ class Marble extends GameObject {
 		marbleUpdate.powerUpId = this.heldPowerup != null ? this.heldPowerup.netIndex : 0x1FF;
 		marbleUpdate.netFlags = this.netFlags;
 		marbleUpdate.gravityDirection = this.currentUp;
+		marbleUpdate.trapdoorUpdates = this.trapdoorContacts;
 		marbleUpdate.serialize(b);
+
+		this.trapdoorContacts = [];
 		return b.getBytes();
 	}
 
@@ -1983,6 +2018,11 @@ class Marble extends GameObject {
 		if (p.moveQueueSize == 0 && this.connection != null) {
 			// Pad null move on client
 			this.connection.moveManager.duplicateLastMove();
+		}
+		if (p.netFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+			for (tId => tTime in p.trapdoorUpdates) {
+				@:privateAccess level.trapdoorPredictions.acknowledgeTrapdoorUpdate(tId, tTime);
+			}
 		}
 		if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
 			var ticksSince = (this.serverTicks - this.blastUseTick);
@@ -2108,14 +2148,14 @@ class Marble extends GameObject {
 			this.setRotationQuat(quat);
 
 			var adt = timeState.clone();
-			adt.dt = physicsAccumulator;
+			adt.dt = Util.adjustedMod(physicsAccumulator, 0.032);
 			for (pi in pathedInteriors) {
 				pi.update(adt);
 			}
 		}
 		physicsAccumulator += timeState.dt;
 
-		if (this.controllable && this.level != null && !this.level.rewinding) {
+		if (this.controllable && this.level != null && !this.level.rewinding && !(Net.clientSpectate || Net.hostSpectate)) {
 			// this.camera.startCenterCamera();
 			this.camera.update(timeState.currentAttemptTime, timeState.dt);
 		}
@@ -2460,8 +2500,10 @@ class Marble extends GameObject {
 		if (this.level == null)
 			return 1;
 		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10
-			|| (Net.isHost && this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)
-			|| (Net.isClient && this.megaMarbleUseTick > 0 && (this.serverTicks - this.megaMarbleUseTick) < 312)) {
+			|| (Net.isHost
+				&& this.megaMarbleUseTick > 0
+				&& (this.level.timeState.ticks - this.megaMarbleUseTick) < this.megaMarbleDuration)
+			|| (Net.isClient && this.megaMarbleUseTick > 0 && (this.serverTicks - this.megaMarbleUseTick) < this.megaMarbleDuration)) {
 			return 5;
 		} else {
 			return 1;
@@ -2563,9 +2605,9 @@ class Marble extends GameObject {
 			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;
 		} else {
 			if (Net.isHost) {
-				return (megaMarbleUseTick > 0 && (this.level.timeState.ticks - megaMarbleUseTick) <= 312);
+				return (megaMarbleUseTick > 0 && (this.level.timeState.ticks - megaMarbleUseTick) <= this.megaMarbleDuration);
 			} else {
-				return (megaMarbleUseTick > 0 && (serverTicks - megaMarbleUseTick) <= 312);
+				return (megaMarbleUseTick > 0 && (serverTicks - megaMarbleUseTick) <= this.megaMarbleDuration);
 			}
 		}
 	}
@@ -2612,6 +2654,10 @@ class Marble extends GameObject {
 		this.blastTicks = 0;
 		this.helicopterUseTick = 0;
 		this.megaMarbleUseTick = 0;
+		this.megaMarbleDuration = 312;
+		if (this.level != null && this.level.gameMode is HuntMode && cast(this.level.gameMode, HuntMode).competitive) {
+			this.megaMarbleDuration = 156;
+		}
 		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this._firstTick = true;

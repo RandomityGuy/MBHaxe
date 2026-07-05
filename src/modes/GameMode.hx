@@ -30,6 +30,7 @@ interface GameMode {
 	public function onClientRestart():Void;
 	public function onRespawn(marble:Marble):Void;
 	public function onGemPickup(marble:Marble, gem:Gem):Void;
+	public function update(t:TimeState):Void;
 
 	// Called every server tick on the host during multiplayer
 	public function onHostTick(timeState:TimeState):Void;
@@ -52,7 +53,9 @@ class GameModeFactory {
 		if (mode != null)
 			switch (mode.toLowerCase()) {
 				case "scrum":
-					return new HuntMode(level);
+					return new HuntMode(level, false);
+				case "competitive":
+					return new HuntMode(level, true);
 				case "king":
 					return new KingMode(level);
 			}

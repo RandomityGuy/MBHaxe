@@ -116,6 +116,23 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(client) public static function setSpectate(clientId:Int, spectate:Bool) {
+		if (Net.isHost) {
+			if (clientId == 0)
+				Net.hostSpectate = spectate;
+			else
+				Net.clientIdMap[clientId].setSpectate(spectate);
+
+			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+			}
+			var b = Net.sendPlayerInfosBytes();
+			for (cc in Net.clients) {
+				cc.sendBytes(b);
+			}
+		}
+	}
+
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
 			if (Net.serverInfo.state == "WAITING") {
@@ -357,6 +374,13 @@ class NetCommands {
 			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).addChatMessage(msg);
 			}
+		}
+	}
+
+	@:rpc(server) public static function setCompetitiveTimerStartTicks(ticks:Int) {
+		if (MarbleGame.instance.world != null) {
+			var huntMode = cast(MarbleGame.instance.world.gameMode, HuntMode);
+			huntMode.setCompetitiveTimerStartTicks(ticks);
 		}
 	}
 }

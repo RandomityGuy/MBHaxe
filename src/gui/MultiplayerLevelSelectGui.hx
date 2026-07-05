@@ -314,10 +314,9 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			optionsCollection.vertSizing = Bottom;
 			optionsCollection.horizSizing = Right;
 
-
-			var gameModeInitIdx = (Net.selectedGameMode == "king") ? 1 : 0;
-			var gameModeOpt = optionsCollection.addOption(0, "Game Mode", ["Normal", "King"], (idx) -> {
-				var newMode = idx == 1 ? "king" : "scrum";
+			var gameModeInitIdx = ["scrum", "competitive", "king"].indexOf(Net.selectedGameMode);
+			var gameModeOpt = optionsCollection.addOption(0, "Game Mode", ["Gem Hunt", "Competitive", "King"], (idx) -> {
+				var newMode = ["scrum", "competitive", "king"][idx];
 				NetCommands.setLobbyGameMode(newMode);
 				return true;
 			}, 0.5, 118);
@@ -330,6 +329,13 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				return true;
 			}, 0.5, 118);
 			inviteOpt.setCurrentOption(inviteInitIdx);
+
+			var spectateOpt = optionsCollection.addOption(0, "Spectate", ["On", "Off"], (idx) -> {
+				NetCommands.setSpectate(Net.isHost ? 0 : Net.clientId, idx == 0);
+				updateLobbyNames();
+				return true;
+			}, 0.5, 118);
+			spectateOpt.setCurrentOption(Net.isHost ? (Net.hostSpectate ? 0 : 1) : 0);
 
 			var optionsButton = new GuiXboxButton("Options", 220);
 			optionsButton.position = new Vector(750, 0);
@@ -354,6 +360,18 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 			}
 			bottomBar.addChild(optionsButton);
+		} else {
+			// Show spectate button for clients
+			var spectateOpt = new GuiXboxButton("Spectate", 220);
+			spectateOpt.position = new Vector(750, 0);
+			spectateOpt.vertSizing = Bottom;
+			spectateOpt.horizSizing = Right;
+			spectateOpt.gamepadAccelerator = [Settings.gamepadSettings.alt2];
+			spectateOpt.pressedAction = (e) -> {
+				NetCommands.setSpectate(Net.isHost ? 0 : Net.clientId, !Net.clientSpectate);
+				updateLobbyNames();
+			}
+			bottomBar.addChild(spectateOpt);
 		}
 
 		var nextButton = new GuiXboxButton("Ready", 160);
@@ -527,14 +545,16 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			playerListArr.push({
 				name: Settings.highscoreName,
 				state: Net.lobbyHostReady,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				spectate: Net.hostSpectate
 			});
 		}
 		if (Net.isClient) {
 			playerListArr.push({
 				name: Settings.highscoreName,
 				state: Net.lobbyClientReady,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				spectate: Net.clientSpectate
 			});
 		}
 		if (Net.clientIdMap != null) {
@@ -542,15 +562,17 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				playerListArr.push({
 					name: v.name,
 					state: v.lobbyReady,
-					platform: v.platform
+					platform: v.platform,
+					spectate: v.spectator
 				});
 			}
 		}
 
 		if (!showingCustoms)
 			playerList.setTexts(playerListArr.map(player -> {
+				var spectateStr = player.spectate ? "[S] " : "";
 				return
-					'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${StringTools.htmlEscape(player.name)}';
+					'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${spectateStr}${StringTools.htmlEscape(player.name)}';
 			}));
 
 		var pubCount = 1; // Self

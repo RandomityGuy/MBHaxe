@@ -11,6 +11,7 @@ import gui.MarblePickerGui;
 import gui.MultiplayerLevelSelectGui;
 import collision.CollisionPool;
 import net.GemPredictionStore;
+import net.TrapdoorPredictionStore;
 import modes.HuntMode;
 import modes.KingMode;
 import net.NetPacket.MarbleNetFlags;
@@ -138,6 +139,8 @@ class MarbleWorld extends Scheduler {
 	public var dtsObjects:Array<DtsObject> = [];
 	public var powerUps:Array<PowerUp> = [];
 	public var forceObjects:Array<ForceObject> = [];
+	public var trapdoors:Array<Trapdoor> = [];
+	public var trapdoorsToTick:Array<Int> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
@@ -227,6 +230,7 @@ class MarbleWorld extends Scheduler {
 	var predictions:MarblePredictionStore;
 	var powerupPredictions:PowerupPredictionStore;
 	var gemPredictions:GemPredictionStore;
+	var trapdoorPredictions:TrapdoorPredictionStore;
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -279,6 +283,7 @@ class MarbleWorld extends Scheduler {
 			predictions = new MarblePredictionStore();
 			powerupPredictions = new PowerupPredictionStore();
 			gemPredictions = new GemPredictionStore();
+			trapdoorPredictions = new TrapdoorPredictionStore(cast this);
 		}
 
 		// Set the network RNG for hunt
@@ -1085,6 +1090,13 @@ class MarbleWorld extends Scheduler {
 				if (obj is ForceObject) {
 					this.forceObjects.push(cast obj);
 				}
+				if (obj is Trapdoor) {
+					var t:Trapdoor = cast obj;
+					t.netId = this.trapdoors.length;
+					this.trapdoors.push(t);
+					if (Net.isClient)
+						trapdoorPredictions.alloc();
+				}
 				obj.isTSStatic = isTsStatic;
 				obj.init(cast this, () -> {
 					obj.update(this.timeState);
@@ -1286,14 +1298,15 @@ class MarbleWorld extends Scheduler {
 						correctPrediction(clientMarble, lastMove, -1, mask, arr.packets);
 					}
 				}
-
-				if (hasStruct) {
-					var ourPred = predictions.retrieveState(marble, ourTick);
-					if (ourPred == null || ourPred.getError(ourMove) > 0.01) {
-						correctPrediction(marble, ourMove, ourTick, 1 << Net.clientId);
+				if (!Net.clientSpectate) {
+					if (hasStruct) {
+						var ourPred = predictions.retrieveState(marble, ourTick);
+						if (ourPred == null || ourPred.getError(ourMove) > 0.01) {
+							correctPrediction(marble, ourMove, ourTick, 1 << Net.clientId);
+						}
+					} else {
+						correctPrediction(marble, ourMove, -1, 1 << Net.clientId);
 					}
-				} else {
-					correctPrediction(marble, ourMove, -1, 1 << Net.clientId);
 				}
 			}
 		}
@@ -1317,6 +1330,13 @@ class MarbleWorld extends Scheduler {
 			if (pw.pickupClient != -1 && marbleNeedsPrediction & (1 << pw.pickupClient) > 0)
 				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 		}
+
+		for (tT in trapdoorsToTick) {
+			var t = trapdoors[tT];
+			t.lastContactTicks = trapdoorPredictions.getState(t.netId);
+			t.update(advanceTimeState);
+		}
+
 		if (this.gameMode is HuntMode) {
 			var huntMode:HuntMode = cast this.gameMode;
 			if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
@@ -1360,6 +1380,10 @@ class MarbleWorld extends Scheduler {
 		@:privateAccess this.marble.posStore.load(this.marble.newPos);
 		@:privateAccess this.marble.netCorrected = true;
 
+		for (pi in this.pathedInteriors) {
+			pi.rollbackToTick(currentTick);
+		}
+
 		for (move in ourQueuedMoves) {
 			var m = move.move;
 			Debug.drawSphere(@:privateAccess this.marble.newPos, this.marble._radius);
@@ -1386,7 +1410,19 @@ class MarbleWorld extends Scheduler {
 			advanceTimeState.currentAttemptTime += 0.032;
 			advanceTimeState.ticks++;
 			currentTick++;
+
+			for (pi in this.pathedInteriors) {
+				pi.computeNextPathStep(0.032);
+				pi.advance(0.032);
+			}
+
+			for (tT in trapdoorsToTick) {
+				var t = trapdoors[tT];
+				t.update(advanceTimeState);
+			}
 		}
+
+		trapdoorsToTick = [];
 
 		lastMoves.ourMoveApplied = true;
 		@:privateAccess this.marble.isNetUpdate = false;
@@ -1539,6 +1575,7 @@ class MarbleWorld extends Scheduler {
 
 		ProfilerUI.measure("updateTimer", 1);
 		this.updateTimer(dt);
+		this.gameMode.update(this.timeState);
 
 		// if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
 		// 	&& this.finishTime == null) {
@@ -1658,12 +1695,19 @@ class MarbleWorld extends Scheduler {
 				}
 				if (Net.isHost)
 					this.gameMode.onHostTick(fixedDt);
+				for (pi in this.pathedInteriors) {
+					pi.computeNextPathStep(0.032);
+					pi.advance(0.032);
+				}
 				timeState.ticks++;
 			}
 			timeState.subframe = tickAccumulator / 0.032;
 			marble.updateClient(timeState, this.pathedInteriors);
 			for (client => marble in clientMarbles) {
 				marble.updateClient(timeState, this.pathedInteriors);
+			}
+			if (Net.clientSpectate || Net.hostSpectate) {
+				marble.camera.update(timeState.currentAttemptTime, timeState.dt);
 			}
 		} else {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
