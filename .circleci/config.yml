@@ -839,7 +839,7 @@ jobs:
               if not exist x64\Release mkdir x64\Release
               for /f "usebackq delims=" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -find VC\Auxiliary\Build\vcvars64.bat`) do call "%%i"
               set HL=%USERPROFILE%\deps\hashlink
-              cl /nologo /c marblegame.c /Fo:x64\Release\marblegame.obj /O2 /MD /DNDEBUG -I . -I "%HL%\src" -I "%HL%\include"
+              cl /nologo /c marblegame.c /Fo:x64\Release\marblegame.obj /O2 /MD /DNDEBUG /D_CONSOLE -I . -I "%HL%\src" -I "%HL%\include"
               if not exist x64\Release\marblegame.obj exit /b 1
               lib /nologo /OUT:x64\Release\marblegame.lib x64\Release\marblegame.obj
               if not exist x64\Release\marblegame.lib exit /b 1
