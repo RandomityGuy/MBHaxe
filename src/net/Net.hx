@@ -273,14 +273,17 @@ class Net {
 				}
 			}
 
-			// haxe.Timer.delay(() -> {
-			// 	finishSdp();
-			// }, 5000);
-
 			clientDatachannel = client.createDatachannel("mp");
 			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", true, null, 600);
 
 			var openFlags = 0;
+
+			haxe.Timer.delay(() -> {
+				if (Net.isMP && Net.isClient && openFlags != 3) {
+					Console.log("Connection timed out (openFlags=" + openFlags + ")");
+					closeFunc("Connection timed out", true);
+				}
+			}, 15000);
 
 			var onDatachannelOpen = (idx:Int) -> {
 				if (!Net.isMP) {
@@ -404,6 +407,7 @@ class Net {
 		if (accum > 1.0) {
 			accum = 0;
 			var t = Console.time();
+			var needsTimeoutKick = [];
 			for (dc => cc in clients) {
 				if (cc is ClientConnection) {
 					var conn = cast(cc, ClientConnection);
@@ -417,22 +421,27 @@ class Net {
 						}
 					}
 					if (conn.needsTimeoutKick(t)) {
-						if (Net.isHost) {
-							dc.close();
-							onClientLeave(conn);
-						}
-						if (Net.isClient) {
-							disconnect();
-							if (MarbleGame.instance.world != null) {
-								MarbleGame.instance.quitMission();
-							}
-							if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
-								var loadGui = new MultiplayerLoadingGui("Timed out");
-								MarbleGame.canvas.setContent(loadGui);
-								loadGui.setErrorStatus("Timed out");
-							}
-						}
+						needsTimeoutKick.push(conn);
 					}
+				}
+			}
+			for (conn in needsTimeoutKick) {
+				if (Net.isHost) {
+					clients.remove(conn.socket); // remove before recount so serverInfo.players isn't off-by-one
+					conn.socket.close();
+					onClientLeave(conn);
+				}
+				if (Net.isClient) {
+					disconnect();
+					if (MarbleGame.instance.world != null) {
+						MarbleGame.instance.quitMission();
+					}
+					if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
+						var loadGui = new MultiplayerLoadingGui("Timed out");
+						MarbleGame.canvas.setContent(loadGui);
+						loadGui.setErrorStatus("Timed out");
+					}
+					return;
 				}
 			}
 		}
@@ -556,6 +565,14 @@ class Net {
 	static function onClientLeave(cc:ClientConnection) {
 		if (!Net.isMP || cc == null)
 			return;
+
+		serverInfo.players = 1;
+		for (k => v in clients) { // Recount
+			serverInfo.players++;
+		}
+
+		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
+
 		if (cc.leftAlready)
 			return;
 		cc.leftAlready = true;
@@ -565,13 +582,6 @@ class Net {
 		if (cc.id != 0) {
 			freeClientId(cc.id);
 		}
-
-		serverInfo.players = 1;
-		for (k => v in clients) { // Recount
-			serverInfo.players++;
-		}
-
-		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
 
 		AudioManager.playSound(ResourceLoader.getAudio("data/sound/infotutorial.wav").resource);
 

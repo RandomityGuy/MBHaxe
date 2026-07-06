@@ -90,6 +90,10 @@ class ReusableList<T> {
 		length = 0;
 	}
 
+	public inline function get(i:Int):T {
+		return array[i];
+	}
+
 	public inline function iterator():ReusableListIterator<T> {
 		return new ReusableListIterator<T>(this);
 	}
@@ -156,67 +160,60 @@ class InstanceManager {
 
 				// Emit non culled primitives
 				if (minfo.meshbatch != null) {
-					minfo.meshbatch.begin(opaqueinstances.length);
-					for (instance in opaqueinstances) { // Draw the opaque shit first
-						var dtsShader = minfo.dtsShader; // minfo.meshbatch.material.mainPass.getShader(DtsTexture);
+					var mb = minfo.meshbatch;
+					var mbPass = mb.material.mainPass;
+					var srcPass = minfo.mesh.material.mainPass;
+					mb.begin(opaqueinstances.length);
+
+					// Per-batch state: invariant across instances (the batch draws with one shared
+					// material), so set it once instead of rewriting these ~13 pass properties plus a
+					// setPassName + getPass("glow") on every single instance.
+					mbPass.depthWrite = srcPass.depthWrite;
+					mbPass.depthTest = srcPass.depthTest;
+					mbPass.setPassName(srcPass.name);
+					mbPass.enableLights = srcPass.enableLights;
+					mbPass.culling = srcPass.culling;
+					mbPass.blendSrc = srcPass.blendSrc;
+					mbPass.blendDst = srcPass.blendDst;
+					mbPass.blendOp = srcPass.blendOp;
+					mbPass.blendAlphaSrc = srcPass.blendAlphaSrc;
+					mbPass.blendAlphaDst = srcPass.blendAlphaDst;
+					mbPass.blendAlphaOp = srcPass.blendAlphaOp;
+
+					var dtsShader = minfo.dtsShader;
+					var glowDtsShader = mb.material.getPass("glow") != null ? minfo.glowPassDtsShader : null;
+
+					for (i in 0...opaqueinstances.length) { // Draw the opaque shit first
+						var instance = opaqueinstances.get(i);
 						var subOpacity = 1.0;
 						if (dtsShader != null) {
 							if (instance.gameObject.animateSubObjectOpacities) {
 								subOpacity = instance.gameObject.getSubObjectOpacity(instance.emptyObj);
 								if (subOpacity == 0)
 									continue; // Do not draw
-								// minfo.meshbatch.shadersChanged = true;
 							}
-
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
 						}
-						var transform = instance.emptyObj.getAbsPos();
-						minfo.meshbatch.material.mainPass.depthWrite = minfo.mesh.material.mainPass.depthWrite;
-						minfo.meshbatch.material.mainPass.depthTest = minfo.mesh.material.mainPass.depthTest;
-						// minfo.meshbatch.shadersChanged = true;
-						minfo.meshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						minfo.meshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
-						minfo.meshbatch.worldPosition = transform;
-						minfo.meshbatch.material.mainPass.culling = minfo.mesh.material.mainPass.culling;
-
-						minfo.meshbatch.material.mainPass.blendSrc = minfo.mesh.material.mainPass.blendSrc;
-						minfo.meshbatch.material.mainPass.blendDst = minfo.mesh.material.mainPass.blendDst;
-						minfo.meshbatch.material.mainPass.blendOp = minfo.mesh.material.mainPass.blendOp;
-						minfo.meshbatch.material.mainPass.blendAlphaSrc = minfo.mesh.material.mainPass.blendAlphaSrc;
-						minfo.meshbatch.material.mainPass.blendAlphaDst = minfo.mesh.material.mainPass.blendAlphaDst;
-						minfo.meshbatch.material.mainPass.blendAlphaOp = minfo.mesh.material.mainPass.blendAlphaOp;
-
 						// handle the glow pass too
-						var glowPass = minfo.meshbatch.material.getPass("glow");
-						if (glowPass != null) {
-							dtsShader = minfo.glowPassDtsShader;
-							if (dtsShader != null)
-								dtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
-						}
-
-						minfo.meshbatch.emitInstance();
+						if (glowDtsShader != null)
+							glowDtsShader.currentOpacity = instance.gameObject.currentOpacity * subOpacity;
+						mb.worldPosition = instance.emptyObj.getAbsPos();
+						mb.emitInstance();
 					}
 				}
 				if (minfo.transparencymeshbatch != null) {
-					minfo.transparencymeshbatch.begin(transparentinstances.length);
-					for (instance in transparentinstances) { // Non opaque shit
-						var dtsShader = minfo.dtsShader;
-						if (dtsShader != null) {
+					var tmb = minfo.transparencymeshbatch;
+					tmb.begin(transparentinstances.length);
+					// Invariant per-batch state, set once (was redundantly re-set every instance).
+					tmb.material.blendMode = Alpha;
+					tmb.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
+					var dtsShader = minfo.dtsShader;
+					for (i in 0...transparentinstances.length) { // Non opaque shit
+						var instance = transparentinstances.get(i);
+						if (dtsShader != null)
 							dtsShader.currentOpacity = instance.gameObject.currentOpacity;
-						}
-						minfo.transparencymeshbatch.material.blendMode = Alpha;
-						// minfo.transparencymeshbatch.material.color.a = instance.gameObject.currentOpacity;
-						// minfo.transparencymeshbatch.material.mainPass.setPassName(minfo.mesh.material.mainPass.name);
-						// minfo.transparencymeshbatch.shadersChanged = true;
-						minfo.transparencymeshbatch.material.mainPass.enableLights = minfo.mesh.material.mainPass.enableLights;
-						// minfo.transparencymeshbatch.material.mainPass.depthWrite = false;
-						// if (dtsShader != null) {
-						// 	dtsShader.currentOpacity = instance.gameObject.currentOpacity;
-						// 	minfo.transparencymeshbatch.shadersChanged = true;
-						// }
-						var transform = instance.emptyObj.getAbsPos();
-						minfo.transparencymeshbatch.worldPosition = transform;
-						minfo.transparencymeshbatch.emitInstance();
+						tmb.worldPosition = instance.emptyObj.getAbsPos();
+						tmb.emitInstance();
 					}
 				}
 			}
