@@ -31,6 +31,8 @@ class Gem extends DtsObject {
 		showSequences = false; // Gems actually have an animation for the little shiny thing, but the actual game ignores that. I get it, it was annoying as hell.
 
 		var GEM_COLORS = ["red"];
+		// strip _MBU from datablock
+		element.datablock = StringTools.replace(element.datablock, "_MBU", "");
 		var color = element.datablock.substring("GemItem".length).toLowerCase();
 		if (color.length == 0)
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];

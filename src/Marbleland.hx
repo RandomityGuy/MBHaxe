@@ -14,8 +14,10 @@ class Marbleland {
 	public static var ultraMissions:Array<Mission> = [];
 	public static var missions:Map<Int, Mission> = [];
 
+	static final marblelandUrl = 'http://127.0.0.1:8080'; // 'https://marbleland.vaniverse.io';
+
 	public static function init() {
-		Http.get('https://marbleland.vaniverse.io/api/level/list', (b) -> {
+		Http.get('${marblelandUrl}/api/level/list', (b) -> {
 			parseMissionList(b.toString());
 			Console.log('Loaded ultra customs: ${ultraMissions.length}');
 			// Load the marbleland level from JS
@@ -42,7 +44,9 @@ class Marbleland {
 
 		for (missionData in claJson) {
 			// filter
-			if (missionData.datablockCompatibility != 'mbw' && missionData.datablockCompatibility != 'mbg')
+			if (missionData.datablockCompatibility != 'mbw'
+				&& missionData.datablockCompatibility != 'mbg'
+				&& missionData.datablockCompatibility != "mbu")
 				continue;
 			// if (!['gold', 'platinum', 'ultra', 'platinumquest'].contains(missionData.modification))
 			// 	continue;
@@ -52,6 +56,9 @@ class Marbleland {
 			var isMultiplayer = missionData.gameType == 'multi';
 			if (isMultiplayer && (missionData.gameMode == null || missionData.gameMode.toLowerCase() != 'hunt'))
 				continue;
+
+			if (missionData.gameMode == "hunt")
+				missionData.gameMode = "scrum";
 
 			var mission = new Mission();
 			mission.id = missionData.id;
@@ -74,6 +81,7 @@ class Marbleland {
 			mission.hasEgg = missionData.hasEgg;
 			mission.isClaMission = true;
 			mission.customSource = "Marbleland";
+			mission.gameMode = missionData.gameMode;
 
 			var game = missionData.modification;
 			if (isMultiplayer) {
@@ -99,7 +107,7 @@ class Marbleland {
 	}
 
 	public static function getMissionImage(id:Int, cb:Image->Void) {
-		return Http.get('https://marbleland.vaniverse.io/api/level/${id}/image?width=258&height=194', (imageBytes) -> {
+		return Http.get('${marblelandUrl}/api/level/${id}/image?width=258&height=194', (imageBytes) -> {
 			var res = new Image(new hxd.fs.BytesFileSystem.BytesFileEntry('${id}.png', imageBytes));
 			cb(res);
 		}, (e) -> {
@@ -108,7 +116,7 @@ class Marbleland {
 	}
 
 	public static function download(id:Int, cb:Array<haxe.zip.Entry>->Void) {
-		Http.get('https://marbleland.vaniverse.io/api/level/${id}/zip?assuming=none', (zipData -> {
+		Http.get('${marblelandUrl}/api/level/${id}/zip?assuming=none', (zipData -> {
 			var reader = new Reader(new BytesInput(zipData));
 			var entries:Array<haxe.zip.Entry> = null;
 			try {

@@ -327,6 +327,8 @@ class Util {
 	}
 
 	public static function formatTime(time:Float) {
+		if (time == Math.POSITIVE_INFINITY)
+			return "None";
 		var et = time * 1000;
 		var thousandth = Std.int(et % 10);
 		var hundredth = Std.int((et % 1000) / 10);

@@ -270,7 +270,7 @@ class MarbleWorld extends Scheduler {
 		this.mission = mission;
 		this.game = mission.game.toLowerCase();
 
-		var misGameMode = mission.missionInfo != null ? mission.missionInfo.gamemode : null;
+		var misGameMode = mission.missionInfo != null ? mission.missionInfo.gamemode : mission.gameMode;
 		if (mission.customSource == "MPCustoms")
 			misGameMode = "scrum";
 		// In multiplayer, host/client can override the game mode via the lobby selector
@@ -335,7 +335,7 @@ class MarbleWorld extends Scheduler {
 					// Override the end pad element. We do this because only the last finish pad element will actually do anything.
 					if (element._type == MissionElementType.StaticShape) {
 						var so:MissionElementStaticShape = cast element;
-						if (so.datablock.toLowerCase() == 'endpad')
+						if (so.datablock.toLowerCase() == 'endpad' || so.datablock.toLowerCase() == 'endpad_mbu')
 							this.endPadElement = so;
 					}
 

@@ -1,5 +1,6 @@
 package src;
 
+import mis.MissionElement.MissionElementSpawnSphere;
 import h3d.Vector;
 import mis.MissionElement.MissionElementTrigger;
 import shapes.Checkpoint;
@@ -48,6 +49,7 @@ class Mission {
 	public var isCustom:Bool;
 	public var marbleAttributes:Map<String, String>;
 	public var customSource:String; // Marbleland or MPCustom
+	public var gameMode:String;
 
 	var next:Mission;
 
@@ -295,6 +297,15 @@ class Mission {
 		var processFunctions = [];
 		var cloudType = "none";
 
+		var hasAstrolabe = false;
+
+		var isHunt = false;
+
+		if (missionInfo.gamemode != null && missionInfo.gamemode == "hunt") {
+			missionInfo.gamemode = "scrum";
+			isHunt = true;
+		}
+
 		function postprocessMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
 				if (element._type == MissionElementType.Sky) {
@@ -303,17 +314,37 @@ class Mission {
 
 					var skyMaterial = skyEl.materiallist.toLowerCase();
 					switch (skyMaterial) {
-						case "~/data/skies/cloudy/cloudy.dml" | "~/data/skies/mbu/sky_beginner.dml":
+						case "~/data/skies/cloudy/cloudy.dml" | "~/data/skies/mbu/sky_beginner.dml" | "~/data/skies_mbu/beginner/sky_beginner.dml":
 							skyMaterialList = "~/data/skies/sky_beginner.dml";
 							cloudType = "beginner";
 
-						case "~/data/skies/mbu/sky_intermediate.dml":
+						case "~/data/skies/mbu/sky_intermediate.dml" | "~/data/skies_mbu/intermediate/sky_intermediate.dml":
 							skyMaterialList = "~/data/skies/sky_intermediate.dml";
 							cloudType = "intermediate";
 
-						case "~/data/skies/mbu/sky_advanced.dml":
+						case "~/data/skies/mbu/sky_advanced.dml" | "~/data/skies_mbu/advanced/sky_advanced.dml":
 							skyMaterialList = "~/data/skies/sky_advanced.dml";
 							cloudType = "advanced";
+					}
+				}
+				if (element._type == MissionElementType.Trigger) {
+					var trigger = cast(element, MissionElementTrigger);
+					var db = trigger.datablock.toLowerCase();
+					switch (db) {
+						case "spawntrigger":
+							// replace this with a spawnsphere entity
+							var sg = simGroup;
+							processFunctions.push(() -> {
+								sg.elements.remove(trigger);
+								var spawnSphereEl = new MissionElementSpawnSphere();
+								spawnSphereEl._name = trigger._name;
+								spawnSphereEl.position = trigger.position;
+								spawnSphereEl.rotation = trigger.rotation;
+								spawnSphereEl.scale = trigger.scale;
+								spawnSphereEl.datablock = "spawnspheremarker";
+								spawnSphereEl.fields = [];
+								sg.elements.push(spawnSphereEl);
+							});
 					}
 				}
 				if (element._type == MissionElementType.StaticShape) {
@@ -332,6 +363,9 @@ class Mission {
 						case "wintry":
 							skyMaterialList = "~/data/skies/sky_advanced.dml";
 							cloudType = "advanced";
+
+						case "astrolabe":
+							hasAstrolabe = true;
 
 						case "glass_3shape" | "glass_6shape" | "glass_9shape" | "glass_12shape" | "glass_15shape" | "glass_18shape":
 							var pos = MisParser.parseVector3(ss.position);
@@ -360,12 +394,184 @@ class Mission {
 							}
 							angle = (angle * -180.0 / Math.PI) % 360.0;
 							ss.rotation = '${x} ${y} ${z} ${angle}';
+
+						case "checkpoint" | "checkpoint_mbu":
+							// need to make a new simgroup for this checkpoint, and move the triggers that affect it into that simgroup
+							var sg = simGroup;
+							processFunctions.push(() -> {
+								// First remove this element
+								sg.elements.remove(ss);
+								// Then add add the actual checkpoint shape
+								var checkpointEl = new MissionElementStaticShape();
+								checkpointEl._name = ss._name;
+								checkpointEl.position = ss.position;
+								checkpointEl.rotation = ss.rotation;
+								checkpointEl.scale = ss.scale;
+								checkpointEl.datablock = "checkPointShape";
+								checkpointEl.fields = [];
+
+								// create new simgroup
+								var checkpointSG = new MissionElementSimGroup();
+								checkpointSG._name = null;
+								checkpointSG.elements = [];
+								checkpointSG.elements.push(checkpointEl);
+								checkpointSG.fields = [];
+
+								// Find the checkpoint triggers affecting this checkpoint
+								var affectedTriggers = sg.elements.filter(x -> x._type == MissionElementType.Trigger)
+									.filter(y -> cast(y, MissionElementTrigger).respawnpoint == ss._name);
+
+								for (triggerEl in affectedTriggers) {
+									var trigger = cast(triggerEl, MissionElementTrigger);
+									// remove trigger from its current simgroup
+									sg.elements.remove(trigger);
+									// add trigger to checkpoint simgroup
+									checkpointSG.elements.push(trigger);
+								}
+
+								sg.elements.push(checkpointSG);
+							});
+					}
+				}
+				if (element._type == MissionElementType.Item) {
+					var ss = cast(element, MissionElementItem);
+					var db = ss.datablock.toLowerCase();
+					switch (db) {
+						case "gemitemred" | "gemitemyellow" | "gemitemblue" | "gemitemred_mbu" | "gemitemyellow_mbu" | "gemitemblue_mbu":
+							// replace them with spawnspheres if its a hunt level
+							if (isHunt) {
+								var sg = simGroup;
+								var datablock = switch (db) {
+									case "gemitemred" | "gemitemred_mbu": "gemitem";
+									case "gemitemyellow" | "gemitemyellow_mbu": "gemitem_2pts";
+									case "gemitemblue" | "gemitemblue_mbu": "gemitem_5pts";
+									case _: null;
+								};
+								processFunctions.push(() -> {
+									// First remove this element
+									sg.elements.remove(ss);
+
+									// then add the spawnsphere
+									var spawnSphereEl = new MissionElementSpawnSphere();
+									spawnSphereEl._name = ss._name;
+									spawnSphereEl.position = ss.position;
+									spawnSphereEl.rotation = ss.rotation;
+									spawnSphereEl.scale = ss.scale;
+									spawnSphereEl.datablock = "gemspawnspheremarker";
+									spawnSphereEl.fields = [];
+									spawnSphereEl.gemdatablock = datablock;
+									sg.elements.push(spawnSphereEl);
+								});
+							}
 					}
 				}
 				if (element._type == MissionElementType.TSStatic) {
 					var ts = cast(element, mis.MissionElement.MissionElementTSStatic);
 					var shapeName = ts.shapename.toLowerCase();
 					switch (shapeName) {
+						case "~/data/shapes/glass/3x3.dts" | "~/data/shapes/glass/6x3.dts" | "~/data/shapes/glass/9x3.dts" | "~/data/shapes/glass/12x3.dts" |
+							"~/data/shapes/glass/15x3.dts" | "~/data/shapes/glass/18x3.dts":
+							var pos = MisParser.parseVector3(ts.position);
+							var rot = MisParser.parseRotation(ts.rotation);
+
+							var quat = new h3d.Quat();
+							quat.initRotateAxis(0, 0, 1, Math.PI / 2);
+							rot.multiply(rot, quat);
+
+							var offset = new Vector(-3, -0.25, 0);
+							offset.transform3x3(rot.toMatrix());
+							pos.load(pos.sub(offset));
+							var newPos = '${pos.x} ${pos.y} ${pos.z}';
+
+							var angle = 2 * Math.acos(rot.w);
+							var s = Math.sqrt(1 - rot.w * rot.w);
+							var x, y, z;
+							if (s < 0.001) {
+								x = rot.x;
+								y = rot.y;
+								z = rot.z;
+							} else {
+								x = rot.x / s;
+								y = rot.y / s;
+								z = rot.z / s;
+							}
+							angle = (angle * -180.0 / Math.PI) % 360.0;
+							var newRot = '${x} ${y} ${z} ${angle}';
+
+							var datablockName = switch (shapeName) {
+								case "~/data/shapes/glass/3x3.dts": "glass_3shape";
+								case "~/data/shapes/glass/6x3.dts": "glass_6shape";
+								case "~/data/shapes/glass/9x3.dts": "glass_9shape";
+								case "~/data/shapes/glass/12x3.dts": "glass_12shape";
+								case "~/data/shapes/glass/15x3.dts": "glass_15shape";
+								case "~/data/shapes/glass/18x3.dts": "glass_18shape";
+								case _:
+									Console.error("Unknown glass shape: " + shapeName);
+									"glass_3shape";
+							};
+
+							var sg = simGroup;
+							processFunctions.push(() -> {
+								var glassEl = new MissionElementStaticShape();
+								glassEl._name = ts._name;
+								glassEl.position = newPos;
+								glassEl.rotation = newRot;
+								glassEl.scale = ts.scale;
+								glassEl.datablock = datablockName;
+								glassEl.fields = [];
+
+								sg.elements.remove(ts);
+								sg.elements.push(glassEl);
+							});
+
+						case "~/data/shapes_mbu/signs/arrowsign_side.dts":
+							// this one is a sign
+							var sg = simGroup;
+							processFunctions.push(() -> {
+								var signEl = new MissionElementStaticShape();
+								signEl._name = ts._name;
+								signEl.position = ts.position;
+								signEl.rotation = ts.rotation;
+								signEl.scale = ts.scale;
+								signEl.datablock = "ArrowSide";
+								signEl.fields = [];
+
+								sg.elements.remove(ts);
+								sg.elements.push(signEl);
+							});
+
+						case "~/data/shapes_mbu/signs/arrowsign_up.dts":
+							// this one is a sign
+							var sg = simGroup;
+							processFunctions.push(() -> {
+								var signEl = new MissionElementStaticShape();
+								signEl._name = ts._name;
+								signEl.position = ts.position;
+								signEl.rotation = ts.rotation;
+								signEl.scale = ts.scale;
+								signEl.datablock = "ArrowUp";
+								signEl.fields = [];
+
+								sg.elements.remove(ts);
+								sg.elements.push(signEl);
+							});
+
+						case "~/data/shapes_mbu/signs/arrowsign_down.dts":
+							// this one is a sign
+							var sg = simGroup;
+							processFunctions.push(() -> {
+								var signEl = new MissionElementStaticShape();
+								signEl._name = ts._name;
+								signEl.position = ts.position;
+								signEl.rotation = ts.rotation;
+								signEl.scale = ts.scale;
+								signEl.datablock = "ArrowDown";
+								signEl.fields = [];
+
+								sg.elements.remove(ts);
+								sg.elements.push(signEl);
+							});
+
 						case "~/data/shapes/buttons/checkpoint.dts":
 							// This one needs to be changed to a "checkpoint"
 							var sg = simGroup;
@@ -416,14 +622,16 @@ class Mission {
 			skyEl.materiallist = skyMaterialList;
 
 		// Add astrolabe, because it does not exist
-		var astrolabeEl = new MissionElementStaticShape();
-		astrolabeEl._name = "Astrolabe";
-		astrolabeEl.position = "0 0 -600";
-		astrolabeEl.rotation = "1 0 0 0";
-		astrolabeEl.scale = "1 1 1";
-		astrolabeEl.datablock = "astrolabeShape";
-		astrolabeEl.fields = [];
-		root.elements.push(astrolabeEl);
+		if (!hasAstrolabe) {
+			var astrolabeEl = new MissionElementStaticShape();
+			astrolabeEl._name = "Astrolabe";
+			astrolabeEl.position = "0 0 -600";
+			astrolabeEl.rotation = "1 0 0 0";
+			astrolabeEl.scale = "1 1 1";
+			astrolabeEl.datablock = "astrolabeShape";
+			astrolabeEl.fields = [];
+			root.elements.push(astrolabeEl);
+		}
 
 		// Add the clouds
 		var cloudEl = new MissionElementStaticShape();
