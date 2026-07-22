@@ -954,9 +954,7 @@ class DifBuilder {
 				if (["NULL"].contains(tex)) {
 					return false;
 				}
-				if (tex.indexOf('/') != -1) {
-					tex = tex.split('/')[1];
-				}
+				tex = Path.withoutExtension(Path.withoutDirectory(tex));
 
 				#if (js || android)
 				path = StringTools.replace(path, "data/", "");
@@ -969,18 +967,50 @@ class DifBuilder {
 					return true;
 				}
 
+				// alright now go use the default torque texture finding method
+				var exts = [".jpg", ".png", ".jpeg", ".bmp"];
+				var dir = Path.directory(path);
+				while (true) {
+					// we recursively go up the directory tree until we find a texture
+					for (ext in exts) {
+						if (ResourceLoader.exists(Path.join([dir, tex + ext]))) {
+							return true;
+						}
+					}
+					// Move up one directory level
+					dir = Path.directory(dir);
+					if (dir == "") {
+						break;
+					}
+				}
+
 				return false;
 			}
 			function tex(tex:String):String {
-				if (tex.indexOf('/') != -1) {
-					tex = tex.split('/')[1];
-				}
+				tex = Path.withoutExtension(Path.withoutDirectory(tex));
 
 				if (ResourceLoader.exists("data/textures/" + tex + ".jpg")) {
 					return "data/textures/" + tex + ".jpg";
 				}
 				if (ResourceLoader.exists("data/textures/" + tex + ".png")) {
 					return "data/textures/" + tex + ".png";
+				}
+
+				// alright now go use the default torque texture finding method
+				var exts = [".jpg", ".png", ".jpeg", ".bmp"];
+				var dir = Path.directory(path);
+				while (true) {
+					// we recursively go up the directory tree until we find a texture
+					for (ext in exts) {
+						if (ResourceLoader.exists(Path.join([dir, tex + ext]))) {
+							return Path.join([dir, tex + ext]);
+						}
+					}
+					// Move up one directory level
+					dir = Path.directory(dir);
+					if (dir == "") {
+						break;
+					}
 				}
 
 				return null;

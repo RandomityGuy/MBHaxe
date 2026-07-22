@@ -60,6 +60,9 @@ class ResourceLoaderWorker {
 		var fileExtension = path.split('.').pop();
 		if (fileExtension != null) {
 			fileExtension = fileExtension.toLowerCase();
+			#if sys
+			paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
+			#else
 			if (fileExtension == "jpg" || fileExtension == "png" || fileExtension == "bmp") {
 				paralleltasks.push(fwd -> {
 					var file = ResourceLoader.load(path);
@@ -70,6 +73,7 @@ class ResourceLoaderWorker {
 			} else if (fileExtension != "") {
 				paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
 			}
+			#end
 		} else {
 			paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
 		}
