@@ -20,7 +20,9 @@ class Gem extends DtsObject {
 
 	public function new(element:MissionElementItem) {
 		super();
-		dtsPath = "data/shapes/items/gem.dts";
+		var isFancy = StringTools.startsWith(element.datablock, "FancyGemItem");
+		var isPQ = StringTools.endsWith(element.datablock, "_PQ");
+		dtsPath = isFancy ? "data/shapes_pq/gameplay/gems/gem_fancy.dts" : (isPQ ? "data/shapes_pq/gameplay/gems/gem.dts" : "data/shapes/items/gem.dts");
 		ambientRotate = true;
 		isCollideable = false;
 		this.isBoundingBoxCollideable = true;
@@ -29,7 +31,11 @@ class Gem extends DtsObject {
 		showSequences = false; // Gems actually have an animation for the little shiny thing, but the actual game ignores that. I get it, it was annoying as hell.
 
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
-		var color = element.datablock.substring("GemItem".length);
+		var prefixLength = (isFancy ? "FancyGemItem" : "GemItem").length;
+		var color = element.datablock.substring(prefixLength);
+		for (suffix in ["_PQ", "_MBU", "_MBG"])
+			if (StringTools.endsWith(color, suffix))
+				color = color.substring(0, color.length - suffix.length);
 		if (color.length == 0)
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 		this.identifier = "Gem" + color;
@@ -81,8 +87,8 @@ class Gem extends DtsObject {
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
 			var worker = new ResourceLoaderWorker(onFinish);
-			worker.loadFile('sound/gotgem.wav');
-			worker.loadFile('sound/gotallgems.wav');
+			src.AudioManager.preloadPitchedSound("gotDiamond", worker);
+			src.AudioManager.preloadPitchedSound("gotAllDiamonds", worker);
 			worker.run();
 		});
 	}

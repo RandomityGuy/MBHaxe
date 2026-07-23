@@ -1,5 +1,6 @@
 package dts;
 
+@:publicFields
 class SubShape {
 	public var firstNode:Int;
 	public var firstObject:Int;

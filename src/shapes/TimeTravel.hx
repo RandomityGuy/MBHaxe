@@ -9,9 +9,18 @@ import src.MarbleWorld;
 class TimeTravel extends PowerUp {
 	var timeBonus:Float = 5;
 
-	public function new(element:MissionElementItem) {
+	public function new(element:MissionElementItem, noRespawn:Bool = true) {
 		super(element);
-		this.dtsPath = "data/shapes/items/timetravel.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		var isPQ = StringTools.endsWith(datablockLower, "_pq");
+		if (StringTools.contains(datablockLower, "sundial"))
+			this.dtsPath = "data/shapes_pq/gameplay/powerups/sundial.dts";
+		else if (isPQ && StringTools.contains(datablockLower, "timepenalty"))
+			this.dtsPath = "data/shapes_pq/gameplay/powerups/timepenalty.dts";
+		else if (isPQ)
+			this.dtsPath = "data/shapes_pq/gameplay/powerups/timetravel.dts";
+		else
+			this.dtsPath = "data/shapes/items/timetravel.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "TimeTravel";
@@ -24,7 +33,8 @@ class TimeTravel extends PowerUp {
 		}
 
 		this.pickUpName = '${this.timeBonus} second Time ${this.timeBonus >= 0 ? 'Modifier' : 'Penalty'}';
-		this.cooldownDuration = 1e8;
+		if (noRespawn)
+			this.cooldownDuration = 1e8;
 		this.useInstancing = true;
 		this.autoUse = true;
 	}
@@ -45,5 +55,6 @@ class TimeTravel extends PowerUp {
 	public function use(marble:src.Marble, time:TimeState) {
 		if (!this.level.rewinding)
 			level.addBonusTime(this.timeBonus);
+		return true;
 	}
 }

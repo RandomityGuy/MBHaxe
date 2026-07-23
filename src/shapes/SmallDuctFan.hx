@@ -6,13 +6,15 @@ import src.ResourceLoader;
 import src.AudioManager;
 import h3d.Vector;
 import src.ForceObject;
+import mis.MissionElement.MissionElementStaticShape;
 
 class SmallDuctFan extends ForceObject {
 	var soundChannel:Channel;
 
-	public function new() {
+	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = "data/shapes/hazards/ductfan.dts";
+		this.dtsPath = (element != null && element.datablock.toLowerCase() == "smallductfan_pq") ? "data/shapes_pq/gameplay/hazards/ductfan.dts" :
+			"data/shapes/hazards/ductfan.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		this.identifier = "DuctFan";
@@ -45,7 +47,12 @@ class SmallDuctFan extends ForceObject {
 		var seffect = this.soundChannel.getEffect(Spatialization);
 		seffect.position = this.getAbsPos().getPosition();
 
-		if (this.soundChannel.pause)
-			this.soundChannel.pause = false;
+		this.soundChannel.pause = !this.powered;
+	}
+
+	public override function setPowered(p:Bool) {
+		super.setPowered(p);
+		if (this.soundChannel != null)
+			this.soundChannel.pause = !p;
 	}
 }

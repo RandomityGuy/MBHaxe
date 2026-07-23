@@ -114,6 +114,10 @@ class InstanceManager {
 		this.scene = scene;
 	}
 
+	static inline function keyOf(object:GameObject):String {
+		return object.instancingKey != null ? object.instancingKey : object.identifier;
+	}
+
 	public function render() {
 		static var tmpBounds = new h3d.col.Bounds();
 		var renderFrustum = scene.camera.frustum;
@@ -222,7 +226,7 @@ class InstanceManager {
 		if (isInstanced(object)) {
 			// Add existing instance
 			var objs = getAllChildren(object);
-			var minfos = objects[objectMap.get(object.identifier)]; // objects.get(object.identifier);
+			var minfos = objects[objectMap.get(keyOf(object))]; // objects.get(object.identifier);
 			for (i in 0...objs.length) {
 				minfos.batches[i].instances.push(new MeshInstance(objs[i], object));
 			}
@@ -336,13 +340,13 @@ class InstanceManager {
 			}
 			var curidx = objects.length;
 			objects.push({batches: minfos});
-			objectMap.set(object.identifier, curidx);
+			objectMap.set(keyOf(object), curidx);
 		}
 	}
 
 	public function getObjectBounds(object:GameObject) {
 		if (isInstanced(object)) {
-			var minfos = objects[objectMap.get(object.identifier)].batches;
+			var minfos = objects[objectMap.get(keyOf(object))].batches;
 			var invmat = minfos[0].instances[0].gameObject.getInvPos();
 			var b = minfos[0].instances[0].gameObject.getBounds().clone();
 			b.transform(invmat);
@@ -356,7 +360,7 @@ class InstanceManager {
 	}
 
 	public function isInstanced(object:GameObject) {
-		if (objectMap.exists(object.identifier))
+		if (objectMap.exists(keyOf(object)))
 			return true;
 		return false;
 	}

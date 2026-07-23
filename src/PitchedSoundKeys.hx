@@ -1,0 +1,265 @@
+package src;
+
+/** Per-song pitch-key maps, ported from PQ's `client/audio/*.json`. Maps a music track's
+	basename (no extension) to a sound-name -> musical-key lookup, used by
+	`AudioManager.playPitchedSound` to pick the pre-rendered pitch variant that matches
+	whichever key the currently playing song is in. `"default"` is used when the current
+	song has no explicit entry (or when music is inaudible). */
+class PitchedSoundKeys {
+	public static var songs:Map<String, Map<String, String>> = [
+		"Astrolabe - Legacy" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "G",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Astrolabe" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "G",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Beach Party" => [
+			"alarm" => "F", "alarm_timeout" => "F", "checkpoint" => "F", "firewrks" => "F",
+			"gotDiamond" => "F", "gotAllDiamonds" => "F", "missinggems" => "F", "easter" => "B_flat",
+			"easterfound" => "B_flat", "spawn" => "B_flat", "opponentDiamond" => "A",
+			"gotDiamond1" => "F", "gotDiamond2" => "F", "gotDiamond5" => "F", "gotDiamond10" => "F"
+		],
+		"Challenge" => [
+			"alarm" => "F", "alarm_timeout" => "F", "checkpoint" => "F", "firewrks" => "F",
+			"gotDiamond" => "F", "gotAllDiamonds" => "F", "missinggems" => "F", "easter" => "B_flat",
+			"easterfound" => "B_flat", "spawn" => "B_flat", "opponentDiamond" => "A",
+			"gotDiamond1" => "F", "gotDiamond2" => "F", "gotDiamond5" => "F", "gotDiamond10" => "F"
+		],
+		"Chilled" => [
+			"alarm" => "F_sharp", "alarm_timeout" => "F_sharp", "checkpoint" => "F_sharp", "firewrks" => "F_sharp",
+			"gotDiamond" => "F_sharp", "gotAllDiamonds" => "F_sharp", "missinggems" => "F_sharp", "easter" => "F_sharp",
+			"easterfound" => "F_sharp", "spawn" => "F_sharp", "opponentDiamond" => "B_flat",
+			"gotDiamond1" => "F_sharp", "gotDiamond2" => "F_sharp", "gotDiamond5" => "F_sharp", "gotDiamond10" => "F_sharp"
+		],
+		"Classic Vibe" => [
+			"alarm" => "A", "alarm_timeout" => "A", "checkpoint" => "A", "firewrks" => "A",
+			"gotDiamond" => "A", "gotAllDiamonds" => "A", "missinggems" => "A", "easter" => "A",
+			"easterfound" => "A", "spawn" => "A", "opponentDiamond" => "C_sharp",
+			"gotDiamond1" => "A", "gotDiamond2" => "A", "gotDiamond5" => "A", "gotDiamond10" => "A"
+		],
+		"Comforting Mystery" => [
+			"alarm" => "B_flat", "alarm_timeout" => "B_flat", "checkpoint" => "B_flat", "firewrks" => "B_flat",
+			"gotDiamond" => "B_flat", "gotAllDiamonds" => "B_flat", "missinggems" => "B_flat", "easter" => "B_flat",
+			"easterfound" => "B_flat", "spawn" => "B_flat", "opponentDiamond" => "D",
+			"gotDiamond1" => "B_flat", "gotDiamond2" => "B_flat", "gotDiamond5" => "B_flat", "gotDiamond10" => "B_flat"
+		],
+		"Electroforte" => [
+			"alarm" => "B", "alarm_timeout" => "B", "checkpoint" => "B", "firewrks" => "B",
+			"gotDiamond" => "B", "gotAllDiamonds" => "B", "missinggems" => "B", "easter" => "E",
+			"easterfound" => "E", "spawn" => "E", "opponentDiamond" => "D_sharp",
+			"gotDiamond1" => "B", "gotDiamond2" => "B", "gotDiamond5" => "B", "gotDiamond10" => "B"
+		],
+		"Endurance" => [
+			"alarm" => "A", "alarm_timeout" => "A", "checkpoint" => "A", "firewrks" => "A",
+			"gotDiamond" => "A", "gotAllDiamonds" => "A", "missinggems" => "A", "easter" => "A",
+			"easterfound" => "A", "spawn" => "A", "opponentDiamond" => "C_sharp",
+			"gotDiamond1" => "A", "gotDiamond2" => "A", "gotDiamond5" => "A", "gotDiamond10" => "A"
+		],
+		"Flanked" => [
+			"alarm" => "D", "alarm_timeout" => "D", "checkpoint" => "D", "firewrks" => "D",
+			"gotDiamond" => "D", "gotAllDiamonds" => "D", "missinggems" => "D", "easter" => "D",
+			"easterfound" => "D", "spawn" => "D", "opponentDiamond" => "F_sharp",
+			"gotDiamond1" => "D", "gotDiamond2" => "D", "gotDiamond5" => "D", "gotDiamond10" => "D"
+		],
+		"Good to Jump to (Loop Edit)" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Good to Jump to" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Groove Police" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "C",
+			"easterfound" => "C", "spawn" => "C", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Grudge" => [
+			"alarm" => "E", "alarm_timeout" => "E", "checkpoint" => "A", "firewrks" => "A",
+			"gotDiamond" => "A", "gotAllDiamonds" => "A", "missinggems" => "A", "easter" => "A",
+			"easterfound" => "A", "spawn" => "A", "opponentDiamond" => "C_sharp",
+			"gotDiamond1" => "A", "gotDiamond2" => "A", "gotDiamond5" => "A", "gotDiamond10" => "A"
+		],
+		"Halloween Trance" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Lakebed" => [
+			"alarm" => "E_flat", "alarm_timeout" => "E_flat", "checkpoint" => "E_flat", "firewrks" => "E_flat",
+			"gotDiamond" => "E_flat", "gotAllDiamonds" => "E_flat", "missinggems" => "E_flat", "easter" => "E_flat",
+			"easterfound" => "E_flat", "spawn" => "E_flat", "opponentDiamond" => "G",
+			"gotDiamond1" => "E_flat", "gotDiamond2" => "E_flat", "gotDiamond5" => "E_flat", "gotDiamond10" => "E_flat"
+		],
+		"MBP Old Shell" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Maze" => [
+			"alarm" => "F", "alarm_timeout" => "F", "checkpoint" => "F", "firewrks" => "F",
+			"gotDiamond" => "F", "gotAllDiamonds" => "F", "missinggems" => "F", "easter" => "F",
+			"easterfound" => "F", "spawn" => "F", "opponentDiamond" => "A",
+			"gotDiamond1" => "F", "gotDiamond2" => "F", "gotDiamond5" => "F", "gotDiamond10" => "F"
+		],
+		"Metropolis - Legacy" => [
+			"alarm" => "C", "alarm_timeout" => "C", "checkpoint" => "C", "firewrks" => "C",
+			"gotDiamond" => "C", "gotAllDiamonds" => "C", "missinggems" => "C", "easter" => "C",
+			"easterfound" => "C", "spawn" => "C", "opponentDiamond" => "E",
+			"gotDiamond1" => "C", "gotDiamond2" => "C", "gotDiamond5" => "C", "gotDiamond10" => "C"
+		],
+		"Metropolis" => [
+			"alarm" => "C", "alarm_timeout" => "C", "checkpoint" => "C", "firewrks" => "C",
+			"gotDiamond" => "C", "gotAllDiamonds" => "C", "missinggems" => "C", "easter" => "C",
+			"easterfound" => "C", "spawn" => "C", "opponentDiamond" => "E",
+			"gotDiamond1" => "C", "gotDiamond2" => "C", "gotDiamond5" => "C", "gotDiamond10" => "C"
+		],
+		"Pianoforte - 1.14 Legacy" => [
+			"alarm" => "B", "alarm_timeout" => "B", "checkpoint" => "B", "firewrks" => "B",
+			"gotDiamond" => "B", "gotAllDiamonds" => "B", "missinggems" => "B", "easter" => "E",
+			"easterfound" => "E", "spawn" => "E", "opponentDiamond" => "D_sharp",
+			"gotDiamond1" => "B", "gotDiamond2" => "B", "gotDiamond5" => "B", "gotDiamond10" => "B"
+		],
+		"Pianoforte - 1.50 Legacy" => [
+			"alarm" => "B", "alarm_timeout" => "B", "checkpoint" => "B", "firewrks" => "B",
+			"gotDiamond" => "B", "gotAllDiamonds" => "B", "missinggems" => "B", "easter" => "E",
+			"easterfound" => "E", "spawn" => "E", "opponentDiamond" => "D_sharp",
+			"gotDiamond1" => "B", "gotDiamond2" => "B", "gotDiamond5" => "B", "gotDiamond10" => "B"
+		],
+		"Pianoforte" => [
+			"alarm" => "B", "alarm_timeout" => "B", "checkpoint" => "B", "firewrks" => "B",
+			"gotDiamond" => "B", "gotAllDiamonds" => "B", "missinggems" => "B", "easter" => "E",
+			"easterfound" => "E", "spawn" => "E", "opponentDiamond" => "D_sharp",
+			"gotDiamond1" => "B", "gotDiamond2" => "B", "gotDiamond5" => "B", "gotDiamond10" => "B"
+		],
+		"Piece by Piece" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Quiet Lab" => [
+			"alarm" => "E", "alarm_timeout" => "E", "checkpoint" => "E", "firewrks" => "E",
+			"gotDiamond" => "E", "gotAllDiamonds" => "E", "missinggems" => "E", "easter" => "E",
+			"easterfound" => "E", "spawn" => "E", "opponentDiamond" => "A_flat",
+			"gotDiamond1" => "E", "gotDiamond2" => "E", "gotDiamond5" => "E", "gotDiamond10" => "E"
+		],
+		"Racing Forever" => [
+			"alarm" => "F", "alarm_timeout" => "F", "checkpoint" => "F", "firewrks" => "F",
+			"gotDiamond" => "F", "gotAllDiamonds" => "F", "missinggems" => "F", "easter" => "F",
+			"easterfound" => "F", "spawn" => "F", "opponentDiamond" => "A",
+			"gotDiamond1" => "F", "gotDiamond2" => "F", "gotDiamond5" => "F", "gotDiamond10" => "F"
+		],
+		"Reanimation" => [
+			"alarm" => "E", "alarm_timeout" => "E", "checkpoint" => "E", "firewrks" => "E",
+			"gotDiamond" => "E", "gotAllDiamonds" => "E", "missinggems" => "E", "easter" => "A",
+			"easterfound" => "A", "spawn" => "A", "opponentDiamond" => "A_flat",
+			"gotDiamond1" => "E", "gotDiamond2" => "E", "gotDiamond5" => "E", "gotDiamond10" => "E"
+		],
+		"Rising Temper - Legacy" => [
+			"alarm" => "E", "alarm_timeout" => "E", "checkpoint" => "E", "firewrks" => "E",
+			"gotDiamond" => "E", "gotAllDiamonds" => "E", "missinggems" => "E", "easter" => "A",
+			"easterfound" => "A", "spawn" => "A", "opponentDiamond" => "A_flat",
+			"gotDiamond1" => "E", "gotDiamond2" => "E", "gotDiamond5" => "E", "gotDiamond10" => "E"
+		],
+		"Rising Temper" => [
+			"alarm" => "E", "alarm_timeout" => "E", "checkpoint" => "E", "firewrks" => "E",
+			"gotDiamond" => "E", "gotAllDiamonds" => "E", "missinggems" => "E", "easter" => "A",
+			"easterfound" => "A", "spawn" => "A", "opponentDiamond" => "A_flat",
+			"gotDiamond1" => "E", "gotDiamond2" => "E", "gotDiamond5" => "E", "gotDiamond10" => "E"
+		],
+		"Seaside Revisited - Legacy" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Seaside Revisited" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Seaside" => [
+			"alarm" => "C_sharp", "alarm_timeout" => "C_sharp", "checkpoint" => "C_sharp", "firewrks" => "C_sharp",
+			"gotDiamond" => "C_sharp", "gotAllDiamonds" => "C_sharp", "missinggems" => "C_sharp", "easter" => "C_sharp",
+			"easterfound" => "C_sharp", "spawn" => "C_sharp", "opponentDiamond" => "C_sharp",
+			"gotDiamond1" => "C_sharp", "gotDiamond2" => "C_sharp", "gotDiamond5" => "C_sharp", "gotDiamond10" => "C_sharp"
+		],
+		"Shell" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"ShellXP" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"The Race" => [
+			"alarm" => "C", "alarm_timeout" => "C", "checkpoint" => "C", "firewrks" => "C",
+			"gotDiamond" => "C", "gotAllDiamonds" => "C", "missinggems" => "C", "easter" => "C",
+			"easterfound" => "C", "spawn" => "C", "opponentDiamond" => "E",
+			"gotDiamond1" => "C", "gotDiamond2" => "C", "gotDiamond5" => "C", "gotDiamond10" => "C"
+		],
+		"Tim Trance" => [
+			"alarm" => "G", "alarm_timeout" => "G", "checkpoint" => "G", "firewrks" => "G",
+			"gotDiamond" => "G", "gotAllDiamonds" => "G", "missinggems" => "G", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "B",
+			"gotDiamond1" => "G", "gotDiamond2" => "G", "gotDiamond5" => "G", "gotDiamond10" => "G"
+		],
+		"Tranquility" => [
+			"alarm" => "C", "alarm_timeout" => "C", "checkpoint" => "C", "firewrks" => "C",
+			"gotDiamond" => "C", "gotAllDiamonds" => "C", "missinggems" => "C", "easter" => "G",
+			"easterfound" => "G", "spawn" => "G", "opponentDiamond" => "E",
+			"gotDiamond1" => "C", "gotDiamond2" => "C", "gotDiamond5" => "C", "gotDiamond10" => "C"
+		],
+		"Upbeat Finale" => [
+			"alarm" => "F_sharp", "alarm_timeout" => "F_sharp", "checkpoint" => "F_sharp", "firewrks" => "F_sharp",
+			"gotDiamond" => "F_sharp", "gotAllDiamonds" => "F_sharp", "missinggems" => "F_sharp", "easter" => "F_sharp",
+			"easterfound" => "F_sharp", "spawn" => "F_sharp", "opponentDiamond" => "B_flat",
+			"gotDiamond1" => "F_sharp", "gotDiamond2" => "F_sharp", "gotDiamond5" => "F_sharp", "gotDiamond10" => "F_sharp"
+		],
+		"Upbeat Freedom" => [
+			"alarm" => "F_sharp", "alarm_timeout" => "F_sharp", "checkpoint" => "F_sharp", "firewrks" => "F_sharp",
+			"gotDiamond" => "F_sharp", "gotAllDiamonds" => "F_sharp", "missinggems" => "F_sharp", "easter" => "F_sharp",
+			"easterfound" => "F_sharp", "spawn" => "F_sharp", "opponentDiamond" => "B_flat",
+			"gotDiamond1" => "F_sharp", "gotDiamond2" => "F_sharp", "gotDiamond5" => "F_sharp", "gotDiamond10" => "F_sharp"
+		],
+		"Waves in the Dark" => [
+			"alarm" => "E_flat", "alarm_timeout" => "E_flat", "checkpoint" => "E_flat", "firewrks" => "E_flat",
+			"gotDiamond" => "E_flat", "gotAllDiamonds" => "E_flat", "missinggems" => "E_flat", "easter" => "A_flat",
+			"easterfound" => "A_flat", "spawn" => "A_flat", "opponentDiamond" => "G",
+			"gotDiamond1" => "E_flat", "gotDiamond2" => "E_flat", "gotDiamond5" => "E_flat", "gotDiamond10" => "E_flat"
+		],
+		"Xmas Trance" => [
+			"alarm" => "B_flat", "alarm_timeout" => "B_flat", "checkpoint" => "B_flat", "firewrks" => "B_flat",
+			"gotDiamond" => "B_flat", "gotAllDiamonds" => "B_flat", "missinggems" => "B_flat", "easter" => "B_flat",
+			"easterfound" => "B_flat", "spawn" => "B_flat", "opponentDiamond" => "D",
+			"gotDiamond1" => "B_flat", "gotDiamond2" => "B_flat", "gotDiamond5" => "B_flat", "gotDiamond10" => "B_flat"
+		],
+		"default" => [
+			"alarm" => "A", "alarm_timeout" => "A", "checkpoint" => "D", "firewrks" => "D",
+			"gotDiamond" => "D", "gotAllDiamonds" => "D", "missinggems" => "D", "easter" => "E",
+			"easterfound" => "E", "spawn" => "E", "opponentDiamond" => "F_sharp",
+			"gotDiamond1" => "F_sharp", "gotDiamond2" => "A", "gotDiamond3" => "B_flat", "gotDiamond4" => "B_flat",
+			"gotDiamond5" => "B", "gotDiamond6" => "C_sharp", "gotDiamond7" => "C_sharp", "gotDiamond8" => "C_sharp",
+			"gotDiamond9" => "C_sharp", "gotDiamond10" => "D"
+		],
+	];
+}

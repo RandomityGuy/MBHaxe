@@ -49,8 +49,13 @@ class Magnet extends ForceObject {
 			seffect.fadeDistance = 15;
 			// seffect.maxDistance = 5;
 
-			if (this.soundChannel.pause)
-				this.soundChannel.pause = false;
+			this.soundChannel.pause = !this.powered;
 		}
+	}
+
+	public override function setPowered(p:Bool) {
+		super.setPowered(p);
+		if (this.soundChannel != null)
+			this.soundChannel.pause = !p;
 	}
 }

@@ -7,6 +7,7 @@ import dif.io.BytesWriter;
 import mis.MissionElement.MissionElementBase;
 import triggers.CheckpointTrigger;
 import src.PathedInterior.PIState;
+import src.GameObjectPathFollower.PathFollowerSaveState;
 import shapes.PowerUp;
 import h3d.Vector;
 import h3d.Quat;
@@ -56,6 +57,23 @@ class RewindFrame {
 	var trapdoorStates:Array<{lastContactTime:Float, lastDirection:Int, lastCompletion:Float}>;
 	var lastContactNormal:Vector;
 	var blastAmt:Float;
+	var marbleRadius:Float;
+	var movementTriggerCount:Int;
+	var toggleButtonStates:Array<Bool>;
+	var teleporterArmed:Bool;
+	var teleporterSavedPosition:Vector;
+	var teleporterSavedYaw:Float;
+	var teleporterSavedPitch:Float;
+	var teleporterSavedGravity:Vector;
+	var teleporterKeepVelocity:Bool;
+	var teleporterTeleTime:Float;
+
+	/** Path-follower progress, index-aligned with `level.movingObjects` filtered to non-
+		`PathedInterior` entries (i.e. path-following `GameObject`s) - see
+		`RewindManager.recordFrame`/`applyFrame`. Parent-followers need no rewind state at all,
+		they're a pure function of their parent's current transform every tick. */
+	var pathFollowerStates:Array<PathFollowerSaveState>;
+
 	var oobState:{
 		oob:Bool,
 		timeState:TimeState
@@ -98,6 +116,22 @@ class RewindFrame {
 			});
 		}
 		c.blastAmt = blastAmt;
+		c.marbleRadius = marbleRadius;
+		c.movementTriggerCount = movementTriggerCount;
+		c.toggleButtonStates = toggleButtonStates.copy();
+		c.teleporterArmed = teleporterArmed;
+		c.teleporterSavedPosition = teleporterSavedPosition.clone();
+		c.teleporterSavedYaw = teleporterSavedYaw;
+		c.teleporterSavedPitch = teleporterSavedPitch;
+		c.teleporterSavedGravity = teleporterSavedGravity.clone();
+		c.teleporterKeepVelocity = teleporterKeepVelocity;
+		c.teleporterTeleTime = teleporterTeleTime;
+		c.pathFollowerStates = pathFollowerStates.map(s -> ({
+			pathPosition: s.pathPosition,
+			currentNode: s.currentNode,
+			prevNode: s.prevNode,
+			rngCursor: s.rngCursor
+		} : PathFollowerSaveState));
 		c.oobState = {
 			oob: oobState.oob,
 			timeState: oobState.timeState != null ? oobState.timeState.clone() : null
@@ -151,6 +185,23 @@ class RewindFrame {
 			framesize += 8; // s.lastCompletion
 		}
 		framesize += 8; // blastAmt
+		framesize += 8; // marbleRadius
+		framesize += 2; // movementTriggerCount
+		framesize += 2 + toggleButtonStates.length * 1; // toggleButtonStates
+		framesize += 1; // teleporterArmed
+		framesize += 24; // teleporterSavedPosition
+		framesize += 8; // teleporterSavedYaw
+		framesize += 8; // teleporterSavedPitch
+		framesize += 24; // teleporterSavedGravity
+		framesize += 1; // teleporterKeepVelocity
+		framesize += 8; // teleporterTeleTime
+		framesize += 2; // pathFollowerStates.length
+		for (s in pathFollowerStates) {
+			framesize += 8; // s.pathPosition
+			framesize += 2 + s.currentNode.length; // s.currentNode
+			framesize += 2 + s.prevNode.length; // s.prevNode
+			framesize += 2; // s.rngCursor
+		}
 		if (oobState.oob)
 			framesize += 1; // oobState.oob
 		framesize += 32; // oobState.timeState
@@ -240,6 +291,32 @@ class RewindFrame {
 			bb.writeDouble(s.lastCompletion);
 		}
 		bb.writeDouble(blastAmt);
+		bb.writeDouble(marbleRadius);
+		bb.writeInt16(movementTriggerCount);
+		bb.writeInt16(toggleButtonStates.length);
+		for (s in toggleButtonStates) {
+			bb.writeByte(s ? 1 : 0);
+		}
+		bb.writeByte(teleporterArmed ? 1 : 0);
+		bb.writeDouble(teleporterSavedPosition.x);
+		bb.writeDouble(teleporterSavedPosition.y);
+		bb.writeDouble(teleporterSavedPosition.z);
+		bb.writeDouble(teleporterSavedYaw);
+		bb.writeDouble(teleporterSavedPitch);
+		bb.writeDouble(teleporterSavedGravity.x);
+		bb.writeDouble(teleporterSavedGravity.y);
+		bb.writeDouble(teleporterSavedGravity.z);
+		bb.writeByte(teleporterKeepVelocity ? 1 : 0);
+		bb.writeDouble(teleporterTeleTime);
+		bb.writeInt16(pathFollowerStates.length);
+		for (s in pathFollowerStates) {
+			bb.writeDouble(s.pathPosition);
+			bb.writeInt16(s.currentNode.length);
+			bb.writeString(s.currentNode);
+			bb.writeInt16(s.prevNode.length);
+			bb.writeString(s.prevNode);
+			bb.writeInt16(s.rngCursor);
+		}
 		bb.writeByte(oobState.oob ? 1 : 0);
 		if (oobState.oob) {
 			bb.writeDouble(oobState.timeState.currentAttemptTime);
@@ -369,6 +446,37 @@ class RewindFrame {
 			trapdoorStates.push(trapdoorStates_item);
 		}
 		blastAmt = br.readDouble();
+		marbleRadius = br.readDouble();
+		movementTriggerCount = br.readInt16();
+		toggleButtonStates = [];
+		var toggleButtonStates_len = br.readInt16();
+		for (i in 0...toggleButtonStates_len) {
+			toggleButtonStates.push(br.readByte() != 0);
+		}
+		teleporterArmed = br.readByte() != 0;
+		teleporterSavedPosition = new Vector();
+		teleporterSavedPosition.x = br.readDouble();
+		teleporterSavedPosition.y = br.readDouble();
+		teleporterSavedPosition.z = br.readDouble();
+		teleporterSavedYaw = br.readDouble();
+		teleporterSavedPitch = br.readDouble();
+		teleporterSavedGravity = new Vector();
+		teleporterSavedGravity.x = br.readDouble();
+		teleporterSavedGravity.y = br.readDouble();
+		teleporterSavedGravity.z = br.readDouble();
+		teleporterKeepVelocity = br.readByte() != 0;
+		teleporterTeleTime = br.readDouble();
+		pathFollowerStates = [];
+		var pathFollowerStates_len = br.readInt16();
+		for (i in 0...pathFollowerStates_len) {
+			var pathPosition = br.readDouble();
+			var currentNodeLen = br.readInt16();
+			var currentNode = br.readString(currentNodeLen);
+			var prevNodeLen = br.readInt16();
+			var prevNode = br.readString(prevNodeLen);
+			var rngCursor = br.readInt16();
+			pathFollowerStates.push({pathPosition: pathPosition, currentNode: currentNode, prevNode: prevNode, rngCursor: rngCursor});
+		}
 		oobState = {
 			oob: br.readByte() != 0,
 			timeState: null

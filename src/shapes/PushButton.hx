@@ -10,13 +10,19 @@ import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.MarbleWorld;
+import mis.MissionElement.MissionElementStaticShape;
 
 class PushButton extends DtsObject {
 	var lastContactTime = -1e8;
 
-	public function new() {
+	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = "data/shapes/buttons/pushbutton.dts";
+		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
+		this.dtsPath = switch (datablockLower) {
+			case "pushbutton_pq": "data/shapes_pq/gameplay/pads/pushbuttonregular.dts";
+			case "pushbuttonflat_pq": "data/shapes_pq/gameplay/pads/pushbuttonflat.dts";
+			default: "data/shapes/buttons/pushbutton.dts";
+		}
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		this.identifier = "PushButton";

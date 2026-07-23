@@ -4,6 +4,8 @@ import h3d.Vector;
 import src.MarbleWorld;
 import mis.MissionElement.MissionElementTrigger;
 import src.ResourceLoader;
+import src.ResourceLoaderWorker;
+import src.AudioManager;
 import mis.MisParser;
 
 class CheckpointTrigger extends Trigger {
@@ -19,7 +21,9 @@ class CheckpointTrigger extends Trigger {
 
 	public override function init(onFinish:() -> Void) {
 		super.init(() -> {
-			ResourceLoader.load("sound/checkpoint.wav").entry.load(onFinish);
+			var worker = new ResourceLoaderWorker(onFinish);
+			AudioManager.preloadPitchedSound("checkpoint", worker);
+			worker.run();
 		});
 	}
 

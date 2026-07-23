@@ -14,6 +14,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleWorld;
 import net.Net;
+import mis.MissionElement.MissionElementStaticShape;
 
 final nukeParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 0.2,
@@ -93,9 +94,14 @@ final nukeSparksParticle:ParticleEmitterOptions = {
 };
 
 class Nuke extends Explodable {
-	public function new() {
+	public function new(?element:MissionElementStaticShape) {
 		super();
-		dtsPath = "data/shapes/hazards/nuke/nuke.dts";
+		if (element != null && element.datablock.toLowerCase() == "nuke_pq") {
+			// PQ's own Nuke_PQ datablock literally reuses the landmine model, reskinned.
+			dtsPath = "data/shapes_pq/gameplay/hazards/mine/landmine.dts";
+			this.skinOverride = "nuke";
+		} else
+			dtsPath = "data/shapes/hazards/nuke/nuke.dts";
 		this.identifier = "Nuke";
 		this.isCollideable = true;
 

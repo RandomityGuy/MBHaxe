@@ -11,6 +11,7 @@ import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.MarbleWorld;
+import mis.MissionElement.MissionElementStaticShape;
 
 class Trapdoor extends DtsObject {
 	var lastContactTime = -1e8;
@@ -22,9 +23,10 @@ class Trapdoor extends DtsObject {
 
 	var netId:Int;
 
-	public function new() {
+	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = "data/shapes/hazards/trapdoor.dts";
+		this.dtsPath = (element != null && element.datablock.toLowerCase() == "trapdoor_pq") ? "data/shapes_pq/gameplay/hazards/trapdoor.dts" :
+			"data/shapes/hazards/trapdoor.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		this.identifier = "Trapdoor";

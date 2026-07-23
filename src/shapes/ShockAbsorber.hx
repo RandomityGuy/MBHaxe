@@ -9,7 +9,7 @@ import src.MarbleWorld;
 class ShockAbsorber extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/shockabsorber.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/pillow.dts" : "data/shapes/items/shockabsorber.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "ShockAbsorber";
@@ -32,5 +32,6 @@ class ShockAbsorber extends PowerUp {
 	public function use(marble:src.Marble, timeState:TimeState) {
 		marble.enableShockAbsorber(timeState);
 		this.level.deselectPowerUp(marble);
+		return true;
 	}
 }

@@ -43,7 +43,7 @@ class SuperSpeed extends PowerUp {
 
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/superspeed.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superspeed.dts" : "data/shapes/items/superspeed.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperSpeed";
@@ -90,5 +90,6 @@ class SuperSpeed extends PowerUp {
 		if (@:privateAccess !marble.isNetUpdate)
 			this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		this.level.deselectPowerUp(marble);
+		return true;
 	}
 }

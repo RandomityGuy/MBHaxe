@@ -34,9 +34,8 @@ class MissionList {
 			#end
 			var difficultyMissions = [];
 			for (file in difficultyFiles) {
-				if (file.extension == "mis") {
-					var misParser = new MisParser(file.getText());
-					var mInfo = misParser.parseMissionInfo();
+				if (file.extension == "mis" || file.extension == "mcs") {
+					var mInfo = file.extension == "mcs" ? new mis.McsParser(file.getText()).getMissionInfo() : new MisParser(file.getText()).parseMissionInfo();
 					var mission = Mission.fromMissionInfo(file.path, mInfo);
 					if (game != "custom")
 						mission.game = game;
@@ -75,10 +74,11 @@ class MissionList {
 		goldMissions.set("intermediate", parseDifficulty("gold", "missions_mbg", "intermediate"));
 		goldMissions.set("advanced", parseDifficulty("gold", "missions_mbg", "advanced"));
 
-		platinumMissions.set("beginner", parseDifficulty("platinum", "missions_mbp", "beginner"));
-		platinumMissions.set("intermediate", parseDifficulty("platinum", "missions_mbp", "intermediate"));
-		platinumMissions.set("advanced", parseDifficulty("platinum", "missions_mbp", "advanced"));
-		platinumMissions.set("expert", parseDifficulty("platinum", "missions_mbp", "expert"));
+		platinumMissions.set("tutorial", parseDifficulty("platinum", "missions_pq", "tutorial"));
+		platinumMissions.set("beginner", parseDifficulty("platinum", "missions_pq", "tutorial"));
+		platinumMissions.set("intermediate", parseDifficulty("platinum", "missions_pq", "intermediate"));
+		platinumMissions.set("advanced", parseDifficulty("platinum", "missions_pq", "advanced"));
+		platinumMissions.set("expert", parseDifficulty("platinum", "missions_pq", "expert"));
 
 		ultraMissions.set("beginner", parseDifficulty("ultra", "missions_mbu", "beginner"));
 		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions_mbu", "intermediate"));
@@ -93,10 +93,11 @@ class MissionList {
 		@:privateAccess goldMissions["beginner"][goldMissions["beginner"].length - 1].next = goldMissions["intermediate"][0];
 		@:privateAccess goldMissions["intermediate"][goldMissions["intermediate"].length - 1].next = goldMissions["advanced"][0];
 		@:privateAccess goldMissions["advanced"][goldMissions["advanced"].length - 1].next = goldMissions["beginner"][0];
+		@:privateAccess platinumMissions["tutorial"][platinumMissions["tutorial"].length - 1].next = platinumMissions["beginner"][0];
 		@:privateAccess platinumMissions["beginner"][platinumMissions["beginner"].length - 1].next = platinumMissions["intermediate"][0];
 		@:privateAccess platinumMissions["intermediate"][platinumMissions["intermediate"].length - 1].next = platinumMissions["advanced"][0];
 		@:privateAccess platinumMissions["advanced"][platinumMissions["advanced"].length - 1].next = platinumMissions["expert"][0];
-		@:privateAccess platinumMissions["expert"][platinumMissions["expert"].length - 1].next = platinumMissions["beginner"][0];
+		@:privateAccess platinumMissions["expert"][platinumMissions["expert"].length - 1].next = platinumMissions["tutorial"][0];
 		@:privateAccess ultraMissions["beginner"][ultraMissions["beginner"].length - 1].next = ultraMissions["intermediate"][0];
 		@:privateAccess ultraMissions["intermediate"][ultraMissions["intermediate"].length - 1].next = ultraMissions["advanced"][0];
 		@:privateAccess ultraMissions["advanced"][ultraMissions["advanced"].length - 1].next = ultraMissions["beginner"][0];

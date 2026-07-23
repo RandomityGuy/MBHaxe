@@ -33,5 +33,6 @@ class Blast extends PowerUp {
 	public function use(marble:src.Marble, timeState:TimeState) {
 		marble.blastAmount = 1.03;
 		marble.blastTicks = 36000 >> 5; // Fix me
+		return true;
 	}
 }

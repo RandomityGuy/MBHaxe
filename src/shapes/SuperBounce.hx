@@ -9,7 +9,7 @@ import src.MarbleWorld;
 class SuperBounce extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/superbounce.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superbounce.dts" : "data/shapes/items/superbounce.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperBounce";
@@ -36,5 +36,6 @@ class SuperBounce extends PowerUp {
 		//	AudioManager.play(this.sounds[1]);
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp(marble);
+		return true;
 	}
 }

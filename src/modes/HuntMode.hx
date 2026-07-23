@@ -260,14 +260,20 @@ class HuntMode extends NullMode {
 	}
 
 	override function getPreloadFiles() {
-		return [
+		var files = [
 			'data/sound/opponentdiamond.wav',
-			'data/sound/firewrks.wav',
 			'data/shapes/items/blue.gem.png',
 			'data/shapes/items/red.gem.png',
 			'data/shapes/items/yellow.gem.png',
 			'data/shapes/items/platinum.gem.png'
 		];
+		for (key in AudioManager.pitchKeys) {
+			files.push('data/sound/firewrks/$key.wav');
+			files.push('data/sound/gotdiamond/$key.wav');
+		}
+		files.push('data/sound/gotdiamond/a_flat_5.wav');
+		files.push('data/sound/gotdiamond/f_5.wav');
+		return files;
 	}
 
 	function setupGems() {
@@ -646,7 +652,7 @@ class HuntMode extends NullMode {
 		if (level.finishTime != null)
 			return;
 
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/firewrks.wav", ResourceLoader.getAudio, @:privateAccess level.soundResources));
+		AudioManager.playPitchedSound("firewrks", @:privateAccess level.soundResources);
 		// AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));
 		level.finishTime = level.timeState.clone();
 		level.marble.setMode(Finish);
@@ -695,7 +701,7 @@ class HuntMode extends NullMode {
 	override function onGemPickup(marble:Marble, gem:Gem) {
 		if ((@:privateAccess !marble.isNetUpdate && Net.isHost) || !Net.isMP) {
 			if (marble == level.marble)
-				AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
+				AudioManager.playPitchedSound("gotDiamond", @:privateAccess this.level.soundResources);
 			else
 				AudioManager.playSound(ResourceLoader.getResource('data/sound/opponentdiamond.wav', ResourceLoader.getAudio,
 					@:privateAccess this.level.soundResources));

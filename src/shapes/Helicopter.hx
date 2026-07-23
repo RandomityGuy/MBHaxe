@@ -11,7 +11,7 @@ import src.Marble;
 class Helicopter extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/images/helicopter.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/gyrocopter.dts" : "data/shapes/images/helicopter.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.showSequences = false;
@@ -33,7 +33,8 @@ class Helicopter extends PowerUp {
 	}
 
 	public function use(marble:Marble, timeState:TimeState) {
-		marble.enableHelicopter(timeState);
+		marble.enableHelicopter(timeState, StringTools.endsWith(dtsPath, "gyrocopter.dts"));
 		this.level.deselectPowerUp(marble);
+		return true;
 	}
 }

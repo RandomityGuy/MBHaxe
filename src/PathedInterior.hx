@@ -7,7 +7,10 @@ import hxd.snd.Channel;
 import src.DifBuilder;
 import mis.MisParser;
 import mis.MissionElement;
+import triggers.Trigger;
 import triggers.MustChangeTrigger;
+import triggers.TriggerGotoDelayTarget;
+import triggers.RepetitiveTriggerGotoTarget;
 import mis.MissionElement.MissionElementPathedInterior;
 import mis.MissionElement.MissionElementSimGroup;
 import mis.MissionElement.MissionElementPath;
@@ -32,7 +35,8 @@ class PathedInterior extends InteriorObject {
 	var simGroup:MissionElementSimGroup;
 	var element:MissionElementPathedInterior;
 
-	public var triggers:Array<MustChangeTrigger> = [];
+	public var triggers:Array<Trigger> = [];
+	public var delayTargetTime:Float = 0;
 
 	public var markerData:Array<PathedInteriorMarker> = [];
 
@@ -137,6 +141,14 @@ class PathedInterior extends InteriorObject {
 		var triggers = this.simGroup.elements.filter((element) -> element._type == MissionElementType.Trigger);
 		for (triggerElement in triggers) {
 			var te:MissionElementTrigger = cast triggerElement;
+			if (te.datablock != null && te.datablock.toLowerCase() == "triggergotodelaytarget") {
+				this.triggers.push(new TriggerGotoDelayTarget(te, cast this));
+				continue;
+			}
+			if (te.datablock != null && te.datablock.toLowerCase() == "repetitivetriggergototarget") {
+				this.triggers.push(new RepetitiveTriggerGotoTarget(te, cast this));
+				continue;
+			}
 			if (te.targettime == null)
 				continue; // Not a pathed interior trigger
 			var trigger = new MustChangeTrigger(te, cast this);
@@ -154,7 +166,7 @@ class PathedInterior extends InteriorObject {
 		onFinish();
 	}
 
-	public function computeNextPathStep(timeDelta:Float) {
+	public override function computeNextPathStep(timeDelta:Float) {
 		stopped = false;
 		prevPosition = this.position.clone();
 		if (currentTime == targetTime) {
@@ -238,6 +250,12 @@ class PathedInterior extends InteriorObject {
 			var spat = this.soundChannel.getEffect(Spatialization);
 			spat.position = newp;
 		}
+	}
+
+	/** Satisfies `IPathMover` (`Marble.advancePhysics` now iterates `level.movingObjects`
+		generically) by delegating to the existing substep-integration method above. */
+	public override function advancePath(timeStep:Float) {
+		this.advance(timeStep);
 	}
 
 	public function update(timeState:TimeState) {

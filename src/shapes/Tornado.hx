@@ -7,13 +7,15 @@ import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.MarbleWorld;
+import mis.MissionElement.MissionElementStaticShape;
 
 class Tornado extends ForceObject {
 	var soundChannel:Channel;
 
-	public function new() {
+	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = "data/shapes/hazards/tornado.dts";
+		this.dtsPath = (element != null && element.datablock.toLowerCase() == "tornado_pq") ? "data/shapes_pq/gameplay/hazards/tornado.dts" :
+			"data/shapes/hazards/tornado.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "Tornado";

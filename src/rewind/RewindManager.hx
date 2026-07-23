@@ -11,8 +11,10 @@ import shapes.LandMine;
 import src.MarbleWorld;
 import shapes.Trapdoor;
 import shapes.PushButton;
+import shapes.ToggleButton;
 import src.Util;
 import shapes.Nuke;
+import h3d.Vector;
 
 class RewindManager {
 	var frameData:BytesBuffer;
@@ -66,6 +68,21 @@ class RewindManager {
 		rf.powerupStates = [];
 		rf.landMineStates = [];
 		rf.trapdoorStates = [];
+		rf.toggleButtonStates = [];
+		rf.teleporterArmed = level.marble.teleporterArmed;
+		rf.teleporterSavedPosition = level.marble.teleporterSavedPosition.clone();
+		rf.teleporterSavedYaw = level.marble.teleporterSavedYaw;
+		rf.teleporterSavedPitch = level.marble.teleporterSavedPitch;
+		rf.teleporterSavedGravity = level.marble.teleporterSavedGravity.clone();
+		rf.teleporterKeepVelocity = level.marble.teleporterKeepVelocity;
+		rf.teleporterTeleTime = level.marble.teleporterTeleTime;
+		rf.marbleRadius = level.marble._radius;
+		rf.movementTriggerCount = level.marble.movementTriggerCount;
+		rf.pathFollowerStates = [
+			for (mover in level.movingObjects)
+				if (!(mover is src.PathedInterior)
+					&& (cast mover : GameObject).pathFollower != null) (cast mover : GameObject).pathFollower.getState()
+		];
 		for (dts in level.dtsObjects) {
 			if (dts is PowerUp) {
 				var pow:PowerUp = cast dts;
@@ -94,6 +111,10 @@ class RewindManager {
 			if (dts is AbstractBumper) {
 				var ab:AbstractBumper = cast dts;
 				rf.powerupStates.push(ab.lastContactTime);
+			}
+			if (dts is ToggleButton) {
+				var tb:ToggleButton = cast dts;
+				rf.toggleButtonStates.push(tb.activated);
 			}
 		}
 		rf.blastAmt = level.marble.blastAmount;
@@ -185,6 +206,33 @@ class RewindManager {
 		var pstates = rf.powerupStates.copy();
 		var lmstates = rf.landMineStates.copy();
 		var tstates = rf.trapdoorStates.copy();
+		var tbstates = rf.toggleButtonStates.copy();
+		level.marble._radius = rf.marbleRadius;
+		level.marble.collider.radius = rf.marbleRadius;
+		level.marble.movementTriggerCount = rf.movementTriggerCount;
+		level.marble.teleporterArmed = rf.teleporterArmed;
+		level.marble.teleporterSavedPosition = rf.teleporterSavedPosition.clone();
+		level.marble.teleporterSavedYaw = rf.teleporterSavedYaw;
+		level.marble.teleporterSavedPitch = rf.teleporterSavedPitch;
+		level.marble.teleporterSavedGravity = rf.teleporterSavedGravity.clone();
+		level.marble.teleporterKeepVelocity = rf.teleporterKeepVelocity;
+		level.marble.teleporterTeleTime = rf.teleporterTeleTime;
+		if (level.marble.teleporterMarker != null) {
+			if (rf.teleporterArmed) {
+				level.marble.teleporterMarker.skinOverride = rf.teleporterKeepVelocity ? "yellow" : null;
+				level.marble.teleporterMarker.setPosition(rf.teleporterSavedPosition.x, rf.teleporterSavedPosition.y, rf.teleporterSavedPosition.z);
+			} else {
+				level.marble.teleporterMarker.setPosition(1e8, 1e8, 1e8);
+			}
+		}
+		var pfstates = rf.pathFollowerStates.copy();
+		for (mover in level.movingObjects) {
+			if (mover is src.PathedInterior)
+				continue;
+			var go:GameObject = cast mover;
+			if (go.pathFollower != null)
+				go.pathFollower.setState(pfstates.shift());
+		}
 		for (dts in level.dtsObjects) {
 			if (dts is PowerUp) {
 				var pow:PowerUp = cast dts;
@@ -212,6 +260,10 @@ class RewindManager {
 			if (dts is AbstractBumper) {
 				var ab:AbstractBumper = cast dts;
 				ab.lastContactTime = pstates.shift();
+			}
+			if (dts is ToggleButton) {
+				var tb:ToggleButton = cast dts;
+				tb.activated = tbstates.shift();
 			}
 		}
 

@@ -87,7 +87,7 @@ class NullMode implements GameMode {
 		if (this.level.gemCount == this.level.totalGems) {
 			string = "You have all the diamonds, head for the finish!";
 			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotallgems.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
+			AudioManager.playPitchedSound("gotAllDiamonds", @:privateAccess this.level.soundResources);
 
 			// Some levels with this package end immediately upon collection of all gems
 			// if (this.mission.misFile.activatedPackages.includes('endWithTheGems')) {
@@ -106,7 +106,7 @@ class NullMode implements GameMode {
 			}
 
 			// if (!this.rewinding)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
+			AudioManager.playPitchedSound("gotDiamond", @:privateAccess this.level.soundResources);
 		}
 
 		this.level.displayAlert(string);

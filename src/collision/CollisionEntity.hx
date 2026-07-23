@@ -281,7 +281,13 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 							cinfo.point.load(closest);
 							cinfo.collider = null;
 							// cinfo.collider = this;
-							cinfo.velocity.load(this.velocity);
+							// Path/parent-following objects can rotate/scale, so a flat per-object
+							// velocity isn't enough (see PQ's getSurfaceVelocityForSceneObject,
+							// interpolation.cpp) - compute the actual velocity at the contact point.
+							if (this.go != null && this.go.hasMover())
+								cinfo.velocity.load(this.go.getSurfaceVelocity(closest, collisionEntity.marble, timeState.dt));
+							else
+								cinfo.velocity.load(this.velocity);
 							cinfo.contactDistance = Math.sqrt(contactDist);
 							cinfo.otherObject = this.go;
 							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
