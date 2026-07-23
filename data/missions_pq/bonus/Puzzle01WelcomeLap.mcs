@@ -1,0 +1,391 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Puzzle01WelcomeLap_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Puzzle 1 - Welcome Lap";
+		type = "Bonus";
+		level = "3";
+		desc = "Take an introductory lap for this puzzle series.";
+		startHelpText = "On the ice you can\'t move your marble, but you can still jump.";
+		artist = "Matan";
+		music = "Maze.ogg";
+		game = "PlatinumQuest";
+		Time = "60000";
+		platinumTime = "40000";
+		ultimateTime = "27000";
+		awesomeTime = "14750";
+		generalHint = "Jump while on the ice to help you maintain momentum. Use the curves to your advantage!";
+		ultimateHint = "Jump as you\'re about to fall on the big downwards slope with the Time Travel. This means you won\'t have too much speed as you fall down on it, and thus can quietly press backwards and slow down at the end.";
+		awesomeHint = "Go back and jump over the big gap.";
+		CustomRadarRule = $Radar::Flags::Gems | $Radar::Flags::TimeTravels | $Radar::Flags::EndPad;
+		easterEgg = "0";
+		gems = "4";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/Puzzle01WelcomeLap.dif";
+		interior1 = $usermods @ "/data/interiors_pq/bonus/Puzzle01WelcomeLap2.dif";
+		interiors = "2";
+		maxScore = "4";
+		requirements = "Find a Nest Egg!";
+		unlockFunc = "unlock_Puzzle01WelcomeLap";
+		trivia = "Some people preferred this level to be an actual laps level rather than have Gems. Matan felt it would make the level too long and hard.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_Puzzle01WelcomeLap(%mission) {
+	return Unlock::getGameCompletionCountFlags("PlatinumQuest", $Completion::EasterEgg) >= 1;
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//These scripts will be loaded by the server only, before the mission is created.
+// This is a great place to put custom datablocks.
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Puzzle01WelcomeLap_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+			fogVolume2 = "-1 1.07208e-014 8.756e-014";
+			fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+			materialList = "~/data/skies_pq/Blender4/blender4.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun() {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "0.750000 0.900000 1.000000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/bonus/Puzzle01WelcomeLap.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/bonus/Puzzle01WelcomeLap2.dif";
+			showTerrainInside = "0";
+		};
+		new StaticShape(StartPoint) {
+			position = "18 -2 0";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "StartPad_PQ";
+		};
+		new StaticShape(EndPoint) {
+			position = "22 -2 0";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "EndPad_PQ";
+		};
+		new Item() {
+			position = "8 -18 4";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "20 14 12";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "38 -18 2";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "42 -2 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "14 -2 8.45";
+			rotation = "1 0 0 157.5";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "1250";
+		};
+		new Item() {
+			position = "26 -0.25 8.4";
+			rotation = "1 0 0 160";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "1250";
+		};
+		new Item() {
+			position = "14 -12 4.74";
+			rotation = "1 0 0 157.5";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "14 8 12.7";
+			rotation = "1 0 0 180";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+	};
+	new Trigger(StayHere) {
+		position = "-2 18 -4";
+		rotation = "1 0 0 0";
+		scale = "48 40 20";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "4 0 0";
+		rotation = "1 0 0 0";
+		scale = "7.75 4 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "12 16 12";
+		rotation = "1 0 0 0";
+		scale = "4 4 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-0.25 -16.25 4";
+		rotation = "1 0 0 0";
+		scale = "6 4 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "4 3.75 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "10.25 -16.25 4";
+		rotation = "1 0 0 0";
+		scale = "6 4 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "12 7.75 4";
+		rotation = "1 0 0 0";
+		scale = "4 19.5 12";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "24 11.75 4";
+		rotation = "1 0 0 0";
+		scale = "4 23.5 12";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "28.25 -16 2";
+		rotation = "1 0 0 0";
+		scale = "11.5 4 6";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "32.25 0 0";
+		rotation = "1 0 0 0";
+		scale = "11.75 4 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "40 -4 0";
+		rotation = "1 0 0 0";
+		scale = "4 11.75 6";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "-5.77963 -24.3563 12.4562";
+			rotation = "0.429176 -0.204603 0.879742 56.9068";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "2500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "-4.47036 -14.1337 9.15527";
+			rotation = "0.330236 -0.216109 0.918826 70.9185";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "2.20312 -4.83551 5.3037";
+			rotation = "0.171904 -0.215972 0.961148 105.166";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "22.3254 13.1829 18.3267";
+			rotation = "0.112194 -0.363699 0.924735 148.157";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "28.0244 8.07422 13.0638";
+			rotation = "0.0223454 -0.288234 0.957299 171.511";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "1750";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "33.0427 4.20583 10.4375";
+			rotation = "-0.0169521 -0.283488 0.958826 186.563";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "2750";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "41.8119 -4.40923 7.24804";
+			rotation = "-0.0748482 -0.254007 0.964302 211.725";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new StaticShape() {
+		position = "28.25 -2 2.5";
+		rotation = "0 0 -1 90.0002";
+		scale = "0.8 0.8 0.8";
+		dataBlock = "ConsFinishlinesign";
+			noParticles = "0";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

@@ -1,0 +1,518 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_DizzyingRoad_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Dizzying Road";
+		type = "Bonus";
+		level = "4";
+		desc = "Doesn\'t look too strange now, but just you wait.";
+		startHelpText = "Building speed will certainly be helpful, except remember to slow down at the end of this path.";
+		artist = "Buzzmusic";
+		music = "Lakebed.ogg";
+		game = "PlatinumQuest";
+		platinumTime = "21000";
+		ultimateTime = "13000";
+		awesomeTime = "6200";
+		generalHint = "Watch out for when the path gets steep, as well as the end of the road. Remember to jump in order to build up speed!";
+		ultimateHint = "A couple of Time Travels and some diagonal movement should suffice to beat this challenge, assuming you slowed down enough towards the end..";
+		awesomeHint = "Lots of speed and a number of Time Travels are all you need. Seriously though, slow down before you fall to the other side of the level!!";
+		CustomRadarRule = $Radar::Flags::TimeTravels | $Radar::Flags::EndPad;
+		easterEgg = "0";
+		gems = "0";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/DizzyingRoad.dif";
+		interiors = "1";
+		maxScore = "0";
+		requirements = "Beat the Platinum Score on Gravity Tower.";
+		trivia = "A highly contested level in that some people liked it, some didn\'t and some thought it to be really horrible. What\'s your opinion?";
+		unlockFunc = "unlock_DizzyingRoad";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_DizzyingRoad(%mission) {
+	return Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/intermediate/GravityTower.mcs")) & $Completion::Platinum;
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//These scripts will be loaded by the server only, before the mission is created.
+// This is a great place to put custom datablocks.
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_DizzyingRoad_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new StaticShape() {
+		position = "-6.97545 77.5307 58.7978";
+		rotation = "0 0 1 72.7656";
+		scale = "2 2 2";
+		dataBlock = "Sign01";
+			skin = "red_down";
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/bonus/DizzyingRoad.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "7.2 -64 62.1489";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "-4.975 -8.25 61.4874";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "0.5 31.7713 63.55";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "-7.05789 44 34.6643";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "3.29988 -23.3 38.6021";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "0 -64 41.509";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+	};
+	new StaticShape() {
+		position = "0.0945848 -87.7938 31.0488";
+		rotation = "1 0 0 180";
+		scale = "1 1 1";
+		dataBlock = "NatureFinishlinesignLight";
+	};
+	new StaticShape(StartPoint) {
+		position = "0 -88 56";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -80 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 0";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 78 -50";
+		rotation = "1 0 0 0";
+		scale = "16 14 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 0";
+	};
+	new StaticShape(EndPoint) {
+		position = "0 -88 44";
+		rotation = "1 0 0 180";
+		scale = "1 1 1";
+		dataBlock = "EndPad_PQ";
+	};
+	new Trigger(gravitychange1) {
+		position = "-6 94 46";
+		rotation = "1 0 0 0";
+		scale = "12 8 8";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 270";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -64 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 170";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 64 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 170";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -48 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 200";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -32 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 160";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -16 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 140";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 0 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 210";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 32 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 175";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 16 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 220";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 48 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 150";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -64 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 -10";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 64 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 -10";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 48 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 -30";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 16 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 40";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 32 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 -5";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 0 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 30";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -16 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 -40";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -32 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 -20";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -48 -50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 20";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 -80 50";
+		rotation = "1 0 0 0";
+		scale = "16 16 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 180";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 78 50";
+		rotation = "1 0 0 0";
+		scale = "16 14 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 180";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 86 54";
+		rotation = "1 0 0 0";
+		scale = "16 8 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 220";
+	};
+	new Trigger(gravitychange1) {
+		position = "-8 86 -54";
+		rotation = "1 0 0 0";
+		scale = "16 8 100";
+		dataBlock = "GravityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			onLeave = "0";
+			simrotation = "1 0 0 0";
+	};
+	new Trigger(waaaht) {
+		position = "-12 82 46";
+		rotation = "1 0 0 0";
+		scale = "24 182 8";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			keepeffectonleave = "0";
+			overlay = "1";
+			VelocityMultiplier = "0.5";
+	};
+	new TSStatic() {
+		position = "0 -9.25 54";
+		rotation = "1 0 0 0";
+		scale = "4 30.5 1";
+		shapeName = "~/data/shapes_pq/Gameplay/water.dts";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "0.0227094 -99.529 68.3023";
+			rotation = "0.9999 0.00249247 -0.0139512 20.2608";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "6000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "0.0542233 52.4854 64.1667";
+			rotation = "0.998879 -0.00248993 0.0472625 6.03817";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-7.56329 72.5649 22.648";
+			rotation = "-0.0303837 0.216848 0.975732 164.43";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "5500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-12.1232 -31.0803 26.9917";
+			rotation = "-0.0524144 0.202046 0.977972 151.529";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new Trigger(oooboe) {
+		position = "-12 82 46";
+		rotation = "1 0 0 0";
+		scale = "24 182 8";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new TSStatic() {
+		position = "0 -9.25 46";
+		rotation = "1 0 0 0";
+		scale = "4 30.5 1";
+		shapeName = "~/data/shapes_pq/Gameplay/water.dts";
+	};
+	new Trigger(buzzpls) {
+		position = "-29 117 0";
+		rotation = "1 0 0 0";
+		scale = "58 220 102.826";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

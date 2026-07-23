@@ -1,0 +1,808 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Railgun_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Railgun";
+		type = "Beginner";
+		level = "10";
+		desc = "Zap to the finish!";
+		startHelpText = "Activate the upcoming Anvil as soon as you get it.\nTry to maintain your speed!";
+		artist = "Pablo Vasquez";
+		music = "Chilled.ogg";
+		game = "PlatinumQuest";
+		gameMode = "Haste";
+		Time = "45000";
+		platinumTime = "25000";
+		ultimateTime = "15000";
+		awesomeTime = "8250";
+		generalHint = "More speed on the initial platform does not necessarily mean more speed later on.\n\nTo get to the required speed, jump as much as you can on the straight-way. Be careful not to hit the Ice Shards!";
+		ultimateHint = "Who needs to even change gravity? (Also, the Anvil is useful.)";
+		awesomeHint = "This level has some amazing shortcuts if you aren\'t afraid to find them.";
+		CustomRadarRule = $Radar::Flags::Gems | $Radar::Flags::EndPad | $Radar::Flags::Powerups;
+		easterEgg = "0";
+		gems = "1";
+		interior0 = $usermods @ "/data/interiors_pq/beginner/RailgunGreen.dif";
+		interior1 = $usermods @ "/data/interiors_pq/beginner/RailgunYellow.dif";
+		interior2 = $usermods @ "/data/interiors_pq/beginner/RailgunOrange.dif";
+		interior3 = $usermods @ "/data/interiors_pq/beginner/RailgunRed.dif";
+		interior4 = $usermods @ "/data/interiors_pq/beginner/Railgun3.dif";
+		interior5 = $usermods @ "/data/interiors_pq/beginner/Railgun2.dif";
+		interior6 = $usermods @ "/data/interiors_pq/beginner/Railgun.dif";
+		interior7 = $usermods @ "/data/interiors_pq/beginner/Railgun5.dif";
+		interiors = "8";
+		maxScore = "1";
+		SpeedToQualify = "30";
+		trivia = "The first version of this level was hated by every single staff member. Pablo did a massive makeover to this level, and added minor things even a year later after it was done.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+//function unlock_MissionNameHere(%mission) { //%mission is the MissionInfo
+//	return true; //True if the mission is unlocked
+//}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE Railgun
+//Sizes of rotating scenery tubes:
+//exterior radius
+//red, orange, yellow, green, blue, violet
+//400, 350, 300, 250, 200, 150
+//all are 640 units long
+//period for 360 degrees:
+//seconds
+//12, 6, 4, 2.4, 2, 1.6
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Railgun_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(Red1) {
+			position = "0 15 0";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Red2";
+				timeToNext = "6000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Green3) {
+			position = "0 25 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Green1";
+				timeToNext = "1200";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Green2) {
+			position = "0 20 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Green3";
+				timeToNext = "0";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Green1) {
+			position = "0 15 0";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Green2";
+				timeToNext = "1200";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Yellow3) {
+			position = "0 25 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Yellow1";
+				timeToNext = "2000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Yellow2) {
+			position = "0 20 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Yellow3";
+				timeToNext = "0";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Yellow1) {
+			position = "0 15 0";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Yellow2";
+				timeToNext = "2000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Orange3) {
+			position = "0 25 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Orange1";
+				timeToNext = "3000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Orange2) {
+			position = "0 20 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Orange3";
+				timeToNext = "0";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Orange1) {
+			position = "0 15 0";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Orange2";
+				timeToNext = "3000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Red3) {
+			position = "0 25 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Red1";
+				timeToNext = "6000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Red2) {
+			position = "0 20 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Red3";
+				timeToNext = "0";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(CameraPath1) {
+			position = "13.469 -5.72058 11.8703";
+			rotation = "-0.394265 0.282079 0.874635 78.5667";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "39.0368 -13.1702 24.3202";
+			rotation = "-0.838139 0.206999 0.504652 52.1539";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "58.1866 -10.0554 31.1906";
+			rotation = "-0.946353 -0.166498 -0.276938 64.855";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "74.749 1.98951 39.9762";
+			rotation = "0.571174 0.571642 -0.589055 118.961";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "5000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "74.7458 1.9895 -130.27";
+			rotation = "0.573156 0.573612 -0.585202 119.288";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "74.7458 1.9895 -130.27";
+			rotation = "0.573156 0.573612 -0.585202 119.288";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "5000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance(green) {
+			position = "75 0 -100";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/RailgunGreen.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "75 0 -100 0 0 -1 1.364039";
+				initialPathScale = "1 1 1";
+				Path = "Green1";
+		};
+		new InteriorInstance(yellow) {
+			position = "75 0 -60";
+			rotation = "0 0 -1 90.0002";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/RailgunYellow.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "75 0 -60 0 0 -1 1.371351";
+				initialPathScale = "1 1 1";
+				Path = "Yellow1";
+		};
+		new InteriorInstance(Orange) {
+			position = "75 0 -20";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/RailgunOrange.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "75 0 -20 0 0 -0.9999999 1.733089";
+				initialPathScale = "1 1 1";
+				Path = "Orange1";
+		};
+		new InteriorInstance(red) {
+			position = "75 0 20";
+			rotation = "0 0 -1 90.0002";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/RailgunRed.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "75 0 20 0 0 -1 1.416399";
+				initialPathScale = "1 1 1";
+				Path = "Red1";
+		};
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/Railgun3.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/Railgun2.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/Railgun.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/beginner/Railgun5.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(SceneryGroup) {
+
+		new StaticShape() {
+			position = "75.4334 -2.11822 54";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "Sign01";
+				skin = "red_diag_1";
+		};
+		new StaticShape() {
+			position = "75.427 2.38445 54";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "Sign01";
+				skin = "red_diag_4";
+		};
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "70.3052 0 68.404";
+			rotation = "0 -1 0 34.9504";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "59.9858 0.0189792 72.6482";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "49.1031 0 67.7942";
+			rotation = "0 1 0 47.5555";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "73.2651 0 64.2445";
+			rotation = "0 -1 0 63.7809";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "46.1645 0 62.8181";
+			rotation = "0 1 0 69.9008";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "20.331 -2.37126e-07 18.5";
+			rotation = "-0.57735 0.57735 0.57735 119.88";
+			scale = "1.2 1.2 1.2";
+			dataBlock = "AnvilItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "74.6271 0 57.1805";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "65.6913 0 71.5234";
+			rotation = "0 -1 0 23.4913";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "54.1597 0 71.4424";
+			rotation = "0 1 0 24.0642";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "32.678 0 28.055";
+			rotation = "0 1 0 90";
+			scale = "3.5 3.5 3.5";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "19.5761 0 14.4305";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "17.133 -5.05447e-05 7.44177";
+			rotation = "0 1 0 236.632";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "11.3566 -0.0511278 2.54942";
+			rotation = "0 1 0 206.541";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+	};
+	new SimGroup(HazardGroup) {
+
+		new StaticShape() {
+			position = "74.8622 0.387513 -34.8853";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.6158 -1.11839 -72.5917";
+			rotation = "0 1 0 90";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "IceShard2";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.8643 0.857983 -114.679";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.9769 -0.829512 -111.985";
+			rotation = "0.287606 0.913546 -0.287606 95.1739";
+			scale = "0.8 0.8 0.8";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.8633 0.677117 -39.1982";
+			rotation = "0.359136 0.861419 -0.359136 98.5155";
+			scale = "1 1 1";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "75.089 1.47053 -34.2134";
+			rotation = "0.185578 0.964946 -0.185578 92.0438";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.8062 2.98553 -15.4659";
+			rotation = "0.194861 0.96128 -0.194861 92.2622";
+			scale = "1.1 1.1 1.1";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.8628 3.01293 19.6994";
+			rotation = "0.253364 0.933602 -0.253364 93.9337";
+			scale = "1 1 1";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.6933 0.560825 -144.241";
+			rotation = "0.554817 0.619964 -0.554817 116.405";
+			scale = "1.3 1.3 1.3";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.8633 1.43804 -146.085";
+			rotation = "-0.240163 0.940555 0.240163 93.5092";
+			scale = "1 1 1";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.8633 1.14262 -142.413";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "IceShard1";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "74.8325 3.02368 -20.5961";
+			rotation = "0 1 0 90";
+			scale = "1.1 1.1 1.1";
+			dataBlock = "IceShard2";
+				noParticles = "0";
+		};
+	};
+	new SimGroup(GemGroup) {
+
+		new Item() {
+			position = "75.3631 0 54.0247";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new Trigger(neggrav) {
+		position = "71.5 2 40.5";
+		rotation = "1 0 0 0";
+		scale = "4 2 2";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "1";
+			origValue = "20";
+			value0 = "-20";
+	};
+	new Trigger() {
+		position = "-55 40 -15";
+		rotation = "1 0 0 0";
+		scale = "120 80 1";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape(StartPoint) {
+		position = "-22 0 0.25";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new Trigger(neggrav2) {
+		position = "71.5 2 -141.5";
+		rotation = "1 0 0 0";
+		scale = "4 2 2";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "1";
+			origValue = "20";
+			value0 = "-20";
+	};
+	new Trigger(neggrav4) {
+		position = "71.5 0 -81.45";
+		rotation = "1 0 0 0";
+		scale = "4 2 4";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "1";
+			origValue = "20";
+			value0 = "-20";
+	};
+	new Trigger(neggrav5) {
+		position = "71.5 4 -7.5";
+		rotation = "1 0 0 0";
+		scale = "4 2 2";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "1";
+			origValue = "20";
+			value0 = "-20";
+	};
+	new Trigger(neggrav3) {
+		position = "71.5 2 -121.5";
+		rotation = "1 0 0 0";
+		scale = "4 2 2";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "1";
+			origValue = "20";
+			value0 = "-20";
+	};
+	new Trigger(neggrav6) {
+		position = "71.45 4 8.5";
+		rotation = "1 0 0 0";
+		scale = "4 2 4";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "1";
+			origValue = "20";
+			value0 = "-20";
+	};
+	new StaticShape(EndPoint) {
+		position = "73.4358 -0.00438422 -155.503";
+		rotation = "0 0 -1 90";
+		scale = "0.85 0.85 0.85";
+		dataBlock = "EndPad_PQ";
+	};
+	new Trigger(RedSquares) {
+		position = "71.5186 2.8511 57.3642";
+		rotation = "1 0 0 0";
+		scale = "4 6 2";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "5000";
+			text = "The red squares give you an upward jolt. Don\'t get iced up!";
+			Time = "3500";
+	};
+	new Trigger(Bounds) {
+		position = "-50 50 -190";
+		rotation = "1 0 0 0";
+		scale = "150 100 280";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(neggrav7) {
+		position = "71.5 2 -49.5";
+		rotation = "1 0 0 0";
+		scale = "4 2 2";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "1";
+			origValue = "20";
+			value0 = "-20";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

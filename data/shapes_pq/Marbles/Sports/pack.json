@@ -1,0 +1,17 @@
+{
+	"name": "Sports",
+	"marbles": [
+		{"name": "Base Ball",        "shape": "BaseBall.dts",       "skin": "base",             "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Basket Ball",      "shape": "basketBall.dts",     "skin": "base",             "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Billiard Ball 1",  "shape": "ball-superball.dts", "skin": "Billiard_Ball_1",  "normalize": true},
+		{"name": "Billiard Ball 3",  "shape": "ball-superball.dts", "skin": "Billiard_Ball_3",  "normalize": true},
+		{"name": "Billiard Ball 8",  "shape": "ball-superball.dts", "skin": "Billiard_Ball_8",  "normalize": true},
+		{"name": "Billiard Ball 11", "shape": "ball-superball.dts", "skin": "Billiard_Ball_11", "normalize": true},
+		{"name": "Billiard Ball 14", "shape": "ball-superball.dts", "skin": "Billiard_Ball_14", "normalize": true},
+		{"name": "Bowling Ball",     "shape": "ball-superball.dts", "skin": "BowlingBall",      "normalize": true},
+		{"name": "Golf Ball",        "shape": "GolfBall.dts",       "skin": "base",             "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Soccer Ball",      "shape": "soccerball.dts",     "skin": "base",             "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Tennis Ball",      "shape": "TennisBall.dts",     "skin": "base",             "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Volley Ball",      "shape": "VolleyBall.dts",     "skin": "base",             "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"}
+	]
+}

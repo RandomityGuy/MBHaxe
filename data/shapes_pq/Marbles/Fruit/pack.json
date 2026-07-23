@@ -1,0 +1,9 @@
+{
+	"name": "Fruit",
+	"marbles": [
+		{"name": "Apple",      "shape": "apple.dts",      "skin": "base", "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Centaloupe", "shape": "centaloupe.dts", "skin": "base", "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Mandarin",   "shape": "Mandarin.dts",   "skin": "base", "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Pear",       "shape": "pear.dts",       "skin": "base", "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"}
+	]
+}

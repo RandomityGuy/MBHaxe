@@ -1,0 +1,332 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Azimuth_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Azimuth";
+		type = "Bonus";
+		level = "17";
+		desc = "Looks can be deceiving.";
+		artist = "Moshe";
+		music = "Reanimation.ogg";
+		game = "PlatinumQuest";
+		platinumTime = "44000";
+		ultimateTime = "28000";
+		awesomeTime = "9250";
+		generalHint = "You will need to know your diagonal movement and wall hitting skills for this one.";
+		ultimateHint = "You can finish sideways, and both Time Travels can be gotten in one sweep using a Super Jump.";
+		awesomeHint = "Switching gravity. Not even once.";
+		customRadarRule = $Radar::Flags::Gems | $Radar::Flags::EndPad;
+		easterEgg = "0";
+		gems = "4";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/azimuth.dif";
+		interiors = "1";
+		maxScore = "4";
+		requirements = "Beat the Platinum Time on Advanced Techniques and the Ultimate Time on Tricks in the Air.";
+		unlockFunc = "unlock_Azimuth";
+		trivia = "This level was made while we were still learning what kind of levels we wanted for PlatinumQuest. You can see it didn\'t quite make the cut.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_Azimuth(%mission) {
+	return (Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/beginner/AdvancedTechniques.mcs")) & $Completion::Platinum) &&
+		(Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/advanced/TricksInTheAir.mcs")) & $Completion::Ultimate);
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE Azimuth
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Azimuth_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/bonus/azimuth.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "-2.77698 4.53069 8.65";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "-13.5 4 8.675";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "-29 17.25 5.875";
+			rotation = "1 0 0 180";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "-4.25 -2.125 7.25";
+			rotation = "-1 0 0 90";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "0.75 -2.75 7.25";
+			rotation = "1 0 0 90.00019";
+			scale = "1 1 1";
+			dataBlock = "SuperJumpItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+	};
+	new SimGroup(GemGroup) {
+
+		new Item() {
+			position = "-24.25 15.25 5.25";
+			rotation = "1 0 0 90.00019";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				hidden = "true";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-31.75 21.75 5.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-17 13.5 6.25001";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-10.75 17.625 4.5";
+			rotation = "1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new Trigger() {
+		position = "-43.5007 39.1614 -3.875";
+		rotation = "1 0 0 0";
+		scale = "60 60 50";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape(EndPoint) {
+		position = "3.75 -9.25 9.25";
+		rotation = "0 0 1 180";
+		scale = "0.75 0.75 0.75";
+		dataBlock = "EndPad_PQ";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "13.86118 37.47289 15.32648";
+			rotation = "-0.1026379 -0.2579432 0.9606929 221.8406";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "2.805013 37.31138 11.5335";
+			rotation = "-0.05304988 -0.2129969 0.9756116 207.3152";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-8.491605 33.41983 8.259691";
+			rotation = "-0.01137646 -0.1692498 0.9855075 187.5798";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-15.90363 28.43566 6.606368";
+			rotation = "0.0210842 -0.1421446 0.9896214 163.2984";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-13.65575 -6.836302 14.88921";
+			rotation = "0.6792741 -0.2414662 0.693023 54.30991";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-22.41786 3.939438 14.54642";
+			rotation = "0.5415118 -0.321645 0.77673 74.81127";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "-27.98115 19.76569 15.51831";
+			rotation = "0.2451905 -0.3303667 0.9114493 111.8467";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "-27.89107 31.4969 18.2303";
+			rotation = "0.140278 -0.3420357 0.9291575 138.2791";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new StaticShape(StartPoint) {
+		position = "-0.25 31.25 5.25";
+		rotation = "0 0 -1 90";
+		scale = "0.75 0.75 0.75";
+		dataBlock = "StartPad_PQ";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

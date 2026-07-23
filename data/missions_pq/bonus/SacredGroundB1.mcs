@@ -1,0 +1,723 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_SacredGroundB1_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Sacred Ground - B1";
+		type = "Bonus";
+		level = "29";
+		desc = "You feel a black wind blow through you. All weapons dropped to level 1!";
+		startHelpText = "The counter moved.";
+		artist = "HiGuy";
+		music = "Reanimation.ogg";
+		game = "PlatinumQuest";
+		gameMode = "2d";
+		platinumTime = "60000";
+		ultimateTime = "40000";
+		awesomeTime = "19500";
+		generalHint = "Use the Super Jumps to slow your fall, just be careful to not let your Gyrocopter run out. All the spikes are instant death so try to avoid those too.";
+		ultimateHint = "Getting everything on the first few tries should be enough for UT, although it\'s not an easy task.";
+		awesomeHint = "Start your Gyrocopter roughly with Go! so you can get the Super Jump without hitting the floor below.";
+		CustomRadarRule = $Radar::Flags::EndPad;
+		cameraFov = "50";
+		cameraPitch = "0.1";
+		cameraPlane = "xz";
+		easterEgg = "0";
+		gems = "0";
+		initialCameraDistance = "50";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/SacredGroundB1.dif";
+		interior1 = $usermods @ "/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		interior2 = $usermods @ "/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		interiors = "3";
+		maxScore = "0";
+		requirements = "Beat the Platinum Time on Miscalculation and find 15 Nest Eggs.";
+		trivia = "All the text is based off the Aeon Genesis translation, and models are based off the original Cave Story, not any of the modern adaptations.";
+		unlockFunc = "unlock_SacredGroundB1";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+function unlock_SacredGroundB1(%mission) {
+	return (Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/expert/Miscalculation.mcs")) & $Completion::Platinum) &&
+		(Unlock::getGameCompletionCountFlags("PlatinumQuest", $Completion::EasterEgg) >= 15);
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+function clientCbOnMissionReset() {
+	if ($Game::Menu)
+		return;
+	activatePackage(SacredGroundB1);
+	$ripperoni = false;
+}
+
+function clientCbOnRespawnOnCheckpoint() {
+	if ($Game::Menu)
+		return;
+	$ripperoni = false;
+}
+
+function clientCbOnMissionEnded() {
+	deactivatePackage(SacredGroundB1);
+}
+
+package SacredGroundB1 {
+	function Marble::onCollide(%this, %contactVert, %normal, %surfVel, %contactDist, %obj, %fric, %force, %material) {
+		if ((strpos(%obj.getFieldValue("interiorFile"), "SacredGroundSmallSpike.dif") != -1) ||
+			(strpos(%obj.getFieldValue("interiorFile"), "SacredGroundBigSpike.dif") != -1)) {
+			//Nope
+			if ($ripperoni) {
+				return;
+			}
+			commandToServer('Ripperoni', %this.getSyncId());
+			$ripperoni = true;
+		} 
+	}
+};
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//These scripts will be loaded by the server only, before the mission is created.
+// This is a great place to put custom datablocks.
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_SacredGroundB1_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new MissionArea(MissionArea) {
+		area = "-360 -648 720 1296";
+		flightCeiling = "300";
+		flightCeilingRange = "20";
+			locked = "true";
+	};
+	new Sky(Sky) {
+		position = "336 136 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		cloudHeightPer[0] = "0";
+		cloudHeightPer[1] = "0";
+		cloudHeightPer[2] = "0";
+		cloudSpeed1 = "0.0001";
+		cloudSpeed2 = "0.0002";
+		cloudSpeed3 = "0.0003";
+		visibleDistance = "500";
+		useSkyTextures = "1";
+		renderBottomTexture = "1";
+		SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+		fogDistance = "300";
+		fogColor = "0.600000 0.600000 0.600000 1.000000";
+		fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+		fogVolume2 = "-1 1.07208e-014 8.756e-014";
+		fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+		materialList = "~/data/skies_pq/Blender4/Blender4.dml";
+		windVelocity = "1 0 0";
+		windEffectPrecipitation = "0";
+		noRenderBans = "1";
+		fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+		fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+		fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+	};
+	new Sun() {
+		direction = "0.638261 0.459006 -0.61801";
+		color = "1.400000 1.200000 0.400000 1.000000";
+		ambient = "0.300000 0.300000 0.400000 1.000000";
+	};
+	new Trigger(Bounds) {
+		position = "-71 15.5 -134.5";
+		rotation = "1 0 0 0";
+		scale = "109 33 425";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundB1.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-16 -2 112";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-45 -2 85";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new StaticShape(StartPoint) {
+		position = "-13 -1 124.25";
+		rotation = "1 0 0 0";
+		scale = "0 0 0";
+		dataBlock = "StartPad";
+			add = "0 0 -1";
+	};
+	new InteriorInstance() {
+		position = "-17 -2 -69";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "-24 -50 115";
+			rotation = "0.916319 0.0189786 -0.399998 5.92824";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				delay = "0";
+				timeToNext = "20000";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				bezier = "0";
+				FinalRotOffset = "1 0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "-24 -50 -60";
+			rotation = "0.936489 0.00969716 -0.350564 3.38377";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				delay = "0";
+				timeToNext = "6000";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				bezier = "0";
+				FinalRotOffset = "1 0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-24 -50 -60";
+			rotation = "0.936489 0.00969716 -0.350564 3.38377";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				delay = "0";
+				timeToNext = "0";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				bezier = "0";
+				FinalRotOffset = "1 0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+	};
+	new InteriorInstance() {
+		position = "-42 -2 -68";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-20 -2 108";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-28 -2 100";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-24 -2 104";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-35.75 -2 92";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-32 -2 96";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-36 -2 74";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-42 -2 74";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-30 -2 72";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-26 -2 72";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-18 -2 82";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-32 -2 52";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-36 -2 52";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-24 -2 52";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-28 -2 52";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-16 -2 52";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-20 -2 52";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-12 -2 52";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-22 -2 -68";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-30 -2 -68";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-26 -2 -68";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-38 -2 -68";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-34 -2 -68";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundBigSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-43 -2 81";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-39 -2 71";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-33 -2 75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-39 -2 43";
+		rotation = "0 1 0 90";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-39 -2 41";
+		rotation = "0 1 0 90";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-19 -2 -69";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/SacredGroundSmallSpike.dif";
+		showTerrainInside = "0";
+	};
+	new Trigger() {
+		position = "-12 0 -68";
+		rotation = "1 0 0 0";
+		scale = "2 2 4";
+		dataBlock = "FinishTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Item() {
+		position = "-13 -1 114";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "HelicopterItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+	};
+	new Item() {
+		position = "-15 -1 114";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "CustomSuperJumpItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+			power = "15";
+	};
+	new Item() {
+		position = "-39 -1 90.25";
+		rotation = "1 0 0 0";
+		scale = "1.5 1.5 1.5";
+		dataBlock = "HelicopterItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+	};
+	new Trigger() {
+		position = "-37.75 0 -59.75";
+		rotation = "1 0 0 0";
+		scale = "4 2 4";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "bounceRestitution";
+			noEmitters = "1";
+			value0 = "0.2";
+	};
+	new Item() {
+		position = "-13 -1 76.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+			timeBonus = "5000";
+	};
+	new Item() {
+		position = "-9 -1 72.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+			timeBonus = "5000";
+	};
+	new Item() {
+		position = "-15 -1 62";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "SuperSpeedItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+	};
+	new Item() {
+		position = "-20.75 -1 54";
+		rotation = "1 0 0 0";
+		scale = "4 4 4";
+		dataBlock = "SuperJumpItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+	};
+	new Item() {
+		position = "-41 -1 44.25";
+		rotation = "1 0 0 0";
+		scale = "10 10 10";
+		dataBlock = "SuperSpeedItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+	};
+	new Trigger() {
+		position = "-44 0 -57.75";
+		rotation = "1 0 0 0";
+		scale = "7.75 2 100";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			marbleAttribute1 = "staticFriction";
+			marbleAttribute2 = "kineticFriction";
+			marbleAttribute3 = "bounceKineticFriction";
+			noEmitters = "1";
+			value0 = "0";
+			value1 = "0";
+			value2 = "0";
+			value3 = "0";
+	};
+	new Item() {
+		position = "-35 -1 -59.9118";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "HelicopterItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+	};
+	new Trigger() {
+		position = "-10 0 96";
+		rotation = "1 0 0 0";
+		scale = "2 2 2";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			extended = "0";
+			persistTime = "5000";
+			text = "Welcome to Hell!";
+	};
+	new StaticShape() {
+		position = "-11 -1 62";
+		rotation = "1 0 0 0";
+		scale = "0.5 0.5 0.5";
+		dataBlock = "Checkpoint_PQ";
+	};
+	new Trigger() {
+		position = "-12 0 -68";
+		rotation = "1 0 0 0";
+		scale = "2 2 4";
+		dataBlock = "CameraDistanceTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			distance = "1.5";
+			ForceExitValue = "0";
+			keepeffectonleave = "0";
+			Smooth = "1";
+			Time = "500";
+	};
+	new Trigger() {
+		position = "-44 0 34";
+		rotation = "1 0 0 0";
+		scale = "6 2 2";
+		dataBlock = "SetVelocityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			ignoreX = "1";
+			ignoreY = "1";
+			ignoreZ = "0";
+			velocity = "0 0 -16";
+	};
+	new Trigger() {
+		position = "-44 0 -26";
+		rotation = "1 0 0 0";
+		scale = "6 2 2";
+		dataBlock = "SetVelocityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			ignoreX = "1";
+			ignoreY = "1";
+			ignoreZ = "0";
+			velocity = "0 0 -12";
+	};
+	new Trigger() {
+		position = "-44 0 -56";
+		rotation = "1 0 0 0";
+		scale = "6 2 2";
+		dataBlock = "SetVelocityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			ignoreX = "1";
+			ignoreY = "1";
+			ignoreZ = "0";
+			velocity = "0 0 -10";
+	};
+	new Trigger() {
+		position = "-44 0 0";
+		rotation = "1 0 0 0";
+		scale = "6 2 2";
+		dataBlock = "SetVelocityTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			ignoreX = "1";
+			ignoreY = "1";
+			ignoreZ = "0";
+			velocity = "0 0 -14";
+	};
+	new Trigger() {
+		position = "-44 0 53";
+		rotation = "1 0 0 0";
+		scale = "34 2 6.75";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			marbleAttribute1 = "bounceRestitution";
+			noEmitters = "1";
+			value0 = "15";
+			value1 = ".1";
+	};
+	new Trigger() {
+		position = "-46 0 92";
+		rotation = "1 0 0 0";
+		scale = "4 2 2";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			extended = "0";
+			persistTime = "5000";
+			text = "Why did you do this?";
+	};
+	new Trigger() {
+		position = "-51 0 -145";
+		rotation = "1 0 0 0";
+		scale = "50 2 300";
+		dataBlock = "AlignmentTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			alwaysOn = "1";
+			x = "none";
+			y = "trigger";
+			z = "none";
+	};
+	new StaticShape() {
+		position = "-9 -0.25 96.0091";
+		rotation = "0 0 1 90.0002";
+		scale = "1 1 0.850353";
+		dataBlock = "Sign01";
+			skin = "base";
+	};
+	new Trigger() {
+		position = "-44 0 -67";
+		rotation = "1 0 0 0";
+		scale = "30 2 4";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			noEmitters = "1";
+			value0 = "10";
+	};
+	new Trigger() {
+		position = "-44 0 -62.75";
+		rotation = "1 0 0 0";
+		scale = "30 2 2.5";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			noEmitters = "1";
+			value0 = "15";
+	};
+	new Item() {
+		position = "-33 -1 76.25";
+		rotation = "1 0 0 0";
+		scale = "4 4 4";
+		dataBlock = "CustomSuperJumpItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "0";
+			power = "30";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+function serverCmdRipperoni(%client) {
+	if (%client.isOOB)
+		return;
+	%client.onOutOfBounds();
+}
+
+//--- SERVER POSTMISSION SCRIPTS END ---

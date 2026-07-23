@@ -1,0 +1,1317 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_TrainedToFade_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Trained to Fade";
+		type = "Beginner";
+		level = "2";
+		desc = "Learn about the fading platforms, preferably without falling off.";
+		artist = "Matan";
+		music = "Waves in the Dark.ogg";
+		game = "PlatinumQuest";
+		platinumTime = "40000";
+		ultimateTime = "21000";
+		awesomeTime = "9500";
+		generalHint = "Most of the time, there\'s no way of telling how each Fade Platform will function -- tread cautiously.";
+		ultimateHint = "Get the Time Travel first, then go to the Fading Platforms to the left.";
+		awesomeHint = "This one is clever, yet tough: Use the checkpoints as a launch pad.\nAdditionally, start by getting the right Gem first. You can cross the gap and if you slow down fast enough you will get the Gem, hit the edge and rebound successfully without falling down.";
+		CustomRadarRule = $Radar::Flags::Gems | $Radar::Flags::TimeTravels | $Radar::Flags::EndPad | $Radar::Flags::Checkpoints;
+		alarmStartTime = "10";
+		easterEgg = "0";
+		gems = "2";
+		interior0 = $usermods @ "/data/interiors_pq/beginner/TrainedToFade.dif";
+		interiors = "1";
+		maxScore = "2";
+		trivia = "Phil originally developed the Fade Platforms in response for the need of a better trapdoor, one with a similar mechanism to that of the trapdoor, but also something new.\nWhile thinking of an introduction level for the Fade Platforms, Matan stumbled on an early design of a trapdoor introduction level by a different mod (this level no longer exists, sadly).\nLiking the idea, but disappointed with its execution, Matan decided to set up a smaller and simpler level with faster challenges in the spirit of the split pathways.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+//function unlock_MissionNameHere(%mission) { //%mission is the MissionInfo
+//	return true; //True if the mission is unlocked
+//}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE TrainedtoFade
+//
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_TrainedToFade_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(HelpBubbleGroup) {
+
+		new StaticShape() {
+			position = "10 35 5.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "1";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				rotate = "1";
+				text = " ";
+				triggerRadius = "3";
+		};
+		new StaticShape(Help3) {
+			position = "18 35 2.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "3000";
+				rotate = "1";
+				text = "These fading platforms will appear and disappear after a different set amount of time.\nTread carefully!";
+				Time = "2000";
+				triggerRadius = "4";
+		};
+		new StaticShape(Help2) {
+			position = "0 35 2.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "3000";
+				rotate = "1";
+				text = "These platforms are exactly like the ones at the start. You\'ll need to jump up quickly here or you\'ll fall through.";
+				Time = "2000";
+				triggerRadius = "4";
+		};
+		new StaticShape(Help1) {
+			position = "10 1 2.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "3000";
+				rotate = "1";
+				text = "These platforms will disappear upon touch, but will reappear soon. Roll fast, or you\'ll fall through.";
+				Time = "2000";
+				triggerRadius = "4";
+		};
+	};
+	new Trigger(Help5) {
+		position = "7 39 0.5";
+		rotation = "1 0 0 0";
+		scale = "6 8 2";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			extended = "0";
+			persistTime = "3000";
+			text = "Try to time your jumps in order to get to the Time Travel!";
+			Time = "3000";
+	};
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Wave/Wave.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "-0.37527 12.7393 14.3624";
+			rotation = "0.758239 -0.203118 0.61953 46.7668";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "6.96432 18.1585 9.27198";
+			rotation = "0.898845 -0.110337 0.42415 32.2822";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3400";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				Spline = "1";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "13.7096 24.5824 5.87717";
+			rotation = "0.793277 0.129669 -0.594893 30.7282";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				Spline = "1";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "15.3118 31.9684 3.69811";
+			rotation = "0.351553 0.194813 -0.915674 62.363";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "17.5469 37.9413 3.55591";
+			rotation = "0.153966 -0.212928 0.964861 110.195";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "27.5083 41.9965 4.51866";
+			rotation = "0.0349252 -0.278119 0.959911 166.253";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "3400";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				Spline = "1";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "39.946 42.4096 7.57454";
+			rotation = "-0.132485 -0.385228 0.913262 214.873";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "18.7655 52.6743 8.59591";
+			rotation = "0.367439 0.365653 -0.855153 98.653";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath9";
+				timeToNext = "5500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath9) {
+			position = "18.8196 63.7792 8.59591";
+			rotation = "0.367439 0.365653 -0.855153 98.653";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new Sun() {
+		direction = "0.638261 0.459006 -0.61801";
+		color = "1.400000 1.200000 0.400000 1.000000";
+		ambient = "0.300000 0.300000 0.400000 1.000000";
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/beginner/TrainedToFade.dif";
+		showTerrainInside = "0";
+			EntitiesLoaded = "1";
+	};
+	new StaticShape(StartPoint) {
+		position = "10 -9 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new StaticShape(EndPoint) {
+		position = "10 76 2";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "EndPad_PQ";
+	};
+	new StaticShape() {
+		position = "9.25782 76.8473 4.76961";
+		rotation = "0.705398 0.705398 0.0694758 15.8972";
+		scale = "1 1 1";
+		dataBlock = "RegularFinishlinesign";
+	};
+	new Item() {
+		position = "39 35 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+	};
+	new Item() {
+		position = "-15 35 4.25";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+	};
+	new Item() {
+		position = "10 35 3.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			timeBonus = "5000";
+	};
+	new StaticShape() {
+		position = "18 35 0.5";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "Checkpoint_PQ";
+			add = "0 0 1.5";
+	};
+	new StaticShape() {
+		position = "2 35 0.5";
+		rotation = "0 0 -1 90";
+		scale = "1 1 1";
+		dataBlock = "Checkpoint_PQ";
+			add = "0 0 1.5";
+	};
+	new StaticShape() {
+		position = "10 46 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "Checkpoint_PQ";
+			add = "0 0 1.5";
+	};
+	new Trigger(StayHere) {
+		position = "-23 85 -2";
+		rotation = "1 0 0 0";
+		scale = "70 100 15";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new SimGroup(FPGroup) {
+
+		new StaticShape() {
+			position = "9 51 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 53 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 55 1.1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "2000";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "2000";
+		};
+		new StaticShape() {
+			position = "9 57 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 59 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "3000";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "3000";
+		};
+		new StaticShape() {
+			position = "9 61 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 55 1.1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "2000";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "2000";
+		};
+		new StaticShape() {
+			position = "39 35 0.35";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "2000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "2000";
+		};
+		new StaticShape() {
+			position = "11 63 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 35 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin3";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 35 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin3";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "10 37 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin3";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "10 33 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin3";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "10 35 1.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin3";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 61 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "33 35 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "2000";
+		};
+		new StaticShape() {
+			position = "31 33 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "2500";
+		};
+		new StaticShape() {
+			position = "11 59 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "3000";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "3000";
+		};
+		new StaticShape() {
+			position = "31 35 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "3000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "5000";
+		};
+		new StaticShape() {
+			position = "11 57 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "29 37 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "29 35 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "5000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "2000";
+		};
+		new StaticShape() {
+			position = "11 53 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 51 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "27 35 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "2000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "4000";
+		};
+		new StaticShape() {
+			position = "25 33 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "2500";
+		};
+		new StaticShape() {
+			position = "25 37 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "3000";
+		};
+		new StaticShape() {
+			position = "25 35 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "23 33 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "90000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "90000";
+		};
+		new StaticShape() {
+			position = "23 37 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "90000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "90000";
+		};
+		new StaticShape() {
+			position = "23 35 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1000";
+				permanent = "0";
+				skin = "skin0";
+				StartOffset = "0";
+				visibleTime = "1000";
+		};
+		new StaticShape() {
+			position = "9 65 1.85";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-5 35 1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-5 33 1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-7 37 2";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-7 35 2";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-7 33 2";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-5 37 1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-9 33 3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-9 35 3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-9 37 3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-3 37 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-3 35 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-3 33 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform";
+				fadeinTime = "500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 13 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 13 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 17 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 17 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 15 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 15 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 11 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 11 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 9 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 9 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 7 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 7 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "11 5 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "-15 35 4.1";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin1";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "9 5 0.35";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin2";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+	};
+	new StaticShape() {
+		position = "21.4 31.4725 0.5";
+		rotation = "0 0 1 102";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "21.55 38.6 0.5";
+		rotation = "0 0 1 70";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Caution";
+	};
+	new StaticShape() {
+		position = "-0.6 31.45 0.5";
+		rotation = "0 0 -1 118.5";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "-0.6 38.6 0.5";
+		rotation = "0 0 -1 50";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "12.5 49.35 0.5";
+		rotation = "0 0 1 15";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "7.4 49.23 0.5";
+		rotation = "0 0 -1 25";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "12.4 3.5 0.5";
+		rotation = "0 0 1 22.75";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Caution";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

@@ -1,0 +1,903 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Shelosh_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Shelosh";
+		type = "Advanced";
+		level = "11";
+		desc = "Use the alternate routes to grab the Gems as you make three laps around the track.";
+		startHelpText = "Take the route you think is the fastest, as long as you get the Gem on each color of floor.";
+		artist = "Moshe";
+		music = "Reanimation.ogg";
+		game = "PlatinumQuest";
+		gameMode = "Laps";
+		platinumTime = "65000";
+		ultimateTime = "37000";
+		awesomeTime = "16500";
+		generalHint = "To get to the upper Gem, use a fan. In addition, diagonal movement will be of help.";
+		ultimateHint = "Start with the pink route, and then use the ending Super Speed to get enough height to make it to the red section. Collect all the Time Travels and both Gems, then choose your route... the pink is the easiest!";
+		awesomeHint = "Go up the red route first, then the middle, followed by the last one. The Time Travels are necessary, but not all of them.";
+		CustomRadarRule = $Radar::Flags::Gems;
+		alarmStartTime = "15";
+		easterEgg = "0";
+		gems = "3";
+		interior0 = $usermods @ "/data/interiors_pq/advanced/Shelosh.dif";
+		interiors = "1";
+		lapsNumber = "3";
+		maxScore = "3";
+		requirements = "Beat the Par Time on Deep Space Morphway.";
+		trivia = "Originally stuck in Bonus, it eventually deemed fitting enough for the main level set once several bugs that related to its gameplay were fixed.\n\nLevel name in Hebrew means \'Three\'.";
+		unlockFunc = "unlock_Shelosh";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_Shelosh(%mission) {
+	return Unlock::hasBeatMissionPar(getMissionInfo("platinum/data/missions_pq/intermediate/DeepSpaceMorphway.mcs"));
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE Shelosh
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Shelosh_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/advanced/Shelosh.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(FPGroup) {
+
+		new StaticShape() {
+			position = "14.75 0.5 21.5";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x3";
+				fadeinTime = "600";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "1000";
+				permanent = "0";
+				skin = "skin4";
+				StartOffset = "0";
+				visibleTime = "1800";
+		};
+		new StaticShape() {
+			position = "6.75 0.5 21.5";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x3";
+				fadeinTime = "700";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "950";
+				permanent = "0";
+				skin = "skin4";
+				StartOffset = "0";
+				visibleTime = "1800";
+		};
+		new StaticShape() {
+			position = "28.75 -10.5 21.5";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x2";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "500";
+				permanent = "0";
+				skin = "skin4";
+				StartOffset = "0";
+				visibleTime = "500";
+		};
+		new StaticShape() {
+			position = "33.75 -9.5 21.5";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x2";
+				fadeinTime = "1500";
+				fadeoutTime = "1500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "1500";
+				permanent = "0";
+				skin = "skin4";
+				StartOffset = "0";
+				visibleTime = "1500";
+		};
+		new StaticShape() {
+			position = "54.75 -39.5 21.6";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "500";
+				permanent = "0";
+				skin = "skin4";
+				StartOffset = "0";
+				visibleTime = "500";
+		};
+	};
+	new SimGroup(SceneryGroup) {
+	};
+	new SimGroup(MPGroup) {
+
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "0 0 -5.5";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "100";
+					smoothingType = "Linear";
+				};
+				new Marker() {
+					position = "0 0 0";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new Trigger(MustChange) {
+				position = "-5.25 -41.5 10.75";
+				rotation = "1 0 0 0";
+				scale = "6 1 1";
+				dataBlock = "TriggerGotoTarget";
+				polyhedron = "0.5000000 -3.5000000 -2.0000000 0.0000000 0.0000000 4.0000000 0.0000000 7.0000000 0.0000000 -1.0000000 0.0000000 0.0000000";
+					IContinueToTTime = "0";
+					instant = "0";
+					targetTime = "105";
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/advanced/Shelosh.dif";
+				interiorIndex = "0";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialScale = "1 1 1";
+					initialTargetPosition = "0";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "0 0 0";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "2500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "0 0 -6";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "0 0 -6";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "2500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "0 0 0";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/advanced/Shelosh.dif";
+				interiorIndex = "1";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "0 0 -5.5";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "100";
+					smoothingType = "Linear";
+				};
+				new Marker() {
+					position = "0 0 0";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new Trigger(MustChange) {
+				position = "-5.25 -41.5 10.75";
+				rotation = "1 0 0 0";
+				scale = "6 1 1";
+				dataBlock = "TriggerGotoTarget";
+				polyhedron = "0.5000000 -3.5000000 -2.0000000 0.0000000 0.0000000 4.0000000 0.0000000 7.0000000 0.0000000 -1.0000000 0.0000000 0.0000000";
+					IContinueToTTime = "0";
+					instant = "0";
+					targetTime = "105";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+			};
+		};
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "-4.25 -34.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "-4.25 -18.5 20.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "-3.25 -47.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "14.75 -41.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "17.75 -48.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "30.75 -17.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "54.75 -27.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "36.75 2.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "6.75 4.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "54.75 -49.5 21.8382";
+			rotation = "0 0 1 45";
+			scale = "1 1 1";
+			dataBlock = "HelicopterItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "-5.125 -47.625 9.875";
+			rotation = "1 0 0 180";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "53.25 -37.25 11.75";
+			rotation = "-1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "18.75 3.25 11.75";
+			rotation = "1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "SuperSpeedItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "52.75 -13.5 11.75";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "8.75 -1.57 13.75";
+			rotation = "1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "16.75 -3.5 22.25";
+			rotation = "1 0 0 0";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2000";
+		};
+		new Item() {
+			position = "-5.35547 -35.5 8.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "SuperSpeedItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "38.75 -9.5 22.217";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "8000";
+		};
+	};
+	new SimGroup(HazardGroup) {
+
+		new StaticShape() {
+			position = "53.75 -46.5 16.25";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "34.9796 -45.4142 15.25";
+			rotation = "0 0 -1 45";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "37.0095 -47.4821 15.25";
+			rotation = "0 0 -1 83.6062";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "37.9584 -49.1167 15.25";
+			rotation = "0 0 -1 96.9668";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "42.1653 -49.6944 15.25";
+			rotation = "0 0 -1 107.807";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "42.1061 -47.0725 15.25";
+			rotation = "0 0 -1 59.0146";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "40.0095 -45.8448 15.25";
+			rotation = "0 0 -1 73.0293";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "37.75 -10.5 16.25";
+			rotation = "-1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "1.75 -40.5 16.25";
+			rotation = "-1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "32.4452 -45.9153 15.25";
+			rotation = "0 0 1 45";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "35.7874 -49.6869 15.25";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "32.8256 -50.4384 15.25";
+			rotation = "0 0 -1 100.313";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "30.8218 -49.8357 15.25";
+			rotation = "0 0 1 225";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "28.8688 -47.5133 15.25";
+			rotation = "0 0 -1 45";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "24.8582 -48.9972 15.25";
+			rotation = "0 0 -1 100.359";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "22.6386 -46.677 15.25";
+			rotation = "0 0 -1 89.9544";
+			scale = "1 1 1";
+			dataBlock = "RoundBumper_PQ";
+		};
+		new StaticShape() {
+			position = "34.9568 -48.0211 15.25";
+			rotation = "0 0 1 134.072";
+			scale = "1 1 1";
+			dataBlock = "TriangleBumper_PQ";
+		};
+		new StaticShape() {
+			position = "27.6957 -45.9382 15.3015";
+			rotation = "0.109123 -0.109123 0.98802 90.6905";
+			scale = "1 1 1";
+			dataBlock = "TriangleBumper_PQ";
+		};
+		new StaticShape() {
+			position = "41.75 -19.5 15.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "36.75 -19.5 15.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "46.75 -19.5 15.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "39.25 -19.5 15.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "44 -19.5 15.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+	};
+	new SimGroup(GemGroup) {
+
+		new Item() {
+			position = "1.75 -40.5 21.7544";
+			rotation = "1 0 0 0";
+			scale = "2 2 2";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "49.75 -12.5 15.2509";
+			rotation = "1 0 0 0";
+			scale = "2 2 2";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "32.75 -48.5 11.75";
+			rotation = "1 0 0 90";
+			scale = "2 2 2";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "16.7218 10.371 26.8931";
+			rotation = "0.0746197 -0.266336 0.960988 149.862";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "2500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "27.5572 7.00792 26.2504";
+			rotation = "0.0185215 -0.169797 0.985305 167.731";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "44.1302 4.44826 24.9843";
+			rotation = "-0.0590236 -0.201315 0.977747 211.992";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "3150";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "56.709 -11.1017 24.4008";
+			rotation = "-0.113272 -0.200369 0.973151 237.634";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "3200";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "60.215 -33.0768 26.1676";
+			rotation = "0.298473 0.206433 -0.931826 73.168";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "3500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "54.8746 -52.1334 29.3402";
+			rotation = "0.514343 0.233162 -0.82528 57.5593";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "41.829 -67.3963 33.2497";
+			rotation = "0.841335 0.158588 -0.516726 40.0827";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "16.3229 -72.3869 34.5478";
+			rotation = "0.970938 -0.0685071 0.229317 34.2048";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath9";
+				timeToNext = "3500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath9) {
+			position = "-5.62099 -58.2571 30.1761";
+			rotation = "0.682301 -0.212754 0.699429 48.0565";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath10";
+				timeToNext = "3500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath10) {
+			position = "-14.6926 -37.3077 25.7024";
+			rotation = "0.336559 -0.210544 0.917823 68.5559";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath11";
+				timeToNext = "3750";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath11) {
+			position = "-14.3184 -11.1909 24.1482";
+			rotation = "0.121648 -0.14658 0.98169 101.66";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath12";
+				timeToNext = "2800";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath12) {
+			position = "-12.143 4.49371 26.2958";
+			rotation = "0.115986 -0.236532 0.964676 129.368";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath13";
+				timeToNext = "2600";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath13) {
+			position = "-0.344155 12.7728 28.1419";
+			rotation = "0.0612357 -0.256837 0.964513 154.099";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new StaticShape(StartPoint) {
+		position = "0.75 0.5 15.125";
+		rotation = "0 0 1 90";
+		scale = "0.1 0.1 0.1";
+		dataBlock = "StartPad_PQ";
+	};
+	new Trigger() {
+		position = "-11.83 15.1244 -0.25";
+		rotation = "1 0 0 0";
+		scale = "70 70 70";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new SimGroup(LapsGroup) {
+
+		new Trigger() {
+			position = "49 -18.5 8";
+			rotation = "1 0 0 0";
+			scale = "10 8 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "1";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+				spawnPoint = "54 -22.5 16 1 0 0 0";
+		};
+		new Trigger() {
+			position = "-9.75 -32.25 7";
+			rotation = "1 0 0 0";
+			scale = "12 4 22";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "2";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+				spawnPoint = "-3.75 -34.25 18 1 0 0 0";
+		};
+		new Trigger(CountMeUpScott) {
+			position = "-0.25 10 14";
+			rotation = "1 0 0 0";
+			scale = "2 16 60";
+			dataBlock = "LapsCounterTrigger";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				customSpawnPoint = "1";
+				enableRespawning = "1";
+				spawnPoint = "-5.25 0.5 17 0 0 1 90";
+		};
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

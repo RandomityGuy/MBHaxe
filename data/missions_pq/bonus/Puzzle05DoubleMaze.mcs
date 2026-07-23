@@ -1,0 +1,899 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Puzzle05DoubleMaze_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Puzzle 5 - Double Maze";
+		type = "Bonus";
+		level = "15";
+		desc = "That corner Gem is HiGuy\'s fault.";
+		artist = "Matan";
+		music = "Maze.ogg";
+		game = "PlatinumQuest";
+		time = "210000";
+		platinumTime = "120000";
+		ultimateTime = "80000";
+		awesomeTime = "29000";
+		generalHint = "The lack of checkpoints means you will have to think before moving to the next areas.";
+		ultimateHint = "Jumping right before hitting the Gravity Modifier on the ice loop will give you some speed boost. You can, technicaly, finish the loop without the time restarting.";
+		awesomeHint = "Clear out the area furthest away from the start, and work your way towards the start point. After that, do the loop, grab a couple of Gems at most and start the second floor.";
+		customRadarRule = $Radar::Flags::Gems;
+		easterEgg = "0";
+		gems = "19";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/Puzzle05DoubleMaze.dif";
+		interiors = "1";
+		maxScore = "19";
+		requirements = "Finish Puzzle 4 - Four Corners.";
+		unlockFunc = "unlock_Puzzle05DoubleMaze";
+		trivia = "This level is in fact two Puzzle series floors that Matan made and joined them into one.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_Puzzle05DoubleMaze(%mission) {
+	return Unlock::hasBeatMissionPar(getMissionInfo("platinum/data/missions_pq/bonus/Puzzle04FourCorners.mcs"));
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//These scripts will be loaded by the server only, before the mission is created.
+// This is a great place to put custom datablocks.
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Puzzle05DoubleMaze_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender4/blender4.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun() {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "0.750000 0.900000 1.000000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/bonus/Puzzle05DoubleMaze.dif";
+			showTerrainInside = "0";
+		};
+		new StaticShape(StartPoint) {
+			position = "36 -14 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "StartPad_PQ";
+		};
+		new StaticShape(EndPoint) {
+			position = "18 -26 18";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "EndPad_PQ";
+		};
+		new Item() {
+			position = "52 -14 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "48 -6 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "52 6 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "44 18 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "20 14 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "24 2 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "28 10 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "44 10 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "32 -6 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "66.05 2 6";
+			rotation = "0 -1 0 90";
+			scale = "2 2 2";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "61.5 -6 5.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "44 -10 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "1500";
+		};
+		new Item() {
+			position = "32 -2 1.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2500";
+		};
+		new Item() {
+			position = "24 18 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "500";
+		};
+		new Item() {
+			position = "36 14 1.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "62 -6 10";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "6500";
+		};
+		new Item() {
+			position = "40 2 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "2500";
+		};
+		new Item() {
+			position = "28 -14 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "10000";
+		};
+		new Item() {
+			position = "20 -6 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "1500";
+		};
+		new Item() {
+			position = "61.5 2 6";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "15000";
+		};
+		new Item() {
+			position = "18.75 -2.75 0.5";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "18.5 -1 1";
+			rotation = "1 0 0 180";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "60.5 11 1.65";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "61.25 9 2.4";
+			rotation = "1 0 0 180";
+			scale = "1 1 1";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "63 -17.25 6.15";
+			rotation = "1 0 0 90";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "67.15 -15 6.15";
+			rotation = "0.5773504 0.57735 -0.5773504 120";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "65 21.15 6.25";
+			rotation = "-1 0 0 90";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "60.75 19 6.25";
+			rotation = "-0.5773504 -0.57735 -0.5773504 120";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "AntiGravityItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new StaticShape() {
+			position = "24.0121 -26 17.1209";
+			rotation = "0 -1 0 94.0107";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "regularfinishlinesign";
+		};
+		new Item() {
+			position = "18.05 -14 18";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.05 -2 26";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.05 -14 34";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.05 -30 30";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.05 -38 18";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.05 -30 10";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.05 -30 22";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.05 -6 34";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.5 2 16";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "10000";
+		};
+		new Item() {
+			position = "18.5 -38 34";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "10000";
+		};
+		new Item() {
+			position = "52 18 0.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "10000";
+		};
+		new Item() {
+			position = "18.5 -30 14";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "1500";
+		};
+		new Item() {
+			position = "18.5 -38 26";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "3000";
+		};
+		new Item() {
+			position = "18.5 -22 34";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "500";
+		};
+		new Item() {
+			position = "20 -20 30";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "7500";
+		};
+	};
+	new Trigger() {
+		position = "26.25 0 0";
+		rotation = "1 0 0 0";
+		scale = "3.5 3.75 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "25.75 -12 0";
+		rotation = "1 0 0 0";
+		scale = "8 4.25 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "26 -8.25 0";
+		rotation = "1 0 0 0";
+		scale = "4 3.75 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "62.25 12 4";
+		rotation = "1 0 0 0";
+		scale = "8 4 24";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "26.25 11.75 0";
+		rotation = "1 0 0 0";
+		scale = "3.5 3.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "26.25 3.75 0";
+		rotation = "1 0 0 0";
+		scale = "23.5 3.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "34.25 11.75 0";
+		rotation = "1 0 0 0";
+		scale = "3.5 19.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "38 11.75 0";
+		rotation = "1 0 0 0";
+		scale = "7.75 3.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "42.25 -4.25 0";
+		rotation = "1 0 0 0";
+		scale = "3.5 11.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "50.25 -8.25 0";
+		rotation = "1 0 0 0";
+		scale = "3.5 3.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "26.25 19.75 0";
+		rotation = "1 0 0 0";
+		scale = "15.5 3.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "46.25 20.25 0";
+		rotation = "1 0 0 0";
+		scale = "8 4.25 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "50.25 16 0";
+		rotation = "1 0 0 0";
+		scale = "3.75 7.75 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "54 11.75 0";
+		rotation = "1 0 0 0";
+		scale = "8 3.5 3.75";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "58.25 30 0";
+		rotation = "1 0 0 0";
+		scale = "15.75 17.75 28";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "58.25 7.75 0";
+		rotation = "1 0 0 0";
+		scale = "15.75 31.75 28";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18.75 0 0";
+		rotation = "1 0 0 0";
+		scale = "3 4 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -4.25 0";
+		rotation = "1 0 0 0";
+		scale = "3.75 3.75 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 11.75 0";
+		rotation = "1 0 0 0";
+		scale = "3.75 11.5 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 4.25 4";
+		rotation = "1 0 0 0";
+		scale = "4 4 24";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -4.25 8.25";
+		rotation = "1 0 0 0";
+		scale = "4 15.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -24.25 8.25";
+		rotation = "1 0 0 0";
+		scale = "4 3.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -28.25 12.25";
+		rotation = "1 0 0 0";
+		scale = "4 3.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -28.25 16.25";
+		rotation = "1 0 0 0";
+		scale = "4 7.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -36.25 20.25";
+		rotation = "1 0 0 0";
+		scale = "4 3.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -28.25 24.25";
+		rotation = "1 0 0 0";
+		scale = "4 7.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -28.25 32.25";
+		rotation = "1 0 0 0";
+		scale = "4 12 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -20.25 32.25";
+		rotation = "1 0 0 0";
+		scale = "4 3.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -12.25 32.25";
+		rotation = "1 0 0 0";
+		scale = "4 3.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -4 32.25";
+		rotation = "1 0 0 0";
+		scale = "4 3.75 3.75";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -20.25 19.75";
+		rotation = "1 0 0 0";
+		scale = "4 3.5 4.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -12.25 24.25";
+		rotation = "1 0 0 0";
+		scale = "4 11.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "18 -16.25 16.25";
+		rotation = "1 0 0 0";
+		scale = "4 7.5 3.5";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(StayHere) {
+		position = "10 30 -6";
+		rotation = "1 0 0 0";
+		scale = "65 75 46";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "62.6881 23.11364 6.423714";
+			rotation = "-0.05247292 -0.1266118 0.9905635 224.6391";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "56.61623 17.04655 4.440185";
+			rotation = "-0.03506114 -0.084599 0.9957981 224.8517";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "2600";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "50.94518 11.81682 3.854766";
+			rotation = "0.02273147 0.04733169 0.9986206 231.2444";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "43.69587 6.227383 5.860946";
+			rotation = "0.1044608 0.2042991 0.9733191 232.9163";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "20.39557 -31.68613 38.97075";
+			rotation = "0.92136 -0.1713148 0.3489226 56.10528";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "18.87919 -24.60259 32.03016";
+			rotation = "0.830709 -0.2353418 0.5045165 58.63124";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "2800";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "18.9367 -17.62492 25.50603";
+			rotation = "0.7401992 -0.2750993 0.6135353 62.41172";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "19.13144 -9.327851 19.10095";
+			rotation = "0.5999543 -0.3127026 0.7363912 70.58101";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

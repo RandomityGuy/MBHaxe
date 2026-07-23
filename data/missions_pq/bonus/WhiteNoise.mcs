@@ -1,0 +1,694 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_WhiteNoise_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "7-1X: White Noise";
+		type = "Bonus";
+		level = "28";
+		desc = "I heard buzzsaws taste like blood.";
+		startHelpText = "Save Meat Boy, Bandage Girl!";
+		artist = "Team Meat, rep. by HiGuy";
+		music = "Maze.ogg";
+		game = "PlatinumQuest";
+		gameMode = "2d";
+		time = "0";
+		platinumTime = "30000";
+		ultimateTime = "25000";
+		awesomeTime = "19500";
+		generalHint = "Don\'t roll too fast or you\'ll bounce too high and hit the buzzsaws/ceiling. Also maybe watch someone speedrun the actual level.";
+		ultimateHint = "You can skip a few jumps if you bounce right, and there are a few walls you can miss.";
+		awesomeHint = "Ready-Set-Go is faster than the normal restarting (that is when respawning after hitting a buzzsaw).\n\nYou have to skip the right wall at the center of the level if you want to have a chance at the Awesome Time, though.";
+		customRadarRule = $Radar::Flags::EndPad;
+		cameraFov = "50";
+		cameraPitch = "0.1";
+		cameraPlane = "xz";
+		easterEgg = "0";
+		forceRadar = "0";
+		gems = "0";
+		hideRadar = "0";
+		initialCameraDistance = "40";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/WhiteNoise.dif";
+		interior1 = $usermods @ "/data/interiors_pq/bonus/Buzzsaw.dif";
+		interiors = "2";
+		maxScore = "0";
+		Radar = "0";
+		requirements = "Beat the Ultimate Time on both Orthogonality and Above and Below.";
+		unlockFunc = "unlock_WhiteNoise";
+		whiteNoise = "1";
+		trivia = "HiGuy still hasn't beaten this level in Super Meat Boy.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_WhiteNoise(%mission) {
+	return (Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/intermediate/AboveAndBelow.mcs")) & $Completion::Ultimate) &&
+		(Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/expert/Orthogonality.mcs")) & $Completion::Ultimate);
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+function clientCbOnMissionReset() {
+	if ($Game::Menu)
+		return;
+	activatePackage(WhiteNoise);
+}
+
+function clientCmdSMBTrigger(%impulse, %upwards) {
+	$SMBTrigger = %impulse;
+	$SMBUpwards = %upwards;
+	echo("SMBTrigger set to " SPC %impulse SPC %upwards);
+}
+
+package WhiteNoise {
+	function Marble::onJump(%this) {
+		Parent::onJump(%this);
+
+		if (MissionInfo.whiteNoise) {
+			if ($SMBTrigger != 0) {
+				%this.applyImpulse("0 0 0", "0 0" SPC $SMBTrigger);
+			}
+			if ($SMBUpwards != 0) {
+				%v = %this.getVelocity();
+				%this.setVelocity(setWord(%v, 2,  max(getWord(%v, 2), $SMBUpwards)));
+			}
+		}
+	}
+
+	function Marble::onCollide(%this, %contactVert, %normal, %surfVel, %contactDist, %obj, %fric, %force, %material) {
+		if (strpos(%obj.getFieldValue("interiorFile"), "Buzzsaw.dif") != -1) {
+			//Nope
+			commandToServer('Buzzsawd', %this.getSyncId());
+		} 
+	}
+};
+
+new MaterialProperty(PQWallStickMaterial) {
+	friction = 1;
+	restitution = 0;
+};
+addMaterialMapping("stickconcrete", PQWallStickMaterial);
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//These scripts will be loaded by the server only, before the mission is created.
+// This is a great place to put custom datablocks.
+
+datablock TriggerData(SMBTrigger) {
+	tickPeriodMS = "100";
+};
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_WhiteNoise_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new StaticShape() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "500 500 500";
+		dataBlock = "Wintry";
+	};
+	new MissionArea(MissionArea) {
+		area = "-360 -648 720 1296";
+		flightCeiling = "300";
+		flightCeilingRange = "20";
+			locked = "true";
+	};
+	new Sky(Sky) {
+		position = "336 136 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		cloudHeightPer[0] = "0";
+		cloudHeightPer[1] = "0";
+		cloudHeightPer[2] = "0";
+		cloudSpeed1 = "0.0001";
+		cloudSpeed2 = "0.0002";
+		cloudSpeed3 = "0.0003";
+		visibleDistance = "1000";
+		useSkyTextures = "1";
+		renderBottomTexture = "1";
+		SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+		fogDistance = "300";
+		fogColor = "0.600000 0.600000 0.600000 1.000000";
+		fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+		fogVolume2 = "-1 1.07208e-14 8.756e-14";
+		fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+		materialList = "~/data/skies_pq/Blender3/blender3.dml";
+		windVelocity = "1 0 0";
+		windEffectPrecipitation = "0";
+		noRenderBans = "1";
+		fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+		fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+		fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+	};
+	new Sun() {
+		direction = "0.638261 0.459006 -0.61801";
+		color = "1.000000 1.000000 1.000000 1.000000";
+		ambient = "0.300000 0.300000 0.400000 1.000000";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(Saw3) {
+			position = "0 0 0";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Saw1";
+				timeToNext = "400";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Saw2) {
+			position = "0 0 0";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Saw3";
+				timeToNext = "0";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Saw1) {
+			position = "0 0 0";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "Saw2";
+				timeToNext = "400";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(CameraPath1) {
+			position = "-17.06595 -2.893516 -6.222092";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "-17.06595 -2.893516 -6.222092";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-16.9889 -21.19175 0.1853173";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "7000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-0.8437344 -27.66909 0.191422";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "15000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-0.8437344 -27.66909 0.191422";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/bonus/WhiteNoise.dif";
+		showTerrainInside = "0";
+	};
+	new StaticShape(StartPoint) {
+		position = "-30 0 -7.125";
+		rotation = "1 0 0 0";
+		scale = "0.25 0.25 0.25";
+		dataBlock = "StartPad_PQ";
+	};
+	new Trigger() {
+		position = "-18.5 1 -7";
+		rotation = "1 0 0 0";
+		scale = "3 2 3";
+		dataBlock = "FinishTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-6.125 0 -7";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-6.125 0 -7 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-17 0 1.375";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-17 0 1.375 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-21 0 0.5";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-21 0 0.5 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-13 0 -1";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-13 0 -1 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-14.5 0 6.5";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-14.5 0 6.5 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-20 0 9.5";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-20 0 9.5 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-8 0 7.625";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.25 1 1.25";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-8 0 7.625 1 0 0 0";
+			initialPathScale = "1.25 1 1.25";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-1 0 7.625";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.25 1 1.25";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-1 0 7.625 1 0 0 0";
+			initialPathScale = "1.25 1 1.25";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "6.125 0 7.625";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.25 1 1.25";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "6.125 0 7.625 1 0 0 0";
+			initialPathScale = "1.25 1 1.25";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "6.125 0 2";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "6.125 0 2 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "12.625 0 6.25";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "12.625 0 6.25 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "18.125 0 9.5";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "18.125 0 9.5 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "15.125 0 1.5";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "15.125 0 1.5 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "19 0 0.5";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "19 0 0.5 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "11 0 -1";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "11 0 -1 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "6 0 -3.75";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "6 0 -3.75 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "4.25 0 -7";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "4.25 0 -7 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "1 0 -7";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "1 0 -7 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-1 0 -4.25";
+		rotation = "0 -1 0 89.99998";
+		scale = "2 1 2";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-1 0 -4.25 1 0 0 0";
+			initialPathScale = "2 1 2";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-1 0 4.25";
+		rotation = "0 -1 0 89.99998";
+		scale = "2 1 2";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-1 0 4.25 1 0 0 0";
+			initialPathScale = "2 1 2";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-7.875 0 2";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-7.875 0 2 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-7.875 0 -3.75";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.5 1 1.5";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-7.875 0 -3.75 1 0 0 0";
+			initialPathScale = "1.5 1 1.5";
+			Path = "Saw1";
+	};
+	new InteriorInstance(Buzzsaw) {
+		position = "-2.875 0 -7";
+		rotation = "0 -1 0 89.99998";
+		scale = "1.75 1 1.75";
+		interiorFile = "~/data/interiors_pq/bonus/Buzzsaw.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-2.875 0 -7 1 0 0 0";
+			initialPathScale = "1.75 1 1.75";
+			Path = "Saw1";
+	};
+	new Trigger(Bounds) {
+		position = "-35 -2 -15";
+		rotation = "1 0 0 0";
+		scale = "70 4 30";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-29 -2 -15";
+		rotation = "1 0 0 0";
+		scale = "16 4 22.75";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "6";
+			upwards = "12";
+	};
+	new Trigger() {
+		position = "-33 -2 -5.5";
+		rotation = "1 0 0 0";
+		scale = "3.5 4 13.25";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "6";
+			upwards = "12";
+	};
+	new Trigger() {
+		position = "-33 -2 -15";
+		rotation = "1 0 0 0";
+		scale = "3.5 4 9";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "6";
+			upwards = "12";
+	};
+	new Trigger() {
+		position = "-12.75 -2 -15";
+		rotation = "1 0 0 0";
+		scale = "23.5 4 22.75";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			marbleAttribute1 = "jumpImpulse";
+			marbleAttribute2 = "airAcceleration";
+			noEmitters = "1";
+			value0 = "6";
+			value1 = "4";
+			value2 = "10";
+	};
+	new Trigger() {
+		position = "-12.75 -2 7.75";
+		rotation = "1 0 0 0";
+		scale = "23.5 4 4";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "jumpImpulse";
+			noEmitters = "1";
+			value0 = "7";
+	};
+	new Trigger() {
+		position = "14 -2 1";
+		rotation = "1 0 0 0";
+		scale = "5 4 10";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "6";
+			upwards = "7";
+	};
+	new Trigger() {
+		position = "-1.75 -2 -15";
+		rotation = "1 0 0 0";
+		scale = "12.5 4 22.75";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "3";
+			upwards = "5";
+	};
+	new Trigger() {
+		position = "-12.75 -2 -15";
+		rotation = "1 0 0 0";
+		scale = "8 4 22.75";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "10";
+			upwards = "3";
+	};
+	new Trigger() {
+		position = "0 1 11";
+		rotation = "1 0 0 0";
+		scale = "1 2 2";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			extended = "0";
+			persistTime = "5000";
+			text = "How the heck did you manage to get up here?";
+	};
+	new Camera() {
+		position = "-5.232642 -33.13786 0.1439056";
+		rotation = "-0.7728164 0.002741406 0.6346238 0.6404112";
+		scale = "1 1 1";
+		dataBlock = "Observer";
+			mode = "toggleCameraFly";
+	};
+	new Trigger(YeahThisIsOnlyHereForTheTrigger) {
+		position = "11 -2 -15";
+		rotation = "1 0 0 0";
+		scale = "22 4 13";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "6";
+			upwards = "12";
+	};
+	new Trigger(AndThisMakesItWayTooEasy) {
+		position = "19 -2 2.5";
+		rotation = "1 0 0 0";
+		scale = "5 4 10";
+		dataBlock = "SMBTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			impulse = "12";
+			upwards = "16";
+	};
+	new Trigger() {
+		position = "-8 1 11";
+		rotation = "1 0 0 0";
+		scale = "1 2 2";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			extended = "0";
+			persistTime = "5000";
+			text = "Just kidding! This path wasn\'t possible without that extra trigger I added ;)";
+	};
+	new Trigger() {
+		position = "-18.5 1 -7";
+		rotation = "1 0 0 0";
+		scale = "3 2 3";
+		dataBlock = "CameraDistanceTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			distance = "2.5";
+			ForceExitValue = "0";
+			keepeffectonleave = "0";
+			Smooth = "1";
+			Time = "500";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+function SMBTrigger::onEnterTrigger(%this, %trigger, %user) {
+	echo("SMB enter");
+	echo("SMBTrigger server setting to " SPC %trigger.impulse SPC %trigger.upwards);
+	commandToClient(%user.client, 'SMBTrigger', %trigger.impulse, %trigger.upwards);
+
+	%user.client.smbblock = true;
+	%user.client.schedule(300, setFieldValue, smbblock, false);
+}
+function SMBTrigger::onLeaveTrigger(%this, %trigger, %user) {
+	if (%user.client.smbblock)
+		return;
+	commandToClient(%user.client, 'SMBTrigger', 0, 0);
+	echo("SMBTrigger server setting to " SPC 0 SPC 0);
+}
+
+function serverCmdBuzzsawd(%client, %id) {
+	%marble = getServerSyncObject(%id);
+	%marble.setVelocity("0 0 0");
+	%marble.setAngularVelocity("0 0 0");
+	%marble.setTransform(%marble.client.getCheckpointPos());
+	Time::set(0);
+}
+
+//--- SERVER POSTMISSION SCRIPTS END ---

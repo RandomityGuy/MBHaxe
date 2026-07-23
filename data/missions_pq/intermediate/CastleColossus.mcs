@@ -1,0 +1,1001 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_CastleColossus_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Castle Colossus";
+		type = "Intermediate";
+		level = "15";
+		desc = "Find as many Gems as you can. You don\'t have much time!";
+		artist = "Ian, replicated by Threefolder";
+		music = "Maze.ogg";
+		game = "PlatinumQuest";
+		gameMode = "Quota";
+		Time = "180000";
+		platinumTime = "130000";
+		ultimateTime = "72500";
+		awesomeTime = "41500";
+		generalHint = "The Teleport Powerup can be helpful to get whisked back to the top. Likewise, collect the Gems you\'ll find the easiest.";
+		ultimateHint = "Don\'t bother with the Gems on the green outside bits. Focus on the Gems near the center of the level, and don\'t fall to the water area until you have less than 3 to go.";
+		awesomeHint = "Use the Teleport Powerup on the central ice area below the Start Pad. After that you can grab a few Gems, make it to the top tightrope and back down on the sand slopes. Use the Teleport Powerup and get the remaining ice Gems, then do the outside challenges before falling down to the water section.";
+		CustomRadarRule = $Radar::Flags::Gems | $Radar::Flags::TimeTravels | $Radar::Flags::EndPad | $Radar::Flags::Powerups;
+		easterEgg = "0";
+		GemQuota = "25";
+		gems = "45";
+		interior0 = $usermods @ "/data/interiors_pq/intermediate/castlecolossus.dif";
+		interiors = "1";
+		maxScore = "45";
+		trivia = "The beginning of the camera path for this level is based on its appearance in PlatinumQuest Trailer #1.\n\nThis level had to be remade entirely from scratch because no one on the Platinum Team had the QuArK file for it.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+//function unlock_MissionNameHere(%mission) { //%mission is the MissionInfo
+//	return true; //True if the mission is unlocked
+//}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+function clientCbCheckEndgameAchievements() {
+	//Achieve 100% and finish the level under Par Time.
+	if ((PlayGui.gemCount == $Game::GemCount) && (PlayGui.currentTime < MissionInfo.time)) {
+		activateAchievement($Achievement::Category::Level, 4);
+	}
+}
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE CastleColossus
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_CastleColossus_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender2/blender2.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "22.1517 -0.511167 -16.2849";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/intermediate/castlecolossus.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(PhysModGroup) {
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "22.1758 -0.533666 32.829";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TeleportItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				teletime = "2000";
+		};
+		new Item() {
+			position = "19.1882 -3.5106 34.581";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "3000";
+		};
+		new Item() {
+			position = "19.1855 2.447 34.5703";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "3000";
+		};
+		new Item() {
+			position = "25.1584 2.48675 34.6406";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "3000";
+		};
+		new Item() {
+			position = "25.1567 -3.50346 34.6385";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				timeBonus = "3000";
+		};
+		new Item() {
+			position = "22.3175 -0.417039 -12.271";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "SuperJumpItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+	};
+	new SimGroup(HazardGroup) {
+
+		new StaticShape() {
+			position = "-15.0186 -0.632997 -12.2879";
+			rotation = "1 0 0 0";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Nuke_PQ";
+				resettime = "Default";
+		};
+		new StaticShape() {
+			position = "-18.0772 0.683808 -12.2836";
+			rotation = "1 0 0 0";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Nuke_PQ";
+				resettime = "Default";
+		};
+		new StaticShape() {
+			position = "-18.2273 -1.64285 -12.2879";
+			rotation = "1 0 0 0";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Nuke_PQ";
+				resettime = "Default";
+		};
+		new StaticShape() {
+			position = "47.1397 -25.4663 16.5981";
+			rotation = "1 0 0 0";
+			scale = "0.25 0.25 0.25";
+			dataBlock = "Tornado_PQ";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "-2.8487 -25.5059 7.7253";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "-2.87813 -25.4537 16.6225";
+			rotation = "1 0 0 0";
+			scale = "0.25 0.25 0.25";
+			dataBlock = "Tornado_PQ";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "-2.84146 24.4909 7.7253";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "-2.77776 24.5569 16.5183";
+			rotation = "1 0 0 0";
+			scale = "0.25 0.25 0.25";
+			dataBlock = "Tornado_PQ";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "47.1166 -25.5121 7.7253";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "47.157 24.4743 7.72533";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DuctFan_PQ";
+		};
+		new StaticShape() {
+			position = "47.1868 24.5338 16.573";
+			rotation = "1 0 0 0";
+			scale = "0.25 0.25 0.25";
+			dataBlock = "Tornado_PQ";
+				noParticles = "0";
+		};
+		new StaticShape() {
+			position = "22.1605 -0.552396 3.72896";
+			rotation = "1 0 0 0";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Tornado_PQ";
+				noParticles = "0";
+		};
+	};
+	new SimGroup(GemGroup) {
+
+		new Item() {
+			position = "33.283 10.5939 -12.2678";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "33.3762 -11.5971 -12.271";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "11.188 -11.535 -12.271";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "11.0222 10.5574 -12.271";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.164 39.4661 -8.1868";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "63.1721 -0.513144 -14.271";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1378 -41.5252 -8.27104";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-18.9117 -0.567934 -12.271";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-2.8482 24.483 25.473";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-2.89371 -25.5309 25.673";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "47.1279 -25.5035 25.673";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "47.1467 24.483 25.673";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-2.80544 -0.461286 27.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1615 24.5371 27.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "47.1409 -0.542615 27.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1321 -25.4938 27.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "50.1366 7.40365 5.22896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "51.1535 -6.49345 3.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "48.2201 -6.49612 5.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "51.1704 2.45266 4.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1318 -24.4987 3.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "19.1449 -28.4565 3.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "31.1756 -28.4456 5.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "15.1683 -24.541 5.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "25.1533 22.5727 11.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "19.2209 22.531 11.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1631 28.6789 3.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1537 28.5252 7.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-4.82528 -9.59525 -0.271042";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-6.83422 8.42506 7.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-4.87466 -5.46565 5.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-4.80064 6.47614 -0.271042";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "5.13137 -17.5672 1.73008";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "39.1454 16.4567 5.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "38.1696 -16.5252 3.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "6.12433 15.3879 7.42767";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1612 -0.535291 3.72896";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "32.1632 9.43303 11.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "12.1588 9.48396 11.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "32.1164 -10.5341 11.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "12.1323 -10.5041 11.729";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "14.9886 -0.6218 16.229";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "29.3251 -0.505334 16.229";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.1955 -7.49006 16.229";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "22.2058 6.75047 16.229";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new Trigger(goal) {
+		position = "16.1701 5.49227 -12.2981";
+		rotation = "1 0 0 0";
+		scale = "12 12 4";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "3000";
+			text = "Don\'t go up until you have reached the Gem quota!";
+	};
+	new Trigger(nojumpin) {
+		position = "-19.6115 1.24154 -12.2854";
+		rotation = "1 0 0 0";
+		scale = "7.5 3.5 1";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "jumpImpulse";
+			megaValue0 = "7.5";
+			noEmitters = "0";
+			origValue = "7.5";
+			value0 = "0";
+	};
+	new Trigger(gravitylol) {
+		position = "20.3683 -34.7529 -12.2835";
+		rotation = "1 0 0 0";
+		scale = "3.5 5.5 8";
+		dataBlock = "MarblePhysModTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			marbleAttribute0 = "gravity";
+			megaValue0 = "7.5";
+			noEmitters = "0";
+			origValue = "20";
+			value0 = "5";
+	};
+	new StaticShape(StartPoint) {
+		position = "22.1505 -0.51445 32.22";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "-4.02366 -5.1371 0.808013";
+			rotation = "-0.00531152 -0.0396269 0.9992 195.257";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "1500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "-5.30683 -11.9309 0.648215";
+			rotation = "0.144235 0.127666 -0.981274 84.1021";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "1500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				Spline = "1";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-9.25975 -15.8432 2.9148";
+			rotation = "0.850645 -0.138445 0.507184 35.5823";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "1500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				Spline = "1";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-17.5086 -11.3364 7.41091";
+			rotation = "0.336674 -0.290689 0.895629 87.9015";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "3500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-24.98 4.54817 14.5424";
+			rotation = "0.160574 -0.231321 0.959535 112.667";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "3500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-30.2353 25.0022 19.9204";
+			rotation = "0.0701815 -0.121296 0.990132 120.384";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "-32.5004 41.6884 22.2146";
+			rotation = "0.0383196 -0.079379 0.996108 128.637";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "29.7631 3.85765 10.9749";
+			rotation = "0.0608991 -0.217428 0.974175 149.476";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath9";
+				timeToNext = "1500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath9) {
+			position = "26.9906 9.33778 13.9793";
+			rotation = "0.124136 -0.247411 0.960926 128.519";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath10";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath10) {
+			position = "19.4727 12.1328 18.863";
+			rotation = "0.206332 -0.267516 0.941203 108.045";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath11";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath11) {
+			position = "12.4399 5.02037 23.7509";
+			rotation = "0.463929 -0.271781 0.843152 69.5833";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath12";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath12) {
+			position = "13.3896 -2.70712 28.9534";
+			rotation = "0.900692 -0.178738 0.395988 53.2347";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath13";
+				timeToNext = "2200";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath13) {
+			position = "20.8334 -9.01849 37.9573";
+			rotation = "0.855915 0.239403 -0.458362 62.7852";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath14";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath14) {
+			position = "27.8998 -5.45601 44.6465";
+			rotation = "0.52373 0.442462 -0.727966 98.4989";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath15";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath15) {
+			position = "29.581 1.81789 54.3233";
+			rotation = "-0.283585 -0.575257 0.767241 221.436";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath16";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath16) {
+			position = "25.4717 7.36643 62.268";
+			rotation = "-0.0906019 -0.636308 0.766096 192.451";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new Trigger(Bounds) {
+		position = "-27.9004 49.609 -17";
+		rotation = "1 0 0 0";
+		scale = "100 100 100";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape(EndPoint) {
+		position = "22.1587 -0.52437 1.75512";
+		rotation = "1 0 0 180";
+		scale = "1 1 1";
+		dataBlock = "EndPad_PQ";
+	};
+	new StaticShape() {
+		position = "-3.71222 -10.978 0.0629876";
+		rotation = "-0.195055 -0.0192106 0.980604 168.967";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "-11.6541 -3.36517 -12.2856";
+		rotation = "0 0 -1 101.25";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

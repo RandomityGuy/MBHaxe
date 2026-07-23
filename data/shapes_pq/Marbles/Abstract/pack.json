@@ -1,0 +1,10 @@
+{
+	"name": "Abstract",
+	"marbles": [
+		{"name": "Air Element",   "shape": "airElement.dts",     "skin": "base",      "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Crackball",     "shape": "crackball.dts",      "skin": "base",      "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Earth Element", "shape": "earthElement.dts",   "skin": "base",      "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Milky Way",     "shape": "ball-superball.dts", "skin": "MilkyWay",  "normalize": true},
+		{"name": "Orangeade",     "shape": "ball-superball.dts", "skin": "Orangeade", "normalize": true}
+	]
+}
