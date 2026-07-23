@@ -1,0 +1,2600 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Hydropower_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Hydropower";
+		type = "Expert";
+		level = "16";
+		desc = "Dam it!";
+		startHelpText = "You\'ll need to travel down the penstocks, up the face, into the turbines, and inside the reservoir.";
+		artist = "Pablo Vasquez";
+		music = "Piece by Piece.ogg";
+		game = "PlatinumQuest";
+		gameMode = "GemMadness";
+		Time = "210000";
+		score = "40";
+		platinumScore = "55";
+		ultimateScore = "73";
+		awesomeScore = "105";
+		generalHint = "If you fall down the face of the dam, use the various pallets and other moving gizmos to make it back to the top.";
+		ultimateHint = "You\'ll want to try going for the Gems in the reservoir area first, then cut through the dam and get the Gems on the other side. Find a path that works for you!";
+		awesomeHint = "This is a planning nightmare, and you'll need to not be too pissed off to actually come up with something. Use the Moving Platforms with the Bubble Powerup to get some serious height!";
+		CustomRadarRule = $Radar::Flags::Gems | $Radar::Flags::Powerups;
+		alarmStartTime = "15";
+		easterEgg = "0";
+		gems = "59";
+		gems1 = "32";
+		gems10 = "2";
+		gems2 = "20";
+		gems5 = "5";
+		interior0 = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+		interior1 = $usermods @ "/data/interiors_pq/expert/HydropowerRope.dif";
+		interior2 = $usermods @ "/data/interiors_pq/expert/HydropowerDam.dif";
+		interior3 = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+		interior4 = $usermods @ "/data/interiors_pq/expert/HydropowerMagnet.dif";
+		interior5 = $usermods @ "/data/interiors_pq/expert/HydropowerTurbine.dif";
+		interior6 = $usermods @ "/data/interiors_pq/expert/HydropowerTurbinePartial.dif";
+		interior7 = $usermods @ "/data/interiors_pq/expert/HydropowerMagnetMP.dif";
+		interiors = "8";
+		maxScore = "117";
+		NoGMLimit = "1";
+		requirements = "Finish Bubble Cavern.";
+		trivia = "Originally, when the time ran out in Gem Madness levels, you would be forced to restart the level. You\'d need to touch the end pad to finish the level. This was changed in favor of a less frustrating, more Hunt-like alternative behavior of the clock.\nWe used to have an end pad in this level as a remnant of that old design choice, but people broke the leaderboards and finished in under a second using it.";
+		unlockFunc = "unlock_Hydropower";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_Hydropower(%mission) {
+   return Unlock::hasBeatMissionPar(getMissionInfo("platinum/data/missions_pq/beginner/BubbleCavern.mcs"));
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE Hydropower
+//Turbines are 96+16 units radius, 256 units high. Outlet holes are 64 units diameter.
+//Top crane is rotated 5.3 degrees.
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Hydropower_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(Path3) {
+			position = "0 25 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "path1";
+				timeToNext = "3000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Path2) {
+			position = "0 20 0";
+			rotation = "0 0 1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "path3";
+				timeToNext = "0";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(Path1) {
+			position = "0 15 0";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "path2";
+				timeToNext = "3000";
+				Smooth = "0";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				placed = "1";
+		};
+		new StaticShape(gempath1) {
+			position = "-4.10997 -19.5905 1.532";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "gempath2";
+				timeToNext = "20000";
+				Smooth = "1";
+				usePosition = "1";
+				useRotation = "0";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(gempath2) {
+			position = "-4.46518 9.07214 1.532";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "gempath3";
+				timeToNext = "20000";
+				Smooth = "1";
+				usePosition = "1";
+				useRotation = "0";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(gempath3) {
+			position = "-5.09135 -18.7542 1.532";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "gempath4";
+				timeToNext = "20000";
+				Smooth = "1";
+				usePosition = "1";
+				useRotation = "0";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(gempath4) {
+			position = "-5.71676 11.306 1.532";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "gempath1";
+				timeToNext = "20000";
+				Smooth = "1";
+				usePosition = "1";
+				useRotation = "0";
+				useScale = "0";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(ropepath1) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 0.15";
+			dataBlock = "PathNode";
+				nextNode = "ropepath2";
+				timeToNext = "10000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(ropepath2) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.05";
+			dataBlock = "PathNode";
+				nextNode = "ropepath1";
+				timeToNext = "10000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(magnetropepath1) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 0.03";
+			dataBlock = "PathNode";
+				nextNode = "magnetropepath2";
+				timeToNext = "6400";
+				SmoothEnd = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(magnetropepath2) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.16";
+			dataBlock = "PathNode";
+				nextNode = "magnetropepath3";
+				timeToNext = "3600";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(magnetropepath3) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.16";
+			dataBlock = "PathNode";
+				nextNode = "magnetropepath4";
+				timeToNext = "10000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(magnetropepath4) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 0.03";
+			dataBlock = "PathNode";
+				nextNode = "magnetropepath1";
+				timeToNext = "2000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(elevatorpath1) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.63";
+			dataBlock = "PathNode";
+				nextNode = "elevatorpath2";
+				timeToNext = "8000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(elevatorpath2) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 0.04";
+			dataBlock = "PathNode";
+				nextNode = "elevatorpath3";
+				timeToNext = "2000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(elevatorpath3) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 0.04";
+			dataBlock = "PathNode";
+				nextNode = "elevatorpath4";
+				timeToNext = "5000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(elevatorpath4) {
+			position = "-12.1086 -20.1189 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.63";
+			dataBlock = "PathNode";
+				nextNode = "elevatorpath1";
+				timeToNext = "3000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "0";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath1) {
+			position = "-102.861 -2.2733 -37.4456";
+			rotation = "0.00493284 -0.00503317 0.999975 91.155";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "-86.5595 -2.56618 -36.7799";
+			rotation = "-0.0850417 0.0867714 0.992592 91.5795";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-71.6526 -2.86636 -32.5273";
+			rotation = "-0.183732 0.18747 0.964934 93.1972";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "7.77593 -17.6362 7.52175";
+			rotation = "0.477021 -0.253475 0.841547 64.5386";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "1.79895 -16.1863 10.8534";
+			rotation = "0.609914 -0.302948 0.732275 68.2985";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "2500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-4.8715 -14.3699 15.7934";
+			rotation = "0.682139 -0.332487 0.65126 73.624";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerFramework.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance(rope1) {
+			position = "-20.4613 -10 -1.75";
+			rotation = "0 -1 0 12.5";
+			scale = "1 1 0.15";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerRope.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "-20.4613 -10 -1.75 0 -1 0 0.2181661";
+				initialPathScale = "1 1 1.05";
+				Path = "ropepath1";
+		};
+		new InteriorInstance(rope2) {
+			position = "-20.4613 6 -1.75";
+			rotation = "0 -1 0 12.5";
+			scale = "1 1 0.15";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerRope.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "-20.4613 6 -1.75 0 -1 0 0.2181661";
+				initialPathScale = "1 1 1.05";
+				Path = "ropepath1";
+		};
+		new InteriorInstance(magnetrope) {
+			position = "-29 -2 -1";
+			rotation = "1 0 0 0";
+			scale = "1 1 0.03";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerRope.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "-29 -2 -1 1 0 0 0";
+				initialPathScale = "1 1 0.03";
+				Path = "magnetropepath1";
+		};
+		new InteriorInstance(Elevator) {
+			position = "-32.4607 -16.754 -1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.63";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerRope.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "-32.4607 -16.754 -1 1 0 0 0";
+				initialPathScale = "1 1 1.63";
+				Path = "elevatorpath1";
+		};
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerDam.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "-29 6 -33.3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerMagnet.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "-29 6 -32";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerMagnet.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "-29 6 -30.7";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerMagnet.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "-29 -10 -32";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerMagnet.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "-29 -10 -30.7";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerMagnet.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance() {
+			position = "-29 -10 -33.3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerMagnet.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance(turbine1) {
+			position = "-29 -10 -42";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerTurbine.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "-29 -10 -42 1 0 0 0";
+				initialPathScale = "1 1 1";
+				Path = "path1";
+		};
+		new InteriorInstance(turbine2) {
+			position = "-29 6 -42";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerTurbine.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "-29 6 -42 1 0 0 0";
+				initialPathScale = "1 1 1";
+				Path = "path1";
+		};
+		new InteriorInstance() {
+			position = "-29 -2 -42";
+			rotation = "0 0 1 32";
+			scale = "1 1 1.125";
+			interiorFile = "~/data/interiors_pq/expert/HydropowerTurbinePartial.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(FPGroup) {
+
+		new StaticShape() {
+			position = "3 -10 -6.15";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "2000";
+				fadeoutTime = "2000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "2000";
+				permanent = "0";
+				skin = "skin8";
+				StartOffset = "0";
+				visibleTime = "2000";
+		};
+		new StaticShape() {
+			position = "8 -10 -6.25";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x2";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "500";
+				permanent = "0";
+				skin = "skin6";
+				StartOffset = "0";
+				visibleTime = "1000";
+		};
+		new StaticShape() {
+			position = "-1 6 -6.15";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "500";
+				permanent = "0";
+				skin = "skin5";
+				StartOffset = "0";
+				visibleTime = "500";
+		};
+		new StaticShape() {
+			position = "7 6 -6.15";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "500";
+				permanent = "0";
+				skin = "skin9";
+				StartOffset = "0";
+				visibleTime = "500";
+		};
+		new StaticShape() {
+			position = "18 -2 -6.25";
+			rotation = "0 0 -1 90";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x3";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "500";
+				permanent = "0";
+				skin = "skin4";
+				StartOffset = "0";
+				visibleTime = "1200";
+		};
+		new StaticShape() {
+			position = "24 -2 -6.15";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "500";
+				fadeoutTime = "500";
+				fadeStyle = "cloak";
+				functionality = "periodic";
+				invisibleTime = "500";
+				permanent = "0";
+				skin = "skin7";
+				StartOffset = "0";
+				visibleTime = "1300";
+		};
+		new StaticShape() {
+			position = "30 -2 -6.15";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "FadePlatform2_1x1";
+				fadeinTime = "3000";
+				fadeoutTime = "3000";
+				fadeStyle = "cloak";
+				functionality = "trapdoor";
+				invisibleTime = "3000";
+				permanent = "0";
+				skin = "skin5";
+				StartOffset = "0";
+				visibleTime = "3000";
+		};
+	};
+	new SimGroup(SceneryGroup) {
+
+		new StaticShape() {
+			position = "-9.52636 12.4854 -4.95154";
+			rotation = "0 0 -1 20.0535";
+			scale = "0.4 0.4 0.4";
+			dataBlock = "Tree01";
+		};
+		new StaticShape() {
+			position = "-17.425 -21.6027 -4.988";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-16.9119 -14.1796 -5";
+			rotation = "0 0 1 8.02127";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "blue";
+		};
+		new StaticShape() {
+			position = "-17.5897 -9.12468 -5";
+			rotation = "0 0 1 39.534";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "red";
+		};
+		new StaticShape() {
+			position = "-9.61052 1.20208 -4.94034";
+			rotation = "0 0 -1 42.3988";
+			scale = "0.3 0.3 0.3";
+			dataBlock = "Tree01";
+		};
+		new StaticShape() {
+			position = "-16.5401 7.05409 -5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "Fern01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "-17.2448 16.3035 -5.01176";
+			rotation = "0 0 1 4.58349";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "-9.51171 -20.17 -5.037";
+			rotation = "0 0 -1 20.0535";
+			scale = "0.3 0.3 0.3";
+			dataBlock = "Tree01";
+		};
+		new StaticShape() {
+			position = "-9.66644 -8.44117 -4.98579";
+			rotation = "0 0 1 162.147";
+			scale = "0.25 0.25 0.25";
+			dataBlock = "Tree01";
+		};
+	};
+	new SimGroup(MPGroup) {
+
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-18.125 -3.5 -6";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "10000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-22.7475 -3.5 -26.8125";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "10000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-18.125 -3.5 -6";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "0";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "0";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-41.5 10.5 -35.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 10.5 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 10.5 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 10.5 -35.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "800";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 10.5 -35.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "1";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "580";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-41.5 -12.5 -35.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 -12.5 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 -12.5 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 -12.5 -35.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "800";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-41.5 -12.5 -35.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 -4 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "2";
+				basePosition = "0 -4 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "1430";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-34.5 -9.25 -27.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -9.25 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -9.25 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "3000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -9.25 -27.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -9.25 -27.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "3";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "3220";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-34.5 1.25 -27.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 1.25 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 1.25 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "3000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 1.25 -27.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 1.25 -27.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "4";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "5160";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-34.5 8.75 -29.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 8.75 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 8.75 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "3000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 8.75 -29.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 8.75 -29.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "5";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "1430";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-34.5 -16.75 -29.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -16.75 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -16.75 -41.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "3000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -16.75 -29.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-34.5 -16.75 -29.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "6";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "2460";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-33.2903 -15.7978 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "8000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-33.2903 -15.7978 -3.5";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-33.2903 -15.7978 -3.5";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-33.2903 -15.7978 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "3000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-33.2903 -15.7978 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerPowerhouse.dif";
+				interiorIndex = "7";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "0";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-31.25 -4.5 -5.5";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "7000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-31.25 -4.5 -32.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "3000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-31.25 -4.5 -32.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "10000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-31.25 -4.5 -5.5";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-31.25 -4.5 -5.5";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerMagnetMP.dif";
+				interiorIndex = "0";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "0";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "12 0.5 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "12 0.5 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "12 0.5 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "12 0.5 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "12 0.5 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "9";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "3780";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "7.5 -6 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "7.5 -6 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "7.5 -6 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "7.5 -6 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "7.5 -6 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "8";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "2150";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "26.5 -7.5 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "26.5 -7.5 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "26.5 -7.5 -42";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "26.5 -7.5 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "26.5 -7.5 -6.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "7";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "0";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "18 -10 -2.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -5.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -5.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -2.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "6";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "1790";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "18 -10 -2.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -5.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -5.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -2.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -2.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "5";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "580";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "18 -10 -3.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -5.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -5.875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "1500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -3.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "2000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "18 -10 -3.375";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "4";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "4";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "0";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "31 -1 -18";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "31 -1 -41.9688";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "31 -1 -41.9688";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "31 -1 -18";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "3";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "6530";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "17 -3 -18";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "17 -3 -41.9688";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "17 -3 -41.9688";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "17 -3 -18";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "2";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "2750";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "11 7 -18";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "11 7 -41.9688";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "11 7 -41.9688";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "11 7 -18";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "3";
+					msToNext = "1000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "1";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "500";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-2 -13 -5.25";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "20000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-2 16.5 -5.25";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "20000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-2 -13 -5.25";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "0";
+					smoothingType = "Accelerate";
+				};
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/expert/HydropowerFramework.dif";
+				interiorIndex = "0";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "20000";
+					initialScale = "1 1 1";
+					initialTargetPosition = "-1";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "11.8637 -2.31185 -41.4907";
+			rotation = "1 0 0 0";
+			scale = "2 2 2";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "0";
+				noParticles = "0";
+				particles = "239527";
+				Time = "5000";
+		};
+	};
+	new SimGroup(GemGroup) {
+
+		new Item(gemcrane) {
+			position = "-4.46518 9.07214 1.532";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemPlatinum_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				initialPathPosition = "-5.10997 -19.5905 1.532 1 0 0 0";
+				initialPathScale = "1 1 1";
+				noParticles = "0";
+				Path = "gempath2";
+		};
+		new Item() {
+			position = "35.9745 -2 0.125";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "36.2188 -3.16063 -2.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "36.7463 0.397617 -2.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "19.204 4.28967 -2.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "15.6018 5.92459 -2.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "16.2241 -10.9176 -2.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "18.514 -7.59676 -2.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "16.0949 -9.87059 -0.00710933";
+			rotation = "1 0 0 45";
+			scale = "1 1 1";
+			dataBlock = "GemItemBlue_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "26.1527 -2.21093 -6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "17.553 -0.708297 -6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "6.96332 6.1954 -6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "2.31904 -9.98875 -6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "9.77059 -9.07403 -6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "3.33333 -11.8938 -30.1968";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "3.33333 -0.699026 -25.8184";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-0.374085 14.6857 -8.51268";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "14.0399 11.2287 -14.2128";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "27.0569 6.88113 -23.7298";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "33.9961 -1.91453 -18";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "20.2145 -5.53498 -20.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemBlue_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "12.5191 -6.23535 -20.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "34.0668 5.01486 -8.44168";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "33.808 -13.5675 -16.7296";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "24.8861 -16.3769 -29.9498";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "15.2099 -5.50677 -40.7659";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "9.24851 -12.1908 -41.5346";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "5.29673 1.01014 -41.4882";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-1.72381 6.12834 -31.1812";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemBlue_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-12.3618 5.58636 -33.6995";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-22.2757 6.66899 -36.8856";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-21.6857 -9.5217 -36.2206";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-2 -9.29884 -30.8305";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemBlue_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-16.7351 -10.3153 -34.88";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-2.65234 -2.00581 -12.7514";
+			rotation = "0 1 0 50.9932";
+			scale = "1 1 1";
+			dataBlock = "GemItemPlatinum_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-17.2067 -1.96733 -30.7222";
+			rotation = "0 1 0 51.5661";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-16.4572 11.2472 -5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-10.9252 -11.4175 -5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-4.61303 6.04377 -11.7266";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-4.82879 -1.90122 -7.36605";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-4.87856 -10.0345 -20.1608";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-35.8837 -6.84733 -35.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-34.6817 -14.8135 -35.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-38.1142 10.8364 -35.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-35.8353 7.26944 -35.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-29 6 -29.875";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-29 -10 -29.875";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-34.2679 -9.96401 -45.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-35.4627 -1.56552 -45.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-29.2437 6.32471 -44.4221";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-20.6235 -7.57861 -17.8004";
+			rotation = "0 1 0 76.7763";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-19.1755 8.02881 -11.2798";
+			rotation = "0 1 0 76.7763";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-19.7518 -4.02407 -13.8779";
+			rotation = "0 1 0 76.78";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-21.8966 -14.1049 -23.5404";
+			rotation = "0 1 0 76.78";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-22.1381 8.37014 -24.6129";
+			rotation = "0 1 0 76.78";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-19.3495 0.444152 -12.0645";
+			rotation = "0 1 0 76.78";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-23.3207 -3.81671 -3.12737";
+			rotation = "0 -1 0 14.3237";
+			scale = "1 1 1";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-21.122 -0.106739 -3.75745";
+			rotation = "0 -1 0 16.0427";
+			scale = "1 1 1";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-30.312 -16.9964 -3.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItemBlue_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new Trigger(OOB) {
+		position = "54 38 -42";
+		rotation = "1 0 0 0";
+		scale = "2 80 80";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(StayHere) {
+		position = "-102 38 -47";
+		rotation = "1 0 0 0";
+		scale = "160 80 80";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape(StartPoint) {
+		position = "-14.144 -23.9578 -5.5";
+		rotation = "0 0 1 8.59402";
+		scale = "0.9 0.9 0.9";
+		dataBlock = "StartPad_PQ_Construction";
+	};
+	new StaticShape() {
+		position = "27.7959 -1.2115 -8.25";
+		rotation = "0 0 -1 90";
+		scale = "20.15 30 0.0001";
+		dataBlock = "WaterCylinder_slow";
+	};
+	new StaticShape() {
+		position = "-63.939 -4.77216 -43";
+		rotation = "0 0 -1 90";
+		scale = "20 38 0.0001";
+		dataBlock = "WaterCylinder_slow";
+	};
+	new Trigger() {
+		position = "-22 -8 -42";
+		rotation = "1 0 0 0";
+		scale = "20 6 14";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			keepeffectonleave = "0";
+			overlay = "1";
+			VelocityMultiplier = "0.5";
+	};
+	new Trigger() {
+		position = "-22 9 -42";
+		rotation = "1 0 0 0";
+		scale = "20 6 14";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			keepeffectonleave = "0";
+			overlay = "1";
+			VelocityMultiplier = "0.5";
+	};
+	new Trigger() {
+		position = "-102 16 -46";
+		rotation = "1 0 0 0";
+		scale = "76 36 3";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			keepeffectonleave = "0";
+			overlay = "1";
+			VelocityMultiplier = "0.5";
+	};
+	new Trigger(OOB) {
+		position = "-96 38 -47";
+		rotation = "1 0 0 0";
+		scale = "2 80 80";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 18 -42";
+		rotation = "1 0 0 0";
+		scale = "60 40 34";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			keepeffectonleave = "0";
+			overlay = "1";
+			VelocityMultiplier = "0.5";
+	};
+	new StaticShape() {
+		position = "-101.9 -2.5 -44.5";
+		rotation = "0 1 0 90";
+		scale = "0.5 6 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "57.75 -2.25 -23.25";
+		rotation = "0 1 0 90";
+		scale = "5 6.5 1";
+		dataBlock = "WaterPlane";
+	};
+	new Item() {
+		position = "-44.25 -6 -45.805";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "BubbleItem";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			Infinite = "0";
+			noParticles = "0";
+			noRespawn = "0";
+			showHelpOnPickup = "0";
+			Time = "5000";
+	};
+	new Item() {
+		position = "-44.25 2 -45.805";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "BubbleItem";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			Infinite = "0";
+			noParticles = "0";
+			Time = "5000";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

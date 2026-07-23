@@ -1,0 +1,18 @@
+{
+	"name": "PQ Classic",
+	"marbles": [
+		{"name": "Mellow Blue",   "shape": "ball-superball.dts", "skin": "mellowBlue",   "normalize": true},
+		{"name": "Mellow Green",  "shape": "ball-superball.dts", "skin": "mellowGreen",  "normalize": true},
+		{"name": "Mellow Grey",   "shape": "ball-superball.dts", "skin": "mellowGrey",   "normalize": true},
+		{"name": "Mellow Orange", "shape": "ball-superball.dts", "skin": "mellowOrange", "normalize": true},
+		{"name": "Mellow Purple", "shape": "ball-superball.dts", "skin": "mellowPurple", "normalize": true},
+		{"name": "Mellow Red",    "shape": "ball-superball.dts", "skin": "mellowRed",    "normalize": true},
+		{"name": "Mellow Yellow", "shape": "ball-superball.dts", "skin": "mellowYellow", "normalize": true},
+		{"name": "Tranquility",   "shape": "ball-superball.dts", "skin": "tranquility",  "normalize": true},
+		{"name": "Wavy Glass 1",  "shape": "wavyGlass1.dts",     "skin": "base",         "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Wavy Glass 2",  "shape": "wavyGlass2.dts",     "skin": "base",         "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Wavy Glass 3",  "shape": "wavyGlass3.dts",     "skin": "base",         "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Wavy Glass 4",  "shape": "wavyGlass4.dts",     "skin": "base",         "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Wavy Glass 5",  "shape": "wavyGlass5.dts",     "skin": "base",         "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"}
+	]
+}

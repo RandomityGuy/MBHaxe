@@ -1,0 +1,1307 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_DangerousDevelopment_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Dangerous Development";
+		type = "Advanced";
+		level = "12";
+		desc = "Don\'t forget your hard hat.";
+		startHelpText = "This is a construction zone, so make sure to control your speed!";
+		artist = "Threefolder";
+		music = "Piece by Piece.ogg";
+		game = "PlatinumQuest";
+		gameMode = "2D";
+		platinumTime = "90000";
+		ultimateTime = "65000";
+		awesomeTime = "33000";
+		generalHint = "Know when to go fast, and when to go slow.";
+		ultimateHint = "There aren\'t many shortcuts to find, so just try not to fall off too much.";
+		awesomeHint = "How crazy are you to perform the obvious stunt?";
+		eggHint = "Between a wall and a camera place.";
+		CustomRadarRule = $Radar::Flags::TimeTravels | $Radar::Flags::EndPad | $Radar::Flags::Powerups;
+		cameraPitch = "0.25";
+		cameraPlane = "xz";
+		easterEgg = "1";
+		gems = "0";
+		initialCameraDistance = "10";
+		interior0 = $usermods @ "/data/interiors_pq/advanced/dangerousDevelopment.dif";
+		interior1 = $usermods @ "/data/interiors_pq/advanced/DD_crane.dif";
+		interior2 = $usermods @ "/data/interiors_pq/advanced/DD_concTubeMP.dif";
+		interior3 = $usermods @ "/data/interiors_pq/tutorial/Pallet.dif";
+		interior4 = $usermods @ "/data/interiors_pq/advanced/DD_triggeredPallets.dif";
+		interior5 = $usermods @ "/data/interiors_pq/advanced/DD_finalPallet.dif";
+		interiors = "6";
+		invertCameraPlane = "0";
+		maxScore = "0";
+		requirements = "Finish Advanced Techniques.";
+		trivia = "The background cranes were the first thing created for this level.\n\nThis level\'s name is also an accurate description of PlatinumQuest itself.";
+		unlockFunc = "unlock_DangerousDevelopment";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_DangerousDevelopment(%mission) {
+   return Unlock::hasBeatMissionPar(getMissionInfo("platinum/data/missions_pq/beginner/AdvancedTechniques.mcs"));
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE DangerousDevelopment
+//Triggered MPs info
+//
+//Pallet 1:  (-23.5, -2.5, 39.11625)	msToNext: 250   L
+//			 (-23.5, -2.5, 39.11625)	msToNext: 1200  L
+//           (-23.5, -2.5, 11.11609)	msToNext: N/A
+//Pallet 2:  (-71.5, -2.5, 20.075)  	msToNext: 3000  A
+//			 (-71.5, -2.5, 45.075)  	msToNext: N/A
+//Pallet 3:  (-55, -2.5, 70.475)		msToNext: 2000  A
+//			 (-55, -2.5, 58.975)		msToNext: 3000  L
+//			 (-55, -2.5, 58.975)		msToNext: 2000  A
+//			 (-55, -2.5, 70.475)		msToNext: N/A
+//Pallet 4:  (-10.5, -4.5, 67.3125)		msToNext: 12000 A
+//			 (43.5, -4.5, 67.3125)		msToNext: N/A
+//Smasher:   (36.5, 11.1429, 73.2143) 	msToNext: 400   L
+//			 (36.5, -1.85714, 73.2143)  msToNext: 600   A
+//
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_DangerousDevelopment_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "10000";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(SceneryGroup) {
+
+		new StaticShape() {
+			position = "3.03371 77.6933 -7.78141";
+			rotation = "0 0 1 51.3943";
+			scale = "1 1 1";
+			dataBlock = "Tree01";
+		};
+		new StaticShape() {
+			position = "39.4787 83.9671 -19.4895";
+			rotation = "0 0 1 186.842";
+			scale = "1 1 1";
+			dataBlock = "Rock01";
+		};
+		new StaticShape() {
+			position = "44.659 10.9855 19.25";
+			rotation = "0.360936 0.659441 -0.659441 219.693";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Marble_Graffiti";
+		};
+		new StaticShape() {
+			position = "13 0.250001 39.5948";
+			rotation = "0.0498846 0.766372 -0.640458 226.044";
+			scale = "0.7 0.9 0.7";
+			dataBlock = "Logo_Graffiti";
+		};
+		new StaticShape() {
+			position = "-35.9842 2.97362 42.7513";
+			rotation = "-0.128137 -0.700998 0.701557 165.385";
+			scale = "1 1 1";
+			dataBlock = "PQ_Graffiti";
+		};
+		new StaticShape() {
+			position = "-20.9321 2.97554 19.1107";
+			rotation = "-0.991948 -0.0895171 0.0895884 90.4176";
+			scale = "0.7 0.7 0.7";
+			dataBlock = "SuperJump_Graffiti";
+		};
+		new StaticShape() {
+			position = "-74.9586 2.93279 27";
+			rotation = "-0.53856 -0.595777 0.595822 123.31";
+			scale = "1 1 1";
+			dataBlock = "PQRulez_Graffiti";
+		};
+		new StaticShape() {
+			position = "-62.9349 7.30715 59.25";
+			rotation = "0.539674 -0.646217 0.539589 114.181";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "GG_Graffiti";
+		};
+		new StaticShape() {
+			position = "-3.22671 2.97617 67.25";
+			rotation = "0.105656 -0.702869 0.703429 192.072";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "PhilsEmpire_Graffiti";
+		};
+		new StaticShape() {
+			position = "45.1308 2.95015 58.275";
+			rotation = "-0.928791 -0.262057 0.262057 94.2287";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Hourglass_Graffiti";
+		};
+	};
+	new SimGroup(HelpBubbleGroup) {
+
+		new StaticShape(palletHelp) {
+			position = "-2.5 -3.5 38.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "3000";
+				text = "Be careful -- these pallets look unstable.";
+				triggerRadius = "4";
+		};
+		new StaticShape(spookyHelp) {
+			position = "-34.75 -3.5 55.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "4000";
+				text = "Quick, hurry back to the left of this platform or you\'ll miss your ride!";
+				triggerRadius = "4";
+		};
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(cranePathA) {
+			position = "-4.27525 112.246 0";
+			rotation = "0 0 1 160";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePathB";
+				timeToNext = "7000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(cranePath2) {
+			position = "1.5 120.5 0";
+			rotation = "0 0 1 55";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePath3";
+				timeToNext = "2000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(cranePath3) {
+			position = "3 120.5 0";
+			rotation = "0 0 1 55";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePath4";
+				timeToNext = "7000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(cranePath4) {
+			position = "4.75 120.5 0";
+			rotation = "0 0 -1 20";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePath1";
+				timeToNext = "3000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(cranePath1) {
+			position = "0 122 0";
+			rotation = "0 0 -1 20";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePath2";
+				timeToNext = "6000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(cranePathB) {
+			position = "-3.02525 112.246 0";
+			rotation = "0 0 1 53";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePathC";
+				timeToNext = "2000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(cranePathD) {
+			position = "1.22475 112.246 0";
+			rotation = "0 0 1 160";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePathA";
+				timeToNext = "3000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(cranePathC) {
+			position = "-1.27525 112.246 0";
+			rotation = "0 0 1 53";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "cranePathD";
+				timeToNext = "5000";
+				Smooth = "1";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				FinalRotOffset = "0 0 0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath1) {
+			position = "-4.99677 -128.888 -36.1";
+			rotation = "0.21301 -0.0610303 0.975142 32.7474";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "-10.4004 -102.202 -33.9544";
+			rotation = "-0.39034 0.125658 0.912055 38.8821";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-9.80946 -70.067 -24.7714";
+			rotation = "-0.486482 0.157948 0.859295 41.3969";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "7000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-3.94164 -37.2024 11.8537";
+			rotation = "-0.398862 0.109988 0.910391 33.7028";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-73.9598 -20.7077 29.5422";
+			rotation = "0.59509 -0.196465 0.779275 45.9202";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "5000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-73.9598 -20.7077 59.2922";
+			rotation = "0.59509 -0.196465 0.779275 45.9202";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "-34.9674 -13.8174 39.1824";
+			rotation = "0.0178473 -0.0074729 0.999813 45.4469";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "5000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "-8.21739 -13.8174 39.1824";
+			rotation = "0.0178473 -0.0074729 0.999813 45.4469";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new Trigger(oobLeft4) {
+		position = "-80 3 23.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/advanced/dangerousDevelopment.dif";
+			showTerrainInside = "0";
+		};
+		new InteriorInstance(CraneTop) {
+			position = "36 93.5 -22";
+			rotation = "0 0 -1 19.9999";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/advanced/DD_crane.dif";
+			showTerrainInside = "0";
+				initialPathPosition = "36 93.5 -22 0 0 1 0";
+				initialPathScale = "1 1 1";
+				Path = "cranePath1";
+		};
+	};
+	new StaticShape(StartPoint) {
+		position = "-3.5 0.5 27.75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ_Construction";
+	};
+	new Trigger(oobLeft6) {
+		position = "-80 3 47.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape() {
+		position = "-36.077 -2.19158 52.2443";
+		rotation = "0.00526902 0.00138272 0.999985 92.9681";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_left";
+	};
+	new StaticShape() {
+		position = "25.7155 3.20459 23.4734";
+		rotation = "0 0 1 100.153";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_down";
+	};
+	new Item() {
+		position = "60.5 0.5 23.75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "SuperSpeedItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+	};
+	new Trigger(check1trig) {
+		position = "-32 -2 7.75";
+		rotation = "1 0 0 0";
+		scale = "1 3 6.75";
+		dataBlock = "CheckpointTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			respawnPoint = "check1";
+			TSStaticName = "check1";
+	};
+	new TSStatic(check1) {
+		position = "-31.5 -3.5 7.625";
+		rotation = "1 0 0 0";
+		scale = "0.1 0.1 0.1";
+		shapeName = "~/data/shapes_pq/Gameplay/pads/checkpoint.dts";
+	};
+	new TSStatic() {
+		position = "-31.5 -3.5 7.625";
+		rotation = "1 0 0 0";
+		scale = "0.1 0.1 0.1";
+		shapeName = "~/data/shapes_pq/Gameplay/pads/silly_cp_glass.dts";
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "69.5 1.8883 20.1528";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "1750";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "69.5 1.8883 28.1528";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "1000";
+				smoothingType = "Linear";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "70.5 0.5 17.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-4.0000000 -0.5000000 2.0000000 0.0000000 1.0000000 0.0000000 8.0000000 0.0000000 0.0000000 0.0000000 0.0000000 -4.0000000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "99999";
+		};
+		new PathedInterior(ConcTube) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/advanced/DD_concTubeMP.dif";
+			interiorIndex = "0";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/advanced/DD_concTubeMP.dif";
+		showTerrainInside = "0";
+	};
+	new Trigger(doNotFall) {
+		position = "-79 128 6.5";
+		rotation = "1 0 0 0";
+		scale = "153 256 1";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(align1a) {
+		position = "-10.25 -3.4375 35.75";
+		rotation = "1 0 0 0";
+		scale = "24 0.125 16";
+		dataBlock = "AlignmentTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			alwaysOn = "0";
+			x = "none";
+			y = "trigger";
+			z = "none";
+	};
+	new Item() {
+		position = "30 0.5 24.25";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			timeBonus = "2000";
+	};
+	new Trigger(failure) {
+		position = "14.25 -3 7.75";
+		rotation = "1 0 0 0";
+		scale = "4.5 1 1";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "3000";
+			text = "Congratulations! You failed the level!";
+	};
+	new Item() {
+		position = "-36.25 -3.5 39.75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "ShockAbsorberItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+	};
+	new Item() {
+		position = "-37.75 -3.5 40.25";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			timeBonus = "7000";
+	};
+	new Trigger(oobRight2) {
+		position = "74 3 31.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(getDown) {
+		position = "9 1 43.5";
+		rotation = "1 0 0 0";
+		scale = "3 1 3";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "3000";
+			text = "There is nothing up here for you.\nPlease get down.";
+	};
+	new InteriorInstance() {
+		position = "-1.90392 6.70105 28.2202";
+		rotation = "0 0 1 117.8";
+		scale = "0.5 0.5 0.5";
+		interiorFile = "~/data/interiors_pq/tutorial/Pallet.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-5.14836 4.62022 27.9069";
+		rotation = "0 0 1 26.1269";
+		scale = "0.5 0.5 0.5";
+		interiorFile = "~/data/interiors_pq/tutorial/Pallet.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-5.36554 4.71616 28.2202";
+		rotation = "0 0 1 66.4058";
+		scale = "0.5 0.5 0.5";
+		interiorFile = "~/data/interiors_pq/tutorial/Pallet.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-5.09301 4.60684 28.5341";
+		rotation = "0 0 1 91.6159";
+		scale = "0.5 0.5 0.5";
+		interiorFile = "~/data/interiors_pq/tutorial/Pallet.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance() {
+		position = "-1.84339 6.47147 27.9069";
+		rotation = "0 0 1 77.5212";
+		scale = "0.5 0.5 0.5";
+		interiorFile = "~/data/interiors_pq/tutorial/Pallet.dif";
+		showTerrainInside = "0";
+	};
+	new StaticShape() {
+		position = "0.962901 3.12908 28.0423";
+		rotation = "0.14573 -0.930714 0.335461 31.3799";
+		scale = "1.5 1.5 1.5";
+		dataBlock = "RoadsignYellow";
+			skin = "Caution";
+	};
+	new StaticShape() {
+		position = "-2.50573 3.27901 27.7431";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_right";
+	};
+	new Item() {
+		position = "-38 -3.5 16.75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "SuperBounceItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+	};
+	new Item() {
+		position = "-35.5 -3.5 7.75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "SuperSpeedItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+	};
+	new StaticShape() {
+		position = "-55.4813 -1.36623 9.24716";
+		rotation = "0 0 1 89.7825";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_diag_3";
+	};
+	new StaticShape() {
+		position = "-47.5123 -0.874955 15.4934";
+		rotation = "0 0 1 89.7825";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_diag_4";
+	};
+	new Item() {
+		position = "-67.5 -3.5 47";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "SuperSpeedItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+	};
+	new Item() {
+		position = "-58.8093 4.80935 39.75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "SuperSpeedItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+	};
+	new Trigger(align2a) {
+		position = "-42.75 -7.4375 63.75";
+		rotation = "1 0 0 0";
+		scale = "16 0.125 16";
+		dataBlock = "AlignmentTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			alwaysOn = "0";
+			x = "none";
+			y = "trigger";
+			z = "none";
+	};
+	new Trigger(oobLeft3) {
+		position = "-80 -5 15.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobLeft2) {
+		position = "-80 -5 7.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobRight7) {
+		position = "73.75 4 79.5";
+		rotation = "1 0 0 0";
+		scale = "1 17 24";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "-55 -2.5 70.475";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "2000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-55 -2.5 58.975";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "2250";
+				smoothingType = "Linear";
+			};
+			new Marker() {
+				position = "-55 -2.5 58.975";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "2000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-55 -2.5 70.475";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "3";
+				msToNext = "1000";
+				smoothingType = "Linear";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "-33.375 -3.5 57.875";
+			rotation = "1 0 0 0";
+			scale = "1 1 3";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-1.3750000 -1.5000000 1.8750000 0.0000000 3.0000000 0.0000000 2.7500000 0.0000000 0.0000000 0.0000000 0.0000000 -3.7500000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "99999";
+		};
+		new Trigger(resetDropPallet) {
+			position = "-32 -2 7.75";
+			rotation = "1 0 0 0";
+			scale = "1 3 6.75";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				IContinueToTTime = "0";
+				instant = "1";
+				targetTime = "0";
+		};
+		new PathedInterior(dropElevatorPallet) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/advanced/DD_triggeredPallets.dif";
+			interiorIndex = "2";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/advanced/DD_triggeredPallets.dif";
+		showTerrainInside = "0";
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "-23.5 -2.5 39.1162";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "250";
+				smoothingType = "Linear";
+			};
+			new Marker() {
+				position = "-23.5 -2.5 39.1162";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "1200";
+				smoothingType = "Linear";
+			};
+			new Marker() {
+				position = "-23.5 -2.5 11.1162";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "1000";
+				smoothingType = "Linear";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "-23.5 -2.5 36";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-4.0000000 -2.5000000 0.2500000 0.0000000 5.0000000 0.0000000 8.0000000 0.0000000 0.0000000 0.0000000 0.0000000 -0.5000000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "99999";
+		};
+		new PathedInterior(fallingPallet) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/advanced/DD_triggeredPallets.dif";
+			interiorIndex = "0";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "-71.5 -2.5 20.075";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "3000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-71.5 -2.5 45.075";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "1000";
+				smoothingType = "Linear";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "-71.5 -2.5 15.375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-2.5000000 -2.5000000 0.6250000 0.0000000 5.0000000 0.0000000 5.0000000 0.0000000 0.0000000 0.0000000 0.0000000 -1.2500000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "99999";
+		};
+		new Trigger(resetElevPallet) {
+			position = "-32 -2 7.75";
+			rotation = "1 0 0 0";
+			scale = "1 3 6.75";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				IContinueToTTime = "0";
+				instant = "1";
+				targetTime = "0";
+		};
+		new PathedInterior(elevatorPallet) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/advanced/DD_triggeredPallets.dif";
+			interiorIndex = "1";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new InteriorInstance(craneTop2ElectricBoogaloo) {
+		position = "-46 83.5 2";
+		rotation = "0 0 1 160";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/advanced/DD_crane.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-46 83.5 2 0 0 1 0";
+			initialPathScale = "1 1 1";
+			Path = "cranePathA";
+	};
+	new StaticShape() {
+		position = "-50.63 -2.16157 52.2482";
+		rotation = "0 0 1 89.7825";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_up";
+	};
+	new StaticShape() {
+		position = "-49.1589 -2.13036 43.6584";
+		rotation = "0.0925518 -0.0906007 0.991577 93.4879";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_left";
+	};
+	new StaticShape() {
+		position = "-62.6322 -2.13367 47.5026";
+		rotation = "-0.27456 0.282023 0.919282 92.5771";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_right";
+	};
+	new StaticShape() {
+		position = "-55.0854 -0.785076 39.4315";
+		rotation = "-0.127767 -0.527813 0.839696 32.1624";
+		scale = "1.5 1.5 1.5";
+		dataBlock = "RoadsignYellow";
+			skin = "Caution";
+	};
+	new TSStatic(check2) {
+		position = "-27.5 -7.5 63.625";
+		rotation = "1 0 0 0";
+		scale = "0.1 0.1 0.1";
+		shapeName = "~/data/shapes_pq/Gameplay/pads/checkpoint.dts";
+	};
+	new TSStatic() {
+		position = "-27.5 -7.5 63.625";
+		rotation = "1 0 0 0";
+		scale = "0.1 0.1 0.1";
+		shapeName = "~/data/shapes_pq/Gameplay/pads/silly_cp_glass.dts";
+	};
+	new Trigger(check2trig) {
+		position = "-28 -6 63.75";
+		rotation = "1 0 0 0";
+		scale = "1 3 16";
+		dataBlock = "CheckpointTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			respawnPoint = "check2";
+			TSStaticName = "check2";
+	};
+	new Trigger(oobLeft7) {
+		position = "-80 -5 47.5";
+		rotation = "1 0 0 0";
+		scale = "1 8 8";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobRight1) {
+		position = "74 3 7.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobLeft1) {
+		position = "-80 3 7.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobLeft5) {
+		position = "-80 -5 39.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobLeft7) {
+		position = "-80 4 55.5";
+		rotation = "1 0 0 0";
+		scale = "1 17 48";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobRight3) {
+		position = "74 3 39.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobRight4) {
+		position = "74 -5 31.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobRight5) {
+		position = "74 -5 47.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oobRight6) {
+		position = "74 -5 63.5";
+		rotation = "1 0 0 0";
+		scale = "1 7 7";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(endMPoob) {
+		position = "-24 3 60.25";
+		rotation = "1 0 0 0";
+		scale = "72.5 32 1";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(align1) {
+		position = "64.75 2 15.75";
+		rotation = "1 0 0 0";
+		scale = "0.25 3 4";
+		dataBlock = "AlignmentTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			alwaysOn = "0";
+			x = "none";
+			y = "trigger";
+			z = "none";
+	};
+	new Trigger(Align2) {
+		position = "-32 -2 7.75";
+		rotation = "1 0 0 0";
+		scale = "1 3 6.75";
+		dataBlock = "AlignmentTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			alwaysOn = "0";
+			x = "none";
+			y = "trigger";
+			z = "none";
+	};
+	new Trigger(align0) {
+		position = "0 2 27.75";
+		rotation = "1 0 0 0";
+		scale = "1 3 6.75";
+		dataBlock = "AlignmentTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			alwaysOn = "0";
+			x = "none";
+			y = "trigger";
+			z = "none";
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "-10.5 -4.5 67.3125";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "12000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "43.5 -4.5 67.3125";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "1000";
+				smoothingType = "Linear";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "-10.5 -4.5 65.625";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-2.5000000 -4.5000000 1.8750000 0.0000000 9.0000000 0.0000000 5.0000000 0.0000000 0.0000000 0.0000000 0.0000000 -3.7500000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "99999";
+		};
+		new PathedInterior(survivalPallet) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/advanced/DD_finalPallet.dif";
+			interiorIndex = "1";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+		new Trigger(resetSurvivalPallet) {
+			position = "-28 -6 63.75";
+			rotation = "1 0 0 0";
+			scale = "1 3 12";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				IContinueToTTime = "0";
+				instant = "1";
+				targetTime = "0";
+		};
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/advanced/DD_finalPallet.dif";
+		showTerrainInside = "0";
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "36.5 11.1429 73.2144";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "1000";
+				smoothingType = "Linear";
+			};
+			new Marker() {
+				position = "36.5 -1.8571 73.2144";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "1200";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "36.5 11.1429 73.2144";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "400";
+				smoothingType = "Linear";
+			};
+		};
+		new PathedInterior(concSmasher) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/advanced/DD_finalPallet.dif";
+			interiorIndex = "0";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "-1";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new Item() {
+		position = "-39 -3.5 64.75";
+		rotation = "0 -1 0 90";
+		scale = "1 1 1";
+		dataBlock = "NestEgg_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			skin = "brown";
+	};
+	new InteriorInstance(craneTop3ThisTimeItsPersonal) {
+		position = "30.5 -63.75 -73.5";
+		rotation = "0 0 1 53";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/advanced/DD_crane.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "30.5 -63.75 -73.5 0 0 1 0";
+			initialPathScale = "1 1 1";
+			Path = "cranePathB";
+	};
+	new Trigger(youShouldNotGoOOBThroughThisOne) {
+		position = "-131 24 -248";
+		rotation = "1 0 0 0";
+		scale = "256 128 384";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape(EndPoint) {
+		position = "52.5 -7.5 57.25";
+		rotation = "1 0 0 0";
+		scale = "0.875 0.875 0.8";
+		dataBlock = "EndPad_PQ";
+			skin = "brown";
+	};
+	new StaticShape() {
+		position = "68 -5.5 65.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "ConsFinishlinesignNocrane";
+			noParticles = "0";
+	};
+	new Trigger(finishZoomTrigger) {
+		position = "50.75 -5.75 57.25";
+		rotation = "1 0 0 0";
+		scale = "3.5 3.5 4";
+		dataBlock = "CameraDistanceTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			distance = "2.5";
+			ForceExitValue = "0";
+			keepeffectonleave = "0";
+			Smooth = "1";
+			Time = "500";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

@@ -1,0 +1,12 @@
+{
+	"name": "Solid Colors",
+	"marbles": [
+		{"name": "Blue",   "shape": "ball-superball.dts", "skin": "blue",   "normalize": true},
+		{"name": "Brown",  "shape": "ball-superball.dts", "skin": "brown",  "normalize": true},
+		{"name": "Green",  "shape": "ball-superball.dts", "skin": "green",  "normalize": true},
+		{"name": "Grey",   "shape": "ball-superball.dts", "skin": "grey",   "normalize": true},
+		{"name": "Purple", "shape": "ball-superball.dts", "skin": "purple", "normalize": true},
+		{"name": "Red",    "shape": "ball-superball.dts", "skin": "red",    "normalize": true},
+		{"name": "Yellow", "shape": "ball-superball.dts", "skin": "yellow", "normalize": true}
+	]
+}

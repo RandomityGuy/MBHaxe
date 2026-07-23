@@ -1,0 +1,11 @@
+Dunno what we'll be doing here for custom marbles... probably use a Custom folder?
+
+Make sure to disable LBs if they are using a custom .dts, but custom skins on a LB-enabled DTS are fine.
+
+-S22
+
+
+Here you can copy your own marble's DTS and it's respective skin file (JPG, PNG, etc.)
+It should appear in Select Marble -> Custom Marbles.
+
+Matan's note - Please note that when making your own texture, it must always be the same filename as the texture name you want to replace. So it always ends up as CustomMarble1.png or CustomMarble17.png etc. This is because each DTS specifies for it and it is unchangeable.

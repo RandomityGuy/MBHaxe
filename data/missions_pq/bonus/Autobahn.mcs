@@ -1,0 +1,1006 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Autobahn_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Autobahn";
+		type = "Bonus";
+		level = "8";
+		desc = "Tear it up!";
+		artist = "MadMarioSkills";
+		music = "Lakebed.ogg";
+		game = "PlatinumQuest";
+		gameMode = "Laps";
+		time = "120000";
+		platinumTime = "100000";
+		ultimateTime = "85000";
+		awesomeTime = "65000";
+		generalHint = "While diagonal movement really helps out, you must watch out for the bumps in the road the could throw you off, or make slowing down much harder.";
+		ultimateHint = "Time some of your jumps carefully, and you can get through the laps much more quickly.";
+		awesomeHint = "After the water bit there are some small bumps. After the last one, cut left. You can cut another corner towards the end.\nOr use the level editor... ya'know... cheater.";
+		customRadarRule = $Radar::Flags::None;
+		alarmStartTime = "10";
+		easterEgg = "0";
+		gems = "0";
+		interiors = "0";
+		lapsNumber = "3";
+		maxScore = "0";
+		requirements = "Beat the Platinum Time on Momentum.";
+		unlockFunc = "unlock_Autobahn";
+		trivia = "MadMarioSkill's only level, and he was never satisfied with it.\nThis level and its scenery were made entirely in Milkshape. No interiors, just shape files.\nThis level is also considered incomplete, as it's missing plenty of fence poles, advertisement signs and even haystacks, among others.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_Autobahn(%mission) {
+	return Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/advanced/Momentum.mcs")) & $Completion::Platinum;
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE Autobahn
+
+//---------------------------------------------------------------------
+// Dirt Track
+//---------------------------------------------------------------------
+
+datablock StaticShapeData(DirtTrack)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/track_col.dts";
+};
+
+datablock StaticShapeData(DirtTrackPlanet)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/track_planet.dts";
+};
+
+datablock StaticShapeData(TrackOverlay)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/track_overlay.dts";
+};
+
+datablock StaticShapeData(DirtTrackPlanet2)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/TrackPlanet.dts";
+};
+
+function DirtTrackPlanet2::onAdd(%this, %obj)
+{
+  %obj.playThread(0, "flow");
+}
+
+datablock StaticShapeData(DirtTrackPlanet2_Col)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/TrackPlan_Collision.dts";
+};
+
+datablock StaticShapeData(Track_Sky)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/Track_Sky.dts";
+};
+
+function Track_Sky::onAdd(%this, %obj)
+{
+  %obj.playThread(0, "rotate");
+}
+
+datablock StaticShapeData(DirtTrackPlanet_Col)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/TrackPlanet_Col.dts";
+};
+
+datablock StaticShapeData(Track_Islands)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/Track_Islands.dts";
+};
+
+datablock StaticShapeData(Fence_Pole)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/Fence_Pole.dts";
+};
+
+datablock StaticShapeData(Fence_Section)
+{
+   className = "LevelParts";
+   category = "LevelParts";
+   shapefile = "platinum/data/shapes_pq/LevelParts/Autobahn/Fence_Section.dts";
+};
+
+//MB doesn't like a dts that has collision+animation from milkshape for no damn reason
+
+// HUGE files, only load if needed for this level
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Autobahn_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(TrackGroup) {
+
+		new StaticShape() {
+			position = "-5.64625 -5.30736 -3.53432";
+			rotation = "1 0 0 0";
+			scale = "7 7 0.0001";
+			dataBlock = "WaterCylinder_slow";
+		};
+		new StaticShape() {
+			position = "-7.56511 2.0544 0.681122";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TrackOverlay";
+		};
+		new StaticShape() {
+			position = "-7.56511 2.0544 0.681122";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DirtTrack";
+		};
+		new StaticShape() {
+			position = "27.8349 0.9544 -250.179";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DirtTrackPlanet2";
+		};
+		new StaticShape() {
+			position = "27.8349 0.9544 -250.179";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "DirtTrackPlanet_Col";
+		};
+		new StaticShape() {
+			position = "-45.3739 -101.541 -7.5192";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "Track_Islands";
+		};
+		new StaticShape() {
+			position = "0 0 0 0";
+			rotation = "1 0 0 0";
+			scale = "2000 2000 666";
+			dataBlock = "Track_Sky";
+		};
+	};
+	new SimGroup(LapsGroup) {
+
+		new Trigger() {
+			position = "16.9357 -2.97098 -1.277";
+			rotation = "1 0 0 0";
+			scale = "12 2 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "1";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "17.5937 -19.2468 -0.504";
+			rotation = "0 0 1 90";
+			scale = "19 2 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "2";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "2.5357 -2.97098 -0.2";
+			rotation = "1 0 0 0";
+			scale = "12 2 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "3";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "1.8597 17.9354 -0.935";
+			rotation = "0 0 1 90";
+			scale = "15 2 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "4";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "-11.2643 -2.97098 -5.075";
+			rotation = "1 0 0 0";
+			scale = "12 2 20";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "5";
+				customSpawnPoint = "1";
+				SpawnPoint = "2.5 11 2 0 0 1 -140";
+		};
+		new Trigger() {
+			position = "-11.1403 -15.6646 -0.2";
+			rotation = "0 0 1 90";
+			scale = "19 2 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "6";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "-28.1273 -2.97098 -3.4";
+			rotation = "1 0 0 0";
+			scale = "13 2 19";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "7";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "-39.0042 6.34324 -0.317";
+			rotation = "0 0 1 90";
+			scale = "14 2 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "8";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "-47.1089 33.853 -0.801";
+			rotation = "0 0 1 45.00001";
+			scale = "17 2 18";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "9";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "-11.5403 33.7354 2.2";
+			rotation = "0 0 1 90";
+			scale = "15 2 16";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "10";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "13.6542 24.2844 -0.2";
+			rotation = "0 0 -1 45.00001";
+			scale = "15 2 20";
+			dataBlock = "LapsCheckpoint";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				checkpointNumber = "11";
+				customSpawnPoint = "0";
+				enableRespawning = "0";
+		};
+		new Trigger() {
+			position = "14.7 16 -0.246";
+			rotation = "1 0 0 0";
+			scale = "15 2 4";
+			dataBlock = "LapsCounterTrigger";
+			polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+				customSpawnPoint = "1";
+				SpawnPoint = "20 25 2 0 0 1 170";
+		};
+	};
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "25000";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Autobahn/Autobahn.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 -0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new Trigger(Bounds) {
+		position = "-58.25 49 -3.5";
+		rotation = "1 0 0 0";
+		scale = "100 100 20";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape(StartPoint) {
+		position = "26.335 19.6381 0.00603091";
+		rotation = "-0.04154229 -0.003733259 0.9991298 197.678";
+		scale = "0.5 0.5 0.5";
+		dataBlock = "StartPad_PQ";
+	};
+	new StaticShape() {
+		position = "24.4776 34.7138 5.07239";
+		rotation = "-0.284515 0.741925 -0.6071231 70.966";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.2941 17.6986 0.2";
+		rotation = "0 0 1 3.437706";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.2941 17.6986 0.2";
+		rotation = "0 0 1 3.437706";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.1842 14.7833 0.0518162";
+		rotation = "0.9569269 0.07107491 0.2814949 12.59674";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.1223 14.8047 0.2";
+		rotation = "0 0 -1 43.5447";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "27.5238 7.04687 3.15146";
+		rotation = "0.9912623 0.06158653 0.116646 17.36282";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "27.9437 11.8939 0.622334";
+		rotation = "0.9654052 -0.0338027 0.258554 15.42451";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "27.9326 11.9825 0.65753";
+		rotation = "0.9811082 -0.07690903 0.177515 23.3677";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "27.758 9.24526 1.77551";
+		rotation = "0.9917892 -0.03472662 0.123079 31.7605";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "27.7798 9.23135 1.82632";
+		rotation = "0.9843451 -0.0340997 0.172922 34.2634";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "27.54 7.34066 3.2878";
+		rotation = "0.07462145 -0.1943671 0.9780865 5.8725";
+		scale = "1 0.842066 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "27.3671 5.25632 3.1839";
+		rotation = "-0.9865701 -0.15556 0.04980505 15.6865";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "16.9441 17.6986 0.2";
+		rotation = "0 0 1 3.437706";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "17.7364 5.05767 3.1339";
+		rotation = "-0.8158628 -0.2095329 -0.538947 18.62329";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "17.4724 7.14948 3.23952";
+		rotation = "0.05481913 -0.120621 -0.9911838 9.23388";
+		scale = "1 0.842066 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "17.5522 6.84559 3.10146";
+		rotation = "0.8803716 0.13941 -0.4533328 19.3645";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "16.9113 9.14029 1.82541";
+		rotation = "0.9321494 -0.1672961 -0.3211071 32.03279";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "16.8912 9.06049 1.86076";
+		rotation = "0.9917892 -0.03472662 0.123079 31.7605";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "16.931 11.825 0.639672";
+		rotation = "0.9998603 -0.0129615 0.0105615 26.37398";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "16.9092 11.8528 0.622334";
+		rotation = "0.9654052 -0.0338027 0.258554 15.42451";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "16.9148 14.8038 0.0507347";
+		rotation = "0.9985425 0.0391009 -0.03720202 12.09384";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "16.917 14.7596 0.2";
+		rotation = "0 0 -1 43.5447";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "16.9288 17.7049 0.18612";
+		rotation = "0.392763 -0.9196291 0.004443089 1.282049";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "17.8916 -5.5259 -0.0500001";
+		rotation = "0 0 1 178.945";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "17.8916 -5.5259 -0.0500001";
+		rotation = "0 0 1 178.945";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "17.7552 2.81993 1.53268";
+		rotation = "-0.002047319 -0.3186519 0.9478697 181.053";
+		scale = "1 1.08811 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "17.7683 2.91424 1.61076";
+		rotation = "0.00114138 -0.271549 0.962424 179.536";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "17.8043 0.200967 0.40753";
+		rotation = "-0.007775852 -0.1991441 0.9799394 179.718";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "17.7863 0.288423 0.372334";
+		rotation = "0.0005449008 -0.129635 0.9915617 179.522";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "17.7729 -2.61095 -0.198184";
+		rotation = "0.0119063 -0.104598 0.9944433 179.072";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "17.8362 -2.62743 -0.0500001";
+		rotation = "0 0 1 131.963";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.4156 -2.63505 0";
+		rotation = "0 0 1 131.78";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.1142 3.06463 1.65073";
+		rotation = "-0.0328612 -0.317437 0.9477098 166.732";
+		scale = "1 1.08721 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.1 3.05766 1.66076";
+		rotation = "-0.002499211 -0.2715461 0.9624222 181.015";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.2028 0.294777 0.439672";
+		rotation = "0.00292831 -0.228157 0.97362 177.398";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.1865 0.262709 0.422334";
+		rotation = "0.0007514477 -0.1296351 0.9915615 179.341";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.4214 -2.67893 -0.149265";
+		rotation = "0.008413969 -0.105037 0.9944328 174.902";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.6439 -5.57152 -0.01388";
+		rotation = "-0.0101092 -0.004814134 0.9999373 175.331";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.6281 -5.56648 0";
+		rotation = "0 0 1 178.763";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.2705 -15.7461 3.5723";
+		rotation = "0.05166264 -0.0004885002 0.9986645 179.941";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.6639 -8.46176 0.350973";
+		rotation = "4.718998e-05 0.05976188 0.9982126 179.908";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.6772 -8.47655 0.358547";
+		rotation = "0.009105267 0.08001895 0.9967518 178.675";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.7303 -11.3371 1.01574";
+		rotation = "-2.048702e-06 0.119511 0.9928329 179.335";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.7059 -11.3694 1.03927";
+		rotation = "0.001574559 0.173602 0.9848147 179.911";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.5294 -13.8316 2.73103";
+		rotation = "-0.01137579 0.3047498 0.9523645 183.777";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.5632 -13.6999 2.52824";
+		rotation = "0.001538021 0.217728 0.9760083 179.903";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.4977 -13.564 2.54634";
+		rotation = "0.9621603 -0.1696541 0.2132251 27.56661";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.3572 -15.2226 3.92406";
+		rotation = "-0.9984222 0.00392742 -0.05601431 30.98628";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.4024 -17.6137 2.40638";
+		rotation = "-0.9855397 -0.04437929 -0.16353 30.7913";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.132 30.4917 4.94244";
+		rotation = "-0.3854989 0.8336051 -0.395592 49.42731";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "28.9571 20.5092 0.981173";
+		rotation = "-0.7371702 0.168161 0.6544479 19.7211";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.9782 20.5113 0.926322";
+		rotation = "-0.8134818 0.5202042 0.260067 17.2562";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "29.645 23.0646 2.11283";
+		rotation = "-0.6715813 0.5637583 0.4807861 29.74878";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "29.6314 23.0646 1.94254";
+		rotation = "-0.7844949 0.6050038 0.136155 29.7742";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "29.6816 25.6086 3.41349";
+		rotation = "-0.6786343 0.7232733 0.1277941 40.35468";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "29.7862 25.5778 3.35554";
+		rotation = "-0.706233 0.7015581 0.09513764 45.10699";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "29.227 27.8939 4.36661";
+		rotation = "-0.4830961 0.8523411 0.200332 49.42149";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "26.4847 32.8 5.08414";
+		rotation = "-0.2371889 0.8019018 -0.5483567 59.05183";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "26.5692 32.7697 5.12349";
+		rotation = "-0.4141071 0.851312 -0.322154 60.22297";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "24.5737 34.6646 5.01669";
+		rotation = "-0.427341 0.8273746 -0.3644598 55.89251";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "29.0734 28.009 4.45787";
+		rotation = "-0.522934 0.8414862 -0.135798 47.6742";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "28.1051 30.4864 5.01468";
+		rotation = "-0.375587 0.8677741 -0.3254269 49.97283";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "22.1575 36.2752 4.80362";
+		rotation = "-0.209103 0.5334691 -0.819565 83.83012";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "22.1112 36.2756 4.89494";
+		rotation = "-0.294221 0.6397868 -0.7100049 75.67522";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "19.2474 36.9785 4.72731";
+		rotation = "-0.3007221 0.451075 -0.8402962 86.93551";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "19.7192 36.9788 4.60355";
+		rotation = "-0.231448 0.6238871 -0.7464561 75.29901";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "16.9333 37.4089 3.95708";
+		rotation = "-0.171066 0.465767 -0.8682151 93.89921";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "17.2021 37.4218 3.90135";
+		rotation = "-0.157504 0.461524 -0.8730338 95.97102";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "14.4556 37.2787 2.98337";
+		rotation = "-0.114697 0.4231798 -0.8987566 103.9871";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "14.73 37.2915 2.89787";
+		rotation = "-0.08827019 0.4249669 -0.9008948 94.28535";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "12.1324 36.9549 1.6653";
+		rotation = "-0.03958102 0.418853 -0.907191 110.335";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "12.2814 36.8797 1.66664";
+		rotation = "-0.04396991 0.3853891 -0.9217061 91.96234";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "9.60476 36.435 0.567961";
+		rotation = "-0.06369686 0.143457 -0.9876046 92.75985";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "9.59692 36.5266 0.582412";
+		rotation = "0.002494259 0.3361 -0.941823 104.097";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "6.91959 36.1935 0.278617";
+		rotation = "0.002219641 0.0231754 -0.999729 92.2815";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "6.7699 36.3382 0.397741";
+		rotation = "-0.04055899 0.127627 -0.9909927 91.11111";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "3.98614 35.9046 0.420981";
+		rotation = "-0.00950475 -0.009407277 -0.9999106 96.38705";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "4.14178 35.9307 0.374957";
+		rotation = "-0.07437519 -0.05663453 -0.9956208 92.61294";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "-0.468046 34.8859 3.08654";
+		rotation = "-0.1807909 -0.3552478 -0.9171225 113.6151";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "1.70719 35.5376 1.29161";
+		rotation = "-0.114219 -0.3361109 -0.9348708 100.254";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new StaticShape() {
+		position = "1.50237 35.6849 1.41752";
+		rotation = "-0.137971 -0.2174841 -0.9662632 97.28781";
+		scale = "1 1 1";
+		dataBlock = "Fence_Section";
+	};
+	new StaticShape() {
+		position = "-0.41047 34.8374 2.99372";
+		rotation = "-0.149855 -0.4333161 -0.888696 107.323";
+		scale = "1 1 1";
+		dataBlock = "Fence_Pole";
+	};
+	new Trigger(ocean) {
+		position = "-494.5 485 -23.5";
+		rotation = "1 0 0 0";
+		scale = "1000 1000 20";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			VelocityMultiplier = "0.5";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "34.41108 -0.3450511 6.14122";
+			rotation = "0.2342109 0.1015964 -0.9668627 48.32666";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "34.56596 -10.99179 7.843714";
+			rotation = "0.2947519 0.1235163 -0.9475574 47.71425";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "2400";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "31.40546 -28.0578 10.8873";
+			rotation = "0.4696483 0.1489326 -0.8702009 40.04509";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "27.41739 -41.30561 14.31289";
+			rotation = "0.6081488 0.1862322 -0.7716688 43.29016";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "0.144825 -5.060417 3.033063";
+			rotation = "-0.01385652 -0.04441877 0.9989169 214.6156";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "2200";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-3.906086 4.189299 5.386275";
+			rotation = "-0.0326777 -0.2122945 0.9766593 197.0989";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "-12.99832 13.35623 9.758211";
+			rotation = "0.02245134 -0.2511388 0.9676907 170.1113";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "-25.47284 16.37258 14.91497";
+			rotation = "0.1168729 -0.2757424 0.9541 135.9638";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath9";
+				timeToNext = "2600";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath9) {
+			position = "-34.69067 13.18535 19.79594";
+			rotation = "0.2588601 -0.323183 0.910244 107.8099";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath10";
+				timeToNext = "2700";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath10) {
+			position = "-39.73677 2.428712 27.15636";
+			rotation = "0.5554599 -0.3492127 0.7546621 79.59377";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

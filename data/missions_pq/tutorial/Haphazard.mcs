@@ -1,0 +1,965 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Haphazard_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Haphazard";
+		type = "Tutorial";
+		level = "2";
+		desc = "Learn about some of the hazards you will face during your journey.";
+		startHelpText = "Hazards are obstacles that will usually hinder your marble. For the most part, you should avoid them.";
+		artist = "Threefolder";
+		music = "Reanimation.ogg";
+		game = "PlatinumQuest";
+		platinumTime = "50000";
+		ultimateTime = "27500";
+		awesomeTime = "17000";
+		generalHint = "There are far fewer walls in this level onwards than there were in Training Wheels, so falling off the level is a real threat. Try to roll slower by holding the <func:bind moveforward> key for a shorter time, or try to use a combination of <func:bind moveforward> and <func:bind movebackward> to control your speed.";
+		ultimateHint = "You can use many of the hazards to your advantage, and not just the mine and bumper.";
+		awesomeHint = "Bumpers and edge hits are easy enough, but that tornado blew so many runs it stopped being funny. A nuke probably edges a faster time, but I\'m not going to be counting milliseconds.";
+		CustomRadarRule = $Radar::Flags::EndPad | $Radar::Flags::Checkpoints;
+		easterEgg = "0";
+		gems = "0";
+		interior0 = $usermods @ "/data/interiors_pq/tutorial/haphazard.dif";
+		interiors = "1";
+		maxScore = "0";
+		trivia = "This level would have taught you about friction floors too, if Matan hadn\'t started work on Feeling Frictional already.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+//function unlock_MissionNameHere(%mission) { //%mission is the MissionInfo
+//	return true; //True if the mission is unlocked
+//}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE Haphazard
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Haphazard_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "10000";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+	};
+	new SimGroup(SceneryGroup) {
+
+		new StaticShape() {
+			position = "-57.5 170.95 18.25";
+			rotation = "-0.179689 -0.695597 0.695598 159.627";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "PQRulez_Graffiti";
+		};
+		new StaticShape() {
+			position = "-83.45 71.5 5";
+			rotation = "0.706342 0.0464768 0.706343 185.322";
+			scale = "0.4 0.4 0.4";
+			dataBlock = "Marble_Graffiti";
+		};
+		new StaticShape() {
+			position = "-57.5 238.45 15";
+			rotation = "-0.973059 -0.163028 0.163028 91.5646";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "PhilsEmpire_Graffiti";
+		};
+	};
+	new SimGroup(HelpBubbleGroup) {
+
+		new StaticShape(bumperHelp1) {
+			position = "0 12 3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = " Bumpers will knock you away if you touch them.";
+				triggerRadius = "5";
+		};
+		new StaticShape(bumperHelp2) {
+			position = "-10 36.25 3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Jump on top of this bumper to make it to the high platform. You can take the ramp if you don\'t feel up to it just yet.";
+				triggerRadius = "5";
+		};
+		new StaticShape(fanHelp1) {
+			position = "-32 36 6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Duct Fans will blow you away from them.";
+				triggerRadius = "5";
+		};
+		new StaticShape(fanHelp2) {
+			position = "-63 35 7";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Stay close to these fans and hold <func:bind moveright> as you roll past them to try and stay on this platform.";
+				triggerRadius = "5";
+		};
+		new StaticShape(fallStatic) {
+			position = "-75.75 25 4";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "1";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = " ";
+				triggerRadius = "1";
+		};
+		new StaticShape(trapdoorHelp1) {
+			position = "-88 64 10.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Trapdoors, like these ones, will open if you touch them.";
+				triggerRadius = "5";
+		};
+		new StaticShape(trapdoorHelp2) {
+			position = "-89 81 6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Go quick over these trapdoors or you\'ll fall Out of Bounds! ";
+				triggerRadius = "5";
+		};
+		new StaticShape(mineHelp1) {
+			position = "-76 112 6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Land Mines are similar to bumpers, but a bit... explodier. Try not to touch them as you climb this small hill.";
+				triggerRadius = "5";
+		};
+		new StaticShape(nukeHelp1) {
+			position = "-57.5 154.5 12";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Nukes will blast you away faster and further than Land Mines. Rolling into them is most likely a bad idea.";
+				triggerRadius = "5";
+		};
+		new StaticShape(mineHelp2) {
+			position = "-64.5 137 10";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Like bumpers, you can also jump on top of Land Mines to get an upward boost, but this is very risky.";
+				triggerRadius = "5";
+		};
+		new StaticShape(tornadoHelp1) {
+			position = "-57.5 192.5 15";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Tornados will suck you in and spit you out. Stay away from it, or alternatively, you can use it to fling yourself to the finish.";
+				triggerRadius = "5";
+		};
+		new StaticShape(pathHelp1) {
+			position = "-69.5 234.5 18";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "2000";
+				text = "Be careful on this thin path...";
+				triggerRadius = "5";
+		};
+	};
+	new StaticShape(check1) {
+		position = "-25.75 36 3.5";
+		rotation = "0 0 -1 90";
+		scale = "1 1 1";
+		dataBlock = "Checkpoint_PQ";
+	};
+	new Sun() {
+		direction = "0.638261 0.459006 -0.61801";
+		color = "1.400000 1.200000 0.400000 1.000000";
+		ambient = "0.300000 0.300000 0.400000 1.000000";
+	};
+	new StaticShape(StartPoint) {
+		position = "0 0 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/tutorial/haphazard.dif";
+		showTerrainInside = "0";
+	};
+	new Trigger(challenges) {
+		position = "-106 262 -2";
+		rotation = "1 0 0 0";
+		scale = "120 280 40";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape() {
+		position = "-11.8207 35.8661 -1.19209e-07";
+		rotation = "0 0 1 16.8447";
+		scale = "2 2 2";
+		dataBlock = "TriangleBumper_PQ";
+	};
+	new StaticShape() {
+		position = "-7 33.75 0.5";
+		rotation = "0 0 -1 76.7191";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "-0.832394 19.9279 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "2.5 24 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "-1.48983 26.1814 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "0.513629 31.1275 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "1.67833 37.6592 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "-2.03418 33.518 0.5";
+		rotation = "0 0 -1 29.5073";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "3.08947 32.2541 0.5";
+		rotation = "0 0 -1 38.2162";
+		scale = "1 1 1";
+		dataBlock = "TriangleBumper_PQ";
+	};
+	new StaticShape() {
+		position = "-3.02612 22.7079 0.5";
+		rotation = "0 0 1 27.8457";
+		scale = "1 1 1";
+		dataBlock = "TriangleBumper_PQ";
+	};
+	new StaticShape() {
+		position = "-4.26527 37.3635 0.5";
+		rotation = "0 0 -1 23.0328";
+		scale = "1 1 1";
+		dataBlock = "RoundBumper_PQ";
+	};
+	new StaticShape() {
+		position = "-77 36 5.5";
+		rotation = "-1 0 0 90";
+		scale = "1 1 1";
+		dataBlock = "DuctFan_PQ";
+	};
+	new StaticShape() {
+		position = "-43 44 4.5";
+		rotation = "-1 0 0 90";
+		scale = "1 1 1";
+		dataBlock = "DuctFan_PQ";
+	};
+	new StaticShape() {
+		position = "-49 44 4.5";
+		rotation = "-1 0 0 90";
+		scale = "1 1 1";
+		dataBlock = "DuctFan_PQ";
+	};
+	new StaticShape() {
+		position = "-71 36 5.5";
+		rotation = "-1 0 0 90";
+		scale = "1 1 1";
+		dataBlock = "DuctFan_PQ";
+	};
+	new Trigger(fallHelp) {
+		position = "-84.5 30.5 1.5";
+		rotation = "1 0 0 0";
+		scale = "17 11 1.4";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "5000";
+			text = "Whoops! Head up the ramp to continue on, or press <func:bind forceRespawn> to go back to the checkpoint and try again.";
+	};
+	new StaticShape(check3) {
+		position = "-82 112 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "Checkpoint_PQ";
+	};
+	new StaticShape(check2) {
+		position = "-88 58 7.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "Checkpoint_PQ";
+	};
+	new StaticShape() {
+		position = "-87 73 7.5";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 73 7.5";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 71 7.5";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 71 7.5";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 87 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 87 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-91 87 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-91 89 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 89 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 89 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 93 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 93 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-91 93 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-91 91 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 91 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 91 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 97 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 97 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-91 97 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-91 95 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 95 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 95 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-91 99 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-87 99 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-89 99 3";
+		rotation = "0 0 1 90";
+		scale = "1 1 1";
+		dataBlock = "TrapDoor_PQ";
+			open = "0";
+			resettime = "Default";
+			timeout = "200";
+	};
+	new StaticShape() {
+		position = "-90.23 74.5 7.5";
+		rotation = "0 0 1 66.4058";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_down";
+	};
+	new StaticShape() {
+		position = "-57.5 162.5 9";
+		rotation = "1 0 0 0";
+		scale = "1.2 1.2 1.2";
+		dataBlock = "Nuke_PQ";
+			resettime = "7500";
+	};
+	new StaticShape() {
+		position = "-66.5 133.032 6.51567";
+		rotation = "-0.222275 -0.222275 0.949309 92.9792";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-66.5 111 3";
+		rotation = "0 0 1 180";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-60.5 113 3";
+		rotation = "0 0 1 137.085";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-62.5 121 3";
+		rotation = "0 0 1 72.6277";
+		scale = "1.2 1.2 1.2";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-68.5 115 3";
+		rotation = "0 0 1 180";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-58.5 119 3";
+		rotation = "0 0 1 122.074";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-58.5 109 3";
+		rotation = "0 0 1 137.085";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-56.5 131 5";
+		rotation = "0 0 1 90";
+		scale = "1.1 1.1 1.1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-64.5 127 5";
+		rotation = "0 0 1 19.8815";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-58.5 143 9";
+		rotation = "0 0 1 69.3852";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-58.5 135 7";
+		rotation = "0 0 1 155.535";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape() {
+		position = "-62.5 139 7";
+		rotation = "0 0 1 101.505";
+		scale = "1 1 1";
+		dataBlock = "LandMine_PQ";
+			resettime = "Default";
+	};
+	new StaticShape(check4) {
+		position = "-57.5 186.25 12";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "Checkpoint_PQ";
+	};
+	new StaticShape(IDontThinkWereInPQAnymore) {
+		position = "-57.5 208.5 12";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "Tornado_PQ";
+			noParticles = "0";
+	};
+	new StaticShape() {
+		position = "-60.25 201.75 12";
+		rotation = "0 0 1 90.0002";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_left";
+	};
+	new StaticShape(EndPoint) {
+		position = "-58.5 251.5 18";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "EndPad_PQ";
+	};
+	new StaticShape() {
+		position = "-58 251.5 23.85";
+		rotation = "1 0 0 0";
+		scale = "2 2 2";
+		dataBlock = "RegularFinishlinesign";
+	};
+	new StaticShape() {
+		position = "-82.8193 29.2184 1.49938";
+		rotation = "0 0 -1 78.7502";
+		scale = "1.25 1.25 1.25";
+		dataBlock = "ConstructonRoadsignYellow";
+			skin = "Left";
+	};
+	new StaticShape() {
+		position = "-64.7 36.5 4.49922";
+		rotation = "0 0 -1 90.0002";
+		scale = "1.25 1.25 1.25";
+		dataBlock = "ConstructonRoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "-92.0605 85.5351 2.99931";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Danger";
+	};
+	new StaticShape() {
+		position = "-55.2659 125.966 4.8837";
+		rotation = "0.160272 -0.553868 0.817033 29.6013";
+		scale = "1 1 1";
+		dataBlock = "RoadsignYellow";
+			skin = "Caution";
+	};
+	new StaticShape() {
+		position = "1 54.25 2";
+		rotation = "0 0 1 90.0002";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_left";
+	};
+	new StaticShape() {
+		position = "-61.75 238.5 18.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_right";
+	};
+	new StaticShape() {
+		position = "-68.5 238.75 15.5";
+		rotation = "0 0 1 90.0002";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_right";
+	};
+	new StaticShape() {
+		position = "-54.75 201.75 12";
+		rotation = "0 0 1 90.0002";
+		scale = "1 1 1";
+		dataBlock = "Sign01";
+			skin = "red_right";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "6.83099 13.0506 8.11083";
+			rotation = "0.559331 0.230992 -0.796111 54.8357";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "9.72966 37.8039 8.81044";
+			rotation = "0.238342 0.25058 -0.938298 96.5038";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-21.0898 30.9593 12.0227";
+			rotation = "0.420874 0.223615 -0.879125 62.2946";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "3500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-60.8739 30.4937 8.41818";
+			rotation = "0.282439 0.183266 -0.941617 69.1416";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-61.8952 105.156 11.3686";
+			rotation = "0.995137 -0.0309207 0.0935249 36.7562";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "2500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-61.4945 138.285 10.7568";
+			rotation = "0.99435 -0.0234548 0.103523 25.6719";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath9";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath13) {
+			position = "-57.6578 184.663 39.8088";
+			rotation = "0.999991 -0.00134102 0.00395975 37.4191";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath12) {
+			position = "-57.6578 184.663 39.8088";
+			rotation = "0.999991 -0.00134102 0.00395975 37.4191";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath13";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath9) {
+			position = "-57.4267 167.787 9.72478";
+			rotation = "-0.796046 0.00885249 0.605172 2.10553";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath10";
+				timeToNext = "1000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath10) {
+			position = "-57.3747 181.078 13.7936";
+			rotation = "-0.999963 0.00114922 0.00850701 15.3876";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath11";
+				timeToNext = "1250";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath11) {
+			position = "-57.4055 186.286 20.8591";
+			rotation = "0.999289 -0.00862149 0.0367112 26.4505";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath12";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

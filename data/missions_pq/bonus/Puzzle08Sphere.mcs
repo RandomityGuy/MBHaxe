@@ -1,0 +1,852 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_Puzzle08Sphere_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Puzzle 8 - Sphere";
+		type = "Bonus";
+		level = "24";
+		desc = "If you thought this was hard in two dimensions, just wait and see.";
+		startHelpText = "No movement on neither the ice nor in the center.";
+		artist = "HiGuy";
+		music = "Maze.ogg";
+		game = "PlatinumQuest";
+		time = "300000";
+		platinumTime = "120000";
+		ultimateTime = "75000";
+		awesomeTime = "20750";
+		generalHint = "Get the outside Gems and use the bouncy floor to activate the moving platforms. Sit still when descending and you won\'t have any issues.";
+		ultimateHint = "You can use the orbital gravity to get the Gems in mid-air, without any moving platforms. Escape might prove difficult.";
+		awesomeHint = "While extremely hard, it is possible to get all four central Gems in two sweeping movements.";
+		customRadarRule = $Radar::Flags::Gems;
+		easterEgg = "0";
+		gems = "8";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+		interiors = "1";
+		maxScore = "8";
+		requirements = "Finish Puzzle 7 - Chaos Theory and beat the Ultimate Score on Exoplanet.";
+		unlockFunc = "unlock_Puzzle08Sphere";
+		trivia = "This unforgiving level was the second level ever made for the puzzle series, a full day after Puzzle 2 was made.\nOriginally the Par Time was 2 minutes.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_Puzzle08Sphere(%mission) {
+	return Unlock::hasBeatMissionPar(getMissionInfo("platinum/data/missions_pq/bonus/Puzzle07ChaosTheory.mcs")) &&
+		(Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/intermediate/Exoplanet.mcs")) & $Completion::Ultimate);
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//These scripts will be loaded by the server only, before the mission is created.
+// This is a great place to put custom datablocks.
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_Puzzle08Sphere_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Blender4/blender4.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun() {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "0.750000 0.900000 1.000000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new StaticShape(StartPoint) {
+		position = "0 0 32";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new StaticShape(EndPoint) {
+		position = "0 0 -2";
+		rotation = "1 0 0 180";
+		scale = "1 1 1";
+		dataBlock = "EndPad_PQ";
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "0 0 30";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 30";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+		};
+		new PathedInterior(MustChange_SP) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+			interiorIndex = "0";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+		};
+		new PathedInterior(MustChange) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+			interiorIndex = "1";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "0 -15 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 -15 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "-8 8 23";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-2.0000000 2.0000000 -2.0000000 0.0000000 -4.0000000 0.0000000 4.0000000 0.0000000 0.0000000 0.0000000 0.0000000 4.0000000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "-1";
+		};
+		new PathedInterior(MustChange) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+			interiorIndex = "2";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "0 15 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 15 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "8 -8 7";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-2.0000000 2.0000000 -2.0000000 0.0000000 -4.0000000 0.0000000 4.0000000 0.0000000 0.0000000 0.0000000 0.0000000 4.0000000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "-1";
+		};
+		new PathedInterior(MustChange) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+			interiorIndex = "3";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "15 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "15 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "-8 -8 23";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-2.0000000 2.0000000 -2.0000000 0.0000000 -4.0000000 0.0000000 4.0000000 0.0000000 0.0000000 0.0000000 0.0000000 4.0000000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "-1";
+		};
+		new PathedInterior(MustChange) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+			interiorIndex = "4";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "-15 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "-15 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "0 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+			new Marker() {
+				position = "-15 0 15";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "3";
+				msToNext = "5000";
+				smoothingType = "Spline";
+			};
+		};
+		new Trigger(MustChange) {
+			position = "8 8 7";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TriggerGotoTarget";
+			polyhedron = "-2.0000000 2.0000000 -2.0000000 0.0000000 -4.0000000 0.0000000 4.0000000 0.0000000 0.0000000 0.0000000 0.0000000 4.0000000";
+				IContinueToTTime = "0";
+				instant = "0";
+				targetTime = "-1";
+		};
+		new PathedInterior(MustChange) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/bonus/Puzzle08Sphere.dif";
+			interiorIndex = "5";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "0";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "0 -17 15";
+			rotation = "-1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "0 17 15";
+			rotation = "1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-17 0 15";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "17 0 15";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "0 -4 15";
+			rotation = "-1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "0 4 15";
+			rotation = "1 0 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-4 0 15";
+			rotation = "0 1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "4 0 15";
+			rotation = "0 -1 0 90";
+			scale = "1 1 1";
+			dataBlock = "FancyGemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new Trigger() {
+		position = "2.25 2 28.25";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-10.25 2 28.25";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 10.25 28.25";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 -2.25 28.25";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "2.25 2 -6.25";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-10.25 2 -6.25";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 10.25 -6.25";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 -2.25 -6.25";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "13.25 2 17.25";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-21.25 2 17.25";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 21.25 17.25";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 -13.25 17.25";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "13.25 2 4.75";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-21.25 2 4.75";
+		rotation = "1 0 0 0";
+		scale = "8 4 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 21.25 4.75";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-2 -13.25 4.75";
+		rotation = "1 0 0 0";
+		scale = "4 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "13.25 -2.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "13.25 10.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-21.25 -2.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-21.25 10.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "2.25 21.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-10.25 21.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "2.25 -13.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-10.25 -13.25 13";
+		rotation = "1 0 0 0";
+		scale = "8 8 4";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-16 4 11";
+		rotation = "1 0 0 0";
+		scale = "32 8 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-4 16 11";
+		rotation = "1 0 0 0";
+		scale = "8 32 8";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-4 4 -1";
+		rotation = "1 0 0 0";
+		scale = "8 8 32";
+		dataBlock = "NoMovementKeysTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "13.36257 14.24314 37.58952";
+			rotation = "-0.07840267 -0.2018377 0.9762759 221.5363";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "13.29387 14.16806 14.68388";
+			rotation = "0.000438854 0.00112974 0.9999993 222.4567";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "13.15087 14.01177 -8.686491";
+			rotation = "0.1034747 0.2663824 0.9582972 220.835";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-15.84414 -8.14133 22.64176";
+			rotation = "0.3808791 -0.2201526 0.8980334 65.53405";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "2400";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-6.36174 -10.40017 19.35719";
+			rotation = "0.6128663 -0.172802 0.7710606 40.17237";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "2.418792 -8.585224 17.8982";
+			rotation = "0.8184818 0.1186447 -0.5621486 28.9189";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "2100";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "10.72465 -1.345959 18.56952";
+			rotation = "0.2245899 0.2059818 -0.9524342 87.83736";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "1900";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "13.15213 6.199829 20.54487";
+			rotation = "0.1451816 0.2331807 -0.9615347 118.1851";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath9";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath9) {
+			position = "12.36422 17.24425 24.66746";
+			rotation = "-0.07733024 -0.2566483 0.9634063 212.3741";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new Trigger(Bounds) {
+		position = "-37 37 -22";
+		rotation = "1 0 0 0";
+		scale = "74 74 74";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger() {
+		position = "-37 37 -22";
+		rotation = "1 0 0 0";
+		scale = "74 74 74";
+		dataBlock = "GravityPointTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			CustomPoint = "0 0 15";
+			invert = "0";
+			Manual = "0";
+			RadiusSize = "100";
+			UpDownLeave = "0";
+			UseRadius = "1";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

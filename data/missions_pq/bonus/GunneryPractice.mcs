@@ -1,0 +1,541 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_GunneryPractice_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Gunnery Practice";
+		type = "Bonus";
+		level = "10";
+		desc = "Become a lean, mean, cannon-shooting machine.";
+		startHelpText = "Aim slightly above the battlements.";
+		artist = "Pablo Vasquez";
+		music = "Tranquility.ogg";
+		game = "PlatinumQuest";
+		gameMode = "GemMadness";
+		Time = "70000";
+		ultimateTime = "45000";
+		awesomeTime = "22000";
+		score = "3";
+		platinumScore = "18";
+		generalHint = "You\'ll need plenty of practice to pass all five challenges!";
+		ultimateHint = "You shouldn\'t have too much difficulty getting these four Gems in the time limit, right?";
+		awesomeHint = "Memorise where you have to shoot!";
+		CustomRadarRule = $Radar::Flags::None;
+		easterEgg = "0";
+		gems = "5";
+		gems1 = "1";
+		gems10 = "2";
+		gems2 = "1";
+		gems5 = "1";
+		interior0 = $usermods @ "/data/interiors_pq/bonus/GunneryPractice.dif";
+		interiors = "1";
+		maxScore = "28";
+		requirements = "Finish Cannon Sniper with 100% of the Gems.";
+		unlockFunc = "unlock_GunneryPractice";
+		trivia = "Pablo decided to combine Cannons with Gem Madness. We're not too sure why he thought it would be part of the main game, since it was thrown to Bonus very quickly.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+function unlock_GunneryPractice(%mission) {
+	return Unlock::getMissionCompletion(getMissionInfo("platinum/data/missions_pq/advanced/CannonSniper.mcs")) & $Completion::Quota100;
+}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+function clientCbCheckEndgameAchievements() {
+	if (PlayGui.gemCount == 20) {
+		activateAchievement($Achievement::Category::Level, 15);
+	}
+}
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE GunneryPractice
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_GunneryPractice_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+			fogVolume2 = "-1 1.07208e-014 8.756e-014";
+			fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+			materialList = "~/data/skies_pq/blender2/blender2.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "-0.57735 0.57735 -0.57735";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/bonus/GunneryPractice.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(MPGroup) {
+
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-6.5 0 15.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 0 19.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 0 19.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new Trigger(MustChange) {
+				position = "-10 -10 18";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "TriggerGotoTarget";
+				polyhedron = "-2.0000000 2.0000000 2.0000000 0.0000000 -4.0000000 0.0000000 0.0000000 0.0000000 -4.0000000 4.0000000 0.0000000 0.0000000";
+					IContinueToTTime = "0";
+					instant = "0";
+					targetTime = "5000";
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/bonus/GunneryPractice.dif";
+				interiorIndex = "0";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialScale = "1 1 1";
+					initialTargetPosition = "0";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-6.5 8 15.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "4500";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 8 19.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 8 19.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new Trigger(MustChange) {
+				position = "-10 -2 18";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "TriggerGotoTarget";
+				polyhedron = "-2.0000000 2.0000000 2.0000000 0.0000000 -4.0000000 0.0000000 0.0000000 0.0000000 -4.0000000 4.0000000 0.0000000 0.0000000";
+					IContinueToTTime = "0";
+					instant = "0";
+					targetTime = "5000";
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/bonus/GunneryPractice.dif";
+				interiorIndex = "1";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialScale = "1 1 1";
+					initialTargetPosition = "0";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-6.5 16 15.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 16 19.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 16 19.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new Trigger(MustChange) {
+				position = "-10 6 18";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "TriggerGotoTarget";
+				polyhedron = "-2.0000000 2.0000000 2.0000000 0.0000000 -4.0000000 0.0000000 0.0000000 0.0000000 -4.0000000 4.0000000 0.0000000 0.0000000";
+					IContinueToTTime = "0";
+					instant = "0";
+					targetTime = "5000";
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/bonus/GunneryPractice.dif";
+				interiorIndex = "2";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialScale = "1 1 1";
+					initialTargetPosition = "0";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-6.5 16 15.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "4000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 16 17.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+				new Marker() {
+					position = "-6.5 16 17.75";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "2";
+					msToNext = "5000";
+					smoothingType = "Accelerate";
+				};
+			};
+			new Trigger(MustChange) {
+				position = "-10 14 18";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "TriggerGotoTarget";
+				polyhedron = "-2.0000000 2.0000000 2.0000000 0.0000000 -4.0000000 0.0000000 0.0000000 0.0000000 -4.0000000 4.0000000 0.0000000 0.0000000";
+					IContinueToTTime = "0";
+					instant = "0";
+					targetTime = "5000";
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/bonus/GunneryPractice.dif";
+				interiorIndex = "3";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialScale = "1 1 1";
+					initialTargetPosition = "0";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+	};
+	new SimGroup(GemGroup) {
+
+		new Item() {
+			position = "-10 14 17.7";
+			rotation = "1 0 0 0";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "GemItemPlatinum_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-10 0 28";
+			rotation = "1 0 0 0";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "GemItemPlatinum_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-10 6 17.6";
+			rotation = "1 0 0 0";
+			scale = "2 2 2";
+			dataBlock = "GemItemBlue_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-10 -2 17.4";
+			rotation = "1 0 0 0";
+			scale = "3 3 3";
+			dataBlock = "GemItemYellow_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-10 -10.062 16.7";
+			rotation = "1 0 0 0";
+			scale = "6 6 6";
+			dataBlock = "GemItemRed_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new SimGroup(CannonGroup) {
+
+		new StaticShape() {
+			position = "33 0 9.78";
+			rotation = "-0.250562 -0.250563 -0.935113 93.8413";
+			scale = "2 2 2";
+			dataBlock = "Cannon_Mid";
+				useCharge = "0";
+				force = "35";
+				yaw = "-90";
+				pitch = "30";
+				pitchBoundLow = "-30";
+				pitchBoundHigh = "80";
+				yawBoundLeft = "-180";
+				yawBoundRight = "180";
+				yawLimit = "0";
+				instant = "0";
+				instantDelayTime = "0";
+				useBase = "1";
+				lockTime = "0";
+				lockCam = "0";
+				basename = "CBase0";
+				showReticle = "1";
+				showAim = "0";
+				aimSize = "0.25";
+				aimTriggers = "0";
+				id = "1";
+				instantCamera = "1";
+				resettime = "112.638000";
+		};
+		new StaticShape() {
+			position = "-53.1474 0 9.78";
+			rotation = "-0.250562 0.250563 0.935113 93.8413";
+			scale = "2 2 2";
+			dataBlock = "Cannon_Mid";
+				useCharge = "0";
+				force = "35";
+				yaw = "90";
+				pitch = "30";
+				pitchBoundLow = "-30";
+				pitchBoundHigh = "80";
+				yawBoundLeft = "-180";
+				yawBoundRight = "180";
+				yawLimit = "0";
+				instant = "0";
+				instantDelayTime = "0";
+				useBase = "1";
+				lockTime = "0";
+				lockCam = "0";
+				basename = "CBase62";
+				showReticle = "1";
+				showAim = "0";
+				aimSize = "0.25";
+				aimTriggers = "0";
+				id = "2";
+				instantCamera = "1";
+				resettime = "112.638000";
+		};
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "43.385 -8.85489 10.8003";
+			rotation = "0.186818 0.133985 -0.973215 72.7756";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "40.8753 -2.96761 9.39275";
+			rotation = "0.10581 0.0912989 -0.990186 82.1385";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "35.0534 3.76677 8.67188";
+			rotation = "-0.0488329 -0.0649739 -0.996691 106.327";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath0";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new Trigger() {
+		position = "-18 16 0";
+		rotation = "1 0 0 0";
+		scale = "16 32 3";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			keepeffectonleave = "0";
+			overlay = "1";
+			VelocityMultiplier = "0.4";
+	};
+	new StaticShape(StartPoint) {
+		position = "32 -12 4";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new Trigger(Bounds) {
+		position = "-72.5 30 -2";
+		rotation = "1 0 0 0";
+		scale = "125 60 90";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape(CBase0) {
+		position = "33 0 9.78";
+		rotation = "0 0 -1 90.0002";
+		scale = "2 2 2";
+		dataBlock = "DefaultCannonBase";
+			id = "1";
+	};
+	new StaticShape(CBase62) {
+		position = "-53.1474 0 9.78";
+		rotation = "0 0 1 90.0002";
+		scale = "2 2 2";
+		dataBlock = "DefaultCannonBase";
+			id = "2";
+	};
+	new StaticShape() {
+		position = "-10 0 3";
+		rotation = "1 0 0 0";
+		scale = "3 5.333 1";
+		dataBlock = "WaterPlane";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

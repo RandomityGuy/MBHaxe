@@ -1,0 +1,699 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function PQ_CentripetalForce_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Centripetal Force";
+		type = "Intermediate";
+		level = "22";
+		desc = "Grab the Gems on this dizzying structure.";
+		startHelpText = "Make sure to take your momentum into account before you jump.";
+		artist = "Threefolder";
+		music = "Waves in the Dark.ogg";
+		game = "PlatinumQuest";
+		platinumTime = "65000";
+		ultimateTime = "42000";
+		awesomeTime = "12000";
+		generalHint = "The finish is a bit tricky to get to. You\'ll have to wait for some platforms to move by so you can use them to bridge the gap.";
+		ultimateHint = "Playing the waiting game is sometimes a necessary evil.";
+		awesomeHint = "There\'s a nice route that takes all Time Travels and it's not hard to figure out. At the end you\'ll have to make a run to the finish or else you can\'t get this low time.";
+		CustomRadarRule = $Radar::Flags::Gems | $Radar::Flags::TimeTravels | $Radar::Flags::EndPad;
+		easterEgg = "0";
+		gems = "5";
+		interior0 = $usermods @ "/data/interiors_pq/intermediate/centripetalForce.dif";
+		interior1 = $usermods @ "/data/interiors_pq/intermediate/centripetalForceCL.dif";
+		interior2 = $usermods @ "/data/interiors_pq/intermediate/centripetalForceCCL.dif";
+		interiors = "3";
+		maxScore = "5";
+		trivia = "This level was created immediately after rotating platforms with real physics were deemed possible in the Torque engine.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+//function unlock_MissionNameHere(%mission) { //%mission is the MissionInfo
+//	return true; //True if the mission is unlocked
+//}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//These scripts will be loaded by the server only, before the mission is created.
+// This is a great place to put custom datablocks.
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function PQ_CentripetalForce_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-31 1.3684e-38";
+			fogVolume2 = "-1 1.07208e-14 8.756e-14";
+			fogVolume3 = "-1 5.1012e-10 2.05098e-08";
+			materialList = "~/data/skies_pq/Wave/Wave.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+	};
+	new SimGroup(SceneryGroup) {
+
+		new StaticShape() {
+			position = "-18.5573 9.98163 11.8597";
+			rotation = "0 0 1 37.2817";
+			scale = "0.7 0.7 0.7";
+			dataBlock = "Tree01";
+				Parent = "darkCCL";
+				parentModTrans = "14.20136 -15.5664 11.85971 0 0 1 4.130001";
+				parentOffset = "0 0 0";
+				parentTransform = "14.20136 -15.5664 11.85971 0 0 1 4.130001";
+		};
+		new StaticShape() {
+			position = "-29.7255 37.1907 11.2685";
+			rotation = "0.399366 -0.583211 0.707369 179.154";
+			scale = "1 1 1";
+			dataBlock = "PQRulez_Graffiti";
+		};
+		new StaticShape() {
+			position = "-23.2352 41.8117 12.5119";
+			rotation = "-0.0422074 0.760638 -0.647803 223.803";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Marble_Graffiti";
+		};
+		new StaticShape() {
+			position = "-33.25 34.75 8.85002";
+			rotation = "0.786786 -0.172114 0.592743 237.288";
+			scale = "0.5 0.6 1";
+			dataBlock = "Logo_Graffiti";
+		};
+		new StaticShape() {
+			position = "-13.9666 45.2263 10.75";
+			rotation = "0.124087 -0.695849 0.707388 180.157";
+			scale = "1 1 1";
+			dataBlock = "PhilsEmpire_Graffiti";
+		};
+		new StaticShape() {
+			position = "-3.66595 47.0365 12.8281";
+			rotation = "0.0167936 0.713576 -0.700377 196.002";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "Hourglass_Graffiti";
+		};
+		new StaticShape() {
+			position = "38.9867 -12.9257 12.1383";
+			rotation = "0.69838 0.609115 -0.375824 99.4128";
+			scale = "0.7 0.7 0.7";
+			dataBlock = "GG_Graffiti";
+		};
+		new StaticShape() {
+			position = "34.8073 -21.8793 13.5";
+			rotation = "0.759892 0.355177 -0.544439 113.95";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "SuperJump_Graffiti";
+		};
+		new StaticShape() {
+			position = "36.2199 -18.8964 9.6047";
+			rotation = "0.712836 0.573187 -0.404131 101.201";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "Tornado_Graffiti";
+		};
+		new StaticShape() {
+			position = "-17.2532 25.7373 12";
+			rotation = "0 0 -1 19.35";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "darkCCL";
+				parentModTrans = "7.750438 -29.99998 12 0 0 1 3.141592";
+				parentOffset = "0 0 0";
+				parentTransform = "7.750438 -29.99998 12 0 0 1 3.141592";
+		};
+		new StaticShape() {
+			position = "-19.1039 12.8989 12";
+			rotation = "0 0 -1 19.35";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "darkCCL";
+				parentModTrans = "13.75044 -18.49998 12 0 0 1 3.141592";
+				parentOffset = "0 0 0";
+				parentTransform = "13.75044 -18.49998 12 0 0 1 3.141592";
+		};
+		new StaticShape() {
+			position = "7.96935 -5.97824 12";
+			rotation = "0 0 1 19.35";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "lightCL";
+				parentModTrans = "9.5 -3 12 1 0 0 0";
+				parentOffset = "0 0 0";
+				parentTransform = "9.5 -3 12 1 0 0 0";
+		};
+		new StaticShape() {
+			position = "14.316 -5.30621 12";
+			rotation = "0 0 -1 19.35";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "darkCCL";
+				parentModTrans = "-11.74956 9.750018 12 0 0 1 3.141592";
+				parentOffset = "0 0 0";
+				parentTransform = "-11.74956 9.750018 12 0 0 1 3.141592";
+		};
+		new StaticShape() {
+			position = "12.769 -25.9718 12";
+			rotation = "0 0 -1 55.4463";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "darkCCL";
+				parentModTrans = "-3.442681 28.73567 12 0 0 1 2.511593";
+				parentOffset = "0 0 0";
+				parentTransform = "-3.442681 28.73567 12 0 0 1 2.511593";
+		};
+		new StaticShape() {
+			position = "11.6913 -26.414 12";
+			rotation = "0 0 1 41.9565";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "darkCCL";
+				parentModTrans = "-2.279416 28.79581 12 0 0 -1 2.071593";
+				parentOffset = "0 0 0";
+				parentTransform = "-2.279416 28.79581 12 0 0 -1 2.071593";
+		};
+		new StaticShape() {
+			position = "-4.20626 -22.3403 12";
+			rotation = "0 0 1 12.1627";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "darkCCL";
+				parentModTrans = "11.37042 19.6848 12 0 0 1 3.691592";
+				parentOffset = "0 0 0";
+				parentTransform = "11.37042 19.6848 12 0 0 1 3.691592";
+		};
+		new StaticShape() {
+			position = "-25.1875 -17.4111 12";
+			rotation = "0 0 1 62.583";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				Parent = "darkCCL";
+				parentModTrans = "29.53329 8.082193 12 0 0 -1 1.711593";
+				parentOffset = "0 0 0";
+				parentTransform = "29.53329 8.082193 12 0 0 -1 1.711593";
+		};
+	};
+	new Sun() {
+		direction = "0.638261 0.459006 -0.61801";
+		color = "1.400000 1.200000 0.400000 1.000000";
+		ambient = "0.300000 0.300000 0.400000 1.000000";
+	};
+	new InteriorInstance(main) {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/intermediate/centripetalForce.dif";
+		showTerrainInside = "0";
+	};
+	new InteriorInstance(lightCL) {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/intermediate/centripetalForceCL.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "0 0 0 1 0 0 0";
+			initialPathScale = "1 1 1";
+			Path = "CL1";
+			StopWhenFinished = "1";
+	};
+	new InteriorInstance(darkCCL) {
+		position = "-0.000437737 -1.81198e-05 0";
+		rotation = "0 0 1 180";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/intermediate/centripetalForceCCL.dif";
+		showTerrainInside = "0";
+			initialPathPosition = "-0.0004377365 -1.811981e-05 0 1 0 0 0";
+			initialPathScale = "1 1 1";
+			Path = "CCL1";
+			StopWhenFinished = "1";
+	};
+	new Item() {
+		position = "-11.5889 7.72144 8";
+		rotation = "0 0 1 160.65";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			Parent = "darkCCL";
+			parentModTrans = "8.375438 -11.12498 8 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "8.375438 -11.12498 8 1 0 0 0";
+	};
+	new StaticShape(StartPoint) {
+		position = "0 0 8";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "29.2523 -18.9509 17.6168";
+			rotation = "0.358846 0.180028 -0.915871 57.4252";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "17.5508 -24.1458 15.8304";
+			rotation = "0.475026 0.158949 -0.865497 42.2743";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "4.32112 -23.6388 13.7983";
+			rotation = "0.860555 0.0807438 -0.502917 21.136";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-3.5867 -18.0811 11.9624";
+			rotation = "0.86089 -0.080654 0.502357 21.1279";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-26.2312 28.8044 25.9828";
+			rotation = "0.140837 -0.335894 0.931311 137.34";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-27.0506 22.2149 22.9871";
+			rotation = "0.150178 -0.307462 0.939635 130.694";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "-26.6615 15.8634 20.3905";
+			rotation = "0.145409 -0.260442 0.954477 123.894";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "-25.1621 10.3948 18.3509";
+			rotation = "0.144456 -0.217399 0.965334 114.645";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CL1) {
+			position = "47.75 -24.5 11.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CL2";
+				delay = "0";
+				timeToNext = "20000";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				CamFOV = "0";
+				LookAtPoint = " ";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				DirectionRotation = "0";
+				bezier = "0";
+				Relative = "0";
+				FinalRotOffset = "0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+		new StaticShape(CL2) {
+			position = "49.25 -24.5 11.75";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CL3";
+				delay = "0";
+				timeToNext = "20000";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				CamFOV = "0";
+				LookAtPoint = " ";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				DirectionRotation = "0";
+				bezier = "0";
+				Relative = "0";
+				FinalRotOffset = "0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+		new StaticShape(CL3) {
+			position = "50.75 -24.5 11.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CL1";
+				delay = "0";
+				timeToNext = "0";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				CamFOV = "0";
+				LookAtPoint = " ";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "0";
+				RotationMultiplier = "1";
+				DirectionRotation = "0";
+				bezier = "0";
+				Relative = "0";
+				FinalRotOffset = "0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+		new StaticShape(CCL1) {
+			position = "47.75 -21.5 11.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CCL2";
+				delay = "0";
+				timeToNext = "20000";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				CamFOV = "0";
+				LookAtPoint = " ";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				DirectionRotation = "0";
+				bezier = "0";
+				Relative = "0";
+				FinalRotOffset = "0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+		new StaticShape(CCL2) {
+			position = "49.25 -21.5 11.75";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CCL3";
+				delay = "0";
+				timeToNext = "20000";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				CamFOV = "0";
+				LookAtPoint = " ";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				DirectionRotation = "0";
+				bezier = "0";
+				Relative = "0";
+				FinalRotOffset = "0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+		new StaticShape(CCL3) {
+			position = "50.75 -21.5 11.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CCL1";
+				delay = "0";
+				timeToNext = "0";
+				SmoothStart = "0";
+				SmoothEnd = "0";
+				Smooth = "0";
+				CamFOV = "0";
+				LookAtPoint = " ";
+				usePosition = "0";
+				useRotation = "1";
+				useScale = "1";
+				reverseRotation = "1";
+				RotationMultiplier = "1";
+				DirectionRotation = "0";
+				bezier = "0";
+				Relative = "0";
+				FinalRotOffset = "0 0 0";
+				branchNodes = " ";
+				speed = "0";
+				placed = "1";
+		};
+	};
+	new StaticShape(EndPoint) {
+		position = "10.2223 28.2319 8";
+		rotation = "0 0 1 160.65";
+		scale = "0.9 0.9 0.9";
+		dataBlock = "EndPad_PQ";
+			Parent = "darkCCL";
+			parentModTrans = "-18.99956 -23.24998 8 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "-18.99956 -23.24998 8 1 0 0 0";
+			skin = "brown";
+	};
+	new StaticShape() {
+		position = "10.2082 28.4233 10";
+		rotation = "0 0 1 201.33";
+		scale = "2 2 2";
+		dataBlock = "RegularFinishlinesign";
+			Parent = "darkCCL";
+			parentModTrans = "-19.04971 -23.43528 15 0 0 1 0.7100002";
+			parentOffset = "0 0 0";
+			parentTransform = "-19.04971 -23.43528 15 0 0 1 0.7100002";
+	};
+	new Item() {
+		position = "-25.9577 -1.48302 8";
+		rotation = "0 0 1 19.35";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			Parent = "lightCL";
+			parentModTrans = "-24 -10 8 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "-24 -10 8 1 0 0 0";
+	};
+	new Item() {
+		position = "24.0864 -18.0381 8";
+		rotation = "0 0 1 160.65";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			Parent = "darkCCL";
+			parentModTrans = "-16.74956 25.00002 8 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "-16.74956 25.00002 8 1 0 0 0";
+	};
+	new Item() {
+		position = "10.669 14.5361 8";
+		rotation = "0 0 1 19.35";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			Parent = "lightCL";
+			parentModTrans = "5.25 17.25 8 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "5.25 17.25 8 1 0 0 0";
+	};
+	new Item() {
+		position = "25.3597 -6.256 8";
+		rotation = "0 0 1 19.35";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			Parent = "lightCL";
+			parentModTrans = "26 2.5 8 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "26 2.5 8 1 0 0 0";
+	};
+	new Item() {
+		position = "-14.4052 -10.8393 8.5";
+		rotation = "0 0 1 19.35";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			Parent = "lightCL";
+			parentModTrans = "-10 -15 8.5 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "-10 -15 8.5 1 0 0 0";
+			timeBonus = "3000";
+	};
+	new Item() {
+		position = "9.43512 -3.31338 8.5";
+		rotation = "0 0 1 19.35";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			Parent = "lightCL";
+			parentModTrans = "10 0 8.5 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "10 0 8.5 1 0 0 0";
+			timeBonus = "2000";
+	};
+	new Item() {
+		position = "13.0183 -28.0192 8.5";
+		rotation = "0 0 1 160.65";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			Parent = "darkCCL";
+			parentModTrans = "-2.999562 30.75002 8.5 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "-2.999562 30.75002 8.5 1 0 0 0";
+			timeBonus = "7000";
+	};
+	new Item() {
+		position = "-22.0117 6.84337 8.5";
+		rotation = "0 0 1 160.65";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			Parent = "darkCCL";
+			parentModTrans = "18.50044 -13.74998 8.5 1 0 0 0";
+			parentOffset = "0 0 0";
+			parentTransform = "18.50044 -13.74998 8.5 1 0 0 0";
+			timeBonus = "4000";
+	};
+	new Trigger(StayHere) {
+		position = "-33 33 6";
+		rotation = "1 0 0 0";
+		scale = "66 66 32";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---
