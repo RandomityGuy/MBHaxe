@@ -341,7 +341,7 @@ class Replay {
 		if (powerup == null)
 			currentRecordFrame.powerupPickup = ""; // Use powerup
 		else
-			currentRecordFrame.powerupPickup = powerup.identifier;
+			currentRecordFrame.powerupPickup = powerup.dtsPath;
 	}
 
 	public function recordMarbleInput(x:Float, y:Float) {

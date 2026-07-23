@@ -17,7 +17,10 @@ class SmallDuctFan extends ForceObject {
 			"data/shapes/hazards/ductfan.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		this.identifier = "DuctFan";
+		// Instancing batches by `identifier`; same "DuctFan" prefix as DuctFan.hx since they
+		// intentionally share meshes (small duct fans reuse the regular duct fan's model), but the
+		// dtsPath is still appended so the PQ variant doesn't get batched with the vanilla mesh.
+		this.identifier = "DuctFan" + this.dtsPath;
 		this.forceDatas = [
 			{
 				forceType: ForceCone,

@@ -10,13 +10,18 @@ import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.MarbleWorld;
+import src.Console;
+import src.Marble;
+import triggers.Trigger;
 import mis.MissionElement.MissionElementStaticShape;
 
 class PushButton extends DtsObject {
 	var lastContactTime = -1e8;
+	var element:MissionElementStaticShape;
 
 	public function new(?element:MissionElementStaticShape) {
 		super();
+		this.element = element;
 		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
 		this.dtsPath = switch (datablockLower) {
 			case "pushbutton_pq": "data/shapes_pq/gameplay/pads/pushbuttonregular.dts";
@@ -25,7 +30,9 @@ class PushButton extends DtsObject {
 		}
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		this.identifier = "PushButton";
+		// Instancing batches by `identifier`, and the PQ variants use a different mesh - keep the
+		// dtsPath in the identifier so they don't get batched with the vanilla mesh (or each other).
+		this.identifier = "PushButton" + this.dtsPath;
 		this.hasNonVisualSequences = true;
 		this.enableCollideCallbacks = true;
 	}
@@ -52,9 +59,58 @@ class PushButton extends DtsObject {
 			return; // The trapdoor is queued to open, so don't do anything.
 		var currentCompletion = this.getCurrentCompletion(time);
 
-		if (currentCompletion == 0)
+		if (currentCompletion == 0) {
 			this.lastContactTime = time.timeSinceLoad;
+			this.triggerCallback(marble, time);
+		}
 
 		// this.level.replay.recordMarbleContact(this);
+	}
+
+	/** Ported from PQ's `Button::triggerCallback` (`server/scripts/buttons.cs`) - a `PushButton`
+		can be configured (via the mission editor's `TriggerObject[i]`/`ObjectMethod[i]` fields) to
+		invoke a method on another named object when pressed. Only `onEnterTrigger()` is supported
+		here (the vast majority of real usages target a `Trigger` this way; `onLeaveTrigger()` and
+		arbitrary other method calls are out of scope).
+
+		TorqueScript's dynamic-field pseudo-arrays are saved as plain numeric-suffixed field names,
+		not bracket syntax, and index 0 has *no* suffix at all (`triggerObject`/`objectMethod` for
+		index 0, `triggerObject2`/`objectMethod2` for index 2, etc.) - confirmed against real
+		mission files. */
+	function fieldAt(baseName:String, index:Int):String {
+		var f = this.element.fields.get(index == 0 ? baseName : baseName + index);
+		return f != null ? f[0] : null;
+	}
+
+	function triggerCallback(marble:Marble, timeState:TimeState) {
+		if (this.element == null)
+			return;
+
+		// PQ's own index-advance has a bug (`%ct += !%ct + 1`) that permanently skips index 1:
+		// 0 -> 2 -> 3 -> 4 -> ... - reproduced verbatim, not "fixed".
+		var ct = 0;
+		while (true) {
+			var method = fieldAt("objectmethod", ct);
+			if (method == null || method == "")
+				break;
+
+			var methodTrimmed = StringTools.trim(method).toLowerCase();
+			// Skip the editor's unfilled template placeholder text.
+			if (StringTools.contains(methodTrimmed, "dothis(")) {
+				ct += ct == 0 ? 2 : 1;
+				continue;
+			}
+
+			if (methodTrimmed == "onentertrigger()") {
+				var targetName = fieldAt("triggerobject", ct);
+				var target = targetName != null ? this.level.namedGameObjects.get(targetName) : null;
+				if (target != null && (target is Trigger))
+					(cast target : Trigger).onMarbleEnter(marble, timeState);
+				else
+					Console.error('PushButton: triggerObject "$targetName" not found or not a Trigger');
+			}
+
+			ct += ct == 0 ? 2 : 1;
+		}
 	}
 }

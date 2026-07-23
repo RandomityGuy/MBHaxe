@@ -46,7 +46,9 @@ class SuperSpeed extends PowerUp {
 		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superspeed.dts" : "data/shapes/items/superspeed.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "SuperSpeed";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		this.identifier = "SuperSpeed" + this.dtsPath;
 		this.pickUpName = "Speed Booster PowerUp";
 		this.useInstancing = true;
 		ssEmitterParticleData = new ParticleData();

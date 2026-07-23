@@ -30,6 +30,7 @@ import triggers.AlignmentTrigger;
 import triggers.CountdownStartTrigger;
 import triggers.CountdownStopTrigger;
 import triggers.DisableShapeForceTrigger;
+import triggers.PhysModTrigger;
 import shapes.StartPad;
 import shapes.EndPad;
 import shapes.SignFinish;
@@ -68,6 +69,8 @@ import shapes.Propeller;
 import shapes.ToggleButton;
 import shapes.NestEgg;
 import shapes.TeleportItem;
+import shapes.IceShard;
+import shapes.FadePlatform;
 
 /**
  * Matches a lowercased mission-file `datablock` name to a registered entry.
@@ -297,6 +300,26 @@ class DatablockRegistry {
 			create: element -> new TeleportItem(cast element)
 		},
 		{
+			match: Exact(["iceshard1", "iceshard2"]),
+			create: element -> new IceShard(cast element)
+		},
+		{
+			match: Exact([
+				"fadeplatform",
+				"fadeplatform2_1x1",
+				"fadeplatform2_1x2",
+				"fadeplatform2_1x3",
+				"fadeplatform2_1x5",
+				"fadeplatform2_2x2",
+				"fadeplatform2_3x3",
+				"fadeplatform2_5x5",
+				"fadeplatformconcrete",
+				"fadeplatformgrass",
+				"fadeplatformice"
+			]),
+			create: element -> new FadePlatform(cast element)
+		},
+		{
 			match: Exact(["helpbubble"]),
 			create: element -> new HelpBubble(cast element)
 		},
@@ -415,6 +438,10 @@ class DatablockRegistry {
 		{
 			match: Exact(["gravitytrigger"]),
 			create: (element, level) -> new GravityTrigger(element, level)
+		},
+		{
+			match: Exact(["marblephysmodtrigger"]),
+			create: (element, level) -> new PhysModTrigger(element, level)
 		},
 		{
 			match: Exact(["altergravitytrigger"]),

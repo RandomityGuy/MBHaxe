@@ -14,7 +14,9 @@ class AntiGravity extends PowerUp {
 		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/gravmod.dts" : "data/shapes/items/antigravity.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "AntiGravity";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		this.identifier = "AntiGravity" + this.dtsPath;
 		this.pickUpName = "Gravity Defier";
 		this.autoUse = true;
 		if (norespawn)

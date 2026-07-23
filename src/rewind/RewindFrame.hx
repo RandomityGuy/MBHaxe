@@ -55,6 +55,7 @@ class RewindFrame {
 	var activePowerupStates:Array<Float>;
 	var currentUp:Vector;
 	var trapdoorStates:Array<{lastContactTime:Float, lastDirection:Int, lastCompletion:Float}>;
+	var fadePlatformStates:Array<{lastContactTime:Float, fadingState:Int, lastFadingContactTime:Float}>;
 	var lastContactNormal:Vector;
 	var blastAmt:Float;
 	var marbleRadius:Float;
@@ -67,6 +68,9 @@ class RewindFrame {
 	var teleporterSavedGravity:Vector;
 	var teleporterKeepVelocity:Bool;
 	var teleporterTeleTime:Float;
+	var isFrozen:Bool;
+	var lastFreezeTime:Float;
+	var powerupLockCount:Int;
 
 	/** Path-follower progress, index-aligned with `level.movingObjects` filtered to non-
 		`PathedInterior` entries (i.e. path-following `GameObject`s) - see
@@ -115,6 +119,14 @@ class RewindFrame {
 				lastCompletion: s.lastCompletion,
 			});
 		}
+		c.fadePlatformStates = [];
+		for (s in fadePlatformStates) {
+			c.fadePlatformStates.push({
+				lastContactTime: s.lastContactTime,
+				fadingState: s.fadingState,
+				lastFadingContactTime: s.lastFadingContactTime,
+			});
+		}
 		c.blastAmt = blastAmt;
 		c.marbleRadius = marbleRadius;
 		c.movementTriggerCount = movementTriggerCount;
@@ -126,6 +138,9 @@ class RewindFrame {
 		c.teleporterSavedGravity = teleporterSavedGravity.clone();
 		c.teleporterKeepVelocity = teleporterKeepVelocity;
 		c.teleporterTeleTime = teleporterTeleTime;
+		c.isFrozen = isFrozen;
+		c.lastFreezeTime = lastFreezeTime;
+		c.powerupLockCount = powerupLockCount;
 		c.pathFollowerStates = pathFollowerStates.map(s -> ({
 			pathPosition: s.pathPosition,
 			currentNode: s.currentNode,
@@ -184,6 +199,12 @@ class RewindFrame {
 			framesize += 1; // s.lastDirection
 			framesize += 8; // s.lastCompletion
 		}
+		framesize += 2; // fadePlatformStates.length
+		for (s in fadePlatformStates) {
+			framesize += 8; // s.lastContactTime
+			framesize += 2; // s.fadingState
+			framesize += 8; // s.lastFadingContactTime
+		}
 		framesize += 8; // blastAmt
 		framesize += 8; // marbleRadius
 		framesize += 2; // movementTriggerCount
@@ -195,6 +216,9 @@ class RewindFrame {
 		framesize += 24; // teleporterSavedGravity
 		framesize += 1; // teleporterKeepVelocity
 		framesize += 8; // teleporterTeleTime
+		framesize += 1; // isFrozen
+		framesize += 8; // lastFreezeTime
+		framesize += 2; // powerupLockCount
 		framesize += 2; // pathFollowerStates.length
 		for (s in pathFollowerStates) {
 			framesize += 8; // s.pathPosition
@@ -290,6 +314,12 @@ class RewindFrame {
 			bb.writeByte(s.lastDirection);
 			bb.writeDouble(s.lastCompletion);
 		}
+		bb.writeInt16(fadePlatformStates.length);
+		for (s in fadePlatformStates) {
+			bb.writeDouble(s.lastContactTime);
+			bb.writeInt16(s.fadingState);
+			bb.writeDouble(s.lastFadingContactTime);
+		}
 		bb.writeDouble(blastAmt);
 		bb.writeDouble(marbleRadius);
 		bb.writeInt16(movementTriggerCount);
@@ -308,6 +338,9 @@ class RewindFrame {
 		bb.writeDouble(teleporterSavedGravity.z);
 		bb.writeByte(teleporterKeepVelocity ? 1 : 0);
 		bb.writeDouble(teleporterTeleTime);
+		bb.writeByte(isFrozen ? 1 : 0);
+		bb.writeDouble(lastFreezeTime);
+		bb.writeInt16(powerupLockCount);
 		bb.writeInt16(pathFollowerStates.length);
 		for (s in pathFollowerStates) {
 			bb.writeDouble(s.pathPosition);
@@ -445,6 +478,19 @@ class RewindFrame {
 			trapdoorStates_item.lastCompletion = br.readDouble();
 			trapdoorStates.push(trapdoorStates_item);
 		}
+		fadePlatformStates = [];
+		var fadePlatformStates_len = br.readInt16();
+		for (i in 0...fadePlatformStates_len) {
+			var fadePlatformStates_item = {
+				lastContactTime: 0.0,
+				fadingState: 0,
+				lastFadingContactTime: 0.0
+			};
+			fadePlatformStates_item.lastContactTime = br.readDouble();
+			fadePlatformStates_item.fadingState = br.readInt16();
+			fadePlatformStates_item.lastFadingContactTime = br.readDouble();
+			fadePlatformStates.push(fadePlatformStates_item);
+		}
 		blastAmt = br.readDouble();
 		marbleRadius = br.readDouble();
 		movementTriggerCount = br.readInt16();
@@ -466,6 +512,9 @@ class RewindFrame {
 		teleporterSavedGravity.z = br.readDouble();
 		teleporterKeepVelocity = br.readByte() != 0;
 		teleporterTeleTime = br.readDouble();
+		isFrozen = br.readByte() != 0;
+		lastFreezeTime = br.readDouble();
+		powerupLockCount = br.readInt16();
 		pathFollowerStates = [];
 		var pathFollowerStates_len = br.readInt16();
 		for (i in 0...pathFollowerStates_len) {

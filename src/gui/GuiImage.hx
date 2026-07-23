@@ -23,6 +23,10 @@ class GuiImage extends GuiControl {
 		this.bmp = new Bitmap(texture);
 	}
 
+	public function setTile(texture:Tile) {
+		this.bmp.tile = texture;
+	}
+
 	public override function render(scene2d:Scene) {
 		var renderRect = this.getRenderRectangle();
 		var hittestRect = this.getHitTestRect();

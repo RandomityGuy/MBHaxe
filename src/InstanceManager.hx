@@ -115,7 +115,7 @@ class InstanceManager {
 	}
 
 	static inline function keyOf(object:GameObject):String {
-		return object.instancingKey != null ? object.instancingKey : object.identifier;
+		return object.identifier;
 	}
 
 	public function render() {

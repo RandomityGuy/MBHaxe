@@ -46,11 +46,17 @@ class TeleportItem extends PowerUp {
 	}
 
 	public function use(marble:Marble, timeState:TimeState):Bool {
-		// Debounce: only treat this as a new "fire" if there's a gap since the last tick we
-		// were called on (i.e. the button was released and pressed again), matching PQ's
-		// teleporterFireNum/client.fireNum check.
-		var isNewPress = timeState.ticks - marble.teleporterLastUseTick > 1;
-		marble.teleporterLastUseTick = timeState.ticks;
+		// Debounce: only treat this as a new "fire" if there's a gap since the last time we were
+		// called (i.e. the button was released and pressed again), matching PQ's
+		// teleporterFireNum/client.fireNum check. `timeState.ticks` doesn't work for this - it's
+		// only meaningfully incremented in multiplayer, staying static in singleplayer, which made
+		// this debounce swallow every press after the first forever. `timeSinceLoad` instead is
+		// the *outer* per-frame time (this function is called once per physics substep, but
+		// `pTime.timeSinceLoad` - unlike `pTime.currentAttemptTime` - is never touched per substep
+		// in `Marble.advancePhysics`, so it's identical across every substep of one frame and only
+		// changes frame-to-frame), reliable in both singleplayer and multiplayer.
+		var isNewPress = timeState.timeSinceLoad - marble.teleporterLastUseTime > 0.001;
+		marble.teleporterLastUseTime = timeState.timeSinceLoad;
 		if (!isNewPress)
 			return false;
 

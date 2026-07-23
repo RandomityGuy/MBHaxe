@@ -18,7 +18,10 @@ class Tornado extends ForceObject {
 			"data/shapes/hazards/tornado.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "Tornado";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh. The
+		// DtsObject "Tornado" material quirk matches by prefix, not exact equality, for this reason.
+		this.identifier = "Tornado" + this.dtsPath;
 		this.forceDatas = [
 			{
 				forceType: ForceSpherical,
