@@ -43,5 +43,6 @@ class MegaMarble extends PowerUp {
 		this.level.deselectPowerUp(marble);
 		if (this.level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/dosuperjump.wav', ResourceLoader.getAudio, this.soundResources));
+		return true;
 	}
 }

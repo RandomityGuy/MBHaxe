@@ -145,7 +145,7 @@ class TeleportTrigger extends Trigger {
 				marble.camera.nextCameraYaw = yaw + Math.PI / 2;
 				marble.camera.nextCameraPitch = 0.45;
 			}
-			AudioManager.playSound(ResourceLoader.getResource("data/sound/spawn.wav", ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playPitchedSound("spawn", this.soundResources);
 		}
 	}
 }

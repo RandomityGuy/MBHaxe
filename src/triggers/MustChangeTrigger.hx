@@ -14,6 +14,10 @@ class MustChangeTrigger extends Trigger {
 	}
 
 	public override function onMarbleEnter(marble:src.Marble, time:TimeState) {
+		var delayField = this.element.fields.get("delaytargettime");
+		if (delayField != null && delayField[0] != "" && delayField[0] != "0")
+			this.interior.delayTargetTime = MisParser.parseNumber(delayField[0]) / 1000;
+
 		var ttime = MisParser.parseNumber(this.element.targettime);
 		if (ttime > 0)
 			ttime /= 1000;

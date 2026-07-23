@@ -84,6 +84,18 @@ class DtsObject extends GameObject {
 	var materialInfos:Map<Material, Array<Texture>> = new Map();
 	var matNameOverride:Map<String, String> = new Map();
 
+	public var skinOverride:String = null;
+
+	/** Resolves a dts material name, honoring an exact-match override first, then falling back
+		to a Torque-style skin substitution (replacing a leading "base" with `skinOverride`). */
+	public function resolveMatName(matName:String):String {
+		if (matNameOverride.exists(matName))
+			return matNameOverride.get(matName);
+		if (skinOverride != null && StringTools.startsWith(matName, "base."))
+			return skinOverride + "." + matName.substr("base.".length);
+		return matName;
+	}
+
 	var sequenceKeyframeOverride:Array<Float> = [];
 	var lastSequenceKeyframes:Array<Float> = [];
 
@@ -109,6 +121,9 @@ class DtsObject extends GameObject {
 
 	var ambientRotate = false;
 	var ambientSpinFactor = -1 / 3 * Math.PI * 2;
+
+	var renderSubshape:dts.SubShape = null;
+	var collisionSubshapes:Array<{subShape:dts.SubShape, detail:Int}> = [];
 
 	public var idInLevel:Int = -1;
 
@@ -141,6 +156,15 @@ class DtsObject extends GameObject {
 		colliders = [];
 		this.mountPointNodes = [for (i in 0...32) -1];
 
+		// find the detail and rendering subshapes
+		for (detail in this.dts.detailLevels) {
+			if (detail.objectDetail == 0) {
+				this.renderSubshape = this.dts.subshapes[detail.subShape];
+			}
+			if (this.dts.names[detail.name].substr(0, 3).toLowerCase() == "col")
+				this.collisionSubshapes.push({subShape: this.dts.subshapes[detail.subShape], detail: detail.objectDetail});
+		}
+
 		for (i in 0...this.dts.nodes.length) {
 			graphNodes.push(new Object());
 		}
@@ -152,6 +176,12 @@ class DtsObject extends GameObject {
 			} else {
 				rootNodesIdx.push(i);
 			}
+
+			if (dts.names[node.name].substr(0, 5) == "mount") {
+				var mountindex = dts.names[node.name].substr(5);
+				var mountNode = Std.parseInt(mountindex);
+				mountPointNodes[mountNode] = i;
+			}
 		}
 
 		this.graphNodes = graphNodes;
@@ -159,99 +189,61 @@ class DtsObject extends GameObject {
 
 		var affectedBySequences = this.dts.sequences.length > 0 ? (this.dts.sequences[0].rotationMatters.length < 0 ? 0 : this.dts.sequences[0].rotationMatters[0]) | (this.dts.sequences[0].translationMatters.length > 0 ? this.dts.sequences[0].translationMatters[0] : 0) : 0;
 
-		for (i in 0...dts.nodes.length) {
-			var objects = dts.objects.filter(object -> object.node == i);
-			var sequenceAffected = ((1 << i) & affectedBySequences) != 0;
+		for (i in this.renderSubshape.firstObject...(this.renderSubshape.firstObject + this.renderSubshape.numObjects)) {
+			var obj = this.dts.objects[i];
+			var mesh = this.dts.meshes[obj.firstMesh]; // od = 0
 
-			if (dts.names[dts.nodes[i].name].substr(0, 5) == "mount") {
-				var mountindex = dts.names[dts.nodes[i].name].substr(5);
-				var mountNode = Std.parseInt(mountindex);
-				mountPointNodes[mountNode] = i;
-			}
+			if (mesh == null)
+				continue;
 
-			for (object in objects) {
-				var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
+			if (mesh.parent >= 0)
+				continue; // Fix teleporter being broken
 
-				if (isCollisionObject)
-					continue;
+			if (mesh.vertices.length == 0)
+				continue;
 
-				for (j in object.firstMesh...(object.firstMesh + object.numMeshes)) {
-					if (j >= this.dts.meshes.length)
+			if (!isInstanced) {
+				var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+				var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
+
+				var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+				var poly = new Polygon();
+				var usedMats = [];
+				for (k in 0...geometry.length) {
+					if (geometry[k].vertices.length == 0)
 						continue;
 
-					var mesh = this.dts.meshes[j];
-					if (mesh == null)
-						continue;
+					poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
+					poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
+					poly.addUVs(geometry[k].uvs);
+					poly.nextMaterial();
 
-					if (mesh.parent >= 0)
-						continue; // Fix teleporter being broken
-
-					if (mesh.vertices.length == 0)
-						continue;
-
-					if (!isInstanced) {
-						var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
-						var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
-
-						var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
-						var poly = new Polygon();
-						var usedMats = [];
-						for (k in 0...geometry.length) {
-							if (geometry[k].vertices.length == 0)
-								continue;
-
-							poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
-							poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
-							poly.addUVs(geometry[k].uvs);
-							poly.nextMaterial();
-
-							usedMats.push(materials[k]);
-						}
-						poly.endPrimitive();
-						var obj = new MultiMaterial(poly, usedMats, this.graphNodes[i]);
-					} else {
-						// var usedMats = [];
-
-						// for (prim in mesh.primitives) {
-						// 	if (!usedMats.contains(prim.matIndex)) {
-						// 		usedMats.push(prim.matIndex);
-						// 	}
-						// }
-
-						// for (k in usedMats) {
-						var obj = new Object(this.graphNodes[i]);
-						// }
-					}
+					usedMats.push(materials[k]);
 				}
+				poly.endPrimitive();
+				var obj = new MultiMaterial(poly, usedMats, this.graphNodes[obj.node]);
+			} else {
+				var obj = new Object(this.graphNodes[obj.node]);
 			}
 		}
 
 		if (this.isCollideable) {
-			for (i in 0...dts.nodes.length) {
-				var objects = dts.objects.filter(object -> object.node == i);
-				var localColliders:Array<CollisionEntity> = [];
+			for (subshapeData in this.collisionSubshapes) {
+				for (i in subshapeData.subShape.firstObject...(subshapeData.subShape.firstObject + subshapeData.subShape.numObjects)) {
+					var obj = dts.objects[i];
+					if (subshapeData.detail >= obj.numMeshes)
+						continue;
+					var mesh = this.dts.meshes[obj.firstMesh + subshapeData.detail];
 
-				for (object in objects) {
-					var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
+					if (mesh == null)
+						continue;
 
-					if (isCollisionObject) {
-						for (j in object.firstMesh...(object.firstMesh + object.numMeshes)) {
-							if (j >= this.dts.meshes.length)
-								continue;
+					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
-							var mesh = this.dts.meshes[j];
-							if (mesh == null)
-								continue;
-
-							var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
-							var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
-
-							var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, i);
-							localColliders = localColliders.concat(hulls);
-						}
-					}
+					var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, obj.node);
+					colliders = colliders.concat(hulls);
 				}
-				colliders = colliders.concat(localColliders);
 			}
 		}
 
@@ -339,7 +331,7 @@ class DtsObject extends GameObject {
 		if (!this.isInstanced) {
 			for (i in 0...this.materials.length) {
 				var info = this.materialInfos.get(this.materials[i]);
-				if (info == null)
+				if (info == null || info.length == 0)
 					continue;
 
 				var iflSequence = this.dts.sequences.filter(seq -> seq.iflMatters.length > 0 ? seq.iflMatters[0] > 0 : false);
@@ -396,7 +388,7 @@ class DtsObject extends GameObject {
 		var environmentMaterial:Material = null;
 
 		for (i in 0...dts.matNames.length) {
-			var matName = matNameOverride.exists(dts.matNames[i]) ? matNameOverride.get(dts.matNames[i]) : this.dts.matNames[i];
+			var matName = this.resolveMatName(dts.matNames[i]);
 			var flags = dts.matFlags[i];
 			var fullNames = ResourceLoader.getFullNamesOf(this.directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
 			var fullName = fullNames.length > 0 ? fullNames[0] : null;
@@ -556,7 +548,12 @@ class DtsObject extends GameObject {
 			var count = parts.length > 1 ? Std.parseInt(parts[1]) : 1;
 
 			for (i in 0...count) {
-				keyframes.push(parts[0]);
+				if (ResourceLoader.exists(this.directoryPath + '/' + parts[0]))
+					keyframes.push(parts[0]);
+				else if (ResourceLoader.exists(this.directoryPath + '/' + parts[0] + ".jpg"))
+					keyframes.push(parts[0] + ".jpg");
+				else if (ResourceLoader.exists(this.directoryPath + '/' + parts[0] + ".png"))
+					keyframes.push(parts[0] + ".png");
 			}
 		}
 
@@ -575,9 +572,6 @@ class DtsObject extends GameObject {
 			mat.setPosition(new Vector(-translation.x, translation.y, translation.z));
 			this.graphNodes[i].setTransform(mat);
 			var absTform = this.graphNodes[i].getAbsPos().clone();
-			if (this.colliders[i] != null)
-				// this.colliders[i].setTransform(Matrix.I());
-				this.colliders[i].setTransform(absTform);
 		}
 	}
 
@@ -616,8 +610,10 @@ class DtsObject extends GameObject {
 					var t1 = vertices[i2].sub(vertices[i1]);
 					var t2 = vertices[i3].sub(vertices[i1]);
 					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
-					if (tarea < 0.00001)
+					if (tarea < 0.00001) {
+						i += 3;
 						continue;
+					}
 
 					for (index in [i1, i2, i3]) {
 						var vertex = vertices[index];
@@ -651,8 +647,10 @@ class DtsObject extends GameObject {
 					var t1 = vertices[i2].sub(vertices[i1]);
 					var t2 = vertices[i3].sub(vertices[i1]);
 					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
-					if (tarea < 0.00001)
+					if (tarea < 0.00001) {
+						k++;
 						continue;
+					}
 
 					for (index in [i1, i2, i3]) {
 						var vertex = vertices[index];
@@ -679,8 +677,10 @@ class DtsObject extends GameObject {
 					var t1 = vertices[i2].sub(vertices[i1]);
 					var t2 = vertices[i3].sub(vertices[i1]);
 					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
-					if (tarea < 0.00001)
+					if (tarea < 0.00001) {
+						i++;
 						continue;
+					}
 
 					for (index in [i1, i2, i3]) {
 						var vertex = vertices[index];
@@ -862,7 +862,7 @@ class DtsObject extends GameObject {
 				quaternions = [];
 
 				for (i in 0...this.dts.nodes.length) {
-					var affected = ((1 << i) & rot) != 0;
+					var affected = ((1 << i) & rot) != 0 && this.dts.nodeRotations.length > sequence.numKeyFrames * affectedCount;
 
 					if (affected) {
 						var rot1 = this.dts.nodeRotations[sequence.numKeyFrames * affectedCount + keyframeLow];
@@ -902,7 +902,7 @@ class DtsObject extends GameObject {
 				translations = [];
 
 				for (i in 0...this.dts.nodes.length) {
-					var affected = ((1 << i) & trans) != 0;
+					var affected = ((1 << i) & trans) != 0 && this.dts.nodeTranslations.length > sequence.numKeyFrames * affectedCount;
 
 					if (affected) {
 						var trans1 = this.dts.nodeTranslations[sequence.numKeyFrames * affectedCount + keyframeLow];
@@ -928,7 +928,7 @@ class DtsObject extends GameObject {
 				scales = [];
 
 				for (i in 0...this.dts.nodes.length) {
-					var affected = ((1 << i) & scale) != 0;
+					var affected = ((1 << i) & scale) != 0 && this.dts.nodeAlignedScales.length > sequence.numKeyFrames * affectedCount;
 
 					if (affected) {
 						var scale1 = this.dts.nodeAlignedScales[sequence.numKeyFrames * affectedCount + keyframeLow];

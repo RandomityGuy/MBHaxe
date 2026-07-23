@@ -69,8 +69,9 @@ class Mission {
 		var entry = ResourceLoader.getFileEntry(this.path).entry;
 		var misText = Util.toASCII(entry.getBytes());
 
-		var misParser = new MisParser(misText);
-		var contents = misParser.parse();
+		var contents = StringTools.endsWith(this.path.toLowerCase(), ".mcs")
+			? new mis.McsParser(misText).parse()
+			: new MisParser(misText).parse();
 		root = contents.root;
 		marbleAttributes = contents.marbleAttributes;
 

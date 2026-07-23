@@ -39,7 +39,7 @@ class MisParser {
 	var text:String;
 	var index = 0;
 	var currentElementId = 0;
-	var variables:Map<String, String>;
+	var variables:Map<String, String> = ["$usermods" => '""'];
 
 	public function new(text:String) {
 		this.text = text;
@@ -52,7 +52,6 @@ class MisParser {
 		var outsideText = this.text.substring(0, objectWriteBeginIndex) + this.text.substring(objectWriteEndIndex);
 
 		// Find all specified variables
-		this.variables = ["$usermods" => '""']; // Just make $usermods point to nothing
 
 		var startText = outsideText;
 
@@ -365,8 +364,36 @@ class MisParser {
 		}
 	}
 
-	/** Resolves a TorqueScript rvalue expression. Currently only supports the concatenation @ operator. */
+	/** Known-at-compile-time TorqueScript engine globals that show up as bitflags in mission
+		field values (e.g. `MissionInfo.customRadarRule`) but are never assigned via a `$var = ...;`
+		statement anywhere in the mission file itself, so `variables` never has them. */
+	static final knownEngineConstants:Map<String, Int> = [
+		"$radar::flags::none" => 0,
+		"$radar::flags::gems" => 1,
+		"$radar::flags::timetravels" => 2,
+		"$radar::flags::endpad" => 4,
+		"$radar::flags::checkpoints" => 8,
+		"$radar::flags::cannons" => 16,
+		"$radar::flags::powerups" => 32,
+	];
+
+	/** Resolves a TorqueScript rvalue expression. Supports the concatenation `@` operator and the
+		bitwise-OR `|` operator (e.g. `$Radar::Flags::Gems | $Radar::Flags::EndPad`), the latter by
+		resolving each operand to an integer (via `knownEngineConstants` for engine globals that
+		aren't themselves assigned anywhere in the mission, falling back to numeric parsing) and
+		OR-ing the results together. */
 	function resolveExpression(expr:String) {
+		var orParts = Util.splitIgnoreStringLiterals(expr, '|');
+		if (orParts.length > 1) {
+			var result = 0;
+			for (part in orParts) {
+				var resolved = this.resolveExpression(StringTools.trim(part));
+				var lower = resolved.toLowerCase();
+				result |= knownEngineConstants.exists(lower) ? knownEngineConstants.get(lower) : (Std.parseInt(resolved) ?? 0);
+			}
+			return Std.string(result);
+		}
+
 		var parts = Util.splitIgnoreStringLiterals(expr, '@').map(x -> {
 			x = StringTools.trim(x);
 			if (StringTools.startsWith(x, '$') && this.variables[x] != null) {

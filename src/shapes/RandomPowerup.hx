@@ -109,5 +109,6 @@ class RandomPowerup extends PowerUp {
 			this.level.addBonusTime(5);
 			wasTimeTravel = false;
 		}
+		return true;
 	}
 }

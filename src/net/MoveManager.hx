@@ -74,20 +74,24 @@ class MoveManager {
 		var move = new Move();
 		move.d = new Vector();
 		if (!MarbleGame.instance.paused) {
-			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
-			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
+			if (marble.movementTriggerCount <= 0) {
+				move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
+				move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
+			}
 			if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
-				if (Key.isDown(Settings.controlsSettings.forward)) {
-					move.d.x -= 1;
-				}
-				if (Key.isDown(Settings.controlsSettings.backward)) {
-					move.d.x += 1;
-				}
-				if (Key.isDown(Settings.controlsSettings.left)) {
-					move.d.y += 1;
-				}
-				if (Key.isDown(Settings.controlsSettings.right)) {
-					move.d.y -= 1;
+				if (marble.movementTriggerCount <= 0) {
+					if (Key.isDown(Settings.controlsSettings.forward)) {
+						move.d.x -= 1;
+					}
+					if (Key.isDown(Settings.controlsSettings.backward)) {
+						move.d.x += 1;
+					}
+					if (Key.isDown(Settings.controlsSettings.left)) {
+						move.d.y += 1;
+					}
+					if (Key.isDown(Settings.controlsSettings.right)) {
+						move.d.y -= 1;
+					}
 				}
 				if (Key.isDown(Settings.controlsSettings.jump)
 					|| MarbleGame.instance.touchInput.jumpButton.pressed
@@ -111,7 +115,7 @@ class MoveManager {
 					Gamepad.releaseKey(Settings.gamepadSettings.respawn);
 				}
 
-				if (MarbleGame.instance.touchInput.movementInput.pressed) {
+				if (marble.movementTriggerCount <= 0 && MarbleGame.instance.touchInput.movementInput.pressed) {
 					move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
 					move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
 				}

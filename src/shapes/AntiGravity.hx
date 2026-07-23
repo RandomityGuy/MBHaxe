@@ -11,7 +11,7 @@ import net.NetPacket.MarbleNetFlags;
 class AntiGravity extends PowerUp {
 	public function new(element:MissionElementItem, norespawn:Bool = false) {
 		super(element);
-		this.dtsPath = "data/shapes/items/antigravity.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/gravmod.dts" : "data/shapes/items/antigravity.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "AntiGravity";
@@ -38,6 +38,7 @@ class AntiGravity extends PowerUp {
 				marble.currentUp.load(direction);
 			}
 		}
+		return true;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

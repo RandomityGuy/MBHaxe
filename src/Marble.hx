@@ -278,7 +278,23 @@ class Marble extends GameObject {
 
 	var forcefield:DtsObject;
 	var helicopter:DtsObject;
+	var helicopterPQ:DtsObject;
 	var megaHelicopter:DtsObject;
+	var usePQHelicopter:Bool = false;
+
+	/** TeleportItem's armed state lives on the marble (matching PQ's `%user.teleporterX`
+		fields), not on any particular TeleportItem instance - PQ stores it globally on the
+		user, so the marker/position/config are shared across every TeleportItem in a level
+		regardless of which one armed it or which one fires it. */
+	public var teleporterMarker:DtsObject;
+	public var teleporterArmed:Bool = false;
+	public var teleporterSavedPosition:Vector = new Vector();
+	public var teleporterSavedYaw:Float = 0;
+	public var teleporterSavedPitch:Float = 0;
+	public var teleporterSavedGravity:Vector = new Vector(0, 0, -1);
+	public var teleporterKeepVelocity:Bool = false;
+	public var teleporterTeleTime:Float = 2;
+	public var teleporterLastUseTick:Int = -1000;
 	var superBounceEnableTime:Float = -1e8;
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
@@ -288,6 +304,9 @@ class Marble extends GameObject {
 	public var megaMarbleUseTick:Int = 0;
 	public var shockAbsorberUseTick:Int = 0;
 	public var superBounceUseTick:Int = 0;
+
+	/** Ref-counted so overlapping `NoMovementKeysTrigger` volumes behave correctly. */
+	public var movementTriggerCount:Int = 0;
 
 	public var blastAmount:Float = 0;
 	public var blastTicks:Int = 0;
@@ -569,6 +588,16 @@ class Marble extends GameObject {
 		this.helicopter.y = 1e8;
 		this.helicopter.z = 1e8;
 
+		this.helicopterPQ = new DtsObject();
+		this.helicopterPQ.dtsPath = "data/shapes_pq/gameplay/powerups/gyrocopter.dts";
+		this.helicopterPQ.useInstancing = true;
+		this.helicopterPQ.identifier = "HelicopterPQ";
+		this.helicopterPQ.showSequences = true;
+		this.helicopterPQ.isBoundingBoxCollideable = false;
+		this.helicopterPQ.x = 1e8;
+		this.helicopterPQ.y = 1e8;
+		this.helicopterPQ.z = 1e8;
+
 		this.megaHelicopter = new DtsObject();
 		this.megaHelicopter.dtsPath = "data/shapes/items/megahelicopter.dts";
 		this.megaHelicopter.useInstancing = false;
@@ -580,10 +609,22 @@ class Marble extends GameObject {
 		this.megaHelicopter.y = 1e8;
 		this.megaHelicopter.z = 1e8;
 
+		this.teleporterMarker = new DtsObject();
+		this.teleporterMarker.dtsPath = "data/shapes_pq/other/wireball.dts";
+		this.teleporterMarker.useInstancing = true;
+		this.teleporterMarker.identifier = "TeleportMarker";
+		this.teleporterMarker.isCollideable = false;
+		this.teleporterMarker.isBoundingBoxCollideable = false;
+		this.teleporterMarker.x = 1e8;
+		this.teleporterMarker.y = 1e8;
+		this.teleporterMarker.z = 1e8;
+
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
+		worker.addTask(fwd -> level.addDtsObject(this.helicopterPQ, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.megaHelicopter, fwd));
+		worker.addTask(fwd -> level.addDtsObject(this.teleporterMarker, fwd));
 		worker.run();
 
 		loadMarbleAttributes();
@@ -1767,7 +1808,10 @@ class Marble extends GameObject {
 		for (interior in pathedInteriors) {
 			if (Net.isMP)
 				interior.pushTickState();
-			interior.computeNextPathStep(timeRemaining);
+		}
+		if (this.level != null) {
+			for (mover in this.level.movingObjects)
+				mover.computeNextPathStep(timeRemaining);
 		}
 		// }
 
@@ -1905,15 +1949,17 @@ class Marble extends GameObject {
 				var netUpdate = this.isNetUpdate;
 				if (this.serverUsePowerup)
 					this.isNetUpdate = false;
-				this.heldPowerup.use(this, pTime);
+				var consumed = this.heldPowerup.use(this, pTime);
 				this.isNetUpdate = netUpdate;
-				this.heldPowerup = null;
 				this.serverUsePowerup = false;
-				if (!this.isNetUpdate) {
-					this.netFlags |= MarbleNetFlags.PickupPowerup | MarbleNetFlags.UsePowerup;
-				}
-				if (this.level.isRecording) {
-					this.level.replay.recordPowerupPickup(null);
+				if (consumed) {
+					this.heldPowerup = null;
+					if (!this.isNetUpdate) {
+						this.netFlags |= MarbleNetFlags.PickupPowerup | MarbleNetFlags.UsePowerup;
+					}
+					if (this.level.isRecording) {
+						this.level.replay.recordPowerupPickup(null);
+					}
 				}
 			}
 
@@ -1923,8 +1969,11 @@ class Marble extends GameObject {
 			timeRemaining -= timeStep;
 
 			// if (this.controllable) {
-			for (interior in pathedInteriors) {
-				interior.advance(timeStep);
+			if (this.level != null) {
+				for (mover in this.level.movingObjects)
+					mover.advancePath(timeStep);
+				for (parented in this.level.parentedObjects)
+					parented.advanceParent();
 			}
 			// }
 
@@ -1936,8 +1985,11 @@ class Marble extends GameObject {
 		if (timeRemaining > 0) {
 			// Advance pls
 			// if (this.controllable) {
-			for (interior in pathedInteriors) {
-				interior.advance(timeRemaining);
+			if (this.level != null) {
+				for (mover in this.level.movingObjects)
+					mover.advancePath(timeRemaining);
+				for (parented in this.level.parentedObjects)
+					parented.advanceParent();
 			}
 			// }
 		}
@@ -2620,13 +2672,16 @@ class Marble extends GameObject {
 			}
 		} else {
 			this.megaHelicopter.setPosition(1e8, 1e8, 1e8);
+			var activeHelicopter = this.usePQHelicopter ? this.helicopterPQ : this.helicopter;
+			var inactiveHelicopter = this.usePQHelicopter ? this.helicopter : this.helicopterPQ;
+			inactiveHelicopter.setPosition(1e8, 1e8, 1e8);
 			if (helicopterEnabled) {
-				this.helicopter.setPosition(x, y, z);
-				this.helicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
+				activeHelicopter.setPosition(x, y, z);
+				activeHelicopter.setRotationQuat(this.level.getOrientationQuat(timeState.currentAttemptTime));
 				if (selfMarble)
 					this.helicopterSound.pause = false;
 			} else {
-				this.helicopter.setPosition(1e8, 1e8, 1e8);
+				activeHelicopter.setPosition(1e8, 1e8, 1e8);
 				if (selfMarble)
 					this.helicopterSound.pause = true;
 			}
@@ -2749,7 +2804,8 @@ class Marble extends GameObject {
 		}
 	}
 
-	public function enableHelicopter(timeState:TimeState) {
+	public function enableHelicopter(timeState:TimeState, usePQModel:Bool = false) {
+		this.usePQHelicopter = usePQModel;
 		if (this.level.isMultiplayer) {
 			this.helicopterUseTick = Net.isHost ? timeState.ticks : serverTicks;
 			if (!this.isNetUpdate)
@@ -2857,6 +2913,11 @@ class Marble extends GameObject {
 		this.megaMarbleEnableTime = Math.NEGATIVE_INFINITY;
 		this.blastUseTick = 0;
 		this.blastTicks = 0;
+		this.movementTriggerCount = 0;
+		this.teleporterArmed = false;
+		this.teleporterLastUseTick = -1000;
+		if (this.teleporterMarker != null)
+			this.teleporterMarker.setPosition(1e8, 1e8, 1e8);
 		this.helicopterUseTick = 0;
 		this.megaMarbleUseTick = 0;
 		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
@@ -2899,6 +2960,8 @@ class Marble extends GameObject {
 			this.helicopterSound.stop();
 		this.shadowVolume.remove();
 		this.helicopter.remove();
+		this.helicopterPQ.remove();
+		this.teleporterMarker.remove();
 		super.dispose();
 		removeChildren();
 		camera = null;

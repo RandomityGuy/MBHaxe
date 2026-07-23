@@ -19,6 +19,15 @@ enum MissionElementType {
 	ParticleEmitterNode;
 }
 
+interface IPlaceableElement {
+	var datablock:String;
+	var position:String;
+	var rotation:String;
+	var scale:String;
+	var _name:String;
+	var fields:Map<String, Array<String>>;
+}
+
 @:publicFields
 class MissionElementBase {
 	// Underscore prefix to avoid name clashes
@@ -151,7 +160,7 @@ class MissionElementInteriorInstance extends MissionElementBase {
 
 @:publicFields
 /** Represents a static shape. */
-class MissionElementStaticShape extends MissionElementBase {
+class MissionElementStaticShape extends MissionElementBase implements IPlaceableElement {
 	var position:String;
 	var rotation:String;
 	var scale:String;
@@ -166,7 +175,7 @@ class MissionElementStaticShape extends MissionElementBase {
 
 @:publicFields
 /** Represents an item. */
-class MissionElementItem extends MissionElementBase {
+class MissionElementItem extends MissionElementBase implements IPlaceableElement {
 	var position:String;
 	var rotation:String;
 	var scale:String;

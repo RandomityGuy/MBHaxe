@@ -36,13 +36,19 @@ final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 class SuperJump extends PowerUp {
 	var sjEmitterParticleData:ParticleData;
 
+	var jumpForce:Float = 20;
+
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/superjump.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superjump.dts" : "data/shapes/items/superjump.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperJump";
 		this.pickUpName = "Jump Boost PowerUp";
+		if (element.datablock.toLowerCase() == "customsuperjumpitem_pq") {
+			var powerField = element.fields != null ? element.fields.get("power") : null;
+			this.jumpForce = powerField != null && powerField.length > 0 ? Std.parseFloat(powerField[0]) : 10;
+		}
 		sjEmitterParticleData = new ParticleData();
 		sjEmitterParticleData.identifier = "superJumpParticle";
 		sjEmitterParticleData.texture = ResourceLoader.getResource("data/particles/twirl.png", ResourceLoader.getTexture, this.textureResources);
@@ -62,7 +68,7 @@ class SuperJump extends PowerUp {
 	}
 
 	public function use(marble:src.Marble, timeState:TimeState) {
-		marble.velocity.load(marble.velocity.add(marble.currentUp.multiply(20)));
+		marble.velocity.load(marble.velocity.add(marble.currentUp.multiply(jumpForce)));
 		if (@:privateAccess !marble.isNetUpdate)
 			this.level.particleManager.createEmitter(superJumpParticleOptions, this.sjEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		// marble.body.addLinearVelocity(this.level.currentUp.scale(20)); // Simply add to vertical velocity
@@ -71,5 +77,6 @@ class SuperJump extends PowerUp {
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperjump.wav", ResourceLoader.getAudio, this.soundResources));
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp(marble);
+		return true;
 	}
 }

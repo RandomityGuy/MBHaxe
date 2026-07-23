@@ -92,7 +92,10 @@ abstract class PowerUp extends DtsObject {
 
 	public abstract function pickUp(marble:Marble):Bool;
 
-	public abstract function use(marble:Marble, timeState:TimeState):Void;
+	/** Returns whether this use should consume/clear the held powerup. Almost always `true`
+		(matching the previous unconditional-consume behavior) - only a two-stage powerup like
+		`TeleportItem` (press to arm, press again to fire) returns `false` on the arming press. */
+	public abstract function use(marble:Marble, timeState:TimeState):Bool;
 
 	public override function reset() {
 		this.lastPickUpTime = Math.NEGATIVE_INFINITY;

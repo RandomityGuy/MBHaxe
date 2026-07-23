@@ -1,11 +1,17 @@
 package shapes;
 
 import src.DtsObject;
+import mis.MissionElement.MissionElementStaticShape;
 
 class StartPad extends DtsObject {
-	public function new() {
+	public function new(?element:MissionElementStaticShape) {
 		super();
-		dtsPath = "data/shapes/pads/startarea.dts";
+		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
+		dtsPath = switch (datablockLower) {
+			case "startpad_pq": "data/shapes_pq/gameplay/pads/startpad.dts";
+			case "startpad_pq_construction": "data/shapes_pq/gameplay/pads/startpadconst.dts";
+			default: "data/shapes/pads/startarea.dts";
+		}
 		isCollideable = true;
 		identifier = "StartPad";
 		useInstancing = false;

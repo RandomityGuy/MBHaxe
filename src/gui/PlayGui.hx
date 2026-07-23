@@ -814,7 +814,7 @@ class PlayGui {
 
 		if (id == Net.clientId) {
 			if (Net.isClient)
-				AudioManager.playSound(ResourceLoader.getResource('data/sound/gotgem.wav', ResourceLoader.getAudio, this.soundResources));
+				AudioManager.playPitchedSound("gotDiamond", this.soundResources);
 		} else if (Net.isClient)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/opponentdiamond.wav', ResourceLoader.getAudio, this.soundResources));
 
@@ -982,26 +982,26 @@ class PlayGui {
 		// helpTextBackground.y = scene2d.height * 0.45 + 1;
 	}
 
-	public function setPowerupImage(powerupIdentifier:String) {
+	public function setPowerupImage(powerupIdentifier:String, ?dtsPath:String) {
 		this.powerupImageScene.removeChildren();
 		if (powerupIdentifier == "SuperJump") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/superjump.dts";
+			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/superjump.dts";
 		} else if (powerupIdentifier == "SuperSpeed") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/superspeed.dts";
+			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/superspeed.dts";
 		} else if (powerupIdentifier == "ShockAbsorber") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/shockabsorber.dts";
+			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/shockabsorber.dts";
 		} else if (powerupIdentifier == "SuperBounce") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/superbounce.dts";
+			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/superbounce.dts";
 		} else if (powerupIdentifier == "Helicopter") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/images/helicopter.dts";
+			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/images/helicopter.dts";
 		} else if (powerupIdentifier == "MegaMarble") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = "data/shapes/items/megamarble.dts";
+			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/megamarble.dts";
 		} else {
 			powerupIdentifier = "";
 			this.powerupImageObject = null;

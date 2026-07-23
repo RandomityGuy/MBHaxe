@@ -23,6 +23,7 @@ import src.ParticleSystem.ParticleEmitterOptions;
 import h3d.Vector;
 import src.Resource;
 import h3d.mat.Texture;
+import mis.MissionElement.MissionElementStaticShape;
 
 class EndPad extends DtsObject {
 	var fireworks:Array<Firework> = [];
@@ -31,9 +32,14 @@ class EndPad extends DtsObject {
 	var finishBounds:Bounds;
 	var inFinish:Bool = false;
 
-	public function new() {
+	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = "data/shapes/pads/endarea.dts";
+		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
+		this.dtsPath = switch (datablockLower) {
+			case "endpad_pq": "data/shapes_pq/gameplay/pads/endpad.dts";
+			case "endpad_pq_construction": "data/shapes_pq/gameplay/pads/endpadconst.dts";
+			default: "data/shapes/pads/endarea.dts";
+		}
 		this.isCollideable = true;
 		this.identifier = "EndPad";
 		this.useInstancing = false;
@@ -41,7 +47,9 @@ class EndPad extends DtsObject {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/firewrks.wav").entry.load(onFinish);
+			var worker = new src.ResourceLoaderWorker(onFinish);
+			AudioManager.preloadPitchedSound("firewrks", worker);
+			worker.run();
 		});
 	}
 
@@ -55,8 +63,7 @@ class EndPad extends DtsObject {
 	function spawnFirework(time:TimeState) {
 		var firework = new Firework(this.getAbsPos().getPosition(), time.timeSinceLoad, this.level);
 		this.fireworks.push(firework);
-		AudioManager.playSound(ResourceLoader.getResource("data/sound/firewrks.wav", ResourceLoader.getAudio, this.soundResources),
-			this.getAbsPos().getPosition());
+		AudioManager.playPitchedSound("firewrks", this.soundResources, null, this.getAbsPos().getPosition());
 		// AudioManager.play(this.sounds[0], 1, AudioManager.soundGain, this.worldPosition);
 	}
 

@@ -4,6 +4,8 @@ import collision.CollisionInfo;
 import mis.MisParser;
 import src.DtsObject;
 import src.ResourceLoader;
+import src.ResourceLoaderWorker;
+import src.AudioManager;
 import mis.MissionElement.MissionElementStaticShape;
 
 class Checkpoint extends DtsObject {
@@ -13,7 +15,8 @@ class Checkpoint extends DtsObject {
 
 	public function new(element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = "data/shapes/buttons/checkpoint.dts";
+		this.dtsPath = element.datablock.toLowerCase() == "checkpoint_pq" ? "data/shapes_pq/gameplay/pads/checkpoint.dts" :
+			"data/shapes/buttons/checkpoint.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		this.identifier = "Checkpoint";
@@ -24,7 +27,9 @@ class Checkpoint extends DtsObject {
 
 	public override function init(level:src.MarbleWorld, onFinish:() -> Void) {
 		super.init(level, () -> {
-			ResourceLoader.load("sound/checkpoint.wav").entry.load(onFinish);
+			var worker = new ResourceLoaderWorker(onFinish);
+			AudioManager.preloadPitchedSound("checkpoint", worker);
+			worker.run();
 		});
 	}
 

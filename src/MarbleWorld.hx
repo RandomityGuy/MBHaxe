@@ -34,7 +34,6 @@ import net.ClientConnection.GameConnection;
 import modes.GameMode;
 import modes.GameMode.GameModeFactory;
 import rewind.RewindManager;
-import Macros.MarbleWorldMacros;
 import shapes.PushButton;
 #if js
 import gui.MainMenuGui;
@@ -133,6 +132,11 @@ import haxe.io.Path;
 import src.Console;
 import src.Gamepad;
 import src.Analytics;
+import src.IPathMover;
+import src.PathNodeElement;
+import src.DatablockRegistry;
+import src.GameObjectPathFollower;
+import src.GameObjectParentFollower;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -157,12 +161,62 @@ class MarbleWorld extends Scheduler {
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
 
+	/** General named-object lookup (any `GameObject` - DTS/interior/trigger) used for `path`/
+		`parent` resolution, since those can target any placed object, not just DTS items like
+		`namedObjects` above. Kept separate from `namedObjects` so existing DtsObject-only lookups
+		(checkpoint respawn points, DisableShapeForceTrigger) aren't affected. */
+	public var namedGameObjects:Map<String, GameObject> = [];
+
+	/** `PathNode`/`BezierHandle` placements - pure data markers, never `GameObject`s. See
+		`resolvePathNodeTransform`. */
+	public var pathNodes:Map<String, PathNodeElement> = [];
+
+	/** `PathedInterior`s plus every path-following `GameObject`, advanced once per frame
+		(`computeNextPathStep`) and once per physics substep (`advancePath`), in that order,
+		before `parentedObjects` are advanced. */
+	public var movingObjects:Array<IPathMover> = [];
+
+	/** Objects with a `parent` field, advanced after `movingObjects` every substep. Insertion
+		order guarantees parent-before-child ordering - see `registerParentedObject`. */
+	public var parentedObjects:Array<GameObject> = [];
+
+	public function registerMovingObject(o:IPathMover) {
+		if (this.movingObjects.indexOf(o) < 0)
+			this.movingObjects.push(o);
+	}
+
+	public function registerParentedObject(o:GameObject) {
+		var parentTarget = o.parentFollower != null ? o.parentFollower.parentObject : null;
+		if (parentTarget != null && parentTarget.parentFollower != null && this.parentedObjects.indexOf(parentTarget) < 0)
+			this.registerParentedObject(parentTarget);
+		if (this.parentedObjects.indexOf(o) < 0)
+			this.parentedObjects.push(o);
+	}
+
+	/** Resolves a `PathNode`/`BezierHandle`'s live world position/rotation. Most nodes are static
+		(no `parent` field) so this just returns the authored local transform, but a node can
+		itself be parented to a moving object, so this is resolved on demand every call rather than
+		cached - a pure function of the parent's *current* transform, same reasoning as
+		`GameObjectParentFollower`. */
+	public function resolvePathNodeTransform(name:String):PathNodeLiveTransform {
+		var node = this.pathNodes.get(name);
+		if (node == null)
+			return null;
+		if (node.parentName == null || node.parentName == "")
+			return {position: node.localPosition, rotation: node.localRotation};
+		var parent = this.namedGameObjects.get(node.parentName);
+		if (parent == null)
+			return {position: node.localPosition, rotation: node.localRotation};
+		return GameObjectParentFollower.applyOffset(parent.getAbsPos(), node.localPosition, node.localRotation);
+	}
+
 	public var timeState:TimeState = new TimeState();
 	public var bonusTime:Float = 0;
 	public var sky:Sky;
 
-	var endPadElement:MissionElementStaticShape;
-	var endPad:EndPad;
+	public var endPadElement:MissionElementStaticShape;
+	public var endPad:EndPad;
+
 	var skyElement:MissionElementSky;
 
 	public var gameMode:GameMode;
@@ -188,6 +242,9 @@ class MarbleWorld extends Scheduler {
 
 	var timeTravelSound:Channel;
 	var alarmSound:Channel;
+
+	var countdownRemaining:Float = -1e8;
+	var countdownActive:Bool = false;
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
@@ -416,7 +473,14 @@ class MarbleWorld extends Scheduler {
 		var worker = new ResourceLoaderWorker(() -> {
 			var renderer = cast(this.scene.renderer, src.Renderer);
 
-			for (element in mission.root.elements) {
+			var iter = mission.root.elements.copy();
+
+			while (iter.length > 0) {
+				var element = iter[0];
+				iter.splice(0, 1);
+				if (element._type == MissionElementType.SimGroup) {
+					iter = iter.concat(cast(element, MissionElementSimGroup).elements);
+				}
 				if (element._type != MissionElementType.Sun)
 					continue;
 
@@ -496,13 +560,11 @@ class MarbleWorld extends Scheduler {
 			"sound/bouncehard2.wav",
 			"sound/bouncehard3.wav",
 			"sound/bouncehard4.wav",
-			"sound/spawn.wav",
 			"sound/ready.wav",
 			"sound/set.wav",
 			"sound/go.wav",
 			"sound/alarm.wav",
 			"sound/alarm_timeout.wav",
-			"sound/missinggems.wav",
 			"shapes/images/glow_bounce.dts",
 			"shapes/images/glow_bounce.png",
 			"shapes/images/helicopter.dts",
@@ -515,6 +577,10 @@ class MarbleWorld extends Scheduler {
 			"shapes/items/gemshine.png",
 			"shapes/items/enviro1.jpg",
 		];
+		for (key in AudioManager.pitchKeys) {
+			marblefiles.push('sound/spawn/$key.wav');
+			marblefiles.push('sound/missinggems/$key.wav');
+		}
 		if (this.game == "ultra" || Net.isMP) {
 			marblefiles.push("shapes/balls/pack1/marble20.normal.png");
 			marblefiles.push("shapes/balls/pack1/marble18.normal.png");
@@ -804,7 +870,7 @@ class MarbleWorld extends Scheduler {
 		this.deselectPowerUp(this.marble);
 
 		if (!this.isMultiplayer)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playPitchedSound("spawn", this.soundResources);
 
 		Console.log("State Start");
 		this.clearSchedule();
@@ -870,7 +936,7 @@ class MarbleWorld extends Scheduler {
 		marble.outOfBounds = false;
 		this.gameMode.onRespawn(marble);
 		if (marble == this.marble && @:privateAccess !marble.isNetUpdate)
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playPitchedSound("spawn", this.soundResources);
 	}
 
 	public function allClientsReady() {
@@ -988,7 +1054,13 @@ class MarbleWorld extends Scheduler {
 				case MissionElementType.InteriorInstance:
 					resourceLoadFuncs.push(fwd -> this.addInteriorFromMis(cast element, fwd));
 				case MissionElementType.StaticShape:
-					resourceLoadFuncs.push(fwd -> this.addStaticShape(cast element, fwd));
+					var sse:MissionElementStaticShape = cast element;
+					var datablockLower = sse.datablock != null ? sse.datablock.toLowerCase() : "";
+					if (datablockLower == "pathnode" || datablockLower == "bezierhandle") {
+						this.addPathNode(sse);
+					} else {
+						resourceLoadFuncs.push(fwd -> this.addStaticShape(cast element, fwd));
+					}
 				case MissionElementType.Item:
 					resourceLoadFuncs.push(fwd -> this.addItem(cast element, fwd));
 				case MissionElementType.Trigger:
@@ -1014,6 +1086,8 @@ class MarbleWorld extends Scheduler {
 
 		var interior = new InteriorObject();
 		interior.interiorFile = difPath;
+		if (element._name != null && element._name != "")
+			this.namedGameObjects.set(element._name, interior);
 		// DifBuilder.loadDif(difPath, interior);
 		// this.interiors.push(interior);
 		this.addInterior(interior, () -> {
@@ -1040,10 +1114,13 @@ class MarbleWorld extends Scheduler {
 			var tmat = Matrix.T(interiorPosition.x, interiorPosition.y, interiorPosition.z);
 			mat.multiply(mat, tmat);
 
-			interior.setTransform(mat);
+			// A path/parent-following interior ignores its own placed transform entirely, same
+			// reasoning as addPlaceableShape.
+			if (!interior.hasMover())
+				interior.setTransform(mat);
 			interior.isCollideable = hasCollision;
 			onFinish();
-		});
+		}, cast element);
 
 		// interior.setTransform(interiorPosition, interiorRotation, interiorScale);
 
@@ -1052,43 +1129,110 @@ class MarbleWorld extends Scheduler {
 		// 	this.physics.addInterior(interior);
 	}
 
+	/** `PathNode`/`BezierHandle` placements never become `GameObject`s - see `PathNodeElement`. */
+	public function addPathNode(element:MissionElementStaticShape) {
+		var position = MisParser.parseVector3(element.position);
+		position.x = -position.x;
+		var rotation = MisParser.parseRotation(element.rotation);
+		rotation.x = -rotation.x;
+		rotation.w = -rotation.w;
+		var scale = MisParser.parseVector3(element.scale);
+		if (scale.x == 0)
+			scale.x = 1;
+		if (scale.y == 0)
+			scale.y = 1;
+		if (scale.z == 0)
+			scale.z = 1;
+
+		this.pathNodes.set(element._name, new PathNodeElement(element._name, position, rotation, scale, element.fields));
+	}
+
 	public function addStaticShape(element:MissionElementStaticShape, onFinish:Void->Void) {
-		var shape:DtsObject = null;
-		MarbleWorldMacros.addStaticShapeOrItem();
+		addPlaceableShape(element, onFinish);
 	}
 
 	public function addItem(element:MissionElementItem, onFinish:Void->Void) {
+		addPlaceableShape(element, onFinish);
+	}
+
+	function addPlaceableShape(element:IPlaceableElement, onFinish:Void->Void) {
 		var shape:DtsObject = null;
-		MarbleWorldMacros.addStaticShapeOrItem();
+		var dataBlockLowerCase = element.datablock.toLowerCase();
+
+		if (dataBlockLowerCase != "") {
+			var entry = DatablockRegistry.resolveShape(dataBlockLowerCase);
+			if (entry == null) {
+				Console.error("Unknown item: " + element.datablock);
+				onFinish();
+				return;
+			}
+			shape = entry.create(element);
+			if (entry.after != null)
+				entry.after(shape, element, this);
+		}
+
+		if (element._name != null && element._name != "") {
+			this.namedObjects.set(element._name, {
+				obj: shape,
+				elem: cast element
+			});
+			if (shape != null)
+				this.namedGameObjects.set(element._name, shape);
+		}
+
+		var shapePosition = MisParser.parseVector3(element.position);
+		shapePosition.x = -shapePosition.x;
+		var shapeRotation = MisParser.parseRotation(element.rotation);
+		shapeRotation.x = -shapeRotation.x;
+		shapeRotation.w = -shapeRotation.w;
+		var shapeScale = MisParser.parseVector3(element.scale);
+
+		// Apparently we still do collide with zero-volume shapes
+		if (shapeScale.x == 0)
+			shapeScale.x = 0.0001;
+		if (shapeScale.y == 0)
+			shapeScale.y = 0.0001;
+		if (shapeScale.z == 0)
+			shapeScale.z = 0.0001;
+
+		var mat = Matrix.S(shapeScale.x, shapeScale.y, shapeScale.z);
+		var tmp = new Matrix();
+		shapeRotation.toMatrix(tmp);
+		mat.multiply3x4(mat, tmp);
+		mat.setPosition(shapePosition);
+
+		this.addDtsObject(shape, () -> {
+			// A path/parent-following shape ignores its own placed transform entirely (it's
+			// driven by the path/parent instead), matching PQ's moveOnPath immediately snapping
+			// to the path chain - applying `mat` afterward would stomp that.
+			if (!shape.hasMover())
+				shape.setTransform(mat);
+			onFinish();
+		}, false, element);
 	}
 
 	public function addTrigger(element:MissionElementTrigger, onFinish:Void->Void) {
-		var trigger:Trigger = null;
-
 		var datablockLowercase = element.datablock.toLowerCase();
 
-		// Create a trigger based on type
-		if (datablockLowercase == "outofboundstrigger") {
-			trigger = new OutOfBoundsTrigger(element, cast this);
-		} else if (datablockLowercase == "inboundstrigger") {
-			trigger = new InBoundsTrigger(element, cast this);
-		} else if (datablockLowercase == "helptrigger") {
-			trigger = new HelpTrigger(element, cast this);
-		} else if (datablockLowercase == "teleporttrigger") {
-			trigger = new TeleportTrigger(element, cast this);
-		} else if (datablockLowercase == "destinationtrigger") {
-			trigger = new DestinationTrigger(element, cast this);
-		} else if (datablockLowercase == "checkpointtrigger") {
-			trigger = new CheckpointTrigger(element, cast this);
-		} else {
+		var entry = DatablockRegistry.resolveTrigger(datablockLowercase);
+		if (entry == null) {
 			Console.error("Unknown trigger: " + element.datablock);
 			onFinish();
 			return;
 		}
 
+		var trigger = entry.create(element, cast this);
+
+		if (element._name != null && element._name != "")
+			this.namedGameObjects.set(element._name, trigger);
+		trigger.initPathAndParent(cast element, this);
+
 		trigger.init(() -> {
 			this.triggers.push(trigger);
-			this.collisionWorld.addEntity(trigger.collider);
+			if (trigger.hasMover())
+				this.collisionWorld.addMovingEntity(trigger.collider);
+			else
+				this.collisionWorld.addEntity(trigger.collider);
 			onFinish();
 		});
 	}
@@ -1156,10 +1300,15 @@ class MarbleWorld extends Scheduler {
 		// TODO THIS SHIT
 	}
 
-	public function addInterior(obj:InteriorObject, onFinish:Void->Void) {
+	public function addInterior(obj:InteriorObject, onFinish:Void->Void, ?element:IPlaceableElement) {
 		this.interiors.push(obj);
 		obj.init(cast this, () -> {
-			this.collisionWorld.addEntity(obj.collider);
+			if (element != null)
+				obj.initPathAndParent(element, this);
+			if (obj.hasMover())
+				this.collisionWorld.addMovingEntity(obj.collider);
+			else
+				this.collisionWorld.addEntity(obj.collider);
 			if (obj.useInstancing)
 				this.instanceManager.addObject(obj);
 			else
@@ -1170,6 +1319,7 @@ class MarbleWorld extends Scheduler {
 
 	public function addPathedInterior(obj:PathedInterior, onFinish:Void->Void) {
 		this.pathedInteriors.push(obj);
+		this.registerMovingObject(obj);
 		obj.init(cast this, () -> {
 			this.collisionWorld.addMovingEntity(obj.collider);
 			if (obj.useInstancing)
@@ -1180,9 +1330,10 @@ class MarbleWorld extends Scheduler {
 		});
 	}
 
-	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false) {
+	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false, ?element:IPlaceableElement) {
 		function parseIfl(path:String, onFinish:Array<String>->Void) {
 			ResourceLoader.load(path).entry.load(() -> {
+				var dirPath = haxe.io.Path.directory(path);
 				var text = ResourceLoader.getFileEntry(path).entry.getText();
 				var lines = text.split('\n');
 				var keyframes = [];
@@ -1197,7 +1348,13 @@ class MarbleWorld extends Scheduler {
 					var count = parts.length > 1 ? Std.parseInt(parts[1]) : 1;
 
 					for (i in 0...count) {
-						keyframes.push(parts[0]);
+						// since these are TEXTURES we need to ensure the files exist
+						if (ResourceLoader.exists(dirPath + '/' + parts[0]))
+							keyframes.push(parts[0]);
+						else if (ResourceLoader.exists(dirPath + '/' + parts[0] + ".jpg"))
+							keyframes.push(parts[0] + ".jpg");
+						else if (ResourceLoader.exists(dirPath + '/' + parts[0] + ".png"))
+							keyframes.push(parts[0] + ".png");
 					}
 				}
 
@@ -1205,12 +1362,15 @@ class MarbleWorld extends Scheduler {
 			});
 		}
 
+		if (obj.instancingKey == null)
+			obj.instancingKey = obj.dtsPath + (obj.skinOverride != null ? obj.skinOverride : "");
+
 		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
 			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
 			var directoryPath = haxe.io.Path.directory(obj.dtsPath);
 			var texToLoad = [];
 			for (i in 0...dtsFile.resource.matNames.length) {
-				var matName = obj.matNameOverride.exists(dtsFile.resource.matNames[i]) ? obj.matNameOverride.get(dtsFile.resource.matNames[i]) : dtsFile.resource.matNames[i];
+				var matName = obj.resolveMatName(dtsFile.resource.matNames[i]);
 				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
 				var fullName = fullNames.length > 0 ? fullNames[0] : null;
 				if (fullName != null) {
@@ -1247,17 +1407,27 @@ class MarbleWorld extends Scheduler {
 				}
 				obj.isTSStatic = isTsStatic;
 				obj.init(cast this, () -> {
+					if (element != null)
+						obj.initPathAndParent(element, this);
 					obj.update(this.timeState);
 					if (obj.useInstancing) {
 						this.instanceManager.addObject(obj);
 					} else
 						this.scene.addChild(obj);
 					for (collider in obj.colliders) {
-						if (collider != null)
-							this.collisionWorld.addEntity(collider);
+						if (collider != null) {
+							if (obj.hasMover())
+								this.collisionWorld.addMovingEntity(collider);
+							else
+								this.collisionWorld.addEntity(collider);
+						}
 					}
-					if (obj.isBoundingBoxCollideable)
-						this.collisionWorld.addEntity(obj.boundingCollider);
+					if (obj.isBoundingBoxCollideable) {
+						if (obj.hasMover())
+							this.collisionWorld.addMovingEntity(obj.boundingCollider);
+						else
+							this.collisionWorld.addEntity(obj.boundingCollider);
+					}
 
 					onFinish();
 				});
@@ -2186,6 +2356,16 @@ class MarbleWorld extends Scheduler {
 	public function updateTimer(dt:Float) {
 		this.timeState.dt = dt;
 
+		if (this.countdownActive) {
+			this.countdownRemaining -= dt;
+			if (this.countdownRemaining <= -5) {
+				this.countdownActive = false;
+				this.playGui.formatCountdownTimer(0);
+			} else {
+				this.playGui.formatCountdownTimer(Math.max(0, this.countdownRemaining));
+			}
+		}
+
 		var prevGameplayClock = this.timeState.gameplayClock;
 
 		var timeMultiplier = this.gameMode.timeMultiplier();
@@ -2394,7 +2574,7 @@ class MarbleWorld extends Scheduler {
 			return;
 
 		if (this.gemCount < this.totalGems) {
-			AudioManager.playSound(ResourceLoader.getResource('data/sound/missinggems.wav', ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playPitchedSound("missinggems", this.soundResources);
 			displayAlert("You can't finish without all the diamonds!!");
 		} else {
 			this.endPad.spawnFirework(this.timeState);
@@ -2540,7 +2720,7 @@ class MarbleWorld extends Scheduler {
 		if (@:privateAccess !marble.isNetUpdate)
 			@:privateAccess marble.netFlags |= MarbleNetFlags.PickupPowerup;
 		if (this.marble == marble) {
-			this.playGui.setPowerupImage(powerUp.identifier);
+			this.playGui.setPowerupImage(powerUp.identifier, powerUp.dtsPath);
 			MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
 			if (this.isRecording) {
 				this.replay.recordPowerupPickup(powerUp);
@@ -2567,6 +2747,19 @@ class MarbleWorld extends Scheduler {
 		} else {
 			this.playGui.addMiddleMessage('+0s', 0xcccccc);
 		}
+	}
+
+	/** Starts (or restarts) the HUD countdown timer, e.g. from `CountdownStartTrigger`. */
+	public function startCountdown(seconds:Float) {
+		this.countdownRemaining = seconds;
+		this.countdownActive = seconds > 0;
+	}
+
+	/** Stops the HUD countdown timer, e.g. from `CountdownStopTrigger`. */
+	public function stopCountdown() {
+		this.countdownActive = false;
+		this.countdownRemaining = -1e8;
+		this.playGui.formatCountdownTimer(0);
 	}
 
 	/** Get the current interpolated orientation quaternion. */
@@ -2716,7 +2909,7 @@ class MarbleWorld extends Scheduler {
 		}
 		this.checkpointHeldPowerup = this.marble.heldPowerup;
 		this.displayAlert("Checkpoint reached!");
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/checkpoint.wav', ResourceLoader.getAudio, this.soundResources));
+		AudioManager.playPitchedSound("checkpoint", this.soundResources);
 	}
 
 	/** Resets to the last stored checkpoint state. */
@@ -2803,7 +2996,7 @@ class MarbleWorld extends Scheduler {
 		// Wait a bit to select the powerup to prevent immediately using it incase the user skipped the OOB screen by clicking
 		if (this.checkpointHeldPowerup != null)
 			this.schedule(this.timeState.currentAttemptTime + 0.5, () -> this.pickUpPowerUp(this.marble, this.checkpointHeldPowerup));
-		AudioManager.playSound(ResourceLoader.getResource('data/sound/spawn.wav', ResourceLoader.getAudio, this.soundResources));
+		AudioManager.playPitchedSound("spawn", this.soundResources);
 	}
 
 	public function setCursorLock(enabled:Bool) {
