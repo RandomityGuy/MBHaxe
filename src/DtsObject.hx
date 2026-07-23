@@ -429,7 +429,7 @@ class DtsObject extends GameObject {
 					var dtsshader = new DtsTexture();
 					dtsshader.texture = texture;
 					dtsshader.currentOpacity = 1;
-					if (this.identifier == "Tornado")
+					if (this.identifier != null && StringTools.startsWith(this.identifier, "Tornado"))
 						dtsshader.normalizeNormals = false; // These arent normalized
 					if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
 						dtsshader.usePremultipliedAlpha = true;
@@ -446,7 +446,7 @@ class DtsObject extends GameObject {
 			if (material.texture == null && !iflMaterial) {
 				var dtsshader = new DtsTexture();
 				dtsshader.currentOpacity = 1;
-				if (this.identifier == "Tornado")
+				if (this.identifier != null && StringTools.startsWith(this.identifier, "Tornado"))
 					dtsshader.normalizeNormals = false; // These arent normalized
 				// Make a 1x1 white texture
 				#if hl

@@ -124,6 +124,7 @@ import h3d.Vector;
 import src.InteriorObject;
 import h3d.scene.Scene;
 import collision.CollisionWorld;
+import collision.CollisionEntity;
 import src.Marble;
 import src.Resource;
 import src.ProfilerUI;
@@ -378,7 +379,7 @@ class MarbleWorld extends Scheduler {
 					// Override the end pad element. We do this because only the last finish pad element will actually do anything.
 					if (element._type == MissionElementType.StaticShape) {
 						var so:MissionElementStaticShape = cast element;
-						if (["endpad", "endpad_mbg", "endpad_mbp"].contains(so.datablock.toLowerCase()))
+						if (["endpad", "endpad_mbg", "endpad_mbp", "endpad_pq"].contains(so.datablock.toLowerCase()))
 							this.endPadElement = so;
 					}
 
@@ -1035,6 +1036,13 @@ class MarbleWorld extends Scheduler {
 
 						// if (pathedInterior.hasCollision)
 						// 	this.physics.addInterior(pathedInterior);
+						// Named references (e.g. IceShard's `gotoTarget`/`pathedInterior[i]`) target
+						// the PathedInterior element's own name, not the containing SimGroup's -
+						// every other placed object is looked up by its own element name too.
+						if (@:privateAccess pathedInterior.element._name != null && @:privateAccess pathedInterior.element._name != "")
+							this.namedGameObjects.set(@:privateAccess pathedInterior.element._name, pathedInterior);
+						if (simGroup._name != null && simGroup._name != "")
+							this.namedGameObjects.set(simGroup._name, pathedInterior);
 						for (trigger in pathedInterior.triggers) {
 							this.triggers.push(trigger);
 							this.collisionWorld.addEntity(trigger.collider);
@@ -1114,13 +1122,14 @@ class MarbleWorld extends Scheduler {
 			var tmat = Matrix.T(interiorPosition.x, interiorPosition.y, interiorPosition.z);
 			mat.multiply(mat, tmat);
 
-			// A path/parent-following interior ignores its own placed transform entirely, same
-			// reasoning as addPlaceableShape.
-			if (!interior.hasMover())
-				interior.setTransform(mat);
+			// Always apply the authored placement first, *then* hand off to the path/parent
+			// follower - see addPlaceableShape for why.
+			interior.setTransform(mat);
+			interior.initPathAndParent(cast element, this);
+			this.promoteMoverColliders(interior, [interior.collider]);
 			interior.isCollideable = hasCollision;
 			onFinish();
-		}, cast element);
+		});
 
 		// interior.setTransform(interiorPosition, interiorRotation, interiorScale);
 
@@ -1138,11 +1147,11 @@ class MarbleWorld extends Scheduler {
 		rotation.w = -rotation.w;
 		var scale = MisParser.parseVector3(element.scale);
 		if (scale.x == 0)
-			scale.x = 1;
+			scale.x = 0.0001;
 		if (scale.y == 0)
-			scale.y = 1;
+			scale.y = 0.0001;
 		if (scale.z == 0)
-			scale.z = 1;
+			scale.z = 0.0001;
 
 		this.pathNodes.set(element._name, new PathNodeElement(element._name, position, rotation, scale, element.fields));
 	}
@@ -1202,13 +1211,18 @@ class MarbleWorld extends Scheduler {
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(shape, () -> {
-			// A path/parent-following shape ignores its own placed transform entirely (it's
-			// driven by the path/parent instead), matching PQ's moveOnPath immediately snapping
-			// to the path chain - applying `mat` afterward would stomp that.
-			if (!shape.hasMover())
-				shape.setTransform(mat);
+			// Always apply the authored placement first, *then* hand off to the path/parent
+			// follower - a path/parent-following shape may still fall back to its own current
+			// absolute transform for any axis it doesn't drive (see
+			// GameObjectPathFollower.evaluateTransform), so that fallback needs to be the real
+			// placed transform, not whatever default origin the object started at.
+			shape.setTransform(mat);
+			shape.initPathAndParent(element, this);
+			this.promoteMoverColliders(shape, shape.colliders);
+			if (shape.isBoundingBoxCollideable)
+				this.promoteMoverColliders(shape, [shape.boundingCollider]);
 			onFinish();
-		}, false, element);
+		});
 	}
 
 	public function addTrigger(element:MissionElementTrigger, onFinish:Void->Void) {
@@ -1266,6 +1280,7 @@ class MarbleWorld extends Scheduler {
 				obj: tsShape,
 				elem: element
 			});
+			this.namedGameObjects.set(element._name, tsShape);
 		}
 
 		var shapePosition = MisParser.parseVector3(element.position);
@@ -1290,7 +1305,13 @@ class MarbleWorld extends Scheduler {
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(tsShape, () -> {
+			// Always apply the authored placement first, *then* hand off to the path/parent
+			// follower - see addPlaceableShape for why.
 			tsShape.setTransform(mat);
+			tsShape.initPathAndParent(cast element, this);
+			this.promoteMoverColliders(tsShape, tsShape.colliders);
+			if (tsShape.isBoundingBoxCollideable)
+				this.promoteMoverColliders(tsShape, [tsShape.boundingCollider]);
 			onFinish();
 		}, true);
 	}
@@ -1300,21 +1321,34 @@ class MarbleWorld extends Scheduler {
 		// TODO THIS SHIT
 	}
 
-	public function addInterior(obj:InteriorObject, onFinish:Void->Void, ?element:IPlaceableElement) {
+	public function addInterior(obj:InteriorObject, onFinish:Void->Void) {
 		this.interiors.push(obj);
 		obj.init(cast this, () -> {
-			if (element != null)
-				obj.initPathAndParent(element, this);
-			if (obj.hasMover())
-				this.collisionWorld.addMovingEntity(obj.collider);
-			else
-				this.collisionWorld.addEntity(obj.collider);
+			this.collisionWorld.addEntity(obj.collider);
 			if (obj.useInstancing)
 				this.instanceManager.addObject(obj);
 			else
 				this.scene.addChild(obj);
 			onFinish();
 		});
+	}
+
+	/** Promotes a `GameObject`'s collider(s) from the static to the moving broadphase grid after
+		the fact - needed because `initPathAndParent` can only run once the object's *true* placed
+		transform has been applied (its own current-absolute-transform is the fallback for any axis
+		a path/parent doesn't drive - see `GameObjectPathFollower.evaluateTransform`), which itself
+		can only happen once the DTS/interior has finished loading and its collider(s) exist. That's
+		necessarily *after* `addDtsObject`/`addInterior` already decided which grid to use, so
+		`hasMover()` isn't known yet at that point - fix it up here instead. */
+	function promoteMoverColliders(obj:GameObject, colliders:Array<CollisionEntity>) {
+		if (!obj.hasMover())
+			return;
+		for (collider in colliders) {
+			if (collider == null)
+				continue;
+			this.collisionWorld.removeEntity(collider);
+			this.collisionWorld.addMovingEntity(collider);
+		}
 	}
 
 	public function addPathedInterior(obj:PathedInterior, onFinish:Void->Void) {
@@ -1330,7 +1364,7 @@ class MarbleWorld extends Scheduler {
 		});
 	}
 
-	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false, ?element:IPlaceableElement) {
+	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false) {
 		function parseIfl(path:String, onFinish:Array<String>->Void) {
 			ResourceLoader.load(path).entry.load(() -> {
 				var dirPath = haxe.io.Path.directory(path);
@@ -1361,9 +1395,6 @@ class MarbleWorld extends Scheduler {
 				onFinish(keyframes);
 			});
 		}
-
-		if (obj.instancingKey == null)
-			obj.instancingKey = obj.dtsPath + (obj.skinOverride != null ? obj.skinOverride : "");
 
 		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
 			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
@@ -1407,27 +1438,17 @@ class MarbleWorld extends Scheduler {
 				}
 				obj.isTSStatic = isTsStatic;
 				obj.init(cast this, () -> {
-					if (element != null)
-						obj.initPathAndParent(element, this);
 					obj.update(this.timeState);
 					if (obj.useInstancing) {
 						this.instanceManager.addObject(obj);
 					} else
 						this.scene.addChild(obj);
 					for (collider in obj.colliders) {
-						if (collider != null) {
-							if (obj.hasMover())
-								this.collisionWorld.addMovingEntity(collider);
-							else
-								this.collisionWorld.addEntity(collider);
-						}
+						if (collider != null)
+							this.collisionWorld.addEntity(collider);
 					}
-					if (obj.isBoundingBoxCollideable) {
-						if (obj.hasMover())
-							this.collisionWorld.addMovingEntity(obj.boundingCollider);
-						else
-							this.collisionWorld.addEntity(obj.boundingCollider);
-					}
+					if (obj.isBoundingBoxCollideable)
+						this.collisionWorld.addEntity(obj.boundingCollider);
 
 					onFinish();
 				});
@@ -2697,14 +2718,14 @@ class MarbleWorld extends Scheduler {
 		return 0;
 	}
 
-	public function pickUpPowerUpReplay(powerupIdent:String) {
-		if (powerupIdent == null)
+	public function pickUpPowerUpReplay(powerupDtsPath:String) {
+		if (powerupDtsPath == null)
 			return false;
 		if (this.marble.heldPowerup != null)
-			if (this.marble.heldPowerup.identifier == powerupIdent)
+			if (this.marble.heldPowerup.dtsPath == powerupDtsPath)
 				return false;
 
-		this.playGui.setPowerupImage(powerupIdent);
+		this.playGui.setPowerupImage(powerupDtsPath);
 
 		return true;
 	}
@@ -2720,7 +2741,7 @@ class MarbleWorld extends Scheduler {
 		if (@:privateAccess !marble.isNetUpdate)
 			@:privateAccess marble.netFlags |= MarbleNetFlags.PickupPowerup;
 		if (this.marble == marble) {
-			this.playGui.setPowerupImage(powerUp.identifier, powerUp.dtsPath);
+			this.playGui.setPowerupImage(powerUp.dtsPath);
 			MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
 			if (this.isRecording) {
 				this.replay.recordPowerupPickup(powerUp);
@@ -2733,7 +2754,7 @@ class MarbleWorld extends Scheduler {
 		marble.heldPowerup = null;
 		@:privateAccess marble.netFlags |= MarbleNetFlags.PickupPowerup;
 		if (this.marble == marble) {
-			this.playGui.setPowerupImage("");
+			this.playGui.setPowerupImage(null);
 			MarbleGame.instance.touchInput.powerupButton.setEnabled(false);
 		}
 	}

@@ -12,7 +12,9 @@ class SuperBounce extends PowerUp {
 		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superbounce.dts" : "data/shapes/items/superbounce.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "SuperBounce";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		this.identifier = "SuperBounce" + this.dtsPath;
 		this.pickUpName = "Marble Recoil PowerUp";
 	}
 

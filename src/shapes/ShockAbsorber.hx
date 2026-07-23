@@ -12,7 +12,9 @@ class ShockAbsorber extends PowerUp {
 		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/pillow.dts" : "data/shapes/items/shockabsorber.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "ShockAbsorber";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		this.identifier = "ShockAbsorber" + this.dtsPath;
 		this.pickUpName = "Anti-Recoil PowerUp";
 	}
 

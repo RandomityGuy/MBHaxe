@@ -21,7 +21,9 @@ class DuctFan extends ForceObject {
 		}
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		this.identifier = "DuctFan";
+		// Instancing batches by `identifier`, and the PQ variants use a different mesh - keep the
+		// dtsPath in the identifier so they don't get batched with the vanilla mesh (or each other).
+		this.identifier = "DuctFan" + this.dtsPath;
 		this.forceDatas = [
 			{
 				forceType: ForceCone,

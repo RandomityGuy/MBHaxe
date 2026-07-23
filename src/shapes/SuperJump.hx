@@ -43,7 +43,10 @@ class SuperJump extends PowerUp {
 		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superjump.dts" : "data/shapes/items/superjump.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "SuperJump";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh. HUD/gameplay
+		// code that cares about the category (PlayGui.setPowerupImage) matches by prefix.
+		this.identifier = "SuperJump" + this.dtsPath;
 		this.pickUpName = "Jump Boost PowerUp";
 		if (element.datablock.toLowerCase() == "customsuperjumpitem_pq") {
 			var powerField = element.fields != null ? element.fields.get("power") : null;

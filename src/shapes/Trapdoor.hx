@@ -29,7 +29,9 @@ class Trapdoor extends DtsObject {
 			"data/shapes/hazards/trapdoor.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		this.identifier = "Trapdoor";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		this.identifier = "Trapdoor" + this.dtsPath;
 		this.hasNonVisualSequences = true;
 		this.enableCollideCallbacks = true;
 	}

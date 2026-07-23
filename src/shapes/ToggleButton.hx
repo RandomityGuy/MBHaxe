@@ -26,7 +26,9 @@ class ToggleButton extends DtsObject {
 			"data/shapes/buttons/pushbutton.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		this.identifier = "ToggleButton";
+		// Instancing batches by `identifier`, and the flat variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the regular button mesh.
+		this.identifier = "ToggleButton" + this.dtsPath;
 		this.hasNonVisualSequences = true;
 		this.enableCollideCallbacks = true;
 

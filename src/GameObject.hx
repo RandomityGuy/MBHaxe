@@ -17,14 +17,6 @@ import src.MarbleWorld;
 class GameObject extends Object implements IPathMover {
 	public var identifier:String;
 
-	/** Key used by `InstanceManager` to decide whether two objects share an instanced mesh
-		batch. Must be unique per distinct geometry. Defaults to `identifier` if unset, but
-		`identifier` is also used elsewhere as a coarser gameplay/material category tag (e.g.
-		HUD powerup icon lookup, `== "Tornado"` material quirks) that deliberately stays the
-		same across reskins with different meshes — so those two purposes can't share one
-		field. `MarbleWorld.addDtsObject` sets this to `dtsPath` automatically. */
-	public var instancingKey:String;
-
 	public var currentOpacity:Float = 1;
 	public var isCollideable:Bool = false;
 	public var isBoundingBoxCollideable:Bool = false;

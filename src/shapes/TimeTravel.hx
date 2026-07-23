@@ -23,7 +23,9 @@ class TimeTravel extends PowerUp {
 			this.dtsPath = "data/shapes/items/timetravel.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "TimeTravel";
+		// Instancing batches by `identifier`, and the sundial/timepenalty/PQ/vanilla variants use
+		// different meshes - keep the dtsPath in the identifier so they don't get batched together.
+		this.identifier = "TimeTravel" + this.dtsPath;
 
 		if (element.timebonus != null) {
 			this.timeBonus = MisParser.parseNumber(element.timebonus) / 1000;

@@ -19,7 +19,9 @@ class Checkpoint extends DtsObject {
 			"data/shapes/buttons/checkpoint.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		this.identifier = "Checkpoint";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		this.identifier = "Checkpoint" + this.dtsPath;
 		this.element = element;
 
 		this.disableOOB = element.fields.exists('disableOob') ? MisParser.parseBoolean(element.fields['disableOob'][0]) : false;

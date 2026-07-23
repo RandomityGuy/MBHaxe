@@ -75,6 +75,8 @@ class PlayGui {
 	var gemImageSceneTargetBitmap:Bitmap;
 
 	var powerupBox:GuiImage;
+	var powerupLockedTile:Tile;
+	var powerupUnlockedTile:Tile;
 	var powerupImageScene:h3d.scene.Scene;
 	var powerupImageSceneTarget:Texture;
 	var powerupImageSceneTargetBitmap:Bitmap;
@@ -209,7 +211,9 @@ class PlayGui {
 		rsgo.push(ResourceLoader.getResource("data/ui/game/outofbounds.png", ResourceLoader.getImage, this.imageResources).toTile());
 		RSGOCenterText = new Anim(rsgo, 0, scene2d);
 
-		powerupBox = new GuiImage(ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile());
+		powerupUnlockedTile = ResourceLoader.getResource('data/ui/game/powerup.png', ResourceLoader.getImage, this.imageResources).toTile();
+		powerupLockedTile = ResourceLoader.getResource('data/ui/game/powerup_locked.png', ResourceLoader.getImage, this.imageResources).toTile();
+		powerupBox = new GuiImage(powerupUnlockedTile);
 		initTimer();
 		initGemCounter(() -> {
 			initCenterText();
@@ -982,32 +986,23 @@ class PlayGui {
 		// helpTextBackground.y = scene2d.height * 0.45 + 1;
 	}
 
-	public function setPowerupImage(powerupIdentifier:String, ?dtsPath:String) {
+	/** Ported from PQ's `PlayGui::lockPowerup` (`client/scripts/playGui.cs`) - swaps the powerup
+		HUD frame to a "locked" graphic whenever the held powerup can't currently be used (e.g.
+		frozen by an ice shard - see `Marble.freeze`). */
+	public function lockPowerup(locked:Bool) {
+		this.powerupBox.setTile(locked ? this.powerupLockedTile : this.powerupUnlockedTile);
+	}
+
+	public function setPowerupImage(?dtsPath:String) {
 		this.powerupImageScene.removeChildren();
-		if (powerupIdentifier == "SuperJump") {
+		if (dtsPath != null && dtsPath != "") {
 			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/superjump.dts";
-		} else if (powerupIdentifier == "SuperSpeed") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/superspeed.dts";
-		} else if (powerupIdentifier == "ShockAbsorber") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/shockabsorber.dts";
-		} else if (powerupIdentifier == "SuperBounce") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/superbounce.dts";
-		} else if (powerupIdentifier == "Helicopter") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/images/helicopter.dts";
-		} else if (powerupIdentifier == "MegaMarble") {
-			powerupImageObject = new DtsObject();
-			powerupImageObject.dtsPath = dtsPath != null ? dtsPath : "data/shapes/items/megamarble.dts";
+			powerupImageObject.dtsPath = dtsPath;
 		} else {
-			powerupIdentifier = "";
 			this.powerupImageObject = null;
 		}
 
-		if (powerupIdentifier != "") {
+		if (powerupImageObject != null) {
 			powerupImageObject.ambientRotate = true;
 			powerupImageObject.ambientSpinFactor /= 2;
 			powerupImageObject.showSequences = false;

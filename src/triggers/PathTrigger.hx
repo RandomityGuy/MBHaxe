@@ -2,18 +2,21 @@ package triggers;
 
 import src.TimeState;
 import src.Marble;
+import src.MarbleWorld;
 import mis.MisParser;
 
 /** Assigns a path to one or more named objects on marble-enter. Ported from PQ's
 	`PathTrigger::onEnterTrigger` (`platinum/server/scripts/triggers.cs`, explicitly marked
 	"UNFINISHED CODE" in the PQ source - reproduced as-is, bugs included, per the standing rule).
 
-	`Object[i]`/`Path[i]` are 1-based indexed fields, read until the first `Object[i]` that doesn't
-	resolve to a real placed object. `InitialPosition[i]` is parsed by PQ but never actually used
-	(the underlying `moveOnPath` only takes one parameter, so PQ's extra argument is silently
-	discarded) - not wired to anything here either. If `Path[i]` is blank, PQ simply doesn't
-	reassign its working `%path` variable, so it silently reuses whatever the *previous* index's
-	path was - reproduced verbatim, not "fixed" to fall back to null. */
+	`Object[i]`/`Path[i]` are 1-based indexed fields in script, but TorqueScript's dynamic-field
+	pseudo-arrays are actually saved as plain numeric-suffixed field names (`Object1`, `Path1`,
+	`Object2`, ...), not bracket syntax - confirmed against real mission files. Read until the
+	first `Object<i>` that doesn't resolve to a real placed object. `InitialPosition<i>` is parsed
+	by PQ but never actually used (the underlying `moveOnPath` only takes one parameter, so PQ's
+	extra argument is silently discarded) - not wired to anything here either. If `Path<i>` is
+	blank, PQ simply doesn't reassign its working `%path` variable, so it silently reuses whatever
+	the *previous* index's path was - reproduced verbatim, not "fixed" to fall back to null. */
 class PathTrigger extends Trigger {
 	var triggered:Bool = false;
 
@@ -24,27 +27,31 @@ class PathTrigger extends Trigger {
 			return;
 		this.triggered = true;
 
-		var objectField = this.element.fields.get("object");
-		var pathField = this.element.fields.get("path");
-		if (objectField == null)
-			return;
+		runObjectPathChain(this.element.fields, this.level);
+	}
 
+	/** Shared with `shapes.IceShard`'s `gotoTarget` feature (a per-mission script override in some
+		PQ levels that bolts this exact `Object[i]`/`Path[i]` behavior onto ice shards too - see
+		`IceShard.hx`), since it's the identical field convention/bug reproduced verbatim. */
+	public static function runObjectPathChain(fields:Map<String, Array<String>>, level:MarbleWorld) {
 		var path:String = null;
 		var i = 1;
 		while (true) {
-			var objectName = objectField[i];
+			var objectField = fields.get("object" + i);
+			var objectName = objectField != null ? objectField[0] : null;
 			if (objectName == null || objectName == "")
 				break;
-			var target = this.level.namedGameObjects.get(objectName);
+			var target = level.namedGameObjects.get(objectName);
 			if (target == null)
 				break;
 
-			var pathAtIndex = pathField != null ? pathField[i] : null;
+			var pathField = fields.get("path" + i);
+			var pathAtIndex = pathField != null ? pathField[0] : null;
 			if (pathAtIndex != null && pathAtIndex != "")
 				path = pathAtIndex;
 
 			if (path != null)
-				target.moveOnPath(path, this.level);
+				target.moveOnPath(path, level);
 
 			i++;
 		}

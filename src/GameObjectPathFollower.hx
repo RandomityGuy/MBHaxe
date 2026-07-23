@@ -187,10 +187,15 @@ class GameObjectPathFollower {
 	}
 
 	function applyState(position:Vector, rotation:Quat, scale:Vector) {
+		// position/rotation/scale here are world-space (see evaluateTransform) - setTransform
+		// expects a transform local to the object's scene parent, so convert like
+		// PathNodeAnimator.updateObjPosition does (`tform.multiply(tform, invTform)`).
 		scratchApplyMat.initScale(scale.x, scale.y, scale.z);
 		rotation.toMatrix(scratchApplyRotMat);
 		scratchApplyMat.multiply3x4(scratchApplyMat, scratchApplyRotMat);
 		scratchApplyMat.setPosition(position);
+		// if (this.obj.parent != null)
+		// 	scratchApplyMat.multiply(scratchApplyMat, this.obj.parent.getInvPos());
 		this.obj.setTransform(scratchApplyMat);
 	}
 
@@ -360,8 +365,8 @@ class GameObjectPathFollower {
 		return 1.0;
 	}
 
-	function getPathPosition(node:PathNodeElement, nodeT:PathNodeLiveTransform, next:PathNodeElement, nextT:PathNodeLiveTransform,
-			prevNodeName:String, t:Float):Vector {
+	function getPathPosition(node:PathNodeElement, nodeT:PathNodeLiveTransform, next:PathNodeElement, nextT:PathNodeLiveTransform, prevNodeName:String,
+			t:Float):Vector {
 		var pointList = getPointList(node, nodeT, next, nextT, prevNodeName);
 		return interpolate(pointList, t);
 	}
@@ -419,8 +424,8 @@ class GameObjectPathFollower {
 		return pointList;
 	}
 
-	function getPathRotation(node:PathNodeElement, nodeT:PathNodeLiveTransform, next:PathNodeElement, nextT:PathNodeLiveTransform,
-			t:Float, adjustedT:Float):Quat {
+	function getPathRotation(node:PathNodeElement, nodeT:PathNodeLiveTransform, next:PathNodeElement, nextT:PathNodeLiveTransform, t:Float,
+			adjustedT:Float):Quat {
 		if (next == node)
 			return nodeT.rotation;
 

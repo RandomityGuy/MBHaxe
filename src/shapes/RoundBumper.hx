@@ -12,6 +12,8 @@ class RoundBumper extends AbstractBumper {
 		dtsPath = (element != null && element.datablock.toLowerCase() == "roundbumper_pq") ? "data/shapes_pq/gameplay/hazards/bumpers/roundbumper.dts" :
 			"data/shapes/bumpers/pball_round.dts";
 		isCollideable = true;
-		identifier = "RoundBumper";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		identifier = "RoundBumper" + dtsPath;
 	}
 }

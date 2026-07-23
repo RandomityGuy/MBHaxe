@@ -238,6 +238,7 @@ class Marble extends GameObject {
 	var blastRechargeShockwaveStrength = 10.0;
 
 	public var _bounceRestitution = 0.5;
+	var _maxForceRadius:Float = 50;
 
 	var _bounceYet:Bool;
 	var _bounceSpeed:Float;
@@ -294,7 +295,23 @@ class Marble extends GameObject {
 	public var teleporterSavedGravity:Vector = new Vector(0, 0, -1);
 	public var teleporterKeepVelocity:Bool = false;
 	public var teleporterTeleTime:Float = 2;
-	public var teleporterLastUseTick:Int = -1000;
+	public var teleporterLastUseTime:Float = -1000;
+
+	/** IceShard freeze state, ported from PQ's `IceShard::onCollision`/`unfreeze`
+		(`server/scripts/hazards.cs`). `iceChunk` is a visual-only DtsObject snapped to the
+		marble's transform every frame while frozen (mirroring `%marble.iceChunk.setParent(%marble,
+		"0 0 0", 1)` - a "simple" 1:1 parent with no offset), scaled to the marble's current radius. */
+	public var isFrozen:Bool = false;
+	public var lastFreezeTime:Float = -1e8;
+	var iceChunk:DtsObject;
+	var iceShard:shapes.IceShard;
+
+	/** Counts reasons the held powerup currently can't be used (only freezing, for now - PQ also
+		locks it from cannons/on respawn, matching `Marble::lockPowerup`/`unlockPowerup` in
+		`server/scripts/marble.cs`, neither of which is ported yet). A count instead of a plain
+		bool so multiple simultaneous lock reasons don't clobber each other. */
+	public var powerupLockCount:Int = 0;
+
 	var superBounceEnableTime:Float = -1e8;
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
@@ -619,15 +636,27 @@ class Marble extends GameObject {
 		this.teleporterMarker.y = 1e8;
 		this.teleporterMarker.z = 1e8;
 
+		this.iceChunk = new DtsObject();
+		this.iceChunk.dtsPath = "data/shapes_pq/gameplay/hazards/ice.dts";
+		this.iceChunk.useInstancing = true;
+		this.iceChunk.identifier = "IceChunk";
+		this.iceChunk.isCollideable = false;
+		this.iceChunk.isBoundingBoxCollideable = false;
+		this.iceChunk.x = 1e8;
+		this.iceChunk.y = 1e8;
+		this.iceChunk.z = 1e8;
+
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopterPQ, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.megaHelicopter, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.teleporterMarker, fwd));
+		worker.addTask(fwd -> level.addDtsObject(this.iceChunk, fwd));
 		worker.run();
 
 		loadMarbleAttributes();
+		capturePhysicsAttributeBaseline();
 	}
 
 	function buildShadowVolume() {
@@ -741,6 +770,13 @@ class Marble extends GameObject {
 			this._bounceKineticFriction = MisParser.parseNumber(attribs.get("bouncekineticfriction"));
 	}
 
+	/** Every attribute PQ's `MarbleAttributeInfoArray`/`PhysMod` system can override on a marble
+		(`shared/defaultProperties.cs`/`client/scripts/physics.cs`) - excludes the "global" (non-
+		datablock) attributes (`cameraSpeedMultiplier`, `timeScale`, etc.) and mega-marble-specific
+		`megaValue` overrides, neither of which are in scope here. Recognizes both PQ's real attribute
+		name (`airAcceleration`) and this codebase's pre-existing shorthand (`airAccel`) for the same
+		field, since both appear in the wild (mission-wide `setMarbleAttributes` vs. real PQ `.mis`
+		`PhysMod` triggers). */
 	public function setMarbleAttribute(attr:String, value:Float) {
 		switch (attr.toLowerCase()) {
 			case "maxrollvelocity":
@@ -757,7 +793,7 @@ class Marble extends GameObject {
 				this._brakingAcceleration = value;
 			case "gravity":
 				this._gravity = value;
-			case "airaccel":
+			case "airaccel", "airacceleration":
 				this._airAccel = value;
 			case "maxdotslide":
 				this._maxDotSlide = value;
@@ -769,7 +805,95 @@ class Marble extends GameObject {
 				this._minTrailVel = value;
 			case "bouncekineticfriction":
 				this._bounceKineticFriction = value;
+			case "bouncerestitution":
+				this._bounceRestitution = value;
+			case "mass":
+				this._mass = value;
+			case "maxforceradius":
+				this._maxForceRadius = value;
 		}
+	}
+
+	/** Counterpart to `setMarbleAttribute` - reads the current value of an overridable attribute,
+		used by `pushPhysicsLayer`/`popPhysicsLayer` to snapshot the baseline to reset to and to
+		re-apply each still-active layer's overrides on top of it. Returns 0 for an unrecognized
+		attribute name (matches `setMarbleAttribute`'s silent-ignore behavior). */
+	function getMarbleAttribute(attr:String):Float {
+		return switch (attr.toLowerCase()) {
+			case "maxrollvelocity": this._maxRollVelocity;
+			case "angularacceleration": this._angularAcceleration;
+			case "jumpimpulse": this._jumpImpulse;
+			case "kineticfriction": this._kineticFriction;
+			case "staticfriction": this._staticFriction;
+			case "brakingacceleration": this._brakingAcceleration;
+			case "gravity": this._gravity;
+			case "airaccel", "airacceleration": this._airAccel;
+			case "maxdotslide": this._maxDotSlide;
+			case "minbouncevel": this._minBounceVel;
+			case "minbouncespeed": this._minBounceSpeed;
+			case "mintrailvel": this._minTrailVel;
+			case "bouncekineticfriction": this._bounceKineticFriction;
+			case "bouncerestitution": this._bounceRestitution;
+			case "mass": this._mass;
+			case "maxforceradius": this._maxForceRadius;
+			default: 0;
+		}
+	}
+
+	/** All attributes currently overridden by pushed `PhysMod` layers, outermost (most-recently-
+		pushed) last - see `pushPhysicsLayer`/`popPhysicsLayer`. Every entry is just an
+		attribute-name/value pair (ported from PQ's `Physics::pushLayer`'s `attribute[i]`/`value[i]`
+		record, `client/scripts/physics.cs`); `megaValue` isn't tracked here since mega-marble-specific
+		attribute overrides are out of scope for this port. */
+	var physicsLayers:Array<Array<PhysicsAttributeOverride>> = [];
+
+	/** Baseline attribute values to reset to before replaying every still-active layer - captured
+		once after `loadMarbleAttributes()` applies the mission's own permanent overrides (see
+		`init()`), so popping every layer returns the marble to the *level's* configured defaults,
+		not the engine's hardcoded ones. */
+	var physicsAttributeBaseline:Map<String, Float>;
+
+	static var PHYSMOD_ATTRIBUTES = [
+		"maxrollvelocity", "angularacceleration", "jumpimpulse", "kineticfriction", "staticfriction", "brakingacceleration", "gravity", "airacceleration",
+		"maxdotslide", "minbouncevel", "minbouncespeed", "mintrailvel", "bouncekineticfriction", "bouncerestitution", "mass", "maxforceradius"
+	];
+
+	function capturePhysicsAttributeBaseline() {
+		this.physicsAttributeBaseline = new Map();
+		for (attr in PHYSMOD_ATTRIBUTES)
+			this.physicsAttributeBaseline.set(attr, getMarbleAttribute(attr));
+	}
+
+	/** Ported from PQ's `Physics::pushLayer` (`client/scripts/physics.cs`) - each `PhysMod` trigger
+		(and, later, things like water) pushes one layer of attribute overrides on marble-enter and
+		pops the same layer on marble-leave (`popPhysicsLayer`). Applies every override in this new
+		layer immediately; doesn't touch attributes the layer doesn't mention, so whatever the
+		previously-active layers (or the baseline) left them at stays in effect. Returns the layer so
+		the caller can pass it back to `popPhysicsLayer` later - overlapping PhysMod volumes combine
+		correctly because the most-recently-pushed layer's value for a given attribute always wins
+		(pushed last = applied last = still in effect until *that* layer is popped). */
+	public function pushPhysicsLayer(overrides:Array<PhysicsAttributeOverride>) {
+		this.physicsLayers.push(overrides);
+		for (o in overrides)
+			setMarbleAttribute(o.attribute, o.value);
+		return overrides;
+	}
+
+	/** Ported from PQ's `Physics::popLayer` - removing a layer can't just re-apply the baseline,
+		since other layers might still be active and need their overrides preserved; instead, like
+		the original, this resets every tracked attribute to the captured baseline and replays every
+		*remaining* layer's overrides back in order, so whichever still-active layer touched an
+		attribute most recently ends up in effect again. */
+	public function popPhysicsLayer(layer:Array<PhysicsAttributeOverride>) {
+		if (!this.physicsLayers.remove(layer))
+			return;
+		if (this.physicsAttributeBaseline == null)
+			return;
+		for (attr in PHYSMOD_ATTRIBUTES)
+			setMarbleAttribute(attr, this.physicsAttributeBaseline.get(attr));
+		for (remaining in this.physicsLayers)
+			for (o in remaining)
+				setMarbleAttribute(o.attribute, o.value);
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
@@ -1885,6 +2009,11 @@ class Marble extends GameObject {
 			}
 			appliedImpulses = [];
 
+			if (this.isFrozen) {
+				this.velocity.set(0, 0, 0);
+				this.omega.set(0, 0, 0);
+			}
+
 			velocity.w = 0;
 
 			var pos = this.collider.transform.getPosition();
@@ -1942,7 +2071,8 @@ class Marble extends GameObject {
 
 			if (this.heldPowerup != null
 				&& (m.powerup || (Net.isClient && this.serverUsePowerup && !this.controllable))
-				&& !this.outOfBounds) {
+				&& !this.outOfBounds
+				&& this.powerupLockCount <= 0) {
 				var pTime = timeState.clone();
 				pTime.dt = timeStep;
 				pTime.currentAttemptTime = passedTime;
@@ -2633,6 +2763,8 @@ class Marble extends GameObject {
 		this.shadowVolume.setScale(this._radius / 0.2);
 		if (this.level == null)
 			return;
+		if (this.isFrozen && timeState.currentAttemptTime - this.lastFreezeTime >= shapes.IceShard.FREEZE_TIME)
+			this.unfreeze(false);
 		var shockEnabled = isShockAbsorberEnabled(timeState);
 		var bounceEnabled = isSuperBounceEnabled(timeState);
 		var helicopterEnabled = isHelicopterEnabled(timeState);
@@ -2685,6 +2817,14 @@ class Marble extends GameObject {
 				if (selfMarble)
 					this.helicopterSound.pause = true;
 			}
+		}
+
+		if (this.isFrozen) {
+			this.iceChunk.setPosition(x, y, z);
+			// PQ: `%scale = %marble.getCollisionRadius() / 0.18975; setScale(%scale + 0.1)`.
+			this.iceChunk.setScale(this._radius / 0.18975 + 0.1);
+		} else {
+			this.iceChunk.setPosition(1e8, 1e8, 1e8);
 		}
 	}
 
@@ -2886,6 +3026,73 @@ class Marble extends GameObject {
 		}
 	}
 
+	/** Ported from PQ's `IceShard::onCollision` (`server/scripts/hazards.cs`). MegaMarble is
+		immune - touching a shard while mega just cancels MegaMarble instead of freezing. Otherwise
+		locks movement (reusing the existing `movementTriggerCount` gate) and zeroes velocity every
+		tick while frozen (see `advancePhysics`). Unfreezing itself is driven by `lastFreezeTime`
+		(checked every frame in `updatePowerupStates`, same pattern as `PowerUp.cooldownDuration`/
+		`PushButton.getCurrentCompletion`) rather than a one-shot schedule, so it survives rewind
+		and mission-reset the same way every other timed state in this class already does. */
+	public function freeze(ice:shapes.IceShard, timeState:TimeState) {
+		if (isMegaMarbleEnabled(timeState)) {
+			this.megaMarbleEnableTime = -1e8;
+			ice.playCrackSound(this);
+			return;
+		}
+
+		this.isFrozen = true;
+		this.movementTriggerCount++;
+		this.lockPowerupUse();
+		this.iceShard = ice;
+		this.lastFreezeTime = timeState.currentAttemptTime;
+		this.velocity.set(0, 0, 0);
+		this.omega.set(0, 0, 0);
+		ice.playFreezeSound(this);
+	}
+
+	/** Ported from PQ's `Marble::lockPowerup`/`unlockPowerup` (`server/scripts/marble.cs`) -
+		swaps the HUD's powerup frame to a "locked" graphic. A count rather than a plain toggle so
+		multiple simultaneous lock reasons (only freezing, currently) don't unlock each other early. */
+	public function lockPowerupUse() {
+		this.powerupLockCount++;
+		if (this.level != null && this.level.marble == this)
+			@:privateAccess this.level.playGui.lockPowerup(true);
+	}
+
+	public function unlockPowerupUse() {
+		this.powerupLockCount--;
+		if (this.powerupLockCount < 0)
+			this.powerupLockCount = 0;
+		if (this.powerupLockCount == 0 && this.level != null && this.level.marble == this)
+			@:privateAccess this.level.playGui.lockPowerup(false);
+	}
+
+	/** `cancel` mirrors PQ's own parameter - `true` when the freeze is being cut short (e.g. a
+		mission restart) rather than expiring naturally, skipping the un-freeze impulse/sound. */
+	public function unfreeze(cancel:Bool) {
+		if (!this.isFrozen)
+			return;
+		this.isFrozen = false;
+		this.movementTriggerCount--;
+		if (this.movementTriggerCount < 0)
+			this.movementTriggerCount = 0;
+		this.unlockPowerupUse();
+
+		if (!cancel) {
+			var pos = this.getAbsPos().getPosition();
+			var icePos = this.iceShard != null ? this.iceShard.getAbsPos().getPosition() : pos;
+			var away = pos.sub(icePos);
+			away = away.length() > 0.0001 ? away.normalized() : new Vector(1, 0, 0);
+			var impulse = away.multiply(3).add(this.currentUp.multiply(5));
+			this.velocity = this.velocity.add(impulse);
+			if (this.iceShard != null)
+				this.iceShard.playCrackSound(this);
+		} else {
+			this.lastFreezeTime = -1e8;
+		}
+		this.iceShard = null;
+	}
+
 	public inline function setMode(mode:Mode) {
 		this.mode = mode;
 	}
@@ -2915,9 +3122,20 @@ class Marble extends GameObject {
 		this.blastTicks = 0;
 		this.movementTriggerCount = 0;
 		this.teleporterArmed = false;
-		this.teleporterLastUseTick = -1000;
+		this.teleporterLastUseTime = -1000;
 		if (this.teleporterMarker != null)
 			this.teleporterMarker.setPosition(1e8, 1e8, 1e8);
+		if (this.isFrozen)
+			this.unlockPowerupUse();
+		this.isFrozen = false;
+		this.lastFreezeTime = -1e8;
+		this.physicsLayers = [];
+		if (this.physicsAttributeBaseline != null)
+			for (attr in PHYSMOD_ATTRIBUTES)
+				setMarbleAttribute(attr, this.physicsAttributeBaseline.get(attr));
+		this.iceShard = null;
+		if (this.iceChunk != null)
+			this.iceChunk.setPosition(1e8, 1e8, 1e8);
 		this.helicopterUseTick = 0;
 		this.megaMarbleUseTick = 0;
 		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;

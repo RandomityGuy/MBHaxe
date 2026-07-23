@@ -104,7 +104,9 @@ class LandMine extends Explodable {
 			this.skinOverride = "base";
 		} else
 			dtsPath = "data/shapes/hazards/landmine.dts";
-		this.identifier = "LandMine";
+		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
+		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
+		this.identifier = "LandMine" + this.dtsPath;
 		this.isCollideable = true;
 
 		particleData = new ParticleData();

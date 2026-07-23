@@ -102,7 +102,9 @@ class Nuke extends Explodable {
 			this.skinOverride = "nuke";
 		} else
 			dtsPath = "data/shapes/hazards/nuke/nuke.dts";
-		this.identifier = "Nuke";
+		// Instancing batches by `identifier` - Nuke_PQ reuses LandMine's mesh with a different skin
+		// (see above), so the dtsPath alone isn't enough to disambiguate; skinOverride included too.
+		this.identifier = "Nuke" + this.dtsPath + (this.skinOverride != null ? this.skinOverride : "");
 		this.isCollideable = true;
 
 		particleData = new ParticleData();

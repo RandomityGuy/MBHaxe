@@ -10,6 +10,7 @@ import shapes.PowerUp;
 import shapes.LandMine;
 import src.MarbleWorld;
 import shapes.Trapdoor;
+import shapes.FadePlatform;
 import shapes.PushButton;
 import shapes.ToggleButton;
 import src.Util;
@@ -70,6 +71,7 @@ class RewindManager {
 		rf.powerupStates = [];
 		rf.landMineStates = [];
 		rf.trapdoorStates = [];
+		rf.fadePlatformStates = [];
 		rf.toggleButtonStates = [];
 		rf.teleporterArmed = level.marble.teleporterArmed;
 		rf.teleporterSavedPosition = level.marble.teleporterSavedPosition.clone();
@@ -78,6 +80,9 @@ class RewindManager {
 		rf.teleporterSavedGravity = level.marble.teleporterSavedGravity.clone();
 		rf.teleporterKeepVelocity = level.marble.teleporterKeepVelocity;
 		rf.teleporterTeleTime = level.marble.teleporterTeleTime;
+		rf.isFrozen = level.marble.isFrozen;
+		rf.lastFreezeTime = level.marble.lastFreezeTime;
+		rf.powerupLockCount = level.marble.powerupLockCount;
 		rf.marbleRadius = level.marble._radius;
 		rf.movementTriggerCount = level.marble.movementTriggerCount;
 		rf.pathFollowerStates = [
@@ -108,6 +113,14 @@ class RewindManager {
 					lastCompletion: td.lastCompletion,
 					lastDirection: td.lastDirection,
 					lastContactTime: td.lastContactTime
+				});
+			}
+			if (dts is FadePlatform) {
+				var fp:FadePlatform = cast dts;
+				rf.fadePlatformStates.push({
+					lastContactTime: fp.lastContactTime,
+					fadingState: fp.fadingState,
+					lastFadingContactTime: fp.lastFadingContactTime
 				});
 			}
 			if (dts is AbstractBumper) {
@@ -208,6 +221,7 @@ class RewindManager {
 		var pstates = rf.powerupStates.copy();
 		var lmstates = rf.landMineStates.copy();
 		var tstates = rf.trapdoorStates.copy();
+		var fpstates = rf.fadePlatformStates.copy();
 		var tbstates = rf.toggleButtonStates.copy();
 		level.marble._radius = rf.marbleRadius;
 		level.marble.collider.radius = rf.marbleRadius;
@@ -219,6 +233,9 @@ class RewindManager {
 		level.marble.teleporterSavedGravity = rf.teleporterSavedGravity.clone();
 		level.marble.teleporterKeepVelocity = rf.teleporterKeepVelocity;
 		level.marble.teleporterTeleTime = rf.teleporterTeleTime;
+		level.marble.isFrozen = rf.isFrozen;
+		level.marble.lastFreezeTime = rf.lastFreezeTime;
+		level.marble.powerupLockCount = rf.powerupLockCount;
 		if (level.marble.teleporterMarker != null) {
 			if (rf.teleporterArmed) {
 				level.marble.teleporterMarker.skinOverride = rf.teleporterKeepVelocity ? "yellow" : null;
@@ -258,6 +275,13 @@ class RewindManager {
 				td.lastCompletion = tdState.lastCompletion;
 				td.lastDirection = tdState.lastDirection;
 				td.lastContactTime = tdState.lastContactTime;
+			}
+			if (dts is FadePlatform) {
+				var fp:FadePlatform = cast dts;
+				var fpState = fpstates.shift();
+				fp.lastContactTime = fpState.lastContactTime;
+				fp.fadingState = fpState.fadingState;
+				fp.lastFadingContactTime = fpState.lastFadingContactTime;
 			}
 			if (dts is AbstractBumper) {
 				var ab:AbstractBumper = cast dts;
