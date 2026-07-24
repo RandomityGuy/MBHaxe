@@ -59,6 +59,10 @@ class PlayGui {
 
 	public function new() {}
 
+	public static final timerNormal:Int = 0xFFFFFFFF;
+	public static final timerStopped:Int = 0xFF99FF99;
+	public static final timerDanger:Int = 0xFFFF9999;
+
 	var timerNumbers:Array<GuiAnim> = [];
 	var timerPoint:GuiAnim;
 	var timerColon:GuiAnim;
@@ -234,14 +238,6 @@ class PlayGui {
 			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}.png', ResourceLoader.getImage, this.imageResources).toTile();
 			numberTiles.push(tile);
 		}
-		for (i in 0...10) {
-			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_green.png', ResourceLoader.getImage, this.imageResources).toTile();
-			numberTiles.push(tile);
-		}
-		for (i in 0...10) {
-			var tile = ResourceLoader.getResource('data/ui/game/numbers/${i}_red.png', ResourceLoader.getImage, this.imageResources).toTile();
-			numberTiles.push(tile);
-		}
 
 		for (i in 0...7) {
 			timerNumbers.push(new GuiAnim(numberTiles));
@@ -334,8 +330,6 @@ class PlayGui {
 
 		var colonCols = [
 			ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/colon_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/colon_red.png', ResourceLoader.getImage, this.imageResources).toTile()
 		];
 
 		timerColon = new GuiAnim(colonCols);
@@ -350,8 +344,6 @@ class PlayGui {
 
 		var pointCols = [
 			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/point_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/point_red.png', ResourceLoader.getImage, this.imageResources).toTile()
 		];
 
 		timerPoint = new GuiAnim(pointCols);
@@ -723,15 +715,18 @@ class PlayGui {
 		var ten = Math.floor(velocity / 10) % 10;
 		var hun = Math.floor(velocity / 100) % 10;
 
-		var colorOffset = 0; // normal/white
+		var colorOffset = timerNormal; // normal/white
 		if (speedometerMinimumSpeed > 0 && velocity < speedometerMinimumSpeed)
-			colorOffset = 20; // red - too slow for Consistency
+			colorOffset = timerDanger; // red - too slow for Consistency
 		else if (speedometerSpeedToQualify > 0 && velocity > speedometerSpeedToQualify)
-			colorOffset = 10; // green - qualified for Haste
+			colorOffset = timerStopped; // green - qualified for Haste
 
-		speedometerDigitOne.anim.currentFrame = one + colorOffset;
-		speedometerDigitTen.anim.currentFrame = ten + colorOffset;
-		speedometerDigitHun.anim.currentFrame = hun + colorOffset;
+		speedometerDigitOne.anim.currentFrame = one;
+		speedometerDigitTen.anim.currentFrame = ten;
+		speedometerDigitHun.anim.currentFrame = hun;
+		speedometerDigitOne.anim.color = Vector.fromColor(colorOffset);
+		speedometerDigitTen.anim.color = Vector.fromColor(colorOffset);
+		speedometerDigitHun.anim.color = Vector.fromColor(colorOffset);
 
 		// Ported from `speedometer.cs`'s scroll math, scaled by 0.8 (PQ's 800x600 reference canvas
 		// vs this port's 640x480 one) - see class doc for the derivation.
@@ -1337,6 +1332,24 @@ class PlayGui {
 		gemCountNumbers[3].anim.currentFrame = totalHundredths;
 		gemCountNumbers[4].anim.currentFrame = totalTenths;
 		gemCountNumbers[5].anim.currentFrame = totalOnes;
+
+		if (collected >= total) {
+			gemCountNumbers[0].anim.color = Vector.fromColor(timerStopped);
+			gemCountNumbers[1].anim.color = Vector.fromColor(timerStopped);
+			gemCountNumbers[2].anim.color = Vector.fromColor(timerStopped);
+			gemCountNumbers[3].anim.color = Vector.fromColor(timerStopped);
+			gemCountNumbers[4].anim.color = Vector.fromColor(timerStopped);
+			gemCountNumbers[5].anim.color = Vector.fromColor(timerStopped);
+			gemCountSlash.bmp.color = Vector.fromColor(timerStopped);
+		} else {
+			gemCountNumbers[0].anim.color = Vector.fromColor(timerNormal);
+			gemCountNumbers[1].anim.color = Vector.fromColor(timerNormal);
+			gemCountNumbers[2].anim.color = Vector.fromColor(timerNormal);
+			gemCountNumbers[3].anim.color = Vector.fromColor(timerNormal);
+			gemCountNumbers[4].anim.color = Vector.fromColor(timerNormal);
+			gemCountNumbers[5].anim.color = Vector.fromColor(timerNormal);
+			gemCountSlash.bmp.color = Vector.fromColor(timerNormal);
+		}
 	}
 
 	public function formatGemHuntCounter(collected:Int) {
@@ -1357,19 +1370,17 @@ class PlayGui {
 		gemCountNumbers[4].anim.visible = false;
 		gemCountNumbers[5].anim.visible = false;
 
-		var off = 10;
-
-		gemCountNumbers[0].anim.currentFrame = off + collectedHundredths;
-		gemCountNumbers[1].anim.currentFrame = off + collectedTenths;
-		gemCountNumbers[2].anim.currentFrame = off + collectedOnes;
+		gemCountNumbers[0].anim.currentFrame = collectedHundredths;
+		gemCountNumbers[1].anim.currentFrame = collectedTenths;
+		gemCountNumbers[2].anim.currentFrame = collectedOnes;
 		gemCountSlash.bmp.visible = false;
 		gemImageSceneTargetBitmap.visible = true;
+		gemCountNumbers[0].anim.color = Vector.fromColor(timerNormal);
+		gemCountNumbers[1].anim.color = Vector.fromColor(timerNormal);
+		gemCountNumbers[2].anim.color = Vector.fromColor(timerNormal);
 	}
 
-	// 0: default
-	// 1: green
-	// 2: red
-	public function formatTimer(time:Float, color:Int = 0) {
+	public function formatTimer(time:Float, color:Int = 0xFFFFFF) {
 		var et = time * 1000;
 		var thousandth = et % 10;
 		var hundredth = Math.floor((et % 1000) / 10);
@@ -1384,19 +1395,26 @@ class PlayGui {
 		var hundredthOne = hundredth % 10;
 		var hundredthTen = (hundredth - hundredthOne) / 10;
 
-		timerNumbers[0].anim.currentFrame = minutesTen + color * 10;
-		timerNumbers[1].anim.currentFrame = minutesOne + color * 10;
-		timerNumbers[2].anim.currentFrame = secondsTen + color * 10;
-		timerNumbers[3].anim.currentFrame = secondsOne + color * 10;
-		timerNumbers[4].anim.currentFrame = hundredthTen + color * 10;
-		timerNumbers[5].anim.currentFrame = hundredthOne + color * 10;
-		timerNumbers[6].anim.currentFrame = thousandth + color * 10;
+		timerNumbers[0].anim.color = Vector.fromColor(color);
+		timerNumbers[1].anim.color = Vector.fromColor(color);
+		timerNumbers[2].anim.color = Vector.fromColor(color);
+		timerNumbers[3].anim.color = Vector.fromColor(color);
+		timerNumbers[4].anim.color = Vector.fromColor(color);
+		timerNumbers[5].anim.color = Vector.fromColor(color);
+		timerNumbers[6].anim.color = Vector.fromColor(color);
+		timerNumbers[0].anim.currentFrame = minutesTen;
+		timerNumbers[1].anim.currentFrame = minutesOne;
+		timerNumbers[2].anim.currentFrame = secondsTen;
+		timerNumbers[3].anim.currentFrame = secondsOne;
+		timerNumbers[4].anim.currentFrame = hundredthTen;
+		timerNumbers[5].anim.currentFrame = hundredthOne;
+		timerNumbers[6].anim.currentFrame = thousandth;
 
-		timerPoint.anim.currentFrame = color;
-		timerColon.anim.currentFrame = color;
+		timerColon.anim.color = Vector.fromColor(color);
+		timerPoint.anim.color = Vector.fromColor(color);
 	}
 
-	public function formatCountdownTimer(time:Float, color:Int = 0) {
+	public function formatCountdownTimer(time:Float, color:Int = 0xFFFFFF) {
 		if (time == 0) {
 			countdownNumbers[0].anim.visible = false;
 			countdownNumbers[1].anim.visible = false;
@@ -1423,13 +1441,17 @@ class PlayGui {
 
 		if (secondsTen > 0) {
 			countdownNumbers[0].anim.visible = true;
-			countdownNumbers[0].anim.currentFrame = secondsTen + color * 10;
+			countdownNumbers[0].anim.currentFrame = secondsTen;
 		} else {
 			countdownNumbers[0].anim.visible = false;
 		}
 
-		countdownNumbers[1].anim.currentFrame = secondsOne + color * 10;
-		countdownNumbers[2].anim.currentFrame = hundredthTen + color * 10;
+		countdownNumbers[1].anim.currentFrame = secondsOne;
+		countdownNumbers[2].anim.currentFrame = hundredthTen;
+
+		countdownNumbers[0].anim.color = Vector.fromColor(color);
+		countdownNumbers[1].anim.color = Vector.fromColor(color);
+		countdownNumbers[2].anim.color = Vector.fromColor(color);
 
 		countdownPoint.anim.currentFrame = color;
 	}
