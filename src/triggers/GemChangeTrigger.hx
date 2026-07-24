@@ -15,7 +15,7 @@ class GemChangeTrigger extends Trigger {
 		} else {
 			this.level.gemCount += bonus;
 		}
-		@:privateAccess this.level.playGui.formatGemCounter(this.level.gemCount, this.level.totalGems);
+		@:privateAccess this.level.playGui.formatGemCounter(this.level.gemCount, this.level.gemCounterTotal());
 
 		var sign = bonus > 0 ? "+" : "";
 		this.level.displayAlert('${sign}${bonus} gem${Math.abs(bonus) == 1 ? "" : "s"}');

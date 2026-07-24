@@ -240,6 +240,27 @@ class MarbleWorld extends Scheduler {
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
 
+	/** How many gems `NullMode.canFinish` requires before allowing the finish - `-1` means "use
+		`totalGems`" (the base rule); `QuotaMode`'s constructor sets this to `MissionInfo.gemquota`
+		instead (always >= 0). Living on `level` rather than as a `GameMode` interface method so any
+		mode that just wants "the current gem requirement, whatever it is" (e.g. `HasteMode`, which
+		inherits `NullMode.canFinish` and ANDs a speed check on top) automatically respects Quota
+		without either mode needing to know about the other. */
+	public var gemsRequiredToFinish:Int = -1;
+
+	/** Highest `LapsCheckpoint.checkpointNumber` seen so far this mission - ported from PQ's
+		`$Laps::LastCheckpointNumber` (`modes/laps.cs`), used to auto-number checkpoints that don't
+		specify one and to know which checkpoint is "the last one" (arms `LapsCounterTrigger`). */
+	public var lapsLastCheckpointNumber:Int = 0;
+
+	/** Ported from PQ's `$Game::TimeStoppedClients`/`GameConnection.timeStopTriggers`
+		(`server/scripts/triggers.cs`'s `TimeStopTrigger`) - a count rather than a plain toggle so
+		overlapping `TimeStopTrigger` volumes don't unlock each other early, mirroring
+		`Marble.powerupLockCount`'s same pattern. `Time::stop()`/`Time::start()` in PQ only gate
+		`$Time::TimerRunning` (the scoring clock), not the whole simulation - `currentAttemptTime`
+		(PQ's `$Time::TotalTime`) keeps advancing regardless. */
+	public var timeStopTriggerCount:Int = 0;
+
 	public var cursorLock:Bool = true;
 
 	var timeTravelSound:Channel;
@@ -450,11 +471,12 @@ class MarbleWorld extends Scheduler {
 		MarbleGame.canvas.clearContent();
 		if (this.endPad != null)
 			this.endPad.generateCollider();
-		if (this.isMultiplayer) {
+		if (this.isMultiplayer || this.gameMode.getScoreType() == Score) {
 			this.playGui.formatGemHuntCounter(0);
-			this.playGui.formatCountdownTimer(0, 0);
+			if (this.isMultiplayer)
+				this.playGui.formatCountdownTimer(0, 0);
 		} else {
-			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+			this.playGui.formatGemCounter(this.gemCount, this.gemCounterTotal());
 		}
 		Console.log("MISSION LOADED");
 		start();
@@ -466,7 +488,7 @@ class MarbleWorld extends Scheduler {
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
-		if (this.isMultiplayer || this.game == "ultra") {
+		if (this.isMultiplayer || this.game == "ultra" || this.mission.missionInfo.game == "PlatinumQuest") {
 			this.radar = new Radar(cast this, this.scene2d);
 			radar.init();
 		}
@@ -520,7 +542,11 @@ class MarbleWorld extends Scheduler {
 			"particles/smoke.png",
 			"particles/spark.png",
 			"particles/star.png",
-			"particles/twirl.png"
+			"particles/twirl.png",
+			"particles/glint.png",
+			"particles/glint2.png",
+			"particles/orb.png",
+			"particles/smoke_blur32.png",
 		];
 
 		for (file in filestoload) {
@@ -783,7 +809,7 @@ class MarbleWorld extends Scheduler {
 			this.endPad.inFinish = false;
 		if (this.totalGems > 0) {
 			this.gemCount = 0;
-			this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+			this.playGui.formatGemCounter(this.gemCount, this.gemCounterTotal());
 		}
 
 		if (radar != null)
@@ -1154,7 +1180,7 @@ class MarbleWorld extends Scheduler {
 		if (scale.z == 0)
 			scale.z = 0.0001;
 
-		this.pathNodes.set(element._name, new PathNodeElement(element._name, position, rotation, scale, element.fields));
+		this.pathNodes.set(element._name.toLowerCase(), new PathNodeElement(element._name, position, rotation, scale, element.fields));
 	}
 
 	public function addStaticShape(element:MissionElementStaticShape, onFinish:Void->Void) {
@@ -2046,6 +2072,7 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 		this.gameMode.update(this.timeState);
+		this.playGui.updateSpeedometer(this.marble.velocity.length());
 
 		if (!this.isMultiplayer) {
 			if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
@@ -2393,54 +2420,59 @@ class MarbleWorld extends Scheduler {
 		var timeMultiplier = this.gameMode.timeMultiplier();
 
 		if (!this.isWatching) {
-			if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
-				this.bonusTime -= dt;
-				if (this.bonusTime < 0) {
-					this.timeState.gameplayClock -= this.bonusTime * timeMultiplier;
-					this.bonusTime = 0;
-				}
-				if (timeTravelSound == null) {
-					var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
-					timeTravelSound = AudioManager.playSound(ttsnd, null, true);
-
-					if (alarmSound != null)
-						alarmSound.pause = true;
-				}
-			} else {
-				if (timeTravelSound != null) {
-					timeTravelSound.stop();
-					timeTravelSound = null;
-					if (alarmSound != null)
-						alarmSound.pause = false;
-				}
-				if (!this.isMultiplayer) {
-					if (this.timeState.currentAttemptTime >= 3.5) {
-						this.timeState.gameplayClock += dt * timeMultiplier;
-					} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
-						this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
+			// Ported from PQ's `Time::advance` - the whole clock-advancement block below is gated
+			// behind `$Time::TimerRunning`, which `TimeStopTrigger` toggles off; `currentAttemptTime`
+			// (PQ's `$Time::TotalTime`) is outside that gate and always keeps advancing.
+			if (this.timeStopTriggerCount <= 0) {
+				if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
+					this.bonusTime -= dt;
+					if (this.bonusTime < 0) {
+						this.timeState.gameplayClock -= this.bonusTime * timeMultiplier;
+						this.bonusTime = 0;
 					}
-				} else if (this.multiplayerStarted) {
-					if (Net.isClient) {
-						var ticksSinceTimerStart = @:privateAccess this.marble.serverTicks - (this.serverStartTicks + 109);
-						var ourStartTime = this.gameMode.getStartTime();
-						var gameplayHigh = ourStartTime - ticksSinceTimerStart * 0.032;
-						var gameplayLow = ourStartTime - (ticksSinceTimerStart + 1) * 0.032;
-						// Clamp timer to be between these two
+					if (timeTravelSound == null) {
+						var ttsnd = ResourceLoader.getResource("data/sound/timetravelactive.wav", ResourceLoader.getAudio, this.soundResources);
+						timeTravelSound = AudioManager.playSound(ttsnd, null, true);
 
-						if (gameplayHigh < this.timeState.gameplayClock || gameplayLow > this.timeState.gameplayClock) {
-							var clockTicks = Math.floor((ourStartTime - this.timeState.gameplayClock) / 0.032);
-							var clockTickTime = ourStartTime - clockTicks * 0.032;
-							var delta = clockTickTime - this.timeState.gameplayClock;
-							this.timeState.gameplayClock = Math.max(0, gameplayHigh - delta);
+						if (alarmSound != null)
+							alarmSound.pause = true;
+					}
+				} else {
+					if (timeTravelSound != null) {
+						timeTravelSound.stop();
+						timeTravelSound = null;
+						if (alarmSound != null)
+							alarmSound.pause = false;
+					}
+					if (!this.isMultiplayer) {
+						if (this.timeState.currentAttemptTime >= 3.5) {
+							this.timeState.gameplayClock += dt * timeMultiplier;
+						} else if (this.timeState.currentAttemptTime + dt >= 3.5) {
+							this.timeState.gameplayClock += ((this.timeState.currentAttemptTime + dt) - 3.5) * timeMultiplier;
 						}
-					}
+					} else if (this.multiplayerStarted) {
+						if (Net.isClient) {
+							var ticksSinceTimerStart = @:privateAccess this.marble.serverTicks - (this.serverStartTicks + 109);
+							var ourStartTime = this.gameMode.getStartTime();
+							var gameplayHigh = ourStartTime - ticksSinceTimerStart * 0.032;
+							var gameplayLow = ourStartTime - (ticksSinceTimerStart + 1) * 0.032;
+							// Clamp timer to be between these two
 
-					this.timeState.gameplayClock += dt * timeMultiplier;
-					this.timeState.gameplayClock = Math.max(0, this.timeState.gameplayClock);
-				}
-				if (this.timeState.gameplayClock <= 0 && !Net.isClient) {
-					this.gameMode.onTimeExpire();
-					this.timeState.gameplayClock = 0;
+							if (gameplayHigh < this.timeState.gameplayClock || gameplayLow > this.timeState.gameplayClock) {
+								var clockTicks = Math.floor((ourStartTime - this.timeState.gameplayClock) / 0.032);
+								var clockTickTime = ourStartTime - clockTicks * 0.032;
+								var delta = clockTickTime - this.timeState.gameplayClock;
+								this.timeState.gameplayClock = Math.max(0, gameplayHigh - delta);
+							}
+						}
+
+						this.timeState.gameplayClock += dt * timeMultiplier;
+						this.timeState.gameplayClock = Math.max(0, this.timeState.gameplayClock);
+					}
+					if (this.timeState.gameplayClock <= 0 && !Net.isClient) {
+						this.gameMode.onTimeExpire();
+						this.timeState.gameplayClock = 0;
+					}
 				}
 			}
 			this.timeState.currentAttemptTime += dt;
@@ -2535,6 +2567,13 @@ class MarbleWorld extends Scheduler {
 		this.playGui.setAlertTextOpacity(1 - alertTextCompletion);
 	}
 
+	/** The gem counter's "total" (right-hand side of the collected/total display) - `totalGems`
+		normally, but `QuotaMode` overrides `gemsRequiredToFinish` (>= 0) to show collected/quota
+		instead, and every `formatGemCounter` call site should respect that. */
+	public function gemCounterTotal():Int {
+		return this.gemsRequiredToFinish >= 0 ? this.gemsRequiredToFinish : this.totalGems;
+	}
+
 	public function displayAlert(text:String) {
 		this.playGui.setAlertText(text);
 		this.alertTextTimeState = this.timeState.timeSinceLoad;
@@ -2595,11 +2634,12 @@ class MarbleWorld extends Scheduler {
 			|| (this.marble.outOfBounds && this.timeState.currentAttemptTime - this.marble.outOfBoundsTime.currentAttemptTime >= 0.5))
 			return;
 
-		if (this.gemCount < this.totalGems) {
+		if (!this.gameMode.canFinish(this.marble)) {
 			AudioManager.playPitchedSound("missinggems", this.soundResources);
-			displayAlert("You can't finish without all the diamonds!!");
+			displayAlert(this.gameMode.getFinishMessage(this.marble));
 		} else {
-			this.endPad.spawnFirework(this.timeState);
+			if (this.endPad != null)
+				this.endPad.spawnFirework(this.timeState);
 			this.finishTime = this.timeState.clone();
 			this.marble.mode = Finish;
 			this.marble.camera.finish = true;
@@ -2894,6 +2934,9 @@ class MarbleWorld extends Scheduler {
 				return null;
 			});
 		}
+		if (this.gameMode.onOutOfBounds(marble))
+			return; // A mode (e.g. MadnessMode) took over entirely - no default restart.
+
 		if (!this.isMultiplayer || Net.isHost) {
 			marble.oobSchedule = this.schedule(this.timeState.currentAttemptTime + 2.5, () -> {
 				this.restart(marble);
@@ -3010,7 +3053,7 @@ class MarbleWorld extends Scheduler {
 				this.gemCount--;
 			}
 		}
-		this.playGui.formatGemCounter(this.gemCount, this.totalGems);
+		this.playGui.formatGemCounter(this.gemCount, this.gemCounterTotal());
 		this.playGui.setCenterText('none');
 		this.clearSchedule();
 		this.marble.outOfBounds = false;

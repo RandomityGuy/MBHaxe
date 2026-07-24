@@ -57,8 +57,8 @@ class GameObjectPathFollower {
 	public function new(obj:GameObject, firstNodeName:String, level:MarbleWorld) {
 		this.obj = obj;
 		this.level = level;
-		this.currentNodeName = firstNodeName;
-		this.prevNodeName = firstNodeName;
+		this.currentNodeName = firstNodeName.toLowerCase();
+		this.prevNodeName = firstNodeName.toLowerCase();
 		this.rngCursor = Std.random(256);
 
 		var s = evaluateTransform(this.currentNodeName, this.prevNodeName, 0);
@@ -182,6 +182,8 @@ class GameObjectPathFollower {
 		scratchBlendRot.slerp(this.frameStartState.rotation, this.frameEndState.rotation, t);
 		var pos = lerpVector(this.frameStartState.position, this.frameEndState.position, t);
 		var scale = lerpVector(this.frameStartState.scale, this.frameEndState.scale, t);
+		pos.w = 1;
+		scale.w = 1;
 
 		applyState(pos, scratchBlendRot, scale);
 	}
@@ -241,6 +243,9 @@ class GameObjectPathFollower {
 		var pos = node.usePosition ? getPathPosition(node, nodeT, next, nextT, prevNodeName, adjustedT) : basePos;
 		var rot = node.useRotation ? getPathRotation(node, nodeT, next, nextT, localT, adjustedT) : baseRot;
 		var scale = node.useScale ? lerpVector(node.localScale, next.localScale, adjustedT) : baseScale;
+		// fix this weird shit
+		pos.w = 1;
+		scale.w = 1;
 
 		return {position: pos, rotation: rot, scale: scale};
 	}

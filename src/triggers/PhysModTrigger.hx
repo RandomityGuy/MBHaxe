@@ -15,18 +15,26 @@ import mis.MisParser;
 import mis.MissionElement.MissionElementTrigger;
 
 /** Ambient orb particles drifting up from each corner emitter base - ported from PQ's
-	`PhysModParticle`/`PhysModEmitter` datablocks (`server/scripts/physMod.cs`). PQ's engine has a
-	true `gravityCoefficient` (a world-down accelerator independent of particle velocity); this
-	engine's `ParticleOptions.acceleration` instead accelerates *along the particle's own velocity
-	vector* - since these particles are ejected in a narrow cone (`thetaMin/Max = ±11.25°`) close to
-	straight up, using the same numeric value as a negative "along-velocity" acceleration still
-	closely approximates the original's slow upward-drift-then-fall-back arc. */
+	`PhysModParticle`/`PhysModEmitter` datablocks (`server/scripts/physMod.cs`). Now that
+	`ParticleOptions` has a real `gravityCoefficient` (a world-down accelerator, matching
+	`PEngine::updateSingleParticle`'s `(0,0,-9.81)*gravityCoefficient` term exactly), this is a
+	direct port rather than the earlier along-velocity-acceleration approximation. `emitterLifetime`
+	is set to "effectively forever" rather than the source's own `lifetimeMS = 0` - both mean
+	"never self-expire" here, just via a very large finite number instead of the sentinel 0 (this
+	engine's `emitterLifetime` is always divided into a completion ratio, so a literal 0 would be
+	a divide-by-zero). */
 final physModParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 150,
+	periodVariance: 5,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 1.5,
 	velocityVariance: 0.25,
 	emitterLifetime: 1e9,
+	ejectionOffset: 0,
+	thetaMin: -11.25,
+	thetaMax: 11.25,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/orb.png',
@@ -37,7 +45,9 @@ final physModParticleOptions:ParticleEmitterOptions = {
 		lifetime: 6000,
 		lifetimeVariance: 0,
 		dragCoefficient: 1,
-		acceleration: -0.2,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.2,
+		windCoefficient: 0,
 		colors: [new Vector(1, 1, 1, 1), new Vector(0.5, 0.5, 1, 0.75), new Vector(0, 0, 1, 0.25)],
 		sizes: [1, 2, 5],
 		times: [1, 1.5, 2]

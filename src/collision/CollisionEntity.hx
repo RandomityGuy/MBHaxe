@@ -21,6 +21,8 @@ import src.MarbleGame;
 class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var boundingBox:Bounds;
 
+	var localBoundingBox:Bounds;
+
 	public var octree:Octree;
 
 	// public var bvh:BVHTree<CollisionSurface>;
@@ -130,20 +132,25 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 			}
 		} else {
 			this.transform.load(transform);
-			this.invTransform = transform.getInverse();
-			generateBoundingBox();
+			transform.getInverse(this.invTransform);
+			if (this.localBoundingBox == null)
+				generateBoundingBox();
+			else {
+				this.boundingBox.load(this.localBoundingBox);
+				this.boundingBox.transform(transform);
+			}
 		}
 		_transformKey++;
 	}
 
 	public function generateBoundingBox() {
-		var boundingBox = new Bounds();
+		this.localBoundingBox = new Bounds();
 		for (surface in this.surfaces) {
 			var tform = surface.boundingBox.clone();
-			tform.transform(transform);
-			boundingBox.add(tform);
+			this.localBoundingBox.add(tform);
 		}
-		this.boundingBox = boundingBox;
+		this.boundingBox = this.localBoundingBox.clone();
+		this.boundingBox.transform(transform);
 		if (Debug.drawBounds) {
 			if (_dbgEntity == null) {
 				_dbgEntity = cast this.boundingBox.makeDebugObj();
@@ -207,8 +214,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 		var radius = collisionEntity.radius + 0.001;
 
 		var invMatrix = invTransform;
-		if (this.go is PathedInterior)
-			invMatrix = transform.getInverse();
 		var sphereBounds = new Bounds();
 		var localPos = position.clone();
 		localPos.transform(invMatrix);

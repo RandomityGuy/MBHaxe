@@ -71,6 +71,12 @@ class RewindFrame {
 	var isFrozen:Bool;
 	var lastFreezeTime:Float;
 	var powerupLockCount:Int;
+	var timeStopTriggerCount:Int;
+
+	/** Ported from the `mbu-port` branch's design - whichever `GameMode` (or `CompositeMode` of
+		several) is active supplies one of these via `getRewindState()`/`constructRewindState()`,
+		rather than `RewindFrame` growing a flat field per mode regardless of which mode is active. */
+	var modeState:RewindableState;
 
 	/** Path-follower progress, index-aligned with `level.movingObjects` filtered to non-
 		`PathedInterior` entries (i.e. path-following `GameObject`s) - see
@@ -141,6 +147,8 @@ class RewindFrame {
 		c.isFrozen = isFrozen;
 		c.lastFreezeTime = lastFreezeTime;
 		c.powerupLockCount = powerupLockCount;
+		c.timeStopTriggerCount = timeStopTriggerCount;
+		c.modeState = modeState != null ? modeState.clone() : null;
 		c.pathFollowerStates = pathFollowerStates.map(s -> ({
 			pathPosition: s.pathPosition,
 			currentNode: s.currentNode,
@@ -219,6 +227,10 @@ class RewindFrame {
 		framesize += 1; // isFrozen
 		framesize += 8; // lastFreezeTime
 		framesize += 2; // powerupLockCount
+		framesize += 2; // timeStopTriggerCount
+		framesize += 1; // Null<modeState>
+		if (modeState != null)
+			framesize += modeState.getSize();
 		framesize += 2; // pathFollowerStates.length
 		for (s in pathFollowerStates) {
 			framesize += 8; // s.pathPosition
@@ -341,6 +353,10 @@ class RewindFrame {
 		bb.writeByte(isFrozen ? 1 : 0);
 		bb.writeDouble(lastFreezeTime);
 		bb.writeInt16(powerupLockCount);
+		bb.writeInt16(timeStopTriggerCount);
+		bb.writeByte(modeState == null ? 0 : 1);
+		if (modeState != null)
+			modeState.serialize(rm, bb);
 		bb.writeInt16(pathFollowerStates.length);
 		for (s in pathFollowerStates) {
 			bb.writeDouble(s.pathPosition);
@@ -515,6 +531,14 @@ class RewindFrame {
 		isFrozen = br.readByte() != 0;
 		lastFreezeTime = br.readDouble();
 		powerupLockCount = br.readInt16();
+		timeStopTriggerCount = br.readInt16();
+		var hasModeState = br.readByte() != 0;
+		if (hasModeState) {
+			modeState = rm.level.gameMode.constructRewindState();
+			modeState.deserialize(rm, br);
+		} else {
+			modeState = null;
+		}
 		pathFollowerStates = [];
 		var pathFollowerStates_len = br.readInt16();
 		for (i in 0...pathFollowerStates_len) {

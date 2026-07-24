@@ -26,6 +26,7 @@ import net.Net;
 import src.MarbleGame;
 import src.Util;
 import src.Settings;
+import rewind.RewindableState;
 
 @:structInit
 @:publicFields
@@ -748,8 +749,7 @@ class HuntMode extends NullMode {
 						points += 10;
 						@:privateAccess level.playGui.addMiddleMessage('+10', 0xdddddd);
 				}
-				if (Net.isHost)
-					@:privateAccess level.playGui.formatGemHuntCounter(points);
+				@:privateAccess level.playGui.formatGemHuntCounter(points);
 			}
 		}
 
@@ -859,5 +859,46 @@ class HuntMode extends NullMode {
 
 	override public function timeMultiplier() {
 		return -1;
+	}
+
+	/** Ported from the `mbu-port` branch's `HuntMode.getRewindState` - covers the currently-active
+		gem-spawn group/gems, score, and RNG seeds; see `HuntState`'s doc comment for what's
+		deliberately left out (this port's competitive/MP-only extras). */
+	override function getRewindState():RewindableState {
+		var s = new HuntState();
+		s.points = points;
+		s.activeGemSpawnGroup = activeGemSpawnGroup.copy();
+		s.activeGems = activeGems.copy();
+		s.rngState = @:privateAccess rng.seed;
+		s.rngState2 = @:privateAccess rng2.seed;
+		return s;
+	}
+
+	override function applyRewindState(state:RewindableState) {
+		var s:HuntState = cast state;
+		points = s.points;
+		@:privateAccess level.playGui.formatGemHuntCounter(points);
+		for (gem in activeGems) {
+			gem.pickedUp = true;
+			gem.setHide(true);
+			var gemBeam = gemToBeamMap.get(gem);
+			if (gemBeam != null)
+				gemBeam.setHide(true);
+		}
+		activeGemSpawnGroup = s.activeGemSpawnGroup;
+		activeGems = s.activeGems;
+		for (gem in activeGems) {
+			gem.pickedUp = false;
+			gem.setHide(false);
+			var gemBeam = gemToBeamMap.get(gem);
+			if (gemBeam != null)
+				gemBeam.setHide(false);
+		}
+		rng.setSeed(s.rngState);
+		rng2.setSeed(s.rngState2);
+	}
+
+	override function constructRewindState():RewindableState {
+		return new HuntState();
 	}
 }

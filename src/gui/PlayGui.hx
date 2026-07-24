@@ -74,6 +74,59 @@ class PlayGui {
 	var gemImageObject:DtsObject;
 	var gemImageSceneTargetBitmap:Bitmap;
 
+	/** Ported from PQ's `GemsQuota` control (`client/ui/playGui.gui`) - a small "/trueTotal" suffix
+		shown beside the main gem counter while `QuotaMode` is active (whose own main counter shows
+		`collected/quota` instead of `collected/totalGems`), so the level's real 100%-completion
+		total is still visible. No rainbow/green "100%" visual effect - out of scope per instruction. */
+	var quotaCountNumbers:Array<GuiAnim> = [];
+
+	var quotaCountSlash:GuiImage;
+
+	/** Ported from PQ's analog speedometer (`client/scripts/speedometer.cs`,
+		`client/ui/playGui.gui`'s `PGSpeedometer` control tree) - shown while `ConsistencyMode`
+		and/or `HasteMode` are active. 3 stacked copies of the same scrolling tape texture
+		(`spdbackground1/2/3.png`, each taller than the visible border) are repositioned every frame
+		so whichever copy currently overlaps the border's visible window shows the right tick marks
+		under the fixed arrow - the border `GuiControl`'s `h2d.Flow` clips everything outside its own
+		extent automatically (Heaps' `overflow = Hidden`), no manual clip mask needed. Repositioning
+		happens on the bare `.bmp`/`.anim` objects directly every frame (not `GuiControl.position` +
+		`.render()`, which is only for initial layout) since this needs to run every tick. */
+	var speedometerCtrl:GuiControl;
+
+	var speedometerBorder:GuiControl;
+	var speedometerBackground1:GuiImage;
+	var speedometerBackground2:GuiImage;
+	var speedometerBackground3:GuiImage;
+	var speedometerArrow:GuiImage;
+	var speedometerConsMarker:GuiImage;
+	var speedometerHasteMarker:GuiImage;
+	var speedometerConsNormalTile:Tile;
+	var speedometerConsTooSlowTile:Tile;
+	var speedometerHasteAchievedTile:Tile;
+	var speedometerHasteNotAchievedTile:Tile;
+	var speedometerDigitHun:GuiAnim;
+	var speedometerDigitTen:GuiAnim;
+	var speedometerDigitOne:GuiAnim;
+
+	// Rest (velocity = 0, "not hundreds") bare-element positions, captured once after the initial
+	// `render()` - every subsequent frame just adds a `Settings.uiScale`-multiplied delta on top of
+	// these, matching how `getRenderRectangle()` scales `position` by `uiScaleFactor` at setup time.
+	var speedometerRestCaptured:Bool = false;
+	var speedometerBackground1RestY:Float = 0;
+	var speedometerMarkerRestY:Float = 0;
+	var speedometerDigitOneRestX:Float = 0;
+	var speedometerDigitTenRestX:Float = 0;
+
+	/** `MissionInfo.MinimumSpeed`/`MissionInfo.SpeedToQualify` - `0` means "that mode isn't active",
+		matching PQ's own truthy-check convention (`MissionInfo.MinimumSpeed && ...`). Set once by
+		`ConsistencyMode`/`HasteMode`'s constructors; read every frame by `updateSpeedometer` so the
+		speedometer/digit-coloring/marker logic is computed once per frame regardless of how many of
+		the two modes are simultaneously active (avoids each mode's own `update()` stomping on the
+		other's marker if both ran the full speedometer update independently). */
+	var speedometerMinimumSpeed:Float = 0;
+
+	var speedometerSpeedToQualify:Float = 0;
+
 	var powerupBox:GuiImage;
 	var powerupLockedTile:Tile;
 	var powerupUnlockedTile:Tile;
@@ -204,6 +257,14 @@ class PlayGui {
 			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
 
+		for (i in 0...3) {
+			quotaCountNumbers.push(new GuiAnim(numberTiles));
+		}
+
+		speedometerDigitHun = new GuiAnim(numberTiles);
+		speedometerDigitTen = new GuiAnim(numberTiles);
+		speedometerDigitOne = new GuiAnim(numberTiles);
+
 		var rsgo = [];
 		rsgo.push(ResourceLoader.getResource("data/ui/game/ready.png", ResourceLoader.getImage, this.imageResources).toTile());
 		rsgo.push(ResourceLoader.getResource("data/ui/game/set.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -218,6 +279,8 @@ class PlayGui {
 		initGemCounter();
 		initCenterText();
 		initPowerupBox();
+		initQuotaCounter();
+		initSpeedometer();
 		if (game == 'ultra' || Net.isMP)
 			initBlastBar();
 		initTexts();
@@ -473,6 +536,450 @@ class PlayGui {
 
 		gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
 		gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
+	}
+
+	function initQuotaCounter() {
+		quotaCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
+		quotaCountSlash.position = new Vector(206, 14);
+		quotaCountSlash.extent = new Vector(24, 31);
+		playGuiCtrl.addChild(quotaCountSlash);
+
+		quotaCountNumbers[0].position = new Vector(226, 14);
+		quotaCountNumbers[0].extent = new Vector(24, 31);
+		quotaCountNumbers[1].position = new Vector(246, 14);
+		quotaCountNumbers[1].extent = new Vector(24, 31);
+		quotaCountNumbers[2].position = new Vector(266, 14);
+		quotaCountNumbers[2].extent = new Vector(24, 31);
+		for (n in quotaCountNumbers)
+			playGuiCtrl.addChild(n);
+
+		setQuotaCounterVisible(false);
+	}
+
+	/** Shows/hides the small "/trueTotal" suffix beside the main gem counter (`QuotaMode` only). */
+	public function setQuotaCounterVisible(visible:Bool) {
+		if (quotaCountSlash == null)
+			return;
+		quotaCountSlash.bmp.visible = visible;
+		for (n in quotaCountNumbers)
+			n.anim.visible = visible;
+	}
+
+	/** Sets the "/trueTotal" digits to the level's real total gem count (`level.totalGems`) - this
+		doesn't change during a run, so it's set once when Quota activates, not every pickup. */
+	public function formatQuotaCounter(trueTotal:Int) {
+		quotaCountNumbers[0].anim.currentFrame = Math.floor(trueTotal / 100);
+		quotaCountNumbers[1].anim.currentFrame = Math.floor(trueTotal / 10) % 10;
+		quotaCountNumbers[2].anim.currentFrame = trueTotal % 10;
+	}
+
+	function initSpeedometer() {
+		speedometerCtrl = new GuiControl();
+		speedometerCtrl.horizSizing = Left;
+		speedometerCtrl.position = new Vector(559, 198);
+		speedometerCtrl.extent = new Vector(86, 255);
+		playGuiCtrl.addChild(speedometerCtrl);
+
+		speedometerBorder = new GuiControl();
+		speedometerBorder.position = new Vector(0, 0);
+		speedometerBorder.extent = new Vector(76, 209);
+		speedometerCtrl.addChild(speedometerBorder);
+
+		speedometerBackground1 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground1.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		speedometerBackground1.position = new Vector(14, -607.2);
+		speedometerBackground1.extent = new Vector(51, 806);
+		speedometerBorder.addChild(speedometerBackground1);
+
+		speedometerBackground2 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground2.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		speedometerBackground2.position = new Vector(14, -607.2 - 806.4);
+		speedometerBackground2.extent = new Vector(51, 806);
+		speedometerBorder.addChild(speedometerBackground2);
+
+		speedometerBackground3 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground3.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		speedometerBackground3.position = new Vector(14, -607.2 - 806.4 * 2);
+		speedometerBackground3.extent = new Vector(51, 806);
+		speedometerBorder.addChild(speedometerBackground3);
+
+		speedometerArrow = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdarrow.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		speedometerArrow.position = new Vector(23, 1);
+		speedometerArrow.extent = new Vector(51, 205);
+		speedometerBorder.addChild(speedometerArrow);
+
+		speedometerConsNormalTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_normal.png', ResourceLoader.getImage, this.imageResources)
+			.toTile();
+		speedometerConsTooSlowTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_tooslow.png', ResourceLoader.getImage, this.imageResources)
+			.toTile();
+		speedometerConsMarker = new GuiImage(speedometerConsNormalTile);
+		speedometerConsMarker.position = new Vector(0, 0);
+		speedometerConsMarker.extent = new Vector(51, 26);
+		speedometerBorder.addChild(speedometerConsMarker);
+
+		speedometerHasteAchievedTile = ResourceLoader.getResource('data/ui/game/speedometer/haste_achieved.png', ResourceLoader.getImage, this.imageResources)
+			.toTile();
+		speedometerHasteNotAchievedTile = ResourceLoader.getResource('data/ui/game/speedometer/haste_notachieved.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile();
+		speedometerHasteMarker = new GuiImage(speedometerHasteAchievedTile);
+		speedometerHasteMarker.position = new Vector(0, 0);
+		speedometerHasteMarker.extent = new Vector(51, 26);
+		speedometerBorder.addChild(speedometerHasteMarker);
+
+		speedometerDigitHun.position = new Vector(9, 204);
+		speedometerDigitHun.extent = new Vector(34, 44);
+		speedometerDigitTen.position = new Vector(19, 204);
+		speedometerDigitTen.extent = new Vector(34, 44);
+		speedometerDigitOne.position = new Vector(40, 204);
+		speedometerDigitOne.extent = new Vector(34, 44);
+		speedometerCtrl.addChild(speedometerDigitHun);
+		speedometerCtrl.addChild(speedometerDigitTen);
+		speedometerCtrl.addChild(speedometerDigitOne);
+
+		setSpeedometerVisible(false);
+	}
+
+	/** Called once, right after the first `render()` pass lays everything out - captures the
+		"rest" (velocity = 0, "not hundreds") bare-element positions that `updateSpeedometer` adds a
+		`Settings.uiScale`-multiplied delta on top of every frame, rather than re-deriving the full
+		parent-offset chain each time. */
+	function captureSpeedometerRestPositions() {
+		speedometerBackground1RestY = speedometerBackground1.bmp.y;
+		speedometerMarkerRestY = speedometerConsMarker.bmp.y;
+		speedometerDigitOneRestX = speedometerDigitOne.anim.x;
+		speedometerDigitTenRestX = speedometerDigitTen.anim.x;
+		speedometerRestCaptured = true;
+	}
+
+	function setSpeedometerElementsVisible(visible:Bool) {
+		speedometerBackground1.bmp.visible = visible;
+		speedometerBackground2.bmp.visible = visible;
+		speedometerBackground3.bmp.visible = visible;
+		speedometerArrow.bmp.visible = visible;
+		speedometerDigitTen.anim.visible = visible;
+		speedometerDigitOne.anim.visible = visible;
+		if (!visible) {
+			speedometerDigitHun.anim.visible = false;
+			speedometerConsMarker.bmp.visible = false;
+			speedometerHasteMarker.bmp.visible = false;
+		}
+	}
+
+	/** Ported from `Mode_consistency`/`Mode_haste`'s constructors - `0` disables that mode's
+		threshold/marker; both can be set simultaneously (a `"Consistency Haste"` mission shows both
+		markers on the same dial). */
+	public function setConsistencyThreshold(minimumSpeed:Float) {
+		speedometerMinimumSpeed = minimumSpeed;
+	}
+
+	public function setHasteThreshold(speedToQualify:Float) {
+		speedometerSpeedToQualify = speedToQualify;
+	}
+
+	/** Ported from PQ's `PlayGui::updateSpeedometer` (`client/scripts/speedometer.cs`) - scrolls the
+		3 stacked tape backgrounds so the tick mark for `velocity` sits under the fixed arrow,
+		updates the digital digit readout (color: red if below `speedometerMinimumSpeed`, green if
+		above `speedometerSpeedToQualify`, else white), and repositions both threshold markers so
+		they scroll in lockstep with the tape (same formula as the tape, offset by a constant baked
+		from each threshold - see `ConsistencyMode`/`HasteMode`'s HUD wiring for the derivation).
+		Runs once per frame from `MarbleWorld`'s update loop regardless of which/how many of
+		Consistency/Haste are active, rather than each mode independently re-running this (which
+		would double the work and let whichever mode's `update()` ran last stomp on the other's
+		digit-coloring). */
+	public function updateSpeedometer(velocity:Float) {
+		if (speedometerCtrl == null)
+			return;
+
+		var active = speedometerMinimumSpeed > 0 || speedometerSpeedToQualify > 0;
+		setSpeedometerElementsVisible(active);
+		if (!active)
+			return;
+
+		if (!speedometerRestCaptured)
+			captureSpeedometerRestPositions();
+
+		// Ported from `speedometer.cs`'s digit-shift logic (makes room for the hundreds digit).
+		var showHundreds = velocity >= 100;
+		var showTens = velocity >= 10;
+		var hundredsShiftUiUnits = (showHundreds ? 11 : 0) * Settings.uiScale;
+		speedometerDigitOne.anim.x = speedometerDigitOneRestX + hundredsShiftUiUnits;
+		speedometerDigitTen.anim.x = speedometerDigitTenRestX + hundredsShiftUiUnits;
+		speedometerDigitHun.anim.visible = showHundreds;
+		speedometerDigitTen.anim.visible = showTens;
+
+		var one = Math.floor(velocity) % 10;
+		var ten = Math.floor(velocity / 10) % 10;
+		var hun = Math.floor(velocity / 100) % 10;
+
+		var colorOffset = 0; // normal/white
+		if (speedometerMinimumSpeed > 0 && velocity < speedometerMinimumSpeed)
+			colorOffset = 20; // red - too slow for Consistency
+		else if (speedometerSpeedToQualify > 0 && velocity > speedometerSpeedToQualify)
+			colorOffset = 10; // green - qualified for Haste
+
+		speedometerDigitOne.anim.currentFrame = one + colorOffset;
+		speedometerDigitTen.anim.currentFrame = ten + colorOffset;
+		speedometerDigitHun.anim.currentFrame = hun + colorOffset;
+
+		// Ported from `speedometer.cs`'s scroll math, scaled by 0.8 (PQ's 800x600 reference canvas
+		// vs this port's 640x480 one) - see class doc for the derivation.
+		var targetY = -607.2 + 6.4 * velocity;
+		if (targetY > 1710.4)
+			targetY = 1710.4; // Matches the "gone to plaid" clamp (without the achievement popup)
+		var deltaCanvasUnits = targetY - (-607.2);
+
+		speedometerBackground1.bmp.y = speedometerBackground1RestY + deltaCanvasUnits * Settings.uiScale;
+		speedometerBackground2.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 806.4) * Settings.uiScale;
+		speedometerBackground3.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 1612.8) * Settings.uiScale;
+
+		if (speedometerMinimumSpeed > 0) {
+			speedometerConsMarker.bmp.visible = true;
+			speedometerConsMarker.setTile(velocity < speedometerMinimumSpeed ? speedometerConsTooSlowTile : speedometerConsNormalTile);
+			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerMinimumSpeed;
+			speedometerConsMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
+		} else {
+			speedometerConsMarker.bmp.visible = false;
+		}
+
+		if (speedometerSpeedToQualify > 0) {
+			speedometerHasteMarker.bmp.visible = true;
+			speedometerHasteMarker.setTile(velocity >= speedometerSpeedToQualify ? speedometerHasteAchievedTile : speedometerHasteNotAchievedTile);
+			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerSpeedToQualify;
+			speedometerHasteMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
+		} else {
+			speedometerHasteMarker.bmp.visible = false;
+		}
+	}
+
+	function setSpeedometerVisible(visible:Bool) {
+		setSpeedometerElementsVisible(visible);
+	}
+
+	function initQuotaCounter() {
+		quotaCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
+		quotaCountSlash.position = new Vector(206, 14);
+		quotaCountSlash.extent = new Vector(24, 31);
+		playGuiCtrl.addChild(quotaCountSlash);
+
+		quotaCountNumbers[0].position = new Vector(226, 14);
+		quotaCountNumbers[0].extent = new Vector(24, 31);
+		quotaCountNumbers[1].position = new Vector(246, 14);
+		quotaCountNumbers[1].extent = new Vector(24, 31);
+		quotaCountNumbers[2].position = new Vector(266, 14);
+		quotaCountNumbers[2].extent = new Vector(24, 31);
+		for (n in quotaCountNumbers)
+			playGuiCtrl.addChild(n);
+
+		setQuotaCounterVisible(false);
+	}
+
+	/** Shows/hides the small "/trueTotal" suffix beside the main gem counter (`QuotaMode` only). */
+	public function setQuotaCounterVisible(visible:Bool) {
+		if (quotaCountSlash == null)
+			return;
+		quotaCountSlash.bmp.visible = visible;
+		for (n in quotaCountNumbers)
+			n.anim.visible = visible;
+	}
+
+	/** Sets the "/trueTotal" digits to the level's real total gem count (`level.totalGems`) - this
+		doesn't change during a run, so it's set once when Quota activates, not every pickup. */
+	public function formatQuotaCounter(trueTotal:Int) {
+		quotaCountNumbers[0].anim.currentFrame = Math.floor(trueTotal / 100);
+		quotaCountNumbers[1].anim.currentFrame = Math.floor(trueTotal / 10) % 10;
+		quotaCountNumbers[2].anim.currentFrame = trueTotal % 10;
+	}
+
+	function initSpeedometer() {
+		speedometerCtrl = new GuiControl();
+		speedometerCtrl.horizSizing = Left;
+		speedometerCtrl.position = new Vector(559, 198);
+		speedometerCtrl.extent = new Vector(86, 255);
+		playGuiCtrl.addChild(speedometerCtrl);
+
+		speedometerBorder = new GuiControl();
+		speedometerBorder.position = new Vector(0, 0);
+		speedometerBorder.extent = new Vector(76, 209);
+		speedometerCtrl.addChild(speedometerBorder);
+
+		speedometerBackground1 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground1.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		speedometerBackground1.position = new Vector(14, -607.2);
+		speedometerBackground1.extent = new Vector(51, 806);
+		speedometerBorder.addChild(speedometerBackground1);
+
+		speedometerBackground2 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground2.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		speedometerBackground2.position = new Vector(14, -607.2 - 806.4);
+		speedometerBackground2.extent = new Vector(51, 806);
+		speedometerBorder.addChild(speedometerBackground2);
+
+		speedometerBackground3 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground3.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		speedometerBackground3.position = new Vector(14, -607.2 - 806.4 * 2);
+		speedometerBackground3.extent = new Vector(51, 806);
+		speedometerBorder.addChild(speedometerBackground3);
+
+		speedometerArrow = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdarrow.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		speedometerArrow.position = new Vector(23, 1);
+		speedometerArrow.extent = new Vector(51, 205);
+		speedometerBorder.addChild(speedometerArrow);
+
+		speedometerConsNormalTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_normal.png', ResourceLoader.getImage, this.imageResources)
+			.toTile();
+		speedometerConsTooSlowTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_tooslow.png', ResourceLoader.getImage, this.imageResources)
+			.toTile();
+		speedometerConsMarker = new GuiImage(speedometerConsNormalTile);
+		speedometerConsMarker.position = new Vector(0, 0);
+		speedometerConsMarker.extent = new Vector(51, 26);
+		speedometerBorder.addChild(speedometerConsMarker);
+
+		speedometerHasteAchievedTile = ResourceLoader.getResource('data/ui/game/speedometer/haste_achieved.png', ResourceLoader.getImage, this.imageResources)
+			.toTile();
+		speedometerHasteNotAchievedTile = ResourceLoader.getResource('data/ui/game/speedometer/haste_notachieved.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile();
+		speedometerHasteMarker = new GuiImage(speedometerHasteAchievedTile);
+		speedometerHasteMarker.position = new Vector(0, 0);
+		speedometerHasteMarker.extent = new Vector(51, 26);
+		speedometerBorder.addChild(speedometerHasteMarker);
+
+		speedometerDigitHun.position = new Vector(9, 204);
+		speedometerDigitHun.extent = new Vector(34, 44);
+		speedometerDigitTen.position = new Vector(19, 204);
+		speedometerDigitTen.extent = new Vector(34, 44);
+		speedometerDigitOne.position = new Vector(40, 204);
+		speedometerDigitOne.extent = new Vector(34, 44);
+		speedometerCtrl.addChild(speedometerDigitHun);
+		speedometerCtrl.addChild(speedometerDigitTen);
+		speedometerCtrl.addChild(speedometerDigitOne);
+
+		setSpeedometerVisible(false);
+	}
+
+	/** Called once, right after the first `render()` pass lays everything out - captures the
+		"rest" (velocity = 0, "not hundreds") bare-element positions that `updateSpeedometer` adds a
+		`Settings.uiScale`-multiplied delta on top of every frame, rather than re-deriving the full
+		parent-offset chain each time. */
+	function captureSpeedometerRestPositions() {
+		speedometerBackground1RestY = speedometerBackground1.bmp.y;
+		speedometerMarkerRestY = speedometerConsMarker.bmp.y;
+		speedometerDigitOneRestX = speedometerDigitOne.anim.x;
+		speedometerDigitTenRestX = speedometerDigitTen.anim.x;
+		speedometerRestCaptured = true;
+	}
+
+	function setSpeedometerElementsVisible(visible:Bool) {
+		speedometerBackground1.bmp.visible = visible;
+		speedometerBackground2.bmp.visible = visible;
+		speedometerBackground3.bmp.visible = visible;
+		speedometerArrow.bmp.visible = visible;
+		speedometerDigitTen.anim.visible = visible;
+		speedometerDigitOne.anim.visible = visible;
+		if (!visible) {
+			speedometerDigitHun.anim.visible = false;
+			speedometerConsMarker.bmp.visible = false;
+			speedometerHasteMarker.bmp.visible = false;
+		}
+	}
+
+	/** Ported from `Mode_consistency`/`Mode_haste`'s constructors - `0` disables that mode's
+		threshold/marker; both can be set simultaneously (a `"Consistency Haste"` mission shows both
+		markers on the same dial). */
+	public function setConsistencyThreshold(minimumSpeed:Float) {
+		speedometerMinimumSpeed = minimumSpeed;
+	}
+
+	public function setHasteThreshold(speedToQualify:Float) {
+		speedometerSpeedToQualify = speedToQualify;
+	}
+
+	/** Ported from PQ's `PlayGui::updateSpeedometer` (`client/scripts/speedometer.cs`) - scrolls the
+		3 stacked tape backgrounds so the tick mark for `velocity` sits under the fixed arrow,
+		updates the digital digit readout (color: red if below `speedometerMinimumSpeed`, green if
+		above `speedometerSpeedToQualify`, else white), and repositions both threshold markers so
+		they scroll in lockstep with the tape (same formula as the tape, offset by a constant baked
+		from each threshold - see `ConsistencyMode`/`HasteMode`'s HUD wiring for the derivation).
+		Runs once per frame from `MarbleWorld`'s update loop regardless of which/how many of
+		Consistency/Haste are active, rather than each mode independently re-running this (which
+		would double the work and let whichever mode's `update()` ran last stomp on the other's
+		digit-coloring). */
+	public function updateSpeedometer(velocity:Float) {
+		if (speedometerCtrl == null)
+			return;
+
+		var active = speedometerMinimumSpeed > 0 || speedometerSpeedToQualify > 0;
+		setSpeedometerElementsVisible(active);
+		if (!active)
+			return;
+
+		if (!speedometerRestCaptured)
+			captureSpeedometerRestPositions();
+
+		// Ported from `speedometer.cs`'s digit-shift logic (makes room for the hundreds digit).
+		var showHundreds = velocity >= 100;
+		var showTens = velocity >= 10;
+		var hundredsShiftUiUnits = (showHundreds ? 11 : 0) * Settings.uiScale;
+		speedometerDigitOne.anim.x = speedometerDigitOneRestX + hundredsShiftUiUnits;
+		speedometerDigitTen.anim.x = speedometerDigitTenRestX + hundredsShiftUiUnits;
+		speedometerDigitHun.anim.visible = showHundreds;
+		speedometerDigitTen.anim.visible = showTens;
+
+		var one = Math.floor(velocity) % 10;
+		var ten = Math.floor(velocity / 10) % 10;
+		var hun = Math.floor(velocity / 100) % 10;
+
+		var colorOffset = 0; // normal/white
+		if (speedometerMinimumSpeed > 0 && velocity < speedometerMinimumSpeed)
+			colorOffset = 20; // red - too slow for Consistency
+		else if (speedometerSpeedToQualify > 0 && velocity > speedometerSpeedToQualify)
+			colorOffset = 10; // green - qualified for Haste
+
+		speedometerDigitOne.anim.currentFrame = one + colorOffset;
+		speedometerDigitTen.anim.currentFrame = ten + colorOffset;
+		speedometerDigitHun.anim.currentFrame = hun + colorOffset;
+
+		// Ported from `speedometer.cs`'s scroll math, scaled by 0.8 (PQ's 800x600 reference canvas
+		// vs this port's 640x480 one) - see class doc for the derivation.
+		var targetY = -607.2 + 6.4 * velocity;
+		if (targetY > 1710.4)
+			targetY = 1710.4; // Matches the "gone to plaid" clamp (without the achievement popup)
+		var deltaCanvasUnits = targetY - (-607.2);
+
+		speedometerBackground1.bmp.y = speedometerBackground1RestY + deltaCanvasUnits * Settings.uiScale;
+		speedometerBackground2.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 806.4) * Settings.uiScale;
+		speedometerBackground3.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 1612.8) * Settings.uiScale;
+
+		if (speedometerMinimumSpeed > 0) {
+			speedometerConsMarker.bmp.visible = true;
+			speedometerConsMarker.setTile(velocity < speedometerMinimumSpeed ? speedometerConsTooSlowTile : speedometerConsNormalTile);
+			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerMinimumSpeed;
+			speedometerConsMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
+		} else {
+			speedometerConsMarker.bmp.visible = false;
+		}
+
+		if (speedometerSpeedToQualify > 0) {
+			speedometerHasteMarker.bmp.visible = true;
+			speedometerHasteMarker.setTile(velocity >= speedometerSpeedToQualify ? speedometerHasteAchievedTile : speedometerHasteNotAchievedTile);
+			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerSpeedToQualify;
+			speedometerHasteMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
+		} else {
+			speedometerHasteMarker.bmp.visible = false;
+		}
+	}
+
+	function setSpeedometerVisible(visible:Bool) {
+		setSpeedometerElementsVisible(visible);
 	}
 
 	function initPowerupBox() {
@@ -1066,7 +1573,7 @@ class PlayGui {
 		gemCountNumbers[4].anim.visible = false;
 		gemCountNumbers[5].anim.visible = false;
 
-		var off = playerList[0].us ? 10 : 0;
+		var off = 10;
 
 		gemCountNumbers[0].anim.currentFrame = off + collectedHundredths;
 		gemCountNumbers[1].anim.currentFrame = off + collectedTenths;

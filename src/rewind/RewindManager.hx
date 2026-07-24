@@ -26,7 +26,9 @@ class RewindManager {
 	var allocObjs:Array<GameObject> = [];
 	var allocMeMap:Map<MissionElementBase, Int> = [];
 	var allocMes:Array<MissionElementBase> = [];
-	var level:MarbleWorld;
+
+	public var level:MarbleWorld;
+
 	var allocId = 0;
 	var allocMeId = 0;
 
@@ -81,6 +83,9 @@ class RewindManager {
 		rf.isFrozen = level.marble.isFrozen;
 		rf.lastFreezeTime = level.marble.lastFreezeTime;
 		rf.powerupLockCount = level.marble.powerupLockCount;
+		rf.timeStopTriggerCount = level.timeStopTriggerCount;
+		rf.modeState = level.gameMode.getRewindState();
+
 		rf.marbleRadius = level.marble._radius;
 		rf.movementTriggerCount = level.marble.movementTriggerCount;
 		rf.pathFollowerStates = [
@@ -172,7 +177,7 @@ class RewindManager {
 
 		level.bonusTime = rf.bonusTime;
 		level.gemCount = rf.gemCount;
-		@:privateAccess level.playGui.formatGemCounter(level.gemCount, level.totalGems);
+		@:privateAccess level.playGui.formatGemCounter(level.gemCount, level.gemCounterTotal());
 		for (i in 0...rf.gemStates.length) {
 			level.gems[i].setHide(rf.gemStates[i]);
 		}
@@ -234,6 +239,10 @@ class RewindManager {
 		level.marble.isFrozen = rf.isFrozen;
 		level.marble.lastFreezeTime = rf.lastFreezeTime;
 		level.marble.powerupLockCount = rf.powerupLockCount;
+		level.timeStopTriggerCount = rf.timeStopTriggerCount;
+		if (rf.modeState != null)
+			level.gameMode.applyRewindState(rf.modeState);
+
 		if (level.marble.teleporterMarker != null) {
 			if (rf.teleporterArmed) {
 				level.marble.teleporterMarker.skinOverride = rf.teleporterKeepVelocity ? "yellow" : null;

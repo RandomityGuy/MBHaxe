@@ -10,6 +10,12 @@ import triggers.HelpTrigger;
 import triggers.TeleportTrigger;
 import triggers.DestinationTrigger;
 import triggers.CheckpointTrigger;
+import triggers.LapsCheckpoint;
+import triggers.LapsCounterTrigger;
+import triggers.TDTrigger;
+import triggers.StopTDTrigger;
+import triggers.LockPowerupTrigger;
+import triggers.TimeStopTrigger;
 import triggers.GemChangeTrigger;
 import triggers.TimeTravelTrigger;
 import triggers.FinishTrigger;
@@ -398,6 +404,30 @@ class DatablockRegistry {
 		{
 			match: Exact(["checkpointtrigger"]),
 			create: (element, level) -> new CheckpointTrigger(element, level)
+		},
+		{
+			match: Exact(["lapscheckpoint"]),
+			create: (element, level) -> new LapsCheckpoint(element, level)
+		},
+		{
+			match: Exact(["lapscountertrigger"]),
+			create: (element, level) -> new LapsCounterTrigger(element, level)
+		},
+		{
+			match: Exact(["tdtrigger"]),
+			create: (element, level) -> new TDTrigger(element, level)
+		},
+		{
+			match: Exact(["stoptdtrigger"]),
+			create: (element, level) -> new StopTDTrigger(element, level)
+		},
+		{
+			match: Exact(["lockpoweruptrigger"]),
+			create: (element, level) -> new LockPowerupTrigger(element, level)
+		},
+		{
+			match: Exact(["timestoptrigger"]),
+			create: (element, level) -> new TimeStopTrigger(element, level)
 		},
 		{
 			match: Exact(["gemchangetrigger"]),

@@ -55,6 +55,10 @@ class TouchInput {
 
 	var touches:Map<Int, Touch> = [];
 
+	public var powerupClicked = false;
+
+	var powerupPrevPressed = false;
+
 	public function new() {
 		this.cameraInput = new CameraInput();
 		this.movementInput = new MovementInput();
@@ -107,6 +111,8 @@ class TouchInput {
 	public function update() {
 		previousTouchState = currentTouchState;
 		currentTouchState = new TouchEventState();
+		powerupClicked = powerupButton.pressed && !powerupPrevPressed;
+		powerupPrevPressed = powerupButton.pressed;
 	}
 
 	public function showControls(parentGui:GuiControl, ultra:Bool) {

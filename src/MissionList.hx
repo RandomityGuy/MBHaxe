@@ -75,7 +75,7 @@ class MissionList {
 		goldMissions.set("advanced", parseDifficulty("gold", "missions_mbg", "advanced"));
 
 		platinumMissions.set("tutorial", parseDifficulty("platinum", "missions_pq", "tutorial"));
-		platinumMissions.set("beginner", parseDifficulty("platinum", "missions_pq", "tutorial"));
+		platinumMissions.set("beginner", parseDifficulty("platinum", "missions_pq", "beginner"));
 		platinumMissions.set("intermediate", parseDifficulty("platinum", "missions_pq", "intermediate"));
 		platinumMissions.set("advanced", parseDifficulty("platinum", "missions_pq", "advanced"));
 		platinumMissions.set("expert", parseDifficulty("platinum", "missions_pq", "expert"));

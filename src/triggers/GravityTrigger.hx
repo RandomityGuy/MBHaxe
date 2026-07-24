@@ -16,7 +16,7 @@ class GravityTrigger extends Trigger {
 	}
 
 	function apply(marble:Marble, timeState:TimeState) {
-		var direction = getDownVector();
+		var direction = getDownVector().multiply(-1);
 		if (marble == this.level.marble)
 			this.level.setUp(marble, direction, timeState, true);
 		else {
