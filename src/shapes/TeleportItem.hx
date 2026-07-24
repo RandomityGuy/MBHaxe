@@ -46,20 +46,6 @@ class TeleportItem extends PowerUp {
 	}
 
 	public function use(marble:Marble, timeState:TimeState):Bool {
-		// Debounce: only treat this as a new "fire" if there's a gap since the last time we were
-		// called (i.e. the button was released and pressed again), matching PQ's
-		// teleporterFireNum/client.fireNum check. `timeState.ticks` doesn't work for this - it's
-		// only meaningfully incremented in multiplayer, staying static in singleplayer, which made
-		// this debounce swallow every press after the first forever. `timeSinceLoad` instead is
-		// the *outer* per-frame time (this function is called once per physics substep, but
-		// `pTime.timeSinceLoad` - unlike `pTime.currentAttemptTime` - is never touched per substep
-		// in `Marble.advancePhysics`, so it's identical across every substep of one frame and only
-		// changes frame-to-frame), reliable in both singleplayer and multiplayer.
-		var isNewPress = timeState.timeSinceLoad - marble.teleporterLastUseTime > 0.001;
-		marble.teleporterLastUseTime = timeState.timeSinceLoad;
-		if (!isNewPress)
-			return false;
-
 		if (marble.teleporterArmed) {
 			marble.teleporterArmed = false;
 			marble.teleporterMarker.setPosition(1e8, 1e8, 1e8);
@@ -90,7 +76,6 @@ class TeleportItem extends PowerUp {
 					marble.camera.nextCameraYaw = savedYaw;
 					marble.camera.nextCameraPitch = savedPitch;
 					this.level.setUp(marble, savedGravity, this.level.timeState, true);
-					AudioManager.playSound(ResourceLoader.getResource("data/sound/teleport.wav", ResourceLoader.getAudio, this.soundResources));
 				}
 				return 0;
 			});
@@ -110,6 +95,7 @@ class TeleportItem extends PowerUp {
 			marble.teleporterMarker.skinOverride = marble.teleporterKeepVelocity ? "yellow" : null;
 			marble.teleporterMarker.setPosition(marble.teleporterSavedPosition.x, marble.teleporterSavedPosition.y, marble.teleporterSavedPosition.z);
 
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/teleport.wav", ResourceLoader.getAudio, this.soundResources));
 			if (marble == this.level.marble)
 				this.level.displayAlert("Teleporter has been activated, please wait.");
 			return false;

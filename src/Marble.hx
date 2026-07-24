@@ -83,6 +83,8 @@ enum Mode {
 	Finish;
 }
 
+/** Ported from `marble.cs`'s `BounceParticle`/`MarbleBounceEmitter` ($pref::Video::particleSystem
+	== 1, or the identical `else` fallback - both branches have the same values). */
 final bounceParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 80,
 	ambientVelocity: new Vector(0, 0, 0.0),
@@ -90,6 +92,11 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 	velocityVariance: 0.25,
 	emitterLifetime: 250,
 	inheritedVelFactor: 0,
+	thetaMin: 80,
+	thetaMax: 90,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/star.png',
 		blending: Alpha,
@@ -99,20 +106,32 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 		lifetime: 500,
 		lifetimeVariance: 100,
 		dragCoefficient: 1,
-		acceleration: -2,
+		constantAcceleration: -2,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(0.9, 0, 0, 1), new Vector(0.9, 0.9, 0, 1), new Vector(0.9, 0.9, 0, 0)],
 		sizes: [0.25, 0.25, 0.25],
 		times: [0, 0.75, 1]
 	}
 };
 
+/** Ported from `marble.cs`'s commented-out `TrailParticle`/`MarbleTrailOldEmitter` - the
+	`ParticleData` itself is dead in real PQ ("these aren't used but we are keeping them so the
+	engine don't go KABOOM"), which actually leaves `MarbleTrailOldEmitter` referencing a
+	nonexistent particle datablock (broken/non-functional in current PQ) - reproduced here anyway
+	using the last-known values, since without it the marble would have no trail at all. */
 final trailParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
 	ejectionVelocity: 0.0,
 	velocityVariance: 0.25,
-	emitterLifetime: 1e8,
+	emitterLifetime: 10000,
 	inheritedVelFactor: 1,
 	ambientVelocity: new Vector(),
+	thetaMin: 80,
+	thetaMax: 90,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
@@ -122,20 +141,29 @@ final trailParticleOptions:ParticleEmitterOptions = {
 		dragCoefficient: 1,
 		lifetime: 100,
 		lifetimeVariance: 10,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(1, 1, 0, 0), new Vector(1, 1, 0, 1), new Vector(1, 1, 1, 0)],
 		sizes: [0.7, 0.4, 0.1],
 		times: [0, 0.15, 1]
 	}
 };
 
+/** Ported from `mp/blast.cs`'s `BlastSmoke`/`BlastEmitter` (the plain, non-"MBU"/non-"Ultra"
+	variant - matches this port's non-mega blast). */
 final blastParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	ambientVelocity: new Vector(0, 0, -0.3),
 	ejectionVelocity: 4,
 	velocityVariance: 0,
-	emitterLifetime: 300,
+	emitterLifetime: 500,
 	inheritedVelFactor: 0,
+	thetaMin: 90,
+	thetaMax: 100,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
@@ -145,20 +173,28 @@ final blastParticleOptions:ParticleEmitterOptions = {
 		lifetime: 500,
 		lifetimeVariance: 100,
 		dragCoefficient: 1,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(0, 1, 1, 0.1), new Vector(0, 1, 1, 0.5), new Vector(0, 1, 1, 0.9)],
 		sizes: [0.125, 0.125, 0.125],
 		times: [0, 0.4, 1]
 	}
 }
 
+/** Ported from `mp/blast.cs`'s `UltraBlastSmoke`/`UltraBlastEmitter`. */
 final blastMaxParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	ambientVelocity: new Vector(0, 0, -0.3),
 	ejectionVelocity: 4,
 	velocityVariance: 0,
-	emitterLifetime: 300,
+	emitterLifetime: 500,
 	inheritedVelFactor: 0,
+	thetaMin: 90,
+	thetaMax: 100,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
@@ -168,7 +204,9 @@ final blastMaxParticleOptions:ParticleEmitterOptions = {
 		lifetime: 500,
 		lifetimeVariance: 100,
 		dragCoefficient: 1,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [
 			new Vector(1, 0.7, 0, 0.1),
 			new Vector(1, 0.7, 0, 0.5),
@@ -238,6 +276,7 @@ class Marble extends GameObject {
 	var blastRechargeShockwaveStrength = 10.0;
 
 	public var _bounceRestitution = 0.5;
+
 	var _maxForceRadius:Float = 50;
 
 	var _bounceYet:Bool;
@@ -288,6 +327,7 @@ class Marble extends GameObject {
 		user, so the marker/position/config are shared across every TeleportItem in a level
 		regardless of which one armed it or which one fires it. */
 	public var teleporterMarker:DtsObject;
+
 	public var teleporterArmed:Bool = false;
 	public var teleporterSavedPosition:Vector = new Vector();
 	public var teleporterSavedYaw:Float = 0;
@@ -302,7 +342,9 @@ class Marble extends GameObject {
 		marble's transform every frame while frozen (mirroring `%marble.iceChunk.setParent(%marble,
 		"0 0 0", 1)` - a "simple" 1:1 parent with no offset), scaled to the marble's current radius. */
 	public var isFrozen:Bool = false;
+
 	public var lastFreezeTime:Float = -1e8;
+
 	var iceChunk:DtsObject;
 	var iceShard:shapes.IceShard;
 
@@ -854,8 +896,22 @@ class Marble extends GameObject {
 	var physicsAttributeBaseline:Map<String, Float>;
 
 	static var PHYSMOD_ATTRIBUTES = [
-		"maxrollvelocity", "angularacceleration", "jumpimpulse", "kineticfriction", "staticfriction", "brakingacceleration", "gravity", "airacceleration",
-		"maxdotslide", "minbouncevel", "minbouncespeed", "mintrailvel", "bouncekineticfriction", "bouncerestitution", "mass", "maxforceradius"
+		"maxrollvelocity",
+		"angularacceleration",
+		"jumpimpulse",
+		"kineticfriction",
+		"staticfriction",
+		"brakingacceleration",
+		"gravity",
+		"airacceleration",
+		"maxdotslide",
+		"minbouncevel",
+		"minbouncespeed",
+		"mintrailvel",
+		"bouncekineticfriction",
+		"bouncerestitution",
+		"mass",
+		"maxforceradius"
 	];
 
 	function capturePhysicsAttributeBaseline() {
@@ -2417,8 +2473,7 @@ class Marble extends GameObject {
 			this.level.particleManager.createEmitter(ublast ? blastMaxParticleOptions : blastParticleOptions, ublast ? blastMaxEmitterData : blastEmitterData,
 				this.getAbsPos().getPosition(), () -> {
 					this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
-				},
-				new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+				});
 		}
 		// if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
 		// 	var ticksSince = (this.serverTicks - this.blastUseTick);
@@ -2620,9 +2675,9 @@ class Marble extends GameObject {
 				|| Gamepad.isDown(Settings.gamepadSettings.jump)) {
 				move.jump = true;
 			}
-			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
-				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
-				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
+			if ((!Util.isTouchDevice() && Key.isPressed(Settings.controlsSettings.powerup))
+				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupClicked)
+				|| Gamepad.isPressed(Settings.gamepadSettings.powerup)) {
 				move.powerup = true;
 			}
 
@@ -2853,8 +2908,7 @@ class Marble extends GameObject {
 				this.level.particleManager.createEmitter(blastAmt > 1 ? blastMaxParticleOptions : blastParticleOptions,
 					blastAmt > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
 						this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
-					},
-					new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+					});
 			this.blastTicks = 0;
 			// Now send the impulse to other marbles
 			if (!Net.connectedServerInfo.competitiveMode || blastAmt > 1) { // Competitor mode only allows ultra blasts
@@ -2888,8 +2942,7 @@ class Marble extends GameObject {
 			this.level.particleManager.createEmitter(this.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
 				this.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
 					this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
-				},
-				new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+				});
 			this.blastAmount = 0;
 		}
 	}
@@ -3055,7 +3108,7 @@ class Marble extends GameObject {
 		multiple simultaneous lock reasons (only freezing, currently) don't unlock each other early. */
 	public function lockPowerupUse() {
 		this.powerupLockCount++;
-		if (this.level != null && this.level.marble == this)
+		if (this.level != null)
 			@:privateAccess this.level.playGui.lockPowerup(true);
 	}
 
@@ -3063,7 +3116,7 @@ class Marble extends GameObject {
 		this.powerupLockCount--;
 		if (this.powerupLockCount < 0)
 			this.powerupLockCount = 0;
-		if (this.powerupLockCount == 0 && this.level != null && this.level.marble == this)
+		if (this.powerupLockCount == 0 && this.level != null)
 			@:privateAccess this.level.playGui.lockPowerup(false);
 	}
 

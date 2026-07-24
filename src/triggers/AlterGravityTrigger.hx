@@ -44,7 +44,7 @@ class AlterGravityTrigger extends Trigger {
 		var quat = MisParser.parseRotation(rotationStr);
 		var direction = new Vector(0, 0, -1);
 		direction.transform(quat.toMatrix());
-		return direction;
+		return direction.multiply(-1);
 	}
 
 	function apply(marble:Marble, timeState:TimeState) {

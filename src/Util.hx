@@ -54,13 +54,24 @@ class Util {
 		return new Vector(lerp(v1.x, v2.x, t), lerp(v1.y, v2.y, t), lerp(v1.z, v2.z, t), lerp(v1.w, v2.w, t));
 	}
 
-	public static inline function rotateImage(bitmap:hxd.Pixels, angle:Float) {
+	public static function rotateImage(bitmap:hxd.Pixels, angle:Float) {
+		switch (bitmap.format) {
+			case S3TC(_):
+				if (angle == Math.PI / 2)
+					transformS3TC(bitmap, 0);
+				if (angle == -Math.PI / 2)
+					transformS3TC(bitmap, 1);
+				if (angle == Math.PI)
+					transformS3TC(bitmap, 2);
+				return;
+			default:
+		}
 		var curpixels = bitmap.clone();
 		if (angle == Math.PI / 2)
 			for (x in 0...curpixels.width) {
 				for (y in 0...curpixels.height) {
 					var psrc = ((y + (curpixels.height - x - 1) * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
-					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + bitmap.offset;
 
 					switch (curpixels.format) {
 						case R8:
@@ -73,6 +84,10 @@ class Util {
 						case RG8:
 							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
 							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+						case RGB8 | BGR8:
+							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
 						default:
 							null;
 					}
@@ -85,7 +100,7 @@ class Util {
 				for (y in 0...curpixels.height) {
 					var psrc = ((curpixels.width - y - 1) + x * curpixels.width) * @:privateAccess curpixels.bytesPerPixel + curpixels.offset;
 
-					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + bitmap.offset;
 
 					switch (curpixels.format) {
 						case R8:
@@ -98,6 +113,10 @@ class Util {
 						case RG8:
 							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
 							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+						case RGB8 | BGR8:
+							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
 						default:
 							null;
 					}
@@ -110,7 +129,7 @@ class Util {
 						+ (curpixels.height - y - 1) * curpixels.width) * @:privateAccess curpixels.bytesPerPixel
 						+ curpixels.offset;
 
-					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + bitmap.offset;
 
 					switch (curpixels.format) {
 						case R8:
@@ -123,6 +142,10 @@ class Util {
 						case RG8:
 							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
 							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+						case RGB8 | BGR8:
+							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
 						default:
 							null;
 					}
@@ -131,6 +154,17 @@ class Util {
 	}
 
 	public static function flipImage(bitmap:hxd.Pixels, hflip:Bool, vflip:Bool) {
+		switch (bitmap.format) {
+			case S3TC(_):
+				if (hflip && vflip)
+					transformS3TC(bitmap, 5);
+				else if (hflip)
+					transformS3TC(bitmap, 3);
+				else if (vflip)
+					transformS3TC(bitmap, 4);
+				return;
+			default:
+		}
 		var curpixels = bitmap.clone();
 
 		if (hflip && vflip) {
@@ -140,7 +174,7 @@ class Util {
 						+ (curpixels.width - y - 1) * curpixels.width) * @:privateAccess curpixels.bytesPerPixel
 						+ curpixels.offset;
 
-					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+					var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + bitmap.offset;
 
 					switch (curpixels.format) {
 						case R8:
@@ -153,6 +187,10 @@ class Util {
 						case RG8:
 							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
 							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+						case RGB8 | BGR8:
+							bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+							bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
 						default:
 							null;
 					}
@@ -164,7 +202,7 @@ class Util {
 					for (y in 0...curpixels.height) {
 						var psrc = ((curpixels.width - x - 1) + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel + curpixels.offset;
 
-						var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+						var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + bitmap.offset;
 
 						switch (curpixels.format) {
 							case R8:
@@ -177,6 +215,10 @@ class Util {
 							case RG8:
 								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
 								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							case RGB8 | BGR8:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+								bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
 							default:
 								null;
 						}
@@ -187,7 +229,7 @@ class Util {
 					for (y in 0...curpixels.height) {
 						var psrc = (x + (curpixels.width - y - 1) * curpixels.width) * @:privateAccess curpixels.bytesPerPixel + curpixels.offset;
 
-						var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + curpixels.offset;
+						var pdest = ((x + y * curpixels.width) * @:privateAccess curpixels.bytesPerPixel) + bitmap.offset;
 
 						switch (curpixels.format) {
 							case R8:
@@ -200,12 +242,128 @@ class Util {
 							case RG8:
 								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
 								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+							case RGB8 | BGR8:
+								bitmap.bytes.set(pdest, curpixels.bytes.get(psrc));
+								bitmap.bytes.set(pdest + 1, curpixels.bytes.get(psrc + 1));
+								bitmap.bytes.set(pdest + 2, curpixels.bytes.get(psrc + 2));
 							default:
 								null;
 						}
 					}
 				}
 		}
+	}
+
+	// mode: 0 = rotate 90, 1 = rotate -90, 2 = rotate 180, 3 = hflip, 4 = vflip, 5 = hflip+vflip
+	static inline function s3tcSrcX(mode:Int, x:Int, y:Int, w:Int, h:Int):Int {
+		return switch (mode) {
+			case 0: y;
+			case 1: w - 1 - y;
+			case 2, 3, 5: w - 1 - x;
+			default: x; // 4
+		}
+	}
+
+	static inline function s3tcSrcY(mode:Int, x:Int, y:Int, w:Int, h:Int):Int {
+		return switch (mode) {
+			case 0: h - 1 - x;
+			case 1: x;
+			case 2, 4, 5: h - 1 - y;
+			default: y; // 3
+		}
+	}
+
+	static inline function getBits(bytes:haxe.io.Bytes, baseByte:Int, bitStart:Int, bitCount:Int):Int {
+		var result = 0;
+		for (i in 0...bitCount) {
+			var bp = bitStart + i;
+			var b = bytes.get(baseByte + (bp >> 3));
+			var bit = (b >> (bp & 7)) & 1;
+			result |= bit << i;
+		}
+		return result;
+	}
+
+	static inline function setBits(bytes:haxe.io.Bytes, baseByte:Int, bitStart:Int, bitCount:Int, value:Int):Void {
+		for (i in 0...bitCount) {
+			var bp = bitStart + i;
+			var byteIdx = baseByte + (bp >> 3);
+			var bitIdx = bp & 7;
+			var cur = bytes.get(byteIdx);
+			if (((value >> i) & 1) != 0)
+				cur |= (1 << bitIdx);
+			else
+				cur &= (~(1 << bitIdx)) & 0xFF;
+			bytes.set(byteIdx, cur);
+		}
+	}
+
+	// Remaps the 16 raster-order bitCount-wide pixel index values of a single 4x4 block
+	static function remapBlockIndices(src:haxe.io.Bytes, dst:haxe.io.Bytes, srcBase:Int, dstBase:Int, bitCount:Int, mode:Int) {
+		for (dy in 0...4) {
+			for (dx in 0...4) {
+				var sx = s3tcSrcX(mode, dx, dy, 4, 4);
+				var sy = s3tcSrcY(mode, dx, dy, 4, 4);
+				var v = getBits(src, srcBase, (sy * 4 + sx) * bitCount, bitCount);
+				setBits(dst, dstBase, (dy * 4 + dx) * bitCount, bitCount, v);
+			}
+		}
+	}
+
+	// Rotates/flips an S3TC (DXT1/3/5) compressed image by rearranging blocks and the per-pixel
+	// index bits within each block, without ever decompressing the texture data.
+	static function transformS3TC(bitmap:hxd.Pixels, mode:Int) {
+		var n = switch (bitmap.format) {
+			case S3TC(v): v;
+			default: return;
+		}
+		if (n != 1 && n != 2 && n != 3)
+			return;
+
+		var width = bitmap.width;
+		var height = bitmap.height;
+		var bw = width >> 2;
+		var bh = height >> 2;
+		var blockSize = n == 1 ? 8 : 16;
+		var srcBytes = bitmap.bytes;
+		var srcOff = bitmap.offset;
+		var dstBytes = haxe.io.Bytes.alloc(bw * bh * blockSize);
+
+		for (dby in 0...bh) {
+			for (dbx in 0...bw) {
+				var sbx = s3tcSrcX(mode, dbx, dby, bw, bh);
+				var sby = s3tcSrcY(mode, dbx, dby, bw, bh);
+				var srcBlockOff = srcOff + (sby * bw + sbx) * blockSize;
+				var dstBlockOff = (dby * bw + dbx) * blockSize;
+
+				switch (n) {
+					case 1:
+						// color0/color1 endpoints (4 bytes) move with the block unchanged
+						dstBytes.blit(dstBlockOff, srcBytes, srcBlockOff, 4);
+						// color indices (4 bytes, 16x2bit)
+						remapBlockIndices(srcBytes, dstBytes, srcBlockOff + 4, dstBlockOff + 4, 2, mode);
+					case 2:
+						// explicit alpha (8 bytes, 16x4bit)
+						remapBlockIndices(srcBytes, dstBytes, srcBlockOff, dstBlockOff, 4, mode);
+						// color0/color1 endpoints (4 bytes)
+						dstBytes.blit(dstBlockOff + 8, srcBytes, srcBlockOff + 8, 4);
+						// color indices (4 bytes, 16x2bit)
+						remapBlockIndices(srcBytes, dstBytes, srcBlockOff + 12, dstBlockOff + 12, 2, mode);
+					case 3:
+						// alpha0/alpha1 endpoints (2 bytes) move with the block unchanged
+						dstBytes.blit(dstBlockOff, srcBytes, srcBlockOff, 2);
+						// alpha indices (6 bytes, 16x3bit)
+						remapBlockIndices(srcBytes, dstBytes, srcBlockOff + 2, dstBlockOff + 2, 3, mode);
+						// color0/color1 endpoints (4 bytes)
+						dstBytes.blit(dstBlockOff + 8, srcBytes, srcBlockOff + 8, 4);
+						// color indices (4 bytes, 16x2bit)
+						remapBlockIndices(srcBytes, dstBytes, srcBlockOff + 12, dstBlockOff + 12, 2, mode);
+				}
+			}
+		}
+
+		bitmap.bytes = dstBytes;
+		bitmap.offset = 0;
 	}
 
 	public static function splitIgnoreStringLiterals(str:String, splitter:String, strLiteralToken = '"') {

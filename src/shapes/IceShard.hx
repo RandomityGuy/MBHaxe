@@ -17,12 +17,24 @@ import mis.MissionElement.MissionElementStaticShape;
 /** PQ's ambient "mist"/"shine" gleam around an ice shard (`server/scripts/particles/
 	IceShardMistEmitter.cs`/`IceShardShineEmitter.cs`) - runs forever (the shard itself is never
 	removed in this port - see `IceShard.hx`'s class doc). */
+/** Ported from `IceShardMistEmitter.cs`. Note the source has a misspelled duplicate
+	`dragCoeffiecient = "1"` at the bottom of `IceShardMistParticle` (and a bogus
+	`dragCoefficient = "5.71219"` on the *emitter*, which has no drag field at all in the real
+	engine) - both are dead/no-op fields since they don't match the real `dragCoefficient` name;
+	the correctly-spelled `dragCoefficient = "9.21569"` earlier in the particle block is the one
+	that actually takes effect. */
 final iceShardMistOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 294,
+	periodVariance: 78,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 0,
 	velocityVariance: 0,
 	emitterLifetime: 1e9,
+	ejectionOffset: 0.392157,
+	thetaMin: 0,
+	thetaMax: 148.235,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/smoke_blur32.png',
@@ -33,7 +45,9 @@ final iceShardMistOptions:ParticleEmitterOptions = {
 		lifetime: 1400,
 		lifetimeVariance: 96,
 		dragCoefficient: 9.21569,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.0980392,
+		windCoefficient: 0,
 		colors: [
 			new Vector(0.843137, 0.833333, 0.843137, 0),
 			new Vector(0.784314, 0.813725, 0.882353, 0.686275),
@@ -45,12 +59,21 @@ final iceShardMistOptions:ParticleEmitterOptions = {
 	}
 };
 
+/** Ported from `IceShardShineEmitter.cs`. Same misspelled-duplicate situation as the mist particle
+	above - the real `dragCoefficient` is `10`, not the dead `dragCoeffiecient = "0.1"` an earlier
+	pass of this port had mistakenly picked up. */
 final iceShardShineOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 275,
+	periodVariance: 274,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 3.92157,
 	velocityVariance: 2.44098,
 	emitterLifetime: 1e9,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/glint2.png',
@@ -60,8 +83,10 @@ final iceShardShineOptions:ParticleEmitterOptions = {
 		spinRandomMax: 0,
 		lifetime: 1500,
 		lifetimeVariance: 100,
-		dragCoefficient: 0.1,
-		acceleration: 0,
+		dragCoefficient: 10,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [
 			new Vector(0.852941, 0.911765, 1, 0),
 			new Vector(0.862745, 0.901961, 1, 0),

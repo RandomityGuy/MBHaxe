@@ -129,18 +129,22 @@ class EndPad extends DtsObject {
 	}
 }
 
+/** Ported from `fireworks.cs`'s `FireWorkSmoke`/`FireWorkSmokeEmitter`. The real
+	`ejectionOffset`+theta/phi cone (0-90deg off up) is what actually produces the "smoke expanding
+	outward from a point" look - MBHaxe's previous version approximated this with a custom
+	`spawnOffset` circle-area function and no real ejection velocity; now that the cone/offset
+	system is accurately ported, that approximation isn't needed. */
 final fireworkSmoke:ParticleEmitterOptions = {
 	ejectionPeriod: 100,
-	ambientVelocity: new Vector(0, 0, 1),
-	ejectionVelocity: 0,
-	velocityVariance: 0,
-	emitterLifetime: 4000,
-	spawnOffset: () -> {
-		var r = Math.sqrt(Math.random());
-		var theta = Math.random() * Math.PI * 2;
-		var randomPointInCircle = new Vector(r * Math.cos(theta), r * Math.sin(theta));
-		return new Vector(randomPointInCircle.x * 1.6, randomPointInCircle.y * 1.6, Math.random() * 0.4 - 0.5);
-	},
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 1,
+	velocityVariance: 0.2,
+	emitterLifetime: 5000,
+	ejectionOffset: 0.75,
+	thetaMin: 0,
+	thetaMax: 90,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/saturn.png',
@@ -150,20 +154,28 @@ final fireworkSmoke:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 2000,
 		lifetimeVariance: 200,
-		dragCoefficient: 0.5,
-		acceleration: 0,
+		dragCoefficient: 1,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(1, 1, 0, 0), new Vector(1, 0, 0, 1), new Vector(1, 0, 0, 0)],
 		sizes: [0.1, 0.2, 0.3],
 		times: [0, 0.2, 1]
 	}
 };
 
+/** Ported from `fireworks.cs`'s `RedFireWorkTrail`/`RedFireWorkTrailEmitter`. */
 final redTrail:ParticleEmitterOptions = {
 	ejectionPeriod: 30,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 0,
+	ejectionVelocity: 0.1,
 	velocityVariance: 0,
-	emitterLifetime: 10000,
+	emitterLifetime: 5000,
+	ejectionOffset: 0,
+	thetaMin: 170,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/spark.png',
@@ -173,20 +185,28 @@ final redTrail:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 600,
 		lifetimeVariance: 100,
-		dragCoefficient: 0,
-		acceleration: 0,
+		dragCoefficient: 1,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(1, 1, 0, 1), new Vector(1, 0, 0, 1), new Vector(1, 0, 0, 0)],
 		sizes: [0.1, 0.05, 0.01],
 		times: [0, 0.5, 1]
 	}
 };
 
+/** Ported from `fireworks.cs`'s `BlueFireWorkTrail`/`BlueFireWorkTrailEmitter`. */
 final blueTrail:ParticleEmitterOptions = {
 	ejectionPeriod: 30,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 0,
+	ejectionVelocity: 0.1,
 	velocityVariance: 0,
-	emitterLifetime: 10000,
+	emitterLifetime: 5000,
+	ejectionOffset: 0,
+	thetaMin: 170,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/spark.png',
@@ -196,54 +216,75 @@ final blueTrail:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 600,
 		lifetimeVariance: 100,
-		dragCoefficient: 0,
-		acceleration: 0,
+		dragCoefficient: 1,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(0, 0, 1, 1), new Vector(0.5, 0.5, 1, 1), new Vector(1, 1, 1, 0)],
 		sizes: [0.1, 0.05, 0.01],
 		times: [0, 0.5, 1]
 	}
 };
 
+/** Ported from `fireworks.cs`'s `RedFireWorkSpark`/`RedFireWorkSparkEmitter` - the source doesn't
+	set `spinSpeed`/`spinRandomMin`/`spinRandomMax` at all, so those default to 0 (`ParticleData`'s
+	C++ constructor defaults), not MBHaxe's previous invented `40`/`-90`/`90`. */
 final redSpark:ParticleEmitterOptions = {
-	ejectionPeriod: 1,
+	ejectionPeriod: 15,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 0.8,
+	ejectionVelocity: 1,
 	velocityVariance: 0.25,
-	emitterLifetime: 10,
-	inheritedVelFactor: 0,
+	emitterLifetime: 300,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	inheritedVelFactor: 0.2,
 	particleOptions: {
 		texture: 'particles/star.png',
 		blending: Alpha,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
 		lifetime: 500,
 		lifetimeVariance: 50,
-		dragCoefficient: 0.5,
-		acceleration: 0,
+		dragCoefficient: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(1, 1, 0, 1), new Vector(1, 1, 0, 1), new Vector(1, 0, 0, 0)],
 		sizes: [0.2, 0.2, 0.2],
 		times: [0, 0.5, 1]
 	}
 };
 
+/** Ported from `fireworks.cs`'s `BlueFireWorkSpark`/`BlueFireWorkSparkEmitter` - same "no spin
+	fields set = defaults to 0" note as `redSpark`. */
 final blueSpark:ParticleEmitterOptions = {
-	ejectionPeriod: 1,
+	ejectionPeriod: 60,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 0.5,
 	velocityVariance: 0.25,
-	emitterLifetime: 10,
-	inheritedVelFactor: 0,
+	emitterLifetime: 300,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	inheritedVelFactor: 0.2,
 	particleOptions: {
 		texture: 'particles/bubble.png',
 		blending: Alpha,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
 		lifetime: 2000,
 		lifetimeVariance: 200,
 		dragCoefficient: 0,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(0, 0, 1, 1), new Vector(0.5, 0.5, 1, 1), new Vector(1, 1, 1, 0)],
 		sizes: [0.2, 0.2, 0.2],
 		times: [0, 0.5, 1]

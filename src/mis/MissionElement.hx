@@ -82,6 +82,21 @@ class MissionElementScriptObject extends MissionElementBase {
 	var bluespawnchance:String;
 	var platinumspawnchance:String;
 
+	// Per-game-mode config fields (2D/Quota/Consistency/Laps/Haste) - `copyFields`
+	// (`mis/MisParser.hx`) only auto-populates fields already declared here, so these must exist
+	// as instance fields even though each is only meaningful when the corresponding mode word is
+	// active in `gamemode`.
+	var cameraplane:String;
+	var invertcameraplane:String;
+	var initialcameradistance:String;
+	var gemquota:String;
+	var minimumspeed:String;
+	var graceperiod:String;
+	var penaltydelay:String;
+	var lapsnumber:String;
+	var nolapscheckpoint:String;
+	var speedtoqualify:String;
+
 	public function new() {
 		_type = MissionElementType.ScriptObject;
 	}

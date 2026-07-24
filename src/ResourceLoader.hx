@@ -192,6 +192,14 @@ class ResourceLoader {
 				toloadfiles.push(file);
 			}
 		}
+		filestats = fileSystem.dir("missions_pq");
+		for (file in filestats) {
+			if (file.isDirectory) {
+				toloaddirs.push(file);
+			} else {
+				toloadfiles.push(file);
+			}
+		}
 		filestats = fileSystem.dir("multiplayer/hunt");
 		for (file in filestats) {
 			if (file.isDirectory) {
@@ -209,7 +217,7 @@ class ResourceLoader {
 				if (file.isDirectory) {
 					toloaddirs.push(file);
 				} else {
-					if (file.extension == "mis")
+					if (file.extension == "mis" || file.extension == "mcs")
 						toloadfiles.push(file);
 				}
 			}

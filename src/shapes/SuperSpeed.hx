@@ -11,12 +11,19 @@ import src.DtsObject;
 import src.AudioManager;
 import src.MarbleWorld;
 
+/** Ported from `marble.cs`'s `SuperSpeedParticle`/`MarbleSuperSpeedEmitter`. */
 final superSpeedParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0.2),
 	ejectionVelocity: 1,
 	velocityVariance: 0.25,
 	emitterLifetime: 1100,
+	ejectionOffset: 0,
+	thetaMin: 130,
+	thetaMax: 170,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.25,
 	particleOptions: {
 		texture: 'particles/spark.png',
@@ -27,11 +34,13 @@ final superSpeedParticleOptions:ParticleEmitterOptions = {
 		lifetime: 1500,
 		lifetimeVariance: 150,
 		dragCoefficient: 0.25,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [
-			new Vector(0.8, 0.8, 0, 0),
-			new Vector(0.8, 0.8, 0, 1),
-			new Vector(0.8, 0.8, 0, 0)
+			new Vector(0.8, 0.8, 0.2, 0),
+			new Vector(0.8, 0.8, 0.2, 1),
+			new Vector(0.8, 0.8, 0.2, 0)
 		],
 		sizes: [0.25, 0.25, 1],
 		times: [0, 0.25, 1]

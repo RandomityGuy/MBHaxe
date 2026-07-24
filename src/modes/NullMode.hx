@@ -11,6 +11,7 @@ import src.Mission;
 import src.AudioManager;
 import src.ResourceLoader;
 import src.Console;
+import rewind.RewindableState;
 
 class NullMode implements GameMode {
 	var level:MarbleWorld;
@@ -110,7 +111,7 @@ class NullMode implements GameMode {
 		}
 
 		this.level.displayAlert(string);
-		@:privateAccess this.level.playGui.formatGemCounter(this.level.gemCount, this.level.totalGems);
+		@:privateAccess this.level.playGui.formatGemCounter(this.level.gemCount, this.level.gemCounterTotal());
 	}
 
 	public function getPreloadFiles() {
@@ -127,17 +128,34 @@ class NullMode implements GameMode {
 		return level.finishTime.gameplayClock;
 	}
 
-	// public function getRewindState():RewindableState {
-	// 	return null;
-	// }
-	// public function applyRewindState(state:RewindableState) {}
-	// public function constructRewindState() {
-	// 	return null;
-	// }
+	public function getRewindState():RewindableState {
+		return null;
+	}
+
+	public function applyRewindState(state:RewindableState) {}
+
+	public function constructRewindState():RewindableState {
+		return null;
+	}
 
 	public function onClientRestart() {}
 
 	public function onMissionLoad() {}
 
 	public function update(t:src.TimeState) {}
+
+	// Base/vanilla rule: every gem in the level is required, unless something else (QuotaMode) has
+	// set a different requirement.
+	public function canFinish(marble:Marble):Bool {
+		var required = level.gemsRequiredToFinish >= 0 ? level.gemsRequiredToFinish : level.totalGems;
+		return level.gemCount >= required;
+	}
+
+	public function getFinishMessage(marble:Marble):String {
+		return "You can't finish without all the diamonds!!";
+	}
+
+	public function onOutOfBounds(marble:Marble):Bool {
+		return false;
+	}
 }

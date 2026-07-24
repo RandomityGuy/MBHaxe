@@ -17,73 +17,111 @@ import src.MarbleWorld;
 import src.MarbleGame;
 import mis.MissionElement.MissionElementStaticShape;
 
+/** Ported from `hazards.cs`'s `LandMineParticle`/`LandMineEmitter`. `emitterLifetime` is kept at
+	MBHaxe's existing tuned value (not the source's own field), since this engine has no separate
+	"explosion duration" concept the way `ExplosionData::lifeTimeMS` gives the real one - this
+	field is the only thing making these one-shot burst emitters stop here. Spin isn't set in the
+	source (`spinSpeed`/`spinRandomMin`/`spinRandomMax` default to 0 in `ParticleData`'s C++
+	constructor), not the `40`/`-90`/`90` an earlier port pass had invented. */
 final landMineParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 2,
+	ejectionPeriod: 7,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 3,
+	ejectionVelocity: 2,
 	velocityVariance: 1,
 	emitterLifetime: 50,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 60,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.2,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Add,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
 		lifetime: 1000,
 		lifetimeVariance: 150,
 		dragCoefficient: 2,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.2,
+		windCoefficient: 0,
 		colors: [new Vector(0.56, 0.36, 0.26, 1), new Vector(0.56, 0.36, 0.26, 0)],
 		sizes: [0.5, 1],
 		times: [0, 1]
 	}
 };
 
+/** Ported from `hazards.cs`'s `LandMineSmoke`/`LandMineSmokeEmitter`. The source's own
+	`dragCoefficient` line is misspelled (`dragCoeffiecient = 100.0`), so it's a dead field there
+	too and the real drag falls back to `ParticleData`'s default of `0` - kept at MBHaxe's existing
+	tuned `10` instead of blindly zeroing it out, since drag=0 here would make this smoke never
+	slow down at all (clearly not the intended look, and likely why an earlier port pass chose a
+	value here instead of leaving it at the "real" default). */
 final landMineSmokeParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 2,
+	ejectionPeriod: 10,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 4,
 	velocityVariance: 0.5,
 	emitterLifetime: 250,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.25,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
+		spinSpeed: 0,
+		spinRandomMin: -80,
+		spinRandomMax: 80,
 		lifetime: 1200,
 		lifetimeVariance: 300,
 		dragCoefficient: 10,
-		acceleration: -8,
+		constantAcceleration: -0.8,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [
 			new Vector(0.56, 0.36, 0.26, 1),
 			new Vector(0.2, 0.2, 0.2, 1),
 			new Vector(0, 0, 0, 0)
 		],
-		sizes: [1.5, 2, 3],
+		sizes: [1, 1.5, 2],
 		times: [0, 0.5, 1]
 	}
 };
 
+/** Ported from `hazards.cs`'s `LandMineSparks`/`LandMineSparkEmitter` - spin also defaults to 0
+	here (not set in the source), same note as `landMineParticle` above. */
 final landMineSparksParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 3,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 13,
 	velocityVariance: 6.75,
 	emitterLifetime: 100,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.2,
 	particleOptions: {
 		texture: 'particles/spark.png',
 		blending: Add,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
 		lifetime: 500,
 		lifetimeVariance: 350,
 		dragCoefficient: 1,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [
 			new Vector(0.6, 0.4, 0.3, 1),
 			new Vector(0.6, 0.4, 0.3, 1),

@@ -47,7 +47,7 @@ class GravityPointTrigger extends Trigger {
 		var marblePos = marble.getAbsPos().getPosition();
 		if (!withinRadius(marblePos, getCenter()))
 			return;
-		apply(marble, getDownVector(marblePos), timeState);
+		apply(marble, getDownVector(marblePos).multiply(-1), timeState);
 	}
 
 	override function onMarbleLeave(marble:Marble, timeState:TimeState) {

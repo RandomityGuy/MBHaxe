@@ -17,13 +17,23 @@ import src.Marble;
 /** PQ's per-color gem sparkle (`GemParticle<Color>`/`GemEmitter<Color>`, `server/scripts/gems.cs`) -
 	an ambient emitter that runs continuously while the gem is uncollected, cleared on pickup
 	(`Gem::onPickup`'s `clearFX`) and restored if un-picked-up (rewind). Base settings shared by
-	every color (`GemParticleBase`/`GemEmitterBase`): a small additive glint, one every 40ms. */
-final gemParticleBase = {
+	every color (`GemParticleBase`/`GemEmitterBase`): a small additive glint, one every 40ms. The
+	source's `dragCoeffiecient = 0.1` is misspelled (dead field - the real, unset `dragCoefficient`
+	defaults to `ParticleData`'s C++ default of 0), so this is a true 0, not the earlier port's `0.1`.
+	`emitterLifetime` substitutes "effectively forever" for the source's own `lifetimeMS = 0`
+	sentinel (see `PhysModTrigger.hx`'s note on the same substitution). */
+final gemParticleBase:ParticleEmitterOptions = {
 	ejectionPeriod: 40,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 0.3,
 	velocityVariance: 0.01,
-	emitterLifetime: 1e9, // Effectively forever - stopped explicitly on pickup, not by self-expiry.
+	emitterLifetime: 1e9,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 150,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/glint.png',
@@ -33,8 +43,10 @@ final gemParticleBase = {
 		spinRandomMax: 5.0,
 		lifetime: 1500,
 		lifetimeVariance: 100,
-		dragCoefficient: 0.1,
-		acceleration: 0,
+		dragCoefficient: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		sizes: [0.15, 0.05, 0.05],
 		times: [0, 0.75, 1],
 		colors: null // set per-color below
@@ -44,10 +56,16 @@ final gemParticleBase = {
 function gemParticleOptions(colors:Array<Vector>, ?sizes:Array<Float>, ?times:Array<Float>):ParticleEmitterOptions {
 	return {
 		ejectionPeriod: gemParticleBase.ejectionPeriod,
+		periodVariance: gemParticleBase.periodVariance,
 		ambientVelocity: gemParticleBase.ambientVelocity,
 		ejectionVelocity: gemParticleBase.ejectionVelocity,
 		velocityVariance: gemParticleBase.velocityVariance,
 		emitterLifetime: gemParticleBase.emitterLifetime,
+		ejectionOffset: gemParticleBase.ejectionOffset,
+		thetaMin: gemParticleBase.thetaMin,
+		thetaMax: gemParticleBase.thetaMax,
+		phiReferenceVel: gemParticleBase.phiReferenceVel,
+		phiVariance: gemParticleBase.phiVariance,
 		inheritedVelFactor: gemParticleBase.inheritedVelFactor,
 		particleOptions: {
 			texture: gemParticleBase.particleOptions.texture,
@@ -58,7 +76,9 @@ function gemParticleOptions(colors:Array<Vector>, ?sizes:Array<Float>, ?times:Ar
 			lifetime: gemParticleBase.particleOptions.lifetime,
 			lifetimeVariance: gemParticleBase.particleOptions.lifetimeVariance,
 			dragCoefficient: gemParticleBase.particleOptions.dragCoefficient,
-			acceleration: gemParticleBase.particleOptions.acceleration,
+			constantAcceleration: gemParticleBase.particleOptions.constantAcceleration,
+			gravityCoefficient: gemParticleBase.particleOptions.gravityCoefficient,
+			windCoefficient: gemParticleBase.particleOptions.windCoefficient,
 			colors: colors,
 			sizes: sizes != null ? sizes : gemParticleBase.particleOptions.sizes,
 			times: times != null ? times : gemParticleBase.particleOptions.times
@@ -67,21 +87,54 @@ function gemParticleOptions(colors:Array<Vector>, ?sizes:Array<Float>, ?times:Ar
 }
 
 final gemParticleOptionsByColor:Map<String, ParticleEmitterOptions> = [
-	"base" => gemParticleOptions([new Vector(1, 0, 1, 1), new Vector(1, 0.382353, 1, 1), new Vector(1, 0.490196, 1, 0)]),
-	"pink" => gemParticleOptions([new Vector(1, 0, 1, 1), new Vector(1, 0.382353, 1, 1), new Vector(1, 0.490196, 1, 0)]),
-	"green" => gemParticleOptions([new Vector(0.2, 1, 0.2, 1), new Vector(0.5, 1, 0.5, 1), new Vector(0.5, 1, 0.5, 0)]),
-	"red" => gemParticleOptions([new Vector(0.8, 0.1, 0.1, 1), new Vector(0.8, 0.3, 0.3, 1), new Vector(0.8, 0.3, 0.3, 0)]),
-	"blue" => gemParticleOptions([new Vector(0.2, 0.4, 1, 1), new Vector(0.5, 0.7, 1, 1), new Vector(0.5, 0.7, 1, 0)]),
-	"black" => gemParticleOptions([new Vector(0.2, 0.2, 0.2, 1), new Vector(0.5, 0.5, 0.5, 1), new Vector(0.5, 0.5, 0.5, 0)]),
+	"base" => gemParticleOptions([
+		new Vector(1, 0, 1, 1),
+		new Vector(1, 0.382353, 1, 1),
+		new Vector(1, 0.490196, 1, 0)
+	]),
+	"pink" => gemParticleOptions([
+		new Vector(1, 0, 1, 1),
+		new Vector(1, 0.382353, 1, 1),
+		new Vector(1, 0.490196, 1, 0)
+	]),
+	"green" => gemParticleOptions([
+		new Vector(0.2, 1, 0.2, 1),
+		new Vector(0.5, 1, 0.5, 1),
+		new Vector(0.5, 1, 0.5, 0)
+	]),
+	"red" => gemParticleOptions([
+		new Vector(0.8, 0.1, 0.1, 1),
+		new Vector(0.8, 0.3, 0.3, 1),
+		new Vector(0.8, 0.3, 0.3, 0)
+	]),
+	"blue" => gemParticleOptions([
+		new Vector(0.2, 0.4, 1, 1),
+		new Vector(0.5, 0.7, 1, 1),
+		new Vector(0.5, 0.7, 1, 0)
+	]),
+	"black" => gemParticleOptions([
+		new Vector(0.2, 0.2, 0.2, 1),
+		new Vector(0.5, 0.5, 0.5, 1),
+		new Vector(0.5, 0.5, 0.5, 0)
+	]),
 	"platinum" => gemParticleOptions([
 		new Vector(0.5, 0.5, 0.5, 1),
 		new Vector(0.7, 0.7, 0.7, 1),
 		new Vector(1, 1, 1, 0.5),
 		new Vector(1, 1, 1, 0)
-	], [0.15, 0.05, 0.05, 0.2], [0, 0.75, 0.95, 1]),
+	],
+		[0.15, 0.05, 0.05, 0.2], [0, 0.75, 0.95, 1]),
 	"yellow" => gemParticleOptions([new Vector(1, 1, 0.2, 1), new Vector(1, 1, 0.5, 1), new Vector(1, 1, 0.5, 0)]),
-	"purple" => gemParticleOptions([new Vector(0.8, 0.3, 1, 1), new Vector(0.8, 0.5, 1, 1), new Vector(0.8, 0.5, 1, 0)]),
-	"orange" => gemParticleOptions([new Vector(1, 0.8, 0.2, 1), new Vector(1, 0.8, 0.5, 1), new Vector(1, 0.8, 0.5, 0)]),
+	"purple" => gemParticleOptions([
+		new Vector(0.8, 0.3, 1, 1),
+		new Vector(0.8, 0.5, 1, 1),
+		new Vector(0.8, 0.5, 1, 0)
+	]),
+	"orange" => gemParticleOptions([
+		new Vector(1, 0.8, 0.2, 1),
+		new Vector(1, 0.8, 0.5, 1),
+		new Vector(1, 0.8, 0.5, 0)
+	]),
 	"turquoise" => gemParticleOptions([new Vector(0.2, 1, 1, 1), new Vector(0.5, 1, 1, 1), new Vector(0.5, 1, 1, 0)])
 ];
 
@@ -119,6 +172,9 @@ class Gem extends DtsObject {
 				color = color.substring(0, color.length - suffix.length);
 		if (color.length == 0)
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
+		if (isFancy) {
+			color = element.fields.get("skin")[0];
+		}
 		// Instancing batches by `identifier`; color alone isn't enough since fancy/PQ/vanilla gems
 		// use different mesh geometry (see dtsPath above), not just a different material.
 		this.identifier = "Gem" + color + dtsPath;

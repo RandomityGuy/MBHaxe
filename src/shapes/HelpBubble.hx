@@ -38,7 +38,7 @@ class HelpBubble extends DtsObject {
 
 	public override function update(timeState:TimeState) {
 		super.update(timeState);
-		if (timeState.timeSinceLoad == 0)
+		if (@:privateAccess !this.level._ready)
 			return;
 
 		var marble = this.level.marble;

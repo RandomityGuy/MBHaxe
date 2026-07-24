@@ -10,12 +10,19 @@ import src.AudioManager;
 import src.DtsObject;
 import src.MarbleWorld;
 
+/** Ported from `marble.cs`'s `SuperJumpParticle`/`MarbleSuperJumpEmitter`. */
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ejectionPeriod: 10,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0.05),
 	ejectionVelocity: 1,
 	velocityVariance: 0.25,
-	emitterLifetime: 1000,
+	emitterLifetime: 5000,
+	ejectionOffset: 0,
+	thetaMin: 150,
+	thetaMax: 170,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.1,
 	particleOptions: {
 		texture: 'particles/twirl.png',
@@ -26,7 +33,9 @@ final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 		lifetime: 1000,
 		lifetimeVariance: 150,
 		dragCoefficient: 0.25,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(0, 0.5, 1, 0), new Vector(0, 0.6, 1, 1), new Vector(0, 0.6, 1, 0)],
 		sizes: [0.25, 0.25, 0.5],
 		times: [0, 0.75, 1]

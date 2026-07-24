@@ -50,7 +50,7 @@ class PathNodeElement {
 	public var rotationOffset:Matrix;
 
 	public function new(name:String, position:Vector, rotation:Quat, scale:Vector, fields:Map<String, Array<String>>) {
-		this.name = name;
+		this.name = name.toLowerCase();
 		this.localPosition = position;
 		this.localRotation = rotation;
 		this.localScale = scale;
@@ -58,7 +58,7 @@ class PathNodeElement {
 
 		function field(key:String):String {
 			var f = fields.get(key);
-			return f != null ? f[0] : null;
+			return f != null ? f[0].toLowerCase() : null;
 		}
 		function boolField(key:String, def:Bool = false):Bool {
 			var v = field(key);
