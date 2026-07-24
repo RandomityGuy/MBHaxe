@@ -274,6 +274,8 @@ class MarbleWorld extends Scheduler {
 
 	var respawnPressedTime:Float = -1e8;
 
+	var scoreType:ScoreType = Time;
+
 	// Orientation
 	var orientationChangeTime = -1e8;
 	var oldOrientationQuat = new Quat();
@@ -431,6 +433,7 @@ class MarbleWorld extends Scheduler {
 		});
 		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
+		this.scoreType = this.gameMode.getScoreType();
 	}
 
 	public function loadMusic(onFinish:Void->Void) {
@@ -2369,36 +2372,36 @@ class MarbleWorld extends Scheduler {
 	function determineClockColor(timeToDisplay:Float) {
 		if (this.finishTime != null)
 			return 1;
-		if (this.isMultiplayer) {
-			if (!this.multiplayerStarted)
-				return 1;
+		if (this.isMultiplayer || this.scoreType == Score) {
+			if (!this.multiplayerStarted || (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0))
+				return PlayGui.timerStopped;
 
 			// Create the flashing effect
 			var alarmStart = this.mission.computeAlarmStartTime();
 			var elapsed = timeToDisplay - alarmStart;
 			if (alarmStart < timeToDisplay)
-				return 0;
+				return PlayGui.timerNormal;
 			if (Math.floor(elapsed) % 2 == 0)
-				return 2;
+				return PlayGui.timerDanger;
 
-			return 0;
+			return PlayGui.timerNormal;
 		} else {
 			if (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0)
-				return 1;
+				return PlayGui.timerStopped;
 			if (timeToDisplay >= this.mission.qualifyTime)
-				return 2;
+				return PlayGui.timerDanger;
 
 			if (this.timeState.currentAttemptTime >= 3.5 && !Net.isMP) {
 				// Create the flashing effect
 				var alarmStart = this.mission.computeAlarmStartTime();
 				var elapsed = timeToDisplay - alarmStart;
 				if (elapsed < 0)
-					return 0;
+					return PlayGui.timerNormal;
 				if (Math.floor(elapsed) % 2 == 0)
-					return 2;
+					return PlayGui.timerDanger;
 			}
 
-			return 0; // Default yellow
+			return PlayGui.timerNormal; // Default yellow
 		}
 	}
 
