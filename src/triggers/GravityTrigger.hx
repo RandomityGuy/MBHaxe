@@ -10,6 +10,10 @@ class GravityTrigger extends Trigger {
 	function getDownVector():Vector {
 		var rotField = this.element.fields.get("simrotation");
 		var quat = rotField != null ? MisParser.parseRotation(rotField[0]) : new h3d.Quat();
+		if (rotField != null) {
+			quat.x = -quat.x;
+			quat.w = -quat.w;
+		}
 		var direction = new Vector(0, 0, -1);
 		direction.transform(quat.toMatrix());
 		return direction;

@@ -68,7 +68,7 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 			var p1 = getPoint(indices[i]);
 			var p2 = getPoint(indices[i + 1]);
 			var p3 = getPoint(indices[i + 2]);
-			var n = p2.sub(p1).cross(p3.sub(p1)).normalized().multiply(-1);
+			var n = p2.sub(p1).cross(p3.sub(p1)).normalized();
 			normals[indices[i] * 3] = n.x;
 			normals[indices[i] * 3 + 1] = n.y;
 			normals[indices[i] * 3 + 2] = n.z;

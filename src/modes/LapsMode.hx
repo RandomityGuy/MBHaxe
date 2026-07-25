@@ -121,7 +121,8 @@ class LapsMode extends NullMode {
 				this.lapsCPCheck++;
 			}
 			this.activateCheckpoint(trigger);
-		} else if (!((trigger.checkpointNumber + 1 == this.lapsCPCheck) || (trigger.checkpointNumber == highest && this.lapsCPCheck == 0))) {
+		} else if (!((trigger.checkpointNumber + 1 == this.lapsCPCheck)
+			|| (trigger.checkpointNumber == highest && this.lapsCPCheck == 0))) {
 			@:privateAccess level.playGui.addMiddleMessage("Wrong way!", 0xff6666);
 		}
 	}
@@ -140,6 +141,8 @@ class LapsMode extends NullMode {
 		var forceGravity = trigger.forceGravity;
 		if (forceGravity != null && forceGravity != "") {
 			var quat = MisParser.parseRotation(forceGravity);
+			quat.x = -quat.x;
+			quat.w = -quat.w;
 			var dir = new Vector(0, 0, -1);
 			dir.transform(quat.toMatrix());
 			this.lapsUp = dir;

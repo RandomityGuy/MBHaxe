@@ -77,10 +77,12 @@ class GravityWellTrigger extends Trigger {
 
 		var direction:Vector;
 		if (restoreField[0] == "1") {
-			direction = this.restoreUp.exists(marble) ? this.restoreUp.get(marble) : new Vector(0, 0, -1);
+			direction = this.restoreUp.exists(marble) ? this.restoreUp.get(marble) : new Vector(0, 0, 1);
 			this.restoreUp.remove(marble);
 		} else {
 			var quat = MisParser.parseRotation(restoreField[0]);
+			quat.x = -quat.x;
+			quat.w = -quat.w;
 			direction = new Vector(0, 0, -1);
 			direction.transform(quat.toMatrix());
 		}

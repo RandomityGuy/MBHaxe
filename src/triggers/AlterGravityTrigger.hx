@@ -42,6 +42,8 @@ class AlterGravityTrigger extends Trigger {
 
 		var rotationStr = '${gravityAxis == 0 ? 1 : 0} ${gravityAxis == 1 ? 1 : 0} ${gravityAxis == 2 ? 1 : 0} $rot';
 		var quat = MisParser.parseRotation(rotationStr);
+		quat.x = -quat.x;
+		quat.w = -quat.w;
 		var direction = new Vector(0, 0, -1);
 		direction.transform(quat.toMatrix());
 		return direction.multiply(-1);
