@@ -1,5 +1,7 @@
 package gui;
 
+import h2d.Flow.FlowOverflow;
+import hxsl.Types.Vec;
 import net.NetPacket.ScoreboardPacket;
 import net.Net;
 import src.ProfilerUI;
@@ -82,9 +84,34 @@ class PlayGui {
 		shown beside the main gem counter while `QuotaMode` is active (whose own main counter shows
 		`collected/quota` instead of `collected/totalGems`), so the level's real 100%-completion
 		total is still visible. No rainbow/green "100%" visual effect - out of scope per instruction. */
-	var quotaCountNumbers:Array<GuiAnim> = [];
+	var gemsQuota:GuiText;
 
-	var quotaCountSlash:GuiImage;
+	/** Ported from PQ's `PGLapsCounter` (`client/ui/playGui.gui`) - shown while `LapsMode` is
+		active. Uses the same bitmap-digit-strip + `anim.color` tint convention as `gemCountNumbers`/
+		the speedometer digits (PQ's own `PGLapsOneComplete`/`PGLapsOneTotal` are `GuiBitmapCtrl`s
+		using `./game/numbers/N`, not a text control - unlike `GemsQuota`, which really is a
+		`GuiMLTextCtrl` in the source). */
+	var lapsCounterCtrl:GuiControl;
+
+	var lapsCounterTransparency:GuiImage;
+	var lapsCounterLabel:GuiImage;
+	var lapsCounterDigitComplete:GuiAnim;
+	var lapsCounterDigitTotal:GuiAnim;
+	var lapsCounterSlash:GuiImage;
+
+	/** Ported from PQ's `PGCountdownThTimer` (`client/ui/playGui.gui`, thousandths-precision
+		variant - `client/scripts/playGui.cs`'s `updateCountdown`) - `CountdownStartTrigger`/
+		`CountdownStopTrigger`'s dedicated HUD element. Explicitly NOT the same counter as
+		`countdownNumbers`/`formatCountdownTimer` (that one's `PG_HuntCounter`'s Hunt-mode gem-respawn
+		countdown, MP-only, and empty/uninitialized in SP) - the two are unrelated PQ controls that
+		happen to look similar. Same on-screen position as `PGLapsCounter` in the source, but the two
+		are never shown at once (Laps vs. a `CountdownStartTrigger`-using mission). */
+	var countdownThCtrl:GuiControl;
+
+	var countdownThImage:GuiImage;
+	var countdownThNumbers:Array<GuiAnim> = [];
+	var countdownThColon:GuiAnim;
+	var countdownThPoint:GuiAnim;
 
 	/** Ported from PQ's analog speedometer (`client/scripts/speedometer.cs`,
 		`client/ui/playGui.gui`'s `PGSpeedometer` control tree) - shown while `ConsistencyMode`
@@ -130,6 +157,44 @@ class PlayGui {
 	var speedometerMinimumSpeed:Float = 0;
 
 	var speedometerSpeedToQualify:Float = 0;
+
+	/** Ported from PQ's `UnderwaterOL` (`client/ui/playGui.gui`) - a full-screen overlay shown while
+		the *camera* (not necessarily the marble) is inside a water trigger (`performWaterOverlay`,
+		`client/scripts/water.cs`). Added directly to `scene2d` rather than through `GuiControl`
+		(matching `RSGOCenterText`/`gemImageSceneTargetBitmap`'s existing raw-bitmap convention),
+		since it's just a fixed full-screen quad with no layout needs. */
+	var underwaterOverlay:Bitmap;
+
+	/** Ported from PQ's `PG_BubbleContainer` (`client/ui/playGui.gui`) - the Bubble PowerUp's
+		remaining-time bar. Ported from `PlayGui::updatePowerupTimerPos` (`client/scripts/
+		playGui.cs`) - unlike every other HUD element in this file, this one isn't at a fixed
+		reference-canvas position at all: it tracks the marble's *projected screen position* every
+		frame (`getGuiSpace`/`getPixelSpace` off a point offset to the marble's side by its collision
+		radius), so it's built from raw `h2d` objects added directly to `scene2d` (matching
+		`RSGOCenterText`/marble radar nametags' existing raw-object convention) rather than
+		`GuiControl`, which only knows how to lay out a fixed reference-canvas position. Uses this
+		codebase's existing `blastFill`-style direct-stretch technique (`bubbleBarFillBmp.width`
+		scaled by remaining-time fraction) for the "shrinking bar" effect. */
+	var bubbleBarFillBmp:Bitmap;
+
+	var bubbleBarFillFlow:h2d.Flow;
+
+	var bubbleBarMeterBmp:Bitmap;
+	var bubbleBarText:h2d.Text;
+	var bubbleBarNormalTile:Tile;
+	var bubbleBarInfiniteTile:Tile;
+
+	/** Ported from PQ's `PG_FireballContainer` - same raw-`h2d`-object/marble-tracking convention as
+		the Bubble bar above (`PlayGui::updateFireballBar`/`updateBarPositions`). The meter image
+		itself swaps between "lit"/"unlit" tiles depending on whether a blast is currently off
+		cooldown (`Marble.canFireballBlast`). */
+	var fireballBarFillBmp:Bitmap;
+
+	var fireballBarFillFlow:h2d.Flow;
+	var fireballBarMeterBmp:Bitmap;
+	var fireballBarText:h2d.Text;
+	var fireballBarLitTile:Tile;
+	var fireballBarUnlitTile:Tile;
 
 	var powerupBox:GuiImage;
 	var powerupLockedTile:Tile;
@@ -209,6 +274,23 @@ class PlayGui {
 			powerupImageSceneTargetBitmap.remove();
 			RSGOCenterText.remove();
 
+			// These are raw h2d objects added directly to scene2d (not through playGuiCtrl's
+			// GuiControl tree, which `playGuiCtrl.dispose()` above already handles) - matching the
+			// gem/powerup image scene targets and RSGOCenterText above, they need their own explicit
+			// removal or they'd be silently orphaned in scene2d past this level unloading.
+			if (underwaterOverlay != null)
+				underwaterOverlay.remove();
+			if (bubbleBarFillBmp != null) {
+				bubbleBarFillBmp.remove();
+				bubbleBarMeterBmp.remove();
+				bubbleBarText.remove();
+			}
+			if (fireballBarFillBmp != null) {
+				fireballBarFillBmp.remove();
+				fireballBarMeterBmp.remove();
+				fireballBarText.remove();
+			}
+
 			for (textureResource in textureResources) {
 				textureResource.release();
 			}
@@ -229,7 +311,7 @@ class PlayGui {
 
 		playGuiCtrl = new GuiControl();
 		playGuiCtrl.position = new Vector();
-		playGuiCtrl.extent = new Vector(640, 480);
+		playGuiCtrl.extent = new Vector(800, 600);
 		playGuiCtrl.horizSizing = Width;
 		playGuiCtrl.vertSizing = Height;
 
@@ -253,13 +335,16 @@ class PlayGui {
 			gemCountNumbers.push(new GuiAnim(numberTiles));
 		}
 
-		for (i in 0...3) {
-			quotaCountNumbers.push(new GuiAnim(numberTiles));
-		}
-
 		speedometerDigitHun = new GuiAnim(numberTiles);
 		speedometerDigitTen = new GuiAnim(numberTiles);
 		speedometerDigitOne = new GuiAnim(numberTiles);
+
+		lapsCounterDigitComplete = new GuiAnim(numberTiles);
+		lapsCounterDigitTotal = new GuiAnim(numberTiles);
+
+		for (i in 0...7) {
+			countdownThNumbers.push(new GuiAnim(numberTiles));
+		}
 
 		var rsgo = [];
 		rsgo.push(ResourceLoader.getResource("data/ui/game/ready.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -276,7 +361,12 @@ class PlayGui {
 		initCenterText();
 		initPowerupBox();
 		initQuotaCounter();
+		initLapsCounter();
+		initCountdownThTimer();
 		initSpeedometer();
+		initUnderwaterOverlay();
+		initBubbleBar();
+		initFireballBar();
 		if (game == 'ultra' || Net.isMP)
 			initBlastBar();
 		initTexts();
@@ -310,20 +400,21 @@ class PlayGui {
 	public function initTimer() {
 		var timerCtrl = new GuiControl();
 		timerCtrl.horizSizing = HorizSizing.Center;
-		timerCtrl.position = new Vector(215, 1);
-		timerCtrl.extent = new Vector(234, 58);
+		timerCtrl.position = new Vector(219, 0);
+		timerCtrl.extent = new Vector(362, 69);
 
 		var timerTransparency = new GuiImage(ResourceLoader.getResource('data/ui/game/transparency.png', ResourceLoader.getImage, this.imageResources)
 			.toTile());
-		timerTransparency.position = new Vector(14, -7);
-		timerTransparency.extent = new Vector(228, 71);
+		timerTransparency.horizSizing = Center;
+		timerTransparency.position = new Vector(77, -7);
+		timerTransparency.extent = new Vector(216, 79);
 		timerTransparency.doClipping = false;
 		timerCtrl.addChild(timerTransparency);
 
-		timerNumbers[0].position = new Vector(23, 0);
+		timerNumbers[0].position = new Vector(80, 3);
 		timerNumbers[0].extent = new Vector(43, 55);
 
-		timerNumbers[1].position = new Vector(47, 0);
+		timerNumbers[1].position = new Vector(104, 3);
 		timerNumbers[1].extent = new Vector(43, 55);
 
 		var colonCols = [
@@ -331,13 +422,13 @@ class PlayGui {
 		];
 
 		timerColon = new GuiAnim(colonCols);
-		timerColon.position = new Vector(67, 0);
+		timerColon.position = new Vector(124, 3);
 		timerColon.extent = new Vector(43, 55);
 
-		timerNumbers[2].position = new Vector(83, 0);
+		timerNumbers[2].position = new Vector(140, 3);
 		timerNumbers[2].extent = new Vector(43, 55);
 
-		timerNumbers[3].position = new Vector(107, 0);
+		timerNumbers[3].position = new Vector(164, 3);
 		timerNumbers[3].extent = new Vector(43, 55);
 
 		var pointCols = [
@@ -345,16 +436,16 @@ class PlayGui {
 		];
 
 		timerPoint = new GuiAnim(pointCols);
-		timerPoint.position = new Vector(127, 0);
+		timerPoint.position = new Vector(184, 3);
 		timerPoint.extent = new Vector(43, 55);
 
-		timerNumbers[4].position = new Vector(143, 0);
+		timerNumbers[4].position = new Vector(200, 3);
 		timerNumbers[4].extent = new Vector(43, 55);
 
-		timerNumbers[5].position = new Vector(167, 0);
+		timerNumbers[5].position = new Vector(224, 3);
 		timerNumbers[5].extent = new Vector(43, 55);
 
-		timerNumbers[6].position = new Vector(191, 0);
+		timerNumbers[6].position = new Vector(248, 0);
 		timerNumbers[6].extent = new Vector(43, 55);
 
 		timerCtrl.addChild(timerNumbers[0]);
@@ -384,8 +475,6 @@ class PlayGui {
 
 		var pointCols = [
 			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/point_green.png', ResourceLoader.getImage, this.imageResources).toTile(),
-			ResourceLoader.getResource('data/ui/game/numbers/point_red.png', ResourceLoader.getImage, this.imageResources).toTile()
 		];
 
 		countdownPoint = new GuiAnim(pointCols);
@@ -464,7 +553,7 @@ class PlayGui {
 		gemCountNumbers[2].extent = new Vector(43, 55);
 
 		gemCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
-		gemCountSlash.position = new Vector(99, 0);
+		gemCountSlash.position = new Vector(101, 0);
 		gemCountSlash.extent = new Vector(43, 55);
 
 		gemCountNumbers[3].position = new Vector(120, 0);
@@ -528,80 +617,247 @@ class PlayGui {
 
 		gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
 		gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
+		onFinish();
 	}
 
 	function initQuotaCounter() {
-		quotaCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
-		quotaCountSlash.position = new Vector(206, 14);
-		quotaCountSlash.extent = new Vector(24, 31);
-		playGuiCtrl.addChild(quotaCountSlash);
-
-		quotaCountNumbers[0].position = new Vector(226, 14);
-		quotaCountNumbers[0].extent = new Vector(24, 31);
-		quotaCountNumbers[1].position = new Vector(246, 14);
-		quotaCountNumbers[1].extent = new Vector(24, 31);
-		quotaCountNumbers[2].position = new Vector(266, 14);
-		quotaCountNumbers[2].extent = new Vector(24, 31);
-		for (n in quotaCountNumbers)
-			playGuiCtrl.addChild(n);
+		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
+		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
+		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
+		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		gemsQuota = new GuiText(markerFelt32);
+		gemsQuota.position = new Vector(205, 28);
+		gemsQuota.extent = new Vector(55, 55);
+		gemsQuota.text.color = Vector.fromColor(0xFFFFFFFF);
+		playGuiCtrl.addChild(gemsQuota);
 
 		setQuotaCounterVisible(false);
 	}
 
 	/** Shows/hides the small "/trueTotal" suffix beside the main gem counter (`QuotaMode` only). */
 	public function setQuotaCounterVisible(visible:Bool) {
-		if (quotaCountSlash == null)
-			return;
-		quotaCountSlash.bmp.visible = visible;
-		for (n in quotaCountNumbers)
-			n.anim.visible = visible;
+		gemsQuota.text.visible = visible;
 	}
 
 	/** Sets the "/trueTotal" digits to the level's real total gem count (`level.totalGems`) - this
 		doesn't change during a run, so it's set once when Quota activates, not every pickup. */
 	public function formatQuotaCounter(trueTotal:Int) {
-		quotaCountNumbers[0].anim.currentFrame = Math.floor(trueTotal / 100);
-		quotaCountNumbers[1].anim.currentFrame = Math.floor(trueTotal / 10) % 10;
-		quotaCountNumbers[2].anim.currentFrame = trueTotal % 10;
+		gemsQuota.text.text = '/${trueTotal}';
+	}
+
+	function initLapsCounter() {
+		lapsCounterCtrl = new GuiControl();
+		lapsCounterCtrl.horizSizing = Center;
+		lapsCounterCtrl.position = new Vector(316, 62);
+		lapsCounterCtrl.extent = new Vector(168, 41);
+		playGuiCtrl.addChild(lapsCounterCtrl);
+
+		lapsCounterTransparency = new GuiImage(ResourceLoader.getResource('data/ui/game/laps/transparency_laps.png', ResourceLoader.getImage,
+			this.imageResources)
+			.toTile());
+		lapsCounterTransparency.position = new Vector(0, 0);
+		lapsCounterTransparency.extent = new Vector(168, 41);
+		lapsCounterCtrl.addChild(lapsCounterTransparency);
+
+		lapsCounterLabel = new GuiImage(ResourceLoader.getResource('data/ui/game/laps/laps_label.png', ResourceLoader.getImage, this.imageResources).toTile());
+		lapsCounterLabel.position = new Vector(11, 1);
+		lapsCounterLabel.extent = new Vector(57, 41);
+		lapsCounterCtrl.addChild(lapsCounterLabel);
+
+		lapsCounterDigitComplete.position = new Vector(99, 0);
+		lapsCounterDigitComplete.extent = new Vector(28, 37);
+		lapsCounterCtrl.addChild(lapsCounterDigitComplete);
+
+		lapsCounterSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
+		lapsCounterSlash.position = new Vector(115, 0);
+		lapsCounterSlash.extent = new Vector(28, 37);
+		lapsCounterCtrl.addChild(lapsCounterSlash);
+
+		lapsCounterDigitTotal.position = new Vector(132, 0);
+		lapsCounterDigitTotal.extent = new Vector(28, 37);
+		lapsCounterCtrl.addChild(lapsCounterDigitTotal);
+
+		setLapsCounterVisible(false);
+	}
+
+	public function setLapsCounterVisible(visible:Bool) {
+		lapsCounterTransparency.bmp.visible = visible;
+		lapsCounterLabel.bmp.visible = visible;
+		lapsCounterDigitComplete.anim.visible = visible;
+		lapsCounterSlash.bmp.visible = visible;
+		lapsCounterDigitTotal.anim.visible = visible;
+	}
+
+	/** Ported from `PlayGui::updateLaps` (`client/scripts/playGui.cs`) - only the *ones* digit of
+		each count is ever shown (`%completeOne = (%this.lapsComplete % 10)`, matching the source
+		exactly, quirks included - a mission with >= 10 laps would display misleadingly, but that's
+		what the original does too), tinted green once `complete >= total`. */
+	public function formatLapsCounter(complete:Int, total:Int) {
+		var color = complete >= total ? timerStopped : timerNormal;
+		lapsCounterDigitComplete.anim.currentFrame = complete % 10;
+		lapsCounterDigitComplete.anim.color = Vector.fromColor(color);
+		lapsCounterDigitTotal.anim.currentFrame = total % 10;
+		lapsCounterDigitTotal.anim.color = Vector.fromColor(color);
+		lapsCounterSlash.bmp.color = Vector.fromColor(color);
+	}
+
+	function initCountdownThTimer() {
+		countdownThCtrl = new GuiControl();
+		countdownThCtrl.horizSizing = Center;
+		countdownThCtrl.position = new Vector(316, 62);
+		countdownThCtrl.extent = new Vector(168, 41);
+		playGuiCtrl.addChild(countdownThCtrl);
+
+		countdownThImage = new GuiImage(ResourceLoader.getResource('data/ui/game/countdown/timerTimeTravel.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		countdownThImage.position = new Vector(3, 3);
+		countdownThImage.extent = new Vector(36, 36);
+		countdownThCtrl.addChild(countdownThImage);
+
+		countdownThNumbers[0].position = new Vector(35, 0); // minutes tens
+		countdownThNumbers[0].extent = new Vector(28, 37);
+		countdownThNumbers[1].position = new Vector(51, 0); // minutes ones
+		countdownThNumbers[1].extent = new Vector(28, 37);
+
+		var colonCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/colon.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+		countdownThColon = new GuiAnim(colonCols);
+		countdownThColon.position = new Vector(62, 0);
+		countdownThColon.extent = new Vector(28, 37);
+
+		countdownThNumbers[2].position = new Vector(73, 0); // seconds tens
+		countdownThNumbers[2].extent = new Vector(28, 37);
+		countdownThNumbers[3].position = new Vector(89, 0); // seconds ones
+		countdownThNumbers[3].extent = new Vector(28, 37);
+
+		var pointCols = [
+			ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile()
+		];
+		countdownThPoint = new GuiAnim(pointCols);
+		countdownThPoint.position = new Vector(101, 0);
+		countdownThPoint.extent = new Vector(28, 37);
+
+		countdownThNumbers[4].position = new Vector(108, 0); // hundredths tens
+		countdownThNumbers[4].extent = new Vector(28, 37);
+		countdownThNumbers[5].position = new Vector(124, 0); // hundredths ones
+		countdownThNumbers[5].extent = new Vector(28, 37);
+		countdownThNumbers[6].position = new Vector(140, 0); // thousandths
+		countdownThNumbers[6].extent = new Vector(28, 37);
+
+		countdownThCtrl.addChild(countdownThNumbers[0]);
+		countdownThCtrl.addChild(countdownThNumbers[1]);
+		countdownThCtrl.addChild(countdownThColon);
+		countdownThCtrl.addChild(countdownThNumbers[2]);
+		countdownThCtrl.addChild(countdownThNumbers[3]);
+		countdownThCtrl.addChild(countdownThPoint);
+		countdownThCtrl.addChild(countdownThNumbers[4]);
+		countdownThCtrl.addChild(countdownThNumbers[5]);
+		countdownThCtrl.addChild(countdownThNumbers[6]);
+
+		setCountdownThVisible(false);
+	}
+
+	public function setCountdownThVisible(visible:Bool) {
+		countdownThImage.bmp.visible = visible;
+		for (n in countdownThNumbers)
+			n.anim.visible = visible;
+		countdownThColon.anim.visible = visible;
+		countdownThPoint.anim.visible = visible;
+	}
+
+	/** `icon` matches `CountdownStartTrigger`'s `icon` field (a filename under
+		`data/ui/game/countdown/`, default `timerTimeTravel` per the source). */
+	public function setCountdownThIcon(icon:String) {
+		countdownThImage.setTile(ResourceLoader.getResource('data/ui/game/countdown/${icon}.png', ResourceLoader.getImage, this.imageResources).toTile());
+	}
+
+	/** Ported from `PlayGui::updateCountdown`'s thousandths branch (`client/scripts/playGui.cs`) -
+		`time` is in seconds (matching `MarbleWorld.countdownRemaining`), `0` hides the whole
+		control. */
+	public function formatCountdownThTimer(time:Float, color:Int = 0xFFFFFFFF) {
+		if (time <= 0) {
+			setCountdownThVisible(false);
+			return;
+		}
+		setCountdownThVisible(true);
+
+		var et = time * 1000;
+		var thousandth = et % 10;
+		var hundredth = Math.floor((et % 1000) / 10);
+		var totalSeconds = Math.floor(et / 1000);
+		var seconds = totalSeconds % 60;
+		var minutes = (totalSeconds - seconds) / 60;
+
+		var secondsOne = seconds % 10;
+		var secondsTen = (seconds - secondsOne) / 10;
+		var minutesOne = minutes % 10;
+		var minutesTen = ((minutes - minutesOne) / 10) % 10;
+		var hundredthOne = hundredth % 10;
+		var hundredthTen = (hundredth - hundredthOne) / 10;
+
+		countdownThNumbers[0].anim.currentFrame = minutesTen;
+		countdownThNumbers[1].anim.currentFrame = minutesOne;
+		countdownThNumbers[2].anim.currentFrame = secondsTen;
+		countdownThNumbers[3].anim.currentFrame = secondsOne;
+		countdownThNumbers[4].anim.currentFrame = hundredthTen;
+		countdownThNumbers[5].anim.currentFrame = hundredthOne;
+		countdownThNumbers[6].anim.currentFrame = thousandth;
+
+		for (n in countdownThNumbers)
+			n.anim.color = Vector.fromColor(color);
+		countdownThColon.anim.color = Vector.fromColor(color);
+		countdownThPoint.anim.color = Vector.fromColor(color);
 	}
 
 	function initSpeedometer() {
 		speedometerCtrl = new GuiControl();
 		speedometerCtrl.horizSizing = Left;
-		speedometerCtrl.position = new Vector(559, 198);
-		speedometerCtrl.extent = new Vector(86, 255);
+		speedometerCtrl.vertSizing = Top;
+		speedometerCtrl.position = new Vector(699, 248);
+		speedometerCtrl.extent = new Vector(107, 319);
 		playGuiCtrl.addChild(speedometerCtrl);
 
 		speedometerBorder = new GuiControl();
+		speedometerBorder.horizSizing = Left;
+		speedometerBorder.vertSizing = Top;
 		speedometerBorder.position = new Vector(0, 0);
-		speedometerBorder.extent = new Vector(76, 209);
+		speedometerBorder.extent = new Vector(95, 261);
 		speedometerCtrl.addChild(speedometerBorder);
 
 		speedometerBackground1 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground1.png', ResourceLoader.getImage,
 			this.imageResources)
 			.toTile());
-		speedometerBackground1.position = new Vector(14, -607.2);
-		speedometerBackground1.extent = new Vector(51, 806);
+		speedometerBackground1.horizSizing = Left;
+		speedometerBackground1.vertSizing = Top;
+		speedometerBackground1.position = new Vector(18, -759);
+		speedometerBackground1.extent = new Vector(64, 1008);
 		speedometerBorder.addChild(speedometerBackground1);
 
 		speedometerBackground2 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground2.png', ResourceLoader.getImage,
 			this.imageResources)
 			.toTile());
-		speedometerBackground2.position = new Vector(14, -607.2 - 806.4);
-		speedometerBackground2.extent = new Vector(51, 806);
+		speedometerBackground2.horizSizing = Left;
+		speedometerBackground2.vertSizing = Top;
+		speedometerBackground2.position = new Vector(18, -1767);
+		speedometerBackground2.extent = new Vector(64, 1008);
 		speedometerBorder.addChild(speedometerBackground2);
 
 		speedometerBackground3 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground3.png', ResourceLoader.getImage,
 			this.imageResources)
 			.toTile());
-		speedometerBackground3.position = new Vector(14, -607.2 - 806.4 * 2);
-		speedometerBackground3.extent = new Vector(51, 806);
+		speedometerBackground3.horizSizing = Left;
+		speedometerBackground3.vertSizing = Top;
+		speedometerBackground3.position = new Vector(18, -2775);
+		speedometerBackground3.extent = new Vector(64, 1008);
 		speedometerBorder.addChild(speedometerBackground3);
 
 		speedometerArrow = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdarrow.png', ResourceLoader.getImage, this.imageResources)
 			.toTile());
-		speedometerArrow.position = new Vector(23, 1);
-		speedometerArrow.extent = new Vector(51, 205);
+		speedometerArrow.horizSizing = Left;
+		speedometerArrow.vertSizing = Top;
+		speedometerArrow.position = new Vector(29, 1);
+		speedometerArrow.extent = new Vector(64, 256);
 		speedometerBorder.addChild(speedometerArrow);
 
 		speedometerConsNormalTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_normal.png', ResourceLoader.getImage, this.imageResources)
@@ -609,8 +865,10 @@ class PlayGui {
 		speedometerConsTooSlowTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_tooslow.png', ResourceLoader.getImage, this.imageResources)
 			.toTile();
 		speedometerConsMarker = new GuiImage(speedometerConsNormalTile);
+		speedometerConsMarker.horizSizing = Left;
+		speedometerConsMarker.vertSizing = Top;
 		speedometerConsMarker.position = new Vector(0, 0);
-		speedometerConsMarker.extent = new Vector(51, 26);
+		speedometerConsMarker.extent = new Vector(64, 32);
 		speedometerBorder.addChild(speedometerConsMarker);
 
 		speedometerHasteAchievedTile = ResourceLoader.getResource('data/ui/game/speedometer/haste_achieved.png', ResourceLoader.getImage, this.imageResources)
@@ -619,19 +877,28 @@ class PlayGui {
 			this.imageResources)
 			.toTile();
 		speedometerHasteMarker = new GuiImage(speedometerHasteAchievedTile);
+		speedometerHasteMarker.horizSizing = Left;
+		speedometerHasteMarker.vertSizing = Top;
 		speedometerHasteMarker.position = new Vector(0, 0);
-		speedometerHasteMarker.extent = new Vector(51, 26);
+		speedometerHasteMarker.extent = new Vector(64, 32);
 		speedometerBorder.addChild(speedometerHasteMarker);
 
-		speedometerDigitHun.position = new Vector(9, 204);
-		speedometerDigitHun.extent = new Vector(34, 44);
-		speedometerDigitTen.position = new Vector(19, 204);
-		speedometerDigitTen.extent = new Vector(34, 44);
-		speedometerDigitOne.position = new Vector(40, 204);
-		speedometerDigitOne.extent = new Vector(34, 44);
-		speedometerCtrl.addChild(speedometerDigitHun);
-		speedometerCtrl.addChild(speedometerDigitTen);
-		speedometerCtrl.addChild(speedometerDigitOne);
+		var speedometerDigits = new GuiControl();
+		speedometerDigits.horizSizing = Left;
+		speedometerDigits.vertSizing = Top;
+		speedometerDigits.position = new Vector(11, 255);
+		speedometerDigits.extent = new Vector(96, 64);
+		speedometerCtrl.addChild(speedometerDigits);
+
+		speedometerDigitHun.position = new Vector(0, 0);
+		speedometerDigitHun.extent = new Vector(43, 55);
+		speedometerDigitTen.position = new Vector(13, 0);
+		speedometerDigitTen.extent = new Vector(43, 55);
+		speedometerDigitOne.position = new Vector(39, 0);
+		speedometerDigitOne.extent = new Vector(43, 55);
+		speedometerDigits.addChild(speedometerDigitHun);
+		speedometerDigits.addChild(speedometerDigitTen);
+		speedometerDigits.addChild(speedometerDigitOne);
 
 		setSpeedometerVisible(false);
 	}
@@ -752,233 +1019,165 @@ class PlayGui {
 		setSpeedometerElementsVisible(visible);
 	}
 
-	function initQuotaCounter() {
-		quotaCountSlash = new GuiImage(ResourceLoader.getResource('data/ui/game/numbers/slash.png', ResourceLoader.getImage, this.imageResources).toTile());
-		quotaCountSlash.position = new Vector(206, 14);
-		quotaCountSlash.extent = new Vector(24, 31);
-		playGuiCtrl.addChild(quotaCountSlash);
-
-		quotaCountNumbers[0].position = new Vector(226, 14);
-		quotaCountNumbers[0].extent = new Vector(24, 31);
-		quotaCountNumbers[1].position = new Vector(246, 14);
-		quotaCountNumbers[1].extent = new Vector(24, 31);
-		quotaCountNumbers[2].position = new Vector(266, 14);
-		quotaCountNumbers[2].extent = new Vector(24, 31);
-		for (n in quotaCountNumbers)
-			playGuiCtrl.addChild(n);
-
-		setQuotaCounterVisible(false);
+	function initUnderwaterOverlay() {
+		underwaterOverlay = new Bitmap(ResourceLoader.getResource('data/ui/game/underwaterol.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			scene2d);
+		underwaterOverlay.width = scene2d.width;
+		underwaterOverlay.height = scene2d.height;
+		underwaterOverlay.visible = false;
 	}
 
-	/** Shows/hides the small "/trueTotal" suffix beside the main gem counter (`QuotaMode` only). */
-	public function setQuotaCounterVisible(visible:Bool) {
-		if (quotaCountSlash == null)
+	/** `cameraInWater` is computed by `MarbleWorld` (it owns the actual camera position/water-
+		trigger lookup) and just passed through here every frame. */
+	public function setUnderwaterOverlayVisible(cameraInWater:Bool) {
+		if (underwaterOverlay == null)
 			return;
-		quotaCountSlash.bmp.visible = visible;
-		for (n in quotaCountNumbers)
-			n.anim.visible = visible;
+		underwaterOverlay.visible = cameraInWater;
+		underwaterOverlay.width = scene2d.width;
+		underwaterOverlay.height = scene2d.height;
 	}
 
-	/** Sets the "/trueTotal" digits to the level's real total gem count (`level.totalGems`) - this
-		doesn't change during a run, so it's set once when Quota activates, not every pickup. */
-	public function formatQuotaCounter(trueTotal:Int) {
-		quotaCountNumbers[0].anim.currentFrame = Math.floor(trueTotal / 100);
-		quotaCountNumbers[1].anim.currentFrame = Math.floor(trueTotal / 10) % 10;
-		quotaCountNumbers[2].anim.currentFrame = trueTotal % 10;
-	}
+	function initFireballBar() {
+		fireballBarFillFlow = new h2d.Flow(scene2d);
+		fireballBarFillFlow.overflow = FlowOverflow.Hidden;
+		fireballBarFillFlow.multiline = true;
 
-	function initSpeedometer() {
-		speedometerCtrl = new GuiControl();
-		speedometerCtrl.horizSizing = Left;
-		speedometerCtrl.position = new Vector(559, 198);
-		speedometerCtrl.extent = new Vector(86, 255);
-		playGuiCtrl.addChild(speedometerCtrl);
+		var barTile = ResourceLoader.getResource('data/ui/game/specials/bar.png', ResourceLoader.getImage, this.imageResources).toTile();
+		fireballBarFillBmp = new Bitmap(barTile, fireballBarFillFlow);
+		fireballBarFillBmp.setScale(Settings.uiScale);
+		fireballBarFillBmp.visible = false;
+		fireballBarFillFlow.maxWidth = Std.int(barTile.width * Settings.uiScale);
+		fireballBarFillFlow.maxHeight = Std.int(barTile.height * Settings.uiScale);
 
-		speedometerBorder = new GuiControl();
-		speedometerBorder.position = new Vector(0, 0);
-		speedometerBorder.extent = new Vector(76, 209);
-		speedometerCtrl.addChild(speedometerBorder);
-
-		speedometerBackground1 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground1.png', ResourceLoader.getImage,
-			this.imageResources)
-			.toTile());
-		speedometerBackground1.position = new Vector(14, -607.2);
-		speedometerBackground1.extent = new Vector(51, 806);
-		speedometerBorder.addChild(speedometerBackground1);
-
-		speedometerBackground2 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground2.png', ResourceLoader.getImage,
-			this.imageResources)
-			.toTile());
-		speedometerBackground2.position = new Vector(14, -607.2 - 806.4);
-		speedometerBackground2.extent = new Vector(51, 806);
-		speedometerBorder.addChild(speedometerBackground2);
-
-		speedometerBackground3 = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdbackground3.png', ResourceLoader.getImage,
-			this.imageResources)
-			.toTile());
-		speedometerBackground3.position = new Vector(14, -607.2 - 806.4 * 2);
-		speedometerBackground3.extent = new Vector(51, 806);
-		speedometerBorder.addChild(speedometerBackground3);
-
-		speedometerArrow = new GuiImage(ResourceLoader.getResource('data/ui/game/speedometer/spdarrow.png', ResourceLoader.getImage, this.imageResources)
-			.toTile());
-		speedometerArrow.position = new Vector(23, 1);
-		speedometerArrow.extent = new Vector(51, 205);
-		speedometerBorder.addChild(speedometerArrow);
-
-		speedometerConsNormalTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_normal.png', ResourceLoader.getImage, this.imageResources)
+		fireballBarLitTile = ResourceLoader.getResource('data/ui/game/specials/fireballbar-lit.png', ResourceLoader.getImage, this.imageResources).toTile();
+		fireballBarUnlitTile = ResourceLoader.getResource('data/ui/game/specials/fireballbar-unlit.png', ResourceLoader.getImage, this.imageResources)
 			.toTile();
-		speedometerConsTooSlowTile = ResourceLoader.getResource('data/ui/game/speedometer/cons_tooslow.png', ResourceLoader.getImage, this.imageResources)
-			.toTile();
-		speedometerConsMarker = new GuiImage(speedometerConsNormalTile);
-		speedometerConsMarker.position = new Vector(0, 0);
-		speedometerConsMarker.extent = new Vector(51, 26);
-		speedometerBorder.addChild(speedometerConsMarker);
+		fireballBarMeterBmp = new Bitmap(fireballBarUnlitTile, scene2d);
+		fireballBarMeterBmp.setScale(Settings.uiScale);
+		fireballBarMeterBmp.visible = false;
 
-		speedometerHasteAchievedTile = ResourceLoader.getResource('data/ui/game/speedometer/haste_achieved.png', ResourceLoader.getImage, this.imageResources)
-			.toTile();
-		speedometerHasteNotAchievedTile = ResourceLoader.getResource('data/ui/game/speedometer/haste_notachieved.png', ResourceLoader.getImage,
-			this.imageResources)
-			.toTile();
-		speedometerHasteMarker = new GuiImage(speedometerHasteAchievedTile);
-		speedometerHasteMarker.position = new Vector(0, 0);
-		speedometerHasteMarker.extent = new Vector(51, 26);
-		speedometerBorder.addChild(speedometerHasteMarker);
-
-		speedometerDigitHun.position = new Vector(9, 204);
-		speedometerDigitHun.extent = new Vector(34, 44);
-		speedometerDigitTen.position = new Vector(19, 204);
-		speedometerDigitTen.extent = new Vector(34, 44);
-		speedometerDigitOne.position = new Vector(40, 204);
-		speedometerDigitOne.extent = new Vector(34, 44);
-		speedometerCtrl.addChild(speedometerDigitHun);
-		speedometerCtrl.addChild(speedometerDigitTen);
-		speedometerCtrl.addChild(speedometerDigitOne);
-
-		setSpeedometerVisible(false);
+		var fireballFontData = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var fireballFontB = new BitmapFont(fireballFontData.entry);
+		@:privateAccess fireballFontB.loader = ResourceLoader.loader;
+		var fireballFont = fireballFontB.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		fireballBarText = new h2d.Text(fireballFont, scene2d);
+		fireballBarText.textColor = 0x000000;
+		fireballBarText.visible = false;
 	}
 
-	/** Called once, right after the first `render()` pass lays everything out - captures the
-		"rest" (velocity = 0, "not hundreds") bare-element positions that `updateSpeedometer` adds a
-		`Settings.uiScale`-multiplied delta on top of every frame, rather than re-deriving the full
-		parent-offset chain each time. */
-	function captureSpeedometerRestPositions() {
-		speedometerBackground1RestY = speedometerBackground1.bmp.y;
-		speedometerMarkerRestY = speedometerConsMarker.bmp.y;
-		speedometerDigitOneRestX = speedometerDigitOne.anim.x;
-		speedometerDigitTenRestX = speedometerDigitTen.anim.x;
-		speedometerRestCaptured = true;
-	}
-
-	function setSpeedometerElementsVisible(visible:Bool) {
-		speedometerBackground1.bmp.visible = visible;
-		speedometerBackground2.bmp.visible = visible;
-		speedometerBackground3.bmp.visible = visible;
-		speedometerArrow.bmp.visible = visible;
-		speedometerDigitTen.anim.visible = visible;
-		speedometerDigitOne.anim.visible = visible;
-		if (!visible) {
-			speedometerDigitHun.anim.visible = false;
-			speedometerConsMarker.bmp.visible = false;
-			speedometerHasteMarker.bmp.visible = false;
-		}
-	}
-
-	/** Ported from `Mode_consistency`/`Mode_haste`'s constructors - `0` disables that mode's
-		threshold/marker; both can be set simultaneously (a `"Consistency Haste"` mission shows both
-		markers on the same dial). */
-	public function setConsistencyThreshold(minimumSpeed:Float) {
-		speedometerMinimumSpeed = minimumSpeed;
-	}
-
-	public function setHasteThreshold(speedToQualify:Float) {
-		speedometerSpeedToQualify = speedToQualify;
-	}
-
-	/** Ported from PQ's `PlayGui::updateSpeedometer` (`client/scripts/speedometer.cs`) - scrolls the
-		3 stacked tape backgrounds so the tick mark for `velocity` sits under the fixed arrow,
-		updates the digital digit readout (color: red if below `speedometerMinimumSpeed`, green if
-		above `speedometerSpeedToQualify`, else white), and repositions both threshold markers so
-		they scroll in lockstep with the tape (same formula as the tape, offset by a constant baked
-		from each threshold - see `ConsistencyMode`/`HasteMode`'s HUD wiring for the derivation).
-		Runs once per frame from `MarbleWorld`'s update loop regardless of which/how many of
-		Consistency/Haste are active, rather than each mode independently re-running this (which
-		would double the work and let whichever mode's `update()` ran last stomp on the other's
-		digit-coloring). */
-	public function updateSpeedometer(velocity:Float) {
-		if (speedometerCtrl == null)
+	/** See `setBubbleBarPosition`'s doc comment - same convention. */
+	public function setFireballBarPosition(x:Float, y:Float) {
+		if (fireballBarMeterBmp == null)
 			return;
+		fireballBarMeterBmp.x = x;
+		fireballBarMeterBmp.y = y;
+		fireballBarText.x = x + 12 * Settings.uiScale;
+		fireballBarText.y = y + 24 * Settings.uiScale;
+		fireballBarFillFlow.setPosition(x, y);
+	}
 
-		var active = speedometerMinimumSpeed > 0 || speedometerSpeedToQualify > 0;
-		setSpeedometerElementsVisible(active);
-		if (!active)
+	/** Ported from PQ's `PlayGui::updateFireballBar` - same 50-133 fill range as the Bubble bar. */
+	public function updateFireballBar(fireballTime:Float, fireballTotalTime:Float, canBlast:Bool) {
+		if (fireballBarMeterBmp == null)
 			return;
+		if (fireballTime > 0) {
+			fireballBarMeterBmp.visible = true;
+			fireballBarMeterBmp.tile = canBlast ? fireballBarLitTile : fireballBarUnlitTile;
+			fireballBarFillBmp.visible = true;
+			fireballBarText.visible = true;
+			var fraction = fireballTotalTime > 0 ? fireballTime / fireballTotalTime : 0;
 
-		if (!speedometerRestCaptured)
-			captureSpeedometerRestPositions();
-
-		// Ported from `speedometer.cs`'s digit-shift logic (makes room for the hundreds digit).
-		var showHundreds = velocity >= 100;
-		var showTens = velocity >= 10;
-		var hundredsShiftUiUnits = (showHundreds ? 11 : 0) * Settings.uiScale;
-		speedometerDigitOne.anim.x = speedometerDigitOneRestX + hundredsShiftUiUnits;
-		speedometerDigitTen.anim.x = speedometerDigitTenRestX + hundredsShiftUiUnits;
-		speedometerDigitHun.anim.visible = showHundreds;
-		speedometerDigitTen.anim.visible = showTens;
-
-		var one = Math.floor(velocity) % 10;
-		var ten = Math.floor(velocity / 10) % 10;
-		var hun = Math.floor(velocity / 100) % 10;
-
-		var colorOffset = timerNormal; // normal/white
-		if (speedometerMinimumSpeed > 0 && velocity < speedometerMinimumSpeed)
-			colorOffset = timerDanger; // red - too slow for Consistency
-		else if (speedometerSpeedToQualify > 0 && velocity > speedometerSpeedToQualify)
-			colorOffset = timerStopped; // green - qualified for Haste
-
-		speedometerDigitOne.anim.currentFrame = one;
-		speedometerDigitTen.anim.currentFrame = ten;
-		speedometerDigitHun.anim.currentFrame = hun;
-		speedometerDigitOne.anim.color = Vector.fromColor(colorOffset);
-		speedometerDigitTen.anim.color = Vector.fromColor(colorOffset);
-		speedometerDigitHun.anim.color = Vector.fromColor(colorOffset);
-
-		// Ported from `speedometer.cs`'s scroll math, scaled by 0.8 (PQ's 800x600 reference canvas
-		// vs this port's 640x480 one) - see class doc for the derivation.
-		var targetY = -607.2 + 6.4 * velocity;
-		if (targetY > 1710.4)
-			targetY = 1710.4; // Matches the "gone to plaid" clamp (without the achievement popup)
-		var deltaCanvasUnits = targetY - (-607.2);
-
-		speedometerBackground1.bmp.y = speedometerBackground1RestY + deltaCanvasUnits * Settings.uiScale;
-		speedometerBackground2.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 806.4) * Settings.uiScale;
-		speedometerBackground3.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 1612.8) * Settings.uiScale;
-
-		if (speedometerMinimumSpeed > 0) {
-			speedometerConsMarker.bmp.visible = true;
-			speedometerConsMarker.setTile(velocity < speedometerMinimumSpeed ? speedometerConsTooSlowTile : speedometerConsNormalTile);
-			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerMinimumSpeed;
-			speedometerConsMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
+			fireballBarFillFlow.maxWidth = Std.int((50 + 83 * fraction) * Settings.uiScale);
+			var fmt = '${Math.fround(fireballTime * 10) / 10}';
+			if (fmt.indexOf('.') == -1)
+				fmt += ".0"; // add decimal
+			fireballBarText.text = fmt;
 		} else {
-			speedometerConsMarker.bmp.visible = false;
-		}
-
-		if (speedometerSpeedToQualify > 0) {
-			speedometerHasteMarker.bmp.visible = true;
-			speedometerHasteMarker.setTile(velocity >= speedometerSpeedToQualify ? speedometerHasteAchievedTile : speedometerHasteNotAchievedTile);
-			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerSpeedToQualify;
-			speedometerHasteMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
-		} else {
-			speedometerHasteMarker.bmp.visible = false;
+			fireballBarMeterBmp.visible = false;
+			fireballBarFillBmp.visible = false;
+			fireballBarText.visible = false;
 		}
 	}
 
-	function setSpeedometerVisible(visible:Bool) {
-		setSpeedometerElementsVisible(visible);
+	function initBubbleBar() {
+		bubbleBarFillFlow = new h2d.Flow(scene2d);
+		bubbleBarFillFlow.overflow = FlowOverflow.Hidden;
+		bubbleBarFillFlow.multiline = true;
+		var barTile = ResourceLoader.getResource('data/ui/game/specials/bar.png', ResourceLoader.getImage, this.imageResources).toTile();
+
+		bubbleBarFillBmp = new Bitmap(barTile, bubbleBarFillFlow);
+		bubbleBarFillBmp.setScale(Settings.uiScale);
+		bubbleBarFillBmp.visible = false;
+		bubbleBarFillFlow.maxWidth = Std.int(barTile.width * Settings.uiScale);
+		bubbleBarFillFlow.maxHeight = Std.int(barTile.height * Settings.uiScale);
+
+		bubbleBarNormalTile = ResourceLoader.getResource('data/ui/game/specials/bubblebar.png', ResourceLoader.getImage, this.imageResources).toTile();
+		bubbleBarInfiniteTile = ResourceLoader.getResource('data/ui/game/specials/bubblebar-infinite.png', ResourceLoader.getImage, this.imageResources)
+			.toTile();
+		bubbleBarMeterBmp = new Bitmap(bubbleBarNormalTile, scene2d);
+		bubbleBarMeterBmp.setScale(Settings.uiScale);
+		bubbleBarMeterBmp.visible = false;
+
+		var bubbleFontData = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var bubbleFontB = new BitmapFont(bubbleFontData.entry);
+		@:privateAccess bubbleFontB.loader = ResourceLoader.loader;
+		var bubbleFont = bubbleFontB.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		bubbleBarText = new h2d.Text(bubbleFont, scene2d);
+		bubbleBarText.textColor = 0x000000;
+		bubbleBarText.visible = false;
+		bubbleBarText.textAlign = Center;
+	}
+
+	/** Ported from PQ's `PlayGui::updatePowerupTimerPos` (`client/scripts/playGui.cs`) - the bar
+		tracks the marble's projected screen position every frame rather than sitting at a fixed HUD
+		spot; `MarbleWorld` owns the actual world-to-screen projection (it has the camera/marble) and
+		just passes the already-computed screen-space anchor point through here every frame. `x`/`y`
+		are the *side* offset point PQ computes (`getPixelSpace(getGuiSpace(...))` of a point offset
+		to the marble's side by its collision radius) plus PQ's own `+20`/`-38` pixel nudge, and
+		`centerY` is the un-offset marble-center projection's Y (PQ reads `%y` from the *center*
+		projection, not the side one, for its own Y before applying `-38`) - both already include
+		that nudge by the time they reach here, so this method only needs to lay out the bar/text
+		relative to that single anchor point. */
+	public function setBubbleBarPosition(x:Float, y:Float) {
+		if (bubbleBarMeterBmp == null)
+			return;
+		bubbleBarMeterBmp.x = x;
+		bubbleBarMeterBmp.y = y;
+		bubbleBarText.x = x + 24 * Settings.uiScale;
+		bubbleBarText.y = y + 24 * Settings.uiScale;
+		bubbleBarFillFlow.setPosition(x, y);
+	}
+
+	/** Ported from PQ's `PlayGui::updateBubbleBar` - fill width ranges from 50 (only just picked
+		up/about to expire) to 133 (full). */
+	public function updateBubbleBar(bubbleTime:Float, bubbleTotalTime:Float, bubbleInfinite:Bool) {
+		if (bubbleBarMeterBmp == null)
+			return;
+		if (bubbleInfinite) {
+			bubbleBarMeterBmp.visible = true;
+			bubbleBarMeterBmp.tile = bubbleBarInfiniteTile;
+			bubbleBarFillBmp.visible = false;
+			bubbleBarText.visible = false;
+		} else if (bubbleTime > 0) {
+			bubbleBarMeterBmp.visible = true;
+			bubbleBarMeterBmp.tile = bubbleBarNormalTile;
+			bubbleBarFillBmp.visible = true;
+			bubbleBarText.visible = true;
+			var fraction = bubbleTotalTime > 0 ? bubbleTime / bubbleTotalTime : 0;
+			bubbleBarFillFlow.maxWidth = Std.int((50 + 83 * fraction) * Settings.uiScale);
+			var fmt = '${Math.fround(bubbleTime * 10) / 10}';
+			if (fmt.indexOf('.') == -1)
+				fmt += ".0"; // add decimal
+			bubbleBarText.text = fmt;
+		} else {
+			bubbleBarMeterBmp.visible = false;
+			bubbleBarFillBmp.visible = false;
+			bubbleBarText.visible = false;
+		}
 	}
 
 	function initPowerupBox() {
-		powerupBox.position = new Vector(538, 6);
+		powerupBox.position = new Vector(698, 6);
 		powerupBox.extent = new Vector(97, 96);
 		powerupBox.horizSizing = Left;
 
@@ -1596,7 +1795,7 @@ class PlayGui {
 		gemCountNumbers[2].anim.color = Vector.fromColor(timerNormal);
 	}
 
-	public function formatTimer(time:Float, color:Int = 0xFFFFFF) {
+	public function formatTimer(time:Float, color:Int = 0xFFFFFFFF) {
 		var et = time * 1000;
 		var thousandth = et % 10;
 		var hundredth = Math.floor((et % 1000) / 10);
@@ -1630,7 +1829,7 @@ class PlayGui {
 		timerPoint.anim.color = Vector.fromColor(color);
 	}
 
-	public function formatCountdownTimer(time:Float, color:Int = 0xFFFFFF) {
+	public function formatCountdownTimer(time:Float, color:Int = 0xFFFFFFFF) {
 		if (time == 0) {
 			countdownNumbers[0].anim.visible = false;
 			countdownNumbers[1].anim.visible = false;

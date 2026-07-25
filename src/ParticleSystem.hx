@@ -169,7 +169,10 @@ typedef ParticleBatch = {
 class ParticleOptions {
 	public var texture:String;
 
-	/** Which blending mode to use. */
+	/** Which blending mode to use - when porting a value from a real PQ `ParticleData` datablock,
+		map its `useInvAlpha` field as: `useInvAlpha = false` (or unset - that's the C++ default) ->
+		`Add`; `useInvAlpha = true` -> `Alpha`. Confirmed directly against the real engine, not a
+		guess - don't assume `Alpha` as a safe default when a datablock's `useInvAlpha` is unknown. */
 	public var blending:h3d.mat.BlendMode;
 
 	/** The spinning speed in degrees per second. */

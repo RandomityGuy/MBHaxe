@@ -89,6 +89,15 @@ class MissionElementScriptObject extends MissionElementBase {
 	var cameraplane:String;
 	var invertcameraplane:String;
 	var initialcameradistance:String;
+	var targetpitch:String;
+
+	// Mission-wide camera defaults, ported from the editor's `EMI_cameraFov`/`EMI_menuCameraFov`/
+	// `EMI_cameraPitch`/`EMI_initialCameraDistance` fields (`core/editor/functions/editMissionInfo.cs`)
+	// - see `MarbleWorld.getDefaultCameraPitch`/`getDefaultCameraDistance` and
+	// `PlayGui`/camera-FOV setup for where these are actually applied.
+	var camerafov:String;
+	var menucamerafov:String;
+	var camerapitch:String;
 	var gemquota:String;
 	var minimumspeed:String;
 	var graceperiod:String;

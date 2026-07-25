@@ -9,6 +9,7 @@ import shapes.AbstractBumper;
 import shapes.PowerUp;
 import shapes.LandMine;
 import src.MarbleWorld;
+import src.Marble;
 import shapes.Trapdoor;
 import shapes.FadePlatform;
 import shapes.PushButton;
@@ -80,10 +81,23 @@ class RewindManager {
 		rf.teleporterSavedGravity = level.marble.teleporterSavedGravity.clone();
 		rf.teleporterKeepVelocity = level.marble.teleporterKeepVelocity;
 		rf.teleporterTeleTime = level.marble.teleporterTeleTime;
+		rf.teleporterFiring = level.marble.teleporterFiring;
+		rf.teleporterFireStartTime = @:privateAccess level.marble.teleporterFireStartTime;
 		rf.isFrozen = level.marble.isFrozen;
 		rf.lastFreezeTime = level.marble.lastFreezeTime;
 		rf.powerupLockCount = level.marble.powerupLockCount;
 		rf.timeStopTriggerCount = level.timeStopTriggerCount;
+		rf.isInWater = level.marble.isInWater;
+		rf.waterTriggers = level.marble.waterTriggers.copy();
+		rf.bubbleTime = level.marble.bubbleTime;
+		rf.bubbleTotalTime = level.marble.bubbleTotalTime;
+		rf.bubbleInfinite = level.marble.bubbleInfinite;
+		rf.bubbleActive = level.marble.bubbleActive;
+		rf.fireball = level.marble.fireball;
+		rf.fireballTime = level.marble.fireballTime;
+		rf.fireballTotalTime = level.marble.fireballTotalTime;
+		rf.fireballLastBlastTime = @:privateAccess level.marble.fireballLastBlastTime;
+		rf.iceShardStates = level.iceShards.map(x -> x.destroyed);
 		rf.modeState = level.gameMode.getRewindState();
 
 		rf.marbleRadius = level.marble._radius;
@@ -158,6 +172,13 @@ class RewindManager {
 
 	public function applyFrame(rf:RewindFrame) {
 		level.timeState = rf.timeState.clone();
+		// `ParticleManager.currentTime` otherwise wouldn't reflect the just-restored (rewound) time
+		// until this frame's later `particleManager.update()` call - any emitter created *during*
+		// `applyFrame` (e.g. `Gem.setHide(false)` -> `startGemEmitter` for a gem un-picked-up by this
+		// rewind) would get stamped with the stale pre-rewind time as its `creationTime`, which
+		// `ParticleManager.tick`'s "remove emitters created in a future we've rewound past" check
+		// would then immediately (same frame) treat as being from the future and delete on the spot.
+		@:privateAccess level.particleManager.currentTime = 1000 * rf.timeState.timeSinceLoad;
 		level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
 		level.marble.setRotationQuat(rf.marbleOrientation.clone());
 		level.marble.velocity.set(rf.marbleVelocity.x, rf.marbleVelocity.y, rf.marbleVelocity.z);
@@ -236,10 +257,46 @@ class RewindManager {
 		level.marble.teleporterSavedGravity = rf.teleporterSavedGravity.clone();
 		level.marble.teleporterKeepVelocity = rf.teleporterKeepVelocity;
 		level.marble.teleporterTeleTime = rf.teleporterTeleTime;
+		level.marble.teleporterFiring = rf.teleporterFiring;
+		@:privateAccess level.marble.teleporterFireStartTime = rf.teleporterFireStartTime;
 		level.marble.isFrozen = rf.isFrozen;
 		level.marble.lastFreezeTime = rf.lastFreezeTime;
 		level.marble.powerupLockCount = rf.powerupLockCount;
 		level.timeStopTriggerCount = rf.timeStopTriggerCount;
+
+		level.marble.waterTriggers = rf.waterTriggers.copy();
+		level.marble.isInWater = rf.isInWater;
+		if (@:privateAccess level.marble.waterPhysicsLayer != null) {
+			level.marble.popPhysicsLayer(@:privateAccess level.marble.waterPhysicsLayer);
+			@:privateAccess level.marble.waterPhysicsLayer = null;
+		}
+		if (rf.isInWater)
+			@:privateAccess level.marble.waterPhysicsLayer = level.marble.pushPhysicsLayer(Marble.buildWaterPhysicsLayer());
+
+		level.marble.bubbleTime = rf.bubbleTime;
+		level.marble.bubbleTotalTime = rf.bubbleTotalTime;
+		level.marble.bubbleInfinite = rf.bubbleInfinite;
+		level.marble.bubbleActive = rf.bubbleActive;
+		if (@:privateAccess level.marble.bubblePhysicsLayer != null) {
+			level.marble.popPhysicsLayer(@:privateAccess level.marble.bubblePhysicsLayer);
+			@:privateAccess level.marble.bubblePhysicsLayer = null;
+		}
+		if (rf.bubbleActive)
+			@:privateAccess level.marble.bubblePhysicsLayer = level.marble.pushPhysicsLayer(Marble.buildBubblePhysicsLayer());
+		@:privateAccess level.playGui.updateBubbleBar(level.marble.bubbleTime, level.marble.bubbleTotalTime, level.marble.bubbleInfinite);
+
+		level.marble.fireball = rf.fireball;
+		level.marble.fireballTime = rf.fireballTime;
+		level.marble.fireballTotalTime = rf.fireballTotalTime;
+		@:privateAccess level.marble.fireballLastBlastTime = rf.fireballLastBlastTime;
+		@:privateAccess level.playGui.updateFireballBar(level.marble.fireballTime, level.marble.fireballTotalTime,
+			@:privateAccess level.marble.canFireballBlast());
+		for (i in 0...rf.iceShardStates.length) {
+			var shard = level.iceShards[i];
+			if (shard.destroyed != rf.iceShardStates[i])
+				shard.setDestroyed(rf.iceShardStates[i]);
+		}
+
 		if (rf.modeState != null)
 			level.gameMode.applyRewindState(rf.modeState);
 

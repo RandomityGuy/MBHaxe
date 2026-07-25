@@ -97,7 +97,11 @@ class CameraController extends Object {
 		}
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
-		level.scene.camera.setFovX(Settings.optionsSettings.fovX, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
+		// Ported from `resetCameraFov` (`client/scripts/camera.cs`) - `MissionInfo.cameraFov`
+		// overrides the player's own FOV setting for this mission specifically.
+		var fovField = level.mission.missionInfo.camerafov;
+		var fov = fovField != null && fovField != "" ? MisParser.parseNumber(fovField) : Settings.optionsSettings.fovX;
+		level.scene.camera.setFovX(fov, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 		if (!Net.isMP)
 			lockCursor();
 	}

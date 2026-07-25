@@ -66,6 +66,16 @@ class LapsMode extends NullMode {
 		this.checkpointLapsCPCheck = 1;
 		this.checkpointLapsHitLastCP = false;
 		this.checkpointLapsStartTime = 0;
+
+		@:privateAccess level.playGui.setLapsCounterVisible(true);
+		this.updateLapsHud();
+	}
+
+	/** Ported from `PlayGui::updateLaps`/`setLapsComplete` - PQ displays `min(lapsNumber,
+		lapsCounter)`, not the raw counter (which can briefly exceed `lapsNumber` right as the final
+		lap completes, before `onNextLap` decides whether to actually finish). */
+	function updateLapsHud() {
+		@:privateAccess level.playGui.formatLapsCounter(Std.int(Math.min(this.lapsCounter, this.lapsNumber)), this.lapsNumber);
 	}
 
 	/** Ported from `GameConnection::onNextLap` - always advances/resets progress regardless of
@@ -86,6 +96,7 @@ class LapsMode extends NullMode {
 		this.lapsCPCheck = 1;
 		this.lapsHitLastCP = false;
 		this.lapsStartTime = level.timeState.currentAttemptTime;
+		this.updateLapsHud();
 		return true;
 	}
 

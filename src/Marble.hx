@@ -76,6 +76,7 @@ import src.Console;
 import src.Gamepad;
 import net.Move;
 import src.ProfilerUI;
+import src.PhysicsAttributeOverride;
 
 enum Mode {
 	Start;
@@ -115,38 +116,476 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `marble.cs`'s commented-out `TrailParticle`/`MarbleTrailOldEmitter` - the
-	`ParticleData` itself is dead in real PQ ("these aren't used but we are keeping them so the
-	engine don't go KABOOM"), which actually leaves `MarbleTrailOldEmitter` referencing a
-	nonexistent particle datablock (broken/non-functional in current PQ) - reproduced here anyway
-	using the last-known values, since without it the marble would have no trail at all. */
+/** Ported from `server/scripts/particles/MarbleTrailEmitter.cs`'s default (`$pref::Video::
+	particleSystem == 0`) branch - `MarbleTrailParticle`/`MarbleTrailEmitter`, the real "gold" speed
+	trail shown when `$TrailEmitterSpeed < speed < $TrailEmitterWhiteSpeed` (see
+	`Marble.updateTrailEmitters`). Distinct from the dead, never-referenced `TrailParticle`/
+	`MarbleTrailOldEmitter` pair in `marble.cs` (kept only "so the engine don't go KABOOM" per its
+	own comment) - this is the datablock `Marble::assignNewTrailEmitter` actually wires up. */
 final trailParticleOptions:ParticleEmitterOptions = {
-	ejectionPeriod: 5,
-	ejectionVelocity: 0.0,
+	ejectionPeriod: 100,
+	periodVariance: 8,
+	ejectionVelocity: 2,
 	velocityVariance: 0.25,
-	emitterLifetime: 10000,
-	inheritedVelFactor: 1,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
 	ambientVelocity: new Vector(),
-	thetaMin: 80,
-	thetaMax: 90,
+	thetaMin: 90,
+	thetaMax: 100,
 	phiReferenceVel: 0,
 	phiVariance: 360,
 	ejectionOffset: 0,
 	particleOptions: {
-		texture: 'particles/smoke.png',
+		texture: 'particles/spark.png',
 		blending: Alpha,
+		spinSpeed: 10,
+		spinRandomMin: 0,
+		spinRandomMax: 0.5,
+		dragCoefficient: 0,
+		lifetime: 992,
+		lifetimeVariance: 128,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.002442,
+		windCoefficient: 0,
+		colors: [
+			new Vector(1.0, 1.0, 0.236220, 0.227451),
+			new Vector(1.0, 1.0, 0.740157, 1.0),
+			new Vector(1.0, 1.0, 0.141732, 0.0),
+			new Vector(1.0, 1.0, 1.0, 1.0)
+		],
+		sizes: [0.19, 0.19, 0.29, 1],
+		times: [0, 0.2, 1, 1]
+	}
+};
+
+/** Ported from `MarbleTrailEmitter.cs`'s default branch - `MarbleWhiteTrailParticle`/
+	`MarbleWhiteTrailEmitter`, shown when `speed >= $TrailEmitterWhiteSpeed`. */
+final whiteTrailParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 50,
+	periodVariance: 20,
+	ejectionVelocity: 2,
+	velocityVariance: 0.25,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 90,
+	thetaMax: 100,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
+	particleOptions: {
+		texture: 'particles/spark.png',
+		blending: Alpha,
+		spinSpeed: 10,
+		spinRandomMin: 0,
+		spinRandomMax: 0.5,
+		dragCoefficient: 0,
+		lifetime: 992,
+		lifetimeVariance: 128,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.002442,
+		windCoefficient: 0,
+		colors: [
+			new Vector(1.0, 1.0, 1.0, 0.227451),
+			new Vector(1.0, 1.0, 1.0, 1.0),
+			new Vector(1.0, 1.0, 1.0, 0.0),
+			new Vector(1.0, 1.0, 1.0, 1.0)
+		],
+		sizes: [0.19, 0.19, 0.29, 1],
+		times: [0, 0.2, 1, 1]
+	}
+};
+
+/** Ported from `server/scripts/marble.cs`'s `MarbleTrailBubbleParticle`/`MarbleTrailBubbleEmitter` -
+	the continuous "bubble trail" shown while moving fully submerged in water (as opposed to
+	`Splash4`, shown while partially submerged/skimming the surface - see `updateTrailEmitters`). */
+final trailBubbleParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 20,
+	periodVariance: 19,
+	ejectionVelocity: 0,
+	velocityVariance: 0,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 61.7647,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/bubble.png',
+		blending: Add,
+		spinSpeed: 1,
+		spinRandomMin: 0,
+		spinRandomMax: 0.5,
+		dragCoefficient: 1.176,
+		lifetime: 1000,
+		lifetimeVariance: 176,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.176,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 1.0),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 1.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0, 0.05, 0.1, 0.3],
+		times: [0, 0.0212202, 0.93756, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Splash4Emitter.cs` - the continuous "skimming the
+	surface" trail (as opposed to the one-shot entry/exit `Splash1/2/3` bursts already ported -
+	see `updateWater`). Reuses the same `splash1.png` texture as `Splash1Emitter` (the source
+	itself references `platinum/data/particles/splash1`, not a distinct "splash4" asset). */
+final splash4ParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 49,
+	periodVariance: 48,
+	ejectionVelocity: 0,
+	velocityVariance: 0,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 37.0588,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.294118,
+	particleOptions: {
+		texture: 'particles/splash1.png',
+		blending: Add,
+		spinSpeed: 10,
+		spinRandomMin: -90,
+		spinRandomMax: 156.863,
+		dragCoefficient: 5.71236,
+		lifetime: 618,
+		lifetimeVariance: 96,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.176471,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 0.686275),
+			new Vector(0.843137, 0.862745, 0.892157, 0.264706),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.25, 0.25, 0.34, 0.34],
+		times: [0, 0.28, 0.73, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/MarbleSnoreEmitter.cs` - shown when the marble hasn't
+	moved for `snoreTimeout` (10s) while play is actually in progress (see `updateTrailEmitters`).
+	Gated on a hardcoded-enabled equivalent of `$pref::Snore` (defaults `true` in real PQ,
+	`client/defaults.cs`) - not wired to a settings toggle here, since none exists yet for it. */
+final snoreParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1500,
+	periodVariance: 300,
+	ejectionVelocity: 0.2,
+	velocityVariance: 0.05,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 7.5,
+	thetaMax: 45,
+	phiReferenceVel: 20,
+	phiVariance: 0,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/zzz.png',
+		blending: Add,
 		spinSpeed: 0,
 		spinRandomMin: 0,
 		spinRandomMax: 0,
-		dragCoefficient: 1,
-		lifetime: 100,
-		lifetimeVariance: 10,
+		dragCoefficient: 0.9975,
+		lifetime: 3000,
+		lifetimeVariance: 475,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.0525,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.787402, 1.0, 0.787402, 1.0),
+			new Vector(0.787402, 1.0, 0.787402, 1.0),
+			new Vector(1.0, 1.0, 1.0, 0.0),
+			new Vector(1.0, 1.0, 1.0, 1.0)
+		],
+		sizes: [0, 0.5, 0, 1],
+		times: [0, 0.15, 1, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Fireball3Emitter.cs` - part of the "fireball" trail set,
+	shown instead of the normal Trail/WhiteTrail while `%player.fireball` is set (see
+	`updateTrailEmitters`). Nothing in `marble.cs`/`powerups.cs` ever actually sets that datafield
+	in real PQ - this is genuinely dead/unreachable content there too, reproduced faithfully rather
+	than skipped, matching [PQ Port Fidelity](pq-port-fidelity.md). */
+final fireball3ParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 49,
+	periodVariance: 48,
+	ejectionVelocity: 0,
+	velocityVariance: 0,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 90,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/fireball_3.png',
+		blending: Add,
+		spinSpeed: 10,
+		spinRandomMin: 2000,
+		spinRandomMax: 2000,
+		dragCoefficient: 2.54902,
+		lifetime: 480,
+		lifetimeVariance: 96,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.2,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.1, 0.24, 1.08, 1],
+		times: [0, 0.28, 0.74, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Fireball4_2Emitter.cs` - the second half of the fireball
+	trail pair, always shown alongside `Fireball3`. Same dead/unreachable status as above. */
+final fireball4ParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 10,
+	periodVariance: 0,
+	ejectionVelocity: 0,
+	velocityVariance: 0,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 61.7647,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
+	particleOptions: {
+		texture: 'particles/fireball_4.png',
+		blending: Add,
+		spinSpeed: 10,
+		spinRandomMin: -100,
+		spinRandomMax: 0.5,
+		dragCoefficient: 2.54902,
+		lifetime: 150,
+		lifetimeVariance: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.215686,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.0),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.88, 0.59, 0, 1],
+		times: [0, 0.14, 0.72, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Fireball3MegaEmitter.cs` - the Mega-marble-scaled variant
+	of `Fireball3`, swapped in when `Marble.isMegaMarbleEnabled` (see `updateTrailEmitters`). Same
+	dead/unreachable status as `Fireball3` itself (nothing sets `fireball`). */
+final fireball3MegaParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 49,
+	periodVariance: 48,
+	ejectionVelocity: 0,
+	velocityVariance: 0,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 90,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/fireball_3.png',
+		blending: Add,
+		spinSpeed: 10,
+		spinRandomMin: 2000,
+		spinRandomMax: 2000,
+		dragCoefficient: 2.54902,
+		lifetime: 480,
+		lifetimeVariance: 96,
+		constantAcceleration: 0,
+		gravityCoefficient: -0.2,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.35, 0.84, 3.2, 2.9],
+		times: [0, 0.28, 0.74, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Fireball4_2MegaEmitter.cs` - the Mega-marble-scaled
+	variant of `Fireball4_2`. Same dead/unreachable status. */
+final fireball4MegaParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 10,
+	periodVariance: 0,
+	ejectionVelocity: 0,
+	velocityVariance: 0,
+	emitterLifetime: 1e9,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 61.7647,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
+	particleOptions: {
+		texture: 'particles/fireball_4.png',
+		blending: Add,
+		spinSpeed: 10,
+		spinRandomMin: -100,
+		spinRandomMax: 0.5,
+		dragCoefficient: 2.54902,
+		lifetime: 150,
+		lifetimeVariance: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.215686,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.0),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [2.7, 1.8, 0, 3.0],
+		times: [0, 0.14, 0.72, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Fireball1Emitter.cs` - one of the 3 one-shot burst
+	emitters `FireballItem::Blast` spawns at the marble's position when blasting (distinct from the
+	continuous Fireball3/4_2 trail emitters above - see `Marble.fireballBlast`). */
+final fireball1BlastParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 2,
+	periodVariance: 0,
+	ejectionVelocity: 3.92157,
+	velocityVariance: 0.05,
+	emitterLifetime: 98,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/fireball_1.png',
+		blending: Add,
+		spinSpeed: 6.47059,
+		spinRandomMin: -90,
+		spinRandomMax: 210.784,
+		dragCoefficient: 1.17647,
+		lifetime: 480,
+		lifetimeVariance: 96,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.156863,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.715686, 0.666667, 0.0),
+			new Vector(0.784314, 0.607843, 0.529412, 1.0),
+			new Vector(0.882353, 0.529412, 0.372549, 0.588235),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.1, 0.24, 1.08, 1.91],
+		times: [0, 0.28, 0.74, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Fireball2Emitter.cs` - always spawned alongside
+	Fireball1/Fireball4 on a blast. Real source reuses the "fireball_4" texture despite the
+	datablock name (`animTexName[0]` says "fireball_2" but `textureName` - the field the engine
+	actually reads - says "fireball_4"), reproduced as-is. */
+final fireball2BlastParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 4,
+	periodVariance: 3,
+	ejectionVelocity: 3.92157,
+	velocityVariance: 0.05,
+	emitterLifetime: 166,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 109.412,
+	thetaMax: 176.471,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 1.17647,
+	particleOptions: {
+		texture: 'particles/fireball_4.png',
+		blending: Add,
+		spinSpeed: 9.11765,
+		spinRandomMin: -100,
+		spinRandomMax: 460.784,
+		dragCoefficient: 1.17647,
+		lifetime: 480,
+		lifetimeVariance: 96,
+		constantAcceleration: 0.392157,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.78, 0.93, 0, 0],
+		times: [0, 0.28, 0.74, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/Fireball4Emitter.cs` - the third blast-burst emitter.
+	Distinct datablock from the continuous `fireball4ParticleOptions` (`Fireball4_2Emitter`) despite
+	sharing a texture - different ejection/timing values. */
+final fireball4BlastParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1,
+	periodVariance: 0,
+	ejectionVelocity: 0,
+	velocityVariance: 0,
+	emitterLifetime: 88,
+	inheritedVelFactor: 0,
+	ambientVelocity: new Vector(),
+	thetaMin: 0,
+	thetaMax: 61.7647,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
+	particleOptions: {
+		texture: 'particles/fireball_4.png',
+		blending: Add,
+		spinSpeed: 10,
+		spinRandomMin: -100,
+		spinRandomMax: 500,
+		dragCoefficient: 2.54902,
+		lifetime: 300,
+		lifetimeVariance: 31,
 		constantAcceleration: 0,
 		gravityCoefficient: 0,
 		windCoefficient: 0,
-		colors: [new Vector(1, 1, 0, 0), new Vector(1, 1, 0, 1), new Vector(1, 1, 1, 0)],
-		sizes: [0.7, 0.4, 0.1],
-		times: [0, 0.15, 1]
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.1, 0.1, 1.08, 1],
+		times: [0, 0.143236, 0.721485, 1]
 	}
 };
 
@@ -214,6 +653,238 @@ final blastMaxParticleOptions:ParticleEmitterOptions = {
 		],
 		sizes: [0.125, 0.125, 0.125],
 		times: [0, 0.4, 1]
+	}
+}
+
+/** Ported from `server/scripts/particles/Splash1Emitter.cs` (`WaterPhysicsTrigger_onEnterWater`'s
+	splash for entry speed >= 20 but < 50). Short `emitterLifetime` (98ms) - a single burst, not
+	ambient. */
+final splash1ParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 3,
+	periodVariance: 0,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 6.07843,
+	velocityVariance: 0.05,
+	emitterLifetime: 98,
+	inheritedVelFactor: 0,
+	thetaMin: 0,
+	thetaMax: 61.7647,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/splash1.png',
+		blending: Alpha,
+		spinSpeed: 1,
+		spinRandomMin: -90,
+		spinRandomMax: 0.5,
+		lifetime: 716,
+		lifetimeVariance: 96,
+		dragCoefficient: 2.54902,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.705882,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.450980),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.59, 0.69, 1, 1],
+		times: [0, 0.28, 0.74, 1]
+	}
+}
+
+/** Ported from `server/scripts/particles/Splash2Emitter.cs` (the "wasn't a hard enough splash"
+	case, entry speed < 20 - also always played once on leaving the water regardless of speed). */
+final splash2ParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 3,
+	periodVariance: 2,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 3.92157,
+	velocityVariance: 0.05,
+	emitterLifetime: 166,
+	inheritedVelFactor: 0,
+	thetaMin: 0,
+	thetaMax: 61.7647,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/splash2.png',
+		blending: Alpha,
+		spinSpeed: 1,
+		spinRandomMin: -90,
+		spinRandomMax: 0.5,
+		lifetime: 480,
+		lifetimeVariance: 96,
+		dragCoefficient: 2.54902,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.705882,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.0),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.1, 0.24, 1.08, 1],
+		times: [0, 0.28125, 0.742706, 1]
+	}
+}
+
+/** Ported from `server/scripts/particles/Splash3Emitter.cs` (the hardest splat, entry speed >= 50). */
+final splash3ParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1,
+	periodVariance: 0,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 10.5882,
+	velocityVariance: 0.05,
+	emitterLifetime: 98,
+	inheritedVelFactor: 0,
+	thetaMin: 0,
+	thetaMax: 61.7647,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.588235,
+	particleOptions: {
+		texture: 'particles/splash3.png',
+		blending: Alpha,
+		spinSpeed: 1,
+		spinRandomMin: -90,
+		spinRandomMax: 0.5,
+		lifetime: 1009,
+		lifetimeVariance: 96,
+		dragCoefficient: 2.54902,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.705882,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 0.686275),
+			new Vector(0.843137, 0.862745, 0.892157, 0.264706),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.64, 0.64, 1, 1],
+		times: [0, 0.28, 0.73, 1]
+	}
+}
+
+/** Ported from `server/scripts/particles/Drop1Emitter.cs` - the extra "splatted hard against the
+	water" emitter, added alongside Splash1/Splash3 (not Splash2) when entry speed >= 20. */
+final drop1ParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1,
+	periodVariance: 0,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 15.6863,
+	velocityVariance: 0.05,
+	emitterLifetime: 176,
+	inheritedVelFactor: 0,
+	thetaMin: 8.82353,
+	thetaMax: 86.4706,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/drop1.png',
+		blending: Alpha,
+		spinSpeed: 1,
+		spinRandomMin: -90,
+		spinRandomMax: 0.5,
+		lifetime: 1986,
+		lifetimeVariance: 96,
+		dragCoefficient: 2.54902,
+		constantAcceleration: 0,
+		gravityCoefficient: 1,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.882353, 1.0),
+			new Vector(0.794118, 0.803922, 0.862745, 1.0),
+			new Vector(0.774510, 0.774510, 0.843137, 0.960784),
+			new Vector(0.794118, 0.813725, 0.803922, 1.0)
+		],
+		sizes: [0.15, 0.2, 0.15, 0],
+		times: [0, 0.28, 0.5, 1]
+	}
+}
+
+/** Ported from `server/scripts/particles/IceChunkChunkEmitter.cs` - one of the two bursts
+	`IceShard::unfreeze` spawns at the marble's position on natural unfreeze (not on `cancel`, e.g.
+	a mission restart while frozen). The source orients the whole emitter node along the marble's
+	gravity-up flipped 180° (`applyrotations(getGravityRot(), "0 180 0")`) - reproduced here as the
+	ejection cone's `axis` pointing opposite `currentUp`, set per-unfreeze in `Marble.unfreeze`
+	since it depends on the marble's gravity at that moment. */
+final iceChunkChunkParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 4,
+	periodVariance: 0,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 6.07843,
+	velocityVariance: 0.05,
+	emitterLifetime: 29,
+	inheritedVelFactor: 0,
+	thetaMin: 0,
+	thetaMax: 120,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.3,
+	particleOptions: {
+		texture: 'particles/icechunk.png',
+		blending: Alpha,
+		spinSpeed: 10,
+		spinRandomMin: -90.1961,
+		spinRandomMax: 151.961,
+		lifetime: 716,
+		lifetimeVariance: 96,
+		dragCoefficient: 2.54902,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.705882,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.843137, 0.833333, 0.843137, 0.441176),
+			new Vector(0.784314, 0.813725, 0.882353, 1.0),
+			new Vector(0.843137, 0.862745, 0.892157, 0.450980),
+			new Vector(0.892157, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.34, 0.34, 0.34, 0.34],
+		times: [0, 0.28, 0.74, 1]
+	}
+}
+
+/** Ported from `server/scripts/particles/IceChunkSnowEmitter.cs` - the second unfreeze burst,
+	always spawned alongside `IceChunkChunkEmitter`. */
+final iceChunkSnowParticleOptions:ParticleEmitterOptions = {
+	ejectionPeriod: 1,
+	periodVariance: 0,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 6.41176,
+	velocityVariance: 0.05,
+	emitterLifetime: 90,
+	inheritedVelFactor: 0,
+	thetaMin: 0,
+	thetaMax: 120,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.3,
+	particleOptions: {
+		texture: 'particles/snowflake.png',
+		blending: Alpha,
+		spinSpeed: 1,
+		spinRandomMin: -90,
+		spinRandomMax: 0.5,
+		lifetime: 480,
+		lifetimeVariance: 96,
+		dragCoefficient: 2.54902,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.705882,
+		windCoefficient: 0,
+		colors: [
+			new Vector(1.0, 1.0, 1.0, 0.441176),
+			new Vector(1.0, 1.0, 1.0, 1.0),
+			new Vector(1.0, 1.0, 1.0, 0.0),
+			new Vector(0.921569, 0.911765, 0.980392, 0.0)
+		],
+		sizes: [0.1, 0.15, 0.1, 0.05],
+		times: [0, 0.28, 0.74, 1]
 	}
 }
 
@@ -287,6 +958,12 @@ class Marble extends GameObject {
 	var _contactTime:Float;
 	var _totalTime:Float;
 
+	/** Mirrors PQ's `$Game::LastJumpTime` (`default.bind.cs`'s `fireballBlast`) - how long since the
+		marble last actually jumped, accumulated in seconds rather than stored as an absolute
+		timestamp so it doesn't need a `TimeState` threaded into `applyContactForces`. Used only to
+		soften the Fireball blast's upward impulse right after a jump (see `fireballBlast`). */
+	var timeSinceLastJump:Float = 1e8;
+
 	public var _mass:Float = 1;
 
 	var physicsAccumulator:Float = 0;
@@ -337,6 +1014,14 @@ class Marble extends GameObject {
 	public var teleporterTeleTime:Float = 2;
 	public var teleporterLastUseTime:Float = -1000;
 
+	/** Set by `TeleportItem.use`'s second press (fire) instead of PQ's `schedule($time,
+		"finishTeleport")` (banned by [No Schedules](feedback_no_schedules.md)) - checked every tick
+		in `updateTeleporterState`, which already runs the (also teleport-related) cloak-fade check,
+		rather than adding a separate call site for this. */
+	public var teleporterFiring:Bool = false;
+
+	var teleporterFireStartTime:Float = 0;
+
 	/** IceShard freeze state, ported from PQ's `IceShard::onCollision`/`unfreeze`
 		(`server/scripts/hazards.cs`). `iceChunk` is a visual-only DtsObject snapped to the
 		marble's transform every frame while frozen (mirroring `%marble.iceChunk.setParent(%marble,
@@ -347,6 +1032,40 @@ class Marble extends GameObject {
 
 	var iceChunk:DtsObject;
 	var iceShard:shapes.IceShard;
+
+	/** Ported from PQ's `water.cs` - `waterTriggers` mirrors `%marble.waterIsInSet` (every
+		`WaterPhysicsTrigger` currently overlapped, since adjacent/overlapping water volumes should
+		feel seamless - entering/leaving physics only actually happens when this goes from empty to
+		non-empty or back, not on every individual trigger transition). All the "am I in water, did
+		I just enter/leave, how deep am I" logic is centralized in `updateWater` (called once per
+		tick from `MarbleWorld`), matching PQ's own split between the trigger's on-enter/leave
+		callbacks (which just add/remove from the set) and the separate `updateClientWater()`
+		function that does the actual work every frame. */
+	public var waterTriggers:Array<triggers.WaterPhysicsTrigger> = [];
+
+	public var isInWater:Bool = false;
+
+	/** The closest overlapping `WaterPhysicsTrigger`, recomputed every `updateWater` tick - also
+		used by `updateTrailEmitters` to tell fully-submerged (bubble trail) from skimming-the-
+		surface (Splash4 trail) via the same `collider.boundingBox.zMax` comparison. */
+	var currentWaterTrigger:triggers.WaterPhysicsTrigger;
+
+	var waterPhysicsLayer:Array<PhysicsAttributeOverride> = null;
+
+	/** Bubble PowerUp state - ported from PQ's `water.cs` (`$Game::BubbleTime`/`BubbleInfinite`/
+		`BubbleActive` globals). Unlike every other `PowerUp`, Bubble is held-to-use (`Move.
+		powerupHeld`, not the click-edge `Move.powerup`) and never occupies the single `heldPowerup`
+		inventory slot - picking one up just banks time directly onto the marble (`BubbleItem.pickUp`),
+		so it doesn't block picking up another one-shot powerup while bubble time is banked. */
+	public var bubbleTime:Float = 0;
+
+	public var bubbleTotalTime:Float = 0;
+	public var bubbleInfinite:Bool = false;
+	public var bubbleActive:Bool = false;
+
+	var bubblePhysicsLayer:Array<PhysicsAttributeOverride> = null;
+	var bubbleVisual:DtsObject;
+	var bubbleSound:Channel;
 
 	/** Counts reasons the held powerup currently can't be used (only freezing, for now - PQ also
 		locks it from cannons/on respawn, matching `Marble::lockPowerup`/`unlockPowerup` in
@@ -381,7 +1100,70 @@ class Marble extends GameObject {
 	var trailEmitterData:ParticleData;
 	var blastEmitterData:ParticleData;
 	var blastMaxEmitterData:ParticleData;
+	var splash1EmitterData:ParticleData;
+	var splash2EmitterData:ParticleData;
+	var splash3EmitterData:ParticleData;
+	var drop1EmitterData:ParticleData;
+	var iceChunkChunkEmitterData:ParticleData;
+	var iceChunkSnowEmitterData:ParticleData;
 	var trailEmitterNode:ParticleEmitter;
+
+	/** Ported from `Marble::assignNewTrailEmitter`'s full slot list (`server/scripts/game.cs`) minus
+		the Mega-marble-only slots, which reuse the same node fields gated by `isMegaMarbleEnabled`
+		instead of separate always-different assets. See `updateTrailEmitters`. */
+	var whiteTrailEmitterData:ParticleData;
+
+	var trailBubbleEmitterData:ParticleData;
+	var splash4EmitterData:ParticleData;
+	var snoreEmitterData:ParticleData;
+	var fireball3EmitterData:ParticleData;
+	var fireball4EmitterData:ParticleData;
+	var fireball3MegaEmitterData:ParticleData;
+	var fireball4MegaEmitterData:ParticleData;
+
+	var whiteTrailEmitterNode:ParticleEmitter;
+	var trailBubbleEmitterNode:ParticleEmitter;
+	var splash4EmitterNode:ParticleEmitter;
+	var snoreEmitterNode:ParticleEmitter;
+	var fireball3EmitterNode:ParticleEmitter;
+	var fireball4EmitterNode:ParticleEmitter;
+	var fireball3MegaEmitterNode:ParticleEmitter;
+	var fireball4MegaEmitterNode:ParticleEmitter;
+
+	/** One-shot burst emitter data for `Marble.fireballBlast` - unlike the trail data above, these
+		are created fresh per-burst (matching the existing `splash1EmitterData`/`bounceEmitterData`
+		one-shot convention), not toggled show/hide. `IceShard`'s own break-burst particles
+		(`IceShardBreak1/2Emitter`) live on `IceShard.hx` instead, since only `IceShard` spawns
+		them. */
+	var fireball1BlastEmitterData:ParticleData;
+
+	var fireball2BlastEmitterData:ParticleData;
+	var fireball4BlastEmitterData:ParticleData;
+
+	/** Mirrors PQ's `%player.fireball` datafield (`client/scripts/fireball.cs`'s
+		`clientCmdFireballStartParticles`/`EndParticles`) - true for the whole duration the Fireball
+		PowerUp is active, driving both the trail visibility gate in `updateTrailEmitters` and the
+		actual gameplay state (`FireballItem.hx`, `IceShard.hx`, `fireballBlast`). This port
+		collapses PQ's separate server (`%player._fireballActive`) and client (`%player.fireball`)
+		flags into this single field, matching how `bubbleActive` already does the same for Bubble. */
+	public var fireball:Bool = false;
+
+	/** Remaining/total banked Fireball time, in seconds - mirrors `%player._fireballTime`/
+		`%obj.activeTime`. Decremented continuously in `updateFireball` rather than PQ's
+		schedule-based `fireballExpire` (see [No Schedules](feedback_no_schedules.md)), and directly
+		by 500ms (`FireballItem::IceCollision`) when melting through an `IceShard` by contact. */
+	public var fireballTime:Float = 0;
+
+	public var fireballTotalTime:Float = 0;
+
+	/** Mirrors `$Client::FireballLastBlastTime` - gates the 2-second blast cooldown
+		(`fireballBlast`/`canFireballBlast`). */
+	var fireballLastBlastTime:Float = -1e8;
+
+	/** Mirrors PQ's `%player.lastMovement` (`client/scripts/mp/particles.cs`) for the Snore trail's
+		idle-timeout check - real sim time (`timeSinceLoad`), not the attempt/gameplay clock, since
+		idling should count even before/after an attempt is actively running. */
+	var lastMovementTime:Float = 0;
 
 	var rollSound:Channel;
 	var rollMegaSound:Channel;
@@ -443,6 +1225,74 @@ class Marble extends GameObject {
 		this.blastMaxEmitterData.identifier = "MarbleBlastMaxParticle";
 		this.blastMaxEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
+		this.splash1EmitterData = new ParticleData();
+		this.splash1EmitterData.identifier = "MarbleSplash1Particle";
+		this.splash1EmitterData.texture = ResourceLoader.getResource("data/particles/splash1.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.splash2EmitterData = new ParticleData();
+		this.splash2EmitterData.identifier = "MarbleSplash2Particle";
+		this.splash2EmitterData.texture = ResourceLoader.getResource("data/particles/splash2.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.splash3EmitterData = new ParticleData();
+		this.splash3EmitterData.identifier = "MarbleSplash3Particle";
+		this.splash3EmitterData.texture = ResourceLoader.getResource("data/particles/splash3.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.drop1EmitterData = new ParticleData();
+		this.drop1EmitterData.identifier = "MarbleDrop1Particle";
+		this.drop1EmitterData.texture = ResourceLoader.getResource("data/particles/drop1.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.iceChunkChunkEmitterData = new ParticleData();
+		this.iceChunkChunkEmitterData.identifier = "MarbleIceChunkChunkParticle";
+		this.iceChunkChunkEmitterData.texture = ResourceLoader.getResource("data/particles/icechunk.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.iceChunkSnowEmitterData = new ParticleData();
+		this.iceChunkSnowEmitterData.identifier = "MarbleIceChunkSnowParticle";
+		this.iceChunkSnowEmitterData.texture = ResourceLoader.getResource("data/particles/snowflake.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.whiteTrailEmitterData = new ParticleData();
+		this.whiteTrailEmitterData.identifier = "MarbleWhiteTrailParticle";
+		this.whiteTrailEmitterData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.trailBubbleEmitterData = new ParticleData();
+		this.trailBubbleEmitterData.identifier = "MarbleTrailBubbleParticle";
+		this.trailBubbleEmitterData.texture = ResourceLoader.getResource("data/particles/bubble.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.splash4EmitterData = new ParticleData();
+		this.splash4EmitterData.identifier = "Splash4Particle";
+		this.splash4EmitterData.texture = ResourceLoader.getResource("data/particles/splash1.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.snoreEmitterData = new ParticleData();
+		this.snoreEmitterData.identifier = "SnoreParticle";
+		this.snoreEmitterData.texture = ResourceLoader.getResource("data/particles/zzz.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.fireball3EmitterData = new ParticleData();
+		this.fireball3EmitterData.identifier = "Fireball3Particle";
+		this.fireball3EmitterData.texture = ResourceLoader.getResource("data/particles/fireball_3.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.fireball4EmitterData = new ParticleData();
+		this.fireball4EmitterData.identifier = "Fireball4_2Particle";
+		this.fireball4EmitterData.texture = ResourceLoader.getResource("data/particles/fireball_4.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.fireball3MegaEmitterData = new ParticleData();
+		this.fireball3MegaEmitterData.identifier = "Fireball3MegaParticle";
+		this.fireball3MegaEmitterData.texture = ResourceLoader.getResource("data/particles/fireball_3.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.fireball4MegaEmitterData = new ParticleData();
+		this.fireball4MegaEmitterData.identifier = "Fireball4_2MegaParticle";
+		this.fireball4MegaEmitterData.texture = ResourceLoader.getResource("data/particles/fireball_4.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.fireball1BlastEmitterData = new ParticleData();
+		this.fireball1BlastEmitterData.identifier = "Fireball1Particle";
+		this.fireball1BlastEmitterData.texture = ResourceLoader.getResource("data/particles/fireball_1.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.fireball2BlastEmitterData = new ParticleData();
+		this.fireball2BlastEmitterData.identifier = "Fireball2Particle";
+		this.fireball2BlastEmitterData.texture = ResourceLoader.getResource("data/particles/fireball_4.png", ResourceLoader.getTexture, this.textureResources);
+
+		this.fireball4BlastEmitterData = new ParticleData();
+		this.fireball4BlastEmitterData.identifier = "Fireball4Particle";
+		this.fireball4BlastEmitterData.texture = ResourceLoader.getResource("data/particles/fireball_4.png", ResourceLoader.getTexture, this.textureResources);
+
 		this.rollSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/rolling_hard.wav", ResourceLoader.getAudio, this.soundResources),
 			this.getAbsPos().getPosition(), true);
 		this.slipSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/sliding.wav", ResourceLoader.getAudio, this.soundResources),
@@ -458,6 +1308,9 @@ class Marble extends GameObject {
 		this.helicopterSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/use_gyrocopter.wav", ResourceLoader.getAudio,
 			this.soundResources), null, true);
 		this.helicopterSound.pause = true;
+		this.bubbleSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/bubble.wav", ResourceLoader.getAudio, this.soundResources), null,
+			true);
+		this.bubbleSound.pause = true;
 	}
 
 	public function init(level:MarbleWorld, connection:GameConnection, onFinish:Void->Void) {
@@ -687,6 +1540,16 @@ class Marble extends GameObject {
 		this.iceChunk.y = 1e8;
 		this.iceChunk.z = 1e8;
 
+		this.bubbleVisual = new DtsObject();
+		this.bubbleVisual.dtsPath = "data/shapes_pq/gameplay/powerups/bubble.dts";
+		this.bubbleVisual.useInstancing = true;
+		this.bubbleVisual.identifier = "BubbleVisual";
+		this.bubbleVisual.isCollideable = false;
+		this.bubbleVisual.isBoundingBoxCollideable = false;
+		this.bubbleVisual.x = 1e8;
+		this.bubbleVisual.y = 1e8;
+		this.bubbleVisual.z = 1e8;
+
 		var worker = new ResourceLoaderWorker(onFinish);
 		worker.addTask(fwd -> level.addDtsObject(this.forcefield, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.helicopter, fwd));
@@ -694,6 +1557,7 @@ class Marble extends GameObject {
 		worker.addTask(fwd -> level.addDtsObject(this.megaHelicopter, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.teleporterMarker, fwd));
 		worker.addTask(fwd -> level.addDtsObject(this.iceChunk, fwd));
+		worker.addTask(fwd -> level.addDtsObject(this.bubbleVisual, fwd));
 		worker.run();
 
 		loadMarbleAttributes();
@@ -949,6 +1813,288 @@ class Marble extends GameObject {
 		for (remaining in this.physicsLayers)
 			for (o in remaining)
 				setMarbleAttribute(o.attribute, o.value);
+	}
+
+	/** Ported from PQ's `"water"` physics layer (`client/scripts/physics.cs`) - the discrete,
+		one-time-per-entry half of water's physics change. Only the first value of each attribute
+		pair is used (the second is the mega-marble-specific variant - out of scope, same as
+		`PhysModTrigger`'s `megaValue[i]`). */
+	static function buildWaterPhysicsLayer():Array<PhysicsAttributeOverride> {
+		return [
+			{attribute: "maxrollvelocity", value: 5},
+			{attribute: "angularacceleration", value: 35},
+			{attribute: "gravity", value: 10},
+			{attribute: "staticfriction", value: 1.1},
+			{attribute: "kineticfriction", value: 0.7},
+			{attribute: "bouncekineticfriction", value: 0.2},
+			{attribute: "maxdotslide", value: 0.5},
+			{attribute: "bouncerestitution", value: 0.2},
+			{attribute: "jumpimpulse", value: 7.5},
+		];
+	}
+
+	/** Ported from PQ's `"bubble"` physics layer (`client/scripts/physics.cs`). */
+	static function buildBubblePhysicsLayer():Array<PhysicsAttributeOverride> {
+		return [
+			{attribute: "maxrollvelocity", value: 10},
+			{attribute: "angularacceleration", value: 55},
+			{attribute: "brakingacceleration", value: 30},
+			{attribute: "airacceleration", value: 7},
+			{attribute: "gravity", value: -5},
+			{attribute: "staticfriction", value: 1.1},
+			{attribute: "kineticfriction", value: 0.7},
+			{attribute: "bouncekineticfriction", value: 0.2},
+			{attribute: "maxdotslide", value: 0.5},
+			{attribute: "bouncerestitution", value: 0.7},
+			{attribute: "jumpimpulse", value: 7.5},
+			{attribute: "mintrailvel", value: 1.2},
+		];
+	}
+
+	/** Ported from `WaterPhysicsTrigger_onEnterWater`/`onLeaveWater` (`client/scripts/water.cs`) -
+		splash burst spawned at the marble's position offset `(0,0,-0.4)`, exactly matching the
+		source's `vectorAdd($MP::MyMarble.getPosition(), "0 0 -0.4")`. Emitter choice is based on
+		entry speed (captured *before* the velocity-dampening impulse, matching the source reading
+		`%velocity`/`%speed` first): Splash3 at >= 50, Splash1 (plus an extra Drop1 burst) at >= 20,
+		otherwise Splash2 - and Splash2 again, unconditionally, on leaving. */
+	function spawnWaterSplash(entrySpeed:Float) {
+		var pos = this.getAbsPos().getPosition().add(new Vector(0, 0, -0.4));
+		if (entrySpeed >= 50) {
+			this.level.particleManager.createEmitter(splash3ParticleOptions, this.splash3EmitterData, pos);
+		} else if (entrySpeed >= 20) {
+			this.level.particleManager.createEmitter(splash1ParticleOptions, this.splash1EmitterData, pos);
+			this.level.particleManager.createEmitter(drop1ParticleOptions, this.drop1EmitterData, pos);
+		} else {
+			this.level.particleManager.createEmitter(splash2ParticleOptions, this.splash2EmitterData, pos);
+		}
+	}
+
+	function spawnWaterExitSplash() {
+		var pos = this.getAbsPos().getPosition().add(new Vector(0, 0, -0.4));
+		this.level.particleManager.createEmitter(splash2ParticleOptions, this.splash2EmitterData, pos);
+	}
+
+	/** Ported from PQ's `updateClientWater()` (`client/scripts/water.cs`) - called once per tick
+		from `MarbleWorld`. Entering/leaving the water's bulk physics layer only happens on the
+		zero/non-zero transition of `waterTriggers.length` (overlapping/adjacent water volumes feel
+		seamless, matching `waterIsInSet`/`waterLastCount`); the continuous depth-based
+		`maxRollVelocity`/`angularAcceleration` scaling is recomputed every tick directly via
+		`setMarbleAttribute` (bypassing the layer-replay mechanism, since it changes continuously
+		with depth rather than being a one-time push) using whichever overlapping trigger is
+		closest, matching `findClosestWaterTrigger`. */
+	public function updateWater(timeState:TimeState) {
+		if (this.waterTriggers.length == 0) {
+			if (this.isInWater) {
+				this.isInWater = false;
+				if (this.waterPhysicsLayer != null) {
+					this.popPhysicsLayer(this.waterPhysicsLayer);
+					this.waterPhysicsLayer = null;
+				}
+				this.spawnWaterExitSplash();
+			}
+			return;
+		}
+
+		var pos = this.getAbsPos().getPosition();
+		var closest = this.waterTriggers[0];
+		var closestDist = 1e30;
+		for (t in this.waterTriggers) {
+			var center = t.collider.boundingBox.getCenter().toVector();
+			var dist = center.distance(pos);
+			if (dist <= closestDist) {
+				closest = t;
+				closestDist = dist;
+			}
+		}
+		this.currentWaterTrigger = closest;
+
+		if (!this.isInWater) {
+			this.isInWater = true;
+			this.waterPhysicsLayer = this.pushPhysicsLayer(buildWaterPhysicsLayer());
+			var entrySpeed = this.velocity.length();
+			var velocityChange = this.velocity.multiply(-closest.velocityMultiplier);
+			this.velocity = this.velocity.add(velocityChange);
+			this.spawnWaterSplash(entrySpeed);
+		}
+
+		var zdist = Util.clamp(pos.z - closest.collider.boundingBox.zMax, 0, 0.2);
+		this.setMarbleAttribute("maxrollvelocity", zdist / 0.2 * 10 + 5);
+		this.setMarbleAttribute("angularacceleration", zdist / 0.2 * 40 + 35);
+	}
+
+	/** Ported from PQ's `setBubbleTime` (`clientCmdSetBubbleTime`, `client/scripts/water.cs`) -
+		called once on pickup. Only actually banks the new time if the bubble isn't already active
+		with more time banked (or becoming infinite), matching the source's `!active || infinite ||
+		time > bubbleTime` guard - picking up a weaker bubble while a stronger one is still running
+		doesn't downgrade it. */
+	public function setBubbleTime(time:Float, infinite:Bool) {
+		var active = time > 0;
+		if (!active || infinite || time > this.bubbleTime) {
+			this.bubbleTotalTime = time;
+			this.bubbleTime = time;
+			this.bubbleInfinite = infinite;
+		}
+		if (this.level != null)
+			this.level.playGui.updateBubbleBar(this.bubbleTime, this.bubbleTotalTime, this.bubbleInfinite);
+	}
+
+	function activateBubble() {
+		this.bubbleActive = true;
+		this.bubblePhysicsLayer = this.pushPhysicsLayer(buildBubblePhysicsLayer());
+	}
+
+	function deactivateBubble() {
+		if (!this.bubbleActive)
+			return;
+		this.bubbleActive = false;
+		if (this.bubblePhysicsLayer != null) {
+			this.popPhysicsLayer(this.bubblePhysicsLayer);
+			this.bubblePhysicsLayer = null;
+		}
+		if (this.level != null)
+			this.level.playGui.updateBubbleBar(this.bubbleTime, this.bubbleTotalTime, this.bubbleInfinite);
+	}
+
+	/** Ported from PQ's `BubbleLoop` (`client/scripts/water.cs`) - held-to-use, undoes itself the
+		instant the powerup button is released or the marble leaves the water (matching the "let go
+		pops it"/"exit the water pops it" checks), and depletes while active unless infinite. Called
+		once per substep, right alongside the click-based `heldPowerup.use()` consumption check,
+		since Bubble deliberately bypasses that mechanism entirely - it never occupies the single
+		`heldPowerup` slot (see the field doc on `bubbleTime`). */
+	function updateBubble(move:Move, timeStep:Float) {
+		var use = move.powerupHeld;
+		if (this.bubbleActive) {
+			if (!use || !this.isInWater)
+				this.deactivateBubble();
+		} else if (this.isInWater && use && this.bubbleTime > 0 && !this.outOfBounds && this.powerupLockCount <= 0) {
+			this.activateBubble();
+			if (this.level != null)
+				this.level.playGui.updateBubbleBar(this.bubbleTime, this.bubbleTotalTime, this.bubbleInfinite);
+		}
+
+		if (this.bubbleActive) {
+			if (!this.bubbleInfinite) {
+				this.bubbleTime -= timeStep;
+				if (this.bubbleTime <= 0) {
+					this.bubbleTime = 0;
+					this.deactivateBubble();
+				}
+			}
+			if (this.level != null)
+				this.level.playGui.updateBubbleBar(this.bubbleTime, this.bubbleTotalTime, this.bubbleInfinite);
+		}
+	}
+
+	/** Ported from `GameConnection::fireballInit` (`server/scripts/fireball.cs`) - called from
+		`FireballItem.pickUp`. Cancels any banked Bubble time (`%user.client.setBubbleTime(0, false)`
+		- "Ruin their bubble", matching `BubbleItem::onPickup`'s one-directional counterpart that
+		blocks picking up a Bubble while Fireball is active). */
+	public function activateFireball(time:Float) {
+		this.fireball = true;
+		this.fireballTime = time;
+		this.fireballTotalTime = time;
+		// "So we can instantly blast after getting a new fireball" (`clientCmdFireballInit`).
+		this.fireballLastBlastTime = -1e8;
+		this.setBubbleTime(0, false);
+		if (this.level != null)
+			this.level.playGui.updateFireballBar(this.fireballTime, this.fireballTotalTime, this.canFireballBlast());
+	}
+
+	/** Ported from `GameConnection::fireballExpire`. */
+	function deactivateFireball() {
+		if (!this.fireball)
+			return;
+		this.fireball = false;
+		this.fireballTime = 0;
+		if (this.level != null)
+			this.level.playGui.updateFireballBar(0, 0, false);
+	}
+
+	/** Continuous decrement, replacing PQ's `schedule($time, "fireballExpire")` (banned by
+		[No Schedules](feedback_no_schedules.md)) - functionally identical, since PQ's own
+		`getFireballTime` already computes remaining time as a pure function of elapsed time anyway. */
+	function updateFireball(timeStep:Float) {
+		if (!this.fireball)
+			return;
+		this.fireballTime -= timeStep;
+		if (this.fireballTime <= 0) {
+			this.fireballTime = 0;
+			this.deactivateFireball();
+		} else if (this.level != null) {
+			this.level.playGui.updateFireballBar(this.fireballTime, this.fireballTotalTime, this.canFireballBlast());
+		}
+	}
+
+	/** Deducts banked Fireball time - ported from `FireballItem::IceCollision`'s `%marble.
+		_fireballTime -= 500` (melting through an `IceShard` by contact, as opposed to `Blast`'s
+		radius search, which doesn't cost any time). */
+	public function deductFireballTime(amount:Float) {
+		if (!this.fireball)
+			return;
+		this.fireballTime -= amount;
+		if (this.fireballTime <= 0) {
+			this.fireballTime = 0;
+			this.deactivateFireball();
+		} else if (this.level != null) {
+			this.level.playGui.updateFireballBar(this.fireballTime, this.fireballTotalTime, this.canFireballBlast());
+		}
+	}
+
+	/** Ported from `fireballBlast`'s cooldown guard (`client/scripts/fireball.cs`) - needs at least
+		1 second of Fireball time left, and at least 2 seconds since the last blast. */
+	function canFireballBlast():Bool {
+		if (!this.fireball || this.level == null)
+			return false;
+		return this.fireballTime >= 1 && (this.level.timeState.currentAttemptTime - this.fireballLastBlastTime) >= 2;
+	}
+
+	/** Ported from `fireballBlast`/`serverCmdFireballBlast`/`FireballItem::Blast`
+		(`client/scripts/fireball.cs` + `server/scripts/fireball.cs`) - called from `useBlast`, which
+		the same physical input (`Settings.controlsSettings.blast`) already drives for the Ultra
+		"blast" mechanic; Fireball intercepts that input first when active, matching real PQ's
+		`input_useBlast` (`if ($Client::FireballActive) { if (fireballBlast()) return; }`). Doesn't
+		consume any Fireball time itself - only contact-melting an `IceShard` costs time (see
+		`deductFireballTime`). Returns `true` if the blast actually fired (so `useBlast` can skip the
+		normal Ultra blast for this call), matching `fireballBlast`'s own return value. */
+	function fireballBlast(timeState:TimeState):Bool {
+		if (!this.canFireballBlast())
+			return false;
+		this.fireballLastBlastTime = timeState.currentAttemptTime;
+
+		// Base 2 + up to 5 scaled by remaining time fraction + up to 5 scaled by how long it's been
+		// since the last jump (ramps 0 -> 1 over 0.4s - jumping right before blasting is weaker, "so
+		// you can't combine for crazy height").
+		var timeFraction = this.fireballTotalTime > 0 ? this.fireballTime / this.fireballTotalTime : 0;
+		var jumpFraction = Util.clamp(this.timeSinceLastJump / 0.4, 0, 1);
+		var scale = timeFraction * 5 + jumpFraction * 5 + 2;
+		this.applyImpulse(this.currentUp.multiply(scale));
+
+		var pos = this.getAbsPos().getPosition();
+
+		// Blast out nearby ice shards - radius shrinks from 3 (full time) down to 1.5 (empty).
+		var radius = timeFraction * 1.5 + 1.5;
+		var smashedAny = false;
+		if (this.level != null) {
+			for (shard in this.level.iceShards) {
+				if (!shard.destroyed && shard.getAbsPos().getPosition().distance(pos) <= radius) {
+					shard.destroyByFireball();
+					smashedAny = true;
+				}
+			}
+		}
+
+		if (!this.isNetUpdate && this.controllable) {
+			if (smashedAny)
+				AudioManager.playSound(ResourceLoader.getResource('data/sound/ice_smash.wav', ResourceLoader.getAudio, this.soundResources));
+			AudioManager.playSound(ResourceLoader.getResource('data/sound/explode1_tweaked.wav', ResourceLoader.getAudio, this.soundResources));
+		}
+
+		var blastPos = pos.add(new Vector(0, 0, 0.5));
+		this.level.particleManager.createEmitter(fireball1BlastParticleOptions, this.fireball1BlastEmitterData, blastPos);
+		this.level.particleManager.createEmitter(fireball2BlastParticleOptions, this.fireball2BlastEmitterData, blastPos);
+		this.level.particleManager.createEmitter(fireball4BlastParticleOptions, this.fireball4BlastEmitterData, blastPos);
+
+		return true;
 	}
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
@@ -1258,6 +2404,7 @@ class Marble extends GameObject {
 	}
 
 	function applyContactForces(dt:Float, m:Move, isCentered:Bool, aControl:Vector, desiredOmega:Vector, A:Vector) {
+		this.timeSinceLastJump += dt;
 		var a = new Vector();
 		this._slipAmount = 0;
 		var gWorkGravityDir = this.currentUp.multiply(-1);
@@ -1282,6 +2429,7 @@ class Marble extends GameObject {
 			}
 			if (sv < this._jumpImpulse) {
 				this.velocity.load(this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv))));
+				this.timeSinceLastJump = 0;
 				if (!playedSounds.contains("data/sound/jump.wav") && !this.isNetUpdate && this.controllable) {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/jump.wav", ResourceLoader.getAudio, this.soundResources));
 					playedSounds.push("data/sound/jump.wav");
@@ -1370,19 +2518,96 @@ class Marble extends GameObject {
 		}
 	}
 
-	function trailEmitter() {
-		// Trails are bugged
-		// var speed = this.velocity.length();
-		// if (this._minTrailVel > speed) {
-		// 	if (this.trailEmitterNode != null) {
-		// 		this.level.particleManager.removeEmitter(this.trailEmitterNode);
-		// 		this.trailEmitterNode = null;
-		// 	}
-		// 	return;
-		// }
-		// if (this.trailEmitterNode == null)
-		// 	this.trailEmitterNode = this.level.particleManager.createEmitter(trailParticleOptions, trailEmitterData, null,
-		// 		() -> this.getAbsPos().getPosition());
+	static final TRAIL_EMITTER_SPEED = 10.0;
+	static final TRAIL_EMITTER_WHITE_SPEED = 30.0;
+	static final SNORE_THRESHOLD = 0.01;
+	static final SNORE_TIMEOUT = 10.0;
+
+	/** Creates or removes `node` (backed by `options`/`data`, following the marble every frame via
+		the `getPos` closure convention already used elsewhere in this file) to match `show`. */
+	function setTrailEmitterShown(node:ParticleEmitter, show:Bool, options:ParticleEmitterOptions, data:ParticleData):ParticleEmitter {
+		if (show && node == null)
+			return this.level.particleManager.createEmitter(options, data, null, () -> this.getAbsPos().getPosition());
+		if (!show && node != null)
+			this.level.particleManager.removeEmitter(node);
+		return show ? node : null;
+	}
+
+	/** Ported from the native `updateTrailEmitters()`/`Marble::assignNewTrailEmitter` (real engine
+		`interpolation.cpp` + `server/scripts/game.cs`) - decides which of the marble's persistent
+		trail emitters should be visible this frame, purely from current state (speed/water/fireball/
+		mega/game-state), and creates/removes each one to match. The real engine instead keeps 9
+		always-existing `ParticleEmitterNode`s per marble and teleports the hidden ones off to
+		`(-999999,...)` - functionally identical to create/remove here, since this codebase's
+		`ParticleManager` already supports on-demand emitter creation/removal (see `createEmitter`/
+		`removeEmitter`), so there's no need for the off-screen-parking indirection. */
+	function updateTrailEmitters(timeState:TimeState) {
+		if (!this.controllable || this.isNetUpdate)
+			return;
+
+		var speed = this.velocity.length();
+		var pos = this.getAbsPos().getPosition();
+
+		var showTrail = false;
+		var showWhiteTrail = false;
+		var showSplash4 = false;
+		var showTrailBubble = false;
+		var showFireball3 = false;
+		var showFireball4 = false;
+		var showFireball3Mega = false;
+		var showFireball4Mega = false;
+		var showSnore = false;
+
+		if (this.isInWater) {
+			// Ported from `%closestTrigger.testObject(%player)` - approximated here as "the marble's
+			// entire radius is below the water's surface", the same `collider.boundingBox.zMax`
+			// `updateWater` already compares against for its depth-based attribute scaling.
+			var fullySubmerged = this.currentWaterTrigger != null
+				&& (pos.z + this._radius) <= this.currentWaterTrigger.collider.boundingBox.zMax;
+			showSplash4 = speed > 1 && !fullySubmerged;
+			showTrailBubble = speed > 1 && fullySubmerged;
+		} else if (this.fireball) {
+			var mega = isMegaMarbleEnabled(timeState);
+			showFireball3 = !mega;
+			showFireball4 = !mega;
+			showFireball3Mega = mega;
+			showFireball4Mega = mega;
+		} else {
+			showTrail = speed > TRAIL_EMITTER_SPEED && speed < TRAIL_EMITTER_WHITE_SPEED;
+			showWhiteTrail = speed >= TRAIL_EMITTER_WHITE_SPEED;
+		}
+
+		if (speed < SNORE_THRESHOLD && this.mode == Play && this.level.finishTime == null) {
+			showSnore = (timeState.timeSinceLoad - this.lastMovementTime) > SNORE_TIMEOUT;
+		} else {
+			this.lastMovementTime = timeState.timeSinceLoad;
+		}
+
+		if (this.level.finishTime != null) {
+			showTrail = false;
+			showWhiteTrail = false;
+			showSplash4 = false;
+			showTrailBubble = false;
+			showFireball3 = false;
+			showFireball4 = false;
+			showFireball3Mega = false;
+			showFireball4Mega = false;
+			showSnore = false;
+		}
+
+		this.trailEmitterNode = this.setTrailEmitterShown(this.trailEmitterNode, showTrail, trailParticleOptions, this.trailEmitterData);
+		this.whiteTrailEmitterNode = this.setTrailEmitterShown(this.whiteTrailEmitterNode, showWhiteTrail, whiteTrailParticleOptions,
+			this.whiteTrailEmitterData);
+		this.splash4EmitterNode = this.setTrailEmitterShown(this.splash4EmitterNode, showSplash4, splash4ParticleOptions, this.splash4EmitterData);
+		this.trailBubbleEmitterNode = this.setTrailEmitterShown(this.trailBubbleEmitterNode, showTrailBubble, trailBubbleParticleOptions,
+			this.trailBubbleEmitterData);
+		this.fireball3EmitterNode = this.setTrailEmitterShown(this.fireball3EmitterNode, showFireball3, fireball3ParticleOptions, this.fireball3EmitterData);
+		this.fireball4EmitterNode = this.setTrailEmitterShown(this.fireball4EmitterNode, showFireball4, fireball4ParticleOptions, this.fireball4EmitterData);
+		this.fireball3MegaEmitterNode = this.setTrailEmitterShown(this.fireball3MegaEmitterNode, showFireball3Mega, fireball3MegaParticleOptions,
+			this.fireball3MegaEmitterData);
+		this.fireball4MegaEmitterNode = this.setTrailEmitterShown(this.fireball4MegaEmitterNode, showFireball4Mega, fireball4MegaParticleOptions,
+			this.fireball4MegaEmitterData);
+		this.snoreEmitterNode = this.setTrailEmitterShown(this.snoreEmitterNode, showSnore, snoreParticleOptions, this.snoreEmitterData);
 	}
 
 	function ReportBounce(pos:Vector, normal:Vector, speed:Float) {
@@ -2148,6 +3373,9 @@ class Marble extends GameObject {
 				}
 			}
 
+			this.updateBubble(m, timeStep);
+			this.updateFireball(timeStep);
+
 			if (contacts.length != 0)
 				contactTime += timeStep;
 
@@ -2642,7 +3870,6 @@ class Marble extends GameObject {
 		// var marbledts = cast(this.getChildAt(0), DtsObject);
 		// marbledts.setScale(this._renderScale);
 
-		this.trailEmitter();
 		if (bounceEmitDelay > 0)
 			bounceEmitDelay -= timeState.dt;
 		if (bounceEmitDelay < 0)
@@ -2678,6 +3905,11 @@ class Marble extends GameObject {
 				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupClicked)
 				|| Gamepad.isPressed(Settings.gamepadSettings.powerup)) {
 				move.powerup = true;
+			}
+			if ((!Util.isTouchDevice() && Key.isDown(Settings.controlsSettings.powerup))
+				|| (Util.isTouchDevice() && MarbleGame.instance.touchInput.powerupButton.pressed)
+				|| Gamepad.isDown(Settings.gamepadSettings.powerup)) {
+				move.powerupHeld = true;
 			}
 
 			if (Key.isDown(Settings.controlsSettings.blast)
@@ -2802,8 +4034,9 @@ class Marble extends GameObject {
 		}
 
 		this.updateTeleporterState(timeState);
+		this.updateWater(timeState);
 
-		this.trailEmitter();
+		this.updateTrailEmitters(timeState);
 		if (bounceEmitDelay > 0)
 			bounceEmitDelay -= timeState.dt;
 		if (bounceEmitDelay < 0)
@@ -2880,6 +4113,16 @@ class Marble extends GameObject {
 		} else {
 			this.iceChunk.setPosition(1e8, 1e8, 1e8);
 		}
+
+		if (this.bubbleActive) {
+			this.bubbleVisual.setPosition(x, y, z);
+			if (selfMarble)
+				this.bubbleSound.pause = false;
+		} else {
+			this.bubbleVisual.setPosition(1e8, 1e8, 1e8);
+			if (selfMarble)
+				this.bubbleSound.pause = true;
+		}
 	}
 
 	public function getMass() {
@@ -2895,6 +4138,10 @@ class Marble extends GameObject {
 	}
 
 	public function useBlast(timeState:TimeState) {
+		// Fireball intercepts the blast input first when active - if it fires, skip the normal
+		// Ultra blast entirely for this call (matches `input_useBlast`'s early return).
+		if (this.fireballBlast(timeState))
+			return;
 		if (Net.isMP) {
 			if (this.blastTicks < 156)
 				return;
@@ -3063,6 +4310,31 @@ class Marble extends GameObject {
 				this.teleporting = false;
 			}
 		}
+
+		// Ported from `TeleportItem::finishTeleport` - fires once `teleporterTeleTime` has elapsed
+		// since the second (fire) press. See `teleporterFiring`'s doc comment for why this lives
+		// here instead of a schedule.
+		if (this.teleporterFiring && time.currentAttemptTime - this.teleporterFireStartTime >= this.teleporterTeleTime) {
+			this.teleporterFiring = false;
+			this.setCloaking(false, time);
+			if (!this.teleporterKeepVelocity) {
+				this.velocity.set(0, 0, 0);
+				this.omega.set(0, 0, 0);
+			}
+			this.prevPos.load(this.teleporterSavedPosition);
+			this.setPosition(this.teleporterSavedPosition.x, this.teleporterSavedPosition.y, this.teleporterSavedPosition.z);
+			var ct = this.collider.transform.clone();
+			ct.setPosition(this.teleporterSavedPosition);
+			this.collider.setTransform(ct);
+
+			if (this == this.level.marble) {
+				this.camera.CameraYaw = this.teleporterSavedYaw;
+				this.camera.CameraPitch = this.teleporterSavedPitch;
+				this.camera.nextCameraYaw = this.teleporterSavedYaw;
+				this.camera.nextCameraPitch = this.teleporterSavedPitch;
+				this.level.setUp(this, this.teleporterSavedGravity, time, true);
+			}
+		}
 	}
 
 	public function setCloaking(active:Bool, time:TimeState) {
@@ -3139,6 +4411,17 @@ class Marble extends GameObject {
 			this.velocity = this.velocity.add(impulse);
 			if (this.iceShard != null)
 				this.iceShard.playCrackSound(this);
+
+			// Ported from `IceShard::unfreeze` - two particle bursts at the marble's position, the
+			// ejection cone oriented along gravity-up flipped 180° (`applyrotations(getGravityRot(),
+			// "0 180 0")`), matching the impulse direction above.
+			if (this.level != null) {
+				var axis = this.currentUp.multiply(-1);
+				iceChunkChunkParticleOptions.axis = axis;
+				iceChunkSnowParticleOptions.axis = axis;
+				this.level.particleManager.createEmitter(iceChunkChunkParticleOptions, this.iceChunkChunkEmitterData, pos);
+				this.level.particleManager.createEmitter(iceChunkSnowParticleOptions, this.iceChunkSnowEmitterData, pos);
+			}
 		} else {
 			this.lastFreezeTime = -1e8;
 		}
@@ -3185,6 +4468,28 @@ class Marble extends GameObject {
 		if (this.physicsAttributeBaseline != null)
 			for (attr in PHYSMOD_ATTRIBUTES)
 				setMarbleAttribute(attr, this.physicsAttributeBaseline.get(attr));
+		// physicsLayers was just wiped wholesale above, so the layers backing these no longer
+		// exist - clear their bookkeeping directly rather than via popPhysicsLayer/deactivate*
+		// (which would try to remove an already-gone layer and skip the flag resets).
+		this.isInWater = false;
+		this.waterTriggers = [];
+		this.waterPhysicsLayer = null;
+		this.currentWaterTrigger = null;
+		this.bubbleActive = false;
+		this.bubbleTime = 0;
+		this.bubbleTotalTime = 0;
+		this.bubbleInfinite = false;
+		this.bubblePhysicsLayer = null;
+		if (this.bubbleSound != null)
+			this.bubbleSound.pause = true;
+		if (this.level != null)
+			this.level.playGui.updateBubbleBar(0, 0, false);
+		this.fireball = false;
+		this.fireballTime = 0;
+		this.fireballTotalTime = 0;
+		this.fireballLastBlastTime = -1e8;
+		if (this.level != null)
+			this.level.playGui.updateFireballBar(0, 0, false);
 		this.iceShard = null;
 		if (this.iceChunk != null)
 			this.iceChunk.setPosition(1e8, 1e8, 1e8);
@@ -3228,10 +4533,13 @@ class Marble extends GameObject {
 			this.slipSound.stop();
 		if (this.helicopterSound != null)
 			this.helicopterSound.stop();
+		if (this.bubbleSound != null)
+			this.bubbleSound.stop();
 		this.shadowVolume.remove();
 		this.helicopter.remove();
 		this.helicopterPQ.remove();
 		this.teleporterMarker.remove();
+		this.bubbleVisual.remove();
 		super.dispose();
 		removeChildren();
 		camera = null;

@@ -370,7 +370,8 @@ class ResourceLoader {
 
 				var pixs = new hxd.Pixels(bmpdata.header.width, bmpdata.header.height, bbuf.getBytes(), hxd.PixelFormat.BGRA);
 				var tex = h3d.mat.Texture.fromPixels(pixs);
-				tex.mipMap = Nearest;
+				tex.mipMap = Linear;
+				tex.filter = Linear;
 				tex.flags.set(MipMapped);
 
 				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
@@ -383,7 +384,7 @@ class ResourceLoader {
 					texObj.flags.set(MipMapped);
 				}
 				var tex = img.toTexture();
-				tex.mipMap = Nearest;
+				tex.mipMap = Linear;
 				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
 				textureCache.set(path, textureresource);
 
@@ -410,7 +411,8 @@ class ResourceLoader {
 				var pixs = new hxd.Pixels(bmpdata.header.width, bmpdata.header.height, bbuf.getBytes(), hxd.PixelFormat.BGRA);
 				pixs.setFlip(true);
 				var tex = h3d.mat.Texture.fromPixels(pixs);
-				tex.mipMap = Nearest;
+				tex.mipMap = Linear;
+				tex.filter = Linear;
 				tex.flags.set(MipMapped);
 
 				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
@@ -423,8 +425,8 @@ class ResourceLoader {
 					texObj.flags.set(MipMapped);
 				}
 				var tex = img.toTexture();
-				tex.mipMap = Nearest;
-				// tex.filter = Nearest;
+				tex.mipMap = Linear;
+				tex.filter = Linear;
 				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
 				textureCache.set(path, textureresource);
 
