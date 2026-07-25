@@ -227,5 +227,15 @@ class PQDecorations {
 		"sockwgift" => "data/shapes/xmas/sockwgift.dts",
 		"sockwnobody" => "data/shapes/xmas/sockwnobody.dts",
 		"thegamebox" => "data/shapes/xmas/thegame_box.dts",
+
+		// Water surfaces - purely visual (`server/scripts/water.cs`'s `Water` class); the ambient
+		// wave animation plays automatically via the generic DTS sequence system, no special
+		// handling needed. Gameplay effects come from the separate `WaterPhysicsTrigger` volume a
+		// level author places on top. The "_slow" cylinder's z-scale-flatten quirk (`isScaled`) is
+		// not reproduced - not worth bespoke `setTransform` machinery for a cosmetic edge case, and
+		// the DTS has no collision mesh either way.
+		"waterplane" => "data/shapes_pq/gameplay/water.dts",
+		"watercylinder" => "data/shapes_pq/other/cylinderwater.dts",
+		"watercylinder_slow" => "data/shapes_pq/other/cylinderwater_slow.dts",
 	];
 }

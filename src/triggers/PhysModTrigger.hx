@@ -38,7 +38,7 @@ final physModParticleOptions:ParticleEmitterOptions = {
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/orb.png',
-		blending: BlendMode.Alpha,
+		blending: BlendMode.Add,
 		spinSpeed: 10,
 		spinRandomMin: 0,
 		spinRandomMax: 0,

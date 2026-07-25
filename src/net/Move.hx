@@ -8,6 +8,7 @@ class Move {
 	public var powerup:Bool;
 	public var blast:Bool;
 	public var respawn:Bool;
+	public var powerupHeld:Bool;
 
 	public function new() {}
 }

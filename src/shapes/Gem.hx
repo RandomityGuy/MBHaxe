@@ -17,7 +17,9 @@ import src.Marble;
 /** PQ's per-color gem sparkle (`GemParticle<Color>`/`GemEmitter<Color>`, `server/scripts/gems.cs`) -
 	an ambient emitter that runs continuously while the gem is uncollected, cleared on pickup
 	(`Gem::onPickup`'s `clearFX`) and restored if un-picked-up (rewind). Base settings shared by
-	every color (`GemParticleBase`/`GemEmitterBase`): a small additive glint, one every 40ms. The
+	every color (`GemParticleBase`/`GemEmitterBase`): a small glint, one every 40ms, using standard
+	alpha blending (`useInvAlpha = true` in the source maps to `Alpha`, not `Add` - see
+	`ParticleOptions.blending`'s doc comment for the general mapping). The
 	source's `dragCoeffiecient = 0.1` is misspelled (dead field - the real, unset `dragCoefficient`
 	defaults to `ParticleData`'s C++ default of 0), so this is a true 0, not the earlier port's `0.1`.
 	`emitterLifetime` substitutes "effectively forever" for the source's own `lifetimeMS = 0`
@@ -37,7 +39,7 @@ final gemParticleBase:ParticleEmitterOptions = {
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/glint.png',
-		blending: BlendMode.Add,
+		blending: BlendMode.Alpha,
 		spinSpeed: 1,
 		spinRandomMin: -5.0,
 		spinRandomMax: 5.0,
@@ -253,7 +255,8 @@ class Gem extends DtsObject {
 		if (!this.spawnGemParticles || this.gemEmitter != null)
 			return;
 		var options = gemParticleOptionsByColor.exists(this.colorLower) ? gemParticleOptionsByColor.get(this.colorLower) : gemParticleOptionsByColor.get("base");
-		this.gemEmitter = this.level.particleManager.createEmitter(options, this.gemParticleData, null, () -> this.getAbsPos().getPosition());
+		this.gemEmitter = this.level.particleManager.createEmitter(options, this.gemParticleData, null,
+			() -> this.boundingCollider.boundingBox.getCenter().toVector());
 	}
 
 	function stopGemEmitter() {

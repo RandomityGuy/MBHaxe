@@ -68,10 +68,40 @@ class RewindFrame {
 	var teleporterSavedGravity:Vector;
 	var teleporterKeepVelocity:Bool;
 	var teleporterTeleTime:Float;
+	var teleporterFiring:Bool;
+	var teleporterFireStartTime:Float;
 	var isFrozen:Bool;
 	var lastFreezeTime:Float;
 	var powerupLockCount:Int;
 	var timeStopTriggerCount:Int;
+
+	/** Water/Bubble state - `waterTriggers`/`isInWater` can't just self-heal from the collision
+		system on the next tick after a rewind (unlike e.g. `onOutOfBounds`-triggered flows), since
+		`WaterPhysicsTrigger.onMarbleEnter`/`onMarbleLeave` only fire on a fresh overlap transition,
+		not every tick the marble happens to already be inside one - a rewind can restore a frame
+		where the marble is mid-submersion without ever re-triggering that enter event. Whether the
+		"water"/"bubble" physics layers are currently pushed isn't snapshotted directly - it's
+		re-derived from `isInWater`/`bubbleActive` on `applyFrame` (the override values themselves
+		are fixed constants, not marble-instance data, so there's nothing instance-specific to lose
+		by re-pushing a fresh layer instead of restoring the exact old array reference). */
+	var isInWater:Bool;
+	var waterTriggers:Array<triggers.WaterPhysicsTrigger>;
+	var bubbleTime:Float;
+	var bubbleTotalTime:Float;
+	var bubbleInfinite:Bool;
+	var bubbleActive:Bool;
+
+	/** Fireball PowerUp state - mirrors the Bubble fields above. `fireball` can't self-heal on
+		rewind either (there's no per-tick "am I still on fire" re-derivation, unlike a trigger-set
+		flag), so it's snapshotted directly like `bubbleActive`. */
+	var fireball:Bool;
+
+	var fireballTime:Float;
+	var fireballTotalTime:Float;
+	var fireballLastBlastTime:Float;
+
+	/** Index-aligned with `level.iceShards`, mirrors `gemStates`. */
+	var iceShardStates:Array<Bool>;
 
 	/** Ported from the `mbu-port` branch's design - whichever `GameMode` (or `CompositeMode` of
 		several) is active supplies one of these via `getRewindState()`/`constructRewindState()`,
@@ -144,10 +174,23 @@ class RewindFrame {
 		c.teleporterSavedGravity = teleporterSavedGravity.clone();
 		c.teleporterKeepVelocity = teleporterKeepVelocity;
 		c.teleporterTeleTime = teleporterTeleTime;
+		c.teleporterFiring = teleporterFiring;
+		c.teleporterFireStartTime = teleporterFireStartTime;
 		c.isFrozen = isFrozen;
 		c.lastFreezeTime = lastFreezeTime;
 		c.powerupLockCount = powerupLockCount;
 		c.timeStopTriggerCount = timeStopTriggerCount;
+		c.isInWater = isInWater;
+		c.waterTriggers = waterTriggers.copy();
+		c.bubbleTime = bubbleTime;
+		c.bubbleTotalTime = bubbleTotalTime;
+		c.bubbleInfinite = bubbleInfinite;
+		c.bubbleActive = bubbleActive;
+		c.fireball = fireball;
+		c.fireballTime = fireballTime;
+		c.fireballTotalTime = fireballTotalTime;
+		c.fireballLastBlastTime = fireballLastBlastTime;
+		c.iceShardStates = iceShardStates.copy();
 		c.modeState = modeState != null ? modeState.clone() : null;
 		c.pathFollowerStates = pathFollowerStates.map(s -> ({
 			pathPosition: s.pathPosition,
@@ -224,10 +267,23 @@ class RewindFrame {
 		framesize += 24; // teleporterSavedGravity
 		framesize += 1; // teleporterKeepVelocity
 		framesize += 8; // teleporterTeleTime
+		framesize += 1; // teleporterFiring
+		framesize += 8; // teleporterFireStartTime
 		framesize += 1; // isFrozen
 		framesize += 8; // lastFreezeTime
 		framesize += 2; // powerupLockCount
 		framesize += 2; // timeStopTriggerCount
+		framesize += 1; // isInWater
+		framesize += 2 + waterTriggers.length * 2; // waterTriggers
+		framesize += 8; // bubbleTime
+		framesize += 8; // bubbleTotalTime
+		framesize += 1; // bubbleInfinite
+		framesize += 1; // bubbleActive
+		framesize += 1; // fireball
+		framesize += 8; // fireballTime
+		framesize += 8; // fireballTotalTime
+		framesize += 8; // fireballLastBlastTime
+		framesize += 2 + iceShardStates.length * 1; // iceShardStates
 		framesize += 1; // Null<modeState>
 		if (modeState != null)
 			framesize += modeState.getSize();
@@ -350,10 +406,27 @@ class RewindFrame {
 		bb.writeDouble(teleporterSavedGravity.z);
 		bb.writeByte(teleporterKeepVelocity ? 1 : 0);
 		bb.writeDouble(teleporterTeleTime);
+		bb.writeByte(teleporterFiring ? 1 : 0);
+		bb.writeDouble(teleporterFireStartTime);
 		bb.writeByte(isFrozen ? 1 : 0);
 		bb.writeDouble(lastFreezeTime);
 		bb.writeInt16(powerupLockCount);
 		bb.writeInt16(timeStopTriggerCount);
+		bb.writeByte(isInWater ? 1 : 0);
+		bb.writeInt16(waterTriggers.length);
+		for (t in waterTriggers)
+			bb.writeInt16(rm.allocGO(t));
+		bb.writeDouble(bubbleTime);
+		bb.writeDouble(bubbleTotalTime);
+		bb.writeByte(bubbleInfinite ? 1 : 0);
+		bb.writeByte(bubbleActive ? 1 : 0);
+		bb.writeByte(fireball ? 1 : 0);
+		bb.writeDouble(fireballTime);
+		bb.writeDouble(fireballTotalTime);
+		bb.writeDouble(fireballLastBlastTime);
+		bb.writeInt16(iceShardStates.length);
+		for (s in iceShardStates)
+			bb.writeByte(s ? 1 : 0);
 		bb.writeByte(modeState == null ? 0 : 1);
 		if (modeState != null)
 			modeState.serialize(rm, bb);
@@ -528,10 +601,29 @@ class RewindFrame {
 		teleporterSavedGravity.z = br.readDouble();
 		teleporterKeepVelocity = br.readByte() != 0;
 		teleporterTeleTime = br.readDouble();
+		teleporterFiring = br.readByte() != 0;
+		teleporterFireStartTime = br.readDouble();
 		isFrozen = br.readByte() != 0;
 		lastFreezeTime = br.readDouble();
 		powerupLockCount = br.readInt16();
 		timeStopTriggerCount = br.readInt16();
+		isInWater = br.readByte() != 0;
+		waterTriggers = [];
+		var waterTriggers_len = br.readInt16();
+		for (i in 0...waterTriggers_len)
+			waterTriggers.push(cast rm.getGO(br.readInt16()));
+		bubbleTime = br.readDouble();
+		bubbleTotalTime = br.readDouble();
+		bubbleInfinite = br.readByte() != 0;
+		bubbleActive = br.readByte() != 0;
+		fireball = br.readByte() != 0;
+		fireballTime = br.readDouble();
+		fireballTotalTime = br.readDouble();
+		fireballLastBlastTime = br.readDouble();
+		iceShardStates = [];
+		var iceShardStates_len = br.readInt16();
+		for (i in 0...iceShardStates_len)
+			iceShardStates.push(br.readByte() != 0);
 		var hasModeState = br.readByte() != 0;
 		if (hasModeState) {
 			modeState = rm.level.gameMode.constructRewindState();

@@ -37,6 +37,10 @@ import triggers.CountdownStartTrigger;
 import triggers.CountdownStopTrigger;
 import triggers.DisableShapeForceTrigger;
 import triggers.PhysModTrigger;
+import triggers.WaterPhysicsTrigger;
+import triggers.RelativeTPTrigger;
+import shapes.BubbleItem;
+import shapes.FireballItem;
 import shapes.StartPad;
 import shapes.EndPad;
 import shapes.SignFinish;
@@ -208,6 +212,14 @@ class DatablockRegistry {
 			create: element -> new Helicopter(cast element)
 		},
 		{
+			match: Exact(["bubbleitem"]),
+			create: element -> new BubbleItem(cast element)
+		},
+		{
+			match: Exact(["fireballitem"]),
+			create: element -> new FireballItem(cast element)
+		},
+		{
 			match: Exact(["easteregg", "easteregg_mbu"]),
 			create: element -> new EasterEgg(cast element)
 		},
@@ -307,7 +319,10 @@ class DatablockRegistry {
 		},
 		{
 			match: Exact(["iceshard1", "iceshard2"]),
-			create: element -> new IceShard(cast element)
+			create: element -> new IceShard(cast element),
+			after: (shape, element, world) -> {
+				world.iceShards.push(cast shape);
+			}
 		},
 		{
 			match: Exact([
@@ -472,6 +487,14 @@ class DatablockRegistry {
 		{
 			match: Exact(["marblephysmodtrigger"]),
 			create: (element, level) -> new PhysModTrigger(element, level)
+		},
+		{
+			match: Exact(["waterphysicstrigger"]),
+			create: (element, level) -> new WaterPhysicsTrigger(element, level)
+		},
+		{
+			match: Exact(["relativetptrigger"]),
+			create: (element, level) -> new RelativeTPTrigger(element, level)
 		},
 		{
 			match: Exact(["altergravitytrigger"]),

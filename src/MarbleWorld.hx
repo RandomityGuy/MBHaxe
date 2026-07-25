@@ -144,7 +144,8 @@ class MarbleWorld extends Scheduler {
 	public var instanceManager:InstanceManager;
 	public var particleManager:ParticleManager;
 
-	var playGui:PlayGui;
+	public var playGui:PlayGui;
+
 	var loadingGui:LoadingGui;
 	var radar:Radar;
 
@@ -160,6 +161,11 @@ class MarbleWorld extends Scheduler {
 	public var trapdoorsToTick:Array<Int> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
+
+	/** All placed `IceShard1`/`IceShard2` instances - mirrors `gems` (used for rewind snapshotting
+		of `IceShard.destroyed`, see `RewindFrame.iceShardStates`). */
+	public var iceShards:Array<shapes.IceShard> = [];
+
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
 
 	/** General named-object lookup (any `GameObject` - DTS/interior/trigger) used for `path`/
@@ -415,7 +421,31 @@ class MarbleWorld extends Scheduler {
 			}
 		};
 		this.mission.load();
-		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
+
+		// Ported from `TDTrigger::onAdd` ("TDTrigger needs 2d mode but it's not listed in
+		// MissionInfo. Activating it ourselves") - a `TDTrigger` can appear in a mission that never
+		// declares "2d" as one of its game modes, so pre-scan for one and force the mode word in
+		// *before* the mode tree gets built, rather than trying to patch the tree after the fact.
+		function missionHasTDTrigger(simGroup:MissionElementSimGroup):Bool {
+			for (element in simGroup.elements) {
+				if (element._type == MissionElementType.Trigger) {
+					var t:MissionElementTrigger = cast element;
+					if (t.datablock != null && t.datablock.toLowerCase() == "tdtrigger")
+						return true;
+				} else if (element._type == MissionElementType.SimGroup) {
+					if (missionHasTDTrigger(cast element))
+						return true;
+				}
+			}
+			return false;
+		}
+		var gameModeStr = mission.gameMode;
+		if (missionHasTDTrigger(this.mission.root)) {
+			var words = gameModeStr == null ? [] : ~/\s+/g.split(StringTools.trim(gameModeStr)).filter(w -> w != "");
+			if (words.filter(w -> w.toLowerCase() == "2d").length == 0)
+				gameModeStr = (gameModeStr == null || gameModeStr == "" ? "" : gameModeStr + " ") + "2D";
+		}
+		this.gameMode = GameModeFactory.getGameMode(cast this, gameModeStr);
 		scanMission(this.mission.root);
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
@@ -760,6 +790,22 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	/** Ported from `getCheckpointPos`'s `%defaultPitch` (`server/scripts/checkpoint.cs`) -
+		`MissionInfo.cameraPitch` overrides the initial camera pitch every spawn/respawn applies,
+		falling back to the same `0.45` every spawn/respawn already hardcoded. */
+	public function getDefaultCameraPitch():Float {
+		var field = this.mission.missionInfo.camerapitch;
+		return field != null && field != "" ? MisParser.parseNumber(field) : 0.45;
+	}
+
+	/** Ported from `GameConnection::respawnPlayer`'s `MissionInfo.initialCameraDistance $= "" ?
+		$Physics::Defaults::CameraDistance : MissionInfo.initialCameraDistance` (`server/scripts/
+		game.cs`) - applied on every spawn/respawn, not just `TwoDMode`'s own use of the same field. */
+	public function getDefaultCameraDistance():Float {
+		var field = this.mission.missionInfo.initialcameradistance;
+		return field != null && field != "" ? MisParser.parseNumber(field) : 2.5;
+	}
+
 	public function restart(marble:Marble, full:Bool = false) {
 		Console.log("LEVEL RESTART");
 		if (!full && this.currentCheckpoint != null) {
@@ -867,9 +913,10 @@ class MarbleWorld extends Scheduler {
 		var euler = startquat.orientation.toEuler();
 		this.marble.camera.init(cast this);
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
-		this.marble.camera.CameraPitch = 0.45;
-		this.marble.camera.nextCameraPitch = 0.45;
+		this.marble.camera.CameraPitch = this.getDefaultCameraPitch();
+		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
 		this.marble.camera.nextCameraYaw = euler.z + Math.PI / 2;
+		this.marble.camera.CameraDistance = this.getDefaultCameraDistance();
 		this.marble.camera.oob = false;
 		this.marble.camera.finish = false;
 		this.marble.mode = Start;
@@ -926,9 +973,10 @@ class MarbleWorld extends Scheduler {
 		// Set camera orientation
 		var euler = respawnQuat.toEuler();
 		marble.camera.CameraYaw = euler.z + Math.PI / 2;
-		marble.camera.CameraPitch = 0.45;
+		marble.camera.CameraPitch = this.getDefaultCameraPitch();
 		marble.camera.nextCameraYaw = marble.camera.CameraYaw;
 		marble.camera.nextCameraPitch = marble.camera.CameraPitch;
+		marble.camera.CameraDistance = this.getDefaultCameraDistance();
 		marble.camera.oob = false;
 		if (isMultiplayer) {
 			marble.megaMarbleUseTick = 0;
@@ -2075,6 +2123,8 @@ class MarbleWorld extends Scheduler {
 		this.updateTimer(dt);
 		this.gameMode.update(this.timeState);
 		this.playGui.updateSpeedometer(this.marble.velocity.length());
+		this.updateUnderwaterOverlay();
+		this.updateBubbleBarPosition();
 
 		if (!this.isMultiplayer) {
 			if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
@@ -2370,7 +2420,7 @@ class MarbleWorld extends Scheduler {
 
 	function determineClockColor(timeToDisplay:Float) {
 		if (this.finishTime != null)
-			return 1;
+			return PlayGui.timerStopped;
 		if (this.isMultiplayer || this.scoreType == Score) {
 			if (!this.multiplayerStarted || (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0))
 				return PlayGui.timerStopped;
@@ -2411,9 +2461,10 @@ class MarbleWorld extends Scheduler {
 			this.countdownRemaining -= dt;
 			if (this.countdownRemaining <= -5) {
 				this.countdownActive = false;
-				this.playGui.formatCountdownTimer(0);
+				this.playGui.formatCountdownThTimer(0);
 			} else {
-				this.playGui.formatCountdownTimer(Math.max(0, this.countdownRemaining));
+				var color = this.countdownRemaining <= 0 ? PlayGui.timerStopped : PlayGui.timerNormal;
+				this.playGui.formatCountdownThTimer(Math.max(0, this.countdownRemaining), color);
 			}
 		}
 
@@ -2574,6 +2625,59 @@ class MarbleWorld extends Scheduler {
 		instead, and every `formatGemCounter` call site should respect that. */
 	public function gemCounterTotal():Int {
 		return this.gemsRequiredToFinish >= 0 ? this.gemsRequiredToFinish : this.totalGems;
+	}
+
+	/** Ported from PQ's `performWaterOverlay` (`client/scripts/water.cs`) - the underwater screen
+		overlay is driven by the *camera's* position, not the marble's, so it's checked separately
+		here rather than folding into `Marble.updateWater` (which only cares about the marble). */
+	function updateUnderwaterOverlay() {
+		var cameraPos = this.scene.camera.pos;
+		var cameraInWater = false;
+		for (t in this.marble.waterTriggers) {
+			if (t.collider.boundingBox.contains(cameraPos.toPoint())) {
+				cameraInWater = true;
+				break;
+			}
+		}
+		this.playGui.setUnderwaterOverlayVisible(cameraInWater);
+	}
+
+	/** Ported from PQ's `PlayGui::updatePowerupTimerPos` (`client/scripts/playGui.cs`) - the bubble
+		bar tracks the marble's projected screen position rather than sitting at a fixed HUD spot.
+		Projects a point offset to the marble's *side* by its collision radius (`RotMulVector(
+		MatrixRot(%trans), %rad SPC "0 0")` - the camera's local right axis scaled by the radius) for
+		X, but the un-offset *center* projection's Y, exactly matching the source's `%rpix`-for-X/
+		`%mpix`-for-Y split; both get PQ's own `+20`/`-38` pixel nudge on top. */
+	/** Also positions the Fireball bar (`PG_FireballContainer`) at the same anchor - ported from
+		`PlayGui::updateBarPositions`' combined bubble/fireball placement. Both showing at once is a
+		defensive case the real source jokes it doesn't expect ("because I know SOMEONE will try
+		this") - Fireball pickup always zeroes any banked Bubble time and Bubble can't be picked up
+		while Fireball is active (see `Marble.activateFireball`/`BubbleItem.pickUp`), so in practice
+		only one bar is ever visible - reproduced anyway since it's a cheap offset. */
+	function updateBubbleBarPosition() {
+		var camera = this.scene.camera;
+		var forward = camera.target.sub(camera.pos).normalized();
+		var right = forward.cross(camera.up).normalized();
+		var marblePos = this.marble.getAbsPos().getPosition();
+		var sidePos = marblePos.add(right.multiply(this.marble._radius));
+
+		var centerProjected = camera.project(marblePos.x, marblePos.y, marblePos.z, this.scene2d.width, this.scene2d.height);
+		var sideProjected = camera.project(sidePos.x, sidePos.y, sidePos.z, this.scene2d.width, this.scene2d.height);
+
+		var x = sideProjected.x + (70 / 800) * this.scene2d.width * Settings.uiScale;
+		var y = centerProjected.y - (50 / 600) * this.scene2d.height * Settings.uiScale;
+
+		var bubbleShown = this.marble.bubbleInfinite || this.marble.bubbleTime > 0;
+		var fireballShown = this.marble.fireball;
+
+		if (fireballShown && bubbleShown) {
+			this.playGui.setBubbleBarPosition(x, y + 40 * Settings.uiScale);
+			this.playGui.setFireballBarPosition(x, y - 20 * Settings.uiScale);
+		} else if (bubbleShown) {
+			this.playGui.setBubbleBarPosition(x, y);
+		} else if (fireballShown) {
+			this.playGui.setFireballBarPosition(x, y);
+		}
 	}
 
 	public function displayAlert(text:String) {
@@ -2814,16 +2918,19 @@ class MarbleWorld extends Scheduler {
 	}
 
 	/** Starts (or restarts) the HUD countdown timer, e.g. from `CountdownStartTrigger`. */
-	public function startCountdown(seconds:Float) {
+	/** `icon` matches `CountdownStartTrigger`'s `icon` field (`server/scripts/triggers.cs` -
+		a filename under `client/ui/game/countdown/`, default `"timerTimeTravel"`). */
+	public function startCountdown(seconds:Float, icon:String = "timerTimeTravel") {
 		this.countdownRemaining = seconds;
 		this.countdownActive = seconds > 0;
+		this.playGui.setCountdownThIcon(icon);
 	}
 
 	/** Stops the HUD countdown timer, e.g. from `CountdownStopTrigger`. */
 	public function stopCountdown() {
 		this.countdownActive = false;
 		this.countdownRemaining = -1e8;
-		this.playGui.formatCountdownTimer(0);
+		this.playGui.formatCountdownThTimer(0);
 	}
 
 	/** Get the current interpolated orientation quaternion. */
@@ -3015,9 +3122,10 @@ class MarbleWorld extends Scheduler {
 		// Set camera orientation
 		var euler = this.currentCheckpoint.obj.getRotationQuat().toEuler();
 		this.marble.camera.CameraYaw = euler.z + Math.PI / 2;
-		this.marble.camera.CameraPitch = 0.45;
+		this.marble.camera.CameraPitch = this.getDefaultCameraPitch();
 		this.marble.camera.nextCameraYaw = this.marble.camera.CameraYaw;
 		this.marble.camera.nextCameraPitch = this.marble.camera.CameraPitch;
+		this.marble.camera.CameraDistance = this.getDefaultCameraDistance();
 		this.marble.camera.oob = false;
 		@:privateAccess this.marble.superBounceEnableTime = -1e8;
 		@:privateAccess this.marble.shockAbsorberEnableTime = -1e8;
@@ -3176,6 +3284,7 @@ class MarbleWorld extends Scheduler {
 			textureResource.release();
 		}
 		gems = null;
+		iceShards = null;
 
 		if (sky != null)
 			sky.dispose();

@@ -51,34 +51,11 @@ class TeleportItem extends PowerUp {
 			marble.teleporterMarker.setPosition(1e8, 1e8, 1e8);
 			marble.setCloaking(true, timeState);
 
-			var savedPos = marble.teleporterSavedPosition.clone();
-			var savedYaw = marble.teleporterSavedYaw;
-			var savedPitch = marble.teleporterSavedPitch;
-			var savedGravity = marble.teleporterSavedGravity.clone();
-			var kv = marble.teleporterKeepVelocity;
-			var isLocal = marble == this.level.marble;
-
-			this.level.schedule(timeState.currentAttemptTime + marble.teleporterTeleTime, () -> {
-				marble.setCloaking(false, this.level.timeState);
-				if (!kv) {
-					marble.velocity.set(0, 0, 0);
-					marble.omega.set(0, 0, 0);
-				}
-				marble.prevPos.load(savedPos);
-				marble.setPosition(savedPos.x, savedPos.y, savedPos.z);
-				var ct = marble.collider.transform.clone();
-				ct.setPosition(savedPos);
-				marble.collider.setTransform(ct);
-
-				if (isLocal) {
-					marble.camera.CameraYaw = savedYaw;
-					marble.camera.CameraPitch = savedPitch;
-					marble.camera.nextCameraYaw = savedYaw;
-					marble.camera.nextCameraPitch = savedPitch;
-					this.level.setUp(marble, savedGravity, this.level.timeState, true);
-				}
-				return 0;
-			});
+			// Actual teleport-back fires once `teleporterTeleTime` elapses - checked every tick in
+			// `Marble.updateTeleporterState` rather than scheduled (see `teleporterFiring`'s doc
+			// comment).
+			marble.teleporterFiring = true;
+			@:privateAccess marble.teleporterFireStartTime = timeState.currentAttemptTime;
 			return true;
 		} else {
 			var keepVelocityField = this.element.fields.get("keepvelocity");

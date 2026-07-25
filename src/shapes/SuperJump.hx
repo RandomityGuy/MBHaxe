@@ -17,7 +17,7 @@ final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ambientVelocity: new Vector(0, 0, 0.05),
 	ejectionVelocity: 1,
 	velocityVariance: 0.25,
-	emitterLifetime: 5000,
+	emitterLifetime: 1000,
 	ejectionOffset: 0,
 	thetaMin: 150,
 	thetaMax: 170,

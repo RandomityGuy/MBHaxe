@@ -1,5 +1,6 @@
 package modes;
 
+import mis.MisParser;
 import src.Marble;
 import src.MarbleWorld;
 import src.Settings;
@@ -23,6 +24,9 @@ class TwoDMode extends NullMode {
 
 	var active:Bool = false;
 	var targetYaw:Float = 0;
+
+	var targetPitch:Float = 0;
+	var changesPitch = false;
 
 	public function new(level:MarbleWorld) {
 		super(level);
@@ -53,26 +57,34 @@ class TwoDMode extends NullMode {
 		this.missionYaw = planeToYaw(plane, this.missionInverted);
 		var distField = level.mission.missionInfo.initialcameradistance;
 		this.missionCamDistance = distField != null && distField != "" ? Std.parseFloat(distField) : Math.NaN;
+		this.changesPitch = level.mission.missionInfo.targetpitch != null
+			&& level.mission.missionInfo.targetpitch.toLowerCase() != "nochange";
+		if (this.changesPitch)
+			targetPitch = MisParser.parseNumber(level.mission.missionInfo.targetpitch);
+		this.activate(this.missionYaw, this.missionCamDistance, this.changesPitch, targetPitch);
 	}
 
 	override function onRespawn(marble:Marble) {
 		if (this.hasMissionPlane)
-			this.activate(this.missionYaw, this.missionCamDistance, Math.NaN);
+			this.activate(this.missionYaw, this.missionCamDistance, this.changesPitch, targetPitch);
 	}
 
 	/** Ported from `GameConnection::start2D`. */
-	public function activate(yaw:Float, camDistance:Float, pitchDegrees:Float) {
+	public function activate(yaw:Float, camDistance:Float, changesPitch:Bool, pitchDegrees:Float) {
 		this.active = true;
 		this.targetYaw = yaw;
+		this.targetPitch = pitchDegrees;
 
-		level.marble.camera.CameraYaw = yaw;
-		level.marble.camera.nextCameraYaw = yaw;
+		level.marble.camera.CameraYaw = yaw + Math.PI / 2;
+		level.marble.camera.nextCameraYaw = yaw + Math.PI / 2;
 		if (!Math.isNaN(camDistance))
 			level.marble.camera.CameraDistance = camDistance;
-		if (!Math.isNaN(pitchDegrees)) {
+		if (changesPitch) {
 			var pitch = pitchDegrees * Math.PI / 180;
 			level.marble.camera.CameraPitch = pitch;
 			level.marble.camera.nextCameraPitch = pitch;
+		} else {
+			this.targetPitch = level.marble.camera.CameraPitch;
 		}
 		level.scene.camera.setFovX(90, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 	}
@@ -82,7 +94,15 @@ class TwoDMode extends NullMode {
 		if (!this.active)
 			return;
 		this.active = false;
-		level.scene.camera.setFovX(Settings.optionsSettings.fovX, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
+		level.scene.camera.setFovX(getBaseFov(), Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
+	}
+
+	/** The FOV to fall back to once 2D deactivates - mirrors `CameraController.init`'s own
+		`MissionInfo.cameraFov` override so leaving a `TDTrigger` doesn't silently drop back to the
+		player's own FOV setting on a mission that overrides it. */
+	function getBaseFov():Float {
+		var fovField = level.mission.missionInfo.camerafov;
+		return fovField != null && fovField != "" ? MisParser.parseNumber(fovField) : Settings.optionsSettings.fovX;
 	}
 
 	override function update(t:src.TimeState) {
@@ -90,14 +110,18 @@ class TwoDMode extends NullMode {
 			return;
 		// Re-lock every tick - counters any mouse-look yaw drift accumulated by `orbit()` between
 		// ticks, matching the effect of the real `cameraSpeedMultiplier 0` layer.
-		level.marble.camera.CameraYaw = this.targetYaw;
-		level.marble.camera.nextCameraYaw = this.targetYaw;
+		level.marble.camera.CameraYaw = this.targetYaw + Math.PI / 2;
+		level.marble.camera.nextCameraYaw = this.targetYaw + Math.PI / 2;
+		level.marble.camera.CameraPitch = this.targetPitch;
+		level.marble.camera.nextCameraPitch = this.targetPitch;
 	}
 
 	override function getRewindState():RewindableState {
 		var s = new TwoDState();
 		s.active = this.active;
 		s.targetYaw = this.targetYaw;
+		s.targetPitch = this.targetPitch;
+		s.changesPitch = this.changesPitch;
 		return s;
 	}
 
@@ -105,9 +129,10 @@ class TwoDMode extends NullMode {
 		var s:TwoDState = cast state;
 		this.active = s.active;
 		this.targetYaw = s.targetYaw;
+		this.targetPitch = s.targetPitch;
+		this.changesPitch = s.changesPitch;
 		// Re-derive the FOV side effect rather than tracking it separately.
-		level.scene.camera.setFovX(this.active ? 90 : Settings.optionsSettings.fovX,
-			Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
+		level.scene.camera.setFovX(this.active ? 90 : getBaseFov(), Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 	}
 
 	override function constructRewindState():RewindableState {

@@ -12,6 +12,7 @@ import src.ResourceLoaderWorker;
 import collision.CollisionInfo;
 import src.ParticleSystem.ParticleData;
 import src.ParticleSystem.ParticleEmitterOptions;
+import src.ParticleSystem.ParticleEmitter;
 import mis.MissionElement.MissionElementStaticShape;
 
 /** PQ's ambient "mist"/"shine" gleam around an ice shard (`server/scripts/particles/
@@ -38,7 +39,7 @@ final iceShardMistOptions:ParticleEmitterOptions = {
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/smoke_blur32.png',
-		blending: BlendMode.Alpha,
+		blending: BlendMode.Add,
 		spinSpeed: 10,
 		spinRandomMin: -90,
 		spinRandomMax: 0.5,
@@ -77,7 +78,7 @@ final iceShardShineOptions:ParticleEmitterOptions = {
 	inheritedVelFactor: 0,
 	particleOptions: {
 		texture: 'particles/glint2.png',
-		blending: BlendMode.Add,
+		blending: BlendMode.Alpha,
 		spinSpeed: 0,
 		spinRandomMin: 0,
 		spinRandomMax: 0,
@@ -98,21 +99,112 @@ final iceShardShineOptions:ParticleEmitterOptions = {
 	}
 };
 
+/** Ported from `server/scripts/particles/IceShardBreak1Emitter.cs` - one of the two bursts
+	`FireballItem::addIceShard` spawns wherever an `IceShard` is melted (both by contact and by
+	`Marble.fireballBlast`'s radius search - see `IceShard.destroyByFireball`). */
+final iceShardBreak1Options:ParticleEmitterOptions = {
+	ejectionPeriod: 2,
+	periodVariance: 1,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 2,
+	velocityVariance: 0.05,
+	emitterLifetime: 166,
+	inheritedVelFactor: 0,
+	thetaMin: 65.29412,
+	thetaMax: 155.2941,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.2,
+	particleOptions: {
+		texture: 'particles/fireball_1B.png',
+		blending: BlendMode.Add,
+		spinSpeed: 6.47059,
+		spinRandomMin: -90,
+		spinRandomMax: 0.5,
+		dragCoefficient: 2.352941,
+		lifetime: 422,
+		lifetimeVariance: 421,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.1176471,
+		windCoefficient: 0.2745098,
+		colors: [
+			new Vector(0.842520, 0.700787, 0.653543, 0.0),
+			new Vector(0.779528, 0.598425, 0.519685, 1.0),
+			new Vector(0.881890, 0.519685, 0.370079, 0.574803),
+			new Vector(0.889764, 0.905512, 0.976378, 0.0)
+		],
+		sizes: [0.1, 0.24, 0.34, 0.29],
+		times: [0, 0.28, 0.74, 1]
+	}
+};
+
+/** Ported from `server/scripts/particles/IceShardBreak2Emitter.cs` - always spawned alongside
+	`IceShardBreak1Emitter`. */
+final iceShardBreak2Options:ParticleEmitterOptions = {
+	ejectionPeriod: 4,
+	periodVariance: 3,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 2.45098,
+	velocityVariance: 0.05,
+	emitterLifetime: 160,
+	inheritedVelFactor: 0,
+	thetaMin: 40.58823,
+	thetaMax: 150,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0.09803922,
+	particleOptions: {
+		texture: 'particles/fireball_2B.png',
+		blending: BlendMode.Add,
+		spinSpeed: 9.11765,
+		spinRandomMin: -100,
+		spinRandomMax: 0.5,
+		dragCoefficient: 0.3921569,
+		lifetime: 480,
+		lifetimeVariance: 235,
+		constantAcceleration: 0.392157,
+		gravityCoefficient: 0.1764706,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.842520, 0.826772, 0.842520, 0.440945),
+			new Vector(0.779528, 0.811024, 0.881890, 1.0),
+			new Vector(0.842520, 0.858268, 0.889764, 0.0),
+			new Vector(0.889764, 0.905512, 0.976378, 0.0)
+		],
+		sizes: [0.78, 0.93, 0, 0],
+		times: [0, 0.28, 0.74, 1]
+	}
+};
+
 /** Ported from PQ's `IceShard1`/`IceShard2`/`IceShard::onCollision` (`server/scripts/hazards.cs`).
 	Touching a shard freezes the marble for `FREEZE_TIME` seconds (see `Marble.freeze`/`unfreeze`),
-	with an `INVULN_TIME`-second grace period after unfreezing before it can refreeze. PQ's version
-	also lets a marble that's currently on fire ("fireball") melt through the shard instead of
-	freezing (`%marble._fireballActive` / `iceCollision`) - that's the Fireball powerup, not ported
-	yet, so shards always freeze here regardless of marble state; shards are also never destroyed
-	(that only happens via the fireball-melts-it path in PQ). */
+	with an `INVULN_TIME`-second grace period after unfreezing before it can refreeze. A marble with
+	an active Fireball PowerUp melts through the shard instead of freezing
+	(`%marble._fireballActive`/`FireballItem::IceCollision`) - destroys it (see `destroyByFireball`)
+	and deducts 500ms of Fireball time. */
 class IceShard extends DtsObject {
 	public static inline final FREEZE_TIME = 2.0;
 	public static inline final INVULN_TIME = 1.0;
 
+	/** True once melted by a Fireball-active marble (contact or `Marble.fireballBlast`'s radius
+		search) - matches PQ setting the shard's damage state to `"Destroyed"`. This port never
+		respawns it mid-attempt (PQ's `_pickUp`/`_pickUpCheckpoint` fields are an MP-only checkpoint
+		resync mechanism with no SP equivalent needed here) - it just stays gone until `reset()`,
+		matching how `Gem.pickedUp` behaves. */
+	public var destroyed:Bool = false;
+
 	var freezeSound:hxd.res.Sound;
 	var crackSound:hxd.res.Sound;
+	var smashSound:hxd.res.Sound;
 	var element:MissionElementStaticShape;
 	var gotoTargetTriggered:Bool = false;
+
+	var mistEmitter:ParticleEmitter;
+	var shineEmitter:ParticleEmitter;
+	var mistData:ParticleData;
+	var shineData:ParticleData;
+	var breakData1:ParticleData;
+	var breakData2:ParticleData;
 
 	public function new(element:MissionElementStaticShape) {
 		super();
@@ -130,16 +222,25 @@ class IceShard extends DtsObject {
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
 		super.init(level, () -> {
-			var mistData = new ParticleData();
-			mistData.identifier = "iceShardMist";
-			mistData.texture = ResourceLoader.getResource("data/particles/smoke_blur32.png", ResourceLoader.getTexture, this.textureResources);
+			this.mistData = new ParticleData();
+			this.mistData.identifier = "iceShardMist";
+			this.mistData.texture = ResourceLoader.getResource("data/particles/smoke_blur32.png", ResourceLoader.getTexture, this.textureResources);
 
-			var shineData = new ParticleData();
-			shineData.identifier = "iceShardShine";
-			shineData.texture = ResourceLoader.getResource("data/particles/glint2.png", ResourceLoader.getTexture, this.textureResources);
+			this.shineData = new ParticleData();
+			this.shineData.identifier = "iceShardShine";
+			this.shineData.texture = ResourceLoader.getResource("data/particles/glint2.png", ResourceLoader.getTexture, this.textureResources);
 
-			this.level.particleManager.createEmitter(iceShardMistOptions, mistData, null, () -> this.getAbsPos().getPosition());
-			this.level.particleManager.createEmitter(iceShardShineOptions, shineData, null, () -> this.getAbsPos().getPosition());
+			this.breakData1 = new ParticleData();
+			this.breakData1.identifier = "IceShardBreak1Particle";
+			this.breakData1.texture = ResourceLoader.getResource("data/particles/fireball_1B.png", ResourceLoader.getTexture, this.textureResources);
+
+			this.breakData2 = new ParticleData();
+			this.breakData2.identifier = "IceShardBreak2Particle";
+			this.breakData2.texture = ResourceLoader.getResource("data/particles/fireball_2B.png", ResourceLoader.getTexture, this.textureResources);
+
+			this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
+			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null,
+				() -> this.getAbsPos().getPosition());
 
 			var worker = new ResourceLoaderWorker(onFinish);
 			worker.addTask(fwd -> ResourceLoader.load("sound/ice_freeze.wav").entry.load(() -> {
@@ -150,6 +251,10 @@ class IceShard extends DtsObject {
 				this.crackSound = ResourceLoader.getResource("data/sound/ice_crack.wav", ResourceLoader.getAudio, this.soundResources);
 				fwd();
 			}));
+			worker.addTask(fwd -> ResourceLoader.load("sound/ice_smash.wav").entry.load(() -> {
+				this.smashSound = ResourceLoader.getResource("data/sound/ice_smash.wav", ResourceLoader.getAudio, this.soundResources);
+				fwd();
+			}));
 			worker.run();
 		});
 	}
@@ -158,6 +263,8 @@ class IceShard extends DtsObject {
 		super.reset();
 
 		this.gotoTargetTriggered = false;
+		if (this.destroyed)
+			this.setDestroyed(false);
 	}
 
 	public function playFreezeSound(marble:Marble) {
@@ -170,8 +277,58 @@ class IceShard extends DtsObject {
 			AudioManager.playSound(this.crackSound);
 	}
 
+	public function setDestroyed(destroyed:Bool) {
+		this.destroyed = destroyed;
+		this.isCollideable = !destroyed;
+		this.setOpacity(destroyed ? 0 : 1);
+		if (destroyed) {
+			if (this.mistEmitter != null) {
+				this.level.particleManager.removeEmitter(this.mistEmitter);
+				this.mistEmitter = null;
+			}
+			if (this.shineEmitter != null) {
+				this.level.particleManager.removeEmitter(this.shineEmitter);
+				this.shineEmitter = null;
+			}
+		} else {
+			this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
+			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null,
+				() -> this.getAbsPos().getPosition());
+		}
+	}
+
+	/** Ported from `FireballItem::addIceShard` (`server/scripts/fireball.cs`) - melts this shard
+		(destroying it for the rest of the attempt, see `destroyed`) and spawns the break-burst
+		particles. Deliberately doesn't play `IceShardSmashSfx` itself - real PQ plays it once per
+		*event* (once for a contact melt, once total for a `Blast` that smashes several shards at
+		once), not once per shard, so the caller (`onMarbleContact`'s fireball branch, or
+		`Marble.fireballBlast`) is responsible for that. Doesn't touch the marble's Fireball time
+		either - contact melts cost 500ms (`Marble.deductFireballTime`), `Blast`'s radius search
+		doesn't cost anything. */
+	public function destroyByFireball() {
+		if (this.destroyed)
+			return;
+		this.setDestroyed(true);
+
+		var pos = this.getAbsPos().getPosition().add(new Vector(0, 0, -0.5));
+		this.level.particleManager.createEmitter(iceShardBreak1Options, this.breakData1, pos);
+		this.level.particleManager.createEmitter(iceShardBreak2Options, this.breakData2, pos);
+	}
+
 	override function onMarbleContact(marble:Marble, timeState:TimeState, ?contact:CollisionInfo) {
 		super.onMarbleContact(marble, timeState, contact);
+		if (this.destroyed)
+			return;
+
+		if (marble.fireball) {
+			this.destroyByFireball();
+			marble.deductFireballTime(0.5);
+			if (marble == this.level.marble && this.smashSound != null)
+				AudioManager.playSound(this.smashSound);
+			this.runGotoTarget(marble, timeState);
+			return;
+		}
+
 		if (!marble.isFrozen && marble.lastFreezeTime + FREEZE_TIME + INVULN_TIME < timeState.currentAttemptTime)
 			marble.freeze(this, timeState);
 
