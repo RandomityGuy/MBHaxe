@@ -632,11 +632,11 @@ class DtsObject extends GameObject {
 					var i2 = dtsMesh.indices[i + 1];
 					var i3 = dtsMesh.indices[i + 2];
 
-					if (k % 2 == 0) {
-						// Swap the first and last index to mainting correct winding order
+					if (k % 2 == 1) {
+						// Swap the first two indices to match Torque's strip winding order
 						var temp = i1;
-						i1 = i3;
-						i3 = temp;
+						i1 = i2;
+						i2 = temp;
 					}
 
 					var t1 = vertices[i2].sub(vertices[i1]);
@@ -694,6 +694,7 @@ class DtsObject extends GameObject {
 				}
 			}
 
+			hs.generateNormals();
 			hs.generateBoundingBox();
 			ent.addSurface(hs);
 			// chull.generateBoundingBox();
@@ -735,11 +736,11 @@ class DtsObject extends GameObject {
 			// ^ temp hardcoded fix
 
 			// if (dot1 < 0 && dot2 < 0 && dot3 < 0) {
-			if ((dot1 < 0 && dot2 < 0 && dot3 < 0) || StringTools.contains(this.dtsPath, 'helicopter.dts')) {
-				var temp = i1;
-				i1 = i3;
-				i3 = temp;
-			}
+			// if ((dot1 < 0 && dot2 < 0 && dot3 < 0) || StringTools.contains(this.dtsPath, 'helicopter.dts')) {
+			// 	var temp = i1;
+			// 	i1 = i3;
+			// 	i3 = temp;
+			// }
 
 			// }
 
@@ -784,11 +785,11 @@ class DtsObject extends GameObject {
 					var i2 = dtsMesh.indices[i + 1];
 					var i3 = dtsMesh.indices[i + 2];
 
-					if (k % 2 == 0) {
-						// Swap the first and last index to mainting correct winding order
+					if (k % 2 == 1) {
+						// Swap the first two indices to match Torque's strip winding order
 						var temp = i1;
-						i1 = i3;
-						i3 = temp;
+						i1 = i2;
+						i2 = temp;
 					}
 
 					addTriangleFromIndices(i1, i2, i3, materialIndex);
@@ -908,6 +909,7 @@ class DtsObject extends GameObject {
 						var trans = Util.lerpThreeVectors(v1, v2, t);
 						this.graphNodes[i].setPosition(trans.x, trans.y, trans.z);
 						this.dirtyTransforms[i] = true;
+						affectedCount++;
 
 						// translations.push(Util.lerpThreeVectors(v1, v2, t));
 					} else {
@@ -938,6 +940,7 @@ class DtsObject extends GameObject {
 						this.graphNodes[i].scaleZ = scaleVec.z;
 
 						this.dirtyTransforms[i] = true;
+						affectedCount++;
 					} else {
 						this.graphNodes[i].scaleX = 1;
 						this.graphNodes[i].scaleY = 1;

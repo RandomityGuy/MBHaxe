@@ -58,7 +58,7 @@ class GravityPointTrigger extends Trigger {
 
 		var marblePos = marble.getAbsPos().getPosition();
 		var center = getCenter();
-		var direction = (marblePos.z - center.z) > 0 ? new Vector(0, 0, -1) : new Vector(0, 0, 1);
+		var direction = (marblePos.z - center.z) > 0 ? new Vector(0, 0, 1) : new Vector(0, 0, -1);
 		apply(marble, direction, timeState);
 	}
 }

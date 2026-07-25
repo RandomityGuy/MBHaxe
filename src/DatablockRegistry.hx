@@ -81,6 +81,7 @@ import shapes.NestEgg;
 import shapes.TeleportItem;
 import shapes.IceShard;
 import shapes.FadePlatform;
+import src.PQDecorations;
 
 /**
  * Matches a lowercased mission-file `datablock` name to a registered entry.

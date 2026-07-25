@@ -138,7 +138,7 @@ class TeleportTrigger extends Trigger {
 				else
 					yaw = 0;
 
-				yaw = -yaw; // Need to flip it for some reason
+				// yaw = -yaw; // Need to flip it for some reason
 
 				marble.camera.CameraYaw = yaw + Math.PI / 2;
 				marble.camera.CameraPitch = 0.45;
