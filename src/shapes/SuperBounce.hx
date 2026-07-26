@@ -9,13 +9,15 @@ import src.MarbleWorld;
 class SuperBounce extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superbounce.dts" : "data/shapes/items/superbounce.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock,
+			"_PQ") ? "data/shapes_pq/gameplay/powerups/superbounce.dts" : "data/shapes/items/superbounce.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
 		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "SuperBounce" + this.dtsPath;
 		this.pickUpName = "Marble Recoil PowerUp";
+		this.radarIndex = 28;
 	}
 
 	public function pickUp(marble:src.Marble):Bool {

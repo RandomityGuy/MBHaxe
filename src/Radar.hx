@@ -1,5 +1,20 @@
 package src;
 
+import shapes.Gem;
+import shapes.SuperSpeed;
+import shapes.SuperJump;
+import shapes.AnvilItem;
+import shapes.Blast;
+import shapes.BubbleItem;
+import shapes.FireballItem;
+import shapes.Helicopter;
+import shapes.MegaMarble;
+import shapes.RandomPowerup;
+import shapes.TeleportItem;
+import shapes.TimeTravel;
+import shapes.SuperBounce;
+import shapes.ShockAbsorber;
+import shapes.AntiGravity;
 import hxd.res.BitmapFont;
 import h3d.Matrix;
 import src.DtsObject;
@@ -12,6 +27,26 @@ import src.Util;
 import src.Marble;
 import src.Settings;
 import src.ResourceLoader;
+import shapes.PowerUp;
+
+enum abstract RadarRule(Int) from Int to Int {
+	var None = 0;
+	var Gems = 1 << 0;
+	var TimeTravels = 1 << 1;
+	var EndPad = 1 << 2;
+	var Checkpoints = 1 << 3;
+	var Cannons = 1 << 4;
+	var Powerups = 1 << 5;
+}
+
+@:structInit
+@:publicFields
+class RadarItem {
+	var obj:DtsObject;
+	var dist:Float;
+	var used:Bool;
+	var index:Int;
+}
 
 class Radar {
 	var level:MarbleWorld;
@@ -27,6 +62,13 @@ class Radar {
 	public var maxArrowAlpha = 0.6;
 	public var maxTargetAlpha = 0.4;
 	public var minArrowFraction = 0.4;
+
+	public var itemSearchDistance:Float = 50.0;
+	public var gemFinishSearchDistance:Float = 50000.0;
+
+	public var customRadarRule:Int = RadarRule.Gems | RadarRule.EndPad;
+
+	var maxRadarItems = 25;
 
 	var radarTiles:Array<h2d.Tile>;
 
@@ -49,9 +91,62 @@ class Radar {
 		var radarTileBlackGem = ResourceLoader.getImage("data/ui/mp/radar/GemItemBlack.png").resource.toTile();
 		var radarTilePlatinumGem = ResourceLoader.getImage("data/ui/mp/radar/GemItemPlatinum.png").resource.toTile();
 		var radarTileEndPad = ResourceLoader.getImage("data/ui/mp/radar/EndPad.png").resource.toTile();
+		var radarTileAntiGravity = ResourceLoader.getImage("data/ui/mp/radar/AntiGravityItem.png").resource.toTile();
+		var radarTileAnvil = ResourceLoader.getImage("data/ui/mp/radar/AnvilItem.png").resource.toTile();
+		var radarTileBlast = ResourceLoader.getImage("data/ui/mp/radar/BlastItem.png").resource.toTile();
+		var radarTileBubble = ResourceLoader.getImage("data/ui/mp/radar/BubbleItem.png").resource.toTile();
+		var radarTileCandyBlue = ResourceLoader.getImage("data/ui/mp/radar/CandyItemBlue.png").resource.toTile();
+		var radarTileCandyRed = ResourceLoader.getImage("data/ui/mp/radar/CandyItemRed.png").resource.toTile();
+		var radarTileCandyYellow = ResourceLoader.getImage("data/ui/mp/radar/CandyItemYellow.png").resource.toTile();
+		var radarTileCannon = ResourceLoader.getImage("data/ui/mp/radar/Cannon.png").resource.toTile();
+		var radarTileCannonHigh = ResourceLoader.getImage("data/ui/mp/radar/Cannon_High.png").resource.toTile();
+		var radarTileCannonLow = ResourceLoader.getImage("data/ui/mp/radar/Cannon_Low.png").resource.toTile();
+		var radarTileCannonMid = ResourceLoader.getImage("data/ui/mp/radar/Cannon_Mid.png").resource.toTile();
+		var radarTileCannonNoGlow = ResourceLoader.getImage("data/ui/mp/radar/Cannon_NoGlow.png").resource.toTile();
+		var radarTileCheckpoint = ResourceLoader.getImage("data/ui/mp/radar/Checkpoint.png").resource.toTile();
+		var radarTileHelicopter = ResourceLoader.getImage("data/ui/mp/radar/HelicopterItem.png").resource.toTile();
+		var radarTileMegaMarble = ResourceLoader.getImage("data/ui/mp/radar/MegaMarbleItem.png").resource.toTile();
+		var radarTileRandomPowerUp = ResourceLoader.getImage("data/ui/mp/radar/RandomPowerUpItem.png").resource.toTile();
+		var radarTileShockAbsorber = ResourceLoader.getImage("data/ui/mp/radar/ShockAbsorberItem.png").resource.toTile();
+		var radarTileSuperBounce = ResourceLoader.getImage("data/ui/mp/radar/SuperBounceItem.png").resource.toTile();
+		var radarTileSuperJump = ResourceLoader.getImage("data/ui/mp/radar/SuperJumpItem.png").resource.toTile();
+		var radarTileSuperSpeed = ResourceLoader.getImage("data/ui/mp/radar/SuperSpeedItem.png").resource.toTile();
+		var radarTileTeleport = ResourceLoader.getImage("data/ui/mp/radar/TeleportItem.png").resource.toTile();
+		var radarTileTimeTravel = ResourceLoader.getImage("data/ui/mp/radar/TimeTravelItem.png").resource.toTile();
 		radarTiles = [
-			radarTileRedGem, radarTileYellowGem, radarTileBlueGem, radarTileGreenGem, radarTileOrangeGem, radarTilePinkGem, radarTilePurpleGem,
-			radarTileTurquoiseGem, radarTileBlackGem, radarTilePlatinumGem, radarTileEndPad
+			radarTileRedGem,
+			radarTileYellowGem,
+			radarTileBlueGem,
+			radarTileGreenGem,
+			radarTileOrangeGem,
+			radarTilePinkGem,
+			radarTilePurpleGem,
+			radarTileTurquoiseGem,
+			radarTileBlackGem,
+			radarTilePlatinumGem,
+			radarTileEndPad,
+			radarTileAntiGravity,
+			radarTileAnvil,
+			radarTileBlast,
+			radarTileBubble,
+			radarTileCandyBlue,
+			radarTileCandyRed,
+			radarTileCandyYellow,
+			radarTileCannon,
+			radarTileCannonHigh,
+			radarTileCannonLow,
+			radarTileCannonMid,
+			radarTileCannonNoGlow,
+			radarTileCheckpoint,
+			radarTileHelicopter,
+			radarTileMegaMarble,
+			radarTileRandomPowerUp,
+			radarTileShockAbsorber,
+			radarTileSuperBounce,
+			radarTileSuperJump,
+			radarTileSuperSpeed,
+			radarTileTeleport,
+			radarTileTimeTravel,
 		];
 		for (tile in radarTiles) {
 			tile.scaleToSize(tile.width * Settings.uiScale, tile.height * Settings.uiScale);
@@ -78,16 +173,154 @@ class Radar {
 			}
 			return;
 		}
+
+		var marblePos = @:privateAccess level.marble.newPos;
+
 		var gemCount = 0;
-		for (gem in level.gems) {
-			if (!gem.pickedUp) {
-				renderArrow(gem.boundingCollider.boundingBox.getCenter().toVector(), gem.radarGemColor, radarTiles[gem.radarGemIndex]);
-				gemCount++;
+
+		var endpads = [];
+
+		// first scan
+		var candidates:Array<RadarItem> = [];
+		if ((this.customRadarRule & RadarRule.Gems) != 0) {
+			for (gem in level.gems) {
+				if (!gem.pickedUp) {
+					gemCount++;
+					var gemDistance = marblePos.distance(new Vector(gem.x, gem.y, gem.z));
+					if (gemDistance < gemFinishSearchDistance) {
+						candidates.push({
+							obj: gem,
+							dist: gemDistance,
+							used: false,
+							index: -1
+						});
+					}
+				}
+			}
+		}
+		if ((this.customRadarRule & (RadarRule.TimeTravels | RadarRule.Powerups)) != 0) {
+			// iterate over powerups
+			for (powerup in level.powerUps) {
+				if (powerup.visible) {
+					var dist = marblePos.distance(new Vector(powerup.x, powerup.y, powerup.z));
+					if (dist < itemSearchDistance) {
+						if ((this.customRadarRule & RadarRule.Powerups) != 0) {
+							if (powerup is SuperJump || powerup is SuperSpeed || powerup is AnvilItem || powerup is Blast || powerup is BubbleItem
+								|| powerup is FireballItem || powerup is Helicopter || powerup is RandomPowerup || powerup is ShockAbsorber
+								|| powerup is SuperBounce || powerup is TeleportItem || powerup is MegaMarble || powerup is AntiGravity) {
+								if (powerup is AntiGravity) {
+									var direction = new Vector(0, 0, -1);
+									direction.transform(powerup.getRotationQuat().toMatrix()); // ignore the ones that have the same direction as up
+									if (direction.equals(level.marble.currentUp))
+										continue;
+								}
+								candidates.push({
+									obj: powerup,
+									dist: dist,
+									used: false,
+									index: -1
+								});
+							}
+						}
+						if ((this.customRadarRule & RadarRule.TimeTravels) != 0) {
+							if (powerup is TimeTravel) {
+								candidates.push({
+									obj: powerup,
+									dist: dist,
+									used: false,
+									index: -1
+								});
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ((this.customRadarRule & (RadarRule.EndPad | RadarRule.Checkpoints | RadarRule.Cannons)) != 0) {
+			// have to scan over everything
+			for (obj in level.dtsObjects) {
+				@:privateAccess if (gemCount == 0
+					&& (this.customRadarRule & RadarRule.EndPad) != -1 && level.endPad != null && obj.dtsPath.indexOf("endpad") != -1) {
+					endpads.push(obj);
+				}
+				if ((this.customRadarRule & RadarRule.Checkpoints) != -1 && obj.dtsPath.indexOf("checkpoint") != -1) {
+					var dist = marblePos.distance(new Vector(obj.x, obj.y, obj.z));
+					if (dist < itemSearchDistance)
+						candidates.push({
+							obj: obj,
+							dist: dist,
+							used: false,
+							index: 23
+						});
+				}
+				if ((this.customRadarRule & RadarRule.Cannons) != -1 && obj.dtsPath.indexOf("cannon") != -1) {
+					var dist = marblePos.distance(new Vector(obj.x, obj.y, obj.z));
+					if (dist < itemSearchDistance)
+						candidates.push({
+							obj: obj,
+							dist: dist,
+							used: false,
+							index: 18
+						});
+				}
+			}
+		}
+
+		// sort everything by distance
+		candidates.sort((a, b) -> a.dist == b.dist ? 0 : (a.dist > b.dist ? 1 : -1));
+		var itemCount = candidates.length;
+		var showCount = itemCount < maxRadarItems ? itemCount : maxRadarItems;
+		var alwaysShowCount = Std.int(itemCount > maxRadarItems ? maxRadarItems * 0.8 : itemCount);
+
+		var spawned = 0;
+
+		// show as many gems and finishes
+		for (item in candidates) {
+			if (item.obj is Gem) {
+				var gem:Gem = cast item.obj;
+				if (renderArrow(gem.boundingCollider.boundingBox.getCenter().toVector(), gem.radarGemColor, radarTiles[gem.radarGemIndex]))
+					spawned++;
+				item.used = true;
+				if (spawned >= alwaysShowCount)
+					break;
 			}
 		}
 		if (@:privateAccess level.endPad != null && gemCount == 0) {
-			renderArrow(@:privateAccess level.endPad.getAbsPos().getPosition(), 0xE6E6E6, radarTiles[10]);
+			// show finishes
+			for (finish in endpads) {
+				if (renderArrow(finish.getAbsPos().getPosition(), 0xE6E6E6, radarTiles[10]))
+					spawned++;
+				if (spawned >= alwaysShowCount)
+					break;
+			}
 		}
+		// show remaining
+		for (item in candidates) {
+			if (item.used)
+				continue;
+
+			var targetPos = item.obj.boundingCollider != null ? item.obj.boundingCollider.boundingBox.getCenter()
+				.toVector() : item.obj.getAbsPos().getPosition();
+
+			var radarIndex = item.index;
+			if (radarIndex == -1) {
+				if (item.obj is PowerUp) {
+					var p:PowerUp = cast item.obj;
+					radarIndex = p.radarIndex;
+				} else {
+					continue; // lets just not show
+				}
+			}
+
+			if (renderArrow(targetPos, 0xFFFFFF, radarTiles[radarIndex], false))
+				spawned++;
+			item.used = true;
+
+			if (spawned >= showCount)
+				break;
+		}
+
 		var fadeDistance = level.scene.camera.zFar * 0.1;
 		for (marble => marbleName in marbleNameTexts) {
 			if (marbleName != null)
@@ -160,7 +393,7 @@ class Radar {
 		return true;
 	}
 
-	function renderArrow(pos:Vector, color:Int, tile:h2d.Tile) {
+	function renderArrow(pos:Vector, color:Int, tile:h2d.Tile, drawArrow:Bool = true) {
 		var validProjection = frustumHasPoint(level.scene.camera.frustum, pos);
 		var projectedPos = level.scene.camera.project(pos.x, pos.y, pos.z, scene2d.width, scene2d.height);
 
@@ -169,7 +402,8 @@ class Radar {
 			g.beginTileFill(projectedPos.x - tile.width / 2, projectedPos.y - tile.height / 2, Settings.uiScale, Settings.uiScale, tile);
 			g.drawRect(projectedPos.x - tile.width / 2, projectedPos.y - tile.height / 2, tile.width, tile.height);
 			g.endFill();
-		} else if (!validProjection) {
+			return true;
+		} else if (!validProjection && drawArrow) {
 			var centerDiff = projectedPos.sub(new Vector(scene2d.width / 2, scene2d.height / 2));
 
 			var theta = Math.atan2(centerDiff.y, centerDiff.x);
@@ -193,7 +427,9 @@ class Radar {
 			g.lineTo(tipUpperPosition.x, tipUpperPosition.y);
 			g.lineTo(tipLowerPosition.x, tipLowerPosition.y);
 			g.endFill();
+			return true;
 		}
+		return false;
 	}
 
 	function renderName(pos:Vector, marble:Marble, opacity:Float) {

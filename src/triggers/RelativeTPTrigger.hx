@@ -59,10 +59,13 @@ class RelativeTPTrigger extends Trigger {
 		var pos = destCenter.add(diff).add(this.tpOffset);
 		pos.w = 1;
 
-		marble.prevPos.load(pos);
-		marble.setPosition(pos.x, pos.y, pos.z);
+		var marblePos = marble.collider.transform.getPosition();
+		marblePos.load(marblePos.add(pos));
+
+		marble.prevPos.load(marblePos);
+		marble.setPosition(marblePos.x, marblePos.y, marblePos.z);
 		var ct = marble.collider.transform.clone();
-		ct.setPosition(pos);
+		ct.setPosition(marblePos);
 		marble.collider.setTransform(ct);
 		if (this.level.isRecording) {
 			this.level.replay.recordMarbleStateFlags(false, false, true, false);
@@ -74,7 +77,8 @@ class RelativeTPTrigger extends Trigger {
 	}
 
 	function resolveDestinationCenter():Vector {
-		var destinationList = this.level.triggers.filter(x -> x is DestinationTrigger && x.element._name.toLowerCase() == this.destination.toLowerCase());
+		var destinationList = this.level.triggers.filter(x -> x is DestinationTrigger
+			&& x.element._name.toLowerCase() == this.destination.toLowerCase());
 		if (destinationList.length > 0)
 			return destinationList[0].collider.boundingBox.getCenter().toVector();
 

@@ -57,6 +57,7 @@ class HelpBubble extends DtsObject {
 	}
 
 	override function reset() {
+		super.reset();
 		this.wasWithin = false;
 		this.hasBeenInOnce = false;
 	}

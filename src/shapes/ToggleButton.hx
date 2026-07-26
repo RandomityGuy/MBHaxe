@@ -22,8 +22,7 @@ class ToggleButton extends DtsObject {
 
 	public function new(element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = element.datablock.toLowerCase() == "togglebuttonflat_pq" ? "data/shapes_pq/gameplay/pads/pushbuttonflathalf.dts" :
-			"data/shapes/buttons/pushbutton.dts";
+		this.dtsPath = element.datablock.toLowerCase() == "togglebuttonflat_pq" ? "data/shapes_pq/gameplay/pads/pushbuttonflathalf.dts" : "data/shapes/buttons/pushbutton.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		// Instancing batches by `identifier`, and the flat variant uses a different mesh - keep the
@@ -60,6 +59,7 @@ class ToggleButton extends DtsObject {
 	}
 
 	override function reset() {
+		super.reset();
 		this.activated = this.initialState;
 		this.currentCompletion = this.initialState ? 1 : 0;
 		this.disabledUntil = -1e8;

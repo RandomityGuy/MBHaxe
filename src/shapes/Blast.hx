@@ -15,6 +15,7 @@ class Blast extends PowerUp {
 		this.identifier = "Blast";
 		this.pickUpName = "Blast PowerUp";
 		this.autoUse = true;
+		this.radarIndex = 13;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

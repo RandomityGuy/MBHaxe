@@ -138,6 +138,7 @@ import src.PathNodeElement;
 import src.DatablockRegistry;
 import src.GameObjectPathFollower;
 import src.GameObjectParentFollower;
+import triggers.PathTrigger;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -273,13 +274,14 @@ class MarbleWorld extends Scheduler {
 
 	var countdownRemaining:Float = -1e8;
 	var countdownActive:Bool = false;
+	var countdownIcon:String = "timerTimeTravel";
 
 	var helpTextTimeState:Float = -1e8;
 	var alertTextTimeState:Float = -1e8;
 
 	var respawnPressedTime:Float = -1e8;
 
-	var scoreType:ScoreType = Time;
+	var timeMultiplier:Float = 1;
 
 	// Orientation
 	var orientationChangeTime = -1e8;
@@ -462,7 +464,7 @@ class MarbleWorld extends Scheduler {
 		});
 		this.resourceLoadFuncs.push(fwd -> this.loadMusic(fwd));
 		this._loadingLength = resourceLoadFuncs.length;
-		this.scoreType = this.gameMode.getScoreType();
+		this.timeMultiplier = this.gameMode.timeMultiplier();
 	}
 
 	public function loadMusic(onFinish:Void->Void) {
@@ -523,6 +525,12 @@ class MarbleWorld extends Scheduler {
 		this.particleManager = new ParticleManager(cast this);
 		if (this.isMultiplayer || this.game == "ultra" || this.mission.missionInfo.game == "PlatinumQuest") {
 			this.radar = new Radar(cast this, this.scene2d);
+			if (this.mission.missionInfo.radardistance != null && this.mission.missionInfo.radardistance != "")
+				this.radar.itemSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radardistance);
+			if (this.mission.missionInfo.radargemdistance != null && this.mission.missionInfo.radargemdistance != "")
+				this.radar.gemFinishSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radargemdistance);
+			if (this.mission.missionInfo.customradarrule != null && this.mission.missionInfo.customradarrule != "")
+				this.radar.customRadarRule = Std.parseInt(this.mission.missionInfo.customradarrule);
 			radar.init();
 		}
 
@@ -580,6 +588,19 @@ class MarbleWorld extends Scheduler {
 			"particles/glint2.png",
 			"particles/orb.png",
 			"particles/smoke_blur32.png",
+			"particles/drop1.png",
+			"particles/fireball_1.png",
+			"particles/fireball_1b.png",
+			"particles/fireball_2.png",
+			"particles/fireball_2b.png",
+			"particles/fireball_3.png",
+			"particles/fireball_4.png",
+			"particles/icechunk.png",
+			"particles/snowflake.png",
+			"particles/splash1.png",
+			"particles/splash2.png",
+			"particles/splash3.png",
+			"particles/zzz.png",
 		];
 
 		for (file in filestoload) {
@@ -636,6 +657,7 @@ class MarbleWorld extends Scheduler {
 			"shapes/items/gem.dts", // Ew ew
 			"shapes/items/gemshine.png",
 			"shapes/items/enviro1.jpg",
+			"sound/bubble.wav",
 		];
 		for (key in AudioManager.pitchKeys) {
 			marblefiles.push('sound/spawn/$key.wav');
@@ -724,7 +746,40 @@ class MarbleWorld extends Scheduler {
 				NetCommands.clientIsReady(Net.clientId);
 			}
 		}
+		this.prescanPathTriggerTargets();
 		this.gameMode.onMissionLoad();
+	}
+
+	/** Ported from the user's own diagnosis of a rewind bug: an object only gets a `GameObjectPath
+		Follower`/a slot in `level.movingObjects` the *first time* something actually calls
+		`moveOnPath` on it (a `PathTrigger` firing, or `IceShard`'s `gotoTarget` reuse of the same
+		field convention) - meaning `level.movingObjects` grows mid-game, which desyncs
+		`RewindFrame.pathFollowerStates`' positional alignment against it (a frame recorded before
+		the object was ever triggered doesn't have a slot for it at all). Fixed by pre-registering
+		every such object into `level.movingObjects` here, once, before any gameplay tick or rewind
+		frame is ever recorded - each starts with `pathFollower == null` (i.e. present in the array,
+		but inactive) until something actually calls `moveOnPath` on it later, exactly mirroring how
+		a stable list of `null`-or-real slots already works for `gemStates`/`iceShardStates`. */
+	function prescanPathTriggerTargets() {
+		for (trigger in this.triggers) {
+			if (trigger is PathTrigger) {
+				var targets = PathTrigger.collectObjectTargets(@:privateAccess trigger.element.fields, cast this);
+				for (target in targets)
+					this.registerMovingObject(target);
+			}
+		}
+		for (dts in this.dtsObjects) {
+			if (dts is shapes.IceShard) {
+				var iceShard:shapes.IceShard = cast dts;
+				var fields = @:privateAccess iceShard.element.fields;
+				var gotoTargetField = fields.get("gototarget");
+				if (gotoTargetField != null && MisParser.parseBoolean(gotoTargetField[0])) {
+					var targets = PathTrigger.collectObjectTargets(fields, cast this);
+					for (target in targets)
+						this.registerMovingObject(target);
+				}
+			}
+		}
 	}
 
 	public function showPreGame() {
@@ -938,10 +993,19 @@ class MarbleWorld extends Scheduler {
 		if (missionInfo.starthelptext != null)
 			displayHelp(missionInfo.starthelptext); // Show the start help text
 
-		for (shape in dtsObjects)
+		for (shape in dtsObjects) {
 			shape.reset();
-		for (interior in this.interiors)
+		}
+		for (interior in this.interiors) {
 			interior.reset();
+		}
+		// Triggers previously had no reset pass at all on a full restart - `PathTrigger.triggered`
+		// (and any other trigger with its own restart-relevant state, e.g. `CountdownStartTrigger.
+		// activated`) would stay stuck from before the restart. Also resets any trigger-activated
+		// path follower (a `Trigger` can itself be a `GameObject` path target, same as a DtsObject).
+		for (trigger in this.triggers) {
+			trigger.reset();
+		}
 
 		this.setUp(this.marble, startquat.up, this.timeState, true);
 		this.deselectPowerUp(this.marble);
@@ -1100,6 +1164,8 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function addSimGroup(simGroup:MissionElementSimGroup) {
+		var elements = simGroup.elements;
+
 		if (simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior).length != 0) {
 			// Create the pathed interior
 			resourceLoadFuncs.push(fwd -> {
@@ -1129,10 +1195,16 @@ class MarbleWorld extends Scheduler {
 				});
 			});
 
-			return;
+			// add non-pathedinterior related entities
+			elements = elements.filter((element) -> element._type != MissionElementType.PathedInterior
+				&& element._type != MissionElementType.Path
+				&& element._type != MissionElementType.Marker
+				&& !(element._type == Trigger
+					&& (["triggergototarget", "triggergotodelaytarget", "repetitivetriggergototarget"].contains(cast(element, MissionElementTrigger)
+						.datablock))));
 		}
 
-		for (element in simGroup.elements) {
+		for (element in elements) {
 			switch (element._type) {
 				case MissionElementType.SimGroup:
 					this.addSimGroup(cast element);
@@ -2122,7 +2194,8 @@ class MarbleWorld extends Scheduler {
 		ProfilerUI.measure("updateTimer");
 		this.updateTimer(dt);
 		this.gameMode.update(this.timeState);
-		this.playGui.updateSpeedometer(this.marble.velocity.length());
+		if (this.marble != null)
+			this.playGui.updateSpeedometer(this.marble.velocity.length());
 		this.updateUnderwaterOverlay();
 		this.updateBubbleBarPosition();
 
@@ -2418,15 +2491,38 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	/** Computes the clock time in MBP when the user should be warned that they're about to exceed the par time. */
+	public function computeAlarmStartTime() {
+		var alarmStart = this.mission.qualifyTime;
+		if (this.timeMultiplier < 0) {
+			alarmStart = 15;
+			if (this.mission.missionInfo.alarmstarttime != null)
+				alarmStart = MisParser.parseNumber(this.mission.missionInfo.alarmstarttime);
+			if (alarmStart == 0)
+				alarmStart = 15;
+			return alarmStart;
+		}
+		var alarmStart = this.mission.qualifyTime;
+		if (this.mission.missionInfo.alarmstarttime != null)
+			alarmStart -= MisParser.parseNumber(this.mission.missionInfo.alarmstarttime);
+		else {
+			alarmStart -= 15;
+		}
+
+		alarmStart = Math.max(0, alarmStart);
+
+		return alarmStart;
+	}
+
 	function determineClockColor(timeToDisplay:Float) {
 		if (this.finishTime != null)
 			return PlayGui.timerStopped;
-		if (this.isMultiplayer || this.scoreType == Score) {
-			if (!this.multiplayerStarted || (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0))
+		if (this.isMultiplayer || this.timeMultiplier < 0) {
+			if ((this.isMultiplayer && !this.multiplayerStarted) || (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0))
 				return PlayGui.timerStopped;
 
 			// Create the flashing effect
-			var alarmStart = this.mission.computeAlarmStartTime();
+			var alarmStart = this.computeAlarmStartTime();
 			var elapsed = timeToDisplay - alarmStart;
 			if (alarmStart < timeToDisplay)
 				return PlayGui.timerNormal;
@@ -2442,7 +2538,7 @@ class MarbleWorld extends Scheduler {
 
 			if (this.timeState.currentAttemptTime >= 3.5 && !Net.isMP) {
 				// Create the flashing effect
-				var alarmStart = this.mission.computeAlarmStartTime();
+				var alarmStart = this.computeAlarmStartTime();
 				var elapsed = timeToDisplay - alarmStart;
 				if (elapsed < 0)
 					return PlayGui.timerNormal;
@@ -2550,7 +2646,7 @@ class MarbleWorld extends Scheduler {
 		// Handle alarm warnings (that the user is about to exceed the par time)
 		if (!Net.isMP) {
 			if (this.timeState.currentAttemptTime >= 3.5) {
-				var alarmStart = this.mission.computeAlarmStartTime();
+				var alarmStart = this.computeAlarmStartTime();
 
 				if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
 					// Start the alarm
@@ -2570,7 +2666,7 @@ class MarbleWorld extends Scheduler {
 			}
 		} else {
 			if (this.multiplayerStarted) {
-				var alarmStart = this.mission.computeAlarmStartTime();
+				var alarmStart = this.computeAlarmStartTime();
 
 				if (prevGameplayClock > alarmStart && this.timeState.gameplayClock <= alarmStart) {
 					// Start the alarm
@@ -2633,6 +2729,8 @@ class MarbleWorld extends Scheduler {
 	function updateUnderwaterOverlay() {
 		var cameraPos = this.scene.camera.pos;
 		var cameraInWater = false;
+		if (this.marble == null)
+			return;
 		for (t in this.marble.waterTriggers) {
 			if (t.collider.boundingBox.contains(cameraPos.toPoint())) {
 				cameraInWater = true;
@@ -2655,6 +2753,8 @@ class MarbleWorld extends Scheduler {
 		while Fireball is active (see `Marble.activateFireball`/`BubbleItem.pickUp`), so in practice
 		only one bar is ever visible - reproduced anyway since it's a cheap offset. */
 	function updateBubbleBarPosition() {
+		if (this.marble == null)
+			return;
 		var camera = this.scene.camera;
 		var forward = camera.target.sub(camera.pos).normalized();
 		var right = forward.cross(camera.up).normalized();
@@ -2923,6 +3023,7 @@ class MarbleWorld extends Scheduler {
 	public function startCountdown(seconds:Float, icon:String = "timerTimeTravel") {
 		this.countdownRemaining = seconds;
 		this.countdownActive = seconds > 0;
+		this.countdownIcon = icon;
 		this.playGui.setCountdownThIcon(icon);
 	}
 

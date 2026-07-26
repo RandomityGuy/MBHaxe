@@ -21,6 +21,7 @@ class BubbleItem extends PowerUp {
 		this.dtsPath = "data/shapes_pq/gameplay/powerups/bubble.dts";
 		this.identifier = "BubbleItem";
 		this.pickUpName = "Bubble PowerUp";
+		this.radarIndex = 14;
 
 		var timeField = element.fields.get("time");
 		this.time = timeField != null && timeField[0] != "" ? MisParser.parseNumber(timeField[0]) / 1000 : 5;

@@ -24,18 +24,35 @@ class RewindMPState {
 	var position:Vector;
 	var velocity:Vector;
 
-	public function new() {}
-
-	public function clone() {
-		var c = new RewindMPState();
-		c.currentTime = currentTime;
-		c.targetTime = targetTime;
-		c.stoppedPosition = stoppedPosition != null ? stoppedPosition.clone() : null;
-		c.prevPosition = prevPosition.clone();
-		c.position = position.clone();
-		c.velocity = velocity.clone();
-		return c;
+	public function new() {
+		prevPosition = new Vector();
+		position = new Vector();
+		velocity = new Vector();
 	}
+}
+
+/** Reusable mutable snapshot of a `Trapdoor`'s progress - was an anonymous struct, reallocated
+	fresh per object per tick; now a plain class so `RewindManager.recordFrame`/`RewindFrame.
+	deserialize` can pool and mutate instances in place instead (see
+	[No Anonymous Structs](feedback_no_anonymous_structs.md), and
+	[PQ Port Status](pq-port-status.md)'s rewind-optimization entry). */
+@:publicFields
+class TrapdoorSaveState {
+	var lastContactTime:Float;
+	var lastDirection:Int;
+	var lastCompletion:Float;
+
+	public function new() {}
+}
+
+/** Same idea as `TrapdoorSaveState`, for `FadePlatform`. */
+@:publicFields
+class FadePlatformSaveState {
+	var lastContactTime:Float;
+	var fadingState:Int;
+	var lastFadingContactTime:Float;
+
+	public function new() {}
 }
 
 @:publicFields
@@ -54,8 +71,8 @@ class RewindFrame {
 	var landMineStates:Array<Float>;
 	var activePowerupStates:Array<Float>;
 	var currentUp:Vector;
-	var trapdoorStates:Array<{lastContactTime:Float, lastDirection:Int, lastCompletion:Float}>;
-	var fadePlatformStates:Array<{lastContactTime:Float, fadingState:Int, lastFadingContactTime:Float}>;
+	var trapdoorStates:Array<TrapdoorSaveState>;
+	var fadePlatformStates:Array<FadePlatformSaveState>;
 	var lastContactNormal:Vector;
 	var blastAmt:Float;
 	var marbleRadius:Float;
@@ -103,6 +120,23 @@ class RewindFrame {
 	/** Index-aligned with `level.iceShards`, mirrors `gemStates`. */
 	var iceShardStates:Array<Bool>;
 
+	/** Also index-aligned with `level.iceShards` - see `IceShard.gotoTargetTriggered`'s doc comment. */
+	var iceShardGotoTargetStates:Array<Bool>;
+
+	/** HUD countdown timer state (`MarbleWorld.startCountdown`/`stopCountdown`,
+		`CountdownStartTrigger`/`CountdownStopTrigger`) - unlike most HUD-driving state elsewhere in
+		this file, `countdownRemaining` is a genuine per-tick accumulator (decremented by `dt` each
+		frame in `updateTimer`, not re-derived from a fixed start timestamp), so it can't self-heal
+		after a rewind and must be snapshotted directly like any other mutable scalar. */
+	var countdownActive:Bool;
+
+	var countdownRemaining:Float;
+	var countdownIcon:String;
+
+	/** Index-aligned with `level.triggers.filter(x -> x is triggers.PathTrigger)` - mirrors
+		`gemStates`/`iceShardStates`. See `triggers.PathTrigger.triggered`'s doc comment. */
+	var pathTriggerStates:Array<Bool>;
+
 	/** Ported from the `mbu-port` branch's design - whichever `GameMode` (or `CompositeMode` of
 		several) is active supplies one of these via `getRewindState()`/`constructRewindState()`,
 		rather than `RewindFrame` growing a flat field per mode regardless of which mode is active. */
@@ -128,92 +162,57 @@ class RewindFrame {
 		checkpointBlast:Float
 	};
 
-	inline public function new() {}
+	/** Every container field is allocated exactly once here, then mutated/refilled in place for the
+		rest of this instance's life - `RewindManager` keeps exactly one persistent `RewindFrame` for
+		recording and one for reading/applying (rather than `new RewindFrame()` every tick), so this
+		constructor's allocations only happen twice total per `RewindManager`, not once per frame.
+		`clone()` no longer exists - nothing ever kept a live `RewindFrame` around long enough to need
+		copying one (recording immediately serializes and discards; reading immediately applies and
+		discards - see `RewindManager.recordFrame`/`getFrameAtIndex`), so it was dead code. */
+	public function new() {
+		timeState = new TimeState();
+		marblePosition = new Vector();
+		marbleOrientation = new Quat();
+		marbleVelocity = new Vector();
+		marbleAngularVelocity = new Vector();
+		currentUp = new Vector();
+		lastContactNormal = new Vector();
+		teleporterSavedPosition = new Vector();
+		teleporterSavedGravity = new Vector();
+		gemStates = [];
+		powerupStates = [];
+		landMineStates = [];
+		activePowerupStates = [0.0, 0.0, 0.0, 0.0];
+		mpStates = [];
+		trapdoorStates = [];
+		fadePlatformStates = [];
+		toggleButtonStates = [];
+		waterTriggers = [];
+		iceShardStates = [];
+		iceShardGotoTargetStates = [];
+		countdownIcon = "";
+		pathTriggerStates = [];
+		pathFollowerStates = [];
+		oobState = {oob: false, timeState: null};
+		checkpointState = {
+			currentCheckpoint: null,
+			currentCheckpointTrigger: null,
+			checkpointCollectedGems: new Map<Gem, Bool>(),
+			checkpointHeldPowerup: null,
+			checkpointUp: null,
+			checkpointBlast: 0.0
+		};
+	}
 
-	public inline function clone() {
-		var c = new RewindFrame();
-		c.timeState = timeState.clone();
-		c.marblePosition = marblePosition.clone();
-		c.marbleOrientation = marbleOrientation.clone();
-		c.marbleVelocity = marbleVelocity.clone();
-		c.marbleAngularVelocity = marbleAngularVelocity.clone();
-		c.marblePowerup = marblePowerup;
-		c.bonusTime = bonusTime;
-		c.gemCount = gemCount;
-		c.gemStates = gemStates.copy();
-		c.powerupStates = powerupStates.copy();
-		c.landMineStates = landMineStates.copy();
-		c.activePowerupStates = activePowerupStates.copy();
-		c.currentUp = currentUp.clone();
-		c.lastContactNormal = lastContactNormal.clone();
-		c.mpStates = mpStates.copy();
-		c.trapdoorStates = [];
-		for (s in trapdoorStates) {
-			c.trapdoorStates.push({
-				lastContactTime: s.lastContactTime,
-				lastDirection: s.lastDirection,
-				lastCompletion: s.lastCompletion,
-			});
-		}
-		c.fadePlatformStates = [];
-		for (s in fadePlatformStates) {
-			c.fadePlatformStates.push({
-				lastContactTime: s.lastContactTime,
-				fadingState: s.fadingState,
-				lastFadingContactTime: s.lastFadingContactTime,
-			});
-		}
-		c.blastAmt = blastAmt;
-		c.marbleRadius = marbleRadius;
-		c.movementTriggerCount = movementTriggerCount;
-		c.toggleButtonStates = toggleButtonStates.copy();
-		c.teleporterArmed = teleporterArmed;
-		c.teleporterSavedPosition = teleporterSavedPosition.clone();
-		c.teleporterSavedYaw = teleporterSavedYaw;
-		c.teleporterSavedPitch = teleporterSavedPitch;
-		c.teleporterSavedGravity = teleporterSavedGravity.clone();
-		c.teleporterKeepVelocity = teleporterKeepVelocity;
-		c.teleporterTeleTime = teleporterTeleTime;
-		c.teleporterFiring = teleporterFiring;
-		c.teleporterFireStartTime = teleporterFireStartTime;
-		c.isFrozen = isFrozen;
-		c.lastFreezeTime = lastFreezeTime;
-		c.powerupLockCount = powerupLockCount;
-		c.timeStopTriggerCount = timeStopTriggerCount;
-		c.isInWater = isInWater;
-		c.waterTriggers = waterTriggers.copy();
-		c.bubbleTime = bubbleTime;
-		c.bubbleTotalTime = bubbleTotalTime;
-		c.bubbleInfinite = bubbleInfinite;
-		c.bubbleActive = bubbleActive;
-		c.fireball = fireball;
-		c.fireballTime = fireballTime;
-		c.fireballTotalTime = fireballTotalTime;
-		c.fireballLastBlastTime = fireballLastBlastTime;
-		c.iceShardStates = iceShardStates.copy();
-		c.modeState = modeState != null ? modeState.clone() : null;
-		c.pathFollowerStates = pathFollowerStates.map(s -> ({
-			pathPosition: s.pathPosition,
-			currentNode: s.currentNode,
-			prevNode: s.prevNode,
-			rngCursor: s.rngCursor
-		} : PathFollowerSaveState));
-		c.oobState = {
-			oob: oobState.oob,
-			timeState: oobState.timeState != null ? oobState.timeState.clone() : null
-		};
-		c.checkpointState = {
-			currentCheckpoint: checkpointState.currentCheckpoint != null ? {
-				obj: checkpointState.currentCheckpoint.obj,
-				elem: checkpointState.currentCheckpoint.elem,
-			} : null,
-			currentCheckpointTrigger: checkpointState.currentCheckpointTrigger,
-			checkpointCollectedGems: checkpointState.checkpointCollectedGems.copy(),
-			checkpointHeldPowerup: checkpointState.checkpointHeldPowerup,
-			checkpointUp: checkpointState.checkpointUp != null ? checkpointState.checkpointUp.clone() : null,
-			checkpointBlast: checkpointState.checkpointBlast,
-		};
-		return c;
+	/** Grows `arr` to `n` elements (appending freshly-`make()`d instances) or shrinks it down to
+		`n` - called every frame against a persistent array, so it only actually allocates the first
+		time a given count is reached, never again after (the count of trapdoors/buttons/path
+		followers/etc. in a level is fixed once loaded). */
+	public static function syncLength<T>(arr:Array<T>, n:Int, make:Void->T) {
+		while (arr.length < n)
+			arr.push(make());
+		if (arr.length > n)
+			arr.resize(n);
 	}
 
 	public inline function serialize(rm:RewindManager) {
@@ -284,15 +283,23 @@ class RewindFrame {
 		framesize += 8; // fireballTotalTime
 		framesize += 8; // fireballLastBlastTime
 		framesize += 2 + iceShardStates.length * 1; // iceShardStates
+		framesize += 2 + iceShardGotoTargetStates.length * 1; // iceShardGotoTargetStates
+		framesize += 1; // countdownActive
+		framesize += 8; // countdownRemaining
+		framesize += 2 + countdownIcon.length; // countdownIcon
+		framesize += 2 + pathTriggerStates.length * 1; // pathTriggerStates
 		framesize += 1; // Null<modeState>
 		if (modeState != null)
 			framesize += modeState.getSize();
 		framesize += 2; // pathFollowerStates.length
 		for (s in pathFollowerStates) {
-			framesize += 8; // s.pathPosition
-			framesize += 2 + s.currentNode.length; // s.currentNode
-			framesize += 2 + s.prevNode.length; // s.prevNode
-			framesize += 2; // s.rngCursor
+			framesize += 1; // s.active
+			if (s.active) {
+				framesize += 8; // s.pathPosition
+				framesize += 2 + s.currentNode.length; // s.currentNode
+				framesize += 2 + s.prevNode.length; // s.prevNode
+				framesize += 2; // s.rngCursor
+			}
 		}
 		if (oobState.oob)
 			framesize += 1; // oobState.oob
@@ -427,17 +434,30 @@ class RewindFrame {
 		bb.writeInt16(iceShardStates.length);
 		for (s in iceShardStates)
 			bb.writeByte(s ? 1 : 0);
+		bb.writeInt16(iceShardGotoTargetStates.length);
+		for (s in iceShardGotoTargetStates)
+			bb.writeByte(s ? 1 : 0);
+		bb.writeByte(countdownActive ? 1 : 0);
+		bb.writeDouble(countdownRemaining);
+		bb.writeInt16(countdownIcon.length);
+		bb.writeString(countdownIcon);
+		bb.writeInt16(pathTriggerStates.length);
+		for (s in pathTriggerStates)
+			bb.writeByte(s ? 1 : 0);
 		bb.writeByte(modeState == null ? 0 : 1);
 		if (modeState != null)
 			modeState.serialize(rm, bb);
 		bb.writeInt16(pathFollowerStates.length);
 		for (s in pathFollowerStates) {
-			bb.writeDouble(s.pathPosition);
-			bb.writeInt16(s.currentNode.length);
-			bb.writeString(s.currentNode);
-			bb.writeInt16(s.prevNode.length);
-			bb.writeString(s.prevNode);
-			bb.writeInt16(s.rngCursor);
+			bb.writeByte(s.active ? 1 : 0);
+			if (s.active) {
+				bb.writeDouble(s.pathPosition);
+				bb.writeInt16(s.currentNode.length);
+				bb.writeString(s.currentNode);
+				bb.writeInt16(s.prevNode.length);
+				bb.writeString(s.prevNode);
+				bb.writeInt16(s.rngCursor);
+			}
 		}
 		bb.writeByte(oobState.oob ? 1 : 0);
 		if (oobState.oob) {
@@ -472,14 +492,15 @@ class RewindFrame {
 		return bb.getBytes();
 	}
 
+	/** Reuses every already-allocated container from `new()` (or a previous `deserialize` call on
+		this same instance) in place instead of reallocating it - safe for every field EXCEPT the
+		handful `RewindManager.applyFrame` hands off *by reference* into long-lived `MarbleWorld`/
+		`Marble` state instead of copying out of (`mpStates[i].stoppedPosition`, `checkpointState.
+		checkpointUp`/`checkpointCollectedGems`/`currentCheckpoint`) - those are deliberately still
+		allocated fresh every call, since aliasing a reused scratch object into state that outlives
+		this call would silently corrupt it the next time this same instance gets deserialized for a
+		*different* frame. See [PQ Port Status](pq-port-status.md)'s rewind-optimization entry. */
 	public inline function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
-		marblePosition = new Vector();
-		marbleOrientation = new Quat();
-		marbleVelocity = new Vector();
-		marbleAngularVelocity = new Vector();
-		currentUp = new Vector();
-		lastContactNormal = new Vector();
-		timeState = new TimeState();
 		timeState.currentAttemptTime = br.readDouble();
 		timeState.timeSinceLoad = br.readDouble();
 		timeState.gameplayClock = br.readDouble();
@@ -500,43 +521,41 @@ class RewindFrame {
 		marblePowerup = cast rm.getGO(br.readInt16());
 		bonusTime = br.readDouble();
 		gemCount = br.readInt16();
-		gemStates = [];
+		gemStates.resize(0);
 		var gemStates_len = br.readInt16();
 		for (i in 0...gemStates_len) {
 			gemStates.push(br.readByte() != 0);
 		}
-		powerupStates = [];
+		powerupStates.resize(0);
 		var powerupStates_len = br.readInt16();
 		for (i in 0...powerupStates_len) {
 			powerupStates.push(br.readDouble());
 		}
-		landMineStates = [];
+		landMineStates.resize(0);
 		var landMineStates_len = br.readInt16();
 		for (i in 0...landMineStates_len) {
 			landMineStates.push(br.readDouble());
 		}
-		activePowerupStates = [];
-		activePowerupStates.push(br.readDouble());
-		activePowerupStates.push(br.readDouble());
-		activePowerupStates.push(br.readDouble());
-		activePowerupStates.push(br.readDouble());
+		activePowerupStates[0] = br.readDouble();
+		activePowerupStates[1] = br.readDouble();
+		activePowerupStates[2] = br.readDouble();
+		activePowerupStates[3] = br.readDouble();
 		currentUp.x = br.readDouble();
 		currentUp.y = br.readDouble();
 		currentUp.z = br.readDouble();
 		lastContactNormal.x = br.readDouble();
 		lastContactNormal.y = br.readDouble();
 		lastContactNormal.z = br.readDouble();
-		mpStates = [];
 		var mpStates_len = br.readInt16();
+		syncLength(mpStates, mpStates_len, () -> new RewindMPState());
 		for (i in 0...mpStates_len) {
-			var mpStates_item = new RewindMPState();
+			var mpStates_item = mpStates[i];
 			mpStates_item.currentTime = br.readDouble();
 			mpStates_item.targetTime = br.readDouble();
-			mpStates_item.stoppedPosition = new Vector();
-			mpStates_item.prevPosition = new Vector();
-			mpStates_item.position = new Vector();
-			mpStates_item.velocity = new Vector();
+			// `stoppedPosition` deliberately allocated fresh (or left null) every time - see this
+			// function's doc comment.
 			if (br.readByte() != 0) {
+				mpStates_item.stoppedPosition = new Vector();
 				mpStates_item.stoppedPosition.x = br.readDouble();
 				mpStates_item.stoppedPosition.y = br.readDouble();
 				mpStates_item.stoppedPosition.z = br.readDouble();
@@ -552,50 +571,37 @@ class RewindFrame {
 			mpStates_item.velocity.x = br.readDouble();
 			mpStates_item.velocity.y = br.readDouble();
 			mpStates_item.velocity.z = br.readDouble();
-			mpStates.push(mpStates_item);
 		}
-		trapdoorStates = [];
 		var trapdoorStates_len = br.readInt16();
+		syncLength(trapdoorStates, trapdoorStates_len, () -> new TrapdoorSaveState());
 		for (i in 0...trapdoorStates_len) {
-			var trapdoorStates_item = {
-				lastContactTime: 0.0,
-				lastDirection: 0,
-				lastCompletion: 0.0
-			};
+			var trapdoorStates_item = trapdoorStates[i];
 			trapdoorStates_item.lastContactTime = br.readDouble();
 			trapdoorStates_item.lastDirection = br.readByte();
 			trapdoorStates_item.lastCompletion = br.readDouble();
-			trapdoorStates.push(trapdoorStates_item);
 		}
-		fadePlatformStates = [];
 		var fadePlatformStates_len = br.readInt16();
+		syncLength(fadePlatformStates, fadePlatformStates_len, () -> new FadePlatformSaveState());
 		for (i in 0...fadePlatformStates_len) {
-			var fadePlatformStates_item = {
-				lastContactTime: 0.0,
-				fadingState: 0,
-				lastFadingContactTime: 0.0
-			};
+			var fadePlatformStates_item = fadePlatformStates[i];
 			fadePlatformStates_item.lastContactTime = br.readDouble();
 			fadePlatformStates_item.fadingState = br.readInt16();
 			fadePlatformStates_item.lastFadingContactTime = br.readDouble();
-			fadePlatformStates.push(fadePlatformStates_item);
 		}
 		blastAmt = br.readDouble();
 		marbleRadius = br.readDouble();
 		movementTriggerCount = br.readInt16();
-		toggleButtonStates = [];
+		toggleButtonStates.resize(0);
 		var toggleButtonStates_len = br.readInt16();
 		for (i in 0...toggleButtonStates_len) {
 			toggleButtonStates.push(br.readByte() != 0);
 		}
 		teleporterArmed = br.readByte() != 0;
-		teleporterSavedPosition = new Vector();
 		teleporterSavedPosition.x = br.readDouble();
 		teleporterSavedPosition.y = br.readDouble();
 		teleporterSavedPosition.z = br.readDouble();
 		teleporterSavedYaw = br.readDouble();
 		teleporterSavedPitch = br.readDouble();
-		teleporterSavedGravity = new Vector();
 		teleporterSavedGravity.x = br.readDouble();
 		teleporterSavedGravity.y = br.readDouble();
 		teleporterSavedGravity.z = br.readDouble();
@@ -608,7 +614,7 @@ class RewindFrame {
 		powerupLockCount = br.readInt16();
 		timeStopTriggerCount = br.readInt16();
 		isInWater = br.readByte() != 0;
-		waterTriggers = [];
+		waterTriggers.resize(0);
 		var waterTriggers_len = br.readInt16();
 		for (i in 0...waterTriggers_len)
 			waterTriggers.push(cast rm.getGO(br.readInt16()));
@@ -620,10 +626,22 @@ class RewindFrame {
 		fireballTime = br.readDouble();
 		fireballTotalTime = br.readDouble();
 		fireballLastBlastTime = br.readDouble();
-		iceShardStates = [];
+		iceShardStates.resize(0);
 		var iceShardStates_len = br.readInt16();
 		for (i in 0...iceShardStates_len)
 			iceShardStates.push(br.readByte() != 0);
+		iceShardGotoTargetStates.resize(0);
+		var iceShardGotoTargetStates_len = br.readInt16();
+		for (i in 0...iceShardGotoTargetStates_len)
+			iceShardGotoTargetStates.push(br.readByte() != 0);
+		countdownActive = br.readByte() != 0;
+		countdownRemaining = br.readDouble();
+		var countdownIcon_len = br.readInt16();
+		countdownIcon = br.readString(countdownIcon_len);
+		pathTriggerStates.resize(0);
+		var pathTriggerStates_len = br.readInt16();
+		for (i in 0...pathTriggerStates_len)
+			pathTriggerStates.push(br.readByte() != 0);
 		var hasModeState = br.readByte() != 0;
 		if (hasModeState) {
 			modeState = rm.level.gameMode.constructRewindState();
@@ -631,16 +649,19 @@ class RewindFrame {
 		} else {
 			modeState = null;
 		}
-		pathFollowerStates = [];
 		var pathFollowerStates_len = br.readInt16();
+		syncLength(pathFollowerStates, pathFollowerStates_len, () -> new PathFollowerSaveState());
 		for (i in 0...pathFollowerStates_len) {
-			var pathPosition = br.readDouble();
+			var s = pathFollowerStates[i];
+			s.active = br.readByte() != 0;
+			if (!s.active)
+				continue;
+			s.pathPosition = br.readDouble();
 			var currentNodeLen = br.readInt16();
-			var currentNode = br.readString(currentNodeLen);
+			s.currentNode = br.readString(currentNodeLen);
 			var prevNodeLen = br.readInt16();
-			var prevNode = br.readString(prevNodeLen);
-			var rngCursor = br.readInt16();
-			pathFollowerStates.push({pathPosition: pathPosition, currentNode: currentNode, prevNode: prevNode, rngCursor: rngCursor});
+			s.prevNode = br.readString(prevNodeLen);
+			s.rngCursor = br.readInt16();
 		}
 		oobState = {
 			oob: br.readByte() != 0,

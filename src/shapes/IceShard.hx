@@ -197,7 +197,13 @@ class IceShard extends DtsObject {
 	var crackSound:hxd.res.Sound;
 	var smashSound:hxd.res.Sound;
 	var element:MissionElementStaticShape;
-	var gotoTargetTriggered:Bool = false;
+
+	/** Gates `gotoTarget`'s `TriggerOnce` the same way `PathTrigger.triggered` does (see its doc
+		comment) - snapshotted directly by `RewindFrame`/`RewindManager` (`iceShardGotoTargetStates`,
+		index-aligned with `level.iceShards`, same registry `iceShardStates`/`destroyed` already
+		uses) so rewinding to before this shard's `gotoTarget` fired doesn't leave it stuck `true`
+		from the forward-time playthrough. */
+	public var gotoTargetTriggered:Bool = false;
 
 	var mistEmitter:ParticleEmitter;
 	var shineEmitter:ParticleEmitter;

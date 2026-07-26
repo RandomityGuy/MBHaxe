@@ -19,6 +19,7 @@ class RandomPowerup extends PowerUp {
 		this.useInstancing = true;
 		this.autoUse = true;
 		this.wasTimeTravel = false;
+		this.radarIndex = 26;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

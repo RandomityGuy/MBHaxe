@@ -21,6 +21,8 @@ abstract class PowerUp extends DtsObject {
 	public var pickupSound:Sound;
 	public var netIndex:Int;
 
+	public var radarIndex:Int;
+
 	// Net
 	var pickupClient:Int = -1;
 	var pickupTicks:Int = -1;
@@ -98,6 +100,7 @@ abstract class PowerUp extends DtsObject {
 	public abstract function use(marble:Marble, timeState:TimeState):Bool;
 
 	public override function reset() {
+		super.reset();
 		this.lastPickUpTime = Math.NEGATIVE_INFINITY;
 		this.pickupClient = -1;
 		this.pickupTicks = -1;

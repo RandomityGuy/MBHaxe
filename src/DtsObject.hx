@@ -38,20 +38,9 @@ import h3d.Matrix;
 import src.Util;
 import src.Resource;
 import src.Console;
+import src.DifBuilder;
 
 var DROP_TEXTURE_FOR_ENV_MAP = ['shapes/items/superjump.dts', 'shapes/items/antigravity.dts'];
-
-var dtsMaterials = [
-	"oilslick" => {friction: 0.05, restitution: 0.5, force: 0.0},
-	"base.slick" => {friction: 0.05, restitution: 0.5, force: 0.0},
-	"ice.slick" => {friction: 0.05, restitution: 0.5, force: 0.0},
-	"bumper-rubber" => {friction: 0.5, restitution: 0.0, force: 15.0},
-	"triang-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
-	"triang-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
-	"pball-round-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
-	"pball-round-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
-	"pball-round-bottm" => {friction: 0.5, restitution: 0.0, force: 15.0}
-];
 
 typedef MaterialGeometry = {
 	var vertices:Array<Vector>;
@@ -125,6 +114,13 @@ class DtsObject extends GameObject {
 	var renderSubshape:dts.SubShape = null;
 	var collisionSubshapes:Array<{subShape:dts.SubShape, detail:Int}> = [];
 
+	var isBillboard = false;
+
+	// How far to push a billboard toward the camera (along the direction to it), at most, to keep
+	// it from clipping into the floor when viewed close to straight down/up. Tune by trial and
+	// error.
+	static var BILLBOARD_FORWARD_OFFSET = 0.4;
+
 	public var idInLevel:Int = -1;
 
 	public function new() {
@@ -196,11 +192,15 @@ class DtsObject extends GameObject {
 			if (mesh == null)
 				continue;
 
-			if (mesh.parent >= 0)
+			if (mesh.parent >= 0 || mesh.meshType == 1)
 				continue; // Fix teleporter being broken
 
 			if (mesh.vertices.length == 0)
 				continue;
+
+			if (mesh.type & (1 << 31) != 0) {
+				isBillboard = true; // render the whole thing as billboard
+			}
 
 			if (!isInstanced) {
 				var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
@@ -591,8 +591,8 @@ class DtsObject extends GameObject {
 			hs.transformKeys = [];
 
 			var material = this.dts.matNames[primitive.matIndex & TSDrawPrimitive.MaterialMask];
-			if (dtsMaterials.exists(material) && !this.isTSStatic) {
-				var data = dtsMaterials.get(material);
+			if (DifBuilder.materialDict.exists(material) && !this.isTSStatic) {
+				var data = DifBuilder.materialDict.get(material);
 				hs.friction = data.friction;
 				hs.force = data.force;
 				hs.restitution = data.restitution;
@@ -1022,6 +1022,10 @@ class DtsObject extends GameObject {
 			for (i in info.indices) {
 				if (pos >= Std.int(prim.points.length / 3)) {
 					meshIndex++;
+					if (prim.buffer != null) {
+						prim.flush();
+					}
+
 					prim = info.primitives[meshIndex];
 					pos = 0;
 				}
@@ -1037,9 +1041,6 @@ class DtsObject extends GameObject {
 				pos++;
 			}
 			if (prim.buffer != null) {
-				// prim.addNormals();
-				// for (norm in prim.normals)
-				// 	norm = norm.multiply(-1);
 				prim.flush();
 			}
 			if (_regenNormals) {
@@ -1080,6 +1081,48 @@ class DtsObject extends GameObject {
 			this.rootObject.getRotationQuat().load(spinAnimation);
 			this.rootObject.posChanged = true;
 			// setRotationQuat(spinAnimation);
+		}
+
+		if (this.isBillboard && this.level != null) {
+			var camPos = this.level.scene.camera.pos;
+			var objPos = this.getAbsPos().getPosition();
+			var faceDir = camPos.sub(objPos);
+			if (faceDir.lengthSq() > 0.0001) {
+				faceDir.normalize();
+				var worldUp = new Vector(0, 0, 1);
+				if (Math.abs(faceDir.dot(worldUp)) > 0.9999)
+					worldUp = new Vector(1, 0, 0); // Degenerate: facing straight up/down.
+				var axisX = faceDir.cross(worldUp);
+				axisX.normalize();
+				var axisZ = axisX.cross(faceDir);
+				axisZ.normalize();
+
+				var mat = new Matrix();
+				mat._11 = axisX.x;
+				mat._12 = axisX.y;
+				mat._13 = axisX.z;
+				mat._14 = 0;
+				mat._21 = faceDir.x;
+				mat._22 = faceDir.y;
+				mat._23 = faceDir.z;
+				mat._24 = 0;
+				mat._31 = axisZ.x;
+				mat._32 = axisZ.y;
+				mat._33 = axisZ.z;
+				mat._34 = 0;
+				mat._41 = 0;
+				mat._42 = 0;
+				mat._43 = 0;
+				mat._44 = 1;
+
+				var billboardQuat = new Quat();
+				billboardQuat.initRotateMatrix(mat);
+				this.rootObject.getRotationQuat().load(billboardQuat);
+
+				var verticalness = Math.abs(faceDir.dot(worldUp));
+				var pushAmount = BILLBOARD_FORWARD_OFFSET * verticalness;
+				this.rootObject.setPosition(faceDir.x * pushAmount, faceDir.y * pushAmount, faceDir.z * pushAmount);
+			}
 		}
 
 		for (i in 0...this.colliders.length) {
