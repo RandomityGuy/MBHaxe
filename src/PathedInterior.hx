@@ -431,5 +431,13 @@ class PathedInterior extends InteriorObject {
 		var initialTform = this.getTransformAtTime(this.currentTime);
 		this.setTransform(initialTform);
 		updatePosition();
+
+		// These are nested inside this interior's own `simGroup`, not `MarbleWorld.triggers`, so
+		// they're never reached by `MarbleWorld.restart()`'s global trigger-reset loop - reset them
+		// here instead. A no-op for the stateless `TriggerGotoDelayTarget`/`MustChangeTrigger`
+		// (`GameObject.reset()`'s default), but fixes `RepetitiveTriggerGotoTarget.triggered`/
+		// `enterCount` surviving a restart.
+		for (t in this.triggers)
+			t.reset();
 	}
 }
