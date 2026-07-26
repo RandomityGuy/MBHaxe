@@ -4566,12 +4566,13 @@ class Marble extends GameObject {
 			// (or hard up against) the cannon's own yaw/pitch bounds (measured *relative to*
 			// `cannon.yaw`/`lastYaw`, not from world zero) - `updateCannonCamera`'s bound clamp would
 			// then immediately pin the camera at one edge, making aiming feel almost frozen right
-			// from the start. `cannon.lastYaw`/`lastPitch` are stored in the same file/Torque sign
-			// convention as `cannon.pitch` itself (positive = up) - `CameraPitch`'s own convention is
-			// the opposite (positive = down, see `CameraController.updateCannonCamera`'s doc comment),
-			// so only pitch needs negating here, not yaw.
-			this.camera.CameraYaw = cannon.lastYaw;
-			this.camera.nextCameraYaw = cannon.lastYaw;
+			// from the start. `cannon.lastYaw`/`lastPitch` are stored in file/`hide` convention
+			// (positive pitch = up, zero yaw = local +Y) - `CameraYaw`/`CameraPitch`'s own convention
+			// differs on *both* axes (positive pitch = down, zero yaw = local +X - a 90-degree axis
+			// mismatch, not just a sign flip; see `shapes.Cannon.computeCameraDirection`'s doc
+			// comment), so yaw needs a `+90 degrees` correction here, not just pitch's negation.
+			this.camera.CameraYaw = cannon.lastYaw + Math.PI / 2;
+			this.camera.nextCameraYaw = this.camera.CameraYaw;
 			this.camera.CameraPitch = -cannon.lastPitch;
 			this.camera.nextCameraPitch = -cannon.lastPitch;
 		}
@@ -4592,7 +4593,16 @@ class Marble extends GameObject {
 			if (this.instantCannonFireTime > 0 && timeState.currentAttemptTime >= this.instantCannonFireTime) {
 				var yawRad = cannon.yaw * Math.PI / 180;
 				var pitchRad = cannon.pitch * Math.PI / 180;
-				this.fireCannon(cannon, cannon.computeFireDirection(yawRad, pitchRad), 1, timeState);
+				// Ported from `activateInstantCannon`'s `%yaw = mDegToRad(%cannon.yaw); %pitch =
+				// -mDegToRad(%cannon.pitch);` - the same values fed to `finishCannonCharge`'s
+				// `cannonSetCamera` call for a non-instant shot come from `getMarbleCamYaw/Pitch()`
+				// directly (already live-camera convention); here they instead come from the
+				// cannon's own fixed fields, so they need the file->camera conversion first (see
+				// `Marble.enterCannon`'s doc comment for the same +90-degree yaw / pitch-negation
+				// rule, applied there in the same direction).
+				var cameraYaw = yawRad + Math.PI / 2;
+				var cameraPitch = -pitchRad;
+				this.fireCannon(cannon, cannon.computeFireDirection(yawRad, pitchRad), 1, timeState, cameraYaw, cameraPitch);
 				this.instantCannonFireTime = -1e8;
 			}
 			return;
@@ -4605,14 +4615,16 @@ class Marble extends GameObject {
 					this.cannonCharge = cannon.chargeTime;
 			} else if (this.cannonCharge > 0) {
 				var t = this.cannonCharge / cannon.chargeTime;
-				// `CameraPitch` needs negating before feeding into `computeFireDirection` - see
-				// `CameraController.updateCannonCamera`'s doc comment for why.
-				var fireDir = cannon.computeFireDirection(this.camera.CameraYaw, -this.camera.CameraPitch);
-				this.fireCannon(cannon, fireDir, t, timeState);
+				// Camera-convention direction (live `CameraYaw`/`CameraPitch`, no pitch negation
+				// needed here) - NOT `computeFireDirection`, which is for the cannon's own authored
+				// `yaw`/`pitch` fields and uses a different zero-yaw axis convention. See
+				// `shapes.Cannon.computeCameraDirection`'s doc comment.
+				var fireDir = cannon.computeFireDirectionFromCamera(this.camera.CameraYaw, this.camera.CameraPitch);
+				this.fireCannon(cannon, fireDir, t, timeState, this.camera.CameraYaw, this.camera.CameraPitch);
 			}
 		} else if (m.powerupHeld) {
-			var fireDir = cannon.computeFireDirection(this.camera.CameraYaw, -this.camera.CameraPitch);
-			this.fireCannon(cannon, fireDir, 1, timeState);
+			var fireDir = cannon.computeFireDirectionFromCamera(this.camera.CameraYaw, this.camera.CameraPitch);
+			this.fireCannon(cannon, fireDir, 1, timeState, this.camera.CameraYaw, this.camera.CameraPitch);
 		}
 	}
 
@@ -4666,14 +4678,20 @@ class Marble extends GameObject {
 		this.movementTriggerCount--;
 		if (this.movementTriggerCount < 0)
 			this.movementTriggerCount = 0;
+		if (this.level != null)
+			this.level.playGui.hideCannonHud();
 	}
 
 	/** Ported from `finishCannonCharge`/`GameConnection::leaveCannon` - a natural fire-and-exit
 		(as opposed to `cancelCannon`, which ejects without firing). `forceFraction` is the charge
-		fraction (1 for a non-charge cannon), `yaw`/`pitch` are the aimed body rotation in radians.
-		`fireDir` is the aimed body's local +Y axis in world space (the barrel direction - matches
-		this codebase's established "local Y is forward" convention, see the DTS billboard port). */
-	public function fireCannon(cannon:shapes.Cannon, fireDir:Vector, forceFraction:Float, timeState:TimeState) {
+		fraction (1 for a non-charge cannon), `fireDir` is the aimed body's local +Y axis in world
+		space (the barrel direction - matches this codebase's established "local Y is forward"
+		convention, see the DTS billboard port). `cameraYaw`/`cameraPitch` are ALREADY in this
+		engine's own live-camera convention (see `shapes.Cannon.computeCameraDirection`'s doc
+		comment) - the caller (`updateCannonFiring`) is responsible for converting the cannon's
+		authored `yaw`/`pitch` fields into that convention for an instant-cannon shot, since
+		`Marble` has no direct reason to know about that conversion otherwise. */
+	public function fireCannon(cannon:shapes.Cannon, fireDir:Vector, forceFraction:Float, timeState:TimeState, cameraYaw:Float, cameraPitch:Float) {
 		if (this.activeCannon != cannon)
 			return;
 		var force = cannon.force * (cannon.useCharge ? forceFraction : 1);
@@ -4685,17 +4703,19 @@ class Marble extends GameObject {
 		this.unlockPowerupUse();
 
 		// Ported from `finishCannonCharge`'s closing `cannonSetCamera(normalizeAngle(%yaw),
-		// normalizeAngle(%pitch))` call ("camera is already set on instant cannons" - real source
-		// skips this entirely for instant cannons, since it never touched the camera in the first
-		// place for those; matches this port's own `CameraController` branch never running for an
-		// instant cannon either). Blends the pitch halfway back toward the default resting camera
-		// pitch (0.45) instead of leaving it wherever the player last aimed, so the view settles
-		// into a normal look right after firing rather than staying stuck at a steep aim angle.
-		// Yaw is left as-is - real source's own yaw adjustment here is just a gravity-direction
-		// correction that only has any effect in a non-default-gravity zone, not worth the added
-		// complexity for this pass.
-		if (!cannon.instant && this.camera != null) {
-			this.camera.CameraPitch = this.camera.CameraPitch / 2 + 0.45;
+		// normalizeAngle(%pitch))` call - real source calls this for BOTH instant and non-instant
+		// cannons (`activateInstantCannon` calls it too, just with `mDegToRad(cannon.yaw)`/
+		// `-mDegToRad(cannon.pitch)` instead of `getMarbleCamYaw()`/`getMarbleCamPitch()` - an
+		// earlier version of this comment wrongly assumed instant cannons skip it entirely). Blends
+		// the pitch halfway back toward the default resting camera pitch (0.45) instead of leaving
+		// it wherever it was aimed/fixed, so the view settles into a normal look right after firing.
+		// Yaw is otherwise left as given - real source's own yaw adjustment here is just a gravity-
+		// direction correction that only has any effect in a non-default-gravity zone, not worth the
+		// added complexity for this pass.
+		if (this.camera != null) {
+			this.camera.CameraYaw = cameraYaw;
+			this.camera.nextCameraYaw = cameraYaw;
+			this.camera.CameraPitch = cameraPitch / 2 + 0.45;
 			this.camera.nextCameraPitch = this.camera.CameraPitch;
 		}
 
@@ -4725,6 +4745,14 @@ class Marble extends GameObject {
 		this.setMarblePosition(exitPos.x, exitPos.y, exitPos.z);
 		this.velocity.set(0, 0, 0);
 		this.omega.set(0, 0, 0);
+
+		// Ported from `clientCmdCancelCannon`'s `setCameraPitch(0.45)` - yaw is left exactly as-is
+		// (matches `setCameraYaw(getMarbleCamYaw())`, a no-op), only pitch resets to the default
+		// resting angle so bailing out via the blast key doesn't leave the view stuck at a steep aim.
+		if (this.camera != null) {
+			this.camera.CameraPitch = 0.45;
+			this.camera.nextCameraPitch = 0.45;
+		}
 	}
 
 	public inline function setMode(mode:Mode) {

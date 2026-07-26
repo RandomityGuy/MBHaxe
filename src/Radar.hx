@@ -28,6 +28,7 @@ import src.Marble;
 import src.Settings;
 import src.ResourceLoader;
 import shapes.PowerUp;
+import shapes.Cannon;
 
 enum abstract RadarRule(Int) from Int to Int {
 	var None = 0;
@@ -254,15 +255,23 @@ class Radar {
 							index: 23
 						});
 				}
-				if ((this.customRadarRule & RadarRule.Cannons) != -1 && obj.dtsPath.indexOf("cannon") != -1) {
+				if ((this.customRadarRule & RadarRule.Cannons) != -1 && obj is Cannon) {
 					var dist = marblePos.distance(new Vector(obj.x, obj.y, obj.z));
-					if (dist < itemSearchDistance)
+					if (dist < itemSearchDistance) {
+						var cannon:Cannon = cast obj;
+
 						candidates.push({
 							obj: obj,
 							dist: dist,
 							used: false,
-							index: 18
+							index: switch (cannon.skinOverride) {
+								case "red": 19;
+								case "green": 20;
+								case "blue": 21;
+								default: 18;
+							}
 						});
+					}
 				}
 			}
 		}
