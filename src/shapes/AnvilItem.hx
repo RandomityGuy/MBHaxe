@@ -13,6 +13,7 @@ class AnvilItem extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "AnvilItem";
 		this.pickUpName = "Anvil PowerUp";
+		this.radarIndex = 12;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

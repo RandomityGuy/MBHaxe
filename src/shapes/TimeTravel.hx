@@ -39,6 +39,7 @@ class TimeTravel extends PowerUp {
 			this.cooldownDuration = 1e8;
 		this.useInstancing = true;
 		this.autoUse = true;
+		this.radarIndex = 32;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

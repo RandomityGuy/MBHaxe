@@ -1,10 +1,54 @@
 package modes;
 
+import hxd.Key;
 import mis.MisParser;
 import src.Marble;
 import src.MarbleWorld;
 import src.Settings;
 import rewind.RewindableState;
+import rewind.RewindManager;
+import src.MarbleGame;
+
+@:publicFields
+class TwoDState implements RewindableState {
+	var active:Bool;
+	var targetYaw:Float;
+	var targetPitch:Float;
+	var changesPitch:Bool;
+	var lastPressedLR:Bool;
+
+	public function new() {}
+
+	public function clone():RewindableState {
+		var c = new TwoDState();
+		c.active = active;
+		c.targetYaw = targetYaw;
+		c.targetPitch = targetPitch;
+		c.changesPitch = changesPitch;
+		c.lastPressedLR = lastPressedLR;
+		return c;
+	}
+
+	public function getSize():Int {
+		return 1 + 8 + 8 + 1 + 1;
+	}
+
+	public function serialize(rm:RewindManager, bw:haxe.io.BytesOutput) {
+		bw.writeByte(active ? 1 : 0);
+		bw.writeDouble(targetYaw);
+		bw.writeDouble(targetPitch);
+		bw.writeByte(changesPitch ? 1 : 0);
+		bw.writeByte(lastPressedLR ? 1 : 0);
+	}
+
+	public function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
+		active = br.readByte() != 0;
+		targetYaw = br.readDouble();
+		targetPitch = br.readDouble();
+		changesPitch = br.readByte() != 0;
+		lastPressedLR = br.readByte() != 0;
+	}
+}
 
 /** Ported from PQ's `modes/2d.cs` - locks the camera to a fixed yaw plane (so mouse-look can't
 	rotate off it, matching the real `Physics::registerLayer("2d", "cameraSpeedMultiplier 0")`
@@ -27,6 +71,8 @@ class TwoDMode extends NullMode {
 
 	var targetPitch:Float = 0;
 	var changesPitch = false;
+
+	public var lastPressedLR:Bool = false;
 
 	public function new(level:MarbleWorld) {
 		super(level);
@@ -114,6 +160,17 @@ class TwoDMode extends NullMode {
 		level.marble.camera.nextCameraYaw = this.targetYaw + Math.PI / 2;
 		level.marble.camera.CameraPitch = this.targetPitch;
 		level.marble.camera.nextCameraPitch = this.targetPitch;
+
+		if (Key.isDown(Settings.controlsSettings.left)) {
+			lastPressedLR = false;
+		}
+		if (Key.isDown(Settings.controlsSettings.right)) {
+			lastPressedLR = true;
+		}
+
+		if (MarbleGame.instance.touchInput.movementInput.pressed) {
+			lastPressedLR = MarbleGame.instance.touchInput.movementInput.value.x < 0;
+		}
 	}
 
 	override function getRewindState():RewindableState {
@@ -122,6 +179,7 @@ class TwoDMode extends NullMode {
 		s.targetYaw = this.targetYaw;
 		s.targetPitch = this.targetPitch;
 		s.changesPitch = this.changesPitch;
+		s.lastPressedLR = this.lastPressedLR;
 		return s;
 	}
 
@@ -131,6 +189,7 @@ class TwoDMode extends NullMode {
 		this.targetYaw = s.targetYaw;
 		this.targetPitch = s.targetPitch;
 		this.changesPitch = s.changesPitch;
+		this.lastPressedLR = s.lastPressedLR;
 		// Re-derive the FOV side effect rather than tracking it separately.
 		level.scene.camera.setFovX(this.active ? 90 : getBaseFov(), Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 	}

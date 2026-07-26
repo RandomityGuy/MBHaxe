@@ -27,6 +27,7 @@ class TeleportItem extends PowerUp {
 		this.isTSStatic = false;
 		this.identifier = "TeleportItem";
 		this.pickUpName = "Teleport PowerUp";
+		this.radarIndex = 31;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -56,6 +57,11 @@ class TeleportItem extends PowerUp {
 			// comment).
 			marble.teleporterFiring = true;
 			@:privateAccess marble.teleporterFireStartTime = timeState.currentAttemptTime;
+
+			AudioManager.playSound(ResourceLoader.getResource("data/sound/teleport.wav", ResourceLoader.getAudio, this.soundResources));
+			if (marble == this.level.marble)
+				this.level.displayAlert("Teleporter has been activated, please wait.");
+			this.level.deselectPowerUp(marble);
 			return true;
 		} else {
 			var keepVelocityField = this.element.fields.get("keepvelocity");
@@ -71,10 +77,6 @@ class TeleportItem extends PowerUp {
 
 			marble.teleporterMarker.skinOverride = marble.teleporterKeepVelocity ? "yellow" : null;
 			marble.teleporterMarker.setPosition(marble.teleporterSavedPosition.x, marble.teleporterSavedPosition.y, marble.teleporterSavedPosition.z);
-
-			AudioManager.playSound(ResourceLoader.getResource("data/sound/teleport.wav", ResourceLoader.getAudio, this.soundResources));
-			if (marble == this.level.marble)
-				this.level.displayAlert("Teleporter has been activated, please wait.");
 			return false;
 		}
 	}

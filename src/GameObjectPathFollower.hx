@@ -19,13 +19,22 @@ class PathFollowerState {
 	public var scale:Vector;
 }
 
-/** Rewind snapshot of a path follower's progress - see `RewindFrame`/`RewindManager`. */
+/** Rewind snapshot of a path follower's progress - see `RewindFrame`/`RewindManager`. `active`
+	replaces the old "the array slot itself is `null`" convention for "not currently on a path" -
+	`RewindFrame.pathFollowerStates` now holds one always-non-null, reusable instance per mover
+	(see [PQ Port Status](pq-port-status.md)'s rewind-optimization entry), so a mover coming on/off
+	a path across frames doesn't need to allocate/discard the slot itself, just flip this flag. All
+	fields default so a pooled instance can be constructed once with `new PathFollowerSaveState()`
+	and filled in later via `fillState`. */
 @:structInit
 class PathFollowerSaveState {
-	public var pathPosition:Float;
-	public var currentNode:String;
-	public var prevNode:String;
-	public var rngCursor:Int;
+	public var active:Bool = false;
+	public var pathPosition:Float = 0;
+	public var currentNode:String = "";
+	public var prevNode:String = "";
+	public var rngCursor:Int = 0;
+
+	public function new() {}
 }
 
 /** Walks a `PathNode` chain and drives a `GameObject`'s transform along it. Ported from PQ's
@@ -69,14 +78,15 @@ class GameObjectPathFollower {
 		}
 	}
 
-	/** Snapshot used by rewind - see `RewindFrame`/`RewindManager`. */
-	public function getState():PathFollowerSaveState {
-		return {
-			pathPosition: this.pathPosition,
-			currentNode: this.currentNodeName,
-			prevNode: this.prevNodeName,
-			rngCursor: this.rngCursor
-		};
+	/** Snapshot used by rewind - see `RewindFrame`/`RewindManager`. Mutates a pooled instance in
+		place (rather than allocating a fresh one every tick) since `RewindManager.recordFrame` keeps
+		one persistent `PathFollowerSaveState` per mover. */
+	public function fillState(s:PathFollowerSaveState) {
+		s.active = true;
+		s.pathPosition = this.pathPosition;
+		s.currentNode = this.currentNodeName;
+		s.prevNode = this.prevNodeName;
+		s.rngCursor = this.rngCursor;
 	}
 
 	public function setState(s:PathFollowerSaveState) {
@@ -92,11 +102,6 @@ class GameObjectPathFollower {
 			this.frameDuration = 0;
 			applyState(state.position, state.rotation, state.scale);
 		}
-	}
-
-	public function reset() {
-		this.pathPosition = 0;
-		this.ended = false;
 	}
 
 	function getNode(name:String):PathNodeElement {

@@ -4115,7 +4115,11 @@ class Marble extends GameObject {
 		}
 
 		if (this.bubbleActive) {
-			this.bubbleVisual.setPosition(x, y, z);
+			var camPos = this.level.scene.camera.pos;
+			var objPos = this.bubbleVisual.getAbsPos().getPosition();
+			var faceDir = camPos.sub(objPos).normalized();
+			var visualPos = new Vector(x, y, z).add(faceDir.multiply(0.2));
+			this.bubbleVisual.setPosition(visualPos.x, visualPos.y, visualPos.z);
 			if (selfMarble)
 				this.bubbleSound.pause = false;
 		} else {

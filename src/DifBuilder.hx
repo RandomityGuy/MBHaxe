@@ -78,7 +78,7 @@ typedef VertexBucket = {
 }
 
 class DifBuilder {
-	static var materialDict:Map<String, {
+	public static var materialDict:Map<String, {
 		friction:Float,
 		restitution:Float,
 		?force:Float
@@ -91,7 +91,15 @@ class DifBuilder {
 			friction: 0.2,
 			restitution: 0.5
 		},
+		"friction_low_shadow" => {
+			friction: 0.2,
+			restitution: 0.5
+		},
 		"friction_high" => {
+			friction: 1.5,
+			restitution: 0.5
+		},
+		"friction_high_shadow" => {
 			friction: 1.5,
 			restitution: 0.5
 		},
@@ -172,9 +180,37 @@ class DifBuilder {
 			friction: 0.03,
 			restitution: 0.95
 		},
+		"xmasice" => {
+			friction: 0.03,
+			restitution: 0.95
+		},
+		"xmasice_shadow" => {
+			friction: 0.03,
+			restitution: 0.95
+		},
 		"mmg_ice_shadow" => {
 			friction: 0.03,
 			restitution: 0.95
+		},
+		"spooky_acidwater" => {
+			friction: 6.0,
+			restitution: 0.0
+		},
+		"spooky_dirt" => {
+			friction: 6.0,
+			restitution: 0.3
+		},
+		"spooky_grass" => {
+			friction: 2.0,
+			restitution: 0.75
+		},
+		"xmassnow" => {
+			friction: 3.0,
+			restitution: 0.2
+		},
+		"xmassnowshadow" => {
+			friction: 3.0,
+			restitution: 0.2
 		},
 		"friction_mp_high" => {
 			friction: 6,
@@ -183,6 +219,11 @@ class DifBuilder {
 		"friction_mp_high_shadow" => {
 			friction: 6,
 			restitution: 0.3
+		},
+		"pq_lava" => {
+			friction: 1,
+			restitution: 2,
+			force: 15.0
 		},
 		"pq_friction_bouncy" => {
 			friction: 0.2,
@@ -197,6 +238,10 @@ class DifBuilder {
 			friction: 0.07331,
 			restitution: 0.75
 		},
+		"pq_friction_ice_with_danger" => {
+			friction: 0.07331,
+			restitution: 0.75
+		},
 		"pq_friction_mud" => {
 			friction: 0.3,
 			restitution: 0.5
@@ -208,7 +253,42 @@ class DifBuilder {
 		"pq_friction_space" => {
 			friction: 0.01,
 			restitution: 0.35
-		}
+		},
+		"bumper-rubber" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"triang-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"triang-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"pball-round-side" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"pball-round-top" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"pball-round-bottm" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"bumper" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"sigil_glow" => {friction: 0.5, restitution: 0.0, force: 15.0},
+		"shard_snow" => {friction: 0.0, restitution: 0.0, force: 0.0},
+		"base.shard_ice" => {friction: 0.0, restitution: 0.0, force: 0.0},
+		"roundbumper_tex" => {
+			friction: 0.2,
+			restitution: 0.0,
+			force: 15.0
+		},
+		"tribumper_tex" => {
+			friction: 0.2,
+			restitution: 0.0,
+			force: 15.0
+		},
+		"repul_stripe_caution" => {
+			friction: 1.0,
+			restitution: 1.0,
+			force: 10.0
+		},
+		"repul_pq_construction_concrete" => {
+			friction: 1.0,
+			restitution: 1.0,
+			force: 10.0
+		},
+		"pq_ray_wall_combo_repul" => {
+			friction: 1.0,
+			restitution: 1.0,
+			force: 5.0
+		},
 		];
 
 	static var customMaterialDict:Map<String, {

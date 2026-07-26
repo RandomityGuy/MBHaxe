@@ -175,7 +175,7 @@ class Gem extends DtsObject {
 		if (color.length == 0)
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 		if (isFancy) {
-			color = element.fields.get("skin")[0];
+			color = element.fields.exists("skin") ? element.fields.get("skin")[0] : "base";
 		}
 		// Instancing batches by `identifier`; color alone isn't enough since fancy/PQ/vanilla gems
 		// use different mesh geometry (see dtsPath above), not just a different material.
@@ -290,6 +290,7 @@ class Gem extends DtsObject {
 	}
 
 	override function reset() {
+		super.reset();
 		this.pickedUp = false;
 		this.pickUpClient = -1;
 		this.setOpacity(1);

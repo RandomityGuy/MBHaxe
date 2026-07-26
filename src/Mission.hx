@@ -64,9 +64,7 @@ class Mission {
 		var entry = ResourceLoader.getFileEntry(this.path).entry;
 		var misText = Util.toASCII(entry.getBytes());
 
-		var contents = StringTools.endsWith(this.path.toLowerCase(), ".mcs")
-			? new mis.McsParser(misText).parse()
-			: new MisParser(misText).parse();
+		var contents = StringTools.endsWith(this.path.toLowerCase(), ".mcs") ? new mis.McsParser(misText).parse() : new MisParser(misText).parse();
 		root = contents.root;
 		marbleAttributes = contents.marbleAttributes;
 
@@ -240,29 +238,6 @@ class Mission {
 			return path;
 		Console.error("Interior resource not found: " + rawElementPath);
 		return "";
-	}
-
-	/** Computes the clock time in MBP when the user should be warned that they're about to exceed the par time. */
-	public function computeAlarmStartTime() {
-		var alarmStart = this.qualifyTime;
-		if (this.gameMode != null && this.gameMode == 'hunt') {
-			alarmStart = 15;
-			if (this.missionInfo.alarmstarttime != null)
-				alarmStart = MisParser.parseNumber(this.missionInfo.alarmstarttime);
-			if (alarmStart == 0)
-				alarmStart = 15;
-			return alarmStart;
-		}
-		var alarmStart = this.qualifyTime;
-		if (this.missionInfo.alarmstarttime != null)
-			alarmStart -= MisParser.parseNumber(this.missionInfo.alarmstarttime);
-		else {
-			alarmStart -= 15;
-		}
-
-		alarmStart = Math.max(0, alarmStart);
-
-		return alarmStart;
 	}
 
 	public function download(onFinish:Void->Void) {

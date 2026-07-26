@@ -5,6 +5,7 @@ import src.DtsObject;
 import src.MarbleWorld;
 import triggers.Trigger;
 import triggers.OutOfBoundsTrigger;
+import triggers.MultipleTGTT;
 import triggers.InBoundsTrigger;
 import triggers.HelpTrigger;
 import triggers.TeleportTrigger;
@@ -400,6 +401,11 @@ class DatablockRegistry {
 		{
 			match: Exact(["outofboundstrigger"]),
 			create: (element, level) -> new OutOfBoundsTrigger(element, level)
+		},
+		{
+			// Mission-specific to `data/missions_pq/expert/Polymorphism.mcs` - see `MultipleTGTT.hx`.
+			match: Exact(["multipletgtt"]),
+			create: (element, level) -> new MultipleTGTT(element, level)
 		},
 		{
 			match: Exact(["inboundstrigger"]),

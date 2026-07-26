@@ -32,6 +32,7 @@ class CountdownStartTrigger extends Trigger {
 	}
 
 	override function reset() {
+		super.reset();
 		this.activated = false;
 	}
 }

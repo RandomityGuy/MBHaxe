@@ -1,5 +1,7 @@
 package shapes;
 
+import modes.TwoDMode;
+import modes.GameMode.GameModeFactory;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
 import src.ResourceLoader;
@@ -63,6 +65,7 @@ class SuperSpeed extends PowerUp {
 		ssEmitterParticleData = new ParticleData();
 		ssEmitterParticleData.identifier = "superSpeedParticle";
 		ssEmitterParticleData.texture = ResourceLoader.getResource("data/particles/spark.png", ResourceLoader.getTexture, this.textureResources);
+		this.radarIndex = 30;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -79,7 +82,14 @@ class SuperSpeed extends PowerUp {
 	}
 
 	public function use(marble:src.Marble, timeState:TimeState) {
-		var movementVector = marble.getMarbleAxis()[0];
+		var marbleAxis = marble.getMarbleAxis();
+
+		var movementVector = marbleAxis[0];
+
+		var twoDMode = GameModeFactory.findMode(this.level.gameMode, TwoDMode);
+		if (twoDMode != null) {
+			movementVector = marbleAxis[1].multiply(twoDMode.lastPressedLR ? 1 : -1);
+		}
 
 		var boostVec = movementVector.clone();
 

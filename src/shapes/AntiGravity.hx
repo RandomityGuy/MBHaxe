@@ -19,6 +19,7 @@ class AntiGravity extends PowerUp {
 		this.identifier = "AntiGravity" + this.dtsPath;
 		this.pickUpName = "Gravity Defier";
 		this.autoUse = true;
+		this.radarIndex = 11;
 		if (norespawn)
 			this.cooldownDuration = Math.NEGATIVE_INFINITY;
 	}

@@ -16,6 +16,7 @@ class ShockAbsorber extends PowerUp {
 		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "ShockAbsorber" + this.dtsPath;
 		this.pickUpName = "Anti-Recoil PowerUp";
+		this.radarIndex = 27;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

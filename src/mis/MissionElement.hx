@@ -106,6 +106,11 @@ class MissionElementScriptObject extends MissionElementBase {
 	var nolapscheckpoint:String;
 	var speedtoqualify:String;
 
+	// radar
+	var radardistance:String;
+	var radargemdistance:String;
+	var customradarrule:String;
+
 	public function new() {
 		_type = MissionElementType.ScriptObject;
 	}

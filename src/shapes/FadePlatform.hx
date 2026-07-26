@@ -204,33 +204,47 @@ class FadePlatform extends DtsObject {
 			}
 		}
 
-		if (this.functionality == "trapdoor" && this.lastContactTime > -1e7) {
-			var progress = timeState.currentAttemptTime - this.lastContactTime;
-			var hideEnd = this.fadeOutTime + this.invisibleTime;
-			if (progress < this.fadeOutTime) {
-				if (this.fadeStyle == "cloak")
-					this.applyCloak(Math.min(progress * CLOAK_RATE, 1));
-				else
-					this.setOpacity(1 - Util.clamp(progress / Math.max(this.fadeOutTime, 0.001), 0, 1));
-			} else if (this.permanent || progress - this.fadeOutTime < this.invisibleTime) {
-				// `permanent` only takes effect once the cycle has actually reached this point -
-				// gated by `lastContactTime > -1e7` above, so a never-triggered permanent trapdoor
-				// stays in its default fully-visible/collideable state.
-				this.setCollisionEnabled(false);
-				this.setOpacity(0);
-			} else if (progress - hideEnd < this.fadeInTime) {
-				this.setCollisionEnabled(true); // `hide(false)` fires immediately at fade-in start.
-				if (this.fadeStyle == "cloak") {
-					var progressIn = Math.min((progress - hideEnd) * CLOAK_RATE, 1);
-					this.applyCloak(1 - progressIn);
+		if (this.functionality == "trapdoor") {
+			if (this.lastContactTime > -1e7) {
+				var progress = timeState.currentAttemptTime - this.lastContactTime;
+				var hideEnd = this.fadeOutTime + this.invisibleTime;
+				if (progress < this.fadeOutTime) {
+					if (this.fadeStyle == "cloak")
+						this.applyCloak(Math.min(progress * CLOAK_RATE, 1));
+					else
+						this.setOpacity(1 - Util.clamp(progress / Math.max(this.fadeOutTime, 0.001), 0, 1));
+				} else if (this.permanent || progress - this.fadeOutTime < this.invisibleTime) {
+					// `permanent` only takes effect once the cycle has actually reached this point -
+					// gated by `lastContactTime > -1e7` above, so a never-triggered permanent trapdoor
+					// stays in its default fully-visible/collideable state.
+					this.setCollisionEnabled(false);
+					this.setOpacity(0);
+				} else if (progress - hideEnd < this.fadeInTime) {
+					this.setCollisionEnabled(true); // `hide(false)` fires immediately at fade-in start.
+					if (this.fadeStyle == "cloak") {
+						var progressIn = Math.min((progress - hideEnd) * CLOAK_RATE, 1);
+						this.applyCloak(1 - progressIn);
+					} else {
+						this.setOpacity(Util.clamp((progress - hideEnd) / Math.max(this.fadeInTime, 0.001), 0, 1));
+					}
 				} else {
-					this.setOpacity(Util.clamp((progress - hideEnd) / Math.max(this.fadeInTime, 0.001), 0, 1));
+					this.setCollisionEnabled(true);
+					if (this.fadeStyle == "cloak")
+						this.applyCloak(0); // restores the original texture, not just opacity
+					this.setOpacity(1);
 				}
 			} else {
+				// Resting state ("never touched") - also re-applied here every frame, not just in
+				// `reset()`, so rewinding back to before this platform was ever touched restores the
+				// visual/collision instead of leaving both stuck at whatever `update()` last computed
+				// right before the rewind (the actual bug: this branch used to be skipped entirely
+				// whenever `lastContactTime <= -1e7`, which is exactly what rewinding-to-never-touched
+				// produces).
 				this.setCollisionEnabled(true);
 				if (this.fadeStyle == "cloak")
-					this.applyCloak(0); // restores the original texture, not just opacity
-				this.setOpacity(1);
+					this.applyCloak(0);
+				else
+					this.setOpacity(1);
 			}
 		}
 	}
