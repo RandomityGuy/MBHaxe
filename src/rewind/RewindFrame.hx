@@ -55,6 +55,35 @@ class FadePlatformSaveState {
 	public function new() {}
 }
 
+/** Same idea as `TrapdoorSaveState`, for `RepetitiveTriggerGotoTarget`'s `triggered`/`enterCount`
+	"triggered-once gate" state - the same bug class `PathTrigger.triggered` had (see its doc
+	comment), fixed the same way. */
+@:publicFields
+class RepetitiveTriggerSaveState {
+	var triggered:Bool;
+	var enterCount:Int;
+
+	public function new() {}
+}
+
+/** `CountdownStartTrigger.activated` has the same "triggered-once gate" bug class as
+	`RepetitiveTriggerGotoTarget`/`PathTrigger`; `pendingStartTime`/`pendingTime`/`pendingIcon` are
+	the (also genuinely per-tick, not self-healing) state backing its `startDelay` countdown, which
+	used to be a `level.schedule()` callback - converting that to a plain per-tick check
+	(`CountdownStartTrigger.update`) means this state now needs the same explicit rewind snapshot
+	any other mutable-per-tick field gets. */
+@:publicFields
+class CountdownTriggerSaveState {
+	var activated:Bool;
+	var pendingStartTime:Float;
+	var pendingTime:Float;
+	var pendingIcon:String;
+
+	public function new() {
+		pendingIcon = "";
+	}
+}
+
 @:publicFields
 class RewindFrame {
 	var timeState:TimeState;
@@ -137,6 +166,16 @@ class RewindFrame {
 		`gemStates`/`iceShardStates`. See `triggers.PathTrigger.triggered`'s doc comment. */
 	var pathTriggerStates:Array<Bool>;
 
+	/** Index-aligned with iterating `level.pathedInteriors` then each one's own nested
+		`triggers` array, filtered to `RepetitiveTriggerGotoTarget` instances - these live nested
+		inside their owning `PathedInterior.triggers`, not `level.triggers`, but that nesting is
+		built once at load and never mutated afterward, so (unlike `PathTrigger`'s `movingObjects`)
+		no pre-scan/stable-registration step is needed for this to stay positionally aligned. */
+	var repetitiveTriggerStates:Array<RepetitiveTriggerSaveState>;
+
+	/** Index-aligned with `level.triggers.filter(x -> x is triggers.CountdownStartTrigger)`. */
+	var countdownTriggerStates:Array<CountdownTriggerSaveState>;
+
 	/** Ported from the `mbu-port` branch's design - whichever `GameMode` (or `CompositeMode` of
 		several) is active supplies one of these via `getRewindState()`/`constructRewindState()`,
 		rather than `RewindFrame` growing a flat field per mode regardless of which mode is active. */
@@ -192,6 +231,8 @@ class RewindFrame {
 		iceShardGotoTargetStates = [];
 		countdownIcon = "";
 		pathTriggerStates = [];
+		repetitiveTriggerStates = [];
+		countdownTriggerStates = [];
 		pathFollowerStates = [];
 		oobState = {oob: false, timeState: null};
 		checkpointState = {
@@ -288,6 +329,18 @@ class RewindFrame {
 		framesize += 8; // countdownRemaining
 		framesize += 2 + countdownIcon.length; // countdownIcon
 		framesize += 2 + pathTriggerStates.length * 1; // pathTriggerStates
+		framesize += 2; // repetitiveTriggerStates.length
+		for (s in repetitiveTriggerStates) {
+			framesize += 1; // s.triggered
+			framesize += 2; // s.enterCount
+		}
+		framesize += 2; // countdownTriggerStates.length
+		for (s in countdownTriggerStates) {
+			framesize += 1; // s.activated
+			framesize += 8; // s.pendingStartTime
+			framesize += 8; // s.pendingTime
+			framesize += 2 + s.pendingIcon.length; // s.pendingIcon
+		}
 		framesize += 1; // Null<modeState>
 		if (modeState != null)
 			framesize += modeState.getSize();
@@ -444,6 +497,19 @@ class RewindFrame {
 		bb.writeInt16(pathTriggerStates.length);
 		for (s in pathTriggerStates)
 			bb.writeByte(s ? 1 : 0);
+		bb.writeInt16(repetitiveTriggerStates.length);
+		for (s in repetitiveTriggerStates) {
+			bb.writeByte(s.triggered ? 1 : 0);
+			bb.writeInt16(s.enterCount);
+		}
+		bb.writeInt16(countdownTriggerStates.length);
+		for (s in countdownTriggerStates) {
+			bb.writeByte(s.activated ? 1 : 0);
+			bb.writeDouble(s.pendingStartTime);
+			bb.writeDouble(s.pendingTime);
+			bb.writeInt16(s.pendingIcon.length);
+			bb.writeString(s.pendingIcon);
+		}
 		bb.writeByte(modeState == null ? 0 : 1);
 		if (modeState != null)
 			modeState.serialize(rm, bb);
@@ -642,6 +708,23 @@ class RewindFrame {
 		var pathTriggerStates_len = br.readInt16();
 		for (i in 0...pathTriggerStates_len)
 			pathTriggerStates.push(br.readByte() != 0);
+		var repetitiveTriggerStates_len = br.readInt16();
+		syncLength(repetitiveTriggerStates, repetitiveTriggerStates_len, () -> new RepetitiveTriggerSaveState());
+		for (i in 0...repetitiveTriggerStates_len) {
+			var s = repetitiveTriggerStates[i];
+			s.triggered = br.readByte() != 0;
+			s.enterCount = br.readInt16();
+		}
+		var countdownTriggerStates_len = br.readInt16();
+		syncLength(countdownTriggerStates, countdownTriggerStates_len, () -> new CountdownTriggerSaveState());
+		for (i in 0...countdownTriggerStates_len) {
+			var s = countdownTriggerStates[i];
+			s.activated = br.readByte() != 0;
+			s.pendingStartTime = br.readDouble();
+			s.pendingTime = br.readDouble();
+			var pendingIcon_len = br.readInt16();
+			s.pendingIcon = br.readString(pendingIcon_len);
+		}
 		var hasModeState = br.readByte() != 0;
 		if (hasModeState) {
 			modeState = rm.level.gameMode.constructRewindState();

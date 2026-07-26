@@ -3,6 +3,8 @@ package rewind;
 import rewind.RewindFrame.RewindMPState;
 import rewind.RewindFrame.TrapdoorSaveState;
 import rewind.RewindFrame.FadePlatformSaveState;
+import rewind.RewindFrame.RepetitiveTriggerSaveState;
+import rewind.RewindFrame.CountdownTriggerSaveState;
 import haxe.io.BytesInput;
 import haxe.io.BytesBuffer;
 import mis.MissionElement.MissionElementBase;
@@ -140,6 +142,34 @@ class RewindManager {
 		for (t in level.triggers)
 			if (t is triggers.PathTrigger)
 				rf.pathTriggerStates.push((cast t : triggers.PathTrigger).triggered);
+		var repetitiveTriggerIdx = 0;
+		for (pi in level.pathedInteriors) {
+			for (t in pi.triggers) {
+				if (!(t is triggers.RepetitiveTriggerGotoTarget))
+					continue;
+				var rt:triggers.RepetitiveTriggerGotoTarget = cast t;
+				if (repetitiveTriggerIdx >= rf.repetitiveTriggerStates.length)
+					rf.repetitiveTriggerStates.push(new RepetitiveTriggerSaveState());
+				var s = rf.repetitiveTriggerStates[repetitiveTriggerIdx++];
+				s.triggered = rt.triggered;
+				s.enterCount = rt.enterCount;
+			}
+		}
+		rf.repetitiveTriggerStates.resize(repetitiveTriggerIdx);
+		var countdownTriggerIdx = 0;
+		for (t in level.triggers) {
+			if (!(t is triggers.CountdownStartTrigger))
+				continue;
+			var ct:triggers.CountdownStartTrigger = cast t;
+			if (countdownTriggerIdx >= rf.countdownTriggerStates.length)
+				rf.countdownTriggerStates.push(new CountdownTriggerSaveState());
+			var s = rf.countdownTriggerStates[countdownTriggerIdx++];
+			s.activated = ct.activated;
+			s.pendingStartTime = ct.pendingStartTime;
+			s.pendingTime = ct.pendingTime;
+			s.pendingIcon = ct.pendingIcon;
+		}
+		rf.countdownTriggerStates.resize(countdownTriggerIdx);
 		rf.modeState = level.gameMode.getRewindState();
 
 		rf.marbleRadius = level.marble._radius;
@@ -383,6 +413,30 @@ class RewindManager {
 		for (t in level.triggers)
 			if (t is triggers.PathTrigger)
 				(cast t : triggers.PathTrigger).triggered = ptstates.shift();
+
+		var rtIdx = 0;
+		for (pi in level.pathedInteriors) {
+			for (t in pi.triggers) {
+				if (!(t is triggers.RepetitiveTriggerGotoTarget))
+					continue;
+				var rt:triggers.RepetitiveTriggerGotoTarget = cast t;
+				var s = rf.repetitiveTriggerStates[rtIdx++];
+				rt.triggered = s.triggered;
+				rt.enterCount = s.enterCount;
+			}
+		}
+
+		var ctIdx = 0;
+		for (t in level.triggers) {
+			if (!(t is triggers.CountdownStartTrigger))
+				continue;
+			var ct:triggers.CountdownStartTrigger = cast t;
+			var s = rf.countdownTriggerStates[ctIdx++];
+			ct.activated = s.activated;
+			ct.pendingStartTime = s.pendingStartTime;
+			ct.pendingTime = s.pendingTime;
+			ct.pendingIcon = s.pendingIcon;
+		}
 
 		if (rf.modeState != null)
 			level.gameMode.applyRewindState(rf.modeState);

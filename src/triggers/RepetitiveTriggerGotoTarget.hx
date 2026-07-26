@@ -8,12 +8,22 @@ import src.Marble;
 
 class RepetitiveTriggerGotoTarget extends Trigger {
 	var interior:PathedInterior;
-	var enterCounts:Map<Marble, Int> = [];
-	var triggered:Bool = false;
+
+	// Real PQ's `enterCount` is tracked per-marble (MP resync concern) - collapsed to a single
+	// SP-only counter here per direct instruction, matching this port's established "MP is out of
+	// scope" stance elsewhere.
+	public var enterCount:Int = 0;
+	public var triggered:Bool = false;
 
 	public function new(element:MissionElementTrigger, interior:PathedInterior) {
 		super(element, interior.level);
 		this.interior = interior;
+	}
+
+	public override function reset() {
+		super.reset();
+		this.triggered = false;
+		this.enterCount = 0;
 	}
 
 	public override function onMarbleEnter(marble:Marble, time:TimeState) {
@@ -27,8 +37,7 @@ class RepetitiveTriggerGotoTarget extends Trigger {
 		var numTimesToRepeatField = this.element.fields.get("numtimestorepeat");
 		var numTimesToRepeat = numTimesToRepeatField != null ? Std.int(MisParser.parseNumber(numTimesToRepeatField[0])) : 0;
 
-		var count = (this.enterCounts.exists(marble) ? this.enterCounts.get(marble) : 0) + 1;
-		this.enterCounts.set(marble, count);
+		var count = ++this.enterCount;
 
 		if (count < numTimesToTrigger)
 			return;
