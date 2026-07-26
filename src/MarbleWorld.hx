@@ -167,6 +167,7 @@ class MarbleWorld extends Scheduler {
 	/** All placed `IceShard1`/`IceShard2` instances - mirrors `gems` (used for rewind snapshotting
 		of `IceShard.destroyed`, see `RewindFrame.iceShardStates`). */
 	public var iceShards:Array<shapes.IceShard> = [];
+	public var cannons:Array<shapes.Cannon> = [];
 
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
 

@@ -19,22 +19,33 @@ import mis.MissionElement.MissionElementStaticShape;
 /** Ported from `hazards.cs`'s `NukeEmitter`, which reuses `LandMineParticle` (`particles =
 	"LandMineParticle"`, not a separate "NukeParticle" - the real, commented-out `NukeParticle`
 	datablock is dead/unused, "Is this even used?") with its own emitter timing (identical to
-	`LandMineEmitter`'s, in fact). `emitterLifetime` kept at MBHaxe's tuned value - same "no separate
-	explosion-duration concept" note as `LandMine.hx`. Spin isn't set on `LandMineParticle`, so it
-	defaults to 0, not the `40`/`-90`/`90` an earlier port pass had invented. */
+	`LandMineEmitter`'s, in fact) - but `NukeExplosion` drives it with its own, much bigger
+	`particleDensity = 120`/`particleRadius = 3` (vs. LandMine's 80/1). Same `spawnOffset`/
+	`emitterLifetime` emulation of the real radius-distributed one-shot spawn as `LandMine.hx`'s
+	`landMineParticle`/`shapes.Cannon`'s `cannonVolumeOptions` - see either's doc comment. Spin
+	isn't set on `LandMineParticle`, so it defaults to 0, not the `40`/`-90`/`90` an earlier port
+	pass had invented. */
 final nukeParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 7,
 	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 2,
 	velocityVariance: 1,
-	emitterLifetime: 50,
+	emitterLifetime: 120 * 7,
 	ejectionOffset: 0,
 	thetaMin: 0,
 	thetaMax: 60,
 	phiReferenceVel: 0,
 	phiVariance: 360,
 	inheritedVelFactor: 0.2,
+	spawnOffset: () -> {
+		var dir = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+		if (dir.lengthSq() < 0.0001)
+			dir.set(0, 0, 1);
+		dir.normalize();
+		var radius = Math.pow(Math.random(), 1 / 3) * 3;
+		return dir.multiply(radius);
+	},
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Add,
