@@ -34,6 +34,12 @@ class SmallDuctFan extends ForceObject {
 	}
 
 	public override function init(level:src.MarbleWorld, onFinish:Void->Void) {
+		// Ported from `applyGravity()` (`core/server/missionload.cs`): `MissionInfo.fanStrength`
+		// (default 40 when blank) scaled by this datablock's own 0.25 `forceStrengthModifier` - see
+		// `DuctFan.hx` for the 1.0-modifier sibling.
+		if (level != null && level.mission != null && level.mission.missionInfo != null && level.mission.missionInfo.fanstrength != null
+			&& level.mission.missionInfo.fanstrength != "")
+			this.forceDatas[0].forceStrength = mis.MisParser.parseNumber(level.mission.missionInfo.fanstrength) * 0.25;
 		super.init(level, () -> {
 			ResourceLoader.load("sound/fan_loop.wav").entry.load(() -> {
 				this.soundChannel = AudioManager.playSound(ResourceLoader.getResource("data/sound/fan_loop.wav", ResourceLoader.getAudio,

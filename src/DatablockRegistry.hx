@@ -230,7 +230,14 @@ class DatablockRegistry {
 			create: element -> new Checkpoint(cast element)
 		},
 		{
-			match: Exact(["ductfan", "ductfan_mbu", "ductfan_mbm", "ductfan_pq", "nomeshductfan_pq"]),
+			match: Exact([
+				"ductfan",
+				"ductfan_mbu",
+				"ductfan_mbm",
+				"ductfan_pq",
+				"nomeshductfan_pq",
+				"taductfan"
+			]),
 			create: element -> new DuctFan(cast element)
 		},
 		{

@@ -111,6 +111,16 @@ class MissionElementScriptObject extends MissionElementBase {
 	var radargemdistance:String;
 	var customradarrule:String;
 
+	// Mission-wide physics defaults, ported from the editor's `EMI_Mega`/`EMI_FanStrength`/
+	// `EMI_Gravity`/`EMI_JumpImpulse` fields (`core/editor/functions/editMissionInfo.cs`) - real
+	// source applies these in `applyGravity()` (`core/server/missionload.cs`), falling back to
+	// 20/7.5/40 respectively when blank; see `Marble.hx`'s `loadMarbleAttributes`/
+	// `isMegaMarbleEnabled` and `shapes/DuctFan.hx`/`SmallDuctFan.hx` for where they're applied.
+	var mega:String;
+	var fanstrength:String;
+	var gravity:String;
+	var jumpimpulse:String;
+
 	public function new() {
 		_type = MissionElementType.ScriptObject;
 	}
