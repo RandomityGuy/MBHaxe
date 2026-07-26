@@ -1094,6 +1094,7 @@ class Marble extends GameObject {
 	public var activeCannon:shapes.Cannon = null;
 
 	var cannonCharge:Float = 0;
+	public var cannonBeforeGravity:Float = 20;
 	var cannonFrozenLayer:Array<PhysicsAttributeOverride> = null;
 	var cannonControlLockLayer:Array<PhysicsAttributeOverride> = null;
 
@@ -4549,6 +4550,11 @@ class Marble extends GameObject {
 		this.velocity.set(0, 0, 0);
 		this.omega.set(0, 0, 0);
 		this.cannonCharge = 0;
+		// Snapshot before pushing the "frozen" layer (which zeroes the `gravity` attribute while
+		// contained) - matches `$Cannon::BeforeGravity`, used by the aim-assist trajectory's own
+		// physics integration (`Cannon.updateAimVisualization`), which needs the marble's *real*
+		// gravity, not the temporarily-zeroed contained value.
+		this.cannonBeforeGravity = this._gravity;
 		this.cannonFrozenLayer = this.pushPhysicsLayer(buildCannonFrozenLayer());
 		this.movementTriggerCount++;
 
@@ -4679,6 +4685,7 @@ class Marble extends GameObject {
 			this.movementTriggerCount = 0;
 		if (this.level != null)
 			this.level.playGui.hideCannonHud();
+		cannon.hideAimVisualization();
 	}
 
 	/** Ported from `finishCannonCharge`/`GameConnection::leaveCannon` - a natural fire-and-exit
