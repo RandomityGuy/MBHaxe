@@ -129,6 +129,13 @@ class RewindManager {
 		rf.fireballTime = level.marble.fireballTime;
 		rf.fireballTotalTime = level.marble.fireballTotalTime;
 		rf.fireballLastBlastTime = @:privateAccess level.marble.fireballLastBlastTime;
+		rf.activeCannon = level.marble.activeCannon;
+		rf.cannonCharge = @:privateAccess level.marble.cannonCharge;
+		rf.lastCannon = level.marble.lastCannon;
+		rf.cannonReenableTime = @:privateAccess level.marble.cannonReenableTime;
+		rf.cannonControlLockUntil = @:privateAccess level.marble.cannonControlLockUntil;
+		rf.cannonCameraLockUntil = @:privateAccess level.marble.cannonCameraLockUntil;
+		rf.instantCannonFireTime = @:privateAccess level.marble.instantCannonFireTime;
 		rf.iceShardStates.resize(0);
 		rf.iceShardGotoTargetStates.resize(0);
 		for (s in level.iceShards) {
@@ -391,6 +398,26 @@ class RewindManager {
 		@:privateAccess level.marble.fireballLastBlastTime = rf.fireballLastBlastTime;
 		@:privateAccess level.playGui.updateFireballBar(level.marble.fireballTime, level.marble.fireballTotalTime,
 			@:privateAccess level.marble.canFireballBlast());
+
+		level.marble.activeCannon = rf.activeCannon;
+		@:privateAccess level.marble.cannonCharge = rf.cannonCharge;
+		level.marble.lastCannon = rf.lastCannon;
+		@:privateAccess level.marble.cannonReenableTime = rf.cannonReenableTime;
+		@:privateAccess level.marble.cannonControlLockUntil = rf.cannonControlLockUntil;
+		@:privateAccess level.marble.cannonCameraLockUntil = rf.cannonCameraLockUntil;
+		@:privateAccess level.marble.instantCannonFireTime = rf.instantCannonFireTime;
+		if (@:privateAccess level.marble.cannonFrozenLayer != null) {
+			level.marble.popPhysicsLayer(@:privateAccess level.marble.cannonFrozenLayer);
+			@:privateAccess level.marble.cannonFrozenLayer = null;
+		}
+		if (rf.activeCannon != null)
+			@:privateAccess level.marble.cannonFrozenLayer = level.marble.pushPhysicsLayer(Marble.buildCannonFrozenLayer());
+		if (@:privateAccess level.marble.cannonControlLockLayer != null) {
+			level.marble.popPhysicsLayer(@:privateAccess level.marble.cannonControlLockLayer);
+			@:privateAccess level.marble.cannonControlLockLayer = null;
+		}
+		if (rf.cannonControlLockUntil > rf.timeState.currentAttemptTime)
+			@:privateAccess level.marble.cannonControlLockLayer = level.marble.pushPhysicsLayer(Marble.buildCannonControlLockLayer());
 		for (i in 0...rf.iceShardStates.length) {
 			var shard = level.iceShards[i];
 			if (shard.destroyed != rf.iceShardStates[i])

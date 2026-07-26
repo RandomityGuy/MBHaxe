@@ -146,6 +146,19 @@ class RewindFrame {
 	var fireballTotalTime:Float;
 	var fireballLastBlastTime:Float;
 
+	/** Cannon containment state (`src.shapes.Cannon`) - `cannonFrozenLayer`/`cannonControlLockLayer`
+		themselves aren't snapshotted (same reasoning as `waterPhysicsLayer`/`bubblePhysicsLayer`
+		above - re-derived fresh from these plain fields on apply, since the override values are
+		fixed constants). */
+	var activeCannon:shapes.Cannon;
+
+	var cannonCharge:Float;
+	var lastCannon:shapes.Cannon;
+	var cannonReenableTime:Float;
+	var cannonControlLockUntil:Float;
+	var cannonCameraLockUntil:Float;
+	var instantCannonFireTime:Float;
+
 	/** Index-aligned with `level.iceShards`, mirrors `gemStates`. */
 	var iceShardStates:Array<Bool>;
 
@@ -323,6 +336,13 @@ class RewindFrame {
 		framesize += 8; // fireballTime
 		framesize += 8; // fireballTotalTime
 		framesize += 8; // fireballLastBlastTime
+		framesize += 2; // activeCannon
+		framesize += 8; // cannonCharge
+		framesize += 2; // lastCannon
+		framesize += 8; // cannonReenableTime
+		framesize += 8; // cannonControlLockUntil
+		framesize += 8; // cannonCameraLockUntil
+		framesize += 8; // instantCannonFireTime
 		framesize += 2 + iceShardStates.length * 1; // iceShardStates
 		framesize += 2 + iceShardGotoTargetStates.length * 1; // iceShardGotoTargetStates
 		framesize += 1; // countdownActive
@@ -484,6 +504,13 @@ class RewindFrame {
 		bb.writeDouble(fireballTime);
 		bb.writeDouble(fireballTotalTime);
 		bb.writeDouble(fireballLastBlastTime);
+		bb.writeInt16(rm.allocGO(activeCannon));
+		bb.writeDouble(cannonCharge);
+		bb.writeInt16(rm.allocGO(lastCannon));
+		bb.writeDouble(cannonReenableTime);
+		bb.writeDouble(cannonControlLockUntil);
+		bb.writeDouble(cannonCameraLockUntil);
+		bb.writeDouble(instantCannonFireTime);
 		bb.writeInt16(iceShardStates.length);
 		for (s in iceShardStates)
 			bb.writeByte(s ? 1 : 0);
@@ -692,6 +719,13 @@ class RewindFrame {
 		fireballTime = br.readDouble();
 		fireballTotalTime = br.readDouble();
 		fireballLastBlastTime = br.readDouble();
+		activeCannon = cast rm.getGO(br.readInt16());
+		cannonCharge = br.readDouble();
+		lastCannon = cast rm.getGO(br.readInt16());
+		cannonReenableTime = br.readDouble();
+		cannonControlLockUntil = br.readDouble();
+		cannonCameraLockUntil = br.readDouble();
+		instantCannonFireTime = br.readDouble();
 		iceShardStates.resize(0);
 		var iceShardStates_len = br.readInt16();
 		for (i in 0...iceShardStates_len)

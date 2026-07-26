@@ -17,11 +17,16 @@ import src.MarbleWorld;
 import src.MarbleGame;
 import mis.MissionElement.MissionElementStaticShape;
 
-/** Ported from `hazards.cs`'s `LandMineParticle`/`LandMineEmitter`. `emitterLifetime` is kept at
-	MBHaxe's existing tuned value (not the source's own field), since this engine has no separate
-	"explosion duration" concept the way `ExplosionData::lifeTimeMS` gives the real one - this
-	field is the only thing making these one-shot burst emitters stop here. Spin isn't set in the
-	source (`spinSpeed`/`spinRandomMin`/`spinRandomMax` default to 0 in `ParticleData`'s C++
+/** Ported from `hazards.cs`'s `LandMineParticle`/`LandMineEmitter`, as driven by
+	`LandMineExplosion`'s `particleEmitter = LandMineEmitter`, `particleDensity = 80`,
+	`particleRadius = 1` fields - the "volume particles" `Explosion::explode` spawns via a native
+	radius-distributed one-shot mode (`ParticleEmitter::emitParticles(pos, normal, radius, vel,
+	density)`) this codebase's `ParticleManager` has no equivalent for. Emulated the same way as
+	`shapes.Cannon`'s `cannonVolumeOptions` (see its doc comment): `spawnOffset` returns a
+	uniformly-random point inside a unit sphere scaled by `particleRadius`, and `emitterLifetime`
+	is `density * ejectionPeriodMS` (80 * 7) so roughly the right particle count spawns over a
+	short continuous burst approximating the real engine's instantaneous spawn. Spin isn't set in
+	the source (`spinSpeed`/`spinRandomMin`/`spinRandomMax` default to 0 in `ParticleData`'s C++
 	constructor), not the `40`/`-90`/`90` an earlier port pass had invented. */
 final landMineParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 7,
@@ -29,13 +34,21 @@ final landMineParticle:ParticleEmitterOptions = {
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 2,
 	velocityVariance: 1,
-	emitterLifetime: 50,
+	emitterLifetime: 80 * 7,
 	ejectionOffset: 0,
 	thetaMin: 0,
 	thetaMax: 60,
 	phiReferenceVel: 0,
 	phiVariance: 360,
 	inheritedVelFactor: 0.2,
+	spawnOffset: () -> {
+		var dir = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+		if (dir.lengthSq() < 0.0001)
+			dir.set(0, 0, 1);
+		dir.normalize();
+		var radius = Math.pow(Math.random(), 1 / 3) * 1;
+		return dir.multiply(radius);
+	},
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Add,

@@ -82,6 +82,9 @@ import shapes.NestEgg;
 import shapes.TeleportItem;
 import shapes.IceShard;
 import shapes.FadePlatform;
+import shapes.Cannon;
+import shapes.CannonBase;
+import shapes.Target;
 import src.PQDecorations;
 
 /**
@@ -301,6 +304,30 @@ class DatablockRegistry {
 		{
 			match: Exact(["tornado", "tornado_mbm", "tornado_pq"]),
 			create: element -> new Tornado(cast element)
+		},
+		{
+			match: Exact(["defaultcannon", "cannon_custom"]),
+			create: element -> new Cannon(cast element)
+		},
+		{
+			match: Exact(["cannon_low"]),
+			create: element -> new Cannon(cast element, 20)
+		},
+		{
+			match: Exact(["cannon_mid"]),
+			create: element -> new Cannon(cast element, 35)
+		},
+		{
+			match: Exact(["cannon_high"]),
+			create: element -> new Cannon(cast element, 50)
+		},
+		{
+			match: Exact(["defaultcannonbase"]),
+			create: element -> new CannonBase(cast element)
+		},
+		{
+			match: Exact(["target"]),
+			create: element -> new Target(cast element)
 		},
 		{
 			match: Exact(["trapdoor", "trapdoor_mbu", "trapdoor_pq"]),

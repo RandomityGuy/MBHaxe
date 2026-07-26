@@ -1086,6 +1086,33 @@ class Marble extends GameObject {
 	/** Ref-counted so overlapping `NoMovementKeysTrigger` volumes behave correctly. */
 	public var movementTriggerCount:Int = 0;
 
+	/** Cannon containment state (`server/scripts/cannon.cs`/`client/scripts/cannon.cs`) - `null`
+		when not inside a cannon. All the actual per-frame aim/fire logic lives in
+		`CameraController.updateCannonCamera` (mirrors the real engine keeping cannon aim tightly
+		coupled to the camera's own yaw/pitch state) and `shapes.Cannon`; these are just the fields
+		that need to survive a rewind/restart. */
+	public var activeCannon:shapes.Cannon = null;
+
+	var cannonCharge:Float = 0;
+	var cannonFrozenLayer:Array<PhysicsAttributeOverride> = null;
+	var cannonControlLockLayer:Array<PhysicsAttributeOverride> = null;
+
+	/** `-1e8` sentinel = no pending unlock (per [No Null Primitives](feedback_no_null_primitives.md)). */
+	var cannonControlLockUntil:Float = -1e8;
+
+	var cannonCameraLockUntil:Float = -1e8;
+
+	/** The "can't immediately re-enter the same cannon you just left" cooldown - ported from
+		`GameConnection::leaveCannon`'s `%this.disableCannon[%cannon] = true` +
+		`schedule(200, activateCannon, %cannon)`, converted to a plain elapsed-time check per
+		[No Schedules](feedback_no_schedules.md). */
+	public var lastCannon:shapes.Cannon = null;
+
+	var cannonReenableTime:Float = -1e8;
+
+	/** When an instant cannon should auto-fire, set on entry - `-1e8` sentinel = nothing pending. */
+	var instantCannonFireTime:Float = -1e8;
+
 	public var blastAmount:Float = 0;
 	public var blastTicks:Int = 0;
 	public var blastUseTick:Int = 0; // blast is 12 ticks long
@@ -1848,6 +1875,35 @@ class Marble extends GameObject {
 			{attribute: "maxdotslide", value: 0.5},
 			{attribute: "bouncerestitution", value: 0.2},
 			{attribute: "jumpimpulse", value: 7.5},
+		];
+	}
+
+	/** Ported from PQ's `"frozen"` physics layer, pushed while contained in a cannon
+		(`client/scripts/cannon.cs`'s `Physics::pushLayerName("frozen")`) - zeroes every attribute
+		that could move the marble under its own power, including gravity, since the marble should
+		float in place while the player aims (its position is forcibly overwritten every frame by
+		`CameraController.updateCannonCamera` regardless, but zeroing these too keeps behavior
+		correct on the rare frame that doesn't happen, e.g. right at container/loading edges). */
+	static function buildCannonFrozenLayer():Array<PhysicsAttributeOverride> {
+		return [
+			{attribute: "maxrollvelocity", value: 0},
+			{attribute: "angularacceleration", value: 0},
+			{attribute: "brakingacceleration", value: 0},
+			{attribute: "airacceleration", value: 0},
+			{attribute: "jumpimpulse", value: 0},
+			{attribute: "gravity", value: 0},
+		];
+	}
+
+	/** Ported from PQ's `"cannonLockControls"` physics layer - pushed briefly after firing
+		(`Cannon.lockTime`). Unlike the "frozen" layer above, gravity is NOT zeroed here - the
+		marble should fall/fly normally along its just-fired trajectory, it just can't be steered. */
+	static function buildCannonControlLockLayer():Array<PhysicsAttributeOverride> {
+		return [
+			{attribute: "maxrollvelocity", value: 0},
+			{attribute: "angularacceleration", value: 0},
+			{attribute: "brakingacceleration", value: 0},
+			{attribute: "airacceleration", value: 0},
 		];
 	}
 
@@ -3393,6 +3449,7 @@ class Marble extends GameObject {
 
 			this.updateBubble(m, timeStep);
 			this.updateFireball(timeStep);
+			this.updateCannonFiring(m, timeStep, timeState);
 
 			if (contacts.length != 0)
 				contactTime += timeStep;
@@ -3434,7 +3491,19 @@ class Marble extends GameObject {
 			this.callCollisionHandlers(tempTimeState, oldPos, newPos);
 		}
 
-		this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
+		// Skip entirely while contained in a cannon - the marble is pinned in place with zeroed
+		// velocity every frame (`CameraController.updateCannonCamera`), which starves this
+		// calculation's `rollVel.length() / this._maxRollVelocity`-style ratios down to degenerate
+		// near-zero inputs for an extended, unnatural stretch of ticks (unlike a normal brief stop),
+		// which was reaching the audio backend as an invalid parameter and crashing it.
+		if (this.activeCannon == null)
+			this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
+		else {
+			this.rollSound.volume = 0;
+			this.slipSound.volume = 0;
+			if (this.rollMegaSound != null)
+				this.rollMegaSound.volume = 0;
+		}
 
 		var megaMarbleDurationTicks = Net.isMP && Net.connectedServerInfo.competitiveMode ? 156 : 312;
 
@@ -4053,6 +4122,7 @@ class Marble extends GameObject {
 
 		this.updateTeleporterState(timeState);
 		this.updateWater(timeState);
+		this.updateCannonLocks(timeState);
 
 		this.updateTrailEmitters(timeState);
 		if (bounceEmitDelay > 0)
@@ -4160,6 +4230,13 @@ class Marble extends GameObject {
 	}
 
 	public function useBlast(timeState:TimeState) {
+		// Cannon intercepts the blast input before anything else - matches `serverCmdBlast`'s
+		// "CANCEL THE CANNON" check being the very first thing it does, ahead of every other blast
+		// mode.
+		if (this.activeCannon != null) {
+			this.cancelCannon(timeState);
+			return;
+		}
 		// Fireball intercepts the blast input first when active - if it fires, skip the normal
 		// Ultra blast entirely for this call (matches `input_useBlast`'s early return).
 		if (this.fireballBlast(timeState))
@@ -4454,6 +4531,202 @@ class Marble extends GameObject {
 		this.iceShard = null;
 	}
 
+	/** Ported from `GameConnection::enterCannon` (`server/scripts/cannon.cs`). MegaMarble is
+		explicitly cancelled (not just ignored) on entry, matching `%this.setMegaMarble(false)`. The
+		`disableCannon`/`disableCannon[%cannon]` re-entry guard is collapsed into the single
+		`lastCannon`/`cannonReenableTime` cooldown - this port has no per-cannon disable map, just
+		"was this the same cannon I just left, and has the cooldown not elapsed yet". */
+	public function enterCannon(cannon:shapes.Cannon, timeState:TimeState) {
+		if (this.activeCannon != null)
+			return;
+		if (cannon == this.lastCannon && timeState.currentAttemptTime < this.cannonReenableTime)
+			return;
+
+		this.activeCannon = cannon;
+		this.lockPowerupUse();
+		if (isMegaMarbleEnabled(timeState))
+			this.megaMarbleEnableTime = -1e8;
+
+		this.velocity.set(0, 0, 0);
+		this.omega.set(0, 0, 0);
+		this.cannonCharge = 0;
+		this.cannonFrozenLayer = this.pushPhysicsLayer(buildCannonFrozenLayer());
+		this.movementTriggerCount++;
+
+		// Ported from `clientCmdEnterCannon`'s instant-cannon branch - fires automatically after
+		// `instantDelayTime` (or effectively "next frame" if 0, matching `onNextFrame
+		// (activateInstantCannon)`) using the cannon's own fixed `yaw`/`pitch`, not the player's
+		// camera.
+		if (cannon.instant) {
+			this.instantCannonFireTime = timeState.currentAttemptTime + Math.max(cannon.instantDelayTime, 0.001);
+		} else if (this.camera != null) {
+			// Ported from `clientCmdEnterCannon`'s `setMarbleCamYaw(%cannon.lastYaw); setMarbleCamPitch
+			// (%cannon.lastPitch);` - without this, the camera keeps whatever direction the player
+			// happened to be facing before touching the cannon, which is very likely already outside
+			// (or hard up against) the cannon's own yaw/pitch bounds (measured *relative to*
+			// `cannon.yaw`/`lastYaw`, not from world zero) - `updateCannonCamera`'s bound clamp would
+			// then immediately pin the camera at one edge, making aiming feel almost frozen right
+			// from the start. `cannon.lastYaw`/`lastPitch` are stored in the same file/Torque sign
+			// convention as `cannon.pitch` itself (positive = up) - `CameraPitch`'s own convention is
+			// the opposite (positive = down, see `CameraController.updateCannonCamera`'s doc comment),
+			// so only pitch needs negating here, not yaw.
+			this.camera.CameraYaw = cannon.lastYaw;
+			this.camera.nextCameraYaw = cannon.lastYaw;
+			this.camera.CameraPitch = -cannon.lastPitch;
+			this.camera.nextCameraPitch = -cannon.lastPitch;
+		}
+	}
+
+	/** Ported from `updateCannonLaunch`/`updateCannonCharge`/`finishCannonCharge` - runs every
+		substep alongside `updateBubble`/`updateFireball`, reading the same `Move.powerupHeld`
+		continuous-hold field real PQ's `$mouseFire` maps to. Aiming/camera positioning itself lives
+		in `CameraController.updateCannonCamera` (visual-only, not gameplay-affecting) - this is only
+		the charge-accumulation/fire-detection half, kept in the deterministic substep/replay path
+		since it does affect the marble's velocity. */
+	function updateCannonFiring(m:Move, timeStep:Float, timeState:TimeState) {
+		var cannon = this.activeCannon;
+		if (cannon == null)
+			return;
+
+		if (cannon.instant) {
+			if (this.instantCannonFireTime > 0 && timeState.currentAttemptTime >= this.instantCannonFireTime) {
+				var yawRad = cannon.yaw * Math.PI / 180;
+				var pitchRad = cannon.pitch * Math.PI / 180;
+				this.fireCannon(cannon, cannon.computeFireDirection(yawRad, pitchRad), 1, timeState);
+				this.instantCannonFireTime = -1e8;
+			}
+			return;
+		}
+
+		if (cannon.useCharge) {
+			if (m.powerupHeld) {
+				this.cannonCharge += timeStep;
+				if (this.cannonCharge > cannon.chargeTime)
+					this.cannonCharge = cannon.chargeTime;
+			} else if (this.cannonCharge > 0) {
+				var t = this.cannonCharge / cannon.chargeTime;
+				// `CameraPitch` needs negating before feeding into `computeFireDirection` - see
+				// `CameraController.updateCannonCamera`'s doc comment for why.
+				var fireDir = cannon.computeFireDirection(this.camera.CameraYaw, -this.camera.CameraPitch);
+				this.fireCannon(cannon, fireDir, t, timeState);
+			}
+		} else if (m.powerupHeld) {
+			var fireDir = cannon.computeFireDirection(this.camera.CameraYaw, -this.camera.CameraPitch);
+			this.fireCannon(cannon, fireDir, 1, timeState);
+		}
+	}
+
+	/** Ported from `client/scripts/cannon.cs`'s `"cannonLockControls"`/`"cannonLockCamera"` named
+		physics layers - `lockTime` defaults to 300ms when unset (`GameConnection::leaveCannon`'s
+		`%unlockTime = (%cannon.lockTime == 0 ? 300 : %cannon.lockTime)`), matching the powerup-lock
+		default exactly. Camera lock is a plain timestamp check (`CameraController.
+		updateCannonCamera` reads `cannonCameraLockUntil` directly) since it isn't a marble physical
+		attribute PhysMod's layer stack covers. */
+	function lockCannonControls(cannon:shapes.Cannon, timeState:TimeState) {
+		var lockTime = cannon.lockTime > 0 ? cannon.lockTime : 0.3;
+		this.cannonControlLockUntil = timeState.currentAttemptTime + lockTime;
+		this.cannonControlLockLayer = this.pushPhysicsLayer(buildCannonControlLockLayer());
+		this.movementTriggerCount++;
+		if (cannon.lockCam)
+			this.cannonCameraLockUntil = timeState.currentAttemptTime + lockTime;
+	}
+
+	/** Checked once per frame (`update()`) - converts the old `schedule(lockTime, ...)`/
+		`schedule(200, activateCannon, ...)` callbacks into plain elapsed-time checks per
+		[No Schedules](feedback_no_schedules.md). */
+	public function cannonCameraLocked():Bool {
+		return this.level != null && this.level.timeState.currentAttemptTime < this.cannonCameraLockUntil;
+	}
+
+	function updateCannonLocks(timeState:TimeState) {
+		if (this.cannonControlLockLayer != null && timeState.currentAttemptTime >= this.cannonControlLockUntil) {
+			this.popPhysicsLayer(this.cannonControlLockLayer);
+			this.cannonControlLockLayer = null;
+			this.movementTriggerCount--;
+			if (this.movementTriggerCount < 0)
+				this.movementTriggerCount = 0;
+			this.unlockPowerupUse();
+		}
+	}
+
+	/** Common exit path shared by a natural fire-and-leave and a cancelled (blast-key) exit -
+		ported from the shared tail of `GameConnection::leaveCannon`/`cancelCannon`: pops the
+		"frozen" layer, unlocks movement, remembers this cannon for the re-entry cooldown. */
+	function leaveCannonInternal(timeState:TimeState) {
+		var cannon = this.activeCannon;
+		if (cannon == null)
+			return;
+		this.activeCannon = null;
+		this.lastCannon = cannon;
+		this.cannonReenableTime = timeState.currentAttemptTime + 0.2;
+		if (this.cannonFrozenLayer != null) {
+			this.popPhysicsLayer(this.cannonFrozenLayer);
+			this.cannonFrozenLayer = null;
+		}
+		this.movementTriggerCount--;
+		if (this.movementTriggerCount < 0)
+			this.movementTriggerCount = 0;
+	}
+
+	/** Ported from `finishCannonCharge`/`GameConnection::leaveCannon` - a natural fire-and-exit
+		(as opposed to `cancelCannon`, which ejects without firing). `forceFraction` is the charge
+		fraction (1 for a non-charge cannon), `yaw`/`pitch` are the aimed body rotation in radians.
+		`fireDir` is the aimed body's local +Y axis in world space (the barrel direction - matches
+		this codebase's established "local Y is forward" convention, see the DTS billboard port). */
+	public function fireCannon(cannon:shapes.Cannon, fireDir:Vector, forceFraction:Float, timeState:TimeState) {
+		if (this.activeCannon != cannon)
+			return;
+		var force = cannon.force * (cannon.useCharge ? forceFraction : 1);
+		var basePos = cannon.baseTransform.getPosition();
+		this.setMarblePosition(basePos.x, basePos.y, basePos.z);
+		this.velocity = fireDir.multiply(force);
+		this.omega.set(0, 0, 0);
+		this.cannonCharge = 0;
+		this.unlockPowerupUse();
+
+		// Ported from `finishCannonCharge`'s closing `cannonSetCamera(normalizeAngle(%yaw),
+		// normalizeAngle(%pitch))` call ("camera is already set on instant cannons" - real source
+		// skips this entirely for instant cannons, since it never touched the camera in the first
+		// place for those; matches this port's own `CameraController` branch never running for an
+		// instant cannon either). Blends the pitch halfway back toward the default resting camera
+		// pitch (0.45) instead of leaving it wherever the player last aimed, so the view settles
+		// into a normal look right after firing rather than staying stuck at a steep aim angle.
+		// Yaw is left as-is - real source's own yaw adjustment here is just a gravity-direction
+		// correction that only has any effect in a non-default-gravity zone, not worth the added
+		// complexity for this pass.
+		if (!cannon.instant && this.camera != null) {
+			this.camera.CameraPitch = this.camera.CameraPitch / 2 + 0.45;
+			this.camera.nextCameraPitch = this.camera.CameraPitch;
+		}
+
+		leaveCannonInternal(timeState);
+		lockCannonControls(cannon, timeState);
+		cannon.explode(timeState);
+	}
+
+	/** Ported from `GameConnection::cancelCannon` - fired via the blast key (`useBlast`'s cannon
+		intercept, matching `serverCmdBlast`'s "CANCEL THE CANNON" check being the very first thing
+		it does). Ejects just outside the cannon's mouth instead of firing. */
+	public function cancelCannon(timeState:TimeState) {
+		var cannon = this.activeCannon;
+		if (cannon == null)
+			return;
+		this.unlockPowerupUse();
+		leaveCannonInternal(timeState);
+
+		// Real source ejects along a purely-yaw (no pitch) direction computed from the live camera
+		// yaw; approximated here with the cannon's current full aimed barrel direction (local +Y)
+		// negated, which is close enough for "pop out the way you were facing" and avoids needing
+		// a second yaw-only rotation just for this cosmetic ejection point.
+		var mat = new Matrix();
+		cannon.getRotationQuat().toMatrix(mat);
+		var barrelDir = new Vector(0, 1, 0).transformed(mat);
+		var exitPos = cannon.getAbsPos().getPosition().sub(barrelDir.multiply(1.5 * cannon.scaleY));
+		this.setMarblePosition(exitPos.x, exitPos.y, exitPos.z);
+		this.velocity.set(0, 0, 0);
+		this.omega.set(0, 0, 0);
+	}
+
 	public inline function setMode(mode:Mode) {
 		this.mode = mode;
 	}
@@ -4501,6 +4774,23 @@ class Marble extends GameObject {
 		this.waterTriggers = [];
 		this.waterPhysicsLayer = null;
 		this.currentWaterTrigger = null;
+		// `physicsLayers` was just wiped wholesale above, so these are already-dangling references -
+		// null them out directly rather than via `popPhysicsLayer` (which would try to remove an
+		// already-gone layer). Any `lockPowerupUse()` call `enterCannon` made is unwound here too,
+		// since the normal `fireCannon`/`cancelCannon`/`updateCannonLocks` unlock path never runs on
+		// an abrupt reset (e.g. respawning while still inside a cannon).
+		if (this.activeCannon != null)
+			this.unlockPowerupUse();
+		if (this.cannonControlLockLayer != null)
+			this.unlockPowerupUse();
+		this.activeCannon = null;
+		this.cannonCharge = 0;
+		this.cannonFrozenLayer = null;
+		this.cannonControlLockLayer = null;
+		this.cannonControlLockUntil = -1e8;
+		this.cannonCameraLockUntil = -1e8;
+		this.lastCannon = null;
+		this.cannonReenableTime = -1e8;
 		this.bubbleActive = false;
 		this.bubbleTime = 0;
 		this.bubbleTotalTime = 0;
