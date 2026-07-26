@@ -11,6 +11,7 @@ import src.TimeState;
 import src.AudioManager;
 import src.ResourceLoader;
 import src.ResourceLoaderWorker;
+import src.Util;
 import src.ParticleSystem.ParticleData;
 import src.ParticleSystem.ParticleEmitterOptions;
 import collision.CollisionInfo;
@@ -202,6 +203,25 @@ class Cannon extends DtsObject {
 		transform). */
 	public var baseTransform:Matrix = null;
 
+	/** The cannon's own authored scale, captured alongside `baseTransform` - `updateAim`/
+		`updateAimFromCamera` rebuild this object's whole local transform from scratch every frame
+		(rotation + position only, no scale), so without re-applying this every time, `setTransform`
+		would silently reset a scaled cannon back to `(1,1,1)` on the very first aim update. */
+	var savedScaleX:Float = 1;
+
+	var savedScaleY:Float = 1;
+	var savedScaleZ:Float = 1;
+
+	/** Same idea as `savedScaleX/Y/Z`, for `this.base` - an auto-created base always matches the
+		cannon's own scale (`Cannon::initFields`'s auto-create block: `scale = %obj.getScale();`),
+		while an explicitly-`basename`-resolved base keeps whatever scale it was placed with; either
+		way, `updateAim`/`updateAimFromCamera` would otherwise reset it to `(1,1,1)` the same way
+		they would the body. */
+	var savedBaseScaleX:Float = 1;
+
+	var savedBaseScaleY:Float = 1;
+	var savedBaseScaleZ:Float = 1;
+
 	public var lastYaw:Float = 0;
 	public var lastPitch:Float = 0;
 
@@ -209,6 +229,35 @@ class Cannon extends DtsObject {
 	var explodeForceSound:hxd.res.Sound;
 	var smokeData:ParticleData;
 	var sparkData:ParticleData;
+
+	/** Aim-assist trajectory rings (`showAim`) - created lazily on first use, a plain 3D
+		wireframe drawn directly into the world (`h3d.scene.Graphics`) rather than reimplementing
+		Torque's `ShowTSCtrl::renderCircle` (a 2D-control technique that projects 3D points onto a
+		HUD control) - this engine can draw world-space lines natively, which is visually
+		equivalent and considerably simpler. */
+	var aimGraphics:h3d.scene.Graphics;
+
+	/** Pooled scratch storage for `updateAimVisualization` - reused across frames instead of
+		allocating a fresh `Array`/`Vector` per element every single call (see that function's doc
+		comment for the full performance rationale). Sized once, on first use, to
+		`AIM_STEP_COUNT + 1` slots and never resized again. */
+	var aimPositions:Array<Vector>;
+
+	var aimDirs:Array<Vector>;
+
+	/** Skip a full recompute if the aim hasn't moved meaningfully since the last call - by far the
+		single biggest win, since a stationary aim (the common case between mouse movements) would
+		otherwise redo the entire integrate-and-raycast loop for a bit-for-bit identical result
+		every frame. `1e8` sentinel = "never computed yet", guaranteeing the first call always
+		actually runs. */
+	var lastAimAppliedYaw:Float = 1e8;
+
+	var lastAimAppliedPitch:Float = 1e8;
+	var lastAimAppliedForceFraction:Float = 1e8;
+
+	static inline var AIM_STEP_COUNT = 125;
+
+	var aimVisualizationValid:Bool = false;
 
 	/** `-1e8` sentinel = not currently disabled (per
 		[No Null Primitives](feedback_no_null_primitives.md)). */
@@ -422,6 +471,7 @@ class Cannon extends DtsObject {
 			var baseDir = this.computeAimDirection(yawRad, 0);
 			var baseMat = new Matrix();
 			this.buildLookRotation(baseDir, worldUp).toMatrix(baseMat);
+			baseMat.scale(this.savedBaseScaleX, this.savedBaseScaleY, this.savedBaseScaleZ);
 			baseMat.setPosition(basePos);
 			this.base.setTransform(baseMat);
 		}
@@ -429,6 +479,7 @@ class Cannon extends DtsObject {
 		var bodyDir = this.computeAimDirection(yawRad, pitchRad);
 		var bodyMat = new Matrix();
 		this.buildLookRotation(bodyDir, worldUp).toMatrix(bodyMat);
+		bodyMat.scale(this.savedScaleX, this.savedScaleY, this.savedScaleZ);
 		bodyMat.setPosition(basePos);
 		this.setTransform(bodyMat);
 
@@ -451,6 +502,7 @@ class Cannon extends DtsObject {
 			var baseDir = this.computeCameraDirection(cameraYaw, 0);
 			var baseMat = new Matrix();
 			this.buildLookRotation(baseDir, worldUp).toMatrix(baseMat);
+			baseMat.scale(this.savedBaseScaleX, this.savedBaseScaleY, this.savedBaseScaleZ);
 			baseMat.setPosition(basePos);
 			this.base.setTransform(baseMat);
 		}
@@ -458,6 +510,7 @@ class Cannon extends DtsObject {
 		var bodyDir = this.computeCameraDirection(cameraYaw, cameraPitch);
 		var bodyMat = new Matrix();
 		this.buildLookRotation(bodyDir, worldUp).toMatrix(bodyMat);
+		bodyMat.scale(this.savedScaleX, this.savedScaleY, this.savedScaleZ);
 		bodyMat.setPosition(basePos);
 		this.setTransform(bodyMat);
 
@@ -487,6 +540,9 @@ class Cannon extends DtsObject {
 			// - same hazard, same fix, already established elsewhere in this codebase. Safe to treat
 			// local == absolute here since a `Cannon` is always a top-level scene object.
 			this.baseTransform = this.getTransform().clone();
+			this.savedScaleX = this.scaleX;
+			this.savedScaleY = this.scaleY;
+			this.savedScaleZ = this.scaleZ;
 			resolveOrCreateBase();
 		}
 		this.updateAim(this.yaw * Math.PI / 180, this.pitch * Math.PI / 180);
@@ -500,9 +556,15 @@ class Cannon extends DtsObject {
 			if (existing != null && (existing is CannonBase)) {
 				this.base = cast existing;
 				this.base.cannon = this;
+				this.savedBaseScaleX = this.base.scaleX;
+				this.savedBaseScaleY = this.base.scaleY;
+				this.savedBaseScaleZ = this.base.scaleZ;
 				return;
 			}
 		}
+		this.savedBaseScaleX = this.savedScaleX;
+		this.savedBaseScaleY = this.savedScaleY;
+		this.savedBaseScaleZ = this.savedScaleZ;
 		var base = new CannonBase();
 		base.cannon = this;
 		this.level.addDtsObject(base, () -> {
@@ -530,6 +592,145 @@ class Cannon extends DtsObject {
 	function spawnExplosionBurst(pos:Vector) {
 		this.level.particleManager.createEmitter(cannonSmokeOptions, this.smokeData, pos);
 		this.level.particleManager.createEmitter(cannonSparkOptions, this.sparkData, pos);
+	}
+
+	/** Draws one wireframe ring of `segments` points, `radius` units across, centered at `pos`,
+		lying in the plane perpendicular to `normal` - the 3D building block `updateCannonAim`'s
+		`renderCircle` calls are built from. Must be called between a matching `aimGraphics.
+		lineStyle(...)` and the next one (color is a `Graphics`-wide state, not per-call). */
+	function drawAimRing(pos:Vector, normal:Vector, radius:Float, segments:Int) {
+		var n = normal.lengthSq() > 0.0001 ? normal.normalized() : new Vector(0, 0, 1);
+		var reference = Math.abs(n.dot(new Vector(0, 0, 1))) > 0.999 ? new Vector(1, 0, 0) : new Vector(0, 0, 1);
+		var axisX = n.cross(reference).normalized();
+		var axisY = axisX.cross(n).normalized();
+		for (i in 0...segments + 1) {
+			var theta = i / segments * Math.PI * 2;
+			var p = pos.add(axisX.multiply(Math.cos(theta) * radius)).add(axisY.multiply(Math.sin(theta) * radius));
+			if (i == 0)
+				this.aimGraphics.moveTo(p.x, p.y, p.z);
+			else
+				this.aimGraphics.lineTo(p.x, p.y, p.z);
+		}
+	}
+
+	public function hideAimVisualization() {
+		if (this.aimGraphics != null)
+			this.aimGraphics.clear();
+		this.aimVisualizationValid = false;
+	}
+
+	/** Ported from `updateCannonAim` (`client/scripts/cannon.cs`) - draws the ring-based trajectory
+		preview while `showAim` is set. The `aimTriggers` branch (resampling gravity from PhysMod
+		triggers along the path every 10 steps - real source's own comment: "Adds significant lag
+		though") is deliberately NOT ported, matching this port's existing PhysMod-layer-rewind
+		scope decisions; always uses the simpler constant-gravity integration (the parabola math
+		itself, `hide`'s `CannonPropertyProvider.drawCannonTrajectory` uses the same physics, just
+		without the raycast-stop or multi-ring rendering this restores). Renders real 3D rings via
+		`h3d.scene.Graphics` instead of reimplementing `ShowTSCtrl::renderCircle`'s 2D-projection
+		technique - see `aimGraphics`'s doc comment. `cameraYaw`/`cameraPitch` are in this engine's
+		live-camera convention (see `computeCameraDirection`'s doc comment) - real source's
+		`%cannon.lastYaw`/`lastPitch` are actually already-computed body-rotation values in ITS OWN
+		single convention, so this port reconstructs the same directional intent by feeding the
+		live camera angles into the camera-convention direction formula directly, rather than trying
+		to round-trip through the file-convention `lastYaw`/`lastPitch` storage.
+
+		Performance: this is one of the more expensive things this port does per-frame (up to
+		`AIM_STEP_COUNT` broadphase raycasts), called every frame while aiming a `showAim` cannon,
+		so it's been optimized three ways versus a naive port: (1) skips the entire recompute if
+		`cameraYaw`/`cameraPitch`/`forceFraction` haven't changed meaningfully since the last call -
+		a stationary aim (the common case between mouse movements) would otherwise redo the full
+		integrate-and-raycast loop every frame for a bit-for-bit identical result; (2) `iSteps` is
+		50, not real source's larger default - still plenty of resolution for a *visual* preview
+		(only ~12 rings are ever actually drawn from it) while halving the raycast count outright;
+		(3) `aimPositions`/`aimDirs` are persistent pooled arrays (`AIM_STEP_COUNT` `Vector`s
+		allocated once, mutated via `.load()` every call) instead of a fresh `Array`+`Vector` per
+		element every frame. */
+	public function updateAimVisualization(cameraYaw:Float, cameraPitch:Float, forceFraction:Float) {
+		if (!this.showAim || this.aimSize <= 0 || (this.useCharge && forceFraction < 0.25)) {
+			this.hideAimVisualization();
+			return;
+		}
+
+		if (this.aimVisualizationValid
+			&& Math.abs(cameraYaw - this.lastAimAppliedYaw) < 0.001
+			&& Math.abs(cameraPitch - this.lastAimAppliedPitch) < 0.001
+			&& Math.abs(forceFraction - this.lastAimAppliedForceFraction) < 0.005)
+			return;
+		this.lastAimAppliedYaw = cameraYaw;
+		this.lastAimAppliedPitch = cameraPitch;
+		this.lastAimAppliedForceFraction = forceFraction;
+		this.aimVisualizationValid = true;
+
+		if (this.aimGraphics == null)
+			this.aimGraphics = new h3d.scene.Graphics(this.level.scene);
+		if (this.aimPositions == null) {
+			this.aimPositions = [for (i in 0...AIM_STEP_COUNT) new Vector()];
+			this.aimDirs = [for (i in 0...AIM_STEP_COUNT) new Vector()];
+		}
+		this.aimGraphics.clear();
+
+		var force = this.force * (this.useCharge ? forceFraction : 1);
+		var initPos = this.baseTransform.getPosition();
+		var vel = this.computeCameraDirection(cameraYaw, cameraPitch).multiply(force);
+		var gravity = this.level.marble.currentUp.multiply(-this.level.marble.cannonBeforeGravity);
+
+		var timeStep = Util.clamp(force * 0.001, 0.02, 0.2);
+		var hitPos:Vector = null;
+		var hitNormal:Vector = null;
+		var stepCount = AIM_STEP_COUNT;
+
+		for (i in 0...AIM_STEP_COUNT) {
+			var start = initPos.add(vel.multiply(i * timeStep)).add(gravity.multiply(0.5 * Math.pow(i * timeStep, 2)));
+			var end = initPos.add(vel.multiply((i + 1) * timeStep)).add(gravity.multiply(0.5 * Math.pow((i + 1) * timeStep, 2)));
+
+			var segVec = end.sub(start);
+			var segLen = segVec.length();
+			if (segLen > 0.0001) {
+				var results = this.level.collisionWorld.rayCast(start, segVec.multiply(1 / segLen), segLen);
+				var closest:octree.IOctreeObject.RayIntersectionData = null;
+				var closestDist = 1e8;
+				for (r in results) {
+					var d = start.distance(r.point);
+					if (d < closestDist) {
+						closestDist = d;
+						closest = r;
+					}
+				}
+				if (closest != null) {
+					end = closest.point;
+					hitPos = closest.point;
+					hitNormal = closest.normal;
+				}
+			}
+
+			this.aimPositions[i].load(end);
+			this.aimDirs[i].load(end.sub(start));
+			if (hitPos != null) {
+				stepCount = i;
+				break;
+			}
+		}
+
+		// 12 rings spread evenly by *step index* (not by distance) along whatever was actually
+		// sampled, colored in a red->yellow gradient (`hue = progress * 60` in real source's HSV
+		// terms simplifies to a plain `(1, progress, 0)` RGB lerp over that specific 0-60-degree
+		// hue range, so no general HSV->RGB conversion is needed).
+		var circleCount = 12;
+		for (i in 0...circleCount) {
+			var index = Std.int(i * stepCount / circleCount);
+			if (index >= AIM_STEP_COUNT)
+				index = AIM_STEP_COUNT - 1;
+			if (index < 0)
+				continue;
+			var progress = Util.clamp(i / circleCount, 0, 1);
+			var color = 0xFF0000 | (Std.int(progress * 255) << 8);
+			this.aimGraphics.lineStyle(2, color);
+			this.drawAimRing(this.aimPositions[index], this.aimDirs[index], this.aimSize, 20);
+		}
+		if (hitPos != null) {
+			this.aimGraphics.lineStyle(2, 0x00FF00);
+			this.drawAimRing(hitPos, hitNormal, this.aimSize, 20);
+		}
 	}
 
 	/** Ported from `Cannon::explode` - plays the launch/explode sound (a louder, distinct one for

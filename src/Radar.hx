@@ -202,7 +202,7 @@ class Radar {
 		if ((this.customRadarRule & (RadarRule.TimeTravels | RadarRule.Powerups)) != 0) {
 			// iterate over powerups
 			for (powerup in level.powerUps) {
-				if (powerup.visible) {
+				if (powerup.currentOpacity != 0) {
 					var dist = marblePos.distance(new Vector(powerup.x, powerup.y, powerup.z));
 					if (dist < itemSearchDistance) {
 						if ((this.customRadarRule & RadarRule.Powerups) != 0) {

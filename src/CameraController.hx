@@ -665,12 +665,22 @@ class CameraController extends Object {
 
 		nextCameraYaw += deltaX;
 		nextCameraPitch += deltaY;
-		nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
+		// Skip the normal free-look pitch range ([-45,~90) degrees) while actively aiming a non-
+		// instant cannon - a cannon's own `pitchBoundLow`/`pitchBoundHigh` (applied later, in
+		// `updateCannonCamera`) can be wider than this (e.g. `pitchBoundHigh` up to 80 degrees
+		// implies a live-pitch floor of -80 degrees), and this clamp running first would otherwise
+		// cap the accumulator before the cannon-specific clamp ever gets a chance to allow the
+		// wider range - clamping can only ever narrow a value further, not widen one this already
+		// restricted.
+		var cannonAiming = level.marble.activeCannon != null && !level.marble.activeCannon.instant;
+		if (!cannonAiming)
+			nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 
 		CameraYaw = Util.lerp(CameraYaw, nextCameraYaw, lerpt);
 		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
-		CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
+		if (!cannonAiming)
+			CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {
@@ -903,5 +913,6 @@ class CameraController extends Object {
 
 		var chargeFraction = cannon.chargeTime > 0 ? @:privateAccess level.marble.cannonCharge / cannon.chargeTime : 0.0;
 		level.playGui.updateCannonHud(cannon.showReticle, cannon.skinOverride, cannon.useCharge, chargeFraction);
+		cannon.updateAimVisualization(CameraYaw, CameraPitch, chargeFraction);
 	}
 }
