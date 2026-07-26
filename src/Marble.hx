@@ -920,7 +920,7 @@ class Marble extends GameObject {
 	public var level:MarbleWorld;
 	public var collisionWorld:CollisionWorld;
 
-	public var _radius = 0.2;
+	public var _radius = 0.18975;
 
 	var _dtsRadius = 0.2;
 	var marbleDts:DtsObject;
@@ -1436,8 +1436,8 @@ class Marble extends GameObject {
 			this._radius = avgRadius;
 
 		if (Net.isMP) {
-			this._radius = 0.2; // For the sake of physics
-			marbleDts.scale(0.2 / avgRadius);
+			this._radius = 0.18975; // For the sake of physics
+			marbleDts.scale(0.18975 / avgRadius);
 		}
 		this.marbleDts = marbleDts;
 
@@ -1643,7 +1643,24 @@ class Marble extends GameObject {
 		shadowVolume.setRotationQuat(q);
 	}
 
+	/** Ported from `applyGravity()` (`core/server/missionload.cs`) - `MissionInfo.gravity`/
+		`jumpimpulse` are mission-wide defaults that fall back to the engine's own hardcoded defaults
+		(20/7.5, already `_gravity`/`_jumpImpulse`'s field initializers) when blank. Applied before
+		`marbleAttributes`/PhysMod-style overrides so an explicit mission-script or trigger override
+		still wins, matching the real order (`applyGravity` bakes into `MarbleData`'s own field, and
+		anything setting the attribute later at runtime just overwrites that). */
+	function loadMissionInfoPhysicsDefaults() {
+		if (this.level == null || this.level.mission == null || this.level.mission.missionInfo == null)
+			return;
+		var missionInfo = this.level.mission.missionInfo;
+		if (missionInfo.gravity != null && missionInfo.gravity != "")
+			this._gravity = MisParser.parseNumber(missionInfo.gravity);
+		if (missionInfo.jumpimpulse != null && missionInfo.jumpimpulse != "")
+			this._jumpImpulse = MisParser.parseNumber(missionInfo.jumpimpulse);
+	}
+
 	function loadMarbleAttributes() {
+		loadMissionInfoPhysicsDefaults();
 		if (this.level == null || this.level.mission == null || this.level.mission.marbleAttributes == null)
 			return;
 		var attribs = this.level.mission.marbleAttributes;
@@ -3426,7 +3443,7 @@ class Marble extends GameObject {
 					this._radius = 0.6666;
 					this.collider.radius = 0.6666;
 				} else if ((timeState.ticks - this.megaMarbleUseTick) > megaMarbleDurationTicks) {
-					this.collider.radius = this._radius = 0.2;
+					this.collider.radius = this._radius = 0.18975;
 					this.megaMarbleUseTick = 0;
 					this.netFlags |= MarbleNetFlags.DoMega;
 				}
@@ -3436,13 +3453,13 @@ class Marble extends GameObject {
 					this._radius = 0.6666;
 					this.collider.radius = 0.6666;
 				} else {
-					this.collider.radius = this._radius = 0.2;
+					this.collider.radius = this._radius = 0.18975;
 					this.megaMarbleUseTick = 0;
 				}
 			}
 		}
 		if (Net.isClient && this.megaMarbleUseTick == 0) {
-			this.collider.radius = this._radius = 0.2;
+			this.collider.radius = this._radius = 0.18975;
 		}
 
 		if (Net.isMP) {
@@ -4275,6 +4292,10 @@ class Marble extends GameObject {
 		var megaMarbleTicks = Net.isMP && Net.connectedServerInfo.competitiveMode ? 156 : 312;
 		if (this.level == null)
 			return false;
+		// Ported from `ghost.cs`'s `... || MissionInfo.mega` - `EMI_Mega`/"Always Mega Marble"
+		// forces every marble permanently mega, bypassing the normal enable-time/use-tick tracking.
+		if (this.level.mission != null && this.level.mission.missionInfo != null && MisParser.parseBoolean(this.level.mission.missionInfo.mega))
+			return true;
 		if (!this.level.isMultiplayer) {
 			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;
 		} else {
