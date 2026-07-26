@@ -196,6 +196,27 @@ class PlayGui {
 	var fireballBarLitTile:Tile;
 	var fireballBarUnlitTile:Tile;
 
+	/** Cannon HUD (`client/scripts/cannon.cs`'s `updateCannonUI`) - only the `!showAim` half (a
+		colored reticle plus a 4-quadrant charge gauge); the aim-assist trajectory rings
+		(`showAim`/`aimSize`/`aimTriggers`) are a separate, not-yet-ported feature, per direct
+		instruction. Never shown for `instant` cannons (matches `clientCmdEnterCannon`'s instant
+		branch never reaching the camera-override calls this HUD is conceptually paired with in real
+		source - see `CameraController.updateCannonCamera`). */
+	var cannonHudCtrl:GuiControl;
+
+	var cannonRetImage:GuiImage;
+	var cannonRetTiles:Map<String, Tile>;
+	var cannonChargeCtrl:GuiControl;
+	var cannonChargeIm1:GuiImage;
+	var cannonChargeIm2:GuiImage;
+	var cannonChargeIm3:GuiImage;
+	var cannonChargeIm4:GuiImage;
+
+	/** `cannonChargeTiles[quadrant 0-3][step 0-5]` - step 0 is always the shared "empty" tile
+		(`cannon_0.png`, matches real source reusing that same file for every quadrant's zero
+		state). */
+	var cannonChargeTiles:Array<Array<Tile>>;
+
 	var powerupBox:GuiImage;
 	var powerupLockedTile:Tile;
 	var powerupUnlockedTile:Tile;
@@ -367,6 +388,7 @@ class PlayGui {
 		initUnderwaterOverlay();
 		initBubbleBar();
 		initFireballBar();
+		initCannonHud();
 		if (game == 'ultra' || Net.isMP)
 			initBlastBar();
 		initTexts();
@@ -1035,6 +1057,123 @@ class PlayGui {
 		underwaterOverlay.visible = cameraInWater;
 		underwaterOverlay.width = scene2d.width;
 		underwaterOverlay.height = scene2d.height;
+	}
+
+	/** Ported from `playGui.gui`'s `PGCannonRet`/`PGChargeGui` control tree - see
+		`cannonHudCtrl`'s doc comment for scope (reticle + charge gauge only, no aim-assist rings). */
+	function initCannonHud() {
+		cannonHudCtrl = new GuiControl();
+		cannonHudCtrl.horizSizing = Center;
+		cannonHudCtrl.vertSizing = Center;
+		cannonHudCtrl.position = new Vector(272, 172);
+		cannonHudCtrl.extent = new Vector(256, 256);
+		playGuiCtrl.addChild(cannonHudCtrl);
+
+		cannonRetTiles = [
+			"white" => ResourceLoader.getResource('data/ui/game/cannon/retwhite.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			"green" => ResourceLoader.getResource('data/ui/game/cannon/retgreen.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			"blue" => ResourceLoader.getResource('data/ui/game/cannon/retblue.png', ResourceLoader.getImage, this.imageResources).toTile(),
+			"red" => ResourceLoader.getResource('data/ui/game/cannon/retred.png', ResourceLoader.getImage, this.imageResources).toTile(),
+		];
+		cannonRetImage = new GuiImage(cannonRetTiles.get("white"));
+		cannonRetImage.horizSizing = Center;
+		cannonRetImage.vertSizing = Center;
+		cannonRetImage.position = new Vector(0, 0);
+		cannonRetImage.extent = new Vector(256, 256);
+		cannonHudCtrl.addChild(cannonRetImage);
+		cannonRetImage.bmp.visible = false;
+
+		var zeroTile = ResourceLoader.getResource('data/ui/game/cannon/cannon_0.png', ResourceLoader.getImage, this.imageResources).toTile();
+		cannonChargeTiles = [];
+		for (q in 1...5) {
+			var row = [zeroTile];
+			for (s in 1...6)
+				row.push(ResourceLoader.getResource('data/ui/game/cannon/charge_${q}_${s}.png', ResourceLoader.getImage, this.imageResources).toTile());
+			cannonChargeTiles.push(row);
+		}
+
+		cannonChargeCtrl = new GuiControl();
+		cannonChargeCtrl.horizSizing = Right;
+		cannonChargeCtrl.vertSizing = Bottom;
+		cannonChargeCtrl.position = new Vector(0, 0);
+		cannonChargeCtrl.extent = new Vector(256, 256);
+		cannonHudCtrl.addChild(cannonChargeCtrl);
+
+		function makeChargeImage(x:Float, y:Float) {
+			var img = new GuiImage(zeroTile);
+			img.horizSizing = Right;
+			img.vertSizing = Bottom;
+			img.position = new Vector(x, y);
+			img.extent = new Vector(98, 98);
+			cannonChargeCtrl.addChild(img);
+			img.bmp.visible = false;
+			return img;
+		}
+		// Positions match `playGui.gui`'s `PGChargeEx1..4` - a 2x2 grid, quadrant N drawing from
+		// `charge_N_*.png`.
+		cannonChargeIm1 = makeChargeImage(129, 29);
+		cannonChargeIm2 = makeChargeImage(29, 29);
+		cannonChargeIm3 = makeChargeImage(29, 129);
+		cannonChargeIm4 = makeChargeImage(129, 129);
+	}
+
+	/** Ported from `updateCannonUI` (`client/scripts/cannon.cs`) - `showAim`/aim-assist half is
+		intentionally not implemented (see `cannonHudCtrl`'s doc comment), so the charge gauge is
+		shown whenever `useCharge` is true regardless of `showAim` (real source only shows it when
+		`useCharge && !showAim`, since a `showAim` cannon normally gets its charge feedback from the
+		rings instead - since this port has no rings yet, showing the gauge unconditionally for
+		`useCharge` cannons is the only way charge feedback exists at all right now; safe to tighten
+		back to the real condition once aim-assist rings are ported). `GuiControl` itself has no
+		visibility concept (`gui.GuiControl` is purely a layout container) - visibility is toggled on
+		each leaf `GuiImage`'s own `.bmp` directly, matching this file's established convention
+		(`setLapsCounterVisible`/`setCountdownThVisible`, etc). */
+	public function updateCannonHud(showReticle:Bool, skin:String, useCharge:Bool, chargeFraction:Float) {
+		if (cannonHudCtrl == null)
+			return;
+
+		cannonRetImage.bmp.visible = showReticle;
+		if (showReticle) {
+			var tile = cannonRetTiles.get(skin);
+			cannonRetImage.setTile(tile != null ? tile : cannonRetTiles.get("white"));
+		}
+
+		cannonChargeIm1.bmp.visible = useCharge;
+		cannonChargeIm2.bmp.visible = useCharge;
+		cannonChargeIm3.bmp.visible = useCharge;
+		cannonChargeIm4.bmp.visible = useCharge;
+		if (useCharge) {
+			var t = Util.clamp(chargeFraction, 0, 1);
+			if (t <= 0.1) {
+				cannonChargeIm1.setTile(cannonChargeTiles[0][0]);
+				cannonChargeIm2.setTile(cannonChargeTiles[1][0]);
+				cannonChargeIm3.setTile(cannonChargeTiles[2][0]);
+				cannonChargeIm4.setTile(cannonChargeTiles[3][0]);
+			} else {
+				var img = Std.int(Math.min(10, Math.floor(t * 10)));
+				if (t < 0.6) {
+					cannonChargeIm3.setTile(cannonChargeTiles[2][img]);
+					cannonChargeIm4.setTile(cannonChargeTiles[3][img]);
+					cannonChargeIm1.setTile(cannonChargeTiles[0][0]);
+					cannonChargeIm2.setTile(cannonChargeTiles[1][0]);
+				} else {
+					img -= 5;
+					cannonChargeIm1.setTile(cannonChargeTiles[0][img]);
+					cannonChargeIm2.setTile(cannonChargeTiles[1][img]);
+					cannonChargeIm3.setTile(cannonChargeTiles[2][5]);
+					cannonChargeIm4.setTile(cannonChargeTiles[3][5]);
+				}
+			}
+		}
+	}
+
+	public function hideCannonHud() {
+		if (cannonHudCtrl == null)
+			return;
+		cannonRetImage.bmp.visible = false;
+		cannonChargeIm1.bmp.visible = false;
+		cannonChargeIm2.bmp.visible = false;
+		cannonChargeIm3.bmp.visible = false;
+		cannonChargeIm4.bmp.visible = false;
 	}
 
 	function initFireballBar() {

@@ -144,10 +144,7 @@ final cannonVolumeOptions:ParticleEmitterOptions = {
 		constantAcceleration: 0,
 		gravityCoefficient: 0.2,
 		windCoefficient: 0,
-		colors: [
-			new Vector(0.56, 0.36, 0.26, 1),
-			new Vector(0.56, 0.36, 0.26, 0)
-		],
+		colors: [new Vector(0.56, 0.36, 0.26, 1), new Vector(0.56, 0.36, 0.26, 0)],
 		sizes: [0.5, 1],
 		times: [0, 1]
 	}
@@ -265,6 +262,7 @@ class Cannon extends DtsObject {
 			case "cannon_high": "red";
 			default: "white";
 		}
+		this.identifier += this.skinOverride;
 	}
 
 	/** Deliberately does NOT call `resetCannon()` here - `init()`'s own `onFinish` runs well
@@ -371,15 +369,50 @@ class Cannon extends DtsObject {
 		return q;
 	}
 
-	/** The aimed body's local +Y axis in world space - see `buildLookRotation`'s doc comment. */
+	/** The aimed body's local +Y axis in world space - see `buildLookRotation`'s doc comment. Takes
+		`yaw`/`pitch` in the cannon's own *authored* (file/`hide`) convention - use
+		`computeFireDirectionFromCamera` instead for anything driven by the live camera. */
 	public function computeFireDirection(yawRad:Float, pitchRad:Float):Vector {
 		return this.computeAimDirection(yawRad, pitchRad);
 	}
 
+	/** Builds a world direction the *same way this engine's own orbit camera does*
+		(`CameraController.update()`'s `directionVector` construction: rotate `(1,0,0)` by pitch
+		around Y, then by yaw around Z, then the level's gravity-orientation quat) - NOT the same
+		axis convention as `computeAimDirection` above. That function treats local **Y** as the
+		zero-yaw forward axis (matching `hide`'s tool, for the cannon's own *authored* `yaw`/`pitch`
+		fields); the live camera treats local **X** as the zero-yaw forward axis. Conflating the two
+		(feeding live `CameraYaw`/`CameraPitch` into `computeAimDirection`) is a 90-degree axis
+		mismatch, not just a sign difference - confirmed as the root cause of a real "camera points
+		90 degrees off after firing" bug report. Use this (and `computeFireDirectionFromCamera`/
+		`updateAimFromCamera` below) for anything driven by live `CameraYaw`/`CameraPitch`; use
+		`computeAimDirection`/`computeFireDirection`/`updateAim` for the cannon's own authored
+		resting `yaw`/`pitch` fields (`resetCannon`, the base auto-create fallback, instant-cannon
+		firing). No pitch sign flip is needed here (unlike calls into the file-convention
+		functions) - `cameraPitch` is used exactly as the orbit camera itself uses it. */
+	function computeCameraDirection(cameraYaw:Float, cameraPitch:Float):Vector {
+		var dir = new Vector(1, 0, 0);
+		var q = new Quat();
+		q.initRotateAxis(0, 1, 0, cameraPitch);
+		dir.transform(q.toMatrix());
+		q.initRotateAxis(0, 0, 1, cameraYaw);
+		dir.transform(q.toMatrix());
+		var orientationQuat = this.level.getOrientationQuat(this.level.timeState.currentAttemptTime);
+		dir.transform(orientationQuat.toMatrix());
+		return dir;
+	}
+
+	/** Camera-convention counterpart to `computeFireDirection` - see `computeCameraDirection`'s doc
+		comment. */
+	public function computeFireDirectionFromCamera(cameraYaw:Float, cameraPitch:Float):Vector {
+		return this.computeCameraDirection(cameraYaw, cameraPitch);
+	}
+
 	/** Ported from `updateCannonView`'s per-frame base/body transform update - sets the base to
 		yaw only, the body to yaw+pitch, both positioned at the cannon's original placement. Called
-		every frame while a marble is aiming this cannon, and once by `resetCannon` to establish the
-		resting pose. */
+		once by `resetCannon` (with the cannon's own authored `yaw`/`pitch` fields, file convention)
+		to establish the resting pose - see `updateAimFromCamera` for the live-camera-driven
+		counterpart called every frame while a marble is actually aiming this cannon. */
 	public function updateAim(yawRad:Float, pitchRad:Float) {
 		var basePos = this.baseTransform.getPosition();
 		var worldUp = new Vector(0, 0, 1);
@@ -401,6 +434,35 @@ class Cannon extends DtsObject {
 
 		this.lastYaw = yawRad;
 		this.lastPitch = pitchRad;
+	}
+
+	/** Camera-convention counterpart to `updateAim` - see `computeCameraDirection`'s doc comment.
+		`lastYaw`/`lastPitch` are still stored in file/`hide` convention regardless of which of the
+		two `updateAim*` methods last ran, so `Marble.enterCannon`'s snap-to-last-aim logic only
+		needs one conversion formula either way; the `- Math.PI / 2` here is that same axis-mismatch
+		correction applied in reverse (see `Marble.enterCannon`'s doc comment for the forward
+		direction of this conversion). */
+	public function updateAimFromCamera(cameraYaw:Float, cameraPitch:Float) {
+		var basePos = this.baseTransform.getPosition();
+		var worldUp = new Vector(0, 0, 1);
+		worldUp.transform(this.level.getOrientationQuat(this.level.timeState.currentAttemptTime).toMatrix());
+
+		if (this.base != null) {
+			var baseDir = this.computeCameraDirection(cameraYaw, 0);
+			var baseMat = new Matrix();
+			this.buildLookRotation(baseDir, worldUp).toMatrix(baseMat);
+			baseMat.setPosition(basePos);
+			this.base.setTransform(baseMat);
+		}
+
+		var bodyDir = this.computeCameraDirection(cameraYaw, cameraPitch);
+		var bodyMat = new Matrix();
+		this.buildLookRotation(bodyDir, worldUp).toMatrix(bodyMat);
+		bodyMat.setPosition(basePos);
+		this.setTransform(bodyMat);
+
+		this.lastYaw = cameraYaw - Math.PI / 2;
+		this.lastPitch = -cameraPitch;
 	}
 
 	/** `MarbleWorld.restart` already calls `.reset()` on every `dtsObjects` entry (including this

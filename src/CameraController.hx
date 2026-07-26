@@ -825,7 +825,12 @@ class CameraController extends Object {
 			nextCameraPitch = Util.clamp(nextCameraPitch, -pitchHighBound, -pitchLowBound);
 
 			if (cannon.yawLimit) {
-				var initialYaw = cannon.yaw * Math.PI / 180;
+				// `cannon.yaw` is in file/`hide` convention (zero-yaw = local +Y); `CameraYaw` is in
+				// this engine's own live-camera convention (zero-yaw = local +X) - a 90-degree axis
+				// mismatch, not just a differently-scaled unit (see `shapes.Cannon.
+				// computeCameraDirection`'s doc comment). Convert before comparing, or the bound
+				// cone ends up centered 90 degrees away from the cannon's actual resting direction.
+				var initialYaw = cannon.yaw * Math.PI / 180 + Math.PI / 2;
 				var leftBound = cannon.yawBoundLeft * Math.PI / 180;
 				var rightBound = cannon.yawBoundRight * Math.PI / 180;
 
@@ -843,13 +848,11 @@ class CameraController extends Object {
 			}
 		}
 
-		// `CameraPitch` is this engine's own live camera-pitch convention (positive = looking DOWN,
-		// confirmed from the normal orbit camera's `initRotateAxis(0,1,0,CameraPitch)` applied to
-		// world-forward), which is the OPPOSITE sign of the `cannon.pitch`/`computeAimDirection`
-		// convention (positive = up, matching `hide`'s `CannonPropertyProvider` field convention) -
-		// negate it here so aiming up/down with the mouse matches the direction the marble actually
-		// launches in.
-		cannon.updateAim(CameraYaw, -CameraPitch);
+		// `updateAimFromCamera` (not `updateAim`) - `CameraYaw`/`CameraPitch` are in this engine's
+		// own live-camera convention, not the cannon's authored file/`hide` convention `updateAim`
+		// expects (see `shapes.Cannon.computeCameraDirection`'s doc comment - conflating the two was
+		// a confirmed 90-degree aiming bug, not just a sign issue).
+		cannon.updateAimFromCamera(CameraYaw, CameraPitch);
 
 		// Ported from `updateCannonView`'s own unconditional `$MP::MyMarble.setTransform(%bodyTrans)`
 		// every frame while aiming - the cannon's base position never actually changes (only its
@@ -864,7 +867,7 @@ class CameraController extends Object {
 		level.marble.velocity.set(0, 0, 0);
 		level.marble.omega.set(0, 0, 0);
 
-		var forward = cannon.computeFireDirection(CameraYaw, -CameraPitch).normalized();
+		var forward = cannon.computeFireDirectionFromCamera(CameraYaw, CameraPitch).normalized();
 		var worldUp = new Vector(0, 0, 1);
 		worldUp.transform(level.getOrientationQuat(level.timeState.currentAttemptTime).toMatrix());
 
@@ -876,5 +879,8 @@ class CameraController extends Object {
 		camera.target = eyePos.add(forward);
 
 		this.setPosition(camera.pos.x, camera.pos.y, camera.pos.z);
+
+		var chargeFraction = cannon.chargeTime > 0 ? @:privateAccess level.marble.cannonCharge / cannon.chargeTime : 0.0;
+		level.playGui.updateCannonHud(cannon.showReticle, cannon.skinOverride, cannon.useCharge, chargeFraction);
 	}
 }
