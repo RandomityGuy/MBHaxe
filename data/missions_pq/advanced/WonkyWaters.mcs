@@ -4301,6 +4301,7 @@ new SimGroup(MissionGroup) {
 		scale = "1 1 1";
 		dataBlock = "WaterPhysicsTrigger";
 		polyhedron = "36.0000000 -49.0000000 2.5000000 -72.0000000 0.0000000 0.0000000 0.0000000 98.0000000 0.0000000 0.0000000 0.0000000 -5.0000000";
+			path = "WT1a";
 			initialPathPosition = "40 49 -7.5 1 0 0 0";
 			initialPathScale = "1 1 1";
 			keepeffectonleave = "0";
