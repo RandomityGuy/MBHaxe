@@ -11,6 +11,8 @@ enum Justification {
 	Left;
 	Right;
 	Center;
+	Pass;
+	MultilineCenter;
 }
 
 @:publicFields
@@ -45,6 +47,10 @@ class GuiText extends GuiControl {
 			if (justify == Center) {
 				text.setPosition(Math.floor(off.x + renderRect.extent.x / 2), Math.floor(off.y));
 				text.textAlign = Center;
+			}
+			if (justify == MultilineCenter) {
+				text.setPosition(Math.floor(off.x + renderRect.extent.x / 2), Math.floor(off.y));
+				text.textAlign = MultilineCenter;
 			}
 		}
 		// if (justify == Left) {
