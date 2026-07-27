@@ -59,7 +59,7 @@ class ToastMessage {
 	/** Matches `createHelpMessage`'s own `%width = min(getWord(PG_ChatBubbleBox.position, 0) + 20,
 		400)` - `PG_ChatBubbleBox.position`'s x is itself a fixed constant (80) in `playGui.gui`, so
 		this always evaluates to a fixed 100 regardless of anything runtime-computed. */
-	public static inline var WIDTH = 400.0;
+	public static inline var WIDTH = 340.0;
 
 	/** Default box height before the post-reflow resize (`createHelpMessage`'s own initial
 		`extent = %width SPC "70"`). */
@@ -1258,10 +1258,10 @@ class PlayGui {
 		fireballBarMeterBmp.setScale(Settings.uiScale);
 		fireballBarMeterBmp.visible = false;
 
-		var fireballFontData = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var fireballFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var fireballFontB = new BitmapFont(fireballFontData.entry);
 		@:privateAccess fireballFontB.loader = ResourceLoader.loader;
-		var fireballFont = fireballFontB.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		var fireballFont = fireballFontB.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
 		fireballBarText = new h2d.Text(fireballFont, scene2d);
 		fireballBarText.textColor = 0x000000;
 		fireballBarText.visible = false;
@@ -1320,10 +1320,10 @@ class PlayGui {
 		bubbleBarMeterBmp.setScale(Settings.uiScale);
 		bubbleBarMeterBmp.visible = false;
 
-		var bubbleFontData = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
+		var bubbleFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var bubbleFontB = new BitmapFont(bubbleFontData.entry);
 		@:privateAccess bubbleFontB.loader = ResourceLoader.loader;
-		var bubbleFont = bubbleFontB.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		var bubbleFont = bubbleFontB.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
 		bubbleBarText = new h2d.Text(bubbleFont, scene2d);
 		bubbleBarText.textColor = 0x000000;
 		bubbleBarText.visible = false;
@@ -1399,10 +1399,10 @@ class PlayGui {
 	}
 
 	function initTexts() {
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var squishneyfontdata = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishney25b = new BitmapFont(squishneyfontdata.entry);
+		@:privateAccess squishney25b.loader = ResourceLoader.loader;
+		var bfont = squishney25b.toSdfFont(cast 21.5 * Settings.uiScale, MultiChannel);
 
 		helpTextContainer = new GuiControl();
 		helpTextContainer.position = new Vector(80, 600);
@@ -1433,34 +1433,40 @@ class PlayGui {
 			right: new Vector(0, 25, 21, 24),
 			bottom: new Vector(43, 25, 19, 24)
 		});
-		helpTextBorder.horizSizing = Width;
-		helpTextBorder.vertSizing = Height;
+		helpTextBorder.horizSizing = Right;
+		helpTextBorder.vertSizing = Bottom;
 		helpTextBorder.position = new Vector(20, 20);
 		helpTextBorder.extent = new Vector(600, 80);
 		helpTextContainer.addChild(helpTextBorder);
 
 		var helpTextInner = new GuiControl();
-		helpTextInner.position = new Vector(35, 30);
+		helpTextInner.position = new Vector(35, 16);
 		helpTextInner.extent = new Vector(550, 60);
-		helpTextInner.horizSizing = Width;
-		helpTextInner.vertSizing = Height;
+		helpTextInner.horizSizing = Right;
+		helpTextInner.vertSizing = Bottom;
 		helpTextContainer.addChild(helpTextInner);
 
 		helpTextBackground = new GuiText(bfont);
 		helpTextBackground.text.textColor = 0x777777;
+		helpTextBackground.text.lineSpacing = 2;
 		helpTextBackground.position = new Vector(1, 3);
 		helpTextBackground.extent = new Vector(550, 26);
 		helpTextBackground.vertSizing = Height;
 		helpTextBackground.horizSizing = Width;
-		helpTextBackground.justify = Center;
+		helpTextBackground.text.textAlign = Center;
+		helpTextBackground.text.maxWidth = 550;
+		helpTextBackground.justify = Pass;
 
 		helpTextForeground = new GuiText(bfont);
 		helpTextForeground.text.textColor = 0xFFFFFF;
+		helpTextForeground.text.lineSpacing = 2;
 		helpTextForeground.position = new Vector(0, 2);
 		helpTextForeground.extent = new Vector(550, 26);
 		helpTextForeground.vertSizing = Height;
 		helpTextForeground.horizSizing = Width;
-		helpTextForeground.justify = Center;
+		helpTextForeground.text.textAlign = Center;
+		helpTextForeground.text.maxWidth = 550;
+		helpTextForeground.justify = Pass;
 
 		var chatBubbleIconTile = ResourceLoader.getResource('data/ui/game/help/help_icon.png', ResourceLoader.getImage, this.imageResources).toTile();
 
@@ -1475,7 +1481,7 @@ class PlayGui {
 		// Ported from PQ's `<bold:23>` prefix on `addHelpLine`'s text - same underlying bitmap font
 		// as `bfont` above, just a smaller target size for the toast notifications (`addHelpLine`/
 		// `ToastMessage`, see their doc comments).
-		toastMessageFont = domcasual32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		toastMessageFont = squishney25b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
 		toastListBox = new GuiControl();
 		toastListBox.horizSizing = Right;
@@ -1488,10 +1494,10 @@ class PlayGui {
 	}
 
 	function initFPSMeter() {
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var squatneyfontdata = ResourceLoader.getFileEntry("data/font/squatney.fnt");
+		var squatney23b = new BitmapFont(squatneyfontdata.entry);
+		@:privateAccess squatney23b.loader = ResourceLoader.loader;
+		var bfont = squatney23b.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
 
 		var fpsMeterCtrl = new GuiImage(ResourceLoader.getResource("data/ui/game/transparency-fps.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
@@ -2117,7 +2123,7 @@ class PlayGui {
 		this.powerupImageScene.setElapsedTime(timeState.dt);
 
 		if (this.fpsMeter != null) {
-			this.fpsMeter.text.text = '${Math.floor(ProfilerUI.instance.fps)} FPS';
+			this.fpsMeter.text.text = 'FPS: ${Math.floor(ProfilerUI.instance.fps)}';
 		}
 		this.updateMiddleMessages(timeState.dt);
 		if (Net.isMP) {
@@ -2162,12 +2168,12 @@ class PlayGui {
 	public function addMiddleMessage(text:String, color:Int) {
 		if (this.middleMessages.length > 10)
 			return;
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
+		var squishney48fontdata = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishney48fb = new BitmapFont(squishney48fontdata.entry);
+		@:privateAccess squishney48fb.loader = ResourceLoader.loader;
+		var squishney48f = squishney48fb.toSdfFont(cast 44 * Settings.uiScale, MultiChannel);
 
-		var middleMsg = new GuiText(markerFelt32);
+		var middleMsg = new GuiText(squishney48f);
 		middleMsg.position = new Vector(200, 50);
 		middleMsg.extent = new Vector(400, 100);
 		middleMsg.horizSizing = Center;
@@ -2246,20 +2252,26 @@ class PlayGui {
 		var bg = new GuiMLText(this.toastMessageFont, s -> null);
 		bg.horizSizing = Right;
 		bg.vertSizing = Bottom;
-		bg.position = new Vector(1, 1);
-		bg.extent = new Vector(width - 24, 46);
+		bg.position = new Vector(13, 1);
+		bg.extent = new Vector(width - 30, 46);
 		bg.text.textColor = 0x777777;
 		bg.text.text = message;
+		bg.text.maxWidth = width - 30;
 		inner.addChild(bg);
 
 		var fg = new GuiMLText(this.toastMessageFont, s -> null);
 		fg.horizSizing = Right;
 		fg.vertSizing = Bottom;
-		fg.position = new Vector(0, 0);
-		fg.extent = new Vector(width - 24, 46);
+		fg.position = new Vector(12, 0);
+		fg.extent = new Vector(width - 30, 46);
 		fg.text.textColor = 0xFFFFFF;
 		fg.text.text = message;
+		fg.text.maxWidth = width - 30;
 		inner.addChild(fg);
+
+		var textHeight = fg.text.textHeight / Settings.uiScale;
+		box.extent.y = textHeight + 24;
+		border.extent.y = box.extent.y;
 
 		this.toastListBox.addChild(box);
 		// Initial render lays out the actual (possibly wrapped) text so its real height can be
@@ -2273,8 +2285,6 @@ class PlayGui {
 		// `vertSizing="height"` declared extents (70/46) and are expected to track the resized
 		// parent automatically through that sizing mode, the same as real source relies on without
 		// ever touching their extents again either.
-		var textHeight = fg.text.textHeight / Settings.uiScale;
-		// box.extent.y = textHeight + 24;
 
 		var msg = new ToastMessage();
 		msg.box = box;
@@ -2289,7 +2299,7 @@ class PlayGui {
 		// everything (itself included), its own post-shift resting position is computed directly
 		// here, and the loop below only needs to handle the *other*, already-existing messages.
 		msg.targetY = msg.y - msg.height;
-		msg.targetX = 0;
+		msg.targetX = -9;
 		msg.timeout = timeout;
 
 		for (existing in this.toastMessages)
