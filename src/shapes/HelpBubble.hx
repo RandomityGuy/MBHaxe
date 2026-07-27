@@ -50,7 +50,7 @@ class HelpBubble extends DtsObject {
 			if (!this.displayOnce || !this.hasBeenInOnce) {
 				this.hasBeenInOnce = true;
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/infotutorial.wav", ResourceLoader.getAudio, this.soundResources));
-				this.level.displayHelp(this.text);
+				this.level.displayHelp(this.text, 5);
 			}
 		}
 		this.wasWithin = within;

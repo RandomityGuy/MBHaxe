@@ -43,6 +43,57 @@ class MiddleMessage {
 	var age:Float;
 }
 
+/** One active "toast" notification - ported from `chathud.cs`'s `createHelpMessage`/
+	`addHelpLine`/`updateMessages`/`shiftMessages` (`PG_MessageListBox`'s stack of sliding
+	messages), built from the SAME `GuiControl`/`GuiBitmapBorderCtrl`/`GuiMLText` system (and the
+	same field values - position/extent/horizSizing/vertSizing - as the real `.gui`/script) every
+	other `PlayGui` element already uses, rather than raw `h2d` objects with hand-derived pixel
+	math - `GuiControl`'s `horizSizing`/`vertSizing` handling is already a correct, tested port of
+	Torque's own anchor semantics, so building the exact same control tree with the exact same
+	field values sidesteps needing to re-derive any of that math by hand. This is what this port's
+	own `alertTextForeground`/`setAlertText`/`displayAlert` naming was always *meant* to represent
+	(pickup/status notifications) - that was previously just a single-message fade placeholder, now
+	fully replaced. NOT the same system as `PlayGui.helpTextForeground`/`setHelpText` (that's
+	`addBubbleLine`'s separate persistent help-bubble machinery, for mission help-trigger text). */
+class ToastMessage {
+	/** Matches `createHelpMessage`'s own `%width = min(getWord(PG_ChatBubbleBox.position, 0) + 20,
+		400)` - `PG_ChatBubbleBox.position`'s x is itself a fixed constant (80) in `playGui.gui`, so
+		this always evaluates to a fixed 100 regardless of anything runtime-computed. */
+	public static inline var WIDTH = 400.0;
+
+	/** Default box height before the post-reflow resize (`createHelpMessage`'s own initial
+		`extent = %width SPC "70"`). */
+	public static inline var DEFAULT_HEIGHT = 70.0;
+
+	/** `$ChatHudMessageXSpeed[1]`/`[-1]`/`$ChatHudMessageYSpeed`, reference-canvas px/sec. */
+	public static inline var X_SPEED_IN = 900.0;
+
+	public static inline var X_SPEED_OUT = 600.0;
+	public static inline var Y_SPEED = 250.0;
+
+	/** Matches `shiftMessages`'s own `+ 24`. */
+	public static inline var SPACING = 0.0;
+
+	public var box:GuiControl;
+	public var border:GuiBitmapBorderCtrl;
+	public var fg:GuiMLText;
+	public var x:Float;
+	public var y:Float;
+	public var targetX:Float;
+	public var targetY:Float;
+	public var direction:Int;
+
+	/** The full vertical space this message occupies in the stack (box height + `SPACING`) -
+		matches `shiftMessages(getWord(%foregroundName.getExtent(), 1) + 24)`. */
+	public var height:Float;
+
+	public var age:Float = 0;
+	public var timeout:Float;
+	public var retreating:Bool = false;
+
+	public function new() {}
+}
+
 @:publicFields
 @:structInit
 class PlayerInfo {
@@ -232,10 +283,22 @@ class PlayGui {
 
 	var RSGOCenterText:Anim;
 
+	var helpTextContainer:GuiControl;
+	var helpTextBorder:GuiBitmapBorderCtrl;
 	var helpTextForeground:GuiText;
 	var helpTextBackground:GuiText;
-	var alertTextForeground:GuiText;
-	var alertTextBackground:GuiText;
+
+	var helpTextDuration:Float = 0;
+	var helpTextStartTime = -1e8;
+
+	/** Ported from PQ's `PG_MessageListBox` (`createHelpMessage`/`updateMessages`,
+		`client/scripts/chathud.cs`) - see `ToastMessage`'s doc comment for how this maps to (and
+		replaces) this port's earlier single-message `alertText*`/`setAlertText` placeholder. Real
+		values: `horizSizing="right"`, `vertSizing="height"`, `position="0 70"`, `extent="500 500"`. */
+	var toastListBox:GuiControl;
+
+	var toastMessages:Array<ToastMessage> = [];
+	var toastMessageFont:h2d.Font;
 
 	var blastBar:GuiControl;
 	var blastFill:GuiImage;
@@ -1341,58 +1404,87 @@ class PlayGui {
 		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
 		var bfont = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
 
-		var helpTextCtrl = new GuiControl();
-		helpTextCtrl.position = new Vector(0, 210);
-		helpTextCtrl.extent = new Vector(640, 60);
-		helpTextCtrl.vertSizing = Center;
-		helpTextCtrl.horizSizing = Width;
+		helpTextContainer = new GuiControl();
+		helpTextContainer.position = new Vector(80, 600);
+		helpTextContainer.extent = new Vector(640, 120);
+		helpTextContainer.vertSizing = Top;
+		helpTextContainer.horizSizing = Center;
+
+		var borderTile = ResourceLoader.getResource('data/ui/game/help/round_border.png', ResourceLoader.getImage, this.imageResources).toTile();
+
+		/**
+			var tl = texture.sub(0, 1, 21, 23);
+			var tr = texture.sub(22, 1, 20, 23);
+			var top = texture.sub(43, 1, 19, 23);
+			var left = texture.sub(63, 1, 21, 23);
+			var right = texture.sub(0, 25, 21, 24);
+			var bl = texture.sub(22, 25, 20, 24);
+			var bottom = texture.sub(43, 25, 19, 24);
+			var br = texture.sub(63, 25, 21, 24);
+		**/
+
+		helpTextBorder = new GuiBitmapBorderCtrl(borderTile, 0x4f3d38, {
+			tl: new Vector(0, 1, 21, 23),
+			tr: new Vector(22, 1, 20, 23),
+			bl: new Vector(22, 25, 20, 24),
+			br: new Vector(63, 25, 21, 24),
+			top: new Vector(43, 1, 19, 23),
+			left: new Vector(63, 1, 21, 23),
+			right: new Vector(0, 25, 21, 24),
+			bottom: new Vector(43, 25, 19, 24)
+		});
+		helpTextBorder.horizSizing = Width;
+		helpTextBorder.vertSizing = Height;
+		helpTextBorder.position = new Vector(20, 20);
+		helpTextBorder.extent = new Vector(600, 80);
+		helpTextContainer.addChild(helpTextBorder);
+
+		var helpTextInner = new GuiControl();
+		helpTextInner.position = new Vector(35, 30);
+		helpTextInner.extent = new Vector(550, 60);
+		helpTextInner.horizSizing = Width;
+		helpTextInner.vertSizing = Height;
+		helpTextContainer.addChild(helpTextInner);
 
 		helpTextBackground = new GuiText(bfont);
 		helpTextBackground.text.textColor = 0x777777;
-		helpTextBackground.position = new Vector(1, 1);
-		helpTextBackground.extent = new Vector(640, 14);
+		helpTextBackground.position = new Vector(1, 3);
+		helpTextBackground.extent = new Vector(550, 26);
 		helpTextBackground.vertSizing = Height;
 		helpTextBackground.horizSizing = Width;
 		helpTextBackground.justify = Center;
 
 		helpTextForeground = new GuiText(bfont);
 		helpTextForeground.text.textColor = 0xFFFFFF;
-		helpTextForeground.position = new Vector(0, 0);
-		helpTextForeground.extent = new Vector(640, 16);
+		helpTextForeground.position = new Vector(0, 2);
+		helpTextForeground.extent = new Vector(550, 26);
 		helpTextForeground.vertSizing = Height;
 		helpTextForeground.horizSizing = Width;
 		helpTextForeground.justify = Center;
 
-		helpTextCtrl.addChild(helpTextBackground);
-		helpTextCtrl.addChild(helpTextForeground);
+		var chatBubbleIconTile = ResourceLoader.getResource('data/ui/game/help/help_icon.png', ResourceLoader.getImage, this.imageResources).toTile();
 
-		var alertTextCtrl = new GuiControl();
-		alertTextCtrl.position = new Vector(0, 371);
-		alertTextCtrl.extent = new Vector(640, 105);
-		alertTextCtrl.vertSizing = Top;
-		alertTextCtrl.horizSizing = Width;
+		var chatBubbleIcon = new GuiImage(chatBubbleIconTile);
+		chatBubbleIcon.position = new Vector(-25, -20);
+		chatBubbleIcon.extent = new Vector(57, 57);
 
-		alertTextBackground = new GuiText(bfont);
-		alertTextBackground.text.textColor = 0x776622;
-		alertTextBackground.position = new Vector(1, 1);
-		alertTextBackground.extent = new Vector(640, 32);
-		alertTextBackground.vertSizing = Height;
-		alertTextBackground.horizSizing = Width;
-		alertTextBackground.justify = Center;
+		helpTextInner.addChild(helpTextBackground);
+		helpTextInner.addChild(helpTextForeground);
+		helpTextContainer.addChild(chatBubbleIcon);
 
-		alertTextForeground = new GuiText(bfont);
-		alertTextForeground.text.textColor = 0xffEE99;
-		alertTextForeground.position = new Vector(0, 0);
-		alertTextForeground.extent = new Vector(640, 32);
-		alertTextForeground.vertSizing = Height;
-		alertTextForeground.horizSizing = Width;
-		alertTextForeground.justify = Center;
+		// Ported from PQ's `<bold:23>` prefix on `addHelpLine`'s text - same underlying bitmap font
+		// as `bfont` above, just a smaller target size for the toast notifications (`addHelpLine`/
+		// `ToastMessage`, see their doc comments).
+		toastMessageFont = domcasual32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
 
-		alertTextCtrl.addChild(alertTextBackground);
-		alertTextCtrl.addChild(alertTextForeground);
+		toastListBox = new GuiControl();
+		toastListBox.horizSizing = Right;
+		toastListBox.vertSizing = Height;
+		toastListBox.position = new Vector(0, 70);
+		toastListBox.extent = new Vector(500, 500);
 
-		playGuiCtrl.addChild(helpTextCtrl);
-		playGuiCtrl.addChild(alertTextCtrl);
+		playGuiCtrl.addChild(helpTextContainer);
+		playGuiCtrl.addChild(toastListBox);
 	}
 
 	function initFPSMeter() {
@@ -1403,7 +1495,7 @@ class PlayGui {
 
 		var fpsMeterCtrl = new GuiImage(ResourceLoader.getResource("data/ui/game/transparency-fps.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
-		fpsMeterCtrl.position = new Vector(534, 448);
+		fpsMeterCtrl.position = new Vector(704, 568);
 		fpsMeterCtrl.horizSizing = Left;
 		fpsMeterCtrl.vertSizing = Top;
 		fpsMeterCtrl.extent = new Vector(106, 32);
@@ -1790,27 +1882,19 @@ class PlayGui {
 		}
 	}
 
-	public function setHelpTextOpacity(value:Float) {
-		@:privateAccess helpTextForeground.text._textColorVec.a = value;
-		@:privateAccess helpTextBackground.text._textColorVec.a = value;
-	}
+	public function setHelpText(currentTime:Float, text:String, duration:Float) {
+		if (this.helpTextStartTime + this.helpTextDuration < currentTime) {
+			this.helpTextStartTime = currentTime;
+			this.helpTextDuration = duration;
+		} else if (this.helpTextStartTime < currentTime && this.helpTextStartTime + this.helpTextDuration > currentTime) {
+			// extend the duration
+			var diff = currentTime - this.helpTextStartTime;
+			this.helpTextDuration = diff + duration;
+		} else {
+			this.helpTextStartTime = currentTime;
+			this.helpTextDuration = duration;
+		}
 
-	public function setAlertTextOpacity(value:Float) {
-		@:privateAccess alertTextForeground.text._textColorVec.a = value;
-		@:privateAccess alertTextBackground.text._textColorVec.a = value;
-	}
-
-	public function setAlertText(text:String) {
-		this.alertTextForeground.text.text = text;
-		this.alertTextBackground.text.text = text;
-		// alertTextBackground.render(scene2d);
-		// alertTextForeground.x = scene2d.width / 2 - alertTextForeground.textWidth / 2;
-		// alertTextForeground.y = scene2d.height - 102;
-		// alertTextBackground.x = scene2d.width / 2 - alertTextBackground.textWidth / 2 + 1;
-		// alertTextBackground.y = scene2d.height - 102 + 1;
-	}
-
-	public function setHelpText(text:String) {
 		this.helpTextForeground.text.text = text;
 		this.helpTextBackground.text.text = text;
 		// helpTextBackground.render(scene2d);
@@ -2039,6 +2123,23 @@ class PlayGui {
 		if (Net.isMP) {
 			this.chatCtrl.updateChat(timeState.dt);
 		}
+		this.updateHelpMessage(timeState);
+		this.updateToastMessages(timeState.dt);
+	}
+
+	function updateHelpMessage(timeState:TimeState) {
+		if (timeState.timeSinceLoad < this.helpTextStartTime + this.helpTextDuration) {
+			var pct = 1.0;
+			if (this.helpTextStartTime + 0.48 > timeState.timeSinceLoad)
+				pct = 1 - (this.helpTextStartTime + 0.48 - timeState.timeSinceLoad) / 0.48;
+			else if (timeState.timeSinceLoad > this.helpTextStartTime + this.helpTextDuration - 0.48) {
+				pct = 1 - (timeState.timeSinceLoad - (this.helpTextStartTime + this.helpTextDuration - 0.48)) / 0.48;
+			}
+
+			this.helpTextContainer.position = new Vector(120, 620 - pct * (95 + 20));
+			this.helpTextContainer.render(scene2d, @:privateAccess playGuiCtrl._flow);
+			@:privateAccess helpTextContainer._flow.overflow = Expand;
+		}
 	}
 
 	function updateMiddleMessages(dt:Float) {
@@ -2085,5 +2186,164 @@ class PlayGui {
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
 		this.middleMessages.push({ctrl: middleMsg, age: 0});
+	}
+
+	/** Ported from `chathud.cs`'s `createHelpMessage`/`addHelpLine` (`$ChatHudMessageId`'s per-
+		message box) - a toast slides in from off the right edge of the screen, waits `timeout`
+		seconds, then slides back out and is removed, and each new arrival pushes every
+		already-active toast further up the stack (`shiftMessages`). Built from the exact same
+		`GuiControl`/`GuiBitmapBorderCtrl`/`GuiMLText` structure and field values (position/extent/
+		horizSizing/vertSizing) as `createHelpMessage` itself - see `ToastMessage`'s doc comment for
+		why (this sidesteps re-deriving Torque's anchor-sizing math by hand, since `GuiControl`
+		already implements it correctly). The one real behavioral difference: this animates by
+		mutating `box.position` and calling `render()` again every frame (see
+		`PlayGui.updateToastMessages`) instead of Torque's native `setPosition`/scheduled callbacks -
+		same visual result, different mechanism, since this engine's `GuiControl` has no animation
+		system of its own to hook into.
+
+		Faithfully reproduces one real quirk rather than "fixing" it: when the *oldest* (topmost)
+		toast finishes retreating and is removed, the remaining toasts do NOT shift back down to
+		fill the gap - `shiftMessages` in real source only ever runs when a NEW message arrives,
+		never on removal, so a permanent gap is a real, reproducible artifact of this system. */
+	public function addHelpLine(message:String, timeout:Float = 4.0) {
+		if (message == null || message.length == 0)
+			return;
+		if (this.toastListBox == null)
+			return;
+
+		var width = ToastMessage.WIDTH;
+
+		var box = new GuiControl();
+		box.horizSizing = Right;
+		box.vertSizing = Top;
+		box.position = new Vector(-width, this.toastListBox.extent.y);
+		box.extent = new Vector(width, ToastMessage.DEFAULT_HEIGHT);
+
+		var borderTile = ResourceLoader.getResource('data/ui/game/help/round_border_thin.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var border = new GuiBitmapBorderCtrl(borderTile, 0x4f3d38, {
+			tl: new Vector(0, 1, 21, 23),
+			tr: new Vector(22, 1, 21, 23),
+			bl: new Vector(22, 25, 21, 23),
+			br: new Vector(64, 25, 21, 23),
+			top: new Vector(44, 1, 19, 23),
+			left: new Vector(64, 1, 21, 23),
+			right: new Vector(0, 25, 21, 23),
+			bottom: new Vector(44, 25, 19, 23)
+		});
+		border.horizSizing = Width;
+		border.vertSizing = Height;
+		border.position = new Vector(0, 0);
+		border.extent = new Vector(width, ToastMessage.DEFAULT_HEIGHT);
+		box.addChild(border);
+
+		var inner = new GuiControl();
+		inner.horizSizing = Width;
+		inner.vertSizing = Height;
+		inner.position = new Vector(6, 12);
+		inner.extent = new Vector(width - 6, 46);
+		box.addChild(inner);
+
+		var bg = new GuiMLText(this.toastMessageFont, s -> null);
+		bg.horizSizing = Right;
+		bg.vertSizing = Bottom;
+		bg.position = new Vector(1, 1);
+		bg.extent = new Vector(width - 24, 46);
+		bg.text.textColor = 0x777777;
+		bg.text.text = message;
+		inner.addChild(bg);
+
+		var fg = new GuiMLText(this.toastMessageFont, s -> null);
+		fg.horizSizing = Right;
+		fg.vertSizing = Bottom;
+		fg.position = new Vector(0, 0);
+		fg.extent = new Vector(width - 24, 46);
+		fg.text.textColor = 0xFFFFFF;
+		fg.text.text = message;
+		inner.addChild(fg);
+
+		this.toastListBox.addChild(box);
+		// Initial render lays out the actual (possibly wrapped) text so its real height can be
+		// measured - matches `if (%foregroundName.isAwake()) %foregroundName.forceReflow();`.
+		box.render(scene2d, @:privateAccess this.toastListBox._flow);
+
+		// Update the size of the box (`%boxName.setExtent(VectorAdd(%foregroundName.getExtent(),
+		// "24 24"))`) - `fg.text.textHeight` is in scaled screen pixels, convert back to
+		// reference-canvas units first. Only the BOX's own extent is touched here, exactly like
+		// real source - `border`/`inner`/`bg`/`fg` all keep their original `horizSizing="width"`/
+		// `vertSizing="height"` declared extents (70/46) and are expected to track the resized
+		// parent automatically through that sizing mode, the same as real source relies on without
+		// ever touching their extents again either.
+		var textHeight = fg.text.textHeight / Settings.uiScale;
+		// box.extent.y = textHeight + 24;
+
+		var msg = new ToastMessage();
+		msg.box = box;
+		msg.border = border;
+		msg.fg = fg;
+		msg.direction = 1;
+		msg.x = -width;
+		msg.height = box.extent.y + ToastMessage.SPACING;
+		msg.y = this.toastListBox.extent.y;
+		// Matches real source's own `shiftMessages` call running over EVERY box including the one
+		// just added - rather than adding this message to the list first and then looping over
+		// everything (itself included), its own post-shift resting position is computed directly
+		// here, and the loop below only needs to handle the *other*, already-existing messages.
+		msg.targetY = msg.y - msg.height;
+		msg.targetX = 0;
+		msg.timeout = timeout;
+
+		for (existing in this.toastMessages)
+			existing.targetY -= msg.height;
+
+		this.toastMessages.push(msg);
+		this.repositionToast(msg);
+	}
+
+	function repositionToast(msg:ToastMessage) {
+		msg.box.position.x = msg.x;
+		msg.box.position.y = msg.y;
+		msg.box.render(scene2d, @:privateAccess this.toastListBox._flow);
+	}
+
+	/** Ported from `updateMessages` - per-frame position/lifetime update for every active toast
+		(see `addHelpLine`'s doc comment). */
+	function updateToastMessages(dt:Float) {
+		var i = 0;
+		while (i < this.toastMessages.length) {
+			var msg = this.toastMessages[i];
+			msg.age += dt;
+			if (!msg.retreating && msg.age >= msg.timeout) {
+				msg.retreating = true;
+				msg.direction = -1;
+				msg.targetX = -ToastMessage.WIDTH;
+			}
+
+			var moved = false;
+			if (msg.x != msg.targetX) {
+				var speed = msg.direction > 0 ? ToastMessage.X_SPEED_IN : ToastMessage.X_SPEED_OUT;
+				msg.x += speed * dt * msg.direction;
+				if ((msg.x - msg.targetX) * msg.direction > 0)
+					msg.x = msg.targetX;
+				moved = true;
+			} else if (msg.direction < 0) {
+				// Fully retreated - remove (matches `onNextFrame(delete)`, just immediate since
+				// there's no other work happening this same frame that removing it early could
+				// interfere with).
+				msg.box.dispose();
+				this.toastMessages.splice(i, 1);
+				continue;
+			}
+
+			if (msg.y != msg.targetY) {
+				msg.y -= ToastMessage.Y_SPEED * dt;
+				if (msg.y < msg.targetY)
+					msg.y = msg.targetY;
+				moved = true;
+			}
+
+			if (moved)
+				this.repositionToast(msg);
+			i++;
+		}
 	}
 }
