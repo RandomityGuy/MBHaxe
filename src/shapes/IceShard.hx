@@ -245,8 +245,7 @@ class IceShard extends DtsObject {
 			this.breakData2.texture = ResourceLoader.getResource("data/particles/fireball_2B.png", ResourceLoader.getTexture, this.textureResources);
 
 			this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
-			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null,
-				() -> this.getAbsPos().getPosition());
+			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null, () -> this.getAbsPos().getPosition());
 
 			var worker = new ResourceLoaderWorker(onFinish);
 			worker.addTask(fwd -> ResourceLoader.load("sound/ice_freeze.wav").entry.load(() -> {
@@ -298,8 +297,7 @@ class IceShard extends DtsObject {
 			}
 		} else {
 			this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
-			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null,
-				() -> this.getAbsPos().getPosition());
+			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null, () -> this.getAbsPos().getPosition());
 		}
 	}
 
@@ -383,7 +381,7 @@ class IceShard extends DtsObject {
 			var extendedField = this.element.fields.get("extended");
 			var extended = extendedField != null && mis.MisParser.parseBoolean(extendedField[0]);
 			if (extended)
-				this.level.displayHelp(textField[0]);
+				this.level.displayHelp(textField[0], 5);
 			else
 				this.level.displayAlert(textField[0]);
 		}

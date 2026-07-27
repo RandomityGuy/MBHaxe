@@ -166,6 +166,7 @@ class MarbleWorld extends Scheduler {
 	/** All placed `IceShard1`/`IceShard2` instances - mirrors `gems` (used for rewind snapshotting
 		of `IceShard.destroyed`, see `RewindFrame.iceShardStates`). */
 	public var iceShards:Array<shapes.IceShard> = [];
+
 	public var cannons:Array<shapes.Cannon> = [];
 
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
@@ -276,9 +277,6 @@ class MarbleWorld extends Scheduler {
 	var countdownRemaining:Float = -1e8;
 	var countdownActive:Bool = false;
 	var countdownIcon:String = "timerTimeTravel";
-
-	var helpTextTimeState:Float = -1e8;
-	var alertTextTimeState:Float = -1e8;
 
 	var respawnPressedTime:Float = -1e8;
 
@@ -992,7 +990,7 @@ class MarbleWorld extends Scheduler {
 		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
 			&& element._name == "MissionInfo")[0];
 		if (missionInfo.starthelptext != null)
-			displayHelp(missionInfo.starthelptext); // Show the start help text
+			displayHelp(missionInfo.starthelptext, 5); // Show the start help text
 
 		for (shape in dtsObjects) {
 			shape.reset();
@@ -2393,8 +2391,6 @@ class MarbleWorld extends Scheduler {
 		// }
 
 		_instancesNeedsUpdate = true;
-
-		this.updateTexts();
 	}
 
 	public function render(e:h3d.Engine) {
@@ -2653,7 +2649,7 @@ class MarbleWorld extends Scheduler {
 					// Start the alarm
 					this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
 						null, true); // AudioManager.createAudioSource('alarm.wav');
-					this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.');
+					this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.', 5);
 				}
 				if (prevGameplayClock < this.mission.qualifyTime && this.timeState.gameplayClock >= this.mission.qualifyTime) {
 					// Stop the alarm
@@ -2661,7 +2657,7 @@ class MarbleWorld extends Scheduler {
 						this.alarmSound.stop();
 						this.alarmSound = null;
 					}
-					this.displayHelp("The clock has passed the Par Time.");
+					this.displayHelp("The clock has passed the Par Time.", 5);
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
 				}
 			}
@@ -2675,7 +2671,7 @@ class MarbleWorld extends Scheduler {
 						this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio,
 							this.soundResources), null,
 							true); // AudioManager.createAudioSource('alarm.wav');
-						this.displayHelp('You have ${alarmStart} seconds remaining.');
+						this.displayHelp('You have ${alarmStart} seconds remaining.', 5);
 					}
 				}
 				if (prevGameplayClock > 0 && this.timeState.gameplayClock <= 0) {
@@ -2706,15 +2702,6 @@ class MarbleWorld extends Scheduler {
 			}
 			this.playGui.setBlastValue(marble.blastAmount);
 		}
-	}
-
-	function updateTexts() {
-		var helpTextTime = this.helpTextTimeState;
-		var alertTextTime = this.alertTextTimeState;
-		var helpTextCompletion = Math.pow(Util.clamp((this.timeState.timeSinceLoad - helpTextTime - 3), 0, 1), 2);
-		var alertTextCompletion = Math.pow(Util.clamp((this.timeState.timeSinceLoad - alertTextTime - 3), 0, 1), 2);
-		this.playGui.setHelpTextOpacity(1 - helpTextCompletion);
-		this.playGui.setAlertTextOpacity(1 - alertTextCompletion);
 	}
 
 	/** The gem counter's "total" (right-hand side of the collected/total display) - `totalGems`
@@ -2781,12 +2768,16 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
+	/** Ported from PQ's `addHelpLine` (`client/scripts/chathud.cs`) - despite this port's own
+		naming ("alert"), matches PQ's stacking/sliding toast notification system
+		(`createHelpMessage`/`updateMessages`), not `addBubbleLine`'s persistent help-bubble
+		machinery (`PlayGui.helpTextForeground`/`setHelpText`, unrelated despite the similar name).
+		See `PlayGui.addHelpLine`'s doc comment for the implementation. */
 	public function displayAlert(text:String) {
-		this.playGui.setAlertText(text);
-		this.alertTextTimeState = this.timeState.timeSinceLoad;
+		this.playGui.addHelpLine(text);
 	}
 
-	public function displayHelp(text:String) {
+	public function displayHelp(text:String, duration:Float) {
 		var start = 0;
 		var pos = text.indexOf("<func:", start);
 		while (pos != -1) {
@@ -2828,8 +2819,7 @@ class MarbleWorld extends Scheduler {
 			text = pre + val + post;
 			pos = text.indexOf("<func:", start);
 		}
-		this.playGui.setHelpText(text);
-		this.helpTextTimeState = this.timeState.timeSinceLoad;
+		this.playGui.setHelpText(this.timeState.timeSinceLoad, text, duration);
 	}
 
 	public function pickUpGem(marble:src.Marble, gem:Gem) {
