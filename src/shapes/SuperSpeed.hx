@@ -60,7 +60,7 @@ class SuperSpeed extends PowerUp {
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
 		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "SuperSpeed" + this.dtsPath;
-		this.pickUpName = "Speed Booster PowerUp";
+		this.pickUpName = "Super Speed PowerUp";
 		this.useInstancing = true;
 		ssEmitterParticleData = new ParticleData();
 		ssEmitterParticleData.identifier = "superSpeedParticle";

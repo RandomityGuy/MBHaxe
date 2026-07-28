@@ -19,7 +19,7 @@ class Helicopter extends PowerUp {
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
 		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "Helicopter" + this.dtsPath;
-		this.pickUpName = "Helicopter PowerUp";
+		this.pickUpName = "Gyrocopter PowerUp";
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
