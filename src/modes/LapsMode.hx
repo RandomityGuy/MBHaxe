@@ -191,7 +191,7 @@ class LapsMode extends NullMode {
 	function onNextLap():Bool {
 		if (this.lapsCounter >= this.lapsNumber) {
 			if (level.gemCount != level.totalGems) {
-				@:privateAccess level.playGui.addMiddleMessage("You need to collect all the gems to finish!", 0xff6666);
+				@:privateAccess level.displayAlert("You need to collect all the gems to finish!");
 				AudioManager.playPitchedSound("missinggems", @:privateAccess level.soundResources);
 			} else {
 				@:privateAccess level.touchFinish();
@@ -212,7 +212,7 @@ class LapsMode extends NullMode {
 			if (this.onNextLap())
 				this.activateCheckpoint(trigger);
 		} else if (this.lapsCPCheck != 1) {
-			@:privateAccess level.playGui.addMiddleMessage("Wrong way!", 0xff6666);
+			@:privateAccess level.displayAlert("Wrong way!");
 		}
 	}
 
@@ -229,7 +229,7 @@ class LapsMode extends NullMode {
 			this.activateCheckpoint(trigger);
 		} else if (!((trigger.checkpointNumber + 1 == this.lapsCPCheck)
 			|| (trigger.checkpointNumber == highest && this.lapsCPCheck == 0))) {
-			@:privateAccess level.playGui.addMiddleMessage("Wrong way!", 0xff6666);
+			@:privateAccess level.displayAlert("Wrong way!");
 		}
 	}
 

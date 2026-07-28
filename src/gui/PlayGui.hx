@@ -1441,7 +1441,7 @@ class PlayGui {
 
 		var helpTextInner = new GuiControl();
 		helpTextInner.position = new Vector(35, 16);
-		helpTextInner.extent = new Vector(550, 60);
+		helpTextInner.extent = new Vector(550, 120);
 		helpTextInner.horizSizing = Right;
 		helpTextInner.vertSizing = Bottom;
 		helpTextContainer.addChild(helpTextInner);
@@ -1903,6 +1903,11 @@ class PlayGui {
 
 		this.helpTextForeground.text.text = text;
 		this.helpTextBackground.text.text = text;
+
+		var textHeight = this.helpTextForeground.text.textHeight / Settings.uiScale;
+		this.helpTextBorder.extent.y = 80;
+		if (textHeight > 44)
+			this.helpTextBorder.extent.y += textHeight - 44;
 		// helpTextBackground.render(scene2d);
 		// helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
 		// helpTextForeground.y = scene2d.height * 0.45;

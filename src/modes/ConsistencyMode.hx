@@ -107,7 +107,7 @@ class ConsistencyMode extends NullMode {
 			if (!this.failing) {
 				this.failing = true;
 				this.belowSpeedSince = t.currentAttemptTime;
-				@:privateAccess level.playGui.addMiddleMessage("Too slow!", 0xff9999);
+				@:privateAccess level.displayAlert("Too slow!");
 			} else if (t.currentAttemptTime - this.belowSpeedSince >= this.penaltyDelay) {
 				this.onConsistencyFail();
 			}
@@ -119,7 +119,7 @@ class ConsistencyMode extends NullMode {
 
 	function onConsistencyFail() {
 		this.failed = true;
-		@:privateAccess level.playGui.addMiddleMessage("Consistency failed!", 0xff6666);
+		@:privateAccess level.playGui.displayAlert("Consistency failed!");
 
 		var isHuntFamily = level.mission.gameMode != null && level.mission.gameMode.toLowerCase().indexOf("hunt") != -1;
 		if (isHuntFamily) {
