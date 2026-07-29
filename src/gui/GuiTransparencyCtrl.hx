@@ -1,42 +1,35 @@
 package gui;
 
-import h3d.Vector;
 import h2d.Scene;
 import h2d.Flow;
+import h2d.Bitmap;
 import h2d.Tile;
+import src.ResourceLoader;
 
-class GuiBitmapBorderCtrl extends GuiControl {
+class GuiTransparencyCtrl extends GuiControl {
 	var tiles:Array<Tile>;
+	var bmps:Array<Bitmap>;
 
-	var bmps:Array<h2d.Bitmap>; // [tl, tr, bl, br, top, left, right, bottom, fill]
 	var container:h2d.Object;
 
-	public function new(texture:Tile, fill:Int, texs:{
-		tl:Vector,
-		tr:Vector,
-		bl:Vector,
-		br:Vector,
-		top:Vector,
-		left:Vector,
-		right:Vector,
-		bottom:Vector
-	}) {
+	public function new(path:String) {
 		super();
-		var tl = texture.sub(texs.tl.x, texs.tl.y, texs.tl.z, texs.tl.w);
-		var tr = texture.sub(texs.tr.x, texs.tr.y, texs.tr.z, texs.tr.w);
-		var top = texture.sub(texs.top.x, texs.top.y, texs.top.z, texs.top.w);
-		var left = texture.sub(texs.left.x, texs.left.y, texs.left.z, texs.left.w);
-		var right = texture.sub(texs.right.x, texs.right.y, texs.right.z, texs.right.w);
-		var bl = texture.sub(texs.bl.x, texs.bl.y, texs.bl.z, texs.bl.w);
-		var bottom = texture.sub(texs.bottom.x, texs.bottom.y, texs.bottom.z, texs.bottom.w);
-		var br = texture.sub(texs.br.x, texs.br.y, texs.br.z, texs.br.w);
-		var fillTile = Tile.fromColor(fill);
-		tiles = [tl, tr, bl, br, top, left, right, bottom, fillTile];
+		var b = ResourceLoader.getResource('${path}/transparency-b.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var bl = ResourceLoader.getResource('${path}/transparency-bl.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var br = ResourceLoader.getResource('${path}/transparency-br.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var t = ResourceLoader.getResource('${path}/transparency-t.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var tl = ResourceLoader.getResource('${path}/transparency-tl.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var tr = ResourceLoader.getResource('${path}/transparency-tr.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var l = ResourceLoader.getResource('${path}/transparency-l.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var r = ResourceLoader.getResource('${path}/transparency-r.png', ResourceLoader.getImage, this.imageResources).toTile();
+		var f = ResourceLoader.getResource('${path}/transparencyfill.png', ResourceLoader.getImage, this.imageResources).toTile();
 
-		this.container = new h2d.Object();
-		this.bmps = [];
+		container = new h2d.Object();
+
+		tiles = [b, bl, br, t, tl, tr, l, r, f];
+		bmps = [];
 		for (tile in tiles) {
-			this.bmps.push(new h2d.Bitmap(tile, container));
+			bmps.push(new Bitmap(tile, container));
 		}
 	}
 
@@ -49,17 +42,18 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		props.isAbsolute = true;
 
 		var renderRect = this.getRenderRectangle();
+		var offset = this.getOffsetFromParent();
 
-		container.setPosition(0, 0);
+		container.setPosition(offset.x, offset.y);
 
-		var tl = bmps[0];
-		var tr = bmps[1];
-		var bl = bmps[2];
-		var br = bmps[3];
-		var top = bmps[4];
-		var left = bmps[5];
-		var right = bmps[6];
-		var bottom = bmps[7];
+		var bottom = bmps[0];
+		var bl = bmps[1];
+		var br = bmps[2];
+		var top = bmps[3];
+		var tl = bmps[4];
+		var tr = bmps[5];
+		var left = bmps[6];
+		var right = bmps[7];
 
 		tl.setPosition(0, 0);
 
@@ -94,12 +88,6 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		fill.height = renderRect.extent.y - tr.tile.height - bl.tile.height;
 
 		super.render(scene2d, parent);
-	}
-
-	public override function onRemove() {
-		super.onRemove();
-
-		container.remove();
 	}
 
 	public override function dispose() {

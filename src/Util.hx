@@ -1,5 +1,7 @@
 package src;
 
+import src.Mission;
+import modes.GameMode.ScoreType;
 import haxe.io.BytesBuffer;
 import haxe.io.Bytes;
 import h3d.Matrix;
@@ -470,6 +472,62 @@ class Util {
 				inString = true;
 		}
 		return false;
+	}
+
+	public static function formatScore(score:Int) {
+		var str = '${score}';
+		// add commas
+		var fin = "";
+		var c = -1;
+		var i = str.length;
+		while (i >= 0) {
+			if ("0123456789".indexOf(str.charAt(i)) == -1) {
+				fin = str.charAt(i) + fin;
+				continue;
+			}
+			if (c % 3 == 0 && c > 0)
+				fin += "," + fin;
+			fin = str.charAt(i) + fin;
+			i--;
+			c++;
+		}
+		return fin;
+	}
+
+	public static function getScoreColor(score:Float, scoreType:ScoreType, mission:Mission) {
+		var beatPar = false;
+		var beatPlatinum = false;
+		var beatUltimate = false;
+		var beatAwesome = false;
+
+		switch (scoreType) {
+			case Score:
+				if (score >= mission.qualifyingScore)
+					beatPar = true;
+				if (score >= mission.goldScore)
+					beatPlatinum = true;
+				if (score >= mission.ultimateScore)
+					beatUltimate = true;
+				if (score >= mission.awesomeScore)
+					beatAwesome = true;
+			case Time:
+				if (score < mission.qualifyTime)
+					beatPar = true;
+				if (score < mission.goldTime)
+					beatPlatinum = true;
+				if (score < mission.ultimateTime)
+					beatUltimate = true;
+				if (score < mission.awesomeTime)
+					beatAwesome = true;
+		}
+		var scoreColor = "#000000";
+		if (beatAwesome)
+			scoreColor = "#FF4444";
+		else if (beatUltimate)
+			scoreColor = "#FFCC33";
+		else if (beatPlatinum)
+			scoreColor = mission.game == "gold" ? "#FFEE11" : "#CCCCCC";
+		return scoreColor;
 	}
 
 	public static function formatTime(time:Float) {

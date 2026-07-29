@@ -22,6 +22,7 @@ import src.Console;
 typedef Score = {
 	var name:String;
 	var time:Float;
+	var type:Int; // 0 - score, 1 - time
 }
 
 typedef OptionsSettings = {
@@ -255,7 +256,16 @@ class Settings {
 		if (highScores.exists(mapPath)) {
 			var scoreList = highScores.get(mapPath);
 			scoreList.push(score);
-			scoreList.sort((a, b) -> a.time == b.time ? 0 : (a.time > b.time ? 1 : -1));
+			scoreList.sort((a, b) -> {
+				if (a.type == b.type) {
+					if (a.type == 0) // time
+						return a.time == b.time ? 0 : (a.time > b.time ? 1 : -1);
+					else
+						return a.time == b.time ? 0 : (a.time > b.time ? -1 : 1);
+				} else {
+					return a.type > b.type ? 1 : -1;
+				}
+			});
 		} else {
 			highScores.set(mapPath, [score]);
 		}

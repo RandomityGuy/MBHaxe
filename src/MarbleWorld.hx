@@ -222,6 +222,7 @@ class MarbleWorld extends Scheduler {
 
 	public var timeState:TimeState = new TimeState();
 	public var bonusTime:Float = 0;
+	public var collectedBonusTime:Float = 0;
 	public var sky:Sky;
 
 	public var endPadElement:MissionElementStaticShape;
@@ -891,6 +892,7 @@ class MarbleWorld extends Scheduler {
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
 		this.timeState.ticks = 0;
 		this.bonusTime = 0;
+		this.collectedBonusTime = 0;
 		this.marble.outOfBounds = false;
 		this.marble.blastAmount = 0;
 		this.marble.outOfBoundsTime = null;
@@ -2641,10 +2643,9 @@ class MarbleWorld extends Scheduler {
 		this.timeState.timeSinceLoad += dt;
 
 		// Handle alarm warnings (that the user is about to exceed the par time)
-		if (!Net.isMP) {
-			if (this.timeState.currentAttemptTime >= 3.5) {
-				var alarmStart = this.computeAlarmStartTime();
-
+		var alarmStart = this.computeAlarmStartTime();
+		if (this.timeMultiplier == 1 && this.timeState.currentAttemptTime >= 3.5) {
+			if (this.timeMultiplier == 1) {
 				if (prevGameplayClock < alarmStart && this.timeState.gameplayClock >= alarmStart) {
 					// Start the alarm
 					this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
@@ -2661,28 +2662,23 @@ class MarbleWorld extends Scheduler {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm_timeout.wav", ResourceLoader.getAudio, this.soundResources));
 				}
 			}
-		} else {
-			if (this.multiplayerStarted) {
-				var alarmStart = this.computeAlarmStartTime();
-
-				if (prevGameplayClock > alarmStart && this.timeState.gameplayClock <= alarmStart) {
-					// Start the alarm
-					if (this.alarmSound == null) {
-						this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio,
-							this.soundResources), null,
-							true); // AudioManager.createAudioSource('alarm.wav');
-						this.displayHelp('You have ${alarmStart} seconds remaining.', 5);
-					}
-				}
-				if (prevGameplayClock > 0 && this.timeState.gameplayClock <= 0) {
-					// Stop the alarm
-					if (this.alarmSound != null) {
-						this.alarmSound.stop();
-						this.alarmSound = null;
-					}
+		}
+		if (this.timeMultiplier == -1) {
+			if (prevGameplayClock > alarmStart && this.timeState.gameplayClock <= alarmStart) {
+				// Start the alarm
+				this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
+					null, true); // AudioManager.createAudioSource('alarm.wav');
+				this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.', 5);
+			}
+			if (prevGameplayClock > 0 && this.timeState.gameplayClock <= 0) {
+				// Stop the alarm
+				if (this.alarmSound != null) {
+					this.alarmSound.stop();
+					this.alarmSound = null;
 				}
 			}
 		}
+
 		if (finishTime != null)
 			this.timeState.gameplayClock = finishTime.gameplayClock;
 		playGui.formatTimer(this.timeState.gameplayClock, determineClockColor(this.timeState.gameplayClock));
@@ -2900,7 +2896,8 @@ class MarbleWorld extends Scheduler {
 		if (Util.isTouchDevice()) {
 			MarbleGame.instance.touchInput.setControlsEnabled(false);
 		}
-		egg = new EndGameGui((sender) -> {
+		var finishScore = this.gameMode.getFinishScore();
+		egg = new EndGameGui(finishScore.score, finishScore.type, (sender) -> {
 			if (Util.isTouchDevice()) {
 				MarbleGame.instance.touchInput.hideControls(@:privateAccess this.playGui.playGuiCtrl);
 			}
@@ -2999,10 +2996,17 @@ class MarbleWorld extends Scheduler {
 
 	public function addBonusTime(t:Float) {
 		this.bonusTime += t;
+		this.collectedBonusTime += t;
 		if (t > 0) {
-			this.playGui.addMiddleMessage('-${t}s', 0x99ff99);
+			if (this.timeMultiplier > 0)
+				this.playGui.addMiddleMessage('-${t}s', 0x99ff99);
+			else
+				this.playGui.addMiddleMessage('+${t}s', 0x99ff99);
 		} else if (t < 0) {
-			this.playGui.addMiddleMessage('+${- t}s', 0xff9999);
+			if (this.timeMultiplier > 0)
+				this.playGui.addMiddleMessage('+${- t}s', 0xff9999);
+			else
+				this.playGui.addMiddleMessage('-${- t}s', 0xff9999);
 		} else {
 			this.playGui.addMiddleMessage('+0s', 0xcccccc);
 		}

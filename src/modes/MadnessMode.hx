@@ -66,8 +66,8 @@ class MadnessMode extends NullMode {
 		return this.gotAllGems ? Time : Score;
 	}
 
-	override function getFinishScore():Float {
-		return this.gotAllGems ? level.finishTime.gameplayClock : this.score;
+	override function getFinishScore():{score:Float, type:ScoreType} {
+		return this.gotAllGems ? {score: getStartTime() - level.finishTime.gameplayClock, type: Time} : {score: this.score, type: Score};
 	}
 
 	override function canFinish(marble:Marble):Bool {
@@ -81,6 +81,15 @@ class MadnessMode extends NullMode {
 	override function onRestart() {
 		score = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(score);
+	}
+
+	override function onTimeExpire() {
+		if (level.finishTime != null)
+			return;
+		if (!level.isMultiplayer) {
+			@:privateAccess level.touchFinish();
+			return;
+		}
 	}
 
 	override function onGemPickup(marble:Marble, gem:Gem) {

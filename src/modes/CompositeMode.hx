@@ -102,7 +102,7 @@ class CompositeMode implements GameMode {
 		return this.children[this.children.length - 1].getScoreType();
 	}
 
-	public function getFinishScore():Float {
+	public function getFinishScore():{score:Float, type:ScoreType} {
 		return this.children[this.children.length - 1].getFinishScore();
 	}
 

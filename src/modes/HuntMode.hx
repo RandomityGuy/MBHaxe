@@ -1,5 +1,6 @@
 package modes;
 
+import modes.GameMode.ScoreType;
 import shapes.StartPad;
 import gui.MPEndGameGui;
 import net.NetCommands;
@@ -759,9 +760,22 @@ class HuntMode extends NullMode {
 		competitiveTimerStartTicks = 0;
 	}
 
+	override function getFinishScore():{score:Float, type:ScoreType} {
+		return {score: this.points, type: Score};
+	}
+
+	override function canFinish(marble:Marble):Bool {
+		return true;
+	}
+
 	override function onTimeExpire() {
 		if (level.finishTime != null)
 			return;
+
+		if (!level.isMultiplayer) {
+			@:privateAccess level.touchFinish();
+			return;
+		}
 
 		AudioManager.playPitchedSound("firewrks", @:privateAccess level.soundResources);
 		// AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess level.soundResources));

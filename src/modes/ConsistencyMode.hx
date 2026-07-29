@@ -119,7 +119,7 @@ class ConsistencyMode extends NullMode {
 
 	function onConsistencyFail() {
 		this.failed = true;
-		@:privateAccess level.playGui.displayAlert("Consistency failed!");
+		@:privateAccess level.displayAlert("Consistency failed!");
 
 		var isHuntFamily = level.mission.gameMode != null && level.mission.gameMode.toLowerCase().indexOf("hunt") != -1;
 		if (isHuntFamily) {

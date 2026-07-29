@@ -24,21 +24,45 @@ class MainMenuGui extends GuiImage {
 		}
 		var img = chooseBg();
 		super(img.resource.toTile());
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 42 * Settings.uiScale, MultiChannel);
+		var helveticafontdata = ResourceLoader.getFileEntry("data/font/helveticaneue.fnt");
+		var helveticafont = new BitmapFont(helveticafontdata.entry);
+		@:privateAccess helveticafont.loader = ResourceLoader.loader;
+		var helveticafont60 = helveticafont.toSdfFont(cast 52 * Settings.uiScale, MultiChannel);
+
+		var squishneyfontdata = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishneyb = new BitmapFont(squishneyfontdata.entry);
+		@:privateAccess squishneyb.loader = ResourceLoader.loader;
+		var squishney32 = squishneyb.toSdfFont(cast 29 * Settings.uiScale, MultiChannel);
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
-		this.extent = new Vector(640, 480);
+		this.extent = new Vector(800, 600);
+
+		var menuCircle1 = new GuiImage(ResourceLoader.getResource("data/ui/menu/bgcircle-large.png", ResourceLoader.getImage, this.imageResources).toTile());
+		menuCircle1.horizSizing = Right;
+		menuCircle1.vertSizing = Height;
+		menuCircle1.position = new Vector(0, 0);
+		menuCircle1.extent = new Vector(116, 720);
+		this.addChild(menuCircle1);
+
+		var menuCircle2 = new GuiImage(ResourceLoader.getResource("data/ui/menu/bgcircle-small.png", ResourceLoader.getImage, this.imageResources).toTile());
+		menuCircle2.horizSizing = Left;
+		menuCircle2.vertSizing = Top;
+		menuCircle2.position = new Vector(550, 470);
+		menuCircle2.extent = new Vector(260, 145);
+		this.addChild(menuCircle2);
+
+		var menuTitle = new GuiImage(ResourceLoader.getResource("data/ui/menu/bgtitle.png", ResourceLoader.getImage, this.imageResources).toTile());
+		menuTitle.position = new Vector(56, 57);
+		menuTitle.extent = new Vector(864, 114);
+		this.addChild(menuTitle);
 
 		var mainMenuContent = new GuiControl();
-		mainMenuContent.horizSizing = Center;
-		mainMenuContent.vertSizing = Center;
-		mainMenuContent.position = new Vector(-130, -110);
-		mainMenuContent.extent = new Vector(900, 700);
+		mainMenuContent.horizSizing = Width;
+		mainMenuContent.vertSizing = Height;
+		mainMenuContent.position = new Vector(0, 0);
+		mainMenuContent.extent = new Vector(800, 600);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -54,82 +78,32 @@ class MainMenuGui extends GuiImage {
 			return [normal, hover, pressed];
 		}
 
-		var siteButton = new GuiButton(loadButtonImages('data/ui/menu/site'));
-		siteButton.horizSizing = Right;
-		siteButton.vertSizing = Top;
-		siteButton.position = new Vector(363, 664);
-		siteButton.extent = new Vector(400, 30);
-		siteButton.pressedAction = (sender) -> {
-			#if sys
-			hxd.System.openURL("https://marbleblast.com");
-			#end
-			#if js
-			js.Browser.window.open("https://marbleblast.com");
-			#end
-		}
-		mainMenuContent.addChild(siteButton);
-
-		var motdButton = new GuiButton(loadButtonImages('data/ui/menu/changelog'));
-		motdButton.horizSizing = Left;
-		motdButton.vertSizing = Top;
-		motdButton.position = new Vector(706, 536);
-		motdButton.extent = new Vector(191, 141);
-		motdButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.pushDialog(new VersionGui());
-		}
-		mainMenuContent.addChild(motdButton);
-
-		var playButton = new GuiButton(loadButtonImages("data/ui/menu/play"));
-		playButton.position = new Vector(-5, -2);
-		playButton.extent = new Vector(247, 164);
+		var playButton = new GuiButtonText(loadButtonImages("data/ui/menu/menu"), helveticafont60);
+		playButton.position = new Vector(75, 178);
+		playButton.setExtent(new Vector(500, 84));
 		playButton.gamepadAccelerator = ["A"];
 		playButton.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new PlayMissionGui());
 		}
+		playButton.txtCtrl.text.textColor = 0;
+		playButton.txtCtrl.text.text = "      Play";
+		playButton.txtCtrl.justify = Left;
 		mainMenuContent.addChild(playButton);
 
-		var lbButton = new GuiButton(loadButtonImages("data/ui/menu/online"));
-		lbButton.position = new Vector(-5, 128);
-		lbButton.extent = new Vector(247, 164);
-		lbButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.setContent(new JoinServerGui());
-		}
-		mainMenuContent.addChild(lbButton);
-
-		var optionsButton = new GuiButton(loadButtonImages("data/ui/menu/options"));
-		optionsButton.position = new Vector(-5, 258);
-		optionsButton.extent = new Vector(247, 164);
+		var optionsButton = new GuiButtonText(loadButtonImages("data/ui/menu/menu"), helveticafont60);
+		optionsButton.position = new Vector(75, 268);
+		optionsButton.setExtent(new Vector(500, 84));
 		optionsButton.pressedAction = (sender) -> {
 			cast(this.parent, Canvas).setContent(new OptionsDlg());
 		}
+		optionsButton.txtCtrl.text.textColor = 0;
+		optionsButton.txtCtrl.text.text = "      Options";
+		optionsButton.txtCtrl.justify = Left;
 		mainMenuContent.addChild(optionsButton);
 
-		#if hl
-		var exitButton = new GuiButton(loadButtonImages("data/ui/menu/quit"));
-		exitButton.position = new Vector(-5, 388);
-		exitButton.extent = new Vector(247, 164);
-		exitButton.pressedAction = (sender) -> {
-			#if hl
-			Sys.exit(0);
-			#end
-		};
-		mainMenuContent.addChild(exitButton);
-		#end
-		#if js
-		var exitButton = new GuiButton(loadButtonImages("data/ui/menu/download"));
-		exitButton.position = new Vector(-5, 388);
-		exitButton.extent = new Vector(247, 164);
-		exitButton.pressedAction = (sender) -> {
-			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
-		};
-		mainMenuContent.addChild(exitButton);
-		#end
-
-		var replButton = new GuiButton(loadButtonImages("data/ui/menu/replay"));
-		replButton.horizSizing = Left;
-		replButton.vertSizing = Top;
-		replButton.position = new Vector(552, 536);
-		replButton.extent = new Vector(191, 141);
+		var replButton = new GuiButtonText(loadButtonImages("data/ui/menu/menu"), helveticafont60);
+		replButton.position = new Vector(75, 358);
+		replButton.setExtent(new Vector(500, 84));
 		replButton.pressedAction = (sender) -> {
 			#if hl
 			MarbleGame.canvas.setContent(new ReplayCenterGui());
@@ -173,34 +147,57 @@ class MainMenuGui extends GuiImage {
 			});
 			#end
 		};
+		replButton.txtCtrl.text.textColor = 0;
+		replButton.txtCtrl.text.text = "      Replays";
+		replButton.txtCtrl.justify = Left;
 		mainMenuContent.addChild(replButton);
 
-		var helpButton = new GuiButton(loadButtonImages("data/ui/menu/help"));
-		helpButton.horizSizing = Left;
-		helpButton.vertSizing = Top;
-		helpButton.position = new Vector(398, 536);
-		helpButton.extent = new Vector(191, 141);
-		helpButton.pressedAction = (sender) -> {
-			MarbleGame.canvas.setContent(new HelpCreditsGui());
+		var changelogButton = new GuiButtonText(loadButtonImages("data/ui/menu/menu"), helveticafont60);
+		changelogButton.position = new Vector(75, 448);
+		changelogButton.setExtent(new Vector(500, 84));
+		changelogButton.pressedAction = (sender) -> {
+			MarbleGame.canvas.pushDialog(new VersionGui());
 		}
-		mainMenuContent.addChild(helpButton);
+		changelogButton.txtCtrl.text.textColor = 0;
+		changelogButton.txtCtrl.text.text = "      Changelog";
+		changelogButton.txtCtrl.justify = Left;
+		mainMenuContent.addChild(changelogButton);
+
+		#if hl
+		var exitButton = new GuiButtonText(loadButtonImages("data/ui/menu/menu"), helveticafont60);
+		exitButton.position = new Vector(75, 538);
+		exitButton.setExtent(new Vector(500, 84));
+		exitButton.pressedAction = (sender) -> {
+			#if hl
+			Sys.exit(0);
+			#end
+		}
+		exitButton.txtCtrl.text.textColor = 0;
+		exitButton.txtCtrl.text.text = "      Quit";
+		exitButton.txtCtrl.justify = Left;
+		mainMenuContent.addChild(exitButton);
+		#end
+		#if js
+		var exitButton = new GuiButtonText(loadButtonImages("data/ui/menu/menu"), helveticafont60);
+		exitButton.position = new Vector(75, 538);
+		exitButton.setExtent(new Vector(500, 84));
+		exitButton.pressedAction = (sender) -> {
+			js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
+		}
+		exitButton.txtCtrl.text.textColor = 0;
+		exitButton.txtCtrl.text.text = "     Download";
+		mainMenuContent.addChild(exitButton);
+		#end
 
 		this.addChild(mainMenuContent);
 
-		var mbp = new GuiImage(ResourceLoader.getResource("data/ui/menu/mbp.png", ResourceLoader.getImage, this.imageResources).toTile());
-		mbp.horizSizing = Left;
-		mbp.vertSizing = Bottom;
-		mbp.position = new Vector(476, 12);
-		mbp.extent = new Vector(153, 150);
-		this.addChild(mbp);
-
-		var versionText = new GuiMLText(domcasual32, null);
+		var versionText = new GuiMLText(squishney32, null);
 
 		versionText.horizSizing = Left;
-		versionText.vertSizing = Bottom;
-		versionText.position = new Vector(502, 61);
+		versionText.vertSizing = Top;
+		versionText.position = new Vector(690, 564);
 		versionText.extent = new Vector(97, 72);
-		versionText.text.text = '<p align=\"center\">${MarbleGame.currentVersion}</p>';
+		versionText.text.text = '<p align=\"right\">${MarbleGame.currentVersion}</p>';
 		versionText.text.dropShadow = {
 			dx: 1 * Settings.uiScale,
 			dy: 1 * Settings.uiScale,
@@ -211,8 +208,8 @@ class MainMenuGui extends GuiImage {
 
 		var kofi = new GuiButton(loadButtonImages("data/ui/kofi1"));
 		kofi.horizSizing = Left;
-		kofi.vertSizing = Top;
-		kofi.position = new Vector(473, 424);
+		kofi.vertSizing = Bottom;
+		kofi.position = new Vector(650, 2);
 		kofi.extent = new Vector(143, 36);
 		kofi.pressedAction = (sender) -> {
 			#if sys
@@ -226,8 +223,8 @@ class MainMenuGui extends GuiImage {
 
 		var github = new GuiButton(loadButtonImages("data/ui/github"));
 		github.horizSizing = Left;
-		github.vertSizing = Top;
-		github.position = new Vector(522, 380);
+		github.vertSizing = Bottom;
+		github.position = new Vector(700, 46);
 		github.extent = new Vector(94, 38);
 		github.pressedAction = (sender) -> {
 			#if sys
@@ -239,37 +236,37 @@ class MainMenuGui extends GuiImage {
 		}
 		this.addChild(github);
 
-		#if js
+		// #if js
 		var mbg = new GuiButton(loadStaticButtonImages("data/ui/icon_mbg"));
 		mbg.horizSizing = Right;
 		mbg.vertSizing = Top;
-		mbg.position = new Vector(0, 380);
+		mbg.position = new Vector(0, 510);
 		mbg.extent = new Vector(76, 76);
 		mbg.pressedAction = (sender) -> {
-			js.Browser.window.open("https://marbleblastgold.randomityguy.me");
+			// js.Browser.window.open("https://marbleblastgold.randomityguy.me");
 		}
 		this.addChild(mbg);
 
 		var mbu = new GuiButton(loadStaticButtonImages("data/ui/icon_mbu"));
 		mbu.horizSizing = Right;
 		mbu.vertSizing = Top;
-		mbu.position = new Vector(76, 380);
+		mbu.position = new Vector(76, 510);
 		mbu.extent = new Vector(76, 76);
 		mbu.pressedAction = (sender) -> {
-			js.Browser.window.open("https://marbleblastultra.randomityguy.me");
+			// js.Browser.window.open("https://marbleblastultra.randomityguy.me");
 		}
 		this.addChild(mbu);
 
 		var discord = new GuiButton(loadStaticButtonImages("data/ui/discord"));
-		discord.horizSizing = Right;
-		discord.vertSizing = Top;
-		discord.position = new Vector(0, 320);
+		discord.horizSizing = Left;
+		discord.vertSizing = Bottom;
+		discord.position = new Vector(650, 90);
 		discord.extent = new Vector(152, 60);
 		discord.pressedAction = (sender) -> {
-			js.Browser.window.open("https://discord.gg/q4JdnRbVhF");
+			// js.Browser.window.open("https://discord.gg/q4JdnRbVhF");
 		}
 		this.addChild(discord);
-		#end
+		// #end
 
 		#if js
 		var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);
