@@ -1,5 +1,8 @@
 package gui;
 
+import h2d.Scene;
+import h2d.Flow;
+import modes.GameMode.ScoreType;
 import src.Leaderboards;
 import hxd.BitmapData;
 import h2d.Tile;
@@ -13,382 +16,419 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.TimeState;
 import src.Util;
+import shapes.TimeTravel;
 
 class EndGameGui extends GuiControl {
 	var mission:Mission;
 
 	var scoreSubmitted:Bool = false;
 
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void, mission:Mission, timeState:TimeState,
-			replayData:haxe.io.Bytes) {
+	public function new(score:Float, scoreType:ScoreType, continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void,
+			mission:Mission, timeState:TimeState, replayData:haxe.io.Bytes) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector(0, 0);
-		this.extent = new Vector(640, 480);
+		this.extent = new Vector(800, 600);
 		this.mission = mission;
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
+		var wnd = new GuiTransparencyCtrl("data/ui/transparency/pqwindow");
+		wnd.horizSizing = Right;
+		wnd.vertSizing = Height;
+		wnd.position = new Vector(128, -14);
+		wnd.extent = new Vector(469, 796);
+		this.addChild(wnd);
 
-		var pg = new GuiImage(ResourceLoader.getResource("data/ui/endgame/base.png", ResourceLoader.getImage, this.imageResources).toTile());
-		pg.horizSizing = Center;
-		pg.vertSizing = Center;
-		pg.position = new Vector(28, 20);
-		pg.extent = new Vector(584, 440);
+		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
+		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
+		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var whatneyFont26 = whatneyFontB.toSdfFont(cast 23 * Settings.uiScale, MultiChannel);
 
-		var continueButton = new GuiButton(loadButtonImages("data/ui/endgame/continue"));
-		continueButton.horizSizing = Right;
-		continueButton.vertSizing = Bottom;
-		continueButton.position = new Vector(460, 307);
-		continueButton.extent = new Vector(104, 54);
-		continueButton.accelerator = hxd.Key.ENTER;
-		continueButton.gamepadAccelerator = ["A"];
-		continueButton.pressedAction = (e) -> continueFunc(continueButton);
+		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
+		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
+		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
 
-		var restartButton = new GuiButton(loadButtonImages("data/ui/endgame/replay"));
-		restartButton.horizSizing = Right;
-		restartButton.vertSizing = Bottom;
-		restartButton.position = new Vector(460, 363);
-		restartButton.extent = new Vector(104, 54);
-		restartButton.gamepadAccelerator = ["B"];
-		restartButton.pressedAction = (e) -> restartFunc(restartButton);
-
-		var nextLevel = new GuiControl();
-		nextLevel.position = new Vector(326, 307);
-		nextLevel.extent = new Vector(130, 110);
-
-		var temprev = new BitmapData(1, 1);
-		temprev.setPixel(0, 0, 0);
-		var tmpprevtile = Tile.fromBitmap(temprev);
-
-		var nextLevelPreview = new GuiImage(tmpprevtile);
-		nextLevelPreview.position = new Vector(-15, 0);
-		nextLevelPreview.extent = new Vector(160, 110);
-		nextLevelPreview.doClipping = true;
-		nextLevel.addChild(nextLevelPreview);
-
-		mission.getNextMission()?.getPreviewImage(t -> {
-			nextLevelPreview.bmp.tile = t;
-		});
-
-		var nextLevelBtn = new GuiButton(loadButtonImages('data/ui/endgame/level_window'));
-		nextLevelBtn.horizSizing = Width;
-		nextLevelBtn.vertSizing = Height;
-		nextLevelBtn.position = new Vector(0, 0);
-		nextLevelBtn.extent = new Vector(130, 110);
-		nextLevelBtn.gamepadAccelerator = ["X"];
-		nextLevelBtn.pressedAction = (e) -> nextLevelFunc(nextLevelBtn);
-		nextLevel.addChild(nextLevelBtn);
-
-		function setButtonStates(enabled:Bool) {
-			nextLevelBtn.disabled = !enabled;
-			continueButton.disabled = !enabled;
-			restartButton.disabled = !enabled;
-		}
-
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
-		var arial14b = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
-
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
-		var domcasual64 = domcasual32b.toSdfFont(cast 58 * Settings.uiScale, MultiChannel);
-		var domcasual24 = domcasual32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
-
-		var expo50fontdata = ResourceLoader.getFileEntry("data/font/EXPON.fnt");
-		var expo50b = new BitmapFont(expo50fontdata.entry);
-		@:privateAccess expo50b.loader = ResourceLoader.loader;
-		var expo50 = expo50b.toSdfFont(cast 35 * Settings.uiScale, MultiChannel);
-		var expo32 = expo50b.toSdfFont(cast 24 * Settings.uiScale, MultiChannel);
+		var squishneyFont30 = squishneyFontB.toSdfFont(cast 27 * Settings.uiScale, MultiChannel);
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
+		var squishneyFont48 = squishneyFontB.toSdfFont(cast 43 * Settings.uiScale, MultiChannel);
 
 		function mlFontLoader(text:String) {
 			switch (text) {
-				case "DomCasual24":
-					return domcasual24;
-				case "DomCasual32":
-					return domcasual32;
-				case "DomCasual64":
-					return domcasual64;
-				case "Arial14":
-					return arial14;
-				case "Expo32":
-					return expo32;
+				case "bold28":
+					return squishneyFont30;
+				case "bold30":
+					return squishneyFont28;
+				case "font26":
+					return whatneyFont26;
 				default:
 					return null;
 			}
 		}
 
-		var egResult = new GuiMLText(domcasual32, mlFontLoader);
-		egResult.position = new Vector(313, 54);
-		egResult.extent = new Vector(244, 69);
-		egResult.text.text = '<font face="DomCasual64" color="#FFFFFF"><p align="right">${Util.formatTime(timeState.gameplayClock)}</p></font>';
-		egResult.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0
-		};
-		pg.addChild(egResult);
+		var endGameBox = new GuiControl();
+		endGameBox.horizSizing = Width;
+		endGameBox.vertSizing = Center;
+		endGameBox.position = new Vector(0, 38);
+		endGameBox.extent = new Vector(469, 720);
+		wnd.addChild(endGameBox);
 
-		var egFirstLine = new GuiMLText(domcasual24, mlFontLoader);
-		egFirstLine.position = new Vector(340, 150);
-		egFirstLine.extent = new Vector(210, 25);
-		egFirstLine.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egFirstLine);
-
-		var egSecondLine = new GuiMLText(domcasual24, mlFontLoader);
-		egSecondLine.position = new Vector(341, 178);
-		egSecondLine.extent = new Vector(209, 25);
-		egSecondLine.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egSecondLine);
-
-		var egThirdLine = new GuiMLText(domcasual24, mlFontLoader);
-		egThirdLine.position = new Vector(341, 206);
-		egThirdLine.extent = new Vector(209, 25);
-		egThirdLine.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egThirdLine);
-
-		var egFourthLine = new GuiMLText(domcasual24, mlFontLoader);
-		egFourthLine.position = new Vector(341, 234);
-		egFourthLine.extent = new Vector(209, 25);
-		egFourthLine.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egFourthLine);
-
-		var egFifthLine = new GuiMLText(domcasual24, mlFontLoader);
-		egFifthLine.position = new Vector(341, 262);
-		egFifthLine.extent = new Vector(209, 25);
-		egFifthLine.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egFifthLine);
-
-		var egFirstLineScore = new GuiMLText(domcasual24, mlFontLoader);
-		egFirstLineScore.position = new Vector(475, 150);
-		egFirstLineScore.extent = new Vector(210, 25);
-		egFirstLineScore.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egFirstLineScore);
-
-		var egSecondLineScore = new GuiMLText(domcasual24, mlFontLoader);
-		egSecondLineScore.position = new Vector(476, 178);
-		egSecondLineScore.extent = new Vector(209, 25);
-		egSecondLineScore.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egSecondLineScore);
-
-		var egThirdLineScore = new GuiMLText(domcasual24, mlFontLoader);
-		egThirdLineScore.position = new Vector(476, 206);
-		egThirdLineScore.extent = new Vector(209, 25);
-		egThirdLineScore.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egThirdLineScore);
-
-		var egFourthLineScore = new GuiMLText(domcasual24, mlFontLoader);
-		egFourthLineScore.position = new Vector(476, 234);
-		egFourthLineScore.extent = new Vector(209, 25);
-		egFourthLineScore.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egFourthLineScore);
-
-		var egFifthLineScore = new GuiMLText(domcasual24, mlFontLoader);
-		egFifthLineScore.position = new Vector(476, 262);
-		egFifthLineScore.extent = new Vector(209, 25);
-		egFifthLineScore.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		pg.addChild(egFifthLineScore);
-
-		var egTitleText = new GuiMLText(expo50, mlFontLoader);
-		egTitleText.text.textColor = 0xffff00;
-		egTitleText.text.text = '<font color="#FFFFFF" face="DomCasual64">Your Time:</font>';
+		var egTitleText = new GuiMLText(squishneyFont48, null);
+		egTitleText.position = new Vector(20, 10);
+		egTitleText.extent = new Vector(247, 56);
+		egTitleText.text.text = 'Your ${scoreType == Score ? "Score" : "Time"}';
 		egTitleText.text.dropShadow = {
 			dx: 1 * Settings.uiScale,
 			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
-			color: 0
+			color: 0x777777
 		};
-		egTitleText.position = new Vector(34, 54);
-		egTitleText.extent = new Vector(247, 69);
-		pg.addChild(egTitleText);
+		egTitleText.text.textColor = 0;
+		endGameBox.addChild(egTitleText);
 
-		var egTopThreeText = new GuiMLText(domcasual32, mlFontLoader);
-		egTopThreeText.position = new Vector(341, 114);
-		egTopThreeText.extent = new Vector(209, 34);
-		egTopThreeText.text.text = '<font face="DomCasual32" color="#FFFFFF">Top 5 Times:</font>'; // Make toggleable 3-5
-		egTopThreeText.text.dropShadow = {
+		var beatPar = false;
+		var beatPlatinum = false;
+		var beatUltimate = false;
+		var beatAwesome = false;
+
+		switch (scoreType) {
+			case Score:
+				if (score >= mission.qualifyingScore)
+					beatPar = true;
+				if (score >= mission.goldScore)
+					beatPlatinum = true;
+				if (score >= mission.ultimateScore)
+					beatUltimate = true;
+				if (score >= mission.awesomeScore)
+					beatAwesome = true;
+			case Time:
+				if (score < mission.qualifyTime)
+					beatPar = true;
+				if (score < mission.goldTime)
+					beatPlatinum = true;
+				if (score < mission.ultimateTime)
+					beatUltimate = true;
+				if (score < mission.awesomeTime)
+					beatAwesome = true;
+		}
+		var scoreColor = "#000000";
+		if (beatAwesome)
+			scoreColor = "#FF4444";
+		else if (beatUltimate)
+			scoreColor = "#FFCC33";
+		else if (beatPlatinum)
+			scoreColor = mission.game == "gold" ? "#FFEE11" : "#CCCCCC";
+
+		var scoreFmt = scoreType == Score ? '${Util.formatScore(Std.int(score))}' : '${Util.formatTime(score)}';
+
+		var egResult = new GuiMLText(squishneyFont48, mlFontLoader);
+		egResult.horizSizing = Left;
+		egResult.position = new Vector(256, 14);
+		egResult.extent = new Vector(194, 56);
+		egResult.text.text = '<p align="right"><font color="${scoreColor}">${scoreFmt}</font></p>';
+		egResult.text.dropShadow = {
 			dx: 1 * Settings.uiScale,
 			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
-			color: 0
+			color: 0x777777,
 		};
-		pg.addChild(egTopThreeText);
+		endGameBox.addChild(egResult);
 
-		var text = '<font color="#FFFFFF" face="DomCasual32"><p align="center">';
+		var continueButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont26);
+		continueButton.position = new Vector(325, 507);
+		continueButton.setExtent(new Vector(112, 55));
+		continueButton.vertSizing = Top;
+		continueButton.horizSizing = Left;
+		continueButton.gamepadAccelerator = ["A"];
+		continueButton.pressedAction = (e) -> continueFunc(continueButton);
+		continueButton.txtCtrl.text.text = "Menu";
+		endGameBox.addChild(continueButton);
+
+		var restartButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont26);
+		restartButton.position = new Vector(27, 507);
+		restartButton.setExtent(new Vector(112, 55));
+		restartButton.vertSizing = Top;
+		restartButton.horizSizing = Right;
+		restartButton.gamepadAccelerator = ["B"];
+		restartButton.pressedAction = (e) -> restartFunc(restartButton);
+		restartButton.txtCtrl.text.text = "Restart";
+		endGameBox.addChild(restartButton);
+
+		var nextLevelButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont26);
+		nextLevelButton.position = new Vector(177, 507);
+		nextLevelButton.setExtent(new Vector(112, 55));
+		nextLevelButton.vertSizing = Top;
+		nextLevelButton.horizSizing = Center;
+		nextLevelButton.gamepadAccelerator = ["X"];
+		nextLevelButton.pressedAction = (e) -> nextLevelFunc(nextLevelButton);
+		nextLevelButton.txtCtrl.text.text = "Next";
+		endGameBox.addChild(nextLevelButton);
+
+		var container = new GuiControl();
+		container.horizSizing = Right;
+		container.vertSizing = Height;
+		container.position = new Vector(36, 62);
+		container.extent = new Vector(409, 579);
+		endGameBox.addChild(container);
+
+		var text = '<font color="#000000" face="bold30"><p align="center">';
 		// Check for ultimate time TODO
-		if (mission.ultimateTime > 0 && timeState.gameplayClock < mission.ultimateTime) {
-			text += 'You beat the <font color="#FFDD22">Ultimate</font> Time!';
-		} else {
-			if (mission.goldTime > 0 && timeState.gameplayClock < mission.goldTime) {
+		if (MarbleGame.instance.world.cheatsUsed)
+			text += "Nice Cheats!";
+		else {
+			if (beatAwesome)
+				text += 'Who\'s Awesome? <font color="#FF3333">You\'re</font> Awesome!';
+			else if (beatUltimate)
+				text += 'You beat the <font color="#FFCC33">Ultimate</font> ${scoreType == Score ? "Score" : "Time"}!';
+			else if (beatPlatinum) {
 				if (mission.game == "gold" || mission.game.toLowerCase() == "ultra")
-					text += 'You beat the <font color="#FFCC00">Gold</font> Time!';
+					text += 'You beat the <font color="#FFEE11">Gold</font> ${scoreType == Score ? "Score" : "Time"}!';
 				else
-					text += 'You beat the <font color="#CCCCCC">Platinum</font> Time!';
+					text += 'You beat the <font color="#CCCCCC">Platinum</font> ${scoreType == Score ? "Score" : "Time"}!';
+			} else if (beatPar) {
+				if (mission.game == "gold")
+					text += 'You\'ve Qualified';
+				else
+					text += 'You beat the Par ${scoreType == Score ? "Score" : "Time"}!';
 			} else {
-				if (mission.qualifyTime > timeState.gameplayClock) {
-					text += "You beat the Par Time!";
-				} else {
-					text += '<font color="#F55555">You didn\'t pass the Par Time!</font>';
-				}
+				if (mission.game == "gold")
+					text += '<font color="F55555">You didn\'t pass the Qualify ${scoreType == Score ? "Score" : "Time"}</font>';
+				else
+					text += '<font color="F55555">You didn\'t pass the Par ${scoreType == Score ? "Score" : "Time"}</font>';
 			}
 		}
 		text += '</p></font>';
 
-		var finishMessage = new GuiMLText(expo32, mlFontLoader);
-		finishMessage.text.textColor = 0x00ff00;
-		finishMessage.text.text = text;
-		finishMessage.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0
-		};
-		// finishMessage.justify = Center;
-		finishMessage.position = new Vector(25, 120);
-		finishMessage.extent = new Vector(293, 211);
-		pg.addChild(finishMessage);
+		var descriptionTop = text;
 
-		var qualified = mission.qualifyTime > timeState.gameplayClock;
+		var goldTimeLabel = mission.goldTime != 0 ? Util.formatTime(mission.goldTime) : "N/A";
+		var ultimateTimeLabel = mission.ultimateTime != 0 ? Util.formatTime(mission.ultimateTime) : "N/A";
+		var awesomeTimeLabel = mission.awesomeTime != 0 ? Util.formatTime(mission.awesomeTime) : "N/A";
+		var goldScoreLabel = mission.goldScore != 0 ? Util.formatScore(mission.goldScore) : "N/A";
+		var ultimateScoreLabel = mission.ultimateScore != 0 ? Util.formatScore(mission.ultimateScore) : "N/A";
+		var awesomeScoreLabel = mission.awesomeScore != 0 ? Util.formatScore(mission.awesomeScore) : "N/A";
 
-		var scoreData:Array<Score> = Settings.getScores(mission.path);
-		while (scoreData.length < 5) {
-			scoreData.push({name: "Matan W.", time: 5999.999});
+		var goldLabel = goldTimeLabel == "N/A" ? goldScoreLabel : goldTimeLabel;
+		var ultimateLabel = ultimateTimeLabel == "N/A" ? ultimateScoreLabel : ultimateTimeLabel;
+		var awesomeLabel = awesomeTimeLabel == "N/A" ? awesomeScoreLabel : awesomeTimeLabel;
+
+		var goldType = goldTimeLabel == "N/A" ? ScoreType.Score : ScoreType.Time;
+		var ultimateType = ultimateTimeLabel == "N/A" ? ScoreType.Score : ScoreType.Time;
+		var awesomeType = awesomeTimeLabel == "N/A" ? ScoreType.Score : ScoreType.Time;
+
+		var parTimeLabel = mission.qualifyTime != Math.POSITIVE_INFINITY ? Util.formatTime(mission.qualifyTime) : "N/A";
+		var parScoreLabel = mission.qualifyingScore != 0 ? Util.formatScore(mission.qualifyingScore) : "N/A";
+		var parLabel = scoreType == Time ? parTimeLabel : parScoreLabel;
+		var parType = scoreType == Time ? "Time" : "Score";
+
+		var parTitle = mission.game == "gold" ? 'Qualify ${scoreType == Score ? "Score" : "Time"}' : 'Par ${scoreType == Score ? "Score" : "Time"}';
+		var goldTitle = mission.game == "gold" ? '<font color="#FFEE11">Gold ${scoreType == Score ? "Score" : "Time"}:</font>' : '<font color="#CCCCCC">Platinum ${scoreType == Score ? "Score" : "Time"}:</font>';
+		var ultimateTitle = '<font color="#FFCC33">Ultimate ${scoreType == Score ? "Score" : "Time"}:</font>';
+		var awesomeTitle = '<font color="#FF3333">Awesome ${scoreType == Score ? "Score" : "Time"}:</font>';
+
+		var textLeft = '<font face="font26">';
+		var textRight = '<font face="font26">';
+
+		textLeft += '<p align="left">${parTitle}</p>';
+		textRight += '<p align="right">${parLabel}</p>';
+
+		if (goldLabel != "N/A") {
+			textLeft += '<p align="left">${goldTitle}</p>';
+			textRight += '<p align="right"><font color="#FFEE11">${goldLabel}</font></p>';
+		}
+		if (ultimateLabel != "N/A") {
+			textLeft += '<p align="left">${ultimateTitle}</p>';
+			textRight += '<p align="right"><font color="#FFCC33">${ultimateLabel}</font></p>';
+		}
+		if (awesomeLabel != "N/A" && beatAwesome) {
+			textLeft += '<p align="left">${awesomeTitle}</p>';
+			textRight += '<p align="right"><font color="#FF3333">${awesomeLabel}</font></p>';
 		}
 
-		egFirstLine.text.text = '<p align="left"><font color="#EEC884">1. </font>${StringTools.htmlEscape(scoreData[0].name)}</p>';
-		egSecondLine.text.text = '<p align="left"><font color="#CDCDCD">2. </font>${StringTools.htmlEscape(scoreData[1].name)}</p>';
-		egThirdLine.text.text = '<p align="left"><font color="#C9AFA0">3. </font>${StringTools.htmlEscape(scoreData[2].name)}</p>';
-		egFourthLine.text.text = '<p align="left"><font color="#A4A4A4">4. </font>${StringTools.htmlEscape(scoreData[3].name)}</p>';
-		egFifthLine.text.text = '<p align="left"><font color="#949494">5. </font>${StringTools.htmlEscape(scoreData[4].name)}</p>';
-		var lineelems = [
-			egFirstLineScore,
-			egSecondLineScore,
-			egThirdLineScore,
-			egFourthLineScore,
-			egFifthLineScore
-		];
-
-		for (i in 0...5) {
-			if (scoreData[i].time < mission.ultimateTime) {
-				lineelems[i].text.text = '<font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font>';
-			} else {
-				if (scoreData[i].time < mission.goldTime) {
-					if (mission.game == "gold" || mission.game.toLowerCase() == "ultra")
-						lineelems[i].text.text = '<font color="#FFCC00">${Util.formatTime(scoreData[i].time)}</font>';
-					else
-						lineelems[i].text.text = '<font color="#CCCCCC">${Util.formatTime(scoreData[i].time)}</font>';
-				} else {
-					lineelems[i].text.text = '${Util.formatTime(scoreData[i].time)}';
+		var totalTTs = 0;
+		var pickedUp = 0;
+		for (dts in MarbleGame.instance.world.powerUps) {
+			if (dts is TimeTravel && dts.cooldownDuration == 1e8) {
+				var tt:TimeTravel = cast dts;
+				if (tt.timeBonus > 0) {
+					totalTTs += 1;
+					if (dts.currentOpacity == 0.0)
+						pickedUp += 1;
 				}
 			}
 		}
 
-		var leftColumn = new GuiMLText(domcasual24, mlFontLoader);
-		leftColumn.text.lineSpacing = 5;
-		leftColumn.text.textColor = 0xFFFFFF;
-		leftColumn.text.text = 'Par Time:<br/>${mission.game == "gold" || mission.game.toLowerCase() == "ultra" ? '<font color="#FFCC00">Gold Time:</font>' : '<font color="#CCCCCC">Platinum Time:</font>'}<br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">Ultimate Time:</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">Time Passed:<br/>Clock Bonuses:</font>';
-		leftColumn.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0x777777
-		};
-		leftColumn.position = new Vector(25, 165);
-		leftColumn.extent = new Vector(293, 211);
-		pg.addChild(leftColumn);
-
 		var elapsedTime = Math.max(timeState.currentAttemptTime - 3.5, 0);
-		var bonusTime = Math.max(0, Std.int((elapsedTime - timeState.gameplayClock) * 1000) / 1000);
 
-		var rightColumn = new GuiMLText(domcasual24, mlFontLoader);
-		rightColumn.text.lineSpacing = 5;
-		rightColumn.text.textColor = 0xFFFFFF;
-		rightColumn.text.text = '${Util.formatTime(mission.qualifyTime == Math.POSITIVE_INFINITY ? 5999.999 : mission.qualifyTime)}<br/><font color="${mission.game == "gold" || mission.game.toLowerCase() == "ultra" ? '#FFCC00' : '#CCCCCC'}">${Util.formatTime(mission.goldTime)}</font><br/>${mission.ultimateTime != 0 ? '<font color="#FFDD22">${Util.formatTime(mission.ultimateTime)}</font><br/>' : ''}<font face="Arial14"><br/></font><font color="#FFFFFF" face="DomCasual24">${Util.formatTime(elapsedTime)}<br/>${Util.formatTime(bonusTime)}</font>';
-		rightColumn.text.dropShadow = {
+		textLeft += '<p align="left">Time Passed:</p>';
+		textRight += '<p align="right">${Util.formatTime(elapsedTime)}</p>';
+
+		var textTTs = "";
+		if (totalTTs != 0) {
+			var plural = totalTTs > 1 ? "s" : "";
+			textTTs = '<font color="#00FF00">(${pickedUp}/${totalTTs} TT${plural})</font>';
+		}
+
+		textLeft += '<p align="left">Clock Bonuses:</p>';
+		textRight += '<p align="right">${Util.formatTime(MarbleGame.instance.world.collectedBonusTime)} ${textTTs}</p>';
+
+		textLeft += "</font>";
+		textRight += "</font>";
+
+		var egDescriptionTop = new GuiMLText(squishneyFont48, mlFontLoader);
+		egDescriptionTop.horizSizing = Width;
+		egDescriptionTop.position = new Vector(0, 0);
+		egDescriptionTop.extent = new Vector(397, 252);
+		egDescriptionTop.text.text = descriptionTop;
+		egDescriptionTop.text.textColor = 0;
+		egDescriptionTop.text.dropShadow = {
 			dx: 1 * Settings.uiScale,
 			dy: 1 * Settings.uiScale,
 			alpha: 0.5,
-			color: 0x777777
+			color: 0x000000,
 		};
-		rightColumn.position = new Vector(235, 165);
-		rightColumn.extent = new Vector(293, 211);
-		pg.addChild(rightColumn);
+		container.addChild(egDescriptionTop);
 
-		pg.addChild(continueButton);
-		pg.addChild(restartButton);
-		pg.addChild(nextLevel);
-		pg.addChild(egFirstLine);
-		pg.addChild(egSecondLine);
-		pg.addChild(egThirdLine);
-		pg.addChild(egFourthLine);
-		pg.addChild(egFifthLine);
+		var egDescriptionLeft = new GuiMLText(squishneyFont48, mlFontLoader);
+		egDescriptionLeft.horizSizing = Width;
+		egDescriptionLeft.position = new Vector(0, 60);
+		egDescriptionLeft.extent = new Vector(397, 252);
+		egDescriptionLeft.text.text = textLeft;
+		egDescriptionLeft.text.textColor = 0;
+		egDescriptionLeft.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0x000000,
+		};
+		container.addChild(egDescriptionLeft);
 
-		this.addChild(pg);
+		var egDescriptionRight = new GuiMLText(squishneyFont48, mlFontLoader);
+		egDescriptionRight.horizSizing = Width;
+		egDescriptionRight.position = new Vector(0, 60);
+		egDescriptionRight.extent = new Vector(397, 252);
+		egDescriptionRight.text.text = textRight;
+		egDescriptionRight.text.textColor = 0;
+		egDescriptionRight.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0x000000,
+		};
+		container.addChild(egDescriptionRight);
 
-		var scoreTimes = scoreData.map(x -> x.time).concat([timeState.gameplayClock]);
-		scoreTimes.sort((a, b) -> a == b ? 0 : (a > b ? 1 : -1));
+		var egTopTimesTextTop = new GuiMLText(squishneyFont48, mlFontLoader);
+		egTopTimesTextTop.horizSizing = Width;
+		egTopTimesTextTop.vertSizing = Top;
+		egTopTimesTextTop.position = new Vector(0, 257);
+		egTopTimesTextTop.extent = new Vector(397, 186);
+		egTopTimesTextTop.text.text = '';
+		egTopTimesTextTop.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0x777777,
+		};
+		container.addChild(egTopTimesTextTop);
 
-		var idx = scoreTimes.indexOf(timeState.gameplayClock);
+		var egTopTimesTextLeft = new GuiMLText(squishneyFont48, mlFontLoader);
+		egTopTimesTextLeft.horizSizing = Width;
+		egTopTimesTextLeft.vertSizing = Top;
+		egTopTimesTextLeft.position = new Vector(0, 257);
+		egTopTimesTextLeft.extent = new Vector(397, 186);
+		egTopTimesTextLeft.text.text = '';
+		egTopTimesTextLeft.text.textColor = 0;
+		egTopTimesTextLeft.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0x777777,
+		};
+		container.addChild(egTopTimesTextLeft);
 
+		var egTopTimesTextRight = new GuiMLText(squishneyFont48, mlFontLoader);
+		egTopTimesTextRight.horizSizing = Width;
+		egTopTimesTextRight.vertSizing = Top;
+		egTopTimesTextRight.position = new Vector(0, 257);
+		egTopTimesTextRight.extent = new Vector(397, 186);
+		egTopTimesTextRight.text.text = '';
+		egTopTimesTextRight.text.textColor = 0;
+		egTopTimesTextRight.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0x777777,
+		};
+		container.addChild(egTopTimesTextRight);
+
+		function reformatScoreList() {
+			var scoreData:Array<Score> = Settings.getScores(mission.path);
+			var scoreCount = Math.min(scoreData.length, 5);
+			while (scoreData.length < 5) {
+				scoreData.push({name: "Matan W.", time: scoreType == Time ? 5999.999 : 0, type: scoreType == Time ? 0 : 1});
+			}
+
+			// find our score index
+			var idx = -1;
+			for (i in 0...5) {
+				if (scoreData[i].time == score && scoreData[i].type == (scoreType == Score ? 1 : 0)) {
+					idx = i;
+					break;
+				}
+			}
+
+			var scoreText = '<font face="bold28" color="#000000"><p align="center">${mission.title}, Top ${scoreCount}</p></font>';
+
+			egTopTimesTextTop.text.text = scoreText;
+
+			var scoreLeft = '<font face="bold28" color="#000000">\n</font><font face="font26">';
+			var scoreRight = '<font face="bold28" color="#000000">\n</font><font face="font26">';
+
+			for (i in 0...5) {
+				if (i == idx) {
+					scoreLeft += '<p align="left"><font color="#00DD00">${i + 1}. </font>${scoreData[i].name}</p>';
+				} else {
+					switch (i) {
+						case 0:
+							scoreLeft += '<p align="left"><font color="#EEC884">1. </font>${scoreData[i].name}</p>';
+						case 1:
+							scoreLeft += '<p align="left"><font color="#CDCDCD">2. </font>${scoreData[i].name}</p>';
+						case 2:
+							scoreLeft += '<p align="left"><font color="#C9AFA0">3. </font>${scoreData[i].name}</p>';
+						case 3:
+							scoreLeft += '<p align="left"><font color="#A4A4A4">4. </font>${scoreData[i].name}</p>';
+						case 4:
+							scoreLeft += '<p align="left"><font color="#949494">5. </font>${scoreData[i].name}</p>';
+					}
+				}
+
+				var scoreColor = Util.getScoreColor(scoreData[i].time, scoreData[i].type == 1 ? Score : Time, mission);
+				var formatted = scoreType == Time ? Util.formatTime(scoreData[i].time) : Util.formatScore(Std.int(scoreData[i].time));
+
+				if (i == idx)
+					scoreColor = "#00DD00";
+
+				scoreRight += '<p align="right"><font color="${scoreColor}">${formatted}</font></p>';
+			}
+
+			scoreLeft += "</font>";
+			scoreRight += "</font>";
+
+			egTopTimesTextLeft.text.text = scoreLeft;
+			egTopTimesTextRight.text.text = scoreRight;
+		}
+
+		reformatScoreList();
+
+		function setButtonStates(enabled:Bool) {
+			nextLevelButton.disabled = !enabled;
+			continueButton.disabled = !enabled;
+			restartButton.disabled = !enabled;
+		}
 		// if (Settings.progression[mission.difficultyIndex] == mission.index && qualified) {
 		// 	Settings.progression[mission.difficultyIndex]++;
 		// }
@@ -397,6 +437,31 @@ class EndGameGui extends GuiControl {
 		var rewindUsed = MarbleGame.instance.world.rewindUsed;
 		var cheatsUsed = MarbleGame.instance.world.cheatsUsed;
 
+		var scoreData:Array<Score> = Settings.getScores(mission.path);
+		// add our score to get the index
+		scoreData.push({name: Settings.highscoreName, type: scoreType == Score ? 1 : 0, time: score});
+		// sort
+
+		scoreData.sort((a, b) -> {
+			if (a.type == b.type) {
+				if (a.type == 0) // time
+					return a.time == b.time ? 0 : (a.time > b.time ? 1 : -1);
+				else
+					return a.time == b.time ? 0 : (a.time > b.time ? -1 : 1);
+			} else {
+				return a.type > b.type ? 1 : -1;
+			}
+		});
+
+		// find our score index
+		var idx = -1;
+		for (i in 0...5) {
+			if (scoreData[i].time == score && scoreData[i].type == (scoreType == Score ? 1 : 0)) {
+				idx = i;
+				break;
+			}
+		}
+
 		if (idx <= 4) {
 			setButtonStates(false);
 			var end = new EnterNameDlg(idx, (name) -> {
@@ -404,34 +469,13 @@ class EndGameGui extends GuiControl {
 				if (scoreSubmitted)
 					return;
 
-				var myScore = {name: name, time: timeState.gameplayClock};
-				scoreData.push(myScore);
-				scoreData.sort((a, b) -> a.time == b.time ? 0 : (a.time > b.time ? 1 : -1));
-
-				egFirstLine.text.text = '<p align="left"><font color="#EEC884">1. </font>${scoreData[0].name}</p>';
-				egSecondLine.text.text = '<p align="left"><font color="#CDCDCD">2. </font>${scoreData[1].name}</p>';
-				egThirdLine.text.text = '<p align="left"><font color="#C9AFA0">3. </font>${scoreData[2].name}</p>';
-				egFourthLine.text.text = '<p align="left"><font color="#A4A4A4">4. </font>${scoreData[3].name}</p>';
-				egFifthLine.text.text = '<p align="left"><font color="#949494">5. </font>${scoreData[4].name}</p>';
-
-				for (i in 0...5) {
-					if (scoreData[i].time < mission.ultimateTime) {
-						lineelems[i].text.text = '<font color="#FFDD22">${Util.formatTime(scoreData[i].time)}</font>';
-					} else {
-						if (scoreData[i].time < mission.goldTime) {
-							lineelems[i].text.text = '<font color="${mission.game == "gold" || mission.game.toLowerCase() == "ultra" ? '#FFCC00' : '#CCCCCC'}">${Util.formatTime(scoreData[i].time)}</font>';
-						} else {
-							lineelems[i].text.text = '${Util.formatTime(scoreData[i].time)}';
-						}
-					}
-				}
-
 				if (!cheatsUsed) { // dont submit or save if we have cheated
-					Settings.saveScore(mission.path, myScore);
+					Settings.saveScore(mission.path, {name: name, type: scoreType == Score ? 1 : 0, time: score});
+					reformatScoreList();
 					var lbPath = mission.path;
 					if (mission.isClaMission)
 						lbPath = 'custom/${mission.id}';
-					Leaderboards.submitScore(lbPath, myScore.time, rewindUsed, (sendReplay, rowId) -> {
+					Leaderboards.submitScore(lbPath, score, rewindUsed, (sendReplay, rowId) -> {
 						if (sendReplay && !mission.isClaMission) {
 							Leaderboards.submitReplay(rowId, replayData);
 						}

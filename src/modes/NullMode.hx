@@ -124,8 +124,8 @@ class NullMode implements GameMode {
 		return Time;
 	}
 
-	public function getFinishScore():Float {
-		return level.finishTime.gameplayClock;
+	public function getFinishScore():{score:Float, type:ScoreType} {
+		return {score: level.finishTime.gameplayClock, type: Time};
 	}
 
 	public function getRewindState():RewindableState {

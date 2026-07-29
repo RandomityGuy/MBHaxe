@@ -7,85 +7,81 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.Settings;
 
-class VersionGui extends GuiImage {
+class VersionGui extends GuiControl {
 	public function new() {
-		var img = ResourceLoader.getImage("data/ui/motd/messagewindow.png");
-		super(img.resource.toTile());
-		this.horizSizing = Center;
-		this.vertSizing = Center;
-		this.position = new Vector(4, 12);
-		this.extent = new Vector(631, 455);
+		super();
+		this.horizSizing = Width;
+		this.vertSizing = Height;
+		this.position = new Vector(0, 0);
+		this.extent = new Vector(800, 600);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
+		var wnd = new GuiTransparencyCtrl("data/ui/transparency/pqwindow");
+		wnd.horizSizing = Center;
+		wnd.vertSizing = Center;
+		wnd.position = new Vector(196, 159);
+		wnd.extent = new Vector(631, 455);
+		this.addChild(wnd);
 
-		var dlButton = new GuiButton(loadButtonImages("data/ui/motd/ok"));
-		dlButton.position = new Vector(500, 370);
-		dlButton.extent = new Vector(88, 41);
+		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
+		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
+		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
+		var whatneyFont17 = whatneyFontB.toSdfFont(cast 15 * Settings.uiScale, MultiChannel);
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+
+		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
+		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
+
+		var dlButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
+		dlButton.position = new Vector(510, 383);
+		dlButton.setExtent(new Vector(94, 45));
 		dlButton.vertSizing = Top;
+		dlButton.horizSizing = Right;
 		dlButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 		}
-		this.addChild(dlButton);
+		dlButton.txtCtrl.text.text = "Close";
+		wnd.addChild(dlButton);
 
 		var scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
-		scrollCtrl.position = new Vector(31, 30);
-		scrollCtrl.extent = new Vector(568, 317);
-		this.addChild(scrollCtrl);
-
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
-		var arial14b = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
-		var arial16 = arial14b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
-
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
-		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+		scrollCtrl.position = new Vector(30, 35);
+		scrollCtrl.extent = new Vector(568, 337);
+		wnd.addChild(scrollCtrl);
 
 		function mlFontLoader(text:String) {
 			switch (text) {
-				case "MarkerFelt32":
-					return markerFelt32;
-				case "MarkerFelt24":
-					return markerFelt24;
-				case "MarkerFelt18":
-					return markerFelt18;
-				case "Arial16":
-					return arial14;
+				case "title":
+					return squishneyFont28;
+				case "text":
+					return whatneyFont17;
 				default:
 					return null;
 			}
 		}
 
-		var changelogContent = new GuiMLText(markerFelt18, mlFontLoader);
+		var changelogContent = new GuiMLText(whatneyFont17, mlFontLoader);
 		changelogContent.position = new Vector(0, 0);
-		changelogContent.extent = new Vector(566, 317);
+		changelogContent.extent = new Vector(568, 337);
 		changelogContent.text.textColor = 0;
 		changelogContent.scrollable = true;
 		changelogContent.text.text = "Loading changelog, please wait.<br/>";
 		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
 			var mdtext = res.toString();
-			var res = "";
+			var res = "<br/>";
 			changelogContent.text.text = "";
 			for (line in mdtext.split("\n")) {
 				if (StringTools.startsWith(line, "#")) {
 					line = StringTools.replace(line, "#", "");
-					line = '<font face="MarkerFelt24">' + line + "</font>";
+					line = '<font face="title">' + line + "</font>";
 				}
 				res += line + "<br/>";
 			}
 			changelogContent.text.text += res;
 			scrollCtrl.setScrollMax(changelogContent.text.textHeight);
 		}, (e) -> {
-			changelogContent.text.text = "Failed to fetch changelog.";
+			changelogContent.text.text = "<br/>Failed to fetch changelog.";
 		});
 		scrollCtrl.addChild(changelogContent);
 	}

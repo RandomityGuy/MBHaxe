@@ -31,6 +31,11 @@ class Mission {
 	public var qualifyTime = Math.POSITIVE_INFINITY;
 	public var goldTime:Float = 0;
 	public var ultimateTime:Float = 0;
+	public var awesomeTime:Float = 0;
+	public var qualifyingScore:Int = 0;
+	public var goldScore:Int = 0;
+	public var ultimateScore:Int = 0;
+	public var awesomeScore:Int = 0;
 	public var type:String;
 	public var path:String;
 	public var missionInfo:MissionElementScriptObject;
@@ -108,9 +113,32 @@ class Mission {
 		if (missionInfo.goldtime != null) {
 			mission.goldTime = MisParser.parseNumber(missionInfo.goldtime) / 1000;
 		}
+		if (missionInfo.platinumtime != null) {
+			mission.goldTime = MisParser.parseNumber(missionInfo.platinumtime) / 1000;
+		}
 		if (missionInfo.ultimatetime != null) {
 			mission.ultimateTime = MisParser.parseNumber(missionInfo.ultimatetime) / 1000;
 		}
+		if (missionInfo.awesometime != null) {
+			mission.awesomeTime = MisParser.parseNumber(missionInfo.awesometime) / 1000;
+		}
+
+		if (missionInfo.score != null) {
+			mission.qualifyingScore = Std.int(MisParser.parseNumber(missionInfo.score));
+		}
+		if (missionInfo.goldscore != null) {
+			mission.goldScore = Std.int(MisParser.parseNumber(missionInfo.goldscore));
+		}
+		if (missionInfo.platinumscore != null) {
+			mission.goldScore = Std.int(MisParser.parseNumber(missionInfo.platinumscore));
+		}
+		if (missionInfo.ultimatescore != null) {
+			mission.ultimateScore = Std.int(MisParser.parseNumber(missionInfo.ultimatescore));
+		}
+		if (missionInfo.awesomescore != null) {
+			mission.awesomeScore = Std.int(MisParser.parseNumber(missionInfo.awesomescore));
+		}
+
 		mission.type = missionInfo.type.toLowerCase();
 		mission.missionInfo = missionInfo;
 		mission.gameMode = missionInfo.gamemode;

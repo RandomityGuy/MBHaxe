@@ -23,7 +23,7 @@ interface GameMode {
 	public function getStartTime():Float;
 	public function timeMultiplier():Float;
 	public function getScoreType():ScoreType;
-	public function getFinishScore():Float;
+	public function getFinishScore():{score:Float, type:ScoreType};
 	public function onTimeExpire():Void;
 	public function onRestart():Void;
 	public function onClientRestart():Void;

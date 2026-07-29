@@ -63,7 +63,14 @@ class MissionElementScriptObject extends MissionElementBase {
 	var level:String;
 	var artist:String;
 	var goldtime:String;
+	var platinumtime:String;
 	var ultimatetime:String;
+	var awesometime:String;
+	var score:String;
+	var goldscore:String;
+	var platinumscore:String;
+	var ultimatescore:String;
+	var awesomescore:String;
 	var music:String;
 	var alarmstarttime:String;
 	var game:String;

@@ -1,5 +1,6 @@
 package gui;
 
+import h2d.BlendMode;
 import h2d.Graphics;
 import h2d.Scene;
 import src.MarbleGame;
@@ -12,6 +13,7 @@ class GuiProgress extends GuiControl {
 	public var progressColor:Int = 0x2C98A264;
 
 	var progressRect:h2d.Graphics;
+	var blendMode:BlendMode;
 
 	public function new() {
 		super();
@@ -21,6 +23,8 @@ class GuiProgress extends GuiControl {
 		var renderRect = getRenderRectangle();
 		if (this.progressRect == null) {
 			this.progressRect = new Graphics();
+			if (this.blendMode != null)
+				this.progressRect.blendMode = blendMode;
 		}
 		if (scene2d.contains(progressRect))
 			progressRect.remove();

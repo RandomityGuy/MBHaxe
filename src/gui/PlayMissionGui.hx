@@ -1182,7 +1182,7 @@ class PlayMissionGui extends GuiImage {
 				if (this.scoreShowing) {
 					var scoreData:Array<Score> = Settings.getScores(currentMission.path);
 					while (scoreData.length < 5) {
-						scoreData.push({name: "Matan W.", time: 5999.999});
+						scoreData.push({name: "Matan W.", time: 5999.999, type: 0});
 					}
 
 					var rightText = '<font color="#FDFEFE" face="MarkerFelt26"><br/></font><font color="#F4EFE3" face="MarkerFelt18"></font>';

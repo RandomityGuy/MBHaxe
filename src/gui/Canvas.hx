@@ -19,7 +19,7 @@ class Canvas extends GuiControl {
 		this.marbleGame = marbleGame;
 
 		this.position = new Vector();
-		this.extent = new Vector(640, 480);
+		this.extent = new Vector(800, 600);
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 	}
