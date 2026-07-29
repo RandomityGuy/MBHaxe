@@ -431,6 +431,12 @@ class DtsObject extends GameObject {
 					dtsshader.currentOpacity = 1;
 					if (this.identifier != null && StringTools.startsWith(this.identifier, "Tornado"))
 						dtsshader.normalizeNormals = false; // These arent normalized
+
+					if (flags & 64 == 0) {
+						dtsshader.usePremultipliedAlpha = true;
+						dtsshader.opacityMult = this.dts.matReflectionAmounts[i];
+					}
+
 					if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
 						dtsshader.usePremultipliedAlpha = true;
 						dtsshader.opacityMult = 3.0; // Hardcoded
@@ -498,7 +504,7 @@ class DtsObject extends GameObject {
 			}
 
 			if (this.isTSStatic && !(flags & 64 > 0)) {
-				var reflectivity = this.dts.matNames.length == 1 ? 1 : (environmentMaterial != null ? 0.5 : 0.333);
+				var reflectivity = this.dts.matReflectionAmounts[i];
 				var cubemapshader = new EnvMap(this.level.sky.cubemap, reflectivity);
 				material.mainPass.addShader(cubemapshader);
 			}

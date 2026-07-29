@@ -81,6 +81,7 @@ class RewindManager {
 		rf.marbleAngularVelocity.load(level.marble.omega);
 		rf.marblePowerup = level.marble.heldPowerup;
 		rf.bonusTime = level.bonusTime;
+		rf.collectedBonusTime = level.collectedBonusTime;
 		rf.gemCount = level.gemCount;
 		rf.gemStates.resize(0);
 		for (g in level.gems)
@@ -297,6 +298,7 @@ class RewindManager {
 		}
 
 		level.bonusTime = rf.bonusTime;
+		level.collectedBonusTime = rf.collectedBonusTime;
 		level.gemCount = rf.gemCount;
 		@:privateAccess level.playGui.formatGemCounter(level.gemCount, level.gemCounterTotal());
 		for (i in 0...rf.gemStates.length) {

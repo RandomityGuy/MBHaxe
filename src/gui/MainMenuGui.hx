@@ -186,6 +186,7 @@ class MainMenuGui extends GuiImage {
 		}
 		exitButton.txtCtrl.text.textColor = 0;
 		exitButton.txtCtrl.text.text = "     Download";
+		exitButton.txtCtrl.justify = Left;
 		mainMenuContent.addChild(exitButton);
 		#end
 
@@ -236,14 +237,14 @@ class MainMenuGui extends GuiImage {
 		}
 		this.addChild(github);
 
-		// #if js
+		#if js
 		var mbg = new GuiButton(loadStaticButtonImages("data/ui/icon_mbg"));
 		mbg.horizSizing = Right;
 		mbg.vertSizing = Top;
 		mbg.position = new Vector(0, 510);
 		mbg.extent = new Vector(76, 76);
 		mbg.pressedAction = (sender) -> {
-			// js.Browser.window.open("https://marbleblastgold.randomityguy.me");
+			js.Browser.window.open("https://marbleblastgold.randomityguy.me");
 		}
 		this.addChild(mbg);
 
@@ -253,7 +254,7 @@ class MainMenuGui extends GuiImage {
 		mbu.position = new Vector(76, 510);
 		mbu.extent = new Vector(76, 76);
 		mbu.pressedAction = (sender) -> {
-			// js.Browser.window.open("https://marbleblastultra.randomityguy.me");
+			js.Browser.window.open("https://marbleblastultra.randomityguy.me");
 		}
 		this.addChild(mbu);
 
@@ -263,10 +264,10 @@ class MainMenuGui extends GuiImage {
 		discord.position = new Vector(650, 90);
 		discord.extent = new Vector(152, 60);
 		discord.pressedAction = (sender) -> {
-			// js.Browser.window.open("https://discord.gg/q4JdnRbVhF");
+			js.Browser.window.open("https://discord.gg/q4JdnRbVhF");
 		}
 		this.addChild(discord);
-		// #end
+		#end
 
 		#if js
 		var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);

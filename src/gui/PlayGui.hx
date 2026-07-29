@@ -532,7 +532,7 @@ class PlayGui {
 		timerNumbers[5].position = new Vector(224, 3);
 		timerNumbers[5].extent = new Vector(43, 55);
 
-		timerNumbers[6].position = new Vector(248, 0);
+		timerNumbers[6].position = new Vector(248, 3);
 		timerNumbers[6].extent = new Vector(43, 55);
 
 		timerCtrl.addChild(timerNumbers[0]);
