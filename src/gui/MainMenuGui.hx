@@ -179,6 +179,7 @@ class MainMenuGui extends GuiImage {
 		}
 		exitButton.txtCtrl.text.textColor = 0;
 		exitButton.txtCtrl.text.text = "     Download";
+		exitButton.txtCtrl.justify = Left;
 		mainMenuContent.addChild(exitButton);
 		#end
 

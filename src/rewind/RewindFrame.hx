@@ -93,6 +93,7 @@ class RewindFrame {
 	var marbleAngularVelocity:Vector;
 	var marblePowerup:PowerUp;
 	var bonusTime:Float;
+	var collectedBonusTime:Float;
 	var mpStates:Array<RewindMPState>;
 	var gemCount:Int;
 	var gemStates:Array<Bool>;
@@ -131,6 +132,7 @@ class RewindFrame {
 		are fixed constants, not marble-instance data, so there's nothing instance-specific to lose
 		by re-pushing a fresh layer instead of restoring the exact old array reference). */
 	var isInWater:Bool;
+
 	var waterTriggers:Array<triggers.WaterPhysicsTrigger>;
 	var bubbleTime:Float;
 	var bubbleTotalTime:Float;
@@ -279,6 +281,7 @@ class RewindFrame {
 		framesize += 24; // marbleAngularVelocity
 		framesize += 2; // marblePowerup
 		framesize += 8; // bonusTime
+		framesize += 8; // collectedBonusTime
 		framesize += 2; // gemCount
 		framesize += 2 + gemStates.length * 1; // gemStates
 		framesize += 2 + powerupStates.length * 8; // powerupStates
@@ -413,6 +416,7 @@ class RewindFrame {
 		bb.writeDouble(marbleAngularVelocity.z);
 		bb.writeInt16(rm.allocGO(marblePowerup));
 		bb.writeDouble(bonusTime);
+		bb.writeDouble(collectedBonusTime);
 		bb.writeInt16(gemCount);
 		bb.writeInt16(gemStates.length);
 		for (s in gemStates) {
@@ -592,7 +596,7 @@ class RewindFrame {
 		checkpointUp`/`checkpointCollectedGems`/`currentCheckpoint`) - those are deliberately still
 		allocated fresh every call, since aliasing a reused scratch object into state that outlives
 		this call would silently corrupt it the next time this same instance gets deserialized for a
-		*different* frame. See [PQ Port Status](pq-port-status.md)'s rewind-optimization entry. */
+	 	 	 *different* frame. See [PQ Port Status](pq-port-status.md)'s rewind-optimization entry. */
 	public inline function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
 		timeState.currentAttemptTime = br.readDouble();
 		timeState.timeSinceLoad = br.readDouble();
@@ -613,6 +617,7 @@ class RewindFrame {
 		marbleAngularVelocity.z = br.readDouble();
 		marblePowerup = cast rm.getGO(br.readInt16());
 		bonusTime = br.readDouble();
+		collectedBonusTime = br.readDouble();
 		gemCount = br.readInt16();
 		gemStates.resize(0);
 		var gemStates_len = br.readInt16();

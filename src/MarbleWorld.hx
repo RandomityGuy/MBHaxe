@@ -2669,7 +2669,7 @@ class MarbleWorld extends Scheduler {
 				// Start the alarm
 				this.alarmSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/alarm.wav", ResourceLoader.getAudio, this.soundResources),
 					null, true); // AudioManager.createAudioSource('alarm.wav');
-				this.displayHelp('You have ${(this.mission.qualifyTime - alarmStart)} seconds remaining.', 5);
+				this.displayHelp('You have ${alarmStart} seconds remaining.', 5);
 			}
 			if (prevGameplayClock > 0 && this.timeState.gameplayClock <= 0) {
 				// Stop the alarm

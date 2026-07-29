@@ -35,6 +35,7 @@ import src.MarbleGame;
 import src.ResourceLoaderWorker;
 import src.Console;
 import src.Debug;
+import src.PQMaterials;
 
 class DifBuilderTriangle {
 	public var texture:String;
@@ -297,7 +298,7 @@ class DifBuilder {
 		?force:Float
 	}> = [];
 
-	static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
+	public static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
 			uvScaleFactor:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
@@ -317,7 +318,7 @@ class DifBuilder {
 		worker.run();
 	}
 
-	static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String, shininess:Float, specular:Vector,
+	public static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String, shininess:Float, specular:Vector,
 			uvScale:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
@@ -340,7 +341,7 @@ class DifBuilder {
 		worker.run();
 	}
 
-	static function createNormalMapMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String) {
+	public static function createNormalMapMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String) {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/${normalTexture}').resource;
@@ -354,118 +355,58 @@ class DifBuilder {
 		worker.run();
 	}
 
-	static function createPQMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, specularTexture:String, secondaryFactor:Float = 1) {
+	public static function createPQMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, specularTexture:String,
+			secondaryFactor:Float = 1) {
+		createPQMaterialPaths(onFinish, 'multiplayer/interiors/platinumquest/${baseTexture}', 'multiplayer/interiors/platinumquest/${normalTexture}',
+			'multiplayer/interiors/platinumquest/${specularTexture}', secondaryFactor);
+	}
+
+	/** Same shader as `createPQMaterial`, but takes full paths (relative to `data/`) for each
+		texture instead of assuming all three live in the same folder - needed for real PQ
+		`interiors_pq/pq_*` diffuse textures, which share a normal/specular pair that only actually
+		exists on disk under `multiplayer/interiors/platinumquest/` (the real `pack.json`-referenced
+		`shaders/tex/pq_tile/tile.normal.png`/`tile.spec.png` aren't present in this repo's asset
+		set). */
+	public static function createPQMaterialPaths(onFinish:hxsl.Shader->Void, diffusePath:String, normalPath:String, specularPath:String,
+			secondaryFactor:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/multiplayer/interiors/platinumquest/${baseTexture}').resource;
-			var normalTex = ResourceLoader.getTexture('data/multiplayer/interiors/platinumquest/${normalTexture}').resource;
+			var diffuseTex = ResourceLoader.getTexture('data/${diffusePath}').resource;
+			var normalTex = ResourceLoader.getTexture('data/${normalPath}').resource;
 			normalTex.wrap = Repeat;
-			var specularTex = ResourceLoader.getTexture('data/multiplayer/interiors/platinumquest/${specularTexture}').resource;
+			var specularTex = ResourceLoader.getTexture('data/${specularPath}').resource;
 			specularTex.wrap = Repeat;
 			var shader = new PQMaterial(diffuseTex, normalTex, 9.0, specularTex, MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight,
 				MarbleGame.instance.world.dirLightDir, secondaryFactor);
 			onFinish(shader);
 		});
-		worker.loadFile('data/multiplayer/interiors/platinumquest/${baseTexture}');
-		worker.loadFile('data/multiplayer/interiors/platinumquest/${normalTexture}');
-		worker.loadFile('data/multiplayer/interiors/platinumquest/${specularTexture}');
+		worker.loadFile('data/${diffusePath}');
+		worker.loadFile('data/${normalPath}');
+		worker.loadFile('data/${specularPath}');
 		worker.run();
 	}
 
-	static var shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void> = [
-		'interiors_mbu/plate_1' => (onFinish) -> createPhongMaterial(onFinish, 'plate.randomize.png', 'plate.normal.png', 8, new Vector(1, 1, 0.8, 1), 0.5),
-		'interiors_mbu/tile_beginner' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_beginner_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_beginner_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_beginner_red_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_red_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_beginner_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_beginner_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '_blue_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_intermediate' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_intermediate_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_intermediate_red' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_intermediate_red_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_red_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_intermediate_green' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green', 40,
-			new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_intermediate_green_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_intermediate.png', '_green_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_advanced' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_advanced_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_advanced_blue' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_advanced_blue_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_blue_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_advanced_green' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/tile_advanced_green_shadow' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_advanced.png', '_green_shadow', 40,
-			new Vector(0.2, 0.2, 0.2, 0.2), 1 / 4),
-		'interiors_mbu/tile_underside' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_underside.png', '', 40, new Vector(1, 1, 1, 1)),
-		'interiors_mbu/wall_beginner' => (onFinish) -> createPhongMaterial(onFinish, 'wall_beginner.png', 'wall_mbu.normal.png', 12,
-			new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/edge_white' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white.png', 'edge.normal.png', 50, new Vector(0.8, 0.8, 0.8, 1)),
-		'interiors_mbu/edge_white_shadow' => (onFinish) -> createPhongMaterial(onFinish, 'edge_white_shadow.png', 'edge.normal.png', 50,
-			new Vector(0.2, 0.2, 0.2, 0.2)),
-		'interiors_mbu/beam' => (onFinish) -> createPhongMaterial(onFinish, 'beam.png', 'beam.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/beam_side' => (onFinish) -> createPhongMaterial(onFinish, 'beam_side.png', 'beam_side.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/friction_low' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
-			new Vector(1, 1, 1, 0.8)),
-		'interiors_mbu/friction_low_shadow' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low_shadow.png', 'friction_low.normal.png', 128,
-			new Vector(0.3, 0.3, 0.35, 1)),
-		'interiors_mbu/friction_high' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high.png', 'friction_high.normal.png', 10,
-			new Vector(0.3, 0.3, 0.35, 1)),
-		'interiors_mbu/friction_high_shadow' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high_shadow.png', 'friction_high.normal.png', 10,
-			new Vector(0.15, 0.15, 0.16, 1.0)),
-		'interiors_mbu/stripe_caution' => (onFinish) -> createPhongMaterial(onFinish, 'stripe_caution.png', 'DefaultNormal.png', 12,
-			new Vector(0.8, 0.8, 0.6, 1)),
-		'multiplayer/interiors/platinumquest/pq_hot_1_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_hot_1_med.jpg', 'tile.normal.png', 'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_hot_2_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_hot_2_light.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_hot_4_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_hot_4_med.jpg', 'tile.normal.png', 'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_rays_blue_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_blue_med.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_rays_green_dark' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_dark.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_rays_green_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_light.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_rays_green_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_med.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_rays_green_random' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_green_random.jpg', 'tile.normal.png',
-			'tile.spec.png', 0.25),
-		'multiplayer/interiors/platinumquest/pq_rays_red_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_red_light.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_rays_purple_light' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_purple_light.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_rays_purple_med' => (onFinish) -> createPQMaterial(onFinish, 'pq_rays_purple_med.jpg', 'tile.normal.png',
-			'tile.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_friction_ice' => (onFinish) -> createPQMaterial(onFinish, 'pq_friction_ice.jpg', 'ice.normal.png',
-			'DefaultSpec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_1' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_1.png', 'pq_ray_wall_1.normal.png',
-			'pq_ray_wall_1.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_2' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_2.png', 'pq_ray_wall_2.normal.png',
-			'pq_ray_wall_2.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_3' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_3.png', 'pq_ray_wall_3.normal.png',
-			'pq_ray_wall_3.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_4' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_4.png', 'pq_ray_wall_4.normal.png',
-			'pq_ray_wall_4.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_5' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_5.png', 'pq_ray_wall_5.normal.png',
-			'pq_ray_wall_5.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_6' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_6.png', 'pq_ray_wall_6.normal.png',
-			'pq_ray_wall_6.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_7' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_7.png', 'pq_ray_wall_7.normal.png',
-			'pq_ray_wall_7.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_8' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_8.png', 'pq_ray_wall_8.normal.png',
-			'pq_ray_wall_8.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_combo' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo.png',
-			'pq_ray_wall_combo.normal.png', 'pq_ray_wall_combo.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_2.png',
-			'pq_ray_wall_combo_2.normal.png', 'pq_ray_wall_combo_2.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2_medium' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_2_medium.png',
-			'pq_ray_wall_combo_2.normal.png', 'pq_ray_wall_combo_2.spec.png'),
-		'multiplayer/interiors/platinumquest/pq_ray_wall_combo_small' => (onFinish) -> createPQMaterial(onFinish, 'pq_ray_wall_combo_small.png',
-			'pq_ray_wall_combo.normal.png', 'pq_ray_wall_combo.spec.png'),
-	];
+	/** `PQIceShaderMaterial` (real shader `SkyboxIce`) - same diffuse/normal/specular loading as
+		`createPQMaterialPaths`, plus a skybox-reflection blend using the mission's own
+		`level.sky.cubemap` (see `shaders.SkyboxIce` for why no per-object `CubemapRenderer` is
+		needed here, unlike the marble's own reflective skins). */
+	public static function createSkyboxIceMaterial(onFinish:hxsl.Shader->Void, diffusePath:String, normalPath:String, specularPath:String, reflectivity:Float,
+			textureScale:Vector) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture('data/${diffusePath}').resource;
+			diffuseTex.wrap = Repeat;
+			var normalTex = ResourceLoader.getTexture('data/${normalPath}').resource;
+			normalTex.wrap = Repeat;
+			var specularTex = ResourceLoader.getTexture('data/${specularPath}').resource;
+			specularTex.wrap = Repeat;
+			var shader = new shaders.SkyboxIce(diffuseTex, normalTex, specularTex, MarbleGame.instance.world.sky.cubemap, 20.0, reflectivity,
+				MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, textureScale);
+			onFinish(shader);
+		});
+		worker.loadFile('data/${diffusePath}');
+		worker.loadFile('data/${normalPath}');
+		worker.loadFile('data/${specularPath}');
+		worker.run();
+	}
 
 	public static function setCustomMaterialDefinitions(materials:Map<String, {friction:Float, restitution:Float, ?force:Float}>) {
 		customMaterialDict = materials;
@@ -789,129 +730,46 @@ class DifBuilder {
 				if (["NULL"].contains(tex)) {
 					return false;
 				}
-				if (tex.indexOf('/') != -1) {
-					var spl = tex.split('/');
-					tex = spl[spl.length - 1];
-				}
 
-				// search with extension first
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex)) {
-					return true;
-				}
+				tex = Path.withoutExtension(Path.withoutDirectory(tex));
 
-				var prevDir = Path.directory(Path.directory(path));
-				if (ResourceLoader.exists(prevDir + "/" + tex)) {
-					return true;
-				}
-
-				prevDir = Path.directory(prevDir);
-				if (ResourceLoader.exists(prevDir + "/" + tex))
-					return true;
-
-				// remove extension from it
-				if (tex.lastIndexOf(".") != -1) {
-					tex = tex.substring(0, tex.lastIndexOf("."));
-				}
-
-				#if (js || android)
-				path = StringTools.replace(path, "data/", "");
-				#end
-
-				// search jpg, png and bmp
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
-					return true;
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
-					return true;
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".bmp")) {
-					return true;
-				}
-				prevDir = Path.directory(Path.directory(path));
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return true;
-				}
-
-				prevDir = Path.directory(prevDir);
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return true;
+				// alright now go use the default torque texture finding method
+				var exts = [".jpg", ".png", ".jpeg", ".bmp"];
+				var dir = Path.directory(path);
+				while (true) {
+					// we recursively go up the directory tree until we find a texture
+					for (ext in exts) {
+						if (ResourceLoader.exists(Path.join([dir, tex + ext]))) {
+							return true;
+						}
+					}
+					// Move up one directory level
+					dir = Path.directory(dir);
+					if (dir == "") {
+						break;
+					}
 				}
 
 				return false;
 			}
 			function tex(tex:String):String {
-				if (tex.indexOf('/') != -1) {
-					var spl = tex.split('/');
-					tex = spl[spl.length - 1];
-				}
+				tex = Path.withoutExtension(Path.withoutDirectory(tex));
 
-				// search with extension first
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex)) {
-					return Path.directory(path) + "/" + tex;
-				}
-
-				var prevDir = Path.directory(Path.directory(path));
-				if (ResourceLoader.exists(prevDir + "/" + tex)) {
-					return prevDir + "/" + tex;
-				}
-
-				prevDir = Path.directory(prevDir);
-
-				if (ResourceLoader.exists(prevDir + "/" + tex)) {
-					return prevDir + "/" + tex;
-				}
-
-				// remove extension from it
-				if (tex.lastIndexOf(".") != -1) {
-					tex = tex.substring(0, tex.lastIndexOf("."));
-				}
-
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
-					return Path.directory(path) + "/" + tex + ".jpg";
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
-					return Path.directory(path) + "/" + tex + ".png";
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".bmp")) {
-					return Path.directory(path) + "/" + tex + ".bmp";
-				}
-
-				var prevDir = Path.directory(Path.directory(path));
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return prevDir + "/" + tex + ".jpg";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return prevDir + "/" + tex + ".png";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return prevDir + "/" + tex + ".bmp";
-				}
-
-				var prevDir = Path.directory(prevDir);
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return prevDir + "/" + tex + ".jpg";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return prevDir + "/" + tex + ".png";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return prevDir + "/" + tex + ".bmp";
+				// alright now go use the default torque texture finding method
+				var exts = [".jpg", ".png", ".jpeg", ".bmp"];
+				var dir = Path.directory(path);
+				while (true) {
+					// we recursively go up the directory tree until we find a texture
+					for (ext in exts) {
+						if (ResourceLoader.exists(Path.join([dir, tex + ext]))) {
+							return Path.join([dir, tex + ext]);
+						}
+					}
+					// Move up one directory level
+					dir = Path.directory(dir);
+					if (dir == "") {
+						break;
+					}
 				}
 
 				return null;
@@ -979,17 +837,25 @@ class DifBuilder {
 							exactName = exactName.substring(0, exactName.lastIndexOf('.'));
 							material = h3d.mat.Material.create(texture);
 							var matDictName = exactName;
-							if (!shaderMaterialDict.exists(matDictName)) {
+							if (!PQMaterials.shaderMaterialDict.exists(matDictName)) {
 								matDictName = StringTools.replace(exactName, "multiplayer/interiors/mbu", "interiors_mbu");
 							}
-							if (!shaderMaterialDict.exists(matDictName)) {
+							if (!PQMaterials.shaderMaterialDict.exists(matDictName)) {
 								matDictName = StringTools.replace(exactName, "multiplayer/interiors/custom/mbu", "interiors_mbu");
 							}
-							if (!shaderMaterialDict.exists(matDictName)) {
+							if (!PQMaterials.shaderMaterialDict.exists(matDictName)) {
 								matDictName = StringTools.replace(exactName, "multiplayer/interiors_mbg/custom/mbu", "interiors_mbu");
 							}
-							if (shaderMaterialDict.exists(matDictName)) {
-								var retrievefunc = shaderMaterialDict[matDictName];
+							if (!PQMaterials.shaderMaterialDict.exists(matDictName)) {
+								// `ResourceLoader.hx`/`Mission.hx` already normalize `lbinteriors* -> interiors*`
+								// at load time, so a DIF sourced from the `lbinteriors_custom/pq` editor folder
+								// arrives here as `interiors_custom/pq` (not `lbinteriors_custom/pq`) - that
+								// folder has no shipped assets of its own (confirmed empty on disk), real PQ
+								// interior textures only ever live under `interiors_pq`.
+								matDictName = StringTools.replace(exactName, "interiors_custom/pq", "interiors_pq");
+							}
+							if (PQMaterials.shaderMaterialDict.exists(matDictName)) {
+								var retrievefunc = PQMaterials.shaderMaterialDict[matDictName];
 								shaderWorker.addTask(fwd -> {
 									retrievefunc(shad -> {
 										material.mainPass.removeShader(material.textureShader);
@@ -1004,8 +870,39 @@ class DifBuilder {
 								});
 								prim.addTangents();
 							} else {
-								material.shadows = false;
-								material.receiveShadows = false;
+								// Ported from real PQ's `resolveInteriorTexture` (`GraphicsExtension.cpp`) - ANY
+								// interior texture with a `<name>.normal.png`/`<name>.spec.png` sitting right next
+								// to it in the same folder gets the default `PQMaterial` shader automatically,
+								// even with no explicit `texture_materials`/`shaderMaterialDict` entry at all.
+								// Falls back to the generic flat default for whichever of normal/spec isn't
+								// actually present (real source still builds the material if *either* file exists).
+								var dir = Path.directory(texture.name);
+								var base = Path.withoutExtension(Path.withoutDirectory(texture.name));
+								var normalCandidate = '${dir}/${base}.normal.png';
+								var specCandidate = '${dir}/${base}.spec.png';
+								var hasNormal = ResourceLoader.exists(normalCandidate);
+								var hasSpec = ResourceLoader.exists(specCandidate);
+								if (hasNormal || hasSpec) {
+									var diffusePath = StringTools.replace(texture.name, "data/", "");
+									var normalPath = StringTools.replace(hasNormal ? normalCandidate : "data/shaders/tex/DefaultNormal.png", "data/", "");
+									var specPath = StringTools.replace(hasSpec ? specCandidate : "data/shaders/tex/DefaultSpec.png", "data/", "");
+									shaderWorker.addTask(fwd -> {
+										DifBuilder.createPQMaterialPaths(shad -> {
+											material.mainPass.removeShader(material.textureShader);
+											material.mainPass.addShader(shad);
+											var thisprops:Dynamic = material.getDefaultProps();
+											thisprops.light = false; // We will calculate our own lighting
+											material.props = thisprops;
+											material.shadows = false;
+											material.receiveShadows = false;
+											fwd();
+										}, diffusePath, normalPath, specPath);
+									});
+									prim.addTangents();
+								} else {
+									material.shadows = false;
+									material.receiveShadows = false;
+								}
 							}
 						} else {
 							Console.warn('Unable to load ${grp} texture for dif ${path}');
