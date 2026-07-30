@@ -23,6 +23,8 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	var scrollBottomTile:Tile;
 	var scrollFillTile:Tile;
 
+	var heightOff:Float = 0;
+
 	var scrollTopBmp:h2d.Bitmap;
 	var scrollBottomBmp:h2d.Bitmap;
 	var scrollFillBmp:h2d.Bitmap;
@@ -42,29 +44,45 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	var scrollUpButton:GuiButton;
 	var scrollDownButton:GuiButton;
 
-	public function new(scrollBar:Tile) {
+	public function new(scrollBar:Tile, exts:{
+		top:Vector,
+		bottom:Vector,
+		fill:Vector,
+		topPressed:Vector,
+		bottomPressed:Vector,
+		fillPressed:Vector,
+		track:Vector,
+		up:Vector,
+		down:Vector,
+		upPressed:Vector,
+		downPressed:Vector,
+		upDisabled:Vector,
+		downDisabled:Vector
+	}) {
 		super();
-		this.scrollTopTile = scrollBar.sub(0, 37, 18, 8);
-		this.scrollBottomTile = scrollBar.sub(0, 55, 18, 8);
-		this.scrollFillTile = scrollBar.sub(0, 46, 18, 1);
-		this.scrollTopPressedTile = scrollBar.sub(19, 37, 18, 8);
-		this.scrollBottomPressedTile = scrollBar.sub(19, 46, 18, 8);
-		this.scrollFillPressedTile = scrollBar.sub(19, 55, 18, 1);
-		this.scrollTrackTile = scrollBar.sub(0, 64, 18, 1);
-		var scrollUpTile = scrollBar.sub(0, 1, 18, 17);
-		var scrollDownTile = scrollBar.sub(0, 19, 18, 17);
-		var scrollUpPressedTile = scrollBar.sub(19, 1, 18, 17);
-		var scrollDownPressedTile = scrollBar.sub(19, 19, 18, 17);
-		var scrollUpDisabledTile = scrollBar.sub(38, 1, 18, 17);
-		var scrollDownDisabledTile = scrollBar.sub(38, 19, 18, 17);
+		this.scrollTopTile = scrollBar.sub(exts.top.x, exts.top.y, exts.top.z, exts.top.w);
+		this.scrollBottomTile = scrollBar.sub(exts.bottom.x, exts.bottom.y, exts.bottom.z, exts.bottom.w);
+		this.scrollFillTile = scrollBar.sub(exts.fill.x, exts.fill.y, exts.fill.z, exts.fill.w);
+		this.scrollTopPressedTile = scrollBar.sub(exts.topPressed.x, exts.topPressed.y, exts.topPressed.z, exts.topPressed.w);
+		this.scrollBottomPressedTile = scrollBar.sub(exts.bottomPressed.x, exts.bottomPressed.y, exts.bottomPressed.z, exts.bottomPressed.w);
+		this.scrollFillPressedTile = scrollBar.sub(exts.fillPressed.x, exts.fillPressed.y, exts.fillPressed.z, exts.fillPressed.w);
+		this.scrollTrackTile = scrollBar.sub(exts.track.x, exts.track.y, exts.track.z, exts.track.w);
+		var scrollUpTile = scrollBar.sub(exts.up.x, exts.up.y, exts.up.z, exts.up.w);
+		var scrollDownTile = scrollBar.sub(exts.down.x, exts.down.y, exts.down.z, exts.down.w);
+		var scrollUpPressedTile = scrollBar.sub(exts.upPressed.x, exts.upPressed.y, exts.upPressed.z, exts.upPressed.w);
+		var scrollDownPressedTile = scrollBar.sub(exts.downPressed.x, exts.downPressed.y, exts.downPressed.z, exts.downPressed.w);
+		var scrollUpDisabledTile = scrollBar.sub(exts.upDisabled.x, exts.upDisabled.y, exts.upDisabled.z, exts.upDisabled.w);
+		var scrollDownDisabledTile = scrollBar.sub(exts.downDisabled.x, exts.downDisabled.y, exts.downDisabled.z, exts.downDisabled.w);
 		this._manualScroll = true;
+
+		this.heightOff = scrollUpTile.height * 2;
 
 		this.scrollTrack = new GuiImage(scrollTrackTile);
 		this.addChild(this.scrollTrack);
 
 		scrollUpButton = new GuiButton([scrollUpTile, scrollUpTile, scrollUpPressedTile, scrollUpDisabledTile]);
 		scrollUpButton.position = new Vector(0, 0);
-		scrollUpButton.extent = new Vector(18, 17);
+		scrollUpButton.extent = new Vector(exts.up.z, exts.up.w);
 		scrollUpButton.horizSizing = Right;
 		scrollUpButton.pressedAction = (e) -> {
 			this.scrollY -= 10;
@@ -74,7 +92,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 		scrollDownButton = new GuiButton([scrollDownTile, scrollDownTile, scrollDownPressedTile, scrollDownDisabledTile]);
 		scrollDownButton.position = new Vector(0, 0);
-		scrollDownButton.extent = new Vector(18, 17);
+		scrollDownButton.extent = new Vector(exts.down.z, exts.down.w);
 		scrollDownButton.horizSizing = Right;
 		scrollDownButton.pressedAction = (e) -> {
 			this.scrollY += 10;
@@ -146,7 +164,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		this.scrollTrack.extent = new Vector(18, this.extent.y);
 
 		scrollUpButton.position = new Vector(this.extent.x - 18, 0);
-		scrollDownButton.position = new Vector(this.extent.x - 18, this.extent.y - 17);
+		scrollDownButton.position = new Vector(this.extent.x - 18, this.extent.y - this.heightOff / 2);
 
 		if (scene2d.contains(scrollBarY))
 			scene2d.removeChild(scrollBarY);
@@ -170,11 +188,11 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		}
 		scrollBarY.visible = true;
 
-		// this.scrollTrack.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y);
+		// this.scrollTrack.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, renderRect.position.y)
 
-		var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
+		var scrollExtentY = renderRect.extent.y - this.heightOff * Settings.uiScale;
 
-		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
+		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - this.heightOff * Settings.uiScale));
 
 		this.scrollTrack.bmp.scaleY = renderRect.extent.y;
 
@@ -183,11 +201,15 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		this.scrollBarY.setPosition(renderRect.position.x
 			+ renderRect.extent.x
 			- 18 * Settings.uiScale,
-			18 * Settings.uiScale
+			(this.heightOff / 2 + 1) * Settings.uiScale
 			+ renderRect.position.y
 			+ scrollY);
 
-		this.clickInteractive.setPosition(renderRect.position.x + renderRect.extent.x - 18 * Settings.uiScale, 18 * Settings.uiScale + renderRect.position.y);
+		this.clickInteractive.setPosition(renderRect.position.x
+			+ renderRect.extent.x
+			- 18 * Settings.uiScale,
+			(this.heightOff / 2 + 1) * Settings.uiScale
+			+ renderRect.position.y);
 
 		this.clickInteractive.height = scrollExtentY;
 
@@ -202,9 +224,9 @@ class GuiConsoleScrollCtrl extends GuiControl {
 			scrollTopBmp.tile = pressed ? scrollTopPressedTile : scrollTopTile;
 			scrollBottomBmp.tile = pressed ? scrollBottomPressedTile : scrollBottomTile;
 			scrollFillBmp.tile = pressed ? scrollFillPressedTile : scrollFillTile;
-			scrollBottomBmp.y = scrollBarYSize - 8;
-			scrollFillBmp.y = 8;
-			scrollFillBmp.scaleY = scrollBarYSize - 12;
+			scrollBottomBmp.y = scrollBarYSize - scrollBottomTile.height;
+			scrollFillBmp.y = scrollTopTile.height;
+			scrollFillBmp.scaleY = scrollBarYSize - (scrollTopTile.height + scrollBottomTile.height);
 
 			// scrollBarY.clear();
 
@@ -225,7 +247,7 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		for (c in this.children) {
 			if (c == this.scrollTrack || c == this.scrollUpButton || c == this.scrollDownButton)
 				continue;
-			c.onScroll(0, scrollY * (this.maxScrollY - 34 * Settings.uiScale) / scrollExtentY);
+			c.onScroll(0, scrollY * (this.maxScrollY - this.heightOff * Settings.uiScale) / scrollExtentY);
 		}
 	}
 
@@ -237,8 +259,8 @@ class GuiConsoleScrollCtrl extends GuiControl {
 
 	public function setScrollPercentage(f:Float) {
 		var renderRect = this.getRenderRectangle();
-		var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
-		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
+		var scrollExtentY = renderRect.extent.y - this.heightOff * Settings.uiScale;
+		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - this.heightOff * Settings.uiScale));
 
 		this.scrollY = Util.lerp(0, scrollExtentY - scrollBarYSize * Settings.uiScale, f);
 		updateScrollVisual();

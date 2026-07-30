@@ -189,33 +189,22 @@ class Mission {
 	public function getPreviewImage(onLoaded:h2d.Tile->Void) {
 		if (!this.isClaMission) {
 			var basename = haxe.io.Path.withoutExtension(this.path);
-			if (ResourceLoader.fileSystem.exists(basename + ".png")) {
-				imgFileEntry = ResourceLoader.fileSystem.get(basename + ".png");
-				#if hl
-				var ret = ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
-				onLoaded(ret);
-				#end
-				#if js
-				imgFileEntry.load(() -> {
-					var ret = ResourceLoader.getResource(basename + ".png", ResourceLoader.getImage, this.imageResources).toTile();
+			var exts = [".jpg", ".png", ".jpeg", ".dds"];
+			for (ext in exts) {
+				if (ResourceLoader.fileSystem.exists(basename + ext)) {
+					imgFileEntry = ResourceLoader.fileSystem.get(basename + ext);
+					#if hl
+					var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
 					onLoaded(ret);
-				});
-				#end
-				return imgFileEntry.path;
-			}
-			if (ResourceLoader.fileSystem.exists(basename + ".jpg")) {
-				imgFileEntry = ResourceLoader.fileSystem.get(basename + ".jpg");
-				#if hl
-				var ret = ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
-				onLoaded(ret);
-				#end
-				#if js
-				imgFileEntry.load(() -> {
-					var ret = ResourceLoader.getResource(basename + ".jpg", ResourceLoader.getImage, this.imageResources).toTile();
-					onLoaded(ret);
-				});
-				#end
-				return imgFileEntry.path;
+					#end
+					#if js
+					imgFileEntry.load(() -> {
+						var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
+						onLoaded(ret);
+					});
+					#end
+					return imgFileEntry.path;
+				}
 			}
 			Console.error("Preview image not found for " + this.path);
 			var img = new BitmapData(1, 1);

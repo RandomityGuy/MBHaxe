@@ -106,7 +106,7 @@ class MainMenuGui extends GuiImage {
 		replButton.setExtent(new Vector(500, 84));
 		replButton.pressedAction = (sender) -> {
 			#if hl
-			MarbleGame.canvas.setContent(new ReplayCenterGui());
+			MarbleGame.canvas.pushDialog(new ReplayCenterGui());
 			#end
 			#if js
 			hxd.File.browse((replayToLoad) -> {

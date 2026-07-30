@@ -12,38 +12,34 @@ import src.MarbleGame;
 import src.Settings;
 import src.MissionList;
 
-class ReplayCenterGui extends GuiImage {
+class ReplayCenterGui extends GuiControl {
 	public function new() {
-		function chooseBg() {
-			var rand = Math.random();
-			if (rand >= 0 && rand <= 0.244)
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (rand > 0.244 && rand <= 0.816)
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-		}
-		var img = chooseBg();
-		super(img.resource.toTile());
+		super();
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
-		this.extent = new Vector(640, 480);
+		this.extent = new Vector(800, 600);
 
-		var wnd = new GuiImage(ResourceLoader.getResource("data/ui/replay/window.png", ResourceLoader.getImage, this.imageResources).toTile());
-		wnd.position = new Vector(0, 0);
-		wnd.extent = new Vector(640, 480);
+		var wnd = new GuiTransparencyCtrl("data/ui/transparency/pqwindow");
 		wnd.horizSizing = Center;
 		wnd.vertSizing = Center;
+		wnd.position = new Vector(33, 24);
+		wnd.extent = new Vector(574, 434);
 		this.addChild(wnd);
 
-		function loadButtonImages(path:String, hasDisabled:Bool = false) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var disabled = hasDisabled ? ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile() : null;
-			return [normal, hover, pressed, disabled];
-		}
+		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
+		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
+		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var whatneyFont14 = whatneyFontB.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+
+		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
+		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
+		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
+
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
 
 		var selectedIdx = -1;
 
@@ -63,9 +59,11 @@ class ReplayCenterGui extends GuiImage {
 			}
 		}
 
-		var playButton = new GuiButton(loadButtonImages('data/ui/replay/play', true));
-		playButton.position = new Vector(323, 386);
-		playButton.extent = new Vector(94, 46);
+		var playButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
+		playButton.position = new Vector(453, 362);
+		playButton.setExtent(new Vector(94, 45));
+		playButton.txtCtrl.text.text = "Play";
 		playButton.disabled = true;
 		playButton.pressedAction = (e) -> {
 			var repl = replayList[selectedIdx];
@@ -86,51 +84,59 @@ class ReplayCenterGui extends GuiImage {
 		}
 		wnd.addChild(playButton);
 
-		var homeButton = new GuiButton(loadButtonImages('data/ui/replay/home'));
-		homeButton.position = new Vector(224, 386);
-		homeButton.extent = new Vector(94, 46);
+		var homeButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
+		homeButton.position = new Vector(27, 362);
+		homeButton.setExtent(new Vector(94, 45));
+		homeButton.txtCtrl.text.text = "Close";
 		homeButton.pressedAction = (e) -> {
-			MarbleGame.canvas.setContent(new MainMenuGui());
+			MarbleGame.canvas.popDialog(this);
 		}
 		wnd.addChild(homeButton);
 
-		var temprev = new BitmapData(1, 1);
-		temprev.setPixel(0, 0, 0);
-		var tmpprevtile = h2d.Tile.fromBitmap(temprev);
+		var panelLeft = new GuiTransparencyCtrl("data/ui/transparency/75square");
+		panelLeft.position = new Vector(22, 62);
+		panelLeft.extent = new Vector(281, 306);
+		wnd.addChild(panelLeft);
 
-		var pmPreview = new GuiImage(tmpprevtile);
-		pmPreview.position = new Vector(360, 29);
-		pmPreview.extent = new Vector(216, 150);
-		wnd.addChild(pmPreview);
+		var scrollCtrl = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/pqscroll.png", ResourceLoader.getImage, this.imageResources)
+			.toTile(), {
+				top: new Vector(0, 39, 16, 7),
+				bottom: new Vector(0, 56, 16, 7),
+				fill: new Vector(0, 47, 16, 1),
+				topPressed: new Vector(19, 39, 16, 7),
+				bottomPressed: new Vector(19, 56, 16, 7),
+				fillPressed: new Vector(19, 47, 16, 1),
+				track: new Vector(0, 65, 16, 7),
+				up: new Vector(0, 1, 16, 16),
+				down: new Vector(0, 20, 16, 16),
+				upPressed: new Vector(19, 1, 16, 16),
+				downPressed: new Vector(19, 20, 16, 16),
+				upDisabled: new Vector(38, 1, 16, 16),
+				downDisabled: new Vector(38, 20, 16, 16)
+			});
+		scrollCtrl.position = new Vector(13, 13);
+		scrollCtrl.extent = new Vector(255, 280);
+		scrollCtrl.horizSizing = Width;
+		scrollCtrl.vertSizing = Height;
 
-		var scrollCtrl = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
-		scrollCtrl.position = new Vector(30, 25);
-		scrollCtrl.extent = new Vector(283, 346);
-		scrollCtrl.childrenHandleScroll = true;
-		wnd.addChild(scrollCtrl);
+		panelLeft.addChild(scrollCtrl);
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
-		var arial14b = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
-		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+		var panelRight = new GuiTransparencyCtrl("data/ui/transparency/75square");
+		panelRight.position = new Vector(292, 62);
+		panelRight.extent = new Vector(260, 306);
+		wnd.addChild(panelRight);
 
-		var missionName = new GuiText(markerFelt24);
-		missionName.position = new Vector(327, 181);
-		missionName.extent = new Vector(278, 14);
+		var missionName = new GuiText(whatneyFont);
+		missionName.position = new Vector(15, 15);
+		missionName.extent = new Vector(230, 14);
 		missionName.text.textColor = 0;
 		missionName.justify = Center;
-		wnd.addChild(missionName);
+		panelRight.addChild(missionName);
 
-		var replayListBox = new GuiTextListCtrl(markerFelt24, replayList.map(x -> x.name));
+		var replayListBox = new GuiTextListCtrl(whatneyFont14, replayList.map(x -> x.name));
 		replayListBox.position = new Vector(0, 0);
-		replayListBox.extent = new Vector(283, 346);
-		replayListBox.textYOffset = -6;
+		replayListBox.extent = new Vector(239, 700);
 		replayListBox.scrollable = true;
 		replayListBox.onSelectedFunc = (idx) -> {
 			if (idx < 0)
@@ -144,17 +150,12 @@ class ReplayCenterGui extends GuiImage {
 			if (MissionList.missions == null)
 				MissionList.buildMissionList();
 			var m = thisReplay.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(thisReplay.customId);
-			missionName.text.text = m.title;
-			m.getPreviewImage((t) -> {
-				pmPreview.bmp.tile = t;
-			});
+			if (m == null)
+				missionName.text.text = "Mission: Unknown";
+			else
+				missionName.text.text = 'Mission: ${m.title}';
 		}
 		scrollCtrl.addChild(replayListBox);
 		scrollCtrl.setScrollMax(replayListBox.calculateFullHeight());
-
-		var replayFrame = new GuiImage(ResourceLoader.getResource("data/ui/replay/replayframe.png", ResourceLoader.getImage, this.imageResources).toTile());
-		replayFrame.position = new Vector(351, 21);
-		replayFrame.extent = new Vector(234, 168);
-		wnd.addChild(replayFrame);
 	}
 }
