@@ -38,7 +38,38 @@ class ConsoleDlg extends GuiControl {
 		consoleWhite.vertSizing = Top;
 		this.addChild(consoleWhite);
 
-		scroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/darkscroll.png", ResourceLoader.getImage, this.imageResources).toTile());
+		/**
+			this.scrollTopTile = scrollBar.sub(0, 37, 18, 8);
+			this.scrollBottomTile = scrollBar.sub(0, 55, 18, 8);
+			this.scrollFillTile = scrollBar.sub(0, 46, 18, 1);
+			this.scrollTopPressedTile = scrollBar.sub(19, 37, 18, 8);
+			this.scrollBottomPressedTile = scrollBar.sub(19, 46, 18, 8);
+			this.scrollFillPressedTile = scrollBar.sub(19, 55, 18, 1);
+			this.scrollTrackTile = scrollBar.sub(0, 64, 18, 1);
+			var scrollUpTile = scrollBar.sub(0, 1, 18, 17);
+			var scrollDownTile = scrollBar.sub(0, 19, 18, 17);
+			var scrollUpPressedTile = scrollBar.sub(19, 1, 18, 17);
+			var scrollDownPressedTile = scrollBar.sub(19, 19, 18, 17);
+			var scrollUpDisabledTile = scrollBar.sub(38, 1, 18, 17);
+			var scrollDownDisabledTile = scrollBar.sub(38, 19, 18, 17);
+
+		**/
+
+		scroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/darkscroll.png", ResourceLoader.getImage, this.imageResources).toTile(), {
+			top: new Vector(0, 37, 18, 8),
+			bottom: new Vector(0, 55, 18, 8),
+			fill: new Vector(0, 46, 18, 1),
+			topPressed: new Vector(19, 37, 18, 8),
+			bottomPressed: new Vector(19, 46, 18, 8),
+			fillPressed: new Vector(19, 55, 18, 1),
+			track: new Vector(0, 64, 18, 1),
+			up: new Vector(0, 1, 18, 17),
+			down: new Vector(0, 19, 18, 17),
+			upPressed: new Vector(19, 1, 18, 17),
+			downPressed: new Vector(19, 19, 18, 17),
+			upDisabled: new Vector(38, 1, 18, 17),
+			downDisabled: new Vector(38, 19, 18, 17)
+		});
 		scroll.position = new Vector(0, 0);
 		scroll.extent = new Vector(640, 350);
 		scroll.horizSizing = Width;
