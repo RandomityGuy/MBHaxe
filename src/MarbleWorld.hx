@@ -139,6 +139,7 @@ import src.DatablockRegistry;
 import src.GameObjectPathFollower;
 import src.GameObjectParentFollower;
 import triggers.PathTrigger;
+import src.MarbleList;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
@@ -673,20 +674,18 @@ class MarbleWorld extends Scheduler {
 		if (client == null) {
 			marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
 
-			if (Settings.optionsSettings.marbleCategoryIndex == 0)
-				marblefiles.push("shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png");
-			else
-				marblefiles.push("shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin + ".marble.png");
+			var modelBaseDir = haxe.io.Path.directory(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
+
+			marblefiles.push(modelBaseDir + "/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		} else {
-			var marbleDts = MarbleSelectGui.marbleData[client.getMarbleCatId()][client.getMarbleId()].dts; // FIXME
+			var marbleDts = MarbleList.marbles[client.getMarbleCatId()][client.getMarbleId()].dts; // FIXME
 			marblefiles.push(StringTools.replace(marbleDts, "data/", ""));
 
-			var marbleSkin = MarbleSelectGui.marbleData[client.getMarbleCatId()][client.getMarbleId()].skin;
+			var marbleSkin = MarbleList.marbles[client.getMarbleCatId()][client.getMarbleId()].skin;
 
-			if (client.getMarbleCatId() == 0)
-				marblefiles.push("shapes/balls/" + marbleSkin + ".marble.png");
-			else
-				marblefiles.push("shapes/balls/pack1/" + marbleSkin + ".marble.png");
+			var modelBaseDir = haxe.io.Path.directory(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
+
+			marblefiles.push(modelBaseDir + "/" + Settings.optionsSettings.marbleSkin + ".marble.png");
 		}
 
 		var gameModeFiles = this.gameMode.getPreloadFiles();

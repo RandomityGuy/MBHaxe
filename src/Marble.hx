@@ -77,6 +77,7 @@ import src.Gamepad;
 import net.Move;
 import src.ProfilerUI;
 import src.PhysicsAttributeOverride;
+import src.MarbleList;
 
 enum Mode {
 	Start;
@@ -1094,7 +1095,9 @@ class Marble extends GameObject {
 	public var activeCannon:shapes.Cannon = null;
 
 	var cannonCharge:Float = 0;
+
 	public var cannonBeforeGravity:Float = 20;
+
 	var cannonFrozenLayer:Array<PhysicsAttributeOverride> = null;
 	var cannonControlLockLayer:Array<PhysicsAttributeOverride> = null;
 
@@ -1365,7 +1368,7 @@ class Marble extends GameObject {
 			marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
 			marbleShader = Settings.optionsSettings.marbleShader;
 		} else {
-			var marbleData = MarbleSelectGui.marbleData[connection.getMarbleCatId()][connection.getMarbleId()]; // FIXME category support
+			var marbleData = MarbleList.marbles[connection.getMarbleCatId()][connection.getMarbleId()]; // FIXME category support
 			Console.log("Marble: " + marbleData.dts + " (" + marbleData.skin + ")");
 			marbleDts.dtsPath = marbleData.dts;
 			marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
@@ -4373,7 +4376,9 @@ class Marble extends GameObject {
 			return false;
 		// Ported from `ghost.cs`'s `... || MissionInfo.mega` - `EMI_Mega`/"Always Mega Marble"
 		// forces every marble permanently mega, bypassing the normal enable-time/use-tick tracking.
-		if (this.level.mission != null && this.level.mission.missionInfo != null && MisParser.parseBoolean(this.level.mission.missionInfo.mega))
+		if (this.level.mission != null
+			&& this.level.mission.missionInfo != null
+			&& MisParser.parseBoolean(this.level.mission.missionInfo.mega))
 			return true;
 		if (!this.level.isMultiplayer) {
 			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;

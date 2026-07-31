@@ -8,8 +8,19 @@ class GuiBorderButtonTextCtrl extends GuiBorderButtonCtrl {
 
 	public var ratio = 0.3;
 
-	public function new(atlas:Tile, font:h2d.Font) {
-		super(atlas);
+	public function new(atlas:Tile, font:h2d.Font, exts:{
+		tl:Vector,
+		tr:Vector,
+		bl:Vector,
+		br:Vector,
+		top:Vector,
+		left:Vector,
+		right:Vector,
+		bottom:Vector,
+		fill:Vector,
+		separation:Float
+	} = null) {
+		super(atlas, exts);
 		txtCtrl = new GuiText(font);
 		txtCtrl.position = new Vector();
 		txtCtrl.extent = this.extent;

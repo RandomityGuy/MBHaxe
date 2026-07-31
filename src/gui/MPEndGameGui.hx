@@ -9,6 +9,7 @@ import src.ResourceLoader;
 import h3d.Vector;
 import src.Settings;
 import src.DtsObject;
+import src.MarbleList;
 
 class MPEndGameGui extends GuiImage {
 	public function new() {
@@ -256,10 +257,8 @@ class MPEndGameGui extends GuiImage {
 				container.addChild(playerB);
 			}
 
-			var marble = buildObjectShow(MarbleSelectGui.marbleData[marbleCat][marbleSel].dts, new Vector((hasPlatinum ? 52 : 0) + 524, -10),
-				new Vector(64, 64), 2.4, 0, [
-					"base.marble" => MarbleSelectGui.marbleData[marbleCat][marbleSel].skin + ".marble"
-				]);
+			var marble = buildObjectShow(MarbleList.marbles[marbleCat][marbleSel].dts, new Vector((hasPlatinum ? 52 : 0) + 524, -10), new Vector(64, 64), 2.4,
+				0, ["base.marble" => MarbleList.marbles[marbleCat][marbleSel].skin + ".marble"]);
 
 			container.addChild(marble);
 

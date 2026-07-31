@@ -19,7 +19,7 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		top:Vector,
 		left:Vector,
 		right:Vector,
-		bottom:Vector
+		bottom:Vector,
 	}) {
 		super();
 		var tl = texture.sub(texs.tl.x, texs.tl.y, texs.tl.z, texs.tl.w);

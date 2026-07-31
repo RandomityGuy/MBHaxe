@@ -207,9 +207,7 @@ class Mission {
 				}
 			}
 			Console.error("Preview image not found for " + this.path);
-			var img = new BitmapData(1, 1);
-			img.setPixel(0, 0, 0);
-			onLoaded(Tile.fromBitmap(img));
+			onLoaded(ResourceLoader.getResource("data/ui/play/missingicon", ResourceLoader.getImage, this.imageResources).toTile());
 			return null;
 		} else {
 			if (_previewRequest != null #if sys && !_previewRequest.fulfilled #end) {
@@ -227,9 +225,7 @@ class Mission {
 					onLoaded(t);
 				} else {
 					Console.error("Preview image not found for " + this.path);
-					var img = new BitmapData(1, 1);
-					img.setPixel(0, 0, 0);
-					onLoaded(Tile.fromBitmap(img));
+					onLoaded(ResourceLoader.getResource("data/ui/play/missingicon", ResourceLoader.getImage, this.imageResources).toTile());
 				}
 			});
 
