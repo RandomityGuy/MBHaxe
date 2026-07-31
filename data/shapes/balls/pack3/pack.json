@@ -1,0 +1,25 @@
+{
+	"name": "Community Selected",
+	"marbles": [
+		{"name": "Alien",                 "shape": "alien.dts",             "skin": "base",        "normalize": true},
+		{"name": "Bacteria",              "shape": "ball-superball.dts",    "skin": "bacteria",    "normalize": true},
+		{"name": "Broken Marble",         "shape": "corrupted.dts",         "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Caged",                 "shape": "caged.dts",             "skin": "base",        "normalize": true},
+		{"name": "Cartoony",              "shape": "cartoon.dts",           "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_unlitF.glsl"},
+		{"name": "Crystal",               "shape": "crystal.dts",           "skin": "base",        "normalize": true},
+		{"name": "Hmmm",                  "shape": "ball-superball.dts",    "skin": "hmmm",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_inverse_alphaF.glsl"},
+		{"name": "Hperks",                "shape": "ball-superball.dts",    "skin": "hp",          "normalize": true},
+		{"name": "Learning To Roll",      "shape": "learntorollmarble.dts", "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Lotus",                 "shape": "lotus.dts",             "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Macscirrus",            "shape": "ball-superball.dts",    "skin": "macscirrus2", "normalize": true, "shaderF": "platinum/data/shaders/sphere_inverse_alphaF.glsl"},
+		{"name": "Octo",                  "shape": "octo.dts",              "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "What's This",           "shape": "owo.dts",               "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Pensive Cowboy Marble", "shape": "pensive.dts",           "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "PlatinumQuest",         "shape": "pq_marble_new.dts",     "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_unlitF.glsl"},
+		{"name": "Pseudoptic",            "shape": "ball-superball.dts",    "skin": "eye",         "normalize": true},
+		{"name": "Rawr-ster",             "shape": "ball-superball.dts",    "skin": "cat",         "normalize": true},
+		{"name": "Snowball",              "shape": "snowball.dts",          "skin": "base",        "normalize": true, "shaderF": "platinum/data/shaders/sphere_diffuse_onlyF.glsl"},
+		{"name": "Teeworlds",             "shape": "ball-superball.dts",    "skin": "tee",         "normalize": true, "shaderF": "platinum/data/shaders/sphere_inverse_alphaF.glsl"},
+		{"name": "Waffle Time",           "shape": "ball-superball.dts",    "skin": "waffle",      "normalize": true, "shaderF": "platinum/data/shaders/sphere_inverse_alphaF.glsl"}
+	]
+}
