@@ -65,65 +65,33 @@ class MissionList {
 			return difficultyMissions;
 		}
 
-		var goldMissions:Map<String, Array<Mission>> = [];
 		var platinumMissions:Map<String, Array<Mission>> = [];
-		var ultraMissions:Map<String, Array<Mission>> = [];
-		var multiplayerMissions:Map<String, Array<Mission>> = [];
-
-		goldMissions.set("beginner", parseDifficulty("gold", "missions_mbg", "beginner"));
-		goldMissions.set("intermediate", parseDifficulty("gold", "missions_mbg", "intermediate"));
-		goldMissions.set("advanced", parseDifficulty("gold", "missions_mbg", "advanced"));
-
 		platinumMissions.set("tutorial", parseDifficulty("platinum", "missions_pq", "tutorial"));
 		platinumMissions.set("beginner", parseDifficulty("platinum", "missions_pq", "beginner"));
 		platinumMissions.set("intermediate", parseDifficulty("platinum", "missions_pq", "intermediate"));
 		platinumMissions.set("advanced", parseDifficulty("platinum", "missions_pq", "advanced"));
 		platinumMissions.set("expert", parseDifficulty("platinum", "missions_pq", "expert"));
-
-		ultraMissions.set("beginner", parseDifficulty("ultra", "missions_mbu", "beginner"));
-		ultraMissions.set("intermediate", parseDifficulty("ultra", "missions_mbu", "intermediate"));
-		ultraMissions.set("advanced", parseDifficulty("ultra", "missions_mbu", "advanced"));
-
-		multiplayerMissions.set("beginner", parseDifficulty("multiplayer", "multiplayer/hunt", "beginner"));
-		multiplayerMissions.set("intermediate", parseDifficulty("multiplayer", "multiplayer/hunt", "intermediate"));
-		multiplayerMissions.set("advanced", parseDifficulty("multiplayer", "multiplayer/hunt", "advanced"));
+		platinumMissions.set("bonus", parseDifficulty("platinum", "missions_pq", "bonus"));
 
 		customMissions = parseDifficulty("custom", "missions", "custom");
 
-		@:privateAccess goldMissions["beginner"][goldMissions["beginner"].length - 1].next = goldMissions["intermediate"][0];
-		@:privateAccess goldMissions["intermediate"][goldMissions["intermediate"].length - 1].next = goldMissions["advanced"][0];
-		@:privateAccess goldMissions["advanced"][goldMissions["advanced"].length - 1].next = goldMissions["beginner"][0];
 		@:privateAccess platinumMissions["tutorial"][platinumMissions["tutorial"].length - 1].next = platinumMissions["beginner"][0];
 		@:privateAccess platinumMissions["beginner"][platinumMissions["beginner"].length - 1].next = platinumMissions["intermediate"][0];
 		@:privateAccess platinumMissions["intermediate"][platinumMissions["intermediate"].length - 1].next = platinumMissions["advanced"][0];
 		@:privateAccess platinumMissions["advanced"][platinumMissions["advanced"].length - 1].next = platinumMissions["expert"][0];
-		@:privateAccess platinumMissions["expert"][platinumMissions["expert"].length - 1].next = platinumMissions["tutorial"][0];
-		@:privateAccess ultraMissions["beginner"][ultraMissions["beginner"].length - 1].next = ultraMissions["intermediate"][0];
-		@:privateAccess ultraMissions["intermediate"][ultraMissions["intermediate"].length - 1].next = ultraMissions["advanced"][0];
-		@:privateAccess ultraMissions["advanced"][ultraMissions["advanced"].length - 1].next = ultraMissions["beginner"][0];
+		@:privateAccess platinumMissions["expert"][platinumMissions["expert"].length - 1].next = platinumMissions["bonus"][0];
+		@:privateAccess platinumMissions["bonus"][platinumMissions["bonus"].length - 1].next = platinumMissions["tutorial"][0];
 
 		// Hypercube uses MBG logic
-		ultraMissions["advanced"][ultraMissions["advanced"].length - 1].game = "gold";
-
-		missionList.set("gold", goldMissions);
 		missionList.set("platinum", platinumMissions);
-		missionList.set("ultra", ultraMissions);
-		missionList.set("multiplayer", multiplayerMissions);
 
 		Console.log("Loaded MissionList");
-		Console.log("Gold Beginner: " + goldMissions["beginner"].length);
-		Console.log("Gold Intermediate: " + goldMissions["intermediate"].length);
-		Console.log("Gold Advanced: " + goldMissions["advanced"].length);
+		Console.log("Platinum Tutorial: " + platinumMissions["tutorial"].length);
 		Console.log("Platinum Beginner: " + platinumMissions["beginner"].length);
 		Console.log("Platinum Intermediate: " + platinumMissions["intermediate"].length);
 		Console.log("Platinum Advanced: " + platinumMissions["advanced"].length);
 		Console.log("Platinum Expert: " + platinumMissions["expert"].length);
-		Console.log("Ultra Beginner: " + ultraMissions["beginner"].length);
-		Console.log("Ultra Intermediate: " + ultraMissions["intermediate"].length);
-		Console.log("Ultra Advanced: " + ultraMissions["advanced"].length);
-		Console.log("Multiplayer Beginner: " + multiplayerMissions["beginner"].length);
-		Console.log("Multiplayer Intermediate: " + multiplayerMissions["intermediate"].length);
-		Console.log("Multiplayer Advanced: " + multiplayerMissions["advanced"].length);
+		Console.log("Platinum Bonus: " + platinumMissions["bonus"].length);
 		Console.log("Custom: " + customMissions.length);
 
 		// parseCLAList();

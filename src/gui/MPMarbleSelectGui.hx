@@ -13,6 +13,7 @@ import src.ResourceLoader;
 import src.DtsObject;
 import src.Settings;
 import src.ResourceLoaderWorker;
+import src.MarbleList;
 
 class MPMarbleSelectGui extends GuiImage {
 	public function new() {
@@ -51,9 +52,9 @@ class MPMarbleSelectGui extends GuiImage {
 		selectBtn.pressedAction = (e) -> {
 			Settings.optionsSettings.marbleIndex = curSelection;
 			Settings.optionsSettings.marbleCategoryIndex = curCategorySelection;
-			Settings.optionsSettings.marbleSkin = MarbleSelectGui.marbleData[curCategorySelection][curSelection].skin;
-			Settings.optionsSettings.marbleModel = MarbleSelectGui.marbleData[curCategorySelection][curSelection].dts;
-			Settings.optionsSettings.marbleShader = MarbleSelectGui.marbleData[curCategorySelection][curSelection].shader;
+			Settings.optionsSettings.marbleSkin = MarbleList.marbles[curCategorySelection][curSelection].skin;
+			Settings.optionsSettings.marbleModel = MarbleList.marbles[curCategorySelection][curSelection].dts;
+			Settings.optionsSettings.marbleShader = MarbleList.marbles[curCategorySelection][curSelection].shader;
 			Settings.save();
 			MarbleGame.canvas.popDialog(this);
 
@@ -71,10 +72,9 @@ class MPMarbleSelectGui extends GuiImage {
 		}
 		this.addChild(selectBtn);
 
-		var marbleShow = buildObjectShow(MarbleSelectGui.marbleData[curCategorySelection][curSelection].dts, new Vector(171, 97), new Vector(150, 150), 2.6,
-			0, [
-				"base.marble" => MarbleSelectGui.marbleData[curCategorySelection][curSelection].skin + ".marble"
-			]);
+		var marbleShow = buildObjectShow(MarbleList.marbles[curCategorySelection][curSelection].dts, new Vector(171, 97), new Vector(150, 150), 2.6, 0, [
+			"base.marble" => MarbleList.marbles[curCategorySelection][curSelection].skin + ".marble"
+		]);
 		marbleShow.horizSizing = Center;
 		marbleShow.vertSizing = Bottom;
 		marbleShow.visible = true;
@@ -107,7 +107,7 @@ class MPMarbleSelectGui extends GuiImage {
 		marbleText.vertSizing = Bottom;
 		marbleText.position = new Vector(86, 243);
 		marbleText.extent = new Vector(320, 22);
-		marbleText.text.text = '<p align="center">${MarbleSelectGui.marbleData[curCategorySelection][curSelection].name}</p>';
+		marbleText.text.text = '<p align="center">${MarbleList.marbles[curCategorySelection][curSelection].name}</p>';
 		this.addChild(marbleText);
 
 		var changeMarbleText = new GuiImage(ResourceLoader.getResource("data/ui/play/change_marble_text.png", ResourceLoader.getImage, this.imageResources)
@@ -119,17 +119,17 @@ class MPMarbleSelectGui extends GuiImage {
 
 		function setMarbleSelection(idx:Int, categoryIdx:Int) {
 			if (categoryIdx < 0)
-				categoryIdx = MarbleSelectGui.marbleData.length + categoryIdx;
-			if (categoryIdx >= MarbleSelectGui.marbleData.length)
-				categoryIdx -= MarbleSelectGui.marbleData.length;
+				categoryIdx = MarbleList.marbles.length + categoryIdx;
+			if (categoryIdx >= MarbleList.marbles.length)
+				categoryIdx -= MarbleList.marbles.length;
 
 			if (idx < 0)
-				idx = MarbleSelectGui.marbleData[categoryIdx].length + idx;
-			if (idx >= MarbleSelectGui.marbleData[categoryIdx].length)
-				idx -= MarbleSelectGui.marbleData[categoryIdx].length;
+				idx = MarbleList.marbles[categoryIdx].length + idx;
+			if (idx >= MarbleList.marbles[categoryIdx].length)
+				idx -= MarbleList.marbles[categoryIdx].length;
 			curSelection = idx;
 			curCategorySelection = categoryIdx;
-			var marble = MarbleSelectGui.marbleData[categoryIdx][idx];
+			var marble = MarbleList.marbles[categoryIdx][idx];
 
 			titleText.text.text = '<p align="center">${categoryNames[curCategorySelection]}</p>';
 			marbleText.text.text = '<p align="center">${marble.name}</p>';

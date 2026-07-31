@@ -34,21 +34,47 @@ class GuiBorderButtonCtrl extends GuiControl {
 	public var gamepadAccelerator:Array<String> = [];
 	public var acceleratorWasPressed = false;
 
-	public function new(texture:Tile) {
+	public function new(texture:Tile, exts:{
+		tl:Vector,
+		tr:Vector,
+		bl:Vector,
+		br:Vector,
+		top:Vector,
+		left:Vector,
+		right:Vector,
+		bottom:Vector,
+		fill:Vector,
+		separation:Float
+	} = null) {
 		super();
+
+		if (exts == null) {
+			exts = {
+				tl: new Vector(0, 1, 13, 13),
+				tr: new Vector(35, 1, 13, 13),
+				bl: new Vector(0, 23, 13, 13),
+				br: new Vector(35, 23, 13, 13),
+				top: new Vector(14, 1, 20, 13),
+				left: new Vector(0, 15, 13, 7),
+				right: new Vector(35, 15, 13, 7),
+				bottom: new Vector(14, 23, 20, 13),
+				fill: new Vector(14, 15, 20, 7),
+				separation: 36
+			}
+		}
 
 		var tilesubs = [];
 
 		for (i in 0...4) {
-			var tl = texture.sub(0, 1 + i * 36, 13, 13);
-			var tr = texture.sub(35, 1 + i * 36, 13, 13);
-			var bl = texture.sub(0, 23 + i * 36, 13, 13);
-			var br = texture.sub(35, 23 + i * 36, 13, 13);
-			var top = texture.sub(14, 1 + i * 36, 20, 13);
-			var left = texture.sub(0, 15 + i * 36, 13, 7);
-			var right = texture.sub(35, 15 + i * 36, 13, 7);
-			var bottom = texture.sub(14, 23 + i * 36, 20, 13);
-			var fill = texture.sub(14, 15 + i * 36, 20, 7);
+			var tl = texture.sub(exts.tl.x, exts.tl.y + i * exts.separation, exts.tl.z, exts.tl.w);
+			var tr = texture.sub(exts.tr.x, exts.tr.y + i * exts.separation, exts.tr.z, exts.tr.w);
+			var bl = texture.sub(exts.bl.x, exts.bl.y + i * exts.separation, exts.bl.z, exts.bl.w);
+			var br = texture.sub(exts.br.x, exts.br.y + i * exts.separation, exts.br.z, exts.br.w);
+			var top = texture.sub(exts.top.x, exts.top.y + i * exts.separation, exts.top.z, exts.top.w);
+			var left = texture.sub(exts.left.x, exts.left.y + i * exts.separation, exts.left.z, exts.left.w);
+			var right = texture.sub(exts.right.x, exts.right.y + i * exts.separation, exts.right.z, exts.right.w);
+			var bottom = texture.sub(exts.bottom.x, exts.bottom.y + i * exts.separation, exts.bottom.z, exts.bottom.w);
+			var fill = texture.sub(exts.fill.x, exts.fill.y + i * exts.separation, exts.fill.z, exts.fill.w);
 			tilesubs = tilesubs.concat([tl, tr, bl, br, top, left, right, bottom, fill]);
 		}
 
