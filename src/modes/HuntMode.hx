@@ -193,8 +193,8 @@ class HuntMode extends NullMode {
 	};
 
 	override function getSpawnTransform() {
-		var idx = Net.connectedServerInfo.competitiveMode ? idealSpawnIndex : Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
-		if (!Net.connectedServerInfo.competitiveMode) {
+		var idx = (Net.isMP && Net.connectedServerInfo.competitiveMode) ? idealSpawnIndex : nextRandomInt(rng2, 0, playerSpawnPoints.length - 1);
+		if (!(Net.isMP && Net.connectedServerInfo.competitiveMode)) {
 			var allTaken = true;
 			for (spw in spawnPointTaken) {
 				if (!spw) {
@@ -204,7 +204,7 @@ class HuntMode extends NullMode {
 			}
 			if (!allTaken) {
 				while (spawnPointTaken[idx]) {
-					idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+					idx = nextRandomInt(rng2, 0, playerSpawnPoints.length - 1);
 				}
 				spawnPointTaken[idx] = true;
 			}
@@ -279,7 +279,7 @@ class HuntMode extends NullMode {
 
 		var lastContactPos = marble.lastContactPosition;
 		if (lastContactPos == null) {
-			var idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+			var idx = nextRandomInt(rng2, 0, playerSpawnPoints.length - 1);
 			var randomSpawn = playerSpawnPoints[idx];
 			var spawnPos = MisParser.parseVector3(randomSpawn.position);
 			spawnPos.x *= -1;
@@ -388,6 +388,33 @@ class HuntMode extends NullMode {
 		return files;
 	}
 
+	/** Every gameplay-affecting `rng`/`rng2`/`Math.random()` draw in this class goes through one of
+		these two instead of calling the generator directly - a live rewind mid-recording still
+		advances the live generator during the since-discarded branch, so recording just the seed
+		can't reproduce the exact draw sequence the kept frames actually saw (unlike the marble's own
+		transform, which IS safe to snapshot/restore directly, since it's the *result* state, not a
+		generator whose future output depends on how many times it's been called so far). Recording
+		the actual drawn *values* (same mechanism `RandomPowerup.hx` already uses for its own pick)
+		sidesteps that entirely - replay never touches the generator at all, it just plays back the
+		exact outcomes verbatim. */
+	inline function nextRandomInt(rng:RandomLCG, lo:Int, hi:Int):Int {
+		if (this.level.isWatching)
+			return this.level.replay.getRandomGenState();
+		var v = Std.int(rng.randRange(lo, hi));
+		if (this.level.isRecording)
+			this.level.replay.recordRandomGenState(v);
+		return v;
+	}
+
+	inline function nextRandomFloat():Float {
+		if (this.level.isWatching)
+			return this.level.replay.getRandomFloatState();
+		var v = Math.random();
+		if (this.level.isRecording)
+			this.level.replay.recordRandomFloatState(v);
+		return v;
+	}
+
 	function setupGems() {
 		hideExisting();
 		this.activeGems = [];
@@ -449,7 +476,7 @@ class HuntMode extends NullMode {
 		var validGem = null;
 
 		for (i in 0...10) {
-			var gem = gemSpawnPoints[Std.int(rng.randRange(0, gemSpawnPoints.length - 1))];
+			var gem = gemSpawnPoints[nextRandomInt(rng, 0, gemSpawnPoints.length - 1)];
 			if (lastPos != null) {
 				var dist = gem.gem.getAbsPos().getPosition().distance(lastPos) + gem.weight;
 				if (dist < spawnBlock) {
@@ -472,7 +499,7 @@ class HuntMode extends NullMode {
 		}
 
 		if (validGem == null) {
-			validGem = gemSpawnPoints[Std.int(rng.randRange(0, gemSpawnPoints.length - 1))];
+			validGem = gemSpawnPoints[nextRandomInt(rng, 0, gemSpawnPoints.length - 1)];
 		}
 		var pos = validGem.gem.getAbsPos().getPosition();
 
@@ -502,7 +529,7 @@ class HuntMode extends NullMode {
 							default:
 								1.0;
 						};
-						var choice = Math.random();
+						var choice = nextRandomFloat();
 						if (choice > chance)
 							continue; // Don't spawn!
 					} else {
@@ -519,7 +546,7 @@ class HuntMode extends NullMode {
 							default:
 								1.0;
 						};
-						var choice = Math.random();
+						var choice = nextRandomFloat();
 						if (choice > chance)
 							continue; // Don't spawn!
 					}
@@ -527,7 +554,7 @@ class HuntMode extends NullMode {
 
 				results.push({
 					gem: gemElem.netIndex,
-					weight: searchRadius - gemPos.distance(pos) + rng.randRange(0, getGemWeight(gemElem.gem) + 3)
+					weight: searchRadius - gemPos.distance(pos) + nextRandomInt(rng, 0, getGemWeight(gemElem.gem) + 3)
 				});
 				points += getGemWeight(gemElem.gem) + 1;
 			}

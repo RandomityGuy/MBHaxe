@@ -12,6 +12,7 @@ import triggers.ILapsRespawnTrigger;
 import rewind.RewindableState;
 import rewind.RewindManager;
 import triggers.ILapsRespawnTrigger;
+import src.Util;
 
 @:publicFields
 class LapsState implements RewindableState {
@@ -191,12 +192,15 @@ class LapsMode extends NullMode {
 	function onNextLap():Bool {
 		if (this.lapsCounter >= this.lapsNumber) {
 			if (level.gemCount != level.totalGems) {
-				@:privateAccess level.displayAlert("You need to collect all the gems to finish!");
+				level.displayHelp("You need to collect all the gems to finish!", 5);
 				AudioManager.playPitchedSound("missinggems", @:privateAccess level.soundResources);
 			} else {
 				@:privateAccess level.touchFinish();
 			}
 		}
+
+		var timeDiff = level.timeState.currentAttemptTime - this.lapsStartTime;
+		level.displayHelp('Lap ${this.lapsCounter}\'s Time: ${Util.formatTime(timeDiff)}', 5);
 
 		this.lapsCounter++;
 		this.lapsCPCheck = 1;
@@ -212,7 +216,7 @@ class LapsMode extends NullMode {
 			if (this.onNextLap())
 				this.activateCheckpoint(trigger);
 		} else if (this.lapsCPCheck != 1) {
-			@:privateAccess level.displayAlert("Wrong way!");
+			level.displayHelp("Wrong way!", 5);
 		}
 	}
 
@@ -229,7 +233,7 @@ class LapsMode extends NullMode {
 			this.activateCheckpoint(trigger);
 		} else if (!((trigger.checkpointNumber + 1 == this.lapsCPCheck)
 			|| (trigger.checkpointNumber == highest && this.lapsCPCheck == 0))) {
-			@:privateAccess level.displayAlert("Wrong way!");
+			level.displayHelp("Wrong way!", 5);
 		}
 	}
 

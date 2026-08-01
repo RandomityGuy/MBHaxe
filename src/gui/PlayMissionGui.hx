@@ -988,6 +988,8 @@ class PlayMissionGui extends GuiControl {
 		var scoreView:LeaderboardsKind = All;
 
 		setSelectedFunc = (idx) -> {
+			if (idx > currentList.length - 1)
+				idx = currentList.length - 1;
 			var mission = currentList[idx];
 
 			currentSelection = idx;

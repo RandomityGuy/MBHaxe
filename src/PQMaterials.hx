@@ -262,5 +262,6 @@ class PQMaterials {
 		for (basename in ["pq_ray_wall_combo_2", "pq_ray_wall_combo_2_medium", "pq_ray_wall_combo_2_small"])
 			addRayWallCombo(basename, combo2Normal, combo2Spec);
 		addRayWallCombo("pq_ray_wall_combo_medium", comboNormal, comboSpec);
+		addRayWallCombo("pattern_cool2", comboNormal, comboSpec);
 	}
 }

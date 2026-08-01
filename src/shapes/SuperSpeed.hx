@@ -87,7 +87,7 @@ class SuperSpeed extends PowerUp {
 		var movementVector = marbleAxis[0];
 
 		var twoDMode = GameModeFactory.findMode(this.level.gameMode, TwoDMode);
-		if (twoDMode != null) {
+		if (twoDMode != null && @:privateAccess twoDMode.active) {
 			movementVector = marbleAxis[1].multiply(twoDMode.lastPressedLR ? 1 : -1);
 		}
 

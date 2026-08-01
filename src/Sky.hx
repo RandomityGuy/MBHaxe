@@ -175,6 +175,10 @@ class Sky extends Object {
 						fmt = RGB8;
 					var cubemaptexture = new Texture(maxheight, maxwidth, [Cube], fmt);
 					for (i in 0...6) {
+						// try resize
+						if (skyboxImages[skyboxIndices[i]].width != maxwidth || skyboxImages[skyboxIndices[i]].height != maxheight) {
+							skyboxImages[skyboxIndices[i]].resize(maxwidth, maxheight);
+						}
 						cubemaptexture.uploadPixels(skyboxImages[skyboxIndices[i]], 0, i);
 					}
 					onFinish(cubemaptexture);

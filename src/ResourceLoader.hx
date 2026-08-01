@@ -383,12 +383,21 @@ class ResourceLoader {
 				Image.setupTextureFlags = (texObj) -> {
 					texObj.flags.set(MipMapped);
 				}
-				var tex = img.toTexture();
-				tex.mipMap = Linear;
-				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
-				textureCache.set(path, textureresource);
-
-				return textureresource;
+				try {
+					var tex = img.toTexture();
+					tex.mipMap = Linear;
+					var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+					textureCache.set(path, textureresource);
+					return textureresource;
+				} catch (e:Dynamic) {
+					Console.error("Failed to load texture: " + path);
+					// make a 1x1 texture with a solid color
+					var tex = Texture.fromColor(0xff00ff);
+					tex.setName("NULL");
+					var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+					textureCache.set(path, textureresource);
+					return textureresource;
+				}
 			}
 		}
 		if (textureCache.exists(path))
@@ -424,13 +433,22 @@ class ResourceLoader {
 				Image.setupTextureFlags = (texObj) -> {
 					texObj.flags.set(MipMapped);
 				}
-				var tex = img.toTexture();
-				tex.mipMap = Linear;
-				tex.filter = Linear;
-				var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
-				textureCache.set(path, textureresource);
-
-				return textureresource;
+				try {
+					var tex = img.toTexture();
+					tex.mipMap = Linear;
+					tex.filter = Linear;
+					var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+					textureCache.set(path, textureresource);
+					return textureresource;
+				} catch (e:Dynamic) {
+					Console.error("Failed to load texture: " + path);
+					// make a 1x1 texture with a solid color
+					var tex = Texture.fromColor(0xff00ff);
+					tex.setName("NULL");
+					var textureresource = new Resource(tex, path, textureCache, tex -> tex.dispose());
+					textureCache.set(path, textureresource);
+					return textureresource;
+				}
 			}
 		}
 		return null;
