@@ -530,8 +530,11 @@ class MarbleWorld extends Scheduler {
 				this.radar.itemSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radardistance);
 			if (this.mission.missionInfo.radargemdistance != null && this.mission.missionInfo.radargemdistance != "")
 				this.radar.gemFinishSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radargemdistance);
-			if (this.mission.missionInfo.customradarrule != null && this.mission.missionInfo.customradarrule != "")
+			if (this.mission.missionInfo.customradarrule != null && this.mission.missionInfo.customradarrule != "") {
 				this.radar.customRadarRule = Std.parseInt(this.mission.missionInfo.customradarrule);
+				if (this.radar.customRadarRule == 0)
+					this.radar.customRadarRule = 5; // RadarRule.Gems | RadarRule.EndPad;
+			}
 			radar.init();
 		}
 
@@ -988,8 +991,7 @@ class MarbleWorld extends Scheduler {
 			this.playGui.resetPlayerScores();
 		}
 
-		var missionInfo:MissionElementScriptObject = cast this.mission.root.elements.filter((element) -> element._type == MissionElementType.ScriptObject
-			&& element._name == "MissionInfo")[0];
+		var missionInfo:MissionElementScriptObject = cast this.mission.missionInfo;
 		if (missionInfo.starthelptext != null)
 			displayHelp(missionInfo.starthelptext, 5); // Show the start help text
 
@@ -2773,47 +2775,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function displayHelp(text:String, duration:Float) {
-		var start = 0;
-		var pos = text.indexOf("<func:", start);
-		while (pos != -1) {
-			var end = text.indexOf(">", start + 5);
-			if (end == -1)
-				break;
-			var pre = text.substr(0, pos);
-			var post = text.substr(end + 1);
-			var func = text.substr(pos + 6, end - (pos + 6));
-			var funcdata = func.split(' ').map(x -> x.toLowerCase());
-			var val = "";
-			if (funcdata[0] == "bind") {
-				if (funcdata[1] == "moveforward")
-					val = Util.getKeyForButton(Settings.controlsSettings.forward);
-				if (funcdata[1] == "movebackward")
-					val = Util.getKeyForButton(Settings.controlsSettings.backward);
-				if (funcdata[1] == "moveleft")
-					val = Util.getKeyForButton(Settings.controlsSettings.left);
-				if (funcdata[1] == "moveright")
-					val = Util.getKeyForButton(Settings.controlsSettings.right);
-				if (funcdata[1] == "panup")
-					val = Util.getKeyForButton(Settings.controlsSettings.camForward);
-				if (funcdata[1] == "pandown")
-					val = Util.getKeyForButton(Settings.controlsSettings.camBackward);
-				if (funcdata[1] == "turnleft")
-					val = Util.getKeyForButton(Settings.controlsSettings.camLeft);
-				if (funcdata[1] == "turnright")
-					val = Util.getKeyForButton(Settings.controlsSettings.camRight);
-				if (funcdata[1] == "jump")
-					val = Util.getKeyForButton(Settings.controlsSettings.jump);
-				if (funcdata[1] == "mousefire")
-					val = Util.getKeyForButton(Settings.controlsSettings.powerup);
-				if (funcdata[1] == "freelook")
-					val = Util.getKeyForButton(Settings.controlsSettings.freelook);
-				if (funcdata[1] == "useblast")
-					val = Util.getKeyForButton(Settings.controlsSettings.blast);
-			}
-			start = val.length + pos;
-			text = pre + val + post;
-			pos = text.indexOf("<func:", start);
-		}
+		text = Util.formatMLText(text);
 		this.playGui.setHelpText(this.timeState.timeSinceLoad, text, duration);
 	}
 

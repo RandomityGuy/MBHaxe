@@ -48,6 +48,7 @@ class Mission {
 	public var hasEgg:Bool;
 	public var isCustom:Bool;
 	public var gameMode:String;
+	public var curationScore:Int = 0;
 	#if hl
 	public var addedAt:Int64;
 	#end
@@ -63,17 +64,19 @@ class Mission {
 	var imgFileEntry:hxd.fs.FileEntry;
 
 	#if sys
-	static var _previewRequest:HttpRequest;
+	var _previewRequest:HttpRequest;
 	#else
-	static var _previewRequest:Int;
+	var _previewRequest:Int;
 	#end
+
 	static var _previewCache:Map<Mission, h2d.Tile> = [];
 
 	#if sys
-	static var _bigPreviewRequest:HttpRequest;
+	var _bigPreviewRequest:HttpRequest;
 	#else
-	static var _bigPreviewRequest:Int;
+	var _bigPreviewRequest:Int;
 	#end
+
 	static var _bigPreviewCache:Map<Mission, h2d.Tile> = [];
 
 	public function new() {}
@@ -238,6 +241,12 @@ class Mission {
 			});
 
 			return null;
+		}
+	}
+
+	public function cancelLoadingPreview() {
+		if (_previewRequest != null #if sys && !_previewRequest.fulfilled #end) {
+			Http.cancel(_previewRequest);
 		}
 	}
 

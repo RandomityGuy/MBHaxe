@@ -128,6 +128,14 @@ class MissionElementScriptObject extends MissionElementBase {
 	var gravity:String;
 	var jumpimpulse:String;
 
+	// Hints
+	var generalhint:String;
+	var trivia:String;
+	var ultimatehint:String;
+	var awesomehint:String;
+	var egghint:String;
+	var easteregghint:String;
+
 	public function new() {
 		_type = MissionElementType.ScriptObject;
 	}

@@ -61,11 +61,7 @@ class Http {
 			if (req.post && req.file != null) {
 				http.fileTransfer("hxfile", "hxfilename", new haxe.io.BytesInput(req.file), req.file.length);
 			}
-			hl.Gc.enable(false);
-			// hl.Gc.blocking(true); // Wtf is this shit
 			http.request(req.post);
-			// hl.Gc.blocking(false);
-			hl.Gc.enable(true);
 		}
 	}
 	#end

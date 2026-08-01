@@ -510,11 +510,11 @@ class Util {
 			case Score:
 				if (score >= mission.qualifyingScore)
 					beatPar = true;
-				if (score >= mission.goldScore)
+				if (score >= mission.goldScore && mission.qualifyingScore > 0)
 					beatPlatinum = true;
-				if (score >= mission.ultimateScore)
+				if (score >= mission.ultimateScore && mission.ultimateScore > 0)
 					beatUltimate = true;
-				if (score >= mission.awesomeScore)
+				if (score >= mission.awesomeScore && mission.awesomeScore > 0)
 					beatAwesome = true;
 			case Time:
 				if (score < mission.qualifyTime)
@@ -574,6 +574,51 @@ class Util {
 
 		return
 			'${(hours > 0 ? (hoursTen > 0 ? '${hoursTen}' : '') +'${hoursOne}' + ':' : '')}${minutesTen}${minutesOne}:${secondsTen}${secondsOne}.${hundredthTen}${hundredthOne}${thousandth}';
+	}
+
+	public static function formatMLText(text:String) {
+		var start = 0;
+		var pos = text.indexOf("<func:", start);
+		while (pos != -1) {
+			var end = text.indexOf(">", start + 5);
+			if (end == -1)
+				break;
+			var pre = text.substr(0, pos);
+			var post = text.substr(end + 1);
+			var func = text.substr(pos + 6, end - (pos + 6));
+			var funcdata = func.split(' ').map(x -> x.toLowerCase());
+			var val = "";
+			if (funcdata[0] == "bind") {
+				if (funcdata[1] == "moveforward")
+					val = Util.getKeyForButton(Settings.controlsSettings.forward);
+				if (funcdata[1] == "movebackward")
+					val = Util.getKeyForButton(Settings.controlsSettings.backward);
+				if (funcdata[1] == "moveleft")
+					val = Util.getKeyForButton(Settings.controlsSettings.left);
+				if (funcdata[1] == "moveright")
+					val = Util.getKeyForButton(Settings.controlsSettings.right);
+				if (funcdata[1] == "panup")
+					val = Util.getKeyForButton(Settings.controlsSettings.camForward);
+				if (funcdata[1] == "pandown")
+					val = Util.getKeyForButton(Settings.controlsSettings.camBackward);
+				if (funcdata[1] == "turnleft")
+					val = Util.getKeyForButton(Settings.controlsSettings.camLeft);
+				if (funcdata[1] == "turnright")
+					val = Util.getKeyForButton(Settings.controlsSettings.camRight);
+				if (funcdata[1] == "jump")
+					val = Util.getKeyForButton(Settings.controlsSettings.jump);
+				if (funcdata[1] == "mousefire")
+					val = Util.getKeyForButton(Settings.controlsSettings.powerup);
+				if (funcdata[1] == "freelook")
+					val = Util.getKeyForButton(Settings.controlsSettings.freelook);
+				if (funcdata[1] == "useblast")
+					val = Util.getKeyForButton(Settings.controlsSettings.blast);
+			}
+			start = val.length + pos;
+			text = pre + val + post;
+			pos = text.indexOf("<func:", start);
+		}
+		return text;
 	}
 
 	public static inline function getKeyForButton(button:Int) {
