@@ -85,7 +85,7 @@ class PlayMissionGui extends GuiControl {
 		currentCategory = PlayMissionGui.currentCategoryStatic;
 		currentGame = PlayMissionGui.currentGameStatic;
 
-		currentList = MissionList.missionList[currentGame][currentCategory];
+		currentList = currentGame == "platinum" ? MissionList.missionList[currentGame][currentCategory] : Marbleland.getMissionList(currentCategory);
 
 		MarbleGame.instance.toRecord = false;
 
@@ -243,6 +243,9 @@ class PlayMissionGui extends GuiControl {
 			});
 		hintsBtn.position = new Vector(122, 0);
 		hintsBtn.extent = new Vector(95, 128);
+		hintsBtn.pressedAction = (sender) -> {
+			MarbleGame.canvas.pushDialog(new HintsDlg(currentList[currentSelection]));
+		}
 		buttonBox.addChild(hintsBtn);
 
 		var hintsIcon = new GuiImage(ResourceLoader.getResource("data/ui/play/buttons/hints.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -308,7 +311,7 @@ class PlayMissionGui extends GuiControl {
 		searchBtn.position = new Vector(194, 0);
 		searchBtn.extent = new Vector(95, 102);
 		searchBtn.pressedAction = (e) -> {
-			MarbleGame.canvas.pushDialog(new SearchGui(currentGame, currentCategory == "custom"));
+			MarbleGame.canvas.pushDialog(new SearchGui(currentGame, currentGame == "custom"));
 		}
 		extrasBox.addChild(searchBtn);
 
@@ -606,22 +609,39 @@ class PlayMissionGui extends GuiControl {
 		var difficultyList = new GuiImage(ResourceLoader.getResource("data/ui/transparency/pc_trans/0.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		difficultyList.position = new Vector(197, 50);
-		difficultyList.extent = new Vector(158, 210);
+		difficultyList.extent = currentGame == "platinum" ? new Vector(158, 210) : new Vector(158, 105);
 		difficultyPopup.addChild(difficultyList);
 
-		for (i in 0...6) {
-			var difficultyBtn = new GuiButtonText(loadButtonImages("data/ui/play/difficulty"), squishney26);
-			difficultyBtn.ratio = 0.27;
-			difficultyBtn.setExtent(new Vector(156, 35));
-			difficultyBtn.position = new Vector(1, 35 * i);
-			difficultyBtn.txtCtrl.text.textColor = 0;
-			difficultyBtn.txtCtrl.text.text = ["Tutorial", "Beginner", "Intermediate", "Advanced", "Expert", "Bonus"][i];
-			var diff = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus"][i];
-			difficultyBtn.pressedAction = (e) -> {
-				setDifficulty("platinum", diff);
-				MarbleGame.canvas.popDialog(difficultyPopup, false);
+		if (currentGame == "platinum") {
+			for (i in 0...6) {
+				var difficultyBtn = new GuiButtonText(loadButtonImages("data/ui/play/difficulty"), squishney26);
+				difficultyBtn.ratio = 0.27;
+				difficultyBtn.setExtent(new Vector(156, 35));
+				difficultyBtn.position = new Vector(1, 35 * i);
+				difficultyBtn.txtCtrl.text.textColor = 0;
+				difficultyBtn.txtCtrl.text.text = ["Tutorial", "Beginner", "Intermediate", "Advanced", "Expert", "Bonus"][i];
+				var diff = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus"][i];
+				difficultyBtn.pressedAction = (e) -> {
+					setDifficulty("platinum", diff);
+					MarbleGame.canvas.popDialog(difficultyPopup, false);
+				}
+				difficultyList.addChild(difficultyBtn);
 			}
-			difficultyList.addChild(difficultyBtn);
+		} else {
+			for (i in 0...3) {
+				var difficultyBtn = new GuiButtonText(loadButtonImages("data/ui/play/difficulty"), squishney26);
+				difficultyBtn.ratio = 0.27;
+				difficultyBtn.setExtent(new Vector(156, 35));
+				difficultyBtn.position = new Vector(1, 35 * i);
+				difficultyBtn.txtCtrl.text.textColor = 0;
+				difficultyBtn.txtCtrl.text.text = ["Relevant", "All", "Alphabetical"][i];
+				var diff = ["relevant", "all", "alphabetical"][i];
+				difficultyBtn.pressedAction = (e) -> {
+					setDifficulty("custom", diff);
+					MarbleGame.canvas.popDialog(difficultyPopup, false);
+				}
+				difficultyList.addChild(difficultyBtn);
+			}
 		}
 
 		var gamePopup = new GuiControl();
@@ -708,6 +728,56 @@ class PlayMissionGui extends GuiControl {
 
 		setDifficulty = (gameName, diffName) -> {
 			difficultySelector.txtCtrl.text.text = diffName.charAt(0).toUpperCase() + diffName.substr(1);
+			gameSelector.txtCtrl.text.text = gameName == "platinum" ? "PlatinumQuest" : "Custom";
+
+			if (currentGame != gameName) {
+				// Rebuild the difficulty list
+
+				// delete everything from difficultylist
+				while (difficultyList.children.length > 0) {
+					var child = difficultyList.children[difficultyList.children.length - 1];
+					child.dispose();
+					difficultyList.children.pop();
+				}
+
+				if (gameName == "platinum") {
+					difficultyList.extent = new Vector(158, 210);
+
+					for (i in 0...6) {
+						var difficultyBtn = new GuiButtonText(loadButtonImages("data/ui/play/difficulty"), squishney26);
+						difficultyBtn.ratio = 0.27;
+						difficultyBtn.setExtent(new Vector(156, 35));
+						difficultyBtn.position = new Vector(1, 35 * i);
+						difficultyBtn.txtCtrl.text.textColor = 0;
+						difficultyBtn.txtCtrl.text.text = ["Tutorial", "Beginner", "Intermediate", "Advanced", "Expert", "Bonus"][i];
+						var diff = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus"][i];
+						difficultyBtn.pressedAction = (e) -> {
+							setDifficulty("platinum", diff);
+							MarbleGame.canvas.popDialog(difficultyPopup, false);
+						}
+						difficultyList.addChild(difficultyBtn);
+					}
+				} else {
+					difficultyList.extent = new Vector(158, 105);
+
+					for (i in 0...3) {
+						var difficultyBtn = new GuiButtonText(loadButtonImages("data/ui/play/difficulty"), squishney26);
+						difficultyBtn.ratio = 0.27;
+						difficultyBtn.setExtent(new Vector(156, 35));
+						difficultyBtn.position = new Vector(1, 35 * i);
+						difficultyBtn.txtCtrl.text.textColor = 0;
+						difficultyBtn.txtCtrl.text.text = ["Relevant", "All", "Alphabetical"][i];
+						var diff = ["relevant", "all", "alphabetical"][i];
+						difficultyBtn.pressedAction = (e) -> {
+							setDifficulty("custom", diff);
+							MarbleGame.canvas.popDialog(difficultyPopup, false);
+						}
+						difficultyList.addChild(difficultyBtn);
+					}
+				}
+				// difficultyList.render(MarbleGame.canvas.scene2d, @:privateAccess difficultyPopup._flow);
+			}
+
 			currentGame = gameName;
 			currentGameStatic = gameName;
 			currentCategory = diffName;
@@ -715,8 +785,9 @@ class PlayMissionGui extends GuiControl {
 			if (gameName == "platinum")
 				currentList = MissionList.missionList[currentGame][currentCategory];
 			else {
-				currentList = Marbleland.pqMissions;
+				currentList = Marbleland.getMissionList(currentCategory);
 			}
+
 			rebuildMissionList(0);
 		};
 
@@ -739,6 +810,7 @@ class PlayMissionGui extends GuiControl {
 		var tmpprevtile = Tile.fromBitmap(temprev);
 
 		var pressedImgs = [];
+		var currentPreviewMissions = [];
 
 		rebuildMissionList = function(page:Int) {
 			// Clear everything
@@ -746,6 +818,9 @@ class PlayMissionGui extends GuiControl {
 				var child = missionListContainer.children[missionListContainer.children.length - 1];
 				child.dispose();
 				missionListContainer.children.pop();
+			}
+			for (mis in currentPreviewMissions) {
+				mis.cancelLoadingPreview();
 			}
 			pressedImgs = [];
 
@@ -804,6 +879,7 @@ class PlayMissionGui extends GuiControl {
 				mis.getPreviewImage(prev -> {
 					misIcon.bmp.tile = prev;
 				});
+				currentPreviewMissions.push(mis);
 				var scores = Settings.getScores(mis.path);
 				var progression = {
 					beatPar: false,

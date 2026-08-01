@@ -63,9 +63,7 @@ class Http {
 				http.fileTransfer("hxfile", "hxfilename", new haxe.io.BytesInput(req.file), req.file.length);
 			}
 			trace('HTTP Request: ' + req.url);
-			hl.Gc.enable(false);
 			http.request(req.post);
-			hl.Gc.enable(true);
 		}
 	}
 
