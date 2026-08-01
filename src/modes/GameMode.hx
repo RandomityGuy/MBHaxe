@@ -97,6 +97,19 @@ class GameModeFactory {
 		}
 	}
 
+	public static function getGameModeDescription(mode:String) {
+		return switch (mode.toLowerCase()) {
+			case "hunt": {name: "Gem Hunt", desc: "Collect Gems and earn as many points as you can!"};
+			case "2d": {name: "2D", desc: "Lose a dimension but none of the challenge."};
+			case "quota": {name: "Gem Quota", desc: "Grab the required amount of Gems or go for 100%!"};
+			case "gemmadness", "madness": {name: "Gem Madness", desc: "Collect as many gems as you can before time runs out!"};
+			case "consistency": {name: "Consistency", desc: "Stay above the target speed!"};
+			case "laps": {name: "Laps", desc: "Complete laps around the level to finish!"};
+			case "haste": {name: "Haste", desc: "Build up speed to activate the finish!"};
+			default: {name: "Normal", desc: "Collect the Gems and finish!"};
+		}
+	}
+
 	/** Finds an active instance of a specific mode class, whether `level.gameMode` is that mode
 		directly or it's one of several modes combined via `CompositeMode` (e.g. triggers belonging
 		to a specific mode - `LapsCounterTrigger`/`LapsCheckpoint` need to reach the active

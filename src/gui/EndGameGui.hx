@@ -225,10 +225,10 @@ class EndGameGui extends GuiControl {
 		var parLabel = scoreType == Time ? parTimeLabel : parScoreLabel;
 		var parType = scoreType == Time ? "Time" : "Score";
 
-		var parTitle = mission.game == "gold" ? 'Qualify ${scoreType == Score ? "Score" : "Time"}' : 'Par ${scoreType == Score ? "Score" : "Time"}';
-		var goldTitle = mission.game == "gold" ? '<font color="#FFEE11">Gold ${scoreType == Score ? "Score" : "Time"}:</font>' : '<font color="#CCCCCC">Platinum ${scoreType == Score ? "Score" : "Time"}:</font>';
-		var ultimateTitle = '<font color="#FFCC33">Ultimate ${scoreType == Score ? "Score" : "Time"}:</font>';
-		var awesomeTitle = '<font color="#FF3333">Awesome ${scoreType == Score ? "Score" : "Time"}:</font>';
+		var parTitle = mission.game == "gold" ? 'Qualify ${parType}' : 'Par ${parType}';
+		var goldTitle = mission.game == "gold" ? '<font color="#FFEE11">Gold ${goldType == Score ? "Score" : "Time"}:</font>' : '<font color="#CCCCCC">Platinum ${goldType == Score ? "Score" : "Time"}:</font>';
+		var ultimateTitle = '<font color="#FFCC33">Ultimate ${ultimateType == Score ? "Score" : "Time"}:</font>';
+		var awesomeTitle = '<font color="#FF3333">Awesome ${awesomeType == Score ? "Score" : "Time"}:</font>';
 
 		var textLeft = '<font face="font26">';
 		var textRight = '<font face="font26">';

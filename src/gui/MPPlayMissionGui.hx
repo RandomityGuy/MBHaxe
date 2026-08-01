@@ -480,7 +480,7 @@ class MPPlayMissionGui extends GuiImage {
 
 		setCategoryFunc = function(category:String, ?sort:String = null, ?doRender:Bool = true) {
 			if (category == "custom") {
-				currentList = Marbleland.multiplayerMissions;
+				currentList = Marbleland.pqMissions;
 			} else
 				currentList = MissionList.missionList["multiplayer"][category];
 
@@ -634,7 +634,7 @@ class MPPlayMissionGui extends GuiImage {
 			// 	NetCommands.playCustomLevel(MPCustoms.missionList[custSelectedIdx].path);
 			// } else {
 			if (cat == "custom") {
-				var curMission = Marbleland.multiplayerMissions[index]; //  mission[index];
+				var curMission = Marbleland.pqMissions[index]; //  mission[index];
 				MarbleGame.instance.playMission(curMission, true);
 			} else {
 				var curMission = MissionList.missionList["multiplayer"][cat][index]; //  mission[index];

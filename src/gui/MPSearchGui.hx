@@ -35,7 +35,7 @@ class MPSearchGui extends GuiImage {
 				}
 			}
 		} else {
-			var customsList = Marbleland.multiplayerMissions;
+			var customsList = Marbleland.pqMissions;
 			for (mis in customsList) {
 				missionList.push({
 					mis: mis,
@@ -135,7 +135,7 @@ class MPSearchGui extends GuiImage {
 				var mis = retrieveMissionList[selectedIdx];
 
 				if (mis.difficulty == "custom") {
-					var idx = Marbleland.multiplayerMissions.indexOf(mis.mis);
+					var idx = Marbleland.pqMissions.indexOf(mis.mis);
 					NetCommands.setLobbyLevelIndex(mis.difficulty, idx);
 				} else {
 					var idx = MissionList.missionList["multiplayer"][mis.difficulty].indexOf(mis.mis);
@@ -269,7 +269,7 @@ class MPSearchGui extends GuiImage {
 			var mis = retrieveMissionList[Math.floor(Math.random() * missionList.length)];
 
 			if (mis.difficulty == "custom") {
-				var idx = Marbleland.multiplayerMissions.indexOf(mis.mis);
+				var idx = Marbleland.pqMissions.indexOf(mis.mis);
 				NetCommands.setLobbyLevelIndex(mis.difficulty, idx);
 			} else {
 				var idx = MissionList.missionList["multiplayer"][mis.difficulty].indexOf(mis.mis);

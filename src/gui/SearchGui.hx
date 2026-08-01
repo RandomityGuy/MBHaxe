@@ -120,16 +120,7 @@ class SearchGui extends GuiControl {
 				}
 			}
 		} else {
-			var customsList = switch (game) {
-				case 'gold':
-					Marbleland.goldMissions;
-				case 'platinum':
-					Marbleland.platinumMissions;
-				case 'ultra':
-					Marbleland.ultraMissions;
-				default:
-					MissionList.customMissions;
-			};
+			var customsList = Marbleland.pqMissions;
 			for (mis in customsList) {
 				missionList.push({
 					mis: mis,

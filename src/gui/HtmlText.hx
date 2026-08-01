@@ -111,33 +111,61 @@ class HtmlText extends Text {
 	var aHrefs:Array<String>;
 	var aInteractive:Interactive;
 
+	/**
+		Per style-run shadow overrides set via `<font shadow="dx,dy" shadowcolor="#RRGGBBAA">`.
+		Falls back to the global `dropShadow` for any TileGroup with no entry here.
+	**/
+	var elementShadows:Map<TileGroup, HtmlShadowStyle>;
+
+	/**
+		Currently active shadow style while walking the XML tree in `addNode`, mirroring the
+		style-stack `mCurStyle->shadowOffset`/`shadowColor` used by GuiMLTextCtrl::reflow.
+	**/
+	var curShadow:HtmlShadowStyle;
+
+	function drawShadowGroup(ctx:RenderContext, tg:TileGroup, s:{dx:Float, dy:Float, color:Int, alpha:Float}) {
+		var oldX = absX, oldY = absY;
+		absX += s.dx * matA + s.dy * matC;
+		absY += s.dx * matB + s.dy * matD;
+		if (dropMatrix == null) {
+			dropMatrix = new h3d.shader.ColorMatrix();
+			addShader(dropMatrix);
+		}
+		dropMatrix.enabled = true;
+		var m = dropMatrix.matrix;
+		m.zero();
+		m._41 = ((s.color >> 16) & 0xFF) / 255;
+		m._42 = ((s.color >> 8) & 0xFF) / 255;
+		m._43 = (s.color & 0xFF) / 255;
+		m._44 = s.alpha;
+		@:privateAccess tg.drawWith(ctx, this);
+		dropMatrix.enabled = false;
+		absX = oldX;
+		absY = oldY;
+	}
+
 	override function draw(ctx:RenderContext) {
-		if (dropShadow != null) {
-			var oldX = absX, oldY = absY;
-			absX += dropShadow.dx * matA + dropShadow.dy * matC;
-			absY += dropShadow.dx * matB + dropShadow.dy * matD;
-			if (dropMatrix == null) {
-				dropMatrix = new h3d.shader.ColorMatrix();
-				addShader(dropMatrix);
-			}
-			dropMatrix.enabled = true;
-			var m = dropMatrix.matrix;
-			m.zero();
-			m._41 = ((dropShadow.color >> 16) & 0xFF) / 255;
-			m._42 = ((dropShadow.color >> 8) & 0xFF) / 255;
-			m._43 = (dropShadow.color & 0xFF) / 255;
-			m._44 = dropShadow.alpha;
+		if (dropShadow != null || elementShadows != null) {
 			for (e in elements) {
-				if (e is TileGroup)
-					@:privateAccess (cast(e, TileGroup)).drawWith(ctx, this);
+				if (e is TileGroup) {
+					var tg = cast(e, TileGroup);
+					var s:HtmlShadowStyle = elementShadows != null ? elementShadows.get(tg) : null;
+					var shadow = s != null ? s : dropShadow;
+					if (shadow != null)
+						drawShadowGroup(ctx, tg, shadow);
+				}
 			}
-			@:privateAccess glyphs.drawWith(ctx, this);
-			dropMatrix.enabled = false;
-			absX = oldX;
-			absY = oldY;
+			var mainS:HtmlShadowStyle = elementShadows != null ? elementShadows.get(glyphs) : null;
+			var mainShadow = mainS != null ? mainS : dropShadow;
+			if (mainShadow != null)
+				drawShadowGroup(ctx, glyphs, mainShadow);
 		} else {
 			removeShader(dropMatrix);
 			dropMatrix = null;
+		}
+		for (e in elements) {
+			if (e is TileGroup)
+				@:privateAccess (cast(e, TileGroup)).drawWith(ctx, this);
 		}
 		@:privateAccess glyphs.drawWith(ctx, this);
 	}
@@ -243,6 +271,7 @@ class HtmlText extends Text {
 			for (e in elements)
 				e.remove();
 			elements = [];
+			elementShadows = null;
 		}
 		glyphs.setDefaultColor(textColor);
 
@@ -659,10 +688,10 @@ class HtmlText extends Text {
 		}
 		if (e.nodeType == Xml.Element) {
 			var prevColor = null, prevGlyphs = null;
+			var prevShadow = curShadow;
 			var oldAlign = align;
 			var nodeName = e.nodeName.toLowerCase();
-			inline function setFont(v:String) {
-				font = loadFont(v);
+			inline function newGlyphGroup() {
 				if (prevGlyphs == null)
 					prevGlyphs = glyphs;
 				var prev = glyphs;
@@ -682,9 +711,23 @@ class HtmlText extends Text {
 				}
 				@:privateAccess glyphs.curColor.load(prev.curColor);
 				elements.push(glyphs);
+				if (curShadow != null) {
+					if (elementShadows == null)
+						elementShadows = new Map();
+					elementShadows.set(glyphs, curShadow);
+				}
+			}
+			inline function setFont(v:String) {
+				font = loadFont(v);
+				newGlyphGroup();
 			}
 			switch (nodeName) {
 				case "font":
+					var shadowChanged = false;
+					var shadowDx = curShadow != null ? curShadow.dx : 0.;
+					var shadowDy = curShadow != null ? curShadow.dy : 0.;
+					var shadowColor = curShadow != null ? curShadow.color : 0x000000;
+					var shadowAlpha = curShadow != null ? curShadow.alpha : 1.;
 					for (a in e.attributes()) {
 						var v = e.get(a);
 						switch (a.toLowerCase()) {
@@ -700,8 +743,34 @@ class HtmlText extends Text {
 								@:privateAccess glyphs.curColor.a *= Std.parseFloat(v);
 							case "face":
 								setFont(v);
+							case "shadow":
+								// "dx,dy" offset, mirrors GuiMLTextCtrl's <shadow:x:y> tag
+								var parts = v.split(",");
+								shadowDx = Std.parseFloat(parts[0]);
+								shadowDy = parts.length > 1 ? Std.parseFloat(parts[1]) : shadowDx;
+								shadowChanged = true;
+							case "shadowcolor":
+								// "#RRGGBB" or "#RRGGBBAA", mirrors GuiMLTextCtrl's <shadowcolor:RRGGBBAA> tag
+								var hex = v.charCodeAt(0) == '#'.code ? v.substr(1) : v;
+								if (hex.length == 3)
+									hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
+								shadowColor = Std.parseInt("0x" + hex.substr(0, 6));
+								shadowAlpha = hex.length >= 8 ? Std.parseInt("0x" + hex.substr(6, 2)) / 255 : 1.;
+								shadowChanged = true;
 							default:
 						}
+					}
+					if (shadowChanged) {
+						curShadow = {dx: shadowDx, dy: shadowDy, color: shadowColor, alpha: shadowAlpha};
+						// Force a dedicated glyph group for this style-run even if the font face didn't change,
+						// since shadow is applied per TileGroup at draw time rather than per glyph.
+						if (prevGlyphs == null)
+							newGlyphGroup();
+					}
+					if (curShadow != null) {
+						if (elementShadows == null)
+							elementShadows = new Map();
+						elementShadows.set(glyphs, curShadow);
 					}
 				case "p":
 					for (a in e.attributes()) {
@@ -808,6 +877,7 @@ class HtmlText extends Text {
 				glyphs = prevGlyphs;
 			if (prevColor != null)
 				@:privateAccess glyphs.curColor.load(prevColor);
+			curShadow = prevShadow;
 		} else if (e.nodeValue.length != 0) {
 			newLine = false;
 			var t = e.nodeValue;
@@ -901,4 +971,14 @@ private typedef SplitNode = {
 	var height:Float;
 	var baseLine:Float;
 	var font:h2d.Font;
+}
+
+/**
+	Matches the shape of `h2d.Text.dropShadow` so instances unify freely with the base class field.
+**/
+private typedef HtmlShadowStyle = {
+	var dx:Float;
+	var dy:Float;
+	var color:Int;
+	var alpha:Float;
 }

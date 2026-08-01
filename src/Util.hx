@@ -24,6 +24,12 @@ class Util {
 		return r2;
 	}
 
+	public static inline function adjustediMod(a:Int, n:Int) {
+		var r1 = a % n;
+		var r2 = (r1 + n) % n;
+		return r2;
+	}
+
 	/** Wraps an angle (radians) to `(-PI, PI]` - ported from Torque's `normalizeAngle`, used by
 		`Cannon`'s yaw-bound clamping (`CameraController.updateCannonCamera`) to measure how far the
 		camera yaw has strayed from the cannon's own starting yaw regardless of which side of the

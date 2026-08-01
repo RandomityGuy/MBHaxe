@@ -1,5 +1,6 @@
 package src;
 
+import modes.GameMode.ScoreType;
 import haxe.Int64;
 import src.Http.HttpRequest;
 import gui.Canvas;
@@ -62,6 +63,13 @@ class Mission {
 	static var _previewRequest:Int;
 	#end
 	static var _previewCache:Map<Mission, h2d.Tile> = [];
+
+	#if sys
+	static var _bigPreviewRequest:HttpRequest;
+	#else
+	static var _bigPreviewRequest:Int;
+	#end
+	static var _bigPreviewCache:Map<Mission, h2d.Tile> = [];
 
 	public function new() {}
 
@@ -196,7 +204,7 @@ class Mission {
 				}
 			}
 			Console.error("Preview image not found for " + this.path);
-			onLoaded(ResourceLoader.getResource("data/ui/play/missingicon", ResourceLoader.getImage, this.imageResources).toTile());
+			onLoaded(ResourceLoader.getResource("data/ui/play/missingicon.png", ResourceLoader.getImage, this.imageResources).toTile());
 			return null;
 		} else {
 			if (_previewRequest != null #if sys && !_previewRequest.fulfilled #end) {
@@ -214,7 +222,77 @@ class Mission {
 					onLoaded(t);
 				} else {
 					Console.error("Preview image not found for " + this.path);
-					onLoaded(ResourceLoader.getResource("data/ui/play/missingicon", ResourceLoader.getImage, this.imageResources).toTile());
+					onLoaded(ResourceLoader.getResource("data/ui/play/missingicon.png", ResourceLoader.getImage, this.imageResources).toTile());
+				}
+			});
+
+			return null;
+		}
+	}
+
+	public function getBigPreviewImage(onLoaded:h2d.Tile->Void) {
+		if (!this.isClaMission) {
+			var basename = haxe.io.Path.withoutExtension(this.path);
+			var exts = [".jpg", ".png", ".jpeg", ".dds"];
+			for (ext in exts) {
+				if (ResourceLoader.fileSystem.exists(basename + ".prev" + ext)) {
+					imgFileEntry = ResourceLoader.fileSystem.get(basename + ext);
+					#if hl
+					var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
+					onLoaded(ret);
+					#end
+					#if js
+					imgFileEntry.load(() -> {
+						var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
+						onLoaded(ret);
+					});
+					#end
+					return imgFileEntry.path;
+				}
+			}
+			// check the previews_pq folder
+			var difficulty = haxe.io.Path.directory(this.path).split("/").pop();
+			var missionName = haxe.io.Path.withoutExtension(haxe.io.Path.withoutDirectory(this.path));
+			for (ext in exts) {
+				if (ResourceLoader.fileSystem.exists('data/previews_pq/${difficulty}/${missionName}.prev' + ext)) {
+					imgFileEntry = ResourceLoader.fileSystem.get('data/previews_pq/${difficulty}/${missionName}.prev' + ext);
+					#if hl
+					var ret = ResourceLoader.getResource('data/previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
+						this.imageResources)
+						.toTile();
+					onLoaded(ret);
+					#end
+					#if js
+					imgFileEntry.load(() -> {
+						var ret = ResourceLoader.getResource('data/previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
+							this.imageResources)
+							.toTile();
+						onLoaded(ret);
+					});
+					#end
+					return imgFileEntry.path;
+				}
+			}
+			Console.error("Preview image not found for " + this.path);
+			onLoaded(ResourceLoader.getResource("data/ui/play/missingicon.png", ResourceLoader.getImage, this.imageResources).toTile());
+			return null;
+		} else {
+			if (_bigPreviewRequest != null #if sys && !_bigPreviewRequest.fulfilled #end) {
+				Http.cancel(_bigPreviewRequest); // Cancel the previous request to save dequeing
+			}
+			if (_bigPreviewCache.exists(this)) {
+				var t = _bigPreviewCache.get(this);
+				onLoaded(t);
+				return t.getTexture().name;
+			}
+			_bigPreviewRequest = Marbleland.getMissionPreview(this.id, (im) -> {
+				if (im != null) {
+					var t = im.toTile();
+					_bigPreviewCache.set(this, t);
+					onLoaded(t);
+				} else {
+					Console.error("Preview image not found for " + this.path);
+					onLoaded(ResourceLoader.getResource("data/ui/play/missingicon.png", ResourceLoader.getImage, this.imageResources).toTile());
 				}
 			});
 
@@ -270,5 +348,39 @@ class Mission {
 				}
 			});
 		}
+	}
+
+	public function calculateProgression(score:Float, scoreType:ScoreType) {
+		var beatPar = false;
+		var beatPlatinum = false;
+		var beatUltimate = false;
+		var beatAwesome = false;
+
+		switch (scoreType) {
+			case Score:
+				if (score >= qualifyingScore)
+					beatPar = true;
+				if (score >= goldScore)
+					beatPlatinum = true;
+				if (score >= ultimateScore)
+					beatUltimate = true;
+				if (score >= awesomeScore)
+					beatAwesome = true;
+			case Time:
+				if (score < qualifyTime)
+					beatPar = true;
+				if (score < goldTime)
+					beatPlatinum = true;
+				if (score < ultimateTime)
+					beatUltimate = true;
+				if (score < awesomeTime)
+					beatAwesome = true;
+		}
+		return {
+			beatPar: beatPar,
+			beatPlatinum: beatPlatinum,
+			beatUltimate: beatUltimate,
+			beatAwesome: beatAwesome
+		};
 	}
 }
