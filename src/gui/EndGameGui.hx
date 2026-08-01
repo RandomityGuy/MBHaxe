@@ -17,14 +17,14 @@ import src.ResourceLoader;
 import src.TimeState;
 import src.Util;
 import shapes.TimeTravel;
+import src.Replay;
 
 class EndGameGui extends GuiControl {
 	var mission:Mission;
-
 	var scoreSubmitted:Bool = false;
 
 	public function new(score:Float, scoreType:ScoreType, continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, nextLevelFunc:GuiControl->Void,
-			mission:Mission, timeState:TimeState, replayData:haxe.io.Bytes) {
+			mission:Mission, timeState:TimeState, replay:Replay) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -477,7 +477,7 @@ class EndGameGui extends GuiControl {
 						lbPath = 'custom/${mission.id}';
 					Leaderboards.submitScore(lbPath, score, rewindUsed, (sendReplay, rowId) -> {
 						if (sendReplay && !mission.isClaMission) {
-							Leaderboards.submitReplay(rowId, replayData);
+							Leaderboards.submitReplay(rowId, replay.write());
 						}
 					});
 				}
@@ -504,7 +504,7 @@ class EndGameGui extends GuiControl {
 					if (!hasMyScore || (hasMyScore && myTopScoreLB > timeState.gameplayClock)) {
 						Leaderboards.submitScore(lbPath, timeState.gameplayClock, rewindUsed, (sendReplay, rowId) -> {
 							if (sendReplay && !mission.isClaMission) {
-								Leaderboards.submitReplay(rowId, replayData);
+								Leaderboards.submitReplay(rowId, replay.write());
 							}
 						});
 					}

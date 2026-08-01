@@ -17,6 +17,7 @@ class DuctFan extends ForceObject {
 		this.dtsPath = switch (datablockLower) {
 			case "ductfan_pq" | "taductfan": "data/shapes_pq/gameplay/hazards/ductfan.dts";
 			case "nomeshductfan_pq": "data/shapes_pq/gameplay/hazards/ductfannomesh.dts";
+			case "ductfan_mbu": "data/shapes_mbu/hazards/mbu-hitboxes/ductfan.dts";
 			default: "data/shapes/hazards/ductfan.dts";
 		}
 		this.isCollideable = true;

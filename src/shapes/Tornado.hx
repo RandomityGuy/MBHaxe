@@ -99,8 +99,13 @@ class Tornado extends ForceObject {
 
 	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.isPQ = element != null && element.datablock.toLowerCase() == "tornado_pq";
-		this.dtsPath = this.isPQ ? "data/shapes_pq/gameplay/hazards/tornado.dts" : "data/shapes/hazards/tornado.dts";
+		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
+		this.isPQ = datablockLower == "tornado_pq";
+		this.dtsPath = switch (datablockLower) {
+			case "tornado_pq": "data/shapes_pq/gameplay/hazards/tornado.dts";
+			case "tornado_mbm": "data/shapes_mbu/hazards/tornado.dts";
+			default: "data/shapes/hazards/tornado.dts";
+		}
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the

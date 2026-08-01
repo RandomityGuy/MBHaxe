@@ -13,8 +13,12 @@ class SmallDuctFan extends ForceObject {
 
 	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = (element != null && element.datablock.toLowerCase() == "smallductfan_pq") ? "data/shapes_pq/gameplay/hazards/ductfan.dts" :
-			"data/shapes/hazards/ductfan.dts";
+		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
+		this.dtsPath = switch (datablockLower) {
+			case "smallductfan_pq": "data/shapes_pq/gameplay/hazards/ductfan.dts";
+			case "smallductfan_mbu": "data/shapes_mbu/hazards/mbu-hitboxes/ductfan.dts";
+			default: "data/shapes/hazards/ductfan.dts";
+		}
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		// Instancing batches by `identifier`; same "DuctFan" prefix as DuctFan.hx since they

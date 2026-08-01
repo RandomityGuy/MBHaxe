@@ -9,8 +9,12 @@ import src.MarbleWorld;
 class SuperBounce extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = StringTools.endsWith(element.datablock,
-			"_PQ") ? "data/shapes_pq/gameplay/powerups/superbounce.dts" : "data/shapes/items/superbounce.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.dtsPath = switch (datablockLower) {
+			case "superbounceitem_pq": "data/shapes_pq/gameplay/powerups/superbounce.dts";
+			case "superbounceitem_mbu": "data/shapes_mbu/items/superbounce.dts";
+			default: "data/shapes/items/superbounce.dts";
+		}
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
