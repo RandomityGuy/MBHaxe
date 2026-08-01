@@ -7,6 +7,18 @@ import dif.math.Point3F;
 import dif.math.Box3F;
 
 @:publicFields
+class TSSortedMeshCluster {
+	var startPrimitive:Int;
+	var endPrimitive:Int;
+	var normal:Point3F;
+	var k:Float;
+	var frontCluster:Int;
+	var backCluster:Int;
+
+	public function new() {}
+}
+
+@:publicFields
 class Mesh {
 	var meshType:Int;
 	var numFrames:Int;
@@ -30,6 +42,14 @@ class Mesh {
 	var boneIndices:Array<Int>;
 	var weights:Array<Float>;
 	var nodeIndices:Array<Int>;
+
+	// TSSortedMesh
+	var clusters:Array<TSSortedMeshCluster>;
+	var startCluster:Array<Int>;
+	var firstVerts:Array<Int>;
+	var numVerts:Array<Int>;
+	var firstTVerts:Array<Int>;
+	var alwaysWriteDepth:Bool;
 
 	public function new() {}
 
@@ -169,6 +189,52 @@ class Mesh {
 		reader.guard();
 	}
 
+	function readSorted(reader:DtsAlloc, version:Int) {
+		readStandard(reader, version);
+
+		var numClusters = reader.readS32();
+		clusters = [];
+		for (i in 0...numClusters) {
+			var cluster = new TSSortedMeshCluster();
+			cluster.startPrimitive = reader.readS32();
+			cluster.endPrimitive = reader.readS32();
+			cluster.normal = reader.readPoint3F();
+			cluster.k = reader.readF32();
+			cluster.frontCluster = reader.readS32();
+			cluster.backCluster = reader.readS32();
+			clusters.push(cluster);
+		}
+
+		var sz = reader.readS32();
+		startCluster = [];
+		for (i in 0...sz) {
+			startCluster.push(reader.readS32());
+		}
+
+		sz = reader.readS32();
+		firstVerts = [];
+		for (i in 0...sz) {
+			firstVerts.push(reader.readS32());
+		}
+
+		sz = reader.readS32();
+
+		numVerts = [];
+		for (i in 0...sz) {
+			numVerts.push(reader.readS32());
+		}
+
+		sz = reader.readS32();
+		firstTVerts = [];
+		for (i in 0...sz) {
+			firstTVerts.push(reader.readS32());
+		}
+
+		alwaysWriteDepth = reader.readS32() != 0;
+
+		reader.guard();
+	}
+
 	public static function read(shape:DtsFile, reader:DtsAlloc, version:Int) {
 		var mesh = new Mesh();
 		mesh.shape = shape;
@@ -178,6 +244,8 @@ class Mesh {
 			mesh.readStandard(reader, version);
 		else if (mesh.meshType == 1)
 			mesh.readSkinned(reader, version);
+		else if (mesh.meshType == 3)
+			mesh.readSorted(reader, version);
 		else if (mesh.meshType == 4)
 			return null;
 		else
