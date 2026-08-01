@@ -40,6 +40,7 @@ import triggers.DisableShapeForceTrigger;
 import triggers.PhysModTrigger;
 import triggers.WaterPhysicsTrigger;
 import triggers.RelativeTPTrigger;
+import triggers.SpawnTrigger;
 import shapes.BubbleItem;
 import shapes.FireballItem;
 import shapes.StartPad;
@@ -456,6 +457,10 @@ class DatablockRegistry {
 		{
 			match: Exact(["destinationtrigger"]),
 			create: (element, level) -> new DestinationTrigger(element, level)
+		},
+		{
+			match: Exact(["spawntrigger"]),
+			create: (element, level) -> new SpawnTrigger(element, level)
 		},
 		{
 			match: Exact(["checkpointtrigger"]),

@@ -22,6 +22,11 @@ enum ReplayMarbleState {
 	UsedBlast;
 }
 
+/** A single decoded/interpolated frame's worth of fields - purely a "view" struct now, never itself
+	the unit of storage (see `Replay.frameData`). Every `Vector`/`Quat` sub-field is allocated exactly
+	once, in the constructor, and mutated in place for the rest of this object's lifetime - callers
+	(`Replay.recordScratch`/`playbackFrameA`/`playbackFrameB`/`currentPlaybackFrame`) are long-lived,
+	reused instances, never reallocated per tick. */
 @:publicFields
 class ReplayFrame {
 	// Time
@@ -41,162 +46,26 @@ class ReplayFrame {
 	// Input
 	var marbleX:Float;
 	var marbleY:Float;
+	// Continuous hold input (Move.powerupHeld) - drives Bubble's hold-to-use and Cannon's
+	// charge/fire state machines (`Marble.updateBubble`/`updateCannonFiring`). Unlike `jump`/
+	// `powerup`/`blast` (one-shot click-edge events, tracked via `marbleStateFlags`), this is a
+	// plain per-frame level, recorded/replayed every tick like `marbleX`/`marbleY` - added after
+	// Cannon/Bubble were ported, since without it neither mechanic's replay could ever actually
+	// charge/fire the cannon or activate the bubble (the position/orientation still play back fine
+	// regardless, since those are snapshotted+snapped every frame independent of move
+	// reconstruction - only the side effects tied to holding the key were silently never triggering).
+	var powerupHeld:Bool;
 	// Gravity
 	var gravity:Vector;
 	var gravityInstant:Bool;
 	var gravityChange:Bool;
 
-	public function new() {}
-
-	public function interpolate(next:ReplayFrame, time:Float) {
-		var t = (time - this.time) / (next.time - this.time);
-
-		var dt = time - this.time;
-		var clockDt = next.clockTime - this.clockTime;
-
-		var interpFrame = new ReplayFrame();
-
-		// Interpolate time
-		interpFrame.time = time;
-		interpFrame.bonusTime = this.bonusTime;
-		interpFrame.clockTime = this.clockTime;
-		if (clockDt > 0) {
-			if (interpFrame.bonusTime != 0 && time >= 3.5) {
-				if (dt <= this.bonusTime) {
-					interpFrame.bonusTime -= dt;
-				} else {
-					interpFrame.clockTime += dt - this.bonusTime;
-					interpFrame.bonusTime = 0;
-				}
-			} else {
-				if (this.time >= 3.5)
-					interpFrame.clockTime += dt;
-				else if (this.time + dt >= 3.5) {
-					interpFrame.clockTime += (this.time + dt) - 3.5;
-				}
-			}
-		}
-
-		// Interpolate marble
-		if (this.marbleStateFlags.has(InstantTeleport)) {
-			interpFrame.marblePosition = this.marblePosition.clone();
-			interpFrame.marbleVelocity = this.marbleVelocity.clone();
-			interpFrame.marbleOrientation = this.marbleOrientation.clone();
-			interpFrame.marbleAngularVelocity = this.marbleAngularVelocity.clone();
-			interpFrame.marbleStateFlags.set(InstantTeleport);
-		} else {
-			interpFrame.marblePosition = Util.lerpThreeVectors(this.marblePosition, next.marblePosition, t);
-			interpFrame.marbleVelocity = Util.lerpThreeVectors(this.marbleVelocity, next.marbleVelocity, t);
-			interpFrame.marbleOrientation = new Quat();
-			interpFrame.marbleOrientation.slerp(this.marbleOrientation, next.marbleOrientation, t);
-			interpFrame.marbleOrientation.normalize();
-			interpFrame.marbleAngularVelocity = Util.lerpThreeVectors(this.marbleAngularVelocity, next.marbleAngularVelocity, t);
-		}
-
-		// Interpolate camera
-		if (this.marbleStateFlags.has(InstantTeleport)) {
-			interpFrame.cameraYaw = this.cameraYaw;
-			interpFrame.cameraPitch = this.cameraPitch;
-		} else {
-			interpFrame.cameraYaw = Util.lerp(this.cameraYaw, next.cameraYaw, t);
-			interpFrame.cameraPitch = Util.lerp(this.cameraPitch, next.cameraPitch, t);
-		}
-
-		// State flags
-		if (this.marbleStateFlags.has(UsedPowerup))
-			interpFrame.marbleStateFlags.set(UsedPowerup);
-		if (this.marbleStateFlags.has(Jumped))
-			interpFrame.marbleStateFlags.set(Jumped);
-		if (this.marbleStateFlags.has(UsedBlast))
-			interpFrame.marbleStateFlags.set(UsedBlast);
-
-		// Input
-		interpFrame.marbleX = this.marbleX;
-		interpFrame.marbleY = this.marbleY;
-
-		// Gravity
-		if (this.gravityChange) {
-			interpFrame.gravity = this.gravity.clone();
-			interpFrame.gravityInstant = this.gravityInstant;
-			interpFrame.gravityChange = true;
-		}
-		if (next.gravityChange) {
-			interpFrame.gravity = next.gravity.clone();
-			interpFrame.gravityInstant = next.gravityInstant;
-			interpFrame.gravityChange = true;
-		}
-
-		if (this.powerupPickup != null) {
-			interpFrame.powerupPickup = this.powerupPickup;
-		}
-
-		return interpFrame;
-	}
-
-	public function write(bw:BytesWriter) {
-		bw.writeFloat(this.time);
-		bw.writeFloat(this.clockTime);
-		bw.writeFloat(this.bonusTime);
-		bw.writeFloat(this.marblePosition.x);
-		bw.writeFloat(this.marblePosition.y);
-		bw.writeFloat(this.marblePosition.z);
-		bw.writeFloat(this.marbleVelocity.x);
-		bw.writeFloat(this.marbleVelocity.y);
-		bw.writeFloat(this.marbleVelocity.z);
-		bw.writeFloat(this.marbleOrientation.x);
-		bw.writeFloat(this.marbleOrientation.y);
-		bw.writeFloat(this.marbleOrientation.z);
-		bw.writeFloat(this.marbleOrientation.w);
-		bw.writeFloat(this.marbleAngularVelocity.x);
-		bw.writeFloat(this.marbleAngularVelocity.y);
-		bw.writeFloat(this.marbleAngularVelocity.z);
-		bw.writeByte(this.marbleStateFlags.toInt());
-		bw.writeFloat(this.cameraPitch);
-		bw.writeFloat(this.cameraYaw);
-		bw.writeFloat(this.marbleX);
-		bw.writeFloat(this.marbleY);
-		if (this.gravityChange) {
-			bw.writeByte(1);
-			bw.writeFloat(this.gravity.x);
-			bw.writeFloat(this.gravity.y);
-			bw.writeFloat(this.gravity.z);
-			bw.writeByte(this.gravityInstant ? 1 : 0);
-		} else {
-			bw.writeByte(0);
-		}
-		if (this.powerupPickup != null) {
-			bw.writeByte(1);
-			bw.writeStr(this.powerupPickup);
-		} else {
-			bw.writeByte(0);
-		}
-	}
-
-	public function read(br:BytesReader) {
-		this.time = br.readFloat();
-		this.clockTime = br.readFloat();
-		this.bonusTime = br.readFloat();
-		this.marblePosition = new Vector(br.readFloat(), br.readFloat(), br.readFloat());
-		this.marbleVelocity = new Vector(br.readFloat(), br.readFloat(), br.readFloat());
-		this.marbleOrientation = new Quat(br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat());
-		this.marbleAngularVelocity = new Vector(br.readFloat(), br.readFloat(), br.readFloat());
-		this.marbleStateFlags = EnumFlags.ofInt(br.readByte());
-		this.cameraPitch = br.readFloat();
-		this.cameraYaw = br.readFloat();
-		this.marbleX = br.readFloat();
-		this.marbleY = br.readFloat();
-		if (br.readByte() == 1) {
-			this.gravity = new Vector(br.readFloat(), br.readFloat(), br.readFloat());
-			this.gravityInstant = br.readByte() == 1;
-			this.gravityChange = true;
-		} else {
-			this.gravityChange = false;
-		}
-		if (br.readByte() == 1) {
-			this.powerupPickup = br.readStr();
-		} else {
-			this.powerupPickup = null;
-		}
+	public function new() {
+		marblePosition = new Vector();
+		marbleVelocity = new Vector();
+		marbleOrientation = new Quat();
+		marbleAngularVelocity = new Vector();
+		gravity = new Vector();
 	}
 }
 
@@ -209,6 +78,14 @@ class ReplayInitialState {
 	var pushButtonContactTimes:Array<Float> = [];
 	var randomGens:Array<Int> = [];
 	var randomGenTimes:Array<Float> = [];
+	// Same idea as `randomGens`, but for `Math.random()`-style [0,1) draws (e.g. Hunt's per-gem
+	// spawn-chance rolls) that don't fit in an Int index. Kept as a fully separate FIFO rather than
+	// interleaved with `randomGens` into one queue - each call site always draws from the one queue
+	// matching its own draw type, so two independent per-type FIFOs are exactly equivalent to one
+	// interleaved queue here (deterministic resimulation means the Nth "int draw" and Nth "float
+	// draw" are always the same calls in the same order either way), and it's simpler.
+	var randomFloats:Array<Float> = [];
+	var randomFloatTimes:Array<Float> = [];
 
 	public function new() {}
 
@@ -231,9 +108,17 @@ class ReplayInitialState {
 		for (time in this.pushButtonContactTimes) {
 			bw.writeFloat(time);
 		}
-		bw.writeInt16(this.randomGens.length);
+		// Was `writeInt16` count + `writeByte` per entry - a real bug for any consumer (like Hunt's
+		// gem/spawn-point index draws) whose value can exceed 255, silently truncating. Widened to
+		// Int32 for both the count and each entry as of version 8; old files are still read back
+		// correctly via the version-gated branch below.
+		bw.writeInt32(this.randomGens.length);
 		for (ri in this.randomGens) {
-			bw.writeByte(ri);
+			bw.writeInt32(ri);
+		}
+		bw.writeInt32(this.randomFloats.length);
+		for (rf in this.randomFloats) {
+			bw.writeFloat(rf);
 		}
 	}
 
@@ -257,29 +142,84 @@ class ReplayInitialState {
 			for (i in 0...pushButtonCount) {
 				this.pushButtonContactTimes.push(br.readFloat());
 			}
-			var rcount = br.readInt16();
-			for (i in 0...rcount) {
-				this.randomGens.push(br.readByte());
+			if (version > 7) {
+				var rcount = br.readInt32();
+				for (i in 0...rcount) {
+					this.randomGens.push(br.readInt32());
+				}
+				var fcount = br.readInt32();
+				for (i in 0...fcount) {
+					this.randomFloats.push(br.readFloat());
+				}
+			} else {
+				var rcount = br.readInt16();
+				for (i in 0...rcount) {
+					this.randomGens.push(br.readByte());
+				}
 			}
 		}
 	}
 }
 
+/** Records/plays back a single-player attempt. Ported behavior-for-behavior from the original
+	object-per-tick design, but the actual per-tick storage (`frameData`) is a flat `Array<Float>`
+	(one contiguous run of `STRIDE` floats per recorded tick) instead of an `Array<ReplayFrame>` of
+	heap objects each holding 4 further `Vector`/`Quat` sub-objects - a multi-minute attempt at full
+	tick rate was allocating 5 heap objects every single tick purely to record, which is real,
+	measurable GC pressure. Recording now just pushes scalars into that flat array (no allocation
+	beyond the array's own amortized growth); playback decodes into a small, fixed set of persistent
+	`ReplayFrame` "view" objects (`playbackFrameA`/`B`, `currentPlaybackFrame`) that get their fields
+	mutated in place every tick instead of being reallocated. `powerupPickup` (a String, set on rare
+	ticks only) is kept out of the flat numeric layout entirely, in a sparse `frameIndex -> path` map,
+	so it doesn't cost anything on the ticks that don't have one. */
 class Replay {
 	public var mission:String;
 	public var name:String;
 	public var customId:Int;
 
-	var frames:Array<ReplayFrame>;
-	var initialState:ReplayInitialState;
-	var currentRecordFrame:ReplayFrame;
+	// Field layout within one frame's slice of `frameData` - single source of truth for both the
+	// write side (`endFrame`) and the read side (`decodeFrameInto`).
+	static inline var OFF_TIME = 0;
+	static inline var OFF_CLOCK = 1;
+	static inline var OFF_BONUS = 2;
+	static inline var OFF_POS = 3; // +0/+1/+2 = x/y/z
+	static inline var OFF_VEL = 6;
+	static inline var OFF_ORIENT = 9; // +0/+1/+2/+3 = x/y/z/w
+	static inline var OFF_ANGVEL = 13;
+	static inline var OFF_FLAGS = 16;
+	static inline var OFF_CAM_PITCH = 17;
+	static inline var OFF_CAM_YAW = 18;
+	static inline var OFF_MARBLE_X = 19;
+	static inline var OFF_MARBLE_Y = 20;
+	static inline var OFF_POWERUP_HELD = 21;
+	static inline var OFF_GRAVITY = 22; // +0/+1/+2 = x/y/z
+	static inline var OFF_GRAVITY_INSTANT = 25;
+	static inline var OFF_GRAVITY_CHANGE = 26;
+	static inline var STRIDE = 27;
 
-	public var currentPlaybackFrame:ReplayFrame;
+	var frameData:Array<Float> = [];
+	var frameCount:Int = 0;
+	var powerupPickups:Map<Int, String> = new Map();
+
+	var initialState:ReplayInitialState;
+
+	// Recording: one persistent scratch frame, mutated in place by the various `recordXXX` calls
+	// throughout a tick, flushed into `frameData` by `endFrame`. `recordingActive` mirrors the old
+	// "currentRecordFrame != null" guard without needing a nullable object.
+	var recordScratch:ReplayFrame = new ReplayFrame();
+	var recordingActive:Bool = false;
+
+	// Playback: two persistent decode targets for the "surrounding" recorded frames (swapped, not
+	// reallocated, when `advance()` steps forward), plus the persistent interpolated result every
+	// consumer actually reads.
+	var playbackFrameA:ReplayFrame = new ReplayFrame();
+	var playbackFrameB:ReplayFrame = new ReplayFrame();
+	public var currentPlaybackFrame:ReplayFrame = new ReplayFrame();
 
 	var currentPlaybackFrameIdx:Int;
 	var currentPlaybackTime:Float;
 
-	var version:Int = 6;
+	var version:Int = 8;
 	var readFullEntry:FileEntry;
 
 	public function new(mission:String, customId:Int = 0) {
@@ -289,82 +229,130 @@ class Replay {
 	}
 
 	public function startFrame() {
-		currentRecordFrame = new ReplayFrame();
+		recordingActive = true;
+		// One-shot fields need an explicit reset every tick, matching what a fresh `new ReplayFrame()`
+		// used to give for free - continuous fields (position, camera, input, ...) don't, since every
+		// `recordXXX` for those is called unconditionally each tick anyway.
+		recordScratch.marbleStateFlags = new EnumFlags();
+		recordScratch.gravityChange = false;
+		recordScratch.powerupPickup = null;
 	}
 
 	public function endFrame() {
-		// Do not record frames beyond par time/5 minutes to limit file size, if we aren't explicitly recording
-		if (!MarbleGame.instance.toRecord
-			&& currentRecordFrame != null
-			&& currentRecordFrame.clockTime > Math.min(300, MarbleGame.instance.world.mission.qualifyTime)) {
-			currentRecordFrame = null;
+		if (!recordingActive)
 			return;
-		}
-		if (currentRecordFrame != null)
-			frames.push(currentRecordFrame);
-		currentRecordFrame = null;
+		recordingActive = false;
+		// Do not record frames beyond par time/5 minutes to limit file size, if we aren't explicitly recording
+		if (!MarbleGame.instance.toRecord && recordScratch.clockTime > Math.min(300, MarbleGame.instance.world.mission.qualifyTime))
+			return;
+		frameData.push(recordScratch.time);
+		frameData.push(recordScratch.clockTime);
+		frameData.push(recordScratch.bonusTime);
+		frameData.push(recordScratch.marblePosition.x);
+		frameData.push(recordScratch.marblePosition.y);
+		frameData.push(recordScratch.marblePosition.z);
+		frameData.push(recordScratch.marbleVelocity.x);
+		frameData.push(recordScratch.marbleVelocity.y);
+		frameData.push(recordScratch.marbleVelocity.z);
+		frameData.push(recordScratch.marbleOrientation.x);
+		frameData.push(recordScratch.marbleOrientation.y);
+		frameData.push(recordScratch.marbleOrientation.z);
+		frameData.push(recordScratch.marbleOrientation.w);
+		frameData.push(recordScratch.marbleAngularVelocity.x);
+		frameData.push(recordScratch.marbleAngularVelocity.y);
+		frameData.push(recordScratch.marbleAngularVelocity.z);
+		frameData.push(recordScratch.marbleStateFlags.toInt());
+		frameData.push(recordScratch.cameraPitch);
+		frameData.push(recordScratch.cameraYaw);
+		frameData.push(recordScratch.marbleX);
+		frameData.push(recordScratch.marbleY);
+		frameData.push(recordScratch.powerupHeld ? 1 : 0);
+		frameData.push(recordScratch.gravity.x);
+		frameData.push(recordScratch.gravity.y);
+		frameData.push(recordScratch.gravity.z);
+		frameData.push(recordScratch.gravityInstant ? 1 : 0);
+		frameData.push(recordScratch.gravityChange ? 1 : 0);
+		// Explicitly clear (not just conditionally set) so a frame index that's being re-recorded
+		// after a `spliceReplay` doesn't inherit a stale pickup from whatever used to occupy this slot.
+		if (recordScratch.powerupPickup != null)
+			powerupPickups.set(frameCount, recordScratch.powerupPickup);
+		else
+			powerupPickups.remove(frameCount);
+		frameCount++;
 	}
 
 	public function recordTimeState(time:Float, clockTime:Float, bonusTime:Float) {
-		if (currentRecordFrame == null)
+		if (!recordingActive)
 			return;
-		currentRecordFrame.time = time;
-		currentRecordFrame.clockTime = clockTime;
-		currentRecordFrame.bonusTime = bonusTime;
+		recordScratch.time = time;
+		recordScratch.clockTime = clockTime;
+		recordScratch.bonusTime = bonusTime;
 	}
 
 	public function recordMarbleState(position:Vector, velocity:Vector, orientation:Quat, angularVelocity:Vector) {
-		if (currentRecordFrame == null)
+		if (!recordingActive)
 			return;
-		currentRecordFrame.marblePosition = position.clone();
-		currentRecordFrame.marbleVelocity = velocity.clone();
-		currentRecordFrame.marbleOrientation = orientation.clone();
-		currentRecordFrame.marbleAngularVelocity = angularVelocity.clone();
+		recordScratch.marblePosition.x = position.x;
+		recordScratch.marblePosition.y = position.y;
+		recordScratch.marblePosition.z = position.z;
+		recordScratch.marbleVelocity.x = velocity.x;
+		recordScratch.marbleVelocity.y = velocity.y;
+		recordScratch.marbleVelocity.z = velocity.z;
+		recordScratch.marbleOrientation.x = orientation.x;
+		recordScratch.marbleOrientation.y = orientation.y;
+		recordScratch.marbleOrientation.z = orientation.z;
+		recordScratch.marbleOrientation.w = orientation.w;
+		recordScratch.marbleAngularVelocity.x = angularVelocity.x;
+		recordScratch.marbleAngularVelocity.y = angularVelocity.y;
+		recordScratch.marbleAngularVelocity.z = angularVelocity.z;
 	}
 
 	public function recordMarbleStateFlags(jumped:Bool, usedPowerup:Bool, instantTeleport:Bool, usedBlast:Bool) {
-		if (currentRecordFrame == null)
+		if (!recordingActive)
 			return;
 		if (jumped)
-			currentRecordFrame.marbleStateFlags.set(Jumped);
+			recordScratch.marbleStateFlags.set(Jumped);
 		if (usedPowerup)
-			currentRecordFrame.marbleStateFlags.set(UsedPowerup);
+			recordScratch.marbleStateFlags.set(UsedPowerup);
 		if (instantTeleport)
-			currentRecordFrame.marbleStateFlags.set(InstantTeleport);
+			recordScratch.marbleStateFlags.set(InstantTeleport);
 		if (usedBlast)
-			currentRecordFrame.marbleStateFlags.set(UsedBlast);
+			recordScratch.marbleStateFlags.set(UsedBlast);
 	}
 
 	public function recordPowerupPickup(powerup:PowerUp) {
-		if (currentRecordFrame == null)
+		if (!recordingActive)
 			return;
 		if (powerup == null)
-			currentRecordFrame.powerupPickup = ""; // Use powerup
+			recordScratch.powerupPickup = ""; // Use powerup
 		else
-			currentRecordFrame.powerupPickup = powerup.dtsPath;
+			recordScratch.powerupPickup = powerup.dtsPath;
 	}
 
-	public function recordMarbleInput(x:Float, y:Float) {
-		if (currentRecordFrame == null)
+	public function recordMarbleInput(x:Float, y:Float, powerupHeld:Bool = false) {
+		if (!recordingActive)
 			return;
-		currentRecordFrame.marbleX = x;
-		currentRecordFrame.marbleY = y;
+		recordScratch.marbleX = x;
+		recordScratch.marbleY = y;
+		recordScratch.powerupHeld = powerupHeld;
 	}
 
 	public function recordCameraState(pitch:Float, yaw:Float) {
-		if (currentRecordFrame == null)
+		if (!recordingActive)
 			return;
-		currentRecordFrame.cameraPitch = pitch;
-		currentRecordFrame.cameraYaw = yaw;
+		recordScratch.cameraPitch = pitch;
+		recordScratch.cameraYaw = yaw;
 	}
 
 	public function recordGravity(gravity:Vector, instant:Bool) {
-		if (currentRecordFrame == null)
+		if (!recordingActive)
 			return;
-		currentRecordFrame.gravityChange = true;
-		currentRecordFrame.gravity = gravity.clone();
+		recordScratch.gravityChange = true;
+		recordScratch.gravity.x = gravity.x;
+		recordScratch.gravity.y = gravity.y;
+		recordScratch.gravity.z = gravity.z;
 		if (instant)
-			currentRecordFrame.gravityInstant = instant;
+			recordScratch.gravityInstant = instant;
 	}
 
 	public function recordTrapdoorState(lastContactTime:Float, lastDirection:Int, lastCompletion:Float) {
@@ -383,11 +371,20 @@ class Replay {
 
 	public function recordRandomGenState(ri:Int) {
 		initialState.randomGens.push(ri);
-		initialState.randomGenTimes.push(currentRecordFrame.time);
+		initialState.randomGenTimes.push(recordScratch.time);
 	}
 
 	public function getRandomGenState() {
 		return initialState.randomGens.shift();
+	}
+
+	public function recordRandomFloatState(rf:Float) {
+		initialState.randomFloats.push(rf);
+		initialState.randomFloatTimes.push(recordScratch.time);
+	}
+
+	public function getRandomFloatState() {
+		return initialState.randomFloats.shift();
 	}
 
 	public function getTrapdoorState(idx:Int) {
@@ -407,76 +404,207 @@ class Replay {
 	}
 
 	public function clear() {
-		this.frames = [];
+		this.frameData = [];
+		this.frameCount = 0;
+		this.powerupPickups = new Map();
 		this.initialState.randomGens = [];
-		currentRecordFrame = null;
+		this.initialState.randomGenTimes = [];
+		this.initialState.randomFloats = [];
+		this.initialState.randomFloatTimes = [];
+		this.recordingActive = false;
+	}
+
+	/** Decodes recorded frame `i` into `target`, mutating its fields in place (never allocates a new
+		`Vector`/`Quat`). */
+	function decodeFrameInto(i:Int, target:ReplayFrame) {
+		var o = i * STRIDE;
+		target.time = frameData[o + OFF_TIME];
+		target.clockTime = frameData[o + OFF_CLOCK];
+		target.bonusTime = frameData[o + OFF_BONUS];
+		target.marblePosition.x = frameData[o + OFF_POS];
+		target.marblePosition.y = frameData[o + OFF_POS + 1];
+		target.marblePosition.z = frameData[o + OFF_POS + 2];
+		target.marbleVelocity.x = frameData[o + OFF_VEL];
+		target.marbleVelocity.y = frameData[o + OFF_VEL + 1];
+		target.marbleVelocity.z = frameData[o + OFF_VEL + 2];
+		target.marbleOrientation.x = frameData[o + OFF_ORIENT];
+		target.marbleOrientation.y = frameData[o + OFF_ORIENT + 1];
+		target.marbleOrientation.z = frameData[o + OFF_ORIENT + 2];
+		target.marbleOrientation.w = frameData[o + OFF_ORIENT + 3];
+		target.marbleAngularVelocity.x = frameData[o + OFF_ANGVEL];
+		target.marbleAngularVelocity.y = frameData[o + OFF_ANGVEL + 1];
+		target.marbleAngularVelocity.z = frameData[o + OFF_ANGVEL + 2];
+		target.marbleStateFlags = EnumFlags.ofInt(Std.int(frameData[o + OFF_FLAGS]));
+		target.cameraPitch = frameData[o + OFF_CAM_PITCH];
+		target.cameraYaw = frameData[o + OFF_CAM_YAW];
+		target.marbleX = frameData[o + OFF_MARBLE_X];
+		target.marbleY = frameData[o + OFF_MARBLE_Y];
+		target.powerupHeld = frameData[o + OFF_POWERUP_HELD] != 0;
+		target.gravityChange = frameData[o + OFF_GRAVITY_CHANGE] != 0;
+		target.gravity.x = frameData[o + OFF_GRAVITY];
+		target.gravity.y = frameData[o + OFF_GRAVITY + 1];
+		target.gravity.z = frameData[o + OFF_GRAVITY + 2];
+		target.gravityInstant = frameData[o + OFF_GRAVITY_INSTANT] != 0;
+		target.powerupPickup = powerupPickups.get(i);
+	}
+
+	/** Same math as the original `ReplayFrame.interpolate`, just writing into a persistent `out`
+		instead of allocating+returning a new frame - see class doc comment. */
+	function interpolateInto(a:ReplayFrame, b:ReplayFrame, time:Float, out:ReplayFrame) {
+		var t = (time - a.time) / (b.time - a.time);
+		var dt = time - a.time;
+		var clockDt = b.clockTime - a.clockTime;
+
+		out.time = time;
+		out.bonusTime = a.bonusTime;
+		out.clockTime = a.clockTime;
+		if (clockDt > 0) {
+			if (out.bonusTime != 0 && time >= 3.5) {
+				if (dt <= a.bonusTime) {
+					out.bonusTime -= dt;
+				} else {
+					out.clockTime += dt - a.bonusTime;
+					out.bonusTime = 0;
+				}
+			} else {
+				if (a.time >= 3.5)
+					out.clockTime += dt;
+				else if (a.time + dt >= 3.5) {
+					out.clockTime += (a.time + dt) - 3.5;
+				}
+			}
+		}
+
+		var teleport = a.marbleStateFlags.has(InstantTeleport);
+		if (teleport) {
+			out.marblePosition.x = a.marblePosition.x;
+			out.marblePosition.y = a.marblePosition.y;
+			out.marblePosition.z = a.marblePosition.z;
+			out.marbleVelocity.x = a.marbleVelocity.x;
+			out.marbleVelocity.y = a.marbleVelocity.y;
+			out.marbleVelocity.z = a.marbleVelocity.z;
+			out.marbleOrientation.x = a.marbleOrientation.x;
+			out.marbleOrientation.y = a.marbleOrientation.y;
+			out.marbleOrientation.z = a.marbleOrientation.z;
+			out.marbleOrientation.w = a.marbleOrientation.w;
+			out.marbleAngularVelocity.x = a.marbleAngularVelocity.x;
+			out.marbleAngularVelocity.y = a.marbleAngularVelocity.y;
+			out.marbleAngularVelocity.z = a.marbleAngularVelocity.z;
+			out.cameraYaw = a.cameraYaw;
+			out.cameraPitch = a.cameraPitch;
+		} else {
+			out.marblePosition.x = a.marblePosition.x + (b.marblePosition.x - a.marblePosition.x) * t;
+			out.marblePosition.y = a.marblePosition.y + (b.marblePosition.y - a.marblePosition.y) * t;
+			out.marblePosition.z = a.marblePosition.z + (b.marblePosition.z - a.marblePosition.z) * t;
+			out.marbleVelocity.x = a.marbleVelocity.x + (b.marbleVelocity.x - a.marbleVelocity.x) * t;
+			out.marbleVelocity.y = a.marbleVelocity.y + (b.marbleVelocity.y - a.marbleVelocity.y) * t;
+			out.marbleVelocity.z = a.marbleVelocity.z + (b.marbleVelocity.z - a.marbleVelocity.z) * t;
+			out.marbleOrientation.slerp(a.marbleOrientation, b.marbleOrientation, t);
+			out.marbleOrientation.normalize();
+			out.marbleAngularVelocity.x = a.marbleAngularVelocity.x + (b.marbleAngularVelocity.x - a.marbleAngularVelocity.x) * t;
+			out.marbleAngularVelocity.y = a.marbleAngularVelocity.y + (b.marbleAngularVelocity.y - a.marbleAngularVelocity.y) * t;
+			out.marbleAngularVelocity.z = a.marbleAngularVelocity.z + (b.marbleAngularVelocity.z - a.marbleAngularVelocity.z) * t;
+			out.cameraYaw = Util.lerp(a.cameraYaw, b.cameraYaw, t);
+			out.cameraPitch = Util.lerp(a.cameraPitch, b.cameraPitch, t);
+		}
+
+		out.marbleStateFlags = EnumFlags.ofInt(0);
+		if (teleport)
+			out.marbleStateFlags.set(InstantTeleport);
+		if (a.marbleStateFlags.has(UsedPowerup))
+			out.marbleStateFlags.set(UsedPowerup);
+		if (a.marbleStateFlags.has(Jumped))
+			out.marbleStateFlags.set(Jumped);
+		if (a.marbleStateFlags.has(UsedBlast))
+			out.marbleStateFlags.set(UsedBlast);
+
+		out.marbleX = a.marbleX;
+		out.marbleY = a.marbleY;
+		out.powerupHeld = a.powerupHeld;
+
+		out.gravityChange = false;
+		if (a.gravityChange) {
+			out.gravity.x = a.gravity.x;
+			out.gravity.y = a.gravity.y;
+			out.gravity.z = a.gravity.z;
+			out.gravityInstant = a.gravityInstant;
+			out.gravityChange = true;
+		}
+		if (b.gravityChange) {
+			out.gravity.x = b.gravity.x;
+			out.gravity.y = b.gravity.y;
+			out.gravity.z = b.gravity.z;
+			out.gravityInstant = b.gravityInstant;
+			out.gravityChange = true;
+		}
+
+		out.powerupPickup = a.powerupPickup;
 	}
 
 	public function advance(dt:Float) {
-		if (this.currentPlaybackFrame == null) {
-			this.currentPlaybackFrame = this.frames[this.currentPlaybackFrameIdx];
-		}
-
-		var nextT = this.currentPlaybackTime + dt;
-		var startFrame = this.frames[this.currentPlaybackFrameIdx];
-		if (this.currentPlaybackFrameIdx + 1 >= this.frames.length) {
+		if (this.currentPlaybackFrameIdx + 1 >= this.frameCount)
 			return false;
-		}
-		var nextFrame = this.frames[this.currentPlaybackFrameIdx + 1];
+
+		decodeFrameInto(this.currentPlaybackFrameIdx, playbackFrameA);
+		var nextT = this.currentPlaybackTime + dt;
+		decodeFrameInto(this.currentPlaybackFrameIdx + 1, playbackFrameB);
+
 		var stateFlags = 0;
-		var nextGravityChange:Bool = false;
-		var nextGravityState:{
-			instant:Bool,
-			gravity:Vector
-		} = null;
+		var nextGravityChange = false;
+		var nextGravityInstant = false;
+		var nextGravityX = 0.0;
+		var nextGravityY = 0.0;
+		var nextGravityZ = 0.0;
 		var powerup:String = null;
-		while (nextFrame.time <= nextT) {
+
+		while (playbackFrameB.time <= nextT) {
 			this.currentPlaybackFrameIdx++;
-			if (this.currentPlaybackFrameIdx + 1 >= this.frames.length) {
+			if (this.currentPlaybackFrameIdx + 1 >= this.frameCount)
 				return false;
-			}
-			var testNextFrame = this.frames[this.currentPlaybackFrameIdx + 1];
-			stateFlags |= testNextFrame.marbleStateFlags.toInt();
-			if (testNextFrame.gravityChange) {
+			// The "next" frame we just examined becomes the new "start" frame - swap the scratch
+			// references instead of decoding it a second time.
+			var tmp = playbackFrameA;
+			playbackFrameA = playbackFrameB;
+			playbackFrameB = tmp;
+			decodeFrameInto(this.currentPlaybackFrameIdx + 1, playbackFrameB);
+
+			stateFlags |= playbackFrameB.marbleStateFlags.toInt();
+			if (playbackFrameB.gravityChange) {
 				nextGravityChange = true;
-				nextGravityState = {
-					instant: testNextFrame.gravityInstant,
-					gravity: testNextFrame.gravity.clone()
-				};
+				nextGravityInstant = playbackFrameB.gravityInstant;
+				nextGravityX = playbackFrameB.gravity.x;
+				nextGravityY = playbackFrameB.gravity.y;
+				nextGravityZ = playbackFrameB.gravity.z;
 			}
-			if (testNextFrame.powerupPickup != null) {
-				powerup = testNextFrame.powerupPickup;
+			if (playbackFrameB.powerupPickup != null) {
+				powerup = playbackFrameB.powerupPickup;
 			}
-			startFrame = nextFrame;
-			nextFrame = testNextFrame;
 		}
-		nextFrame.marbleStateFlags = EnumFlags.ofInt(stateFlags);
+		playbackFrameB.marbleStateFlags = EnumFlags.ofInt(stateFlags);
 		if (nextGravityChange) {
-			nextFrame.gravityChange = true;
-			nextFrame.gravityInstant = nextGravityState.instant;
-			nextFrame.gravity = nextGravityState.gravity.clone();
+			playbackFrameB.gravityChange = true;
+			playbackFrameB.gravityInstant = nextGravityInstant;
+			playbackFrameB.gravity.x = nextGravityX;
+			playbackFrameB.gravity.y = nextGravityY;
+			playbackFrameB.gravity.z = nextGravityZ;
 		}
 		if (powerup != null) {
-			nextFrame.powerupPickup = powerup;
+			playbackFrameB.powerupPickup = powerup;
 		}
-		this.currentPlaybackFrame = startFrame.interpolate(nextFrame, nextT);
+
+		interpolateInto(playbackFrameA, playbackFrameB, nextT, this.currentPlaybackFrame);
 		this.currentPlaybackTime += dt;
 		return true;
 	}
 
 	public function rewind() {
 		this.currentPlaybackTime = 0;
-		this.currentPlaybackFrame = null;
 		this.currentPlaybackFrameIdx = 0;
 	}
 
 	public function spliceReplay(cutAfterTime:Float) {
-		if (this.frames.length > 0) {
-			var curframe = this.frames[this.frames.length - 1];
-			while (curframe.time > cutAfterTime && this.frames.length > 0) {
-				this.frames.pop();
-				curframe = this.frames[this.frames.length - 1];
-			}
+		while (frameCount > 0 && frameData[(frameCount - 1) * STRIDE + OFF_TIME] > cutAfterTime) {
+			frameCount--;
 		}
 		if (this.initialState.randomGenTimes.length > 0) {
 			var rtimeIdx = this.initialState.randomGenTimes.length - 1;
@@ -486,15 +614,61 @@ class Replay {
 				rtimeIdx = this.initialState.randomGenTimes.length - 1;
 			}
 		}
+		if (this.initialState.randomFloatTimes.length > 0) {
+			var ftimeIdx = this.initialState.randomFloatTimes.length - 1;
+			while (this.initialState.randomFloatTimes[ftimeIdx] > cutAfterTime && this.initialState.randomFloatTimes.length > 0) {
+				this.initialState.randomFloatTimes.pop();
+				this.initialState.randomFloats.pop();
+				ftimeIdx = this.initialState.randomFloatTimes.length - 1;
+			}
+		}
 	}
 
 	public function write() {
 		var bw = new BytesWriter();
 
 		this.initialState.write(bw);
-		bw.writeInt32(this.frames.length);
-		for (frame in this.frames) {
-			frame.write(bw);
+		bw.writeInt32(this.frameCount);
+		for (i in 0...frameCount) {
+			var o = i * STRIDE;
+			bw.writeFloat(frameData[o + OFF_TIME]);
+			bw.writeFloat(frameData[o + OFF_CLOCK]);
+			bw.writeFloat(frameData[o + OFF_BONUS]);
+			bw.writeFloat(frameData[o + OFF_POS]);
+			bw.writeFloat(frameData[o + OFF_POS + 1]);
+			bw.writeFloat(frameData[o + OFF_POS + 2]);
+			bw.writeFloat(frameData[o + OFF_VEL]);
+			bw.writeFloat(frameData[o + OFF_VEL + 1]);
+			bw.writeFloat(frameData[o + OFF_VEL + 2]);
+			bw.writeFloat(frameData[o + OFF_ORIENT]);
+			bw.writeFloat(frameData[o + OFF_ORIENT + 1]);
+			bw.writeFloat(frameData[o + OFF_ORIENT + 2]);
+			bw.writeFloat(frameData[o + OFF_ORIENT + 3]);
+			bw.writeFloat(frameData[o + OFF_ANGVEL]);
+			bw.writeFloat(frameData[o + OFF_ANGVEL + 1]);
+			bw.writeFloat(frameData[o + OFF_ANGVEL + 2]);
+			bw.writeByte(Std.int(frameData[o + OFF_FLAGS]));
+			bw.writeFloat(frameData[o + OFF_CAM_PITCH]);
+			bw.writeFloat(frameData[o + OFF_CAM_YAW]);
+			bw.writeFloat(frameData[o + OFF_MARBLE_X]);
+			bw.writeFloat(frameData[o + OFF_MARBLE_Y]);
+			bw.writeByte(Std.int(frameData[o + OFF_POWERUP_HELD]));
+			if (frameData[o + OFF_GRAVITY_CHANGE] != 0) {
+				bw.writeByte(1);
+				bw.writeFloat(frameData[o + OFF_GRAVITY]);
+				bw.writeFloat(frameData[o + OFF_GRAVITY + 1]);
+				bw.writeFloat(frameData[o + OFF_GRAVITY + 2]);
+				bw.writeByte(Std.int(frameData[o + OFF_GRAVITY_INSTANT]));
+			} else {
+				bw.writeByte(0);
+			}
+			var pickup = powerupPickups.get(i);
+			if (pickup != null) {
+				bw.writeByte(1);
+				bw.writeStr(pickup);
+			} else {
+				bw.writeByte(0);
+			}
 		}
 
 		var buf = bw.getBuffer();
@@ -558,13 +732,51 @@ class Replay {
 		#end
 		var br = new BytesReader(uncompressed);
 		this.initialState.read(br, replayVersion);
-		var frameCount = br.readInt32();
-		this.frames = [];
-		for (i in 0...frameCount) {
-			var frame = new ReplayFrame();
-			frame.read(br);
-			this.frames.push(frame);
+		var count = br.readInt32();
+		this.frameData = [];
+		this.powerupPickups = new Map();
+		for (i in 0...count) {
+			frameData.push(br.readFloat()); // time
+			frameData.push(br.readFloat()); // clockTime
+			frameData.push(br.readFloat()); // bonusTime
+			frameData.push(br.readFloat()); // pos.x
+			frameData.push(br.readFloat()); // pos.y
+			frameData.push(br.readFloat()); // pos.z
+			frameData.push(br.readFloat()); // vel.x
+			frameData.push(br.readFloat()); // vel.y
+			frameData.push(br.readFloat()); // vel.z
+			frameData.push(br.readFloat()); // orient.x
+			frameData.push(br.readFloat()); // orient.y
+			frameData.push(br.readFloat()); // orient.z
+			frameData.push(br.readFloat()); // orient.w
+			frameData.push(br.readFloat()); // angvel.x
+			frameData.push(br.readFloat()); // angvel.y
+			frameData.push(br.readFloat()); // angvel.z
+			frameData.push(br.readByte()); // stateFlags
+			frameData.push(br.readFloat()); // cameraPitch
+			frameData.push(br.readFloat()); // cameraYaw
+			frameData.push(br.readFloat()); // marbleX
+			frameData.push(br.readFloat()); // marbleY
+			// Added in version 7 - older replay files simply never had cannon/bubble hold-input recorded.
+			frameData.push(replayVersion > 6 ? br.readByte() : 0); // powerupHeld
+			if (br.readByte() == 1) {
+				frameData.push(br.readFloat()); // gravity.x
+				frameData.push(br.readFloat()); // gravity.y
+				frameData.push(br.readFloat()); // gravity.z
+				frameData.push(br.readByte()); // gravityInstant
+				frameData.push(1); // gravityChange
+			} else {
+				frameData.push(0);
+				frameData.push(0);
+				frameData.push(0);
+				frameData.push(0);
+				frameData.push(0);
+			}
+			if (br.readByte() == 1) {
+				powerupPickups.set(i, br.readStr());
+			}
 		}
+		this.frameCount = count;
 		return true;
 	}
 

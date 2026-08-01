@@ -103,6 +103,7 @@ class SearchGui extends GuiControl {
 		var searchLevelDesc = new GuiMLText(squishneyFont18, mlFontLoader);
 		searchLevelDesc.text.textColor = 0x000000;
 		searchLevelDesc.text.text = "Name";
+		searchLevelDesc.text.lineSpacing = 4;
 		searchLevelDesc.position = new Vector(2, 2);
 		searchLevelDesc.extent = new Vector(213, 14);
 		descScrollCtrl.addChild(searchLevelDesc);

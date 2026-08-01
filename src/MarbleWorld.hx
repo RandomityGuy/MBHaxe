@@ -385,7 +385,7 @@ class MarbleWorld extends Scheduler {
 
 	public function initLoading() {
 		Console.log("*** LOADING MISSION: " + mission.path);
-		this.loadingGui = new LoadingGui(this.mission.title, this.mission.game, this.isMultiplayer);
+		this.loadingGui = new LoadingGui(this.mission, this.isMultiplayer);
 		MarbleGame.canvas.setContent(this.loadingGui);
 		if (this.mission.isClaMission) {
 			this.mission.download(() -> loadBegin());
@@ -524,19 +524,17 @@ class MarbleWorld extends Scheduler {
 		this.playGui = new PlayGui();
 		this.instanceManager = new InstanceManager(scene);
 		this.particleManager = new ParticleManager(cast this);
-		if (this.isMultiplayer || this.game == "ultra" || this.mission.missionInfo.game == "PlatinumQuest") {
-			this.radar = new Radar(cast this, this.scene2d);
-			if (this.mission.missionInfo.radardistance != null && this.mission.missionInfo.radardistance != "")
-				this.radar.itemSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radardistance);
-			if (this.mission.missionInfo.radargemdistance != null && this.mission.missionInfo.radargemdistance != "")
-				this.radar.gemFinishSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radargemdistance);
-			if (this.mission.missionInfo.customradarrule != null && this.mission.missionInfo.customradarrule != "") {
-				this.radar.customRadarRule = Std.parseInt(this.mission.missionInfo.customradarrule);
-				if (this.radar.customRadarRule == 0)
-					this.radar.customRadarRule = 5; // RadarRule.Gems | RadarRule.EndPad;
-			}
-			radar.init();
+		this.radar = new Radar(cast this, this.scene2d);
+		if (this.mission.missionInfo.radardistance != null && this.mission.missionInfo.radardistance != "")
+			this.radar.itemSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radardistance);
+		if (this.mission.missionInfo.radargemdistance != null && this.mission.missionInfo.radargemdistance != "")
+			this.radar.gemFinishSearchDistance = MisParser.parseNumber(this.mission.missionInfo.radargemdistance);
+		if (this.mission.missionInfo.customradarrule != null && this.mission.missionInfo.customradarrule != "") {
+			this.radar.customRadarRule = Std.parseInt(this.mission.missionInfo.customradarrule);
+			if (this.radar.customRadarRule == 0)
+				this.radar.customRadarRule = 5; // RadarRule.Gems | RadarRule.EndPad;
 		}
+		radar.init();
 
 		var worker = new ResourceLoaderWorker(() -> {
 			var renderer = cast(this.scene.renderer, src.Renderer);
@@ -2619,8 +2617,8 @@ class MarbleWorld extends Scheduler {
 						this.timeState.gameplayClock = Math.max(0, this.timeState.gameplayClock);
 					}
 					if (this.timeState.gameplayClock <= 0 && !Net.isClient) {
-						this.gameMode.onTimeExpire();
 						this.timeState.gameplayClock = 0;
+						this.gameMode.onTimeExpire();
 					}
 				}
 			}

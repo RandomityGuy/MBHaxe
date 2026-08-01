@@ -377,34 +377,139 @@ class MisParser {
 		"$radar::flags::powerups" => 32,
 	];
 
-	/** Resolves a TorqueScript rvalue expression. Supports the concatenation `@` operator and the
-		bitwise-OR `|` operator (e.g. `$Radar::Flags::Gems | $Radar::Flags::EndPad`), the latter by
-		resolving each operand to an integer (via `knownEngineConstants` for engine globals that
-		aren't themselves assigned anywhere in the mission, falling back to numeric parsing) and
-		OR-ing the results together. */
-	function resolveExpression(expr:String) {
-		var orParts = Util.splitIgnoreStringLiterals(expr, '|');
-		if (orParts.length > 1) {
-			var result = 0;
-			for (part in orParts) {
-				var resolved = this.resolveExpression(StringTools.trim(part));
-				var lower = resolved.toLowerCase();
-				result |= knownEngineConstants.exists(lower) ? knownEngineConstants.get(lower) : (Std.parseInt(resolved) ?? 0);
-			}
-			return Std.string(result);
+	/** Resolves a TorqueScript rvalue expression. Supports, in ascending precedence: the
+		bitwise-OR `|` operator (e.g. `$Radar::Flags::Gems | $Radar::Flags::EndPad`); the
+		concatenation `@` operator; additive `+`/`-`; multiplicative `*`/`/`; unary `-`; and
+		parenthesized grouping. Numeric operands resolve via `knownEngineConstants` (for engine
+		globals that aren't themselves assigned anywhere in the mission) or `Std.parseFloat`,
+		falling back to 0 for anything that resolves to neither (e.g. a plain string operand). */
+	function resolveExpression(expr:String):String {
+		var pos = 0;
+
+		inline function atEnd()
+			return pos >= expr.length;
+
+		function skipWhitespace() {
+			while (!atEnd() && StringTools.isSpace(expr, pos))
+				pos++;
 		}
 
-		var parts = Util.splitIgnoreStringLiterals(expr, '@').map(x -> {
-			x = StringTools.trim(x);
-			if (StringTools.startsWith(x, '$') && this.variables[x] != null) {
-				// Replace the variable with its value
-				x = this.resolveExpression(this.variables[x]);
-			} else if (StringTools.startsWith(x, '"') && StringTools.endsWith(x, '"')) {
-				x = Util.unescape(x.substring(1, x.length - 1)); // It' s a string literal, so remove " "
+		// Peeks the next non-whitespace character without consuming it, or "" at end of input.
+		function peek():String {
+			skipWhitespace();
+			return atEnd() ? "" : expr.charAt(pos);
+		}
+
+		function toNumber(s:String):Float {
+			var lower = StringTools.trim(s).toLowerCase();
+			if (knownEngineConstants.exists(lower))
+				return knownEngineConstants.get(lower);
+			var f = Std.parseFloat(s);
+			return Math.isNaN(f) ? 0 : f;
+		}
+
+		function numToString(f:Float):String
+			return f == Std.int(f) ? Std.string(Std.int(f)) : Std.string(f);
+
+		function isBarewordChar(c:String):Bool
+			return c != "" && !StringTools.isSpace(c, 0) && c != "(" && c != ")" && c != '"'
+				&& c != "+" && c != "-" && c != "*" && c != "/" && c != "@" && c != "|";
+
+		// Forward-declared: parsePrimary needs to call parseOr (for parenthesized sub-expressions),
+		// but parseOr is defined in terms of parseConcat/parseAdd/parseMul/parseUnary/parsePrimary -
+		// Haxe local functions aren't hoisted, so this mutual recursion needs the var declared before
+		// parsePrimary references it; the real closure is assigned once everything else is defined.
+		var parseOr:Void->String = null;
+
+		function parsePrimary():String {
+			var c = peek();
+			if (c == "(") {
+				pos++;
+				var value = parseOr();
+				if (peek() == ")")
+					pos++;
+				return value;
 			}
-			return x;
-		});
-		return parts.join('');
+			if (c == '"') {
+				var start = pos;
+				pos++;
+				while (!atEnd() && !(expr.charAt(pos) == '"' && expr.charAt(pos - 1) != '\\'))
+					pos++;
+				var str = expr.substring(start + 1, pos);
+				if (!atEnd())
+					pos++; // Consume the closing quote.
+				return Util.unescape(str);
+			}
+			if (c == "$") {
+				var start = pos;
+				pos++;
+				while (!atEnd() && isBarewordChar(expr.charAt(pos)))
+					pos++;
+				var name = expr.substring(start, pos);
+				// Only substitute if it's an actual mission variable - otherwise leave it as the
+				// literal token text (it may still resolve numerically later via knownEngineConstants).
+				return this.variables[name] != null ? this.resolveExpression(this.variables[name]) : name;
+			}
+			var start = pos;
+			while (!atEnd() && isBarewordChar(expr.charAt(pos)))
+				pos++;
+			return expr.substring(start, pos);
+		}
+
+		function parseUnary():String {
+			if (peek() == "-") {
+				pos++;
+				return numToString(-toNumber(parseUnary()));
+			}
+			return parsePrimary();
+		}
+
+		function parseMul():String {
+			var left = parseUnary();
+			while (peek() == "*" || peek() == "/") {
+				var op = expr.charAt(pos);
+				pos++;
+				var right = toNumber(parseUnary());
+				var l = toNumber(left);
+				left = numToString(op == "*" ? l * right : (right == 0 ? 0 : l / right));
+			}
+			return left;
+		}
+
+		function parseAdd():String {
+			var left = parseMul();
+			while (peek() == "+" || peek() == "-") {
+				var op = expr.charAt(pos);
+				pos++;
+				var right = toNumber(parseMul());
+				var l = toNumber(left);
+				left = numToString(op == "+" ? l + right : l - right);
+			}
+			return left;
+		}
+
+		function parseConcat():String {
+			var left = parseAdd();
+			while (peek() == "@") {
+				pos++;
+				left += parseAdd();
+			}
+			return left;
+		}
+
+		parseOr = function():String {
+			var left = parseConcat();
+			if (peek() != "|")
+				return left;
+			var result = Std.int(toNumber(left));
+			while (peek() == "|") {
+				pos++;
+				result |= Std.int(toNumber(parseConcat()));
+			}
+			return Std.string(result);
+		};
+
+		return parseOr();
 	}
 
 	/** Parses a 4-component vector from a string of four numbers. */

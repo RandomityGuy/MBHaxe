@@ -11,6 +11,7 @@ import src.Mission;
 import src.AudioManager;
 import src.ResourceLoader;
 import src.Console;
+import triggers.SpawnTrigger;
 import rewind.RewindableState;
 
 class NullMode implements GameMode {
@@ -31,7 +32,16 @@ class NullMode implements GameMode {
 			quat = startPad.getRotationQuat().clone();
 			position.z += 3;
 		} else {
-			position = new Vector(0, 0, 300);
+			// try finding a SpawnTrigger
+			var spawnTrigger = this.level.triggers.filter(x -> x is SpawnTrigger).pop();
+			if (spawnTrigger != null) {
+				position = spawnTrigger.getAbsPos().getPosition();
+				quat = spawnTrigger.getRotationQuat().clone();
+				position.z += 3;
+			} else {
+				// If there's no start pad, just spawn at the origin
+				position = new Vector(0, 0, 300);
+			}
 		}
 		return {
 			position: position,

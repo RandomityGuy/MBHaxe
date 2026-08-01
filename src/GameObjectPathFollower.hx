@@ -19,6 +19,15 @@ class PathFollowerState {
 	public var scale:Vector;
 }
 
+/** An axis-angle rotation pair - see `GameObjectPathFollower.rotInterpolate`. Pure scratch (never
+	escapes the function it's computed in), so instances are pooled into statics rather than
+	allocated per call. */
+@:structInit
+class AxisAngle {
+	public var axis:Vector;
+	public var angle:Float;
+}
+
 /** Rewind snapshot of a path follower's progress - see `RewindFrame`/`RewindManager`. `active`
 	replaces the old "the array slot itself is `null`" convention for "not currently on a path" -
 	`RewindFrame.pathFollowerStates` now holds one always-non-null, reusable instance per mover
@@ -94,6 +103,10 @@ class GameObjectPathFollower {
 		this.currentNodeName = s.currentNode;
 		this.prevNodeName = s.prevNode;
 		this.rngCursor = s.rngCursor;
+		// A rewind jump invalidates rotInterpolate's delta-axis continuity reference (see its doc
+		// comment) - it was tracking continuity for a since-rewound-past sequence of frames, not the
+		// one about to resume from here. Let it re-establish fresh from whatever this jump lands on.
+		this.lastDeltaAxis = null;
 		var state = evaluateTransform(this.currentNodeName, this.prevNodeName, this.pathPosition);
 		if (state != null) {
 			this.frameStartState = state;
@@ -164,6 +177,27 @@ class GameObjectPathFollower {
 		}
 
 		this.frameEndState = evaluateTransform(this.currentNodeName, this.prevNodeName, this.pathPosition);
+
+		// `rotInterpolate` re-extracts a quaternion from a matrix on every call (Shepperd's method,
+		// no continuity across calls) - since q and -q represent the identical rotation, two nearly-
+		// identical rotation matrices computed a frame apart can land on opposite quaternion
+		// hemispheres depending on which branch of the extraction they happen to hit, with no actual
+		// jump in the underlying rotation. `advancePath`'s `Quat.slerp` treats a negative dot product
+		// between the two quaternions as "more than 180 degrees apart" and flips to the long way
+		// around, which visibly reverses the object for one frame before snapping back once the
+		// extraction lands on the matching hemisphere again (the "see-saw" bug on paths whose segment
+		// angle sweeps through one of Shepperd's branch boundaries). Forcing hemisphere continuity
+		// between the two ends of this frame's blend range fixes it without affecting normal frames,
+		// where the dot product is already positive.
+		if (this.frameStartState != null
+			&& this.frameEndState != null
+			&& this.frameStartState.rotation.dot(this.frameEndState.rotation) < 0) {
+			this.frameEndState.rotation.x *= -1;
+			this.frameEndState.rotation.y *= -1;
+			this.frameEndState.rotation.z *= -1;
+			this.frameEndState.rotation.w *= -1;
+		}
+
 		this.frameDuration = dt;
 		this.substepAccum = 0;
 	}
@@ -258,6 +292,7 @@ class GameObjectPathFollower {
 	// Pure scratch for the rotational-velocity computation below - all data extracted from these
 	// (angle/axis) is copied into local floats/Vectors before the function returns.
 	static var scratchStartMat = new Matrix();
+	static var scratchStartMatInv = new Matrix();
 	static var scratchEndMat = new Matrix();
 	static var scratchMatSub = new Matrix();
 	static var scratchVelQuat = new Quat();
@@ -312,10 +347,13 @@ class GameObjectPathFollower {
 			var tRot = node.reverseRotation ? 1.0 - t : t;
 			nodeT.rotation.toMatrix(scratchStartMat);
 			nextT.rotation.toMatrix(scratchEndMat);
+			// Reversed multiply order vs the C++ - see `rotInterpolate`'s doc comment for why
+			// (Torque column-vector vs h3d row-vector convention).
 			if (node.rotationOffset != null)
-				scratchEndMat.multiply(scratchEndMat, node.rotationOffset);
+				scratchEndMat.multiply(node.rotationOffset, scratchEndMat);
 
-			scratchMatSub.multiply(scratchEndMat, scratchStartMat.getInverse());
+			scratchStartMat.getInverse(scratchStartMatInv);
+			scratchMatSub.multiply(scratchStartMatInv, scratchEndMat);
 			var q = scratchVelQuat;
 			q.initRotateMatrix(scratchMatSub);
 			if (q.w > 1)
@@ -445,7 +483,11 @@ class GameObjectPathFollower {
 		if (node.rotationOffset != null) {
 			var rotMat = new Matrix();
 			rot.toMatrix(rotMat);
-			rotMat.multiply(rotMat, node.rotationOffset);
+			// PQ computes `rotM * finalRotOffset` under Torque's column-vector (M*p) convention,
+			// where that means "apply finalRotOffset first, then rotM". h3d.Matrix is row-vector
+			// (p*M) - see `rotInterpolate`'s doc comment - so the equivalent composition needs the
+			// arguments reversed.
+			rotMat.multiply(node.rotationOffset, rotMat);
 			var q = new Quat();
 			q.initRotateMatrix(rotMat);
 			return q;
@@ -453,39 +495,111 @@ class GameObjectPathFollower {
 		return rot;
 	}
 
-	function rotInterpolate(rot1:Quat, rot2:Quat, t:Float, multiplier:Float = 1.0):Quat {
-		var mat1 = new Matrix();
-		var mat2 = new Matrix();
-		rot1.toMatrix(mat1);
-		rot2.toMatrix(mat2);
+	static var scratchRotMat1 = new Matrix();
+	static var scratchRotMat1Inv = new Matrix();
+	static var scratchRotMat2 = new Matrix();
+	static var scratchRotMatSub = new Matrix();
+	static var scratchRotDeltaMat = new Matrix();
+	static var scratchRotComposedMat = new Matrix();
+	static var scratchRotFinalMat = new Matrix();
+	static var scratchRotExtractQuat = new Quat();
+	static var scratchRotDelta:AxisAngle = {axis: new Vector(), angle: 0};
+	static var scratchRotFinal:AxisAngle = {axis: new Vector(), angle: 0};
 
-		var matSub = new Matrix();
-		matSub.multiply(mat2, mat1.getInverse());
-
-		var q = new Quat();
-		q.initRotateMatrix(matSub);
+	/** Extracts an (axis, angle) pair from a rotation matrix via its quaternion, matching Torque's
+		`AngAxisF(const MatrixF&)` constructor closely enough to reproduce `RotInterpolate`'s
+		re-decomposition step (see `rotInterpolate`'s doc comment). Fills `out` in place. */
+	function axisAngleFromMatrix(mat:Matrix, out:AxisAngle) {
+		var q = scratchRotExtractQuat;
+		q.initRotateMatrix(mat);
 		if (q.w > 1)
 			q.normalize();
 		var angle = 2 * Math.acos(q.w);
-		angle *= t * multiplier;
-
 		var s = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z);
-		var x, y, z;
-		if (s == 0.0) {
-			x = 1.0;
-			y = 0.0;
-			z = 0.0;
-		} else {
-			x = q.x / s;
-			y = q.y / s;
-			z = q.z / s;
-		}
+		if (s == 0.0)
+			out.axis.set(1, 0, 0);
+		else
+			out.axis.set(q.x / s, q.y / s, q.z / s);
+		out.angle = angle;
+	}
 
-		var retMat = new Matrix();
-		retMat.initRotationAxis(new Vector(x, y, z), angle);
-		retMat.multiply(retMat, mat1);
+	/** Ported from PQ's `RotInterpolate` (`MathLib.h`). Bug-for-bug faithful: `RotInterpolate` itself
+		scales the delta (rot1->rot2) angle by `t` and composes it onto rot1's matrix, but then
+		RE-DECOMPOSES that absolute composed matrix into a fresh (axis, angle) pair - it's this
+		fresh pair, not the original delta, that `RotationMultiplier` scales in
+		`Node_getPathRotation`, and the result is rebuilt as a matrix from identity rather than
+		composed onto rot1 again. Collapsing this into a single "scale delta angle by t*multiplier"
+		step (as an earlier version of this port did) is NOT equivalent once multiplier != 1.
+
+		Also critically: Torque's `MatrixF` is column-vector (`mulP` does `M*p`), where `X * Y`
+		composed onto a point means "apply Y first, then X". `h3d.Matrix` is row-vector
+		(`Matrix.hx`'s point-transform does `p*M`), where `multiply(A, B)` composed onto a point
+		means "apply A first, then B" - the OPPOSITE order. For the same physical rotation,
+		heapsMatrix == torqueMatrix transposed, and `(X*Y)^T == Y^T*X^T`, so every multiply() call
+		here must take its arguments in the REVERSE order of the corresponding C++ expression, not
+		the same order. Preserving the C++ argument order verbatim (as an earlier version of this
+		port did) silently computes the wrong composed rotation whenever rot1/rot2 aren't about the
+		same axis - this was the cause of reversed rotation direction on two-node setups where the
+		nodes' rotations aren't about a common axis.
+
+		Separately: `axisAngleFromMatrix`'s underlying quaternion extraction (Shepperd's method,
+		which Torque's own `QuatF::set(const MatrixF&)` also uses - see `mQuat.cc`) branches on
+		which of the matrix's diagonal terms is largest, and each branch independently forces its own
+		"primary" component non-negative - there is no guarantee of continuity between two nearby
+		matrices that happen to land on different branches. A delta rotation of exactly (or very
+		nearly) 180 degrees is the classic trigger: the matrix itself is symmetric under axis
+		negation (`R(180,+axis) == R(180,-axis)`), so the branch that gets taken can flip the
+		extracted delta axis relative to neighboring segments' deltas for no physical reason. Since
+		only the delta's `angle` gets scaled by `t` before recomposing (the axis is held fixed), an
+		axis flip silently reverses that segment's rotation direction - this, not the multiply-order
+		issue above, was the actual cause of the "completes the rotation, reverses back to the start,
+		then goes forward again" see-saw bug on multi-node paths whose cumulative segment angles pass
+		through 180 degrees (reproduced even with same-axis rotations, where the multiply-order fix
+		is a no-op, and with `RotationMultiplier == 1`, where the multiplier-collapsing bug above
+		can't be the culprit either). Fixed by canonicalizing the extracted delta axis to be
+		continuous with the previous call's delta axis (`lastDeltaAxis`), which is the standard fix
+		for this class of quaternion/axis-angle double-cover instability. */
+	var lastDeltaAxis:Vector = null;
+
+	function rotInterpolate(rot1:Quat, rot2:Quat, t:Float, multiplier:Float = 1.0):Quat {
+		var mat1 = scratchRotMat1;
+		var mat2 = scratchRotMat2;
+		rot1.toMatrix(mat1);
+		rot2.toMatrix(mat2);
+
+		// C++: matSub = mat2 * inverse(mat1) -> reversed here: inverse(mat1) * mat2.
+		var matSub = scratchRotMatSub;
+		mat1.getInverse(scratchRotMat1Inv);
+		matSub.multiply(scratchRotMat1Inv, mat2);
+
+		var delta = scratchRotDelta;
+		axisAngleFromMatrix(matSub, delta);
+		if (this.lastDeltaAxis != null && delta.axis.dot(this.lastDeltaAxis) < 0) {
+			delta.axis.set(-delta.axis.x, -delta.axis.y, -delta.axis.z);
+			delta.angle = 2 * Math.PI - delta.angle;
+		}
+		if (this.lastDeltaAxis == null)
+			this.lastDeltaAxis = new Vector();
+		this.lastDeltaAxis.set(delta.axis.x, delta.axis.y, delta.axis.z);
+
+		delta.angle *= t;
+
+		// C++: newMat = a.toMatrix() * mat1 -> reversed here: mat1 * a.toMatrix().
+		var deltaMat = scratchRotDeltaMat;
+		deltaMat.initRotationAxis(delta.axis, delta.angle);
+		var composedMat = scratchRotComposedMat;
+		composedMat.multiply(mat1, deltaMat);
+
+		var finalAA = scratchRotFinal;
+		axisAngleFromMatrix(composedMat, finalAA);
+		finalAA.angle *= multiplier;
+
+		var finalMat = scratchRotFinalMat;
+		finalMat.initRotationAxis(finalAA.axis, finalAA.angle);
+		// This Quat escapes into PathFollowerState (frameStartState/frameEndState), which needs two
+		// independent live instances at once - must NOT be a pooled scratch, unlike everything above.
 		var retQuat = new Quat();
-		retQuat.initRotateMatrix(retMat);
+		retQuat.initRotateMatrix(finalMat);
 		return retQuat;
 	}
 

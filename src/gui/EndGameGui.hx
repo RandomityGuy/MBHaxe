@@ -270,11 +270,11 @@ class EndGameGui extends GuiControl {
 		var textTTs = "";
 		if (totalTTs != 0) {
 			var plural = totalTTs > 1 ? "s" : "";
-			textTTs = '<font color="#00FF00">(${pickedUp}/${totalTTs} TT${plural})</font>';
+			textTTs = ' <font color="#00FF00">(${pickedUp}/${totalTTs} TT${plural})</font>';
 		}
 
 		textLeft += '<p align="left">Clock Bonuses:</p>';
-		textRight += '<p align="right">${Util.formatTime(MarbleGame.instance.world.collectedBonusTime)} ${textTTs}</p>';
+		textRight += '<p align="right">${Util.formatTime(MarbleGame.instance.world.collectedBonusTime)}${textTTs}</p>';
 
 		textLeft += "</font>";
 		textRight += "</font>";

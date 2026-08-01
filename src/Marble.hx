@@ -4044,10 +4044,14 @@ class Marble extends GameObject {
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(UsedPowerup))
 				move.powerup = true;
 			move.d = new Vector(this.level.replay.currentPlaybackFrame.marbleX, this.level.replay.currentPlaybackFrame.marbleY, 0);
+			// Continuous hold input - drives Bubble/Cannon's charge-and-fire state machines, which
+			// otherwise never see the key held during replay playback (see `Replay.hx`'s
+			// `ReplayFrame.powerupHeld` doc comment).
+			move.powerupHeld = this.level.replay.currentPlaybackFrame.powerupHeld;
 		} else {
 			if (this.level.isRecording) {
 				this.level.replay.recordMarbleStateFlags(move.jump, move.powerup, false, false);
-				this.level.replay.recordMarbleInput(move.d.x, move.d.y);
+				this.level.replay.recordMarbleInput(move.d.x, move.d.y, move.powerupHeld);
 			}
 		}
 		if (!this.controllable && (this.connection != null || this.level == null)) {

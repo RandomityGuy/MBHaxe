@@ -6,27 +6,28 @@ import src.ResourceLoader;
 import src.MarbleGame;
 import src.Settings;
 import src.Util;
+import src.Mission;
 
-class LoadingGui extends GuiImage {
+class LoadingGui extends GuiControl {
 	public var setProgress:Float->Void;
 
-	public function new(missionName:String, game:String, isMultiplayer:Bool = false) {
-		function chooseBg() {
-			if (game == "gold")
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (game == "platinum")
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			if (game == "ultra")
-				return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-		}
-
-		var img = chooseBg();
-		super(img.resource.toTile());
+	public function new(mission:Mission, isMultiplayer:Bool = false) {
+		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.extent = new Vector(800, 600);
 		this.position = new Vector();
+
+		var levelPreview = new GuiImage(ResourceLoader.getResource("data/ui/play/missingicon.png", ResourceLoader.getImage, this.imageResources).toTile());
+		levelPreview.horizSizing = Width;
+		levelPreview.vertSizing = Height;
+		levelPreview.position = new Vector(0, 0);
+		levelPreview.extent = new Vector(800, 600);
+		this.addChild(levelPreview);
+
+		mission.getBigPreviewImage(prev -> {
+			levelPreview.bmp.tile = prev;
+		});
 
 		var loadingBody = new GuiControl();
 		loadingBody.horizSizing = Center;
@@ -70,7 +71,7 @@ class LoadingGui extends GuiImage {
 		loadingLevel.position = new Vector(305, 65);
 		loadingLevel.extent = new Vector(456, 65);
 		loadingLevel.text.textColor = 0x000000;
-		loadingLevel.text.text = missionName;
+		loadingLevel.text.text = mission.title;
 		loadingBody.addChild(loadingLevel);
 
 		var loadingMessage = new GuiText(squishney28);
@@ -79,6 +80,7 @@ class LoadingGui extends GuiImage {
 		loadingMessage.extent = new Vector(700, 96);
 		loadingMessage.text.textColor = 0x000000;
 		loadingMessage.text.text = "Message.";
+		loadingMessage.text.lineSpacing = 4;
 		loadingMessage.text.maxWidth = 700;
 		loadingBody.addChild(loadingMessage);
 
