@@ -540,6 +540,10 @@ class Settings {
 					Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 			}
 
+			#if js
+			MarbleGame.canvas.onResize(MarbleGame.canvas.scene2d.width, MarbleGame.canvas.scene2d.height);
+			#end
+
 			MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
 		});
 	}

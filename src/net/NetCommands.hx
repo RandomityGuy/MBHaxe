@@ -68,7 +68,7 @@ class NetCommands {
 		if (Net.isClient) {
 			MissionList.buildMissionList();
 			if (category == "custom") {
-				var curMission = Marbleland.multiplayerMissions[levelIndex];
+				var curMission = null;
 				MarbleGame.instance.playMission(curMission, true);
 			} else {
 				var difficultyMissions = MissionList.missionList['multiplayer'][category];

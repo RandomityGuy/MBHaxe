@@ -3970,20 +3970,24 @@ class Marble extends GameObject {
 	public function recordMove() {
 		var move = new Move();
 		move.d = new Vector();
-		move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
-		move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
+		if (movementTriggerCount <= 0) {
+			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
+			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
+		}
 		if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
-			if (Key.isDown(Settings.controlsSettings.forward)) {
-				move.d.x -= 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.backward)) {
-				move.d.x += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.left)) {
-				move.d.y += 1;
-			}
-			if (Key.isDown(Settings.controlsSettings.right)) {
-				move.d.y -= 1;
+			if (movementTriggerCount <= 0) {
+				if (Key.isDown(Settings.controlsSettings.forward)) {
+					move.d.x -= 1;
+				}
+				if (Key.isDown(Settings.controlsSettings.backward)) {
+					move.d.x += 1;
+				}
+				if (Key.isDown(Settings.controlsSettings.left)) {
+					move.d.y += 1;
+				}
+				if (Key.isDown(Settings.controlsSettings.right)) {
+					move.d.y -= 1;
+				}
 			}
 			move.d.x = Util.clamp(move.d.x, -1, 1);
 			move.d.y = Util.clamp(move.d.y, -1, 1);
@@ -4016,7 +4020,7 @@ class Marble extends GameObject {
 				}
 			}
 
-			if (MarbleGame.instance.touchInput.movementInput.pressed) {
+			if (movementTriggerCount <= 0 && MarbleGame.instance.touchInput.movementInput.pressed) {
 				move.d.y = -MarbleGame.instance.touchInput.movementInput.value.x;
 				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
 			}

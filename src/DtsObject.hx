@@ -78,6 +78,7 @@ class DtsObject extends GameObject {
 	/** Resolves a dts material name, honoring an exact-match override first, then falling back
 		to a Torque-style skin substitution (replacing a leading "base" with `skinOverride`). */
 	public function resolveMatName(matName:String):String {
+		matName = StringTools.trim(matName);
 		if (matNameOverride.exists(matName))
 			return matNameOverride.get(matName);
 		if (skinOverride != null && StringTools.startsWith(matName, "base."))
