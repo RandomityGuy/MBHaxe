@@ -1,5 +1,0 @@
-These levels here are former Bonus levels that aren't very good and are in fact, awful.
-If you disagree with what was moved out of Bonus, move it back.
-In addition, previous "Custom" levels have been moved to "oldCustom."
-
-ALL MISSIONS IN THIS FOLDER WILL NOT MAKE IT TO THE FINAL RELEASE BUILD OF 2.00.
