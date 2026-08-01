@@ -16,8 +16,13 @@ class Checkpoint extends DtsObject {
 
 	public function new(element:MissionElementStaticShape) {
 		super();
-		this.isPQ = element.datablock.toLowerCase() == "checkpoint_pq";
-		this.dtsPath = this.isPQ ? "data/shapes_pq/gameplay/pads/checkpoint.dts" : "data/shapes/buttons/checkpoint.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.isPQ = datablockLower == "checkpoint_pq";
+		this.dtsPath = switch (datablockLower) {
+			case "checkpoint_pq": "data/shapes_pq/gameplay/pads/checkpoint.dts";
+			case "checkpoint_mbu": "data/shapes_mbu/pads/checkpad.dts";
+			default: "data/shapes/buttons/checkpoint.dts";
+		}
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the

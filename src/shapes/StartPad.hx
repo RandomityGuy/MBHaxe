@@ -10,6 +10,7 @@ class StartPad extends DtsObject {
 		dtsPath = switch (datablockLower) {
 			case "startpad_pq": "data/shapes_pq/gameplay/pads/startpad.dts";
 			case "startpad_pq_construction": "data/shapes_pq/gameplay/pads/startpadconst.dts";
+			case "startpad_mbu": "data/shapes_mbu/pads/mbu/startarea.dts";
 			default: "data/shapes/pads/startarea.dts";
 		}
 		isCollideable = true;

@@ -9,7 +9,12 @@ import src.MarbleWorld;
 class ShockAbsorber extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/pillow.dts" : "data/shapes/items/shockabsorber.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.dtsPath = switch (datablockLower) {
+			case "shockabsorberitem_pq": "data/shapes_pq/gameplay/powerups/pillow.dts";
+			case "shockabsorberitem_mbu": "data/shapes_mbu/items/shockabsorber.dts";
+			default: "data/shapes/items/shockabsorber.dts";
+		}
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the

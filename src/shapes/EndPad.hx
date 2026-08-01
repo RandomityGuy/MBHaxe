@@ -31,13 +31,16 @@ class EndPad extends DtsObject {
 	var finishCollider:ConvexHull;
 	var finishBounds:Bounds;
 	var inFinish:Bool = false;
+	var isMbu:Bool;
 
 	public function new(?element:MissionElementStaticShape) {
 		super();
 		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
+		this.isMbu = datablockLower == "endpad_mbu";
 		this.dtsPath = switch (datablockLower) {
 			case "endpad_pq": "data/shapes_pq/gameplay/pads/endpad.dts";
 			case "endpad_pq_construction": "data/shapes_pq/gameplay/pads/endpadconst.dts";
+			case "endpad_mbu": "data/shapes_mbu/pads/mbu/endarea.dts";
 			default: "data/shapes/pads/endarea.dts";
 		}
 		this.isCollideable = true;
@@ -49,7 +52,29 @@ class EndPad extends DtsObject {
 		super.init(level, () -> {
 			var worker = new src.ResourceLoaderWorker(onFinish);
 			AudioManager.preloadPitchedSound("firewrks", worker);
+			if (this.isMbu)
+				worker.addTask(fwd -> this.spawnLightBeam(fwd));
 			worker.run();
+		});
+	}
+
+	/** Ported from `EndPad_MBU::onAdd` (`server/scripts/pads.cs`) - `EndPad_MBU` spawns a purely
+		decorative light-beam column (`MBU_LightBeam`, `className = ""` despite inheriting the
+		`EndPad` datablock - that inheritance is just for convenience defaults, not actual finish-pad
+		behavior) rigidly attached with zero offset/rotation at the end pad's own transform. Same
+		scene-graph-child approach as `Checkpoint.hx`'s `SillyGlass` (a checkpoint/end pad never
+		moves, so real parent-child scene graph nesting - inheriting position/rotation/scale for free
+		- is simpler than a separately-tracked, manually-synced object). */
+	function spawnLightBeam(onFinish:Void->Void) {
+		var beam = new DtsObject();
+		beam.dtsPath = "data/shapes_mbu/pads/mbu/lightbeam.dts";
+		beam.identifier = "MbuLightBeam";
+		beam.isCollideable = false;
+		beam.isBoundingBoxCollideable = false;
+		beam.useInstancing = true;
+		this.level.addDtsObject(beam, () -> {
+			this.addChild(beam);
+			onFinish();
 		});
 	}
 

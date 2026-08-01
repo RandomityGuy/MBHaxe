@@ -158,7 +158,11 @@ class Gem extends DtsObject {
 		super();
 		var isFancy = StringTools.startsWith(element.datablock, "FancyGemItem");
 		var isPQ = StringTools.endsWith(element.datablock, "_PQ");
-		dtsPath = isFancy ? "data/shapes_pq/gameplay/gems/gem_fancy.dts" : (isPQ ? "data/shapes_pq/gameplay/gems/gem.dts" : "data/shapes/items/gem.dts");
+		var isMbu = StringTools.endsWith(element.datablock, "_MBU");
+		dtsPath = if (isFancy) "data/shapes_pq/gameplay/gems/gem_fancy.dts";
+		else if (isPQ) "data/shapes_pq/gameplay/gems/gem.dts";
+		else if (isMbu) "data/shapes_mbu/items/gem.dts";
+		else "data/shapes/items/gem.dts";
 		ambientRotate = true;
 		isCollideable = false;
 		this.isBoundingBoxCollideable = true;

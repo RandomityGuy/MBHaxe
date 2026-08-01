@@ -150,9 +150,12 @@ class LandMine extends Explodable {
 
 	public function new(?element:MissionElementStaticShape) {
 		super();
-		if (element != null && element.datablock.toLowerCase() == "landmine_pq") {
+		var datablockLower = element != null ? element.datablock.toLowerCase() : "";
+		if (datablockLower == "landmine_pq") {
 			dtsPath = "data/shapes_pq/gameplay/hazards/mine/landmine.dts";
 			this.skinOverride = "base";
+		} else if (datablockLower == "landmine_mbm") {
+			dtsPath = "data/shapes_mbu/hazards/landmine.dts";
 		} else
 			dtsPath = "data/shapes/hazards/landmine.dts";
 		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the

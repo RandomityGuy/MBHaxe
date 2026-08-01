@@ -48,6 +48,7 @@ import shapes.EndPad;
 import shapes.SignFinish;
 import shapes.SignPlain;
 import shapes.SignCaution;
+import shapes.ArrowSign;
 import shapes.Sign;
 import shapes.Gem;
 import shapes.SuperJump;
@@ -202,11 +203,15 @@ class DatablockRegistry {
 			create: element -> new SignCaution(cast element)
 		},
 		{
-			match: Exact(["superbounceitem", "superbounceitem_pq"]),
+			match: Exact(["arrowup", "arrowside", "arrowdown"]),
+			create: element -> new ArrowSign(cast element)
+		},
+		{
+			match: Exact(["superbounceitem", "superbounceitem_pq", "superbounceitem_mbu"]),
 			create: element -> new SuperBounce(cast element)
 		},
 		{
-			match: Exact(["roundbumper", "bumper", "roundbumper_pq"]),
+			match: Exact(["roundbumper", "bumper", "roundbumper_pq", "roundbumper_mbu", "roundbumper_original"]),
 			create: element -> new RoundBumper(cast element)
 		},
 		{
@@ -245,7 +250,7 @@ class DatablockRegistry {
 			create: element -> new DuctFan(cast element)
 		},
 		{
-			match: Exact(["smallductfan", "smallductfan_mbm", "smallductfan_pq"]),
+			match: Exact(["smallductfan", "smallductfan_mbm", "smallductfan_mbu", "smallductfan_pq"]),
 			create: element -> new SmallDuctFan(cast element)
 		},
 		{
@@ -269,7 +274,7 @@ class DatablockRegistry {
 			create: element -> new Nuke(cast element)
 		},
 		{
-			match: Exact(["shockabsorberitem", "shockabsorberitem_pq"]),
+			match: Exact(["shockabsorberitem", "shockabsorberitem_pq", "shockabsorberitem_mbu"]),
 			create: element -> new ShockAbsorber(cast element)
 		},
 		{
