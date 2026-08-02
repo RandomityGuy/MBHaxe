@@ -272,7 +272,7 @@ class Cannon extends DtsObject {
 		var fields = element.fields;
 		function getStr(name:String, def:String):String {
 			var f = fields.get(name);
-			return f != null && f[0] != "" ? f[0] : def;
+			return f != null && f[0] != "" ? f[0].toLowerCase() : def;
 		}
 		function getNum(name:String, def:Float):Float {
 			var f = fields.get(name);

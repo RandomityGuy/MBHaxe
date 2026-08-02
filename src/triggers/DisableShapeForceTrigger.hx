@@ -13,7 +13,7 @@ class DisableShapeForceTrigger extends Trigger {
 		for (name in targetField) {
 			if (name == null || name == "")
 				continue;
-			var named = this.level.namedObjects.get(name);
+			var named = this.level.namedObjects.get(name.toLowerCase());
 			if (named != null && named.obj is ForceObject)
 				callback(cast named.obj);
 		}

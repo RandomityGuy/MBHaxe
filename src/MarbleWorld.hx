@@ -1183,12 +1183,14 @@ class MarbleWorld extends Scheduler {
 						// the PathedInterior element's own name, not the containing SimGroup's -
 						// every other placed object is looked up by its own element name too.
 						if (@:privateAccess pathedInterior.element._name != null && @:privateAccess pathedInterior.element._name != "")
-							this.namedGameObjects.set(@:privateAccess pathedInterior.element._name, pathedInterior);
+							this.namedGameObjects.set(@:privateAccess pathedInterior.element._name.toLowerCase(), pathedInterior);
 						if (simGroup._name != null && simGroup._name != "")
-							this.namedGameObjects.set(simGroup._name, pathedInterior);
+							this.namedGameObjects.set(simGroup._name.toLowerCase(), pathedInterior);
 						for (trigger in pathedInterior.triggers) {
 							this.triggers.push(trigger);
 							this.collisionWorld.addEntity(trigger.collider);
+							if (@:privateAccess trigger.element._name != null && @:privateAccess trigger.element._name != "")
+								this.namedGameObjects.set(@:privateAccess trigger.element._name.toLowerCase(), trigger);
 						}
 						fwd();
 					});
@@ -1244,7 +1246,7 @@ class MarbleWorld extends Scheduler {
 		var interior = new InteriorObject();
 		interior.interiorFile = difPath;
 		if (element._name != null && element._name != "")
-			this.namedGameObjects.set(element._name, interior);
+			this.namedGameObjects.set(element._name.toLowerCase(), interior);
 		// DifBuilder.loadDif(difPath, interior);
 		// this.interiors.push(interior);
 		this.addInterior(interior, () -> {
@@ -1330,12 +1332,12 @@ class MarbleWorld extends Scheduler {
 		}
 
 		if (element._name != null && element._name != "") {
-			this.namedObjects.set(element._name, {
+			this.namedObjects.set(element._name.toLowerCase(), {
 				obj: shape,
 				elem: cast element
 			});
 			if (shape != null)
-				this.namedGameObjects.set(element._name, shape);
+				this.namedGameObjects.set(element._name.toLowerCase(), shape);
 		}
 
 		var shapePosition = MisParser.parseVector3(element.position);
@@ -1387,7 +1389,7 @@ class MarbleWorld extends Scheduler {
 		var trigger = entry.create(element, cast this);
 
 		if (element._name != null && element._name != "")
-			this.namedGameObjects.set(element._name, trigger);
+			this.namedGameObjects.set(element._name.toLowerCase(), trigger);
 		trigger.initPathAndParent(cast element, this);
 
 		trigger.init(() -> {
@@ -1425,11 +1427,11 @@ class MarbleWorld extends Scheduler {
 		tsShape.showSequences = false;
 
 		if (element._name != null && element._name != "") {
-			this.namedObjects.set(element._name, {
+			this.namedObjects.set(element._name.toLowerCase(), {
 				obj: tsShape,
 				elem: element
 			});
-			this.namedGameObjects.set(element._name, tsShape);
+			this.namedGameObjects.set(element._name.toLowerCase(), tsShape);
 		}
 
 		var shapePosition = MisParser.parseVector3(element.position);

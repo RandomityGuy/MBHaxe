@@ -475,7 +475,8 @@ class EndGameGui extends GuiControl {
 					var lbPath = mission.path;
 					if (mission.isClaMission)
 						lbPath = 'custom/${mission.id}';
-					Leaderboards.submitScore(lbPath, score, rewindUsed, (sendReplay, rowId) -> {
+					var scoreToSubmit = scoreType == Time ? score : (1000000 - score);
+					Leaderboards.submitScore(lbPath, scoreToSubmit, rewindUsed, (sendReplay, rowId) -> {
 						if (sendReplay && !mission.isClaMission) {
 							Leaderboards.submitReplay(rowId, replay.write());
 						}
@@ -501,8 +502,9 @@ class EndGameGui extends GuiControl {
 					}
 				}
 				if (!cheatsUsed) {
-					if (!hasMyScore || (hasMyScore && myTopScoreLB > timeState.gameplayClock)) {
-						Leaderboards.submitScore(lbPath, timeState.gameplayClock, rewindUsed, (sendReplay, rowId) -> {
+					var scoreToSubmit = scoreType == Time ? score : (1000000 - score);
+					if (!hasMyScore || (hasMyScore && myTopScoreLB > scoreToSubmit)) {
+						Leaderboards.submitScore(lbPath, scoreToSubmit, rewindUsed, (sendReplay, rowId) -> {
 							if (sendReplay && !mission.isClaMission) {
 								Leaderboards.submitReplay(rowId, replay.write());
 							}

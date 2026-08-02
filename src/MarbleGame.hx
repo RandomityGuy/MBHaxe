@@ -403,8 +403,7 @@ class MarbleGame {
 			world.dispose();
 		}
 		Analytics.trackLevelPlay(mission.title, mission.path);
-		// TODO SET RECORD TO TRUE ONCE WE ARE PQ COMPLETE
-		world = new MarbleWorld(scene, scene2d, mission, MarbleGame.instance.toRecord, multiplayer);
+		world = new MarbleWorld(scene, scene2d, mission, true, multiplayer);
 		world.init();
 	}
 

@@ -42,7 +42,7 @@ class GameObjectParentFollower {
 
 		function field(key:String):String {
 			var f = element.fields.get(key);
-			return f != null ? f[0] : null;
+			return f != null ? f[0].toLowerCase() : null;
 		}
 
 		this.parentName = field("parent");

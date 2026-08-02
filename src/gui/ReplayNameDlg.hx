@@ -63,7 +63,7 @@ class ReplayNameDlg extends GuiControl {
 		if (MarbleGame.instance.world.finishTime == null) {
 			textInput.text.text += " Unfinished Run";
 		} else {
-			textInput.text.text += " " + MarbleGame.instance.world.finishTime.gameplayClock;
+			textInput.text.text += " " + MarbleGame.instance.world.gameMode.getFinishScore().score;
 		}
 
 		var yesButton = new GuiButton(loadButtonImages("data/ui/common/ok"));

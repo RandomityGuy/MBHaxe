@@ -437,8 +437,8 @@ class PlayMissionGui extends GuiControl {
 
 		var missionScoresInfoLeft = new GuiMLText(whatneyFont21, null);
 		missionScoresInfoLeft.horizSizing = Left;
-		missionScoresInfoLeft.position = new Vector(128, 0);
-		missionScoresInfoLeft.extent = new Vector(186, 162);
+		missionScoresInfoLeft.position = new Vector(98, 0);
+		missionScoresInfoLeft.extent = new Vector(222, 162);
 		missionScoresInfoLeft.text.textColor = 0;
 		missionScoresInfoLeft.text.text = "Score1";
 		missionScoresInfoLeft.text.lineSpacing = 4;
@@ -446,8 +446,8 @@ class PlayMissionGui extends GuiControl {
 
 		var missionScoresInfoRight = new GuiMLText(whatneyFont21, null);
 		missionScoresInfoRight.horizSizing = Left;
-		missionScoresInfoRight.position = new Vector(128, 0);
-		missionScoresInfoRight.extent = new Vector(172, 162);
+		missionScoresInfoRight.position = new Vector(98, 0);
+		missionScoresInfoRight.extent = new Vector(218, 162);
 		missionScoresInfoRight.text.textColor = 0;
 		missionScoresInfoRight.text.text = "Score1";
 		missionScoresInfoRight.text.lineSpacing = 4;
@@ -455,7 +455,7 @@ class PlayMissionGui extends GuiControl {
 
 		var missionInfoLeft = new GuiMLText(whatneyFont21, mlFontLoader);
 		missionInfoLeft.position = new Vector(0, 0);
-		missionInfoLeft.extent = new Vector(194, 138);
+		missionInfoLeft.extent = new Vector(144, 138);
 		missionInfoLeft.text.textColor = 0;
 		missionInfoLeft.text.text = "Grab all the gems to finish!";
 		missionInfoLeft.text.lineSpacing = 4;
@@ -464,7 +464,7 @@ class PlayMissionGui extends GuiControl {
 
 		var missionInfoRight = new GuiMLText(whatneyFont21, mlFontLoader);
 		missionInfoRight.position = new Vector(0, 0);
-		missionInfoRight.extent = new Vector(194, 138);
+		missionInfoRight.extent = new Vector(164, 138);
 		missionInfoRight.text.textColor = 0;
 		missionInfoRight.text.text = "Grab all the gems to finish!";
 		missionInfoRight.text.lineSpacing = 4;
@@ -483,7 +483,7 @@ class PlayMissionGui extends GuiControl {
 		var sep = new GuiImage(ResourceLoader.getResource("data/ui/play/extras/extraslinev.png", ResourceLoader.getImage, this.imageResources).toTile());
 		sep.horizSizing = Left;
 		sep.vertSizing = Height;
-		sep.position = new Vector(124, 3);
+		sep.position = new Vector(94, 3);
 		sep.extent = new Vector(2, 159);
 		missionInfoPanel.addChild(sep);
 
@@ -1039,11 +1039,17 @@ class PlayMissionGui extends GuiControl {
 						var boxRenderRect = missionInfoPanel.getRenderRectangle();
 
 						for (score in scores) {
+							var scoreType = Time;
+							if (score.score > 100000) {
+								scoreType = Score;
+								score.score = 1000000 - score.score; // revert the negation
+							}
+
 							sFmt.push('${i}. 
 								<offset value="15">${StringTools.htmlEscape(score.name.substr(0, 30))}</offset>
-								<offset value="${boxRenderRect.extent.x - 198 - 120}">${Util.formatTime(score.score)}</offset>
-								<offset value="${boxRenderRect.extent.x - 198 - 100 + 64}"><img src="${platformToString(score.platform)}"/></offset>
-								${score.rewind == 1 ? '<offset value="${boxRenderRect.extent.x - 198 - 16}"><img src="rewind"/></offset> ' : ""}');
+								<offset value="${boxRenderRect.extent.x - 228 - 120}">${scoreType == Time ? Util.formatTime(score.score) : Util.formatScore(Std.int(score.score))}</offset>
+								<offset value="${boxRenderRect.extent.x - 228 - 100 + 64}"><img src="${platformToString(score.platform)}"/></offset>
+								${score.rewind == 1 ? '<offset value="${boxRenderRect.extent.x - 228 - 16}"><img src="rewind"/></offset> ' : ""}');
 							i++;
 						}
 						text += sFmt.join('<br/>');
@@ -1106,9 +1112,9 @@ class PlayMissionGui extends GuiControl {
 
 			var boxRenderRect = missionInfoPanel.getRenderRectangle();
 
-			missionInfoLeft.extent.x = boxRenderRect.extent.x - 198;
-			missionInfoRight.extent.x = boxRenderRect.extent.x - 198;
-			missionModesInfo.extent.x = boxRenderRect.extent.x - 198;
+			missionInfoLeft.extent.x = boxRenderRect.extent.x - 228;
+			missionInfoRight.extent.x = boxRenderRect.extent.x - 228;
+			missionModesInfo.extent.x = boxRenderRect.extent.x - 228;
 
 			var descTextHeight = missionInfoLeft.text.textHeight;
 			var modeTextHeight = missionModesInfo.text.textHeight;

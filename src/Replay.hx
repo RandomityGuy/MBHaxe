@@ -214,6 +214,7 @@ class Replay {
 	// consumer actually reads.
 	var playbackFrameA:ReplayFrame = new ReplayFrame();
 	var playbackFrameB:ReplayFrame = new ReplayFrame();
+
 	public var currentPlaybackFrame:ReplayFrame = new ReplayFrame();
 
 	var currentPlaybackFrameIdx:Int;
@@ -242,8 +243,8 @@ class Replay {
 		if (!recordingActive)
 			return;
 		recordingActive = false;
-		// Do not record frames beyond par time/5 minutes to limit file size, if we aren't explicitly recording
-		if (!MarbleGame.instance.toRecord && recordScratch.clockTime > Math.min(300, MarbleGame.instance.world.mission.qualifyTime))
+		// Do not record frames beyond par time/10 minutes to limit file size, if we aren't explicitly recording
+		if (!MarbleGame.instance.toRecord && recordScratch.clockTime > Math.min(600, MarbleGame.instance.world.mission.qualifyTime))
 			return;
 		frameData.push(recordScratch.time);
 		frameData.push(recordScratch.clockTime);

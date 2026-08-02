@@ -82,7 +82,7 @@ class RelativeTPTrigger extends Trigger {
 		if (destinationList.length > 0)
 			return destinationList[0].collider.boundingBox.getCenter().toVector();
 
-		var named = this.level.namedObjects.get(this.destination);
+		var named = this.level.namedObjects.get(this.destination.toLowerCase());
 		if (named != null && named.obj != null)
 			return new Vector(named.obj.x, named.obj.y, named.obj.z);
 
