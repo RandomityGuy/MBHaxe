@@ -301,7 +301,7 @@ class DifBuilder {
 	public static function createPhongMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
 			uvScaleFactor:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var diffuseTex = ResourceLoader.getTexture(ResourceLoader.resolveTexture('data/interiors_mbu/${baseTexture}')).resource;
 			diffuseTex.wrap = Repeat;
 			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/${normalTexture}').resource;
@@ -313,7 +313,7 @@ class DifBuilder {
 				shader.isHalfTile = true;
 			onFinish(shader);
 		});
-		worker.loadFile('interiors_mbu/${baseTexture}');
+		worker.loadFile(ResourceLoader.resolveTexture('data/interiors_mbu/${baseTexture}'));
 		worker.loadFile('shaders/tex/${normalTexture}');
 		worker.run();
 	}
@@ -321,7 +321,7 @@ class DifBuilder {
 	public static function createNoiseTileMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, noiseSuffix:String, shininess:Float, specular:Vector,
 			uvScale:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var diffuseTex = ResourceLoader.getTexture(ResourceLoader.resolveTexture('data/interiors_mbu/${baseTexture}')).resource;
 			diffuseTex.wrap = Repeat;
 			diffuseTex.mipMap = Nearest;
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/tile_mbu.normal.png').resource;
@@ -334,7 +334,7 @@ class DifBuilder {
 				MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, uvScale);
 			onFinish(shader);
 		});
-		worker.loadFile('interiors_mbu/${baseTexture}');
+		worker.loadFile(ResourceLoader.resolveTexture('data/interiors_mbu/${baseTexture}'));
 		worker.loadFile('shaders/tex/noise${noiseSuffix}.jpg');
 		worker.loadFile('shaders/tex/tile_mbu.spec.jpg');
 		worker.loadFile('shaders/tex/tile_mbu.normal.png');
@@ -343,14 +343,14 @@ class DifBuilder {
 
 	public static function createNormalMapMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
+			var diffuseTex = ResourceLoader.getTexture(ResourceLoader.resolveTexture('data/interiors_mbu/${baseTexture}')).resource;
 			var normalTex = ResourceLoader.getTexture('data/shaders/tex/${normalTexture}').resource;
 			normalTex.wrap = Repeat;
 			var shader = new NormalMaterial(diffuseTex, normalTex, MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight,
 				MarbleGame.instance.world.dirLightDir);
 			onFinish(shader);
 		});
-		worker.loadFile('interiors_mbu/${baseTexture}');
+		worker.loadFile(ResourceLoader.resolveTexture('data/interiors_mbu/${baseTexture}'));
 		worker.loadFile('shaders/tex/${normalTexture}');
 		worker.run();
 	}
@@ -370,7 +370,7 @@ class DifBuilder {
 	public static function createPQMaterialPaths(onFinish:hxsl.Shader->Void, diffusePath:String, normalPath:String, specularPath:String,
 			secondaryFactor:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/${diffusePath}').resource;
+			var diffuseTex = ResourceLoader.getTexture(ResourceLoader.resolveTexture('data/${diffusePath}')).resource;
 			var normalTex = ResourceLoader.getTexture('data/${normalPath}').resource;
 			normalTex.wrap = Repeat;
 			var specularTex = ResourceLoader.getTexture('data/${specularPath}').resource;
@@ -379,7 +379,7 @@ class DifBuilder {
 				MarbleGame.instance.world.dirLightDir, secondaryFactor);
 			onFinish(shader);
 		});
-		worker.loadFile('data/${diffusePath}');
+		worker.loadFile(ResourceLoader.resolveTexture('data/${diffusePath}'));
 		worker.loadFile('data/${normalPath}');
 		worker.loadFile('data/${specularPath}');
 		worker.run();
@@ -392,7 +392,7 @@ class DifBuilder {
 	public static function createSkyboxIceMaterial(onFinish:hxsl.Shader->Void, diffusePath:String, normalPath:String, specularPath:String, reflectivity:Float,
 			textureScale:Vector) {
 		var worker = new ResourceLoaderWorker(() -> {
-			var diffuseTex = ResourceLoader.getTexture('data/${diffusePath}').resource;
+			var diffuseTex = ResourceLoader.getTexture(ResourceLoader.resolveTexture('data/${diffusePath}')).resource;
 			diffuseTex.wrap = Repeat;
 			var normalTex = ResourceLoader.getTexture('data/${normalPath}').resource;
 			normalTex.wrap = Repeat;
@@ -402,7 +402,7 @@ class DifBuilder {
 				MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, textureScale);
 			onFinish(shader);
 		});
-		worker.loadFile('data/${diffusePath}');
+		worker.loadFile(ResourceLoader.resolveTexture('data/${diffusePath}'));
 		worker.loadFile('data/${normalPath}');
 		worker.loadFile('data/${specularPath}');
 		worker.run();

@@ -83,7 +83,13 @@ class Http {
 		return req;
 		#else
 		return js.Browser.window.setTimeout(() -> {
-			js.Browser.window.fetch(url).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
+			js.Browser.window.fetch(url).then(r -> {
+				if (!r.ok) {
+					errCallback('${r.status} ${r.statusText}');
+				} else {
+					r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b)), e -> errCallback(Std.string(e)));
+				}
+			}, e -> errCallback(e.toString()));
 		}, 75);
 		#end
 	}
@@ -112,7 +118,13 @@ class Http {
 						"Content-Type": "application/json",
 					},
 					body: postData
-				}).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
+				}).then(r -> {
+					if (!r.ok) {
+						errCallback('${r.status} ${r.statusText}');
+					} else {
+						r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b)), e -> errCallback(Std.string(e)));
+					}
+				}, e -> errCallback(e.toString()));
 		}, 75);
 		#end
 	}
@@ -143,7 +155,13 @@ class Http {
 						"Content-Type": "application/octet-stream",
 					},
 					body: data.getData()
-				}).then(r -> r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b))), e -> errCallback(e.toString()));
+				}).then(r -> {
+					if (!r.ok) {
+						errCallback('${r.status} ${r.statusText}');
+					} else {
+						r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b)), e -> errCallback(Std.string(e)));
+					}
+				}, e -> errCallback(e.toString()));
 		}, 75);
 		#end
 	}

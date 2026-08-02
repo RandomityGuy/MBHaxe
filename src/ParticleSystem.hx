@@ -284,8 +284,6 @@ class ParticleEmitter {
 
 	public function tick(time:Float, dt:Float) {
 		// Cap the amount of particles emitted in such a case to prevent lag
-		if (this.lastEmitTime > time)
-			this.lastEmitTime = time - 1000;
 		if (time - this.lastEmitTime >= 1000)
 			this.lastEmitTime = time - 1000;
 		// Spawn as many particles as needed

@@ -143,6 +143,7 @@ class ResourceLoader {
 			}
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
+		worker.loadFile("data/previews_pq/tutorial/trainingwheels.prev.dds");
 		for (file in toloadfiles) {
 			worker.addTaskParallel((fwd) -> file.load(fwd));
 		}
@@ -152,47 +153,7 @@ class ResourceLoader {
 	static function preloadMisFiles(onFinish:Void->Void) {
 		var toloadfiles = [];
 		var toloaddirs = [];
-		var filestats = fileSystem.dir("missions");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_mbg");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_mbp");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_mbu");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("missions_pq");
-		for (file in filestats) {
-			if (file.isDirectory) {
-				toloaddirs.push(file);
-			} else {
-				toloadfiles.push(file);
-			}
-		}
-		filestats = fileSystem.dir("multiplayer/hunt");
+		var filestats = fileSystem.dir("missions_pq");
 		for (file in filestats) {
 			if (file.isDirectory) {
 				toloaddirs.push(file);
@@ -606,6 +567,18 @@ class ResourceLoader {
 				names.push(file.path);
 		}
 		return names;
+	}
+
+	public static function resolveTexture(path:String) {
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
+		#end
+		var exts = [".png", ".jpg", ".bmp", ".dds"];
+		for (ext in exts) {
+			if (ResourceLoader.exists(path + ext))
+				return path + ext;
+		}
+		return null;
 	}
 
 	public static function loadZip(entries:Array<haxe.zip.Entry>, game:String) {

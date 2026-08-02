@@ -173,6 +173,10 @@ class Sky extends Object {
 					var fmt = skyboxImages[0].format;
 					if (fmt == BGR8)
 						fmt = RGB8;
+					#if js
+					if (fmt == BGRA)
+						fmt = RGBA;
+					#end
 					var cubemaptexture = new Texture(maxheight, maxwidth, [Cube], fmt);
 					for (i in 0...6) {
 						// try resize

@@ -60,7 +60,6 @@ class PlayMissionGui extends GuiControl {
 	#end
 	#if hl
 	var previewToken:Int = 0;
-	var lbToken:Int = 0;
 	var lbRequest:src.Http.HttpRequest = null;
 	#end
 
@@ -986,6 +985,7 @@ class PlayMissionGui extends GuiControl {
 
 		var showLeaderboards = false;
 		var scoreView:LeaderboardsKind = All;
+		var lbToken:Int = 0;
 
 		setSelectedFunc = (idx) -> {
 			if (idx > currentList.length - 1)
