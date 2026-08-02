@@ -128,7 +128,9 @@ class CompositeMode implements GameMode {
 
 	public function onGemPickup(marble:Marble, gem:Gem) {
 		for (m in this.children)
-			m.onGemPickup(marble, gem);
+			if (m.onGemPickup(marble, gem))
+				return true;
+		return false;
 	}
 
 	public function update(t:TimeState) {

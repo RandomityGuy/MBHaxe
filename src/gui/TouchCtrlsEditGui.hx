@@ -25,30 +25,31 @@ class TouchCtrlsEditGui extends GuiImage {
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
-		this.extent = new Vector(640, 480);
+		this.extent = new Vector(800, 600);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed];
-		}
+		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
+		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
+		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
+		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
+		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
 
-		var mainMenuButton = new GuiButton(loadButtonImages("data/ui/menu/options"));
-		mainMenuButton.position = new Vector(380, 15);
-		mainMenuButton.extent = new Vector(247, 164);
+		var mainMenuButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
+		mainMenuButton.position = new Vector(650, 15);
+		mainMenuButton.ratio = 0.42;
+		mainMenuButton.setExtent(new Vector(141, 141));
+		mainMenuButton.txtCtrl.text.text = "Home";
 		mainMenuButton.horizSizing = Left;
 		mainMenuButton.vertSizing = Bottom;
 		mainMenuButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.setContent(new OptionsDlg());
 		}
 
-		var touchControlsTxt = new GuiText(domcasual32);
+		var touchControlsTxt = new GuiText(squishneyFont);
 		touchControlsTxt.position = new Vector(350, 415);
 		touchControlsTxt.extent = new Vector(121, 53);
 		touchControlsTxt.text.text = "Edit Touch Controls";

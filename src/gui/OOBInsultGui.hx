@@ -6,10 +6,9 @@ import src.ResourceLoader;
 import src.Settings;
 import src.MarbleGame;
 
-class OOBInsultGui extends GuiImage {
+class OOBInsultGui extends GuiControl {
 	public function new(title:String, text:String) {
-		var img = ResourceLoader.getImage("data/ui/marbleSelect/marbleSelect.png");
-		super(img.resource.toTile());
+		super();
 
 		MarbleGame.instance.world.setCursorLock(false);
 		MarbleGame.instance.paused = true;
@@ -17,54 +16,57 @@ class OOBInsultGui extends GuiImage {
 		this.horizSizing = Center;
 		this.vertSizing = Center;
 		this.position = new Vector(98, 69);
-		this.extent = new Vector(444, 341);
+		this.extent = new Vector(800, 600);
 
-		var domcasual32fontdata = ResourceLoader.getFileEntry("data/font/DomCasualD.fnt");
-		var domcasual32b = new BitmapFont(domcasual32fontdata.entry);
-		@:privateAccess domcasual32b.loader = ResourceLoader.loader;
-		var domcasual32 = domcasual32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var domcasual64 = domcasual32b.toSdfFont(cast 58 * Settings.uiScale, MultiChannel);
-		var domcasual24 = domcasual32b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
+		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
+		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
-		var arial14b = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
+		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
 
-		function loadButtonImages(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed, disabled];
-		}
+		var wnd = new GuiTransparencyCtrl("data/ui/transparency/pqwindow");
+		wnd.horizSizing = Center;
+		wnd.vertSizing = Center;
+		wnd.position = new Vector(490, 225);
+		wnd.extent = new Vector(444, 341);
+		this.addChild(wnd);
 
-		var titleText = new GuiMLText(domcasual24, null);
+		var titleText = new GuiMLText(squishneyFont28, null);
 		titleText.horizSizing = Center;
-		titleText.position = new Vector(35, 39);
-		titleText.extent = new Vector(374, 25);
+		titleText.position = new Vector(17, 20);
+		titleText.extent = new Vector(410, 29);
 		titleText.text.textColor = 0;
 		titleText.text.text = '<p align="center">${title}</p>';
-		this.addChild(titleText);
+		wnd.addChild(titleText);
 
-		var contentText = new GuiMLText(arial14, null);
+		var contentText = new GuiMLText(whatneyFont, null);
 		contentText.horizSizing = Center;
-		contentText.position = new Vector(33, 66);
-		contentText.extent = new Vector(377, 350);
+		contentText.position = new Vector(16, 53);
+		contentText.extent = new Vector(412, 14);
 		contentText.text.textColor = 0;
 		contentText.text.text = text;
-		this.addChild(contentText);
+		wnd.addChild(contentText);
 
-		var okBtn = new GuiButton(loadButtonImages("data/ui/motd/ok"));
-		okBtn.position = new Vector(179, 254);
-		okBtn.extent = new Vector(88, 41);
-		okBtn.vertSizing = Top;
-		okBtn.pressedAction = (e) -> {
+		var okButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
+		okButton.position = new Vector(175, 269);
+		okButton.setExtent(new Vector(94, 45));
+		okButton.vertSizing = Top;
+		okButton.horizSizing = Center;
+		okButton.accelerator = hxd.Key.ENTER;
+		okButton.gamepadAccelerator = ["A"];
+		okButton.pressedAction = (sender) -> {
 			MarbleGame.instance.paused = false;
 			MarbleGame.canvas.popDialog(this);
 			MarbleGame.instance.world.setCursorLock(true);
 		}
-		this.addChild(okBtn);
+		okButton.txtCtrl.text.text = "Ok";
+
+		wnd.addChild(okButton);
 	}
 
 	public static function OOBCheck() {

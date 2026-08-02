@@ -84,5 +84,7 @@ class QuotaMode extends NullMode {
 
 		this.level.displayAlert(message);
 		@:privateAccess this.level.playGui.formatGemCounter(this.level.gemCount, this.gemQuota);
+
+		return true;
 	}
 }
