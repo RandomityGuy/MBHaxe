@@ -1,5 +1,6 @@
 package gui;
 
+import h3d.Matrix;
 import haxe.DynamicAccess;
 import hxd.BitmapData;
 import h2d.filter.DropShadow;
@@ -41,12 +42,21 @@ class OptionsDlg extends GuiImage {
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
-		this.extent = new Vector(640, 480);
+		this.extent = new Vector(800, 600);
 
-		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
-		var arial14b = new BitmapFont(arial14fontdata.entry);
-		@:privateAccess arial14b.loader = ResourceLoader.loader;
-		var arial14 = arial14b.toSdfFont(cast 12 * Settings.uiScale, MultiChannel);
+		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
+		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
+		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var whatneyFont14 = whatneyFontB.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
+		var whatneyFont20 = whatneyFontB.toSdfFont(cast 17 * Settings.uiScale, MultiChannel);
+
+		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
+		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
+		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
+		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
+		var squishneyFont24 = squishneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -68,32 +78,45 @@ class OptionsDlg extends GuiImage {
 		var window = new GuiImage(ResourceLoader.getResource("data/ui/options/window.png", ResourceLoader.getImage, this.imageResources).toTile());
 		window.horizSizing = Center;
 		window.vertSizing = Center;
-		window.position = new Vector(-72, -47);
+		window.position = new Vector(8, 13);
 		window.extent = new Vector(784, 573);
 		this.addChild(window);
 
-		var generalBtn = new GuiButton(loadButtonImages('data/ui/options/general'));
+		var generalBtn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
 		generalBtn.position = new Vector(102, 19);
-		generalBtn.extent = new Vector(134, 65);
+		generalBtn.ratio = 0.37;
+		generalBtn.setExtent(new Vector(134, 65));
+		generalBtn.txtCtrl.text.text = "General";
 		window.addChild(generalBtn);
 
-		var hotkeysBtn = new GuiButton(loadButtonImages2('data/ui/options/hotkeys')); // touch settings
+		var hotkeysBtn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
 		hotkeysBtn.position = new Vector(325, 19);
-		hotkeysBtn.extent = new Vector(134, 65);
+		hotkeysBtn.ratio = 0.37;
+		hotkeysBtn.setExtent(new Vector(134, 65));
+		hotkeysBtn.txtCtrl.text.text = "Input";
 		window.addChild(hotkeysBtn);
 
-		var miscBtn = new GuiButton(loadButtonImages('data/ui/options/misc'));
+		var miscBtn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
 		miscBtn.position = new Vector(548, 19);
-		miscBtn.extent = new Vector(134, 65);
+		miscBtn.ratio = 0.37;
+		miscBtn.setExtent(new Vector(134, 65));
+		miscBtn.txtCtrl.text.text = "Misc";
 		window.addChild(miscBtn);
+
+		var generalPanel:GuiControl = null;
 
 		var applyFunc:Void->Void = () -> {
 			Settings.applySettings();
 		};
 
-		var homeBtn = new GuiButton(loadButtonImages('data/ui/options/home'));
-		homeBtn.position = new Vector(292, 482);
-		homeBtn.extent = new Vector(94, 46);
+		var homeBtn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
+		homeBtn.position = new Vector(304, 500);
+		homeBtn.setExtent(new Vector(94, 46));
+		homeBtn.txtCtrl.text.text = "Home";
 		homeBtn.pressedAction = (sender) -> {
 			applyFunc();
 			if (!pause)
@@ -103,15 +126,17 @@ class OptionsDlg extends GuiImage {
 		}
 		window.addChild(homeBtn);
 
-		var applyBtn = new GuiButton(loadButtonImages('data/ui/options/apply'));
-		applyBtn.position = new Vector(398, 482);
-		applyBtn.extent = new Vector(94, 46);
+		var applyBtn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+			.toTile(), whatneyFont);
+		applyBtn.position = new Vector(398, 500);
+		applyBtn.setExtent(new Vector(94, 46));
+		applyBtn.txtCtrl.text.text = "Apply";
 		applyBtn.pressedAction = (sender) -> {
 			applyFunc();
 		}
 		window.addChild(applyBtn);
 
-		var generalPanel = new GuiControl();
+		generalPanel = new GuiControl();
 		generalPanel.position = new Vector(30, 88);
 		generalPanel.extent = new Vector(726, 394);
 		window.addChild(generalPanel);
@@ -126,130 +151,97 @@ class OptionsDlg extends GuiImage {
 		miscPanel.position = new Vector(30, 88);
 		miscPanel.extent = new Vector(726, 394);
 
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
-		var markerFelt24 = markerFelt32b.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
-		var markerFelt18 = markerFelt32b.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
-
 		var optBtns = [];
 		var optSliders = [];
 
-		var transparentbmp = new hxd.BitmapData(1, 1);
-		transparentbmp.setPixel(0, 0, 0);
-		var transparentTile = Tile.fromBitmap(transparentbmp);
-
-		var currentDropDown:GuiImage = null;
-
-		function setAllBtnState(enabled:Bool) {
-			for (b in optBtns) {
-				b.disabled = !enabled;
-			}
-			for (s in optSliders) {
-				s.enabled = enabled;
-			}
-		}
-
-		window.pressedAction = (sender) -> {
-			if (currentDropDown != null) {
-				var dropdownparent = currentDropDown.parent;
-				currentDropDown.parent.removeChild(currentDropDown);
-				currentDropDown = null;
-				haxe.Timer.delay(() -> setAllBtnState(true), 5); // delay this a bit to avoid update();
-			}
-		}
-
 		function makeOption(text:String, valueFunc:Void->String, yPos:Float, parent:GuiControl, size:String, options:Array<String>, onSelect:Int->Void,
 				right:Bool = false, smallfont:Bool = false) {
-			var textObj = new GuiText(smallfont ? markerFelt24 : markerFelt32);
-			textObj.position = new Vector(right ? 388 : 7, yPos);
+			var textObj = new GuiText(smallfont ? squishneyFont24 : squishneyFont28);
+			textObj.position = new Vector(right ? 388 : 5, yPos + 7);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
-			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.dropShadow = {
-				dx: 1 * Settings.uiScale,
-				dy: 1 * Settings.uiScale,
-				alpha: 0.5,
-				color: 0
-			};
+			textObj.text.textColor = 0x0;
 			parent.addChild(textObj);
 
-			var optDropdownImg = new GuiImage(ResourceLoader.getResource('data/ui/options/dropdown-${size}.png', ResourceLoader.getImage, this.imageResources)
+			var optionText = new GuiText(squishneyFont24);
+			optionText.position = new Vector(right ? 522 : 180, yPos + 9);
+			optionText.extent = new Vector(212, 14);
+			optionText.justify = Center;
+			optionText.text.text = valueFunc();
+			optionText.text.textColor = 0x0;
+			parent.addChild(optionText);
+
+			var colorMat = new Matrix();
+			colorMat.colorSet(0x0);
+
+			var nextBtn = new GuiBorderButtonCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
 				.toTile());
-
-			optDropdownImg.position = new Vector(right ? 552 : 222, yPos + 39);
-			optDropdownImg.extent = new Vector(163, 79 + switch (size) {
-				case 'small': 0;
-				case 'medium': 20;
-				case 'large': 42;
-				case 'xlarge': 97;
-				default: 0;
-			});
-
-			var optDropdown = new GuiButtonText(loadButtonImages('data/ui/options/dropdown'), markerFelt24);
-			optDropdown.position = new Vector(right ? 552 : 222, yPos - 12);
-			optDropdown.setExtent(new Vector(163, 56));
-			optDropdown.txtCtrl.text.text = valueFunc();
-			optDropdown.txtCtrl.text.textColor = 0;
-			optDropdown.pressedAction = (sender) -> {
-				if (currentDropDown == null) {
-					parent.addChild(optDropdownImg);
-					optDropdownImg.render(MarbleGame.canvas.scene2d);
-					currentDropDown = optDropdownImg;
-					setAllBtnState(false);
-					return;
-				}
-				if (currentDropDown == optDropdownImg) {
-					parent.removeChild(optDropdownImg);
-					currentDropDown = null;
-					haxe.Timer.delay(() -> setAllBtnState(true), 5); // delay this a bit to avoid update();
-					return;
-				}
+			nextBtn.position = new Vector(right ? 689 : 337, yPos - 4);
+			nextBtn.extent = new Vector(45, 45);
+			nextBtn.pressedAction = (e) -> {
+				// setMarbleSelection(curSelection + 1, curCategorySelection);
 			}
-			parent.addChild(optDropdown);
+			parent.addChild(nextBtn);
 
-			var optDropdownList = new GuiTextListCtrl(markerFelt24, options);
-			optDropdownList.position = new Vector(11, 15);
-			optDropdownList.extent = new Vector(135, 47 + switch (size) {
-				case 'small': 0;
-				case 'medium': 20;
-				case 'large': 42;
-				case 'xlarge': 97;
-				default: 0;
-			});
-			optDropdownList.textYOffset = -5;
-			optDropdownList.onSelectedFunc = (idx) -> {
-				onSelect(idx);
-				optDropdown.txtCtrl.text.text = valueFunc();
-			};
-			optDropdownImg.addChild(optDropdownList);
+			var nextBtnIcon = new GuiImage(ResourceLoader.getResource("data/ui/play/leftright.png", ResourceLoader.getImage, this.imageResources).toTile());
+			nextBtnIcon.position = new Vector(22.5 + 13.0 / 2, 22.5 + 19.0 / 2);
+			nextBtnIcon.extent = new Vector(13, 19);
+			nextBtnIcon.bmp.colorMatrix = colorMat;
+			nextBtnIcon.bmp.rotation = Math.PI;
+			nextBtn.addChild(nextBtnIcon);
 
-			optBtns.push(optDropdown);
+			var prevBtn = new GuiBorderButtonCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+				.toTile());
+			prevBtn.position = new Vector(right ? 522 : 190, yPos - 4);
+			prevBtn.extent = new Vector(45, 45);
+			prevBtn.pressedAction = (e) -> {
+				// setMarbleSelection(curSelection - 1, curCategorySelection);
+			}
+			parent.addChild(prevBtn);
+
+			var prevBtnIcon = new GuiImage(ResourceLoader.getResource("data/ui/play/leftright.png", ResourceLoader.getImage, this.imageResources).toTile());
+			prevBtnIcon.horizSizing = Center;
+			prevBtnIcon.vertSizing = Center;
+			prevBtnIcon.position = new Vector(0, 0);
+			prevBtnIcon.extent = new Vector(13, 19);
+			prevBtnIcon.bmp.colorMatrix = colorMat;
+			prevBtn.addChild(prevBtnIcon);
+
+			var curOptionIndex = options.indexOf(valueFunc());
+			if (curOptionIndex == -1) {
+				curOptionIndex = 0;
+			}
+
+			nextBtn.pressedAction = (e) -> {
+				curOptionIndex = Util.adjustediMod(curOptionIndex + 1, options.length);
+				onSelect(curOptionIndex);
+				optionText.text.text = valueFunc();
+			}
+
+			prevBtn.pressedAction = (e) -> {
+				curOptionIndex = Util.adjustediMod(curOptionIndex - 1, options.length);
+				onSelect(curOptionIndex);
+				optionText.text.text = valueFunc();
+			}
 		}
 
 		function makeSlider(text:String, value:Float, yPos:Float, parent:GuiControl, onChange:Float->Void, right:Bool = false, smallfont:Bool = false) {
-			var textObj = new GuiText(smallfont ? markerFelt24 : markerFelt32);
-			textObj.position = new Vector(right ? 388 : 7, yPos);
+			var textObj = new GuiText(smallfont ? squishneyFont24 : squishneyFont28);
+			textObj.position = new Vector(right ? 388 : 5, yPos + 7);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
-			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.dropShadow = {
-				dx: 1 * Settings.uiScale,
-				dy: 1 * Settings.uiScale,
-				alpha: 0.5,
-				color: 0
-			};
+			textObj.text.textColor = 0x0;
 			parent.addChild(textObj);
 
-			var sliderBar = new GuiImage(ResourceLoader.getResource("data/ui/options/bar.png", ResourceLoader.getImage, this.imageResources).toTile());
-			sliderBar.position = new Vector(right ? 552 : 226, yPos + 3 + 5);
-			sliderBar.extent = new Vector(154, 19);
+			var sliderBar = new GuiImage(ResourceLoader.getResource("data/ui/options/slider_bar.png", ResourceLoader.getImage, this.imageResources).toTile());
+			sliderBar.position = new Vector(right ? 552 : 226, yPos + 3 + 14);
+			sliderBar.extent = new Vector(154, 10);
+			sliderBar.bmp.tile = sliderBar.bmp.tile.sub(0, 0, 154, sliderBar.bmp.tile.height);
 			parent.addChild(sliderBar);
 
 			var optSlider = new GuiSlider(ResourceLoader.getResource("data/ui/options/slider.png", ResourceLoader.getImage, this.imageResources).toTile());
-			optSlider.position = new Vector(right ? 550 : 220, yPos - 8 + 5);
-			optSlider.extent = new Vector(150, 41);
+			optSlider.position = new Vector(right ? 550 : 220, yPos - 8 + 12);
+			optSlider.extent = new Vector(150, 35);
 			optSlider.sliderValue = value;
 			optSlider.pressedAction = (sender) -> {
 				onChange(optSlider.sliderValue);
@@ -414,7 +406,7 @@ class OptionsDlg extends GuiImage {
 			return null;
 		}
 
-		function remapFunc(bindingName:String, bindingFunc:Int->Void, ctrl:GuiButtonText) {
+		function remapFunc(bindingName:String, bindingFunc:Int->Void, ctrl:GuiBorderButtonTextCtrl) {
 			var remapDlg = new RemapDlg(bindingName);
 			MarbleGame.canvas.pushDialog(remapDlg);
 			remapDlg.remapCallback = (key) -> {
@@ -439,23 +431,18 @@ class OptionsDlg extends GuiImage {
 		}
 
 		function makeRemapOption(text:String, yPos:Int, defaultVal:String, bindingFunc:Int->Void, parent:GuiControl, right:Bool = false) {
-			var textObj = new GuiText(markerFelt32);
+			var textObj = new GuiText(squishneyFont28);
 			textObj.position = new Vector(right ? 368 : 5, yPos);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
-			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.dropShadow = {
-				dx: 1 * Settings.uiScale,
-				dy: 1 * Settings.uiScale,
-				alpha: 0.5,
-				color: 0
-			};
+			textObj.text.textColor = 0x0;
 			parent.addChild(textObj);
 
-			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			remapBtn.position = new Vector(right ? 363 + 203 : 203, yPos - 3);
+			var remapBtn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+				.toTile(), whatneyFont20);
+			remapBtn.position = new Vector(right ? 363 + 203 : 203, yPos - 12);
+			remapBtn.setExtent(new Vector(163, 45));
 			remapBtn.txtCtrl.text.text = defaultVal;
-			remapBtn.setExtent(new Vector(152, 49));
 			remapBtn.pressedAction = (sender) -> {
 				remapFunc(text, bindingFunc, remapBtn);
 			}
@@ -464,23 +451,18 @@ class OptionsDlg extends GuiImage {
 		}
 
 		function makeButton(text:String, yPos:Int, buttonText:String, pressedAction:() -> Void, parent:GuiControl, right:Bool = false) {
-			var textObj = new GuiText(markerFelt32);
+			var textObj = new GuiText(squishneyFont28);
 			textObj.position = new Vector(right ? 368 : 5, yPos);
 			textObj.extent = new Vector(212, 14);
 			textObj.text.text = text;
-			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.dropShadow = {
-				dx: 1 * Settings.uiScale,
-				dy: 1 * Settings.uiScale,
-				alpha: 0.5,
-				color: 0
-			};
+			textObj.text.textColor = 0x0;
 			parent.addChild(textObj);
 
-			var btn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			btn.position = new Vector(right ? 363 + 203 : 203, yPos - 3);
+			var btn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+				.toTile(), whatneyFont20);
+			btn.position = new Vector(right ? 363 + 203 : 203, yPos - 12);
+			btn.setExtent(new Vector(163, 45));
 			btn.txtCtrl.text.text = buttonText;
-			btn.setExtent(new Vector(152, 49));
 			btn.pressedAction = (sender) -> {
 				pressedAction();
 			}
@@ -489,45 +471,26 @@ class OptionsDlg extends GuiImage {
 		}
 
 		if (Util.isTouchDevice()) {
-			var textObj = new GuiText(markerFelt32);
-			textObj.position = new Vector(5, 38);
-			textObj.extent = new Vector(212, 14);
-			textObj.text.text = "Touch Controls";
-			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.dropShadow = {
-				dx: 1 * Settings.uiScale,
-				dy: 1 * Settings.uiScale,
-				alpha: 0.5,
-				color: 0
-			};
-			hotkeysPanel.addChild(textObj);
+			makeButton("Touch Controls:", 44, "Edit", () -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			}, hotkeysPanel);
 
-			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			remapBtn.position = new Vector(5 + 203, 35);
-			remapBtn.txtCtrl.text.text = "Edit";
-			remapBtn.setExtent(new Vector(152, 49));
-			if (!pause)
-				remapBtn.pressedAction = (sender) -> {
-					MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-				}
-			hotkeysPanel.addChild(remapBtn);
-
-			makeOption("Hide Controls:", () -> '${Settings.touchSettings.hideControls ? "Yes" : "No"}', 38, hotkeysPanel, "small", ["No", "Yes"], (idx) -> {
+			makeOption("Hide Controls:", () -> '${Settings.touchSettings.hideControls ? "Yes" : "No"}', 86, hotkeysPanel, "small", ["No", "Yes"], (idx) -> {
 				Settings.touchSettings.hideControls = idx == 1;
-			}, true);
+			}, false);
 
-			makeSlider("Button-Camera Factor:", (Settings.touchSettings.buttonJoystickMultiplier) / 3, 86, hotkeysPanel, (val) -> {
+			makeSlider("Button-Camera Factor:", (Settings.touchSettings.buttonJoystickMultiplier) / 3, 134, hotkeysPanel, (val) -> {
 				Settings.touchSettings.buttonJoystickMultiplier = val * 3;
 			}, false, true);
 
-			makeSlider("Camera Swipe Extent:", (Settings.touchSettings.cameraSwipeExtent - 5) / (35 - 5), 86, hotkeysPanel, (val) -> {
-				Settings.touchSettings.cameraSwipeExtent = 5 + (35 - 5) * val;
-			}, true, true);
-
-			makeOption("Dynamic Joystick:", () -> '${Settings.touchSettings.dynamicJoystick ? "Yes" : "No"}', 134, hotkeysPanel, "small", ["No", "Yes"],
+			makeOption("Dynamic Joystick:", () -> '${Settings.touchSettings.dynamicJoystick ? "Yes" : "No"}', 182, hotkeysPanel, "small", ["No", "Yes"],
 				(idx) -> {
 					Settings.touchSettings.dynamicJoystick = idx == 1;
 				}, false, true);
+
+			makeSlider("Camera Swipe Extent:", (Settings.touchSettings.cameraSwipeExtent - 5) / (35 - 5), 230, hotkeysPanel, (val) -> {
+				Settings.touchSettings.cameraSwipeExtent = 5 + (35 - 5) * val;
+			}, false, true);
 		} else {
 			makeRemapOption("Move Forward:", 38, Util.getKeyForButton2(Settings.controlsSettings.forward), (key) -> Settings.controlsSettings.forward = key,
 				hotkeysPanel);
@@ -620,56 +583,6 @@ class OptionsDlg extends GuiImage {
 				MarbleGame.canvas.render(MarbleGame.canvas.scene2d); // Force refresh
 			}
 		};
-
-		// // Touch Controls buttons???
-		// if (Util.isTouchDevice()) {
-		// 	var touchControlsTxt = new GuiText(domcasual24);
-		// 	touchControlsTxt.text.text = "Touch Controls:";
-		// 	touchControlsTxt.text.color = new Vector(0, 0, 0);
-		// 	touchControlsTxt.position = new Vector(200, 465);
-		// 	touchControlsTxt.extent = new Vector(200, 40);
-		// 	var touchControlsEdit = new GuiButtonText(loadButtonImages("data/ui/options/cntr_cam_dwn"), domcasual24);
-
-		// 	touchControlsEdit.position = new Vector(300, 455);
-		// 	touchControlsEdit.txtCtrl.text.text = "Edit";
-		// 	touchControlsEdit.setExtent(new Vector(109, 39));
-		// 	touchControlsEdit.pressedAction = (sender) -> {
-		// 		MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-		// 	}
-		// 	mainPane.addChild(touchControlsTxt);
-		// 	mainPane.addChild(touchControlsEdit);
-		// }
-		// setTab = function(tab:String) {
-		// 	tabs.removeChild(audioTab);
-		// 	tabs.removeChild(controlsTab);
-		// 	tabs.removeChild(boxFrame);
-		// 	tabs.removeChild(graphicsTab);
-		// 	mainPane.removeChild(graphicsPane);
-		// 	mainPane.removeChild(audioPane);
-		// 	mainPane.removeChild(controlsPane);
-		// 	if (tab == "Graphics") {
-		// 		tabs.addChild(audioTab);
-		// 		tabs.addChild(controlsTab);
-		// 		tabs.addChild(boxFrame);
-		// 		tabs.addChild(graphicsTab);
-		// 		mainPane.addChild(graphicsPane);
-		// 	}
-		// 	if (tab == "Audio") {
-		// 		tabs.addChild(graphicsTab);
-		// 		tabs.addChild(controlsTab);
-		// 		tabs.addChild(boxFrame);
-		// 		tabs.addChild(audioTab);
-		// 		mainPane.addChild(audioPane);
-		// 	}
-		// 	if (tab == "Controls") {
-		// 		tabs.addChild(audioTab);
-		// 		tabs.addChild(graphicsTab);
-		// 		tabs.addChild(boxFrame);
-		// 		tabs.addChild(controlsTab);
-		// 		mainPane.addChild(controlsPane);
-		// 	}
-		// 	this.render(MarbleGame.canvas.scene2d);
-		// }
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {

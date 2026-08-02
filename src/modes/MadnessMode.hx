@@ -117,6 +117,8 @@ class MadnessMode extends NullMode {
 			this.gotAllGems = true;
 			@:privateAccess this.level.touchFinish();
 		}
+
+		return true;
 	}
 
 	/** SP-only: going out of bounds before collecting everything ends the level immediately with

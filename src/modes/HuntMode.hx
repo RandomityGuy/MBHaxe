@@ -965,6 +965,8 @@ class HuntMode extends NullMode {
 		if (!this.level.isMultiplayer || Net.isHost) {
 			spawnHuntGems();
 		}
+
+		return true;
 	}
 
 	public function setCompetitiveTimerStartTicks(ticks:Int) {
