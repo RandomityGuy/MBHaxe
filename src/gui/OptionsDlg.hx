@@ -18,30 +18,24 @@ import src.ResourceLoader;
 import src.Util;
 import src.Settings;
 
-class OptionsDlg extends GuiImage {
+class OptionsDlg extends GuiControl {
 	var musicSliderFunc:(dt:Float, mouseState:MouseState) -> Void;
 
 	public function new(pause:Bool = false) {
-		function chooseBg() {
-			var rand = Math.random();
-			if (rand >= 0 && rand <= 0.244)
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (rand > 0.244 && rand <= 0.816)
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-		}
-		var img = chooseBg();
-		var temprev = new BitmapData(1, 1);
-		temprev.setPixel(0, 0, 0);
-		var tmpprevtile = Tile.fromBitmap(temprev);
-		if (!pause)
-			super(img.resource.toTile());
-		else
-			super(tmpprevtile);
+		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
 		this.position = new Vector();
 		this.extent = new Vector(800, 600);
+		if (!ResourceLoader.exists(Settings.optionsSettings.previewPath))
+			Settings.optionsSettings.previewPath = "data/previews_pq/tutorial/trainingwheels.prev.dds";
+		var levelPreview = new GuiImage(ResourceLoader.getResource(Settings.optionsSettings.previewPath, ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		levelPreview.horizSizing = Width;
+		levelPreview.vertSizing = Height;
+		levelPreview.position = new Vector(0, 0);
+		levelPreview.extent = new Vector(800, 600);
+		this.addChild(levelPreview);
 
 		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var whatneyFontB = new BitmapFont(whatneyFontData.entry);

@@ -33,7 +33,7 @@ import src.MarbleGame;
 import src.MissionList;
 
 class PlayMissionGui extends GuiControl {
-	static var currentSelectionStatic:Int = -1;
+	static var currentSelectionStatic:Int = 0;
 	static var currentCategoryStatic:String = "tutorial";
 	static var currentGameStatic:String = "platinum";
 	static var currentSortType:Int = 1;
@@ -66,13 +66,6 @@ class PlayMissionGui extends GuiControl {
 	public function new() {
 		MissionList.buildMissionList();
 
-		// if (currentSelectionStatic == -1)
-		// 	currentSelectionStatic = cast Math.min(MissionList.missionList["platinum"]["beginner"].length - 1,
-		// 		Settings.progression[["beginner", "intermediate", "advanced", "expert"].indexOf(currentCategory)]);
-		if (currentSelectionStatic == -1) {
-			currentSelectionStatic = 0; // start from the beginning please, this is PQ
-		}
-
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
 			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -94,9 +87,7 @@ class PlayMissionGui extends GuiControl {
 		this.position = new Vector(0, 0);
 		this.extent = new Vector(800, 600);
 
-		var levelPreview = new GuiImage(ResourceLoader.getResource("data/previews_pq/tutorial/TrainingWheels.prev.dds", ResourceLoader.getImage,
-			this.imageResources)
-			.toTile());
+		var levelPreview = new GuiImage(ResourceLoader.getResource("data/ui/play/missingicon.png", ResourceLoader.getImage, this.imageResources).toTile());
 		levelPreview.horizSizing = Width;
 		levelPreview.vertSizing = Height;
 		levelPreview.position = new Vector(0, 0);
@@ -456,7 +447,7 @@ class PlayMissionGui extends GuiControl {
 		var missionScoresInfoRight = new GuiMLText(whatneyFont21, null);
 		missionScoresInfoRight.horizSizing = Left;
 		missionScoresInfoRight.position = new Vector(128, 0);
-		missionScoresInfoRight.extent = new Vector(186, 162);
+		missionScoresInfoRight.extent = new Vector(172, 162);
 		missionScoresInfoRight.text.textColor = 0;
 		missionScoresInfoRight.text.text = "Score1";
 		missionScoresInfoRight.text.lineSpacing = 4;
@@ -535,7 +526,12 @@ class PlayMissionGui extends GuiControl {
 				difficultyBtn.txtCtrl.text.text = ["Relevant", "All", "Alphabetical"][i];
 				var diff = ["relevant", "all", "alphabetical"][i];
 				difficultyBtn.pressedAction = (e) -> {
-					setDifficulty("custom", diff);
+					if (Marbleland.pqMissions.length == 0) {
+						var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
+						MarbleGame.canvas.pushDialog(mbo);
+					} else {
+						setDifficulty("custom", diff);
+					}
 					MarbleGame.canvas.popDialog(difficultyPopup, false);
 				}
 				difficultyList.addChild(difficultyBtn);
@@ -625,6 +621,12 @@ class PlayMissionGui extends GuiControl {
 		missionBox.addChild(difficultySelector);
 
 		setDifficulty = (gameName, diffName) -> {
+			if (gameName == "custom" && Marbleland.pqMissions.length == 0) {
+				var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
+				MarbleGame.canvas.pushDialog(mbo);
+				return;
+			}
+
 			difficultySelector.txtCtrl.text.text = diffName.charAt(0).toUpperCase() + diffName.substr(1);
 			gameSelector.txtCtrl.text.text = gameName == "platinum" ? "PlatinumQuest" : "Custom";
 
@@ -667,7 +669,12 @@ class PlayMissionGui extends GuiControl {
 						difficultyBtn.txtCtrl.text.text = ["Relevant", "All", "Alphabetical"][i];
 						var diff = ["relevant", "all", "alphabetical"][i];
 						difficultyBtn.pressedAction = (e) -> {
-							setDifficulty("custom", diff);
+							if (Marbleland.pqMissions.length == 0) {
+								var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
+								MarbleGame.canvas.pushDialog(mbo);
+							} else {
+								setDifficulty("custom", diff);
+							}
 							MarbleGame.canvas.popDialog(difficultyPopup, false);
 						}
 						difficultyList.addChild(difficultyBtn);
@@ -1116,6 +1123,12 @@ class PlayMissionGui extends GuiControl {
 			infoBox.position.y = 230 + (238 - panelSize);
 			missionModesInfo.position.y = 142 + (panelSize - 238) - (modeTextHeight - 40);
 
+			var textWidth = missionTitle.text.textWidth;
+			if (textWidth > missionInfoLeft.extent.x)
+				missionTitle.text.setScale(missionInfoLeft.extent.x / textWidth);
+			else
+				missionTitle.text.setScale(1);
+
 			// now for the scores
 
 			var scoreData:Array<Score> = Settings.getScores(mission.path);
@@ -1158,6 +1171,8 @@ class PlayMissionGui extends GuiControl {
 				case None:
 					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
 						var prevpath = mission.getBigPreviewImage(prevImg -> {
+							if (!mission.isClaMission)
+								Settings.optionsSettings.previewPath = prevImg.getTexture().name;
 							levelPreview.bmp.tile = prevImg;
 						});
 						if (prevpath != levelPreview.bmp.tile.getTexture().name) {
@@ -1168,6 +1183,8 @@ class PlayMissionGui extends GuiControl {
 					js.Browser.window.clearTimeout(previewTimeoutHandle_id);
 					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
 						var prevpath = mission.getBigPreviewImage(prevImg -> {
+							if (!mission.isClaMission)
+								Settings.optionsSettings.previewPath = prevImg.getTexture().name;
 							levelPreview.bmp.tile = prevImg;
 						});
 						if (prevpath != levelPreview.bmp.tile.getTexture().name) {
@@ -1181,6 +1198,8 @@ class PlayMissionGui extends GuiControl {
 			var prevpath = mission.getBigPreviewImage(prevImg -> {
 				if (pTok + 1 != previewToken)
 					return;
+				if (!mission.isClaMission)
+					Settings.optionsSettings.previewPath = prevImg.getTexture().name;
 				levelPreview.bmp.tile = prevImg;
 			}); // Shit be sync
 			if (prevpath != levelPreview.bmp.tile.getTexture().name) {

@@ -12,18 +12,19 @@ import src.Replay;
 import src.Marbleland;
 import src.MissionList;
 
-class MainMenuGui extends GuiImage {
+class MainMenuGui extends GuiControl {
 	public function new() {
-		function chooseBg() {
-			var rand = Math.random();
-			if (rand >= 0 && rand <= 0.244)
-				return ResourceLoader.getImage('data/ui/backgrounds/gold/${cast (Math.floor(Util.lerp(1, 12, Math.random())), Int)}.jpg');
-			if (rand > 0.244 && rand <= 0.816)
-				return ResourceLoader.getImage('data/ui/backgrounds/platinum/${cast (Math.floor(Util.lerp(1, 28, Math.random())), Int)}.jpg');
-			return ResourceLoader.getImage('data/ui/backgrounds/ultra/${cast (Math.floor(Util.lerp(1, 9, Math.random())), Int)}.jpg');
-		}
-		var img = chooseBg();
-		super(img.resource.toTile());
+		super();
+		if (!ResourceLoader.exists(Settings.optionsSettings.previewPath))
+			Settings.optionsSettings.previewPath = "data/previews_pq/tutorial/trainingwheels.prev.dds";
+		var levelPreview = new GuiImage(ResourceLoader.getResource(Settings.optionsSettings.previewPath, ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		levelPreview.horizSizing = Width;
+		levelPreview.vertSizing = Height;
+		levelPreview.position = new Vector(0, 0);
+		levelPreview.extent = new Vector(800, 600);
+		this.addChild(levelPreview);
+
 		var helveticafontdata = ResourceLoader.getFileEntry("data/font/helveticaneue.fnt");
 		var helveticafont = new BitmapFont(helveticafontdata.entry);
 		@:privateAccess helveticafont.loader = ResourceLoader.loader;
