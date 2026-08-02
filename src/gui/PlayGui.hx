@@ -715,7 +715,7 @@ class PlayGui {
 		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
 		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
 		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel);
+		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 		gemsQuota = new GuiText(markerFelt32);
 		gemsQuota.position = new Vector(205, 28);
 		gemsQuota.extent = new Vector(55, 55);
@@ -1270,7 +1270,7 @@ class PlayGui {
 		var fireballFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var fireballFontB = new BitmapFont(fireballFontData.entry);
 		@:privateAccess fireballFontB.loader = ResourceLoader.loader;
-		var fireballFont = fireballFontB.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
+		var fireballFont = fireballFontB.toSdfFont(cast 22 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 		fireballBarText = new h2d.Text(fireballFont, scene2d);
 		fireballBarText.textColor = 0x000000;
 		fireballBarText.visible = false;
@@ -1332,7 +1332,7 @@ class PlayGui {
 		var bubbleFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var bubbleFontB = new BitmapFont(bubbleFontData.entry);
 		@:privateAccess bubbleFontB.loader = ResourceLoader.loader;
-		var bubbleFont = bubbleFontB.toSdfFont(cast 22 * Settings.uiScale, MultiChannel);
+		var bubbleFont = bubbleFontB.toSdfFont(cast 22 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 		bubbleBarText = new h2d.Text(bubbleFont, scene2d);
 		bubbleBarText.textColor = 0x000000;
 		bubbleBarText.visible = false;
@@ -1411,7 +1411,7 @@ class PlayGui {
 		var squishneyfontdata = ResourceLoader.getFileEntry("data/font/squishney.fnt");
 		var squishney25b = new BitmapFont(squishneyfontdata.entry);
 		@:privateAccess squishney25b.loader = ResourceLoader.loader;
-		var bfont = squishney25b.toSdfFont(cast 21.5 * Settings.uiScale, MultiChannel);
+		var bfont = squishney25b.toSdfFont(cast 21.5 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		helpTextContainer = new GuiControl();
 		helpTextContainer.position = new Vector(80, 600);
@@ -1436,10 +1436,10 @@ class PlayGui {
 			tl: new Vector(0, 1, 21, 23),
 			tr: new Vector(22, 1, 20, 23),
 			bl: new Vector(22, 25, 20, 24),
-			br: new Vector(63, 25, 21, 24),
+			br: new Vector(64, 25, 20, 24),
 			top: new Vector(43, 1, 19, 23),
 			left: new Vector(63, 1, 21, 23),
-			right: new Vector(0, 25, 21, 24),
+			right: new Vector(1, 25, 20, 24),
 			bottom: new Vector(43, 25, 19, 24)
 		});
 		helpTextBorder.horizSizing = Right;
@@ -1490,7 +1490,7 @@ class PlayGui {
 		// Ported from PQ's `<bold:23>` prefix on `addHelpLine`'s text - same underlying bitmap font
 		// as `bfont` above, just a smaller target size for the toast notifications (`addHelpLine`/
 		// `ToastMessage`, see their doc comments).
-		toastMessageFont = squishney25b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel);
+		toastMessageFont = squishney25b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		toastListBox = new GuiControl();
 		toastListBox.horizSizing = Right;
@@ -1506,7 +1506,7 @@ class PlayGui {
 		var squatneyfontdata = ResourceLoader.getFileEntry("data/font/squatney.fnt");
 		var squatney23b = new BitmapFont(squatneyfontdata.entry);
 		@:privateAccess squatney23b.loader = ResourceLoader.loader;
-		var bfont = squatney23b.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var bfont = squatney23b.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var fpsMeterCtrl = new GuiImage(ResourceLoader.getResource("data/ui/game/transparency-fps.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());

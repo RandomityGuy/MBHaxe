@@ -56,7 +56,7 @@ class LoadingGui extends GuiControl {
 		var squishneyb = new BitmapFont(squishneyfontdata.entry);
 		@:privateAccess squishneyb.loader = ResourceLoader.loader;
 		var squishney56 = squishneyb.toSdfFont(cast 50 * Settings.uiScale, MultiChannel);
-		var squishney28 = squishneyb.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
+		var squishney28 = squishneyb.toSdfFont(cast 25 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var loadingTitleText = new GuiText(squishney56);
 		loadingTitleText.justify = Center;
