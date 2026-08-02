@@ -254,8 +254,9 @@ class Mission {
 		if (!this.isClaMission) {
 			var basename = haxe.io.Path.withoutExtension(this.path);
 			var exts = [".jpg", ".png", ".jpeg", ".dds"];
+			var baseDir = #if sys "data/"; #else ""; #end
 			for (ext in exts) {
-				if (ResourceLoader.fileSystem.exists(basename + ".prev" + ext)) {
+				if (ResourceLoader.exists(basename + ".prev" + ext)) {
 					imgFileEntry = ResourceLoader.fileSystem.get(basename + ext);
 					#if hl
 					var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
@@ -274,17 +275,17 @@ class Mission {
 			var difficulty = haxe.io.Path.directory(this.path).split("/").pop();
 			var missionName = haxe.io.Path.withoutExtension(haxe.io.Path.withoutDirectory(this.path));
 			for (ext in exts) {
-				if (ResourceLoader.fileSystem.exists('data/previews_pq/${difficulty}/${missionName}.prev' + ext)) {
-					imgFileEntry = ResourceLoader.fileSystem.get('data/previews_pq/${difficulty}/${missionName}.prev' + ext);
+				if (ResourceLoader.exists('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext)) {
+					imgFileEntry = ResourceLoader.fileSystem.get('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext);
 					#if hl
-					var ret = ResourceLoader.getResource('data/previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
+					var ret = ResourceLoader.getResource('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
 						this.imageResources)
 						.toTile();
 					onLoaded(ret);
 					#end
 					#if js
 					imgFileEntry.load(() -> {
-						var ret = ResourceLoader.getResource('data/previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
+						var ret = ResourceLoader.getResource('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
 							this.imageResources)
 							.toTile();
 						onLoaded(ret);
