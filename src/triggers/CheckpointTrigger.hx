@@ -29,7 +29,7 @@ class CheckpointTrigger extends Trigger {
 
 	public override function onMarbleEnter(marble:src.Marble, time:src.TimeState) {
 		super.onMarbleEnter(marble, time);
-		var shape = this.level.namedObjects.get(this.element.respawnpoint);
+		var shape = this.level.namedObjects.get(this.element.respawnpoint.toLowerCase());
 		if (shape == null)
 			return;
 		this.level.saveCheckpointState(shape, this);

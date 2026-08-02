@@ -50,7 +50,7 @@ class PathTrigger extends Trigger {
 			var objectName = objectField != null ? objectField[0] : null;
 			if (objectName == null || objectName == "")
 				break;
-			var target = level.namedGameObjects.get(objectName);
+			var target = level.namedGameObjects.get(objectName.toLowerCase());
 			if (target == null)
 				break;
 
@@ -79,7 +79,7 @@ class PathTrigger extends Trigger {
 			var objectName = objectField != null ? objectField[0] : null;
 			if (objectName == null || objectName == "")
 				break;
-			var target = level.namedGameObjects.get(objectName);
+			var target = level.namedGameObjects.get(objectName.toLowerCase());
 			if (target == null)
 				break;
 			targets.push(target);

@@ -103,7 +103,7 @@ class PushButton extends DtsObject {
 
 			if (methodTrimmed == "onentertrigger()") {
 				var targetName = fieldAt("triggerobject", ct);
-				var target = targetName != null ? this.level.namedGameObjects.get(targetName) : null;
+				var target = targetName != null ? this.level.namedGameObjects.get(targetName.toLowerCase()) : null;
 				if (target != null && (target is Trigger))
 					(cast target : Trigger).onMarbleEnter(marble, timeState);
 				else

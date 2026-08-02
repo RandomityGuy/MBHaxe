@@ -361,7 +361,7 @@ class IceShard extends DtsObject {
 		var i = 1;
 		while (true) {
 			var interiorField = this.element.fields.get("pathedinterior" + i);
-			var interiorName = interiorField != null ? interiorField[0] : null;
+			var interiorName = interiorField != null ? interiorField[0].toLowerCase() : null;
 			if (interiorName == null || interiorName == "")
 				break;
 			var target = this.level.namedGameObjects.get(interiorName);
