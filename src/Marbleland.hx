@@ -92,7 +92,7 @@ class Marbleland {
 	}
 
 	public static function getMissionPreview(id:Int, cb:Image->Void) {
-		return Http.get('https://marbleland.vaniverse.io/api/level/${id}/prev-image?width=1280&height=720', (imageBytes) -> {
+		return Http.get('https://marbleland.vaniverse.io/api/level/${id}/prev-image?width=1920&height=1080', (imageBytes) -> {
 			var res = new Image(new hxd.fs.BytesFileSystem.BytesFileEntry('${id}.png', imageBytes));
 			cb(res);
 		}, (e) -> {

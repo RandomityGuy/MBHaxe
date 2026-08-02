@@ -47,6 +47,7 @@ typedef OptionsSettings = {
 	var cameraDistance:Float;
 	var rewindEnabled:Bool;
 	var rewindTimescale:Float;
+	var previewPath:String;
 }
 
 typedef ControlsSettings = {
@@ -139,9 +140,10 @@ class Settings {
 		reflectiveMarble: false,
 		marbleIndex: 0,
 		marbleCategoryIndex: 0,
-		marbleSkin: "base",
-		marbleModel: "data/shapes/balls/ball-superball.dts",
+		marbleSkin: "mellowblue",
+		marbleModel: "data/shapes_pq/marbles/pq classic/ball-superball.dts",
 		marbleShader: "Default",
+		previewPath: "data/previews_pq/tutorial/trainingwheels.prev.dds",
 		cameraDistance: 2.5,
 		rewindEnabled: false,
 		rewindTimescale: 1.0,
@@ -335,6 +337,7 @@ class Settings {
 			marbleModel: optionsSettings.marbleModel,
 			marbleCategoryIndex: optionsSettings.marbleCategoryIndex,
 			marbleShader: optionsSettings.marbleShader,
+			previewPath: optionsSettings.previewPath
 		};
 		var scoreCount = 0;
 		var eggCount = 0;
@@ -447,6 +450,8 @@ class Settings {
 				optionsSettings.fovX = 90;
 			if (optionsSettings.rewindEnabled == false #if js || optionsSettings.rewindEnabled == null #end)
 				optionsSettings.rewindEnabled = false;
+			if (optionsSettings.previewPath == null)
+				optionsSettings.previewPath = "data/previews_pq/tutorial/trainingwheels.prev.dds";
 			controlsSettings = json.controls;
 			if (json.touch != null) {
 				touchSettings = json.touch;

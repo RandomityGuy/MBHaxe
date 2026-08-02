@@ -143,7 +143,10 @@ class ResourceLoader {
 			}
 		}
 		var worker = new ResourceLoaderWorker(onFinish);
-		worker.loadFile("data/previews_pq/tutorial/trainingwheels.prev.dds");
+		if (!ResourceLoader.exists(Settings.optionsSettings.previewPath))
+			Settings.optionsSettings.previewPath = "data/previews_pq/tutorial/trainingwheels.prev.dds";
+		worker.loadFile(Settings.optionsSettings.previewPath);
+		worker.loadFile("data/previews_pq/tutorial/trainingwheels.prev.dds"); // backup
 		for (file in toloadfiles) {
 			worker.addTaskParallel((fwd) -> file.load(fwd));
 		}
