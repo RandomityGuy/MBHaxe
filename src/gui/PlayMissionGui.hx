@@ -106,18 +106,19 @@ class PlayMissionGui extends GuiControl {
 		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
 		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
-		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
-		var whatneyFont21 = whatneyFontB.toSdfFont(cast 17 * Settings.uiScale, MultiChannel);
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.4);
+		var whatneyFont21 = whatneyFontB.toSdfFont(cast 17 * Settings.uiScale, MultiChannel, 0.5, 0.4);
 
 		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
 		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
 		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
-		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
+		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel, 0.5, 0.4);
 		var squishney48 = squishneyFontB.toSdfFont(cast 41 * Settings.uiScale, MultiChannel);
-		var squishney36 = squishneyFontB.toSdfFont(cast 32 * Settings.uiScale, MultiChannel);
-		var squishney26 = squishneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
-		var squishney24 = squishneyFontB.toSdfFont(cast 19 * Settings.uiScale, MultiChannel);
-		var squishney21 = squishneyFontB.toSdfFont(cast 18 * Settings.uiScale, MultiChannel);
+		var squishney36 = squishneyFontB.toSdfFont(cast 32 * Settings.uiScale, MultiChannel, 0.5, 0.4);
+		var squishney26 = squishneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.4);
+		var squishney24 = squishneyFontB.toSdfFont(cast 19 * Settings.uiScale, MultiChannel, 0.5, 0.4);
+		var squishney21 = squishneyFontB.toSdfFont(cast 18 * Settings.uiScale, MultiChannel, 0.5, 0.4);
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel, 0.5, 0.4);
 
 		function mlFontLoader(text:String) {
 			switch (text) {
@@ -155,8 +156,6 @@ class PlayMissionGui extends GuiControl {
 				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
 			return t;
 		}
-
-		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
 
 		var optionsButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button-plain.png', ResourceLoader.getImage,
 			this.imageResources)

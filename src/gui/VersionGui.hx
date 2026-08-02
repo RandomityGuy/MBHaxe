@@ -25,13 +25,13 @@ class VersionGui extends GuiControl {
 		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
 		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
-		var whatneyFont17 = whatneyFontB.toSdfFont(cast 15 * Settings.uiScale, MultiChannel);
-		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var whatneyFont17 = whatneyFontB.toSdfFont(cast 15 * Settings.uiScale, MultiChannel, 0.5, 0.5);
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
 		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
 		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
-		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var dlButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
 			.toTile(), whatneyFont);

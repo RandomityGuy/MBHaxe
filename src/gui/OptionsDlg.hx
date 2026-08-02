@@ -47,16 +47,16 @@ class OptionsDlg extends GuiImage {
 		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
 		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
-		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
-		var whatneyFont14 = whatneyFontB.toSdfFont(cast 14 * Settings.uiScale, MultiChannel);
-		var whatneyFont20 = whatneyFontB.toSdfFont(cast 17 * Settings.uiScale, MultiChannel);
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.5);
+		var whatneyFont14 = whatneyFontB.toSdfFont(cast 14 * Settings.uiScale, MultiChannel, 0.5, 0.5);
+		var whatneyFont20 = whatneyFontB.toSdfFont(cast 17 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
 		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
 		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
-		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel);
-		var squishneyFont24 = squishneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
-		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
+		var squishneyFont = squishneyFontB.toSdfFont(cast 28 * Settings.uiScale, MultiChannel, 0.5, 0.5);
+		var squishneyFont24 = squishneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.5);
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		function loadButtonImages(path:String) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();

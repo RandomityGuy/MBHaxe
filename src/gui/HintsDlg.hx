@@ -41,18 +41,18 @@ class HintsDlg extends GuiControl {
 		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
 		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
 		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
-		var whatneyFont17 = whatneyFontB.toSdfFont(cast 15 * Settings.uiScale, MultiChannel);
-		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var whatneyFont17 = whatneyFontB.toSdfFont(cast 15 * Settings.uiScale, MultiChannel, 0.5, 0.5);
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var squishneyFontData = ResourceLoader.getFileEntry("data/font/squishney.fnt");
 		var squishneyFontB = new BitmapFont(squishneyFontData.entry);
 		@:privateAccess squishneyFontB.loader = ResourceLoader.loader;
-		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel);
+		var squishneyFont28 = squishneyFontB.toSdfFont(cast 25 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var squatneyFontData = ResourceLoader.getFileEntry("data/font/squatney.fnt");
 		var squatneyFontB = new BitmapFont(squatneyFontData.entry);
 		@:privateAccess squatneyFontB.loader = ResourceLoader.loader;
-		var squatneyFont24 = squatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+		var squatneyFont24 = squatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		var hintsTitle = new GuiText(squishneyFont28);
 		hintsTitle.text.textColor = 0x000000;
@@ -66,7 +66,7 @@ class HintsDlg extends GuiControl {
 		closeButton.position = new Vector(273, 393);
 		closeButton.setExtent(new Vector(94, 45));
 		closeButton.vertSizing = Bottom;
-		closeButton.horizSizing = Right;
+		closeButton.horizSizing = Center;
 		closeButton.pressedAction = (sender) -> {
 			MarbleGame.canvas.popDialog(this);
 		}
