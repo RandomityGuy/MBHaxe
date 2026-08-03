@@ -169,6 +169,13 @@ class MarbleWorld extends Scheduler {
 		of `IceShard.destroyed`, see `RewindFrame.iceShardStates`). */
 	public var iceShards:Array<shapes.IceShard> = [];
 
+	/** All placed `RespawningTimeTravelItem`/`RespawningTimeTravelItem_PQ`/`*Penalty*` instances
+		(i.e. `TimeTravel`s constructed with `noRespawn = false`) - mirrors `iceShards`, used for
+		rewind snapshotting of `TimeTravel.respawnCount` (see `RewindFrame.respawningTimeTravelStates`).
+		Plain, non-respawning `TimeTravel`s are never pushed here since they have no extra state to
+		restore beyond the generic `PowerUp.lastPickUpTime` snapshot every `PowerUp` already gets. */
+	public var respawningTimeTravels:Array<shapes.TimeTravel> = [];
+
 	public var cannons:Array<shapes.Cannon> = [];
 
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
@@ -449,7 +456,7 @@ class MarbleWorld extends Scheduler {
 			if (words.filter(w -> w.toLowerCase() == "2d").length == 0)
 				gameModeStr = (gameModeStr == null || gameModeStr == "" ? "" : gameModeStr + " ") + "2D";
 		}
-		this.gameMode = GameModeFactory.getGameMode(cast this, gameModeStr);
+		this.gameMode = GameModeFactory.getGameMode(cast this, gameModeStr, this.mission.activatedPackages);
 		scanMission(this.mission.root);
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
@@ -2116,6 +2123,11 @@ class MarbleWorld extends Scheduler {
 
 		var realDt = dt;
 
+		if (this.marble != null) {
+			realDt *= @:privateAccess this.marble._simulationTimeScale;
+			dt *= @:privateAccess this.marble._simulationTimeScale;
+		}
+
 		if ((Key.isDown(Settings.controlsSettings.rewind)
 			|| MarbleGame.instance.touchInput.rewindButton.pressed
 			|| Gamepad.isDown(Settings.gamepadSettings.rewind))
@@ -3343,6 +3355,7 @@ class MarbleWorld extends Scheduler {
 		}
 		gems = null;
 		iceShards = null;
+		respawningTimeTravels = null;
 
 		if (sky != null)
 			sky.dispose();

@@ -951,6 +951,20 @@ class Marble extends GameObject {
 
 	var _maxForceRadius:Float = 50;
 
+	/** Ported from `physics.cs`'s `"global"` (not per-marble-datablock) attribute type -
+		`$Game::CameraSpeedMultiplier`/`$Game::MovementSpeedMultiplier`. Unlike the datablock
+		attributes above, these have no mission-authored default to read from `loadMarbleAttributes`,
+		they're just always `1` until a `PhysMod` layer overrides them. Real PQ applies these by
+		scaling the TGE keyboard-camera-look (`mvPitch/YawSpeed`) and digital movement-key
+		(`mvLeftAction`/etc.) speed globals; this engine has no keyboard-camera-look and reads
+		movement straight off the keys/gamepad/touch every tick, so the equivalent hook points are
+		`CameraController.orbit` (mouse-look delta) and `Marble.recordMove` (the compiled `move.d`
+		vector) respectively. */
+	public var _cameraSpeedMultiplier:Float = 1;
+
+	public var _movementSpeedMultiplier:Float = 1;
+	public var _simulationTimeScale:Float = 1;
+
 	var _bounceYet:Bool;
 	var _bounceSpeed:Float;
 	var _bouncePos:Vector;
@@ -1078,6 +1092,7 @@ class Marble extends GameObject {
 	var shockAbsorberEnableTime:Float = -1e8;
 	var helicopterEnableTime:Float = -1e8;
 	var megaMarbleEnableTime:Float = -1e8;
+	var megaMarbleDuration:Float = 10.0;
 
 	public var helicopterUseTick:Int = 0;
 	public var megaMarbleUseTick:Int = 0;
@@ -1229,7 +1244,6 @@ class Marble extends GameObject {
 	var lastRespawnTick:Int = -100000;
 	var trapdoorContacts:Map<Int, Int> = [];
 
-	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<GameObject> = [];
 
 	public function new() {
@@ -1724,9 +1738,11 @@ class Marble extends GameObject {
 	}
 
 	/** Every attribute PQ's `MarbleAttributeInfoArray`/`PhysMod` system can override on a marble
-		(`shared/defaultProperties.cs`/`client/scripts/physics.cs`) - excludes the "global" (non-
-		datablock) attributes (`cameraSpeedMultiplier`, `timeScale`, etc.) and mega-marble-specific
-		`megaValue` overrides, neither of which are in scope here. Recognizes both PQ's real attribute
+		(`shared/defaultProperties.cs`/`client/scripts/physics.cs`), plus the two "global" (non-
+		datablock) attributes that are actually exercised by real PhysMod/registered layers
+		(`cameraSpeedMultiplier`, `movementSpeedMultiplier` - see their fields' doc comment). The
+		remaining "global" attributes (`timeScale`, `superJumpVelocity`, etc.) and mega-marble-specific
+		`megaValue` overrides are still out of scope. Recognizes both PQ's real attribute
 		name (`airAcceleration`) and this codebase's pre-existing shorthand (`airAccel`) for the same
 		field, since both appear in the wild (mission-wide `setMarbleAttributes` vs. real PQ `.mis`
 		`PhysMod` triggers). */
@@ -1764,6 +1780,12 @@ class Marble extends GameObject {
 				this._mass = value;
 			case "maxforceradius":
 				this._maxForceRadius = value;
+			case "cameraspeedmultiplier":
+				this._cameraSpeedMultiplier = value;
+			case "movementspeedmultiplier":
+				this._movementSpeedMultiplier = value;
+			case "timescale":
+				this._simulationTimeScale = value;
 		}
 	}
 
@@ -1789,6 +1811,9 @@ class Marble extends GameObject {
 			case "bouncerestitution": this._bounceRestitution;
 			case "mass": this._mass;
 			case "maxforceradius": this._maxForceRadius;
+			case "cameraspeedmultiplier": this._cameraSpeedMultiplier;
+			case "movementspeedmultiplier": this._movementSpeedMultiplier;
+			case "timescale": this._simulationTimeScale;
 			default: 0;
 		}
 	}
@@ -1822,7 +1847,10 @@ class Marble extends GameObject {
 		"bouncekineticfriction",
 		"bouncerestitution",
 		"mass",
-		"maxforceradius"
+		"maxforceradius",
+		"cameraspeedmultiplier",
+		"movementspeedmultiplier",
+		"timescale"
 	];
 
 	function capturePhysicsAttributeBaseline() {
@@ -2507,6 +2535,7 @@ class Marble extends GameObject {
 			if (sv < this._jumpImpulse) {
 				this.velocity.load(this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv))));
 				this.timeSinceLastJump = 0;
+				this.level.gameMode.onJump(this);
 				if (!playedSounds.contains("data/sound/jump.wav") && !this.isNetUpdate && this.controllable) {
 					AudioManager.playSound(ResourceLoader.getResource("data/sound/jump.wav", ResourceLoader.getAudio, this.soundResources));
 					playedSounds.push("data/sound/jump.wav");
@@ -2523,6 +2552,7 @@ class Marble extends GameObject {
 			}
 		}
 		if (bestSurface != -1 && this.mode != Finish) {
+			this.level.gameMode.processMaterialContact(this, bestContact);
 			var vAtC = this.velocity.add(this.omega.cross(bestContact.normal.multiply(-this._radius))).sub(bestContact.velocity);
 			var vAtCMag = vAtC.length();
 			var slipping = false;
@@ -2703,7 +2733,7 @@ class Marble extends GameObject {
 		if (minVelocityBounceSoft <= contactVel) {
 			var hardBounceSpeed = minVelocityBounceHard;
 			var bounceSoundNum = Math.floor(Math.random() * 4);
-			var sndList = ((time - this.megaMarbleEnableTime < 10)
+			var sndList = ((time - this.megaMarbleEnableTime < this.megaMarbleDuration)
 				|| (this.megaMarbleUseTick > 0
 					&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
 						|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) ? [
@@ -2770,7 +2800,7 @@ class Marble extends GameObject {
 		if (slipVolume < 0)
 			slipVolume = 0;
 
-		if (time.currentAttemptTime - this.megaMarbleEnableTime < 10
+		if (time.currentAttemptTime - this.megaMarbleEnableTime < this.megaMarbleDuration
 			|| (this.megaMarbleUseTick > 0
 				&& ((Net.isHost && (this.level.timeState.ticks - this.megaMarbleUseTick) <= 312)
 					|| (Net.isClient && (this.serverTicks - this.megaMarbleUseTick) <= 312)))) {
@@ -4024,6 +4054,11 @@ class Marble extends GameObject {
 				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
 			}
 		}
+		// Ported from `physics.cs`'s `"movementSpeedMultiplier"` global attribute - real PQ scales
+		// the digital movement-key speed globals themselves; this engine reads `move.d` straight off
+		// keys/gamepad/touch every tick, so scaling the compiled vector here is the equivalent hook.
+		move.d.x *= this._movementSpeedMultiplier;
+		move.d.y *= this._movementSpeedMultiplier;
 		this.level.gameMode.processMove(this, move);
 		return move;
 	}
@@ -4117,13 +4152,13 @@ class Marble extends GameObject {
 
 		updatePowerupStates(timeState);
 
-		if (this._radius != 0.6666 && timeState.currentAttemptTime - this.megaMarbleEnableTime < 10) {
+		if (this._radius != 0.6666 && timeState.currentAttemptTime - this.megaMarbleEnableTime < this.megaMarbleDuration) {
 			this._prevRadius = this._radius;
 			this._radius = 0.6666;
 			this.collider.radius = 0.6666;
 			var marbledts = cast(this.getChildAt(0), DtsObject);
 			marbledts.scale(this._radius / this._prevRadius);
-		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > 10) {
+		} else if (timeState.currentAttemptTime - this.megaMarbleEnableTime > this.megaMarbleDuration) {
 			if (this._radius != this._prevRadius) {
 				this._radius = this._prevRadius;
 				this.collider.radius = this._radius;
@@ -4232,7 +4267,7 @@ class Marble extends GameObject {
 	public function getMass() {
 		if (this.level == null)
 			return 1;
-		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < 10
+		if (this.level.timeState.currentAttemptTime - this.megaMarbleEnableTime < this.megaMarbleDuration
 			|| (Net.isHost && this.megaMarbleUseTick > 0 && (this.level.timeState.ticks - this.megaMarbleUseTick) < 312)
 			|| (Net.isClient && this.megaMarbleUseTick > 0 && (this.serverTicks - this.megaMarbleUseTick) < 312)) {
 			return 4;
@@ -4382,14 +4417,8 @@ class Marble extends GameObject {
 		var megaMarbleTicks = Net.isMP && Net.connectedServerInfo.competitiveMode ? 156 : 312;
 		if (this.level == null)
 			return false;
-		// Ported from `ghost.cs`'s `... || MissionInfo.mega` - `EMI_Mega`/"Always Mega Marble"
-		// forces every marble permanently mega, bypassing the normal enable-time/use-tick tracking.
-		if (this.level.mission != null
-			&& this.level.mission.missionInfo != null
-			&& MisParser.parseBoolean(this.level.mission.missionInfo.mega))
-			return true;
 		if (!this.level.isMultiplayer) {
-			return timeState.currentAttemptTime - this.megaMarbleEnableTime < 10;
+			return timeState.currentAttemptTime - this.megaMarbleEnableTime < this.megaMarbleDuration;
 		} else {
 			if (Net.isHost) {
 				return (megaMarbleUseTick > 0 && (this.level.timeState.ticks - megaMarbleUseTick) <= megaMarbleTicks);
@@ -4800,6 +4829,7 @@ class Marble extends GameObject {
 		this.shockAbsorberEnableTime = Math.NEGATIVE_INFINITY;
 		this.helicopterEnableTime = Math.NEGATIVE_INFINITY;
 		this.megaMarbleEnableTime = Math.NEGATIVE_INFINITY;
+		this.megaMarbleDuration = 10;
 		this.blastUseTick = 0;
 		this.blastTicks = 0;
 		this.movementTriggerCount = 0;
@@ -4886,6 +4916,15 @@ class Marble extends GameObject {
 			var marbledts = cast(this.getChildAt(0), DtsObject);
 			marbledts.scale(this._prevRadius / 0.6666);
 		}
+		this.shapeOrTriggerInside.resize(0);
+
+		if (this.level.mission != null
+			&& this.level.mission.missionInfo != null
+			&& MisParser.parseBoolean(this.level.mission.missionInfo.mega)) {
+			this.megaMarbleEnableTime = 0;
+			this.megaMarbleDuration = 1e8;
+		}
+		this._simulationTimeScale = 1;
 	}
 
 	public override function dispose() {

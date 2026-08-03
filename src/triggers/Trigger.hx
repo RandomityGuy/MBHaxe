@@ -44,18 +44,21 @@ class Trigger extends GameObject {
 		var p7 = origin.add(d2).add(d3);
 		var p8 = origin.add(d1).add(d2).add(d3);
 
-		var mat = new Matrix();
-		var quat = MisParser.parseRotation(element.rotation);
-		quat.x = -quat.x;
-		quat.w = -quat.w;
-		quat.toMatrix(mat);
-		var scale = MisParser.parseVector3(element.scale);
-		mat.scale(scale.x, scale.y, scale.z);
-		var pos = MisParser.parseVector3(element.position);
-		pos.x = -pos.x;
+		var shapePosition = MisParser.parseVector3(element.position);
+		shapePosition.x = -shapePosition.x;
+		var shapeRotation = MisParser.parseRotation(element.rotation);
+		shapeRotation.x = -shapeRotation.x;
+		shapeRotation.w = -shapeRotation.w;
+		var shapeScale = MisParser.parseVector3(element.scale);
+
+		var mat = Matrix.S(shapeScale.x, shapeScale.y, shapeScale.z);
+		var tmp = new Matrix();
+		shapeRotation.toMatrix(tmp);
+		mat.multiply3x4(mat, tmp);
+		mat.setPosition(shapePosition);
 		// mat.setPosition(pos);
 
-		vertices = [p1, p2, p3, p4, p5, p6, p7, p8].map((vert) -> vert.transformed(mat));
+		vertices = [p1, p2, p3, p4, p5, p6, p7, p8];
 
 		var boundingbox = new Bounds();
 		for (vector in vertices) {
@@ -63,7 +66,7 @@ class Trigger extends GameObject {
 		}
 
 		collider = new BoxCollisionEntity(boundingbox, this);
-		this.setTransform(Matrix.T(pos.x, pos.y, pos.z));
+		this.setTransform(mat);
 
 		// var cub = new Cube(boundingbox.xSize, boundingbox.ySize, boundingbox.zSize);
 		// cub.addUVs();

@@ -14,6 +14,7 @@ import src.Console;
 import triggers.SpawnTrigger;
 import rewind.RewindableState;
 import net.Move;
+import collision.CollisionInfo;
 
 class NullMode implements GameMode {
 	var level:MarbleWorld;
@@ -152,6 +153,10 @@ class NullMode implements GameMode {
 	public function constructRewindState():RewindableState {
 		return null;
 	}
+
+	public function processMaterialContact(marble:Marble, contact:CollisionInfo) {}
+
+	public function onJump(marble:Marble) {}
 
 	public function onClientRestart() {}
 

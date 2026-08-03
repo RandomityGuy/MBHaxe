@@ -167,6 +167,10 @@ class RewindFrame {
 	/** Also index-aligned with `level.iceShards` - see `IceShard.gotoTargetTriggered`'s doc comment. */
 	var iceShardGotoTargetStates:Array<Bool>;
 
+	/** Index-aligned with `level.respawningTimeTravels`, mirrors `iceShardStates` - see
+		`shapes.TimeTravel.respawnCount`'s doc comment. */
+	var respawningTimeTravelStates:Array<Int>;
+
 	/** HUD countdown timer state (`MarbleWorld.startCountdown`/`stopCountdown`,
 		`CountdownStartTrigger`/`CountdownStopTrigger`) - unlike most HUD-driving state elsewhere in
 		this file, `countdownRemaining` is a genuine per-tick accumulator (decremented by `dt` each
@@ -244,6 +248,7 @@ class RewindFrame {
 		waterTriggers = [];
 		iceShardStates = [];
 		iceShardGotoTargetStates = [];
+		respawningTimeTravelStates = [];
 		countdownIcon = "";
 		pathTriggerStates = [];
 		repetitiveTriggerStates = [];
@@ -348,6 +353,7 @@ class RewindFrame {
 		framesize += 8; // instantCannonFireTime
 		framesize += 2 + iceShardStates.length * 1; // iceShardStates
 		framesize += 2 + iceShardGotoTargetStates.length * 1; // iceShardGotoTargetStates
+		framesize += 2 + respawningTimeTravelStates.length * 1; // respawningTimeTravelStates
 		framesize += 1; // countdownActive
 		framesize += 8; // countdownRemaining
 		framesize += 2 + countdownIcon.length; // countdownIcon
@@ -521,6 +527,9 @@ class RewindFrame {
 		bb.writeInt16(iceShardGotoTargetStates.length);
 		for (s in iceShardGotoTargetStates)
 			bb.writeByte(s ? 1 : 0);
+		bb.writeInt16(respawningTimeTravelStates.length);
+		for (s in respawningTimeTravelStates)
+			bb.writeByte(s);
 		bb.writeByte(countdownActive ? 1 : 0);
 		bb.writeDouble(countdownRemaining);
 		bb.writeInt16(countdownIcon.length);
@@ -739,6 +748,10 @@ class RewindFrame {
 		var iceShardGotoTargetStates_len = br.readInt16();
 		for (i in 0...iceShardGotoTargetStates_len)
 			iceShardGotoTargetStates.push(br.readByte() != 0);
+		respawningTimeTravelStates.resize(0);
+		var respawningTimeTravelStates_len = br.readInt16();
+		for (i in 0...respawningTimeTravelStates_len)
+			respawningTimeTravelStates.push(br.readByte());
 		countdownActive = br.readByte() != 0;
 		countdownRemaining = br.readDouble();
 		var countdownIcon_len = br.readInt16();

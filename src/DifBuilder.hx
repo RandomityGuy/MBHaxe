@@ -231,6 +231,10 @@ class DifBuilder {
 			restitution: 0.0,
 			force: 15.0
 		},
+		"pq_friction_water" => {
+			friction: 6.0,
+			restitution: 0.0
+		},
 		"pq_friction_grass" => {
 			friction: 2,
 			restitution: 0.5
@@ -289,6 +293,10 @@ class DifBuilder {
 			friction: 1.0,
 			restitution: 1.0,
 			force: 5.0
+		},
+		"stickconcrete" => {
+			friction: 1.0,
+			restitution: 0.0
 		},
 		];
 
@@ -463,6 +471,24 @@ class DifBuilder {
 				colliderSurface.transformKeys = [];
 				colliderSurface.originalIndices = [];
 				colliderSurface.originalSurfaceIndex = surfaceindex;
+
+				var materialName = stripTexName(texture).toLowerCase();
+				var hasCustomMaterialInfo = customMaterialDict.exists(materialName);
+				if (hasCustomMaterialInfo) {
+					var minfo = customMaterialDict.get(materialName);
+					colliderSurface.friction = minfo.friction;
+					colliderSurface.restitution = minfo.restitution;
+					colliderSurface.force = minfo.force != null ? minfo.force : 0;
+				} else {
+					var hasMaterialInfo = materialDict.exists(materialName);
+					if (hasMaterialInfo) {
+						var minfo = materialDict.get(materialName);
+						colliderSurface.friction = minfo.friction;
+						colliderSurface.restitution = minfo.restitution;
+						colliderSurface.force = minfo.force != null ? minfo.force : 0;
+					}
+				}
+
 				for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
 					var p1, p2, p3;
 					if ((k - (surface.windingStart + 2)) % 2 == 0) {
@@ -523,23 +549,7 @@ class DifBuilder {
 					tri.uv2 = uv2;
 					tri.uv3 = uv3;
 					triangles.push(tri);
-					var materialName = stripTexName(texture).toLowerCase();
 
-					var hasCustomMaterialInfo = customMaterialDict.exists(materialName);
-					if (hasCustomMaterialInfo) {
-						var minfo = customMaterialDict.get(materialName);
-						colliderSurface.friction = minfo.friction;
-						colliderSurface.restitution = minfo.restitution;
-						colliderSurface.force = minfo.force != null ? minfo.force : 0;
-					} else {
-						var hasMaterialInfo = materialDict.exists(materialName);
-						if (hasMaterialInfo) {
-							var minfo = materialDict.get(materialName);
-							colliderSurface.friction = minfo.friction;
-							colliderSurface.restitution = minfo.restitution;
-							colliderSurface.force = minfo.force != null ? minfo.force : 0;
-						}
-					}
 					colliderSurface.addPoint(-p1.x, p1.y, p1.z);
 					colliderSurface.addPoint(-p2.x, p2.y, p2.z);
 					colliderSurface.addPoint(-p3.x, p3.y, p3.z);

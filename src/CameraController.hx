@@ -184,13 +184,15 @@ class CameraController extends Object {
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
+		var camSpeedMul = marble != null ? marble._cameraSpeedMultiplier : 1.0;
+
 		if (!isTouch)
 			wasLastGamepadInput = false;
 		else
 			wasLastGamepadInput = true;
 
-		nextCameraPitch = CameraPitch + deltaposY * factor;
-		nextCameraYaw = CameraYaw + deltaposX * factor;
+		nextCameraPitch = CameraPitch + deltaposY * factor * camSpeedMul;
+		nextCameraYaw = CameraYaw + deltaposX * factor * camSpeedMul;
 
 		// var rotX = deltaposX * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
 		// var rotY = deltaposY * 0.001 * Settings.controlsSettings.cameraSensitivity * Math.PI * 2;
@@ -659,7 +661,8 @@ class CameraController extends Object {
 		CameraPitch = Util.lerp(CameraPitch, nextCameraPitch, lerpt);
 
 		if (!cannonAiming)
-			CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
+			CameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4,
+				Math.min(Math.PI / 2 - 0.0001, CameraPitch)); // Util.clamp(CameraPitch, -Math.PI / 12, Math.PI / 2);
 
 		function getRotQuat(v1:Vector, v2:Vector) {
 			function orthogonal(v:Vector) {

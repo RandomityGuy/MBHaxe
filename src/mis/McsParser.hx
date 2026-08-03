@@ -10,6 +10,8 @@ import mis.MissionElement.MissionElementScriptObject;
 class McsParser {
 	var text:String;
 
+	final activatePackageRegEx = ~/activatePackage\((.+?)\);/g;
+
 	public function new(text:String) {
 		this.text = text;
 	}
@@ -26,6 +28,16 @@ class McsParser {
 			minfo._name = "MissionInfo";
 			mdata.root.elements.insert(0, minfo);
 		}
+
+		var activatedPackages = [];
+		var startText = this.text;
+
+		// scan all the activated packages
+		while (activatePackageRegEx.match(startText)) {
+			activatedPackages.push(StringTools.replace(activatePackageRegEx.matched(1), "\"", "").toLowerCase());
+			startText = activatePackageRegEx.matchedRight();
+		}
+		mdata.activatedPackages = mdata.activatedPackages.concat(activatedPackages);
 
 		return mdata;
 	}

@@ -80,7 +80,7 @@ class PQMaterials {
 			'multiplayer/interiors/platinumquest/pq_rays_green_med' => (onFinish) -> DifBuilder.createPQMaterial(onFinish, 'pq_rays_green_med',
 				'tile.normal.png', 'tile.spec.png'),
 			'multiplayer/interiors/platinumquest/pq_rays_green_random' => (onFinish) -> DifBuilder.createPQMaterial(onFinish, 'pq_rays_green_random',
-				'tile.normal.png', 'tile.spec.png', 0.25),
+				'tile.normal.png', 'tile.spec.png', 4),
 			'multiplayer/interiors/platinumquest/pq_rays_red_light' => (onFinish) -> DifBuilder.createPQMaterial(onFinish, 'pq_rays_red_light',
 				'tile.normal.png', 'tile.spec.png'),
 			'multiplayer/interiors/platinumquest/pq_rays_purple_light' => (onFinish) -> DifBuilder.createPQMaterial(onFinish, 'pq_rays_purple_light',
@@ -141,9 +141,10 @@ class PQMaterials {
 		ordinary, already-baked-to-look-varied square diffuse textures (confirmed: e.g.
 		`pq_hot_1_random.jpg` is a plain 512x512 image, not a packed multi-tile strip), so they're
 		wired below as plain `PQMaterial` entries exactly like the "dark"/"light"/"med" ones, just
-		using the "random" asset as the diffuse. `secondaryFactor=0.25` compensates for these being
-		4x the pixel size of the shared 128x128 `tile.normal.png`/`tile.spec.png` pair (same reason
-		the pre-existing `pq_rays_green_random` entry uses that exact factor) - this is purely a
+		using the "random" asset as the diffuse. `secondaryFactor=4` compensates for these being 4x
+		the pixel size of the shared 128x128 `tile.normal.png`/`tile.spec.png` pair, so the shared
+		normal/spec tile repeats 4x4 across the surface instead of stretching once across it (same
+		reason the pre-existing `pq_rays_green_random` entry uses that exact factor) - this is purely a
 		texture-resolution compensation, unrelated to any "_2"/"_small" naming, so it applies equally
 		to every "random"/"random_2" variant and their own "_small" counterparts (which are just
 		lower-res versions of the exact same image, not a different real-world tile size).
@@ -200,13 +201,13 @@ class PQMaterials {
 			shaderMaterialDict.set('interiors_pq/${basename}',
 				(onFinish) -> DifBuilder.createSkyboxIceMaterial(onFinish, 'interiors_pq/${basename}', iceNormal, iceSpec, 0.3, new Vector(1, 1)));
 
-		// "Random" variants of circles/hot/neutral/rays - plain PQMaterial, secondaryFactor 0.25 (see
+		// "Random" variants of circles/hot/neutral/rays - plain PQMaterial, secondaryFactor 4 (see
 		// class doc comment above for why). Ported directly from the real, already-present
 		// `data/interiors_pq/` assets - only entries with a real backing file are added, matching
 		// exactly what's on disk (not every color/number has every suffix).
 		function addRandomPqTile(basename:String) {
 			shaderMaterialDict.set('interiors_pq/${basename}',
-				(onFinish) -> DifBuilder.createPQMaterialPaths(onFinish, 'interiors_pq/${basename}', tileNormal, tileSpec, 0.25));
+				(onFinish) -> DifBuilder.createPQMaterialPaths(onFinish, 'interiors_pq/${basename}', tileNormal, tileSpec, 4));
 		}
 		for (color in ["blue", "gray", "green", "orange", "purple", "red", "yellow"])
 			addRandomPqTile('pq_circles_${color}_random');

@@ -70,7 +70,7 @@ class MisParser {
 			startText = marbleAttributesRegEx.matchedRight();
 		}
 
-		// var activatedPackages = [];
+		var activatedPackages = [];
 		startText = outsideText;
 
 		var customMaterials = new Map<String, {
@@ -116,10 +116,10 @@ class MisParser {
 
 		DifBuilder.setCustomMaterialDefinitions(materialMappings);
 
-		// while (activatePackageRegEx.match(startText)) {
-		// 	activatedPackages.push(this.resolveExpression(activatePackageRegEx.matched(1)));
-		// 	startText = marbleAttributesRegEx.matchedRight();
-		// }
+		while (activatePackageRegEx.match(startText)) {
+			activatedPackages.push(this.resolveExpression(activatePackageRegEx.matched(1)).toLowerCase());
+			startText = activatePackageRegEx.matchedRight();
+		}
 
 		if (objectWriteBeginIndex != -1 && objectWriteEndIndex != -1) {
 			this.text = this.text.substring(objectWriteBeginIndex, objectWriteEndIndex);
@@ -172,6 +172,7 @@ class MisParser {
 		var mf = new MisFile();
 		mf.root = cast elements[0];
 		mf.marbleAttributes = marbleAttributes;
+		mf.activatedPackages = activatedPackages;
 		return mf;
 	}
 
@@ -412,8 +413,8 @@ class MisParser {
 			return f == Std.int(f) ? Std.string(Std.int(f)) : Std.string(f);
 
 		function isBarewordChar(c:String):Bool
-			return c != "" && !StringTools.isSpace(c, 0) && c != "(" && c != ")" && c != '"'
-				&& c != "+" && c != "-" && c != "*" && c != "/" && c != "@" && c != "|";
+			return c != "" && !StringTools.isSpace(c, 0) && c != "(" && c != ")" && c != '"' && c != "+" && c != "-" && c != "*" && c != "/" && c != "@"
+				&& c != "|";
 
 		// Forward-declared: parsePrimary needs to call parseOr (for parenthesized sub-expressions),
 		// but parseOr is defined in terms of parseConcat/parseAdd/parseMul/parseUnary/parsePrimary -

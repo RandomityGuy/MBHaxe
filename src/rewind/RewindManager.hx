@@ -141,6 +141,9 @@ class RewindManager {
 			rf.iceShardStates.push(s.destroyed);
 			rf.iceShardGotoTargetStates.push(s.gotoTargetTriggered);
 		}
+		rf.respawningTimeTravelStates.resize(0);
+		for (t in level.respawningTimeTravels)
+			rf.respawningTimeTravelStates.push(@:privateAccess t.respawnCount);
 		rf.countdownActive = @:privateAccess level.countdownActive;
 		rf.countdownRemaining = @:privateAccess level.countdownRemaining;
 		rf.countdownIcon = @:privateAccess level.countdownIcon;
@@ -424,6 +427,8 @@ class RewindManager {
 				shard.setDestroyed(rf.iceShardStates[i]);
 			shard.gotoTargetTriggered = rf.iceShardGotoTargetStates[i];
 		}
+		for (i in 0...rf.respawningTimeTravelStates.length)
+			@:privateAccess level.respawningTimeTravels[i].respawnCount = rf.respawningTimeTravelStates[i];
 
 		@:privateAccess level.countdownActive = rf.countdownActive;
 		@:privateAccess level.countdownRemaining = rf.countdownRemaining;

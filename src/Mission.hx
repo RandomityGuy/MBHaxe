@@ -51,6 +51,7 @@ class Mission {
 	public var curationScore:Int = 0;
 	public var addedAt:Int64;
 	public var marbleAttributes:Map<String, String>;
+	public var activatedPackages = [];
 
 	var next:Mission;
 
@@ -82,6 +83,7 @@ class Mission {
 
 		var contents = StringTools.endsWith(this.path.toLowerCase(), ".mcs") ? new mis.McsParser(misText).parse() : new MisParser(misText).parse();
 		root = contents.root;
+		activatedPackages = contents.activatedPackages;
 		marbleAttributes = contents.marbleAttributes;
 
 		function scanMission(simGroup:MissionElementSimGroup) {

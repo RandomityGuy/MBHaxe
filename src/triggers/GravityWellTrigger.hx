@@ -8,6 +8,10 @@ import net.NetPacket.MarbleNetFlags;
 
 class GravityWellTrigger extends Trigger {
 	var restoreUp:Map<Marble, Vector> = [];
+	// Ported from `gravity.cs`'s `Gravity::update()`/`GravityWellTrigger_getDistance()` - see
+	// `GravityPointTrigger.wasWithinRadius`'s doc comment for why this needs to be tracked
+	// separately from actual AABB enter/leave.
+	var wasWithinRadius:Map<Marble, Bool> = [];
 
 	function getCenter():Vector {
 		var pointField = this.element.fields.get("custompoint");
@@ -57,20 +61,7 @@ class GravityWellTrigger extends Trigger {
 		}
 	}
 
-	override function onMarbleEnter(marble:Marble, timeState:TimeState) {
-		var restoreField = this.element.fields.get("restoregravity");
-		if (restoreField != null && restoreField[0] == "1")
-			this.restoreUp.set(marble, marble.currentUp.clone());
-	}
-
-	override function onMarbleInside(marble:Marble, timeState:TimeState) {
-		var marblePos = marble.getAbsPos().getPosition();
-		if (!withinRadius(marblePos, getCenter()))
-			return;
-		apply(marble, getDownVector(marblePos).multiply(-1), timeState);
-	}
-
-	override function onMarbleLeave(marble:Marble, timeState:TimeState) {
+	function leaveRestoreGravity(marble:Marble, timeState:TimeState) {
 		var restoreField = this.element.fields.get("restoregravity");
 		if (restoreField == null || restoreField[0] == "")
 			return;
@@ -88,5 +79,38 @@ class GravityWellTrigger extends Trigger {
 		}
 
 		apply(marble, direction, timeState);
+	}
+
+	override function onMarbleInside(marble:Marble, timeState:TimeState) {
+		var marblePos = marble.getAbsPos().getPosition();
+		var within = withinRadius(marblePos, getCenter());
+		if (!within) {
+			// Radius-exit while still inside the AABB - real source's `getDistance` reports this
+			// trigger out of range the instant this happens, not just on real AABB exit.
+			if (this.wasWithinRadius.get(marble) == true)
+				leaveRestoreGravity(marble, timeState);
+			this.wasWithinRadius.set(marble, false);
+			return;
+		}
+		// Real source only snapshots the gravity-to-restore when this trigger actually becomes the
+		// active one (i.e. on radius-enter, not raw AABB-enter).
+		if (this.wasWithinRadius.get(marble) != true) {
+			var restoreField = this.element.fields.get("restoregravity");
+			if (restoreField != null && restoreField[0] == "1")
+				this.restoreUp.set(marble, marble.currentUp.clone());
+		}
+		this.wasWithinRadius.set(marble, true);
+		apply(marble, getDownVector(marblePos).multiply(-1), timeState);
+	}
+
+	override function onMarbleLeave(marble:Marble, timeState:TimeState) {
+		this.wasWithinRadius.remove(marble);
+		leaveRestoreGravity(marble, timeState);
+	}
+
+	override function reset() {
+		super.reset();
+		this.wasWithinRadius = [];
+		this.restoreUp = [];
 	}
 }

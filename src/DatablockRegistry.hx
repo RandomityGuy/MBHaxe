@@ -38,6 +38,7 @@ import triggers.CountdownStartTrigger;
 import triggers.CountdownStopTrigger;
 import triggers.DisableShapeForceTrigger;
 import triggers.PhysModTrigger;
+import triggers.SMBTrigger;
 import triggers.WaterPhysicsTrigger;
 import triggers.RelativeTPTrigger;
 import triggers.SpawnTrigger;
@@ -83,6 +84,7 @@ import shapes.ToggleButton;
 import shapes.NestEgg;
 import shapes.TeleportItem;
 import shapes.IceShard;
+import shapes.PhysModEmitterBase;
 import shapes.FadePlatform;
 import shapes.Cannon;
 import shapes.CannonBase;
@@ -211,7 +213,13 @@ class DatablockRegistry {
 			create: element -> new SuperBounce(cast element)
 		},
 		{
-			match: Exact(["roundbumper", "bumper", "roundbumper_pq", "roundbumper_mbu", "roundbumper_original"]),
+			match: Exact([
+				"roundbumper",
+				"bumper",
+				"roundbumper_pq",
+				"roundbumper_mbu",
+				"roundbumper_original"
+			]),
 			create: element -> new RoundBumper(cast element)
 		},
 		{
@@ -293,7 +301,10 @@ class DatablockRegistry {
 				   "respawningtimetravelitem",  "respawningtimepenaltyitem",
 				"respawningtimetravelitem_pq", "respawningtimepenaltyitem_pq"
 			]),
-			create: element -> new TimeTravel(cast element, false)
+			create: element -> new TimeTravel(cast element, false),
+			after: (shape, element, world) -> {
+				world.respawningTimeTravels.push(cast shape);
+			}
 		},
 		{
 			match: Exact(["randompowerupitem"]),
@@ -360,11 +371,15 @@ class DatablockRegistry {
 			create: element -> new TeleportItem(cast element)
 		},
 		{
-			match: Exact(["iceshard1", "iceshard2"]),
+			match: Exact(["iceshard1", "iceshard2", "pointsiceshard1", "pointsiceshard2"]),
 			create: element -> new IceShard(cast element),
 			after: (shape, element, world) -> {
 				world.iceShards.push(cast shape);
 			}
+		},
+		{
+			match: Exact(["physmodemitterbase"]),
+			create: element -> new PhysModEmitterBase(cast element)
 		},
 		{
 			match: Exact([
@@ -538,6 +553,10 @@ class DatablockRegistry {
 		{
 			match: Exact(["marblephysmodtrigger"]),
 			create: (element, level) -> new PhysModTrigger(element, level)
+		},
+		{
+			match: Exact(["smbtrigger"]),
+			create: (element, level) -> new SMBTrigger(element, level)
 		},
 		{
 			match: Exact(["waterphysicstrigger"]),

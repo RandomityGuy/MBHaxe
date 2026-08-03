@@ -378,7 +378,8 @@ class Cannon extends DtsObject {
 	function computeAimDirection(yawRad:Float, pitchRad:Float):Vector {
 		var dir = new Vector(-Math.cos(pitchRad) * Math.sin(yawRad), Math.cos(pitchRad) * Math.cos(yawRad), Math.sin(pitchRad));
 		var orientationQuat = this.level.getOrientationQuat(this.level.timeState.currentAttemptTime);
-		dir.transform(orientationQuat.toMatrix());
+		// if (!this.level.marble.currentUp.equals(new Vector(0, 0, -1)))
+		// 	dir.transform(orientationQuat.toMatrix());
 		return dir;
 	}
 

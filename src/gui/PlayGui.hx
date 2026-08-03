@@ -854,7 +854,8 @@ class PlayGui {
 	/** `icon` matches `CountdownStartTrigger`'s `icon` field (a filename under
 		`data/ui/game/countdown/`, default `timerTimeTravel` per the source). */
 	public function setCountdownThIcon(icon:String) {
-		countdownThImage.setTile(ResourceLoader.getResource('data/ui/game/countdown/${icon}.png', ResourceLoader.getImage, this.imageResources).toTile());
+		countdownThImage.setTile(ResourceLoader.getResource('data/ui/game/countdown/${icon.toLowerCase()}.png', ResourceLoader.getImage, this.imageResources)
+			.toTile());
 	}
 
 	/** Ported from `PlayGui::updateCountdown`'s thousandths branch (`client/scripts/playGui.cs`) -
