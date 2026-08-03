@@ -72,6 +72,14 @@ class PhysModTrigger extends Trigger {
 	var overrides:Array<PhysicsAttributeOverride>;
 	var noEmitters:Bool;
 
+	/** Ported from `physics.cs`'s `%trigger.disabled` check in `MarblePhysModTrigger_onClient
+		Enter/LeaveTrigger` - most `PhysMod` triggers never set this field (defaults to `false`), but
+		a few (e.g. `TakeTheGold.mcs`'s `FinishGravity`) start disabled and get toggled on/off at
+		runtime by mission-specific mode code (`TakeTheGoldMode`) rather than by anything in the
+		mission file itself after load. Public so those modes can flip it directly, matching real
+		PQ's plain field assignment (`FinishGravity.disabled = 0`). */
+	public var disabled:Bool;
+
 	// One pushed layer per marble currently inside this volume - `pushPhysicsLayer`/
 	// `popPhysicsLayer` operate per-`Marble` instance, so each overlapping marble (relevant in
 	// multiplayer) needs its own tracked layer to pop later.
@@ -88,9 +96,12 @@ class PhysModTrigger extends Trigger {
 				break;
 			var valueField = element.fields.get("value" + i);
 			var value = valueField != null && valueField[0] != "" ? MisParser.parseNumber(valueField[0]) : 0;
-			this.overrides.push({attribute: attrField[0], value: value});
+			this.overrides.push({attribute: attrField[0].toLowerCase(), value: value});
 			i++;
 		}
+
+		var disabledField = element.fields.get("disabled");
+		this.disabled = disabledField != null && MisParser.parseBoolean(disabledField[0]);
 
 		var noEmittersField = element.fields.get("noemitters");
 		var builtEmittersField = element.fields.get("_builtemitters");
@@ -151,7 +162,7 @@ class PhysModTrigger extends Trigger {
 	}
 
 	override function onMarbleEnter(marble:Marble, timeState:TimeState) {
-		if (this.activeLayers.exists(marble) || this.overrides.length == 0)
+		if (this.disabled || this.activeLayers.exists(marble) || this.overrides.length == 0)
 			return;
 		this.activeLayers.set(marble, marble.pushPhysicsLayer(this.overrides));
 	}

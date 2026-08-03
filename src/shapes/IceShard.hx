@@ -1,5 +1,7 @@
 package shapes;
 
+import modes.MadnessMode;
+import modes.GameMode.GameModeFactory;
 import h3d.Vector;
 import h3d.mat.BlendMode;
 import src.DtsObject;
@@ -212,10 +214,12 @@ class IceShard extends DtsObject {
 	var breakData1:ParticleData;
 	var breakData2:ParticleData;
 
+	var points = 0;
+
 	public function new(element:MissionElementStaticShape) {
 		super();
 		this.element = element;
-		var isShard2 = element.datablock.toLowerCase() == "iceshard2";
+		var isShard2 = element.datablock.toLowerCase() == "iceshard2" || element.datablock.toLowerCase() == "pointiceshard2";
 		this.dtsPath = isShard2 ? "data/shapes_pq/gameplay/hazards/ice_shard_2.dts" : "data/shapes_pq/gameplay/hazards/ice_shard.dts";
 		this.isCollideable = true;
 		this.identifier = "IceShard" + this.dtsPath;
@@ -224,6 +228,18 @@ class IceShard extends DtsObject {
 		var skinField = element.fields.get("skin");
 		if (skinField != null && skinField[0] != "")
 			this.skinOverride = skinField[0];
+		if (this.skinOverride != null) {
+			switch (this.skinOverride) {
+				case "red":
+					this.points = 1;
+				case "yellow":
+					this.points = 2;
+				case "blue":
+					this.points = 5;
+				case "platinum":
+					this.points = 10;
+			}
+		}
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -244,8 +260,10 @@ class IceShard extends DtsObject {
 			this.breakData2.identifier = "IceShardBreak2Particle";
 			this.breakData2.texture = ResourceLoader.getResource("data/particles/fireball_2B.png", ResourceLoader.getTexture, this.textureResources);
 
-			this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
-			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null, () -> this.getAbsPos().getPosition());
+			if (this.points == 0) {
+				this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
+				this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null, () -> this.getAbsPos().getPosition());
+			}
 
 			var worker = new ResourceLoaderWorker(onFinish);
 			worker.addTask(fwd -> ResourceLoader.load("sound/ice_freeze.wav").entry.load(() -> {
@@ -296,8 +314,10 @@ class IceShard extends DtsObject {
 				this.shineEmitter = null;
 			}
 		} else {
-			this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
-			this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null, () -> this.getAbsPos().getPosition());
+			if (this.points == 0) {
+				this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());
+				this.shineEmitter = this.level.particleManager.createEmitter(iceShardShineOptions, this.shineData, null, () -> this.getAbsPos().getPosition());
+			}
 		}
 	}
 
@@ -317,6 +337,23 @@ class IceShard extends DtsObject {
 		var pos = this.getAbsPos().getPosition().add(new Vector(0, 0, -0.5));
 		this.level.particleManager.createEmitter(iceShardBreak1Options, this.breakData1, pos);
 		this.level.particleManager.createEmitter(iceShardBreak2Options, this.breakData2, pos);
+
+		// Give points
+		if (this.points != 0) {
+			var gm = GameModeFactory.findMode(this.level.gameMode, MadnessMode);
+			switch (points) {
+				case 1:
+					@:privateAccess level.playGui.addMiddleMessage('+1', 0xFF6666);
+				case 2:
+					@:privateAccess level.playGui.addMiddleMessage('+2', 0xFFFF66);
+				case 5:
+					@:privateAccess level.playGui.addMiddleMessage('+5', 0x6666FF);
+				case 10:
+					@:privateAccess level.playGui.addMiddleMessage('+10', 0xdddddd);
+			}
+			@:privateAccess gm.score += this.points;
+			@:privateAccess level.playGui.formatGemHuntCounter(@:privateAccess gm.score);
+		}
 	}
 
 	override function onMarbleContact(marble:Marble, timeState:TimeState, ?contact:CollisionInfo) {

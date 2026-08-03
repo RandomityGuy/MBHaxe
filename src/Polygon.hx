@@ -137,6 +137,36 @@ class Polygon extends MeshPrimitive {
 		}
 	}
 
+	// Ported from real PQ's `tangentsFromVertices`/`calculateTangents` (`interiorRender.cc`): each
+	// vertex's tangent is orthogonalized against its own normal, and its handedness is derived from
+	// the sign of the UV-delta determinant (`r`) so that mirrored/flipped UV triangles get a tangent
+	// with the correct sign instead of always taking the same handedness.
+	function tangentForVertex(p0:Vector, p1:Vector, p2:Vector, uv0:Vector, uv1:Vector, uv2:Vector, n:Vector) {
+		var deltaPos1 = p1.sub(p0);
+		var deltaPos2 = p2.sub(p0);
+		var deltaUV1x = uv1.x - uv0.x;
+		var deltaUV1y = uv1.y - uv0.y;
+		var deltaUV2x = uv2.x - uv0.x;
+		var deltaUV2y = uv2.y - uv0.y;
+
+		var det = deltaUV1x * deltaUV2y - deltaUV1y * deltaUV2x;
+		if (det == 0)
+			return new Vector(0, 0, 0);
+
+		var r = 1.0 / det;
+		var uDir = deltaPos1.multiply(deltaUV2y).sub(deltaPos2.multiply(deltaUV1y));
+		uDir.scale(r);
+		var vDir = deltaPos2.multiply(deltaUV1x).sub(deltaPos1.multiply(deltaUV2x));
+		vDir.scale(r);
+
+		var tangent = uDir.sub(n.multiply(n.dot3(uDir)));
+		tangent.normalize();
+		if (n.cross(tangent).dot3(vDir) < 0)
+			tangent.scale(-1);
+
+		return tangent;
+	}
+
 	public function addTangents() {
 		tangents = [];
 		for (i in 0...points.length)
@@ -153,35 +183,23 @@ class Polygon extends MeshPrimitive {
 			var uv0 = new Vector(uvs[i0 * 2], uvs[i0 * 2 + 1]);
 			var uv1 = new Vector(uvs[i1 * 2], uvs[i1 * 2 + 1]);
 			var uv2 = new Vector(uvs[i2 * 2], uvs[i2 * 2 + 1]);
-			var n = new Vector(normals[i0 * 3], normals[i0 * 3 + 1], normals[i0 * 3 + 2]);
+			var n0 = new Vector(normals[i0 * 3], normals[i0 * 3 + 1], normals[i0 * 3 + 2]);
+			var n1 = new Vector(normals[i1 * 3], normals[i1 * 3 + 1], normals[i1 * 3 + 2]);
+			var n2 = new Vector(normals[i2 * 3], normals[i2 * 3 + 1], normals[i2 * 3 + 2]);
 
-			var k0 = p1.sub(p0);
-			var k1 = p2.sub(p0);
-			k0.scale(uv2.y - uv0.y);
-			k1.scale(uv1.y - uv0.y);
-			var t = k0.sub(k1);
-			var b = n.cross(t);
-			b.normalize();
-			t = b.cross(n);
-			t.normalize();
+			var t0 = tangentForVertex(p0, p1, p2, uv0, uv1, uv2, n0);
+			var t1 = tangentForVertex(p1, p0, p2, uv1, uv0, uv2, n1);
+			var t2 = tangentForVertex(p2, p0, p1, uv2, uv0, uv1, n2);
 
-			// add it to each point
-			tangents[i0 * 3] += t.x;
-			tangents[i0 * 3 + 1] += t.y;
-			tangents[i0 * 3 + 2] += t.z;
-			tangents[i1 * 3] += t.x;
-			tangents[i1 * 3 + 1] += t.y;
-			tangents[i1 * 3 + 2] += t.z;
-			tangents[i2 * 3] += t.x;
-			tangents[i2 * 3 + 1] += t.y;
-			tangents[i2 * 3 + 1] += t.z;
-		}
-		for (i in 0...Std.int(tangents.length / 3)) {
-			var t = new Vector(tangents[i * 3], tangents[i * 3 + 1], tangents[i * 3 + 2]);
-			t.normalize();
-			tangents[i * 3] = t.x;
-			tangents[i * 3 + 1] = t.y;
-			tangents[i * 3 + 2] = t.z;
+			tangents[i0 * 3] = t0.x;
+			tangents[i0 * 3 + 1] = t0.y;
+			tangents[i0 * 3 + 2] = t0.z;
+			tangents[i1 * 3] = t1.x;
+			tangents[i1 * 3 + 1] = t1.y;
+			tangents[i1 * 3 + 2] = t1.z;
+			tangents[i2 * 3] = t2.x;
+			tangents[i2 * 3 + 1] = t2.y;
+			tangents[i2 * 3 + 2] = t2.z;
 		}
 	}
 

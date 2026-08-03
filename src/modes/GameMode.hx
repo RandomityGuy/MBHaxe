@@ -1,5 +1,6 @@
 package modes;
 
+import collision.CollisionInfo;
 import net.Move;
 import src.TimeState;
 import src.Marble;
@@ -10,6 +11,11 @@ import src.MarbleWorld;
 import src.Mission;
 import src.Marble;
 import rewind.RewindableState;
+import modes.special.ArkanoidMode;
+import modes.special.SacredGroundMode;
+import modes.special.ViceVersaMode;
+import modes.special.WhiteNoiseMode;
+import modes.special.TakeTheGoldMode;
 
 enum ScoreType {
 	Time;
@@ -33,6 +39,15 @@ interface GameMode {
 	public function update(t:TimeState):Void;
 
 	public function processMove(marble:Marble, move:Move):Void;
+
+	public function processMaterialContact(marble:Marble, contact:CollisionInfo):Void;
+
+	/** Ported from PQ's `Marble::onJump` package-override pattern (`WhiteNoise.mcs`'s `package
+		WhiteNoise` block is the only real user of this hook currently) - called every time a jump
+		actually applies velocity (`Marble.applyContactForces`'s `sv < this._jumpImpulse` branch), not
+		just on the jump key edge. `NullMode`'s default is a no-op; only `WhiteNoiseMode` overrides it
+		(for `SMBTrigger`'s extra impulse/minimum-upward-velocity effect). */
+	public function onJump(marble:Marble):Void;
 
 	public function getPreloadFiles():Array<String>;
 
@@ -73,7 +88,23 @@ class GameModeFactory {
 		(confirmed against PQ's `shared/mission.cs::resolveMissionGameModes` - e.g. `"Hunt Laps"`),
 		not a single mode name - split it and delegate through `CompositeMode` whenever more than
 		one word is present, so every listed mode's hooks actually run. */
-	public static function getGameMode(level:MarbleWorld, mode:String):GameMode {
+	public static function getGameMode(level:MarbleWorld, mode:String, activatedPackages:Array<String>):GameMode {
+		if (activatedPackages.length != 0) {
+			// Special mis-mod game modes used by PQ bonus
+			if (activatedPackages.contains("arkanoid"))
+				return new ArkanoidMode(level);
+			if (activatedPackages.contains("sacredgroundb1"))
+				return new SacredGroundMode(level);
+			if (activatedPackages.contains("whitenoise"))
+				return new WhiteNoiseMode(level);
+			if (activatedPackages.contains("viceendnext"))
+				return new ViceVersaMode(level, false);
+			if (activatedPackages.contains("versa"))
+				return new ViceVersaMode(level, true);
+			if (activatedPackages.contains("ttg"))
+				return new TakeTheGoldMode(level);
+		}
+
 		if (mode == null || StringTools.trim(mode) == "")
 			return new NullMode(level);
 

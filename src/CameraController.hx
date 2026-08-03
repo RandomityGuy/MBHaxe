@@ -186,8 +186,14 @@ class CameraController extends Object {
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
-		nextCameraPitch += deltaposY * factor;
-		nextCameraYaw += deltaposX * factor;
+		// Ported from `physics.cs`'s `"cameraSpeedMultiplier"` global attribute - real PQ scales the
+		// keyboard-camera-look speed globals (`mvPitch/YawSpeed`); this engine has no keyboard-look
+		// and drives the camera straight off mouse delta every tick, so scaling that delta here is
+		// the equivalent hook (e.g. `cannonLockCamera`/`noInput`'s `cameraSpeedMultiplier 0` layers
+		// fully freeze mouse-look, matching a real `0` multiplier's effect).
+		var camSpeedMul = marble != null ? marble._cameraSpeedMultiplier : 1.0;
+		nextCameraPitch += deltaposY * factor * camSpeedMul;
+		nextCameraYaw += deltaposX * factor * camSpeedMul;
 
 		if (Math.abs(deltaposX) > 0.001)
 			hasXInput = true;

@@ -11,6 +11,7 @@ import modes.GameMode.ScoreType;
 import rewind.RewindableState;
 import rewind.RewindManager;
 import net.Move;
+import collision.CollisionInfo;
 
 /** `RewindableState` counterpart to `CompositeMode` - one slot per child mode (`null` where that
 	child has no state of its own), so a multi-mode mission (e.g. `"Quota Haste"`) rewinds every
@@ -170,6 +171,16 @@ class CompositeMode implements GameMode {
 			if (m.onOutOfBounds(marble))
 				handled = true;
 		return handled;
+	}
+
+	public function processMaterialContact(marble:Marble, contact:CollisionInfo) {
+		for (m in this.children)
+			m.processMaterialContact(marble, contact);
+	}
+
+	public function onJump(marble:Marble) {
+		for (m in this.children)
+			m.onJump(marble);
 	}
 
 	public function getRewindState():RewindableState {
