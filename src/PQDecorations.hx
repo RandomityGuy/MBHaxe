@@ -24,7 +24,6 @@ class PQDecorations {
 		"plastic_end_fence_tall" => "data/shapes_pq/scenery/fence/plasticendfencetall.dts",
 		"plastic_start_fence_tall" => "data/shapes_pq/scenery/fence/plasticstartfencetall.dts",
 		"plastic_pole_fence_tall" => "data/shapes_pq/scenery/fence/plasticpolefenceshort.dts",
-
 		// Nature / plants
 		"plant01" => "data/shapes_pq/scenery/nature/plant.dts",
 		"fern01" => "data/shapes_pq/scenery/nature/fern01.dts",
@@ -65,7 +64,6 @@ class PQDecorations {
 		"iceslick2" => "data/shapes_pq/gameplay/hazards/iceslick2.dts",
 		"iceslick3" => "data/shapes_pq/gameplay/hazards/iceslick3.dts",
 		"iceslick4" => "data/shapes_pq/gameplay/hazards/iceslick4.dts",
-
 		// Graffiti (all decal-like, zdrop in source)
 		"marble_graffiti" => "data/shapes_pq/scenery/graffiti/graffiti_marble.dts",
 		"superjump_graffiti" => "data/shapes_pq/scenery/graffiti/graffiti_sj.dts",
@@ -78,7 +76,6 @@ class PQDecorations {
 		"philsempire_graffiti" => "data/shapes_pq/scenery/graffiti/graffiti_pe.dts",
 		"tornado_graffiti" => "data/shapes_pq/scenery/graffiti/graffiti_tornado.dts",
 		"hourglass_graffiti" => "data/shapes_pq/scenery/graffiti/graffiti_hourglass.dts",
-
 		// Signs
 		"sign01" => "data/shapes_pq/scenery/signs/sign01.dts",
 		"sign02" => "data/shapes_pq/scenery/signs/sign02.dts",
@@ -100,7 +97,6 @@ class PQDecorations {
 		"consfinishlinesignnocrane" => "data/shapes_pq/gameplay/signs/consfinishlinesignnocrane.dts",
 		"naturefinishlinesignlight" => "data/shapes_pq/gameplay/signs/naturfinishlinesignlight.dts",
 		"naturefinishlinesigndark" => "data/shapes_pq/gameplay/signs/naturfinishlinesigndark.dts",
-
 		// Windows
 		"window01" => "data/shapes_pq/scenery/windows/window01.dts",
 		"window01_light" => "data/shapes_pq/scenery/windows/window01_light.dts",
@@ -142,7 +138,6 @@ class PQDecorations {
 		"window04o_light" => "data/shapes_pq/scenery/windows/window04o_light.dts",
 		"window04o_3x3" => "data/shapes_pq/scenery/windows/window04o_3x3.dts",
 		"window04o_3x3_light" => "data/shapes_pq/scenery/windows/window04o_3x3_light.dts",
-
 		// Misc
 		"marblius" => "data/shapes_pq/levelparts/marblius.dts",
 		"spectrum" => "data/shapes_pq/other/spectrum.dts",
@@ -158,7 +153,6 @@ class PQDecorations {
 		"cloud24" => "data/shapes_pq/scenery/clouds/cloud24.dts",
 		"flatlargeclouds" => "data/shapes_pq/scenery/clouds/flatlarge.dts",
 		"orbitingclouds" => "data/shapes_pq/scenery/clouds/cloudscape.dts",
-
 		// Halloween
 		"candybasket" => "data/shapes/halloween/candy_basket.dts",
 		"haybale" => "data/shapes/halloween/hay_bale.dts",
@@ -185,7 +179,6 @@ class PQDecorations {
 		"halloweenlights3u" => "data/shapes/halloween/halloweenlights_3t.dts",
 		"halloweenlights6u" => "data/shapes/halloween/halloweenlights_6t.dts",
 		"halloweenlights9u" => "data/shapes/halloween/halloweenlights_9t.dts",
-
 		// Christmas
 		"santahatimage" => "data/shapes/xmas/santahat.dts",
 		"santahatlargeimage" => "data/shapes/xmas/santahatmega.dts",
@@ -227,7 +220,6 @@ class PQDecorations {
 		"sockwgift" => "data/shapes/xmas/sockwgift.dts",
 		"sockwnobody" => "data/shapes/xmas/sockwnobody.dts",
 		"thegamebox" => "data/shapes/xmas/thegame_box.dts",
-
 		// Water surfaces - purely visual (`server/scripts/water.cs`'s `Water` class); the ambient
 		// wave animation plays automatically via the generic DTS sequence system, no special
 		// handling needed. Gameplay effects come from the separate `WaterPhysicsTrigger` volume a
@@ -237,5 +229,16 @@ class PQDecorations {
 		"waterplane" => "data/shapes_pq/gameplay/water.dts",
 		"watercylinder" => "data/shapes_pq/other/cylinderwater.dts",
 		"watercylinder_slow" => "data/shapes_pq/other/cylinderwater_slow.dts",
+		// Autobahn
+		"dirttrack" => "data/shapes_pq/levelparts/autobahn/track_col.dts",
+		"dirttrackplanet" => "data/shapes_pq/levelparts/autobahn/track_planet.dts",
+		"trackoverlay" => "data/shapes_pq/levelparts/autobahn/track_overlay.dts",
+		"dirttrackplanet2" => "data/shapes_pq/levelparts/autobahn/trackplanet.dts",
+		"dirttrackplanet2_col" => "data/shapes_pq/levelparts/autobahn/trackplan_collision.dts",
+		"track_sky" => "data/shapes_pq/levelparts/autobahn/track_sky.dts",
+		"dirttrackplanet_col" => "data/shapes_pq/levelparts/autobahn/trackplanet_col.dts",
+		"track_islands" => "data/shapes_pq/levelparts/autobahn/track_islands.dts",
+		"fence_pole" => "data/shapes_pq/levelparts/autobahn/fence_pole.dts",
+		"fence_section" => "data/shapes_pq/levelparts/autobahn/fence_section.dts"
 	];
 }

@@ -31,26 +31,62 @@ class ParticleData {
 
 @:publicFields
 class Particle {
-	public var part:src.ParticlesMesh.ParticleElement;
+	/** Owning mesh, set by `ParticlesMesh.alloc()`/`emitParticle()`. */
+	var parts:src.ParticlesMesh.ParticlesMesh;
+
+	// ---- Render state - this used to live on a separate `ParticleElement` object referenced via a
+	// `part` field, with `update()` copying position/color/etc into it every frame. Merged directly
+	// in here instead since nothing but this file used `ParticlesMesh`/`ParticleElement`: the copy
+	// step was pure overhead, and a `Particle` can now be handed out from `ParticlesMesh`'s existing
+	// alloc/free-list pool instead of always `new`-ing a fresh one per emission. ----
+	var x:Float;
+	var y:Float;
+	var z:Float;
+	var w:Float; // used for sorting by ParticlesMesh.draw()
+	var r:Float;
+	var g:Float;
+	var b:Float;
+	var a:Float;
+	var size:Float;
+	var ratio:Float;
+	var rotation:Float;
+
+	/** `ParticlesMesh`'s draw-order list pointers (threaded through its free-list too) - kept
+		separate from `simPrev`/`simNext` below because the two lists can differ in order/membership
+		(sort modes reorder this one; `ParticleManager`'s simulation list never reorders), and
+		`haxe.ds.ListSort.sort` requires the field names to literally be `prev`/`next`. */
+	var prev:Particle;
+	var next:Particle;
+
+	/** `ParticleManager`'s simulation list pointers - see `prev`/`next` above for why these can't
+		share the same fields. O(1) unlink in `removeParticle`: no search, no shifting following
+		elements down (as a plain `Array<Particle>` would need). */
+	var simPrev:Particle;
+	var simNext:Particle;
 
 	var data:ParticleData;
 	var manager:ParticleManager;
 	var o:ParticleOptions;
-	var position:Vector;
-	var vel:Vector;
-	var rotation:Float;
-	var color:Vector;
-	var scale:Float;
+	var velX:Float;
+	var velY:Float;
+	var velZ:Float;
 	var lifeTime:Float;
 	var initialSpin:Float;
 	var spawnTime:Float;
 
-	// Everything below is fixed at spawn time and never mutated afterward - `position`/`vel` above
-	// are just cached *outputs* of `update()`, recomputed fresh from these constants and the
-	// current absolute time every call (see `update`), not accumulated frame-to-frame. A rewound
-	// particle needs nothing but `spawnTime` (already here) to jump to any point in its life.
-	var initialPos:Vector;
-	var initialVel:Vector;
+	// Everything below is fixed at spawn time and never mutated afterward - `x/y/z`/`velX/Y/Z` above
+	// are just cached *outputs* of `update()`, recomputed fresh from these constants and the current
+	// absolute time every call (see `update`), not accumulated frame-to-frame. A rewound particle
+	// needs nothing but `spawnTime` (already here) to jump to any point in its life.
+	// Kept as plain floats rather than `Vector` fields - `update()` runs every frame for every live
+	// particle, and `Vector`'s add/sub/multiply each allocate a new instance, so at ~100k particles
+	// that was the dominant source of per-frame GC pressure/stutter.
+	var initialPosX:Float;
+	var initialPosY:Float;
+	var initialPosZ:Float;
+	var initialVelX:Float;
+	var initialVelY:Float;
+	var initialVelZ:Float;
 
 	/** Combined constant acceleration term - ported from `PEngine::updateSingleParticle`
 		(`particleEngine.cc`): `a = acc - vel*dragCoefficient - windVelocity*windCoefficient +
@@ -58,27 +94,53 @@ class Particle {
 		in `ParticleData::initializeParticle`) is itself fixed at spawn from the particle's *initial*
 		velocity, not recomputed from the live velocity - so besides drag (velocity-dependent, kept
 		separate below), every other term here is a fixed vector for the particle's whole life. */
-	var constantForce:Vector;
+	var constantForceX:Float;
+	var constantForceY:Float;
+	var constantForceZ:Float;
 
-	public function new(options:ParticleOptions, manager:ParticleManager, data:ParticleData, spawnTime:Float, pos:Vector, vel:Vector) {
+	public function new() {
+		r = 1;
+		g = 1;
+		b = 1;
+		a = 1;
+	}
+
+	public inline function clear() {
+		r = 1;
+		g = 1;
+		b = 1;
+		a = 1;
+		x = y = z = w = 0;
+	}
+
+	/** (Re)initializes the simulation state for a particle handed out by `ParticlesMesh.alloc()`
+		(pooled or freshly `new`-ed) - split out from the constructor so the pool doesn't need to know
+		anything about drag/gravity/lifetime to recycle an instance. */
+	public function init(options:ParticleOptions, manager:ParticleManager, data:ParticleData, spawnTime:Float, pos:Vector, vel:Vector) {
 		this.o = options;
 		this.manager = manager;
 		this.data = data;
 		this.spawnTime = spawnTime;
-		this.initialPos = pos;
-		this.initialVel = vel;
-		this.position = pos;
-		this.vel = vel;
+		this.initialPosX = pos.x;
+		this.initialPosY = pos.y;
+		this.initialPosZ = pos.z;
+		this.initialVelX = vel.x;
+		this.initialVelY = vel.y;
+		this.initialVelZ = vel.z;
+		this.x = pos.x;
+		this.y = pos.y;
+		this.z = pos.z;
+		this.velX = vel.x;
+		this.velY = vel.y;
+		this.velZ = vel.z;
 
-		var constantAccel = vel.multiply(options.constantAcceleration);
-		var gravity = new Vector(0, 0, -9.81).multiply(options.gravityCoefficient);
-		var wind = manager.windVelocity.multiply(-options.windCoefficient);
-		this.constantForce = constantAccel.add(gravity).add(wind);
+		this.constantForceX = vel.x * options.constantAcceleration - manager.windVelocity.x * options.windCoefficient;
+		this.constantForceY = vel.y * options.constantAcceleration - manager.windVelocity.y * options.windCoefficient;
+		this.constantForceZ = vel.z * options.constantAcceleration + (-9.81) * options.gravityCoefficient
+			- manager.windVelocity.z * options.windCoefficient;
 
 		this.lifeTime = this.o.lifetime + this.o.lifetimeVariance * (Math.random() * 2 - 1);
 		this.initialSpin = Util.lerp(this.o.spinRandomMin, this.o.spinRandomMax, Math.random());
-
-		this.part = new src.ParticlesMesh.ParticleElement();
 	}
 
 	public function update(time:Float, dt:Float) {
@@ -101,13 +163,33 @@ class Particle {
 		var drag = this.o.dragCoefficient;
 		if (drag > 0.0001) {
 			var decay = Math.exp(-drag * elapsedSec);
-			var vTerminal = this.constantForce.multiply(1 / drag);
-			var velOffset = this.initialVel.sub(vTerminal);
-			this.vel = vTerminal.add(velOffset.multiply(decay));
-			this.position = this.initialPos.add(vTerminal.multiply(elapsedSec)).add(velOffset.multiply((1 - decay) / drag));
+			var invDrag = 1 / drag;
+			var offsetFactor = (1 - decay) * invDrag;
+
+			var vTerminalX = this.constantForceX * invDrag;
+			var vTerminalY = this.constantForceY * invDrag;
+			var vTerminalZ = this.constantForceZ * invDrag;
+
+			var velOffsetX = this.initialVelX - vTerminalX;
+			var velOffsetY = this.initialVelY - vTerminalY;
+			var velOffsetZ = this.initialVelZ - vTerminalZ;
+
+			this.velX = vTerminalX + velOffsetX * decay;
+			this.velY = vTerminalY + velOffsetY * decay;
+			this.velZ = vTerminalZ + velOffsetZ * decay;
+
+			this.x = this.initialPosX + vTerminalX * elapsedSec + velOffsetX * offsetFactor;
+			this.y = this.initialPosY + vTerminalY * elapsedSec + velOffsetY * offsetFactor;
+			this.z = this.initialPosZ + vTerminalZ * elapsedSec + velOffsetZ * offsetFactor;
 		} else {
-			this.vel = this.initialVel.add(this.constantForce.multiply(elapsedSec));
-			this.position = this.initialPos.add(this.initialVel.multiply(elapsedSec)).add(this.constantForce.multiply(0.5 * elapsedSec * elapsedSec));
+			this.velX = this.initialVelX + this.constantForceX * elapsedSec;
+			this.velY = this.initialVelY + this.constantForceY * elapsedSec;
+			this.velZ = this.initialVelZ + this.constantForceZ * elapsedSec;
+
+			var halfSq = 0.5 * elapsedSec * elapsedSec;
+			this.x = this.initialPosX + this.initialVelX * elapsedSec + this.constantForceX * halfSq;
+			this.y = this.initialPosY + this.initialVelY * elapsedSec + this.constantForceY * halfSq;
+			this.z = this.initialPosZ + this.initialVelZ * elapsedSec + this.constantForceZ * halfSq;
 		}
 
 		this.rotation = (this.initialSpin + this.o.spinSpeed * elapsed / 1000) * Math.PI / 180;
@@ -132,6 +214,7 @@ class Particle {
 			}
 		}
 
+		var scale:Float;
 		if (found) {
 			// `ParticleData::loadParameters` unconditionally forces `times[0] = 0.0f` at load time,
 			// discarding whatever the datablock script itself authored for that slot (e.g.
@@ -140,22 +223,24 @@ class Particle {
 			// behavior, not a per-datablock quirk.
 			var lowTime = indexLow == 0 ? 0 : this.o.times[indexLow];
 			var t = (completion - lowTime) / (this.o.times[indexHigh] - lowTime);
-			this.color = Util.lerpThreeVectors(this.o.colors[indexLow], this.o.colors[indexHigh], t);
-			this.scale = Util.lerp(this.o.sizes[indexLow], this.o.sizes[indexHigh], t);
+			var colorLow = this.o.colors[indexLow];
+			var colorHigh = this.o.colors[indexHigh];
+			this.r = Util.lerp(colorLow.r, colorHigh.r, t);
+			this.g = Util.lerp(colorLow.g, colorHigh.g, t);
+			this.b = Util.lerp(colorLow.b, colorHigh.b, t);
+			this.a = Util.lerp(colorLow.a, colorHigh.a, t);
+			scale = Util.lerp(this.o.sizes[indexLow], this.o.sizes[indexHigh], t);
 		} else {
-			this.color = this.o.colors[this.o.colors.length - 1];
-			this.scale = this.o.sizes[this.o.sizes.length - 1];
+			var color = this.o.colors[this.o.colors.length - 1];
+			this.r = color.r;
+			this.g = color.g;
+			this.b = color.b;
+			this.a = color.a;
+			scale = this.o.sizes[this.o.sizes.length - 1];
 		}
 
-		this.part.x = this.position.x;
-		this.part.y = this.position.y;
-		this.part.z = this.position.z;
-		this.part.r = this.color.r;
-		this.part.g = this.color.g;
-		this.part.b = this.color.b;
-		this.part.a = this.color.a;
-		this.part.ratio = 1;
-		this.part.size = this.scale / 2;
+		this.ratio = 1;
+		this.size = scale / 2;
 	}
 }
 
@@ -268,7 +353,7 @@ class ParticleEmitter {
 	var vel = new Vector();
 	var getPos:Void->Vector;
 
-	var emittedParticles:Array<Particle> = [];
+	// var emittedParticles:Array<Particle> = [];
 
 	public function new(options:ParticleEmitterOptions, data:ParticleData, manager:ParticleManager, ?getPos:Void->Vector) {
 		this.o = options;
@@ -334,9 +419,8 @@ class ParticleEmitter {
 		var initialVel = this.o.ejectionVelocity;
 		initialVel += (this.o.velocityVariance * 2 * Math.random()) - this.o.velocityVariance;
 		var vel = this.vel.multiply(this.o.inheritedVelFactor).add(ejectionAxis.multiply(initialVel)).add(this.o.ambientVelocity);
-		var particle = new Particle(this.o.particleOptions, this.manager, this.data, time, pos, vel);
-		this.manager.addParticle(data, particle);
-		this.emittedParticles.push(particle);
+		var particle = this.manager.spawnParticle(this.data, this.o.particleOptions, time, pos, vel);
+		// this.emittedParticles.push(particle);
 	}
 
 	/** Computes the interpolated emitter position at a point in time. */
@@ -368,7 +452,8 @@ class ParticleManager {
 	public var windVelocity:Vector = new Vector(0, 0, 0);
 
 	var particleGroups:Map<String, src.ParticlesMesh.ParticlesMesh> = [];
-	var particles:Array<Particle> = [];
+	var particleHead:Particle;
+	var particleTail:Particle;
 
 	var emitters:Array<ParticleEmitter> = [];
 
@@ -380,36 +465,63 @@ class ParticleManager {
 
 	public function update(currentTime:Float, dt:Float) {
 		this.currentTime = currentTime;
-		for (particle in this.particles) {
+		var particle = this.particleHead;
+		while (particle != null) {
+			// `update()` may kill and unlink `particle` (clearing its `simNext`), so the walk must
+			// grab the next node before calling it, not after.
+			var nextParticle = particle.simNext;
 			particle.update(currentTime, dt);
+			particle = nextParticle;
 		}
 		this.tick(dt);
 	}
 
-	public function addParticle(particleData:ParticleData, particle:Particle) {
-		if (particleGroups.exists(particleData.identifier)) {
-			particleGroups[particleData.identifier].add(particle.part);
-		} else {
-			var pGroup = new src.ParticlesMesh.ParticlesMesh(particle.data.texture, this.scene);
+	/** Allocates (pooled or new) and initializes a particle for `particleData`/`options`, and links
+		it into the simulation list. The one entry point for spawning a particle - `ParticleElement`
+		pooling lives on the `ParticlesMesh` returned by `particleGroups`, so the manager has to look
+		that up before it can hand out a `Particle` instance to initialize. */
+	public function spawnParticle(particleData:ParticleData, options:ParticleOptions, spawnTime:Float, pos:Vector, vel:Vector):Particle {
+		var pGroup = particleGroups.get(particleData.identifier);
+		if (pGroup == null) {
+			pGroup = new src.ParticlesMesh.ParticlesMesh(particleData.texture, this.scene);
 			pGroup.hasColor = true;
 			pGroup.material.setDefaultProps("ui");
 			// var pdts = new DtsTexture(pGroup.material.texture);
 			// pdts.currentOpacity = 1;
-			pGroup.material.blendMode = particle.o.blending;
+			pGroup.material.blendMode = options.blending;
 			pGroup.material.mainPass.depthWrite = false;
 			// pGroup.material.mainPass.removeShader(pGroup.material.textureShader);
 			// pGroup.material.mainPass.addShader(pdts);
-			pGroup.add(particle.part);
 			particleGroups.set(particleData.identifier, pGroup);
 		}
-		this.particles.push(particle);
+		var particle = pGroup.alloc();
+		particle.init(options, this, particleData, spawnTime, pos, vel);
+
+		particle.simPrev = this.particleTail;
+		particle.simNext = null;
+		if (this.particleTail != null)
+			this.particleTail.simNext = particle;
+		else
+			this.particleHead = particle;
+		this.particleTail = particle;
+		return particle;
 	}
 
 	public function removeParticle(particleData:ParticleData, particle:Particle) {
-		if (particleGroups.exists(particleData.identifier)) {
-			@:privateAccess particleGroups[particleData.identifier].kill(particle.part);
+		var pGroup = particleGroups.get(particleData.identifier);
+		if (pGroup != null) {
+			@:privateAccess pGroup.kill(particle);
 		}
-		this.particles.remove(particle);
+		if (particle.simPrev != null)
+			particle.simPrev.simNext = particle.simNext;
+		else
+			this.particleHead = particle.simNext;
+		if (particle.simNext != null)
+			particle.simNext.simPrev = particle.simPrev;
+		else
+			this.particleTail = particle.simPrev;
+		particle.simPrev = null;
+		particle.simNext = null;
 	}
 
 	public function getTime() {
@@ -434,8 +546,8 @@ class ParticleManager {
 
 	public function removeEmitterWithParticles(emitter:ParticleEmitter) {
 		this.removeEmitter(emitter);
-		for (particle in emitter.emittedParticles)
-			this.removeParticle(particle.data, particle);
+		// for (particle in emitter.emittedParticles)
+		// 	this.removeParticle(particle.data, particle);
 	}
 
 	public function removeEverything() {

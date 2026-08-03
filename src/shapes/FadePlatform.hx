@@ -48,6 +48,7 @@ class FadePlatform extends DtsObject {
 	var fadingLevel:Int = 1;
 	var fadingInitialState:Int = 0;
 	var lastFadingContactTime:Float = -1e8;
+
 	static inline final FADING_CONTACT_COOLDOWN = 0.25;
 
 	// "cloak" fadeStyle only - all captured lazily on the first call to `applyCloak` (materials
@@ -82,7 +83,7 @@ class FadePlatform extends DtsObject {
 
 		function field(key:String):String {
 			var f = element.fields.get(key);
-			return f != null && f[0] != "" ? f[0] : null;
+			return f != null && f[0] != "" ? f[0].toLowerCase() : null;
 		}
 
 		// The concrete/grass/ice variants disallow skinning entirely in the original (`skin[0] =

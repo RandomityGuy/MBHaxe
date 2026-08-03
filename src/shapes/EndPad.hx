@@ -30,6 +30,7 @@ class EndPad extends DtsObject {
 
 	var finishCollider:ConvexHull;
 	var finishBounds:Bounds;
+	var localFinishBounds:Bounds;
 	var inFinish:Bool = false;
 	var isMbu:Bool;
 
@@ -133,6 +134,7 @@ class EndPad extends DtsObject {
 
 		finishCollider.transform = tform;
 
+		localFinishBounds = finishBounds.clone();
 		finishBounds.transform(tform);
 
 		// var polygon = new Polygon(vertices.map(x -> x.toPoint()));
@@ -150,6 +152,18 @@ class EndPad extends DtsObject {
 			if (timeState.timeSinceLoad - firework.spawnTime >= 10)
 				this.fireworks.remove(firework);
 			// We can safely remove the firework
+		}
+
+		if (this.hasMover()) {
+			// Move!
+
+			var tform = this.getAbsPos().clone();
+			tform.prependRotation(Math.PI / 2, 0, 0);
+
+			finishCollider.transform = tform;
+
+			finishBounds.load(localFinishBounds);
+			finishBounds.transform(tform);
 		}
 	}
 }

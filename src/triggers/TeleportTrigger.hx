@@ -20,11 +20,20 @@ class TeleportTrigger extends Trigger {
 	var delay:Float = 2;
 
 	var marbleStates:Map<Marble, TeleportationState> = [];
+	var gemsToActivate:Int = 0;
+	var gemsToDeactivate:Int = 100000000;
+	var displayGemsMessage:Bool = false;
 
 	public function new(element:MissionElementTrigger, level:MarbleWorld) {
 		super(element, level);
 		if (element.delay != null)
 			this.delay = MisParser.parseNumber(element.delay) / 1000;
+		if (element.gemstoactivate != null)
+			this.gemsToActivate = Std.int(MisParser.parseNumber(element.gemstoactivate));
+		if (element.gemstodeactivate != null)
+			this.gemsToDeactivate = Std.int(MisParser.parseNumber(element.gemstodeactivate));
+		if (element.displayGemsMessage != null)
+			this.displayGemsMessage = MisParser.parseBoolean(element.displayGemsMessage);
 	}
 
 	function getState(marble:Marble) {
@@ -37,6 +46,19 @@ class TeleportTrigger extends Trigger {
 	}
 
 	override function onMarbleEnter(marble:src.Marble, time:src.TimeState) {
+		if (this.level.gemCount < this.gemsToActivate) {
+			if (this.displayGemsMessage) {
+				this.level.displayHelp('You need ${this.gemsToActivate} gem${this.gemsToActivate != 1 ? "s" : ""} to activate this Teleporter.', 2);
+			}
+			return;
+		}
+		if (this.level.gemCount < this.gemsToDeactivate) {
+			if (this.displayGemsMessage) {
+				this.level.displayHelp('You need ${this.gemsToDeactivate} gem${this.gemsToDeactivate != 1 ? "s" : ""} to deactivate this Teleporter.', 2);
+			}
+		} else {
+			return;
+		}
 		var state = getState(marble);
 		state.exitTime = null;
 		marble.setCloaking(true, time);
@@ -50,6 +72,13 @@ class TeleportTrigger extends Trigger {
 	}
 
 	override function onMarbleLeave(marble:src.Marble, time:src.TimeState) {
+		if (this.level.gemCount < this.gemsToActivate) {
+			return;
+		}
+		if (this.level.gemCount < this.gemsToDeactivate) {} else {
+			return;
+		}
+
 		var state = getState(marble);
 		state.exitTime = time.currentAttemptTime;
 		marble.setCloaking(false, time);

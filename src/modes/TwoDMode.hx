@@ -8,6 +8,7 @@ import src.Settings;
 import rewind.RewindableState;
 import rewind.RewindManager;
 import src.MarbleGame;
+import net.Move;
 
 @:publicFields
 class TwoDState implements RewindableState {
@@ -149,6 +150,11 @@ class TwoDMode extends NullMode {
 	function getBaseFov():Float {
 		var fovField = level.mission.missionInfo.camerafov;
 		return fovField != null && fovField != "" ? MisParser.parseNumber(fovField) : Settings.optionsSettings.fovX;
+	}
+
+	override function processMove(marble:Marble, move:Move) {
+		if (this.active)
+			move.d.x = 0;
 	}
 
 	override function update(t:src.TimeState) {

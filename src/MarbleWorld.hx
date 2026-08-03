@@ -2516,7 +2516,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	function determineClockColor(timeToDisplay:Float) {
-		if (this.finishTime != null)
+		if (this.finishTime != null || this.timeStopTriggerCount > 0)
 			return PlayGui.timerStopped;
 		if (this.isMultiplayer || this.timeMultiplier < 0) {
 			if ((this.isMultiplayer && !this.multiplayerStarted) || (this.timeState.currentAttemptTime < 3.5 || this.bonusTime > 0))
