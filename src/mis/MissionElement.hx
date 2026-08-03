@@ -325,6 +325,9 @@ class MissionElementTrigger extends MissionElementBase {
 	var keepangular:Null<String>;
 	var keepcamera:Null<String>;
 	var camerayaw:Null<String>;
+	var gemstoactivate:String;
+	var gemstodeactivate:String;
+	var displayGemsMessage:String;
 	var g:Null<String>;
 
 	public function new() {

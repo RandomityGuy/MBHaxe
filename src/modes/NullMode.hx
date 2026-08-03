@@ -13,6 +13,7 @@ import src.ResourceLoader;
 import src.Console;
 import triggers.SpawnTrigger;
 import rewind.RewindableState;
+import net.Move;
 
 class NullMode implements GameMode {
 	var level:MarbleWorld;
@@ -65,6 +66,8 @@ class NullMode implements GameMode {
 	public function timeMultiplier() {
 		return 1.0;
 	}
+
+	public function processMove(marble:Marble, move:Move) {}
 
 	public function onRestart() {
 		this.level.schedule(0.5, () -> {

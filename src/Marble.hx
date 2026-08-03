@@ -4025,6 +4025,7 @@ class Marble extends GameObject {
 				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
 			}
 		}
+		this.level.gameMode.processMove(this, move);
 		return move;
 	}
 

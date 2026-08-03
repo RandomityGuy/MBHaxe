@@ -10,6 +10,7 @@ import src.Mission;
 import modes.GameMode.ScoreType;
 import rewind.RewindableState;
 import rewind.RewindManager;
+import net.Move;
 
 /** `RewindableState` counterpart to `CompositeMode` - one slot per child mode (`null` where that
 	child has no state of its own), so a multi-mode mission (e.g. `"Quota Haste"`) rewinds every
@@ -187,5 +188,10 @@ class CompositeMode implements GameMode {
 
 	public function constructRewindState():RewindableState {
 		return new CompositeRewindState([for (m in this.children) m.constructRewindState()]);
+	}
+
+	public function processMove(marble:Marble, move:Move) {
+		for (m in this.children)
+			m.processMove(marble, move);
 	}
 }

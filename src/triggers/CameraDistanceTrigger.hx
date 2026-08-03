@@ -84,4 +84,11 @@ class CameraDistanceTrigger extends Trigger {
 			marble.camera.CameraDistance = state.startDistance + eased * (state.targetDistance - state.startDistance);
 		}
 	}
+
+	public override function reset() {
+		super.reset();
+
+		prevDistances.clear();
+		states.clear();
+	}
 }

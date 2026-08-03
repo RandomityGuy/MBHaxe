@@ -1,7 +1,9 @@
 package src;
 
+import src.ParticleSystem.Particle;
+
 private class ParticleIterator {
-	var p:ParticleElement;
+	var p:Particle;
 
 	public inline function new(p) {
 		this.p = p;
@@ -25,101 +27,39 @@ enum SortMode {
 	InvSort;
 }
 
-class ParticleElement {
-	public var parts:ParticlesMesh;
-
-	public var x:Float;
-	public var y:Float;
-	public var z:Float;
-
-	public var w:Float; // used for sorting
-
-	public var r:Float;
-	public var g:Float;
-	public var b:Float;
-	public var a:Float;
-	public var alpha(get, set):Float;
-
-	public var frame:Int;
-
-	public var size:Float;
-	public var ratio:Float;
-	public var rotation:Float;
-
-	public var prev:ParticleElement;
-	public var next:ParticleElement;
-
-	// --- Particle emitter ---
-	public var time:Float;
-	public var lifeTimeFactor:Float;
-
-	public var dx:Float;
-	public var dy:Float;
-	public var dz:Float;
-
-	public var fx:Float;
-	public var fy:Float;
-	public var fz:Float;
-
-	public var randIndex = 0;
-	public var randValues:Array<Float>;
-
-	// -------------------------
-
-	public function new() {
-		r = 1;
-		g = 1;
-		b = 1;
-		a = 1;
-		frame = 0;
-	}
-
-	inline function get_alpha()
-		return a;
-
-	inline function set_alpha(v)
-		return a = v;
-
-	public function setColor(color:Int, alpha = 1.) {
-		a = alpha;
-		r = ((color >> 16) & 0xFF) / 255.;
-		g = ((color >> 8) & 0xFF) / 255.;
-		b = (color & 0xFF) / 255.;
-	}
-
-	public function remove() {
-		if (parts != null) {
-			@:privateAccess parts.kill(this);
-			parts = null;
-		}
-	}
-
-	public function rand():Float {
-		if (randValues == null)
-			randValues = [];
-		if (randValues.length <= randIndex)
-			randValues.push(Math.random());
-		return randValues[randIndex++];
-	}
-}
-
 class ParticlesMesh extends h3d.scene.Mesh {
 	var pshader:h3d.shader.ParticleShader;
 
-	public var frames:Array<h2d.Tile>;
 	public var count(default, null):Int = 0;
 	public var hasColor(default, set):Bool;
 	public var sortMode:SortMode;
 	public var globalSize:Float = 1;
 
-	var head:ParticleElement;
-	var tail:ParticleElement;
-	var pool:ParticleElement;
+	/** Skip particles outside the camera frustum when building the draw buffer - doesn't affect
+		simulation (`ParticleManager.update()` still ticks every particle every frame regardless), only
+		how many end up written to `tmp`/uploaded to the GPU. On by default since it's nearly free
+		(6 dot products per particle, no allocation) and only ever reduces upload volume. */
+	public var frustumCull:Bool = true;
+
+	/** Additionally skip particles farther than this from the camera. `<= 0` disables it - left off
+		by default since the right threshold depends on the effect's visual size, unlike frustum
+		culling which is always correct to apply. */
+	public var cullDistance:Float = -1;
+
+	var head:Particle;
+	var tail:Particle;
+	var pool:Particle;
 
 	var tmp:h3d.Vector;
 	var tmpBuf:hxd.FloatBuffer;
 	var buffer:h3d.Buffer;
 	var bufferSize:Int = 0;
+
+	var tile:h2d.Tile;
+
+	/** Reused every `draw()` call so frustum-testing a particle doesn't allocate a `Point` per
+		particle per frame - would undo the point of culling in the first place. */
+	var cullPoint = new h3d.col.Point();
 
 	public function new(?texture, ?parent) {
 		super(null, null, parent);
@@ -130,6 +70,7 @@ class ParticlesMesh extends h3d.scene.Mesh {
 		material.mainPass.addShader(pshader);
 		material.mainPass.dynamicParameters = true;
 		material.texture = texture;
+		tile = h2d.Tile.fromTexture(material.texture);
 		tmp = new h3d.Vector();
 	}
 
@@ -163,7 +104,12 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			kill(head);
 	}
 
-	public function alloc() {
+	/** Allocates a `Particle` from the free-list (or creates a new one if the pool is empty) and
+		resets its render state to a blank/invisible default - `ParticleManager.spawnParticle` fills
+		in the actual simulation state (position, physics constants, etc.) right after via
+		`Particle.init`. Kept invisible (zero size/alpha) in between so a particle that's allocated
+		but not yet simulated this frame doesn't flash with stale data from a previous life. */
+	public function alloc():Particle {
 		var p = emitParticle();
 		if (posChanged)
 			syncPos();
@@ -172,21 +118,21 @@ class ParticlesMesh extends h3d.scene.Mesh {
 		p.y = absPos.ty;
 		p.z = absPos.tz;
 		p.rotation = 0;
-		p.ratio = 1;
-		p.size = 1;
-		p.r = p.g = p.b = p.a = 1;
+		p.ratio = 0;
+		p.size = 0;
+		p.r = p.g = p.b = p.a = 0;
 		return p;
 	}
 
-	public function add(p) {
+	public function add(p:Particle) {
 		emitParticle(p);
 		return p;
 	}
 
-	function emitParticle(?p) {
+	function emitParticle(?p:Particle) {
 		if (p == null) {
 			if (pool == null)
-				p = new ParticleElement();
+				p = new Particle();
 			else {
 				p = pool;
 				pool = p.next;
@@ -217,7 +163,8 @@ class ParticlesMesh extends h3d.scene.Mesh {
 		return p;
 	}
 
-	function kill(p:ParticleElement) {
+	function kill(p:Particle) {
+		p.clear();
 		if (p.prev == null)
 			head = p.next
 		else
@@ -232,11 +179,11 @@ class ParticlesMesh extends h3d.scene.Mesh {
 		count--;
 	}
 
-	function sort(list:ParticleElement) {
+	function sort(list:Particle) {
 		return haxe.ds.ListSort.sort(list, function(p1, p2) return p1.w < p2.w ? 1 : -1);
 	}
 
-	function sortInv(list:ParticleElement) {
+	function sortInv(list:Particle) {
 		return haxe.ds.ListSort.sort(list, function(p1, p2) return p1.w < p2.w ? -1 : 1);
 	}
 
@@ -268,20 +215,44 @@ class ParticlesMesh extends h3d.scene.Mesh {
 		var p = head;
 		var tmp = tmpBuf;
 		var surface = 0.;
-		if (frames == null || frames.length == 0) {
-			var t = material.texture == null ? h2d.Tile.fromColor(0xFF00FF) : h2d.Tile.fromTexture(material.texture);
-			frames = [t];
-		}
-		material.texture = frames[0].getTexture();
+
+		var camPos = ctx.camera.pos;
+		var frustum = ctx.camera.frustum;
+		var cullDistSq = cullDistance * cullDistance;
 
 		while (p != null) {
-			var f = frames[p.frame];
-			if (f == null)
-				f = frames[0];
-			var ratio = p.size * p.ratio * (f.height / f.width);
+			// Simulation already ran for every particle this frame regardless (`ParticleManager.
+			// update()`) - culling only decides whether this particle's quad gets written into `tmp`/
+			// uploaded to the GPU, which is what was actually costing frame time at high counts.
+			if (cullDistance > 0) {
+				var dx = p.x - camPos.x;
+				var dy = p.y - camPos.y;
+				var dz = p.z - camPos.z;
+				if (dx * dx + dy * dy + dz * dz > cullDistSq) {
+					p = p.next;
+					continue;
+				}
+			}
+			if (frustumCull) {
+				cullPoint.set(p.x, p.y, p.z);
+				if (!frustum.hasPoint(cullPoint)) {
+					p = p.next;
+					continue;
+				}
+			}
+
+			var ratio = p.size * p.ratio * (tile.height / tile.width);
 
 			if (pos >= tmp.length) {
-				tmp.grow(tmp.length + 40 + (hasColor ? 16 : 0));
+				// Grow geometrically (double) instead of by exactly one particle's worth - `grow`
+				// reallocates+copies the whole backing array, so growing by a tiny fixed increment
+				// every time capacity is exceeded turns a particle count ramp-up into O(n) separate
+				// reallocations (O(n^2) total copying) instead of the ~log2(n) a doubling strategy costs.
+				var stride = 40 + (hasColor ? 16 : 0);
+				var newLen = tmp.length == 0 ? stride * 64 : tmp.length * 2;
+				while (newLen <= pos)
+					newLen *= 2;
+				tmp.grow(newLen);
 			}
 
 			tmp[pos++] = p.x;
@@ -294,8 +265,8 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			tmp[pos++] = -0.5;
 			tmp[pos++] = -0.5;
 			// UV
-			tmp[pos++] = f.u;
-			tmp[pos++] = f.v2;
+			tmp[pos++] = tile.u;
+			tmp[pos++] = tile.v2;
 			// RBGA
 			if (hasColor) {
 				tmp[pos++] = p.r;
@@ -312,8 +283,8 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			tmp[pos++] = p.rotation;
 			tmp[pos++] = -0.5;
 			tmp[pos++] = 0.5;
-			tmp[pos++] = f.u;
-			tmp[pos++] = f.v;
+			tmp[pos++] = tile.u;
+			tmp[pos++] = tile.v;
 			if (hasColor) {
 				tmp[pos++] = p.r;
 				tmp[pos++] = p.g;
@@ -329,8 +300,8 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			tmp[pos++] = p.rotation;
 			tmp[pos++] = 0.5;
 			tmp[pos++] = -0.5;
-			tmp[pos++] = f.u2;
-			tmp[pos++] = f.v2;
+			tmp[pos++] = tile.u2;
+			tmp[pos++] = tile.v2;
 			if (hasColor) {
 				tmp[pos++] = p.r;
 				tmp[pos++] = p.g;
@@ -346,8 +317,8 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			tmp[pos++] = p.rotation;
 			tmp[pos++] = 0.5;
 			tmp[pos++] = 0.5;
-			tmp[pos++] = f.u2;
-			tmp[pos++] = f.v;
+			tmp[pos++] = tile.u2;
+			tmp[pos++] = tile.v;
 			if (hasColor) {
 				tmp[pos++] = p.r;
 				tmp[pos++] = p.g;
@@ -362,19 +333,23 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			var stride = 10;
 			if (hasColor)
 				stride += 4;
-			if (buffer == null) {
-				buffer = h3d.Buffer.ofSubFloats(tmp, stride, Std.int(pos / stride), [Quads, Dynamic, RawFormat]);
-				bufferSize = Std.int(pos / stride);
-			} else {
-				var len = Std.int(pos / stride);
-				if (bufferSize < len) {
+			var len = Std.int(pos / stride);
+			if (buffer == null || bufferSize < len) {
+				// Allocate with headroom (double) instead of exactly `len` vertices - dispose+recreate
+				// is a full GPU buffer reallocation (driver call), not a cheap upload, so sizing it
+				// exactly meant a burst of newly emitted particles could force a recreate on almost
+				// every frame. Doubling means recreation only happens ~log2(n) times total, and every
+				// other frame - including during heavy emission - just does a plain uploadVector.
+				var newCapacity = bufferSize == 0 ? 64 : bufferSize * 2;
+				while (newCapacity < len)
+					newCapacity *= 2;
+				tmp.grow(newCapacity * stride);
+				if (buffer != null)
 					buffer.dispose();
-					buffer = h3d.Buffer.ofSubFloats(tmp, stride, Std.int(pos / stride), [Quads, Dynamic, RawFormat]);
-					bufferSize = Std.int(pos / stride);
-				} else {
-					buffer.uploadVector(tmp, 0, len);
-				}
+				buffer = h3d.Buffer.ofSubFloats(tmp, stride, newCapacity, [Quads, Dynamic, RawFormat]);
+				bufferSize = newCapacity;
 			}
+			buffer.uploadVector(tmp, 0, len);
 			if (pshader.is3D)
 				pshader.size.set(globalSize, globalSize);
 			else

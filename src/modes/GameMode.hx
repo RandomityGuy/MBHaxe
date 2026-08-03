@@ -1,5 +1,6 @@
 package modes;
 
+import net.Move;
 import src.TimeState;
 import src.Marble;
 import shapes.Gem;
@@ -30,6 +31,8 @@ interface GameMode {
 	public function onRespawn(marble:Marble):Void;
 	public function onGemPickup(marble:Marble, gem:Gem):Bool;
 	public function update(t:TimeState):Void;
+
+	public function processMove(marble:Marble, move:Move):Void;
 
 	public function getPreloadFiles():Array<String>;
 
