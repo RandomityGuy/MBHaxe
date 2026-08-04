@@ -14,6 +14,7 @@ import h3d.Vector;
 import src.Util;
 import src.Console;
 import src.MarbleGame;
+import modes.GameMode;
 
 enum ReplayMarbleState {
 	UsedPowerup;
@@ -220,8 +221,32 @@ class Replay {
 	var currentPlaybackFrameIdx:Int;
 	var currentPlaybackTime:Float;
 
-	var version:Int = 8;
+	var version:Int = 9;
 	var readFullEntry:FileEntry;
+
+	/** Raw `GameMode.saveReplayData` bytes decoded by `read()` - can't be handed to the mode itself
+		yet (no mission is loaded, so no `MarbleWorld`/`GameMode` exists at that point - `read()` can
+		run standalone, e.g. `MainMenuGui`'s "load a replay file" flow, well before any mission is
+		chosen). Stashed here and applied later via `applyModeData` once a mission has actually
+		loaded for playback. */
+	public var modeData:Bytes;
+
+	/** Captured by `captureModeData` (called once, from `MarbleWorld.touchFinish`, while the level
+		is still guaranteed alive) rather than read lazily from inside `write()` - `write()` itself
+		can end up called well after finishing, from deferred/async code (`EndGameGui`'s leaderboard
+		submission callbacks) that may run after the level's already been disposed, so there's no
+		reliable `GameMode` to reach for at that point. `null` if never captured (e.g. this replay's
+		mode has nothing to save, or the attempt never actually finished). */
+	var savedModeData:Bytes;
+
+	/** Ported from the need to keep a Versa replay reproducible even if external state (e.g.
+		`ViceVersaState`'s save file) changes between recording and later playback - see
+		`GameMode.saveReplayData`'s doc comment. Called once, at the moment a level is finished. */
+	public function captureModeData(gameMode:GameMode) {
+		var out = new haxe.io.BytesOutput();
+		gameMode.saveReplayData(out);
+		this.savedModeData = out.getBytes();
+	}
 
 	public function new(mission:String, customId:Int = 0) {
 		this.mission = mission;
@@ -629,6 +654,11 @@ class Replay {
 		var bw = new BytesWriter();
 
 		this.initialState.write(bw);
+		// Once per recording (not per-frame) - see `captureModeData`'s doc comment for why this reads
+		// the already-captured bytes rather than pulling from a `GameMode` here.
+		var modeBytes = this.savedModeData != null ? this.savedModeData : haxe.io.Bytes.alloc(0);
+		bw.writeInt32(modeBytes.length);
+		@:privateAccess bw.bytes.addBytes(modeBytes, 0, modeBytes.length);
 		bw.writeInt32(this.frameCount);
 		for (i in 0...frameCount) {
 			var o = i * STRIDE;
@@ -699,6 +729,15 @@ class Replay {
 		return finalB.getBytes();
 	}
 
+	/** Hands `modeData` (decoded standalone by `read()`, before any mission/`GameMode` existed) to
+		the now-loaded mission's actual `GameMode` - call once, after the mission has finished
+		loading, when about to watch this replay. No-op if this replay predates version 9 or its mode
+		wrote nothing. */
+	public function applyModeData(level:MarbleWorld) {
+		if (this.modeData != null)
+			level.gameMode.loadReplayData(new BytesInput(this.modeData));
+	}
+
 	public function read(data:Bytes) {
 		Console.log("Loading replay");
 		var replayVersion = data.get(0);
@@ -733,6 +772,13 @@ class Replay {
 		#end
 		var br = new BytesReader(uncompressed);
 		this.initialState.read(br, replayVersion);
+		if (replayVersion > 8) {
+			var modeLen = br.readInt32();
+			this.modeData = modeLen > 0 ? @:privateAccess br.bytes.sub(br.tell(), modeLen) : null;
+			br.seek(br.tell() + modeLen);
+		} else {
+			this.modeData = null;
+		}
 		var count = br.readInt32();
 		this.frameData = [];
 		this.powerupPickups = new Map();

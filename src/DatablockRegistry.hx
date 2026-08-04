@@ -86,6 +86,8 @@ import shapes.NestEgg;
 import shapes.TeleportItem;
 import shapes.IceShard;
 import shapes.PhysModEmitterBase;
+import shapes.MegaManPlatform;
+import triggers.MegaManEmulationTrigger;
 import shapes.FadePlatform;
 import shapes.Cannon;
 import shapes.CannonBase;
@@ -384,6 +386,18 @@ class DatablockRegistry {
 		},
 		{
 			match: Exact([
+				"megamanplatform2_1x1",
+				"megamanplatform2_1x2",
+				"megamanplatform2_1x3",
+				"megamanplatform2_1x5",
+				"megamanplatform2_2x2",
+				"megamanplatform2_3x3",
+				"megamanplatform2_5x5"
+			]),
+			create: element -> new MegaManPlatform(cast element)
+		},
+		{
+			match: Exact([
 				"fadeplatform",
 				"fadeplatform2_1x1",
 				"fadeplatform2_1x2",
@@ -610,6 +624,10 @@ class DatablockRegistry {
 		{
 			match: Exact(["disableshapeforcetrigger"]),
 			create: (element, level) -> new DisableShapeForceTrigger(element, level)
-		}
+		},
+		{
+			match: Exact(["megamanemulationtrigger"]),
+			create: (element, level) -> new MegaManEmulationTrigger(element, level)
+		},
 	];
 }

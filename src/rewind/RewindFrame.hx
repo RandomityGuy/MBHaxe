@@ -55,6 +55,17 @@ class FadePlatformSaveState {
 	public function new() {}
 }
 
+/** Same idea as `TrapdoorSaveState`, for `MegaManPlatform`. */
+@:publicFields
+class MegaManPlatformSaveState {
+	var showTime:Float;
+	var hasCollided:Bool;
+	var respondToCollision:Bool;
+	var queuedNext:Bool;
+
+	public function new() {}
+}
+
 /** Same idea as `TrapdoorSaveState`, for `RepetitiveTriggerGotoTarget`'s `triggered`/`enterCount`
 	"triggered-once gate" state - the same bug class `PathTrigger.triggered` had (see its doc
 	comment), fixed the same way. */
@@ -103,6 +114,7 @@ class RewindFrame {
 	var currentUp:Vector;
 	var trapdoorStates:Array<TrapdoorSaveState>;
 	var fadePlatformStates:Array<FadePlatformSaveState>;
+	var megaManPlatformStates:Array<MegaManPlatformSaveState>;
 	var lastContactNormal:Vector;
 	var blastAmt:Float;
 	var marbleRadius:Float;
@@ -244,6 +256,7 @@ class RewindFrame {
 		mpStates = [];
 		trapdoorStates = [];
 		fadePlatformStates = [];
+		megaManPlatformStates = [];
 		toggleButtonStates = [];
 		waterTriggers = [];
 		iceShardStates = [];
@@ -316,6 +329,13 @@ class RewindFrame {
 			framesize += 8; // s.lastContactTime
 			framesize += 2; // s.fadingState
 			framesize += 8; // s.lastFadingContactTime
+		}
+		framesize += 2; // megaManPlatformStates.length
+		for (s in megaManPlatformStates) {
+			framesize += 8; // s.showTime
+			framesize += 1; // s.hasCollided
+			framesize += 1; // s.respondToCollision
+			framesize += 1; // s.queuedNext
 		}
 		framesize += 8; // blastAmt
 		framesize += 8; // marbleRadius
@@ -477,6 +497,13 @@ class RewindFrame {
 			bb.writeDouble(s.lastContactTime);
 			bb.writeInt16(s.fadingState);
 			bb.writeDouble(s.lastFadingContactTime);
+		}
+		bb.writeInt16(megaManPlatformStates.length);
+		for (s in megaManPlatformStates) {
+			bb.writeDouble(s.showTime);
+			bb.writeByte(s.hasCollided ? 1 : 0);
+			bb.writeByte(s.respondToCollision ? 1 : 0);
+			bb.writeByte(s.queuedNext ? 1 : 0);
 		}
 		bb.writeDouble(blastAmt);
 		bb.writeDouble(marbleRadius);
@@ -694,6 +721,15 @@ class RewindFrame {
 			fadePlatformStates_item.lastContactTime = br.readDouble();
 			fadePlatformStates_item.fadingState = br.readInt16();
 			fadePlatformStates_item.lastFadingContactTime = br.readDouble();
+		}
+		var megaManPlatformStates_len = br.readInt16();
+		syncLength(megaManPlatformStates, megaManPlatformStates_len, () -> new MegaManPlatformSaveState());
+		for (i in 0...megaManPlatformStates_len) {
+			var megaManPlatformStates_item = megaManPlatformStates[i];
+			megaManPlatformStates_item.showTime = br.readDouble();
+			megaManPlatformStates_item.hasCollided = br.readByte() != 0;
+			megaManPlatformStates_item.respondToCollision = br.readByte() != 0;
+			megaManPlatformStates_item.queuedNext = br.readByte() != 0;
 		}
 		blastAmt = br.readDouble();
 		marbleRadius = br.readDouble();

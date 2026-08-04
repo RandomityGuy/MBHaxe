@@ -158,6 +158,10 @@ class NullMode implements GameMode {
 
 	public function onJump(marble:Marble) {}
 
+	public function saveReplayData(bw:haxe.io.BytesOutput) {}
+
+	public function loadReplayData(br:haxe.io.BytesInput) {}
+
 	public function onClientRestart() {}
 
 	public function onMissionLoad() {}

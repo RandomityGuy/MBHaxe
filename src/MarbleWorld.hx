@@ -755,6 +755,8 @@ class MarbleWorld extends Scheduler {
 		}
 		this.prescanPathTriggerTargets();
 		this.gameMode.onMissionLoad();
+		if (this.isWatching)
+			this.replay.applyModeData(this);
 	}
 
 	/** Ported from the user's own diagnosis of a rewind bug: an object only gets a `GameObjectPath
@@ -2812,6 +2814,11 @@ class MarbleWorld extends Scheduler {
 			this.marble.camera.finish = true;
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
+			// Captured here (level guaranteed alive) rather than lazily inside `Replay.write` (which
+			// can end up called well after this, from deferred/async code that may run after the
+			// level's been disposed) - see `Replay.captureModeData`'s doc comment.
+			if (!this.isWatching)
+				this.replay.captureModeData(this.gameMode);
 			displayAlert("Congratulations! You've finished!");
 			if (!Settings.levelStatistics.exists(mission.path)) {
 				Settings.levelStatistics.set(mission.path, {
