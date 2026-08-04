@@ -59,31 +59,31 @@ class MarbleList {
 			},
 			{
 				name: "Wavy Glass 1",
-				dts: "data/shapes_pq/marbles/pq classic/wavyGlass1.dts",
+				dts: "data/shapes_pq/marbles/pq classic/wavyglass1.dts",
 				skin: "base",
 				shader: "Default"
 			},
 			{
 				name: "Wavy Glass 2",
-				dts: "data/shapes_pq/marbles/pq classic/wavyGlass2.dts",
+				dts: "data/shapes_pq/marbles/pq classic/wavyglass2.dts",
 				skin: "base",
 				shader: "Default"
 			},
 			{
 				name: "Wavy Glass 3",
-				dts: "data/shapes_pq/marbles/pq classic/wavyGlass3.dts",
+				dts: "data/shapes_pq/marbles/pq classic/wavyglass3.dts",
 				skin: "base",
 				shader: "Default"
 			},
 			{
 				name: "Wavy Glass 4",
-				dts: "data/shapes_pq/marbles/pq classic/wavyGlass4.dts",
+				dts: "data/shapes_pq/marbles/pq classic/wavyglass4.dts",
 				skin: "base",
 				shader: "Default"
 			},
 			{
 				name: "Wavy Glass 5",
-				dts: "data/shapes_pq/marbles/pq classic/wavyGlass5.dts",
+				dts: "data/shapes_pq/marbles/pq classic/wavyglass5.dts",
 				skin: "base",
 				shader: "Default"
 			}
@@ -92,7 +92,7 @@ class MarbleList {
 			// Abstract
 			{
 				name: "Air Element",
-				dts: "data/shapes_pq/marbles/abstract/airElement.dts",
+				dts: "data/shapes_pq/marbles/abstract/airelement.dts",
 				skin: "base",
 				shader: "Default"
 			},
@@ -104,7 +104,7 @@ class MarbleList {
 			},
 			{
 				name: "Earth Element",
-				dts: "data/shapes_pq/marbles/abstract/earthElement.dts",
+				dts: "data/shapes_pq/marbles/abstract/earthelement.dts",
 				skin: "base",
 				shader: "Default"
 			},
@@ -137,7 +137,7 @@ class MarbleList {
 			},
 			{
 				name: "Mandarin",
-				dts: "data/shapes_pq/marbles/fruit/Mandarin.dts",
+				dts: "data/shapes_pq/marbles/fruit/mandarin.dts",
 				skin: "base",
 				shader: "Default"
 			},
@@ -197,13 +197,13 @@ class MarbleList {
 			// Sports
 			{
 				name: "Base Ball",
-				dts: "data/shapes_pq/marbles/sports/BaseBall.dts",
+				dts: "data/shapes_pq/marbles/sports/baseball.dts",
 				skin: "base",
 				shader: "Default"
 			},
 			{
 				name: "Basket Ball",
-				dts: "data/shapes_pq/marbles/sports/basketBall.dts",
+				dts: "data/shapes_pq/marbles/sports/basketball.dts",
 				skin: "base",
 				shader: "Default"
 			},
@@ -245,7 +245,7 @@ class MarbleList {
 			},
 			{
 				name: "Golf Ball",
-				dts: "data/shapes_pq/marbles/sports/GolfBall.dts",
+				dts: "data/shapes_pq/marbles/sports/golfball.dts",
 				skin: "base",
 				shader: "Default"
 			},
@@ -257,13 +257,13 @@ class MarbleList {
 			},
 			{
 				name: "Tennis Ball",
-				dts: "data/shapes_pq/marbles/sports/TennisBall.dts",
+				dts: "data/shapes_pq/marbles/sports/tennisball.dts",
 				skin: "base",
 				shader: "Default"
 			},
 			{
 				name: "Volley Ball",
-				dts: "data/shapes_pq/marbles/sports/VolleyBall.dts",
+				dts: "data/shapes_pq/marbles/sports/volleyball.dts",
 				skin: "base",
 				shader: "Default"
 			}
@@ -278,7 +278,7 @@ class MarbleList {
 			},
 			{
 				name: "3D Marble",
-				dts: "data/shapes/balls/3dMarble.dts",
+				dts: "data/shapes/balls/3dmarble.dts",
 				skin: "base",
 				shader: "Default"
 			},
@@ -470,7 +470,7 @@ class MarbleList {
 			},
 			{
 				name: "GarageGames logo",
-				dts: "data/shapes/balls/garageGames.dts",
+				dts: "data/shapes/balls/garagegames.dts",
 				skin: "base",
 				shader: "Default"
 			},

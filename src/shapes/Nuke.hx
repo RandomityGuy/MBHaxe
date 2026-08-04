@@ -154,7 +154,7 @@ class Nuke extends Explodable {
 		sparksParticle = nukeSparksParticle;
 
 		renewTime = 15000;
-		explodeSoundFile = "data/sound/nukeexplode.wav";
+		explodeSoundFile = "data/sound/NukeExplode.wav";
 	}
 
 	function computeExplosionForce(distVec:Vector) {
