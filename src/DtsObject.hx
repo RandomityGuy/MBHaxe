@@ -186,6 +186,16 @@ class DtsObject extends GameObject {
 
 		var affectedBySequences = this.dts.sequences.length > 0 ? (this.dts.sequences[0].rotationMatters.length < 0 ? 0 : this.dts.sequences[0].rotationMatters[0]) | (this.dts.sequences[0].translationMatters.length > 0 ? this.dts.sequences[0].translationMatters[0] : 0) : 0;
 
+		var hasCache = this.level != null && this.level.dtsCache.has(this.dtsPath);
+		var cacheEntry = this.level != null ? (hasCache ? this.level.dtsCache.get(this.dtsPath) : this.level.dtsCache.createEntry(this.dtsPath)) : null;
+
+		if (!hasCache && cacheEntry != null) {
+			// Set up the cache structs
+			cacheEntry.polygons = [for (i in 0...graphNodes.length) null];
+			cacheEntry.polygonMaterials = [for (i in 0...graphNodes.length) null];
+			cacheEntry.surfaces = [];
+		}
+
 		for (i in this.renderSubshape.firstObject...(this.renderSubshape.firstObject + this.renderSubshape.numObjects)) {
 			var obj = this.dts.objects[i];
 			var mesh = this.dts.meshes[obj.firstMesh]; // od = 0
@@ -204,59 +214,87 @@ class DtsObject extends GameObject {
 			}
 
 			if (!isInstanced) {
-				var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
-				var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
+				if (hasCache) {
+					var mats = [for (matIdx in cacheEntry.polygonMaterials[obj.node]) materials[matIdx]];
+					var obj = new MultiMaterial(cacheEntry.polygons[obj.node], mats, this.graphNodes[obj.node]);
+				} else {
+					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
-				var meshBounds = mesh.bounds;
-				var boundsSize = new Vector(meshBounds.maxX - meshBounds.minX, meshBounds.maxY - meshBounds.minY, meshBounds.maxZ - meshBounds.minZ);
-				if (Math.abs(boundsSize.x) < 1e-5 || Math.abs(boundsSize.y) < 1e-5 || Math.abs(boundsSize.z) < 1e-5) {
-					// offset the vertices along the normal!
-					var avgNormal = new Vector();
-					for (norm in vertexNormals)
-						avgNormal.load(avgNormal.add(norm));
-					avgNormal.scale(1.0 / vertexNormals.length);
-					for (v in vertices) {
-						v.load(v.add(avgNormal.multiply(0.01)));
+					var meshBounds = mesh.bounds;
+					var boundsSize = new Vector(meshBounds.maxX - meshBounds.minX, meshBounds.maxY - meshBounds.minY, meshBounds.maxZ - meshBounds.minZ);
+					if (Math.abs(boundsSize.x) < 1e-5 || Math.abs(boundsSize.y) < 1e-5 || Math.abs(boundsSize.z) < 1e-5) {
+						// offset the vertices along the normal!
+						var avgNormal = new Vector();
+						for (norm in vertexNormals)
+							avgNormal.load(avgNormal.add(norm));
+						avgNormal.scale(1.0 / vertexNormals.length);
+						for (v in vertices) {
+							v.load(v.add(avgNormal.multiply(0.01)));
+						}
 					}
+
+					var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
+					var poly = new Polygon();
+					var usedMats = [];
+					var usedMatIndices = [];
+					for (k in 0...geometry.length) {
+						if (geometry[k].vertices.length == 0)
+							continue;
+
+						poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
+						poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
+						poly.addUVs(geometry[k].uvs);
+						poly.nextMaterial();
+
+						usedMats.push(materials[k]);
+						usedMatIndices.push(k);
+					}
+					poly.endPrimitive();
+					if (cacheEntry != null) {
+						cacheEntry.polygons[obj.node] = poly;
+						cacheEntry.polygonMaterials[obj.node] = usedMatIndices;
+					}
+					var obj = new MultiMaterial(poly, usedMats, this.graphNodes[obj.node]);
 				}
-
-				var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
-				var poly = new Polygon();
-				var usedMats = [];
-				for (k in 0...geometry.length) {
-					if (geometry[k].vertices.length == 0)
-						continue;
-
-					poly.addPoints(geometry[k].vertices.map(x -> x.toPoint()));
-					poly.addNormals(geometry[k].normals.map(x -> x.toPoint()));
-					poly.addUVs(geometry[k].uvs);
-					poly.nextMaterial();
-
-					usedMats.push(materials[k]);
-				}
-				poly.endPrimitive();
-				var obj = new MultiMaterial(poly, usedMats, this.graphNodes[obj.node]);
 			} else {
 				var obj = new Object(this.graphNodes[obj.node]);
 			}
 		}
 
 		if (this.isCollideable) {
-			for (subshapeData in this.collisionSubshapes) {
-				for (i in subshapeData.subShape.firstObject...(subshapeData.subShape.firstObject + subshapeData.subShape.numObjects)) {
-					var obj = dts.objects[i];
-					if (subshapeData.detail >= obj.numMeshes)
-						continue;
-					var mesh = this.dts.meshes[obj.firstMesh + subshapeData.detail];
+			if (hasCache && cacheEntry != null) {
+				for (cent in cacheEntry.surfaces) {
+					var ent = new CollisionEntity(this);
+					ent.userData = cent.node;
+					for (surf in cent.surfaces)
+						ent.addSurface(surf);
+					ent.generateBoundingBox();
+					ent.finalize();
+					colliders.push(ent);
+				}
+			} else {
+				for (subshapeData in this.collisionSubshapes) {
+					for (i in subshapeData.subShape.firstObject...(subshapeData.subShape.firstObject + subshapeData.subShape.numObjects)) {
+						var obj = dts.objects[i];
+						if (subshapeData.detail >= obj.numMeshes)
+							continue;
+						var mesh = this.dts.meshes[obj.firstMesh + subshapeData.detail];
 
-					if (mesh == null)
-						continue;
+						if (mesh == null)
+							continue;
 
-					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
-					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
+						var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+						var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
-					var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, obj.node);
-					colliders = colliders.concat(hulls);
+						var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, obj.node);
+						colliders = colliders.concat(hulls);
+
+						if (!hasCache && cacheEntry != null) {
+							var entry = {node: obj.node, surfaces: hulls[0].surfaces};
+							cacheEntry.surfaces.push(entry);
+						}
+					}
 				}
 			}
 		}

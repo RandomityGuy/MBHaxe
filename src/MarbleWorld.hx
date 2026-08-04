@@ -1,5 +1,6 @@
 package src;
 
+import src.DtsMeshCache;
 import net.NetPacket.ExplodableUpdatePacket;
 import net.TrapdoorPredictionStore;
 import shapes.Explodable;
@@ -146,6 +147,7 @@ class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
 	public var instanceManager:InstanceManager;
 	public var particleManager:ParticleManager;
+	public var dtsCache:DtsMeshCache;
 
 	public var playGui:PlayGui;
 
@@ -375,6 +377,7 @@ class MarbleWorld extends Scheduler {
 		this.rewindManager = new RewindManager(cast this);
 		this.inputRecorder = new InputRecorder(cast this);
 		this.isMultiplayer = multiplayer;
+		this.dtsCache = new DtsMeshCache();
 		if (this.isMultiplayer) {
 			isRecording = false;
 			isWatching = false;
@@ -3354,6 +3357,8 @@ class MarbleWorld extends Scheduler {
 			trigger.dispose();
 		}
 		triggers = null;
+		dtsCache.dispose();
+		dtsCache = null;
 		for (soundResource in this.soundResources) {
 			soundResource.release();
 		}
