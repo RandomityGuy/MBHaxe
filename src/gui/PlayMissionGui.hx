@@ -345,106 +345,6 @@ class PlayMissionGui extends GuiControl {
 		recordBtnIcon.bmp.colorMatrix = colorMat;
 		recordBtn.addChild(recordBtnIcon);
 
-		var scoreBox = new GuiMLText(markerFelt16, mlFontLoader);
-		scoreBox.text.loadImage = imgLoader;
-		scoreBox.text.onHyperlink = (url) -> {
-			if (url == "watch") {
-				var currentMission = currentList[currentSelection];
-				var lbPath = currentMission.path;
-				if (currentMission.isClaMission)
-					lbPath = 'custom/${currentMission.id}';
-				Leaderboards.watchTopReplay(lbPath, scoreView, (b) -> {
-					if (b != null) {
-						var replayF = new Replay("");
-						if (replayF.read(b)) {
-							var repmis = replayF.mission;
-							// Strip data/ from the mission name
-							if (StringTools.startsWith(repmis, "data/")) {
-								repmis = repmis.substr(5);
-							}
-
-							var mi = replayF.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(replayF.customId);
-
-							// try with data/ added
-							if (mi == null && replayF.customId == 0) {
-								if (!StringTools.contains(repmis, "data/"))
-									repmis = "data/" + repmis;
-								mi = MissionList.missions.get(repmis);
-							}
-
-							if (mi.isClaMission) {
-								mi.download(() -> {
-									MarbleGame.instance.watchMissionReplay(mi, replayF, PlayMissionGui);
-								});
-							} else {
-								MarbleGame.instance.watchMissionReplay(mi, replayF, PlayMissionGui);
-							}
-						} else {
-							MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Could not load replay for this level."));
-						}
-					} else {
-						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("No top replay found for this level."));
-					}
-				});
-			}
-		}
-		scoreBox.text.textColor = 0xF4E4CE;
-		scoreBox.text.dropShadow = {
-			dx: 1 * Settings.uiScale,
-			dy: 1 * Settings.uiScale,
-			alpha: 0.5,
-			color: 0
-		};
-		scoreBox.text.lineSpacing = -1;
-		scoreBox.horizSizing = Width;
-		scoreBox.position = new Vector(0, 0);
-		scoreBox.extent = new Vector(407, 1184);
-		var scores = [
-			'1. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="unknown"/></offset>',
-			'2. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="pc"/></offset>',
-			'3. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="mac"/></offset>',
-			'4. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="web"/></offset>',
-			'5. <offset value="15">Nardo Polo</offset><offset value="215">99:59:999</offset><offset value="279"><img src="android"/></offset>',
-		];
-		scoreBox.text.text = '<p align="center">Loading scores</p>'; // scores.join('<br/>');
-		scoreBox.text.imageVerticalAlign = Top;
-		scoreScroll.addChild(scoreBox);
-
-		var lbImgs = loadButtonImages("data/ui/play/lb");
-		var infoImgs = loadButtonImages("data/ui/play/info");
-
-		var pmLBToggle = new GuiButton(lbImgs);
-		pmLBToggle.position = new Vector(118, 98);
-		pmLBToggle.extent = new Vector(43, 43);
-		pmLBToggle.pressedAction = (e) -> {
-			showLBs = !showLBs;
-			if (!showLBs) {
-				@:privateAccess pmLBToggle.anim.frames = lbImgs;
-			} else {
-				@:privateAccess pmLBToggle.anim.frames = infoImgs;
-			}
-
-			// pmScoreButton.disabled = showLBs;
-			// pmScoreText.text.visible = !showLBs;
-
-			setSelectedFunc(currentSelection);
-			if (showLBs) {
-				pmBox.addChild(scoreScroll);
-			} else {
-				pmBox.removeChild(scoreScroll);
-			}
-			pmBox.render(MarbleGame.canvas.scene2d);
-			// setCategoryFunc(currentGame, currentCategoryStatic, currentSortType == 1 ? "date" : "alpha");
-			// MarbleGame.canvas.pushDialog(new SearchGui(currentGame, currentCategory == "custom"));
-		}
-
-		if (!showLBs) {
-			@:privateAccess pmLBToggle.anim.frames = lbImgs;
-		} else {
-			@:privateAccess pmLBToggle.anim.frames = infoImgs;
-		}
-
-		pmBox.addChild(pmLBToggle);
 		var temprev = new BitmapData(1, 1);
 		temprev.setPixel(0, 0, 0);
 		var tmpprevtile = Tile.fromBitmap(temprev);
@@ -994,7 +894,7 @@ class PlayMissionGui extends GuiControl {
 			paginationText.horizSizing = Center;
 			missionListContainer.addChild(paginationText);
 
-			missionListContainer.render(MarbleGame.canvas.scene2d, @:privateAccess missionBox._flow);
+			missionListContainer.render(MarbleGame.canvas.scene2d);
 		}
 
 		var showLeaderboards = false;
@@ -1278,7 +1178,7 @@ class PlayMissionGui extends GuiControl {
 				}
 			};
 
-			infoBox.render(MarbleGame.canvas.scene2d, @:privateAccess this._flow);
+			infoBox.render(MarbleGame.canvas.scene2d);
 
 			#if js
 			switch (previewTimeoutHandle) {

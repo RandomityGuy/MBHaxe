@@ -617,7 +617,6 @@ class PlayGui {
 
 		gemImageScene.camera.pos = new Vector(0, 3, gemImageCenter.z);
 		gemImageScene.camera.target = new Vector(gemImageCenter.x, gemImageCenter.y, gemImageCenter.z);
-		onFinish();
 	}
 
 	function initQuotaCounter() {
@@ -1999,8 +1998,7 @@ class PlayGui {
 			}
 
 			this.helpTextContainer.position = new Vector(120, 620 - pct * (95 + 20));
-			this.helpTextContainer.render(scene2d, @:privateAccess playGuiCtrl._flow);
-			@:privateAccess helpTextContainer._flow.overflow = Expand;
+			this.helpTextContainer.render(scene2d);
 		}
 	}
 
@@ -2114,7 +2112,7 @@ class PlayGui {
 
 		this.toastListBox.addChild(box);
 
-		box.render(scene2d, @:privateAccess this.toastListBox._flow);
+		box.render(scene2d);
 
 		// Update the size of the box
 
@@ -2140,7 +2138,7 @@ class PlayGui {
 	function repositionToast(msg:ToastMessage) {
 		msg.box.position.x = msg.x;
 		msg.box.position.y = msg.y;
-		msg.box.render(scene2d, @:privateAccess this.toastListBox._flow);
+		msg.box.render(scene2d);
 	}
 
 	function updateToastMessages(dt:Float) {

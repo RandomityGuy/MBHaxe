@@ -88,18 +88,15 @@ class GuiBorderButtonCtrl extends GuiControl {
 		this.tiles = tilesubs;
 	}
 
-	public override function render(scene2d:Scene, ?parent:Flow) {
-		if (parent.contains(container))
-			parent.removeChild(container);
+	public override function render(scene2d:Scene) {
+		if (scene2d.contains(container))
+			scene2d.removeChild(container);
 
-		parent.addChild(container);
-		var props = parent.getProperties(container);
-		props.isAbsolute = true;
+		scene2d.addChild(container);
 
 		var renderRect = this.getRenderRectangle();
-		var offset = this.getOffsetFromParent();
 
-		container.setPosition(Math.floor(offset.x), Math.floor(offset.y));
+		container.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 
 		var tl = bmps[0];
 		var tr = bmps[1];
@@ -142,7 +139,7 @@ class GuiBorderButtonCtrl extends GuiControl {
 		fill.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
 		fill.height = Math.floor(renderRect.extent.y - tr.tile.height - bl.tile.height);
 
-		super.render(scene2d, parent);
+		super.render(scene2d);
 	}
 
 	public override function onRemove() {

@@ -348,29 +348,35 @@ class OptionsDlg extends GuiControl {
 				Settings.controlsSettings.cameraSensitivity = cast(0.12 + val * (1.2 - 0.12));
 			}, true);
 
+		function makeButton(text:String, yPos:Int, buttonText:String, pressedAction:() -> Void, parent:GuiControl, right:Bool = false) {
+			var textObj = new GuiText(squishneyFont28);
+			textObj.position = new Vector(right ? 368 : 5, yPos);
+			textObj.extent = new Vector(212, 14);
+			textObj.text.text = text;
+			textObj.text.textColor = 0x0;
+			parent.addChild(textObj);
+
+			var btn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
+				.toTile(), whatneyFont20);
+			btn.position = new Vector(right ? 363 + 203 : 203, yPos - 12);
+			btn.setExtent(new Vector(163, 45));
+			btn.txtCtrl.text.text = buttonText;
+			btn.pressedAction = (sender) -> {
+				pressedAction();
+			}
+
+			parent.addChild(btn);
+		}
+
 		if (touch) {
 			current += 56;
 			makeSlider("Camera Distance:", (Settings.optionsSettings.cameraDistance - 1.01) / (3 - 1.01), current, generalPanel, (val) -> {
 				Settings.optionsSettings.cameraDistance = cast(1.01 + val * (3 - 1.01));
 			});
 
-			var textObj = new GuiText(markerFelt32);
-			textObj.position = new Vector(388, current - 6);
-			textObj.extent = new Vector(212, 14);
-			textObj.text.text = "Touch Controls";
-			textObj.text.textColor = 0xFFFFFF;
-			textObj.text.filter = new DropShadow(1.414, 0.785, 0x0000000F, 1, 0, 0.4, 1, true);
-			generalPanel.addChild(textObj);
-
-			var remapBtn = new GuiButtonText(loadButtonImages("data/ui/options/bind"), markerFelt24);
-			remapBtn.position = new Vector(552, current - 6);
-			remapBtn.txtCtrl.text.text = "Edit";
-			remapBtn.setExtent(new Vector(152, 49));
-			if (!pause)
-				remapBtn.pressedAction = (sender) -> {
-					MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
-				}
-			generalPanel.addChild(remapBtn);
+			makeButton("Touch Controls:", current, "Edit", () -> {
+				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
+			}, generalPanel, true);
 		}
 
 		function getConflictingBinding(bindingName:String, key:Int) {
@@ -442,26 +448,6 @@ class OptionsDlg extends GuiControl {
 			}
 
 			parent.addChild(remapBtn);
-		}
-
-		function makeButton(text:String, yPos:Int, buttonText:String, pressedAction:() -> Void, parent:GuiControl, right:Bool = false) {
-			var textObj = new GuiText(squishneyFont28);
-			textObj.position = new Vector(right ? 368 : 5, yPos);
-			textObj.extent = new Vector(212, 14);
-			textObj.text.text = text;
-			textObj.text.textColor = 0x0;
-			parent.addChild(textObj);
-
-			var btn = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
-				.toTile(), whatneyFont20);
-			btn.position = new Vector(right ? 363 + 203 : 203, yPos - 12);
-			btn.setExtent(new Vector(163, 45));
-			btn.txtCtrl.text.text = buttonText;
-			btn.pressedAction = (sender) -> {
-				pressedAction();
-			}
-
-			parent.addChild(btn);
 		}
 
 		if (Util.isTouchDevice()) {

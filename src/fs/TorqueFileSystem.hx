@@ -2,7 +2,6 @@ package fs;
 
 #if android
 import hxd.fs.LocalFileSystem;
-
 #if hl
 class TorqueFileEntry extends LocalEntry {
 	override function load(?onReady:Void->Void):Void {
@@ -98,11 +97,9 @@ class TorqueFileSystem extends LocalFileSystem {
 	}
 	#end
 }
-
 #end
-#if ios
-package fs;
 
+#if ios
 import hxd.fs.LocalFileSystem;
 import src.Settings;
 
@@ -180,6 +177,7 @@ class TorqueFileSystem extends LocalFileSystem {
 
 		root = new TorqueFileEntry(this, "root", null, baseDir);
 	}
+
 	override function checkPath(path:String) {
 		path = normalizePath(path);
 
