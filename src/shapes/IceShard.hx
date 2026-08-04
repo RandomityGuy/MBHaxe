@@ -103,7 +103,7 @@ final iceShardBreak1Options:ParticleEmitterOptions = {
 	phiVariance: 360,
 	ejectionOffset: 0.2,
 	particleOptions: {
-		texture: 'particles/fireball_1B.png',
+		texture: 'particles/fireball_1b.png',
 		blending: BlendMode.Add,
 		spinSpeed: 6.47059,
 		spinRandomMin: -90,
@@ -139,7 +139,7 @@ final iceShardBreak2Options:ParticleEmitterOptions = {
 	phiVariance: 360,
 	ejectionOffset: 0.09803922,
 	particleOptions: {
-		texture: 'particles/fireball_2B.png',
+		texture: 'particles/fireball_2b.png',
 		blending: BlendMode.Add,
 		spinSpeed: 9.11765,
 		spinRandomMin: -100,
@@ -221,11 +221,11 @@ class IceShard extends DtsObject {
 
 			this.breakData1 = new ParticleData();
 			this.breakData1.identifier = "IceShardBreak1Particle";
-			this.breakData1.texture = ResourceLoader.getResource("data/particles/fireball_1B.png", ResourceLoader.getTexture, this.textureResources);
+			this.breakData1.texture = ResourceLoader.getResource("data/particles/fireball_1b.png", ResourceLoader.getTexture, this.textureResources);
 
 			this.breakData2 = new ParticleData();
 			this.breakData2.identifier = "IceShardBreak2Particle";
-			this.breakData2.texture = ResourceLoader.getResource("data/particles/fireball_2B.png", ResourceLoader.getTexture, this.textureResources);
+			this.breakData2.texture = ResourceLoader.getResource("data/particles/fireball_2b.png", ResourceLoader.getTexture, this.textureResources);
 
 			if (this.points == 0) {
 				this.mistEmitter = this.level.particleManager.createEmitter(iceShardMistOptions, this.mistData, null, () -> this.getAbsPos().getPosition());

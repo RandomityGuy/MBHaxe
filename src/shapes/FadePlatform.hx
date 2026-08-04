@@ -42,17 +42,17 @@ class FadePlatform extends DtsObject {
 		super();
 
 		this.dtsPath = switch (element.datablock.toLowerCase()) {
-			case "fadeplatform2_1x1": "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform2_1x1.dts";
-			case "fadeplatform2_1x2": "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform2_1x2.dts";
-			case "fadeplatform2_1x3": "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform2_1x3.dts";
-			case "fadeplatform2_1x5": "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform2_1x5.dts";
-			case "fadeplatform2_2x2": "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform2_2x2.dts";
-			case "fadeplatform2_3x3": "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform2_3x3.dts";
-			case "fadeplatform2_5x5": "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform2_5x5.dts";
-			case "fadeplatformconcrete": "data/shapes_pq/gameplay/hazards/FadePlatform/fadeplat_concrete_cube_2x2.dts";
-			case "fadeplatformgrass": "data/shapes_pq/gameplay/hazards/FadePlatform/fadeplat_grass_cube_2x2.dts";
-			case "fadeplatformice": "data/shapes_pq/gameplay/hazards/FadePlatform/fadeplat_ice_cube_2x2.dts";
-			default: "data/shapes_pq/gameplay/hazards/FadePlatform/FadePlatform.dts";
+			case "fadeplatform2_1x1": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform2_1x1.dts";
+			case "fadeplatform2_1x2": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform2_1x2.dts";
+			case "fadeplatform2_1x3": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform2_1x3.dts";
+			case "fadeplatform2_1x5": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform2_1x5.dts";
+			case "fadeplatform2_2x2": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform2_2x2.dts";
+			case "fadeplatform2_3x3": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform2_3x3.dts";
+			case "fadeplatform2_5x5": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform2_5x5.dts";
+			case "fadeplatformconcrete": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplat_concrete_cube_2x2.dts";
+			case "fadeplatformgrass": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplat_grass_cube_2x2.dts";
+			case "fadeplatformice": "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplat_ice_cube_2x2.dts";
+			default: "data/shapes_pq/gameplay/hazards/fadeplatform/fadeplatform.dts";
 		}
 		this.isCollideable = true;
 		this.enableCollideCallbacks = true;
