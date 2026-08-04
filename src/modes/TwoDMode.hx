@@ -107,7 +107,7 @@ class TwoDMode extends NullMode {
 		this.changesPitch = level.mission.missionInfo.targetpitch != null
 			&& level.mission.missionInfo.targetpitch.toLowerCase() != "nochange";
 		if (this.changesPitch)
-			targetPitch = MisParser.parseNumber(level.mission.missionInfo.targetpitch);
+			targetPitch = hxd.Math.degToRad(MisParser.parseNumber(level.mission.missionInfo.targetpitch));
 		this.activate(this.missionYaw, this.missionCamDistance, this.changesPitch, targetPitch);
 	}
 
@@ -117,17 +117,17 @@ class TwoDMode extends NullMode {
 	}
 
 	/** Ported from `GameConnection::start2D`. */
-	public function activate(yaw:Float, camDistance:Float, changesPitch:Bool, pitchDegrees:Float) {
+	public function activate(yaw:Float, camDistance:Float, changesPitch:Bool, pitch:Float) {
 		this.active = true;
 		this.targetYaw = yaw;
-		this.targetPitch = pitchDegrees;
+		this.targetPitch = pitch;
 
 		level.marble.camera.CameraYaw = yaw + Math.PI / 2;
 		level.marble.camera.nextCameraYaw = yaw + Math.PI / 2;
 		if (!Math.isNaN(camDistance))
 			level.marble.camera.CameraDistance = camDistance;
 		if (changesPitch) {
-			var pitch = pitchDegrees * Math.PI / 180;
+			var pitch = pitch;
 			level.marble.camera.CameraPitch = pitch;
 			level.marble.camera.nextCameraPitch = pitch;
 		} else {

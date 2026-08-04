@@ -440,4 +440,8 @@ class PathedInterior extends InteriorObject {
 		for (t in this.triggers)
 			t.reset();
 	}
+
+	override function getSurfaceVelocity(point:Vector, marble:Marble, dt:Float):Vector {
+		return this.velocity;
+	}
 }

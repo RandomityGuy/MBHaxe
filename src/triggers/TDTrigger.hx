@@ -53,7 +53,7 @@ class TDTrigger extends Trigger {
 
 		this.targetPitch = pitchField != null
 			&& pitchField[0] != ""
-			&& pitchField[0].toLowerCase() != "nochange" ? Std.parseFloat(pitchField[0]) : Math.NaN;
+			&& pitchField[0].toLowerCase() != "nochange" ? hxd.Math.degToRad(Std.parseFloat(pitchField[0])) : Math.NaN;
 	}
 
 	override function onMarbleEnter(marble:Marble, time:TimeState) {

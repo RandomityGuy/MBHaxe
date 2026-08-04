@@ -5,6 +5,7 @@ import h3d.col.Bounds;
 import octree.IOctreeObject;
 import h3d.Vector;
 import collision.BVHTree.IBVHObject;
+import src.Debug;
 
 @:publicFields
 class TransformedCollisionTriangle {

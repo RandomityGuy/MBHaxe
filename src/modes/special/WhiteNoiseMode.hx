@@ -82,15 +82,17 @@ class WhiteNoiseMode extends TwoDMode {
 		this.smbUpwards = 0;
 	}
 
+	// `onJump` fires mid-substep, from inside `Marble.applyContactForces` - well before that same
+	// substep's `this.velocity.set(...)` (integrating `A`) and `appliedImpulses` processing, both of
+	// which would clobber a direct mutation made this early. Deferred to `update()` instead (once
+	// per frame, after the whole substep loop has settled) - same reasoning as `buzzsawd` above.
+	var pendingSmbJump:Bool = false;
+
 	/** Ported from `Marble::onJump`'s `MissionInfo.whiteNoise` branch - gated implicitly by this
-		mode only being active on the White Noise mission at all. `applyImpulse` with no offset
-		matches the original's `applyImpulse("0 0 0", "0 0" SPC $SMBTrigger)` (through the center,
-		so no torque). */
+		mode only being active on the White Noise mission at all. */
 	public override function onJump(marble:Marble) {
-		if (this.smbImpulse != 0)
-			marble.applyImpulse(new h3d.Vector(0, 0, this.smbImpulse));
-		if (this.smbUpwards != 0)
-			marble.velocity.z = Math.max(marble.velocity.z, this.smbUpwards);
+		if (this.smbImpulse != 0 || this.smbUpwards != 0)
+			this.pendingSmbJump = true;
 	}
 
 	public override function processMaterialContact(marble:src.Marble, contact:CollisionInfo) {
@@ -105,6 +107,15 @@ class WhiteNoiseMode extends TwoDMode {
 
 	public override function update(t:src.TimeState) {
 		super.update(t);
+		if (this.pendingSmbJump) {
+			this.pendingSmbJump = false;
+			// `applyImpulse` with no offset matches the original's `applyImpulse("0 0 0", "0 0" SPC
+			// $SMBTrigger)` (through the center, so no torque).
+			if (this.smbImpulse != 0)
+				this.level.marble.velocity.load(this.level.marble.velocity.add(new h3d.Vector(0, 0, this.smbImpulse)));
+			if (this.smbUpwards != 0)
+				this.level.marble.velocity.z = Math.max(this.level.marble.velocity.z, this.smbUpwards);
+		}
 		if (buzzsawd) {
 			buzzsawd = false;
 

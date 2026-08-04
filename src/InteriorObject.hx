@@ -39,5 +39,7 @@ class InteriorObject extends GameObject {
 		super.setTransform(transform);
 		collider.setTransform(transform);
 		this.level.collisionWorld.updateTransform(this.collider);
+		// if scale is non-zero, make it collideable!
+		isCollideable = transform.getDeterminant() != 0;
 	}
 }

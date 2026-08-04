@@ -103,10 +103,9 @@ class GameObjectPathFollower {
 		this.currentNodeName = s.currentNode;
 		this.prevNodeName = s.prevNode;
 		this.rngCursor = s.rngCursor;
-		// A rewind jump invalidates rotInterpolate's delta-axis continuity reference (see its doc
-		// comment) - it was tracking continuity for a since-rewound-past sequence of frames, not the
-		// one about to resume from here. Let it re-establish fresh from whatever this jump lands on.
-		this.lastDeltaAxis = null;
+		// Re-derive the transform for the restored path position and collapse the frame blend, so the
+		// object snaps straight to where the rewound-to state puts it instead of continuing to
+		// interpolate toward a frame-end computed before the jump.
 		var state = evaluateTransform(this.currentNodeName, this.prevNodeName, this.pathPosition);
 		if (state != null) {
 			this.frameStartState = state;
@@ -177,26 +176,6 @@ class GameObjectPathFollower {
 		}
 
 		this.frameEndState = evaluateTransform(this.currentNodeName, this.prevNodeName, this.pathPosition);
-
-		// `rotInterpolate` re-extracts a quaternion from a matrix on every call (Shepperd's method,
-		// no continuity across calls) - since q and -q represent the identical rotation, two nearly-
-		// identical rotation matrices computed a frame apart can land on opposite quaternion
-		// hemispheres depending on which branch of the extraction they happen to hit, with no actual
-		// jump in the underlying rotation. `advancePath`'s `Quat.slerp` treats a negative dot product
-		// between the two quaternions as "more than 180 degrees apart" and flips to the long way
-		// around, which visibly reverses the object for one frame before snapping back once the
-		// extraction lands on the matching hemisphere again (the "see-saw" bug on paths whose segment
-		// angle sweeps through one of Shepperd's branch boundaries). Forcing hemisphere continuity
-		// between the two ends of this frame's blend range fixes it without affecting normal frames,
-		// where the dot product is already positive.
-		if (this.frameStartState != null
-			&& this.frameEndState != null
-			&& this.frameStartState.rotation.dot(this.frameEndState.rotation) < 0) {
-			this.frameEndState.rotation.x *= -1;
-			this.frameEndState.rotation.y *= -1;
-			this.frameEndState.rotation.z *= -1;
-			this.frameEndState.rotation.w *= -1;
-		}
 
 		this.frameDuration = dt;
 		this.substepAccum = 0;
@@ -508,7 +487,16 @@ class GameObjectPathFollower {
 
 	/** Extracts an (axis, angle) pair from a rotation matrix via its quaternion, matching Torque's
 		`AngAxisF(const MatrixF&)` constructor closely enough to reproduce `RotInterpolate`'s
-		re-decomposition step (see `rotInterpolate`'s doc comment). Fills `out` in place. */
+		re-decomposition step (see `rotInterpolate`'s doc comment). Fills `out` in place.
+
+		Known unresolved issue: a rotation of exactly 180 degrees has no unique axis (`R(a, 180) ==
+		R(-a, 180)`), and which of the two `Quat.initRotateMatrix`'s Shepperd extraction picks isn't
+		guaranteed to match the direction a node chain's neighboring segments are travelling in - this
+		is the cause of a see-saw/reversal on node loops whose cumulative rotation passes through
+		exactly 180 degrees (e.g. a 0/90/180-degree three-node chain). A per-segment sign correction
+		was attempted and reverted - it fixed the ambiguous segment but flipped the direction of every
+		other (unambiguous) segment too, so whatever's actually driving direction here isn't fully
+		understood yet. Left as-is pending a real fix. */
 	function axisAngleFromMatrix(mat:Matrix, out:AxisAngle) {
 		var q = scratchRotExtractQuat;
 		q.initRotateMatrix(mat);
@@ -542,25 +530,10 @@ class GameObjectPathFollower {
 		same axis - this was the cause of reversed rotation direction on two-node setups where the
 		nodes' rotations aren't about a common axis.
 
-		Separately: `axisAngleFromMatrix`'s underlying quaternion extraction (Shepperd's method,
-		which Torque's own `QuatF::set(const MatrixF&)` also uses - see `mQuat.cc`) branches on
-		which of the matrix's diagonal terms is largest, and each branch independently forces its own
-		"primary" component non-negative - there is no guarantee of continuity between two nearby
-		matrices that happen to land on different branches. A delta rotation of exactly (or very
-		nearly) 180 degrees is the classic trigger: the matrix itself is symmetric under axis
-		negation (`R(180,+axis) == R(180,-axis)`), so the branch that gets taken can flip the
-		extracted delta axis relative to neighboring segments' deltas for no physical reason. Since
-		only the delta's `angle` gets scaled by `t` before recomposing (the axis is held fixed), an
-		axis flip silently reverses that segment's rotation direction - this, not the multiply-order
-		issue above, was the actual cause of the "completes the rotation, reverses back to the start,
-		then goes forward again" see-saw bug on multi-node paths whose cumulative segment angles pass
-		through 180 degrees (reproduced even with same-axis rotations, where the multiply-order fix
-		is a no-op, and with `RotationMultiplier == 1`, where the multiplier-collapsing bug above
-		can't be the culprit either). Fixed by canonicalizing the extracted delta axis to be
-		continuous with the previous call's delta axis (`lastDeltaAxis`), which is the standard fix
-		for this class of quaternion/axis-angle double-cover instability. */
-	var lastDeltaAxis:Vector = null;
-
+		Separately, a delta rotation of exactly 180 degrees has an ambiguous axis sign that has to be
+		resolved against this engine's mirrored X axis rather than Torque's - see
+		`axisAngleFromMatrix`'s doc comment. That ambiguity, not the multiply order above, is what
+		caused the "rotates all the way around, then see-saws back" bug on node loops like 0/90/180. */
 	function rotInterpolate(rot1:Quat, rot2:Quat, t:Float, multiplier:Float = 1.0):Quat {
 		var mat1 = scratchRotMat1;
 		var mat2 = scratchRotMat2;
@@ -574,13 +547,6 @@ class GameObjectPathFollower {
 
 		var delta = scratchRotDelta;
 		axisAngleFromMatrix(matSub, delta);
-		if (this.lastDeltaAxis != null && delta.axis.dot(this.lastDeltaAxis) < 0) {
-			delta.axis.set(-delta.axis.x, -delta.axis.y, -delta.axis.z);
-			delta.angle = 2 * Math.PI - delta.angle;
-		}
-		if (this.lastDeltaAxis == null)
-			this.lastDeltaAxis = new Vector();
-		this.lastDeltaAxis.set(delta.axis.x, delta.axis.y, delta.axis.z);
 
 		delta.angle *= t;
 
