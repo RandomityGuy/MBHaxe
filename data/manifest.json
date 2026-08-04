@@ -1,7 +1,7 @@
 {
-	"name": "Marble Blast Platinum Haxe Port",
-	"short_name": "Marble Blast Platinum",
-	"description": "A reimplementation of Marble Blast Platinum in Haxe",
+	"name": "PlatinumQuest Haxe Port",
+	"short_name": "PlatinumQuest",
+	"description": "A reimplementation of PlatinumQuest in Haxe",
 	"dir": "ltr",
 	"start_url": "/index.html?app=true",
 	"scope": "/",
