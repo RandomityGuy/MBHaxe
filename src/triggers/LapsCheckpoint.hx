@@ -8,11 +8,6 @@ import mis.MissionElement.MissionElementTrigger;
 import modes.GameMode.GameModeFactory;
 import modes.LapsMode;
 
-/** Ported from PQ's `LapsCheckpoint` datablock (`modes/laps.cs`) - a numbered checkpoint that must
-	be hit in sequence (1, 2, 3, ...); hitting the checkpoint at the top of the sequence (the
-	highest `checkpointNumber` seen in the mission) wraps back around and arms `LapsCounterTrigger`
-	for the next lap. Auto-numbers itself from `level.lapsLastCheckpointNumber` if `checkpointNumber`
-	isn't explicitly set, matching `LapsCheckpoint::onAdd`. */
 class LapsCheckpoint extends Trigger implements ILapsRespawnTrigger {
 	public var checkpointNumber:Int;
 	public var enableRespawning:Bool;

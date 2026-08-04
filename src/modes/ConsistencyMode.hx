@@ -43,12 +43,6 @@ class ConsistencyState implements RewindableState {
 	}
 }
 
-/** Ported from PQ's `modes/consistency.cs` - fail if speed drops below `MissionInfo.minimumspeed`
-	for longer than `MissionInfo.penaltydelay` (default 2000ms), after an initial `MissionInfo.
-	graceperiod` at mission start (and, for countdown-timer modes like Hunt, another grace window
-	near time-up) and after respawning. Per the standing rule against `level.schedule(...)` for
-	gameplay, the "how long have they been too slow" timer is tracked as a plain timestamp
-	(`belowSpeedSince`) and checked every `update()` tick rather than scheduled. */
 class ConsistencyMode extends NullMode {
 	var minimumSpeed:Float;
 	var gracePeriod:Float;
@@ -69,9 +63,6 @@ class ConsistencyMode extends NullMode {
 		this.penaltyDelay = penalty != null && penalty != "" ? Std.parseFloat(penalty) / 1000 : 2.0;
 	}
 
-	// `level.playGui` doesn't exist yet at construction time (`GameModeFactory.getGameMode` runs
-	// before `MarbleWorld.initScene`/`postInit` create and initialize it) - register the HUD
-	// threshold once it's actually safe to reach `level.playGui`.
 	override function onMissionLoad() {
 		@:privateAccess level.playGui.setConsistencyThreshold(this.minimumSpeed);
 	}

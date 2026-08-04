@@ -112,19 +112,15 @@ class HtmlText extends Text {
 	var aHrefs:Array<String>;
 	var aInteractive:Interactive;
 
-	/**
-		Per style-run shadow overrides set via `<font shadow="dx,dy" shadowcolor="#RRGGBBAA">`.
-		Falls back to the global `dropShadow` for any TileGroup with no entry here.
-	**/
 	var elementShadows:Map<TileGroup, HtmlShadowStyle>;
-
-	/**
-		Currently active shadow style while walking the XML tree in `addNode`, mirroring the
-		style-stack `mCurStyle->shadowOffset`/`shadowColor` used by GuiMLTextCtrl::reflow.
-	**/
 	var curShadow:HtmlShadowStyle;
 
-	function drawShadowGroup(ctx:RenderContext, tg:TileGroup, s:{dx:Float, dy:Float, color:Int, alpha:Float}) {
+	function drawShadowGroup(ctx:RenderContext, tg:TileGroup, s:{
+		dx:Float,
+		dy:Float,
+		color:Int,
+		alpha:Float
+	}) {
 		var oldX = absX, oldY = absY;
 		absX += s.dx * matA + s.dy * matC;
 		absY += s.dx * matB + s.dy * matD;
@@ -745,13 +741,13 @@ class HtmlText extends Text {
 							case "face":
 								setFont(v);
 							case "shadow":
-								// "dx,dy" offset, mirrors GuiMLTextCtrl's <shadow:x:y> tag
+								// "dx,dy" offset
 								var parts = v.split(",");
 								shadowDx = Std.parseFloat(parts[0]);
 								shadowDy = parts.length > 1 ? Std.parseFloat(parts[1]) : shadowDx;
 								shadowChanged = true;
 							case "shadowcolor":
-								// "#RRGGBB" or "#RRGGBBAA", mirrors GuiMLTextCtrl's <shadowcolor:RRGGBBAA> tag
+								// "#RRGGBB" or "#RRGGBBAA"
 								var hex = v.charCodeAt(0) == '#'.code ? v.substr(1) : v;
 								if (hex.length == 3)
 									hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
@@ -762,7 +758,12 @@ class HtmlText extends Text {
 						}
 					}
 					if (shadowChanged) {
-						curShadow = {dx: shadowDx, dy: shadowDy, color: shadowColor, alpha: shadowAlpha};
+						curShadow = {
+							dx: shadowDx,
+							dy: shadowDy,
+							color: shadowColor,
+							alpha: shadowAlpha
+						};
 						// Force a dedicated glyph group for this style-run even if the font face didn't change,
 						// since shadow is applied per TileGroup at draw time rather than per glyph.
 						if (prevGlyphs == null)
@@ -974,9 +975,6 @@ private typedef SplitNode = {
 	var font:h2d.Font;
 }
 
-/**
-	Matches the shape of `h2d.Text.dropShadow` so instances unify freely with the base class field.
-**/
 private typedef HtmlShadowStyle = {
 	var dx:Float;
 	var dy:Float;

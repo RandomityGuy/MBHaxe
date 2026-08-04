@@ -7,13 +7,6 @@ import h3d.Vector;
 import net.NetPacket.MarbleNetFlags;
 
 class GravityPointTrigger extends Trigger {
-	// Ported from `gravity.cs`'s `Gravity::update()`/`GravityPointTrigger_getDistance()` -
-	// real PQ's radius check happens independently of the trigger's actual AABB volume (which just
-	// controls whether the marble is a candidate at all): a marble can be well inside the AABB but
-	// outside `RadiusSize`, at which point this trigger reports itself out of range and effectively
-	// "leaves" (its `onPlayerLeave`-equivalent, `UpDownLeave`, fires) even though it never actually
-	// exited the trigger volume. Tracks per-marble since multiple marbles can be inside/outside the
-	// radius independently of each other.
 	var wasWithinRadius:Map<Marble, Bool> = [];
 
 	function getCenter():Vector {
@@ -68,8 +61,6 @@ class GravityPointTrigger extends Trigger {
 		var marblePos = marble.getAbsPos().getPosition();
 		var within = withinRadius(marblePos, getCenter());
 		if (!within) {
-			// Radius-exit while still inside the AABB - real source's `getDistance` reports this
-			// trigger out of range the instant this happens, not just on real AABB exit.
 			if (this.wasWithinRadius.get(marble) == true)
 				leaveUpDown(marble, timeState);
 			this.wasWithinRadius.set(marble, false);

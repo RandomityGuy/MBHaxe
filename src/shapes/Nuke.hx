@@ -16,15 +16,6 @@ import src.MarbleWorld;
 import net.Net;
 import mis.MissionElement.MissionElementStaticShape;
 
-/** Ported from `hazards.cs`'s `NukeEmitter`, which reuses `LandMineParticle` (`particles =
-	"LandMineParticle"`, not a separate "NukeParticle" - the real, commented-out `NukeParticle`
-	datablock is dead/unused, "Is this even used?") with its own emitter timing (identical to
-	`LandMineEmitter`'s, in fact) - but `NukeExplosion` drives it with its own, much bigger
-	`particleDensity = 120`/`particleRadius = 3` (vs. LandMine's 80/1). Same `spawnOffset`/
-	`emitterLifetime` emulation of the real radius-distributed one-shot spawn as `LandMine.hx`'s
-	`landMineParticle`/`shapes.Cannon`'s `cannonVolumeOptions` - see either's doc comment. Spin
-	isn't set on `LandMineParticle`, so it defaults to 0, not the `40`/`-90`/`90` an earlier port
-	pass had invented. */
 final nukeParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 7,
 	periodVariance: 0,
@@ -64,9 +55,6 @@ final nukeParticle:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `hazards.cs`'s `NukeSmoke`/`NukeSmokeEmitter` - same misspelled-`dragCoefficient`
-	dead-field note as `LandMineSmoke`, kept at MBHaxe's tuned value rather than the "real" default
-	of 0. */
 final nukeSmokeParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 10,
 	periodVariance: 0,
@@ -102,8 +90,6 @@ final nukeSmokeParticle:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `hazards.cs`'s `NukeSparks`/`NukeSparkEmitter` - spin also defaults to 0 here (not
-	set in the source). */
 final nukeSparksParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 3,
 	periodVariance: 0,
@@ -148,8 +134,6 @@ class Nuke extends Explodable {
 			this.skinOverride = "nuke";
 		} else
 			dtsPath = "data/shapes/hazards/nuke/nuke.dts";
-		// Instancing batches by `identifier` - Nuke_PQ reuses LandMine's mesh with a different skin
-		// (see above), so the dtsPath alone isn't enough to disambiguate; skinOverride included too.
 		this.identifier = "Nuke" + this.dtsPath + (this.skinOverride != null ? this.skinOverride : "");
 		this.isCollideable = true;
 

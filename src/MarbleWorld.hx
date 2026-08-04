@@ -165,39 +165,15 @@ class MarbleWorld extends Scheduler {
 	public var trapdoorsToTick:Array<Int> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
-
-	/** All placed `IceShard1`/`IceShard2` instances - mirrors `gems` (used for rewind snapshotting
-		of `IceShard.destroyed`, see `RewindFrame.iceShardStates`). */
 	public var iceShards:Array<shapes.IceShard> = [];
-
-	/** All placed `RespawningTimeTravelItem`/`RespawningTimeTravelItem_PQ`/`*Penalty*` instances
-		(i.e. `TimeTravel`s constructed with `noRespawn = false`) - mirrors `iceShards`, used for
-		rewind snapshotting of `TimeTravel.respawnCount` (see `RewindFrame.respawningTimeTravelStates`).
-		Plain, non-respawning `TimeTravel`s are never pushed here since they have no extra state to
-		restore beyond the generic `PowerUp.lastPickUpTime` snapshot every `PowerUp` already gets. */
 	public var respawningTimeTravels:Array<shapes.TimeTravel> = [];
-
 	public var cannons:Array<shapes.Cannon> = [];
 
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
-
-	/** General named-object lookup (any `GameObject` - DTS/interior/trigger) used for `path`/
-		`parent` resolution, since those can target any placed object, not just DTS items like
-		`namedObjects` above. Kept separate from `namedObjects` so existing DtsObject-only lookups
-		(checkpoint respawn points, DisableShapeForceTrigger) aren't affected. */
 	public var namedGameObjects:Map<String, GameObject> = [];
 
-	/** `PathNode`/`BezierHandle` placements - pure data markers, never `GameObject`s. See
-		`resolvePathNodeTransform`. */
 	public var pathNodes:Map<String, PathNodeElement> = [];
-
-	/** `PathedInterior`s plus every path-following `GameObject`, advanced once per frame
-		(`computeNextPathStep`) and once per physics substep (`advancePath`), in that order,
-		before `parentedObjects` are advanced. */
 	public var movingObjects:Array<IPathMover> = [];
-
-	/** Objects with a `parent` field, advanced after `movingObjects` every substep. Insertion
-		order guarantees parent-before-child ordering - see `registerParentedObject`. */
 	public var parentedObjects:Array<GameObject> = [];
 
 	public function registerMovingObject(o:IPathMover) {
@@ -213,11 +189,6 @@ class MarbleWorld extends Scheduler {
 			this.parentedObjects.push(o);
 	}
 
-	/** Resolves a `PathNode`/`BezierHandle`'s live world position/rotation. Most nodes are static
-		(no `parent` field) so this just returns the authored local transform, but a node can
-		itself be parented to a moving object, so this is resolved on demand every call rather than
-		cached - a pure function of the parent's *current* transform, same reasoning as
-		`GameObjectParentFollower`. */
 	public function resolvePathNodeTransform(name:String):PathNodeLiveTransform {
 		var node = this.pathNodes.get(name);
 		if (node == null)
@@ -258,26 +229,10 @@ class MarbleWorld extends Scheduler {
 	public var finishYaw:Float;
 	public var totalGems:Int = 0;
 	public var gemCount:Int = 0;
-
-	/** How many gems `NullMode.canFinish` requires before allowing the finish - `-1` means "use
-		`totalGems`" (the base rule); `QuotaMode`'s constructor sets this to `MissionInfo.gemquota`
-		instead (always >= 0). Living on `level` rather than as a `GameMode` interface method so any
-		mode that just wants "the current gem requirement, whatever it is" (e.g. `HasteMode`, which
-		inherits `NullMode.canFinish` and ANDs a speed check on top) automatically respects Quota
-		without either mode needing to know about the other. */
 	public var gemsRequiredToFinish:Int = -1;
 
-	/** Highest `LapsCheckpoint.checkpointNumber` seen so far this mission - ported from PQ's
-		`$Laps::LastCheckpointNumber` (`modes/laps.cs`), used to auto-number checkpoints that don't
-		specify one and to know which checkpoint is "the last one" (arms `LapsCounterTrigger`). */
 	public var lapsLastCheckpointNumber:Int = 0;
 
-	/** Ported from PQ's `$Game::TimeStoppedClients`/`GameConnection.timeStopTriggers`
-		(`server/scripts/triggers.cs`'s `TimeStopTrigger`) - a count rather than a plain toggle so
-		overlapping `TimeStopTrigger` volumes don't unlock each other early, mirroring
-		`Marble.powerupLockCount`'s same pattern. `Time::stop()`/`Time::start()` in PQ only gate
-		`$Time::TimerRunning` (the scoring clock), not the whole simulation - `currentAttemptTime`
-		(PQ's `$Time::TotalTime`) keeps advancing regardless. */
 	public var timeStopTriggerCount:Int = 0;
 
 	public var cursorLock:Bool = true;
@@ -435,10 +390,6 @@ class MarbleWorld extends Scheduler {
 		};
 		this.mission.load();
 
-		// Ported from `TDTrigger::onAdd` ("TDTrigger needs 2d mode but it's not listed in
-		// MissionInfo. Activating it ourselves") - a `TDTrigger` can appear in a mission that never
-		// declares "2d" as one of its game modes, so pre-scan for one and force the mode word in
-		// *before* the mode tree gets built, rather than trying to patch the tree after the fact.
 		function missionHasTDTrigger(simGroup:MissionElementSimGroup):Bool {
 			for (element in simGroup.elements) {
 				if (element._type == MissionElementType.Trigger) {
@@ -762,16 +713,6 @@ class MarbleWorld extends Scheduler {
 			this.replay.applyModeData(this);
 	}
 
-	/** Ported from the user's own diagnosis of a rewind bug: an object only gets a `GameObjectPath
-		Follower`/a slot in `level.movingObjects` the *first time* something actually calls
-		`moveOnPath` on it (a `PathTrigger` firing, or `IceShard`'s `gotoTarget` reuse of the same
-		field convention) - meaning `level.movingObjects` grows mid-game, which desyncs
-		`RewindFrame.pathFollowerStates`' positional alignment against it (a frame recorded before
-		the object was ever triggered doesn't have a slot for it at all). Fixed by pre-registering
-		every such object into `level.movingObjects` here, once, before any gameplay tick or rewind
-		frame is ever recorded - each starts with `pathFollower == null` (i.e. present in the array,
-		but inactive) until something actually calls `moveOnPath` on it later, exactly mirroring how
-		a stable list of `null`-or-real slots already works for `gemStates`/`iceShardStates`. */
 	function prescanPathTriggerTargets() {
 		for (trigger in this.triggers) {
 			if (trigger is PathTrigger) {
@@ -857,17 +798,11 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	/** Ported from `getCheckpointPos`'s `%defaultPitch` (`server/scripts/checkpoint.cs`) -
-		`MissionInfo.cameraPitch` overrides the initial camera pitch every spawn/respawn applies,
-		falling back to the same `0.45` every spawn/respawn already hardcoded. */
 	public function getDefaultCameraPitch():Float {
 		var field = this.mission.missionInfo.camerapitch;
 		return field != null && field != "" ? MisParser.parseNumber(field) : 0.45;
 	}
 
-	/** Ported from `GameConnection::respawnPlayer`'s `MissionInfo.initialCameraDistance $= "" ?
-		$Physics::Defaults::CameraDistance : MissionInfo.initialCameraDistance` (`server/scripts/
-		game.cs`) - applied on every spawn/respawn, not just `TwoDMode`'s own use of the same field. */
 	public function getDefaultCameraDistance():Float {
 		var field = this.mission.missionInfo.initialcameradistance;
 		return field != null && field != "" ? MisParser.parseNumber(field) : 2.5;
@@ -1011,10 +946,6 @@ class MarbleWorld extends Scheduler {
 		for (interior in this.interiors) {
 			interior.reset();
 		}
-		// Triggers previously had no reset pass at all on a full restart - `PathTrigger.triggered`
-		// (and any other trigger with its own restart-relevant state, e.g. `CountdownStartTrigger.
-		// activated`) would stay stuck from before the restart. Also resets any trigger-activated
-		// path follower (a `Trigger` can itself be a `GameObject` path target, same as a DtsObject).
 		for (trigger in this.triggers) {
 			trigger.reset();
 		}
@@ -1191,9 +1122,6 @@ class MarbleWorld extends Scheduler {
 
 						// if (pathedInterior.hasCollision)
 						// 	this.physics.addInterior(pathedInterior);
-						// Named references (e.g. IceShard's `gotoTarget`/`pathedInterior[i]`) target
-						// the PathedInterior element's own name, not the containing SimGroup's -
-						// every other placed object is looked up by its own element name too.
 						if (@:privateAccess pathedInterior.element._name != null && @:privateAccess pathedInterior.element._name != "")
 							this.namedGameObjects.set(@:privateAccess pathedInterior.element._name.toLowerCase(), pathedInterior);
 						if (simGroup._name != null && simGroup._name != "")
@@ -1285,8 +1213,6 @@ class MarbleWorld extends Scheduler {
 			var tmat = Matrix.T(interiorPosition.x, interiorPosition.y, interiorPosition.z);
 			mat.multiply(mat, tmat);
 
-			// Always apply the authored placement first, *then* hand off to the path/parent
-			// follower - see addPlaceableShape for why.
 			interior.setTransform(mat);
 			interior.initPathAndParent(cast element, this);
 			this.promoteMoverColliders(interior, [interior.collider]);
@@ -1374,11 +1300,6 @@ class MarbleWorld extends Scheduler {
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(shape, () -> {
-			// Always apply the authored placement first, *then* hand off to the path/parent
-			// follower - a path/parent-following shape may still fall back to its own current
-			// absolute transform for any axis it doesn't drive (see
-			// GameObjectPathFollower.evaluateTransform), so that fallback needs to be the real
-			// placed transform, not whatever default origin the object started at.
 			shape.setTransform(mat);
 			shape.initPathAndParent(element, this);
 			this.promoteMoverColliders(shape, shape.colliders);
@@ -1468,8 +1389,6 @@ class MarbleWorld extends Scheduler {
 		mat.setPosition(shapePosition);
 
 		this.addDtsObject(tsShape, () -> {
-			// Always apply the authored placement first, *then* hand off to the path/parent
-			// follower - see addPlaceableShape for why.
 			tsShape.setTransform(mat);
 			tsShape.initPathAndParent(cast element, this);
 			this.promoteMoverColliders(tsShape, tsShape.colliders);
@@ -1496,13 +1415,6 @@ class MarbleWorld extends Scheduler {
 		});
 	}
 
-	/** Promotes a `GameObject`'s collider(s) from the static to the moving broadphase grid after
-		the fact - needed because `initPathAndParent` can only run once the object's *true* placed
-		transform has been applied (its own current-absolute-transform is the fallback for any axis
-		a path/parent doesn't drive - see `GameObjectPathFollower.evaluateTransform`), which itself
-		can only happen once the DTS/interior has finished loading and its collider(s) exist. That's
-		necessarily *after* `addDtsObject`/`addInterior` already decided which grid to use, so
-		`hasMover()` isn't known yet at that point - fix it up here instead. */
 	function promoteMoverColliders(obj:GameObject, colliders:Array<CollisionEntity>) {
 		if (!obj.hasMover())
 			return;
@@ -2586,9 +2498,6 @@ class MarbleWorld extends Scheduler {
 		var timeMultiplier = this.gameMode.timeMultiplier();
 
 		if (!this.isWatching) {
-			// Ported from PQ's `Time::advance` - the whole clock-advancement block below is gated
-			// behind `$Time::TimerRunning`, which `TimeStopTrigger` toggles off; `currentAttemptTime`
-			// (PQ's `$Time::TotalTime`) is outside that gate and always keeps advancing.
 			if (this.timeStopTriggerCount <= 0) {
 				if (this.bonusTime != 0 && this.timeState.currentAttemptTime >= 3.5) {
 					this.bonusTime -= dt;
@@ -2718,16 +2627,10 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	/** The gem counter's "total" (right-hand side of the collected/total display) - `totalGems`
-		normally, but `QuotaMode` overrides `gemsRequiredToFinish` (>= 0) to show collected/quota
-		instead, and every `formatGemCounter` call site should respect that. */
 	public function gemCounterTotal():Int {
 		return this.gemsRequiredToFinish >= 0 ? this.gemsRequiredToFinish : this.totalGems;
 	}
 
-	/** Ported from PQ's `performWaterOverlay` (`client/scripts/water.cs`) - the underwater screen
-		overlay is driven by the *camera's* position, not the marble's, so it's checked separately
-		here rather than folding into `Marble.updateWater` (which only cares about the marble). */
 	function updateUnderwaterOverlay() {
 		var cameraPos = this.scene.camera.pos;
 		var cameraInWater = false;
@@ -2742,18 +2645,6 @@ class MarbleWorld extends Scheduler {
 		this.playGui.setUnderwaterOverlayVisible(cameraInWater);
 	}
 
-	/** Ported from PQ's `PlayGui::updatePowerupTimerPos` (`client/scripts/playGui.cs`) - the bubble
-		bar tracks the marble's projected screen position rather than sitting at a fixed HUD spot.
-		Projects a point offset to the marble's *side* by its collision radius (`RotMulVector(
-		MatrixRot(%trans), %rad SPC "0 0")` - the camera's local right axis scaled by the radius) for
-		X, but the un-offset *center* projection's Y, exactly matching the source's `%rpix`-for-X/
-		`%mpix`-for-Y split; both get PQ's own `+20`/`-38` pixel nudge on top. */
-	/** Also positions the Fireball bar (`PG_FireballContainer`) at the same anchor - ported from
-		`PlayGui::updateBarPositions`' combined bubble/fireball placement. Both showing at once is a
-		defensive case the real source jokes it doesn't expect ("because I know SOMEONE will try
-		this") - Fireball pickup always zeroes any banked Bubble time and Bubble can't be picked up
-		while Fireball is active (see `Marble.activateFireball`/`BubbleItem.pickUp`), so in practice
-		only one bar is ever visible - reproduced anyway since it's a cheap offset. */
 	function updateBubbleBarPosition() {
 		if (this.marble == null)
 			return;
@@ -2782,11 +2673,6 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	/** Ported from PQ's `addHelpLine` (`client/scripts/chathud.cs`) - despite this port's own
-		naming ("alert"), matches PQ's stacking/sliding toast notification system
-		(`createHelpMessage`/`updateMessages`), not `addBubbleLine`'s persistent help-bubble
-		machinery (`PlayGui.helpTextForeground`/`setHelpText`, unrelated despite the similar name).
-		See `PlayGui.addHelpLine`'s doc comment for the implementation. */
 	public function displayAlert(text:String) {
 		this.playGui.addHelpLine(text);
 	}
@@ -2816,9 +2702,6 @@ class MarbleWorld extends Scheduler {
 			this.marble.camera.finish = true;
 			this.finishYaw = this.marble.camera.CameraYaw;
 			this.finishPitch = this.marble.camera.CameraPitch;
-			// Captured here (level guaranteed alive) rather than lazily inside `Replay.write` (which
-			// can end up called well after this, from deferred/async code that may run after the
-			// level's been disposed) - see `Replay.captureModeData`'s doc comment.
 			if (!this.isWatching)
 				this.replay.captureModeData(this.gameMode);
 			displayAlert("Congratulations! You've finished!");
@@ -2995,9 +2878,6 @@ class MarbleWorld extends Scheduler {
 		}
 	}
 
-	/** Starts (or restarts) the HUD countdown timer, e.g. from `CountdownStartTrigger`. */
-	/** `icon` matches `CountdownStartTrigger`'s `icon` field (`server/scripts/triggers.cs` -
-		a filename under `client/ui/game/countdown/`, default `"timerTimeTravel"`). */
 	public function startCountdown(seconds:Float, icon:String = "timerTimeTravel") {
 		this.countdownRemaining = seconds;
 		this.countdownActive = seconds > 0;
@@ -3005,7 +2885,6 @@ class MarbleWorld extends Scheduler {
 		this.playGui.setCountdownThIcon(icon);
 	}
 
-	/** Stops the HUD countdown timer, e.g. from `CountdownStopTrigger`. */
 	public function stopCountdown() {
 		this.countdownActive = false;
 		this.countdownRemaining = -1e8;

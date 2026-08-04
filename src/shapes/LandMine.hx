@@ -17,17 +17,6 @@ import src.MarbleWorld;
 import src.MarbleGame;
 import mis.MissionElement.MissionElementStaticShape;
 
-/** Ported from `hazards.cs`'s `LandMineParticle`/`LandMineEmitter`, as driven by
-	`LandMineExplosion`'s `particleEmitter = LandMineEmitter`, `particleDensity = 80`,
-	`particleRadius = 1` fields - the "volume particles" `Explosion::explode` spawns via a native
-	radius-distributed one-shot mode (`ParticleEmitter::emitParticles(pos, normal, radius, vel,
-	density)`) this codebase's `ParticleManager` has no equivalent for. Emulated the same way as
-	`shapes.Cannon`'s `cannonVolumeOptions` (see its doc comment): `spawnOffset` returns a
-	uniformly-random point inside a unit sphere scaled by `particleRadius`, and `emitterLifetime`
-	is `density * ejectionPeriodMS` (80 * 7) so roughly the right particle count spawns over a
-	short continuous burst approximating the real engine's instantaneous spawn. Spin isn't set in
-	the source (`spinSpeed`/`spinRandomMin`/`spinRandomMax` default to 0 in `ParticleData`'s C++
-	constructor), not the `40`/`-90`/`90` an earlier port pass had invented. */
 final landMineParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 7,
 	periodVariance: 0,
@@ -67,12 +56,6 @@ final landMineParticle:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `hazards.cs`'s `LandMineSmoke`/`LandMineSmokeEmitter`. The source's own
-	`dragCoefficient` line is misspelled (`dragCoeffiecient = 100.0`), so it's a dead field there
-	too and the real drag falls back to `ParticleData`'s default of `0` - kept at MBHaxe's existing
-	tuned `10` instead of blindly zeroing it out, since drag=0 here would make this smoke never
-	slow down at all (clearly not the intended look, and likely why an earlier port pass chose a
-	value here instead of leaving it at the "real" default). */
 final landMineSmokeParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 10,
 	periodVariance: 0,
@@ -108,8 +91,6 @@ final landMineSmokeParticle:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `hazards.cs`'s `LandMineSparks`/`LandMineSparkEmitter` - spin also defaults to 0
-	here (not set in the source), same note as `landMineParticle` above. */
 final landMineSparksParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 3,
 	periodVariance: 0,
@@ -158,8 +139,6 @@ class LandMine extends Explodable {
 			dtsPath = "data/shapes_mbu/hazards/landmine.dts";
 		} else
 			dtsPath = "data/shapes/hazards/landmine.dts";
-		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "LandMine" + this.dtsPath;
 		this.isCollideable = true;
 

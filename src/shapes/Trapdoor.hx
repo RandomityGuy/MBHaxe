@@ -25,12 +25,10 @@ class Trapdoor extends DtsObject {
 
 	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = (element != null && element.datablock.toLowerCase() == "trapdoor_pq") ? "data/shapes_pq/gameplay/hazards/trapdoor.dts" :
-			"data/shapes/hazards/trapdoor.dts";
+		this.dtsPath = (element != null
+			&& element.datablock.toLowerCase() == "trapdoor_pq") ? "data/shapes_pq/gameplay/hazards/trapdoor.dts" : "data/shapes/hazards/trapdoor.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "Trapdoor" + this.dtsPath;
 		this.hasNonVisualSequences = true;
 		this.enableCollideCallbacks = true;

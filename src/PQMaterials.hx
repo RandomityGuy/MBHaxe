@@ -120,41 +120,7 @@ class PQMaterials {
 		return shaderMaterialDict;
 	}
 
-	/** Ported from `texture_materials` in the real `pack.json` (`platinum/data/texture_packs/default/pack.json`)
-		- covers every entry whose material definition has no `shader` field (plain diffuse/normal/
-		specular via `PQMaterial`, same shader `createPQMaterial` above already uses), keyed to the
-		real `interiors_pq/pq_*` assets already present in this repo's `data/interiors_pq/` folder
-		(the `multiplayer/interiors/platinumquest/` entries above are for old MBG multiplayer maps
-		reusing a handful of PQ textures - a different, much smaller set - not these).
-		`lbinteriors_pq/`/`lbinteriors_custom/pq/` are pack.json aliases for the exact same assets
-		(confirmed both folders are empty on disk, i.e. editor-only source paths with nothing
-		actually shipped under them). `ResourceLoader.hx`/`Mission.hx` already normalize
-		`lbinteriors* -> interiors*` at load time, so `lbinteriors_pq` needs no extra handling here;
-		`lbinteriors_custom/pq` survives that normalization as `interiors_custom/pq`, which
-		`DifBuilder.hx`'s `matDictName` resolution separately folds down to `interiors_pq` - so a
-		single dict entry per basename still covers all three source forms.
-		`PQRayWallMaterial`/`PQCirclesRandomMaterial`/`PQRaysRandomMaterial`/`PQHotRandomMaterial`/
-		`PQNeutralRandomMaterial` are deliberately NOT ported as their own real shader
-		(`Choice_Tile_Array`/`Choice_Tile_Diffuse_Array`, real per-quad runtime slice randomization)
-		- same simplification this codebase's pre-existing `multiplayer/interiors/platinumquest/
-		pq_rays_green_random` entry above already uses: real PQ's "random" variants are actually just
-		ordinary, already-baked-to-look-varied square diffuse textures (confirmed: e.g.
-		`pq_hot_1_random.jpg` is a plain 512x512 image, not a packed multi-tile strip), so they're
-		wired below as plain `PQMaterial` entries exactly like the "dark"/"light"/"med" ones, just
-		using the "random" asset as the diffuse. `secondaryFactor=4` compensates for these being 4x
-		the pixel size of the shared 128x128 `tile.normal.png`/`tile.spec.png` pair, so the shared
-		normal/spec tile repeats 4x4 across the surface instead of stretching once across it (same
-		reason the pre-existing `pq_rays_green_random` entry uses that exact factor) - this is purely a
-		texture-resolution compensation, unrelated to any "_2"/"_small" naming, so it applies equally
-		to every "random"/"random_2" variant and their own "_small" counterparts (which are just
-		lower-res versions of the exact same image, not a different real-world tile size).
-		`MPTileMaterial` is out of scope here - it's a different, MP-only asset family
-		(`multiplayer/interiors/mbu_neutralN_random*`) unrelated to `interiors_pq`.
-		**Still NOT covered**: `PQAltNeutralMaterial` - defined in `pack.json` but not actually
-		referenced by any `texture_materials` entry - dead in the default pack, skipped. */
 	static function addPqInteriorMaterials(shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void>) {
-		// Real pack.json paths, copied in from the actual PQ source tree
-		// (`platinum/data/shaders/tex/pq_tile/`) into `data/shaders/tex/pq_tile/` in this repo.
 		var tileNormal = 'shaders/tex/pq_tile/tile.normal.png';
 		var tileSpec = 'shaders/tex/pq_tile/tile.spec.png';
 
@@ -183,28 +149,21 @@ class PQMaterials {
 			for (shade in ["dark", "light", "med"])
 				addPqTile('pq_rays_${color}_${shade}');
 
-		// PQWaterShaderMaterial (mmg_water/pq_friction_water/water) - real pack.json normal/spec,
-		// copied into `data/shaders/tex/pq_tile/water.normal.png` / `data/shaders/tex/DefaultSpec.png`.
+		// PQWaterShaderMaterial (mmg_water/pq_friction_water/water)
 		var waterNormal = 'shaders/tex/pq_tile/water.normal.png';
 		var waterSpec = 'shaders/tex/DefaultSpec.png';
 		for (basename in ["mmg_water", "pq_friction_water", "water"])
 			shaderMaterialDict.set('interiors_pq/${basename}',
 				(onFinish) -> DifBuilder.createPQMaterialPaths(onFinish, 'interiors_pq/${basename}', waterNormal, waterSpec));
 
-		// PQIceShaderMaterial (real shader `SkyboxIce`, reflectivity 0.3) - real pack.json normal/spec.
-		// `pq_friction_ice_with_danger` is a THIRD material instance using this shader (per
-		// pack.json) but has no backing diffuse asset anywhere in this repo (checked `interiors_pq/`
-		// - only plain `pq_friction_ice.jpg`/`ice1.jpg` exist) - skipped, not approximated.
+		// PQIceShaderMaterial
 		var iceNormal = 'shaders/tex/pq_tile/ice.normal.png';
 		var iceSpec = 'shaders/tex/DefaultSpec.png';
 		for (basename in ["ice1", "pq_friction_ice"])
 			shaderMaterialDict.set('interiors_pq/${basename}',
 				(onFinish) -> DifBuilder.createSkyboxIceMaterial(onFinish, 'interiors_pq/${basename}', iceNormal, iceSpec, 0.3, new Vector(1, 1)));
 
-		// "Random" variants of circles/hot/neutral/rays - plain PQMaterial, secondaryFactor 4 (see
-		// class doc comment above for why). Ported directly from the real, already-present
-		// `data/interiors_pq/` assets - only entries with a real backing file are added, matching
-		// exactly what's on disk (not every color/number has every suffix).
+		// "Random" variants of circles/hot/neutral/rays
 		function addRandomPqTile(basename:String) {
 			shaderMaterialDict.set('interiors_pq/${basename}',
 				(onFinish) -> DifBuilder.createPQMaterialPaths(onFinish, 'interiors_pq/${basename}', tileNormal, tileSpec, 4));
@@ -224,9 +183,7 @@ class PQMaterials {
 			for (suffix in ["random", "random_2", "random_small", "random_2_small"])
 				addRandomPqTile('pq_rays_${color}_${suffix}');
 
-		// "_small" (lower-res) variants of the plain dark/light/med tiles - same material as their
-		// full-res counterpart (same real-world tile, just a smaller downloaded/rendered texture),
-		// again only where a real file actually backs it (circles has none).
+		// "_small" (lower-res) variants of the plain dark/light/med tiles
 		for (i in 1...7)
 			for (shade in ["dark", "light", "med"])
 				addPqTile('pq_hot_${i}_${shade}_small');
@@ -237,19 +194,12 @@ class PQMaterials {
 			for (shade in ["dark", "light", "med"])
 				addPqTile('pq_rays_${color}_${shade}_small');
 
-		// PQRayWallMaterial - same "plain PQMaterial per numbered variant" treatment as the
-		// pre-existing `multiplayer/interiors/platinumquest/pq_ray_wall_N` entries above, just
-		// pointed at the real `interiors_pq/` assets (which include their own per-variant
-		// normal/specular maps, unlike the multiplayer set).
+		// PQRayWallMaterial
 		for (i in 1...9)
 			shaderMaterialDict.set('interiors_pq/pq_ray_wall_${i}',
 				(onFinish) -> DifBuilder.createPQMaterialPaths(onFinish, 'interiors_pq/pq_ray_wall_${i}', 'interiors_pq/pq_ray_wall_${i}.normal.png',
 					'interiors_pq/pq_ray_wall_${i}.spec.png'));
 
-		// The "combo" ray-wall variants have no per-variant normal/spec of their own in
-		// `interiors_pq/` - reusing the shared substitute pairs the pre-existing multiplayer combo
-		// entries above already rely on (`combo`/`combo_2`'s own normal/spec, matching which "family"
-		// each belongs to).
 		var comboNormal = 'multiplayer/interiors/platinumquest/pq_ray_wall_combo.normal.png';
 		var comboSpec = 'multiplayer/interiors/platinumquest/pq_ray_wall_combo.spec.png';
 		var combo2Normal = 'multiplayer/interiors/platinumquest/pq_ray_wall_combo_2.normal.png';

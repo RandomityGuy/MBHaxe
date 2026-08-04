@@ -369,12 +369,6 @@ class DifBuilder {
 			'multiplayer/interiors/platinumquest/${specularTexture}', secondaryFactor);
 	}
 
-	/** Same shader as `createPQMaterial`, but takes full paths (relative to `data/`) for each
-		texture instead of assuming all three live in the same folder - needed for real PQ
-		`interiors_pq/pq_*` diffuse textures, which share a normal/specular pair that only actually
-		exists on disk under `multiplayer/interiors/platinumquest/` (the real `pack.json`-referenced
-		`shaders/tex/pq_tile/tile.normal.png`/`tile.spec.png` aren't present in this repo's asset
-		set). */
 	public static function createPQMaterialPaths(onFinish:hxsl.Shader->Void, diffusePath:String, normalPath:String, specularPath:String,
 			secondaryFactor:Float = 1) {
 		var worker = new ResourceLoaderWorker(() -> {
@@ -393,10 +387,6 @@ class DifBuilder {
 		worker.run();
 	}
 
-	/** `PQIceShaderMaterial` (real shader `SkyboxIce`) - same diffuse/normal/specular loading as
-		`createPQMaterialPaths`, plus a skybox-reflection blend using the mission's own
-		`level.sky.cubemap` (see `shaders.SkyboxIce` for why no per-object `CubemapRenderer` is
-		needed here, unlike the marble's own reflective skins). */
 	public static function createSkyboxIceMaterial(onFinish:hxsl.Shader->Void, diffusePath:String, normalPath:String, specularPath:String, reflectivity:Float,
 			textureScale:Vector) {
 		var worker = new ResourceLoaderWorker(() -> {
@@ -857,11 +847,6 @@ class DifBuilder {
 								matDictName = StringTools.replace(exactName, "multiplayer/interiors_mbg/custom/mbu", "interiors_mbu");
 							}
 							if (!PQMaterials.shaderMaterialDict.exists(matDictName)) {
-								// `ResourceLoader.hx`/`Mission.hx` already normalize `lbinteriors* -> interiors*`
-								// at load time, so a DIF sourced from the `lbinteriors_custom/pq` editor folder
-								// arrives here as `interiors_custom/pq` (not `lbinteriors_custom/pq`) - that
-								// folder has no shipped assets of its own (confirmed empty on disk), real PQ
-								// interior textures only ever live under `interiors_pq`.
 								matDictName = StringTools.replace(exactName, "interiors_custom/pq", "interiors_pq");
 							}
 							if (PQMaterials.shaderMaterialDict.exists(matDictName)) {
@@ -880,12 +865,6 @@ class DifBuilder {
 								});
 								prim.addTangents();
 							} else {
-								// Ported from real PQ's `resolveInteriorTexture` (`GraphicsExtension.cpp`) - ANY
-								// interior texture with a `<name>.normal.png`/`<name>.spec.png` sitting right next
-								// to it in the same folder gets the default `PQMaterial` shader automatically,
-								// even with no explicit `texture_materials`/`shaderMaterialDict` entry at all.
-								// Falls back to the generic flat default for whichever of normal/spec isn't
-								// actually present (real source still builds the material if *either* file exists).
 								var dir = Path.directory(texture.name);
 								var base = Path.withoutExtension(Path.withoutDirectory(texture.name));
 								var normalCandidate = '${dir}/${base}.normal.png';

@@ -37,20 +37,8 @@ class MadnessState implements RewindableState {
 	}
 }
 
-/** Ported from PQ's `modes/gemMadness.cs` ("GemMadness" internally - not a chaos/randomizer mode):
-	collect every gem in the level before time runs out. Every pickup unconditionally scores by the
-	gem's point value (same 1/2/5/10 red/yellow/blue/platinum tiers as `HuntMode`) and removes the
-	gem for good (no spawn-group cycling); once none remain, the timer stops, remaining time becomes
-	the score basis, and the level finishes immediately - `canFinish` is always true here since
-	reaching the pad early (before collecting everything) is *also* a valid, if lower-scoring, way
-	to finish (`Mode_GemMadness::onEnterPad`). */
 class MadnessMode extends NullMode {
 	var gotAllGems:Bool = false;
-
-	// `level.gemCount` stays a plain "how many gems collected" count (same meaning everywhere else
-	// in the codebase - the "every gem collected" check compares it against `level.totalGems`);
-	// Madness's score is a separate point total (1/2/5/10 per tier), matching how `HuntMode` also
-	// keeps its own `points` field distinct from `level.gemCount`.
 	var score:Int = 0;
 
 	override function getStartTime():Float {
@@ -121,8 +109,6 @@ class MadnessMode extends NullMode {
 		return true;
 	}
 
-	/** SP-only: going out of bounds before collecting everything ends the level immediately with
-		the current gem score, rather than restarting (`Mode_GemMadness::onOutOfBounds`). */
 	override function onOutOfBounds(marble:Marble):Bool {
 		if (level.isMultiplayer)
 			return false;

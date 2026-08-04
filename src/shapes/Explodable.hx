@@ -79,17 +79,6 @@ abstract class Explodable extends DtsObject {
 		});
 	}
 
-	/** Ported from `Explosion::explode`/`Explosion::onAdd` (`game/fx/explosion.cc`) - real source's
-		`LandMineExplosion`/`NukeExplosion` both spawn their `emitter[0]/emitter[1]` (smoke+spark)
-		point burst at the exact explosion center, *plus* two more identical bursts via their
-		`subExplosion[0]/[1]` entries (`LandMineSubExplosion1/2`, `NukeSubBlow1/2` - both use
-		`offset = 1.0` same as `CannonSubExplosion1/2`), each nudged to a random point within 1 unit
-		of center (`randVec.set(rand(-1,1), rand(0,1), rand(-1,1)).normalize() * offset`, simplified
-		here to a plain world-space offset - see `shapes.Cannon.spawnExplosionBurst`'s doc comment
-		for the same simplification applied there). `emitter1`/`emitter2`/`emitter3` only track the
-		*last* burst spawned (matching the pre-existing single-burst behavior enough for
-		`revertContactTicks`'s rewind cleanup - the extra scattered bursts are short-lived one-shots
-		that finish and get garbage-collected on their own regardless). */
 	function spawnExplosionBurst(pos:Vector) {
 		emitter2 = this.level.particleManager.createEmitter(smokeParticle, smokeParticleData, pos);
 		emitter3 = this.level.particleManager.createEmitter(sparksParticle, sparkParticleData, pos);

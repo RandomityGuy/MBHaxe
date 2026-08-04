@@ -8,14 +8,6 @@ import mis.MissionElement.MissionElementTrigger;
 import modes.GameMode.GameModeFactory;
 import modes.special.WhiteNoiseMode;
 
-/** Ported from `WhiteNoise.mcs`'s `SMBTrigger` `TriggerData` - a White-Noise-mission-only trigger
-	that hands its `impulse`/`upwards` fields to the active `WhiteNoiseMode` (see
-	`WhiteNoiseMode.smbTriggerEnter`/`smbTriggerLeave` for the actual jump-time effect and the
-	300ms-debounce reasoning), rather than doing anything itself - matches real PQ, where the
-	trigger only relays `commandToClient('SMBTrigger', ...)` and the actual behavior lives in
-	`Marble::onJump`. Registered directly in `DatablockRegistry` rather than via the mission file's
-	own (never-loaded-here) `datablock TriggerData(SMBTrigger)` definition, since nothing about it
-	is mission-specific except the field values on each placed instance. */
 class SMBTrigger extends Trigger {
 	var impulse:Float;
 	var upwards:Float;

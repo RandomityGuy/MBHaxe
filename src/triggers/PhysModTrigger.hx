@@ -14,15 +14,6 @@ import src.ParticleSystem.ParticleEmitterOptions;
 import mis.MisParser;
 import mis.MissionElement.MissionElementTrigger;
 
-/** Ambient orb particles drifting up from each corner emitter base - ported from PQ's
-	`PhysModParticle`/`PhysModEmitter` datablocks (`server/scripts/physMod.cs`). Now that
-	`ParticleOptions` has a real `gravityCoefficient` (a world-down accelerator, matching
-	`PEngine::updateSingleParticle`'s `(0,0,-9.81)*gravityCoefficient` term exactly), this is a
-	direct port rather than the earlier along-velocity-acceleration approximation. `emitterLifetime`
-	is set to "effectively forever" rather than the source's own `lifetimeMS = 0` - both mean
-	"never self-expire" here, just via a very large finite number instead of the sentinel 0 (this
-	engine's `emitterLifetime` is always divided into a completion ratio, so a literal 0 would be
-	a divide-by-zero). */
 final physModParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 150,
 	periodVariance: 5,
@@ -54,35 +45,12 @@ final physModParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from PQ's `MarblePhysModTrigger` (`server/scripts/physMod.cs`) - reads a 0-based indexed
-	list of `marbleAttribute[i]`/`value[i]` fields (confirmed against a real mission,
-	`SpecificGravity.mis`: `marbleAttribute0 = "gravity"`, `value0 = "6"`) and pushes/pops a single
-	physics layer of those overrides on marble-enter/marble-leave (`Marble.pushPhysicsLayer`/
-	`popPhysicsLayer`, itself ported from `Physics::pushLayer`/`popLayer` in `client/scripts/
-	physics.cs`) - this is exactly how overlapping `PhysMod` volumes combine correctly in the
-	original, since it's the same generic layer stack every other temporary physics override
-	(frozen, cannon-lock, etc.) uses. `megaValue[i]` (the mega-marble-specific override half of each
-	field) isn't ported - out of scope for this pass.
-
-	Unless `noEmitters` is set, also spawns 4 decorative `PhysModEmitterBase` shapes (each with an
-	ambient orb particle emitter) at the trigger volume's corners, matching `buildPhysmodEmitters`'s
-	`%pos[0..3]` computation (`%obj`'s own position, offset by its scale on X/Y only - not the real
-	polyhedron shape, and never accounting for rotation - reproduced as-is, quirks included). */
 class PhysModTrigger extends Trigger {
 	var overrides:Array<PhysicsAttributeOverride>;
 	var noEmitters:Bool;
 
-	/** Ported from `physics.cs`'s `%trigger.disabled` check in `MarblePhysModTrigger_onClient
-		Enter/LeaveTrigger` - most `PhysMod` triggers never set this field (defaults to `false`), but
-		a few (e.g. `TakeTheGold.mcs`'s `FinishGravity`) start disabled and get toggled on/off at
-		runtime by mission-specific mode code (`TakeTheGoldMode`) rather than by anything in the
-		mission file itself after load. Public so those modes can flip it directly, matching real
-		PQ's plain field assignment (`FinishGravity.disabled = 0`). */
 	public var disabled:Bool;
 
-	// One pushed layer per marble currently inside this volume - `pushPhysicsLayer`/
-	// `popPhysicsLayer` operate per-`Marble` instance, so each overlapping marble (relevant in
-	// multiplayer) needs its own tracked layer to pop later.
 	var activeLayers:Map<Marble, Array<PhysicsAttributeOverride>> = new Map();
 
 	public function new(element:MissionElementTrigger, level:MarbleWorld) {
@@ -121,14 +89,8 @@ class PhysModTrigger extends Trigger {
 	}
 
 	function buildCornerEmitters(onFinish:Void->Void) {
-		// `%obj.getScale()` in the original - `Trigger` bakes its authored scale directly into
-		// `collider`'s vertices rather than the scene object's own `scaleX`/`scaleY`, so it has to
-		// be parsed again here rather than read off `this`.
 		var scale = MisParser.parseVector3(this.element.scale);
 		var x = this.x, y = this.y, z = this.z;
-		// Only X gets negated when parsing mission coordinates (`Trigger`'s constructor), so a
-		// `+scale` offset in PQ's own coordinate space becomes `-scale` here to land on the same
-		// physical corner; Y isn't flipped, so its offset direction carries over unchanged.
 		var corners = [
 			new Vector(x, y, z),
 			new Vector(x - scale.x, y, z),

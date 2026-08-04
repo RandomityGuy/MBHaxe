@@ -87,10 +87,6 @@ class Trigger extends GameObject {
 		onFinish();
 	}
 
-	/** Triggers previously baked their collider's world position once at construction and never
-		moved it; path/parent following needs a real live transform, mirroring
-		`InteriorObject.setTransform`'s pattern (`collider` stores local-space `vertices`, so
-		re-transforming it here on every move is correct, not a one-time bake). */
 	public override function setTransform(mat:Matrix) {
 		super.setTransform(mat);
 		if (this.collider != null) {

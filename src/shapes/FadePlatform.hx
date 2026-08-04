@@ -11,19 +11,6 @@ import collision.CollisionInfo;
 import mis.MisParser;
 import mis.MissionElement.MissionElementStaticShape;
 
-/** Ported from PQ's `FadePlatformClass` (`server/scripts/fadingPlatforms.cs`). The original drives
-	its cycling with `%obj.schedule(...)`/`cancel(...)` one-shot callbacks (`_hideSch`/`_toggleSch`);
-	per the standing rule against schedules for gameplay logic, every mode here is instead computed
-	as a pure function of `timeState.currentAttemptTime` (plus, for "trapdoor", a single
-	`lastContactTime` timestamp) rather than an explicit state machine with its own elapsed-time
-	accumulators - there is nothing to advance per-frame and nothing but plain scalars to persist, so
-	rewind/pause/mission-reset all fall out for free without any dedicated snapshot logic.
-
-	The "cloak" `fadeStyle` (confirmed against `OpenMBG-TGEMIT/engine/game/shapeBase.cc`/
-	`tempRenderCompat.cpp`) ramps opacity toward `0.125 + (1 - cloakLevel) * 0.875` at a fixed rate
-	of 2.0/sec (a 0.5s transition) that is *independent* of `fadeInTime`/`fadeOutTime` - reproduced
-	here as a plain function of elapsed time *within the current segment*, computed fresh every call
-	rather than accumulated frame-to-frame. */
 class FadePlatform extends DtsObject {
 	var functionality:String;
 	var fadeStyle:String;
@@ -35,15 +22,8 @@ class FadePlatform extends DtsObject {
 	var permanent:Bool;
 	var totalTime:Float;
 
-	// "trapdoor" mode only - the sole piece of persisted state this class needs. A sentinel far in
-	// the past means "never touched" (fully visible/collideable, the resting state).
 	var lastContactTime:Float = -1e8;
 
-	// "fading" mode only: `%obj.state`/`%obj.level` from the original script - state increments
-	// once per collision, `level` is the number of hits needed to fully hide. Not part of the
-	// original script, but a marble resting in continuous contact would otherwise increment
-	// `fadingState` every single physics substep - `lastFadingContactTime` gates it to once per
-	// 250ms, the same debounce pattern as `lastContactTime` above.
 	var fadingState:Int = 0;
 	var fadingLevel:Int = 1;
 	var fadingInitialState:Int = 0;
@@ -51,9 +31,6 @@ class FadePlatform extends DtsObject {
 
 	static inline final FADING_CONTACT_COOLDOWN = 0.25;
 
-	// "cloak" fadeStyle only - all captured lazily on the first call to `applyCloak` (materials
-	// aren't ready yet in the constructor) and cached from then on, since `getShader`/
-	// `ResourceLoader.getResource` aren't free and this runs every frame while cloaking.
 	var dtsShaders:Array<DtsTexture>;
 	var originalTextures:Array<Texture>;
 	var whiteTexture:Texture;
@@ -86,8 +63,6 @@ class FadePlatform extends DtsObject {
 			return f != null && f[0] != "" ? f[0].toLowerCase() : null;
 		}
 
-		// The concrete/grass/ice variants disallow skinning entirely in the original (`skin[0] =
-		// ""`), so a skin field is only meaningful for the base/size-variant datablocks.
 		var isSkinnable = !StringTools.startsWith(element.datablock.toLowerCase(), "fadeplatformconcrete")
 			&& !StringTools.startsWith(element.datablock.toLowerCase(), "fadeplatformgrass")
 			&& !StringTools.startsWith(element.datablock.toLowerCase(), "fadeplatformice");
@@ -121,12 +96,6 @@ class FadePlatform extends DtsObject {
 		this.fadingState = stateField != null ? Std.parseInt(stateField) : 0;
 		this.fadingInitialState = this.fadingState;
 
-		// The cloak style swaps each material's actual sampled texture (the `DtsTexture` shader's
-		// `texture` param - see `applyCloak`, not `Material.texture`, which the render pipeline
-		// never reads once `computeMaterials` swaps in that shader) - that param is a
-		// per-material/per-batch uniform, not `@perInstance` like `currentOpacity` is, so instanced
-		// platforms sharing a material would all flash white together. Only cloak-style platforms
-		// need to opt out of instancing here.
 		if (this.fadeStyle == "cloak")
 			this.useInstancing = false;
 
@@ -142,24 +111,12 @@ class FadePlatform extends DtsObject {
 		return Std.parseFloat(field) / 1000;
 	}
 
-	/** Applies the real engine's cloak visual for a given *physical* cloak amount (0 = fully
-		normal, 1 = fully cloaked/white - not a segment-local progress value, so callers must flip
-		the ramp direction themselves per segment). Swaps each material's actual sampled texture -
-		the `DtsTexture` shader's `texture` param, which is what the fragment shader samples once
-		`computeMaterials` swaps that shader in (see `shaders/DtsTexture.hx`); `Material.texture`
-		itself is set for bookkeeping but never read by the render pipeline after that swap, so
-		mutating it (as an earlier version of this file did) has no visual effect at all. Alpha
-		follows `0.125 + (1 - cloakLevel) * 0.875` from `tempRenderCompat.cpp`. */
 	function applyCloak(cloakLevel:Float) {
 		if (this.dtsShaders == null) {
 			this.dtsShaders = [for (material in this.materials) material.mainPass.getShader(DtsTexture)];
 			this.originalTextures = [for (shader in this.dtsShaders) shader != null ? shader.texture : null];
 			this.whiteTexture = ResourceLoader.getResource("data/shapes/pads/white.jpg", ResourceLoader.getTexture, this.textureResources);
 		}
-		// The texture only actually needs touching at the two instants it *changes* (entering vs.
-		// leaving the cloaked look) - every other frame in between (steady white, steady normal, or
-		// mid-fade where it's already white) would otherwise redundantly reassign every material's
-		// shader texture, and this runs every frame this platform exists.
 		var shouldBeWhite = cloakLevel > 0;
 		if (shouldBeWhite != this.isTextureWhite) {
 			this.isTextureWhite = shouldBeWhite;
@@ -176,9 +133,6 @@ class FadePlatform extends DtsObject {
 		super.update(timeState);
 
 		if (this.functionality == "fading") {
-			// Recomputed every frame (not just in `onMarbleContact`) purely so rewind can restore
-			// `fadingState` as a plain Int and have the visual follow automatically, the same way
-			// `periodic`/`trapdoor` already re-derive everything from a timestamp every frame.
 			var ratio = (this.fadingLevel - this.fadingState) / this.fadingLevel;
 			this.setCollisionEnabled(ratio > 0);
 			this.setOpacity(Math.max(ratio, 0));
@@ -200,7 +154,7 @@ class FadePlatform extends DtsObject {
 			} else {
 				this.setCollisionEnabled(true);
 				if (this.fadeStyle == "cloak")
-					this.applyCloak(0); // restores the original texture, not just opacity
+					this.applyCloak(0); // restores the original texture
 				this.setOpacity(1);
 			}
 		}
@@ -215,13 +169,10 @@ class FadePlatform extends DtsObject {
 					else
 						this.setOpacity(1 - Util.clamp(progress / Math.max(this.fadeOutTime, 0.001), 0, 1));
 				} else if (this.permanent || progress - this.fadeOutTime < this.invisibleTime) {
-					// `permanent` only takes effect once the cycle has actually reached this point -
-					// gated by `lastContactTime > -1e7` above, so a never-triggered permanent trapdoor
-					// stays in its default fully-visible/collideable state.
 					this.setCollisionEnabled(false);
 					this.setOpacity(0);
 				} else if (progress - hideEnd < this.fadeInTime) {
-					this.setCollisionEnabled(true); // `hide(false)` fires immediately at fade-in start.
+					this.setCollisionEnabled(true);
 					if (this.fadeStyle == "cloak") {
 						var progressIn = Math.min((progress - hideEnd) * CLOAK_RATE, 1);
 						this.applyCloak(1 - progressIn);
@@ -235,12 +186,6 @@ class FadePlatform extends DtsObject {
 					this.setOpacity(1);
 				}
 			} else {
-				// Resting state ("never touched") - also re-applied here every frame, not just in
-				// `reset()`, so rewinding back to before this platform was ever touched restores the
-				// visual/collision instead of leaving both stuck at whatever `update()` last computed
-				// right before the rewind (the actual bug: this branch used to be skipped entirely
-				// whenever `lastContactTime <= -1e7`, which is exactly what rewinding-to-never-touched
-				// produces).
 				this.setCollisionEnabled(true);
 				if (this.fadeStyle == "cloak")
 					this.applyCloak(0);
@@ -255,11 +200,6 @@ class FadePlatform extends DtsObject {
 
 		switch (this.functionality) {
 			case "trapdoor":
-				// `onCollision` only reacts while the platform is currently in its visible resting
-				// state (`if (%obj._visible)`) - re-touching it mid-fade/while hidden is a no-op.
-				// True both for a never-yet-triggered platform and for a non-permanent platform
-				// that's cycled all the way back around to visible; false forever for a permanent
-				// platform once it's been triggered once.
 				var isVisible = this.lastContactTime <= -1e7
 					|| (!this.permanent
 						&& timeState.currentAttemptTime - this.lastContactTime >= this.fadeOutTime + this.invisibleTime + this.fadeInTime);
@@ -269,7 +209,7 @@ class FadePlatform extends DtsObject {
 				if (timeState.currentAttemptTime - this.lastFadingContactTime < FADING_CONTACT_COOLDOWN)
 					return;
 				this.lastFadingContactTime = timeState.currentAttemptTime;
-				this.fadingState++; // visual reapplied every frame in `update()`
+				this.fadingState++;
 		}
 	}
 
@@ -279,7 +219,7 @@ class FadePlatform extends DtsObject {
 		switch (this.functionality) {
 			case "fading":
 				this.fadingState = this.fadingInitialState;
-				this.lastFadingContactTime = -1e8; // visual reapplied every frame in `update()`
+				this.lastFadingContactTime = -1e8;
 			case "trapdoor":
 				this.lastContactTime = -1e8;
 				this.setCollisionEnabled(true);

@@ -31,11 +31,6 @@ class RewindMPState {
 	}
 }
 
-/** Reusable mutable snapshot of a `Trapdoor`'s progress - was an anonymous struct, reallocated
-	fresh per object per tick; now a plain class so `RewindManager.recordFrame`/`RewindFrame.
-	deserialize` can pool and mutate instances in place instead (see
-	[No Anonymous Structs](feedback_no_anonymous_structs.md), and
-	[PQ Port Status](pq-port-status.md)'s rewind-optimization entry). */
 @:publicFields
 class TrapdoorSaveState {
 	var lastContactTime:Float;
@@ -45,7 +40,6 @@ class TrapdoorSaveState {
 	public function new() {}
 }
 
-/** Same idea as `TrapdoorSaveState`, for `FadePlatform`. */
 @:publicFields
 class FadePlatformSaveState {
 	var lastContactTime:Float;
@@ -55,7 +49,6 @@ class FadePlatformSaveState {
 	public function new() {}
 }
 
-/** Same idea as `TrapdoorSaveState`, for `MegaManPlatform`. */
 @:publicFields
 class MegaManPlatformSaveState {
 	var showTime:Float;
@@ -66,9 +59,6 @@ class MegaManPlatformSaveState {
 	public function new() {}
 }
 
-/** Same idea as `TrapdoorSaveState`, for `RepetitiveTriggerGotoTarget`'s `triggered`/`enterCount`
-	"triggered-once gate" state - the same bug class `PathTrigger.triggered` had (see its doc
-	comment), fixed the same way. */
 @:publicFields
 class RepetitiveTriggerSaveState {
 	var triggered:Bool;
@@ -77,12 +67,6 @@ class RepetitiveTriggerSaveState {
 	public function new() {}
 }
 
-/** `CountdownStartTrigger.activated` has the same "triggered-once gate" bug class as
-	`RepetitiveTriggerGotoTarget`/`PathTrigger`; `pendingStartTime`/`pendingTime`/`pendingIcon` are
-	the (also genuinely per-tick, not self-healing) state backing its `startDelay` countdown, which
-	used to be a `level.schedule()` callback - converting that to a plain per-tick check
-	(`CountdownStartTrigger.update`) means this state now needs the same explicit rewind snapshot
-	any other mutable-per-tick field gets. */
 @:publicFields
 class CountdownTriggerSaveState {
 	var activated:Bool;
@@ -134,15 +118,6 @@ class RewindFrame {
 	var powerupLockCount:Int;
 	var timeStopTriggerCount:Int;
 
-	/** Water/Bubble state - `waterTriggers`/`isInWater` can't just self-heal from the collision
-		system on the next tick after a rewind (unlike e.g. `onOutOfBounds`-triggered flows), since
-		`WaterPhysicsTrigger.onMarbleEnter`/`onMarbleLeave` only fire on a fresh overlap transition,
-		not every tick the marble happens to already be inside one - a rewind can restore a frame
-		where the marble is mid-submersion without ever re-triggering that enter event. Whether the
-		"water"/"bubble" physics layers are currently pushed isn't snapshotted directly - it's
-		re-derived from `isInWater`/`bubbleActive` on `applyFrame` (the override values themselves
-		are fixed constants, not marble-instance data, so there's nothing instance-specific to lose
-		by re-pushing a fresh layer instead of restoring the exact old array reference). */
 	var isInWater:Bool;
 
 	var waterTriggers:Array<triggers.WaterPhysicsTrigger>;
@@ -151,19 +126,12 @@ class RewindFrame {
 	var bubbleInfinite:Bool;
 	var bubbleActive:Bool;
 
-	/** Fireball PowerUp state - mirrors the Bubble fields above. `fireball` can't self-heal on
-		rewind either (there's no per-tick "am I still on fire" re-derivation, unlike a trigger-set
-		flag), so it's snapshotted directly like `bubbleActive`. */
 	var fireball:Bool;
 
 	var fireballTime:Float;
 	var fireballTotalTime:Float;
 	var fireballLastBlastTime:Float;
 
-	/** Cannon containment state (`src.shapes.Cannon`) - `cannonFrozenLayer`/`cannonControlLockLayer`
-		themselves aren't snapshotted (same reasoning as `waterPhysicsLayer`/`bubblePhysicsLayer`
-		above - re-derived fresh from these plain fields on apply, since the override values are
-		fixed constants). */
 	var activeCannon:shapes.Cannon;
 
 	var cannonCharge:Float;
@@ -173,49 +141,25 @@ class RewindFrame {
 	var cannonCameraLockUntil:Float;
 	var instantCannonFireTime:Float;
 
-	/** Index-aligned with `level.iceShards`, mirrors `gemStates`. */
 	var iceShardStates:Array<Bool>;
 
-	/** Also index-aligned with `level.iceShards` - see `IceShard.gotoTargetTriggered`'s doc comment. */
 	var iceShardGotoTargetStates:Array<Bool>;
 
-	/** Index-aligned with `level.respawningTimeTravels`, mirrors `iceShardStates` - see
-		`shapes.TimeTravel.respawnCount`'s doc comment. */
 	var respawningTimeTravelStates:Array<Int>;
 
-	/** HUD countdown timer state (`MarbleWorld.startCountdown`/`stopCountdown`,
-		`CountdownStartTrigger`/`CountdownStopTrigger`) - unlike most HUD-driving state elsewhere in
-		this file, `countdownRemaining` is a genuine per-tick accumulator (decremented by `dt` each
-		frame in `updateTimer`, not re-derived from a fixed start timestamp), so it can't self-heal
-		after a rewind and must be snapshotted directly like any other mutable scalar. */
 	var countdownActive:Bool;
 
 	var countdownRemaining:Float;
 	var countdownIcon:String;
 
-	/** Index-aligned with `level.triggers.filter(x -> x is triggers.PathTrigger)` - mirrors
-		`gemStates`/`iceShardStates`. See `triggers.PathTrigger.triggered`'s doc comment. */
 	var pathTriggerStates:Array<Bool>;
 
-	/** Index-aligned with iterating `level.pathedInteriors` then each one's own nested
-		`triggers` array, filtered to `RepetitiveTriggerGotoTarget` instances - these live nested
-		inside their owning `PathedInterior.triggers`, not `level.triggers`, but that nesting is
-		built once at load and never mutated afterward, so (unlike `PathTrigger`'s `movingObjects`)
-		no pre-scan/stable-registration step is needed for this to stay positionally aligned. */
 	var repetitiveTriggerStates:Array<RepetitiveTriggerSaveState>;
 
-	/** Index-aligned with `level.triggers.filter(x -> x is triggers.CountdownStartTrigger)`. */
 	var countdownTriggerStates:Array<CountdownTriggerSaveState>;
 
-	/** Ported from the `mbu-port` branch's design - whichever `GameMode` (or `CompositeMode` of
-		several) is active supplies one of these via `getRewindState()`/`constructRewindState()`,
-		rather than `RewindFrame` growing a flat field per mode regardless of which mode is active. */
 	var modeState:RewindableState;
 
-	/** Path-follower progress, index-aligned with `level.movingObjects` filtered to non-
-		`PathedInterior` entries (i.e. path-following `GameObject`s) - see
-		`RewindManager.recordFrame`/`applyFrame`. Parent-followers need no rewind state at all,
-		they're a pure function of their parent's current transform every tick. */
 	var pathFollowerStates:Array<PathFollowerSaveState>;
 
 	var oobState:{
@@ -232,13 +176,6 @@ class RewindFrame {
 		checkpointBlast:Float
 	};
 
-	/** Every container field is allocated exactly once here, then mutated/refilled in place for the
-		rest of this instance's life - `RewindManager` keeps exactly one persistent `RewindFrame` for
-		recording and one for reading/applying (rather than `new RewindFrame()` every tick), so this
-		constructor's allocations only happen twice total per `RewindManager`, not once per frame.
-		`clone()` no longer exists - nothing ever kept a live `RewindFrame` around long enough to need
-		copying one (recording immediately serializes and discards; reading immediately applies and
-		discards - see `RewindManager.recordFrame`/`getFrameAtIndex`), so it was dead code. */
 	public function new() {
 		timeState = new TimeState();
 		marblePosition = new Vector();
@@ -278,10 +215,6 @@ class RewindFrame {
 		};
 	}
 
-	/** Grows `arr` to `n` elements (appending freshly-`make()`d instances) or shrinks it down to
-		`n` - called every frame against a persistent array, so it only actually allocates the first
-		time a given count is reached, never again after (the count of trapdoors/buttons/path
-		followers/etc. in a level is fixed once loaded). */
 	public static function syncLength<T>(arr:Array<T>, n:Int, make:Void->T) {
 		while (arr.length < n)
 			arr.push(make());
@@ -625,14 +558,6 @@ class RewindFrame {
 		return bb.getBytes();
 	}
 
-	/** Reuses every already-allocated container from `new()` (or a previous `deserialize` call on
-		this same instance) in place instead of reallocating it - safe for every field EXCEPT the
-		handful `RewindManager.applyFrame` hands off *by reference* into long-lived `MarbleWorld`/
-		`Marble` state instead of copying out of (`mpStates[i].stoppedPosition`, `checkpointState.
-		checkpointUp`/`checkpointCollectedGems`/`currentCheckpoint`) - those are deliberately still
-		allocated fresh every call, since aliasing a reused scratch object into state that outlives
-		this call would silently corrupt it the next time this same instance gets deserialized for a
-	 	 	 *different* frame. See [PQ Port Status](pq-port-status.md)'s rewind-optimization entry. */
 	public inline function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
 		timeState.currentAttemptTime = br.readDouble();
 		timeState.timeSinceLoad = br.readDouble();

@@ -22,8 +22,6 @@ class DuctFan extends ForceObject {
 		}
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		// Instancing batches by `identifier`, and the PQ variants use a different mesh - keep the
-		// dtsPath in the identifier so they don't get batched with the vanilla mesh (or each other).
 		this.identifier = "DuctFan" + this.dtsPath;
 		this.forceDatas = [
 			{
@@ -51,9 +49,6 @@ class DuctFan extends ForceObject {
 	}
 
 	public override function init(level:src.MarbleWorld, onFinish:Void->Void) {
-		// Ported from `applyGravity()` (`core/server/missionload.cs`): `MissionInfo.fanStrength`
-		// (default 40 when blank) scales this datablock's `forceStrength` directly (its
-		// `forceStrengthModifier` is 1) - see `SmallDuctFan.hx` for the 0.25-modifier sibling.
 		if (level != null
 			&& level.mission != null
 			&& level.mission.missionInfo != null

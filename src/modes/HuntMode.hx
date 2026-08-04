@@ -31,13 +31,6 @@ import src.Settings;
 import rewind.RewindableState;
 import rewind.RewindManager;
 
-/** Ported from the `mbu-port` branch's `HuntState` (`src/modes/HuntMode.hx`) - covers exactly the
-	state that actually needs to survive a rewind: which gem-spawn group is currently active (and
-	the `Gem` instances currently spawned in from it), the running score, and the two RNG seeds
-	(`rng` picks the next spawn group, `rng2` picks spawn points) so a rewind can't desync which
-	gem cluster spawns next. Doesn't cover this port's extra competitive-mode-only fields
-	(`expiredGems`, `competitiveTimerStartTicks`, `lastSpawn`'s distance-avoidance tracking) - out
-	of scope for the same reason `mbu-port`'s `HuntState` doesn't cover them either (MP-only). */
 @:publicFields
 class HuntState implements RewindableState {
 	var activeGemSpawnGroup:Array<Int>;
@@ -388,15 +381,6 @@ class HuntMode extends NullMode {
 		return files;
 	}
 
-	/** Every gameplay-affecting `rng`/`rng2`/`Math.random()` draw in this class goes through one of
-		these two instead of calling the generator directly - a live rewind mid-recording still
-		advances the live generator during the since-discarded branch, so recording just the seed
-		can't reproduce the exact draw sequence the kept frames actually saw (unlike the marble's own
-		transform, which IS safe to snapshot/restore directly, since it's the *result* state, not a
-		generator whose future output depends on how many times it's been called so far). Recording
-		the actual drawn *values* (same mechanism `RandomPowerup.hx` already uses for its own pick)
-		sidesteps that entirely - replay never touches the generator at all, it just plays back the
-		exact outcomes verbatim. */
 	inline function nextRandomInt(rng:RandomLCG, lo:Int, hi:Int):Int {
 		if (this.level.isWatching)
 			return this.level.replay.getRandomGenState();
@@ -514,7 +498,7 @@ class HuntMode extends NullMode {
 				var gemElem:GemSpawnPoint = cast elem;
 				var gemPos = gemElem.gem.getAbsPos().getPosition();
 
-				if (level.mission.missionInfo.game == "PlatinumQuest") {
+				if (level.mission.missionInfo.game.toLowerCase() == "platinumquest") {
 					if (Net.isMP && Net.connectedServerInfo.oldSpawns) {
 						// Spawn chances!
 						var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
@@ -1014,9 +998,6 @@ class HuntMode extends NullMode {
 		return -1;
 	}
 
-	/** Ported from the `mbu-port` branch's `HuntMode.getRewindState` - covers the currently-active
-		gem-spawn group/gems, score, and RNG seeds; see `HuntState`'s doc comment for what's
-		deliberately left out (this port's competitive/MP-only extras). */
 	override function getRewindState():RewindableState {
 		var s = new HuntState();
 		s.points = points;

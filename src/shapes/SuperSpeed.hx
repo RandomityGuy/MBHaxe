@@ -13,7 +13,6 @@ import src.DtsObject;
 import src.AudioManager;
 import src.MarbleWorld;
 
-/** Ported from `marble.cs`'s `SuperSpeedParticle`/`MarbleSuperSpeedEmitter`. */
 final superSpeedParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
 	periodVariance: 0,
@@ -57,8 +56,6 @@ class SuperSpeed extends PowerUp {
 		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superspeed.dts" : "data/shapes/items/superspeed.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "SuperSpeed" + this.dtsPath;
 		this.pickUpName = "Super Speed PowerUp";
 		this.useInstancing = true;

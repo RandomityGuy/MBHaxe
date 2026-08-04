@@ -15,6 +15,7 @@ import src.Util;
 import src.Console;
 import src.MarbleGame;
 import modes.GameMode;
+import src.MarbleWorld;
 
 enum ReplayMarbleState {
 	UsedPowerup;
@@ -23,11 +24,6 @@ enum ReplayMarbleState {
 	UsedBlast;
 }
 
-/** A single decoded/interpolated frame's worth of fields - purely a "view" struct now, never itself
-	the unit of storage (see `Replay.frameData`). Every `Vector`/`Quat` sub-field is allocated exactly
-	once, in the constructor, and mutated in place for the rest of this object's lifetime - callers
-	(`Replay.recordScratch`/`playbackFrameA`/`playbackFrameB`/`currentPlaybackFrame`) are long-lived,
-	reused instances, never reallocated per tick. */
 @:publicFields
 class ReplayFrame {
 	// Time
@@ -47,14 +43,6 @@ class ReplayFrame {
 	// Input
 	var marbleX:Float;
 	var marbleY:Float;
-	// Continuous hold input (Move.powerupHeld) - drives Bubble's hold-to-use and Cannon's
-	// charge/fire state machines (`Marble.updateBubble`/`updateCannonFiring`). Unlike `jump`/
-	// `powerup`/`blast` (one-shot click-edge events, tracked via `marbleStateFlags`), this is a
-	// plain per-frame level, recorded/replayed every tick like `marbleX`/`marbleY` - added after
-	// Cannon/Bubble were ported, since without it neither mechanic's replay could ever actually
-	// charge/fire the cannon or activate the bubble (the position/orientation still play back fine
-	// regardless, since those are snapshotted+snapped every frame independent of move
-	// reconstruction - only the side effects tied to holding the key were silently never triggering).
 	var powerupHeld:Bool;
 	// Gravity
 	var gravity:Vector;
@@ -79,12 +67,6 @@ class ReplayInitialState {
 	var pushButtonContactTimes:Array<Float> = [];
 	var randomGens:Array<Int> = [];
 	var randomGenTimes:Array<Float> = [];
-	// Same idea as `randomGens`, but for `Math.random()`-style [0,1) draws (e.g. Hunt's per-gem
-	// spawn-chance rolls) that don't fit in an Int index. Kept as a fully separate FIFO rather than
-	// interleaved with `randomGens` into one queue - each call site always draws from the one queue
-	// matching its own draw type, so two independent per-type FIFOs are exactly equivalent to one
-	// interleaved queue here (deterministic resimulation means the Nth "int draw" and Nth "float
-	// draw" are always the same calls in the same order either way), and it's simpler.
 	var randomFloats:Array<Float> = [];
 	var randomFloatTimes:Array<Float> = [];
 
@@ -109,10 +91,6 @@ class ReplayInitialState {
 		for (time in this.pushButtonContactTimes) {
 			bw.writeFloat(time);
 		}
-		// Was `writeInt16` count + `writeByte` per entry - a real bug for any consumer (like Hunt's
-		// gem/spawn-point index draws) whose value can exceed 255, silently truncating. Widened to
-		// Int32 for both the count and each entry as of version 8; old files are still read back
-		// correctly via the version-gated branch below.
 		bw.writeInt32(this.randomGens.length);
 		for (ri in this.randomGens) {
 			bw.writeInt32(ri);
@@ -162,24 +140,11 @@ class ReplayInitialState {
 	}
 }
 
-/** Records/plays back a single-player attempt. Ported behavior-for-behavior from the original
-	object-per-tick design, but the actual per-tick storage (`frameData`) is a flat `Array<Float>`
-	(one contiguous run of `STRIDE` floats per recorded tick) instead of an `Array<ReplayFrame>` of
-	heap objects each holding 4 further `Vector`/`Quat` sub-objects - a multi-minute attempt at full
-	tick rate was allocating 5 heap objects every single tick purely to record, which is real,
-	measurable GC pressure. Recording now just pushes scalars into that flat array (no allocation
-	beyond the array's own amortized growth); playback decodes into a small, fixed set of persistent
-	`ReplayFrame` "view" objects (`playbackFrameA`/`B`, `currentPlaybackFrame`) that get their fields
-	mutated in place every tick instead of being reallocated. `powerupPickup` (a String, set on rare
-	ticks only) is kept out of the flat numeric layout entirely, in a sparse `frameIndex -> path` map,
-	so it doesn't cost anything on the ticks that don't have one. */
 class Replay {
 	public var mission:String;
 	public var name:String;
 	public var customId:Int;
 
-	// Field layout within one frame's slice of `frameData` - single source of truth for both the
-	// write side (`endFrame`) and the read side (`decodeFrameInto`).
 	static inline var OFF_TIME = 0;
 	static inline var OFF_CLOCK = 1;
 	static inline var OFF_BONUS = 2;
@@ -204,15 +169,9 @@ class Replay {
 
 	var initialState:ReplayInitialState;
 
-	// Recording: one persistent scratch frame, mutated in place by the various `recordXXX` calls
-	// throughout a tick, flushed into `frameData` by `endFrame`. `recordingActive` mirrors the old
-	// "currentRecordFrame != null" guard without needing a nullable object.
 	var recordScratch:ReplayFrame = new ReplayFrame();
 	var recordingActive:Bool = false;
 
-	// Playback: two persistent decode targets for the "surrounding" recorded frames (swapped, not
-	// reallocated, when `advance()` steps forward), plus the persistent interpolated result every
-	// consumer actually reads.
 	var playbackFrameA:ReplayFrame = new ReplayFrame();
 	var playbackFrameB:ReplayFrame = new ReplayFrame();
 
@@ -224,24 +183,10 @@ class Replay {
 	var version:Int = 9;
 	var readFullEntry:FileEntry;
 
-	/** Raw `GameMode.saveReplayData` bytes decoded by `read()` - can't be handed to the mode itself
-		yet (no mission is loaded, so no `MarbleWorld`/`GameMode` exists at that point - `read()` can
-		run standalone, e.g. `MainMenuGui`'s "load a replay file" flow, well before any mission is
-		chosen). Stashed here and applied later via `applyModeData` once a mission has actually
-		loaded for playback. */
 	public var modeData:Bytes;
 
-	/** Captured by `captureModeData` (called once, from `MarbleWorld.touchFinish`, while the level
-		is still guaranteed alive) rather than read lazily from inside `write()` - `write()` itself
-		can end up called well after finishing, from deferred/async code (`EndGameGui`'s leaderboard
-		submission callbacks) that may run after the level's already been disposed, so there's no
-		reliable `GameMode` to reach for at that point. `null` if never captured (e.g. this replay's
-		mode has nothing to save, or the attempt never actually finished). */
 	var savedModeData:Bytes;
 
-	/** Ported from the need to keep a Versa replay reproducible even if external state (e.g.
-		`ViceVersaState`'s save file) changes between recording and later playback - see
-		`GameMode.saveReplayData`'s doc comment. Called once, at the moment a level is finished. */
 	public function captureModeData(gameMode:GameMode) {
 		var out = new haxe.io.BytesOutput();
 		gameMode.saveReplayData(out);
@@ -256,9 +201,6 @@ class Replay {
 
 	public function startFrame() {
 		recordingActive = true;
-		// One-shot fields need an explicit reset every tick, matching what a fresh `new ReplayFrame()`
-		// used to give for free - continuous fields (position, camera, input, ...) don't, since every
-		// `recordXXX` for those is called unconditionally each tick anyway.
 		recordScratch.marbleStateFlags = new EnumFlags();
 		recordScratch.gravityChange = false;
 		recordScratch.powerupPickup = null;
@@ -440,8 +382,6 @@ class Replay {
 		this.recordingActive = false;
 	}
 
-	/** Decodes recorded frame `i` into `target`, mutating its fields in place (never allocates a new
-		`Vector`/`Quat`). */
 	function decodeFrameInto(i:Int, target:ReplayFrame) {
 		var o = i * STRIDE;
 		target.time = frameData[o + OFF_TIME];
@@ -474,8 +414,6 @@ class Replay {
 		target.powerupPickup = powerupPickups.get(i);
 	}
 
-	/** Same math as the original `ReplayFrame.interpolate`, just writing into a persistent `out`
-		instead of allocating+returning a new frame - see class doc comment. */
 	function interpolateInto(a:ReplayFrame, b:ReplayFrame, time:Float, out:ReplayFrame) {
 		var t = (time - a.time) / (b.time - a.time);
 		var dt = time - a.time;
@@ -654,8 +592,6 @@ class Replay {
 		var bw = new BytesWriter();
 
 		this.initialState.write(bw);
-		// Once per recording (not per-frame) - see `captureModeData`'s doc comment for why this reads
-		// the already-captured bytes rather than pulling from a `GameMode` here.
 		var modeBytes = this.savedModeData != null ? this.savedModeData : haxe.io.Bytes.alloc(0);
 		bw.writeInt32(modeBytes.length);
 		@:privateAccess bw.bytes.addBytes(modeBytes, 0, modeBytes.length);
@@ -729,10 +665,6 @@ class Replay {
 		return finalB.getBytes();
 	}
 
-	/** Hands `modeData` (decoded standalone by `read()`, before any mission/`GameMode` existed) to
-		the now-loaded mission's actual `GameMode` - call once, after the mission has finished
-		loading, when about to watch this replay. No-op if this replay predates version 9 or its mode
-		wrote nothing. */
 	public function applyModeData(level:MarbleWorld) {
 		if (this.modeData != null)
 			level.gameMode.loadReplayData(new BytesInput(this.modeData));

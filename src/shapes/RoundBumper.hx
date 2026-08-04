@@ -17,8 +17,6 @@ class RoundBumper extends AbstractBumper {
 			default: "data/shapes/bumpers/pball_round.dts";
 		}
 		isCollideable = true;
-		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		identifier = "RoundBumper" + dtsPath;
 	}
 }

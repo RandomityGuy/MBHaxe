@@ -9,16 +9,6 @@ import src.AudioManager;
 import mis.MissionElement.MissionElementItem;
 import mis.MisParser;
 
-/** Press-to-arm, press-again-to-fire self-teleport: first use marks the current spot (and
-	shows the marble's shared wireball marker there); second use cloaks the marble, waits
-	`teleTime`, then warps it back to the marked spot (restoring camera + gravity), matching
-	PQ's TeleportItem::onUse / setLocation / performTeleport / finishTeleport.
-
-	The armed state, saved position/camera/gravity, and the marker object all live on the
-	Marble itself (see Marble.hx's teleporter* fields) rather than on this class - PQ stores
-	this on `%user`, not on the trigger/item instance, so it's shared across every TeleportItem
-	in a level: arm with one, walk over a different powerup, then walk over a second
-	TeleportItem and fire it - it still fires using the position/config saved by the first one. */
 class TeleportItem extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
@@ -52,9 +42,6 @@ class TeleportItem extends PowerUp {
 			marble.teleporterMarker.setPosition(1e8, 1e8, 1e8);
 			marble.setCloaking(true, timeState);
 
-			// Actual teleport-back fires once `teleporterTeleTime` elapses - checked every tick in
-			// `Marble.updateTeleporterState` rather than scheduled (see `teleporterFiring`'s doc
-			// comment).
 			marble.teleporterFiring = true;
 			@:privateAccess marble.teleporterFireStartTime = timeState.currentAttemptTime;
 

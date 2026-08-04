@@ -7,9 +7,6 @@ import mis.MisParser;
 class CountdownStartTrigger extends Trigger {
 	public var activated:Bool = false;
 
-	// `startDelay > 0` used to be implemented via `level.schedule()` - replaced per
-	// [No Schedules](feedback_no_schedules.md) with a plain pending-time check in `update()`.
-	// `-1` is the "nothing pending" sentinel (per [No Null Primitives](feedback_no_null_primitives.md)).
 	public var pendingStartTime:Float = -1;
 	public var pendingTime:Float = 0;
 	public var pendingIcon:String = "";

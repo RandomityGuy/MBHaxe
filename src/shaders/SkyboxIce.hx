@@ -1,16 +1,5 @@
 package shaders;
 
-/** Ported from `skybox_iceF.glsl`/`interiorV.glsl` (`platinum/data/shaders/`) - the `SkyboxIce`
-	material shader (`PQIceShaderMaterial` in `pack.json`), used for PQ's ice interior surfaces.
-	Reflection uses `level.sky.cubemap` (the static skybox cubemap already built for sky rendering,
-	see `Sky.hx`) rather than a per-object `CubemapRenderer` like the marble's own reflective skins
-	(`MarbleReflection`/`ClassicGlass`) - real source's `skyboxSampler` is genuinely just a fixed
-	reflection of the skybox, not a live scene reflection, so no per-frame cubemap render is needed
-	here at all. `rot_from_torque_mat` (real source's fixup between Torque's raw world axes and the
-	skybox's own orientation) is dropped - this port's existing skybox-reflection shaders
-	(`EnvMap`/`MarbleReflection`) already reflect correctly against `sky.cubemap` with no extra
-	rotation, since Heaps' world-space vectors here are already in the same frame the cubemap was
-	rendered in. */
 class SkyboxIce extends hxsl.Shader {
 	static var SRC = {
 		@param var diffuseMap:Sampler2D;
@@ -65,8 +54,7 @@ class SkyboxIce extends hxsl.Shader {
 
 			var outCol = vec4(diffuse.rgb * effectiveSun.rgb, 1);
 
-			// Skybox reflection (real source's `QUALITY_LEVEL > 1` branch - always on here, this
-			// port has no interior-shader quality tiering).
+			// Skybox reflection
 			var eyeVec = (camera.position - transformedPosition).normalize();
 			var incidentRay = -eyeVec;
 			var reflectionRay = reflect(incidentRay, bumpNormal);
@@ -76,9 +64,6 @@ class SkyboxIce extends hxsl.Shader {
 			// Ice is too dark without a little color added, so we adjust it a bit.
 			outCol += vec4(0.2, 0.25, 0.3, 1.0) * cosTheta;
 
-			// Real Phong specular (reflect the light around the normal, dot with the eye vector) -
-			// NOT the Blinn half-angle approximation `PhongMaterial`/`PQMaterial` use elsewhere in
-			// this port, since real source genuinely uses this formula here.
 			var specularColor = specularMap.get(calculatedUV);
 			var lightReflection = reflect(-lightNormal, bumpNormal);
 			var cosAlpha = clamp(dot(eyeVec, lightReflection), 0, 1);

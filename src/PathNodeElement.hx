@@ -5,22 +5,12 @@ import h3d.Quat;
 import h3d.Matrix;
 import mis.MisParser;
 
-/** A resolved live world position/rotation for a `PathNode` (or any object) - see
-	`MarbleWorld.resolvePathNodeTransform`/`GameObjectParentFollower.applyOffset`. */
 @:structInit
 class PathNodeLiveTransform {
 	public var position:Vector;
 	public var rotation:Quat;
 }
 
-/** A `PathNode`/`BezierHandle` placement. These are pure data markers in PQ (`StaticShapeData`
-	with an editor-only model, never rendered or collided with in gameplay) - they never become
-	`GameObject`s/`DtsObject`s, they just live in `MarbleWorld.pathNodes` keyed by name and get
-	walked by `GameObjectPathFollower`.
-
-	A node's own position/rotation/scale is stored **locally** rather than baked into a live world
-	transform, because a node can itself have a `parent` field (rigidly follow a moving object) -
-	see `MarbleWorld.resolvePathNodeTransform`, which resolves the live transform on demand. */
 class PathNodeElement {
 	public var name:String;
 	public var localPosition:Vector;

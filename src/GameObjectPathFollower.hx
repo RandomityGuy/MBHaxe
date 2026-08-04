@@ -9,9 +9,6 @@ import src.PathNodeElement;
 import src.PathNodeElement.PathNodeLiveTransform;
 import src.Marble;
 
-/** Position/rotation/scale snapshot at a point along the path - see `GameObjectPathFollower`'s
-	`frameStartState`/`frameEndState`. Two independent instances must be alive at once (the frame's
-	start and end), so unlike pure-scratch matrices this can't be pooled into a single static. */
 @:structInit
 class PathFollowerState {
 	public var position:Vector;
@@ -19,22 +16,12 @@ class PathFollowerState {
 	public var scale:Vector;
 }
 
-/** An axis-angle rotation pair - see `GameObjectPathFollower.rotInterpolate`. Pure scratch (never
-	escapes the function it's computed in), so instances are pooled into statics rather than
-	allocated per call. */
 @:structInit
 class AxisAngle {
 	public var axis:Vector;
 	public var angle:Float;
 }
 
-/** Rewind snapshot of a path follower's progress - see `RewindFrame`/`RewindManager`. `active`
-	replaces the old "the array slot itself is `null`" convention for "not currently on a path" -
-	`RewindFrame.pathFollowerStates` now holds one always-non-null, reusable instance per mover
-	(see [PQ Port Status](pq-port-status.md)'s rewind-optimization entry), so a mover coming on/off
-	a path across frames doesn't need to allocate/discard the slot itself, just flip this flag. All
-	fields default so a pooled instance can be constructed once with `new PathFollowerSaveState()`
-	and filled in later via `fillState`. */
 @:structInit
 class PathFollowerSaveState {
 	public var active:Bool = false;
@@ -46,17 +33,6 @@ class PathFollowerSaveState {
 	public function new() {}
 }
 
-/** Walks a `PathNode` chain and drives a `GameObject`'s transform along it. Ported from PQ's
-	`SceneObject::moveOnPath`/`updatePathPosition` (`platinum/server/scripts/moving.cs`) for the
-	state machine/sequencing (accumulate elapsed time, loop node-to-node transitions within a
-	single frame, branch-node RNG cursor that only advances on leaving a branching node), and from
-	`hrt.prefab.props.PathNodeAnimator` for the underlying interpolation math (linear/quadratic-
-	bezier/cubic-bezier position blend, rotation slerp-like blend, per-node smoothing curve).
-
-	Two-phase like `PathedInterior`: `computeNextStep` runs once per frame (steps the state
-	machine, computes the transform at the start and end of this frame), `advance` runs once per
-	physics substep (blends between those two transforms proportionally to how much of the frame
-	has elapsed) so collision stays correct at substep granularity. */
 class GameObjectPathFollower {
 	var obj:GameObject;
 	var level:MarbleWorld;
@@ -87,9 +63,6 @@ class GameObjectPathFollower {
 		}
 	}
 
-	/** Snapshot used by rewind - see `RewindFrame`/`RewindManager`. Mutates a pooled instance in
-		place (rather than allocating a fresh one every tick) since `RewindManager.recordFrame` keeps
-		one persistent `PathFollowerSaveState` per mover. */
 	public function fillState(s:PathFollowerSaveState) {
 		s.active = true;
 		s.pathPosition = this.pathPosition;
@@ -103,9 +76,6 @@ class GameObjectPathFollower {
 		this.currentNodeName = s.currentNode;
 		this.prevNodeName = s.prevNode;
 		this.rngCursor = s.rngCursor;
-		// Re-derive the transform for the restored path position and collapse the frame blend, so the
-		// object snaps straight to where the rewound-to state puts it instead of continuing to
-		// interpolate toward a frame-end computed before the jump.
 		var state = evaluateTransform(this.currentNodeName, this.prevNodeName, this.pathPosition);
 		if (state != null) {
 			this.frameStartState = state;
@@ -166,7 +136,7 @@ class GameObjectPathFollower {
 
 			this.prevNodeName = this.currentNodeName;
 			if (next == null || nextName == this.currentNodeName) {
-				// Dead end / self-loop - stop advancing, matching moving.cs's break condition.
+				// Dead end / self-loop
 				this.ended = true;
 				break;
 			}
@@ -181,8 +151,6 @@ class GameObjectPathFollower {
 		this.substepAccum = 0;
 	}
 
-	// Pure scratch - consumed and passed to `obj.setTransform` (which copies out of it) before
-	// returning, so it's safe to share a single reusable instance across every substep/call.
 	static var scratchApplyMat = new Matrix();
 	static var scratchApplyRotMat = new Matrix();
 	static var scratchBlendRot = new Quat();
@@ -193,10 +161,6 @@ class GameObjectPathFollower {
 		this.substepAccum += timeStep;
 		var t = this.frameDuration > 0 ? hxd.Math.clamp(this.substepAccum / this.frameDuration, 0, 1) : 1;
 
-		// Blend position/rotation/scale as separate components (not by decomposing a combined
-		// scale*rotation Matrix back into a quaternion - Quat.initRotateMatrix assumes a pure
-		// rotation matrix, so feeding it a matrix with scale baked in silently produces a wrong
-		// rotation whenever scale != 1, which visibly skews the object away from its actual pivot).
 		scratchBlendRot.slerp(this.frameStartState.rotation, this.frameEndState.rotation, t);
 		var pos = lerpVector(this.frameStartState.position, this.frameEndState.position, t);
 		var scale = lerpVector(this.frameStartState.scale, this.frameEndState.scale, t);
@@ -207,9 +171,6 @@ class GameObjectPathFollower {
 	}
 
 	function applyState(position:Vector, rotation:Quat, scale:Vector) {
-		// position/rotation/scale here are world-space (see evaluateTransform) - setTransform
-		// expects a transform local to the object's scene parent, so convert like
-		// PathNodeAnimator.updateObjPosition does (`tform.multiply(tform, invTform)`).
 		scratchApplyMat.initScale(scale.x, scale.y, scale.z);
 		rotation.toMatrix(scratchApplyRotMat);
 		scratchApplyMat.multiply3x4(scratchApplyMat, scratchApplyRotMat);
@@ -248,12 +209,6 @@ class GameObjectPathFollower {
 		if (nextT == null)
 			nextT = nodeT;
 
-		// PQ's own Node_updatePath (interpolation.cpp) starts from the OBJECT's own current
-		// transform and only overwrites the axes actually in use - `UsePosition`/`UseRotation`
-		// false means that axis is left exactly as it already was (which for most objects is
-		// their originally-placed transform, since nothing else touches it once path-following
-		// takes over), NOT the guide node's own position/rotation (the node is just a gizmo,
-		// its own transform is meaningless to an object that isn't using that axis).
 		var basePos = new Vector(this.obj.x, this.obj.y, this.obj.z);
 		var baseRot = this.obj.getRotationQuat();
 		var baseScale = new Vector(this.obj.scaleX, this.obj.scaleY, this.obj.scaleZ);
@@ -268,21 +223,12 @@ class GameObjectPathFollower {
 		return {position: pos, rotation: rot, scale: scale};
 	}
 
-	// Pure scratch for the rotational-velocity computation below - all data extracted from these
-	// (angle/axis) is copied into local floats/Vectors before the function returns.
 	static var scratchStartMat = new Matrix();
 	static var scratchStartMatInv = new Matrix();
 	static var scratchEndMat = new Matrix();
 	static var scratchMatSub = new Matrix();
 	static var scratchVelQuat = new Quat();
 
-	/** Per-contact-point velocity for marble collision response, ported from PQ's
-		`getSurfaceVelocityForSceneObject` (`interpolation.cpp`) - unlike `PathedInterior`'s flat
-		per-object velocity, PQ computes translational + rotational + scaling contributions at the
-		exact contact point, since PathNode-driven objects can rotate/scale (a spinning or growing
-		platform pushes a marble standing off-center differently than one at its pivot). Uses the
-		*current* authoritative path state (`pathPosition`/`currentNodeName`), not the
-		frame-start/frame-end blend used for rendering/collision-shape placement. */
 	public function getSurfaceVelocity(point:Vector, marble:Marble, dt:Float):Vector {
 		var node = getNode(this.currentNodeName);
 		if (node == null)
@@ -326,8 +272,6 @@ class GameObjectPathFollower {
 			var tRot = node.reverseRotation ? 1.0 - t : t;
 			nodeT.rotation.toMatrix(scratchStartMat);
 			nextT.rotation.toMatrix(scratchEndMat);
-			// Reversed multiply order vs the C++ - see `rotInterpolate`'s doc comment for why
-			// (Torque column-vector vs h3d row-vector convention).
 			if (node.rotationOffset != null)
 				scratchEndMat.multiply(node.rotationOffset, scratchEndMat);
 
@@ -384,8 +328,6 @@ class GameObjectPathFollower {
 		return t;
 	}
 
-	/** Derivative (w.r.t. `t`) of `getAdjustedProgress`'s smoothing curve - used by
-		`getSurfaceVelocity`'s chain rule, matching `Node_getAdjustedProgressDeriv`. */
 	function getAdjustedProgressDeriv(node:PathNodeElement, t:Float):Float {
 		if (node.smooth || (t <= 0.5 && node.smoothStart) || (t > 0.5 && node.smoothEnd))
 			return 0.5 * Math.PI * Math.sin(t * Math.PI);
@@ -462,10 +404,6 @@ class GameObjectPathFollower {
 		if (node.rotationOffset != null) {
 			var rotMat = new Matrix();
 			rot.toMatrix(rotMat);
-			// PQ computes `rotM * finalRotOffset` under Torque's column-vector (M*p) convention,
-			// where that means "apply finalRotOffset first, then rotM". h3d.Matrix is row-vector
-			// (p*M) - see `rotInterpolate`'s doc comment - so the equivalent composition needs the
-			// arguments reversed.
 			rotMat.multiply(node.rotationOffset, rotMat);
 			var q = new Quat();
 			q.initRotateMatrix(rotMat);
@@ -485,18 +423,6 @@ class GameObjectPathFollower {
 	static var scratchRotDelta:AxisAngle = {axis: new Vector(), angle: 0};
 	static var scratchRotFinal:AxisAngle = {axis: new Vector(), angle: 0};
 
-	/** Extracts an (axis, angle) pair from a rotation matrix via its quaternion, matching Torque's
-		`AngAxisF(const MatrixF&)` constructor closely enough to reproduce `RotInterpolate`'s
-		re-decomposition step (see `rotInterpolate`'s doc comment). Fills `out` in place.
-
-		Known unresolved issue: a rotation of exactly 180 degrees has no unique axis (`R(a, 180) ==
-		R(-a, 180)`), and which of the two `Quat.initRotateMatrix`'s Shepperd extraction picks isn't
-		guaranteed to match the direction a node chain's neighboring segments are travelling in - this
-		is the cause of a see-saw/reversal on node loops whose cumulative rotation passes through
-		exactly 180 degrees (e.g. a 0/90/180-degree three-node chain). A per-segment sign correction
-		was attempted and reverted - it fixed the ambiguous segment but flipped the direction of every
-		other (unambiguous) segment too, so whatever's actually driving direction here isn't fully
-		understood yet. Left as-is pending a real fix. */
 	function axisAngleFromMatrix(mat:Matrix, out:AxisAngle) {
 		var q = scratchRotExtractQuat;
 		q.initRotateMatrix(mat);
@@ -511,36 +437,12 @@ class GameObjectPathFollower {
 		out.angle = angle;
 	}
 
-	/** Ported from PQ's `RotInterpolate` (`MathLib.h`). Bug-for-bug faithful: `RotInterpolate` itself
-		scales the delta (rot1->rot2) angle by `t` and composes it onto rot1's matrix, but then
-		RE-DECOMPOSES that absolute composed matrix into a fresh (axis, angle) pair - it's this
-		fresh pair, not the original delta, that `RotationMultiplier` scales in
-		`Node_getPathRotation`, and the result is rebuilt as a matrix from identity rather than
-		composed onto rot1 again. Collapsing this into a single "scale delta angle by t*multiplier"
-		step (as an earlier version of this port did) is NOT equivalent once multiplier != 1.
-
-		Also critically: Torque's `MatrixF` is column-vector (`mulP` does `M*p`), where `X * Y`
-		composed onto a point means "apply Y first, then X". `h3d.Matrix` is row-vector
-		(`Matrix.hx`'s point-transform does `p*M`), where `multiply(A, B)` composed onto a point
-		means "apply A first, then B" - the OPPOSITE order. For the same physical rotation,
-		heapsMatrix == torqueMatrix transposed, and `(X*Y)^T == Y^T*X^T`, so every multiply() call
-		here must take its arguments in the REVERSE order of the corresponding C++ expression, not
-		the same order. Preserving the C++ argument order verbatim (as an earlier version of this
-		port did) silently computes the wrong composed rotation whenever rot1/rot2 aren't about the
-		same axis - this was the cause of reversed rotation direction on two-node setups where the
-		nodes' rotations aren't about a common axis.
-
-		Separately, a delta rotation of exactly 180 degrees has an ambiguous axis sign that has to be
-		resolved against this engine's mirrored X axis rather than Torque's - see
-		`axisAngleFromMatrix`'s doc comment. That ambiguity, not the multiply order above, is what
-		caused the "rotates all the way around, then see-saws back" bug on node loops like 0/90/180. */
 	function rotInterpolate(rot1:Quat, rot2:Quat, t:Float, multiplier:Float = 1.0):Quat {
 		var mat1 = scratchRotMat1;
 		var mat2 = scratchRotMat2;
 		rot1.toMatrix(mat1);
 		rot2.toMatrix(mat2);
 
-		// C++: matSub = mat2 * inverse(mat1) -> reversed here: inverse(mat1) * mat2.
 		var matSub = scratchRotMatSub;
 		mat1.getInverse(scratchRotMat1Inv);
 		matSub.multiply(scratchRotMat1Inv, mat2);
@@ -550,7 +452,6 @@ class GameObjectPathFollower {
 
 		delta.angle *= t;
 
-		// C++: newMat = a.toMatrix() * mat1 -> reversed here: mat1 * a.toMatrix().
 		var deltaMat = scratchRotDeltaMat;
 		deltaMat.initRotationAxis(delta.axis, delta.angle);
 		var composedMat = scratchRotComposedMat;
@@ -562,8 +463,6 @@ class GameObjectPathFollower {
 
 		var finalMat = scratchRotFinalMat;
 		finalMat.initRotationAxis(finalAA.axis, finalAA.angle);
-		// This Quat escapes into PathFollowerState (frameStartState/frameEndState), which needs two
-		// independent live instances at once - must NOT be a pooled scratch, unlike everything above.
 		var retQuat = new Quat();
 		retQuat.initRotateMatrix(finalMat);
 		return retQuat;
@@ -594,8 +493,6 @@ class GameObjectPathFollower {
 			.add(p3.multiply(t * t * t));
 	}
 
-	/** Derivative (w.r.t. `t`) of `interpolate` - used by `getSurfaceVelocity` (`VectorBezierDeriv`
-		in PQ's `interpolation.cpp`). */
 	function interpolateDeriv(pointList:Array<Vector>, t:Float):Vector {
 		if (pointList.length == 2)
 			return pointList[1].sub(pointList[0]);

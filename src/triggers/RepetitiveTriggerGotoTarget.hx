@@ -9,9 +9,6 @@ import src.Marble;
 class RepetitiveTriggerGotoTarget extends Trigger {
 	var interior:PathedInterior;
 
-	// Real PQ's `enterCount` is tracked per-marble (MP resync concern) - collapsed to a single
-	// SP-only counter here per direct instruction, matching this port's established "MP is out of
-	// scope" stance elsewhere.
 	public var enterCount:Int = 0;
 	public var triggered:Bool = false;
 
@@ -27,9 +24,6 @@ class RepetitiveTriggerGotoTarget extends Trigger {
 	}
 
 	public override function onMarbleEnter(marble:Marble, time:TimeState) {
-		// PQ's own default for an unset NumTimesToTrigger is a literal " " string, which
-		// TorqueScript coerces to 0 in numeric comparisons - reproduced here as 0, not the
-		// misleading "default" shown in the mission editor's customField hint.
 		var numTimesToTriggerField = this.element.fields.get("numtimestotrigger");
 		var numTimesToTrigger = numTimesToTriggerField != null ? MisParser.parseNumber(numTimesToTriggerField[0]) : 0;
 		var triggerOnceField = this.element.fields.get("triggeronce");

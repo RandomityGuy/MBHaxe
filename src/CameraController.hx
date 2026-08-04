@@ -98,8 +98,6 @@ class CameraController extends Object {
 		this.level = level;
 		// level.scene.addEventListener(onEvent);
 		// Sdl.setRelativeMouseMode(true);
-		// Ported from `resetCameraFov` (`client/scripts/camera.cs`) - `MissionInfo.cameraFov`
-		// overrides the player's own FOV setting for this mission specifically.
 		var fovField = level.mission.missionInfo.camerafov;
 		var fov = fovField != null && fovField != "" ? MisParser.parseNumber(fovField) : Settings.optionsSettings.fovX;
 		level.scene.camera.setFovX(fov, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
@@ -186,11 +184,6 @@ class CameraController extends Object {
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
-		// Ported from `physics.cs`'s `"cameraSpeedMultiplier"` global attribute - real PQ scales the
-		// keyboard-camera-look speed globals (`mvPitch/YawSpeed`); this engine has no keyboard-look
-		// and drives the camera straight off mouse delta every tick, so scaling that delta here is
-		// the equivalent hook (e.g. `cannonLockCamera`/`noInput`'s `cameraSpeedMultiplier 0` layers
-		// fully freeze mouse-look, matching a real `0` multiplier's effect).
 		var camSpeedMul = marble != null ? marble._cameraSpeedMultiplier : 1.0;
 		nextCameraPitch += deltaposY * factor * camSpeedMul;
 		nextCameraYaw += deltaposX * factor * camSpeedMul;
@@ -671,13 +664,7 @@ class CameraController extends Object {
 
 		nextCameraYaw += deltaX;
 		nextCameraPitch += deltaY;
-		// Skip the normal free-look pitch range ([-45,~90) degrees) while actively aiming a non-
-		// instant cannon - a cannon's own `pitchBoundLow`/`pitchBoundHigh` (applied later, in
-		// `updateCannonCamera`) can be wider than this (e.g. `pitchBoundHigh` up to 80 degrees
-		// implies a live-pitch floor of -80 degrees), and this clamp running first would otherwise
-		// cap the accumulator before the cannon-specific clamp ever gets a chance to allow the
-		// wider range - clamping can only ever narrow a value further, not widen one this already
-		// restricted.
+
 		var cannonAiming = level.marble.activeCannon != null && !level.marble.activeCannon.instant;
 		if (!cannonAiming)
 			nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
@@ -736,10 +723,6 @@ class CameraController extends Object {
 			CameraYaw = this.level.replay.currentPlaybackFrame.cameraYaw;
 		}
 
-		// Instant cannons never give the player camera control at all (real source's
-		// `clientCmdEnterCannon` returns before reaching any of the camera-override calls in its
-		// instant branch) - the marble just sits frozen in the normal follow-camera view until
-		// `Marble.updateCannonFiring` auto-fires it, so only branch here for non-instant cannons.
 		if (level.marble.activeCannon != null && !level.marble.activeCannon.instant) {
 			this.updateCannonCamera(level.marble.activeCannon, camera);
 			return;
@@ -839,39 +822,15 @@ class CameraController extends Object {
 		// this.level.scene.camera.follow = {pos: this, target: this.marble};
 	}
 
-	/** Ported from `updateCannonView` (`client/scripts/cannon.cs`) - runs in place of the normal
-		marble-orbit camera positioning while aiming a non-instant cannon. `CameraYaw`/`CameraPitch`
-		have already been updated by the normal mouse-look/gamepad input code above this call site
-		(same values, same input) - this only (1) clamps them into the cannon's aim bounds (skipped
-		entirely while `cannonCameraLockUntil` is active, i.e. briefly after firing with `lockCam`
-		set - matches real source never calling `updateCannonView`'s clamp logic once
-		`clientCmdLeaveCannon` has already cleared `$Client::ColCannon`), (2) drives the cannon
-		body/base's visual rotation from them, and (3) positions the render camera "slightly forward
-		in the body" (down the barrel) instead of behind-and-above the marble. */
 	function updateCannonCamera(cannon:Cannon, camera:Camera) {
 		var locked = level.marble.cannonCameraLocked();
 		if (!locked) {
-			// Clamp `nextCameraPitch`/`nextCameraYaw` (the raw mouse-look accumulators the input
-			// handler writes to) the same way `CameraPitch`/`CameraYaw` (this frame's already-
-			// smoothed values) are clamped, instead of overwriting the accumulators with the
-			// smoothed values outright. Overwriting `next*` with the current `*` every single frame
-			// (an earlier version of this function did that) discards whatever portion of that
-			// frame's mouse delta the `Util.lerp` smoothing in the shared code above hadn't caught
-			// up on yet, permanently losing most of the player's input each frame instead of just
-			// the part that's genuinely out of bounds - this made aiming feel very slow, and the
-			// effect got worse the tighter a given cannon's own bounds were (small bounds -> the
-			// clamp triggers on nearly every frame of movement).
 			var pitchLowBound = cannon.pitchBoundLow * Math.PI / 180;
 			var pitchHighBound = cannon.pitchBoundHigh * Math.PI / 180;
 			CameraPitch = Util.clamp(CameraPitch, -pitchHighBound, -pitchLowBound);
 			nextCameraPitch = Util.clamp(nextCameraPitch, -pitchHighBound, -pitchLowBound);
 
 			if (cannon.yawLimit) {
-				// `cannon.yaw` is in file/`hide` convention (zero-yaw = local +Y); `CameraYaw` is in
-				// this engine's own live-camera convention (zero-yaw = local +X) - a 90-degree axis
-				// mismatch, not just a differently-scaled unit (see `shapes.Cannon.
-				// computeCameraDirection`'s doc comment). Convert before comparing, or the bound
-				// cone ends up centered 90 degrees away from the cannon's actual resting direction.
 				var initialYaw = cannon.yaw * Math.PI / 180 + Math.PI / 2;
 				var leftBound = cannon.yawBoundLeft * Math.PI / 180;
 				var rightBound = cannon.yawBoundRight * Math.PI / 180;
@@ -890,20 +849,8 @@ class CameraController extends Object {
 			}
 		}
 
-		// `updateAimFromCamera` (not `updateAim`) - `CameraYaw`/`CameraPitch` are in this engine's
-		// own live-camera convention, not the cannon's authored file/`hide` convention `updateAim`
-		// expects (see `shapes.Cannon.computeCameraDirection`'s doc comment - conflating the two was
-		// a confirmed 90-degree aiming bug, not just a sign issue).
 		cannon.updateAimFromCamera(CameraYaw, CameraPitch);
 
-		// Ported from `updateCannonView`'s own unconditional `$MP::MyMarble.setTransform(%bodyTrans)`
-		// every frame while aiming - the cannon's base position never actually changes (only its
-		// rotation does), so this looks like a no-op, but it's real source's own way of pinning the
-		// marble in place against any residual velocity/contact-response drift while contained (the
-		// "frozen" physics layer only zeroes the marble's own *attributes*, it doesn't prevent
-		// collision-response impulses from nudging it). Without this, the marble could drift into a
-		// degenerate contact/velocity state that eventually fed a NaN into the rolling-sound pitch
-		// calculation and crashed the audio backend.
 		var basePos = cannon.baseTransform.getPosition();
 		level.marble.setMarblePosition(basePos.x, basePos.y, basePos.z);
 		level.marble.velocity.set(0, 0, 0);

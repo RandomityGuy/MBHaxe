@@ -118,13 +118,6 @@ class LapsState implements RewindableState {
 	}
 }
 
-/** Ported from PQ's `modes/laps.cs` - full lap-based circuit racing. Live progress
-	(`lapsCPCheck`/`lapsHitLastCP`) advances as `LapsCheckpoint`/`LapsCounterTrigger` are hit in
-	sequence; a *separate* snapshot (`checkpointLaps*`) is only updated when a checkpoint is
-	actually "activated" (a genuine forward hit, not a same-checkpoint re-touch) and is what
-	actually gets restored on respawn - matching `Mode_laps::onActivateCheckpoint`/
-	`onRespawnOnCheckpoint` exactly, including the subtlety that re-touching the checkpoint you're
-	already at doesn't reset anything. */
 class LapsMode extends NullMode {
 	var lapsNumber:Int;
 	var noLapsCheckpoint:Bool;
@@ -178,17 +171,10 @@ class LapsMode extends NullMode {
 		this.updateLapsHud();
 	}
 
-	/** Ported from `PlayGui::updateLaps`/`setLapsComplete` - PQ displays `min(lapsNumber,
-		lapsCounter)`, not the raw counter (which can briefly exceed `lapsNumber` right as the final
-		lap completes, before `onNextLap` decides whether to actually finish). */
 	function updateLapsHud() {
 		@:privateAccess level.playGui.formatLapsCounter(Std.int(Math.min(this.lapsCounter, this.lapsNumber)), this.lapsNumber);
 	}
 
-	/** Ported from `GameConnection::onNextLap` - always advances/resets progress regardless of
-		whether this lap actually finishes the mission (matches the original: the increment isn't
-		gated behind the finish check), and always returns true so the calling trigger always also
-		activates this line as a checkpoint. */
 	function onNextLap():Bool {
 		if (this.lapsCounter >= this.lapsNumber) {
 			if (level.gemCount != level.totalGems) {
@@ -210,7 +196,6 @@ class LapsMode extends NullMode {
 		return true;
 	}
 
-	/** Called by `LapsCounterTrigger`. */
 	public function onCounterTrigger(trigger:LapsCounterTrigger, marble:Marble) {
 		if (this.lapsHitLastCP) {
 			if (this.onNextLap())
@@ -220,7 +205,6 @@ class LapsMode extends NullMode {
 		}
 	}
 
-	/** Called by `LapsCheckpoint`. */
 	public function onCheckpointTrigger(trigger:LapsCheckpoint, marble:Marble) {
 		var highest = level.lapsLastCheckpointNumber;
 		if (trigger.checkpointNumber == this.lapsCPCheck) {
@@ -237,11 +221,6 @@ class LapsMode extends NullMode {
 		}
 	}
 
-	/** Ported from `GameConnection::activateLapsCheckpoint` - snapshots the marble's current spot
-		(or the trigger's fixed `spawnPoint` field, if it has one configured) as the respawn point,
-		along with a gravity override from the trigger's `forceGravity` field if set (else the
-		marble's current up vector), and snapshots live lap progress into the `checkpointLaps*`
-		fields at the same time (`Mode_laps::onActivateCheckpoint`). */
 	function activateCheckpoint(trigger:ILapsRespawnTrigger) {
 		if (this.noLapsCheckpoint || !trigger.enableRespawning)
 			return;
@@ -281,10 +260,6 @@ class LapsMode extends NullMode {
 		this.checkpointLapsStartTime = this.lapsStartTime;
 	}
 
-	/** Ported from `Mode_laps::getCheckpointPos`/`onRespawnOnCheckpoint` - restores progress to
-		whatever it was at the last *activated* checkpoint (not necessarily the live progress, if
-		the marble progressed further and then went OOB without touching another checkpoint), and
-		supplies the respawn position/facing/gravity captured at that same checkpoint. */
 	override function getRespawnTransform(marble:Marble):{position:Vector, orientation:Quat, up:Vector} {
 		if (this.noLapsCheckpoint || this.lapsCheckpoint == null)
 			return null;
