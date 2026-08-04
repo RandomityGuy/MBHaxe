@@ -6,12 +6,6 @@ import src.Marble;
 import src.MarbleWorld;
 import mis.MisParser;
 
-/** Ported from PQ's `FireballItem` (`server/scripts/fireball.cs`). Like `BubbleItem.hx`, this
-	doesn't occupy the single `heldPowerup` inventory slot - picking one up just activates the
-	marble's fireball state directly (`Marble.activateFireball`). Unlike Bubble, a new pickup can
-	*replace* an already-active fireball (refreshing its time) rather than only ever adding to one -
-	matches `FireballItem::onPickup`'s "don't downgrade" guard: reject if the marble's current
-	remaining time is already >= this item's `activeTime`. */
 class FireballItem extends PowerUp {
 	var activeTime:Float;
 

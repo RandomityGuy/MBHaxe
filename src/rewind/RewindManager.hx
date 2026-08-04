@@ -44,13 +44,7 @@ class RewindManager {
 
 	public var timeScale:Float = 1;
 
-	/** Recording (`recordFrame`) and reading (`getFrameAtIndex`) each reuse exactly one persistent
-		`RewindFrame` instead of allocating a fresh one every tick - both are populated, immediately
-		consumed (`serialize()`/`applyFrame()`), and discarded within the same function call, with no
-		code anywhere keeping a `RewindFrame` reference beyond that, so a single reused scratch
-		instance per direction is safe. See [PQ Port Status](pq-port-status.md)'s rewind-optimization
-		entry for the full writeup, including the handful of fields that still allocate fresh on
-		purpose because `applyFrame` hands them off by reference into long-lived state. */
+	// Reuse these to save allocations
 	var recordScratch:RewindFrame = new RewindFrame();
 
 	var readScratch:RewindFrame = new RewindFrame();
@@ -60,15 +54,6 @@ class RewindManager {
 		this.frameData = new BytesBuffer();
 	}
 
-	/** Populates the persistent `recordScratch` in place (see its doc comment) instead of building
-		a fresh `RewindFrame` graph every tick just to serialize and discard it - was previously the
-		single biggest GC-pressure source in this file, allocating a whole object graph (frame,
-		~15 cloned Vectors/Quats, ~10 arrays, a struct per trapdoor/fadeplatform/button/mover in the
-		level) every tick only to throw all of it away right after `serialize()`. None of this
-		function's writes into `recordScratch` are ever read back by anyone after `serialize()`
-		returns, so reference-only assignments (no `.clone()`/`.copy()`) are safe throughout - unlike
-		`RewindFrame.deserialize`, which has a few fields it deliberately still allocates fresh
-		because `RewindManager.applyFrame` hands *those* off by reference into long-lived state. */
 	public function recordFrame() {
 		var rf = recordScratch;
 		rf.timeState.currentAttemptTime = level.timeState.currentAttemptTime;
@@ -185,12 +170,7 @@ class RewindManager {
 
 		rf.marbleRadius = level.marble._radius;
 		rf.movementTriggerCount = level.marble.movementTriggerCount;
-		// One slot per non-`PathedInterior` mover, unconditionally (not filtered to only currently-
-		// active ones) - `active = false` for a mover that isn't path-active right now.
-		// `level.movingObjects` must be stable in size/order for the whole session (see
-		// `MarbleWorld.loadBegin`'s PathTrigger-target pre-scan) for this to align positionally
-		// across every recorded frame; otherwise a mover that gets triggered mid-game would shift
-		// every later frame's array out of alignment with earlier ones on rewind.
+
 		var pathFollowerIdx = 0;
 		for (mover in level.movingObjects) {
 			if (mover is src.PathedInterior)
@@ -288,12 +268,7 @@ class RewindManager {
 
 	public function applyFrame(rf:RewindFrame) {
 		level.timeState = rf.timeState.clone();
-		// `ParticleManager.currentTime` otherwise wouldn't reflect the just-restored (rewound) time
-		// until this frame's later `particleManager.update()` call - any emitter created *during*
-		// `applyFrame` (e.g. `Gem.setHide(false)` -> `startGemEmitter` for a gem un-picked-up by this
-		// rewind) would get stamped with the stale pre-rewind time as its `creationTime`, which
-		// `ParticleManager.tick`'s "remove emitters created in a future we've rewound past" check
-		// would then immediately (same frame) treat as being from the future and delete on the spot.
+
 		@:privateAccess level.particleManager.currentTime = 1000 * rf.timeState.timeSinceLoad;
 		level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
 		level.marble.setRotationQuat(rf.marbleOrientation.clone());
@@ -380,12 +355,7 @@ class RewindManager {
 		level.marble.isFrozen = rf.isFrozen;
 		level.marble.lastFreezeTime = rf.lastFreezeTime;
 		level.marble.powerupLockCount = rf.powerupLockCount;
-		// `powerupLockCount` itself was already snapshotted correctly, but the HUD icon
-		// (`PlayGui.lockPowerup`) is a one-shot call fired only on the 0<->1 transition edge
-		// (`Marble.lockPowerupUse`/`unlockPowerupUse`), not re-derived every frame - so without this,
-		// rewinding past a freeze (or any other lock reason) left the icon showing whatever it was at
-		// the moment rewind started, even though the underlying count was already correct. Fully
-		// derivable from the restored count, so no extra state needs to be captured for this.
+
 		level.playGui.lockPowerup(rf.powerupLockCount > 0);
 		level.timeStopTriggerCount = rf.timeStopTriggerCount;
 
@@ -503,9 +473,6 @@ class RewindManager {
 			var go:GameObject = cast mover;
 			var state = pfstates.shift();
 			if (!state.active) {
-				// Rewound to before this object was ever put on a path (e.g. a PathTrigger/button
-				// hasn't fired yet in this timeline) - un-trigger it entirely rather than leaving it
-				// stuck wherever it was mid-path.
 				go.deactivatePath();
 			} else {
 				if (go.pathFollower == null)

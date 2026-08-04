@@ -51,16 +51,6 @@ class TwoDState implements RewindableState {
 	}
 }
 
-/** Ported from PQ's `modes/2d.cs` - locks the camera to a fixed yaw plane (so mouse-look can't
-	rotate off it, matching the real `Physics::registerLayer("2d", "cameraSpeedMultiplier 0")`
-	layer's only effect) and widens the FOV to 90 while active. A mission-wide plane comes from
-	`MissionInfo.cameraplane`/`invertcameraplane`/`initialcameradistance`; `TDTrigger`/`StopTDTrigger`
-	(the two 2D-owned triggers) can independently activate/deactivate a possibly-different plane
-	per region regardless of whether the mission-wide mode is active.
-
-	`camDistance`/`pitchDegrees` use `Math.NaN` as the "not set" sentinel (both are otherwise
-	always-finite values - camera distance can't naturally be NaN, nor can an authored pitch in
-	degrees) rather than a nullable float. */
 class TwoDMode extends NullMode {
 	var hasMissionPlane:Bool = false;
 	var missionYaw:Float = 0;
@@ -79,8 +69,6 @@ class TwoDMode extends NullMode {
 		super(level);
 	}
 
-	/** Ported from `Mode_2d::detectCamera` - `xz`/`yz` are fixed yaw values, anything else is a raw
-		degree value; `invert` adds a half-turn on top. */
 	public static function planeToYaw(plane:String, invert:Bool):Float {
 		var yaw = switch (plane.toLowerCase()) {
 			case "xz": 0.0;
@@ -116,7 +104,6 @@ class TwoDMode extends NullMode {
 			this.activate(this.missionYaw, this.missionCamDistance, this.changesPitch, targetPitch);
 	}
 
-	/** Ported from `GameConnection::start2D`. */
 	public function activate(yaw:Float, camDistance:Float, changesPitch:Bool, pitch:Float) {
 		this.active = true;
 		this.targetYaw = yaw;
@@ -136,7 +123,6 @@ class TwoDMode extends NullMode {
 		level.scene.camera.setFovX(90, Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 	}
 
-	/** Ported from `GameConnection::stop2D`. */
 	public function deactivate() {
 		if (!this.active)
 			return;
@@ -144,9 +130,6 @@ class TwoDMode extends NullMode {
 		level.scene.camera.setFovX(getBaseFov(), Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 	}
 
-	/** The FOV to fall back to once 2D deactivates - mirrors `CameraController.init`'s own
-		`MissionInfo.cameraFov` override so leaving a `TDTrigger` doesn't silently drop back to the
-		player's own FOV setting on a mission that overrides it. */
 	function getBaseFov():Float {
 		var fovField = level.mission.missionInfo.camerafov;
 		return fovField != null && fovField != "" ? MisParser.parseNumber(fovField) : Settings.optionsSettings.fovX;
@@ -160,8 +143,6 @@ class TwoDMode extends NullMode {
 	override function update(t:src.TimeState) {
 		if (!this.active)
 			return;
-		// Re-lock every tick - counters any mouse-look yaw drift accumulated by `orbit()` between
-		// ticks, matching the effect of the real `cameraSpeedMultiplier 0` layer.
 		level.marble.camera.CameraYaw = this.targetYaw + Math.PI / 2;
 		level.marble.camera.nextCameraYaw = this.targetYaw + Math.PI / 2;
 		level.marble.camera.CameraPitch = this.targetPitch;
@@ -196,7 +177,6 @@ class TwoDMode extends NullMode {
 		this.targetPitch = s.targetPitch;
 		this.changesPitch = s.changesPitch;
 		this.lastPressedLR = s.lastPressedLR;
-		// Re-derive the FOV side effect rather than tracking it separately.
 		level.scene.camera.setFovX(this.active ? 90 : getBaseFov(), Settings.optionsSettings.screenWidth / Settings.optionsSettings.screenHeight);
 	}
 

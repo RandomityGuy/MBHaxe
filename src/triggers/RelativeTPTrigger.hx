@@ -9,13 +9,6 @@ import mis.MisParser;
 import src.MarbleWorld;
 import mis.MissionElement.MissionElementTrigger;
 
-/** Ported from PQ's `RelativeTPTrigger` (`server/scripts/teleporter.cs`). Unlike `TeleportTrigger`,
-	the destination is a fixed offset from the destination object's center - independent of where
-	the marble actually entered the trigger volume:
-	`diff = triggerCenter * -1 * TPScale` (componentwise), `pos = destCenter + diff + TPOffset`.
-	The `delay` field is parsed for fidelity but deliberately unused - it's parsed in the real
-	source's `onAdd` but never read anywhere in `onEnterTrigger`, so it has no actual effect there
-	either. */
 class RelativeTPTrigger extends Trigger {
 	var destination:String;
 	var silent:Bool = false;

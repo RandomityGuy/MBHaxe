@@ -2,11 +2,7 @@ package mis;
 
 import mis.MissionElement.MissionElementScriptObject;
 
-/** Parses PQ's `.mcs` (multiplayer-coop) mission format. Structurally the same SimGroup-based
-	body as a `.mis` file, but wrapped with an embedded `_GetMissionInfo()` function returning an
-	anonymous `new ScriptObject() { ... };` block that has to be sliced out and parsed separately,
-	then reinserted as a `MissionInfo`-named element (matching how `.mis` files have their
-	`MissionInfo` ScriptObject inline in the SimGroup body already). */
+// Parse MCS files specifically for PQ
 class McsParser {
 	var text:String;
 

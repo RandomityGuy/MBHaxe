@@ -8,20 +8,11 @@ import mis.MissionElement.MissionElementTrigger;
 import modes.GameMode.GameModeFactory;
 import modes.TwoDMode;
 
-/** Ported from PQ's `TDTrigger` datablock (`modes/2d.cs`) - starts 2D mode (possibly on a
-	different plane than the mission-wide default, or even in a mission that isn't 2D at all) on
-	marble-enter, stopping it again on leave unless `KeepEffectOnLeave` is set. Matches
-	`TDTrigger::onAdd`'s force-add behavior ("TDTrigger needs 2d mode but it's not listed in
-	MissionInfo. Activating it ourselves"): `MarbleWorld.loadBegin` pre-scans the mission for any
-	`TDTrigger` placement and appends `"2d"` to the mode string *before* `GameModeFactory.getGameMode`
-	builds the mode tree, so a `TwoDMode` is always guaranteed to exist here regardless of what the
-	mission itself declares - no runtime mode-tree mutation needed. */
 class TDTrigger extends Trigger {
 	var plane:String;
 	var invertDirection:Bool;
 	var keepEffectOnLeave:Bool;
-	// `Math.NaN` = "no override" (`camdistance`/`targetpitch` blank or "NoChange") - matches
-	// `TwoDMode.activate`'s sentinel convention.
+
 	var camDistance:Float;
 	var targetPitch:Float;
 	var changesPitch:Bool;

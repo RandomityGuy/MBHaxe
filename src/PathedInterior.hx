@@ -252,8 +252,6 @@ class PathedInterior extends InteriorObject {
 		}
 	}
 
-	/** Satisfies `IPathMover` (`Marble.advancePhysics` now iterates `level.movingObjects`
-		generically) by delegating to the existing substep-integration method above. */
 	public override function advancePath(timeStep:Float) {
 		this.advance(timeStep);
 	}
@@ -432,11 +430,6 @@ class PathedInterior extends InteriorObject {
 		this.setTransform(initialTform);
 		updatePosition();
 
-		// These are nested inside this interior's own `simGroup`, not `MarbleWorld.triggers`, so
-		// they're never reached by `MarbleWorld.restart()`'s global trigger-reset loop - reset them
-		// here instead. A no-op for the stateless `TriggerGotoDelayTarget`/`MustChangeTrigger`
-		// (`GameObject.reset()`'s default), but fixes `RepetitiveTriggerGotoTarget.triggered`/
-		// `enterCount` surviving a restart.
 		for (t in this.triggers)
 			t.reset();
 	}

@@ -94,10 +94,6 @@ import shapes.CannonBase;
 import shapes.Target;
 import src.PQDecorations;
 
-/**
- * Matches a lowercased mission-file `datablock` name to a registered entry.
- * `Any` lets a single entry accept several match rules (used for the sign/arrow overlap).
- */
 enum DatablockMatch {
 	Exact(names:Array<String>);
 	Prefix(prefix:String);
@@ -149,8 +145,6 @@ class DatablockRegistry {
 		return null;
 	}
 
-	// Order matters: entries are matched top-to-bottom, first match wins. This mirrors the
-	// original if/else chain, notably the sign* prefixes which must stay ordered narrowest-first.
 	public static var shapeEntries:Array<ShapeDatablockEntry> = [
 		{
 			match: Exact([
@@ -473,7 +467,6 @@ class DatablockRegistry {
 			create: (element, level) -> new OutOfBoundsTrigger(element, level)
 		},
 		{
-			// Mission-specific to `data/missions_pq/expert/Polymorphism.mcs` - see `MultipleTGTT.hx`.
 			match: Exact(["multipletgtt"]),
 			create: (element, level) -> new MultipleTGTT(element, level)
 		},

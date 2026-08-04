@@ -17,8 +17,6 @@ class SuperBounce extends PowerUp {
 		}
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh.
 		this.identifier = "SuperBounce" + this.dtsPath;
 		this.pickUpName = "Super Bounce PowerUp";
 		this.radarIndex = 28;

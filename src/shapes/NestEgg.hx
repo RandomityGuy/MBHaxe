@@ -7,11 +7,6 @@ import src.ResourceLoader;
 import src.ResourceLoaderWorker;
 import src.AudioManager;
 
-/** PQ's NestEgg_PQ::onPickup forwards verbatim to EasterEgg::onPickup, and the client-side
-	sound handler always plays the "easter"/"easterfound" pitched sounds regardless of egg type
-	(the NestEggSfx/NestEggFoundSfx audio profiles are defined in PQ's source but never actually
-	referenced anywhere - dead data) - so this reuses EasterEgg's mechanism/sounds exactly,
-	just keyed per-skin since a single mission can have multiple distinctly-skinned nest eggs. */
 class NestEgg extends PowerUp {
 	static var skins = ["base", "black", "blue", "brown", "green", "orange", "purple", "red"];
 

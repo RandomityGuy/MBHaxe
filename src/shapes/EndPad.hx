@@ -59,13 +59,6 @@ class EndPad extends DtsObject {
 		});
 	}
 
-	/** Ported from `EndPad_MBU::onAdd` (`server/scripts/pads.cs`) - `EndPad_MBU` spawns a purely
-		decorative light-beam column (`MBU_LightBeam`, `className = ""` despite inheriting the
-		`EndPad` datablock - that inheritance is just for convenience defaults, not actual finish-pad
-		behavior) rigidly attached with zero offset/rotation at the end pad's own transform. Same
-		scene-graph-child approach as `Checkpoint.hx`'s `SillyGlass` (a checkpoint/end pad never
-		moves, so real parent-child scene graph nesting - inheriting position/rotation/scale for free
-		- is simpler than a separately-tracked, manually-synced object). */
 	function spawnLightBeam(onFinish:Void->Void) {
 		var beam = new DtsObject();
 		beam.dtsPath = "data/shapes_mbu/pads/mbu/lightbeam.dts";
@@ -78,13 +71,6 @@ class EndPad extends DtsObject {
 			onFinish();
 		});
 	}
-
-	// override function onMarbleContact(timeState:TimeState, ?contact:CollisionInfo) {
-	// 	if (!isEntered) {
-	// 		isEntered = true;
-	// 		spawnFirework(timeState);
-	// 	}
-	// }
 
 	function spawnFirework(time:TimeState) {
 		var firework = new Firework(this.getAbsPos().getPosition(), time.timeSinceLoad, this.level);
@@ -168,11 +154,6 @@ class EndPad extends DtsObject {
 	}
 }
 
-/** Ported from `fireworks.cs`'s `FireWorkSmoke`/`FireWorkSmokeEmitter`. The real
-	`ejectionOffset`+theta/phi cone (0-90deg off up) is what actually produces the "smoke expanding
-	outward from a point" look - MBHaxe's previous version approximated this with a custom
-	`spawnOffset` circle-area function and no real ejection velocity; now that the cone/offset
-	system is accurately ported, that approximation isn't needed. */
 final fireworkSmoke:ParticleEmitterOptions = {
 	ejectionPeriod: 100,
 	ambientVelocity: new Vector(0, 0, 0),
@@ -203,7 +184,6 @@ final fireworkSmoke:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `fireworks.cs`'s `RedFireWorkTrail`/`RedFireWorkTrailEmitter`. */
 final redTrail:ParticleEmitterOptions = {
 	ejectionPeriod: 30,
 	ambientVelocity: new Vector(0, 0, 0),
@@ -234,7 +214,6 @@ final redTrail:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `fireworks.cs`'s `BlueFireWorkTrail`/`BlueFireWorkTrailEmitter`. */
 final blueTrail:ParticleEmitterOptions = {
 	ejectionPeriod: 30,
 	ambientVelocity: new Vector(0, 0, 0),
@@ -265,9 +244,6 @@ final blueTrail:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `fireworks.cs`'s `RedFireWorkSpark`/`RedFireWorkSparkEmitter` - the source doesn't
-	set `spinSpeed`/`spinRandomMin`/`spinRandomMax` at all, so those default to 0 (`ParticleData`'s
-	C++ constructor defaults), not MBHaxe's previous invented `40`/`-90`/`90`. */
 final redSpark:ParticleEmitterOptions = {
 	ejectionPeriod: 15,
 	ambientVelocity: new Vector(0, 0, 0),
@@ -298,8 +274,6 @@ final redSpark:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `fireworks.cs`'s `BlueFireWorkSpark`/`BlueFireWorkSparkEmitter` - same "no spin
-	fields set = defaults to 0" note as `redSpark`. */
 final blueSpark:ParticleEmitterOptions = {
 	ejectionPeriod: 60,
 	ambientVelocity: new Vector(0, 0, 0),

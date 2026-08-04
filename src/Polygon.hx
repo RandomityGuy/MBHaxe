@@ -137,10 +137,6 @@ class Polygon extends MeshPrimitive {
 		}
 	}
 
-	// Ported from real PQ's `tangentsFromVertices`/`calculateTangents` (`interiorRender.cc`): each
-	// vertex's tangent is orthogonalized against its own normal, and its handedness is derived from
-	// the sign of the UV-delta determinant (`r`) so that mirrored/flipped UV triangles get a tangent
-	// with the correct sign instead of always taking the same handedness.
 	function tangentForVertex(p0:Vector, p1:Vector, p2:Vector, uv0:Vector, uv1:Vector, uv2:Vector, n:Vector) {
 		var deltaPos1 = p1.sub(p0);
 		var deltaPos2 = p2.sub(p0);

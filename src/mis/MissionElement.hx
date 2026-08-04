@@ -89,26 +89,23 @@ class MissionElementScriptObject extends MissionElementBase {
 	var bluespawnchance:String;
 	var platinumspawnchance:String;
 
-	// Per-game-mode config fields (2D/Quota/Consistency/Laps/Haste) - `copyFields`
-	// (`mis/MisParser.hx`) only auto-populates fields already declared here, so these must exist
-	// as instance fields even though each is only meaningful when the corresponding mode word is
-	// active in `gamemode`.
+	// 2D
 	var cameraplane:String;
 	var invertcameraplane:String;
 	var initialcameradistance:String;
 	var targetpitch:String;
 
-	// Mission-wide camera defaults, ported from the editor's `EMI_cameraFov`/`EMI_menuCameraFov`/
-	// `EMI_cameraPitch`/`EMI_initialCameraDistance` fields (`core/editor/functions/editMissionInfo.cs`)
-	// - see `MarbleWorld.getDefaultCameraPitch`/`getDefaultCameraDistance` and
-	// `PlayGui`/camera-FOV setup for where these are actually applied.
+	// Camera settings
 	var camerafov:String;
 	var menucamerafov:String;
 	var camerapitch:String;
+	// Quota
 	var gemquota:String;
+	// Consistency
 	var minimumspeed:String;
 	var graceperiod:String;
 	var penaltydelay:String;
+	// Laps
 	var lapsnumber:String;
 	var nolapscheckpoint:String;
 	var speedtoqualify:String;
@@ -118,11 +115,7 @@ class MissionElementScriptObject extends MissionElementBase {
 	var radargemdistance:String;
 	var customradarrule:String;
 
-	// Mission-wide physics defaults, ported from the editor's `EMI_Mega`/`EMI_FanStrength`/
-	// `EMI_Gravity`/`EMI_JumpImpulse` fields (`core/editor/functions/editMissionInfo.cs`) - real
-	// source applies these in `applyGravity()` (`core/server/missionload.cs`), falling back to
-	// 20/7.5/40 respectively when blank; see `Marble.hx`'s `loadMarbleAttributes`/
-	// `isMegaMarbleEnabled` and `shapes/DuctFan.hx`/`SmallDuctFan.hx` for where they're applied.
+	// Other physics stuff
 	var mega:String;
 	var fanstrength:String;
 	var gravity:String;

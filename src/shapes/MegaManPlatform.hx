@@ -8,24 +8,6 @@ import src.Util;
 import collision.CollisionInfo;
 import mis.MissionElement.MissionElementStaticShape;
 
-/** Ported from `Vice.mcs`/`Versa.mcs`'s `MegaManPlatform` - a chain of disappearing/reappearing
-	platforms (named after the classic Mega Man vanishing-block puzzles), kicked off by a
-	`triggers.MegaManEmulationTrigger` and advancing down each platform's own `next` field.
-
-	Real PQ drives this with a cascade of `schedule()` calls per platform (each one, once shown,
-	independently schedules its own fade-out/hide/advance-to-next-platform callbacks). Per the
-	standing no-schedules rule, this is instead a single `showTime` timestamp per platform,
-	recomputed every frame (mirrors `FadePlatform`'s own "recompute from a timestamp" pattern) -
-	`update()` derives the current fade phase from `currentAttemptTime - showTime`, and separately
-	fires `next`'s `show()` once, `NEXT_DELAY` seconds in.
-
-	`onCollision`'s reschedule-on-touch (`fadeTimer`/`hideAgainTimer` reassigned from the collision
-	moment, without cancelling the schedule they're about to overwrite) has the *observable* effect
-	of "touching the platform resets its own fade-out countdown to start counting from the touch,
-	not from when it first appeared" - reproduced here as bumping `showTime` forward on contact,
-	gated the same way as the source (only the *first* platform in a chain, once each, via
-	`respondToCollision`/`hasCollided` - and the *last* platform in a chain, every time, via the
-	`next == null` branch that has no such gate). */
 class MegaManPlatform extends DtsObject {
 	static inline final FADE_S = 0.5; // $VV::MegaManFadeInOut
 	static inline final IDLE_S = 1.5; // $VV::MegaManTimer
@@ -39,7 +21,6 @@ class MegaManPlatform extends DtsObject {
 	public var respondToCollision:Bool = false;
 	public var hasCollided:Bool = false;
 
-	// -1e8 = never shown (permanently hidden, matches `onAdd`'s `hide(true)`/`startFade(0,0,1)`).
 	var showTime:Float = -1e8;
 	var queuedNext:Bool = false;
 
@@ -74,10 +55,6 @@ class MegaManPlatform extends DtsObject {
 		});
 	}
 
-	/** Resolves `next` lazily - DTS objects load asynchronously, so a same-mission named reference
-		may not exist in `namedGameObjects` yet at construction time (same reasoning as
-		`GameObjectParentFollower.advance`). `"-1"` (the terminal platforms' authored `Next` value)
-		never resolves to an object, matching `isObject(%obj.next)` being false for them. */
 	function resolveNext():MegaManPlatform {
 		if (this.next == null && this.nextName != null) {
 			var obj = this.level.namedGameObjects.get(this.nextName.toLowerCase());
@@ -87,8 +64,6 @@ class MegaManPlatform extends DtsObject {
 		return this.next;
 	}
 
-	/** Ported from `MegaManEmulationTrigger::onEnterTrigger`/`vv_megaManLoop`'s "unhide and start
-		fading in" half. */
 	public function show(timeState:TimeState) {
 		this.showTime = timeState.currentAttemptTime;
 		this.queuedNext = false;
@@ -100,8 +75,6 @@ class MegaManPlatform extends DtsObject {
 		if (hasNext && (!this.respondToCollision || this.hasCollided))
 			return;
 		this.hasCollided = true;
-		// Restart the idle/fade-out countdown from now, without replaying the fade-in (the platform
-		// is already at least partway visible by the time it can be touched at all).
 		this.showTime = timeState.currentAttemptTime - FADE_S;
 	}
 
@@ -136,9 +109,6 @@ class MegaManPlatform extends DtsObject {
 		}
 	}
 
-	/** Ported from `MegaManPlatform::onMissionReset` (wired to both a normal mission
-		restart/respawn and, via `ViceVersaMode.onOutOfBounds`, `serverCbOnOutOfBounds`'s
-		FPGroup scan). */
 	public override function reset() {
 		super.reset();
 		this.showTime = -1e8;

@@ -30,10 +30,6 @@ class Util {
 		return r2;
 	}
 
-	/** Wraps an angle (radians) to `(-PI, PI]` - ported from Torque's `normalizeAngle`, used by
-		`Cannon`'s yaw-bound clamping (`CameraController.updateCannonCamera`) to measure how far the
-		camera yaw has strayed from the cannon's own starting yaw regardless of which side of the
-		+-PI wraparound either value happens to fall on. */
 	public static inline function normalizeAngle(angle:Float):Float {
 		var wrapped = adjustedMod(angle + Math.PI, Math.PI * 2) - Math.PI;
 		return wrapped <= -Math.PI ? wrapped + Math.PI * 2 : wrapped;

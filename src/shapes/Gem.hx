@@ -14,16 +14,6 @@ import src.ParticleSystem.ParticleEmitterOptions;
 import h3d.mat.BlendMode;
 import src.Marble;
 
-/** PQ's per-color gem sparkle (`GemParticle<Color>`/`GemEmitter<Color>`, `server/scripts/gems.cs`) -
-	an ambient emitter that runs continuously while the gem is uncollected, cleared on pickup
-	(`Gem::onPickup`'s `clearFX`) and restored if un-picked-up (rewind). Base settings shared by
-	every color (`GemParticleBase`/`GemEmitterBase`): a small glint, one every 40ms, using standard
-	alpha blending (`useInvAlpha = true` in the source maps to `Alpha`, not `Add` - see
-	`ParticleOptions.blending`'s doc comment for the general mapping). The
-	source's `dragCoeffiecient = 0.1` is misspelled (dead field - the real, unset `dragCoefficient`
-	defaults to `ParticleData`'s C++ default of 0), so this is a true 0, not the earlier port's `0.1`.
-	`emitterLifetime` substitutes "effectively forever" for the source's own `lifetimeMS = 0`
-	sentinel (see `PhysModTrigger.hx`'s note on the same substitution). */
 final gemParticleBase:ParticleEmitterOptions = {
 	ejectionPeriod: 40,
 	periodVariance: 0,
@@ -179,8 +169,7 @@ class Gem extends DtsObject {
 		if (isFancy) {
 			color = element.fields.exists("skin") ? element.fields.get("skin")[0] : "base";
 		}
-		// Instancing batches by `identifier`; color alone isn't enough since fancy/PQ/vanilla gems
-		// use different mesh geometry (see dtsPath above), not just a different material.
+
 		this.identifier = "Gem" + color + dtsPath;
 		this.matNameOverride.set('base.gem', color + ".gem");
 		gemColor = color + ".gem";
@@ -227,9 +216,6 @@ class Gem extends DtsObject {
 				radarGemIndex = 9;
 		}
 
-		// PQ only spawns the ambient sparkle on its own gems (`GemItem_PQ`/`FancyGemItem_PQ` set
-		// `pq = true` specifically "for gemFX"), and only if the level author didn't disable it via
-		// the `noParticles` custom field.
 		this.isPQGem = isPQ || isFancy;
 		var noParticlesField = element.fields != null ? element.fields.get("noparticles") : null;
 		var noParticles = noParticlesField != null && mis.MisParser.parseBoolean(noParticlesField[0]);
@@ -251,8 +237,6 @@ class Gem extends DtsObject {
 		});
 	}
 
-	/** Starts (or restarts) the ambient sparkle - safe to call repeatedly, matching PQ's
-		`initFX`/`clearFX` being idempotent from script's perspective. */
 	function startGemEmitter() {
 		if (!this.spawnGemParticles || this.gemEmitter != null)
 			return;

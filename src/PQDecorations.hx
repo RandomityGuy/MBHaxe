@@ -1,8 +1,5 @@
 package src;
 
-/** Datablock name (lowercased) -> dts path, for purely-cosmetic PlatinumQuest static props
-	that need nothing beyond `PQProp` (no bespoke behavior class). Used as a fallback by
-	`DatablockRegistry.resolveShape` once the ordered match list misses. */
 class PQDecorations {
 	public static var paths:Map<String, String> = [
 		// Fences
@@ -114,7 +111,7 @@ class PQDecorations {
 		"window01o_3x3_light" => "data/shapes_pq/scenery/windows/window01o_3x3_light.dts",
 		"window01o_6x6" => "data/shapes_pq/scenery/windows/window01o_6x6.dts",
 		"window01o_6x6_light" => "data/shapes_pq/scenery/windows/window01o_6x6_light.dts",
-		"window02" => "data/shapes_pq/scenery/windows/window01.dts", // matches a literal bug in PQ's own script (Window02's shapeFile points at Window01.dts)
+		"window02" => "data/shapes_pq/scenery/windows/window01.dts",
 		"window02_light" => "data/shapes_pq/scenery/windows/window02_light.dts",
 		"window02_3x3" => "data/shapes_pq/scenery/windows/window02_3x3.dts",
 		"window02_3x3_light" => "data/shapes_pq/scenery/windows/window02_3x3_light.dts",
@@ -220,12 +217,7 @@ class PQDecorations {
 		"sockwgift" => "data/shapes/xmas/sockwgift.dts",
 		"sockwnobody" => "data/shapes/xmas/sockwnobody.dts",
 		"thegamebox" => "data/shapes/xmas/thegame_box.dts",
-		// Water surfaces - purely visual (`server/scripts/water.cs`'s `Water` class); the ambient
-		// wave animation plays automatically via the generic DTS sequence system, no special
-		// handling needed. Gameplay effects come from the separate `WaterPhysicsTrigger` volume a
-		// level author places on top. The "_slow" cylinder's z-scale-flatten quirk (`isScaled`) is
-		// not reproduced - not worth bespoke `setTransform` machinery for a cosmetic edge case, and
-		// the DTS has no collision mesh either way.
+		// Water surfaces
 		"waterplane" => "data/shapes_pq/gameplay/water.dts",
 		"watercylinder" => "data/shapes_pq/other/cylinderwater.dts",
 		"watercylinder_slow" => "data/shapes_pq/other/cylinderwater_slow.dts",

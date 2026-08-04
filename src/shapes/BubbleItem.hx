@@ -12,10 +12,6 @@ import src.ParticleSystem.ParticleEmitterOptions;
 import src.ParticleSystem.ParticleEmitter;
 import mis.MisParser;
 
-/** Ported from `server/scripts/particles/ItemBubbleEmitter.cs` - the ambient bubble-fizz `fxEmitter`
-	every `BubbleItem` pickup has (`server/scripts/powerups.cs`'s `fxEmitter[0] = "ItemBubbleEmitter"`),
-	distinct from the marble's own underwater-breathing bubble trail (`Marble.hx`'s
-	`TrailBubble` particle slot) despite sharing the same `bubble.png` texture as the real engine. */
 final itemBubbleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 25,
 	periodVariance: 24,
@@ -52,12 +48,6 @@ final itemBubbleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from PQ's `BubbleItem` (`server/scripts/powerups.cs`) - unlike every other `PowerUp`,
-	picking one up doesn't occupy the single `heldPowerup` inventory slot at all; it just banks
-	time directly onto the marble (`Marble.setBubbleTime`, mirroring `client.setBubbleTime`), so the
-	slot stays free for another one-shot powerup even while bubble time is banked. `use()` is
-	consequently never actually invoked through the normal `heldPowerup.use()` path - the marble's
-	own `updateBubble` (hold-to-use, gated on `Move.powerupHeld`) drives activation instead. */
 class BubbleItem extends PowerUp {
 	var time:Float;
 	var infinite:Bool;
@@ -78,12 +68,8 @@ class BubbleItem extends PowerUp {
 	}
 
 	public function pickUp(marble:Marble):Bool {
-		// Matches `BubbleItem::onPickup`'s guard - no sense picking up another one while already
-		// infinite.
 		if (marble.bubbleInfinite)
 			return false;
-		// "Can't bubble with fireball" - one-directional (Fireball pickup cancels Bubble, but not
-		// vice versa; see `Marble.activateFireball`).
 		if (marble.fireball)
 			return false;
 		marble.setBubbleTime(this.time, this.infinite);
@@ -99,14 +85,12 @@ class BubbleItem extends PowerUp {
 			this.bubbleFxData = new ParticleData();
 			this.bubbleFxData.identifier = "itemBubbleFx";
 			this.bubbleFxData.texture = ResourceLoader.getResource("data/particles/bubble.png", ResourceLoader.getTexture, this.textureResources);
-			this.bubbleFxEmitter = this.level.particleManager.createEmitter(itemBubbleOptions, this.bubbleFxData, null,
-				() -> this.getAbsPos().getPosition());
+			this.bubbleFxEmitter = this.level.particleManager.createEmitter(itemBubbleOptions, this.bubbleFxData, null, () -> this.getAbsPos().getPosition());
 			onFinish();
 		});
 	}
 
 	public override function dispose() {
-		// Must run before `super.dispose()` - `DtsObject.dispose()` nulls `this.level`.
 		if (this.bubbleFxEmitter != null) {
 			this.level.particleManager.removeEmitter(this.bubbleFxEmitter);
 			this.bubbleFxEmitter = null;

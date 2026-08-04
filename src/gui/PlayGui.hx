@@ -43,35 +43,16 @@ class MiddleMessage {
 	var age:Float;
 }
 
-/** One active "toast" notification - ported from `chathud.cs`'s `createHelpMessage`/
-	`addHelpLine`/`updateMessages`/`shiftMessages` (`PG_MessageListBox`'s stack of sliding
-	messages), built from the SAME `GuiControl`/`GuiBitmapBorderCtrl`/`GuiMLText` system (and the
-	same field values - position/extent/horizSizing/vertSizing - as the real `.gui`/script) every
-	other `PlayGui` element already uses, rather than raw `h2d` objects with hand-derived pixel
-	math - `GuiControl`'s `horizSizing`/`vertSizing` handling is already a correct, tested port of
-	Torque's own anchor semantics, so building the exact same control tree with the exact same
-	field values sidesteps needing to re-derive any of that math by hand. This is what this port's
-	own `alertTextForeground`/`setAlertText`/`displayAlert` naming was always *meant* to represent
-	(pickup/status notifications) - that was previously just a single-message fade placeholder, now
-	fully replaced. NOT the same system as `PlayGui.helpTextForeground`/`setHelpText` (that's
-	`addBubbleLine`'s separate persistent help-bubble machinery, for mission help-trigger text). */
+// PQ's side help messages
 class ToastMessage {
-	/** Matches `createHelpMessage`'s own `%width = min(getWord(PG_ChatBubbleBox.position, 0) + 20,
-		400)` - `PG_ChatBubbleBox.position`'s x is itself a fixed constant (80) in `playGui.gui`, so
-		this always evaluates to a fixed 100 regardless of anything runtime-computed. */
 	public static inline var WIDTH = 340.0;
 
-	/** Default box height before the post-reflow resize (`createHelpMessage`'s own initial
-		`extent = %width SPC "70"`). */
 	public static inline var DEFAULT_HEIGHT = 70.0;
-
-	/** `$ChatHudMessageXSpeed[1]`/`[-1]`/`$ChatHudMessageYSpeed`, reference-canvas px/sec. */
 	public static inline var X_SPEED_IN = 900.0;
 
 	public static inline var X_SPEED_OUT = 600.0;
 	public static inline var Y_SPEED = 250.0;
 
-	/** Matches `shiftMessages`'s own `+ 24`. */
 	public static inline var SPACING = 0.0;
 
 	public var box:GuiControl;
@@ -83,8 +64,6 @@ class ToastMessage {
 	public var targetY:Float;
 	public var direction:Int;
 
-	/** The full vertical space this message occupies in the stack (box height + `SPACING`) -
-		matches `shiftMessages(getWord(%foregroundName.getExtent(), 1) + 24)`. */
 	public var height:Float;
 
 	public var age:Float = 0;
@@ -131,17 +110,8 @@ class PlayGui {
 	var gemImageObject:DtsObject;
 	var gemImageSceneTargetBitmap:Bitmap;
 
-	/** Ported from PQ's `GemsQuota` control (`client/ui/playGui.gui`) - a small "/trueTotal" suffix
-		shown beside the main gem counter while `QuotaMode` is active (whose own main counter shows
-		`collected/quota` instead of `collected/totalGems`), so the level's real 100%-completion
-		total is still visible. No rainbow/green "100%" visual effect - out of scope per instruction. */
 	var gemsQuota:GuiText;
 
-	/** Ported from PQ's `PGLapsCounter` (`client/ui/playGui.gui`) - shown while `LapsMode` is
-		active. Uses the same bitmap-digit-strip + `anim.color` tint convention as `gemCountNumbers`/
-		the speedometer digits (PQ's own `PGLapsOneComplete`/`PGLapsOneTotal` are `GuiBitmapCtrl`s
-		using `./game/numbers/N`, not a text control - unlike `GemsQuota`, which really is a
-		`GuiMLTextCtrl` in the source). */
 	var lapsCounterCtrl:GuiControl;
 
 	var lapsCounterTransparency:GuiImage;
@@ -150,29 +120,12 @@ class PlayGui {
 	var lapsCounterDigitTotal:GuiAnim;
 	var lapsCounterSlash:GuiImage;
 
-	/** Ported from PQ's `PGCountdownThTimer` (`client/ui/playGui.gui`, thousandths-precision
-		variant - `client/scripts/playGui.cs`'s `updateCountdown`) - `CountdownStartTrigger`/
-		`CountdownStopTrigger`'s dedicated HUD element. Explicitly NOT the same counter as
-		`countdownNumbers`/`formatCountdownTimer` (that one's `PG_HuntCounter`'s Hunt-mode gem-respawn
-		countdown, MP-only, and empty/uninitialized in SP) - the two are unrelated PQ controls that
-		happen to look similar. Same on-screen position as `PGLapsCounter` in the source, but the two
-		are never shown at once (Laps vs. a `CountdownStartTrigger`-using mission). */
 	var countdownThCtrl:GuiControl;
-
 	var countdownThImage:GuiImage;
 	var countdownThNumbers:Array<GuiAnim> = [];
 	var countdownThColon:GuiAnim;
 	var countdownThPoint:GuiAnim;
 
-	/** Ported from PQ's analog speedometer (`client/scripts/speedometer.cs`,
-		`client/ui/playGui.gui`'s `PGSpeedometer` control tree) - shown while `ConsistencyMode`
-		and/or `HasteMode` are active. 3 stacked copies of the same scrolling tape texture
-		(`spdbackground1/2/3.png`, each taller than the visible border) are repositioned every frame
-		so whichever copy currently overlaps the border's visible window shows the right tick marks
-		under the fixed arrow - the border `GuiControl`'s `h2d.Flow` clips everything outside its own
-		extent automatically (Heaps' `overflow = Hidden`), no manual clip mask needed. Repositioning
-		happens on the bare `.bmp`/`.anim` objects directly every frame (not `GuiControl.position` +
-		`.render()`, which is only for initial layout) since this needs to run every tick. */
 	var speedometerCtrl:GuiControl;
 
 	var speedometerBorder:GuiControl;
@@ -190,42 +143,18 @@ class PlayGui {
 	var speedometerDigitTen:GuiAnim;
 	var speedometerDigitOne:GuiAnim;
 
-	// Rest (velocity = 0, "not hundreds") bare-element positions, captured once after the initial
-	// `render()` - every subsequent frame just adds a `Settings.uiScale`-multiplied delta on top of
-	// these, matching how `getRenderRectangle()` scales `position` by `uiScaleFactor` at setup time.
 	var speedometerRestCaptured:Bool = false;
 	var speedometerBackground1RestY:Float = 0;
 	var speedometerMarkerRestY:Float = 0;
 	var speedometerDigitOneRestX:Float = 0;
 	var speedometerDigitTenRestX:Float = 0;
 
-	/** `MissionInfo.MinimumSpeed`/`MissionInfo.SpeedToQualify` - `0` means "that mode isn't active",
-		matching PQ's own truthy-check convention (`MissionInfo.MinimumSpeed && ...`). Set once by
-		`ConsistencyMode`/`HasteMode`'s constructors; read every frame by `updateSpeedometer` so the
-		speedometer/digit-coloring/marker logic is computed once per frame regardless of how many of
-		the two modes are simultaneously active (avoids each mode's own `update()` stomping on the
-		other's marker if both ran the full speedometer update independently). */
 	var speedometerMinimumSpeed:Float = 0;
 
 	var speedometerSpeedToQualify:Float = 0;
 
-	/** Ported from PQ's `UnderwaterOL` (`client/ui/playGui.gui`) - a full-screen overlay shown while
-		the *camera* (not necessarily the marble) is inside a water trigger (`performWaterOverlay`,
-		`client/scripts/water.cs`). Added directly to `scene2d` rather than through `GuiControl`
-		(matching `RSGOCenterText`/`gemImageSceneTargetBitmap`'s existing raw-bitmap convention),
-		since it's just a fixed full-screen quad with no layout needs. */
 	var underwaterOverlay:Bitmap;
 
-	/** Ported from PQ's `PG_BubbleContainer` (`client/ui/playGui.gui`) - the Bubble PowerUp's
-		remaining-time bar. Ported from `PlayGui::updatePowerupTimerPos` (`client/scripts/
-		playGui.cs`) - unlike every other HUD element in this file, this one isn't at a fixed
-		reference-canvas position at all: it tracks the marble's *projected screen position* every
-		frame (`getGuiSpace`/`getPixelSpace` off a point offset to the marble's side by its collision
-		radius), so it's built from raw `h2d` objects added directly to `scene2d` (matching
-		`RSGOCenterText`/marble radar nametags' existing raw-object convention) rather than
-		`GuiControl`, which only knows how to lay out a fixed reference-canvas position. Uses this
-		codebase's existing `blastFill`-style direct-stretch technique (`bubbleBarFillBmp.width`
-		scaled by remaining-time fraction) for the "shrinking bar" effect. */
 	var bubbleBarFillBmp:Bitmap;
 
 	var bubbleBarFillFlow:h2d.Flow;
@@ -235,10 +164,6 @@ class PlayGui {
 	var bubbleBarNormalTile:Tile;
 	var bubbleBarInfiniteTile:Tile;
 
-	/** Ported from PQ's `PG_FireballContainer` - same raw-`h2d`-object/marble-tracking convention as
-		the Bubble bar above (`PlayGui::updateFireballBar`/`updateBarPositions`). The meter image
-		itself swaps between "lit"/"unlit" tiles depending on whether a blast is currently off
-		cooldown (`Marble.canFireballBlast`). */
 	var fireballBarFillBmp:Bitmap;
 
 	var fireballBarFillFlow:h2d.Flow;
@@ -247,12 +172,6 @@ class PlayGui {
 	var fireballBarLitTile:Tile;
 	var fireballBarUnlitTile:Tile;
 
-	/** Cannon HUD (`client/scripts/cannon.cs`'s `updateCannonUI`) - only the `!showAim` half (a
-		colored reticle plus a 4-quadrant charge gauge); the aim-assist trajectory rings
-		(`showAim`/`aimSize`/`aimTriggers`) are a separate, not-yet-ported feature, per direct
-		instruction. Never shown for `instant` cannons (matches `clientCmdEnterCannon`'s instant
-		branch never reaching the camera-override calls this HUD is conceptually paired with in real
-		source - see `CameraController.updateCannonCamera`). */
 	var cannonHudCtrl:GuiControl;
 
 	var cannonRetImage:GuiImage;
@@ -263,9 +182,6 @@ class PlayGui {
 	var cannonChargeIm3:GuiImage;
 	var cannonChargeIm4:GuiImage;
 
-	/** `cannonChargeTiles[quadrant 0-3][step 0-5]` - step 0 is always the shared "empty" tile
-		(`cannon_0.png`, matches real source reusing that same file for every quadrant's zero
-		state). */
 	var cannonChargeTiles:Array<Array<Tile>>;
 
 	var powerupBox:GuiImage;
@@ -291,10 +207,6 @@ class PlayGui {
 	var helpTextDuration:Float = 0;
 	var helpTextStartTime = -1e8;
 
-	/** Ported from PQ's `PG_MessageListBox` (`createHelpMessage`/`updateMessages`,
-		`client/scripts/chathud.cs`) - see `ToastMessage`'s doc comment for how this maps to (and
-		replaces) this port's earlier single-message `alertText*`/`setAlertText` placeholder. Real
-		values: `horizSizing="right"`, `vertSizing="height"`, `position="0 70"`, `extent="500 500"`. */
 	var toastListBox:GuiControl;
 
 	var toastMessages:Array<ToastMessage> = [];
@@ -358,10 +270,6 @@ class PlayGui {
 			powerupImageSceneTargetBitmap.remove();
 			RSGOCenterText.remove();
 
-			// These are raw h2d objects added directly to scene2d (not through playGuiCtrl's
-			// GuiControl tree, which `playGuiCtrl.dispose()` above already handles) - matching the
-			// gem/powerup image scene targets and RSGOCenterText above, they need their own explicit
-			// removal or they'd be silently orphaned in scene2d past this level unloading.
 			if (underwaterOverlay != null)
 				underwaterOverlay.remove();
 			if (bubbleBarFillBmp != null) {
@@ -719,13 +627,10 @@ class PlayGui {
 		setQuotaCounterVisible(false);
 	}
 
-	/** Shows/hides the small "/trueTotal" suffix beside the main gem counter (`QuotaMode` only). */
 	public function setQuotaCounterVisible(visible:Bool) {
 		gemsQuota.text.visible = visible;
 	}
 
-	/** Sets the "/trueTotal" digits to the level's real total gem count (`level.totalGems`) - this
-		doesn't change during a run, so it's set once when Quota activates, not every pickup. */
 	public function formatQuotaCounter(trueTotal:Int) {
 		gemsQuota.text.text = '/${trueTotal}';
 	}
@@ -773,10 +678,6 @@ class PlayGui {
 		lapsCounterDigitTotal.anim.visible = visible;
 	}
 
-	/** Ported from `PlayGui::updateLaps` (`client/scripts/playGui.cs`) - only the *ones* digit of
-		each count is ever shown (`%completeOne = (%this.lapsComplete % 10)`, matching the source
-		exactly, quirks included - a mission with >= 10 laps would display misleadingly, but that's
-		what the original does too), tinted green once `complete >= total`. */
 	public function formatLapsCounter(complete:Int, total:Int) {
 		var color = complete >= total ? timerStopped : timerNormal;
 		lapsCounterDigitComplete.anim.currentFrame = complete % 10;
@@ -851,16 +752,11 @@ class PlayGui {
 		countdownThPoint.anim.visible = visible;
 	}
 
-	/** `icon` matches `CountdownStartTrigger`'s `icon` field (a filename under
-		`data/ui/game/countdown/`, default `timerTimeTravel` per the source). */
 	public function setCountdownThIcon(icon:String) {
 		countdownThImage.setTile(ResourceLoader.getResource('data/ui/game/countdown/${icon.toLowerCase()}.png', ResourceLoader.getImage, this.imageResources)
 			.toTile());
 	}
 
-	/** Ported from `PlayGui::updateCountdown`'s thousandths branch (`client/scripts/playGui.cs`) -
-		`time` is in seconds (matching `MarbleWorld.countdownRemaining`), `0` hides the whole
-		control. */
 	public function formatCountdownThTimer(time:Float, color:Int = 0xFFFFFFFF) {
 		if (time <= 0) {
 			setCountdownThVisible(false);
@@ -989,10 +885,6 @@ class PlayGui {
 		setSpeedometerVisible(false);
 	}
 
-	/** Called once, right after the first `render()` pass lays everything out - captures the
-		"rest" (velocity = 0, "not hundreds") bare-element positions that `updateSpeedometer` adds a
-		`Settings.uiScale`-multiplied delta on top of every frame, rather than re-deriving the full
-		parent-offset chain each time. */
 	function captureSpeedometerRestPositions() {
 		speedometerBackground1RestY = speedometerBackground1.bmp.y;
 		speedometerMarkerRestY = speedometerConsMarker.bmp.y;
@@ -1015,9 +907,6 @@ class PlayGui {
 		}
 	}
 
-	/** Ported from `Mode_consistency`/`Mode_haste`'s constructors - `0` disables that mode's
-		threshold/marker; both can be set simultaneously (a `"Consistency Haste"` mission shows both
-		markers on the same dial). */
 	public function setConsistencyThreshold(minimumSpeed:Float) {
 		speedometerMinimumSpeed = minimumSpeed;
 	}
@@ -1026,16 +915,6 @@ class PlayGui {
 		speedometerSpeedToQualify = speedToQualify;
 	}
 
-	/** Ported from PQ's `PlayGui::updateSpeedometer` (`client/scripts/speedometer.cs`) - scrolls the
-		3 stacked tape backgrounds so the tick mark for `velocity` sits under the fixed arrow,
-		updates the digital digit readout (color: red if below `speedometerMinimumSpeed`, green if
-		above `speedometerSpeedToQualify`, else white), and repositions both threshold markers so
-		they scroll in lockstep with the tape (same formula as the tape, offset by a constant baked
-		from each threshold - see `ConsistencyMode`/`HasteMode`'s HUD wiring for the derivation).
-		Runs once per frame from `MarbleWorld`'s update loop regardless of which/how many of
-		Consistency/Haste are active, rather than each mode independently re-running this (which
-		would double the work and let whichever mode's `update()` ran last stomp on the other's
-		digit-coloring). */
 	public function updateSpeedometer(velocity:Float) {
 		if (speedometerCtrl == null)
 			return;
@@ -1048,7 +927,6 @@ class PlayGui {
 		if (!speedometerRestCaptured)
 			captureSpeedometerRestPositions();
 
-		// Ported from `speedometer.cs`'s digit-shift logic (makes room for the hundreds digit).
 		var showHundreds = velocity >= 100;
 		var showTens = velocity >= 10;
 		var hundredsShiftUiUnits = (showHundreds ? 11 : 0) * Settings.uiScale;
@@ -1071,12 +949,10 @@ class PlayGui {
 		speedometerDigitTen.anim.currentFrame = ten + colorOffset;
 		speedometerDigitHun.anim.currentFrame = hun + colorOffset;
 
-		// Ported from `speedometer.cs`'s scroll math, scaled by 0.8 (PQ's 800x600 reference canvas
-		// vs this port's 640x480 one) - see class doc for the derivation.
-		var targetY = -607.2 + 6.4 * velocity;
-		if (targetY > 1710.4)
-			targetY = 1710.4; // Matches the "gone to plaid" clamp (without the achievement popup)
-		var deltaCanvasUnits = targetY - (-607.2);
+		var targetY = -759 + 8 * velocity;
+		if (targetY > 2138)
+			targetY = 2138;
+		var deltaCanvasUnits = targetY - (-759);
 
 		speedometerBackground1.bmp.y = speedometerBackground1RestY + deltaCanvasUnits * Settings.uiScale;
 		speedometerBackground2.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 806.4) * Settings.uiScale;
@@ -1113,8 +989,6 @@ class PlayGui {
 		underwaterOverlay.visible = false;
 	}
 
-	/** `cameraInWater` is computed by `MarbleWorld` (it owns the actual camera position/water-
-		trigger lookup) and just passed through here every frame. */
 	public function setUnderwaterOverlayVisible(cameraInWater:Bool) {
 		if (underwaterOverlay == null)
 			return;
@@ -1123,8 +997,6 @@ class PlayGui {
 		underwaterOverlay.height = scene2d.height;
 	}
 
-	/** Ported from `playGui.gui`'s `PGCannonRet`/`PGChargeGui` control tree - see
-		`cannonHudCtrl`'s doc comment for scope (reticle + charge gauge only, no aim-assist rings). */
 	function initCannonHud() {
 		cannonHudCtrl = new GuiControl();
 		cannonHudCtrl.horizSizing = Center;
@@ -1181,16 +1053,6 @@ class PlayGui {
 		cannonChargeIm4 = makeChargeImage(129, 129);
 	}
 
-	/** Ported from `updateCannonUI` (`client/scripts/cannon.cs`) - `showAim`/aim-assist half is
-		intentionally not implemented (see `cannonHudCtrl`'s doc comment), so the charge gauge is
-		shown whenever `useCharge` is true regardless of `showAim` (real source only shows it when
-		`useCharge && !showAim`, since a `showAim` cannon normally gets its charge feedback from the
-		rings instead - since this port has no rings yet, showing the gauge unconditionally for
-		`useCharge` cannons is the only way charge feedback exists at all right now; safe to tighten
-		back to the real condition once aim-assist rings are ported). `GuiControl` itself has no
-		visibility concept (`gui.GuiControl` is purely a layout container) - visibility is toggled on
-		each leaf `GuiImage`'s own `.bmp` directly, matching this file's established convention
-		(`setLapsCounterVisible`/`setCountdownThVisible`, etc). */
 	public function updateCannonHud(showReticle:Bool, skin:String, useCharge:Bool, chargeFraction:Float) {
 		if (cannonHudCtrl == null)
 			return;
@@ -1268,7 +1130,6 @@ class PlayGui {
 		fireballBarText.visible = false;
 	}
 
-	/** See `setBubbleBarPosition`'s doc comment - same convention. */
 	public function setFireballBarPosition(x:Float, y:Float) {
 		if (fireballBarMeterBmp == null)
 			return;
@@ -1279,7 +1140,6 @@ class PlayGui {
 		fireballBarFillFlow.setPosition(x, y);
 	}
 
-	/** Ported from PQ's `PlayGui::updateFireballBar` - same 50-133 fill range as the Bubble bar. */
 	public function updateFireballBar(fireballTime:Float, fireballTotalTime:Float, canBlast:Bool) {
 		if (fireballBarMeterBmp == null)
 			return;
@@ -1331,16 +1191,6 @@ class PlayGui {
 		bubbleBarText.textAlign = Center;
 	}
 
-	/** Ported from PQ's `PlayGui::updatePowerupTimerPos` (`client/scripts/playGui.cs`) - the bar
-		tracks the marble's projected screen position every frame rather than sitting at a fixed HUD
-		spot; `MarbleWorld` owns the actual world-to-screen projection (it has the camera/marble) and
-		just passes the already-computed screen-space anchor point through here every frame. `x`/`y`
-		are the *side* offset point PQ computes (`getPixelSpace(getGuiSpace(...))` of a point offset
-		to the marble's side by its collision radius) plus PQ's own `+20`/`-38` pixel nudge, and
-		`centerY` is the un-offset marble-center projection's Y (PQ reads `%y` from the *center*
-		projection, not the side one, for its own Y before applying `-38`) - both already include
-		that nudge by the time they reach here, so this method only needs to lay out the bar/text
-		relative to that single anchor point. */
 	public function setBubbleBarPosition(x:Float, y:Float) {
 		if (bubbleBarMeterBmp == null)
 			return;
@@ -1351,8 +1201,6 @@ class PlayGui {
 		bubbleBarFillFlow.setPosition(x, y);
 	}
 
-	/** Ported from PQ's `PlayGui::updateBubbleBar` - fill width ranges from 50 (only just picked
-		up/about to expire) to 133 (full). */
 	public function updateBubbleBar(bubbleTime:Float, bubbleTotalTime:Float, bubbleInfinite:Bool) {
 		if (bubbleBarMeterBmp == null)
 			return;
@@ -1479,9 +1327,6 @@ class PlayGui {
 		helpTextInner.addChild(helpTextForeground);
 		helpTextContainer.addChild(chatBubbleIcon);
 
-		// Ported from PQ's `<bold:23>` prefix on `addHelpLine`'s text - same underlying bitmap font
-		// as `bfont` above, just a smaller target size for the toast notifications (`addHelpLine`/
-		// `ToastMessage`, see their doc comments).
 		toastMessageFont = squishney25b.toSdfFont(cast 20 * Settings.uiScale, MultiChannel, 0.5, 0.5);
 
 		toastListBox = new GuiControl();
@@ -1916,9 +1761,6 @@ class PlayGui {
 		// helpTextBackground.y = scene2d.height * 0.45 + 1;
 	}
 
-	/** Ported from PQ's `PlayGui::lockPowerup` (`client/scripts/playGui.cs`) - swaps the powerup
-		HUD frame to a "locked" graphic whenever the held powerup can't currently be used (e.g.
-		frozen by an ice shard - see `Marble.freeze`). */
 	public function lockPowerup(locked:Bool) {
 		this.powerupBox.setTile(locked ? this.powerupLockedTile : this.powerupUnlockedTile);
 	}
@@ -2200,23 +2042,6 @@ class PlayGui {
 		this.middleMessages.push({ctrl: middleMsg, age: 0});
 	}
 
-	/** Ported from `chathud.cs`'s `createHelpMessage`/`addHelpLine` (`$ChatHudMessageId`'s per-
-		message box) - a toast slides in from off the right edge of the screen, waits `timeout`
-		seconds, then slides back out and is removed, and each new arrival pushes every
-		already-active toast further up the stack (`shiftMessages`). Built from the exact same
-		`GuiControl`/`GuiBitmapBorderCtrl`/`GuiMLText` structure and field values (position/extent/
-		horizSizing/vertSizing) as `createHelpMessage` itself - see `ToastMessage`'s doc comment for
-		why (this sidesteps re-deriving Torque's anchor-sizing math by hand, since `GuiControl`
-		already implements it correctly). The one real behavioral difference: this animates by
-		mutating `box.position` and calling `render()` again every frame (see
-		`PlayGui.updateToastMessages`) instead of Torque's native `setPosition`/scheduled callbacks -
-		same visual result, different mechanism, since this engine's `GuiControl` has no animation
-		system of its own to hook into.
-
-		Faithfully reproduces one real quirk rather than "fixing" it: when the *oldest* (topmost)
-		toast finishes retreating and is removed, the remaining toasts do NOT shift back down to
-		fill the gap - `shiftMessages` in real source only ever runs when a NEW message arrives,
-		never on removal, so a permanent gap is a real, reproducible artifact of this system. */
 	public function addHelpLine(message:String, timeout:Float = 4.0) {
 		if (message == null || message.length == 0)
 			return;
@@ -2280,17 +2105,10 @@ class PlayGui {
 		border.extent.y = box.extent.y;
 
 		this.toastListBox.addChild(box);
-		// Initial render lays out the actual (possibly wrapped) text so its real height can be
-		// measured - matches `if (%foregroundName.isAwake()) %foregroundName.forceReflow();`.
+
 		box.render(scene2d, @:privateAccess this.toastListBox._flow);
 
-		// Update the size of the box (`%boxName.setExtent(VectorAdd(%foregroundName.getExtent(),
-		// "24 24"))`) - `fg.text.textHeight` is in scaled screen pixels, convert back to
-		// reference-canvas units first. Only the BOX's own extent is touched here, exactly like
-		// real source - `border`/`inner`/`bg`/`fg` all keep their original `horizSizing="width"`/
-		// `vertSizing="height"` declared extents (70/46) and are expected to track the resized
-		// parent automatically through that sizing mode, the same as real source relies on without
-		// ever touching their extents again either.
+		// Update the size of the box
 
 		var msg = new ToastMessage();
 		msg.box = box;
@@ -2300,10 +2118,6 @@ class PlayGui {
 		msg.x = -width;
 		msg.height = box.extent.y + ToastMessage.SPACING;
 		msg.y = this.toastListBox.extent.y;
-		// Matches real source's own `shiftMessages` call running over EVERY box including the one
-		// just added - rather than adding this message to the list first and then looping over
-		// everything (itself included), its own post-shift resting position is computed directly
-		// here, and the loop below only needs to handle the *other*, already-existing messages.
 		msg.targetY = msg.y - msg.height;
 		msg.targetX = -9;
 		msg.timeout = timeout;
@@ -2321,8 +2135,6 @@ class PlayGui {
 		msg.box.render(scene2d, @:privateAccess this.toastListBox._flow);
 	}
 
-	/** Ported from `updateMessages` - per-frame position/lifetime update for every active toast
-		(see `addHelpLine`'s doc comment). */
 	function updateToastMessages(dt:Float) {
 		var i = 0;
 		while (i < this.toastMessages.length) {
@@ -2342,9 +2154,7 @@ class PlayGui {
 					msg.x = msg.targetX;
 				moved = true;
 			} else if (msg.direction < 0) {
-				// Fully retreated - remove (matches `onNextFrame(delete)`, just immediate since
-				// there's no other work happening this same frame that removing it early could
-				// interfere with).
+				// Now remove it
 				msg.box.dispose();
 				this.toastMessages.splice(i, 1);
 				continue;

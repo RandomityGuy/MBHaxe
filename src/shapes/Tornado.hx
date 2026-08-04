@@ -13,9 +13,6 @@ import src.ParticleSystem.ParticleEmitterOptions;
 import src.ParticleSystem.ParticleEmitter;
 import mis.MissionElement.MissionElementStaticShape;
 
-/** Ported from `server/scripts/particles/GustEmitter.cs` - one of `Tornado_PQ`'s two ambient
-	`fxEmitter`s (`hazards.cs`'s `Tornado_PQ` datablock, `fxEmitter[0] = "GustEmitter"`); only the PQ
-	variant has these, not the base `Tornado`/`Tornado_MBM`. */
 final tornadoGustOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 10,
 	periodVariance: 9,
@@ -52,7 +49,6 @@ final tornadoGustOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/SpeckEmitter.cs` - `Tornado_PQ`'s `fxEmitter[1]`. */
 final tornadoSpeckOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 10,
 	periodVariance: 9,
@@ -108,9 +104,6 @@ class Tornado extends ForceObject {
 		}
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh. The
-		// DtsObject "Tornado" material quirk matches by prefix, not exact equality, for this reason.
 		this.identifier = "Tornado" + this.dtsPath;
 		this.forceDatas = [
 			{
@@ -168,7 +161,6 @@ class Tornado extends ForceObject {
 	}
 
 	public override function dispose() {
-		// Must run before `super.dispose()` - `DtsObject.dispose()` nulls `this.level`.
 		if (this.gustEmitter != null) {
 			this.level.particleManager.removeEmitter(this.gustEmitter);
 			this.gustEmitter = null;

@@ -44,69 +44,29 @@ interface GameMode {
 
 	public function processMaterialContact(marble:Marble, contact:CollisionInfo):Void;
 
-	/** Ported from PQ's `Marble::onJump` package-override pattern (`WhiteNoise.mcs`'s `package
-		WhiteNoise` block is the only real user of this hook currently) - called every time a jump
-		actually applies velocity (`Marble.applyContactForces`'s `sv < this._jumpImpulse` branch), not
-		just on the jump key edge. `NullMode`'s default is a no-op; only `WhiteNoiseMode` overrides it
-		(for `SMBTrigger`'s extra impulse/minimum-upward-velocity effect). */
 	public function onJump(marble:Marble):Void;
 
 	public function getPreloadFiles():Array<String>;
 
-	/** Whether touching the finish right now is allowed - `NullMode`'s default is the base rule
-		(every gem collected); `QuotaMode` checks its gem quota instead, `HasteMode` checks minimum
-		speed instead. A mission with multiple modes active (`"Quota Haste"`) requires ALL of them
-		to allow it (`CompositeMode` ANDs every child) - matches "collect quota gems AND be above
-		the speed limit". */
 	public function canFinish(marble:Marble):Bool;
 
-	/** Message to show when `canFinish` returns false. */
 	public function getFinishMessage(marble:Marble):String;
 
-	/** Called when a marble goes out of bounds, before the default restart-after-a-few-seconds
-		behavior is scheduled - return `true` to take over entirely (matches PQ's `MadnessMode`,
-		which ends the level immediately with the current gem score instead of restarting) and
-		suppress the default; `false` (`NullMode`'s default) to let the normal OOB/restart flow
-		happen as usual. */
 	public function onOutOfBounds(marble:Marble):Bool;
 
-	/** Ported from the `mbu-port` branch's rewind design - modes with actual per-tick state
-		(`MadnessMode`, `ConsistencyMode`, `LapsMode`, `TwoDMode`) return a `RewindableState` here;
-		`NullMode`'s default (and any mode with nothing to snapshot) returns `null`. Keeps
-		`RewindFrame` a single `modeState` field regardless of which mode is active, rather than a
-		flat field per mode. */
 	public function getRewindState():RewindableState;
 
 	public function applyRewindState(state:RewindableState):Void;
 
-	/** Builds an empty instance of this mode's concrete `RewindableState` subclass so
-		`RewindFrame.deserialize` has something to call `deserialize` on - it can't know the
-		concrete type ahead of time otherwise. */
 	public function constructRewindState():RewindableState;
 
-	/** Ported from the need to keep a replay reproducible even when a mode's own one-time-at-load
-		behavior depends on state living *outside* the mission itself (`ViceVersaMode` loading from
-		`ViceVersaState`'s save file/localStorage, which can change between when a Versa replay was
-		recorded and whenever it's watched later) - called once when a replay finishes recording
-		(`Replay.write`) and once when a replay begins watching (after the mission's finished loading
-		and this mode exists, restoring exactly what was true at record time instead of re-reading
-		whatever the external state happens to be *now*). `NullMode`'s default is a no-op; most modes
-		don't need this at all. Write/read order must match exactly. */
 	public function saveReplayData(bw:haxe.io.BytesOutput):Void;
 
 	public function loadReplayData(br:haxe.io.BytesInput):Void;
 }
 
 class GameModeFactory {
-	/** A mission's `gameMode` field is a space-separated list of independently-active modes
-		(confirmed against PQ's `shared/mission.cs::resolveMissionGameModes` - e.g. `"Hunt Laps"`),
-		not a single mode name - split it and delegate through `CompositeMode` whenever more than
-		one word is present, so every listed mode's hooks actually run. */
 	public static function getGameMode(level:MarbleWorld, mode:String, activatedPackages:Array<String>):GameMode {
-		// `BagOfSecrets`/`BlastToTheBeat` have no `activatePackage` call of their own - their
-		// mission-specific behavior is just a `missionStartup()`/custom trigger datablock, not an
-		// activated package - so they're identified by mission path instead, unlike every special
-		// mode below.
 		var missionPath = level.mission != null && level.mission.path != null ? level.mission.path.toLowerCase() : "";
 		if (StringTools.endsWith(missionPath, "bagofsecrets.mcs"))
 			return new BagOfSecretsMode(level);
@@ -168,10 +128,6 @@ class GameModeFactory {
 		}
 	}
 
-	/** Finds an active instance of a specific mode class, whether `level.gameMode` is that mode
-		directly or it's one of several modes combined via `CompositeMode` (e.g. triggers belonging
-		to a specific mode - `LapsCounterTrigger`/`LapsCheckpoint` need to reach the active
-		`LapsMode` regardless of what else is active alongside it). */
 	public static function findMode<T:GameMode>(mode:GameMode, cl:Class<T>):T {
 		if (Std.isOfType(mode, cl))
 			return cast mode;

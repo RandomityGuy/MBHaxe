@@ -35,15 +35,8 @@ class ParticlesMesh extends h3d.scene.Mesh {
 	public var sortMode:SortMode;
 	public var globalSize:Float = 1;
 
-	/** Skip particles outside the camera frustum when building the draw buffer - doesn't affect
-		simulation (`ParticleManager.update()` still ticks every particle every frame regardless), only
-		how many end up written to `tmp`/uploaded to the GPU. On by default since it's nearly free
-		(6 dot products per particle, no allocation) and only ever reduces upload volume. */
 	public var frustumCull:Bool = true;
 
-	/** Additionally skip particles farther than this from the camera. `<= 0` disables it - left off
-		by default since the right threshold depends on the effect's visual size, unlike frustum
-		culling which is always correct to apply. */
 	public var cullDistance:Float = -1;
 
 	var head:Particle;
@@ -57,8 +50,6 @@ class ParticlesMesh extends h3d.scene.Mesh {
 
 	var tile:h2d.Tile;
 
-	/** Reused every `draw()` call so frustum-testing a particle doesn't allocate a `Point` per
-		particle per frame - would undo the point of culling in the first place. */
 	var cullPoint = new h3d.col.Point();
 
 	public function new(?texture, ?parent) {
@@ -86,9 +77,6 @@ class ParticlesMesh extends h3d.scene.Mesh {
 		return hasColor = b;
 	}
 
-	/**
-		Offset all existing particles by the given values.
-	**/
 	public function offsetParticles(dx:Float, dy:Float, dz = 0.) {
 		var p = head;
 		while (p != null) {
@@ -104,11 +92,6 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			kill(head);
 	}
 
-	/** Allocates a `Particle` from the free-list (or creates a new one if the pool is empty) and
-		resets its render state to a blank/invisible default - `ParticleManager.spawnParticle` fills
-		in the actual simulation state (position, physics constants, etc.) right after via
-		`Particle.init`. Kept invisible (zero size/alpha) in between so a particle that's allocated
-		but not yet simulated this frame doesn't flash with stale data from a previous life. */
 	public function alloc():Particle {
 		var p = emitParticle();
 		if (posChanged)
@@ -221,9 +204,6 @@ class ParticlesMesh extends h3d.scene.Mesh {
 		var cullDistSq = cullDistance * cullDistance;
 
 		while (p != null) {
-			// Simulation already ran for every particle this frame regardless (`ParticleManager.
-			// update()`) - culling only decides whether this particle's quad gets written into `tmp`/
-			// uploaded to the GPU, which is what was actually costing frame time at high counts.
 			if (cullDistance > 0) {
 				var dx = p.x - camPos.x;
 				var dy = p.y - camPos.y;
@@ -244,10 +224,6 @@ class ParticlesMesh extends h3d.scene.Mesh {
 			var ratio = p.size * p.ratio * (tile.height / tile.width);
 
 			if (pos >= tmp.length) {
-				// Grow geometrically (double) instead of by exactly one particle's worth - `grow`
-				// reallocates+copies the whole backing array, so growing by a tiny fixed increment
-				// every time capacity is exceeded turns a particle count ramp-up into O(n) separate
-				// reallocations (O(n^2) total copying) instead of the ~log2(n) a doubling strategy costs.
 				var stride = 40 + (hasColor ? 16 : 0);
 				var newLen = tmp.length == 0 ? stride * 64 : tmp.length * 2;
 				while (newLen <= pos)
@@ -335,11 +311,6 @@ class ParticlesMesh extends h3d.scene.Mesh {
 				stride += 4;
 			var len = Std.int(pos / stride);
 			if (buffer == null || bufferSize < len) {
-				// Allocate with headroom (double) instead of exactly `len` vertices - dispose+recreate
-				// is a full GPU buffer reallocation (driver call), not a cheap upload, so sizing it
-				// exactly meant a burst of newly emitted particles could force a recreate on almost
-				// every frame. Doubling means recreation only happens ~log2(n) times total, and every
-				// other frame - including during heavy emission - just does a plain uploadVector.
 				var newCapacity = bufferSize == 0 ? 64 : bufferSize * 2;
 				while (newCapacity < len)
 					newCapacity *= 2;

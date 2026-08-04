@@ -49,32 +49,19 @@ class WhiteNoiseState extends TwoDState {
 	}
 }
 
-/** Ported from `WhiteNoise.mcs`'s `package WhiteNoise` block. `buzzsawd` (the `Marble::onCollide`
-	teleport-back-to-checkpoint half) is a same-tick, non-persistent flag - set and consumed within
-	the same `update()` call, so it needs no rewind state of its own.
-
-	The `SMBTrigger` half (`Marble::onJump`) is real persistent state though - `smbImpulse`/
-	`smbUpwards` stay in effect for as long as the marble remains between trigger volumes, so a
-	rewind needs to restore them or a rewound jump could apply the wrong (or no) extra impulse. */
 class WhiteNoiseMode extends TwoDMode {
 	var buzzsawd = false;
 
 	var smbImpulse:Float = 0;
 	var smbUpwards:Float = 0;
-	// Mirrors PQ's `client.smbblock` - set true for 300ms after any `SMBTrigger` enter, matching
-	// `%user.client.schedule(300, setFieldValue, smbblock, false)`. Suppresses `onLeaveTrigger`'s
-	// reset-to-zero while true, so briefly crossing from one `SMBTrigger` volume directly into an
-	// overlapping/adjacent one doesn't flicker the effect off in between.
 	var smbBlockUntil:Float = -1e8;
 
-	/** Called by `SMBTrigger.onMarbleEnter` - ported from `SMBTrigger::onEnterTrigger`. */
 	public function smbTriggerEnter(impulse:Float, upwards:Float, currentTime:Float) {
 		this.smbImpulse = impulse;
 		this.smbUpwards = upwards;
 		this.smbBlockUntil = currentTime + 0.3;
 	}
 
-	/** Called by `SMBTrigger.onMarbleLeave` - ported from `SMBTrigger::onLeaveTrigger`. */
 	public function smbTriggerLeave(currentTime:Float) {
 		if (currentTime < this.smbBlockUntil)
 			return;
@@ -82,14 +69,8 @@ class WhiteNoiseMode extends TwoDMode {
 		this.smbUpwards = 0;
 	}
 
-	// `onJump` fires mid-substep, from inside `Marble.applyContactForces` - well before that same
-	// substep's `this.velocity.set(...)` (integrating `A`) and `appliedImpulses` processing, both of
-	// which would clobber a direct mutation made this early. Deferred to `update()` instead (once
-	// per frame, after the whole substep loop has settled) - same reasoning as `buzzsawd` above.
 	var pendingSmbJump:Bool = false;
 
-	/** Ported from `Marble::onJump`'s `MissionInfo.whiteNoise` branch - gated implicitly by this
-		mode only being active on the White Noise mission at all. */
 	public override function onJump(marble:Marble) {
 		if (this.smbImpulse != 0 || this.smbUpwards != 0)
 			this.pendingSmbJump = true;
@@ -109,8 +90,6 @@ class WhiteNoiseMode extends TwoDMode {
 		super.update(t);
 		if (this.pendingSmbJump) {
 			this.pendingSmbJump = false;
-			// `applyImpulse` with no offset matches the original's `applyImpulse("0 0 0", "0 0" SPC
-			// $SMBTrigger)` (through the center, so no torque).
 			if (this.smbImpulse != 0)
 				this.level.marble.velocity.load(this.level.marble.velocity.add(new h3d.Vector(0, 0, this.smbImpulse)));
 			if (this.smbUpwards != 0)

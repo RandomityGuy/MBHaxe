@@ -8,12 +8,6 @@ import src.MarbleWorld;
 import mis.MissionElement.MissionElementStaticShape;
 import mis.MisParser;
 
-/** Note: PQ's ToggleButton also scans its containing mission group for whether every button
-	matches its "correct" state, and if so activates a target PathedInterior (see
-	`ToggleButton::scanGroup` in PQ's buttons.cs). That part isn't ported - this Haxe port has no
-	mechanism for a static shape to know its own containing mission group at construction time
-	(unlike PathedInterior, which is special-cased), so only the per-button toggle
-	visual/interactive behavior is implemented here. */
 class ToggleButton extends DtsObject {
 	var activated:Bool = false;
 	var initialState:Bool = false;
@@ -25,8 +19,6 @@ class ToggleButton extends DtsObject {
 		this.dtsPath = element.datablock.toLowerCase() == "togglebuttonflat_pq" ? "data/shapes_pq/gameplay/pads/pushbuttonflathalf.dts" : "data/shapes/buttons/pushbutton.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
-		// Instancing batches by `identifier`, and the flat variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the regular button mesh.
 		this.identifier = "ToggleButton" + this.dtsPath;
 		this.hasNonVisualSequences = true;
 		this.enableCollideCallbacks = true;

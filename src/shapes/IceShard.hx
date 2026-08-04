@@ -17,15 +17,6 @@ import src.ParticleSystem.ParticleEmitterOptions;
 import src.ParticleSystem.ParticleEmitter;
 import mis.MissionElement.MissionElementStaticShape;
 
-/** PQ's ambient "mist"/"shine" gleam around an ice shard (`server/scripts/particles/
-	IceShardMistEmitter.cs`/`IceShardShineEmitter.cs`) - runs forever (the shard itself is never
-	removed in this port - see `IceShard.hx`'s class doc). */
-/** Ported from `IceShardMistEmitter.cs`. Note the source has a misspelled duplicate
-	`dragCoeffiecient = "1"` at the bottom of `IceShardMistParticle` (and a bogus
-	`dragCoefficient = "5.71219"` on the *emitter*, which has no drag field at all in the real
-	engine) - both are dead/no-op fields since they don't match the real `dragCoefficient` name;
-	the correctly-spelled `dragCoefficient = "9.21569"` earlier in the particle block is the one
-	that actually takes effect. */
 final iceShardMistOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 294,
 	periodVariance: 78,
@@ -62,9 +53,6 @@ final iceShardMistOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `IceShardShineEmitter.cs`. Same misspelled-duplicate situation as the mist particle
-	above - the real `dragCoefficient` is `10`, not the dead `dragCoeffiecient = "0.1"` an earlier
-	pass of this port had mistakenly picked up. */
 final iceShardShineOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 275,
 	periodVariance: 274,
@@ -101,9 +89,6 @@ final iceShardShineOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/IceShardBreak1Emitter.cs` - one of the two bursts
-	`FireballItem::addIceShard` spawns wherever an `IceShard` is melted (both by contact and by
-	`Marble.fireballBlast`'s radius search - see `IceShard.destroyByFireball`). */
 final iceShardBreak1Options:ParticleEmitterOptions = {
 	ejectionPeriod: 2,
 	periodVariance: 1,
@@ -140,8 +125,6 @@ final iceShardBreak1Options:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/IceShardBreak2Emitter.cs` - always spawned alongside
-	`IceShardBreak1Emitter`. */
 final iceShardBreak2Options:ParticleEmitterOptions = {
 	ejectionPeriod: 4,
 	periodVariance: 3,
@@ -178,21 +161,10 @@ final iceShardBreak2Options:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from PQ's `IceShard1`/`IceShard2`/`IceShard::onCollision` (`server/scripts/hazards.cs`).
-	Touching a shard freezes the marble for `FREEZE_TIME` seconds (see `Marble.freeze`/`unfreeze`),
-	with an `INVULN_TIME`-second grace period after unfreezing before it can refreeze. A marble with
-	an active Fireball PowerUp melts through the shard instead of freezing
-	(`%marble._fireballActive`/`FireballItem::IceCollision`) - destroys it (see `destroyByFireball`)
-	and deducts 500ms of Fireball time. */
 class IceShard extends DtsObject {
 	public static inline final FREEZE_TIME = 2.0;
 	public static inline final INVULN_TIME = 1.0;
 
-	/** True once melted by a Fireball-active marble (contact or `Marble.fireballBlast`'s radius
-		search) - matches PQ setting the shard's damage state to `"Destroyed"`. This port never
-		respawns it mid-attempt (PQ's `_pickUp`/`_pickUpCheckpoint` fields are an MP-only checkpoint
-		resync mechanism with no SP equivalent needed here) - it just stays gone until `reset()`,
-		matching how `Gem.pickedUp` behaves. */
 	public var destroyed:Bool = false;
 
 	var freezeSound:hxd.res.Sound;
@@ -200,11 +172,6 @@ class IceShard extends DtsObject {
 	var smashSound:hxd.res.Sound;
 	var element:MissionElementStaticShape;
 
-	/** Gates `gotoTarget`'s `TriggerOnce` the same way `PathTrigger.triggered` does (see its doc
-		comment) - snapshotted directly by `RewindFrame`/`RewindManager` (`iceShardGotoTargetStates`,
-		index-aligned with `level.iceShards`, same registry `iceShardStates`/`destroyed` already
-		uses) so rewinding to before this shard's `gotoTarget` fired doesn't leave it stuck `true`
-		from the forward-time playthrough. */
 	public var gotoTargetTriggered:Bool = false;
 
 	var mistEmitter:ParticleEmitter;
@@ -321,14 +288,6 @@ class IceShard extends DtsObject {
 		}
 	}
 
-	/** Ported from `FireballItem::addIceShard` (`server/scripts/fireball.cs`) - melts this shard
-		(destroying it for the rest of the attempt, see `destroyed`) and spawns the break-burst
-		particles. Deliberately doesn't play `IceShardSmashSfx` itself - real PQ plays it once per
-		*event* (once for a contact melt, once total for a `Blast` that smashes several shards at
-		once), not once per shard, so the caller (`onMarbleContact`'s fireball branch, or
-		`Marble.fireballBlast`) is responsible for that. Doesn't touch the marble's Fireball time
-		either - contact melts cost 500ms (`Marble.deductFireballTime`), `Blast`'s radius search
-		doesn't cost anything. */
 	public function destroyByFireball() {
 		if (this.destroyed)
 			return;
@@ -376,12 +335,6 @@ class IceShard extends DtsObject {
 		this.runGotoTarget(marble, timeState);
 	}
 
-	/** `gotoTarget` isn't a core PQ engine feature - it's a per-mission script override some PQ
-		levels inject (`package IceShardGoToTarget { function IceShard::onCollision(...) }`, e.g.
-		`UnseasonablyCold.mcs`) that bolts PathTrigger-style object/path movement, PathedInterior
-		target-time setting, and a help-bubble message onto specific ice shard instances. Since
-		arbitrary embedded script can't be interpreted generically, this one pattern is baked in as
-		a built-in IceShard capability instead - active only when the `gotoTarget` field is set. */
 	function runGotoTarget(marble:Marble, timeState:TimeState) {
 		var gotoTargetField = this.element.fields.get("gototarget");
 		if (gotoTargetField == null || !mis.MisParser.parseBoolean(gotoTargetField[0]))

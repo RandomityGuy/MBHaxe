@@ -101,11 +101,11 @@ class ResourceLoader {
 			fwd();
 		});
 		worker.addTask(fwd -> preloadUISounds(fwd));
-		worker.addTask(fwd -> {
-			loadg.text = "Loading Shapes..";
-			fwd();
-		});
-		worker.addTask(fwd -> preloadShapes(fwd));
+		// worker.addTask(fwd -> {
+		// 	loadg.text = "Loading Shapes..";
+		// 	fwd();
+		// });
+		// worker.addTask(fwd -> preloadShapes(fwd));
 		worker.addTask(fwd -> {
 			scene2d.removeChild(loadg);
 			fwd();

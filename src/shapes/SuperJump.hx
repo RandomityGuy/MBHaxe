@@ -10,7 +10,6 @@ import src.AudioManager;
 import src.DtsObject;
 import src.MarbleWorld;
 
-/** Ported from `marble.cs`'s `SuperJumpParticle`/`MarbleSuperJumpEmitter`. */
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ejectionPeriod: 10,
 	periodVariance: 0,
@@ -52,9 +51,6 @@ class SuperJump extends PowerUp {
 		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superjump.dts" : "data/shapes/items/superjump.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		// Instancing batches by `identifier`, and the PQ variant uses a different mesh - keep the
-		// dtsPath in the identifier so it doesn't get batched with the vanilla mesh. HUD/gameplay
-		// code that cares about the category (PlayGui.setPowerupImage) matches by prefix.
 		this.identifier = "SuperJump" + this.dtsPath;
 		this.pickUpName = "Super Jump PowerUp";
 		if (element.datablock.toLowerCase() == "customsuperjumpitem_pq") {

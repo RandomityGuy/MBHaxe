@@ -3,7 +3,6 @@ package gui;
 import modes.GameMode.GameModeFactory;
 import modes.GameMode.ScoreType;
 import modes.special.ViceVersaMode.ViceVersaState;
-import h3d.shader.VertexColorAlpha;
 import src.Http;
 import src.Leaderboards;
 import net.ClientConnection.NetPlatform;
@@ -39,11 +38,7 @@ class PlayMissionGui extends GuiControl {
 	static var currentGameStatic:String = "platinum";
 	static var currentSortType:Int = 1;
 
-	/** Simplified stand-in for `Versa.mcs`'s real `display_Versa` (`Unlock::getMissionCompletion(...)
-		& $Completion::Par`) - there's no generic per-mission `unlockFunc`/`displayFunc` dispatch in
-		this engine (Vice/Versa is the only mission that currently needs one), so this is hardcoded
-		to the one condition that actually matters for playability: Versa stays hidden from every
-		mission list until a Vice run has been saved (see `ViceVersaState`). */
+	// Really just used for Vice-Versa
 	static function isMissionVisible(m:Mission):Bool {
 		if (StringTools.endsWith(m.path.toLowerCase(), "versa.mcs"))
 			return ViceVersaState.hasSavedState();

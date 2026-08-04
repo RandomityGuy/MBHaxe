@@ -365,9 +365,6 @@ class MisParser {
 		}
 	}
 
-	/** Known-at-compile-time TorqueScript engine globals that show up as bitflags in mission
-		field values (e.g. `MissionInfo.customRadarRule`) but are never assigned via a `$var = ...;`
-		statement anywhere in the mission file itself, so `variables` never has them. */
 	static final knownEngineConstants:Map<String, Int> = [
 		"$radar::flags::none" => 0,
 		"$radar::flags::gems" => 1,
@@ -378,12 +375,6 @@ class MisParser {
 		"$radar::flags::powerups" => 32,
 	];
 
-	/** Resolves a TorqueScript rvalue expression. Supports, in ascending precedence: the
-		bitwise-OR `|` operator (e.g. `$Radar::Flags::Gems | $Radar::Flags::EndPad`); the
-		concatenation `@` operator; additive `+`/`-`; multiplicative `*`/`/`; unary `-`; and
-		parenthesized grouping. Numeric operands resolve via `knownEngineConstants` (for engine
-		globals that aren't themselves assigned anywhere in the mission) or `Std.parseFloat`,
-		falling back to 0 for anything that resolves to neither (e.g. a plain string operand). */
 	function resolveExpression(expr:String):String {
 		var pos = 0;
 
@@ -416,10 +407,6 @@ class MisParser {
 			return c != "" && !StringTools.isSpace(c, 0) && c != "(" && c != ")" && c != '"' && c != "+" && c != "-" && c != "*" && c != "/" && c != "@"
 				&& c != "|";
 
-		// Forward-declared: parsePrimary needs to call parseOr (for parenthesized sub-expressions),
-		// but parseOr is defined in terms of parseConcat/parseAdd/parseMul/parseUnary/parsePrimary -
-		// Haxe local functions aren't hoisted, so this mutual recursion needs the var declared before
-		// parsePrimary references it; the real closure is assigned once everything else is defined.
 		var parseOr:Void->String = null;
 
 		function parsePrimary():String {
@@ -448,7 +435,6 @@ class MisParser {
 					pos++;
 				var name = expr.substring(start, pos);
 				// Only substitute if it's an actual mission variable - otherwise leave it as the
-				// literal token text (it may still resolve numerically later via knownEngineConstants).
 				return this.variables[name] != null ? this.resolveExpression(this.variables[name]) : name;
 			}
 			var start = pos;

@@ -85,8 +85,6 @@ enum Mode {
 	Finish;
 }
 
-/** Ported from `marble.cs`'s `BounceParticle`/`MarbleBounceEmitter` ($pref::Video::particleSystem
-	== 1, or the identical `else` fallback - both branches have the same values). */
 final bounceParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 80,
 	ambientVelocity: new Vector(0, 0, 0.0),
@@ -117,12 +115,6 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/MarbleTrailEmitter.cs`'s default (`$pref::Video::
-	particleSystem == 0`) branch - `MarbleTrailParticle`/`MarbleTrailEmitter`, the real "gold" speed
-	trail shown when `$TrailEmitterSpeed < speed < $TrailEmitterWhiteSpeed` (see
-	`Marble.updateTrailEmitters`). Distinct from the dead, never-referenced `TrailParticle`/
-	`MarbleTrailOldEmitter` pair in `marble.cs` (kept only "so the engine don't go KABOOM" per its
-	own comment) - this is the datablock `Marble::assignNewTrailEmitter` actually wires up. */
 final trailParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 100,
 	periodVariance: 8,
@@ -159,8 +151,6 @@ final trailParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `MarbleTrailEmitter.cs`'s default branch - `MarbleWhiteTrailParticle`/
-	`MarbleWhiteTrailEmitter`, shown when `speed >= $TrailEmitterWhiteSpeed`. */
 final whiteTrailParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 50,
 	periodVariance: 20,
@@ -197,9 +187,6 @@ final whiteTrailParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/marble.cs`'s `MarbleTrailBubbleParticle`/`MarbleTrailBubbleEmitter` -
-	the continuous "bubble trail" shown while moving fully submerged in water (as opposed to
-	`Splash4`, shown while partially submerged/skimming the surface - see `updateTrailEmitters`). */
 final trailBubbleParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 20,
 	periodVariance: 19,
@@ -236,10 +223,6 @@ final trailBubbleParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Splash4Emitter.cs` - the continuous "skimming the
-	surface" trail (as opposed to the one-shot entry/exit `Splash1/2/3` bursts already ported -
-	see `updateWater`). Reuses the same `splash1.png` texture as `Splash1Emitter` (the source
-	itself references `platinum/data/particles/splash1`, not a distinct "splash4" asset). */
 final splash4ParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 49,
 	periodVariance: 48,
@@ -276,10 +259,6 @@ final splash4ParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/MarbleSnoreEmitter.cs` - shown when the marble hasn't
-	moved for `snoreTimeout` (10s) while play is actually in progress (see `updateTrailEmitters`).
-	Gated on a hardcoded-enabled equivalent of `$pref::Snore` (defaults `true` in real PQ,
-	`client/defaults.cs`) - not wired to a settings toggle here, since none exists yet for it. */
 final snoreParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1500,
 	periodVariance: 300,
@@ -316,11 +295,6 @@ final snoreParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Fireball3Emitter.cs` - part of the "fireball" trail set,
-	shown instead of the normal Trail/WhiteTrail while `%player.fireball` is set (see
-	`updateTrailEmitters`). Nothing in `marble.cs`/`powerups.cs` ever actually sets that datafield
-	in real PQ - this is genuinely dead/unreachable content there too, reproduced faithfully rather
-	than skipped, matching [PQ Port Fidelity](pq-port-fidelity.md). */
 final fireball3ParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 49,
 	periodVariance: 48,
@@ -357,8 +331,6 @@ final fireball3ParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Fireball4_2Emitter.cs` - the second half of the fireball
-	trail pair, always shown alongside `Fireball3`. Same dead/unreachable status as above. */
 final fireball4ParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 10,
 	periodVariance: 0,
@@ -395,9 +367,6 @@ final fireball4ParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Fireball3MegaEmitter.cs` - the Mega-marble-scaled variant
-	of `Fireball3`, swapped in when `Marble.isMegaMarbleEnabled` (see `updateTrailEmitters`). Same
-	dead/unreachable status as `Fireball3` itself (nothing sets `fireball`). */
 final fireball3MegaParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 49,
 	periodVariance: 48,
@@ -434,8 +403,6 @@ final fireball3MegaParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Fireball4_2MegaEmitter.cs` - the Mega-marble-scaled
-	variant of `Fireball4_2`. Same dead/unreachable status. */
 final fireball4MegaParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 10,
 	periodVariance: 0,
@@ -472,9 +439,6 @@ final fireball4MegaParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Fireball1Emitter.cs` - one of the 3 one-shot burst
-	emitters `FireballItem::Blast` spawns at the marble's position when blasting (distinct from the
-	continuous Fireball3/4_2 trail emitters above - see `Marble.fireballBlast`). */
 final fireball1BlastParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 2,
 	periodVariance: 0,
@@ -511,10 +475,6 @@ final fireball1BlastParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Fireball2Emitter.cs` - always spawned alongside
-	Fireball1/Fireball4 on a blast. Real source reuses the "fireball_4" texture despite the
-	datablock name (`animTexName[0]` says "fireball_2" but `textureName` - the field the engine
-	actually reads - says "fireball_4"), reproduced as-is. */
 final fireball2BlastParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 4,
 	periodVariance: 3,
@@ -551,9 +511,6 @@ final fireball2BlastParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `server/scripts/particles/Fireball4Emitter.cs` - the third blast-burst emitter.
-	Distinct datablock from the continuous `fireball4ParticleOptions` (`Fireball4_2Emitter`) despite
-	sharing a texture - different ejection/timing values. */
 final fireball4BlastParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	periodVariance: 0,
@@ -590,8 +547,6 @@ final fireball4BlastParticleOptions:ParticleEmitterOptions = {
 	}
 };
 
-/** Ported from `mp/blast.cs`'s `BlastSmoke`/`BlastEmitter` (the plain, non-"MBU"/non-"Ultra"
-	variant - matches this port's non-mega blast). */
 final blastParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	ambientVelocity: new Vector(0, 0, -0.3),
@@ -622,7 +577,6 @@ final blastParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
-/** Ported from `mp/blast.cs`'s `UltraBlastSmoke`/`UltraBlastEmitter`. */
 final blastMaxParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	ambientVelocity: new Vector(0, 0, -0.3),
@@ -657,9 +611,6 @@ final blastMaxParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
-/** Ported from `server/scripts/particles/Splash1Emitter.cs` (`WaterPhysicsTrigger_onEnterWater`'s
-	splash for entry speed >= 20 but < 50). Short `emitterLifetime` (98ms) - a single burst, not
-	ambient. */
 final splash1ParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 3,
 	periodVariance: 0,
@@ -696,8 +647,6 @@ final splash1ParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
-/** Ported from `server/scripts/particles/Splash2Emitter.cs` (the "wasn't a hard enough splash"
-	case, entry speed < 20 - also always played once on leaving the water regardless of speed). */
 final splash2ParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 3,
 	periodVariance: 2,
@@ -734,7 +683,6 @@ final splash2ParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
-/** Ported from `server/scripts/particles/Splash3Emitter.cs` (the hardest splat, entry speed >= 50). */
 final splash3ParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	periodVariance: 0,
@@ -771,8 +719,6 @@ final splash3ParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
-/** Ported from `server/scripts/particles/Drop1Emitter.cs` - the extra "splatted hard against the
-	water" emitter, added alongside Splash1/Splash3 (not Splash2) when entry speed >= 20. */
 final drop1ParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	periodVariance: 0,
@@ -809,12 +755,6 @@ final drop1ParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
-/** Ported from `server/scripts/particles/IceChunkChunkEmitter.cs` - one of the two bursts
-	`IceShard::unfreeze` spawns at the marble's position on natural unfreeze (not on `cancel`, e.g.
-	a mission restart while frozen). The source orients the whole emitter node along the marble's
-	gravity-up flipped 180° (`applyrotations(getGravityRot(), "0 180 0")`) - reproduced here as the
-	ejection cone's `axis` pointing opposite `currentUp`, set per-unfreeze in `Marble.unfreeze`
-	since it depends on the marble's gravity at that moment. */
 final iceChunkChunkParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 4,
 	periodVariance: 0,
@@ -851,8 +791,6 @@ final iceChunkChunkParticleOptions:ParticleEmitterOptions = {
 	}
 }
 
-/** Ported from `server/scripts/particles/IceChunkSnowEmitter.cs` - the second unfreeze burst,
-	always spawned alongside `IceChunkChunkEmitter`. */
 final iceChunkSnowParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
 	periodVariance: 0,
@@ -951,15 +889,6 @@ class Marble extends GameObject {
 
 	var _maxForceRadius:Float = 50;
 
-	/** Ported from `physics.cs`'s `"global"` (not per-marble-datablock) attribute type -
-		`$Game::CameraSpeedMultiplier`/`$Game::MovementSpeedMultiplier`. Unlike the datablock
-		attributes above, these have no mission-authored default to read from `loadMarbleAttributes`,
-		they're just always `1` until a `PhysMod` layer overrides them. Real PQ applies these by
-		scaling the TGE keyboard-camera-look (`mvPitch/YawSpeed`) and digital movement-key
-		(`mvLeftAction`/etc.) speed globals; this engine has no keyboard-camera-look and reads
-		movement straight off the keys/gamepad/touch every tick, so the equivalent hook points are
-		`CameraController.orbit` (mouse-look delta) and `Marble.recordMove` (the compiled `move.d`
-		vector) respectively. */
 	public var _cameraSpeedMultiplier:Float = 1;
 
 	public var _movementSpeedMultiplier:Float = 1;
@@ -973,10 +902,6 @@ class Marble extends GameObject {
 	var _contactTime:Float;
 	var _totalTime:Float;
 
-	/** Mirrors PQ's `$Game::LastJumpTime` (`default.bind.cs`'s `fireballBlast`) - how long since the
-		marble last actually jumped, accumulated in seconds rather than stored as an absolute
-		timestamp so it doesn't need a `TimeState` threaded into `applyContactForces`. Used only to
-		soften the Fireball blast's upward impulse right after a jump (see `fireballBlast`). */
 	var timeSinceLastJump:Float = 1e8;
 
 	public var _mass:Float = 1;
@@ -1014,10 +939,6 @@ class Marble extends GameObject {
 	var megaHelicopter:DtsObject;
 	var usePQHelicopter:Bool = false;
 
-	/** TeleportItem's armed state lives on the marble (matching PQ's `%user.teleporterX`
-		fields), not on any particular TeleportItem instance - PQ stores it globally on the
-		user, so the marker/position/config are shared across every TeleportItem in a level
-		regardless of which one armed it or which one fires it. */
 	public var teleporterMarker:DtsObject;
 
 	public var teleporterArmed:Bool = false;
@@ -1029,51 +950,23 @@ class Marble extends GameObject {
 	public var teleporterTeleTime:Float = 2;
 	public var teleporterLastUseTime:Float = -1000;
 
-	/** Set by `TeleportItem.use`'s second press (fire) instead of PQ's `schedule($time,
-		"finishTeleport")` (banned by [No Schedules](feedback_no_schedules.md)) - checked every tick
-		in `updateTeleporterState`, which already runs the (also teleport-related) cloak-fade check,
-		rather than adding a separate call site for this. */
 	public var teleporterFiring:Bool = false;
 
 	var teleporterFireStartTime:Float = 0;
 
-	/** IceShard freeze state, ported from PQ's `IceShard::onCollision`/`unfreeze`
-		(`server/scripts/hazards.cs`). `iceChunk` is a visual-only DtsObject snapped to the
-		marble's transform every frame while frozen (mirroring `%marble.iceChunk.setParent(%marble,
-		"0 0 0", 1)` - a "simple" 1:1 parent with no offset), scaled to the marble's current radius. */
 	public var isFrozen:Bool = false;
-
 	public var lastFreezeTime:Float = -1e8;
 
 	var iceChunk:DtsObject;
 	var iceShard:shapes.IceShard;
 
-	/** Ported from PQ's `water.cs` - `waterTriggers` mirrors `%marble.waterIsInSet` (every
-		`WaterPhysicsTrigger` currently overlapped, since adjacent/overlapping water volumes should
-		feel seamless - entering/leaving physics only actually happens when this goes from empty to
-		non-empty or back, not on every individual trigger transition). All the "am I in water, did
-		I just enter/leave, how deep am I" logic is centralized in `updateWater` (called once per
-		tick from `MarbleWorld`), matching PQ's own split between the trigger's on-enter/leave
-		callbacks (which just add/remove from the set) and the separate `updateClientWater()`
-		function that does the actual work every frame. */
 	public var waterTriggers:Array<triggers.WaterPhysicsTrigger> = [];
-
 	public var isInWater:Bool = false;
 
-	/** The closest overlapping `WaterPhysicsTrigger`, recomputed every `updateWater` tick - also
-		used by `updateTrailEmitters` to tell fully-submerged (bubble trail) from skimming-the-
-		surface (Splash4 trail) via the same `collider.boundingBox.zMax` comparison. */
 	var currentWaterTrigger:triggers.WaterPhysicsTrigger;
-
 	var waterPhysicsLayer:Array<PhysicsAttributeOverride> = null;
 
-	/** Bubble PowerUp state - ported from PQ's `water.cs` (`$Game::BubbleTime`/`BubbleInfinite`/
-		`BubbleActive` globals). Unlike every other `PowerUp`, Bubble is held-to-use (`Move.
-		powerupHeld`, not the click-edge `Move.powerup`) and never occupies the single `heldPowerup`
-		inventory slot - picking one up just banks time directly onto the marble (`BubbleItem.pickUp`),
-		so it doesn't block picking up another one-shot powerup while bubble time is banked. */
 	public var bubbleTime:Float = 0;
-
 	public var bubbleTotalTime:Float = 0;
 	public var bubbleInfinite:Bool = false;
 	public var bubbleActive:Bool = false;
@@ -1082,10 +975,6 @@ class Marble extends GameObject {
 	var bubbleVisual:DtsObject;
 	var bubbleSound:Channel;
 
-	/** Counts reasons the held powerup currently can't be used (only freezing, for now - PQ also
-		locks it from cannons/on respawn, matching `Marble::lockPowerup`/`unlockPowerup` in
-		`server/scripts/marble.cs`, neither of which is ported yet). A count instead of a plain
-		bool so multiple simultaneous lock reasons don't clobber each other. */
 	public var powerupLockCount:Int = 0;
 
 	var superBounceEnableTime:Float = -1e8;
@@ -1099,14 +988,8 @@ class Marble extends GameObject {
 	public var shockAbsorberUseTick:Int = 0;
 	public var superBounceUseTick:Int = 0;
 
-	/** Ref-counted so overlapping `NoMovementKeysTrigger` volumes behave correctly. */
 	public var movementTriggerCount:Int = 0;
 
-	/** Cannon containment state (`server/scripts/cannon.cs`/`client/scripts/cannon.cs`) - `null`
-		when not inside a cannon. All the actual per-frame aim/fire logic lives in
-		`CameraController.updateCannonCamera` (mirrors the real engine keeping cannon aim tightly
-		coupled to the camera's own yaw/pitch state) and `shapes.Cannon`; these are just the fields
-		that need to survive a rewind/restart. */
 	public var activeCannon:shapes.Cannon = null;
 
 	var cannonCharge:Float = 0;
@@ -1115,21 +998,12 @@ class Marble extends GameObject {
 
 	var cannonFrozenLayer:Array<PhysicsAttributeOverride> = null;
 	var cannonControlLockLayer:Array<PhysicsAttributeOverride> = null;
-
-	/** `-1e8` sentinel = no pending unlock (per [No Null Primitives](feedback_no_null_primitives.md)). */
 	var cannonControlLockUntil:Float = -1e8;
-
 	var cannonCameraLockUntil:Float = -1e8;
 
-	/** The "can't immediately re-enter the same cannon you just left" cooldown - ported from
-		`GameConnection::leaveCannon`'s `%this.disableCannon[%cannon] = true` +
-		`schedule(200, activateCannon, %cannon)`, converted to a plain elapsed-time check per
-		[No Schedules](feedback_no_schedules.md). */
 	public var lastCannon:shapes.Cannon = null;
 
 	var cannonReenableTime:Float = -1e8;
-
-	/** When an instant cannon should auto-fire, set on entry - `-1e8` sentinel = nothing pending. */
 	var instantCannonFireTime:Float = -1e8;
 
 	public var blastAmount:Float = 0;
@@ -1154,9 +1028,6 @@ class Marble extends GameObject {
 	var iceChunkSnowEmitterData:ParticleData;
 	var trailEmitterNode:ParticleEmitter;
 
-	/** Ported from `Marble::assignNewTrailEmitter`'s full slot list (`server/scripts/game.cs`) minus
-		the Mega-marble-only slots, which reuse the same node fields gated by `isMegaMarbleEnabled`
-		instead of separate always-different assets. See `updateTrailEmitters`. */
 	var whiteTrailEmitterData:ParticleData;
 
 	var trailBubbleEmitterData:ParticleData;
@@ -1176,39 +1047,17 @@ class Marble extends GameObject {
 	var fireball3MegaEmitterNode:ParticleEmitter;
 	var fireball4MegaEmitterNode:ParticleEmitter;
 
-	/** One-shot burst emitter data for `Marble.fireballBlast` - unlike the trail data above, these
-		are created fresh per-burst (matching the existing `splash1EmitterData`/`bounceEmitterData`
-		one-shot convention), not toggled show/hide. `IceShard`'s own break-burst particles
-		(`IceShardBreak1/2Emitter`) live on `IceShard.hx` instead, since only `IceShard` spawns
-		them. */
 	var fireball1BlastEmitterData:ParticleData;
 
 	var fireball2BlastEmitterData:ParticleData;
 	var fireball4BlastEmitterData:ParticleData;
 
-	/** Mirrors PQ's `%player.fireball` datafield (`client/scripts/fireball.cs`'s
-		`clientCmdFireballStartParticles`/`EndParticles`) - true for the whole duration the Fireball
-		PowerUp is active, driving both the trail visibility gate in `updateTrailEmitters` and the
-		actual gameplay state (`FireballItem.hx`, `IceShard.hx`, `fireballBlast`). This port
-		collapses PQ's separate server (`%player._fireballActive`) and client (`%player.fireball`)
-		flags into this single field, matching how `bubbleActive` already does the same for Bubble. */
 	public var fireball:Bool = false;
-
-	/** Remaining/total banked Fireball time, in seconds - mirrors `%player._fireballTime`/
-		`%obj.activeTime`. Decremented continuously in `updateFireball` rather than PQ's
-		schedule-based `fireballExpire` (see [No Schedules](feedback_no_schedules.md)), and directly
-		by 500ms (`FireballItem::IceCollision`) when melting through an `IceShard` by contact. */
 	public var fireballTime:Float = 0;
-
 	public var fireballTotalTime:Float = 0;
 
-	/** Mirrors `$Client::FireballLastBlastTime` - gates the 2-second blast cooldown
-		(`fireballBlast`/`canFireballBlast`). */
 	var fireballLastBlastTime:Float = -1e8;
 
-	/** Mirrors PQ's `%player.lastMovement` (`client/scripts/mp/particles.cs`) for the Snore trail's
-		idle-timeout check - real sim time (`timeSinceLoad`), not the attempt/gameplay clock, since
-		idling should count even before/after an attempt is actively running. */
 	var lastMovementTime:Float = 0;
 
 	var rollSound:Channel;
@@ -1688,12 +1537,6 @@ class Marble extends GameObject {
 		shadowVolume.setRotationQuat(q);
 	}
 
-	/** Ported from `applyGravity()` (`core/server/missionload.cs`) - `MissionInfo.gravity`/
-		`jumpimpulse` are mission-wide defaults that fall back to the engine's own hardcoded defaults
-		(20/7.5, already `_gravity`/`_jumpImpulse`'s field initializers) when blank. Applied before
-		`marbleAttributes`/PhysMod-style overrides so an explicit mission-script or trigger override
-		still wins, matching the real order (`applyGravity` bakes into `MarbleData`'s own field, and
-		anything setting the attribute later at runtime just overwrites that). */
 	function loadMissionInfoPhysicsDefaults() {
 		if (this.level == null || this.level.mission == null || this.level.mission.missionInfo == null)
 			return;
@@ -1737,15 +1580,6 @@ class Marble extends GameObject {
 			this._bounceKineticFriction = MisParser.parseNumber(attribs.get("bouncekineticfriction"));
 	}
 
-	/** Every attribute PQ's `MarbleAttributeInfoArray`/`PhysMod` system can override on a marble
-		(`shared/defaultProperties.cs`/`client/scripts/physics.cs`), plus the two "global" (non-
-		datablock) attributes that are actually exercised by real PhysMod/registered layers
-		(`cameraSpeedMultiplier`, `movementSpeedMultiplier` - see their fields' doc comment). The
-		remaining "global" attributes (`timeScale`, `superJumpVelocity`, etc.) and mega-marble-specific
-		`megaValue` overrides are still out of scope. Recognizes both PQ's real attribute
-		name (`airAcceleration`) and this codebase's pre-existing shorthand (`airAccel`) for the same
-		field, since both appear in the wild (mission-wide `setMarbleAttributes` vs. real PQ `.mis`
-		`PhysMod` triggers). */
 	public function setMarbleAttribute(attr:String, value:Float) {
 		switch (attr.toLowerCase()) {
 			case "maxrollvelocity":
@@ -1789,10 +1623,6 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Counterpart to `setMarbleAttribute` - reads the current value of an overridable attribute,
-		used by `pushPhysicsLayer`/`popPhysicsLayer` to snapshot the baseline to reset to and to
-		re-apply each still-active layer's overrides on top of it. Returns 0 for an unrecognized
-		attribute name (matches `setMarbleAttribute`'s silent-ignore behavior). */
 	function getMarbleAttribute(attr:String):Float {
 		return switch (attr.toLowerCase()) {
 			case "maxrollvelocity": this._maxRollVelocity;
@@ -1818,17 +1648,7 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** All attributes currently overridden by pushed `PhysMod` layers, outermost (most-recently-
-		pushed) last - see `pushPhysicsLayer`/`popPhysicsLayer`. Every entry is just an
-		attribute-name/value pair (ported from PQ's `Physics::pushLayer`'s `attribute[i]`/`value[i]`
-		record, `client/scripts/physics.cs`); `megaValue` isn't tracked here since mega-marble-specific
-		attribute overrides are out of scope for this port. */
 	var physicsLayers:Array<Array<PhysicsAttributeOverride>> = [];
-
-	/** Baseline attribute values to reset to before replaying every still-active layer - captured
-		once after `loadMarbleAttributes()` applies the mission's own permanent overrides (see
-		`init()`), so popping every layer returns the marble to the *level's* configured defaults,
-		not the engine's hardcoded ones. */
 	var physicsAttributeBaseline:Map<String, Float>;
 
 	static var PHYSMOD_ATTRIBUTES = [
@@ -1859,14 +1679,6 @@ class Marble extends GameObject {
 			this.physicsAttributeBaseline.set(attr, getMarbleAttribute(attr));
 	}
 
-	/** Ported from PQ's `Physics::pushLayer` (`client/scripts/physics.cs`) - each `PhysMod` trigger
-		(and, later, things like water) pushes one layer of attribute overrides on marble-enter and
-		pops the same layer on marble-leave (`popPhysicsLayer`). Applies every override in this new
-		layer immediately; doesn't touch attributes the layer doesn't mention, so whatever the
-		previously-active layers (or the baseline) left them at stays in effect. Returns the layer so
-		the caller can pass it back to `popPhysicsLayer` later - overlapping PhysMod volumes combine
-		correctly because the most-recently-pushed layer's value for a given attribute always wins
-		(pushed last = applied last = still in effect until *that* layer is popped). */
 	public function pushPhysicsLayer(overrides:Array<PhysicsAttributeOverride>) {
 		this.physicsLayers.push(overrides);
 		for (o in overrides)
@@ -1874,11 +1686,6 @@ class Marble extends GameObject {
 		return overrides;
 	}
 
-	/** Ported from PQ's `Physics::popLayer` - removing a layer can't just re-apply the baseline,
-		since other layers might still be active and need their overrides preserved; instead, like
-		the original, this resets every tracked attribute to the captured baseline and replays every
-		*remaining* layer's overrides back in order, so whichever still-active layer touched an
-		attribute most recently ends up in effect again. */
 	public function popPhysicsLayer(layer:Array<PhysicsAttributeOverride>) {
 		if (!this.physicsLayers.remove(layer))
 			return;
@@ -1891,10 +1698,6 @@ class Marble extends GameObject {
 				setMarbleAttribute(o.attribute, o.value);
 	}
 
-	/** Ported from PQ's `"water"` physics layer (`client/scripts/physics.cs`) - the discrete,
-		one-time-per-entry half of water's physics change. Only the first value of each attribute
-		pair is used (the second is the mega-marble-specific variant - out of scope, same as
-		`PhysModTrigger`'s `megaValue[i]`). */
 	static function buildWaterPhysicsLayer():Array<PhysicsAttributeOverride> {
 		return [
 			{attribute: "maxrollvelocity", value: 5},
@@ -1909,12 +1712,6 @@ class Marble extends GameObject {
 		];
 	}
 
-	/** Ported from PQ's `"frozen"` physics layer, pushed while contained in a cannon
-		(`client/scripts/cannon.cs`'s `Physics::pushLayerName("frozen")`) - zeroes every attribute
-		that could move the marble under its own power, including gravity, since the marble should
-		float in place while the player aims (its position is forcibly overwritten every frame by
-		`CameraController.updateCannonCamera` regardless, but zeroing these too keeps behavior
-		correct on the rare frame that doesn't happen, e.g. right at container/loading edges). */
 	static function buildCannonFrozenLayer():Array<PhysicsAttributeOverride> {
 		return [
 			{attribute: "maxrollvelocity", value: 0},
@@ -1926,9 +1723,6 @@ class Marble extends GameObject {
 		];
 	}
 
-	/** Ported from PQ's `"cannonLockControls"` physics layer - pushed briefly after firing
-		(`Cannon.lockTime`). Unlike the "frozen" layer above, gravity is NOT zeroed here - the
-		marble should fall/fly normally along its just-fired trajectory, it just can't be steered. */
 	static function buildCannonControlLockLayer():Array<PhysicsAttributeOverride> {
 		return [
 			{attribute: "maxrollvelocity", value: 0},
@@ -1938,7 +1732,6 @@ class Marble extends GameObject {
 		];
 	}
 
-	/** Ported from PQ's `"bubble"` physics layer (`client/scripts/physics.cs`). */
 	static function buildBubblePhysicsLayer():Array<PhysicsAttributeOverride> {
 		return [
 			{attribute: "maxrollvelocity", value: 10},
@@ -1956,12 +1749,6 @@ class Marble extends GameObject {
 		];
 	}
 
-	/** Ported from `WaterPhysicsTrigger_onEnterWater`/`onLeaveWater` (`client/scripts/water.cs`) -
-		splash burst spawned at the marble's position offset `(0,0,-0.4)`, exactly matching the
-		source's `vectorAdd($MP::MyMarble.getPosition(), "0 0 -0.4")`. Emitter choice is based on
-		entry speed (captured *before* the velocity-dampening impulse, matching the source reading
-		`%velocity`/`%speed` first): Splash3 at >= 50, Splash1 (plus an extra Drop1 burst) at >= 20,
-		otherwise Splash2 - and Splash2 again, unconditionally, on leaving. */
 	function spawnWaterSplash(entrySpeed:Float) {
 		var pos = this.getAbsPos().getPosition().add(new Vector(0, 0, -0.4));
 		if (entrySpeed >= 50) {
@@ -1979,14 +1766,6 @@ class Marble extends GameObject {
 		this.level.particleManager.createEmitter(splash2ParticleOptions, this.splash2EmitterData, pos);
 	}
 
-	/** Ported from PQ's `updateClientWater()` (`client/scripts/water.cs`) - called once per tick
-		from `MarbleWorld`. Entering/leaving the water's bulk physics layer only happens on the
-		zero/non-zero transition of `waterTriggers.length` (overlapping/adjacent water volumes feel
-		seamless, matching `waterIsInSet`/`waterLastCount`); the continuous depth-based
-		`maxRollVelocity`/`angularAcceleration` scaling is recomputed every tick directly via
-		`setMarbleAttribute` (bypassing the layer-replay mechanism, since it changes continuously
-		with depth rather than being a one-time push) using whichever overlapping trigger is
-		closest, matching `findClosestWaterTrigger`. */
 	public function updateWater(timeState:TimeState) {
 		if (this.waterTriggers.length == 0) {
 			if (this.isInWater) {
@@ -2027,11 +1806,6 @@ class Marble extends GameObject {
 		this.setMarbleAttribute("angularacceleration", zdist / 0.2 * 40 + 35);
 	}
 
-	/** Ported from PQ's `setBubbleTime` (`clientCmdSetBubbleTime`, `client/scripts/water.cs`) -
-		called once on pickup. Only actually banks the new time if the bubble isn't already active
-		with more time banked (or becoming infinite), matching the source's `!active || infinite ||
-		time > bubbleTime` guard - picking up a weaker bubble while a stronger one is still running
-		doesn't downgrade it. */
 	public function setBubbleTime(time:Float, infinite:Bool) {
 		var active = time > 0;
 		if (!active || infinite || time > this.bubbleTime) {
@@ -2060,12 +1834,6 @@ class Marble extends GameObject {
 			this.level.playGui.updateBubbleBar(this.bubbleTime, this.bubbleTotalTime, this.bubbleInfinite);
 	}
 
-	/** Ported from PQ's `BubbleLoop` (`client/scripts/water.cs`) - held-to-use, undoes itself the
-		instant the powerup button is released or the marble leaves the water (matching the "let go
-		pops it"/"exit the water pops it" checks), and depletes while active unless infinite. Called
-		once per substep, right alongside the click-based `heldPowerup.use()` consumption check,
-		since Bubble deliberately bypasses that mechanism entirely - it never occupies the single
-		`heldPowerup` slot (see the field doc on `bubbleTime`). */
 	function updateBubble(move:Move, timeStep:Float) {
 		var use = move.powerupHeld;
 		if (this.bubbleActive) {
@@ -2090,22 +1858,16 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Ported from `GameConnection::fireballInit` (`server/scripts/fireball.cs`) - called from
-		`FireballItem.pickUp`. Cancels any banked Bubble time (`%user.client.setBubbleTime(0, false)`
-		- "Ruin their bubble", matching `BubbleItem::onPickup`'s one-directional counterpart that
-		blocks picking up a Bubble while Fireball is active). */
 	public function activateFireball(time:Float) {
 		this.fireball = true;
 		this.fireballTime = time;
 		this.fireballTotalTime = time;
-		// "So we can instantly blast after getting a new fireball" (`clientCmdFireballInit`).
 		this.fireballLastBlastTime = -1e8;
 		this.setBubbleTime(0, false);
 		if (this.level != null)
 			this.level.playGui.updateFireballBar(this.fireballTime, this.fireballTotalTime, this.canFireballBlast());
 	}
 
-	/** Ported from `GameConnection::fireballExpire`. */
 	function deactivateFireball() {
 		if (!this.fireball)
 			return;
@@ -2115,9 +1877,6 @@ class Marble extends GameObject {
 			this.level.playGui.updateFireballBar(0, 0, false);
 	}
 
-	/** Continuous decrement, replacing PQ's `schedule($time, "fireballExpire")` (banned by
-		[No Schedules](feedback_no_schedules.md)) - functionally identical, since PQ's own
-		`getFireballTime` already computes remaining time as a pure function of elapsed time anyway. */
 	function updateFireball(timeStep:Float) {
 		if (!this.fireball)
 			return;
@@ -2130,9 +1889,6 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Deducts banked Fireball time - ported from `FireballItem::IceCollision`'s `%marble.
-		_fireballTime -= 500` (melting through an `IceShard` by contact, as opposed to `Blast`'s
-		radius search, which doesn't cost any time). */
 	public function deductFireballTime(amount:Float) {
 		if (!this.fireball)
 			return;
@@ -2145,30 +1901,17 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Ported from `fireballBlast`'s cooldown guard (`client/scripts/fireball.cs`) - needs at least
-		1 second of Fireball time left, and at least 2 seconds since the last blast. */
 	function canFireballBlast():Bool {
 		if (!this.fireball || this.level == null)
 			return false;
 		return this.fireballTime >= 1 && (this.level.timeState.currentAttemptTime - this.fireballLastBlastTime) >= 2;
 	}
 
-	/** Ported from `fireballBlast`/`serverCmdFireballBlast`/`FireballItem::Blast`
-		(`client/scripts/fireball.cs` + `server/scripts/fireball.cs`) - called from `useBlast`, which
-		the same physical input (`Settings.controlsSettings.blast`) already drives for the Ultra
-		"blast" mechanic; Fireball intercepts that input first when active, matching real PQ's
-		`input_useBlast` (`if ($Client::FireballActive) { if (fireballBlast()) return; }`). Doesn't
-		consume any Fireball time itself - only contact-melting an `IceShard` costs time (see
-		`deductFireballTime`). Returns `true` if the blast actually fired (so `useBlast` can skip the
-		normal Ultra blast for this call), matching `fireballBlast`'s own return value. */
 	function fireballBlast(timeState:TimeState):Bool {
 		if (!this.canFireballBlast())
 			return false;
 		this.fireballLastBlastTime = timeState.currentAttemptTime;
 
-		// Base 2 + up to 5 scaled by remaining time fraction + up to 5 scaled by how long it's been
-		// since the last jump (ramps 0 -> 1 over 0.4s - jumping right before blasting is weaker, "so
-		// you can't combine for crazy height").
 		var timeFraction = this.fireballTotalTime > 0 ? this.fireballTime / this.fireballTotalTime : 0;
 		var jumpFraction = Util.clamp(this.timeSinceLastJump / 0.4, 0, 1);
 		var scale = timeFraction * 5 + jumpFraction * 5 + 2;
@@ -2176,7 +1919,7 @@ class Marble extends GameObject {
 
 		var pos = this.getAbsPos().getPosition();
 
-		// Blast out nearby ice shards - radius shrinks from 3 (full time) down to 1.5 (empty).
+		// Blast out nearby ice shards
 		var radius = timeFraction * 1.5 + 1.5;
 		var smashedAny = false;
 		if (this.level != null) {
@@ -2630,8 +2373,6 @@ class Marble extends GameObject {
 	static final SNORE_THRESHOLD = 0.01;
 	static final SNORE_TIMEOUT = 10.0;
 
-	/** Creates or removes `node` (backed by `options`/`data`, following the marble every frame via
-		the `getPos` closure convention already used elsewhere in this file) to match `show`. */
 	function setTrailEmitterShown(node:ParticleEmitter, show:Bool, options:ParticleEmitterOptions, data:ParticleData):ParticleEmitter {
 		if (show && node == null)
 			return this.level.particleManager.createEmitter(options, data, null, () -> this.getAbsPos().getPosition());
@@ -2640,14 +2381,6 @@ class Marble extends GameObject {
 		return show ? node : null;
 	}
 
-	/** Ported from the native `updateTrailEmitters()`/`Marble::assignNewTrailEmitter` (real engine
-		`interpolation.cpp` + `server/scripts/game.cs`) - decides which of the marble's persistent
-		trail emitters should be visible this frame, purely from current state (speed/water/fireball/
-		mega/game-state), and creates/removes each one to match. The real engine instead keeps 9
-		always-existing `ParticleEmitterNode`s per marble and teleports the hidden ones off to
-		`(-999999,...)` - functionally identical to create/remove here, since this codebase's
-		`ParticleManager` already supports on-demand emitter creation/removal (see `createEmitter`/
-		`removeEmitter`), so there's no need for the off-screen-parking indirection. */
 	function updateTrailEmitters(timeState:TimeState) {
 		if (!this.controllable || this.isNetUpdate)
 			return;
@@ -2666,9 +2399,6 @@ class Marble extends GameObject {
 		var showSnore = false;
 
 		if (this.isInWater) {
-			// Ported from `%closestTrigger.testObject(%player)` - approximated here as "the marble's
-			// entire radius is below the water's surface", the same `collider.boundingBox.zMax`
-			// `updateWater` already compares against for its depth-based attribute scaling.
 			var fullySubmerged = this.currentWaterTrigger != null
 				&& (pos.z + this._radius) <= this.currentWaterTrigger.collider.boundingBox.zMax;
 			showSplash4 = speed > 1 && !fullySubmerged;
@@ -3524,11 +3254,6 @@ class Marble extends GameObject {
 			this.callCollisionHandlers(tempTimeState, oldPos, newPos);
 		}
 
-		// Skip entirely while contained in a cannon - the marble is pinned in place with zeroed
-		// velocity every frame (`CameraController.updateCannonCamera`), which starves this
-		// calculation's `rollVel.length() / this._maxRollVelocity`-style ratios down to degenerate
-		// near-zero inputs for an extended, unnatural stretch of ticks (unlike a normal brief stop),
-		// which was reaching the audio backend as an invalid parameter and crashing it.
 		if (this.activeCannon == null)
 			this.updateRollSound(timeState, contactTime / timeState.dt, this._slipAmount);
 		else {
@@ -4054,9 +3779,7 @@ class Marble extends GameObject {
 				move.d.x = MarbleGame.instance.touchInput.movementInput.value.y;
 			}
 		}
-		// Ported from `physics.cs`'s `"movementSpeedMultiplier"` global attribute - real PQ scales
-		// the digital movement-key speed globals themselves; this engine reads `move.d` straight off
-		// keys/gamepad/touch every tick, so scaling the compiled vector here is the equivalent hook.
+
 		move.d.x *= this._movementSpeedMultiplier;
 		move.d.y *= this._movementSpeedMultiplier;
 		this.level.gameMode.processMove(this, move);
@@ -4079,9 +3802,6 @@ class Marble extends GameObject {
 			if (this.level.replay.currentPlaybackFrame.marbleStateFlags.has(UsedPowerup))
 				move.powerup = true;
 			move.d = new Vector(this.level.replay.currentPlaybackFrame.marbleX, this.level.replay.currentPlaybackFrame.marbleY, 0);
-			// Continuous hold input - drives Bubble/Cannon's charge-and-fire state machines, which
-			// otherwise never see the key held during replay playback (see `Replay.hx`'s
-			// `ReplayFrame.powerupHeld` doc comment).
 			move.powerupHeld = this.level.replay.currentPlaybackFrame.powerupHeld;
 		} else {
 			if (this.level.isRecording) {
@@ -4243,7 +3963,6 @@ class Marble extends GameObject {
 
 		if (this.isFrozen) {
 			this.iceChunk.setPosition(x, y, z);
-			// PQ: `%scale = %marble.getCollisionRadius() / 0.18975; setScale(%scale + 0.1)`.
 			this.iceChunk.setScale(this._radius / 0.18975 + 0.1);
 		} else {
 			this.iceChunk.setPosition(1e8, 1e8, 1e8);
@@ -4277,15 +3996,10 @@ class Marble extends GameObject {
 	}
 
 	public function useBlast(timeState:TimeState) {
-		// Cannon intercepts the blast input before anything else - matches `serverCmdBlast`'s
-		// "CANCEL THE CANNON" check being the very first thing it does, ahead of every other blast
-		// mode.
 		if (this.activeCannon != null) {
 			this.cancelCannon(timeState);
 			return;
 		}
-		// Fireball intercepts the blast input first when active - if it fires, skip the normal
-		// Ultra blast entirely for this call (matches `input_useBlast`'s early return).
 		if (this.fireballBlast(timeState))
 			return;
 		if (Net.isMP) {
@@ -4457,9 +4171,6 @@ class Marble extends GameObject {
 			}
 		}
 
-		// Ported from `TeleportItem::finishTeleport` - fires once `teleporterTeleTime` has elapsed
-		// since the second (fire) press. See `teleporterFiring`'s doc comment for why this lives
-		// here instead of a schedule.
 		if (this.teleporterFiring && time.currentAttemptTime - this.teleporterFireStartTime >= this.teleporterTeleTime) {
 			this.teleporterFiring = false;
 			this.setCloaking(false, time);
@@ -4496,13 +4207,6 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Ported from PQ's `IceShard::onCollision` (`server/scripts/hazards.cs`). MegaMarble is
-		immune - touching a shard while mega just cancels MegaMarble instead of freezing. Otherwise
-		locks movement (reusing the existing `movementTriggerCount` gate) and zeroes velocity every
-		tick while frozen (see `advancePhysics`). Unfreezing itself is driven by `lastFreezeTime`
-		(checked every frame in `updatePowerupStates`, same pattern as `PowerUp.cooldownDuration`/
-		`PushButton.getCurrentCompletion`) rather than a one-shot schedule, so it survives rewind
-		and mission-reset the same way every other timed state in this class already does. */
 	public function freeze(ice:shapes.IceShard, timeState:TimeState) {
 		if (isMegaMarbleEnabled(timeState)) {
 			this.megaMarbleEnableTime = -1e8;
@@ -4520,9 +4224,6 @@ class Marble extends GameObject {
 		ice.playFreezeSound(this);
 	}
 
-	/** Ported from PQ's `Marble::lockPowerup`/`unlockPowerup` (`server/scripts/marble.cs`) -
-		swaps the HUD's powerup frame to a "locked" graphic. A count rather than a plain toggle so
-		multiple simultaneous lock reasons (only freezing, currently) don't unlock each other early. */
 	public function lockPowerupUse() {
 		this.powerupLockCount++;
 		if (this.level != null)
@@ -4537,8 +4238,6 @@ class Marble extends GameObject {
 			@:privateAccess this.level.playGui.lockPowerup(false);
 	}
 
-	/** `cancel` mirrors PQ's own parameter - `true` when the freeze is being cut short (e.g. a
-		mission restart) rather than expiring naturally, skipping the un-freeze impulse/sound. */
 	public function unfreeze(cancel:Bool) {
 		if (!this.isFrozen)
 			return;
@@ -4558,9 +4257,6 @@ class Marble extends GameObject {
 			if (this.iceShard != null)
 				this.iceShard.playCrackSound(this);
 
-			// Ported from `IceShard::unfreeze` - two particle bursts at the marble's position, the
-			// ejection cone oriented along gravity-up flipped 180° (`applyrotations(getGravityRot(),
-			// "0 180 0")`), matching the impulse direction above.
 			if (this.level != null) {
 				var axis = this.currentUp.multiply(-1);
 				iceChunkChunkParticleOptions.axis = axis;
@@ -4574,11 +4270,6 @@ class Marble extends GameObject {
 		this.iceShard = null;
 	}
 
-	/** Ported from `GameConnection::enterCannon` (`server/scripts/cannon.cs`). MegaMarble is
-		explicitly cancelled (not just ignored) on entry, matching `%this.setMegaMarble(false)`. The
-		`disableCannon`/`disableCannon[%cannon]` re-entry guard is collapsed into the single
-		`lastCannon`/`cannonReenableTime` cooldown - this port has no per-cannon disable map, just
-		"was this the same cannon I just left, and has the cooldown not elapsed yet". */
 	public function enterCannon(cannon:shapes.Cannon, timeState:TimeState) {
 		if (this.activeCannon != null)
 			return;
@@ -4593,32 +4284,13 @@ class Marble extends GameObject {
 		this.velocity.set(0, 0, 0);
 		this.omega.set(0, 0, 0);
 		this.cannonCharge = 0;
-		// Snapshot before pushing the "frozen" layer (which zeroes the `gravity` attribute while
-		// contained) - matches `$Cannon::BeforeGravity`, used by the aim-assist trajectory's own
-		// physics integration (`Cannon.updateAimVisualization`), which needs the marble's *real*
-		// gravity, not the temporarily-zeroed contained value.
 		this.cannonBeforeGravity = this._gravity;
 		this.cannonFrozenLayer = this.pushPhysicsLayer(buildCannonFrozenLayer());
 		this.movementTriggerCount++;
 
-		// Ported from `clientCmdEnterCannon`'s instant-cannon branch - fires automatically after
-		// `instantDelayTime` (or effectively "next frame" if 0, matching `onNextFrame
-		// (activateInstantCannon)`) using the cannon's own fixed `yaw`/`pitch`, not the player's
-		// camera.
 		if (cannon.instant) {
 			this.instantCannonFireTime = timeState.currentAttemptTime + Math.max(cannon.instantDelayTime, 0.001);
 		} else if (this.camera != null) {
-			// Ported from `clientCmdEnterCannon`'s `setMarbleCamYaw(%cannon.lastYaw); setMarbleCamPitch
-			// (%cannon.lastPitch);` - without this, the camera keeps whatever direction the player
-			// happened to be facing before touching the cannon, which is very likely already outside
-			// (or hard up against) the cannon's own yaw/pitch bounds (measured *relative to*
-			// `cannon.yaw`/`lastYaw`, not from world zero) - `updateCannonCamera`'s bound clamp would
-			// then immediately pin the camera at one edge, making aiming feel almost frozen right
-			// from the start. `cannon.lastYaw`/`lastPitch` are stored in file/`hide` convention
-			// (positive pitch = up, zero yaw = local +Y) - `CameraYaw`/`CameraPitch`'s own convention
-			// differs on *both* axes (positive pitch = down, zero yaw = local +X - a 90-degree axis
-			// mismatch, not just a sign flip; see `shapes.Cannon.computeCameraDirection`'s doc
-			// comment), so yaw needs a `+90 degrees` correction here, not just pitch's negation.
 			this.camera.CameraYaw = cannon.lastYaw + Math.PI / 2;
 			this.camera.nextCameraYaw = this.camera.CameraYaw;
 			this.camera.CameraPitch = -cannon.lastPitch;
@@ -4626,12 +4298,6 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Ported from `updateCannonLaunch`/`updateCannonCharge`/`finishCannonCharge` - runs every
-		substep alongside `updateBubble`/`updateFireball`, reading the same `Move.powerupHeld`
-		continuous-hold field real PQ's `$mouseFire` maps to. Aiming/camera positioning itself lives
-		in `CameraController.updateCannonCamera` (visual-only, not gameplay-affecting) - this is only
-		the charge-accumulation/fire-detection half, kept in the deterministic substep/replay path
-		since it does affect the marble's velocity. */
 	function updateCannonFiring(m:Move, timeStep:Float, timeState:TimeState) {
 		var cannon = this.activeCannon;
 		if (cannon == null)
@@ -4641,13 +4307,6 @@ class Marble extends GameObject {
 			if (this.instantCannonFireTime > 0 && timeState.currentAttemptTime >= this.instantCannonFireTime) {
 				var yawRad = cannon.yaw * Math.PI / 180;
 				var pitchRad = cannon.pitch * Math.PI / 180;
-				// Ported from `activateInstantCannon`'s `%yaw = mDegToRad(%cannon.yaw); %pitch =
-				// -mDegToRad(%cannon.pitch);` - the same values fed to `finishCannonCharge`'s
-				// `cannonSetCamera` call for a non-instant shot come from `getMarbleCamYaw/Pitch()`
-				// directly (already live-camera convention); here they instead come from the
-				// cannon's own fixed fields, so they need the file->camera conversion first (see
-				// `Marble.enterCannon`'s doc comment for the same +90-degree yaw / pitch-negation
-				// rule, applied there in the same direction).
 				var cameraYaw = yawRad + Math.PI / 2;
 				var cameraPitch = -pitchRad;
 				this.fireCannon(cannon, cannon.computeFireDirection(yawRad, pitchRad), 1, timeState, cameraYaw, cameraPitch);
@@ -4663,10 +4322,6 @@ class Marble extends GameObject {
 					this.cannonCharge = cannon.chargeTime;
 			} else if (this.cannonCharge > 0) {
 				var t = this.cannonCharge / cannon.chargeTime;
-				// Camera-convention direction (live `CameraYaw`/`CameraPitch`, no pitch negation
-				// needed here) - NOT `computeFireDirection`, which is for the cannon's own authored
-				// `yaw`/`pitch` fields and uses a different zero-yaw axis convention. See
-				// `shapes.Cannon.computeCameraDirection`'s doc comment.
 				var fireDir = cannon.computeFireDirectionFromCamera(this.camera.CameraYaw, this.camera.CameraPitch);
 				this.fireCannon(cannon, fireDir, t, timeState, this.camera.CameraYaw, this.camera.CameraPitch);
 			}
@@ -4676,12 +4331,6 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Ported from `client/scripts/cannon.cs`'s `"cannonLockControls"`/`"cannonLockCamera"` named
-		physics layers - `lockTime` defaults to 300ms when unset (`GameConnection::leaveCannon`'s
-		`%unlockTime = (%cannon.lockTime == 0 ? 300 : %cannon.lockTime)`), matching the powerup-lock
-		default exactly. Camera lock is a plain timestamp check (`CameraController.
-		updateCannonCamera` reads `cannonCameraLockUntil` directly) since it isn't a marble physical
-		attribute PhysMod's layer stack covers. */
 	function lockCannonControls(cannon:shapes.Cannon, timeState:TimeState) {
 		var lockTime = cannon.lockTime > 0 ? cannon.lockTime : 0.3;
 		this.cannonControlLockUntil = timeState.currentAttemptTime + lockTime;
@@ -4691,9 +4340,6 @@ class Marble extends GameObject {
 			this.cannonCameraLockUntil = timeState.currentAttemptTime + lockTime;
 	}
 
-	/** Checked once per frame (`update()`) - converts the old `schedule(lockTime, ...)`/
-		`schedule(200, activateCannon, ...)` callbacks into plain elapsed-time checks per
-		[No Schedules](feedback_no_schedules.md). */
 	public function cannonCameraLocked():Bool {
 		return this.level != null && this.level.timeState.currentAttemptTime < this.cannonCameraLockUntil;
 	}
@@ -4709,9 +4355,6 @@ class Marble extends GameObject {
 		}
 	}
 
-	/** Common exit path shared by a natural fire-and-leave and a cancelled (blast-key) exit -
-		ported from the shared tail of `GameConnection::leaveCannon`/`cancelCannon`: pops the
-		"frozen" layer, unlocks movement, remembers this cannon for the re-entry cooldown. */
 	function leaveCannonInternal(timeState:TimeState) {
 		var cannon = this.activeCannon;
 		if (cannon == null)
@@ -4731,15 +4374,6 @@ class Marble extends GameObject {
 		cannon.hideAimVisualization();
 	}
 
-	/** Ported from `finishCannonCharge`/`GameConnection::leaveCannon` - a natural fire-and-exit
-		(as opposed to `cancelCannon`, which ejects without firing). `forceFraction` is the charge
-		fraction (1 for a non-charge cannon), `fireDir` is the aimed body's local +Y axis in world
-		space (the barrel direction - matches this codebase's established "local Y is forward"
-		convention, see the DTS billboard port). `cameraYaw`/`cameraPitch` are ALREADY in this
-		engine's own live-camera convention (see `shapes.Cannon.computeCameraDirection`'s doc
-		comment) - the caller (`updateCannonFiring`) is responsible for converting the cannon's
-		authored `yaw`/`pitch` fields into that convention for an instant-cannon shot, since
-		`Marble` has no direct reason to know about that conversion otherwise. */
 	public function fireCannon(cannon:shapes.Cannon, fireDir:Vector, forceFraction:Float, timeState:TimeState, cameraYaw:Float, cameraPitch:Float) {
 		if (this.activeCannon != cannon)
 			return;
@@ -4751,16 +4385,6 @@ class Marble extends GameObject {
 		this.cannonCharge = 0;
 		this.unlockPowerupUse();
 
-		// Ported from `finishCannonCharge`'s closing `cannonSetCamera(normalizeAngle(%yaw),
-		// normalizeAngle(%pitch))` call - real source calls this for BOTH instant and non-instant
-		// cannons (`activateInstantCannon` calls it too, just with `mDegToRad(cannon.yaw)`/
-		// `-mDegToRad(cannon.pitch)` instead of `getMarbleCamYaw()`/`getMarbleCamPitch()` - an
-		// earlier version of this comment wrongly assumed instant cannons skip it entirely). Blends
-		// the pitch halfway back toward the default resting camera pitch (0.45) instead of leaving
-		// it wherever it was aimed/fixed, so the view settles into a normal look right after firing.
-		// Yaw is otherwise left as given - real source's own yaw adjustment here is just a gravity-
-		// direction correction that only has any effect in a non-default-gravity zone, not worth the
-		// added complexity for this pass.
 		if (this.camera != null) {
 			this.camera.CameraYaw = cameraYaw;
 			this.camera.nextCameraYaw = cameraYaw;
@@ -4773,9 +4397,6 @@ class Marble extends GameObject {
 		cannon.explode(timeState);
 	}
 
-	/** Ported from `GameConnection::cancelCannon` - fired via the blast key (`useBlast`'s cannon
-		intercept, matching `serverCmdBlast`'s "CANCEL THE CANNON" check being the very first thing
-		it does). Ejects just outside the cannon's mouth instead of firing. */
 	public function cancelCannon(timeState:TimeState) {
 		var cannon = this.activeCannon;
 		if (cannon == null)
@@ -4783,10 +4404,6 @@ class Marble extends GameObject {
 		this.unlockPowerupUse();
 		leaveCannonInternal(timeState);
 
-		// Real source ejects along a purely-yaw (no pitch) direction computed from the live camera
-		// yaw; approximated here with the cannon's current full aimed barrel direction (local +Y)
-		// negated, which is close enough for "pop out the way you were facing" and avoids needing
-		// a second yaw-only rotation just for this cosmetic ejection point.
 		var mat = new Matrix();
 		cannon.getRotationQuat().toMatrix(mat);
 		var barrelDir = new Vector(0, 1, 0).transformed(mat);
@@ -4795,9 +4412,6 @@ class Marble extends GameObject {
 		this.velocity.set(0, 0, 0);
 		this.omega.set(0, 0, 0);
 
-		// Ported from `clientCmdCancelCannon`'s `setCameraPitch(0.45)` - yaw is left exactly as-is
-		// (matches `setCameraYaw(getMarbleCamYaw())`, a no-op), only pitch resets to the default
-		// resting angle so bailing out via the blast key doesn't leave the view stuck at a steep aim.
 		if (this.camera != null) {
 			this.camera.CameraPitch = 0.45;
 			this.camera.nextCameraPitch = 0.45;
@@ -4845,18 +4459,10 @@ class Marble extends GameObject {
 		if (this.physicsAttributeBaseline != null)
 			for (attr in PHYSMOD_ATTRIBUTES)
 				setMarbleAttribute(attr, this.physicsAttributeBaseline.get(attr));
-		// physicsLayers was just wiped wholesale above, so the layers backing these no longer
-		// exist - clear their bookkeeping directly rather than via popPhysicsLayer/deactivate*
-		// (which would try to remove an already-gone layer and skip the flag resets).
 		this.isInWater = false;
 		this.waterTriggers = [];
 		this.waterPhysicsLayer = null;
 		this.currentWaterTrigger = null;
-		// `physicsLayers` was just wiped wholesale above, so these are already-dangling references -
-		// null them out directly rather than via `popPhysicsLayer` (which would try to remove an
-		// already-gone layer). Any `lockPowerupUse()` call `enterCannon` made is unwound here too,
-		// since the normal `fireCannon`/`cancelCannon`/`updateCannonLocks` unlock path never runs on
-		// an abrupt reset (e.g. respawning while still inside a cannon).
 		if (this.activeCannon != null)
 			this.unlockPowerupUse();
 		if (this.cannonControlLockLayer != null)

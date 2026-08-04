@@ -21,10 +21,9 @@ typedef ForceData = {
 
 class ForceObject extends DtsObject {
 	var forceDatas:Array<ForceData>;
+
 	public var powered:Bool = true;
 
-	/** Toggles whether this force shape's field (and, where overridden, its sound/animation)
-		is active. Used by `DisableShapeForceTrigger`. */
 	public function setPowered(p:Bool) {
 		this.powered = p;
 	}

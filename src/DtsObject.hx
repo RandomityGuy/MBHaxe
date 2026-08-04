@@ -75,8 +75,6 @@ class DtsObject extends GameObject {
 
 	public var skinOverride:String = null;
 
-	/** Resolves a dts material name, honoring an exact-match override first, then falling back
-		to a Torque-style skin substitution (replacing a leading "base" with `skinOverride`). */
 	public function resolveMatName(matName:String):String {
 		matName = StringTools.trim(matName);
 		if (matNameOverride.exists(matName))
@@ -117,9 +115,6 @@ class DtsObject extends GameObject {
 
 	var isBillboard = false;
 
-	// How far to push a billboard toward the camera (along the direction to it), at most, to keep
-	// it from clipping into the floor when viewed close to straight down/up. Tune by trial and
-	// error.
 	static var BILLBOARD_FORWARD_OFFSET = 0.4;
 
 	public var idInLevel:Int = -1;

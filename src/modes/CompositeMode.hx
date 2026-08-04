@@ -13,9 +13,6 @@ import rewind.RewindManager;
 import net.Move;
 import collision.CollisionInfo;
 
-/** `RewindableState` counterpart to `CompositeMode` - one slot per child mode (`null` where that
-	child has no state of its own), so a multi-mode mission (e.g. `"Quota Haste"`) rewinds every
-	active mode's state, not just one. */
 @:publicFields
 class CompositeRewindState implements RewindableState {
 	var states:Array<RewindableState>;
@@ -57,13 +54,6 @@ class CompositeRewindState implements RewindableState {
 	}
 }
 
-/** Delegates every `GameMode` hook to a fixed set of child modes - a mission's `gameMode` field is
-	a space-separated list of *independently active* modes (e.g. `"Hunt Laps"`, confirmed against
-	PQ's `shared/mission.cs::resolveMissionGameModes`), not a single mode. Void hooks (scoring
-	side-effects, HUD updates, etc.) run on every child. `canFinish` is a plain AND across children
-	("Quota Haste" needs the quota met AND the speed requirement met); the position/time/score hooks
-	aren't realistically ever overridden by more than one mode in the same mission at once, so the
-	last child in the list wins (mission authors list their "primary" mode last). */
 class CompositeMode implements GameMode {
 	var level:MarbleWorld;
 
@@ -163,8 +153,6 @@ class CompositeMode implements GameMode {
 		return "";
 	}
 
-	/** Every child still runs (for side effects), but if any child takes over, the default OOB
-		flow is suppressed. */
 	public function onOutOfBounds(marble:Marble):Bool {
 		var handled = false;
 		for (m in this.children)

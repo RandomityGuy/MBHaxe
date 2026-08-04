@@ -7,8 +7,6 @@ import src.MarbleWorld;
 import modes.GameMode.GameModeFactory;
 import modes.TwoDMode;
 
-/** Ported from PQ's `StopTDTrigger` datablock (`modes/2d.cs`) - unconditionally force-stops 2D
-	mode on marble-enter, regardless of `KeepEffectOnLeave` on whatever activated it. */
 class StopTDTrigger extends Trigger {
 	public function new(element:MissionElementTrigger, level:MarbleWorld) {
 		super(element, level);
