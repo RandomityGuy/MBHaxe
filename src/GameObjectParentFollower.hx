@@ -69,7 +69,7 @@ class GameObjectParentFollower {
 
 			this.relativeTransform = new Matrix();
 			var quat = new Quat();
-			quat.initRotateAxis(rotOff[0], rotOff[1], rotOff[2], -rotOff[3] * Math.PI / 180);
+			quat.initRotateAxis(rotOff[0], rotOff[1], rotOff[2], -rotOff[3]);
 			quat.x = -quat.x;
 			quat.w = -quat.w;
 			quat.toMatrix(this.relativeTransform);

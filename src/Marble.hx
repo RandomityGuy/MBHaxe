@@ -2516,6 +2516,7 @@ class Marble extends GameObject {
 		var bestSurface = -1;
 		var bestNormalForce = 0.0;
 		for (i in 0...contacts.length) {
+			this.level.gameMode.processMaterialContact(this, contacts[i]);
 			if (contacts[i].collider == null) {
 				contacts[i].normalForce = -contacts[i].normal.dot(A);
 				if (contacts[i].normalForce > bestNormalForce) {
@@ -2552,7 +2553,6 @@ class Marble extends GameObject {
 			}
 		}
 		if (bestSurface != -1 && this.mode != Finish) {
-			this.level.gameMode.processMaterialContact(this, bestContact);
 			var vAtC = this.velocity.add(this.omega.cross(bestContact.normal.multiply(-this._radius))).sub(bestContact.velocity);
 			var vAtCMag = vAtC.length();
 			var slipping = false;

@@ -44,6 +44,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	public var fastTransform:Bool = false;
 	public var isWorldStatic:Bool = false;
 
+	public var ignoreRayCast:Bool = false;
+
 	var _transformKey:Int = 0;
 
 	public var key:Int = 0;
@@ -168,6 +170,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 	}
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector, results:Array<RayIntersectionData>, bestT:Float) {
+		if (ignoreRayCast)
+			return bestT;
 		var invMatrix = invTransform;
 		var invTPos = invMatrix.clone();
 		invTPos.transpose();

@@ -14,9 +14,14 @@ class Debug {
 		position:Vector,
 		radius:Float
 	}> = [];
+	static var _lines:Array<{
+		v1:Vector,
+		v2:Vector
+	}> = [];
 
 	static var debugTriangles:h3d.scene.Mesh;
 	static var debugSphere:h3d.scene.MeshBatch;
+	static var debugGraphics:h3d.scene.Graphics;
 
 	public static function init() {}
 
@@ -61,6 +66,27 @@ class Debug {
 				debugSphere = null;
 			}
 		}
+
+		if (_lines.length != 0 && drawBounds) {
+			if (debugGraphics == null) {
+				debugGraphics = new h3d.scene.Graphics();
+				debugGraphics.material.receiveShadows = false;
+				debugGraphics.material.castShadows = false;
+				MarbleGame.instance.scene.addChild(debugGraphics);
+			}
+			debugGraphics.clear();
+			debugGraphics.lineStyle(4, 0xFF0000);
+			for (line in _lines) {
+				debugGraphics.moveTo(line.v1.x, line.v1.y, line.v1.z);
+				debugGraphics.lineTo(line.v2.x, line.v2.y, line.v2.z);
+			}
+			_lines.resize(0);
+		} else {
+			if (debugGraphics != null) {
+				debugGraphics.remove();
+				debugGraphics = null;
+			}
+		}
 	}
 
 	public static inline function drawTriangle(p1:Vector, p2:Vector, p3:Vector) {
@@ -75,5 +101,11 @@ class Debug {
 		if (!drawBounds)
 			return;
 		_spheres.push({position: centre.clone(), radius: radius});
+	}
+
+	public static inline function drawLine(p1:Vector, p2:Vector) {
+		if (!drawBounds)
+			return;
+		_lines.push({v1: p1, v2: p2});
 	}
 }

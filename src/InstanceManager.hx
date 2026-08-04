@@ -1,5 +1,6 @@
 package src;
 
+import shaders.SkyboxIce;
 import shaders.PQMaterial;
 import h3d.mat.Material;
 import h3d.scene.MultiMaterial;
@@ -286,6 +287,11 @@ class InstanceManager {
 							matclone.mainPass.removeShader(matclone.textureShader);
 							matclone.mainPass.addShader(pqshdr);
 							// minfo.meshbatch.material.mainPass.culling = mat.mainPass.culling;
+						}
+						var iceshdr = mat.mainPass.getShader(SkyboxIce);
+						if (iceshdr != null) {
+							matclone.mainPass.removeShader(matclone.textureShader);
+							matclone.mainPass.addShader(iceshdr);
 						}
 
 						var cubemapshdr = mat.mainPass.getShader(EnvMap);

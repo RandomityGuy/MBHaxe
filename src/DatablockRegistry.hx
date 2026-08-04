@@ -39,6 +39,7 @@ import triggers.CountdownStopTrigger;
 import triggers.DisableShapeForceTrigger;
 import triggers.PhysModTrigger;
 import triggers.SMBTrigger;
+import triggers.SecretAreaTrigger;
 import triggers.WaterPhysicsTrigger;
 import triggers.RelativeTPTrigger;
 import triggers.SpawnTrigger;
@@ -557,6 +558,10 @@ class DatablockRegistry {
 		{
 			match: Exact(["smbtrigger"]),
 			create: (element, level) -> new SMBTrigger(element, level)
+		},
+		{
+			match: Exact(["secretareatrigger"]),
+			create: (element, level) -> new SecretAreaTrigger(element, level)
 		},
 		{
 			match: Exact(["waterphysicstrigger"]),

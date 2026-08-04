@@ -740,12 +740,14 @@ class CameraController extends Object {
 		camera.target = marblePosition.add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
-		var rayCastOrigin = marblePosition.add(level.marble.currentUp.multiply(marble._radius));
+		var rayCastOrigin = camera.target;
 
 		var processedShapes = [];
 		for (i in 0...3) {
 			var rayCastDirection = camera.pos.sub(rayCastOrigin);
 			rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
+
+			// Debug.drawLine(rayCastOrigin, rayCastOrigin.add(rayCastDirection));
 
 			var rayCastLen = rayCastDirection.length();
 
@@ -777,6 +779,8 @@ class CameraController extends Object {
 						continue;
 
 					camera.pos = projected.toVector().add(normal.multiply(-closeness));
+
+					// Debug.drawSphere(camera.pos, 0.1);
 
 					var forwardVec = marblePosition.sub(camera.pos).normalized();
 					var rightVec = camera.up.cross(forwardVec).normalized();

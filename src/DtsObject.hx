@@ -207,6 +207,19 @@ class DtsObject extends GameObject {
 				var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
 				var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
+				var meshBounds = mesh.bounds;
+				var boundsSize = new Vector(meshBounds.maxX - meshBounds.minX, meshBounds.maxY - meshBounds.minY, meshBounds.maxZ - meshBounds.minZ);
+				if (Math.abs(boundsSize.x) < 1e-5 || Math.abs(boundsSize.y) < 1e-5 || Math.abs(boundsSize.z) < 1e-5) {
+					// offset the vertices along the normal!
+					var avgNormal = new Vector();
+					for (norm in vertexNormals)
+						avgNormal.load(avgNormal.add(norm));
+					avgNormal.scale(1.0 / vertexNormals.length);
+					for (v in vertices) {
+						v.load(v.add(avgNormal.multiply(0.01)));
+					}
+				}
+
 				var geometry = this.generateMaterialGeometry(mesh, vertices, vertexNormals);
 				var poly = new Polygon();
 				var usedMats = [];
@@ -581,6 +594,8 @@ class DtsObject extends GameObject {
 		var hulls:Array<CollisionEntity> = [new CollisionEntity(cast this)];
 		var ent = hulls[0];
 		ent.userData = node;
+		if (this.isTSStatic)
+			ent.ignoreRayCast = true;
 		for (primitive in dtsMesh.primitives) {
 			var k = 0;
 

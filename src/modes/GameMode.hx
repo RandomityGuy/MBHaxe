@@ -16,6 +16,8 @@ import modes.special.SacredGroundMode;
 import modes.special.ViceVersaMode;
 import modes.special.WhiteNoiseMode;
 import modes.special.TakeTheGoldMode;
+import modes.special.BagOfSecretsMode;
+import modes.special.BlastToTheBeatMode;
 
 enum ScoreType {
 	Time;
@@ -89,6 +91,16 @@ class GameModeFactory {
 		not a single mode name - split it and delegate through `CompositeMode` whenever more than
 		one word is present, so every listed mode's hooks actually run. */
 	public static function getGameMode(level:MarbleWorld, mode:String, activatedPackages:Array<String>):GameMode {
+		// `BagOfSecrets`/`BlastToTheBeat` have no `activatePackage` call of their own - their
+		// mission-specific behavior is just a `missionStartup()`/custom trigger datablock, not an
+		// activated package - so they're identified by mission path instead, unlike every special
+		// mode below.
+		var missionPath = level.mission != null && level.mission.path != null ? level.mission.path.toLowerCase() : "";
+		if (StringTools.endsWith(missionPath, "bagofsecrets.mcs"))
+			return new BagOfSecretsMode(level);
+		if (StringTools.endsWith(missionPath, "blasttothebeat.mcs"))
+			return new BlastToTheBeatMode(level);
+
 		if (activatedPackages.length != 0) {
 			// Special mis-mod game modes used by PQ bonus
 			if (activatedPackages.contains("arkanoid"))
