@@ -441,6 +441,13 @@ class DtsObject extends GameObject {
 			var fullNames = ResourceLoader.getFullNamesOf(this.directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
 			var fullName = fullNames.length > 0 ? fullNames[0] : null;
 
+			if (fullNames.length == 0) {
+				// alright try the unresolved mat name then
+				matName = dts.matNames[i];
+				fullNames = ResourceLoader.getFullNamesOf(this.directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
+				fullName = fullNames.length > 0 ? fullNames[0] : null;
+			}
+
 			if (this.isTSStatic && environmentMaterial != null && DROP_TEXTURE_FOR_ENV_MAP.contains(this.dtsPath)) {
 				this.materials.push(environmentMaterial);
 				continue;

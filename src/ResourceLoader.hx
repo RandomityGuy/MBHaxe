@@ -216,6 +216,11 @@ class ResourceLoader {
 				var matName = resolveMatName(dtsFile.resource.matNames[i]);
 				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
 				var fullName = fullNames.length > 0 ? fullNames[0] : null;
+				if (fullNames.length == 0) {
+					matName = dtsFile.resource.matNames[i];
+					fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
+					fullName = fullNames.length > 0 ? fullNames[0] : null;
+				}
 				if (fullName != null) {
 					texToLoad.push(fullName);
 				}
