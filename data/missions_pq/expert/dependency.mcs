@@ -1715,5 +1715,17 @@ new SimGroup(MissionGroup) {
 //--- MISSION END ---
 //--- SERVER POSTMISSION SCRIPTS BEGIN ---
 //Put any scripts that will be loaded after the mission is loaded here
-
+package Dependency {
+	function RespawningTimeTravelItem_PQ::onPickup(%this, %obj, %user) {
+		if (!Parent::onPickup(%this, %obj, %user)) {
+			return false;
+		}
+		if (!MissionInfo.dependency) {
+			deactivatePackage(Dependency);
+		}
+		commandToClient(%user.client, 'StartCountdown', $Time::BonusTime, "timerTimeTravel");
+		return true;
+	}
+};
+activatePackage(Dependency);
 //--- SERVER POSTMISSION SCRIPTS END ---
