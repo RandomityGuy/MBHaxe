@@ -60,6 +60,34 @@ class MegaManPlatformSaveState {
 }
 
 @:publicFields
+class CannonSaveState {
+	var explodeReenableTime:Float;
+	var lastYaw:Float;
+	var lastPitch:Float;
+
+	public function new() {}
+}
+
+@:publicFields
+class PhysicsOverrideSaveState {
+	var attrIndex:Int;
+	var value:Float;
+
+	public function new() {}
+}
+
+@:publicFields
+class PhysicsLayerSaveState {
+	var kind:Int;
+	var triggerIndex:Int;
+	var overrides:Array<PhysicsOverrideSaveState>;
+
+	public function new() {
+		overrides = [];
+	}
+}
+
+@:publicFields
 class RepetitiveTriggerSaveState {
 	var triggered:Bool;
 	var enterCount:Int;
@@ -94,6 +122,8 @@ class RewindFrame {
 	var gemStates:Array<Bool>;
 	var powerupStates:Array<Float>;
 	var landMineStates:Array<Float>;
+	var cannonStates:Array<CannonSaveState>;
+	var physicsLayerStack:Array<PhysicsLayerSaveState>;
 	var activePowerupStates:Array<Float>;
 	var currentUp:Vector;
 	var trapdoorStates:Array<TrapdoorSaveState>;
@@ -189,6 +219,8 @@ class RewindFrame {
 		gemStates = [];
 		powerupStates = [];
 		landMineStates = [];
+		cannonStates = [];
+		physicsLayerStack = [];
 		activePowerupStates = [0.0, 0.0, 0.0, 0.0];
 		mpStates = [];
 		trapdoorStates = [];
@@ -237,6 +269,19 @@ class RewindFrame {
 		framesize += 2 + gemStates.length * 1; // gemStates
 		framesize += 2 + powerupStates.length * 8; // powerupStates
 		framesize += 2 + landMineStates.length * 8; // landMineStates
+		framesize += 2; // cannonStates.length
+		for (s in cannonStates) {
+			framesize += 8; // s.explodeReenableTime
+			framesize += 8; // s.lastYaw
+			framesize += 8; // s.lastPitch
+		}
+		framesize += 2; // physicsLayerStack.length
+		for (s in physicsLayerStack) {
+			framesize += 1; // s.kind
+			framesize += 2; // s.triggerIndex
+			framesize += 2; // s.overrides.length
+			framesize += s.overrides.length * (1 + 8); // attrIndex + value
+		}
 		framesize += 32; // activePowerupStates
 		framesize += 24; // currentUp
 		framesize += 24; // lastContactNormal
@@ -388,6 +433,22 @@ class RewindFrame {
 		bb.writeInt16(landMineStates.length);
 		for (s in landMineStates) {
 			bb.writeDouble(s);
+		}
+		bb.writeInt16(cannonStates.length);
+		for (s in cannonStates) {
+			bb.writeDouble(s.explodeReenableTime);
+			bb.writeDouble(s.lastYaw);
+			bb.writeDouble(s.lastPitch);
+		}
+		bb.writeInt16(physicsLayerStack.length);
+		for (s in physicsLayerStack) {
+			bb.writeByte(s.kind);
+			bb.writeInt16(s.triggerIndex);
+			bb.writeInt16(s.overrides.length);
+			for (o in s.overrides) {
+				bb.writeByte(o.attrIndex);
+				bb.writeDouble(o.value);
+			}
 		}
 		bb.writeDouble(activePowerupStates[0]);
 		bb.writeDouble(activePowerupStates[1]);
@@ -595,6 +656,30 @@ class RewindFrame {
 		for (i in 0...landMineStates_len) {
 			landMineStates.push(br.readDouble());
 		}
+		cannonStates.resize(0);
+		var cannonStates_len = br.readInt16();
+		for (i in 0...cannonStates_len) {
+			var cs = new CannonSaveState();
+			cs.explodeReenableTime = br.readDouble();
+			cs.lastYaw = br.readDouble();
+			cs.lastPitch = br.readDouble();
+			cannonStates.push(cs);
+		}
+		physicsLayerStack.resize(0);
+		var physicsLayerStack_len = br.readInt16();
+		for (i in 0...physicsLayerStack_len) {
+			var layer = new PhysicsLayerSaveState();
+			layer.kind = br.readByte();
+			layer.triggerIndex = br.readInt16();
+			var overridesLen = br.readInt16();
+			for (j in 0...overridesLen) {
+				var o = new PhysicsOverrideSaveState();
+				o.attrIndex = br.readByte();
+				o.value = br.readDouble();
+				layer.overrides.push(o);
+			}
+			physicsLayerStack.push(layer);
+		}
 		activePowerupStates[0] = br.readDouble();
 		activePowerupStates[1] = br.readDouble();
 		activePowerupStates[2] = br.readDouble();
@@ -611,8 +696,6 @@ class RewindFrame {
 			var mpStates_item = mpStates[i];
 			mpStates_item.currentTime = br.readDouble();
 			mpStates_item.targetTime = br.readDouble();
-			// `stoppedPosition` deliberately allocated fresh (or left null) every time - see this
-			// function's doc comment.
 			if (br.readByte() != 0) {
 				mpStates_item.stoppedPosition = new Vector();
 				mpStates_item.stoppedPosition.x = br.readDouble();

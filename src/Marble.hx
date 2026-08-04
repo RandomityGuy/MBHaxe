@@ -1651,7 +1651,7 @@ class Marble extends GameObject {
 	var physicsLayers:Array<Array<PhysicsAttributeOverride>> = [];
 	var physicsAttributeBaseline:Map<String, Float>;
 
-	static var PHYSMOD_ATTRIBUTES = [
+	public static var PHYSMOD_ATTRIBUTES = [
 		"maxrollvelocity",
 		"angularacceleration",
 		"jumpimpulse",
@@ -1695,6 +1695,51 @@ class Marble extends GameObject {
 			setMarbleAttribute(attr, this.physicsAttributeBaseline.get(attr));
 		for (remaining in this.physicsLayers)
 			for (o in remaining)
+				setMarbleAttribute(o.attribute, o.value);
+	}
+
+	public static inline var LAYER_KIND_OTHER = 0;
+	public static inline var LAYER_KIND_WATER = 1;
+	public static inline var LAYER_KIND_BUBBLE = 2;
+	public static inline var LAYER_KIND_CANNON_FROZEN = 3;
+	public static inline var LAYER_KIND_CANNON_CONTROL_LOCK = 4;
+
+	public function getPhysicsLayerKind(layer:Array<PhysicsAttributeOverride>):Int {
+		if (layer == this.waterPhysicsLayer)
+			return LAYER_KIND_WATER;
+		if (layer == this.bubblePhysicsLayer)
+			return LAYER_KIND_BUBBLE;
+		if (layer == this.cannonFrozenLayer)
+			return LAYER_KIND_CANNON_FROZEN;
+		if (layer == this.cannonControlLockLayer)
+			return LAYER_KIND_CANNON_CONTROL_LOCK;
+		return LAYER_KIND_OTHER;
+	}
+
+	public function restorePhysicsLayers(layers:Array<Array<PhysicsAttributeOverride>>, kinds:Array<Int>) {
+		this.physicsLayers = layers;
+		this.waterPhysicsLayer = null;
+		this.bubblePhysicsLayer = null;
+		this.cannonFrozenLayer = null;
+		this.cannonControlLockLayer = null;
+		for (i in 0...layers.length) {
+			switch (kinds[i]) {
+				case LAYER_KIND_WATER:
+					this.waterPhysicsLayer = layers[i];
+				case LAYER_KIND_BUBBLE:
+					this.bubblePhysicsLayer = layers[i];
+				case LAYER_KIND_CANNON_FROZEN:
+					this.cannonFrozenLayer = layers[i];
+				case LAYER_KIND_CANNON_CONTROL_LOCK:
+					this.cannonControlLockLayer = layers[i];
+			}
+		}
+		if (this.physicsAttributeBaseline == null)
+			return;
+		for (attr in PHYSMOD_ATTRIBUTES)
+			setMarbleAttribute(attr, this.physicsAttributeBaseline.get(attr));
+		for (layer in this.physicsLayers)
+			for (o in layer)
 				setMarbleAttribute(o.attribute, o.value);
 	}
 
@@ -1947,6 +1992,7 @@ class Marble extends GameObject {
 
 	function findContacts(collisiomWorld:CollisionWorld, timeState:TimeState) {
 		this.contacts = queuedContacts;
+		this.queuedContacts = [];
 		CollisionPool.clear();
 		collisiomWorld.sphereIntersection(this.collider, timeState, this.contacts);
 	}
@@ -3064,6 +3110,11 @@ class Marble extends GameObject {
 			}
 		}
 
+		if (Util.isTouchDevice() && m.jump && this.activeCannon != null) {
+			this.cancelCannon(timeState);
+			return;
+		}
+
 		do {
 			if (timeRemaining <= 0)
 				break;
@@ -3721,6 +3772,20 @@ class Marble extends GameObject {
 			bounceEmitDelay = 0;
 	}
 
+	public function updateTouchBlastButton() {
+		if (Util.isTouchDevice()) {
+			if (fireballTime > 0) {
+				if (!MarbleGame.instance.touchInput.hasBlast)
+					if (!MarbleGame.instance.touchInput.blastbutton.isVisible())
+						MarbleGame.instance.touchInput.blastbutton.setVisible(true);
+			} else {
+				if (!MarbleGame.instance.touchInput.hasBlast)
+					if (MarbleGame.instance.touchInput.blastbutton.isVisible())
+						MarbleGame.instance.touchInput.blastbutton.setVisible(false);
+			}
+		}
+	}
+
 	public function recordMove() {
 		var move = new Move();
 		move.d = new Vector();
@@ -3816,6 +3881,9 @@ class Marble extends GameObject {
 
 		playedSounds = [];
 		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
+
+		if (this.controllable)
+			updateTouchBlastButton();
 
 		for (pi in pathedInteriors) {
 			pi.update(timeState);
@@ -4295,6 +4363,8 @@ class Marble extends GameObject {
 			this.camera.nextCameraYaw = this.camera.CameraYaw;
 			this.camera.CameraPitch = -cannon.lastPitch;
 			this.camera.nextCameraPitch = -cannon.lastPitch;
+
+			MarbleGame.instance.touchInput.powerupButton.setEnabled(true);
 		}
 	}
 
@@ -4305,11 +4375,9 @@ class Marble extends GameObject {
 
 		if (cannon.instant) {
 			if (this.instantCannonFireTime > 0 && timeState.currentAttemptTime >= this.instantCannonFireTime) {
-				var yawRad = cannon.yaw * Math.PI / 180;
-				var pitchRad = cannon.pitch * Math.PI / 180;
-				var cameraYaw = yawRad + Math.PI / 2;
-				var cameraPitch = -pitchRad;
-				this.fireCannon(cannon, cannon.computeFireDirection(yawRad, pitchRad), 1, timeState, cameraYaw, cameraPitch);
+				var cameraYaw = cannon.lastYaw + Math.PI / 2;
+				var cameraPitch = -cannon.lastPitch;
+				this.fireCannon(cannon, cannon.computeFireDirection(), 1, timeState, cameraYaw, cameraPitch);
 				this.instantCannonFireTime = -1e8;
 			}
 			return;
@@ -4322,12 +4390,14 @@ class Marble extends GameObject {
 					this.cannonCharge = cannon.chargeTime;
 			} else if (this.cannonCharge > 0) {
 				var t = this.cannonCharge / cannon.chargeTime;
-				var fireDir = cannon.computeFireDirectionFromCamera(this.camera.CameraYaw, this.camera.CameraPitch);
-				this.fireCannon(cannon, fireDir, t, timeState, this.camera.CameraYaw, this.camera.CameraPitch);
+				var cameraYaw = cannon.lastYaw + Math.PI / 2;
+				var cameraPitch = -cannon.lastPitch;
+				this.fireCannon(cannon, cannon.computeFireDirection(), t, timeState, cameraYaw, cameraPitch);
 			}
 		} else if (m.powerupHeld) {
-			var fireDir = cannon.computeFireDirectionFromCamera(this.camera.CameraYaw, this.camera.CameraPitch);
-			this.fireCannon(cannon, fireDir, 1, timeState, this.camera.CameraYaw, this.camera.CameraPitch);
+			var cameraYaw = cannon.lastYaw + Math.PI / 2;
+			var cameraPitch = -cannon.lastPitch;
+			this.fireCannon(cannon, cannon.computeFireDirection(), 1, timeState, cameraYaw, cameraPitch);
 		}
 	}
 
@@ -4372,6 +4442,9 @@ class Marble extends GameObject {
 		if (this.level != null)
 			this.level.playGui.hideCannonHud();
 		cannon.hideAimVisualization();
+
+		if (this.heldPowerup == null)
+			MarbleGame.instance.touchInput.powerupButton.setEnabled(false);
 	}
 
 	public function fireCannon(cannon:shapes.Cannon, fireDir:Vector, forceFraction:Float, timeState:TimeState, cameraYaw:Float, cameraPitch:Float) {

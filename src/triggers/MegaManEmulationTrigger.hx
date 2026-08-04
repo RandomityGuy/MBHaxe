@@ -20,7 +20,7 @@ class MegaManEmulationTrigger extends Trigger {
 		if (this.startPlatformName == null)
 			return;
 		var obj = this.level.namedGameObjects.get(this.startPlatformName.toLowerCase());
-		if (obj == null || !Std.isOfType(obj, MegaManPlatform))
+		if (obj == null || !(obj is MegaManPlatform))
 			return;
 		var platform:MegaManPlatform = cast obj;
 		platform.respondToCollision = true;

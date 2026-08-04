@@ -494,6 +494,7 @@ class DtsObject extends GameObject {
 			if (material.texture == null && !iflMaterial) {
 				var dtsshader = new DtsTexture();
 				dtsshader.currentOpacity = 1;
+				dtsshader.hasAlpha = false;
 				if (this.identifier != null && StringTools.startsWith(this.identifier, "Tornado"))
 					dtsshader.normalizeNormals = false; // These arent normalized
 				// Make a 1x1 white texture
@@ -524,6 +525,9 @@ class DtsObject extends GameObject {
 					material.mainPass.culling = h3d.mat.Data.Face.None;
 					material.receiveShadows = false;
 					material.mainPass.depthWrite = false;
+					var dtsShader = material.mainPass.getShader(DtsTexture);
+					if (dtsShader != null)
+						dtsShader.hasAlpha = true;
 				}
 				if (this.identifier != null && StringTools.startsWith(this.identifier, "GemBeam")) {
 					material.blendMode = BlendMode.Alpha;
@@ -531,6 +535,9 @@ class DtsObject extends GameObject {
 					material.receiveShadows = false;
 					material.mainPass.blend(SrcAlpha, OneMinusSrcAlpha);
 					material.mainPass.depthWrite = false;
+					var dtsShader = material.mainPass.getShader(DtsTexture);
+					if (dtsShader != null)
+						dtsShader.hasAlpha = true;
 				}
 			}
 			if (flags & 8 > 0) {

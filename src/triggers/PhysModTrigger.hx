@@ -46,12 +46,13 @@ final physModParticleOptions:ParticleEmitterOptions = {
 };
 
 class PhysModTrigger extends Trigger {
-	var overrides:Array<PhysicsAttributeOverride>;
+	public var overrides:Array<PhysicsAttributeOverride>;
+
 	var noEmitters:Bool;
 
 	public var disabled:Bool;
 
-	var activeLayers:Map<Marble, Array<PhysicsAttributeOverride>> = new Map();
+	public var activeLayers:Map<Marble, Array<PhysicsAttributeOverride>> = new Map();
 
 	public function new(element:MissionElementTrigger, level:MarbleWorld) {
 		super(element, level);

@@ -87,7 +87,7 @@ class VersionGui extends GuiControl {
 	}
 
 	public static function checkVersion() {
-		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
+		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/pq/CHANGELOG.md", (res) -> {
 			var mdtext = res.toString();
 			var firstline = mdtext.split("\n")[0];
 			firstline = StringTools.replace(firstline, "#", "");

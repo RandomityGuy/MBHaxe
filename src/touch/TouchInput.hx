@@ -59,6 +59,8 @@ class TouchInput {
 
 	var powerupPrevPressed = false;
 
+	public var hasBlast = false;
+
 	public function new() {
 		this.cameraInput = new CameraInput();
 		this.movementInput = new MovementInput();
@@ -115,11 +117,10 @@ class TouchInput {
 		powerupPrevPressed = powerupButton.pressed;
 	}
 
-	public function showControls(parentGui:GuiControl, ultra:Bool) {
+	public function showControls(parentGui:GuiControl) {
 		jumpButton.dispose();
 		powerupButton.dispose();
-		if (ultra)
-			blastbutton.dispose();
+		blastbutton.dispose();
 		movementInput.dispose();
 		pauseButton.dispose();
 		restartButton.dispose();
@@ -130,8 +131,7 @@ class TouchInput {
 		this.powerupButton = new PowerupButton();
 		if (Settings.optionsSettings.rewindEnabled && !MarbleGame.instance.world.isMultiplayer)
 			this.rewindButton = new RewindButton();
-		if (ultra)
-			this.blastbutton = new BlastButton();
+		this.blastbutton = new BlastButton();
 		this.pauseButton = new PauseButton();
 		if (!MarbleGame.instance.world.isMultiplayer)
 			this.restartButton = new RestartButton();
@@ -142,8 +142,8 @@ class TouchInput {
 		powerupButton.add(parentGui);
 		if (Settings.optionsSettings.rewindEnabled && !MarbleGame.instance.world.isMultiplayer)
 			rewindButton.add(parentGui);
-		if (ultra)
-			blastbutton.add(parentGui);
+
+		blastbutton.add(parentGui);
 		movementInput.add(parentGui);
 		cameraInput.add(parentGui);
 		cameraInput.enabled = true;

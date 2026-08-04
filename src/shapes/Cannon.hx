@@ -265,8 +265,7 @@ class Cannon extends DtsObject {
 
 	public override function update(timeState:TimeState) {
 		super.update(timeState);
-		if (!this.isCollideable && timeState.currentAttemptTime >= this.explodeReenableTime)
-			this.isCollideable = true;
+		this.isCollideable = timeState.currentAttemptTime >= this.explodeReenableTime;
 	}
 
 	public override function onMarbleContact(marble:Marble, timeState:TimeState, ?contact:CollisionInfo) {
@@ -274,12 +273,14 @@ class Cannon extends DtsObject {
 		marble.enterCannon(this, timeState);
 	}
 
+	public function computeFireDirection():Vector {
+		var mat = new Matrix();
+		this.getRotationQuat().toMatrix(mat);
+		return new Vector(0, 1, 0).transformed(mat);
+	}
+
 	inline function computeAimDirection(yawRad:Float, pitchRad:Float):Vector {
-		var dir = new Vector(-Math.cos(pitchRad) * Math.sin(yawRad), Math.cos(pitchRad) * Math.cos(yawRad), Math.sin(pitchRad));
-		var orientationQuat = this.level.getOrientationQuat(this.level.timeState.currentAttemptTime);
-		// if (!this.level.marble.currentUp.equals(new Vector(0, 0, -1)))
-		// 	dir.transform(orientationQuat.toMatrix());
-		return dir;
+		return new Vector(-Math.cos(pitchRad) * Math.sin(yawRad), Math.cos(pitchRad) * Math.cos(yawRad), Math.sin(pitchRad));
 	}
 
 	function buildLookRotation(dir:Vector, up:Vector):Quat {
@@ -315,26 +316,6 @@ class Cannon extends DtsObject {
 		return q;
 	}
 
-	public inline function computeFireDirection(yawRad:Float, pitchRad:Float):Vector {
-		return this.computeAimDirection(yawRad, pitchRad);
-	}
-
-	function computeCameraDirection(cameraYaw:Float, cameraPitch:Float):Vector {
-		var dir = new Vector(1, 0, 0);
-		var q = new Quat();
-		q.initRotateAxis(0, 1, 0, cameraPitch);
-		dir.transform(q.toMatrix());
-		q.initRotateAxis(0, 0, 1, cameraYaw);
-		dir.transform(q.toMatrix());
-		var orientationQuat = this.level.getOrientationQuat(this.level.timeState.currentAttemptTime);
-		dir.transform(orientationQuat.toMatrix());
-		return dir;
-	}
-
-	public inline function computeFireDirectionFromCamera(cameraYaw:Float, cameraPitch:Float):Vector {
-		return this.computeCameraDirection(cameraYaw, cameraPitch);
-	}
-
 	public function updateAim(yawRad:Float, pitchRad:Float) {
 		var basePos = this.baseTransform.getPosition();
 		var worldUp = new Vector(0, 0, 1);
@@ -361,32 +342,12 @@ class Cannon extends DtsObject {
 	}
 
 	public function updateAimFromCamera(cameraYaw:Float, cameraPitch:Float) {
-		var basePos = this.baseTransform.getPosition();
-		var worldUp = new Vector(0, 0, 1);
-		worldUp.transform(this.level.getOrientationQuat(this.level.timeState.currentAttemptTime).toMatrix());
-
-		if (this.base != null) {
-			var baseDir = this.computeCameraDirection(cameraYaw, 0);
-			var baseMat = new Matrix();
-			this.buildLookRotation(baseDir, worldUp).toMatrix(baseMat);
-			baseMat.scale(this.savedBaseScaleX, this.savedBaseScaleY, this.savedBaseScaleZ);
-			baseMat.setPosition(basePos);
-			this.base.setTransform(baseMat);
-		}
-
-		var bodyDir = this.computeCameraDirection(cameraYaw, cameraPitch);
-		var bodyMat = new Matrix();
-		this.buildLookRotation(bodyDir, worldUp).toMatrix(bodyMat);
-		bodyMat.scale(this.savedScaleX, this.savedScaleY, this.savedScaleZ);
-		bodyMat.setPosition(basePos);
-		this.setTransform(bodyMat);
-
-		this.lastYaw = cameraYaw - Math.PI / 2;
-		this.lastPitch = -cameraPitch;
+		this.updateAim(cameraYaw - Math.PI / 2, -cameraPitch);
 	}
 
 	public override function reset() {
 		super.reset();
+		this.explodeReenableTime = -1e8;
 		this.resetCannon();
 	}
 
@@ -478,7 +439,7 @@ class Cannon extends DtsObject {
 
 		var force = this.force * (this.useCharge ? forceFraction : 1);
 		var initPos = this.baseTransform.getPosition();
-		var vel = this.computeCameraDirection(cameraYaw, cameraPitch).multiply(force);
+		var vel = this.computeFireDirection().multiply(force);
 		var gravity = this.level.marble.currentUp.multiply(-this.level.marble.cannonBeforeGravity);
 
 		var timeStep = Util.clamp(force * 0.001, 0.02, 0.2);

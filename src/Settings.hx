@@ -174,15 +174,15 @@ class Settings {
 	};
 
 	public static var touchSettings:TouchSettings = {
-		joystickPos: [100, 40],
+		joystickPos: [100, 160],
 		joystickSize: 50,
-		jumpButtonPos: [440, 320],
+		jumpButtonPos: [600, 440],
 		jumpButtonSize: 60,
-		powerupButtonPos: [440, 180],
+		powerupButtonPos: [600, 300],
 		powerupButtonSize: 60,
-		blastButtonPos: [300, 240],
+		blastButtonPos: [460, 360],
 		blastButtonSize: 60,
-		rewindButtonPos: [300, 100],
+		rewindButtonPos: [460, 220],
 		rewindButtonSize: 60,
 		buttonJoystickMultiplier: 2.5,
 		hideControls: false,
@@ -460,11 +460,11 @@ class Settings {
 				controlsSettings.rewind = Key.R;
 			}
 			if (touchSettings.blastButtonPos == null) {
-				touchSettings.blastButtonPos = [300, 240];
+				touchSettings.blastButtonPos = [460, 360];
 				touchSettings.blastButtonSize = 60;
 			}
 			if (touchSettings.rewindButtonPos == null) {
-				touchSettings.rewindButtonPos = [300, 100];
+				touchSettings.rewindButtonPos = [460, 220];
 				touchSettings.rewindButtonSize = 60;
 			}
 			#if js

@@ -23,11 +23,6 @@ class MegaMarble extends PowerUp {
 		super.init(level, () -> {
 			ResourceLoader.load("sound/pumegamarblevoice.wav").entry.load(() -> {
 				var worker = new ResourceLoaderWorker(onFinish);
-				worker.loadFile("sound/mega_bouncehard1.wav");
-				worker.loadFile("sound/mega_bouncehard2.wav");
-				worker.loadFile("sound/mega_bouncehard3.wav");
-				worker.loadFile("sound/mega_bouncehard4.wav");
-				worker.loadFile("sound/mega_roll.wav");
 				worker.loadFile("sound/dosuperjump.wav");
 				this.pickupSound = ResourceLoader.getResource("data/sound/pumegamarblevoice.wav", ResourceLoader.getAudio, this.soundResources);
 				worker.run();
