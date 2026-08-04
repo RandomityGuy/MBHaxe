@@ -2,6 +2,7 @@ package gui;
 
 import modes.GameMode.GameModeFactory;
 import modes.GameMode.ScoreType;
+import modes.special.ViceVersaMode.ViceVersaState;
 import h3d.shader.VertexColorAlpha;
 import src.Http;
 import src.Leaderboards;
@@ -37,6 +38,17 @@ class PlayMissionGui extends GuiControl {
 	static var currentCategoryStatic:String = "tutorial";
 	static var currentGameStatic:String = "platinum";
 	static var currentSortType:Int = 1;
+
+	/** Simplified stand-in for `Versa.mcs`'s real `display_Versa` (`Unlock::getMissionCompletion(...)
+		& $Completion::Par`) - there's no generic per-mission `unlockFunc`/`displayFunc` dispatch in
+		this engine (Vice/Versa is the only mission that currently needs one), so this is hardcoded
+		to the one condition that actually matters for playability: Versa stays hidden from every
+		mission list until a Vice run has been saved (see `ViceVersaState`). */
+	static function isMissionVisible(m:Mission):Bool {
+		if (StringTools.endsWith(m.path.toLowerCase(), "versa.mcs"))
+			return ViceVersaState.hasSavedState();
+		return true;
+	}
 
 	var currentGame:String = "platinum";
 	var currentSelection:Int = 0;
@@ -77,7 +89,8 @@ class PlayMissionGui extends GuiControl {
 		currentCategory = PlayMissionGui.currentCategoryStatic;
 		currentGame = PlayMissionGui.currentGameStatic;
 
-		currentList = currentGame == "platinum" ? MissionList.missionList[currentGame][currentCategory] : Marbleland.getMissionList(currentCategory);
+		currentList = (currentGame == "platinum" ? MissionList.missionList[currentGame][currentCategory] : Marbleland.getMissionList(currentCategory))
+			.filter(isMissionVisible);
 
 		MarbleGame.instance.toRecord = false;
 
@@ -688,9 +701,9 @@ class PlayMissionGui extends GuiControl {
 			currentCategory = diffName;
 			currentCategoryStatic = diffName;
 			if (gameName == "platinum")
-				currentList = MissionList.missionList[currentGame][currentCategory];
+				currentList = MissionList.missionList[currentGame][currentCategory].filter(isMissionVisible);
 			else {
-				currentList = Marbleland.getMissionList(currentCategory);
+				currentList = Marbleland.getMissionList(currentCategory).filter(isMissionVisible);
 			}
 
 			rebuildMissionList(0);

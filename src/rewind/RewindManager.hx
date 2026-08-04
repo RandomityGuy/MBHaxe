@@ -3,6 +3,7 @@ package rewind;
 import rewind.RewindFrame.RewindMPState;
 import rewind.RewindFrame.TrapdoorSaveState;
 import rewind.RewindFrame.FadePlatformSaveState;
+import rewind.RewindFrame.MegaManPlatformSaveState;
 import rewind.RewindFrame.RepetitiveTriggerSaveState;
 import rewind.RewindFrame.CountdownTriggerSaveState;
 import haxe.io.BytesInput;
@@ -19,6 +20,7 @@ import src.Marble;
 import gui.PlayGui;
 import shapes.Trapdoor;
 import shapes.FadePlatform;
+import shapes.MegaManPlatform;
 import shapes.PushButton;
 import shapes.ToggleButton;
 import src.Util;
@@ -211,6 +213,7 @@ class RewindManager {
 		rf.toggleButtonStates.resize(0);
 		var trapdoorIdx = 0;
 		var fadePlatformIdx = 0;
+		var megaManPlatformIdx = 0;
 		for (dts in level.dtsObjects) {
 			if (dts is PowerUp) {
 				var pow:PowerUp = cast dts;
@@ -246,6 +249,16 @@ class RewindManager {
 				fs.fadingState = fp.fadingState;
 				fs.lastFadingContactTime = fp.lastFadingContactTime;
 			}
+			if (dts is MegaManPlatform) {
+				var mm:MegaManPlatform = cast dts;
+				if (megaManPlatformIdx >= rf.megaManPlatformStates.length)
+					rf.megaManPlatformStates.push(new MegaManPlatformSaveState());
+				var ms = rf.megaManPlatformStates[megaManPlatformIdx++];
+				ms.showTime = mm.showTime;
+				ms.hasCollided = mm.hasCollided;
+				ms.respondToCollision = mm.respondToCollision;
+				ms.queuedNext = mm.queuedNext;
+			}
 			if (dts is AbstractBumper) {
 				var ab:AbstractBumper = cast dts;
 				rf.powerupStates.push(ab.lastContactTime);
@@ -257,6 +270,7 @@ class RewindManager {
 		}
 		rf.trapdoorStates.resize(trapdoorIdx);
 		rf.fadePlatformStates.resize(fadePlatformIdx);
+		rf.megaManPlatformStates.resize(megaManPlatformIdx);
 		rf.blastAmt = level.marble.blastAmount;
 		rf.oobState.oob = level.marble.outOfBounds;
 		// Reference-only, safe on the record side (see this function's doc comment).
@@ -351,6 +365,7 @@ class RewindManager {
 		var lmstates = rf.landMineStates.copy();
 		var tstates = rf.trapdoorStates.copy();
 		var fpstates = rf.fadePlatformStates.copy();
+		var mmstates = rf.megaManPlatformStates.copy();
 		var tbstates = rf.toggleButtonStates.copy();
 		level.marble._radius = rf.marbleRadius;
 		level.marble.collider.radius = rf.marbleRadius;
@@ -530,6 +545,14 @@ class RewindManager {
 				fp.lastContactTime = fpState.lastContactTime;
 				fp.fadingState = fpState.fadingState;
 				fp.lastFadingContactTime = fpState.lastFadingContactTime;
+			}
+			if (dts is MegaManPlatform) {
+				var mm:MegaManPlatform = cast dts;
+				var mmState = mmstates.shift();
+				mm.showTime = mmState.showTime;
+				mm.hasCollided = mmState.hasCollided;
+				mm.respondToCollision = mmState.respondToCollision;
+				mm.queuedNext = mmState.queuedNext;
 			}
 			if (dts is AbstractBumper) {
 				var ab:AbstractBumper = cast dts;

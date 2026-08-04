@@ -205,4 +205,14 @@ class CompositeMode implements GameMode {
 		for (m in this.children)
 			m.processMove(marble, move);
 	}
+
+	public function saveReplayData(bw:haxe.io.BytesOutput) {
+		for (m in this.children)
+			m.saveReplayData(bw);
+	}
+
+	public function loadReplayData(br:haxe.io.BytesInput) {
+		for (m in this.children)
+			m.loadReplayData(br);
+	}
 }

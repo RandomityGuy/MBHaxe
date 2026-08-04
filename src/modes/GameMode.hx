@@ -83,6 +83,18 @@ interface GameMode {
 		`RewindFrame.deserialize` has something to call `deserialize` on - it can't know the
 		concrete type ahead of time otherwise. */
 	public function constructRewindState():RewindableState;
+
+	/** Ported from the need to keep a replay reproducible even when a mode's own one-time-at-load
+		behavior depends on state living *outside* the mission itself (`ViceVersaMode` loading from
+		`ViceVersaState`'s save file/localStorage, which can change between when a Versa replay was
+		recorded and whenever it's watched later) - called once when a replay finishes recording
+		(`Replay.write`) and once when a replay begins watching (after the mission's finished loading
+		and this mode exists, restoring exactly what was true at record time instead of re-reading
+		whatever the external state happens to be *now*). `NullMode`'s default is a no-op; most modes
+		don't need this at all. Write/read order must match exactly. */
+	public function saveReplayData(bw:haxe.io.BytesOutput):Void;
+
+	public function loadReplayData(br:haxe.io.BytesInput):Void;
 }
 
 class GameModeFactory {
