@@ -22,6 +22,8 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		bottom:Vector,
 	}) {
 		super();
+		texture.getTexture().filter = Nearest;
+		texture.getTexture().mipMap = None;
 		var tl = texture.sub(texs.tl.x, texs.tl.y, texs.tl.z, texs.tl.w);
 		var tr = texture.sub(texs.tr.x, texs.tr.y, texs.tr.z, texs.tr.w);
 		var top = texture.sub(texs.top.x, texs.top.y, texs.top.z, texs.top.w);
@@ -63,35 +65,35 @@ class GuiBitmapBorderCtrl extends GuiControl {
 
 		tl.setPosition(0, 0);
 
-		tr.setPosition(renderRect.extent.x - tr.tile.width, 0);
+		tr.setPosition(Math.floor(renderRect.extent.x - tr.tile.width), 0);
 
-		bl.setPosition(0, renderRect.extent.y - bl.tile.height);
+		bl.setPosition(0, Math.floor(renderRect.extent.y - bl.tile.height));
 
-		br.setPosition(renderRect.extent.x - tr.tile.width, renderRect.extent.y - bl.tile.height);
+		br.setPosition(Math.floor(renderRect.extent.x - tr.tile.width), Math.floor(renderRect.extent.y - bl.tile.height));
 
 		// now for the sides
 
 		top.setPosition(tl.tile.width, 0);
-		top.width = renderRect.extent.x - tl.tile.width - tr.tile.width;
+		top.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
 		top.height = top.tile.height;
 
 		left.setPosition(0, tl.tile.height);
-		left.height = renderRect.extent.y - tl.tile.height - bl.tile.height;
+		left.height = Math.floor(renderRect.extent.y - tl.tile.height - bl.tile.height);
 		left.width = left.tile.width;
 
-		right.setPosition(renderRect.extent.x - tr.tile.width, tl.tile.height);
-		right.height = renderRect.extent.y - tl.tile.height - bl.tile.height;
+		right.setPosition(Math.floor(renderRect.extent.x - tr.tile.width), tl.tile.height);
+		right.height = Math.floor(renderRect.extent.y - tl.tile.height - bl.tile.height);
 		right.width = right.tile.width;
 
-		bottom.setPosition(bl.tile.width, renderRect.extent.y - bl.tile.height);
-		bottom.width = renderRect.extent.x - bl.tile.width - br.tile.width;
+		bottom.setPosition(bl.tile.width, Math.floor(renderRect.extent.y - bl.tile.height));
+		bottom.width = Math.floor(renderRect.extent.x - bl.tile.width - br.tile.width);
 		bottom.height = bottom.tile.height;
 
 		// // the fill
 		var fill = bmps[8];
 		fill.setPosition(tl.tile.width, tl.tile.height);
-		fill.width = renderRect.extent.x - tl.tile.width - tr.tile.width;
-		fill.height = renderRect.extent.y - tr.tile.height - bl.tile.height;
+		fill.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
+		fill.height = Math.floor(renderRect.extent.y - tr.tile.height - bl.tile.height);
 
 		super.render(scene2d, parent);
 	}

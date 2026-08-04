@@ -58,7 +58,7 @@ class MegaManPlatform extends DtsObject {
 	function resolveNext():MegaManPlatform {
 		if (this.next == null && this.nextName != null) {
 			var obj = this.level.namedGameObjects.get(this.nextName.toLowerCase());
-			if (obj != null && Std.isOfType(obj, MegaManPlatform))
+			if (obj != null && obj is MegaManPlatform)
 				this.next = cast obj;
 		}
 		return this.next;

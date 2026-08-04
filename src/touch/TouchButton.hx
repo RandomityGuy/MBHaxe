@@ -106,6 +106,10 @@ class TouchButton {
 		this.guiElement.graphics.visible = enabled;
 	}
 
+	public inline function isVisible() {
+		return this.guiElement.graphics.visible;
+	}
+
 	public dynamic function onClick() {
 		pressed = true;
 	}

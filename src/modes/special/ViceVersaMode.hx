@@ -67,19 +67,19 @@ class ViceVersaState {
 			fadingPlatforms: [
 				for (name in FADING_PLATFORMS) {
 					var obj = level.namedGameObjects.get(name.toLowerCase());
-					{name: name, hidden: obj != null && Std.isOfType(obj, FadePlatform) && cast(obj, FadePlatform).currentOpacity == 0};
+					{name: name, hidden: obj != null && obj is FadePlatform && cast(obj, FadePlatform).currentOpacity == 0};
 				}
 			],
 			timeTravels: [
 				for (name in TIME_TRAVELS) {
 					var obj = level.namedGameObjects.get(name.toLowerCase());
-					{name: name, hidden: obj != null && Std.isOfType(obj, TimeTravel) && cast(obj, TimeTravel).currentOpacity == 0};
+					{name: name, hidden: obj != null && obj is TimeTravel && cast(obj, TimeTravel).currentOpacity == 0};
 				}
 			],
 			pathedInteriors: [
 				for (name in PATHED_INTERIORS) {
 					var obj = level.namedGameObjects.get(name.toLowerCase());
-					var pi = obj != null && Std.isOfType(obj, PathedInterior) ? cast(obj, PathedInterior) : null;
+					var pi = obj != null && obj is PathedInterior ? cast(obj, PathedInterior) : null;
 					{name: name, currentTime: pi != null ? pi.currentTime : 0.0, targetTime: pi != null ? pi.targetTime : 0.0};
 				}
 			],
@@ -99,7 +99,7 @@ class ViceVersaState {
 			return;
 		for (s in data.fadingPlatforms) {
 			var obj = level.namedGameObjects.get(s.name.toLowerCase());
-			if (obj != null && Std.isOfType(obj, FadePlatform)) {
+			if (obj != null && obj is FadePlatform) {
 				var fp = cast(obj, FadePlatform);
 				fp.reset();
 				if (s.hidden)
@@ -108,7 +108,7 @@ class ViceVersaState {
 		}
 		for (s in data.timeTravels) {
 			var obj = level.namedGameObjects.get(s.name.toLowerCase());
-			if (obj != null && Std.isOfType(obj, TimeTravel)) {
+			if (obj != null && obj is TimeTravel) {
 				var tt = cast(obj, TimeTravel);
 				tt.reset();
 				if (s.hidden)
@@ -117,7 +117,7 @@ class ViceVersaState {
 		}
 		for (s in data.pathedInteriors) {
 			var obj = level.namedGameObjects.get(s.name.toLowerCase());
-			if (obj != null && Std.isOfType(obj, PathedInterior)) {
+			if (obj != null && obj is PathedInterior) {
 				var pi = cast(obj, PathedInterior);
 				pi.currentTime = s.currentTime;
 				pi.targetTime = s.targetTime;
@@ -219,20 +219,17 @@ class ViceVersaMode extends NullMode {
 		if (this.startPowerupDatablock == null)
 			return;
 		var wanted = this.startPowerupDatablock.toLowerCase();
-		for (obj in this.level.dtsObjects) {
-			if (Std.isOfType(obj, PowerUp)) {
-				var p:PowerUp = cast obj;
-				if (p.element.datablock.toLowerCase() == wanted) {
-					this.level.pickUpPowerUp(this.level.marble, p);
-					break;
-				}
+		for (p in this.level.powerUps) {
+			if (p.element.datablock.toLowerCase() == wanted) {
+				this.level.pickUpPowerUp(this.level.marble, p);
+				break;
 			}
 		}
 	}
 
 	public override function onOutOfBounds(marble:Marble):Bool {
 		for (obj in this.level.dtsObjects)
-			if (Std.isOfType(obj, MegaManPlatform))
+			if (obj is MegaManPlatform)
 				cast(obj, MegaManPlatform).reset();
 		return false;
 	}

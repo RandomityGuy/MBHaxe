@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Engine;
 import mis.MisParser;
 import mis.MissionElement.MissionElementSky;
 import hxd.Pixels;
@@ -178,6 +179,13 @@ class Sky extends Object {
 					if (fmt == BGRA)
 						fmt = RGBA;
 					#end
+					if (!Engine.getCurrent().driver.isSupportedFormat(fmt)) {
+						#if hl
+						fmt = BGRA;
+						#else
+						fmt = RGBA;
+						#end
+					}
 					var cubemaptexture = new Texture(maxheight, maxwidth, [Cube], fmt);
 					for (i in 0...6) {
 						// try resize

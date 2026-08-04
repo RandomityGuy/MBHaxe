@@ -17,6 +17,7 @@ class DtsTexture extends hxsl.Shader {
 		@param var texture:Sampler2D;
 		@const var normalizeNormals:Bool;
 		@const var usePremultipliedAlpha:Bool;
+		@const var hasAlpha:Bool;
 		@param var opacityMult:Float;
 		@perInstance @param var currentOpacity:Float;
 		var calculatedUV:Vec2;
@@ -36,6 +37,8 @@ class DtsTexture extends hxsl.Shader {
 			var c = texture.get(calculatedUV);
 			if (killAlpha && c.a - killAlphaThreshold < 0)
 				discard;
+			if (!hasAlpha)
+				c.a = 1;
 			if (additive)
 				pixelColor = c;
 			else

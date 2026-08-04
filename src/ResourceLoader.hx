@@ -99,11 +99,11 @@ class ResourceLoader {
 			fwd();
 		});
 		worker.addTask(fwd -> preloadUISounds(fwd));
-		// worker.addTask(fwd -> {
-		// 	loadg.text = "Loading Shapes..";
-		// 	fwd();
-		// });
-		// worker.addTask(fwd -> preloadShapes(fwd));
+		worker.addTask(fwd -> {
+			loadg.text = "Loading Shapes..";
+			fwd();
+		});
+		worker.addTask(fwd -> preloadShapes(fwd));
 		worker.addTask(fwd -> {
 			scene2d.removeChild(loadg);
 			fwd();
@@ -209,40 +209,88 @@ class ResourceLoader {
 	}
 
 	static function preloadShapes(onFinish:Void->Void) {
-		var toloadfiles = [
-			StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""),
-			(Settings.optionsSettings.marbleCategoryIndex == 0)
-			? "shapes/balls/" + Settings.optionsSettings.marbleSkin + ".marble.png" : "shapes/balls/pack1/" + Settings.optionsSettings.marbleSkin +
-			".marble.png"
-		];
-		// var toloaddirs = [];
-		// var filestats = fileSystem.dir("shapes");
-		// for (file in filestats) {
-		// 	if (file.isDirectory) {
-		// 		toloaddirs.push(file);
-		// 	} else {
-		// 		toloadfiles.push(file);
-		// 	}
-		// }
-		// while (toloaddirs.length > 0) {
-		// 	var nextdir = toloaddirs.pop();
-		// 	for (file in fileSystem.dir(nextdir.path.substring(2))) {
-		// 		if (file.isDirectory) {
-		// 			toloaddirs.push(file);
-		// 		} else {
-		// 			toloadfiles.push(file);
-		// 		}
-		// 	}
-		// }
-		// var teleportPad = fileSystem.get("interiors_mbp/teleportpad.dts");
-		// var teleportTexture = fileSystem.get("interiors_mbp/repairbay.jpg");
-		// toloadfiles.push(teleportPad); // Because its not in the shapes folder like wtf
-		// toloadfiles.push(teleportTexture);
 		var worker = new ResourceLoaderWorker(onFinish);
-		for (file in toloadfiles) {
-			worker.loadFile(file);
-		}
+		worker.addTask(fwd -> preloadMarbleResources(Settings.optionsSettings.marbleModel, Settings.optionsSettings.marbleSkin, fwd));
 		worker.run();
+	}
+
+	// Loads a dts file and every texture/material (including ifl keyframes) it references
+	public static function preloadDtsResources(dtsPath:String, resolveMatName:String->String, onFinish:Void->Void) {
+		ResourceLoader.load(dtsPath).entry.load(() -> {
+			var dtsFile = ResourceLoader.loadDts(dtsPath);
+			var directoryPath = haxe.io.Path.directory(dtsPath);
+			var texToLoad = [];
+			for (i in 0...dtsFile.resource.matNames.length) {
+				var matName = resolveMatName(dtsFile.resource.matNames[i]);
+				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> Path.extension(x) != "dts");
+				var fullName = fullNames.length > 0 ? fullNames[0] : null;
+				if (fullName != null) {
+					texToLoad.push(fullName);
+				}
+			}
+
+			var worker = new ResourceLoaderWorker(onFinish);
+			for (texPath in texToLoad) {
+				if (Path.extension(texPath) == "ifl") {
+					worker.addTask(fwd -> {
+						parseIfl(directoryPath, texPath, keyframes -> {
+							var innerWorker = new ResourceLoaderWorker(fwd);
+							var loadedkf = [];
+							for (kf in keyframes) {
+								if (!loadedkf.contains(kf)) {
+									innerWorker.loadFile(directoryPath + '/' + kf);
+									loadedkf.push(kf);
+								}
+							}
+							innerWorker.run();
+						});
+					});
+				} else {
+					worker.loadFile(texPath);
+				}
+			}
+			worker.run();
+		});
+	}
+
+	static function parseIfl(directoryPath:String, path:String, onFinish:Array<String>->Void) {
+		ResourceLoader.load(path).entry.load(() -> {
+			var text = ResourceLoader.getFileEntry(path).entry.getText();
+			var lines = text.split('\n');
+			var keyframes = [];
+			for (line in lines) {
+				line = StringTools.trim(line);
+				if (line.substr(0, 2) == "//")
+					continue;
+				if (line == "")
+					continue;
+
+				var parts = line.split(' ');
+				var count = parts.length > 1 ? Std.parseInt(parts[1]) : 1;
+
+				for (i in 0...count) {
+					// since these are TEXTURES we need to ensure the files exist
+					if (ResourceLoader.exists(directoryPath + '/' + parts[0]))
+						keyframes.push(parts[0]);
+					else if (ResourceLoader.exists(directoryPath + '/' + parts[0] + ".jpg"))
+						keyframes.push(parts[0] + ".jpg");
+					else if (ResourceLoader.exists(directoryPath + '/' + parts[0] + ".png"))
+						keyframes.push(parts[0] + ".png");
+				}
+			}
+
+			onFinish(keyframes);
+		});
+	}
+
+	// Gathers and preloads every resource the marble model + skin needs
+	public static function preloadMarbleResources(marbleModelPath:String, marbleSkin:String, onFinish:Void->Void) {
+		preloadDtsResources(marbleModelPath, matName -> {
+			matName = StringTools.trim(matName);
+			if (matName == "base.marble")
+				return marbleSkin + ".marble";
+			return matName;
+		}, onFinish);
 	}
 
 	public static function getProperFilepath(rawElementPath:String) {

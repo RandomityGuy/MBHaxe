@@ -376,7 +376,14 @@ class PlayGui {
 			}
 
 			if (Util.isTouchDevice()) {
-				MarbleGame.instance.touchInput.showControls(this.playGuiCtrl, game == 'ultra' || MarbleGame.instance.world.isMultiplayer);
+				MarbleGame.instance.touchInput.showControls(this.playGuiCtrl);
+				if (game == 'ultra' || MarbleGame.instance.world.isMultiplayer) {
+					MarbleGame.instance.touchInput.hasBlast = true;
+					MarbleGame.instance.touchInput.blastbutton.setVisible(true);
+				} else {
+					MarbleGame.instance.touchInput.hasBlast = false;
+					MarbleGame.instance.touchInput.blastbutton.setVisible(false);
+				}
 			}
 
 			playGuiCtrl.render(scene2d);
@@ -620,11 +627,12 @@ class PlayGui {
 	}
 
 	function initQuotaCounter() {
-		var markerFelt32fontdata = ResourceLoader.getFileEntry("data/font/MarkerFelt.fnt");
-		var markerFelt32b = new BitmapFont(markerFelt32fontdata.entry);
-		@:privateAccess markerFelt32b.loader = ResourceLoader.loader;
-		var markerFelt32 = markerFelt32b.toSdfFont(cast 26 * Settings.uiScale, MultiChannel, 0.5, 0.5);
-		gemsQuota = new GuiText(markerFelt32);
+		var whatneyFontData = ResourceLoader.getFileEntry("data/font/whatney.fnt");
+		var whatneyFontB = new BitmapFont(whatneyFontData.entry);
+		@:privateAccess whatneyFontB.loader = ResourceLoader.loader;
+		var whatneyFont = whatneyFontB.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
+
+		gemsQuota = new GuiText(whatneyFont);
 		gemsQuota.position = new Vector(205, 28);
 		gemsQuota.extent = new Vector(55, 55);
 		gemsQuota.text.color = Vector.fromColor(0xFFFFFFFF);

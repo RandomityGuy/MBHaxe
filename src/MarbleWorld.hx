@@ -604,6 +604,11 @@ class MarbleWorld extends Scheduler {
 			"sound/bouncehard2.wav",
 			"sound/bouncehard3.wav",
 			"sound/bouncehard4.wav",
+			"sound/mega_bouncehard1.wav",
+			"sound/mega_bouncehard2.wav",
+			"sound/mega_bouncehard3.wav",
+			"sound/mega_bouncehard4.wav",
+			"sound/mega_roll.wav",
 			"sound/ready.wav",
 			"sound/set.wav",
 			"sound/go.wav",
@@ -632,24 +637,6 @@ class MarbleWorld extends Scheduler {
 			marblefiles.push("shapes/balls/pack1/marble01.normal.png");
 			marblefiles.push("sound/blast.wav");
 		}
-		// Hacky
-		if (client == null) {
-			marblefiles.push(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
-
-			var modelBaseDir = haxe.io.Path.directory(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
-
-			marblefiles.push(modelBaseDir + "/" + Settings.optionsSettings.marbleSkin + ".marble.png");
-		} else {
-			var marbleDts = MarbleList.marbles[client.getMarbleCatId()][client.getMarbleId()].dts; // FIXME
-			marblefiles.push(StringTools.replace(marbleDts, "data/", ""));
-
-			var marbleSkin = MarbleList.marbles[client.getMarbleCatId()][client.getMarbleId()].skin;
-
-			var modelBaseDir = haxe.io.Path.directory(StringTools.replace(Settings.optionsSettings.marbleModel, "data/", ""));
-
-			marblefiles.push(modelBaseDir + "/" + Settings.optionsSettings.marbleSkin + ".marble.png");
-		}
-
 		var gameModeFiles = this.gameMode.getPreloadFiles();
 		for (file in marblefiles) {
 			worker.loadFile(file);
@@ -657,6 +644,14 @@ class MarbleWorld extends Scheduler {
 		for (file in gameModeFiles) {
 			worker.loadFile(file);
 		}
+		worker.addTask(fwd -> {
+			if (client == null) {
+				ResourceLoader.preloadMarbleResources(Settings.optionsSettings.marbleModel, Settings.optionsSettings.marbleSkin, fwd);
+			} else {
+				var marbleData = MarbleList.marbles[client.getMarbleCatId()][client.getMarbleId()]; // FIXME category support
+				ResourceLoader.preloadMarbleResources(marbleData.dts, marbleData.skin, fwd);
+			}
+		});
 		worker.addTask(fwd -> {
 			var marble = new Marble();
 			if (client == null)
@@ -1440,120 +1435,60 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function addDtsObject(obj:DtsObject, onFinish:Void->Void, isTsStatic:Bool = false) {
-		function parseIfl(path:String, onFinish:Array<String>->Void) {
-			ResourceLoader.load(path).entry.load(() -> {
-				var dirPath = haxe.io.Path.directory(path);
-				var text = ResourceLoader.getFileEntry(path).entry.getText();
-				var lines = text.split('\n');
-				var keyframes = [];
-				for (line in lines) {
-					line = StringTools.trim(line);
-					if (line.substr(0, 2) == "//")
-						continue;
-					if (line == "")
-						continue;
-
-					var parts = line.split(' ');
-					var count = parts.length > 1 ? Std.parseInt(parts[1]) : 1;
-
-					for (i in 0...count) {
-						// since these are TEXTURES we need to ensure the files exist
-						if (ResourceLoader.exists(dirPath + '/' + parts[0]))
-							keyframes.push(parts[0]);
-						else if (ResourceLoader.exists(dirPath + '/' + parts[0] + ".jpg"))
-							keyframes.push(parts[0] + ".jpg");
-						else if (ResourceLoader.exists(dirPath + '/' + parts[0] + ".png"))
-							keyframes.push(parts[0] + ".png");
-					}
-				}
-
-				onFinish(keyframes);
-			});
-		}
-
-		ResourceLoader.load(obj.dtsPath).entry.load(() -> {
-			var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
-			var directoryPath = haxe.io.Path.directory(obj.dtsPath);
-			var texToLoad = [];
-			for (i in 0...dtsFile.resource.matNames.length) {
-				var matName = obj.resolveMatName(dtsFile.resource.matNames[i]);
-				var fullNames = ResourceLoader.getFullNamesOf(directoryPath + '/' + matName).filter(x -> haxe.io.Path.extension(x) != "dts");
-				var fullName = fullNames.length > 0 ? fullNames[0] : null;
-				if (fullName != null) {
-					texToLoad.push(fullName);
-				}
-			}
-
-			var worker = new ResourceLoaderWorker(() -> {
-				obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
-				this.dtsObjects.push(obj);
-				if (obj is PowerUp) {
-					var pw:PowerUp = cast obj;
-					pw.netIndex = this.powerUps.length;
-					this.powerUps.push(cast obj);
-					if (Net.isClient)
-						powerupPredictions.alloc();
-				}
-				if (obj is ForceObject) {
-					this.forceObjects.push(cast obj);
-				}
-				if (obj is Explodable) {
-					var exp:Explodable = cast obj;
-					exp.netId = this.explodables.length;
-					this.explodables.push(exp);
-					if (Net.isClient)
-						explodablePredictions.alloc();
-				}
-				if (obj is Trapdoor) {
-					var t:Trapdoor = cast obj;
-					t.netId = this.trapdoors.length;
-					this.trapdoors.push(t);
-					if (Net.isClient)
-						trapdoorPredictions.alloc();
-				}
-				obj.isTSStatic = isTsStatic;
-				obj.init(cast this, () -> {
-					obj.update(this.timeState);
-					if (obj.useInstancing) {
-						this.instanceManager.addObject(obj);
-					} else
-						this.scene.addChild(obj);
-					for (collider in obj.colliders) {
-						if (collider != null)
-							this.collisionWorld.addEntity(collider);
-					}
-					if (obj.isBoundingBoxCollideable)
-						this.collisionWorld.addEntity(obj.boundingCollider);
-
-					onFinish();
-				});
-			});
-
-			for (texPath in texToLoad) {
-				if (haxe.io.Path.extension(texPath) == "ifl") {
-					if (isTsStatic)
+		ResourceLoader.preloadDtsResources(obj.dtsPath, obj.resolveMatName, () -> {
+			if (isTsStatic) {
+				// dts + textures are guaranteed loaded now, safe to inspect materials synchronously
+				var dtsFile = ResourceLoader.loadDts(obj.dtsPath);
+				for (matName in dtsFile.resource.matNames) {
+					var fullNames = ResourceLoader.getFullNamesOf(haxe.io.Path.directory(obj.dtsPath) + '/' + obj.resolveMatName(matName))
+						.filter(x -> haxe.io.Path.extension(x) != "dts");
+					if (fullNames.length > 0 && haxe.io.Path.extension(fullNames[0]) == "ifl")
 						obj.useInstancing = false;
-					worker.addTask(fwd -> {
-						parseIfl(texPath, keyframes -> {
-							var innerWorker = new ResourceLoaderWorker(() -> {
-								fwd();
-							});
-							var loadedkf = [];
-							for (kf in keyframes) {
-								if (!loadedkf.contains(kf)) {
-									innerWorker.loadFile(directoryPath + '/' + kf);
-									loadedkf.push(kf);
-								}
-							}
-							innerWorker.run();
-						});
-					});
-				} else {
-					worker.loadFile(texPath);
 				}
 			}
 
-			worker.run();
+			obj.idInLevel = this.dtsObjects.length; // Set the id of the thing
+			this.dtsObjects.push(obj);
+			if (obj is PowerUp) {
+				var pw:PowerUp = cast obj;
+				pw.netIndex = this.powerUps.length;
+				this.powerUps.push(cast obj);
+				if (Net.isClient)
+					powerupPredictions.alloc();
+			}
+			if (obj is ForceObject) {
+				this.forceObjects.push(cast obj);
+			}
+			if (obj is Explodable) {
+				var exp:Explodable = cast obj;
+				exp.netId = this.explodables.length;
+				this.explodables.push(exp);
+				if (Net.isClient)
+					explodablePredictions.alloc();
+			}
+			if (obj is Trapdoor) {
+				var t:Trapdoor = cast obj;
+				t.netId = this.trapdoors.length;
+				this.trapdoors.push(t);
+				if (Net.isClient)
+					trapdoorPredictions.alloc();
+			}
+			obj.isTSStatic = isTsStatic;
+			obj.init(cast this, () -> {
+				obj.update(this.timeState);
+				if (obj.useInstancing) {
+					this.instanceManager.addObject(obj);
+				} else
+					this.scene.addChild(obj);
+				for (collider in obj.colliders) {
+					if (collider != null)
+						this.collisionWorld.addEntity(collider);
+				}
+				if (obj.isBoundingBoxCollideable)
+					this.collisionWorld.addEntity(obj.boundingCollider);
+
+				onFinish();
+			});
 		});
 	}
 

@@ -131,7 +131,7 @@ class GameModeFactory {
 	public static function findMode<T:GameMode>(mode:GameMode, cl:Class<T>):T {
 		if (Std.isOfType(mode, cl))
 			return cast mode;
-		if (Std.isOfType(mode, CompositeMode)) {
+		if (mode is CompositeMode) {
 			for (child in (cast mode : CompositeMode).children)
 				if (Std.isOfType(child, cl))
 					return cast child;

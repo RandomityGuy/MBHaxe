@@ -11,7 +11,8 @@ class ArkanoidMode extends TwoDMode {
 	public override function onMissionLoad() {
 		super.onMissionLoad();
 		this.bricks = [
-			for (o in this.level.dtsObjects) if (Std.isOfType(o, FadePlatform)) cast(o, FadePlatform)
+			for (o in this.level.dtsObjects)
+				if (o is FadePlatform) cast(o, FadePlatform)
 		];
 	}
 

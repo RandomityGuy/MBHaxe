@@ -12,6 +12,7 @@ import src.ParticleSystem.ParticleData;
 import src.ParticleSystem.ParticleEmitterOptions;
 import src.ParticleSystem.ParticleEmitter;
 import mis.MissionElement.MissionElementStaticShape;
+import src.ResourceLoaderWorker;
 
 final tornadoGustOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 10,
@@ -145,15 +146,25 @@ class Tornado extends ForceObject {
 					material.mainPass.depthWrite = false;
 				}
 				if (this.isPQ) {
-					this.gustData = new ParticleData();
-					this.gustData.identifier = "tornadoGust";
-					this.gustData.texture = ResourceLoader.getResource("data/particles/gust.png", ResourceLoader.getTexture, this.textureResources);
-					this.speckData = new ParticleData();
-					this.speckData.identifier = "tornadoSpeck";
-					this.speckData.texture = ResourceLoader.getResource("data/particles/speck.png", ResourceLoader.getTexture, this.textureResources);
-					this.gustEmitter = this.level.particleManager.createEmitter(tornadoGustOptions, this.gustData, null, () -> this.getAbsPos().getPosition());
-					this.speckEmitter = this.level.particleManager.createEmitter(tornadoSpeckOptions, this.speckData, null,
-						() -> this.getAbsPos().getPosition());
+					var worker = new ResourceLoaderWorker(() -> {
+						this.gustData = new ParticleData();
+						this.gustData.identifier = "tornadoGust";
+						this.gustData.texture = ResourceLoader.getResource("data/particles/gust.png", ResourceLoader.getTexture, this.textureResources);
+						this.speckData = new ParticleData();
+						this.speckData.identifier = "tornadoSpeck";
+						this.speckData.texture = ResourceLoader.getResource("data/particles/speck.png", ResourceLoader.getTexture, this.textureResources);
+						this.gustEmitter = this.level.particleManager.createEmitter(tornadoGustOptions, this.gustData, null,
+							() -> this.getAbsPos().getPosition());
+						this.speckEmitter = this.level.particleManager.createEmitter(tornadoSpeckOptions, this.speckData, null,
+							() -> this.getAbsPos().getPosition());
+
+						onFinish();
+					});
+					worker.loadFile("particles/gust.png");
+					worker.loadFile("particles/speck.png");
+
+					worker.run();
+					return;
 				}
 				onFinish();
 			});

@@ -6,6 +6,12 @@ import rewind.RewindFrame.FadePlatformSaveState;
 import rewind.RewindFrame.MegaManPlatformSaveState;
 import rewind.RewindFrame.RepetitiveTriggerSaveState;
 import rewind.RewindFrame.CountdownTriggerSaveState;
+import rewind.RewindFrame.PhysicsLayerSaveState;
+import rewind.RewindFrame.PhysicsOverrideSaveState;
+import rewind.RewindFrame.CannonSaveState;
+import shapes.Cannon;
+import src.PhysicsAttributeOverride;
+import triggers.PhysModTrigger;
 import haxe.io.BytesInput;
 import haxe.io.BytesBuffer;
 import mis.MissionElement.MissionElementBase;
@@ -124,6 +130,31 @@ class RewindManager {
 		rf.cannonControlLockUntil = @:privateAccess level.marble.cannonControlLockUntil;
 		rf.cannonCameraLockUntil = @:privateAccess level.marble.cannonCameraLockUntil;
 		rf.instantCannonFireTime = @:privateAccess level.marble.instantCannonFireTime;
+		var physModTriggers = [
+			for (t in level.triggers)
+				if (t is PhysModTrigger) cast(t, PhysModTrigger)
+		];
+		rf.physicsLayerStack.resize(0);
+		for (layer in @:privateAccess level.marble.physicsLayers) {
+			var ls = new PhysicsLayerSaveState();
+			ls.kind = level.marble.getPhysicsLayerKind(layer);
+			ls.triggerIndex = -1;
+			if (ls.kind == Marble.LAYER_KIND_OTHER) {
+				for (i in 0...physModTriggers.length) {
+					if (physModTriggers[i].overrides == layer) {
+						ls.triggerIndex = i;
+						break;
+					}
+				}
+			}
+			for (o in layer) {
+				var os = new PhysicsOverrideSaveState();
+				os.attrIndex = Marble.PHYSMOD_ATTRIBUTES.indexOf(o.attribute);
+				os.value = o.value;
+				ls.overrides.push(os);
+			}
+			rf.physicsLayerStack.push(ls);
+		}
 		rf.iceShardStates.resize(0);
 		rf.iceShardGotoTargetStates.resize(0);
 		for (s in level.iceShards) {
@@ -190,6 +221,14 @@ class RewindManager {
 
 		rf.powerupStates.resize(0);
 		rf.landMineStates.resize(0);
+		rf.cannonStates.resize(0);
+		for (cannon in level.cannons) {
+			var cs = new CannonSaveState();
+			cs.explodeReenableTime = cannon.explodeReenableTime;
+			cs.lastYaw = cannon.lastYaw;
+			cs.lastPitch = cannon.lastPitch;
+			rf.cannonStates.push(cs);
+		}
 		rf.toggleButtonStates.resize(0);
 		var trapdoorIdx = 0;
 		var fadePlatformIdx = 0;
@@ -338,6 +377,15 @@ class RewindManager {
 		}
 		var pstates = rf.powerupStates.copy();
 		var lmstates = rf.landMineStates.copy();
+		for (i in 0...rf.cannonStates.length) {
+			if (i >= level.cannons.length)
+				break;
+			var cannon = level.cannons[i];
+			var cs = rf.cannonStates[i];
+			cannon.explodeReenableTime = cs.explodeReenableTime;
+			if (cannon.baseTransform != null)
+				cannon.updateAim(cs.lastYaw, cs.lastPitch);
+		}
 		var tstates = rf.trapdoorStates.copy();
 		var fpstates = rf.fadePlatformStates.copy();
 		var mmstates = rf.megaManPlatformStates.copy();
@@ -363,23 +411,11 @@ class RewindManager {
 
 		level.marble.waterTriggers = rf.waterTriggers.copy();
 		level.marble.isInWater = rf.isInWater;
-		if (@:privateAccess level.marble.waterPhysicsLayer != null) {
-			level.marble.popPhysicsLayer(@:privateAccess level.marble.waterPhysicsLayer);
-			@:privateAccess level.marble.waterPhysicsLayer = null;
-		}
-		if (rf.isInWater)
-			@:privateAccess level.marble.waterPhysicsLayer = level.marble.pushPhysicsLayer(Marble.buildWaterPhysicsLayer());
 
 		level.marble.bubbleTime = rf.bubbleTime;
 		level.marble.bubbleTotalTime = rf.bubbleTotalTime;
 		level.marble.bubbleInfinite = rf.bubbleInfinite;
 		level.marble.bubbleActive = rf.bubbleActive;
-		if (@:privateAccess level.marble.bubblePhysicsLayer != null) {
-			level.marble.popPhysicsLayer(@:privateAccess level.marble.bubblePhysicsLayer);
-			@:privateAccess level.marble.bubblePhysicsLayer = null;
-		}
-		if (rf.bubbleActive)
-			@:privateAccess level.marble.bubblePhysicsLayer = level.marble.pushPhysicsLayer(Marble.buildBubblePhysicsLayer());
 		@:privateAccess level.playGui.updateBubbleBar(level.marble.bubbleTime, level.marble.bubbleTotalTime, level.marble.bubbleInfinite);
 
 		level.marble.fireball = rf.fireball;
@@ -389,25 +425,48 @@ class RewindManager {
 		@:privateAccess level.playGui.updateFireballBar(level.marble.fireballTime, level.marble.fireballTotalTime,
 			@:privateAccess level.marble.canFireballBlast());
 
+		var previousCannon = level.marble.activeCannon;
 		level.marble.activeCannon = rf.activeCannon;
+		if (previousCannon != null && previousCannon != rf.activeCannon) {
+			previousCannon.hideAimVisualization();
+			level.playGui.hideCannonHud();
+		}
 		@:privateAccess level.marble.cannonCharge = rf.cannonCharge;
 		level.marble.lastCannon = rf.lastCannon;
 		@:privateAccess level.marble.cannonReenableTime = rf.cannonReenableTime;
 		@:privateAccess level.marble.cannonControlLockUntil = rf.cannonControlLockUntil;
 		@:privateAccess level.marble.cannonCameraLockUntil = rf.cannonCameraLockUntil;
 		@:privateAccess level.marble.instantCannonFireTime = rf.instantCannonFireTime;
-		if (@:privateAccess level.marble.cannonFrozenLayer != null) {
-			level.marble.popPhysicsLayer(@:privateAccess level.marble.cannonFrozenLayer);
-			@:privateAccess level.marble.cannonFrozenLayer = null;
+
+		var physModTriggers = [
+			for (t in level.triggers)
+				if (t is PhysModTrigger) cast(t, PhysModTrigger)
+		];
+		var restoredLayers:Array<Array<PhysicsAttributeOverride>> = [];
+		var restoredKinds:Array<Int> = [];
+		for (ls in rf.physicsLayerStack) {
+			var reused:Array<PhysicsAttributeOverride> = null;
+			if (ls.kind == Marble.LAYER_KIND_OTHER && ls.triggerIndex >= 0 && ls.triggerIndex < physModTriggers.length)
+				reused = physModTriggers[ls.triggerIndex].overrides;
+			if (reused != null) {
+				restoredLayers.push(reused);
+			} else {
+				var layer:Array<PhysicsAttributeOverride> = [
+					for (o in ls.overrides)
+						{attribute: Marble.PHYSMOD_ATTRIBUTES[o.attrIndex], value: o.value}
+				];
+				restoredLayers.push(layer);
+			}
+			restoredKinds.push(ls.kind);
 		}
-		if (rf.activeCannon != null)
-			@:privateAccess level.marble.cannonFrozenLayer = level.marble.pushPhysicsLayer(Marble.buildCannonFrozenLayer());
-		if (@:privateAccess level.marble.cannonControlLockLayer != null) {
-			level.marble.popPhysicsLayer(@:privateAccess level.marble.cannonControlLockLayer);
-			@:privateAccess level.marble.cannonControlLockLayer = null;
+		level.marble.restorePhysicsLayers(restoredLayers, restoredKinds);
+		for (t in physModTriggers) {
+			var stillActive = restoredLayers.indexOf(t.overrides) >= 0;
+			if (stillActive)
+				t.activeLayers.set(level.marble, t.overrides);
+			else
+				t.activeLayers.remove(level.marble);
 		}
-		if (rf.cannonControlLockUntil > rf.timeState.currentAttemptTime)
-			@:privateAccess level.marble.cannonControlLockLayer = level.marble.pushPhysicsLayer(Marble.buildCannonControlLockLayer());
 		for (i in 0...rf.iceShardStates.length) {
 			var shard = level.iceShards[i];
 			if (shard.destroyed != rf.iceShardStates[i])

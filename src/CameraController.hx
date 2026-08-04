@@ -856,7 +856,7 @@ class CameraController extends Object {
 		level.marble.velocity.set(0, 0, 0);
 		level.marble.omega.set(0, 0, 0);
 
-		var forward = cannon.computeFireDirectionFromCamera(CameraYaw, CameraPitch).normalized();
+		var forward = cannon.computeFireDirection().normalized();
 		var worldUp = new Vector(0, 0, 1);
 		worldUp.transform(level.getOrientationQuat(level.timeState.currentAttemptTime).toMatrix());
 
