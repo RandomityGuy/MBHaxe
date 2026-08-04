@@ -46,6 +46,8 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 	public var ignoreRayCast:Bool = false;
 
+	static var globalTransformKey:Int = 0;
+
 	var _transformKey:Int = 0;
 
 	public var key:Int = 0;
@@ -142,7 +144,7 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 				this.boundingBox.transform(transform);
 			}
 		}
-		_transformKey++;
+		_transformKey = ++globalTransformKey;
 	}
 
 	public function generateBoundingBox() {
