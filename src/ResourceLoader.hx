@@ -301,6 +301,33 @@ class ResourceLoader {
 			// var lock = new Lock();
 			// threadPool.run(() -> {
 			dts.read(path);
+
+			// clear stuff we don't need
+			dts.alphaIn = null;
+			dts.alphaOut = null;
+			dts.triggers = null;
+			dts.decalStates = null;
+			dts.objectStates = null;
+			dts.groundRots = null;
+			dts.groundTranslations = null;
+			dts.nodeArbitraryScaleRots = null;
+			dts.nodeArbitraryScaleFactors = null;
+			dts.nodeUniformScales = null;
+			dts.matDetailMaps = null;
+			dts.matDetailScales = null;
+			dts.matBumpMaps = null;
+			for (mesh in dts.meshes) {
+				if (mesh != null) {
+					mesh.clusters = null;
+					mesh.startCluster = null;
+					mesh.firstVerts = null;
+					mesh.numVerts = null;
+					mesh.firstTVerts = null;
+					mesh.mindices = null;
+					mesh.enormals = null;
+				}
+			}
+
 			var dtsresource = new Resource(dts, path, dtsResources, dtsFile -> {});
 			dtsResources.set(path, dtsresource);
 			//	lock.release();
