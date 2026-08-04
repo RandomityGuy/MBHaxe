@@ -236,9 +236,9 @@ class Settings {
 
 	#if hl
 	#if MACOS_BUNDLE
-	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBP"]);
+	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Library", "Application Support", "MBHaxe-MBPQ"]);
 	#elseif IOS_BUNDLE
-	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Documents", "MBHaxe-MBP"]);
+	public static var settingsDir = Path.join([Sys.getEnv("HOME"), "Documents", "MBHaxe-MBPQ"]);
 	#else
 	public static var settingsDir = ".";
 	#end
@@ -507,8 +507,8 @@ class Settings {
 			}
 			if (optionsSettings.marbleIndex == null) {
 				optionsSettings.marbleIndex = 0;
-				optionsSettings.marbleSkin = "base";
-				optionsSettings.marbleModel = "data/shapes/balls/ball-superball.dts";
+				optionsSettings.marbleSkin = "mellowblue";
+				optionsSettings.marbleModel = "data/shapes_pq/marbles/pq classic/ball-superball.dts";
 			}
 			if (optionsSettings.marbleCategoryIndex == null) {
 				optionsSettings.marbleCategoryIndex = 0;
