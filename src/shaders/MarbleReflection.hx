@@ -5,6 +5,7 @@ class MarbleReflection extends hxsl.Shader {
 		var pixelColor:Vec4;
 		var transformedNormal:Vec3;
 		@param var texture:SamplerCube;
+		@param var diffuseMap:Sampler2D;
 		@global var camera:{
 			var position:Vec3;
 		};
@@ -12,6 +13,7 @@ class MarbleReflection extends hxsl.Shader {
 			var position:Vec3;
 			var normal:Vec3;
 		};
+		var calculatedUV:Vec2;
 		var pixelTransformedPosition:Vec3;
 		function tanh(x:Float):Float {
 			return (exp(2.0 * x) - 1.0) / (exp(2.0 * x) + 1.0);
@@ -33,8 +35,9 @@ class MarbleReflection extends hxsl.Shader {
 
 			var refl = texture.get(reflectionRay);
 
-			var reflectAmount = invSigmoid(0.01 + 0.98 * pixelColor.a);
-			reflectAmount -= 0.7 * (2.0 * -dot(transformedNormal, viewDir) - 1.0);
+			var materialAlpha = diffuseMap.get(calculatedUV).a;
+			var reflectAmount = invSigmoid(0.01 + 0.98 * materialAlpha);
+			reflectAmount -= 0.7 * (2.0 * dot(transformedNormal, viewDir) - 1.0);
 			reflectAmount = sigmoid(reflectAmount);
 			reflectAmount = 0.95 * reflectAmount;
 
@@ -42,8 +45,9 @@ class MarbleReflection extends hxsl.Shader {
 		}
 	}
 
-	public function new(texture) {
+	public function new(texture, diffuseMap) {
 		super();
 		this.texture = texture;
+		this.diffuseMap = diffuseMap;
 	}
 }
