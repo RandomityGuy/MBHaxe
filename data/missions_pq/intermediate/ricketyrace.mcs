@@ -1229,6 +1229,17 @@ new SimGroup(MissionGroup) {
 		interiorFile = "~/data/interiors_pq/intermediate/ricketyRaceRope.dif";
 		showTerrainInside = "0";
 	};
+    new Trigger() {
+        position = "-30.63 -16.5 53.31";
+        rotation = "0 0 0 0";
+        scale = "6.5 1.5 46";
+        datablock = "alignmenttrigger";
+        polyhedron = "0 0 0 -1 0 0 0 1 0 0 0 1";
+        x = "none";
+        y = "trigger";
+        z = "none";
+        alwayson = "0";
+    };
 };
 }
 //--- MISSION END ---
