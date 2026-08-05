@@ -69,7 +69,7 @@ class OptionsDlg extends GuiControl {
 
 		var touch = Util.isTouchDevice();
 
-		var window = new GuiImage(ResourceLoader.getResource("data/ui/options/window.png", ResourceLoader.getImage, this.imageResources).toTile());
+		var window = new GuiTransparencyCtrl("data/ui/transparency/pqwindow");
 		window.horizSizing = Center;
 		window.vertSizing = Center;
 		window.position = new Vector(8, 13);
@@ -505,6 +505,7 @@ class OptionsDlg extends GuiControl {
 		makeButton("Import Progress:", 38, "Import", () -> {
 			trace("Start prefs import");
 			importing = true;
+			#if (android || ios)
 			Settings.start_import_prefs((data) -> {
 				try {
 					// convert to string
@@ -529,9 +530,12 @@ class OptionsDlg extends GuiControl {
 				}
 				importing = false; // reset this flag after import is done
 			});
+			#end
 		}, miscPanel);
 		makeButton("Export Progress:", 38, "Export", () -> {
+			#if (android || ios)
 			Settings.export_prefs();
+			#end
 		}, miscPanel, true);
 
 		generalBtn.pressedAction = (e) -> {
@@ -570,7 +574,9 @@ class OptionsDlg extends GuiControl {
 		if (musicSliderFunc != null)
 			musicSliderFunc(dt, mouseState);
 		if (importing) {
+			#if (android || ios)
 			Settings.call_import_cb();
+			#end
 		}
 	}
 }

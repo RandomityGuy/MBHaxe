@@ -27,6 +27,10 @@ class GuiText extends GuiControl {
 
 	public override function render(scene2d:Scene) {
 		var renderRect = this.getRenderRectangle();
+		if (scene2d.contains(text))
+			scene2d.removeChild(text);
+		scene2d.addChild(text);
+
 		if (justify == Left) {
 			text.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 			text.textAlign = Left;
@@ -43,9 +47,10 @@ class GuiText extends GuiControl {
 			text.setPosition(Math.floor(renderRect.position.x + renderRect.extent.x / 2), Math.floor(renderRect.position.y));
 			text.textAlign = MultilineCenter;
 		}
-		if (scene2d.contains(text))
-			scene2d.removeChild(text);
-		scene2d.addChild(text);
+		if (justify == Pass) {
+			text.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
+		}
+
 		super.render(scene2d);
 	}
 

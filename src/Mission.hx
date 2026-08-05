@@ -199,7 +199,7 @@ class Mission {
 			var basename = haxe.io.Path.withoutExtension(this.path);
 			var exts = [".jpg", ".png", ".jpeg", ".dds"];
 			for (ext in exts) {
-				if (ResourceLoader.fileSystem.exists(basename + ext)) {
+				if (ResourceLoader.exists(basename + ext)) {
 					imgFileEntry = ResourceLoader.fileSystem.get(basename + ext);
 					imgFileEntry.load(() -> {
 						var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
@@ -245,20 +245,14 @@ class Mission {
 		if (!this.isClaMission) {
 			var basename = haxe.io.Path.withoutExtension(this.path);
 			var exts = [".jpg", ".png", ".jpeg", ".dds"];
-			var baseDir = #if sys "data/"; #else ""; #end
+			var baseDir = "";
 			for (ext in exts) {
 				if (ResourceLoader.exists(basename + ".prev" + ext)) {
-					imgFileEntry = ResourceLoader.fileSystem.get(basename + ext);
-					#if hl
-					var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
-					onLoaded(ret);
-					#end
-					#if js
+					imgFileEntry = ResourceLoader.fileSystem.get(basename + ".prev" + ext);
 					imgFileEntry.load(() -> {
-						var ret = ResourceLoader.getResource(basename + ext, ResourceLoader.getImage, this.imageResources).toTile();
+						var ret = ResourceLoader.getResource(basename + ".prev" + ext, ResourceLoader.getImage, this.imageResources).toTile();
 						onLoaded(ret);
 					});
-					#end
 					return imgFileEntry.path;
 				}
 			}
@@ -268,20 +262,12 @@ class Mission {
 			for (ext in exts) {
 				if (ResourceLoader.exists('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext)) {
 					imgFileEntry = ResourceLoader.fileSystem.get('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext);
-					#if hl
-					var ret = ResourceLoader.getResource('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
-						this.imageResources)
-						.toTile();
-					onLoaded(ret);
-					#end
-					#if js
 					imgFileEntry.load(() -> {
 						var ret = ResourceLoader.getResource('${baseDir}previews_pq/${difficulty}/${missionName}.prev' + ext, ResourceLoader.getImage,
 							this.imageResources)
 							.toTile();
 						onLoaded(ret);
 					});
-					#end
 					return imgFileEntry.path;
 				}
 			}

@@ -796,6 +796,8 @@ class Util {
 		#end
 		#if android
 		return "Android";
+		#else
+		return "Windows";
 		#end
 	}
 }

@@ -45,6 +45,11 @@ class GuiMLText extends GuiControl {
 
 		var obj:h2d.Object = this.scrollable ? flow : text;
 
+		if (scene2d.contains(obj))
+			scene2d.removeChild(obj);
+
+		scene2d.addChild(obj);
+
 		if (justify == Left) {
 			obj.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 			text.textAlign = Left;
@@ -60,11 +65,6 @@ class GuiMLText extends GuiControl {
 
 		if (scrollable)
 			text.setPosition(0, -_scroll);
-
-		if (scene2d.contains(obj))
-			scene2d.removeChild(obj);
-
-		scene2d.addChild(obj);
 		super.render(scene2d);
 	}
 
