@@ -51,7 +51,7 @@ targets:
         # --- Networking ---
         # WebRTC ICE host-candidate gathering / LAN peer discovery needs the
         # local-network permission on iOS 14+.
-        NSLocalNetworkUsageDescription: "Marble Blast Platinum uses the local network to discover and connect to nearby players for multiplayer."
+        NSLocalNetworkUsageDescription: "PlatinumQuest uses the local network to discover and connect to nearby players for multiplayer."
         # The master server has a plain ws:// (and other non-TLS) fallback that
         # App Transport Security blocks by default; allow arbitrary loads so the
         # websocket + WebRTC transports all connect.
@@ -59,8 +59,8 @@ targets:
           NSAllowsArbitraryLoads: true
     settings:
       base:
-        PRODUCT_NAME: Marble Blast Platinum
-        PRODUCT_BUNDLE_IDENTIFIER: com.randomityguy.mbphaxe
+        PRODUCT_NAME: PlatinumQuest
+        PRODUCT_BUNDLE_IDENTIFIER: com.randomityguy.mbpqhaxe
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO
         CLANG_ENABLE_OBJC_ARC: YES
