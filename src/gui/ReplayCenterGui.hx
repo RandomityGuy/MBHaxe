@@ -1,6 +1,5 @@
 package gui;
 
-import hxd.fs.BytesFileSystem.BytesFileEntry;
 import src.Marbleland;
 import src.Mission;
 import hxd.BitmapData;
@@ -57,22 +56,18 @@ class ReplayCenterGui extends GuiControl {
 			}
 		}
 		#end
-		// #if android
 		var replayFiles = sys.FileSystem.readDirectory(replayPath);
 		for (replayFile in replayFiles) {
 			var extension = haxe.io.Path.extension(replayFile);
-			trace('Replay file: ${replayFile}}');
 			if (extension == "mbr") {
 				var replayF = new Replay(null);
 				var fullpath = haxe.io.Path.join([Settings.settingsDir, "data", "replays", replayFile]);
-				trace('Replay file path: ${fullpath}}');
 				var replayBytes = sys.io.File.getBytes(fullpath);
-				var fe = new BytesFileEntry(fullpath, replayBytes);
+				var fe = new hxd.fs.BytesFileSystem.BytesFileEntry(fullpath, replayBytes);
 				if (replayF.readHeader(replayBytes, fe))
 					replayList.push(replayF);
 			}
 		}
-		// #end
 
 		var playButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
 			.toTile(), whatneyFont);

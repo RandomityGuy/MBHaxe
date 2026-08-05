@@ -18,7 +18,7 @@ class GuiGraphics extends GuiControl {
 		this.graphics = graphics;
 	}
 
-	public override function render(scene2d:Scene) {
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		var renderRect = this.getRenderRectangle();
 		graphics.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
 		// bmp.scaleX = renderRect.extent.x / bmp.tile.width;

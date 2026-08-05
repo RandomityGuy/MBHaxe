@@ -37,7 +37,7 @@ class GuiButton extends GuiAnim {
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {
-		var renderRect = getRenderRectangle();
+		var renderRect = getHitTestRect();
 		if (renderRect.inRect(mouseState.position) && !disabled) {
 			if (buttonSounds && Key.isPressed(Key.MOUSE_LEFT)) {
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
@@ -73,8 +73,7 @@ class GuiButton extends GuiAnim {
 			}
 		}
 		if (!disabled) {
-			if (acceleratorWasPressed &&
-				(accelerator != 0 && hxd.Key.isReleased(accelerator)) || Gamepad.isReleased(gamepadAccelerator)) {
+			if (acceleratorWasPressed && (accelerator != 0 && hxd.Key.isReleased(accelerator)) || Gamepad.isReleased(gamepadAccelerator)) {
 				if (this.pressedAction != null) {
 					this.pressedAction(new GuiEvent(this));
 				}

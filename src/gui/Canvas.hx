@@ -42,7 +42,7 @@ class Canvas extends GuiControl {
 	public function pushDialog(content:GuiControl) {
 		this.content.onDormant(scene2d);
 		this.addChild(content);
-		content.render(scene2d);
+		content.render(scene2d, this._flow);
 	}
 
 	public function popDialog(content:GuiControl, dispose:Bool = true) {

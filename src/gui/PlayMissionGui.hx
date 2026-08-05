@@ -894,7 +894,7 @@ class PlayMissionGui extends GuiControl {
 			paginationText.horizSizing = Center;
 			missionListContainer.addChild(paginationText);
 
-			missionListContainer.render(MarbleGame.canvas.scene2d);
+			missionListContainer.render(MarbleGame.canvas.scene2d, @:privateAccess missionBox._flow);
 		}
 
 		var showLeaderboards = false;
@@ -1178,7 +1178,7 @@ class PlayMissionGui extends GuiControl {
 				}
 			};
 
-			infoBox.render(MarbleGame.canvas.scene2d);
+			infoBox.render(MarbleGame.canvas.scene2d, @:privateAccess this._flow);
 
 			#if js
 			switch (previewTimeoutHandle) {
@@ -1225,8 +1225,8 @@ class PlayMissionGui extends GuiControl {
 		setDifficulty(currentGameStatic, currentCategoryStatic);
 	}
 
-	public override function render(scene2d:Scene) {
-		super.render(scene2d);
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
+		super.render(scene2d, parent);
 		setSelectedFunc(currentSelectionStatic);
 	}
 

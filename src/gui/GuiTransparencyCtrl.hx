@@ -35,15 +35,18 @@ class GuiTransparencyCtrl extends GuiControl {
 		}
 	}
 
-	public override function render(scene2d:Scene) {
-		if (scene2d.contains(container))
-			scene2d.removeChild(container);
+	public override function render(scene2d:Scene, ?parent:Flow) {
+		if (parent.contains(container))
+			parent.removeChild(container);
 
-		scene2d.addChild(container);
+		parent.addChild(container);
+		var props = parent.getProperties(container);
+		props.isAbsolute = true;
 
 		var renderRect = this.getRenderRectangle();
+		var offset = this.getOffsetFromParent();
 
-		container.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
+		container.setPosition(Math.floor(offset.x), Math.floor(offset.y));
 
 		var bottom = bmps[0];
 		var bl = bmps[1];
@@ -86,7 +89,7 @@ class GuiTransparencyCtrl extends GuiControl {
 		fill.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
 		fill.height = Math.floor(renderRect.extent.y - tr.tile.height - bl.tile.height);
 
-		super.render(scene2d);
+		super.render(scene2d, parent);
 	}
 
 	public override function dispose() {

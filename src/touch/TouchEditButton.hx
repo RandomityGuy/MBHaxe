@@ -44,7 +44,7 @@ class TouchEditButton extends GuiGraphics {
 		this.radius = radius;
 	}
 
-	public override function getHitTestRect() {
+	public override function getHitTestRect(useScroll:Bool = true) {
 		var thisRect = this.getRenderRectangle();
 		thisRect.position = thisRect.position.sub(new Vector(radius, radius));
 

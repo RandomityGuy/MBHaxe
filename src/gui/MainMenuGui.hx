@@ -72,6 +72,13 @@ class MainMenuGui extends GuiControl {
 			return [normal, hover, pressed];
 		}
 
+		function loadStaticButtonImages(path:String) {
+			var normal = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var hover = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			var pressed = ResourceLoader.getResource('${path}.png', ResourceLoader.getImage, this.imageResources).toTile();
+			return [normal, hover, pressed];
+		}
+
 		var playButton = new GuiButtonText(loadButtonImages("data/ui/menu/menu"), helveticafont60);
 		playButton.position = new Vector(75, 178);
 		playButton.setExtent(new Vector(500, 84));
@@ -208,7 +215,7 @@ class MainMenuGui extends GuiControl {
 		kofi.extent = new Vector(143, 36);
 		kofi.pressedAction = (sender) -> {
 			#if sys
-			Settings.open_web_url("https://ko-fi.com/H2H5FRTTL");
+			hxd.System.openURL("https://ko-fi.com/H2H5FRTTL");
 			#end
 			#if js
 			js.Browser.window.open("https://ko-fi.com/H2H5FRTTL");
@@ -230,6 +237,38 @@ class MainMenuGui extends GuiControl {
 			#end
 		}
 		this.addChild(github);
+
+		#if js
+		var mbg = new GuiButton(loadStaticButtonImages("data/ui/icon_mbg"));
+		mbg.horizSizing = Right;
+		mbg.vertSizing = Top;
+		mbg.position = new Vector(0, 510);
+		mbg.extent = new Vector(76, 76);
+		mbg.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblastgold.randomityguy.me");
+		}
+		this.addChild(mbg);
+
+		var mbu = new GuiButton(loadStaticButtonImages("data/ui/icon_mbu"));
+		mbu.horizSizing = Right;
+		mbu.vertSizing = Top;
+		mbu.position = new Vector(76, 510);
+		mbu.extent = new Vector(76, 76);
+		mbu.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblastultra.randomityguy.me");
+		}
+		this.addChild(mbu);
+
+		var discord = new GuiButton(loadStaticButtonImages("data/ui/discord"));
+		discord.horizSizing = Left;
+		discord.vertSizing = Bottom;
+		discord.position = new Vector(650, 90);
+		discord.extent = new Vector(152, 60);
+		discord.pressedAction = (sender) -> {
+			js.Browser.window.open("https://discord.gg/q4JdnRbVhF");
+		}
+		this.addChild(discord);
+		#end
 
 		#if js
 		var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);

@@ -106,7 +106,6 @@ class SearchGui extends GuiControl {
 		searchLevelDesc.text.lineSpacing = 4;
 		searchLevelDesc.position = new Vector(2, 2);
 		searchLevelDesc.extent = new Vector(213, 14);
-		searchLevelDesc.scrollable = true;
 		descScrollCtrl.addChild(searchLevelDesc);
 
 		var missionList = [];

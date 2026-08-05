@@ -59,14 +59,6 @@ class OptionsDlg extends GuiControl {
 			return [normal, hover, pressed];
 		}
 
-		function loadButtonImages2(path:String) {
-			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed, disabled];
-		}
-
 		var touch = Util.isTouchDevice();
 
 		var window = new GuiTransparencyCtrl("data/ui/transparency/pqwindow");
@@ -245,11 +237,11 @@ class OptionsDlg extends GuiControl {
 			optSliders.push(optSlider);
 		}
 
-		var begin = 18;
-		var current = begin;
+		var yPos = 18;
+
 		if (!touch) {
-			makeOption("Screen Resolution:", () -> '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', current,
-				generalPanel, "xlarge", [
+			makeOption("Screen Resolution:", () -> '${Settings.optionsSettings.screenWidth} x ${Settings.optionsSettings.screenHeight}', yPos, generalPanel,
+				"xlarge", [
 					"1024 x 800",
 					"1280 x 720",
 					"1366 x 768",
@@ -278,75 +270,75 @@ class OptionsDlg extends GuiControl {
 							Settings.optionsSettings.screenHeight = 1080;
 					}
 				});
-			makeOption("Screen Style:", () -> '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', current, generalPanel, "small",
+			makeOption("Screen Style:", () -> '${Settings.optionsSettings.isFullScreen ? "Full Screen" : "Windowed"}', yPos, generalPanel, "small",
 				["Windowed", "Full Screen"], (idx) -> {
 					Settings.optionsSettings.isFullScreen = idx == 1;
 				}, true);
 
-			current += 56;
+			yPos += 56;
 		}
 
-		makeOption("Frame Rate:", () -> '${Settings.optionsSettings.frameRateVis ? "Visible" : "Hidden"}', current, generalPanel, "small",
-			["Visible", "Hidden"], (idx) -> {
+		makeOption("Frame Rate:", () -> '${Settings.optionsSettings.frameRateVis ? "Visible" : "Hidden"}', yPos, generalPanel, "small", ["Visible", "Hidden"],
+			(idx) -> {
 				Settings.optionsSettings.frameRateVis = idx == 0;
 			});
-		makeOption("OoB Insults:", () -> '${Settings.optionsSettings.oobInsults ? "Enabled" : "Disabled"}', current, generalPanel, "small",
+		makeOption("OoB Insults:", () -> '${Settings.optionsSettings.oobInsults ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.oobInsults = idx == 1;
 			}, true);
 
-		current += 56;
+		yPos += 56;
 
-		makeOption("Free-Look:", () -> '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', current, generalPanel, "small",
+		makeOption("Free-Look:", () -> '${Settings.controlsSettings.alwaysFreeLook ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.controlsSettings.alwaysFreeLook = idx == 1;
 			});
-		makeOption("Invert Y:", () -> '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', current, generalPanel, "small", ["No", "Yes"], (idx) -> {
+		makeOption("Invert Y:", () -> '${Settings.controlsSettings.invertYAxis ? "Yes" : "No"}', yPos, generalPanel, "small", ["No", "Yes"], (idx) -> {
 			Settings.controlsSettings.invertYAxis = idx == 1;
 		}, true);
 
-		current += 56;
+		yPos += 56;
 
-		makeOption("Reflective Marble:", () -> '${Settings.optionsSettings.reflectiveMarble ? "Enabled" : "Disabled"}', current, generalPanel, "small",
+		makeOption("Reflective Marble:", () -> '${Settings.optionsSettings.reflectiveMarble ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.reflectiveMarble = idx == 1;
 			});
-		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', current, generalPanel, "small",
-			["Disabled", "Enabled"], (idx) -> {
+
+		makeOption("Vertical Sync:", () -> '${Settings.optionsSettings.vsync ? "Enabled" : "Disabled"}', yPos, generalPanel, "small", ["Disabled", "Enabled"],
+			(idx) -> {
 				Settings.optionsSettings.vsync = idx == 1;
 			}, true);
 
-		current += 56;
+		yPos += 56;
 
-		makeOption("Rewind:", () -> '${Settings.optionsSettings.rewindEnabled ? "Enabled" : "Disabled"}', current, generalPanel, "small",
+		makeOption("Rewind:", () -> '${Settings.optionsSettings.rewindEnabled ? "Enabled" : "Disabled"}', yPos, generalPanel, "small",
 			["Disabled", "Enabled"], (idx) -> {
 				Settings.optionsSettings.rewindEnabled = idx == 1;
 			}, false);
 
-		makeSlider("Rewind Speed:", (Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1), current, generalPanel, (val) -> {
+		makeSlider("Rewind Speed:", (Settings.optionsSettings.rewindTimescale - 0.1) / (1 - 0.1), yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.rewindTimescale = cast(0.1 + val * (1 - 0.1));
 		}, true);
 
-		current += 56;
+		yPos += 56;
 
-		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, current, generalPanel, (val) -> {
+		makeSlider("Music Volume:", Settings.optionsSettings.musicVolume, yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.musicVolume = val;
 			AudioManager.updateVolumes();
 		});
-		makeSlider("Sound Volume:", Settings.optionsSettings.soundVolume, current, generalPanel, (val) -> {
+		makeSlider("Sound Volume:", Settings.optionsSettings.soundVolume, yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.soundVolume = val;
 			AudioManager.updateVolumes();
 		}, true);
 
-		current += 56;
+		yPos += 56;
 
-		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), current, generalPanel, (val) -> {
+		makeSlider("Field of View:", (Settings.optionsSettings.fovX - 60) / (140 - 60), yPos, generalPanel, (val) -> {
 			Settings.optionsSettings.fovX = cast(60 + val * (140 - 60));
 		});
-		makeSlider(touch ? "Camera Speed" : "Mouse Speed:", (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12), current, generalPanel,
-			(val) -> {
-				Settings.controlsSettings.cameraSensitivity = cast(0.12 + val * (1.2 - 0.12));
-			}, true);
+		makeSlider("Camera Speed:", (Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12), yPos, generalPanel, (val) -> {
+			Settings.controlsSettings.cameraSensitivity = cast(0.12 + val * (1.2 - 0.12));
+		}, true);
 
 		function makeButton(text:String, yPos:Int, buttonText:String, pressedAction:() -> Void, parent:GuiControl, right:Bool = false) {
 			var textObj = new GuiText(squishneyFont28);
@@ -369,12 +361,12 @@ class OptionsDlg extends GuiControl {
 		}
 
 		if (touch) {
-			current += 56;
-			makeSlider("Camera Distance:", (Settings.optionsSettings.cameraDistance - 1.01) / (3 - 1.01), current, generalPanel, (val) -> {
+			yPos += 56;
+			makeSlider("Camera Distance:", (Settings.optionsSettings.cameraDistance - 1.01) / (3 - 1.01), yPos, generalPanel, (val) -> {
 				Settings.optionsSettings.cameraDistance = cast(1.01 + val * (3 - 1.01));
 			});
 
-			makeButton("Touch Controls:", current, "Edit", () -> {
+			makeButton("Touch Controls:", yPos, "Edit", () -> {
 				MarbleGame.canvas.setContent(new TouchCtrlsEditGui());
 			}, generalPanel, true);
 		}
@@ -402,6 +394,8 @@ class OptionsDlg extends GuiControl {
 				return "Use PowerUp";
 			if (Settings.controlsSettings.freelook == key && bindingName != "Free Look")
 				return "Free Look";
+			if (Settings.controlsSettings.rewind == key && bindingName != "Rewind")
+				return "Rewind";
 
 			return null;
 		}

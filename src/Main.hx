@@ -115,7 +115,7 @@ class Main extends hxd.App {
 			ResourceLoader.init(s2d, () -> {
 				AudioManager.init();
 				AudioManager.playShell();
-				Marbleland.init();
+				haxe.Timer.delay(() -> Marbleland.init(), 1000);
 				marbleGame = new MarbleGame(s2d, s3d);
 				MarbleGame.canvas.setContent(new MainMenuGui());
 				VersionGui.checkVersion();

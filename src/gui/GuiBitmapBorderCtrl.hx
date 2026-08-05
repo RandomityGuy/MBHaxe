@@ -33,6 +33,8 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		var bottom = texture.sub(texs.bottom.x, texs.bottom.y, texs.bottom.z, texs.bottom.w);
 		var br = texture.sub(texs.br.x, texs.br.y, texs.br.z, texs.br.w);
 		var fillTile = Tile.fromColor(fill);
+		for (t in [tl, tr, bl, br, top, left, right, bottom])
+			GuiControl.insetTileUV(t);
 		tiles = [tl, tr, bl, br, top, left, right, bottom, fillTile];
 
 		this.container = new h2d.Object();
@@ -42,15 +44,17 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		}
 	}
 
-	public override function render(scene2d:Scene) {
-		if (scene2d.contains(container))
-			scene2d.removeChild(container);
+	public override function render(scene2d:Scene, ?parent:Flow) {
+		if (parent.contains(container))
+			parent.removeChild(container);
 
-		scene2d.addChild(container);
+		parent.addChild(container);
+		var props = parent.getProperties(container);
+		props.isAbsolute = true;
 
 		var renderRect = this.getRenderRectangle();
 
-		container.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
+		container.setPosition(0, 0);
 
 		var tl = bmps[0];
 		var tr = bmps[1];
@@ -93,7 +97,7 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		fill.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
 		fill.height = Math.floor(renderRect.extent.y - tr.tile.height - bl.tile.height);
 
-		super.render(scene2d);
+		super.render(scene2d, parent);
 	}
 
 	public override function onRemove() {

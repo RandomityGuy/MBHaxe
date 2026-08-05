@@ -408,7 +408,6 @@ class PlayGui {
 		timerTransparency.horizSizing = Center;
 		timerTransparency.position = new Vector(77, -7);
 		timerTransparency.extent = new Vector(216, 79);
-		timerTransparency.doClipping = false;
 		timerCtrl.addChild(timerTransparency);
 
 		timerNumbers[0].position = new Vector(80, 3);
@@ -946,15 +945,18 @@ class PlayGui {
 		var ten = Math.floor(velocity / 10) % 10;
 		var hun = Math.floor(velocity / 100) % 10;
 
-		var colorOffset = 0; // normal/white
+		var colorOffset = timerNormal; // normal/white
 		if (speedometerMinimumSpeed > 0 && velocity < speedometerMinimumSpeed)
-			colorOffset = 20; // red - too slow for Consistency
+			colorOffset = timerDanger; // red - too slow for Consistency
 		else if (speedometerSpeedToQualify > 0 && velocity > speedometerSpeedToQualify)
-			colorOffset = 10; // green - qualified for Haste
+			colorOffset = timerStopped; // green - qualified for Haste
 
-		speedometerDigitOne.anim.currentFrame = one + colorOffset;
-		speedometerDigitTen.anim.currentFrame = ten + colorOffset;
-		speedometerDigitHun.anim.currentFrame = hun + colorOffset;
+		speedometerDigitOne.anim.currentFrame = one;
+		speedometerDigitTen.anim.currentFrame = ten;
+		speedometerDigitHun.anim.currentFrame = hun;
+		speedometerDigitOne.anim.color = Vector.fromColor(colorOffset);
+		speedometerDigitTen.anim.color = Vector.fromColor(colorOffset);
+		speedometerDigitHun.anim.color = Vector.fromColor(colorOffset);
 
 		var targetY = -759 + 8 * velocity;
 		if (targetY > 2138)
@@ -962,13 +964,13 @@ class PlayGui {
 		var deltaCanvasUnits = targetY - (-759);
 
 		speedometerBackground1.bmp.y = speedometerBackground1RestY + deltaCanvasUnits * Settings.uiScale;
-		speedometerBackground2.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 806.4) * Settings.uiScale;
-		speedometerBackground3.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 1612.8) * Settings.uiScale;
+		speedometerBackground2.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 1008) * Settings.uiScale;
+		speedometerBackground3.bmp.y = speedometerBackground1RestY + (deltaCanvasUnits - 2016) * Settings.uiScale;
 
 		if (speedometerMinimumSpeed > 0) {
 			speedometerConsMarker.bmp.visible = true;
 			speedometerConsMarker.setTile(velocity < speedometerMinimumSpeed ? speedometerConsTooSlowTile : speedometerConsNormalTile);
-			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerMinimumSpeed;
+			var markerCanvasUnits = targetY + 857 - 8 * speedometerMinimumSpeed;
 			speedometerConsMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
 		} else {
 			speedometerConsMarker.bmp.visible = false;
@@ -977,7 +979,7 @@ class PlayGui {
 		if (speedometerSpeedToQualify > 0) {
 			speedometerHasteMarker.bmp.visible = true;
 			speedometerHasteMarker.setTile(velocity >= speedometerSpeedToQualify ? speedometerHasteAchievedTile : speedometerHasteNotAchievedTile);
-			var markerCanvasUnits = targetY + 685.6 - 6.4 * speedometerSpeedToQualify;
+			var markerCanvasUnits = targetY + 857 - 8 * speedometerSpeedToQualify;
 			speedometerHasteMarker.bmp.y = speedometerMarkerRestY + markerCanvasUnits * Settings.uiScale;
 		} else {
 			speedometerHasteMarker.bmp.visible = false;
@@ -1396,7 +1398,6 @@ class PlayGui {
 		blastFill = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar_bargreen.png", ResourceLoader.getImage, this.imageResources).toTile());
 		blastFill.position = new Vector(5, 5);
 		blastFill.extent = new Vector(58, 17);
-		blastFill.doClipping = false;
 		blastBar.addChild(blastFill);
 
 		blastFrame = new GuiImage(ResourceLoader.getResource("data/ui/game/blastbar.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -1708,7 +1709,7 @@ class PlayGui {
 	public function setSpectateMenu(enabled:Bool) {
 		if (enabled && spectatorCtrl == null) {
 			initSpectatorMenu();
-			spectatorCtrl.render(MarbleGame.canvas.scene2d);
+			spectatorCtrl.render(MarbleGame.canvas.scene2d, @:privateAccess playGuiCtrl._flow);
 			blastFill.bmp.visible = false;
 			blastFrame.bmp.visible = false;
 			return true;
@@ -1998,7 +1999,8 @@ class PlayGui {
 			}
 
 			this.helpTextContainer.position = new Vector(120, 620 - pct * (95 + 20));
-			this.helpTextContainer.render(scene2d);
+			this.helpTextContainer.render(scene2d, @:privateAccess playGuiCtrl._flow);
+			@:privateAccess helpTextContainer._flow.overflow = Expand;
 		}
 	}
 
@@ -2042,7 +2044,7 @@ class PlayGui {
 			color: 0
 		}; // new h2d.filter.DropShadow(1.414, 0.785, 0x000000F, 1, 0, 0.4, 1, true);
 		this.playGuiCtrl.addChild(middleMsg);
-		middleMsg.render(scene2d);
+		middleMsg.render(scene2d, @:privateAccess this.playGuiCtrl._flow);
 		middleMsg.text.y -= (25 / playGuiCtrl.extent.y) * scene2d.height;
 
 		this.middleMessages.push({ctrl: middleMsg, age: 0});
@@ -2112,7 +2114,7 @@ class PlayGui {
 
 		this.toastListBox.addChild(box);
 
-		box.render(scene2d);
+		box.render(scene2d, @:privateAccess this.toastListBox._flow);
 
 		// Update the size of the box
 
@@ -2138,7 +2140,7 @@ class PlayGui {
 	function repositionToast(msg:ToastMessage) {
 		msg.box.position.x = msg.x;
 		msg.box.position.y = msg.y;
-		msg.box.render(scene2d);
+		msg.box.render(scene2d, @:privateAccess this.toastListBox._flow);
 	}
 
 	function updateToastMessages(dt:Float) {

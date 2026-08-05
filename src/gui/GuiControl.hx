@@ -1,5 +1,7 @@
 package gui;
 
+import format.abc.Data.ABCData;
+import h2d.Flow;
 import hxd.res.Image;
 import h2d.Graphics;
 import hxd.Key;
@@ -31,6 +33,7 @@ enum VertSizing {
 typedef MouseState = {
 	var position:Vector;
 	var ?button:Int;
+	var ?wheel:Float;
 }
 
 @:publicFields
@@ -55,18 +58,71 @@ class GuiControl {
 
 	var _disposed = false;
 
+	var _flow:Flow;
+
+	var _manualScroll = false;
+
+	// var _border:h2d.Graphics = null;
+	static inline var UV_INSET = 0.02;
+
+	public static function insetTileUV(t:h2d.Tile) {
+		var tex = t.getTexture();
+		@:privateAccess {
+			t.u += UV_INSET / tex.width;
+			t.v += UV_INSET / tex.height;
+			t.u2 -= UV_INSET / tex.width;
+			t.v2 -= UV_INSET / tex.height;
+		}
+	}
+
 	public function new() {}
 
-	public function render(scene2d:Scene) {
+	public function render(scene2d:Scene, ?parent:Flow) {
+		if (this._flow == null) {
+			this._flow = new Flow(parent != null ? parent : scene2d);
+			// this._flow.debug = true;
+		}
+		// if (_border == null) {
+		// 	_border = new h2d.Graphics(scene2d);
+		// }
+		if (parent == null) {
+			if (scene2d.contains(this._flow)) {
+				scene2d.removeChild(this._flow);
+			}
+			scene2d.addChild(this._flow);
+		} else {
+			if (parent.contains(this._flow)) {
+				parent.removeChild(this._flow);
+			}
+			parent.addChild(this._flow);
+		}
+		var rrect = getRenderRectangle();
+		this._flow.maxWidth = cast rrect.extent.x;
+		this._flow.maxHeight = cast rrect.extent.y;
+		this._flow.borderWidth = cast rrect.extent.x;
+		this._flow.borderHeight = cast rrect.extent.y;
+		this._flow.borderRight = cast rrect.extent.x;
+		this._flow.borderBottom = cast rrect.extent.y;
+		this._flow.overflow = Hidden;
+		this._flow.multiline = true;
+		if (parent != null) {
+			var props = parent.getProperties(this._flow);
+			props.isAbsolute = true;
+			var off = this.getOffsetFromParent();
+			this._flow.setPosition(off.x, off.y);
+		}
 		for (c in children) {
-			c.render(scene2d);
+			c.render(scene2d, this._flow);
 		}
 		this._skipNextEvent = true;
 	}
 
 	public function update(dt:Float, mouseState:MouseState) {
 		if (!_skipNextEvent) {
-			var hitTestRect = getHitTestRect();
+			var hitTestRect = getHitTestRect(!_manualScroll);
+			// _border.clear();
+			// _border.lineStyle(2, 0x0000FF);
+			// _border.drawRect(hitTestRect.position.x, hitTestRect.position.y, hitTestRect.extent.x, hitTestRect.extent.y);
 			if (hitTestRect.inRect(mouseState.position)) {
 				if (Key.isPressed(Key.MOUSE_LEFT)) {
 					mouseState.button = Key.MOUSE_LEFT;
@@ -210,13 +266,87 @@ class GuiControl {
 		return rect;
 	}
 
-	public function getHitTestRect() {
+	public function getHitTestRect(useScroll:Bool = true) {
 		var thisRect = this.getRenderRectangle();
+		if (useScroll)
+			thisRect.position.y -= thisRect.scroll.y;
 		if (this.parent == null)
 			return thisRect;
 		else {
-			return thisRect.intersect(this.parent.getRenderRectangle());
+			var parRect = this.parent.getRenderRectangle();
+			// parRect.position.y -= parRect.scroll.y;
+			var rr = thisRect.intersect(parRect);
+			if (useScroll) {
+				thisRect.position.y -= thisRect.scroll.y;
+				rr.scroll.y = thisRect.scroll.y;
+			}
+			return rr;
 		}
+	}
+
+	public function getOffsetFromParent() {
+		var rect = new Rect(this.position, this.extent);
+		var parentRect:Rect = null;
+
+		var uiScaleFactor = Settings.uiScale;
+
+		var offset = this.position.clone();
+		offset.x *= uiScaleFactor;
+		offset.y *= uiScaleFactor;
+
+		if (this.parent != null) {
+			parentRect = this.parent.getRenderRectangle();
+			offset = this.position.multiply(uiScaleFactor);
+		}
+
+		var scaleFactor = 1.0 / Window.getInstance().windowToPixelRatio;
+		#if (js || android || ios)
+		scaleFactor = 1 / Settings.zoomRatio; // 768 / js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio; // 0.5; // 768 / js.Browser.window.innerHeight; // js.Browser.window.innerHeight * js.Browser.window.devicePixelRatio / 768;
+		#end
+
+		if (this.horizSizing == HorizSizing.Center) {
+			if (this.parent != null) {
+				offset.x = parentRect.extent.x / 2 - (rect.extent.x * uiScaleFactor) / 2;
+			}
+		}
+		if (this.vertSizing == VertSizing.Center) {
+			if (this.parent != null) {
+				offset.y = parentRect.extent.y / 2 - (rect.extent.y * uiScaleFactor) / 2;
+			}
+		}
+		if (this.horizSizing == HorizSizing.Right) {
+			if (this.parent != null) {
+				offset.x = this.position.x * uiScaleFactor;
+			}
+		}
+		if (this.vertSizing == VertSizing.Bottom) {
+			if (this.parent != null) {
+				offset.y = this.position.y * uiScaleFactor;
+			}
+		}
+		if (this.horizSizing == HorizSizing.Left) {
+			if (this.parent != null) {
+				offset.x = parentRect.extent.x - (parent.extent.x - this.position.x) * uiScaleFactor;
+			}
+		}
+		if (this.vertSizing == VertSizing.Top) {
+			if (this.parent != null) {
+				offset.y = parentRect.extent.y - (parent.extent.y - this.position.y) * uiScaleFactor;
+			}
+		}
+		if (this.horizSizing == HorizSizing.Relative) {
+			if (this.parent != null && parent.extent.x != 0) {
+				offset.x = this.position.x * parentRect.extent.x / parent.extent.x * uiScaleFactor;
+			}
+		}
+		if (this.vertSizing == VertSizing.Relative) {
+			if (this.parent != null && parent.extent.y != 0) {
+				offset.y = this.position.y * parentRect.extent.y / parent.extent.y * uiScaleFactor;
+			}
+		}
+		offset.x = Math.floor(offset.x);
+		offset.y = Math.floor(offset.y);
+		return offset;
 	}
 
 	public function guiToScreen(point:Vector) {
@@ -244,6 +374,7 @@ class GuiControl {
 	}
 
 	public function dispose() {
+		this._flow.remove();
 		for (c in this.children) {
 			c.dispose();
 		}
@@ -283,6 +414,7 @@ class GuiControl {
 	public function onScroll(scrollX:Float, scrollY:Float) {}
 
 	public function onRemove() {
+		this._flow.remove();
 		for (c in this.children) {
 			c.onRemove();
 		}

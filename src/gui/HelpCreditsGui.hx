@@ -75,12 +75,14 @@ class HelpCreditsGui extends GuiImage {
 		manualPageList = new GuiTextListCtrl(arial14, pageheadings);
 		manualPageList.position = new Vector(0, 0);
 		manualPageList.extent = new Vector(176, 352);
+		manualPageList.scrollable = true;
 		scrollCtrl1.addChild(manualPageList);
 
 		var scrollCtrl2 = new GuiScrollCtrl(ResourceLoader.getResource("data/ui/common/philscroll.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		scrollCtrl2.position = new Vector(219, 28);
 		scrollCtrl2.extent = new Vector(386, 342);
+		scrollCtrl2.childrenHandleScroll = true;
 		wnd.addChild(scrollCtrl2);
 
 		var arial14fontdata = ResourceLoader.getFileEntry("data/font/arial.fnt");
@@ -130,8 +132,8 @@ class HelpCreditsGui extends GuiImage {
 		};
 	}
 
-	public override function render(scene2d:Scene) {
-		super.render(scene2d);
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
+		super.render(scene2d, parent);
 
 		manualPageList.onSelectedFunc(0);
 	}

@@ -1,5 +1,6 @@
 package gui;
 
+import hxd.Key;
 import h3d.Vector;
 import src.Settings;
 import gui.GuiControl.MouseState;
@@ -13,10 +14,12 @@ import haxe.Timer;
 
 class GuiScrollCtrl extends GuiControl {
 	public var scrollY:Float = 0;
+	public var enabled:Bool = true;
+	public var childrenHandleScroll:Bool = false;
+	public var scrollSpeed = 500;
 	public var scrollToBottom:Bool = false;
 
 	var maxScrollY:Float;
-	var scrollSpeed = 500.0;
 
 	var scrollBarY:h2d.Object;
 
@@ -44,14 +47,28 @@ class GuiScrollCtrl extends GuiControl {
 
 	static inline var MOMENTUM_DAMPING:Float = 8;
 
+	var _contentYPositions:Map<h2d.Object, Float> = [];
+
+	var deltaY:Float = 0;
+
 	public function new(scrollBar:Tile) {
 		super();
+		this._manualScroll = true;
 		this.scrollTopTile = scrollBar.sub(0, 4, 10, 6);
 		this.scrollBottomTile = scrollBar.sub(0, 13, 10, 6);
 		this.scrollFillTile = scrollBar.sub(0, 11, 10, 1);
 		this.scrollTopPressedTile = scrollBar.sub(11, 4, 10, 6);
 		this.scrollBottomPressedTile = scrollBar.sub(11, 13, 10, 6);
 		this.scrollFillPressedTile = scrollBar.sub(11, 11, 10, 1);
+		for (t in [
+			scrollTopTile,
+			scrollBottomTile,
+			scrollFillTile,
+			scrollTopPressedTile,
+			scrollBottomPressedTile,
+			scrollFillPressedTile
+		])
+			GuiControl.insetTileUV(t);
 		this.scrollBarY = new h2d.Object();
 		scrollTopBmp = new h2d.Bitmap(scrollTopTile);
 		scrollBottomBmp = new h2d.Bitmap(scrollBottomTile);
@@ -62,7 +79,7 @@ class GuiScrollCtrl extends GuiControl {
 		this.scrollBarY.scale(Settings.uiScale);
 		this.clickInteractive = new Interactive(10 * Settings.uiScale, 1);
 		this.clickInteractive.onPush = (e) -> {
-			if (!this.pressed) {
+			if (!this.pressed && enabled) {
 				this.pressed = true;
 				this.dirty = true;
 				this.updateScrollVisual();
@@ -72,12 +89,14 @@ class GuiScrollCtrl extends GuiControl {
 				this.clickInteractive.startCapture(e2 -> {
 					if (e2.kind == ERelease) {
 						this.clickInteractive.stopCapture();
+						deltaY = 0;
 					}
 					if (e2.kind == EMove) {
 						if (prevEY == null) {
 							prevEY = e2.relY;
 						} else {
 							this.scrollY += (e2.relY - prevEY);
+							deltaY = (e2.relY - prevEY);
 							prevEY = e2.relY;
 							this.updateScrollVisual();
 						}
@@ -86,6 +105,7 @@ class GuiScrollCtrl extends GuiControl {
 					if (this.pressed) {
 						this.pressed = false;
 						this.dirty = true;
+						deltaY = 0;
 						this.updateScrollVisual();
 					}
 				});
@@ -108,11 +128,12 @@ class GuiScrollCtrl extends GuiControl {
 
 	public override function getRenderRectangle():Rect {
 		var rrec = super.getRenderRectangle();
-		rrec.scroll.y = scrollY * this.maxScrollY / rrec.extent.y;
+		if (!this.childrenHandleScroll)
+			rrec.scroll.y = scrollY * this.maxScrollY / rrec.extent.y;
 		return rrec;
 	}
 
-	public override function render(scene2d:Scene) {
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		this.dirty = true;
 
 		if (scene2d.contains(scrollBarY))
@@ -134,7 +155,11 @@ class GuiScrollCtrl extends GuiControl {
 
 		updateScrollVisual();
 
-		super.render(scene2d);
+		super.render(scene2d, parent);
+		for (i in 0...this._flow.numChildren) {
+			var ch = this._flow.getChildAt(i);
+			_contentYPositions.set(ch, ch.y);
+		}
 
 		if (scrollToBottom) {
 			updateScrollVisual();
@@ -202,6 +227,17 @@ class GuiScrollCtrl extends GuiControl {
 		for (c in this.children) {
 			c.onScroll(0, scrollY * this.maxScrollY / renderRect.extent.y);
 		}
+
+		if (this._flow != null && !childrenHandleScroll) {
+			var actualDelta = deltaY;
+			if (scrollY != scrollYOld) {
+				actualDelta -= (scrollYOld - scrollY);
+			}
+			for (i in 0...this._flow.numChildren) {
+				var ch = this._flow.getChildAt(i);
+				ch.y -= cast(actualDelta * this.maxScrollY / renderRect.extent.y);
+			}
+		}
 	}
 
 	public override function dispose() {
@@ -235,6 +271,7 @@ class GuiScrollCtrl extends GuiControl {
 		if (Util.isTouchDevice()) {
 			this.pressed = false;
 			this.dirty = true;
+			deltaY = 0;
 			this.updateScrollVisual();
 			this.momentumActive = Math.abs(scrollVelocity) > 0.01;
 			this.lastMoveStamp = 0;
@@ -248,6 +285,7 @@ class GuiScrollCtrl extends GuiControl {
 				var renderRect = this.getRenderRectangle();
 				var scrollExtentY = renderRect.extent.y;
 				var dy = (mouseState.position.y - this.prevMousePos.y) / ((maxScrollY * Settings.uiScale) / scrollExtentY);
+				deltaY = -dy;
 				this.scrollY -= dy;
 				this.prevMousePos = mouseState.position;
 				var now = Timer.stamp();
@@ -274,6 +312,20 @@ class GuiScrollCtrl extends GuiControl {
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {
+		if (Key.isPressed(Key.MOUSE_WHEEL_DOWN) && Math.abs(mouseState.wheel) >= 1) {
+			var renderRect = this.getRenderRectangle();
+			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
+			this.scrollY += scrollBarYSize / 10;
+			deltaY = scrollBarYSize / 10;
+			this.updateScrollVisual();
+		}
+		if (Key.isPressed(Key.MOUSE_WHEEL_UP) && Math.abs(mouseState.wheel) >= 1) {
+			var renderRect = this.getRenderRectangle();
+			var scrollBarYSize = renderRect.extent.y * renderRect.extent.y / (maxScrollY * Settings.uiScale);
+			this.scrollY -= scrollBarYSize / 10;
+			deltaY = -scrollBarYSize / 10;
+			this.updateScrollVisual();
+		}
 		super.update(dt, mouseState);
 
 		if (!pressed && momentumActive) {

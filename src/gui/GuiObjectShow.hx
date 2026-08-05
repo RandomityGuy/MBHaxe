@@ -34,18 +34,32 @@ class GuiObjectShow extends GuiControl {
 		timeState.timeSinceLoad = 0;
 	}
 
-	public override function render(scene2d:Scene) {
+	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		var renderRect = getRenderRectangle();
+
 		init(renderRect);
-		if (scene2d.contains(sceneBitmap))
-			scene2d.removeChild(sceneBitmap);
-		if (visible)
-			scene2d.addChild(sceneBitmap);
-		sceneBitmap.x = renderRect.position.x;
-		sceneBitmap.y = renderRect.position.y;
+
+		if (parent != null) {
+			if (parent.contains(this.sceneBitmap)) {
+				parent.removeChild(this.sceneBitmap);
+			}
+			parent.addChild(this.sceneBitmap);
+			var off = this.getOffsetFromParent();
+			var props = parent.getProperties(this.sceneBitmap);
+			props.isAbsolute = true;
+			this.sceneBitmap.setPosition(off.x, off.y);
+		}
+		super.render(scene2d, parent);
+		var renderRect = this.getRenderRectangle();
+
+		// if (scene2d.contains(sceneBitmap))
+		// 	scene2d.removeChild(sceneBitmap);
+		// if (visible)
+		// 	scene2d.addChild(sceneBitmap);
+		// sceneBitmap.x = renderRect.position.x;
+		// sceneBitmap.y = renderRect.position.y;
 		sceneBitmap.width = renderRect.extent.x;
 		sceneBitmap.height = renderRect.extent.y;
-		super.render(scene2d);
 	}
 
 	public override function update(dt:Float, mouseState:MouseState) {

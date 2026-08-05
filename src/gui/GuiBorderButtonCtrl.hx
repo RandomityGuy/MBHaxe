@@ -76,6 +76,8 @@ class GuiBorderButtonCtrl extends GuiControl {
 			var right = texture.sub(exts.right.x, exts.right.y + i * exts.separation, exts.right.z, exts.right.w);
 			var bottom = texture.sub(exts.bottom.x, exts.bottom.y + i * exts.separation, exts.bottom.z, exts.bottom.w);
 			var fill = texture.sub(exts.fill.x, exts.fill.y + i * exts.separation, exts.fill.z, exts.fill.w);
+			for (t in [tl, tr, bl, br, top, left, right, bottom, fill])
+				GuiControl.insetTileUV(t);
 			tilesubs = tilesubs.concat([tl, tr, bl, br, top, left, right, bottom, fill]);
 		}
 
@@ -88,15 +90,18 @@ class GuiBorderButtonCtrl extends GuiControl {
 		this.tiles = tilesubs;
 	}
 
-	public override function render(scene2d:Scene) {
-		if (scene2d.contains(container))
-			scene2d.removeChild(container);
+	public override function render(scene2d:Scene, ?parent:Flow) {
+		if (parent.contains(container))
+			parent.removeChild(container);
 
-		scene2d.addChild(container);
+		parent.addChild(container);
+		var props = parent.getProperties(container);
+		props.isAbsolute = true;
 
 		var renderRect = this.getRenderRectangle();
+		var offset = this.getOffsetFromParent();
 
-		container.setPosition(Math.floor(renderRect.position.x), Math.floor(renderRect.position.y));
+		container.setPosition(Math.floor(offset.x), Math.floor(offset.y));
 
 		var tl = bmps[0];
 		var tr = bmps[1];
@@ -139,7 +144,7 @@ class GuiBorderButtonCtrl extends GuiControl {
 		fill.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
 		fill.height = Math.floor(renderRect.extent.y - tr.tile.height - bl.tile.height);
 
-		super.render(scene2d);
+		super.render(scene2d, parent);
 	}
 
 	public override function onRemove() {

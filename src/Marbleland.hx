@@ -18,7 +18,7 @@ class Marbleland {
 			parseMissionList(b.toString());
 			Console.log('Loaded platinumquest customs: ${pqMissions.length}');
 		}, (e) -> {
-			Console.log('Error getting custom list from marbleland.');
+			Console.log('Error getting custom list from marbleland. ${e}');
 		});
 	}
 

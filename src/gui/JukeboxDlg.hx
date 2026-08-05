@@ -147,7 +147,7 @@ class JukeboxDlg extends GuiControl {
 		stopBtn.pressedAction = (e) -> {
 			wnd.removeChild(stopBtn);
 			wnd.addChild(playBtn);
-			playBtn.render(MarbleGame.canvas.scene2d);
+			playBtn.render(MarbleGame.canvas.scene2d, @:privateAccess playBtn.parent._flow);
 			playing = false;
 			songStatus.text.text = '<p align="center">${playing ? "Playing" : "Stopped"}</p>';
 			AudioManager.pauseMusic(true);
@@ -156,7 +156,7 @@ class JukeboxDlg extends GuiControl {
 		playBtn.pressedAction = (e) -> {
 			wnd.removeChild(playBtn);
 			wnd.addChild(stopBtn);
-			stopBtn.render(MarbleGame.canvas.scene2d);
+			stopBtn.render(MarbleGame.canvas.scene2d, @:privateAccess stopBtn.parent._flow);
 			playing = true;
 			songStatus.text.text = '<p align="center">${playing ? "Playing" : "Stopped"}</p>';
 			if (AudioManager.currentMusicName != songList[selectedIdx]) {

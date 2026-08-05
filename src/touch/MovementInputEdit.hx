@@ -115,7 +115,7 @@ class MovementInputEdit extends GuiGraphics {
 		state = 0;
 	}
 
-	public override function getHitTestRect() {
+	public override function getHitTestRect(useScroll:Bool = true) {
 		var thisRect = this.getRenderRectangle();
 
 		if (selected) {
