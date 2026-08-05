@@ -77,6 +77,9 @@ class GuiBorderButtonCtrl extends GuiControl {
 			var bottom = texture.sub(exts.bottom.x, exts.bottom.y + i * exts.separation, exts.bottom.z, exts.bottom.w);
 			var fill = texture.sub(exts.fill.x, exts.fill.y + i * exts.separation, exts.fill.z, exts.fill.w);
 			tilesubs = tilesubs.concat([tl, tr, bl, br, top, left, right, bottom, fill]);
+
+			for (t in [tl, tr, bl, br, top, left, right, bottom, fill])
+				GuiControl.insetTileUV(t);
 		}
 
 		this.container = new h2d.Object();

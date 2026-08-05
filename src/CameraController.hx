@@ -631,12 +631,15 @@ class CameraController extends Object {
 		var deltaX = 0.75 * 5 * cameraYawDelta * dt * gamePadSensitivity;
 		var deltaY = 0.75 * 5 * cameraPitchDelta * dt * gamePadSensitivity;
 
+		var cannonAiming = level.marble.activeCannon != null && !level.marble.activeCannon.instant;
+
 		// Center the pitch
 		if (Util.isTouchDevice()) { // Do this only on touch devices
 			if (!Settings.controlsSettings.alwaysFreeLook
 				&& !Key.isDown(Settings.controlsSettings.freelook)
 				&& !MarbleGame.instance.touchInput.cameraInput.pressed
-				&& deltaY == 0.0) {
+				&& deltaY == 0.0
+				&& !cannonAiming) {
 				var rescaledY = deltaY;
 				if (rescaledY <= 0.0)
 					rescaledY = 0.4 - rescaledY * -0.75;
@@ -665,7 +668,6 @@ class CameraController extends Object {
 		nextCameraYaw += deltaX;
 		nextCameraPitch += deltaY;
 
-		var cannonAiming = level.marble.activeCannon != null && !level.marble.activeCannon.instant;
 		if (!cannonAiming)
 			nextCameraPitch = Math.max(-Math.PI / 2 + Math.PI / 4, Math.min(Math.PI / 2 - 0.0001, nextCameraPitch));
 

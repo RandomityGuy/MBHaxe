@@ -53,12 +53,22 @@ class GuiScrollCtrl extends GuiControl {
 
 	public function new(scrollBar:Tile) {
 		super();
+		this._manualScroll = true;
 		this.scrollTopTile = scrollBar.sub(0, 4, 10, 6);
 		this.scrollBottomTile = scrollBar.sub(0, 13, 10, 6);
 		this.scrollFillTile = scrollBar.sub(0, 11, 10, 1);
 		this.scrollTopPressedTile = scrollBar.sub(11, 4, 10, 6);
 		this.scrollBottomPressedTile = scrollBar.sub(11, 13, 10, 6);
 		this.scrollFillPressedTile = scrollBar.sub(11, 11, 10, 1);
+		for (t in [
+			scrollTopTile,
+			scrollBottomTile,
+			scrollFillTile,
+			scrollTopPressedTile,
+			scrollBottomPressedTile,
+			scrollFillPressedTile
+		])
+			GuiControl.insetTileUV(t);
 		this.scrollBarY = new h2d.Object();
 		scrollTopBmp = new h2d.Bitmap(scrollTopTile);
 		scrollBottomBmp = new h2d.Bitmap(scrollBottomTile);

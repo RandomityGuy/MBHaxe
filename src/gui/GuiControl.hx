@@ -63,6 +63,17 @@ class GuiControl {
 	var _manualScroll = false;
 
 	// var _border:h2d.Graphics = null;
+	static inline var UV_INSET = 0.02;
+
+	public static function insetTileUV(t:h2d.Tile) {
+		var tex = t.getTexture();
+		@:privateAccess {
+			t.u += UV_INSET / tex.width;
+			t.v += UV_INSET / tex.height;
+			t.u2 -= UV_INSET / tex.width;
+			t.v2 -= UV_INSET / tex.height;
+		}
+	}
 
 	public function new() {}
 

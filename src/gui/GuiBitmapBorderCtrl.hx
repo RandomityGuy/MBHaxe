@@ -35,6 +35,9 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		var fillTile = Tile.fromColor(fill);
 		tiles = [tl, tr, bl, br, top, left, right, bottom, fillTile];
 
+		for (t in [tl, tr, bl, br, top, left, right, bottom])
+			GuiControl.insetTileUV(t);
+
 		this.container = new h2d.Object();
 		this.bmps = [];
 		for (tile in tiles) {

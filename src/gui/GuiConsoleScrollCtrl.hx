@@ -44,6 +44,12 @@ class GuiConsoleScrollCtrl extends GuiControl {
 	var scrollUpButton:GuiButton;
 	var scrollDownButton:GuiButton;
 
+	var scrollVelocity:Float = 0;
+	var lastMoveStamp:Float = 0;
+	var momentumActive:Bool = false;
+
+	static inline var MOMENTUM_DAMPING:Float = 8;
+
 	public function new(scrollBar:Tile, exts:{
 		top:Vector,
 		bottom:Vector,
@@ -73,6 +79,22 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		var scrollDownPressedTile = scrollBar.sub(exts.downPressed.x, exts.downPressed.y, exts.downPressed.z, exts.downPressed.w);
 		var scrollUpDisabledTile = scrollBar.sub(exts.upDisabled.x, exts.upDisabled.y, exts.upDisabled.z, exts.upDisabled.w);
 		var scrollDownDisabledTile = scrollBar.sub(exts.downDisabled.x, exts.downDisabled.y, exts.downDisabled.z, exts.downDisabled.w);
+		for (t in [
+			scrollTopTile,
+			scrollBottomTile,
+			scrollFillTile,
+			scrollTopPressedTile,
+			scrollBottomPressedTile,
+			scrollFillPressedTile,
+			scrollTrackTile,
+			scrollUpTile,
+			scrollDownTile,
+			scrollUpPressedTile,
+			scrollDownPressedTile,
+			scrollUpDisabledTile,
+			scrollDownDisabledTile
+		])
+			GuiControl.insetTileUV(t);
 		this._manualScroll = true;
 
 		this.heightOff = scrollUpTile.height * 2;
@@ -282,6 +304,9 @@ class GuiConsoleScrollCtrl extends GuiControl {
 			this.dirty = true;
 			this.updateScrollVisual();
 			this.prevMousePos = mouseState.position;
+			this.scrollVelocity = 0;
+			this.momentumActive = false;
+			this.lastMoveStamp = Timer.stamp();
 		}
 	}
 
@@ -290,6 +315,8 @@ class GuiConsoleScrollCtrl extends GuiControl {
 			this.pressed = false;
 			this.dirty = true;
 			this.updateScrollVisual();
+			this.momentumActive = Math.abs(scrollVelocity) > 0.01;
+			this.lastMoveStamp = 0;
 		}
 	}
 
@@ -297,11 +324,50 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		if (Util.isTouchDevice()) {
 			super.onMouseMove(mouseState);
 			if (this.pressed) {
-				var dy = mouseState.position.y - this.prevMousePos.y;
+				var renderRect = this.getRenderRectangle();
+				var scrollExtentY = renderRect.extent.y - this.heightOff * Settings.uiScale;
+				var dy = (mouseState.position.y - this.prevMousePos.y) / ((maxScrollY * Settings.uiScale) / scrollExtentY);
 				this.scrollY -= dy;
 				this.prevMousePos = mouseState.position;
+				var now = Timer.stamp();
+				if (lastMoveStamp > 0) {
+					var dt = now - lastMoveStamp;
+					if (dt > 0)
+						scrollVelocity = -dy / dt;
+				}
+				lastMoveStamp = now;
+				momentumActive = false;
 				this.updateScrollVisual();
 			}
+		}
+	}
+
+	public override function onMouseLeave(mouseState:MouseState) {
+		if (Util.isTouchDevice()) {
+			this.pressed = false;
+			this.dirty = true;
+			this.updateScrollVisual();
+			this.momentumActive = Math.abs(scrollVelocity) > 0.01;
+			this.lastMoveStamp = 0;
+		}
+	}
+
+	public override function update(dt:Float, mouseState:MouseState) {
+		super.update(dt, mouseState);
+
+		if (!pressed && momentumActive) {
+			var damping = Math.exp(-MOMENTUM_DAMPING * dt);
+			scrollVelocity *= damping;
+			if (Math.abs(scrollVelocity) < 0.01) {
+				scrollVelocity = 0;
+				momentumActive = false;
+				return;
+			}
+			var before = scrollY;
+			scrollY += scrollVelocity * dt;
+			updateScrollVisual();
+			if (scrollY == 0 || scrollY == before)
+				momentumActive = false;
 		}
 	}
 
