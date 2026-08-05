@@ -1145,6 +1145,7 @@ class PlayGui {
 		fireballBarText = new h2d.Text(fireballFont, scene2d);
 		fireballBarText.textColor = 0x000000;
 		fireballBarText.visible = false;
+		fireballBarText.textAlign = Center;
 	}
 
 	public function setFireballBarPosition(x:Float, y:Float) {
@@ -1152,7 +1153,7 @@ class PlayGui {
 			return;
 		fireballBarMeterBmp.x = x;
 		fireballBarMeterBmp.y = y;
-		fireballBarText.x = x + 12 * Settings.uiScale;
+		fireballBarText.x = x + 24 * Settings.uiScale;
 		fireballBarText.y = y + 24 * Settings.uiScale;
 		fireballBarFillFlow.setPosition(x, y);
 	}
@@ -1168,8 +1169,8 @@ class PlayGui {
 			var fraction = fireballTotalTime > 0 ? fireballTime / fireballTotalTime : 0;
 
 			fireballBarFillFlow.maxWidth = Std.int((50 + 83 * fraction) * Settings.uiScale);
-			var fmt = '${Math.fround(fireballTime * 10) / 10}';
-			if (fmt.indexOf('.') == -1)
+			var fmt = fireballTime < 100 ? '${Math.fround(fireballTime * 10) / 10}' : '${Math.fround(fireballTime)}';
+			if (fmt.indexOf('.') == -1 && fireballTime < 100)
 				fmt += ".0"; // add decimal
 			fireballBarText.text = fmt;
 		} else {
@@ -1768,8 +1769,9 @@ class PlayGui {
 
 		var textHeight = this.helpTextForeground.text.textHeight / Settings.uiScale;
 		this.helpTextBorder.extent.y = 80;
-		if (textHeight > 44)
+		if (textHeight > 44) {
 			this.helpTextBorder.extent.y += textHeight - 44;
+		}
 		// helpTextBackground.render(scene2d);
 		// helpTextForeground.x = scene2d.width / 2 - helpTextForeground.textWidth / 2;
 		// helpTextForeground.y = scene2d.height * 0.45;
@@ -2006,7 +2008,13 @@ class PlayGui {
 				pct = 1 - (timeState.timeSinceLoad - (this.helpTextStartTime + this.helpTextDuration - 0.48)) / 0.48;
 			}
 
-			this.helpTextContainer.position = new Vector(120, 620 - pct * (95 + 20));
+			var off = 0.0;
+			var textHeight = this.helpTextForeground.text.textHeight / Settings.uiScale;
+			if (textHeight > 44) {
+				off += textHeight - 44;
+			}
+
+			this.helpTextContainer.position = new Vector(120, 620 - off - pct * (95 + 20));
 			this.helpTextContainer.render(scene2d, @:privateAccess playGuiCtrl._flow);
 			@:privateAccess helpTextContainer._flow.overflow = Expand;
 		}

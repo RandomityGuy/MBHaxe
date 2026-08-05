@@ -10,6 +10,7 @@ import h2d.Tile;
 import h2d.Graphics;
 import src.MarbleGame;
 import src.Util;
+import haxe.Timer;
 
 class GuiConsoleScrollCtrl extends GuiControl {
 	public var scrollY:Float = 0;

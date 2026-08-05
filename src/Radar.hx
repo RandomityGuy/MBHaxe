@@ -317,6 +317,8 @@ class Radar {
 				if (item.obj is PowerUp) {
 					var p:PowerUp = cast item.obj;
 					radarIndex = p.radarIndex;
+					if (radarIndex == 0)
+						continue; // no-icon :/
 				} else {
 					continue; // lets just not show
 				}
