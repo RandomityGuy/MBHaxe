@@ -1252,7 +1252,7 @@ class Marble extends GameObject {
 				this.cubemapRenderer = new CubemapRenderer(level.scene, level.sky, !this.controllable && level != null);
 
 				if (marbleShader == null || marbleShader == "Default" || marbleShader == "" || !isUltra) { // Use this shit everywhere except ultra
-					mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
+					mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap, mat.texture));
 				} else {
 					// Generate tangents for next shaders, only for Ultra
 					for (node in marbleDts.graphNodes) {

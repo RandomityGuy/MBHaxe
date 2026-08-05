@@ -376,7 +376,14 @@ class MarbleWorld extends Scheduler {
 					// Override the end pad element. We do this because only the last finish pad element will actually do anything.
 					if (element._type == MissionElementType.StaticShape) {
 						var so:MissionElementStaticShape = cast element;
-						if (["endpad", "endpad_mbg", "endpad_mbp", "endpad_pq"].contains(so.datablock.toLowerCase()))
+						if ([
+							"endpad",
+							"endpad_mbg",
+							"endpad_mbp",
+							"endpad_pq",
+							"endpad_pq_construction",
+							"endpad_mbu"
+						].contains(so.datablock.toLowerCase()))
 							this.endPadElement = so;
 					}
 
