@@ -1,0 +1,659 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function LB_PQ_ToTheFinishOld_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "To the Finish!";
+		type = "dc";
+		level = "44";
+		desc = "Jump the gaps and ride the platforms to victory.";
+		artist = "Matan";
+		music = "Reanimation.ogg";
+		game = "PlatinumQuest";
+		Time = "30000";
+		platinumTime = "15000";
+		ultimateTime = "9000";
+		awesomeTime = "3500";
+		generalHint = "This level was originally the first tutorial level in PlatinumQuest. What was Matan thinking?";
+		ultimateHint = "You don\'t even need to worry about difficulty here, just grab the first Time Travel and either elevator will get you to the finish in time.";
+		awesomeHint = "At first it looks impossible, but you can edge hit all the way to the platform next to the finish!";
+		eggHint = "Enjoying the shade from the tree?";
+		CustomRadarRule = $Radar::Flags::EndPad;
+		alarmStartTime = "15";
+		easterEgg = "1";
+		gems = "0";
+		interior0 = $usermods @ "/data/interiors_pq/ToTheFinish.dif";
+		interiors = "1";
+		maxScore = "0";
+		trivia = "Fun Fact:\nMatan originally had colmesh as the floor, so players would never be able to get Out of Bounds in this level.\nDouble fun fact:\nThe original 10 tutorials, which Matan wanted to create, were all supposed to have this 'cage' as its scenery-theme. Good thing that didn't happen.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+//function unlock_MissionNameHere(%mission) { //%mission is the MissionInfo
+//	return true; //True if the mission is unlocked
+//}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE TotheFinish
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function LB_PQ_ToTheFinishOld_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(SceneryGroup) {
+
+		new StaticShape() {
+			position = "-31 -20 10.8274";
+			rotation = "0 0 1 56.2501";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Tree02";
+		};
+		new StaticShape() {
+			position = "-30.75 -3.75 5.21968";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TreeBare01";
+		};
+		new StaticShape() {
+			position = "-28.5 -0.5 5.50076";
+			rotation = "0 0 1 22.5001";
+			scale = "1 1 1";
+			dataBlock = "Scarce_Tulips";
+				skin = "yellow";
+		};
+		new StaticShape() {
+			position = "-29.2446 -6.14297 5.50076";
+			rotation = "0 0 1 22.5001";
+			scale = "1 1 1";
+			dataBlock = "Scarce_Tulips";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-33.5385 -1.35437 5.50076";
+			rotation = "0 0 1 56.2502";
+			scale = "1 1 1";
+			dataBlock = "Scarce_Tulips";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "-26.95 -20.75 10.9535";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-28 -17.85 10.95";
+			rotation = "0 0 -1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-32.5 -17.85 10.95";
+			rotation = "0 0 -1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-32 -7.25 11.65";
+			rotation = "1 0 0 0";
+			scale = "0.4 0.4 0.4";
+			dataBlock = "Rock04";
+				skin = "reddish";
+		};
+		new StaticShape() {
+			position = "16.803 -20.7645 5.5568";
+			rotation = "0 0 -1 33.7501";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "16.4603 -19.007 5.5568";
+			rotation = "0 0 -1 112.5";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "red";
+		};
+		new StaticShape() {
+			position = "15 -19.75 5.5568";
+			rotation = "0 0 1 67.5002";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "yellow";
+		};
+		new StaticShape() {
+			position = "-9 12.25 21";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-4.75 12.25 21";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-2.45 18.25 21.1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-2.45 13.5 21.1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-6 15.75 21.3919";
+			rotation = "0 0 1 56.2501";
+			scale = "1 1 1";
+			dataBlock = "Tree03";
+		};
+		new StaticShape() {
+			position = "-17 0 21";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-13.25 -1.38581e-005 21";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "-29.84 0.26 11.5";
+			rotation = "0 0 1 90.0002";
+			scale = "0.4 0.4 0.4";
+			dataBlock = "Rock02";
+				skin = "gray";
+		};
+		new StaticShape() {
+			position = "15.2542 -18.4316 17.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "Fence_3TilesLength";
+		};
+		new StaticShape() {
+			position = "21.45 -18.5 17.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "FencePole";
+		};
+		new StaticShape() {
+			position = "15.25 -21.75 17.05";
+			rotation = "0 0 -1 90.0002";
+			scale = "0.8 1 1";
+			dataBlock = "Fence_2TilesLength";
+		};
+		new StaticShape() {
+			position = "17.3004 -20.1152 17.0008";
+			rotation = "0 0 1 45.0001";
+			scale = "1 1 1";
+			dataBlock = "Tulip";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "15.45 17.95 17";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "19.2 17.95 17";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "VinesWideLong";
+		};
+		new StaticShape() {
+			position = "18.75 5.5 16.0008";
+			rotation = "0 0 -1 67.5002";
+			scale = "1 1 1";
+			dataBlock = "Scarce_tulips_3tiles";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "16.75 8.25 16.0008";
+			rotation = "0 0 1 67.5002";
+			scale = "1 1 1";
+			dataBlock = "Scarce_tulips_3tiles";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "18.25 19.5 16.892";
+			rotation = "0 0 -1 67.5002";
+			scale = "1 1 1";
+			dataBlock = "Tree01";
+		};
+		new StaticShape() {
+			position = "15.75 20 16.4677";
+			rotation = "0 0 1 67.4993";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Rock02";
+				skin = "sandy";
+		};
+		new StaticShape() {
+			position = "21.0186 19.5007 16.7624";
+			rotation = "1 0 0 0";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Rock03";
+				skin = "thisiscoal";
+		};
+		new StaticShape() {
+			position = "-11.75 1 21";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "grass";
+		};
+		new StaticShape() {
+			position = "-13.9055 0.905514 21";
+			rotation = "0 0 1 45.0001";
+			scale = "1 1 1";
+			dataBlock = "grass";
+		};
+		new StaticShape() {
+			position = "-17.081 0.912618 21";
+			rotation = "0 0 1 123.75";
+			scale = "1 1 1";
+			dataBlock = "grass";
+		};
+		new StaticShape() {
+			position = "-15.6588 0.896361 21";
+			rotation = "0 0 -1 11.2501";
+			scale = "1 1 1";
+			dataBlock = "grass";
+		};
+	};
+	new TSStatic() {
+		position = "-25.5 2.25 -1.6";
+		rotation = "1 0 0 0";
+		scale = "15 0.25 12";
+		shapeName = "~/data/shapes/colmesh.dts";
+	};
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+			fogVolume2 = "-1 1.07208e-014 8.756e-014";
+			fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+			materialList = "~/data/skies_pq/Blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+	};
+	new TSStatic() {
+		position = "-7.2 -22.25 -1.6";
+		rotation = "1 0 0 0";
+		scale = "30 0.25 12";
+		shapeName = "~/data/shapes/colmesh.dts";
+	};
+	new Sun() {
+		direction = "0.638261 0.459006 -0.61801";
+		color = "1.400000 1.200000 0.400000 1.000000";
+		ambient = "0.300000 0.300000 0.400000 1.000000";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "19.3404 -16.755 32.7368";
+			rotation = "0.670226 0.3468 -0.656146 76.5187";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3400";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "10.6845 -19.4535 26.6848";
+			rotation = "0.727215 0.276081 -0.628441 62.2725";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "2.54888 -20.0681 22.3387";
+			rotation = "0.843916 0.19602 -0.499382 49.8885";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-3.98738 29.299 18.9858";
+			rotation = "0.0564051 -0.332155 0.941537 161.832";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "5.5139 30.9128 18.9858";
+			rotation = "-0.00565071 -0.266103 0.963928 182.345";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "2600";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "17.5807 26.6992 18.9858";
+			rotation = "-0.0675386 -0.212385 0.974849 214.447";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "23.6564 19.8317 18.4625";
+			rotation = "-0.0993431 -0.223919 0.969531 226.549";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new TSStatic() {
+		position = "-35.75 -10.2 -1.6";
+		rotation = "1 0 0 0";
+		scale = "0.25 15 12";
+		shapeName = "~/data/shapes/colmesh.dts";
+	};
+	new TSStatic() {
+		position = "-10.25 17 -1.6";
+		rotation = "1 0 0 0";
+		scale = "0.25 15 12";
+		shapeName = "~/data/shapes/colmesh.dts";
+	};
+	new InteriorInstance() {
+		position = "0 0 0";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		interiorFile = "~/data/interiors_pq/ToTheFinish.dif";
+		showTerrainInside = "0";
+	};
+	new TSStatic() {
+		position = "6 22.25 -1.4";
+		rotation = "1 0 0 0";
+		scale = "17 0.25 12";
+		shapeName = "~/data/shapes/colmesh.dts";
+	};
+	new TSStatic() {
+		position = "-4.6 0 21";
+		rotation = "1 0 0 0";
+		scale = "35 30 0.25";
+		shapeName = "~/data/shapes/colmesh.dts";
+	};
+	new StaticShape() {
+		position = "19.5 -19.5 5.29429";
+		rotation = "0 0 1 180";
+		scale = "1 1 1";
+		dataBlock = "Rock01";
+			skin = "white";
+	};
+	new StaticShape(StartPoint) {
+		position = "-3 3 0.5";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new StaticShape(EndPoint) {
+		position = "0.25 -3.5 15.5";
+		rotation = "0 0 1 45";
+		scale = "1 1 1";
+		dataBlock = "EndPad_PQ";
+	};
+	new Item() {
+		position = "5 19 3.75";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noRespawn = "0";
+			timeBonus = "5000";
+	};
+	new Item() {
+		position = "-20 -3.5 14";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "TimeTravelItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noRespawn = "0";
+			timeBonus = "5000";
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "-1 -3.5 5.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "4000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-27.5 -3.5 12.5";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "1250";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-27.5 -3.5 12.5";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "4000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-1 -3.5 5.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "3";
+				msToNext = "1500";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-1 -3.5 5.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "4";
+				msToNext = "1";
+				smoothingType = "Linear";
+			};
+		};
+		new PathedInterior(MustChange) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/ToTheFinish.dif";
+			interiorIndex = "0";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "-1";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new SimGroup(MustChange_g) {
+
+		new Path() {
+
+			new Marker() {
+				position = "0.25 -18 13.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "0";
+				msToNext = "3000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-1 -17 4.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "1";
+				msToNext = "1250";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "-1 -17 4.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "2";
+				msToNext = "3000";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "0.25 -18 13.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "3";
+				msToNext = "1500";
+				smoothingType = "Accelerate";
+			};
+			new Marker() {
+				position = "0.25 -18 13.75";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				seqNum = "4";
+				msToNext = "1";
+				smoothingType = "Linear";
+			};
+		};
+		new PathedInterior(MustChange) {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "PathedDefault";
+			interiorResource = $usermods @ "/data/interiors_pq/ToTheFinish.dif";
+			interiorIndex = "1";
+			basePosition = "0 0 0";
+			baseRotation = "1 0 0 0";
+			baseScale = "1 1 1";
+				initialScale = "1 1 1";
+				initialTargetPosition = "-1";
+				initialTransform = "0 0 0 1 0 0 0";
+		};
+	};
+	new Trigger(Bounds) {
+		position = "-40.3063 27.3618 -1.8";
+		rotation = "1 0 0 0";
+		scale = "65 50 30";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new TSStatic() {
+		position = "22.223 0.1663 -2.57996";
+		rotation = "1 0 0 0";
+		scale = "0.25 23 12";
+		shapeName = "~/data/shapes/colmesh.dts";
+	};
+	new StaticShape() {
+		position = "-0.0753343 -3.51111 19";
+		rotation = "0 0 1 45.0001";
+		scale = "1 1 1";
+		dataBlock = "NatureFinishlinesignLight";
+			skin = "Lime";
+	};
+	new Item() {
+		position = "18.3 21.25 16.9111";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "NestEgg_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noRespawn = "0";
+			skin = "red";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---

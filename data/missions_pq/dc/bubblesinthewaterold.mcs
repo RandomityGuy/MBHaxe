@@ -1,0 +1,1558 @@
+//--- INFO BEGIN ---
+//Mission information for the level select. Generated from the MissionInfo object except with extra goodies.
+function LB_PQ_BubblesInTheWaterOld_GetMissionInfo() {
+	return
+new ScriptObject() {
+		name = "Bubbles in the Water";
+		type = "dc";
+		level = "7";
+		desc = "Learn how to swim in the water, and also about the Bubble powerup.";
+		artist = "Matan";
+		music = "Chilled.ogg";
+		game = "PlatinumQuest";
+		platinumTime = "60000";
+		ultimateTime = "30000";
+		awesomeTime = "13000";
+	 	modification = "PlatinumQuest";
+		generalHint = "The original tutorial level before Into the Deep. Matan abandoned it after it didn't do its job well, and he didn't want to fix that giant water physics trigger. Like seriously... get a bubble and go out of the level.";
+		ultimateHint = "Ensure you collect all Time Travels, including out of reach ones.";
+		awesomeHint = "Matan please stop holding up Level Packs 60-69!";
+		eggHint = "Push the button!";
+		CustomRadarRule = $Radar::Flags::Gems | $Radar::Flags::EndPad;
+		easterEgg = "1";
+		gems = "8";
+		interior0 = $usermods @ "/data/lbinteriors_custom/pq/BubblesInTheWater.dif";
+		interiors = "1";
+		maxScore = "8";
+		trivia = "There used to be 5 gems but Matan is being a jerk now.";
+};
+}
+//--- INFO END ---
+//--- UNLOCK BEGIN ---
+//In the event that you want this mission to be locked by a function, here's
+// where you should put that. Just uncomment this function and fill it out:
+//function unlock_MissionNameHere(%mission) { //%mission is the MissionInfo
+//	return true; //True if the mission is unlocked
+//}
+//--- UNLOCK END ---
+//Don't continue loading if this just wants the mission info
+if ($loadingMissionInfo) return;
+//--- CLIENT SCRIPTS BEGIN ---
+//Put any scripts that will be loaded on all clients (in MP / SP) here.
+// Note: these will be loaded by dedicated servers too, so be sure to test for
+// $Server::Dedicated before creating any GUI.
+
+//--- CLIENT SCRIPTS END ---
+//Don't continue loading if this is a client (non-server)
+if (!$Server::Hosting || $Server::_Dedicated) return;
+//--- SERVER PREMISSION SCRIPTS BEGIN ---
+//DO NOT DELETE THIS LINE BubblesintheWater
+// TODO:
+//
+// REMEMBER THAT LAST BUBBLE POWERUP MUST BE ACTIVATED ALWAYS! activeAlways field ?
+// Make a "killPowerup" trigger that kills any active powerups immediately & kills all inventory powerups as well
+// 	KillActivePowerup and killInventoryPowerup fields
+//	Maybe have like a SPECIFIC powerup, say killInventoryPowerup = 2; but won't kill 1,3-9 etc. if they're in inventory instead of 2.
+// WavyGlass1.dts unlocks that marble IF reaching UnlockTrigger (which is 2 2 2 and is around that marble.
+// Get seaweed.dts shapes and spam them around
+
+// Matan:
+// if macos display current mission stuff
+// if not, display different skybox and show the lightfx
+// i thought of a blackish-starrish-coolish-nightish skybox
+// Brian:
+// ooh godo idea
+// Matan:
+// and then have blue-ish glow-ish lights inside the water
+// like you see in pools in the night
+// Brian:
+// I AGREEASE
+
+//--- SERVER PREMISSION SCRIPTS END ---
+//--- MISSION BEGIN ---
+function LB_PQ_BubblesInTheWaterOld_LoadMission() {
+	return
+new SimGroup(MissionGroup) {
+
+	new SimGroup(MissionData) {
+
+		new MissionArea(MissionArea) {
+			area = "-360 -648 720 1296";
+			flightCeiling = "300";
+			flightCeilingRange = "20";
+				locked = "true";
+		};
+		new Sky(Sky) {
+			position = "336 136 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			cloudHeightPer[0] = "0";
+			cloudHeightPer[1] = "0";
+			cloudHeightPer[2] = "0";
+			cloudSpeed1 = "0.0001";
+			cloudSpeed2 = "0.0002";
+			cloudSpeed3 = "0.0003";
+			visibleDistance = "500";
+			useSkyTextures = "1";
+			renderBottomTexture = "1";
+			SkySolidColor = "0.600000 0.600000 0.600000 1.000000";
+			fogDistance = "300";
+			fogColor = "0.600000 0.600000 0.600000 1.000000";
+			fogVolume1 = "-1 7.45949e-031 1.3684e-038";
+			fogVolume2 = "-1 1.07208e-014 8.756e-014";
+			fogVolume3 = "-1 5.1012e-010 2.05098e-008";
+			materialList = "~/data/skies_pq/Blender3/blender3.dml";
+			windVelocity = "1 0 0";
+			windEffectPrecipitation = "0";
+			noRenderBans = "1";
+			fogVolumeColor1 = "128.000000 128.000000 128.000000 0.000000";
+			fogVolumeColor2 = "128.000000 128.000000 128.000000 0.000004";
+			fogVolumeColor3 = "128.000000 128.000000 128.000000 14435505.000000";
+		};
+		new Sun(Sun1) {
+			direction = "0.638261 0.459006 -0.61801";
+			color = "1.400000 1.200000 0.400000 1.000000";
+			ambient = "0.300000 0.300000 0.400000 1.000000";
+		};
+	};
+	new SimGroup(HelpBubbleGroup) {
+
+		new StaticShape() {
+			position = "-94 60 1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "5000";
+				text = " ";
+				triggerRadius = "0";
+		};
+		new StaticShape() {
+			position = "-88 56 -2.2";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "5000";
+				text = " Use the Super Speed powerup to gain a quick boost and traverse the water faster.";
+				triggerRadius = "3";
+		};
+		new StaticShape() {
+			position = "-55 60.5 -1.25";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "1";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "5000";
+				text = " ";
+				triggerRadius = "0";
+		};
+		new StaticShape() {
+			position = "-24 61 -0.75";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "1";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "5000";
+				text = " ";
+				triggerRadius = "0";
+		};
+		new StaticShape() {
+			position = "-2 46 -1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "1";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "5000";
+				text = " ";
+				triggerRadius = "0";
+		};
+		new StaticShape() {
+			position = "2 -38 2";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "HelpBubble";
+				disable = "0";
+				displayonce = "0";
+				extended = "0";
+				persistTime = "5000";
+				text = " This bubble powerup, if used, is always active while you\'re in this area.";
+				triggerRadius = "3";
+		};
+	};
+	new SimGroup(InteriorGroup) {
+
+		new InteriorInstance() {
+			position = "0 0 0";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			interiorFile = "~/data/interiors_pq/BubblesInTheWater.dif";
+			showTerrainInside = "0";
+		};
+	};
+	new SimGroup(SceneryGroup) {
+
+		new StaticShape() {
+			position = "-13 71.3 0";
+			rotation = "1 0 0 0";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "Fern01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-11.0313 72.8101 0";
+			rotation = "0 0 -1 32.6586";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "green";
+		};
+		new StaticShape() {
+			position = "-8.90704 71.6812 0";
+			rotation = "0 0 -1 114.019";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "navy";
+		};
+		new StaticShape() {
+			position = "-5.6 71.65 0";
+			rotation = "0 0 1 99.6947";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "turquoise";
+		};
+		new StaticShape() {
+			position = "-0.347779 72.2402 0";
+			rotation = "0 0 -1 111.154";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "pink";
+		};
+		new StaticShape() {
+			position = "0.34406 72.5585 0";
+			rotation = "0 0 1 144.958";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "0.0989197 71.6864 0";
+			rotation = "0 0 1 140.192";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "-7.25 71.84 0.012";
+			rotation = "0 0 -1 35";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-1.55 72.4 0.012";
+			rotation = "0 0 -1 117.506";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-3.9 72.3 0.012";
+			rotation = "0 0 1 192.074";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "1.83 72.38 0.012";
+			rotation = "0 0 1 107.849";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "0.6 70.3 0.012";
+			rotation = "0 0 1 148.529";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "2.42 68.7 0.012";
+			rotation = "0 0 1 148.529";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-9.67396 72.8709 0";
+			rotation = "0 0 1 168.632";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "red";
+		};
+		new StaticShape() {
+			position = "3.66 70.27 0.012";
+			rotation = "0 0 1 24.77";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "2.3071 70.0719 0";
+			rotation = "0 0 -1 74.0943";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "red";
+		};
+		new StaticShape() {
+			position = "1.82 71 0";
+			rotation = "0 0 1 25.6";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "red";
+		};
+		new StaticShape() {
+			position = "5 67.75 0.018";
+			rotation = "0 0 1 8.72717";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "5.18 66.57 0.006";
+			rotation = "0 0 1 107.849";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "3.64 67.5 0.006";
+			rotation = "0 0 1 50.5532";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "6 68.45 0.006";
+			rotation = "0 0 1 57.4287";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "5.48 69.9 0";
+			rotation = "0 0 1 117.456";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "green";
+		};
+		new StaticShape() {
+			position = "6 71 1.39165e-010";
+			rotation = "0 0 1 14.8965";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "blue";
+		};
+		new StaticShape() {
+			position = "4.76092 70.8923 0";
+			rotation = "0 0 1 49.847";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "yellow";
+		};
+		new StaticShape() {
+			position = "6 72.18 0";
+			rotation = "0 0 1 49.847";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "green";
+		};
+		new StaticShape() {
+			position = "4.8 71.9 0";
+			rotation = "0 0 -1 17.762";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "turquoise";
+		};
+		new StaticShape() {
+			position = "3.65 72.35 0";
+			rotation = "0 0 1 216.187";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "navy";
+		};
+		new StaticShape() {
+			position = "6.6 70 0";
+			rotation = "0 0 1 78.6774";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "pink";
+		};
+		new StaticShape() {
+			position = "6.55 65.7 0.006";
+			rotation = "0 0 -1 39.4011";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "6.25 40.87 0.015";
+			rotation = "0 0 1 201.864";
+			scale = "1.25 1.25 1.25";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "6.46 42.8 0.012";
+			rotation = "0 0 1 33.9874";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "6.8 44.28 0.009";
+			rotation = "0 0 1 208.349";
+			scale = "0.75 0.75 0.75";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "6.9 64.25 0";
+			rotation = "0 0 -1 99.8774";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "red";
+		};
+		new StaticShape() {
+			position = "6.86 62.5 0";
+			rotation = "0 0 1 84.7972";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "7 60.5 0";
+			rotation = "0 0 1 149.542";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "yellow";
+		};
+		new StaticShape() {
+			position = "6.96 58.4 0";
+			rotation = "0 0 1 97.4022";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "green";
+		};
+		new StaticShape() {
+			position = "7.15 56 0";
+			rotation = "0 0 -1 64.927";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "turquoise";
+		};
+		new StaticShape() {
+			position = "6.93 53.6 0";
+			rotation = "0 0 1 96.2563";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "blue";
+		};
+		new StaticShape() {
+			position = "7.15 50.95 0";
+			rotation = "0 0 -1 112.483";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "navy";
+		};
+		new StaticShape() {
+			position = "7.15 48.6 0";
+			rotation = "0 0 1 210.848";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "7.1 46.5 0";
+			rotation = "0 0 1 155.844";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "pink";
+		};
+		new StaticShape() {
+			position = "-13.35 50.18 0";
+			rotation = "0 0 1 232.803";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "blue";
+		};
+		new StaticShape() {
+			position = "-12.95 48.68 0.012";
+			rotation = "0 0 -1 36.6693";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-13.22 47.22 0";
+			rotation = "0 0 1 122.795";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "-11.7 47.87 0";
+			rotation = "0 0 -1 30.7577";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "yellow";
+		};
+		new StaticShape() {
+			position = "-12 46.48 0.012";
+			rotation = "0 0 1 195.561";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-10.83 47.2 0.006";
+			rotation = "0 0 1 54.6134";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-13.45 45.9 0.006";
+			rotation = "0 0 -1 33.0491";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-10.4643 42.4597 0.024";
+			rotation = "0 0 1 118.212";
+			scale = "2 2 2";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "-10 44.2 0.006";
+			rotation = "0 0 -1 61.6973";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-11.15 40.6 0";
+			rotation = "0 0 1 231.839";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "red";
+		};
+		new StaticShape() {
+			position = "-13 41 0";
+			rotation = "0 0 1 152.198";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "navy";
+		};
+		new StaticShape() {
+			position = "-12.9 44.6 0";
+			rotation = "0 0 1 104.643";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "turquoise";
+		};
+		new StaticShape() {
+			position = "-9.88 45.7 0";
+			rotation = "0 0 -1 22.5536";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "pink";
+		};
+		new StaticShape() {
+			position = "-11.53 44.82 0";
+			rotation = "0 0 1 25.5748";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-13.06 42.97 0";
+			rotation = "0 0 1 106.362";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "blue";
+		};
+		new StaticShape() {
+			position = "-8.42 41.16 0";
+			rotation = "0 0 -1 71.2548";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "green";
+		};
+		new StaticShape() {
+			position = "-8.2 42.9 0";
+			rotation = "0 0 1 137.484";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "purple";
+		};
+		new StaticShape() {
+			position = "-8.62 44.75 0";
+			rotation = "0 0 1 55.551";
+			scale = "1 1 1";
+			dataBlock = "Flowers";
+				skin = "navy";
+		};
+		new StaticShape() {
+			position = "-6.96 41.41 0.012";
+			rotation = "0 0 1 3.61983";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-46.1 53.17 0.017";
+			rotation = "0 0 -1 64.7442";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-45.93 68.45 0.017";
+			rotation = "0 0 1 216.761";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-24.42 53.45 0.017";
+			rotation = "0 0 1 85.5536";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-23.92 69.36 0.017";
+			rotation = "0 0 1 166.341";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-23.3 71.83 0.017";
+			rotation = "0 0 -1 14.1407";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "-18.5 72.04 0.017";
+			rotation = "0 0 1 137.693";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-10.6 -29.91 0.017";
+			rotation = "0 0 1 76.9596";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-8.6 -29.6 0.012";
+			rotation = "0 0 -1 3.25405";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "9.751 -29.9 0.017";
+			rotation = "0 0 1 40.2903";
+			scale = "1.5 1.5 1.5";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "11 -61 0.012";
+			rotation = "0 0 -1 31.9023";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "11.65 -59.75 0.006";
+			rotation = "0 0 1 186.004";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "dark";
+		};
+		new StaticShape() {
+			position = "-10.6 -60.9 0.012";
+			rotation = "0 0 1 33.9878";
+			scale = "1 1 1";
+			dataBlock = "Plant01";
+				skin = "base";
+		};
+		new StaticShape() {
+			position = "-11.57 -59.67 0.006";
+			rotation = "0 0 -1 107.533";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-11.93 -60.84 0.006";
+			rotation = "0 0 1 102.925";
+			scale = "0.5 0.5 0.5";
+			dataBlock = "Plant01";
+				skin = "light";
+		};
+		new StaticShape() {
+			position = "-101.089 55.0232 -2.25";
+			rotation = "1 0 0 0";
+			scale = "0.6 0.6 0.6";
+			dataBlock = "Sandhill03";
+		};
+		new StaticShape() {
+			position = "-68.795 64.9031 -8.9";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "Sandhill05";
+		};
+		new StaticShape() {
+			position = "-52.8779 66.4627 -4.0768";
+			rotation = "1 0 0 0";
+			scale = "0.6 0.6 0.75";
+			dataBlock = "Sandhill01";
+		};
+		new StaticShape() {
+			position = "-53.1209 62.3692 -4.18";
+			rotation = "0 0 1 90";
+			scale = "0.6 0.6 0.75";
+			dataBlock = "Sandhill02";
+		};
+		new StaticShape() {
+			position = "-53.8886 55.3065 -4.7";
+			rotation = "1 0 0 0";
+			scale = "0.6 0.6 0.75";
+			dataBlock = "Sandhill04";
+		};
+		new StaticShape() {
+			position = "-15.0846 65.5648 -4.68624";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.25";
+			dataBlock = "Sandhill03";
+		};
+		new StaticShape() {
+			position = "-10.1012 56.779 -5.12632";
+			rotation = "1 0 0 0";
+			scale = "1 1 1.25";
+			dataBlock = "Sandhill05";
+		};
+		new StaticShape() {
+			position = "3.4688 62.2751 -4.36294";
+			rotation = "0 0 -1 90.5273";
+			scale = "0.5 0.5 0.6";
+			dataBlock = "Sandhill04";
+		};
+		new StaticShape() {
+			position = "2.55782 48.8656 -4.0768";
+			rotation = "0 0 -1 90";
+			scale = "0.65 0.65 1";
+			dataBlock = "Sandhill01";
+		};
+		new StaticShape() {
+			position = "-4.54 49.75 -4.25727";
+			rotation = "0 0 1 90";
+			scale = "0.7 0.7 1";
+			dataBlock = "Sandhill02";
+		};
+		new StaticShape() {
+			position = "-8.29707 -35.7632 -2.02";
+			rotation = "1 0 0 0";
+			scale = "0.4 0.4 0.6";
+			dataBlock = "Sandhill01";
+		};
+		new StaticShape() {
+			position = "-0.3376 -33 -3";
+			rotation = "1 0 0 0";
+			scale = "1.15 0.75 1.15";
+			dataBlock = "Sandhill05";
+		};
+		new StaticShape() {
+			position = "-12.2 70.75 0.04";
+			rotation = "0 0 1 180";
+			scale = "0.8 0.8 0.8";
+			dataBlock = "Fence_1TilesLength";
+		};
+		new StaticShape() {
+			position = "-12.2 72.1 0.04";
+			rotation = "0 0 1 90.0002";
+			scale = "0.7 0.8 0.8";
+			dataBlock = "Fence_1TilesLength";
+		};
+		new StaticShape() {
+			position = "-13.8 72.05 0.04";
+			rotation = "1 0 0 0";
+			scale = "0.8 0.8 0.8";
+			dataBlock = "Fence_1TilesLength";
+		};
+		new StaticShape() {
+			position = "-13.8 70.7 0.04";
+			rotation = "0 0 -1 90.0002";
+			scale = "0.7 0.8 0.8";
+			dataBlock = "Fence_1TilesLength";
+		};
+		new StaticShape() {
+			position = "-4.7 39.6 0.05";
+			rotation = "0 0 1 180";
+			scale = "1 1 1";
+			dataBlock = "Fence_4TilesLength";
+		};
+		new StaticShape() {
+			position = "-8.4 73.5 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "Fence_4TilesLength";
+		};
+		new StaticShape() {
+			position = "-0.4 73.5 0.05";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "Fence_4TilesLength";
+		};
+		new StaticShape() {
+			position = "7.6 73.5 0.05";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "Fence_1TilesLength";
+		};
+		new StaticShape() {
+			position = "7.6 71.5 0.05";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "Fence_4TilesLength";
+		};
+		new StaticShape() {
+			position = "7.6 63.5 0.05";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "Fence_4TilesLength";
+		};
+		new StaticShape() {
+			position = "7.6 55.5 0.05";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "Fence_4TilesLength";
+		};
+		new StaticShape() {
+			position = "-11.8 73.5 0.05";
+			rotation = "1 0 0 0";
+			scale = "0.8 1 1";
+			dataBlock = "Fence_2TilesLength";
+		};
+		new StaticShape() {
+			position = "5 39.5 0.05";
+			rotation = "1 0 0 0";
+			scale = "1.25 1 1";
+			dataBlock = "Fence_1TilesLength";
+		};
+		new StaticShape() {
+			position = "7.6 47.5 0.05";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "Fence_5TilesLength";
+		};
+		new StaticShape() {
+			position = "-14.25 47.5 0.05";
+			rotation = "0 0 1 90.0002";
+			scale = "1 1 1";
+			dataBlock = "Fence_5TilesLength";
+		};
+		new StaticShape() {
+			position = "-14.25 51.2 0.05";
+			rotation = "0 0 1 90.0002";
+			scale = "0.9 1 1";
+			dataBlock = "Fence_2TilesLength";
+		};
+		new StaticShape() {
+			position = "-12.6 39.6 0.05";
+			rotation = "0 0 1 180";
+			scale = "0.9 1 1";
+			dataBlock = "Fence_1TilesLength";
+		};
+		new StaticShape() {
+			position = "3.5 57.5 -3.485";
+			rotation = "0 0 1 78.7502";
+			scale = "0.3 0.3 0.3";
+			dataBlock = "Logo_Graffiti";
+		};
+		new StaticShape() {
+			position = "-0.25 54.7 -0.54";
+			rotation = "0 0 1 146.25";
+			scale = "0.2 0.2 0.2";
+			dataBlock = "Hourglass_Graffiti";
+		};
+	};
+	new SimGroup(MPGroup) {
+
+		new SimGroup(MustChange_g) {
+
+			new Path() {
+
+				new Marker() {
+					position = "-77 58.25 -7.1875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "0";
+					msToNext = "1000";
+					smoothingType = "Linear";
+				};
+				new Marker() {
+					position = "-77 58.25 -24.6875";
+					rotation = "1 0 0 0";
+					scale = "1 1 1";
+					seqNum = "1";
+					msToNext = "1";
+					smoothingType = "Linear";
+				};
+			};
+			new Trigger(NestEggMP) {
+				position = "-63.75 61 -30";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "TriggerGotoTarget";
+				polyhedron = "-1.0000000 1.0000000 1.0000000 2.0000000 0.0000000 0.0000000 0.0000000 -2.0000000 0.0000000 0.0000000 0.0000000 -2.0000000";
+					IContinueToTTime = "0";
+					instant = "0";
+					ORIGIN = "-2464 1864 -230";
+					targetTime = "1001";
+					zdrop = "-0.09";
+			};
+			new PathedInterior(MustChange) {
+				position = "0 0 0";
+				rotation = "1 0 0 0";
+				scale = "1 1 1";
+				dataBlock = "PathedDefault";
+				interiorResource = $usermods @ "/data/interiors_pq/BubblesInTheWater.dif";
+				interiorIndex = "0";
+				basePosition = "0 0 0";
+				baseRotation = "1 0 0 0";
+				baseScale = "1 1 1";
+					initialPosition = "0";
+					initialScale = "1 1 1";
+					initialTargetPosition = "0";
+					initialTransform = "0 0 0 1 0 0 0";
+			};
+		};
+	};
+	new SimGroup(ItemGroup) {
+
+		new Item() {
+			position = "-9.25 -52 -3.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noRespawn = "0";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "2 -38 0.22";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "1";
+				noParticles = "0";
+				particles = "6268";
+				Time = "5000";
+		};
+		new Item() {
+			position = "-8.5 68 -3.5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noRespawn = "0";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "-60 66 -4.875";
+			rotation = "0 1 0 15";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noRespawn = "0";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "-77 54.25 -9.575";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noRespawn = "0";
+				timeBonus = "7500";
+		};
+		new Item() {
+			position = "-88 56 -4.625";
+			rotation = "0.681364 -0.720119 -0.13104 29.9055";
+			scale = "1 1 1";
+			dataBlock = "SuperSpeedItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "0 32 -1";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "SuperSpeedItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+		};
+		new Item() {
+			position = "3.68 58.0425 -3.28";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "0";
+				noParticles = "0";
+				particles = "6269";
+				Time = "5000";
+		};
+		new Item() {
+			position = "-1.1 54.8 -0.1375";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "TimeTravelItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noRespawn = "0";
+				timeBonus = "5000";
+		};
+		new Item() {
+			position = "-52.15 58.3 -3.78";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "0";
+				noParticles = "0";
+				particles = "6274";
+				Time = "5000";
+		};
+		new Item() {
+			position = "-53.55 63.15 -3.78";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "0";
+				noParticles = "0";
+				particles = "6273";
+				Time = "5000";
+		};
+		new Item() {
+			position = "-18.5 66.7 -3.78";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "0";
+				noParticles = "0";
+				particles = "6272";
+				Time = "5000";
+		};
+		new Item() {
+			position = "-15.8 54.35 -3.78";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "0";
+				noParticles = "0";
+				particles = "6271";
+				Time = "5000";
+		};
+		new Item() {
+			position = "0 42.9 -4.8";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "BubbleItem";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				Infinite = "0";
+				noParticles = "0";
+				particles = "6270";
+				Time = "5000";
+		};
+	};
+	new SimGroup(GemGroup) {
+
+		new Item() {
+			position = "2 -53.25 -3.6";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+				noRespawn = "0";
+		};
+		new Item() {
+			position = "0 66 -2.3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+				noRespawn = "0";
+		};
+		new Item() {
+			position = "-10 58 -1.7";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+				noRespawn = "0";
+		};
+		new Item() {
+			position = "-89 67 -3";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+		new Item() {
+			position = "-65 55 -5";
+			rotation = "1 0 0 0";
+			scale = "1 1 1";
+			dataBlock = "GemItem_PQ";
+			collideable = "0";
+			static = "1";
+			rotate = "1";
+				noParticles = "0";
+		};
+	};
+	new StaticShape() {
+		position = "0 -70 5.5";
+		rotation = "0 0 -1 17";
+		scale = "1.5 1.5 1.5";
+		dataBlock = "RegularFinishlinesign";
+	};
+	new StaticShape(StartPoint) {
+		position = "-119 61 0.753361";
+		rotation = "0.120971 -0.121188 0.985231 90.7497";
+		scale = "1 1 1";
+		dataBlock = "StartPad_PQ";
+	};
+	new StaticShape(EndPoint) {
+		position = "0 -70 2";
+		rotation = "0 0 1 180";
+		scale = "1 1 1";
+		dataBlock = "EndPad_PQ";
+	};
+	new Trigger(Bounds) {
+		position = "-130 75 -40";
+		rotation = "1 0 0 0";
+		scale = "150 155 50";
+		dataBlock = "InBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(oblivion) {
+		position = "-43 64 -9";
+		rotation = "1 0 0 0";
+		scale = "16 6 1";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new Trigger(obliviontwo) {
+		position = "-4 34 -13";
+		rotation = "1 0 0 0";
+		scale = "8 48 1";
+		dataBlock = "OutOfBoundsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+	};
+	new StaticShape() {
+		position = "1.9 46.3 -2.75";
+		rotation = "0 0 1 155.845";
+		scale = "1 1 1";
+		dataBlock = "SignCautionDanger";
+	};
+	new StaticShape(PushForNestEgg) {
+		position = "6.8 -52.8 -2";
+		rotation = "0 0 1 130.68";
+		scale = "1 1 1";
+		dataBlock = "PushButton";
+			activated = "0";
+			objectMethod = "onEnterTrigger()";
+			resettime = "5000";
+			triggerObject = "NestEggMP";
+			TriggerOnce = "1";
+	};
+	new Trigger(WaterZone) {
+		position = "-107 75 -36";
+		rotation = "1 0 0 0";
+		scale = "119.1 134.5 35";
+		dataBlock = "WaterPhysicsTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			keepeffectonleave = "0";
+			overlay = "1";
+			VelocityMultiplier = "0.3";
+	};
+	new Item() {
+		position = "-82.5 60.5 -8.09";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "NestEgg_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			skin = "red";
+	};
+	new Trigger(SlowMove) {
+		position = "-94.5 70.5 -4";
+		rotation = "1 0 0 0";
+		scale = "1 19 8";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "5000";
+			text = "Moving in the water can sometimes be very slow. Jumping can often help you to move in the water. Press <func:bind jump> to jump.";
+			Time = "6000";
+	};
+	new StaticShape() {
+		position = "-4.68048 62.4863 7.9";
+		rotation = "-0.700215 -0.700214 -0.139282 31.717";
+		scale = "1 1 1";
+		dataBlock = "ConstructonRoadsignRed";
+			skin = "Dragon";
+	};
+	new SimGroup(PathNodeGroup) {
+
+		new StaticShape(CameraPath1) {
+			position = "-5.67351 32.9408 12.8317";
+			rotation = "0.954288 0.0813042 -0.287618 33.0009";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath2";
+				timeToNext = "3000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath2) {
+			position = "-15.5319 39.0175 9.54908";
+			rotation = "0.87619 -0.120668 0.466617 32.8873";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath3";
+				timeToNext = "3900";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath3) {
+			position = "-20.3054 50.8404 5.31525";
+			rotation = "0.439061 -0.190081 0.87812 52.488";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath4";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath4) {
+			position = "-11.3724 -27.6481 8.56291";
+			rotation = "0.12475 -0.317096 0.940153 139.404";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath5";
+				timeToNext = "2500";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath5) {
+			position = "-4.91889 -29.0162 5.17041";
+			rotation = "0.0710214 -0.280845 0.957122 152.788";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath6";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath6) {
+			position = "-0.562418 -32.0096 2.7905";
+			rotation = "0.0199818 -0.226066 0.973907 170.16";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath7";
+				timeToNext = "2000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath7) {
+			position = "3.00836 -35.7228 1.4596";
+			rotation = "-0.0202763 -0.145277 0.989183 195.721";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath8";
+				timeToNext = "4000";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+		new StaticShape(CameraPath8) {
+			position = "3.00836 -35.7228 1.4596";
+			rotation = "-0.0202763 -0.145277 0.989183 195.721";
+			scale = "1 1 1";
+			dataBlock = "PathNode";
+				nextNode = "CameraPath1";
+				timeToNext = "0";
+				usePosition = "1";
+				useRotation = "1";
+				useScale = "0";
+				reverseRotation = "0";
+				placed = "1";
+		};
+	};
+	new Trigger(MeetBubblePowerup) {
+		position = "-55.5 70 -4";
+		rotation = "1 0 0 0";
+		scale = "1 18 4";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "5000";
+			text = "Activate the Bubble powerup to float in the water and cross the gap.\nKeep pressing <func:bind mouseFire> to keep yourself afloat.";
+			Time = "7000";
+	};
+	new Trigger(UseBubbles) {
+		position = "-24.5 65.5 -5.5";
+		rotation = "1 0 0 0";
+		scale = "1 9.5 7";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "5000";
+			text = "Use the bubble powerups to collect the Gems from this wreckage.\nIt appears they were accidentally dropped during construction of a different level and are now forgotten about.";
+			Time = "9000";
+	};
+	new Trigger(BubbleAndSuperSpeed) {
+		position = "-7.8 46.4 -4";
+		rotation = "1 0 0 0";
+		scale = "14 1 4";
+		dataBlock = "HelpTrigger";
+		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
+			displayonce = "0";
+			persistTime = "5000";
+			text = "Activate the Bubble powerup so you can reach the Super Speed.\nYou can use both at the same time, so use them to cross the Great Depths before you fall into them, and oblivion.";
+			Time = "8000";
+	};
+	new StaticShape() {
+		position = "-54 55.25 -3.25062";
+		rotation = "0 0 1 112.5";
+		scale = "1 1 1";
+		dataBlock = "ConstructonRoadsignYellow";
+			skin = "Caution";
+	};
+	new StaticShape() {
+		position = "-68.25 60.5 -7.81";
+		rotation = "0 0 1 180";
+		scale = "1 1 1";
+		dataBlock = "Sign02";
+			skin = "red_diag_1";
+	};
+	new StaticShape() {
+		position = "-78.5 61 -1";
+		rotation = "1 0 0 0";
+		scale = "9.5 3 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "-6.5 62.3 -1";
+		rotation = "1 0 0 0";
+		scale = "4.5 3.5 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "-35 61 -1";
+		rotation = "1 0 0 0";
+		scale = "3 1 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "-47 61 -1";
+		rotation = "1 0 0 0";
+		scale = "1 3 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "-23 61 -1";
+		rotation = "1 0 0 0";
+		scale = "1 3 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "0 5.9 -1";
+		rotation = "1 0 0 0";
+		scale = "1.5 11.3 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "-3.6 45.8 -1";
+		rotation = "1 0 0 0";
+		scale = "3.5 2 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "0 -31 -1";
+		rotation = "1 0 0 0";
+		scale = "4 1 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "0 -47.2 -1";
+		rotation = "1 0 0 0";
+		scale = "4 4.4 1";
+		dataBlock = "WaterPlane";
+	};
+	new StaticShape() {
+		position = "-6.01538 69.1243 5.8";
+		rotation = "-1 0 0 22.5001";
+		scale = "1 1 1";
+		dataBlock = "ConstructonRoadsignYellow";
+			skin = "NoFunAllowed";
+	};
+	new StaticShape() {
+		position = "-18.25 60.5 -3.80726";
+		rotation = "0 0 1 180";
+		scale = "1 1 1";
+		dataBlock = "Sign02";
+			skin = "red_leftright";
+	};
+	new Item() {
+		position = "-2.5 56.5 -4";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			noRespawn = "0";
+	};
+	new Item() {
+		position = "-8.7 -35.5 -1.42";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			noRespawn = "0";
+	};
+	new StaticShape() {
+		position = "0.75 -33.75 -1.80726";
+		rotation = "0 0 -1 90.0002";
+		scale = "1 1 1";
+		dataBlock = "Sign02";
+			skin = "red_up";
+	};
+	new Item() {
+		position = "-70 64 -8";
+		rotation = "1 0 0 0";
+		scale = "1 1 1";
+		dataBlock = "GemItem_PQ";
+		collideable = "0";
+		static = "1";
+		rotate = "1";
+			noParticles = "0";
+			noRespawn = "0";
+	};
+	new TSStatic() {
+		position = "-6.025 69.05 6.5";
+		rotation = "0.783658 -0.237721 0.573907 55.7188";
+		scale = "0.3 0.3 0.3";
+		shapeName = "~/data/shapes_pq/Marbles/Sports/TennisBall.dts";
+	};
+	new StaticShape() {
+		position = "-4.55 62.5 8.55";
+		rotation = "1 0 0 0";
+		scale = "0.3 0.3 0.3";
+		dataBlock = "Bat";
+	};
+};
+}
+//--- MISSION END ---
+//--- SERVER POSTMISSION SCRIPTS BEGIN ---
+//Put any scripts that will be loaded after the mission is loaded here
+
+//--- SERVER POSTMISSION SCRIPTS END ---
