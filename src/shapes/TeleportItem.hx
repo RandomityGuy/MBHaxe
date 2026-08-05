@@ -18,6 +18,13 @@ class TeleportItem extends PowerUp {
 		this.identifier = "TeleportItem";
 		this.pickUpName = "Teleport PowerUp";
 		this.radarIndex = 31;
+
+		var keepVelocityField = this.element.fields.get("keepvelocity");
+		var keepVelocity = keepVelocityField != null && MisParser.parseBoolean(keepVelocityField[0]);
+		if (keepVelocity) {
+			this.skinOverride = "yellow";
+			this.identifier += "Yellow";
+		}
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {

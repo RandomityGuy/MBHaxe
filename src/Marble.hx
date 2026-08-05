@@ -1844,6 +1844,7 @@ class Marble extends GameObject {
 			var velocityChange = this.velocity.multiply(-closest.velocityMultiplier);
 			this.velocity = this.velocity.add(velocityChange);
 			this.spawnWaterSplash(entrySpeed);
+			this.deactivateFireball();
 		}
 
 		var zdist = Util.clamp(pos.z - closest.collider.boundingBox.zMax, 0, 0.2);
@@ -1969,7 +1970,17 @@ class Marble extends GameObject {
 		var smashedAny = false;
 		if (this.level != null) {
 			for (shard in this.level.iceShards) {
-				if (!shard.destroyed && shard.getAbsPos().getPosition().distance(pos) <= radius) {
+				if (shard.destroyed)
+					continue;
+				var bounds = this.level.instanceManager.getObjectBounds(shard).clone();
+				bounds.transform(shard.getAbsPos());
+				var cx = Util.clamp(pos.x, bounds.xMin, bounds.xMax);
+				var cy = Util.clamp(pos.y, bounds.yMin, bounds.yMax);
+				var cz = Util.clamp(pos.z, bounds.zMin, bounds.zMax);
+				var dx = pos.x - cx;
+				var dy = pos.y - cy;
+				var dz = pos.z - cz;
+				if (dx * dx + dy * dy + dz * dz <= radius * radius) {
 					shard.destroyByFireball();
 					smashedAny = true;
 				}

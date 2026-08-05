@@ -13,26 +13,32 @@ class MarbleReflection extends hxsl.Shader {
 			var normal:Vec3;
 		};
 		var pixelTransformedPosition:Vec3;
-		function fresnel(direction:Vec3, normal:Vec3, invert:Bool):Float {
-			var nDirection = normalize(direction);
-			var nNormal = normalize(normal);
-			var halfDirection = normalize(nNormal + nDirection);
-			var exponent = 5.0;
-			var cosine = dot(halfDirection, nDirection);
-			var product = max(cosine, 0.0);
-			var factor = invert ? 1.0 - pow(product, exponent) : pow(product, exponent);
-			return factor;
+		function tanh(x:Float):Float {
+			return (exp(2.0 * x) - 1.0) / (exp(2.0 * x) + 1.0);
+		}
+		function sigmoid(x:Float):Float {
+			return 0.5 + 0.5 * tanh(2.0 * x - 1.0);
+		}
+		function atanh(x:Float):Float {
+			return 0.5 * log((1.0 + x) / (1.0 - x));
+		}
+		function invSigmoid(x:Float):Float {
+			return 0.5 + 0.5 * atanh(2.0 * x - 1.0);
 		}
 		function fragment() {
 			var viewDir = normalize(camera.position - pixelTransformedPosition);
-			var fac = fresnel(viewDir, transformedNormal, true);
 
 			var incidentRay = normalize(pixelTransformedPosition - camera.position);
 			var reflectionRay = reflect(incidentRay, transformedNormal);
 
 			var refl = texture.get(reflectionRay);
 
-			pixelColor = mix(pixelColor, refl, fac * 0.7);
+			var reflectAmount = invSigmoid(0.01 + 0.98 * pixelColor.a);
+			reflectAmount -= 0.7 * (2.0 * -dot(transformedNormal, viewDir) - 1.0);
+			reflectAmount = sigmoid(reflectAmount);
+			reflectAmount = 0.95 * reflectAmount;
+
+			pixelColor = vec4(mix(pixelColor.rgb, refl.rgb, reflectAmount), 1.0);
 		}
 	}
 

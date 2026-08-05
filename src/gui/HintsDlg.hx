@@ -1,5 +1,7 @@
 package gui;
 
+import h2d.Scene;
+import h2d.Flow;
 import src.Mission;
 import src.Http;
 import src.MarbleGame;
@@ -11,6 +13,9 @@ import src.Util;
 import src.Marbleland;
 
 class HintsDlg extends GuiControl {
+	var scroll:GuiConsoleScrollCtrl;
+	var hintsContent:GuiMLText;
+
 	public function new(mission:Mission) {
 		super();
 		this.horizSizing = Width;
@@ -73,22 +78,21 @@ class HintsDlg extends GuiControl {
 		closeButton.txtCtrl.text.text = "Close";
 		wnd.addChild(closeButton);
 
-		var scroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/pqscroll.png", ResourceLoader.getImage, this.imageResources)
-			.toTile(), {
-				top: new Vector(0, 39, 16, 7),
-				bottom: new Vector(0, 56, 16, 7),
-				fill: new Vector(0, 47, 16, 1),
-				topPressed: new Vector(19, 39, 16, 7),
-				bottomPressed: new Vector(19, 56, 16, 7),
-				fillPressed: new Vector(19, 47, 16, 1),
-				track: new Vector(0, 65, 16, 7),
-				up: new Vector(0, 1, 16, 16),
-				down: new Vector(0, 20, 16, 16),
-				upPressed: new Vector(19, 1, 16, 16),
-				downPressed: new Vector(19, 20, 16, 16),
-				upDisabled: new Vector(38, 1, 16, 16),
-				downDisabled: new Vector(38, 20, 16, 16)
-			});
+		scroll = new GuiConsoleScrollCtrl(ResourceLoader.getResource("data/ui/common/pqscroll.png", ResourceLoader.getImage, this.imageResources).toTile(), {
+			top: new Vector(0, 39, 16, 7),
+			bottom: new Vector(0, 56, 16, 7),
+			fill: new Vector(0, 47, 16, 1),
+			topPressed: new Vector(19, 39, 16, 7),
+			bottomPressed: new Vector(19, 56, 16, 7),
+			fillPressed: new Vector(19, 47, 16, 1),
+			track: new Vector(0, 65, 16, 7),
+			up: new Vector(0, 1, 16, 16),
+			down: new Vector(0, 20, 16, 16),
+			upPressed: new Vector(19, 1, 16, 16),
+			downPressed: new Vector(19, 20, 16, 16),
+			upDisabled: new Vector(38, 1, 16, 16),
+			downDisabled: new Vector(38, 20, 16, 16)
+		});
 		scroll.position = new Vector(29, 72);
 		scroll.extent = new Vector(481, 319);
 		// scroll.childrenHandleScroll = true;
@@ -107,7 +111,7 @@ class HintsDlg extends GuiControl {
 			}
 		}
 
-		var hintsContent = new GuiMLText(whatneyFont17, mlFontLoader);
+		hintsContent = new GuiMLText(whatneyFont17, mlFontLoader);
 		hintsContent.position = new Vector(0, 0);
 		hintsContent.extent = new Vector(466, 328);
 		hintsContent.text.textColor = 0;
@@ -191,11 +195,16 @@ class HintsDlg extends GuiControl {
 
 		hintsContent.text.text = hintText;
 		scroll.addChild(hintsContent);
-		scroll.setScrollMax(hintsContent.text.textHeight);
-		scroll.setScrollPercentage(0);
 	}
 
 	function isNullOrEmpty(s:String):Bool {
 		return s == null || s == "";
+	}
+
+	public override function render(scene2d:Scene, ?parent:Flow) {
+		super.render(scene2d, parent);
+
+		scroll.setScrollMax(hintsContent.text.textHeight);
+		scroll.setScrollPercentage(0);
 	}
 }

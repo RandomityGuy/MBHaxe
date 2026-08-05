@@ -16,7 +16,7 @@ class AntiGravity extends PowerUp {
 		this.isTSStatic = false;
 
 		this.identifier = "AntiGravity" + this.dtsPath;
-		this.pickUpName = "Gravity Defier";
+		this.pickUpName = "Gravity Modifier";
 		this.autoUse = true;
 		this.radarIndex = 11;
 		if (norespawn)

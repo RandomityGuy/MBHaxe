@@ -72,6 +72,7 @@ class MissionList {
 		platinumMissions.set("advanced", parseDifficulty("platinum", "missions_pq", "advanced"));
 		platinumMissions.set("expert", parseDifficulty("platinum", "missions_pq", "expert"));
 		platinumMissions.set("bonus", parseDifficulty("platinum", "missions_pq", "bonus"));
+		platinumMissions.set("dc", parseDifficulty("platinum", "missions_pq", "dc"));
 
 		customMissions = parseDifficulty("custom", "missions", "custom");
 
@@ -80,7 +81,8 @@ class MissionList {
 		@:privateAccess platinumMissions["intermediate"][platinumMissions["intermediate"].length - 1].next = platinumMissions["advanced"][0];
 		@:privateAccess platinumMissions["advanced"][platinumMissions["advanced"].length - 1].next = platinumMissions["expert"][0];
 		@:privateAccess platinumMissions["expert"][platinumMissions["expert"].length - 1].next = platinumMissions["bonus"][0];
-		@:privateAccess platinumMissions["bonus"][platinumMissions["bonus"].length - 1].next = platinumMissions["tutorial"][0];
+		@:privateAccess platinumMissions["bonus"][platinumMissions["bonus"].length - 1].next = platinumMissions["dc"][0];
+		@:privateAccess platinumMissions["dc"][platinumMissions["dc"].length - 1].next = platinumMissions["tutorial"][0];
 
 		// Hypercube uses MBG logic
 		missionList.set("platinum", platinumMissions);
@@ -92,6 +94,7 @@ class MissionList {
 		Console.log("Platinum Advanced: " + platinumMissions["advanced"].length);
 		Console.log("Platinum Expert: " + platinumMissions["expert"].length);
 		Console.log("Platinum Bonus: " + platinumMissions["bonus"].length);
+		Console.log("Platinum DC: " + platinumMissions["dc"].length);
 		Console.log("Custom: " + customMissions.length);
 
 		// parseCLAList();

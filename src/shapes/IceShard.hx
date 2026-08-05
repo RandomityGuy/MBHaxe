@@ -206,6 +206,7 @@ class IceShard extends DtsObject {
 				case "platinum":
 					this.points = 10;
 			}
+			this.identifier += this.skinOverride;
 		}
 	}
 

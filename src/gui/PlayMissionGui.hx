@@ -38,6 +38,8 @@ class PlayMissionGui extends GuiControl {
 	static var currentGameStatic:String = "platinum";
 	static var currentSortType:Int = 1;
 
+	static var currentPageStatic:Int = 0;
+
 	// Really just used for Vice-Versa
 	static function isMissionVisible(m:Mission):Bool {
 		if (StringTools.endsWith(m.path.toLowerCase(), "versa.mcs"))
@@ -209,7 +211,7 @@ class PlayMissionGui extends GuiControl {
 		playMission.pressedAction = (sender) -> {
 			// Wacky hacks
 			currentList[currentSelection].index = currentSelection;
-			currentList[currentSelection].difficultyIndex = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus"].indexOf(currentCategory);
+			currentList[currentSelection].difficultyIndex = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus", "dc"].indexOf(currentCategory);
 			currentSelectionStatic = currentSelection;
 			currentCategoryStatic = currentCategory;
 			cast(this.parent, Canvas).marbleGame.playMission(currentList[currentSelection]);
@@ -420,12 +422,12 @@ class PlayMissionGui extends GuiControl {
 		infoBox.extent = new Vector(330, 238);
 		this.addChild(infoBox);
 
-		var missionInfoPanel = new GuiControl();
-		missionInfoPanel.horizSizing = Width;
-		missionInfoPanel.vertSizing = Height;
-		missionInfoPanel.position = new Vector(19, 57);
-		missionInfoPanel.extent = new Vector(317, 238);
-		infoBox.addChild(missionInfoPanel);
+		// var missionInfoPanel = new GuiControl();
+		// missionInfoPanel.horizSizing = Width;
+		// missionInfoPanel.vertSizing = Height;
+		// missionInfoPanel.position = new Vector(19, 57);
+		// missionInfoPanel.extent = new Vector(317, 238);
+		// infoBox.addChild(missionInfoPanel);
 
 		var missionTitle = new GuiText(squishney48);
 		missionTitle.position = new Vector(16, 14);
@@ -445,57 +447,57 @@ class PlayMissionGui extends GuiControl {
 
 		var missionScoresInfoLeft = new GuiMLText(whatneyFont21, null);
 		missionScoresInfoLeft.horizSizing = Left;
-		missionScoresInfoLeft.position = new Vector(98, 0);
+		missionScoresInfoLeft.position = new Vector(98, 57);
 		missionScoresInfoLeft.extent = new Vector(222, 162);
 		missionScoresInfoLeft.text.textColor = 0;
 		missionScoresInfoLeft.text.text = "Score1";
 		missionScoresInfoLeft.text.lineSpacing = 4;
-		missionInfoPanel.addChild(missionScoresInfoLeft);
+		infoBox.addChild(missionScoresInfoLeft);
 
 		var missionScoresInfoRight = new GuiMLText(whatneyFont21, null);
 		missionScoresInfoRight.horizSizing = Left;
-		missionScoresInfoRight.position = new Vector(98, 0);
+		missionScoresInfoRight.position = new Vector(98, 57);
 		missionScoresInfoRight.extent = new Vector(218, 162);
 		missionScoresInfoRight.text.textColor = 0;
 		missionScoresInfoRight.text.text = "Score1";
 		missionScoresInfoRight.text.lineSpacing = 4;
-		missionInfoPanel.addChild(missionScoresInfoRight);
+		infoBox.addChild(missionScoresInfoRight);
 
 		var missionInfoLeft = new GuiMLText(whatneyFont21, mlFontLoader);
-		missionInfoLeft.position = new Vector(0, 0);
+		missionInfoLeft.position = new Vector(19, 57);
 		missionInfoLeft.extent = new Vector(144, 138);
 		missionInfoLeft.text.textColor = 0;
 		missionInfoLeft.text.text = "Grab all the gems to finish!";
 		missionInfoLeft.text.lineSpacing = 4;
 		missionInfoLeft.text.loadImage = imgLoader;
-		missionInfoPanel.addChild(missionInfoLeft);
+		infoBox.addChild(missionInfoLeft);
 
 		var missionInfoRight = new GuiMLText(whatneyFont21, mlFontLoader);
-		missionInfoRight.position = new Vector(0, 0);
+		missionInfoRight.position = new Vector(19, 57);
 		missionInfoRight.extent = new Vector(164, 138);
 		missionInfoRight.text.textColor = 0;
 		missionInfoRight.text.text = "Grab all the gems to finish!";
 		missionInfoRight.text.lineSpacing = 4;
-		missionInfoPanel.addChild(missionInfoRight);
+		infoBox.addChild(missionInfoRight);
 
 		var missionModesInfo = new GuiMLText(whatneyFont21, mlFontLoader);
 		missionModesInfo.horizSizing = Width;
 		missionModesInfo.vertSizing = Bottom;
-		missionModesInfo.position = new Vector(0, 142);
+		missionModesInfo.position = new Vector(19, 142 + 57);
 		missionModesInfo.extent = new Vector(174, 69);
 		missionModesInfo.text.textColor = 0;
 		missionModesInfo.text.lineSpacing = 4;
 		missionModesInfo.text.text = "Gem Collection: Pick up all the gems to finish!";
-		missionInfoPanel.addChild(missionModesInfo);
+		infoBox.addChild(missionModesInfo);
 
 		var sep = new GuiImage(ResourceLoader.getResource("data/ui/play/extras/extraslinev.png", ResourceLoader.getImage, this.imageResources).toTile());
 		sep.horizSizing = Left;
 		sep.vertSizing = Height;
-		sep.position = new Vector(94, 3);
+		sep.position = new Vector(94, 57 + 3);
 		sep.extent = new Vector(2, 159);
-		missionInfoPanel.addChild(sep);
+		infoBox.addChild(sep);
 
-		var setDifficulty:(String, String) -> Void = null;
+		var setDifficulty:(String, String, Int) -> Void = null;
 
 		var difficultyPopup = new GuiControl();
 		difficultyPopup.horizSizing = Width;
@@ -506,20 +508,28 @@ class PlayMissionGui extends GuiControl {
 		var difficultyList = new GuiImage(ResourceLoader.getResource("data/ui/transparency/pc_trans/0.png", ResourceLoader.getImage, this.imageResources)
 			.toTile());
 		difficultyList.position = new Vector(197, 50);
-		difficultyList.extent = currentGame == "platinum" ? new Vector(158, 210) : new Vector(158, 105);
+		difficultyList.extent = currentGame == "platinum" ? new Vector(158, 245) : new Vector(158, 105);
 		difficultyPopup.addChild(difficultyList);
 
 		if (currentGame == "platinum") {
-			for (i in 0...6) {
+			for (i in 0...7) {
 				var difficultyBtn = new GuiButtonText(loadButtonImages("data/ui/play/difficulty"), squishney26);
 				difficultyBtn.ratio = 0.27;
 				difficultyBtn.setExtent(new Vector(156, 35));
 				difficultyBtn.position = new Vector(1, 35 * i);
 				difficultyBtn.txtCtrl.text.textColor = 0;
-				difficultyBtn.txtCtrl.text.text = ["Tutorial", "Beginner", "Intermediate", "Advanced", "Expert", "Bonus"][i];
-				var diff = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus"][i];
+				difficultyBtn.txtCtrl.text.text = [
+					"Tutorial",
+					"Beginner",
+					"Intermediate",
+					"Advanced",
+					"Expert",
+					"Bonus",
+					"Director's Cut"
+				][i];
+				var diff = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus", "dc"][i];
 				difficultyBtn.pressedAction = (e) -> {
-					setDifficulty("platinum", diff);
+					setDifficulty("platinum", diff, 0);
 					MarbleGame.canvas.popDialog(difficultyPopup, false);
 				}
 				difficultyList.addChild(difficultyBtn);
@@ -538,7 +548,7 @@ class PlayMissionGui extends GuiControl {
 						var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
 						MarbleGame.canvas.pushDialog(mbo);
 					} else {
-						setDifficulty("custom", diff);
+						setDifficulty("custom", diff, 0);
 					}
 					MarbleGame.canvas.popDialog(difficultyPopup, false);
 				}
@@ -564,7 +574,7 @@ class PlayMissionGui extends GuiControl {
 		pqBtn.txtCtrl.text.textColor = 0;
 		pqBtn.txtCtrl.text.text = "PlatinumQuest";
 		pqBtn.pressedAction = (e) -> {
-			setDifficulty("platinum", "tutorial");
+			setDifficulty("platinum", "tutorial", 0);
 			MarbleGame.canvas.popDialog(gamePopup, false);
 		}
 		gameList.addChild(pqBtn);
@@ -576,7 +586,7 @@ class PlayMissionGui extends GuiControl {
 		customBtn.txtCtrl.text.textColor = 0;
 		customBtn.txtCtrl.text.text = "Custom";
 		customBtn.pressedAction = (e) -> {
-			setDifficulty("custom", "relevant");
+			setDifficulty("custom", "relevant", 0);
 			MarbleGame.canvas.popDialog(gamePopup, false);
 		}
 		gameList.addChild(customBtn);
@@ -628,14 +638,37 @@ class PlayMissionGui extends GuiControl {
 		}
 		missionBox.addChild(difficultySelector);
 
-		setDifficulty = (gameName, diffName) -> {
+		setDifficulty = (gameName, diffName, page:Int) -> {
 			if (gameName == "custom" && Marbleland.pqMissions.length == 0) {
 				var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
 				MarbleGame.canvas.pushDialog(mbo);
 				return;
 			}
 
-			difficultySelector.txtCtrl.text.text = diffName.charAt(0).toUpperCase() + diffName.substr(1);
+			difficultySelector.txtCtrl.text.text = switch (diffName) {
+				case "tutorial":
+					"Tutorial";
+				case "beginner":
+					"Beginner";
+				case "intermediate":
+					"Intermediate";
+				case "advanced":
+					"Advanced";
+				case "expert":
+					"Expert";
+				case "bonus":
+					"Bonus";
+				case "dc":
+					"Director's Cut";
+				case "all":
+					"All";
+				case "relevant":
+					"Relevant";
+				case "alphabetical":
+					"Alphabetical";
+				default:
+					"Unknown";
+			}
 			gameSelector.txtCtrl.text.text = gameName == "platinum" ? "PlatinumQuest" : "Custom";
 
 			if (currentGame != gameName) {
@@ -649,18 +682,26 @@ class PlayMissionGui extends GuiControl {
 				}
 
 				if (gameName == "platinum") {
-					difficultyList.extent = new Vector(158, 210);
+					difficultyList.extent = new Vector(158, 245);
 
-					for (i in 0...6) {
+					for (i in 0...7) {
 						var difficultyBtn = new GuiButtonText(loadButtonImages("data/ui/play/difficulty"), squishney26);
 						difficultyBtn.ratio = 0.27;
 						difficultyBtn.setExtent(new Vector(156, 35));
 						difficultyBtn.position = new Vector(1, 35 * i);
 						difficultyBtn.txtCtrl.text.textColor = 0;
-						difficultyBtn.txtCtrl.text.text = ["Tutorial", "Beginner", "Intermediate", "Advanced", "Expert", "Bonus"][i];
-						var diff = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus"][i];
+						difficultyBtn.txtCtrl.text.text = [
+							"Tutorial",
+							"Beginner",
+							"Intermediate",
+							"Advanced",
+							"Expert",
+							"Bonus",
+							"Director's Cut"
+						][i];
+						var diff = ["tutorial", "beginner", "intermediate", "advanced", "expert", "bonus", "dc"][i];
 						difficultyBtn.pressedAction = (e) -> {
-							setDifficulty("platinum", diff);
+							setDifficulty("platinum", diff, 0);
 							MarbleGame.canvas.popDialog(difficultyPopup, false);
 						}
 						difficultyList.addChild(difficultyBtn);
@@ -681,7 +722,7 @@ class PlayMissionGui extends GuiControl {
 								var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
 								MarbleGame.canvas.pushDialog(mbo);
 							} else {
-								setDifficulty("custom", diff);
+								setDifficulty("custom", diff, 0);
 							}
 							MarbleGame.canvas.popDialog(difficultyPopup, false);
 						}
@@ -701,7 +742,7 @@ class PlayMissionGui extends GuiControl {
 				currentList = Marbleland.getMissionList(currentCategory).filter(isMissionVisible);
 			}
 
-			rebuildMissionList(0);
+			rebuildMissionList(page);
 		};
 
 		var missionListContainer = new GuiControl();
@@ -743,6 +784,12 @@ class PlayMissionGui extends GuiControl {
 
 			var maxCount = Math.floor(containerYSize / 40.0) - 1; // size is 40 for each row, reserve one last row for pagination buttons
 			var totalPages = Math.ceil(mlist.length / maxCount);
+
+			if (page >= totalPages)
+				page = totalPages - 1;
+			if (page < 0)
+				page = 0;
+			currentPageStatic = page;
 
 			for (i in 0...maxCount) {
 				// build the thing
@@ -1044,7 +1091,7 @@ class PlayMissionGui extends GuiControl {
 						var sFmt = [];
 						var i = 1;
 
-						var boxRenderRect = missionInfoPanel.getRenderRectangle();
+						var boxRenderRect = infoBox.getRenderRectangle();
 
 						for (score in scores) {
 							var scoreType = Time;
@@ -1055,9 +1102,9 @@ class PlayMissionGui extends GuiControl {
 
 							sFmt.push('${i}. 
 								<offset value="15">${StringTools.htmlEscape(score.name.substr(0, 30))}</offset>
-								<offset value="${boxRenderRect.extent.x - 228 - 120}">${scoreType == Time ? Util.formatTime(score.score) : Util.formatScore(Std.int(score.score))}</offset>
-								<offset value="${boxRenderRect.extent.x - 228 - 100 + 64}"><img src="${platformToString(score.platform)}"/></offset>
-								${score.rewind == 1 ? '<offset value="${boxRenderRect.extent.x - 228 - 16}"><img src="rewind"/></offset> ' : ""}');
+								<offset value="${boxRenderRect.extent.x - 228 - 120 - missionInfoLeft.position.x - 10}">${scoreType == Time ? Util.formatTime(score.score) : Util.formatScore(Std.int(score.score))}</offset>
+								<offset value="${boxRenderRect.extent.x - 228 - 100 + 64 - missionInfoLeft.position.x - 10}"><img src="${platformToString(score.platform)}"/></offset>
+								${score.rewind == 1 ? '<offset value="${boxRenderRect.extent.x - 228 - 16 - missionInfoLeft.position.x - 10}"><img src="rewind"/></offset> ' : ""}');
 							i++;
 						}
 						text += sFmt.join('<br/>');
@@ -1118,11 +1165,20 @@ class PlayMissionGui extends GuiControl {
 				}
 			}
 
-			var boxRenderRect = missionInfoPanel.getRenderRectangle();
+			var boxRenderRect = infoBox.getRenderRectangle();
+			var infoBoxRect = infoBox.getRenderRectangle();
 
-			missionInfoLeft.extent.x = boxRenderRect.extent.x - 228;
-			missionInfoRight.extent.x = boxRenderRect.extent.x - 228;
-			missionModesInfo.extent.x = boxRenderRect.extent.x - 228;
+			missionInfoLeft.extent.x = boxRenderRect.extent.x - 228 - missionInfoLeft.position.x - 10;
+			missionInfoRight.extent.x = boxRenderRect.extent.x - 228 - missionInfoRight.position.x - 10;
+			missionModesInfo.extent.x = boxRenderRect.extent.x - 228 - missionModesInfo.position.x - 10;
+
+			var sepExtents = sep.getRenderRectangle();
+
+			missionScoresInfoRight.extent.x = infoBoxRect.extent.x - (sepExtents.position.x - infoBoxRect.position.x) - 20;
+			missionScoresInfoLeft.extent.x = infoBoxRect.extent.x - (sepExtents.position.x - infoBoxRect.position.x) - 20;
+
+			// missionScoresInfoLeft.position.x = missionScoresInfoLeft.extent.x / 2;
+			// missionScoresInfoRight.position.x = missionScoresInfoRight.extent.x / 2;
 
 			var descTextHeight = missionInfoLeft.text.textHeight;
 			var modeTextHeight = missionModesInfo.text.textHeight;
@@ -1135,7 +1191,7 @@ class PlayMissionGui extends GuiControl {
 
 			infoBox.extent.y = panelSize;
 			infoBox.position.y = 230 + (238 - panelSize);
-			missionModesInfo.position.y = 142 + (panelSize - 238) - (modeTextHeight - 40);
+			missionModesInfo.position.y = 142 + 57 + (panelSize - 238) - (modeTextHeight - 40);
 
 			var textWidth = missionTitle.text.textWidth;
 			if (textWidth > missionInfoLeft.extent.x)
@@ -1178,6 +1234,7 @@ class PlayMissionGui extends GuiControl {
 				}
 			};
 
+			infoBox.render(MarbleGame.canvas.scene2d, @:privateAccess this._flow);
 			infoBox.render(MarbleGame.canvas.scene2d, @:privateAccess this._flow);
 
 			#if js
@@ -1222,7 +1279,7 @@ class PlayMissionGui extends GuiControl {
 			#end
 		}
 
-		setDifficulty(currentGameStatic, currentCategoryStatic);
+		setDifficulty(currentGameStatic, currentCategoryStatic, currentPageStatic);
 	}
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
@@ -1237,7 +1294,7 @@ class PlayMissionGui extends GuiControl {
 	public override function onResize(width:Int, height:Int) {
 		super.onResize(width, height);
 
-		rebuildMissionList(0);
+		rebuildMissionList(currentPageStatic);
 		setSelectedFunc(currentSelection); // resize these
 	}
 
