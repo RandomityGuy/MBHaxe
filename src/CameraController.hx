@@ -189,6 +189,12 @@ class CameraController extends Object {
 		else
 			wasLastGamepadInput = true;
 
+		var cannonAiming = level.marble.activeCannon != null && !level.marble.activeCannon.instant;
+
+		if (cannonAiming) {
+			factor *= 0.4;
+		}
+
 		nextCameraPitch = CameraPitch + deltaposY * factor * camSpeedMul;
 		nextCameraYaw = CameraYaw + deltaposX * factor * camSpeedMul;
 
