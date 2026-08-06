@@ -32,7 +32,7 @@ class MessageBoxOkDlg extends GuiControl {
 		yesNoText.extent = new Vector(198, 23);
 		yesNoText.text.text = text;
 		yesNoText.text.textColor = 0;
-		yesNoText.text.maxWidth = 198;
+		yesNoText.text.maxWidth = 198 * Settings.uiScale;
 		wnd.addChild(yesNoText);
 
 		var okButton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)

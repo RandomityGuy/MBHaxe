@@ -81,7 +81,7 @@ class LoadingGui extends GuiControl {
 		loadingMessage.text.textColor = 0x000000;
 		loadingMessage.text.text = "Message.";
 		loadingMessage.text.lineSpacing = 4;
-		loadingMessage.text.maxWidth = 700;
+		loadingMessage.text.maxWidth = 700 * Settings.uiScale;
 		loadingBody.addChild(loadingMessage);
 
 		var rng = Std.random(101);
