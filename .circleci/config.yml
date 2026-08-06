@@ -209,14 +209,36 @@ jobs:
             cd ~/deps
             git clone https://github.com/RandomityGuy/hxDatachannel
             cd hashlink
-            mv ~/deps/hxDatachannel/cpp libs/datachannel
-            echo -e "\nadd_subdirectory(datachannel)" >> libs/CMakeLists.txt
             curl -L https://raw.githubusercontent.com/RandomityGuy/hashlink/master/libs/ssl/CMakeLists.txt > libs/ssl/CMakeLists.txt
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
             cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="~/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
+
+      - run:
+          name: Build hxDatachannel
+          # Built as its own CMake project (like the Linux/Windows jobs) instead of being
+          # embedded into hashlink's build via add_subdirectory. Embedding made
+          # `cmake --install` try to install libjuice.a from a path it can't find.
+          command: |
+            cd ~/deps/hxDatachannel/cpp
+            sed -i '' 's/target_link_libraries(hxdatachannel.hdll libhl datachannel-static)/target_link_libraries(hxdatachannel.hdll hl datachannel-static)/' CMakeLists.txt || true
+            sed -i '' 's/agent->selected_entry = ATOMIC_VAR_INIT(NULL);/atomic_init(\&agent->selected_entry, NULL);/' \
+              libdatachannel/deps/libjuice/src/agent.c || true
+            cmake -S. -Bbuild \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" \
+              -DCMAKE_FIND_FRAMEWORK=LAST \
+              -DCMAKE_MACOSX_RPATH=TRUE \
+              -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" \
+              -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build --config Release -j$NPROC
+            DATACHANNEL_HDLL="$(find build -name 'datachannel.hdll' -type f | head -n 1)"
+            [ -n "$DATACHANNEL_HDLL" ] || { echo "ERROR: datachannel.hdll not built"; exit 1; }
+            sudo cp "$DATACHANNEL_HDLL" /usr/local/lib/
 
       - run:
           name: Install haxe dependencies
@@ -411,16 +433,16 @@ jobs:
         - run:
             name: Compile MBHaxe
             command: |
-              export PATH=/tmp/haxe/haxe:"$PATH"
-              export HAXE_STD_PATH=/tmp/haxe/haxe/std
-              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
-              set NEKOPATH=$nekopath
-              export PATH=$nekopath:"$PATH"
-              cd ~/project
-              haxe compile-c.hxml
-              cd native
-              HASHLINKPATH=~/deps/hashlink
-              MSBuild.exe -m -nologo -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142 -p:MultiProcessorCompilation=true -p:HASHLINK=$HASHLINKPATH marblegame.sln
+              cd ~/project/native
+              cat > build.bat \<<'EOF'
+              cd /d %USERPROFILE%\project\native
+              if not exist x64\Release mkdir x64\Release
+              for /f "usebackq delims=" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -find VC\Auxiliary\Build\vcvars64.bat`) do call "%%i"
+              set HL=%USERPROFILE%\deps\hashlink
+              cl /nologo marblegame.c /Fe:x64\Release\marblegame.exe /O2 /MD /DNDEBUG -I . -I "%HL%\src" -I "%HL%\include" "%HL%\x64\Release\libhl.lib" "%HL%\x64\Release\ssl.lib" "%HL%\x64\Release\ui.lib" "%HL%\x64\Release\datachannel.lib" "%HL%\x64\Release\openal.lib" "%HL%\x64\Release\uv.lib" "%HL%\x64\Release\fmt.lib" "%HL%\x64\Release\sdl.lib"
+              if not exist x64\Release\marblegame.exe exit /b 1
+              EOF
+              cmd.exe //c build.bat
         - run:
             name: Package app bundle
             command: |
