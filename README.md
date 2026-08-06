@@ -1,5 +1,5 @@
 # MBHaxe
-A Haxe port of Marble Blast Gold, Ultra and Platinum, name subject to change.
+A Haxe port of Marble Blast Gold, Ultra, Platinum and PlatinumQuest, name subject to change.
 The marble physics code was taken from [OpenMBU](https://github.com/MBU-Team/OpenMBU) along with my own collision detection code, game logic was partially from scratch and taken with permission from [Marble Blast Web Port](https://github.com/Vanilagy/MarbleBlast).  
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H5FRTTL)  
@@ -10,10 +10,12 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Gold: [Play](https://marbleblastgold.randomityguy.me/)
 ### Marble Blast Platinum: [Play](https://marbleblast.randomityguy.me/)
 ### Marble Blast Ultra: [Play](https://marbleblastultra.randomityguy.me/)
+### PlatinumQuest: [Play](https://platinumquest.randomityguy.me)
 ## Windows, Mac and Linux
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.14)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.3)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.5-mbu)
+### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/2.0.0)
 Linux port by [boucymatt](https://github.com/boucymatt). Supports Steam Deck.
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
@@ -22,11 +24,13 @@ You will also have to bypass Gatekeeper since the .app is not signed.
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum.apk)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra.apk)
+### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.0/MBHaxe-PlatinumQuest.apk)
 
 ## iOS (NEW!)
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold-iOS.ipa)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum-iOS.ipa)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-iOS.ipa)
+### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.0/MBHaxe-PlatinumQuest-iOS.ipa)
 Ported to iOS by [boucymatt](https://github.com/boucymatt).  
 iOS builds ship as `.ipa` files that must be sideloaded, as Apple does not allow direct installs outside the App Store. Use [LiveContainer](https://github.com/LiveContainer/LiveContainer) or an AltStore-compatible store (AltStore, SideStore, etc.). To install and update all builds from one place, add the AltStore source.  
 <a href="https://stikstore.app/altdirect/?url=https://dl.randomityguy.me/altstore-source.json" target="_blank">
@@ -46,6 +50,7 @@ You will need to enable Developer Mode on your Xbox in order to sideload the app
 - Touch Controls: Available in the Web (mobile) and Android and iOS versions.
 
 # Screenshots
+<img src="https://imgur.com/x6DYms7.png" width="640">
 <img src="https://imgur.com/Ncb4atl.png" width="640">
 <img src="https://imgur.com/KQKUk0Y.png" width="640">
 <img src="https://imgur.com/VnnrIt2.png" width="640">
@@ -72,6 +77,7 @@ I chose Haxe because its a good language that can target other languages, meanin
 The `master` branch is currently for Marble Blast Platinum. 
 If you want to build Marble Blast Ultra, go to the [mbu-port](https://github.com/RandomityGuy/MBHaxe/tree/mbu-port) branch.    
 If you want to build Marble Blast Gold, go to the [mbg](https://github.com/RandomityGuy/MBHaxe/tree/mbg) branch.  
+If you want to build PlatinumQuest, go to the [pq](https://github.com/RandomityGuy/MBHaxe/tree/pq) branch.  
 
 Requires Haxe 4.3.0 or above
 You require the following Haxe libraries: 
@@ -93,7 +99,7 @@ If the build dependencies are fullfilled, compile with `haxe compile-js.hxml` an
 See [here](README-macOS.md)
 
 ## Android
-The branches used for Android builds are `mbg-mobile`, `mbp-mobile` or `mbu-mobile`.  
+The branches used for Android builds are `mbg-mobile`, `mbp-mobile`, `mbu-mobile` or `pq-mobile`.  
 Clone [this repository](https://github.com/RandomityGuy/MBHaxeAndroidLibs) containing the necessary libraries for the build and merge its src folder with that of Export/android/app/src folder.  
 Android NDK version 18.1.5063045 and platform SDK version 31 is needed.  
 Install zyheaps haxelib as well.  
@@ -101,7 +107,7 @@ Finally run `gradlew` in Export/android folder and run `gradlew assembleRelease`
 This will build the apk file at Export/android/app/build/outputs/apk/release/app-release-unsigned.apk which you can sign yourself and install on your device.  
 
 ## iOS
-The branches used for iOS builds are `mbg-mobile`, `mbp-mobile` or `mbu-mobile`. Follow the CI scripts in the .circleci folder to build the iOS version. You will need a Mac with Xcode installed and an Apple Developer account to build the iOS version. The resulting .ipa file can be sideloaded onto your device using AltStore or similar tools.
+The branches used for iOS builds are `mbg-mobile`, `mbp-mobile`, `mbu-mobile` or `pq-mobile`. Follow the CI scripts in the .circleci folder to build the iOS version. You will need a Mac with Xcode installed and an Apple Developer account to build the iOS version. The resulting .ipa file can be sideloaded onto your device using AltStore or similar tools.
 
 # FAQ
 
