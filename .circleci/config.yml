@@ -268,7 +268,7 @@ jobs:
           command: |
             cd ~/MBHaxe
             ./package-macos.sh v$COMMIT_TAG
-            cd "macos-dist/MarbleBlast Platinum.app/Contents/MacOS"
+            cd "macos-dist/MBHaxe PlatinumQuest.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
             cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll,datachannel.hdll} .
@@ -292,24 +292,24 @@ jobs:
           name: Sign app bundle
           command: |
             cd ~/MBHaxe/macos-dist
-            xattr -rc "MarbleBlast Platinum.app"
-            cp "MarbleBlast Platinum.app/Contents/Entitlements.plist" .
-            codesign --deep --entitlements Entitlements.plist -fs - "MarbleBlast Platinum.app"
+            xattr -rc "MBHaxe PlatinumQuest.app"
+            cp "MBHaxe PlatinumQuest.app/Contents/Entitlements.plist" .
+            codesign --deep --entitlements Entitlements.plist -fs - "MBHaxe PlatinumQuest.app"
 
       - run:
           name: ZIP Bundle
           command: |
             cd ~/MBHaxe/macos-dist
             npm install -g create-dmg
-            create-dmg --dmg-title="Marble Blast Platinum" "MarbleBlast Platinum.app" || true
-            rm -rf "macos-dist/MarbleBlast Platinum.app.in"
-            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-Platinum-Mac.dmg"
+            create-dmg --dmg-title="MBHaxe PlatinumQuest" "MBHaxe PlatinumQuest.app" || true
+            rm -rf "macos-dist/MBHaxe PlatinumQuest.app.in"
+            mv "marblegame vpipeline.git.tag.dmg" "MBHaxe-PlatinumQuest-Mac.dmg"
             # zip -r MBHaxe-Ultra-Mac.zip macos-dist/
 
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-Platinum-Mac.dmg $REMOTEDIR/MBHaxe-Platinum-Mac.dmg
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/macos-dist/MBHaxe-PlatinumQuest-Mac.dmg $REMOTEDIR/MBHaxe-PlatinumQuest-Mac.dmg
 
       # - store_artifacts:
       #     path: ~/MBHaxe/MBHaxe-Platinum-Mac.zip
@@ -443,12 +443,12 @@ jobs:
             name: Zip bundle
             command: |
               cd ~/project
-              7z a MBHaxe-Platinum-Win.zip release/
+              7z a MBHaxe-PlatinumQuest-Win.zip release/
 
         - run:
             name: Upload to Artifact Storage
             command: |
-              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-Platinum-Win.zip $REMOTEDIR/MBHaxe-Platinum-Win.zip
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/project/MBHaxe-PlatinumQuest-Win.zip $REMOTEDIR/MBHaxe-PlatinumQuest-Win.zip
         # - store_artifacts:
         #     path: ~/project/MBHaxe-Platinum-Win.zip
 
@@ -577,7 +577,7 @@ jobs:
       - run:
           name: Package portable bundle
           command: |
-            DIST=$HOME/MBHaxe-Platinum-Linux
+            DIST=$HOME/MBHaxe-PlatinumQuest-Linux
             mkdir -p "$DIST"
 
             # Native binary
@@ -671,14 +671,14 @@ jobs:
             ln -sf libhl.so.1 libhl.so
 
             cd $HOME
-            tar -czvf MBHaxe-Platinum-Linux.tar.gz MBHaxe-Platinum-Linux
+            tar -czvf MBHaxe-PlatinumQuest-Linux.tar.gz MBHaxe-PlatinumQuest-Linux
 
       - run:
           name: Upload to Artifact Storage
           command: |
             scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT \
-              $HOME/MBHaxe-Platinum-Linux.tar.gz \
-              $REMOTEDIR/MBHaxe-Platinum-Linux.tar.gz
+              $HOME/MBHaxe-PlatinumQuest-Linux.tar.gz \
+              $REMOTEDIR/MBHaxe-PlatinumQuest-Linux.tar.gz
 
 
 
