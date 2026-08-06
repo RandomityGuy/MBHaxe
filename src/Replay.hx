@@ -240,8 +240,6 @@ class Replay {
 		frameData.push(recordScratch.gravity.z);
 		frameData.push(recordScratch.gravityInstant ? 1 : 0);
 		frameData.push(recordScratch.gravityChange ? 1 : 0);
-		// Explicitly clear (not just conditionally set) so a frame index that's being re-recorded
-		// after a `spliceReplay` doesn't inherit a stale pickup from whatever used to occupy this slot.
 		if (recordScratch.powerupPickup != null)
 			powerupPickups.set(frameCount, recordScratch.powerupPickup);
 		else
@@ -415,7 +413,12 @@ class Replay {
 	}
 
 	function interpolateInto(a:ReplayFrame, b:ReplayFrame, time:Float, out:ReplayFrame) {
-		var t = (time - a.time) / (b.time - a.time);
+		// Defensive guard against a zero (or near-zero) segment duration - `spliceReplay` avoids ever
+		// recording one of these, but dividing by zero here would produce NaN across every
+		// interpolated field, so this stays cheap insurance rather than trusting that invariant to
+		// hold from every possible caller/future change.
+		var timeDelta = b.time - a.time;
+		var t = timeDelta > 0.00001 ? (time - a.time) / timeDelta : 0;
 		var dt = time - a.time;
 		var clockDt = b.clockTime - a.clockTime;
 
@@ -567,24 +570,19 @@ class Replay {
 	}
 
 	public function spliceReplay(cutAfterTime:Float) {
-		while (frameCount > 0 && frameData[(frameCount - 1) * STRIDE + OFF_TIME] > cutAfterTime) {
+		while (frameCount > 0 && frameData[(frameCount - 1) * STRIDE + OFF_TIME] >= cutAfterTime) {
 			frameCount--;
 		}
-		if (this.initialState.randomGenTimes.length > 0) {
-			var rtimeIdx = this.initialState.randomGenTimes.length - 1;
-			while (this.initialState.randomGenTimes[rtimeIdx] > cutAfterTime && this.initialState.randomGenTimes.length > 0) {
-				this.initialState.randomGenTimes.pop();
-				this.initialState.randomGens.pop();
-				rtimeIdx = this.initialState.randomGenTimes.length - 1;
-			}
+		frameData.resize(frameCount * STRIDE);
+		while (this.initialState.randomGenTimes.length > 0
+			&& this.initialState.randomGenTimes[this.initialState.randomGenTimes.length - 1] > cutAfterTime) {
+			this.initialState.randomGenTimes.pop();
+			this.initialState.randomGens.pop();
 		}
-		if (this.initialState.randomFloatTimes.length > 0) {
-			var ftimeIdx = this.initialState.randomFloatTimes.length - 1;
-			while (this.initialState.randomFloatTimes[ftimeIdx] > cutAfterTime && this.initialState.randomFloatTimes.length > 0) {
-				this.initialState.randomFloatTimes.pop();
-				this.initialState.randomFloats.pop();
-				ftimeIdx = this.initialState.randomFloatTimes.length - 1;
-			}
+		while (this.initialState.randomFloatTimes.length > 0
+			&& this.initialState.randomFloatTimes[this.initialState.randomFloatTimes.length - 1] > cutAfterTime) {
+			this.initialState.randomFloatTimes.pop();
+			this.initialState.randomFloats.pop();
 		}
 	}
 
