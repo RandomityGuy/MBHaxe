@@ -134,7 +134,7 @@ jobs:
         - run:
             name: Upload to Artifact Storage
             command: |
-              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/Export/android/app/build/outputs/apk/release/app-release-unsigned.apk $REMOTEDIR/MBHaxe-Platinum.apk
+              scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe/Export/android/app/build/outputs/apk/release/app-release-unsigned.apk $REMOTEDIR/MBHaxe-PlatinumQuest.apk
   # ---------------------------------------------------------------------------
   # iOS (native device, arm64) build.
   #
@@ -415,16 +415,16 @@ jobs:
             # --- package unsigned .ipa ---
             rm -rf Payload
             mkdir Payload
-            cp -R build/out/Marble\ Blast\ Platinum.app Payload/
-            zip -qr ~/MBHaxe-Platinum-iOS.ipa Payload
+            cp -R build/out/PlatinumQuest.app Payload/
+            zip -qr ~/MBHaxe-PlatinumQuest-iOS.ipa Payload
 
       - store_artifacts:
-          path: ~/MBHaxe-Platinum-iOS.ipa
+          path: ~/MBHaxe-PlatinumQuest-iOS.ipa
 
       - run:
           name: Upload to Artifact Storage
           command: |
-            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe-Platinum-iOS.ipa $REMOTEDIR/MBHaxe-Platinum-iOS.ipa
+            scp -o StrictHostKeyChecking=no -i $KEYPATH -P $PORT ~/MBHaxe-PlatinumQuest-iOS.ipa $REMOTEDIR/MBHaxe-PlatinumQuest-iOS.ipa
 
 
 # Invoke jobs via workflows

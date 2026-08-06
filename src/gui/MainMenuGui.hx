@@ -254,7 +254,7 @@ class MainMenuGui extends GuiControl {
 		};
 		dlText.text.onHyperlink = (v) -> {
 			#if sys
-			hxd.System.openURL("https://marbleblast.com/index.php/downloads");
+			Settings.open_web_url("https://marbleblast.com/index.php/downloads");
 			#end
 			#if js
 			js.Browser.window.open("https://marbleblast.com/index.php/downloads");
