@@ -428,9 +428,9 @@ class Radar {
 			if (projectedPos.z > 1)
 				arrowDir.scale(-1);
 
-			var tipPosition = ellipsePos.add(arrowDir.multiply(fullArrowLength));
-			var tipUpperPosition = ellipsePos.add(arrowDirPerp.multiply(fullArrowWidth / 2));
-			var tipLowerPosition = ellipsePos.add(arrowDirPerp.multiply(-fullArrowWidth / 2));
+			var tipPosition = ellipsePos.add(arrowDir.multiply(fullArrowLength * Settings.uiScale));
+			var tipUpperPosition = ellipsePos.add(arrowDirPerp.multiply(fullArrowWidth * Settings.uiScale / 2));
+			var tipLowerPosition = ellipsePos.add(arrowDirPerp.multiply(-fullArrowWidth * Settings.uiScale / 2));
 
 			g.beginFill(color, 0.6);
 			g.lineStyle(1, 0, 0.6);

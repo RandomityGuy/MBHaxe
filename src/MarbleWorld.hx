@@ -2599,8 +2599,8 @@ class MarbleWorld extends Scheduler {
 		var centerProjected = camera.project(marblePos.x, marblePos.y, marblePos.z, this.scene2d.width, this.scene2d.height);
 		var sideProjected = camera.project(sidePos.x, sidePos.y, sidePos.z, this.scene2d.width, this.scene2d.height);
 
-		var x = sideProjected.x + (70 / 800) * this.scene2d.width * Settings.uiScale;
-		var y = centerProjected.y - (50 / 600) * this.scene2d.height * Settings.uiScale;
+		var x = sideProjected.x + (70 / 800) * this.scene2d.width; // * Settings.uiScale;
+		var y = centerProjected.y - (50 / 600) * this.scene2d.height; // * Settings.uiScale;
 
 		var bubbleShown = this.marble.bubbleInfinite || this.marble.bubbleTime > 0;
 		var fireballShown = this.marble.fireball;

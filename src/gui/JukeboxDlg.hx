@@ -49,8 +49,12 @@ class JukeboxDlg extends GuiControl {
 		var playing:Bool = !AudioManager.currentMusicPaused;
 		var selectedIdx:Int = 0;
 
-		var currentPlayingSong = StringTools.replace(AudioManager.currentMusicName, ".ogg", "");
-		selectedIdx = songList.indexOf(currentPlayingSong);
+		var currentPlayingSong = StringTools.replace(AudioManager.currentMusicName, ".ogg", "").toLowerCase();
+		for (i in 0...songList.length)
+			if (songList[i].toLowerCase() == currentPlayingSong) {
+				selectedIdx = i;
+				break;
+			}
 
 		var songTitle = new GuiMLText(squishneyFont28, null);
 		songTitle.position = new Vector(54, 224);

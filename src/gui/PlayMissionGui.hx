@@ -780,7 +780,7 @@ class PlayMissionGui extends GuiControl {
 
 			var mlist = currentList;
 
-			var containerYSize = missionListContainer.getRenderRectangle().extent.y;
+			var containerYSize = missionListContainer.getRenderRectangle().extent.y / Settings.uiScale;
 
 			var maxCount = Math.floor(containerYSize / 40.0) - 1; // size is 40 for each row, reserve one last row for pagination buttons
 			var totalPages = Math.ceil(mlist.length / maxCount);
@@ -1102,9 +1102,9 @@ class PlayMissionGui extends GuiControl {
 
 							sFmt.push('${i}. 
 								<offset value="15">${StringTools.htmlEscape(score.name.substr(0, 30))}</offset>
-								<offset value="${boxRenderRect.extent.x - 228 - 120 - missionInfoLeft.position.x - 10}">${scoreType == Time ? Util.formatTime(score.score) : Util.formatScore(Std.int(score.score))}</offset>
-								<offset value="${boxRenderRect.extent.x - 228 - 100 + 64 - missionInfoLeft.position.x - 10}"><img src="${platformToString(score.platform)}"/></offset>
-								${score.rewind == 1 ? '<offset value="${boxRenderRect.extent.x - 228 - 16 - missionInfoLeft.position.x - 10}"><img src="rewind"/></offset> ' : ""}');
+								<offset value="${boxRenderRect.extent.x / Settings.uiScale - 228 - 120 - missionInfoLeft.position.x / Settings.uiScale - 20}">${scoreType == Time ? Util.formatTime(score.score) : Util.formatScore(Std.int(score.score))}</offset>
+								<offset value="${boxRenderRect.extent.x / Settings.uiScale - 228 - 100 + 64 - missionInfoLeft.position.x / Settings.uiScale - 20}"><img src="${platformToString(score.platform)}"/></offset>
+								${score.rewind == 1 ? '<offset value="${boxRenderRect.extent.x / Settings.uiScale - 228 - 16 - missionInfoLeft.position.x / Settings.uiScale - 20}"><img src="rewind"/></offset> ' : ""}');
 							i++;
 						}
 						text += sFmt.join('<br/>');
@@ -1168,20 +1168,22 @@ class PlayMissionGui extends GuiControl {
 			var boxRenderRect = infoBox.getRenderRectangle();
 			var infoBoxRect = infoBox.getRenderRectangle();
 
-			missionInfoLeft.extent.x = boxRenderRect.extent.x - 228 - missionInfoLeft.position.x - 10;
-			missionInfoRight.extent.x = boxRenderRect.extent.x - 228 - missionInfoRight.position.x - 10;
-			missionModesInfo.extent.x = boxRenderRect.extent.x - 228 - missionModesInfo.position.x - 10;
+			missionInfoLeft.extent.x = boxRenderRect.extent.x / Settings.uiScale - 228 - missionInfoLeft.position.x / Settings.uiScale - 10 * Settings.uiScale;
+			missionInfoRight.extent.x = boxRenderRect.extent.x / Settings.uiScale - 228 - missionInfoRight.position.x / Settings.uiScale
+				- 10 * Settings.uiScale;
+			missionModesInfo.extent.x = boxRenderRect.extent.x / Settings.uiScale - 228 - missionModesInfo.position.x / Settings.uiScale
+				- 10 * Settings.uiScale;
 
 			var sepExtents = sep.getRenderRectangle();
 
-			missionScoresInfoRight.extent.x = infoBoxRect.extent.x - (sepExtents.position.x - infoBoxRect.position.x) - 20;
-			missionScoresInfoLeft.extent.x = infoBoxRect.extent.x - (sepExtents.position.x - infoBoxRect.position.x) - 20;
+			missionScoresInfoRight.extent.x = (infoBoxRect.extent.x - (sepExtents.position.x - infoBoxRect.position.x)) / Settings.uiScale - 20;
+			missionScoresInfoLeft.extent.x = (infoBoxRect.extent.x - (sepExtents.position.x - infoBoxRect.position.x)) / Settings.uiScale - 20;
 
 			// missionScoresInfoLeft.position.x = missionScoresInfoLeft.extent.x / 2;
 			// missionScoresInfoRight.position.x = missionScoresInfoRight.extent.x / 2;
 
-			var descTextHeight = missionInfoLeft.text.textHeight;
-			var modeTextHeight = missionModesInfo.text.textHeight;
+			var descTextHeight = missionInfoLeft.text.textHeight / Settings.uiScale;
+			var modeTextHeight = missionModesInfo.text.textHeight / Settings.uiScale;
 
 			var panelSize = 238.0;
 			if (descTextHeight > 128)
@@ -1193,7 +1195,7 @@ class PlayMissionGui extends GuiControl {
 			infoBox.position.y = 230 + (238 - panelSize);
 			missionModesInfo.position.y = 142 + 57 + (panelSize - 238) - (modeTextHeight - 40);
 
-			var textWidth = missionTitle.text.textWidth;
+			var textWidth = missionTitle.text.textWidth / Settings.uiScale;
 			if (textWidth > missionInfoLeft.extent.x)
 				missionTitle.text.setScale(missionInfoLeft.extent.x / textWidth);
 			else
@@ -1284,6 +1286,7 @@ class PlayMissionGui extends GuiControl {
 
 	public override function render(scene2d:Scene, ?parent:h2d.Flow) {
 		super.render(scene2d, parent);
+		setSelectedFunc(currentSelectionStatic);
 		setSelectedFunc(currentSelectionStatic);
 	}
 

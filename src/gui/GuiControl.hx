@@ -247,16 +247,16 @@ class GuiControl {
 			if (this.parent != null && parent.extent.x != 0) {
 				var newLeft = this.position.x * parentRect.extent.x / parent.extent.x;
 				var newRight = (this.position.x + this.extent.x) * parentRect.extent.x / parent.extent.x;
-				rect.position.x = parentRect.position.x + newLeft * uiScaleFactor;
-				rect.extent.x = (newRight - newLeft) * uiScaleFactor;
+				rect.position.x = parentRect.position.x + newLeft; // * uiScaleFactor;
+				rect.extent.x = (newRight - newLeft); // * uiScaleFactor;
 			}
 		}
 		if (this.vertSizing == VertSizing.Relative) {
 			if (this.parent != null && parent.extent.y != 0) {
 				var newTop = this.position.y * parentRect.extent.y / parent.extent.y;
 				var newBottom = (this.position.y + this.extent.y) * parentRect.extent.y / parent.extent.y;
-				rect.position.y = parentRect.position.y + newTop * uiScaleFactor;
-				rect.extent.y = (newBottom - newTop) * uiScaleFactor;
+				rect.position.y = parentRect.position.y + newTop; // * uiScaleFactor;
+				rect.extent.y = (newBottom - newTop); // * uiScaleFactor;
 			}
 		}
 		if (this.parent != null) {
@@ -336,12 +336,12 @@ class GuiControl {
 		}
 		if (this.horizSizing == HorizSizing.Relative) {
 			if (this.parent != null && parent.extent.x != 0) {
-				offset.x = this.position.x * parentRect.extent.x / parent.extent.x * uiScaleFactor;
+				offset.x = this.position.x * parentRect.extent.x / parent.extent.x; // * uiScaleFactor;
 			}
 		}
 		if (this.vertSizing == VertSizing.Relative) {
 			if (this.parent != null && parent.extent.y != 0) {
-				offset.y = this.position.y * parentRect.extent.y / parent.extent.y * uiScaleFactor;
+				offset.y = this.position.y * parentRect.extent.y / parent.extent.y; // * uiScaleFactor;
 			}
 		}
 		offset.x = Math.floor(offset.x);

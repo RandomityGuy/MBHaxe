@@ -4,6 +4,7 @@ import h3d.Vector;
 import h2d.Scene;
 import h2d.Flow;
 import h2d.Tile;
+import src.Settings;
 
 class GuiBitmapBorderCtrl extends GuiControl {
 	var tiles:Array<Tile>;
@@ -67,36 +68,39 @@ class GuiBitmapBorderCtrl extends GuiControl {
 		var bottom = bmps[7];
 
 		tl.setPosition(0, 0);
+		tl.width = tl.tile.width * Settings.uiScale;
 
-		tr.setPosition(Math.floor(renderRect.extent.x - tr.tile.width), 0);
+		tr.setPosition(Math.floor(renderRect.extent.x - tr.tile.width * Settings.uiScale), 0);
+		tr.width = tr.tile.width * Settings.uiScale;
 
-		bl.setPosition(0, Math.floor(renderRect.extent.y - bl.tile.height));
+		bl.setPosition(0, Math.floor(renderRect.extent.y - bl.tile.height * Settings.uiScale));
+		bl.width = bl.tile.width * Settings.uiScale;
 
-		br.setPosition(Math.floor(renderRect.extent.x - tr.tile.width), Math.floor(renderRect.extent.y - bl.tile.height));
-
+		br.setPosition(Math.floor(renderRect.extent.x - tr.tile.width * Settings.uiScale), Math.floor(renderRect.extent.y - bl.tile.height * Settings.uiScale));
+		br.width = br.tile.width * Settings.uiScale;
 		// now for the sides
 
-		top.setPosition(tl.tile.width, 0);
-		top.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
-		top.height = top.tile.height;
+		top.setPosition(tl.tile.width * Settings.uiScale, 0);
+		top.width = Math.floor(renderRect.extent.x - tl.tile.width * Settings.uiScale - tr.tile.width * Settings.uiScale);
+		top.height = top.tile.height * Settings.uiScale;
 
-		left.setPosition(0, tl.tile.height);
-		left.height = Math.floor(renderRect.extent.y - tl.tile.height - bl.tile.height);
-		left.width = left.tile.width;
+		left.setPosition(0, tl.tile.height * Settings.uiScale);
+		left.height = Math.floor(renderRect.extent.y - tl.tile.height * Settings.uiScale - bl.tile.height * Settings.uiScale);
+		left.width = left.tile.width * Settings.uiScale;
 
-		right.setPosition(Math.floor(renderRect.extent.x - tr.tile.width), tl.tile.height);
-		right.height = Math.floor(renderRect.extent.y - tl.tile.height - bl.tile.height);
-		right.width = right.tile.width;
+		right.setPosition(Math.floor(renderRect.extent.x - tr.tile.width * Settings.uiScale), tl.tile.height * Settings.uiScale);
+		right.height = Math.floor(renderRect.extent.y - tl.tile.height * Settings.uiScale - bl.tile.height * Settings.uiScale);
+		right.width = right.tile.width * Settings.uiScale;
 
-		bottom.setPosition(bl.tile.width, Math.floor(renderRect.extent.y - bl.tile.height));
-		bottom.width = Math.floor(renderRect.extent.x - bl.tile.width - br.tile.width);
-		bottom.height = bottom.tile.height;
+		bottom.setPosition(bl.tile.width * Settings.uiScale, Math.floor(renderRect.extent.y - bl.tile.height * Settings.uiScale));
+		bottom.width = Math.floor(renderRect.extent.x - bl.tile.width * Settings.uiScale - br.tile.width * Settings.uiScale);
+		bottom.height = bottom.tile.height * Settings.uiScale;
 
 		// // the fill
 		var fill = bmps[8];
-		fill.setPosition(tl.tile.width, tl.tile.height);
-		fill.width = Math.floor(renderRect.extent.x - tl.tile.width - tr.tile.width);
-		fill.height = Math.floor(renderRect.extent.y - tr.tile.height - bl.tile.height);
+		fill.setPosition(tl.tile.width * Settings.uiScale, tl.tile.height * Settings.uiScale);
+		fill.width = Math.floor(renderRect.extent.x - tl.tile.width * Settings.uiScale - tr.tile.width * Settings.uiScale);
+		fill.height = Math.floor(renderRect.extent.y - tr.tile.height * Settings.uiScale - bl.tile.height * Settings.uiScale);
 
 		super.render(scene2d, parent);
 	}

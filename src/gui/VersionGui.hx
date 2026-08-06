@@ -67,7 +67,7 @@ class VersionGui extends GuiControl {
 		changelogContent.text.textColor = 0;
 		changelogContent.scrollable = true;
 		changelogContent.text.text = "Loading changelog, please wait.<br/>";
-		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/master/CHANGELOG.md", (res) -> {
+		Http.get("https://raw.githubusercontent.com/RandomityGuy/MBHaxe/pq/CHANGELOG.md", (res) -> {
 			var mdtext = res.toString();
 			var res = "<br/>";
 			changelogContent.text.text = "";

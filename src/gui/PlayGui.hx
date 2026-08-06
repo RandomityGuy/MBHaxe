@@ -1321,7 +1321,7 @@ class PlayGui {
 		helpTextBackground.vertSizing = Height;
 		helpTextBackground.horizSizing = Width;
 		helpTextBackground.text.textAlign = Center;
-		helpTextBackground.text.maxWidth = 550;
+		helpTextBackground.text.maxWidth = 550 * Settings.uiScale;
 		helpTextBackground.justify = Pass;
 
 		helpTextForeground = new GuiText(bfont);
@@ -1332,7 +1332,7 @@ class PlayGui {
 		helpTextForeground.vertSizing = Height;
 		helpTextForeground.horizSizing = Width;
 		helpTextForeground.text.textAlign = Center;
-		helpTextForeground.text.maxWidth = 550;
+		helpTextForeground.text.maxWidth = 550 * Settings.uiScale;
 		helpTextForeground.justify = Pass;
 
 		var chatBubbleIconTile = ResourceLoader.getResource('data/ui/game/help/help_icon.png', ResourceLoader.getImage, this.imageResources).toTile();
@@ -2111,7 +2111,7 @@ class PlayGui {
 		bg.extent = new Vector(width - 30, 46);
 		bg.text.textColor = 0x777777;
 		bg.text.text = message;
-		bg.text.maxWidth = width - 30;
+		bg.text.maxWidth = width * Settings.uiScale - 30 * Settings.uiScale;
 		inner.addChild(bg);
 
 		var fg = new GuiMLText(this.toastMessageFont, s -> null);
@@ -2121,7 +2121,7 @@ class PlayGui {
 		fg.extent = new Vector(width - 30, 46);
 		fg.text.textColor = 0xFFFFFF;
 		fg.text.text = message;
-		fg.text.maxWidth = width - 30;
+		fg.text.maxWidth = width * Settings.uiScale - 30 * Settings.uiScale;
 		inner.addChild(fg);
 
 		var textHeight = fg.text.textHeight / Settings.uiScale;

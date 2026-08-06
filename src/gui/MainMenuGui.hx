@@ -34,6 +34,7 @@ class MainMenuGui extends GuiControl {
 		var squishneyb = new BitmapFont(squishneyfontdata.entry);
 		@:privateAccess squishneyb.loader = ResourceLoader.loader;
 		var squishney32 = squishneyb.toSdfFont(cast 29 * Settings.uiScale, MultiChannel);
+		var squishney24 = squishneyb.toSdfFont(cast 21 * Settings.uiScale, MultiChannel);
 
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -238,6 +239,29 @@ class MainMenuGui extends GuiControl {
 		}
 		this.addChild(github);
 
+		var dlText = new GuiMLText(squishney24, null);
+
+		dlText.horizSizing = Left;
+		dlText.vertSizing = Top;
+		dlText.position = new Vector(0, 564);
+		dlText.extent = new Vector(497, 72);
+		dlText.text.text = '<a href="download">Click here to get the original game at MarbleBlast.com</a>';
+		dlText.text.dropShadow = {
+			dx: 1 * Settings.uiScale,
+			dy: 1 * Settings.uiScale,
+			alpha: 0.5,
+			color: 0
+		};
+		dlText.text.onHyperlink = (v) -> {
+			#if sys
+			hxd.System.openURL("https://marbleblast.com/index.php/downloads");
+			#end
+			#if js
+			js.Browser.window.open("https://marbleblast.com/index.php/downloads");
+			#end
+		};
+		this.addChild(dlText);
+
 		#if js
 		var mbg = new GuiButton(loadStaticButtonImages("data/ui/icon_mbg"));
 		mbg.horizSizing = Right;
@@ -249,10 +273,20 @@ class MainMenuGui extends GuiControl {
 		}
 		this.addChild(mbg);
 
+		var mbp = new GuiButton(loadStaticButtonImages("data/ui/icon_mbp"));
+		mbp.horizSizing = Right;
+		mbp.vertSizing = Top;
+		mbp.position = new Vector(76, 510);
+		mbp.extent = new Vector(76, 76);
+		mbp.pressedAction = (sender) -> {
+			js.Browser.window.open("https://marbleblast.randomityguy.me");
+		}
+		this.addChild(mbp);
+
 		var mbu = new GuiButton(loadStaticButtonImages("data/ui/icon_mbu"));
 		mbu.horizSizing = Right;
 		mbu.vertSizing = Top;
-		mbu.position = new Vector(76, 510);
+		mbu.position = new Vector(152, 510);
 		mbu.extent = new Vector(76, 76);
 		mbu.pressedAction = (sender) -> {
 			js.Browser.window.open("https://marbleblastultra.randomityguy.me");

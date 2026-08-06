@@ -759,8 +759,8 @@ class HtmlText extends Text {
 					}
 					if (shadowChanged) {
 						curShadow = {
-							dx: shadowDx,
-							dy: shadowDy,
+							dx: shadowDx * Settings.uiScale,
+							dy: shadowDy * Settings.uiScale,
 							color: shadowColor,
 							alpha: shadowAlpha
 						};
