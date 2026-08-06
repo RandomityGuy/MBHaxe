@@ -161,18 +161,10 @@ class HuntMode extends NullMode {
 					}
 				} else if (element._type == MissionElementType.SimGroup) {
 					var scanPls = true;
-					if (Net.connectedServerInfo.oldSpawns) {
-						if (element._name.toLowerCase() == "newversion") {
-							// Remove this
-							elToRemove.push(element);
-							scanPls = false;
-						}
-					} else {
-						if (element._name.toLowerCase() == "oldversion") {
-							// Remove this
-							elToRemove.push(element);
-							scanPls = false;
-						}
+					if (element._name.toLowerCase() == "oldversion") {
+						// Remove this
+						elToRemove.push(element);
+						scanPls = false;
 					}
 					if (scanPls)
 						scanMission(cast element);
@@ -979,7 +971,7 @@ class HuntMode extends NullMode {
 	}
 
 	override function update(t:src.TimeState) {
-		if (Net.connectedServerInfo.competitiveMode) {
+		if (Net.isMP && Net.connectedServerInfo.competitiveMode) {
 			if (competitiveTimerStartTicks != 0) {
 				var currentTime = Net.isHost ? t.ticks : @:privateAccess level.marble.serverTicks;
 				var endTime = competitiveTimerStartTicks + (20000 >> 5);

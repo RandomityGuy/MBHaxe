@@ -60,12 +60,12 @@ class EnterNameDlg extends GuiControl {
 		enterNameEdit.text.onFocus = (e) -> {
 			dlg.vertSizing = Bottom;
 			dlg.position = new Vector(110, 56);
-			dlg.render(MarbleGame.canvas.scene2d);
+			dlg.render(MarbleGame.canvas.scene2d, this._flow);
 		}
 		enterNameEdit.text.onFocusLost = (e) -> {
 			dlg.vertSizing = Center;
 			dlg.position = new Vector(110, 112);
-			dlg.render(MarbleGame.canvas.scene2d);
+			dlg.render(MarbleGame.canvas.scene2d, this._flow);
 		}
 
 		var okbutton = new GuiBorderButtonTextCtrl(ResourceLoader.getResource('data/ui/common/button.png', ResourceLoader.getImage, this.imageResources)
