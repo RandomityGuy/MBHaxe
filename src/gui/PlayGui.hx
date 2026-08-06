@@ -2014,7 +2014,7 @@ class PlayGui {
 				off += textHeight - 44;
 			}
 
-			this.helpTextContainer.position = new Vector(120, 620 - off - pct * (95 + 20));
+			this.helpTextContainer.position = new Vector(120, 620 - pct * (95 + 20 + off));
 			this.helpTextContainer.render(scene2d, @:privateAccess playGuiCtrl._flow);
 			@:privateAccess helpTextContainer._flow.overflow = Expand;
 		}
