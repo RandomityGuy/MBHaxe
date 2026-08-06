@@ -20,6 +20,11 @@ class CameraInput {
 
 	var collider:GuiGraphics;
 
+	static inline var DELTA_BUFFER_SIZE = 3;
+
+	var deltaBufferX:Array<Float> = [];
+	var deltaBufferY:Array<Float> = [];
+
 	public function new() {
 		var width = MarbleGame.canvas.scene2d.width;
 		var height = MarbleGame.canvas.scene2d.height;
@@ -65,6 +70,8 @@ class CameraInput {
 			this.identifier = e.touchId;
 			prevMouse.x = e.relX;
 			prevMouse.y = e.relY;
+			deltaBufferX.resize(0);
+			deltaBufferY.resize(0);
 		}
 
 		interactive.onMove = (e) -> {
@@ -83,7 +90,14 @@ class CameraInput {
 				scaleFactor = js.Browser.window.devicePixelRatio / Settings.zoomRatio;
 				#end
 				var jumpcam = MarbleGame.instance.touchInput.jumpButton.pressed || MarbleGame.instance.touchInput.powerupButton.pressed;
-				if (jumpcam) {
+
+				var cannonAiming = false;
+				if (MarbleGame.instance.world != null && MarbleGame.instance.world.marble != null) {
+					cannonAiming = MarbleGame.instance.world.marble.activeCannon != null
+						&& !MarbleGame.instance.world.marble.activeCannon.instant;
+				}
+
+				if (jumpcam && !cannonAiming) {
 					scaleFactor /= Settings.touchSettings.buttonJoystickMultiplier;
 				}
 				var inpX = delta.x / scaleFactor;
@@ -96,10 +110,27 @@ class CameraInput {
 						inpY = 0;
 				}
 
+				deltaBufferX.push(inpX);
+				deltaBufferY.push(inpY);
+				if (deltaBufferX.length > DELTA_BUFFER_SIZE)
+					deltaBufferX.shift();
+				if (deltaBufferY.length > DELTA_BUFFER_SIZE)
+					deltaBufferY.shift();
+
+				var smoothX = 0.0;
+				for (v in deltaBufferX)
+					smoothX += v;
+				smoothX /= deltaBufferX.length;
+
+				var smoothY = 0.0;
+				for (v in deltaBufferY)
+					smoothY += v;
+				smoothY /= deltaBufferY.length;
+
 				var dt = MarbleGame.instance.world.timeState.dt;
 
-				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((inpX / dt) * (1 / 60.0)) * (1 / 60.0) * 35,
-					applyNonlinearScale((inpY / dt) * (1 / 60.0)) * (1 / 60.0) * 35, true);
+				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((smoothX / dt) * (1 / 60.0)) * (1 / 60.0) * 35,
+					applyNonlinearScale((smoothY / dt) * (1 / 60.0)) * (1 / 60.0) * 35, true);
 
 				if (inpX != 0)
 					prevMouse.x = e.relX;
@@ -118,6 +149,8 @@ class CameraInput {
 
 			pressed = false;
 			this.identifier = -1;
+			deltaBufferX.resize(0);
+			deltaBufferY.resize(0);
 		}
 	}
 

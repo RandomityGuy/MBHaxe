@@ -184,6 +184,12 @@ class CameraController extends Object {
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
+		var cannonAiming = level.marble.activeCannon != null && !level.marble.activeCannon.instant;
+
+		if (cannonAiming) {
+			factor *= 0.4;
+		}
+
 		var camSpeedMul = marble != null ? marble._cameraSpeedMultiplier : 1.0;
 		nextCameraPitch += deltaposY * factor * camSpeedMul;
 		nextCameraYaw += deltaposX * factor * camSpeedMul;
