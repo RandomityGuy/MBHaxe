@@ -431,6 +431,17 @@ jobs:
               haxelib install colyseus-websocket
 
         - run:
+            name: Generate C source
+            command: |
+              export PATH=/tmp/haxe/haxe:"$PATH"
+              export HAXE_STD_PATH=/tmp/haxe/haxe/std
+              nekopath=$(/bin/find /c/ProgramData/chocolatey/lib/neko -name neko.dll -printf '%h\n')
+              set NEKOPATH=$nekopath
+              export PATH=$nekopath:"$PATH"
+              cd ~/project
+              haxe compile-c.hxml
+              
+        - run:
             name: Compile MBHaxe
             command: |
               cd ~/project/native
