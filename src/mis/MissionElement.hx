@@ -78,6 +78,9 @@ class MissionElementScriptObject extends MissionElementBase {
 	var maxgemsperspawn:String;
 	var radiusfromgem:String;
 	var spawnblock:String;
+	var minpointsperspawn:String;
+	var mingemsperspawn:String;
+	var gemgroups:String;
 	var overviewwidth:String;
 	var overviewheight:String;
 	var spawnchancered:String;
@@ -88,6 +91,7 @@ class MissionElementScriptObject extends MissionElementBase {
 	var yellowspawnchance:String;
 	var bluespawnchance:String;
 	var platinumspawnchance:String;
+	var easteregg:String;
 
 	// 2D
 	var cameraplane:String;

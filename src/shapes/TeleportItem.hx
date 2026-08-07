@@ -18,6 +18,7 @@ class TeleportItem extends PowerUp {
 		this.identifier = "TeleportItem";
 		this.pickUpName = "Teleport PowerUp";
 		this.radarIndex = 31;
+		this.holdUsable = false;
 
 		var keepVelocityField = this.element.fields.get("keepvelocity");
 		var keepVelocity = keepVelocityField != null && MisParser.parseBoolean(keepVelocityField[0]);

@@ -143,9 +143,11 @@ class Gem extends DtsObject {
 	var spawnGemParticles:Bool;
 	var gemParticleData:ParticleData;
 	var gemEmitter:ParticleEmitter;
+	var element:MissionElementItem;
 
 	public function new(element:MissionElementItem) {
 		super();
+		this.element = element;
 		var isFancy = StringTools.startsWith(element.datablock, "FancyGemItem");
 		var isPQ = StringTools.endsWith(element.datablock, "_PQ");
 		var isMbu = StringTools.endsWith(element.datablock, "_MBU");

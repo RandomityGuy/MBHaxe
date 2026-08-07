@@ -20,6 +20,7 @@ abstract class PowerUp extends DtsObject {
 	public var element:MissionElementItem;
 	public var pickupSound:Sound;
 	public var netIndex:Int;
+	public var holdUsable:Bool = true;
 
 	public var radarIndex:Int;
 
