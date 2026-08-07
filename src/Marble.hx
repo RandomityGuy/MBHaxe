@@ -3250,7 +3250,7 @@ class Marble extends GameObject {
 			this.collider.velocity = this.velocity;
 
 			if (this.heldPowerup != null
-				&& (m.powerup || (Net.isClient && this.serverUsePowerup && !this.controllable))
+				&& (m.powerup || m.powerupHeld || (Net.isClient && this.serverUsePowerup && !this.controllable))
 				&& !this.outOfBounds
 				&& this.powerupLockCount <= 0) {
 				var pTime = timeState.clone();
@@ -3259,7 +3259,13 @@ class Marble extends GameObject {
 				var netUpdate = this.isNetUpdate;
 				if (this.serverUsePowerup)
 					this.isNetUpdate = false;
-				var consumed = this.heldPowerup.use(this, pTime);
+				var consumed = false;
+				if (m.powerupHeld && this.heldPowerup.holdUsable)
+					consumed = this.heldPowerup.use(this, pTime);
+				else if (!this.heldPowerup.holdUsable && m.powerup) {
+					consumed = this.heldPowerup.use(this, pTime);
+					m.powerup = false;
+				}
 				this.isNetUpdate = netUpdate;
 				this.serverUsePowerup = false;
 				if (consumed) {

@@ -17,6 +17,7 @@ import h3d.Vector;
 import shapes.Gem;
 import mis.MisParser;
 import mis.MissionElement.MissionElementSimGroup;
+import mis.MissionElement.MissionElementItem;
 import octree.Octree;
 import mis.MissionElement.MissionElementTrigger;
 import mis.MissionElement.MissionElementType;
@@ -38,6 +39,7 @@ class HuntState implements RewindableState {
 	var points:Int;
 	var rngState:Int;
 	var rngState2:Int;
+	var groupSpawnCounts:Array<Int>;
 
 	public function new() {}
 
@@ -48,6 +50,7 @@ class HuntState implements RewindableState {
 		c.points = points;
 		c.rngState = rngState;
 		c.rngState2 = rngState2;
+		c.groupSpawnCounts = groupSpawnCounts.copy();
 		return c;
 	}
 
@@ -57,6 +60,7 @@ class HuntState implements RewindableState {
 		size += 2 + activeGems.length * 2;
 		size += 4; // rngState
 		size += 4; // rngState2
+		size += 2 + groupSpawnCounts.length * 2;
 		return size;
 	}
 
@@ -72,6 +76,10 @@ class HuntState implements RewindableState {
 		}
 		bw.writeInt32(rngState);
 		bw.writeInt32(rngState2);
+		bw.writeUInt16(groupSpawnCounts.length);
+		for (elem in groupSpawnCounts) {
+			bw.writeUInt16(elem);
+		}
 	}
 
 	public function deserialize(rm:RewindManager, br:haxe.io.BytesInput) {
@@ -89,6 +97,11 @@ class HuntState implements RewindableState {
 		}
 		rngState = br.readInt32();
 		rngState2 = br.readInt32();
+		groupSpawnCounts = [];
+		var len3 = br.readUInt16();
+		for (i in 0...len3) {
+			groupSpawnCounts.push(br.readUInt16());
+		}
 	}
 }
 
@@ -127,6 +140,24 @@ class GemSpawnPoint implements IOctreeObject {
 	}
 }
 
+@:structInit
+@:publicFields
+class GemSpawnCandidate {
+	var gem:Int;
+	var weight:Float;
+}
+
+@:publicFields
+class HuntGemGroup {
+	var gemIndices:Array<Int>;
+	var spawnCount:Int;
+
+	public function new(gemIndices:Array<Int>) {
+		this.gemIndices = gemIndices;
+		this.spawnCount = 0;
+	}
+}
+
 class HuntMode extends NullMode {
 	var playerSpawnPoints:Array<MissionElementTrigger> = [];
 	var spawnPointTaken = [];
@@ -138,6 +169,13 @@ class HuntMode extends NullMode {
 	var gemSpawnPoints:Array<GemSpawnPoint>;
 	var lastSpawn:GemSpawnPoint;
 	var activeGemSpawnGroup:Array<Int>;
+	// Mission-authored gem groups (MissionInfo.gemGroups): each element is the list of
+	// MissionElementItem gems found nested inside one child of the mission's "GemGroups"
+	// SimGroup. Correlated to runtime GemSpawnPoints in prepareGems().
+	var huntGemGroupElements:Array<Array<MissionElementItem>> = [];
+	var huntGemGroups:Array<HuntGemGroup> = [];
+	var huntGemGroupsMode:Int = 0;
+	var isFirstGemSpawn:Bool = false;
 	var gemBeams:Array<GemBeam> = [];
 	var gemToBeamMap:Map<Gem, GemBeam> = [];
 	var gemToBlackBeamMap:Map<Gem, GemBeam> = [];
@@ -147,6 +185,19 @@ class HuntMode extends NullMode {
 	var idealSpawnIndex:Int;
 	var expiredGems:Map<Gem, Bool> = [];
 	var competitiveTimerStartTicks:Int;
+
+	function collectGemElements(group:MissionElementSimGroup, out:Array<MissionElementItem>) {
+		for (element in group.elements) {
+			if (element._type == MissionElementType.Item) {
+				var item:MissionElementItem = cast element;
+				var db = item.datablock.toLowerCase();
+				if (StringTools.startsWith(db, "gemitem") || StringTools.startsWith(db, "fancygemitem"))
+					out.push(item);
+			} else if (element._type == MissionElementType.SimGroup) {
+				collectGemElements(cast element, out);
+			}
+		}
+	}
 
 	override function missionScan(mission:Mission) {
 		function scanMission(simGroup:MissionElementSimGroup) {
@@ -161,6 +212,17 @@ class HuntMode extends NullMode {
 					}
 				} else if (element._type == MissionElementType.SimGroup) {
 					var scanPls = true;
+					if (element._name.toLowerCase() == "gemgroups") {
+						var gemGroupsGroup:MissionElementSimGroup = cast element;
+						for (child in gemGroupsGroup.elements) {
+							if (child._type == MissionElementType.SimGroup) {
+								var groupElements:Array<MissionElementItem> = [];
+								collectGemElements(cast child, groupElements);
+								if (groupElements.length > 0)
+									huntGemGroupElements.push(groupElements);
+							}
+						}
+					}
 					if (Net.isMP && Net.connectedServerInfo.oldSpawns) {
 						if (element._name.toLowerCase() == "newversion") {
 							// Remove this
@@ -358,6 +420,19 @@ class HuntMode extends NullMode {
 				}
 			}
 			idealSpawnIndex = closestSpawnIndex;
+
+			huntGemGroupsMode = (level.mission.missionInfo.gemgroups != null
+				&& level.mission.missionInfo.gemgroups != "") ? Std.parseInt(level.mission.missionInfo.gemgroups) : 0;
+			huntGemGroups = [];
+			for (elements in huntGemGroupElements) {
+				var indices = [];
+				for (gsp in gemSpawnPoints) {
+					if (elements.indexOf(gsp.gem.element) != -1)
+						indices.push(gsp.netIndex);
+				}
+				if (indices.length > 0)
+					huntGemGroups.push(new HuntGemGroup(indices));
+			}
 		}
 		for (i in 0...spawnPointTaken.length) {
 			spawnPointTaken[i] = false;
@@ -406,12 +481,164 @@ class HuntMode extends NullMode {
 		this.rng.setSeed(cast Math.random() * 10000);
 		this.rng2.setSeed(cast Math.random() * 10000);
 		prepareGems();
+		isFirstGemSpawn = true;
 		spawnHuntGems();
+		isFirstGemSpawn = false;
+	}
+
+	function testSpawn(gem:Gem):Bool {
+		if (level.mission.missionInfo.game.toLowerCase() == "platinumquest") {
+			if (Net.isMP && Net.connectedServerInfo.oldSpawns) {
+				// Spawn chances!
+				var chance = switch (gem.gemColor.toLowerCase()) {
+					case "red.gem":
+						level.mission.missionInfo.spawnchancered != null ? Std.parseFloat(level.mission.missionInfo.spawnchancered) : 0.9;
+					case "yellow.gem":
+						level.mission.missionInfo.spawnchanceyellow != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceyellow) : 0.65;
+					case "blue.gem":
+						level.mission.missionInfo.spawnchanceblue != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceblue) : 0.35;
+					case "platinum.gem":
+						level.mission.missionInfo.spawnchanceplatinum != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceplatinum) : 0.18;
+					default:
+						1.0;
+				};
+				var choice = nextRandomFloat();
+				if (choice > chance)
+					return false;
+			} else {
+				// Spawn chances!
+				var chance = switch (gem.gemColor.toLowerCase()) {
+					case "red.gem":
+						level.mission.missionInfo.redspawnchance != null ? Std.parseFloat(level.mission.missionInfo.redspawnchance) : 0.9;
+					case "yellow.gem":
+						level.mission.missionInfo.yellowspawnchance != null ? Std.parseFloat(level.mission.missionInfo.yellowspawnchance) : 0.65;
+					case "blue.gem":
+						level.mission.missionInfo.bluespawnchance != null ? Std.parseFloat(level.mission.missionInfo.bluespawnchance) : 0.35;
+					case "platinum.gem":
+						level.mission.missionInfo.platinumspawnchance != null ? Std.parseFloat(level.mission.missionInfo.platinumspawnchance) : 0.18;
+					default:
+						1.0;
+				};
+				var choice = nextRandomFloat();
+				if (choice > chance)
+					return false;
+			}
+		}
+		return true;
+	}
+
+	function commitSpawnSet(spawnSet:Array<Int>, force:Bool) {
+		if (!force)
+			activeGemSpawnGroup = spawnSet;
+		else {
+			var uncollectedGems = [];
+			for (g in activeGemSpawnGroup) {
+				if (!gemSpawnPoints[g].gem.pickedUp)
+					uncollectedGems.push(g);
+			}
+			activeGemSpawnGroup = uncollectedGems.concat(spawnSet);
+		}
+
+		if (level.isMultiplayer && Net.isHost) {
+			var bs = new OutputBitStream();
+			bs.writeByte(GemSpawn);
+			var packet = new GemSpawnPacket();
+			packet.gemIds = activeGemSpawnGroup;
+			packet.expireds = [];
+			for (i in 0...packet.gemIds.length) {
+				if (expiredGems.exists(gemSpawnPoints[packet.gemIds[i]].gem)) {
+					packet.expireds.push(true);
+				} else {
+					packet.expireds.push(false);
+				}
+			}
+			packet.serialize(bs);
+			Net.sendPacketToIngame(bs);
+		}
+	}
+
+	// Spawns every gem in a mission-authored gem group unconditionally (no radius search,
+	// no spawn-chance rolls) - MissionInfo.gemGroups mode 1.
+	function spawnEntireGemGroup(group:HuntGemGroup, force:Bool) {
+		var spawnSet = group.gemIndices.copy();
+		for (gem in spawnSet)
+			spawnGem(gem);
+		commitSpawnSet(spawnSet, force);
+	}
+
+	// Finds which gem group (if any) the given gem net index belongs to.
+	function findGemGroup(netIndex:Int):HuntGemGroup {
+		for (group in huntGemGroups) {
+			if (group.gemIndices.indexOf(netIndex) != -1)
+				return group;
+		}
+		return null;
+	}
+
+	// MissionInfo.gemGroups is set: gems are only ever spawned from within a single
+	// mission-authored group at a time, either wholesale (mode 1) or via a radius search
+	// scoped to that group's gems (mode 2). Which group spawns is either the group
+	// containing the single highest-value gem (on the very first spawn of the mission) or
+	// a random group weighted towards ones that have been spawned less recently.
+	function spawnHuntGemGroupsMode(force:Bool) {
+		var group:HuntGemGroup;
+
+		if (isFirstGemSpawn) {
+			var highest = 0;
+			for (g in huntGemGroups)
+				for (idx in g.gemIndices) {
+					var w = getGemWeight(gemSpawnPoints[idx].gem);
+					if (w > highest)
+						highest = w;
+				}
+			var validCenters:Array<GemSpawnPoint> = [];
+			for (g in huntGemGroups)
+				for (idx in g.gemIndices)
+					if (getGemWeight(gemSpawnPoints[idx].gem) == highest)
+						validCenters.push(gemSpawnPoints[idx]);
+
+			var center = validCenters[nextRandomInt(rng, 0, validCenters.length - 1)];
+			group = findGemGroup(center.netIndex);
+		} else if (huntGemGroups.length == 1) {
+			group = huntGemGroups[0];
+		} else {
+			var maxSpawnCount = 0;
+			for (g in huntGemGroups)
+				if (g.spawnCount > maxSpawnCount)
+					maxSpawnCount = g.spawnCount;
+			// Weight towards groups that have been spawned less recently: a group gets
+			// (maxSpawnCount - spawnCount + 2) entries in the weighted pool.
+			var weighted:Array<HuntGemGroup> = [];
+			for (g in huntGemGroups) {
+				var repeats = maxSpawnCount - g.spawnCount + 2;
+				for (i in 0...repeats)
+					weighted.push(g);
+			}
+			group = weighted[nextRandomInt(rng, 0, weighted.length - 1)];
+		}
+
+		group.spawnCount++;
+
+		if (huntGemGroupsMode == 2) {
+			spawnHuntGemsFromPool([for (idx in group.gemIndices) gemSpawnPoints[idx]], force);
+		} else {
+			spawnEntireGemGroup(group, force);
+		}
 	}
 
 	function spawnHuntGems(force:Bool = false) {
 		if (activeGems.length != 0 && !force)
 			return;
+
+		if (huntGemGroupsMode > 0 && huntGemGroups.length > 0) {
+			spawnHuntGemGroupsMode(force);
+			return;
+		}
+
+		spawnHuntGemsFromPool(gemSpawnPoints, force);
+	}
+
+	function spawnHuntGemsFromPool(pool:Array<GemSpawnPoint>, force:Bool = false) {
 		var gemGroupRadius = 15.0;
 		var maxGemsPerSpawn = 7;
 		if (level.mission.missionInfo.maxgemsperspawn != null && level.mission.missionInfo.maxgemsperspawn != "")
@@ -423,8 +650,13 @@ class HuntMode extends NullMode {
 			spawnBlock = Std.parseFloat(level.mission.missionInfo.spawnblock);
 
 		var minPointsPerSpawn = 5;
+		if (level.mission.missionInfo.minpointsperspawn != null && level.mission.missionInfo.minpointsperspawn != "")
+			minPointsPerSpawn = Std.parseInt(level.mission.missionInfo.minpointsperspawn);
 		var minGemsPerSpawn = 3;
+		if (level.mission.missionInfo.mingemsperspawn != null && level.mission.missionInfo.mingemsperspawn != "")
+			minGemsPerSpawn = Std.parseInt(level.mission.missionInfo.mingemsperspawn);
 		var maxSpawnSearchLoops = 15;
+		var maxPoints = 9999.0;
 
 		var lastPos = null;
 		if (lastSpawn != null)
@@ -455,104 +687,114 @@ class HuntMode extends NullMode {
 			spawnBlock *= blockFactor;
 		}
 
+		// Find every candidate that's far enough from lastPos (blockCenter), sampling
+		// up to 10 random gems. Unlike a single "first hit wins" search, ALL valid
+		// candidates found are collected so the center can be chosen randomly among them.
 		var furthestDist = 0.0;
-		var furthest = null;
-		var validGem = null;
+		var furthest:GemSpawnPoint = null;
+		var validCenters:Array<GemSpawnPoint> = [];
 
 		for (i in 0...10) {
-			var gem = gemSpawnPoints[nextRandomInt(rng, 0, gemSpawnPoints.length - 1)];
+			var gem = pool[nextRandomInt(rng, 0, pool.length - 1)];
 			if (lastPos != null) {
 				var dist = gem.gem.getAbsPos().getPosition().distance(lastPos) + gem.weight;
 				if (dist < spawnBlock) {
-					if (dist > furthestDist) {
-						furthestDist = dist;
+					if (validCenters.length == 0 && dist > furthestDist) {
+						furthestDist = dist - gem.weight;
 						furthest = gem;
 					}
-					continue;
 				} else {
-					validGem = gem;
-					break;
+					validCenters.push(gem);
 				}
 			} else {
-				validGem = gem;
-				break;
+				validCenters.push(gem);
 			}
 		}
-		if (validGem == null && furthest != null) {
-			validGem = furthest;
-		}
+		if (furthest != null)
+			validCenters.push(furthest);
 
+		var validGem:GemSpawnPoint = null;
+		if (validCenters.length > 0) {
+			// Draw 5 times from validCenters and keep the last draw (there's only ever
+			// a single spawn center, so the "furthest from previous centers" distance
+			// PQ tracks is always 0, which means every draw overwrites the last).
+			for (j in 0...5) {
+				validGem = validCenters[nextRandomInt(rng, 0, validCenters.length - 1)];
+			}
+		}
 		if (validGem == null) {
-			validGem = gemSpawnPoints[nextRandomInt(rng, 0, gemSpawnPoints.length - 1)];
+			validGem = pool[nextRandomInt(rng, 0, pool.length - 1)];
 		}
 		var pos = validGem.gem.getAbsPos().getPosition();
 
-		var results = [];
-		var spawned = 1;
-		var points = 1 + getGemWeight(validGem.gem);
-		var loops = 0;
+		// Gather every gem within range of the center as a spawn candidate (growing the
+		// search radius until we have enough points/gems, or we've looped twice).
+		var spawnables:Array<GemSpawnCandidate> = [];
+		var spawnablesSet:Map<Int, Bool> = [];
+		var gatherPoints = 1 + getGemWeight(validGem.gem);
+		var gatherLoops = 0;
 		var searchRadius = gemGroupRadius;
-		while ((results.length == 0 || points < minPointsPerSpawn) && loops < 2) {
-			var search = gemOctree.radiusSearch(pos, searchRadius);
-			for (elem in search) {
-				var gemElem:GemSpawnPoint = cast elem;
+		while ((gatherPoints < minPointsPerSpawn || spawnables.length < minGemsPerSpawn) && gatherLoops < 2) {
+			for (gemElem in pool) {
+				if (gemElem == validGem)
+					continue;
+				if (spawnablesSet.exists(gemElem.netIndex))
+					continue;
 				var gemPos = gemElem.gem.getAbsPos().getPosition();
-
-				if (level.mission.missionInfo.game.toLowerCase() == "platinumquest") {
-					if (Net.isMP && Net.connectedServerInfo.oldSpawns) {
-						// Spawn chances!
-						var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
-							case "red.gem":
-								level.mission.missionInfo.spawnchancered != null ? Std.parseFloat(level.mission.missionInfo.spawnchancered) : 0.9;
-							case "yellow.gem":
-								level.mission.missionInfo.spawnchanceyellow != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceyellow) : 0.65;
-							case "blue.gem":
-								level.mission.missionInfo.spawnchanceblue != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceblue) : 0.35;
-							case "platinum.gem":
-								level.mission.missionInfo.spawnchanceplatinum != null ? Std.parseFloat(level.mission.missionInfo.spawnchanceplatinum) : 0.18;
-							default:
-								1.0;
-						};
-						var choice = nextRandomFloat();
-						if (choice > chance)
-							continue; // Don't spawn!
-					} else {
-						// Spawn chances!
-						var chance = switch (gemElem.gem.gemColor.toLowerCase()) {
-							case "red.gem":
-								level.mission.missionInfo.redspawnchance != null ? Std.parseFloat(level.mission.missionInfo.redspawnchance) : 0.9;
-							case "yellow.gem":
-								level.mission.missionInfo.yellowspawnchance != null ? Std.parseFloat(level.mission.missionInfo.yellowspawnchance) : 0.65;
-							case "blue.gem":
-								level.mission.missionInfo.bluespawnchance != null ? Std.parseFloat(level.mission.missionInfo.bluespawnchance) : 0.35;
-							case "platinum.gem":
-								level.mission.missionInfo.platinumspawnchance != null ? Std.parseFloat(level.mission.missionInfo.platinumspawnchance) : 0.18;
-							default:
-								1.0;
-						};
-						var choice = nextRandomFloat();
-						if (choice > chance)
-							continue; // Don't spawn!
-					}
+				var delta = gemPos.sub(pos);
+				if (delta.length() < searchRadius) {
+					spawnablesSet.set(gemElem.netIndex, true);
+					var weight = searchRadius - delta.length() - Math.abs(delta.z) + nextRandomInt(rng, 0, getGemWeight(gemElem.gem) + 3);
+					spawnables.push({gem: gemElem.netIndex, weight: weight});
+					gatherPoints += getGemWeight(gemElem.gem) + 1;
 				}
-
-				results.push({
-					gem: gemElem.netIndex,
-					weight: searchRadius - gemPos.distance(pos) + nextRandomInt(rng, 0, getGemWeight(gemElem.gem) + 3)
-				});
-				points += getGemWeight(gemElem.gem) + 1;
 			}
-			loops++;
 			searchRadius *= 2;
+			gatherLoops++;
 		}
-		results.sort((a, b) -> {
+		spawnables.sort((a, b) -> {
 			if (a.weight > b.weight)
 				return -1;
 			if (a.weight < b.weight)
 				return 1;
 			return 0;
 		});
-		var spawnSet = results.slice(0, maxGemsPerSpawn).map(x -> x.gem);
+
+		// Gems already active from a previous cluster (only relevant on a forced re-roll)
+		// are skipped rather than re-selected.
+		var activeSet:Map<Int, Bool> = [];
+		if (force)
+			for (idx in activeGemSpawnGroup)
+				activeSet.set(idx, true);
+
+		// Select gems from the sorted candidates, re-rolling the spawn chance each retry
+		// loop, until we have enough points/gems or we've looped too many times. Note
+		// that selPoints/spawned are bumped every successful pass regardless of whether
+		// the candidate was already selected on an earlier loop, matching PQ's behavior.
+		// The center itself is excluded from the candidate pool above, so it's seeded
+		// into the spawn set directly here (matching PQ's %spawnSet.add(%center)).
+		var spawnSet:Array<Int> = [validGem.netIndex];
+		var spawned = 1;
+		var selPoints = 1 + getGemWeight(validGem.gem);
+		var selLoops = 0;
+		while ((selPoints < minPointsPerSpawn || spawned < minGemsPerSpawn) && selLoops < maxSpawnSearchLoops) {
+			var count = Std.int(Math.min(spawnables.length, maxGemsPerSpawn - 1));
+			for (i in 0...count) {
+				var cand = spawnables[i];
+				if (activeSet.exists(cand.gem))
+					continue;
+				if (!testSpawn(gemSpawnPoints[cand.gem].gem))
+					continue;
+				var value = 1 + getGemWeight(gemSpawnPoints[cand.gem].gem);
+				if (selPoints + value > maxPoints)
+					continue;
+				if (spawnSet.indexOf(cand.gem) == -1)
+					spawnSet.push(cand.gem);
+				selPoints += value;
+				spawned++;
+			}
+			selLoops++;
+		}
 
 		// Get the furthest gem
 		var maxDist = 0.0;
@@ -582,43 +824,12 @@ class HuntMode extends NullMode {
 			gem.weight -= min;
 		}
 
-		if (force) {
-			for (activeGem in activeGemSpawnGroup)
-				spawnSet.remove(activeGem);
-		}
-
 		for (gem in spawnSet) {
 			spawnGem(gem);
 		}
-		if (!force)
-			activeGemSpawnGroup = spawnSet;
-		else {
-			var uncollectedGems = [];
-			for (g in activeGemSpawnGroup) {
-				if (!gemSpawnPoints[g].gem.pickedUp)
-					uncollectedGems.push(g);
-			}
-			activeGemSpawnGroup = uncollectedGems.concat(spawnSet);
-		}
+		commitSpawnSet(spawnSet, force);
 
-		if (level.isMultiplayer && Net.isHost) {
-			var bs = new OutputBitStream();
-			bs.writeByte(GemSpawn);
-			var packet = new GemSpawnPacket();
-			packet.gemIds = activeGemSpawnGroup;
-			packet.expireds = [];
-			for (i in 0...packet.gemIds.length) {
-				if (expiredGems.exists(gemSpawnPoints[packet.gemIds[i]].gem)) {
-					packet.expireds.push(true);
-				} else {
-					packet.expireds.push(false);
-				}
-			}
-			packet.serialize(bs);
-			Net.sendPacketToIngame(bs);
-		}
-
-		lastSpawn = furthest;
+		lastSpawn = validGem;
 	}
 
 	function spawnGem(spawn:Int, expired:Bool = false) {
@@ -726,6 +937,8 @@ class HuntMode extends NullMode {
 	}
 
 	override public function getStartTime() {
+		if (level.mission.qualifyTime == 0 || level.mission.qualifyTime == Math.POSITIVE_INFINITY)
+			return 600.0; // 5 minutes default
 		return level.mission.qualifyTime;
 	}
 
@@ -1005,6 +1218,7 @@ class HuntMode extends NullMode {
 		s.activeGems = activeGems.copy();
 		s.rngState = @:privateAccess rng.seed;
 		s.rngState2 = @:privateAccess rng2.seed;
+		s.groupSpawnCounts = [for (g in huntGemGroups) g.spawnCount];
 		return s;
 	}
 
@@ -1030,6 +1244,8 @@ class HuntMode extends NullMode {
 		}
 		rng.setSeed(s.rngState);
 		rng2.setSeed(s.rngState2);
+		for (i in 0...huntGemGroups.length)
+			huntGemGroups[i].spawnCount = s.groupSpawnCounts[i];
 	}
 
 	override function constructRewindState():RewindableState {

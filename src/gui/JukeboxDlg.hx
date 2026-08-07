@@ -45,6 +45,7 @@ class JukeboxDlg extends GuiControl {
 		#end
 		var songFiles = ResourceLoader.fileSystem.dir(songPath);
 		var songList = songFiles.map(x -> StringTools.replace(x.name, ".ogg", ""));
+		songList.sort((x, y) -> x.toLowerCase() > y.toLowerCase() ? 1 : (x.toLowerCase() < y.toLowerCase() ? -1 : 0));
 
 		var playing:Bool = !AudioManager.currentMusicPaused;
 		var selectedIdx:Int = 0;

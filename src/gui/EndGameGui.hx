@@ -87,37 +87,14 @@ class EndGameGui extends GuiControl {
 		egTitleText.text.textColor = 0;
 		endGameBox.addChild(egTitleText);
 
-		var beatPar = false;
-		var beatPlatinum = false;
-		var beatUltimate = false;
-		var beatAwesome = false;
+		var prog = mission.calculateProgression(score, scoreType);
 
-		switch (scoreType) {
-			case Score:
-				if (score >= mission.qualifyingScore)
-					beatPar = true;
-				if (score >= mission.goldScore)
-					beatPlatinum = true;
-				if (score >= mission.ultimateScore)
-					beatUltimate = true;
-				if (score >= mission.awesomeScore)
-					beatAwesome = true;
-			case Time:
-				if (score < mission.qualifyTime)
-					beatPar = true;
-				if (score < mission.goldTime)
-					beatPlatinum = true;
-				if (score < mission.ultimateTime)
-					beatUltimate = true;
-				if (score < mission.awesomeTime)
-					beatAwesome = true;
-		}
 		var scoreColor = "#000000";
-		if (beatAwesome)
+		if (prog.beatAwesome)
 			scoreColor = "#FF4444";
-		else if (beatUltimate)
+		else if (prog.beatUltimate)
 			scoreColor = "#FFCC33";
-		else if (beatPlatinum)
+		else if (prog.beatPlatinum)
 			scoreColor = mission.game == "gold" ? "#FFEE11" : "#CCCCCC";
 
 		var scoreFmt = scoreType == Score ? '${Util.formatScore(Std.int(score))}' : '${Util.formatTime(score)}';
@@ -180,16 +157,16 @@ class EndGameGui extends GuiControl {
 		if (MarbleGame.instance.world.cheatsUsed)
 			text += "Nice Cheats!";
 		else {
-			if (beatAwesome)
+			if (prog.beatAwesome)
 				text += 'Who\'s Awesome? <font color="#FF3333">You\'re</font> Awesome!';
-			else if (beatUltimate)
+			else if (prog.beatUltimate)
 				text += 'You beat the <font color="#FFCC33">Ultimate</font> ${scoreType == Score ? "Score" : "Time"}!';
-			else if (beatPlatinum) {
+			else if (prog.beatPlatinum) {
 				if (mission.game == "gold" || mission.game.toLowerCase() == "ultra")
 					text += 'You beat the <font color="#FFEE11">Gold</font> ${scoreType == Score ? "Score" : "Time"}!';
 				else
 					text += 'You beat the <font color="#CCCCCC">Platinum</font> ${scoreType == Score ? "Score" : "Time"}!';
-			} else if (beatPar) {
+			} else if (prog.beatPar) {
 				if (mission.game == "gold")
 					text += 'You\'ve Qualified';
 				else
@@ -238,13 +215,16 @@ class EndGameGui extends GuiControl {
 
 		if (goldLabel != "N/A") {
 			textLeft += '<p align="left">${goldTitle}</p>';
-			textRight += '<p align="right"><font color="#FFEE11">${goldLabel}</font></p>';
+			if (mission.game == "gold")
+				textRight += '<p align="right"><font color="#FFEE11">${goldLabel}</font></p>';
+			else
+				textRight += '<p align="right"><font color="#CCCCCC">${goldLabel}</font></p>';
 		}
 		if (ultimateLabel != "N/A") {
 			textLeft += '<p align="left">${ultimateTitle}</p>';
 			textRight += '<p align="right"><font color="#FFCC33">${ultimateLabel}</font></p>';
 		}
-		if (awesomeLabel != "N/A" && beatAwesome) {
+		if (awesomeLabel != "N/A" && prog.beatAwesome) {
 			textLeft += '<p align="left">${awesomeTitle}</p>';
 			textRight += '<p align="right"><font color="#FF3333">${awesomeLabel}</font></p>';
 		}

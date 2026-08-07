@@ -2084,7 +2084,7 @@ class MarbleWorld extends Scheduler {
 				|| Gamepad.isDown(Settings.gamepadSettings.respawn))
 				&& !this.isWatching
 				&& this.finishTime == null) {
-				if (timeState.timeSinceLoad - this.respawnPressedTime > 1.5) {
+				if (timeState.timeSinceLoad - this.respawnPressedTime > 1) {
 					this.restart(this.marble, true);
 					this.respawnPressedTime = Math.POSITIVE_INFINITY;
 					return;

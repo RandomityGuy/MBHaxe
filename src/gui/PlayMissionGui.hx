@@ -872,7 +872,7 @@ class PlayMissionGui extends GuiControl {
 					var eggCollected = Settings.easterEggs.exists(mis.path);
 
 					var eggIconImg = "";
-					if (mis.missionInfo != null && mis.missionInfo.game == "platinumquest")
+					if (mis.missionInfo != null && mis.missionInfo.game?.toLowerCase() == "platinumquest")
 						eggIconImg = eggCollected ? "data/ui/play/egg_pq_get_ol.png" : "data/ui/play/egg_pq_notfound_ol.png";
 					else
 						eggIconImg = eggCollected ? "data/ui/play/egg_mbp_get_ol.png" : "data/ui/play/egg_mbp_notfound_ol.png";
@@ -1080,7 +1080,11 @@ class PlayMissionGui extends GuiControl {
 				var lTok = lbToken++;
 				var lbPath = mission.path;
 
-				var req = Leaderboards.getScores(mission.path, scoreView, (scores) -> {
+				var lbPath = mission.path;
+				if (mission.isClaMission)
+					lbPath = 'custom/${mission.id}';
+
+				var req = Leaderboards.getScores(lbPath, scoreView, (scores) -> {
 					if (lTok + 1 != lbToken || !showLeaderboards)
 						return;
 					var text = '';

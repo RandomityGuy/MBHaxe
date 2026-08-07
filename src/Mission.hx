@@ -97,7 +97,8 @@ class Mission {
 					break;
 				if (element._type == MissionElementType.Item) {
 					var so:MissionElementItem = cast element;
-					if (so.datablock.toLowerCase() == 'easteregg')
+					var dblo = so.datablock.toLowerCase();
+					if (['easteregg', 'easteregg_mbu', 'nestegg_pq'].contains(dblo))
 						this.hasEgg = true;
 				} else if (element._type == MissionElementType.SimGroup && !this.hasEgg) {
 					scanMission(cast element);
@@ -155,6 +156,10 @@ class Mission {
 		}
 		if (missionInfo.awesomescore != null) {
 			mission.awesomeScore = Std.int(MisParser.parseNumber(missionInfo.awesomescore));
+		}
+
+		if (missionInfo.easteregg != null) {
+			mission.hasEgg = MisParser.parseBoolean(missionInfo.easteregg);
 		}
 
 		mission.type = missionInfo.type.toLowerCase();
@@ -383,20 +388,20 @@ class Mission {
 			case Score:
 				if (score >= qualifyingScore)
 					beatPar = true;
-				if (score >= goldScore)
+				if (goldScore != 0 && score >= goldScore)
 					beatPlatinum = true;
-				if (score >= ultimateScore)
+				if (ultimateScore != 0 && score >= ultimateScore)
 					beatUltimate = true;
-				if (score >= awesomeScore)
+				if (awesomeScore != 0 && score >= awesomeScore)
 					beatAwesome = true;
 			case Time:
 				if (score < qualifyTime)
 					beatPar = true;
-				if (score < goldTime)
+				if (goldTime != 0 && score < goldTime)
 					beatPlatinum = true;
-				if (score < ultimateTime)
+				if (ultimateTime != 0 && score < ultimateTime)
 					beatUltimate = true;
-				if (score < awesomeTime)
+				if (awesomeTime != 0 && score < awesomeTime)
 					beatAwesome = true;
 		}
 		return {
