@@ -378,6 +378,11 @@ class MisParser {
 	function resolveExpression(expr:String):String {
 		var pos = 0;
 
+		// do simple known engine constants first
+		var lower = StringTools.trim(expr).toLowerCase();
+		if (knownEngineConstants.exists(lower))
+			return '${knownEngineConstants.get(lower)}';
+
 		inline function atEnd()
 			return pos >= expr.length;
 

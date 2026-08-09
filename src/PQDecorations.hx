@@ -61,6 +61,7 @@ class PQDecorations {
 		"iceslick2" => "data/shapes_pq/gameplay/hazards/iceslick2.dts",
 		"iceslick3" => "data/shapes_pq/gameplay/hazards/iceslick3.dts",
 		"iceslick4" => "data/shapes_pq/gameplay/hazards/iceslick4.dts",
+		"icechunkdata" => "data/shapes_pq/gameplay/hazards/ice.dts",
 		// Graffiti (all decal-like, zdrop in source)
 		"marble_graffiti" => "data/shapes_pq/scenery/graffiti/graffiti_marble.dts",
 		"superjump_graffiti" => "data/shapes_pq/scenery/graffiti/graffiti_sj.dts",
