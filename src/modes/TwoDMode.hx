@@ -156,7 +156,7 @@ class TwoDMode extends NullMode {
 		}
 
 		if (MarbleGame.instance.touchInput.movementInput.pressed) {
-			lastPressedLR = MarbleGame.instance.touchInput.movementInput.value.x < 0;
+			lastPressedLR = MarbleGame.instance.touchInput.movementInput.value.x > 0;
 		}
 	}
 

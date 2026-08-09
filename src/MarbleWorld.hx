@@ -382,7 +382,8 @@ class MarbleWorld extends Scheduler {
 							"endpad_mbp",
 							"endpad_pq",
 							"endpad_pq_construction",
-							"endpad_mbu"
+							"endpad_mbu",
+							"endpad_mbm"
 						].contains(so.datablock.toLowerCase()))
 							this.endPadElement = so;
 					}

@@ -1292,7 +1292,7 @@ new SimGroup(MissionGroup) {
 	new Trigger(noGravCannonChallengeTrigger) {
 		position = "-92 60 15.75";
 		rotation = "1 0 0 0";
-		scale = "30 10 24";
+		scale = "31 10 24";
 		dataBlock = "MarblePhysModTrigger";
 		polyhedron = "0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 -1.0000000 0.0000000 0.0000000 0.0000000 1.0000000";
 			IDCheck = "4411";
