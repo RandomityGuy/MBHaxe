@@ -248,7 +248,7 @@ class LapsMode extends NullMode {
 			rotQuat.initRotateAxis(words[3], words[4], words[5], -words[6] * Math.PI / 180);
 			var yawAxis = new Vector(0, 0, 1);
 			yawAxis.transform(rotQuat.toMatrix());
-			this.lapsCameraYaw = Math.atan2(yawAxis.y, yawAxis.x);
+			this.lapsCameraYaw = Math.atan2(yawAxis.y, yawAxis.x) + Math.PI;
 		} else {
 			this.lapsPosition = level.marble.getAbsPos().getPosition().clone();
 			this.lapsCameraYaw = level.marble.camera.CameraYaw;

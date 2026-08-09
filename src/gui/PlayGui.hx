@@ -405,7 +405,7 @@ class PlayGui {
 
 		var timerTransparency = new GuiImage(ResourceLoader.getResource('data/ui/game/transparency.png', ResourceLoader.getImage, this.imageResources)
 			.toTile());
-		timerTransparency.horizSizing = Center;
+		// timerTransparency.horizSizing = Center;
 		timerTransparency.position = new Vector(77, -7);
 		timerTransparency.extent = new Vector(216, 79);
 		timerCtrl.addChild(timerTransparency);

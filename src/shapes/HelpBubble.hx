@@ -15,6 +15,7 @@ class HelpBubble extends DtsObject {
 
 	var wasWithin:Bool = false;
 	var hasBeenInOnce:Bool = false;
+	var disabled:Bool = false;
 
 	public function new(element:MissionElementStaticShape) {
 		super();
@@ -28,6 +29,8 @@ class HelpBubble extends DtsObject {
 			this.triggerRadius = MisParser.parseNumber(element.fields.get("triggerradius")[0]);
 		if (element.fields.exists("displayonce"))
 			this.displayOnce = MisParser.parseBoolean(element.fields.get("displayonce")[0]);
+		if (element.fields.exists("disabled"))
+			this.disabled = MisParser.parseBoolean(element.fields.get("disabled")[0]);
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -38,7 +41,7 @@ class HelpBubble extends DtsObject {
 
 	public override function update(timeState:TimeState) {
 		super.update(timeState);
-		if (@:privateAccess !this.level._ready)
+		if (@:privateAccess !this.level._ready || disabled)
 			return;
 
 		var marble = this.level.marble;

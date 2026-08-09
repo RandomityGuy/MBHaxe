@@ -42,6 +42,7 @@ class EndPad extends DtsObject {
 			case "endpad_pq": "data/shapes_pq/gameplay/pads/endpad.dts";
 			case "endpad_pq_construction": "data/shapes_pq/gameplay/pads/endpadconst.dts";
 			case "endpad_mbu": "data/shapes_mbu/pads/mbu/endarea.dts";
+			case "endpad_mbm": "data/shapes_mbu/pads/endarea.dts";
 			default: "data/shapes/pads/endarea.dts";
 		}
 		this.isCollideable = true;

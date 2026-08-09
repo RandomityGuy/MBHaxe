@@ -69,7 +69,12 @@ class CompositeMode implements GameMode {
 	}
 
 	public function getRespawnTransform(marble:Marble):{position:Vector, orientation:Quat, up:Vector} {
-		return this.children[this.children.length - 1].getRespawnTransform(marble);
+		for (i in 0...this.children.length) {
+			var resp = this.children[this.children.length - i - 1].getRespawnTransform(marble);
+			if (resp != null)
+				return resp;
+		}
+		return null;
 	}
 
 	public function missionScan(mission:Mission) {

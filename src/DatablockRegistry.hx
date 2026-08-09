@@ -163,6 +163,7 @@ class DatablockRegistry {
 				"endpad_mbg",
 				"endpad_mbp",
 				"endpad_mbu",
+				"endpad_mbm",
 				"endpad_pq",
 				"endpad_pq_construction"
 			]),
@@ -240,7 +241,7 @@ class DatablockRegistry {
 			create: element -> new EasterEgg(cast element)
 		},
 		{
-			match: Exact(["checkpoint", "checkpoint_mbu", "checkpoint_pq"]),
+			match: Exact(["checkpoint", "checkpoint_mbu", "checkpoint_pq", "checkpoint_mbg"]),
 			create: element -> new Checkpoint(cast element)
 		},
 		{
