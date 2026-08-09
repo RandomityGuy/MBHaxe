@@ -161,10 +161,10 @@ class SearchGui extends GuiControl {
 			});
 
 			var mis = selectedLevel.mis;
-			var descText = '<font face="bold20">${mis.title}</font><br/>';
-			descText += '<font face="bold18">Author:</font> ${mis.artist}<br/>';
+			var descText = '<font face="bold20">${StringTools.htmlEscape(mis.title)}</font><br/>';
+			descText += '<font face="bold18">Author:</font> ${StringTools.htmlEscape(mis.artist)}<br/>';
 			descText += '<font face="bold18">Description:</font><br/>';
-			descText += '<font face="font16">${mis.description}</font><br/>';
+			descText += '<font face="font16">${StringTools.htmlEscape(mis.description)}</font><br/>';
 			descText += '<font face="bold18">Has Easter Egg: </font> ${mis.hasEgg ? "Yes" : "No"}<br/>';
 			if (mis.qualifyTime != Math.POSITIVE_INFINITY)
 				descText += '<font face="bold18">Qualifying Time: </font> ${Util.formatTime(mis.qualifyTime)}<br/>';

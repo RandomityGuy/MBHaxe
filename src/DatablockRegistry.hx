@@ -68,6 +68,7 @@ import shapes.LandMine;
 import shapes.Nuke;
 import shapes.ShockAbsorber;
 import shapes.SuperSpeed;
+import shapes.SuperStop;
 import shapes.TimeTravel;
 import shapes.RandomPowerup;
 import shapes.Blast;
@@ -286,6 +287,10 @@ class DatablockRegistry {
 		{
 			match: Exact(["superspeeditem", "superspeeditem_mbu", "superspeeditem_pq"]),
 			create: element -> new SuperSpeed(cast element)
+		},
+		{
+			match: Exact(["superstopitem"]),
+			create: element -> new SuperStop(cast element)
 		},
 		{
 			match: Exact([
