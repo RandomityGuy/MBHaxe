@@ -262,6 +262,8 @@ class DtsObject extends GameObject {
 				for (cent in cacheEntry.surfaces) {
 					var ent = new CollisionEntity(this);
 					ent.userData = cent.node;
+					if (this.isTSStatic)
+						ent.ignoreRayCast = true;
 					for (surf in cent.surfaces)
 						ent.addSurface(surf);
 					ent.generateBoundingBox();
@@ -651,8 +653,8 @@ class DtsObject extends GameObject {
 			var hs = new CollisionSurface();
 			hs.points = [];
 			hs.normals = [];
-			hs.indices = [];
 			hs.transformKeys = [];
+			hs.vertexCounts = [];
 
 			var material = this.dts.matNames[primitive.matIndex & TSDrawPrimitive.MaterialMask];
 			if (DifBuilder.materialDict.exists(material) && !this.isTSStatic) {
@@ -683,14 +685,9 @@ class DtsObject extends GameObject {
 						var vertex = vertices[index];
 						hs.addPoint(vertex.x, vertex.y, vertex.z);
 						hs.transformKeys.push(0);
-
-						var normal = vertexNormals[index];
-						hs.addNormal(normal.x, normal.y, normal.z);
 					}
 
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
+					hs.vertexCounts.push(3);
 
 					i += 3;
 				}
@@ -720,14 +717,9 @@ class DtsObject extends GameObject {
 						var vertex = vertices[index];
 						hs.addPoint(vertex.x, vertex.y, vertex.z);
 						hs.transformKeys.push(0);
-
-						var normal = vertexNormals[index];
-						hs.addNormal(normal.x, normal.y, normal.z);
 					}
 
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
+					hs.vertexCounts.push(3);
 
 					k++;
 				}
@@ -750,14 +742,9 @@ class DtsObject extends GameObject {
 						var vertex = vertices[index];
 						hs.addPoint(vertex.x, vertex.y, vertex.z);
 						hs.transformKeys.push(0);
-
-						var normal = vertexNormals[index];
-						hs.addNormal(normal.x, normal.y, normal.z);
 					}
 
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
+					hs.vertexCounts.push(3);
 
 					i++;
 				}
@@ -765,6 +752,7 @@ class DtsObject extends GameObject {
 
 			hs.generateNormals();
 			hs.generateBoundingBox();
+			hs.initialize();
 			ent.addSurface(hs);
 			// chull.generateBoundingBox();
 			// chull.finalize();

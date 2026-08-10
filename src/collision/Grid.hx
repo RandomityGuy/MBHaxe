@@ -181,9 +181,7 @@ class Grid {
 		var cb = new Vector();
 		if (direction.x > 0) {
 			stepX = 1;
-			outX = destX;
-			if (outX == X)
-				outX = Math.min(CELL_DIV.x, outX + 1);
+			outX = Math.min(CELL_DIV.x, destX + 1);
 			cb.x = this.bounds.xMin + (X + 1) * this.cellSize.x;
 		} else {
 			stepX = -1;
@@ -192,9 +190,7 @@ class Grid {
 		}
 		if (direction.y > 0.0) {
 			stepY = 1;
-			outY = destY;
-			if (outY == Y)
-				outY = Math.min(CELL_DIV.y, outY + 1);
+			outY = Math.min(CELL_DIV.y, destY + 1);
 			cb.y = this.bounds.yMin + (Y + 1) * this.cellSize.y;
 		} else {
 			stepY = -1;
