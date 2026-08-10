@@ -171,16 +171,50 @@ class ManifestEntry extends FileEntry {
 		}
 		load(() -> {
 			var img:js.html.Image = new js.html.Image();
+			var strippedBytes = stripPngColorChunks(this.bytes);
+			var blob = new js.html.Blob([strippedBytes.getData()]);
+			var url = js.html.URL.createObjectURL(blob);
 			img.onload = (_) -> {
+				js.html.URL.revokeObjectURL(url);
 				loadedBmp = new LoadedBitmap(img);
 				onLoaded(loadedBmp);
 			};
-			img.src = file;
+			img.src = url;
 		});
 		#else
 		throw "Unsupported platform";
 		#end
 	}
+
+	#if js
+	static function stripPngColorChunks(src:Bytes):Bytes {
+		if (src.length < 8 || src.get(0) != 0x89 || src.get(1) != 0x50)
+			return src;
+		var stripTypes = ["gAMA", "cHRM", "sRGB", "iCCP"];
+		var out = new haxe.io.BytesBuffer();
+		out.addBytes(src, 0, 8);
+		var pos = 8;
+		var found = false;
+		while (pos + 8 <= src.length) {
+			var len = (src.get(pos) << 24) | (src.get(pos + 1) << 16) | (src.get(pos + 2) << 8) | src.get(pos + 3);
+			var type = src.getString(pos + 4, 4);
+			var chunkTotal = 8 + len + 4;
+			if (pos + chunkTotal > src.length) {
+				// malformed/truncated - bail out and keep whatever's left untouched
+				out.addBytes(src, pos, src.length - pos);
+				break;
+			}
+			if (stripTypes.indexOf(type) >= 0)
+				found = true;
+			else
+				out.addBytes(src, pos, chunkTotal);
+			pos += chunkTotal;
+			if (type == "IEND")
+				break;
+		}
+		return found ? out.getBytes() : src;
+	}
+	#end
 
 	override public function exists(name:String):Bool {
 		return _exists(name);
