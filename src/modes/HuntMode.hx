@@ -40,6 +40,8 @@ class HuntState implements RewindableState {
 	var rngState:Int;
 	var rngState2:Int;
 	var groupSpawnCounts:Array<Int>;
+	var lastSpawnGem:Gem;
+	var gemWeights:Array<Float>;
 
 	public function new() {}
 
@@ -51,6 +53,8 @@ class HuntState implements RewindableState {
 		c.rngState = rngState;
 		c.rngState2 = rngState2;
 		c.groupSpawnCounts = groupSpawnCounts.copy();
+		c.lastSpawnGem = lastSpawnGem;
+		c.gemWeights = gemWeights.copy();
 		return c;
 	}
 
@@ -61,6 +65,8 @@ class HuntState implements RewindableState {
 		size += 4; // rngState
 		size += 4; // rngState2
 		size += 2 + groupSpawnCounts.length * 2;
+		size += 4; // lastSpawnGem
+		size += 2 + gemWeights.length * 4;
 		return size;
 	}
 
@@ -79,6 +85,11 @@ class HuntState implements RewindableState {
 		bw.writeUInt16(groupSpawnCounts.length);
 		for (elem in groupSpawnCounts) {
 			bw.writeUInt16(elem);
+		}
+		bw.writeInt32(rm.allocGO(lastSpawnGem));
+		bw.writeUInt16(gemWeights.length);
+		for (w in gemWeights) {
+			bw.writeFloat(w);
 		}
 	}
 
@@ -101,6 +112,12 @@ class HuntState implements RewindableState {
 		var len3 = br.readUInt16();
 		for (i in 0...len3) {
 			groupSpawnCounts.push(br.readUInt16());
+		}
+		lastSpawnGem = cast rm.getGO(br.readInt32());
+		gemWeights = [];
+		var len4 = br.readUInt16();
+		for (i in 0...len4) {
+			gemWeights.push(br.readFloat());
 		}
 	}
 }
@@ -452,7 +469,7 @@ class HuntMode extends NullMode {
 		if (this.level.isWatching)
 			return this.level.replay.getRandomGenState();
 		var v = Std.int(rng.randRange(lo, hi));
-		if (this.level.isRecording)
+		if (this.level.isRecording && !this.level.rewinding)
 			this.level.replay.recordRandomGenState(v);
 		return v;
 	}
@@ -461,7 +478,7 @@ class HuntMode extends NullMode {
 		if (this.level.isWatching)
 			return this.level.replay.getRandomFloatState();
 		var v = Math.random();
-		if (this.level.isRecording)
+		if (this.level.isRecording && !this.level.rewinding)
 			this.level.replay.recordRandomFloatState(v);
 		return v;
 	}
@@ -764,7 +781,7 @@ class HuntMode extends NullMode {
 		// that selPoints/spawned are bumped every successful pass regardless of whether
 		// the candidate was already selected on an earlier loop, matching PQ's behavior.
 		// The center itself is excluded from the candidate pool above, so it's seeded
-		// into the spawn set directly here (matching PQ's %spawnSet.add(%center)).
+		// into the spawn set directly here
 		var spawnSet:Array<Int> = [validGem.netIndex];
 		var spawned = 1;
 		var selPoints = 1 + getGemWeight(validGem.gem);
@@ -1211,6 +1228,8 @@ class HuntMode extends NullMode {
 		s.rngState = @:privateAccess rng.seed;
 		s.rngState2 = @:privateAccess rng2.seed;
 		s.groupSpawnCounts = [for (g in huntGemGroups) g.spawnCount];
+		s.lastSpawnGem = lastSpawn != null ? lastSpawn.gem : null;
+		s.gemWeights = [for (g in gemSpawnPoints) g.weight];
 		return s;
 	}
 
@@ -1236,6 +1255,9 @@ class HuntMode extends NullMode {
 		}
 		rng.setSeed(s.rngState);
 		rng2.setSeed(s.rngState2);
+		lastSpawn = s.lastSpawnGem != null ? gemSpawnPoints[s.lastSpawnGem.netIndex] : null;
+		for (i in 0...gemSpawnPoints.length)
+			gemSpawnPoints[i].weight = s.gemWeights[i];
 		for (i in 0...huntGemGroups.length)
 			huntGemGroups[i].spawnCount = s.groupSpawnCounts[i];
 	}
