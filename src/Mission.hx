@@ -379,6 +379,14 @@ class Mission {
 				if (awesomeTime != 0 && score < awesomeTime)
 					beatAwesome = true;
 		}
+		if (gameMode != null && gameMode.indexOf("madness") != -1) {
+			if (goldScore != 0)
+				beatPlatinum = true;
+			if (ultimateScore != 0)
+				beatUltimate = true;
+			if (awesomeScore != 0)
+				beatAwesome = true;
+		}
 		return {
 			beatPar: beatPar,
 			beatPlatinum: beatPlatinum,
