@@ -528,12 +528,14 @@ class CameraController extends Object {
 			camera.target = marblePosition.add(cameraVerticalTranslation);
 
 			var closeness = 0.1;
-			var rayCastOrigin = marblePosition.add(level.marbles[spectateMarbleIndex].currentUp.multiply(marble._radius));
 
-			var processedShapes = [];
 			for (i in 0...3) {
+				var rayCastOrigin = camera.target;
 				var rayCastDirection = camera.pos.sub(rayCastOrigin);
-				rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
+
+				var camDist = camera.pos.sub(rayCastOrigin).length();
+
+				// Debug.drawLine(rayCastOrigin, rayCastOrigin.add(rayCastDirection));
 
 				var rayCastLen = rayCastDirection.length();
 
@@ -542,29 +544,26 @@ class CameraController extends Object {
 				var firstHit:octree.IOctreeObject.RayIntersectionData = null;
 				var firstHitDistance = 1e8;
 				for (result in results) {
-					if (!processedShapes.contains(result.object)
-						&& (firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
+					if ((firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
 						firstHit = result;
 						firstHitDistance = rayCastOrigin.distance(result.point);
 					}
 				}
-				if (firstHit != null)
-					processedShapes.push(firstHit.object);
 
 				if (firstHit != null) {
-					if (firstHitDistance < CameraDistance) {
-						// camera.pos = marblePosition.sub(directionVector.multiply(firstHit.distance * 0.7));
-						var plane = new Plane(firstHit.normal.x, firstHit.normal.y, firstHit.normal.z, firstHit.point.dot(firstHit.normal));
-						var normal = firstHit.normal.multiply(-1);
+					if (firstHitDistance < camDist) {
+						var dist = camera.pos.sub(firstHit.point).dot(firstHit.normal);
 						// var position = firstHit.point;
+						var projected = camera.pos.sub(firstHit.normal.multiply(dist));
 
-						var projected = plane.project(camera.pos.toPoint());
-						var dist = plane.distance(camera.pos.toPoint());
+						// Debug.drawLine(projected, projected.add(firstHit.normal));
 
-						if (dist >= closeness)
+						if (dist > closeness)
 							continue;
 
-						camera.pos = projected.toVector().add(normal.multiply(-closeness));
+						camera.pos = projected.add(firstHit.normal.multiply(closeness));
+
+						// Debug.drawSphere(camera.pos, 0.1);
 
 						var forwardVec = marblePosition.sub(camera.pos).normalized();
 						var rightVec = camera.up.cross(forwardVec).normalized();
@@ -756,12 +755,12 @@ class CameraController extends Object {
 		camera.target = marblePosition.add(cameraVerticalTranslation);
 
 		var closeness = 0.1;
-		var rayCastOrigin = camera.target;
 
-		var processedShapes = [];
 		for (i in 0...3) {
+			var rayCastOrigin = camera.target;
 			var rayCastDirection = camera.pos.sub(rayCastOrigin);
-			rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
+
+			var camDist = camera.pos.sub(rayCastOrigin).length();
 
 			// Debug.drawLine(rayCastOrigin, rayCastOrigin.add(rayCastDirection));
 
@@ -772,29 +771,24 @@ class CameraController extends Object {
 			var firstHit:octree.IOctreeObject.RayIntersectionData = null;
 			var firstHitDistance = 1e8;
 			for (result in results) {
-				if (!processedShapes.contains(result.object)
-					&& (firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
+				if ((firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
 					firstHit = result;
 					firstHitDistance = rayCastOrigin.distance(result.point);
 				}
 			}
-			if (firstHit != null)
-				processedShapes.push(firstHit.object);
 
 			if (firstHit != null) {
-				if (firstHitDistance < CameraDistance) {
-					// camera.pos = marblePosition.sub(directionVector.multiply(firstHit.distance * 0.7));
-					var plane = new Plane(firstHit.normal.x, firstHit.normal.y, firstHit.normal.z, firstHit.point.dot(firstHit.normal));
-					var normal = firstHit.normal.multiply(-1);
+				if (firstHitDistance < camDist) {
+					var dist = camera.pos.sub(firstHit.point).dot(firstHit.normal);
 					// var position = firstHit.point;
+					var projected = camera.pos.sub(firstHit.normal.multiply(dist));
 
-					var projected = plane.project(camera.pos.toPoint());
-					var dist = plane.distance(camera.pos.toPoint());
+					// Debug.drawLine(projected, projected.add(firstHit.normal));
 
-					if (dist >= closeness)
+					if (dist > closeness)
 						continue;
 
-					camera.pos = projected.toVector().add(normal.multiply(-closeness));
+					camera.pos = projected.add(firstHit.normal.multiply(closeness));
 
 					// Debug.drawSphere(camera.pos, 0.1);
 

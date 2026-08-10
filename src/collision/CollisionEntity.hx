@@ -244,81 +244,100 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 		for (obj in surfaces) {
 			var surface:CollisionSurface = cast obj;
-
-			var surfaceBestContact:CollisionInfo = null;
-			var bestDot:Float = Math.NEGATIVE_INFINITY;
-
 			var i = 0;
-			while (i < surface.indices.length) {
-				var verts = surface.transformTriangle(i, tform, invtform, this._transformKey);
-				// var v0 = surface.points[surface.indices[i]].transformed(tform);
-				// var v = surface.points[surface.indices[i + 1]].transformed(tform);
-				// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
-				var v0 = new Vector(verts.v1x, verts.v1y, verts.v1z);
-				var v = new Vector(verts.v2x, verts.v2y, verts.v2z);
-				var v2 = new Vector(verts.v3x, verts.v3y, verts.v3z);
+			for (vi in 0...surface.vertexCounts.length) {
+				var vtxCount = surface.vertexCounts[vi];
+				var surfaceNormal = surface.getNormal(vi).transformed3x3(invtform).normalized();
+				var surfacePoint = surface.getTransformedPoint(i, tform, _transformKey);
 
-				var surfacenormal = new Vector(verts.nx, verts.ny, verts.nz); // surface.normals[surface.indices[i]].transformed3x3(transform).normalized();
+				var distance = position.sub(surfacePoint).dot(surfaceNormal);
 
-				if (correctNormals) {
-					var vn = v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1);
-					var vdot = vn.dot(surfacenormal);
-					if (vdot < 0.95) {
-						v.set(verts.v3x, verts.v3y, verts.v3z);
-						v2.set(verts.v2x, verts.v2y, verts.v2z);
+				if (Math.abs(distance) <= radius + 0.0001) {
+					var contactVert = position.sub(surfaceNormal.multiply(distance));
 
-						surfacenormal.load(vn);
+					// if (Debug.drawBounds) {
+					// 	Debug.drawLine(contactVert, contactVert.add(surfaceNormal));
+					// }
+
+					// Check if point is completely inside the triangle
+					var inside = true;
+					for (j in 0...vtxCount) {
+						var v1 = surface.getTransformedPoint(i + j, tform, _transformKey);
+						var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), tform, _transformKey);
+
+						var edgeNormal = surfaceNormal.cross(v2.sub(v1));
+
+						if (edgeNormal.dot(contactVert.sub(v1)) < 0) {
+							inside = false;
+							break;
+						}
 					}
-				}
 
-				var closest = new Vector();
-				var normal = new Vector();
-				var res = Collision.TriangleSphereIntersection(v0, v, v2, surfacenormal, position, radius, closest, normal);
-				// var closest = Collision.ClosestPtPointTriangle(position, radius, v0, v, v2, surfacenormal);
-				if (res) {
-					var contactDist = closest.distanceSq(position);
-					// Debug.drawTriangle(v0, v, v2);
-					if (contactDist <= radius * radius) {
-						if (position.sub(closest).dot(surfacenormal) > 0) {
-							normal.normalize();
+					var closest = new Vector();
 
-							// We find the normal that is closest to the surface normal, sort of fixes weird edge cases of when colliding with
-							// var testDot = normal.dot(surfacenormal);
-							// if (testDot > bestDot) {
-							// 	bestDot = testDot;
+					if (inside) {
+						closest.load(contactVert);
+					} else {
+						var bestDistSq = Math.POSITIVE_INFINITY;
+						// Find the point closest to one of the edges
+						for (j in 0...vtxCount) {
+							var v1 = surface.getTransformedPoint(i + j, tform, _transformKey);
+							var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), tform, _transformKey);
 
-							var cinfo = CollisionPool.alloc();
-							cinfo.normal.load(normal);
-							cinfo.point.load(closest);
-							cinfo.collider = null;
-							// cinfo.collider = this;
-							// Path/parent-following objects can rotate/scale, so a flat per-object
-							// velocity isn't enough (see PQ's getSurfaceVelocityForSceneObject,
-							// interpolation.cpp) - compute the actual velocity at the contact point.
-							if (this.go != null && this.go.hasMover())
-								cinfo.velocity.load(this.go.getSurfaceVelocity(closest, collisionEntity.marble, timeState.dt));
-							else
-								cinfo.velocity.load(this.velocity);
-							cinfo.contactDistance = Math.sqrt(contactDist);
-							cinfo.otherObject = this.go;
-							// cinfo.penetration = radius - (position.sub(closest).dot(normal));
-							cinfo.restitution = surface.restitution;
-							cinfo.force = surface.force;
-							cinfo.friction = surface.friction;
-							contacts.push(cinfo);
-							if (this.go != null)
-								this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
-							// surfaceBestContact = cinfo;
+							var edge = v2.sub(v1);
+							var edgeLen = edge.dot(edge);
+
+							if (edgeLen < 0.0000001)
+								continue;
+
+							var diff = contactVert.sub(v1);
+
+							var t = edgeLen > 0.0000001 ? Util.clamp(edge.dot(diff) / edgeLen, 0, 1) : 0.0;
+							var c = v1.add(edge.multiply(t));
+
+							var distFromEdgeSq = c.distanceSq(contactVert);
+							if (distFromEdgeSq < bestDistSq) {
+								bestDistSq = distFromEdgeSq;
+								closest.load(c);
+							}
+
+							// if (Debug.drawBounds) {
+							// 	Debug.drawLine(contactVert, c);
+							// 	Debug.drawLine(v1, v2);
 							// }
 						}
 					}
+
+					var contactDist = closest.distanceSq(position);
+
+					if (contactDist > radius * radius) {
+						i += vtxCount;
+						continue;
+					}
+
+					var contactNormal = surfaceNormal.clone();
+					if (!inside)
+						contactNormal.load(position.sub(closest).normalized());
+
+					var cinfo = CollisionPool.alloc();
+					cinfo.normal.load(contactNormal);
+					cinfo.point.load(closest);
+					cinfo.collider = null;
+					if (this.go != null && this.go.hasMover())
+						cinfo.velocity.load(this.go.getSurfaceVelocity(cinfo.point, collisionEntity.marble, timeState.dt));
+					else
+						cinfo.velocity.load(this.velocity);
+					cinfo.contactDistance = Math.sqrt(contactDist);
+					cinfo.otherObject = this.go;
+					cinfo.restitution = surface.restitution;
+					cinfo.force = surface.force;
+					cinfo.friction = surface.friction;
+					contacts.push(cinfo);
+					if (this.go != null)
+						this.go.onMarbleContact(collisionEntity.marble, timeState, cinfo);
 				}
-
-				i += 3;
+				i += vtxCount;
 			}
-
-			// if (surfaceBestContact != null)
-			// contacts.push(surfaceBestContact);
 		}
 	}
 }
