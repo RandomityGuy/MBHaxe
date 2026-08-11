@@ -97,6 +97,32 @@ class PlayMissionGui extends GuiControl {
 		this.position = new Vector(0, 0);
 		this.extent = new Vector(800, 600);
 
+		var grad = new GuiImage(ResourceLoader.getResource("data/ui/menu/brown-gradient.png", ResourceLoader.getImage, this.imageResources).toTile());
+		grad.horizSizing = Width;
+		grad.vertSizing = Height;
+		grad.position = new Vector(0, 0);
+		grad.extent = new Vector(800, 600);
+		grad.bmp.smooth = true;
+		this.addChild(grad);
+
+		var gradNoise = new GuiImage(ResourceLoader.getResource("data/ui/menu/noise-pattern-overlay.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		gradNoise.horizSizing = Width;
+		gradNoise.vertSizing = Height;
+		gradNoise.position = new Vector(0, 0);
+		gradNoise.extent = new Vector(800, 600);
+		gradNoise.bmp.smooth = true;
+		gradNoise.bmp.tileWrap = true;
+		this.addChild(gradNoise);
+
+		var levelPreviewNotFound = new GuiImage(ResourceLoader.getResource("data/ui/menu/preview-not-found.png", ResourceLoader.getImage, this.imageResources)
+			.toTile());
+		levelPreviewNotFound.horizSizing = Center;
+		levelPreviewNotFound.vertSizing = Center;
+		levelPreviewNotFound.position = new Vector(0, 0);
+		levelPreviewNotFound.extent = new Vector(165, 330);
+		this.addChild(levelPreviewNotFound);
+
 		var levelPreview = new GuiImage(ResourceLoader.getResource("data/ui/play/missingicon.png", ResourceLoader.getImage, this.imageResources).toTile());
 		levelPreview.horizSizing = Width;
 		levelPreview.vertSizing = Height;
@@ -1262,7 +1288,8 @@ class PlayMissionGui extends GuiControl {
 						var prevpath = mission.getBigPreviewImage(prevImg -> {
 							if (!mission.isClaMission)
 								Settings.optionsSettings.previewPath = prevImg.getTexture().name;
-							levelPreview.bmp.tile = prevImg;
+							if (prevImg.getTexture().name.indexOf("play/missingicon.png") == -1)
+								levelPreview.bmp.tile = prevImg;
 						});
 						if (prevpath != levelPreview.bmp.tile.getTexture().name) {
 							levelPreview.bmp.tile = tmpprevtile;
@@ -1277,7 +1304,8 @@ class PlayMissionGui extends GuiControl {
 					return;
 				if (!mission.isClaMission)
 					Settings.optionsSettings.previewPath = prevImg.getTexture().name;
-				levelPreview.bmp.tile = prevImg;
+				if (prevImg.getTexture().name.indexOf("play/missingicon.png") == -1)
+					levelPreview.bmp.tile = prevImg;
 			}); // Shit be sync
 			if (prevpath != levelPreview.bmp.tile.getTexture().name) {
 				levelPreview.bmp.tile = tmpprevtile;
