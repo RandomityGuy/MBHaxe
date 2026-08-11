@@ -88,8 +88,6 @@ class Mission {
 
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
-				if (this.hasEgg)
-					break;
 				if (element._type == MissionElementType.Item) {
 					var so:MissionElementItem = cast element;
 					var dblo = so.datablock.toLowerCase();
