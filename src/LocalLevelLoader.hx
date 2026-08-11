@@ -4,6 +4,9 @@ import haxe.io.Bytes;
 import haxe.io.Path;
 import mis.MisParser;
 import src.Mission;
+import src.ResourceLoader;
+import src.MarbleGame;
+import src.Console;
 
 class LocalLevelLoader {
 	public static var currentLocalPath:String = null;
@@ -83,6 +86,7 @@ class LocalLevelLoader {
 
 		var mission = Mission.fromMissionInfo(misRelPath, mInfo);
 		mission.isCustom = true;
+		mission.isLocal = true;
 		mission.game = mInfo.game?.toLowerCase();
 
 		currentMission = mission;

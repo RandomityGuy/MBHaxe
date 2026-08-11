@@ -586,7 +586,6 @@ class ResourceLoader {
 	}
 
 	public static function registerLocalFile(path:String, bytes:haxe.io.Bytes) {
-		Console.log(path);
 		path = StringTools.replace(path, "\\", "/").toLowerCase();
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");

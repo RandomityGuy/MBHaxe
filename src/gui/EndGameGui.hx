@@ -181,7 +181,7 @@ class EndGameGui extends GuiControl {
 		}
 		Settings.save();
 
-		if (idx <= 2) {
+		if (idx <= 2 && !mission.isLocal) {
 			setButtonStates(false);
 			var end = new EnterNameDlg(idx, (name) -> {
 				setButtonStates(true);
