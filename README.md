@@ -15,7 +15,7 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.14)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.3)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.5-mbu)
-### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/2.0.1)
+### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/2.0.2)
 Linux port by [boucymatt](https://github.com/boucymatt). Supports Steam Deck.
 ## Mac Instructions - Important
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
@@ -24,13 +24,13 @@ You will also have to bypass Gatekeeper since the .app is not signed.
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum.apk)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra.apk)
-### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.1/MBHaxe-PlatinumQuest.apk)
+### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.2/MBHaxe-PlatinumQuest.apk)
 
 ## iOS (NEW!)
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold-iOS.ipa)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum-iOS.ipa)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-iOS.ipa)
-### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.1/MBHaxe-PlatinumQuest-iOS.ipa)
+### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.2/MBHaxe-PlatinumQuest-iOS.ipa)
 Ported to iOS by [boucymatt](https://github.com/boucymatt).  
 iOS builds ship as `.ipa` files that must be sideloaded, as Apple does not allow direct installs outside the App Store. Use [LiveContainer](https://github.com/LiveContainer/LiveContainer) or an AltStore-compatible store (AltStore, SideStore, etc.). To install and update all builds from one place, add the AltStore source.  
 <a href="https://stikstore.app/altdirect/?url=https://dl.randomityguy.me/altstore-source.json" target="_blank">
