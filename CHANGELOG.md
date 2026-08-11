@@ -1,3 +1,10 @@
+# 2.0.2
+This update fixes more bugs and regressions:
+- Fixed abnormal collision response flinging the marble up in certain cases.
+- Fixed gravity point triggers flipping when they aren't supposed to.
+- Fixed Easter Egg icons not showing up for Custom Levels.
+- Improved the placeholder level preview to be closer to that of the original game.
+
 # 2.0.1
 This update fixes a ton of bugs and issues encountered since release:
 - The marble physics collision code is now completely accurate to the original game.
