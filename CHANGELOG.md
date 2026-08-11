@@ -1,3 +1,8 @@
+# 2.0.3
+This release fixes a few more regressions:
+- Fixed custom levels not loading in some cases.
+- Fixed Gem Madness completions being wrong.
+
 # 2.0.2
 This update fixes more bugs and regressions:
 - Fixed abnormal collision response flinging the marble up in certain cases.
