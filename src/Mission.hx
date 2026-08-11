@@ -41,6 +41,7 @@ class Mission {
 	public var game:String;
 	public var hasEgg:Bool;
 	public var isCustom:Bool;
+	public var isLocal:Bool = false;
 	public var gameMode:String;
 	#if hl
 	public var addedAt:Int64;
