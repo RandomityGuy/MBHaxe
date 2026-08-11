@@ -61,7 +61,7 @@ class Marbleland {
 			mission.awesomeTime = missionData.awesomeTime != null ? missionData.awesomeTime / 1000 : 0;
 			mission.ultimateScore = missionData.ultimateScore != null ? missionData.ultimateScore : 0;
 			mission.awesomeScore = missionData.awesomeScore != null ? missionData.awesomeScore : 0;
-			mission.hasEgg = missionData.hasEgg;
+			mission.hasEgg = missionData.hasEasterEgg;
 			mission.isClaMission = true;
 			mission.addedAt = missionData.addedAt;
 			mission.curationScore = missionData.curationScore != null ? missionData.curationScore : 0;
