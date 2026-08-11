@@ -61,7 +61,7 @@ class GravityPointTrigger extends Trigger {
 		var marblePos = marble.getAbsPos().getPosition();
 		var within = withinRadius(marblePos, getCenter());
 		if (!within) {
-			if (this.wasWithinRadius.get(marble) == true)
+			if (this.wasWithinRadius.get(marble))
 				leaveUpDown(marble, timeState);
 			this.wasWithinRadius.set(marble, false);
 			return;
@@ -71,8 +71,10 @@ class GravityPointTrigger extends Trigger {
 	}
 
 	override function onMarbleLeave(marble:Marble, timeState:TimeState) {
-		this.wasWithinRadius.remove(marble);
-		leaveUpDown(marble, timeState);
+		if (wasWithinRadius.get(marble)) {
+			this.wasWithinRadius.remove(marble);
+			leaveUpDown(marble, timeState);
+		}
 	}
 
 	override function reset() {
