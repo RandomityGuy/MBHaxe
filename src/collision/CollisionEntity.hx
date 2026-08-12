@@ -317,8 +317,14 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 					}
 
 					var contactNormal = surfaceNormal.clone();
-					if (!inside)
-						contactNormal.load(position.sub(closest).normalized());
+					if (!inside) {
+						var edgeNormal = position.sub(closest).normalized();
+						if (edgeNormal.dot(surfaceNormal) > 0.988)
+							contactNormal.load(surfaceNormal);
+						else {
+							contactNormal.load(edgeNormal);
+						}
+					}
 
 					var cinfo = CollisionPool.alloc();
 					cinfo.normal.load(contactNormal);

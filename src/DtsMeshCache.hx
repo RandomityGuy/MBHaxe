@@ -5,16 +5,18 @@ import src.Polygon;
 
 @:publicFields
 class DtsMeshCacheEntry {
-	var polygons:Array<Polygon>; // length: graphNodes.length
-	var polygonMaterials:Array<Array<Int>>;
+	var polygons:Array<Map<Int, Polygon>>; // length: graphNodes.length
+	var polygonMaterials:Array<Map<Int, Array<Int>>>;
 	var surfaces:Array<{node:Int, surfaces:Array<CollisionSurface>}>;
 
 	public function new() {}
 
 	public function dispose() {
-		for (poly in polygons) {
-			if (poly != null)
-				poly.dispose();
+		for (polys in polygons) {
+			for (poly in polys) {
+				if (poly != null)
+					poly.dispose();
+			}
 		}
 	}
 }

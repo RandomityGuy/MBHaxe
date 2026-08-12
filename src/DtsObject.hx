@@ -186,8 +186,8 @@ class DtsObject extends GameObject {
 
 		if (!hasCache && cacheEntry != null) {
 			// Set up the cache structs
-			cacheEntry.polygons = [for (i in 0...graphNodes.length) null];
-			cacheEntry.polygonMaterials = [for (i in 0...graphNodes.length) null];
+			cacheEntry.polygons = [for (i in 0...graphNodes.length) []];
+			cacheEntry.polygonMaterials = [for (i in 0...graphNodes.length) []];
 			cacheEntry.surfaces = [];
 		}
 
@@ -210,8 +210,8 @@ class DtsObject extends GameObject {
 
 			if (!isInstanced) {
 				if (hasCache) {
-					var mats = [for (matIdx in cacheEntry.polygonMaterials[obj.node]) materials[matIdx]];
-					var obj = new MultiMaterial(cacheEntry.polygons[obj.node], mats, this.graphNodes[obj.node]);
+					var mats = [for (matIdx in cacheEntry.polygonMaterials[obj.node][i]) materials[matIdx]];
+					var obj = new MultiMaterial(cacheEntry.polygons[obj.node][i], mats, this.graphNodes[obj.node]);
 				} else {
 					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
 					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
@@ -247,8 +247,8 @@ class DtsObject extends GameObject {
 					}
 					poly.endPrimitive();
 					if (cacheEntry != null) {
-						cacheEntry.polygons[obj.node] = poly;
-						cacheEntry.polygonMaterials[obj.node] = usedMatIndices;
+						cacheEntry.polygons[obj.node][i] = poly;
+						cacheEntry.polygonMaterials[obj.node][i] = usedMatIndices;
 					}
 					var obj = new MultiMaterial(poly, usedMats, this.graphNodes[obj.node]);
 				}
@@ -794,17 +794,6 @@ class DtsObject extends GameObject {
 			var dot1 = normal.dot(vertexNormals[i1]);
 			var dot2 = normal.dot(vertexNormals[i2]);
 			var dot3 = normal.dot(vertexNormals[i3]);
-			// if (!StringTools.contains(this.dtsPath, 'helicopter.dts') && !StringTools.contains(this.dtsPath, 'tornado.dts'))
-			// ^ temp hardcoded fix
-
-			// if (dot1 < 0 && dot2 < 0 && dot3 < 0) {
-			// if ((dot1 < 0 && dot2 < 0 && dot3 < 0) || StringTools.contains(this.dtsPath, 'helicopter.dts')) {
-			// 	var temp = i1;
-			// 	i1 = i3;
-			// 	i3 = temp;
-			// }
-
-			// }
 
 			var geometrydata = materialGeometry[materialIndex];
 

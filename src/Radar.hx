@@ -242,7 +242,9 @@ class Radar {
 			// have to scan over everything
 			for (obj in level.dtsObjects) {
 				@:privateAccess if (gemCount == 0
-					&& (this.customRadarRule & RadarRule.EndPad) != -1 && level.endPad != null && obj.dtsPath.indexOf("endpad") != -1) {
+					&& (this.customRadarRule & RadarRule.EndPad) != -1
+						&& level.endPad != null
+						&& (obj.dtsPath.indexOf("endpad") != -1 || obj.dtsPath.indexOf("endarea") != -1)) {
 					endpads.push(obj);
 				}
 				if ((this.customRadarRule & RadarRule.Checkpoints) != -1 && obj.dtsPath.indexOf("checkpoint") != -1) {

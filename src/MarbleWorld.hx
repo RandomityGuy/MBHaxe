@@ -579,6 +579,7 @@ class MarbleWorld extends Scheduler {
 		}
 
 		this.scene.camera.zFar = Math.max(4000, Std.parseFloat(this.skyElement.visibledistance));
+		this.scene.camera.zNear = 0.1;
 
 		this.sky = new Sky();
 

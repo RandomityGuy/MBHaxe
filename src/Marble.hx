@@ -2708,6 +2708,9 @@ class Marble extends GameObject {
 
 			var relVel = velocity.sub(obj.velocity);
 			var relLocalVel = relVel.transformed3x3(invMatrix);
+			var relVelDir = relVel.normalized();
+
+			var fixedFinalPos = position.add(relVel.multiply(deltaT));
 
 			var invScale = invMatrix.getScale();
 			var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
@@ -2741,7 +2744,7 @@ class Marble extends GameObject {
 					var surfaceNormal = surface.getNormal(vi).transformed3x3(invTform).normalized();
 					var surfacePoint = surface.getTransformedPoint(i, obj.transform, @:privateAccess obj._transformKey);
 
-					if (surfaceNormal.dot(relVel) > -0.001 || surfaceNormal.dot(currentFinalPos.sub(surfacePoint)) > radius) {
+					if (surfaceNormal.dot(relVelDir) > -0.001 || surfaceNormal.dot(fixedFinalPos.sub(surfacePoint)) > radius) {
 						i += vtxCount;
 						continue;
 					}
@@ -2962,7 +2965,11 @@ class Marble extends GameObject {
 		do {
 			var resolved = 0;
 			for (testTri in concernedContacts) {
-				// Check if we are on wrong side of the triangle
+				var vtxCount = testTri.v.length;
+				if (vtxCount < 3)
+					continue;
+
+				// Check if we are on wrong side of the polygon's plane
 				if (testTri.n.dot(position) - testTri.n.dot(testTri.v[0]) < 0) {
 					continue;
 				}
@@ -2971,7 +2978,7 @@ class Marble extends GameObject {
 				var t2 = testTri.v[2].sub(testTri.v[0]);
 				var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
 
-				// Check if our triangle is too small to be collided with
+				// Check if our polygon is too small to be collided with
 				if (tarea < 0.001) {
 					continue;
 				}
@@ -2980,13 +2987,24 @@ class Marble extends GameObject {
 				var t = (testTri.v[0].sub(position)).dot(testTri.n) / testTri.n.lengthSq();
 				var intersect = position.add(testTri.n.multiply(t));
 
-				var tsi = Collision.PointInTriangle(intersect, testTri.v[0], testTri.v[1], testTri.v[2]);
+				// Generic point-in-convex-polygon test (mirrors sphereIntersection/testMove's
+				// edge-normal inside test), not the fixed-3-vertex PointInTriangle - testTri.v
+				// can hold a full DIF polygon boundary now, not just a triangle.
+				var tsi = true;
+				for (j in 0...vtxCount) {
+					var v1 = testTri.v[j];
+					var v2 = testTri.v[(j + 1) % vtxCount];
+					var edgeNormal = testTri.n.cross(v2.sub(v1));
+					if (edgeNormal.dot(intersect.sub(v1)) < 0) {
+						tsi = false;
+						break;
+					}
+				}
 				if (tsi) {
 					var separatingDistance = position.sub(intersect).normalized();
 					var distToContactPlane = intersect.distance(position);
 					if (radius - 0.005 - distToContactPlane > 0.0001) {
 						// Nudge to the surface of the contact plane
-						Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
 						Debug.drawSphere(position, radius);
 						position.load(position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005)));
 						resolved++;
