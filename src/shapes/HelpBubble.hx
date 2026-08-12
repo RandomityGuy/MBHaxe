@@ -50,7 +50,7 @@ class HelpBubble extends DtsObject {
 
 		var within = marble.getAbsPos().getPosition().distance(this.getAbsPos().getPosition()) < this.triggerRadius;
 		if (within && !this.wasWithin) {
-			if (!this.displayOnce || !this.hasBeenInOnce) {
+			if ((!this.displayOnce || !this.hasBeenInOnce) && this.text != "") {
 				this.hasBeenInOnce = true;
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/infotutorial.wav", ResourceLoader.getAudio, this.soundResources));
 				this.level.displayHelp(this.text, 5);
