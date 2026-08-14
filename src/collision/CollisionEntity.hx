@@ -255,11 +255,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 
 				if (absDistance >= 1e-6 && absDistance <= radius + 0.0001) {
 					var contactVert = position.sub(surfaceNormal.multiply(distance));
-
-					// if (Debug.drawBounds) {
-					// 	Debug.drawLine(contactVert, contactVert.add(surfaceNormal));
-					// }
-
 					// Check if point is completely inside the triangle
 					var inside = true;
 					for (j in 0...vtxCount) {
@@ -301,11 +296,6 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 								bestDistSq = distFromEdgeSq;
 								closest.load(c);
 							}
-
-							// if (Debug.drawBounds) {
-							// 	Debug.drawLine(contactVert, c);
-							// 	Debug.drawLine(v1, v2);
-							// }
 						}
 					}
 

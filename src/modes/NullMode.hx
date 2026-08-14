@@ -32,7 +32,7 @@ class NullMode implements GameMode {
 		} else {
 			position = new Vector(0, 0, 300);
 		}
-		position.z += 0.727843;
+		position.z += 0.5 + 0.22784343361854553; // the other value is the start pad's z center
 		return {
 			position: position,
 			orientation: quat,
