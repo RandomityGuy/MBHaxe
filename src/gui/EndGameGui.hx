@@ -1,5 +1,6 @@
 package gui;
 
+import src.Replay;
 import net.Net;
 import modes.GameMode.ScoreType;
 import mis.MisParser;
@@ -26,8 +27,7 @@ class EndGameGui extends GuiImage {
 
 	var scoreSubmitted:Bool = false;
 
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, mission:Mission, score:Float, scoreType:ScoreType,
-			replayData:haxe.io.Bytes) {
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, mission:Mission, score:Float, scoreType:ScoreType, replay:Replay) {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
 		this.horizSizing = Width;
@@ -212,7 +212,7 @@ class EndGameGui extends GuiImage {
 					lbScoreValue = 1000 - score;
 				Leaderboards.submitScore(misPath, lbScoreValue, rewindUsed, (needsReplay, ref) -> {
 					if (needsReplay && !mission.isClaMission) {
-						Leaderboards.submitReplay(ref, replayData);
+						Leaderboards.submitReplay(ref, replay.write());
 					}
 				});
 			}
