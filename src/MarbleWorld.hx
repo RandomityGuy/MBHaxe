@@ -2175,25 +2175,42 @@ class MarbleWorld extends Scheduler {
 						chullinvT.transpose();
 						for (surface in chull.surfaces) {
 							var i = 0;
-							while (i < surface.indices.length) {
-								var surfaceN = surface.getNormal(surface.indices[i]).transformed3x3(chullinvT);
-								var v1 = surface.getPoint(surface.indices[i]).transformed(chull.transform);
-								var surfaceD = -surfaceN.dot(v1);
+							for (vi in 0...surface.vertexCounts.length) {
+								var vtxCount = surface.vertexCounts[vi];
+
+								var surfaceN = surface.getNormal(vi).transformed3x3(chullinvT).normalized();
+								var surfacePoint = surface.getTransformedPoint(i, chull.transform, @:privateAccess chull._transformKey);
+								var surfaceD = -surfaceN.dot(surfacePoint);
 
 								if (surfaceN.dot(padUp.multiply(-10)) < 0) {
 									var dist = surfaceN.dot(checkBoundsCenter.toVector()) + surfaceD;
 									if (dist >= 0 && dist < 5) {
 										var intersectT = -(checkBoundsCenter.dot(surfaceN.toPoint()) + surfaceD) / (padUp.dot(surfaceN));
 										var intersectP = checkBoundsCenter.add(padUp.multiply(intersectT).toPoint()).toVector();
-										if (Collision.PointInTriangle(intersectP, v1, surface.getPoint(surface.indices[i + 1]).transformed(chull.transform),
-											surface.getPoint(surface.indices[i + 2]).transformed(chull.transform))) {
+
+										var inside = true;
+
+										for (j in 0...vtxCount) {
+											var v1 = surface.getTransformedPoint(i + j, chull.transform, @:privateAccess chull._transformKey);
+											var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), chull.transform,
+												@:privateAccess chull._transformKey);
+
+											var edgeNormal = surfaceN.cross(v2.sub(v1));
+
+											if (edgeNormal.dot(intersectP.sub(v1)) < 0) {
+												inside = false;
+												break;
+											}
+										}
+
+										if (inside) {
 											found = true;
 											break;
 										}
 									}
 								}
 
-								i += 3;
+								i += vtxCount;
 							}
 
 							if (found) {

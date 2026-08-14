@@ -270,7 +270,44 @@ class GridBroadphase {
 	}
 
 	public function rayCast(origin:Vector, direction:Vector, bestT:Float) {
-		var cell = origin.sub(this.bounds.getMin().toVector());
+		// Clip the ray against the grid's own bounds first: the origin is usually
+		// outside a per-entity grid's tight bbox (raycasting towards it from elsewhere),
+		// so we can't just bail when the origin's cell is out of range.
+		var tEnter = 0.0;
+		var tExit = bestT;
+		if (direction.x != 0) {
+			var tx1 = (this.bounds.xMin - origin.x) / direction.x;
+			var tx2 = (this.bounds.xMax - origin.x) / direction.x;
+			if (tx1 > tx2) {
+				var tmp = tx1;
+				tx1 = tx2;
+				tx2 = tmp;
+			}
+			if (tx1 > tEnter)
+				tEnter = tx1;
+			if (tx2 < tExit)
+				tExit = tx2;
+		} else if (origin.x < this.bounds.xMin || origin.x > this.bounds.xMax)
+			return [];
+		if (direction.y != 0) {
+			var ty1 = (this.bounds.yMin - origin.y) / direction.y;
+			var ty2 = (this.bounds.yMax - origin.y) / direction.y;
+			if (ty1 > ty2) {
+				var tmp = ty1;
+				ty1 = ty2;
+				ty2 = tmp;
+			}
+			if (ty1 > tEnter)
+				tEnter = ty1;
+			if (ty2 < tExit)
+				tExit = ty2;
+		} else if (origin.y < this.bounds.yMin || origin.y > this.bounds.yMax)
+			return [];
+		if (tEnter > tExit)
+			return [];
+
+		var entry = origin.add(direction.multiply(tEnter));
+		var cell = entry.sub(this.bounds.getMin().toVector());
 		cell.x /= this.cellSize.x;
 		cell.y /= this.cellSize.y;
 		var destCell = origin.add(direction.multiply(bestT)).sub(this.bounds.getMin().toVector());
@@ -280,15 +317,19 @@ class GridBroadphase {
 		var stepY, outY, Y = Math.floor(cell.y);
 		var destX = Util.clamp(Math.max(Math.floor(destCell.x), 0), 0, CELL_DIV.x);
 		var destY = Util.clamp(Math.max(Math.floor(destCell.y), 0), 0, CELL_DIV.y);
-		if ((X < 0) || (X >= CELL_DIV.x) || (Y < 0) || (Y >= CELL_DIV.y)) {
-			return [];
-		}
+		// Entry point can land exactly on the bounds edge, so clamp defensively against float error
+		if (X < 0)
+			X = 0;
+		else if (X >= CELL_DIV.x)
+			X = Std.int(CELL_DIV.x - 1);
+		if (Y < 0)
+			Y = 0;
+		else if (Y >= CELL_DIV.y)
+			Y = Std.int(CELL_DIV.y - 1);
 		var cb = new Vector();
 		if (direction.x > 0) {
 			stepX = 1;
-			outX = destX;
-			if (outX == X)
-				outX = Math.min(CELL_DIV.x, outX + 1);
+			outX = Math.min(CELL_DIV.x, destX + 1);
 			cb.x = this.bounds.xMin + (X + 1) * this.cellSize.x;
 		} else {
 			stepX = -1;
@@ -297,9 +338,7 @@ class GridBroadphase {
 		}
 		if (direction.y > 0.0) {
 			stepY = 1;
-			outY = destY;
-			if (outY == Y)
-				outY = Math.min(CELL_DIV.y, outY + 1);
+			outY = Math.min(CELL_DIV.y, destY + 1);
 			cb.y = this.bounds.yMin + (Y + 1) * this.cellSize.y;
 		} else {
 			stepY = -1;
@@ -324,9 +363,11 @@ class GridBroadphase {
 		searchKey++;
 		var results = [];
 		while (true) {
+			if (X < 0 || X >= CELL_DIV.x || Y < 0 || Y >= CELL_DIV.y)
+				break;
 			var cell = cells[16 * X + Y];
 			for (idx in cell) {
-				var surf = objects[idx].object;
+				var surf = bjects[idx].object;
 				if (surf.key == searchKey)
 					continue;
 				surf.key = searchKey;

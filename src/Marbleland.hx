@@ -14,7 +14,7 @@ class Marbleland {
 	public static var ultraMissions:Array<Mission> = [];
 	public static var missions:Map<Int, Mission> = [];
 
-	static final marblelandUrl = 'http://127.0.0.1:8080'; // 'https://marbleland.vaniverse.io';
+	static final marblelandUrl = 'https://marbleland.vaniverse.io';
 
 	public static function init() {
 		Http.get('${marblelandUrl}/api/level/list', (b) -> {
