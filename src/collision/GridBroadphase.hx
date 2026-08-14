@@ -367,7 +367,7 @@ class GridBroadphase {
 				break;
 			var cell = cells[16 * X + Y];
 			for (idx in cell) {
-				var surf = bjects[idx].object;
+				var surf = objects[idx].object;
 				if (surf.key == searchKey)
 					continue;
 				surf.key = searchKey;
