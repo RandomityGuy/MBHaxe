@@ -257,32 +257,30 @@ class DtsObject extends GameObject {
 			}
 		}
 
+		var collisionSubshapes = [];
+
+		for (detail in this.dts.detailLevels) {
+			if (this.dts.names[detail.name].substr(0, 3).toLowerCase() == "col")
+				collisionSubshapes.push({subShape: this.dts.subshapes[detail.subShape], detail: detail.objectDetail});
+		}
+
 		if (this.isCollideable) {
-			for (i in 0...dts.nodes.length) {
-				var objects = dts.objects.filter(object -> object.node == i);
-				var localColliders:Array<CollisionEntity> = [];
+			for (subshapeData in collisionSubshapes) {
+				for (i in subshapeData.subShape.firstObject...(subshapeData.subShape.firstObject + subshapeData.subShape.numObjects)) {
+					var obj = dts.objects[i];
+					if (subshapeData.detail >= obj.numMeshes)
+						continue;
+					var mesh = this.dts.meshes[obj.firstMesh + subshapeData.detail];
 
-				for (object in objects) {
-					var isCollisionObject = dts.names[object.name].substr(0, 3).toLowerCase() == "col";
+					if (mesh == null)
+						continue;
 
-					if (isCollisionObject) {
-						for (j in object.firstMesh...(object.firstMesh + object.numMeshes)) {
-							if (j >= this.dts.meshes.length)
-								continue;
+					var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
+					var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
 
-							var mesh = this.dts.meshes[j];
-							if (mesh == null)
-								continue;
-
-							var vertices = mesh.vertices.map(v -> new Vector(-v.x, v.y, v.z));
-							var vertexNormals = mesh.normals.map(v -> new Vector(-v.x, v.y, v.z));
-
-							var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, i);
-							localColliders = localColliders.concat(hulls);
-						}
-					}
+					var hulls = this.generateCollisionGeometry(mesh, vertices, vertexNormals, obj.node);
+					colliders = colliders.concat(hulls);
 				}
-				colliders = colliders.concat(localColliders);
 			}
 		}
 
@@ -610,7 +608,6 @@ class DtsObject extends GameObject {
 		var hulls:Array<CollisionEntity> = [new CollisionEntity(cast this)];
 		var ent = hulls[0];
 		ent.userData = node;
-		ent.correctNormals = true;
 
 		for (primitive in dtsMesh.primitives) {
 			var k = 0;
@@ -620,8 +617,8 @@ class DtsObject extends GameObject {
 			var hs = new CollisionSurface();
 			hs.points = [];
 			hs.normals = [];
-			hs.indices = [];
 			hs.transformKeys = [];
+			hs.vertexCounts = [];
 
 			var material = this.dts.matNames[primitive.matIndex & TSDrawPrimitive.MaterialMask];
 			if (dtsMaterials.exists(material) && !this.isTSStatic) {
@@ -639,18 +636,21 @@ class DtsObject extends GameObject {
 					var i2 = dtsMesh.indices[i + 1];
 					var i3 = dtsMesh.indices[i + 2];
 
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001) {
+						i += 3;
+						continue;
+					}
+
 					for (index in [i1, i2, i3]) {
 						var vertex = vertices[index];
 						hs.addPoint(vertex.x, vertex.y, vertex.z);
 						hs.transformKeys.push(0);
-
-						var normal = vertexNormals[index];
-						hs.addNormal(normal.x, normal.y, normal.z);
 					}
 
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
+					hs.vertexCounts.push(3);
 
 					i += 3;
 				}
@@ -661,25 +661,28 @@ class DtsObject extends GameObject {
 					var i2 = dtsMesh.indices[i + 1];
 					var i3 = dtsMesh.indices[i + 2];
 
-					if (k % 2 == 0) {
+					if (k % 2 == 1) {
 						// Swap the first and last index to mainting correct winding order
 						var temp = i1;
 						i1 = i3;
 						i3 = temp;
 					}
 
+					var t1 = vertices[i2].sub(vertices[i1]);
+					var t2 = vertices[i3].sub(vertices[i1]);
+					var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
+					if (tarea < 0.00001) {
+						k++;
+						continue;
+					}
+
 					for (index in [i1, i2, i3]) {
 						var vertex = vertices[index];
 						hs.addPoint(vertex.x, vertex.y, vertex.z);
 						hs.transformKeys.push(0);
-
-						var normal = vertexNormals[index];
-						hs.addNormal(normal.x, normal.y, normal.z);
 					}
 
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
+					hs.vertexCounts.push(3);
 
 					k++;
 				}
@@ -694,20 +697,17 @@ class DtsObject extends GameObject {
 						var vertex = vertices[index];
 						hs.addPoint(vertex.x, vertex.y, vertex.z);
 						hs.transformKeys.push(0);
-
-						var normal = vertexNormals[index];
-						hs.addNormal(normal.x, normal.y, normal.z);
 					}
 
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
-					hs.indices.push(hs.indices.length);
+					hs.vertexCounts.push(3);
 
 					i++;
 				}
 			}
 
+			hs.generateNormals();
 			hs.generateBoundingBox();
+			hs.initialize();
 			ent.addSurface(hs);
 			// chull.generateBoundingBox();
 			// chull.finalize();

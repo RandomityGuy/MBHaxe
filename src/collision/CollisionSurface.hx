@@ -5,7 +5,7 @@ import h3d.col.Bounds;
 import octree.IOctreeObject;
 import h3d.Vector;
 import collision.BVHTree.IBVHObject;
-import src.Util;
+import src.Debug;
 
 @:publicFields
 class TransformedCollisionTriangle {
@@ -44,17 +44,14 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public var boundingBox:Bounds;
 	public var points:Array<Float>;
 	public var normals:Array<Float>;
-	public var indices:Array<Int>;
+	public var vertexCounts:Array<Int>; // amount of vertices this has, so it can step this many indices
 	public var friction:Float = 1;
 	public var restitution:Float = 1;
 	public var force:Float = 0;
-	public var originalIndices:Array<Int>;
-	public var originalSurfaceIndex:Int;
 	public var transformKeys:Array<Int>;
 	public var key:Int = 0;
 
 	var _transformedPoints:Array<Float>;
-	var _transformedNormals:Array<Float>;
 
 	public function new() {}
 
@@ -64,22 +61,26 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 
 	public function generateNormals() {
 		var i = 0;
-		normals = [for (n in points) 0.0];
-		while (i < indices.length) {
-			var p1 = getPoint(indices[i]);
-			var p2 = getPoint(indices[i + 1]);
-			var p3 = getPoint(indices[i + 2]);
-			var n = p2.sub(p1).cross(p3.sub(p1)).normalized().multiply(-1);
-			normals[indices[i] * 3] = n.x;
-			normals[indices[i] * 3 + 1] = n.y;
-			normals[indices[i] * 3 + 2] = n.z;
-			normals[indices[i + 1] * 3] = n.x;
-			normals[indices[i + 1] * 3 + 1] = n.y;
-			normals[indices[i + 1] * 3 + 2] = n.z;
-			normals[indices[i + 2] * 3] = n.x;
-			normals[indices[i + 2] * 3 + 1] = n.y;
-			normals[indices[i + 2] * 3 + 2] = n.z;
-			i += 3;
+		normals = [];
+
+		for (vi in vertexCounts) {
+			var p1 = getPoint(i);
+			var p2 = getPoint(i + 1);
+			var p3 = getPoint(i + 2);
+
+			var n = p1.sub(p2).cross(p3.sub(p2)).multiply(-1).normalized();
+
+			normals.push(n.x);
+			normals.push(n.y);
+			normals.push(n.z);
+
+			i += vi;
+		}
+	}
+
+	public function initialize() {
+		if (_transformedPoints == null) {
+			_transformedPoints = points.copy();
 		}
 	}
 
@@ -124,6 +125,19 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		return new Vector(points[idx * 3], points[idx * 3 + 1], points[idx * 3 + 2]);
 	}
 
+	inline public function getTransformedPoint(idx:Int, tform:Matrix, key:Int) {
+		var p1 = idx;
+		if (transformKeys[p1] != key) {
+			var pt = getPoint(p1).transformed(tform);
+			_transformedPoints[p1 * 3] = pt.x;
+			_transformedPoints[p1 * 3 + 1] = pt.y;
+			_transformedPoints[p1 * 3 + 2] = pt.z;
+			transformKeys[p1] = key;
+		}
+
+		return new Vector(_transformedPoints[p1 * 3], _transformedPoints[p1 * 3 + 1], _transformedPoints[p1 * 3 + 2]);
+	}
+
 	inline public function getNormal(idx:Int) {
 		return new Vector(normals[idx * 3], normals[idx * 3 + 1], normals[idx * 3 + 2]);
 	}
@@ -142,18 +156,31 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 
 	public function rayCast(rayOrigin:Vector, rayDirection:Vector, intersections:Array<RayIntersectionData>, bestT:Float) {
 		var i = 0;
-		while (i < indices.length) {
-			var p1 = getPoint(indices[i]);
-			var p2 = getPoint(indices[i + 1]);
-			var p3 = getPoint(indices[i + 2]);
-			var n = getNormal(indices[i]);
-			var d = -p1.dot(n);
+		for (vi in 0...vertexCounts.length) {
+			var vtxCount = vertexCounts[vi];
+			var p1 = getPoint(i);
+			var n = getNormal(vi);
 
-			var t = -(rayOrigin.dot(n) + d) / (rayDirection.dot(n));
+			var t = -rayOrigin.sub(p1).dot(n) / (rayDirection.dot(n));
 			var ip = rayOrigin.add(rayDirection.multiply(t));
 			ip.w = 1;
-			if (t >= 0 && Collision.PointInTriangle(ip, p1, p2, p3)) {
-				if (t < bestT) {
+
+			var inside = true;
+
+			for (j in 0...vtxCount) {
+				var v1 = getPoint(i + j);
+				var v2 = getPoint(i + ((j + 1) % vtxCount));
+
+				var edgeNormal = n.cross(v2.sub(v1));
+
+				if (edgeNormal.dot(ip.sub(v1)) < 0) {
+					inside = false;
+					break;
+				}
+			}
+
+			if (inside) {
+				if (t >= 0 && t < bestT) {
 					bestT = t;
 					intersections.push({
 						point: ip.clone(),
@@ -163,7 +190,8 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 					});
 				}
 			}
-			i += 3;
+
+			i += vtxCount;
 		}
 		return bestT;
 	}
@@ -187,60 +215,10 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 		return furthestVertex;
 	}
 
-	public inline function transformTriangle(idx:Int, tform:Matrix, invtform:Matrix, key:Int) {
-		if (_transformedPoints == null) {
-			_transformedPoints = points.copy();
-		}
-		if (_transformedNormals == null) {
-			_transformedNormals = normals.copy();
-		}
-		var p1 = indices[idx];
-		var p2 = indices[idx + 1];
-		var p3 = indices[idx + 2];
-		if (transformKeys[p1] != key) {
-			var pt = getPoint(p1).transformed(tform);
-			_transformedPoints[p1 * 3] = pt.x;
-			_transformedPoints[p1 * 3 + 1] = pt.y;
-			_transformedPoints[p1 * 3 + 2] = pt.z;
-			var pn = Util.transformTranspose3x3(getNormal(p1), invtform).normalized();
-			_transformedNormals[p1 * 3] = pn.x;
-			_transformedNormals[p1 * 3 + 1] = pn.y;
-			_transformedNormals[p1 * 3 + 2] = pn.z;
-			transformKeys[p1] = key;
-		}
-		if (transformKeys[p2] != key) {
-			var pt = getPoint(p2).transformed(tform);
-			_transformedPoints[p2 * 3] = pt.x;
-			_transformedPoints[p2 * 3 + 1] = pt.y;
-			_transformedPoints[p2 * 3 + 2] = pt.z;
-			transformKeys[p2] = key;
-		}
-		if (transformKeys[p3] != key) {
-			var pt = getPoint(p3).transformed(tform);
-			_transformedPoints[p3 * 3] = pt.x;
-			_transformedPoints[p3 * 3 + 1] = pt.y;
-			_transformedPoints[p3 * 3 + 2] = pt.z;
-			transformKeys[p3] = key;
-		}
-		return new TransformedCollisionTriangle(new Vector(_transformedPoints[p1 * 3], _transformedPoints[p1 * 3 + 1], _transformedPoints[p1 * 3 + 2]),
-			new Vector(_transformedPoints[p2 * 3], _transformedPoints[p2 * 3 + 1], _transformedPoints[p2 * 3 + 2]),
-			new Vector(_transformedPoints[p3 * 3], _transformedPoints[p3 * 3 + 1], _transformedPoints[p3 * 3 + 2]),
-			new Vector(_transformedNormals[p1 * 3], _transformedNormals[p1 * 3 + 1], _transformedNormals[p1 * 3 + 2]));
-	}
-
-	public inline function getTriangle(idx:Int) {
-		var p1 = indices[idx];
-		var p2 = indices[idx + 1];
-		var p3 = indices[idx + 2];
-
-		return new TransformedCollisionTriangle(getPoint(p1), getPoint(p2), getPoint(p3), getNormal(p1));
-	}
-
 	public function getTransformed(m:Matrix, invtform:Matrix) {
 		var tformed = new CollisionSurface();
 		tformed.points = this.points.copy();
 		tformed.normals = this.normals.copy();
-		tformed.indices = this.indices.copy();
 		tformed.friction = this.friction;
 		tformed.force = this.force;
 		tformed.restitution = this.restitution;
@@ -267,9 +245,6 @@ class CollisionSurface implements IOctreeObject implements IBVHObject {
 	public function dispose() {
 		points = null;
 		normals = null;
-		indices = null;
 		_transformedPoints = null;
-		_transformedNormals = null;
-		originalIndices = null;
 	}
 }

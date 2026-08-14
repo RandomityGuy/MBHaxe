@@ -13,11 +13,16 @@ import src.MarbleWorld;
 
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ejectionPeriod: 10,
+	phiReferenceVel: 0.0,
+	phiVariance: 360.0,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 1,
 	velocityVariance: 0.25,
 	emitterLifetime: 1000,
 	inheritedVelFactor: 0.1,
+	thetaMin: 150,
+	thetaMax: 170,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/twirl.png',
 		blending: Add,
@@ -26,8 +31,10 @@ final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 1000,
 		lifetimeVariance: 150,
+		windCoefficient: 0.0,
 		dragCoefficient: 0.25,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
 		colors: [
 			new Vector(0.38, 0.38, 0.38, 0),
 			new Vector(0.34, 0.34, 0.34, 1),

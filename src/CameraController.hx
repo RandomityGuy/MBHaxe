@@ -718,64 +718,45 @@ class CameraController extends Object {
 		camera.pos = marblePosition.sub(directionVector.multiply(cameraDistance)).add(cameraVerticalTranslation);
 		camera.target = marblePosition.add(cameraVerticalTranslation);
 
-		var closeness = 0.1;
-		var rayCastOrigin = marblePosition.add(level.marble.currentUp.multiply(marble._radius)).add(cameraVerticalTranslation);
+		var closeness = 0.25;
 
-		for (pi in level.pathedInteriors) {
-			pi.pushTickState();
-		}
-
-		var processedShapes = [];
 		for (i in 0...3) {
-			var rayCastDirection = camera.pos.sub(rayCastOrigin);
-			rayCastDirection = rayCastDirection.add(rayCastDirection.normalized().multiply(2));
+			var rayCastOrigin = camera.target;
+			var dir = camera.pos.sub(rayCastOrigin).normalized();
+			var rayCastLen = cameraDistance + closeness;
 
-			var rayCastLen = rayCastDirection.length();
-
-			var results = level.collisionWorld.rayCast(rayCastOrigin, rayCastDirection.normalized(), rayCastLen);
+			var results = level.collisionWorld.rayCast(rayCastOrigin, dir, rayCastLen);
 
 			var firstHit:octree.IOctreeObject.RayIntersectionData = null;
 			var firstHitDistance = 1e8;
 			for (result in results) {
-				if (!processedShapes.contains(result.object)
-					&& (firstHit == null || (rayCastOrigin.distance(result.point) < firstHitDistance))) {
+				var d = rayCastOrigin.distance(result.point);
+				if (firstHit == null || d < firstHitDistance) {
 					firstHit = result;
-					firstHitDistance = rayCastOrigin.distance(result.point);
+					firstHitDistance = d;
 				}
 			}
+
+			var clippedDist = cameraDistance;
 			if (firstHit != null)
-				processedShapes.push(firstHit.object);
+				clippedDist = Math.max(0, Math.min(cameraDistance, firstHitDistance - closeness));
 
-			if (firstHit != null) {
-				if (firstHitDistance < cameraDistance) {
-					// camera.pos = marblePosition.sub(directionVector.multiply(firstHit.distance * 0.7));
-					var plane = new Plane(firstHit.normal.x, firstHit.normal.y, firstHit.normal.z, firstHit.point.dot(firstHit.normal));
-					var normal = firstHit.normal.multiply(-1);
-					// var position = firstHit.point;
+			camera.pos = rayCastOrigin.add(dir.multiply(clippedDist));
 
-					var projected = plane.project(camera.pos.toPoint());
-					var dist = plane.distance(camera.pos.toPoint());
-
-					if (dist >= closeness)
-						continue;
-
-					camera.pos = projected.toVector().add(normal.multiply(-closeness));
-
-					var forwardVec = marblePosition.sub(camera.pos).normalized();
-					var rightVec = camera.up.cross(forwardVec).normalized();
-					var upVec = forwardVec.cross(rightVec);
-
-					camera.target = marblePosition.add(cameraVerticalTranslation);
-					camera.up = upVec;
-					continue;
-				}
-			}
+			if (firstHit != null && clippedDist < cameraDistance)
+				continue;
 			break;
 		}
 
-		for (pi in level.pathedInteriors) {
-			pi.popTickState();
-		}
+		var fwd = camera.target.sub(camera.pos);
+		fwd.normalize();
+
+		var side = fwd.cross(camera.up);
+		side.normalize();
+
+		var up = side.cross(fwd);
+		up.normalize();
+		camera.up.load(up);
 
 		if (oob) {
 			camera.pos = lastCamPos;

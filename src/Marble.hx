@@ -89,12 +89,17 @@ enum Mode {
 }
 
 final bounceParticleOptions:ParticleEmitterOptions = {
-	ejectionPeriod: 5,
+	ejectionPeriod: 10,
 	ambientVelocity: new Vector(0, 0, 0.0),
 	ejectionVelocity: 6,
 	velocityVariance: 0.25,
-	emitterLifetime: 50,
+	emitterLifetime: 250,
 	inheritedVelFactor: 0,
+	thetaMin: 80,
+	thetaMax: 90,
+	phiReferenceVel: 0.0,
+	phiVariance: 360.0,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/burst.png',
 		blending: Add,
@@ -103,8 +108,10 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 400,
 		lifetimeVariance: 50,
-		dragCoefficient: 0,
-		acceleration: -2,
+		dragCoefficient: 0.5,
+		gravityCoefficient: -0.1,
+		windCoefficient: 0,
+		constantAcceleration: -2,
 		colors: [
 			new Vector(0.5, 0.5, 0.5, 0.6),
 			new Vector(0.3, 0.3, 0.2, 0.4),
@@ -116,77 +123,38 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 };
 
 final trailParticleOptions:ParticleEmitterOptions = {
-	ejectionPeriod: 5,
-	ejectionVelocity: 0.0,
+	ejectionPeriod: 9,
+	ejectionVelocity: 3.0,
 	velocityVariance: 0.25,
 	emitterLifetime: 1e8,
-	inheritedVelFactor: 1,
+	inheritedVelFactor: 0,
 	ambientVelocity: new Vector(),
+	thetaMin: 60,
+	thetaMax: 90,
+	phiReferenceVel: 0.0,
+	phiVariance: 360.0,
+	ejectionOffset: 0,
 	particleOptions: {
-		texture: 'particles/smoke.png',
-		blending: Alpha,
+		texture: 'particles/burst.png',
+		blending: Add,
 		spinSpeed: 0,
 		spinRandomMin: 0,
 		spinRandomMax: 0,
 		dragCoefficient: 1,
-		lifetime: 100,
-		lifetimeVariance: 10,
-		acceleration: 0,
-		colors: [new Vector(1, 1, 0, 0), new Vector(1, 1, 0, 1), new Vector(1, 1, 1, 0)],
-		sizes: [0.7, 0.4, 0.1],
-		times: [0, 0.15, 1]
+		lifetime: 2000,
+		lifetimeVariance: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
+		colors: [
+			new Vector(0.5, 0.3, 0.2, 0.1),
+			new Vector(0.5, 0.3, 0.2, 0.1),
+			new Vector(0.2, 0.0, 0.0, 0.0)
+		],
+		sizes: [0.6, 0.5, 0.1],
+		times: [0, 0.5, 1]
 	}
 };
-
-final blastParticleOptions:ParticleEmitterOptions = {
-	ejectionPeriod: 1,
-	ambientVelocity: new Vector(0, 0, -0.3),
-	ejectionVelocity: 4,
-	velocityVariance: 0,
-	emitterLifetime: 300,
-	inheritedVelFactor: 0,
-	particleOptions: {
-		texture: 'particles/smoke.png',
-		blending: Alpha,
-		spinSpeed: 20,
-		spinRandomMin: 0,
-		spinRandomMax: 0,
-		lifetime: 500,
-		lifetimeVariance: 100,
-		dragCoefficient: 1,
-		acceleration: 0,
-		colors: [new Vector(0, 1, 1, 0.1), new Vector(0, 1, 1, 0.5), new Vector(0, 1, 1, 0.9)],
-		sizes: [0.125, 0.125, 0.125],
-		times: [0, 0.4, 1]
-	}
-}
-
-final blastMaxParticleOptions:ParticleEmitterOptions = {
-	ejectionPeriod: 1,
-	ambientVelocity: new Vector(0, 0, -0.3),
-	ejectionVelocity: 4,
-	velocityVariance: 0,
-	emitterLifetime: 300,
-	inheritedVelFactor: 0,
-	particleOptions: {
-		texture: 'particles/smoke.png',
-		blending: Alpha,
-		spinSpeed: 20,
-		spinRandomMin: 0,
-		spinRandomMax: 0,
-		lifetime: 500,
-		lifetimeVariance: 100,
-		dragCoefficient: 1,
-		acceleration: 0,
-		colors: [
-			new Vector(1, 0.7, 0, 0.1),
-			new Vector(1, 0.7, 0, 0.5),
-			new Vector(1, 0.7, 0, 0.9)
-		],
-		sizes: [0.125, 0.125, 0.125],
-		times: [0, 0.4, 1]
-	}
-}
 
 @:publicFields
 @:structInit
@@ -306,8 +274,6 @@ class Marble extends GameObject {
 
 	var bounceEmitterData:ParticleData;
 	var trailEmitterData:ParticleData;
-	var blastEmitterData:ParticleData;
-	var blastMaxEmitterData:ParticleData;
 	var trailEmitterNode:ParticleEmitter;
 
 	var rollSound:Channel;
@@ -357,14 +323,6 @@ class Marble extends GameObject {
 		this.trailEmitterData = new ParticleData();
 		this.trailEmitterData.identifier = "MarbleTrailParticle";
 		this.trailEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
-
-		this.blastEmitterData = new ParticleData();
-		this.blastEmitterData.identifier = "MarbleBlastParticle";
-		this.blastEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
-
-		this.blastMaxEmitterData = new ParticleData();
-		this.blastMaxEmitterData.identifier = "MarbleBlastMaxParticle";
-		this.blastMaxEmitterData.texture = ResourceLoader.getResource("data/particles/smoke.png", ResourceLoader.getTexture, this.textureResources);
 
 		this.rollSound = AudioManager.playSound(ResourceLoader.getResource("data/sound/rolling_hard.wav", ResourceLoader.getAudio, this.soundResources),
 			this.getAbsPos().getPosition(), true);
@@ -427,12 +385,12 @@ class Marble extends GameObject {
 						mat.mainPass.addShader(new MarbleReflection(this.cubemapRenderer.cubemap));
 					} else {
 						// Generate tangents for next shaders, only for Ultra
-						for (node in marbleDts.graphNodes) {
-							for (chmesh in node.getMeshes()) {
-								var chpoly = cast(chmesh.primitive, mesh.Polygon);
-								chpoly.addTangents();
-							}
-						}
+						// for (node in marbleDts.graphNodes) {
+						// 	for (chmesh in node.getMeshes()) {
+						// 		var chpoly = cast(chmesh.primitive, mesh.Polygon);
+						// 		chpoly.addTangents();
+						// 	}
+						// }
 
 						mat.mainPass.removeShader(mat.textureShader);
 
@@ -1147,7 +1105,7 @@ class Marble extends GameObject {
 			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
 			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData,
-				this.collider.transform.getPosition().sub(normal.multiply(_radius)), null, new Vector(1, 1, 1).add(normal.multiply(-0.8)));
+				this.collider.transform.getPosition().sub(normal.multiply(_radius)));
 			this.bounceEmitDelay = 0.3;
 		}
 	}
@@ -1349,6 +1307,7 @@ class Marble extends GameObject {
 
 		// for (iter in 0...10) {
 		//	var iterationFound = false;
+		var radSq = radius * radius;
 		for (obj in foundObjs) {
 			// Its an MP so bruh
 			if (obj.go != null && !obj.go.isCollideable)
@@ -1357,11 +1316,16 @@ class Marble extends GameObject {
 			var invMatrix = @:privateAccess obj.invTransform;
 			if (obj.go is PathedInterior)
 				invMatrix = obj.transform.getInverse();
+			var invTform = invMatrix.clone();
+			invTform.transpose();
 			var localpos = position.clone();
 			localpos.transform(invMatrix);
 
 			var relVel = velocity.sub(obj.velocity);
 			var relLocalVel = relVel.transformed3x3(invMatrix);
+			var relVelDir = relVel.normalized();
+
+			var fixedFinalPos = position.add(relVel.multiply(deltaT));
 
 			var invScale = invMatrix.getScale();
 			var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
@@ -1386,90 +1350,79 @@ class Marble extends GameObject {
 				currentFinalPos.load(position.add(relVel.multiply(finalT)));
 
 				var i = 0;
-				while (i < surface.indices.length) {
-					var verts = surface.transformTriangle(i, obj.transform, invMatrix, @:privateAccess obj._transformKey);
-					// var v0 = surface.points[surface.indices[i]].transformed(tform);
-					// var v = surface.points[surface.indices[i + 1]].transformed(tform);
-					// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
-					var v0 = new Vector(verts.v1x, verts.v1y, verts.v1z);
-					var v = new Vector(verts.v2x, verts.v2y, verts.v2z);
-					var v2 = new Vector(verts.v3x, verts.v3y, verts.v3z);
-					// var v0 = surface.points[surface.indices[i]].transformed(obj.transform);
-					// var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
-					// var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
+				for (vi in 0...surface.vertexCounts.length) {
+					var vtxCount = surface.vertexCounts[vi];
+					if (vtxCount == 0)
+						continue;
 
-					// var triangleVerts = [v0, v, v2];
+					var surfaceNormal = surface.getNormal(vi).transformed3x3(invTform).normalized();
+					var surfacePoint = surface.getTransformedPoint(i, obj.transform, @:privateAccess obj._transformKey);
 
-					var surfaceNormal = new Vector(verts.nx, verts.ny,
-						verts.nz); // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
-					if (obj.correctNormals) {
-						surfaceNormal.load(v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1));
-					}
-					// If we're going the wrong direction or not going to touch the plane, ignore...
-					if (surfaceNormal.dot(relVel) > -0.001 || surfaceNormal.dot(currentFinalPos.sub(v0)) > radius) {
-						i += 3;
+					if (surfaceNormal.dot(relVelDir) > -0.001 || surfaceNormal.dot(fixedFinalPos.sub(surfacePoint)) > radius) {
+						i += vtxCount;
 						continue;
 					}
 
-					testTriangles.push({
-						v1: v0,
-						v2: v,
-						v3: v2,
-						n: surfaceNormal,
-					});
-
 					// Time until collision with the plane
-					var collisionTime = (radius - surfaceNormal.dot(position.sub(v0))) / surfaceNormal.dot(relVel);
+					var collisionTime = (radius - position.sub(surfacePoint).dot(surfaceNormal)) / surfaceNormal.dot(relVel);
 
 					// Are we going to touch the plane during this time step?
 					if (collisionTime >= 0.000001 && finalT >= collisionTime) {
 						var collisionPoint = position.add(relVel.multiply(collisionTime));
-						// If we're inside the poly, just get the position
-						if (Collision.PointInTriangle(collisionPoint, v0, v, v2)) {
+
+						var inside = true;
+						for (j in 0...vtxCount) {
+							var v1 = surface.getTransformedPoint(i + j, obj.transform, @:privateAccess obj._transformKey);
+							var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), obj.transform, @:privateAccess obj._transformKey);
+
+							var edgeNormal = surfaceNormal.cross(v2.sub(v1));
+
+							if (edgeNormal.dot(collisionPoint.sub(v1)) < 0) {
+								inside = false;
+								break;
+							}
+						}
+
+						if (inside) {
 							finalT = collisionTime;
 							currentFinalPos.load(position.add(relVel.multiply(finalT)));
 							found = true;
 							lastContactPos.load(currentFinalPos);
-							// iterationFound = true;
-							i += 3;
-							// Debug.drawSphere(currentFinalPos, radius);
+
+							i += vtxCount;
 							continue;
 						}
 					}
-					// We *might* be colliding with an edge
 
-					var triangleVerts = [v0, v, v2];
+					for (j in 0...vtxCount) {
+						var v1 = surface.getTransformedPoint(i + j, obj.transform, @:privateAccess obj._transformKey);
+						var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), obj.transform, @:privateAccess obj._transformKey);
 
-					var lastVert = v2.clone();
+						var edge = v2.sub(v1);
 
-					var radSq = radius * radius;
-					for (iter in 0...3) {
-						var thisVert = triangleVerts[iter];
+						var posDiff = position.sub(v1);
 
-						var vertDiff = lastVert.sub(thisVert);
-						var posDiff = position.sub(thisVert);
-
-						var velRejection = vertDiff.cross(relVel);
-						var posRejection = vertDiff.cross(posDiff);
+						var velRejection = edge.cross(relVel);
+						var posRejection = edge.cross(posDiff);
 
 						// Build a quadratic equation to solve for the collision time
 						var a = velRejection.lengthSq();
 						var b = 2 * posRejection.dot(velRejection);
-						var c = (posRejection.lengthSq() - vertDiff.lengthSq() * radSq);
+						var c = (posRejection.lengthSq() - edge.lengthSq() * radSq);
 
 						var discriminant = b * b - (4 * a * c);
 
 						// If it's not quadratic or has no solution, ignore this edge.
 						if (a == 0.0 || discriminant < 0.0) {
-							lastVert.load(thisVert);
 							continue;
 						}
 
+						var oneOverTwoA = 0.5 / a;
 						var discriminantSqrt = Math.sqrt(discriminant);
 
-						var q = -0.5 * (b + (b >= 0.0 ? discriminantSqrt : -discriminantSqrt));
-						var edgeCollisionTime = q / a;
-						var edgeCollisionTime2 = (q != 0.0) ? c / q : edgeCollisionTime;
+						// Solve using the quadratic formula
+						var edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
+						var edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
 
 						// Make sure the 2 times are in ascending order
 						if (edgeCollisionTime2 < edgeCollisionTime) {
@@ -1480,21 +1433,19 @@ class Marble extends GameObject {
 
 						// If the collision doesn't happen on this time step, ignore this edge.
 						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert.load(thisVert);
 							continue;
 						}
 
 						// Check if the collision hasn't already happened
 						if (edgeCollisionTime >= 0.000001) {
-							var edgeLen = vertDiff.length();
+							var edgeLen = edge.length();
 
-							var relativeCollisionPos = posDiff.add(relVel.multiply(edgeCollisionTime));
+							var relativeCollisionPos = position.sub(v1).add(relVel.multiply(edgeCollisionTime));
 
-							var distanceAlongEdge = relativeCollisionPos.dot(vertDiff) / edgeLen;
+							var distanceAlongEdge = relativeCollisionPos.dot(edge) / edgeLen;
 
 							// If the collision happens outside the boundaries of the edge, ignore this edge.
 							if (-radius > distanceAlongEdge || edgeLen + radius < distanceAlongEdge) {
-								lastVert.load(thisVert);
 								continue;
 							}
 
@@ -1502,11 +1453,8 @@ class Marble extends GameObject {
 							if (distanceAlongEdge >= 0.0 && distanceAlongEdge <= edgeLen) {
 								finalT = edgeCollisionTime;
 								currentFinalPos.load(position.add(relVel.multiply(finalT)));
-								lastContactPos.load(vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert));
-								lastVert.load(thisVert);
+								lastContactPos.load(v1.add(edge.multiply(distanceAlongEdge / edgeLen)));
 								found = true;
-								// Debug.drawSphere(currentFinalPos, radius);
-								// iterationFound = true;
 								continue;
 							}
 						}
@@ -1516,19 +1464,18 @@ class Marble extends GameObject {
 						a = relVel.lengthSq();
 
 						// Build a quadratic equation to solve for the collision time
-						var posVertDiff = position.sub(thisVert);
-						b = 2 * posVertDiff.dot(relVel);
-						c = posVertDiff.lengthSq() - radSq;
+						b = 2 * posDiff.dot(relVel);
+						c = posDiff.lengthSq() - radSq;
 						discriminant = b * b - (4 * a * c);
 
 						// If it's quadratic and has a solution ...
 						if (a != 0.0 && discriminant >= 0.0) {
+							oneOverTwoA = 0.5 / a;
 							discriminantSqrt = Math.sqrt(discriminant);
 
-							// Solve using the numerically stable quadratic
-							q = -0.5 * (b + (b >= 0.0 ? discriminantSqrt : -discriminantSqrt));
-							edgeCollisionTime = q / a;
-							edgeCollisionTime2 = (q != 0.0) ? c / q : edgeCollisionTime;
+							// Solve using the quadratic formula
+							edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
+							edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
 
 							// Make sure the 2 times are in ascending order
 							if (edgeCollisionTime2 < edgeCollisionTime) {
@@ -1548,7 +1495,7 @@ class Marble extends GameObject {
 									// Resolve it and continue
 									finalT = edgeCollisionTime;
 									currentFinalPos.load(position.add(relVel.multiply(finalT)));
-									lastContactPos.load(thisVert);
+									lastContactPos.load(v1);
 									found = true;
 									// Debug.drawSphere(currentFinalPos, radius);
 									// iterationFound = true;
@@ -1558,23 +1505,22 @@ class Marble extends GameObject {
 
 						// We still need to check the other corner ...
 						// Build one last quadratic equation to solve for the collision time
-						var posVertDiff = position.sub(lastVert);
+						var posVertDiff = position.sub(v2);
 						b = 2 * posVertDiff.dot(relVel);
 						c = posVertDiff.lengthSq() - radSq;
 						discriminant = b * b - (4 * a * c);
 
 						// If it's not quadratic or has no solution, then skip this corner
-						if (a == 0.0 || discriminant < 0.0) {
-							lastVert.load(thisVert);
+						if (Math.abs(a) < 1e-6 || discriminant < 1e-6) {
 							continue;
 						}
 
+						oneOverTwoA = 0.5 / a;
 						discriminantSqrt = Math.sqrt(discriminant);
 
-						// Solve using the numerically stable quadratic
-						q = -0.5 * (b + (b >= 0.0 ? discriminantSqrt : -discriminantSqrt));
-						edgeCollisionTime = q / a;
-						edgeCollisionTime2 = (q != 0.0) ? c / q : edgeCollisionTime;
+						// Solve using the quadratic formula
+						edgeCollisionTime = (-b + discriminantSqrt) * oneOverTwoA;
+						edgeCollisionTime2 = (-b - discriminantSqrt) * oneOverTwoA;
 
 						// Make sure the 2 times are in ascending order
 						if (edgeCollisionTime2 < edgeCollisionTime) {
@@ -1584,7 +1530,6 @@ class Marble extends GameObject {
 						}
 
 						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1592,20 +1537,17 @@ class Marble extends GameObject {
 							edgeCollisionTime = 0;
 
 						if (edgeCollisionTime < 0.000001) {
-							lastVert.load(thisVert);
 							continue;
 						}
 
 						finalT = edgeCollisionTime;
 						currentFinalPos.load(position.add(relVel.multiply(finalT)));
-						// Debug.drawSphere(currentFinalPos, radius);
 
-						lastVert.load(thisVert);
 						found = true;
 						// iterationFound = true;
 					}
 
-					i += 3;
+					i += vtxCount;
 				}
 			}
 		}
