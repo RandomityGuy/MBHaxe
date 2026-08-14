@@ -2389,8 +2389,8 @@ class MarbleWorld extends Scheduler {
 			} else {
 				restartGameCode();
 			}
-		}, mission, this.gameMode.getFinishScore(),
-			this.gameMode.getScoreType(), this.replay.write());
+		}, mission, this.gameMode.getFinishScore(), this.gameMode.getScoreType(),
+			this.replay);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;
@@ -2463,6 +2463,7 @@ class MarbleWorld extends Scheduler {
 		if (isMultiplayer && Net.isHost) {
 			@:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
 		}
+
 		marble.currentUp = vec;
 		if (marble == this.marble) {
 			var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);
