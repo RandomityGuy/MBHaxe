@@ -739,7 +739,7 @@ class CameraController extends Object {
 
 			var clippedDist = cameraDistance;
 			if (firstHit != null)
-				clippedDist = Math.max(0, Math.min(cameraDistance, firstHitDistance - closeness));
+				clippedDist = Math.max(closeness, Math.min(cameraDistance, firstHitDistance - closeness));
 
 			camera.pos = rayCastOrigin.add(dir.multiply(clippedDist));
 
