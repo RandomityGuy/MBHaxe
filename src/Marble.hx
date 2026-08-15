@@ -138,8 +138,8 @@ final trailParticleOptions:ParticleEmitterOptions = {
 		texture: 'particles/burst.png',
 		blending: Add,
 		spinSpeed: 0,
-		spinRandomMin: 0,
-		spinRandomMax: 0,
+		spinRandomMin: -90,
+		spinRandomMax: 90,
 		dragCoefficient: 1,
 		lifetime: 2000,
 		lifetimeVariance: 0,
@@ -151,7 +151,7 @@ final trailParticleOptions:ParticleEmitterOptions = {
 			new Vector(0.5, 0.3, 0.2, 0.1),
 			new Vector(0.2, 0.0, 0.0, 0.0)
 		],
-		sizes: [0.6, 0.5, 0.1],
+		sizes: [0.6 / 2, 0.5 / 2, 0.1 / 2],
 		times: [0, 0.5, 1]
 	}
 };
@@ -208,7 +208,7 @@ class Marble extends GameObject {
 	var _maxDotSlide = 0.5;
 	var _minBounceVel:Float = 0.1;
 	var _minBounceSpeed:Float = 3;
-	var _minTrailVel:Float = 10;
+	var _minTrailVel:Float = 15;
 	var _bounceKineticFriction = 0.2;
 	var minVelocityBounceSoft = 2.5;
 	var minVelocityBounceHard = 12.0;
@@ -271,10 +271,10 @@ class Marble extends GameObject {
 	var blastPerc:Float = 0.0;
 
 	var bounceEmitDelay:Float = 0;
+	var trailEmitDelay:Float = 0;
 
 	var bounceEmitterData:ParticleData;
 	var trailEmitterData:ParticleData;
-	var trailEmitterNode:ParticleEmitter;
 
 	var rollSound:Channel;
 	var rollMegaSound:Channel;
@@ -757,10 +757,8 @@ class Marble extends GameObject {
 			var contactNormal = new Vector();
 			var forceObjectCount = 0;
 
-			var forceObjects = [];
-
 			for (contact in contacts) {
-				if (contact.force != 0 && !forceObjects.contains(contact.otherObject)) {
+				if (contact.force != 0) {
 					if (contact.otherObject is RoundBumper) {
 						if (!level.isReplayingMovement && !playedSounds.contains("data/sound/bumperding1.wav") && !this.isNetUpdate) {
 							if (level.marble == cast this)
@@ -773,8 +771,7 @@ class Marble extends GameObject {
 					}
 					forceObjectCount++;
 					contactNormal.load(contactNormal.add(contact.normal));
-					contactForce += contact.force;
-					forceObjects.push(contact.otherObject);
+					contactForce = contact.force;
 				}
 			}
 
@@ -967,7 +964,6 @@ class Marble extends GameObject {
 					dir2.load(dir2.add(contacts[j].normal));
 				}
 				dir.load(dir2);
-				dir.normalize();
 				gotOne = true;
 			}
 			if (gotOne) {
@@ -1013,9 +1009,6 @@ class Marble extends GameObject {
 		if (canJump && m.jump) {
 			var velDifference = this.velocity.sub(bestContact.velocity);
 			var sv = bestContact.normal.dot(velDifference);
-			if (sv < 0) {
-				sv = 0;
-			}
 			if (sv < this._jumpImpulse) {
 				this.velocity.load(this.velocity.add(bestContact.normal.multiply((this._jumpImpulse - sv))));
 				if (!level.isReplayingMovement
@@ -1104,25 +1097,45 @@ class Marble extends GameObject {
 		if (!this.controllable || this.isNetUpdate)
 			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
-			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData,
-				this.collider.transform.getPosition().sub(normal.multiply(_radius)));
-			this.bounceEmitDelay = 0.3;
+			var cl = bounceParticleOptions.clone();
+			cl.axis = normal;
+			cl.emitterLifetime = 1; //
+			cl.velocity = this.velocity.clone();
+			cl.ejectionPeriod = 10.0 / Math.min(speed * 100.0, 2500.0);
+			this.level.particleManager.createEmitter(cl, this.bounceEmitterData, this.collider.transform.getPosition().sub(normal.multiply(_radius)));
+			this.bounceEmitDelay = 5;
 		}
 	}
 
-	function trailEmitter() {
+	function trailEmitter(dt:Float) {
 		// Trails are bugged
-		// var speed = this.velocity.length();
-		// if (this._minTrailVel > speed) {
-		// 	if (this.trailEmitterNode != null) {
-		// 		this.level.particleManager.removeEmitter(this.trailEmitterNode);
-		// 		this.trailEmitterNode = null;
-		// 	}
-		// 	return;
-		// }
-		// if (this.trailEmitterNode == null)
-		// 	this.trailEmitterNode = this.level.particleManager.createEmitter(trailParticleOptions, trailEmitterData, null,
-		// 		() -> this.getAbsPos().getPosition());
+
+		if (trailEmitDelay > 0)
+			trailEmitDelay -= dt;
+		if (trailEmitDelay < 0)
+			trailEmitDelay = 0;
+
+		var speed = this.velocity.length();
+		if (this._minTrailVel > speed || trailEmitDelay > 0) {
+			return;
+		}
+		if (this._minTrailVel * 2 > speed)
+			dt *= (speed - this._minTrailVel) / this._minTrailVel;
+
+		var norm = this.velocity.normalized();
+
+		var particlePos = this.collider.transform.getPosition();
+		particlePos.load(particlePos.add(new Vector(this._radius * (Math.random() * 2 - 1), this._radius * (Math.random() * 2 - 1),
+			this._radius * (Math.random() * 2 - 1))));
+
+		var trailOpts = trailParticleOptions.clone();
+		trailOpts.emitterLifetime = 1;
+		trailOpts.ejectionPeriod = 9.0 / (1000.0 * dt);
+		trailOpts.axis = norm;
+		trailOpts.velocity = this.velocity.clone();
+		trailEmitDelay = 16.0 / 1000.0;
+
+		this.level.particleManager.createEmitter(trailOpts, trailEmitterData, particlePos);
 	}
 
 	function ReportBounce(pos:Vector, normal:Vector, speed:Float) {
@@ -2171,7 +2184,7 @@ class Marble extends GameObject {
 			updatePowerupStates(timeState);
 		}
 
-		this.trailEmitter();
+		this.trailEmitter(timeState.dt);
 		if (bounceEmitDelay > 0)
 			bounceEmitDelay -= timeState.dt;
 		if (bounceEmitDelay < 0)
@@ -2364,7 +2377,7 @@ class Marble extends GameObject {
 			updatePowerupStates(timeState);
 		}
 
-		this.trailEmitter();
+		this.trailEmitter(timeState.dt);
 		if (bounceEmitDelay > 0)
 			bounceEmitDelay -= timeState.dt;
 		if (bounceEmitDelay < 0)
