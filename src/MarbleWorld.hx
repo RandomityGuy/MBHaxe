@@ -221,6 +221,7 @@ class MarbleWorld extends Scheduler {
 	public var cheatsUsed:Bool = false;
 
 	public var inputRecorder:InputRecorder;
+	public var playtestPointManager:PlaytestPointManager;
 	public var isReplayingMovement:Bool = false;
 	public var currentInputMoves:Array<InputRecorderFrame>;
 
@@ -276,6 +277,7 @@ class MarbleWorld extends Scheduler {
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
 		this.inputRecorder = new InputRecorder(cast this);
+		this.playtestPointManager = new PlaytestPointManager(cast this);
 		this.isMultiplayer = multiplayer;
 		if (this.isMultiplayer) {
 			isRecording = false;
@@ -336,6 +338,7 @@ class MarbleWorld extends Scheduler {
 		this.mission.load();
 		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
 		scanMission(this.mission.root);
+		this.playtestPointManager.scanMission(this.mission.root);
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		if (this.isMultiplayer) {
@@ -1856,6 +1859,10 @@ class MarbleWorld extends Scheduler {
 		this.gameMode.update(this.timeState);
 
 		if (!this.isMultiplayer) {
+			if (!this.isWatching && this.finishTime == null) {
+				this.playtestPointManager.update(dt);
+			}
+
 			if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
 				&& this.finishTime == null) {
 				performRestart();
