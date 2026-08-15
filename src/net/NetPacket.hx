@@ -66,7 +66,7 @@ class MarbleUpdatePacket implements NetPacket {
 	var heliTick:Int;
 	var gravityDirection:Vector;
 	var oob:Bool;
-	var powerUpId:Int;
+	var powerUpId:Int = 0x1FF;
 	var moveQueueSize:Int;
 	var netFlags:Int;
 	var trapdoorUpdates:Map<Int, Int> = [];
@@ -104,7 +104,7 @@ class MarbleUpdatePacket implements NetPacket {
 			b.writeUInt16(megaTick);
 		}
 		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
-			b.writeInt(powerUpId, 9);
+			b.writeInt(powerUpId, 10);
 		}
 		if (netFlags & MarbleNetFlags.GravityChange > 0) {
 			b.writeFloat(gravityDirection.x);
@@ -147,7 +147,7 @@ class MarbleUpdatePacket implements NetPacket {
 		}
 
 		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
-			powerUpId = b.readInt(9);
+			powerUpId = b.readInt(10);
 		}
 		if (netFlags & MarbleNetFlags.GravityChange > 0) {
 			gravityDirection = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
