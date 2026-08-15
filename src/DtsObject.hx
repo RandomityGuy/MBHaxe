@@ -883,22 +883,6 @@ class DtsObject extends GameObject {
 			var dot2 = normal.dot(vertexNormals[i2]);
 			var dot3 = normal.dot(vertexNormals[i3]);
 			var matname = dts.matNames[materialIndex];
-			// if (matname == 'blastwave') {
-			// 	var temp = i1;
-			// 	i1 = i3;
-			// 	i3 = temp;
-			// }
-			// if (!StringTools.contains(this.dtsPath, 'helicopter.dts') && !StringTools.contains(this.dtsPath, 'tornado.dts'))
-			// ^ temp hardcoded fix
-
-			// if (dot1 < 0 && dot2 < 0 && dot3 < 0) {
-			// if ((dot1 < 0 && dot2 < 0 && dot3 < 0) || StringTools.contains(this.dtsPath, 'helicopter.dts')) {
-			// 	var temp = i1;
-			// 	i1 = i3;
-			// 	i3 = temp;
-			// }
-
-			// }
 
 			var tri = {
 				material: materialIndex,

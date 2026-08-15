@@ -258,7 +258,31 @@ class ParticleEmitterOptions {
 	/** Computes a spawn offset for each particle. */
 	public var spawnOffset:Void->Vector = null;
 
+	public var velocity:Vector = null;
+
 	public var particleOptions:ParticleOptions;
+
+	public function clone():ParticleEmitterOptions {
+		var clone:ParticleEmitterOptions = {
+			ejectionPeriod: ejectionPeriod,
+			particleOptions: particleOptions,
+			spawnOffset: spawnOffset,
+			ejectionOffset: ejectionOffset,
+			phiVariance: phiVariance,
+			phiReferenceVel: phiReferenceVel,
+			thetaMax: thetaMax,
+			thetaMin: thetaMin,
+			axis: axis,
+			inheritedVelFactor: inheritedVelFactor,
+			emitterLifetime: emitterLifetime,
+			velocityVariance: velocityVariance,
+			ejectionVelocity: ejectionVelocity,
+			ambientVelocity: ambientVelocity,
+			periodVariance: periodVariance,
+			velocity: velocity
+		};
+		return clone;
+	}
 }
 
 @:publicFields
@@ -284,6 +308,8 @@ class ParticleEmitter {
 		this.manager = manager;
 		this.getPos = getPos;
 		this.data = data;
+		if (this.o.velocity != null)
+			this.vel = this.o.velocity.clone();
 	}
 
 	public function spawn(time:Float) {
