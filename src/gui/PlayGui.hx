@@ -952,7 +952,7 @@ class PlayGui {
 	public function setSpectateMenu(enabled:Bool) {
 		if (enabled && spectatorCtrl == null) {
 			initSpectatorMenu();
-			spectatorCtrl.render(MarbleGame.canvas.scene2d, @:privateAccess playGuiCtrl._flow);
+			spectatorCtrl.render(MarbleGame.canvas.scene2d);
 			blastFillUltra.bmp.visible = false;
 			blastFill.bmp.visible = false;
 			blastFrame.bmp.visible = false;

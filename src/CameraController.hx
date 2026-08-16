@@ -261,7 +261,10 @@ class CameraController extends Object {
 
 		if (spectateMarbleIndex != -1) {
 			// Center the pitch
-			if (Settings.controlsSettings.controllerVerticalCenter && !(hasXInput || hasYInput) && deltaY == 0.0 && wasLastGamepadInput) {
+			if (!Settings.controlsSettings.alwaysFreeLook
+				&& !Key.isDown(Settings.controlsSettings.freelook)
+				&& !MarbleGame.instance.touchInput.cameraInput.pressed
+				&& deltaY == 0.0) {
 				var rescaledY = deltaY;
 				if (rescaledY <= 0.0)
 					rescaledY = 0.4 - rescaledY * -0.75;
