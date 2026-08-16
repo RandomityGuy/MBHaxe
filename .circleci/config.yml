@@ -878,25 +878,25 @@ workflows:
       - build:
           filters:
             tags:
-              only: /^\d+.\d+.\d+$/
+              only: /^\d+.\d+.\d+\-mbu$/
 
   build-windows:
     jobs:
       - build-win:
           filters:
             tags:
-              only: /^\d+.\d+.\d+$/
+              only: /^\d+.\d+.\d+\-mbu$/
 
   build-universal-windows:
     jobs:
       - build-uwp:
           filters:
             tags:
-              only: /^\d+.\d+.\d+$/
+              only: /^\d+.\d+.\d+\-mbu$/
 
   build-lin:
     jobs:
       - build-linux:
           filters:
             tags:
-              only: /^\d+.\d+.\d+$/
+              only: /^\d+.\d+.\d+\-mbu$/
