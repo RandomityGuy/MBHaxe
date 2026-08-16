@@ -163,7 +163,7 @@ class CameraController extends Object {
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
 		if (spectate && spectateMarbleIndex == -1) {
-			factor *= 0.4;
+			factor *= 0.5;
 		}
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;

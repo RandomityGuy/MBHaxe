@@ -127,8 +127,8 @@ class CameraInput {
 
 				var dt = MarbleGame.instance.world.timeState.dt;
 
-				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((smoothX / dt) * (1 / 60.0)) * (1 / 60.0) * 35,
-					applyNonlinearScale((smoothY / dt) * (1 / 60.0)) * (1 / 60.0) * 35, true);
+				MarbleGame.instance.world.marble.camera.orbit(applyNonlinearScale((smoothX / dt) * (1 / 60.0)) * (1 / 60.0) * 20,
+					applyNonlinearScale((smoothY / dt) * (1 / 60.0)) * (1 / 60.0) * 20, true);
 
 				if (inpX != 0)
 					prevMouse.x = e.relX;
