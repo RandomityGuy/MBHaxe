@@ -113,7 +113,7 @@ class Net {
 			MasterServerClient.requestTurnCredentials();
 			Net.onTurnServersReceived = () -> {
 				Net.onTurnServersReceived = null;
-				addClientFromSdp(sdpString, onFinishSdp, true);
+				addClientFromSdp(sdpString, privateJoin, onFinishSdp, true);
 			};
 			return;
 		}
@@ -210,7 +210,7 @@ class Net {
 				MasterServerClient.requestTurnCredentials();
 				Net.onTurnServersReceived = () -> {
 					Net.onTurnServersReceived = null;
-					joinServer(serverName, password, connectedCb, true);
+					joinServer(serverName, isInvite, connectedCb, true);
 				};
 				return;
 			}
