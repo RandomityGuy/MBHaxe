@@ -283,6 +283,9 @@ class CameraController extends Object {
 				}
 				deltaY = movePitchSpeed;
 			}
+		} else {
+			deltaX *= 0.5;
+			deltaY *= 0.5;
 		}
 
 		nextCameraYaw += deltaX;
