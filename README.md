@@ -14,7 +14,7 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ## Windows, Mac and Linux
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.14)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.3)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.2.5-mbu)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.0-mbu)
 ### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/2.0.3)
 Linux port by [boucymatt](https://github.com/boucymatt). Supports Steam Deck.
 ## Mac Instructions - Important
@@ -23,13 +23,13 @@ You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum.apk)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra.apk)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.3.0-mbu/MBHaxe-Ultra.apk)
 ### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.3/MBHaxe-PlatinumQuest.apk)
 
 ## iOS (NEW!)
 ### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold-iOS.ipa)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum-iOS.ipa)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-iOS.ipa)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.3.0-mbu/MBHaxe-Ultra-iOS.ipa)
 ### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.3/MBHaxe-PlatinumQuest-iOS.ipa)
 Ported to iOS by [boucymatt](https://github.com/boucymatt).  
 iOS builds ship as `.ipa` files that must be sideloaded, as Apple does not allow direct installs outside the App Store. Use [LiveContainer](https://github.com/LiveContainer/LiveContainer) or an AltStore-compatible store (AltStore, SideStore, etc.). To install and update all builds from one place, add the AltStore source.  
@@ -38,7 +38,7 @@ iOS builds ship as `.ipa` files that must be sideloaded, as Apple does not allow
 </a>
 
 ## Xbox (NEW!)
-### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.2.5-mbu/MBHaxe-Ultra-UWP-Xbox.msix)
+### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.3.0-mbu/MBHaxe-Ultra-UWP-Xbox.msix)
 Ported to Xbox via UWP by [Daniel Worley](https://github.com/worleydl).  
 You will need to enable Developer Mode on your Xbox in order to sideload the app. The walkthrough can be found at https://www.youtube.com/watch?v=2Ly9TIdu9uw.  
 
