@@ -114,7 +114,23 @@ class GuiButton extends GuiAnim {
 		super.onMouseEnter(mouseState);
 
 		if (buttonSounds && !disabled) {
+			#if js
+			js.Browser.document.body.style.cursor = 'pointer';
+			#end
+			#if sys
+			Cursors.setCursor(Hand);
+			#end
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonover.wav", ResourceLoader.getAudio, this.soundResources));
 		}
+	}
+
+	public override function onMouseLeave(mouseState:MouseState) {
+		super.onMouseLeave(mouseState);
+		#if js
+		js.Browser.document.body.style.cursor = '';
+		#end
+		#if sys
+		Cursors.setCursor(Arrow);
+		#end
 	}
 }
