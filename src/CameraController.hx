@@ -162,6 +162,9 @@ class CameraController extends Object {
 		var factor = isTouch ? Util.lerp(1 / 250, 1 / 25,
 			Settings.controlsSettings.cameraSensitivity) : Util.lerp(1 / 2500, 1 / 100, Settings.controlsSettings.cameraSensitivity);
 
+		if (spectate && spectateMarbleIndex == -1) {
+			factor *= 0.4;
+		}
 		// CameraPitch += deltaposY * factor;
 		// CameraYaw += deltaposX * factor;
 
@@ -283,9 +286,6 @@ class CameraController extends Object {
 				}
 				deltaY = movePitchSpeed;
 			}
-		} else {
-			deltaX *= 0.5;
-			deltaY *= 0.5;
 		}
 
 		nextCameraYaw += deltaX;
