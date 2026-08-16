@@ -37,7 +37,7 @@ class ClientConnection extends GameConnection {
 		this.socket = socket;
 		this.datachannel = datachannel;
 		this.datachannelUnreliable = datachannelUnreliable;
-		this.state = GameplayState.LOBBY;
+		this.state = GameplayState.UNKNOWN; // only after handshaking, will it change to GAME
 		this.rtt = 0;
 		this.name = "Unknown";
 	}

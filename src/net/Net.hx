@@ -88,6 +88,8 @@ class Net {
 	public static var serverInfo:ServerInfo;
 	public static var remoteServerInfo:RemoteServerInfo;
 
+	public static var pendingConnections:Array<RTCPeerConnection> = [];
+
 	static var stunServers = ["stun:stun.l.google.com:19302"];
 
 	public static var turnServer:String = "";
@@ -112,6 +114,7 @@ class Net {
 	}
 
 	static function addClient(peer:RTCPeerConnection, privateJoin:Bool, onFinishSdp:String->Void) {
+		Net.pendingConnections.push(peer);
 		var candidates = [];
 		peer.onLocalCandidate = (c) -> {
 			Console.log('Local candidate: ' + c);
@@ -122,14 +125,17 @@ class Net {
 			switch (s) {
 				case RTC_CLOSED:
 					Console.log("RTC State change: Connection closed!");
+					Net.pendingConnections.remove(peer);
 				case RTC_CONNECTED:
 					Console.log("RTC State change: Connected!");
 				case RTC_CONNECTING:
 					Console.log("RTC State change: Connecting...");
 				case RTC_DISCONNECTED:
 					Console.log("RTC State change: Disconnected!");
+					Net.pendingConnections.remove(peer);
 				case RTC_FAILED:
 					Console.log("RTC State change: Failed!");
+					Net.pendingConnections.remove(peer);
 				case RTC_NEW:
 					Console.log("RTC State change: New...");
 			}
@@ -362,15 +368,6 @@ class Net {
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			Net.clientConnection = null;
-			Net.serverInfo = null;
-			Net.remoteServerInfo = null;
-			Net.lobbyHostReady = false;
-			Net.lobbyClientReady = false;
-			Net.hostReady = false;
-			Net.hostSpectate = false;
-			Net.clientSpectate = false;
-			Net.selectedGameMode = "scrum";
-			MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
 			NetCommands.serverClosed();
@@ -385,16 +382,17 @@ class Net {
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			MasterServerClient.disconnectFromMasterServer();
-			Net.serverInfo = null;
-			Net.remoteServerInfo = null;
-			Net.lobbyHostReady = false;
-			Net.lobbyClientReady = false;
-			Net.hostReady = false;
-			Net.hostSpectate = false;
-			Net.clientSpectate = false;
-			Net.selectedGameMode = "scrum";
-			MultiplayerLevelSelectGui.custSelected = false;
 		}
+		Net.pendingConnections.resize(0);
+		Net.serverInfo = null;
+		Net.remoteServerInfo = null;
+		Net.lobbyHostReady = false;
+		Net.lobbyClientReady = false;
+		Net.hostReady = false;
+		Net.hostSpectate = false;
+		Net.clientSpectate = false;
+		Net.selectedGameMode = "scrum";
+		MultiplayerLevelSelectGui.custSelected = false;
 	}
 
 	public static function checkPacketTimeout(dt:Float) {
@@ -481,6 +479,8 @@ class Net {
 		cc.isPrivate = joiningPrivate;
 		clientIdMap[clientId] = clients[c];
 		cc.lastRecvTime = Console.time(); // So it doesnt get timed out
+
+		Net.pendingConnections.remove(c);
 
 		var closing = false;
 
@@ -592,6 +592,7 @@ class Net {
 
 	static function onClientHandshakeComplete(conn:ClientConnection) {
 		// Send our current mission to connecting client
+		conn.state = LOBBY;
 		NetCommands.setLobbyGameModeClient(conn, Net.selectedGameMode);
 		if (MultiplayerLevelSelectGui.custSelected) {
 			NetCommands.setLobbyCustLevelNameClient(conn, MultiplayerLevelSelectGui.custPath);
