@@ -70,6 +70,7 @@ class NetCommands {
 
 	@:rpc(server) public static function enterLobby() {
 		if (Net.isClient) {
+			Net.clientConnection.state = LOBBY;
 			MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
 		}
 	}
@@ -92,7 +93,7 @@ class NetCommands {
 				Net.lobbyHostReady = !Net.lobbyHostReady;
 			else
 				Net.clientIdMap[clientId].toggleLobbyReady();
-			var allReady = true;
+			var allReady = Net.pendingConnections.length == 0;
 			for (id => client in Net.clientIdMap) {
 				if (!client.lobbyReady) {
 					allReady = false;
