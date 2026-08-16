@@ -251,6 +251,14 @@ class GuiConsoleScrollCtrl extends GuiControl {
 		updateScrollVisual();
 	}
 
+	public function getScrollPercentage() {
+		var renderRect = this.getRenderRectangle();
+		var scrollExtentY = renderRect.extent.y - 34 * Settings.uiScale;
+		var scrollBarYSize = (scrollExtentY * scrollExtentY / (maxScrollY * Settings.uiScale - 34 * Settings.uiScale));
+
+		return this.scrollY / (scrollExtentY - scrollBarYSize * Settings.uiScale);
+	}
+
 	public override function onRemove() {
 		super.onRemove();
 		if (MarbleGame.canvas.scene2d.contains(scrollBarY)) {
