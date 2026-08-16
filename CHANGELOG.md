@@ -1,3 +1,19 @@
+# 1.3.0
+This update fixes a ton of bugs and adds more gameplay to Multiplayer!
+- New multiplayer game modes: Competitive Gem Hunt and King.
+- Added Spectator Mode for Multiplayer.
+- Implemented support for Moving Platforms and Trapdoors in Multiplayer.
+- The collision system is now identical to that of the original game, making the physics significantly more accurate.
+- Added Console Cheats.
+- Properly implemented Marble Trail and Bounce particles to look as close as the original game as possible.
+- Optimized performance some more.
+- Added proper TURN server support so that you can join multiplayer servers even if your network doesn't allow you to.
+- Fixed camera sometimes going through shapes and interiors.
+- Fixed lag caused when completing a level.
+- Fixed various bugs with joining a multiplayer match while one is ongoing.
+- Fixed not being able to join multiplayer match in some cases.
+- Fixed certain powerup effects not showing in multiplayer.
+
 # 1.2.5
 Finally, the ability to play Marbleland custom levels has arrived, check it out in the Singleplayer Custom Levels menu!
 This update brings the following changes:
