@@ -1,5 +1,6 @@
 package dts;
 
+@:publicFields
 class Detail {
 	var name:Int;
 	var subShape:Int;
