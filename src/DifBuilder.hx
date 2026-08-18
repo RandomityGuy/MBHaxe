@@ -1,5 +1,6 @@
 package src;
 
+import dif.Surface;
 import shaders.PQMaterial;
 import h3d.scene.MultiMaterial;
 import shaders.NormalMaterial;
@@ -391,6 +392,27 @@ class DifBuilder {
 		customMaterialDict = materials;
 	}
 
+	static function collisionFanFromSurface(surface:Surface) {
+		var tempIndices = [0];
+		var i = 1;
+		while (i < surface.windingCount) {
+			tempIndices.push(i);
+			i += 2;
+		}
+		i = (surface.windingCount - 1) & (~0x1);
+		while (i > 0) {
+			tempIndices.push(i);
+			i -= 2;
+		}
+		var fanIndices:Array<Int> = [];
+		for (i in 0...surface.windingCount) {
+			if (surface.fanMask & (1 << i) != 0) {
+				fanIndices.push(surface.windingStart + tempIndices[i]);
+			}
+		}
+		return fanIndices;
+	}
+
 	public static function loadDif(path:String, itr:InteriorObject, onFinish:Void->Void, ?so:Int = -1) {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
@@ -438,33 +460,37 @@ class DifBuilder {
 				var colliderSurface = new CollisionSurface();
 				colliderSurface.points = [];
 				colliderSurface.normals = [];
-				colliderSurface.indices = [];
 				colliderSurface.transformKeys = [];
-				colliderSurface.originalIndices = [];
-				colliderSurface.originalSurfaceIndex = surfaceindex;
+				colliderSurface.vertexCounts = [];
+
+				var materialName = stripTexName(texture).toLowerCase();
+				var hasCustomMaterialInfo = customMaterialDict.exists(materialName);
+				if (hasCustomMaterialInfo) {
+					var minfo = customMaterialDict.get(materialName);
+					colliderSurface.friction = minfo.friction;
+					colliderSurface.restitution = minfo.restitution;
+					colliderSurface.force = minfo.force != null ? minfo.force : 0;
+				} else {
+					var hasMaterialInfo = materialDict.exists(materialName);
+					if (hasMaterialInfo) {
+						var minfo = materialDict.get(materialName);
+						colliderSurface.friction = minfo.friction;
+						colliderSurface.restitution = minfo.restitution;
+						colliderSurface.force = minfo.force != null ? minfo.force : 0;
+					}
+				}
+
 				for (k in (surface.windingStart + 2)...(surface.windingStart + surface.windingCount)) {
 					var p1, p2, p3;
 					if ((k - (surface.windingStart + 2)) % 2 == 0) {
 						p1 = points[geo.windings[k]];
 						p2 = points[geo.windings[k - 1]];
 						p3 = points[geo.windings[k - 2]];
-						colliderSurface.originalIndices.push(geo.windings[k]);
-						colliderSurface.originalIndices.push(geo.windings[k - 1]);
-						colliderSurface.originalIndices.push(geo.windings[k - 2]);
 					} else {
 						p1 = points[geo.windings[k - 2]];
 						p2 = points[geo.windings[k - 1]];
 						p3 = points[geo.windings[k]];
-						colliderSurface.originalIndices.push(geo.windings[k - 2]);
-						colliderSurface.originalIndices.push(geo.windings[k - 1]);
-						colliderSurface.originalIndices.push(geo.windings[k]);
 					}
-					var e1 = new TriangleEdge(geo.windings[k], geo.windings[k - 1], geo.windings[k - 2], surfaceindex);
-					var e2 = new TriangleEdge(geo.windings[k - 1], geo.windings[k - 2], geo.windings[k], surfaceindex);
-					var e3 = new TriangleEdge(geo.windings[k], geo.windings[k - 2], geo.windings[k - 1], surfaceindex);
-					edges.push(e1);
-					edges.push(e2);
-					edges.push(e3);
 					var texgen = geo.texGenEQs[surface.texGenIndex];
 					var uv1 = new Point2F(p1.x * texgen.planeX.x
 						+ p1.y * texgen.planeX.y
@@ -502,35 +528,7 @@ class DifBuilder {
 					tri.uv2 = uv2;
 					tri.uv3 = uv3;
 					triangles.push(tri);
-					var materialName = stripTexName(texture).toLowerCase();
 
-					var hasCustomMaterialInfo = customMaterialDict.exists(materialName);
-					if (hasCustomMaterialInfo) {
-						var minfo = customMaterialDict.get(materialName);
-						colliderSurface.friction = minfo.friction;
-						colliderSurface.restitution = minfo.restitution;
-						colliderSurface.force = minfo.force != null ? minfo.force : 0;
-					} else {
-						var hasMaterialInfo = materialDict.exists(materialName);
-						if (hasMaterialInfo) {
-							var minfo = materialDict.get(materialName);
-							colliderSurface.friction = minfo.friction;
-							colliderSurface.restitution = minfo.restitution;
-							colliderSurface.force = minfo.force != null ? minfo.force : 0;
-						}
-					}
-					colliderSurface.addPoint(-p1.x, p1.y, p1.z);
-					colliderSurface.addPoint(-p2.x, p2.y, p2.z);
-					colliderSurface.addPoint(-p3.x, p3.y, p3.z);
-					colliderSurface.addNormal(-normal.x, normal.y, normal.z);
-					colliderSurface.addNormal(-normal.x, normal.y, normal.z);
-					colliderSurface.addNormal(-normal.x, normal.y, normal.z);
-					colliderSurface.indices.push(colliderSurface.indices.length);
-					colliderSurface.indices.push(colliderSurface.indices.length);
-					colliderSurface.indices.push(colliderSurface.indices.length);
-					colliderSurface.transformKeys.push(0);
-					colliderSurface.transformKeys.push(0);
-					colliderSurface.transformKeys.push(0);
 					for (v in [p1, p2, p3]) {
 						var buckets = vertexBuckets.get(v);
 						if (buckets == null) {
@@ -556,120 +554,24 @@ class DifBuilder {
 						bucket.normals.push(normal);
 					}
 				}
+				// make collider surface
+				var collisionFan = collisionFanFromSurface(surface);
+				// collisionFan.reverse(); // reverse the winding for math to make sense due to the chirality flip
+				for (idx in collisionFan) {
+					var point = points[geo.windings[idx]];
+					var normal = normal;
+					colliderSurface.addPoint(-point.x, point.y, point.z);
+					colliderSurface.transformKeys.push(0);
+				}
+				colliderSurface.addNormal(-normal.x, normal.y, normal.z);
+				colliderSurface.vertexCounts.push(collisionFan.length);
+
 				colliderSurface.generateBoundingBox();
+				colliderSurface.initialize();
 				collider.addSurface(colliderSurface);
 				colliderSurfaces.push(colliderSurface);
 			}
-			var edgeMap:Map<Int, TriangleEdge> = new Map();
-			var internalEdges:Map<Int, Bool> = new Map();
-			var difEdges:Map<Int, Edge> = [];
-			for (edge in edges) {
-				var edgeHash = edge.index1 >= edge.index2 ? edge.index1 * edge.index1 + edge.index1 + edge.index2 : edge.index1 + edge.index2 * edge.index2;
-				if (internalEdges.exists(edgeHash))
-					continue;
-				if (edgeMap.exists(edgeHash)) {
-					if (edgeMap[edgeHash].surfaceIndex == edge.surfaceIndex) {
-						// Internal edge
-						internalEdges.set(edgeHash, true);
-						edgeMap.remove(edgeHash);
-						// trace('Removing internal edge: ${edge.index1} ${edge.index2}');
-					} else {
-						var difEdge = new Edge(edge.index1, edge.index2, edge.surfaceIndex, edgeMap[edgeHash].surfaceIndex);
-						difEdge.farPoint0 = edge.farPoint;
-						difEdge.farPoint1 = edgeMap[edgeHash].farPoint;
-						difEdges.set(edgeHash, difEdge); // Literal edge
-					}
-				} else {
-					edgeMap.set(edgeHash, edge);
-				}
-			}
-			function hashEdge(i1:Int, i2:Int) {
-				return i1 >= i2 ? i1 * i1 + i1 + i2 : i1 + i2 * i2;
-			}
-			function getEdgeConcavity(edge:Edge) {
-				var edgeSurface0 = edge.surfaceIndex0;
-				var surface0 = geo.surfaces[edgeSurface0];
 
-				var planeindex = surface0.planeIndex;
-
-				var planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				var plane = geo.planes[planeindex];
-				var normal0 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal0 = normal0.scalar(-1);
-
-				var edgeSurface1 = edge.surfaceIndex1;
-				var surface1 = geo.surfaces[edgeSurface1];
-
-				planeindex = surface1.planeIndex;
-
-				planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				plane = geo.planes[planeindex];
-				var normal1 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal1 = normal1.scalar(-1);
-
-				var dot = normal0.dot(normal1);
-
-				if (Math.abs(dot) < 0.1)
-					return false;
-
-				var farP0 = geo.points[edge.farPoint0];
-				var farP1 = geo.points[edge.farPoint1];
-
-				var diff = farP1.sub(farP0);
-				var cdot0 = normal0.dot(diff);
-				if (cdot0 > -0.1) {
-					return true;
-				}
-
-				return false;
-			}
-			function getEdgeNormal(edge:Edge) {
-				var edgeSurface0 = edge.surfaceIndex0;
-				var surface0 = geo.surfaces[edgeSurface0];
-
-				var planeindex = surface0.planeIndex;
-
-				var planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				var plane = geo.planes[planeindex];
-				var normal0 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal0 = normal0.scalar(-1);
-
-				var edgeSurface1 = edge.surfaceIndex1;
-				var surface1 = geo.surfaces[edgeSurface1];
-
-				planeindex = surface1.planeIndex;
-
-				planeFlipped = (planeindex & 0x8000) == 0x8000;
-				if (planeFlipped)
-					planeindex &= ~0x8000;
-
-				plane = geo.planes[planeindex];
-				var normal1 = geo.normals[plane.normalIndex];
-
-				if (planeFlipped)
-					normal1 = normal1.scalar(-1);
-
-				var norm = normal0.add(normal1).scalarDiv(2).normalized();
-
-				var vec = new Vector(norm.x, norm.y, norm.z);
-
-				return vec;
-			}
 			for (vtex => buckets in vertexBuckets) {
 				for (i in 0...buckets.length) {
 					var bucket = buckets[i];
@@ -709,129 +611,46 @@ class DifBuilder {
 				if (["NULL"].contains(tex)) {
 					return false;
 				}
-				if (tex.indexOf('/') != -1) {
-					var spl = tex.split('/');
-					tex = spl[spl.length - 1];
-				}
 
-				// search with extension first
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex)) {
-					return true;
-				}
+				tex = Path.withoutExtension(Path.withoutDirectory(tex));
 
-				var prevDir = Path.directory(Path.directory(path));
-				if (ResourceLoader.exists(prevDir + "/" + tex)) {
-					return true;
-				}
-
-				prevDir = Path.directory(prevDir);
-				if (ResourceLoader.exists(prevDir + "/" + tex))
-					return true;
-
-				// remove extension from it
-				if (tex.lastIndexOf(".") != -1) {
-					tex = tex.substring(0, tex.lastIndexOf("."));
-				}
-
-				#if (js || android)
-				path = StringTools.replace(path, "data/", "");
-				#end
-
-				// search jpg, png and bmp
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
-					return true;
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
-					return true;
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".bmp")) {
-					return true;
-				}
-				prevDir = Path.directory(Path.directory(path));
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return true;
-				}
-
-				prevDir = Path.directory(prevDir);
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return true;
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return true;
+				// alright now go use the default torque texture finding method
+				var exts = [".jpg", ".png", ".jpeg", ".bmp"];
+				var dir = Path.directory(path);
+				while (true) {
+					// we recursively go up the directory tree until we find a texture
+					for (ext in exts) {
+						if (ResourceLoader.exists(Path.join([dir, tex + ext]))) {
+							return true;
+						}
+					}
+					// Move up one directory level
+					dir = Path.directory(dir);
+					if (dir == "") {
+						break;
+					}
 				}
 
 				return false;
 			}
 			function tex(tex:String):String {
-				if (tex.indexOf('/') != -1) {
-					var spl = tex.split('/');
-					tex = spl[spl.length - 1];
-				}
+				tex = Path.withoutExtension(Path.withoutDirectory(tex));
 
-				// search with extension first
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex)) {
-					return Path.directory(path) + "/" + tex;
-				}
-
-				var prevDir = Path.directory(Path.directory(path));
-				if (ResourceLoader.exists(prevDir + "/" + tex)) {
-					return prevDir + "/" + tex;
-				}
-
-				prevDir = Path.directory(prevDir);
-
-				if (ResourceLoader.exists(prevDir + "/" + tex)) {
-					return prevDir + "/" + tex;
-				}
-
-				// remove extension from it
-				if (tex.lastIndexOf(".") != -1) {
-					tex = tex.substring(0, tex.lastIndexOf("."));
-				}
-
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".jpg")) {
-					return Path.directory(path) + "/" + tex + ".jpg";
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".png")) {
-					return Path.directory(path) + "/" + tex + ".png";
-				}
-				if (ResourceLoader.exists(Path.directory(path) + "/" + tex + ".bmp")) {
-					return Path.directory(path) + "/" + tex + ".bmp";
-				}
-
-				var prevDir = Path.directory(Path.directory(path));
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return prevDir + "/" + tex + ".jpg";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return prevDir + "/" + tex + ".png";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return prevDir + "/" + tex + ".bmp";
-				}
-
-				var prevDir = Path.directory(prevDir);
-
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".jpg")) {
-					return prevDir + "/" + tex + ".jpg";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".png")) {
-					return prevDir + "/" + tex + ".png";
-				}
-				if (ResourceLoader.exists(prevDir + "/" + tex + ".bmp")) {
-					return prevDir + "/" + tex + ".bmp";
+				// alright now go use the default torque texture finding method
+				var exts = [".jpg", ".png", ".jpeg", ".bmp"];
+				var dir = Path.directory(path);
+				while (true) {
+					// we recursively go up the directory tree until we find a texture
+					for (ext in exts) {
+						if (ResourceLoader.exists(Path.join([dir, tex + ext]))) {
+							return Path.join([dir, tex + ext]);
+						}
+					}
+					// Move up one directory level
+					dir = Path.directory(dir);
+					if (dir == "") {
+						break;
+					}
 				}
 
 				return null;

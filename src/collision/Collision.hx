@@ -145,11 +145,15 @@ class Collision {
 		return res;
 	}
 
-	public static inline function TriangleSphereIntersection(v0:Vector, v1:Vector, v2:Vector, N:Vector, P:Vector, r:Float, point:Vector, normal:Vector) {
-		ClosestPtPointTriangle(P, v0, v1, v2, point);
+	public static function TriangleSphereIntersection(v0:Vector, v1:Vector, v2:Vector, N:Vector, P:Vector, r:Float, point:Vector, normal:Vector) {
+		var inside = ClosestPtPointTriangle(P, v0, v1, v2, point);
 		var v = point.sub(P);
 		if (v.dot(v) <= r * r) {
-			normal.load(P.sub(point));
+			if (inside) {
+				normal.load(N);
+			} else {
+				normal.load(P.sub(point));
+			}
 			normal.normalize();
 			return true;
 		} else {
@@ -344,7 +348,7 @@ class Collision {
 		var d2 = ac.dot(ap);
 		if (d1 <= 0.0 && d2 <= 0.0) { // barycentric coordinates (1,0,0)
 			outP.load(a);
-			return;
+			return false;
 		}
 		// Check if P in vertex region outside B
 		var bp = p.sub(b);
@@ -352,7 +356,7 @@ class Collision {
 		var d4 = ac.dot(bp);
 		if (d3 >= 0.0 && d4 <= d3) { // barycentric coordinates (0,1,0
 			outP.load(b);
-			return;
+			return false;
 		}
 
 		// Check if P in edge region of AB, if so return projection of P onto AB
@@ -360,7 +364,7 @@ class Collision {
 		if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0) {
 			var v = d1 / (d1 - d3);
 			outP.load(a.add(ab.multiply(v)));
-			return;
+			return false;
 		}
 
 		// Check if P in vertex region outside C
@@ -369,7 +373,7 @@ class Collision {
 		var d6 = ac.dot(cp);
 		if (d6 >= 0.0 && d5 <= d6) { // barycentric coordinates (0,0,1)
 			outP.load(c);
-			return;
+			return false;
 		}
 
 		// Check if P in edge region of AC, if so return projection of P onto AC
@@ -377,7 +381,7 @@ class Collision {
 		if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0) {
 			var w = d2 / (d2 - d6);
 			outP.load(a.add(ac.multiply(w)));
-			return;
+			return false;
 		}
 
 		// Check if P in edge region of BC, if so return projection of P onto BC
@@ -385,7 +389,7 @@ class Collision {
 		if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0) {
 			var w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
 			outP.load(b.add((c.sub(b)).multiply(w)));
-			return;
+			return false;
 		}
 		// P inside face region. Compute Q through its barycentric coordinates (u,v,w)
 
@@ -393,7 +397,7 @@ class Collision {
 		var v = vb * denom;
 		var w = vc * denom;
 		outP.load(a.add(ab.multiply(v)).add(ac.multiply(w)));
-		return;
+		return true;
 	}
 
 	public static function capsuleSphereNearestOverlap(a0:Vector, a1:Vector, radA:Float, b:Vector, radB:Float) {

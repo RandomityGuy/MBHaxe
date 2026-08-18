@@ -70,9 +70,13 @@ class ResourceLoaderWorker {
 			if (fileExtension == "jpg" || fileExtension == "png" || fileExtension == "bmp") {
 				paralleltasks.push(fwd -> {
 					var file = ResourceLoader.load(path);
-					file.entry.loadBitmap(v -> {
-						fwd();
-					});
+					if (file.entry is hxd.fs.BytesFileSystem.BytesFileEntry) {
+						file.entry.load(fwd);
+					} else {
+						file.entry.loadBitmap(v -> {
+							fwd();
+						});
+					}
 				});
 			} else if (fileExtension != "") {
 				paralleltasks.push(fwd -> ResourceLoader.load(path).entry.load(fwd));
