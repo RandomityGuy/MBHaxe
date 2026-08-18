@@ -133,11 +133,13 @@ import haxe.io.Path;
 import src.Console;
 import src.Gamepad;
 import src.Analytics;
+import src.DtsMeshCache;
 
 class MarbleWorld extends Scheduler {
 	public var collisionWorld:CollisionWorld;
 	public var instanceManager:InstanceManager;
 	public var particleManager:ParticleManager;
+	public var dtsCache:DtsMeshCache;
 
 	var playGui:PlayGui;
 	var loadingGui:LoadingGui;
@@ -277,6 +279,7 @@ class MarbleWorld extends Scheduler {
 		this.rewindManager = new RewindManager(cast this);
 		this.inputRecorder = new InputRecorder(cast this);
 		this.isMultiplayer = multiplayer;
+		this.dtsCache = new DtsMeshCache();
 		if (this.isMultiplayer) {
 			isRecording = false;
 			isWatching = false;
@@ -2909,6 +2912,8 @@ class MarbleWorld extends Scheduler {
 			trigger.dispose();
 		}
 		triggers = null;
+		dtsCache.dispose();
+		dtsCache = null;
 		for (soundResource in this.soundResources) {
 			soundResource.release();
 		}

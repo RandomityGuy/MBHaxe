@@ -1342,7 +1342,7 @@ class Marble extends GameObject {
 						var p = posDiff.add(position);
 						lastContactNormal = p.sub(otherPosition);
 						lastContactNormal.normalize();
-						lastContactPos = p.sub(lastContactNormal.multiply(_radius));
+						lastContactPos.load(p.sub(lastContactNormal.multiply(_radius)));
 					}
 				}
 			}
@@ -1350,6 +1350,7 @@ class Marble extends GameObject {
 
 		// for (iter in 0...10) {
 		//	var iterationFound = false;
+		var radSq = radius * radius;
 		for (obj in foundObjs) {
 			// Its an MP so bruh
 			if (obj.go == this || (obj.go != null && !obj.go.isCollideable))
@@ -1367,6 +1368,9 @@ class Marble extends GameObject {
 
 			var relVel = velocity.sub(obj.velocity);
 			var relLocalVel = relVel.transformed3x3(invMatrix);
+			var relVelDir = relVel.normalized();
+
+			var fixedFinalPos = position.add(relVel.multiply(deltaT));
 
 			var invScale = invMatrix.getScale();
 			var sphereRadius = new Vector(radius * invScale.x, radius * invScale.y, radius * invScale.z);
@@ -1388,88 +1392,74 @@ class Marble extends GameObject {
 			for (surf in surfaces) {
 				var surface:CollisionSurface = surf;
 
-				currentFinalPos = position.add(relVel.multiply(finalT));
+				currentFinalPos.load(position.add(relVel.multiply(finalT)));
 
 				var i = 0;
-				while (i < surface.indices.length) {
-					var verts = surface.transformTriangle(i, obj.transform, invTform, @:privateAccess obj._transformKey);
-					// var v0 = surface.points[surface.indices[i]].transformed(tform);
-					// var v = surface.points[surface.indices[i + 1]].transformed(tform);
-					// var v2 = surface.points[surface.indices[i + 2]].transformed(tform);
-					var v0 = new Vector(verts.v1x, verts.v1y, verts.v1z);
-					var v = new Vector(verts.v2x, verts.v2y, verts.v2z);
-					var v2 = new Vector(verts.v3x, verts.v3y, verts.v3z);
-					// var v0 = surface.points[surface.indices[i]].transformed(obj.transform);
-					// var v = surface.points[surface.indices[i + 1]].transformed(obj.transform);
-					// var v2 = surface.points[surface.indices[i + 2]].transformed(obj.transform);
 
-					// var triangleVerts = [v0, v, v2];
+				for (vi in 0...surface.vertexCounts.length) {
+					var vtxCount = surface.vertexCounts[vi];
+					if (vtxCount == 0)
+						continue;
 
-					var surfaceNormal = new Vector(verts.nx, verts.ny,
-						verts.nz); // surface.normals[surface.indices[i]].transformed3x3(obj.transform).normalized();
-					if (obj is DtsObject)
-						surfaceNormal.load(v.sub(v0).cross(v2.sub(v0)).normalized().multiply(-1));
-					var surfaceD = -surfaceNormal.dot(v0);
+					var surfaceNormal = surface.getNormal(vi).transformed3x3(invTform).normalized();
+					var surfacePoint = surface.getTransformedPoint(i, obj.transform, @:privateAccess obj._transformKey);
 
-					// If we're going the wrong direction or not going to touch the plane, ignore...
-					if (surfaceNormal.dot(relVel) > -0.001 || surfaceNormal.dot(currentFinalPos) + surfaceD > radius) {
-						i += 3;
+					if (surfaceNormal.dot(relVelDir) > -0.001 || surfaceNormal.dot(fixedFinalPos.sub(surfacePoint)) > radius) {
+						i += vtxCount;
 						continue;
 					}
 
-					// var v0T = v0.transformed(obj.transform);
-					// var vT = v.transformed(obj.transform);
-					// var v2T = v2.transformed(obj.transform);
-					// var vN = surfaceNormal.transformed3x3(obj.transform);
-					if (!isDts)
-						testTriangles.push({
-							v: [v0.clone(), v.clone(), v2.clone()],
-							n: surfaceNormal.clone(),
-						});
-
 					// Time until collision with the plane
-					var collisionTime = (radius - position.dot(surfaceNormal) - surfaceD) / surfaceNormal.dot(relVel);
+					var collisionTime = (radius - position.sub(surfacePoint).dot(surfaceNormal)) / surfaceNormal.dot(relVel);
 
 					// Are we going to touch the plane during this time step?
 					if (collisionTime >= 0.000001 && finalT >= collisionTime) {
 						var collisionPoint = position.add(relVel.multiply(collisionTime));
-						// If we're inside the poly, just get the position
-						if (Collision.PointInTriangle(collisionPoint, v0, v, v2)) {
+
+						var inside = true;
+						for (j in 0...vtxCount) {
+							var v1 = surface.getTransformedPoint(i + j, obj.transform, @:privateAccess obj._transformKey);
+							var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), obj.transform, @:privateAccess obj._transformKey);
+
+							var edgeNormal = surfaceNormal.cross(v2.sub(v1));
+
+							if (edgeNormal.dot(collisionPoint.sub(v1)) < 0) {
+								inside = false;
+								break;
+							}
+						}
+
+						if (inside) {
 							finalT = collisionTime;
-							currentFinalPos = position.add(relVel.multiply(finalT));
+							currentFinalPos.load(position.add(relVel.multiply(finalT)));
 							found = true;
-							lastContactPos = currentFinalPos.clone();
-							// iterationFound = true;
-							i += 3;
-							// Debug.drawSphere(currentFinalPos, radius);
+							lastContactPos.load(currentFinalPos);
+
+							i += vtxCount;
 							continue;
 						}
 					}
-					// We *might* be colliding with an edge
-					var triangleVerts = [v0.clone(), v.clone(), v2.clone()];
 
-					var lastVert = v2.clone();
+					for (j in 0...vtxCount) {
+						var v1 = surface.getTransformedPoint(i + j, obj.transform, @:privateAccess obj._transformKey);
+						var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), obj.transform, @:privateAccess obj._transformKey);
 
-					var radSq = radius * radius;
-					for (iter in 0...3) {
-						var thisVert = triangleVerts[iter];
+						var edge = v2.sub(v1);
 
-						var vertDiff = lastVert.sub(thisVert);
-						var posDiff = position.sub(thisVert);
+						var posDiff = position.sub(v1);
 
-						var velRejection = vertDiff.cross(relVel);
-						var posRejection = vertDiff.cross(posDiff);
+						var velRejection = edge.cross(relVel);
+						var posRejection = edge.cross(posDiff);
 
 						// Build a quadratic equation to solve for the collision time
 						var a = velRejection.lengthSq();
 						var b = 2 * posRejection.dot(velRejection);
-						var c = (posRejection.lengthSq() - vertDiff.lengthSq() * radSq);
+						var c = (posRejection.lengthSq() - edge.lengthSq() * radSq);
 
 						var discriminant = b * b - (4 * a * c);
 
 						// If it's not quadratic or has no solution, ignore this edge.
 						if (a == 0.0 || discriminant < 0.0) {
-							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1489,33 +1479,28 @@ class Marble extends GameObject {
 
 						// If the collision doesn't happen on this time step, ignore this edge.
 						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert = thisVert;
 							continue;
 						}
 
 						// Check if the collision hasn't already happened
 						if (edgeCollisionTime >= 0.000001) {
-							var edgeLen = vertDiff.length();
+							var edgeLen = edge.length();
 
-							var relativeCollisionPos = position.add(relVel.multiply(edgeCollisionTime)).sub(thisVert);
+							var relativeCollisionPos = position.sub(v1).add(relVel.multiply(edgeCollisionTime));
 
-							var distanceAlongEdge = relativeCollisionPos.dot(vertDiff) / edgeLen;
+							var distanceAlongEdge = relativeCollisionPos.dot(edge) / edgeLen;
 
 							// If the collision happens outside the boundaries of the edge, ignore this edge.
 							if (-radius > distanceAlongEdge || edgeLen + radius < distanceAlongEdge) {
-								lastVert.load(thisVert);
 								continue;
 							}
 
 							// If the collision is within the edge, resolve the collision and continue.
 							if (distanceAlongEdge >= 0.0 && distanceAlongEdge <= edgeLen) {
 								finalT = edgeCollisionTime;
-								currentFinalPos = position.add(relVel.multiply(finalT));
-								lastContactPos = vertDiff.multiply(distanceAlongEdge / edgeLen).add(thisVert);
-								lastVert.load(thisVert);
+								currentFinalPos.load(position.add(relVel.multiply(finalT)));
+								lastContactPos.load(v1.add(edge.multiply(distanceAlongEdge / edgeLen)));
 								found = true;
-								// Debug.drawSphere(currentFinalPos, radius);
-								// iterationFound = true;
 								continue;
 							}
 						}
@@ -1525,9 +1510,8 @@ class Marble extends GameObject {
 						a = relVel.lengthSq();
 
 						// Build a quadratic equation to solve for the collision time
-						var posVertDiff = position.sub(thisVert);
-						b = 2 * posVertDiff.dot(relVel);
-						c = posVertDiff.lengthSq() - radSq;
+						b = 2 * posDiff.dot(relVel);
+						c = posDiff.lengthSq() - radSq;
 						discriminant = b * b - (4 * a * c);
 
 						// If it's quadratic and has a solution ...
@@ -1556,8 +1540,8 @@ class Marble extends GameObject {
 								if (edgeCollisionTime >= 0.000001) {
 									// Resolve it and continue
 									finalT = edgeCollisionTime;
-									currentFinalPos = position.add(relVel.multiply(finalT));
-									lastContactPos = thisVert;
+									currentFinalPos.load(position.add(relVel.multiply(finalT)));
+									lastContactPos.load(v1);
 									found = true;
 									// Debug.drawSphere(currentFinalPos, radius);
 									// iterationFound = true;
@@ -1567,14 +1551,13 @@ class Marble extends GameObject {
 
 						// We still need to check the other corner ...
 						// Build one last quadratic equation to solve for the collision time
-						var posVertDiff = position.sub(lastVert);
+						var posVertDiff = position.sub(v2);
 						b = 2 * posVertDiff.dot(relVel);
 						c = posVertDiff.lengthSq() - radSq;
 						discriminant = b * b - (4 * a * c);
 
 						// If it's not quadratic or has no solution, then skip this corner
-						if (a == 0.0 || discriminant < 0.0) {
-							lastVert.load(thisVert);
+						if (Math.abs(a) < 1e-6 || discriminant < 1e-6) {
 							continue;
 						}
 
@@ -1593,7 +1576,6 @@ class Marble extends GameObject {
 						}
 
 						if (edgeCollisionTime2 <= 0.0001 || finalT <= edgeCollisionTime) {
-							lastVert.load(thisVert);
 							continue;
 						}
 
@@ -1601,20 +1583,17 @@ class Marble extends GameObject {
 							edgeCollisionTime = 0;
 
 						if (edgeCollisionTime < 0.000001) {
-							lastVert.load(thisVert);
 							continue;
 						}
 
 						finalT = edgeCollisionTime;
-						currentFinalPos = position.add(relVel.multiply(finalT));
-						// Debug.drawSphere(currentFinalPos, radius);
+						currentFinalPos.load(position.add(relVel.multiply(finalT)));
 
-						lastVert.load(thisVert);
 						found = true;
 						// iterationFound = true;
 					}
 
-					i += 3;
+					i += vtxCount;
 				}
 			}
 		}
@@ -2087,25 +2066,42 @@ class Marble extends GameObject {
 						chullinvT.transpose();
 						for (surface in chull.surfaces) {
 							var i = 0;
-							while (i < surface.indices.length) {
-								var surfaceN = surface.getNormal(surface.indices[i]).transformed3x3(chullinvT);
-								var v1 = surface.getPoint(surface.indices[i]).transformed(chull.transform);
-								var surfaceD = -surfaceN.dot(v1);
+							for (vi in 0...surface.vertexCounts.length) {
+								var vtxCount = surface.vertexCounts[vi];
+
+								var surfaceN = surface.getNormal(vi).transformed3x3(chullinvT).normalized();
+								var surfacePoint = surface.getTransformedPoint(i, chull.transform, @:privateAccess chull._transformKey);
+								var surfaceD = -surfaceN.dot(surfacePoint);
 
 								if (surfaceN.dot(padUp.multiply(-10)) < 0) {
 									var dist = surfaceN.dot(checkBoundsCenter.toVector()) + surfaceD;
 									if (dist >= 0 && dist < 5) {
 										var intersectT = -(checkBoundsCenter.dot(surfaceN.toPoint()) + surfaceD) / (padUp.dot(surfaceN));
 										var intersectP = checkBoundsCenter.add(padUp.multiply(intersectT).toPoint()).toVector();
-										if (Collision.PointInTriangle(intersectP, v1, surface.getPoint(surface.indices[i + 1]).transformed(chull.transform),
-											surface.getPoint(surface.indices[i + 2]).transformed(chull.transform))) {
+
+										var inside = true;
+
+										for (j in 0...vtxCount) {
+											var v1 = surface.getTransformedPoint(i + j, chull.transform, @:privateAccess chull._transformKey);
+											var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), chull.transform,
+												@:privateAccess chull._transformKey);
+
+											var edgeNormal = surfaceN.cross(v2.sub(v1));
+
+											if (edgeNormal.dot(intersectP.sub(v1)) < 0) {
+												inside = false;
+												break;
+											}
+										}
+
+										if (inside) {
 											found = true;
 											break;
 										}
 									}
 								}
 
-								i += 3;
+								i += vtxCount;
 							}
 
 							if (found) {
