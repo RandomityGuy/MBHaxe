@@ -338,7 +338,9 @@ class MarbleWorld extends Scheduler {
 		this.mission.load();
 		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
 		scanMission(this.mission.root);
-		this.playtestPointManager.scanMission(this.mission.root);
+		if(this.mission.isLocal) {
+			this.playtestPointManager.scanMission(this.mission.root);
+		}
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		if (this.isMultiplayer) {
