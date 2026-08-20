@@ -2420,8 +2420,10 @@ class MarbleWorld extends Scheduler {
 					totalTime: 0,
 				});
 			}
-			Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.levelStatistics[mission.path].oobs,
-				Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
+			if (!mission.isLocal) {
+				Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.levelStatistics[mission.path].oobs,
+					Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
+			}
 			if (!this.isWatching)
 				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
