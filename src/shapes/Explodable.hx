@@ -79,13 +79,24 @@ abstract class Explodable extends DtsObject {
 		});
 	}
 
+	function spawnExplosionBurst(pos:Vector) {
+		emitter2 = this.level.particleManager.createEmitter(smokeParticle, smokeParticleData, pos);
+		emitter3 = this.level.particleManager.createEmitter(sparksParticle, sparkParticleData, pos);
+	}
+
 	public inline function playExplosion() {
 		if (!this.level.rewinding && !Net.isClient)
 			AudioManager.playSound(ResourceLoader.getResource(explodeSoundFile, ResourceLoader.getAudio, this.soundResources));
 
-		emitter1 = this.level.particleManager.createEmitter(particle, particleData, this.getAbsPos().getPosition());
-		emitter2 = this.level.particleManager.createEmitter(smokeParticle, smokeParticleData, this.getAbsPos().getPosition());
-		emitter3 = this.level.particleManager.createEmitter(sparksParticle, sparkParticleData, this.getAbsPos().getPosition());
+		var pos = this.getAbsPos().getPosition();
+		emitter1 = this.level.particleManager.createEmitter(particle, particleData, pos);
+		this.spawnExplosionBurst(pos);
+		for (i in 0...2) {
+			var randVec = new Vector(Math.random() * 2 - 1, Math.random(), Math.random() * 2 - 1);
+			if (randVec.lengthSq() > 0.0001)
+				randVec.normalize();
+			this.spawnExplosionBurst(pos.add(randVec));
+		}
 	}
 
 	override function onMarbleContact(marble:src.Marble, timeState:TimeState, ?contact:CollisionInfo) {
@@ -102,9 +113,15 @@ abstract class Explodable extends DtsObject {
 			if (!this.level.rewinding && @:privateAccess !marble.isNetUpdate && !Net.isClient)
 				AudioManager.playSound(ResourceLoader.getResource(explodeSoundFile, ResourceLoader.getAudio, this.soundResources));
 			if (@:privateAccess !marble.isNetUpdate) {
-				emitter1 = this.level.particleManager.createEmitter(particle, particleData, this.getAbsPos().getPosition());
-				emitter2 = this.level.particleManager.createEmitter(smokeParticle, smokeParticleData, this.getAbsPos().getPosition());
-				emitter3 = this.level.particleManager.createEmitter(sparksParticle, sparkParticleData, this.getAbsPos().getPosition());
+				var pos = this.getAbsPos().getPosition();
+				emitter1 = this.level.particleManager.createEmitter(particle, particleData, pos);
+				this.spawnExplosionBurst(pos);
+				for (i in 0...2) {
+					var randVec = new Vector(Math.random() * 2 - 1, Math.random(), Math.random() * 2 - 1);
+					if (randVec.lengthSq() > 0.0001)
+						randVec.normalize();
+					this.spawnExplosionBurst(pos.add(randVec));
+				}
 			}
 
 			if (Net.isClient) {

@@ -89,6 +89,11 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 	velocityVariance: 0.25,
 	emitterLifetime: 250,
 	inheritedVelFactor: 0,
+	thetaMin: 80,
+	thetaMax: 90,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/star.png',
 		blending: Alpha,
@@ -98,7 +103,9 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 		lifetime: 500,
 		lifetimeVariance: 100,
 		dragCoefficient: 1,
-		acceleration: -2,
+		constantAcceleration: -2,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [new Vector(0.9, 0, 0, 1), new Vector(0.9, 0.9, 0, 1), new Vector(0.9, 0.9, 0, 0)],
 		sizes: [0.25, 0.25, 0.25],
 		times: [0, 0.75, 1]
@@ -107,34 +114,51 @@ final bounceParticleOptions:ParticleEmitterOptions = {
 
 final trailParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
-	ejectionVelocity: 0.0,
+	periodVariance: 0,
+	ejectionVelocity: 0,
 	velocityVariance: 0.25,
-	emitterLifetime: 1e8,
-	inheritedVelFactor: 1,
+	emitterLifetime: 1,
+	inheritedVelFactor: 0.25,
 	ambientVelocity: new Vector(),
+	thetaMin: 80,
+	thetaMax: 90,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
 		spinSpeed: 0,
 		spinRandomMin: 0,
 		spinRandomMax: 0,
-		dragCoefficient: 1,
+		dragCoefficient: 1.0,
 		lifetime: 100,
 		lifetimeVariance: 10,
-		acceleration: 0,
-		colors: [new Vector(1, 1, 0, 0), new Vector(1, 1, 0, 1), new Vector(1, 1, 1, 0)],
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
+		colors: [
+			new Vector(1.0, 1.0, 0, 0),
+			new Vector(1.0, 1.0, 0, 1.0),
+			new Vector(1.0, 1.0, 1, 0.0),
+		],
 		sizes: [0.7, 0.4, 0.1],
-		times: [0, 0.15, 1]
+		times: [0, 0.15, 1.0]
 	}
 };
 
 final blastParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
-	ambientVelocity: new Vector(0, 0, -0.3),
+	ambientVelocity: new Vector(0, 0, 0.0),
 	ejectionVelocity: 4,
 	velocityVariance: 0,
-	emitterLifetime: 300,
+	emitterLifetime: 500,
 	inheritedVelFactor: 0,
+	thetaMin: 90,
+	thetaMax: 100,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
@@ -144,7 +168,9 @@ final blastParticleOptions:ParticleEmitterOptions = {
 		lifetime: 500,
 		lifetimeVariance: 100,
 		dragCoefficient: 1,
-		acceleration: 0,
+		constantAcceleration: 0,
+		windCoefficient: 0,
+		gravityCoefficient: 0,
 		colors: [new Vector(0, 1, 1, 0.1), new Vector(0, 1, 1, 0.5), new Vector(0, 1, 1, 0.9)],
 		sizes: [0.125, 0.125, 0.125],
 		times: [0, 0.4, 1]
@@ -153,11 +179,16 @@ final blastParticleOptions:ParticleEmitterOptions = {
 
 final blastMaxParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 1,
-	ambientVelocity: new Vector(0, 0, -0.3),
+	ambientVelocity: new Vector(0, 0, 0.0),
 	ejectionVelocity: 4,
 	velocityVariance: 0,
-	emitterLifetime: 300,
+	emitterLifetime: 500,
 	inheritedVelFactor: 0,
+	thetaMin: 90,
+	thetaMax: 100,
+	phiReferenceVel: 0,
+	phiVariance: 360,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
@@ -167,7 +198,9 @@ final blastMaxParticleOptions:ParticleEmitterOptions = {
 		lifetime: 500,
 		lifetimeVariance: 100,
 		dragCoefficient: 1,
-		acceleration: 0,
+		constantAcceleration: 0,
+		windCoefficient: 0,
+		gravityCoefficient: 0,
 		colors: [
 			new Vector(1, 0.7, 0, 0.1),
 			new Vector(1, 0.7, 0, 0.5),
@@ -229,6 +262,7 @@ class Marble extends GameObject {
 	var _minBounceVel:Float = 0.1;
 	var _minBounceSpeed:Float = 3;
 	var _minTrailVel:Float = 10;
+	var _minTrail2Vel:Float = 30;
 	var _bounceKineticFriction = 0.2;
 	var minVelocityBounceSoft = 2.5;
 	var minVelocityBounceHard = 12.0;
@@ -293,9 +327,11 @@ class Marble extends GameObject {
 
 	var blastPerc:Float = 0.0;
 
+	var bounceEmitDelay:Float = 0;
+	var trailEmitDelay:Float = 0;
+
 	var teleportEnableTime:Null<Float> = null;
 	var teleportDisableTime:Null<Float> = null;
-	var bounceEmitDelay:Float = 0;
 
 	var bounceEmitterData:ParticleData;
 	var trailEmitterData:ParticleData;
@@ -1131,24 +1167,43 @@ class Marble extends GameObject {
 		if (!this.controllable || this.isNetUpdate)
 			return;
 		if (this.bounceEmitDelay == 0 && this._minBounceSpeed <= speed) {
-			this.level.particleManager.createEmitter(bounceParticleOptions, this.bounceEmitterData, this.getAbsPos().getPosition());
-			this.bounceEmitDelay = 0.3;
+			var cl = bounceParticleOptions.clone();
+			cl.axis = normal;
+			cl.emitterLifetime = 1; //
+			cl.velocity = this.velocity.clone();
+			cl.ejectionPeriod = 80.0 / Math.max(speed * 100.0, 1.0);
+			this.level.particleManager.createEmitter(cl, this.bounceEmitterData, this.collider.transform.getPosition().sub(normal.multiply(_radius)));
+			this.bounceEmitDelay = 5;
 		}
 	}
 
-	function trailEmitter() {
+	function trailEmitter(dt:Float) {
 		// Trails are bugged
-		// var speed = this.velocity.length();
-		// if (this._minTrailVel > speed) {
-		// 	if (this.trailEmitterNode != null) {
-		// 		this.level.particleManager.removeEmitter(this.trailEmitterNode);
-		// 		this.trailEmitterNode = null;
-		// 	}
-		// 	return;
-		// }
-		// if (this.trailEmitterNode == null)
-		// 	this.trailEmitterNode = this.level.particleManager.createEmitter(trailParticleOptions, trailEmitterData, null,
-		// 		() -> this.getAbsPos().getPosition());
+
+		if (trailEmitDelay > 0)
+			trailEmitDelay -= dt;
+		if (trailEmitDelay < 0)
+			trailEmitDelay = 0;
+
+		var speed = this.velocity.length();
+		if (this._minTrailVel > speed || trailEmitDelay > 0) {
+			return;
+		}
+		if (this._minTrailVel * 2 > speed)
+			dt *= (speed - this._minTrailVel) / this._minTrailVel;
+
+		var norm = this.velocity.normalized();
+
+		var particlePos = this.collider.transform.getPosition();
+
+		var trailOpts = trailParticleOptions.clone();
+		trailOpts.emitterLifetime = 1;
+		trailOpts.ejectionPeriod = (speed > this._minTrail2Vel ? 10.0 : 20.0) / (1000.0 * dt);
+		trailOpts.axis = norm;
+		trailOpts.velocity = this.velocity.clone();
+		trailEmitDelay = 16.0 / 1000.0;
+
+		this.level.particleManager.createEmitter(trailOpts, trailEmitterData, particlePos);
 	}
 
 	function ReportBounce(pos:Vector, normal:Vector, speed:Float) {
@@ -2217,8 +2272,7 @@ class Marble extends GameObject {
 			this.level.particleManager.createEmitter(ublast ? blastMaxParticleOptions : blastParticleOptions, ublast ? blastMaxEmitterData : blastEmitterData,
 				this.getAbsPos().getPosition(), () -> {
 					this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
-				},
-				new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+				});
 		}
 		// if (Net.isClient && !this.controllable && (this.serverTicks - this.blastUseTick) < 12) {
 		// 	var ticksSince = (this.serverTicks - this.blastUseTick);
@@ -2388,7 +2442,7 @@ class Marble extends GameObject {
 		// var marbledts = cast(this.getChildAt(0), DtsObject);
 		// marbledts.setScale(this._renderScale);
 
-		this.trailEmitter();
+		this.trailEmitter(timeState.dt);
 		if (bounceEmitDelay > 0)
 			bounceEmitDelay -= timeState.dt;
 		if (bounceEmitDelay < 0)
@@ -2543,7 +2597,7 @@ class Marble extends GameObject {
 
 		this.updateTeleporterState(timeState);
 
-		this.trailEmitter();
+		this.trailEmitter(timeState.dt);
 		if (bounceEmitDelay > 0)
 			bounceEmitDelay -= timeState.dt;
 		if (bounceEmitDelay < 0)
@@ -2620,8 +2674,7 @@ class Marble extends GameObject {
 				this.level.particleManager.createEmitter(blastAmt > 1 ? blastMaxParticleOptions : blastParticleOptions,
 					blastAmt > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
 						this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
-					},
-					new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+					});
 			this.blastTicks = 0;
 			// Now send the impulse to other marbles
 			if (!Net.connectedServerInfo.competitiveMode || blastAmt > 1) { // Competitor mode only allows ultra blasts
@@ -2655,8 +2708,7 @@ class Marble extends GameObject {
 			this.level.particleManager.createEmitter(this.blastAmount > 1 ? blastMaxParticleOptions : blastParticleOptions,
 				this.blastAmount > 1 ? blastMaxEmitterData : blastEmitterData, this.getAbsPos().getPosition(), () -> {
 					this.getAbsPos().getPosition().add(this.currentUp.multiply(-this._radius * 0.4));
-				},
-				new Vector(1, 1, 1).add(new Vector(Math.abs(this.currentUp.x), Math.abs(this.currentUp.y), Math.abs(this.currentUp.z)).multiply(-0.8)));
+				});
 			this.blastAmount = 0;
 		}
 	}
