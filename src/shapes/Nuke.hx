@@ -16,22 +16,38 @@ import src.MarbleWorld;
 import net.Net;
 
 final nukeParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 0.2,
+	ejectionPeriod: 7,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 2,
 	velocityVariance: 1,
-	emitterLifetime: 50,
+	emitterLifetime: 120 * 7,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 60,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.2,
+	spawnOffset: () -> {
+		var dir = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+		if (dir.lengthSq() < 0.0001)
+			dir.set(0, 0, 1);
+		dir.normalize();
+		var radius = Math.pow(Math.random(), 1 / 3) * 3;
+		return dir.multiply(radius);
+	},
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Add,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
 		lifetime: 1000,
 		lifetimeVariance: 150,
-		dragCoefficient: 0.8,
-		acceleration: 0,
+		dragCoefficient: 2,
+		constantAcceleration: 0,
+		gravityCoefficient: 0.2,
+		windCoefficient: 0,
 		colors: [new Vector(0.56, 0.36, 0.26, 1), new Vector(0.56, 0.36, 0.26, 0)],
 		sizes: [0.5, 1],
 		times: [0, 1]
@@ -39,22 +55,30 @@ final nukeParticle:ParticleEmitterOptions = {
 };
 
 final nukeSmokeParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 0.5,
+	ejectionPeriod: 10,
+	periodVariance: 0,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 1.3,
+	ejectionVelocity: 4,
 	velocityVariance: 0.5,
-	emitterLifetime: 50,
+	emitterLifetime: 250,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.25,
 	particleOptions: {
 		texture: 'particles/smoke.png',
 		blending: Alpha,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
-		lifetime: 2500,
-		lifetimeVariance: 300,
-		dragCoefficient: 0.7,
-		acceleration: -8,
+		spinSpeed: 0,
+		spinRandomMin: -80,
+		spinRandomMax: 80,
+		lifetime: 10000,
+		lifetimeVariance: 3000,
+		dragCoefficient: 100,
+		constantAcceleration: -0.8,
+		gravityCoefficient: -0.5,
+		windCoefficient: 0,
 		colors: [
 			new Vector(0.56, 0.36, 0.26, 1),
 			new Vector(0.2, 0.2, 0.2, 1),
@@ -66,28 +90,36 @@ final nukeSmokeParticle:ParticleEmitterOptions = {
 };
 
 final nukeSparksParticle:ParticleEmitterOptions = {
-	ejectionPeriod: 1.7,
-	ambientVelocity: new Vector(0, -0.5, 0),
-	ejectionVelocity: 13 / 1.5,
-	velocityVariance: 5,
+	ejectionPeriod: 3,
+	periodVariance: 0,
+	ambientVelocity: new Vector(0, 0, 0),
+	ejectionVelocity: 13,
+	velocityVariance: 6.75,
 	emitterLifetime: 5000,
+	ejectionOffset: 0,
+	thetaMin: 0,
+	thetaMax: 180,
+	phiReferenceVel: 0,
+	phiVariance: 360,
 	inheritedVelFactor: 0.2,
 	particleOptions: {
 		texture: 'particles/spark.png',
 		blending: Add,
-		spinSpeed: 40,
-		spinRandomMin: -90,
-		spinRandomMax: 90,
-		lifetime: 4500,
-		lifetimeVariance: 2500,
-		dragCoefficient: 0.5,
-		acceleration: 0,
+		spinSpeed: 0,
+		spinRandomMin: 0,
+		spinRandomMax: 0,
+		lifetime: 5000,
+		lifetimeVariance: 2000,
+		dragCoefficient: 1,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
+		windCoefficient: 0,
 		colors: [
 			new Vector(0.6, 0.4, 0.3, 1),
 			new Vector(0.6, 0.4, 0.3, 1),
 			new Vector(1, 0.4, 0.3, 0)
 		],
-		sizes: [0.5, 0.4, 0.2],
+		sizes: [0.5, 0.25, 0.25],
 		times: [0, 0.5, 1]
 	}
 };
