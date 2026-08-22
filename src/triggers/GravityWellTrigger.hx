@@ -5,34 +5,63 @@ import src.Marble;
 import mis.MisParser;
 import h3d.Vector;
 import net.NetPacket.MarbleNetFlags;
+import mis.MissionElement.MissionElementTrigger;
+import src.MarbleWorld;
 
 class GravityWellTrigger extends Trigger {
 	var restoreUp:Map<Marble, Vector> = [];
 	var wasWithinRadius:Map<Marble, Bool> = [];
 
-	function getCenter():Vector {
+	var useRadius:Bool;
+	var radius:Float;
+	var axis:String;
+	var invert:Bool;
+	var restoreGravity:Bool;
+	var restoreGravityQuat:h3d.Quat;
+	var customPoint:Vector;
+
+	override public function new(element:MissionElementTrigger, level:MarbleWorld) {
+		super(element, level);
+
+		var useRadiusField = this.element.fields.get("useradius");
+		useRadius = useRadiusField != null && MisParser.parseBoolean(useRadiusField[0]);
+
+		var radiusField = this.element.fields.get("radiussize");
+		radius = radiusField != null ? MisParser.parseNumber(radiusField[0]) : 0;
+
+		var axisField = this.element.fields.get("axis");
+		axis = axisField != null ? axisField[0] : "x";
+		var invertField = this.element.fields.get("invert");
+		invert = invertField != null && MisParser.parseBoolean(invertField[0]);
+
 		var pointField = this.element.fields.get("custompoint");
-		if (pointField != null && pointField[0] != null && StringTools.trim(pointField[0]) != "")
-			return MisParser.parseVector3(pointField[0]);
+		if (pointField != null && pointField[0] != null && StringTools.trim(pointField[0]) != "") {
+			customPoint = MisParser.parseVector3(pointField[0]);
+			customPoint.x *= -1;
+		}
+
+		var restoreField = this.element.fields.get("restoregravity");
+		restoreGravity = restoreField[0] == "1";
+		if (!restoreGravity) {
+			restoreGravityQuat = MisParser.parseRotation(restoreField[0]);
+			restoreGravityQuat.x = -restoreGravityQuat.x;
+			restoreGravityQuat.w = -restoreGravityQuat.w;
+		}
+	}
+
+	function getCenter():Vector {
+		if (customPoint != null)
+			return customPoint;
 		return this.collider.boundingBox.getCenter().toVector();
 	}
 
 	function withinRadius(marblePos:Vector, center:Vector):Bool {
-		var useRadiusField = this.element.fields.get("useradius");
-		var useRadius = useRadiusField != null && MisParser.parseBoolean(useRadiusField[0]);
 		if (!useRadius)
 			return true;
-		var radiusField = this.element.fields.get("radiussize");
-		var radius = radiusField != null ? MisParser.parseNumber(radiusField[0]) : 0;
 		return marblePos.sub(center).length() <= radius;
 	}
 
 	function getDownVector(marblePos:Vector):Vector {
-		var axisField = this.element.fields.get("axis");
-		var axis = axisField != null ? axisField[0] : "x";
-		var invertField = this.element.fields.get("invert");
-		var invert = invertField != null && MisParser.parseBoolean(invertField[0]);
-
 		var center = getCenter();
 		var off = marblePos.sub(center);
 		switch (axis) {
@@ -59,20 +88,16 @@ class GravityWellTrigger extends Trigger {
 	}
 
 	function leaveRestoreGravity(marble:Marble, timeState:TimeState) {
-		var restoreField = this.element.fields.get("restoregravity");
-		if (restoreField == null || restoreField[0] == "")
+		if (!restoreGravity && restoreGravityQuat == null)
 			return;
 
 		var direction:Vector;
-		if (restoreField[0] == "1") {
+		if (restoreGravity) {
 			direction = this.restoreUp.exists(marble) ? this.restoreUp.get(marble) : new Vector(0, 0, 1);
 			this.restoreUp.remove(marble);
 		} else {
-			var quat = MisParser.parseRotation(restoreField[0]);
-			quat.x = -quat.x;
-			quat.w = -quat.w;
 			direction = new Vector(0, 0, -1);
-			direction.transform(quat.toMatrix());
+			direction.transform(restoreGravityQuat.toMatrix());
 		}
 
 		apply(marble, direction, timeState);
@@ -88,8 +113,7 @@ class GravityWellTrigger extends Trigger {
 			return;
 		}
 		if (this.wasWithinRadius.get(marble) != true) {
-			var restoreField = this.element.fields.get("restoregravity");
-			if (restoreField != null && restoreField[0] == "1")
+			if (restoreGravity)
 				this.restoreUp.set(marble, marble.currentUp.clone());
 		}
 		this.wasWithinRadius.set(marble, true);

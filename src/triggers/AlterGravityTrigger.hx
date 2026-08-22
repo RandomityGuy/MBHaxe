@@ -1,13 +1,36 @@
 package triggers;
 
+import mis.MissionElement.MissionElementTrigger;
 import src.TimeState;
 import src.Marble;
 import mis.MisParser;
 import h3d.Vector;
 import src.Util;
 import net.NetPacket.MarbleNetFlags;
+import src.MarbleWorld;
 
 class AlterGravityTrigger extends Trigger {
+	var measureAxis:Int;
+	var gravityAxis:Int;
+	var flip:Bool;
+	var startRot:Float;
+	var endRot:Float;
+
+	override public function new(element:MissionElementTrigger, level:MarbleWorld) {
+		super(element, level);
+
+		var measureAxisField = this.element.fields.get("measureaxis");
+		measureAxis = axisIndex(measureAxisField != null ? measureAxisField[0] : "x");
+		var gravityAxisField = this.element.fields.get("gravityaxis");
+		gravityAxis = axisIndex(gravityAxisField != null ? gravityAxisField[0] : "y");
+		var flipField = this.element.fields.get("flipmeasure");
+		flip = flipField != null && MisParser.parseBoolean(flipField[0]);
+		var startField = this.element.fields.get("startinggravityrot");
+		startRot = startField != null ? MisParser.parseNumber(startField[0]) : 0;
+		var endField = this.element.fields.get("endinggravityrot");
+		endRot = endField != null ? MisParser.parseNumber(endField[0]) : 720;
+	}
+
 	function axisIndex(name:String):Int {
 		return switch (name) {
 			case "y": 1;
@@ -17,17 +40,6 @@ class AlterGravityTrigger extends Trigger {
 	}
 
 	function getDownVector(marblePos:Vector):Vector {
-		var measureAxisField = this.element.fields.get("measureaxis");
-		var measureAxis = axisIndex(measureAxisField != null ? measureAxisField[0] : "x");
-		var gravityAxisField = this.element.fields.get("gravityaxis");
-		var gravityAxis = axisIndex(gravityAxisField != null ? gravityAxisField[0] : "y");
-		var flipField = this.element.fields.get("flipmeasure");
-		var flip = flipField != null && MisParser.parseBoolean(flipField[0]);
-		var startField = this.element.fields.get("startinggravityrot");
-		var startRot = startField != null ? MisParser.parseNumber(startField[0]) : 0;
-		var endField = this.element.fields.get("endinggravityrot");
-		var endRot = endField != null ? MisParser.parseNumber(endField[0]) : 720;
-
 		var box = this.collider.boundingBox;
 		var lo = [box.xMin, box.yMin, box.zMin][measureAxis];
 		var hi = [box.xMax, box.yMax, box.zMax][measureAxis];

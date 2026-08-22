@@ -974,6 +974,8 @@ class PlayMissionGui extends GuiControl {
 		var scoreView:LeaderboardsKind = All;
 		var lbToken:Int = 0;
 
+		var downloadingReplay = false;
+
 		setSelectedFunc = (idx) -> {
 			if (idx > currentList.length - 1)
 				idx = currentList.length - 1;
@@ -1158,7 +1160,11 @@ class PlayMissionGui extends GuiControl {
 						var lbPath = currentMission.path;
 						if (currentMission.isClaMission)
 							lbPath = 'custom/${currentMission.id}';
+						if (downloadingReplay)
+							return;
+						downloadingReplay = true;
 						Leaderboards.watchTopReplay(lbPath, scoreView, (b) -> {
+							downloadingReplay = false;
 							if (b != null) {
 								var replayF = new Replay("");
 								if (replayF.read(b)) {
