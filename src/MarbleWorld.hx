@@ -2618,10 +2618,14 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function displayAlert(text:String) {
+		if (text == "")
+			return;
 		this.playGui.addHelpLine(text);
 	}
 
 	public function displayHelp(text:String, duration:Float) {
+		if (text == "")
+			return;
 		text = Util.formatMLText(text);
 		this.playGui.setHelpText(this.timeState.timeSinceLoad, text, duration);
 	}

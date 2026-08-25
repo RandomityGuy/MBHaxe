@@ -11,7 +11,8 @@ import net.NetPacket.MarbleNetFlags;
 class AntiGravity extends PowerUp {
 	public function new(element:MissionElementItem, norespawn:Bool = false) {
 		super(element);
-		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/gravmod.dts" : "data/shapes/items/antigravity.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock.toLowerCase(),
+			"_pq") ? "data/shapes_pq/gameplay/powerups/gravmod.dts" : "data/shapes/items/antigravity.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 

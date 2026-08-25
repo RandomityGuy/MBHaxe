@@ -53,7 +53,8 @@ class SuperSpeed extends PowerUp {
 
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = StringTools.endsWith(element.datablock, "_PQ") ? "data/shapes_pq/gameplay/powerups/superspeed.dts" : "data/shapes/items/superspeed.dts";
+		this.dtsPath = StringTools.endsWith(element.datablock.toLowerCase(),
+			"_pq") ? "data/shapes_pq/gameplay/powerups/superspeed.dts" : "data/shapes/items/superspeed.dts";
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperSpeed" + this.dtsPath;

@@ -48,9 +48,29 @@ class Marbleland {
 			if (missionData.hasCustomCode)
 				continue;
 
-			var isMultiplayer = missionData.gameType == 'multi';
-			if (isMultiplayer)
-				continue;
+			var gameMode:String = missionData.gameMode;
+			if (gameMode != null) {
+				gameMode = gameMode.toLowerCase();
+				// filter out only the compatible game modes
+				var compatibleModes = [
+					"",
+					"null",
+					"normal",
+					"hunt",
+					"2d",
+					"quota",
+					"madness",
+					"gemmadness",
+					"consistency",
+					"haste",
+					"laps"
+				];
+				var split = gameMode.split(' ');
+				for (mode in split) {
+					if (!compatibleModes.contains(mode))
+						continue; // skip it!
+				}
+			}
 
 			var mission = new Mission();
 			mission.id = missionData.id;

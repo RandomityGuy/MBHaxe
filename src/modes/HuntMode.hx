@@ -955,7 +955,7 @@ class HuntMode extends NullMode {
 
 	override public function getStartTime() {
 		if (level.mission.qualifyTime == 0 || level.mission.qualifyTime == Math.POSITIVE_INFINITY)
-			return 600.0; // 5 minutes default
+			return 300.0; // 5 minutes default
 		return level.mission.qualifyTime;
 	}
 

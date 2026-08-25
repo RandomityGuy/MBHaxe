@@ -148,9 +148,10 @@ class Gem extends DtsObject {
 	public function new(element:MissionElementItem) {
 		super();
 		this.element = element;
-		var isFancy = StringTools.startsWith(element.datablock, "FancyGemItem");
-		var isPQ = StringTools.endsWith(element.datablock, "_PQ");
-		var isMbu = StringTools.endsWith(element.datablock, "_MBU");
+		var datablockLowercase = element.datablock.toLowerCase();
+		var isFancy = StringTools.startsWith(datablockLowercase, "fancygemitem");
+		var isPQ = StringTools.endsWith(datablockLowercase, "_pq");
+		var isMbu = StringTools.endsWith(datablockLowercase, "_mbu");
 		dtsPath = if (isFancy) "data/shapes_pq/gameplay/gems/gem_fancy.dts"; else if (isPQ) "data/shapes_pq/gameplay/gems/gem.dts"; else if (isMbu)
 			"data/shapes_mbu/items/gem.dts"; else "data/shapes/items/gem.dts";
 		ambientRotate = true;
@@ -162,8 +163,8 @@ class Gem extends DtsObject {
 
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
 		var prefixLength = (isFancy ? "FancyGemItem" : "GemItem").length;
-		var color = element.datablock.substring(prefixLength);
-		for (suffix in ["_PQ", "_MBU", "_MBG"])
+		var color = datablockLowercase.substring(prefixLength);
+		for (suffix in ["_pq", "_mbu", "_mbg"])
 			if (StringTools.endsWith(color, suffix))
 				color = color.substring(0, color.length - suffix.length);
 		if (color.length == 0)
