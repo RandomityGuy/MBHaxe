@@ -41,8 +41,8 @@ class GravityWellTrigger extends Trigger {
 		}
 
 		var restoreField = this.element.fields.get("restoregravity");
-		restoreGravity = restoreField[0] == "1";
-		if (!restoreGravity) {
+		restoreGravity = restoreField != null && restoreField[0] == "1";
+		if (!restoreGravity && restoreField != null) {
 			restoreGravityQuat = MisParser.parseRotation(restoreField[0]);
 			restoreGravityQuat.x = -restoreGravityQuat.x;
 			restoreGravityQuat.w = -restoreGravityQuat.w;

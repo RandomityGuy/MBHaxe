@@ -535,6 +535,14 @@ class DifBuilder {
 						+ p3.y * texgen.planeY.y
 						+ p3.z * texgen.planeY.z
 						+ texgen.planeY.d);
+					var uvShiftX = Math.floor(uv1.x);
+					var uvShiftY = Math.floor(uv1.y);
+					uv1.x -= uvShiftX;
+					uv1.y -= uvShiftY;
+					uv2.x -= uvShiftX;
+					uv2.y -= uvShiftY;
+					uv3.x -= uvShiftX;
+					uv3.y -= uvShiftY;
 					var tri = new DifBuilderTriangle();
 					tri.texture = texture;
 					tri.normal1 = normal;
