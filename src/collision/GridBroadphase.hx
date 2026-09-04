@@ -246,7 +246,11 @@ class GridBroadphase {
 		for (i in xStart...xEnd) {
 			for (j in yStart...yEnd) {
 				for (surfIdx in cells[16 * i + j]) {
-					var surf = objects[surfIdx].object;
+					// remove() nulls the slot but keeps the index; build() skips these too.
+					var proxy = objects[surfIdx];
+					if (proxy == null)
+						continue;
+					var surf = proxy.object;
 					if (surf.key == searchKey)
 						continue;
 					surf.key = searchKey;
