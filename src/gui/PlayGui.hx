@@ -1077,7 +1077,8 @@ class PlayGui {
 		gemCountNumbers[4].anim.visible = false;
 		gemCountNumbers[5].anim.visible = false;
 
-		var off = playerList[0].us ? 10 : 0;
+		// playerList is multiplayer-only, so it is empty in single player.
+		var off = (playerList.length > 0 && playerList[0].us) ? 10 : 0;
 
 		gemCountNumbers[0].anim.currentFrame = off + collectedHundredths;
 		gemCountNumbers[1].anim.currentFrame = off + collectedTenths;
