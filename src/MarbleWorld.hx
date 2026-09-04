@@ -223,6 +223,7 @@ class MarbleWorld extends Scheduler {
 	public var cheatsUsed:Bool = false;
 
 	public var inputRecorder:InputRecorder;
+	public var playtestPointManager:PlaytestPointManager;
 	public var isReplayingMovement:Bool = false;
 	public var currentInputMoves:Array<InputRecorderFrame>;
 
@@ -278,6 +279,7 @@ class MarbleWorld extends Scheduler {
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
 		this.inputRecorder = new InputRecorder(cast this);
+		this.playtestPointManager = new PlaytestPointManager(cast this);
 		this.isMultiplayer = multiplayer;
 		this.dtsCache = new DtsMeshCache();
 		if (this.isMultiplayer) {
@@ -339,6 +341,9 @@ class MarbleWorld extends Scheduler {
 		this.mission.load();
 		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
 		scanMission(this.mission.root);
+		if(this.mission.isLocal) {
+			this.playtestPointManager.scanMission(this.mission.root);
+		}
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		if (this.isMultiplayer) {
@@ -1859,6 +1864,10 @@ class MarbleWorld extends Scheduler {
 		this.gameMode.update(this.timeState);
 
 		if (!this.isMultiplayer) {
+			if (!this.isWatching && this.finishTime == null) {
+				this.playtestPointManager.update(dt);
+			}
+
 			if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
 				&& this.finishTime == null) {
 				performRestart();
@@ -2414,8 +2423,10 @@ class MarbleWorld extends Scheduler {
 					totalTime: 0,
 				});
 			}
-			Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.levelStatistics[mission.path].oobs,
-				Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
+			if (!mission.isLocal) {
+				Analytics.trackLevelScore(mission.title, mission.path, Std.int(finishTime.gameplayClock * 1000), Settings.levelStatistics[mission.path].oobs,
+					Settings.levelStatistics[mission.path].respawns, Settings.optionsSettings.rewindEnabled);
+			}
 			if (!this.isWatching)
 				this.schedule(this.timeState.currentAttemptTime + 2, () -> cast showFinishScreen());
 			// Stop the ongoing sounds
