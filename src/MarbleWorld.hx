@@ -959,29 +959,28 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function addSimGroup(simGroup:MissionElementSimGroup) {
-		if (simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior).length != 0) {
+		var pathedInteriorElements:Array<MissionElementPathedInterior> = cast simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior);
+		if (pathedInteriorElements.length != 0) {
 			// Create the pathed interior
 			resourceLoadFuncs.push(fwd -> {
-				src.PathedInterior.createFromSimGroup(simGroup, cast this, pathedInterior -> {
-					this.addPathedInterior(pathedInterior, () -> {
-						if (pathedInterior == null) {
-							fwd();
-							Console.error("Unable to load pathed interior");
-							return;
-						}
-
-						// if (pathedInterior.hasCollision)
-						// 	this.physics.addInterior(pathedInterior);
-						for (trigger in pathedInterior.triggers) {
-							this.triggers.push(trigger);
-							this.collisionWorld.addEntity(trigger.collider);
-						}
+				src.PathedInterior.createFromSimGroup(simGroup, cast this, pathedInteriors -> {
+					if (pathedInteriors == null || pathedInteriors.length == 0) {
 						fwd();
-					});
+						Console.error("Unable to load pathed interior");
+						return;
+					}
+
+					var count = pathedInteriors.length;
+					for (pathedInterior in pathedInteriors) {
+						this.addPathedInterior(pathedInterior, () -> {
+							count--;
+							if (count == 0) {
+								fwd();
+							}
+						});
+					}
 				});
 			});
-
-			return;
 		}
 
 		for (element in simGroup.elements) {
@@ -995,6 +994,9 @@ class MarbleWorld extends Scheduler {
 				case MissionElementType.Item:
 					resourceLoadFuncs.push(fwd -> this.addItem(cast element, fwd));
 				case MissionElementType.Trigger:
+					var te:MissionElementTrigger = cast element;
+					if (pathedInteriorElements.length != 0 && te.targettime != null)
+						continue;
 					resourceLoadFuncs.push(fwd -> this.addTrigger(cast element, fwd));
 				case MissionElementType.TSStatic:
 					resourceLoadFuncs.push(fwd -> this.addTSStatic(cast element, fwd));
@@ -1003,6 +1005,8 @@ class MarbleWorld extends Scheduler {
 						this.addParticleEmitterNode(cast element);
 						fwd();
 					});
+				case MissionElementType.Path, MissionElementType.PathedInterior:
+					// Handled by createFromSimGroup
 				default:
 			}
 		}
