@@ -66,10 +66,15 @@ class Marbleland {
 					"laps"
 				];
 				var split = gameMode.split(' ');
+				var compatible = true;
 				for (mode in split) {
-					if (!compatibleModes.contains(mode))
-						continue; // skip it!
+					if (!compatibleModes.contains(mode)) {
+						compatible = false;
+						break; // skip it!
+					}
 				}
+				if (!compatible)
+					continue;
 			}
 
 			var mission = new Mission();
