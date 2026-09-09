@@ -675,6 +675,17 @@ class DifBuilder {
 						var points = [];
 						var normals = [];
 						var uvs = [];
+
+						var shiftUVs = true;
+						if (canFindTex(grp)) {
+							var texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
+							var exactName = StringTools.replace(texture.name, "data/", "").toLowerCase();
+							exactName = exactName.substring(0, exactName.lastIndexOf('.'));
+							var matDictName = exactName;
+							if (StringTools.startsWith(matDictName, "interiors_mbu"))
+								shiftUVs = false;
+						}
+
 						for (tri in tris) {
 							var p1 = new Point(-tri.p1.x, tri.p1.y, tri.p1.z);
 							var p2 = new Point(-tri.p2.x, tri.p2.y, tri.p2.z);
@@ -685,6 +696,16 @@ class DifBuilder {
 							var uv1 = new UV(tri.uv1.x, tri.uv1.y);
 							var uv2 = new UV(tri.uv2.x, tri.uv2.y);
 							var uv3 = new UV(tri.uv3.x, tri.uv3.y);
+							if (shiftUVs) {
+								var uvShiftX = Math.floor(uv1.u);
+								var uvShiftY = Math.floor(uv1.v);
+								uv1.u -= uvShiftX;
+								uv1.v -= uvShiftY;
+								uv2.u -= uvShiftX;
+								uv2.v -= uvShiftY;
+								uv3.u -= uvShiftX;
+								uv3.v -= uvShiftY;
+							}
 							points.push(p3);
 							points.push(p2);
 							points.push(p1);
