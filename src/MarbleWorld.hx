@@ -690,10 +690,6 @@ class MarbleWorld extends Scheduler {
 		this.rewindManager.clear();
 		this.rewindUsed = false;
 
-		if (!this.isMultiplayer || _skipPreGame) {
-			setCursorLock(true);
-		}
-
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
 		this.timeState.ticks = 0;
