@@ -48,6 +48,7 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var GravityChange = 1 << 4;
 	var UsePowerup = 1 << 5;
 	var UpdateTrapdoor = 1 << 6;
+	var UpdatePosition = 1 << 7;
 }
 
 @:publicFields
@@ -77,7 +78,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeByte(clientId);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
-		b.writeInt(netFlags, 7); // All bits flagged in one, UsePowerup flag already serialized in this
+		b.writeByte(netFlags); // All bits flagged in one, UsePowerup flag already serialized in this
 		b.writeByte(moveQueueSize);
 		b.writeFloat(position.x);
 		b.writeFloat(position.y);
@@ -128,7 +129,7 @@ class MarbleUpdatePacket implements NetPacket {
 		clientId = b.readByte();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
-		netFlags = b.readInt(7);
+		netFlags = b.readByte();
 		moveQueueSize = b.readByte();
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());

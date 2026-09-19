@@ -235,6 +235,7 @@ class Marble extends GameObject {
 	var lastRenderPos:Vector;
 	var netSmoothOffset:Vector;
 	var netCorrected:Bool;
+	var justWarped:Bool = true;
 
 	public var contacts:Array<CollisionInfo> = [];
 	public var bestContact:CollisionInfo;
@@ -2026,6 +2027,13 @@ class Marble extends GameObject {
 				this.blastUseTime = this.level.timeState.currentAttemptTime - ticksSince * 0.032;
 			}
 		}
+		if (p.netFlags & MarbleNetFlags.UpdatePosition > 0) {
+			this.oldPos.load(p.position);
+			this.newPos.load(p.position);
+			this.netSmoothOffset.set(0, 0, 0);
+			this.lastRenderPos.load(p.position);
+			this.justWarped = true;
+		}
 
 		// if (this.controllable && Net.isClient) {
 		// 	// We are client, need to do something about the queue
@@ -2042,6 +2050,12 @@ class Marble extends GameObject {
 
 	function calculateNetSmooth() {
 		if (this.netCorrected) {
+			if (this.justWarped) {
+				this.justWarped = false;
+				this.netSmoothOffset.set(0, 0, 0);
+				this.netCorrected = false;
+				return;
+			}
 			this.netCorrected = false;
 			this.netSmoothOffset.load(this.lastRenderPos.sub(this.oldPos));
 			// this.oldPos.load(this.posStore);
@@ -2121,9 +2135,6 @@ class Marble extends GameObject {
 		var newDt = 2.3 * (timeState.dt / 0.4);
 		var smooth = 1.0 / (newDt * (newDt * 0.235 * newDt) + newDt + 1.0 + 0.48 * newDt * newDt);
 		this.netSmoothOffset.scale(smooth);
-		var smoothScale = this.netSmoothOffset.lengthSq();
-		if (smoothScale < 0.01 || smoothScale > 20.0)
-			this.netSmoothOffset.set(0, 0, 0);
 
 		if (oldPos != null && newPos != null) {
 			var deltaT = physicsAccumulator / 0.032;
@@ -2629,7 +2640,15 @@ class Marble extends GameObject {
 
 	public function setMarblePosition(x:Float, y:Float, z:Float) {
 		this.collider.transform.setPosition(new Vector(x, y, z));
+		this.lastRenderPos.set(x, y, z);
+		if (this.oldPos != null)
+			this.oldPos.set(x, y, z);
+		this.netSmoothOffset.set(0, 0, 0);
 		this.setPosition(x, y, z);
+		this.netFlags |= MarbleNetFlags.UpdatePosition;
+		this.netCorrected = false;
+		this.physicsAccumulator = 0;
+		this.justWarped = true;
 	}
 
 	public inline function getConnectionId() {
@@ -2655,7 +2674,7 @@ class Marble extends GameObject {
 		if (this.level != null && this.level.gameMode is HuntMode && cast(this.level.gameMode, HuntMode).competitive) {
 			this.megaMarbleDuration = 156;
 		}
-		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
+		this.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup | MarbleNetFlags.UpdatePosition;
 		this.lastContactNormal = new Vector(0, 0, 1);
 		this._firstTick = true;
 		this.finishAnimTime = 0;
@@ -2664,8 +2683,9 @@ class Marble extends GameObject {
 		this.newPos = this.getAbsPos().getPosition();
 		this.posStore = new Vector();
 		this.netSmoothOffset = new Vector();
-		this.lastRenderPos = new Vector();
+		this.lastRenderPos = this.newPos.clone();
 		this.netCorrected = false;
+		this.justWarped = true;
 		this.serverUsePowerup = false;
 		if (this._radius != this._prevRadius) {
 			this._radius = this._prevRadius;
