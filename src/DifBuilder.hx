@@ -112,11 +112,11 @@ class DifBuilder {
 		},
 		"friction_low" => {
 			friction: 0.2,
-			restitution: 0.5
+			restitution: 1.0
 		},
 		"friction_low_shadow" => {
 			friction: 0.2,
-			restitution: 0.5
+			restitution: 1.0
 		},
 		"friction_high" => {
 			friction: 4.5,

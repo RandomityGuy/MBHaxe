@@ -1209,7 +1209,7 @@ class MarbleWorld extends Scheduler {
 		// Marble states
 		for (marb in this.marbles) {
 			var oldFlags = @:privateAccess marb.netFlags;
-			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
+			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup | MarbleNetFlags.UpdatePosition;
 
 			if (oldFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
 				@:privateAccess marb.netFlags |= MarbleNetFlags.UpdateTrapdoor;
