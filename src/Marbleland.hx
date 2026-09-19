@@ -75,6 +75,8 @@ class Marbleland {
 			if (missionData.modification == 'platinumquest')
 				missionData.modification = 'platinum'; // play PQ levels compatible with web pls
 			mission.game = missionData.modification;
+			if (mission.game == null)
+				mission.game = 'platinum';
 			if (missionData.modification == 'platinum')
 				mission.goldTime = missionData.platinumTime != null ? missionData.platinumTime / 1000 : mission.goldTime;
 			mission.ultimateTime = missionData.ultimateTime != null ? missionData.ultimateTime / 1000 : 0;

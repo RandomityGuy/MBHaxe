@@ -509,7 +509,7 @@ class ResourceLoader {
 		path = StringTools.replace(path, "data/", "");
 		#end
 		if (zipFilesystem.exists(path.toLowerCase())) {
-			var entry = zipFilesystem.get(path);
+			var entry = zipFilesystem.get(path.toLowerCase());
 			var res = new hxd.res.Sound(entry);
 			var audioresource = new Resource(res, path, audioCache, snd -> snd.dispose());
 			return audioresource;
