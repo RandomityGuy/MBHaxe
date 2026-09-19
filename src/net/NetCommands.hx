@@ -1,5 +1,9 @@
 package net;
 
+import hxd.snd.effect.Spatialization;
+import h3d.Vector;
+import net.NetPacket.SoundFXIndex;
+import src.AudioManager;
 import gui.MultiplayerGui;
 import net.ClientConnection.NetPlatform;
 import gui.EndGameGui;
@@ -13,6 +17,7 @@ import gui.MultiplayerLoadingGui;
 import src.MissionList;
 import src.Console;
 import src.MPCustoms;
+import src.ResourceLoader;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -383,6 +388,35 @@ class NetCommands {
 		if (MarbleGame.instance.world != null) {
 			var huntMode = cast(MarbleGame.instance.world.gameMode, HuntMode);
 			huntMode.setCompetitiveTimerStartTicks(ticks);
+		}
+	}
+
+	@:rpc(server) public static function playSound(audioIndex:Int, x:Float, y:Float, z:Float) {
+		if (Net.isClient) {
+			var ch = switch (audioIndex) {
+				case SoundFXIndex.UseSuperJump:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_superjump.wav").resource);
+				case SoundFXIndex.UseSuperSpeed:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_speed.wav").resource);
+				case SoundFXIndex.UseMega:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_mega.wav").resource);
+				case SoundFXIndex.UseBlast:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_blast.wav").resource);
+				case _:
+					null;
+			}
+
+			var audioSrc = new Spatialization();
+			audioSrc.position = new Vector(x, y, z);
+			#if hl
+			audioSrc.referenceDistance = 10.0;
+			#end
+			#if js
+			audioSrc.referenceDistance = 9.5;
+			#end
+			audioSrc.maxDistance = 100.0;
+
+			ch.addEffect(audioSrc);
 		}
 	}
 }

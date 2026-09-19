@@ -1,5 +1,7 @@
 package src;
 
+import net.NetPacket.SoundFXIndex;
+import net.NetCommands;
 import mis.MisParser;
 import gui.MarblePickerGui;
 import collision.CollisionPool;
@@ -2534,6 +2536,8 @@ class Marble extends GameObject {
 			if (!this.isNetUpdate) {
 				if (this.controllable)
 					AudioManager.playSound(ResourceLoader.getResource('data/sound/use_blast.wav', ResourceLoader.getAudio, this.soundResources));
+				if (Net.isHost)
+					NetCommands.playSound(SoundFXIndex.UseBlast, x, y, z);
 
 				this.blastWave.doSequenceOnceBeginTime = this.level.timeState.timeSinceLoad;
 				this.blastUseTime = this.level.timeState.currentAttemptTime;

@@ -1,5 +1,8 @@
 package shapes;
 
+import net.NetPacket.SoundFXIndex;
+import net.NetCommands;
+import net.Net;
 import src.Marble;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
@@ -95,6 +98,8 @@ class SuperSpeed extends PowerUp {
 
 		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/use_speed.wav", ResourceLoader.getAudio, this.soundResources));
+		if (Net.isHost)
+			NetCommands.playSound(SoundFXIndex.UseSuperSpeed, marble.x, marble.y, marble.z);
 		if (@:privateAccess !marble.isNetUpdate)
 			this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		this.level.deselectPowerUp(marble);
