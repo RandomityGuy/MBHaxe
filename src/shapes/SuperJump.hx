@@ -1,5 +1,8 @@
 package shapes;
 
+import net.NetPacket.SoundFXIndex;
+import net.NetCommands;
+import net.Net;
 import src.Marble;
 import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
@@ -85,6 +88,8 @@ class SuperJump extends PowerUp {
 		// if (!this.level.rewinding)
 		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/use_superjump.wav", ResourceLoader.getAudio, this.soundResources));
+		if (Net.isHost)
+			NetCommands.playSound(SoundFXIndex.UseSuperJump, marble.x, marble.y, marble.z);
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp(marble);
 	}

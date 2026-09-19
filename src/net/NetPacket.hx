@@ -39,6 +39,13 @@ class MarbleMovePacket implements NetPacket {
 	}
 }
 
+enum abstract SoundFXIndex(Int) from Int to Int {
+	var UseSuperJump = 1;
+	var UseSuperSpeed = 2;
+	var UseMega = 3;
+	var UseBlast = 4;
+}
+
 enum abstract MarbleNetFlags(Int) from Int to Int {
 	var NullFlag = 0;
 	var DoBlast = 1 << 0;

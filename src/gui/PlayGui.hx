@@ -336,29 +336,49 @@ class PlayGui {
 	}
 
 	public function initGemCountdownTimer() {
+		#if hl
+		var scene2d = hxd.Window.getInstance();
+		#end
+		#if (js || uwp)
+		var scene2d = MarbleGame.instance.scene2d;
+		#end
+		var safeVerMargin = 1 + (scene2d.height * 0.15) / 2;
+
 		var timerCtrl = new GuiControl();
 		timerCtrl.horizSizing = HorizSizing.Center;
-		timerCtrl.position = new Vector(316, 69);
+		timerCtrl.position = new Vector(316, 89);
 		timerCtrl.extent = new Vector(374, 58);
+		timerCtrl.yScale = (scene2d.height - safeVerMargin * 2) / 960;
+		timerCtrl.xScale = (scene2d.height - safeVerMargin * 2) / 960;
 
 		countdownNumbers[0].position = new Vector(158, 10);
 		countdownNumbers[0].extent = new Vector(28, 37);
+		countdownNumbers[0].xScale = (scene2d.height - safeVerMargin * 2) / 960;
+		countdownNumbers[0].yScale = (scene2d.height - safeVerMargin * 2) / 960;
 
 		countdownNumbers[1].position = new Vector(174, 10);
 		countdownNumbers[1].extent = new Vector(28, 37);
+		countdownNumbers[1].xScale = (scene2d.height - safeVerMargin * 2) / 960;
+		countdownNumbers[1].yScale = (scene2d.height - safeVerMargin * 2) / 960;
 
 		var pointCols = ResourceLoader.getResource('data/ui/game/numbers/point.png', ResourceLoader.getImage, this.imageResources).toTile();
 
 		countdownPoint = new GuiImage(pointCols);
 		countdownPoint.position = new Vector(184, 10);
 		countdownPoint.extent = new Vector(28, 37);
+		countdownPoint.xScale = (scene2d.height - safeVerMargin * 2) / 960;
+		countdownPoint.yScale = (scene2d.height - safeVerMargin * 2) / 960;
 
 		countdownNumbers[2].position = new Vector(195, 10);
 		countdownNumbers[2].extent = new Vector(28, 37);
+		countdownNumbers[2].xScale = (scene2d.height - safeVerMargin * 2) / 960;
+		countdownNumbers[2].yScale = (scene2d.height - safeVerMargin * 2) / 960;
 
 		countdownIcon = new GuiImage(ResourceLoader.getResource("data/ui/game/timerhuntrespawn.png", ResourceLoader.getImage, this.imageResources).toTile());
 		countdownIcon.position = new Vector(125, 10);
 		countdownIcon.extent = new Vector(36, 36);
+		countdownIcon.xScale = (scene2d.height - safeVerMargin * 2) / 960;
+		countdownIcon.yScale = (scene2d.height - safeVerMargin * 2) / 960;
 
 		timerCtrl.addChild(countdownIcon);
 		timerCtrl.addChild(countdownNumbers[0]);
