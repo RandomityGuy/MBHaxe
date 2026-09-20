@@ -1299,6 +1299,9 @@ class MarbleWorld extends Scheduler {
 					if (clientMarble == null)
 						continue;
 
+					if (connection.spectator)
+						continue;
+
 					var mask = 1 << client;
 					if (hasStruct) {
 						var otherPred = predictions.retrieveState(clientMarble, ourMoveStruct.timeState.ticks);
@@ -1672,7 +1675,8 @@ class MarbleWorld extends Scheduler {
 				if (myMove != null && Net.isClient) {
 					this.predictions.storeState(marble, myMove.timeState.ticks);
 					for (client => marble in clientMarbles) {
-						this.predictions.storeState(marble, myMove.timeState.ticks);
+						if (!client.spectator)
+							this.predictions.storeState(marble, myMove.timeState.ticks);
 					}
 				}
 				if (Net.isHost) {
