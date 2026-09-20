@@ -1929,8 +1929,12 @@ class Marble extends GameObject {
 
 		if (Net.isMP) {
 			if (m.jump && this.outOfBounds) {
-				this.level.cancel(this.oobSchedule);
-				this.level.restart(cast this);
+				if (this.level != null && this.level.gameMode is HuntMode && cast(this.level.gameMode, HuntMode).competitive) {
+					// you cannot quick-respawn
+				} else {
+					this.level.cancel(this.oobSchedule);
+					this.level.restart(cast this);
+				}
 			}
 
 			for (interior in pathedInteriors) {
