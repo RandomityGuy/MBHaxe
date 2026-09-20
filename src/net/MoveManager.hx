@@ -34,6 +34,10 @@ class NetMove {
 		this.serverTicks = serverTicks;
 		this.timeState = timeState;
 	}
+
+	public function clone() {
+		return new NetMove(move, motionDir, timeState, serverTicks, id);
+	}
 }
 
 class MoveManager {
@@ -68,7 +72,11 @@ class MoveManager {
 	}
 
 	public function recordMove(marble:Marble, motionDir:Vector, timeState:TimeState, serverTicks:Int) {
-		if (queuedMoves.length >= maxMoves || stall) {
+		if (queuedMoves.length >= maxMoves) {
+			queuedMoves.shift();
+		}
+		if (stall) {
+			// FPS too low: don't record new input
 			return queuedMoves[queuedMoves.length - 1];
 		}
 		var move = new Move();
@@ -170,7 +178,11 @@ class MoveManager {
 	public inline function duplicateLastMove() {
 		if (queuedMoves.length == 0)
 			return;
-		queuedMoves.insert(0, queuedMoves[0]);
+		var last = queuedMoves[0];
+		var dup = new NetMove(last.move, last.motionDir, last.timeState.clone(), last.serverTicks, nextMoveId++);
+		if (nextMoveId >= 65535) // 65535 is reserved for null move
+			nextMoveId = 0;
+		queuedMoves.insert(0, dup);
 	}
 
 	public static inline function packMove(m:NetMove, b:OutputBitStream) {
@@ -204,17 +216,11 @@ class MoveManager {
 	}
 
 	public inline function queueMove(m:NetMove) {
-		if (serverLastRecvMove < m.id && serverLastAckMove < m.id) {
+		var lastQueuedId = queuedMoves.length > 0 ? queuedMoves[queuedMoves.length - 1].id : serverLastAckMove;
+		if (m.id > lastQueuedId) {
 			queuedMoves.push(m);
 			serverLastRecvMove = m.id;
 		}
-		// if (queuedMoves.length != 0) {
-		// 	var lastQueuedMove = queuedMoves[queuedMoves.length - 1];
-		// 	if (lastQueuedMove.id < m.id)
-		// 		queuedMoves.push(m);
-		// } else if (lastMove == null || lastMove.id < m.id) {
-		// 	queuedMoves.push(m);
-		// }
 	}
 
 	public function getNextMove() {
@@ -225,40 +231,21 @@ class MoveManager {
 				&& queuedMoves.length < serverTargetMoveListSize
 				&& queuedMoves.length != 0) {
 				serverAvgMoveListSize = Math.max(Std.int(serverAvgMoveListSize + serverMoveListSizeSlack + 0.5), queuedMoves.length);
-				// serverAbnormalMoveCount++;
-				// if (serverAbnormalMoveCount > 3) {
-				// 	serverTargetMoveListSize += 1;
-				// 	if (serverTargetMoveListSize > serverMaxMoveListSize)
-				// 		serverTargetMoveListSize = serverMaxMoveListSize;
-				// }
 				// Send null move
 				return null;
 			}
 			if (queuedMoves.length > serverMaxMoveListSize
 				|| (serverAvgMoveListSize > serverTargetMoveListSize + serverMoveListSizeSlack
 					&& queuedMoves.length > serverTargetMoveListSize)) {
-				// if (queuedMoves.length > serverMaxMoveListSize) {
 				var dropAmt = queuedMoves.length - serverTargetMoveListSize;
 				while (dropAmt-- > 0) {
-					queuedMoves.shift();
+					queuedMoves.pop();
 				}
-				// }
 				serverAvgMoveListSize = serverTargetMoveListSize;
-				// serverAbnormalMoveCount++;
-				// if (serverAbnormalMoveCount > 3) {
-				// 	serverTargetMoveListSize -= 1;
-				// 	if (serverTargetMoveListSize < serverDefaultMinTargetMoveListSize)
-				// 		serverTargetMoveListSize = serverDefaultMinTargetMoveListSize;
-				// } else {
-				// 	serverAbnormalMoveCount = 0;
-				// }
 			}
 		}
 		if (queuedMoves.length == 0) {
-			// if (lastMove != null) {
-			//	lastMove.id++; // So that we force client's move to be overriden by this one
-			// }
-			return lastMove;
+			return null;
 		} else {
 			lastMove = queuedMoves[0];
 			queuedMoves.shift();
@@ -282,17 +269,22 @@ class MoveManager {
 		if (m.id >= nextMoveId) {
 			return queuedMoves[0]; // Input lag
 		}
-		while (m.id != queuedMoves[0].id) {
+		var idx = -1;
+		for (i in 0...queuedMoves.length) {
+			if (queuedMoves[i].id == m.id) {
+				idx = i;
+				break;
+			}
+			if (queuedMoves[i].id > m.id)
+				break; // ids are monotonic, so it's not present
+		}
+		if (idx < 0)
+			return null;
+		while (idx-- > 0)
 			queuedMoves.shift();
-		}
-		var delta = -1;
-		var mv = null;
-		if (m.id == queuedMoves[0].id) {
-			delta = queuedMoves[0].id - lastAckMoveId;
-			mv = queuedMoves.shift();
-			ackRTT = timeState.ticks - mv.timeState.ticks;
-			// maxMoves = ackRTT + 2;
-		}
+		var mv = queuedMoves.shift();
+		ackRTT = timeState.ticks - mv.timeState.ticks;
+		// maxMoves = ackRTT + 2;
 		lastAckMoveId = m.id;
 		return mv;
 	}
