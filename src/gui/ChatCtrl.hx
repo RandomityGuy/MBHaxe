@@ -111,6 +111,10 @@ class ChatCtrl extends GuiControl {
 		this.chatHud.text.text = "";
 	}
 
+	public inline function loseFocus() {
+		this.chatHudInput.text.onFocusLost(null);
+	}
+
 	public inline function isChatFocused() {
 		return chatFocused;
 	}
