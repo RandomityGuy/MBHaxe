@@ -212,7 +212,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 		chatWnd = new ChatCtrl();
 		chatWnd.horizSizing = Left;
-		chatWnd.position = new Vector(330, 58);
+		chatWnd.position = new Vector(330 - subX, 58);
 		chatWnd.extent = new Vector(200, 250);
 		innerCtrl.addChild(chatWnd);
 

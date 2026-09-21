@@ -96,6 +96,9 @@ class MarbleGame {
 						// js.Browser.document.exitPointerLock();
 					}
 				}
+				if (world.finishTime == null && world._ready && @:privateAccess world.playGui.isChatFocused()) {
+					@:privateAccess world.playGui.chatCtrl.loseFocus();
+				}
 			}
 		});
 		// Resize shit
