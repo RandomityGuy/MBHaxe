@@ -213,8 +213,8 @@ class CameraController extends Object {
 
 	public function startCenterCamera() {
 		if (this.marble.velocity.lengthSq() >= 81) {
-			var marbAxis = this.marble.getMarbleAxis();
-			var motionDir = marbAxis[0].multiply(-1);
+			var marbleAxis = this.marble.getMarbleAxis();
+			var motionDir = new Vector(marbleAxis.sideDirX, marbleAxis.sideDirY, marbleAxis.sideDirZ).multiply(-1);
 
 			radsLeftToCenter = Math.atan2(marble.velocity.x, marble.velocity.y) - Math.atan2(motionDir.x, motionDir.y);
 

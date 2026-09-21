@@ -465,7 +465,7 @@ class Collision {
 		return null;
 	}
 
-	public static function capsuleSphereNearestOverlap(a0:Vector, a1:Vector, radA:Float, b:Vector, radB:Float) {
+	public static inline function capsuleSphereNearestOverlap(a0:Vector, a1:Vector, radA:Float, b:Vector, radB:Float) {
 		var V = a1.sub(a0);
 		var A0B = a0.sub(b);
 		var d1 = A0B.dot(V);

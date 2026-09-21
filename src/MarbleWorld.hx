@@ -1214,7 +1214,8 @@ class MarbleWorld extends Scheduler {
 			}
 			var motionDir = @:privateAccess marb.moveMotionDir;
 			if (motionDir == null) {
-				motionDir = marb.getMarbleAxis()[1];
+				var axes = marb.getMarbleAxis();
+				motionDir = new Vector(axes.motionDirX, axes.motionDirY, axes.motionDirZ);
 			}
 
 			var move = new NetMove(innerMove, motionDir, timeState, timeState.ticks, 65535);
