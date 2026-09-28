@@ -1,3 +1,15 @@
+# 1.3.1
+This update brings the following improvements and bugfixes:
+- Improved the movement smoothing of marbles in multiplayer.
+- Implemented PowerUp pickup sounds when other players collect them in multiplayer.
+- Minor performance improvements.
+- Increased Chat message text duration.
+- Fixed a critical performance issue when any one of the players are spectating.
+- Fixed glass being rotated incorrectly in some custom levels.
+- Fixed Chat and Competitive Mode timer being positioned incorrectly at some resolutions.
+- Fixed various issues with chat focus.
+- Fixed not being able to rewind properly during gravity changes.
+
 # 1.3.0
 This update fixes a ton of bugs and adds more gameplay to Multiplayer!
 - New multiplayer game modes: Competitive Gem Hunt and King.
