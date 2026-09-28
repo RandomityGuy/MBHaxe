@@ -501,6 +501,9 @@ jobs:
           name: Install build dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
+            # Bullseye (Debian 11) reached EOL June 2024; redirect security repo to archive
+            sed -i 's|deb.debian.org/debian-security|archive.debian.org/debian-security|g' \
+              /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
             apt-get update
             apt remove -y libsdl2-compat-shim libsdl2-compat-shim:i386
             apt-get install -y --no-install-recommends \
