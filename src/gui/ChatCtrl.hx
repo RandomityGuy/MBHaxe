@@ -123,7 +123,7 @@ class ChatCtrl extends GuiControl {
 		var realText = StringTools.htmlUnescape(text);
 		this.chats.push({
 			text: realText,
-			age: 10.0
+			age: 20.0
 		});
 		if (this.chats.length > 10) {
 			this.chats = this.chats.slice(this.chats.length - 10);
