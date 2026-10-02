@@ -64,25 +64,61 @@ class PathedInterior extends InteriorObject {
 
 	var soundChannel:Channel;
 
-	public static function createFromSimGroup(simGroup:MissionElementSimGroup, level:MarbleWorld, onFinish:PathedInterior->Void) {
-		var interiorElement:MissionElementPathedInterior = cast simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior)[0];
-		var difFile = level.mission.getDifPath(interiorElement.interiorresource);
-		if (difFile == null)
-			onFinish(null);
-		var pathedInterior = new PathedInterior();
-		pathedInterior.level = level;
-		pathedInterior.collisionWorld = level.collisionWorld;
+	public static function createFromSimGroup(simGroup:MissionElementSimGroup, level:MarbleWorld, onFinish:Array<PathedInterior>->Void) {
+		var interiorElements:Array<MissionElementPathedInterior> = cast simGroup.elements.filter((element) -> element._type == MissionElementType.PathedInterior);
+		if (interiorElements.length == 0) {
+			onFinish([]);
+			return;
+		}
 
-		DifBuilder.loadDif(difFile, pathedInterior, () -> {
-			pathedInterior.identifier = difFile + interiorElement.interiorindex;
+		var createdInteriors:Array<PathedInterior> = [];
+		var total = interiorElements.length;
+		var completed = 0;
 
-			pathedInterior.simGroup = simGroup;
-			pathedInterior.element = interiorElement;
-			level.interiors.push(pathedInterior);
-			pathedInterior.init(level, () -> {
-				onFinish(pathedInterior);
-			});
-		}, cast MisParser.parseNumber(interiorElement.interiorindex));
+		var triggers = simGroup.elements.filter((element) -> element._type == MissionElementType.Trigger);
+		var mustChangeTriggers:Array<MustChangeTrigger> = [];
+		for (triggerElement in triggers) {
+			var te:MissionElementTrigger = cast triggerElement;
+			if (te.targettime == null)
+				continue; // Not a pathed interior trigger
+			var trigger = new MustChangeTrigger(te, level);
+			mustChangeTriggers.push(trigger);
+			level.triggers.push(trigger);
+			level.collisionWorld.addEntity(trigger.collider);
+		}
+
+		for (interiorElement in interiorElements) {
+			var difFile = level.mission.getDifPath(interiorElement.interiorresource);
+			if (difFile == null) {
+				completed++;
+				if (completed == total) {
+					onFinish(createdInteriors);
+				}
+				continue;
+			}
+			var pathedInterior = new PathedInterior();
+			pathedInterior.level = level;
+			pathedInterior.collisionWorld = level.collisionWorld;
+
+			DifBuilder.loadDif(difFile, pathedInterior, () -> {
+				pathedInterior.identifier = difFile + interiorElement.interiorindex;
+
+				pathedInterior.simGroup = simGroup;
+				pathedInterior.element = interiorElement;
+				for (mct in mustChangeTriggers) {
+					mct.addInterior(pathedInterior);
+					pathedInterior.triggers.push(mct);
+				}
+				level.interiors.push(pathedInterior);
+				pathedInterior.init(level, () -> {
+					createdInteriors.push(pathedInterior);
+					completed++;
+					if (completed == total) {
+						onFinish(createdInteriors);
+					}
+				});
+			}, cast MisParser.parseNumber(interiorElement.interiorindex));
+		}
 	}
 
 	public function new() {
@@ -113,34 +149,38 @@ class PathedInterior extends InteriorObject {
 
 		this.path = cast this.simGroup.elements.filter((element) -> element._type == MissionElementType.Path)[0];
 
-		this.markerData = this.path.markers.map(x -> {
-			var marker = new PathedInteriorMarker();
-			marker.msToNext = MisParser.parseNumber(x.mstonext) / 1000;
-			marker.smoothingType = switch (x.smoothingtype) {
-				case "Accelerate":
-					PathedInteriorMarker.SMOOTHING_ACCELERATE;
-				case "Spline":
-					PathedInteriorMarker.SMOOTHING_SPLINE;
-				default:
-					PathedInteriorMarker.SMOOTHING_LINEAR;
-			};
-			marker.position = MisParser.parseVector3(x.position);
-			marker.position.x = -marker.position.x;
-			marker.rotation = MisParser.parseRotation(x.rotation);
-			marker.rotation.x = -marker.rotation.x;
-			marker.rotation.w = -marker.rotation.w;
-			return marker;
-		});
+		if (this.path != null) {
+			this.markerData = this.path.markers.map(x -> {
+				var marker = new PathedInteriorMarker();
+				marker.msToNext = MisParser.parseNumber(x.mstonext) / 1000;
+				marker.smoothingType = switch (x.smoothingtype) {
+					case "Accelerate":
+						PathedInteriorMarker.SMOOTHING_ACCELERATE;
+					case "Spline":
+						PathedInteriorMarker.SMOOTHING_SPLINE;
+					default:
+						PathedInteriorMarker.SMOOTHING_LINEAR;
+				};
+				marker.position = MisParser.parseVector3(x.position);
+				marker.position.x = -marker.position.x;
+				marker.rotation = MisParser.parseRotation(x.rotation);
+				marker.rotation.x = -marker.rotation.x;
+				marker.rotation.w = -marker.rotation.w;
+				return marker;
+			});
 
-		this.computeDuration();
+			this.computeDuration();
+		}
 
-		var triggers = this.simGroup.elements.filter((element) -> element._type == MissionElementType.Trigger);
-		for (triggerElement in triggers) {
-			var te:MissionElementTrigger = cast triggerElement;
-			if (te.targettime == null)
-				continue; // Not a pathed interior trigger
-			var trigger = new MustChangeTrigger(te, cast this);
-			this.triggers.push(trigger);
+		if (this.triggers.length == 0) {
+			var triggers = this.simGroup.elements.filter((element) -> element._type == MissionElementType.Trigger);
+			for (triggerElement in triggers) {
+				var te:MissionElementTrigger = cast triggerElement;
+				if (te.targettime == null)
+					continue; // Not a pathed interior trigger
+				var trigger = new MustChangeTrigger(te, cast this);
+				this.triggers.push(trigger);
+			}
 		}
 
 		if (this.element.datablock.toLowerCase() == "pathedmovingblock") {
