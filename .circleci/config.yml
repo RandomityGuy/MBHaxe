@@ -282,7 +282,7 @@ jobs:
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} -lsdl2 -lhl -luv
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} -lsdl2 -lhl -luv -framework OpenGL
 
       - run:
           name: Package app bundle
