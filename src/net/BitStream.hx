@@ -38,6 +38,18 @@ class InputBitStream {
 	}
 
 	public function readInt(bits:Int = 32) {
+		if (this.shift == 0) {
+			var value = 0;
+			var s = 0;
+			while (bits >= 8) {
+				value |= data.get(position++) << s;
+				s += 8;
+				bits -= 8;
+			}
+			if (bits > 0)
+				value |= readBits(bits) << s;
+			return value;
+		}
 		var value = 0;
 		var shift = 0;
 		while (bits > 0) {
@@ -48,27 +60,27 @@ class InputBitStream {
 		return value;
 	}
 
-	public function readFlag() {
+	public inline function readFlag() {
 		return readInt(1) != 0;
 	}
 
-	public function readByte() {
+	public inline function readByte() {
 		return readInt(8);
 	}
 
-	public function readUInt16() {
+	public inline function readUInt16() {
 		return readInt(16);
 	}
 
-	public function readInt32() {
+	public inline function readInt32() {
 		return readInt(32);
 	}
 
-	public function readFloat() {
+	public inline function readFloat() {
 		return FPHelper.i32ToFloat(readInt32());
 	}
 
-	public function readString() {
+	public inline function readString() {
 		var length = readUInt16();
 		var str = "";
 		for (i in 0...length) {
@@ -113,6 +125,16 @@ class OutputBitStream {
 	}
 
 	public function writeInt(value:Int, bits:Int = 32) {
+		if (this.shift == 0) {
+			while (bits >= 8) {
+				data.writeByte(value & 0xFF);
+				value >>= 8;
+				bits -= 8;
+			}
+			if (bits > 0)
+				writeBits(value & 0xFF, bits);
+			return;
+		}
 		while (bits > 0) {
 			this.writeBits(value & 0xFF, bits < 8 ? bits : 8);
 			value >>= 8;
@@ -120,32 +142,32 @@ class OutputBitStream {
 		}
 	}
 
-	public function writeFlag(value:Bool) {
+	public inline function writeFlag(value:Bool) {
 		writeInt(value ? 1 : 0, 1);
 	}
 
-	public function writeByte(value:Int) {
+	public inline function writeByte(value:Int) {
 		writeInt(value, 8);
 	}
 
-	public function writeUInt16(value:Int) {
+	public inline function writeUInt16(value:Int) {
 		writeInt(value, 16);
 	}
 
-	public function writeInt32(value:Int) {
+	public inline function writeInt32(value:Int) {
 		writeInt(value, 32);
 	}
 
-	public function getBytes() {
+	public inline function getBytes() {
 		this.data.writeByte(this.lastByte);
 		return this.data.getBytes();
 	}
 
-	public function writeFloat(value:Float) {
+	public inline function writeFloat(value:Float) {
 		writeInt(FPHelper.floatToI32(value), 32);
 	}
 
-	public function writeString(value:String) {
+	public inline function writeString(value:String) {
 		writeUInt16(value.length);
 		for (i in 0...value.length) {
 			writeByte(StringTools.fastCodeAt(value, i));

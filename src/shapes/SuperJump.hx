@@ -1,5 +1,8 @@
 package shapes;
 
+import net.NetPacket.SoundFXIndex;
+import net.NetCommands;
+import net.Net;
 import src.Marble;
 import src.ResourceLoader;
 import mis.MissionElement.MissionElementItem;
@@ -13,11 +16,16 @@ import src.MarbleWorld;
 
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ejectionPeriod: 10,
+	phiReferenceVel: 0.0,
+	phiVariance: 360.0,
 	ambientVelocity: new Vector(0, 0, 0),
 	ejectionVelocity: 1,
 	velocityVariance: 0.25,
 	emitterLifetime: 1000,
 	inheritedVelFactor: 0.1,
+	thetaMin: 150,
+	thetaMax: 170,
+	ejectionOffset: 0,
 	particleOptions: {
 		texture: 'particles/twirl.png',
 		blending: Add,
@@ -26,8 +34,10 @@ final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 		spinRandomMax: 90,
 		lifetime: 1000,
 		lifetimeVariance: 150,
+		windCoefficient: 0.0,
 		dragCoefficient: 0.25,
-		acceleration: 0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
 		colors: [
 			new Vector(0.38, 0.38, 0.38, 0),
 			new Vector(0.34, 0.34, 0.34, 1),
@@ -78,6 +88,8 @@ class SuperJump extends PowerUp {
 		// if (!this.level.rewinding)
 		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/use_superjump.wav", ResourceLoader.getAudio, this.soundResources));
+		if (Net.isHost)
+			NetCommands.playSound(SoundFXIndex.UseSuperJump, marble.x, marble.y, marble.z);
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp(marble);
 	}

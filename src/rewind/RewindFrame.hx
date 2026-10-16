@@ -47,7 +47,6 @@ class RewindFrame {
 	var marbleNextPosition:Vector;
 	var marblePhysicsAccmulator:Float;
 	var marbleOrientation:Quat;
-	var marblePrevOrientation:Quat;
 	var marbleVelocity:Vector;
 	var marbleAngularVelocity:Vector;
 	var marblePowerup:PowerUp;
@@ -87,7 +86,6 @@ class RewindFrame {
 		c.marbleNextPosition = marbleNextPosition.clone();
 		c.marblePhysicsAccmulator = marblePhysicsAccmulator;
 		c.marbleOrientation = marbleOrientation.clone();
-		c.marblePrevOrientation = marblePrevOrientation.clone();
 		c.marbleVelocity = marbleVelocity.clone();
 		c.marbleAngularVelocity = marbleAngularVelocity.clone();
 		c.marblePowerup = marblePowerup;
@@ -134,7 +132,6 @@ class RewindFrame {
 		framesize += 24; // marbleNextPosition
 		framesize += 8; // marblePhysicsAccumulator
 		framesize += 32; // marbleOrientation
-		framesize += 32; // marblePrevOrientation
 		framesize += 24; // marbleVelocity
 		framesize += 24; // marbleAngularVelocity
 		framesize += 2; // marblePowerup
@@ -216,10 +213,6 @@ class RewindFrame {
 		bb.writeDouble(marbleOrientation.y);
 		bb.writeDouble(marbleOrientation.z);
 		bb.writeDouble(marbleOrientation.w);
-		bb.writeDouble(marblePrevOrientation.x);
-		bb.writeDouble(marblePrevOrientation.y);
-		bb.writeDouble(marblePrevOrientation.z);
-		bb.writeDouble(marblePrevOrientation.w);
 		bb.writeDouble(marbleVelocity.x);
 		bb.writeDouble(marbleVelocity.y);
 		bb.writeDouble(marbleVelocity.z);
@@ -309,7 +302,6 @@ class RewindFrame {
 		marbleColliderTransform = new Matrix();
 		marblePrevPosition = new Vector();
 		marbleNextPosition = new Vector();
-		marblePrevOrientation = new Quat();
 		marbleOrientation = new Quat();
 		marbleVelocity = new Vector();
 		marbleAngularVelocity = new Vector();
@@ -348,10 +340,6 @@ class RewindFrame {
 		marbleOrientation.y = br.readDouble();
 		marbleOrientation.z = br.readDouble();
 		marbleOrientation.w = br.readDouble();
-		marblePrevOrientation.x = br.readDouble();
-		marblePrevOrientation.y = br.readDouble();
-		marblePrevOrientation.z = br.readDouble();
-		marblePrevOrientation.w = br.readDouble();
 		marbleVelocity.x = br.readDouble();
 		marbleVelocity.y = br.readDouble();
 		marbleVelocity.z = br.readDouble();

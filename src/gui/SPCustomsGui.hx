@@ -19,6 +19,8 @@ class SPCustomsGui extends GuiImage {
 	var innerCtrl:GuiControl;
 	var serverWnd:GuiImage;
 
+	static var currentScrollPosition:Float = 0;
+
 	public function new() {
 		var res = ResourceLoader.getImage("data/ui/xbox/BG_fadeOutSoftEdge.png").resource.toTile();
 		super(res);
@@ -81,6 +83,7 @@ class SPCustomsGui extends GuiImage {
 		customList.scrollable = true;
 		customListScroll.addChild(customList);
 		customListScroll.setScrollMax(customList.calculateFullHeight());
+		customListScroll.setScrollPercentage(currentScrollPosition);
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
@@ -218,6 +221,7 @@ class SPCustomsGui extends GuiImage {
 		customList.onSelectedFunc = (idx) -> {
 			setLevel(idx);
 			levelSelectOpts.setCurrentOption(idx);
+			currentScrollPosition = customListScroll.getScrollPercentage();
 		}
 	}
 

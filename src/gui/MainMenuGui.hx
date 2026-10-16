@@ -228,6 +228,16 @@ class MainMenuGui extends GuiImage {
 		}
 		this.addChild(mbp);
 
+		var pq = new GuiButton(loadStaticButtonImages("data/ui/icon_pq"));
+		pq.horizSizing = Right;
+		pq.vertSizing = Top;
+		pq.position = new Vector(152, 380);
+		pq.extent = new Vector(76, 76);
+		pq.pressedAction = (sender) -> {
+			js.Browser.window.open("https://platinumquest.randomityguy.me");
+		}
+		this.addChild(pq);
+
 		var discord = new GuiButton(loadStaticButtonImages("data/ui/discord"));
 		discord.horizSizing = Right;
 		discord.vertSizing = Top;

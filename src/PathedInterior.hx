@@ -40,6 +40,9 @@ class PathedInterior extends InteriorObject {
 	public var currentTime:Float;
 	public var targetTime:Float;
 
+	var initialPosition:Float;
+	var initialTargetPosition:Float;
+
 	var basePosition:Vector;
 	var baseOrientation:Quat;
 	var baseScale:Vector;
@@ -53,6 +56,13 @@ class PathedInterior extends InteriorObject {
 
 	var stopped:Bool = false;
 	var stoppedPosition:Vector;
+
+	var savedPosition:Vector;
+	var savedVelocity:Vector;
+	var savedStopped:Bool;
+	var savedStoppedPosition:Vector;
+	var savedInvPosition:Vector;
+	var savedTime:Float;
 
 	var soundChannel:Channel;
 
@@ -139,27 +149,12 @@ class PathedInterior extends InteriorObject {
 		onFinish();
 	}
 
-	public function pushTickState() {
-		this._storedColliderTransform = this.collider.transform.clone();
-		var tform = this.getAbsPos();
-		if (this.isCollideable) {
-			collider.setTransform(tform);
-			collisionWorld.updateTransform(this.collider);
-		}
-	}
-
-	public function popTickState() {
-		if (this.isCollideable) {
-			collider.setTransform(this._storedColliderTransform);
-			collisionWorld.updateTransform(this.collider);
-		}
-	}
-
 	public function computeNextPathStep(timeDelta:Float) {
 		stopped = false;
 		prevPosition = this.position.clone();
 		if (currentTime == targetTime) {
 			velocity.set(0, 0, 0);
+			this.collider.velocity.set(0, 0, 0);
 		} else {
 			var delta = 0.0;
 			if (targetTime < 0) {
@@ -186,8 +181,23 @@ class PathedInterior extends InteriorObject {
 
 			var displaceDelta = tForm.getPosition().sub(curTform);
 			velocity.set(displaceDelta.x / timeDelta, displaceDelta.y / timeDelta, displaceDelta.z / timeDelta);
-			this.collider.velocity = velocity.clone();
+			this.collider.velocity.load(velocity);
 		}
+	}
+
+	public function rollbackToTick(tick:Int) {
+		// this.reset();
+		// Reset
+		this.currentTime = initialPosition;
+		this.targetTime = initialTargetPosition;
+		if (this.targetTime < 0) {
+			var direction = (this.targetTime == -1) ? 1 : (this.targetTime == -2) ? -1 : 0;
+			this.currentTime = Util.adjustedMod(this.currentTime + (tick * 0.032) * direction, duration);
+		} else {
+			this.currentTime = Util.clamp(this.currentTime + (tick * 0.032), 0, duration);
+		}
+		this.computeNextPathStep(0.032);
+		this.advance(0.032);
 	}
 
 	public function advance(timeDelta:Float) {
@@ -195,9 +205,10 @@ class PathedInterior extends InteriorObject {
 			return;
 		if (this.velocity.length() == 0)
 			return;
+		static var tform = new Matrix();
 		velocity.w = 0;
 		var newp = position.add(velocity.multiply(timeDelta));
-		var tform = this.getAbsPos().clone();
+		tform.load(this.getAbsPos()); // .clone();
 		tform.setPosition(newp);
 		// this.setPosition(newp.x, newp.y, newp.z);
 		if (this.isCollideable) {
@@ -205,7 +216,7 @@ class PathedInterior extends InteriorObject {
 			collisionWorld.updateTransform(this.collider);
 		}
 		// this.setTransform(this.getTransform());
-		this.position = newp;
+		this.position.load(newp);
 
 		if (this.soundChannel != null) {
 			var spat = this.soundChannel.getEffect(Spatialization);
@@ -229,6 +240,36 @@ class PathedInterior extends InteriorObject {
 		// 	this.stopTime = currentTime;
 		this.stopped = stopped;
 		this.stoppedPosition = this.position.clone();
+	}
+
+	public function pushTickState() {
+		savedPosition = this.position.clone();
+		savedInvPosition = @:privateAccess this.collider.invTransform.getPosition();
+		savedVelocity = this.velocity.clone();
+		savedStopped = this.stopped;
+		savedStoppedPosition = this.stoppedPosition != null ? this.stoppedPosition.clone() : null;
+		savedTime = this.currentTime;
+	}
+
+	public function popTickState() {
+		this.position.load(savedPosition);
+		this.velocity.load(savedVelocity);
+		this.stopped = savedStopped;
+		this.stoppedPosition = savedStoppedPosition;
+		var oldtPos = this.collider.transform.getPosition();
+		this.collider.transform.setPosition(savedPosition);
+		@:privateAccess this.collider.invTransform.setPosition(savedInvPosition);
+
+		this.collider.boundingBox.xMin += savedPosition.x - oldtPos.x;
+		this.collider.boundingBox.xMax += savedPosition.x - oldtPos.x;
+		this.collider.boundingBox.yMin += savedPosition.y - oldtPos.y;
+		this.collider.boundingBox.yMax += savedPosition.y - oldtPos.y;
+		this.collider.boundingBox.zMin += savedPosition.z - oldtPos.z;
+		this.collider.boundingBox.zMax += savedPosition.z - oldtPos.z;
+
+		collisionWorld.updateTransform(this.collider);
+
+		this.currentTime = savedTime;
 	}
 
 	function computeDuration() {
@@ -333,9 +374,12 @@ class PathedInterior extends InteriorObject {
 	override function reset() {
 		this.currentTime = 0;
 		this.targetTime = 0;
+		this.initialPosition = 0;
+		this.initialTargetPosition = 0;
 
 		if (this.element.initialposition != "") {
 			this.currentTime = MisParser.parseNumber(this.element.initialposition) / 1000;
+			initialPosition = this.currentTime;
 		}
 
 		if (this.element.initialtargetposition != "") {
@@ -345,6 +389,7 @@ class PathedInterior extends InteriorObject {
 			// Alright this is strange. In Torque, there are some FPS-dependent client/server desync issues that cause the interior to start at the end position whenever the initialTargetPosition is somewhere greater than 1 and, like, approximately below 50.
 			if (this.targetTime > 0 && this.targetTime < 0.05)
 				this.currentTime = this.duration;
+			initialTargetPosition = this.targetTime;
 		}
 
 		this.stopped = false;

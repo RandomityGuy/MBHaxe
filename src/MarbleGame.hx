@@ -43,7 +43,7 @@ class MarbleGame {
 	static var canvas:Canvas;
 	static var instance:MarbleGame;
 
-	static var currentVersion = "1.2.5";
+	static var currentVersion = "1.3.1";
 
 	var world:MarbleWorld;
 	var previewWorld:PreviewWorld;
@@ -95,6 +95,9 @@ class MarbleGame {
 						jsCanvas.focus();
 						// js.Browser.document.exitPointerLock();
 					}
+				}
+				if (world.finishTime == null && world._ready && @:privateAccess world.playGui.isChatFocused()) {
+					@:privateAccess world.playGui.chatCtrl.loseFocus();
 				}
 			}
 		});

@@ -21,4 +21,13 @@ class TimeState {
 		n.subframe = subframe;
 		return n;
 	}
+
+	public inline function load(o:TimeState) {
+		this.timeSinceLoad = o.timeSinceLoad;
+		this.currentAttemptTime = o.currentAttemptTime;
+		this.gameplayClock = o.gameplayClock;
+		this.dt = o.dt;
+		this.ticks = o.ticks;
+		this.subframe = o.subframe;
+	}
 }

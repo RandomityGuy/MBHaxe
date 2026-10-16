@@ -94,7 +94,7 @@ class StartPad extends DtsObject {
 			var diffuseTex = ResourceLoader.getTexture("data/shapes/pads/ringtex.png").resource;
 			diffuseTex.wrap = Repeat;
 			diffuseTex.mipMap = Nearest;
-			var shader = new shaders.DefaultNormalMaterial(diffuseTex, 14, new h3d.Vector(0.3, 0.3, 0.3, 7), 1);
+			var shader = new shaders.DefaultNormalMaterial(diffuseTex, 14, new h3d.Vector(0.3, 0.3, 0.3, 0.7), 1);
 			shader.doGammaRamp = false;
 			var dtsshader = material.mainPass.getShader(shaders.DtsTexture);
 			if (dtsshader != null)
@@ -116,7 +116,7 @@ class StartPad extends DtsObject {
 			material.props = thisprops;
 			material.shadows = false;
 			material.receiveShadows = true;
-			var rotshader = new shaders.UVRotAnim(0.5, 0.5, 1);
+			var rotshader = new shaders.UVRotAnim(0.5, 0.5, -1.0);
 			material.mainPass.addShader(rotshader);
 		}
 
@@ -130,7 +130,7 @@ class StartPad extends DtsObject {
 			material.mainPass.setPassName("glowPre");
 			material.mainPass.enableLights = false;
 
-			var rotshader = new shaders.UVRotAnim(0.5, 0.5, 1);
+			var rotshader = new shaders.UVRotAnim(0.5, 0.5, -1.0);
 			material.mainPass.addShader(rotshader);
 
 			var thisprops:Dynamic = material.getDefaultProps();

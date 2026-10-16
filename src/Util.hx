@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Quat;
 import haxe.io.BytesBuffer;
 import haxe.io.Bytes;
 import h3d.Matrix;
@@ -11,9 +12,30 @@ import h3d.Vector;
 import src.Settings;
 
 class Util {
+	public static inline function transformVecByQuat(v:Vector, q:Quat) {
+		var t = new Vector(q.x, q.y, q.z).cross(v).multiply(2.0);
+		return v.add(t.multiply(q.w)).add(new Vector(q.x, q.y, q.z).cross(t));
+	}
+
 	public static inline function mat3x3equal(a:Matrix, b:Matrix) {
 		return a._11 == b._11 && a._12 == b._12 && a._13 == b._13 && a._21 == b._21 && a._22 == b._22 && a._23 == b._23 && a._31 == b._31 && a._32 == b._32
 			&& a._33 == b._33;
+	}
+
+	public static inline function transformTranspose(v:Vector, m:Matrix) {
+		var px = v.x * m._11 + v.y * m._12 + v.z * m._13 + v.w * m._14;
+		var py = v.x * m._21 + v.y * m._22 + v.z * m._23 + v.w * m._24;
+		var pz = v.x * m._31 + v.y * m._32 + v.z * m._33 + v.w * m._34;
+		var pw = v.x * m._41 + v.y * m._42 + v.z * m._43 + v.w * m._44;
+		v.set(px, py, pz, pw);
+	}
+
+	public static inline function transformTranspose3x3(v:Vector, m:Matrix) {
+		var px = v.x * m._11 + v.y * m._12 + v.z * m._13;
+		var py = v.x * m._21 + v.y * m._22 + v.z * m._23;
+		var pz = v.x * m._31 + v.y * m._32 + v.z * m._33;
+		v.set(px, py, pz, v.w);
+		return v;
 	}
 
 	public static inline function adjustedMod(a:Float, n:Float) {
@@ -311,6 +333,8 @@ class Util {
 	}
 
 	public static function formatTime(time:Float) {
+		if (time == Math.POSITIVE_INFINITY)
+			return "None";
 		var et = time * 1000;
 		var thousandth = Std.int(et % 10);
 		var hundredth = Std.int((et % 1000) / 10);
@@ -553,6 +577,8 @@ class Util {
 		#if hl
 		#if MACOS_BUNDLE
 		return "MacOS";
+		#elseif linux
+		return "Linux";
 		#else
 		return "Windows";
 		#end

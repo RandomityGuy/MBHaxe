@@ -1,9 +1,14 @@
 package net;
 
+import hxd.snd.effect.Spatialization;
+import h3d.Vector;
+import net.NetPacket.SoundFXIndex;
+import src.AudioManager;
 import gui.MultiplayerGui;
 import net.ClientConnection.NetPlatform;
 import gui.EndGameGui;
 import modes.HuntMode;
+import modes.KingMode;
 import net.ClientConnection.GameplayState;
 import net.Net.NetPacketType;
 import gui.MultiplayerLevelSelectGui;
@@ -12,6 +17,7 @@ import gui.MultiplayerLoadingGui;
 import src.MissionList;
 import src.Console;
 import src.MPCustoms;
+import src.ResourceLoader;
 
 @:build(net.RPCMacro.build())
 class NetCommands {
@@ -69,6 +75,7 @@ class NetCommands {
 
 	@:rpc(server) public static function enterLobby() {
 		if (Net.isClient) {
+			Net.clientConnection.state = LOBBY;
 			MarbleGame.canvas.setContent(new MultiplayerLevelSelectGui(false));
 		}
 	}
@@ -91,7 +98,7 @@ class NetCommands {
 				Net.lobbyHostReady = !Net.lobbyHostReady;
 			else
 				Net.clientIdMap[clientId].toggleLobbyReady();
-			var allReady = true;
+			var allReady = Net.pendingConnections.length == 0;
 			for (id => client in Net.clientIdMap) {
 				if (!client.lobbyReady) {
 					allReady = false;
@@ -111,6 +118,23 @@ class NetCommands {
 					NetCommands.playCustomLevel(MultiplayerLevelSelectGui.custPath);
 				} else
 					NetCommands.playLevel(MultiplayerLevelSelectGui.currentSelectionStatic);
+			}
+		}
+	}
+
+	@:rpc(client) public static function setSpectate(clientId:Int, spectate:Bool) {
+		if (Net.isHost) {
+			if (clientId == 0)
+				Net.hostSpectate = spectate;
+			else
+				Net.clientIdMap[clientId].setSpectate(spectate);
+
+			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+			}
+			var b = Net.sendPlayerInfosBytes();
+			for (cc in Net.clients) {
+				cc.sendBytes(b);
 			}
 		}
 	}
@@ -148,6 +172,7 @@ class NetCommands {
 					for (packet in packets) {
 						c.sendBytes(packet);
 					}
+					MarbleGame.instance.world.gameMode.transmitAnyNetCommands(c); // send to client
 					Net.clientIdMap[clientId].ready();
 
 					if (MarbleGame.instance.world.serverStartTicks == 0) {
@@ -203,12 +228,25 @@ class NetCommands {
 			if (MarbleGame.instance.paused) {
 				MarbleGame.instance.handlePauseGame(); // Unpause
 			}
-			var huntMode:HuntMode = cast MarbleGame.instance.world.gameMode;
-			huntMode.onTimeExpire();
+			MarbleGame.instance.world.gameMode.onTimeExpire();
 		}
 		if (Net.isHost) {
 			Net.serverInfo.state = "WAITING";
 			MasterServerClient.instance.sendServerInfo(Net.serverInfo); // notify the server of the playing state
+		}
+	}
+
+	@:rpc(server) public static function setLobbyGameMode(mode:String) {
+		Net.selectedGameMode = mode;
+	}
+
+	@:rpc(server) public static function setKingMarble(newKingId:Int, oldKingId:Int) {
+		if (Net.isClient && MarbleGame.instance.world != null) {
+			var world = MarbleGame.instance.world;
+			if (world.gameMode is KingMode) {
+				var kingMode:KingMode = cast world.gameMode;
+				kingMode.onKingChanged(newKingId, oldKingId);
+			}
 		}
 	}
 
@@ -343,6 +381,42 @@ class NetCommands {
 			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).addChatMessage(msg);
 			}
+		}
+	}
+
+	@:rpc(server) public static function setCompetitiveTimerStartTicks(ticks:Int) {
+		if (MarbleGame.instance.world != null) {
+			var huntMode = cast(MarbleGame.instance.world.gameMode, HuntMode);
+			huntMode.setCompetitiveTimerStartTicks(ticks);
+		}
+	}
+
+	@:rpc(server) public static function playSound(audioIndex:Int, x:Float, y:Float, z:Float) {
+		if (Net.isClient) {
+			var ch = switch (audioIndex) {
+				case SoundFXIndex.UseSuperJump:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_superjump.wav").resource);
+				case SoundFXIndex.UseSuperSpeed:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_speed.wav").resource);
+				case SoundFXIndex.UseMega:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_mega.wav").resource);
+				case SoundFXIndex.UseBlast:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/use_blast.wav").resource);
+				case _:
+					null;
+			}
+
+			var audioSrc = new Spatialization();
+			audioSrc.position = new Vector(x, y, z);
+			#if hl
+			audioSrc.referenceDistance = 10.0;
+			#end
+			#if js
+			audioSrc.referenceDistance = 9.5;
+			#end
+			audioSrc.maxDistance = 100.0;
+
+			ch.addEffect(audioSrc);
 		}
 	}
 }

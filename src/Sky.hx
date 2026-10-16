@@ -178,6 +178,10 @@ class Sky extends Object {
 
 						cubemaptexture = new Texture(maxheight, maxwidth, [Cube]);
 						for (i in 0...6) {
+							// try resize
+							if (skyboxImages[skyboxIndices[i]].width != maxwidth || skyboxImages[skyboxIndices[i]].height != maxheight) {
+								skyboxImages[skyboxIndices[i]].resize(maxwidth, maxheight);
+							}
 							cubemaptexture.uploadPixels(skyboxImages[skyboxIndices[i]], 0, i);
 						}
 						cubemapTextureCache.set(dmlPath, cubemaptexture);

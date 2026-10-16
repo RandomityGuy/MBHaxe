@@ -173,6 +173,18 @@ class HuntMode extends NullMode {
 
 	var points:Int = 0;
 
+	public var competitive = false;
+
+	var gemsCentroid:Vector;
+	var idealSpawnIndex:Int;
+	var expiredGems:Map<Gem, Bool> = [];
+	var competitiveTimerStartTicks:Int;
+
+	public function new(level:src.MarbleWorld, competitive:Bool) {
+		super(level);
+		this.competitive = competitive;
+	}
+
 	override function missionScan(mission:Mission) {
 		function scanMission(simGroup:MissionElementSimGroup) {
 			for (element in simGroup.elements) {
@@ -200,11 +212,37 @@ class HuntMode extends NullMode {
 	};
 
 	override function getSpawnTransform() {
-		var idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
-		while (spawnPointTaken[idx]) {
-			idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+		if (competitive && gemsCentroid == null) {
+			this.gemsCentroid = new Vector();
+			for (gem in this.level.gems) {
+				gemsCentroid.load(gemsCentroid.add(gem.getAbsPos().getPosition()));
+			}
+			if (gemSpawnPoints.length > 0)
+				gemsCentroid.load(gemsCentroid.multiply(1.0 / gemSpawnPoints.length));
+
+			var closestSpawnIndex = 0;
+			var closestSpawnDistance = 1e8;
+			for (i in 0...playerSpawnPoints.length) {
+				var spawn = playerSpawnPoints[i];
+				var spawnPos = MisParser.parseVector3(spawn.position);
+				spawnPos.x *= -1;
+				if (spawnPos.distance(gemsCentroid) < closestSpawnDistance) {
+					closestSpawnDistance = spawnPos.distance(gemsCentroid);
+					closestSpawnIndex = i;
+				}
+			}
+			idealSpawnIndex = closestSpawnIndex;
 		}
-		spawnPointTaken[idx] = true;
+
+		var idx = (Net.isMP && competitive) ? idealSpawnIndex : Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+
+		if (!competitive) {
+			while (spawnPointTaken[idx]) {
+				idx = Math.floor(rng2.randRange(0, playerSpawnPoints.length - 1));
+			}
+
+			spawnPointTaken[idx] = true;
+		}
 		var randomSpawn = playerSpawnPoints[idx];
 		var spawnPos = MisParser.parseVector3(randomSpawn.position);
 		spawnPos.x *= -1;
@@ -282,6 +320,28 @@ class HuntMode extends NullMode {
 		return level.mission.qualifyTime;
 	}
 
+	override function update(t:src.TimeState) {
+		if (this.level.isMultiplayer && competitive) {
+			if (competitiveTimerStartTicks != 0) {
+				var currentTime = Net.isHost ? t.ticks : @:privateAccess level.marble.serverTicks;
+				var endTime = competitiveTimerStartTicks + (20000 >> 5);
+				@:privateAccess level.playGui.formatCountdownTimer(Math.max(0, (endTime - currentTime) * 0.032));
+				if (Net.isHost && endTime < currentTime) {
+					spawnNextGemCluster();
+					NetCommands.setCompetitiveTimerStartTicks(0);
+				}
+			} else {
+				@:privateAccess level.playGui.formatCountdownTimer(0);
+			}
+		}
+	}
+
+	public override function transmitAnyNetCommands(client:net.ClientConnection.GameConnection) {
+		if (competitive) {
+			NetCommands.setCompetitiveTimerStartTicksClient(client, competitiveTimerStartTicks);
+		}
+	}
+
 	override public function timeMultiplier() {
 		return -1;
 	}
@@ -297,6 +357,7 @@ class HuntMode extends NullMode {
 			setupGems();
 		}
 		points = 0;
+		competitiveTimerStartTicks = 0;
 		@:privateAccess level.playGui.formatGemHuntCounter(points);
 
 		if (!Net.isMP) {
@@ -314,6 +375,15 @@ class HuntMode extends NullMode {
 				gemSpawn.gemBeam.setHide(true);
 			}
 		}
+		competitiveTimerStartTicks = 0;
+	}
+
+	function spawnNextGemCluster() {
+		// Expire all existing
+		for (g in activeGems) {
+			expiredGems.set(g, true);
+		}
+		refillGemGroups(true);
 	}
 
 	override function onGemPickup(marble:Marble, gem:Gem) {
@@ -326,10 +396,17 @@ class HuntMode extends NullMode {
 					@:privateAccess this.level.soundResources));
 		}
 		activeGems.remove(gem);
+
+		var wasExpiredGem = false;
+
+		if (expiredGems.exists(gem)) {
+			wasExpiredGem = true;
+		}
+
 		var beam = gemToBeamMap.get(gem);
 		beam.setHide(true);
 
-		if (!this.level.isMultiplayer || Net.isHost) {
+		if (!this.level.isMultiplayer || (Net.isHost && !competitive)) {
 			refillGemGroups();
 		}
 
@@ -361,6 +438,44 @@ class HuntMode extends NullMode {
 		}
 
 		if (this.level.isMultiplayer && Net.isHost) {
+			if (competitive && !wasExpiredGem) {
+				if (competitiveTimerStartTicks == 0) {
+					NetCommands.setCompetitiveTimerStartTicks(this.level.timeState.ticks);
+				}
+				var remaining = 0;
+				for (g in activeGems)
+					if (!expiredGems.exists(g))
+						remaining++;
+				if (remaining == 3) {
+					var currentTime = level.timeState.ticks;
+					var endTime = competitiveTimerStartTicks + (20000 >> 5);
+					var remainingTicks = (endTime - currentTime);
+					if (remainingTicks > (15000 >> 5)) {
+						NetCommands.setCompetitiveTimerStartTicks(currentTime - (5000 >> 5));
+					}
+				}
+				if (remaining == 2) {
+					var currentTime = level.timeState.ticks;
+					var endTime = competitiveTimerStartTicks + (20000 >> 5);
+					var remainingTicks = (endTime - currentTime);
+					if (remainingTicks > (10000 >> 5)) {
+						NetCommands.setCompetitiveTimerStartTicks(currentTime - (10000 >> 5));
+					}
+				}
+				if (remaining == 1) {
+					var currentTime = level.timeState.ticks;
+					var endTime = competitiveTimerStartTicks + (20000 >> 5);
+					var remainingTicks = (endTime - currentTime);
+					if (remainingTicks > (5000 >> 5)) {
+						NetCommands.setCompetitiveTimerStartTicks(currentTime - (15000 >> 5));
+					}
+				}
+				if (remaining == 0) {
+					NetCommands.setCompetitiveTimerStartTicks(0);
+					spawnNextGemCluster();
+				}
+			}
+
 			var packet = new GemPickupPacket();
 			packet.clientId = @:privateAccess marble.connection == null ? 0 : @:privateAccess marble.connection.id;
 			packet.gemId = gem.netIndex;
@@ -375,6 +490,8 @@ class HuntMode extends NullMode {
 
 			@:privateAccess level.playGui.incrementPlayerScore(packet.clientId, packet.scoreIncr);
 		}
+		if (wasExpiredGem)
+			expiredGems.remove(gem);
 		if (this.level.isMultiplayer && Net.isClient) {
 			gem.pickUpClient = @:privateAccess marble.connection == null ? Net.clientId : @:privateAccess marble.connection.id;
 		}
@@ -439,8 +556,8 @@ class HuntMode extends NullMode {
 		}
 	}
 
-	function refillGemGroups() {
-		if (activeGems.length == 0) {
+	function refillGemGroups(force:Bool = false) {
+		if (activeGems.length == 0 || force) {
 			var spawnGroup = pickGemSpawnGroup();
 			activeGemSpawnGroup = spawnGroup;
 			fillGemGroup(spawnGroup);
@@ -451,6 +568,14 @@ class HuntMode extends NullMode {
 				bs.writeByte(GemSpawn);
 				var packet = new GemSpawnPacket();
 				packet.gemIds = spawnGroup;
+				packet.expireds = [];
+				for (i in 0...packet.gemIds.length) {
+					if (expiredGems.exists(gemSpawnPoints[packet.gemIds[i]].gem)) {
+						packet.expireds.push(true);
+					} else {
+						packet.expireds.push(false);
+					}
+				}
 				packet.serialize(bs);
 				Net.sendPacketToIngame(bs);
 			}
@@ -662,7 +787,8 @@ class HuntMode extends NullMode {
 
 				var misPath = level.mission.isClaMission ? 'custom/mbu/${level.mission.id}' : level.mission.path;
 
-				Settings.saveScore(misPath, myScore, getScoreType());
+				if (!level.cheatsUsed)
+					Settings.saveScore(misPath, myScore, getScoreType());
 				var notifies = AchievementsGui.check();
 				var delay = 5.0;
 				var achDelay = 0.0;
@@ -741,4 +867,30 @@ class HuntMode extends NullMode {
 	override function constructRewindState():RewindableState {
 		return new HuntState();
 	};
+
+	override function onMultiplayerStart():Void {
+		freeSpawns();
+	}
+
+	override function getWorldJoinPackets():Array<haxe.io.Bytes> {
+		var packets:Array<haxe.io.Bytes> = [];
+		if (activeGemSpawnGroup != null) {
+			var activeGemIds = [];
+			for (gemId in activeGemSpawnGroup) {
+				if (gemSpawnPoints[gemId].gem != null && !gemSpawnPoints[gemId].gem.pickedUp)
+					activeGemIds.push(gemId);
+			}
+			var bs = new OutputBitStream();
+			bs.writeByte(net.Net.NetPacketType.GemSpawn);
+			var packet = new GemSpawnPacket();
+			packet.gemIds = activeGemIds;
+			packet.serialize(bs);
+			packets.push(bs.getBytes());
+		}
+		return packets;
+	}
+
+	public function setCompetitiveTimerStartTicks(ticks:Int) {
+		competitiveTimerStartTicks = ticks;
+	}
 }

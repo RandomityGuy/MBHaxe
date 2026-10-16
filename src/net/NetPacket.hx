@@ -39,6 +39,13 @@ class MarbleMovePacket implements NetPacket {
 	}
 }
 
+enum abstract SoundFXIndex(Int) from Int to Int {
+	var UseSuperJump = 1;
+	var UseSuperSpeed = 2;
+	var UseMega = 3;
+	var UseBlast = 4;
+}
+
 enum abstract MarbleNetFlags(Int) from Int to Int {
 	var NullFlag = 0;
 	var DoBlast = 1 << 0;
@@ -47,6 +54,8 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var PickupPowerup = 1 << 3;
 	var GravityChange = 1 << 4;
 	var UsePowerup = 1 << 5;
+	var UpdateTrapdoor = 1 << 6;
+	var UpdatePosition = 1 << 7;
 }
 
 @:publicFields
@@ -65,9 +74,10 @@ class MarbleUpdatePacket implements NetPacket {
 	var heliTick:Int;
 	var gravityDirection:Vector;
 	var oob:Bool;
-	var powerUpId:Int;
+	var powerUpId:Int = 0x1FF;
 	var moveQueueSize:Int;
 	var netFlags:Int;
+	var trapdoorUpdates:Map<Int, Int> = [];
 
 	public function new() {}
 
@@ -75,7 +85,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeByte(clientId);
 		MoveManager.packMove(move, b);
 		b.writeUInt16(serverTicks);
-		b.writeInt(netFlags, 6); // All bits flagged in one, UsePowerup flag already serialized in this
+		b.writeByte(netFlags); // All bits flagged in one, UsePowerup flag already serialized in this
 		b.writeByte(moveQueueSize);
 		b.writeFloat(position.x);
 		b.writeFloat(position.y);
@@ -102,12 +112,23 @@ class MarbleUpdatePacket implements NetPacket {
 			b.writeUInt16(megaTick);
 		}
 		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
-			b.writeInt(powerUpId, 9);
+			b.writeInt(powerUpId, 10);
 		}
 		if (netFlags & MarbleNetFlags.GravityChange > 0) {
 			b.writeFloat(gravityDirection.x);
 			b.writeFloat(gravityDirection.y);
 			b.writeFloat(gravityDirection.z);
+		}
+		if (netFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+			var cnt = 0;
+			for (k => v in trapdoorUpdates) {
+				cnt++;
+			}
+			b.writeInt(cnt, 4);
+			for (k => v in trapdoorUpdates) {
+				b.writeInt(k, 8);
+				b.writeUInt16(v);
+			}
 		}
 	}
 
@@ -115,7 +136,7 @@ class MarbleUpdatePacket implements NetPacket {
 		clientId = b.readByte();
 		move = MoveManager.unpackMove(b);
 		serverTicks = b.readUInt16();
-		netFlags = b.readInt(6);
+		netFlags = b.readByte();
 		moveQueueSize = b.readByte();
 		position = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		velocity = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
@@ -134,10 +155,18 @@ class MarbleUpdatePacket implements NetPacket {
 		}
 
 		if (netFlags & MarbleNetFlags.PickupPowerup > 0) {
-			powerUpId = b.readInt(9);
+			powerUpId = b.readInt(10);
 		}
 		if (netFlags & MarbleNetFlags.GravityChange > 0) {
 			gravityDirection = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
+		}
+		if (netFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+			var cnt = b.readInt(4);
+			for (i in 0...cnt) {
+				var tId = b.readInt(8);
+				var tTime = b.readUInt16();
+				trapdoorUpdates.set(tId, tTime);
+			}
 		}
 	}
 }
@@ -166,15 +195,19 @@ class PowerupPickupPacket implements NetPacket {
 @:publicFields
 class GemSpawnPacket implements NetPacket {
 	var gemIds:Array<Int>;
+	var expireds:Array<Bool>;
 
 	public function new() {
 		gemIds = [];
+		expireds = [];
 	}
 
 	public function serialize(b:OutputBitStream) {
 		b.writeInt(gemIds.length, 5);
-		for (gemId in gemIds) {
+		for (i in 0...gemIds.length) {
+			var gemId = gemIds[i];
 			b.writeInt(gemId, 11);
+			b.writeFlag(expireds[i]);
 		}
 	}
 
@@ -182,6 +215,7 @@ class GemSpawnPacket implements NetPacket {
 		var count = b.readInt(5);
 		for (i in 0...count) {
 			gemIds.push(b.readInt(11));
+			expireds.push(b.readFlag());
 		}
 	}
 }
@@ -207,6 +241,21 @@ class GemPickupPacket implements NetPacket {
 		b.writeUInt16(serverTicks);
 		b.writeInt(gemId, 11);
 		b.writeInt(scoreIncr, 4);
+	}
+}
+
+@:publicFields
+class KingInfoPacket implements NetPacket {
+	var kingClientId:Int;
+
+	public function new() {}
+
+	public inline function serialize(b:OutputBitStream) {
+		b.writeByte(kingClientId + 1); // shift by 1 so -1 → 0
+	}
+
+	public inline function deserialize(b:InputBitStream) {
+		kingClientId = b.readByte() - 1;
 	}
 }
 

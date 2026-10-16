@@ -56,9 +56,9 @@ class MarbleWorldMacros {
 			// Add the correct shape based on type
 			var dataBlockLowerCase = element.datablock.toLowerCase();
 			if (dataBlockLowerCase == "") {} // Make sure we don't do anything if there's no data block
-			else if (dataBlockLowerCase == "startpad")
+			else if (dataBlockLowerCase == "startpad" || dataBlockLowerCase == "startpad_mbu")
 				shape = new StartPad();
-			else if (dataBlockLowerCase == "endpad") {
+			else if (dataBlockLowerCase == "endpad" || dataBlockLowerCase == "endpad_mbu") {
 				shape = new EndPad();
 				if (element is MissionElementStaticShape && cast(element, MissionElementStaticShape) == endPadElement)
 					endPad = cast shape;
@@ -68,35 +68,38 @@ class MarbleWorldMacros {
 				shape = new Gem(cast element);
 				this.totalGems++;
 				this.gems.push(cast shape);
-			} else if (dataBlockLowerCase == "superjumpitem")
+			} else if (dataBlockLowerCase == "superjumpitem" || dataBlockLowerCase == "superjumpitem_mbu")
 				shape = new SuperJump(cast element);
 			else if (StringTools.startsWith(dataBlockLowerCase, "signcaution"))
 				shape = new SignCaution(cast element);
-			else if (dataBlockLowerCase == "roundbumper")
+			else if (dataBlockLowerCase == "roundbumper" || dataBlockLowerCase == "roundbumper_mbu")
 				shape = new RoundBumper();
-			else if (dataBlockLowerCase == "helicopteritem")
+			else if (dataBlockLowerCase == "helicopteritem" || dataBlockLowerCase == "helicopteritem_mbu")
 				shape = new Helicopter(cast element);
-			else if (dataBlockLowerCase == "eastereggitem")
+			else if (dataBlockLowerCase == "eastereggitem" || dataBlockLowerCase == "easteregg_mbu")
 				shape = new EasterEgg(cast element);
 			else if (dataBlockLowerCase == "checkpointshape") {
 				shape = new Checkpoint(cast element);
-			} else if (dataBlockLowerCase == "ductfan")
+			} else if (dataBlockLowerCase == "ductfan" || dataBlockLowerCase == "ductfan_mbu")
 				shape = new DuctFan();
-			else if (dataBlockLowerCase == "smallductfan")
+			else if (dataBlockLowerCase == "smallductfan" || dataBlockLowerCase == "smallductfan_mbu")
 				shape = new SmallDuctFan();
-			else if (dataBlockLowerCase == "antigravityitem")
+			else if (dataBlockLowerCase == "antigravityitem" || dataBlockLowerCase == "antigravityitem_mbu")
 				shape = new AntiGravity(cast element);
-			else if (dataBlockLowerCase == "norespawnantigravityitem")
+			else if (dataBlockLowerCase == "norespawnantigravityitem" || dataBlockLowerCase == "norespawnantigravityitem_mbu")
 				shape = new AntiGravity(cast element, true);
-			else if (dataBlockLowerCase == "superspeeditem")
+			else if (dataBlockLowerCase == "superspeeditem" || dataBlockLowerCase == "superspeeditem_mbu")
 				shape = new SuperSpeed(cast element);
-			else if (dataBlockLowerCase == "timetravelitem" || dataBlockLowerCase == "timepenaltyitem")
+			else if (dataBlockLowerCase == "timetravelitem"
+				|| dataBlockLowerCase == "timepenaltyitem"
+				|| dataBlockLowerCase == "timetravelitem_mbu"
+				|| dataBlockLowerCase == "timepenaltyitem_mbu")
 				shape = new TimeTravel(cast element);
-			else if (dataBlockLowerCase == "blastitem")
+			else if (dataBlockLowerCase == "blastitem" || dataBlockLowerCase == "blastitem_mbu")
 				shape = new Blast(cast element);
-			else if (dataBlockLowerCase == "megamarbleitem")
+			else if (dataBlockLowerCase == "megamarbleitem" || dataBlockLowerCase == "megamarbleitem_mbu")
 				shape = new MegaMarble(cast element);
-			else if (dataBlockLowerCase == "trapdoor")
+			else if (dataBlockLowerCase == "trapdoor" || dataBlockLowerCase == "trapdoor_mbu")
 				shape = new Trapdoor();
 			else if ([
 				"glass_3shape",
@@ -113,7 +116,7 @@ class MarbleWorldMacros {
 				"astrolabecloudsadvancedshape"
 			].contains(dataBlockLowerCase))
 				shape = new shapes.Sky(dataBlockLowerCase);
-			else if (dataBlockLowerCase == "astrolabeshape")
+			else if (dataBlockLowerCase == "astrolabeshape" || dataBlockLowerCase == "astrolabe")
 				shape = new shapes.Astrolabe();
 			else {
 				Console.error("Unknown item: " + element.datablock);

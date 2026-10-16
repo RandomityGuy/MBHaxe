@@ -212,7 +212,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 		chatWnd = new ChatCtrl();
 		chatWnd.horizSizing = Left;
-		chatWnd.position = new Vector(330, 58);
+		chatWnd.position = new Vector(330 - subX, 58);
 		chatWnd.extent = new Vector(200, 250);
 		innerCtrl.addChild(chatWnd);
 
@@ -285,7 +285,14 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		}
 		bottomBar.addChild(backButton);
 
+		var levelSelectOpts:GuiXboxOptionsList = null;
+
 		if (Net.isHost) {
+			// ── Options panel (Invite Visibility + Game Mode) ──────────────
+			var showingOptions = false;
+
+			var optionsCollection = new GuiXboxOptionsListCollection();
+
 			var customsButton = new GuiXboxButton("Customs", 200);
 			customsButton.position = new Vector(560, 0);
 			customsButton.vertSizing = Bottom;
@@ -296,6 +303,10 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				if (showingCustoms) {
 					innerCtrl.removeChild(playerWnd);
 					innerCtrl.addChild(custWnd);
+					if (showingOptions) {
+						showingOptions = false;
+						innerCtrl.removeChild(optionsCollection);
+					}
 				} else {
 					innerCtrl.addChild(playerWnd);
 					innerCtrl.removeChild(custWnd);
@@ -305,16 +316,73 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			}
 			bottomBar.addChild(customsButton);
 
-			var inviteButton = new GuiXboxButton("Invite Visibility", 220);
-			inviteButton.position = new Vector(750, 0);
-			inviteButton.vertSizing = Bottom;
-			inviteButton.horizSizing = Right;
-			inviteButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
-			inviteButton.pressedAction = (e) -> {
-				inviteVisibility = !inviteVisibility;
+			optionsCollection.position = new Vector(380, 160);
+			optionsCollection.extent = new Vector(815, 500);
+			optionsCollection.vertSizing = Bottom;
+			optionsCollection.horizSizing = Right;
+
+			var gameModeInitIdx = ["scrum", "competitive", "king"].indexOf(Net.selectedGameMode);
+			var gameModeOpt = optionsCollection.addOption(0, "Game Mode", ["Gem Hunt", "Competitive", "King"], (idx) -> {
+				var newMode = ["scrum", "competitive", "king"][idx];
+				NetCommands.setLobbyGameMode(newMode);
+				return true;
+			}, 0.5, 118);
+			gameModeOpt.setCurrentOption(gameModeInitIdx);
+
+			var inviteInitIdx = inviteVisibility ? 0 : 1;
+			var inviteOpt = optionsCollection.addOption(0, "Invite Visibility", ["On", "Off"], (idx) -> {
+				inviteVisibility = idx == 0;
+				updateLobbyNames();
+				return true;
+			}, 0.5, 118);
+			inviteOpt.setCurrentOption(inviteInitIdx);
+
+			var spectateOpt = optionsCollection.addOption(0, "Spectate", ["On", "Off"], (idx) -> {
+				NetCommands.setSpectate(Net.isHost ? 0 : Net.clientId, idx == 0);
+				updateLobbyNames();
+				return true;
+			}, 0.5, 118);
+			spectateOpt.setCurrentOption(Net.isHost ? (Net.hostSpectate ? 0 : 1) : 0);
+
+			var optionsButton = new GuiXboxButton("Options", 220);
+			optionsButton.position = new Vector(750, 0);
+			optionsButton.vertSizing = Bottom;
+			optionsButton.horizSizing = Right;
+			optionsButton.gamepadAccelerator = [Settings.gamepadSettings.alt2];
+			optionsButton.pressedAction = (e) -> {
+				showingOptions = !showingOptions;
+				if (showingOptions) {
+					innerCtrl.removeChild(playerWnd);
+					innerCtrl.addChild(optionsCollection);
+					levelSelectOpts.alwaysActive = false;
+					levelSelectOpts.selected = false;
+					if (showingCustoms) {
+						showingCustoms = false;
+						innerCtrl.removeChild(custWnd);
+						updateLobbyNames();
+					}
+				} else {
+					levelSelectOpts.alwaysActive = true;
+					levelSelectOpts.selected = true;
+					innerCtrl.addChild(playerWnd);
+					innerCtrl.removeChild(optionsCollection);
+					updateLobbyNames();
+				}
+				MarbleGame.canvas.render(MarbleGame.canvas.scene2d);
+			}
+			bottomBar.addChild(optionsButton);
+		} else {
+			// Show spectate button for clients
+			var spectateOpt = new GuiXboxButton("Spectate", 220);
+			spectateOpt.position = new Vector(750, 0);
+			spectateOpt.vertSizing = Bottom;
+			spectateOpt.horizSizing = Right;
+			spectateOpt.gamepadAccelerator = [Settings.gamepadSettings.alt2];
+			spectateOpt.pressedAction = (e) -> {
+				NetCommands.setSpectate(Net.isHost ? 0 : Net.clientId, !Net.clientSpectate);
 				updateLobbyNames();
 			}
-			bottomBar.addChild(inviteButton);
+			bottomBar.addChild(spectateOpt);
 		}
 
 		var nextButton = new GuiXboxButton("Ready", 160);
@@ -358,7 +426,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		levelWnd.addChild(levelInfoLeft);
 
 		var levelNames = difficultyMissions.map(x -> x.title);
-		var levelSelectOpts = new GuiXboxOptionsList(6, "Level", levelNames, 0.3, 155.5, isHost);
+		levelSelectOpts = new GuiXboxOptionsList(6, "Level", levelNames, 0.3, 155.5, isHost);
 
 		function setLevel(idx:Int) {
 			// if (lock)
@@ -488,14 +556,16 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			playerListArr.push({
 				name: Settings.highscoreName,
 				state: Net.lobbyHostReady,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				spectate: Net.hostSpectate
 			});
 		}
 		if (Net.isClient) {
 			playerListArr.push({
 				name: Settings.highscoreName,
 				state: Net.lobbyClientReady,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				spectate: Net.clientSpectate
 			});
 		}
 		if (Net.clientIdMap != null) {
@@ -503,15 +573,17 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				playerListArr.push({
 					name: v.name,
 					state: v.lobbyReady,
-					platform: v.platform
+					platform: v.platform,
+					spectate: v.spectator
 				});
 			}
 		}
 
 		if (!showingCustoms)
 			playerList.setTexts(playerListArr.map(player -> {
+				var spectateStr = player.spectate ? "[S] " : "";
 				return
-					'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${StringTools.htmlEscape(player.name)}';
+					'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${spectateStr}${StringTools.htmlEscape(player.name)}';
 			}));
 
 		var pubCount = 1; // Self

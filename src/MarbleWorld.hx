@@ -11,7 +11,9 @@ import gui.MarblePickerGui;
 import gui.MultiplayerLevelSelectGui;
 import collision.CollisionPool;
 import net.GemPredictionStore;
+import net.TrapdoorPredictionStore;
 import modes.HuntMode;
+import modes.KingMode;
 import net.NetPacket.MarbleNetFlags;
 import net.PowerupPredictionStore;
 import net.MarblePredictionStore;
@@ -136,6 +138,8 @@ class MarbleWorld extends Scheduler {
 	public var dtsObjects:Array<DtsObject> = [];
 	public var powerUps:Array<PowerUp> = [];
 	public var forceObjects:Array<ForceObject> = [];
+	public var trapdoors:Array<Trapdoor> = [];
+	public var trapdoorsToTick:Array<Int> = [];
 	public var triggers:Array<Trigger> = [];
 	public var gems:Array<Gem> = [];
 	public var namedObjects:Map<String, {obj:DtsObject, elem:MissionElementBase}> = [];
@@ -143,6 +147,11 @@ class MarbleWorld extends Scheduler {
 
 	var shapeImmunity:Array<DtsObject> = [];
 	var shapeOrTriggerInside:Array<GameObject> = [];
+
+	// Reusable scratch buffers for the client rollback/prediction path (applyClientPrediction),
+	// which runs every fixed tick. Reusing these avoids per-tick allocations during resimulation.
+	var _advanceTimeState:TimeState = new TimeState();
+	var _marblesToTick:Map<Int, net.NetPacket.MarbleUpdatePacket> = new Map();
 
 	public var timeState:TimeState = new TimeState();
 	public var bonusTime:Float = 0;
@@ -207,6 +216,8 @@ class MarbleWorld extends Scheduler {
 	public var rewinding:Bool = false;
 	public var rewindUsed:Bool = false;
 
+	public var cheatsUsed:Bool = false;
+
 	public var inputRecorder:InputRecorder;
 	public var isReplayingMovement:Bool = false;
 	public var currentInputMoves:Array<InputRecorderFrame>;
@@ -225,6 +236,7 @@ class MarbleWorld extends Scheduler {
 	var predictions:MarblePredictionStore;
 	var powerupPredictions:PowerupPredictionStore;
 	var gemPredictions:GemPredictionStore;
+	var trapdoorPredictions:TrapdoorPredictionStore;
 
 	public var lastMoves:MarbleUpdateQueue;
 
@@ -257,16 +269,19 @@ class MarbleWorld extends Scheduler {
 		this.mission = mission;
 		this.game = mission.game.toLowerCase();
 
-		var misGameMode = mission.missionInfo != null ? mission.missionInfo.gamemode : null;
+		var misGameMode = mission.missionInfo != null ? mission.missionInfo.gamemode : mission.gameMode;
 		if (mission.customSource == "MPCustoms")
 			misGameMode = "scrum";
+		// In multiplayer, host/client can override the game mode via the lobby selector
+		this.isMultiplayer = multiplayer;
+		if (isMultiplayer && Net.selectedGameMode != null)
+			misGameMode = Net.selectedGameMode;
 
 		this.gameMode = GameModeFactory.getGameMode(cast this, misGameMode);
 		this.replay = new Replay(mission.path, mission.isClaMission ? mission.id : 0);
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
 		this.inputRecorder = new InputRecorder(cast this);
-		this.isMultiplayer = multiplayer;
 		if (this.isMultiplayer) {
 			isRecording = false;
 			isWatching = false;
@@ -274,6 +289,7 @@ class MarbleWorld extends Scheduler {
 			predictions = new MarblePredictionStore();
 			powerupPredictions = new PowerupPredictionStore();
 			gemPredictions = new GemPredictionStore();
+			trapdoorPredictions = new TrapdoorPredictionStore(cast this);
 		}
 
 		// Set the network RNG for hunt
@@ -318,7 +334,7 @@ class MarbleWorld extends Scheduler {
 					// Override the end pad element. We do this because only the last finish pad element will actually do anything.
 					if (element._type == MissionElementType.StaticShape) {
 						var so:MissionElementStaticShape = cast element;
-						if (so.datablock.toLowerCase() == 'endpad')
+						if (so.datablock.toLowerCase() == 'endpad' || so.datablock.toLowerCase() == 'endpad_mbu')
 							this.endPadElement = so;
 					}
 
@@ -802,9 +818,7 @@ class MarbleWorld extends Scheduler {
 					for (client => marble in this.clientMarbles)
 						marble.setMode(Play);
 
-					var huntMode = cast(this.gameMode, HuntMode);
-
-					huntMode.freeSpawns();
+					this.gameMode.onMultiplayerStart();
 				}
 			}
 		}
@@ -1091,6 +1105,13 @@ class MarbleWorld extends Scheduler {
 				if (obj is ForceObject) {
 					this.forceObjects.push(cast obj);
 				}
+				if (obj is Trapdoor) {
+					var t:Trapdoor = cast obj;
+					t.netId = this.trapdoors.length;
+					this.trapdoors.push(t);
+					if (Net.isClient)
+						trapdoorPredictions.alloc();
+				}
 				obj.isTSStatic = isTsStatic;
 				obj.init(cast this, () -> {
 					obj.update(this.timeState);
@@ -1180,28 +1201,19 @@ class MarbleWorld extends Scheduler {
 
 	public function getWorldStateForClientJoin() {
 		var packets = [];
-		// First, gem spawn packet
-		var bs = new OutputBitStream();
-		bs.writeByte(GemSpawn);
-		var packet = new GemSpawnPacket();
 
-		var hunt = cast(this.gameMode, HuntMode);
-		if (@:privateAccess hunt.activeGemSpawnGroup != null) {
-			var activeGemIds = [];
-			for (gemId in @:privateAccess hunt.activeGemSpawnGroup) {
-				if (@:privateAccess hunt.gemSpawnPoints[gemId].gem != null && @:privateAccess !hunt.gemSpawnPoints[gemId].gem.pickedUp) {
-					activeGemIds.push(gemId);
-				}
-			}
-			packet.gemIds = activeGemIds;
-			packet.serialize(bs);
-			packets.push(bs.getBytes());
-		}
+		// Mode-specific join packets (gems for HuntMode, king state for KingMode, etc.)
+		for (p in this.gameMode.getWorldJoinPackets())
+			packets.push(p);
 
 		// Marble states
 		for (marb in this.marbles) {
 			var oldFlags = @:privateAccess marb.netFlags;
-			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
+			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup | MarbleNetFlags.UpdatePosition;
+
+			if (oldFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
+				@:privateAccess marb.netFlags |= MarbleNetFlags.UpdateTrapdoor;
+			}
 
 			var innerMove = @:privateAccess marb.lastMove;
 			if (innerMove == null) {
@@ -1210,7 +1222,8 @@ class MarbleWorld extends Scheduler {
 			}
 			var motionDir = @:privateAccess marb.moveMotionDir;
 			if (motionDir == null) {
-				motionDir = marb.getMarbleAxis()[1];
+				var axes = marb.getMarbleAxis();
+				motionDir = new Vector(axes.motionDirX, axes.motionDirY, axes.motionDirZ);
 			}
 
 			var move = new NetMove(innerMove, motionDir, timeState, timeState.ticks, 65535);
@@ -1295,6 +1308,9 @@ class MarbleWorld extends Scheduler {
 					if (clientMarble == null)
 						continue;
 
+					if (connection.spectator)
+						continue;
+
 					var mask = 1 << client;
 					if (hasStruct) {
 						var otherPred = predictions.retrieveState(clientMarble, ourMoveStruct.timeState.ticks);
@@ -1305,14 +1321,15 @@ class MarbleWorld extends Scheduler {
 						correctPrediction(clientMarble, lastMove, -1, mask, arr.packets);
 					}
 				}
-
-				if (hasStruct) {
-					var ourPred = predictions.retrieveState(marble, ourTick);
-					if (ourPred == null || ourPred.getError(ourMove) > 0.01) {
-						correctPrediction(marble, ourMove, ourTick, 1 << Net.clientId);
+				if (!Net.clientSpectate) {
+					if (hasStruct) {
+						var ourPred = predictions.retrieveState(marble, ourTick);
+						if (ourPred == null || ourPred.getError(ourMove) > 0.01) {
+							correctPrediction(marble, ourMove, ourTick, 1 << Net.clientId);
+						}
+					} else {
+						correctPrediction(marble, ourMove, -1, 1 << Net.clientId);
 					}
-				} else {
-					correctPrediction(marble, ourMove, -1, 1 << Net.clientId);
 				}
 			}
 		}
@@ -1328,7 +1345,8 @@ class MarbleWorld extends Scheduler {
 		var ourLastMoveTime = ourLastMove.serverTicks;
 		var ourQueuedMoves = @:privateAccess Net.clientConnection.getQueuedMoves().copy();
 		var qm = ourQueuedMoves[0];
-		var advanceTimeState = qm != null ? qm.timeState.clone() : timeState.clone();
+		var advanceTimeState = _advanceTimeState;
+		advanceTimeState.load(qm != null ? qm.timeState : timeState);
 		advanceTimeState.dt = 0.032;
 		advanceTimeState.ticks = ourLastMoveTime;
 
@@ -1336,12 +1354,21 @@ class MarbleWorld extends Scheduler {
 			if (pw.pickupClient != -1 && marbleNeedsPrediction & (1 << pw.pickupClient) > 0)
 				pw.lastPickUpTime = powerupPredictions.getState(pw.netIndex);
 		}
-		var huntMode:HuntMode = cast this.gameMode;
-		if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
-			for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
-				var g = @:privateAccess huntMode.gemSpawnPoints[activeGem].gem;
-				if (g != null && g.pickUpClient != -1 && marbleNeedsPrediction & (1 << g.pickUpClient) > 0)
-					huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+
+		for (tT in trapdoorsToTick) {
+			var t = trapdoors[tT];
+			t.lastContactTicks = trapdoorPredictions.getState(t.netId);
+			t.update(advanceTimeState);
+		}
+
+		if (this.gameMode is HuntMode) {
+			var huntMode:HuntMode = cast this.gameMode;
+			if (@:privateAccess huntMode.activeGemSpawnGroup != null) {
+				for (activeGem in @:privateAccess huntMode.activeGemSpawnGroup) {
+					var g = @:privateAccess huntMode.gemSpawnPoints[activeGem].gem;
+					if (g != null && g.pickUpClient != -1 && marbleNeedsPrediction & (1 << g.pickUpClient) > 0)
+						huntMode.setGemHiddenStatus(activeGem, gemPredictions.getState(activeGem));
+				}
 			}
 		}
 
@@ -1352,7 +1379,8 @@ class MarbleWorld extends Scheduler {
 		var currentTick = ourLastMoveTime;
 		//- Std.int(ourLastMove.moveQueueSize - @:privateAccess Net.clientConnection.moveManager.ackRTT); // - Std.int((@:privateAccess Net.clientConnection.moveManager.ackRTT)) - offset;
 
-		var marblesToTick = new Map();
+		var marblesToTick = _marblesToTick;
+		marblesToTick.clear();
 
 		for (client => arr in lastMoves.otherMarbleUpdates) {
 			if (marbleNeedsPrediction & (1 << client) > 0 && arr.packets.length > 0) {
@@ -1376,6 +1404,10 @@ class MarbleWorld extends Scheduler {
 
 		@:privateAccess this.marble.posStore.load(this.marble.newPos);
 		@:privateAccess this.marble.netCorrected = true;
+
+		for (pi in this.pathedInteriors) {
+			pi.rollbackToTick(currentTick);
+		}
 
 		for (move in ourQueuedMoves) {
 			var m = move.move;
@@ -1403,7 +1435,19 @@ class MarbleWorld extends Scheduler {
 			advanceTimeState.currentAttemptTime += 0.032;
 			advanceTimeState.ticks++;
 			currentTick++;
+
+			for (pi in this.pathedInteriors) {
+				pi.computeNextPathStep(0.032);
+				pi.advance(0.032);
+			}
+
+			for (tT in trapdoorsToTick) {
+				var t = trapdoors[tT];
+				t.update(advanceTimeState);
+			}
 		}
+
+		trapdoorsToTick.resize(0);
 
 		lastMoves.ourMoveApplied = true;
 		@:privateAccess this.marble.isNetUpdate = false;
@@ -1413,7 +1457,7 @@ class MarbleWorld extends Scheduler {
 	}
 
 	public function spawnHuntGemsClientSide(gemIds:Array<Int>) {
-		if (this.isMultiplayer && Net.isClient) {
+		if (this.isMultiplayer && Net.isClient && this.gameMode is HuntMode) {
 			var huntMode:HuntMode = cast this.gameMode;
 			huntMode.setActiveSpawnSphere(gemIds);
 			radar.blink();
@@ -1556,6 +1600,7 @@ class MarbleWorld extends Scheduler {
 
 		ProfilerUI.measure("updateTimer", 1);
 		this.updateTimer(dt);
+		this.gameMode.update(this.timeState);
 
 		// if ((Key.isPressed(Settings.controlsSettings.respawn) || Gamepad.isPressed(Settings.gamepadSettings.respawn))
 		// 	&& this.finishTime == null) {
@@ -1639,7 +1684,8 @@ class MarbleWorld extends Scheduler {
 				if (myMove != null && Net.isClient) {
 					this.predictions.storeState(marble, myMove.timeState.ticks);
 					for (client => marble in clientMarbles) {
-						this.predictions.storeState(marble, myMove.timeState.ticks);
+						if (!client.spectator)
+							this.predictions.storeState(marble, myMove.timeState.ticks);
 					}
 				}
 				if (Net.isHost) {
@@ -1673,12 +1719,21 @@ class MarbleWorld extends Scheduler {
 					if (allRecv)
 						this.marble.clearNetFlags();
 				}
+				if (Net.isHost)
+					this.gameMode.onHostTick(fixedDt);
+				for (pi in this.pathedInteriors) {
+					pi.computeNextPathStep(0.032);
+					pi.advance(0.032);
+				}
 				timeState.ticks++;
 			}
 			timeState.subframe = tickAccumulator / 0.032;
 			marble.updateClient(timeState, this.pathedInteriors);
 			for (client => marble in clientMarbles) {
 				marble.updateClient(timeState, this.pathedInteriors);
+			}
+			if (Net.clientSpectate || Net.hostSpectate) {
+				marble.camera.update(timeState.currentAttemptTime, timeState.dt);
 			}
 		} else {
 			marble.update(timeState, collisionWorld, this.pathedInteriors);
@@ -2139,25 +2194,42 @@ class MarbleWorld extends Scheduler {
 						chullinvT.transpose();
 						for (surface in chull.surfaces) {
 							var i = 0;
-							while (i < surface.indices.length) {
-								var surfaceN = surface.getNormal(surface.indices[i]).transformed3x3(chullinvT);
-								var v1 = surface.getPoint(surface.indices[i]).transformed(chull.transform);
-								var surfaceD = -surfaceN.dot(v1);
+							for (vi in 0...surface.vertexCounts.length) {
+								var vtxCount = surface.vertexCounts[vi];
+
+								var surfaceN = surface.getNormal(vi).transformed3x3(chullinvT).normalized();
+								var surfacePoint = surface.getTransformedPoint(i, chull.transform, @:privateAccess chull._transformKey);
+								var surfaceD = -surfaceN.dot(surfacePoint);
 
 								if (surfaceN.dot(padUp.multiply(-10)) < 0) {
 									var dist = surfaceN.dot(checkBoundsCenter.toVector()) + surfaceD;
 									if (dist >= 0 && dist < 5) {
 										var intersectT = -(checkBoundsCenter.dot(surfaceN.toPoint()) + surfaceD) / (padUp.dot(surfaceN));
 										var intersectP = checkBoundsCenter.add(padUp.multiply(intersectT).toPoint()).toVector();
-										if (Collision.PointInTriangle(intersectP, v1, surface.getPoint(surface.indices[i + 1]).transformed(chull.transform),
-											surface.getPoint(surface.indices[i + 2]).transformed(chull.transform))) {
+
+										var inside = true;
+
+										for (j in 0...vtxCount) {
+											var v1 = surface.getTransformedPoint(i + j, chull.transform, @:privateAccess chull._transformKey);
+											var v2 = surface.getTransformedPoint(i + ((j + 1) % vtxCount), chull.transform,
+												@:privateAccess chull._transformKey);
+
+											var edgeNormal = surfaceN.cross(v2.sub(v1));
+
+											if (edgeNormal.dot(intersectP.sub(v1)) < 0) {
+												inside = false;
+												break;
+											}
+										}
+
+										if (inside) {
 											found = true;
 											break;
 										}
 									}
 								}
 
-								i += 3;
+								i += vtxCount;
 							}
 
 							if (found) {
@@ -2220,7 +2292,8 @@ class MarbleWorld extends Scheduler {
 					name: "Player",
 					time: this.gameMode.getFinishScore()
 				};
-				Settings.saveScore(misPath, myScore, this.gameMode.getScoreType());
+				if (!this.cheatsUsed)
+					Settings.saveScore(misPath, myScore, this.gameMode.getScoreType());
 				var notifies = AchievementsGui.check();
 				var delay = 5.0;
 				var achDelay = 0.0;
@@ -2335,8 +2408,8 @@ class MarbleWorld extends Scheduler {
 			} else {
 				restartGameCode();
 			}
-		}, mission, this.gameMode.getFinishScore(),
-			this.gameMode.getScoreType(), this.replay.write());
+		}, mission, this.gameMode.getFinishScore(), this.gameMode.getScoreType(),
+			this.replay);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;
@@ -2409,6 +2482,7 @@ class MarbleWorld extends Scheduler {
 		if (isMultiplayer && Net.isHost) {
 			@:privateAccess marble.netFlags |= MarbleNetFlags.GravityChange;
 		}
+
 		marble.currentUp = vec;
 		if (marble == this.marble) {
 			var currentQuat = this.getOrientationQuat(timeState.currentAttemptTime);

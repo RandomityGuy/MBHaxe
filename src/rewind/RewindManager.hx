@@ -49,7 +49,6 @@ class RewindManager {
 			rf.marblePrevPosition = @:privateAccess level.marble.oldPos.clone();
 			rf.marbleNextPosition = @:privateAccess level.marble.newPos.clone();
 			rf.marbleOrientation = @:privateAccess level.marble.getRotationQuat().clone();
-			rf.marblePrevOrientation = @:privateAccess level.marble.prevRot.clone();
 			rf.marblePhysicsAccmulator = @:privateAccess level.marble.physicsAccumulator;
 			rf.marbleVelocity = level.marble.velocity.clone();
 			rf.marbleAngularVelocity = level.marble.omega.clone();
@@ -120,7 +119,6 @@ class RewindManager {
 		@:privateAccess level.marble.newPos.load(rf.marbleNextPosition);
 		@:privateAccess level.marble.collider.transform.load(rf.marbleColliderTransform);
 		@:privateAccess level.marble.physicsAccumulator = rf.marblePhysicsAccmulator;
-		@:privateAccess level.marble.prevRot.load(rf.marblePrevOrientation);
 		// level.marble.setMarblePosition(rf.marblePosition.x, rf.marblePosition.y, rf.marblePosition.z);
 		level.marble.setRotationQuat(rf.marbleOrientation.clone());
 		level.marble.velocity.load(rf.marbleVelocity);
@@ -152,13 +150,13 @@ class RewindManager {
 			|| level.marble.currentUp.z != rf.currentUp.z) {
 			level.setUp(level.marble, rf.currentUp, level.timeState);
 			// Hacky things
-			@:privateAccess level.orientationChangeTime = level.timeState.currentAttemptTime - 300;
+			@:privateAccess level.orientationChangeTime = level.timeState.currentAttemptTime - 0.3;
 			var oldorient = level.newOrientationQuat;
 			level.newOrientationQuat = @:privateAccess level.oldOrientationQuat;
 			@:privateAccess level.oldOrientationQuat = oldorient;
 		}
 
-		var gravitycompletion = Util.clamp((level.timeState.currentAttemptTime - @:privateAccess level.orientationChangeTime) / 300, 0, 1);
+		var gravitycompletion = Util.clamp((level.timeState.currentAttemptTime - @:privateAccess level.orientationChangeTime) / 0.3, 0, 1);
 		if (gravitycompletion == 0) {
 			level.newOrientationQuat = @:privateAccess level.oldOrientationQuat;
 			@:privateAccess level.orientationChangeTime = -1e8;

@@ -5,6 +5,8 @@ import gui.GuiControl;
 import src.MarbleWorld;
 import h3d.Vector;
 import src.Settings;
+import src.ResourceLoader;
+import src.MarbleGame;
 
 enum TouchState {
 	Pressed;
@@ -45,6 +47,8 @@ class TouchInput {
 	public var pauseButton:PauseButton;
 	public var rewindButton:RewindButton;
 	public var restartButton:RestartButton;
+	public var leftButton:SpectatorChangeTargetButton;
+	public var rightButton:SpectatorChangeTargetButton;
 
 	public var currentTouchState:TouchEventState;
 
@@ -150,6 +154,10 @@ class TouchInput {
 				this.restartButton.setVisible(false);
 			if (this.rewindButton != null)
 				this.rewindButton.setVisible(false);
+			if (this.leftButton != null)
+				this.leftButton.setVisible(false);
+			if (this.rightButton != null)
+				this.rightButton.setVisible(false);
 		}
 	}
 
@@ -165,7 +173,10 @@ class TouchInput {
 		if (this.rewindButton != null)
 			this.rewindButton.setVisible(enabled);
 		this.cameraInput.enabled = enabled;
-
+		if (this.leftButton != null)
+			this.leftButton.setVisible(enabled);
+		if (this.rightButton != null)
+			this.rightButton.setVisible(enabled);
 		if (Settings.touchSettings.hideControls) {
 			this.jumpButton.setVisible(false);
 			this.powerupButton.setVisible(false);
@@ -174,6 +185,10 @@ class TouchInput {
 			this.movementInput.setVisible(false);
 			if (this.rewindButton != null)
 				this.rewindButton.setVisible(false);
+			if (this.leftButton != null)
+				this.leftButton.setVisible(false);
+			if (this.rightButton != null)
+				this.rightButton.setVisible(false);
 		}
 	}
 
@@ -189,6 +204,14 @@ class TouchInput {
 		cameraInput.remove(parentGui);
 		if (this.rewindButton != null)
 			rewindButton.remove(parentGui);
+		if (this.leftButton != null) {
+			leftButton.remove(parentGui);
+			leftButton.dispose();
+		}
+		if (this.rightButton != null) {
+			rightButton.remove(parentGui);
+			rightButton.dispose();
+		}
 		jumpButton.dispose();
 		powerupButton.dispose();
 		movementInput.dispose();
@@ -197,5 +220,42 @@ class TouchInput {
 		cameraInput.dispose();
 		if (this.rewindButton != null)
 			rewindButton.dispose();
+	}
+
+	public function setSpectatorControls(enabled:Bool) {
+		var tile = ResourceLoader.getImage(enabled ? "data/ui/touch/video-camera.png" : "data/ui/touch/explosion.png").resource;
+		@:privateAccess this.blastbutton.guiElement.graphics.content.state.tail.texture = tile.toTexture();
+		if (enabled) {
+			jumpButton.setVisible(false);
+			if (this.leftButton == null) { // both are added at same time so it doesnt matter
+				var par = jumpButton.guiElement.parent;
+				this.leftButton = new SpectatorChangeTargetButton(false);
+				this.rightButton = new SpectatorChangeTargetButton(true);
+				this.leftButton.add(par);
+				this.rightButton.add(par);
+				this.leftButton.guiElement.render(MarbleGame.canvas.scene2d, @:privateAccess par._flow);
+				this.rightButton.guiElement.render(MarbleGame.canvas.scene2d, @:privateAccess par._flow);
+			}
+		} else {
+			jumpButton.setVisible(true);
+			if (this.leftButton != null) {
+				this.leftButton.remove(this.leftButton.guiElement.parent);
+				this.leftButton.dispose();
+				this.leftButton = null;
+			}
+			if (this.rightButton != null) {
+				this.rightButton.remove(this.rightButton.guiElement.parent);
+				this.rightButton.dispose();
+				this.rightButton = null;
+			}
+		}
+	}
+
+	public function setSpectatorControlsVisibility(enabled:Bool) {
+		if (this.leftButton != null) {
+			this.leftButton.setVisible(enabled);
+			this.rightButton.setVisible(enabled);
+			this.movementInput.setVisible(!enabled);
+		}
 	}
 }

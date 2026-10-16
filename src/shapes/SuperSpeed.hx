@@ -1,5 +1,8 @@
 package shapes;
 
+import net.NetPacket.SoundFXIndex;
+import net.NetCommands;
+import net.Net;
 import src.Marble;
 import mis.MissionElement.MissionElementItem;
 import src.TimeState;
@@ -15,26 +18,34 @@ import src.MarbleWorld;
 final superSpeedParticleOptions:ParticleEmitterOptions = {
 	ejectionPeriod: 5,
 	ambientVelocity: new Vector(0, 0, 0),
-	ejectionVelocity: 1,
+	periodVariance: 0,
+	ejectionVelocity: 1.0,
 	velocityVariance: 0.25,
-	emitterLifetime: 1100,
-	inheritedVelFactor: 0.25,
+	thetaMin: 130.0,
+	thetaMax: 170.0,
+	phiReferenceVel: 0.0,
+	phiVariance: 360.0,
+	emitterLifetime: 1000,
+	ejectionOffset: 0.0,
+	inheritedVelFactor: 0.0,
 	particleOptions: {
+		windCoefficient: 0.0,
 		texture: 'particles/smoke.png',
 		blending: Add,
-		spinSpeed: 0,
+		spinSpeed: 15,
 		spinRandomMin: 0,
-		spinRandomMax: 0,
-		lifetime: 1500,
+		spinRandomMax: 150,
+		lifetime: 2000,
 		lifetimeVariance: 750,
-		dragCoefficient: 4,
-		acceleration: 0,
+		dragCoefficient: 4.0,
+		constantAcceleration: 0,
+		gravityCoefficient: 0,
 		colors: [
 			new Vector(0.42, 0.42, 0.38, 0.1),
 			new Vector(0.34, 0.34, 0.34, 0.1),
 			new Vector(0.30, 0.30, 0.30, 0.1)
 		],
-		sizes: [0.3, 0.7, 1.4],
+		sizes: [0.5, 1, 2],
 		times: [0, 0.5, 1]
 	}
 };
@@ -70,7 +81,8 @@ class SuperSpeed extends PowerUp {
 	}
 
 	public function use(marble:Marble, timeState:TimeState) {
-		var movementVector = marble.getMarbleAxis()[0];
+		var marbleAxis = marble.getMarbleAxis();
+		var movementVector = new Vector(marbleAxis.sideDirX, marbleAxis.sideDirY, marbleAxis.sideDirZ);
 
 		var boostVec = movementVector.clone();
 
@@ -87,6 +99,8 @@ class SuperSpeed extends PowerUp {
 
 		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/use_speed.wav", ResourceLoader.getAudio, this.soundResources));
+		if (Net.isHost)
+			NetCommands.playSound(SoundFXIndex.UseSuperSpeed, marble.x, marble.y, marble.z);
 		if (@:privateAccess !marble.isNetUpdate)
 			this.level.particleManager.createEmitter(superSpeedParticleOptions, this.ssEmitterParticleData, null, () -> marble.getAbsPos().getPosition());
 		this.level.deselectPowerUp(marble);

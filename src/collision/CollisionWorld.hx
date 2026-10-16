@@ -93,9 +93,10 @@ class CollisionWorld {
 		dynamicGrid.boundingSearch(bounds, this.intersectionList);
 
 		var results = [];
+		var bestT = rayLength;
 		for (obj in this.intersectionList) {
 			var oo = obj;
-			oo.rayCast(rayStart, rayDirection, results, rayLength);
+			bestT = oo.rayCast(rayStart, rayDirection, results, bestT);
 		}
 
 		return results;

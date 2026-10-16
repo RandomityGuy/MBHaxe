@@ -1,6 +1,7 @@
 package net;
 
 import net.NetPacket.ScoreboardPacket;
+import net.NetPacket.KingInfoPacket;
 import gui.MultiplayerLevelSelectGui;
 import gui.Canvas;
 import net.MasterServerClient.RemoteServerInfo;
@@ -36,6 +37,7 @@ enum abstract NetPacketType(Int) from Int to Int {
 	var GemPickup;
 	var PlayerInfo;
 	var ScoreBoardInfo;
+	var KingInfo;
 }
 
 @:publicFields
@@ -69,10 +71,13 @@ class Net {
 	public static var isMP:Bool;
 	public static var isHost:Bool;
 	public static var isClient:Bool;
+	public static var selectedGameMode:String = "scrum"; // overrides mission gamemode in MP
 
 	public static var lobbyHostReady:Bool;
 	public static var lobbyClientReady:Bool;
 	public static var hostReady:Bool;
+	public static var hostSpectate:Bool;
+	public static var clientSpectate:Bool;
 
 	static var clientIdAllocs:Int = 1;
 	public static var clientId:Int;
@@ -83,9 +88,13 @@ class Net {
 	public static var serverInfo:ServerInfo;
 	public static var remoteServerInfo:RemoteServerInfo;
 
+	public static var pendingConnections:Array<RTCPeerConnection> = [];
+
 	static var stunServers = ["stun:stun.l.google.com:19302"];
 
-	public static var turnServer:String = "";
+	public static var turnServers:Array<String> = [];
+
+	static var onTurnServersReceived:Null<() -> Void> = null;
 
 	public static function hostServer(name:String, maxPlayers:Int, privateSlots:Int, privateServer:Bool, onHosted:() -> Void) {
 		serverInfo = new ServerInfo(name, 1, maxPlayers, privateSlots, privateServer, Std.int(999999 * Math.random()), "LOBBY", getPlatform());
@@ -99,14 +108,23 @@ class Net {
 		});
 	}
 
-	public static function addClientFromSdp(sdpString:String, privateJoin:Bool, onFinishSdp:String->Void) {
-		var peer = new RTCPeerConnection(stunServers, "0.0.0.0");
+	public static function addClientFromSdp(sdpString:String, privateJoin:Bool, onFinishSdp:String->Void, turnTried:Bool = false) {
+		if (Net.turnServers.length == 0 && !turnTried) {
+			MasterServerClient.requestTurnCredentials();
+			Net.onTurnServersReceived = () -> {
+				Net.onTurnServersReceived = null;
+				addClientFromSdp(sdpString, privateJoin, onFinishSdp, true);
+			};
+			return;
+		}
+		var peer = new RTCPeerConnection(stunServers.concat(Net.turnServers), "0.0.0.0");
 		var sdpObj = Json.parse(sdpString);
 		peer.setRemoteDescription(sdpObj.sdp, sdpObj.type);
 		addClient(peer, privateJoin, onFinishSdp);
 	}
 
 	static function addClient(peer:RTCPeerConnection, privateJoin:Bool, onFinishSdp:String->Void) {
+		Net.pendingConnections.push(peer);
 		var candidates = [];
 		peer.onLocalCandidate = (c) -> {
 			Console.log('Local candidate: ' + c);
@@ -117,14 +135,17 @@ class Net {
 			switch (s) {
 				case RTC_CLOSED:
 					Console.log("RTC State change: Connection closed!");
+					Net.pendingConnections.remove(peer);
 				case RTC_CONNECTED:
 					Console.log("RTC State change: Connected!");
 				case RTC_CONNECTING:
 					Console.log("RTC State change: Connecting...");
 				case RTC_DISCONNECTED:
 					Console.log("RTC State change: Disconnected!");
+					Net.pendingConnections.remove(peer);
 				case RTC_FAILED:
 					Console.log("RTC State change: Failed!");
+					Net.pendingConnections.remove(peer);
 				case RTC_NEW:
 					Console.log("RTC State change: New...");
 			}
@@ -183,9 +204,18 @@ class Net {
 		clientIdMap[id] = ghost;
 	}
 
-	public static function joinServer(serverName:String, isInvite:Bool, connectedCb:() -> Void) {
+	public static function joinServer(serverName:String, isInvite:Bool, connectedCb:() -> Void, turnTried:Bool = false) {
 		MasterServerClient.connectToMasterServer(() -> {
-			client = new RTCPeerConnection(stunServers, "0.0.0.0");
+			if (Net.turnServers.length == 0 && !turnTried) {
+				MasterServerClient.requestTurnCredentials();
+				Net.onTurnServersReceived = () -> {
+					Net.onTurnServersReceived = null;
+					joinServer(serverName, isInvite, connectedCb, true);
+				};
+				return;
+			}
+
+			client = new RTCPeerConnection(stunServers.concat(Net.turnServers), "0.0.0.0");
 			var candidates = [];
 
 			var closing = false;
@@ -268,14 +298,17 @@ class Net {
 				}
 			}
 
-			// haxe.Timer.delay(() -> {
-			// 	finishSdp();
-			// }, 5000);
-
 			clientDatachannel = client.createDatachannel("mp");
 			clientDatachannelUnreliable = client.createDatachannelWithOptions("unreliable", true, null, 600);
 
 			var openFlags = 0;
+
+			haxe.Timer.delay(() -> {
+				if (Net.isMP && Net.isClient && openFlags != 3) {
+					Console.log("Connection timed out (openFlags=" + openFlags + ")");
+					closeFunc("Connection timed out", true);
+				}
+			}, 15000);
 
 			var onDatachannelOpen = (idx:Int) -> {
 				if (!Net.isMP) {
@@ -354,12 +387,6 @@ class Net {
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			Net.clientConnection = null;
-			Net.serverInfo = null;
-			Net.remoteServerInfo = null;
-			Net.lobbyHostReady = false;
-			Net.lobbyClientReady = false;
-			Net.hostReady = false;
-			MultiplayerLevelSelectGui.custSelected = false;
 		}
 		if (Net.isHost) {
 			NetCommands.serverClosed();
@@ -374,13 +401,17 @@ class Net {
 			Net.clients.clear();
 			Net.clientIdMap.clear();
 			MasterServerClient.disconnectFromMasterServer();
-			Net.serverInfo = null;
-			Net.remoteServerInfo = null;
-			Net.lobbyHostReady = false;
-			Net.lobbyClientReady = false;
-			Net.hostReady = false;
-			MultiplayerLevelSelectGui.custSelected = false;
 		}
+		Net.pendingConnections.resize(0);
+		Net.serverInfo = null;
+		Net.remoteServerInfo = null;
+		Net.lobbyHostReady = false;
+		Net.lobbyClientReady = false;
+		Net.hostReady = false;
+		Net.hostSpectate = false;
+		Net.clientSpectate = false;
+		Net.selectedGameMode = "scrum";
+		MultiplayerLevelSelectGui.custSelected = false;
 	}
 
 	public static function checkPacketTimeout(dt:Float) {
@@ -393,6 +424,7 @@ class Net {
 		if (accum > 1.0) {
 			accum = 0;
 			var t = Console.time();
+			var needsTimeoutKick = [];
 			for (dc => cc in clients) {
 				if (cc is ClientConnection) {
 					var conn = cast(cc, ClientConnection);
@@ -406,22 +438,27 @@ class Net {
 						}
 					}
 					if (conn.needsTimeoutKick(t)) {
-						if (Net.isHost) {
-							dc.close();
-							onClientLeave(conn);
-						}
-						if (Net.isClient) {
-							disconnect();
-							if (MarbleGame.instance.world != null) {
-								MarbleGame.instance.quitMission();
-							}
-							if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
-								var loadGui = new MultiplayerLoadingGui("Timed out");
-								MarbleGame.canvas.setContent(loadGui);
-								loadGui.setErrorStatus("Timed out");
-							}
-						}
+						needsTimeoutKick.push(conn);
 					}
+				}
+			}
+			for (conn in needsTimeoutKick) {
+				if (Net.isHost) {
+					clients.remove(conn.socket); // remove before recount so serverInfo.players isn't off-by-one
+					conn.socket.close();
+					onClientLeave(conn);
+				}
+				if (Net.isClient) {
+					disconnect();
+					if (MarbleGame.instance.world != null) {
+						MarbleGame.instance.quitMission();
+					}
+					if (!(MarbleGame.canvas.content is MultiplayerLoadingGui)) {
+						var loadGui = new MultiplayerLoadingGui("Timed out");
+						MarbleGame.canvas.setContent(loadGui);
+						loadGui.setErrorStatus("Timed out");
+					}
+					return;
 				}
 			}
 		}
@@ -461,6 +498,8 @@ class Net {
 		cc.isPrivate = joiningPrivate;
 		clientIdMap[clientId] = clients[c];
 		cc.lastRecvTime = Console.time(); // So it doesnt get timed out
+
+		Net.pendingConnections.remove(c);
 
 		var closing = false;
 
@@ -545,6 +584,14 @@ class Net {
 	static function onClientLeave(cc:ClientConnection) {
 		if (!Net.isMP || cc == null)
 			return;
+
+		serverInfo.players = 1;
+		for (k => v in clients) { // Recount
+			serverInfo.players++;
+		}
+
+		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
+
 		if (cc.leftAlready)
 			return;
 		cc.leftAlready = true;
@@ -555,13 +602,6 @@ class Net {
 			freeClientId(cc.id);
 		}
 
-		serverInfo.players = 1;
-		for (k => v in clients) { // Recount
-			serverInfo.players++;
-		}
-
-		MasterServerClient.instance.sendServerInfo(serverInfo); // notify the server of the player leave
-
 		AudioManager.playSound(ResourceLoader.getAudio("data/sound/infotutorial.wav").resource);
 
 		if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
@@ -571,6 +611,8 @@ class Net {
 
 	static function onClientHandshakeComplete(conn:ClientConnection) {
 		// Send our current mission to connecting client
+		conn.state = LOBBY;
+		NetCommands.setLobbyGameModeClient(conn, Net.selectedGameMode);
 		if (MultiplayerLevelSelectGui.custSelected) {
 			NetCommands.setLobbyCustLevelNameClient(conn, MultiplayerLevelSelectGui.custPath);
 		} else {
@@ -609,6 +651,7 @@ class Net {
 			b.writeByte(v.lobbyReady ? 1 : 0);
 			b.writeByte(v.platform);
 			b.writeByte(v.marbleId);
+			b.writeByte(v.spectator ? 1 : 0);
 			var name = v.getName();
 			b.writeByte(name.length);
 			for (i in 0...name.length) {
@@ -620,6 +663,7 @@ class Net {
 		b.writeByte(Net.lobbyHostReady ? 1 : 0);
 		b.writeByte(getPlatform());
 		b.writeByte(Settings.optionsSettings.marbleIndex);
+		b.writeByte(Net.hostSpectate ? 1 : 0);
 		var name = Settings.highscoreName;
 		b.writeByte(name.length);
 		for (i in 0...name.length) {
@@ -729,6 +773,7 @@ class Net {
 					var cready = input.readByte() == 1;
 					var platform = input.readByte();
 					var marble = input.readByte();
+					var cspectator = input.readByte() == 1;
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
@@ -744,9 +789,11 @@ class Net {
 						clientIdMap[id].setMarbleId(marble);
 						clientIdMap[id].lobbyReady = cready;
 						clientIdMap[id].platform = platform;
+						clientIdMap[id].spectator = cspectator;
 					}
 					if (Net.clientId == id) {
 						Net.lobbyClientReady = cready;
+						Net.clientSpectate = cspectator;
 					}
 				}
 				if (newP) {
@@ -760,7 +807,21 @@ class Net {
 				var scoreboardPacket = new ScoreboardPacket();
 				scoreboardPacket.deserialize(input);
 				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
-					@:privateAccess MarbleGame.instance.world.playGui.updatePlayerScores(scoreboardPacket);
+					var world = MarbleGame.instance.world;
+					@:privateAccess world.playGui.updatePlayerScores(scoreboardPacket);
+					if (world.gameMode is modes.KingMode)
+						cast(world.gameMode, modes.KingMode).onScoreboardUpdate(scoreboardPacket.scoreBoard);
+				}
+
+			case KingInfo:
+				var kingInfoPacket = new KingInfoPacket();
+				kingInfoPacket.deserialize(input);
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed) {
+					var world = MarbleGame.instance.world;
+					if (world.gameMode is modes.KingMode) {
+						var kingMode:modes.KingMode = cast world.gameMode;
+						kingMode.onKingChanged(kingInfoPacket.kingClientId, -1);
+					}
 				}
 
 			case _:

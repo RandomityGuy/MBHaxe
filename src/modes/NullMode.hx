@@ -9,6 +9,7 @@ import h3d.Vector;
 import shapes.StartPad;
 import src.MarbleWorld;
 import src.Mission;
+import src.TimeState;
 import src.AudioManager;
 import src.ResourceLoader;
 
@@ -31,7 +32,7 @@ class NullMode implements GameMode {
 		} else {
 			position = new Vector(0, 0, 300);
 		}
-		position.z += 0.727843;
+		position.z += 0.5 + 0.22784343361854553; // the other value is the start pad's z center
 		return {
 			position: position,
 			orientation: quat,
@@ -110,4 +111,18 @@ class NullMode implements GameMode {
 	}
 
 	public function onClientRestart() {}
+
+	public function update(t:src.TimeState) {}
+
+	public function onHostTick(timeState:TimeState):Void {}
+
+	public function onMarbleContact(attacker:Marble, victim:Marble):Void {}
+
+	public function onMultiplayerStart():Void {}
+
+	public function getWorldJoinPackets():Array<haxe.io.Bytes> {
+		return [];
+	}
+
+	public function transmitAnyNetCommands(client:net.ClientConnection.GameConnection) {}
 }

@@ -51,6 +51,13 @@ class RPCMacro {
 										callExprs.push(macro $i{argName});
 										serializeFns.push(macro stream.writeString($i{argName}));
 									}
+									case TPath({
+										name: 'Bool'
+									}): {
+										deserializeFns.push(macro var $argName = stream.readFlag());
+										callExprs.push(macro $i{argName});
+										serializeFns.push(macro stream.writeFlag($i{argName}));
+									}
 
 									case _: {}
 								}
