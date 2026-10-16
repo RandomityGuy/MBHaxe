@@ -211,7 +211,7 @@ jobs:
             curl -L https://raw.githubusercontent.com/RandomityGuy/hashlink/master/libs/ssl/CMakeLists.txt > libs/ssl/CMakeLists.txt
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DSDL2_INCLUDE_DIR="$HOME/deps/SDL2-2.26.1/include" -DSDL2_LIBRARY="$HOME/deps/SDL2-2.26.1-install/lib/libSDL2-2.0.0.dylib" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DSDL2_INCLUDE_DIR="$HOME/deps/SDL2-2.26.1-install/include" -DSDL2_LIBRARY="$HOME/deps/SDL2-2.26.1-install/lib/libSDL2-2.0.0.dylib" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
