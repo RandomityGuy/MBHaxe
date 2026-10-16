@@ -24,6 +24,16 @@ android {
 
 
     buildTypes {
+        debug {
+            debuggable true
+            jniDebuggable true
+            externalNativeBuild {
+                cmake {
+                    cFlags "-g -O0"
+                    cppFlags "-g -O0 -lstdc++"
+                }
+            }
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
