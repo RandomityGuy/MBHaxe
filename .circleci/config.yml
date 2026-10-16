@@ -182,11 +182,12 @@ jobs:
             cd ~/deps
             curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.26.1/SDL2-2.26.1.tar.gz | tar xz
             cd SDL2-2.26.1
-            if [ ! -f /usr/local/lib/libSDL2-2.0.0.dylib ]; then
-              cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_MACOSX_RPATH=TRUE
-              cmake --build build --config Release -j$NPROC
-              sudo cmake --install build
-            fi
+            SDL2_INSTALL_DIR="$HOME/deps/SDL2-2.26.1-install"
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX="$SDL2_INSTALL_DIR" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_SHARED_LINKER_FLAGS="-framework OpenGL"
+            cmake --build build --config Release -j$NPROC
+            sudo cmake --install build
+            test -f "$SDL2_INSTALL_DIR/lib/libSDL2-2.0.0.dylib"
+            otool -L "$SDL2_INSTALL_DIR/lib/libSDL2-2.0.0.dylib" | grep -q "OpenGL.framework"
       - run:
           name: Compile libuv
           command: |
@@ -210,7 +211,7 @@ jobs:
             curl -L https://raw.githubusercontent.com/RandomityGuy/hashlink/master/libs/ssl/CMakeLists.txt > libs/ssl/CMakeLists.txt
             # Fix OpenAL
             # curl -L https://github.com/nullobsi/hashlink/commit/a09491918cc4b83c2cb9fcded855fe967857385f.diff | git apply
-            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_FIND_FRAMEWORK=LAST -DWITH_SQLITE=OFF -DBUILD_TESTING=OFF -DCMAKE_MACOSX_RPATH=TRUE -DHASHLINK_INCLUDE_DIR="$HOME/deps/hashlink/src" -DHASHLINK_LIBRARY_DIR="/usr/local/lib/" -DSDL2_INCLUDE_DIR="$HOME/deps/SDL2-2.26.1/include" -DSDL2_LIBRARY="$HOME/deps/SDL2-2.26.1-install/lib/libSDL2-2.0.0.dylib" -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             cmake --build build --config Release -j$NPROC
             sudo cmake --install build
 
@@ -252,13 +253,13 @@ jobs:
             haxelib install colyseus-websocket
 
       - save_cache:
-          key: mbhaxe-deps-v1
+          key: mbhaxe-deps-v2-sdl2-2.26.1
           paths:
             - /usr/local/lib/ui.hdll
             - /usr/local/lib/openal.hdll
             - /usr/local/lib/fmt.hdll
             - /usr/local/lib/sdl.hdll
-            - /usr/local/lib/libSDL2-2.0.0.dylib
+            - ~/deps/SDL2-2.26.1-install/lib/libSDL2-2.0.0.dylib
             - /usr/local/lib/libhl.1.13.0.dylib
             - /usr/local/lib/libogg.0.8.5.dylib
             - /usr/local/lib/libopenal.1.22.2.dylib
@@ -282,7 +283,7 @@ jobs:
             haxe compile-macos.hxml
             cd native
             cp ~/deps/hashlink/src/hlc_main.c .
-            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} -lsdl2 -lhl -luv -framework OpenGL
+            clang -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -o marblegame -I . -L /usr/local/lib/ -std=c11 marblegame.c /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,uv.hdll,ssl.hdll,datachannel.hdll} "$HOME/deps/SDL2-2.26.1-install/lib/libSDL2-2.0.0.dylib" -lhl -luv -framework OpenGL
 
       - run:
           name: Package app bundle
@@ -292,7 +293,8 @@ jobs:
             cd "macos-dist/MarbleBlast Ultra.app/Contents/MacOS"
             otool -L marblegame
             cd ../Frameworks
-            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,libSDL2-2.0.0.dylib,ssl.hdll,uv.hdll,datachannel.hdll} .
+            cp /usr/local/lib/{ui.hdll,openal.hdll,fmt.hdll,sdl.hdll,ssl.hdll,uv.hdll,datachannel.hdll} .
+            cp "$HOME/deps/SDL2-2.26.1-install/lib/libSDL2-2.0.0.dylib" .
             cp /usr/local/lib/libhl.1.13.0.dylib libhl.1.dylib
             cp /usr/local/lib/libogg.0.8.5.dylib libogg.0.dylib
             cp /usr/local/lib/libopenal.1.22.2.dylib libopenal.1.dylib
