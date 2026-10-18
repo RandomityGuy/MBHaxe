@@ -193,7 +193,6 @@ class Main extends hxd.App {
 		h3d.Engine.ANTIALIASING = 4;
 		#if hl
 		sdl.Sdl.init();
-		sdl.Sdl.setGLOptions(3, 2, 24, 8, 1, 4);
 		#end
 		new Main();
 	}
