@@ -841,7 +841,7 @@ class Marble extends GameObject {
 		var currentXVelocity = rollVelocity.dot(sideDir);
 		var mv = m.d;
 
-		mv.load(mv.multiply(1.538461565971375));
+		mv = mv.multiply(1.538461565971375);
 		var mvlen = Math.sqrt(mv.x * mv.x + mv.y * mv.y);
 		if (mvlen > 1) {
 			mv.scale(1 / mvlen);
