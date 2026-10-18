@@ -1,3 +1,7 @@
+# 1.3.2
+This update brings the following regression fix:
+- Fixed a critical regression where the marble didn't move as fast.
+
 # 1.3.1
 This update brings the following improvements and bugfixes:
 - Improved the movement smoothing of marbles in multiplayer.
