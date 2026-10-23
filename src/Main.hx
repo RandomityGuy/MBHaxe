@@ -9,6 +9,7 @@ import src.Console;
 import hxd.Key;
 import src.Util;
 import src.ResourceLoader;
+import src.LocalLevelLoader;
 #if js
 import fs.ManifestFileSystem;
 import fs.ManifestBuilder;
@@ -144,6 +145,7 @@ class Main extends hxd.App {
 
 			new ProfilerUI(s2d);
 
+			LocalLevelLoader.init();
 			loaded = true;
 		});
 		// } catch (e) {

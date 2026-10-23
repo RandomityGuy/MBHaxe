@@ -351,8 +351,10 @@ class MarbleGame {
 			});
 		}
 		var stats = Settings.levelStatistics[world.mission.path];
-		Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
-			Settings.optionsSettings.rewindEnabled);
+		if (!world.mission.isLocal) {
+			Analytics.trackLevelQuit(world.mission.title, world.mission.path, Std.int(world.timeState.timeSinceLoad * 1000), stats.oobs, stats.respawns,
+				Settings.optionsSettings.rewindEnabled);
+		}
 		world.dispose();
 		world = null;
 		paused = false;
@@ -408,7 +410,9 @@ class MarbleGame {
 		if (world != null) {
 			world.dispose();
 		}
-		Analytics.trackLevelPlay(mission.title, mission.path);
+		if (!mission.isLocal) {
+			Analytics.trackLevelPlay(mission.title, mission.path);
+		}
 		world = new MarbleWorld(scene, scene2d, mission, !multiplayer, multiplayer);
 		world.init();
 	}

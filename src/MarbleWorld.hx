@@ -219,6 +219,7 @@ class MarbleWorld extends Scheduler {
 	public var cheatsUsed:Bool = false;
 
 	public var inputRecorder:InputRecorder;
+	public var playtestPointManager:PlaytestPointManager;
 	public var isReplayingMovement:Bool = false;
 	public var currentInputMoves:Array<InputRecorderFrame>;
 
@@ -282,6 +283,7 @@ class MarbleWorld extends Scheduler {
 		this.isRecording = record;
 		this.rewindManager = new RewindManager(cast this);
 		this.inputRecorder = new InputRecorder(cast this);
+		this.playtestPointManager = new PlaytestPointManager(cast this);
 		if (this.isMultiplayer) {
 			isRecording = false;
 			isWatching = false;
@@ -348,6 +350,9 @@ class MarbleWorld extends Scheduler {
 		};
 		this.mission.load();
 		scanMission(this.mission.root);
+		if (this.mission.isLocal) {
+			this.playtestPointManager.scanMission(this.mission.root);
+		}
 		this.gameMode.missionScan(this.mission);
 		this.resourceLoadFuncs.push(fwd -> this.initScene(fwd));
 		if (this.isMultiplayer) {
@@ -1608,6 +1613,10 @@ class MarbleWorld extends Scheduler {
 		// 	return;
 		// }
 
+		if (!this.isWatching && this.finishTime == null) {
+			this.playtestPointManager.update(dt);
+		}
+
 		// if ((Key.isDown(Settings.controlsSettings.respawn)
 		// 	|| MarbleGame.instance.touchInput.restartButton.pressed
 		// 	|| Gamepad.isDown(Settings.gamepadSettings.respawn))
@@ -2284,15 +2293,17 @@ class MarbleWorld extends Scheduler {
 					totalMPScore: 0
 				});
 			}
-			Analytics.trackLevelScore(mission.title, misPath,
-				gameMode.getScoreType() == Time ? Std.int(1000 * gameMode.getFinishScore()) : Std.int(gameMode.getFinishScore()),
-				Settings.levelStatistics[misPath].oobs, Settings.levelStatistics[misPath].respawns, Settings.optionsSettings.rewindEnabled);
+			if (!mission.isLocal) {
+				Analytics.trackLevelScore(mission.title, misPath,
+					gameMode.getScoreType() == Time ? Std.int(1000 * gameMode.getFinishScore()) : Std.int(gameMode.getFinishScore()),
+					Settings.levelStatistics[misPath].oobs, Settings.levelStatistics[misPath].respawns, Settings.optionsSettings.rewindEnabled);
+			}
 			if (!this.isWatching) {
 				var myScore = {
 					name: "Player",
 					time: this.gameMode.getFinishScore()
 				};
-				if (!this.cheatsUsed)
+				if (!this.cheatsUsed && !mission.isLocal)
 					Settings.saveScore(misPath, myScore, this.gameMode.getScoreType());
 				var notifies = AchievementsGui.check();
 				var delay = 5.0;
