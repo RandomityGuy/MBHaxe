@@ -47,6 +47,7 @@ class Mission {
 	public var game:String;
 	public var hasEgg:Bool;
 	public var isCustom:Bool;
+	public var isLocal:Bool = false;
 	public var gameMode:String;
 	public var curationScore:Int = 0;
 	#if hl
@@ -342,6 +343,10 @@ class Mission {
 		#end
 		if (!StringTools.endsWith(path, ".dif"))
 			path += ".dif";
+		if (ResourceLoader.existsInZip(path))
+			return path;
+		if (ResourceLoader.existsInZip(fname))
+			return fname;
 		if (ResourceLoader.exists(path))
 			return path;
 		if (StringTools.contains(path, 'interiors_mbg/'))
@@ -359,6 +364,8 @@ class Mission {
 		path = StringTools.replace(path, "lbinteriors", "interiors"); // This shit ew
 		if (ResourceLoader.exists(path))
 			return path;
+		if (ResourceLoader.exists(fname))
+			return fname;
 		Console.error("Interior resource not found: " + rawElementPath);
 		return "";
 	}
