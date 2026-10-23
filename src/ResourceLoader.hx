@@ -283,10 +283,16 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		if (ResourceLoader.existsInZip(path))
+			return path;
+		if (ResourceLoader.existsInZip(fname))
+			return fname;
 		if (ResourceLoader.exists(path))
 			return path;
 		if (ResourceLoader.exists(dirpath + fname))
 			return dirpath + fname;
+		if (ResourceLoader.exists(fname))
+			return fname;
 		return "";
 	}
 
@@ -559,6 +565,13 @@ class ResourceLoader {
 		return fileSystem.exists(path);
 	}
 
+	public static function existsInZip(path:String):Bool {
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
+		#end
+		return zipFilesystem.exists(path.toLowerCase());
+	}
+
 	public static function clearInteriorResources() {
 		interiorResources = new Map();
 	}
@@ -615,5 +628,14 @@ class ResourceLoader {
 			var zfe = new BytesFileEntry(fname, entry.data);
 			zipFilesystem.set(fname, zfe);
 		}
+	}
+
+	public static function registerLocalFile(path:String, bytes:haxe.io.Bytes) {
+		path = StringTools.replace(path, "\\", "/").toLowerCase();
+		#if (js || android)
+		path = StringTools.replace(path, "data/", "");
+		#end
+		var zfe = new BytesFileEntry(path, bytes);
+		zipFilesystem.set(path, zfe);
 	}
 }

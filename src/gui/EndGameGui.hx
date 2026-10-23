@@ -396,7 +396,7 @@ class EndGameGui extends GuiControl {
 		var rewindUsed = MarbleGame.instance.world.rewindUsed;
 		var cheatsUsed = MarbleGame.instance.world.cheatsUsed;
 
-		if (idx <= 4) {
+		if (idx <= 4 && !mission.isLocal) {
 			setButtonStates(false);
 			var end = new EnterNameDlg(idx, (name) -> {
 				setButtonStates(true);
@@ -440,7 +440,7 @@ class EndGameGui extends GuiControl {
 				scoreSubmitted = true;
 			});
 			this.addChild(end);
-		} else {
+		} else if (!mission.isLocal) {
 			// Check if we can submit LB scores
 			var lbPath = mission.path;
 			if (mission.isClaMission)
