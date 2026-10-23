@@ -94,7 +94,7 @@ class Mission {
 		};
 
 		scanMission(root); // Scan for egg
-		if (this.isClaMission && this.customSource != "MPCustoms")
+		if (this.isClaMission && this.customSource != "MPCustoms" || this.isLocal)
 			postProcessFromMarbleland();
 
 		if (this.customSource == "MPCustoms") {
