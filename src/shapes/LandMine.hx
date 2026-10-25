@@ -15,6 +15,7 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.MarbleWorld;
 import src.MarbleGame;
+import mis.MissionElement.MissionElementStaticShape;
 
 final landMineParticle:ParticleEmitterOptions = {
 	ejectionPeriod: 7,
@@ -128,8 +129,9 @@ final landMineSparksParticle:ParticleEmitterOptions = {
 class LandMine extends Explodable {
 	var light:h3d.scene.fwd.PointLight;
 
-	public function new() {
+	public function new(element:MissionElementStaticShape) {
 		super();
+		renewTime = element.getResetTime(5000);
 		dtsPath = "data/shapes/hazards/landmine.dts";
 		this.identifier = "LandMine";
 		this.isCollideable = true;

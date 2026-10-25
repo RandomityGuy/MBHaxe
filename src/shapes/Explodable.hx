@@ -28,7 +28,19 @@ abstract class Explodable extends DtsObject {
 	var disappearTime = -1e8;
 	var lastContactTick:Int = -100000;
 
-	var renewTime = 5000;
+	var renewTime = 5000; // In milliseconds, 0 for never
+
+	inline function renewAtTick():Float {
+		if (lastContactTick < -50000)
+			return Math.NEGATIVE_INFINITY; // Never exploded
+		return renewTime > 0 ? this.lastContactTick + (renewTime >> 5) : Math.POSITIVE_INFINITY;
+	}
+
+	inline function renewAtTime():Float {
+		if (disappearTime < -1e7)
+			return Math.NEGATIVE_INFINITY; // Never exploded
+		return renewTime > 0 ? this.disappearTime + (renewTime / 1000) : Math.POSITIVE_INFINITY;
+	}
 
 	var explodeSoundFile:String = "data/sound/explode1.wav";
 
@@ -43,32 +55,32 @@ abstract class Explodable extends DtsObject {
 
 		if (Net.isMP) {
 			if (Net.isHost) {
-				if (timeState.ticks >= this.lastContactTick + (renewTime >> 5) || timeState.ticks < this.lastContactTick) {
+				if (timeState.ticks >= renewAtTick() || timeState.ticks < this.lastContactTick) {
 					this.setHide(false);
 				} else {
 					this.setHide(true);
 				}
 
-				var opacity = Util.clamp((timeState.ticks - (this.lastContactTick + (renewTime >> 5))), 0, 1);
+				var opacity = Util.clamp((timeState.ticks - renewAtTick()), 0, 1);
 				this.setOpacity(opacity);
 			} else {
-				if (@:privateAccess level.marble.serverTicks >= this.lastContactTick + (renewTime >> 5) || @:privateAccess level.marble.serverTicks < this.lastContactTick) {
+				if (@:privateAccess level.marble.serverTicks >= renewAtTick() || @:privateAccess level.marble.serverTicks < this.lastContactTick) {
 					this.setHide(false);
 				} else {
 					this.setHide(true);
 				}
 
-				var opacity = Util.clamp((@:privateAccess level.marble.serverTicks - (this.lastContactTick + (renewTime >> 5))), 0, 1);
+				var opacity = Util.clamp((@:privateAccess level.marble.serverTicks - renewAtTick()), 0, 1);
 				this.setOpacity(opacity);
 			}
 		} else {
-			if (timeState.timeSinceLoad >= this.disappearTime + (renewTime / 1000) || timeState.timeSinceLoad < this.disappearTime) {
+			if (timeState.timeSinceLoad >= renewAtTime() || timeState.timeSinceLoad < this.disappearTime) {
 				this.setHide(false);
 			} else {
 				this.setHide(true);
 			}
 
-			var opacity = Util.clamp((timeState.timeSinceLoad - (this.disappearTime + (renewTime / 1000))), 0, 1);
+			var opacity = Util.clamp((timeState.timeSinceLoad - renewAtTime()), 0, 1);
 			this.setOpacity(opacity);
 		}
 	}
@@ -163,7 +175,7 @@ abstract class Explodable extends DtsObject {
 
 	public function revertContactTicks(ticks:Int) {
 		this.lastContactTick = ticks;
-		if (level.timeState.ticks >= this.lastContactTick + (renewTime >> 5) || level.timeState.ticks < this.lastContactTick) {
+		if (level.timeState.ticks >= renewAtTick() || level.timeState.ticks < this.lastContactTick) {
 			if (emitter1 != null) {
 				this.level.particleManager.removeEmitterWithParticles(emitter1);
 				emitter1 = null;

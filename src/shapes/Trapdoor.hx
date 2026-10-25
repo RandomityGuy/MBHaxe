@@ -11,10 +11,12 @@ import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.MarbleWorld;
+import mis.MissionElement.MissionElementStaticShape;
 
 class Trapdoor extends DtsObject {
 	var lastContactTime = -1e8;
 	var timeout:Float = 0.2;
+	var resetTime:Float; // Seconds until it closes again, 0 for never
 	var lastDirection:Int;
 	var lastCompletion:Float = 0;
 
@@ -22,8 +24,9 @@ class Trapdoor extends DtsObject {
 
 	var netId:Int;
 
-	public function new() {
+	public function new(element:MissionElementStaticShape) {
 		super();
+		this.resetTime = element.getResetTime(5000) / 1000;
 		this.dtsPath = "data/shapes/hazards/trapdoor.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
@@ -65,24 +68,28 @@ class Trapdoor extends DtsObject {
 
 	function getCurrentCompletion(timeState:TimeState) {
 		if (level.isMultiplayer) {
+			if (lastContactTicks < -50000)
+				return 0.0; // Never touched
 			if (Net.isHost) {
 				var elapsed = (timeState.ticks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
 				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-				if (elapsed > 5)
-					completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+				if (resetTime > 0 && elapsed > resetTime)
+					completion = Util.clamp(1 - (elapsed - resetTime) / 1.6666676998138428, 0, 1);
 				return completion;
 			} else {
 				var elapsed = (@:privateAccess level.marble.serverTicks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
 				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-				if (elapsed > 5)
-					completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+				if (resetTime > 0 && elapsed > resetTime)
+					completion = Util.clamp(1 - (elapsed - resetTime) / 1.6666676998138428, 0, 1);
 				return completion;
 			}
 		} else {
+			if (lastContactTime < -1e7)
+				return 0.0; // Never touched
 			var elapsed = timeState.timeSinceLoad - this.lastContactTime;
 			var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-			if (elapsed > 5)
-				completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+			if (resetTime > 0 && elapsed > resetTime)
+				completion = Util.clamp(1 - (elapsed - resetTime) / 1.6666676998138428, 0, 1);
 			return completion;
 		}
 	}

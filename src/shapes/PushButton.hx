@@ -10,12 +10,15 @@ import src.ForceObject;
 import src.ResourceLoader;
 import src.AudioManager;
 import src.MarbleWorld;
+import mis.MissionElement.MissionElementStaticShape;
 
 class PushButton extends DtsObject {
 	var lastContactTime = -1e8;
+	var resetTime:Float; // Seconds until it resets, 0 for never
 
-	public function new() {
+	public function new(element:MissionElementStaticShape) {
 		super();
+		this.resetTime = element.getResetTime(5000) / 1000;
 		this.dtsPath = "data/shapes/buttons/pushbutton.dts";
 		this.isCollideable = true;
 		this.isTSStatic = false;
@@ -33,10 +36,12 @@ class PushButton extends DtsObject {
 	}
 
 	function getCurrentCompletion(timeState:TimeState) {
+		if (lastContactTime < -1e7)
+			return 0.0; // Never touched
 		var elapsed = timeState.timeSinceLoad - this.lastContactTime;
 		var completion = Util.clamp(elapsed / this.dts.sequences[0].duration, 0, 1);
-		if (elapsed > 5)
-			completion = Util.clamp(1 - (elapsed - 5) / this.dts.sequences[0].duration, 0, 1);
+		if (resetTime > 0 && elapsed > resetTime)
+			completion = Util.clamp(1 - (elapsed - resetTime) / this.dts.sequences[0].duration, 0, 1);
 		return completion;
 	}
 

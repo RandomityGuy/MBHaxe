@@ -162,6 +162,14 @@ class MissionElementStaticShape extends MissionElementBase {
 	public function new() {
 		_type = MissionElementType.StaticShape;
 	}
+
+	/** Gets the reset time in milliseconds, falling back to `defaultMs` if unset or "Default". A value of 0 means it never resets. **/
+	public function getResetTime(defaultMs:Int):Int {
+		if (resettime == null || resettime == "" || resettime.toLowerCase() == "default")
+			return defaultMs;
+		var parsed = Std.parseInt(resettime);
+		return parsed == null ? defaultMs : parsed;
+	}
 }
 
 @:publicFields

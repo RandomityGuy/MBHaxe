@@ -1468,7 +1468,7 @@ class MarbleWorld extends Scheduler {
 
 		// Explosion states
 		for (exp in this.explodables) {
-			if (this.timeState.ticks < (exp.lastContactTick + exp.renewTime >> 5)) {
+			if (exp.renewTime <= 0 || this.timeState.ticks < (exp.lastContactTick + exp.renewTime >> 5)) {
 				var b = new OutputBitStream();
 				b.writeByte(NetPacketType.ExplodableUpdate);
 				var explPacket = new ExplodableUpdatePacket();
