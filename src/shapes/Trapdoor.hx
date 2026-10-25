@@ -66,32 +66,31 @@ class Trapdoor extends DtsObject {
 		this.lastDirection = direction;
 	}
 
-	function getCurrentCompletion(timeState:TimeState) {
+	function getElapsed(timeState:TimeState) {
 		if (level.isMultiplayer) {
-			if (lastContactTicks < -50000)
-				return 0.0; // Never touched
-			if (Net.isHost) {
-				var elapsed = (timeState.ticks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
-				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-				if (resetTime > 0 && elapsed > resetTime)
-					completion = Util.clamp(1 - (elapsed - resetTime) / 1.6666676998138428, 0, 1);
-				return completion;
-			} else {
-				var elapsed = (@:privateAccess level.marble.serverTicks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
-				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-				if (resetTime > 0 && elapsed > resetTime)
-					completion = Util.clamp(1 - (elapsed - resetTime) / 1.6666676998138428, 0, 1);
-				return completion;
-			}
-		} else {
-			if (lastContactTime < -1e7)
-				return 0.0; // Never touched
-			var elapsed = timeState.timeSinceLoad - this.lastContactTime;
-			var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-			if (resetTime > 0 && elapsed > resetTime)
-				completion = Util.clamp(1 - (elapsed - resetTime) / 1.6666676998138428, 0, 1);
-			return completion;
+			var ticks = Net.isHost ? timeState.ticks : @:privateAccess level.marble.serverTicks;
+			return (ticks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
 		}
+		return timeState.timeSinceLoad - this.lastContactTime;
+	}
+
+	function isNeverTouched() {
+		return level.isMultiplayer ? lastContactTicks < -50000 : lastContactTime < -1e7;
+	}
+
+	// lastContactTime is offset by the open delay, but the reset time counts from the hit itself
+	function isClosing(elapsed:Float) {
+		return resetTime > 0 && elapsed > Math.max(0, resetTime - timeout);
+	}
+
+	function getCurrentCompletion(timeState:TimeState) {
+		if (isNeverTouched())
+			return 0.0; // Never touched
+		var elapsed = getElapsed(timeState);
+		var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
+		if (isClosing(elapsed))
+			completion = Util.clamp(1 - (elapsed - Math.max(0, resetTime - timeout)) / 1.6666676998138428, 0, 1);
+		return completion;
 	}
 
 	override function onMarbleContact(marble:src.Marble, time:TimeState, ?contact:CollisionInfo) {
@@ -109,6 +108,10 @@ class Trapdoor extends DtsObject {
 				return; // The trapdoor is queued to open, so don't do anything.
 		}
 		var currentCompletion = this.getCurrentCompletion(time);
+
+		// Only react if the trapdoor is fully closed or closing back up
+		if (currentCompletion > 0 && !isClosing(getElapsed(time)))
+			return;
 
 		// Set the last contact time accordingly so that the trapdoor starts closing (again)
 
