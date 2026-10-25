@@ -591,6 +591,35 @@ class DifBuilder {
 				collider.addSurface(colliderSurface);
 				colliderSurfaces.push(colliderSurface);
 			}
+			for (i in 0...geo.nullSurfaces.length) {
+				var surface = geo.nullSurfaces[i];
+
+				var planeindex = surface.planeIndex;
+				var planeFlipped = (planeindex & 0x8000) == 0x8000;
+				if (planeFlipped)
+					planeindex &= ~0x8000;
+				var plane = geo.planes[planeindex];
+				var normal = geo.normals[plane.normalIndex];
+				if (planeFlipped)
+					normal = normal.scalar(-1);
+
+				var colliderSurface = new CollisionSurface();
+				colliderSurface.points = [];
+				colliderSurface.normals = [];
+				colliderSurface.transformKeys = [];
+				colliderSurface.vertexCounts = [];
+				for (j in surface.windingStart...surface.windingStart + surface.windingCount) {
+					var point = geo.points[geo.windings[j]];
+					colliderSurface.addPoint(-point.x, point.y, point.z);
+					colliderSurface.transformKeys.push(0);
+				}
+				colliderSurface.addNormal(-normal.x, normal.y, normal.z);
+				colliderSurface.vertexCounts.push(surface.windingCount);
+				colliderSurface.generateBoundingBox();
+				colliderSurface.initialize();
+				collider.addSurface(colliderSurface);
+				colliderSurfaces.push(colliderSurface);
+			}
 			for (vtex => buckets in vertexBuckets) {
 				for (i in 0...buckets.length) {
 					var bucket = buckets[i];
@@ -871,7 +900,6 @@ class DifBuilder {
 			itr.nameBuffer = null;
 			itr.normalIndices = null;
 			itr.normalLMapIndices = null;
-			itr.nullSurfaces = null;
 			itr.pointVisibilities = null;
 			itr.polyListPlanes = null;
 			itr.polyListPoints = null;
