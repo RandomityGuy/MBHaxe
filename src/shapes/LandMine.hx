@@ -1,5 +1,7 @@
 package shapes;
 
+import mis.MisParser;
+import mis.MissionElement.MissionElementStaticShape;
 import net.BitStream.OutputBitStream;
 import net.NetPacket.ExplodableUpdatePacket;
 import net.Net;
@@ -128,7 +130,7 @@ final landMineSparksParticle:ParticleEmitterOptions = {
 class LandMine extends Explodable {
 	var light:h3d.scene.fwd.PointLight;
 
-	public function new() {
+	public function new(element:MissionElementStaticShape) {
 		super();
 		dtsPath = "data/shapes/hazards/landmine.dts";
 		this.identifier = "LandMine";
@@ -149,6 +151,8 @@ class LandMine extends Explodable {
 		this.smokeParticle = landMineSmokeParticle;
 		this.sparksParticle = landMineSparksParticle;
 		this.particle = landMineParticle;
+		if (element.resettime != null && element.resettime.toLowerCase() != "default")
+			this.renewTime = cast MisParser.parseNumber(element.resettime);
 	}
 
 	function computeExplosionStrength(r:Float) {
