@@ -1,5 +1,7 @@
 package shapes;
 
+import mis.MisParser;
+import mis.MissionElement.MissionElementStaticShape;
 import net.BitStream.OutputBitStream;
 import net.NetPacket.ExplodableUpdatePacket;
 import net.Net;
@@ -157,6 +159,8 @@ class LandMine extends Explodable {
 		this.smokeParticle = landMineSmokeParticle;
 		this.sparksParticle = landMineSparksParticle;
 		this.particle = landMineParticle;
+		if (element != null && element.resettime != null && element.resettime.toLowerCase() != "default")
+			this.renewTime = cast MisParser.parseNumber(element.resettime);
 	}
 
 	function computeExplosionStrength(r:Float) {
