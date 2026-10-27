@@ -1,5 +1,7 @@
 package shapes;
 
+import mis.MissionElement.MissionElementStaticShape;
+import mis.MisParser;
 import net.BitStream.OutputBitStream;
 import net.NetPacket.ExplodableUpdatePacket;
 import src.AudioManager;
@@ -125,7 +127,7 @@ final nukeSparksParticle:ParticleEmitterOptions = {
 };
 
 class Nuke extends Explodable {
-	public function new() {
+	public function new(element:MissionElementStaticShape) {
 		super();
 		dtsPath = "data/shapes/hazards/nuke/nuke.dts";
 		this.identifier = "Nuke";
@@ -149,6 +151,9 @@ class Nuke extends Explodable {
 
 		renewTime = 15000;
 		explodeSoundFile = "data/sound/nukeexplode.wav";
+
+		if (element.resettime != null && element.resettime.toLowerCase() != "default")
+			this.renewTime = cast MisParser.parseNumber(element.resettime);
 	}
 
 	function computeExplosionForce(distVec:Vector) {

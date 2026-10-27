@@ -97,9 +97,9 @@ class MarbleWorldMacros {
 			else if (dataBlockLowerCase == "norespawnantigravityitem")
 				shape = new AntiGravity(cast element, true);
 			else if (dataBlockLowerCase == "landmine" || dataBlockLowerCase == "landmine_mbm")
-				shape = new LandMine();
+				shape = new LandMine(cast element);
 			else if (dataBlockLowerCase == "nuke")
-				shape = new Nuke();
+				shape = new Nuke(cast element);
 			else if (dataBlockLowerCase == "shockabsorberitem")
 				shape = new ShockAbsorber(cast element);
 			else if (dataBlockLowerCase == "superspeeditem" || dataBlockLowerCase == "superspeeditem_mbu")
@@ -117,7 +117,7 @@ class MarbleWorldMacros {
 			else if (dataBlockLowerCase == "tornado" || dataBlockLowerCase == "tornado_mbm")
 				shape = new Tornado();
 			else if (dataBlockLowerCase == "trapdoor" || dataBlockLowerCase == "trapdoor_mbu")
-				shape = new Trapdoor();
+				shape = new Trapdoor(cast element);
 			else if (dataBlockLowerCase == "pushbutton")
 				shape = new PushButton();
 			else if (dataBlockLowerCase == "oilslick")
