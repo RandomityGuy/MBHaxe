@@ -388,12 +388,13 @@ class Mission {
 						case "glass_3shape" | "glass_6shape" | "glass_9shape" | "glass_12shape" | "glass_15shape" | "glass_18shape":
 							var pos = MisParser.parseVector3(ss.position);
 							var rot = MisParser.parseRotation(ss.rotation);
+							var scale = MisParser.parseVector3(ss.scale);
 
 							var quat = new h3d.Quat();
 							quat.initRotateAxis(0, 0, 1, Math.PI / 2);
 							rot.multiply(rot, quat);
 
-							var offset = new Vector(-3, -0.25, 0);
+							var offset = new Vector(-3 * scale.y, -0.25 * scale.x, 0);
 							offset.transform3x3(rot.toMatrix());
 							pos.load(pos.sub(offset));
 							ss.position = '${pos.x} ${pos.y} ${pos.z}';
@@ -412,6 +413,7 @@ class Mission {
 							}
 							angle = (angle * -180.0 / Math.PI) % 360.0;
 							ss.rotation = '${x} ${y} ${z} ${angle}';
+							ss.scale = '${scale.y} ${scale.x} ${scale.z}';
 
 						case "checkpoint" | "checkpoint_mbu":
 							// need to make a new simgroup for this checkpoint, and move the triggers that affect it into that simgroup
@@ -481,6 +483,94 @@ class Mission {
 									sg.elements.push(spawnSphereEl);
 								});
 							}
+						case "antigravityitem_mbu" | "norespawnantigravityitem_mbu":
+							{
+								var pos = MisParser.parseVector3(ss.position);
+								var scale = MisParser.parseVector3(ss.scale);
+								var rot = MisParser.parseRotation(ss.rotation);
+								var offset = new Vector(0, 0.00509 * scale.y, -0.00293 * scale.z);
+								offset.transform3x3(rot.toMatrix());
+								pos.load(pos.sub(offset));
+								ss.position = '${pos.x} ${pos.y} ${pos.z}';
+							}
+						case "easteregg_mbu":
+							{
+								var pos = MisParser.parseVector3(ss.position);
+								var scale = MisParser.parseVector3(ss.scale);
+								var rot = MisParser.parseRotation(ss.rotation);
+								var offset = new Vector(0, 0, -0.51168 * scale.z);
+
+								offset.transform3x3(rot.toMatrix());
+								pos.load(pos.sub(offset));
+								ss.position = '${pos.x} ${pos.y} ${pos.z}';
+							}
+						case "helicopteritem_mbu":
+							{
+								var pos = MisParser.parseVector3(ss.position);
+								var scale = MisParser.parseVector3(ss.scale);
+								var rot = MisParser.parseRotation(ss.rotation);
+								var offset = new Vector(0, -0.02397 * scale.y, -0.26289 * scale.z);
+
+								offset.transform3x3(rot.toMatrix());
+								pos.load(pos.sub(offset));
+								ss.position = '${pos.x} ${pos.y} ${pos.z}';
+							}
+						case "megamarbleitem_mbu":
+							{
+								var pos = MisParser.parseVector3(ss.position);
+								var scale = MisParser.parseVector3(ss.scale);
+								var rot = MisParser.parseRotation(ss.rotation);
+								var offset = new Vector(0, 0, -0.00668 * scale.z);
+
+								offset.transform3x3(rot.toMatrix());
+								pos.load(pos.sub(offset));
+								ss.position = '${pos.x} ${pos.y} ${pos.z}';
+							}
+						case "superspeeditem_mbu":
+							{
+								var pos = MisParser.parseVector3(ss.position);
+								var scale = MisParser.parseVector3(ss.scale);
+								var rot = MisParser.parseRotation(ss.rotation);
+								var offset = new Vector(-0.01392 * scale.x, -0.00893 * scale.y, 0.23474 * scale.z);
+
+								offset.transform3x3(rot.toMatrix());
+								pos.load(pos.sub(offset));
+								ss.position = '${pos.x} ${pos.y} ${pos.z}';
+							}
+						case "timetravelitem_mbu":
+							{
+								var pos = MisParser.parseVector3(ss.position);
+								var scale = MisParser.parseVector3(ss.scale);
+								var rot = MisParser.parseRotation(ss.rotation);
+								var offset = new Vector(0, 0, 0.36398 * scale.z);
+
+								offset.transform3x3(rot.toMatrix());
+								pos.load(pos.sub(offset));
+								ss.position = '${pos.x} ${pos.y} ${pos.z}';
+							}
+						case "trapdoor_mbu":
+							{
+								// Rotate this 180 on Z axis
+								var rot = MisParser.parseRotation(ss.rotation);
+								var quat = new h3d.Quat();
+								quat.initRotateAxis(0, 0, 1, Math.PI);
+								rot.multiply(rot, quat);
+
+								var angle = 2 * Math.acos(rot.w);
+								var s = Math.sqrt(1 - rot.w * rot.w);
+								var x, y, z;
+								if (s < 0.001) {
+									x = rot.x;
+									y = rot.y;
+									z = rot.z;
+								} else {
+									x = rot.x / s;
+									y = rot.y / s;
+									z = rot.z / s;
+								}
+								angle = (angle * -180.0 / Math.PI) % 360.0;
+								ss.rotation = '${x} ${y} ${z} ${angle}';
+							}
 					}
 				}
 				if (element._type == MissionElementType.TSStatic) {
@@ -491,12 +581,13 @@ class Mission {
 							"~/data/shapes/glass/15x3.dts" | "~/data/shapes/glass/18x3.dts":
 							var pos = MisParser.parseVector3(ts.position);
 							var rot = MisParser.parseRotation(ts.rotation);
+							var scale = MisParser.parseVector3(ts.scale);
 
 							var quat = new h3d.Quat();
 							quat.initRotateAxis(0, 0, 1, Math.PI / 2);
 							rot.multiply(rot, quat);
 
-							var offset = new Vector(-3, -0.25, 0);
+							var offset = new Vector(-3 * scale.y, -0.25 * scale.x, 0);
 							offset.transform3x3(rot.toMatrix());
 							pos.load(pos.sub(offset));
 							var newPos = '${pos.x} ${pos.y} ${pos.z}';
@@ -534,7 +625,7 @@ class Mission {
 								glassEl._name = ts._name;
 								glassEl.position = newPos;
 								glassEl.rotation = newRot;
-								glassEl.scale = ts.scale;
+								glassEl.scale = '${scale.y} ${scale.x} ${scale.z}';
 								glassEl.datablock = datablockName;
 								glassEl.fields = [];
 
