@@ -405,6 +405,7 @@ class MarbleGame {
 	}
 
 	public function playMission(mission:Mission, multiplayer:Bool = false) {
+		paused = false;
 		canvas.clearContent();
 		destroyPreviewWorld();
 		if (world != null) {
