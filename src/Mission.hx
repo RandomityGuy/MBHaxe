@@ -415,6 +415,30 @@ class Mission {
 							ss.rotation = '${x} ${y} ${z} ${angle}';
 							ss.scale = '${scale.y} ${scale.x} ${scale.z}';
 
+						case "trapdoor_mbu":
+							{
+								// Rotate this 180 on Z axis
+								var rot = MisParser.parseRotation(ss.rotation);
+								var quat = new h3d.Quat();
+								quat.initRotateAxis(0, 0, 1, Math.PI);
+								rot.multiply(rot, quat);
+
+								var angle = 2 * Math.acos(rot.w);
+								var s = Math.sqrt(1 - rot.w * rot.w);
+								var x, y, z;
+								if (s < 0.001) {
+									x = rot.x;
+									y = rot.y;
+									z = rot.z;
+								} else {
+									x = rot.x / s;
+									y = rot.y / s;
+									z = rot.z / s;
+								}
+								angle = (angle * -180.0 / Math.PI) % 360.0;
+								ss.rotation = '${x} ${y} ${z} ${angle}';
+							}
+
 						case "checkpoint" | "checkpoint_mbu":
 							// need to make a new simgroup for this checkpoint, and move the triggers that affect it into that simgroup
 							var sg = simGroup;
@@ -547,29 +571,6 @@ class Mission {
 								offset.transform3x3(rot.toMatrix());
 								pos.load(pos.sub(offset));
 								ss.position = '${pos.x} ${pos.y} ${pos.z}';
-							}
-						case "trapdoor_mbu":
-							{
-								// Rotate this 180 on Z axis
-								var rot = MisParser.parseRotation(ss.rotation);
-								var quat = new h3d.Quat();
-								quat.initRotateAxis(0, 0, 1, Math.PI);
-								rot.multiply(rot, quat);
-
-								var angle = 2 * Math.acos(rot.w);
-								var s = Math.sqrt(1 - rot.w * rot.w);
-								var x, y, z;
-								if (s < 0.001) {
-									x = rot.x;
-									y = rot.y;
-									z = rot.z;
-								} else {
-									x = rot.x / s;
-									y = rot.y / s;
-									z = rot.z / s;
-								}
-								angle = (angle * -180.0 / Math.PI) % 360.0;
-								ss.rotation = '${x} ${y} ${z} ${angle}';
 							}
 					}
 				}

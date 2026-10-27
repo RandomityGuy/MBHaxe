@@ -425,7 +425,7 @@ class PreviewWorld extends Scheduler {
 		else if (dataBlockLowerCase == "megamarbleitem")
 			shape = new MegaMarble(cast element);
 		else if (dataBlockLowerCase == "trapdoor")
-			shape = new Trapdoor();
+			shape = new Trapdoor(cast element);
 		else if ([
 			"glass_3shape",
 			"glass_6shape",
