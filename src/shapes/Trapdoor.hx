@@ -1,5 +1,7 @@
 package shapes;
 
+import mis.MisParser;
+import mis.MissionElement.MissionElementStaticShape;
 import hxd.snd.effect.Spatialization;
 import src.TimeState;
 import collision.CollisionInfo;
@@ -22,8 +24,9 @@ class Trapdoor extends DtsObject {
 	var lastContactTicks:Int = -100000;
 
 	var netId:Int;
+	var resetTime:Float = 5;
 
-	public function new() {
+	public function new(element:MissionElementStaticShape) {
 		super();
 		this.dtsPath = "data/shapes/hazards/trapdoor.dts";
 		this.isCollideable = true;
@@ -31,6 +34,8 @@ class Trapdoor extends DtsObject {
 		this.identifier = "Trapdoor";
 		this.hasNonVisualSequences = true;
 		this.enableCollideCallbacks = true;
+		this.resetTime = (element.resettime != null
+			&& element.resettime.toLowerCase() != "default") ? MisParser.parseNumber(element.resettime) / 1000 : 5;
 	}
 
 	public override function init(level:MarbleWorld, onFinish:Void->Void) {
@@ -67,21 +72,21 @@ class Trapdoor extends DtsObject {
 			if (Net.isHost) {
 				var elapsed = (timeState.ticks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
 				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-				if (elapsed > 5)
-					completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+				if (elapsed > this.resetTime)
+					completion = Util.clamp(1 - (elapsed - this.resetTime) / 1.6666676998138428, 0, 1);
 				return completion;
 			} else {
 				var elapsed = (@:privateAccess level.marble.serverTicks - this.lastContactTicks) * 0.032 + (timeState.subframe * 0.032);
 				var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-				if (elapsed > 5)
-					completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+				if (elapsed > this.resetTime)
+					completion = Util.clamp(1 - (elapsed - this.resetTime) / 1.6666676998138428, 0, 1);
 				return completion;
 			}
 		} else {
 			var elapsed = timeState.timeSinceLoad - this.lastContactTime;
 			var completion = Util.clamp(elapsed / 1.6666676998138428, 0, 1);
-			if (elapsed > 5)
-				completion = Util.clamp(1 - (elapsed - 5) / 1.6666676998138428, 0, 1);
+			if (elapsed > this.resetTime)
+				completion = Util.clamp(1 - (elapsed - this.resetTime) / 1.6666676998138428, 0, 1);
 			return completion;
 		}
 	}
@@ -101,6 +106,18 @@ class Trapdoor extends DtsObject {
 				return; // The trapdoor is queued to open, so don't do anything.
 		}
 		var currentCompletion = this.getCurrentCompletion(time);
+
+		var elapsed = (time.timeSinceLoad - this.lastContactTime);
+
+		if (level.isMultiplayer) {
+			if (Net.isHost)
+				elapsed = (time.ticks - this.lastContactTicks) * 0.032 + (time.subframe * 0.032);
+			else
+				elapsed = (@:privateAccess level.marble.serverTicks - this.lastContactTicks) * 0.032 + (time.subframe * 0.032);
+		}
+
+		if (currentCompletion > 0 && elapsed < this.resetTime)
+			return; // Don't react if we are opening
 
 		// Set the last contact time accordingly so that the trapdoor starts closing (again)
 		if (level.isMultiplayer) {

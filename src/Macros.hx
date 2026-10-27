@@ -100,7 +100,7 @@ class MarbleWorldMacros {
 			else if (dataBlockLowerCase == "megamarbleitem" || dataBlockLowerCase == "megamarbleitem_mbu")
 				shape = new MegaMarble(cast element);
 			else if (dataBlockLowerCase == "trapdoor" || dataBlockLowerCase == "trapdoor_mbu")
-				shape = new Trapdoor();
+				shape = new Trapdoor(cast element);
 			else if ([
 				"glass_3shape",
 				"glass_6shape",
