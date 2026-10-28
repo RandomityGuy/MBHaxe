@@ -143,7 +143,9 @@ class EndGameGui extends GuiControl {
 		nextLevelButton.gamepadAccelerator = ["X"];
 		nextLevelButton.pressedAction = (e) -> nextLevelFunc(nextLevelButton);
 		nextLevelButton.txtCtrl.text.text = "Next";
-		endGameBox.addChild(nextLevelButton);
+		if (!mission.isLocal) {
+			endGameBox.addChild(nextLevelButton);
+		}
 
 		var container = new GuiControl();
 		container.horizSizing = Right;
