@@ -29,6 +29,7 @@ import src.Gamepad;
 import src.Analytics;
 import net.Net;
 import net.NetCommands;
+import src.LocalLevelLoader;
 
 @:publicFields
 class MarbleGame {
@@ -338,6 +339,7 @@ class MarbleGame {
 		world = null;
 
 		Settings.save();
+		LocalLevelLoader.notifyExitLevel();
 	}
 
 	public function playMission(mission:Mission, multiplayer:Bool = false) {

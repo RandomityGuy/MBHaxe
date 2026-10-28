@@ -41,6 +41,27 @@ class LocalLevelLoader {
 		#end
 	}
 
+	public static function notifyExitLevel() {
+		#if js
+		if (js.Browser.window.opener != null) {
+			try {
+				Console.log("Notifying level editor that we exit the level...");
+				js.Browser.window.opener.postMessage({type: "mbhaxe-exit"}, "*");
+			} catch (e:Dynamic) {}
+		}
+		if (js.Browser.window.parent != null) {
+			try {
+				Console.log("Notifying level editor that we exit the level...");
+				js.Browser.window.parent.postMessage({type: "mbhaxe-exit"}, "*");
+			} catch (e:Dynamic) {}
+		}
+		try {
+			var channel = new js.html.BroadcastChannel("mbhaxe-level-editor");
+			channel.postMessage({type: "mbhaxe-exit"});
+		} catch (e:Dynamic) {}
+		#end
+	}
+
 	static function setupWebPostMessage() {
 		#if js
 		function handleMessage(data:Dynamic) {
