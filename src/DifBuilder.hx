@@ -236,6 +236,10 @@ class DifBuilder {
 		?force:Float
 	}> = [];
 
+	public static function clearDifCache() {
+		difCache.clear();
+	}
+
 	static function createDefaultMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String, shininess:Float, specularColor:Vector,
 			uvScaleFactor:Float = 1, half:Bool = false) {
 		var worker = new ResourceLoaderWorker(() -> {

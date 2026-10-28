@@ -7,6 +7,8 @@ import src.Mission;
 import src.ResourceLoader;
 import src.MarbleGame;
 import src.Console;
+import src.DifBuilder;
+import src.Settings;
 
 class LocalLevelLoader {
 	public static var currentLocalPath:String = null;
@@ -70,6 +72,9 @@ class LocalLevelLoader {
 				return;
 			}
 
+			DifBuilder.clearDifCache();
+
+			Settings.optionsSettings.rewindEnabled = true; // enable rewind while testing!
 			MarbleGame.instance.playMission(mission);
 		}
 
