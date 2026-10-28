@@ -374,7 +374,9 @@ class EndGameGui extends GuiControl {
 
 		pg.addChild(continueButton);
 		pg.addChild(restartButton);
-		pg.addChild(nextLevel);
+		if (!mission.isLocal)
+			pg.addChild(nextLevel);
+
 		pg.addChild(egFirstLine);
 		pg.addChild(egSecondLine);
 		pg.addChild(egThirdLine);

@@ -341,7 +341,7 @@ class MarbleWorld extends Scheduler {
 		this.mission.load();
 		this.gameMode = GameModeFactory.getGameMode(cast this, mission.gameMode);
 		scanMission(this.mission.root);
-		if(this.mission.isLocal) {
+		if (this.mission.isLocal) {
 			this.playtestPointManager.scanMission(this.mission.root);
 		}
 		this.gameMode.missionScan(this.mission);
@@ -2483,6 +2483,7 @@ class MarbleWorld extends Scheduler {
 				#if js
 				pointercontainer.hidden = false;
 				#end
+				LocalLevelLoader.notifyExitLevel();
 			}
 			if (MarbleGame.instance.toRecord) {
 				MarbleGame.canvas.pushDialog(new ReplayNameDlg(endGameCode));
