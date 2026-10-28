@@ -7,6 +7,7 @@ import src.Mission;
 import src.ResourceLoader;
 import src.MarbleGame;
 import src.Console;
+import src.Settings;
 
 class LocalLevelLoader {
 	public static var currentLocalPath:String = null;
@@ -70,6 +71,7 @@ class LocalLevelLoader {
 				return;
 			}
 
+			Settings.optionsSettings.rewindEnabled = true;
 			MarbleGame.instance.playMission(mission);
 		}
 
