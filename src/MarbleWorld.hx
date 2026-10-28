@@ -2371,6 +2371,7 @@ class MarbleWorld extends Scheduler {
 						var pmg = new LevelSelectGui(["beginner", "intermediate", "advanced", "multiplayer"][mission.difficultyIndex]);
 						MarbleGame.canvas.setContent(pmg);
 					}
+					LocalLevelLoader.notifyExitLevel();
 				}
 				#if js
 				pointercontainer.hidden = false;
