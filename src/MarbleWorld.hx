@@ -2198,6 +2198,7 @@ class MarbleWorld extends Scheduler {
 				#if js
 				pointercontainer.hidden = false;
 				#end
+				LocalLevelLoader.notifyExitLevel();
 			}
 			if (MarbleGame.instance.toRecord) {
 				if (this.isRecording) {
