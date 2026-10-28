@@ -24,12 +24,18 @@ class LocalLevelLoader {
 		if (js.Browser.window.opener != null) {
 			try {
 				Console.log("Notifying level editor that MBHaxe is ready...");
-				js.Browser.window.opener.postMessage({ type: "mbhaxe-ready" }, "*");
+				js.Browser.window.opener.postMessage({type: "mbhaxe-ready"}, "*");
+			} catch (e:Dynamic) {}
+		}
+		if (js.Browser.window.parent != null) {
+			try {
+				Console.log("Notifying level editor that MBHaxe is ready...");
+				js.Browser.window.parent.postMessage({type: "mbhaxe-ready"}, "*");
 			} catch (e:Dynamic) {}
 		}
 		try {
 			var channel = new js.html.BroadcastChannel("mbhaxe-level-editor");
-			channel.postMessage({ type: "mbhaxe-ready" });
+			channel.postMessage({type: "mbhaxe-ready"});
 		} catch (e:Dynamic) {}
 		#end
 	}
@@ -37,7 +43,8 @@ class LocalLevelLoader {
 	static function setupWebPostMessage() {
 		#if js
 		function handleMessage(data:Dynamic) {
-			if (data == null || data.type != "loadLevel" || data.files == null) return;
+			if (data == null || data.type != "loadLevel" || data.files == null)
+				return;
 			Console.log("Received level load message via postMessage/BroadcastChannel");
 
 			var mission:Mission = null;
