@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Vector;
 import haxe.io.Bytes;
 import haxe.io.Path;
 import mis.MisParser;
@@ -12,6 +13,7 @@ import src.Settings;
 class LocalLevelLoader {
 	public static var currentLocalPath:String = null;
 	public static var currentMission:Mission = null;
+	static var keyboardRelayAttached = false;
 
 	public static function init() {
 		#if js
@@ -62,38 +64,93 @@ class LocalLevelLoader {
 		#end
 	}
 
+	static function attachKeyboardRelay() {
+		#if js
+		if (keyboardRelayAttached)
+			return;
+		keyboardRelayAttached = true;
+
+		js.Browser.window.addEventListener("keydown", (e:js.html.KeyboardEvent) -> relayKeyboardEvent("mbhaxe-keydown", e));
+		js.Browser.window.addEventListener("keyup", (e:js.html.KeyboardEvent) -> relayKeyboardEvent("mbhaxe-keyup", e));
+		#end
+	}
+
+	static function relayKeyboardEvent(type:String, e:js.html.KeyboardEvent) {
+		#if js
+		var parent = js.Browser.window.parent;
+		if (parent == null || parent == js.Browser.window)
+			return;
+
+		parent.postMessage({
+			type: type,
+			code: e.code,
+			key: e.key,
+			altKey: e.altKey,
+			ctrlKey: e.ctrlKey,
+			metaKey: e.metaKey,
+			shiftKey: e.shiftKey,
+			repeat: e.repeat
+		}, "*");
+		#end
+	}
+
 	static function setupWebPostMessage() {
 		#if js
 		function handleMessage(data:Dynamic) {
-			if (data == null || data.type != "loadLevel" || data.files == null)
+			if (data == null)
 				return;
-			Console.log("Received level load message via postMessage/BroadcastChannel");
 
-			var mission:Mission = null;
+			switch (data.type) {
+				case "loadLevel":
+					{
+						if (data.files == null)
+							return;
+						Console.log("Received level load message via postMessage/BroadcastChannel");
 
-			var filesAccess:haxe.DynamicAccess<Dynamic> = data.files;
-			for (k in filesAccess.keys()) {
-				var fileData:Dynamic = filesAccess.get(k);
-				var bytes:Bytes = null;
-				if (Std.isOfType(fileData, String)) {
-					bytes = Bytes.ofString(fileData);
-				} else {
-					bytes = Bytes.ofData(fileData);
-				}
-				ResourceLoader.registerLocalFile(k, bytes);
+						var mission:Mission = null;
 
-				if (StringTools.endsWith(k.toLowerCase(), ".mis")) {
-					mission = createLocalMission(k, bytes.toString());
-				}
+						var filesAccess:haxe.DynamicAccess<Dynamic> = data.files;
+						for (k in filesAccess.keys()) {
+							var fileData:Dynamic = filesAccess.get(k);
+							var bytes:Bytes = null;
+							if (Std.isOfType(fileData, String)) {
+								bytes = Bytes.ofString(fileData);
+							} else {
+								bytes = Bytes.ofData(fileData);
+							}
+							ResourceLoader.registerLocalFile(k, bytes);
+
+							if (StringTools.endsWith(k.toLowerCase(), ".mis")) {
+								mission = createLocalMission(k, bytes.toString());
+							}
+						}
+
+						if (mission == null) {
+							Console.error("postMessage loadLevel missing .mis file in files payload");
+							return;
+						}
+
+						Settings.optionsSettings.rewindEnabled = true;
+						MarbleGame.instance.playMission(mission);
+						attachKeyboardRelay();
+					}
+				case "teleport":
+					{
+						if (MarbleGame.instance.world != null && MarbleGame.instance.world.mission.isLocal) {
+							// we can teleport our marble
+							var destPos = new Vector(data.position.x, data.position.y, data.position.z);
+							if (MarbleGame.instance.world.marble != null) {
+								MarbleGame.instance.world.marble.setMarblePosition(-destPos.x, destPos.y, destPos.z);
+								MarbleGame.instance.world.marble.velocity.set(0, 0, 0);
+								MarbleGame.instance.world.marble.omega.set(0, 0, 0);
+
+								// If level is paused, unpause it since we are gonna tab back to it
+								if (MarbleGame.instance.paused)
+									MarbleGame.instance.handlePauseGame();
+							}
+						}
+					}
 			}
-
-			if (mission == null) {
-				Console.error("postMessage loadLevel missing .mis file in files payload");
-				return;
-			}
-
-			Settings.optionsSettings.rewindEnabled = true;
-			MarbleGame.instance.playMission(mission);
 		}
 
 		js.Browser.window.addEventListener("message", (e:js.html.MessageEvent) -> {
