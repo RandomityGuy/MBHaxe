@@ -35,6 +35,11 @@ class LRUCache<V> {
 		return cacheMap.exists(k);
 	}
 
+	public function clear() {
+		cacheMap.clear();
+		curSize = 0;
+	}
+
 	public function set(k:String, v:V) {
 		var cv = cacheMap.get(k);
 		if (cv != null) {
