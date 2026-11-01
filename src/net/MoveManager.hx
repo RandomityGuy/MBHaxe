@@ -72,8 +72,19 @@ class MoveManager {
 	}
 
 	public function recordMove(marble:Marble, motionDir:Vector, timeState:TimeState, serverTicks:Int) {
+		if (Net.isClient && ackRTT >= 0) {
+			var excessMoveCount = queuedMoves.length - (ackRTT + (timeState.ticks - serverTicks));
+			if (excessMoveCount > 12) {
+				queuedMoves.resize(0); // clear everything
+				stall = false;
+			} else if (excessMoveCount > 3) {
+				stall = true;
+			} else {
+				stall = false;
+			}
+		}
 		if (queuedMoves.length >= maxMoves) {
-			queuedMoves.shift();
+			return queuedMoves[queuedMoves.length - 1];
 		}
 		if (stall) {
 			// FPS too low: don't record new input
@@ -170,7 +181,7 @@ class MoveManager {
 		return netMove;
 	}
 
-	function copyMove(to:Int, from:Int) {
+	inline function copyMove(to:Int, from:Int) {
 		queuedMoves[to].move = queuedMoves[from].move;
 		queuedMoves[to].motionDir.load(queuedMoves[from].motionDir);
 	}
@@ -239,7 +250,7 @@ class MoveManager {
 					&& queuedMoves.length > serverTargetMoveListSize)) {
 				var dropAmt = queuedMoves.length - serverTargetMoveListSize;
 				while (dropAmt-- > 0) {
-					queuedMoves.pop();
+					queuedMoves.shift();
 				}
 				serverAvgMoveListSize = serverTargetMoveListSize;
 			}
