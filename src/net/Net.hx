@@ -79,6 +79,8 @@ class Net {
 	public static var hostReady:Bool;
 	public static var hostSpectate:Bool;
 	public static var clientSpectate:Bool;
+	public static var hostTeam:Int = -1; // -1 : unassigned/auto, 0: red, 1: blue
+	public static var clientTeam:Int = -1;
 
 	static var clientIdAllocs:Int = 1;
 	public static var clientId:Int;
@@ -203,6 +205,127 @@ class Net {
 	public static function addGhost(id:Int) {
 		var ghost = new DummyConnection(id);
 		clientIdMap[id] = ghost;
+	}
+
+	public static function getTeamId(clientId:Int):Int {
+		if (clientId == 0)
+			return Net.hostTeam;
+		if (Net.isClient && clientId == Net.clientId)
+			return Net.clientTeam;
+		var conn = clientIdMap.get(clientId);
+		return conn != null ? conn.teamId : -1;
+	}
+
+	public static function setTeamId(clientId:Int, team:Int) {
+		if (clientId == 0) {
+			Net.hostTeam = team;
+		} else {
+			var conn = clientIdMap.get(clientId);
+			if (conn != null)
+				conn.teamId = team;
+		}
+	}
+
+	public static function broadcastPlayerInfos() {
+		var b = sendPlayerInfosBytes();
+		for (cc in clients) {
+			cc.sendBytes(b);
+		}
+	}
+
+	static function resetTeamIds() {
+		Net.hostTeam = -1;
+		for (id => conn in clientIdMap) {
+			conn.teamId = -1;
+		}
+	}
+
+	// Randomly and evenly splits all participating players into red/blue teams.
+	public static function assignTeams() {
+		if (!Net.isHost)
+			return;
+
+		resetTeamIds();
+
+		var ids:Array<Int> = [];
+		if (!Net.hostSpectate)
+			ids.push(0);
+		for (id => conn in clientIdMap) {
+			// Ghost connections are not real players
+			if (conn is DummyConnection)
+				continue;
+			if (conn.spectator)
+				continue;
+			ids.push(id);
+		}
+
+		// Shuffle so the split is random
+		for (i in 0...ids.length) {
+			var j = Math.floor(Math.random() * ids.length);
+			var tmp = ids[i];
+			ids[i] = ids[j];
+			ids[j] = tmp;
+		}
+
+		for (i in 0...ids.length) {
+			Net.setTeamId(ids[i], i % 2);
+		}
+
+		broadcastPlayerInfos();
+		refreshLobbyTeams();
+	}
+
+	// Clears all team assignments.
+	public static function clearTeams() {
+		if (!Net.isHost)
+			return;
+		resetTeamIds();
+		broadcastPlayerInfos();
+		refreshLobbyTeams();
+	}
+
+	// Assigns teams only to players that don't have one yet.
+	public static function ensureTeamsAssigned() {
+		if (!Net.isHost)
+			return;
+
+		var teamCounts = [0, 0];
+		if (!Net.hostSpectate && Net.hostTeam >= 0 && Net.hostTeam < 2)
+			teamCounts[Net.hostTeam]++;
+		for (id => conn in clientIdMap) {
+			if (conn is DummyConnection || conn.spectator)
+				continue;
+			if (conn.teamId >= 0 && conn.teamId < 2)
+				teamCounts[conn.teamId]++;
+		}
+
+		var unassigned:Array<Int> = [];
+		if (!Net.hostSpectate && Net.hostTeam < 0)
+			unassigned.push(0);
+		for (id => conn in clientIdMap) {
+			if (conn is DummyConnection || conn.spectator)
+				continue;
+			if (conn.teamId < 0)
+				unassigned.push(id);
+		}
+
+		if (unassigned.length == 0)
+			return;
+
+		for (id in unassigned) {
+			var team = teamCounts[0] <= teamCounts[1] ? 0 : 1;
+			Net.setTeamId(id, team);
+			teamCounts[team]++;
+		}
+
+		broadcastPlayerInfos();
+		refreshLobbyTeams();
+	}
+
+	static function refreshLobbyTeams() {
+		if (MarbleGame.canvas != null && MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+			cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+		}
 	}
 
 	public static function joinServer(serverName:String, isInvite:Bool, connectedCb:() -> Void, turnTried:Bool = false) {
@@ -411,6 +534,8 @@ class Net {
 		Net.hostReady = false;
 		Net.hostSpectate = false;
 		Net.clientSpectate = false;
+		Net.hostTeam = -1;
+		Net.clientTeam = -1;
 		Net.selectedGameMode = "scrum";
 		MultiplayerLevelSelectGui.custSelected = false;
 	}
@@ -644,15 +769,20 @@ class Net {
 		var b = new haxe.io.BytesOutput();
 		b.writeByte(PlayerInfo);
 		var cnt = 0;
-		for (c in clientIdMap)
-			cnt++;
-		b.writeByte(cnt + 1); // all + host
 		for (c => v in clientIdMap) {
+			if (!(v is DummyConnection))
+				cnt++;
+		}
+		b.writeByte(cnt + 1); // all real players + host
+		for (c => v in clientIdMap) {
+			if (v is DummyConnection)
+				continue; // Ghost connections are not players
 			b.writeByte(c);
 			b.writeByte(v.lobbyReady ? 1 : 0);
 			b.writeByte(v.platform);
 			b.writeByte(v.marbleId);
 			b.writeByte(v.spectator ? 1 : 0);
+			b.writeByte(v.teamId + 1); // shift by 1 so -1 -> 0
 			var name = v.getName();
 			b.writeByte(name.length);
 			for (i in 0...name.length) {
@@ -665,6 +795,7 @@ class Net {
 		b.writeByte(getPlatform());
 		b.writeByte(Settings.optionsSettings.marbleIndex);
 		b.writeByte(Net.hostSpectate ? 1 : 0);
+		b.writeByte(Net.hostTeam + 1); // shift by 1 so -1 -> 0
 		var name = Settings.highscoreName;
 		b.writeByte(name.length);
 		for (i in 0...name.length) {
@@ -781,6 +912,7 @@ class Net {
 					var platform = input.readByte();
 					var marble = input.readByte();
 					var cspectator = input.readByte() == 1;
+					var cteam = input.readByte() - 1;
 					if (id != 0 && id != Net.clientId && !clientIdMap.exists(id)) {
 						Console.log('Adding ghost connection ${id}');
 						addGhost(id);
@@ -797,10 +929,15 @@ class Net {
 						clientIdMap[id].lobbyReady = cready;
 						clientIdMap[id].platform = platform;
 						clientIdMap[id].spectator = cspectator;
+						clientIdMap[id].teamId = cteam;
+					}
+					if (id == 0) {
+						Net.hostTeam = cteam;
 					}
 					if (Net.clientId == id) {
 						Net.lobbyClientReady = cready;
 						Net.clientSpectate = cspectator;
+						Net.clientTeam = cteam;
 					}
 				}
 				if (newP) {

@@ -275,7 +275,7 @@ class MarbleWorld extends Scheduler {
 			misGameMode = "scrum";
 		// In multiplayer, host/client can override the game mode via the lobby selector
 		this.isMultiplayer = multiplayer;
-		if (isMultiplayer && Net.selectedGameMode != null)
+		if (isMultiplayer && Net.selectedGameMode != null && misGameMode != "soccer")
 			misGameMode = Net.selectedGameMode;
 
 		this.gameMode = GameModeFactory.getGameMode(cast this, misGameMode);
@@ -687,7 +687,9 @@ class MarbleWorld extends Scheduler {
 		this.cancel(this.oobSchedule);
 		this.cancel(this.marble.oobSchedule);
 
-		var startquat = this.gameMode.getSpawnTransform();
+		var startquat = this.gameMode.getInitialSpawnTransform(this.marble);
+		if (startquat == null)
+			startquat = this.gameMode.getSpawnTransform();
 
 		this.marble.setMarblePosition(startquat.position.x, startquat.position.y, startquat.position.z);
 		this.marble.reset();
@@ -706,7 +708,9 @@ class MarbleWorld extends Scheduler {
 		if (isMultiplayer) {
 			for (client => marble in clientMarbles) {
 				this.cancel(marble.oobSchedule);
-				var marbleStartQuat = this.gameMode.getSpawnTransform();
+				var marbleStartQuat = this.gameMode.getInitialSpawnTransform(marble);
+				if (marbleStartQuat == null)
+					marbleStartQuat = this.gameMode.getSpawnTransform();
 				marble.setMarblePosition(marbleStartQuat.position.x, marbleStartQuat.position.y, marbleStartQuat.position.z);
 				marble.reset();
 				marble.setMode(Start);
@@ -2749,6 +2753,9 @@ class MarbleWorld extends Scheduler {
 		}
 
 		CollisionPool.freeMemory();
+
+		if (this.gameMode != null)
+			this.gameMode.onDispose();
 
 		radar.dispose();
 

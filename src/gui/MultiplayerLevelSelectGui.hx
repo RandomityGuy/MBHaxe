@@ -1,8 +1,11 @@
 package gui;
 
 import net.ClientConnection.NetPlatform;
+import net.ClientConnection.DummyConnection;
 import net.Net;
 import net.NetCommands;
+import modes.GameMode.GameModeFactory;
+import modes.TeamInfo;
 import modes.GameMode.ScoreType;
 import src.Util;
 import haxe.io.Path;
@@ -29,6 +32,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 	var innerCtrl:GuiControl;
 	var inviteVisibility:Bool = true;
 	var chatWnd:ChatCtrl;
+	var teamButton:GuiXboxButton;
+	var teamOption:GuiXboxOptionsList;
 
 	static var custSelected:Bool = false;
 	static var custPath:String;
@@ -164,23 +169,28 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			playerListArr.push({
 				name: Settings.highscoreName,
 				state: Net.lobbyHostReady,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				team: Net.hostTeam
 			});
 		}
 		if (Net.isClient) {
 			playerListArr.push({
 				name: Settings.highscoreName,
 				state: Net.clientConnection.lobbyReady,
-				platform: Net.getPlatform()
+				platform: Net.getPlatform(),
+				team: Net.clientTeam
 			});
 		}
 
 		if (Net.clientIdMap != null) {
 			for (c => v in Net.clientIdMap) {
+				if (v is DummyConnection)
+					continue;
 				playerListArr.push({
 					name: v.name,
 					state: v.lobbyReady,
-					platform: v.platform
+					platform: v.platform,
+					team: v.teamId
 				});
 			}
 		}
@@ -218,7 +228,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 		playerList = new GuiMLTextListCtrl(arial14, playerListArr.map(player -> {
 			return
-				'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${StringTools.htmlEscape(player.name)}';
+				'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${teamTag(player.team)}${StringTools.htmlEscape(player.name)}';
 		}), imgLoader);
 		playerList.selectedColor = 0xF29515;
 		playerList.selectedFillColor = 0xEBEBEB;
@@ -321,9 +331,9 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			optionsCollection.vertSizing = Bottom;
 			optionsCollection.horizSizing = Right;
 
-			var gameModeInitIdx = ["scrum", "competitive", "king"].indexOf(Net.selectedGameMode);
-			var gameModeOpt = optionsCollection.addOption(0, "Game Mode", ["Gem Hunt", "Competitive", "King"], (idx) -> {
-				var newMode = ["scrum", "competitive", "king"][idx];
+			var gameModeInitIdx = ["scrum", "competitive", "king", "teamhunt"].indexOf(Net.selectedGameMode);
+			var gameModeOpt = optionsCollection.addOption(0, "Game Mode", ["Gem Hunt", "Competitive", "King", "Team Gem Hunt"], (idx) -> {
+				var newMode = ["scrum", "competitive", "king", "teamhunt"][idx];
 				NetCommands.setLobbyGameMode(newMode);
 				return true;
 			}, 0.5, 118);
@@ -343,6 +353,14 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				return true;
 			}, 0.5, 118);
 			spectateOpt.setCurrentOption(Net.isHost ? (Net.hostSpectate ? 0 : 1) : 0);
+
+			var teamOpt = optionsCollection.addOption(0, "Team", ["Auto", "Red", "Blue"], (idx) -> {
+				NetCommands.setTeam(0, idx - 1);
+				updateLobbyNames();
+				return true;
+			}, 0.5, 118);
+			teamOpt.setCurrentOption(Net.hostTeam + 1);
+			teamOption = teamOpt;
 
 			var optionsButton = new GuiXboxButton("Options", 220);
 			optionsButton.position = new Vector(750, 0);
@@ -372,7 +390,23 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			}
 			bottomBar.addChild(optionsButton);
 		} else {
-			// Show spectate button for clients
+			// Show team and spectate buttons for clients
+			teamButton = new GuiXboxButton("Team: Auto", 180);
+			teamButton.position = new Vector(560, 0);
+			teamButton.vertSizing = Bottom;
+			teamButton.horizSizing = Right;
+			teamButton.gamepadAccelerator = [Settings.gamepadSettings.alt1];
+			teamButton.pressedAction = (e) -> {
+				var next = switch (Net.clientTeam) {
+					case 0: 1;
+					case 1: -1;
+					default: 0;
+				}
+				NetCommands.setTeam(Net.clientId, next);
+				updateTeamButton();
+			}
+			bottomBar.addChild(teamButton);
+
 			var spectateOpt = new GuiXboxButton("Spectate", 220);
 			spectateOpt.position = new Vector(750, 0);
 			spectateOpt.vertSizing = Bottom;
@@ -440,6 +474,12 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			lock = true;
 			curMission = difficultyMissions[idx];
 			currentSelectionStatic = idx;
+			if (Net.isHost) {
+				if (isTeamsMission(curMission))
+					Net.assignTeams();
+				else
+					Net.clearTeams();
+			}
 			currentToken++;
 			var misFile = Path.withoutExtension(Path.withoutDirectory(curMission.path));
 			var mis = difficultyMissions[idx];
@@ -473,6 +513,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				var pubCount = 1; // 1 for host
 				var privCount = 0;
 				for (cid => cc in Net.clientIdMap) {
+					if (cc is DummyConnection)
+						continue;
 					if (cc.isPrivate) {
 						privCount++;
 					} else {
@@ -513,6 +555,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			custSelected = true;
 			custPath = str;
 			if (Net.isHost) {
+				syncTeamsForCurrentSelection();
 				updateLobbyNames();
 			} else
 				updatePlayerCountFn(0, 0, 0, 0);
@@ -550,6 +593,44 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		}
 	}
 
+	inline function teamTag(team:Int) {
+		if (team < 0)
+			return "";
+		return '<font color="${TeamInfo.toHex(TeamInfo.getColor(team))}">[${TeamInfo.getName(team).charAt(0)}]</font> ';
+	}
+
+	inline function isTeamsMission(mission:src.Mission) {
+		if (GameModeFactory.isTeamsMode(Net.selectedGameMode))
+			return true;
+		return mission != null && mission.missionInfo != null && GameModeFactory.isTeamsMode(mission.missionInfo.gamemode);
+	}
+
+	/**
+	 * Re-evaluates whether the current lobby selection uses teams and updates
+	 * the host-side team assignments accordingly.
+	 */
+	public static function syncTeamsForCurrentSelection() {
+		if (!Net.isHost)
+			return;
+		var teams = GameModeFactory.isTeamsMode(Net.selectedGameMode);
+		if (!teams && !custSelected) {
+			var missions = MissionList.missionList['ultra']["multiplayer"];
+			if (currentSelectionStatic >= 0 && currentSelectionStatic < missions.length) {
+				var mission = missions[currentSelectionStatic];
+				teams = mission != null && mission.missionInfo != null && GameModeFactory.isTeamsMode(mission.missionInfo.gamemode);
+			}
+		}
+		if (teams)
+			Net.assignTeams();
+		else
+			Net.clearTeams();
+	}
+
+	function updateTeamButton() {
+		if (teamButton != null)
+			teamButton.setText('Team: ${Net.clientTeam < 0 ? "Auto" : TeamInfo.getName(Net.clientTeam)}');
+	}
+
 	public function updateLobbyNames() {
 		var playerListArr = [];
 		if (Net.isHost) {
@@ -557,7 +638,8 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				name: Settings.highscoreName,
 				state: Net.lobbyHostReady,
 				platform: Net.getPlatform(),
-				spectate: Net.hostSpectate
+				spectate: Net.hostSpectate,
+				team: Net.hostTeam
 			});
 		}
 		if (Net.isClient) {
@@ -565,16 +647,20 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				name: Settings.highscoreName,
 				state: Net.lobbyClientReady,
 				platform: Net.getPlatform(),
-				spectate: Net.clientSpectate
+				spectate: Net.clientSpectate,
+				team: Net.clientTeam
 			});
 		}
 		if (Net.clientIdMap != null) {
 			for (c => v in Net.clientIdMap) {
+				if (v is DummyConnection)
+					continue;
 				playerListArr.push({
 					name: v.name,
 					state: v.lobbyReady,
 					platform: v.platform,
-					spectate: v.spectator
+					spectate: v.spectator,
+					team: v.teamId
 				});
 			}
 		}
@@ -583,12 +669,18 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			playerList.setTexts(playerListArr.map(player -> {
 				var spectateStr = player.spectate ? "[S] " : "";
 				return
-					'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${spectateStr}${StringTools.htmlEscape(player.name)}';
+					'<img src="${player.state ? "ready" : "notready"}"></img><img src="${platformToString(player.platform)}"></img>${teamTag(player.team)}${spectateStr}${StringTools.htmlEscape(player.name)}';
 			}));
+
+		updateTeamButton();
+		if (Net.isHost && teamOption != null)
+			teamOption.setCurrentOption(Net.hostTeam + 1);
 
 		var pubCount = 1; // Self
 		var privCount = 0;
 		for (cid => cc in Net.clientIdMap) {
+			if (cc is DummyConnection)
+				continue;
 			if (cc.isPrivate) {
 				privCount++;
 			} else {
@@ -596,7 +688,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			}
 		}
 
-		if (Net.isHost) {
+		if (Net.isHost && updatePlayerCountFn != null) {
 			updatePlayerCountFn(pubCount, privCount, Net.serverInfo.maxPlayers - Net.serverInfo.privateSlots, Net.serverInfo.privateSlots);
 		}
 	}

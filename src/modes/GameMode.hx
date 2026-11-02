@@ -18,6 +18,8 @@ enum ScoreType {
 interface GameMode {
 	public function getSpawnTransform():{position:Vector, orientation:Quat, up:Vector};
 	public function getRespawnTransform(marble:Marble):{position:Vector, orientation:Quat, up:Vector};
+
+	public function getInitialSpawnTransform(marble:Marble):{position:Vector, orientation:Quat, up:Vector};
 	public function missionScan(mission:Mission):Void;
 	public function getStartTime():Float;
 	public function timeMultiplier():Float;
@@ -48,6 +50,9 @@ interface GameMode {
 
 	public function getPreloadFiles():Array<String>;
 	public function constructRewindState():RewindableState;
+
+	// Called when the world is disposed so modes can clean up any network state
+	public function onDispose():Void;
 }
 
 class GameModeFactory {
@@ -62,7 +67,13 @@ class GameModeFactory {
 					return new KingMode(level);
 				case "soccer":
 					return new SoccerMode(level);
+				case "teamhunt":
+					return new TeamHuntMode(level);
 			}
 		return new NullMode(level);
+	}
+
+	public static function isTeamsMode(mode:String):Bool {
+		return mode != null && (mode.toLowerCase() == "soccer" || mode.toLowerCase() == "teamhunt");
 	}
 }

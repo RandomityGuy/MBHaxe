@@ -1,6 +1,8 @@
 package gui;
 
 import gui.GuiControl.MouseState;
+import modes.TeamsMode;
+import modes.TeamInfo;
 import net.NetCommands;
 import hxd.Key;
 import net.NetPacket.ScoreboardPacket;
@@ -860,6 +862,11 @@ class PlayGui {
 	}
 
 	public function redrawPlayerList() {
+		if (isTeamsMode()) {
+			redrawTeamsPlayerList();
+			return;
+		}
+
 		var pl = [];
 		var plScores = [];
 		var plShadow = [];
@@ -881,6 +888,86 @@ class PlayGui {
 			plShadow.push('<font color="#000000"><img src="them"></img>${spectateText}${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
 			plShadowScores.push('<font color="#000000">${item.score}</font>');
 		}
+		applyPlayerList(pl, plScores, plShadow, plShadowScores);
+	}
+
+	inline function isTeamsMode() {
+		return getTeamsMode() != null;
+	}
+
+	function getTeamsMode():TeamsMode {
+		if (MarbleGame.instance.world == null)
+			return null;
+		var gameMode = MarbleGame.instance.world.gameMode;
+		return gameMode is TeamsMode ? cast gameMode : null;
+	}
+
+	public function refreshScoreboard() {
+		redrawPlayerList();
+	}
+
+	function redrawTeamsPlayerList() {
+		var teamsMode = getTeamsMode();
+		if (teamsMode == null)
+			return;
+
+		var pl = [];
+		var plScores = [];
+		var plShadow = [];
+		var plShadowScores = [];
+
+		function teamOrder(team:Int) {
+			return team >= 0 && team < teamsMode.getTeamCount() ? team : teamsMode.getTeamCount();
+		}
+
+		playerList.sort((a, b) -> {
+			var at = teamOrder(Net.getTeamId(a.id));
+			var bt = teamOrder(Net.getTeamId(b.id));
+			if (at != bt)
+				return at - bt;
+			var an = a.name.toLowerCase();
+			var bn = b.name.toLowerCase();
+			return an < bn ? -1 : (an > bn ? 1 : 0);
+		});
+
+		var currentTeam = -2;
+		for (item in playerList) {
+			var team = Net.getTeamId(item.id);
+			if (team != currentTeam) {
+				var color = TeamInfo.toHex(teamsMode.getTeamColor(team));
+				var label = team >= 0 && team < teamsMode.getTeamCount() ? 'Team ${teamsMode.getTeamName(team)}' : "No Team";
+				var total = team >= 0 && team < teamsMode.getTeamCount() ? teamsMode.getTeamScore(team) : 0;
+				pl.push('<font color="${color}"><img src="them"></img>${label}${Util.rightPad("", 15, 3)}</font>');
+				plScores.push('<font color="${color}">${total}</font>');
+				plShadow.push('<font color="#000000"><img src="them"></img>${label}${Util.rightPad("", 15, 3)}</font>');
+				plShadowScores.push('<font color="#000000">${total}</font>');
+				currentTeam = team;
+			}
+
+			var isSpectating = false;
+			if (item.us) {
+				if (Net.isHost)
+					isSpectating = Net.hostSpectate;
+				if (Net.isClient)
+					isSpectating = Net.clientSpectate;
+			} else {
+				isSpectating = Net.clientIdMap[item.id].spectator;
+			}
+			var spectateText = isSpectating ? "[S] " : "";
+			var tint = TeamInfo.toHex(TeamInfo.lighten(teamsMode.getTeamColor(team), 0.6));
+			var showScores = teamsMode.showsIndividualScores();
+			pl.push('<font color="${tint}"><img src="${item.us ? "us" : "them"}"></img>${spectateText}${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
+			plScores.push(showScores ? '<font color="${tint}">${item.score}</font>' : '<font color="${tint}"></font>');
+			plShadow.push('<font color="#000000"><img src="them"></img>${spectateText}${Util.rightPad(StringTools.htmlEscape(item.name), 25, 3)}</font>');
+			plShadowScores.push(showScores ? '<font color="#000000">${item.score}</font>' : '<font color="#000000"></font>');
+		}
+
+		applyPlayerList(pl, plScores, plShadow, plShadowScores);
+	}
+
+	function applyPlayerList(pl:Array<String>, plScores:Array<String>, plShadow:Array<String>, plShadowScores:Array<String>) {
+		if (playerListCtrl == null)
+			return;
 		playerListCtrl.setTexts(pl);
 		playerListScoresCtrl.setTexts(plScores);
 		playerListShadowCtrl.setTexts(plShadow);
@@ -888,6 +975,38 @@ class PlayGui {
 	}
 
 	public function doMPEndGameMessage() {
+		var teamsMode = getTeamsMode();
+		if (teamsMode != null) {
+			var bestTeam = -1;
+			var bestScore = -1;
+			var tie = false;
+			var scoreParts = [];
+			for (team in 0...teamsMode.getTeamCount()) {
+				var score = teamsMode.getTeamScore(team);
+				scoreParts.push('${teamsMode.getTeamName(team)} ${score}');
+				if (score > bestScore) {
+					bestScore = score;
+					bestTeam = team;
+					tie = false;
+				} else if (score == bestScore) {
+					tie = true;
+				}
+			}
+			if (tie || bestTeam < 0) {
+				MarbleGame.instance.world.displayAlert('Game tied! ${scoreParts.join(" - ")}');
+			} else {
+				var teamName = teamsMode.getTeamName(bestTeam);
+				var pointText = bestScore == 1 ? "1 point" : '${bestScore} points';
+				MarbleGame.instance.world.displayAlert('${teamName} Team won with ${pointText}!');
+
+				var myTeam = Net.getTeamId(Net.isHost ? 0 : Net.clientId);
+				if (myTeam == bestTeam)
+					AchievementsGui.queueMPAchievement(512);
+			}
+			queueOurMPAchievements();
+			return;
+		}
+
 		playerList.sort((a, b) -> a.score > b.score ? -1 : (a.score < b.score ? 1 : 0));
 		var p1 = playerList[0];
 		var p2 = playerList.length > 1 ? playerList[1] : null;
@@ -913,29 +1032,33 @@ class PlayGui {
 				}
 			}
 
-			var ourScore = playerList.filter(x -> x.id == Net.clientId);
-			if (ourScore.length != 0) {
-				var ourScoreReal = ourScore[0].score;
-				if (ourScoreReal >= 75) {
-					AchievementsGui.queueMPAchievement(1024);
-				}
-				var ourLevel = MarbleGame.instance.world.mission;
-				if (ourScoreReal >= 40) {
-					if (ourLevel.path.indexOf("playground.mis") != -1
-						|| ourLevel.path.indexOf("bowl.mis") != -1
-						|| ourLevel.path.indexOf("concentric.mis") != -1
-						|| ourLevel.path.indexOf("vortexeffect.mis") != -1
-						|| ourLevel.path.indexOf("blastclub.mis") != -1) {
-						AchievementsGui.queueMPAchievement(8192);
-					}
-				}
-				if (ourScoreReal >= 50 && ourLevel.path.indexOf("spires.mis") != -1) {
-					AchievementsGui.queueMPAchievement(16384);
-				}
-				if (Settings.playStatistics.totalMPScore >= 2000)
-					AchievementsGui.queueMPAchievement(2048);
+			queueOurMPAchievements();
+		}
+	}
+
+	function queueOurMPAchievements() {
+		var ourScore = playerList.filter(x -> x.id == Net.clientId);
+		if (ourScore.length == 0)
+			return;
+		var ourScoreReal = ourScore[0].score;
+		if (ourScoreReal >= 75) {
+			AchievementsGui.queueMPAchievement(1024);
+		}
+		var ourLevel = MarbleGame.instance.world.mission;
+		if (ourScoreReal >= 40) {
+			if (ourLevel.path.indexOf("playground.mis") != -1
+				|| ourLevel.path.indexOf("bowl.mis") != -1
+				|| ourLevel.path.indexOf("concentric.mis") != -1
+				|| ourLevel.path.indexOf("vortexeffect.mis") != -1
+				|| ourLevel.path.indexOf("blastclub.mis") != -1) {
+				AchievementsGui.queueMPAchievement(8192);
 			}
 		}
+		if (ourScoreReal >= 50 && ourLevel.path.indexOf("spires.mis") != -1) {
+			AchievementsGui.queueMPAchievement(16384);
+		}
+		if (Settings.playStatistics.totalMPScore >= 2000)
+			AchievementsGui.queueMPAchievement(2048);
 	}
 
 	public function addPlayer(id:Int, name:String, us:Bool) {

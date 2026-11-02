@@ -78,6 +78,10 @@ class GuiXboxButton extends GuiControl {
 		this.addChild(this.text);
 	}
 
+	public function setText(text:String) {
+		this.text.text.text = text;
+	}
+
 	public override function update(dt:Float, mouseState:MouseState) {
 		var renderRect = getHitTestRect();
 		renderRect.position = renderRect.position.add(new Vector(16, 22));

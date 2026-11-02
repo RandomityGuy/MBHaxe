@@ -250,6 +250,10 @@ class SoccerStatePacket implements NetPacket {
 	var blueScore:Int = 0;
 	var overtime:Bool = false;
 	var footballSpawned:Bool = false;
+	var timerPausedTicks:Int = 0;
+	var goalPauseStartTick:Int = -1;
+	var goalPauseDurationTicks:Int = 0;
+	var gameplayClock:Float = 0;
 
 	public function new() {}
 
@@ -258,6 +262,10 @@ class SoccerStatePacket implements NetPacket {
 		b.writeInt(blueScore, 10);
 		b.writeFlag(overtime);
 		b.writeFlag(footballSpawned);
+		b.writeInt32(timerPausedTicks);
+		b.writeInt32(goalPauseStartTick + 1); // shift by 1 so -1 -> 0
+		b.writeInt32(goalPauseDurationTicks);
+		b.writeFloat(gameplayClock);
 	}
 
 	public inline function deserialize(b:InputBitStream) {
@@ -265,6 +273,10 @@ class SoccerStatePacket implements NetPacket {
 		blueScore = b.readInt(10);
 		overtime = b.readFlag();
 		footballSpawned = b.readFlag();
+		timerPausedTicks = b.readInt32();
+		goalPauseStartTick = b.readInt32() - 1;
+		goalPauseDurationTicks = b.readInt32();
+		gameplayClock = b.readFloat();
 	}
 }
 

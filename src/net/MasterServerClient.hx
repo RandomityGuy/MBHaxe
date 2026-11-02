@@ -3,6 +3,7 @@ package net;
 import gui.MessageBoxOkDlg;
 import src.MarbleGame;
 import haxe.Json;
+import net.ClientConnection.DummyConnection;
 import net.Net.ServerInfo;
 import haxe.net.WebSocket;
 import src.Console;
@@ -288,6 +289,8 @@ class MasterServerClient {
 			var pubCount = 1; // Self
 			var privCount = 0;
 			for (cid => cc in Net.clientIdMap) {
+				if (cc is DummyConnection)
+					continue; // Ghost connections (soccer ball, etc.) are not players
 				if (cc.isPrivate) {
 					privCount++;
 				} else {

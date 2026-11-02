@@ -80,11 +80,13 @@ abstract class GameConnection {
 	var marbleId:Int;
 	var isPrivate:Bool;
 	var spectator:Bool;
+	var teamId:Int;
 
 	function new(id:Int) {
 		this.id = id;
 		this.moveManager = new MoveManager(this);
 		this.lobbyReady = false;
+		this.teamId = -1; // -1 : no team, 0: red, 1: blue
 	}
 
 	public function ready() {
@@ -101,6 +103,10 @@ abstract class GameConnection {
 
 	public function setSpectate(spectate:Bool) {
 		spectator = spectate;
+	}
+
+	public function setTeam(team:Int) {
+		teamId = team;
 	}
 
 	public function queueMove(m:NetMove) {

@@ -5,6 +5,9 @@ import h3d.Matrix;
 import src.DtsObject;
 import h3d.Vector;
 import gui.Graphics;
+import modes.TeamsMode;
+import net.Net;
+import net.ClientConnection.DummyConnection;
 import src.GameObject;
 import h2d.Scene;
 import src.MarbleWorld;
@@ -71,6 +74,10 @@ class Radar {
 			if (marble != level.marble || spectating) {
 				if (@:privateAccess marble.connection == null)
 					continue;
+				if (@:privateAccess marble.connection is DummyConnection) {
+					dontRenderName(marble);
+					continue;
+				}
 				var shapePos = marble.getAbsPos().getPosition();
 				var shapeDir = shapePos.sub(level.scene.camera.pos);
 				var shapeDist = shapeDir.lengthSq();
@@ -441,6 +448,8 @@ class Radar {
 	function renderName(pos:Vector, marble:Marble, opacity:Float) {
 		if (@:privateAccess marble.connection == null)
 			return;
+		if (@:privateAccess marble.connection is DummyConnection)
+			return;
 		if (!marbleNameTexts.exists(marble)) {
 			var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 			var arialb14b = new BitmapFont(arialb14fontdata.entry);
@@ -455,6 +464,13 @@ class Radar {
 		if (connName == null)
 			return;
 		textObj.text = @:privateAccess marble.connection.getName();
+		var teamsMode = level.gameMode is TeamsMode ? cast(level.gameMode, TeamsMode) : null;
+		var team = Net.getTeamId(marble.getConnectionId());
+		if (teamsMode != null && team >= 0 && team < teamsMode.getTeamCount()) {
+			textObj.textColor = teamsMode.getTeamColor(team);
+		} else {
+			textObj.textColor = 0xFFFF00;
+		}
 		textObj.setPosition(pos.x - textObj.textWidth / 2, pos.y - textObj.textHeight);
 		textObj.alpha = opacity;
 	}
