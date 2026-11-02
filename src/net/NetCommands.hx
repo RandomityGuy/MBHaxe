@@ -40,6 +40,17 @@ class NetCommands {
 	}
 
 	@:rpc(server) public static function playLevel(levelIndex:Int) {
+		if (Net.isHost) {
+			var difficultyMissions = MissionList.missionList['ultra']["multiplayer"];
+			var mission = levelIndex >= 0 && levelIndex < difficultyMissions.length ? difficultyMissions[levelIndex] : null;
+			var teams = modes.GameMode.GameModeFactory.isTeamsMode(Net.selectedGameMode);
+			if (!teams && mission != null && mission.missionInfo != null)
+				teams = modes.GameMode.GameModeFactory.isTeamsMode(mission.missionInfo.gamemode);
+			if (teams)
+				Net.ensureTeamsAssigned();
+			else
+				Net.clearTeams();
+		}
 		MultiplayerLevelSelectGui.playSelectedLevel(levelIndex);
 		if (Net.isHost) {
 			Net.serverInfo.state = "WAITING";
@@ -48,6 +59,12 @@ class NetCommands {
 	}
 
 	@:rpc(server) public static function playCustomLevel(levelPath:String) {
+		if (Net.isHost) {
+			if (modes.GameMode.GameModeFactory.isTeamsMode(Net.selectedGameMode))
+				Net.ensureTeamsAssigned();
+			else
+				Net.clearTeams();
+		}
 		var levelEntry = MPCustoms.missionList.filter(x -> x.path == levelPath)[0];
 		MarbleGame.canvas.setContent(new MultiplayerLoadingGui("Downloading", false));
 		MPCustoms.play(levelEntry, () -> {}, () -> {
@@ -140,6 +157,17 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(client) public static function setTeam(clientId:Int, team:Int) {
+		if (Net.isHost) {
+			Net.setTeamId(clientId, team);
+
+			if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
+				cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+			}
+			Net.broadcastPlayerInfos();
+		}
+	}
+
 	@:rpc(client) public static function clientIsReady(clientId:Int) {
 		if (Net.isHost) {
 			if (Net.serverInfo.state == "WAITING") {
@@ -166,6 +194,21 @@ class NetCommands {
 			} else {
 				// Mid game join
 				Console.log("Mid game join for client " + clientId);
+				if (MarbleGame.instance.world != null && MarbleGame.instance.world.gameMode is modes.TeamsMode) {
+					var conn = Net.clientIdMap.get(clientId);
+					if (conn != null && !conn.spectator && conn.teamId < 0) {
+						// Put the late joiner on the team with fewer players
+						var teamCounts = [0, 0];
+						if (!Net.hostSpectate && Net.hostTeam >= 0)
+							teamCounts[Net.hostTeam]++;
+						for (id => c in Net.clientIdMap) {
+							if (!c.spectator && c.teamId >= 0)
+								teamCounts[c.teamId]++;
+						}
+						Net.setTeamId(clientId, teamCounts[0] <= teamCounts[1] ? 0 : 1);
+						Net.broadcastPlayerInfos();
+					}
+				}
 				// Send em our present world state
 				if (MarbleGame.instance.world != null) {
 					var packets = MarbleGame.instance.world.getWorldStateForClientJoin();
@@ -239,14 +282,17 @@ class NetCommands {
 
 	@:rpc(server) public static function setLobbyGameMode(mode:String) {
 		Net.selectedGameMode = mode;
+		if (Net.isHost)
+			MultiplayerLevelSelectGui.syncTeamsForCurrentSelection();
 	}
 
-	@:rpc(server) public static function soccerGoalScored(scoringTeam:Int, redScore:Int, blueScore:Int) {
+	@:rpc(server) public static function soccerGoalScored(scoringTeam:Int, redScore:Int, blueScore:Int, pauseTicks:Int, startTick:Int, scorerId:Int) {
 		if (Net.isClient && MarbleGame.instance.world != null) {
 			var world = MarbleGame.instance.world;
 			if (world.gameMode is SoccerMode) {
 				var soccer:SoccerMode = cast world.gameMode;
-				soccer.onGoalNotification(scoringTeam, redScore, blueScore);
+				soccer.onGoalPauseStarted(pauseTicks, startTick);
+				soccer.onGoalNotification(scoringTeam, redScore, blueScore, scorerId);
 			}
 		}
 	}

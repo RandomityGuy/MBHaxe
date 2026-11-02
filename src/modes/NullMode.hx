@@ -44,6 +44,10 @@ class NullMode implements GameMode {
 		return null;
 	}
 
+	public function getInitialSpawnTransform(marble:Marble):{up:Vector, position:Vector, orientation:Quat} {
+		return getSpawnTransform();
+	}
+
 	public function missionScan(mission:Mission) {
 		// Do nothing
 	}
@@ -125,4 +129,6 @@ class NullMode implements GameMode {
 	}
 
 	public function transmitAnyNetCommands(client:net.ClientConnection.GameConnection) {}
+
+	public function onDispose() {}
 }

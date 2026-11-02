@@ -204,6 +204,7 @@ class Marble extends GameObject {
 	public var camera:CameraController;
 	public var cameraObject:Object;
 	public var controllable:Bool = false;
+	public var startInvulnerable:Bool = true;
 
 	public var collider:SphereCollisionEntity;
 
@@ -1651,7 +1652,8 @@ class Marble extends GameObject {
 
 			var ticks = Net.isClient ? serverTicks : timeState.ticks;
 
-			if ((ticks - this.level.serverStartTicks) < (10000 >> 5)) // 10 seconds marble collision invulnerability - competitive mode needs this
+			if (this.startInvulnerable
+				&& (ticks - this.level.serverStartTicks) < (10000 >> 5)) // 10 seconds marble collision invulnerability - competitive mode needs this
 				this.collider.ignore = true;
 			else
 				this.collider.ignore = false;

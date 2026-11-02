@@ -63,6 +63,7 @@ class MissionElementScriptObject extends MissionElementBase {
 	var gamemode:String;
 	var gemgroupradius:String;
 	var maxgemspergroup:String;
+	var postprocess:String;
 
 	public function new() {
 		_type = MissionElementType.ScriptObject;

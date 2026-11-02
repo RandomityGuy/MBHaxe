@@ -68,7 +68,7 @@ class SoccerState implements RewindableState {
 	}
 }
 
-class SoccerMode extends NullMode {
+class SoccerMode extends NullMode implements TeamsMode {
 	static final FOOTBALL_NET_ID = 32;
 	static final TICKS_PER_SECOND = 32;
 	static final OVERTIME_DURATION_TICKS = 120 * TICKS_PER_SECOND; // 2 minutes
@@ -83,15 +83,46 @@ class SoccerMode extends NullMode {
 
 	public var football:Marble = null;
 
+	var footballSpawning:Bool = false;
+
 	var teamScores:Array<Int> = [0, 0];
 
 	public var overtime:Bool = false;
 
 	var overtimeTicks:Int = 0;
 	var goalCooldown:Int = 0;
+	var timerPausedTicks:Int = 0;
+	var goalPauseStartTick:Int = -1;
+	var goalPauseDurationTicks:Int = 0;
+
+	var lastTouchMarble:Marble = null;
 
 	inline function getTeam(clientId:Int):Int {
-		return clientId % 2;
+		var team = Net.getTeamId(clientId);
+		if (team == 0 || team == 1)
+			return team;
+		// Fallback for unassigned players
+		return Std.int(Math.abs(clientId)) % 2;
+	}
+
+	public function getTeamCount():Int {
+		return 2;
+	}
+
+	public function getTeamName(team:Int):String {
+		return TeamInfo.getName(team);
+	}
+
+	public function getTeamColor(team:Int):Int {
+		return TeamInfo.getColor(team);
+	}
+
+	public function getTeamScore(team:Int):Int {
+		return (team >= 0 && team < teamScores.length) ? teamScores[team] : 0;
+	}
+
+	public function showsIndividualScores():Bool {
+		return false;
 	}
 
 	override function missionScan(mission:Mission) {
@@ -159,22 +190,89 @@ class SoccerMode extends NullMode {
 				orientation: new Quat(),
 				up: new Vector(0, 0, 1)
 			} : super.getRespawnTransform(marble);
-		var team = getTeam(marble.getConnectionId());
+		var clientId = marble.getConnectionId();
+		var team = getTeam(clientId);
 		var points = team == 0 ? redSpawnPoints : blueSpawnPoints;
 		if (points.length == 0)
 			points = redSpawnPoints.length > 0 ? redSpawnPoints : blueSpawnPoints;
 		if (points.length == 0)
 			return super.getRespawnTransform(marble);
-		var idx = (spawnIdx >> 1) % points.length;
+		// Use the player's position within the team instead of spawn-call order,
+		// so every peer puts the same player on the same team spawn point.
+		var idx = getTeamSpawnIndex(team, clientId) % points.length;
 		return spawnPointToTransform(points[idx]);
 	}
 
+	function getTeamSpawnIndex(team:Int, clientId:Int):Int {
+		var ids:Array<Int> = [];
+		if (!Net.hostSpectate && Net.hostTeam == team)
+			ids.push(0);
+		if (Net.isClient && Net.clientTeam == team)
+			ids.push(Net.clientId);
+		for (id => conn in Net.clientIdMap) {
+			if (conn.spectator)
+				continue;
+			if (id == 0)
+				continue; // host is handled above
+			if (Net.isClient && id == Net.clientId)
+				continue; // local client is handled above
+			if (conn.teamId == team)
+				ids.push(id);
+		}
+		ids.sort((a, b) -> a - b);
+		var idx = ids.indexOf(clientId);
+		return idx < 0 ? 0 : idx;
+	}
+
+	override function getInitialSpawnTransform(marble:Marble):{up:Vector, position:Vector, orientation:Quat} {
+		return getRespawnTransform(marble);
+	}
+
 	override function getStartTime():Float {
-		return level.mission.qualifyTime;
+		return level.mission.qualifyTime + getPausedTicks() * 0.032;
 	}
 
 	override function timeMultiplier():Float {
-		return -1.0;
+		return goalCooldown > 0 ? 0.0 : -1.0;
+	}
+
+	inline function getCurrentTick():Int {
+		if (Net.isHost)
+			return level.timeState.ticks;
+		var serverTick = level.marble != null ? @:privateAccess level.marble.serverTicks : 0;
+		if (serverTick > 0)
+			return serverTick;
+		// Before the first marble update arrives (e.g. right after a mid-game
+		// join), timeState.ticks was seeded with the host's current tick.
+		return level.timeState.ticks;
+	}
+
+	function getPausedTicks():Int {
+		var paused = timerPausedTicks;
+		if (goalPauseStartTick >= 0) {
+			var elapsed = getCurrentTick() - goalPauseStartTick;
+			if (elapsed < 0)
+				elapsed = 0;
+			if (elapsed > goalPauseDurationTicks)
+				elapsed = goalPauseDurationTicks;
+			paused += elapsed;
+		}
+		return paused;
+	}
+
+	override function update(t:TimeState) {
+		if (goalPauseStartTick >= 0) {
+			var remaining = goalPauseStartTick + goalPauseDurationTicks - getCurrentTick();
+			if (remaining <= 0) {
+				goalCooldown = 0;
+				timerPausedTicks += goalPauseDurationTicks;
+				goalPauseStartTick = -1;
+				if (Net.isHost)
+					resetAfterGoal();
+			} else {
+				goalCooldown = remaining;
+			}
+		}
 	}
 
 	override function getScoreType():ScoreType {
@@ -186,8 +284,17 @@ class SoccerMode extends NullMode {
 		overtime = false;
 		overtimeTicks = 0;
 		goalCooldown = 0;
+		timerPausedTicks = 0;
+		goalPauseStartTick = -1;
+		goalPauseDurationTicks = 0;
 		spawnIdx = 0;
-		football = null;
+		lastTouchMarble = null;
+		spawnFootball();
+		if (football != null)
+			resetBall();
+		faceBall(level.marble);
+		if (@:privateAccess level.playGui != null)
+			@:privateAccess level.playGui.refreshScoreboard();
 	}
 
 	override function onClientRestart() {
@@ -195,24 +302,55 @@ class SoccerMode extends NullMode {
 		overtime = false;
 		overtimeTicks = 0;
 		goalCooldown = 0;
-		football = null;
+		timerPausedTicks = 0;
+		goalPauseStartTick = -1;
+		goalPauseDurationTicks = 0;
+		lastTouchMarble = null;
+		spawnFootball();
+		if (football != null)
+			resetBall();
+		faceBall(level.marble);
+		if (@:privateAccess level.playGui != null)
+			@:privateAccess level.playGui.refreshScoreboard();
 	}
 
 	override function onMultiplayerStart() {
 		spawnFootball();
 	}
 
-	public function spawnFootball() {
-		if (football != null)
+	function faceBall(marble:Marble) {
+		if (marble == null || (football == null && footballSpawnPos == null))
 			return;
+		var target = football != null ? football.getAbsPos().getPosition() : footballSpawnPos;
+		var pos = marble.getAbsPos().getPosition();
+		var dir = target.sub(pos);
+		if (dir.x == 0 && dir.y == 0)
+			return;
+		// Camera yaw is applied to the +X axis in CameraController.
+		var yaw = Math.atan2(dir.y, dir.x);
+		marble.camera.CameraYaw = yaw;
+		marble.camera.nextCameraYaw = yaw;
+	}
+
+	override function onRespawn(marble:Marble) {
+		if (marble.controllable)
+			faceBall(marble);
+	}
+
+	public function spawnFootball() {
+		if (football != null || footballSpawning)
+			return;
+		footballSpawning = true;
 		var f = new Marble();
 		f.controllable = false;
+		f.startInvulnerable = false;
 		if (!Net.clientIdMap.exists(FOOTBALL_NET_ID)) {
 			Net.addGhost(FOOTBALL_NET_ID);
 			Net.clientIdMap[FOOTBALL_NET_ID].setMarbleId(33);
 		}
 		level.addMarble(f, Net.clientIdMap[FOOTBALL_NET_ID], () -> {
 			football = f;
+			footballSpawning = false;
 			@:privateAccess level.clientMarbles.set(football.connection, football);
 			resetBall();
 		});
@@ -235,16 +373,16 @@ class SoccerMode extends NullMode {
 		@:privateAccess football._kineticFriction = 0.7 * 0.66;
 		@:privateAccess football._staticFriction = 1.1 * 0.66;
 		@:privateAccess football._bounceKineticFriction = 0.2 * 0.66;
+
+		football.setMode(Play);
 	}
 
 	override function onHostTick(timeState:TimeState) {
 		if (!level.isMultiplayer || !Net.isHost)
 			return;
 
-		if (goalCooldown > 0) {
-			goalCooldown--;
+		if (goalCooldown > 0)
 			return;
-		}
 
 		if (overtime) {
 			overtimeTicks++;
@@ -256,6 +394,20 @@ class SoccerMode extends NullMode {
 		}
 	}
 
+	override function onMarbleContact(attacker:Marble, victim:Marble) {
+		if (!level.isMultiplayer || !Net.isHost)
+			return;
+
+		if (attacker == football && victim != football) {
+			// store the player who last touched the ball
+			lastTouchMarble = victim;
+		}
+		if (victim == football && attacker != football) {
+			// store the player who last touched the ball
+			lastTouchMarble = attacker;
+		}
+	}
+
 	public function onBallEnterGoal(marble:Marble, goalTeam:Int) {
 		if (marble != football)
 			return;
@@ -263,9 +415,24 @@ class SoccerMode extends NullMode {
 			return;
 		// Scoring team is the one that kicked it INTO the opposing team's goal
 		var scoringTeam = 1 - goalTeam;
-		scoreGoal(scoringTeam);
+		var scorerId = lastTouchMarble != null ? lastTouchMarble.getConnectionId() : -1;
 
-		// Respawn everyone else back at their spawn points to prevent spawn camping the ball after a goal
+		teamScores[scoringTeam]++;
+		var startTick = level.timeState.ticks;
+		onGoalPauseStarted(GOAL_COOLDOWN_TICKS, startTick);
+		NetCommands.soccerGoalScored(scoringTeam, teamScores[0], teamScores[1], GOAL_COOLDOWN_TICKS, startTick, scorerId);
+		onGoalNotification(scoringTeam, teamScores[0], teamScores[1], scorerId);
+	}
+
+	public function onGoalPauseStarted(pauseTicks:Int, startTick:Int) {
+		goalPauseStartTick = startTick;
+		goalPauseDurationTicks = pauseTicks;
+		goalCooldown = pauseTicks;
+	}
+
+	function resetAfterGoal() {
+		lastTouchMarble = null;
+		resetBall();
 		for (m in level.marbles) {
 			if (m == football)
 				continue;
@@ -273,21 +440,35 @@ class SoccerMode extends NullMode {
 		}
 	}
 
-	function scoreGoal(scoringTeam:Int) {
-		teamScores[scoringTeam]++;
-		goalCooldown = GOAL_COOLDOWN_TICKS;
-		resetBall();
-		NetCommands.soccerGoalScored(scoringTeam, teamScores[0], teamScores[1]);
-		onGoalNotification(scoringTeam, teamScores[0], teamScores[1]);
-	}
-
-	public function onGoalNotification(scoringTeam:Int, redScore:Int, blueScore:Int) {
+	public function onGoalNotification(scoringTeam:Int, redScore:Int, blueScore:Int, scorerId:Int) {
 		teamScores[0] = redScore;
 		teamScores[1] = blueScore;
+		if (@:privateAccess level.playGui != null)
+			@:privateAccess level.playGui.refreshScoreboard();
 		var teamName = scoringTeam == 0 ? "Red" : "Blue";
 		var color = scoringTeam == 0 ? 0xFF4444 : 0x4444FF;
-		@:privateAccess level.playGui.addMiddleMessage('GOAL! $teamName  $redScore - $blueScore', color);
+		var scorerName = getPlayerName(scorerId);
+		if (scorerName != null)
+			level.displayAlert('${scorerName} has scored a goal!');
+
+		@:privateAccess level.playGui.addMiddleMessage('GOAL!  $redScore - $blueScore', color);
+
+		// Pause the marble!
+		football.setMode(Start);
+
+		AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
 		broadcastScoreboard();
+	}
+
+	function getPlayerName(clientId:Int):String {
+		if (clientId < 0)
+			return null;
+		if (Net.isHost && clientId == 0)
+			return Settings.highscoreName;
+		if (Net.isClient && clientId == Net.clientId)
+			return Settings.highscoreName;
+		var conn = Net.clientIdMap.get(clientId);
+		return conn != null ? conn.getName() : null;
 	}
 
 	function broadcastScoreboard() {
@@ -323,7 +504,7 @@ class SoccerMode extends NullMode {
 	}
 
 	public function onOvertimeStarted() {
-		@:privateAccess level.playGui.addMiddleMessage("OVERTIME!", 0xFFFF00);
+		level.displayAlert("Match going into overtime! First team to score a goal wins!");
 	}
 
 	public function doEndGame() {
@@ -385,6 +566,10 @@ class SoccerMode extends NullMode {
 		packet.blueScore = teamScores[1];
 		packet.overtime = overtime;
 		packet.footballSpawned = football != null;
+		packet.timerPausedTicks = timerPausedTicks;
+		packet.goalPauseStartTick = goalPauseStartTick;
+		packet.goalPauseDurationTicks = goalPauseDurationTicks;
+		packet.gameplayClock = level.timeState.gameplayClock;
 		packet.serialize(bs);
 		packets.push(bs.getBytes());
 
@@ -407,6 +592,18 @@ class SoccerMode extends NullMode {
 		teamScores[0] = packet.redScore;
 		teamScores[1] = packet.blueScore;
 		overtime = packet.overtime;
+		timerPausedTicks = packet.timerPausedTicks;
+		goalPauseStartTick = packet.goalPauseStartTick;
+		goalPauseDurationTicks = packet.goalPauseDurationTicks;
+		level.timeState.gameplayClock = packet.gameplayClock;
+		if (goalPauseStartTick >= 0) {
+			var remaining = goalPauseStartTick + goalPauseDurationTicks - getCurrentTick();
+			goalCooldown = remaining > 0 ? remaining : 0;
+		} else {
+			goalCooldown = 0;
+		}
+		if (@:privateAccess level.playGui != null)
+			@:privateAccess level.playGui.refreshScoreboard();
 		if (packet.footballSpawned)
 			spawnFootball();
 	}
@@ -436,5 +633,9 @@ class SoccerMode extends NullMode {
 
 	override function getPreloadFiles():Array<String> {
 		return ['sound/finish.wav'];
+	}
+
+	override function onDispose() {
+		Net.clientIdMap.remove(FOOTBALL_NET_ID);
 	}
 }
