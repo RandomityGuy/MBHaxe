@@ -15114,5 +15114,30 @@ new SimGroup(MissionGroup) {
          outdoorWeight = "100";
       };
    };
+
+
+   new SimGroup(soccerclubGroup) {
+       new InteriorInstance() {
+           position = "0 0 0";
+           rotation = "0 0 0 0";
+           scale = "1 1 1";
+           interiorFile = "~/data/missions/multiplayer/soccerclub/soccer.dif";
+           hidden = "0";
+           reandershadow = "1";
+           showterraininside = "0";
+       };
+      new SpawnSphere() {
+         position = "-22.3839 -31.1947 16.33496";
+         rotation = "0.491756 -0.22684 0.840666 57.5085";
+         scale = "1 1 1";
+         hidden = "1";
+         reanderShadow = "1";
+         dataBlock = "CameraSpawnSphereMarker";
+         radius = "100";
+         sphereWeight = "100";
+         indoorWeight = "100";
+         outdoorWeight = "100";
+      };
+   };
 };
 //--- OBJECT WRITE END ---
