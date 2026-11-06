@@ -40,7 +40,7 @@ abstract class PowerUp extends DtsObject {
 		if (!pickupable)
 			return;
 
-		if (this.pickUp(marble)) {
+		if (marble.canPickupPowerups && this.pickUp(marble)) {
 			// this.level.replay.recordMarbleInside(this);
 
 			if (level.isMultiplayer && Net.isHost) {

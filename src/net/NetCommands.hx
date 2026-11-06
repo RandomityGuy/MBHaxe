@@ -308,6 +308,16 @@ class NetCommands {
 		}
 	}
 
+	@:rpc(server) public static function soccerResetAfterGoal() {
+		if (Net.isClient && MarbleGame.instance.world != null) {
+			var world = MarbleGame.instance.world;
+			if (world.gameMode is SoccerMode) {
+				var soccer:SoccerMode = cast world.gameMode;
+				soccer.resetAfterGoalClient();
+			}
+		}
+	}
+
 	@:rpc(server) public static function setKingMarble(newKingId:Int, oldKingId:Int) {
 		if (Net.isClient && MarbleGame.instance.world != null) {
 			var world = MarbleGame.instance.world;
