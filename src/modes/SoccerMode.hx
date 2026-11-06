@@ -17,6 +17,7 @@ import src.AudioManager;
 import src.ResourceLoader;
 import src.Settings;
 import src.Marble;
+import src.Marble.Mode;
 import src.TimeState;
 import src.Mission;
 import h3d.Vector;
@@ -72,10 +73,14 @@ class SoccerMode extends NullMode implements TeamsMode {
 	static final FOOTBALL_NET_ID = 32;
 	static final TICKS_PER_SECOND = 32;
 	static final OVERTIME_DURATION_TICKS = 120 * TICKS_PER_SECOND; // 2 minutes
-	static final GOAL_COOLDOWN_TICKS = TICKS_PER_SECOND * 3; // 3 seconds
+	static final GOAL_CELEBRATION_TICKS = TICKS_PER_SECOND * 3; // 3 seconds before the reset
+	static final GOAL_START_BUFFER_TICKS = TICKS_PER_SECOND * 3.5; // 3.5 seconds in Start mode after the reset
+	static final GOAL_PAUSE_TICKS = GOAL_CELEBRATION_TICKS + GOAL_START_BUFFER_TICKS;
 
 	var redSpawnPoints:Array<MissionElementSpawnSphere> = [];
 	var blueSpawnPoints:Array<MissionElementSpawnSphere> = [];
+	var redSpawnPointsByDistance:Array<MissionElementSpawnSphere> = [];
+	var blueSpawnPointsByDistance:Array<MissionElementSpawnSphere> = [];
 	var allSpawnPoints:Array<MissionElementSpawnSphere> = [];
 	var spawnIdx:Int = 0;
 
@@ -94,6 +99,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 	var timerPausedTicks:Int = 0;
 	var goalPauseStartTick:Int = -1;
 	var goalPauseDurationTicks:Int = 0;
+	var goalResetDone:Bool = false;
 
 	var lastTouchMarble:Marble = null;
 
@@ -158,6 +164,36 @@ class SoccerMode extends NullMode implements TeamsMode {
 					blueSpawnPoints.push(allSpawnPoints[i]);
 			}
 		}
+
+		// Pair spawn points by distance from the ball so both teams get equally
+		// distant spawns (closest red with closest blue, etc).
+		redSpawnPointsByDistance = sortSpawnsByBallDistance(redSpawnPoints);
+		blueSpawnPointsByDistance = sortSpawnsByBallDistance(blueSpawnPoints);
+	}
+
+	function sortSpawnsByBallDistance(points:Array<MissionElementSpawnSphere>) {
+		var sorted = points.copy();
+		if (footballSpawnPos != null) {
+			sorted.sort((a, b) -> {
+				var pa = MisParser.parseVector3(a.position);
+				pa.x *= -1;
+				var pb = MisParser.parseVector3(b.position);
+				pb.x *= -1;
+				var da = pa.sub(footballSpawnPos).lengthSq();
+				var db = pb.sub(footballSpawnPos).lengthSq();
+				return da < db ? -1 : (da > db ? 1 : 0);
+			});
+		}
+		return sorted;
+	}
+
+	function getTeamSpawnPoints(team:Int) {
+		var points = team == 0 ? redSpawnPointsByDistance : blueSpawnPointsByDistance;
+		if (points == null || points.length == 0)
+			points = team == 0 ? redSpawnPoints : blueSpawnPoints;
+		if (points.length == 0)
+			points = redSpawnPoints.length > 0 ? redSpawnPoints : blueSpawnPoints;
+		return points;
 	}
 
 	function spawnPointToTransform(s:MissionElementSpawnSphere) {
@@ -173,9 +209,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 
 	override function getSpawnTransform() {
 		var team = spawnIdx % 2;
-		var points = team == 0 ? redSpawnPoints : blueSpawnPoints;
-		if (points.length == 0)
-			points = redSpawnPoints.length > 0 ? redSpawnPoints : blueSpawnPoints;
+		var points = getTeamSpawnPoints(team);
 		if (points.length == 0)
 			return super.getSpawnTransform();
 		var idx = (spawnIdx >> 1) % points.length;
@@ -192,9 +226,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 			} : super.getRespawnTransform(marble);
 		var clientId = marble.getConnectionId();
 		var team = getTeam(clientId);
-		var points = team == 0 ? redSpawnPoints : blueSpawnPoints;
-		if (points.length == 0)
-			points = redSpawnPoints.length > 0 ? redSpawnPoints : blueSpawnPoints;
+		var points = getTeamSpawnPoints(team);
 		if (points.length == 0)
 			return super.getRespawnTransform(marble);
 		// Use the player's position within the team instead of spawn-call order,
@@ -262,16 +294,32 @@ class SoccerMode extends NullMode implements TeamsMode {
 
 	override function update(t:TimeState) {
 		if (goalPauseStartTick >= 0) {
-			var remaining = goalPauseStartTick + goalPauseDurationTicks - getCurrentTick();
+			var currentTick = getCurrentTick();
+			var resetTick = goalPauseStartTick + goalPauseDurationTicks - GOAL_START_BUFFER_TICKS;
+			if (!goalResetDone && currentTick >= resetTick) {
+				goalResetDone = true;
+				if (Net.isHost)
+					resetAfterGoal();
+				setPlayersMode(Start);
+			}
+
+			var remaining = goalPauseStartTick + goalPauseDurationTicks - currentTick;
 			if (remaining <= 0) {
 				goalCooldown = 0;
 				timerPausedTicks += goalPauseDurationTicks;
 				goalPauseStartTick = -1;
-				if (Net.isHost)
-					resetAfterGoal();
+				goalResetDone = false;
+				setPlayersMode(Play);
 			} else {
 				goalCooldown = remaining;
 			}
+		}
+	}
+
+	function setPlayersMode(mode:Mode) {
+		for (marble in level.marbles) {
+			if (marble != football)
+				marble.setMode(mode);
 		}
 	}
 
@@ -287,12 +335,14 @@ class SoccerMode extends NullMode implements TeamsMode {
 		timerPausedTicks = 0;
 		goalPauseStartTick = -1;
 		goalPauseDurationTicks = 0;
+		goalResetDone = false;
 		spawnIdx = 0;
 		lastTouchMarble = null;
 		spawnFootball();
 		if (football != null)
 			resetBall();
 		faceBall(level.marble);
+		level.marble.startInvulnerable = false;
 		if (@:privateAccess level.playGui != null)
 			@:privateAccess level.playGui.refreshScoreboard();
 	}
@@ -305,6 +355,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 		timerPausedTicks = 0;
 		goalPauseStartTick = -1;
 		goalPauseDurationTicks = 0;
+		goalResetDone = false;
 		lastTouchMarble = null;
 		spawnFootball();
 		if (football != null)
@@ -344,6 +395,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 		var f = new Marble();
 		f.controllable = false;
 		f.startInvulnerable = false;
+		f.canPickupPowerups = false;
 		if (!Net.clientIdMap.exists(FOOTBALL_NET_ID)) {
 			Net.addGhost(FOOTBALL_NET_ID);
 			Net.clientIdMap[FOOTBALL_NET_ID].setMarbleId(33);
@@ -359,6 +411,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 	function resetBall() {
 		if (football == null || footballSpawnPos == null)
 			return;
+		football.canPickupPowerups = false;
 		football.setMarblePosition(footballSpawnPos.x, footballSpawnPos.y, footballSpawnPos.z);
 		football.velocity.load(new Vector(0, 0, 0));
 		football.omega.load(new Vector(0, 0, 0));
@@ -370,9 +423,12 @@ class SoccerMode extends NullMode implements TeamsMode {
 		football.getChildAt(0).setScale(1.86 / 0.2);
 		football._mass = 0.75;
 		football.collider.radius = 1.86;
-		@:privateAccess football._kineticFriction = 0.7 * 0.66;
-		@:privateAccess football._staticFriction = 1.1 * 0.66;
-		@:privateAccess football._bounceKineticFriction = 0.2 * 0.66;
+		@:privateAccess football._kineticFriction = 0.7 * 0.5;
+		@:privateAccess football._staticFriction = 1.1 * 0.5;
+		@:privateAccess football._bounceKineticFriction = 0.2 * 0.5;
+		@:privateAccess football._bounceRestitution = 0.5 * 0.66;
+		@:privateAccess football._gravity = 20 * 1.125;
+		@:privateAccess football._megaImpactForceMult = 0.35;
 
 		football.setMode(Play);
 	}
@@ -419,8 +475,8 @@ class SoccerMode extends NullMode implements TeamsMode {
 
 		teamScores[scoringTeam]++;
 		var startTick = level.timeState.ticks;
-		onGoalPauseStarted(GOAL_COOLDOWN_TICKS, startTick);
-		NetCommands.soccerGoalScored(scoringTeam, teamScores[0], teamScores[1], GOAL_COOLDOWN_TICKS, startTick, scorerId);
+		onGoalPauseStarted(Std.int(GOAL_PAUSE_TICKS), startTick);
+		NetCommands.soccerGoalScored(scoringTeam, teamScores[0], teamScores[1], Std.int(GOAL_PAUSE_TICKS), startTick, scorerId);
 		onGoalNotification(scoringTeam, teamScores[0], teamScores[1], scorerId);
 	}
 
@@ -428,6 +484,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 		goalPauseStartTick = startTick;
 		goalPauseDurationTicks = pauseTicks;
 		goalCooldown = pauseTicks;
+		goalResetDone = false;
 	}
 
 	function resetAfterGoal() {
@@ -437,7 +494,13 @@ class SoccerMode extends NullMode implements TeamsMode {
 			if (m == football)
 				continue;
 			level.restart(m);
+			level.deselectPowerUp(m);
 		}
+	}
+
+	public function resetAfterGoalClient() {
+		faceBall(level.marble);
+		level.deselectPowerUp(level.marble);
 	}
 
 	public function onGoalNotification(scoringTeam:Int, redScore:Int, blueScore:Int, scorerId:Int) {

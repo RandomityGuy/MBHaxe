@@ -235,6 +235,7 @@ class Marble extends GameObject {
 	var _minBounceSpeed:Float = 3;
 	var _minTrailVel:Float = 15;
 	var _bounceKineticFriction = 0.2;
+	var _megaImpactForceMult = 1.0;
 	var minVelocityBounceSoft = 2.5;
 	var minVelocityBounceHard = 12.0;
 	var bounceMinGain = 0.2;
@@ -271,6 +272,7 @@ class Marble extends GameObject {
 	var queuedContacts:Array<CollisionInfo> = [];
 	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
 
+	public var canPickupPowerups = true;
 	public var heldPowerup:PowerUp;
 	public var lastContactNormal:Vector = new Vector(0, 0, 0);
 	public var lastContactPosition:Vector = new Vector(0, 0, 0);
@@ -875,7 +877,7 @@ class Marble extends GameObject {
 		return true;
 	}
 
-	function velocityCancel(currentTime:Float, dt:Float, surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
+	function velocityCancel(timeState:TimeState, currentTime:Float, dt:Float, surfaceSlide:Bool, noBounce:Bool, stoppedPaths:Bool, pi:Array<PathedInterior>) {
 		var SurfaceDotThreshold = 0.0001;
 		var looped = false;
 		var itersIn = 0;
@@ -909,7 +911,11 @@ class Marble extends GameObject {
 						var dp = this.velocity.multiply(ourMass).sub(otherMarble.velocity.multiply(theirMass));
 						var normP = contacts[i].normal.multiply(dp.dot(contacts[i].normal));
 
-						normP.scale(1 + bounce);
+						var mult = 1.0;
+						if (this.isMegaMarbleEnabled(timeState) || otherMarble.isMegaMarbleEnabled(timeState))
+							mult *= this._megaImpactForceMult * otherMarble._megaImpactForceMult;
+
+						normP.scale((1 + bounce) * mult);
 
 						velocity.load(velocity.sub(normP.multiply(1 / ourMass)));
 						if (Math.isNaN(velocity.lengthSq())) {
@@ -1695,7 +1701,7 @@ class Marble extends GameObject {
 			var desiredOmega = new Vector();
 			var isCentered = this.computeMoveForces(m, aControl, desiredOmega);
 
-			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
+			stoppedPaths = this.velocityCancel(timeState, timeState.currentAttemptTime, timeStep, isCentered, false, stoppedPaths, pathedInteriors);
 			var A = this.getExternalForces(tempState, m);
 			var a = this.applyContactForces(timeStep, m, isCentered, aControl, desiredOmega, A);
 
@@ -1713,7 +1719,7 @@ class Marble extends GameObject {
 			if (this.mode == Start) {
 				this.velocity.set(0, 0, 0);
 			}
-			stoppedPaths = this.velocityCancel(timeState.currentAttemptTime, timeStep, isCentered, true, stoppedPaths, pathedInteriors);
+			stoppedPaths = this.velocityCancel(timeState, timeState.currentAttemptTime, timeStep, isCentered, true, stoppedPaths, pathedInteriors);
 			this._totalTime += timeStep;
 			if (contacts.length != 0) {
 				this._contactTime += timeStep;
@@ -1969,8 +1975,14 @@ class Marble extends GameObject {
 			}
 		}
 		if (p.netFlags & MarbleNetFlags.UpdatePosition > 0) {
-			this.oldPos.load(p.position);
-			this.newPos.load(p.position);
+			if (this.oldPos != null)
+				this.oldPos.load(p.position);
+			else
+				this.oldPos = p.position.clone();
+			if (this.newPos != null)
+				this.newPos.load(p.position);
+			else
+				this.newPos = p.position.clone();
 			this.netSmoothOffset.set(0, 0, 0);
 			this.lastRenderPos.load(p.position);
 			this.justWarped = true;

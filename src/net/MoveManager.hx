@@ -73,11 +73,11 @@ class MoveManager {
 
 	public function recordMove(marble:Marble, motionDir:Vector, timeState:TimeState, serverTicks:Int) {
 		if (Net.isClient && ackRTT >= 0) {
-			var excessMoveCount = queuedMoves.length - (ackRTT + (timeState.ticks - serverTicks));
+			var excessMoveCount = queuedMoves.length - ackRTT;
 			if (excessMoveCount > 12) {
 				queuedMoves.resize(0); // clear everything
 				stall = false;
-			} else if (excessMoveCount > 3) {
+			} else if (excessMoveCount > 4) {
 				stall = true;
 			} else {
 				stall = false;
