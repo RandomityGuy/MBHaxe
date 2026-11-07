@@ -2,16 +2,16 @@
 new SimGroup(MissionGroup) {
     new ScriptObject(MissionInfo) {
         gamemode = "soccer";
-        level = "85";
+        level = "92";
         difficulty = "4";
         maxgemspergroup = "5";
         time = "180000";
         goldtime = "0";
         type = "beginner";
         gemgroupradius = "22";
-        name = "Stadium";
+        name = "Pedestal";
         gametype = "MultiPlayer";
-        desc = "Stadium";
+        desc = "Pedestal";
         numgems = "1";
         include = "1";
         guid = "{B65ACF73-A6C5-48A0-BEEC-D4C6D1E9D33E}";
@@ -67,10 +67,10 @@ new SimGroup(MissionGroup) {
         reandershadow = "1";
     };
     new InteriorInstance() {
-        position = "0 0 0";
-        rotation = "0 0 0 0";
+        position = "0.0244463961571455 0.25 0.16771426796913147";
+        rotation = "1 0 0 0";
         scale = "1 1 1";
-        interiorFile = "~/data/missions/multiplayer/soccerclub/soccer.dif";
+        interiorFile = "./soccer.dif";
         hidden = "0";
         reandershadow = "1";
         showterraininside = "0";
@@ -103,7 +103,7 @@ new SimGroup(MissionGroup) {
         outdoorweight = "100";
     };
     new SpawnSphere(spawnsphere) {
-        position = "7 -3.75 1.1679651737213135";
+        position = "7 -3.75 5.417965412139893";
         rotation = "0 0 -1 -228.79299999999998";
         scale = "1 1 1";
         datablock = "FootballSpawnSphere";
@@ -280,16 +280,6 @@ new SimGroup(MissionGroup) {
         rotate = "1";
     };
     new Item() {
-        position = "7.25 -31.23336410522461 1.1654515266418457";
-        rotation = "0 0.0824805274605751 0.9965927004814148 -180";
-        scale = "1 1 1";
-        dataBlock = "MegaMarbleItem_MBU";
-        showHelpOnPickUp = "0";
-        collideable = "0";
-        static = "1";
-        rotate = "1";
-    };
-    new Item() {
         position = "-38.48881149291992 18.51495933532715 1.3176823854446411";
         rotation = "0.2140655666589737 0.0805685743689537 0.9734909534454346 -42.27523422241211";
         scale = "1 1 1";
@@ -374,16 +364,6 @@ new SimGroup(MissionGroup) {
         rotation = "0 0 1 -180";
         scale = "1 1 1";
         dataBlock = "SuperSpeedItem_MBU";
-        showHelpOnPickUp = "0";
-        collideable = "0";
-        static = "1";
-        rotate = "1";
-    };
-    new Item() {
-        position = "6.772389888763428 23.76451873779297 1.1654515266418457";
-        rotation = "-1 6.123234262925839e-17 7.39855856734964e-16 -350.5376892089844";
-        scale = "1 1 1";
-        dataBlock = "MegaMarbleItem_MBU";
         showHelpOnPickUp = "0";
         collideable = "0";
         static = "1";
