@@ -75,6 +75,7 @@ typedef ControlsSettings = {
 	var chat:Int;
 	var oobRespawnKeyByPowerup:Bool;
 	var moddedController:Bool;
+	var eightWayController:Bool;
 }
 
 typedef TouchSettings = {
@@ -175,7 +176,8 @@ class Settings {
 		rewind: Key.R,
 		chat: Key.T,
 		oobRespawnKeyByPowerup: false,
-		moddedController: false
+		moddedController: false,
+		eightWayController: false
 	};
 
 	public static var touchSettings:TouchSettings = {
@@ -507,6 +509,9 @@ class Settings {
 			}
 			if (controlsSettings.moddedController == null) {
 				controlsSettings.moddedController = false;
+			}
+			if (controlsSettings.eightWayController == null) {
+				controlsSettings.eightWayController = false;
 			}
 			if (optionsSettings.rewindEnabled == null) {
 				optionsSettings.rewindEnabled = false;

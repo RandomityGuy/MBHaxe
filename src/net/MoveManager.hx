@@ -121,6 +121,17 @@ class MoveManager {
 				}
 			}
 
+			if (Settings.controlsSettings.eightWayController) {
+				var ang = Math.atan2(move.d.y, move.d.x);
+
+				if (move.d.x != 0 || move.d.y != 0) {
+					var ang = Math.atan2(move.d.y, move.d.x);
+					var step = Math.round(ang / (Math.PI / 4)); // -4..4
+					move.d.x = Math.round(Math.cos(step * Math.PI / 4));
+					move.d.y = Math.round(Math.sin(step * Math.PI / 4));
+				}
+			}
+
 			if (@:privateAccess !MarbleGame.instance.world.playGui.isChatFocused()) {
 				if (Key.isDown(Settings.controlsSettings.forward)) {
 					move.d.x -= 1;
