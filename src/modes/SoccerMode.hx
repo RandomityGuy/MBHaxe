@@ -496,11 +496,14 @@ class SoccerMode extends NullMode implements TeamsMode {
 			level.restart(m);
 			level.deselectPowerUp(m);
 		}
+		NetCommands.soccerResetAfterGoal();
 	}
 
 	public function resetAfterGoalClient() {
 		faceBall(level.marble);
 		level.deselectPowerUp(level.marble);
+		// resume the marble!
+		football.setMode(Play);
 	}
 
 	public function onGoalNotification(scoringTeam:Int, redScore:Int, blueScore:Int, scorerId:Int) {
