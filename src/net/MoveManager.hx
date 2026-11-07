@@ -96,6 +96,13 @@ class MoveManager {
 			move.d.x = Gamepad.getAxis(Settings.gamepadSettings.moveYAxis);
 			move.d.y = -Gamepad.getAxis(Settings.gamepadSettings.moveXAxis);
 
+			var moveLen = Math.sqrt(move.d.x * move.d.x + move.d.y * move.d.y);
+			if (moveLen > 0.00001) {
+				var scaled = Math.min(moveLen / Settings.gamepadSettings.outerDeadzone, 1);
+				move.d.x *= scaled / moveLen;
+				move.d.y *= scaled / moveLen;
+			}
+
 			if (Settings.controlsSettings.moddedController) {
 				// we need to scale the moves to square instead of circle
 				var moveLen = Math.sqrt(move.d.x * move.d.x + move.d.y * move.d.y);

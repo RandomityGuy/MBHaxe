@@ -104,6 +104,7 @@ typedef GamepadSettings = {
 	var invertXAxis:Bool;
 	var invertYAxis:Bool;
 	var axisDeadzone:Float;
+	var outerDeadzone:Float;
 	var respawn:Array<String>;
 	var blast:Array<String>;
 	var rewind:Array<String>;
@@ -203,6 +204,7 @@ class Settings {
 		invertXAxis: false,
 		invertYAxis: false,
 		axisDeadzone: 0.15,
+		outerDeadzone: 0.9,
 		respawn: ["back"],
 		blast: ["X", "LB", "RB"],
 		rewind: ["Y"],
@@ -267,7 +269,6 @@ class Settings {
 	#end
 
 	#if ios
-
 	@:hlNative public static function open_web_url(url:String):Void {}
 
 	@:hlNative public static function export_prefs():Void {}
@@ -510,6 +511,8 @@ class Settings {
 			}
 			if (optionsSettings.rewindTimescale == 0)
 				optionsSettings.rewindTimescale = 1;
+			if (gamepadSettings.outerDeadzone == 0)
+				gamepadSettings.outerDeadzone = 0.9;
 			if (json.stats != null) {
 				playStatistics = json.stats;
 				#if js
@@ -556,6 +559,9 @@ class Settings {
 			}
 			if (achievementProgression == null)
 				achievementProgression = 0;
+			if (gamepadSettings.outerDeadzone == null) {
+				gamepadSettings.outerDeadzone = 0.9;
+			}
 			#end
 			highscoreName = json.highscoreName;
 			if (highscoreName == null) {
