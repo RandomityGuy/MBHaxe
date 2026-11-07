@@ -67,7 +67,7 @@ class InputOptionsGui extends GuiImage {
 		}
 
 		var optionCollection = new GuiXboxOptionsListCollection();
-		optionCollection.position = new Vector(380, 160);
+		optionCollection.position = new Vector(380, 90);
 		optionCollection.extent = new Vector(815, 500);
 		innerCtrl.addChild(optionCollection);
 
@@ -112,6 +112,18 @@ class InputOptionsGui extends GuiImage {
 			return true;
 		}, 0.5, 118);
 		msOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.controlsSettings.cameraSensitivity - 0.12) / (1.2 - 0.12)) * 18), 0, 18)));
+
+		var odOpt = optionCollection.addOption(1, "Axis Deadzone", numberRange(0, 50, 5), (idx) -> {
+			Settings.gamepadSettings.axisDeadzone = idx * 0.05;
+			return true;
+		}, 0.5, 118);
+		odOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.gamepadSettings.axisDeadzone) / 0.5) * 10), 0, 10)));
+
+		var idOpt = optionCollection.addOption(1, "Outer Deadzone", numberRange(50, 100, 5), (idx) -> {
+			Settings.gamepadSettings.outerDeadzone = 0.5 + idx * 0.05;
+			return true;
+		}, 0.5, 118);
+		idOpt.setCurrentOption(Std.int(Util.clamp(Math.floor(((Settings.gamepadSettings.outerDeadzone - 0.5) / 0.5) * 10), 0, 10)));
 
 		var bottomBar = new GuiControl();
 		bottomBar.position = new Vector(0, 590);
