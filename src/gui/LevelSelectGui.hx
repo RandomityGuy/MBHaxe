@@ -70,7 +70,7 @@ class LevelSelectGui extends GuiImage {
 		}
 		currentDifficultyStatic = difficulty;
 
-		var difficultyMissions = MissionList.missionList['ultra'][currentDifficultyStatic];
+		var difficultyMissions = MissionList.missionList['ultra'][currentDifficultyStatic].filter(x -> x.gameMode.toLowerCase() != "soccer");
 		if (currentSelectionStatic >= difficultyMissions.length)
 			currentSelectionStatic = 0;
 		var curMission = difficultyMissions[currentSelectionStatic];

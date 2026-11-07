@@ -137,6 +137,7 @@ class Mission {
 		}
 		mission.type = missionInfo.type.toLowerCase();
 		mission.missionInfo = missionInfo;
+		mission.gameMode = missionInfo.gamemode;
 		return mission;
 	}
 
