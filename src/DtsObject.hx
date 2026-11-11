@@ -566,7 +566,7 @@ class DtsObject extends GameObject {
 				material.receiveShadows = false;
 			}
 
-			if (this.isTSStatic && !(flags & 64 > 0)) {
+			if (this.isTSStatic && !(flags & 64 > 0) && this.dts.matReflectanceMaps[i] != i) {
 				var reflectivity = this.dts.matReflectionAmounts[i];
 				var cubemapshader = new EnvMap(this.level.sky.cubemap, reflectivity);
 				material.mainPass.addShader(cubemapshader);
