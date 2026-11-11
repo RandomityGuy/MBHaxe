@@ -361,7 +361,7 @@ class EndGameGui extends GuiControl {
 				}
 			}
 
-			var scoreText = '<font face="bold28" color="#000000"><p align="center">${mission.title}, Top ${scoreCount}</p></font>';
+			var scoreText = '<font face="bold28" color="#000000"><p align="center">Top ${scoreCount}</p></font>';
 
 			egTopTimesTextTop.text.text = scoreText;
 

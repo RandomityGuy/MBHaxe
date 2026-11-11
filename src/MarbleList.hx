@@ -5,7 +5,8 @@ class MarbleList {
 		name:String,
 		dts:String,
 		skin:String,
-		shader:String
+		shader:String,
+		?supportsReflections:Bool
 	}>> = [
 		[
 			// PQ Classic
@@ -61,31 +62,36 @@ class MarbleList {
 				name: "Wavy Glass 1",
 				dts: "data/shapes_pq/marbles/pq classic/wavyglass1.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Wavy Glass 2",
 				dts: "data/shapes_pq/marbles/pq classic/wavyglass2.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Wavy Glass 3",
 				dts: "data/shapes_pq/marbles/pq classic/wavyglass3.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Wavy Glass 4",
 				dts: "data/shapes_pq/marbles/pq classic/wavyglass4.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Wavy Glass 5",
 				dts: "data/shapes_pq/marbles/pq classic/wavyglass5.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			}
 		],
 		[
@@ -94,31 +100,36 @@ class MarbleList {
 				name: "Air Element",
 				dts: "data/shapes_pq/marbles/abstract/airelement.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Crackball",
 				dts: "data/shapes_pq/marbles/abstract/crackball.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Earth Element",
 				dts: "data/shapes_pq/marbles/abstract/earthelement.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Milky Way",
 				dts: "data/shapes_pq/marbles/abstract/ball-superball.dts",
 				skin: "MilkyWay",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Orangeade",
 				dts: "data/shapes_pq/marbles/abstract/ball-superball.dts",
 				skin: "Orangeade",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			}
 		],
 		[
@@ -127,25 +138,29 @@ class MarbleList {
 				name: "Apple",
 				dts: "data/shapes_pq/marbles/fruit/apple.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Centaloupe",
 				dts: "data/shapes_pq/marbles/fruit/centaloupe.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Mandarin",
 				dts: "data/shapes_pq/marbles/fruit/mandarin.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Pear",
 				dts: "data/shapes_pq/marbles/fruit/pear.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			}
 		],
 		[
@@ -286,7 +301,8 @@ class MarbleList {
 				name: "Mid P",
 				dts: "data/shapes/balls/midp.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Spade",
@@ -898,25 +914,29 @@ class MarbleList {
 				name: "Broken Marble",
 				dts: "data/shapes/balls/pack3/corrupted.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Caged",
 				dts: "data/shapes/balls/pack3/caged.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Cartoony",
 				dts: "data/shapes/balls/pack3/cartoon.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Crystal",
 				dts: "data/shapes/balls/pack3/crystal.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Hmmm",
@@ -934,7 +954,8 @@ class MarbleList {
 				name: "Learning To Roll",
 				dts: "data/shapes/balls/pack3/learntorollmarble.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Lotus",
@@ -958,7 +979,8 @@ class MarbleList {
 				name: "What's This",
 				dts: "data/shapes/balls/pack3/owo.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Pensive Cowboy Marble",
@@ -970,7 +992,8 @@ class MarbleList {
 				name: "PlatinumQuest",
 				dts: "data/shapes/balls/pack3/pq_marble_new.dts",
 				skin: "base",
-				shader: "Default"
+				shader: "Default",
+				supportsReflections: false
 			},
 			{
 				name: "Pseudoptic",
@@ -1004,4 +1027,14 @@ class MarbleList {
 			}
 		]
 		];
+
+	public static function findMarble(dts:String, skin:String) {
+		for (cat in MarbleList.marbles) {
+			for (marble in cat) {
+				if (marble.dts == dts && marble.skin == skin)
+					return marble;
+			}
+		}
+		return null;
+	}
 }
