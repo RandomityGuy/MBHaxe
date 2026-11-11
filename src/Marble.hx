@@ -1225,16 +1225,21 @@ class Marble extends GameObject {
 
 		var marbleDts = new DtsObject();
 		var marbleShader = "";
+		var canDoReflections = true;
 		if (connection == null) {
 			Console.log("Marble: " + Settings.optionsSettings.marbleModel + " (" + Settings.optionsSettings.marbleSkin + ")");
 			marbleDts.dtsPath = Settings.optionsSettings.marbleModel;
 			marbleDts.matNameOverride.set("base.marble", Settings.optionsSettings.marbleSkin + ".marble");
 			marbleShader = Settings.optionsSettings.marbleShader;
+			var marbleData = MarbleList.findMarble(Settings.optionsSettings.marbleModel, Settings.optionsSettings.marbleSkin);
+			if (marbleData != null)
+				canDoReflections = marbleData.supportsReflections ?? true;
 		} else {
 			var marbleData = MarbleList.marbles[connection.getMarbleCatId()][connection.getMarbleId()]; // FIXME category support
 			Console.log("Marble: " + marbleData.dts + " (" + marbleData.skin + ")");
 			marbleDts.dtsPath = marbleData.dts;
 			marbleDts.matNameOverride.set("base.marble", marbleData.skin + ".marble");
+			canDoReflections = marbleData.supportsReflections ?? true;
 			marbleShader = marbleData.shader;
 		}
 		marbleDts.identifier = "Marble";
@@ -1248,7 +1253,7 @@ class Marble extends GameObject {
 			mat.receiveShadows = false;
 			// mat.mainPass.culling = None;
 
-			if (Settings.optionsSettings.reflectiveMarble) {
+			if (Settings.optionsSettings.reflectiveMarble && canDoReflections) {
 				this.cubemapRenderer = new CubemapRenderer(level.scene, level.sky, !this.controllable && level != null);
 
 				if (marbleShader == null || marbleShader == "Default" || marbleShader == "" || !isUltra) { // Use this shit everywhere except ultra

@@ -124,6 +124,11 @@ class PhysModTrigger extends Trigger {
 		worker.run();
 	}
 
+	override function reset() {
+		super.reset();
+		this.activeLayers.clear();
+	}
+
 	override function onMarbleEnter(marble:Marble, timeState:TimeState) {
 		if (this.disabled || this.activeLayers.exists(marble) || this.overrides.length == 0)
 			return;

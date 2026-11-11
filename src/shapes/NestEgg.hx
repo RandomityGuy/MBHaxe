@@ -27,14 +27,10 @@ class NestEgg extends PowerUp {
 		this.skinOverride = this.skin;
 	}
 
-	function eggKey():String {
-		return this.level.mission.path + "_nestegg_" + this.skin;
-	}
-
 	public function pickUp(marble:Marble):Bool {
-		var found = Settings.easterEggs.exists(eggKey());
+		var found = Settings.easterEggs.exists(this.level.mission.path);
 		if (!found) {
-			Settings.easterEggs.set(eggKey(), this.level.timeState.currentAttemptTime);
+			Settings.easterEggs.set(this.level.mission.path, this.level.timeState.currentAttemptTime);
 			this.pickupSound = ResourceLoader.getResource(AudioManager.getPitchedSoundPath("easter"), ResourceLoader.getAudio, this.soundResources);
 			this.customPickupMessage = "You found a Nest Egg!";
 		} else {
