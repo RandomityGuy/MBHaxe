@@ -48,8 +48,15 @@ class SuperJump extends PowerUp {
 
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = StringTools.endsWith(element.datablock.toLowerCase(),
-			"_pq") ? "data/shapes_pq/gameplay/powerups/superjump.dts" : "data/shapes/items/superjump.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.dtsPath = switch (datablockLower) {
+			case "superjumpitem": "data/shapes/items/superjump.dts";
+			case "superjumpitem_mbu": "data/shapes_mbu/items/superjump.dts";
+			case "superjumpitem_pq": "data/shapes_pq/gameplay/powerups/superjump.dts";
+			case "customsuperjumpitem_pq": "data/shapes_pq/gameplay/powerups/superjump.dts";
+			default: "data/shapes/items/superjump.dts";
+		};
+
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.identifier = "SuperJump" + this.dtsPath;

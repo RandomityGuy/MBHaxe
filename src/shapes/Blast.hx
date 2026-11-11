@@ -8,11 +8,15 @@ import mis.MissionElement.MissionElementItem;
 class Blast extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/blast.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.dtsPath = switch (datablockLower) {
+			case "blastitem_mbu": "data/shapes_mbu/images/blast.dts";
+			default: "data/shapes/items/blast.dts";
+		};
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.showSequences = true;
-		this.identifier = "Blast";
+		this.identifier = "Blast" + this.dtsPath;
 		this.pickUpName = "Blast PowerUp";
 		this.autoUse = true;
 		this.radarIndex = 13;

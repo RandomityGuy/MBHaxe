@@ -24,11 +24,20 @@ class Trapdoor extends DtsObject {
 
 	var netId:Int;
 	var resetTime:Float = 5;
+	var sequenceIndex = 0;
 
 	public function new(?element:MissionElementStaticShape) {
 		super();
-		this.dtsPath = (element != null
-			&& element.datablock.toLowerCase() == "trapdoor_pq") ? "data/shapes_pq/gameplay/hazards/trapdoor.dts" : "data/shapes/hazards/trapdoor.dts";
+		var datablockLower = element != null ? element.datablock.toLowerCase() : "trapdoor";
+		this.dtsPath = switch (datablockLower) {
+			case "trapdoor": "data/shapes/hazards/trapdoor.dts";
+			case "trapdoor_mbu": "data/shapes_mbu/hazards/trapdoor.dts";
+			case "trapdoor_pq": "data/shapes_pq/gameplay/hazards/trapdoor.dts";
+			default: "data/shapes/hazards/trapdoor.dts";
+		};
+		if (datablockLower == "trapdoor_mbu")
+			sequenceIndex = 0;
+
 		this.isCollideable = true;
 		this.isTSStatic = false;
 		this.identifier = "Trapdoor" + this.dtsPath;
@@ -49,7 +58,9 @@ class Trapdoor extends DtsObject {
 		var currentCompletion = this.getCurrentCompletion(timeState);
 
 		// Override the keyframe
-		this.sequenceKeyframeOverride[0] = (currentCompletion * (this.dts.sequences[0].numKeyFrames - 1));
+		for (seq in 0...this.sequenceKeyframeOverride.length)
+			this.sequenceKeyframeOverride[seq] = 0;
+		this.sequenceKeyframeOverride[sequenceIndex] = (currentCompletion * (this.dts.sequences[sequenceIndex].numKeyFrames - 1));
 		super.update(timeState);
 
 		var diff = (currentCompletion - this.lastCompletion);

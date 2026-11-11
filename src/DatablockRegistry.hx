@@ -457,7 +457,13 @@ class DatablockRegistry {
 				"glass_9shape",
 				"glass_12shape",
 				"glass_15shape",
-				"glass_18shape"
+				"glass_18shape",
+				"glass_3shape_mbu",
+				"glass_6shape_mbu",
+				"glass_9shape_mbu",
+				"glass_12shape_mbu",
+				"glass_15shape_mbu",
+				"glass_18shape_mbu"
 			]),
 			create: element -> new Glass(cast element)
 		},

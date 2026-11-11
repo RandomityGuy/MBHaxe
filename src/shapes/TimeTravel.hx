@@ -19,12 +19,15 @@ class TimeTravel extends PowerUp {
 		super(element);
 		var datablockLower = element.datablock.toLowerCase();
 		var isPQ = StringTools.endsWith(datablockLower, "_pq");
+		var isMBU = StringTools.endsWith(datablockLower, "_mbu");
 		if (StringTools.contains(datablockLower, "sundial"))
 			this.dtsPath = "data/shapes_pq/gameplay/powerups/sundial.dts";
 		else if (isPQ && StringTools.contains(datablockLower, "timepenalty"))
 			this.dtsPath = "data/shapes_pq/gameplay/powerups/timepenalty.dts";
 		else if (isPQ)
 			this.dtsPath = "data/shapes_pq/gameplay/powerups/timetravel.dts";
+		else if (isMBU)
+			this.dtsPath = "data/shapes_mbu/items/timetravel.dts";
 		else
 			this.dtsPath = "data/shapes/items/timetravel.dts";
 		this.isCollideable = false;
