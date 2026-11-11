@@ -11,8 +11,14 @@ import src.Marble;
 class Helicopter extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = StringTools.endsWith(element.datablock.toLowerCase(),
-			"_pq") ? "data/shapes_pq/gameplay/powerups/gyrocopter.dts" : "data/shapes/images/helicopter.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.dtsPath = switch (datablockLower) {
+			case "helicopteritem": "data/shapes/images/helicopter.dts";
+			case "helicopteritem_mbu": "data/shapes_mbu/images/helicopter.dts";
+			case "helicopteritem_pq": "data/shapes_pq/gameplay/powerups/gyrocopter.dts";
+			default: "data/shapes/images/helicopter.dts";
+		};
+
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.showSequences = false;

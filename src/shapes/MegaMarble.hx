@@ -10,7 +10,13 @@ import src.AudioManager;
 class MegaMarble extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/megamarble.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.dtsPath = switch (datablockLower) {
+			case "megamarbleitem": "data/shapes/items/megamarble.dts";
+			case "megamarbleitem_mbu": "data/shapes_mbu/images/megamarble.dts";
+			default: "data/shapes/items/megamarble.dts";
+		};
+
 		this.isCollideable = false;
 		this.isTSStatic = false;
 		this.showSequences = true;

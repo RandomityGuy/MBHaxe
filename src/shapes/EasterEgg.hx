@@ -10,10 +10,14 @@ import src.AudioManager;
 class EasterEgg extends PowerUp {
 	public function new(element:MissionElementItem) {
 		super(element);
-		this.dtsPath = "data/shapes/items/easteregg.dts";
+		var datablockLower = element.datablock.toLowerCase();
+		this.dtsPath = switch (datablockLower) {
+			case "easteregg_mbu": "data/shapes_mbu/items/egg.dts";
+			default: "data/shapes/items/easteregg.dts";
+		};
 		this.isCollideable = false;
 		this.isTSStatic = false;
-		this.identifier = "EasterEgg";
+		this.identifier = "EasterEgg" + this.dtsPath;
 		this.pickUpName = "Easter Egg";
 		this.autoUse = true;
 		this.cooldownDuration = 1e8;
