@@ -43,12 +43,12 @@ class Http {
 			cancellationMutex.release();
 			var http = new sys.Http(req.url);
 			http.onError = (e) -> {
-				trace('HTTP Request Failed: ' + req.url);
+				// trace('HTTP Request Failed: ' + req.url);
 				responses.add(() -> req.errCallback(e + ":" + http.responseBytes.toString()));
 				req.fulfilled = true;
 			};
 			http.onBytes = (b) -> {
-				trace('HTTP Request Succeeded: ' + req.url);
+				// trace('HTTP Request Succeeded: ' + req.url);
 				responses.add(() -> req.callback(b));
 				req.fulfilled = true;
 			};
@@ -62,8 +62,14 @@ class Http {
 			if (req.post && req.file != null) {
 				http.fileTransfer("hxfile", "hxfilename", new haxe.io.BytesInput(req.file), req.file.length);
 			}
-			trace('HTTP Request: ' + req.url);
+			// trace('HTTP Request: ' + req.url);
+			#if sys
+			hl.Gc.enable(false);
+			#end
 			http.request(req.post);
+			#if sys
+			hl.Gc.enable(true);
+			#end
 		}
 	}
 
@@ -110,21 +116,20 @@ class Http {
 		return req;
 		#else
 		return js.Browser.window.setTimeout(() -> {
-			js.Browser.window.fetch(url,
-				{
-					method: "POST",
-					headers: {
-						"User-Agent": js.Browser.window.navigator.userAgent,
-						"Content-Type": "application/json",
-					},
-					body: postData
-				}).then(r -> {
-					if (!r.ok) {
-						errCallback('${r.status} ${r.statusText}');
-					} else {
-						r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b)), e -> errCallback(Std.string(e)));
-					}
-				}, e -> errCallback(e.toString()));
+			js.Browser.window.fetch(url, {
+				method: "POST",
+				headers: {
+					"User-Agent": js.Browser.window.navigator.userAgent,
+					"Content-Type": "application/json",
+				},
+				body: postData
+			}).then(r -> {
+				if (!r.ok) {
+					errCallback('${r.status} ${r.statusText}');
+				} else {
+					r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b)), e -> errCallback(Std.string(e)));
+				}
+			}, e -> errCallback(e.toString()));
 		}, 75);
 		#end
 	}
@@ -147,21 +152,20 @@ class Http {
 		#else
 		// TODO
 		return js.Browser.window.setTimeout(() -> {
-			js.Browser.window.fetch(url,
-				{
-					method: "POST",
-					headers: {
-						"User-Agent": js.Browser.window.navigator.userAgent,
-						"Content-Type": "application/octet-stream",
-					},
-					body: data.getData()
-				}).then(r -> {
-					if (!r.ok) {
-						errCallback('${r.status} ${r.statusText}');
-					} else {
-						r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b)), e -> errCallback(Std.string(e)));
-					}
-				}, e -> errCallback(e.toString()));
+			js.Browser.window.fetch(url, {
+				method: "POST",
+				headers: {
+					"User-Agent": js.Browser.window.navigator.userAgent,
+					"Content-Type": "application/octet-stream",
+				},
+				body: data.getData()
+			}).then(r -> {
+				if (!r.ok) {
+					errCallback('${r.status} ${r.statusText}');
+				} else {
+					r.arrayBuffer().then(b -> callback(haxe.io.Bytes.ofData(b)), e -> errCallback(Std.string(e)));
+				}
+			}, e -> errCallback(e.toString()));
 		}, 75);
 		#end
 	}
