@@ -62,9 +62,9 @@ jobs:
           command: |
             mkdir -p ~/deps
             cd ~/deps
-            curl https://www.zlib.net/zlib-1.3.2.tar.xz | tar xz
-            cd zlib-1.3.2
-            if [ ! -f /usr/local/lib/libz.1.3.2.dylib ]; then
+            curl https://www.zlib.net/zlib-1.4.tar.xz | tar xz
+            cd zlib-1.4
+            if [ ! -f /usr/local/lib/libz.1.4.dylib ]; then
               cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -DCMAKE_MACOSX_RPATH=TRUE -DCMAKE_POLICY_VERSION_MINIMUM=3.5
               cmake --build build --config Release -j$NPROC
               sudo cmake --install build
@@ -269,7 +269,7 @@ jobs:
             - /usr/local/lib/libvorbis.0.4.9.dylib
             - /usr/local/lib/libvorbisfile.3.3.8.dylib
             - /usr/local/lib/libvorbisenc.2.0.12.dylib
-            - /usr/local/lib/libz.1.3.2.dylib
+            - /usr/local/lib/libz.1.4.dylib
             - /usr/local/lib/datachannel.hdll
 
 
@@ -303,7 +303,7 @@ jobs:
             cp /usr/local/lib/libvorbis.0.4.9.dylib libvorbis.0.4.9.dylib
             cp /usr/local/lib/libvorbisfile.3.3.8.dylib libvorbisfile.3.3.8.dylib
             cp /usr/local/lib/libvorbisenc.2.0.12.dylib libvorbisenc.2.0.12.dylib
-            cp /usr/local/lib/libz.1.3.2.dylib libz.1.dylib
+            cp /usr/local/lib/libz.1.4.dylib libz.1.dylib
             cp /usr/local/lib/libuv.1.dylib libuv.1.dylib
             # These libraries have dangling RPATHs
             install_name_tool -delete_rpath /usr/local/lib libturbojpeg.0.dylib
