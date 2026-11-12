@@ -1,3 +1,23 @@
+# 2.0.4
+This release contains the following improvements:
+- Added support for playing custom Gem Hunt levels originally intended for multiplayer.
+- Added basic support for MBU shapes.
+- Added support for invisible interior surfaces.
+- Fixed MBU Ice not looking correct.
+- Fixed various collision issues.
+- Fixed radar not showing up for certain kinds of End Pads.
+- Fixed certain Help bubbles showing empty dialogues.
+- Fixed Gravity Triggers not functioning correctly.
+- Fixed PhysMod Triggers resetting their state on level restart.
+- Fixed Marble reflections on certain marble shapes that do not support it.
+- Fixed Nest Egg pickups not being counted on the level select menu.
+- Fixed being able to spam click watching top replays to crash the game.
+- Fixed Gem Hunt default time being incorrect.
+- Fixed Custom Music not playing.
+- Fixed Trapdoors, Landmines and Nukes not respecting their reset times.
+- Fixed Trapdoor sounds not playing.
+- Fixed some crashes caused by certain misconfigured levels.
+
 # 2.0.3
 This release fixes a few more regressions:
 - Fixed custom levels not loading in some cases.
