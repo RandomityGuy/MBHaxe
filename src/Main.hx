@@ -191,7 +191,7 @@ class Main extends hxd.App {
 	static function main() {
 		// h3d.mat.PbrMaterialSetup.set();
 		h3d.Engine.ANTIALIASING = 4;
-		#if hl
+		#if (hl && !MACOS_BUNDLE)
 		sdl.Sdl.init();
 		sdl.Sdl.setGLOptions(3, 2, 24, 8, 1, 4);
 		#end
