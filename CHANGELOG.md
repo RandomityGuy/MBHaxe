@@ -17,6 +17,7 @@ This release contains the following improvements:
 - Fixed Trapdoors, Landmines and Nukes not respecting their reset times.
 - Fixed Trapdoor sounds not playing.
 - Fixed some crashes caused by certain misconfigured levels.
+- Fixed crashes on Android.
 
 # 2.0.3
 This release fixes a few more regressions:
