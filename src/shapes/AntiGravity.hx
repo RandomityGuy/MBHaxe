@@ -13,7 +13,7 @@ class AntiGravity extends PowerUp {
 		super(element);
 		this.dtsPath = StringTools.endsWith(element.datablock.toLowerCase(),
 			"_pq") ? "data/shapes_pq/gameplay/powerups/gravmod.dts" : (StringTools.endsWith(element.datablock.toLowerCase(),
-				"_pq") ? "data/shapes_mbu/items/antigravity.dts" : "data/shapes/items/antigravity.dts");
+				"_mbu") ? "data/shapes_mbu/items/antigravity.dts" : "data/shapes/items/antigravity.dts");
 		this.isCollideable = false;
 		this.isTSStatic = false;
 
