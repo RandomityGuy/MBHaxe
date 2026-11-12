@@ -496,7 +496,7 @@ class HuntMode extends NullMode {
 	}
 
 	function testSpawn(gem:Gem):Bool {
-		if (level.mission.missionInfo.game.toLowerCase() == "platinumquest") {
+		if (level.mission.missionInfo.game?.toLowerCase() == "platinumquest") {
 			if (Net.isMP && Net.connectedServerInfo.oldSpawns) {
 				// Spawn chances!
 				var chance = switch (gem.gemColor.toLowerCase()) {
