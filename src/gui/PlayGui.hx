@@ -592,7 +592,7 @@ class PlayGui {
 		var GEM_COLORS = ["blue", "red", "yellow", "purple", "green", "turquoise", "orange", "black"];
 		var gemColor = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
 
-		if (MarbleGame.instance.world.mission.missionInfo.game == "PlatinumQuest")
+		if (MarbleGame.instance.world.mission.missionInfo.game?.toLowerCase() == "platinumquest")
 			gemColor = "platinum";
 
 		gemImageObject = new DtsObject();

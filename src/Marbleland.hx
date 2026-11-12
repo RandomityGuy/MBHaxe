@@ -85,6 +85,8 @@ class Marbleland {
 			#end
 			mission.path = mission.path.toLowerCase();
 			mission.title = missionData.name;
+			// Clean it
+			mission.title = StringTools.replace(mission.title, "\n", "");
 			mission.artist = missionData.artist != null ? missionData.artist : "Unknown Author";
 			mission.description = missionData.desc != null ? missionData.desc : "";
 			mission.qualifyTime = (missionData.qualifyingTime != null && missionData.qualifyingTime != 0) ? missionData.qualifyingTime / 1000 : Math.POSITIVE_INFINITY;
