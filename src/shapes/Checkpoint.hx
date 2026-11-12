@@ -20,7 +20,7 @@ class Checkpoint extends DtsObject {
 		this.isPQ = datablockLower == "checkpoint_pq";
 		this.dtsPath = switch (datablockLower) {
 			case "checkpoint_pq": "data/shapes_pq/gameplay/pads/checkpoint.dts";
-			case "checkpoint_mbu": "data/shapes_mbu/pads/checkpad.dts";
+			case "checkpoint_mbu": "data/shapes/buttons/checkpoint.dts";
 			default: "data/shapes/buttons/checkpoint.dts";
 		}
 		this.isCollideable = true;
