@@ -251,6 +251,12 @@ class CollisionEntity implements IOctreeObject implements IBVHObject {
 				var surfacePoint = surface.getTransformedPoint(i, tform, _transformKey);
 
 				var distance = position.sub(surfacePoint).dot(surfaceNormal);
+
+				if (distance < -0.0001 || distance > radius + 0.0001) { // back side or too far
+					i += vtxCount;
+					continue;
+				}
+
 				var absDistance = Math.abs(distance);
 
 				if (absDistance >= 1e-6 && absDistance <= radius + 0.0001) {
