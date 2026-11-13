@@ -1,5 +1,6 @@
 package src;
 
+import h3d.Quat;
 import haxe.io.BytesBuffer;
 import haxe.io.Bytes;
 import h3d.Matrix;
@@ -11,6 +12,11 @@ import h3d.Vector;
 import src.Settings;
 
 class Util {
+	public static inline function transformVecByQuat(v:Vector, q:Quat) {
+		var t = new Vector(q.x, q.y, q.z).cross(v).multiply(2.0);
+		return v.add(t.multiply(q.w)).add(new Vector(q.x, q.y, q.z).cross(t));
+	}
+
 	public static inline function mat3x3equal(a:Matrix, b:Matrix) {
 		return a._11 == b._11 && a._12 == b._12 && a._13 == b._13 && a._21 == b._21 && a._22 == b._22 && a._23 == b._23 && a._31 == b._31 && a._32 == b._32
 			&& a._33 == b._33;
