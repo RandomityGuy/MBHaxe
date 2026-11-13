@@ -224,10 +224,31 @@ class MarbleTestMoveResult {
 	var position:Vector;
 	var t:Float;
 	var found:Bool;
-	var foundContacts:Array<MarbleTestMoveFoundContact>;
-	var lastContactPos:Null<Vector>;
-	var lastContactNormal:Null<Vector>;
-	var foundMarbles:Array<SphereCollisionEntity>;
+}
+
+@:publicFields
+class MarbleAxis {
+	var sideDirX:Float;
+	var sideDirY:Float;
+	var sideDirZ:Float;
+	var motionDirX:Float;
+	var motionDirY:Float;
+	var motionDirZ:Float;
+	var upDirX:Float;
+	var upDirY:Float;
+	var upDirZ:Float;
+
+	public inline function new(side:Vector, motion:Vector, up:Vector) {
+		sideDirX = side.x;
+		sideDirY = side.y;
+		sideDirZ = side.z;
+		motionDirX = motion.x;
+		motionDirY = motion.y;
+		motionDirZ = motion.z;
+		upDirX = up.x;
+		upDirY = up.y;
+		upDirZ = up.z;
+	}
 }
 
 class Marble extends GameObject {
@@ -301,8 +322,8 @@ class Marble extends GameObject {
 	var appliedImpulses:Array<{impulse:Vector, contactImpulse:Bool}> = [];
 
 	public var heldPowerup:PowerUp;
-	public var lastContactPosition:Vector;
-	public var lastContactNormal:Vector;
+	public var lastContactNormal:Vector = new Vector(0, 0, 0);
+	public var lastContactPosition:Vector = new Vector(0, 0, 0);
 	public var currentUp = new Vector(0, 0, 1);
 
 	public var outOfBounds:Bool = false;
@@ -763,34 +784,37 @@ class Marble extends GameObject {
 		this.queuedContacts.push(collisionInfo);
 	}
 
-	public function getMarbleAxis() {
+	public inline function getMarbleAxis():MarbleAxis {
 		var motiondir = new Vector(0, -1, 0);
-		if (level.isReplayingMovement)
-			return level.currentInputMoves[1].marbleAxes;
+		var sidedir = new Vector(1, 0, 0);
+		var updir = new Vector(0, 0, 1);
+		// if (level.isReplayingMovement)
+		// 	return level.currentInputMoves[1].marbleAxes;
 		if (this.controllable && !this.isNetUpdate) {
-			motiondir.transform(Matrix.R(0, 0, camera.CameraYaw));
-			motiondir.transform(level.newOrientationQuat.toMatrix());
-			var updir = this.currentUp;
-			var sidedir = motiondir.cross(updir);
+			var rotMat = new Matrix();
+			rotMat.initRotation(0, 0, camera.CameraYaw);
+			motiondir.transform(rotMat);
+			motiondir.load(Util.transformVecByQuat(motiondir, level.newOrientationQuat));
+			updir.load(this.currentUp);
+			sidedir.load(motiondir.cross(updir));
 
 			sidedir.normalize();
-			motiondir = updir.cross(sidedir);
-			return [sidedir, motiondir, updir];
+			motiondir.load(updir.cross(sidedir));
 		} else {
 			if (moveMotionDir != null)
-				motiondir = moveMotionDir;
-			var updir = this.currentUp;
-			var sidedir = motiondir.cross(updir);
-			return [sidedir, motiondir, updir];
+				motiondir.load(moveMotionDir);
+			updir.load(this.currentUp);
+			sidedir.load(motiondir.cross(updir));
 		}
+		return new MarbleAxis(sidedir, motiondir, updir);
 	}
 
 	function getExternalForces(timeState:TimeState, m:Move) {
 		if (this.mode == Finish)
 			return this.velocity.multiply(-16);
-		var gWorkGravityDir = this.currentUp.multiply(-1);
 		var A = new Vector();
-		A = gWorkGravityDir.multiply(this._gravity);
+		A.load(this.currentUp.multiply(-this._gravity));
+		var myPosition = this.collider.transform.getPosition();
 		var helicopter = isHelicopterEnabled(timeState);
 		if (helicopter) {
 			A.load(A.multiply(0.25));
@@ -798,9 +822,8 @@ class Marble extends GameObject {
 		if (this.level != null && level.forceObjects.length > 0) {
 			var mass = this.getMass();
 			var externalForce = new Vector();
-			var pos = this.collider.transform.getPosition();
 			for (obj in level.forceObjects) {
-				cast(obj, ForceObject).getForce(pos, externalForce);
+				cast(obj, ForceObject).getForce(myPosition, externalForce);
 			}
 			A.load(A.add(externalForce.multiply(1 / mass)));
 		}
@@ -857,9 +880,8 @@ class Marble extends GameObject {
 		}
 		if (contacts.length == 0 && this.mode != Start) {
 			var axes = this.getMarbleAxis();
-			var sideDir = axes[0];
-			var motionDir = axes[1];
-			var upDir = axes[2];
+			var sideDir = new Vector(axes.sideDirX, axes.sideDirY, axes.sideDirZ);
+			var motionDir = new Vector(axes.motionDirX, axes.motionDirY, axes.motionDirZ);
 			var airAccel = this._airAccel;
 			if (helicopter) {
 				airAccel *= 2;
@@ -876,9 +898,8 @@ class Marble extends GameObject {
 		var axes = this.getMarbleAxis();
 		// if (!level.isReplayingMovement)
 		// 	level.inputRecorder.recordAxis(axes);
-		var sideDir = axes[0];
-		var motionDir = axes[1];
-		var upDir = axes[2];
+		var sideDir = new Vector(axes.sideDirX, axes.sideDirY, axes.sideDirZ);
+		var motionDir = new Vector(axes.motionDirX, axes.motionDirY, axes.motionDirZ);
 		var currentYVelocity = rollVelocity.dot(motionDir);
 		var currentXVelocity = rollVelocity.dot(sideDir);
 		var mv = m.d;
@@ -1153,8 +1174,8 @@ class Marble extends GameObject {
 			A.load(A.add(AFriction));
 			a.load(a.add(aFriction));
 
-			lastContactNormal = bestContact.normal;
-			lastContactPosition = this.getAbsPos().getPosition();
+			lastContactNormal.load(bestContact.normal);
+			lastContactPosition.load(this.getAbsPos().getPosition());
 		}
 		a.load(a.add(aControl));
 		if (this.mode == Finish) {
@@ -1255,16 +1276,17 @@ class Marble extends GameObject {
 	}
 
 	function updateRollSound(time:TimeState, contactPct:Float, slipAmount:Float) {
+		var ourPos = this.collider.transform.getPosition();
 		var rSpat = rollSound.getEffect(Spatialization);
-		rSpat.position = this.collider.transform.getPosition();
+		rSpat.position = ourPos;
 
 		if (this.rollMegaSound != null) {
 			var rmspat = this.rollMegaSound.getEffect(Spatialization);
-			rmspat.position = this.collider.transform.getPosition();
+			rmspat.position = ourPos;
 		}
 
 		var sSpat = slipSound.getEffect(Spatialization);
-		sSpat.position = this.collider.transform.getPosition();
+		sSpat.position = ourPos;
 
 		var rollVel = bestContact != null ? this.velocity.sub(bestContact.velocity) : this.velocity;
 		var scale = rollVel.length();
@@ -1337,10 +1359,6 @@ class Marble extends GameObject {
 				position: position,
 				t: deltaT,
 				found: false,
-				foundContacts: [],
-				lastContactPos: null,
-				lastContactNormal: null,
-				foundMarbles: [],
 			};
 		}
 		var searchbox = new Bounds();
@@ -1355,13 +1373,6 @@ class Marble extends GameObject {
 		var finalT = deltaT;
 		var found = false;
 
-		var lastContactPos = new Vector();
-
-		var testTriangles:Array<MarbleTestMoveFoundContact> = [];
-
-		var finalContacts = [];
-		var foundMarbles = [];
-
 		// Marble-Marble
 		var nextPos = position.add(velocity.multiply(deltaT));
 		for (marble in this.collisionWorld.marbleEntities) {
@@ -1370,7 +1381,6 @@ class Marble extends GameObject {
 			var otherPosition = marble.transform.getPosition();
 			var isec = Collision.capsuleSphereNearestOverlap(position, nextPos, _radius, otherPosition, marble.radius);
 			if (isec.result) {
-				foundMarbles.push(marble);
 				isec.t *= deltaT;
 				if (isec.t >= finalT) {
 					var vel = position.add(velocity.multiply(finalT)).sub(otherPosition);
@@ -1381,9 +1391,9 @@ class Marble extends GameObject {
 
 						var posDiff = nextPos.sub(position).multiply(isec.t);
 						var p = posDiff.add(position);
-						lastContactNormal = p.sub(otherPosition);
+						lastContactNormal.load(p.sub(otherPosition));
 						lastContactNormal.normalize();
-						lastContactPos.load(p.sub(lastContactNormal.multiply(_radius)));
+						lastContactPosition.load(p.sub(lastContactNormal.multiply(_radius)));
 					}
 				}
 			}
@@ -1401,7 +1411,7 @@ class Marble extends GameObject {
 
 			var invMatrix = @:privateAccess obj.invTransform;
 			if (obj.go is PathedInterior)
-				invMatrix = obj.transform.getInverse();
+				obj.transform.getInverse(invMatrix);
 			var invTform = invMatrix.clone();
 			invTform.transpose();
 			var localpos = position.clone();
@@ -1474,7 +1484,7 @@ class Marble extends GameObject {
 							finalT = collisionTime;
 							currentFinalPos.load(position.add(relVel.multiply(finalT)));
 							found = true;
-							lastContactPos.load(currentFinalPos);
+							lastContactPosition.load(currentFinalPos);
 
 							i += vtxCount;
 							continue;
@@ -1540,7 +1550,7 @@ class Marble extends GameObject {
 							if (distanceAlongEdge >= 0.0 && distanceAlongEdge <= edgeLen) {
 								finalT = edgeCollisionTime;
 								currentFinalPos.load(position.add(relVel.multiply(finalT)));
-								lastContactPos.load(v1.add(edge.multiply(distanceAlongEdge / edgeLen)));
+								lastContactPosition.load(v1.add(edge.multiply(distanceAlongEdge / edgeLen)));
 								found = true;
 								continue;
 							}
@@ -1582,7 +1592,7 @@ class Marble extends GameObject {
 									// Resolve it and continue
 									finalT = edgeCollisionTime;
 									currentFinalPos.load(position.add(relVel.multiply(finalT)));
-									lastContactPos.load(v1);
+									lastContactPosition.load(v1);
 									found = true;
 									// Debug.drawSphere(currentFinalPos, radius);
 									// iterationFound = true;
@@ -1646,87 +1656,14 @@ class Marble extends GameObject {
 		var finalPosition = position.add(deltaPosition);
 		position = finalPosition;
 
+		if (found)
+			lastContactNormal.load(position.sub(lastContactPosition).normalized());
+
 		return {
 			position: position,
 			t: finalT,
 			found: found,
-			foundContacts: testTriangles,
-			lastContactPos: lastContactPos,
-			lastContactNormal: position.sub(lastContactPos).normalized(),
-			foundMarbles: foundMarbles
 		};
-	}
-
-	function nudgeToContacts(position:Vector, radius:Float, foundContacts:Array<MarbleTestMoveFoundContact>, foundMarbles:Array<SphereCollisionEntity>) {
-		if (Net.isMP)
-			return position;
-		var it = 0;
-		var concernedContacts = foundContacts; // PathedInteriors have their own nudge logic
-		var prevResolved = 0;
-		do {
-			var resolved = 0;
-			for (testTri in concernedContacts) {
-				// Check if we are on wrong side of the triangle
-				if (testTri.n.dot(position) - testTri.n.dot(testTri.v[0]) < 0) {
-					continue;
-				}
-
-				var t1 = testTri.v[1].sub(testTri.v[0]);
-				var t2 = testTri.v[2].sub(testTri.v[0]);
-				var tarea = Math.abs(t1.cross(t2).length()) / 2.0;
-
-				// Check if our triangle is too small to be collided with
-				if (tarea < 0.001) {
-					continue;
-				}
-
-				// Intersection with plane of testTri and current position
-				var t = (testTri.v[0].sub(position)).dot(testTri.n) / testTri.n.lengthSq();
-				var intersect = position.add(testTri.n.multiply(t));
-
-				var tsi = Collision.PointInTriangle(intersect, testTri.v[0], testTri.v[1], testTri.v[2]);
-				if (tsi) {
-					var separatingDistance = position.sub(intersect).normalized();
-					var distToContactPlane = intersect.distance(position);
-					if (radius - 0.005 - distToContactPlane > 0.0001) {
-						// Nudge to the surface of the contact plane
-						Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
-						Debug.drawSphere(position, radius);
-						position.load(position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005)));
-						resolved++;
-					}
-				}
-
-				// var tsi = Collision.TriangleSphereIntersection(testTri.v[0], testTri.v[1], testTri.v[2], testTri.n, position, radius, testTri.edge,
-				// 	testTri.concavity);
-				// if (tsi.result) {
-				// 	var separatingDistance = position.sub(tsi.point).normalized();
-				// 	var distToContactPlane = tsi.point.distance(position);
-				// 	if (radius - 0.005 - distToContactPlane > 0.0001) {
-				// 		// Nudge to the surface of the contact plane
-				// 		Debug.drawTriangle(testTri.v[0], testTri.v[1], testTri.v[2]);
-				// 		Debug.drawSphere(position, radius);
-				// 		position = position.add(separatingDistance.multiply(radius - distToContactPlane - 0.005));
-				// 		resolved++;
-				// 	}
-				// }
-
-				// var distToContactPlane = position.dot(contact.normal) - contact.point.dot(contact.normal);
-			}
-			if (resolved == 0 && prevResolved == 0)
-				break;
-			prevResolved = resolved;
-			it++;
-		} while (true && it < 10);
-		for (marble in foundMarbles) {
-			var marblePosition = marble.transform.getPosition();
-			var dist = marblePosition.distance(position);
-			if (dist < radius + marble.radius + 0.001) {
-				var separatingDistance = position.sub(marblePosition).normalized();
-				position.load(position.add(separatingDistance.multiply(radius + marble.radius + 0.001 - dist)));
-			}
-		}
-		return position;
 	}
 
 	function advancePhysics(timeState:TimeState, m:Move, collisionWorld:CollisionWorld, pathedInteriors:Array<PathedInterior>) {
@@ -1879,7 +1816,7 @@ class Marble extends GameObject {
 			}
 			var expectedPos = finalPosData.position;
 			// var newPos = expectedPos;
-			var newPos = nudgeToContacts(expectedPos, _radius, finalPosData.foundContacts, finalPosData.foundMarbles);
+			var newPos = expectedPos;
 
 			if (this.velocity.lengthSq() > 1e-8) {
 				var posDiff = newPos.sub(expectedPos);
@@ -2307,10 +2244,10 @@ class Marble extends GameObject {
 		var move:NetMove = null;
 		if (this.controllable && this.mode != Finish) {
 			if (Net.isClient) {
-				var axis = getMarbleAxis()[1];
-				move = Net.clientConnection.recordMove(cast this, axis, timeState, recvServerTick);
+				var axes = getMarbleAxis();
+				move = Net.clientConnection.recordMove(cast this, new Vector(axes.motionDirX, axes.motionDirY, axes.motionDirZ), timeState, recvServerTick);
 			} else if (Net.isHost) {
-				var axis = getMarbleAxis()[1];
+				var axes = getMarbleAxis();
 				var innerMove = recordMove();
 				if (MarbleGame.instance.paused) {
 					innerMove.d.x = 0;
@@ -2322,7 +2259,7 @@ class Marble extends GameObject {
 					innerMove.d.x = (qx - 16) / 16.0;
 					innerMove.d.y = (qy - 16) / 16.0;
 				}
-				move = new NetMove(innerMove, axis, timeState, recvServerTick, 65535);
+				move = new NetMove(innerMove, new Vector(axes.motionDirX, axes.motionDirY, axes.motionDirZ), timeState, recvServerTick, 65535);
 			}
 		}
 		var moveId = 65535;
@@ -2330,7 +2267,11 @@ class Marble extends GameObject {
 			var nextMove = this.connection.getNextMove();
 			// trace('Moves left: ${@:privateAccess this.connection.moveManager.queuedMoves.length}');
 			if (nextMove == null) {
-				var axis = moveMotionDir != null ? moveMotionDir : getMarbleAxis()[1];
+				var axis = moveMotionDir;
+				if (axis == null) {
+					var axes = getMarbleAxis();
+					axis = new Vector(axes.motionDirX, axes.motionDirY, axes.motionDirZ);
+				}
 				var innerMove = lastMove;
 				if (innerMove == null) {
 					innerMove = new Move();
@@ -2355,7 +2296,7 @@ class Marble extends GameObject {
 		}
 
 		if (move != null) {
-			playedSounds = [];
+			playedSounds.resize(0);
 			advancePhysics(timeState, move.move, collisionWorld, pathedInteriors);
 			physicsAccumulator = 0;
 		} else {
@@ -2522,7 +2463,7 @@ class Marble extends GameObject {
 			move.d = new Vector(0, 0);
 		}
 
-		playedSounds = [];
+		playedSounds.resize(0);
 		advancePhysics(timeState, move, collisionWorld, pathedInteriors);
 
 		for (pi in pathedInteriors) {
