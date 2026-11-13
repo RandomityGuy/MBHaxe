@@ -9,6 +9,9 @@ import h3d.Vector;
 import src.AudioManager;
 import src.DtsObject;
 import src.MarbleWorld;
+import net.NetPacket.SoundFXIndex;
+import net.NetCommands;
+import net.Net;
 
 final superJumpParticleOptions:src.ParticleSystem.ParticleEmitterOptions = {
 	ejectionPeriod: 10,
@@ -77,6 +80,8 @@ class SuperJump extends PowerUp {
 		// if (!this.level.rewinding)
 		if (level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource("data/sound/dosuperjump.wav", ResourceLoader.getAudio, this.soundResources));
+		if (Net.isHost)
+			NetCommands.playSound(SoundFXIndex.UseSuperJump, marble.x, marble.y, marble.z);
 		// this.level.particles.createEmitter(superJumpParticleOptions, null, () => Util.vecOimoToThree(marble.body.getPosition()));
 		this.level.deselectPowerUp(marble);
 	}

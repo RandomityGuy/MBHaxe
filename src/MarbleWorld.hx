@@ -1427,7 +1427,7 @@ class MarbleWorld extends Scheduler {
 		// Marble states
 		for (marb in this.marbles) {
 			var oldFlags = @:privateAccess marb.netFlags;
-			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup;
+			@:privateAccess marb.netFlags = MarbleNetFlags.DoBlast | MarbleNetFlags.DoMega | MarbleNetFlags.DoHelicopter | MarbleNetFlags.DoShockAbsorber | MarbleNetFlags.DoSuperBounce | MarbleNetFlags.PickupPowerup | MarbleNetFlags.GravityChange | MarbleNetFlags.UsePowerup | MarbleNetFlags.UpdatePosition;
 
 			if (oldFlags & MarbleNetFlags.UpdateTrapdoor > 0) {
 				@:privateAccess marb.netFlags |= MarbleNetFlags.UpdateTrapdoor;
@@ -1539,6 +1539,9 @@ class MarbleWorld extends Scheduler {
 						continue;
 					var clientMarble = clientMarbles[connection];
 					if (clientMarble == null)
+						continue;
+
+					if (connection.spectator)
 						continue;
 
 					var mask = 1 << client;
@@ -1956,7 +1959,8 @@ class MarbleWorld extends Scheduler {
 					if (myMove != null && Net.isClient) {
 						this.predictions.storeState(marble, myMove.timeState.ticks);
 						for (client => marble in clientMarbles) {
-							this.predictions.storeState(marble, myMove.timeState.ticks);
+							if (!client.spectator)
+								this.predictions.storeState(marble, myMove.timeState.ticks);
 						}
 					}
 
@@ -2522,7 +2526,7 @@ class MarbleWorld extends Scheduler {
 			} else {
 				nextLevelCode();
 			}
-		}, mission, finishTime, this.replay.write());
+		}, mission, finishTime, this.replay);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;

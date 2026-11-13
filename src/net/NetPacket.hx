@@ -39,6 +39,13 @@ class MarbleMovePacket implements NetPacket {
 	}
 }
 
+enum abstract SoundFXIndex(Int) from Int to Int {
+	var UseSuperJump = 1;
+	var UseSuperSpeed = 2;
+	var UseMega = 3;
+	var UseBlast = 4;
+}
+
 enum abstract MarbleNetFlags(Int) from Int to Int {
 	var NullFlag = 0;
 	var DoBlast = 1 << 0;
@@ -51,6 +58,7 @@ enum abstract MarbleNetFlags(Int) from Int to Int {
 	var UsePowerup = 1 << 7;
 	var UpdateTrapdoor = 1 << 8;
 	var DoUltraBlast = 1 << 9;
+	var UpdatePosition = 1 << 10;
 }
 
 @:publicFields
@@ -98,6 +106,7 @@ class MarbleUpdatePacket implements NetPacket {
 		b.writeFloat(lastContactNormal.y);
 		b.writeFloat(lastContactNormal.z);
 		b.writeInt(blastAmount, 11);
+		b.writeFlag(netFlags & MarbleNetFlags.UpdatePosition > 0);
 		if (netFlags & MarbleNetFlags.DoBlast > 0) {
 			b.writeFlag(true);
 			b.writeFlag(netFlags & MarbleNetFlags.DoUltraBlast > 0);
@@ -179,6 +188,8 @@ class MarbleUpdatePacket implements NetPacket {
 		lastContactNormal = new Vector(b.readFloat(), b.readFloat(), b.readFloat());
 		blastAmount = b.readInt(11);
 		this.netFlags = 0;
+		if (b.readFlag())
+			this.netFlags |= MarbleNetFlags.UpdatePosition;
 		if (b.readFlag()) {
 			if (b.readFlag()) {
 				this.netFlags |= MarbleNetFlags.DoUltraBlast;

@@ -75,8 +75,8 @@ class LocalLevelLoader {
 		#end
 	}
 
+	#if js
 	static function relayKeyboardEvent(type:String, e:js.html.KeyboardEvent) {
-		#if js
 		var parent = js.Browser.window.parent;
 		if (parent == null || parent == js.Browser.window)
 			return;
@@ -91,8 +91,8 @@ class LocalLevelLoader {
 			shiftKey: e.shiftKey,
 			repeat: e.repeat
 		}, "*");
-		#end
 	}
+	#end
 
 	static function setupWebPostMessage() {
 		#if js

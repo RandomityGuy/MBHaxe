@@ -1,5 +1,8 @@
 package shapes;
 
+import net.NetPacket.SoundFXIndex;
+import net.NetCommands;
+import net.Net;
 import src.ResourceLoaderWorker;
 import src.MarbleWorld;
 import src.ResourceLoader;
@@ -43,5 +46,7 @@ class MegaMarble extends PowerUp {
 		this.level.deselectPowerUp(marble);
 		if (this.level.marble == marble && @:privateAccess !marble.isNetUpdate)
 			AudioManager.playSound(ResourceLoader.getResource('data/sound/dosuperjump.wav', ResourceLoader.getAudio, this.soundResources));
+		if (Net.isHost)
+			NetCommands.playSound(SoundFXIndex.UseMega, marble.x, marble.y, marble.z);
 	}
 }

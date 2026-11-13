@@ -1,5 +1,9 @@
 package net;
 
+import hxd.snd.effect.Spatialization;
+import h3d.Vector;
+import net.NetPacket.SoundFXIndex;
+import src.AudioManager;
 import gui.MPMessageGui;
 import gui.MessageBoxOkDlg;
 import gui.JoinServerGui;
@@ -87,6 +91,7 @@ class NetCommands {
 
 	@:rpc(server) public static function enterLobby() {
 		if (Net.isClient) {
+			Net.clientConnection.state = LOBBY;
 			MarbleGame.canvas.setContent(new MPPlayMissionGui(false));
 		}
 	}
@@ -109,7 +114,7 @@ class NetCommands {
 				Net.lobbyHostReady = !Net.lobbyHostReady;
 			else
 				Net.clientIdMap[clientId].toggleLobbyReady();
-			var allReady = true;
+			var allReady = Net.pendingConnections.length == 0;
 			for (id => client in Net.clientIdMap) {
 				if (!client.lobbyReady) {
 					allReady = false;
@@ -433,6 +438,35 @@ class NetCommands {
 		if (MarbleGame.instance.world != null) {
 			var huntMode = cast(MarbleGame.instance.world.gameMode, HuntMode);
 			huntMode.setCompetitiveTimerStartTicks(ticks);
+		}
+	}
+
+	@:rpc(server) public static function playSound(audioIndex:Int, x:Float, y:Float, z:Float) {
+		if (Net.isClient) {
+			var ch = switch (audioIndex) {
+				case SoundFXIndex.UseSuperJump:
+					AudioManager.playSound(ResourceLoader.getAudio('data/sound/dosuperjump.wav').resource);
+				case SoundFXIndex.UseSuperSpeed:
+					AudioManager.playSound(ResourceLoader.getAudio("data/sound/dosuperspeed.wav").resource);
+				case SoundFXIndex.UseMega:
+					AudioManager.playSound(ResourceLoader.getAudio('data/sound/dosuperjump.wav').resource);
+				case SoundFXIndex.UseBlast:
+					AudioManager.playSound(ResourceLoader.getAudio('data/sound/blast.wav').resource);
+				case _:
+					null;
+			}
+
+			var audioSrc = new Spatialization();
+			audioSrc.position = new Vector(x, y, z);
+			#if hl
+			audioSrc.referenceDistance = 10.0;
+			#end
+			#if js
+			audioSrc.referenceDistance = 9.5;
+			#end
+			audioSrc.maxDistance = 100.0;
+
+			ch.addEffect(audioSrc);
 		}
 	}
 }
