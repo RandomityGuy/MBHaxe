@@ -92,7 +92,15 @@ class DifBuilder {
 			friction: 0.2,
 			restitution: 0.5
 		},
+		"friction_low_shadow" => {
+			friction: 0.2,
+			restitution: 0.5
+		},
 		"friction_high" => {
+			friction: 1.5,
+			restitution: 0.5
+		},
+		"friction_high_shadow" => {
 			friction: 1.5,
 			restitution: 0.5
 		},
@@ -292,6 +300,25 @@ class DifBuilder {
 		worker.run();
 	}
 
+	public static function createSkyboxIceMaterial(onFinish:hxsl.Shader->Void, diffusePath:String, normalPath:String, specularPath:String, reflectivity:Float,
+			textureScale:Vector) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture('data/${diffusePath}').resource;
+			diffuseTex.wrap = Repeat;
+			var normalTex = ResourceLoader.getTexture('data/${normalPath}').resource;
+			normalTex.wrap = Repeat;
+			var specularTex = ResourceLoader.getTexture('data/${specularPath}').resource;
+			specularTex.wrap = Repeat;
+			var shader = new shaders.SkyboxIce(diffuseTex, normalTex, specularTex, MarbleGame.instance.world.sky.cubemap, 20.0, reflectivity,
+				MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight, MarbleGame.instance.world.dirLightDir, textureScale);
+			onFinish(shader);
+		});
+		worker.loadFile('data/${diffusePath}');
+		worker.loadFile('data/${normalPath}');
+		worker.loadFile('data/${specularPath}');
+		worker.run();
+	}
+
 	static var shaderMaterialDict:Map<String, (hxsl.Shader->Void)->Void> = [
 		'interiors_mbu/plate_1' => (onFinish) -> createPhongMaterial(onFinish, 'plate.randomize.png', 'plate.normal.png', 8, new Vector(1, 1, 0.8, 1), 0.5),
 		'interiors_mbu/tile_beginner' => (onFinish) -> createNoiseTileMaterial(onFinish, 'tile_beginner.png', '', 40, new Vector(1, 1, 1, 1)),
@@ -330,10 +357,10 @@ class DifBuilder {
 			new Vector(0.2, 0.2, 0.2, 0.2)),
 		'interiors_mbu/beam' => (onFinish) -> createPhongMaterial(onFinish, 'beam.png', 'beam.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
 		'interiors_mbu/beam_side' => (onFinish) -> createPhongMaterial(onFinish, 'beam_side.png', 'beam_side.normal.png', 12, new Vector(0.8, 0.8, 0.6, 1)),
-		'interiors_mbu/friction_low' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low.png', 'friction_low.normal.png', 128,
-			new Vector(1, 1, 1, 0.8)),
-		'interiors_mbu/friction_low_shadow' => (onFinish) -> createPhongMaterial(onFinish, 'friction_low_shadow.png', 'friction_low.normal.png', 128,
-			new Vector(0.3, 0.3, 0.35, 1)),
+		'interiors_mbu/friction_low' => (onFinish) -> createSkyboxIceMaterial(onFinish, 'interiors_mbu/friction_low.png',
+			'shaders/tex/friction_low_mbu.normal.png', 'shaders/tex/friction_low_mbu.spec.png', 0.3, new Vector(1, 1)),
+		'interiors_mbu/friction_low_shadow' => (onFinish) -> createSkyboxIceMaterial(onFinish, 'interiors_mbu/friction_low_shadow.png',
+			'shaders/tex/friction_low_mbu.normal.png', 'shaders/tex/friction_low_mbu.spec.png', 0.3, new Vector(1, 1)),
 		'interiors_mbu/friction_high' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high.png', 'friction_high.normal.png', 10,
 			new Vector(0.3, 0.3, 0.35, 1)),
 		'interiors_mbu/friction_high_shadow' => (onFinish) -> createPhongMaterial(onFinish, 'friction_high_shadow.png', 'friction_high.normal.png', 10,
