@@ -79,7 +79,8 @@ class SuperSpeed extends PowerUp {
 	}
 
 	public function use(marble:src.Marble, timeState:TimeState) {
-		var movementVector = marble.getMarbleAxis()[0];
+		var marbleAxis = marble.getMarbleAxis();
+		var movementVector = new Vector(marbleAxis.sideDirX, marbleAxis.sideDirY, marbleAxis.sideDirZ);
 
 		var boostVec = movementVector.clone();
 
