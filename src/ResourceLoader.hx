@@ -580,8 +580,7 @@ class ResourceLoader {
 			#if sys
 			fname = "data/" + fname;
 			#end
-			if (game == 'gold')
-				fname = StringTools.replace(fname, 'interiors/', 'interiors_mbg/');
+			fname = StringTools.replace(fname, 'interiors_mbg/', 'interiors/');
 			fname = StringTools.replace(fname, "lbinteriors", "interiors"); // Normalize
 			if (exists(fname))
 				continue;
@@ -596,6 +595,7 @@ class ResourceLoader {
 		#if (js || android)
 		path = StringTools.replace(path, "data/", "");
 		#end
+		path = StringTools.replace(path, 'interiors_mbg/', 'interiors/');
 		var zfe = new BytesFileEntry(path, bytes);
 		zipFilesystem.set(path, zfe);
 	}
