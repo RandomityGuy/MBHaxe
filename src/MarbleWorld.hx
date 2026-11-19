@@ -618,10 +618,6 @@ class MarbleWorld extends Scheduler {
 		this.rewindManager.clear();
 		this.rewindUsed = false;
 
-		if (!this.isMultiplayer || _skipPreGame) {
-			setCursorLock(true);
-		}
-
 		this.timeState.currentAttemptTime = 0;
 		this.timeState.gameplayClock = this.gameMode.getStartTime();
 		this.timeState.ticks = 0;
@@ -2202,7 +2198,8 @@ class MarbleWorld extends Scheduler {
 			var endGameCode = () -> {
 				this.dispose();
 				var pmg = new PlayMissionGui();
-				PlayMissionGui.currentSelectionStatic = mission.index + 1;
+				if (!mission.isCustom)
+					PlayMissionGui.currentSelectionStatic = mission.index + 1;
 				MarbleGame.canvas.setContent(pmg);
 				#if js
 				pointercontainer.hidden = false;
@@ -2241,7 +2238,7 @@ class MarbleWorld extends Scheduler {
 				}
 			}
 			restartGameCode();
-		}, mission, finishTime);
+		}, mission, finishTime, this.replay);
 		MarbleGame.canvas.pushDialog(egg);
 		this.setCursorLock(false);
 		return 0;

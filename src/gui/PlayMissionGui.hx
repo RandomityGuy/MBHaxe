@@ -1,5 +1,7 @@
 package gui;
 
+import net.ClientConnection.NetPlatform;
+import src.Leaderboards.LeaderboardsKind;
 import src.MarbleGame;
 import src.Replay;
 import haxe.ds.Option;
@@ -23,10 +25,15 @@ import src.ResourceLoader;
 import h3d.Vector;
 import src.Util;
 import src.MissionList;
+import src.Http;
+import src.Leaderboards;
+import src.Marbleland;
+import src.MissionMapping;
 
 class PlayMissionGui extends GuiImage {
 	static var currentSelectionStatic:Int = -1;
 	static var currentCategoryStatic:String = "beginner";
+	static var currentSortType:Int = 1;
 
 	var currentSelection:Int = 0;
 	var currentCategory:String = "beginner";
@@ -41,6 +48,13 @@ class PlayMissionGui extends GuiImage {
 
 	#if js
 	var previewTimeoutHandle:Option<Int> = None;
+	var lbRequest:Int = 0;
+	#end
+
+	#if hl
+	var previewToken:Int = 0;
+	var lbToken:Int = 0;
+	var lbRequest:src.Http.HttpRequest = null;
 	#end
 
 	public function new() {
@@ -68,12 +82,16 @@ class PlayMissionGui extends GuiImage {
 		localContainer.extent = new Vector(651, 392);
 		this.addChild(localContainer);
 
-		function loadButtonImages(path:String) {
+		function loadButtonImages(path:String, hasDisabled:Bool = true) {
 			var normal = ResourceLoader.getResource('${path}_n.png', ResourceLoader.getImage, this.imageResources).toTile();
 			var hover = ResourceLoader.getResource('${path}_h.png', ResourceLoader.getImage, this.imageResources).toTile();
 			var pressed = ResourceLoader.getResource('${path}_d.png', ResourceLoader.getImage, this.imageResources).toTile();
-			var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
-			return [normal, hover, pressed, disabled];
+			if (hasDisabled) {
+				var disabled = ResourceLoader.getResource('${path}_i.png', ResourceLoader.getImage, this.imageResources).toTile();
+				return [normal, hover, pressed, disabled];
+			} else {
+				return [normal, hover, pressed];
+			}
 		}
 
 		var tabAdvanced = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_adv.png", ResourceLoader.getImage, this.imageResources).toTile());
@@ -81,7 +99,6 @@ class PlayMissionGui extends GuiImage {
 		tabAdvanced.extent = new Vector(166, 43);
 		tabAdvanced.pressedAction = (sender) -> {
 			currentList = MissionList.advancedMissions;
-			currentCategory = "advanced";
 			setCategoryFunc("advanced");
 		}
 		localContainer.addChild(tabAdvanced);
@@ -91,7 +108,6 @@ class PlayMissionGui extends GuiImage {
 		tabIntermediate.extent = new Vector(205, 58);
 		tabIntermediate.pressedAction = (sender) -> {
 			currentList = MissionList.intermediateMissions;
-			currentCategory = "intermediate";
 			setCategoryFunc("intermediate");
 		}
 		localContainer.addChild(tabIntermediate);
@@ -100,23 +116,30 @@ class PlayMissionGui extends GuiImage {
 		tabCustom.position = new Vector(589, 91);
 		tabCustom.extent = new Vector(52, 198);
 		tabCustom.pressedAction = (sender) -> {
-			#if (js || android)
-			var mbo = new MessageBoxYesNoDlg("The custom level browser is not available in this game.\n Please play Marble Blast Platinum to get access to 7000+ community made customs of both Marble Blast Gold and Marble Blast Platinum. Visit download link?",
-				() -> {
-					#if sys
-					hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe");
-					#end
-					#if js
-					js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
-					#end
-				}, () -> {});
+			if (Marbleland.goldMissions.length == 0) {
+				var mbo = new MessageBoxOkDlg("Level list has not been downloaded yet. Please try again later");
+				MarbleGame.canvas.pushDialog(mbo);
+			} else {
+				setCategoryFunc("custom");
+			}
 
-			MarbleGame.canvas.pushDialog(mbo);
-			#else
-			currentList = MissionList.customMissions;
-			currentCategory = "custom";
-			setCategoryFunc("custom");
-			#end
+			// #if (js || android)
+			// var mbo = new MessageBoxYesNoDlg("The custom level browser is not available in this game.\n Please play Marble Blast Platinum to get access to 7000+ community made customs of both Marble Blast Gold and Marble Blast Platinum. Visit download link?",
+			// 	() -> {
+			// 		#if sys
+			// 		hxd.System.openURL("https://github.com/RandomityGuy/MBHaxe");
+			// 		#end
+			// 		#if js
+			// 		js.Browser.window.open("https://github.com/RandomityGuy/MBHaxe");
+			// 		#end
+			// 	}, () -> {});
+
+			// MarbleGame.canvas.pushDialog(mbo);
+			// #else
+			// currentList = MissionList.customMissions;
+			// currentCategory = "custom";
+			// setCategoryFunc("custom");
+			// #end
 		}
 		localContainer.addChild(tabCustom);
 
@@ -351,10 +374,48 @@ class PlayMissionGui extends GuiImage {
 			}
 		}
 
+		var goldBadge = ResourceLoader.getResource("data/ui/play/goldscore.png", ResourceLoader.getImage, this.imageResources).toTile();
+		goldBadge.dy = 2.5 * Settings.uiScale;
+		goldBadge.dx = 8 * Settings.uiScale;
+		var gbWidth = goldBadge.width;
+		var gbHeight = goldBadge.height;
+
+		function imgLoader(path:String) {
+			var t = switch (path) {
+				case "pc":
+					ResourceLoader.getResource("data/ui/play/platform_desktop.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "mac":
+					ResourceLoader.getResource("data/ui/play/platform_mac.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "web":
+					ResourceLoader.getResource("data/ui/play/platform_web.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "android":
+					ResourceLoader.getResource("data/ui/play/platform_android.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "unknown":
+					ResourceLoader.getResource("data/ui/play/platform_unknown.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "rewind":
+					ResourceLoader.getResource("data/ui/play/rewind_ico_black.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "watch":
+					ResourceLoader.getResource("data/ui/play/record.png", ResourceLoader.getImage, this.imageResources).toTile();
+				case "goldBadge.png":
+					return goldBadge;
+				case _:
+					return null;
+			};
+			if (t != null)
+				t.scaleToSize(t.width * (Settings.uiScale), t.height * (Settings.uiScale));
+			return t;
+		}
+
 		var pmDescription = new GuiMLText(arial14, mlFontLoader);
 		pmDescription.position = new Vector(61, 52);
 		pmDescription.extent = new Vector(215, 174);
 		pmDescription.text.textColor = 0x000000;
+		pmDescription.text.lineHeightMode = TextOnly;
+		pmDescription.text.loadImage = imgLoader;
+		pmDescription.text.imageVerticalAlign = Middle;
+		pmDescription.text.maxWidth = 215;
+
+		goldBadge.scaleToSize((gbWidth / gbHeight) * arialBold14.lineHeight, arialBold14.lineHeight);
 		// We're gonna use Â to align shit lmao, its too hacky i know
 		var descText = '<font face="DomCasual24" color="#000000">Learn The Super Speed </font><br/><br/>' + 'ÂTest Align';
 		descText += '<br/><br/><font face="DomCasual24">Best Times:</font><br/>';
@@ -364,26 +425,123 @@ class PlayMissionGui extends GuiImage {
 		pmDescription.text.text = descText;
 		pmBox.addChild(pmDescription);
 
-		// Oh god this is yet another hack cause I cant do that tab thing torque does so thats bruh
-		var pmDescriptionOther = new GuiMLText(arial14, mlFontLoader);
-		pmDescriptionOther.position = new Vector(61, 52);
-		pmDescriptionOther.extent = new Vector(215, 174);
-		pmDescriptionOther.text.textColor = 0x000000;
-		var descText2 = '<br/><br/>' + '<font opacity="0">ÂTest Align</font>';
-		descText2 += '<br/><br/><br/>';
-		for (i in 0...3) {
-			descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">99:59.999</font>';
+		var scoreView:LeaderboardsKind = All;
+		var showLBs = false;
+
+		var infoButtonImages = loadButtonImages("data/ui/play/info", false);
+		var leaderboardButtonImages = loadButtonImages("data/ui/play/leaderboards", false);
+
+		var pmLeaderboards = new GuiButton(leaderboardButtonImages);
+		pmLeaderboards.position = new Vector(181, 260);
+		pmLeaderboards.extent = new Vector(64, 64);
+		pmLeaderboards.gamepadAccelerator = [];
+		pmLeaderboards.pressedAction = (sender) -> {
+			showLBs = !showLBs;
+			if (showLBs) {
+				@:privateAccess pmLeaderboards.anim.frames = infoButtonImages;
+			} else {
+				@:privateAccess pmLeaderboards.anim.frames = leaderboardButtonImages;
+			}
+			setSelectedFunc(currentSelection);
+		};
+		pmBox.addChild(pmLeaderboards);
+
+		var sortAlphaButtonImages = loadButtonImages("data/ui/play/sort_alpha", false);
+		var sortTimeButtonImages = loadButtonImages("data/ui/play/sort_time", false);
+
+		var pmSort = new GuiButton(sortTimeButtonImages);
+		pmSort.position = new Vector(245, 260);
+		pmSort.extent = new Vector(64, 64);
+		pmSort.gamepadAccelerator = [];
+		pmSort.pressedAction = (sender) -> {
+			currentSortType = (currentSortType + 1) % 2;
+			if (currentSortType == 0) {
+				@:privateAccess pmSort.anim.frames = sortAlphaButtonImages;
+			}
+			if (currentSortType == 1) {
+				@:privateAccess pmSort.anim.frames = sortTimeButtonImages;
+			}
+			setCategoryFunc(currentCategoryStatic, false);
+			this.render(cast(this.parent, Canvas).scene2d);
+		};
+
+		if (currentSortType == 0) {
+			@:privateAccess pmSort.anim.frames = sortAlphaButtonImages;
 		}
-		pmDescriptionOther.text.text = descText2;
-		pmBox.addChild(pmDescriptionOther);
+		if (currentSortType == 1) {
+			@:privateAccess pmSort.anim.frames = sortTimeButtonImages;
+		}
+
+		if (currentCategory == "custom") {
+			pmSort.anim.visible = true;
+			pmSort.disabled = false;
+		} else {
+			pmSort.anim.visible = false;
+			pmSort.disabled = true;
+		}
+
+		pmBox.addChild(pmSort);
+
+		pmDescription.text.onHyperlink = (url) -> {
+			if (url == "watch") {
+				var currentMission = currentList[currentSelection];
+				var lbPath = currentMission.path;
+				if (currentMission.isClaMission)
+					lbPath = 'custom/${currentMission.id}';
+				Leaderboards.watchTopReplay(lbPath, scoreView, (b) -> {
+					if (b != null) {
+						var replayF = new Replay("");
+						if (replayF.read(b)) {
+							var repmis = replayF.mission;
+							// Strip data/ from the mission name
+							if (StringTools.startsWith(repmis, "data/")) {
+								repmis = repmis.substr(5);
+							}
+
+							// do the mapping
+
+							if (!StringTools.startsWith(repmis, 'custom/')) {
+								repmis = repmis.substr(repmis.indexOf('missions'));
+								repmis = repmis.substr(repmis.indexOf('/') + 1);
+								if (MissionMapping.mbpToMbg.exists(repmis))
+									repmis = 'missions/' + MissionMapping.mbpToMbg.get(repmis);
+							}
+
+							var mi = replayF.customId == 0 ? MissionList.missions.get(repmis) : Marbleland.missions.get(replayF.customId);
+
+							// try with data/ added
+							if (mi == null && replayF.customId == 0) {
+								if (!StringTools.contains(repmis, "data/"))
+									repmis = "data/" + repmis;
+								mi = MissionList.missions.get(repmis);
+							}
+
+							if (mi.isClaMission) {
+								mi.download(() -> {
+									MarbleGame.instance.watchMissionReplay(mi, replayF, PlayMissionGui);
+								});
+							} else {
+								MarbleGame.instance.watchMissionReplay(mi, replayF, PlayMissionGui);
+							}
+						} else {
+							MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("Could not load replay for this level."));
+						}
+					} else {
+						MarbleGame.canvas.pushDialog(new MessageBoxOkDlg("No top replay found for this level."));
+					}
+				});
+			}
+			if (url == "changeScore") {
+				scoreView = cast((cast(scoreView, Int) + 1) % 3);
+				setSelectedFunc(currentSelection);
+			}
+		}
 
 		var tabBeginner = new GuiImage(ResourceLoader.getResource("data/ui/play/tab_begin.png", ResourceLoader.getImage, this.imageResources).toTile());
 		tabBeginner.position = new Vector(29, 2);
 		tabBeginner.extent = new Vector(184, 55);
 		tabBeginner.pressedAction = (sender) -> {
 			currentList = MissionList.beginnerMissions;
-			currentCategory = "beginner";
-			setSelectedFunc(cast Math.min(Settings.progression[0], currentList.length - 1));
 			setCategoryFunc("beginner");
 		}
 		localContainer.addChild(tabBeginner);
@@ -398,6 +556,10 @@ class PlayMissionGui extends GuiImage {
 			localContainer.removeChild(pmBox);
 			if (doRender)
 				AudioManager.playSound(ResourceLoader.getResource("data/sound/buttonpress.wav", ResourceLoader.getAudio, this.soundResources));
+
+			pmSort.disabled = true;
+			pmSort.anim.visible = false;
+
 			if (category == "beginner") {
 				localContainer.addChild(tabIntermediate);
 				localContainer.addChild(tabAdvanced);
@@ -428,13 +590,31 @@ class PlayMissionGui extends GuiImage {
 				localContainer.addChild(tabAdvanced);
 				localContainer.addChild(pmBox);
 				localContainer.addChild(tabCustom);
-				currentList = MissionList.customMissions;
+				pmSort.disabled = false;
+				pmSort.anim.visible = true;
+				currentList = Marbleland.goldMissions;
+
+				currentList = currentList.copy(); // Don't modify the originals
+				if (currentSortType == 0) {
+					currentList.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
+				}
+				if (currentSortType == 1) {
+					currentList.sort((x, y) -> x.addedAt > y.addedAt ? 1 : (x.addedAt < y.addedAt ? -1 : 0));
+				}
 			}
-			currentCategoryStatic = currentCategory;
-			if (currentCategory != "custom")
-				setSelectedFunc(cast Math.min(currentList.length - 1, Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
-			else
-				setSelectedFunc(currentList.length - 1);
+
+			var lastCategory = currentCategory;
+
+			currentCategoryStatic = currentCategory = category;
+			if (lastCategory != currentCategory) {
+				if (currentCategory != "custom")
+					setSelectedFunc(cast Math.min(currentList.length - 1,
+						Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)]));
+				else
+					setSelectedFunc(currentList.length - 1);
+			} else {
+				setSelectedFunc(currentSelection);
+			}
 			if (doRender)
 				this.render(cast(this.parent, Canvas).scene2d);
 		}
@@ -462,12 +642,6 @@ class PlayMissionGui extends GuiImage {
 			splits.push(currentText);
 			return splits.join('\n');
 		}
-
-		var goldBadge = ResourceLoader.getResource("data/ui/play/goldscore.png", ResourceLoader.getImage, this.imageResources).toTile();
-		goldBadge.dy = 2.5 * Settings.uiScale;
-		goldBadge.dx = 8 * Settings.uiScale;
-		var gbWidth = goldBadge.width;
-		var gbHeight = goldBadge.height;
 
 		setSelectedFunc = function setSelected(index:Int) {
 			if (index > currentList.length - 1) {
@@ -523,63 +697,115 @@ class PlayMissionGui extends GuiImage {
 				scoreData.push({name: "Nardo Polo", time: 5999.999});
 			}
 
-			var descText = '<font face="DomCasual24" color="#000000">${currentMission.title}</font><br/><br/>'
-				+ splitTextWithPadding(pmDescription.text, StringTools.htmlEscape(Util.unescape(currentMission.description)));
-			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
-				descText += '<font face="DomCasual24"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
-			}
-			descText += '<br/><br/><font face="DomCasual24">Best Times:</font><br/>';
-			for (i in 0...3) {
-				descText += '<br/>ÂÂ<font face="ArialBold14">${i + 1}. ${scoreData[i].name}</font>';
+			var descText = '<font face="DomCasual24" color="#000000">${currentMission.title}</font><br/><br/>';
+
+			if (showLBs) {
+				descText += '<font face="DomCasual24">Leaderboards:<br/></font>';
+				descText += '<offset value="8">Loading</offset>';
+
+				#if hl
+				if (lbRequest != null)
+					Http.cancel(lbRequest);
+				#end
+				#if js
+				if (lbRequest != 0)
+					Http.cancel(lbRequest);
+				#end
+				var lTok = lbToken++;
+				var lbPath = currentMission.path;
+				if (currentMission.isClaMission)
+					lbPath = 'custom/${currentMission.id}';
+
+				var req = Leaderboards.getScores(lbPath, scoreView, (scoreList) -> {
+					if (lTok + 1 != lbToken || !showLBs)
+						return;
+					var sFmt = [];
+					var i = 1;
+					for (score in scoreList) {
+						sFmt.push('<offset value="16"><font face="ArialBold14">${i}. ${StringTools.htmlEscape(score.name.substr(0, 12))}</font></offset>
+						<offset value="128"><font face="ArialBold14">${Util.formatTime(score.score)}</font></offset>
+						<offset value="185"><img src="${platformToString(score.platform)}" deltaY="-2" scale="0.9" /></offset>
+						${score.rewind == 1 ? '<offset value="205"><img src="rewind" deltaY="-2" scale="0.9"  /></offset> ' : ""}');
+						i++;
+					}
+
+					descText = '<font face="DomCasual24" color="#000000">${currentMission.title}</font><br/><br/>';
+					descText += '<font face="DomCasual24">Leaderboards:';
+					if (scoreList.length == 0) {
+						descText += '<br/></font><offset value="8">No scores!</offset>';
+					} else {
+						descText += '<offset value="120">Top Replay:<a href="watch"><img src="watch" deltaY="-2" scale="0.9"/></a></offset><br/></font>';
+						descText += sFmt.join('<br/>');
+					}
+
+					var kindList = ["All Scores", "Rewind Only", "No Rewind"];
+
+					descText += '<br/><br/><font face="ArialBold14">Showing: <font color="#ff6060"><a href="changeScore">${kindList[cast(scoreView, Int)]}</a></font></font>';
+
+					pmDescription.text.text = descText;
+
+					// scoreBox.text.text = '<font color="#FDFEFE" face="MarkerFelt18">Leaderboards</font>
+					// ${scoreList.length != 0 ? '<offset value="220">Top Replay:<a href="watch"><img src="watch" /></a></offset>' : ""}
+					// <br/>'
+					// 	+ sFmt.join('<br/>');
+				});
+				lbRequest = req;
+			} else {
+				descText += '<offset value="8">' + StringTools.htmlEscape(Util.unescape(currentMission.description)) + "</offset>";
+				if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
+					descText += '<font face="DomCasual24"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
+				}
+				if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
+					descText += '<font face="DomCasual24" opacity="0"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
+				} else {
+					descText += '<br/>';
+				}
+				descText += '<br/><font face="DomCasual24">Best Times:</font><br/>';
+				for (i in 0...3) {
+					descText += '<br/><offset value="16"><font face="ArialBold14">${i + 1}. ${scoreData[i].name}</font></offset>';
+					descText += '<offset value="128"><font face="ArialBold14">${Util.formatTime(scoreData[i].time)}</font>';
+					if (scoreData[i].time < currentMission.goldTime) {
+						descText += '<img src="goldBadge.png"></img>';
+					}
+					descText += "</offset>";
+				}
 			}
 			pmDescription.text.text = descText;
 
-			var descText2 = '<br/><br/>'
-				+
-				'<font opacity="0">${splitTextWithPadding(pmDescriptionOther.text, StringTools.htmlEscape(Util.unescape(currentMission.description)))}</font>';
-			descText2 += '<br/><br/>';
-			if (currentMission.qualifyTime != Math.POSITIVE_INFINITY) {
-				descText2 += '<font face="DomCasual24" opacity="0"><br/>Time To Qualify: ${Util.formatTime(currentMission.qualifyTime)}</font>';
-			}
-			descText2 += '<br/>';
-			for (i in 0...3) {
-				descText2 += '<br/>ÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂÂ<font face="ArialBold14">${Util.formatTime(scoreData[i].time)}</font>';
-				if (scoreData[i].time < currentMission.goldTime) {
-					descText2 += '<img src="goldBadge.png"></img>';
-				}
-			}
-			pmDescriptionOther.text.lineHeightMode = TextOnly;
-			pmDescriptionOther.text.text = descText2;
-			pmDescriptionOther.text.loadImage = (name) -> goldBadge;
-			goldBadge.scaleToSize((gbWidth / gbHeight) * arialBold14.lineHeight, arialBold14.lineHeight);
-			pmDescription.text.lineSpacing = pmDescriptionOther.text.lineSpacing;
-
-			#if android
-			pmPreview.bmp.tile = currentMission.getPreviewImageSync();
-			#else
 			pmPreview.bmp.tile = tmpprevtile;
-			#end
 			#if js
 			switch (previewTimeoutHandle) {
 				case None:
 					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
-						currentMission.getPreviewImage(prevImg -> {
+						var prevpath = currentMission.getPreviewImage(prevImg -> {
 							pmPreview.bmp.tile = prevImg;
 						});
+						if (prevpath != pmPreview.bmp.tile.getTexture().name) {
+							pmPreview.bmp.tile = tmpprevtile;
+						}
 					}, 75));
 				case Some(previewTimeoutHandle_id):
 					js.Browser.window.clearTimeout(previewTimeoutHandle_id);
 					previewTimeoutHandle = Some(js.Browser.window.setTimeout(() -> {
-						currentMission.getPreviewImage(prevImg -> {
+						var prevpath = currentMission.getPreviewImage(prevImg -> {
 							pmPreview.bmp.tile = prevImg;
 						});
+						if (prevpath != pmPreview.bmp.tile.getTexture().name) {
+							pmPreview.bmp.tile = tmpprevtile;
+						}
 					}, 75));
 			}
 			#end
-			#if (hl && !android)
-			currentMission.getPreviewImage(prevImg -> {
+			#if hl
+			var pTok = previewToken++;
+			var prevpath = currentMission.getPreviewImage(prevImg -> {
+				if (pTok + 1 != previewToken)
+					return;
 				pmPreview.bmp.tile = prevImg;
 			}); // Shit be sync
+			if (prevpath != pmPreview.bmp.tile.getTexture().name) {
+				pmPreview.bmp.tile = tmpprevtile;
+			}
 			#end
 
 			levelBkgnd.text.text = currentCategory.charAt(0).toUpperCase() + currentCategory.substr(1) + ' Level ${currentSelection + 1}';
@@ -621,5 +847,15 @@ class PlayMissionGui extends GuiImage {
 			setSelectedFunc(currentSelection - 1);
 		if (Key.isPressed(Key.RIGHT))
 			setSelectedFunc(currentSelection + 1);
+	}
+
+	inline function platformToString(platform:NetPlatform) {
+		return switch (platform) {
+			case Unknown: return "unknown";
+			case Android: return "android";
+			case MacOS: return "mac";
+			case PC: return "pc";
+			case Web: return "web";
+		}
 	}
 }

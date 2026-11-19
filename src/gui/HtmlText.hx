@@ -525,10 +525,10 @@ class HtmlText extends Text {
 		return t;
 	}
 
-	inline function nextLine(align:Align, size:Float) {
+	inline function nextLine(align:Align, size:Float, startXPos:Float = 0) {
 		switch (align) {
 			case Left:
-				xPos = 0;
+				xPos = startXPos;
 				if (xMin > 0)
 					xMin = 0;
 			case Right, Center, MultilineCenter, MultilineRight:
@@ -629,7 +629,7 @@ class HtmlText extends Text {
 		return doc.toString();
 	}
 
-	function addNode(e:Xml, font:Font, align:Align, rebuild:Bool, metrics:Array<LineInfo>) {
+	function addNode(e:Xml, font:Font, align:Align, rebuild:Bool, metrics:Array<LineInfo>, childrenOffset:Float = 0) {
 		inline function createInteractive() {
 			if (aHrefs == null || aHrefs.length == 0)
 				return;
@@ -655,7 +655,7 @@ class HtmlText extends Text {
 			if (xPos > xMax)
 				xMax = xPos;
 			yPos += metrics[sizePos].height + lineSpacing;
-			nextLine(align, metrics[++sizePos].width);
+			nextLine(align, metrics[++sizePos].width, childrenOffset);
 			createInteractive();
 		}
 		if (e.nodeType == Xml.Element) {
@@ -730,14 +730,16 @@ class HtmlText extends Text {
 						newLine = true;
 						prevChar = -1;
 					} else {
-						nextLine(align, metrics[sizePos].width);
+						nextLine(align, metrics[sizePos].width, childrenOffset);
 					}
 				case "offset":
 					for (a in e.attributes()) {
 						switch (a.toLowerCase()) {
 							case "value":
 								var v = e.get(a);
-								if (v != null) xPos = Std.parseFloat(v) * Settings.uiScale;
+								if (v != null)
+									xPos = Std.parseFloat(v) * Settings.uiScale;
+								childrenOffset = xPos;
 							default:
 						}
 					}
@@ -765,10 +767,18 @@ class HtmlText extends Text {
 					}
 					if (py + i.dy < calcYMin)
 						calcYMin = py + i.dy;
+					var deltaY = e.get("deltaY");
+					if (deltaY != null)
+						py += Std.parseFloat(deltaY);
+					var scaling = e.get("scale");
 					if (rebuild) {
 						var b = new Bitmap(i, this);
 						b.x = xPos;
 						b.y = py;
+
+						if (scale != null)
+							b.scaleX = b.scaleY = Std.parseFloat(scaling);
+
 						elements.push(b);
 					}
 					newLine = false;
@@ -785,7 +795,7 @@ class HtmlText extends Text {
 				default:
 			}
 			for (child in e)
-				addNode(child, font, align, rebuild, metrics);
+				addNode(child, font, align, rebuild, metrics, childrenOffset);
 			align = oldAlign;
 			switch (nodeName) {
 				case "p":

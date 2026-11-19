@@ -10,13 +10,16 @@ import h3d.Vector;
 import src.ResourceLoader;
 import src.TimeState;
 import src.Util;
+import src.Replay;
+import src.Leaderboards;
+import src.MissionMapping;
 
 class EndGameGui extends GuiControl {
 	var mission:Mission;
 
 	var scoreSubmitted:Bool = false;
 
-	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, mission:Mission, timeState:TimeState) {
+	public function new(continueFunc:GuiControl->Void, restartFunc:GuiControl->Void, mission:Mission, timeState:TimeState, replay:Replay) {
 		super();
 		this.horizSizing = Width;
 		this.vertSizing = Height;
@@ -181,6 +184,9 @@ class EndGameGui extends GuiControl {
 		}
 		Settings.save();
 
+		var rewindUsed = MarbleGame.instance.world.rewindUsed;
+		var cheatsUsed = MarbleGame.instance.world.cheatsUsed;
+
 		if (idx <= 2 && !mission.isLocal) {
 			setButtonStates(false);
 			var end = new EnterNameDlg(idx, (name) -> {
@@ -213,11 +219,63 @@ class EndGameGui extends GuiControl {
 						rightColumnGold.text.text += '<br/>';
 				}
 
-				Settings.saveScore(mission.path, myScore);
+				if (!cheatsUsed) { // dont submit or save if we have cheated
+					Settings.saveScore(mission.path, myScore);
+					var lbPath = mission.path;
+					if (mission.isClaMission)
+						lbPath = 'custom/${mission.id}';
+					Leaderboards.submitScore(lbPath, myScore.time, rewindUsed, (sendReplay, rowId) -> {
+						if (sendReplay && !mission.isClaMission) {
+							// update the replay mission
+							var oldMission = replay.mission;
+							if (!StringTools.startsWith(replay.mission, 'custom/')) {
+								replay.mission = replay.mission.substr(replay.mission.indexOf('missions'));
+								replay.mission = replay.mission.substr(replay.mission.indexOf('/') + 1);
+								if (MissionMapping.mbgToMbp.exists(replay.mission))
+									replay.mission = 'data/missions_mbg/' + MissionMapping.mbgToMbp.get(replay.mission);
+							}
+							Leaderboards.submitReplay(rowId, replay.write());
+							replay.mission = oldMission;
+						}
+					});
+				}
 
 				scoreSubmitted = true;
 			});
 			this.addChild(end);
+		} else if (!mission.isLocal) {
+			// Check if we can submit LB scores
+			var lbPath = mission.path;
+			if (mission.isClaMission)
+				lbPath = 'custom/${mission.id}';
+			Leaderboards.getScores(lbPath, All, (scores) -> {
+				var hasMyScore = false;
+				var myTopScoreLB = 0.0;
+				for (score in scores) {
+					if (score.name == Settings.highscoreName) {
+						hasMyScore = true;
+						myTopScoreLB = score.score;
+						break;
+					}
+				}
+				if (!cheatsUsed) {
+					if (!hasMyScore || (hasMyScore && myTopScoreLB > timeState.gameplayClock)) {
+						Leaderboards.submitScore(lbPath, timeState.gameplayClock, rewindUsed, (sendReplay, rowId) -> {
+							if (sendReplay && !mission.isClaMission) {
+								var oldMission = replay.mission;
+								if (!StringTools.startsWith(replay.mission, 'custom/')) {
+									replay.mission = replay.mission.substr(replay.mission.indexOf('missions'));
+									replay.mission = replay.mission.substr(replay.mission.indexOf('/') + 1);
+									if (MissionMapping.mbgToMbp.exists(replay.mission))
+										replay.mission = 'data/missions_mbg/' + MissionMapping.mbgToMbp.get(replay.mission);
+								}
+								Leaderboards.submitReplay(rowId, replay.write());
+								replay.mission = oldMission;
+							}
+						});
+					}
+				}
+			});
 		}
 	}
 }

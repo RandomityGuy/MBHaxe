@@ -12,18 +12,12 @@ import src.MarbleGame;
 
 class Marbleland {
 	public static var goldMissions = [];
-	public static var ultraMissions = [];
-	public static var platinumMissions = [];
-	public static var multiplayerMissions = [];
 	public static var missions:Map<Int, Mission> = [];
 
 	public static function init() {
 		Http.get('https://marbleland.vaniverse.io/api/level/list', (b) -> {
 			parseMissionList(b.toString());
 			Console.log('Loaded gold customs: ${goldMissions.length}');
-			Console.log('Loaded ultra customs: ${ultraMissions.length}');
-			Console.log('Loaded platinum customs: ${platinumMissions.length}');
-			Console.log('Loaded multiplayer customs: ${multiplayerMissions.length}');
 			// Load the marbleland level from JS
 			#if js
 			var urlParams = new js.html.URLSearchParams(js.Browser.window.location.search);
@@ -49,7 +43,7 @@ class Marbleland {
 
 		for (missionData in claJson) {
 			// filter
-			if (missionData.datablockCompatibility != 'mbw' && missionData.datablockCompatibility != 'mbg')
+			if (missionData.datablockCompatibility != 'mbg')
 				continue;
 			// if (!['gold', 'platinum', 'ultra', 'platinumquest'].contains(missionData.modification))
 			// 	continue;
@@ -73,7 +67,7 @@ class Marbleland {
 			mission.qualifyTime = (missionData.qualifyingTime != null && missionData.qualifyingTime != 0) ? missionData.qualifyingTime / 1000 : Math.POSITIVE_INFINITY;
 			mission.goldTime = missionData.goldTime != null ? missionData.goldTime / 1000 : 0;
 			if (missionData.modification == 'platinumquest')
-				missionData.modification = 'platinum'; // play PQ levels compatible with web pls
+				missionData.modification = 'gold'; // play PQ levels compatible with web pls
 			mission.game = missionData.modification;
 			if (missionData.modification == 'platinum')
 				mission.goldTime = missionData.platinumTime != null ? missionData.platinumTime / 1000 : mission.goldTime;
@@ -102,12 +96,6 @@ class Marbleland {
 			switch (game) {
 				case 'gold':
 					goldMissions.push(mission);
-				case 'ultra':
-					ultraMissions.push(mission);
-				case 'platinum':
-					platinumMissions.push(mission);
-				case 'multiplayer':
-					multiplayerMissions.push(mission);
 			}
 
 			missions.set(mission.id, mission);
@@ -121,28 +109,6 @@ class Marbleland {
 		}
 		@:privateAccess goldMissions[goldMissions.length - 1].next = goldMissions[0];
 		goldMissions[goldMissions.length - 1].index = goldMissions.length - 1;
-		platinumMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
-		for (i in 0...platinumMissions.length - 1) {
-			@:privateAccess platinumMissions[i].next = platinumMissions[i + 1];
-			platinumMissions[i].index = i;
-		}
-		@:privateAccess platinumMissions[platinumMissions.length - 1].next = platinumMissions[0];
-		platinumMissions[platinumMissions.length - 1].index = platinumMissions.length - 1;
-		ultraMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
-		for (i in 0...ultraMissions.length - 1) {
-			@:privateAccess ultraMissions[i].next = ultraMissions[i + 1];
-			ultraMissions[i].index = i;
-		}
-		@:privateAccess ultraMissions[ultraMissions.length - 1].next = ultraMissions[0];
-		ultraMissions[ultraMissions.length - 1].index = ultraMissions.length - 1;
-
-		multiplayerMissions.sort((x, y) -> x.title > y.title ? 1 : (x.title < y.title ? -1 : 0));
-		for (i in 0...multiplayerMissions.length - 1) {
-			@:privateAccess multiplayerMissions[i].next = multiplayerMissions[i + 1];
-			multiplayerMissions[i].index = i;
-		}
-		@:privateAccess multiplayerMissions[multiplayerMissions.length - 1].next = multiplayerMissions[0];
-		multiplayerMissions[multiplayerMissions.length - 1].index = multiplayerMissions.length - 1;
 	}
 
 	public static function getMissionImage(id:Int, cb:Image->Void) {
