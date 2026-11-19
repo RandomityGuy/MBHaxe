@@ -5,6 +5,7 @@ import haxe.Json;
 import src.Http;
 import src.Console;
 import src.Settings;
+import src.MissionMapping;
 
 typedef LBScore = {
 	name:String,
@@ -25,6 +26,13 @@ class Leaderboards {
 	static var game = "Platinum";
 
 	public static function submitScore(mission:String, score:Float, rewindUsed:Bool, needsReplayCb:(Bool, Int) -> Void) {
+		// Need to do the missionMapping
+		if (!StringTools.startsWith(mission, 'custom/')) {
+			mission = mission.substr(mission.indexOf('missions'));
+			mission = mission.substr(mission.indexOf('/') + 1);
+			if (MissionMapping.mbgToMbp.exists(mission))
+				mission = 'data/missions_mbg/' + MissionMapping.mbgToMbp.get(mission);
+		}
 		if (!StringTools.startsWith(mission, "data/"))
 			mission = "data/" + mission;
 		Http.post('${host}/api/submit', Json.stringify({
@@ -47,9 +55,16 @@ class Leaderboards {
 	}
 
 	public static function getScores(mission:String, kind:LeaderboardsKind, cb:Array<LBScore>->Void) {
+		// Need to do the missionMapping
+		if (!StringTools.startsWith(mission, 'custom/')) {
+			mission = mission.substr(mission.indexOf('missions'));
+			mission = mission.substr(mission.indexOf('/') + 1);
+			if (MissionMapping.mbgToMbp.exists(mission))
+				mission = 'data/missions_mbg/' + MissionMapping.mbgToMbp.get(mission);
+		}
 		if (!StringTools.startsWith(mission, "data/"))
 			mission = "data/" + mission;
-		return Http.get('${host}/api/scores?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}&count=5', (b) -> {
+		return Http.get('${host}/api/scores?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}&count=8', (b) -> {
 			var s = b.toString();
 			var scores:Array<LBScore> = Json.parse(s).scores;
 			cb(scores);
@@ -68,6 +83,13 @@ class Leaderboards {
 	}
 
 	public static function watchTopReplay(mission:String, kind:LeaderboardsKind, cb:haxe.io.Bytes->Void) {
+		// Need to do the missionMapping
+		if (!StringTools.startsWith(mission, 'custom/')) {
+			mission = mission.substr(mission.indexOf('missions'));
+			mission = mission.substr(mission.indexOf('/') + 1);
+			if (MissionMapping.mbgToMbp.exists(mission))
+				mission = 'data/missions_mbg/' + MissionMapping.mbgToMbp.get(mission);
+		}
 		if (!StringTools.startsWith(mission, "data/"))
 			mission = "data/" + mission;
 		return Http.get('${host}/api/replay?mission=${StringTools.urlEncode(mission)}&game=${game}&view=${kind}', (b) -> {

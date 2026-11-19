@@ -429,6 +429,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 
 			Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
 			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
+			Settings.optionsSettings.vsync = vsyncButton.pressed;
 
 			Settings.applySettings();
 		}
