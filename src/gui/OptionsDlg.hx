@@ -163,7 +163,7 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.addChild(screenStyleLabel);
 
 		var vsyncLabel = new GuiText(domcasual32);
-		vsyncLabel.position = new Vector(12, 120);
+		vsyncLabel.position = new Vector(12, 125);
 		vsyncLabel.extent = new Vector(146, 271);
 		vsyncLabel.text.textColor = 0x000000;
 		vsyncLabel.text.text = "VSync:";
@@ -177,6 +177,23 @@ class OptionsDlg extends GuiImage {
 		graphicsPane.addChild(vsyncButton);
 		if (Settings.optionsSettings.vsync) {
 			vsyncButton.pressed = true;
+		}
+
+		var shadowLabel = new GuiText(domcasual32);
+		shadowLabel.position = new Vector(162, 125);
+		shadowLabel.extent = new Vector(146, 271);
+		shadowLabel.text.textColor = 0x000000;
+		shadowLabel.text.text = "Shadows:";
+		shadowLabel.justify = Right;
+		graphicsPane.addChild(shadowLabel);
+
+		var shadowButton = new GuiButton(loadButtonImages("data/ui/options/graf_chkbx"));
+		shadowButton.position = new Vector(320, 110);
+		shadowButton.extent = new Vector(46, 54);
+		shadowButton.buttonType = Toggle;
+		graphicsPane.addChild(shadowButton);
+		if (Settings.optionsSettings.shadows) {
+			shadowButton.pressed = true;
 		}
 
 		var fieldOfViewLabel = new GuiText(domcasual32);
@@ -429,6 +446,7 @@ Extensions: EAX 2.0, EAX 3.0, EAX Unified, and EAX-AC3";
 			Settings.optionsSettings.musicVolume = audMusKnob.sliderValue;
 			Settings.optionsSettings.soundVolume = audSndKnob.sliderValue;
 			Settings.optionsSettings.vsync = vsyncButton.pressed;
+			Settings.optionsSettings.shadows = shadowButton.pressed;
 
 			Settings.applySettings();
 		}

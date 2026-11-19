@@ -1,18 +1,54 @@
 package src;
 
 import h3d.Vector;
+import h3d.pass.ScreenFx;
+import h3d.shader.ScreenShader;
+import h3d.shader.FixedColor;
+import h3d.mat.Stencil;
+import h3d.mat.Data.Compare;
+import h3d.mat.Data.StencilOp;
+import h3d.mat.Data.Face;
+import h3d.mat.Data.Blend;
 import src.Console;
+import src.Settings;
 
 class Renderer extends h3d.scene.Renderer {
 	var def(get, never):h3d.pass.Base;
 
 	public var shadow = new h3d.pass.DefaultShadowMap(1);
 
+	var stencilClear:ScreenFx<ScreenShader>;
+	var stencilDarken:ScreenFx<ScreenShader>;
+	var darkenColor:FixedColor;
+
 	public function new() {
 		super();
 		defaultPass = new h3d.pass.Default("default");
 		allPasses = [defaultPass, shadow];
 		shadow.enabled = false;
+
+		stencilClear = new ScreenFx(new ScreenShader());
+		stencilClear.addShader(new FixedColor(0, 0));
+		stencilClear.pass.depth(false, Always);
+		stencilClear.pass.culling = None;
+		stencilClear.pass.setColorMask(false, false, false, false);
+		stencilClear.pass.blend(One, Zero);
+		var clearStencil = new Stencil();
+		clearStencil.setFunc(Always, 0, 0xFF, 0xFF);
+		clearStencil.setOp(Keep, Keep, Zero);
+		stencilClear.pass.stencil = clearStencil;
+
+		stencilDarken = new ScreenFx(new ScreenShader());
+		darkenColor = new FixedColor(0x000026, 0.35);
+		stencilDarken.addShader(darkenColor);
+		stencilDarken.pass.depth(false, Always);
+		stencilDarken.pass.culling = None;
+		stencilDarken.pass.setColorMask(true, true, true, true);
+		stencilDarken.pass.blend(SrcAlpha, OneMinusSrcAlpha);
+		var darkenStencil = new Stencil();
+		darkenStencil.setFunc(NotEqual, 0, 0xFF, 0xFF);
+		darkenStencil.setOp(Keep, Keep, Zero);
+		stencilDarken.pass.stencil = darkenStencil;
 	}
 
 	inline function get_def()
@@ -45,6 +81,13 @@ class Renderer extends h3d.scene.Renderer {
 
 		renderPass(defaultPass, get("skyshape"));
 		renderPass(defaultPass, get("default"));
+
+		if (Settings.optionsSettings.shadows) {
+			stencilClear.render();
+			renderPass(defaultPass, get("interiorShadowVolume"));
+			stencilDarken.render();
+		}
+
 		renderPass(defaultPass, get("shadowPass1"));
 		renderPass(defaultPass, get("shadowPass2"));
 		renderPass(defaultPass, get("shadowPass3"));

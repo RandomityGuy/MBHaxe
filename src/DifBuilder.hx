@@ -423,6 +423,7 @@ class DifBuilder {
 			var dif = difresource.resource;
 			dumbDownDif(dif);
 			var geo = so == -1 ? dif.interiors[0] : dif.subObjects[so];
+			itr.dif = geo;
 			var triangles = [];
 			var textures = [];
 			var collider = new CollisionEntity(itr);
