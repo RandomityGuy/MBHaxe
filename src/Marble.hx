@@ -667,43 +667,67 @@ class Marble extends GameObject {
 		shadowVolume.material.receiveShadows = false;
 		shadowVolume.material.shadows = false;
 
-		var colShader = new h3d.shader.FixedColor(0x000026, 0.35);
+		if (Settings.optionsSettings.shadows) {
+			var mat = Material.create();
+			mat.castShadows = false;
+			mat.receiveShadows = false;
+			mat.shadows = false;
 
-		var shadowPass1 = shadowVolume.material.mainPass.clone();
-		shadowPass1.setPassName("shadowPass1");
-		shadowPass1.stencil = new h3d.mat.Stencil();
-		shadowPass1.stencil.setFunc(Always, 1, 0xFF, 0xFF);
-		shadowPass1.depth(false, Less);
-		shadowPass1.setColorMask(false, false, false, false);
-		shadowPass1.culling = Back;
-		shadowPass1.stencil.setOp(Keep, Increment, Keep);
-		shadowPass1.addShader(colShader);
+			var pass = mat.mainPass;
+			pass.setPassName("interiorShadowVolume");
+			pass.enableLights = false;
+			pass.culling = None;
+			pass.depth(false, Less);
+			pass.setColorMask(false, false, false, false);
+			pass.blend(One, Zero);
+			pass.addShader(new h3d.shader.FixedColor(0, 0));
 
-		var shadowPass2 = shadowVolume.material.mainPass.clone();
-		shadowPass2.setPassName("shadowPass2");
-		shadowPass2.stencil = new h3d.mat.Stencil();
-		shadowPass2.stencil.setFunc(Always, 1, 0xFF, 0xFF);
-		shadowPass2.depth(false, Less);
-		shadowPass2.setColorMask(false, false, false, false);
-		shadowPass2.culling = Front;
-		shadowPass2.stencil.setOp(Keep, Decrement, Keep);
-		shadowPass2.addShader(colShader);
+			var stencil = new h3d.mat.Stencil();
+			stencil.setFunc(Always, 0, 0xFF, 0xFF);
+			stencil.setFront(Keep, IncrementWrap, Keep);
+			stencil.setBack(Keep, DecrementWrap, Keep);
+			pass.stencil = stencil;
 
-		var shadowPass3 = shadowVolume.material.mainPass.clone();
-		shadowPass3.setPassName("shadowPass3");
-		shadowPass3.stencil = new h3d.mat.Stencil();
-		shadowPass3.stencil.setFunc(LessEqual, 1, 0xFF, 0xFF);
-		shadowPass3.depth(false, Less);
-		shadowPass3.culling = Front;
-		shadowPass3.stencil.setOp(Keep, Keep, Keep);
-		shadowPass3.blend(SrcAlpha, OneMinusSrcAlpha);
-		shadowPass3.addShader(colShader);
+			shadowVolume.material = mat;
+		} else {
+			var colShader = new h3d.shader.FixedColor(0x000026, 0.35);
 
-		shadowVolume.material.addPass(shadowPass1);
-		shadowVolume.material.addPass(shadowPass2);
-		shadowVolume.material.addPass(shadowPass3);
+			var shadowPass1 = shadowVolume.material.mainPass.clone();
+			shadowPass1.setPassName("shadowPass1");
+			shadowPass1.stencil = new h3d.mat.Stencil();
+			shadowPass1.stencil.setFunc(Always, 1, 0xFF, 0xFF);
+			shadowPass1.depth(false, Less);
+			shadowPass1.setColorMask(false, false, false, false);
+			shadowPass1.culling = Back;
+			shadowPass1.stencil.setOp(Keep, Increment, Keep);
+			shadowPass1.addShader(colShader);
 
-		shadowVolume.material.removePass(shadowVolume.material.mainPass);
+			var shadowPass2 = shadowVolume.material.mainPass.clone();
+			shadowPass2.setPassName("shadowPass2");
+			shadowPass2.stencil = new h3d.mat.Stencil();
+			shadowPass2.stencil.setFunc(Always, 1, 0xFF, 0xFF);
+			shadowPass2.depth(false, Less);
+			shadowPass2.setColorMask(false, false, false, false);
+			shadowPass2.culling = Front;
+			shadowPass2.stencil.setOp(Keep, Decrement, Keep);
+			shadowPass2.addShader(colShader);
+
+			var shadowPass3 = shadowVolume.material.mainPass.clone();
+			shadowPass3.setPassName("shadowPass3");
+			shadowPass3.stencil = new h3d.mat.Stencil();
+			shadowPass3.stencil.setFunc(LessEqual, 1, 0xFF, 0xFF);
+			shadowPass3.depth(false, Less);
+			shadowPass3.culling = Front;
+			shadowPass3.stencil.setOp(Keep, Keep, Keep);
+			shadowPass3.blend(SrcAlpha, OneMinusSrcAlpha);
+			shadowPass3.addShader(colShader);
+
+			shadowVolume.material.addPass(shadowPass1);
+			shadowVolume.material.addPass(shadowPass2);
+			shadowVolume.material.addPass(shadowPass3);
+
+			shadowVolume.material.removePass(shadowVolume.material.mainPass);
+		}
 
 		var q = new Quat();
 		q.initNormal(@:privateAccess this.level.dirLightDir.toPoint());
