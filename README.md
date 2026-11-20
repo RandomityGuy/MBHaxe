@@ -12,7 +12,7 @@ The browser port supports touch controls, meaning it can be played on mobile dev
 ### Marble Blast Ultra: [Play](https://marbleblastultra.randomityguy.me/)
 ### PlatinumQuest: [Play](https://platinumquest.randomityguy.me)
 ## Windows, Mac and Linux
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.14)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.1.15)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.7.3)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/1.3.2-mbu)
 ### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/tag/2.0.4)
@@ -21,13 +21,13 @@ Linux port by [boucymatt](https://github.com/boucymatt). Supports Steam Deck.
 Put the .app file in either /Applications or ~/Applications in order to run it properly.  
 You will also have to bypass Gatekeeper since the .app is not signed.
 ## Android
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold.apk)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.15/MBHaxe-Gold.apk)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum.apk)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.3.2-mbu/MBHaxe-Ultra.apk)
 ### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.4/MBHaxe-PlatinumQuest.apk)
 
 ## iOS (NEW!)
-### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.14/MBHaxe-Gold-iOS.ipa)
+### Marble Blast Gold: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.1.15/MBHaxe-Gold-iOS.ipa)
 ### Marble Blast Platinum: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.7.3/MBHaxe-Platinum-iOS.ipa)
 ### Marble Blast Ultra: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/1.3.2-mbu/MBHaxe-Ultra-iOS.ipa)
 ### PlatinumQuest: [Download](https://github.com/RandomityGuy/MBHaxe/releases/download/2.0.4/MBHaxe-PlatinumQuest-iOS.ipa)
