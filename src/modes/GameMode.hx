@@ -1,5 +1,6 @@
 package modes;
 
+import src.Radar.RadarItem;
 import src.Marble;
 import rewind.RewindableState;
 import shapes.Gem;
@@ -53,6 +54,8 @@ interface GameMode {
 
 	// Called when the world is disposed so modes can clean up any network state
 	public function onDispose():Void;
+
+	public function getRadarItems(items:Array<RadarItem>):Void;
 }
 
 class GameModeFactory {

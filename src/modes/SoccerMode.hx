@@ -1,5 +1,7 @@
 package modes;
 
+import triggers.SoccerGoalTrigger;
+import src.Radar.RadarItem;
 import net.ClientConnection.DummyConnection;
 import net.BitStream.OutputBitStream;
 import net.NetPacket.ScoreboardPacket;
@@ -83,6 +85,9 @@ class SoccerMode extends NullMode implements TeamsMode {
 	var blueSpawnPointsByDistance:Array<MissionElementSpawnSphere> = [];
 	var allSpawnPoints:Array<MissionElementSpawnSphere> = [];
 	var spawnIdx:Int = 0;
+
+	var redGoalpostPos:Vector = null;
+	var blueGoalpostPos:Vector = null;
 
 	var footballSpawnPos:Vector = null;
 
@@ -367,6 +372,17 @@ class SoccerMode extends NullMode implements TeamsMode {
 
 	override function onMultiplayerStart() {
 		spawnFootball();
+
+		for (trigger in this.level.triggers) {
+			if (trigger is SoccerGoalTrigger) {
+				var socTrigger:SoccerGoalTrigger = cast trigger;
+
+				if (socTrigger.team == 0)
+					redGoalpostPos = socTrigger.collider.boundingBox.getCenter().toVector();
+				if (socTrigger.team == 1)
+					blueGoalpostPos = socTrigger.collider.boundingBox.getCenter().toVector();
+			}
+		}
 	}
 
 	function faceBall(marble:Marble) {
@@ -524,6 +540,47 @@ class SoccerMode extends NullMode implements TeamsMode {
 
 		AudioManager.playSound(ResourceLoader.getResource('data/sound/finish.wav', ResourceLoader.getAudio, @:privateAccess this.level.soundResources));
 		broadcastScoreboard();
+	}
+
+	override function getRadarItems(items:Array<RadarItem>) {
+		// Mark the soccer ball
+		if (football != null) {
+			items.push({
+				color: 0xE6E6E6,
+				position: football.getAbsPos().getPosition()
+			});
+		}
+		// Mark the goalpost
+		if (redGoalpostPos != null && blueGoalpostPos != null) {
+			var myId = Net.isHost ? 0 : Net.clientId;
+			var myTeam = getTeam(myId);
+			switch (myTeam) {
+				case 0:
+					// Show blue goalpost
+					items.push({
+						color: 0x0000E6,
+						position: blueGoalpostPos
+					});
+
+				case 1:
+					// show red goalpost
+					items.push({
+						color: 0xE60000,
+						position: redGoalpostPos
+					});
+
+				case 2:
+					// show both
+					items.push({
+						color: 0x0000E6,
+						position: blueGoalpostPos
+					});
+					items.push({
+						color: 0xE60000,
+						position: redGoalpostPos
+					});
+			}
+		}
 	}
 
 	function getPlayerName(clientId:Int):String {
