@@ -53,9 +53,9 @@ class PlayMissionGui extends GuiImage {
 
 	#if hl
 	var previewToken:Int = 0;
-	var lbToken:Int = 0;
 	var lbRequest:src.Http.HttpRequest = null;
 	#end
+	var lbToken:Int = 0;
 
 	public function new() {
 		MissionList.buildMissionList();
@@ -166,7 +166,6 @@ class PlayMissionGui extends GuiImage {
 		pmPreview.extent = new Vector(258, 193);
 		pmBox.addChild(pmPreview);
 		var filt = new ColorMatrix(Matrix.I());
-		pmPreview.bmp.filter = filt;
 
 		var replayPlayButton = new GuiImage(ResourceLoader.getResource("data/ui/play/playback.png", ResourceLoader.getImage, this.imageResources).toTile());
 		replayPlayButton.position = new Vector(38, 315);
@@ -668,17 +667,20 @@ class PlayMissionGui extends GuiImage {
 			if (currentCategory != "custom"
 				&& Settings.progression[["beginner", "intermediate", "advanced"].indexOf(currentCategory)] < currentSelection) {
 				noQualText.text.visible = true;
+				pmPreview.bmp.filter = filt;
 				filt.matrix.identity();
 				filt.matrix.colorGain(0, 96 / 255);
 				pmPlay.disabled = true;
 			} else {
 				noQualText.text.visible = false;
+				pmPreview.bmp.filter = null;
 				filt.matrix.identity();
 				pmPlay.disabled = false;
 			}
 
 			if (currentMission == null) {
 				noQualText.text.visible = true;
+				pmPreview.bmp.filter = filt;
 				filt.matrix.identity();
 				filt.matrix.colorGain(0, 96 / 255);
 				pmPlay.disabled = true;

@@ -1,3 +1,13 @@
+# 1.1.15
+This release contains the following improvements:
+- Added Leaderboards and Marbleland support.
+- Added stencil shadows support.
+- Added better camera smoothing for touch controls.
+- Updated the collision system to be more accurate to the original.
+- Updated the particle system to be more accurate to the original.
+- Fixed trapdoor sounds not playing.
+- Fixed custom reset times for Trapdoors and Land Mines not working.
+
 # 1.1.14
 This update brings the following bugfixes:
 - Fixed PowerUp names being incorrect.
