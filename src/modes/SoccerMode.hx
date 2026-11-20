@@ -388,12 +388,21 @@ class SoccerMode extends NullMode implements TeamsMode {
 	function faceBall(marble:Marble) {
 		if (marble == null || (football == null && footballSpawnPos == null))
 			return;
-		var target = football != null ? football.getAbsPos().getPosition() : footballSpawnPos;
+		var target = footballSpawnPos;
 		var pos = marble.getAbsPos().getPosition();
 		var dir = target.sub(pos);
 		if (dir.x == 0 && dir.y == 0)
 			return;
-		// Camera yaw is applied to the +X axis in CameraController.
+
+		var gravFrame = level.getOrientationQuat(0).toMatrix();
+		var v1 = gravFrame.front();
+		var v2 = gravFrame.right();
+		var deltaRot = new Vector(dir.dot(v2), dir.dot(v1));
+		if (deltaRot.length() >= 0.001) {
+			var ang = Math.atan2(deltaRot.x, deltaRot.y);
+			level.marble.camera.CameraYaw = ang;
+			level.marble.camera.nextCameraYaw = ang;
+		}
 		var yaw = Math.atan2(dir.y, dir.x);
 		marble.camera.CameraYaw = yaw;
 		marble.camera.nextCameraYaw = yaw;
