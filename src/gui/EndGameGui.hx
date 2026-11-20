@@ -243,7 +243,7 @@ class EndGameGui extends GuiControl {
 				scoreSubmitted = true;
 			});
 			this.addChild(end);
-		} else if (!mission.isLocal) {
+		} else {
 			// Check if we can submit LB scores
 			var lbPath = mission.path;
 			if (mission.isClaMission)

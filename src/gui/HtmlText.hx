@@ -8,6 +8,7 @@ import h2d.RenderContext;
 import h2d.Interactive;
 import h2d.Object;
 import h2d.Text;
+import src.Settings;
 
 /**
 	The `HtmlText` line height calculation rules.
