@@ -16,6 +16,13 @@ import src.Marble;
 import src.Settings;
 import src.ResourceLoader;
 
+@:structInit
+@:publicFields
+class RadarItem {
+	var color:Int;
+	var position:h3d.Vector;
+}
+
 class Radar {
 	var level:MarbleWorld;
 	var scene2d:Scene;
@@ -34,11 +41,13 @@ class Radar {
 	var time:Float = 0.0;
 
 	var _dirty = false;
+	var radarItems:Array<RadarItem>;
 
 	public function new(level:MarbleWorld, scene2d:Scene) {
 		this.level = level;
 		this.scene2d = scene2d;
 		this.marbleNameTexts = [];
+		this.radarItems = [];
 	}
 
 	public function init() {
@@ -64,6 +73,14 @@ class Radar {
 		if (@:privateAccess level.endPad != null && gemCount == 0) {
 			renderArrow(@:privateAccess level.endPad.getAbsPos().getPosition(), 0xE6E6E6);
 		}
+		// Render gamemode specific stuff
+		this.radarItems.resize(0);
+		this.level.gameMode.getRadarItems(this.radarItems);
+
+		for (item in this.radarItems) {
+			renderArrow(item.position, item.color);
+		}
+
 		var fadeDistance = level.scene.camera.zFar * 0.1;
 		for (marble => marbleName in marbleNameTexts) {
 			if (marbleName != null)
@@ -91,6 +108,7 @@ class Radar {
 					continue;
 				}
 				shapePos.z += 0.5; // Vertical offset
+				shapeDist = Math.sqrt(shapeDist);
 
 				var projectedPos = level.scene.camera.project(shapePos.x, shapePos.y, shapePos.z, scene2d.width, scene2d.height);
 				var opacity = (shapeDist < fadeDistance) ? 1.0 : (1.0 - (shapeDist - fadeDistance) / (level.scene.camera.zFar - fadeDistance));

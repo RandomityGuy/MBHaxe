@@ -1,5 +1,6 @@
 package modes;
 
+import src.Radar.RadarItem;
 import src.Marble;
 import rewind.RewindableState;
 import modes.GameMode.ScoreType;
@@ -131,4 +132,6 @@ class NullMode implements GameMode {
 	public function transmitAnyNetCommands(client:net.ClientConnection.GameConnection) {}
 
 	public function onDispose() {}
+
+	public function getRadarItems(items:Array<RadarItem>) {}
 }

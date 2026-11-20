@@ -1,5 +1,6 @@
 package modes;
 
+import src.Radar.RadarItem;
 import net.BitStream.OutputBitStream;
 import net.NetPacket.KingInfoPacket;
 import net.NetPacket.ScoreboardPacket;
@@ -362,6 +363,16 @@ class KingMode extends NullMode {
 		var myId = Net.isHost ? 0 : Net.clientId;
 		var s = scores.get(myId);
 		return s != null ? s : 0;
+	}
+
+	override function getRadarItems(items:Array<RadarItem>) {
+		// Mark the king!
+		var marble = getMarbleByClientId(kingClientId);
+		if (marble != null)
+			items.push({
+				color: 0xE6FF00,
+				position: marble.getAbsPos().getPosition()
+			});
 	}
 
 	override function getRewindState():RewindableState {
