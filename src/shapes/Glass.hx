@@ -16,17 +16,17 @@ class Glass extends DtsObject {
 
 		var datablockLowercase = element.datablock.toLowerCase();
 		switch (datablockLowercase) {
-			case "glass_3shape":
+			case "glass_3shape" | "glass_3shape_mbu":
 				this.dtsPath = "data/shapes/structures/glass_3.dts";
-			case "glass_6shape":
+			case "glass_6shape" | "glass_6shape_mbu":
 				this.dtsPath = "data/shapes/structures/glass_6.dts";
-			case "glass_9shape":
+			case "glass_9shape" | "glass_9shape_mbu":
 				this.dtsPath = "data/shapes/structures/glass_9.dts";
-			case "glass_12shape":
+			case "glass_12shape" | "glass_12shape_mbu":
 				this.dtsPath = "data/shapes/structures/glass_12.dts";
-			case "glass_15shape":
+			case "glass_15shape" | "glass_15shape_mbu":
 				this.dtsPath = "data/shapes/structures/glass_15.dts";
-			case "glass_18shape":
+			case "glass_18shape" | "glass_18shape_mbu":
 				this.dtsPath = "data/shapes/structures/glass_18.dts";
 		}
 
