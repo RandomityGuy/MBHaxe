@@ -5,7 +5,7 @@ new SimGroup(MissionGroup) {
         level = "95";
         difficulty = "4";
         maxgemspergroup = "5";
-        time = "180000";
+        time = "360000";
         goldtime = "0";
         type = "beginner";
         gemgroupradius = "22";
