@@ -61,6 +61,8 @@ class ClientConnection extends GameConnection {
 
 @:publicFields
 class DummyConnection extends GameConnection {
+	var isNPC:Bool = false;
+
 	public function new(id:Int) {
 		super(id);
 		this.state = GameplayState.GAME;

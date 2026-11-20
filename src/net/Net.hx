@@ -202,8 +202,9 @@ class Net {
 		}
 	}
 
-	public static function addGhost(id:Int) {
+	public static function addGhost(id:Int, isNPC:Bool = false) {
 		var ghost = new DummyConnection(id);
+		ghost.isNPC = isNPC;
 		clientIdMap[id] = ghost;
 	}
 
@@ -252,8 +253,11 @@ class Net {
 			ids.push(0);
 		for (id => conn in clientIdMap) {
 			// Ghost connections are not real players
-			if (conn is DummyConnection)
-				continue;
+			if (conn is DummyConnection) {
+				var vDummy = cast(conn, DummyConnection);
+				if (vDummy.isNPC)
+					continue;
+			}
 			if (conn.spectator)
 				continue;
 			ids.push(id);
@@ -293,7 +297,12 @@ class Net {
 		if (!Net.hostSpectate && Net.hostTeam >= 0 && Net.hostTeam < 2)
 			teamCounts[Net.hostTeam]++;
 		for (id => conn in clientIdMap) {
-			if (conn is DummyConnection || conn.spectator)
+			if (conn is DummyConnection) {
+				var vDummy = cast(conn, DummyConnection);
+				if (vDummy.isNPC)
+					continue;
+			}
+			if (conn.spectator)
 				continue;
 			if (conn.teamId >= 0 && conn.teamId < 2)
 				teamCounts[conn.teamId]++;
@@ -303,7 +312,12 @@ class Net {
 		if (!Net.hostSpectate && Net.hostTeam < 0)
 			unassigned.push(0);
 		for (id => conn in clientIdMap) {
-			if (conn is DummyConnection || conn.spectator)
+			if (conn is DummyConnection) {
+				var vDummy = cast(conn, DummyConnection);
+				if (vDummy.isNPC)
+					continue;
+			}
+			if (conn.spectator)
 				continue;
 			if (conn.teamId < 0)
 				unassigned.push(id);
@@ -770,13 +784,20 @@ class Net {
 		b.writeByte(PlayerInfo);
 		var cnt = 0;
 		for (c => v in clientIdMap) {
-			if (!(v is DummyConnection))
-				cnt++;
+			if (v is DummyConnection) {
+				var vDummy = cast(v, DummyConnection);
+				if (vDummy.isNPC)
+					continue;
+			}
+			cnt++;
 		}
 		b.writeByte(cnt + 1); // all real players + host
 		for (c => v in clientIdMap) {
-			if (v is DummyConnection)
-				continue; // Ghost connections are not players
+			if (v is DummyConnection) {
+				var vDummy = cast(v, DummyConnection);
+				if (vDummy.isNPC)
+					continue;
+			}
 			b.writeByte(c);
 			b.writeByte(v.lobbyReady ? 1 : 0);
 			b.writeByte(v.platform);
