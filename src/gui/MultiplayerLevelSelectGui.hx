@@ -184,8 +184,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 
 		if (Net.clientIdMap != null) {
 			for (c => v in Net.clientIdMap) {
-				if (v is DummyConnection)
-					continue;
+				if (v is DummyConnection) {
+					var vDummy = cast(v, DummyConnection);
+					if (vDummy.isNPC)
+						continue;
+				}
 				playerListArr.push({
 					name: v.name,
 					state: v.lobbyReady,
@@ -513,8 +516,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				var pubCount = 1; // 1 for host
 				var privCount = 0;
 				for (cid => cc in Net.clientIdMap) {
-					if (cc is DummyConnection)
-						continue;
+					if (cc is DummyConnection) {
+						var vDummy = cast(cc, DummyConnection);
+						if (vDummy.isNPC)
+							continue;
+					}
 					if (cc.isPrivate) {
 						privCount++;
 					} else {
@@ -653,8 +659,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		}
 		if (Net.clientIdMap != null) {
 			for (c => v in Net.clientIdMap) {
-				if (v is DummyConnection)
-					continue;
+				if (v is DummyConnection) {
+					var vDummy = cast(v, DummyConnection);
+					if (vDummy.isNPC)
+						continue;
+				}
 				playerListArr.push({
 					name: v.name,
 					state: v.lobbyReady,
@@ -679,8 +688,11 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		var pubCount = 1; // Self
 		var privCount = 0;
 		for (cid => cc in Net.clientIdMap) {
-			if (cc is DummyConnection)
-				continue;
+			if (cc is DummyConnection) {
+				var vDummy = cast(cc, DummyConnection);
+				if (vDummy.isNPC)
+					continue;
+			}
 			if (cc.isPrivate) {
 				privCount++;
 			} else {

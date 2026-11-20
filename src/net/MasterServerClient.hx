@@ -289,8 +289,11 @@ class MasterServerClient {
 			var pubCount = 1; // Self
 			var privCount = 0;
 			for (cid => cc in Net.clientIdMap) {
-				if (cc is DummyConnection)
-					continue; // Ghost connections (soccer ball, etc.) are not players
+				if (cc is DummyConnection) {
+					var vDummy = cast(cc, DummyConnection);
+					if (vDummy.isNPC)
+						continue;
+				}
 				if (cc.isPrivate) {
 					privCount++;
 				} else {

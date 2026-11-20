@@ -397,7 +397,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 		f.startInvulnerable = false;
 		f.canPickupPowerups = false;
 		if (!Net.clientIdMap.exists(FOOTBALL_NET_ID)) {
-			Net.addGhost(FOOTBALL_NET_ID);
+			Net.addGhost(FOOTBALL_NET_ID, true);
 			Net.clientIdMap[FOOTBALL_NET_ID].setMarbleId(33);
 		}
 		level.addMarble(f, Net.clientIdMap[FOOTBALL_NET_ID], () -> {

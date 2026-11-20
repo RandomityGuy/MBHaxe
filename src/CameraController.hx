@@ -459,6 +459,8 @@ class CameraController extends Object {
 			var directionVector = new Vector(1, 0, 0);
 			var cameraVerticalTranslation = new Vector(0, 0, 0.55);
 
+			var distAdd = @:privateAccess level.marbles[spectateMarbleIndex]._radius - 0.3;
+
 			var q1 = new Quat();
 			q1.initRotateAxis(0, 1, 0, CameraPitch);
 			directionVector.transform(q1.toMatrix());
@@ -469,7 +471,7 @@ class CameraController extends Object {
 			directionVector.transform(orientationQuat.toMatrix());
 			// cameraVerticalTranslation.transform(orientationQuat.toMatrix());
 			camera.up = up;
-			camera.pos = marblePosition.sub(directionVector.multiply(CameraDistance)).add(cameraVerticalTranslation);
+			camera.pos = marblePosition.sub(directionVector.multiply(CameraDistance + distAdd)).add(cameraVerticalTranslation);
 			camera.target = marblePosition.add(cameraVerticalTranslation);
 
 			var closeness = 0.1;
