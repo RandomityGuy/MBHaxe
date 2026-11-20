@@ -283,7 +283,6 @@ class Marble extends GameObject {
 	var _minBounceVel:Float = 0.1;
 	var _minBounceSpeed:Float = 3;
 	var _minTrailVel:Float = 10;
-	var _minTrail2Vel:Float = 30;
 	var _bounceKineticFriction = 0.2;
 	var minVelocityBounceSoft = 2.5;
 	var minVelocityBounceHard = 12.0;
@@ -1243,7 +1242,7 @@ class Marble extends GameObject {
 
 		var trailOpts = trailParticleOptions.clone();
 		trailOpts.emitterLifetime = 1;
-		trailOpts.ejectionPeriod = (speed > this._minTrail2Vel ? 10.0 : 20.0) / (1000.0 * dt);
+		trailOpts.ejectionPeriod = trailOpts.ejectionPeriod / (1000.0 * dt);
 		trailOpts.axis = norm;
 		trailOpts.velocity = this.velocity.clone();
 		trailEmitDelay = 16.0 / 1000.0;
