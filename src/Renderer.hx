@@ -3,7 +3,6 @@ package src;
 import h3d.Vector;
 import h3d.pass.ScreenFx;
 import h3d.shader.ScreenShader;
-import h3d.shader.FixedColor;
 import h3d.mat.Stencil;
 import h3d.mat.Data.Compare;
 import h3d.mat.Data.StencilOp;
@@ -17,9 +16,9 @@ class Renderer extends h3d.scene.Renderer {
 
 	public var shadow = new h3d.pass.DefaultShadowMap(1);
 
-	var stencilClear:ScreenFx<ScreenShader>;
-	var stencilDarken:ScreenFx<ScreenShader>;
-	var darkenColor:FixedColor;
+	var stencilClear:ScreenFx<StencilScreenShader>;
+	var stencilDarken:ScreenFx<StencilScreenShader>;
+	var darkenColor:StencilScreenShader;
 
 	public function new() {
 		super();
@@ -27,8 +26,8 @@ class Renderer extends h3d.scene.Renderer {
 		allPasses = [defaultPass, shadow];
 		shadow.enabled = false;
 
-		stencilClear = new ScreenFx(new ScreenShader());
-		stencilClear.addShader(new FixedColor(0, 0));
+		stencilClear = new ScreenFx(new StencilScreenShader());
+		stencilClear.shader.color.set(0, 0, 0, 0);
 		stencilClear.pass.depth(false, Always);
 		stencilClear.pass.culling = None;
 		stencilClear.pass.setColorMask(false, false, false, false);
@@ -38,9 +37,10 @@ class Renderer extends h3d.scene.Renderer {
 		clearStencil.setOp(Keep, Keep, Zero);
 		stencilClear.pass.stencil = clearStencil;
 
-		stencilDarken = new ScreenFx(new ScreenShader());
-		darkenColor = new FixedColor(0x000026, 0.35);
-		stencilDarken.addShader(darkenColor);
+		stencilDarken = new ScreenFx(new StencilScreenShader());
+		darkenColor = stencilDarken.shader;
+		darkenColor.color.setColor(0x000026);
+		darkenColor.color.w = 0.35;
 		stencilDarken.pass.depth(false, Always);
 		stencilDarken.pass.culling = None;
 		stencilDarken.pass.setColorMask(true, true, true, true);
@@ -95,4 +95,16 @@ class Renderer extends h3d.scene.Renderer {
 		renderPass(defaultPass, get("alpha"), backToFront);
 		renderPass(defaultPass, get("additive"));
 	}
+}
+
+private class StencilScreenShader extends ScreenShader {
+	static var SRC = {
+		@param var color:Vec4;
+		function __init__() {
+			// ScreenShader itself writes output.color from pixelColor; make
+			// sure it is initialized here instead of using FixedColor.
+			pixelColor = color;
+			output.color = color;
+		}
+	};
 }
