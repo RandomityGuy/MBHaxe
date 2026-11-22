@@ -378,7 +378,8 @@ class Mission {
 						case "astrolabe":
 							hasAstrolabe = true;
 
-						case "glass_3shape" | "glass_6shape" | "glass_9shape" | "glass_12shape" | "glass_15shape" | "glass_18shape":
+						case "glass_3shape" | "glass_6shape" | "glass_9shape" | "glass_12shape" | "glass_15shape" | "glass_18shape" | "glass_3shape_mbu" |
+							"glass_6shape_mbu" | "glass_9shape_mbu" | "glass_12shape_mbu" | "glass_15shape_mbu" | "glass_18shape_mbu":
 							var pos = MisParser.parseVector3(ss.position);
 							var rot = MisParser.parseRotation(ss.rotation);
 							var scale = MisParser.parseVector3(ss.scale);
@@ -572,7 +573,10 @@ class Mission {
 					var shapeName = ts.shapename.toLowerCase();
 					switch (shapeName) {
 						case "~/data/shapes/glass/3x3.dts" | "~/data/shapes/glass/6x3.dts" | "~/data/shapes/glass/9x3.dts" | "~/data/shapes/glass/12x3.dts" |
-							"~/data/shapes/glass/15x3.dts" | "~/data/shapes/glass/18x3.dts":
+							"~/data/shapes/glass/15x3.dts" | "~/data/shapes/glass/18x3.dts" | "~/data/shapes_mbu/structures/glass_3.dts" |
+							"~/data/shapes_mbu/structures/glass_6.dts" | "~/data/shapes_mbu/structures/glass_9.dts" |
+							"~/data/shapes_mbu/structures/glass_12.dts" | "~/data/shapes_mbu/structures/glass_15.dts" |
+							"~/data/shapes_mbu/structures/glass_18.dts":
 							var pos = MisParser.parseVector3(ts.position);
 							var rot = MisParser.parseRotation(ts.rotation);
 							var scale = MisParser.parseVector3(ts.scale);
@@ -602,12 +606,12 @@ class Mission {
 							var newRot = '${x} ${y} ${z} ${angle}';
 
 							var datablockName = switch (shapeName) {
-								case "~/data/shapes/glass/3x3.dts": "glass_3shape";
-								case "~/data/shapes/glass/6x3.dts": "glass_6shape";
-								case "~/data/shapes/glass/9x3.dts": "glass_9shape";
-								case "~/data/shapes/glass/12x3.dts": "glass_12shape";
-								case "~/data/shapes/glass/15x3.dts": "glass_15shape";
-								case "~/data/shapes/glass/18x3.dts": "glass_18shape";
+								case "~/data/shapes/glass/3x3.dts" | "~/data/shapes_mbu/structures/glass_3.dts": "glass_3shape";
+								case "~/data/shapes/glass/6x3.dts" | "~/data/shapes_mbu/structures/glass_6.dts": "glass_6shape";
+								case "~/data/shapes/glass/9x3.dts" | "~/data/shapes_mbu/structures/glass_9.dts": "glass_9shape";
+								case "~/data/shapes/glass/12x3.dts" | "~/data/shapes_mbu/structures/glass_12.dts": "glass_12shape";
+								case "~/data/shapes/glass/15x3.dts" | "~/data/shapes_mbu/structures/glass_15.dts": "glass_15shape";
+								case "~/data/shapes/glass/18x3.dts" | "~/data/shapes_mbu/structures/glass_18.dts": "glass_18shape";
 								case _:
 									Console.error("Unknown glass shape: " + shapeName);
 									"glass_3shape";
