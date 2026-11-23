@@ -19,6 +19,7 @@ typedef MPCustomEntry = {
 	path:String,
 	title:String,
 	id:Int,
+	?gameMode:String,
 };
 
 class MPCustoms {
