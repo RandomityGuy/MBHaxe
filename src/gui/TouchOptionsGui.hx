@@ -78,11 +78,11 @@ class TouchOptionsGui extends GuiImage {
 		}, 0.5, 118);
 		dynamicJoystick.setCurrentOption(Settings.touchSettings.dynamicJoystick ? 1 : 0);
 
-		var cameraMultiplier = optionCollection.addOption(1, "Button-Camera Factor", ["0.5", "1", "1.5", "2", "2.5", "3", "3.5"], (idx) -> {
-			Settings.touchSettings.buttonJoystickMultiplier = 0.5 + (idx * 0.5);
+		var cameraMultiplier = optionCollection.addOption(1, "Button-Camera Factor", ["0", "0.5", "1", "1.5", "2", "2.5", "3", "3.5"], (idx) -> {
+			Settings.touchSettings.buttonJoystickMultiplier = (idx * 0.5);
 			return true;
 		}, 0.5, 118);
-		cameraMultiplier.setCurrentOption(Std.int(Util.clamp((Settings.touchSettings.buttonJoystickMultiplier - 0.5) / 0.5, 0, 6)));
+		cameraMultiplier.setCurrentOption(Std.int(Util.clamp((Settings.touchSettings.buttonJoystickMultiplier) / 0.5, 0, 7)));
 
 		var swipeExtent = optionCollection.addOption(1, "Camera Swipe Extent", ["5", "10", "15", "20", "25", "30", "35"], (idx) -> {
 			Settings.touchSettings.cameraSwipeExtent = 5 + (idx * 5);
