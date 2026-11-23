@@ -92,8 +92,11 @@ class Radar {
 				if (@:privateAccess marble.connection == null)
 					continue;
 				if (@:privateAccess marble.connection is DummyConnection) {
-					dontRenderName(marble);
-					continue;
+					var dcon:DummyConnection = cast @:privateAccess marble.connection;
+					if (dcon.isNPC) {
+						dontRenderName(marble);
+						continue;
+					}
 				}
 				var shapePos = marble.getAbsPos().getPosition();
 				var shapeDir = shapePos.sub(level.scene.camera.pos);

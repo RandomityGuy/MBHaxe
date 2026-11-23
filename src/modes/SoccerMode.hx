@@ -764,7 +764,11 @@ class SoccerMode extends NullMode implements TeamsMode {
 	}
 
 	override function getPreloadFiles():Array<String> {
-		return ['sound/finish.wav'];
+		return [
+			'sound/finish.wav',
+			'shapes/balls/marble16.dts',
+			'shapes/balls/marble16.skin.png'
+		];
 	}
 
 	override function onDispose() {
