@@ -2,7 +2,7 @@
 new SimGroup(MissionGroup) {
     new ScriptObject(MissionInfo) {
         gamemode = "soccer";
-        level = "95";
+        level = "96";
         difficulty = "4";
         maxgemspergroup = "5";
         time = "360000";
