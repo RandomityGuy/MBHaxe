@@ -1,3 +1,7 @@
+# 1.4.1
+This release fixes the following issue:
+- Fixed name tags of players not rendering.
+
 # 1.4.0
 This update brings out an all new Soccer game mode available in multiplayer!
 It also brings out the following changes:
