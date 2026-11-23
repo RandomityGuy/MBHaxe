@@ -36,6 +36,8 @@ class Gem extends DtsObject {
 		var color = element.datablock.substring("GemItem".length).toLowerCase();
 		if (color.length == 0)
 			color = GEM_COLORS[Math.floor(Math.random() * GEM_COLORS.length)];
+		if (!["red", "yellow", "blue"].contains(color))
+			color = "red";
 		this.identifier = "Gem" + color;
 		this.matNameOverride.set('base.gem', color + ".gem");
 		gemColor = color + ".gem";

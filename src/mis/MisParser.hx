@@ -36,6 +36,8 @@ final marbleAttributesRegEx = ~/setMarbleAttributes\("(\w+)",\s*(.+?)\);/g;
 final activatePackageRegEx = ~/activatePackage\((.+?)\);/g;
 final materialPropertyRegEx = ~/new MaterialProperty *\( *(.+?) *\)\s*{\s*((?:\w+ *= *(\d|\.)+;\s*)*)}/gi;
 final addMaterialMappingRegEx = ~/addMaterialMapping *\( *"(.+?)" *, *(.+?) *\)/gi;
+final customMaterialRegEx = ~/@material (\w+) ((?:\S+:(?:\S| )+)\s*)*/gi;
+final customMaterialFieldRegEx = ~/(\w+):(?:"([^"]*)"|(\S+))/gi;
 
 class MisParser {
 	var text:String;
@@ -137,6 +139,9 @@ class MisParser {
 		}
 
 		DifBuilder.setCustomMaterialDefinitions(materialMappings);
+
+		var customShaders = parseCustomMaterials(outsideText);
+		DifBuilder.setCustomShaderDefinitions(customShaders);
 
 		startText = outsideText;
 
@@ -369,6 +374,29 @@ class MisParser {
 		obj.markers.sort((a, b) -> cast MisParser.parseNumber(a.seqnum) - MisParser.parseNumber(b.seqnum));
 
 		return obj;
+	}
+
+	function parseCustomMaterials(text:String):Map<String, Map<String, String>> {
+		var mats = new Map<String, Map<String, String>>();
+		while (customMaterialRegEx.match(text)) {
+			var materialName = customMaterialRegEx.matched(1);
+			var materialFields = customMaterialRegEx.matched(2);
+
+			var matObj = new Map<String, String>();
+
+			// Split the fields
+			while (customMaterialFieldRegEx.match(materialFields)) {
+				var fieldName = customMaterialFieldRegEx.matched(1);
+				var fieldValue = customMaterialFieldRegEx.matched(2) ?? customMaterialFieldRegEx.matched(3);
+				matObj.set(fieldName, fieldValue);
+				materialFields = customMaterialFieldRegEx.matchedRight();
+			}
+
+			mats.set(materialName, matObj);
+
+			text = customMaterialRegEx.matchedRight();
+		}
+		return mats;
 	}
 
 	/** Resolves a TorqueScript rvalue expression. Currently only supports the concatenation @ operator. */

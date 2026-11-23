@@ -1,5 +1,6 @@
 package src;
 
+import modes.GameMode.GameModeFactory;
 import src.Mission;
 import src.MissionList;
 import gui.MessageBoxOkDlg;
@@ -41,6 +42,8 @@ class MPCustoms {
 
 				// Add this to marbleland customs too!
 				for (mis in missionList) {
+					if (mis.gameMode != null && GameModeFactory.isTeamsMode(mis.gameMode))
+						continue; // skip MP exclusive maps
 					var mission = new Mission();
 
 					mission.id = mis.id;
