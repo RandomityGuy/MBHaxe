@@ -1,5 +1,6 @@
 package src;
 
+import mis.MisParser;
 import dif.Surface;
 import shaders.DefaultCubemapMaterial;
 import shaders.DefaultNormalMaterial;
@@ -236,6 +237,8 @@ class DifBuilder {
 		?force:Float
 	}> = [];
 
+	static var customShaderDict:Map<String, Map<String, String>> = [];
+
 	public static function clearDifCache() {
 		difCache.clear();
 	}
@@ -330,6 +333,31 @@ class DifBuilder {
 		worker.run();
 	}
 
+	static function createNoiseTileMaterialCustom(onFinish:hxsl.Shader->Void, baseTexture:String, normalMap:String, noiseTexture:String, shininess:Float,
+			specular:Vector, uvScale:Float = 1.0) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
+			diffuseTex.wrap = Repeat;
+			diffuseTex.mipMap = Linear;
+			diffuseTex.filter = Linear;
+			var normalTex = ResourceLoader.getTexture(normalMap).resource;
+			normalTex.wrap = Repeat;
+			normalTex.mipMap = Nearest;
+			var noiseTex = ResourceLoader.getTexture(noiseTexture).resource;
+			noiseTex.wrap = Repeat;
+			noiseTex.mipMap = None;
+			var shader = new NoiseTileMaterial(diffuseTex, normalTex, noiseTex, shininess, specular, uvScale);
+			#if hl
+			shader.useAccurateNoise = true;
+			#end
+			onFinish(shader);
+		});
+		worker.loadFile(baseTexture);
+		worker.loadFile(noiseTexture);
+		worker.loadFile(normalMap);
+		worker.run();
+	}
+
 	static function createNormalMapMaterial(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String) {
 		var worker = new ResourceLoaderWorker(() -> {
 			var diffuseTex = ResourceLoader.getTexture('data/interiors_mbu/${baseTexture}').resource;
@@ -341,6 +369,20 @@ class DifBuilder {
 		});
 		worker.loadFile('interiors_mbu/${baseTexture}');
 		worker.loadFile('shaders/tex/${normalTexture}');
+		worker.run();
+	}
+
+	static function createNormalMapMaterialCustom(onFinish:hxsl.Shader->Void, baseTexture:String, normalTexture:String) {
+		var worker = new ResourceLoaderWorker(() -> {
+			var diffuseTex = ResourceLoader.getTexture(baseTexture).resource;
+			var normalTex = ResourceLoader.getTexture(normalTexture).resource;
+			normalTex.wrap = Repeat;
+			var shader = new NormalMaterial(diffuseTex, normalTex, MarbleGame.instance.world.ambient, MarbleGame.instance.world.dirLight,
+				MarbleGame.instance.world.dirLightDir);
+			onFinish(shader);
+		});
+		worker.loadFile(baseTexture);
+		worker.loadFile(normalTexture);
 		worker.run();
 	}
 
@@ -442,6 +484,50 @@ class DifBuilder {
 
 	public static function setCustomMaterialDefinitions(materials:Map<String, {friction:Float, restitution:Float, ?force:Float}>) {
 		customMaterialDict = materials;
+	}
+
+	public static function setCustomShaderDefinitions(materials:Map<String, Map<String, String>>) {
+		customShaderDict = materials;
+	}
+
+	static function buildShaderMaterial(materialDef:Map<String, String>, onFinish:hxsl.Shader->Void) {
+		if (materialDef.exists("type")) {
+			var materialType = materialDef.get("type");
+			switch (materialType) {
+				case "DefaultMaterial":
+					createDefaultMaterial(onFinish, materialDef.get("diffuse") ?? "data/textures/defaultdiffuse.png",
+						materialDef.get("normal") ?? "data/textures/defaultnormal.png",
+						materialDef.exists("shininess") ? MisParser.parseNumber(materialDef.get("shininess")) : 0.0,
+						materialDef.exists("specular") ? MisParser.parseVector4(materialDef.get("specular")) : new Vector(),
+						materialDef.exists("uvScale") ? MisParser.parseNumber(materialDef.get("uvScale")) : 1.0,
+						MisParser.parseBoolean(materialDef.get("half")));
+				case "DefaultCubemapMaterial":
+					createDefaultCubemapMaterial(onFinish, materialDef.get("diffuse") ?? "data/textures/defaultdiffuse.png",
+						materialDef.get("normal") ?? "data/textures/defaultnormal.png",
+						materialDef.exists("shininess") ? MisParser.parseNumber(materialDef.get("shininess")) : 0.0,
+						materialDef.exists("specular") ? MisParser.parseVector4(materialDef.get("specular")) : new Vector(),
+						materialDef.exists("uvScale") ? MisParser.parseNumber(materialDef.get("uvScale")) : 1.0);
+				case "DefaultNormalMaterial":
+					createDefaultNormalMaterial(onFinish, materialDef.get("diffuse") ?? "data/textures/defaultdiffuse.png",
+						materialDef.exists("shininess") ? MisParser.parseNumber(materialDef.get("shininess")) : 0.0,
+						materialDef.exists("specular") ? MisParser.parseVector4(materialDef.get("specular")) : new Vector(),
+						materialDef.exists("uvScale") ? MisParser.parseNumber(materialDef.get("uvScale")) : 1.0);
+				case "NoiseTileMaterial":
+					createNoiseTileMaterialCustom(onFinish, materialDef.get("diffuse") ?? "data/textures/defaultdiffuse.png",
+						materialDef.get("normal") ?? 'data/textures/tile_intermediate.normal.png', materialDef.get("noise") ?? 'data/textures/noise.jpg',
+						materialDef.exists("shininess") ? MisParser.parseNumber(materialDef.get("shininess")) : 0.0,
+						materialDef.exists("specular") ? MisParser.parseVector4(materialDef.get("specular")) : new Vector(),
+						materialDef.exists("uvScale") ? MisParser.parseNumber(materialDef.get("uvScale")) : 1.0);
+				case "NormalMapMaterial":
+					createNormalMapMaterialCustom(onFinish, materialDef.get("diffuse") ?? "data/textures/defaultdiffuse.png",
+						materialDef.get("normal") ?? "data/textures/defaultnormal.png");
+				default:
+					return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	static function collisionFanFromSurface(surface:Surface) {
@@ -1029,6 +1115,38 @@ class DifBuilder {
 									material.mainPass.setPassName("interior");
 									fwd();
 								});
+							});
+						} else if (customShaderDict.exists(exactName)) {
+							var shaderDef = customShaderDict.get(exactName);
+							shaderWorker.addTask(fwd -> {
+								if (buildShaderMaterial(shaderDef, (shad) -> {
+									var zPass = material.mainPass.clone();
+									zPass.removeShader(material.textureShader);
+									var tx = zPass.getShader(h3d.shader.Texture);
+									zPass.removeShader(tx);
+									zPass.setColorMask(false, false, false, false);
+									zPass.depthWrite = true;
+									zPass.setPassName("zPass");
+									material.addPass(zPass);
+
+									material.mainPass.depthTest = LessEqual;
+									material.mainPass.removeShader(material.textureShader);
+									material.mainPass.addShader(shad);
+									var thisprops:Dynamic = material.getDefaultProps();
+									thisprops.light = false; // We will calculate our own lighting
+									material.props = thisprops;
+									material.shadows = false;
+									material.receiveShadows = true;
+									material.mainPass.setPassName("interior");
+									fwd();
+								})) {
+									texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
+									texture.wrap = Wrap.Repeat;
+									texture.mipMap = Linear;
+									material.texture = texture;
+									material.shadows = false;
+									material.receiveShadows = true;
+								}
 							});
 						} else {
 							texture = ResourceLoader.getTextureRealpath(tex(grp)).resource; // ResourceLoader.getTexture(tex(grp), false).resource;
