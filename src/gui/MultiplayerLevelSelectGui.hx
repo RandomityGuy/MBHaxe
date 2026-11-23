@@ -282,7 +282,7 @@ class MultiplayerLevelSelectGui extends GuiImage {
 		bottomBar.vertSizing = Bottom;
 		innerCtrl.addChild(bottomBar);
 
-		var backButton = new GuiXboxButton("Back", 160);
+		var backButton = new GuiXboxButton("Leave", 160);
 		backButton.position = new Vector(400, 0);
 		backButton.vertSizing = Bottom;
 		backButton.horizSizing = Right;
