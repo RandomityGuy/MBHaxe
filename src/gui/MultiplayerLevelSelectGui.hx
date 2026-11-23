@@ -555,6 +555,12 @@ class MultiplayerLevelSelectGui extends GuiImage {
 			levelSelectOpts.optionText.text.text = cust.title;
 			custSelected = true;
 			custPath = str;
+
+			if (cust.gameMode != null && GameModeFactory.isTeamsMode(cust.gameMode))
+				Net.assignTeams();
+			else
+				Net.clearTeams();
+
 			if (Net.isHost) {
 				syncTeamsForCurrentSelection();
 				updateLobbyNames();
@@ -620,6 +626,9 @@ class MultiplayerLevelSelectGui extends GuiImage {
 				var mission = missions[currentSelectionStatic];
 				teams = mission != null && mission.missionInfo != null && GameModeFactory.isTeamsMode(mission.missionInfo.gamemode);
 			}
+		}
+		if (custSelected) {
+			teams = GameModeFactory.isTeamsMode(MPCustoms.missionList.filter(x -> x.path == custPath)[0].gameMode);
 		}
 		if (teams)
 			Net.assignTeams();
