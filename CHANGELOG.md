@@ -1,3 +1,20 @@
+# 1.4.0
+This update brings out an all new Soccer game mode available in multiplayer!
+It also brings out the following changes:
+- Added Soccer multiplayer game mode along with its original and inspired maps to go with it.
+- Added Team Gem Hunt game mode.
+- Added custom shader material support for custom levels.
+- Added 8-way controller input style. Available in Misc Options menu.
+- Added controller Dead Zone settings in Input & Sounds options.
+- Added radar indicator to identify the King marble in King game mode.
+- Added way to completely disable camera movement while holding down a button, set Button-Camera Factor to 0.
+- Added support for invisible surfaces.
+- Various Marbleland compatibility improvements.
+- Fixed a regression in Multiplayer where prolonged connection would cause high ping.
+- Fixed a bug where player name tags were not visible from a distance.
+- Fixed trapdoor sounds and custom reset times not working.
+- Fixed shapes from Marbleland custom level being offset/rotated.
+
 # 1.3.2
 This update brings the following regression fix:
 - Fixed a critical regression where the marble didn't move as fast.
