@@ -243,7 +243,7 @@ class Net {
 
 	// Randomly and evenly splits all participating players into red/blue teams.
 	public static function assignTeams() {
-		if (!Net.isHost)
+		if (!Net.isHost || MarbleGame.instance.world != null)
 			return;
 
 		resetTeamIds();
@@ -281,7 +281,7 @@ class Net {
 
 	// Clears all team assignments.
 	public static function clearTeams() {
-		if (!Net.isHost)
+		if (!Net.isHost || MarbleGame.instance.world != null)
 			return;
 		resetTeamIds();
 		broadcastPlayerInfos();
@@ -290,7 +290,7 @@ class Net {
 
 	// Assigns teams only to players that don't have one yet.
 	public static function ensureTeamsAssigned() {
-		if (!Net.isHost)
+		if (!Net.isHost || MarbleGame.instance.world != null)
 			return;
 
 		var teamCounts = [0, 0];
@@ -966,6 +966,10 @@ class Net {
 				}
 				if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 					cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
+				}
+				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed
+					&& @:privateAccess MarbleGame.instance.world.playGui != null) {
+					@:privateAccess MarbleGame.instance.world.playGui.refreshScoreboard();
 				}
 
 			case ScoreBoardInfo:
