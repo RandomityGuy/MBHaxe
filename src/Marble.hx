@@ -241,6 +241,7 @@ class Marble extends GameObject {
 	var bounceMinGain = 0.2;
 	var maxBlastRepulse = 60.0;
 	var blastRepulseDist = 10.0;
+	var blastForceMultiplier = 1.0;
 
 	public var _bounceRestitution = 0.5;
 
@@ -2550,9 +2551,9 @@ class Marble extends GameObject {
 			else
 				dist = maxRepulse / deltaLen;
 
-			retForce.load(retForce.add(delta.multiply(dist)));
+			retForce.load(retForce.add(delta.multiply(dist * blastForceMultiplier)));
 		} else {
-			retForce.load(retForce.add(this.currentUp.multiply(maxRepulse)));
+			retForce.load(retForce.add(this.currentUp.multiply(maxRepulse * blastForceMultiplier)));
 		}
 		return retForce;
 	}
