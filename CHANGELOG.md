@@ -1,3 +1,11 @@
+# 1.4.2
+This release fixes the following issues:
+- Increased the effectiveness of blast on the soccer ball.
+- Fixed loss of marble control in multiplayer after playing for a certain amount of time.
+- Fixed teams assigned to players randomly shuffling after a player joins or leaves.
+- Fixed name tags of other players not showing up, again.
+- Fixed game not handling unknown platforms correctly.
+
 # 1.4.1
 This release fixes the following issue:
 - Fixed name tags of players not rendering.
