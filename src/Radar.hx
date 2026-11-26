@@ -469,8 +469,6 @@ class Radar {
 	function renderName(pos:Vector, marble:Marble, opacity:Float) {
 		if (@:privateAccess marble.connection == null)
 			return;
-		if (@:privateAccess marble.connection is DummyConnection)
-			return;
 		if (!marbleNameTexts.exists(marble)) {
 			var arialb14fontdata = ResourceLoader.getFileEntry("data/font/Arial Bold.fnt");
 			var arialb14b = new BitmapFont(arialb14fontdata.entry);
