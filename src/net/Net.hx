@@ -931,6 +931,9 @@ class Net {
 					var id = input.readByte();
 					var cready = input.readByte() == 1;
 					var platform = input.readByte();
+					// Validate platform
+					if (platform < 0 || platform > cast NetPlatform.NetPlatformCount)
+						platform = 0;
 					var marble = input.readByte();
 					var cspectator = input.readByte() == 1;
 					var cteam = input.readByte() - 1;
@@ -967,7 +970,8 @@ class Net {
 				if (MarbleGame.canvas.content is MultiplayerLevelSelectGui) {
 					cast(MarbleGame.canvas.content, MultiplayerLevelSelectGui).updateLobbyNames();
 				}
-				if (MarbleGame.instance.world != null && !MarbleGame.instance.world._disposed
+				if (MarbleGame.instance.world != null
+					&& !MarbleGame.instance.world._disposed
 					&& @:privateAccess MarbleGame.instance.world.playGui != null) {
 					@:privateAccess MarbleGame.instance.world.playGui.refreshScoreboard();
 				}
