@@ -36,8 +36,8 @@ targets:
     info:
       path: MBHaxeIOS/Info.plist
       properties:
-        CFBundleShortVersionString: "1.4.1"
-        CFBundleVersion: "2"
+        CFBundleShortVersionString: "1.4.2"
+        CFBundleVersion: "8"
         UILaunchStoryboardName: LaunchScreen
         UIRequiresFullScreen: true
         UIStatusBarHidden: true
