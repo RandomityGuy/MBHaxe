@@ -441,6 +441,7 @@ class SoccerMode extends NullMode implements TeamsMode {
 		football.velocity.load(new Vector(0, 0, 0));
 		football.omega.load(new Vector(0, 0, 0));
 		football._radius = 1.86;
+		@:privateAccess football.blastForceMultiplier = 1.25;
 		@:privateAccess football._defaultRadius = 1.86;
 		@:privateAccess football._renderScale = 1.86 / 0.2;
 		@:privateAccess football._marbleScale = 1.86 / 0.2;
