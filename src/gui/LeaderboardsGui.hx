@@ -376,11 +376,12 @@ class LeaderboardsGui extends GuiImage {
 
 	inline function platformToString(platform:NetPlatform) {
 		return switch (platform) {
-			case Unknown: return "unknown";
+			case Unknown | NetPlatformCount: return "unknown";
 			case Android: return "android";
 			case MacOS: return "mac";
 			case PC: return "pc";
 			case Web: return "web";
+			case _: return "unknown";
 		}
 	}
 }
