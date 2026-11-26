@@ -58,10 +58,17 @@ class MoveManager {
 	var serverMoveListSizeSlack = 1.5;
 	var serverDefaultMinTargetMoveListSize = 3;
 	var serverAbnormalMoveCount = 0;
-	var serverLastRecvMove = 0;
-	var serverLastAckMove = 0;
+	var serverLastRecvMove = -1;
+	var serverLastAckMove = -1;
 
 	public var stall = false;
+
+	static inline function isMoveIdNewer(id:Int, reference:Int):Bool {
+		if (reference < 0)
+			return true;
+		var diff = (id - reference) & 0xFFFF;
+		return diff != 0 && diff < 0x8000;
+	}
 
 	public function new(connection:GameConnection) {
 		queuedMoves = [];
@@ -245,8 +252,10 @@ class MoveManager {
 	}
 
 	public inline function queueMove(m:NetMove) {
+		if (m.id == 65535)
+			return; // reserved null move id
 		var lastQueuedId = queuedMoves.length > 0 ? queuedMoves[queuedMoves.length - 1].id : serverLastAckMove;
-		if (m.id > lastQueuedId) {
+		if (isMoveIdNewer(m.id, lastQueuedId)) {
 			queuedMoves.push(m);
 			serverLastRecvMove = m.id;
 		}
@@ -268,7 +277,7 @@ class MoveManager {
 					&& queuedMoves.length > serverTargetMoveListSize)) {
 				var dropAmt = queuedMoves.length - serverTargetMoveListSize;
 				while (dropAmt-- > 0) {
-					queuedMoves.shift();
+					serverLastAckMove = queuedMoves.shift().id;
 				}
 				serverAvgMoveListSize = serverTargetMoveListSize;
 			}
@@ -279,6 +288,7 @@ class MoveManager {
 			lastMove = queuedMoves[0];
 			queuedMoves.shift();
 			lastAckMoveId = lastMove.id;
+			serverLastAckMove = lastMove.id;
 			return lastMove;
 		}
 	}
@@ -291,11 +301,11 @@ class MoveManager {
 		if (m.id == 65535 || m.id == -1) {
 			return null;
 		}
-		if (m.id <= lastAckMoveId)
+		if (!isMoveIdNewer(m.id, lastAckMoveId))
 			return null; // Already acked
 		if (queuedMoves.length == 0)
 			return null;
-		if (m.id >= nextMoveId) {
+		if (m.id == nextMoveId || isMoveIdNewer(m.id, nextMoveId)) {
 			return queuedMoves[0]; // Input lag
 		}
 		var idx = -1;
@@ -304,7 +314,7 @@ class MoveManager {
 				idx = i;
 				break;
 			}
-			if (queuedMoves[i].id > m.id)
+			if (isMoveIdNewer(queuedMoves[i].id, m.id))
 				break; // ids are monotonic, so it's not present
 		}
 		if (idx < 0)
@@ -319,7 +329,7 @@ class MoveManager {
 	}
 
 	public function getMoveForTick(m:Int) {
-		if (m <= lastAckMoveId)
+		if (!isMoveIdNewer(m, lastAckMoveId))
 			return null;
 		if (m == 65535 || m == -1)
 			return null;
@@ -328,7 +338,7 @@ class MoveManager {
 		for (i in 0...queuedMoves.length) {
 			if (queuedMoves[i].id == m)
 				return queuedMoves[i];
-			if (queuedMoves[i].id > m)
+			if (isMoveIdNewer(queuedMoves[i].id, m))
 				return null;
 		}
 		return null;
