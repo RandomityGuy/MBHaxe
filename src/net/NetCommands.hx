@@ -207,6 +207,8 @@ class NetCommands {
 						}
 						Net.setTeamId(clientId, teamCounts[0] <= teamCounts[1] ? 0 : 1);
 						Net.broadcastPlayerInfos();
+						if (@:privateAccess MarbleGame.instance.world.playGui != null)
+							@:privateAccess MarbleGame.instance.world.playGui.refreshScoreboard();
 					}
 				}
 				// Send em our present world state
